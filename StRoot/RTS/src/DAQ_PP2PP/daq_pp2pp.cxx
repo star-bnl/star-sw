@@ -54,7 +54,7 @@ daq_pp2pp::daq_pp2pp(daqReader *rts_caller)
 	
 	raw = new daq_dta ;
 	adc = new daq_dta ;
-	
+	pedrms = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p, endianess %d",name,rts_caller,endianess) ;
 	return ;
@@ -65,6 +65,7 @@ daq_pp2pp::~daq_pp2pp()
 	LOG(DBG,"%s: Destructor",name) ;
 	if(raw) delete raw ;
 	if(adc) delete adc ;
+	if(pedrms) delete pedrms ;
 
 	return ;
 }
@@ -85,11 +86,121 @@ daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, v
 	else if(strcasecmp(bank,"adc")==0) {
 		return handle_adc(sec, row) ;
 	}
+	else if(strcasecmp(bank,"pedrms")==0) {
+		return handle_pedrms(sec) ;
+	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
 	}
 
 	return 0 ;
+}
+
+daq_dta *daq_pp2pp::handle_pedrms(int sec)
+{
+	char str[128] ;
+	char *full_name ;
+	int found_some = 0 ;
+
+	int tot_bytes ;
+	int min_sec, max_sec ;
+	struct {
+		int sec ;
+		u_int bytes ;
+	} obj[MAX_SEC*(MAX_RDO+1)] ;	// pp2pp has a special rdo#0 case!
+
+	// sanity
+	if(sec==-1) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
+	}
+	else if((sec<0) || (sec>MAX_SEC)) return 0 ;
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+	// bring in the bacon from the SFS file....
+	assert(caller) ;
+
+	// calc total bytes
+	tot_bytes = 0 ;
+	int o_cou = 0 ;
+	for(int s=min_sec;s<=max_sec;s++) {
+	
+		sprintf(str,"%s/sec%02d/pedrms",sfs_name, s) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+
+		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+
+		int size = caller->sfs->fileSize(str) ;	// this is bytes
+
+		LOG(DBG,"Got %d",size) ;
+
+		if(size <= 0) {
+			LOG(NOTE,"%s: %s: not found in this event",name,str) ;
+			continue ;
+		}
+		else {
+			obj[o_cou].sec = s ;
+			obj[o_cou].bytes = size ;
+
+			o_cou++ ;
+	
+			tot_bytes += size ;
+			found_some = 1 ;
+			LOG(NOTE,"%s: %s: reading in \"%s\": bytes %d",name,str,"pedrms", size) ;
+		}
+	}
+
+	if(o_cou == 0) return 0 ;
+
+	pedrms->create(2,"pp2pp_rms",rts_id,DAQ_DTA_STRUCT(pp2pp_pedrms_t)) ;
+
+	for(int i=0;i<o_cou;i++) {
+
+		sprintf(str,"%s/sec%02d/pedrms",sfs_name, obj[i].sec) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+
+		char *mem = (char *)malloc(obj[i].bytes) ;
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
+
+                if(ret != (int)obj[i].bytes) {
+                        LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
+                                obj[i].bytes,ret,strerror(errno)) ;
+                }
+                else {
+                        LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
+
+                }
+
+		int banks = obj[i].bytes / sizeof(pp2pp_pedrms_t) ;
+		int remain = obj[i].bytes % sizeof(pp2pp_pedrms_t) ;
+
+		int version = ((pp2pp_pedrms_t *)mem)->version ;
+
+		if(remain || (version != PP2PP_PED_VERSION)) {
+			LOG(ERR,"PEDRMS bank corrupt (%d, %d); version %d but I known version %d",banks,remain,version,PP2PP_PED_VERSION) ;
+			continue ;
+		}
+
+		for(int j=0;j<banks;j++) {
+			pp2pp_pedrms_t *ped = (pp2pp_pedrms_t *)pedrms->request(1) ;
+
+			memcpy(ped,mem+j*sizeof(pp2pp_pedrms_t),sizeof(pp2pp_pedrms_t)) ;
+		
+			pedrms->finalize(1, obj[i].sec, ped->seq_id, ped->chain_id) ;
+		}
+	}
+
+
+	pedrms->rewind() ;
+
+	if(found_some) return pedrms ;
+	else return 0 ;
+
+
 }
 
 daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
@@ -281,7 +392,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 	// get count
 	trg_cou = ntohl(d[words-1]) ;
 
-	if(trg_cou>10) {	
+	if(trg_cou>100) {	
 		LOG(ERR,"trg_cou 0x%08X, words %d",trg_cou,words) ;
 		return -1 ;
 	}
@@ -381,6 +492,8 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	u_char *d8 ;
 	int ret = 0  ;
 
+	LOG(DBG,"adc %p",adc) ;
+
 	int seq_id, chain_id, svx_id ;
 
 	int words = bytes/4 ;
@@ -416,6 +529,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	int bunch_xing = -1 ;
 	u_int trigger = 0xFFFFFFFF ;
 
+	svx_id = 0 ;
 	int not_sparse = 0 ;
 
 	while(cur_ix < w16) {
@@ -526,13 +640,23 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 					LOG(NOTE,"SVX break: seq %d:%d: SVX 0x%02X",seq_id, chain_id,ch) ;
 			 	}
 
+				LOG(DBG,"requested %d",requested) ;
+
 				if(requested) {
+					LOG(DBG,"finalize %d %d %d",sec_id,d->seq_id,d->chain_id) ;
 					adc->finalize(1, sec_id, d->seq_id, d->chain_id) ;
 					requested = 0 ;
 				}
 
 				svx_id = ch & 0x7F ;	
+
+				LOG(DBG,"svx_id %d",svx_id) ;
+
+				LOG(DBG,"Calling adc request %p",adc) ;
+
 				d = (struct pp2pp_t *) adc->request(1) ;
+
+				LOG(DBG,"d is %p",d) ;
 
 				requested = 1 ;
 
@@ -557,7 +681,9 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 					LOG(DBG,"datum %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
 
 					if(d->trace[ch]) {
-						LOG(WARN,"duplicate channel %d: ADC now %d, was %d!",ch,c_adc,d->adc[ch]) ;
+						LOG(WARN,"Seq %d, chain %c, SVX %d: duplicate channel %d: ADC now %d, was %d!",
+						    seq_id,chain_id+'A',svx_id,
+						    ch,c_adc,d->adc[ch]) ;
 						ret |= 4;
 						d->trace[ch] = 2 ;
 					}
