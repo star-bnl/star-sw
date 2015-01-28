@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 
 
 		/*************************** PP2PP **********************/
-		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
+		pp2pp_doer(evp,print_det) ;
 
 
 		/*************************** L3/HLT09 **************************/
@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 
 		/*************************** IST **************************/
 		fgt_doer(evp,print_det,IST_ID) ;
-		fgt_test(evp,print_det,IST_ID) ;
+		fgt_test(evp,print_det,IST_ID) ;	//used by Tonko; ignore
 
 		/*************************** PXL **************************/
 		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
@@ -1076,7 +1076,10 @@ static int emc_pseudo_doer(daqReader *rdr, const char *do_print)
 
 static int pp2pp_doer(daqReader *rdr, const char *do_print)
 {
-	int found = 0 ;
+	int raw_found = 0 ;
+	int adc_found = 0 ;
+	int pedrms_found = 0 ;
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"pp2pp")) ;	// leave as is...
@@ -1085,8 +1088,7 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("pp2pp")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
-			found = 1 ;
-
+			raw_found++ ;
 
 			if(do_print) {
 				printf("PP2PP: RAW: sector %d, RDO %d, bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
@@ -1105,19 +1107,57 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("pp2pp")->get("adc") ;
 	if(dd) {
 		while(dd->iterate()) {
-			found = 1 ;
+			adc_found++ ;
 
 			pp2pp_t *d = (pp2pp_t *) dd->Void ;
 
 			if(do_print) {
-				printf("PP2PP: sector %d, seq %d, chain %c, SVX %d:\n",dd->sec,d->seq_id,'A'+d->chain_id,d->svx_id) ;
+				int cou = 0 ;
+				for(int c=0;c<PP2PP_SVX_CH;c++) {
+					if(d->trace[c]) cou++ ;
+				}
+				
+				printf("PP2PP: sector %d, sequencer %d, chain %c, SVX %d: %d channels:\n",dd->sec,d->seq_id,'A'+d->chain_id,d->svx_id,cou) ;
 				for(int c=0;c<PP2PP_SVX_CH;c++) {
 					// print only found channels via the "trace" array
 					if(d->trace[c]) printf("   ch %3d: ADC %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
+					//printf("   ch %3d: ADC %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
 				}
 			}
 
 		}
+	}
+
+	dd = rdr->det("pp2pp")->get("pedrms") ;
+	if(dd) {
+		while(dd->iterate()) {
+			pedrms_found++ ;
+
+			pp2pp_pedrms_t *d = (pp2pp_pedrms_t *) dd->Void ;
+
+			if(do_print) {
+				printf("PP2PP PEDRMS: sector %d, sequencer %d, chain %c, SVX %d: SVX pedestal %f +- %f\n",dd->sec,d->seq_id,'A'+d->chain_id,d->svx_id,
+				       d->svx_ped,d->svx_rms) ;
+
+				for(int c=0;c<PP2PP_SVX_CH;c++) {
+					printf("   ch %3d: ped %f, rms %f\n",c,d->ped[c],d->rms[c]) ;
+				}
+			}
+
+		}
+	}
+
+	char fstr[128] ;
+	fstr[0] = 0 ;
+
+	if(raw_found) strcat(fstr,"RAW ") ;
+	if(adc_found) strcat(fstr,"ADC ") ;
+	if(pedrms_found) strcat(fstr,"PEDRMS ") ;
+
+	int found = raw_found || adc_found || pedrms_found ;
+
+	if(found) {
+		LOG(INFO,"PP2PP found [%s]",fstr) ;
 	}
 
 	return found ;
@@ -1253,10 +1293,12 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 	}
 
+	
 	while(dd && dd->iterate()) {
 		found |= 2 ;
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
+
 
 		if(do_print) {
 			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
@@ -1318,10 +1360,19 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 	}
 
+	int charge_sum = 0 ;
+
 	while(dd && dd->iterate()) {
 		found |= 4 ;
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
+
+		for(u_int i=0;i<dd->ncontent;i++) {
+			if(f[i].adc > 0) {
+				charge_sum += f[i].adc ;
+			}
+		}
+
 
 		if(do_print) {
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
@@ -1331,13 +1382,17 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			}
 		}
 	}
-
+	
+	if((found & 4) && do_print) {
+		printf("+++ Charge sum %d\n",charge_sum) ;
+	}
 
 	dd = rdr->det(d_name)->get("pedrms") ;
 	while(dd && dd->iterate()) {
 		found |= 8 ;
 
 		fgt_pedrms_t *f = (fgt_pedrms_t *) dd->Void ;
+
 
 		if(do_print) {
 			int arc = dd->rdo ;
