@@ -167,7 +167,7 @@ void StOnlineTriggerMonitoring::saveTrigger(
 	for(int crate = 1;crate<=30;crate++)
 	{
 		FILENAME = saved_dir;
-		FILENAME+="/pedestal_crate0x";
+		FILENAME+="/daq_pedestal_crate0x";
 		char str[10];
 		sprintf(str,"%02x",crate);
 		FILENAME+=str;
