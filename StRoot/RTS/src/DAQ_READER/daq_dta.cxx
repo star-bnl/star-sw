@@ -305,6 +305,8 @@ void daq_dta::rewind()
 	nitems = store->nitems ;
 	
 	if(nitems <= 0) {
+		LOG(NOTE,"No items %d???",nitems) ;
+		return ;
 		assert(nitems>0) ;
 	}
 
