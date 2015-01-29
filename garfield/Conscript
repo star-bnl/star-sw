@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+#use File::Basename;
+#print "========================== Conscript ======= \n";
+Import qw ( env INCLUDE LIB BIN BUILD OBJ);
+(my $build = $OBJ) =~ s/\#//g;#   print "build = $build\n";
+$build =~ s/\\/\//g;          #   print "build = $build\n";
+(my $obj_dir = DirPath '.') =~ s/\\/\//g;# print "obj_dir = $obj_dir\n";
+(my $Dir = $obj_dir) =~ s/$build\///g;# print "Dir = $Dir\n";
+my $pkg = "Garfield";
+my $SO_PKG= $pkg . "." . $env1->{SUFSOLIB};
+my $ObjDir = "#" . $obj_dir; 
+my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $GARFIELD_HOME = $env->{ENV}->{GARFIELD_HOME};
+my @src = script::find_sources($Dir);# print "src = @src\n";
+#Command $env, @srcc, qq(make installdirs; make);
+if ($#src > -1) {
+  script::Keep $SO_PKG;
+#  Program      $env2 $pkg, @src;
+#  LinkedModule $env, $SO_PKG, @src;
+#  Install $env $LIB, $SO_PKG;
+  Command $env ($LIB . "/" . $SO_PKG), (@src, makefile),  qq(cd $obj_dir; make installdirs; make);
+}
