@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
 		sst_doer(evp,print_det) ;
 
 		/*************************** FPS **************************/
-		if(fps_doer(evp,print_det)) LOG(INFO,"FPS found") ;
+		fps_doer(evp,print_det) ;
 		
 
 
@@ -1709,7 +1709,9 @@ static int sst_test(daqReader *rdr, int mode)
 
 static int fps_doer(daqReader *rdr, const char *do_print)
 {
-	int found = 0 ;
+	int adc_found = 0 ;
+	int pedrms_found = 0 ;
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"fps")) ;	// leave as is...
@@ -1725,7 +1727,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 		}
 
 		while(dd->iterate()) {
-			found = 1 ;
+			adc_found = 1 ;
 
 			if(do_print) {
 				printf("  xing %2d, QT %d, chs %d\n",(char)dd->sec,dd->rdo,dd->ncontent) ;
@@ -1740,6 +1742,41 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 			}
 		}
 
+	}
+
+
+	dd = rdr->det("fps")->get("pedrms") ;
+	if(dd) {
+		while(dd->iterate()) {
+			pedrms_found = 1 ;
+
+			fps_pedrms_t *ped = (fps_pedrms_t *) dd->Void ;
+
+			if(do_print) {
+				printf("FPS PEDRMS: QT %d\n",dd->rdo) ;
+
+				for(int i=0;i<ped->ch_cou;i++) {
+					printf("    ch %2d: %f +- %f (bad 0x%X)\n",i,
+					       ped->ped[i].ped,ped->ped[i].rms,ped->ped[i].flag) ;
+				}
+			}
+			
+		}
+	}
+
+
+	char fstr[128] ;
+	fstr[0] = 0 ;
+
+	if(adc_found) strcat(fstr,"ADC ") ;
+	if(pedrms_found) strcat(fstr,"PEDRMS ") ;
+
+	int found = 0 ;
+	if(adc_found || pedrms_found) found = 1 ;
+
+
+	if(found) {
+		LOG(INFO,"FPS found: [%s]",fstr) ;
 	}
 
 	return found ;

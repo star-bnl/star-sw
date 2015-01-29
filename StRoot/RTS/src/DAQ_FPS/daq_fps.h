@@ -76,15 +76,30 @@ struct fps_config_t {
 
 };
 
+#define FPS_PED_VERSION	0x0
+
+struct fps_pedrms_t {	
+	u_char version ;
+	u_char qt_ix ;		//0..7
+	u_char ch_cou ;	//32
+	
+	struct {
+		float ped ;
+		float rms ;
+		u_char flag ;	//1=error
+	} ped[32] ;
+} ;
+
+
 class daq_fps : public daq_det {
 private:
 	class daq_dta *handle_raw() ;
-	class daq_dta *handle_ped() ;
+	class daq_dta *handle_pedrms() ;
 	class daq_dta *handle_adc() ;
 
 	class daq_dta *raw ;
 	class daq_dta *adc ;
-	class daq_dta *ped ;
+	class daq_dta *pedrms ;
 
 	static const char *help_string ;
 
