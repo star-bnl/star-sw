@@ -5,13 +5,16 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.13 2014/08/27 16:52:14 qiuh Exp $
+ * $Id: StPxlDbMaker.h,v 1.14 2014/11/19 18:29:47 genevb Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  *
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.14  2014/11/19 18:29:47  genevb
+ * Use flags to indicate DbMaker readiness
+ *
  * Revision 1.13  2014/08/27 16:52:14  qiuh
  * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
  *
@@ -56,14 +59,16 @@ class StPxlDbMaker : public StMaker
 public:
    StPxlDbMaker(const char *name = "pxlDb");
    Int_t  InitRun(Int_t runNumber);
+   Int_t  Make();
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.13 2014/08/27 16:52:14 qiuh Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.14 2014/11/19 18:29:47 genevb Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
 private:
    StPxlDb *mPxlDb; ///< See StPxlDb for details on created data structure. The ownership is passed to the STAR framework via ToWhiteBoard()
+   Int_t mReady;
    int readAllRowColumnStatus;
 
    ClassDef(StPxlDbMaker, 0)

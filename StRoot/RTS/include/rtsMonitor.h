@@ -199,7 +199,6 @@ struct rtsMonTCD_new {
 
 	int deadtime[32] ;
 	int clock[32] ;	// the clock of the TCD; or TCU for "Trigger"
-	unsigned int cpu_busy ;
 
 	struct {
 		int sca_hz ;

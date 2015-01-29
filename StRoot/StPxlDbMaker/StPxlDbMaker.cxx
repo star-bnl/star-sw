@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.16 2014/10/25 00:51:11 qiuh Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.17 2014/11/19 18:29:47 genevb Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.17  2014/11/19 18:29:47  genevb
+ * Use flags to indicate DbMaker readiness
+ *
  * Revision 1.16  2014/10/25 00:51:11  qiuh
  * replace ToWhiteBoard with ToWhiteConst to fix a chain crush
  *
@@ -54,14 +57,15 @@
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
 StPxlDbMaker::StPxlDbMaker(const char *name) :
-   StMaker(name)
+   StMaker(name), mPxlDb(0), mReady(kStErr)
 {
-   mPxlDb = 0;
    readAllRowColumnStatus = 0;
 }
 //_____________________________________________________________________________
 Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 {
+   mReady = kStFatal;
+
    if (!mPxlDb) mPxlDb = new StPxlDb();
 
    // set geoHMatrices
@@ -148,5 +152,12 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    // finally write the data
    ToWhiteConst("pxl_db", mPxlDb);
 
+   mReady = kStOK;
+
    return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StPxlDbMaker::Make()
+{
+   return mReady;
 }
