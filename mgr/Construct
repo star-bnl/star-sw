@@ -441,10 +441,10 @@ if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
 #    print "$qtRoot does not exist\n";
   }
 }
+push @packages, "garfield";
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
-#@Targets = map('#' . $_ . "/Conscript", @packages);
 
 if ($param::debug){
     print "Packages $#packages : @packages\n";

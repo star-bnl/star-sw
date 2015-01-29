@@ -10,7 +10,6 @@ my $pkg = "Garfield";
 my $SO_PKG= $pkg . "." . $env1->{SUFSOLIB};
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my $GARFIELD_HOME = $env->{ENV}->{GARFIELD_HOME};
 my @src = script::find_sources($Dir);# print "src = @src\n";
 #Command $env, @srcc, qq(make installdirs; make);
 if ($#src > -1) {

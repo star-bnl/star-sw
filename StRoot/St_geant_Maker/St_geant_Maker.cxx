@@ -1526,7 +1526,10 @@ void St_geant_Maker::Draw(const char* opt)
 void St_geant_Maker::Do(const Char_t *job)
 {  
   Int_t l=strlen(job);
-  if (l) geant3->Kuexel(job);
+  if (l) {
+    LOG_INFO << "St_geant_Maker::Do(\"" << job << "\")" << endm;
+    geant3->Kuexel(job);
+  }
 }
 //_____________________________________________________________________________
 

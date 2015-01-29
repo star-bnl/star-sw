@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.11 2015/01/23 19:42:04 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.12 2015/01/29 04:43:21 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -189,22 +189,37 @@ Int_t StIstFastSimMaker::Make()
    return kStOK;
 }
 
-Double_t StIstFastSimMaker::distortHit(double x, double res, double detLength)
-{
-   double test;
-   test = x + myRandom->gauss(0, res);
 
-   while ( fabs(test) > detLength) {
-      test = x + myRandom->gauss(0, res);
+/**
+ * Calculates and returns new value for the local coordinate x by smearing it
+ * acccording to a normal distribution N(mean, sigma) = N(x, res). The returned
+ * value is constrained to be within the characteristic dimension detLength
+ * provided by the user.
+ */
+double StIstFastSimMaker::distortHit(const double x, const double res, const double detLength) const
+{
+   // Do not smear x when it is outside the physical limits. Issue a warning instead
+   if (fabs(x) > detLength) {
+      LOG_WARN << "distortHit() - Generated hit is outside detector sensor plane" << endm;
+      return x;
    }
 
-   return test;
+   double smeared_x;
+
+   do {
+      smeared_x = myRandom->gauss(x, res);
+   } while ( fabs(smeared_x) > detLength);
+
+   return smeared_x;
 }
 
 
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.12  2015/01/29 04:43:21  smirnovd
+* Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+*
 * Revision 1.11  2015/01/23 19:42:04  smirnovd
 * No need to check for valid pointer to StEvent object as it is already done at the begining of Make() routine
 *

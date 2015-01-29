@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StTpcMcAnalysisMaker.h,v 1.3 2012/09/25 13:38:13 fisyak Exp $
+ * $Id: StTpcMcAnalysisMaker.h,v 1.4 2015/01/28 21:20:02 fisyak Exp $
  * $Log: StTpcMcAnalysisMaker.h,v $
+ * Revision 1.4  2015/01/28 21:20:02  fisyak
+ * Freeze
+ *
  * Revision 1.3  2012/09/25 13:38:13  fisyak
  * Freeze
  *
@@ -37,7 +40,7 @@ class StTpcMcAnalysisMaker : public StMaker {
   TTree      *mTpcT;
   TpcCluster *fCluster;
   virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcMcAnalysisMaker.h,v 1.3 2012/09/25 13:38:13 fisyak Exp $ built " __DATE__ " " __TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcMcAnalysisMaker.h,v 1.4 2015/01/28 21:20:02 fisyak Exp $ built " __DATE__ " " __TIME__; return cvs;}
   ClassDef(StTpcMcAnalysisMaker,0)
 };
 #endif

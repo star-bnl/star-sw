@@ -428,13 +428,15 @@ void HftT::Loop(Int_t Nevents) {
 #if 1
       Int_t m = 0;
       if (s == 14) m = 1;
-      if (s == 15) m = 2;
+      if (s == 15 || s > 40) m = 2;
       if (s == 16) m = 1;
       Double_t xmax = plotName[t].xmax[m];
       Int_t n = (Int_t) (4.*xmax);
       if (n < 100) n = 100;
       if (n > 400) n = 400;
       Double_t ymax = 0.2;
+      if (((t >= 16 && t <= 18) || t >= 31) && ( s == 15 || s >= 41)) ymax = 0.5; // dZ for Ist
+
 #else
       Int_t    n = 100;
       Double_t xmax = 0;
@@ -467,7 +469,7 @@ void HftT::Loop(Int_t Nevents) {
       if (_debug) {
 	cout << "hitK\t"; hitK->Print("");
       }
-      if (hitK->NM < 101) continue;
+      //      if (hitK->NM < 101) continue;
 #if __BEST__
       Double_t difK = hitK->Diff();
       Int_t k1 = k + 1;
@@ -567,9 +569,9 @@ void HftT::Loop(Int_t Nevents) {
 	ss[2] = 13;                   // Pxl as whole
       } else if (layer == 3) {
 	ss[0] = 14;                   // Ist
+	ss[4] =  tpcSector+40;
       } else if (layer == 4) {
 	ss[0] = 15;                   // Sst
-	ss[4] =  tpcSector+40;
       }
       for (Int_t k = 0; k < 5; k++) {
 	Int_t s = ss[k];

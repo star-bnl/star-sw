@@ -68,7 +68,7 @@ ADD_DEFINITIONS( "-c" )
 # Allow to use debug symbols
 IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
  CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
- ADD_DEFINITIONS( "-g -O0" )
+ ADD_DEFINITIONS( "-ggdb -O0" )
 ELSE()
  ADD_DEFINITIONS( "-O2" )
 ENDIF()

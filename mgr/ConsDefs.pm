@@ -1130,6 +1130,8 @@
 		      'STAR_BIN'        => $STAR_BIN,
 		      'STAR_SYS'        => $STAR_HOST_SYS,
 		      'STAR_HOST_SYS'   => $STAR_HOST_SYS,
+		      'STAR_OBJ'        => $STAR_OBJ,
+		      'STAR_LIB'        => $STAR_LIB,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
 		      'OPTSTAR'         => $XOPTSTAR,
@@ -1137,6 +1139,7 @@
 		      'COIN3DIR'        => $COIN3DIR,
 		      'IVROOT'          => $IVROOT,
 		      'HOME'            => $HOME,
+		      'GARFIELD_HOME'   => $GARFIELD_HOME,
 		      'CC'       => $CC, #         C compiler command
 		      'CFLAGS'   => $CFLAGS, #     C compiler flags
 	              'LDFLAGS'  => $LDFLAGS, #    linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>

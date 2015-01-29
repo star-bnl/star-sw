@@ -30,10 +30,11 @@ St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",  
-	   const Char_t *fileIn = 0, const Char_t *opt = "Bichsel", const Char_t *kuip = 0) {
+	   const Char_t *fileIn = 0, const Char_t *opt = "Bichsel", const Char_t *kuip = 0,
+	   const Char_t *fileOut = 0) {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
-  TString RootFile("");
+  TString RootFile(fileOut);
   TString Opt(opt);
   TString RunOpt(Run);
   //  RunOpt.ToLower();
@@ -44,11 +45,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
     //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
     //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
-    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
+    //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
+    ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     // ChainOpt += ",tree,";
 #if 1
     if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2" ||
-	TString(gSystem->Getenv("STAR_VERSION")) == "SL11d_embed") ChainOpt += "NoHistos,NoRunco,noTags,"; // McTpcAna,
+	TString(gSystem->Getenv("STAR_VERSION")) == "SL11d_embed") ChainOpt += "NoHistos,NoRunco,noTags,McTpcAna,";
     else                                                           ChainOpt += "tags,";
 #endif
   }
@@ -62,7 +64,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
-  if (FileIn == "") {
+  if (FileIn == "" && fileOut == 0) {
     if (RunOpt.Contains("pythia",TString::kIgnoreCase)) {
       RootFile += "pythia";
     } else if (RunOpt.Contains("hijing",TString::kIgnoreCase)) {
@@ -83,7 +85,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
   } else {
-    RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
+    RootFile += Form("%s",gSystem->BaseName(FileIn.Data())); 
     if        (FileIn.Contains(".daq",TString::kIgnoreCase)) {
       ChainOpt += "in,TpxRaw,";
       RootFile.ReplaceAll(".daq","");
@@ -107,6 +109,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   ChainOpt += RunOpt;
   RootFile += Form("_%s_%i_%i",Opt.Data(),First,Last);
+  RootFile.ReplaceAll(".root","");
   RootFile.ReplaceAll(",","_");
   if (RootFile.Contains(";")) {
     Int_t index = RootFile.Index(";");
@@ -116,14 +119,15 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
   
-
-  TString output = RootFile;
-  output.ReplaceAll(".root","O.root");
-  output.ReplaceAll("*","");
   if (Last < 0) {
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
   }
+
+  TString output = RootFile;
+  output = RootFile;
+  output.ReplaceAll(".root","O.root");
+  output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
@@ -199,7 +203,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   if (gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-    if (FileIn == "" && ! RunOpt.Contains("pythia",TString::kIgnoreCase)) {
+    if (FileIn == "" && 
+	! RunOpt.Contains("pythia",TString::kIgnoreCase) && 
+	! RunOpt.Contains("hijing",TString::kIgnoreCase)) {
       /** Setup interaction region
        **  mean and sigma for Vx Vy Vz
        **  0.31  -0.35  -1.4  and 0.91   0.77   33.68   respectively .
@@ -307,13 +313,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 //________________________________________________________________________________
 void TpcRS(Int_t Last=100,
 	   const Char_t *Run = "y2009,TpcRS",//trs,fcf", // "TpcRS,fcf",
-	   //	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   const Char_t *fileIn = 0,
-	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
-	   const Char_t *opt = "Bichsel", const Char_t *kuip = 0) {
+	   const Char_t *opt = "Bichsel", const Char_t *kuip = 0,
+	   const Char_t *fileOut = 0) {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
   //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
   // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
   //                                   st_physics_adc_5076061_raw_4050001.daq
-  TpcRS(1,Last,Run,fileIn,opt,kuip);
+  TpcRS(1,Last,Run,fileIn,opt,kuip,fileOut);
 }

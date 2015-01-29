@@ -1,3 +1,4 @@
+#define __USE_GLOBAL__
 #include <vector>
 #include "St_base/Stypes.h"
 #include "St_base/StMessMgr.h"
@@ -288,7 +289,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
     if (! pTrackT) continue;
     StThreeVectorF pmom = pTrackT->geometry()->momentum();
     if (pmom.perp() < pCut) continue;
+#ifdef __USE_GLOBAL__
+    StPhysicalHelixD helixI = dcaGeometry->helix();
+#else
     StPhysicalHelixD helixI = pTrackT->geometry()->helix();
+#endif
     StTrackDetectorInfo *dInfo = stGlobalTrack->detectorInfo();
     if ( !dInfo ) continue;
 #if 0

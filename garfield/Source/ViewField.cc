@@ -547,6 +547,8 @@ void ViewField::PlotContourWeightingField(const std::string label,
     std::cerr << "    Plotting the absolute value of the field.\n";
     fWfield->SetParameter(0, 1.);
   }
+  fWfield->SetMinimum(wmin);
+  fWfield->SetMaximum(wmax);
 
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {

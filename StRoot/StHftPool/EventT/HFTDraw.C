@@ -496,6 +496,34 @@ Double_t STchebP(Double_t *x, Double_t *par) {
   return STcheb(N,par+1,x[0]-0.1);
 }
 //________________________________________________________________________________
+Double_t sexpo(Double_t *x, Double_t *par) {
+  return TMath::Exp(par[0]-TMath::Power(TMath::Abs(par[2]*(x[0]-par[1])),par[3]))+par[4];
+}
+//________________________________________________________________________________
+TF1 *Sexpo() {
+  struct Par_t {
+    const Char_t *Name;
+    Double_t p, pmin, pmax;
+  };
+  const Par_t par[6] = {
+    {"LNorm", 5.,    0, 25},
+    {"mu",    0.,   -1, 1. },
+    {"slope", 10, 0.01, 1e5},
+    {"power", 10,  0.1, 1e3},
+    {"gras0",  0,    0, 1e5},
+    {"gras1",  0,    0, 0}
+  };
+  TF1 *gp = (TF1 *) gROOT->GetListOfFunctions()->FindObject("Sexpo");
+  if (!gp) gp = new TF1("Sexpo",sexpo,-0.2,0.2,6);
+  for (Int_t i = 0; i < 6; i++) {
+    gp->SetParName(i,par[i].Name);
+    gp->SetParameter(i,par[i].p);
+    if (par[i].pmin < par[i].pmax) 
+      gp->SetParLimits(i,par[i].pmin, par[i].pmax);
+  }
+  return gp;
+}
+//________________________________________________________________________________
 void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, TF1 *gp, ofstream &out,
 	  Double_t FitR[6], Double_t dFitR[6], Double_t LSFit[6], Double_t dLSFit[6],TString &name) {
   TString line("");
@@ -520,17 +548,208 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
   Double_t Mu = 0;
   Double_t dMu = 0;
   TString HistName(h->GetName());
+#if 1
   TF1 *gaus = sp->GetFunction("gaus");
   if (! gaus) {cout << "Histogram:" << sp->GetName() << " Guas fit fails" << endl; return;}
   UpdateGP(gp,gaus);
   sp->Fit(gp,"q");
+#endif  
   Mu = sp->GetFunction("gp")->GetParameter(1);
   if (j >= firstHG && j < firstHP) dMu = sp->GetFunction("gp")->GetParError(1);
-  Double_t *params = gp->GetParameters();
+  Double_t params[5];
+  gp->GetParameters(params);
   params[0] -= TMath::Log(100.);
   gp->SetParameters(params);
   //  SlicesYFit(h,0,0,10,"qnig3"); //g3
   SlicesYFit(h,0,0,10,"qni"); //g3
+  TH1 *fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
+  //       TH1 *sig = (TH1 *) gDirectory->Get(Form("%s_2",h->GetName()));
+  //       TH1 *gra = (TH1 *) gDirectory->Get(Form("%s_3",h->GetName()));
+  Double_t slope = 0;
+  Double_t dslope = 0;
+  TLegend *leg = new TLegend(0.2,0.2,0.8,0.3,"");
+  leg->SetTextSize(0.033);
+  if (fit) {
+    fit->SetTitle(h->GetTitle());
+    fit->SetMarkerStyle(20);
+    fit->SetMarkerColor(1);
+    fit->SetMaximum(0.2);
+    fit->SetMinimum(-.2);
+    fit->SetStats(1);
+    Double_t zmax = 99;
+    FitPolN(fit,-zmax,zmax);
+    //	fit->Fit("PolN","eqr","",-zmax,zmax);
+    TF1 *pol1 = fit->GetFunction("PolN");
+    Double_t prob = 0;
+    if (pol1) {
+      prob = pol1->GetProb();
+      // 	if (prob <= 1e-3) {
+      // 	  fit = prof;
+      // 	  FitPolN(fit,-zmax,zmax);
+      // 	  pol1 = fit->GetFunction("PolN");
+      // 	  prob = pol1->GetProb();
+      // 	}
+      //      if (prob > 1.e-7) {
+	slope = pol1->GetParameter(1);
+	dslope = pol1->GetParError(1);
+	//      }
+    }
+    static const Char_t *dXYZ[3] = {"dX", "dY", "dZ"};
+    static const Char_t *abc[6]  = {"=> dx", "=> dy", "=> dz", "=> alpha","=> beta","=> gamma"};
+    TString Name(h->GetName());
+    TString Title(h->GetTitle());
+    line = "";
+    if (j >= firstHG && j < firstHP) {
+      if (dMu > 0) {
+	for (Int_t m = 0; m < 3; m++) {
+	  if (Name.BeginsWith(dXYZ[m])) {
+	    Double_t mu = -1e4*Mu;
+	    Double_t dmu = 1e4*dMu;
+	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
+	    Double_t dev = mu - LSFit[m];
+	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
+	      Double_t dMu2 = dMu*dMu;
+	      FitR[m]  += -Mu/dMu2;
+	      dFitR[m] +=  1./dMu2;
+	      line += "A";
+	    } else line +="R";
+	    if (m == 2) comment = Form("| slope = %7.2f+-%5.2f",1e3*slope, 1e3*dslope);
+	  }
+	  else                          line += Form("|               ");
+	  //	 cout << line << endl;
+	}
+	for (Int_t m = 3; m < 6; m++) {
+	  if (dslope > 0 && Title.Contains(abc[m]))   {
+	    Double_t mu = 1e3*slope;
+	    Double_t dmu = 1e3*dslope;
+	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
+	    Double_t dev = mu - LSFit[m];
+	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
+	      Double_t dslope2 = dslope*dslope;
+	      FitR[m]  += slope/dslope2;
+	      dFitR[m] +=  1./dslope2;
+	      line += "A";
+	    } else line +="R";
+	  }
+	  else                          line += Form("|               ");
+	  //	 cout << line << endl;
+	}
+      }
+      if (pol1) 
+	leg->AddEntry(pol1,Form("Mu = %7.2f +- %5.2f (mkm) Slope = %7.2f +- %5.2f (mrad)", 
+				1e4*Mu, 1e4*dMu, 1e3*slope, 1e3*dslope));
+    } else {
+      if (j >= firstHP) {
+	for (Int_t m = 0; m < 6; m++) {
+	  if (dslope > 0 && Title.Contains(abc[m]))   {
+	    Double_t scale = 1e4;
+	    if (m >= 3) scale = 1.e3;
+	    Double_t mu = scale*slope;
+	    Double_t dmu = scale*dslope;
+	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
+	    Double_t dev = mu - LSFit[m];
+	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
+	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
+	      Double_t dslope2 = dslope*dslope;
+	      FitR[m]  += slope/dslope2;
+	      dFitR[m] +=  1./dslope2;
+	      line += "A";
+	    } else line +="R";
+	    if (pol1) {
+	      TString legT(abc[m]);
+	      legT.ReplaceAll("=> d","#Delta ");
+	      legT.ReplaceAll("=> ","#");
+	      legT += Form(" = %8.2f +- %8.2f",mu,dmu);
+	      if (scale < 5.e3) legT += "(mrad)";
+	      else              legT += "(mkm)";
+	      legT += Form(" prob = %4.3f",prob);
+	      leg->AddEntry(pol1,legT);
+	    }
+	  }
+	  else  line += Form("|               ");
+	}
+      }
+    }
+    line += "|"; line += fit->GetName(); line += "/"; line += h->GetTitle();// line += "\t"; line += f->GetName();
+    line += comment;
+    cout << line << endl;
+    out << line << endl;
+
+    Int_t ij = i + nx*(j-firstH) + 1;
+    c1->cd(ij)->SetLogz(1);
+    h->SetMinimum(1);
+#if 0
+    if (h) h->DrawCopy("colz");
+    if (prof) prof->DrawCopy("same");
+#else
+    if (h) h->Draw("colz");
+    if (prof) prof->Draw("same");
+#endif
+    if (fit) {
+#if 0
+      fit->DrawCopy("same"); 
+#else
+      fit->Draw("same"); 
+#endif
+      TF1 *pol1 = fit->GetFunction("PolN"); 
+      if (pol1) {pol1->SetLineColor(2); pol1->Draw("same");}
+      // 	 TPaveStats *st = (TPaveStats*) fit->FindObject("stats");
+      // 	 if (st) {
+      // 	   st->SetX1NDC(0.1);
+      // 	   st->SetX2NDC(0.5);
+      // 	   st->Draw();
+      // 	 }
+    }
+    if (leg->GetEntry()) leg->Draw();
+    //        cout << f->GetName() << "\t" << h->GetName() << "/" << h->GetTitle() 
+    // 	    << "\tMu = " << Mu << " +/- " << dMu 
+    // 	    << "\tSlope = " << slope << " +/- " << dslope << endl;
+    //       static const Char_t *blank10 = Form("|             ");
+  }
+}
+//________________________________________________________________________________
+void FitGP(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, ofstream &out,
+	  Double_t FitR[6], Double_t dFitR[6], Double_t LSFit[6], Double_t dLSFit[6],TString &name) {
+  TString line("");
+  TString comment("");
+  TH2F *h = 0;
+  if (c2) c2->cd();
+  h = (TH2F *) f->Get(Form("%s%02i",plotName[j],s));
+  if (! h) return;
+  for (Int_t k = s1+1; k <= s2; s++) {
+    TH2F *h2 = (TH2F *) f->Get(Form("%s%0i",plotName[j],k));
+    if (! h2) return;
+    h->Add(h2);
+  }
+  if (! h) {cout << "Histogram for s/j = " << s << "/" << j << endl; return;}
+  if (h->GetEntries() < 100) {cout << "Histogram:" << h->GetName() << " for s/j = " << s << "/" << j << " is empty" <<  endl; return;}
+  h->SetXTitle(f->GetName());
+  TProfile *prof = h->ProfileX();
+  prof->SetMarkerStyle(24);
+  prof->SetMarkerColor(6);
+  TH1 *sp = h->ProjectionY("_py",-1,-1,"e");
+#if 0
+  sp->Fit("gaus","q"); //"q"
+  if (c2) c2->Update();
+#endif
+  Double_t Mu = 0;
+  Double_t dMu = 0;
+  TString HistName(h->GetName());
+  TF1 *gp = Sexpo();
+  sp->Fit(gp,"q"); // "q"
+  if (c2) c2->Update();
+  TF1 *gpc = sp->GetFunction(gp->GetName());
+  if (! gpc) return;
+  Mu = gpc->GetParameter(1);
+  if (j >= firstHG && j < firstHP) dMu = gpc->GetParError(1);
+  Double_t *params = gp->GetParameters();
+  params[0] -= TMath::Log(100.);
+  gp->SetParameters(params);
+  //  SlicesYFit(h,0,0,10,"qnig3"); //g3
+  //  SlicesYFit(h,0,0,10,"qni"); //g3
+  h->FitSlicesY(gp,0,0, 10,"qnig3");
   TH1 *fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
   //       TH1 *sig = (TH1 *) gDirectory->Get(Form("%s_2",h->GetName()));
   //       TH1 *gra = (TH1 *) gDirectory->Get(Form("%s_3",h->GetName()));
@@ -771,8 +990,13 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
     } // LSF
 
     for (Int_t j = firstH; j <= lastH; j++) {//cout << "Plot:" << plotName[j] << endl;
+#if 0
       FitG(f,i,j,nx,s,s1,s2,gp, out, FitR, dFitR, LSFit, dLSFit, name); 
+#else
+      FitGP(f,i,j,nx,s,s1,s2,out, FitR, dFitR, LSFit, dLSFit, name); 
+#endif
     }
+    TString line, lineC;
     for (Int_t m = 0; m < 6; m++) {
       if (dFitR[m] > 0) {
 	Double_t scale = 1e4;

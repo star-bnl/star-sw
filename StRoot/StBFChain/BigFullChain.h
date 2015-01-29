@@ -1727,7 +1727,7 @@ Bfc_st BFC[] = { // standard chains
   {"McAnaSsd"    ,"","","McAna"                                        ,"","","Mc Analysis for Ssd",kFALSE},
   {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"McQa"        ,"","McChain","McEvent",  "StMcQaMaker","StMcQaMaker","QA histogramms for McEvent",kFALSE},
-  {"McTpcAna"    ,"","McAnaChain","tpcDb,dbutil,McEvent,StEvent"
+  {"McTpcAna"    ,"","McAnaChain","tpcDb,dbutil,McEvent,StEvent,McAss"
    ,                                               "StTpcMcAnalysisMaker","StTpcMcAnalysisMaker","",kFALSE},
   {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
   {"MiniMcMk"    ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker"
