@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.223 2015/01/15 19:04:41 perev Exp $
+// $Id: StiMaker.cxx,v 1.224 2015/01/29 17:08:47 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -301,7 +301,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
@@ -313,7 +313,7 @@ Int_t StiMaker::InitDetectors()
 //  if (IAttr("useBTof"))
 //     {
 //       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
+//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
 //       group->setGroupId(kBTofId);
 //     }
   return kStOk;
@@ -561,11 +561,11 @@ void StiMaker::FinishTracks (int gloPri)
 // 1. loop over nodes
 // 2. Move node to the center volume along x or r  local
 
-static const char * tkNames[2] = {"globalTracks","primaryTracks"};
-static const char * noNames[2] = {"globalNodes" ,"primaryNodes" };
-static const char * inNames[2] = {"globalInside","primaryInside"};
-static const char * hiNames[2] = {"globaHits"   ,"primaryHits"  };
-static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
+// static const char * tkNames[2] = {"globalTracks","primaryTracks"};
+// static const char * noNames[2] = {"globalNodes" ,"primaryNodes" };
+// static const char * inNames[2] = {"globalInside","primaryInside"};
+// static const char * hiNames[2] = {"globaHits"   ,"primaryHits"  };
+// static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 
 
  StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
@@ -604,8 +604,11 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 }
 
 
-// $Id: StiMaker.cxx,v 1.223 2015/01/15 19:04:41 perev Exp $
+// $Id: StiMaker.cxx,v 1.224 2015/01/29 17:08:47 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.224  2015/01/29 17:08:47  perev
+// Remove redundant inputFile parameter
+//
 // Revision 1.223  2015/01/15 19:04:41  perev
 // Debug--
 //
