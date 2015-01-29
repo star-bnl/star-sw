@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.224 2015/01/29 17:08:47 perev Exp $
+// $Id: StiMaker.cxx,v 1.225 2015/01/29 19:04:43 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -338,6 +338,16 @@ Int_t StiMaker::InitRun(int run)
       if (IAttr("useTracker")) {
 
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+
+//		useTreeSearch flag means
+//		useTreeSearch == tpcFlag *4 + hftFlag
+//		flag == treeSearchOn + 2*treeSearchFull
+// 		treeSearchOn==1 means tree search is ON
+// 		treeSearchFull==1 means tree search includes case that existing hit
+//                                on this level could be omitted
+//  		Typical case chain->SetAttr("useTreeSearch",(1+2) +4*(1),"Sti");
+//		means HFT full tree searh, TPC tree search only with existing hits, no hits is not considered
+
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
         if ( IAttr("useTiming"    )) _tracker->setTiming();
 #if 0
@@ -604,8 +614,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.224 2015/01/29 17:08:47 perev Exp $
+// $Id: StiMaker.cxx,v 1.225 2015/01/29 19:04:43 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.225  2015/01/29 19:04:43  perev
+// Comments about treeSearch On/Off added
+//
 // Revision 1.224  2015/01/29 17:08:47  perev
 // Remove redundant inputFile parameter
 //
