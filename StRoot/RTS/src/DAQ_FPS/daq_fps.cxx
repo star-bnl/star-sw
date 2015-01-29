@@ -45,7 +45,7 @@ daq_fps::daq_fps(daqReader *rts_caller)
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
-	ped = new daq_dta ;
+	pedrms = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -57,7 +57,7 @@ daq_fps::~daq_fps()
 
 	delete raw ;
 	delete adc ;
-	delete ped ;
+	delete pedrms ;
 
 	return ;
 }
@@ -78,7 +78,7 @@ daq_dta *daq_fps::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 		return handle_adc() ;
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
-		return handle_ped() ;
+		return handle_pedrms() ;
 	}
 
 
@@ -208,34 +208,14 @@ daq_dta *daq_fps::handle_raw()
 
 	
 
-daq_dta *daq_fps::handle_ped()
+daq_dta *daq_fps::handle_pedrms()
 {
-
-	return 0 ;
-#if 0
-
 	char str[128] ;
 	char *full_name ;
 	int bytes ;
-	u_short *d, *d_in ;
-	int s_start, s_stop ;
 
 
-	LOG(NOTE,"handle_ped(%d)",sec) ;
-
-	if(sec<=0) {
-		s_start = 1 ;
-		s_stop = 2 ;
-	}
-	else {
-		s_start = s_stop = sec ;
-	}
-
-	ped->create(8,"fps_pedrms",rts_id,DAQ_DTA_STRUCT(daq_fps_pedrms_t)) ;
-
-	for(sec=s_start;sec<=s_stop;sec++) {
-
-	sprintf(str,"%s/sec%02d/pedrms",sfs_name, sec) ;
+	sprintf(str,"%s/sec%02d/pedrms",sfs_name, 1) ;
 
 	LOG(NOTE,"Trying %s",str) ;
 
@@ -245,71 +225,48 @@ daq_dta *daq_fps::handle_ped()
 		LOG(NOTE,"full_name %s",full_name) ;
 	}
 
-	if(!full_name) continue  ;
+	if(!full_name) return 0 ;  ;
+
+
 	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
 	LOG(NOTE,"bytes %d",bytes) ;
 
-	d = (u_short *) malloc(bytes) ;
-	d_in = d ;
-			
-	int ret = caller->sfs->read(str, (char *)d, bytes) ;
+	int nitems = bytes / sizeof(fps_pedrms_t) ;
+	int remain = bytes % sizeof(fps_pedrms_t) ;
+
+	if(remain) {
+		LOG(ERR,"Got %d, expect %d",bytes,sizeof(fps_pedrms_t)) ;
+		return 0 ;
+	}
+
+	char *data = (char *)malloc(bytes) ;
+
+	int ret = caller->sfs->read(str, (char *)data, bytes) ;
 	if(ret != bytes) {
 		LOG(ERR,"ret is %d") ;
 	}
 
-	if(d[0] != 0xBEEF) {
-		LOG(ERR,"Bad pedestal version") ;
-	}
+	pedrms->create(1,"fps_pedrms",rts_id,DAQ_DTA_STRUCT(fps_pedrms_t)) ;
 
-	if(d[1] != 1 ) {
-		LOG(ERR,"Bad pedestal version") ;
-	}
+	for(int i=0;i<nitems;i++) {
 
-	int rdo_cou = d[2] ;
-	int fib_cou = d[3] ;
-	int hy_cou = d[4] ;
-	int strip_cou = d[5] ;
+		fps_pedrms_t *ped = (fps_pedrms_t *)pedrms->request(1) ;
 
+		memcpy(ped,data+i*sizeof(fps_pedrms_t),sizeof(fps_pedrms_t)) ;
 
-	d += 6 ;	// skip header
-
-//	int max_ix = (bytes/2) ;
-
-	daq_fps_pedrms_t *f_ped = 0 ;
-
-	for(int r=0;r<rdo_cou;r++) {
-		int rdo1 = *d++ ;
-
-		for(int f=0;f<fib_cou;f++) {
-
-			f_ped = (daq_fpsyyyyy_pedrms_t *) ped->request(1) ;
-
-			for(int h=0;h<hy_cou;h++) {
-			for(int s=0;s<strip_cou;s++) {
-				short ped = (short)*d++ ;
-				short rms = (short)*d++ ;
-
-				f_ped->ped[h][s] = ped ;
-				f_ped->rms[h][s] = rms ;
-
-			}
-			}
-
-			ped->finalize(1,sec,rdo1,f) ;
+		if(ped->version != FPS_PED_VERSION) {
+			LOG(ERR,"Wrong version %d in file, expect %d",ped->version,FPS_PED_VERSION) ;
 		}
 
+		pedrms->finalize(1,1,ped->qt_ix,0) ;
 	}
 
-	free(d_in) ;
+	free(data) ;
 
-	}
+	pedrms->rewind() ;
 
-	ped->rewind() ;
-
-
-	return ped ;
-#endif
+	return pedrms ;
 }
 
 /*
