@@ -1006,7 +1006,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     Depends $env ["mpdalc.o"], qw(mpdef.o);
     Depends $env ["mpmod.o"],  qw(mpdef.o);
     Depends $env ["mpnum.o"],  qw(mpdef.o);
-    Depends $env ["pede.o"],   qw(mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o);
+    Depends $env ["pede.o"],   qw(mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o minresModule.o);
     $CPPFLAGS .= " -Df2cFortran -DUSE_ZLIB"; 
     $FFLAGS   .= " -DREAD_C_FILES -fopenmp";
 #    my $libs   = "-L" . $LIBPATH . " -l" . $pkg . " -lz -lgfortran -lm -lgomp"; 
