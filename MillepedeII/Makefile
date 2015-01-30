@@ -43,7 +43,7 @@ ZLIB_INCLUDES_DIR = =
 ZLIB_LIBS_DIR = =
 #
 # If yes use multithreading with OpenMP (TM)
-SUPPORT_OPENMP = yes
+#SUPPORT_OPENMP = yes
 # ompP profiler (http://www.ompp-tool.com, needs Opari for source-to-source instrumentation)
 OMPP =
 # kinst-ompp
@@ -67,7 +67,8 @@ ifeq ($(findstring 4.4., $(GCCVERS)), 4.4.)
   C_LIBS = -lgfortran -lgfortranbegin
 else  
 # gcc45, gcc46:
-  C_LIBS = -lgfortran -lm
+#  C_LIBS = -lgfortran -lm
+   C_LIBS = /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib/gcc/x86_64-unknown-linux-gnu/4.9.2/../../../../lib64/libgfortran.so -lm
 # math library -lm or -lquadmath may be required  
 endif
 DEBUG =          # e.g. -g

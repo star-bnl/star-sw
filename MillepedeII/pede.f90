@@ -484,7 +484,7 @@ PROGRAM mptwo
     WRITE(*,*) '($Rev: 119 $)'
     !$    WRITE(*,*) 'using OpenMP (TM)'
 #ifdef __GFORTRAN__
-    WRITE(*,111)  __GNUC__ , __GNUC_MINOR__ , __GNUC_PATCHLEVEL__
+!    WRITE(*,111)  __GNUC__ , __GNUC_MINOR__ , __GNUC_PATCHLEVEL__
 111 FORMAT(' compiled with gcc ',i0,'.',i0,'.',i0)
 #endif
     WRITE(*,*) ' '
