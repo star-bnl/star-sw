@@ -39,6 +39,11 @@ StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
    setGroupId(kSsdId);
+
+   if (!gGeoManager)
+      throw runtime_error("StiSstDetectorBuilder::StiSstDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
 }
 
 

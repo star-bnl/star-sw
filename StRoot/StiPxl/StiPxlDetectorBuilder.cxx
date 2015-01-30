@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.108 2015/01/21 23:10:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.109 2015/01/30 21:33:59 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -42,6 +42,11 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Pixel", active), mBuildIdealGeom(buildIdealGeom), mPxlDb(0)
 {
    setGroupId(kPxlId);
+
+   if (!gGeoManager)
+      throw runtime_error("StiPxlDetectorBuilder::StiPxlDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
 }
 
 

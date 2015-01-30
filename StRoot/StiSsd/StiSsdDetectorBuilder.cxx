@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.38 2014/12/02 23:25:54 smirnovd Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.39 2015/01/30 21:34:00 smirnovd Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.39  2015/01/30 21:34:00  smirnovd
+// StiXxxDetectorBuilder: Added a check for valid global object of TGeoManager. The detector builder is required one and cannot proceed if one does not exist
+//
 // Revision 1.38  2014/12/02 23:25:54  smirnovd
 // StiXxxDetectorBuilder: Removed deprecated calls to dummy methods
 //
@@ -93,6 +96,11 @@ StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active)
     : StiDetectorBuilder("Ssd",active), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
+
+   if (!gGeoManager)
+      throw runtime_error("StiSsdDetectorBuilder::StiSsdDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
 }
 
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
