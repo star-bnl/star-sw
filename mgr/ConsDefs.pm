@@ -1097,6 +1097,7 @@
 		      '.g'   => 'build::command::agetof',
 		      '.age' => 'build::command::agetof',
 		      '.f'   => 'build::command::fc',
+		      '.f90' => 'build::command::fc',
 		      '.F'   => 'build::command::fc',
 		      '.C'   => 'build::command::cxx',
 		      '.s'   => 'build::command::cc',

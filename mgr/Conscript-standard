@@ -990,6 +990,27 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       }
     }
   }
+  if ($pkg =~ m/^MillepedeII$/) { #  Module dependencies
+    $SO_PKG_lib = "lib" . $SO_PKG;
+#    print "pkg = $pkg\n";
+    @src = ();
+    foreach my $s (@srcL) {
+ #     print "s = $s\n";
+      next if $s =~ /^pede\.f90/;
+      push @src, $s;
+    }
+    @srcL = @src;
+    Depends $env ["Dbandmatrix.o"], qw(mpdef.o);
+    Depends $env ["minresqlpBlasModule.o"], qw(minresqlpDataModule.o);
+    Depends $env ["mpbits.o"], qw(mpdef.o mpdalc.o);
+    Depends $env ["mpdalc.o"], qw(mpdef.o);
+    Depends $env ["mpmod.o"],  qw(mpdef.o);
+    Depends $env ["mpnum.o"],  qw(mpdef.o);
+    Depends $env ["pede.o"],   qw(mpdef.o mpmod.o mpdalc.o mptest1.o mptest2.o mptext.o);
+    $CPPFLAGS .= " -Df2cFortran -DUSE_ZLIB"; 
+    $FFLAGS   .= " -DREAD_C_FILES -fopenmp";
+#    my $libs   = "-L" . $LIBPATH . " -l" . $pkg . " -lz -lgfortran -lm -lgomp"; 
+  }
   if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
   if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
   #    print "pkg = $pkg FPPFLAGS = $FPPFLAGS\n";
@@ -1462,7 +1483,7 @@ if ( $#src > -1 ) {
       #      print "$#src => @src \n";
       #      print "$#PlainObj => @PlainObj \n";
     }
-      if ($SO_PKG) {
+    if ($SO_PKG) {
 	#    print "LinkedModule  $SO_PKG, @src\n";
 	LinkedModule $env2 $SO_PKG, @src;
 	#    print "Install $LIB,         $SO_PKG\n";
@@ -1508,6 +1529,17 @@ if ( $#src > -1 ) {
 	Program      $envRTS $prog, ("src/RTS_EXAMPLE/" . $prog . ".C");
 	Install $envRTS $BIN, $prog;
       }
+    }
+    if ($pkg =~ m/^MillepedeII$/) { #  Module dependencies
+      my $prog = "pede";
+      #    Depends $env [$prog], ($LIB . "/" . $SO_PKG_lib);
+      $envP = $env2->clone('Package'  => $pkg,
+			   'LIBPATH'  => $LIB,
+			   'LIBS'     => "-lMillepedeII -lz -lgfortran -lm -lgomp"
+			  );
+      script::Keep $prog;
+      Program      $envP $prog, ("pede.f90");
+      Install $envP $BIN, $prog;
     }
   }
 }
