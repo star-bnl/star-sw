@@ -9,6 +9,7 @@ class StiNodePars {
    int isZeroH() const { return fabs(P[kHz]) <= 2e-6;}
   StiNodePars &merge(Double_t wt,StiNodePars &other);
   StiNodePars &operator=(const StiNodePars& fr);
+  void rotate(double alfa);
     /// accessors
   Double_t  operator[](Int_t idx) const {return P[idx];}
   Double_t &operator[](Int_t idx)       {return P[idx];}
