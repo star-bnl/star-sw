@@ -1,10 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.153 2015/01/15 20:05:27 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.154 2015/01/31 03:54:17 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.154  2015/01/31 03:54:17  perev
+ * New member _wallx added. _wallx means:
+ * 1. For kPlanar shape just normal radius
+ * 2. For cylindric shape node when createdrotated in such a way
+ *    that track in crossing point phi==0
+ *    Xlocal in this point is _wallx. Then _wallx is fixed forever
+ *    When refitted we search crossing point with this plane x= _wallx
+ *
  * Revision 2.153  2015/01/15 20:05:27  perev
  * Simplified check of simplified locate()
  *
@@ -937,20 +945,30 @@ StiDebug::Break(nCall);
     }
     					break;
   case kDisk:  							
-  case kCylindrical: endVal = nNormalRadius;
+  case kCylindrical: ;
     {
       double xy[2][3];
-      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),endVal,dir,xy);
-
+      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),nNormalRadius,dir,xy);
       if (!position) 			return -11;
-      dAlpha = atan2(xy[0][1],xy[0][0]);
-      position = rotate(dAlpha);
-      if (position) 			return -11;
+      int sol = 0;
+      for (sol=0;sol<2;sol++) {
+        double s = xy[sol][2];
+        double myX[3]={xy[sol][0],xy[sol][1],mFP.P[2]+mFP.tanl()*s};
+//        if (!insideL(myX,2|4)) continue;
+        dAlpha = mFP.phi()+mFP.curv()*s;
+        TVector3 v3(myX);
+        position = rotate(dAlpha);	
+        v3.RotateZ(-dAlpha);
+        endVal = v3[0];
+        break;
+      }
+//VP  if (sol>1) 			return -12;
     }
    					break;
   default: assert(0);
   }
-   
+  _wallx = endVal;
+assert(_wallx);
   position = propagate(endVal,shapeCode,dir); 
 
   if (position) return position;
@@ -1125,7 +1143,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   if (!hit) hit = getHit();
   double deltaX = 0;
   if (hit) { deltaX = hit->x()-mFP.x();}
-  else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP.x();}
+  else     { if (_detector) deltaX = _wallx-mFP.x();}
   if(fabs(deltaX)>5)		return -1;
   if (fabs(deltaX) <1.e-3) 	return  0;
   double deltaS = mFP.curv()*(deltaX);
@@ -1930,7 +1948,7 @@ int StiKalmanTrackNode::locate()
     break;
   case kSector: 	// cylinder sector
     ang = atan2(mFP.y(),mFP.x());
-    yOff    = nice(ang +_alpha - place->getLayerAngle());
+    yOff    = nice(ang +_alpha - place->getNormalRefAngle());
     if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
     break;
   case kPlanar: 
@@ -2028,6 +2046,7 @@ void StiKalmanTrackNode::initialize(StiHit *h)
   setHit(h);
   _detector = h->detector();
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
+  _wallx   = _detector->getPlacement()->getNormalRadius(); 
   mFP._sinCA = 0.6;
   mFP._cosCA = 0.8;
   mFP.x() = h->x();
@@ -2046,6 +2065,7 @@ void StiKalmanTrackNode::initialize(StiDetector *d)
   reset();
   _detector = d;
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
+  _wallx   = _detector->getPlacement()->getNormalRadius(); 
   _state = kTNInit;
   setChi2(1e10);
 }
