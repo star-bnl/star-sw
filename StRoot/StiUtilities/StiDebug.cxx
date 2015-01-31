@@ -72,7 +72,7 @@ void StiDebug::tally(const char *name,int val)
 //______________________________________________________________________________
 void StiDebug::Finish()
 {
-  Sumary();
+//VP  Sumary();
 }
 //______________________________________________________________________________
 void StiDebug::Break(int kase)
