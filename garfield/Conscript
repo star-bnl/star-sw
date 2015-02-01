@@ -11,11 +11,12 @@ my $SO_PKG= $pkg . "." . $env1->{SUFSOLIB};
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @src = script::find_sources($Dir);# print "src = @src\n";
+my @hfiles = script::find_hfiles($Dir);
 #Command $env, @srcc, qq(make installdirs; make);
 if ($#src > -1) {
   script::Keep $SO_PKG;
 #  Program      $env2 $pkg, @src;
 #  LinkedModule $env, $SO_PKG, @src;
 #  Install $env $LIB, $SO_PKG;
-  Command $env ($LIB . "/" . $SO_PKG), (@src, makefile),  qq(cd $obj_dir; make installdirs; make);
+  Command $env ($LIB . "/" . $SO_PKG), (@src, @hfiles, makefile),  qq(cd $obj_dir; make installdirs; make);
 }
