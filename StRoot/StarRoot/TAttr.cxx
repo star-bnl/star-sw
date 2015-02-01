@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.8 2011/03/19 03:13:31 perev Exp $
+ * $Id: TAttr.cxx,v 1.9 2015/01/31 03:38:22 perev Exp $
  *
  ***************************************************************************
  *
@@ -46,7 +46,9 @@ void TAttr::SetAttr(const char *key, const char *val)
      TObject *t = FindObject(tk.Data());
      if (t) {Remove(t); delete t;}
    } else {
-     AddFirst(new TNamed(tk.Data(),tv.Data()));
+     TNamed *t = new TNamed(tk.Data(),tv.Data());
+     t->SetUniqueID(0);
+     AddFirst(t);
    }
    if (_debug)
      Info("SetAttr","(\"%s\",\"%s\",\")",tk.Data(),tv.Data());
@@ -82,6 +84,11 @@ const char *TAttr::SAttr(const char *key) const
    TString tey(key);
    tey.ToLower(); tey.ReplaceAll(" ",""); tey.ReplaceAll("\t","");
    TObject *att = FindObject(tey.Data());
+   if (att) { // we found the attribut
+     int n = att->GetUniqueID();
+     att->SetUniqueID(n+1);
+     if (n<13) Info("Found","%s = %s\n",att->GetName(),att->GetTitle());
+   }
    return (att)? att->GetTitle():"";
 }   
 //_____________________________________________________________________________
