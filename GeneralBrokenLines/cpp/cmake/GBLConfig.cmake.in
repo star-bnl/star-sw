@@ -1,0 +1,71 @@
+###############################################
+# cmake configuration file for GBL
+# @author original: Jan Engels, DESY
+# @changes by Ch. Rosemann
+###############################################
+
+SET( GBL_FOUND FALSE )
+MARK_AS_ADVANCED( GBL_FOUND )
+
+# do not store find results in cache
+SET( GBL_INCLUDE_DIR GBL_INCLUDE_DIR-NOTFOUND )
+
+FIND_PATH( GBL_INCLUDE_DIR
+	NAMES GblTrajectory.h
+	PATHS @CMAKE_INSTALL_PREFIX@/include
+	NO_DEFAULT_PATH
+)
+IF( NOT GBL_INCLUDE_DIR )
+    MESSAGE( STATUS "Check for GBL: @CMAKE_INSTALL_PREFIX@"
+					" -- failed to find GBL include directory!!" )
+ELSE( NOT GBL_INCLUDE_DIR )
+    MARK_AS_ADVANCED( GBL_INCLUDE_DIR )
+ENDIF( NOT GBL_INCLUDE_DIR )
+
+# libraries
+SET( GBL_LIB_NAMES GBL )
+SET( GBL_FINDLIB_FAILED FALSE )
+MARK_AS_ADVANCED( GBL_LIB_NAMES GBL_FINDLIB_FAILED )
+
+FOREACH( libname ${GBL_LIB_NAMES} )
+
+    # name of the component in upper case
+    STRING( TOUPPER ${libname} ulibname)
+
+    SET( GBL_LIB_${ulibname} GBL_LIB_${ulibname}-NOTFOUND )
+    MARK_AS_ADVANCED( GBL_LIB_${ulibname} )
+
+    FIND_LIBRARY( GBL_LIB_${ulibname}
+        NAMES ${libname}
+        PATHS @CMAKE_INSTALL_PREFIX@
+        PATH_SUFFIXES lib
+        NO_DEFAULT_PATH )
+
+    IF( NOT GBL_LIB_${ulibname} )
+        SET( GBL_FINDLIB_FAILED TRUE )
+        IF( NOT GBL_FIND_QUIETLY )
+            MESSAGE( STATUS "Check for GBL: @CMAKE_INSTALL_PREFIX@"
+                    " -- failed to find GBL ${libname} library!!" )
+        ENDIF()
+    ELSE()
+        LIST( APPEND GBL_LIBS ${GBL_LIB_${ulibname}} )
+    ENDIF()
+ENDFOREACH()
+
+
+# set variables and display results
+IF( GBL_INCLUDE_DIR AND NOT GBL_FINDLIB_FAILED )
+    SET( GBL_FOUND TRUE )
+    SET( GBL_INCLUDE_DIRS ${GBL_INCLUDE_DIR} ${GBL_INCLUDE_DIR}/GBL @ROOT_INCLUDE_DIRS@ )
+    SET( GBL_LIBRARY_DIRS @CMAKE_INSTALL_PREFIX@/lib @ROOT_LIBRARY_DIR@ )
+	SET( GBL_LIBRARIES ${GBL_LIBS} @ROOT_LIBS@)
+    MARK_AS_ADVANCED( GBL_INCLUDE_DIRS GBL_LIBRARY_DIRS GBL_LIBRARIES )
+	MESSAGE( STATUS "Check for GBL: it works" )
+ELSE()
+	IF( GBL_FIND_REQUIRED )
+		MESSAGE( FATAL_ERROR "Check for GBL: @CMAKE_INSTALL_PREFIX@ -- failed!!" )
+    ELSE( GBL_FIND_REQUIRED )
+        MESSAGE( STATUS "Check for GBL: @CMAKE_INSTALL_PREFIX@"
+						" -- failed!! will skip this package..." )
+    ENDIF( GBL_FIND_REQUIRED )
+ENDIF()

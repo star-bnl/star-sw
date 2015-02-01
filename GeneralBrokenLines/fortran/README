@@ -1,0 +1,185 @@
+$Rev: 27 $
+$Date: 2012-03-13 10:20:52 -0400 (Tue, 13 Mar 2012) $
+C. Kleinwort, DESY 
+===========================================================
+                               Helmholtz Terascale Alliance
+General Broken Lines                        Analysis Centre
+                                     Statistics Tools Group
+===========================================================
+
+Track refitting with broken lines in 3D building on:
+
+A new fast track-fit algorithm based on broken lines
+V. Blobel, NIM A, 566 (2006), pp. 14-17
+
+===========================================================
+
+For a track with an initial trajectory from a prefit of the
+measurements (internal seed) or an external prediction
+(external seed) the description of multiple scattering is 
+added by offsets in a local system. Along the initial
+trajectory points are defined with can describe a measurement
+or a (thin) scatterer or both. Measurements are arbitrary
+functions of the local track parameters at a point (e.g. 2D:
+position, 4D: slope+position). The refit provides corrections
+to the local track parameters (in the local system) and the
+corresponding covariance matrix at any of those points.
+Outliers can be down-weighted by use of M-estimators.
+
+The broken lines trajectory is defined by (2D) offsets at the 
+first and last point and all points with a scatterer. The
+prediction for a measurement is obtained by interpolation of
+the enclosing offsets and for triplets of adjacent offsets
+kink angles are determined. This requires for all points the
+jacobians for propagation to the previous and next offset.
+These are calculated from the point-to-point jacobians along
+the initial trajectory.
+
+Additional local or global parameters can be added and the
+trajectories can be written to special binary files for
+calibration and alignment with Millepede-II.
+(V. Blobel, NIM A, 566 (2006), pp. 5-13)
+
+The conventions for the coordinate systems follow:
+
+Derivation of Jacobians for the propagation of covariance
+matrices of track parameters in homogeneous magnetic fields
+A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698
+
+===========================================================
+
+Description of Subroutines:
+
+Calls to () are mandatory, to [] optionally.
+
+( 1) Initialize fit 
+                  ------ ------
+      CALL GBLINI(LPRINT,ICOORD)
+
+Input
+   LPRINT : print level
+            0 = none
+            1 = minimal
+            2 = more
+
+   ICOORD : coordinate (0: both (track in 3D), 1: u_1, 2: u_2) to use
+
+( 2) Add point
+     Points have to be added in correct order! 
+    (Increasing or decreasing arclength)
+                  ----
+      CALL GBLADP(AJAC,IRET)
+                       ----
+Input
+   AJAC(5,5) : jacobian from previous point
+
+Output
+   IRET=0    : error
+       >0    : label of point added
+
+[ 3] Add measurement to current point (Only 2D implemented)
+                  ---- --- ----
+      CALL GBLADM(PROJ,RES,PREC)
+
+Input
+   PROJ(2,2)  : projection matrix of measurement directions 
+                into local system (dm/du) (double precision)
+   RES(2)     : residuals (m)
+   PREC(2)    : diagonal of inverse covariance matrix
+
+[3a] Add local derivatives to current measurement
+                  ---- ---
+      CALL GBLADL(NDER,DER,IRET)
+                           ----
+Input
+   NDER     : number of local derivatives
+   DER(2,*) : local derivatives
+Output
+   IRET     : number of non zero derivatives added
+
+[3b] Add global derivatives to current measurement
+                  ---- ---- ---
+      CALL GBLADG(NDER,LDER,DER,IRET)
+                                ----
+Input
+   NDER     : number of global derivatives
+   LDER(*)  : labels for global derivatives
+   DER(2,*) : global derivatives
+Output
+   IRET     : number of non zero derivatives added
+
+[ 4] Add (thin) scatterer to current point
+                  --- ----
+      CALL GBLADS(RES,PREC)
+
+Input
+   RES(2)    : values for initial kinks (in case of iterating)
+   PREC(2)   : diagonal of inverse (multiple scattering) 
+               covariance matrix of kinks
+
+[ 5] Dump trajectory definition
+
+      CALL GBLDMP
+
+[ 6] Add (inverse covariance matrix from) external seed
+                  ------ ----
+      CALL GBLADX(IPOINT,DPRC)
+
+Input
+   IPOINT    : (signed) point 
+               (<0: side towards previous point)
+               (>0: side towards next point)
+   DPRC(NP2) :  precision matrix (inverse covariance) from external seed
+               (NP is number of track parameters: 5 + #local par.,
+                double precision, symmetric storage mode, NP2=(NP+1)*NP/2)
+
+[ 7] Write Millepede-II record (to unit 51) 
+
+      CALL GBLMP2(IRET)
+                  ----
+Output
+   IRET      : number of MillePede measurements in record
+
+( 8) Perform fit
+                  ---
+      CALL GBLFIT(CDW,MRANK,NP,NDF,CHI2,WLS)
+                      ----- -- --- ---- ---
+Input
+   CDW       : string defining iterations for outlier
+               down weighting, one char per iteration
+               (C: Cauchy, H: Huber, T: Tukey)
+
+Output
+   MRANK     : rank of trajectory
+               =5: curved   track in space (3D)
+               =4: straight track in space (3D)
+               =3: curved   track in a plane
+               =2: straight track in a plane
+               <2: fit failed
+   NP        : number of track parameter at given point
+               (5 + #local parameters)
+   NDF       : number of degrees of freedom
+   CHI2      : Chi2
+   WLS       : weights [hits] lost by down weighting
+
+[ 9] Get track parameter corrections 
+     with covariance matrix at point
+                  ------
+      CALL GBLRES(IPOINT,DPAR,DCOV)
+                         ---- ----
+Input
+   IPOINT    : (signed) point
+               (<0: side towards previous point)
+               (>0: side towards next point)
+Output
+   DPAR(NP)  : corrections (double precision)
+               (NP is number of track parameters: 
+                5 + #local par.)
+   DCOV(NP2) : covariance matrix (double precision,
+               symmetric storage mode, NP2=(NP+1)*NP/2)
+
+===========================================================
+
+Example main program: GBLTST (very simple 3D tracks)
+
+===========================================================
