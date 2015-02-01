@@ -58,7 +58,7 @@ ClassImp(StMtdQAMaker)
 //_____________________________________________________________________________
 StMtdQAMaker::StMtdQAMaker(const Char_t *name) : 
   StMaker(name),
-  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mRunId(-1), mTriggerData(0),
+  mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mRunId(-1), mRunCount(0), mTriggerData(0),
   mMuDstIn(kFALSE), mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE),
   mTriggerIDs(0),
   mMaxVtxZ(150.), mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
@@ -82,6 +82,11 @@ StMtdQAMaker::~StMtdQAMaker()
 //_____________________________________________________________________________
 Int_t StMtdQAMaker::InitRun(const Int_t runNumber)
 {
+  // run Id
+  mRunId = runNumber;
+  mRunCount++;
+  mhRunId->GetXaxis()->SetBinLabel(mRunCount,Form("%d",mRunId));
+
   // initialize maps
   memset(mModuleToQT,-1,sizeof(mModuleToQT));
   memset(mModuleToQTPos,-1,sizeof(mModuleToQTPos));
@@ -135,10 +140,7 @@ Int_t StMtdQAMaker::Init()
 
 //_____________________________________________________________________________
 Int_t StMtdQAMaker::Finish()
-{
-  if(mhEventTrig)
-    mhEventTrig->SetName(Form("%s_Run%d",mhEventTrig->GetName(),mRunId));
-  
+{  
   if(fOutTreeFile)
     {
       fOutTreeFile->Write();
@@ -159,6 +161,8 @@ Int_t StMtdQAMaker::Make()
 
   // reset the structure
   memset(&mMtdData, 0, sizeof(mMtdData));
+
+  mhRunId->Fill(mRunCount-0.5);
 
   // Check the availability of input data
   Int_t iret;
@@ -273,7 +277,6 @@ Int_t StMtdQAMaker::processStEvent()
 
   mMtdData.runId   = mStEvent->runId();
   mMtdData.eventId = mStEvent->id();
-  mRunId = mMtdData.runId;
 
   // collect trigger information
   Int_t nTrigger = 0;
@@ -1158,7 +1161,7 @@ void StMtdQAMaker::bookHistos()
 
 
   const Int_t nbins = 3 + mTriggerIDs.size();
-  mhEventTrig = new TH1F("hEventId","Event statistics",nbins,0.,(Float_t)nbins);
+  mhEventTrig = new TH1F("hEventStat","Event statistics",nbins,0.,(Float_t)nbins);
   mhEventTrig->GetXaxis()->SetBinLabel(1,"All events");
   mhEventTrig->GetXaxis()->SetBinLabel(2,"Good trigger");
   mhEventTrig->GetXaxis()->SetBinLabel(3,Form("|vtx_z|<%2.0f cm",mMaxVtxZ));
@@ -1168,16 +1171,19 @@ void StMtdQAMaker::bookHistos()
     }
   AddHist(mhEventTrig);
   
-  mhVertexXY = new TH2F("hVertexXY","Primary vertex y vs x;x (cm);y (cm)",100,-5,5,100,-5,5);
+  mhRunId = new TH1F("hRunId","Statistics per run",100,0,100);
+  AddHist(mhRunId);
+
+  mhVertexXY = new TH2F("hVertexXY","Primary vertex y vs x (TPC);x (cm);y (cm)",100,-5,5,100,-5,5);
   AddHist(mhVertexXY);
 
-  mhVertexZ = new TH1F("hVertexZ","Primary vertex z; z",201,-201,201);
+  mhVertexZ = new TH1F("hVertexZ","Primary vertex z (TPC); z",201,-201,201);
   AddHist(mhVertexZ);
 
-  mhVtxZvsVpdVz = new TH2F("hVtxZvsVpdVz","Primary vertex z: VPD vs tracks;track z_{vtx} (cm);VPD z_{vtx} (cm)",201,-201,201,201,-201,201);
+  mhVtxZvsVpdVz = new TH2F("hVtxZvsVpdVz","Primary vertex z: VPD vs TPC;TPC z_{vtx} (cm);VPD z_{vtx} (cm)",201,-201,201,201,-201,201);
   AddHist(mhVtxZvsVpdVz);
 
-  mhVtxZDiff = new TH1F("hVtxZDiff","Track vz - VPD vz; #Deltavz (cm)",201,-201,201);
+  mhVtxZDiff = new TH1F("hVtxZDiff","TPC vz - VPD vz; #Deltavz (cm)",201,-201,201);
   AddHist(mhVtxZDiff);
 
   // TOF histograms
@@ -1185,40 +1191,40 @@ void StMtdQAMaker::bookHistos()
   AddHist(mhTofStartTime);
 
   // QT information
-  mhVpdQTadc = new TH2F("hVpdQTadc","VPD: ADC vs channel;channel;ADC",64,0.5,64.5,250,0,2500);
+  mhVpdQTadc = new TH2F("hVpdQTadc","VPD QT: ADC vs channel;channel;ADC",64,0.5,64.5,250,0,2500);
   AddHist(mhVpdQTadc);
 
-  mhVpdQTtac = new TH2F("hVpdQTtac","VPD: TAC vs channel;channel;TAC",64,0.5,64.5,200,500,2500);
+  mhVpdQTtac = new TH2F("hVpdQTtac","VPD QT: TAC vs channel;channel;TAC",64,0.5,64.5,200,500,2500);
   AddHist(mhVpdQTtac);
 
-  mhMtdQTadc = new TH2F("hMtdQTadc","MTD: ADC vs channel;;ADC",64,0.5,64.5,350,0,3500);
+  mhMtdQTadc = new TH2F("hMtdQTadc","MTD QT: ADC vs channel;;ADC",64,0.5,64.5,350,0,3500);
   AddHist(mhMtdQTadc);
 
-  mhMtdQTAllTac = new TH2F("hMtdQTAllTac","MTD: TAC vs channel (raw);;TAC",64,0.5,64.5,150,0,1500);
+  mhMtdQTAllTac = new TH2F("hMtdQTAllTac","MTD QT: TAC vs channel (all);;TAC",64,0.5,64.5,150,0,1500);
   AddHist(mhMtdQTAllTac);
 
-  mhMtdQTBestTac = new TH2F("hMtdQTBestTac","MTD: TAC vs channel (fastest);;TAC",64,0.5,64.5,150,0,1500);
+  mhMtdQTBestTac = new TH2F("hMtdQTBestTac","MTD QT: TAC vs channel (fastest);;TAC",64,0.5,64.5,150,0,1500);
   AddHist(mhMtdQTBestTac);
 
-  mhMtdMthQTTac = new TH2F("hMtdMthQTTac","MTD: TAC vs channel (matched to MTD hits);;TAC",64,0.5,64.5,150,0,1500);
+  mhMtdMthQTTac = new TH2F("hMtdMthQTTac","MTD QT: TAC vs channel (track-matched);;TAC",64,0.5,64.5,150,0,1500);
   AddHist(mhMtdMthQTTac);
   
-  mhMtdQTvsHit = new TH2F("hMtdQTvsHit","MTD: QT channel from hits vs from QT",32,0.5,32.5,32,0.5,32.5);
+  mhMtdQTvsHit = new TH2F("hMtdQTvsHit","MTD QT: QT channel from hits vs from QT",32,0.5,32.5,32,0.5,32.5);
   AddHist(mhMtdQTvsHit);
 
-  mhMtdVpdTacDiffMT001 = new TH2F("hMtdVpdTacDiffMT001","MT001: MTD-VPD TAC vs channel with position correction;;tac_{MTD}-tac_{VPD}+pos.corr.",32,0.5,32.5,3000,-3000,0);
+  mhMtdVpdTacDiffMT001 = new TH2F("hMtdVpdTacDiffMT001","QT: MTD-VPD tac difference with position correction (all);;tac_{MTD}-tac_{VPD}+pos.corr.",32,0.5,32.5,3000,-3000,0);
   AddHist(mhMtdVpdTacDiffMT001);
 
-  mhMtdVpdMthTacDiffMT001 = new TH2F("hMtdVpdMthTacDiffMT001","MT001: MTD-VPD TAC vs channel with position correction (matched to MTD hits);;tac_{MTD}-tac_{VPD}+pos.corr.",32,0.5,32.5,3000,-3000,0);
+  mhMtdVpdMthTacDiffMT001 = new TH2F("hMtdVpdMthTacDiffMT001","QT: MTD-VPD tac difference with position correction (track-matched);;tac_{MTD}-tac_{VPD}+pos.corr.",32,0.5,32.5,3000,-3000,0);
   AddHist(mhMtdVpdMthTacDiffMT001);
 
-  mhMtdVpdTacDiffMT101 = new TH2F("hMtdVpdTacDiffMT101","MT101: MTD-VPD TAC vs channel;;TAC (MTD-VPD)",32,0.5,32.5,3000,-3000,0);
+  mhMtdVpdTacDiffMT101 = new TH2F("hMtdVpdTacDiffMT101","MT101: MTD-VPD tac difference;;tac_{MTD}-tac_{VPD}",32,0.5,32.5,3000,-3000,0);
   AddHist(mhMtdVpdTacDiffMT101);
 
-  mhMtdVpdMthTacDiffMT101 = new TH2F("hMtdVpdMthTacDiffMT101","MT101: MTD-VPD TAC vs channel (matched to MTD hits);;TAC (MTD-VPD)",32,0.5,32.5,3000,-3000,0);
+  mhMtdVpdMthTacDiffMT101 = new TH2F("hMtdVpdMthTacDiffMT101","MT101: MTD-VPD tac difference (track-matched);;tac_{MTD}-tac_{VPD}",32,0.5,32.5,3000,-3000,0);
   AddHist(mhMtdVpdMthTacDiffMT101);
 
-  mhMtdQTJ2J3Diff = new TH2F("hMtdQTJ2J3Diff","MTD: J3-J2 TAC vs channel;;TAC (J3-J2)",32,0.5,32.5,80,-400,400);
+  mhMtdQTJ2J3Diff = new TH2F("hMtdQTJ2J3Diff","MTD QT: J3-J2 TAC vs channel;;TAC (J3-J2)",32,0.5,32.5,80,-400,400);
   AddHist(mhMtdQTJ2J3Diff);
 
   for(Int_t i=0; i<64; i++)
@@ -1250,10 +1256,10 @@ void StMtdQAMaker::bookHistos()
     }
 
   // MTD histograms
-  mhMtdTriggerTime[0] = new TH1F("hMtdTriggerTime0","MTD: trigger time 0;t",120,0,1.2e5);
+  mhMtdTriggerTime[0] = new TH1F("hMtdTriggerTime0","MTD: trigger time for backleg 16-30;t",120,0,1.2e5);
   AddHist(mhMtdTriggerTime[0]);
 
-  mhMtdTriggerTime[1] = new TH1F("hMtdTriggerTime1","MTD: trigger time 1;t",120,0,1.2e5);
+  mhMtdTriggerTime[1] = new TH1F("hMtdTriggerTime1","MTD: trigger time for backleg 1-15;t",120,0,1.2e5);
   AddHist(mhMtdTriggerTime[1]);
 
   // ===== raw hits
@@ -1297,19 +1303,19 @@ void StMtdQAMaker::bookHistos()
   mhMtdHitMap = new TH2F("hMtdHitMap","MTD: channel vs backleg of hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
   AddHist(mhMtdHitMap);
 
-  mhMtdHitLeTimeWest = new TH2F("hMtdHitLeTimeWest","MTD: west leading time per channel;channel;t_{leading} (ns)",1801,-0.5,1800.5,216,0,51200);
+  mhMtdHitLeTimeWest = new TH2F("hMtdHitLeTimeWest","MTD: west leading time of hits;channel;t_{leading} (ns)",1801,-0.5,1800.5,216,0,51200);
   AddHist(mhMtdHitLeTimeWest);
 
-  mhMtdHitLeTimeEast = new TH2F("hMtdHitLeTimeEast","MTD: east leading time per channel;channel;t_{leading} (ns)",1801,-0.5,1800.5,216,0,51200);
+  mhMtdHitLeTimeEast = new TH2F("hMtdHitLeTimeEast","MTD: east leading time of hits;channel;t_{leading} (ns)",1801,-0.5,1800.5,216,0,51200);
   AddHist(mhMtdHitLeTimeEast);
 
-  mhMtdHitLeTimeDiff = new TH2F("hMtdHitLeTimeDiff","MTD: (east-west) leading time per channel;channel;#Deltat_{leading} (ns)",1801,-0.5,1800.5,41,-20.5,20.5);
+  mhMtdHitLeTimeDiff = new TH2F("hMtdHitLeTimeDiff","MTD: (east-west) leading time of hits;channel;#Deltat_{leading} (ns)",1801,-0.5,1800.5,41,-20.5,20.5);
   AddHist(mhMtdHitLeTimeDiff);
 
-  mhMtdHitTotWest = new TH2F("hMtdHitTotWest","MTD: west TOT per channel;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
+  mhMtdHitTotWest = new TH2F("hMtdHitTotWest","MTD: west TOT of hits;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
   AddHist(mhMtdHitTotWest);
 
-  mhMtdHitTotEast = new TH2F("hMtdHitTotEast","MTD: east TOT per channel;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
+  mhMtdHitTotEast = new TH2F("hMtdHitTotEast","MTD: east TOT of hits;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
   AddHist(mhMtdHitTotEast);
 
   mhMtdHitTrigTime = new TH2F("hMtdHitTrigTime","MTD: trigger time of hit (west+east)/2;channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,450,2400,3300);
@@ -1322,7 +1328,7 @@ void StMtdQAMaker::bookHistos()
   mhMtdMatchHitMap = new TH2F("hMtdMatchHitMap","MTD: channel vs backleg of matched hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
   AddHist(mhMtdMatchHitMap);
  
-  mhMtdMatchPhi = new TH2F("hMtdMatchPhi","MTD: hit #varphi vs projected #varphi;#varphi_{proj};#varphi_{hit}",90,0,2*pi,90,0,2*pi);
+  mhMtdMatchPhi = new TH2F("hMtdMatchPhi","MTD hit #varphi vs track #varphi for matched pairs;#varphi_{proj};#varphi_{hit}",90,0,2*pi,90,0,2*pi);
   AddHist(mhMtdMatchPhi);
 
   mhMtdMatchDzVsChan = new TH2F("hMtdMatchDzVsChan","MTD: #Deltaz distribution;channel;#Deltaz = z_{proj}-z_{hit} (cm)",1801,-0.5,1800.5,201,-201,201);
@@ -1359,7 +1365,7 @@ void StMtdQAMaker::bookHistos()
   mhTrkDca = new TH2F("hTrkDca","Dca vs p_{T} of global tracks;p_{T} (GeV/c);dca (cm)",100,0,20,100,0,50);
   AddHist(mhTrkDca);
 
-  mhTrkPhiEta = new TH2F("hTrkPhiEta","#varphi vs #eta of global tracks at primary vertex;#eta;#varphi",50,-1,1,30,0,2*pi);
+  mhTrkPhiEta = new TH2F("hTrkPhiEta","#varphi vs #eta of global tracks at primary vertex;#eta;#varphi",50,-1,1,150,0,2*pi);
   AddHist(mhTrkPhiEta);
 
   mhMtdTrackProjMap = new TH2F("hMtdTrackProjMap","MTD: channel vs backleg of projected tracks;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
@@ -1757,8 +1763,12 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.6 2014/12/11 21:14:13 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.7 2015/02/01 16:26:31 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.7  2015/02/01 16:26:31  marr
+//// 1) Add a new histogram to store the run indices
+//// 2) Change the titles of some histograms for better readability
+////
 //// Revision 1.6  2014/12/11 21:14:13  marr
 //// Use (leadTimeW+leadTimeE)/2 instead of leadTimeW for MTD hit time
 ////
