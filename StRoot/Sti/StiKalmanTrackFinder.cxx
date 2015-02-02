@@ -229,7 +229,7 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     track->setFlag(1);
     _trackContainer->push_back(track);
     track->setId(_trackContainer->size());
-    track->reserveHits();
+//VP??    track->reserveHits();
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     nSsdHits+=track->getFitPointCount(kSsdId);
