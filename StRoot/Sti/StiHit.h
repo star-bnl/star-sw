@@ -142,7 +142,11 @@ public:
     ///Set the pointer to the corresponding StHit object.
     void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
-    void setTimesUsed(unsigned int);
+    void setMaxTimes(int set)	{mMaxTimes = set;}
+    void setTimesUsed(int set);
+    void addTimesUsed();
+    void subTimesUsed();
+    int  isUsed() const {return mTimesUsed>=mMaxTimes;}
     void setVz(Float_t vz) {_vz = vz;}
     void setVy(Float_t vy) {_vy = vy;}
     void reset();
@@ -155,7 +159,8 @@ public:
     friend ostream& operator<<(ostream& os, const StiHit& h);
 protected:
     char  mBeg[1];
-    unsigned char mTimesUsed;
+    char mMaxTimes;
+    char mTimesUsed;
     Float_t mrefangle;
     Float_t mposition;
     Float_t mx;
@@ -215,7 +220,7 @@ struct StiHitIsUsed
 {
   bool operator() (const StiHit*hit) const
   {
-    return (hit->timesUsed()==0);
+    return (hit->isUsed()==0);
   }
 };
 

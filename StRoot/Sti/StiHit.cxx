@@ -123,6 +123,7 @@ double StiHit::getPseudoRapidity() const
 void StiHit::reset()
 {
   memset(mBeg,0,mEnd-mBeg+1);
+  mMaxTimes = 1;
 static unsigned int myCount=0;  
   mCount = ++myCount;
 }
@@ -256,9 +257,22 @@ void StiHit::setGlobal(const StiDetector * detector,
 }
 
 //_____________________________________________________________________________
- void StiHit::setTimesUsed(unsigned int val)
+ void StiHit::setTimesUsed(int val)
 {
-    mTimesUsed=(unsigned char)val;
+    mTimesUsed=(char)val;
+    assert(mTimesUsed<=mMaxTimes);
+}
+//_____________________________________________________________________________
+ void StiHit::addTimesUsed()
+{
+    mTimesUsed++;
+    assert(mTimesUsed<=mMaxTimes);
+}
+//_____________________________________________________________________________
+ void StiHit::subTimesUsed()
+{
+    mTimesUsed--;
+    if(mTimesUsed<0) mTimesUsed=0;
 }
 
 //_____________________________________________________________________________
