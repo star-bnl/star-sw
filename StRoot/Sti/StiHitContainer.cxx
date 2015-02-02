@@ -238,7 +238,7 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
       hit = *cit;
       if (fabs( hit->y() - ref.y() ) < dY)
 	{
-	  if (fetchAll || (hit->timesUsed()==0 && hit->detector()->isActive()) )
+	  if (fetchAll || (hit->isUsed()==0 && hit->detector()->isActive()) )
 	    _selectedHits.push_back(hit);
 	}
     }
