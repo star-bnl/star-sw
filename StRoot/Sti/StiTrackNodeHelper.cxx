@@ -96,14 +96,11 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   int ierr = 0;
   mAlpha = mTargetNode->_alpha - mParentNode->_alpha;
   mCa=1;mSa=0;
-  parPars.check("1propagatePars");
+  if (parPars.check()) return 1;;
   rotPars = parPars;
   if (fabs(mAlpha) > 1.e-6) { //rotation part
     rotPars.rotate(mAlpha);
   }// end of rotation part
-
-  ierr = rotPars.check();
-  if (ierr) return 1;
   
 //  	Propagation 
   mX1 = rotPars.x();
