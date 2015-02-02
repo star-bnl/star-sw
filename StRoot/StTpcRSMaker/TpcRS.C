@@ -187,6 +187,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     SETBIT(Mode,StdEdxY2Maker::kZBGX);
     SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
     if (Mode) {
+      dEdx->SetDebug(1);
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
       dEdx->SetMode(Mode); 
     }

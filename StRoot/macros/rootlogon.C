@@ -151,9 +151,11 @@
   {
     TString STAR_LEVEL("$STAR_LEVEL");
     TString ROOT_LEVEL("$ROOT_LEVEL");
+    TString GARFIELD_HOME("$GARFIELD_HOME");
 #if 1
     gSystem->ExpandPathName(STAR_LEVEL);
     gSystem->ExpandPathName(ROOT_LEVEL);
+    gSystem->ExpandPathName(GARFIELD_HOME);
     cout <<  Form("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s ",  
 		  STAR_LEVEL.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
     SysInfo_t info;
@@ -166,8 +168,12 @@
   // note that the above bacward support the old mode for include whenever
   // it was not in .$STAR_HOST_SYS but one level up. The backward compatibility
   // can be removed only at the net root release ... 
-  gSystem->SetIncludePath(" -I.");
-  gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I/usr/include/mysql");
+  gSystem->SetIncludePath(" -D__ROOT__ -I.");
+  gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+  if (GARFIELD_HOME != "$GARFIELD_HOME") {
+    gSystem->AddIncludePath(" -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed");
+  }
+  gSystem->AddIncludePath(" -I$XOPTSTAR/include -I$OPTSTAR/include");
   gSystem->AddIncludePath(" -I$QTDIR/include -I$QTDIR/include/Qt -I$QTDIR/include/QtCore -I$QTDIR/include/QtGui");
   gSystem->AddIncludePath(" -I$ROOTSYS/include");
   gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);

@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.11 2015/01/29 04:43:21 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.12 2015/02/02 14:14:19 ypwang Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -32,31 +32,32 @@ class StIstFastSimMaker : public StMaker
 {
 public:
 
-   StIstFastSimMaker(const char *name = "istFastSim");
+   StIstFastSimMaker(const Char_t *name = "istFastSim");
+   virtual ~StIstFastSimMaker();
    Int_t Make();
-   Int_t InitRun( int);
+   Int_t InitRun( Int_t runNo);
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.10 2014/10/13 22:35:07 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.12 2015/02/02 14:14:19 ypwang Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
 protected:
-   THashList *istRot;
+   THashList *mIstRot;
    StIstDb *mIstDb;
    Bool_t mBuildIdealGeom;
 
-   StRandom *myRandom;
+   StRandom *mRandom;
 
-   Double_t resXIst1;
-   Double_t resZIst1;
-   bool     mSmear; //to turn smearing on and off
+   Double_t mResXIst1;
+   Double_t mResZIst1;
+   Bool_t mSmear; //to turn smearing on and off
 
 private:
 
    /// Routine to smear hit by resolution with gaussian, mean zero and width res
-   double distortHit(const double x, const double res, const double detLength) const;
+   Double_t distortHit(const Double_t x, const Double_t res, const Double_t detLength) const;
 
    ClassDef(StIstFastSimMaker, 0)
 };
@@ -67,6 +68,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.12  2015/02/02 14:14:19  ypwang
+* STAR Coding Standards style upates according to Jason W. comments
+*
 * Revision 1.11  2015/01/29 04:43:21  smirnovd
 * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
 *

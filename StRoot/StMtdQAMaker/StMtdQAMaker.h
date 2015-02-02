@@ -222,6 +222,7 @@ class StMtdQAMaker : public StMaker {
   StEvent          *mStEvent;                                  // Pointer to StEvent
   StMuDst          *mMuDst;                                    // Pointer to MuDst event
   Int_t            mRunId;                                     // Run number
+  Int_t            mRunCount;                                  // Keep track of number of runs processed
   StTriggerData    *mTriggerData;                              // Pointer to the trigger data
   Bool_t           mMuDstIn;                                   // Flag to force running on MuDst
   Bool_t           mPrintMemory;                               // Flag to print out memory usage
@@ -252,6 +253,7 @@ class StMtdQAMaker : public StMaker {
   TTree            *mQATree;                                   // Pointer to the QA tree
   TH1F             *mhEventTrig;                               // Event statistics 
   TH1F             *mhEventCuts;                               // Analysis cuts used
+  TH1F             *mhRunId;                                   // Run indices
   TH2F             *mhVertexXY;                                // Correlation between vertex x and y
   TH1F             *mhVertexZ;                                 // Distribution of vertex z
   TH2F             *mhVtxZvsVpdVz;                             // Correlation between z of vertices reconstructed using tracks and VPD
@@ -321,7 +323,7 @@ class StMtdQAMaker : public StMaker {
     return cvs;
   }
   
-  ClassDef(StMtdQAMaker, 1)
+  ClassDef(StMtdQAMaker, 2)
 };
 
 inline void StMtdQAMaker::setCosmic(const Bool_t c)                { mIsCosmic = c;            }
