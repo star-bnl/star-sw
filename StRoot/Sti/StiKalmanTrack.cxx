@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.135 2015/02/02 04:37:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.135 2015/02/02 04:37:19 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.135  2015/02/02 04:37:19  perev
+ * replacemens of names *TimesUsed to new versions
+ *
  * Revision 2.134  2015/01/15 19:10:19  perev
  * Added mthod test() for debug only
  *
@@ -1521,7 +1524,7 @@ int StiKalmanTrack::refit()
       //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
-    {//worstNode->getHit()->setTimesUsed(0);
+    {//worstNode->getHit()->subTimesUsed();
       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
     
@@ -1529,7 +1532,7 @@ int StiKalmanTrack::refit()
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-    {//flipFlopNode->getHit()->setTimesUsed(0);
+    {//flipFlopNode->getHit()->subTimesUsed();
       flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
       //	The last resource
@@ -1561,12 +1564,12 @@ int StiKalmanTrack::refit()
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
-      hit->setTimesUsed(0);
+      hit->subTimesUsed();
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
       assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
-      hit->setTimesUsed(1);
+      hit->addTimesUsed();
       node->setHit(hit);
     }
   }
@@ -1873,7 +1876,7 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
     if (hit->x()>rMax)		break;
     sum++;
     node->setHit(0);
-    hit->setTimesUsed(0);
+    hit->subTimesUsed();
   }
   return sum;
 }
