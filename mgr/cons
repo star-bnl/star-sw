@@ -2215,6 +2215,31 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
+# Builder for a F9 module
+package build::command::f90;
+
+use vars qw( @ISA );
+
+BEGIN { @ISA = qw(build::command) }
+
+#________________________________________
+sub find {
+    $_[1]->{_f90} || do {
+	my($class, $env) = @_;
+	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{FCPATH});
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
+	my($self) = find build::command($env, $env->{F90COM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_f90} = $self;
+    }
+}
+#________________________________________
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+#________________________________________________________________________________
 # Builder for a geant3 module
 package build::command::geant3;
 

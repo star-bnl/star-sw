@@ -312,6 +312,8 @@
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  my $FCCOM = 
  "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
+ my $F90COM = 
+ "cd %<:d; %FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %<:f %Fout%>:f;";
  my $FCviaAGETOFCOM
  = " test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
  . " test -f %>:b.for && rm %>:b.for; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.for;";
@@ -1039,6 +1041,7 @@
 		  'Lout'           => $Lout,
 		  'SoOUT'          => $SoOUT,
 		  'FCCOM'          => $FCCOM,
+		  'F90COM'         => $F90COM,
 		  'AGETOF'         => $AGETOF,
 		  'AGETOFLAGS'     => $AGETOFLAGS,
 		  'AGETOFCOM'      => $AGETOFCOM,
@@ -1097,7 +1100,7 @@
 		      '.g'   => 'build::command::agetof',
 		      '.age' => 'build::command::agetof',
 		      '.f'   => 'build::command::fc',
-		      '.f90' => 'build::command::fc',
+		      '.f90' => 'build::command::f90',
 		      '.F'   => 'build::command::fc',
 		      '.C'   => 'build::command::cxx',
 		      '.s'   => 'build::command::cc',
