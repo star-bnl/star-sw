@@ -1,6 +1,15 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.39 2015/01/30 21:34:00 smirnovd Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.40 2015/02/03 10:21:17 smirnovd Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.40  2015/02/03 10:21:17  smirnovd
+// Check for valid gGeoManager in buildDetectors instead of constructor
+//
+// This is a fixup of the change committed on 2015-01-30 16:33:59 (8b14dfaf)
+// The detector builder requires a valid TGeoManager object to build detector
+// geometries. However in the current StiMaker gGeoManager is not available when
+// detector builder is created. It becomes available just before the
+// ::buildDetectors() is called in StiMasterDetectorBuilder::build()
+//
 // Revision 1.39  2015/01/30 21:34:00  smirnovd
 // StiXxxDetectorBuilder: Added a check for valid global object of TGeoManager. The detector builder is required one and cannot proceed if one does not exist
 //
@@ -96,11 +105,6 @@ StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active)
     : StiDetectorBuilder("Ssd",active), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-
-   if (!gGeoManager)
-      throw runtime_error("StiSsdDetectorBuilder::StiSsdDetectorBuilder() "
-         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
-         "Make sure STAR geometry is properly loaded with BFC AgML option");
 }
 
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
@@ -109,6 +113,11 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
+   if (!gGeoManager)
+      throw runtime_error("StiSsdDetectorBuilder::StiSsdDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
+
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     StSsdBarrel *mySsd = StSsdBarrel::Instance();
     if (! mySsd) {// no active SSD
