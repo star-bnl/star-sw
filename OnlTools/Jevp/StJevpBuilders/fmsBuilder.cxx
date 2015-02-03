@@ -15,6 +15,7 @@ ClassImp(fmsBuilder)
 
 namespace {
   enum StFmsQtCrateNumber {kQt1 = 1, kQt2, kQt3, kQt4, kFpd, kQtError};
+  enum StFmsSignalType {kADC, kLED};
 
   /*
    Basic QT crate geometry.
@@ -57,16 +58,26 @@ namespace {
   /*
    Composes the name and title corresponding to a given QT crate number.
    */
-  std::pair<std::string, std::string> composeQtNameTitle(int qt) {
+  std::pair<std::string, std::string> composeQtNameTitle(int qt, int evtype) {
     std::string name, title;
     if(qt >= kQt1 and qt <= kQt4) {
       std::stringstream stream;
-      stream << "fms_qt_channel_adc_crate_" << qt;
-      name = stream.str();
-      stream.str("");
-      stream.clear();
-      stream << "Input to FMS QT crate " << qt << " (" << position(qt) << ")";
-      title = stream.str();
+      if(evtype == kADC) {
+        stream << "fms_qt_channel_adc_crate_" << qt;
+        name = stream.str();
+        stream.str("");
+        stream.clear();
+        stream << "Input to FMS QT crate " << qt << " (" << position(qt) << ")";
+        title = stream.str();
+      } // if
+      else if(evtype == kLED) {
+        stream << "fms_qt_channel_led_crate_" << qt;
+        name = stream.str();
+        stream.str("");
+        stream.clear();
+        stream << "LED Input to FMS QT crate " << qt << " (" << position(qt) << ")";
+        title = stream.str();
+      } // if
     } // if
     else if(kFpd == qt) {
       name = "fpd_channel_adc";
@@ -104,22 +115,24 @@ fmsBuilder::~fmsBuilder() {
 void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
   LOG(DBG, "fmsBuilder::initialize");
   // Create histograms for each QT crate (1 to 5), including FPD (5).
-  for(int qt = kQt1; qt < kQtError; ++qt) {
-    // Create the histogram.
-    std::pair<std::string, std::string> nameTitle
-      = composeQtNameTitle(qt);
-    TH2F* h = new TH2F(nameTitle.first.c_str(),
-                       nameTitle.second.c_str(),
-                       kNChannels, 0., kNChannels,  // Channel axis bins
-                       200, 0., kNAdc);           // ADC axis bins
-    h->SetBit(TH1::kCanRebin);
-    h->SetXTitle("slot * 32 + channel");
-    h->SetYTitle("ADC");
-    // Store the histogram.
-    // Create a JevpPlot owning the histogram and add it to the collection.
-    mHists.insert(std::make_pair(qt, h));
-    mPlots.push_back(new JevpPlot(h));
-    addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
+  for(int evtype = kADC; evtype <= kLED; ++evtype) {
+    for(int qt = kQt1; qt <= kQt4; ++qt) {
+      // Create the histogram.
+      std::pair<std::string, std::string> nameTitle
+        = composeQtNameTitle(qt,evtype);
+      TH2F* h = new TH2F(nameTitle.first.c_str(),
+                         nameTitle.second.c_str(),
+                         kNChannels, 0., kNChannels,  // Channel axis bins
+                         200, 0., kNAdc);           // ADC axis bins
+      h->SetBit(TH1::kCanRebin);
+      h->SetXTitle("slot * 32 + channel");
+      h->SetYTitle("ADC");
+      // Store the histogram.
+      // Create a JevpPlot owning the histogram and add it to the collection.
+      mHists.insert(std::make_pair(qt+4*evtype, h));
+      mPlots.push_back(new JevpPlot(h));
+      addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
+    } // for
   } // for
 }
 
@@ -144,25 +157,30 @@ void fmsBuilder::event(daqReader* reader) {
   if(not trigger.get()) {
     return;
   } // if
-  // Skip LED events.
+  // select event type
+  int evtype;
   if(isLedEvent(*trigger)) {
-    return;
+    evtype = kLED;
   } // if
-  // Loop over histograms for each QT crate.
+  else evtype = kADC;
+  // Loop over map of histograms (indexed by crate+evtype*4).
   TH1PtrMap::iterator i;
   for(i = mHists.begin(); i not_eq mHists.end(); ++i) {
-    TH1* histogram = i->second;
-    // Fill the histogram for each channel by looping over
-    // all slot and channel-in-slot values.
-    int crate = i->first;
-    for(int slot(0); slot < kNQtSlotsPerCrate; ++slot) {
-      for(int channel(0); channel < kNQtChannelsPerSlot; ++channel) {
-        int index = slot * kNQtChannelsPerSlot + channel;
-        float adc = trigger->fmsADC(crate, slot, channel, 0);
-        histogram->Fill(index, adc);
+    int ii = i->first;
+    if(ii>evtype*4 && ii<=(evtype*4+4)) {
+      TH1* histogram = i->second;
+      // Fill the histogram for each channel by looping over
+      // all slot and channel-in-slot values.
+      int crate = ii - evtype*4;
+      for(int slot(0); slot < kNQtSlotsPerCrate; ++slot) {
+        for(int channel(0); channel < kNQtChannelsPerSlot; ++channel) {
+          int index = slot * kNQtChannelsPerSlot + channel;
+          float adc = trigger->fmsADC(crate, slot, channel, 0);
+          histogram->Fill(index, adc);
+        } // for
       } // for
     } // for
-  } // for
+  } // if
 }
 
 void fmsBuilder::main(int argc, char *argv[]) {
