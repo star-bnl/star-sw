@@ -51,6 +51,11 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
+   if (!gGeoManager)
+      throw runtime_error("StiIstDetectorBuilder::StiIstDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
+
    SetCurrentDetectorBuilder(this);
 
    if (!mBuildIdealGeom) {

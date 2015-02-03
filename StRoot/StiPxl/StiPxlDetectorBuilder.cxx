@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.108 2015/01/21 23:10:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.110 2015/02/03 10:21:17 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -48,6 +48,11 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
 /** Build the pixel detector components. */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
+   if (!gGeoManager)
+      throw runtime_error("StiPxlDetectorBuilder::StiPxlDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
+
    SetCurrentDetectorBuilder(this);
 
    // Access the (survey) geometry if requested by the user
