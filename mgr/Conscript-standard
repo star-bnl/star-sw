@@ -91,6 +91,7 @@ my $LIBS    = $env1->{LIBS};
 my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
+my $LD      = $env1->{LD};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
@@ -1541,7 +1542,9 @@ if ( $#src > -1 ) {
       if ($env->{CXX_MAJOR} < 4 or $env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 8) {
 	$libs .= "  -lgfortranbegin";
       }
+      $LD = $FC;
       $envP = $env2->clone('Package'  => $pkg,
+			   'LD'       => $LD,
 			   'LIBPATH'  => $LIB,
 			   'LIBS'     => $libs
 			  );
