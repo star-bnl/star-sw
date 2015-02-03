@@ -997,6 +997,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     foreach my $s (@srcL) {
  #     print "s = $s\n";
       next if $s =~ /^pede\.f90/;
+      next if $s =~ /^Mille\.cc/;
       push @src, $s;
     }
     @srcL = @src;#  print "srcL = @srcL\n";
