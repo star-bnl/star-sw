@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.22 2014/11/19 18:29:47 genevb Exp $ */
+/* $Id: StIstDbMaker.h,v 1.23 2015/02/04 07:56:20 smirnovd Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -18,11 +18,12 @@ class StIstDbMaker : public StMaker
 {
 public:
    StIstDbMaker(const char *name = "istDb");
+   virtual Int_t Init();
    Int_t  InitRun(Int_t runNumber);
    Int_t  Make();
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.22 2014/11/19 18:29:47 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.23 2015/02/04 07:56:20 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    /// See StIstDb for details on created data structure. The ownership is passed to the STAR
@@ -39,6 +40,12 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.23  2015/02/04 07:56:20  smirnovd
+* Create StIstDb object in constructor and pass it to the framework in Init()
+*
+* It makes perfect sense to do it this way because the StIstDb obect is created
+* once by the maker and later reused/updated only at every new run.
+*
 * Revision 1.22  2014/11/19 18:29:47  genevb
 * Use flags to indicate DbMaker readiness
 *
