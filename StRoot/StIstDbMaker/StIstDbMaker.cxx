@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.28 2015/02/04 07:56:19 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.29 2015/02/04 07:56:31 smirnovd Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -26,7 +26,7 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(new StIstDb
 
 Int_t StIstDbMaker::Init()
 {
-   ToWhiteBoard("ist_db", mIstDb);
+   ToWhiteConst("ist_db", mIstDb);
 
    return kStOk;
 }
@@ -160,6 +160,9 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.29  2015/02/04 07:56:31  smirnovd
+* StIstDbMaker: Changed ToWhiteBoard() to ToWhiteConst() because we don't want to loose the StIstDb object at every call to StMaker::Clear()
+*
 * Revision 1.28  2015/02/04 07:56:19  smirnovd
 * Create StIstDb object in constructor and pass it to the framework in Init()
 *
