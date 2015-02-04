@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.17 2014/11/19 18:29:47 genevb Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.18 2015/02/04 07:55:41 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,12 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.18  2015/02/04 07:55:41  smirnovd
+ * Create StPxlDb object in constructor and pass it to the framework via ToWhiteConst() in Init()
+ *
+ * It makes perfect sense to do it this way because the StPxlDb obect is created
+ * once by the maker and later reused/updated only at every new run.
+ *
  * Revision 1.17  2014/11/19 18:29:47  genevb
  * Use flags to indicate DbMaker readiness
  *
@@ -57,16 +63,24 @@
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
 StPxlDbMaker::StPxlDbMaker(const char *name) :
-   StMaker(name), mPxlDb(0), mReady(kStErr)
+   StMaker(name), mPxlDb(new StPxlDb()), mReady(kStErr)
 {
    readAllRowColumnStatus = 0;
 }
+
+
+Int_t StPxlDbMaker::Init()
+{
+   ToWhiteConst("pxl_db", mPxlDb);
+
+   return kStOk;
+}
+
+
 //_____________________________________________________________________________
 Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
-
-   if (!mPxlDb) mPxlDb = new StPxlDb();
 
    // set geoHMatrices
    St_Survey *idsOnTpc          = (St_Survey *) GetDataBase("Geometry/pxl/idsOnTpc");
@@ -148,9 +162,6 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 
    if ( GetDebug() >= 2)
       mPxlDb->Print();
-
-   // finally write the data
-   ToWhiteConst("pxl_db", mPxlDb);
 
    mReady = kStOK;
 

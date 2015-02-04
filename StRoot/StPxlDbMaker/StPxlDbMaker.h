@@ -5,13 +5,19 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.14 2014/11/19 18:29:47 genevb Exp $
+ * $Id: StPxlDbMaker.h,v 1.15 2015/02/04 07:55:41 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  *
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.15  2015/02/04 07:55:41  smirnovd
+ * Create StPxlDb object in constructor and pass it to the framework via ToWhiteConst() in Init()
+ *
+ * It makes perfect sense to do it this way because the StPxlDb obect is created
+ * once by the maker and later reused/updated only at every new run.
+ *
  * Revision 1.14  2014/11/19 18:29:47  genevb
  * Use flags to indicate DbMaker readiness
  *
@@ -58,11 +64,12 @@ class StPxlDbMaker : public StMaker
 {
 public:
    StPxlDbMaker(const char *name = "pxlDb");
+   virtual Int_t Init();
    Int_t  InitRun(Int_t runNumber);
    Int_t  Make();
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.14 2014/11/19 18:29:47 genevb Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.15 2015/02/04 07:55:41 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
