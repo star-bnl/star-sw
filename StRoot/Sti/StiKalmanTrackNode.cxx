@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.154 2015/01/31 03:54:17 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.155 2015/02/04 02:18:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.155  2015/02/04 02:18:37  perev
+ * Fix small angle approximation
+ *
  * Revision 2.154  2015/01/31 03:54:17  perev
  * New member _wallx added. _wallx means:
  * 1. For kPlanar shape just normal radius
@@ -972,7 +975,8 @@ assert(_wallx);
   position = propagate(endVal,shapeCode,dir); 
 
   if (position) return position;
-  assert(mFP.x() > 0.);
+// ??  assert(shapeCode==1 || fabs(mFP.phi()) < 1e-4);
+// ??  assert(shapeCode >1 || mFP.x()         > 0   );
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
@@ -1068,7 +1072,6 @@ StiDebug::StiDebug::Break(nCall);
 
   assert(fDerivTestOn!=-10 || _state==kTNRotEnd ||_state>=kTNReady);
   _state = kTNProBeg;
-//  numeDeriv(xk,1,option,dir);
   mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
   double rho = mFP.curv();
   mgP.x2 = xk;
@@ -1103,12 +1106,11 @@ StiDebug::StiDebug::Break(nCall);
 
     mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
     double sind = mgP.dl0*rho;
-  
-    if (fabs(dsin) < 0.02 ) { //tiny angle
+    double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
+    if (fabs(sind) < 0.1 && cosd>0) { //tiny angle
       mgP.dl = mgP.dl0*(1.+sind*sind/6);
       
     } else {
-      double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
       mgP.dl = atan2(sind,cosd)/rho;
     }
     if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;

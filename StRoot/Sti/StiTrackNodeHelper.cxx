@@ -120,7 +120,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   mDl0 = rotPars._cosCA*mDx+rotPars._sinCA*mDy;
   mSind = mDl0*mRho;
   double cosd = mCosCA2*rotPars._cosCA+mSinCA2*rotPars._sinCA;
-  if (fabs(mDSin) < 0.02 && cosd  >0) { //tiny angle
+  if (fabs(mSind) < 0.1 && cosd  >0) { //tiny angle
     mDl = mDl0*(1.+mSind*mSind/6);
   } else {
     mDl = atan2(mSind,cosd)/mRho;
