@@ -2,6 +2,8 @@
 #include "Stiostream.h"
 #include <string>
 #include <map>
+#include "TError.h"
+#include "TVector3.h"
 #include "StiMaterial.h"
 #include "StiShape.h"
 #include "StiPlanarShape.h"
@@ -10,6 +12,7 @@
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "Sti/StiToolkit.h"
+#include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
 
 
@@ -69,7 +72,6 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
 static int nCall=0; nCall++;
 
 
-  double startWeight = getWeight();
   vect.resize(1);
   vect[0]=this;
   assert(shape);
@@ -79,7 +81,7 @@ static int nCall=0; nCall++;
   float halfY  = shape->getHalfWidth(); 
   float angle  = shape->getOpeningAngle(); 
   float nRadius = placement->getNormalRadius();
-  if (iShape == kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
+  if (iShape >= kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
 
   if (nRadius < deltaX/2) {		// non splitable
     printf("StiDetector::splitIt %s Non splitable Rnormal < thickness/2 %g %g\n"
@@ -115,7 +117,7 @@ assert(myRadius>1e-2 && myRadius < 1e3);
      if (iShape==kPlanar) 	{//Planar shape
        myShape = new StiPlanarShape(ts.Data(),halfZ,dX,halfY);
 
-     } else if (iShape==kCylindrical) {//Cylinder shape
+     } else if (iShape>=kCylindrical) {//Cylinder shape
        myShape = new StiCylindricalShape(ts.Data(),halfZ,dX,myRadius+dX/2,angle);
 
      } else { assert(0 && "Wrong shape type");}
@@ -152,7 +154,42 @@ return shape->getVolume();
 {
 return shape->getVolume()*material->getDensity();
 }
+//______________________________________________________________________________
+int StiDetector::insideL(const double xl[3],int mode) const 
+{
+static int nCall = 0; nCall++;
+static const double fakt = 1.;
+if (!mode) mode = 1;
+double rN = placement->getNormalRadius();
+double thick = shape->getThickness();
+do {
+ if (shape->getShapeCode()==1) { //Planar
+   if (mode&1 && fabs(xl[0]-rN)>thick/2) 		break;
+   if (mode&2) {
+     double y = xl[1]-placement->getNormalYoffset();
+     double dy = shape->getHalfWidth()*fakt;
+     if (fabs(y)>dy) 					break;
+   }
+ } else {
+   if (mode&1) {
+     double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
+     if (fabs(rxy-rN)>thick/2) 				break;
+   }
 
+   if (mode&2) {
+     double ang = atan2(xl[1],xl[0]);
+     if (ang<-M_PI) ang +=M_PI*2;
+     if (ang> M_PI) ang -=M_PI*2;
+     if (fabs(ang)>shape->getOpeningAngle()/2*fakt)	break;
+   }
+ } 
+   if (!(mode&4)) return 1;
+   double z = xl[2]-placement->getZcenter();  
+   if (fabs(z)>shape->getHalfDepth()*fakt)		break;
+   return 1;
+ } while(0);
+  return 0;
+}
 
 /**
  * A setter for most of the detector properties. We do not pass arguments in
@@ -169,4 +206,28 @@ void StiDetector::setProperties(std::string name, StiIsActiveFunctor* activeFunc
    setPlacement(placement);
    setGas(gas);
    setMaterial(material);
+}
+//______________________________________________________________________________
+int StiDetector::insideG(const double xl[3],int mode) const 
+{
+  TVector3 xg(xl);
+  double alfa = getPlacement()->getNormalRefAngle();
+  xg.RotateZ(-alfa);
+  return insideL(&xg[0],mode);
+}
+//______________________________________________________________________________
+double StiDetector::getCenterX() const 
+{
+  int shapeCode = shape->getShapeCode();
+  switch(shapeCode) {
+  
+    case kPlanar: 		return placement->getNormalRadius()-shape->getThickness()/2;
+    case kCylindrical: 	return 0;
+    case kSector: {
+      double rn = placement->getNormalRadius()-shape->getThickness()/2;
+      double ang = shape->getOpeningAngle();
+      return rn*cos(ang);}
+    default: assert(0 && "WrongShape");
+  }
+  return 0;
 }
