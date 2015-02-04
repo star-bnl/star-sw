@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.26 2015/01/27 21:16:51 genevb Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.27 2015/02/04 07:56:05 smirnovd Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -139,6 +139,9 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    if ( GetDebug() >= 2)
       mIstDb->Print();
 
+   // Write the data
+   ToWhiteBoard("ist_db", mIstDb);
+
    mReady = kStOK;
 
    return kStOK;
@@ -147,9 +150,6 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
 Int_t StIstDbMaker::Make()
 {
-   // Write the data
-   ToWhiteBoard("ist_db", mIstDb);
-
    return mReady;
 }
 
@@ -157,8 +157,8 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
-* Revision 1.26  2015/01/27 21:16:51  genevb
-* Move ToWhiteBoard() to Make
+* Revision 1.27  2015/02/04 07:56:05  smirnovd
+* Revert "Move ToWhiteBoard() to Make". Will implement a different solution to avoid losing istDb from this maker's data container
 *
 * Revision 1.25  2014/11/19 18:29:47  genevb
 * Use flags to indicate DbMaker readiness
