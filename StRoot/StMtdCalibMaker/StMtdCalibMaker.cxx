@@ -489,15 +489,17 @@ void StMtdCalibMaker::processStEvent()
       mtdPid->setDeltaZ(dz);
       if (mHisto) hDzModule->Fill((backlegId-1)*5+moduleId-1,dz);
 
+
       // primary track
-      StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack *>(gTrack->node()->track(primary));
+      StTrack *pTrack = gTrack->node()->track(primary);
+      if(!pTrack) continue;
       StMtdPidTraits *pmtdPid = 0;
-      traits = pTrack->pidTraits();
-      for(UInt_t it=0; it<traits.size(); it++)
+      StSPtrVecTrackPidTraits &ptraits = pTrack->pidTraits();
+      for(UInt_t it=0; it<ptraits.size(); it++)
 	{
-	  if(traits[it]->detector()==kMtdId)
+	  if(ptraits[it]->detector()==kMtdId)
 	    {
-	      pmtdPid = dynamic_cast<StMtdPidTraits*>(traits[it]);
+	      pmtdPid = dynamic_cast<StMtdPidTraits*>(ptraits[it]);
 	      break;
 	    }
 	}
@@ -690,8 +692,11 @@ void StMtdCalibMaker::bookHistograms()
 
 
 //
-// $Id: StMtdCalibMaker.cxx,v 1.2 2015/02/04 14:35:59 marr Exp $
+// $Id: StMtdCalibMaker.cxx,v 1.3 2015/02/04 22:35:24 marr Exp $
 // $Log: StMtdCalibMaker.cxx,v $
+// Revision 1.3  2015/02/04 22:35:24  marr
+// Check the existance of the matched primary track
+//
 // Revision 1.2  2015/02/04 14:35:59  marr
 // Added dy and dz correction for pidTraits
 //
