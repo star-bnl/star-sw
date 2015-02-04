@@ -21,12 +21,14 @@ class StiMaterial;
 //class StiElossCalculator;
   
 typedef enum {
-  kFailed = -1,         // could not find intersection
-  kHit,                                
-  kEdgePhiPlus, kEdgeZminus, kEdgePhiMinus, kEdgeZplus, 
-  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus,
-  kEnded
+  kFailed = -3,         // could not find intersection
+  kTooFar = -2,
+  kEnded  = -1,
+  kHit    =  0,                                
 } StiIntersection;
+
+enum {kEdgeZplus=9}; //???????????????????????????????????????????
+
   
 class StiNodeStat {
 public:	
@@ -190,6 +192,7 @@ const StiELoss *getELoss()const		{return mELoss;}
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   int  isEnded() const;	
   int  isDca()   const;	
+  int  isPrimary()   const;	
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
@@ -208,6 +211,10 @@ const StiELoss *getELoss()const		{return mELoss;}
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
+  int  inside(			int mode=1) const;
+  int  insideL(double x,double y,int mode=1) const;
+  int  insideL(const double *x,	int mode=1) const; 
+  int  insideG(const double *x,	int mode=1) const; 
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
