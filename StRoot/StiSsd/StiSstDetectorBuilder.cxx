@@ -127,44 +127,13 @@ void StiSstDetectorBuilder::useVMCGeometry()
          continue;
       }
 
-      // Build global rotation for the sensor
-      TGeoRotation sensorRot(*sensorMatrix);
-
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-      // Convert center of the sensor geobox to coordinates in the global coordinate system
-      double sensorXyzLocal[3]  = {};
-      double sensorXyzGlobal[3] = {};
-
-      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-      TVector3 sensorVec(sensorXyzGlobal);
 
       // XXX:ds: Need to verify the constant for sensor spacing
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
       StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
-      add(stiShape);
-
-      Double_t phi  = sensorVec.Phi();
-      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-      double normVecMag = fabs(r * sin(phi - phiD));
-      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-      else                            normVec *=  normVecMag;
-
-      // Volume positioning
-      StiPlacement *pPlacement = new StiPlacement();
-
-      pPlacement->setZcenter(0);
-      pPlacement->setLayerRadius(r);
-      pPlacement->setLayerAngle(phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-      double centerOrient = sensorVec.Phi() - normVec.Phi();
-      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+      StiPlacement *pPlacement= new StiPlacement(*sensorMatrix);
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
