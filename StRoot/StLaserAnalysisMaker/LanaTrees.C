@@ -1,3 +1,6 @@
+/* 
+   root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
+ */
 // $Id: LanaTrees.C,v 1.1 2015/01/20 19:41:54 fisyak Exp $
 // $Log: LanaTrees.C,v $
 // Revision 1.1  2015/01/20 19:41:54  fisyak
@@ -45,9 +48,6 @@
 // Revision 1.3  2007/12/10 19:54:02  fisyak
 // Add Id and Log, correct spelling error in README
 //
-/* 
-   root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
- */
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS

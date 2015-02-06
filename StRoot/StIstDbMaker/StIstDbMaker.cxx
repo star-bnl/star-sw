@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.26 2015/01/27 21:16:51 genevb Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.29 2015/02/04 07:56:31 smirnovd Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -18,16 +18,22 @@ ClassImp(StIstDbMaker)
  * \author Yaping Wang
  * \date June 2013
  */
-StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(0), mReady(kStErr)
+StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(new StIstDb()), mReady(kStErr)
 {
+}
+
+
+Int_t StIstDbMaker::Init()
+{
+   ToWhiteConst("ist_db", mIstDb);
+
+   return kStOk;
 }
 
 
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
-
-   if ( !mIstDb ) { mIstDb = new StIstDb(); }
 
    LOG_DEBUG << "StIstDbMaker::InitRun() - Access data from database" << endm;
 
@@ -71,9 +77,6 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
 Int_t StIstDbMaker::Make()
 {
-   // Write the data
-   ToWhiteBoard("ist_db", mIstDb);
-
    return mReady;
 }
 
@@ -81,8 +84,17 @@ Int_t StIstDbMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
-* Revision 1.26  2015/01/27 21:16:51  genevb
-* Move ToWhiteBoard() to Make
+* Revision 1.29  2015/02/04 07:56:31  smirnovd
+* StIstDbMaker: Changed ToWhiteBoard() to ToWhiteConst() because we don't want to loose the StIstDb object at every call to StMaker::Clear()
+*
+* Revision 1.28  2015/02/04 07:56:19  smirnovd
+* Create StIstDb object in constructor and pass it to the framework in Init()
+*
+* It makes perfect sense to do it this way because the StIstDb obect is created
+* once by the maker and later reused/updated only at every new run.
+*
+* Revision 1.27  2015/02/04 07:56:05  smirnovd
+* Revert "Move ToWhiteBoard() to Make". Will implement a different solution to avoid losing istDb from this maker's data container
 *
 * Revision 1.25  2014/11/19 18:29:47  genevb
 * Use flags to indicate DbMaker readiness

@@ -44,6 +44,7 @@
 #include "tables/St_mtdSlewingCorr_Table.h"
 #include "tables/St_mtdT0Offset_Table.h"
 #include "tables/St_mtdTriggerTimeCut_Table.h"
+#include "tables/St_mtdPositionCorr_Table.h"
 
 #include "StMtdCalibMaker.h"
 
@@ -63,6 +64,8 @@ StMtdCalibMaker::StMtdCalibMaker(const char *name) : StMaker(name)
   mCalibFileTot           = "";
   mCalibFileT0            = "";
   mCalibFileTrigger       = "";
+  mCalibFileDy            = "";
+  mCalibFileDz            = "";
   hTimeOfFlightCorr       = 0;
   hAllCorr                = 0;
   hTimeOfFlightCorrModule = 0;
@@ -82,6 +85,8 @@ StMtdCalibMaker::~StMtdCalibMaker()
   if(hTriggerTimeBL)          delete hTriggerTimeBL;
   if(hVertexzVsTpcz)          delete hVertexzVsTpcz;
   if(hTOFTimeOfFlightTray)    delete hTOFTimeOfFlightTray;
+  if(hDyModule)               delete hDyModule;
+  if(hDzModule)               delete hDzModule;
 }
 
 //____________________________________________________________________________
@@ -101,6 +106,8 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
   memset(mMtdT0Corr,      0, mNBackleg*mNModule*mNCell*dblSize);
   memset(mMtdTotCorr,     0, mNBackleg*mNModule*mNBinMax*dblSize);
   memset(mMtdTotEdge,     0, mNBackleg*mNModule*mNBinMax*dblSize);
+  memset(mMtdDyCorr,      0, mNBackleg*mNModule*dblSize);
+  memset(mMtdDzCorr,      0, mNBackleg*mNModule*mNCell*dblSize);
   memset(mTriggerHighEdge,0, mNBackleg*mNModule*dblSize);
   memset(mTriggerLowEdge, 0, mNBackleg*mNModule*dblSize);
 
@@ -125,7 +132,31 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
 	  Int_t cell    =  j-backleg*60-module*12;
 	  mMtdT0Corr[backleg][module][cell] = tZero->t0Offset[j];
 	}
- 
+
+      // extract Dy  and Dz correction parameters
+      mDbDataSet = GetDataBase("Calibrations/mtd/mtdPositionCorr");
+      St_mtdPositionCorr* mtdPositionCorr = static_cast<St_mtdPositionCorr*>(mDbDataSet->Find("mtdPositionCorr"));
+      if(!mtdPositionCorr)
+        {
+          LOG_ERROR << "Unable to get the posistion correction parameters from data base" << endm;
+          return kStErr;
+        }
+      mtdPositionCorr_st* posCorr = static_cast<mtdPositionCorr_st*>(mtdPositionCorr->GetTable());
+      for(int j=0; j<mNBackleg*mNModule; j++)
+        {
+          Int_t backleg = j/5;
+          Int_t module  = j%5;
+          mMtdDyCorr[backleg][module] = posCorr->yCorr[j];
+        }
+
+      for(int j=0; j<mNBackleg*mNModule*mNCell; j++)
+        {
+          Int_t backleg = j/60;
+          Int_t module  = (j-backleg*60)/12;
+          Int_t cell    =  j-backleg*60-module*12;
+          mMtdDzCorr[backleg][module][cell] = posCorr->zCorr[j];
+        }
+
       // extract slewing correction parameters
       mDbDataSet = GetDataBase("Calibrations/mtd/mtdSlewingCorr");
       St_mtdSlewingCorr* mtdSlewingCorr = static_cast<St_mtdSlewingCorr*>(mDbDataSet->Find("mtdSlewingCorr"));
@@ -197,6 +228,65 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
 	    }
 	  }
 	}
+      inData.close();
+
+      //load dy offset parameters from local file
+      if (mCalibFileDy.length()==0)
+        {
+          LOG_ERROR << "Please input the local file path for Dy offset parameters" << endm;
+          return kStErr;
+        }
+      if (mDebug) { LOG_INFO << " Local file for Dy offset : " << mCalibFileDy << endm; }
+      inData.open(mCalibFileDy.c_str());
+      if(!inData.is_open())
+        {
+          LOG_ERROR << "Unable to get the Dy offset parameters from local file" <<endm;
+          LOG_ERROR << "Check if this file exists: " << mCalibFileDy.c_str() << endm;
+          return kStErr;
+        }
+      Double_t yCorr;
+
+      for(Int_t i=0;i<mNBackleg;i++)
+        {
+        for(Int_t j=0;j<mNModule;j++)
+          {
+              inData>>backlegId>>moduleId;
+              inData>>yCorr;
+              mMtdDyCorr[backlegId-1][moduleId-1]=yCorr;
+              if (mDebug) { LOG_INFO << "mMtdDyCorr=" <<mMtdDyCorr[backlegId-1][moduleId-1]<< endm;}
+          }
+        }
+      inData.close();
+
+      //load dz offset parameters from local file
+      if (mCalibFileDz.length()==0)
+        {
+          LOG_ERROR << "Please input the local file path for Dz offset parameters" << endm;
+          return kStErr;
+        }
+      if (mDebug) { LOG_INFO << " Local file for Dz offset : " << mCalibFileDz << endm; }
+      inData.open(mCalibFileDz.c_str());
+      if(!inData.is_open())
+        {
+          LOG_ERROR << "Unable to get the Dz offset parameters from local file" <<endm;
+          LOG_ERROR << "Check if this file exists: " << mCalibFileDz.c_str() << endm;
+          return kStErr;
+        }
+      Double_t zCorr;
+
+      for(Int_t i=0;i<mNBackleg;i++)
+        {
+        for(Int_t j=0;j<mNModule;j++)
+          {
+            for(Int_t l=0;l<mNCell;l++)
+              {
+                inData>>backlegId>>moduleId>>cellId;
+                inData>>zCorr;
+                mMtdDzCorr[backlegId-1][moduleId-1][cellId]=zCorr;
+                if (mDebug) { LOG_INFO << "mMtdDzCorr=" <<mMtdDzCorr[backlegId-1][moduleId-1][cellId] << endm;}
+              }
+          }
+        }
       inData.close();
 
       //load slewing correction parameters from local file
@@ -388,21 +478,36 @@ void StMtdCalibMaker::processStEvent()
       mtdPid->setTimeOfFlight(timeOfFlight);
       if (mDebug) 
 	{ LOG_INFO << "Time-of-flight = " <<timeOfFlight <<",  Calibration parameter = "<<AllCorr << endm; }
+      //change dy in mtdPidTraits
+      Float_t dy = mtdPid->deltaY();
+      dy -= mMtdDyCorr[backlegId-1][moduleId-1];
+      if (mHisto) hDyModule->Fill((backlegId-1)*5+moduleId-1,dy);
+      mtdPid->setDeltaY(dy);
+      //change dz in mtdPidTraits
+      Float_t dz = mtdPid->deltaZ();
+      dz -= mMtdDzCorr[backlegId-1][moduleId-1][cellId];
+      mtdPid->setDeltaZ(dz);
+      if (mHisto) hDzModule->Fill((backlegId-1)*5+moduleId-1,dz);
+
 
       // primary track
-      StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack *>(gTrack->node()->track(primary));
+      StTrack *pTrack = gTrack->node()->track(primary);
+      if(!pTrack) continue;
       StMtdPidTraits *pmtdPid = 0;
-      traits = pTrack->pidTraits();
-      for(UInt_t it=0; it<traits.size(); it++)
+      StSPtrVecTrackPidTraits &ptraits = pTrack->pidTraits();
+      for(UInt_t it=0; it<ptraits.size(); it++)
 	{
-	  if(traits[it]->detector()==kMtdId)
+	  if(ptraits[it]->detector()==kMtdId)
 	    {
-	      pmtdPid = dynamic_cast<StMtdPidTraits*>(traits[it]);
+	      pmtdPid = dynamic_cast<StMtdPidTraits*>(ptraits[it]);
 	      break;
 	    }
 	}
       if(!pmtdPid) continue;
       pmtdPid->setTimeOfFlight(timeOfFlight);
+      pmtdPid->setDeltaY(dy);
+      pmtdPid->setDeltaZ(dz);
+
     }
   return;
 }
@@ -429,7 +534,7 @@ void StMtdCalibMaker::processMuDst()
     }
   Double_t tStartTime = bTofHeader->tStart();
   Double_t vpdvz = bTofHeader->vpdVz();
-  if (tStartTime==-9999) return;
+  //if (tStartTime==-9999) return;
   if (mHisto) hVertexzVsTpcz->Fill(vpdvz,tpcvz); //check vertex distribution
 
   // Get trigger time recorded in THUB
@@ -444,7 +549,6 @@ void StMtdCalibMaker::processMuDst()
     }
   mtdTriggerTime[0] = 25.*(muMtdHeader->triggerTime(1)&0xfff);
   mtdTriggerTime[1] = 25.*(muMtdHeader->triggerTime(2)&0xfff);
-
   // loop over all the MTD hits
   for(Int_t i=0;i<nhits;i++) 
     {
@@ -498,12 +602,28 @@ void StMtdCalibMaker::processMuDst()
       StMuMtdPidTraits pidMtd = gTrack->mtdPidTraits();
       pidMtd.setTimeOfFlight (timeOfFlight);
       if (mDebug) { LOG_INFO << "Time-of-flight = " <<timeOfFlight <<",  Calibration parameter = "<<AllCorr << endm; }
+      //change dy in mtdPidTraits
+      Float_t dy = pidMtd.deltaY();
+      dy -= mMtdDyCorr[backlegId-1][moduleId-1];
+      pidMtd.setDeltaY(dy);
+      if (mHisto) hDyModule->Fill((backlegId-1)*5+moduleId-1,dy);
+      //change dz in mtdPidTraits
+      Float_t dz = pidMtd.deltaZ();
+      dz -= mMtdDzCorr[backlegId-1][moduleId-1][cellId];
+      pidMtd.setDeltaZ(dz);
+      if (mHisto) hDzModule->Fill((backlegId-1)*5+moduleId-1,dz);
+      gTrack->setMtdPidTraits(pidMtd);
 
       //primary track
-      StMuTrack *pTrack = mMuDst->primaryTracks(index);
+      index = aHit->index2Primary();
+      if(index<0) continue;
+      StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(index); 
       if(!pTrack) continue;
-      StMuMtdPidTraits ppidMtd = gTrack->mtdPidTraits();
+      StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
       ppidMtd.setTimeOfFlight (timeOfFlight);
+      ppidMtd.setDeltaY(dy);
+      ppidMtd.setDeltaZ(dz);
+      pTrack->setMtdPidTraits(ppidMtd);
     }  // end mtd hits loop
 
   return;
@@ -556,10 +676,13 @@ void StMtdCalibMaker::bookHistograms()
   hTriggerTimeBL          = new TH2F("hTriggerTimeBL","hTriggerTimeBL",150,0,150,400,2700,3100);
   hVertexzVsTpcz          = new TH2F("hVertexzVsTpcz","hVertexzVsTpcz",800,-100,100,800,-100,100);
   hTOFTimeOfFlightTray    = new TH2F("hTOFTimeOfFlightTray","hTOFTimeOfFlightTray",120,0,120,1000,-1000,1000);
-
+  hDyModule               = new TH2F("hDyModule","hDyModule",mNBackleg*mNModule,0,mNBackleg*mNModule,200,-50,50);
+  hDzModule               = new TH2F("hDzModule","hDzModule",mNBackleg*mNModule,0,mNBackleg*mNModule,240,-60,60);
   AddHist(hTimeOfFlightCorr);
   AddHist(hAllCorr);
   AddHist(hTimeOfFlightModule);
+  AddHist(hDyModule);
+  AddHist(hDzModule);
   AddHist(hTimeOfFlightCorrModule);
   AddHist(hTriggerTimeBL);
   AddHist(hVertexzVsTpcz);
@@ -569,8 +692,14 @@ void StMtdCalibMaker::bookHistograms()
 
 
 //
-// $Id: StMtdCalibMaker.cxx,v 1.1 2014/10/09 16:59:52 jeromel Exp $
+// $Id: StMtdCalibMaker.cxx,v 1.3 2015/02/04 22:35:24 marr Exp $
 // $Log: StMtdCalibMaker.cxx,v $
+// Revision 1.3  2015/02/04 22:35:24  marr
+// Check the existance of the matched primary track
+//
+// Revision 1.2  2015/02/04 14:35:59  marr
+// Added dy and dz correction for pidTraits
+//
 // Revision 1.1  2014/10/09 16:59:52  jeromel
 // Reviewed version of the MtdCalibMaker - first commit
 //

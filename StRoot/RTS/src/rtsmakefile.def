@@ -187,7 +187,7 @@ ifeq (${HOST_CPU}, alpha)
 		HOSTFLAGS += -Dalpha
 else
 		HOSTFLAGS += 
-		HOSTLIBS := -lpthread 
+		HOSTLIBS := -lpthread -ldl 
 endif
 	HOSTDEFINES := 
 	HOSTINCLUDES :=
