@@ -31,12 +31,14 @@
   //             SEQ  |    1      2      3      4      5      6      7      8
   TString RP_name[8]  = { "EHI", "EHO", "EVU", "EVD", "WHI", "WHO", "WVD", "WVU" };
   TString PMT_name[8] = { "PMT0", "PMT1" };
-  u_short PMT_RP_MAP[8] = { 2, 3, 7, 6, 0, 1, 4, 5 };
- #else
+  //  u_short PMT_RP_MAP[8] = { 2, 3, 7, 6, 0, 1, 4, 5 };
+  int PMT_RP_MAP[8] = { 2, 3, 7, 6, 1, 0, 5, 4 }; // changed by KY (2015-1-30)
+#else
   //              SEQ  |    1      2      3      4      5      6      7      8
   TString RP_name[8] =  { "E1U", "E1D", "E2U", "E2D", "W1U", "W1D", "W2U", "W2D" };
-  TString PMT_name[2] = { "PMT0", "PMT1"};
-  int PMT_RP_MAP[8] = { 2, 3, 6, 7, 0, 1, 4, 5 };
+  TString PMT_name[2] = { "PMT1", "PMT2"};
+  //  int PMT_RP_MAP[8] = { 2, 3, 6, 7, 0, 1, 4, 5 };
+  int PMT_RP_MAP[8] = { 2, 3, 6, 7, 1, 0, 5, 4 }; // changed by KY (2015-1-30)
 #endif
 const double TAC_TRSHLD = 50.;
 
@@ -89,8 +91,8 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     contVIP.PMT->LabelsDeflate("X");
     contVIP.PMT->LabelsDeflate("Y");
     for (int i=0;i<8;i++) contVIP.PMT->GetXaxis()->SetBinLabel(i+1,RP_name[i]);
-                          contVIP.PMT->GetYaxis()->SetBinLabel( 1,"PMT0");
-                          contVIP.PMT->GetYaxis()->SetBinLabel( 2,"PMT1");
+                          contVIP.PMT->GetYaxis()->SetBinLabel( 1,"PMT1");
+                          contVIP.PMT->GetYaxis()->SetBinLabel( 2,"PMT2");
     //
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     contVIP.SVX = new TH2D("SVX_STATUS","SVX_STATUS <ADC>",6,0,6,32,0,32);
@@ -135,23 +137,23 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     // PMT's
     //
     //
-    int k = PMT_RP_MAP[i];
-    TString name = SEQ_name[i] + "_PMT0_ADC";
-    TString caption = RP_name[k] + " PMT0 ;ADC; Nent";
+    //    int k = PMT_RP_MAP[i]; // changed by KY (2015-1-30) : RP_name[k] -> RP_name[i] 
+    TString name = SEQ_name[i] + "_PMT1_ADC";
+    TString caption = RP_name[i] + " PMT1 ;ADC; Nent";
  
       contPMT_ADC.h1_P2P[i*2] = new TH1D(name, caption, mBinsADC,0.,maxBinADC); 
       np_Tot++;
       contPMT_ADC.h1_P2P[i*2] -> SetFillColor(8); 
 
-      name = SEQ_name[i] + "_PMT1_ADC";
-      caption = RP_name[k] +  " PMT1 ;ADC; Nent";
+      name = SEQ_name[i] + "_PMT2_ADC";
+      caption = RP_name[i] +  " PMT2 ;ADC; Nent";
       contPMT_ADC.h1_P2P[i*2+1] = new TH1D(name, caption, mBinsADC,0.,maxBinADC); 
       np_Tot++;
       contPMT_ADC.h1_P2P[i*2+1] -> SetFillColor(8); 
 
 
       name = SEQ_name[i] + "_TAC";
-      caption = RP_name[k] + " TAC ; PMT0; PMT1";
+      caption = RP_name[i] + " TAC ; PMT1; PMT2";
       contPMT_TAC.h2_P2P[i] = new TH2D(name, caption, mBinsTAC,0.,maxBinTAC,mBinsTAC,0.,maxBinTAC);
       np_Tot++;
       //
@@ -210,8 +212,8 @@ void ppBuilder::initialize(int argc, char *argv[]) {
 
   for(u_int i=0;i<sizeof(contentsSVX) / sizeof(TProfile *);i++) {
     plots[iNext] = new JevpPlot(contentsSVX.array[i]);
-    plots[iNext]->getHisto(0)->histo->SetMinimum( 50.);
-    plots[iNext]->getHisto(0)->histo->SetMaximum(100.);
+    plots[iNext]->getHisto(0)->histo->SetMinimum(  0.);
+    plots[iNext]->getHisto(0)->histo->SetMaximum(250.);
     plots[iNext]->gridx = 0;
     plots[iNext]->setDrawOpts("HIST");
     iNext++;
@@ -261,12 +263,13 @@ void ppBuilder::event(daqReader *rdr)
           tac_avr[iSeq] = ( tac0 + tac1 )/4.;  
           adc_avr[iSeq] = ( adc0 + adc1 )/2.;  
 	  
-	  contPMT_ADC.h1_P2P[i*2]->Fill( adc0);
-	  contPMT_ADC.h1_P2P[i*2+1]->Fill(adc1 );
-	  contPMT_TAC.h2_P2P[i]->Fill( tac0, tac1 );
+	  // changed by KY (2015-1-30) : i -> iSeq 
+	  contPMT_ADC.h1_P2P[iSeq*2]->Fill( adc0);
+	  contPMT_ADC.h1_P2P[iSeq*2+1]->Fill(adc1 );
+	  contPMT_TAC.h2_P2P[iSeq]->Fill( tac0, tac1 );
 
-	  contVIP.PMT->SetBinContent( iSeq+1, 1, contPMT_ADC.h1_P2P[i*2]->GetMean()); 
-	  contVIP.PMT->SetBinContent( iSeq+1, 2, contPMT_ADC.h1_P2P[i*2+1]->GetMean());
+	  contVIP.PMT->SetBinContent( iSeq+1, 1, contPMT_ADC.h1_P2P[iSeq*2]->GetMean()); 
+	  contVIP.PMT->SetBinContent( iSeq+1, 2, contPMT_ADC.h1_P2P[iSeq*2+1]->GetMean());
 	  i++;
         }
       }
@@ -291,6 +294,8 @@ void ppBuilder::event(daqReader *rdr)
       u_char rp_id  = ds->seq_id - 1;                // NOTE!  range 1-8
       u_char plane_id = ds->chain_id;
       u_char svx = ds->svx_id;
+      // Added by KY (2015-1-30) : Correcting wrong svx_id
+      if ( svx == 7 ) svx = 3 ; 
       double sum = 0.;
       double nch_live = 0.;
 	  assert (rp_id >= 0 &&  rp_id < 8 );
