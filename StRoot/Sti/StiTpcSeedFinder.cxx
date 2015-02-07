@@ -37,9 +37,15 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
   caTrackerInt.SetHits(map);
   caTrackerInt.Run();
   vector<Seed_t> &seeds = caTrackerInt.GetSeeds();
-
-
   sort(seeds.begin(), seeds.end(),SeedsCompareStatus );
+  static Int_t _debug = 0;
+  if (_debug) {
+    for (UInt_t i  = 0; i <  seeds.size(); i++) {
+      LOG_INFO << "Seed " << i << endm;
+      Seed_t &aSeed = seeds[i];
+      aSeed.Print();
+    }
+  }
 #ifdef PRINT_SEED_STATISTIC
   Int_t nSeed = 0;
 #endif // PRINT_SEED_STATISTIC

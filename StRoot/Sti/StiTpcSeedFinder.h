@@ -14,13 +14,20 @@ struct SeedHit_t {
   Double_t x,y,z;
   StiHit   *hit;
 };
-struct Seed_t {
+class Seed_t {
+ public:
   vector<SeedHit_t *> vhit;
   Int_t total_hits;
   StiNodePars firstNodePars;
   StiNodePars lastNodePars;
   StiNodeErrs firstNodeErrs;
   StiNodeErrs lastNodeErrs;
+  virtual void Print(Option_t *option="") const {
+    firstNodePars.print(kTRUE);
+    firstNodeErrs.print(kTRUE);
+    lastNodePars.print(kTRUE);
+    lastNodeErrs.print(kTRUE);
+  }
 };
 class StiTpcSeedFinder {
  public:
