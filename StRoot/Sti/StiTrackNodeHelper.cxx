@@ -58,7 +58,6 @@ void StiTrackNodeHelper::reset()
 //______________________________________________________________________________
 void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode)		
 {
-  static const double EC = 2.99792458e-4;
   if(!pNode) reset();
   mParentNode = pNode;
   mTargetNode = sNode;
@@ -67,12 +66,8 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mWallx = mTargetNode->getWallx();
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
-    assert(fabs(mParentHz-mParentNode->mFP.hz()) < EC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
+    assert(fabs(mParentHz-mParentNode->mFP.hz()) < kEC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
     mParentNode->mFP.check("2StiTrackNodeHelper::set");
-  }
-  if (mTargetNode->isValid()) {
-    mTargetNode->mFP.check("1StiTrackNodeHelper::set");
-    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
 
   mDetector   = mTargetNode->getDetector();
@@ -138,6 +133,8 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   proPars._sinCA   = mSinCA2;
   proPars._cosCA   = mCosCA2;
   ierr = proPars.check();
+  assert(!proPars.nan());
+  assert(!proPars.nan());
   if (ierr) return 2;
   return 0;
 } 
@@ -1030,6 +1027,9 @@ static int nCall=0; nCall++;
 
 static int ERRTEST=0;
 if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
+
+assert(!mFitdPars.nan());
+assert(!mFitdErrs.nan());
 
 //prod  assert(mHrr.hYY > mFitdErrs._cYY);
 //prod  assert(mHrr.hZZ > mFitdErrs._cZZ);
