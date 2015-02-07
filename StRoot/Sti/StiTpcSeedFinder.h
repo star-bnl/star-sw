@@ -23,10 +23,10 @@ class Seed_t {
   StiNodeErrs firstNodeErrs;
   StiNodeErrs lastNodeErrs;
   virtual void Print(Option_t *option="") const {
-    firstNodePars.print(kTRUE);
-    firstNodeErrs.print(kTRUE);
-    lastNodePars.print(kTRUE);
-    lastNodeErrs.print(kTRUE);
+    firstNodePars.print();
+    firstNodeErrs.print();
+    lastNodePars.print();
+    lastNodeErrs.print();
   }
 };
 class StiTpcSeedFinder {

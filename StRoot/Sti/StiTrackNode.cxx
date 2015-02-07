@@ -325,8 +325,8 @@ void StiNodeErrs::print() const
 {
    const double *d = A;
    for (int n=1;n<=6;n++) {
-     LOG_DEBUG << Form("%d - ",n);
-     for (int i=0;i<n;i++){LOG_DEBUG << Form("%g\t",*(d++));}; LOG_DEBUG << endm;
+     LOG_INFO << Form("%d - ",n);
+     for (int i=0;i<n;i++){LOG_INFO << Form("%g\t",*(d++));}; LOG_INFO << endm;
    }  
 }     
 
@@ -472,8 +472,8 @@ StiNodePars &StiNodePars::merge(double wt,StiNodePars &other)
 void StiNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],P[i]);}
-  LOG_DEBUG << endm;
+  for (int i=-2;i<kNPars+1;i++) {LOG_INFO << Form("%s = %g, ",tit[i+2],P[i]);}
+  LOG_INFO << endm;
 }   
 //______________________________________________________________________________
 void StiHitErrs::rotate(double angle)
