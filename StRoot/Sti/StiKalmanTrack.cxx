@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.135 2015/02/02 04:37:19 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.135 2015/02/02 04:37:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.136 2015/02/07 04:21:05 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.136 2015/02/07 04:21:05 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.136  2015/02/07 04:21:05  perev
+ * More accurate zero field accounting
+ *
  * Revision 2.135  2015/02/02 04:37:19  perev
  * replacemens of names *TimesUsed to new versions
  *
@@ -1708,12 +1711,17 @@ double Xi2=0;
   nNode=0;
   THelixFitter circ;
   THelixTrack  cirl;
+  int zeroH = -1;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
     if (targetNode->getChi2()>1000)	continue;
+    if (zeroH<0) {//What kind of mag field ?
+      double hz = targetNode->getHz();
+      zeroH = fabs(hz)<=kZEROHZ;
+    }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
     circ.AddErr(hr.A,hr.hZZ);
@@ -1732,11 +1740,7 @@ double Xi2=0;
   
   Xi2 =circ.Fit();
   if (mode==1 && Xi2>BAD_XI2[1]) return 2; //Xi2 too bad, no updates
-#ifdef APPROX_DEBUG
-  H[mode+0]->Fill(log(Xi2)/log(10.));
-  H[mode+2]->Fill(nNode,Xi2);
-#endif // APPROX_DEBUG
-
+  if (zeroH) circ.Set(kZEROCURV);
   circ.MakeErrs();
   
   double s=0,xyz[3]; 
@@ -1767,13 +1771,9 @@ double Xi2=0;
     P.z()  =  cirl.Pos()[2];
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
-    StiNodePars PP(P);
     double hh = P.hz();
-
-{
-    if (P.isZeroH()) 	{ P.ready(); hh =1e-11;} else {hh = 1./hh;}
-    P.ptin() = curv*hh; 
-}
+    assert(hh);
+    P.ptin() = curv/hh; 
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
@@ -1791,7 +1791,6 @@ double Xi2=0;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
     E.check("In aprox");
   }   
-//  printf ("UUUUUUUUUU %d %d %d\n",nCall,nNode,nNodeIn);
   if (Xi2>BAD_XI2[mode])return 2;
   if (nNode==nNodeIn) 	return 0;
   if (nNode<2)		return 3;
