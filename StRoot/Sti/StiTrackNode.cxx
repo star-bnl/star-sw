@@ -497,6 +497,14 @@ L42:
 RETN: *xx=save; 
    return ans;
 } /* trchlu_ */
+//______________________________________________________________________________
+int StiNodeErrs::nan() const
+{
+  for (int i=0; i<kNPars;i++) {
+    if (!finite(A[i])) return 100+i;
+  }
+  return 0;
+}
 
 //______________________________________________________________________________
 int StiNodePars::check(const char *pri) const
@@ -557,6 +565,14 @@ void StiNodePars::rotate(double alpha)
   _sinCA /= nor;
   eta()= NICE(eta()-alpha); 
 }   
+//______________________________________________________________________________
+int StiNodePars::nan() const
+{
+  for (int i=-2; i<=kHz;i++) {
+    if (!finite(P[i])) return 100+i;
+  }
+  return 0;
+}
 //______________________________________________________________________________
 void StiNodePars::print() const
 {

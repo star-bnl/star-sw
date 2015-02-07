@@ -26,6 +26,7 @@ double getDelta2() const 		{return     (_cXX+_cYY+_cZZ);}
 StiNodeErrs &operator*=(double f) 	{for (int i=0;i<kNErrs;i++){A[i]*=f;}; return *this;}
 StiNodeErrs &merge(double wt,StiNodeErrs &other);
 void rotate(double alpha,const StiNodePars &pars );
+ int nan() const;
 
 void get00(      double *a) const;
 void set00(const double *a)      ;
