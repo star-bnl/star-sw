@@ -1362,13 +1362,23 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   if (!tNode->isDca()) return;
   const StiNodePars &pars = tNode->fitPars(); 
   const StiNodeErrs &errs = tNode->fitErrs();
-  float alfa = tNode->getAlpha();
-  Float_t setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.eta()
-                    ,(float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
+  Double_t alfa = tNode->getAlpha();
+  Double_t setp[6] = {pars.y(),    pars.z(),    pars.eta(),
+		      pars.ptin(), pars.tanl(), pars.curv()};
   setp[2]+= alfa;  
-  Float_t sete[15];
+#if 0
+  // gcc 4.8 and 4.9 has optimized this out 
+  Double_t sete[15];1
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
     for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
+#else
+  Double_t sete[15] = {  errs._cYY,                       
+			 errs._cZY, errs._cZZ,                 
+			 errs._cEY, errs._cEZ, errs._cEE,           
+			 errs._cPY, errs._cPZ, errs._cPE, errs._cPP,     
+			 errs._cTY, errs._cTZ, errs._cTE, errs._cTP, errs._cTT
+  };
+#endif
   StDcaGeometry *dca = new StDcaGeometry;
   dca->set(setp,sete);
   gTrack->setDcaGeometry(dca);

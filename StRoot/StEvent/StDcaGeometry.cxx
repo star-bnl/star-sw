@@ -83,7 +83,7 @@ void StDcaGeometry::set(const float pars[6],const float errs[15])
     if (pars) memcpy(&mImp   ,pars,sizeof(float)*6 );
     if (errs) memcpy(&mImpImp,errs,sizeof(float)*15);
 }
-void StDcaGeometry::set(const double pars[7],const double errs[15])
+void StDcaGeometry::set(const double pars[6],const double errs[15])
 {
   if (pars) TCL::ucopy(pars, &mImp, 6);
   if (errs) TCL::ucopy(errs, &mImpImp, 15);
