@@ -23,6 +23,9 @@ G__*.h
 # Other Stuff
 *.d
 CVS 
+*.root
+paw.metafile
+gphysi.dat
 .consign* 
 ir.out 
 *.bck 
@@ -49,6 +52,7 @@ Root
 Repository
 .svn
 .sl*
+.amd64*
 .misc
 *.BAK
 *.log
