@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.156 2015/02/04 04:39:44 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.157 2015/02/08 02:46:34 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.157  2015/02/08 02:46:34  perev
+ * Put back line, removed for debuging.
+ * This line checks that all crossings are outside of the volume
+ *
  * Revision 2.156  2015/02/04 04:39:44  perev
  * Introduction of inside()
  *
@@ -968,7 +972,7 @@ StiDebug::Break(nCall);
         endVal = v3[0];
         break;
       }
-//VP  if (sol>1) 			return -12;
+      if (sol>1) 			return -12;
     }
    					break;
   default: assert(0);
@@ -978,8 +982,8 @@ assert(_wallx);
   position = propagate(endVal,shapeCode,dir); 
 
   if (position) return position;
-// ??  assert(shapeCode==1 || fabs(mFP.phi()) < 1e-4);
-// ??  assert(shapeCode >1 || mFP.x()         > 0   );
+  assert(shapeCode==1 || fabs(mFP.phi()) < 1e-4);
+  assert(shapeCode >1 || mFP.x()         > 0   );
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
