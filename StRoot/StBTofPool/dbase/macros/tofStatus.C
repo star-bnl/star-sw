@@ -77,7 +77,7 @@ void tofStatus(){
 	//May want to add multiple date entries to make this easier.
 
         ifstream inData;
-        inData.open("data/run12/tofStatus/badtofentry.txt");
+        inData.open("data/run13/tofStatus/badtofentry.txt");
 	inData >> Date >> Time >> nEntries;
 
 	cout<<"Date: "<<Date<<", Entries: "<<nEntries<<endl;

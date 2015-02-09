@@ -6,7 +6,7 @@
 #include <fstream>
 using namespace std;
 
-void readtofTrgWindow(const char* time = "2010-01-01 00:00:00") {
+void readtofTrgWindow(const char* time = "2011-01-01 00:00:00") {
 
   const Int_t NTRAY = 120;
   const Int_t NVPDTRAY = 2;
@@ -64,11 +64,13 @@ void readtofTrgWindow(const char* time = "2010-01-01 00:00:00") {
   //}
 
   cout << "read out from database ..." << endl;
-  //ofstream outData;
-  //outData.open("TrgWindow_read.dat");
+  ofstream outData;
+  outData.open("TrgWindow_read.dat");
   for (int i=0;i<NTRAY+NVPDTRAY+NMTD;i++){
     cout << i << " " << trg[i].trgWindow_Min << " "<< trg[i].trgWindow_Max << endl;
+    outData << i << " " << trg[i].trgWindow_Min << " "<< trg[i].trgWindow_Max << endl;
   }
+ outData.close();
 
 
 }
