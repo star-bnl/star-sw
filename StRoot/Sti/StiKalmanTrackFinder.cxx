@@ -215,13 +215,14 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
       status = _trackFilter->filter(track);
       if (status) {nTFilt++; errType = abs(status)*100 + kCheckFail; break;}
     }
+    if (errType!=kNoErrors) {track->reduce(); return errType;}
+
     //cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
     //		Add DCA node
     StiHit dcaHit; dcaHit.makeDca();
     StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
     if (extenDca) {
       track->add(extenDca,kOutsideIn);
-      if (debug() >= 1) StiKalmanTrackNode::PrintStep();
     }
     //		End DCA node
     track->reduce();
@@ -229,7 +230,7 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     track->setFlag(1);
     _trackContainer->push_back(track);
     track->setId(_trackContainer->size());
-//VP??    track->reserveHits();
+    track->reserveHits();
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     nSsdHits+=track->getFitPointCount(kSsdId);
@@ -272,38 +273,38 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracks(double rMin)
 {
-static int nCall=0;nCall++;
-
-  int nTKeep=0;
-  int ntr = _trackContainer->size();
-  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nPxlHits=0,nIstHits=0, extended=0;
-  
-  for ( int itr=0;itr < ntr;itr++) {	//Track loop
-    StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
-    if (track->getFlag()<=0) 	continue;
-
-    extended = extendTrack(track,rMin);
-    track->reduce();
-    if (extended<0 || track->getFlag()<=0) {
-      track->reduce(); continue;
-    } else {
-      assert(track->getChi2()<1e3);
-      StiHit dcaHit; dcaHit.makeDca();
-      StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
-      if (extenDca) track->add(extenDca,kOutsideIn);
-      track->reduce();
-    }
-    nTKeep++;
-    nTpcHits+=track->getFitPointCount(kTpcId);
-    nSvtHits+=track->getFitPointCount(kSvtId);
-    nSsdHits+=track->getFitPointCount(kSsdId);
-    nPxlHits+=track->getFitPointCount(kPxlId);
-    nIstHits+=track->getFitPointCount(kIstId);
-    track->reserveHits();
-  }// end track loop
-   LOG_DEBUG << Form("***extendTracks***: nTKeep=%d", nTKeep) << endm;
-   LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nPxlHits=%d nIstHits=%d",
-	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits) << endm;
+assert(0);
+// static int nCall=0;nCall++;
+// 
+//   int nTKeep=0;
+//   int ntr = _trackContainer->size();
+//   int nTpcHits=0,nSvtHits=0,nSsdHits=0,nPxlHits=0,nIstHits=0, extended=0;
+//   
+//   for ( int itr=0;itr < ntr;itr++) {	//Track loop
+//     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
+//     if (track->getFlag()<=0) 	continue;
+// 
+//     extended = extendTrack(track,rMin);
+//     track->reduce();
+//     if (extended<0 || track->getFlag()<=0) {
+//       track->clear(); continue;
+//     } else {
+//       assert(track->getChi2()<1e3);
+//       StiHit dcaHit; dcaHit.makeDca();
+//       StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
+//       if (extenDca) track->add(extenDca,kOutsideIn);
+//     }
+//     nTKeep++;
+//     nTpcHits+=track->getFitPointCount(kTpcId);
+//     nSvtHits+=track->getFitPointCount(kSvtId);
+//     nSsdHits+=track->getFitPointCount(kSsdId);
+//     nPxlHits+=track->getFitPointCount(kPxlId);
+//     nIstHits+=track->getFitPointCount(kIstId);
+//     track->reserveHits();
+//   }// end track loop
+//    LOG_DEBUG << Form("***extendTracks***: nTKeep=%d", nTKeep) << endm;
+//    LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nPxlHits=%d nIstHits=%d",
+// 	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits) << endm;
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
@@ -338,9 +339,7 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   }
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
-track->test("BefAprx");
     status = track->approx(1);
-track->test("AftAprx");
       //    if (status) return -1;
     status = track->refit();
     if (status) return abs(status)*100 + kRefitOutFail;
@@ -538,8 +537,6 @@ static  const double ref1a  = 110.*degToRad;
     vector<StiDetector*> detectors;
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
 
-//#define PEREV
-
       //find all relevant detectors to visit.
     sector = (!direction)? _detectorContainer->beginPhi(rlayer):_detectorContainer->beginPhi(layer);
     for ( ; (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer); ++sector)
@@ -615,6 +612,7 @@ static  const double ref1a  = 110.*degToRad;
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
+          assert(!stiHit->isUsed());
           if (stiHit->detector() && stiHit->detector()!=tDet) continue;
           status = testNode.nudge(stiHit);
           testNode.setReady();
