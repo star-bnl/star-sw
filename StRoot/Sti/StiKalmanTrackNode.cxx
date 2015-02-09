@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.158 2015/02/09 22:09:35 genevb Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.159 2015/02/09 22:16:21 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.159  2015/02/09 22:16:21  genevb
+ * Previous commit missed some asserts
+ *
  * Revision 2.158  2015/02/09 22:09:35  genevb
  * Comment out an assert causing RT 3007 setState, introduced in vers. 2.140 for RT 2903
  *
@@ -1343,7 +1346,7 @@ void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
-assert(mFE.sign()>0); ///??? 
+//assert(mFE.sign()>0); ///??? 
   if (debug() & 1) 
     {
       LOG_DEBUG << "Prior Error:"
@@ -1674,7 +1677,7 @@ assert(mFE._cEE>0);
 assert(mFE._cPP>0);
 assert(mFE._cTT>0);
 
-assert(mFE.sign()>0); ///??? 
+//assert(mFE.sign()>0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
@@ -1730,7 +1733,7 @@ static int nCall=0; nCall++;
 #ifdef STI_ERROR_TEST
   testError(mFE.A,0);
 #endif //STI_ERROR_TEST
-assert(mFE.sign()>0); ///??? 
+//assert(mFE.sign()>0); ///??? 
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
@@ -1848,7 +1851,7 @@ assert(mFE.sign()>0); ///???
   mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
   mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
-assert(mFE.sign()>0); ///??? 
+//assert(mFE.sign()>0); ///??? 
 
   if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
     LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
