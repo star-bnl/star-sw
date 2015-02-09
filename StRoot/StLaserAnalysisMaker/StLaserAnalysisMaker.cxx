@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.21 2014/09/17 19:11:49 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.22 2015/02/06 00:31:46 perev Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.22  2015/02/06 00:31:46  perev
+// defence agains zero dcaGeometry pointer added
+//
 // Revision 1.21  2014/09/17 19:11:49  fisyak
 // Fix bug in Fit logic, bug #2901
 //
@@ -330,6 +333,7 @@ Int_t StLaserAnalysisMaker::Make(){
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
+    if (!gTrack->dcaGeometry()) continue;
     Int_t key = gTrack->key();
     //    if (gTrack->numberOfPossiblePoints(kTpcId) < 25) continue;
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));

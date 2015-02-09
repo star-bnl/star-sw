@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134.2.1 2015/02/09 19:29:37 didenko Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134.2.1 2015/02/09 19:29:37 didenko Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.134.2.1  2015/02/09 19:29:37  didenko
+ * More accurate zero field and laser tracks accounting from Gene
+ *
  * Revision 2.134  2015/01/15 19:10:19  perev
  * Added mthod test() for debug only
  *
@@ -1705,12 +1708,17 @@ double Xi2=0;
   nNode=0;
   THelixFitter circ;
   THelixTrack  cirl;
+  int zeroH = -1;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
     if (targetNode->getChi2()>1000)	continue;
+    if (zeroH<0) {//What kind of mag field ?
+      double hz = targetNode->getHz();
+      zeroH = fabs(hz)<=2e-6;
+    }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
     circ.AddErr(hr.A,hr.hZZ);
@@ -1729,6 +1737,7 @@ double Xi2=0;
   
   Xi2 =circ.Fit();
   if (mode==1 && Xi2>BAD_XI2[1]) return 2; //Xi2 too bad, no updates
+  if (zeroH) circ.Set(2e-9);
 #ifdef APPROX_DEBUG
   H[mode+0]->Fill(log(Xi2)/log(10.));
   H[mode+2]->Fill(nNode,Xi2);
@@ -1764,11 +1773,12 @@ double Xi2=0;
     P.z()  =  cirl.Pos()[2];
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
-    StiNodePars PP(P);
     double hh = P.hz();
 
 {
-    if (P.isZeroH()) 	{ P.ready(); hh =1e-11;} else {hh = 1./hh;}
+    //if (P.isZeroH()) 	{ P.ready(); hh =1e-11;} else {hh = 1./hh;}
+    assert(hh);
+    hh = 1./hh;
     P.ptin() = curv*hh; 
 }
 

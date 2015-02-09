@@ -51,7 +51,7 @@ float mELoss,mLen,mDens,mX0;
 inline void StiNodePars::ready()
 {
 _cosCA=cos(P[kPhi]);_sinCA=sin(P[kPhi]); 
-if (fabs(P[kHz])<=2e-6) {P[kHz] = 2e-6; P[kPtin]=1./0.350;}
+//if (fabs(P[kHz])<=2e-6) {P[kHz] = 2e-6; P[kPtin]=1./0.350;}
 P[kCurv]  = P[kHz]*P[kPtin];
 }
 
