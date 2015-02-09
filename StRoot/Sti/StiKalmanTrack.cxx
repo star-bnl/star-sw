@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.137 2015/02/09 04:14:52 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.137 2015/02/09 04:14:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.138  2015/02/09 15:47:59  genevb
+ * Restore inversion of hh because it is used in multiple places
+ *
  * Revision 2.137  2015/02/09 04:14:52  perev
  * Remove redundant hit->subTimesUsed() + Cleanup
  *
@@ -1734,7 +1737,8 @@ double Xi2=0;
     P.curv() = curv;
     double hh = P.hz();
     assert(hh);
-    P.ptin() = curv/hh; 
+    hh = 1./hh;
+    P.ptin() = curv*hh; 
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
