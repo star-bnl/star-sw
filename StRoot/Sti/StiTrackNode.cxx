@@ -260,7 +260,7 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
-assert(sign()>0); ///??? 
+//assert(sign()>0); ///
 
    return *this;
 }
@@ -343,8 +343,8 @@ void StiNodeErrs::recov()
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
 
-  double s = sign(); ///??? 
-  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
+//   double s = sign(); ///??? 
+//   if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
 
@@ -370,11 +370,11 @@ StiDebug::Break(nCall);
      for (int j=i0;j<i;j++) {
        A[li+j]/=corrMax;
    } } 
-   while (sign()<=0) {
-    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
-      for (int j=i0;j<i;j++) {
-        A[li+j]*=0.9;
-   } } }
+//    while (sign()<=0) {
+//     for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+//       for (int j=i0;j<i;j++) {
+//         A[li+j]*=0.9;
+//    } } }
 
 }
 //______________________________________________________________________________
@@ -390,7 +390,7 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
-assert(sign()>0); ///??? 
+// assert(sign()>0); ///
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -424,7 +424,7 @@ RETN:
           break;
     case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
-assert(sign()>0); ///??? 
+// assert(sign()>0); /// 
   return kase;
 }  
 //____________________________________________________________
