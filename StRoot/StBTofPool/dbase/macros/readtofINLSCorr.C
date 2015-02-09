@@ -33,7 +33,7 @@ void readtofINLSCorr()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = "2010-12-31 00:00:00";
+  string ZReadTime = "2011-10-31 00:00:00";
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofinlcorr = configNode->addDbTable("tofINLSCorr");
