@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.136 2015/02/07 04:21:05 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.136 2015/02/07 04:21:05 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.137 2015/02/09 04:14:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.137 2015/02/09 04:14:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.137  2015/02/09 04:14:52  perev
+ * Remove redundant hit->subTimesUsed() + Cleanup
+ *
  * Revision 2.136  2015/02/07 04:21:05  perev
  * More accurate zero field accounting
  *
@@ -1235,26 +1238,6 @@ static int nCall=0; nCall++;
 	_vChi2= chi2; _dca = d;
       }
 
-#ifdef Sti_DEBUG      
-	int npoints[2] = {0,0};
-	vector<StMeasuredPoint*> hitVec = stHits();
-	for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
-	  StHit * hit = dynamic_cast<StHit *>(*point);
-	  if (hit) {
-	    StDetectorId detId = hit->detector();
-	    if (detId == kTpcId) ++npoints[0];
-	    if (detId == kSvtId) ++npoints[1];
-	  }
-	}
-	cout << "StiKalmanTrack::extendToVertex: localVertex: " << localVertex << endl;
-	cout << "StiKalmanTrack::extendToVertex: chi2 @ vtx: " << chi2 
-	     << " dx:"<< dx
-	     << " dy:"<< dy
-	     << " dz:"<< dz
-	     << " d: "<< d
-	     << " dca: " << _dca << " npoints tpc/svt: " << npoints[0] << "/" << npoints[1] << endl;
-	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
-#endif
 
 //    if (chi2<StiKalmanTrackFinderParameters::instance()->maxChi2Vertex  && d<4.)
 //    if (                             d<4.)
@@ -1267,11 +1250,6 @@ static int nCall=0; nCall++;
 	  tNode->setDetector(0);
           trackExtended = (tNode->updateNode()==0);
           
-#ifdef Sti_DEBUG      
-cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
-#endif
-if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << endl;
-
 	  if (trackExtended) return tNode;
           trackNodeFactory->free(tNode);             
 	}
@@ -1567,27 +1545,10 @@ int StiKalmanTrack::refit()
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
-      hit->subTimesUsed();
+      if (node->isValid() && node->getChi2()<10000. ) 	continue;
       node->setHit(0);
-      if (!node->isValid()) 				continue;
-      if (node->getChi2()>10000.)			continue;
-      assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
-      hit->addTimesUsed();
-      node->setHit(hit);
     }
   }
-  static int VPDEBUG=0;
-  if (VPDEBUG) {
-    if (fail>0) {
-      LOG_DEBUG <<
-        Form("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d",fail,nCall,nNBeg,nNEnd)
-                << endm;
-    } else {
-      LOG_DEBUG <<    
-        Form("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d",fail,nCall,nNBeg,nNEnd)
-                << endm;
-    }
-  } //endif VPDEBUG
 
   if (fail) setFlag(-1);
 #ifdef DO_TPCCATRACKER
@@ -1875,7 +1836,6 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
     if (hit->x()>rMax)		break;
     sum++;
     node->setHit(0);
-    hit->subTimesUsed();
   }
   return sum;
 }
