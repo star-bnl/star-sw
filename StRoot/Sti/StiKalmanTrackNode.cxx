@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.157 2015/02/08 02:46:34 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.158 2015/02/09 22:09:35 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.158  2015/02/09 22:09:35  genevb
+ * Comment out an assert causing RT 3007 setState, introduced in vers. 2.140 for RT 2903
+ *
  * Revision 2.157  2015/02/08 02:46:34  perev
  * Put back line, removed for debuging.
  * This line checks that all crossings are outside of the volume
@@ -603,7 +606,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-assert(mFE.sign()>0);///???
+//assert(mFE.sign()>0);///???
   mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
