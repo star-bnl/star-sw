@@ -16,4 +16,10 @@ inline int getbits(int x, int pos, int n) { return x >> pos & ~(~0 << n); }
 // OR x with value starting at position pos
 inline void setbits(int& x, int pos, int value) { x |= value << pos; }
 
+// Reverse bits
+inline int reversebit(int x, int max=31) {
+  int y=0;
+  for(int i=0; i<max; i++) y += ((x >> i) & 1) << (max-i-1);
+  return y;
+}
 #endif	// BITS_HH

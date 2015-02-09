@@ -7,6 +7,7 @@
 #include "Board.hh"
 #include "bits.hh"
 #include "l1_fp201_2012_b.hh"
+#include <stdio.h>
 
 void l1_fp201_2012_b(Board& fp201)
 {

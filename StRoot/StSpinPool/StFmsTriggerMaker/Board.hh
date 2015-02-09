@@ -12,7 +12,7 @@
 struct Board {
   enum { NCHANNELS = 32, NREGISTERS = 32 };
 
-  char name[6];
+  char name[10];
   unsigned int bitmask;
   unsigned short channels[NCHANNELS];
   unsigned int registers[NREGISTERS];

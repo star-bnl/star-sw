@@ -33,6 +33,10 @@ public:
   void useStEvent() { mUseStEvent = 1; }
 
   //
+  void overwriteThr(char* name, int value);
+  void forceRunNumber(int run) {mForceRun=run;}
+
+  //
   // QT and DSM algorithms and cabling for 2011:
   //
   // http://www.star.bnl.gov/public/trg/TSL/Software/FMS_2011.pdf
@@ -129,6 +133,7 @@ private:
   Board& fm011;
   Board& fm012;
   Board& fm103;
+  Board& fm104;
 
   // MIX crate
   Board& fe101;
@@ -151,6 +156,15 @@ private:
   TH2F* hqt3adc;
   TH2F* hqt4adc;
   TH2F* hfeqadc;
+
+  //run# overwrites
+  Int_t mForceRun;
+
+  //thresholds overwrites
+  static const int MAX=100;
+  Int_t mNThrOW;
+  TString mThrOWName[MAX];
+  Int_t mThrOWValue[MAX];
 
   ClassDef(StFmsTriggerMaker,0);
 };
