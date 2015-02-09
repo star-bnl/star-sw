@@ -257,12 +257,6 @@ void StiHit::setGlobal(const StiDetector * detector,
 }
 
 //_____________________________________________________________________________
- void StiHit::setTimesUsed(int val)
-{
-    mTimesUsed=(char)val;
-    assert(mTimesUsed<=mMaxTimes);
-}
-//_____________________________________________________________________________
  void StiHit::addTimesUsed()
 {
     mTimesUsed++;
@@ -272,7 +266,7 @@ void StiHit::setGlobal(const StiDetector * detector,
  void StiHit::subTimesUsed()
 {
     mTimesUsed--;
-    if(mTimesUsed<0) mTimesUsed=0;
+    assert(mTimesUsed>=0);
 }
 
 //_____________________________________________________________________________

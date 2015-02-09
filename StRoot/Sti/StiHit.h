@@ -100,16 +100,10 @@ public:
     //const StHit* stHit() const 
     const StMeasuredPoint * stHit() const {return msthit;}
 
-    ///If we are running in simulated mode, return a const pointer to the
-    /// StMcHit associated with this StiHit.
-    //const StMcHit* stMcHit() const;
 
     ///Return the number of times this hit was assigned to a track
     UInt_t timesUsed() const { return mTimesUsed;}
     
-    ///Return a boolean that marks whether or not this hit is assigned to a
-    ///track.
-    //bool   isUsed() const;
 
     ///Return a const reference to a StThreeVectorF that denotes the position
     ///of the hit in global STAR coordinates.
@@ -143,9 +137,11 @@ public:
     void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
     void setMaxTimes(int set)	{mMaxTimes = set;}
-    void setTimesUsed(int set);
+    void setTimesUsed(int set){mTimesUsed=set;}///???
     void addTimesUsed();
     void subTimesUsed();
+    ///Return a boolean that marks whether or not this hit is assigned to a
+    ///track >= than max times.
     int  isUsed() const {return mTimesUsed>=mMaxTimes;}
     void setVz(Float_t vz) {_vz = vz;}
     void setVy(Float_t vy) {_vy = vy;}

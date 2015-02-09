@@ -26,11 +26,9 @@ class   StiNodeInf;
 class   StiHit;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
-//#include "Sti/StiDetectorGroups.h"
 template<class Event> class StiDetectorGroup;
 //template<class EVENT> class StiDetectorGroups;
 class StiDetectorGroups;
-//??class   StiMaker;
 template<class Factorized> class Factory;
 template<class Filtered>   class EditableFilter;
 template<class Filtered>   class Filter;
@@ -50,7 +48,6 @@ class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
 class   StiVertexFinder;
-//??class   StAssociationMaker;
 class   EditableParameter;
 
 /** 
@@ -84,12 +81,8 @@ public:
   virtual StiTrackFitter        * getTrackFitter()=0;
   virtual StiTrackMerger        * getTrackMerger()=0;
   virtual StiVertexFinder       * getVertexFinder()=0;
-//??  virtual StAssociationMaker    * getAssociationMaker()=0;
-//??  virtual StiMaker              * getStiMaker()=0;
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
 
-//??  virtual void setAssociationMaker(StAssociationMaker * a)=0;
-//??  virtual void setStiMaker(StiMaker* a)=0;
   virtual void add(StiDetectorGroup<StEvent>* detectorGroup)=0;
   
   virtual void setEvaluatorEnabled(bool)=0;
