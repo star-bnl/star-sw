@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.22 2015/02/06 00:31:46 perev Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.23 2015/02/10 20:27:16 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.23  2015/02/10 20:27:16  fisyak
+// Adjust split style for ROOT_VERSION_CODE
+//
 // Revision 1.22  2015/02/06 00:31:46  perev
 // defence agains zero dcaGeometry pointer added
 //
@@ -86,8 +89,11 @@ Int_t StLaserAnalysisMaker::Init(){
     m_laser = new TTree("laser","Tpc laser track tree");
     m_laser->SetAutoSave(100000000); //Save every 100 MB
     Int_t bufsize= 64000;
-    //    Int_t split = 99;
+#if ROOT_VERSION_CODE <= ROOT_VERSION(5,34,10)
+    Int_t split = 99;
+#else
     Int_t split  = -2;       // by default, split Event in sub branches << old style
+#endif
     if (split)  bufsize /= 4;
     Int_t branchStyle = 1; //new style by default
     if (split < 0) {branchStyle = 0; split = -1-split;}
