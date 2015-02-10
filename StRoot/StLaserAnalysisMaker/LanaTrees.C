@@ -1,5 +1,11 @@
-// $Id: LanaTrees.C,v 1.1 2015/01/20 19:41:54 fisyak Exp $
+/* 
+   root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
+ */
+// $Id: LanaTrees.C,v 1.2 2015/02/10 20:27:16 fisyak Exp $
 // $Log: LanaTrees.C,v $
+// Revision 1.2  2015/02/10 20:27:16  fisyak
+// Adjust split style for ROOT_VERSION_CODE
+//
 // Revision 1.1  2015/01/20 19:41:54  fisyak
 // Add new Laser drift velocity calculator
 //
@@ -45,9 +51,6 @@
 // Revision 1.3  2007/12/10 19:54:02  fisyak
 // Add Id and Log, correct spelling error in README
 //
-/* 
-   root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
- */
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
