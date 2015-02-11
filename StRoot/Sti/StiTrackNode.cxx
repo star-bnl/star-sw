@@ -162,7 +162,8 @@ for (int ix = 0;ix<2; ix++) {
 
 for (int ix = 0;ix<2; ix++) {
   double len = (Out[ix]-X).Mag();
-  if (len*aRho > 0.1) len = 2*asin(0.5*len*aRho)/aRho;
+  double lenaRho =len*aRho; if (lenaRho>2) lenaRho = 1.999;
+  if (lenaRho > 0.1) len = 2*asin(0.5*lenaRho)/aRho;
   if ((Out[ix]-X).Dot(D)<0) len = -len;
 
   double tst = (X-Out[ix])*D;
