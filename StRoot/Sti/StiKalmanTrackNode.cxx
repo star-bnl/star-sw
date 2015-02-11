@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.159 2015/02/09 22:16:21 genevb Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.160 2015/02/11 01:54:10 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.160  2015/02/11 01:54:10  perev
+ * Cleanup
+ *
  * Revision 2.159  2015/02/09 22:16:21  genevb
  * Previous commit missed some asserts
  *
@@ -1929,10 +1932,6 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP.eta()= nice(mFP.eta()-alpha); /*VP*/
   mFP._sinCA = sin(mFP.eta());
   mFP._cosCA = cos(mFP.eta());
-#ifdef Sti_DEBUG  
-  TRSymMatrix C(kNPars,mFE.A);
-  if (debug() & 4) {PrPP(rotate,C);}
-#endif
 //cout << " mFP._sinCA:"<<mFP._sinCA<<endl;
   assert(fabs(mFP._sinCA)<=1.);
   assert(fabs(mFP._cosCA)<=1.);
