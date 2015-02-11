@@ -30,7 +30,7 @@ public:
   const TList    *Vertices() const {return &fVertices;}
   void operator +=(StKFVerticesCollection &col);
   void      SetMc();
-  void      SetParents(Int_t *parents = 0) const;
+  void      SetParents(Int_t *parents) const;
   virtual void Print(const Option_t*  opt = "") const  {if (opt) {};  std::cout << *this;}
   static  void SetVxPenaltyFactor(Double_t chi2 = 1000) {fgVxPenaltyFactor = chi2;}
  private:

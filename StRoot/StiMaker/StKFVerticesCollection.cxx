@@ -326,6 +326,22 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
     Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
     vtxl->Vertex().SetIdParentMcVx(IdParentTk);
   }
+  //  SetParents();
+  nextL.Reset();
+  while ((vtxl = (StKFVertex *)  nextL())) {
+    StKFTrack *track;
+    vtxl->CleanDaughtersId();
+    TIter nextT(&vtxl->Tracks(),kIterForward);
+    while ((track = (StKFTrack *) nextT())) {
+      if (track->Chi2() < StAnneling::Chi2CutUniq()) {
+	UInt_t k = track->K();
+	if (k) {
+	  track->SetParent(vtxl->GetID());
+	  vtxl->AddDaughterId(track->GetID());
+	}
+      }
+    }
+  }
   SetMc();
 }
 //________________________________________________________________________________
@@ -387,6 +403,7 @@ Double_t StKFVerticesCollection::Fit(Int_t marker, TCanvas *c1, TH1 *VertexZPlot
 }
 //________________________________________________________________________________
 void  StKFVerticesCollection::SetParents(Int_t *parents) const {
+  assert(parents);
   if (StKFVertex::Debug()) {
     cout << "StKFVerticesCollection::SetParents arrray\t" << *this << endl;
   }

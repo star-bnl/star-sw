@@ -738,7 +738,6 @@ void StKFVertexMaker::PrimaryVertices() {
 	     << " with " << fgcVertices->NoVertices() << " vertices" << endm;
   }
   fgcVertices->UniqueTracks2VertexAssociation();
-  fgcVertices->SetParents();
 }
 //________________________________________________________________________________
 StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
@@ -1026,7 +1025,6 @@ void StKFVertexMaker::SecondaryVertices() {
     LOG_INFO << "Candidates for secondary vertices: " << No << endm;
     SecondaryVertices->UpdateWeights();
     SecondaryVertices->UniqueTracks2VertexAssociation();
-    SecondaryVertices->SetParents();
     //       SecondaryVertices->PrintV(NoMuMcVertex,NoMuMcTrack,StMuMcVertex_time,
     // 		       StMuMcVertex_xyzV_mX1,StMuMcVertex_xyzV_mX2,StMuMcVertex_xyzV_mX3,
     // 		       StMuMcVertex_NoDaughters,StMuMcVertex_IdParTrk,StMuMcTrack_gePid);
