@@ -6,11 +6,18 @@ Requirements:
 A. Access as onlmon on the onlXX machines. You can get access with your SSH key here:
 https://www.star.bnl.gov/starkeyw/
 
+You may also need access to log into the following:
+
+operator@daqman.starp.bnl.gov
+staruser@startrg.starp.bnl.gov
+sysuser@sc5.starp.bnl.gov
+evpops@evp.starp.bnl.gov
+
 B. Write access to the database
 Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
 Please consult EMC or DB experts on how to set it up.
 
-Create a new directory. This code no longer uses a "crontab"-type job, so it can be ran on any of the onlXX machines. I generally run on onl02.
+Create a new directory. This code uses a "crontab"-type job, so it can be ran on onl11-13 machines. I generally run on onl11.
 mkdir /ldaphome/onlmon/bemctrgdbYYYY (YYYY = year)
 cd /ldaphome/onlmon/bemctrgdbYYYY
 
@@ -36,7 +43,6 @@ NOTE: I never have checked anything other than the StOnlineTriggerMonitoring pac
 
 The following files are created:
     .emconline_trg.cfg.sh - configuration file
-    bemcTrgDbMonitor.py   - Infinite loop script which runs the monitoring task
     saveTriggerLoad.C     - ROOT script to run the trigger monitoring
     job.emconline_trg     - script to be run as a cron job
     status.emconline_trg  - set or report the current status
@@ -52,6 +58,7 @@ In this file one should/change set three things:
    - EMCONLINE_TRG_DIR -> change to current working directory
    - EMCONLINE_TRG_WEBDIR -> change to a directory for web monitoring that you have write access to (somewhere on /onlineweb/www/)
    - EMCONLINE_TRG_STARVER -> Set to the STAR library version you will be compiling under (pro or dev)
+     NOTE: In 2015 'root4star' was not set up in starpro. Therefore the code would break and DEV was the only option
 
 3. Compile
 cons
@@ -75,14 +82,13 @@ File RUNMODE.emconline_trg will contain the current monitoring status, RUN or ST
 *NOTE* If you wish to stop monitoring, it's as simple as:
 ./status.emconline_trg STOP
 
-6. Fire up the infinite monitoring loop with nohup command:
-nohup bemcTrgDbMonitor.py >& monitoringReport.txt &
+6. Add the cron job to the list of crontabs
+   execute 'crontab -e'
+   In the editor type '*/10 * * * * csh -c "stardev; bash /ldaphome/onlmon/bemctrgdbYYYY/job.emconline_trg"
 
-This script should be stopped once you stop monitoring. To stop perform the following:
-ps -daf | grep "bemcTrgDb" 
-kill XXXX
+   Note that if you're using "starpro" (didn't work for run15!!) then you'll need to change from stardev to starpro in the editor command
 
-where XXXX is the process ID of the bemcTrgDbMonitor.py process.
+   Note at the end of the run you should uninstall the cronjob command. So execute 'crontab -e' and remove the above command and save the file again to remove it completely (remember to log into the node which you installed the crontab)
 
 ----------------------------------------------------------------------
 USAGE
@@ -123,9 +129,9 @@ Notes:
 
 6.) Saved tables may be uploaded to the DB after the run. Use the macro uploadToDB.C to do this, the directions are in the code and pretty simple to follow. One would have to set the DB_ACCESS_MODE to write for this code to run, and should be cautious when running it. Don't upload before you're ready, you can comment out the write command (or place a return statement) to stop accidential uploads - be prepared before you act!
 
-7.) In 2015, the libraries were in such a way that only "stardev" had the root4star variable defined in it. So, one MUST be in this library when starting up the Python monitoring script. Otherwise, the code will not run correctly. This may not be the case in 2016 and beyond.
+7.) In 2015, the libraries were in such a way that only "stardev" had the root4star variable defined in it. So, one must compile the code in dev, then have the stardev command in the cronjob command
 
 Oleksandr Grebenyuk
 April, 2007
 
-Updated 1/23/2015 - Kevin Adkins
+Updated 2/11/2015 - Kevin Adkins
