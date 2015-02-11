@@ -4,7 +4,7 @@
 # configuration had changed. If so, it updated the
 # database with the new trigger configuration
 #
-# it runs as a cronjob every 5-10 minutes in the emc01
+# it runs as a cronjob every 10 minutes in the onl11
 # machine
 #
 # this script follows the steps bellow
@@ -13,30 +13,33 @@
 #    program. This is done if, for some reason, we
 #    want to stop the script from updating the DB
 #
-# 2. SCP the config_crate* and pedestal_crate* files
-#    from sc3.starp.bnl.gov machine
+# 2. SCP the config_crate0x??.dat files from sc5 machine,
+#    the BemcConfig.dat file from sc5 machine, and 
+#    the daq_pedestal_crate0x??.dat files from daqman
 #
-# 3. SCP the trigegr masks from startrg2.starp.bnl.gov machine
+# 3. SCP the trigger masks from startrg.starp.bnl.gov machine
 #
-# 4. Copy these files to the sc3 and startrg2 directories
+# 4. Copy these files to the current_config.emconline_trg/ 
+#    directory
 #
-# 5. Compare these files to the files saved in the sc3.saved 
-#    and startrg2.saved directories
+# 5. Compare these files to the files saved in the 
+#    last_config.emconline_trg/ directory
 #    
-# 6. If there is no difference, clear the sc3 and startrg2
-#    directories and exit
+# 6. If there is no difference, clear current_config.emconline_trg/
+#    directory and exit
 #
 # 7. If ANY difference was found, copy the contents of the
-#    sc3 and startrg2 directories to sc3.saved and startrg2.saved
+#    current_config.emconline_trg/ directory to the 
+#    last_config.emconline_trg/ directory
 #    Also saves the directory with timestamped names in the
 #    backup directory
 #
 # 8. runs the root4star macro that create the tables from
 #    the files in those directories and save them to the DB
 #    It also creates plain text file bemcStatus.txt with the same information
-#    for the trigger people and Pplots
+#    for the trigger people and pPlots
 #
-# 9. clear the sc3 and startrg2 directories and exit
+# 9. clear the current_config.emconline_trg  directory and exit
 #
 # you can also run it by hand with the command
 #
