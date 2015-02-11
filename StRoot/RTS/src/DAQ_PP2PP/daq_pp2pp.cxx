@@ -55,8 +55,11 @@ daq_pp2pp::daq_pp2pp(daqReader *rts_caller)
 	raw = new daq_dta ;
 	adc = new daq_dta ;
 	pedrms = new daq_dta ;
+	adc_ped_sub = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p, endianess %d",name,rts_caller,endianess) ;
+
+
 	return ;
 }
 
@@ -66,6 +69,7 @@ daq_pp2pp::~daq_pp2pp()
 	if(raw) delete raw ;
 	if(adc) delete adc ;
 	if(pedrms) delete pedrms ;
+	if(adc_ped_sub) delete adc_ped_sub ;
 
 	return ;
 }
@@ -85,6 +89,9 @@ daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, v
 	}
 	else if(strcasecmp(bank,"adc")==0) {
 		return handle_adc(sec, row) ;
+	}
+	else if(strcasecmp(bank,"adc_ped_sub")==0) {
+		return handle_adc_ped_sub(sec, row) ;
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
 		return handle_pedrms(sec) ;
@@ -201,6 +208,102 @@ daq_dta *daq_pp2pp::handle_pedrms(int sec)
 	else return 0 ;
 
 
+}
+
+daq_dta *daq_pp2pp::handle_adc_ped_sub(int sec, int rdo)
+{
+	int min_sec, max_sec ;
+	int found_some = 0 ;
+
+	// sanity
+	if(sec==-1) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
+	}
+	else if((sec<0) || (sec>MAX_SEC)) return 0 ;
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+	LOG(DBG,"In handle_adc_ped_sub [%d,%d]",min_sec,max_sec) ;
+
+	adc_ped_sub->create(1,"pp2pp_t",rts_id,DAQ_DTA_STRUCT(pp2pp_t)) ;
+
+	
+	for(int i=min_sec;i<=max_sec;i++) {	//loop over sequencers
+		char str[128] ;
+		char *full_name ;
+
+		sprintf(str,"%s/sec%02d/rb00/adc_ped_sub",sfs_name, i) ;
+		LOG(DBG,"Checking %s",str) ;
+
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+		
+		LOG(DBG, "No bank %s",str) ;
+
+		int bytes = caller->sfs->fileSize(str) ;	// this is bytes		
+		if(bytes <= 0) continue ;
+
+
+		char *mem = (char *)malloc(bytes) ;
+
+		int ret = caller->sfs->read(full_name, mem, bytes) ;
+		if(ret < 0) {
+			LOG(ERR,"read error") ;
+			free(mem) ;
+			continue ;
+		}
+
+		LOG(NOTE,"Got %d bytes",bytes) ;
+
+		char *u_mem = mem ;	// the one we will advance...
+		
+		while(bytes>0) {
+			pp2pp_ped_sub_t *ps = (pp2pp_ped_sub_t  *)u_mem ;
+		
+			int l_bytes = sizeof(pp2pp_ped_sub_t) + ps->ch_cou*(1+1) ;
+
+			LOG(DBG,"Chs %d: bytes %d",ps->ch_cou,l_bytes) ;
+
+			pp2pp_t *pp  = (pp2pp_t *)adc_ped_sub->request(1) ;
+
+
+			memset(pp,0,sizeof(pp2pp_t)) ;
+			memcpy(pp,ps,sizeof(pp2pp_ped_sub_t)) ;	// to get all the variables...
+
+
+			for(int j=0;j<ps->ch_cou;j++) {
+				int ch = ps->dta[j].ch ;
+				int adc = ps->dta[j].adc ;
+
+				LOG(DBG,"ix %d: ch %d, adc %d",j,ch,adc) ;
+
+				pp->adc[ch] = adc ;
+				pp->trace[ch] = 1 ;
+			}
+			
+
+			adc_ped_sub->finalize(1,i,pp->seq_id,pp->chain_id) ;
+
+			u_mem += l_bytes ;
+			bytes -= l_bytes ;
+
+			LOG(DBG,"%d %d %d -- left %d",pp->seq_id,pp->chain_id,pp->svx_id,bytes) ;
+
+		}
+
+		free(mem) ;
+		found_some++ ;
+
+	}
+
+	LOG(DBG,"exiting handle adc_ped_sub") ;
+
+	adc_ped_sub->rewind() ;
+
+	if(found_some) return adc_ped_sub ;
+	else return 0 ;
 }
 
 daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)

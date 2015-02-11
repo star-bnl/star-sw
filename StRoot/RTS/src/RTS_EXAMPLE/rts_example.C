@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <rtsLog.h>	// for my LOG() call
 #include <rtsSystems.h>
@@ -167,17 +168,19 @@ int main(int argc, char *argv[])
 
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
+		time_t e_time = (time_t) evp->evt_time ;
+		char *date = ctime(&e_time) ;
+		date[strlen(date)-1] = 0 ;	//get rid of NL
 
-		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time %u, detectors 0x%08X (status 0x%X)",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
-		    evp->evt_time, evp->detectors, evp->status) ;
+		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time \"%s\", detectors 0x%08X (status 0x%X), evpgroups 0x%X",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
+		    date, evp->detectors, evp->status,evp->evpgroups) ;
 
 
-		//if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		if(print_det[0]) {
 		  if(strcmp(print_det, "tinfo") == 0) {		    
-		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evptriggers=0x%x flags=0x%x\n",
+		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
 			   evp->seq,
 			   evp->token,
 			   evp->detectors,
@@ -1079,6 +1082,7 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 	int raw_found = 0 ;
 	int adc_found = 0 ;
 	int pedrms_found = 0 ;
+	int adc_ped_sub_found = 0 ;
 
 	daq_dta *dd ;
 
@@ -1128,6 +1132,31 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 		}
 	}
 
+	dd = rdr->det("pp2pp")->get("adc_ped_sub") ;
+	if(dd) {
+		while(dd->iterate()) {
+			adc_ped_sub_found++ ;
+
+			pp2pp_t *d = (pp2pp_t *) dd->Void ;
+
+			if(do_print) {
+				int cou = 0 ;
+				for(int c=0;c<PP2PP_SVX_CH;c++) {
+					if(d->trace[c]) cou++ ;
+				}
+				
+				printf("PP2PP PED_SUB: sector %d, sequencer %d, chain %c, SVX %d: %d channels:\n",dd->sec,d->seq_id,'A'+d->chain_id,d->svx_id,cou) ;
+
+				for(int c=0;c<PP2PP_SVX_CH;c++) {
+					// print only found channels via the "trace" array
+					if(d->trace[c]) printf("   ch %3d: ADC %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
+					//printf("   ch %3d: ADC %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
+				}
+			}
+
+		}
+	}
+
 	dd = rdr->det("pp2pp")->get("pedrms") ;
 	if(dd) {
 		while(dd->iterate()) {
@@ -1147,11 +1176,12 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 		}
 	}
 
-	char fstr[128] ;
+	char fstr[256] ;
 	fstr[0] = 0 ;
 
 	if(raw_found) strcat(fstr,"RAW ") ;
 	if(adc_found) strcat(fstr,"ADC ") ;
+	if(adc_ped_sub_found) strcat(fstr,"ADC-PED-SUB ") ;
 	if(pedrms_found) strcat(fstr,"PEDRMS ") ;
 
 	int found = raw_found || adc_found || pedrms_found ;
@@ -1712,38 +1742,67 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	int adc_found = 0 ;
 	int pedrms_found = 0 ;
 
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"fps")) ;	// leave as is...
 	else do_print = 0 ;
 
+	static int tot_charge[21] ;
+
+
 
 	dd = rdr->det("fps")->get("adc") ;
 	if(dd) {
-
+		
 		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
 		if(do_print) {
 			printf("FPS META: delta %u us, xing %d\n",hdr->delta,hdr->xing) ;
 		}
 
-		while(dd->iterate()) {
+		while(dd->iterate()) {	//per xing and per RDO
 			adc_found = 1 ;
 
-			if(do_print) {
-				printf("  xing %2d, QT %d, chs %d\n",(char)dd->sec,dd->rdo,dd->ncontent) ;
-			}
 
 			fps_adc_t *a = (fps_adc_t *)dd->Void ;
+
+			if(do_print) {
+				double occ = 100.0 * (double)dd->ncontent / (double)32 ;
+
+				int sum = 0 ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					sum += a[i].adc ;
+				}
+				
+				printf("  xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",(char)dd->sec,dd->rdo,dd->ncontent,occ,sum) ;
+		
+				int xing = (char)dd->sec ;
+
+				int ix = xing + 10 ;
+
+				if(ix>=0 && ix<21) tot_charge[ix] += sum ;
+
+
+			}
+
+
 
 			for(u_int i=0;i<dd->ncontent;i++) {
 				if(do_print) {
 					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+					
 				}
 			}
 		}
 
 	}
 
+	if(adc_found && do_print) {
+		printf("FPS: total charge per crossing: ") ; 
+		for(int i=0;i<21;i++) printf("%d ",tot_charge[i]) ;
+		printf("\n") ;
+	}
 
 	dd = rdr->det("fps")->get("pedrms") ;
 	if(dd) {
