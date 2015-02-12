@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcOnly.C,v 1.6 2013/04/28 14:41:31 fisyak Exp $
+// $Id: bfcMixer_TpcOnly.C,v 1.7 2015/02/12 13:39:18 zhux Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
   TString geomP07ib("ry2005f");
 
   // production chains for P12ia - run6 p+p 62.4 GeV
-  TString prodP12iapp62("DbV20060915,pp2006b,ITTF,DbV20081215_EMC_Calibrations,DbV20081215_EEMC_Calibrations VFMCE -VFPPVnoCTB -hitfilt");
+  TString prodP12iapp62("DbV20060915,pp2006b,ITTF,DbV20081215_EMC_Calibrations,DbV20081215_EEMC_Calibrations -hitfilt");
 
   TString geomP12iapp62("ry2006h");
 
@@ -57,7 +57,7 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",TpcMixer,Embedding,onlraw,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,EmbeddingShortCut"; 
+  chain3Opt += ",TpcMixer,bbcSim,Embedding,onlraw,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,EmbeddingShortCut"; 
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
