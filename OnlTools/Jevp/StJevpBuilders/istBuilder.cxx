@@ -626,11 +626,67 @@ void istBuilder::startrun(daqReader *rdr) {
 	}
 	fclose(file);
 
+
+	sprintf(paraDir, "%s/ist/ist_apv_bad.txt", clientdatadir);
+	LOG(U_IST,"Loading file %s",paraDir);
+	FILE *file1;
+	file1 = fopen(paraDir,"rb");
+	if(file1==0){
+		LOG(U_IST,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	}else{
+		int c=0, ret=-1;
+		long offset=0;
+		int runTemp=-1,rdoTemp=-1,armTemp=-1,groupTemp=-1,apvTemp=-1,tmp1=-1;
+		fseek(file1,0,SEEK_END);
+		while(1){
+			c = fgetc(file1);
+			char buff[256];
+			if(c=='\n'){
+				offset = ftell(file1);
+				fgets(buff,256,file1);
+				fseek(file1,offset-2,SEEK_SET);
+				ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
+				if(ret!=6){ 
+					LOG(U_IST,"Wrong input:%s",buff);
+				}else{
+					if(runTemp<run) break;
+					else if(runTemp==run){
+						int apvId = (rdoTemp-1)*numARM*numAPV + armTemp*numAPV + groupTemp*numAPV/2+apvTemp;
+						for(int i=0;i<ChPerApv;i++){
+							int chId = apvId*ChPerApv+i;
+							int geoId    = istMapping[chId];
+							isChannelBad[geoId-1] = true;
+						}
+					}
+				}
+			}else if(fseek(file1,-2,SEEK_CUR)==-1){
+				fseek(file1,0,SEEK_SET);
+				fgets(buff,256,file1);
+
+				ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
+				if(ret!=6) LOG(U_IST,"Wrong input:%s",buff);
+				else{
+					if(runTemp<run) break;
+					else if(runTemp==run){
+						int apvId = (rdoTemp-1)*numARM*numAPV + armTemp*numAPV + groupTemp*numAPV/2+apvTemp;
+						for(int i=0;i<ChPerApv;i++){
+							int chId = apvId*ChPerApv+i;
+							int geoId    = istMapping[chId];
+							isChannelBad[geoId-1] = true;
+						}
+					}
+				}
+				break;
+			}
+		}
+	}
+
 	errorMsg->SetText("No Error Message");    
 	sumHistogramsFilled  = 0;  
 	t_2min               = time(NULL);
 	t_10min              = time(NULL);
 	t_120min             = time(NULL);
+
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
