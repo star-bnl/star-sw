@@ -1,0 +1,63 @@
+MACRO mypyth outfile rndm1 rndm2 nevts ptmin ptmax
+
+
+gfile o [outfile]
+detp geom y2006h
+make geometry
+make gstar
+gclose all
+
+* define a beam with 100um transverse sigma and 60cm sigma in Z
+vxyz -0.02488 -0.3177 5.054
+vsig  0.025  78.0
+* Cut on eta (+-6.3) to avoid having to handle massive showers caused by the spectators
+
+* Cut on vertex Z (+-30 cm)
+gkine -1 0 0 100 -6.3 6.3 0 6.29 -75.0 75.0
+
+* load pythia
+gexec $STAR_LIB/apythia.so
+* specify parameters
+ENER 62.4     ! Collision energy
+MSEL 1         ! Collision type
+MSTP (51)=7
+MSTP (82)=4
+PARP (82)=2.0
+PARP (83)=0.5
+PARP (84)=0.4
+PARP (85)=0.9
+PARP (86)=0.95
+PARP (89)=1800
+PARP (90)=0.25
+PARP (91)=1.0
+PARP (67)=4.0
+*
+MDCY (102,1)=0  ! PI0 111
+MDCY (106,1)=0  ! PI+ 211
+*
+MDCY (109,1)=0  ! ETA 221
+*
+MDCY (116,1)=0  ! K+ 321
+*
+MDCY (112,1)=0  ! K_SHORT 310
+MDCY (105,1)=0  ! K_LONG 130
+*
+*
+MDCY (164,1)=0  ! LAMBDA0 3122
+*
+MDCY (167,1)=0  ! SIGMA0 3212
+MDCY (162,1)=0  ! SIGMA- 3112
+MDCY (169,1)=0  ! SIGMA+ 3222
+MDCY (172,1)=0  ! Xi- 3312
+MDCY (174,1)=0  ! Xi0 3322
+MDCY (176,1)=0  ! OMEGA- 3334
+*
+* seed the random generator
+rndm [rndm1] [rndm2]
+* trigger - change to trigger the desired number of times
+DO i=1,[nevts]
+  MESSAGE Processing event [i] / [nevts]
+  TRIG 1
+ENDDO
+*gprint kine
+quit
