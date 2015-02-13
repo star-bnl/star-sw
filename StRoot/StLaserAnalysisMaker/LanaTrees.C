@@ -1,8 +1,11 @@
 /* 
    root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
  */
-// $Id: LanaTrees.C,v 1.2 2015/02/10 20:27:16 fisyak Exp $
+// $Id: LanaTrees.C,v 1.3 2015/02/13 15:31:24 fisyak Exp $
 // $Log: LanaTrees.C,v $
+// Revision 1.3  2015/02/13 15:31:24  fisyak
+// Check fit status
+//
 // Revision 1.2  2015/02/10 20:27:16  fisyak
 // Adjust split style for ROOT_VERSION_CODE
 //
@@ -67,6 +70,7 @@
 #include "TH3.h"
 #include "TStyle.h"
 #include "TF1.h"
+#include "TFitResult.h"
 #include "TProfile.h"
 #include "TTree.h"
 #include "TChain.h"
@@ -154,6 +158,7 @@ void MakeTable() {
     dv = 1e-6*Run.vWest*(1. + (5.85670e-01 -1.42815e-03*(Run.zWO + Run.zEO)));
   }
   TString fOut =  Form("tpcDriftVelocity.%8i.%06i.C",date,Time);
+#if 0
   Double_t scaleY = 0;
   Double_t dscaleY = 0;
   Float_t *par = &Run.YWI;
@@ -170,6 +175,7 @@ void MakeTable() {
     scaleY  /= dscaleY;
     dscaleY = 1./TMath::Sqrt(dscaleY);
   }
+#endif
   ofstream out;
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
@@ -190,17 +196,14 @@ void MakeTable() {
       dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
     }
 #endif 
-    
     out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
 	<< " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << dvEast << " +/- " << ddvEast
 	<< endl;
     out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
 	<< " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << dvWest << " +/- " << ddvWest<< endl;
 #if 0
-    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-#endif
     out << "//row.scaleY                  	 = " << scaleY << ";// +/-" << dscaleY << endl;
+#endif
     out << "  tableSet->AddAt(&row); " << endl;
     out << "  return (TDataSet *)tableSet; // 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
   } else { // averaged drif tvelocity
@@ -211,10 +214,6 @@ void MakeTable() {
     out << endl;
     out << "  row.laserDriftVelocityWest	 =   " << dv << "; // +/- " << ddv 
 	<< " cm/us All: West = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << endl;
-#if 0
-    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-#endif
     out << "  tableSet->AddAt(&row);// 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
     out << "  return (TDataSet *)tableSet;//" 
 	<< " West = " << dvWest << " +/- " << ddvWest
@@ -255,17 +254,22 @@ void Fit() {
     if (pol0) {
       for (Int_t k = 0; k < 3; k++) {
 	pol0->SetLineColor(k+1);
-	if (k == 0) fit->Fit(pol0,"er","",xmin,xmax); 
+	Double_t x1 = xmin;
+	Double_t x2 = xmax;
+	TString opt("er");
 	if (k == 1) {
-	  if (xmin >= 13) continue;
-	  fit->Fit(pol0,"er+","",xmin,12.5);
+	  x2 = 12.5;
+	} else if (k == 2) {
+	  opt += "+";
+	  x1 = 12.5;
 	}
-	if (k == 2) {
-	  if (xmax <= 15) continue;
-	  fit->Fit(pol0,"er+","",13.5,xmax);
+	DVAll[l][k]  = -999;
+	dDVAll[l][k] =  999;
+	Int_t status = fit->Fit(pol0,opt,"",x1,x2);
+	if (! status) {
+	  DVAll[l][k]  = pol0->GetParameter(0);
+	  dDVAll[l][k] = pol0->GetParError(0);
 	}
-	DVAll[l][k]  = pol0->GetParameter(0);
-	dDVAll[l][k] = pol0->GetParError(0);
 	par[2*(k+3*l)] = DVAll[l][k];
 	par[2*(k+3*l)+1] = dDVAll[l][k];
       }
