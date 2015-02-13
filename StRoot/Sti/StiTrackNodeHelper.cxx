@@ -6,6 +6,7 @@
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
+#include "StarRoot/THelixTrack.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -1124,12 +1125,73 @@ int StiTrackNodeHelper::nudge()
 //______________________________________________________________________________
 double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
 {
+static int nCall =0;nCall++;
   if (!det) return 0.; 
-  double thickness = det->getShape()->getThickness();
+  StiShape *shape = det->getShape();
+  double thickness = shape->getThickness();
   double t = pars->tanl();
   double c = fabs(pars->_cosCA);
+  double pla = (thickness*::sqrt(1.+t*t)) / c;///???
+  if (shape->getShapeCode()==kPlanar) return (thickness*::sqrt(1.+t*t)) / c;
+
+ //cyl or sector
+  double r = shape->getOuterRadius() - thickness/2;
+  double maxStep = 0.1/(fabs(pars->curv())+1e-3);
+  if (maxStep>0.1*r) maxStep=0.1*r;
+  double dir[3] = {pars->_cosCA,pars->_sinCA,pars->tanl()};
+  THelixTrack hlx(pars->P,dir,pars->curv());
+  double *X = hlx.Pos();
+  double *D = hlx.Dir();
+  double Dot,totS=0,s;
+  int it = 10;
+  for (; it>0;it--) {
+    double rxy = sqrt(X[0]*X[0]+X[1]*X[1]);
+    Dot = (X[0]*D[0]+X[1]*D[1])/rxy;
+    s = (r*r-X[0]*X[0]-X[1]*X[1])/(2*Dot);
+    if (fabs(s)>maxStep) s= (s<0)? -maxStep:maxStep;
+    hlx.Move(s); totS += s;
+    if (fabs(s)<0.1*thickness+1e-4) break;
+  } 
+  if (!it) return 0;
+  double cyl = (thickness)/Dot;///???
+  StiDebug::Count("Cyl-Pla",cyl);
+  assert(fabs(cyl)<100);
+  return fabs(thickness/Dot);
+}
+#if 0
+//______________________________________________________________________________
+double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
+{
+  if (!det) return 0.; 
+  StiShape *shape = det->getShape();
+  double thickness = shape->getThickness();
+  double t = pars->tanl();
+  double c = fabs(pars->_cosCA);
+  if (shape->getShapeCode()>kPlanar) { //cyl or sector
+    double r = shape->getOuterRadius() - thickness/2;
+    double sur[7] = { -r*r,0,0,0,1,1,0}; 
+    double dir[3] = {pars->_cosCA,pars->_sinCA,pars->tanl()};
+    THelixTrack hlx(pars->P,dir,pars->curv());
+    double s = hlx.Path(1000.,sur,7,0,0,1);
+assert(fabs(s)<100);
+    hlx.Move(s);
+    double nor = sqrt(pow(hlx.Pos()[0],2)+pow(hlx.Pos()[1],2));
+    double myDir[2]={hlx.Pos()[0]/nor,hlx.Pos()[1]/nor};
+
+    double old = (thickness*::sqrt(1.+t*t)) / c;
+
+
+    c = fabs(hlx.Dir()[0]*myDir[0]+hlx.Dir()[1]*myDir[1]);
+    double cyl = (thickness)/c;
+assert(fabs(cyl-old)<100);
+    StiDebug::Count("Cyl-Pla",cyl-old);
+    return (thickness)/c;
+  }
+
   return (thickness*::sqrt(1.+t*t)) / c;
 }
+#endif
+
 //______________________________________________________________________________
 int StiTrackNodeHelper::getHitErrors(const StiHit *hit,const StiNodePars *pars,StiHitErrs *hrr)
 {
