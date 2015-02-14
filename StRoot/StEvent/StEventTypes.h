@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.44 2014/04/10 16:00:13 jeromel Exp $
+ * $Id: StEventTypes.h,v 2.45 2015/02/14 18:57:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.45  2015/02/14 18:57:24  ullrich
+ * Big upgrade after adding StFmPoint and StFmsCluster.
+ *
  * Revision 2.44  2014/04/10 16:00:13  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
@@ -162,7 +165,9 @@
 #include "StEventInfo.h"
 #include "StEventSummary.h"
 #include "StFmsCollection.h"
+#include "StFmsCluster.h"
 #include "StFmsHit.h"
+#include "StFmsPoint.h"
 #include "StFmsTriggerDetector.h"
 #include "StFpdCollection.h"
 #include "StFpdTriggerDetector.h"

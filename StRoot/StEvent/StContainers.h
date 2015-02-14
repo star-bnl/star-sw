@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.34 2014/04/10 16:00:12 jeromel Exp $
+ * $Id: StContainers.h,v 2.35 2015/02/14 18:57:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.35  2015/02/14 18:57:24  ullrich
+ * Big upgrade after adding StFmPoint and StFmsCluster.
+ *
  * Revision 2.34  2014/04/10 16:00:12  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
@@ -139,6 +142,8 @@ class StEmcRawHit;
 class StEmcCluster;
 class StEmcPoint;
 class StFmsHit;
+class StFmsCluster;
+class StFmsPoint;
 class StTofHit;
 class StTofSlat;
 class StTofCell;
@@ -197,6 +202,8 @@ StCollectionDef(EmcRawHit)
 StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
 StCollectionDef(FmsHit)
+StCollectionDef(FmsCluster)
+StCollectionDef(FmsPoint)
 StCollectionDef(TofHit)
 StCollectionDef(TofSlat)
 StCollectionDef(TofCell)
