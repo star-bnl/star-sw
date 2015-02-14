@@ -1122,7 +1122,6 @@ int StiTrackNodeHelper::nudge()
   }
   return 0;
 }
-//______________________________________________________________________________
 double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
 {
 static int nCall =0;nCall++;
@@ -1131,13 +1130,17 @@ static int nCall =0;nCall++;
   double thickness = shape->getThickness();
   double t = pars->tanl();
   double c = fabs(pars->_cosCA);
-  double pla = (thickness*::sqrt(1.+t*t)) / c;///???
   if (shape->getShapeCode()==kPlanar) return (thickness*::sqrt(1.+t*t)) / c;
 
  //cyl or sector
   double r = shape->getOuterRadius() - thickness/2;
   double maxStep = 0.1/(fabs(pars->curv())+1e-3);
   if (maxStep>0.1*r) maxStep=0.1*r;
+  double N[2] = {-pars->_sinCA,pars->_cosCA};
+  double Rho = pars->curv(),aRho = fabs(Rho);
+  double C = sqrt(1+Rho*(2.*(pars->P[0]*N[0]+pars->P[1]*N[1])+Rho*pars->rxy2()));
+  if (     1+(r*aRho)  > C) return 0;
+  if (fabs(1-(r*aRho)) < C) return 0;
   double dir[3] = {pars->_cosCA,pars->_sinCA,pars->tanl()};
   THelixTrack hlx(pars->P,dir,pars->curv());
   double *X = hlx.Pos();
