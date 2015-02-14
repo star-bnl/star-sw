@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.160 2015/02/11 01:54:10 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.161 2015/02/14 23:27:05 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.161  2015/02/14 23:27:05  perev
+ * propagate(StiKalmanTrackNode *,StiDetector *,int dir)
+ * rewritten. For case cyl propagate(xk...) is not called anymore.
+ * Actually all info is there.  It was a problem that point, due to loss accuracy
+ * was belonged and not belonget to volume. In result was asser
+ *
  * Revision 2.160  2015/02/11 01:54:10  perev
  * Cleanup
  *
@@ -940,6 +946,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
+memset(&mgP.x1,'@',sizeof(mgP));	//Debug only
+
   int position = 0;
   setState(pNode);
   setDetector(tDet);
@@ -961,6 +969,7 @@ StiDebug::Break(nCall);
       // bail out if the rotation fails...
       position = rotate(dAlpha);
       if (position) 			return -10;
+      position = propagate(endVal,shapeCode,dir); 
     }
     					break;
   case kDisk:  							
@@ -978,8 +987,24 @@ StiDebug::Break(nCall);
         TVector3 v3(myX);
         position = rotate(dAlpha);	
         v3.RotateZ(-dAlpha);
-        endVal = v3[0];
-        break;
+        mgP.dl = s; mgP.dl0 = 3e33;
+        mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
+        mgP.x2=v3[0];    mgP.y2=v3[1];   mgP.cosCA2 =1;          mgP.sinCA2 =0;
+        mgP.dx=mgP.x2-mgP.x1; mgP.dy=mgP.y2-mgP.y1;  
+        mgP.sumSin = mgP.sinCA1+mgP.sinCA2;
+        mgP.sumCos = mgP.cosCA1+mgP.cosCA2;
+
+        mFP._cosCA = mgP.cosCA2; mFP._sinCA = mgP.sinCA2;
+        mFP.x() = v3[0]; mFP.y()   = v3[1]; 
+	mFP.z() = v3[2]; mFP.eta() = 0;
+
+	position = 0;
+	if (mgP.x2*mgP.cosCA2+mgP.y2*mgP.sinCA2<=0)	position = kEnded; 
+	mFP.hz()   = getHz();
+	mFP.curv() = mFP.hz()*mFP.ptin();
+	mPP() = mFP;
+	endVal = v3[0];
+       break;
       }
       if (sol>1) 			return -12;
     }
@@ -987,19 +1012,15 @@ StiDebug::Break(nCall);
   default: assert(0);
   }
   _wallx = endVal;
-assert(_wallx);
-  position = propagate(endVal,shapeCode,dir); 
 
-  if (position) return position;
+  if (position && position!=kEnded ) return position;
   assert(shapeCode==1 || fabs(mFP.phi()) < 1e-4);
   assert(shapeCode >1 || mFP.x()         > 0   );
   propagateError();
-  if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && getHz())  
+  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated())  
     propagateMCS(pNode,tDet);
-  if (debug() & 8) { PrintpT("M");}
   return position;
 }
 
@@ -1196,7 +1217,7 @@ StiDebug::StiDebug::Break(nCall);
   int ians = 0;
   StiNodePars save = mFP;
   for (int iIt=0; iIt<nIt; iIt++) {//try 2 cases, +ve and -ve cosCA
-    ians = -1;
+    ians = kFailed;
     mFP = save;
     mgP.cosCA2 = (!iIt)? fabs(mgP.cosCA2):-fabs(mgP.cosCA2);
     mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
@@ -1231,9 +1252,8 @@ StiDebug::StiDebug::Break(nCall);
     if (fabs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
-  mFP.hz()      = getHz();
-  if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
-  else 				{ mFP.curv() = 1e-6 ;}
+  mFP.hz()   = getHz();
+  mFP.curv() = mFP.hz()*mFP.ptin();
 
   mPP() = mFP;
   _state = kTNProEnd;
