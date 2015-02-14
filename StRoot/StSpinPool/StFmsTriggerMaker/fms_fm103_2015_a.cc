@@ -5,17 +5,17 @@
 #include "fms_fm006_2015_a.hh"
 #include <stdio.h>
 
-#include "registerHack.hh"
+//#include "registerHack.hh"
 
 void fms_fm103_2015_a(Board& fm103)
 {
-  //const int R0 = fm103.registers[0]; // FMSsmall-cluster-th0
-  //const int R1 = fm103.registers[1]; // FMSsmall-cluster-th1
-  //const int R2 = fm103.registers[2]; // FMSsmall-layer1-mode: 0=data taking, 1=debug
+  const int BSThr1=fm103.registers[0];
+  const int BSThr2=fm103.registers[1];
+  const int BSThr3=fm103.registers[2];
   //Hack until we know details of registers
-  int BSThr1=Lg_BSThr1; 
-  int BSThr2=Lg_BSThr2; 
-  int BSThr3=Lg_BSThr3; 
+  //int BSThr1=Lg_BSThr1; 
+  //int BSThr2=Lg_BSThr2; 
+  //int BSThr3=Lg_BSThr3; 
 
   //input
   int* in = (int*)fm103.channels;
@@ -36,16 +36,16 @@ void fms_fm103_2015_a(Board& fm103)
   int BS1B=getFM006_BS1E(B2);
   
   //Jp
-  int JpT=getFM006_JpEF(T2)+getFM005_JpG(T1)+getFM005_JpHIJ(T1);
-  int JpM=getFM005_JpHIJ(T1)+getFM005_JpHIJ(B1);
-  int JpB=getFM006_JpEF(B2)+getFM005_JpG(B1)+getFM005_JpHIJ(B1);
+  int JpT=getFM006_JpEF(T2)+getFM005_JpGH(T1)+getFM005_JpIJ(T1);
+  int JpM=getFM005_JpIJ(T1)+getFM005_JpIJ(B1);
+  int JpB=getFM006_JpEF(B2)+getFM005_JpGH(B1)+getFM005_JpIJ(B1);
   if(JpT  >0xFF) JpT  =0xFF;
   if(JpM  >0xFF) JpM  =0xFF;
   if(JpB  >0xFF) JpB  =0xFF;
 
   fm103.output =  BS3 | BS2   << 1
     | BS1T << 2 | BS1M <<  3 | BS1B <<4 
-    | JpT  << 5 | JpM  << 13 | JpB  <<21;
+    | JpT  << 5 | JpM  << 16 | JpB  <<24;
 
   printf("%s input T1=%08x T2=%08x B1=%08x B2=%08x\n",fm103.name,T1,T2,B1,B2); 
   printf("%s out=%08x BS3=%1d BS2=%1d BS1T/M/B=%1d %1d %1d JpT/M/B %3d %3d %3d\n",
@@ -59,5 +59,5 @@ int getFM103_BS1T(int out) {return getbits(out, 2, 1);}
 int getFM103_BS1M(int out) {return getbits(out, 3, 1);}
 int getFM103_BS1B(int out) {return getbits(out, 4, 1);}
 int getFM103_JpT(int out) {return getbits(out, 5, 8);}
-int getFM103_JpM(int out) {return getbits(out,13, 8);}
-int getFM103_JpB(int out) {return getbits(out,21, 8);}
+int getFM103_JpM(int out) {return getbits(out,16, 8);}
+int getFM103_JpB(int out) {return getbits(out,24, 8);}

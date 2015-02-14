@@ -18,8 +18,8 @@ void fms_fm006_2015_a(Board& fm006){
   
   //input
   int* in = (int*)fm006.channels;
-  int E=in[3];
-  int F=in[2];
+  int E=in[1];
+  int F=in[0];
 
   //2x8 sums from QT
   int E01 = getQT01Sum(E);
@@ -51,7 +51,7 @@ void fms_fm006_2015_a(Board& fm006){
   fm006.output 
     = BS3         | BS2  << 1
     | BS1E  << 2  | BS1F << 3  
-    | JpEF  << 4;
+    | JpEF  << 16;
   
   printf("%s input E=%08x F=%08x\n",fm006.name,E,F); 
   printf("%s out=%08x BS3=%1d BS2=%1d BS1E/F=%1d %1d sum=%4d %4d %4d JpEF=%3d\n",
@@ -62,4 +62,4 @@ int getFM006_BS3(int out)   {return getbits(out, 0, 1);}
 int getFM006_BS2(int out)   {return getbits(out, 1, 1);}
 int getFM006_BS1E(int out)  {return getbits(out, 2, 1);}
 int getFM006_BS1F(int out)  {return getbits(out, 3, 1);}
-int getFM006_JpEF(int out)  {return getbits(out,4, 8);}
+int getFM006_JpEF(int out)  {return getbits(out,16, 8);}

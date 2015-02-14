@@ -29,6 +29,7 @@ public:
   int Make();
 
   // Input mode
+  void useTrgData() { mUseTrgData = 1;}
   void useMuDst() { mUseMuDst = 1;}
   void useStEvent() { mUseStEvent = 1; }
 
@@ -44,6 +45,12 @@ public:
   // http://www.star.bnl.gov/public/trg/TSL/Schematics/FEQ_Crate_Cable_Map.pdf
   //
   int FP201output() const { return fp201.output; }
+  int FM0xxoutput(int number) const;
+  int FM1xxoutput(int number) const;
+  int FP201input(int ch) const; 
+  int FM0xxinput(int number, int ch) const;
+  int FM1xxinput(int number, int ch) const;
+
   int FmsHighTowerTh0() const { return btest(fp201.output,0); } // Small cells
   int FmsHighTowerTh1() const { return btest(fp201.output,1); } // Large cells
   int FmsSmallClusterTh0() const { return btest(fp201.output,2); }
@@ -57,7 +64,7 @@ public:
   int FmsJetPatchTh2() const { return btest(fp201.output,10); }
   int FmsDijet() const { return btest(fp201.output,11); }
   int FPE() const { return btest(fp201.output,14); }
-
+  
   //
   // Additions for 2012:
   //
@@ -70,6 +77,7 @@ private:
   int loadRegisters(int runNumber);
   int MakeMuDst();
   int MakeStEvent();
+  int MakeTrgData();
 
   Crate& crateAt(int i) { return crates[i-1]; }
   const Crate& crateAt(int i) const { return crates[i-1]; }
@@ -83,6 +91,7 @@ private:
 
   template<class T>
   void writeQtCrate(const T* hit);
+  void writeQtCrate(int crate, int slot, int ch, int adc);
   void writeFpeQtLayerToFpeLayer1(Crate& sim);
   void writeFmsQtLayerToFmsLayer0(Crate& sim);
   void writeFmsLayer0ToFmsLayer1(Crate& sim);
@@ -97,6 +106,7 @@ private:
   TDatime mDBTime;
 
   // Input mode
+  int mUseTrgData;
   int mUseMuDst;
   int mUseStEvent;
 

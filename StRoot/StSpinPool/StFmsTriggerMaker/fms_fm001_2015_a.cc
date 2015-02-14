@@ -4,18 +4,20 @@
 #include "fms_fm001_2015_a.hh"
 #include <stdio.h>
 
-#include "registerHack.hh"
+//#include "registerHack.hh"
 
 void fms_fm001_2015_a(Board& fm001)
 {
   // thresholds
-  //const int R0 = fm001.registers[0];
-  //const int R1 = fm001.registers[1];
+  const int BSThr1    = fm001.registers[0];
+  const int BSThr2    = fm001.registers[1];
+  const int BSThr3    = fm001.registers[2];
+  const int BitSelect = fm001.registers[3];
   //Hack until we know details of registers
-  int BSThr1=Sm_BSThr1; 
-  int BSThr2=Sm_BSThr2; 
-  int BSThr3=Sm_BSThr3; 
-  int BitSelect=Sm_BitSelect;
+  //int BSThr1=Sm_BSThr1; 
+  //int BSThr2=Sm_BSThr2; 
+  //int BSThr3=Sm_BSThr3; 
+  //int BitSelect=Sm_BitSelect;
 
   //input
   int* in = (int*)fm001.channels;

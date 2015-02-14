@@ -5,7 +5,7 @@
 #include "fms_fm103_2015_a.hh"
 #include <stdio.h>
 
-#include "registerHack.hh"
+//#include "registerHack.hh"
 
 static const int NBITBS=12;
 static int DBS[NBITBS][NBITBS];
@@ -39,14 +39,13 @@ static const int tableJp[NBITJp][NBITJp]={
 // T M B B M T
    
 void l1_fp201_2015_a(Board& fp201){
-
-  //const int R0 = fm101.registers[0]; // FMSsmall-cluster-th0
-  //const int R1 = fm101.registers[1]; // FMSsmall-cluster-th1
-  //const int R2 = fm101.registers[2]; // FMSsmall-layer1-mode: 0=data taking, 1=debug
+  const int JpThr0=fp201.registers[0];
+  const int JpThr1=fp201.registers[1];
+  const int JpThr2=fp201.registers[2];
   //Hack until we know details of registers
-  int JpThr0=JPthr0; 
-  int JpThr1=JPthr1; 
-  int JpThr2=JPthr2; 
+  //int JpThr0=JPthr0; 
+  //int JpThr1=JPthr1; 
+  //int JpThr2=JPthr2; 
 
   //input
   int* channels = (int*)fp201.channels;

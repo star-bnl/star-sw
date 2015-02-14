@@ -9,7 +9,7 @@ int getFM005_BS3(int out);
 int getFM005_BS2(int out);    
 int getFM005_BS1GHIJ(int out);   
 int getFM005_J23(int out);
-int getFM005_JpG(int out);    
-int getFM005_JpHIJ(int out);    
+int getFM005_JpGH(int out);    
+int getFM005_JpIJ(int out);    
 
 #endif
