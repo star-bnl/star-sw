@@ -17,7 +17,7 @@ void qt32b_fms_2015_a(Board& qt)
       int id = i*16 + j;
       int adc = qt.channels[id];
 
-      adc = 4095;       //fake data
+      //adc = 4095;       //fake data
       
       sum[i] += adc;
     }
@@ -25,7 +25,7 @@ void qt32b_fms_2015_a(Board& qt)
   }
 
   qt.output |= sum[0];
-  qt.output |= sum[1]<<12;
+  qt.output |= sum[1]<<16;
   
   if(sum[0]>0 | sum[1]>0)
     printf("%s=%08x sum=%4d %4d\n",
@@ -33,4 +33,4 @@ void qt32b_fms_2015_a(Board& qt)
 }
 
 int getQT01Sum(int qtout){return getbits(qtout, 0,12);}
-int getQT23Sum(int qtout){return getbits(qtout,12,12);}
+int getQT23Sum(int qtout){return getbits(qtout,16,12);}

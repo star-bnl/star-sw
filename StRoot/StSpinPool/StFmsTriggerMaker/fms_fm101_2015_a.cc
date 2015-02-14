@@ -4,17 +4,17 @@
 #include "fms_fm001_2015_a.hh"
 #include <stdio.h>
 
-#include "registerHack.hh"
+//#include "registerHack.hh"
 
 void fms_fm101_2015_a(Board& fm101)
 {
-  //const int R0 = fm101.registers[0]; // FMSsmall-cluster-th0
-  //const int R1 = fm101.registers[1]; // FMSsmall-cluster-th1
-  //const int R2 = fm101.registers[2]; // FMSsmall-layer1-mode: 0=data taking, 1=debug
+  const int BSThr1=fm101.registers[0];
+  const int BSThr2=fm101.registers[1];
+  const int BSThr3=fm101.registers[2];
   //Hack until we know details of registers
-  int BSThr1=Sm_BSThr1; 
-  int BSThr2=Sm_BSThr2; 
-  int BSThr3=Sm_BSThr3; 
+  //int BSThr1=Sm_BSThr1; 
+  //int BSThr2=Sm_BSThr2; 
+  //int BSThr3=Sm_BSThr3; 
 
   //input
   int* in = (int*)fm101.channels;
@@ -44,7 +44,7 @@ void fms_fm101_2015_a(Board& fm101)
   
   fm101.output =  BS3 | BS2   << 1
     | BS1T << 2 | BS1M <<  3 | BS1B <<4 
-    | JpT  << 5 | JpM  << 13 | JpB  <<21;
+    | JpT  << 5 | JpM  << 16 | JpB  <<24;
   
   printf("%s out=%08x BS3=%1d BS2=%1d BS1T/M/B=%1d %1d %1d JpT/M/B %3d %3d %3d\n",
 	 fm101.name,fm101.output,
@@ -57,5 +57,5 @@ int getFM101_BS1T(int out) {return getbits(out, 2, 1);}
 int getFM101_BS1M(int out) {return getbits(out, 3, 1);}
 int getFM101_BS1B(int out) {return getbits(out, 4, 1);}
 int getFM101_JpT(int out) {return getbits(out, 5, 8);}
-int getFM101_JpM(int out) {return getbits(out,13, 8);}
-int getFM101_JpB(int out) {return getbits(out,21, 8);}
+int getFM101_JpM(int out) {return getbits(out,16, 8);}
+int getFM101_JpB(int out) {return getbits(out,24, 8);}

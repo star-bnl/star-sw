@@ -4,17 +4,24 @@
 #include "fms_fm005_2015_a.hh"
 #include <stdio.h>
 
-#include "registerHack.hh"
+//#include "registerHack.hh"
 
 void fms_fm005_2015_a(Board& fm005){
-  //const int R0 = fm005.registers[0];
-  //const int R1 = fm005.registers[1];
+  int BSThr1   = fm005.registers[0];
+  int BSThr2   = fm005.registers[1];
+  int BSThr3   = fm005.registers[2];
+  int BitSelect= fm005.registers[3];
   //Hack until we know details of registers
-  int BSThr1=Lg_BSThr1;
-  int BSThr2=Lg_BSThr2;
-  int BSThr3=Lg_BSThr3;
-  int BitSelect=Lg_BitSelect;
-  
+  //int BSThr1=Lg_BSThr1;
+  //int BSThr2=Lg_BSThr2;
+  //int BSThr3=Lg_BSThr3;
+  //int BitSelect=Lg_BitSelect;
+  BSThr1=192;
+  BSThr2=544;
+  BSThr3=800;
+  BitSelect=4;
+  //printf("FM005 : Thr1=%d Thr2=%d Thr3=%d BitSelect=%d\n",BSThr1,BSThr2,BSThr3,BitSelect);
+
   //input
   int* in = (int*)fm005.channels;
   int G=in[3];
@@ -31,6 +38,7 @@ void fms_fm005_2015_a(Board& fm005){
   int I23 = getQT23Sum(I);
   int J01 = getQT01Sum(J);
   int J23 = getQT23Sum(J);
+  //printf("G01-J23=%x %x %x %x %x %x %x %x\n",G01,G23,H01,H23,I01,I23,J01,J23);
 
   // Form 2x4 board sums 
   const int MAX=7; 
@@ -42,7 +50,7 @@ void fms_fm005_2015_a(Board& fm005){
   bs[4] = I01 + I23; //I
   bs[5] = I23 + J01; //IJ
   bs[6] = J01 + J23; //J
-
+  
   //Compare BS to thresholds
   int BS3=0, BS2=0;
   for(int i=0; i<MAX; i++){
@@ -53,27 +61,27 @@ void fms_fm005_2015_a(Board& fm005){
              | (bs[4]>BSThr1) | (bs[5]>BSThr1) | (bs[6]>BSThr1);
 
   //Jp Sum
-  int JpG   = (bs[0])>>BitSelect;                  //G
-  int JpHIJ = (bs[2] + bs[4] + bs[6])>>BitSelect;  //H+I+J
-  if(JpG  >0xFF) JpG  =0xFF;
-  if(JpHIJ>0xFF) JpHIJ=0xFF;
+  int JpGH = (bs[0] + bs[2])>>BitSelect;  //G+H
+  int JpIJ = (bs[4] + bs[6])>>BitSelect;  //I+J
+  if(JpGH >0xFF) JpGH=0xFF;
+  if(JpIJ >0xFF) JpIJ=0xFF;
 
   // Output the resulting 6 5-bit sums to the Layer-1 DSM (30 bits)
   fm005.output 
     = BS3          | BS2   << 1 
     | BS1GHIJ << 2   
-    | J23     << 3
-    | JpG     << 15 | JpHIJ << 23;
+    | J23     << 4
+    | JpGH    << 16 | JpIJ << 24;
   
   printf("%s input G=%08x H=%08x I=%08x J=%08x\n",fm005.name,G,H,I,J); 
-  printf("%s out=%08x BS3=%1d BS2=%1d BS1GHIJ=%1d sum=%4d %4d %4d %4d %4d %4d %4d JpG/HIJ=%3d %3d\n",
+  printf("%s out=%08x BS3=%1d BS2=%1d BS1GHIJ=%1d sum=%4d %4d %4d %4d %4d %4d %4d JpGH/IJ=%3d %3d\n",
 	 fm005.name,fm005.output,BS3,BS2,BS1GHIJ,
-	 bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],bs[6],JpG,JpHIJ);
+	 bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],bs[6],JpGH,JpIJ);
 }
 
 int getFM005_BS3(int out)    {return getbits(out, 0, 1);}
 int getFM005_BS2(int out)    {return getbits(out, 1, 1);}
 int getFM005_BS1GHIJ(int out){return getbits(out, 2, 1);}
-int getFM005_J23(int out)    {return getbits(out, 3,12);}
-int getFM005_JpG(int out)    {return getbits(out,15, 8);}
-int getFM005_JpHIJ(int out)  {return getbits(out,23, 8);}
+int getFM005_J23(int out)    {return getbits(out, 4,12);}
+int getFM005_JpGH(int out)   {return getbits(out,16, 8);}
+int getFM005_JpIJ(int out)   {return getbits(out,24, 8);}
