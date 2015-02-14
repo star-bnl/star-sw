@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.56 2014/04/10 14:35:26 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.57 2015/02/14 18:57:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.57  2015/02/14 18:57:24  ullrich
+ * Big upgrade after adding StFmPoint and StFmsCluster.
+ *
  * Revision 2.56  2014/04/10 14:35:26  ullrich
  * Add Ist constants.
  *
@@ -529,6 +532,15 @@ enum StFgtClusterSeedType {
     kFgtNextToCluster,
     kFgtKeepStrip
 };
+
+/** Categorization of a FMS tower cluster as 1- or 2-photon, or "not sure". */
+enum StFmsClusterCategory {
+  kAmbiguousCluster = 0,  ///< Could be 1- or 2-photon, needs to be fitted
+  k1PhotonCluster = 1,  ///< A cluster created by 1 photon
+  k2PhotonCluster = 2,  ///< A cluster created by 2 photons
+  kInvalidClusterCategory  ///< For default/unknown/error value
+};  // enum StFmsClusterCategory
+
 
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
 namespace StIstConsts
