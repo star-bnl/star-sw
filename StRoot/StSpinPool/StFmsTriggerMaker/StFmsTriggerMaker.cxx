@@ -25,6 +25,13 @@
 #include "fms_fm101_2012_a.hh"
 #include "fms_fm102_2012_a.hh"
 #include "l1_fp201_2012_b.hh"
+#include "qt32b_fms_2015_a.hh"
+#include "fms_fm001_2015_a.hh"
+#include "fms_fm005_2015_a.hh"
+#include "fms_fm006_2015_a.hh"
+#include "fms_fm101_2015_a.hh"
+#include "fms_fm103_2015_a.hh"
+#include "l1_fp201_2015_a.hh"
 #include "StFmsTriggerMaker.h"
 
 using namespace std;
@@ -52,18 +59,19 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   , fm002(fms.boardAt(FM002_BASE_ADDRESS))
   , fm003(fms.boardAt(FM003_BASE_ADDRESS))
   , fm004(fms.boardAt(FM004_BASE_ADDRESS))
-  , fm101(fms.boardAt(FM101_BASE_ADDRESS))
   , fm005(fms.boardAt(FM005_BASE_ADDRESS))
   , fm006(fms.boardAt(FM006_BASE_ADDRESS))
   , fm007(fms.boardAt(FM007_BASE_ADDRESS))
   , fm008(fms.boardAt(FM008_BASE_ADDRESS))
-  , fm102(fms.boardAt(FM102_BASE_ADDRESS))
   , fm009(fms.boardAt(FM009_BASE_ADDRESS))
   , fm010(fms.boardAt(FM010_BASE_ADDRESS))
   , fm011(fms.boardAt(FM011_BASE_ADDRESS))
   , fm012(fms.boardAt(FM012_BASE_ADDRESS))
-  , fm103(fms.boardAt(FM103_BASE_ADDRESS))
-
+  , fm101(fms.boardAt(FM101_BASE_ADDRESS))
+  , fm102(fms.boardAt(FM102_BASE_ADDRESS))
+  , fm103(fms.boardAt(FM103_BASE_ADDRESS))  
+  , fm104(fms.boardAt(FM104_BASE_ADDRESS))  
+  
   // MIX crate
   , fe101(mix.boardAt(FE101_BASE_ADDRESS))
 
@@ -79,6 +87,8 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   , fs005(feq.boardAt(FS005_BASE_ADDRESS))
   , fs006(feq.boardAt(FS006_BASE_ADDRESS))
 
+  , mForceRun(0)
+  , mNThrOW(0)
 {
   // L1 crate
   fp201.setName("FP201");
@@ -99,6 +109,7 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   fm011.setName("FM011");
   fm012.setName("FM012");
   fm103.setName("FM103");
+  fm104.setName("FM104");
 
   // MIX crate
   fe101.setName("FE101");
@@ -120,7 +131,16 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   fe003.bitmask = 0x01010101;
   fe004.bitmask = 0xff010101;
 
+  //QT1-4
+  for(int i=0; i<16; i++){
+    qt1.boards[i].setName(Form("QT1.0x%02x",i+0x10));
+    qt2.boards[i].setName(Form("QT2.0x%02x",i+0x10));
+    qt3.boards[i].setName(Form("QT3.0x%02x",i+0x10));
+    qt4.boards[i].setName(Form("QT4.0x%02x",i+0x10));
+  }
+
   // Input mode
+  mUseTrgData = 0;
   mUseMuDst = 0;
   mUseStEvent = 0;
 }
@@ -146,29 +166,32 @@ int StFmsTriggerMaker::Init()
   return kStOk;
 }
 
-int StFmsTriggerMaker::InitRun(int runNumber)
-{
-  mDBTime = GetDBTime();
+int StFmsTriggerMaker::InitRun(int runNumber){  
+  //mDBTime = GetDBTime();
+  //mDBTime = TDatime();
   return loadRegisters(runNumber);
 }
 
 int StFmsTriggerMaker::Make()
 {
+  if (mUseTrgData) MakeTrgData();
   if (mUseMuDst) MakeMuDst();
   if (mUseStEvent) MakeStEvent();
   if (Debug()) fillQtHistograms();
-  runFpeQtLayer();
+  if(mDBTime.GetYear()<2015){
+    runFpeQtLayer();
+    writeFpeQtLayerToFpeLayer1(mix);
+    runFpeLayer1();
+    writeFpeLayer1ToFpdLayer2(l1);
+  }
   runFmsQtLayer();
-  writeFpeQtLayerToFpeLayer1(mix);
   writeFmsQtLayerToFmsLayer0(fms);
   runFmsLayer0();
   writeFmsLayer0ToFmsLayer1(fms);
-  runFpeLayer1();
   runFmsLayer1();
-  writeFpeLayer1ToFpdLayer2(l1);
   writeFmsLayer1ToFpdLayer2(l1);
   runFpdLayer2();
-  LOG_INFO << Form("FP201: Fms-HT-th0=%d Fms-HT-th1=%d FmsSml-Cluster-th0=%d FmsSml-Cluster-th1=%d FmsSml-Cluster-th2=%d FmsLrg-Cluster-th0=%d FmsLrg-Cluster-th1=%d FmsLrg-Cluster-th2=%d Fms-JP-th0=%d Fms-JP-th1=%d Fms-JP-th2=%d Fms-dijet=%d FPE=%d",FmsHighTowerTh0(),FmsHighTowerTh1(),FmsSmallClusterTh0(),FmsSmallClusterTh1(),FmsSmallClusterTh2(),FmsLargeClusterTh0(),FmsLargeClusterTh1(),FmsLargeClusterTh2(),FmsJetPatchTh0(),FmsJetPatchTh1(),FmsJetPatchTh2(),FmsDijet(),FPE()) << endm;
+  //LOG_INFO << Form("FP201: Fms-HT-th0=%d Fms-HT-th1=%d FmsSml-Cluster-th0=%d FmsSml-Cluster-th1=%d FmsSml-Cluster-th2=%d FmsLrg-Cluster-th0=%d FmsLrg-Cluster-th1=%d FmsLrg-Cluster-th2=%d Fms-JP-th0=%d Fms-JP-th1=%d Fms-JP-th2=%d Fms-dijet=%d FPE=%d",FmsHighTowerTh0(),FmsHighTowerTh1(),FmsSmallClusterTh0(),FmsSmallClusterTh1(),FmsSmallClusterTh2(),FmsLargeClusterTh0(),FmsLargeClusterTh1(),FmsLargeClusterTh2(),FmsJetPatchTh0(),FmsJetPatchTh1(),FmsJetPatchTh2(),FmsDijet(),FPE()) << endm;
     //LOG_INFO << Form("FP201: 0x%04x (data) / 0x%04x (simu)",StMuDst::event()->l0Trigger().lastDsmArray(5),FP201output()) << endm;
   return kStOk;
 }
@@ -186,13 +209,33 @@ int StFmsTriggerMaker::MakeMuDst()
 int StFmsTriggerMaker::MakeStEvent()
 {
   StEvent* event = (StEvent*)GetDataSet("StEvent");
-  if (event && event->fmsCollection()) {
+  // printf("Getting StEvent and fmsCollection %x %x\n",event,event->fmsCollection());  
+  if (event && event->fmsCollection()) {    
+    //printf("Found StEvent and fmsCollection\n");
     const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
     for (size_t i = 0; i < hits.size(); ++i) writeQtCrate(hits[i]);
     return kStOk;
   }
   return kStErr;
 }
+
+int StFmsTriggerMaker::MakeTrgData(){
+  StTriggerData* trgd=(StTriggerData*)GetDataSet("StTriggerData")->GetObject();
+  if(!trgd) {printf("MakeTrgData found no trigger data\n"); return kStErr;}
+  for(int crt=1; crt<=4; crt++){
+    for(int adr=0; adr<12; adr++){
+      for(int ch=0; ch<32; ch++){
+	int adc=trgd->fmsADC(crt,adr,ch);
+	if(adc>0) writeQtCrate(crt,adr,ch,adc);
+      }
+    }
+  }
+  //hack fake stuck bits -akio
+  writeQtCrate(3,2,16,0x115);
+  writeQtCrate(4,5, 0,0x040);
+  return kStOk;
+}
+
 
 template<class T>
 void StFmsTriggerMaker::writeQtCrate(const T* hit)
@@ -246,6 +289,15 @@ void StFmsTriggerMaker::writeQtCrate(const T* hit)
   }
 }
 
+void StFmsTriggerMaker::writeQtCrate(int crate, int slot, int ch, int adc){
+  switch (crate) {
+  case 1: qt1.boards[slot].channels[ch] = adc; break;
+  case 2: qt2.boards[slot].channels[ch] = adc; break;
+  case 3: qt3.boards[slot].channels[ch] = adc; break;
+  case 4: qt4.boards[slot].channels[ch] = adc; break;
+  }
+}
+
 void StFmsTriggerMaker::fillQtHistogram(const Crate& qtcrate, TH2F* hqtadc)
 {
   for (int slot = 0; slot < 16; ++slot) {
@@ -276,10 +328,20 @@ void StFmsTriggerMaker::runFpeQtLayer()
 
 void StFmsTriggerMaker::runFmsQtLayer()
 {
-  for_each(qt1.boards,qt1.boards+12,qt32b_fms_2009_a);
-  for_each(qt2.boards,qt2.boards+12,qt32b_fms_2009_a);
-  for_each(qt3.boards,qt3.boards+12,qt32b_fms_2009_a);
-  for_each(qt4.boards,qt4.boards+12,qt32b_fms_2009_a);
+  switch (mDBTime.GetYear()) {
+  case 2011: case 2012: case 2013: 
+    for_each(qt1.boards,qt1.boards+12,qt32b_fms_2009_a);
+    for_each(qt2.boards,qt2.boards+12,qt32b_fms_2009_a);
+    for_each(qt3.boards,qt3.boards+12,qt32b_fms_2009_a);
+    for_each(qt4.boards,qt4.boards+12,qt32b_fms_2009_a);
+    break;
+  case 2015:
+    for_each(qt1.boards,qt1.boards+12,qt32b_fms_2015_a);
+    for_each(qt2.boards,qt2.boards+12,qt32b_fms_2015_a);
+    for_each(qt3.boards,qt3.boards+12,qt32b_fms_2015_a);
+    for_each(qt4.boards,qt4.boards+12,qt32b_fms_2015_a);
+    break;
+  }
 }
 
 void StFmsTriggerMaker::runFmsLayer0()
@@ -290,24 +352,44 @@ void StFmsTriggerMaker::runFmsLayer0()
     fms_fm001_2011_a(fm002);
     fms_fm001_2011_a(fm003);
     fms_fm001_2011_a(fm004);
+    fms_fm005_2011_a(fm005);
+    fms_fm005_2011_a(fm007);
+    fms_fm005_2011_a(fm009);
+    fms_fm005_2011_a(fm011);    
+    fms_fm006_2011_a(fm006);
+    fms_fm006_2011_a(fm008);
+    fms_fm006_2011_a(fm010);
+    fms_fm006_2011_a(fm012);
     break;
-  case 2012:
+  case 2012: case 2013:
     fms_fm001_2012_a(fm001);
     fms_fm001_2012_a(fm002);
     fms_fm001_2012_a(fm003);
     fms_fm001_2012_a(fm004);
+    fms_fm005_2011_a(fm005);
+    fms_fm005_2011_a(fm007);
+    fms_fm005_2011_a(fm009);
+    fms_fm005_2011_a(fm011);    
+    fms_fm006_2011_a(fm006);
+    fms_fm006_2011_a(fm008);
+    fms_fm006_2011_a(fm010);
+    fms_fm006_2011_a(fm012);
+    break;
+  case 2015:
+    fms_fm001_2015_a(fm001);
+    fms_fm001_2015_a(fm002);
+    fms_fm001_2015_a(fm003);
+    fms_fm001_2015_a(fm004);
+    fms_fm005_2015_a(fm005);
+    fms_fm006_2015_a(fm006);
+    fms_fm005_2015_a(fm007);
+    fms_fm006_2015_a(fm008);
+    fms_fm005_2015_a(fm009);
+    fms_fm006_2015_a(fm010);
+    fms_fm005_2015_a(fm011);
+    fms_fm006_2015_a(fm012);
     break;
   }
-
-  fms_fm005_2011_a(fm005);
-  fms_fm005_2011_a(fm007);
-  fms_fm005_2011_a(fm009);
-  fms_fm005_2011_a(fm011);
-
-  fms_fm006_2011_a(fm006);
-  fms_fm006_2011_a(fm008);
-  fms_fm006_2011_a(fm010);
-  fms_fm006_2011_a(fm012);
 }
 
 void StFmsTriggerMaker::runFpeLayer1()
@@ -323,10 +405,16 @@ void StFmsTriggerMaker::runFmsLayer1()
     fms_fm102_2011_a(fm102);
     fms_fm102_2011_a(fm103);
     break;
-  case 2012:
+  case 2012: case 2013:
     fms_fm101_2012_a(fm101);
     fms_fm102_2012_a(fm102);
     fms_fm102_2012_a(fm103);
+    break;
+  case 2015:
+    fms_fm101_2015_a(fm101);
+    fms_fm101_2015_a(fm102);
+    fms_fm103_2015_a(fm103);
+    fms_fm103_2015_a(fm104);
     break;
   }
 }
@@ -336,6 +424,8 @@ void StFmsTriggerMaker::runFpdLayer2()
   switch (mDBTime.GetYear()) {
   case 2011: l1_fp201_2011_a(fp201); break;
   case 2012: l1_fp201_2012_b(fp201); break;
+  case 2013: l1_fp201_2012_b(fp201); break;
+  case 2015: l1_fp201_2015_a(fp201); break;
   }
 }
 
@@ -349,8 +439,7 @@ void StFmsTriggerMaker::writeFpeQtLayerToFpeLayer1(Crate& sim)
   fe101simchannels[3] = fe004.output;
 }
 
-void StFmsTriggerMaker::writeFmsQtLayerToFmsLayer0(Crate& sim)
-{
+void StFmsTriggerMaker::writeFmsQtLayerToFmsLayer0(Crate& sim){
   Board& fm001sim = sim.boardAt(FM001_BASE_ADDRESS);
   Board& fm002sim = sim.boardAt(FM002_BASE_ADDRESS);
   Board& fm003sim = sim.boardAt(FM003_BASE_ADDRESS);
@@ -371,18 +460,62 @@ void StFmsTriggerMaker::writeFmsQtLayerToFmsLayer0(Crate& sim)
     ((int*)fm002sim.channels)[ch] = qt2.boards[3-ch].output;
     ((int*)fm003sim.channels)[ch] = qt3.boards[3-ch].output;
     ((int*)fm004sim.channels)[ch] = qt4.boards[3-ch].output;
-    ((int*)fm005sim.channels)[ch] = qt1.boards[7-ch].output;
-    ((int*)fm007sim.channels)[ch] = qt2.boards[7-ch].output;
-    ((int*)fm009sim.channels)[ch] = qt3.boards[7-ch].output;
-    ((int*)fm011sim.channels)[ch] = qt4.boards[7-ch].output;
+    if(mDBTime.GetYear()<2015){
+      ((int*)fm005sim.channels)[ch] = qt1.boards[7-ch].output;
+      ((int*)fm007sim.channels)[ch] = qt2.boards[7-ch].output;
+      ((int*)fm009sim.channels)[ch] = qt3.boards[7-ch].output;
+      ((int*)fm011sim.channels)[ch] = qt4.boards[7-ch].output;
+    }else{
+      ((int*)fm005sim.channels)[ch] = qt1.boards[9-ch].output;
+      ((int*)fm007sim.channels)[ch] = qt2.boards[9-ch].output;
+      ((int*)fm009sim.channels)[ch] = qt3.boards[9-ch].output;
+      ((int*)fm011sim.channels)[ch] = qt4.boards[9-ch].output;
+    }
   }
 
   for (int ch = 0; ch < 2; ++ch) {
-    ((int*)fm006sim.channels)[ch] = qt1.boards[9-ch].output;
-    ((int*)fm008sim.channels)[ch] = qt2.boards[9-ch].output;
-    ((int*)fm010sim.channels)[ch] = qt3.boards[9-ch].output;
-    ((int*)fm012sim.channels)[ch] = qt4.boards[9-ch].output;
+    if(mDBTime.GetYear()<2015){
+      ((int*)fm006sim.channels)[ch] = qt1.boards[9-ch].output;
+      ((int*)fm008sim.channels)[ch] = qt2.boards[9-ch].output;
+      ((int*)fm010sim.channels)[ch] = qt3.boards[9-ch].output;
+      ((int*)fm012sim.channels)[ch] = qt4.boards[9-ch].output;
+    }else{
+      ((int*)fm006sim.channels)[ch] = qt1.boards[5-ch].output;
+      ((int*)fm008sim.channels)[ch] = qt2.boards[5-ch].output;
+      ((int*)fm010sim.channels)[ch] = qt3.boards[5-ch].output;
+      ((int*)fm012sim.channels)[ch] = qt4.boards[5-ch].output;
+    }
   }
+
+  //ZERO-ing out QT3A->FM003 lower 16 bits
+  ((int*)fm003sim.channels)[3] = 0;
+  //wrong map!!!
+  /*
+  ((int*)fm005sim.channels)[1] = qt1.boards[4].output;
+  ((int*)fm005sim.channels)[0] = qt1.boards[5].output;
+  ((int*)fm006sim.channels)[1] = qt1.boards[6].output;
+  ((int*)fm006sim.channels)[0] = qt1.boards[7].output;
+  ((int*)fm005sim.channels)[3] = qt1.boards[8].output;
+  ((int*)fm005sim.channels)[2] = qt1.boards[9].output;
+  ((int*)fm007sim.channels)[1] = qt2.boards[4].output;
+  ((int*)fm007sim.channels)[0] = qt2.boards[5].output;
+  ((int*)fm008sim.channels)[1] = qt2.boards[6].output;
+  ((int*)fm008sim.channels)[0] = qt2.boards[7].output;
+  ((int*)fm007sim.channels)[3] = qt2.boards[8].output;
+  ((int*)fm007sim.channels)[2] = qt2.boards[9].output;
+  ((int*)fm009sim.channels)[1] = qt3.boards[4].output;
+  ((int*)fm009sim.channels)[0] = qt3.boards[5].output;
+  ((int*)fm010sim.channels)[1] = qt3.boards[6].output;
+  ((int*)fm010sim.channels)[0] = qt3.boards[7].output;
+  ((int*)fm009sim.channels)[3] = qt3.boards[9].output;
+  ((int*)fm009sim.channels)[2] = qt3.boards[10].output;
+  ((int*)fm011sim.channels)[1] = qt4.boards[4].output;
+  ((int*)fm011sim.channels)[0] = qt4.boards[5].output;
+  ((int*)fm012sim.channels)[1] = qt4.boards[6].output;
+  ((int*)fm012sim.channels)[0] = qt4.boards[7].output;
+  ((int*)fm011sim.channels)[3] = qt4.boards[9].output;
+  ((int*)fm011sim.channels)[2] = qt4.boards[10].output;
+  */
 
   for (int ch = 2; ch < 4; ++ch) {
     ((int*)fm006sim.channels)[ch] = 0xffffffff;
@@ -397,11 +530,23 @@ void StFmsTriggerMaker::writeFmsLayer0ToFmsLayer1(Crate& sim)
   Board& fm101sim = sim.boardAt(FM101_BASE_ADDRESS);
   Board& fm102sim = sim.boardAt(FM102_BASE_ADDRESS);
   Board& fm103sim = sim.boardAt(FM103_BASE_ADDRESS);
+  Board& fm104sim = sim.boardAt(FM104_BASE_ADDRESS);
 
-  for (int ch = 0; ch < 4; ++ch) {
+  if(mDBTime.GetYear()<2015){
+    for (int ch = 0; ch < 4; ++ch) {
     ((int*)fm101sim.channels)[ch] = fms.boards[ch   ].output;
     ((int*)fm102sim.channels)[ch] = fms.boards[ch+5 ].output;
     ((int*)fm103sim.channels)[ch] = fms.boards[ch+10].output;
+    }
+  }else{
+    for (int ch = 0; ch < 4; ++ch) {
+      if(ch<2){
+	((int*)fm101sim.channels)[ch] = fms.boards[ch  ].output;
+	((int*)fm102sim.channels)[ch] = fms.boards[ch+2].output;
+      }
+      ((int*)fm103sim.channels)[ch] = fms.boards[ch+5].output;
+      ((int*)fm104sim.channels)[ch] = fms.boards[ch+10].output;
+    }
   }
 }
 
@@ -417,19 +562,41 @@ void StFmsTriggerMaker::writeFmsLayer1ToFpdLayer2(Crate& sim)
   Board& fp201sim = sim.boardAt(FP201_BASE_ADDRESS);
   int* fp201simchannels = (int*)fp201sim.channels;
 
-  fp201simchannels[0] = fm101.output;
-  fp201simchannels[1] = fm102.output;
-  fp201simchannels[2] = fm103.output;
+  if(mDBTime.GetYear()<2015){
+    fp201simchannels[0] = fm101.output;
+    fp201simchannels[1] = fm102.output;
+    fp201simchannels[2] = fm103.output;
+  }else{
+    fp201simchannels[0] = fm102.output;
+    fp201simchannels[1] = fm103.output;
+    fp201simchannels[2] = fm104.output;
+    fp201simchannels[3] = fm101.output;    
+  }
 }
 
 int StFmsTriggerMaker::loadRegisters(int runNumber)
 {
   MYSQL mysql;
-  const char* host = "dbbak.starp.bnl.gov";
+  char* host1 = "dbbak.starp.bnl.gov";
+  char* host2 = "onldb2.starp.bnl.gov";
   const char* user = "";
   const char* pass = "";
   // See http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
-  unsigned int port = 3400+mDBTime.GetYear()%100-1;
+  char* host = host1;
+  int year;
+  if(mForceRun==0){ 
+    mDBTime=GetDBTime(); 
+    year=mDBTime.GetYear(); 
+  }else{
+    int date=(mForceRun%1000000)/1000;   
+    year=mForceRun/1000000+1999;
+    if(date>250) year++;
+    LOG_INFO << Form("DB Year=%d forceYear=%d\n",mDBTime.GetYear(),year) <<endm;
+  }
+  unsigned int port = 3400+year%100-1; 
+  if(year==2015) {port=3501; host=host2;}
+  if(year>2016) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
+  
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
   unsigned long client_flag = 0;
@@ -446,14 +613,33 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   }
 
   // Get run number associated with DB time stamp
-  sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",mDBTime.AsSQLString());
-  LOG_INFO << query << endm;
-  mysql_query(&mysql,query);
-  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    while (MYSQL_ROW row = mysql_fetch_row(result)) {
-      runNumber = atoi(row[0]);
+  if(mForceRun==0) {
+    sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",mDBTime.AsSQLString());
+    LOG_INFO << query << endm;
+    mysql_query(&mysql,query);
+    if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+      while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	runNumber = atoi(row[0]);
+      }
+      mysql_free_result(result);
     }
-    mysql_free_result(result);
+  }else{ 
+    //if mForceRun is set, get date/time for the run, and overwrite run# and DBdate/time.
+    sprintf(query,"select beginTime from run where idx_rn=%d",mForceRun);
+    LOG_INFO << query << endm;
+    mysql_query(&mysql,query);
+    TString newdt;
+    if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+      while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	newdt=row[0];
+      }
+      mysql_free_result(result);
+    }
+    LOG_INFO << "StFmsTriggerMaker Ignoring run# from DB timestamp and Forcing run#="<<mForceRun<<endm;
+    //LOG_INFO << " from "<<mDBTime.GetDate()<< " " <<mDBTime.GetTime();
+    mDBTime.Set(newdt.Data());
+    LOG_INFO << "StFmsTriggerMaker DB timestamp is taken from forced run begin time = "<<mDBTime.GetDate()<< " " <<mDBTime.GetTime()<< endm;
+    runNumber = mForceRun;
   }
 
   // Get register values
@@ -470,6 +656,14 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
       TString label = row[3];
       int value = atoi(row[4]);
       int defaultvalue = atoi(row[5]);
+      if(mNThrOW>0){
+	for(int i=0; i<mNThrOW; i++){
+	  if(label.Contains(mThrOWName[i])) {
+	    LOG_INFO << "Overwriting Thr="<<mThrOWName[i].Data()<<" from " <<value<< " to "<<mThrOWValue[i]<<endm;
+	    value=mThrOWValue[i];
+	  }
+	}
+      }
       LOG_INFO << setw(10) << object << setw(10) << idx << setw(10) << reg << setw(30) << label << setw(10) << value << setw(15) << defaultvalue << endm;
       if (object >= 1 && object <= NCRATES && idx >= 0x10) {
 	LOG_INFO << object << '\t' << idx << '\t' << reg << '\t' << label << '\t' << value << '\t' << defaultvalue << endm;
@@ -483,4 +677,67 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   mysql_close(&mysql);
 
   return kStOk;
+}
+
+void StFmsTriggerMaker::overwriteThr(char* name, int value){
+  mThrOWName[mNThrOW]=name;
+  mThrOWValue[mNThrOW]=value;
+  LOG_INFO << "Set overwriting Thr="<<mThrOWName[mNThrOW].Data()<<" to "<<mThrOWValue[mNThrOW]<<endm;
+  mNThrOW++;
+}
+
+int StFmsTriggerMaker::FM0xxoutput(int number) const{
+  switch(number){
+  case 1:  return fm001.output;
+  case 2:  return fm002.output;
+  case 3:  return fm003.output;
+  case 4:  return fm004.output;
+  case 5:  return fm005.output;
+  case 6:  return fm006.output;
+  case 7:  return fm007.output;
+  case 8:  return fm008.output;
+  case 9:  return fm009.output;
+  case 10: return fm010.output;
+  case 11: return fm011.output;
+  case 12: return fm012.output;
+  }
+}
+
+int StFmsTriggerMaker::FM1xxoutput(int number) const{
+  switch(number){
+  case 1:  return fm101.output;
+  case 2:  return fm102.output;
+  case 3:  return fm103.output;
+  case 4:  return fm104.output;
+  }
+}
+
+int StFmsTriggerMaker::FP201input(int ch) const{
+  return ((int*)fp201.channels)[ch];
+}
+
+int StFmsTriggerMaker::FM0xxinput(int number, int ch) const{
+  switch(number){
+  case 1:  return ((int*)fm001.channels)[ch];
+  case 2:  return ((int*)fm002.channels)[ch];
+  case 3:  return ((int*)fm003.channels)[ch];
+  case 4:  return ((int*)fm004.channels)[ch];
+  case 5:  return ((int*)fm005.channels)[ch];
+  case 6:  return ((int*)fm006.channels)[ch];
+  case 7:  return ((int*)fm007.channels)[ch];
+  case 8:  return ((int*)fm008.channels)[ch];
+  case 9:  return ((int*)fm009.channels)[ch];
+  case 10: return ((int*)fm010.channels)[ch];
+  case 11: return ((int*)fm011.channels)[ch];
+  case 12: return ((int*)fm012.channels)[ch];
+  }
+}
+
+int StFmsTriggerMaker::FM1xxinput(int number, int ch) const{
+  switch(number){
+  case 1:  return ((int*)fm101.channels)[ch];
+  case 2:  return ((int*)fm102.channels)[ch];
+  case 3:  return ((int*)fm103.channels)[ch];
+  case 4:  return ((int*)fm104.channels)[ch];
+  }
 }

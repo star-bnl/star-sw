@@ -10,6 +10,7 @@ using namespace std;
 #include "bits.hh"
 #include "Board.hh"
 #include "qt32b_fms_2009_a.hh"
+#include <stdio.h>
 
 void qt32b_fms_2009_a(Board& qt)
 {
@@ -24,21 +25,32 @@ void qt32b_fms_2009_a(Board& qt)
       int id  = dcard*8+dch;
       int adc = qt.channels[id];
       sum += adc;
-      adc = getbits(adc,5,7);
+      if(adc > 0xfff) {printf("ADC above 4k %d\n",adc); adc = 0x4f;}
+      else             {adc = getbits(adc,5,7);}
       if (adc > htadc) {
         htadc = adc;
         htid  = id;
       }
     }
-    if (sum & ~0x3ff)
-      sum = 0x1f;
-    else
+    if (sum & ~0x3ff){
+      sum = 0x1f;      
+    }else{
       sum = getbits(sum,5,5);
+    }
     qt.output |= sum << (dcard*5);
   }
 
   qt.output |= htadc << 20;
   qt.output |= htid  << 27;
+
+  if(htadc>0)
+    printf("%s %08x sum=%3d %3d %3d %3d ht=%3d htid=%3d\n",
+	   qt.name,qt.output,
+	   getbits(qt.output,0 ,5),
+	   getbits(qt.output,5 ,5),
+	   getbits(qt.output,10,5),
+	   getbits(qt.output,15,5),
+	   htadc,htid);
 }
 
 void getQtDaughterSum(int qtout, int* sum)
