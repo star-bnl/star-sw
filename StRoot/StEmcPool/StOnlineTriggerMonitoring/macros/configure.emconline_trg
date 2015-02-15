@@ -44,7 +44,6 @@
         chmod a+x $SRC_PATH/macros/update.emconline_trg
         chmod a+x $SRC_PATH/macros/heartbeat.emconline_trg
         chmod a+x $SRC_PATH/macros/stopped.emconline_trg
-	chmod a+x $SRC_PATH/macros/bemcTrgDbMonitor.py
 
 	export CFG_FILE=$DST_PATH/.emconline_trg.cfg.sh
 	rm -f $CFG_FILE
@@ -59,7 +58,6 @@
         ln -sf $SRC_PATH/macros/bce_table.txt $DST_PATH
         ln -sf $SRC_PATH/macros/bcw_table.txt $DST_PATH
 	ln -sf $SRC_PATH/macros/scp $DST_PATH
-	ln -sf $SRC_PATH/macros/bemcTrgDbMonitor.py $DST_PATH
 	ln -sf $SRC_PATH/macros/README.emconline_trg $DST_PATH
 
 	touch $DST_PATH/README

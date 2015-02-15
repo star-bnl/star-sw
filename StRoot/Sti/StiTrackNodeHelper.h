@@ -53,6 +53,7 @@ public:
   StiKalmanTrackNode *getFlipFlop() 	const 	{return mFlipFlopNode;}
   StiKalmanTrackNode *getVertexNode()	const 	{return mVertexNode;}
   int                 getUsed()     	const	{return mUsed;}
+
 static int isCutStep()				{return mgCutStep;}
 private:
   void reset();
@@ -108,6 +109,7 @@ StiKalmanTrackNode *mParentNode;
 StiKalmanTrackNode *mTargetNode;		
 const StiDetector  *mDetector;
 const StiHit       *mHit;
+double mWallx;
 StiNodePars mBestParentPars; 	//Best parent params 
 StiNodePars mBestParentRotPars;	//Best rotated parent params into target node frame
 StiNodePars mBestPars; 		//Propagated  best parent params into target node frame
@@ -133,21 +135,21 @@ double     mHitPars[3];
 StiHitErrs mHrr;
 StiNode2Pars mUnTouch;
 // locals
-  double alpha,ca,sa;
-  double x1;
-  double x2;
-  double dx;
-  double rho;
-  double dsin;
-  double sinCA2; 
-  double cosCA2;
-  double sumSin;
-  double sumCos;
-  double dy;
-  double y2;
-  double dl0;
-  double sind;
-  double dl;
+  double mAlpha,mCa,mSa;
+  double mX1;
+  double mX2;
+  double mDx;
+  double mRho;
+  double mDSin;
+  double mSinCA2; 
+  double mCosCA2;
+  double mSumSin;
+  double mSumCos;
+  double mDy;
+  double mY2;
+  double mDl0;
+  double mDl;
+  double mSind;
   
   double mDetm;
   double mChi2;

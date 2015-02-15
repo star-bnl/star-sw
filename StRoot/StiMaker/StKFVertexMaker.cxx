@@ -854,7 +854,7 @@ void StKFVertexMaker::ReFitToVertex() {
     StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
     Vertex->setGlobal(0, 0, V->Vertex().X(), V->Vertex().Y(), V->Vertex().Z(), 0);
     Vertex->setError(cov);
-    
+
     TArrayI indexT(NoTracks); Int_t *indexes = indexT.GetArray();
     TArrayI IdT(NoTracks);    Int_t *Ids     = IdT.GetArray();
     TIter next(&V->Tracks());
@@ -1002,6 +1002,7 @@ void StKFVertexMaker::SecondaryVertices() {
     vtx->Vertex().SetId(ID);
     vtx->UpdateVertex2TrackChi2(); PrPP(Initiate,*vtx);
     vtx->Fit();
+
     PrPP(Fit,*vtx);
     Int_t N = vtx->NoTracks();
     if (N <= 1) {SafeDelete(vtx); continue;}

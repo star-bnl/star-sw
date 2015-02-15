@@ -87,11 +87,8 @@ StiHitContainer::~StiHitContainer()
 void StiHitContainer::add(StiHit* hit)
 {
   const StiDetector* det = hit->detector();
-  if (!det) 
-    throw runtime_error("StiHitContainer::add() -E- Given hit has no associated detector");
-  //_key.refangle = det->getPlacement()->getNormalRefAngle();
+  assert(det);
   _key.refangle = det->getPlacement()->getLayerAngle();
-  //_key.position = det->getPlacement()->getNormalRadius();
   _key.position = det->getPlacement()->getLayerRadius();
   _map[_key].push_back(hit);
   return;
@@ -238,7 +235,7 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
       hit = *cit;
       if (fabs( hit->y() - ref.y() ) < dY)
 	{
-	  if (fetchAll || (hit->timesUsed()==0 && hit->detector()->isActive()) )
+	  if (fetchAll || (hit->isUsed()==0 && hit->detector()->isActive()) )
 	    _selectedHits.push_back(hit);
 	}
     }

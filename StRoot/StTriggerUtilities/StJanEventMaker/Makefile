@@ -7,8 +7,8 @@ endif
 
 
 LIBNAME  = L2binEve
-HDRS     =JanEventReader.h JanEvent.h
-SRCS     =JanEventReader.cxx JanEvent.cxx
+HDRS     =JanEvent.h
+SRCS     =JanEvent.cxx
 
 
 CXX    = g++

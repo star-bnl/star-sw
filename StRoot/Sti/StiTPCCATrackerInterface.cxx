@@ -41,9 +41,7 @@
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
-
-#endif
-
+#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
 #include <algorithm>
 using std::vector;
@@ -93,7 +91,6 @@ void StiTPCCATrackerInterface::SetNewEvent()
   fMCPoints.clear();
   fHitLabels.clear();
 #endif
-  
   fCaParam.clear();// settings for all sectors to give CATracker
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds

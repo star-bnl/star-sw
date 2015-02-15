@@ -305,6 +305,7 @@ class StiKalmanTrack : public StiTrack
     kTooManyDroppedNodes
   } TRefitStatus;
 
+  
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:

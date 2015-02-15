@@ -7,6 +7,10 @@
 #include "StiUtilities/StiDebug.h"
 #include "Stiostream.h"
 #include "TMath.h"
+static double gsigma2(double ZoverA,double DENS,double CHARGE2
+                     ,double AMASS ,double BET2,double STEP  );
+static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
+
 StiElossCalculator::StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens) 
     : _zOverA(zOverA), _ionization2(ionization*ionization), _A(A), _Z(Z), _Dens(Dens) 
 {
@@ -45,10 +49,7 @@ if (noEloss) return 0;
   if (_A <=0.) return 0.;
   double beta21 = 1 - beta2; if (beta21 < 1.e-10) beta21 = 1.e-10; 
   double T = m*(1./::sqrt(beta21) - 1);
-  double A = _A;
-  double Z = _Z;
-  double Dens = _Dens;
-  double dedx = StiElossCalculator::gdrelx(A,Z,Dens,T,m)*z2*_Dens;
+  double dedx = gdrelx(_A,_Z,_Dens,T,m)*z2*_Dens;
 assert(!TMath::IsNaN(dedx));
 assert(dedx>=0 && dedx<1e3);
   return dedx;
@@ -60,10 +61,7 @@ static int noEloss = StiDebug::iFlag("NOELOSS");
 if (noEloss) return 0;
 
   if (_A<=0.) return 0.;
-  static double step = 1;
-  static double dens = 1;
-  double zOverA = _Z/_A;
-  double err2=gsigma2(zOverA, dens,z2,m ,beta2, step);
+  double err2=gsigma2(_Z/_A,1.,z2,m ,beta2,1.);
 assert(!TMath::IsNaN(err2));
 assert(err2>=0 && err2<1e3);
   return err2;
@@ -88,7 +86,7 @@ ostream& operator<<(ostream& os, const StiElossCalculator& m) {
 //*-- Author :
 //______________________________________________________________________________
 //      SUBROUTINE GDRELX(A,Z,DENS,T,HMASS,dedx)
-double StiElossCalculator::gdrelx(double& A,double& Z,double& DENS,double& T,double& HMASS)
+double gdrelx(double A,double Z,double DENS,double T,double HMASS)
 {
 //
 //    ******************************************************************
@@ -395,8 +393,8 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 //-- Author :
 //______________________________________________________________________________
-double StiElossCalculator::gsigma2(double& ZoverA,double& DENS,double& CHARGE2
-              ,double& AMASS ,double& BET2,double& STEP  )
+double gsigma2(double ZoverA,double DENS,double CHARGE2
+              ,double AMASS ,double BET2,double STEP  )
 {
 //      SUBROUTINE GFLUCT(DEMEAN,DE)
 

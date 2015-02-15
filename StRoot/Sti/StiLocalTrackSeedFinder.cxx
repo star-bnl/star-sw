@@ -60,7 +60,7 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
       try 
 	{
           StiHit *hit = &(*_hitIter);
-	  if (hit->timesUsed()) continue;
+	  if (hit->isUsed()) continue;
 	  if (fRxyMin && pow(hit->x(),2)+pow(hit->y(),2)<fRxyMin*fRxyMin) continue;
 	  track = makeTrack(&*_hitIter);
 	}
@@ -194,11 +194,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
-#if 0
-  assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
-#else
   if (fabs(dr) <1.e-3) return kFALSE;
-#endif
 //    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector());
@@ -290,55 +286,6 @@ bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
   return (ierr==0);
 }
 
-#if 0
-//______________________________________________________________________________
-void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
-{
-  //cout<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*) -I- Started"<<endl;
-  const StThreeVectorF& outside = _seedHits.front()->globalPosition();
-  const StThreeVectorF& middle = (*(_seedHits.begin()+_seedHits.size()/2))->globalPosition();
-  const StThreeVectorF& inside = _seedHits.back()->globalPosition();
-  //cout<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*) -I- Calculate circle parameters:\t";
-  _helixCalculator.calculate( StThreeVector<double>( inside.x(), inside.y(), inside.z() ),
-			      StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
-			      StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
-  /*
-    cout <<"  origin: "<<_helixCalculator.xCenter()<<" "<<_helixCalculator.yCenter()<<" "
-    <<_helixCalculator.z0()<<" "
-    <<" curvature: "<<_helixCalculator.curvature()<<" "
-    <<" tanLambda: "<<_helixCalculator.tanLambda()<<endl;
-  */
-  track->initialize( _helixCalculator.curvature(), 
-		     _helixCalculator.tanLambda(),
-		     StThreeVectorD(_helixCalculator.xCenter(),_helixCalculator.yCenter(), 0.),
-		     _seedHits);    
-  //cout<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*) -I- Done"<<endl;
-}
-
-//______________________________________________________________________________
-void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
-{
-  //cout<<"StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack*)"<<endl;
-  const StThreeVectorF& outside = _seedHits.front()->globalPosition();
-  const StThreeVectorF& middle = _seedHits.back()->globalPosition();
-  
-  //cout<<"\tCalculate circle parameters:\t";
-  _helixCalculator.calculate( StThreeVector<double>(0., 0., 0.),
-			      StThreeVector<double>( middle.x(), middle.y(), middle.z() ),
-			      StThreeVector<double>( outside.x(), outside.y(), outside.z() ) );
-  
-  /*
-    cout <<"origin: "<<_helixCalculator.xCenter()<<" "<<_helixCalculator.yCenter()<<" "
-    <<_helixCalculator.z0()<<" "
-    <<" curvature: "<<_helixCalculator.curvature()<<" "
-    <<" tanLambda: "<<_helixCalculator.tanLambda()<<endl
-    <<"\tInitialzie Track:\t";
-  */
-  track->initialize( _helixCalculator.curvature(), _helixCalculator.tanLambda(),
-		     StThreeVectorD(_helixCalculator.xCenter(), _helixCalculator.yCenter(), 0.),
-		     _seedHits);    
-}
-#endif
 //______________________________________________________________________________
 /*
 //sort in descending order in radius, and ascending order in phi

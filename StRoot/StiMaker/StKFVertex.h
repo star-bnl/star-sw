@@ -19,6 +19,7 @@ public:
   virtual     ~StKFVertex() {Clear();}
   void         AddTrack(const StKFTrack *track);
   virtual void Clear(Option_t *opt="")     {fKFTracks.Clear(opt);}
+  StKFTrack*   Remove(Int_t k=0)           {return (StKFTrack *) fKFTracks.RemoveAt(k);}
   StKFTrack*   Remove(StKFTrack *track)    {return (StKFTrack *) fKFTracks.Remove(track);}
   StKFTrack*   Remove(KFParticle *particle); 
   Int_t        ID()                  const {return   Vertex().GetID();}

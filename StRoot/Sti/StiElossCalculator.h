@@ -38,10 +38,6 @@ class StiElossCalculator
   double getA() const 		{return _A;} 
   double getZ() const 		{return _Z;}
   double getDens() const 	{return _Dens;}
-  static double gsigma2(double& ZoverA,double& DENS,double& CHARGE2
-			,double& AMASS ,double& BET2,double& STEP  );
-  static double gdrelx (double& A     ,double& Z   ,double& DENS ,double& T,double& HMASS);
-  
  protected:  
   static const double _k;
 

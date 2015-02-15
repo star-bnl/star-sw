@@ -86,7 +86,7 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 	     v.position().x(),v.posError().x(),
 	     v.position().y(),v.posError().y(),
 	     v.position().z(),v.posError().z());
-  os << Form(" Rank:%8.1f",v.ranking());
+  os << Form(" Rank:%8.2f",v.ranking());
   //  os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
   //  os << Form(" RefMult:%4i(%4i%4i)",v.refMult(),v.refMultPos(),-v.refMultNeg());
   os << Form(" U/T:%4i,%4i ",v.nTracksUsed(),v.noTracks());

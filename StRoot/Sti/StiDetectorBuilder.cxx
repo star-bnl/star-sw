@@ -118,13 +118,11 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
 StiDetector * StiDetectorBuilder::add(StiDetector *detector)
 {
   NameMapKey key(detector->getName());
-#if 0
   StiDetector *old = findDetector(detector->getName());
   if (old ) {
     cout << "StiDetectorBuilder::add(" << detector << old << "existing with the same name " << detector->getName() <<endl;
     assert(0);
   }
-#endif
   mDetectorMap.insert( detectorMapValType(key, detector) );
   //complete the building of this detector element
   // in the base class nothing is actually done

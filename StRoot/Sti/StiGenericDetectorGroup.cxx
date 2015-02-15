@@ -1,4 +1,4 @@
-// $Id: StiGenericDetectorGroup.cxx,v 1.2 2014/08/25 21:05:18 fisyak Exp $
+// $Id: StiGenericDetectorGroup.cxx,v 2.3 2014/08/22 16:29:14 perev Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include <stdexcept>

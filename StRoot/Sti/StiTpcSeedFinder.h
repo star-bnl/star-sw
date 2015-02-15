@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 1.1.1.1 2013/08/13 22:20:29 fisyak Exp $
+// $Id: StiTpcSeedFinder.h,v 2.4 2013/01/14 22:21:14 fisyak Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -35,9 +35,6 @@ class StiTpcSeedFinder {
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
-// Revision 1.1.1.1  2013/08/13 22:20:29  fisyak
-// Save m version
-//
 // Revision 2.4  2013/01/14 22:21:14  fisyak
 // Clean up unused variables
 //

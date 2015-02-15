@@ -1,8 +1,17 @@
 /* 
    root.exe 'bfc.C(-1,"lana,nodefault")' LanaTrees.C+
  */
-// $Id: LanaTrees.C,v 1.1 2015/01/20 19:41:54 fisyak Exp $
+// $Id: LanaTrees.C,v 1.4 2015/02/13 22:55:17 fisyak Exp $
 // $Log: LanaTrees.C,v $
+// Revision 1.4  2015/02/13 22:55:17  fisyak
+// Force East == West drift velocities for Run XIV, because of bad East one
+//
+// Revision 1.3  2015/02/13 15:31:24  fisyak
+// Check fit status
+//
+// Revision 1.2  2015/02/10 20:27:16  fisyak
+// Adjust split style for ROOT_VERSION_CODE
+//
 // Revision 1.1  2015/01/20 19:41:54  fisyak
 // Add new Laser drift velocity calculator
 //
@@ -51,7 +60,9 @@
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
-#define SeparateWestandEast
+//#define SeparateWestandEast
+//#define ADJUSTABLE_BINNING
+//#define __Memberane__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
 #include "Riostream.h"
@@ -64,6 +75,7 @@
 #include "TH3.h"
 #include "TStyle.h"
 #include "TF1.h"
+#include "TFitResult.h"
 #include "TProfile.h"
 #include "TTree.h"
 #include "TChain.h"
@@ -86,6 +98,7 @@ static Int_t Time = 0;
 static Double_t  DVAll[2][3];
 static Double_t dDVAll[2][3];
 static Int_t  _debug = 0; 
+static Double_t sigmaAcceptedDV = 5e-4; // maximum sigma for acceptable drift velocity
 TH2D *dv = 0;
 TH2D *slope = 0;
 TH2D *memAdc = 0;
@@ -115,10 +128,10 @@ void MakeTable() {
   Double_t dvEast  =  DVAll[0][2]; 
   Double_t ddvEast = dDVAll[0][2]; 
   Run.ok = 0; // ok == 0 => use both: west and east; ok == 1 => use averaged drift velocities; ok > 1 ==> no. acceptable drift velocities
-  if (dvWest < 5.3 || dvWest > 5.9 || ddvWest <= 0 || ddvWest> 5e-5 ||
-      dvEast < 5.3 || dvEast > 5.9 || ddvEast <= 0 || ddvEast> 5e-5) {
-    //  if (! (dvWest < 5.3 && dvWest > 5.9 && ddvWest < 0 && ddvWest> 5e-5) ||
-    //      ! (dvEast < 5.3 && dvEast > 5.9 && ddvEast < 0 && ddvEast> 5e-5)) {
+  if (dvWest < 5.3 || dvWest > 5.9 || ddvWest <= 0 || ddvWest>sigmaAcceptedDV ||
+      dvEast < 5.3 || dvEast > 5.9 || ddvEast <= 0 || ddvEast>sigmaAcceptedDV) {
+    //  if (! (dvWest < 5.3 && dvWest > 5.9 && ddvWest < 0 && ddvWest>sigmaAcceptedDV) ||
+    //      ! (dvEast < 5.3 && dvEast > 5.9 && ddvEast < 0 && ddvEast>sigmaAcceptedDV)) {
     cout << "Run " << run << " fails ============================= to make separated East and West drift velocities" << endl;
     cout << "vWest = " << dvWest << " +/- " << ddvWest 
 	 << "\tvEast = " << dvEast << " +/- " << ddvEast << endl;
@@ -127,8 +140,8 @@ void MakeTable() {
 #ifndef SeparateWestandEast
   Run.ok = 1;
 #endif
-  //  if (ok == 1 && ! (dv > 5.3 && dv < 5.9 && ddv > 0 && ddv< 5e-5)) {
-  if (Run.ok == 1 && (dv < 5.3 || dv > 5.9 || ddv <= 0 || ddv > 5e-5)) {
+  //  if (ok == 1 && ! (dv > 5.3 && dv < 5.9 && ddv > 0 && ddv<sigmaAcceptedDV)) {
+  if (Run.ok == 1 && (dv < 5.3 || dv > 5.9 || ddv <= 0 || ddv >sigmaAcceptedDV)) {
     cout << "Run " << run << " fails ============================= to make averaged drift velocities" << endl;
     cout << "v = " << dv << " +/- " << ddv << endl;
     Run.ok = 2;
@@ -151,22 +164,6 @@ void MakeTable() {
     dv = 1e-6*Run.vWest*(1. + (5.85670e-01 -1.42815e-03*(Run.zWO + Run.zEO)));
   }
   TString fOut =  Form("tpcDriftVelocity.%8i.%06i.C",date,Time);
-  Double_t scaleY = 0;
-  Double_t dscaleY = 0;
-  Float_t *par = &Run.YWI;
-  for (Int_t io = 0; io < 2; io++) {
-    for (Int_t we = 0; we < 2; we++) {
-      if (par[4*io+2*we+1] > 0) {
-	Double_t w2 = par[4*io+2*we+1]*par[4*io+2*we+1];
-	scaleY  += par[4*io+2*we]/w2;
-	dscaleY += 1./w2;
-      }
-    }
-  }
-  if (dscaleY > 0) {
-    scaleY  /= dscaleY;
-    dscaleY = 1./TMath::Sqrt(dscaleY);
-  }
   ofstream out;
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
@@ -177,27 +174,11 @@ void MakeTable() {
   out << "  memset(&row, 0, tableSet->GetRowSize());"<< endl;
   if (! Run.ok) {// ok == 0 => use both: west and east
     Run.dvSet = dvWest;
-#if 0
-    if (! (dvWest > 5.5 && dvWest < 5.9 && ddvWest > 0 && ddvWest< 1e-3) ) {// West From East
-      ddvWest = -1;
-      dvWest = dvEast/(1 + 1e-3*ScaleE2W(Run.day));
-    } 
-    if (! (dvEast > 5.5 && dvEast < 5.9 && ddvEast > 0 && ddvEast< 1e-3) ) {// East from West
-      ddvEast = -1;
-      dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
-    }
-#endif 
-    
     out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
 	<< " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << dvEast << " +/- " << ddvEast
 	<< endl;
     out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
 	<< " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << dvWest << " +/- " << ddvWest<< endl;
-#if 0
-    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-#endif
-    out << "//row.scaleY                  	 = " << scaleY << ";// +/-" << dscaleY << endl;
     out << "  tableSet->AddAt(&row); " << endl;
     out << "  return (TDataSet *)tableSet; // 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
   } else { // averaged drif tvelocity
@@ -208,10 +189,6 @@ void MakeTable() {
     out << endl;
     out << "  row.laserDriftVelocityWest	 =   " << dv << "; // +/- " << ddv 
 	<< " cm/us All: West = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << endl;
-#if 0
-    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-#endif
     out << "  tableSet->AddAt(&row);// 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
     out << "  return (TDataSet *)tableSet;//" 
 	<< " West = " << dvWest << " +/- " << ddvWest
@@ -252,23 +229,29 @@ void Fit() {
     if (pol0) {
       for (Int_t k = 0; k < 3; k++) {
 	pol0->SetLineColor(k+1);
-	if (k == 0) fit->Fit(pol0,"er","",xmin,xmax); 
+	Double_t x1 = xmin;
+	Double_t x2 = xmax;
+	TString opt("er");
 	if (k == 1) {
-	  if (xmin >= 13) continue;
-	  fit->Fit(pol0,"er+","",xmin,12.5);
+	  x2 = 12.5;
+	} else if (k == 2) {
+	  opt += "+";
+	  x1 = 12.5;
 	}
-	if (k == 2) {
-	  if (xmax <= 15) continue;
-	  fit->Fit(pol0,"er+","",13.5,xmax);
+	DVAll[l][k]  = -999;
+	dDVAll[l][k] =  999;
+	Int_t status = fit->Fit(pol0,opt,"",x1,x2);
+	if (! status) {
+	  DVAll[l][k]  = pol0->GetParameter(0);
+	  dDVAll[l][k] = pol0->GetParError(0);
 	}
-	DVAll[l][k]  = pol0->GetParameter(0);
-	dDVAll[l][k] = pol0->GetParError(0);
 	par[2*(k+3*l)] = DVAll[l][k];
 	par[2*(k+3*l)+1] = dDVAll[l][k];
       }
     }
     fit->Write();
   }
+#ifdef __Memberane__
   // Memberane
   for (Int_t io = 0; io < 2; io++) {
     zMembrane[io]->FitSlicesY(0,1,0,10,"QNRI");
@@ -297,16 +280,22 @@ void Fit() {
 	fitN += "_1";
 	TH1D *fit = (TH1D *) gDirectory->Get(fitN);
 	if (! fit) continue;
-	fit->SetMarkerStyle(20);
-	TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
-	fit->Fit(pol1);
-	par[8*xy+4*io+2*we  ] = pol1->GetParameter(1)/210;
-	par[8*xy+4*io+2*we+1] = pol1->GetParError(1)/210;
+	Int_t status = fit->SetMarkerStyle(20);
+	if (! status) {
+	  TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
+	  fit->Fit(pol1);
+	  par[8*xy+4*io+2*we  ] = pol1->GetParameter(1)/210;
+	  par[8*xy+4*io+2*we+1] = pol1->GetParError(1)/210;
+	} else {
+	  par[8*xy+4*io+2*we  ] = -999;
+	  par[8*xy+4*io+2*we+1] =  999;
+	}
 	fit->Write();
       }
     }
   }
-   MakeTable();
+#endif /* __Memberane__ */
+  MakeTable();
   runNT->Fill(&Run.run);
 }
 //________________________________________________________________________________
@@ -429,7 +418,9 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
 	Double_t Slope = 1e3*fit->slope;
 	if (fit->Sector > 12) Slope -= EastWRTWestDiff;
 	slope->Fill(fit->Sector, Slope);
-	Double_t Vm = OnlFreq/event->GetHeader()->fClock*event->GetHeader()->fDriVel;
+	Double_t Vm = OnlFreq/event->GetHeader()->fClock;//*event->GetHeader()->fDriVel;
+	if (fit->Sector <= 12) Vm *= event->GetHeader()->fDriVelWest;
+	else                   Vm *= event->GetHeader()->fDriVelEast;
 	Double_t V = 1e-6*Vm/(1.+1e-3*Slope-Vm/TMath::Ccgs());
 	dv->Fill(fit->Sector,V);
       }

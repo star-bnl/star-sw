@@ -123,6 +123,7 @@ double StiHit::getPseudoRapidity() const
 void StiHit::reset()
 {
   memset(mBeg,0,mEnd-mBeg+1);
+  mMaxTimes = 1;
 static unsigned int myCount=0;  
   mCount = ++myCount;
 }
@@ -150,7 +151,7 @@ void StiHit::setGlobal(const StiDetector * detector,
            Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
            ,detector->getName().c_str(),myAngle,centerAngle,dif)
          << endm;
-          assert( fabs(dif) < 45 );     // 30 for sixangle
+          assert( fabs(dif) <55 );     // 30 for sixangle
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
@@ -256,9 +257,16 @@ void StiHit::setGlobal(const StiDetector * detector,
 }
 
 //_____________________________________________________________________________
- void StiHit::setTimesUsed(unsigned int val)
+ void StiHit::addTimesUsed()
 {
-    mTimesUsed=(unsigned char)val;
+    mTimesUsed++;
+    //yf    assert(mTimesUsed<=mMaxTimes);
+}
+//_____________________________________________________________________________
+ void StiHit::subTimesUsed()
+{
+    mTimesUsed--;
+    assert(mTimesUsed>=0);
 }
 
 //_____________________________________________________________________________

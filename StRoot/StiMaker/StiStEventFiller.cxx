@@ -975,7 +975,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
     kXY, kYY, 
     kXZ, kYZ, kZZ, 
     kXE, kYE, kZE, KEE,
-    kXC, kYC, kZC, kEC, KCC,
+    kXC, kYC, kZC, KEC, KCC,
     kXT, kYT, kZT, kET, KCT, kTT};
   Double_t alpha, xRef, x[kNPars], cc[kNErrs], Chi2;
   node->get(alpha, xRef, x, cc, Chi2);
@@ -987,7 +987,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   covMFloat[lTanPsi] = cc[kET];
   covMFloat[lPsiPsi] = cc[KEE];
   covMFloat[lTanCur] = cc[KCT];
-  covMFloat[lPsiCur] = cc[kEC];
+  covMFloat[lPsiCur] = cc[KEC];
   covMFloat[lCurCur] = cc[KCC];
   if (_debug) {
     TRSymMatrix C(6,cc); PrPP(fillFitTraits,C);

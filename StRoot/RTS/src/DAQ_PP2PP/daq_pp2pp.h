@@ -5,6 +5,11 @@
 
 #define PP2PP_SVX_CH	128
 
+
+//used for:
+//   non zero-suppressed data
+//   zero-suppressed data
+//   zero-suppressed data and pedestal subtracted too
 struct pp2pp_t {
 	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
 	u_char chain_id ;	// 0..3 ;
@@ -19,6 +24,26 @@ struct pp2pp_t {
 	u_char adc[PP2PP_SVX_CH] ;	
 	u_char trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
 } ;
+
+
+#define PP2PP_PED_SUB_VERSION	0x01
+struct pp2pp_ped_sub_t {
+	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
+	u_char chain_id ;	// 0..3 ;
+	u_char svx_id ;		// 0..7 ;
+	u_char error ;		// error occured!
+	
+	u_char bunch_xing ;
+	u_char not_sparse ;	
+	u_char ch_cou ;
+	u_char version ;
+
+	struct {
+		u_char adc ;	
+		u_char ch ;
+	} dta[0] ;
+} ;
+
 
 #define PP2PP_PED_VERSION 0 
 struct pp2pp_pedrms_t {
@@ -44,9 +69,11 @@ private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
 	class daq_dta *handle_adc(int sec, int rdo) ;
 	class daq_dta *handle_pedrms(int sec) ;
+	class daq_dta *handle_adc_ped_sub(int sec, int rdo) ;
 
 	class daq_dta *raw ;
 	class daq_dta *pedrms ;
+	class daq_dta *adc_ped_sub ;
 
 	static const int MAX_SEC = 2 ;
 	static const int MAX_RDO = 4 ;	// can be 0 for all RDOs; sequencers, typically 4

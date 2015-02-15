@@ -1,11 +1,23 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.138  2015/02/09 15:47:59  genevb
+ * Restore inversion of hh because it is used in multiple places
+ *
+ * Revision 2.137  2015/02/09 04:14:52  perev
+ * Remove redundant hit->subTimesUsed() + Cleanup
+ *
+ * Revision 2.136  2015/02/07 04:21:05  perev
+ * More accurate zero field accounting
+ *
+ * Revision 2.135  2015/02/02 04:37:19  perev
+ * replacemens of names *TimesUsed to new versions
+ *
  * Revision 2.134  2015/01/15 19:10:19  perev
  * Added mthod test() for debug only
  *
@@ -441,6 +453,7 @@
 #endif
 #include "StMessMgr.h"
 ostream& operator<<(ostream&, const StiHit&);
+
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
@@ -464,6 +477,7 @@ static double diff(const StiNodePars &p1,const StiNodeErrs &e1
    i.e. does not represent any track and is thus ready for a new
    search and reconstruction.  
  */
+//_____________________________________________________________________________
 void StiKalmanTrack::reset()
 {
 static int mIdCount = 0;
@@ -634,11 +648,8 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   px=py=pz=0;
 
   StiKalmanTrackNode * inner = getInnerMostNode();
-#if 1
-  assert(inner);
-#else
-  if (inner==0) throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-#endif
+
+  if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
   inner->propagate(0.,0,kOutsideIn);
   double p[3];
   inner->getMomentum(p,0);
@@ -1078,15 +1089,12 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 #ifdef DO_TPCCATRACKER
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
 {
-#if 1
-  assert(firstNode && lastNode);
-#else
   if (firstNode==0 || lastNode==0)
  {
   //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
   throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
  }
-#endif
+
   StiKalmanTrackNode *node = 0;
   StiKalmanTrackNode* leaf = getLastNode();
   StiKTNForwardIterator it(leaf);
@@ -1540,7 +1548,7 @@ int StiKalmanTrack::refit()
       //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
-    {//worstNode->getHit()->setTimesUsed(0);
+    {//worstNode->getHit()->subTimesUsed();
       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
     
@@ -1548,7 +1556,7 @@ int StiKalmanTrack::refit()
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-    {//flipFlopNode->getHit()->setTimesUsed(0);
+    {//flipFlopNode->getHit()->subTimesUsed();
       flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
       //	The last resource
@@ -1580,27 +1588,10 @@ int StiKalmanTrack::refit()
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
-      hit->setTimesUsed(0);
+      if (node->isValid() && node->getChi2()<10000. ) 	continue;
       node->setHit(0);
-      if (!node->isValid()) 				continue;
-      if (node->getChi2()>10000.)			continue;
-      assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
-      hit->setTimesUsed(1);
-      node->setHit(hit);
     }
   }
-  static int VPDEBUG=0;
-  if (VPDEBUG) {
-    if (fail>0) {
-      LOG_DEBUG <<
-        Form("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d",fail,nCall,nNBeg,nNEnd)
-                << endm;
-    } else {
-      LOG_DEBUG <<    
-        Form("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d",fail,nCall,nNBeg,nNEnd)
-                << endm;
-    }
-  } //endif VPDEBUG
 
   if (fail) setFlag(-1);
 #ifdef DO_TPCCATRACKER
@@ -1722,16 +1713,19 @@ double Xi2=0;
   StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
   nNode=0;
-  double hz=0; 
   THelixFitter circ;
   THelixTrack  cirl;
+  int zeroH = -1;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
-    if (!hz) hz = targetNode->getHz();
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
     if (targetNode->getChi2()>1000)	continue;
+    if (zeroH<0) {//What kind of mag field ?
+      double hz = targetNode->getHz();
+      zeroH = fabs(hz)<=kZEROHZ;
+    }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
     circ.AddErr(hr.A,hr.hZZ);
@@ -1750,11 +1744,7 @@ double Xi2=0;
   
   Xi2 =circ.Fit();
   if (mode==1 && Xi2>BAD_XI2[1]) return 2; //Xi2 too bad, no updates
-#ifdef APPROX_DEBUG
-  H[mode+0]->Fill(log(Xi2)/log(10.));
-  H[mode+2]->Fill(nNode,Xi2);
-#endif // APPROX_DEBUG
-
+  if (zeroH) circ.Set(kZEROCURV);
   circ.MakeErrs();
   
   double s=0,xyz[3]; 
@@ -1786,11 +1776,19 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
+#if 0
+    assert(hh);
+    hh = 1./hh;
+    P.ptin() = curv*hh; 
+#else
     hh = (fabs(hh)<1e-10)? 0:1./hh;
     P.ptin() = (hh)? curv*hh:1e-3;
+#endif
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
+    if (fabs(P._cosCA)>0.99 || fabs(P._sinCA)>0.99) P.ready();
+
     targetNode->fitPars() = P;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}
@@ -1802,7 +1800,6 @@ double Xi2=0;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
     E.check("In aprox");
   }   
-//  printf ("UUUUUUUUUU %d %d %d\n",nCall,nNode,nNodeIn);
   if (Xi2>BAD_XI2[mode])return 2;
   if (nNode==nNodeIn) 	return 0;
   if (nNode<2)		return 3;
@@ -1887,7 +1884,6 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
     if (hit->x()>rMax)		break;
     sum++;
     node->setHit(0);
-    hit->setTimesUsed(0);
   }
   return sum;
 }

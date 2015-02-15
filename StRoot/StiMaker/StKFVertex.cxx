@@ -126,15 +126,6 @@ Bool_t StKFVertex::Fit() {
   i = N-1;
   while ((Track = (StKFTrack *) nextI())) {
     if(fail || ! Flag[i])  delete Remove(Track);
-#if 0
-#if 0
-    Float_t dS, dS1;
-    Track->Particle().GetDStoParticle(*this,dS,dS1); PrPP(GetDStoParticle,dS);
-    Track->Particle().TransportToDS( dS );           PrPP(Trans.,Track->Particle());
-#else
-    Track->Particle().SetProductionVertex(*this);    PrPP(SetProdVx,Track->Particle());
-#endif
-#endif
     i--;
   }
   delete [] particles;

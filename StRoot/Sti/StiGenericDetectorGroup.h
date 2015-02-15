@@ -1,6 +1,6 @@
 #ifndef STAR_StiGenericDetectorGroup_H_INCLUDED
 #define STAR_StiGenericDetectorGroup_H_INCLUDED
-// $Id: StiGenericDetectorGroup.h,v 1.2 2014/08/25 21:05:18 fisyak Exp $
+// $Id: StiGenericDetectorGroup.h,v 2.2 2014/08/22 16:28:36 perev Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include <stdexcept>

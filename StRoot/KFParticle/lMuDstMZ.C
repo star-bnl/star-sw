@@ -26,4 +26,5 @@ std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
   //  gSystem->Load("libStKFVertex");
  gSystem->AddIncludePath(" -IStRoot/TPCCATracker -IStRoot/TPCCATrackerPerformance -IStRoot/KFParticle -IStRoot/StarRoot ");
+ gSystem->SetFlagsDebug("-fdiagnostics-color=always -std=c++11 -fPIC -pipe -Wall -Woverloaded-virtual -Wno-long-long -msse -mfpmath=sse -Wno-pragmas -Wno-parentheses -g -O0");
 }

@@ -92,7 +92,6 @@ class StKFVertexMaker : public StMaker {
 
   ClassDef(StKFVertexMaker,0)   //StAF chain virtual base class for Makers
 };
-#endif
 // $Log: StKFVertexMaker.h,v $
 // Revision 2.5  2015/01/05 21:04:31  fisyak
 // Add access to TMVA ranking
@@ -106,3 +105,4 @@ class StKFVertexMaker : public StMaker {
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //
+#endif /* STAR_StKFVertexMaker */

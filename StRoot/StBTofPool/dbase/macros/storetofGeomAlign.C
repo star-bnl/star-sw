@@ -55,7 +55,8 @@ void storetofGeomAlign() {
 //  TString ZStoreTime = "2012-12-20 00:00:01";  // Run-13 aligment 
 //  TString ZStoreTime = "2013-12-20 00:00:01";  // Run-14 aligment for FastOffline (based on Run-13)
 //  TString ZStoreTime = "2013-12-20 00:00:02";  // Run-14 aligment for 14.6GeV preproduction (based on Run-14 preproduction TPC calib.)
-  TString ZStoreTime = "2013-05-09 00:00:00";  // Run-13 aligment for second half of pp510 (after pixel installation)
+//  TString ZStoreTime = "2013-05-09 00:00:00";  // Run-13 aligment for second half of pp510 (after pixel installation)
+  TString ZStoreTime = "2013-12-20 00:00:03";  // Run-14 aligment for 14.5GeV final production (based on run-14 hltgood stream)
 
 
 
@@ -68,7 +69,7 @@ void storetofGeomAlign() {
 // year10+
   float shifty[NMAX], shiftz[NMAX], shiftx[NMAX];
   ifstream inData;
-  inData.open("data/run13/pp510c/geometry.txt");
+  inData.open("data/run14/14.5GeV_final/geometry.txt");
   if (!inData.is_open()){
     cerr <<" unable to open geometry.txt; bailing out ..." << endl;
     exit(-1);

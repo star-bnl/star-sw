@@ -339,6 +339,8 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
 	  track->SetParent(vtxl->GetID());
 	  vtxl->AddDaughterId(track->GetID());
 	}
+	if (! vtxl->NoTracks()) break;
+	continue;
       }
     }
   }

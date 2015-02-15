@@ -77,6 +77,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
 
 $env1 = $env->clone('Package'  => $pkg);
 my $DEBUG   = $env1->{DEBUG};
+my $FDEBUG  = $env1->{FDEBUG};
 my $CXXFLAGS= $env1->{CXXFLAGS}; #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
 my $CFLAGS  = $env1->{CFLAGS};
 my $FC      = $env1->{FC};
@@ -1001,6 +1002,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       next if $s =~ /^Mille\.cc/;
       push @src, $s;
     }
+    if ($STAR_SYS =~ /_gcc447/) {
+      $FDEBUG = "-g";
+    }
     @srcL = @src;#  print "srcL = @srcL\n";
     Depends $env ["minresModule.o"], qw(minresDataModule.o);
     Depends $env ["Dbandmatrix.o"], qw(mpdef.o);
@@ -1037,7 +1041,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		       'SOFLAGS'  => $SOFLAGS,
 		       'LIBPATH'  => $libpath,
 		       'ObjDir'   => $obj_dir,
-		       'DEBUG'    => $DEBUG
+		       'DEBUG'    => $DEBUG,
+		       'FDEBUG'   => $FDEBUG
 		      );
   my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
   #  print "Cint_CPPPATH => $Cint_CPPPATH\n";
@@ -1546,7 +1551,8 @@ if ( $#src > -1 ) {
       $envP = $env2->clone('Package'  => $pkg,
 			   'LD'       => $LD,
 			   'LIBPATH'  => $LIB,
-			   'LIBS'     => $libs
+			   'LIBS'     => $libs,
+			   'FDEBUG'   => $FDEBUG
 			  );
       script::Keep $prog;
       Program      $envP $prog, ("pede.f90");

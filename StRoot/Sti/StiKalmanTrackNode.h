@@ -21,12 +21,14 @@ class StiMaterial;
 //class StiElossCalculator;
   
 typedef enum {
-  kFailed = -1,         // could not find intersection
-  kHit,                                
-  kEdgePhiPlus, kEdgeZminus, kEdgePhiMinus, kEdgeZplus, 
-  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus,
-  kEnded
+  kFailed = -3,         // could not find intersection
+  kTooFar = -2,
+  kEnded  = -1,
+  kHit    =  0,                                
 } StiIntersection;
+
+enum {kEdgeZplus=9}; //???????????????????????????????????????????
+
   
 class StiNodeStat {
 public:	
@@ -138,7 +140,7 @@ public:
   double x_g() const;
   double y_g() const;
   double z_g() const;
-  void   getXYZ_g(double *xyz) const;
+  void   getXYZ_g(Double_t xyzp[6], Double_t CovXyzp[21]) const;
   double getX() const 			{ return mFP.x();}
   double getY() const 			{ return mFP.y();}  
   double getZ() const 			{ return mFP.z();}
@@ -151,6 +153,7 @@ public:
   double getSin  () const 		{return mFP._sinCA;}
   double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;  }
+  double getWallx() const 		{return _wallx;  }
   const double *hitErrs() const         {return mHrr.A;  }
   double getEyy()   const 		{return mHrr.hYY;}
   double getEzz()   const 		{return mHrr.hZZ;}
@@ -174,14 +177,14 @@ public:
   void setNullCount(char c=0)       	{ nullCount=c;}
   void setContigHitCount (char c=0) 	{ contiguousHitCount=c ;}
   void setContigNullCount(char c=0) 	{ contiguousNullCount=c;}
-  void setELoss(double detLoss,double gasLoss) 	{ mELoss[0]=(float)detLoss; mELoss[1]=(float)gasLoss;}
   double getTime() const;
 
   void   setHitCand(int nhits)		{mHitCand = nhits;}
   void   setIHitCand(int ihit)		{mIHitCand = ihit;}
   int    getHitCand()const		{return mHitCand;}
   int    getIHitCand()const		{return mIHitCand;}
-  double getELoss(int idx=0)const	{return mELoss[!!idx];}
+      StiELoss *getELoss()  		{return mELoss;}
+const StiELoss *getELoss()const		{return mELoss;}
  static void Break(int kase);
   static void PrintStep();
   StThreeVector<double>getPoint() const;
@@ -190,6 +193,7 @@ public:
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   int  isEnded() const;	
   int  isDca()   const;	
+  int  isPrimary()   const;	
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
@@ -208,6 +212,10 @@ public:
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
+  int  inside(			int mode=1) const;
+  int  insideL(double x,double y,int mode=1) const;
+  int  insideL(const double *x,	int mode=1) const; 
+  int  insideG(const double *x,	int mode=1) const; 
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
@@ -293,6 +301,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
 
   char _beg[1];  
   double _alpha;
+  double _wallx;
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
   StiNodePars mFP; 
@@ -300,7 +309,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StiNodeErrs  mFE;
   StiNode2Pars mUnTouch;
   StiHitErrs   mHrr;
-  float mELoss[2];
+  StiELoss mELoss[2];
   char hitCount;
   char nullCount;
   char contiguousHitCount;

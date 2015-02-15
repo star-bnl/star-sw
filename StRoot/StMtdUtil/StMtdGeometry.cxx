@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.10 2014/12/23 16:32:33 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.11 2015/02/09 21:29:23 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.11  2015/02/09 21:29:23  marr
+ * Fix an overlook in extracting geometry for 2015 during bfc chain running
+ *
  * Revision 1.10  2014/12/23 16:32:33  marr
  * In 2015 geometry file, MTD modules are placed under directory MagRefSys_1.
  * Modification is maded to reflect this change.
@@ -510,6 +513,10 @@ void StMtdGeometry::Init(StMaker *maker){
 		LOG_INFO<<"found y2012 geometry"<<endm;
 	   	mGeoYear=2012;
 	}
+	else if(gGeoManager->CheckPath("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1")){
+		LOG_INFO<<"found y2015 geometry"<<endm;
+	   	mGeoYear=2015;
+	}
 
 	// intialize backleg/module geometry
 	TGeoVolume *mMtdGeom = gGeoManager->FindVolumeFast("MUTD");
@@ -517,7 +524,7 @@ void StMtdGeometry::Init(StMaker *maker){
 	if(elementName){
 		if(IsDebugOn()) LOG_INFO <<" found detector:"<<elementName<<endm;
 		TGeoIterator next(mMtdGeom);
-		if(mGeomTag.Contains("2015")) next.SetTopName("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1");
+		if(mGeoYear==2015) next.SetTopName("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1");
 		else next.SetTopName("/HALL_1/CAVE_1/MUTD_1");
 		TGeoNode   *node = 0;
 		TGeoVolume *blVol = 0;

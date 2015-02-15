@@ -101,11 +101,19 @@
 #define PXL_GRP		8
 #define IST_GRP         9
 //#define xxx_GRP		10	// unused
-#define RPII_GRP		11	// but still unused
+//#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
 //#define xxx_GRP		13	// unused
 #define GMT_GRP		14
 #define MTD_GRP		15
+
+
+//FY15, new "evp group" concept; Tonko Feb 2015
+#define EVP_GRP_FMS		0	//FMS,FPS: FMS_xxx triggers
+#define EVP_GRP_RP		1	//RomanPots RP_xxx triggers
+#define EVP_GRP_ZEROBIAS	2	// and similar;
+
+
 
 /* RTS Node Id, Tonko, 11/06/2000
 
@@ -254,8 +262,8 @@ so we keep it here for source compatibility
 #define SST_SYSTEM      24
 #define SST_ID          SST_SYSTEM     /* HFT's SSD */
 
-#define RPII_SYSTEM      25
-#define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
+//#define RPII_SYSTEM      25
+//#define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
 
 #define GMT_SYSTEM      26
 #define GMT_ID          GMT_SYSTEM     /* GEM Monitor for TPC */
@@ -558,7 +566,7 @@ so we keep it here for source compatibility
 #define PXL_NODES(x)     ((EXT2_SYSTEM<<12) | (PXL_SYSTEM<<7) | (x))
 #define IST_NODES(x)     ((EXT2_SYSTEM<<12) | (IST_SYSTEM<<7) | (x))
 #define SST_NODES(x)     ((EXT2_SYSTEM<<12) | (SST_SYSTEM<<7) | (x))
-#define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
+//#define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
 
 #define GMT_NODES(x)     ((EXT2_SYSTEM<<12) | (GMT_SYSTEM<<7) | (x))
 
@@ -613,8 +621,8 @@ extern inline const char *rts2name(int rts_id)
 		return "IST" ;
 	case SST_SYSTEM :
 		return "SST" ;
-	case RPII_SYSTEM :
-		return "RPII" ;
+//	case RPII_SYSTEM :
+//		return "RPII" ;
 	case GMT_SYSTEM :
 		return "GMT" ;
 	case L4_SYSTEM :
@@ -675,8 +683,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "ist" ;
 	case SST_SYSTEM :
 		return "sst" ;
-	case RPII_SYSTEM :
-		return "rpii" ;
+//	case RPII_SYSTEM :
+//		return "rpii" ;
 	case GMT_SYSTEM :
 		return "gmt" ;
 	case L4_SYSTEM :
@@ -725,7 +733,7 @@ extern inline int rts2det(int ix)
 	case MTD_ID :
 	case IST_ID :
 	case SST_ID :
-	case RPII_ID :
+//	case RPII_ID :
 	case GMT_ID :
 	case FPS_ID:
 		return ix ;
@@ -763,7 +771,7 @@ extern inline int rts2tcd(int rts)
 		TCD_MTD,	//22 MTD
 		TCD_IST,	//23 IST
 		TCD_SST,	//24 SST
-		-1,		//25 RPII
+		-1,		//25 
 		TCD_GMT,	//26 GMT
 		-1,		//27
 		-1,		//28
@@ -824,7 +832,7 @@ extern inline int tcd2rts(int tcd)
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SST_ID) | (1<<RPII_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID)
+		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SST_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID)
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -906,8 +914,8 @@ extern inline int rts2grp(int rts)
 		return PXL_GRP;
 	case IST_ID :
 		return IST_GRP ;
-	case RPII_ID :
-		return RPII_GRP ;
+//	case RPII_ID :
+//		return RPII_GRP ;
 	default:
 		return 31 ;	// this is an ERROR since groups < 16
    }

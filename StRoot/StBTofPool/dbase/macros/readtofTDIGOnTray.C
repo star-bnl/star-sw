@@ -33,7 +33,7 @@ void readtofTDIGOnTray()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = "2010-12-20 00:00:00";
+  string ZReadTime = "2011-04-20 00:00:00";
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofmaptable = configNode->addDbTable("tofTDIGOnTray");

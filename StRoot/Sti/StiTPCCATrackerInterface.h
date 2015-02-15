@@ -52,8 +52,7 @@ class StiTPCCATrackerInterface {
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   void FillPerformance(const vector<AliHLTTPCCAGBHit>& hits, const vector<int>& idTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels); // fill fPerformance by MCTracks, MCPoints and Hit-MCPointsMatch
 #endif
-  
-  void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs); // convert caPars into NodePars
+   void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs); // convert caPars into NodePars
 
   HitMapToVectorAndEndType *fHitsMap;
   vector<Seed_t> fSeeds;
@@ -90,7 +89,6 @@ class StiTPCCATrackerInterface {
   AliHLTResizableArray<AliHLTTPCCAMCTrack> fStiMCTracks;
   AliHLTResizableArray<AliHLTTPCCALocalMCPoint> fStiMCPoints;
 #endif
-
   double fPreparationTime_real, fPreparationTime_cpu; // time for coping data and performance
 };
 #endif /* DO_TPCCATRACKER */

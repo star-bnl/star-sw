@@ -213,3 +213,11 @@ void put2DB(const char* file=
   delete [] rowIDs;
 #endif
 }
+/*
+  select * from tpcDriftVelocity where beginTime > "2014" and beginTime < "2014-03-14 19:37:58" and deactive=1423867472 order by beginTime ;
+  select * from tpcDriftVelocity where beginTime > "2014-06-16 10:06:06" and beginTime < "2014-07-30 19:38:58" and deactive=1423867472 order by beginTime ;
+
+ update tpcDriftVelocity set deactive=0, entryTime = entryTime  where deactive = 1423867472 and ( beginTime > "2014" and beginTime < "2014-03-14 19:37:58");
+ update tpcDriftVelocity set deactive=0, entryTime = entryTime  where deactive = 1423867472 and ( beginTime >"2014-06-16 10:06:06" and beginTime < "2014-07-30 19:38:58");
+
+*/

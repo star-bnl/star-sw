@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.6 2015/01/05 21:04:31 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.5 2013/03/22 23:29:15 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************

@@ -5,6 +5,11 @@
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "StMessMgr.h"
+#include "StiUtilities/StiDebug.h"
+
+#define NICE(a) ( ((a) <= -M_PI)? ((a)+2*M_PI) :\
+                  ((a) >   M_PI)? ((a)-2*M_PI) : (a))
+
 int StiTrackNode::mgFlag=0;
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
@@ -17,7 +22,7 @@ static const double MAX2ERR[]={MAX1ERR[0]*MAX1ERR[0]
                               ,MAX1ERR[4]*MAX1ERR[4]
                               ,MAX1ERR[5]*MAX1ERR[5]};
 
-static const double MIN1ERR[]={1e-5,1e-5,1e-5,1e-7,0,1e-7};
+static const double MIN1ERR[]={1e-4,1e-4,1e-4,1e-5,1e-3,1e-5};
 static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[1]*MIN1ERR[1]
                               ,MIN1ERR[2]*MIN1ERR[2]
@@ -26,7 +31,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[5]*MIN1ERR[5]};
 static const double recvCORRMAX  = 0.99999;
 static const double chekCORRMAX  = 0.99999;
-static double MAXPARS[]={250,250,250,1.5,100,100};
+static const double baddCORRMAX  = 1.1;
+static double MAXPARS[]={500,500,500,3.15,100,100};
 
 //______________________________________________________________________________
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
@@ -35,18 +41,10 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 
   double g[NE];      memcpy(g,    G,sizeof( g));
   double fg[NP][NP]; memset(fg[0],0,sizeof(fg));
-//   double myF[6][6];  memcpy(myF[0],F[0],sizeof(fg));
-//   for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
-//   double myG[NE];
-//   TCL::trasat(myF[0],G,myG,NP,NP);
-//#define TEST_errPropag6
-#ifdef TEST_errPropag6
-  TRSymMatrix rG(nF,G);    cout << "rG\t" << rG << endl;
-  TRMatrix    rU(TRArray::kUnit,nF);
-  TRMatrix    rF(nF,nF,&F[0][0]); 
-  rF += rU;   cout << "rF\t" << rF << endl;
-  TRSymMatrix rFGFT(rF,TRArray::kAxSxAT,rG); cout << "rFGFT\t" << rFGFT << endl;
-#endif
+
+  double myF[6][6];  memcpy(myF[0],F[0],sizeof(fg));
+  for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
+
   for (int i=0;i<nF;i++) {
   for (int j=0;j<nF;j++) {
     if (!F[i][j]) 	continue;
@@ -66,11 +64,6 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
     }
     G[ik] += (s + fg[i][k] + fg[k][i]);
   }}
-//  for (int i=0;i<NE;i++) {assert(fabs(G[i]-myG[i]) <= 1e-6*fabs(G[i]+myG[i]));}
-#ifdef TEST_errPropag6
-  TRSymMatrix rGnew(nF,G); cout << "rGnew\t" << rGnew << endl;
-#undef TEST_errPropag6
-#endif
 
 }       
 
@@ -108,54 +101,99 @@ void StiHitContino::print(const char* tit) const
 int StiHitContino::getNHits() const
 { int n=0; for(int i=0;i<kMaxSize;i++) {if (mHits[i]) n++;}; return n;}	
 //______________________________________________________________________________
-
-#include "TComplex.h"
-const TComplex Im(0,1);
-//______________________________________________________________________________
-int StiTrackNode::cylCross(double r, const double dx[4],double Rho,double out[4])
+int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double Rho
+                          ,const double r    ,int dir,            double out[2][3])
 {
-//  dx[0] == cosCA; dx[1] == sinCA;dx[2] == _x; dx[3]==_y
+//Circles crossing
+//==========================================================
 
-  TComplex d(dx[0],dx[1]),n(-dx[1],dx[0]),x(dx[2],dx[3]);
-  TComplex res[2];
-  TComplex xd = x/d;
-  double R2 = x.Re()*x.Re()+x.Im()*x.Im();
+// Rho -curvature
+// r - cyl radius
+//L - distance between centers
+//d - distance of crossing line d<r
+// X0,Y0 start track with R
+// Dx,Dy direction of it
+// Nx,Ny = -Dy,Dx
+// Cx,Cy = direction to center
+/// 
+// 
+// r**2-d**2 == R**2-(L-d)**2
+// r**2 == R**2- L**2 +2*L*d 
+// 
+// r**2 +L**2-R**2=  2*L*d
+// 
+// d = (r**2 +L**2-R**2)/(2*L)
+// 
+// L**2 = (X0+N*R)**2 = X0**2+R**2 +2*(X0*N)*R
+// L**2-R**2 = X0**2+ 2*(X0*N)*R
+// 
+// 
+// d = (r**2 +X0**2+ 2*(X0*N)*R)/(2*sqrt(X0**2+R**2 +2*(X0*N)*R)
+// d = (r**2 +X0**2+ 2*(X0*N)*R)/(2*sqrt(X0**2+R**2 +2*(X0*N)*R)
+// 
+// 
+static int nCall=0;nCall++;
+StiDebug::Break(nCall);
 
-  if (R2*Rho*Rho< 1e-4) {// Low curvature approx
-    double a = (1.+xd.Im()*Rho);
-    double b = xd.Re();
-    double c = (R2-r*r);
-    double dis = b*b - a*c;
-    if (dis<0.) 		return 1;
-    dis = sqrt(dis);
-    double L[2];
-    if (b<0) {a=-a;b=-b;c=-c;}
-    L[0] = -c/(dis+b);
-    L[1] = -(b+(dis))/a;
-    res[0] = x+L[0]*(1.+Im*(0.5*L[0]*Rho))*d;
-    res[1] = x+L[1]*(1.+Im*(0.5*L[1]*Rho))*d;
 
-  } else {	//General case
+int sRho = (Rho<0) ? -1:1;
+double aRho = fabs(Rho), rr=r*r,d=0;
+TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
+TVector3 C,Cd,Cn,N;
+double XX,XN,L;
+N[0] = -D[1]; N[1] = D[0];
+XX = X*X; XN = X*N;
 
-    TComplex Q = Rho*x+n;
-    double a1Q = ((x.Re()*n.Re()+x.Im()*n.Im())*2 + R2*Rho);
-    double aQ = a1Q*Rho+1;
-    double q = TComplex::Log(Q).Im();
- //       cos(Al-q) = ((Rho*r)**2 +Q**2-1)/(2*Q*r*Rho)
-    double mycos = (r*r*Rho+a1Q)/(2*aQ*r);
-    if (fabs(mycos)>1) 		return 1;
-    double ang = acos(mycos);
-    res[0] = r*TComplex::Exp(Im*(q+ang));
-    res[1] = r*TComplex::Exp(Im*(q-ang));
-  }
-  if (res[0].Re() < res[1].Re()) {//swap
-    xd = res[0]; res[0]=res[1]; res[1]=xd;}
-  out[0] = res[0].Re();
-  out[1] = res[0].Im();
-  out[2] = res[1].Re();
-  out[3] = res[1].Im();
-  return 0;
+double LLmRR = XX*aRho+2*XN*sRho;
+double LL = LLmRR*aRho+1; L = sqrt(LL);
+d = (rr*aRho+LLmRR)/(2*L);
+
+double p = ((r-d)*(r+d));
+if (p<=0) return 0;
+p = sqrt(p);
+
+C = X*aRho+N*sRho;
+Cd = C.Unit(); Cn[0] = -Cd[1];   Cn[1] = Cd[0];
+
+TVector3 Out[2];
+for (int ix = 0;ix<2; ix++) {
+  Out[ix] = Cd*d + Cn*p; p = -p;
 }
+
+for (int ix = 0;ix<2; ix++) {
+  double len = (Out[ix]-X).Mag();
+  double lenaRho =len*aRho; if (lenaRho>2) lenaRho = 1.999;
+  if (lenaRho > 0.01) len = 2*asin(0.5*lenaRho)/aRho;
+  if ((Out[ix]-X).Dot(D)<0) len = -len;
+
+  double tst = (X-Out[ix])*D;
+  if (dir) tst = -tst;
+//VP  if (tst<0) len = M_PI*2*aR-len;
+  out[ix][2] = len; 
+  out[ix][0] = Out[ix][0];
+  out[ix][1] = Out[ix][1];
+}
+  if (fabs(out[0][2])>fabs(out[1][2])) { 	//wrong order
+    for (int j=0;j<3;j++)  { 
+      double t=out[0][j]; 
+      out[0][j] = out[1][j]; 
+      out[1][j] = t; 
+  } }
+
+
+
+  for (int i=0;i<2;i++) {
+//  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
+  double dif = (Out[i]*aRho-C).Mag()-1.;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  dif = (Out[i]).Mag()/r-1;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  }
+  return 2;
+}
+
 
 //______________________________________________________________________________
  
@@ -223,6 +261,8 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
+//assert(sign()>0); ///
+
    return *this;
 }
 //______________________________________________________________________________
@@ -234,6 +274,7 @@ void StiNodeErrs::get00(      double *a) const
 void StiNodeErrs::set00(const double *a) 
 {
    memcpy(A,a,6*sizeof(double));
+
 }
 //______________________________________________________________________________
 void StiNodeErrs::get10(double *a) const
@@ -274,50 +315,67 @@ void StiNodeErrs::zeroX()
 { 
   for (int i=0;i<kNPars;i++) {A[idx66[i][0]]=0;}
 }
+//____________________________________________________________
+void StiNodeErrs::rotate(double alpha,const StiNodePars &pars)
+{
+// it is rotation by -alpha
+
+  double ca = cos(alpha),sa=sin(alpha);
+  double dX = (fabs(pars._cosCA)<1e-5)? 1e-5:pars._cosCA; 
+  double dYdX = pars._sinCA/dX;
+  double dZdX = pars.tanl()/dX;
+
+  double F[6][6]= {{         -1,            0,0,0,0,0}
+                  ,{-ca*dYdX-sa,-sa*dYdX+ca-1,0,0,0,0}
+                  ,{-ca*dZdX   ,-sa*dZdX     ,0,0,0,0}
+                  ,{          0,            0,0,0,0,0}
+                  ,{          0,            0,0,0,0,0}
+                  ,{          0,            0,0,0,0,0}};
+  		  
+  StiTrackNode::errPropag6( A,F,kNPars );
+  for (int i=0,li=0;i<kNPars ;li+=++i) {
+    assert(fabs(A[li+0]) <1e-6);
+  }
+
+}
 //______________________________________________________________________________
 void StiNodeErrs::recov() 
 {
-static int PRINT_IT=0;
+static int nCall = 0; nCall++;
+StiDebug::Break(nCall);
 
-  int i0=0; if (!_cXX) i0 = 1;
-  for (int i=i0;i<kNPars;i++) {
-    double maxDia = MAX2ERR[i];
-    double minDia = MIN2ERR[i];
-    int ld = idx66[i][i];
-    if (A[ld]<minDia) {
-if(PRINT_IT){
-      LOG_DEBUG << Form("StiNodeErrs::cut. Negative diagonal %g(%d)",A[ld],i)<<endm;
-      print();
-}
-       A[ld] = minDia;
-    }
-    if (A[ld]>maxDia) {
-if(PRINT_IT) {
-      LOG_DEBUG << Form("StiNodeErrs::cut. Too big  diagonal %g(%d)",A[ld],i)<<endm;
-      print();
-}
-       for (int j=0;j<kNPars;j++){ A[idx66[i][j]]=0;}
-       A[ld]=maxDia;
-    }
-  }
-  for (int i=i0;i<kNPars;i++) {
-    double &aii = A[idx66[i][i]];
-    if (TMath::Abs(aii) < 1e-7) continue;
-    for (int j=i+1;j<kNPars;j++) {
-      double &ajj = A[idx66[j][j]];
-      if (TMath::Abs(ajj) < 1e-7) continue;
-      double &aij = A[idx66[i][j]];
-      if (aij*aij <= aii*ajj*recvCORRMAX) continue;
-      if (aij*aij > aii*ajj){
-        LOG_DEBUG << Form("StiNodeErrs::recov : Correlation too big %g[%d][%d]>%g"
-              ,aij,i,j,sqrt(aii*ajj))<< endm;}	  
-      double ab = sqrt(aii*ajj);
-      double t2 = (fabs(aij)/ab-recvCORRMAX)/(1+recvCORRMAX);
-      aii += aii*t2; ajj += ajj*t2;
-      if (aij<0) t2 = -t2; aij -= ab*t2;
-      
-    }//end j
-  }//end i
+//   double s = sign(); ///??? 
+//   if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
+  int i0=1,li0=1,isMod=0;
+  if (_cXX>0) {i0=0;li0=0;}
+
+   double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
+   int isTouched[kNPars]={0};
+   for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+     double &aii = A[li+i];
+     if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
+     if (aii > MAX2ERR[i]) { fak[i] = sqrt(MAX2ERR[i]/aii); aii = MAX2ERR[i]; isMod=2014;}
+     dia[i] = aii;
+     for (int j=i0;j<i;j++) {
+       double &aij = A[li+j];
+       if (isMod) aij*=fak[i]*fak[j];
+       if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
+       double qwe = aij*aij/(dia[i]*dia[j]);
+       if (corrMax>=qwe) continue;
+       corrMax=qwe; isTouched[i]=1; isTouched[j]=1;
+   } } 
+   if (corrMax<=1) return;
+   corrMax = sqrt(corrMax/recvCORRMAX);
+   
+   for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+     for (int j=i0;j<i;j++) {
+       A[li+j]/=corrMax;
+   } } 
+//    while (sign()<=0) {
+//     for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+//       for (int j=i0;j<i;j++) {
+//         A[li+j]*=0.9;
+//    } } }
 
 }
 //______________________________________________________________________________
@@ -333,6 +391,7 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
+// assert(sign()>0); ///
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -347,7 +406,7 @@ int StiNodeErrs::check(const char *pri) const
       ajj = A[idx66[j][j]];
       if (ajj<=0) continue;
       aij = A[idx66[i][j]];
-      if ((aij*aij)> chekCORRMAX*aii*ajj) {kase = 2; break;}
+      if ((aij*aij)> aii*ajj) {kase = 2; break;}
     }
     if (kase) break;
   }  
@@ -366,6 +425,7 @@ RETN:
           break;
     case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
+// assert(sign()>0); /// 
   return kase;
 }  
 //____________________________________________________________
@@ -425,7 +485,7 @@ L42:
          if (j != i__) b[kpiv] = sum * r__;
          else {
             if (sum<ans) ans = sum;
-            if (sum<0.) goto RETN;
+            if (sum<=0.) goto RETN;
             dc = sqrt(sum);
             b[kpiv] = dc;
             if (r__ > 0.)  r__ = (double)1. / dc;
@@ -438,7 +498,14 @@ L42:
 RETN: *xx=save; 
    return ans;
 } /* trchlu_ */
-
+//______________________________________________________________________________
+int StiNodeErrs::nan() const
+{
+  for (int i=0; i<kNPars;i++) {
+    if (!finite(A[i])) return 100+i;
+  }
+  return 0;
+}
 
 //______________________________________________________________________________
 int StiNodePars::check(const char *pri) const
@@ -446,6 +513,7 @@ int StiNodePars::check(const char *pri) const
 
   int ierr=0;
 //?? temp test
+  assert(fabs(_cosCA) <=1 && fabs(_sinCA)<=1);
   double tmp = (fabs(curv())<1e-6)? 0: curv()-ptin()*hz();
 //		1km for 1GeV is a zero field
 //  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
@@ -467,6 +535,44 @@ StiNodePars &StiNodePars::merge(double wt,StiNodePars &other)
    for (int i=0;i<kNPars+1;i++) {P[i] = wt0*P[i] + wt*other.P[i];}
    ready();
    return *this;
+}
+//______________________________________________________________________________
+StiNodePars &StiNodePars::operator=(const StiNodePars &fr)
+{
+  assert(fabs(fr._sinCA)<=1);
+  assert(fabs(fr._cosCA)<=1);
+  memcpy (this,&fr,sizeof(fr));
+  return *this;
+}
+//______________________________________________________________________________
+void StiNodePars::rotate(double alpha)
+{
+// actually it is rotation by -alpha
+
+  double xt1=x(); 
+  double yt1=y(); 
+  double cosCA0 = _cosCA;
+  double sinCA0 = _sinCA;
+
+  double ca = cos(alpha);
+  double sa = sin(alpha);
+
+  x() =  xt1*ca + yt1*sa;
+  y() = -xt1*sa + yt1*ca;
+  _cosCA =  cosCA0*ca+sinCA0*sa;
+  _sinCA = -cosCA0*sa+sinCA0*ca;
+  double nor = 0.5*(_sinCA*_sinCA+_cosCA*_cosCA +1);
+  _cosCA /= nor;
+  _sinCA /= nor;
+  eta()= NICE(eta()-alpha); 
+}   
+//______________________________________________________________________________
+int StiNodePars::nan() const
+{
+  for (int i=-2; i<=kHz;i++) {
+    if (!finite(P[i])) return 100+i;
+  }
+  return 0;
 }
 //______________________________________________________________________________
 void StiNodePars::print() const

@@ -5,7 +5,7 @@
 //
 /*!
 
-\class StiMaker 
+\class StiMaker
 
 \author M.L. Miller 5/00
 \author C Pruneau 3/02
@@ -13,19 +13,19 @@
 
 A maker StiMaker is a steering maker for Sti package.
 <br>
-Main tasks:				
+Main tasks:
 <ul>
-<li> Create StiHits;			
-<li> Make tracks;				
-<li> Make Primary vertices;		
-<li> Make Primary tracks;			
-<li> Save produced data into StEvent.	
+<li> Create StiHits;
+<li> Make tracks;
+<li> Make Primary vertices;
+<li> Make Primary tracks;
+<li> Save produced data into StEvent.
 </ul>
 More detailed: 				<br>
 <ul>
-<li>On Init:				
+<li>On Init:
 <ul>
-<li> Detectors initialization. 
+<li> Detectors initialization.
      SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
      SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
      SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
@@ -42,24 +42,24 @@ More detailed: 				<br>
 
      SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
 </ul>
- 
-<li>On InitRun:				
+
+<li>On InitRun:
 <ul>
- <li> Build detectors;			
- <li> Init seed finder;			
- <li> Init hit loader;			
- <li> Init tracker;  			
- <li> Init StEvent filler;			 
- <li> Init vertex finder;			 
+ <li> Build detectors;
+ <li> Init seed finder;
+ <li> Init hit loader;
+ <li> Init tracker;
+ <li> Init StEvent filler;
+ <li> Init vertex finder;
 </ul>
-<li>In Make:				
+<li>In Make:
 <ul>
- <li> Load hits; 
- <li> Find seeds; 
- <li> Create global tracks; 
+ <li> Load hits;
+ <li> Find seeds;
+ <li> Create global tracks;
  <li> Save tracks into StEvent;
- <li> Find vertecies; 
- <li> Create and assign primaries tracks; 
+ <li> Find vertecies;
+ <li> Create and assign primaries tracks;
  <li> Save primary tracks into StEvent;
 
 */
@@ -135,9 +135,9 @@ More detailed: 				<br>
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
 enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
 ClassImp(StiMaker)
-  
+
 //_____________________________________________________________________________
-StiMaker::StiMaker(const Char_t *name) : 
+StiMaker::StiMaker(const Char_t *name) :
     StMaker(name),
     fVolume(0),
     _initialized(false),
@@ -183,7 +183,7 @@ StiMaker::StiMaker(const Char_t *name) :
 }
 
 //_____________________________________________________________________________
-StiMaker::~StiMaker() 
+StiMaker::~StiMaker()
 {
   cout <<"StiMaker::~StiMaker() -I- Started/Done"<<endl;
 }
@@ -219,7 +219,7 @@ static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
     for (int i=0;timg[i];i++) {
       Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
       ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
-      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());    
+      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());
   } }
   if (_tracker) _tracker->finish();
 
@@ -237,7 +237,7 @@ Int_t StiMaker::Init()
   _loaderHitFilter = 0; // not using this yet.
   mTotPrimTks[1] = IAttr("maxTotPrims");
   if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
-  
+
 
   if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
   if (IAttr("useTiming")) {
@@ -260,7 +260,7 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc")));
       group->setGroupId(kTpcId);
       StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
-      if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row 
+      if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row
 	hitLoader->setMinRow(2);
       }
       if (IAttr("EastOff")) {
@@ -271,7 +271,7 @@ Int_t StiMaker::InitDetectors()
 	hitLoader->setMinSector(13);
 	hitLoader->setMaxSector(24);
       }
-      cout << "StiMaker::InitDetectors() -I- use hits in sectors[" 
+      cout << "StiMaker::InitDetectors() -I- use hits in sectors["
 	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
 	   << hitLoader->minRow() << ",*]" << endl;
       if (IAttr("laserIT")) {
@@ -329,7 +329,7 @@ Int_t StiMaker::InitRun(int run)
       // Load Detector related parameters
       StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
       masterBuilder->build(*this);
-      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
+      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer();
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
        _seedFinder = _toolkit->getTrackSeedFinder();
@@ -379,7 +379,7 @@ Int_t StiMaker::InitRun(int run)
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
-  
+
   return StMaker::InitRun(run);
 }
 
@@ -404,18 +404,19 @@ Int_t StiMaker::Make()
   StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
   eventIsFinished = false;
   try {		// try new event
-    
+
     _tracker->clear();
-    
+
     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
     _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
-    
+
     _seedFinder->reset();
     StMaker *HLT = GetMaker("HLTCA");
     if (HLT) HLT->Make();
     iAnz = MakeGlobalTracks(event);
     if (iAnz) {MyClear(); return iAnz;}
+
     if (_vertexFinder) {
       iAnz = MakePrimaryTracks(event);
       if (iAnz) {MyClear(); return iAnz;}
@@ -437,6 +438,7 @@ Int_t StiMaker::Make()
     return kStErr;
   }
 }
+
 //_____________________________________________________________________________
 Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
@@ -473,13 +475,13 @@ Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
       vtx->setError(vtxErr);
     }
     if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
-    
+
     _tracker->extendTracksToVertices(*vertexes);
     mTotPrimTks[0]+=_tracker->getNPrims();
     FinishTracks(1);
     if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
-    
-    //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
+
+    //cout << "StiMaker::Make() -I- Primary Filling"<<endl;
     if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
     if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
     if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
@@ -503,7 +505,7 @@ void StiMaker::MyClear()
 Int_t StiMaker::InitPulls()
 {
   if (!IAttr("makePulls")) 	return 0;
-  
+
   const StChainOpt *bfc = GetChainOpt();
   assert(bfc);
   TFile *tfile  = GetTFile();
@@ -531,8 +533,8 @@ Int_t StiMaker::FillPulls()
   mPullEvent->mRun  = hddr->GetRunNumber();
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
-  mPullEvent->mChi2 = 0;	
-    
+  mPullEvent->mChi2 = 0;
+
   memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
   memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
   if (_vertexFinder) {
@@ -553,20 +555,20 @@ Int_t StiMaker::FillPulls()
   if (k<0) return kStOK;
   k = mPullHits[k]<<(k*3);
   if (k>1000000) return kStSTOP;
-  return kStOK;  
-}  
+  return kStOK;
+}
 //_____________________________________________________________________________
 TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
-                                        const StMaker *dowMk) const 
+                                        const StMaker *dowMk) const
 {
   TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
-  
+
   if (ds || strcmp(logInput,"STIGEOM")) return ds;
-  
+
 //  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit->getDetectorBuilder(), kActive);
   if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), 0);
-  
-  if (fVolume) { 
+
+  if (fVolume) {
      if (gGeometry) {
         TList *listOfVolume = gGeometry->GetListOfNodes();
 
