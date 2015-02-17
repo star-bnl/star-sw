@@ -25,6 +25,7 @@ public:
 
  private:
   int mEntriesSVX[6][32];
+  int mEntriesNCH[6][32];
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
