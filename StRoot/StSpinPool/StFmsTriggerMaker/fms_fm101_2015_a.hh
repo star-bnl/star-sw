@@ -1,9 +1,9 @@
 #ifndef FMS_FM101_2015_A_HH
 #define FMS_FM101_2015_A_HH
 
-struct Board;
+#include "Board.hh"
 
-void fms_fm101_2015_a(Board& fm101);
+void fms_fm101_2015_a(Board& fm101, int t=MAXPP, int simdat=0);
 
 int getFM101_BS3(int out);
 int getFM101_BS2(int out);

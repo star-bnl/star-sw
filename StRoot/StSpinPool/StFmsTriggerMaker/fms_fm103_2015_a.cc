@@ -1,4 +1,3 @@
-#include "Board.hh"
 #include "bits.hh"
 #include "fms_fm103_2015_a.hh"
 #include "fms_fm005_2015_a.hh"
@@ -7,8 +6,7 @@
 
 //#include "registerHack.hh"
 
-void fms_fm103_2015_a(Board& fm103)
-{
+void fms_fm103_2015_a(Board& fm103, int t, int simdat){
   const int BSThr1=fm103.registers[0];
   const int BSThr2=fm103.registers[1];
   const int BSThr3=fm103.registers[2];
@@ -16,13 +14,16 @@ void fms_fm103_2015_a(Board& fm103)
   //int BSThr1=Lg_BSThr1; 
   //int BSThr2=Lg_BSThr2; 
   //int BSThr3=Lg_BSThr3; 
+  //printf("%s BSthr1=%d BSthr2=%d BSthr3=%d\n",fm103.name,BSThr1,BSThr2,BSThr3);
 
   //input
-  int* in = (int*)fm103.channels;
-  int T1=in[3];  //fm005,fm009
-  int T2=in[2];  //fm006,fm010
-  int B1=in[1];  //fm007,fm011
-  int B2=in[0];  //fm008,fm012
+  int* in;
+  if(simdat==0) {in=(int*)fm103.channels[t];}
+  else          {in=(int*)fm103.dsmdata[t];}
+  int T1=in[0];  //fm005,fm009
+  int T2=in[1];  //fm006,fm010
+  int B1=in[2];  //fm007,fm011
+  int B2=in[3];  //fm008,fm012
 
   //From another 2*4 sum
   int JJ=getFM005_J23(T1) + getFM005_J23(B1);
@@ -43,14 +44,16 @@ void fms_fm103_2015_a(Board& fm103)
   if(JpM  >0xFF) JpM  =0xFF;
   if(JpB  >0xFF) JpB  =0xFF;
 
-  fm103.output =  BS3 | BS2   << 1
+  fm103.output[t] =  BS3 | BS2   << 1
     | BS1T << 2 | BS1M <<  3 | BS1B <<4 
     | JpT  << 5 | JpM  << 16 | JpB  <<24;
 
-  printf("%s input T1=%08x T2=%08x B1=%08x B2=%08x\n",fm103.name,T1,T2,B1,B2); 
-  printf("%s out=%08x BS3=%1d BS2=%1d BS1T/M/B=%1d %1d %1d JpT/M/B %3d %3d %3d\n",
-	 fm103.name,fm103.output,
-	 BS3,BS2,BS1T,BS1M,BS1B,JpT,JpM,JpB);
+  if(PRINT){
+    printf("%s input T1=%08x T2=%08x B1=%08x B2=%08x\n",fm103.name,T1,T2,B1,B2); 
+    printf("%s out=%08x BS3=%1d BS2=%1d BS1T/M/B=%1d %1d %1d JpT/M/B %3d %3d %3d\n",
+	   fm103.name,fm103.output[t],
+	   BS3,BS2,BS1T,BS1M,BS1B,JpT,JpM,JpB);
+  }
 }
 
 int getFM103_BS3(int out)  {return getbits(out, 0, 1);}

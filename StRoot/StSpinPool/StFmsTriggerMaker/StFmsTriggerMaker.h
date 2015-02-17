@@ -33,9 +33,11 @@ public:
   void useMuDst() { mUseMuDst = 1;}
   void useStEvent() { mUseStEvent = 1; }
 
-  //
+  // Some controls
   void overwriteThr(char* name, int value);
   void forceRunNumber(int run) {mForceRun=run;}
+  void useDsmData() {mUseDsmData=1;}
+  void useQTSim()   {mUseDsmData=0;}
 
   //
   // QT and DSM algorithms and cabling for 2011:
@@ -44,34 +46,37 @@ public:
   // http://www.star.bnl.gov/public/trg/TSL/Schematics/FMS_Crate_Cable_Map.pdf
   // http://www.star.bnl.gov/public/trg/TSL/Schematics/FEQ_Crate_Cable_Map.pdf
   //
-  int FP201output() const { return fp201.output; }
-  int FM0xxoutput(int number) const;
-  int FM1xxoutput(int number) const;
-  int FP201input(int ch) const; 
-  int FM0xxinput(int number, int ch) const;
-  int FM1xxinput(int number, int ch) const;
+  int FP201output(int t=MAXPP) const { return fp201.output[t]; }
+  int FM0xxoutput(int number, int t=MAXPP) const;
+  int FM1xxoutput(int number, int t=MAXPP) const;
+  int FP201input(int ch, int t=MAXPP) const; 
+  int FM0xxinput(int number, int ch, int t=MAXPP) const;
+  int FM1xxinput(int number, int ch, int t=MAXPP) const;
+  int FP201data(int ch) const; 
+  int FM0xxdata(int number, int ch, int t=MAXPP) const;
+  int FM1xxdata(int number, int ch, int t=MAXPP) const;
 
-  int FmsHighTowerTh0() const { return btest(fp201.output,0); } // Small cells
-  int FmsHighTowerTh1() const { return btest(fp201.output,1); } // Large cells
-  int FmsSmallClusterTh0() const { return btest(fp201.output,2); }
-  int FmsSmallClusterTh1() const { return btest(fp201.output,3); }
-  int FmsSmallClusterTh2() const { return btest(fp201.output,4); }
-  int FmsLargeClusterTh0() const { return btest(fp201.output,5); }
-  int FmsLargeClusterTh1() const { return btest(fp201.output,6); }
-  int FmsLargeClusterTh2() const { return btest(fp201.output,7); }
-  int FmsJetPatchTh0() const { return btest(fp201.output,8); }
-  int FmsJetPatchTh1() const { return btest(fp201.output,9); }
-  int FmsJetPatchTh2() const { return btest(fp201.output,10); }
-  int FmsDijet() const { return btest(fp201.output,11); }
-  int FPE() const { return btest(fp201.output,14); }
+  int FmsHighTowerTh0(int t=MAXPP) const { return btest(fp201.output[t],0); } // Small cells
+  int FmsHighTowerTh1(int t=MAXPP) const { return btest(fp201.output[t],1); } // Large cells
+  int FmsSmallClusterTh0(int t=MAXPP) const { return btest(fp201.output[t],2); }
+  int FmsSmallClusterTh1(int t=MAXPP) const { return btest(fp201.output[t],3); }
+  int FmsSmallClusterTh2(int t=MAXPP) const { return btest(fp201.output[t],4); }
+  int FmsLargeClusterTh0(int t=MAXPP) const { return btest(fp201.output[t],5); }
+  int FmsLargeClusterTh1(int t=MAXPP) const { return btest(fp201.output[t],6); }
+  int FmsLargeClusterTh2(int t=MAXPP) const { return btest(fp201.output[t],7); }
+  int FmsJetPatchTh0(int t=MAXPP) const { return btest(fp201.output[t],8); }
+  int FmsJetPatchTh1(int t=MAXPP) const { return btest(fp201.output[t],9); }
+  int FmsJetPatchTh2(int t=MAXPP) const { return btest(fp201.output[t],10); }
+  int FmsDijet(int t=MAXPP) const { return btest(fp201.output[t],11); }
+  int FPE(int t=MAXPP) const { return btest(fp201.output[t],14); }
   
   //
   // Additions for 2012:
   //
   // http://www.star.bnl.gov/public/trg/TSL/Software/FMS.pdf
   //
-  int FmsFPEcombo1() const { return btest(fp201.output,12); }
-  int FmsFPEcombo2() const { return btest(fp201.output,13); }
+  int FmsFPEcombo1(int t=MAXPP) const { return btest(fp201.output[t],12); }
+  int FmsFPEcombo2(int t=MAXPP) const { return btest(fp201.output[t],13); }
 
 private:
   int loadRegisters(int runNumber);
@@ -82,25 +87,27 @@ private:
   Crate& crateAt(int i) { return crates[i-1]; }
   const Crate& crateAt(int i) const { return crates[i-1]; }
 
-  void runFpeQtLayer();
-  void runFmsQtLayer();
-  void runFmsLayer0();
-  void runFpeLayer1();
-  void runFmsLayer1();
-  void runFpdLayer2();
+  void runFpeQtLayer(int t=MAXPP);
+  void runFmsQtLayer(int t=MAXPP);
+  void runFmsLayer0(int t=MAXPP);
+  void runFpeLayer1(int t=MAXPP);
+  void runFmsLayer1(int t=MAXPP);
+  void runFpdLayer2(int t=MAXPP);
 
   template<class T>
-  void writeQtCrate(const T* hit);
-  void writeQtCrate(int crate, int slot, int ch, int adc);
-  void writeFpeQtLayerToFpeLayer1(Crate& sim);
-  void writeFmsQtLayerToFmsLayer0(Crate& sim);
-  void writeFmsLayer0ToFmsLayer1(Crate& sim);
-  void writeFpeLayer1ToFpdLayer2(Crate& sim);
-  void writeFmsLayer1ToFpdLayer2(Crate& sim);
-  void writeFpdLayer2ToFpdLayer3(Crate& sim);
+  void writeQtCrate(const T* hit, int t=MAXPP);
+  void writeQtCrate(int crate, int slot, int ch, int adc, int t=MAXPP);
+  void writeDsmData(int t=MAXPP);
+  
+  void writeFpeQtLayerToFpeLayer1(Crate& sim, int t=MAXPP);
+  void writeFmsQtLayerToFmsLayer0(Crate& sim, int t=MAXPP);
+  void writeFmsLayer0ToFmsLayer1(Crate& sim, int t=MAXPP);
+  void writeFpeLayer1ToFpdLayer2(Crate& sim, int t=MAXPP);
+  void writeFmsLayer1ToFpdLayer2(Crate& sim, int t=MAXPP);
+  void writeFpdLayer2ToFpdLayer3(Crate& sim, int t=MAXPP);
 
-  void fillQtHistogram(const Crate& qtcrate, TH2F* hqtadc);
-  void fillQtHistograms();
+  void fillQtHistogram(const Crate& qtcrate, TH2F* hqtadc, int t=MAXPP);
+  void fillQtHistograms(int t=MAXPP);
 
   // DB time stamp
   TDatime mDBTime;
@@ -132,16 +139,16 @@ private:
   Board& fm002;
   Board& fm003;
   Board& fm004;
-  Board& fm101;
   Board& fm005;
   Board& fm006;
   Board& fm007;
   Board& fm008;
-  Board& fm102;
   Board& fm009;
   Board& fm010;
   Board& fm011;
   Board& fm012;
+  Board& fm101;
+  Board& fm102;
   Board& fm103;
   Board& fm104;
 
@@ -175,7 +182,14 @@ private:
   Int_t mNThrOW;
   TString mThrOWName[MAX];
   Int_t mThrOWValue[MAX];
+  
+  //0 = Use simulatied QT data 1=use DSM input from data
+  Int_t mUseDsmData;
 
+  // # of pre/post from data
+  Int_t mNPre;
+  Int_t mNPost;
+ 
   ClassDef(StFmsTriggerMaker,0);
 };
 

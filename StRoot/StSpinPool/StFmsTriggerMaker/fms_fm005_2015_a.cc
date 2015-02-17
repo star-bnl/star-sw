@@ -1,12 +1,11 @@
 #include "bits.hh"
-#include "Board.hh"
 #include "qt32b_fms_2015_a.hh"
 #include "fms_fm005_2015_a.hh"
 #include <stdio.h>
 
 //#include "registerHack.hh"
 
-void fms_fm005_2015_a(Board& fm005){
+void fms_fm005_2015_a(Board& fm005, int t, int simdat){
   int BSThr1   = fm005.registers[0];
   int BSThr2   = fm005.registers[1];
   int BSThr3   = fm005.registers[2];
@@ -16,14 +15,11 @@ void fms_fm005_2015_a(Board& fm005){
   //int BSThr2=Lg_BSThr2;
   //int BSThr3=Lg_BSThr3;
   //int BitSelect=Lg_BitSelect;
-  BSThr1=192;
-  BSThr2=544;
-  BSThr3=800;
-  BitSelect=4;
-  //printf("FM005 : Thr1=%d Thr2=%d Thr3=%d BitSelect=%d\n",BSThr1,BSThr2,BSThr3,BitSelect);
 
   //input
-  int* in = (int*)fm005.channels;
+  int* in;
+  if(simdat==0) {in=(int*)fm005.channels[t];}
+  else          {in=(int*)fm005.dsmdata[t];}
   int G=in[3];
   int H=in[2];
   int I=in[1];
@@ -67,16 +63,18 @@ void fms_fm005_2015_a(Board& fm005){
   if(JpIJ >0xFF) JpIJ=0xFF;
 
   // Output the resulting 6 5-bit sums to the Layer-1 DSM (30 bits)
-  fm005.output 
+  fm005.output[t] 
     = BS3          | BS2   << 1 
     | BS1GHIJ << 2   
     | J23     << 4
     | JpGH    << 16 | JpIJ << 24;
   
-  printf("%s input G=%08x H=%08x I=%08x J=%08x\n",fm005.name,G,H,I,J); 
-  printf("%s out=%08x BS3=%1d BS2=%1d BS1GHIJ=%1d sum=%4d %4d %4d %4d %4d %4d %4d JpGH/IJ=%3d %3d\n",
-	 fm005.name,fm005.output,BS3,BS2,BS1GHIJ,
-	 bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],bs[6],JpGH,JpIJ);
+  if(PRINT){
+    printf("%s input G=%08x H=%08x I=%08x J=%08x\n",fm005.name,G,H,I,J); 
+    printf("%s out=%08x BS3=%1d BS2=%1d BS1GHIJ=%1d sum=%4d %4d %4d %4d %4d %4d %4d JpGH/IJ=%3d %3d\n",
+	   fm005.name,fm005.output[t],BS3,BS2,BS1GHIJ,
+	   bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],bs[6],JpGH,JpIJ);
+  }
 }
 
 int getFM005_BS3(int out)    {return getbits(out, 0, 1);}

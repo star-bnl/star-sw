@@ -4,13 +4,11 @@
 // 14 Jan 2011
 //
 
-#include "Board.hh"
 #include "bits.hh"
 #include "fms_fm102_2011_a.hh"
 
-void fms_fm102_2011_a(Board& fm102)
-{
-  int* channels = (int*)fm102.channels;
+void fms_fm102_2011_a(Board& fm102, int t){
+  int* channels = (int*)fm102.channels[t];
 
   // Board sum thresholds
   const int R0 = fm102.registers[0];
@@ -72,5 +70,5 @@ void fms_fm102_2011_a(Board& fm102)
   }
 
   // Output the resulting 2 6-bit sums to the Layer-2 DSM (12 bits)
-  fm102.output = Sum[0] | Sum[2] << 6 | BS0 << 24 | BS1 << 25 | BS2 << 26 | HT0 << 27 | HT1 << 28;
+  fm102.output[t] = Sum[0] | Sum[2] << 6 | BS0 << 24 | BS1 << 25 | BS2 << 26 | HT0 << 27 | HT1 << 28;
 }

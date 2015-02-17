@@ -7,8 +7,8 @@
 #ifndef FMS_FM102_2012_A_HH
 #define FMS_FM102_2012_A_HH
 
-struct Board;
+#include "Board.hh"
 
-void fms_fm102_2012_a(Board& fm102);
+void fms_fm102_2012_a(Board& fm102, int t=MAXPP);
 
 #endif	// FMS_FM101_2012_A_HH

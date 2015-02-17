@@ -8,8 +8,7 @@
 #include "Board.hh"
 #include "qt32b_fpe_2009_a.hh"
 
-void qt32b_fpe_2009_a(Board& qt)
-{
-  qt.output = 0;
-  for (int ch = 0; ch < 32; ++ch) if (!btest(qt.bitmask,ch)) qt.output += qt.channels[ch];
+void qt32b_fpe_2009_a(Board& qt, int t){
+  qt.output[t] = 0;
+  for (int ch = 0; ch < 32; ++ch) if (!btest(qt.bitmask,ch)) qt.output[t] += qt.channels[t][ch];
 }

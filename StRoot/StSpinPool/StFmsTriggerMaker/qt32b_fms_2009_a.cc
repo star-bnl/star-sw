@@ -8,13 +8,11 @@
 using namespace std;
 
 #include "bits.hh"
-#include "Board.hh"
 #include "qt32b_fms_2009_a.hh"
 #include <stdio.h>
 
-void qt32b_fms_2009_a(Board& qt)
-{
-  qt.output = 0;
+void qt32b_fms_2009_a(Board& qt, int t){
+  qt.output[t] = 0;
 
   int htadc = 0;
   int htid  = 0;
@@ -23,7 +21,7 @@ void qt32b_fms_2009_a(Board& qt)
     int sum = 0;
     for (int dch = 7; dch >= 0; --dch) {
       int id  = dcard*8+dch;
-      int adc = qt.channels[id];
+      int adc = qt.channels[t][id];
       sum += adc;
       if(adc > 0xfff) {printf("ADC above 4k %d\n",adc); adc = 0x4f;}
       else             {adc = getbits(adc,5,7);}
@@ -37,19 +35,19 @@ void qt32b_fms_2009_a(Board& qt)
     }else{
       sum = getbits(sum,5,5);
     }
-    qt.output |= sum << (dcard*5);
+    qt.output[t] |= sum << (dcard*5);
   }
 
-  qt.output |= htadc << 20;
-  qt.output |= htid  << 27;
+  qt.output[t] |= htadc << 20;
+  qt.output[t] |= htid  << 27;
 
   if(htadc>0)
     printf("%s %08x sum=%3d %3d %3d %3d ht=%3d htid=%3d\n",
-	   qt.name,qt.output,
-	   getbits(qt.output,0 ,5),
-	   getbits(qt.output,5 ,5),
-	   getbits(qt.output,10,5),
-	   getbits(qt.output,15,5),
+	   qt.name,qt.output[t],
+	   getbits(qt.output[t],0 ,5),
+	   getbits(qt.output[t],5 ,5),
+	   getbits(qt.output[t],10,5),
+	   getbits(qt.output[t],15,5),
 	   htadc,htid);
 }
 
@@ -61,18 +59,15 @@ void getQtDaughterSum(int qtout, int* sum)
   sum[3] = getbits(qtout,15,5);
 }
 
-int getQtHighTowerAdc(int qtout)
-{
+int getQtHighTowerAdc(int qtout){
   return getbits(qtout,20,7);
 }
 
-int getQtHighTowerId(int qtout)
-{
+int getQtHighTowerId(int qtout){
   return getbits(qtout,27,5);
 }
 
-void getQtSumAndHighTower(int* channels, int* A, int* B, int* C, int* D, int& htadc, int& htid)
-{
+void getQtSumAndHighTower(int* channels, int* A, int* B, int* C, int* D, int& htadc, int& htid){
   getQtDaughterSum(channels[3],A);
   getQtDaughterSum(channels[2],B);
   getQtDaughterSum(channels[1],C);
