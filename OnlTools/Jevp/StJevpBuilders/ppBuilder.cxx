@@ -40,7 +40,7 @@
   //  int PMT_RP_MAP[8] = { 2, 3, 6, 7, 0, 1, 4, 5 };
   int PMT_RP_MAP[8] = { 2, 3, 6, 7, 1, 0, 5, 4 }; // changed by KY (2015-1-30)
 #endif
-const double TAC_TRSHLD = 50.;
+const double TAC_TRSHLD = 100.;
 
 ClassImp(ppBuilder);
   
@@ -54,6 +54,7 @@ ppBuilder::ppBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   memset(&contVIP, 0, sizeof(contVIP));
   memset(&contentsSVX, 0, sizeof(contentsSVX));
   memset(&mEntriesSVX, 0, sizeof(mEntriesSVX));
+  memset(&mEntriesNCH, 0, sizeof(mEntriesNCH));
 }
 
 ppBuilder::~ppBuilder() {
@@ -100,7 +101,7 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     contVIP.SVX->LabelsDeflate("X");
     contVIP.SVX->LabelsDeflate("Y");
 
-    contVIP.SVX_NCH = new TH2D("SVX_NCH","SVX_NCH <% nch read>",6,0,6,32,0,32);
+    contVIP.SVX_NCH = new TH2D("SVX_NCH","SVX_NCH <average fraction of chnls read>",6,0,6,32,0,32);
     contVIP.SVX_NCH->SetStats(0);
     contVIP.SVX_NCH->LabelsDeflate("X");
     contVIP.SVX_NCH->LabelsDeflate("Y");
@@ -121,8 +122,11 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     }
     //
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=+++++
-    contVIP.VTIM = new TH2D("CTIME","PMT Time; (TAC_{WEST}-TAC_{EAST})/2; (TAC_{WEST}+TAC_{EAST})/2", 50,-700.,700.,50,0.,1400.);
+    contVIP.VTIM = new TH2D("CTIME","PMT Time vs z-vertex; (TAC_{WEST}-TAC_{EAST})/2; (TAC_{WEST}+TAC_{EAST})/2", 50,-700.,700.,50,600.,2000.);
     contVIP.VTIM -> SetStats(0);
+    // added by KY (2015-2-13) : To make the Y-axis label unobstructed
+    gStyle->SetPadLeftMargin(0.11);
+    contVIP.VTIM->GetYaxis()->SetTitleOffset(1.38); 
     //
     //
     np_Tot += sizeof(contVIP)/sizeof( TH2 *);
@@ -130,7 +134,7 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     //
     // for PMT
     int mBinsTAC = 100;
-    double maxBinTAC = 1400.;
+    double maxBinTAC = 2500.;
     int mBinsADC = 100;
     double maxBinADC = 400.;
   for(int i=0;i<8;i++) {
@@ -155,6 +159,12 @@ void ppBuilder::initialize(int argc, char *argv[]) {
       name = SEQ_name[i] + "_TAC";
       caption = RP_name[i] + " TAC ; PMT1; PMT2";
       contPMT_TAC.h2_P2P[i] = new TH2D(name, caption, mBinsTAC,0.,maxBinTAC,mBinsTAC,0.,maxBinTAC);
+      // added by KY (2015-2-13) : To make it look nicer/unobstructed
+      contPMT_TAC.h2_P2P[i]->GetXaxis()->SetNdivisions(5,0,0,true);
+      contPMT_TAC.h2_P2P[i]->GetXaxis()->CenterTitle();
+      contPMT_TAC.h2_P2P[i]->GetYaxis()->CenterTitle();
+      contPMT_TAC.h2_P2P[i]->GetYaxis()->SetTitleOffset(1.28);
+
       np_Tot++;
       //
       //  SVX'es
@@ -285,7 +295,9 @@ void ppBuilder::event(daqReader *rdr)
   // SVX ADCs plots
   //
 
-  daq_dta *dd = rdr->det("pp2pp")->get("adc") ;
+  //  daq_dta *dd = rdr->det("pp2pp")->get("adc") ;
+  // changed by KY (2015-2-13) : read pedestal-subtracted ADC
+  daq_dta *dd = rdr->det("pp2pp")->get("adc_ped_sub") ;  
 
 
   if ( dd ){
@@ -319,10 +331,12 @@ void ppBuilder::event(daqReader *rdr)
 	  double wt1 = contVIP.SVX->GetBinContent( svx+1, idh+1 );
 	  double wt2 = contVIP.SVX_NCH->GetBinContent( svx+1, idh+1 );
 	  if ( nch_live > 0.) {
-	    double nent = (double)mEntriesSVX[svx][idh];
-	    wt1 = (wt1*nent + sum/nch_live  )/(nent+1.);
-	    wt2 = (wt2*nent + nch_live/128. )/(nent+1.);
-      	    mEntriesSVX[svx][idh] += 1 ;
+	    double nent1 = (double)mEntriesSVX[svx][idh];
+            double nent2 = (double)mEntriesNCH[svx][idh];
+	    wt1 = (wt1*nent1 + sum  )/(nent1+nch_live);
+	    wt2 = (wt2*nent2 + nch_live/128. )/(nent2+1.);
+      	    mEntriesSVX[svx][idh] += (int)nch_live ;
+            mEntriesNCH[svx][idh] += 1;
 	  }
 	  contVIP.SVX->SetBinContent( svx+1, idh+1, wt1 ); 
 	  contVIP.SVX_NCH->SetBinContent( svx+1, idh+1, wt2 ); 
