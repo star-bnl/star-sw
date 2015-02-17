@@ -1,13 +1,11 @@
 #include "bits.hh"
-#include "Board.hh"
 #include "qt32b_fms_2015_a.hh"
 #include "fms_fm001_2015_a.hh"
 #include <stdio.h>
 
 //#include "registerHack.hh"
 
-void fms_fm001_2015_a(Board& fm001)
-{
+void fms_fm001_2015_a(Board& fm001, int t, int simdat){
   // thresholds
   const int BSThr1    = fm001.registers[0];
   const int BSThr2    = fm001.registers[1];
@@ -20,7 +18,9 @@ void fms_fm001_2015_a(Board& fm001)
   //int BitSelect=Sm_BitSelect;
 
   //input
-  int* in = (int*)fm001.channels;
+  int* in;
+  if(simdat==0) {in=(int*)fm001.channels[t];}
+  else          {in=(int*)fm001.dsmdata[t];}
   int A=in[3];
   int B=in[2];
   int C=in[1];
@@ -62,16 +62,18 @@ void fms_fm001_2015_a(Board& fm001)
   if(JpCD>0xFF) JpCD=0xFF;
 
   // Output 
-  fm001.output 
+  fm001.output[t]
     = BS3         | BS2    << 1
     | BS1A  << 2  | BS1BCD << 3 
     | D23   << 4
     | JpAB  << 16 | JpCD   << 24;
   
-  printf("%s input A=%08x B=%08x C=%08x D=%08x\n",fm001.name,A,B,C,D); 
-  printf("%s out=%08x BS3=%1d BS2=%1d BS1A/BCD=%1d %1d sum=%4d %4d %4d %4d %4d %4d Jp=%3d %3d\n",
-	 fm001.name,fm001.output,BS3,BS2,BS1A,BS1BCD,
-	 bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],JpAB,JpCD);
+  if(PRINT){
+    printf("%s input A=%08x B=%08x C=%08x D=%08x\n",fm001.name,A,B,C,D); 
+    printf("%s out=%08x BS3=%1d BS2=%1d BS1A/BCD=%1d %1d sum=%4d %4d %4d %4d %4d %4d Jp=%3d %3d\n",
+	   fm001.name,fm001.output[t],BS3,BS2,BS1A,BS1BCD,
+	   bs[0],bs[1],bs[2],bs[3],bs[4],bs[5],JpAB,JpCD);
+  }
 }
 
 int getFM001_BS3(int out)    {return getbits(out, 0, 1);}

@@ -9,14 +9,15 @@
 
 #include <cstring>
 
-struct Board {
-  enum { NCHANNELS = 32, NREGISTERS = 32 };
+enum { NCHANNELS = 32, NREGISTERS = 32, MAXPP=5, MAXT=MAXPP*2+1, PRINT=0};
 
+struct Board {
   char name[10];
   unsigned int bitmask;
-  unsigned short channels[NCHANNELS];
+  unsigned short channels[MAXT][NCHANNELS];
+  unsigned short dsmdata[MAXT][NCHANNELS];
   unsigned int registers[NREGISTERS];
-  unsigned int output;
+  unsigned int output[MAXT];
 
   Board();
   unsigned int& registerAt(int i) { return registers[i>>24]; }
@@ -39,7 +40,8 @@ inline void Board::setName(const char* s)
 inline void Board::clear()
 {
   memset(channels,0,sizeof(channels));
-  output = 0;
+  memset(dsmdata,0,sizeof(dsmdata));
+  memset(output,0,sizeof(output));
 }
 
 inline void Board::reset()
@@ -47,8 +49,9 @@ inline void Board::reset()
   setName("");
   bitmask = 0xffffffff;
   memset(channels,0,sizeof(channels));
+  memset(dsmdata,0,sizeof(dsmdata));
   memset(registers,0,sizeof(registers));
-  output = 0;
+  memset(output,0,sizeof(output));
 }
 
 #endif // BOARD_HH

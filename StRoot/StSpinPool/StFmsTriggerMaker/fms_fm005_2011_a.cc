@@ -5,15 +5,13 @@
 //
 
 //#include <cstdio>
-#include "Board.hh"
 #include "qt32b_fms_2009_a.hh"
 #include "fms_fm005_2011_a.hh"
 
-void fms_fm005_2011_a(Board& fm005)
-{
+void fms_fm005_2011_a(Board& fm005,int t){
   int E[4], F[4], G[4], H[4], htadc, htid;
 
-  getQtSumAndHighTower((int*)fm005.channels,E,F,G,H,htadc,htid);
+  getQtSumAndHighTower((int*)fm005.channels[t],E,F,G,H,htadc,htid);
 
   // High tower thresholds
   const int R0 = fm005.registers[0];
@@ -43,7 +41,7 @@ void fms_fm005_2011_a(Board& fm005)
   if (SumH  > 31) SumH  = 31;
 
   // Output the resulting 6 5-bit sums to the Layer-1 DSM (30 bits)
-  fm005.output = SumH | SumGH << 5 | SumG << 10 | SumF << 15 | SumEF << 20 | SumE << 25 | HT0 << 30 | HT1 << 31;
+  fm005.output[t] = SumH | SumGH << 5 | SumG << 10 | SumF << 15 | SumEF << 20 | SumE << 25 | HT0 << 30 | HT1 << 31;
 
 #if 0
   if (strcmp(fm005.name,"FM007") == 0) {

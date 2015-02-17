@@ -7,9 +7,9 @@
 #ifndef QT32B_FMS_2009_HH
 #define QT32B_FMS_2009_HH
 
-struct Board;
+#include "Board.hh"
 
-void qt32b_fms_2009_a(Board& qt);
+void qt32b_fms_2009_a(Board& qt, int t=MAXPP);
 
 void getQtDaughterSum(int qtout, int* sum);
 int getQtHighTowerAdc(int qtout);

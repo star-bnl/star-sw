@@ -4,14 +4,12 @@
 // 13 Feb 2012
 //
 
-#include "Board.hh"
 #include "bits.hh"
 #include "l1_fp201_2012_b.hh"
 #include <stdio.h>
 
-void l1_fp201_2012_b(Board& fp201)
-{
-  int* channels = (int*)fp201.channels;
+void l1_fp201_2012_b(Board& fp201, int t){
+  int* channels = (int*)fp201.channels[t];
 
   const int R0 = fp201.registers[0]; // FMS-JP0
   const int R1 = fp201.registers[1]; // FMS-JP1
@@ -23,7 +21,7 @@ void l1_fp201_2012_b(Board& fp201)
   int fm101out = channels[0];   // small cells
   int fm102out = channels[1];   // large cells south
   int fm103out = channels[2];   // large cells north
-  int fe101out = fp201.channels[7]; // FE101, FPE
+  int fe101out = channels[7];   // FE101, FPE
 
   // Combine (OR) the two FPE bits
   int fpe0 = btest(fe101out,0);
@@ -103,27 +101,27 @@ void l1_fp201_2012_b(Board& fp201)
 		(dijet && btest(R5,8)) ||
 		(fpe   && btest(R5,9)));
 
-  fp201.output = 0;
+  fp201.output[t] = 0;
 
-  fp201.output |= HT0    << 0;
-  fp201.output |= HT1    << 1;
-  fp201.output |= SBS0   << 2;
-  fp201.output |= SBS1   << 3;
-  fp201.output |= LBS0   << 5;
-  fp201.output |= LBS1   << 6;
-  fp201.output |= LBS2   << 7;
-  fp201.output |= JP0    << 8;
-  fp201.output |= JP1    << 9;
-  fp201.output |= JP2    << 10;
-  fp201.output |= dijet  << 11;
-  fp201.output |= combo1 << 12;
-  fp201.output |= combo2 << 13;
-  fp201.output |= fpe    << 14;
+  fp201.output[t] |= HT0    << 0;
+  fp201.output[t] |= HT1    << 1;
+  fp201.output[t] |= SBS0   << 2;
+  fp201.output[t] |= SBS1   << 3;
+  fp201.output[t] |= LBS0   << 5;
+  fp201.output[t] |= LBS1   << 6;
+  fp201.output[t] |= LBS2   << 7;
+  fp201.output[t] |= JP0    << 8;
+  fp201.output[t] |= JP1    << 9;
+  fp201.output[t] |= JP2    << 10;
+  fp201.output[t] |= dijet  << 11;
+  fp201.output[t] |= combo1 << 12;
+  fp201.output[t] |= combo2 << 13;
+  fp201.output[t] |= fpe    << 14;
 }
 
-void computeJetPatchSums(const Board& fp201, int& SumST, int& SumSB, int& SumNT, int& SumNB, int& SumS, int& SumN)
+void computeJetPatchSums(const Board& fp201, int& SumST, int& SumSB, int& SumNT, int& SumNB, int& SumS, int& SumN, int t)
 {
-  int* channels = (int*)fp201.channels;
+  int* channels = (int*)fp201.channels[t];
 
   int fm101out = channels[0];   // small cells
   int fm102out = channels[1];   // large cells south

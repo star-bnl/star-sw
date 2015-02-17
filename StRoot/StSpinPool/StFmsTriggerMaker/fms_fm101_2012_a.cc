@@ -4,13 +4,11 @@
 // 9 Feb 2012
 //
 
-#include "Board.hh"
 #include "bits.hh"
 #include "fms_fm101_2012_a.hh"
 
-void fms_fm101_2012_a(Board& fm101)
-{
-  int* channels = (int*)fm101.channels;
+void fms_fm101_2012_a(Board& fm101, int t){
+  int* channels = (int*)fm101.channels[t];
 
   const int R0 = fm101.registers[0]; // FMSsmall-cluster-th0
   const int R1 = fm101.registers[1]; // FMSsmall-cluster-th1
@@ -73,29 +71,29 @@ void fms_fm101_2012_a(Board& fm101)
   if (SumS > 31) SumS = 31;
   if (SumN > 31) SumN = 31;
 
-  fm101.output = 0;
+  fm101.output[t] = 0;
 
   switch (R2) {
   case 0: // data taking mode
-    fm101.output |= SumST << 0;
-    fm101.output |= SumS  << 5;
-    fm101.output |= SumSB << 10;
-    fm101.output |= SumNT << 15;
-    fm101.output |= SumN  << 20;
-    fm101.output |= SumNB << 25;
-    fm101.output |= BS0   << 30;
-    fm101.output |= BS1   << 31;
+    fm101.output[t] |= SumST << 0;
+    fm101.output[t] |= SumS  << 5;
+    fm101.output[t] |= SumSB << 10;
+    fm101.output[t] |= SumNT << 15;
+    fm101.output[t] |= SumN  << 20;
+    fm101.output[t] |= SumNB << 25;
+    fm101.output[t] |= BS0   << 30;
+    fm101.output[t] |= BS1   << 31;
     break;
   case 1: // debug mode
-    fm101.output |= SumST << 0;
-    fm101.output |= SumS  << 5;
-    fm101.output |= SumSB << 10;
-    fm101.output |= SumNT << 15;
-    fm101.output |= HT0   << 20;
-    fm101.output |= HT1   << 21;
-    fm101.output |= SumNB << 25;
-    fm101.output |= BS0   << 30;
-    fm101.output |= BS1   << 31;
+    fm101.output[t] |= SumST << 0;
+    fm101.output[t] |= SumS  << 5;
+    fm101.output[t] |= SumSB << 10;
+    fm101.output[t] |= SumNT << 15;
+    fm101.output[t] |= HT0   << 20;
+    fm101.output[t] |= HT1   << 21;
+    fm101.output[t] |= SumNB << 25;
+    fm101.output[t] |= BS0   << 30;
+    fm101.output[t] |= BS1   << 31;
     break;
   }
 }
