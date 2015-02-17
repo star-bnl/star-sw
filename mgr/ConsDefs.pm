@@ -279,10 +279,10 @@
 
     my $gccfilter = "";
     if ($CC eq 'clang') {
-      $CFLAGS .= " -fcolor-diagnostics"; $CXXFLAGS .= " -fcolor-diagnostics";
+#      $CFLAGS .= " -fcolor-diagnostics"; $CXXFLAGS .= " -fcolor-diagnostics";
       #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
     } elsif ($cxx_version >= 4.9) {
-      $CFLAGS .= " -fdiagnostics-color=always"; $CXXFLAGS .= " -fdiagnostics-color=always";
+#      $CFLAGS .= " -fdiagnostics-color=always"; $CXXFLAGS .= " -fdiagnostics-color=always";
     }  elsif (-e "$STAR/mgr/gccfilter") { 
       $gccfilter = "$STAR/mgr/gccfilter -c -w -a ";
       my $flag = system($gccfilter);
@@ -291,16 +291,16 @@
 #      print "gccfilter = $gccfilter ==============\n";
 #      die;
     } 
-    if ($cxx_version >= 4.7) {
-      print "C++11 activated.\n";
-      $CXXFLAGS    .= " -std=c++11"; #gnu++11
-    } elsif (defined($ENV{CXX11}) or $cxx_version .= 4.3) {
-      print "C++0x activated. If you get any errors update to a compiler which fully supports C++11\n";
-      $CXXFLAGS    .= " -std=c++0x"; # gnu++0x
-    } else {
-      print "C++11 needed. Therefore a gcc compiler with a version higher than 4.3 is needed.\n";
-      $CXXFLAGS    .= " -ansi"; # == -std=c89
-    }
+#    if ($cxx_version >= 4.7) {
+#      print "C++11 activated.\n";
+#      $CXXFLAGS    .= " -std=c++11"; #gnu++11
+#    } elsif (defined($ENV{CXX11}) or $cxx_version .= 4.3) {
+#      print "C++0x activated. If you get any errors update to a compiler which fully supports C++11\n";
+#      $CXXFLAGS    .= " -std=c++0x"; # gnu++0x
+#    } else {
+#      print "C++11 needed. Therefore a gcc compiler with a version higher than 4.3 is needed.\n";
+#      $CXXFLAGS    .= " -ansi"; # == -std=c89
+#    }
 
     $CXXCOM = $gccfilter .
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
