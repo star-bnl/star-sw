@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.162 2015/02/16 22:12:46 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.163 2015/02/17 01:42:34 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.163  2015/02/17 01:42:34  perev
+ * Fix bug #3034. It is the conisedence of -1 (return local()) and kEnded.
+ * Now if (local()==-1) volume is missed, return kFailed
+ *
  * Revision 2.162  2015/02/16 22:12:46  perev
  * Roll back all changes related to nudge problem wall x in particular
  *
@@ -1107,14 +1111,13 @@ StiDebug::StiDebug::Break(nCall);
     ians = locate();
     if (!ians) break;
   }
-  if (ians) 		return ians;
+  if (ians) 						return kFailed;
+  if (fabs(mFP.eta())>kMaxEta) 				return kFailed;
   if (mFP.x()> kFarFromBeam) {
-    if (fabs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
   mFP.hz()      = getHz();
-  if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
-  else 				{ mFP.curv() = 1e-6 ;}
+  mFP.curv() = mFP.hz()*mFP.ptin();
 
   mPP() = mFP;
   _state = kTNProEnd;
