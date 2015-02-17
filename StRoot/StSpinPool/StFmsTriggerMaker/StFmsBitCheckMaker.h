@@ -12,8 +12,12 @@ public:
   int InitRun(int runNumber);
   int Make();
   int Finish();
+  void setRun(int v) {mRun=v;}
+  void setPrint(int v) {mPrint=v;}
 
 private:
+  int mRun;
+  int mPrint;
 
   ClassDef(StFmsBitCheckMaker,0);
 };

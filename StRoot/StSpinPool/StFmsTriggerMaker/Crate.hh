@@ -7,6 +7,9 @@
 #ifndef CRATE_HH
 #define CRATE_HH
 
+#include <stdio.h>
+#include "Board.hh"
+
 #if defined(__linux__) || defined(__APPLE__)
 #if defined(__linux__) 
 /* linux has its own (fast) swaps */
@@ -132,6 +135,8 @@ const int ZD101_BASE_ADDRESS = 0x14000000;
 const int VP101_BASE_ADDRESS = 0x16000000;
 
 // FMS crate
+#define RUN15
+#ifndef RUN15
 const int FM001_BASE_ADDRESS = 0x10000000;
 const int FM002_BASE_ADDRESS = 0x11000000;
 const int FM003_BASE_ADDRESS = 0x12000000;
@@ -147,7 +152,25 @@ const int FM010_BASE_ADDRESS = 0x1b000000;
 const int FM011_BASE_ADDRESS = 0x1c000000;
 const int FM012_BASE_ADDRESS = 0x1d000000;
 const int FM103_BASE_ADDRESS = 0x1e000000;
-const int FM104_BASE_ADDRESS = 0x1f000000;
+#endif
+#ifdef RUN15
+const int FM001_BASE_ADDRESS = 0x21000000;
+const int FM002_BASE_ADDRESS = 0x10000000;
+const int FM101_BASE_ADDRESS = 0x11000000;
+const int FM003_BASE_ADDRESS = 0x12000000;
+const int FM004_BASE_ADDRESS = 0x13000000;
+const int FM102_BASE_ADDRESS = 0x14000000;
+const int FM005_BASE_ADDRESS = 0x15000000;
+const int FM006_BASE_ADDRESS = 0x16000000;
+const int FM007_BASE_ADDRESS = 0x17000000;
+const int FM008_BASE_ADDRESS = 0x18000000;
+const int FM103_BASE_ADDRESS = 0x19000000;
+const int FM009_BASE_ADDRESS = 0x1a000000;
+const int FM010_BASE_ADDRESS = 0x1b000000;
+const int FM011_BASE_ADDRESS = 0x1c000000;
+const int FM012_BASE_ADDRESS = 0x1d000000;
+const int FM104_BASE_ADDRESS = 0x1e000000;
+#endif
 
 // BBQ crate
 const int BB001_BASE_ADDRESS = 0x10000000;
@@ -175,15 +198,16 @@ struct Crate {
   Board& boardAt(int i) { return boards[(i>>24)-0x10]; }
   void clear() { for_each(boards,boards+NBOARDS,mem_fun_ref(&Board::clear)); }
   void read(const TriggerDataBlk& event, int id);
-  void decodeQT(const QTBlock& qt, int crate);
+  void decodeQT(const QTBlock& qt, int crate, int t=MAXPP);
   unsigned long long swapLL(unsigned long long x);
   void copy_and_swap(unsigned char* dest, const unsigned char* src);
   void copy_and_swap(unsigned short* dest, const unsigned short* src);
   void unpack(unsigned short* dest, const unsigned char* src);
 };
 
-inline void Crate::read(const TriggerDataBlk& event, int id)
-{
+inline void Crate::read(const TriggerDataBlk& event, int id){
+  printf("CRATE::READ CALLED!!!\n");
+/*
   clear();
   switch (id) {
     // DSM crates
@@ -332,10 +356,10 @@ inline void Crate::read(const TriggerDataBlk& event, int id)
   default:
     break;
   }
+*/
 }
 
-inline void Crate::decodeQT(const QTBlock& qt, int crate)
-{
+inline void Crate::decodeQT(const QTBlock& qt, int crate, int t){
   int sz = qt.length/4;
   assert(qt.data[sz-1] == 0xac10);
   for (int i = 0; i < sz-1;) {
@@ -351,7 +375,7 @@ inline void Crate::decodeQT(const QTBlock& qt, int crate)
       int d = qt.data[i++];
       int ch = d >> 27 & 0x1f;
       assert(0 <= ch && ch < 32);
-      boards[addr].channels[ch] = d & 0xfff;
+      boards[addr].channels[t][ch] = d & 0xfff;
     }
   }
 }

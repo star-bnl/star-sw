@@ -1,4 +1,3 @@
-#include "Board.hh"
 #include "bits.hh"
 #include "l1_fp201_2015_a.hh"
 #include "fms_fm101_2015_a.hh"
@@ -38,7 +37,7 @@ static const int tableJp[NBITJp][NBITJp]={
 // South North
 // T M B B M T
    
-void l1_fp201_2015_a(Board& fp201){
+void l1_fp201_2015_a(Board& fp201, int t, int simdat){
   const int JpThr0=fp201.registers[0];
   const int JpThr1=fp201.registers[1];
   const int JpThr2=fp201.registers[2];
@@ -48,11 +47,13 @@ void l1_fp201_2015_a(Board& fp201){
   //int JpThr2=JPthr2; 
 
   //input
-  int* channels = (int*)fp201.channels;
-  int fm101 = channels[0];   // small cells south
-  int fm102 = channels[1];   // small cells north
-  int fm103 = channels[2];   // large cells south
-  int fm104 = channels[3];   // large cells north
+  int* in;
+  if(simdat==0) {in=(int*)fp201.channels[t];}
+  else          {in=(int*)fp201.dsmdata[t];}
+  int fm101 = in[3];   // small cells south
+  int fm102 = in[0];   // small cells north
+  int fm103 = in[1];   // large cells south
+  int fm104 = in[2];   // large cells north
   
   //BS
   int smBS3 = getFM101_BS3(fm101) | getFM101_BS3(fm102);
@@ -106,22 +107,24 @@ void l1_fp201_2015_a(Board& fp201){
     }
   }
 
-  fp201.output 
+  fp201.output[t]
     = smBS3<<0 | smBS2<<1 | smBS1<<2 
     | lgBS3<<3 | lgBS2<<4 | lgBS1<<5
     | DiBS<<6
     | JP2<<7 | JP1<<8 | JP0<<9 
     | DiJp<<10;
   
-  printf("%s input FM101=%08x FM102=%08x FM103=%08x FM104=%08x\n",fp201.name,fm101,fm102,fm103,fm104); 
-  printf("%s out=%08x smBS3/2/1=%1d %1d %1d lgBS3/2/1=%1d %1d %1d DiBS=%1d JP=%1d %1d %1d DiJp=%1d\n",
-	 fp201.name,fp201.output,
-	 smBS3,smBS2,smBS1,
-	 lgBS3,lgBS2,lgBS1,
-	 DiBS,
-	 JP2,JP1,JP0,
-	 DiJp);
-
+  if(PRINT){
+    printf("%s input FM101=%08x FM102=%08x FM103=%08x FM104=%08x\n",fp201.name,fm101,fm102,fm103,fm104); 
+    printf("%s out=%08x smBS3/2/1=%1d %1d %1d lgBS3/2/1=%1d %1d %1d DiBS=%1d JP=%1d %1d %1d DiJp=%1d\n",
+	   fp201.name,fp201.output[t],
+	   smBS3,smBS2,smBS1,
+	   lgBS3,lgBS2,lgBS1,
+	   DiBS,
+	   JP2,JP1,JP0,
+	   DiJp);
+  }
+  /*
   printf("%s DiBS bs1=%03x\n",fp201.name,bs1);
   for(int j=0; j<NBITBS; j++){
     for(int i=0; i<=j; i++){
@@ -136,4 +139,5 @@ void l1_fp201_2015_a(Board& fp201){
     }
     printf("\n");
   }
+  */
 }

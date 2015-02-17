@@ -7,8 +7,8 @@
 #ifndef MIX_FE101_2009_A_HH
 #define MIX_FE101_2009_A_HH
 
-struct Board;
+#include "Board.hh"
 
-void mix_fe101_2009_a(Board& fe101);
+void mix_fe101_2009_a(Board& fe101, int t=MAXPP);
 
 #endif	// MIX_FE101_2009_A_HH

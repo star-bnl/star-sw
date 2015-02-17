@@ -4,18 +4,16 @@
 // 14 Jan 2011
 //
 
-#include "Board.hh"
 #include "bits.hh"
 #include "l1_fp201_2011_a.hh"
 
-void l1_fp201_2011_a(Board& fp201)
-{
-  int* channels = (int*)fp201.channels;
+void l1_fp201_2011_a(Board& fp201, int t){
+  int* channels = (int*)fp201.channels[t];
 
   int fm101out = channels[0];   // small cells
   int fm102out = channels[1];   // large cells south
   int fm103out = channels[2];   // large cells north
-  int fe101out = fp201.channels[7]; // FE101, FPE
+  int fe101out = channels[7];   // FE101, FPE
 
   // Combine (OR) the two FPE bits
   int fpe0 = btest(fe101out,0);
@@ -67,13 +65,11 @@ void l1_fp201_2011_a(Board& fp201)
                ((SumSB > R0) && ((SumNT > R0) || (SumNB > R0))) ||
                ((SumNT > R0) &&  (SumNB > R0)));
 
-  fp201.output = HT0 | HT1 << 1 | SBS0 << 2 | SBS1 << 3 | SBS2 << 4 | LBS0 << 5 | LBS1 << 6 | LBS2 << 7 | JP0 << 8 | JP1 << 9 | JP2 << 10 | dijet << 11 | fpe << 14;
+  fp201.output[t] = HT0 | HT1 << 1 | SBS0 << 2 | SBS1 << 3 | SBS2 << 4 | LBS0 << 5 | LBS1 << 6 | LBS2 << 7 | JP0 << 8 | JP1 << 9 | JP2 << 10 | dijet << 11 | fpe << 14;
 }
 
-void computeJetPatchSums(const Board& fp201, int& SumST, int& SumSB, int& SumNT,
- int& SumNB)
-{
-  int* channels = (int*)fp201.channels;
+void computeJetPatchSums(const Board& fp201, int& SumST, int& SumSB, int& SumNT, int& SumNB, int t){
+  int* channels = (int*)fp201.channels[t];
 
   int fm101out = channels[0];   // small cells
   int fm102out = channels[1];   // large cells south

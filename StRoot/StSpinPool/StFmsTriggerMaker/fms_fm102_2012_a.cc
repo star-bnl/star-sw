@@ -4,13 +4,11 @@
 // 9 Feb 2012
 //
 
-#include "Board.hh"
 #include "bits.hh"
 #include "fms_fm102_2012_a.hh"
 
-void fms_fm102_2012_a(Board& fm102)
-{
-  int* channels = (int*)fm102.channels;
+void fms_fm102_2012_a(Board& fm102, int t){
+  int* channels = (int*)fm102.channels[t];
 
   // Board sum thresholds
   const int R0 = fm102.registers[0]; // FMSlarge-cluster-th0
@@ -78,14 +76,14 @@ void fms_fm102_2012_a(Board& fm102)
   if (SumB > 31) SumB = 31;
   if (SumS > 31) SumS = 31;
 
-  fm102.output = 0;
+  fm102.output[t] = 0;
 
-  fm102.output |= SumT << 0;
-  fm102.output |= SumS << 5;
-  fm102.output |= SumB << 10;
-  fm102.output |= BS0  << 24;
-  fm102.output |= BS1  << 25;
-  fm102.output |= BS2  << 26;
-  fm102.output |= HT0  << 27;
-  fm102.output |= HT1  << 28;
+  fm102.output[t] |= SumT << 0;
+  fm102.output[t] |= SumS << 5;
+  fm102.output[t] |= SumB << 10;
+  fm102.output[t] |= BS0  << 24;
+  fm102.output[t] |= BS1  << 25;
+  fm102.output[t] |= BS2  << 26;
+  fm102.output[t] |= HT0  << 27;
+  fm102.output[t] |= HT1  << 28;
 }

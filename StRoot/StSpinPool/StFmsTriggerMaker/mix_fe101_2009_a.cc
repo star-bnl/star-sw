@@ -8,9 +8,8 @@
 #include "Board.hh"
 #include "mix_fe101_2009_a.hh"
 
-void mix_fe101_2009_a(Board& fe101)
-{
-  int* fe101channels = (int*)fe101.channels;
+void mix_fe101_2009_a(Board& fe101, int t){
+  int* fe101channels = (int*)fe101.channels[t];
   int qt1sum = getbits(fe101channels[0],0,17);
   int qt2sum = getbits(fe101channels[1],0,17);
   int qt3sum = getbits(fe101channels[2],0,17);
@@ -22,5 +21,5 @@ void mix_fe101_2009_a(Board& fe101)
   const int fpeThr = R1 << 12 | R0;
   int fpe1 = sum1 > fpeThr;
   int fpe2 = sum2 > fpeThr;
-  fe101.output = fpe1 | fpe2 << 1;
+  fe101.output[t] = fpe1 | fpe2 << 1;
 }

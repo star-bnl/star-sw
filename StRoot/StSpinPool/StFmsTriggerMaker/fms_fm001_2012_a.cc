@@ -4,16 +4,14 @@
 // 11 Feb 2012
 //
 
-#include "Board.hh"
 #include "qt32b_fms_2009_a.hh"
 #include "fms_fm001_2012_a.hh"
 #include <stdio.h>
 
-void fms_fm001_2012_a(Board& fm001)
-{
+void fms_fm001_2012_a(Board& fm001, int t){
   int A[4], B[4], C[4], D[4], htadc, htid;
 
-  getQtSumAndHighTower((int*)fm001.channels,A,B,C,D,htadc,htid);
+  getQtSumAndHighTower((int*)fm001.channels[t],A,B,C,D,htadc,htid);
 
   // High tower thresholds
   const int R0 = fm001.registers[0];
@@ -46,7 +44,7 @@ void fms_fm001_2012_a(Board& fm001)
   if (SumD  > 31) SumD  = 31;
 
   // Output the resulting 6 5-bit sums to the Layer-1 DSM (30 bits)
-  fm001.output = SumD | SumC << 5 | SumBC << 10 | SumB << 15 | SumCD << 20 | SumA << 25 | HT0 << 30 | HT1 << 31;
+  fm001.output[t] = SumD | SumC << 5 | SumBC << 10 | SumB << 15 | SumCD << 20 | SumA << 25 | HT0 << 30 | HT1 << 31;
 
   printf("%10s HTADC=%4d sum=%2d %2d %2d %2d %2d %2d %2d\n",fm001.name,htadc,SumA,SumAB,SumB,SumBC,SumC,SumCD,SumD);
 }
