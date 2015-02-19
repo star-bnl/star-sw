@@ -112,17 +112,17 @@ void StiIstDetectorBuilder::useVMCGeometry()
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoMatrix* sensorMatrix = 0;
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
-      if (mBuildIdealGeom) {
-         sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
-      } else {
-         sensorMatrix = (TGeoMatrix*) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
-      }
+      if (!mBuildIdealGeom) {
+         const TGeoHMatrix* sensorMatrixDb = mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
-      if (!sensorMatrix) {
-         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
-         continue;
+         if (!sensorMatrixDb) {
+            LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
+            continue;
+         }
+
+         sensorMatrix = *sensorMatrixDb;
       }
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
@@ -138,7 +138,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
          StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
          TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
-         StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
+         StiPlacement *pPlacement= new StiPlacement(sensorMatrix, offset);
 
          // Build final detector object
          StiDetector *stiDetector = getDetectorFactory()->getInstance();
@@ -222,23 +222,23 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          continue;
       }
 
-      TGeoMatrix* transMatrix = 0;
+      TGeoHMatrix transMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
-      if (mBuildIdealGeom) {
-         transMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
-      } else {
-         transMatrix = (TGeoMatrix*) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      if (!mBuildIdealGeom) {
+         const TGeoHMatrix* transMatrixDb = mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+
+         if (!transMatrixDb) {
+            LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
+            continue;
+         }
+
+         transMatrix = *transMatrixDb;
       }
 
-      if (!transMatrix) {
-         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
-         continue;
-      }
-
-      StiPlacement *cfBackingPlacement = new StiPlacement(*transMatrix, cfBackingOffset);
-      StiPlacement *alumConnectorPlacement = new StiPlacement(*transMatrix, alumConnectorOffset);
-      StiPlacement *gtenConnectorPlacement = new StiPlacement(*transMatrix, gtenConnectorOffset);
-      StiPlacement *digiBoardPlacement = new StiPlacement(*transMatrix, digiBoardOffset);
+      StiPlacement *cfBackingPlacement = new StiPlacement(transMatrix, cfBackingOffset);
+      StiPlacement *alumConnectorPlacement = new StiPlacement(transMatrix, alumConnectorOffset);
+      StiPlacement *gtenConnectorPlacement = new StiPlacement(transMatrix, gtenConnectorOffset);
+      StiPlacement *digiBoardPlacement = new StiPlacement(transMatrix, digiBoardOffset);
 
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
       stiDetector->setProperties(pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
