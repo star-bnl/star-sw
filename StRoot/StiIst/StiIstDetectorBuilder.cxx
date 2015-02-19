@@ -51,7 +51,10 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() -I- Started " << endm;
+   if (!gGeoManager)
+      throw runtime_error("StiIstDetectorBuilder::StiIstDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
 
    SetCurrentDetectorBuilder(this);
 
@@ -59,14 +62,15 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
       TObjectSet *istDbDataSet = (TObjectSet *) source.GetDataSet("ist_db");
 
       if (!istDbDataSet) {
-         LOG_ERROR << "StiIstDetectorBuilder::buildDetectors: IST geometry was requested from "
-                   "DB but no StIstDb object found. Check for istDb option in BFC chain" << endm;
+         LOG_ERROR << "StiIstDetectorBuilder::buildDetectors() - IST geometry was requested from "
+            "DB but no StIstDb object found. Check for istDb option in BFC chain" << endm;
          exit(EXIT_FAILURE);
       }
 
       mIstDb = (StIstDb *) istDbDataSet->GetObject();
       assert(mIstDb);
-      LOG_INFO << "StiIstDetectorBuilder::buildDetectors: Will build IST geometry from DB tables" << endm;
+
+      LOG_INFO << "StiIstDetectorBuilder::buildDetectors() - Will build IST geometry from DB tables" << endm;
    }
 
    // Gas material must be defined. Here we use air properties
@@ -84,8 +88,6 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 
 void StiIstDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endm;
-
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
@@ -105,7 +107,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder...");
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
@@ -119,7 +121,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       }
 
       if (!sensorMatrix) {
-         Warning("useVMCGeometry()", "Could not get IST sensor position matrix. Skipping to next ladder...");
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
          continue;
       }
 
@@ -216,7 +218,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder...");
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
@@ -229,7 +231,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
 
       if (!transMatrix) {
-         Warning("useVMCGeometry()", "Could not get IST sensor position matrix. Skipping to next ladder...");
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot get IST sensor position matrix. Skipping to next ladder..." << endm;
          continue;
       }
 

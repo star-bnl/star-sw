@@ -49,13 +49,17 @@ StiSstDetectorBuilder::~StiSstDetectorBuilder()
 /** Build the SST detector components. */
 void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - I - Started " << endm;
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
+
+   if (!gGeoManager)
+      throw runtime_error("StiSstDetectorBuilder::buildDetectors() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
 
    if (!mBuildIdealGeom) {
 
       if (!gStSstDbMaker) {
-         LOG_ERROR << "StiSstDetectorBuilder::buildDetectors: SST geometry was requested from "
+         LOG_ERROR << "StiSstDetectorBuilder::buildDetectors() - SST geometry was requested from "
             "DB but no StSstDb object found. Check for sstDb option in BFC chain" << endm;
          exit(EXIT_FAILURE);
       }
@@ -63,7 +67,7 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
       mSstDb = (StSstDbMaker*) gStSstDbMaker;
       assert(mSstDb);
 
-      LOG_INFO << "StiSstDetectorBuilder::buildDetectors: Will build SST geometry from DB tables" << endm;
+      LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - Will build SST geometry from DB tables" << endm;
    }
 
    SetCurrentDetectorBuilder(this);
@@ -86,8 +90,6 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
  */
 void StiSstDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiSstDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
-
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
@@ -107,7 +109,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         Warning("useVMCGeometry()", "Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder...");
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
@@ -121,48 +123,17 @@ void StiSstDetectorBuilder::useVMCGeometry()
       }
 
       if (!sensorMatrix) {
-         Warning("useVMCGeometry()", "Could not get SST sensor position matrix. Skipping to next ladder...");
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot get SST sensor position matrix. Skipping to next ladder..." << endm;
          continue;
       }
 
-      // Build global rotation for the sensor
-      TGeoRotation sensorRot(*sensorMatrix);
-
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-      // Convert center of the sensor geobox to coordinates in the global coordinate system
-      double sensorXyzLocal[3]  = {};
-      double sensorXyzGlobal[3] = {};
-
-      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-      TVector3 sensorVec(sensorXyzGlobal);
 
       // XXX:ds: Need to verify the constant for sensor spacing
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
       StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
-      add(stiShape);
-
-      Double_t phi  = sensorVec.Phi();
-      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-      double normVecMag = fabs(r * sin(phi - phiD));
-      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-      else                            normVec *=  normVecMag;
-
-      // Volume positioning
-      StiPlacement *pPlacement = new StiPlacement();
-
-      pPlacement->setZcenter(0);
-      pPlacement->setLayerRadius(r);
-      pPlacement->setLayerAngle(phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-      double centerOrient = sensorVec.Phi() - normVec.Phi();
-      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+      StiPlacement *pPlacement= new StiPlacement(*sensorMatrix);
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();

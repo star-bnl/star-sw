@@ -1,6 +1,39 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.38 2014/12/02 23:25:54 smirnovd Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.38.2.1 2015/02/19 01:59:07 smirnovd Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.38.2.1  2015/02/19 01:59:07  smirnovd
+// Squashed Dmitri Smirnov's commits SL15b..02/16/2015 (a3803b3b)
+//
+// Made all info/warn/error messages consistent across StiDetectorBuilder's
+//
+// Made all info/warn/error messages consistent across StiDetectorBuilder's
+//
+// StiSsdHitLoader: Just to be safe got rid of local variable 'ladder' shadowing the loop's counter having the same name
+//
+// StiXxxDetectorBuilder: Added a check for valid global object of TGeoManager. The detector builder is required one and cannot proceed if one does not exist
+//
+// Check for valid gGeoManager in buildDetectors instead of constructor
+//
+// This is a fixup of the change committed on 2015-01-30 16:33:59 (8b14dfaf)
+// The detector builder requires a valid TGeoManager object to build detector
+// geometries. However in the current StiMaker gGeoManager is not available when
+// detector builder is created. It becomes available just before the
+// ::buildDetectors() is called in StiMasterDetectorBuilder::build()
+//
+// StiSstDetectorBuilder: Switched to StiPlacement constructor when positioning active IST sensors
+//
+// Revision 1.40  2015/02/03 10:21:17  smirnovd
+// Check for valid gGeoManager in buildDetectors instead of constructor
+//
+// This is a fixup of the change committed on 2015-01-30 16:33:59 (8b14dfaf)
+// The detector builder requires a valid TGeoManager object to build detector
+// geometries. However in the current StiMaker gGeoManager is not available when
+// detector builder is created. It becomes available just before the
+// ::buildDetectors() is called in StiMasterDetectorBuilder::build()
+//
+// Revision 1.39  2015/01/30 21:34:00  smirnovd
+// StiXxxDetectorBuilder: Added a check for valid global object of TGeoManager. The detector builder is required one and cannot proceed if one does not exist
+//
 // Revision 1.38  2014/12/02 23:25:54  smirnovd
 // StiXxxDetectorBuilder: Removed deprecated calls to dummy methods
 //
@@ -101,6 +134,11 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
+   if (!gGeoManager)
+      throw runtime_error("StiSsdDetectorBuilder::StiSsdDetectorBuilder() "
+         "- Cannot build Sti geometry due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option");
+
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     StSsdBarrel *mySsd = StSsdBarrel::Instance();
     if (! mySsd) {// no active SSD

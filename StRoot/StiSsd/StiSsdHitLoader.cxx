@@ -1,6 +1,27 @@
-// $Id: StiSsdHitLoader.cxx,v 1.13 2009/03/18 19:55:39 fisyak Exp $
+// $Id: StiSsdHitLoader.cxx,v 1.13.4.1 2015/02/19 01:59:07 smirnovd Exp $
 // 
 // $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.13.4.1  2015/02/19 01:59:07  smirnovd
+// Squashed Dmitri Smirnov's commits SL15b..02/16/2015 (a3803b3b)
+//
+// Made all info/warn/error messages consistent across StiDetectorBuilder's
+//
+// Made all info/warn/error messages consistent across StiDetectorBuilder's
+//
+// StiSsdHitLoader: Just to be safe got rid of local variable 'ladder' shadowing the loop's counter having the same name
+//
+// StiXxxDetectorBuilder: Added a check for valid global object of TGeoManager. The detector builder is required one and cannot proceed if one does not exist
+//
+// Check for valid gGeoManager in buildDetectors instead of constructor
+//
+// This is a fixup of the change committed on 2015-01-30 16:33:59 (8b14dfaf)
+// The detector builder requires a valid TGeoManager object to build detector
+// geometries. However in the current StiMaker gGeoManager is not available when
+// detector builder is created. It becomes available just before the
+// ::buildDetectors() is called in StiMasterDetectorBuilder::build()
+//
+// StiSstDetectorBuilder: Switched to StiPlacement constructor when positioning active IST sensors
+//
 // Revision 1.13  2009/03/18 19:55:39  fisyak
 // remove StiDetectorFinder class
 //
@@ -84,9 +105,8 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 
 	      if (!hit) throw runtime_error("StiSsdHitLoader::loadHits() - WARNING - hit==0");
 
-	      int ssdLadder = hit->ladder();
-	      int ladder = ssdLadder -1 ;
-	      detector = _detector->getDetector(layer,ladder);	      
+	      detector = _detector->getDetector(layer, hit->ladder() - 1);
+
 	      if (hit && detector) 
 		{
 		  compt++;
