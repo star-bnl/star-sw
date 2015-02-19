@@ -240,19 +240,25 @@ int StFmsTriggerMaker::MakeTrgData(){
       for(int adr=0; adr<12; adr++){
 	for(int ch=0; ch<32; ch++){
 	  int adc=trgd->fmsADC(crt,adr,ch,x);
-	  if(adc>0) {writeQtCrate(crt,adr,ch,adc,t); n++;}
+	  if(adc>0) {
+	    writeQtCrate(crt,adr,ch,adc,t); 
+	    n++;
+	    printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	  }
 	}
       }
     }
   }
   printf("StFmsTriggerMaker::MakeTrgData found %d hits\n",n);
   //hack FAKE stuck bits -akio
+  /*
   for(int t=0; t<MAXT; t++){
     int x=t-MAXPP;
     if(-x>mNPre|| x>mNPost) continue;
     writeQtCrate(3,2,16,0x115,t);
     writeQtCrate(4,5, 0,0x040,t);
   }
+  */
   return kStOk;
 }
 
@@ -539,7 +545,7 @@ void StFmsTriggerMaker::writeFmsQtLayerToFmsLayer0(Crate& sim, int t){
   }
 
   //ZERO-ing out QT3A->FM003 lower 16 bits FAKE - akio
-  ((int*)fm003sim.channels[t])[3] = 0;
+  //((int*)fm003sim.channels[t])[3] = 0;
   //wrong map!!!
   /*
   ((int*)fm005sim.channels[t])[1] = qt1.boards[4].output[t];

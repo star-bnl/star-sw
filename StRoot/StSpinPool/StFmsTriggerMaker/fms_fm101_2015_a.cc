@@ -50,6 +50,7 @@ void fms_fm101_2015_a(Board& fm101, int t, int simdat){
     | JpT  << 5 | JpM  << 16 | JpB  <<24;
   
   if(PRINT)
+    printf("%s input T=%08x B=%08x\n",fm101.name,T,B);
     printf("%s out=%08x BS3=%1d BS2=%1d BS1T/M/B=%1d %1d %1d JpT/M/B %3d %3d %3d\n",
 	   fm101.name,fm101.output[t],
 	   BS3,BS2,BS1T,BS1M,BS1B,JpT,JpM,JpB);

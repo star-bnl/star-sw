@@ -25,11 +25,10 @@ void qt32b_fms_2015_a(Board& qt, int t){
   qt.output[t] |= sum[0];
   qt.output[t] |= sum[1]<<16;
   
-  /*
-  if(sum[0]>0 || sum[1]>0)
-    printf("%s=%08x sum=%4d %4d\n",
-	   qt.name,qt.output[t],getQT01Sum(qt.output[t]),getQT23Sum(qt.output[t]));
-  */
+  if(PRINT)
+    if(sum[0]>0 || sum[1]>0)
+      printf("%s=%08x sum=%4d %4d\n",
+	     qt.name,qt.output[t],getQT01Sum(qt.output[t]),getQT23Sum(qt.output[t]));
 }
 
 int getQT01Sum(int qtout){return getbits(qtout, 0,12);}

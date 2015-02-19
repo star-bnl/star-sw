@@ -46,6 +46,47 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
   //int JpThr1=JPthr1; 
   //int JpThr2=JPthr2; 
 
+  //hack
+  if(PRINT && t==MAXPP){
+    int* sim=(int*)fp201.channels[t];
+    int* dsm=(int*)fp201.dsmdata[t];
+    int s1=sim[3], d1=dsm[3];
+    int s2=sim[0], d2=dsm[0];
+    int s3=sim[1], d3=dsm[1];
+    int s4=sim[2], d4=dsm[2];
+    if(getFM101_BS3(s1)  != getFM101_BS3(d1))  printf("BAD FM101_BS3 sim=%d data=%d\n", getFM101_BS3(s1), getFM101_BS3(d1));
+    if(getFM101_BS3(s2)  != getFM101_BS3(d2))  printf("BAD FM102_BS3 sim=%d data=%d\n", getFM101_BS3(s2), getFM101_BS3(d2));
+    if(getFM103_BS3(s3)  != getFM103_BS3(d3))  printf("BAD FM103_BS3 sim=%d data=%d\n", getFM103_BS3(s3), getFM103_BS3(d3));
+    if(getFM103_BS3(s4)  != getFM103_BS3(d4))  printf("BAD FM104_BS3 sim=%d data=%d\n", getFM103_BS3(s4), getFM103_BS3(d4));
+    if(getFM101_BS2(s1)  != getFM101_BS2(d1))  printf("BAD FM101_BS2 sim=%d data=%d\n", getFM101_BS2(s1), getFM101_BS2(d1));
+    if(getFM101_BS2(s2)  != getFM101_BS2(d2))  printf("BAD FM102_BS2 sim=%d data=%d\n", getFM101_BS2(s2), getFM101_BS2(d2));
+    if(getFM103_BS2(s3)  != getFM103_BS2(d3))  printf("BAD FM103_BS2 sim=%d data=%d\n", getFM103_BS2(s3), getFM103_BS2(d3));
+    if(getFM103_BS2(s4)  != getFM103_BS2(d4))  printf("BAD FM104_BS2 sim=%d data=%d\n", getFM103_BS2(s4), getFM103_BS2(d4));
+    if(getFM101_BS1T(s1) != getFM101_BS1T(d1)) printf("BAD FM101_BS1T sim=%d data=%d\n",getFM101_BS1T(s1),getFM101_BS1T(d1));
+    if(getFM101_BS1T(s2) != getFM101_BS1T(d2)) printf("BAD FM102_BS1T sim=%d data=%d\n",getFM101_BS1T(s2),getFM101_BS1T(d2));
+    if(getFM103_BS1T(s3) != getFM103_BS1T(d3)) printf("BAD FM103_BS1T sim=%d data=%d\n",getFM103_BS1T(s3),getFM103_BS1T(d3));
+    if(getFM103_BS1T(s4) != getFM103_BS1T(d4)) printf("BAD FM104_BS1T sim=%d data=%d\n",getFM103_BS1T(s4),getFM103_BS1T(d4));
+    if(getFM101_BS1M(s1) != getFM101_BS1M(d1)) printf("BAD FM101_BS1M sim=%d data=%d\n",getFM101_BS1M(s1),getFM101_BS1M(d1));
+    if(getFM101_BS1M(s2) != getFM101_BS1M(d2)) printf("BAD FM102_BS1M sim=%d data=%d\n",getFM101_BS1M(s2),getFM101_BS1M(d2));
+    if(getFM103_BS1M(s3) != getFM103_BS1M(d3)) printf("BAD FM103_BS1M sim=%d data=%d\n",getFM103_BS1M(s3),getFM103_BS1M(d3));
+    if(getFM103_BS1M(s4) != getFM103_BS1M(d4)) printf("BAD FM104_BS1M sim=%d data=%d\n",getFM103_BS1M(s4),getFM103_BS1M(d4));
+    if(getFM101_BS1B(s1) != getFM101_BS1B(d1)) printf("BAD FM101_BS1B sim=%d data=%d\n",getFM101_BS1B(s1),getFM101_BS1B(d1));
+    if(getFM101_BS1B(s2) != getFM101_BS1B(d2)) printf("BAD FM102_BS1B sim=%d data=%d\n",getFM101_BS1B(s2),getFM101_BS1B(d2));
+    if(getFM103_BS1B(s3) != getFM103_BS1B(d3)) printf("BAD FM103_BS1B sim=%d data=%d\n",getFM103_BS1B(s3),getFM103_BS1B(d3));
+    if(getFM103_BS1B(s4) != getFM103_BS1B(d4)) printf("BAD FM104_BS1B sim=%d data=%d\n",getFM103_BS1B(s4),getFM103_BS1B(d4));
+    if(getFM101_JpT(s1) != getFM101_JpT(d1)) printf("BAD FM101_JpT sim=%d data=%d\n",getFM101_JpT(s1),getFM101_JpT(d1));
+    if(getFM101_JpT(s2) != getFM101_JpT(d2)) printf("BAD FM102_JpT sim=%d data=%d\n",getFM101_JpT(s2),getFM101_JpT(d2));
+    if(getFM103_JpT(s3) != getFM103_JpT(d3)) printf("BAD FM103_JpT sim=%d data=%d\n",getFM103_JpT(s3),getFM103_JpT(d3));
+    if(getFM103_JpT(s4) != getFM103_JpT(d4)) printf("BAD FM104_JpT sim=%d data=%d\n",getFM103_JpT(s4),getFM103_JpT(d4));
+    if(getFM101_JpM(s1) != getFM101_JpM(d1)) printf("BAD FM101_JpM sim=%d data=%d\n",getFM101_JpM(s1),getFM101_JpM(d1));
+    if(getFM101_JpM(s2) != getFM101_JpM(d2)) printf("BAD FM102_JpM sim=%d data=%d\n",getFM101_JpM(s2),getFM101_JpM(d2));
+    if(getFM103_JpM(s3) != getFM103_JpM(d3)) printf("BAD FM103_JpM sim=%d data=%d\n",getFM103_JpM(s3),getFM103_JpM(d3));
+    if(getFM103_JpM(s4) != getFM103_JpM(d4)) printf("BAD FM104_JpM sim=%d data=%d\n",getFM103_JpM(s4),getFM103_JpM(d4));
+    if(getFM101_JpB(s1) != getFM101_JpB(d1)) printf("BAD FM101_JpB sim=%d data=%d\n",getFM101_JpB(s1),getFM101_JpB(d1));
+    if(getFM101_JpB(s2) != getFM101_JpB(d2)) printf("BAD FM102_JpB sim=%d data=%d\n",getFM101_JpB(s2),getFM101_JpB(d2));
+    if(getFM103_JpB(s3) != getFM103_JpB(d3)) printf("BAD FM103_JpB sim=%d data=%d\n",getFM103_JpB(s3),getFM103_JpB(d3));
+    if(getFM103_JpB(s4) != getFM103_JpB(d4)) printf("BAD FM104_JpB sim=%d data=%d\n",getFM103_JpB(s4),getFM103_JpB(d4));
+  }  
   //input
   int* in;
   if(simdat==0) {in=(int*)fp201.channels[t];}

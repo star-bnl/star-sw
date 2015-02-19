@@ -20,7 +20,7 @@ void bitcheck(int run=16043074, int file=1, int nEvents=10000, int useDSM=1){
   if(useDSM==1) fmstrg->useDsmData();
   StFmsBitCheckMaker* bitcheck = new StFmsBitCheckMaker();
   bitcheck->setRun(run);
-  bitcheck->setPrint(0);
+  bitcheck->setPrint(1);
 
   chain->Init();
 
@@ -31,7 +31,7 @@ void bitcheck(int run=16043074, int file=1, int nEvents=10000, int useDSM=1){
     int x=i-NX;  
     char tt[100];
     sprintf(tt,"FMS xing=%d",x);
-    HF[i]=new TH1F(tt,tt,50,0,10000); HF[i]->SetFillColor(kRed);
+    HF[i]=new TH1F(tt,tt,50,0,200000); HF[i]->SetFillColor(kRed);
     sprintf(tt,"BBC xing=%d",x);      
     HB[i]=new TH1F(tt,tt,50,0,10000); HB[i]->SetFillColor(kRed);
   }
