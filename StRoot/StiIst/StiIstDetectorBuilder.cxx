@@ -114,6 +114,10 @@ void StiIstDetectorBuilder::useVMCGeometry()
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
       TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
+      // Temporarily save the translation for this sensor in Z so, we can center
+      // the newly built sensors at Z=0 (in ideal geometry) later
+      double idealOffsetZ = sensorMatrix.GetTranslation()[2];
+
       if (!mBuildIdealGeom) {
          const TGeoHMatrix* sensorMatrixDb = mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
@@ -124,6 +128,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
          sensorMatrix = *sensorMatrixDb;
       }
+
+      // Update the global translation in Z so that the new volumes are centered at Z=0
+      sensorMatrix.SetDz(sensorMatrix.GetTranslation()[2] - idealOffsetZ);
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
@@ -224,6 +231,10 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
       TGeoHMatrix transMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
+      // Temporarily save the translation for this sensor in Z so, we can center
+      // the newly built sensors at Z=0 (in ideal geometry) later
+      double idealOffsetZ = transMatrix.GetTranslation()[2];
+
       if (!mBuildIdealGeom) {
          const TGeoHMatrix* transMatrixDb = mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
@@ -234,6 +245,9 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
          transMatrix = *transMatrixDb;
       }
+
+      // Update the global translation in Z so that the new volumes are centered at Z=0
+      transMatrix.SetDz(transMatrix.GetTranslation()[2] - idealOffsetZ);
 
       StiPlacement *cfBackingPlacement = new StiPlacement(transMatrix, cfBackingOffset);
       StiPlacement *alumConnectorPlacement = new StiPlacement(transMatrix, alumConnectorOffset);

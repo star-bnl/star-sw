@@ -116,6 +116,10 @@ void StiSstDetectorBuilder::useVMCGeometry()
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
       TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
+      // Temporarily save the translation for this sensor in Z so, we can center
+      // the newly built sensors at Z=0 (in ideal geometry) later
+      double idealOffsetZ = sensorMatrix.GetTranslation()[2];
+
       if (!mBuildIdealGeom) {
          const TGeoHMatrix* sensorMatrixDb = mSstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
@@ -126,6 +130,9 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
          sensorMatrix = *sensorMatrixDb;
       }
+
+      // Update the global translation in Z so that the new volumes are centered at Z=0
+      sensorMatrix.SetDz(sensorMatrix.GetTranslation()[2] - idealOffsetZ);
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
