@@ -243,7 +243,7 @@ int StFmsTriggerMaker::MakeTrgData(){
 	  if(adc>0) {
 	    writeQtCrate(crt,adr,ch,adc,t); 
 	    n++;
-	    printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	    //printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
 	  }
 	}
       }
