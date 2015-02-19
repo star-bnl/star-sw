@@ -1386,6 +1386,9 @@ Bfc_st BFC[] = { // standard chains
   {"istCluster", "", "", "istRaw",           "StIstClusterMaker", "StIstClusterMaker", "Run IST cluster maker", kFALSE},
   {"istHit",     "", "", "event istCluster", "StIstHitMaker",     "StIstHitMaker",     "Run IST hit Maker",     kFALSE},
 
+  {"istFastSim", "", "", "StMcEvent,StEvent", "StIstFastSimMaker",
+        "StIstSimMaker", "Load StIstSimMaker, invoke StIstFastSimMaker to fill StIstHitCollection", kFALSE},
+
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
