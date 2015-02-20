@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.13 2014/08/06 11:43:56 jeromel Exp $
+// $Id: St_pp2pp_Maker.h,v 1.14 2015/02/20 21:45:13 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -44,9 +44,11 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   vector<HitChannel>  mValidHits[kMAXSEQ][kMAXCHAIN] ; /// mValidHits[][] array to store hits which are above thresholds
   static Bool_t hitcompare (HitChannel A,HitChannel B) { return (A.first<B.first); }
 
-
-  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
-  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+  //  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+  //  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+  // K. Yip : Feb. 20, 2015 : Use a new table of pedestal/rms per SVX (160 of them only)
+  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX] ;
+  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX] ;
 
   unsigned char mRpStatus[kMAXSEQ] ;
 
@@ -107,7 +109,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.13 2014/08/06 11:43:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.14 2015/02/20 21:45:13 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
