@@ -55,7 +55,7 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   contents.cdb[3]->SetYTitle("Low-Th TAC (west)");
   
   sprintf(tmp,"vpd_tac_east_vs_tac_west");
-  contents.tac_east_vs_tac_west = new TH2D(tmp,"VPD-vtx TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
+  contents.tac_east_vs_tac_west = new TH2D(tmp,"VPD-vtx TAC East vs. TAC West", 256, -1.5, 4094.5, 256, -1.5, 4094.5);
   contents.tac_east_vs_tac_west->SetXTitle("TAC West");
   contents.tac_east_vs_tac_west->SetYTitle("TAC East");
   
@@ -66,13 +66,13 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   //contents.vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   sprintf(tmp,"vpd_earliestTAC_vs_chan_east");
-  contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan east", 16, -0.5, 15.5, 256, -1.5, 4094.5);
   contents.earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
   contents.earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
 
   sprintf(tmp,"vpd_earliestTAC_vs_chan_west");
-  contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan west", 16, -0.5, 15.5, 256, -1.5, 4094.5);
   contents.earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
   contents.earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
   
@@ -105,7 +105,7 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   contents.hi_cdb[3]->SetYTitle("High-Th TAC (west)");
   
   sprintf(tmp,"vpd_hi_tac_east_vs_tac_west");
-  contents.hi_tac_east_vs_tac_west = new TH2D(tmp,"VPD-mtd TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
+  contents.hi_tac_east_vs_tac_west = new TH2D(tmp,"VPD-mtd TAC East vs. TAC West", 256, -1.5, 4094.5, 256, -1.5, 4094.5);
   contents.hi_tac_east_vs_tac_west->SetXTitle("TAC West");
   contents.hi_tac_east_vs_tac_west->SetYTitle("TAC East");
   
@@ -116,13 +116,13 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   //contents.hi_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   sprintf(tmp,"vpd_hi_earliestTAC_vs_chan_east");
-  contents.hi_earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.hi_earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan east", 16, -0.5, 15.5, 256, -1.5, 4094.5);
   contents.hi_earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
   contents.hi_earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
 
   sprintf(tmp,"vpd_hi_earliestTAC_vs_chan_west");
-  contents.hi_earliestTAC_vs_westchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.hi_earliestTAC_vs_westchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan west", 16, -0.5, 15.5, 256, -1.5, 4094.5);
   contents.hi_earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
   contents.hi_earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
   
@@ -169,7 +169,6 @@ void vpdBuilder::stoprun(daqReader *rdr) {
 
 void vpdBuilder::event(daqReader *rdr) {
   LOG(DBG, "event #%d",rdr->seq);
-  char tmp[20];
 
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) {
@@ -177,32 +176,52 @@ void vpdBuilder::event(daqReader *rdr) {
     return;
   }
 
-  LOG(DBG, "Got trigger data");
-  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
-  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
-  contents.tac_east_vs_tac_west->Fill(maxTacWest, maxTacEast);
-  
+//  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
+//  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
+  int maxTacEast = -1;
+  int maxTacWest = -1;
   int earliestchan_east=-1;
-  int earliestchan_west=-1;
-  
-  LOG(DBG, "here...");
-
+  int earliestchan_west=-1; 
+  int nlitlo[2]={0};
   for(int i=0;i<2;i++) {   //
     for(int ich=0;ich<16;ich++){
       int adc_lo = trgd->vpdADC((StBeamDirection)i,ich+1);
       int tdc_lo = trgd->vpdTDC((StBeamDirection)i,ich+1);
-      if(i==0 && maxTacEast == tdc_lo) earliestchan_east=ich;
-      if(i==1 && maxTacWest == tdc_lo) earliestchan_west=ich;
-
-      contents.cdb[2*i+0]->Fill(ich, adc_lo);
-      contents.cdb[2*i+1]->Fill(ich, tdc_lo);
+      if(tdc_lo>200 && i==0 && maxTacEast<tdc_lo){ earliestchan_east=ich; maxTacEast=tdc_lo; }
+      if(tdc_lo>200 && i==1 && maxTacWest<tdc_lo){ earliestchan_west=ich; maxTacWest=tdc_lo; }
+      if (tdc_lo>200){
+          nlitlo[i]++;
+	      contents.cdb[2*i+0]->Fill(ich, adc_lo);
+	      contents.cdb[2*i+1]->Fill(ich, tdc_lo);
+	  }
     }
   }
-  LOG(DBG, "here...");
+  contents.tac_east_vs_tac_west->Fill(maxTacWest, maxTacEast);
+  if (maxTacEast>200){
+      contents.earliestTAC_vs_eastchan->Fill(earliestchan_east,maxTacEast);
+  }
+  if (maxTacWest>200){
+      contents.earliestTAC_vs_westchan->Fill(earliestchan_west,maxTacWest);
+  }
 
-  contents.earliestTAC_vs_eastchan->Fill(earliestchan_east,maxTacEast);
-  contents.earliestTAC_vs_westchan->Fill(earliestchan_west,maxTacWest);
+	//---- debug.....
+//  	if(maxTacEast>200||maxTacWest>200){
+//  		for(int i=0;i<2;i++) {   //
+//  			cout<<nlitlo[i]<<" .... ";
+//  			for(int ich=0;ich<16;ich++){
+//  				int adc_lo = trgd->vpdADC((StBeamDirection)i,ich+1);
+//  				int tdc_lo = trgd->vpdTDC((StBeamDirection)i,ich+1);
+//  				if (tdc_lo>200){
+//  					cout<<"["<<ich<<","<<adc_lo<<","<<tdc_lo<<"]";
+//  				}
+//  			} cout<<endl;
+//  		}
+//  		cout<<"max E,W = "<<earliestchan_east<<" "<<maxTacEast<<" ... "<<earliestchan_west<<" "<<maxTacWest<<endl;
+//  		cout<<"--------------"<<endl;
+//  	}
+	//---- debug.....
 
+	
 //   int ret = evtTracker->trackEvent(evp, datap, l3p, sizL3_max);
 //   if (!(ret<0)) ret = evtTracker->copyl3_t(l3,l3p);
 //   if(ret < 0){
@@ -213,48 +232,40 @@ void vpdBuilder::event(daqReader *rdr) {
 //   unsigned int tacDiff=trgd->vpdTimeDifference();
 //   contents.vertex_vs_l3_vertex->Fill(l3.zVertex, tacDiff);
 
-  LOG(DBG, "here...");
-  
-  // Hi plots...
-  int maxTacEastHigh = trgd->vpdEarliestTDCHighThr((StBeamDirection)0);
-  LOG(DBG, "here...");
-
-  int maxTacWestHigh = trgd->vpdEarliestTDCHighThr((StBeamDirection)1);
-  LOG(DBG, "here...");
-
-  contents.hi_tac_east_vs_tac_west->Fill(maxTacEastHigh, maxTacWestHigh);
-
-  LOG(DBG, "here...");
-
-
+//  int maxTacEastHigh = trgd->vpdEarliestTDCHighThr((StBeamDirection)0);
+//  int maxTacWestHigh = trgd->vpdEarliestTDCHighThr((StBeamDirection)1);
+  int maxTacEastHigh = -1;
+  int maxTacWestHigh = -1;
   int earliestchan_east_hi=-1;
-  int earliestchan_west_hi=-1;
-
-  LOG(DBG, "here...");
-
+  int earliestchan_west_hi=-1; 
+  int nlithi[2]={0};
   for(int i=0;i<2;i++) {   //
     for(int ich=0;ich<16;ich++){
       int adc_hi = trgd->vpdADCHighThr((StBeamDirection)i,ich+1);
       int tdc_hi = trgd->vpdTDCHighThr((StBeamDirection)i,ich+1);
-      contents.hi_cdb[2*i+0]->Fill(ich, adc_hi);
-      contents.hi_cdb[2*i+1]->Fill(ich, tdc_hi);
-      if(i==0 && maxTacEastHigh == tdc_hi) earliestchan_east_hi=ich;
-      if(i==1 && maxTacWestHigh == tdc_hi) earliestchan_west_hi=ich;
-
+      if(tdc_hi>200 && i==0 && maxTacEastHigh<tdc_hi){ earliestchan_east_hi=ich; maxTacEastHigh=tdc_hi; }
+      if(tdc_hi>200 && i==1 && maxTacWestHigh<tdc_hi){ earliestchan_west_hi=ich; maxTacWestHigh=tdc_hi; }
+      if (tdc_hi>200){
+          nlithi[i]++;
+	      contents.hi_cdb[2*i+0]->Fill(ich, adc_hi);
+	      contents.hi_cdb[2*i+1]->Fill(ich, tdc_hi);
+	  }
     }
   }
-  LOG(DBG, "here...");
-
-  contents.hi_earliestTAC_vs_eastchan->Fill(earliestchan_east_hi,maxTacEastHigh);
-  contents.hi_earliestTAC_vs_westchan->Fill(earliestchan_west_hi,maxTacWestHigh);
+  contents.hi_tac_east_vs_tac_west->Fill(maxTacWestHigh, maxTacEastHigh);
+  if (maxTacEastHigh>200){
+      contents.hi_earliestTAC_vs_eastchan->Fill(earliestchan_east_hi,maxTacEastHigh);
+  }
+  if (maxTacWestHigh>200){
+      contents.hi_earliestTAC_vs_westchan->Fill(earliestchan_west_hi,maxTacWestHigh);
+  }
 
   if(trgd) delete trgd;
 }
 
 void vpdBuilder::main(int argc, char *argv[])
 {
-  vpdBuilder me;
-  
+  vpdBuilder me;  
   me.Main(argc, argv);
 }
 
