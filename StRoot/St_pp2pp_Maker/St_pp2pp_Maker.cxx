@@ -5,7 +5,7 @@
  * \date   2009/11/19
  * \brief  For pp2pp analysis : mainly to create clusters from raw data silicon hits
  *
- *
+ *  
  *
  */                                                                      
 
@@ -16,7 +16,8 @@
 
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "tables/St_pp2ppPedestal_Table.h"
+//#include "tables/St_pp2ppPedestal_Table.h"
+#include "tables/St_pp2ppPedestal160_Table.h" // K. Yip : Feb. 20, 2015 : New pedestal table (one per SVX)
 #include "tables/St_pp2ppOffset_Table.h"
 #include "tables/St_pp2ppZ_Table.h"
 
@@ -25,6 +26,8 @@
 #include "StEvent/StRpsCluster.h"
 
 #include "StEvent/StTriggerData2009.h"
+#include "StEvent/StTriggerData2012.h"
+#include "StEvent/StTriggerData2013.h"
 
 using namespace std;
 
@@ -67,7 +70,8 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
   memset(mPedave,0,sizeof(mPedave));
   memset(mPedrms,0,sizeof(mPedrms));
 
-  Int_t s, c, sv, ch, idb = 0 ;
+  //  Int_t s, c, sv, ch, idb = 0 ;
+  Int_t s, c, sv = 0 ;
 
   /*
   //  cout << GetTime() << " " << GetDate() << endl ;
@@ -84,11 +88,15 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
 
   // Database
   TDataSet *DB = 0;
-  DB = GetInputDB("Calibrations/pp2pp");
+  //  DB = GetInputDB("Calibrations/pp2pp");
+  // K. Yip : Feb. 20, 2015 : Use a new table of pedestal/rms per SVX (160 of them only)
+  DB = GetDataBase("Calibrations/pp2pp/pp2ppPedestal160");
   if (!DB) {
-    LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+    LOG_ERROR << "ERROR: cannot find database Calibrations/pp2pp/pp2ppPedestal160 ?" << endm ;
   }
   else {
+
+    /*
     // fetch ROOT descriptor of db table
     St_pp2ppPedestal *descr = 0;
     descr = (St_pp2ppPedestal*) DB->Find("pp2ppPedestal");
@@ -112,9 +120,52 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
     } else {
       LOG_ERROR << "St_pp2pp_Maker: No data in pp2ppPedestal table (wrong timestamp?). Nothing to return, then." << endm ;
     }
+    */
+
+    St_pp2ppPedestal160 *dataset = 0;
+    dataset = (St_pp2ppPedestal160*) DB->Find("pp2ppPedestal160");
+
+    if ( dataset->GetNRows() > 1 ) {
+      LOG_ERROR << "Found INDEXED table with " <<  dataset->GetNRows() << " rows \?!" << std::endl;
+    }
+
+    if (dataset) {
+      pp2ppPedestal160_st *table = dataset->GetTable();
+      for (Int_t j = 0; j < 160; j++) {
+
+	s = j/20 ; // == Sequence - 1
+	if ( (j%20) < 4 ) {
+	  c = 0 ;
+	  sv = j%20 ;
+	}
+	else if ( (j%20) < 10 ) {
+	  c = 1 ;
+	  sv = j%20 - 4  ;
+	}
+	else if ( (j%20) < 14 ) {
+	  c = 2 ;
+	  sv = j%20 - 10  ;
+	}
+	else {
+	  c = 3 ;
+	  sv = j%20 - 14  ;
+	}
+
+	LOG_DEBUG << j << "th element: seq = " << s+1 << " chain = " << c << " svx = " << sv 
+		  << " => mean: " << table[0].mean[j] << ", rms: " << table[0].rms[j] << endm ;
+
+	mPedave[s][c][sv] = table[0].mean[j] ;
+	mPedrms[s][c][sv] = table[0].rms[j] ;
+
+      } 
+    }
+    else {
+      std::cout << "ERROR: dataset does not contain requested table" << std::endl;
+    }
+
   }
 
-  LOG_DEBUG << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endm ;
+  //  LOG_DEBUG << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endm ;
 
 
   return kStOk ;
@@ -283,6 +334,9 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
   // For clustering purpose
   HitChannel onehit ;
 
+  /* 
+     K. Yip : Feb. 20, 2015 : Since we're reading "adc_ped_sub" bank, the continuity is no longer there.
+
   // Mar. 14, 2009 (K. Yip) : checking for wrong SVX_ID
   // One known case is for SEQ 3, CHAIN 2 and SVX is 7 but it should be 3.
   // Mostly, just some debugging codes that we've used in the past and shouldn't happen
@@ -327,7 +381,11 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
     LOG_WARN << "Repeated : So -> " << " svx is now = " << (int) oneSihit.svx << endm ;	      
   }
+  */
 
+  // K. Yip : Feb. 20, 2015 : Now, it's for SEQ 7, CHAIN 2 => SVX is 7 but it should be 3.
+  if ( oneSihit.svx == 7 && oneSihit.sequencer == 7 && oneSihit.chain == 2 )
+    oneSihit.svx = 3 ;
 
   mRpStatus[oneSihit.sequencer - 1] = d.bunch_xing ; // hack to store the silicon_bunch
 
@@ -350,11 +408,18 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
       if ( mLDoCluster && (c != 127) && (c != 0) ) { // Avoid the channels at 2 ends of SVX
 	
 	// Getting rid of the 1st channel (0) and the last channel (127)
-	onehit.first = mLastSvx*(kMAXSTRIP-2) + oneSihit.channel - 1  ; 
+	// K. Yip : Feb. 20, 2015 : 
+	// The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it. In this version _all_ SVX channels were connected to the silicon.
+	if ( ( mLastSeq == 4 ) && (mLastChain == 0 ) )
+	  onehit.first = mLastSvx*(kMAXSTRIP) + oneSihit.channel - 1  ; 
+	else
+	  onehit.first = mLastSvx*(kMAXSTRIP-2) + oneSihit.channel - 1  ; 
 
-	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ;
+	//	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ;
+	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx];
 
-	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ) {
+	//	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ) {
+	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx] ) {
 	  (mValidHits[mLastSeq-1][mLastChain]).push_back(onehit);
 	  //	  cout << "mValidHits : position " << onehit.first << " , energy " << onehit.second << endl ;
 	}
