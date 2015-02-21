@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.14 2015/02/20 21:45:13 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.15 2015/02/21 13:32:59 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -47,7 +47,6 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   //  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
   //  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
   // K. Yip : Feb. 20, 2015 : Use a new table of pedestal/rms per SVX (160 of them only)
-  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX] ;
   Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX] ;
 
   unsigned char mRpStatus[kMAXSEQ] ;
@@ -109,7 +108,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.14 2015/02/20 21:45:13 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.15 2015/02/21 13:32:59 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
