@@ -38,6 +38,7 @@ void set11(const double *a)      ;
 void recov(); 
 int  check(const char *pri=0) const; 
 double sign() const; 
+double zign() const; 
 double operator()(int i,int j) const;
 void zeroX();
 void print() const;
