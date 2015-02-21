@@ -193,11 +193,6 @@ Double_t St_MDFCorrectionC::EvalError(Int_t k, const Double_t *x) const {
   Double_t returnValue = 0;
   Double_t term        = 0;
   UChar_t    i, j;
-#if 0
-  for (i = 0; i < NCoefficients(k); i++) {
-    //     cout << "Error coef " << i << " -> " << CoefficientsRMS(k)[i] << endl;
-  }
-#endif
   for (i = 0; i < NCoefficients(k); i++) {
     // Evaluate the ith term in the expansion
     term = CoefficientsRMS(k)[i];
@@ -207,11 +202,9 @@ Double_t St_MDFCorrectionC::EvalError(Int_t k, const Double_t *x) const {
       Double_t y  =  1 + 2. / (XMax(k)[j] - XMin(k)[j])
 	* (x[j] - XMax(k)[j]);
       term        *= EvalFactor(p,y);
-      //	 cout << "i,j " << i << ", " << j << "  "  << p << "  " << y << "  " << EvalFactor(p,y) << "  " << term << endl;
     }
     // Add this term to the final result
     returnValue += term*term;
-    //      cout << " i = " << i << " value = " << returnValue << endl;
   }
   returnValue = TMath::Sqrt(returnValue);
   return returnValue;
@@ -962,7 +955,42 @@ MakeChairInstance(istGain,Calibrations/ist/istGain);
 MakeChairInstance(istMapping,Calibrations/ist/istMapping);
 //____________________________Calibrations/pxl____________________________________________________
 #include "St_pxlHotPixelsC.h"
-MakeChairInstance(pxlHotPixels,Calibrations/pxl/pxlHotPixels);
+//MakeChairInstance(pxlHotPixels,Calibrations/pxl/pxlHotPixels);
+St_pxlHotPixelsC *St_pxlHotPixelsC::fgInstance = 0;
+map<UInt_t,Short_t> St_pxlHotPixelsC::mMapHotPixels;
+St_pxlHotPixelsC *St_pxlHotPixelsC::instance() {
+  if (! fgInstance) {
+    St_pxlHotPixels *table = (St_pxlHotPixels *) StMaker::GetChain()->GetDataBase("Calibrations/pxl/pxlHotPixels");
+    if (! table) {							
+      LOG_WARN << "St_pxlHotPixelsC::instance Calibrations/pxl/pxlHotPixels\twas not found" << endm;
+      assert(table);			 			       
+    }									
+    DEBUGTABLE(pxlHotPixels);
+    fgInstance = new St_pxlHotPixelsC(table);	
+    
+    mMapHotPixels.clear();
+    for(Int_t i=0; i<10000; i++){ 
+      if(fgInstance->hotPixel()[i]>0){ 
+	mMapHotPixels.insert ( std::pair<UInt_t, Short_t>(fgInstance->hotPixel()[i],i) ); 
+      } 
+      else break;
+    }
+    LOG_INFO << "St_pxlHotPixelsC have been instantiated with" << mMapHotPixels.size() << endm;
+  }
+  return fgInstance;
+}
+//________________________________________________________________________________
+Int_t  St_pxlHotPixelsC::pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column) const {
+  map<UInt_t,Short_t>::const_iterator got;
+  got = mMapHotPixels.find(1000000*((sector-1)*40+(ladder-1)*10+sensor) + 1000*row + column);
+  if ( got == mMapHotPixels.end() ) {
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+//________________________________________________________________________________
 #include "St_pxlRowColumnStatusC.h"
 MakeChairInstance(pxlRowColumnStatus,Calibrations/pxl/pxlRowColumnStatus);
 #include "St_pxlBadRowColumnsC.h"
