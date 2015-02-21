@@ -28,9 +28,9 @@ static const int tableBS[NBITBS][NBITBS]={
 static const int NBITJp=6;
 static int DJp[NBITJp][NBITJp];
 static const int tableJp[NBITJp][NBITJp]={
-  {0,0,0,0,0,0}, //ST	 
-  {0,0,0,0,0,0}, //SM	 
-  {0,0,0,0,0,0}, //SB	 
+  {0,0,0,1,1,0}, //ST	 
+  {0,0,0,1,1,1}, //SM	 
+  {0,0,0,0,1,1}, //SB	 
   {1,1,0,0,0,0}, //NB	 
   {1,1,1,0,0,0}, //NM	 
   {0,1,1,0,0,0}};//NT	 
@@ -114,6 +114,7 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
     | (getFM101_BS1B(fm102)<<3) | (getFM101_BS1M(fm102)<<4) | (getFM101_BS1T(fm102)<<5)
     | (getFM103_BS1T(fm103)<<6) | (getFM103_BS1M(fm103)<<7) | (getFM103_BS1B(fm103)<<8)
     | (getFM103_BS1B(fm104)<<9) | (getFM103_BS1M(fm104)<<10)| (getFM103_BS1T(fm104)<<12);
+  fp201.userdata[t][0]=bs1;
   for(int i=0; i<NBITBS; i++){
     if(btest(bs1,i)){
       for(int j=i+1; j<NBITBS; j++){
@@ -128,7 +129,7 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
   jp[1] = getFM101_JpM(fm101) + getFM103_JpM(fm103); //SM
   jp[2] = getFM101_JpB(fm101) + getFM103_JpB(fm103); //SB  
   jp[3] = getFM101_JpB(fm102) + getFM103_JpB(fm104); //NB
-  jp[4] = getFM101_JpM(fm102) + getFM103_JpT(fm104); //NM
+  jp[4] = getFM101_JpM(fm102) + getFM103_JpM(fm104); //NM
   jp[5] = getFM101_JpT(fm102) + getFM103_JpT(fm104); //NT
   int JP2=0, JP1=0, JP0=0, jp0=0;
   for(int i=0; i<NBITJp; i++){
@@ -136,11 +137,12 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
     if(jp[i]>JpThr1) JP1=1;
     if(jp[i]>JpThr0) {JP0=1; jp0+=(1<<i);}
   }
-  
+  fp201.userdata[t][1]=jp0;
+
   //DiJp
   int DiJp=0;
   memset(DJp,0,sizeof(DJp));
-  for(int i=0; i<NBITJp; i++){
+  for(int i=0; i<NBITJp-1; i++){
     if(btest(jp0,i)){
       for(int j=i+1; j<NBITJp; j++){
         if(tableJp[j][i] & btest(jp0,j)) {DJp[j][i]=1; DiJp=1;}
@@ -155,7 +157,8 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
     | JP2<<7 | JP1<<8 | JP0<<9 
     | DiJp<<10;
   
-  if(PRINT){
+  if(1){
+    //if(PRINT){
     printf("%s input FM101=%08x FM102=%08x FM103=%08x FM104=%08x\n",fp201.name,fm101,fm102,fm103,fm104); 
     printf("%s out=%08x smBS3/2/1=%1d %1d %1d lgBS3/2/1=%1d %1d %1d DiBS=%1d JP=%1d %1d %1d DiJp=%1d\n",
 	   fp201.name,fp201.output[t],
@@ -165,20 +168,29 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
 	   JP2,JP1,JP0,
 	   DiJp);
   }
-  /*
-  printf("%s DiBS bs1=%03x\n",fp201.name,bs1);
+  
+  printf("%s DiBS bs1=%03x=",fp201.name,bs1);
+  for(int i=NBITBS-1; i>=0; i--) printf("%1x",btest(bs1,i));
+  printf("\n"); 
   for(int j=0; j<NBITBS; j++){
+    printf("DiBS ");
     for(int i=0; i<=j; i++){
       printf(" %1d", DBS[j][i]);
     }
     printf("\n");
   }
-  printf("%s DiJp jp1=%02x\n",fp201.name,jp0);
+
+  printf("%s DiJp jp1=%02x=",fp201.name,jp0);
+  for(int i=NBITJp-1; i>=0; i--) printf("%1x",btest(jp0,i));
+  printf("\n");
   for(int j=0; j<NBITJp; j++){
+    printf("DiJp ");
     for(int i=0; i<NBITJp; i++){
       printf(" %1d", DJp[j][i]);
     }
     printf("\n");
   }
-  */
 }
+
+int getFP201_bs0bits(Board& fp201, int t) {return fp201.userdata[t][0];}
+int getFP201_jp1bits(Board& fp201, int t) {return fp201.userdata[t][1];}

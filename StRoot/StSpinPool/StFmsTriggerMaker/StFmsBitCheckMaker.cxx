@@ -75,7 +75,7 @@ void printCount(const char* name, unsigned int n[MAXDT][4][32][4], int run, int 
 }
 
 void printCount3(const char* name, unsigned int n[32][4], int run){  
-  printf("%8d = %15s : ",run,name);
+  printf("%8d %15s :  0 ",run,name);
   for(int j=15; j>=0; j--){
     char a[2];
     if(n[j][1]==0 && n[j][2]==0) {
@@ -190,9 +190,12 @@ void Comp2(const char* name, int t2, int run){
 void Comp3(const char* name, int run){
   unsigned int d1=TCU;
   unsigned int s1=SIM->FP201output();
-  printf("%8d %15s | %04x / %04x | %04x\n",
+  int jp0=SIM->FP201userdata(1);
+  printf("%8d %15s | %04x / %04x | %04x  DiJp=",
 	 run,name,
          d1,s1,d1^s1);
+  for(int i=5; i>=0; i--) printf("%1x",(jp0>>i)&0x1);  
+  printf("\n");
   Count3(d1,s1,N3);
 }
 
@@ -218,18 +221,18 @@ int StFmsBitCheckMaker::InitRun(int runNumber){
 
 int StFmsBitCheckMaker::Finish(){
   printf("Run      Name            Mismatch%   Data Xing - Previous layer&Emulation xing\n");
-  printCount("QT1/ABCD=>FM001",N0[0],mRun);
-  printCount("QT2/ABCD=>FM002",N0[1],mRun);
-  printCount("QT3/ABCD=>FM003",N0[2],mRun);
-  printCount("QT4/ABCD=>FM004",N0[3],mRun);
-  printCount("QT1/GHIJ=>FM005",N0[4],mRun);
-  printCount("QT1/EF  =>FM006",N0[5],mRun);
-  printCount("QT2/GHIJ=>FM007",N0[6],mRun);
-  printCount("QT2/EF  =>FM008",N0[7],mRun);
-  printCount("QT3/GHIJ=>FM009",N0[8],mRun);
-  printCount("QT3/EF  =>FM010",N0[9],mRun);
-  printCount("QT4/GHIJ=>FM011",N0[10],mRun);
-  printCount("QT4/EF  =>FM012",N0[11],mRun);
+  printCount("QT1/DCBA=>FM001",N0[0],mRun);
+  printCount("QT2/DCBA=>FM002",N0[1],mRun);
+  printCount("QT3/DCBA=>FM003",N0[2],mRun);
+  printCount("QT4/DCBA=>FM004",N0[3],mRun);
+  printCount("QT1/JIHG=>FM005",N0[4],mRun);
+  printCount("QT1/FE  =>FM006",N0[5],mRun);
+  printCount("QT2/JIHG=>FM007",N0[6],mRun);
+  printCount("QT2/FE  =>FM008",N0[7],mRun);
+  printCount("QT3/JIHG=>FM009",N0[8],mRun);
+  printCount("QT3/FE  =>FM010",N0[9],mRun);
+  printCount("QT4/JIHG=>FM011",N0[10],mRun);
+  printCount("QT4/FE  =>FM012",N0[11],mRun);
 
   //Layer0->Layer1                                                                                                                                                    
   printCount("FM001/2 =>FM101", N1[0],mRun);
@@ -274,18 +277,18 @@ int StFmsBitCheckMaker::Make(){
     for(int t2=0; t2<MAXT; t2++){ //sim xing loop
       int x2=t2-MAXPP;
       if(-x2>NPRE || x2>NPOST) continue;
-      Comp0("QT1/ABCD=>FM001",0,1,t1,t2,mRun);
-      Comp0("QT2/ABCD=>FM002",1,2,t1,t2,mRun);
-      Comp0("QT3/ABCD=>FM003",3,3,t1,t2,mRun);
-      Comp0("QT4/ABCD=>FM004",4,4,t1,t2,mRun);
-      Comp0("QT1/GHIJ=>FM005",6,5,t1,t2,mRun);
-      Comp0("QT1/EF  =>FM006",7,6,t1,t2,mRun);
-      Comp0("QT2/GHIJ=>FM007",8,7,t1,t2,mRun);
-      Comp0("QT2/EF  =>FM008",9,8,t1,t2,mRun);
-      Comp0("QT3/GHIJ=>FM009",11,9,t1,t2,mRun);
-      Comp0("QT3/EF  =>FM010",12,10,t1,t2,mRun);
-      Comp0("QT4/GHIJ=>FM011",13,11,t1,t2,mRun);
-      Comp0("QT4/EF  =>FM012",14,12,t1,t2,mRun);
+      Comp0("QT1/DCBA=>FM001",0,1,t1,t2,mRun);
+      Comp0("QT2/DCBA=>FM002",1,2,t1,t2,mRun);
+      Comp0("QT3/DCBA=>FM003",3,3,t1,t2,mRun);
+      Comp0("QT4/DCBA=>FM004",4,4,t1,t2,mRun);
+      Comp0("QT1/JIHG=>FM005",6,5,t1,t2,mRun);
+      Comp0("QT1/FE  =>FM006",7,6,t1,t2,mRun);
+      Comp0("QT2/JIHG=>FM007",8,7,t1,t2,mRun);
+      Comp0("QT2/FE  =>FM008",9,8,t1,t2,mRun);
+      Comp0("QT3/JIHG=>FM009",11,9,t1,t2,mRun);
+      Comp0("QT3/FE  =>FM010",12,10,t1,t2,mRun);
+      Comp0("QT4/JIHG=>FM011",13,11,t1,t2,mRun);
+      Comp0("QT4/FE  =>FM012",14,12,t1,t2,mRun);
       
       //Layer0->Layer1
       Comp1("FM001/2 =>FM101", 2,1,t1,t2,mRun);
@@ -297,7 +300,7 @@ int StFmsBitCheckMaker::Make(){
       if(t1==MAXPP) Comp2("FM101/4 =>FP201",t2,mRun);      
       
       //Layer2->TCU
-      if(t1==MAXPP && t2==MAXPP) Comp3("FP201   =>TCU  ",mRun);
+      if(t1==MAXPP && t2==MAXPP) Comp3("FP201   =>TCU",mRun);
     }
   }
   return kStOk;
