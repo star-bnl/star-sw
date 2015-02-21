@@ -11,6 +11,9 @@ class TH2D;
 class TTree;
 class TBranch;
 class StTrack;
+class StGlobalTrack;
+class StPrimaryTrack;
+class StSPtrVecTrackNode;
 class StTrackMateMaker : public StMaker {
 
 public: 
@@ -28,7 +31,7 @@ public:
     TTree* trackTree;
     TBranch* trackBr;
     TBranch* eventBr;
-    void Fill(StTrack* trk1, StTrack* ptrk1,StTrack* trk2, StTrack* ptrk2,Int_t maxPing);
+    void Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalTrack* trk2, StPrimaryTrack* ptrk2,Int_t maxPing);
     ClassDef(StTrackMateMaker, 1)   //StAF chain virtual base class for Makers
     
 };

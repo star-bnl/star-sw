@@ -10,7 +10,7 @@ void RunTbyT(Int_t nevents=999,
 	     //"./new/st_physics_11035026_raw_2010001_1_200.event.root",
 	     const char* tFile="TbyT.root") {
   gROOT->LoadMacro("bfc.C");
-  TString Chain("StEvent,nodefault");
+  TString Chain("StEvent,StiLib,nodefault");
   bfc(-2,Chain.Data(),0,0,tFile);
   gSystem->Load("StTrackMateMaker");
   cout << "Job will run on    File: " << eventFile1 << endl;
