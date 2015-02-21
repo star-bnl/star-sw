@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.163 2015/02/17 01:42:34 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.164 2015/02/21 04:48:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.164  2015/02/21 04:48:03  perev
+ * All asserts with sign() replaced for zign() for speedup
+ * Some outdated asserts removed
+ * Some outdated debug prints removed as well
+ *
  * Revision 2.163  2015/02/17 01:42:34  perev
  * Fix bug #3034. It is the conisedence of -1 (return local()) and kEnded.
  * Now if (local()==-1) volume is missed, return kFailed
@@ -1015,8 +1020,10 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
       ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
-  if (propagate(0., kPlanar,dir) < 0) return false; // track does not reach vertex "plane"
+  if (!propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
+  
   propagateError();
+  if (mFE.zign()<0) return false;
   if (debug() & 8) { PrintpT("B");}
   setHit(0);
   setDetector(0);
@@ -1055,7 +1062,6 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 static int nCall=0; nCall++;
 StiDebug::StiDebug::Break(nCall);  
 
-  assert(fDerivTestOn!=-10 || _state==kTNRotEnd ||_state>=kTNReady);
   _state = kTNProBeg;
 //  numeDeriv(xk,1,option,dir);
   mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
@@ -1233,41 +1239,10 @@ void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
-  assert(fDerivTestOn!=-10 || _state==kTNProEnd);
-assert(mFE.sign()>0); ///??? 
-  if (debug() & 1) 
-    {
-      LOG_DEBUG << "Prior Error:"
-	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-      LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-      LOG_DEBUG << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endm;
-      LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
-    }
   propagateMtx();
-  mFE.recov();
   errPropag6(mFE.A,mMtx().A,kNPars);
   mFE.recov();
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
-#ifdef Sti_DEBUG
-  if (debug() & 4) {
-    PrPP(propagateError,C);
-    TRMatrix F(kNPars,kNPars,f[0]); PrPP(propagateError,F);
-    // C^k-1_k = F_k * C_k-1 * F_kT + Q_k
-    C = TRSymMatrix(F,TRArray::kAxSxAT,C); PrPP(propagateError,C);
-    TRSymMatrix C1(kNPars,mFE.A);   PrPP(propagateError,C1);
-    C1.Verify(C);//,1e-7,2);
-  }
-#endif
-  if (debug() & 1) 
-    {
-      LOG_DEBUG << "Post Error:"
-	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-	   LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-	   LOG_DEBUG << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endm;
-	   LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
-    }
 // now set hiterrors
    if (_hit) setHitErrors();
 
@@ -1565,7 +1540,7 @@ assert(mFE._cEE>0);
 assert(mFE._cPP>0);
 assert(mFE._cTT>0);
 
-assert(mFE.sign()>0); ///??? 
+assert(mFE.zign()>0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
@@ -1617,12 +1592,8 @@ assert(mFE.sign()>0); ///???
 int StiKalmanTrackNode::updateNode() 
 {
 static int nCall=0; nCall++;
-  assert(fDerivTestOn!=-10 || _state>=kTNReady);
   _state = kTNFitBeg;
-#ifdef STI_ERROR_TEST
-  testError(mFE.A,0);
-#endif //STI_ERROR_TEST
-assert(mFE.sign()>0); ///??? 
+assert(mFE.zign()>0); ///??? 
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
@@ -1794,7 +1765,6 @@ assert(mFE.sign()>0); ///???
 */
 int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 {
-  assert(fDerivTestOn!=-10 || _state>=kTNReady);
   mMtx().A[0][0]=0;
   if (fabs(alpha)<1.e-6) return 0;
   _state = kTNRotBeg;
