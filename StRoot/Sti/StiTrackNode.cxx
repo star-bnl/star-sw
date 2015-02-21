@@ -371,11 +371,11 @@ StiDebug::Break(nCall);
      for (int j=i0;j<i;j++) {
        A[li+j]/=corrMax;
    } } 
-//    while (sign()<=0) {
-//     for (int i=i0,li=li0;i<kNPars ;li+=++i) {
-//       for (int j=i0;j<i;j++) {
-//         A[li+j]*=0.9;
-//    } } }
+   while (zign()<=0) {
+    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+      for (int j=i0;j<i;j++) {
+        A[li+j]*=0.9;
+   } } }
 
 }
 //______________________________________________________________________________
@@ -428,6 +428,24 @@ RETN:
 // assert(sign()>0); /// 
   return kase;
 }  
+//____________________________________________________________
+double StiNodeErrs::zign() const
+{
+   double dia[kNPars];
+   double minCorr = 1e11;
+   for (int i=1,li=1;i<kNPars ;li+=++i) {
+     const double &aii = A[li+i];
+     if (aii<0) return aii;
+     dia[i] = aii;
+     for (int j=1;j<i;j++) {
+       const double &aij = A[li+j];
+       double dis = 1-(aij*aij)/(dia[i]*dia[j]);
+       if (dis<0) return dis;
+       if (dis<minCorr) minCorr = dis;
+
+   } } 
+   return minCorr;  
+}
 //____________________________________________________________
 double StiNodeErrs::sign() const
 {
