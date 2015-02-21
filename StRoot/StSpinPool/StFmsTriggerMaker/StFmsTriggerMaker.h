@@ -49,12 +49,16 @@ public:
   int FP201output(int t=MAXPP) const { return fp201.output[t]; }
   int FM0xxoutput(int number, int t=MAXPP) const;
   int FM1xxoutput(int number, int t=MAXPP) const;
+
   int FP201input(int ch, int t=MAXPP) const; 
   int FM0xxinput(int number, int ch, int t=MAXPP) const;
   int FM1xxinput(int number, int ch, int t=MAXPP) const;
+
   int FP201data(int ch) const; 
   int FM0xxdata(int number, int ch, int t=MAXPP) const;
   int FM1xxdata(int number, int ch, int t=MAXPP) const;
+
+  int FP201userdata(int ch, int t=MAXPP) const;
 
   int FmsHighTowerTh0(int t=MAXPP) const { return btest(fp201.output[t],0); } // Small cells
   int FmsHighTowerTh1(int t=MAXPP) const { return btest(fp201.output[t],1); } // Large cells

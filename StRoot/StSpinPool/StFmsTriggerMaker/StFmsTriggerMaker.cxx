@@ -302,7 +302,11 @@ void StFmsTriggerMaker::writeDsmData(int t){
     ((int*)fm104.dsmdata[t])[ch] = getDSMdata(15,ch);
     if(x==0) ((int*)fp201.dsmdata[t])[ch] = getDSMdata(16,ch);
   }
-  printf("StFmsTriggerMaker::writeDsmData x=%d\n",x);
+
+  //FAKE!!! FM010 3rd int should be 0xFFFFFFFF since not connected... but shows some activities fake increasing mismatch%. Masking out -akio
+  ((int*)fm010.dsmdata[t])[2] = 0xFFFFFFFF;
+
+  Printf("StFmsTriggerMaker::writeDsmData x=%d\n",x);
 }
 
 template<class T>
@@ -843,4 +847,8 @@ int StFmsTriggerMaker::FM1xxdata(int number, int ch, int t) const{
   case 4:  return ((int*)fm104.dsmdata[t])[ch];
   }
   return 0;
+}
+
+int StFmsTriggerMaker::FP201userdata(int ch, int t) const{
+  return fp201.userdata[MAXPP][ch];
 }
