@@ -67,7 +67,7 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
 
   //  cout << "Size of mPedave : " << sizeof(mPedave) << " , Size of mPedrms : " << sizeof(mPedrms) << endl ;
 
-  memset(mPedave,0,sizeof(mPedave));
+  //  memset(mPedave,0,sizeof(mPedave));
   memset(mPedrms,0,sizeof(mPedrms));
 
   //  Int_t s, c, sv, ch, idb = 0 ;
@@ -154,7 +154,7 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
 	LOG_DEBUG << j << "th element: seq = " << s+1 << " chain = " << c << " svx = " << sv 
 		  << " => mean: " << table[0].mean[j] << ", rms: " << table[0].rms[j] << endm ;
 
-	mPedave[s][c][sv] = table[0].mean[j] ;
+	//	mPedave[s][c][sv] = table[0].mean[j] ;
 	mPedrms[s][c][sv] = table[0].rms[j] ;
 
       } 
@@ -281,7 +281,8 @@ Int_t St_pp2pp_Maker::Make(){
 
 
   // Each GetNextAdc would get a SVX ...
-  while ( GetNextAdc() ) {
+  //  while ( GetNextAdc() ) {
+  while ( GetNext("adc_ped_sub") ) { // K. Yip : Feb. 20, 2015 : to get the pedestal-subtracted ADC's
      counter++;
      TGenericTable::iterator iword = DaqDta()->begin();
      for (;iword != DaqDta()->end();++iword) {
@@ -416,7 +417,7 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 	  onehit.first = mLastSvx*(kMAXSTRIP-2) + oneSihit.channel - 1  ; 
 
 	//	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ;
-	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx];
+	onehit.second = oneSihit.adc ; // as it's pedestal-subtracted already
 
 	//	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ) {
 	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx] ) {
