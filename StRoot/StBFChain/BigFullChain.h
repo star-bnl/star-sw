@@ -1030,12 +1030,10 @@ Bfc_st BFC[] = { // standard chains
   {"P2014a","" ,"",
    "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  {"P2014aPxLData","" ,"",
-   "P2014a,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit"
-   ,                      "","","Production chain for 2014 data with pixel, ist",kFALSE},
-  {"P2014aPxLSim","" ,"",
-   "P2014a,pxlfastsim, istfastsim"
-   ,                      "","","Production chain for 2014 simulation wtih pixesl, ist",kFALSE},
+  {"P2014aPxLData","" ,"", "P2014a,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit"
+   ,                                         "","","Production chain for 2014 data with pixel, ist",kFALSE},
+  {"P2014aPxLSim","" ,"",   "P2014a,pxlfastsim, istfastsim"
+   ,                                  "","","Production chain for 2014 simulation wtih pixesl, ist",kFALSE},
   // Year 15 chains
   {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
@@ -1233,7 +1231,9 @@ Bfc_st BFC[] = { // standard chains
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
-  //{"FmsUtil"     ,""  ,"","",""                                       ,"StFmsUtil","Load StFmsUtil",kFALSE},
+#if 0
+  {"FmsUtil"     ,""  ,"","",""                                       ,"StFmsUtil","Load StFmsUtil",kFALSE},
+#endif
   {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
   {"GmtUtil"     ,""  ,"","",""                                       ,"StGmtUtil","Load StGmtUtil",kFALSE},
   {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1279,11 +1279,9 @@ Bfc_st BFC[] = { // standard chains
    ,"Hijing1_383"
    ,                                                    "Load Hijing in starsim, set He3 Au200 GeV",kFALSE},
   {"pAu200"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"Hijing1_383"
-   ,                                                      "Load Hijing in starsim, set pp 510 GeV",kFALSE},
+   ,"Hijing1_383",                                         "Load Hijing in starsim, set pp 510 GeV",kFALSE},
   {"pp510StarLight"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"StarLight"
-   ,                                                      "Load StarLight in starsim, set pp 510 GeV",kFALSE},
+   ,"StarLight",                                        "Load StarLight in starsim, set pp 510 GeV",kFALSE},
   {"AuAu200StarLight_rho"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
    ,"StarLight"
    ,                                         "Load StarLight in starsim, set AuAu 200 GeV with rho",kFALSE},
@@ -1313,7 +1311,9 @@ Bfc_st BFC[] = { // standard chains
   {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-  //{"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+#if 0
+  {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+#endif
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1439,10 +1439,11 @@ Bfc_st BFC[] = { // standard chains
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
-  {"istFastSim"  ,"","","StMcEvent,StEvent", "StIstFastSimMaker","StIstFastSimMaker","Ist Fast Sim",kFALSE},
   {"istRaw",     "", "", "istUtil istDb","StIstRawHitMaker","StIstRawHitMaker","IST raw hit maker", kFALSE},
   {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","Run IST cluster maker", kFALSE},
   {"istHit",     "", "", "event istCluster", "StIstHitMaker","StIstHitMaker",  "Run IST hit Maker", kFALSE},
+  {"istFastSim"  ,"","","StMcEvent,StEvent", "StIstFastSimMaker","StIstFastSimMaker"
+   ,                     "Load StIstSimMaker, invoke StIstFastSimMaker to fill StIstHitCollection", kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
@@ -1531,9 +1532,8 @@ Bfc_st BFC[] = { // standard chains
    "StFmsFastSimulatorMaker","StFmsFastSimulatorMaker","FMS Fast Simulator",                        kFALSE},
   {"fmsDat"     ,"","", "StEvent,fmsDb",
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
-  //{"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker",
-  // "Fill FMS clusters",                                                                             kFALSE},
 #if 0
+  {"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker","Fill FMS clusters",    kFALSE},
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
   {"fpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1572,12 +1572,11 @@ Bfc_st BFC[] = { // standard chains
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
 
   // left for historical purpose
-  {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,StiSst,BTofUtil"
-                                                       ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
+  {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,BTofUtil" ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   // switch to the HFT based chain
   {"StiLibsHft" ,"","","StiLibs,StiSst,StiPxl,StiIst"       ,"","","Load Sti Detector libs for HFT",kFALSE},
   {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb",""      ,"","Enables partial  Hft (PXL)",kFALSE},
-  {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT",""
+  {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,sstDb",""
    ,                                                        "","Enables complete Hft (PXL+IST+SST)",kFALSE},
 
   // depends on Sti symbols
@@ -1612,8 +1611,7 @@ Bfc_st BFC[] = { // standard chains
   {"PixelIT",""  ,"","PxlIT",""                                               ,"","Alias for PxlIT",kFALSE},
   {"PxlIT"  ,""  ,"","ITTF",""                                 ,"StiPxl","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                                   ,"StiIst","Sti tracking: Ist geom",kFALSE},
-  {"SstIT"  ,""  ,"","ITTF",""                                   ,"StiSst","Sti tracking: Sst geom",kFALSE},
-
+  {"SstIT"  ,""  ,"","ITTF",""                                   ,"StiSsd","Sti tracking: Sst geom",kFALSE},
   {"BTofIT"  ,""  ,"","ITTF",""                                ,"StiBTof","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
