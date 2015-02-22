@@ -48,12 +48,14 @@
 #include "StMessMgr.h"
 #include "tables/St_Survey_Table.h"
 #include "StTpcDb/StTpcDb.h"
+#ifndef  __NEW_PXLDB__
 #include "tables/St_pxlSensorStatus_Table.h"
 #include "tables/St_pxlRowColumnStatus_Table.h"
 #include "tables/St_pxlBadRowColumns_Table.h"
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
+#endif /* ! __NEW_PXLDB__ */
 
 
 StPxlDb* StPxlDb::fgInstance = 0;
@@ -62,16 +64,25 @@ ClassImp(StPxlDb)
 //_____________________________________________________________________________
 StPxlDb::StPxlDb() : StObject()
 {
+#ifndef __NEW_PXLDB__
    mGeoHMatrixTpcOnGlobal = 0;
    mSensorStatusTable = 0;
+#endif /* __NEW_PXLDB__ */
    mRowColumnStatusTable = 0;
+#ifndef __NEW_PXLDB__
    mPxlControl = 0;
+#endif /* __NEW_PXLDB__ */
    memset(mThinPlateSpline, 0, sizeof(mThinPlateSpline));
    fgInstance = this;
 }
 //_____________________________________________________________________________
+#ifndef __NEW_PXLDB__
 void StPxlDb::setGeoHMatrices(Survey_st **tables)
+#else /* __NEW_PXLDB__ */
+void StPxlDb::setGeoHMatrices()
+#endif /* __NEW_PXLDB__ */
 {
+#ifndef __NEW_PXLDB__
    if (gStTpcDb)
       mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
    else {
@@ -88,6 +99,15 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
    Survey_st *LaddersOnSectors  = tables[5];
    Survey_st *SensorsOnLadders  = tables[6];
 
+#else /* __NEW_PXLDB__ */
+   Survey_st *IdsOnTpc          = ((St_Survey *) StidsOnTpc::instance()->Table())->GetTable();	 
+   Survey_st *PstOnIds          = ((St_Survey *) StPxlpstOnIds::instance()->Table())->GetTable();	 
+   Survey_st *PxlOnPst          = ((St_Survey *) StpxlOnPst::instance()->Table())->GetTable();	 
+   Survey_st *HalfOnPxl         = ((St_Survey *) StpxlHalfOnPxl::instance()->Table())->GetTable();	 
+   Survey_st *SectorsOnHalf     = ((St_Survey *) StpxlSectorOnHalf::instance()->Table())->GetTable();	 
+   Survey_st *LaddersOnSectors  = ((St_Survey *) StpxlLadderOnSector::instance()->Table())->GetTable();
+   Survey_st *SensorsOnLadders  = ((St_Survey *) StpxlSensorOnLadder::instance()->Table())->GetTable();
+#endif /* __NEW_PXLDB__ */
    mGeoHMatrixIdsOnTpc.SetName("idsOnTpc");
    mGeoHMatrixIdsOnTpc.SetRotation(&IdsOnTpc->r00);
    mGeoHMatrixIdsOnTpc.SetTranslation(&IdsOnTpc->t0);
@@ -139,12 +159,19 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
             mGeoHMatrixSensorOnGlobal[i][j][k].SetName(Form("sensorOnGlobal%03i%03i%03i", i + 1, j + 1, k + 1));
+#ifndef  __NEW_PXLDB__
             mGeoHMatrixSensorOnGlobal[i][j][k] = (*mGeoHMatrixTpcOnGlobal) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
                                                  * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
                                                  * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+#else /* __NEW_PXLDB__ */
+            mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix()) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
+                                                 * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
+                                                 * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+#endif /* ! __NEW_PXLDB__ */
          }
 
 }
+#ifndef  __NEW_PXLDB__
 //_____________________________________________________________________________
 Int_t StPxlDb::sensorStatus(Int_t sector, Int_t ladder, Int_t sensor) const
 {
@@ -175,6 +202,7 @@ Int_t StPxlDb::pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int
     return 1;
   }
 }
+#endif /* ! __NEW_PXLDB__ */
 //_____________________________________________________________________________
 void StPxlDb::setThinPlateSpline(pxlSensorTps_st *pxlSensorTps)
 {
@@ -188,6 +216,7 @@ void StPxlDb::setThinPlateSpline(pxlSensorTps_st *pxlSensorTps)
       mThinPlateSpline[iSector][iLadder][iSensor] = new StThinPlateSpline(nMeasurements, pxlSensorTps[i].X, pxlSensorTps[i].Y, pxlSensorTps[i].W, pxlSensorTps[i].A);
    }
 }
+#ifndef  __NEW_PXLDB__
 //_____________________________________________________________________________
 void StPxlDb::setHotPixels(pxlHotPixels_st *hotPixelsTable)
 {
@@ -198,6 +227,7 @@ void StPxlDb::setHotPixels(pxlHotPixels_st *hotPixelsTable)
     else break;
   }
 }
+#endif /* ! __NEW_PXLDB__ */
 //_____________________________________________________________________________
 void StPxlDb::setBadRowColumns(pxlBadRowColumns_st *badRowColumns)
 {

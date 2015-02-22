@@ -47,10 +47,12 @@
 
 #ifndef StPxlDb_h
 #define StPxlDb_h
+#define __NEW_PXLDB__
 
 #include "StPxlUtil/StPxlConstants.h"
 #include "StObject.h"
 #include "TGeoMatrix.h"
+#ifndef  __NEW_PXLDB__
 #include <map>
 
 class pxlSensorStatus_st;
@@ -60,6 +62,16 @@ class pxlHotPixels_st;
 class Survey_st;
 class pxlSensorTps_st;
 class pxlControl_st;
+#else /*  __NEW_PXLDB__ */
+#include "StDetectorDbMaker/StIstSurveyC.h"
+#include "StDetectorDbMaker/StPxlSurveyC.h"
+#include "StDetectorDbMaker/St_pxlSensorStatusC.h"
+#include "StDetectorDbMaker/St_pxlRowColumnStatusC.h"
+#include "StDetectorDbMaker/St_pxlBadRowColumnsC.h"
+#include "StDetectorDbMaker/St_pxlHotPixelsC.h"
+#include "StDetectorDbMaker/St_pxlControlC.h"
+#include "StDetectorDbMaker/St_pxlSensorTpsC.h"
+#endif /* ! __NEW_PXLDB__ */
 class StThinPlateSpline;
 
 
@@ -89,7 +101,7 @@ class StPxlDb : public StObject
 {
 public:
    StPxlDb();
-   virtual ~StPxlDb() {fgInstance = 0;}
+   virtual ~StPxlDb() {fgInstance = 0; SafeDelete(mRowColumnStatusTable);}
    static StPxlDb* 	instance() {return fgInstance;}
 
    //! geoHMatrices describing rotation + shift tranlations between different coordinate systems
@@ -113,23 +125,50 @@ public:
      {return &mGeoHMatrixSensorOnGlobal[sector - 1][ladder - 1][sensor - 1];}
    
    //! status for sensor/row/column
+#ifndef  __NEW_PXLDB__
    Int_t sensorStatus(Int_t sector, Int_t ladder, Int_t sensor) const; ///< 1-9: good or usable status
    Int_t rowStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t row) const; ///< 1: good status
    Int_t columnStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t column) const; ///< 1: good status
    Int_t pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column) const; ///< 1: hot; 0: good
+#else /*  __NEW_PXLDB__ */
+   Int_t sensorStatus(Int_t sector, Int_t ladder, Int_t sensor) const { ///< 1-9: good or usable status
+     return St_pxlSensorStatusC::instance()->sensorStatus(sector, ladder, sensor);
+   }
+   Int_t rowStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t row) const { ///< 1: good status
+     return St_pxlRowColumnStatusC::instance()->rowStatus(sector, ladder, sensor, row);
+   }
+   Int_t columnStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t column) const {; ///< 1: good status
+     return St_pxlRowColumnStatusC::instance()->columnStatus(sector, ladder, sensor, column);
+   }
+   Int_t pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column) const { ///< 1: hot; 0: good
+     return St_pxlHotPixelsC::instance()->pixelHot(sector, ladder, sensor, row, column);
+   }
+#endif /* ! __NEW_PXLDB__ */
    const StThinPlateSpline *thinPlateSpline(Int_t sector, Int_t ladder, Int_t sensor) const ///< thin plate spline function to describe the sensor surface
    {return mThinPlateSpline[sector - 1][ladder - 1][sensor - 1];}
 
    /*! Control parameters for raw data decoding and so on */
+#ifndef  __NEW_PXLDB__
    const pxlControl_st *pxlControl() {return mPxlControl;}
 
+#else /*  __NEW_PXLDB__ */
+   const pxlControl_st *pxlControl() {return St_pxlControlC::instance()->Struct();}
+#endif /* ! __NEW_PXLDB__ */
+#ifndef  __NEW_PXLDB__
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
    void setRowColumnStatus(pxlRowColumnStatus_st *rowColumnStatus) {mRowColumnStatusTable = rowColumnStatus;}
+#else /*  __NEW_PXLDB__ */
+   void setGeoHMatrices();                   ///< set geoHMatrix parameters with parameters from Survey_st tables
+#endif /* ! __NEW_PXLDB__ */
    void setBadRowColumns(pxlBadRowColumns_st *badRowColumns);
+#ifndef  __NEW_PXLDB__
    void setHotPixels(pxlHotPixels_st *hotPixelsTable);
+#endif /* ! __NEW_PXLDB__ */
    void setThinPlateSpline(pxlSensorTps_st *pxlSensorTps); ///< create sensor thin plate spline functions and set their parameters
+#ifndef  __NEW_PXLDB__
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
+#endif /* ! __NEW_PXLDB__ */
 
    virtual void Print(Option_t *opt = "") const;
    virtual const char *GetCVS() const {
@@ -150,13 +189,17 @@ private:
    TGeoHMatrix mGeoHMatrixSensorOnGlobal[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder];
 
    //! status for sensor/row/column
+#ifndef __NEW_PXLDB__
    pxlSensorStatus_st *mSensorStatusTable;
+#endif /* !__NEW_PXLDB__ */
    pxlRowColumnStatus_st *mRowColumnStatusTable;
+#ifndef __NEW_PXLDB__
    map<unsigned int,short> mMapHotPixels; //! 
    pxlControl_st *mPxlControl; ///< control parameters for raw data decoding and so on
+#endif /* !__NEW_PXLDB__ */
    StThinPlateSpline *mThinPlateSpline[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< thin plate spline function to describe the sensor surface
    static StPxlDb       *fgInstance;
 
    ClassDef(StPxlDb, 0)
 };
-#endif
+#endif /* StPxlDb_h */

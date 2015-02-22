@@ -51,15 +51,16 @@
 #include "StPxlDbMaker.h"
 #include "StPxlDb.h"
 #include "StMessMgr.h"
-
-#include "StDetectorDbMaker/StIstSurveyC.h"
-#include "StDetectorDbMaker/StPxlSurveyC.h"
-#include "StDetectorDbMaker/St_pxlSensorStatusC.h"
-#include "StDetectorDbMaker/St_pxlRowColumnStatusC.h"
-#include "StDetectorDbMaker/St_pxlBadRowColumnsC.h"
-#include "StDetectorDbMaker/St_pxlHotPixelsC.h"
-#include "StDetectorDbMaker/St_pxlControlC.h"
-#include "StDetectorDbMaker/St_pxlSensorTpsC.h"
+#ifndef __NEW_PXLDB__
+#include "tables/St_Survey_Table.h"
+#include "St_db_Maker/St_db_Maker.h"
+#include "tables/St_pxlSensorStatus_Table.h"
+#include "tables/St_pxlRowColumnStatus_Table.h"
+#include "tables/St_pxlBadRowColumns_Table.h"
+#include "tables/St_pxlHotPixels_Table.h"
+#include "tables/St_pxlControl_Table.h"
+#include "tables/St_pxlSensorTps_Table.h"
+#endif /* __NEW_PXLDB__ */
 
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
@@ -82,41 +83,109 @@ Int_t StPxlDbMaker::Init()
 Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
+
    // set geoHMatrices
-   St_Survey *idsOnTpc          = (St_Survey *) StidsOnTpc::instance()->Table();
-   St_Survey *pstOnIds          = (St_Survey *) StPxlpstOnIds::instance()->Table();
-   St_Survey *pxlOnPst          = (St_Survey *) StpxlOnPst::instance()->Table();
-   St_Survey *pxlHalfOnPxl      = (St_Survey *) StpxlHalfOnPxl::instance()->Table();
-   St_Survey *pxlSectorOnHalf   = (St_Survey *) StpxlSectorOnHalf::instance()->Table();
-   St_Survey *pxlLadderOnSector = (St_Survey *) StpxlLadderOnSector::instance()->Table();
-   St_Survey *pxlSensorOnLadder = (St_Survey *) StpxlSensorOnLadder::instance()->Table();
+#ifndef __NEW_PXLDB__
+   St_Survey *idsOnTpc          = (St_Survey *) GetDataBase("Geometry/pxl/idsOnTpc");
+   if (! idsOnTpc)          {LOG_WARN << "idsOnTpc has not been found"  << endm; return kStErr;}
+
+   St_Survey *pstOnIds          = (St_Survey *) GetDataBase("Geometry/pxl/pstOnIds");
+   if (! pstOnIds)          {LOG_WARN << "pstOnIds has not been found"  << endm; return kStErr;}
+
+   St_Survey *pxlOnPst          = (St_Survey *) GetDataBase("Geometry/pxl/pxlOnPst");
+   if (! pxlOnPst)          {LOG_WARN << "pxlOnPst has not been found"  << endm; return kStErr;}
+
+   St_Survey *pxlHalfOnPxl         = (St_Survey *) GetDataBase("Geometry/pxl/pxlHalfOnPxl");
+   if (! pxlHalfOnPxl)         {LOG_WARN << "pxlHalfOnPxl has not been found"  << endm; return kStErr;}
+
+   St_Survey *pxlSectorOnHalf     = (St_Survey *) GetDataBase("Geometry/pxl/pxlSectorOnHalf");
+   if (! pxlSectorOnHalf)     {LOG_WARN << "pxlSectorOnHalf has not been found"  << endm; return kStErr;}
+
+   St_Survey *pxlLadderOnSector  = (St_Survey *) GetDataBase("Geometry/pxl/pxlLadderOnSector");
+   if (! pxlLadderOnSector)  {LOG_WARN << "pxladderOnSector has not been found"  << endm; return kStErr;}
+
+   St_Survey *pxlSensorOnLadder  = (St_Survey *) GetDataBase("Geometry/pxl/pxlSensorOnLadder");
+   if (! pxlSensorOnLadder)  {LOG_WARN << "pxlSensorOnLadder has not been found"  << endm; return kStErr;}
+
    Survey_st *tables[7] = {idsOnTpc->GetTable(), pstOnIds->GetTable(), pxlOnPst->GetTable(), pxlHalfOnPxl->GetTable(),
                            pxlSectorOnHalf->GetTable(), pxlLadderOnSector->GetTable(), pxlSensorOnLadder->GetTable()
                           };
 
    mPxlDb->setGeoHMatrices(tables);
+#else /* __NEW_PXLDB__ */
+   mPxlDb->setGeoHMatrices();
+#endif /* __NEW_PXLDB__ */
 
    // set status tables
-   St_pxlSensorStatus *sensorStatus = (St_pxlSensorStatus *) St_pxlSensorStatusC::instance()->Table();
-   mPxlDb->setSensorStatus(sensorStatus->GetTable());
+#ifndef __NEW_PXLDB__
+   St_pxlSensorStatus *sensorStatus = (St_pxlSensorStatus *)GetDataBase("Calibrations/pxl/pxlSensorStatus");
+   if (sensorStatus) mPxlDb->setSensorStatus(sensorStatus->GetTable());
+   else {LOG_WARN << " no pxl sensor status table " << endm; return kStErr;}
+
+#endif /* ! __NEW_PXLDB__ */
    if(readAllRowColumnStatus) // old method
        {
-	 St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *) St_pxlRowColumnStatusC::instance()->Table();
+#ifndef __NEW_PXLDB__
+           St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
+           if (rowColumnStatus) mPxlDb->setRowColumnStatus(rowColumnStatus->GetTable());
+           else {LOG_WARN << " no pxl row column status table " << endm; return kStErr;}
+#endif /* __NEW_PXLDB__ */
        }
    else
        {
+#ifndef __NEW_PXLDB__
+           St_pxlBadRowColumns *badRowColumns = (St_pxlBadRowColumns *)GetDataBase("Calibrations/pxl/pxlBadRowColumns");
+           if (badRowColumns) mPxlDb->setBadRowColumns(badRowColumns->GetTable());
+           else {LOG_WARN << " no pxl bad row columns table " << endm; return kStErr;}
+#else /* __NEW_PXLDB__ */
            St_pxlBadRowColumns *badRowColumns = (St_pxlBadRowColumns *) St_pxlBadRowColumnsC::instance()->Table();
+           if (badRowColumns) mPxlDb->setBadRowColumns(badRowColumns->GetTable());
+#endif /* __NEW_PXLDB__ */
        }
 
+#ifndef __NEW_PXLDB__
+   St_pxlHotPixels *hotPixels = (St_pxlHotPixels *)GetDataBase("Calibrations/pxl/pxlHotPixels");
+   if (hotPixels) mPxlDb->setHotPixels(hotPixels->GetTable());
+   else {LOG_WARN << " no pxl hot pixels table " << endm; return kStErr;}
+#else /* __NEW_PXLDB__ */
    St_pxlHotPixels *hotPixels = (St_pxlHotPixels *) St_pxlHotPixelsC::instance()->Table();
+#endif /* __NEW_PXLDB__ */
 
+#ifndef __NEW_PXLDB__
    // set pxlControl
-   St_pxlControl *pxlControl = (St_pxlControl *) St_pxlControlC::instance()->Table();
-   mPxlDb->setPxlControl(pxlControl->GetTable());
+   St_pxlControl *pxlControl = (St_pxlControl *)GetDataBase("Geometry/pxl/pxlControl");
+   if (pxlControl) {
+      mPxlDb->setPxlControl(pxlControl->GetTable());
+   }
+   else {
+      LOG_WARN << "InitRun : No access to pxlControl table, abort PXL reconstruction" << endm;
+      return kStErr;
+   }
+#endif /* __NEW_PXLDB__ */
 
    // create and set thin plate functions
+#ifndef __NEW_PXLDB__
+   TDataSet *dbTps = 0;
+   dbTps = GetDataBase("Geometry/pxl/pxlSensorTps");
+   if (!dbTps) {
+      LOG_WARN << "no tps table found in db, or malformed local db config " << endm;
+      return kStErr;
+   }
+
+   St_pxlSensorTps *datasetTps = 0;
+   datasetTps = (St_pxlSensorTps *) dbTps->Find("pxlSensorTps");
+   if (datasetTps) {
+      mPxlDb->setThinPlateSpline(datasetTps->GetTable());
+   }
+   else {
+      LOG_WARN << "ERROR: dataset does not contain tps table" << endm;
+      return kStErr;
+   }
+
+#else /* __NEW_PXLDB__ */
    St_pxlSensorTps *datasetTps = (St_pxlSensorTps *) St_pxlSensorTpsC::instance()->Table();
    mPxlDb->setThinPlateSpline(datasetTps->GetTable());
+#endif /* __NEW_PXLDB__ */
    if ( GetDebug() >= 2)
       mPxlDb->Print();
 
