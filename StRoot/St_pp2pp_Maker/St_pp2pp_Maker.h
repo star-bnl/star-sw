@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.15 2015/02/21 13:32:59 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.16 2015/02/22 18:10:10 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -44,10 +44,8 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   vector<HitChannel>  mValidHits[kMAXSEQ][kMAXCHAIN] ; /// mValidHits[][] array to store hits which are above thresholds
   static Bool_t hitcompare (HitChannel A,HitChannel B) { return (A.first<B.first); }
 
-  //  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
-  //  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
-  // K. Yip : Feb. 20, 2015 : Use a new table of pedestal/rms per SVX (160 of them only)
-  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX] ;
+  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
 
   unsigned char mRpStatus[kMAXSEQ] ;
 
@@ -67,6 +65,8 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   //  Int_t nevt_count ;
 
   Bool_t mLDoCluster; // to do clustering or not
+
+  Int_t mVersion ; // K. Yip (2015-2-22) : to deal with different (years of) data
 
  public: 
 
@@ -108,7 +108,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.15 2015/02/21 13:32:59 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.16 2015/02/22 18:10:10 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
