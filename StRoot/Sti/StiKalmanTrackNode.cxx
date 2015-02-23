@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.164 2015/02/21 04:48:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.165 2015/02/23 19:54:06 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.165  2015/02/23 19:54:06  perev
+ * Bug #3048 fixed. Very starnge mistype. instead of if(something) it was if(!something)
+ * How it was happened I have no idea (VP)
+ *
  * Revision 2.164  2015/02/21 04:48:03  perev
  * All asserts with sign() replaced for zign() for speedup
  * Some outdated asserts removed
@@ -1020,7 +1024,7 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
       ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
-  if (!propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
+  if (propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
   
   propagateError();
   if (mFE.zign()<0) return false;
