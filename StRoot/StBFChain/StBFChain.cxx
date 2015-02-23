@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.615 2014/09/11 03:36:57 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.616 2015/02/23 20:08:19 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -456,17 +456,29 @@ Int_t StBFChain::Instantiate()
       }
 
       // back to the HFT sub-system
-      if (GetOption("PixelIT") || GetOption("PxlIT") ){
+      if (GetOption("NoPxlIT")) {
 	mk->SetAttr("usePixel"	 ,kTRUE);
-	mk->SetAttr("activePixel",kTRUE);
+      } else {
+        if (GetOption("PixelIT") || GetOption("PxlIT") ){
+	  mk->SetAttr("usePixel"	 ,kTRUE);
+	  mk->SetAttr("activePixel",kTRUE);
+        }
       }
-      if (GetOption("IstIT")){
-	mk->SetAttr("useIst"     ,kTRUE);
-	mk->SetAttr("activeIst"  ,kTRUE);
+      if (GetOption("NoIstIT")) {
+	mk->SetAttr("useIst"	 ,kTRUE);
+      } else {
+        if (GetOption("IstIT")){
+	  mk->SetAttr("useIst"     ,kTRUE);
+	  mk->SetAttr("activeIst"  ,kTRUE);
+        }
       }
-      if (GetOption("SstIT")){
-	mk->SetAttr("useSst"	 ,kTRUE);
-	mk->SetAttr("activeSst"  ,kTRUE);
+      if (GetOption("NoSstIT")) {
+        mk->SetAttr("useSst"	 ,kTRUE);
+      } else {
+        if (GetOption("SstIT")){
+	  mk->SetAttr("useSst"	 ,kTRUE);
+	  mk->SetAttr("activeSst"  ,kTRUE);
+        }
       }
 
       // other sub-systems
