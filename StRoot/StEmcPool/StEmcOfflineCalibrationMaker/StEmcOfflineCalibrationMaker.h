@@ -1,17 +1,23 @@
+/*
+ * StEmcOfflineCalibrationMaker.h
+ * Update author: J. Kevin Adkins, University of Kentucky
+ * June 15, 2014
+ */
+
 #ifndef STAR_StEmcOfflineCalibrationMaker
 #define STAR_StEmcOfflineCalibrationMaker
 
 class TFile;
 class TTree;
-class TH2;
-class TH3;
+class TH2F;
 
 class StEmcOfflineCalibrationEvent;
 class StEmcOfflineCalibrationTrack;
+class StEmcOfflineCalibrationVertex;
+class StEmcOfflineCalibrationTrigger;
 
 class StMuDstMaker;
 class StEmcADCtoEMaker;
-class StEmcTriggerMaker;
 class StTriggerSimuMaker;
 
 class StBemcTables;
@@ -25,82 +31,61 @@ class StMuTrack;
 class StEmcOfflineCalibrationMaker : public StMaker
 {
 private:
-	const char* filename;
-	TFile* myFile;
-	TFile* mapFile;
-	TTree* calibTree;
-	TH2* mapcheck;
-	TH2* towerSlopes[2]; //[MB][HT]
-	TH2* preshowerSlopes; 
-	TH2* smdSlopes[2]; //[eta][phi] no caps
-	StEmcOfflineCalibrationEvent* myEvent;
-	StEmcOfflineCalibrationTrack* myTrack;
-	
-	vector<unsigned int> mbTriggers;
-	vector<unsigned int> htTriggers;
-	vector<unsigned int> httpTriggers;
-	vector<unsigned int> fastTriggers;	
-	//pointers to makers - get them in Init()
-	StMuDstMaker*		muDstMaker;
-	StEmcADCtoEMaker*	mADCtoEMaker;
-	//StEmcTriggerMaker*	emcTrigMaker;
-	StTriggerSimuMaker* emcTrigMaker;
+  const char* filename;
+  TFile* myFile;
+  TTree* calibTree;
+  TH2F *mapcheck, *towerSlopes, *preshowerSlopes, *smdeSlopes, *smdpSlopes;
+  StEmcOfflineCalibrationEvent* myEvent;
+  
+  StMuDstMaker* muDstMaker;
+  StEmcADCtoEMaker* mADCtoEMaker;
+  StTriggerSimuMaker* emcTrigSimu;
+  StBemcTables* mTables;
+  StEmcPosition* mEmcPosition;
+  StEmcCollection* mEmcCollection;
+  StEmcGeom* mEmcGeom;
+  StEmcGeom* mSmdEGeom;
+  StEmcGeom* mSmdPGeom;
 
-	int mHT0threshold;
-	int mHT1threshold;
-	int mHT2threshold;
-	int mHT3threshold;
-
-	vector< pair<int,int> > HT0towersAboveThreshold;
-	vector< pair<int,int> > HT1towersAboveThreshold;
-	vector< pair<int,int> > HT2towersAboveThreshold;
-	vector< pair<int,int> > HT3towersAboveThreshold;
-
-	//all these random BEMC objects
-	StBemcTables*		mTables;
-	StEmcGeom*		mEmcGeom;
-	StEmcPosition*		mEmcPosition;
-	StEmcCollection*	mEmcCollection;
-	StEmcGeom*              mSmdEGeom;
-	StEmcGeom*              mSmdPGeom;
-	
-	//tower info (0==BTOW, 1==BPRS, 2=BSMDE, 3=BSMDP)
-	unsigned short	mADC[2][4800];
-	unsigned short mADCSmd[2][18000];
-	float			mPedestal[2][4800];
-	float			mPedRMS[2][4800];
-	float mPedestalSmd[2][18000];
-	float mPedRMSSmd[2][18000];
-	int				mStatus[2][4800];
-	int mStatusSmd[2][18000];
-	unsigned char	mCapacitor[4800]; //only for BPRS
-	unsigned char mCapacitorSmd[2][18000];
-	
-	void getADCs(int det); //1==BTOW, 2==BPRS, 3=BSMDE, 4=BSMDP
-	pair<unsigned short, pair<float,float> > getTrackTower(const StMuTrack* track, bool useExitRadius=false, int det=1);
-	float getTrackDeltaR(float track_eta, float track_phi, int id);
-	pair<float, float> getTrackDetaDphi(float track_eta, float track_phi, int id, int det);
-	double highestNeighbor(int id);
-	
-	
-public:
-	StEmcOfflineCalibrationMaker(const char* name="btowCalibMaker", const char* file="test.root");
-	virtual ~StEmcOfflineCalibrationMaker();
-
-	virtual Int_t Init();
-	virtual Int_t InitRun(int run);
-	virtual Int_t Make();	
-	virtual Int_t Finish();
-	virtual void Clear(Option_t* option="");
-	
-	bool subtractPedestals;
-	
-	void addMinBiasTrigger(unsigned int trigId);
-	void addHighTowerTrigger(unsigned int trigId);
-	void addHTTPTrigger(unsigned int trigId);
-	void addFastTrigger(unsigned int trigId);
-	
-	ClassDef(StEmcOfflineCalibrationMaker, 3)
+  vector<UInt_t> mbTriggers;
+  vector<UInt_t> htTriggers;
+  
+  Int_t mHT0threshold;
+  Int_t mHT1threshold;
+  Int_t mHT2threshold;
+  Int_t mHT3threshold;
+  
+  //tower info (0==BTOW, 1==BPRS, 2=BSMDE, 3=BSMDP)
+  Int_t mADC[2][4800];
+  Int_t mADCSmd[2][18000];
+  Float_t mPedestal[2][4800];
+  Float_t mPedRMS[2][4800];
+  Float_t mPedestalSmd[2][18000];
+  Float_t mPedRMSSmd[2][18000];
+  Int_t	mStatus[2][4800];
+  Int_t mStatusSmd[2][18000];
+  UChar_t mCapacitor[4800]; //only for BPRS
+  UChar_t mCapacitorSmd[2][18000];
+  
+  void getADCs(Int_t det); //1==BTOW, 2==BPRS, 3=BSMDE, 4=BSMDP
+  pair<Int_t, pair<Float_t,Float_t> > getTrackTower(const StMuTrack* track, Bool_t useExitRadius=false, Int_t det=1);
+  Float_t getTrackDeltaR(Float_t track_eta, Float_t track_phi, Int_t id);
+  pair<Float_t, Float_t> getTrackDetaDphi(Float_t track_eta, Float_t track_phi, Int_t id, Int_t det);
+  double highestNeighbor(Int_t id);
+  
+ public:
+  StEmcOfflineCalibrationMaker(const char* name="btowCalibMaker", const char* file="test.root");
+  virtual ~StEmcOfflineCalibrationMaker();
+  
+  virtual Int_t Init();
+  virtual Int_t Make();	
+  virtual Int_t InitRun(Int_t run);
+  virtual Int_t Finish();
+  virtual void Clear(Option_t* option="");
+    
+  void addHighTowerTrigger(UInt_t trigId);
+  
+  ClassDef(StEmcOfflineCalibrationMaker, 5);
 };
 
 #endif
