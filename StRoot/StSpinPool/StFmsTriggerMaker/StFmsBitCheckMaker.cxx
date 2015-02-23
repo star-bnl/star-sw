@@ -15,6 +15,7 @@ static unsigned int N0[12][MAXDT][4][32][4];
 static unsigned int N1[4][MAXDT][4][32][4];
 static unsigned int N2[MAXDT][4][32][4];
 static unsigned int N3[16][4];
+static float MM[MAXDT][18];
 
 /*
 unsigned int getDSM(int slot, int ch){
@@ -31,7 +32,20 @@ unsigned int getDSM(int slot, int ch){
 }
 */
 
-void printCount(const char* name, unsigned int n[MAXDT][4][32][4], int run, int layer2=0){  
+void printMismatch(int run){
+  printf("Run      Mismatch% =  FM001  FM002  FM003  FM004  FM005  FM006  FM007  FM008  FM009  FM010  FM011  FM012 |  FM101  FM102  FM03   FM104 |  FP201 |  TCU   | Average\n");
+  printf("%8d mismatch\% = ",run);
+  float ave=0.0;
+  for(int id=0; id<18; id++) {
+    ave+=MM[MAXD][id];
+    printf("%6.3f ",MM[MAXD][id]);
+    if(id==11 || id==15 || id==16) printf("| ");
+  }
+  printf("| ave=%6.3f\n",ave/18.0);
+  printf("%8.4f AVGMM\n",ave/18.0);
+}
+
+void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int run, int layer2=0){  
   int dmin,dmax;
   dmin=-(NPRE+NPOST); dmax=NPRE+NPOST;
   //  if(layer2==0){ dmin=-(NPRE+NPOST); dmax=NPRE+NPOST; }
@@ -69,26 +83,38 @@ void printCount(const char* name, unsigned int n[MAXDT][4][32][4], int run, int 
   for(int dt=0; dt<MAXDT; dt++){
     int d=dt-MAXD;
     if(d<dmin || d>dmax) continue;
-    printf("%4.1f  ",float(nt[dt]-ng[dt])/float(nt[dt])*100.0);
+    float mm=float(nt[dt]-ng[dt])/float(nt[dt])*100.0;
+    printf("%4.1f  ",mm);
+    MM[dt][id]=mm;
   }
   printf("\n");
 }
 
-void printCount3(const char* name, unsigned int n[32][4], int run){  
+void printCount3(int id, const char* name, unsigned int n[32][4], int run){  
+  int nt=0,ng=0;
   printf("%8d %15s :  0 ",run,name);
   for(int j=15; j>=0; j--){
     char a[2];
-    if(n[j][1]==0 && n[j][2]==0) {
-      sprintf(a,"."); 
+    int n00=n[j][0];
+    int n01=n[j][1];
+    int n10=n[j][2];
+    int n11=n[j][3];
+    nt+=n00+n01+n10+n11;
+    ng+=n00+n11;
+    if(n01==0 && n10==0) {
+      sprintf(a,".");
     }else{
-      float r = float(n[j][0] + n[j][3])/float(n[j][0] + n[j][1] + n[j][2] + n[j][3])*10.0;
+      float r = float(n00+n11)/float(n00+n01+n10+n11)*10.0;
       sprintf(a,"%1d",(int)r);
-      if(n[j][0]==0 && n[j][1]==0) sprintf(a,"!");
-      if(n[j][2]==0 && n[j][3]==0) sprintf(a,"o");
-    }	
+      if(n00==0 && n01==0) sprintf(a,"!");
+      if(n10==0 && n11==0) sprintf(a,"o");
+    }
     printf("%1s",a);
   }
   printf("\n");
+  float mm=float(nt-ng)/float(nt)*100.0;
+  printf("%8d %15s Mismatch\% = \n",run,name,mm); 
+  MM[MAXD][id]=mm;
 }
 
 void Count(int d1, int d2, int d3, int d4, int s1, int s2, int s3, int s4, unsigned int n[4][32][4]){
@@ -221,30 +247,31 @@ int StFmsBitCheckMaker::InitRun(int runNumber){
 
 int StFmsBitCheckMaker::Finish(){
   printf("Run      Name            Mismatch%   Data Xing - Previous layer&Emulation xing\n");
-  printCount("QT1/DCBA=>FM001",N0[0],mRun);
-  printCount("QT2/DCBA=>FM002",N0[1],mRun);
-  printCount("QT3/DCBA=>FM003",N0[2],mRun);
-  printCount("QT4/DCBA=>FM004",N0[3],mRun);
-  printCount("QT1/JIHG=>FM005",N0[4],mRun);
-  printCount("QT1/FE  =>FM006",N0[5],mRun);
-  printCount("QT2/JIHG=>FM007",N0[6],mRun);
-  printCount("QT2/FE  =>FM008",N0[7],mRun);
-  printCount("QT3/JIHG=>FM009",N0[8],mRun);
-  printCount("QT3/FE  =>FM010",N0[9],mRun);
-  printCount("QT4/JIHG=>FM011",N0[10],mRun);
-  printCount("QT4/FE  =>FM012",N0[11],mRun);
+  printCount(0,"QT1/DCBA=>FM001",N0[0],mRun);
+  printCount(1,"QT2/DCBA=>FM002",N0[1],mRun);
+  printCount(2,"QT3/DCBA=>FM003",N0[2],mRun);
+  printCount(3,"QT4/DCBA=>FM004",N0[3],mRun);
+  printCount(4,"QT1/JIHG=>FM005",N0[4],mRun);
+  printCount(5,"QT1/FE  =>FM006",N0[5],mRun);
+  printCount(6,"QT2/JIHG=>FM007",N0[6],mRun);
+  printCount(7,"QT2/FE  =>FM008",N0[7],mRun);
+  printCount(8,"QT3/JIHG=>FM009",N0[8],mRun);
+  printCount(9,"QT3/FE  =>FM010",N0[9],mRun);
+  printCount(10,"QT4/JIHG=>FM011",N0[10],mRun);
+  printCount(11,"QT4/FE  =>FM012",N0[11],mRun);
 
   //Layer0->Layer1                                                                                                                                                    
-  printCount("FM001/2 =>FM101", N1[0],mRun);
-  printCount("FM003/4 =>FM102", N1[1],mRun);
-  printCount("FM005/8 =>FM103", N1[2],mRun);
-  printCount("FM09/12 =>FM104", N1[3],mRun);
+  printCount(12,"FM001/2 =>FM101", N1[0],mRun);
+  printCount(13,"FM003/4 =>FM102", N1[1],mRun);
+  printCount(14,"FM005/8 =>FM103", N1[2],mRun);
+  printCount(15,"FM09/12 =>FM104", N1[3],mRun);
 
   //Layer1->Layer2                                                                                                                                                   
-  printCount("FM101/4 =>FP201", N2,mRun,1);
+  printCount(16,"FM101/4 =>FP201", N2,mRun,1);
 
   //Layer2->TCU                                                                                                                                                   
-  printCount3("FP201   =>TCU  ",N3,mRun);
+  printCount3(17,"FP201   =>TCU  ",N3,mRun);
+  printMismatch(mRun);
 }
 
 int StFmsBitCheckMaker::Make(){
