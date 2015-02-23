@@ -1123,11 +1123,13 @@ bool ComponentCST::Coordinate2Index(const double xin, const double yin, const do
   it_z = std::lower_bound(m_zlines.begin(),m_zlines.end(),position_mapped[2]);
   if(it_x == m_xlines.end() || it_y == m_ylines.end() || it_z == m_zlines.end() ||
      position_mapped[0] < m_xlines.at(0) || position_mapped[1] < m_ylines.at(0) || position_mapped[2] < m_zlines.at(0) ){
-    std::cerr << className << "::ElectricFieldBinary:" << std::endl;
-    std::cerr << "    Could not find the given coordinate!" << std::endl;
-    std::cerr << "    You ask for the following position: " << xin << ", " << yin << ", " << zin << std::endl;
-    std::cerr << "    The mapped position is: " << position_mapped[0] << ", " << position_mapped[1] << ", " << position_mapped[2] << std::endl;
-    PrintRange();
+    if(debug){
+      std::cerr << className << "::ElectricFieldBinary:" << std::endl;
+      std::cerr << "    Could not find the given coordinate!" << std::endl;
+      std::cerr << "    You ask for the following position: " << xin << ", " << yin << ", " << zin << std::endl;
+      std::cerr << "    The mapped position is: " << position_mapped[0] << ", " << position_mapped[1] << ", " << position_mapped[2] << std::endl;
+      PrintRange();
+    }
     return false;
   }
   /* Lower bound returns the next mesh line behind the position in question.
