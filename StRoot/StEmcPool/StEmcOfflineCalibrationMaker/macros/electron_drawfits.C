@@ -7,7 +7,7 @@
  * algorithm. Also, removed a lot of code which was unnecessary,
  * and updated naming conventions for clearer reading.
  *
- * Most recent update: June 10, 2014
+ * Most recent update: Feb 23, 2015
  */
 
 #include <iostream>
@@ -58,7 +58,7 @@ void electron_drawfits(const char* infile="CombinedElectrons.root", const char* 
   //**********************************************//
   //Initialization                                //
   //**********************************************//
-  const char* dbDate="2009-01-01 00:11:00";
+  const char* dbDate="2012-01-01 00:11:00";
   StBemcTablesWriter *bemctables = new StBemcTablesWriter();
   bemctables->loadTables(dbDate,"sim");
   StEmcDecoder* mDecoder = bemctables->getDecoder();
