@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.111 2015/02/24 19:10:05 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.112 2015/02/24 19:10:15 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -112,17 +112,17 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
 
          TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-         TGeoMatrix* sensorMatrix = 0;
+         TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
-         if (mBuildIdealGeom) {
-            sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
-         } else {
-            sensorMatrix = (TGeoMatrix*) mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
-         }
+         if (!mBuildIdealGeom) {
+            const TGeoHMatrix* sensorMatrixDb = mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
 
-         if (!sensorMatrix) {
-            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot get PXL sensor position matrix. Skipping to next ladder..." << endm;
-            continue;
+            if (!sensorMatrixDb) {
+               LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot get PXL sensor position matrix. Skipping to next ladder..." << endm;
+               continue;
+            }
+
+            sensorMatrix = *sensorMatrixDb;
          }
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
@@ -135,7 +135,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
             TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
-            StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
+            StiPlacement *pPlacement= new StiPlacement(sensorMatrix, offset);
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
