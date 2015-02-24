@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.110 2015/02/03 10:21:17 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.111 2015/02/24 19:10:05 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -102,7 +102,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
          std::ostringstream geoPath;
-         geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_1/PLAC_1";
+         geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
 
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
