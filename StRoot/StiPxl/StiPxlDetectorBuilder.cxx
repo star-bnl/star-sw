@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.112 2015/02/24 19:10:15 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.113 2015/02/24 19:10:25 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -114,6 +114,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
          TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
+         // Temporarily save the translation for this sensor in Z so, we can center
+         // the newly built sensors at Z=0 (in ideal geometry) later
+         double idealOffsetZ = sensorMatrix.GetTranslation()[2];
+
          if (!mBuildIdealGeom) {
             const TGeoHMatrix* sensorMatrixDb = mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
 
@@ -124,6 +128,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             sensorMatrix = *sensorMatrixDb;
          }
+
+         // Update the global translation in Z so that the new volumes are centered at Z=0
+         sensorMatrix.SetDz(sensorMatrix.GetTranslation()[2] - idealOffsetZ);
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
