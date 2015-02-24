@@ -157,8 +157,8 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
     | JP2<<7 | JP1<<8 | JP0<<9 
     | DiJp<<10;
   
-  if(1){
-    //if(PRINT){
+  //if(1){
+  if(PRINT){
     printf("%s input FM101=%08x FM102=%08x FM103=%08x FM104=%08x\n",fp201.name,fm101,fm102,fm103,fm104); 
     printf("%s out=%08x smBS3/2/1=%1d %1d %1d lgBS3/2/1=%1d %1d %1d DiBS=%1d JP=%1d %1d %1d DiJp=%1d\n",
 	   fp201.name,fp201.output[t],
@@ -167,28 +167,28 @@ void l1_fp201_2015_a(Board& fp201, int t, int simdat){
 	   DiBS,
 	   JP2,JP1,JP0,
 	   DiJp);
-  }
-  
-  printf("%s DiBS bs1=%03x=",fp201.name,bs1);
-  for(int i=NBITBS-1; i>=0; i--) printf("%1x",btest(bs1,i));
-  printf("\n"); 
-  for(int j=0; j<NBITBS; j++){
-    printf("DiBS ");
-    for(int i=0; i<=j; i++){
-      printf(" %1d", DBS[j][i]);
+    
+    printf("%s DiBS bs1=%03x=",fp201.name,bs1);
+    for(int i=NBITBS-1; i>=0; i--) printf("%1x",btest(bs1,i));
+    printf("\n"); 
+    for(int j=0; j<NBITBS; j++){
+      printf("DiBS ");
+      for(int i=0; i<=j; i++){
+	printf(" %1d", DBS[j][i]);
+      }
+      printf("\n");
     }
+    
+    printf("%s DiJp jp1=%02x=",fp201.name,jp0);
+    for(int i=NBITJp-1; i>=0; i--) printf("%1x",btest(jp0,i));
     printf("\n");
-  }
-
-  printf("%s DiJp jp1=%02x=",fp201.name,jp0);
-  for(int i=NBITJp-1; i>=0; i--) printf("%1x",btest(jp0,i));
-  printf("\n");
-  for(int j=0; j<NBITJp; j++){
-    printf("DiJp ");
-    for(int i=0; i<NBITJp; i++){
-      printf(" %1d", DJp[j][i]);
+    for(int j=0; j<NBITJp; j++){
+      printf("DiJp ");
+      for(int i=0; i<NBITJp; i++){
+	printf(" %1d", DJp[j][i]);
+      }
+      printf("\n");
     }
-    printf("\n");
   }
 }
 

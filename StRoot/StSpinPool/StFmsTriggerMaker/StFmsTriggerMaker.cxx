@@ -231,7 +231,7 @@ int StFmsTriggerMaker::MakeTrgData(){
   if(!trgd) {printf("MakeTrgData found no trigger data\n"); return kStErr;}
   mNPre=trgd->numberOfPreXing();
   mNPost=trgd->numberOfPostXing();
-  printf("StFmsTriggerMaker::MakeTrgData found npre=%d npost=%d\n",mNPre,mNPost);
+  //printf("StFmsTriggerMaker::MakeTrgData found npre=%d npost=%d\n",mNPre,mNPost);
   int n=0;
   for(int t=0; t<MAXT; t++){
     int x=t-MAXPP;
@@ -249,7 +249,7 @@ int StFmsTriggerMaker::MakeTrgData(){
       }
     }
   }
-  printf("StFmsTriggerMaker::MakeTrgData found %d hits\n",n);
+  //printf("StFmsTriggerMaker::MakeTrgData found %d hits\n",n);
   //hack FAKE stuck bits -akio
   /*
   for(int t=0; t<MAXT; t++){
@@ -306,7 +306,7 @@ void StFmsTriggerMaker::writeDsmData(int t){
   //FAKE!!! FM010 3rd int should be 0xFFFFFFFF since not connected... but shows some activities fake increasing mismatch%. Masking out -akio
   ((int*)fm010.dsmdata[t])[2] = 0xFFFFFFFF;
 
-  Printf("StFmsTriggerMaker::writeDsmData x=%d\n",x);
+  //printf("StFmsTriggerMaker::writeDsmData x=%d\n",x);
 }
 
 template<class T>
