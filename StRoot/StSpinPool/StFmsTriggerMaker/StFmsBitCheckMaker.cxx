@@ -8,7 +8,7 @@ enum {MAXD=MAXPP*2, MAXDT=MAXD*2+1};
 //unsigned short FP201[8];
 unsigned short TCU;
 StFmsTriggerMaker* SIM;
-int PRINTLEVEL;
+static int PRINTLEVEL;
 
 static int NPRE,NPOST;
 static unsigned int N0[12][MAXDT][4][32][4];
@@ -84,7 +84,7 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
     int d=dt-MAXD;
     if(d<dmin || d>dmax) continue;
     float mm=float(nt[dt]-ng[dt])/float(nt[dt])*100.0;
-    printf("%4.1f  ",mm);
+    printf("%6.3f ",mm);
     MM[dt][id]=mm;
   }
   printf("\n");
@@ -113,7 +113,7 @@ void printCount3(int id, const char* name, unsigned int n[32][4], int run){
   }
   printf("\n");
   float mm=float(nt-ng)/float(nt)*100.0;
-  printf("%8d %15s Mismatch\% = \n",run,name,mm); 
+  printf("%8d %15s Mismatch\% = %6.3f\n",run,name,mm); 
   MM[MAXD][id]=mm;
 }
 
@@ -151,7 +151,7 @@ void Comp0(const char* name, int slot, int num, int t1, int t2, int run){
   unsigned int s2=SIM->FM0xxinput(num,1,t2);
   unsigned int s3=SIM->FM0xxinput(num,2,t2);
   unsigned int s4=SIM->FM0xxinput(num,3,t2);
-  if(PRINTLEVEL){
+  if(PRINTLEVEL>0){
     printf("%8d %15s | %2d %2d %2d | %08x %08x %08x %08x | %08x %08x %08x %08x | %08x %08x %08x %08x\n",
 	   run,name,x1-x2,x1,x2,
 	   d1,d2,d3,d4,
@@ -178,7 +178,7 @@ void Comp1(const char* name, int slot, int num, int t1, int t2, int run){
   unsigned int s2=SIM->FM1xxinput(num,1,t2);
   unsigned int s3=SIM->FM1xxinput(num,2,t2);
   unsigned int s4=SIM->FM1xxinput(num,3,t2);
-  if(PRINTLEVEL)
+  if(PRINTLEVEL>0)
     printf("%8d %15s | %2d %2d %2d | %08x %08x %08x %08x | %08x %08x %08x %08x | %08x %08x %08x %08x\n",
 	   run,name,x1-x2,x1,x2,
 	   d1,d2,d3,d4,
@@ -204,7 +204,7 @@ void Comp2(const char* name, int t2, int run){
   unsigned int s2=SIM->FP201input(1,t2);
   unsigned int s3=SIM->FP201input(2,t2);
   unsigned int s4=SIM->FP201input(3,t2);
-  if(PRINTLEVEL)
+  if(PRINTLEVEL>0)
     printf("%8d %15s | %2d %2d %2d | %08x %08x %08x %08x | %08x %08x %08x %08x | %08x %08x %08x %08x\n",
 	   run,name,x1-x2,x1,x2,
 	   d1,d2,d3,d4,
@@ -217,11 +217,13 @@ void Comp3(const char* name, int run){
   unsigned int d1=TCU;
   unsigned int s1=SIM->FP201output();
   int jp0=SIM->FP201userdata(1);
-  printf("%8d %15s | %04x / %04x | %04x  DiJp=",
-	 run,name,
-         d1,s1,d1^s1);
-  for(int i=5; i>=0; i--) printf("%1x",(jp0>>i)&0x1);  
-  printf("\n");
+  if(PRINTLEVEL>0) {
+    printf("%8d %15s | %04x / %04x | %04x  DiJp=",
+	   run,name,
+	   d1,s1,d1^s1);
+    for(int i=5; i>=0; i--) printf("%1x",(jp0>>i)&0x1);  
+    printf("\n");
+  }
   Count3(d1,s1,N3);
 }
 
@@ -238,6 +240,7 @@ int StFmsBitCheckMaker::Init(){
   memset(N1,0,sizeof(N1));
   memset(N2,0,sizeof(N2));
   memset(N3,0,sizeof(N3));
+  PRINTLEVEL=mPrint;
   return kStOk;
 }
 
@@ -287,7 +290,7 @@ int StFmsBitCheckMaker::Make(){
   bxinglo = (bxing1 << 16) + td->bcData(11);
   bx = (bxinghi << 32) + bxinglo;
   bxdiff=bx-bxkeep;
-  printf("StFmsBitCheckMaker: Year=%d Version=%x Event=%d Token=%d BC=%lld BCDiff=%lld\n",td->year(),td->version(),td->eventNumber(),td->token(),bx,bxdiff);
+  if(PRINTLEVEL>0) printf("StFmsBitCheckMaker: Year=%d Version=%x Event=%d Token=%d BC=%lld BCDiff=%lld\n",td->year(),td->version(),td->eventNumber(),td->token(),bx,bxdiff);
   bxkeep=bx;
 
   //FMS=td->getDsm_FMS();  
@@ -295,7 +298,6 @@ int StFmsBitCheckMaker::Make(){
   TCU = td->lastDSM(5);
   NPRE=td->numberOfPreXing();
   NPOST=td->numberOfPostXing();
-  PRINTLEVEL=mPrint;
 
   //QT -> layer0
   for(int t1=0; t1<MAXT; t1++){ //data xing loop
@@ -330,6 +332,7 @@ int StFmsBitCheckMaker::Make(){
       if(t1==MAXPP && t2==MAXPP) Comp3("FP201   =>TCU",mRun);
     }
   }
+  PRINTLEVEL--;
   return kStOk;
 }
 
