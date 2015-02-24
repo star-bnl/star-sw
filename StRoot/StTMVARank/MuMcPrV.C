@@ -354,7 +354,7 @@ void MapRc2McVertices(map<StMuPrimaryVertex *,StMuMcVertex *> &Rc2McVertices) {
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV38") { 
+	     const  char* outFile="MuMcPrV40") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -368,6 +368,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   // 36 use table
   // 37 use only "B" for KFV
   // 38 check StTMVAranking
+  // 39 switch to maps
+  // 40 plots only for l == lBest
   // Initialize histograms -----------------------
   /* 
      1. Data sample : pp200 W->e nu with  pile-up corresponding to 1 MHz min. bias events, 50 K event y2011, 10 K event y2012.
@@ -393,7 +395,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   if (RankMin) OutFile += "R"; 
   OutFile += ".root";
   TFile *fOut = TFile::Open(OutFile,"recreate");
-  const Int_t nMcRecMult = 100;
+  const Int_t nMcRecMult = 75; // 100;
   TArrayD xMult(nMcRecMult+1);
   xMult[0] = -0.5;
   for (Int_t i = 1; i <= nMcRecMult; i++) {
@@ -628,9 +630,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     UInt_t NoRcVertices = Id2RcVx.size();
     map<Int_t,PVgadgets_st> dataS;
     PVgadgets_st &aData = *(TMVAdata::instance()->GetArray());
-    UInt_t NoAccepetedRcVx = AccepedRcVx.size();
+    Int_t NoAccepetedRcVx = AccepedRcVx.size();
     TArrayF Ranks(NoAccepetedRcVx);
-    for (UInt_t l = 0; l < NoAccepetedRcVx; l++) {
+    for (Int_t l = 0; l < NoAccepetedRcVx; l++) {
       StMuPrimaryVertex *RcVx = AccepedRcVx[l];
       assert(RcVx);
       Int_t idd = RcVx->idTruth();
@@ -671,7 +673,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     Int_t NoMcTracksWithHitsL = NoMcTracksWithHitsAtMC1;
     StMuMcVertex *McVx = RcVx2McVx[RcVx];
     if (McVx) NoMcTracksWithHitsL = McVx2Tracks.count(McVx);
-    for (UInt_t l = 0; l < NoAccepetedRcVx; l++) {
+    for (Int_t l = 0; l < NoAccepetedRcVx; l++) {
       StMuPrimaryVertex *RcVx = AccepedRcVx[l];
       assert(RcVx);
       Int_t idd = RcVx->idTruth();
@@ -710,62 +712,28 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	if (TMath::Abs(RcVx->position().z()-VpdZ) < 200) cout << Form("VpdZ %8.2f",RcVx->position().z()-VpdZ);
 	cout << endl;
       }
-      aData = dataS[l];
-      Int_t h = 1; 
-      if (l == lMcBest) h = 1;
-      else  {
-	h = 2;
-	if (aData.good) h = 3;
-      }
-      hists[0][3]->Fill(aData.Rank);
-      hists[h][3]->Fill(aData.Rank);
-      if (aData.Rank > RankMin) {
-	hists[0][0]->Fill(NoMcTracksWithHitsL,noTracks);
-	hists[0][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
-	hists[0][2]->Fill(NoMcTracksWithHitsAtMC1);
-	hists[h][0]->Fill(NoMcTracksWithHitsL,noTracks);
-	hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
-	hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
-      }
     }
-    //#define __V0__
+    aData = dataS[lBest];
+    Int_t h = 1; 
+    if (lBest == lMcBest) h = 1;
+    else  {
+      h = 2;
+      if (aData.good) h = 3;
+    }
+    hists[0][3]->Fill(aData.Rank);
+    hists[h][3]->Fill(aData.Rank);
+    if (aData.Rank > RankMin) {
+      hists[0][0]->Fill(NoMcTracksWithHitsL,noTracks);
+      hists[0][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
+      hists[0][2]->Fill(NoMcTracksWithHitsAtMC1);
+      hists[h][0]->Fill(NoMcTracksWithHitsL,noTracks);
+      hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
+      hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
+    }
+#define __V0__
 #ifdef __V0__
     // V0 section
     if (NoKFVertices < 2) continue;
-#if 0
-    // =============  Build map between global and primary tracks from proper vertex
-    map<Int_t,Int_t> Gl2Pr;
-    for (Int_t k = 0; k < NoPrimaryTracks; k++) {
-      StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
-      if (! Accept(pTrack)) continue;
-      Int_t l = pTrack->vertexIndex();
-      if (l < 0) continue;
-      StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
-      if (! RcVx) continue; // ??????
-      if (RcVx->idTruth() != 1) continue;
-      Int_t kg = pTrack->index2Global();
-      Gl2Pr.insert(pair<Int_t,Int_t>(kg,k));
-    }
-    // =============  Build map between global and Mc tracks
-    multimap<Int_t,Int_t> Mc2RcTracks;
-    for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
-      StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
-      if (! Accept(gTrack)) continue;
-      //      gTrack->Print();
-      // Check Mc
-      if (gTrack->idTruth() < 0 || gTrack->idTruth() > NoMuMcTracks) {
-	cout << "Illegal idTruth " << gTrack->idTruth() << " The track is ignored" << endl;
-	continue;
-      }
-      StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(gTrack->idTruth()-1);
-      if (McTrack->Id() != gTrack->idTruth()) {
-	cout << "Mismatched idTruth " << gTrack->idTruth() << " and McTrack Id " <<  McTrack->Id() 
-	     << " The track is ignored" <<  endl;
-      }
-      //      McTrack->Print();
-      Mc2RcTracks.insert(pair<Int_t,Int_t>(gTrack->idTruth()-1,kg)); // Id shifted by 1
-    }
-#endif
     // Loop over KF Vetrices and KF particles
     // Map between Id and position in Clones Array
     map<Int_t,Int_t> VerId2k;
