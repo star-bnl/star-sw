@@ -51,6 +51,7 @@
 #include "Jevp/StJevpBuilders/istBuilder.h"
 #include "Jevp/StJevpBuilders/ssdBuilder.h"
 #include "Jevp/StJevpBuilders/ppBuilder.h"
+#include "Jevp/StJevpBuilders/fpsBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -328,6 +329,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
       i++;
       daqfilename = argv[i];
     }
+    else if (strcmp(argv[i], "-log") == 0) {
+      logevent=1;
+    }
     else if (strcmp(argv[i], "-files") == 0) {
       i++;
 
@@ -400,6 +404,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
       printf("\t[-production]\n");
       printf("\t[-diska [/net/a]]  (used to pass to builders on launch)\n");
       printf("\t[-nothrottle]\n");
+      printf("\t[-log]   (log each event)\n");
       printf("\n\n");
       printf("Defaults:  \n");
       printf("\tbasedir      = '/RTScache/conf'\n");
@@ -471,6 +476,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     builders.Add(new fgtBuilder(this));
     builders.Add(new vpdBuilder(this));
     builders.Add(new fmsBuilder(this));
+    builders.Add(new fpsBuilder(this));
     builders.Add(new gmtBuilder(this));
     builders.Add(new pxlBuilder(this));
     builders.Add(new istBuilder(this));
@@ -571,7 +577,9 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       CP;
-      LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      if(logevent) {
+	printf("Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)\n",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      }
       
       if(sigsetjmp(env, 1)) {
 	LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
