@@ -27,7 +27,7 @@ for($i=0;$i<=$nRuns;$i++){
 
     print(OUTFILE "<SandBox installer=\"ZIP\">\n");
     print(OUTFILE "<Package name=\"bemcCalibCode2012\">\n");
-    print(OUTFILE "<File>file:/star/u/jkadkins/bemcCalib2012/StRoot/StEmcOfflineCalibrationMaker/macros/bemcCalibMacro.C </File> \n");
+    print(OUTFILE "<File>file:/star/u/jkadkins/bemcCalib2012/StRoot/StEmcPool/StEmcOfflineCalibrationMaker/macros/bemcCalibMacro.C </File> \n");
     print(OUTFILE "<File>file:/star/u/jkadkins/bemcCalib2012/.sl64_gcc447 </File> \n");
     print(OUTFILE "</Package>\n");
     print(OUTFILE "</SandBox>\n");
