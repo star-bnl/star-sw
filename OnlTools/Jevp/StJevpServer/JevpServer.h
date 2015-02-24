@@ -41,6 +41,7 @@ class JevpServer {
   char *basedir;       // base for config files...
   char *diska;
   int myport;
+  int logevent;
   char *launchArgs;    // used to pass the lanuch arguments back to reader thread...
   daqReader *rdr;
 
@@ -67,6 +68,7 @@ class JevpServer {
 
   JevpServer() {
     myport = JEVP_PORT;
+    logevent = 0;
     ssocket = NULL;
     mon = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
