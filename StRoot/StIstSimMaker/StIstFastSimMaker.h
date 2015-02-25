@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.3 2015/02/25 20:20:08 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.4 2015/02/25 20:31:58 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -33,8 +33,6 @@ class StIstFastSimMaker : public StMaker {
 
   StIstFastSimMaker(const char *name="istFastSim");
   Int_t Make();
-  Int_t Finish();
-  Int_t Init();
   Int_t InitRun( int);
   void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;} 
  
@@ -43,7 +41,7 @@ class StIstFastSimMaker : public StMaker {
 
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.3 2015/02/25 20:20:08 smirnovd Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.4 2015/02/25 20:31:58 smirnovd Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -67,6 +65,9 @@ class StIstFastSimMaker : public StMaker {
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.4  2015/02/25 20:31:58  smirnovd
+* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
+*
 * Revision 1.3  2015/02/25 20:20:08  smirnovd
 * Minor style, comments and whitespace changes
 *
