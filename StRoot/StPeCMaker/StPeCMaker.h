@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.20 2014/08/06 11:43:32 jeromel Exp $
+// $Id: StPeCMaker.h,v 1.21 2015/02/25 01:19:45 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.21  2015/02/25 01:19:45  ramdebbe
+// added a setter to select writing Roman Pot Collection to output tree
+//
 // Revision 1.20  2014/08/06 11:43:32  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -110,10 +113,11 @@ public:
 	void setFilter(Int_t fi) {filter = fi;};
 	void setMuDst(StMuDst* mu) {muDst = mu;};	//Accessor for muDst pointer
 	void setFileName ( TString name ) { treeFileName = name ; } ;
-	void setUseBemc   ( Bool_t includeBemc = kFALSE ) { useBemc = includeBemc ; } ;
-	void setUseTOF    ( Bool_t includeTOF = kFALSE ) { useTOF = includeTOF ; } ;
+	void setUseBemc   ( Bool_t includeBemc   = kFALSE ) { useBemc   = includeBemc ; } ;
+	void setUseTOF    ( Bool_t includeTOF    = kFALSE ) { useTOF    = includeTOF ; } ;
 	void setUseVertex ( Bool_t includeVertex = kFALSE ) { useVertex = includeVertex ; } ;
 	void setUseTracks ( Bool_t includeTracks = kFALSE ) { useTracks = includeTracks ; } ;
+	void setRomanPots ( Bool_t includeRP     = kFALSE ) { useRP     = includeRP ; } ;
 
 	void setReadStMuDst    ( Bool_t includeStMuDst = kFALSE ) { readStMuDst             = includeStMuDst ; } ;
 	void setReadStEvent    ( Bool_t includeStEvent = kFALSE ) { readStEvent             = includeStEvent ; } ;
@@ -127,6 +131,8 @@ public:
 	Bool_t   useTOF;      //if TRUE TOF information is written to ntuple
 	Bool_t   useVertex;   //if TRUE Vertex information is written to ntuple
 	Bool_t   useTracks;   //if TRUE track information is written to ntuple
+	Bool_t   useRP;       //if TRUE Roman Pot information is written to ntuple
+
 	Bool_t readStMuDst;               //if TRUE will work with information passed in StMuDst format
 	Bool_t readStEvent;               //if TRUE will work with information passed in StEvent format
 	Bool_t readStMuDst_and_StEvent;   //if TRUE will work with information passed in both StMuDst and StEvent format
@@ -166,7 +172,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.20 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.21 2015/02/25 01:19:45 ramdebbe Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,2)
 };
