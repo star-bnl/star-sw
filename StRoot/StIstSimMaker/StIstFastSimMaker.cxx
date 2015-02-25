@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.25 2015/02/25 20:44:31 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.26 2015/02/25 20:44:41 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -97,9 +97,7 @@ Int_t StIstFastSimMaker::Make()
    }
 
    // Store hits into Ist Hit Collection
-   StIstHitCollection *istHitCollection = 0;
-
-   istHitCollection = rcEvent->istHitCollection();
+   StIstHitCollection *istHitCollection = rcEvent->istHitCollection();
 
    if (!istHitCollection) {
       istHitCollection = new StIstHitCollection;
@@ -132,11 +130,11 @@ Int_t StIstFastSimMaker::Make()
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
          if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
-  	  TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-  	  Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+  	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+  	  path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
   	  gGeoManager->RestoreMasterVolume();
   	  gGeoManager->CdTop();
-  	  gGeoManager->cd(Path);
+  	  gGeoManager->cd(path);
   	  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
          }
          else { //using mis-aligned gemetry from IST geometry DB tables
