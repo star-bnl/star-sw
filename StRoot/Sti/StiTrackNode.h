@@ -35,7 +35,7 @@ void set10(const double *a)      ;
 void get11(      double *a) const;
 void set11(const double *a)      ;
 
-void recov(); 
+void recov(int force=0); 
 int  check(const char *pri=0) const; 
 double sign() const; 
 double zign() const; 
