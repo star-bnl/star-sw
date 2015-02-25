@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.2 2015/02/25 20:20:00 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.3 2015/02/25 20:31:58 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -30,22 +30,13 @@ using namespace std;
 
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const char* name ) : StMaker(name), istRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE)
+StIstFastSimMaker::StIstFastSimMaker( const char* name ) : StMaker(name), istRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
+   myRandom(new StRandom()), mSmear(true)
 {
-   /* no op */
+   int seed=time(NULL);
+   myRandom->setSeed(seed);
 }
 
-Int_t StIstFastSimMaker::Init()
-{
-  LOG_INFO<<"StIstFastSimMaker::Init()"<<endm;
-  int seed=time(NULL);
-  myRandom=new StRandom();
-  myRandom->setSeed(seed);
- 
-  mSmear=1; //smearing on/off
-
-  return kStOk;
-}
 
 //____________________________________________________________
 Int_t StIstFastSimMaker::InitRun(int RunNo)
@@ -204,14 +195,13 @@ Double_t StIstFastSimMaker::distortHit(double x, double res, double detLength){
   return test;
 }
 
-Int_t StIstFastSimMaker::Finish()
-{
-  return kStOk;
-}
 
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.3  2015/02/25 20:31:58  smirnovd
+* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
+*
 * Revision 1.2  2015/02/25 20:20:00  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
