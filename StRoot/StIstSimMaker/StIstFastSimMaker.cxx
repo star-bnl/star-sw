@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.3 2015/02/25 20:31:58 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.4 2015/02/25 20:32:14 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <map>
 #include <exception>
-using namespace std;
 #include <stdexcept>
 #include "tables/St_g2t_ist_hit_Table.h"
 #include "tables/St_HitError_Table.h"
@@ -199,6 +198,9 @@ Double_t StIstFastSimMaker::distortHit(double x, double res, double detLength){
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.4  2015/02/25 20:32:14  smirnovd
+* Minor adjustments to the code and comments
+*
 * Revision 1.3  2015/02/25 20:31:58  smirnovd
 * Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
 *
