@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.29 2015/02/25 20:45:00 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.30 2015/02/25 20:46:41 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -23,15 +23,6 @@ ClassImp(StIstFastSimMaker)
 StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
    mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
-}
-
-//____________________________________________________________
-StIstFastSimMaker::~StIstFastSimMaker(){ 
-}
-
-//____________________________________________________________
-void StIstFastSimMaker::Clear(Option_t *) {
-   StMaker::Clear();
 }
 
 //____________________________________________________________
@@ -133,7 +124,7 @@ Int_t StIstFastSimMaker::Make()
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
          Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
-         cout << " matIst : " << matIst << endl;
+         LOG_DEBUG << " matIst : " << matIst << endm;
 
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
@@ -152,18 +143,12 @@ Int_t StIstFastSimMaker::Make()
          //YPWANG: McIstHit stored local position
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
          Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
-         LOG_DEBUG << "Before Smearing" << endm;
-         LOG_DEBUG << "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
 
          if (mSmear) { // smearing on
-            LOG_DEBUG << "Smearing start... " << endm;
             localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
             localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
-
-            LOG_DEBUG << Form("Smearing done...") << endm;
          }
          else { //smearing off
-            LOG_DEBUG << "No smearing, but discreting ... " << endm;
             //discrete hit local position (2D structure of IST sensor pads)
             Float_t rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
             Float_t zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
@@ -178,9 +163,6 @@ Int_t StIstFastSimMaker::Make()
          //YPWANG: do local-->global transform with geometry table
          combI->LocalToMaster(localIstHitPos, globalIstHitPos);
          StThreeVectorF gistpos(globalIstHitPos);
-         LOG_DEBUG << "smeared globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endm;
-         LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
-         LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
          UInt_t hw =  ( mcI->ladder() - 1 ) * kIstNumSensorsPerLadder + mcI->wafer();
          StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
@@ -189,10 +171,6 @@ Int_t StIstFastSimMaker::Make()
          mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
          tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
          istHitCollection->addHit(tempHit);
-
-         LOG_DEBUG << "id() : " << tempHit->id()  << " idTruth: " << tempHit->idTruth() << endm;
-         LOG_DEBUG << "from StMcIstHit x= " << mcI->position().x()   << "; y= " << mcI->position().y()   << "; z= " << mcI->position().z() << endm;
-         LOG_DEBUG << "istHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << "; energy/charge = " << tempHit->charge() << endm;
       }//MC hits loop over
    }//end layer=0 cut
 
