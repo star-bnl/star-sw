@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.7 2015/02/25 20:39:43 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.8 2015/02/25 20:39:51 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -29,38 +29,45 @@
 
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const char *name ) : StMaker(name), istRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
-   myRandom(new StRandom()), mSmear(true)
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
+   mRandom(new StRandom()), mSmear(kTRUE)
 {
-   int seed = time(NULL);
-   myRandom->setSeed(seed);
+   Int_t seed = time(NULL);
+   mRandom->setSeed(seed);
 }
 
+StIstFastSimMaker::~StIstFastSimMaker(){ 
+   if (mIstDb) delete mIstDb;
+   if (mRandom) delete mRandom; 
+}
 
 //____________________________________________________________
-Int_t StIstFastSimMaker::InitRun(int RunNo)
+Int_t StIstFastSimMaker::InitRun(int runNo)
 {
    LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
    TDataSet *set = GetDataBase("Calibrations/tracker");
    St_HitError *istTableSet = (St_HitError *)set->Find("ist1HitError");
    HitError_st *istHitError = istTableSet->GetTable();
-   resXIst1 = sqrt(istHitError->coeff[0]);
-   resZIst1 = sqrt(istHitError->coeff[3]);
+   mResXIst1 = sqrt(istHitError->coeff[0]);
+   mResZIst1 = sqrt(istHitError->coeff[3]);
 
    TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
 
    if (istDbDataSet) {
       mIstDb = (StIstDb *)istDbDataSet->GetObject();
-      assert(mIstDb);
    }
    else {
-      LOG_ERROR << "InitRun : no istDb" << endm;
+      LOG_ERROR << "InitRun : no mIstDb" << endm;
       return kStErr;
    }
 
    // geometry Db tables
-   istRot = mIstDb->getRotations();
+   mIstRot = mIstDb->getRotations();
+   if (mIstRot) {
+      LOG_ERROR << "InitRun : mIstRot is not initialized" << endm;
+      return kStErr;
+   }
 
    return kStOk;
 }
@@ -108,22 +115,22 @@ Int_t StIstFastSimMaker::Make()
    const StMcIstHitCollection *istMcHitCol = mcEvent->istHitCollection();
 
    //new simulator for new 1-layer design
-   float smearedX = 0., smearedZ = 0.;
+   Float_t smearedX = 0., smearedZ = 0.;
 
    if (istMcHitCol) {
       LOG_INFO << "ist MC hit collection found" << endm;
-      int nIsthits = istMcHitCol->numberOfHits();
+      Int_t nIsthits = istMcHitCol->numberOfHits();
       LOG_DEBUG << "there are " << nIsthits << " ist hits" << endm;
 
       if (nIsthits) {
          if (istMcHitCol->layer(0)) {
-            for (unsigned int kk = 0; kk < istMcHitCol->layer(0)->hits().size(); kk++) {
+            for (UInt_t kk = 0; kk < istMcHitCol->layer(0)->hits().size(); kk++) {
                StMcHit *mcH = istMcHitCol->layer(0)->hits()[kk];
                StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
-               int matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
+               Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
                cout << " matIst : " << matIst << endl;
-               TGeoHMatrix *combI = (TGeoHMatrix *)istRot->FindObject(Form("R%04i", matIst));
+               TGeoHMatrix *combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));
 
                if (combI) {
                   cout << " from Tables :" << endl;
@@ -131,15 +138,15 @@ Int_t StIstFastSimMaker::Make()
                }
 
                //YPWANG: McIstHit stored local position
-               double globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
-               double localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
+               Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
+               Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
                LOG_DEBUG << "Before Smearing" << endm;
                LOG_DEBUG << "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
 
                if (mSmear) { // smearing on
                   LOG_DEBUG << "Smearing start... " << endm;
-                  smearedX = distortHit(localIstHitPos[0], resXIst1, kIstSensorActiveSizeRPhi / 2.0);
-                  smearedZ = distortHit(localIstHitPos[2], resZIst1, kIstSensorActiveSizeZ / 2.0);
+                  smearedX = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
+                  smearedZ = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
 
                   localIstHitPos[0] = smearedX;
                   localIstHitPos[2] = smearedZ;
@@ -148,10 +155,10 @@ Int_t StIstFastSimMaker::Make()
                else { //smearing off
                   LOG_DEBUG << "No smearing, but discreting ... " << endm;
                   //discrete hit local position (2D structure of IST sensor pads)
-                  float rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
-                  float zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
-                  short meanColumn  = (short)floor( zPos / kIstPadPitchColumn ) + 1;
-                  short meanRow     = (short)floor( rPhiPos / kIstPadPitchRow ) + 1;
+                  Float_t rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
+                  Float_t zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
+                  Short_t meanColumn  = (Short_t)floor( zPos / kIstPadPitchColumn ) + 1;
+                  Short_t meanRow     = (Short_t)floor( rPhiPos / kIstPadPitchRow ) + 1;
                   rPhiPos = (meanRow - 1) * kIstPadPitchRow + 0.5 * kIstPadPitchRow; //unit: cm
                   zPos    = (meanColumn - 1) * kIstPadPitchColumn + 0.5 * kIstPadPitchColumn; //unit: cm
                   localIstHitPos[0] = kIstSensorActiveSizeRPhi / 2.0 - rPhiPos;
@@ -165,7 +172,7 @@ Int_t StIstFastSimMaker::Make()
                LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
                LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
-               unsigned int hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
+               UInt_t hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
                StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
                tempHit->setDetectorId(kIstId);
                tempHit->setId(mcI->key());
@@ -180,10 +187,11 @@ Int_t StIstFastSimMaker::Make()
          }//end layer=0 cut
       }//end MC hits number cut
 
-      gMessMgr->Info() << "StIstFastSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
+      LOG_DEBUG << "StIstFastSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
    }
    else {
-      LOG_INFO << "No Ist MC hits found." << endm;
+      LOG_FATAL << "No Ist MC hits found." << endm;
+      return kStFatal;
    }
 
    return kStOK;
@@ -196,7 +204,7 @@ Int_t StIstFastSimMaker::Make()
  * value is constrained to be within the characteristic dimension detLength
  * provided by the user.
  */
-double StIstFastSimMaker::distortHit(const double x, const double res, const double detLength) const
+Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength) const
 {
    // Do not smear x when it is outside the physical limits. Issue a warning instead
    if (fabs(x) > detLength) {
@@ -204,10 +212,10 @@ double StIstFastSimMaker::distortHit(const double x, const double res, const dou
       return x;
    }
 
-   double smeared_x;
+   Double_t smeared_x;
 
    do {
-      smeared_x = myRandom->gauss(x, res);
+      smeared_x = mRandom->gauss(x, res);
    } while ( fabs(smeared_x) > detLength);
 
    return smeared_x;
@@ -217,6 +225,9 @@ double StIstFastSimMaker::distortHit(const double x, const double res, const dou
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.8  2015/02/25 20:39:51  smirnovd
+* STAR Coding Standards style upates according to Jason W. comments
+*
 * Revision 1.7  2015/02/25 20:39:43  smirnovd
 * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
 *
