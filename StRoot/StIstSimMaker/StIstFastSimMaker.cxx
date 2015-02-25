@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.24 2015/02/25 20:44:27 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.25 2015/02/25 20:44:31 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -65,6 +65,11 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
    // geometry Db tables
    mIstRot = mIstDb->getRotations();
 
+   if (!mIstRot) {
+      LOG_FATAL << "InitRun(): mIstRot is not initialized" << endm;
+      return kStFatal;
+   }
+
    return kStOk;
 }
 
@@ -77,11 +82,6 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
 Int_t StIstFastSimMaker::Make()
 {
    using namespace StIstConsts;
-
-   if (!mIstRot) {
-      LOG_FATAL << "Make(): mIstRot is not initialized" << endm;
-      return kStFatal;
-   }
 
    // Get the input data structures from StEvent and StMcEvent
    StEvent *rcEvent =  (StEvent *) GetInputDS("StEvent");
