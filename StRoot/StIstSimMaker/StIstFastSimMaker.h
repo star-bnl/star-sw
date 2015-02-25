@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.17 2015/02/25 20:44:41 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ */
 
 #ifndef StIstFastSimMaker_h
 #define StIstFastSimMaker_h
@@ -24,7 +24,6 @@ class StIstFastSimMaker : public StMaker
 public:
 
    StIstFastSimMaker(const Char_t *name = "istFastSim", bool useRandomSeed=true);
-   virtual ~StIstFastSimMaker();
    Int_t Init();
    /// Retrieve GEANT hit information then transfer hit position to ideal or misaligned geometry of
    /// realistic IST detector
@@ -33,10 +32,9 @@ public:
    /// Selects whether ideal or misalgined geometry is used mBuildIdealGeom kTRUE=ideal,
    /// kFALSE=misaligned
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
-   virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.17 2015/02/25 20:44:41 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
