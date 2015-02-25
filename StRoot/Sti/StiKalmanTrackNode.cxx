@@ -1,10 +1,17 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.165 2015/02/23 19:54:06 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.166 2015/02/25 02:35:26 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.166  2015/02/25 02:35:26  perev
+ * Some outdated asserts and debug lines removed
+ * In propagateError recov is colled
+ * When length is big recov(1) is called, otherwice recov(0).
+ * recov(1) is slower and negative error matrix happens with big length,
+ * about 100.
+ *
  * Revision 2.165  2015/02/23 19:54:06  perev
  * Bug #3048 fixed. Very starnge mistype. instead of if(something) it was if(!something)
  * How it was happened I have no idea (VP)
@@ -601,7 +608,6 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-assert(mFE.sign()>0);///???
   mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
@@ -1007,7 +1013,7 @@ StiDebug::Break(nCall);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
-  if (debug() & 8) { PrintpT("V");}
+  
   setHit(vertex);
   setDetector(0);
   return true;
@@ -1241,16 +1247,19 @@ void StiKalmanTrackNode::propagateMtx()
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
 {  
+  enum {kBigLen = 20};
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
-  mFE.recov();
+  int force = (fabs(mgP.dl) > kBigLen); 
+  mFE.recov(force);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
 // now set hiterrors
    if (_hit) setHitErrors();
 
 // set state node is ready
+
   mPE() = mFE;
   _state = kTNReady;
 }
@@ -1715,42 +1724,8 @@ assert(mFE.zign()>0); ///???
   mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
   mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
-assert(mFE.sign()>0); ///??? 
+  mFE.recov(1);
 
-  if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
-    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
-          ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ)<< endm;
-    return -14;
-  }
-  if (mFE.check()) return -14;
-
-#ifdef Sti_DEBUG
-  TRSymMatrix W(H,TRArray::kATxSxA,G); 
-  TRSymMatrix C0(C);
-  C0 -= TRSymMatrix(C,TRArray::kRxSxR,W);
-  TRSymMatrix C1(kNPars,mFE.A);  
-  if (debug() & 4) {
-    PrPP(updateNode,W); 
-    PrPP(updateNode,C0);
-    PrPP(updateNode,C1);
-    C1.Verify(C0);
-  }
-  //   update of the covariance matrix:
-  //    C_k = (I - K_k * H_k) * C^k-1_k * (I - K_k * H_k)T + K_k * V_k * KT_k
-  // P* C^k-1_k * PT
-  TRMatrix A(K,TRArray::kAxB,H);
-  TRMatrix P(TRArray::kUnit,kNPars);
-  P -= A;
-  TRSymMatrix C2(P,TRArray::kAxSxAT,C); 
-  TRSymMatrix Y(K,TRArray::kAxSxAT,V);  
-  C2 += Y;  
-  if (debug() & 4) {
-    PrPP(updateNode,C2); PrPP(updateNode,Y); PrPP(updateNode,C2);
-    C2.Verify(C0);
-    C2.Verify(C1);
-  }
-#endif
-  if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
   return 0; 
 }
