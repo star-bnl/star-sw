@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.32 2014/06/18 17:29:49 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.33 2015/02/25 01:19:38 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.33  2015/02/25 01:19:38  ramdebbe
+// added a setter to select writing Roman Pot Collection to output tree
+//
 // Revision 1.32  2014/06/18 17:29:49  ramdebbe
 // ignore flag from StPeCEvent and writes all events with a summary
 //
@@ -137,7 +140,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.32 2014/06/18 17:29:49 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.33 2015/02/25 01:19:38 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -163,23 +166,24 @@ Int_t StPeCMaker::Init() {
    LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
    LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
    LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
-   LOG_INFO <<"trigger to be selected: "    << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" )
+   LOG_INFO <<"trigger to be selected: "      << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" )
+
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
    m_outfile->SetCompressionLevel(1);
-//    setTriggerOfInterest("another");
+
 
    uDstTree = new TTree("uDst", "Pcol uDst", 99);
 
    //Instantiate StPeCEvent
 
-   pevent = new StPeCEvent(useBemc, useTOF, useVertex, useTracks, readStMuDst, readStEvent, readStMuDst_and_StEvent);
+   pevent = new StPeCEvent(useBemc, useTOF, useVertex, useTracks, useRP, readStMuDst, readStEvent, readStMuDst_and_StEvent);
    pevent->setInfoLevel(infoLevel);
    if(!pevent) LOG_INFO << "StPeCMaker Init: unable to make instance of StPeCEvent ---------- " << endm;
    trigger = new StPeCTrigger();
    trigger->setInfoLevel(infoLevel);
    char test[] = "ZDC_monitor";
-//    strcpy(triggerChoice, test); 
+
    geant = new StPeCGeant();
     LOG_INFO << "StPeCMaker Init: before branch add ---------- " << endm;
 
@@ -270,6 +274,7 @@ Int_t StPeCMaker::Make()
    int tw        = 0 ;
    int ok = 0 ;
    int returnValue = 0;
+   int gReturn = 0;
    //
    // 26-APR 2012 RD we comment the whole muDst part NEEDS TO BE FIXED
    // 12-JULY2012 RD this is still in need of a fix, I return to StMuDst for triggerEfficiency studies
@@ -288,6 +293,11 @@ Int_t StPeCMaker::Make()
 //       LOG_INFO << "StPeCMaker make: trigger return ---------- "  <<returnValue<< endm;
       pevent->setTOFgeometry(mBTofGeom);
       ok = pevent->fill(muDst);
+      //
+      // read MC information from MuDst
+   //Fill geant simulations             //RD
+
+      gReturn = geant->fill(muDst);
    }   // was commented up to here  //commented mudst ends here
 //    else
 //   {                                           //this needs fix RD 9DEC09
