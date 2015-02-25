@@ -9,7 +9,7 @@
 
 #include <cstring>
 
-enum { NCHANNELS = 32, NREGISTERS = 32, MAXPP=5, MAXT=MAXPP*2+1, PRINT=0};
+enum { NCHANNELS = 32, NREGISTERS = 32, MAXPP=5, MAXT=MAXPP*2+1, PRINT=1};
 
 struct Board {
   char name[10];
