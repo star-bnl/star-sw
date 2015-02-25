@@ -1,9 +1,9 @@
-/* $Id: StIstSimMaker.cxx,v 1.1 2015/02/25 16:52:54 jeromel Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.31 2015/02/25 21:30:30 jeromel Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
 
-#include "StIstSimMaker/StIstSimMaker.h"
+#include "StIstSimMaker/StIstFastSimMaker.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEnumerations.h"
 #include "StMcEvent/StMcEvent.hh"
@@ -18,40 +18,36 @@
 #include "StThreeVectorF.hh"
 #include "tables/St_HitError_Table.h"
 
-ClassImp(StIstSimMaker)
+ClassImp(StIstFastSimMaker)
 
-StIstSimMaker::StIstSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
    mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
 }
 
 //____________________________________________________________
-StIstSimMaker::~StIstSimMaker(){ 
-}
-
-//____________________________________________________________
-void StIstSimMaker::Clear(Option_t *) {
-   StMaker::Clear();
-}
-
-//____________________________________________________________
-Int_t StIstSimMaker::Init() {
-   LOG_INFO << "StIstSimMaker::Init()" << endm;
+Int_t StIstFastSimMaker::Init() {
+   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
 
    if (mBuildIdealGeom && !gGeoManager) {
-      LOG_ERROR << "Init() - "
-         "Cannot initialize StIstSimMaker due to missing global object of TGeoManager class. "
-         "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
-      return kFatal;
+
+      GetDataBase("VmcGeometry");
+
+      if (!gGeoManager) {
+         LOG_ERROR << "Init() - "
+            "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
+            "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
+         return kFatal;
+      }
    }
 
    return kStOk;
 }
 
 //____________________________________________________________
-Int_t StIstSimMaker::InitRun(int runNo)
+Int_t StIstFastSimMaker::InitRun(int runNo)
 {
-   LOG_INFO << "StIstSimMaker::InitRun" << endm;
+   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
    TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
    St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
@@ -86,7 +82,7 @@ Int_t StIstSimMaker::InitRun(int runNo)
  * StIstHitCollection with (possibly smeared) hit positions in either ideal or
  * misaligned geometry. Thus created StIstHitCollection is used in tracking.
  */
-Int_t StIstSimMaker::Make()
+Int_t StIstFastSimMaker::Make()
 {
    using namespace StIstConsts;
 
@@ -128,13 +124,13 @@ Int_t StIstSimMaker::Make()
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
          Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
-         cout << " matIst : " << matIst << endl;
+         LOG_DEBUG << " matIst : " << matIst << endm;
 
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
          if (mBuildIdealGeom) {
   	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-  	  path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+  	  path += Form("/IBAM_%ld/IBLM_%ld/IBSS_1", mcI->ladder(), mcI->wafer());
   	  gGeoManager->RestoreMasterVolume();
   	  gGeoManager->CdTop();
   	  gGeoManager->cd(path);
@@ -147,18 +143,12 @@ Int_t StIstSimMaker::Make()
          //YPWANG: McIstHit stored local position
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
          Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
-         LOG_DEBUG << "Before Smearing" << endm;
-         LOG_DEBUG << "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
 
          if (mSmear) { // smearing on
-            LOG_DEBUG << "Smearing start... " << endm;
             localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
             localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
-
-            LOG_DEBUG << Form("Smearing done...") << endm;
          }
          else { //smearing off
-            LOG_DEBUG << "No smearing, but discreting ... " << endm;
             //discrete hit local position (2D structure of IST sensor pads)
             Float_t rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
             Float_t zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
@@ -173,9 +163,6 @@ Int_t StIstSimMaker::Make()
          //YPWANG: do local-->global transform with geometry table
          combI->LocalToMaster(localIstHitPos, globalIstHitPos);
          StThreeVectorF gistpos(globalIstHitPos);
-         LOG_DEBUG << "smeared globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endm;
-         LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
-         LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
          UInt_t hw =  ( mcI->ladder() - 1 ) * kIstNumSensorsPerLadder + mcI->wafer();
          StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
@@ -184,14 +171,10 @@ Int_t StIstSimMaker::Make()
          mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
          tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
          istHitCollection->addHit(tempHit);
-
-         LOG_DEBUG << "id() : " << tempHit->id()  << " idTruth: " << tempHit->idTruth() << endm;
-         LOG_DEBUG << "from StMcIstHit x= " << mcI->position().x()   << "; y= " << mcI->position().y()   << "; z= " << mcI->position().z() << endm;
-         LOG_DEBUG << "istHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << "; energy/charge = " << tempHit->charge() << endm;
       }//MC hits loop over
    }//end layer=0 cut
 
-   LOG_DEBUG << "StIstSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
+   LOG_DEBUG << "StIstFastSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
 
    return kStOK;
 }
@@ -203,7 +186,7 @@ Int_t StIstSimMaker::Make()
  * value is constrained to be within the characteristic dimension detLength
  * provided by the user.
  */
-Double_t StIstSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength)
+Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength)
 {
    // Do not smear x when it is outside the physical limits. Issue a warning instead
    if (fabs(x) > detLength) {

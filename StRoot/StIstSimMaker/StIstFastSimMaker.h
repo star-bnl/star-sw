@@ -1,7 +1,7 @@
-/* $Id: StIstSimMaker.h,v 1.1 2015/02/25 16:52:54 jeromel Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ */
 
-#ifndef StIstSimMaker_h
-#define StIstSimMaker_h
+#ifndef StIstFastSimMaker_h
+#define StIstFastSimMaker_h
 
 #include "TRandom1.h"
 
@@ -19,12 +19,11 @@ class THashList;
  * \author: Yaping Wang
  * \date August 2012
  */
-class StIstSimMaker : public StMaker
+class StIstFastSimMaker : public StMaker
 {
 public:
 
-   StIstSimMaker(const Char_t *name = "istFastSim", bool useRandomSeed=true);
-   virtual ~StIstSimMaker();
+   StIstFastSimMaker(const Char_t *name = "istFastSim", bool useRandomSeed=true);
    Int_t Init();
    /// Retrieve GEANT hit information then transfer hit position to ideal or misaligned geometry of
    /// realistic IST detector
@@ -33,10 +32,9 @@ public:
    /// Selects whether ideal or misalgined geometry is used mBuildIdealGeom kTRUE=ideal,
    /// kFALSE=misaligned
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
-   virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstSimMaker.h,v 1.1 2015/02/25 16:52:54 jeromel Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -53,7 +51,7 @@ private:
    /// Routine to smear hit by resolution with gaussian, mean zero and width res
    Double_t distortHit(const Double_t x, const Double_t res, const Double_t detLength);
 
-   ClassDef(StIstSimMaker, 0)
+   ClassDef(StIstFastSimMaker, 0)
 };
 
 #endif
