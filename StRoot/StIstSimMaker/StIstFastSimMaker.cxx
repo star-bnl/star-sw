@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.30 2015/02/25 20:46:41 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.31 2015/02/25 21:30:30 jeromel Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -130,7 +130,7 @@ Int_t StIstFastSimMaker::Make()
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
          if (mBuildIdealGeom) {
   	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-  	  path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+  	  path += Form("/IBAM_%ld/IBLM_%ld/IBSS_1", mcI->ladder(), mcI->wafer());
   	  gGeoManager->RestoreMasterVolume();
   	  gGeoManager->CdTop();
   	  gGeoManager->cd(path);
