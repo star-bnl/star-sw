@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.11 2015/02/25 20:42:57 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.12 2015/02/25 20:43:21 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -10,8 +10,11 @@ class StRandom;
 class StIstDb;
 class THashList;
 
+
 /**
- * Fast simulation maker for IST.
+ * Fast simulation maker for IST. IST GEANT hit is transformed to either ideal
+ * or misaligned geometry of realistic detector, with smearing or pixelization.
+ * The GEANT hit dE is directly propagated to IST hit in GeV.
  *
  * \author: Yaping Wang
  * \date August 2012
@@ -23,29 +26,30 @@ public:
    StIstFastSimMaker(const Char_t *name = "istFastSim");
    virtual ~StIstFastSimMaker();
    Int_t Init();
-   //retrieve GEANT hit information, and transfer hit position to ideal/misaligned geometry of realistic IST detector
+   /// Retrieve GEANT hit information then transfer hit position to ideal or misaligned geometry of
+   /// realistic IST detector
    Int_t Make();
    Int_t InitRun( Int_t runNo);
-   //Selects whether ideal or misalgined geometry is used
-   //mBuildIdealGeom kTRUE=ideal, kFALSE=misaligned
+   /// Selects whether ideal or misalgined geometry is used mBuildIdealGeom kTRUE=ideal,
+   /// kFALSE=misaligned
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
    virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.11 2015/02/25 20:42:57 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.12 2015/02/25 20:43:21 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 protected:
    THashList *mIstRot;
    StIstDb *mIstDb;
-   Bool_t mBuildIdealGeom;
+   Bool_t mBuildIdealGeom; ///< Switch between ideal and misaligned geometries. Default is true (ideal)
 
    StRandom *mRandom;
 
    Double_t mResXIst1;
    Double_t mResZIst1;
-   Bool_t mSmear; //to turn smearing on and off
+   Bool_t mSmear; ///< Smear generated IST hit positions. Default is true
 
 private:
 
