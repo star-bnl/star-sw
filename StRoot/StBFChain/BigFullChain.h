@@ -188,14 +188,11 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,MakeEvent,IdTruth,tags,bbcsim,emcY2,EEfs,evout,big,McEvout,MiniMcMk,ReadAll,useXGeom"
    ,                                                                                       "","","",kFALSE},
   {"MC.y2013"        ,"","","TpcRS,TpxClu,y2013_1x,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
-   "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big"
-   ,                                                                                       "","","",kFALSE},
-  {"MC.y2014"        ,"","","TpcRS,TpxClu,y2014a,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
-   "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big"
-   ,                                                                                       "","","",kFALSE},
-  {"MC.devT"        ,"","","TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
-   "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
-   ,                                                                                       "","","",kFALSE},
+   "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big",      "","","",kFALSE},
+  {"MC.y2014"        ,"","","P2014a,TpcRS,TpxClu,pxlfastsim,istsim,bbcSim,btofsim,emcSim,EEfs"
+   ",geantout,big,emcY2",                                                                  "","","",kFALSE},
+  {"MC.devT"        ,"","","TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,TpcHitMover"
+   ",bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",        "","","",kFALSE},
   {"MC.devTA"        ,"","","TpcRS,TpxClu,devTA,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
@@ -280,7 +277,8 @@ Bfc_st BFC[] = { // standard chains
    ",-hitfilt",                                                                            "","","",kFALSE},
   {"RC.pp.y2013","","","pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,"
    "OSpaceZ2,OGridLeak3D,-hitfilt",                                                        "","","",kFALSE},
-  {"RC.y2014","","","P2014a,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt",     "","","",kFALSE},
+  {"RC.y2014","","","P2014a,pxlHit,istHit,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
+   ,                                                                                       "","","",kFALSE},
 
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
@@ -1030,10 +1028,12 @@ Bfc_st BFC[] = { // standard chains
   {"P2014a","" ,"",
    "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+#if 0
   {"P2014aPxLData","" ,"", "P2014a,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit"
    ,                                         "","","Production chain for 2014 data with pixel, ist",kFALSE},
-  {"P2014aPxLSim","" ,"",   "P2014a,pxlfastsim, istfastsim"
+  {"P2014aPxLSim","" ,"",   "P2014a,pxlfastsim, istsim"
    ,                                  "","","Production chain for 2014 simulation wtih pixesl, ist",kFALSE},
+#endif
   // Year 15 chains
   {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
@@ -1434,7 +1434,7 @@ Bfc_st BFC[] = { // standard chains
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
-  {"pxlFastSim"  ,"","","StMcEvent,StEvent",   "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
+  {"pxlFastSim"  ,"","","McEvent,StEvent",     "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
@@ -1442,8 +1442,8 @@ Bfc_st BFC[] = { // standard chains
   {"istRaw",     "", "", "istUtil istDb","StIstRawHitMaker","StIstRawHitMaker","IST raw hit maker", kFALSE},
   {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","Run IST cluster maker", kFALSE},
   {"istHit",     "", "", "event istCluster", "StIstHitMaker","StIstHitMaker",  "Run IST hit Maker", kFALSE},
-  {"istFastSim"  ,"","","StMcEvent,StEvent", "StIstFastSimMaker","StIstFastSimMaker"
-   ,                     "Load StIstSimMaker, invoke StIstFastSimMaker to fill StIstHitCollection", kFALSE},
+  {"istSim"  ,"","", "McEvent,StEvent", "StIstFastSimMaker","StIstSimMaker"
+   ,                         "Load StIstSimMaker, invoke StIstSimMaker to fill StIstHitCollection", kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
@@ -1462,7 +1462,7 @@ Bfc_st BFC[] = { // standard chains
   {"emcDY2"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
   {"eemcD"       ,"","","","","",                              "WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc","","" //no  emcAtoE in simulation
+  {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc,-emcDY2,-daq","","" //no  emcAtoE in simulation
    ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","","emc_T,EmcUtil,McEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker"
    ,                                                                       "New simulator for BEMC",kFALSE},
@@ -1615,6 +1615,9 @@ Bfc_st BFC[] = { // standard chains
   {"BTofIT"  ,""  ,"","ITTF",""                                ,"StiBTof","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
+  {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
+  {"NoPxlIT"     ,""  ,"","-PxlIT",""                    ,"","ITTF: track with switch off PXL geom",kFALSE},
+  {"NoIstIT"     ,""  ,"","-IstIT",""                    ,"","ITTF: track with switch off IST geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},
