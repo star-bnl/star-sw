@@ -11,13 +11,11 @@
  */
 
 void saveTriggerLoad(
-char *timestamp = "",
+char *timestamp = "20150214.000001",
 bool status = true,
 bool pedestal = true,
 bool lut = true,
-bool statusOffline = true,
-bool pedestalOffline = true,
-bool saveDB = true,
+bool saveDB = false,
 bool saveTables = true,
 char *tables_dir = "tables.emconline_trg",
 char *saved_dir = "last_config.emconline_trg",
@@ -32,5 +30,5 @@ char *bcwTable = "bcw_table.txt"
     gSystem->Load("StOnlineTriggerMonitoring");
 
     StOnlineTriggerMonitoring *onltrg = new StOnlineTriggerMonitoring();
-    onltrg->saveTrigger(timestamp, status, pedestal, lut, statusOffline, pedestalOffline, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
+    onltrg->saveTrigger(timestamp, status, pedestal, lut, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
 }
