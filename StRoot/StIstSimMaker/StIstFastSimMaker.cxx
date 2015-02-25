@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.21 2015/02/25 20:44:11 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.22 2015/02/25 20:44:17 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -82,7 +82,6 @@ Int_t StIstFastSimMaker::Make()
 {
    using namespace StIstConsts;
 
-   LOG_INFO << "StIstFastSimMaker::Make()" << endm;
    if (!mIstRot) {
       LOG_FATAL << "Make(): mIstRot is not initialized" << endm;
       return kStFatal;
@@ -107,7 +106,6 @@ Int_t StIstFastSimMaker::Make()
    istHitCollection = rcEvent->istHitCollection();
 
    if (!istHitCollection) {
-      gMessMgr->Info() << "StIstFastSimMaker -E- no istHitCollection!\n";
       istHitCollection = new StIstHitCollection;
       rcEvent->setIstHitCollection(istHitCollection);
       LOG_WARN << "Make() - Added new StIstHitCollection to StEvent" << endm;
@@ -125,7 +123,6 @@ Int_t StIstFastSimMaker::Make()
 
    //new simulator for new 1-layer design
 
-   LOG_INFO << "ist MC hit collection found" << endm;
    Int_t nIsthits = istMcHitCol->numberOfHits();
 
    if (istMcHitCol->layer(0)) {
@@ -148,11 +145,6 @@ Int_t StIstFastSimMaker::Make()
          }
          else { //using mis-aligned gemetry from IST geometry DB tables
   	  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
-         }
-
-         if (combI) {
-            cout << " geometry matrix :" << endl;
-            combI->Print();
          }
 
          //YPWANG: McIstHit stored local position
