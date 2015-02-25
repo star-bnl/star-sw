@@ -1,70 +1,60 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.19 2015/02/09 12:27:17 smirnovd Exp $ */
+/* $Id: StIstSimMaker.cxx,v 1.1 2015/02/25 16:52:54 jeromel Exp $ */
 
-#include "Stiostream.h"
-#include "StIstFastSimMaker.h"
-#include "StHit.h"
-#include "StEventTypes.h"
-#include "StEvent.h"
-#include "StMcEvent.hh"
+#include "TGeoManager.h"
+#include "TDataSet.h"
+
+#include "StIstSimMaker/StIstSimMaker.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StEnumerations.h"
+#include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcHit.hh"
-#include "StMcIstHit.hh"
-#include "StRoot/StIstUtil/StIstConsts.h"
-#include "StIstHit.h"
-#include "StIstHitCollection.h"
+#include "StMcEvent/StMcIstHit.hh"
+#include "StIstUtil/StIstConsts.h"
+#include "StEvent/StIstHit.h"
+#include "StEvent/StIstHitCollection.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StMcEvent/StMcIstHit.hh"
 #include "StMcEvent/StMcIstHitCollection.hh"
-#include "StMcEventTypes.hh"
-
-#include <stdio.h>
 #include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
-#include <vector>
-#include <exception>
-#include <stdexcept>
-#include "tables/St_g2t_ist_hit_Table.h"
 #include "tables/St_HitError_Table.h"
-#include "TGeoManager.h"
-#include "TGeoMatrix.h"
-#include "TDataSet.h"
-#include "StarClassLibrary/StRandom.hh"
 
-ClassImp(StIstFastSimMaker)
+ClassImp(StIstSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
-   mRandom(new StRandom()), mSmear(kTRUE)
+StIstSimMaker::StIstSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
+   mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
-   Int_t seed = time(NULL);
-   mRandom->setSeed(seed);
 }
 
 //____________________________________________________________
-StIstFastSimMaker::~StIstFastSimMaker(){ 
-   if (mRandom) delete mRandom; 
+StIstSimMaker::~StIstSimMaker(){ 
 }
 
 //____________________________________________________________
-void StIstFastSimMaker::Clear(Option_t *) {
+void StIstSimMaker::Clear(Option_t *) {
    StMaker::Clear();
 }
 
 //____________________________________________________________
-Int_t StIstFastSimMaker::Init() {
-   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+Int_t StIstSimMaker::Init() {
+   LOG_INFO << "StIstSimMaker::Init()" << endm;
 
-   mBuildIdealGeom = kTRUE; //setup an ideal simulation of the IST
-   mSmear = kTRUE; //do smearing for IST hit by default
+   if (mBuildIdealGeom && !gGeoManager) {
+      LOG_ERROR << "Init() - "
+         "Cannot initialize StIstSimMaker due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
+      return kFatal;
+   }
 
    return kStOk;
 }
 
 //____________________________________________________________
-Int_t StIstFastSimMaker::InitRun(int runNo)
+Int_t StIstSimMaker::InitRun(int runNo)
 {
-   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
+   LOG_INFO << "StIstSimMaker::InitRun" << endm;
 
-   TDataSet *set = GetDataBase("Calibrations/tracker");
-   St_HitError *istTableSet = (St_HitError *)set->Find("ist1HitError");
+   TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
+   St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
    HitError_st *istHitError = istTableSet->GetTable();
    mResXIst1 = sqrt(istHitError->coeff[0]);
    mResZIst1 = sqrt(istHitError->coeff[3]);
@@ -82,41 +72,40 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
    // geometry Db tables
    mIstRot = mIstDb->getRotations();
 
+   if (!mIstRot) {
+      LOG_FATAL << "InitRun(): mIstRot is not initialized" << endm;
+      return kStFatal;
+   }
+
    return kStOk;
 }
 
-//______________________________________________________________________________
-Int_t StIstFastSimMaker::Make()
+
+/**
+ * Retrieves GEANT hit information from StMcEvent then fills the StEvent's
+ * StIstHitCollection with (possibly smeared) hit positions in either ideal or
+ * misaligned geometry. Thus created StIstHitCollection is used in tracking.
+ */
+Int_t StIstSimMaker::Make()
 {
-   LOG_INFO << "StIstFastSimMaker::Make()" << endm;
-   if (!mIstRot) {
-      LOG_FATAL << "Make(): mIstRot is not initialized" << endm;
-      return kStFatal;
-   }
+   using namespace StIstConsts;
 
    // Get the input data structures from StEvent and StMcEvent
    StEvent *rcEvent =  (StEvent *) GetInputDS("StEvent");
 
-   if (! rcEvent) {LOG_INFO << "No StEvent on input" << endl; return kStWarn;}
+   if (! rcEvent) {LOG_WARN << "Make() - StEvent not found" << endl; return kStWarn;}
 
    StMcEvent *mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
 
-   if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
-
-   if ( mBuildIdealGeom && !gGeoManager ) {
-      GetDataBase("VmcGeometry");
-   }
+   if (! mcEvent) {LOG_WARN << "Make() - StMcEvent not found" << endl; return kStWarn;}
 
    // Store hits into Ist Hit Collection
-   StIstHitCollection *istHitCollection = 0;
-
-   istHitCollection = rcEvent->istHitCollection();
+   StIstHitCollection *istHitCollection = rcEvent->istHitCollection();
 
    if (!istHitCollection) {
-      gMessMgr->Info() << "StIstFastSimMaker -E- no istHitCollection!\n";
       istHitCollection = new StIstHitCollection;
-      LOG_WARN << "Make() has added a non existing StIstHitCollection" << endm;
       rcEvent->setIstHitCollection(istHitCollection);
+      LOG_WARN << "Make() - Added new StIstHitCollection to StEvent" << endm;
    }
 
    StThreeVectorF mHitError(0., 0., 0.);
@@ -130,9 +119,7 @@ Int_t StIstFastSimMaker::Make()
    }
 
    //new simulator for new 1-layer design
-   Float_t smearedX = 0., smearedZ = 0.;
 
-   LOG_INFO << "ist MC hit collection found" << endm;
    Int_t nIsthits = istMcHitCol->numberOfHits();
 
    if (istMcHitCol->layer(0)) {
@@ -140,26 +127,21 @@ Int_t StIstFastSimMaker::Make()
          StMcHit *mcH = istMcHitCol->layer(0)->hits()[kk];
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
-         Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
+         Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
          cout << " matIst : " << matIst << endl;
 
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
-         if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
-  	  TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-  	  Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+         if (mBuildIdealGeom) {
+  	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+  	  path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
   	  gGeoManager->RestoreMasterVolume();
   	  gGeoManager->CdTop();
-  	  gGeoManager->cd(Path);
+  	  gGeoManager->cd(path);
   	  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
          }
          else { //using mis-aligned gemetry from IST geometry DB tables
   	  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
-         }
-
-         if (combI) {
-            cout << " geometry matrix :" << endl;
-            combI->Print();
          }
 
          //YPWANG: McIstHit stored local position
@@ -170,11 +152,9 @@ Int_t StIstFastSimMaker::Make()
 
          if (mSmear) { // smearing on
             LOG_DEBUG << "Smearing start... " << endm;
-            smearedX = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
-            smearedZ = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
+            localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
+            localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
 
-            localIstHitPos[0] = smearedX;
-            localIstHitPos[2] = smearedZ;
             LOG_DEBUG << Form("Smearing done...") << endm;
          }
          else { //smearing off
@@ -197,7 +177,7 @@ Int_t StIstFastSimMaker::Make()
          LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
          LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
-         UInt_t hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
+         UInt_t hw =  ( mcI->ladder() - 1 ) * kIstNumSensorsPerLadder + mcI->wafer();
          StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
          tempHit->setDetectorId(kIstId);
          tempHit->setId(mcI->key());
@@ -211,7 +191,7 @@ Int_t StIstFastSimMaker::Make()
       }//MC hits loop over
    }//end layer=0 cut
 
-   LOG_DEBUG << "StIstFastSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
+   LOG_DEBUG << "StIstSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
 
    return kStOK;
 }
@@ -223,7 +203,7 @@ Int_t StIstFastSimMaker::Make()
  * value is constrained to be within the characteristic dimension detLength
  * provided by the user.
  */
-Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength) const
+Double_t StIstSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength)
 {
    // Do not smear x when it is outside the physical limits. Issue a warning instead
    if (fabs(x) > detLength) {
@@ -234,78 +214,8 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
    Double_t smeared_x;
 
    do {
-      smeared_x = mRandom->gauss(x, res);
+      smeared_x = mRandom.Gaus(x, res);
    } while ( fabs(smeared_x) > detLength);
 
    return smeared_x;
 }
-
-
-/***************************************************************************
-*
-* $Log: StIstFastSimMaker.cxx,v $
-* Revision 1.19  2015/02/09 12:27:17  smirnovd
-* Removed a quite pointless check for number of hits in IST MC container
-*
-* Revision 1.18  2015/02/09 12:27:09  smirnovd
-* Check for valid StMcIstHitCollection in StMcEvent
-*
-* This is essentially a change in style only to save one indentation level
-*
-* Revision 1.17  2015/02/09 12:27:02  smirnovd
-* Do not delete StIstDb object as StIstFastSimMaker does not own it
-*
-* The StIstDb object is created by StIstDbMaker and should not be deleted by
-* another maker
-*
-* Revision 1.16  2015/02/04 17:21:08  ypwang
-* adding method to access VMC geometry once no avaible geometry DB tables or set to use ideal geoemtry
-*
-* Revision 1.15  2015/02/04 16:36:09  ypwang
-* Further general codeing style updates according to Jason W. reviews
-*
-* Revision 1.14  2015/02/02 14:37:17  ypwang
-* minor update for mIstRot initialization check
-*
-* Revision 1.13  2015/02/02 14:14:19  ypwang
-* STAR Coding Standards style upates according to Jason W. comments
-*
-* Revision 1.12  2015/01/29 04:43:21  smirnovd
-* Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
-*
-* Revision 1.11  2015/01/23 19:42:04  smirnovd
-* No need to check for valid pointer to StEvent object as it is already done at the begining of Make() routine
-*
-* Revision 1.10  2014/10/13 22:35:07  smirnovd
-* StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.9  2014/10/13 22:33:04  smirnovd
-* Minor adjustments to the code and comments
-*
-* Revision 1.8  2014/10/13 22:28:11  smirnovd
-* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
-*
-* Revision 1.7  2014/10/13 22:21:56  smirnovd
-* Moved CVS log to the end of file and updated doxygen-style comments
-*
-* Revision 1.6  2014/08/06 18:56:52  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.5  2014/08/05 03:28:42  ypwang
-* buildIdealGeom() added to switch between ideal VMC geometry or DB geometry, Db geometry was built by default
-*
-* Revision 1.4  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstFastSimMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 16:25:30 Yaping
-* Initial version
-* IST GEANT hit is transformed to either ideal or misaligned geometry of 
-* realistic detector, with smearing or pixelization. The GEANT hit dE is 
-* directly propagated to IST hit in GeV.
-****************************************************************************/
