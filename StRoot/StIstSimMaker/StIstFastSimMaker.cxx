@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.16 2015/02/25 20:43:03 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.17 2015/02/25 20:43:09 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -94,11 +94,11 @@ Int_t StIstFastSimMaker::Make()
    // Get the input data structures from StEvent and StMcEvent
    StEvent *rcEvent =  (StEvent *) GetInputDS("StEvent");
 
-   if (! rcEvent) {LOG_INFO << "No StEvent on input" << endl; return kStWarn;}
+   if (! rcEvent) {LOG_WARN << "Make() - StEvent not found" << endl; return kStWarn;}
 
    StMcEvent *mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
 
-   if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
+   if (! mcEvent) {LOG_WARN << "Make() - StMcEvent not found" << endl; return kStWarn;}
 
    if ( mBuildIdealGeom && !gGeoManager ) {
       GetDataBase("VmcGeometry");
@@ -112,8 +112,8 @@ Int_t StIstFastSimMaker::Make()
    if (!istHitCollection) {
       gMessMgr->Info() << "StIstFastSimMaker -E- no istHitCollection!\n";
       istHitCollection = new StIstHitCollection;
-      LOG_WARN << "Make() has added a non existing StIstHitCollection" << endm;
       rcEvent->setIstHitCollection(istHitCollection);
+      LOG_WARN << "Make() - Added new StIstHitCollection to StEvent" << endm;
    }
 
    StThreeVectorF mHitError(0., 0., 0.);
