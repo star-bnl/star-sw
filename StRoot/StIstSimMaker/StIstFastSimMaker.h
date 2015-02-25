@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.7 2015/02/25 20:36:26 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.8 2015/02/25 20:39:43 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -37,11 +37,8 @@ public:
    Int_t InitRun( int);
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
-   //Routine to smear hit by resolution with gaussian, mean zero and width res
-   Double_t distortHit(double x, double res, double detLength);
-
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.7 2015/02/25 20:36:26 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.8 2015/02/25 20:39:43 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -56,6 +53,11 @@ protected:
    Double_t resZIst1;
    bool     mSmear; //to turn smearing on and off
 
+private:
+
+   /// Routine to smear hit by resolution with gaussian, mean zero and width res
+   double distortHit(const double x, const double res, const double detLength) const;
+
    ClassDef(StIstFastSimMaker, 0)
 };
 
@@ -65,6 +67,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.8  2015/02/25 20:39:43  smirnovd
+* Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+*
 * Revision 1.7  2015/02/25 20:36:26  smirnovd
 * StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
