@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.17 2014/06/18 19:01:42 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.18 2015/02/25 01:18:22 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.18  2015/02/25 01:18:22  ramdebbe
+// added trigger information for Roman Pot triggers 2015 pp200GeV
+//
 // Revision 1.17  2014/06/18 19:01:42  ramdebbe
 // reset trg_... for every event
 //
@@ -59,7 +62,7 @@
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "StPeCCtbSlat.h"
-
+//#include <math.h>       /* pow */
 
 
 ClassImp(StPeCTrigger)
@@ -448,7 +451,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 
   // get trigger word 
   tw = mudst->event()->l0Trigger().triggerWord();
-//   LOG_INFO << "StPeCTrigger::reading StMuDst ---------- " << endm;
+  LOG_INFO << "StPeCTrigger::reading StMuDst ---------- " << endm;
   // read trigger information with up to date methods
   //
   double zdcRate = mudst->event()->runInfo().zdcCoincidenceRate();
@@ -475,145 +478,172 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
     ttid= tt.nominal();
     if(&ttid) {
 
-    triggerIds=  ttid.triggerIds();
-    std::vector<unsigned int>::iterator iiter;
-//     for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
-//     }
-    if(triggerSel=="ZDC_Monitor"){
-      trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study 
-      trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
-//       LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
-//       LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
-    }
-    if(triggerSel=="zerobias"){
-      trg_3000     =ttid.isTrigger(9300);  //zerobias  run10  this two lines are used for trigger efficiency study 
-      trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
-      LOG_INFO << "StPeCTrigger::value of trg_3000 zerobias ---------- " <<trg_3000<< endm;
-      LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
-    }
-    if(triggerSel=="UPC_Main"){
-      if(runN>11011035 && runN<= 11039028) trg_3000     =ttid.isTrigger(1);       //run10 UPC Main unofficial
-      if(runN>11011035 && runN<= 11039028) trg_3001     =ttid.isTrigger(11);      //run10 UPC Topo not present
-      if(runN>11039028 && runN<= 11077018) trg_3000     =ttid.isTrigger(260750);  //run10 UPC Main official 260750
-      if(runN>11050046 && runN<= 11077018) trg_3001     =ttid.isTrigger(1);      //run10 UPC Topo was never official
-
-      if(runN>12130030 && runN<= 12146002) trg_3000     =ttid.isTrigger(4);       //run11 UPC Main unofficial
-      if(runN>12130030 && runN<= 12179050) trg_3001     =ttid.isTrigger(11);      //run11 UPC Topo was never official
-      if(runN>12146002 && runN<= 12152016) trg_3000     =ttid.isTrigger(350007);  //run11 UPC Main official
-      if(runN>12152016 && runN<= 12179050) trg_3000     =ttid.isTrigger(350017);  //run11 UPC Main official
-
-      if(runN>13116029 && runN<= 13116046) trg_3000     =ttid.isTrigger(1);       //run12 UU UPC Main unofficial
-      if(runN>13110010 && runN<= 13116042) trg_3001     =ttid.isTrigger(2);       //run12 UU UPC Topo
-      if(runN>13121046 && runN<= 13125024) trg_3001     =ttid.isTrigger(1);       //run12 UU UPC Topo
-      if(runN>13125024 && runN<= 13130033) trg_3001     =ttid.isTrigger(400604);  //run12 UU UPC Topo
-      if(runN>13131006 && runN<= 13136015) trg_3001     =ttid.isTrigger(400614);      //run12 UU UPC Topo
-      if(runN>13116047 && runN<= 13117027) trg_3000     =ttid.isTrigger(400601);  //run12 UU UPC Main official
-      if(runN>13117027 && runN<= 13117036) trg_3000     =ttid.isTrigger(400611);  //run12 UU UPC Main official
-      if(runN>13117036 && runN<= 13118017) trg_3000     =ttid.isTrigger(400621);  //run12 UU UPC Main official
-      if(runN>13118017 && runN<= 13130033) trg_3000     =ttid.isTrigger(400631);  //run12 UU UPC Main official
-      if(runN>13131006 && runN<= 13136015) trg_3000     =ttid.isTrigger(400641);  //run12 UU UPC Main official
-
-
-
-      LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main ---------- " <<trg_3000<< endm;
-      LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Topo ---------- " <<trg_3001<< endm;
-
-    }
-    if(runN>15001001 && runN<= 15070001){
-
-      trg_3000     =ttid.isTrigger(8);       //run14 low energy UPC_cosmic
-      LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_cosmic ------------------------------------ " <<trg_3000<< endm;
-    }
-
-    if(runN>15077068 && runN<= 15170001){
+      triggerIds=  ttid.triggerIds();
+      std::vector<unsigned int>::iterator iiter;
+      //     for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
+      //     }
+      if(triggerSel=="ZDC_Monitor"){
+	trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study 
+	trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+	//       LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
+	//       LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
+      }
+      if(triggerSel=="zerobias"){
+	trg_3000     =ttid.isTrigger(9300);  //zerobias  run10  this two lines are used for trigger efficiency study 
+	trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+	LOG_INFO << "StPeCTrigger::value of trg_3000 zerobias ---------- " <<trg_3000<< endm;
+	LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
+      }
       if(triggerSel=="UPC_Main"){
+	if(runN>11011035 && runN<= 11039028) trg_3000     =ttid.isTrigger(1);       //run10 UPC Main unofficial
+	if(runN>11011035 && runN<= 11039028) trg_3001     =ttid.isTrigger(11);      //run10 UPC Topo not present
+	if(runN>11039028 && runN<= 11077018) trg_3000     =ttid.isTrigger(260750);  //run10 UPC Main official 260750
+	if(runN>11050046 && runN<= 11077018) trg_3001     =ttid.isTrigger(1);      //run10 UPC Topo was never official
 
-	trg_3000     =ttid.isTrigger(11);       //run14 200 GeV UPC_Main in preparation
-	trg_3001     =ttid.isTrigger(14);       //run14 UPC_topo 
-	trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
-	trg_2004     =ttid.isTrigger(25);       //run14 UPC_jpsiC 
-	if(runN>15079024){
-	trg_3000     =ttid.isTrigger(450701);       //run14 200 GeV UPC_Main elevated to physics 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main  ------------------------------------ " <<trg_3000<< endm;
-	trg_3001     =ttid.isTrigger(450713);       //run14 UPC_highG
-	trg_2001     =ttid.isTrigger(450717);       //run14 UPC_main-p  
-	trg_2004     =ttid.isTrigger(450702);       //run14 UPC_topo 
+	if(runN>12130030 && runN<= 12146002) trg_3000     =ttid.isTrigger(4);       //run11 UPC Main unofficial
+	if(runN>12130030 && runN<= 12179050) trg_3001     =ttid.isTrigger(11);      //run11 UPC Topo was never official
+	if(runN>12146002 && runN<= 12152016) trg_3000     =ttid.isTrigger(350007);  //run11 UPC Main official
+	if(runN>12152016 && runN<= 12179050) trg_3000     =ttid.isTrigger(350017);  //run11 UPC Main official
+
+	if(runN>13116029 && runN<= 13116046) trg_3000     =ttid.isTrigger(1);       //run12 UU UPC Main unofficial
+	if(runN>13110010 && runN<= 13116042) trg_3001     =ttid.isTrigger(2);       //run12 UU UPC Topo
+	if(runN>13121046 && runN<= 13125024) trg_3001     =ttid.isTrigger(1);       //run12 UU UPC Topo
+	if(runN>13125024 && runN<= 13130033) trg_3001     =ttid.isTrigger(400604);  //run12 UU UPC Topo
+	if(runN>13131006 && runN<= 13136015) trg_3001     =ttid.isTrigger(400614);      //run12 UU UPC Topo
+	if(runN>13116047 && runN<= 13117027) trg_3000     =ttid.isTrigger(400601);  //run12 UU UPC Main official
+	if(runN>13117027 && runN<= 13117036) trg_3000     =ttid.isTrigger(400611);  //run12 UU UPC Main official
+	if(runN>13117036 && runN<= 13118017) trg_3000     =ttid.isTrigger(400621);  //run12 UU UPC Main official
+	if(runN>13118017 && runN<= 13130033) trg_3000     =ttid.isTrigger(400631);  //run12 UU UPC Main official
+	if(runN>13131006 && runN<= 13136015) trg_3000     =ttid.isTrigger(400641);  //run12 UU UPC Main official
+
+
+
+	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main ---------- " <<trg_3000<< endm;
+	LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Topo ---------- " <<trg_3001<< endm;
+
+      }
+      if(runN>15001001 && runN<= 15070001){
+
+	trg_3000     =ttid.isTrigger(8);       //run14 low energy UPC_cosmic
+	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_cosmic ------------------------------------ " <<trg_3000<< endm;
+      }
+
+      if(runN>15077068 && runN<= 15170001){
+	if(triggerSel=="UPC_Main"){
+
+	  trg_3000     =ttid.isTrigger(11);       //run14 200 GeV UPC_Main in preparation
+	  trg_3001     =ttid.isTrigger(14);       //run14 UPC_topo 
+	  trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
+	  trg_2004     =ttid.isTrigger(25);       //run14 UPC_jpsiC 
+	  if(runN>15079024){
+	    trg_3000     =ttid.isTrigger(450701);       //run14 200 GeV UPC_Main elevated to physics 
+	    LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main  ------------------------------------ " <<trg_3000<< endm;
+	    trg_3001     =ttid.isTrigger(450713);       //run14 UPC_highG
+	    trg_2001     =ttid.isTrigger(450717);       //run14 UPC_main-p  
+	    trg_2004     =ttid.isTrigger(450702);       //run14 UPC_topo 
+	  }
+	}
+	if(triggerSel=="UPC_Main-p"){
+
+	  trg_3000     =ttid.isTrigger(450717);       //run14 200 GeV UPC_Main-p
+	  trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
+	  trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG  
+	  trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_topo  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_highG"){
+
+	  trg_3000     =ttid.isTrigger(450713);       //run14 200 GeV UPC_highG
+	  trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main unprotected
+	  trg_2001     =ttid.isTrigger(450702);       //run14 UPC_topo
+	  trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiA  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_topo"){
+
+	  trg_3000     =ttid.isTrigger(450702);       //run14 200 GeV UPC_topo in preparation
+	  trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
+	  trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG  
+	  trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_topo  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_jpsiC"){
+
+	  trg_3000     =ttid.isTrigger(25);       //run14 200 GeV UPC_jpsiC in preparation
+	  trg_3001     =ttid.isTrigger(11);       //run14 UPC_Main 
+	  trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
+	  trg_2004     =ttid.isTrigger(14);       //run14 UPC_topo 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiC  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_jpsiB"){
+
+	  trg_3000     =ttid.isTrigger(450705);       //run14 200 GeV UPC_jpsiB in preparation
+	  trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
+	  trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG
+	  trg_2004     =ttid.isTrigger(450702);       //run14 UPC_topo 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiB  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_jpsiA"){
+
+	  trg_3000     =ttid.isTrigger(24);       //run14 200 GeV UPC_jpsiB in preparation
+	  trg_3001     =ttid.isTrigger(11);       //run14 UPC_Main 
+	  trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
+	  trg_2004     =ttid.isTrigger(14);       //run14 UPC_topo 
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiA  ------------------------------------ " <<trg_3000<< endm;
+	}
+	if(triggerSel=="UPC_main_daq10k"){
+
+	  trg_3000     =ttid.isTrigger(3);        //run14 200 GeV UPC_Main used to test daq10k 
+
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_main_daq10k  ------------------------------------ " <<trg_3000<< endm;
+	}
+      }  //15077---15170 
+
+      if(runN>16041100 && runN<= 16770001){
+	if(triggerSel=="RP_trig"){
+
+
+	  if(ttid.isTrigger(470707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
+	  if(ttid.isTrigger(470708)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT
+	  if(ttid.isTrigger(470711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
+	  if(ttid.isTrigger(9)     ) trg_3000 = trg_3000 | (int)pow(2.0, 3.0); //RP_ET not elevated
+	  if(ttid.isTrigger(470704)) trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_RPZMU
+	  if(ttid.isTrigger(470701)) trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
+	  if(ttid.isTrigger(470703)) trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
+	  if(ttid.isTrigger(470702)) trg_3000 = trg_3000 | (int)pow(2.0, 7.0); //RP_SDZ
+	  if(ttid.isTrigger(470712)) trg_3000 = trg_3000 | (int)pow(2.0, 8.0); //RP_zerobias
+	  if(ttid.isTrigger(470709)) trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_RP2MU elevated to physics in run 16054061
+
+	  LOG_INFO << "StPeCTrigger::value of trg_3000 RP triggers  ------------------------------------ " <<trg_3000<< endm;
 	}
       }
-      if(triggerSel=="UPC_Main-p"){
+      //ignore trigger selection
+      if(triggerSel=="Ignore"){
 
-	trg_3000     =ttid.isTrigger(450717);       //run14 200 GeV UPC_Main-p
-	trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
-	trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG  
-	trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_topo  ------------------------------------ " <<trg_3000<< endm;
+	trg_3000     = 1;
+	trg_3001     = 0;
+
+	LOG_INFO << "StPeCTrigger::Ignore trigger selection  ------------------------------------ " <<trg_3000	 << endm;
       }
-      if(triggerSel=="UPC_highG"){
 
-	trg_3000     =ttid.isTrigger(450713);       //run14 200 GeV UPC_highG
-	trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main unprotected
-	trg_2001     =ttid.isTrigger(450702);       //run14 UPC_topo
-	trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiA  ------------------------------------ " <<trg_3000<< endm;
+      lastDSM0 = trigData->lastDSM(0);
+      lastDSM1 = trigData->lastDSM(1);
+
+
+
+      if(runN==14116064){
+	trg_3000 =  ttid.isTrigger(1);
+	trg_3001 =  ttid.isTrigger(2);
+	trg_3001 =  ttid.isTrigger(4);
       }
-      if(triggerSel=="UPC_topo"){
-
-	trg_3000     =ttid.isTrigger(450702);       //run14 200 GeV UPC_topo in preparation
-	trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
-	trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG  
-	trg_2004     =ttid.isTrigger(450705);       //run14 UPC_jpsiB 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_topo  ------------------------------------ " <<trg_3000<< endm;
+      if(runN>14137093 && runN<15001001){
+	trg_3000 =  ttid.isTrigger(3);
+	trg_3001 =  ttid.isTrigger(430104);
+	trg_3001 =  ttid.isTrigger(430605);
       }
-      if(triggerSel=="UPC_jpsiC"){
-
-	trg_3000     =ttid.isTrigger(25);       //run14 200 GeV UPC_jpsiC in preparation
-	trg_3001     =ttid.isTrigger(11);       //run14 UPC_Main 
-	trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
-	trg_2004     =ttid.isTrigger(14);       //run14 UPC_topo 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiC  ------------------------------------ " <<trg_3000<< endm;
-      }
-      if(triggerSel=="UPC_jpsiB"){
-
-	trg_3000     =ttid.isTrigger(450705);       //run14 200 GeV UPC_jpsiB in preparation
-	trg_3001     =ttid.isTrigger(450701);       //run14 UPC_Main 
-	trg_2001     =ttid.isTrigger(450713);       //run14 UPC_highG
-	trg_2004     =ttid.isTrigger(450702);       //run14 UPC_topo 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiB  ------------------------------------ " <<trg_3000<< endm;
-      }
-      if(triggerSel=="UPC_jpsiA"){
-
-	trg_3000     =ttid.isTrigger(24);       //run14 200 GeV UPC_jpsiB in preparation
-	trg_3001     =ttid.isTrigger(11);       //run14 UPC_Main 
-	trg_2001     =ttid.isTrigger(24);       //run14 UPC_jpsiA  i
-	trg_2004     =ttid.isTrigger(14);       //run14 UPC_topo 
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiA  ------------------------------------ " <<trg_3000<< endm;
-      }
-      if(triggerSel=="UPC_main_daq10k"){
-
-	trg_3000     =ttid.isTrigger(3);        //run14 200 GeV UPC_Main used to test daq10k 
-
-	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_main_daq10k  ------------------------------------ " <<trg_3000<< endm;
-      }
-    }  //15077---15170 
-
-    lastDSM0 = trigData->lastDSM(0);
-    lastDSM1 = trigData->lastDSM(1);
-
-//     cout<<" lastDSM 0 "<<lastDSM0<<" lastDSM1 "<<lastDSM1<<endl;
-
-    if(runN==14116064){
-      trg_3000 =  ttid.isTrigger(1);
-      trg_3001 =  ttid.isTrigger(2);
-      trg_3001 =  ttid.isTrigger(4);
-    }
-    if(runN>14137093 && runN<15001001){
-      trg_3000 =  ttid.isTrigger(3);
-      trg_3001 =  ttid.isTrigger(430104);
-      trg_3001 =  ttid.isTrigger(430605);
-    }
 
     }
-  }
+  } //                 if(&tt)
 
     int bit5  = trigData->lastDSM(5/16)  & (1<<(5  %16)) ? 1 : 0;
     int bit6  = trigData->lastDSM(6/16)  & (1<<(6  %16)) ? 1 : 0;
@@ -625,13 +655,9 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
     int bit25 = trigData->lastDSM(25/16) & (1<<(25 %16)) ? 1 : 0;
     int bit96 = trigData->lastDSM(96/16) & (1<<(96 %16)) ? 1 : 0;
 
-  if(!bit5 && bit6 && !bit17 && !bit18 && bit22 && bit23 && bit24 && bit25 && !bit96) {
-//     trg_2001 = 1;
-//     cout<<"UPC_Main set "<<endl;
-//     cout<<"UPC_Main bits --- "<<bit5<<"        "<<bit6<<"       "<<bit17<<"       "<<bit18<<"   "<<bit22<<"        "<<bit23<<"       "<<bit24<<"       "<<bit25<<"    "<<bit96<<endl;
-  }
+
   l0_2000->setInfoLevel ( infoLevel );
-//  l0_2000Corrected->setInfoLevel ( infoLevel );
+
 
   StL0Trigger* l0Data = &mudst->event()->l0Trigger();
 
@@ -754,7 +780,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
    StThreeVectorF vtx = mudst->event()->primaryVertexPosition();
 
    size_t Nvert = mudst->numberOfPrimaryVertices();
-//    LOG_INFO << "StPeCTrigger::fill(event mudst) #vertices: "  <<Nvert<< endm; 
+   LOG_INFO << "StPeCTrigger::fill(event mudst) #vertices: "  <<Nvert<< endm; 
    for (size_t verti = 0;verti<Nvert;++verti){
 //      LOG_INFO << "StPeCTrigger::  vertex Index: "<<verti<<endm;
      StMuPrimaryVertex* V= mudst->primaryVertex(verti);
@@ -856,5 +882,6 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
      printf ( "\n" ) ;
   }
 //   return 0 ; //standard return (unused)
-  return trg_3000 ; //to pass UPC_Main trigger selection 
+
+  return trg_3000 ; //to pass UPC_Main trigger selection or all RP triggers in that single int
 }
