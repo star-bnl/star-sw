@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.15 2015/02/25 20:42:57 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.16 2015/02/25 20:43:03 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -31,7 +31,7 @@
 
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
    mRandom(new StRandom()), mSmear(kTRUE)
 {
    Int_t seed = time(NULL);
@@ -51,9 +51,6 @@ void StIstFastSimMaker::Clear(Option_t *) {
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
    LOG_INFO << "StIstFastSimMaker::Init()" << endm;
-
-   mBuildIdealGeom = kTRUE; //setup an ideal simulation of the IST
-   mSmear = kTRUE; //do smearing for IST hit by default
 
    return kStOk;
 }
