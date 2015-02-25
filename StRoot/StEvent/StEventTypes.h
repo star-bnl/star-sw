@@ -1,10 +1,6 @@
 /***************************************************************************
  *
-<<<<<<< StEventTypes.h
- * $Id: StEventTypes.h,v 1.2 2013/08/31 12:42:34 fisyak Exp $
-=======
  * $Id: StEventTypes.h,v 2.45 2015/02/14 18:57:24 ullrich Exp $
->>>>>>> 2.45
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,16 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
-<<<<<<< StEventTypes.h
- * Revision 1.2  2013/08/31 12:42:34  fisyak
- * Add Gmt
-=======
  * Revision 2.45  2015/02/14 18:57:24  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
  * Revision 2.44  2014/04/10 16:00:13  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
->>>>>>> 2.45
  *
  * Revision 1.1.1.1  2013/07/23 14:13:29  fisyak
  *

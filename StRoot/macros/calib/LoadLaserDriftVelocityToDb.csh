@@ -4,10 +4,12 @@
 # Based on work by J. Castillo
 # /star/u/jecc/tpcwrk/StarDb/Calibrations/tpc
 #
-# Modifieded on 31 Jan 2007 by G. Van Buren to use
-# tags.root (now laser.root) files with LoopOverLaserTree.C and
-# handle possibility of additional files for
-# laser runs already processed
+# Automatic organization of laser.root files
+# for processing with LanaTrees.C to find TPC
+# drift velocities, then manage uploading to
+# the database, accounting for existing database
+# entries that might conflict (intended for
+# periodic running via cron)
 #
 
 
@@ -118,10 +120,7 @@ if ( -e $laserFiles ) $RM $laserFiles
 foreach run ($listOfRuns)
     set runDir = $DIR/runs/$run
     cd $runDir
-    $MYROOT <<EOF 
-.x $WDIR/LoopOverLaserTrees.C+("st_laser_*.laser.root")
-.q
-EOF
+    $MYROOT -q 'bfc.C(-1,"lana,nodefault")' $WDIR/LanaTrees.C+
     set laserMacro = `$LS tpcDriftVelocity*`
     if ( $#laserMacro != 0) then
         set macros = $runDir/macros

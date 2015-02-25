@@ -114,12 +114,19 @@ Int_t HftMatchedTree::Make()
    // Fill the event with information from StEvent
    StEvent *stEvent = (StEvent*) GetInputDS("StEvent");
 
-   LOG_DEBUG << "stEvent id: " << stEvent->id() << endm;
-
-   if (stEvent && fEvent->Build(stEvent, fMinNoHits, fpCut) == kStOk) {
-      fTree->Fill();
+   if (!stEvent) {
+      LOG_ERROR << "Make() - StEvent object not found. It is needed to fill HFT tree. Skipping..." << endm;
+      return kStErr;
    }
 
+   int retCode = fEvent->Build(stEvent, fMinNoHits, fpCut);
+
+   if (retCode) {
+      LOG_ERROR << "Make() - EventT was not built properly. Please investigate" << endm;
+      return retCode;
+   }
+
+   fTree->Fill();
    return kStOK;
 }
 

@@ -1,42 +1,32 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.161 2015/02/14 23:27:05 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.166 2015/02/25 02:35:26 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.161  2015/02/14 23:27:05  perev
- * propagate(StiKalmanTrackNode *,StiDetector *,int dir)
- * rewritten. For case cyl propagate(xk...) is not called anymore.
- * Actually all info is there.  It was a problem that point, due to loss accuracy
- * was belonged and not belonget to volume. In result was asser
+ * Revision 2.166  2015/02/25 02:35:26  perev
+ * Some outdated asserts and debug lines removed
+ * In propagateError recov is colled
+ * When length is big recov(1) is called, otherwice recov(0).
+ * recov(1) is slower and negative error matrix happens with big length,
+ * about 100.
  *
- * Revision 2.160  2015/02/11 01:54:10  perev
- * Cleanup
+ * Revision 2.165  2015/02/23 19:54:06  perev
+ * Bug #3048 fixed. Very starnge mistype. instead of if(something) it was if(!something)
+ * How it was happened I have no idea (VP)
  *
- * Revision 2.159  2015/02/09 22:16:21  genevb
- * Previous commit missed some asserts
+ * Revision 2.164  2015/02/21 04:48:03  perev
+ * All asserts with sign() replaced for zign() for speedup
+ * Some outdated asserts removed
+ * Some outdated debug prints removed as well
  *
- * Revision 2.158  2015/02/09 22:09:35  genevb
- * Comment out an assert causing RT 3007 setState, introduced in vers. 2.140 for RT 2903
+ * Revision 2.163  2015/02/17 01:42:34  perev
+ * Fix bug #3034. It is the conisedence of -1 (return local()) and kEnded.
+ * Now if (local()==-1) volume is missed, return kFailed
  *
- * Revision 2.157  2015/02/08 02:46:34  perev
- * Put back line, removed for debuging.
- * This line checks that all crossings are outside of the volume
- *
- * Revision 2.156  2015/02/04 04:39:44  perev
- * Introduction of inside()
- *
- * Revision 2.155  2015/02/04 02:18:37  perev
- * Fix small angle approximation
- *
- * Revision 2.154  2015/01/31 03:54:17  perev
- * New member _wallx added. _wallx means:
- * 1. For kPlanar shape just normal radius
- * 2. For cylindric shape node when createdrotated in such a way
- *    that track in crossing point phi==0
- *    Xlocal in this point is _wallx. Then _wallx is fixed forever
- *    When refitted we search crossing point with this plane x= _wallx
+ * Revision 2.162  2015/02/16 22:12:46  perev
+ * Roll back all changes related to nudge problem wall x in particular
  *
  * Revision 2.153  2015/01/15 20:05:27  perev
  * Simplified check of simplified locate()
@@ -619,7 +609,6 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-//assert(mFE.sign()>0);///???
   mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
@@ -948,8 +937,6 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
-memset(&mgP.x1,'@',sizeof(mgP));	//Debug only
-
   int position = 0;
   setState(pNode);
   setDetector(tDet);
@@ -971,58 +958,34 @@ memset(&mgP.x1,'@',sizeof(mgP));	//Debug only
       // bail out if the rotation fails...
       position = rotate(dAlpha);
       if (position) 			return -10;
-      position = propagate(endVal,shapeCode,dir); 
     }
     					break;
   case kDisk:  							
-  case kCylindrical: ;
+  case kCylindrical: endVal = nNormalRadius;
     {
       double xy[2][3];
-      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),nNormalRadius,dir,xy);
+      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),endVal,dir,xy);
+
       if (!position) 			return -11;
-      int sol = 0;
-      for (sol=0;sol<2;sol++) {
-        double s = xy[sol][2];
-        double myX[3]={xy[sol][0],xy[sol][1],mFP.P[2]+mFP.tanl()*s};
-        if (!insideL(myX,2|4)) continue;
-        dAlpha = mFP.phi()+mFP.curv()*s;
-        TVector3 v3(myX);
-        position = rotate(dAlpha);	
-        v3.RotateZ(-dAlpha);
-        mgP.dl = s; mgP.dl0 = 3e33;
-        mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
-        mgP.x2=v3[0];    mgP.y2=v3[1];   mgP.cosCA2 =1;          mgP.sinCA2 =0;
-        mgP.dx=mgP.x2-mgP.x1; mgP.dy=mgP.y2-mgP.y1;  
-        mgP.sumSin = mgP.sinCA1+mgP.sinCA2;
-        mgP.sumCos = mgP.cosCA1+mgP.cosCA2;
-
-        mFP._cosCA = mgP.cosCA2; mFP._sinCA = mgP.sinCA2;
-        mFP.x() = v3[0]; mFP.y()   = v3[1]; 
-	mFP.z() = v3[2]; mFP.eta() = 0;
-
-	position = 0;
-	if (mgP.x2*mgP.cosCA2+mgP.y2*mgP.sinCA2<=0)	position = kEnded; 
-	mFP.hz()   = getHz();
-	mFP.curv() = mFP.hz()*mFP.ptin();
-	mPP() = mFP;
-	endVal = v3[0];
-       break;
-      }
-      if (sol>1) 			return -12;
+      dAlpha = atan2(xy[0][1],xy[0][0]);
+      position = rotate(dAlpha);
+      if (position) 			return -11;
     }
    					break;
   default: assert(0);
   }
-  _wallx = endVal;
+   
+  position = propagate(endVal,shapeCode,dir); 
 
-  if (position && position!=kEnded ) return position;
-  assert(shapeCode==1 || fabs(mFP.phi()) < 1e-4);
-  assert(shapeCode >1 || mFP.x()         > 0   );
+  if (position) return position;
+  assert(mFP.x() > 0.);
   propagateError();
+  if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated())  
+  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && getHz())  
     propagateMCS(pNode,tDet);
+  if (debug() & 8) { PrintpT("M");}
   return position;
 }
 
@@ -1052,7 +1015,7 @@ StiDebug::Break(nCall);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
-  if (debug() & 8) { PrintpT("V");}
+  
   setHit(vertex);
   setDetector(0);
   return true;
@@ -1069,8 +1032,10 @@ bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,in
       ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
     else ResetComment("Unknown Detector");
   }
-  if (propagate(0., kPlanar,dir) < 0) return false; // track does not reach vertex "plane"
+  if (propagate(0., kPlanar,dir)) return false; // track does not reach vertex "plane"
+  
   propagateError();
+  if (mFE.zign()<0) return false;
   if (debug() & 8) { PrintpT("B");}
   setHit(0);
   setDetector(0);
@@ -1103,93 +1068,6 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
   option == 0 Planar
   option == 1 Cylinder
  */
-#if 0
-//______________________________________________________________________________
-int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
-{
-dir = -1; ///????????????????????????
-static int nCall=0; nCall++;
-StiDebug::Break(nCall);  
-  double mySign =mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA; 
-
-
-  mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
-  double rho = mFP.curv();
-  mgP.x2 = xk;
-
-  mgP.dx=mgP.x2-mgP.x1;  
-  if (fabs(mgP.dx) < 1e-5) 		return kHit;
-  int myDir = (dir>=0) ? (2*dir-1):0;
-  double dsin = mFP.curv()*mgP.dx;
-  mgP.sinCA2=mgP.sinCA1 + dsin; 
-//	Orientation is bad. Fit is non reliable
-  if (fabs(mgP.sinCA2)>kMaxSinEta) 	return kFailed; 
-  int nTry = 2;
-  if (option>=kCylindrical) { 	//cyl case
-    nTry = 1;
-    mgP.cosCA2=1.;
-    mgP.sinCA2=0;
-    }
-  else          { 	//planar case
-    mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
-  }
-  double bestLen = 1e11;
-  StiNodeStat mygP; 
-  StiNodePars myFP;
-  double myZ = mFP.z(),myPhi = mFP.phi();;
-  int iAns=kFailed;
-  for (int iCos=0;iCos<nTry;iCos++) {
-    if (iCos) mgP.cosCA2 = -mgP.cosCA2;
-    mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
-    mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
-    if (fabs(mgP.sumCos)<1e-5) continue;
-    mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
-    mgP.y2 = mgP.y1+mgP.dy;
-    mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
-    double sind = mgP.dl0*rho;
-    double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
-
-    if (fabs(sind) < 0.02 && cosd>0) { //tiny angle
-      mgP.dl = mgP.dl0*(1.+sind*sind*(1./6 + (sind*sind*3./40)));
-    } else {
-      mgP.dl = atan2(sind,cosd)/rho;
-    }
-    if (myDir &&  mgP.dl*myDir<0 ) 	continue;//if we know direction and it is wrong, next one
-    if (fabs(mgP.dl)> bestLen) 	continue;//if it is bigger than previous, next one
-//??    if (iAns < kTooFar) iAns = kTooFar;
-    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	continue;
-    mFP.z()  = myZ + mgP.dl*mFP.tanl();
-    if (fabs(mFP.z()) > kMaxZ) 	continue;
-    mFP.x()  = mgP.x2;
-    mFP.y()  = mgP.y2;
-    if (locate())		continue;
-    mFP.eta() = nice(myPhi+rho*mgP.dl);  	/*VP*/
-    mFP._sinCA   = mgP.sinCA2;
-    mFP._cosCA   = mgP.cosCA2;
-    bestLen = fabs(mgP.dl);   
-    mygP = mgP;
-    myFP = mFP;
-    iAns = kHit;
-  }  
-  if (bestLen >= 1e10) 		return kFailed;
-  iAns = kHit;
-  mFP = myFP;
-  mgP = mygP;
-  if (fabs(mFP._cosCA)>0.999 || fabs(mFP._sinCA)>0.999) mFP.ready();
-  mFP.hz()      = getHz();
-  assert(fabs(mFP.hz()) > 1e-7);
-  if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
-  else 				{ mFP.curv() = 1e-6 ;}
-  mFP.ready();
-  mPP() = mFP;
-  if (mFP.x()> kFarFromBeam) {
-    if ((mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA)*mySign<0)	return kEnded; 
-  }
-  return 0;
-}
-
-#endif
-#if 1
 //______________________________________________________________________________
 int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 {
@@ -1197,6 +1075,7 @@ static int nCall=0; nCall++;
 StiDebug::StiDebug::Break(nCall);  
 
   _state = kTNProBeg;
+//  numeDeriv(xk,1,option,dir);
   mgP.x1=mFP.x();  mgP.y1=mFP.y(); mgP.cosCA1 =mFP._cosCA; mgP.sinCA1 =mFP._sinCA;
   double rho = mFP.curv();
   mgP.x2 = xk;
@@ -1219,7 +1098,7 @@ StiDebug::StiDebug::Break(nCall);
   int ians = 0;
   StiNodePars save = mFP;
   for (int iIt=0; iIt<nIt; iIt++) {//try 2 cases, +ve and -ve cosCA
-    ians = kFailed;
+    ians = -1;
     mFP = save;
     mgP.cosCA2 = (!iIt)? TMath::Abs(mgP.cosCA2):-TMath::Abs(mgP.cosCA2);
     mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
@@ -1231,11 +1110,12 @@ StiDebug::StiDebug::Break(nCall);
 
     mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
     double sind = mgP.dl0*rho;
-    double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
-    if (fabs(sind) < 0.1 && cosd>0) { //tiny angle
+  
+    if (fabs(dsin) < 0.02 ) { //tiny angle
       mgP.dl = mgP.dl0*(1.+sind*sind/6);
       
     } else {
+      double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
       mgP.dl = atan2(sind,cosd)/rho;
     }
     if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
@@ -1249,19 +1129,19 @@ StiDebug::StiDebug::Break(nCall);
     ians = locate();
     if (!ians) break;
   }
-  if (ians) 		return ians;
+  if (ians) 						return kFailed;
+  if (fabs(mFP.eta())>kMaxEta) 				return kFailed;
   if (mFP.x()> kFarFromBeam) {
-    if (TMath::Abs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
-  mFP.hz()   = getHz();
+  mFP.hz()      = getHz();
   mFP.curv() = mFP.hz()*mFP.ptin();
 
   mPP() = mFP;
   _state = kTNProEnd;
   return ians;
 }
-#endif //0
+
 //______________________________________________________________________________
 int StiKalmanTrackNode::nudge(StiHit *hitp)
 {
@@ -1269,7 +1149,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   if (!hit) hit = getHit();
   double deltaX = 0;
   if (hit) { deltaX = hit->x()-mFP.x();}
-  else     { if (_detector) deltaX = _wallx-mFP.x();}
+  else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP.x();}
   if(fabs(deltaX)>5)		return -1;
   if (fabs(deltaX) <1.e-3) 	return  0;
   double deltaS = mFP.curv()*(deltaX);
@@ -1369,46 +1249,19 @@ void StiKalmanTrackNode::propagateMtx()
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
 {  
+  enum {kBigLen = 20};
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
-//assert(mFE.sign()>0); ///??? 
-  if (debug() & 1) 
-    {
-      LOG_DEBUG << "Prior Error:"
-	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-      LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-      LOG_DEBUG << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endm;
-      LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
-    }
   propagateMtx();
-  mFE.recov();
   errPropag6(mFE.A,mMtx().A,kNPars);
-  mFE.recov();
+  int force = (fabs(mgP.dl) > kBigLen); 
+  mFE.recov(force);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
-#ifdef Sti_DEBUG
-  if (debug() & 4) {
-    PrPP(propagateError,C);
-    TRMatrix F(kNPars,kNPars,f[0]); PrPP(propagateError,F);
-    // C^k-1_k = F_k * C_k-1 * F_kT + Q_k
-    C = TRSymMatrix(F,TRArray::kAxSxAT,C); PrPP(propagateError,C);
-    TRSymMatrix C1(kNPars,mFE.A);   PrPP(propagateError,C1);
-    C1.Verify(C);//,1e-7,2);
-  }
-#endif
-  if (debug() & 1) 
-    {
-      LOG_DEBUG << "Post Error:"
-	   << "cYY:"<<mFE._cYY<<endm;
-	   LOG_DEBUG << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endm;
-	   LOG_DEBUG << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endm;
-	   LOG_DEBUG << "cCY:"<<mFE._cPY<<" cCZ:"<<mFE._cPZ<<endm;
-	   LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
-    }
 // now set hiterrors
    if (_hit) setHitErrors();
 
 // set state node is ready
+
   mPE() = mFE;
   _state = kTNReady;
 }
@@ -1703,7 +1556,7 @@ assert(mFE._cEE>0);
 assert(mFE._cPP>0);
 assert(mFE._cTT>0);
 
-//assert(mFE.sign()>0); ///??? 
+assert(mFE.zign()>0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
@@ -1756,10 +1609,7 @@ int StiKalmanTrackNode::updateNode()
 {
 static int nCall=0; nCall++;
   _state = kTNFitBeg;
-#ifdef STI_ERROR_TEST
-  testError(mFE.A,0);
-#endif //STI_ERROR_TEST
-//assert(mFE.sign()>0); ///??? 
+assert(mFE.zign()>0); ///??? 
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
@@ -1877,42 +1727,8 @@ static int nCall=0; nCall++;
   mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
   mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
-//assert(mFE.sign()>0); ///??? 
+  mFE.recov(1);
 
-  if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
-    LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
-          ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ)<< endm;
-    return -14;
-  }
-  if (mFE.check()) return -14;
-
-#ifdef Sti_DEBUG
-  TRSymMatrix W(H,TRArray::kATxSxA,G); 
-  TRSymMatrix C0(C);
-  C0 -= TRSymMatrix(C,TRArray::kRxSxR,W);
-  TRSymMatrix C1(kNPars,mFE.A);  
-  if (debug() & 4) {
-    PrPP(updateNode,W); 
-    PrPP(updateNode,C0);
-    PrPP(updateNode,C1);
-    C1.Verify(C0);
-  }
-  //   update of the covariance matrix:
-  //    C_k = (I - K_k * H_k) * C^k-1_k * (I - K_k * H_k)T + K_k * V_k * KT_k
-  // P* C^k-1_k * PT
-  TRMatrix A(K,TRArray::kAxB,H);
-  TRMatrix P(TRArray::kUnit,kNPars);
-  P -= A;
-  TRSymMatrix C2(P,TRArray::kAxSxAT,C); 
-  TRSymMatrix Y(K,TRArray::kAxSxAT,V);  
-  C2 += Y;  
-  if (debug() & 4) {
-    PrPP(updateNode,C2); PrPP(updateNode,Y); PrPP(updateNode,C2);
-    C2.Verify(C0);
-    C2.Verify(C1);
-  }
-#endif
-  if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
   return 0; 
 }
@@ -1955,6 +1771,10 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP.eta()= nice(mFP.eta()-alpha); /*VP*/
   mFP._sinCA = sin(mFP.eta());
   mFP._cosCA = cos(mFP.eta());
+#ifdef Sti_DEBUG  
+  TRSymMatrix C(kNPars,mFE.A);
+  if (debug() & 4) {PrPP(rotate,C);}
+#endif
 //cout << " mFP._sinCA:"<<mFP._sinCA<<endl;
   assert(TMath::Abs(mFP._sinCA)<=1.);
   assert(TMath::Abs(mFP._cosCA)<=1.);
@@ -2068,7 +1888,7 @@ int StiKalmanTrackNode::locate()
     break;
   case kSector: 	// cylinder sector
     ang = atan2(mFP.y(),mFP.x());
-    yOff    = nice(ang +_alpha - place->getNormalRefAngle());
+    yOff    = nice(ang +_alpha - place->getLayerAngle());
     if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
     break;
   case kPlanar: 
@@ -2169,7 +1989,6 @@ void StiKalmanTrackNode::initialize(StiHit *h)
   setHit(h);
   _detector = h->detector();
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
-  _wallx   = _detector->getPlacement()->getNormalRadius(); 
   mFP._sinCA = 0.6;
   mFP._cosCA = 0.8;
   mFP.x() = h->x();
@@ -2188,7 +2007,6 @@ void StiKalmanTrackNode::initialize(StiDetector *d)
   reset();
   _detector = d;
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
-  _wallx   = _detector->getPlacement()->getNormalRadius(); 
   _state = kTNInit;
   setChi2(1e10);
 }
@@ -2266,11 +2084,77 @@ int StiKalmanTrackNode::testError(double *emx, int begend)
 //______________________________________________________________________________
 void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
 {
+   double maxStep[kNPars]={0.1,0.1,0.1,0.01,0.001,0.01};
+   if (fDerivTestOn<0) return;
+   gCurrShape = shape;
+   fDerivTestOn=-1;
+   double save[20];
+   StiKalmanTrackNode myNode;
+   double *pars = &myNode.mFP.x();
+   int state=0;
+   saveStatics(save);
+   if (fabs(mFP.curv())> 0.02) goto FAIL;
+   int ipar;
+   for (ipar=1;ipar<kNPars;ipar++)
+   {
+     for (int is=-1;is<=1;is+=2) {
+       myNode = *this;
+       backStatics(save);
+       double step = 0.1*sqrt((mFE.A)[idx66[ipar][ipar]]);
+       if (step>maxStep[ipar]) step = maxStep[ipar];
+//       if (step>0.1*fabs(pars[ipar])) step = 0.1*pars[ipar];
+//       if (fabs(step)<1.e-7) step = 1.e-7;
+       pars[ipar] +=step*is;
+// 		Update sinCA & cosCA       
+       myNode.mFP._sinCA = sin(myNode.mFP.eta());
+       if (fabs(myNode.mFP._sinCA) > 0.9) goto FAIL;
+       myNode.mFP._cosCA = cos(myNode.mFP.eta());
+       
+       switch (kind) {
+	 case 1: //propagate
+	   state = myNode.propagate(val,shape,dir); break;
+	 case 2: //rotate
+	   state = myNode.rotate(val);break;
+	 default: assert(0);  
+       }  
+       if(state  ) goto FAIL;
+
+       for (int jpar=1;jpar<kNPars;jpar++) {
+	 if (is<0) {
+	   fDerivTest[jpar][ipar]= pars[jpar];
+	 } else      {
+	   double tmp = fDerivTest[jpar][ipar];
+	   fDerivTest[jpar][ipar] = (pars[jpar]-tmp)/(2.*step);
+	   if (ipar==jpar) fDerivTest[jpar][ipar]-=1.;
+         }
+       }
+     }
+   }
+   fDerivTestOn=1;backStatics(save);return;
+FAIL: 
+   fDerivTestOn=0;backStatics(save);return;
 }
 //______________________________________________________________________________
 int StiKalmanTrackNode::testDeriv(double *der)
 {
-  return 0;
+   if (fDerivTestOn!=1) return 0;
+   double *num = fDerivTest[0];
+   int nerr = 0;
+   for (int i=1;i<kNErrs;i++) {
+     int ipar = i/kNPars;
+     int jpar = i%kNPars;
+     if (ipar==jpar)					continue;
+     if (ipar==0)					continue;
+     if (jpar==0)					continue;
+     double dif = fabs(num[i]-der[i]);
+     if (fabs(dif) <= 1.e-5) 				continue;
+     if (fabs(dif) <= 0.2*0.5*fabs(num[i]+der[i]))	continue;
+     nerr++;
+     LOG_DEBUG << Form("***Wrong deriv [%d][%d] = %g %g %g",ipar,jpar,num[i],der[i],dif)
+     << endm;
+  }
+  fDerivTestOn=0;
+  return nerr;
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::saveStatics(double *sav)
@@ -2542,61 +2426,4 @@ void StiKalmanTrackNode::getXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const {
   TRSymMatrix C(6,errs.A);
   TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
   TCL::ucopy(Cov.GetArray(),CovXyzp,21);
-}
-//________________________________________________________________________________
-int StiKalmanTrackNode::inside(int mode) const 
-{
-const StiDetector *det = getDetector();
-if (!det) return 1;
-int shapeCode = det->getShape()->getShapeCode();
-TVector3 myPos(mFP.P);
-if (shapeCode == kSector) {
-  const StiPlacement *pla = det->getPlacement();
-  double refAlpha = pla->getNormalRefAngle();
-  double dAlpha = _alpha -refAlpha;
-  if (fabs(dAlpha)>1e-6) myPos.RotateZ(dAlpha);
-}
-int ans = insideL(&(myPos[0]),mode);
-return ans;
-}
-//________________________________________________________________________________
-int StiKalmanTrackNode::insideL(double x,double y,int mode) const 
-{
-const StiDetector *det = getDetector();
-  if (!det) return 1;
-  const StiPlacement *place = det->getPlacement();
-  double z = place->getZcenter();
-  double xyz[3] = {x,y,z};
-return insideL(xyz,mode);
-}
-//________________________________________________________________________________
-int StiKalmanTrackNode::insideL(const double *x,int mode) const 
-{
-const StiDetector *det = getDetector();
-  if (!det) return 1;
-  const StiPlacement *place = det->getPlacement();
-  double placeAng = place->getNormalRefAngle();
-  double dAng = placeAng-_alpha;
-  double xyz[3];
-  const double *X = x;
-  if (fabs(dAng)>1e-6) {
-    xyz[0] = x[0]*cos(dAng)+x[1]*sin(dAng);
-    xyz[1] =-x[0]*sin(dAng)+x[1]*cos(dAng);
-    xyz[2] = x[2];
-    X = xyz;
-  }
-  return det->insideL(X,mode);
-}
-//________________________________________________________________________________
-int StiKalmanTrackNode::insideG(const double *x,int mode) const 
-{
-const StiDetector *det = getDetector();
-  if (!det) return 1;
-  const StiPlacement *place = det->getPlacement();
-  double dAng = place->getNormalRefAngle();
-  double xyz[3];
-    xyz[0] = x[0]*cos(dAng)+x[1]*sin(dAng);
-    xyz[1] =-x[0]*sin(dAng)+x[1]*cos(dAng);
-    xyz[2] = x[2];
-  return det->insideL(xyz,mode);
 }

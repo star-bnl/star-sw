@@ -114,18 +114,25 @@ void StiSstDetectorBuilder::useVMCGeometry()
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoMatrix* sensorMatrix = 0;
+      TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
-      if (mBuildIdealGeom) {
-         sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
-      } else {
-         sensorMatrix = (TGeoMatrix*) mSstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      // Temporarily save the translation for this sensor in Z so, we can center
+      // the newly built sensors at Z=0 (in ideal geometry) later
+      double idealOffsetZ = sensorMatrix.GetTranslation()[2];
+
+      if (!mBuildIdealGeom) {
+         const TGeoHMatrix* sensorMatrixDb = mSstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+
+         if (!sensorMatrixDb) {
+            LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot get SST sensor position matrix. Skipping to next ladder..." << endm;
+            continue;
+         }
+
+         sensorMatrix = *sensorMatrixDb;
       }
 
-      if (!sensorMatrix) {
-         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot get SST sensor position matrix. Skipping to next ladder..." << endm;
-         continue;
-      }
+      // Update the global translation in Z so that the new volumes are centered at Z=0
+      sensorMatrix.SetDz(sensorMatrix.GetTranslation()[2] - idealOffsetZ);
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
@@ -133,7 +140,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
       StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
 
-      StiPlacement *pPlacement= new StiPlacement(*sensorMatrix);
+      StiPlacement *pPlacement= new StiPlacement(sensorMatrix);
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();

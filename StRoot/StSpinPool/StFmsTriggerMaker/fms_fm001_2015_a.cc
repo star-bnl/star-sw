@@ -63,10 +63,10 @@ void fms_fm001_2015_a(Board& fm001, int t, int simdat){
 
   // Output 
   fm001.output[t]
-    = BS3         | BS2    << 1
-    | BS1A  << 2  | BS1BCD << 3 
+    = BS3          | BS2    << 1
+    | BS1BCD  << 2 | BS1A   << 3 
     | D23   << 4
-    | JpAB  << 16 | JpCD   << 24;
+    | JpAB  << 16  | JpCD   << 24;
   
   if(PRINT){
     printf("%s input A=%08x B=%08x C=%08x D=%08x\n",fm001.name,A,B,C,D); 
@@ -78,8 +78,8 @@ void fms_fm001_2015_a(Board& fm001, int t, int simdat){
 
 int getFM001_BS3(int out)    {return getbits(out, 0, 1);}
 int getFM001_BS2(int out)    {return getbits(out, 1, 1);}
-int getFM001_BS1A(int out)   {return getbits(out, 2, 1);}
-int getFM001_BS1BCD(int out) {return getbits(out, 3, 1);}
+int getFM001_BS1BCD(int out) {return getbits(out, 2, 1);}
+int getFM001_BS1A(int out)   {return getbits(out, 3, 1);}
 int getFM001_D23(int out)    {return getbits(out, 4,12);}
 int getFM001_JpAB(int out)   {return getbits(out,16, 8);}
 int getFM001_JpCD(int out)   {return getbits(out,24, 8);}

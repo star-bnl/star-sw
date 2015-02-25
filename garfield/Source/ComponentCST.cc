@@ -593,12 +593,18 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 	materials.resize(nMaterials);
 	result = fread(m_xlines.data(), sizeof(double), m_xlines.size(), f);
 	if (result != m_xlines.size()) {fputs ("Reading error while reading xlines.",stderr); exit (3);}
+	else if (result == 0) {fputs ("No xlines are stored in the data file.",stderr); exit (3);}
 	result = fread(m_ylines.data(), sizeof(double), m_ylines.size(), f);
 	if (result != m_ylines.size()) {fputs ("Reading error while reading ylines",stderr); exit (3);}
+	else if (result == 0) {fputs ("No ylines are stored in the data file.",stderr); exit (3);}
 	result = fread(m_zlines.data(), sizeof(double), m_zlines.size(), f);
 	if (result != m_zlines.size()) {fputs ("Reading error while reasing zlines",stderr); exit (3);}
+	else if (result == 0) {fputs ("No zlines are stored in the data file.",stderr); exit (3);}
 	result = fread(m_potential.data(), sizeof(float), m_potential.size(), f);
 	if (result != m_potential.size()) {fputs ("Reading error while reading nodes.",stderr); exit (3);}
+	else if (result == 0) {fputs ("No potentials are stored in the data file.",stderr); exit (3);}
+	fseek(f,  e_s*sizeof(float), SEEK_CUR);
+	// not needed in principle - thus it is ok if nothing is read
 	result = fread(m_elementMaterial.data(), sizeof(unsigned char), m_elementMaterial.size(), f);
 	if (result != m_elementMaterial.size()) {fputs ("Reading error while reading element material",stderr); exit (3);}
 	std::stringstream st;
@@ -610,13 +616,13 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 	for (unsigned int i = 0; i<materials.size(); i++) {
 		float id;
 		result = fread(&(id), sizeof(float), 1, f);
-		if (result != 1) {fputs ("Reading error while reading material id.",stderr); exit (3);}
+		if (result != 1) {fputs ("Input error while reading material id.",stderr); exit (3);}
 		unsigned int description_size = 0;
 		result = fread(&(description_size), sizeof(int), 1, f);
-		if (result != 1) {fputs ("Reading error while reading description size.",stderr); exit (3);}
+		if (result != 1) {fputs ("Input error while reading material description size.",stderr); exit (3);}
 		char* c = new char[description_size];
 		result = fread(c, sizeof(char), description_size, f);
-		if (result != description_size) {fputs ("Reading error while reading description.",stderr); exit (3);}
+		if (result != description_size) {fputs ("Input error while reading material description.",stderr); exit (3);}
 		std::string name = c;
 		st << "  Read material: " << name.c_str();
 		if(name.compare("gas") == 0){
@@ -788,6 +794,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
     fseek(f, m_z*sizeof(double), SEEK_CUR);
     result = fread(potentials.data(), sizeof(float), potentials.size(), f);
     if (result != potentials.size()) {fputs ("Reading error while reading nodes.",stderr); exit (3);}
+    else if (result == 0) {fputs ("No wighting potentials are stored in the data file.",stderr); exit (3);}
     fprnsol.close();
   } else {
     std::cout <<  className << "::SetWeightingField:" << std::endl;
@@ -1116,11 +1123,13 @@ bool ComponentCST::Coordinate2Index(const double xin, const double yin, const do
   it_z = std::lower_bound(m_zlines.begin(),m_zlines.end(),position_mapped[2]);
   if(it_x == m_xlines.end() || it_y == m_ylines.end() || it_z == m_zlines.end() ||
      position_mapped[0] < m_xlines.at(0) || position_mapped[1] < m_ylines.at(0) || position_mapped[2] < m_zlines.at(0) ){
-    std::cerr << className << "::ElectricFieldBinary:" << std::endl;
-    std::cerr << "    Could not find the given coordinate!" << std::endl;
-    std::cerr << "    You ask for the following position: " << xin << ", " << yin << ", " << zin << std::endl;
-    std::cerr << "    The mapped position is: " << position_mapped[0] << ", " << position_mapped[1] << ", " << position_mapped[2] << std::endl;
-    PrintRange();
+    if(debug){
+      std::cerr << className << "::ElectricFieldBinary:" << std::endl;
+      std::cerr << "    Could not find the given coordinate!" << std::endl;
+      std::cerr << "    You ask for the following position: " << xin << ", " << yin << ", " << zin << std::endl;
+      std::cerr << "    The mapped position is: " << position_mapped[0] << ", " << position_mapped[1] << ", " << position_mapped[2] << std::endl;
+      PrintRange();
+    }
     return false;
   }
   /* Lower bound returns the next mesh line behind the position in question.

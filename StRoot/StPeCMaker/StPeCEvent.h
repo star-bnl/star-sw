@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.14 2014/06/18 16:38:30 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.15 2015/02/25 01:34:26 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.15  2015/02/25 01:34:26  ramdebbe
+// added copy of the Roman Pot StMuRpsCollection to output tree
+//
 // Revision 1.14  2014/06/18 16:38:30  ramdebbe
 // added more variables to event summary
 //
@@ -77,7 +80,7 @@ class StPeCEvent: public TObject {
 
 public:
 
-  StPeCEvent(bool useBemc, bool useTOF, bool useVertex, bool useTracks, bool readStMuDst, bool readStEvent, bool readBothInputs);
+  StPeCEvent(bool useBemc, bool useTOF, bool useVertex, bool useTracks, bool useRP, bool readStMuDst, bool readStEvent, bool readBothInputs);
   virtual                         ~StPeCEvent();
 
 
@@ -152,6 +155,7 @@ private:
   TClonesArray                   *tofHits;
   TClonesArray                   *tofTracks;
   TClonesArray                   *vertices;
+  TClonesArray                   *romanPots;
 
   StBTofGeometry                 *mTOFgeoEv;   //!
   Int_t                           shotCount;
@@ -159,6 +163,7 @@ private:
   Bool_t                          useTOFlocal;
   Bool_t                          useVertexLocal;
   Bool_t                          useTracksLocal;
+  Bool_t                          useRPLocal;
 
   Bool_t                          readStMuDstLocal;
   Bool_t                          readStEventLocal;

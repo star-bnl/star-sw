@@ -39,17 +39,20 @@ if ($level >= 305 )  then
     else
 	# we reset it according to what is defined
 	setenv ROOTSYS ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/${p}root${x}
+	setenv TMVASYS $ROOTSYS
     endif
 #echo "rootenv 4 => $PATH"
 
 else
     if ($level  >= 224 )  then
 	setenv ROOTSYS ${ROOT}/${ROOT_LEVEL}
+	setenv TMVASYS $ROOTSYS
 	set root = "/.${STAR_HOST_SYS}/root"
     else
 	# not sure what that was but older version of
 	# root we can probably get rid off
 	setenv ROOTSYS ${ROOT}/${ROOT_LEVEL}/.${STAR_HOST_SYS}/root
+	setenv TMVASYS $ROOTSYS
 	set root   = ""
     endif
 endif

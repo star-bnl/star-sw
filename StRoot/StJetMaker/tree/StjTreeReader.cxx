@@ -16,7 +16,7 @@ void StjTreeReader::Init()
 
 Long64_t StjTreeReader::GetEntryWithIndex(const StjTreeIndex& idx)
 {
-  return GetEntryWithIndex(idx.major(), idx.minor());
+  return GetEntryWithIndex(idx.Major(), idx.Minor());
 }
 
 Long64_t StjTreeReader::GetEntryWithIndex(Int_t major, Int_t minor)

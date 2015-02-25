@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEnumerations.h,v 1.7 2012/06/13 15:46:53 ramdebbe Exp $
+// $Id: StPeCEnumerations.h,v 1.8 2015/02/25 01:23:07 ramdebbe Exp $
 // $Log: StPeCEnumerations.h,v $
+// Revision 1.8  2015/02/25 01:23:07  ramdebbe
+// fixed StPeCnMaxTracks =6
+//
 // Revision 1.7  2012/06/13 15:46:53  ramdebbe
 // Control the number of tracks for UPC selection
 //
@@ -39,7 +42,7 @@ const double mMassKaon     =0.493677;
 const double mMassProton   =0.93827231;
 
 // Maximmum number of tracka
-const int  StPeCnMaxTracks =12;
+const int  StPeCnMaxTracks =6;
 // maximu number of snapShots
 const int snapLimit = 0;
 #endif

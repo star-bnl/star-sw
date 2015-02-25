@@ -119,10 +119,12 @@ void Setup(const Char_t *xmlFile = "") {
   */
   delete StTMVARanking::instance();
   if (! TMVAdata::instance()->PileUp()) {
+    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
   } else {
     //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
   }
@@ -284,9 +286,9 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   //	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 0) return kFALSE;
   if (  Vtx->nCTBMatch()     + Vtx->nBTOFMatch() +
   	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 1) return kFALSE; // 22
+#endif
   if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
   //21  if (  Vtx->position().perp() > 3.0) return kFALSE;
-#endif
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -354,7 +356,7 @@ void MapRc2McVertices(map<StMuPrimaryVertex *,StMuMcVertex *> &Rc2McVertices) {
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV40") { 
+	     const  char* outFile="MuMcPrV41") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -370,6 +372,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   // 38 check StTMVAranking
   // 39 switch to maps
   // 40 plots only for l == lBest
+  // 41 add beam for KFV vertex selection
   // Initialize histograms -----------------------
   /* 
      1. Data sample : pp200 W->e nu with  pile-up corresponding to 1 MHz min. bias events, 50 K event y2011, 10 K event y2012.
@@ -538,6 +541,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     vector<StMuPrimaryVertex *>                 CloneVx; //  1 to many (>1) Mc to Rc match
     vector<StMuPrimaryVertex *>                 GhostVx; //  no Mc match
     vector<StMuMcVertex *>                      LostVx;  //  no Rc match
+    map<Id2KFVx,KFVertex*>                      Id2KFvx; // 
+    map<KFVertex*,StMuMcVertex *>               KFVx2McVx; 
+    multimap<StMuMcVertex*,KFVertex*>           McVc2KFVx; 
     for (Int_t m = 0; m < NoMuMcVertices; m++) {
       StMuMcVertex *McVx = (StMuMcVertex *) MuMcVertices->UncheckedAt(m);
       if (! McVx) continue;
@@ -616,6 +622,12 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	  CloneVx.push_back(aRcVx);
 	}
       }
+    }
+    for (Int_t m = 0; m < NoKFVertices; m++) {
+      KFVertex *KFVx = (KFVertex *) KFVertices->UncheckedAt(m);
+      if (! KFVx) continue;
+      PrP(*KFVx);
+      
     }
     // Done with maps --------------------------------------------------------------------------------
     // Primary vertices:
