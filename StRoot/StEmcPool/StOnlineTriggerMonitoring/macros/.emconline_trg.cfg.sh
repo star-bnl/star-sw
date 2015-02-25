@@ -108,7 +108,7 @@ function update_desktop_icon_trg () {
 # Most recent real configuration in the control room
 
 # Directory that contains pedestal files
-if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='operator@daqman.starp.bnl.gov:/RTS/conf/btow' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='/net/daqman/RTS/conf/btow' ; fi
 
 # Directory that contains crate configuration files
 if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_CFG_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
