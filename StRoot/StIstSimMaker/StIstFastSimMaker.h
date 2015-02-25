@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.11 2015/02/25 20:42:57 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -32,7 +32,7 @@ public:
    virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.11 2015/02/25 20:42:57 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -56,53 +56,3 @@ private:
 };
 
 #endif
-
-
-/***************************************************************************
-*
-* $Log: StIstFastSimMaker.h,v $
-* Revision 1.10  2015/02/25 20:41:27  smirnovd
-* Further general codeing style updates according to Jason W. reviews
-*
-* Revision 1.9  2015/02/25 20:39:51  smirnovd
-* STAR Coding Standards style upates according to Jason W. comments
-*
-* Revision 1.8  2015/02/25 20:39:43  smirnovd
-* Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
-*
-* Revision 1.7  2015/02/25 20:36:26  smirnovd
-* StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.6  2015/02/25 20:32:14  smirnovd
-* Minor adjustments to the code and comments
-*
-* Revision 1.5  2015/02/25 20:32:05  smirnovd
-* Do not use automatic ROOT I/O as this is a StMaker. Makers are not persistent
-*
-* Revision 1.4  2015/02/25 20:31:58  smirnovd
-* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
-*
-* Revision 1.3  2015/02/25 20:20:08  smirnovd
-* Minor style, comments and whitespace changes
-*
-* Revision 1.2  2015/02/25 20:20:00  smirnovd
-* Moved CVS log to the end of file and updated doxygen-style comments
-*
-* Revision 1.6  2014/10/13 22:21:56  smirnovd
-* Moved CVS log to the end of file and updated doxygen-style comments
-*
-* Revision 1.4  2014/08/05 03:28:42  ypwang
-* buildIdealGeom() added to switch between ideal VMC geometry or DB geometry, Db geometry was built by default
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstFastSimMaker.h,v 1.0
-* Revision 1.0 2013/11/04 16:25:30 Yaping
-* Initial version
-* IST GEANT hit is transformed to either ideal or misaligned geometry of 
-* realistic detector, with smearing or pixelization. The GEANT hit dE is 
-* directly propagated to IST hit in GeV.
-****************************************************************************/

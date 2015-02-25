@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.14 2015/02/25 20:41:48 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.15 2015/02/25 20:42:57 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -239,76 +239,3 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 
    return smeared_x;
 }
-
-
-/***************************************************************************
-*
-* $Log: StIstFastSimMaker.cxx,v $
-* Revision 1.14  2015/02/25 20:41:48  smirnovd
-* Removed a quite pointless check for number of hits in IST MC container
-*
-* Revision 1.13  2015/02/25 20:41:43  smirnovd
-* Check for valid StMcIstHitCollection in StMcEvent
-*
-* This is essentially a change in style only to save one indentation level
-*
-* Revision 1.12  2015/02/25 20:41:38  smirnovd
-* Do not delete StIstDb object as StIstFastSimMaker does not own it
-*
-* The StIstDb object is created by StIstDbMaker and should not be deleted by
-* another maker
-*
-* Revision 1.11  2015/02/25 20:41:33  smirnovd
-* adding method to access VMC geometry once no avaible geometry DB tables or set to use ideal geoemtry
-*
-* Revision 1.10  2015/02/25 20:41:27  smirnovd
-* Further general codeing style updates according to Jason W. reviews
-*
-* Revision 1.9  2015/02/25 20:39:57  smirnovd
-* minor update for mIstRot initialization check
-*
-* Revision 1.8  2015/02/25 20:39:51  smirnovd
-* STAR Coding Standards style upates according to Jason W. comments
-*
-* Revision 1.7  2015/02/25 20:39:43  smirnovd
-* Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
-*
-* Revision 1.6  2015/02/25 20:36:36  smirnovd
-* No need to check for valid pointer to StEvent object as it is already done at the begining of Make() routine
-*
-* Revision 1.5  2015/02/25 20:36:26  smirnovd
-* StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.4  2015/02/25 20:32:14  smirnovd
-* Minor adjustments to the code and comments
-*
-* Revision 1.3  2015/02/25 20:31:58  smirnovd
-* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
-*
-* Revision 1.2  2015/02/25 20:20:00  smirnovd
-* Moved CVS log to the end of file and updated doxygen-style comments
-*
-* Revision 1.7  2014/10/13 22:21:56  smirnovd
-* Moved CVS log to the end of file and updated doxygen-style comments
-*
-* Revision 1.6  2014/08/06 18:56:52  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.5  2014/08/05 03:28:42  ypwang
-* buildIdealGeom() added to switch between ideal VMC geometry or DB geometry, Db geometry was built by default
-*
-* Revision 1.4  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstFastSimMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 16:25:30 Yaping
-* Initial version
-* IST GEANT hit is transformed to either ideal or misaligned geometry of 
-* realistic detector, with smearing or pixelization. The GEANT hit dE is 
-* directly propagated to IST hit in GeV.
-****************************************************************************/
