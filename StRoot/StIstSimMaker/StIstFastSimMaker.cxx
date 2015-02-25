@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.9 2015/02/25 20:39:57 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -17,7 +17,9 @@
 #include "StMcEventTypes.hh"
 
 #include <stdio.h>
-#include <map>
+#include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
+#include <vector>
 #include <exception>
 #include <stdexcept>
 #include "tables/St_g2t_ist_hit_Table.h"
@@ -36,9 +38,25 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIst
    mRandom->setSeed(seed);
 }
 
+//____________________________________________________________
 StIstFastSimMaker::~StIstFastSimMaker(){ 
    if (mIstDb) delete mIstDb;
    if (mRandom) delete mRandom; 
+}
+
+//____________________________________________________________
+void StIstFastSimMaker::Clear(Option_t *) {
+   StMaker::Clear();
+}
+
+//____________________________________________________________
+Int_t StIstFastSimMaker::Init() {
+   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+
+   mBuildIdealGeom = kTRUE; //setup an ideal simulation of the IST
+   mSmear = kTRUE; //do smearing for IST hit by default
+
+   return kStOk;
 }
 
 //____________________________________________________________
@@ -86,16 +104,9 @@ Int_t StIstFastSimMaker::Make()
 
    if (! mcEvent) {LOG_INFO << "No StMcEvent on input" << endl; return kStWarn;}
 
-   TDataSetIter geant(GetInputDS("geant"));
-
    if ( mBuildIdealGeom && !gGeoManager ) {
       GetDataBase("VmcGeometry");
    }
-
-   g2t_ist_hit_st *g2tIst = 0;
-   St_g2t_ist_hit *g2t_ist_hit = (St_g2t_ist_hit *)geant("g2t_ist_hit");
-
-   if (g2t_ist_hit) g2tIst = g2t_ist_hit->GetTable();
 
    // Store hits into Ist Hit Collection
    StIstHitCollection *istHitCollection = 0;
@@ -176,7 +187,7 @@ Int_t StIstFastSimMaker::Make()
                StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
                tempHit->setDetectorId(kIstId);
                tempHit->setId(mcI->key());
-               tempHit->setIdTruth(g2tIst[kk].track_p, 100);
+	       mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
                tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
                istHitCollection->addHit(tempHit);
 
@@ -225,6 +236,9 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.10  2015/02/25 20:41:27  smirnovd
+* Further general codeing style updates according to Jason W. reviews
+*
 * Revision 1.9  2015/02/25 20:39:57  smirnovd
 * minor update for mIstRot initialization check
 *
@@ -269,4 +283,7 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 * StIstFastSimMaker.cxx,v 1.0
 * Revision 1.0 2013/11/04 16:25:30 Yaping
 * Initial version
+* IST GEANT hit is transformed to either ideal or misaligned geometry of 
+* realistic detector, with smearing or pixelization. The GEANT hit dE is 
+* directly propagated to IST hit in GeV.
 ****************************************************************************/

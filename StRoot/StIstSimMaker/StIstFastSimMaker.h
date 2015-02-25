@@ -1,26 +1,14 @@
-/* $Id: StIstFastSimMaker.h,v 1.9 2015/02/25 20:39:51 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
-#include <vector>
 
-class StEvent;
-class StMcEvent;
 class StRandom;
-class StMcIstHitCollection;
-class StIstHitCollection;
-class St_g2t_ist_hit;
-
 class StIstDb;
 class THashList;
-
-class TString;
-
 
 /**
  * Fast simulation maker for IST.
@@ -34,12 +22,17 @@ public:
 
    StIstFastSimMaker(const Char_t *name = "istFastSim");
    virtual ~StIstFastSimMaker();
+   Int_t Init();
+   //retrieve GEANT hit information, and transfer hit position to ideal/misaligned geometry of realistic IST detector
    Int_t Make();
    Int_t InitRun( Int_t runNo);
+   //Selects whether ideal or misalgined geometry is used
+   //mBuildIdealGeom kTRUE=ideal, kFALSE=misaligned
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
+   virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.9 2015/02/25 20:39:51 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -68,6 +61,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.10  2015/02/25 20:41:27  smirnovd
+* Further general codeing style updates according to Jason W. reviews
+*
 * Revision 1.9  2015/02/25 20:39:51  smirnovd
 * STAR Coding Standards style upates according to Jason W. comments
 *
@@ -106,4 +102,7 @@ private:
 * StIstFastSimMaker.h,v 1.0
 * Revision 1.0 2013/11/04 16:25:30 Yaping
 * Initial version
+* IST GEANT hit is transformed to either ideal or misaligned geometry of 
+* realistic detector, with smearing or pixelization. The GEANT hit dE is 
+* directly propagated to IST hit in GeV.
 ****************************************************************************/
