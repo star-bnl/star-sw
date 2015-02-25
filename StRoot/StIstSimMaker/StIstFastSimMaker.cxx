@@ -1,10 +1,11 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.19 2015/02/25 20:43:21 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.20 2015/02/25 20:43:25 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
 #include "StHit.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
+#include "StEvent/StEnumerations.h"
 #include "StMcEvent.hh"
 #include "StMcEvent/StMcHit.hh"
 #include "StMcIstHit.hh"
@@ -90,6 +91,8 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
  */
 Int_t StIstFastSimMaker::Make()
 {
+   using namespace StIstConsts;
+
    LOG_INFO << "StIstFastSimMaker::Make()" << endm;
    if (!mIstRot) {
       LOG_FATAL << "Make(): mIstRot is not initialized" << endm;
@@ -142,7 +145,7 @@ Int_t StIstFastSimMaker::Make()
          StMcHit *mcH = istMcHitCol->layer(0)->hits()[kk];
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
-         Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
+         Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
          cout << " matIst : " << matIst << endl;
 
          TGeoHMatrix *combI = NULL;
@@ -199,7 +202,7 @@ Int_t StIstFastSimMaker::Make()
          LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
          LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
-         UInt_t hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
+         UInt_t hw =  ( mcI->ladder() - 1 ) * kIstNumSensorsPerLadder + mcI->wafer();
          StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
          tempHit->setDetectorId(kIstId);
          tempHit->setId(mcI->key());
