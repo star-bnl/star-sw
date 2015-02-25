@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.28 2015/02/25 20:44:53 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.29 2015/02/25 20:45:00 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -39,10 +39,15 @@ Int_t StIstFastSimMaker::Init() {
    LOG_INFO << "StIstFastSimMaker::Init()" << endm;
 
    if (mBuildIdealGeom && !gGeoManager) {
-      LOG_ERROR << "Init() - "
-         "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
-         "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
-      return kFatal;
+
+      GetDataBase("VmcGeometry");
+
+      if (!gGeoManager) {
+         LOG_ERROR << "Init() - "
+            "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
+            "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
+         return kFatal;
+      }
    }
 
    return kStOk;
