@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.6 2015/02/25 20:32:14 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.7 2015/02/25 20:36:26 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -28,35 +28,35 @@ class TString;
  * \author: Yaping Wang
  * \date August 2012
  */
-class StIstFastSimMaker : public StMaker {
- public:
+class StIstFastSimMaker : public StMaker
+{
+public:
 
-  StIstFastSimMaker(const char *name="istFastSim");
-  Int_t Make();
-  Int_t InitRun( int);
-  void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;} 
- 
-  //Routine to smear hit by resolution with gaussian, mean zero and width res
-  Double_t distortHit(double x, double res, double detLength);
+   StIstFastSimMaker(const char *name = "istFastSim");
+   Int_t Make();
+   Int_t InitRun( int);
+   void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
-  virtual const char *GetCVS() const
-  {
-    static const char cvs[]="Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.6 2015/02/25 20:32:14 smirnovd Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
+   //Routine to smear hit by resolution with gaussian, mean zero and width res
+   Double_t distortHit(double x, double res, double detLength);
 
- protected:
-  THashList *istRot;
-  StIstDb *mIstDb;
-  Bool_t mBuildIdealGeom;
+   virtual const char *GetCVS() const {
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.7 2015/02/25 20:36:26 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      return cvs;
+   }
 
-  StRandom* myRandom;
+protected:
+   THashList *istRot;
+   StIstDb *mIstDb;
+   Bool_t mBuildIdealGeom;
 
-  Double_t resXIst1;
-  Double_t resZIst1;
-  bool     mSmear; //to turn smearing on and off
+   StRandom *myRandom;
 
-  ClassDef(StIstFastSimMaker, 0)
+   Double_t resXIst1;
+   Double_t resZIst1;
+   bool     mSmear; //to turn smearing on and off
+
+   ClassDef(StIstFastSimMaker, 0)
 };
 
 #endif
@@ -65,6 +65,9 @@ class StIstFastSimMaker : public StMaker {
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.7  2015/02/25 20:36:26  smirnovd
+* StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.6  2015/02/25 20:32:14  smirnovd
 * Minor adjustments to the code and comments
 *
