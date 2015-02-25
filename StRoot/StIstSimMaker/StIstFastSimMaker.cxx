@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.11 2015/02/25 20:41:33 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.12 2015/02/25 20:41:38 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -40,7 +40,6 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIst
 
 //____________________________________________________________
 StIstFastSimMaker::~StIstFastSimMaker(){ 
-   if (mIstDb) delete mIstDb;
    if (mRandom) delete mRandom; 
 }
 
@@ -249,6 +248,12 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.12  2015/02/25 20:41:38  smirnovd
+* Do not delete StIstDb object as StIstFastSimMaker does not own it
+*
+* The StIstDb object is created by StIstDbMaker and should not be deleted by
+* another maker
+*
 * Revision 1.11  2015/02/25 20:41:33  smirnovd
 * adding method to access VMC geometry once no avaible geometry DB tables or set to use ideal geoemtry
 *
