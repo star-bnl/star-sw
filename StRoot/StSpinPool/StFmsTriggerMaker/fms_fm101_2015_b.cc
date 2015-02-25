@@ -1,11 +1,11 @@
 #include "bits.hh"
-#include "fms_fm101_2015_a.hh"
+#include "fms_fm101_2015_b.hh"
 #include "fms_fm001_2015_a.hh"
 #include <stdio.h>
 
 //#include "registerHack.hh"
 
-void fms_fm101_2015_a(Board& fm101, int t, int simdat){
+void fms_fm101_2015_b(Board& fm101, int t, int simdat){
   const int BSThr1=fm101.registers[0];
   const int BSThr2=fm101.registers[1];
   const int BSThr3=fm101.registers[2];
@@ -45,7 +45,7 @@ void fms_fm101_2015_a(Board& fm101, int t, int simdat){
   if(JpM>0xff) JpM=0xff;
   if(JpB>0xff) JpB=0xff;
   
-  fm101.output[t] =  BS3 | BS2   << 1
+  fm101.output[t] =  BS3 <<13 | BS2   << 1
     | BS1T << 2 | BS1M <<  3 | BS1B <<4 
     | JpT  << 5 | JpM  << 16 | JpB  <<24;
   
@@ -57,11 +57,11 @@ void fms_fm101_2015_a(Board& fm101, int t, int simdat){
   }
 }
 
-int getFM101_2015a_BS3(int out)  {return getbits(out, 0, 1);}
-int getFM101_2015a_BS2(int out)  {return getbits(out, 1, 1);}
-int getFM101_2015a_BS1T(int out) {return getbits(out, 2, 1);}
-int getFM101_2015a_BS1M(int out) {return getbits(out, 3, 1);}
-int getFM101_2015a_BS1B(int out) {return getbits(out, 4, 1);}
-int getFM101_2015a_JpT(int out)  {return getbits(out, 5, 8);}
-int getFM101_2015a_JpM(int out)  {return getbits(out,16, 8);}
-int getFM101_2015a_JpB(int out)  {return getbits(out,24, 8);}
+int getFM101_2015b_BS3(int out)  {return getbits(out,13, 1);}
+int getFM101_2015b_BS2(int out)  {return getbits(out, 1, 1);}
+int getFM101_2015b_BS1T(int out) {return getbits(out, 2, 1);}
+int getFM101_2015b_BS1M(int out) {return getbits(out, 3, 1);}
+int getFM101_2015b_BS1B(int out) {return getbits(out, 4, 1);}
+int getFM101_2015b_JpT(int out)  {return getbits(out, 5, 8);}
+int getFM101_2015b_JpM(int out)  {return getbits(out,16, 8);}
+int getFM101_2015b_JpB(int out)  {return getbits(out,24, 8);}

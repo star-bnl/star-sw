@@ -30,8 +30,10 @@
 #include "fms_fm005_2015_a.hh"
 #include "fms_fm006_2015_a.hh"
 #include "fms_fm101_2015_a.hh"
+#include "fms_fm101_2015_b.hh"
 #include "fms_fm103_2015_a.hh"
 #include "l1_fp201_2015_a.hh"
+#include "l1_fp201_2015_b.hh"
 #include "StFmsTriggerMaker.h"
 
 using namespace std;
@@ -474,8 +476,13 @@ void StFmsTriggerMaker::runFmsLayer1(int t){
     fms_fm102_2012_a(fm103,t);
     break;
   case 2015:
-    fms_fm101_2015_a(fm101,t,mUseDsmData);
-    fms_fm101_2015_a(fm102,t,mUseDsmData);
+    if(mForceRun<16056024){ 
+      fms_fm101_2015_a(fm101,t,mUseDsmData);
+      fms_fm101_2015_a(fm102,t,mUseDsmData);
+    }else{                
+      fms_fm101_2015_b(fm101,t,mUseDsmData);
+      fms_fm101_2015_b(fm102,t,mUseDsmData);
+    }
     fms_fm103_2015_a(fm103,t,mUseDsmData);
     fms_fm103_2015_a(fm104,t,mUseDsmData);
     break;
@@ -487,7 +494,10 @@ void StFmsTriggerMaker::runFpdLayer2(int t){
   case 2011: l1_fp201_2011_a(fp201,t); break;
   case 2012: l1_fp201_2012_b(fp201,t); break;
   case 2013: l1_fp201_2012_b(fp201,t); break;
-  case 2015: l1_fp201_2015_a(fp201,t,mUseDsmData); break;
+  case 2015: 
+    if(mForceRun<16056024)  {l1_fp201_2015_a(fp201,t,mUseDsmData);} 
+    else                    {l1_fp201_2015_b(fp201,t,mUseDsmData);}
+    break;
   }
 }
 
