@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.13 2015/02/25 20:41:43 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.14 2015/02/25 20:41:48 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -134,85 +134,82 @@ Int_t StIstFastSimMaker::Make()
 
    LOG_INFO << "ist MC hit collection found" << endm;
    Int_t nIsthits = istMcHitCol->numberOfHits();
-   LOG_DEBUG << "there are " << nIsthits << " ist hits" << endm;
 
-   if (nIsthits) {
-      if (istMcHitCol->layer(0)) {
-         for (UInt_t kk = 0; kk < istMcHitCol->layer(0)->hits().size(); kk++) {
-            StMcHit *mcH = istMcHitCol->layer(0)->hits()[kk];
-            StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
+   if (istMcHitCol->layer(0)) {
+      for (UInt_t kk = 0; kk < istMcHitCol->layer(0)->hits().size(); kk++) {
+         StMcHit *mcH = istMcHitCol->layer(0)->hits()[kk];
+         StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
-            Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
-            cout << " matIst : " << matIst << endl;
+         Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
+         cout << " matIst : " << matIst << endl;
 
-            TGeoHMatrix *combI = NULL;
-            //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
-            if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
-     	  TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-     	  Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
-     	  gGeoManager->RestoreMasterVolume();
-     	  gGeoManager->CdTop();
-     	  gGeoManager->cd(Path);
-     	  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
-            }
-            else { //using mis-aligned gemetry from IST geometry DB tables
-     	  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
-            }
+         TGeoHMatrix *combI = NULL;
+         //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
+         if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
+  	  TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+  	  Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+  	  gGeoManager->RestoreMasterVolume();
+  	  gGeoManager->CdTop();
+  	  gGeoManager->cd(Path);
+  	  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
+         }
+         else { //using mis-aligned gemetry from IST geometry DB tables
+  	  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
+         }
 
-            if (combI) {
-               cout << " geometry matrix :" << endl;
-               combI->Print();
-            }
+         if (combI) {
+            cout << " geometry matrix :" << endl;
+            combI->Print();
+         }
 
-            //YPWANG: McIstHit stored local position
-            Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
-            Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
-            LOG_DEBUG << "Before Smearing" << endm;
-            LOG_DEBUG << "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
+         //YPWANG: McIstHit stored local position
+         Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
+         Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
+         LOG_DEBUG << "Before Smearing" << endm;
+         LOG_DEBUG << "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
 
-            if (mSmear) { // smearing on
-               LOG_DEBUG << "Smearing start... " << endm;
-               smearedX = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
-               smearedZ = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
+         if (mSmear) { // smearing on
+            LOG_DEBUG << "Smearing start... " << endm;
+            smearedX = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
+            smearedZ = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
 
-               localIstHitPos[0] = smearedX;
-               localIstHitPos[2] = smearedZ;
-               LOG_DEBUG << Form("Smearing done...") << endm;
-            }
-            else { //smearing off
-               LOG_DEBUG << "No smearing, but discreting ... " << endm;
-               //discrete hit local position (2D structure of IST sensor pads)
-               Float_t rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
-               Float_t zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
-               Short_t meanColumn  = (Short_t)floor( zPos / kIstPadPitchColumn ) + 1;
-               Short_t meanRow     = (Short_t)floor( rPhiPos / kIstPadPitchRow ) + 1;
-               rPhiPos = (meanRow - 1) * kIstPadPitchRow + 0.5 * kIstPadPitchRow; //unit: cm
-               zPos    = (meanColumn - 1) * kIstPadPitchColumn + 0.5 * kIstPadPitchColumn; //unit: cm
-               localIstHitPos[0] = kIstSensorActiveSizeRPhi / 2.0 - rPhiPos;
-               localIstHitPos[2] = zPos - kIstSensorActiveSizeZ / 2.0;
-            }
+            localIstHitPos[0] = smearedX;
+            localIstHitPos[2] = smearedZ;
+            LOG_DEBUG << Form("Smearing done...") << endm;
+         }
+         else { //smearing off
+            LOG_DEBUG << "No smearing, but discreting ... " << endm;
+            //discrete hit local position (2D structure of IST sensor pads)
+            Float_t rPhiPos   = kIstSensorActiveSizeRPhi / 2.0 - localIstHitPos[0];
+            Float_t zPos      = localIstHitPos[2] + kIstSensorActiveSizeZ / 2.0;
+            Short_t meanColumn  = (Short_t)floor( zPos / kIstPadPitchColumn ) + 1;
+            Short_t meanRow     = (Short_t)floor( rPhiPos / kIstPadPitchRow ) + 1;
+            rPhiPos = (meanRow - 1) * kIstPadPitchRow + 0.5 * kIstPadPitchRow; //unit: cm
+            zPos    = (meanColumn - 1) * kIstPadPitchColumn + 0.5 * kIstPadPitchColumn; //unit: cm
+            localIstHitPos[0] = kIstSensorActiveSizeRPhi / 2.0 - rPhiPos;
+            localIstHitPos[2] = zPos - kIstSensorActiveSizeZ / 2.0;
+         }
 
-            //YPWANG: do local-->global transform with geometry table
-            combI->LocalToMaster(localIstHitPos, globalIstHitPos);
-            StThreeVectorF gistpos(globalIstHitPos);
-            LOG_DEBUG << "smeared globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endm;
-            LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
-            LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
+         //YPWANG: do local-->global transform with geometry table
+         combI->LocalToMaster(localIstHitPos, globalIstHitPos);
+         StThreeVectorF gistpos(globalIstHitPos);
+         LOG_DEBUG << "smeared globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endm;
+         LOG_DEBUG << "smeared localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;
+         LOG_DEBUG << "hit position(ladder/sensor): " << mcI->ladder() << " " << mcI->wafer() << endm;
 
-            UInt_t hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
-            StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
-            tempHit->setDetectorId(kIstId);
-            tempHit->setId(mcI->key());
-            mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
-            tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
-            istHitCollection->addHit(tempHit);
+         UInt_t hw =  ( mcI->ladder() - 1 ) * 6 + mcI->wafer();
+         StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
+         tempHit->setDetectorId(kIstId);
+         tempHit->setId(mcI->key());
+         mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
+         tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
+         istHitCollection->addHit(tempHit);
 
-            LOG_DEBUG << "id() : " << tempHit->id()  << " idTruth: " << tempHit->idTruth() << endm;
-            LOG_DEBUG << "from StMcIstHit x= " << mcI->position().x()   << "; y= " << mcI->position().y()   << "; z= " << mcI->position().z() << endm;
-            LOG_DEBUG << "istHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << "; energy/charge = " << tempHit->charge() << endm;
-         }//MC hits loop over
-      }//end layer=0 cut
-   }//end MC hits number cut
+         LOG_DEBUG << "id() : " << tempHit->id()  << " idTruth: " << tempHit->idTruth() << endm;
+         LOG_DEBUG << "from StMcIstHit x= " << mcI->position().x()   << "; y= " << mcI->position().y()   << "; z= " << mcI->position().z() << endm;
+         LOG_DEBUG << "istHit location x= " << tempHit->position().x() << "; y= " << tempHit->position().y() << "; z= " << tempHit->position().z() << "; energy/charge = " << tempHit->charge() << endm;
+      }//MC hits loop over
+   }//end layer=0 cut
 
    LOG_DEBUG << "StIstFastSimMaker::Make() -I- Loaded " << nIsthits << " ist hits. \n";
 
@@ -247,6 +244,9 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.14  2015/02/25 20:41:48  smirnovd
+* Removed a quite pointless check for number of hits in IST MC container
+*
 * Revision 1.13  2015/02/25 20:41:43  smirnovd
 * Check for valid StMcIstHitCollection in StMcEvent
 *
