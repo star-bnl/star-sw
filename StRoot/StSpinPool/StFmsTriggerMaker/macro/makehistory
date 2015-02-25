@@ -1,0 +1,10 @@
+#!/bin/csh 
+set day=$1
+set debug=$2
+
+if ( $debug == "0" ) then
+    root -b -q history.C"($day)" >& /dev/null
+else
+    echo root -b -q history.C"($day)"
+    root -b -q history.C"($day)"
+endif
