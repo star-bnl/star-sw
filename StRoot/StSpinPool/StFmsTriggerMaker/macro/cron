@@ -1,0 +1,12 @@
+#!/bin/csh
+
+set arg=$1
+echo cron $arg
+
+if ( "$arg" == "set" ) then
+    crontab crontab.txt
+else if ( "$arg" == "remove" ) then
+    crontab -r
+endif
+
+crontab -l
