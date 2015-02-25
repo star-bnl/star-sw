@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.22 2015/02/25 20:44:17 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.23 2015/02/25 20:44:22 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -17,20 +17,16 @@
 #include "StMcEvent/StMcIstHitCollection.hh"
 #include "StThreeVectorF.hh"
 #include "tables/St_HitError_Table.h"
-#include "StarClassLibrary/StRandom.hh"
 
 ClassImp(StIstFastSimMaker)
 
 StIstFastSimMaker::StIstFastSimMaker( const Char_t *name ) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
-   mRandom(new StRandom()), mSmear(kTRUE)
+   mRandom(time(0)), mSmear(kTRUE)
 {
-   Int_t seed = time(NULL);
-   mRandom->setSeed(seed);
 }
 
 //____________________________________________________________
 StIstFastSimMaker::~StIstFastSimMaker(){ 
-   if (mRandom) delete mRandom; 
 }
 
 //____________________________________________________________
@@ -206,7 +202,7 @@ Int_t StIstFastSimMaker::Make()
  * value is constrained to be within the characteristic dimension detLength
  * provided by the user.
  */
-Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength) const
+Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, const Double_t detLength)
 {
    // Do not smear x when it is outside the physical limits. Issue a warning instead
    if (fabs(x) > detLength) {
@@ -217,7 +213,7 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
    Double_t smeared_x;
 
    do {
-      smeared_x = mRandom->gauss(x, res);
+      smeared_x = mRandom.Gaus(x, res);
    } while ( fabs(smeared_x) > detLength);
 
    return smeared_x;
