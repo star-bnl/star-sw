@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.2 2015/02/25 20:20:00 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.3 2015/02/25 20:20:08 smirnovd Exp $ */
 
 #ifndef STAR_StIstFastSimMaker
 #define STAR_StIstFastSimMaker
@@ -43,7 +43,7 @@ class StIstFastSimMaker : public StMaker {
 
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.2 2015/02/25 20:20:00 smirnovd Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.3 2015/02/25 20:20:08 smirnovd Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -58,16 +58,18 @@ class StIstFastSimMaker : public StMaker {
   Double_t resZIst1;
   Int_t mSmear; //to turn smearing on and off
 
-  private:
-
-  ClassDef(StIstFastSimMaker,1)   //StAF chain virtual base class for Makers
+  ClassDef(StIstFastSimMaker,1)
 };
+
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.h,v $
+* Revision 1.3  2015/02/25 20:20:08  smirnovd
+* Minor style, comments and whitespace changes
+*
 * Revision 1.2  2015/02/25 20:20:00  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
