@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.10 2015/02/25 20:41:27 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.11 2015/02/25 20:41:33 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -82,10 +82,6 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
 
    // geometry Db tables
    mIstRot = mIstDb->getRotations();
-   if (!mIstRot) {
-      LOG_FATAL << "InitRun : mIstRot is not initialized" << endm;
-      return kStFatal;
-   }
 
    return kStOk;
 }
@@ -94,6 +90,10 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
 Int_t StIstFastSimMaker::Make()
 {
    LOG_INFO << "StIstFastSimMaker::Make()" << endm;
+   if (!mIstRot) {
+      LOG_FATAL << "Make(): mIstRot is not initialized" << endm;
+      return kStFatal;
+   }
 
    // Get the input data structures from StEvent and StMcEvent
    StEvent *rcEvent =  (StEvent *) GetInputDS("StEvent");
@@ -141,10 +141,23 @@ Int_t StIstFastSimMaker::Make()
 
                Int_t matIst = 1000 + (mcI->ladder() - 1) * 6 + mcI->wafer();
                cout << " matIst : " << matIst << endl;
-               TGeoHMatrix *combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));
+
+               TGeoHMatrix *combI = NULL;
+	       //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
+	       if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
+		  TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+		  Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
+		  gGeoManager->RestoreMasterVolume();
+		  gGeoManager->CdTop();
+		  gGeoManager->cd(Path);
+		  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
+	       }
+	       else { //using mis-aligned gemetry from IST geometry DB tables
+		  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
+	       }
 
                if (combI) {
-                  cout << " from Tables :" << endl;
+                  cout << " geometry matrix :" << endl;
                   combI->Print();
                }
 
@@ -236,6 +249,9 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.11  2015/02/25 20:41:33  smirnovd
+* adding method to access VMC geometry once no avaible geometry DB tables or set to use ideal geoemtry
+*
 * Revision 1.10  2015/02/25 20:41:27  smirnovd
 * Further general codeing style updates according to Jason W. reviews
 *
