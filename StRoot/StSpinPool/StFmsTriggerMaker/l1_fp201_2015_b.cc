@@ -57,12 +57,12 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   int fm104 = in[2];   // large cells north
   
   //BS
-  int smBS3 = getFM101_2015b_BS3(fm101) | getFM101_2015a_BS3(fm102);
+  int smBS3 = getFM101_2015b_BS3(fm101) | getFM101_2015b_BS3(fm102);
   int lgBS3 = getFM103_2015a_BS3(fm103) | getFM103_2015a_BS3(fm104);
-  int smBS2 = getFM101_2015b_BS2(fm101) | getFM101_2015a_BS2(fm102);
+  int smBS2 = getFM101_2015b_BS2(fm101) | getFM101_2015b_BS2(fm102);
   int lgBS2 = getFM103_2015a_BS2(fm103) | getFM103_2015a_BS2(fm104);
   int smBS1 = getFM101_2015b_BS1T(fm101) | getFM101_2015b_BS1M(fm101) | getFM101_2015b_BS1B(fm101)
-            | getFM101_2015a_BS1T(fm102) | getFM101_2015a_BS1M(fm102) | getFM101_2015a_BS1B(fm102);
+            | getFM101_2015b_BS1T(fm102) | getFM101_2015b_BS1M(fm102) | getFM101_2015b_BS1B(fm102);
   int lgBS1 = getFM103_2015a_BS1T(fm103) | getFM103_2015a_BS1M(fm103) | getFM103_2015a_BS1B(fm103)
             | getFM103_2015a_BS1T(fm104) | getFM103_2015a_BS1M(fm104) | getFM103_2015a_BS1B(fm104);
 
@@ -71,7 +71,7 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   memset(DBS,0,sizeof(DBS));
   int bs1 
     = (getFM101_2015b_BS1T(fm101)<<0) | (getFM101_2015b_BS1M(fm101)<<1) | (getFM101_2015b_BS1B(fm101)<<2)
-    | (getFM101_2015a_BS1B(fm102)<<3) | (getFM101_2015a_BS1M(fm102)<<4) | (getFM101_2015a_BS1T(fm102)<<5)
+    | (getFM101_2015b_BS1B(fm102)<<3) | (getFM101_2015b_BS1M(fm102)<<4) | (getFM101_2015b_BS1T(fm102)<<5)
     | (getFM103_2015a_BS1T(fm103)<<6) | (getFM103_2015a_BS1M(fm103)<<7) | (getFM103_2015a_BS1B(fm103)<<8)
     | (getFM103_2015a_BS1B(fm104)<<9) | (getFM103_2015a_BS1M(fm104)<<10)| (getFM103_2015a_BS1T(fm104)<<12);
   fp201.userdata[t][0]=bs1;
@@ -88,9 +88,9 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   jp[0] = getFM101_2015b_JpT(fm101) + getFM103_2015a_JpT(fm103); //ST
   jp[1] = getFM101_2015b_JpM(fm101) + getFM103_2015a_JpM(fm103); //SM
   jp[2] = getFM101_2015b_JpB(fm101) + getFM103_2015a_JpB(fm103); //SB  
-  jp[3] = getFM101_2015a_JpB(fm102) + getFM103_2015a_JpB(fm104); //NB
-  jp[4] = getFM101_2015a_JpM(fm102) + getFM103_2015a_JpM(fm104); //NM
-  jp[5] = getFM101_2015a_JpT(fm102) + getFM103_2015a_JpT(fm104); //NT
+  jp[3] = getFM101_2015b_JpB(fm102) + getFM103_2015a_JpB(fm104); //NB
+  jp[4] = getFM101_2015b_JpM(fm102) + getFM103_2015a_JpM(fm104); //NM
+  jp[5] = getFM101_2015b_JpT(fm102) + getFM103_2015a_JpT(fm104); //NT
   int JP2=0, JP1=0, JP0=0, jp0=0;
   for(int i=0; i<NBITJp; i++){
     if(jp[i]>JpThr2) JP2=1;
