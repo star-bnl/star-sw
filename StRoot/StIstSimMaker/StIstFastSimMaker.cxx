@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.26 2015/02/25 20:44:41 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.27 2015/02/25 20:44:47 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -37,6 +37,13 @@ void StIstFastSimMaker::Clear(Option_t *) {
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
    LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+
+   if (mBuildIdealGeom && !gGeoManager) {
+      LOG_ERROR << "Init() - "
+         "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
+         "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
+      return kFatal;
+   }
 
    return kStOk;
 }
@@ -92,10 +99,6 @@ Int_t StIstFastSimMaker::Make()
 
    if (! mcEvent) {LOG_WARN << "Make() - StMcEvent not found" << endl; return kStWarn;}
 
-   if ( mBuildIdealGeom && !gGeoManager ) {
-      GetDataBase("VmcGeometry");
-   }
-
    // Store hits into Ist Hit Collection
    StIstHitCollection *istHitCollection = rcEvent->istHitCollection();
 
@@ -129,7 +132,7 @@ Int_t StIstFastSimMaker::Make()
 
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
-         if( (!mIstRot || mBuildIdealGeom) && gGeoManager) {
+         if (mBuildIdealGeom) {
   	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
   	  path += Form("/IBAM_%d/IBLM_%d/IBSS_1", mcI->ladder(), mcI->wafer());
   	  gGeoManager->RestoreMasterVolume();
