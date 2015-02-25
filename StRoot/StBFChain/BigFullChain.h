@@ -1376,18 +1376,17 @@ Bfc_st BFC[] = { // standard chains
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
   {"pxlFastSim"  ,"","","StMcEvent,StEvent"
-   ,                                           "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
-  {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
-  {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
-  {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
+   ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
+  {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker",     "PXL raw hit maker",kFALSE},
+  {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker",     "PXL cluster maker",kFALSE},
+  {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
 
-  {"istRaw",     "", "", "istUtil istDb",    "StIstRawHitMaker",  "StIstRawHitMaker",  "Run IST raw hit maker", kFALSE},
-  {"istCluster", "", "", "istRaw",           "StIstClusterMaker", "StIstClusterMaker", "Run IST cluster maker", kFALSE},
-  {"istHit",     "", "", "event istCluster", "StIstHitMaker",     "StIstHitMaker",     "Run IST hit Maker",     kFALSE},
+  {"istRaw",     "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
+  {"istCluster", "", "", "istRaw","StIstClusterMaker",     "StIstClusterMaker","IST Cluster maker", kFALSE},
+  {"istHit",     "", "", "event,istCluster", "StIstHitMaker",       "StIstHitMaker","IST Hit Maker",kFALSE},
 
-  {"istFastSim", "", "", "StMcEvent,StEvent", "StIstFastSimMaker",
-        "StIstSimMaker", "Load StIstSimMaker, invoke StIstFastSimMaker to fill StIstHitCollection", kFALSE},
+  {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
