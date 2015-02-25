@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.5 2015/02/25 20:36:26 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.6 2015/02/25 20:36:36 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -93,15 +93,13 @@ Int_t StIstFastSimMaker::Make()
    // Store hits into Ist Hit Collection
    StIstHitCollection *istHitCollection = 0;
 
-   if (rcEvent) {
-      istHitCollection = rcEvent->istHitCollection();
+   istHitCollection = rcEvent->istHitCollection();
 
-      if (!istHitCollection) {
-         gMessMgr->Info() << "StIstFastSimMaker -E- no istHitCollection!\n";
-         istHitCollection = new StIstHitCollection;
-         LOG_WARN << "Make() has added a non existing StIstHitCollection" << endm;
-         rcEvent->setIstHitCollection(istHitCollection);
-      }
+   if (!istHitCollection) {
+      gMessMgr->Info() << "StIstFastSimMaker -E- no istHitCollection!\n";
+      istHitCollection = new StIstHitCollection;
+      LOG_WARN << "Make() has added a non existing StIstHitCollection" << endm;
+      rcEvent->setIstHitCollection(istHitCollection);
    }
 
    StThreeVectorF mHitError(0., 0., 0.);
@@ -207,6 +205,9 @@ Double_t StIstFastSimMaker::distortHit(double x, double res, double detLength)
 /***************************************************************************
 *
 * $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.6  2015/02/25 20:36:36  smirnovd
+* No need to check for valid pointer to StEvent object as it is already done at the begining of Make() routine
+*
 * Revision 1.5  2015/02/25 20:36:26  smirnovd
 * StIstFastSimMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
