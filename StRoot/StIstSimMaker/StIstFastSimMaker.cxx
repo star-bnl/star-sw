@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.17 2015/02/25 20:43:09 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.18 2015/02/25 20:43:14 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -60,8 +60,8 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
 {
    LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
-   TDataSet *set = GetDataBase("Calibrations/tracker");
-   St_HitError *istTableSet = (St_HitError *)set->Find("ist1HitError");
+   TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
+   St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
    HitError_st *istHitError = istTableSet->GetTable();
    mResXIst1 = sqrt(istHitError->coeff[0]);
    mResZIst1 = sqrt(istHitError->coeff[3]);
