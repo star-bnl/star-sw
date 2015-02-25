@@ -1,35 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstFastSimMaker.cxx,v 1.1 2015/02/25 20:03:38 smirnovd Exp $
-*
-* Author: Yaping Wang, August 2012
-****************************************************************************
-* Description: 
-* See header file.
-****************************************************************************
-*
-* $Log: StIstFastSimMaker.cxx,v $
-* Revision 1.1  2015/02/25 20:03:38  smirnovd
-* New simulation maker for IST
-*
-* Revision 1.6  2014/08/06 18:56:52  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.5  2014/08/05 03:28:42  ypwang
-* buildIdealGeom() added to switch between ideal VMC geometry or DB geometry, Db geometry was built by default
-*
-* Revision 1.4  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstFastSimMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 16:25:30 Yaping
-* Initial version
-****************************************************************************/
+/* $Id: StIstFastSimMaker.cxx,v 1.2 2015/02/25 20:20:00 smirnovd Exp $ */
 
 #include "Stiostream.h"
 #include "StIstFastSimMaker.h"
@@ -239,3 +208,31 @@ Int_t StIstFastSimMaker::Finish()
 {
   return kStOk;
 }
+
+/***************************************************************************
+*
+* $Log: StIstFastSimMaker.cxx,v $
+* Revision 1.2  2015/02/25 20:20:00  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.7  2014/10/13 22:21:56  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.6  2014/08/06 18:56:52  ypwang
+* minor update due to coding style update of the StIstDb method
+*
+* Revision 1.5  2014/08/05 03:28:42  ypwang
+* buildIdealGeom() added to switch between ideal VMC geometry or DB geometry, Db geometry was built by default
+*
+* Revision 1.4  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstFastSimMaker.cxx,v 1.0
+* Revision 1.0 2013/11/04 16:25:30 Yaping
+* Initial version
+****************************************************************************/
