@@ -1,33 +1,22 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.20 2015/02/25 20:43:25 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.21 2015/02/25 20:44:11 smirnovd Exp $ */
 
-#include "Stiostream.h"
-#include "StIstFastSimMaker.h"
-#include "StHit.h"
-#include "StEventTypes.h"
-#include "StEvent.h"
+#include "TGeoManager.h"
+#include "TDataSet.h"
+
+#include "StIstFastSimMaker/StIstFastSimMaker.h"
+#include "StEvent/StEvent.h"
 #include "StEvent/StEnumerations.h"
-#include "StMcEvent.hh"
+#include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcHit.hh"
-#include "StMcIstHit.hh"
-#include "StRoot/StIstUtil/StIstConsts.h"
-#include "StIstHit.h"
-#include "StIstHitCollection.h"
+#include "StMcEvent/StMcIstHit.hh"
+#include "StIstUtil/StIstConsts.h"
+#include "StEvent/StIstHit.h"
+#include "StEvent/StIstHitCollection.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StMcEvent/StMcIstHit.hh"
 #include "StMcEvent/StMcIstHitCollection.hh"
-#include "StMcEventTypes.hh"
-
-#include <stdio.h>
 #include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
-#include <vector>
-#include <exception>
-#include <stdexcept>
-#include "tables/St_g2t_ist_hit_Table.h"
 #include "tables/St_HitError_Table.h"
-#include "TGeoManager.h"
-#include "TGeoMatrix.h"
-#include "TDataSet.h"
 #include "StarClassLibrary/StRandom.hh"
 
 ClassImp(StIstFastSimMaker)
@@ -135,7 +124,6 @@ Int_t StIstFastSimMaker::Make()
    }
 
    //new simulator for new 1-layer design
-   Float_t smearedX = 0., smearedZ = 0.;
 
    LOG_INFO << "ist MC hit collection found" << endm;
    Int_t nIsthits = istMcHitCol->numberOfHits();
@@ -175,11 +163,9 @@ Int_t StIstFastSimMaker::Make()
 
          if (mSmear) { // smearing on
             LOG_DEBUG << "Smearing start... " << endm;
-            smearedX = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
-            smearedZ = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
+            localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
+            localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
 
-            localIstHitPos[0] = smearedX;
-            localIstHitPos[2] = smearedZ;
             LOG_DEBUG << Form("Smearing done...") << endm;
          }
          else { //smearing off

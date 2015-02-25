@@ -1,10 +1,9 @@
-/* $Id: StIstFastSimMaker.h,v 1.12 2015/02/25 20:43:21 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.13 2015/02/25 20:44:11 smirnovd Exp $ */
 
-#ifndef STAR_StIstFastSimMaker
-#define STAR_StIstFastSimMaker
-#ifndef StMaker_H
+#ifndef StIstFastSimMaker_h
+#define StIstFastSimMaker_h
+
 #include "StMaker.h"
-#endif
 
 class StRandom;
 class StIstDb;
@@ -36,7 +35,7 @@ public:
    virtual void  Clear(Option_t *option="");
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.12 2015/02/25 20:43:21 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.13 2015/02/25 20:44:11 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
