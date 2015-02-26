@@ -7,7 +7,7 @@
  * algorithm. Also, removed a lot of code which was unnecessary,
  * and updated naming conventions for clearer reading.
  *
- * Most recent update: Feb 23, 2015
+ * Most recent update: Feb 25, 2015
  */
 
 #include <iostream>
@@ -29,41 +29,17 @@ using namespace std;
 void electron_drawfits(const char* infile="CombinedElectrons.root", const char* mipGainFilename="mip.gains", const char* absoluteGainFilename="electron.gains", 
 		       const char* psName="electron.ps", const char* ffile="electron.fits")
 {
-  //**********************************************//
-  //Load Libraries                               //
-  //**********************************************//
-  gROOT->Macro("LoadLogger.C");
-  gROOT->Macro("loadMuDst.C");
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDaqLib");
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("St_db_Maker");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StMcEvent");
-  gSystem->Load("StMcEventMaker");//***
-  gSystem->Load("StEmcSimulatorMaker");//***
-  gSystem->Load("StEmcADCtoEMaker");
-  gSystem->Load("StEpcMaker");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("StEEmcUtil");
-  gSystem->Load("StAssociationMaker");
-  gSystem->Load("StEmcTriggerMaker");
-  gSystem->Load("StTriggerUtilities");
-  gSystem->Load("StEmcOfflineCalibrationMaker");
-
   cout << "Input File: " << infile << endl;
   cout << "Plots File: " << psName << endl;
+  
+  // Load library and set up decoder & geometry
+  gROOT->Macro("loadMuDst.C");
+  StEmcDecoder *mDecoder = new StEmcDecoder();
+  StEmcGeom *mEmcGeom = StEmcGeom::instance("bemc");
 
   //**********************************************//
   //Initialization                                //
   //**********************************************//
-  const char* dbDate="2012-01-01 00:11:00";
-  StBemcTablesWriter *bemctables = new StBemcTablesWriter();
-  bemctables->loadTables(dbDate,"sim");
-  StEmcDecoder* mDecoder = bemctables->getDecoder();
-  StEmcGeom *mEmcGeom = StEmcGeom::instance("bemc");
-
   const Int_t nTowers = 4800;
   const Int_t nRings = 40;
   const Int_t nCrates = 30;
@@ -124,13 +100,11 @@ void electron_drawfits(const char* infile="CombinedElectrons.root", const char* 
       crateslice_histo[iCrate][iRing]->SetTitle("");
     }    
   }
-  
+
   //global graphics functions
-  //gStyle->SetOptStat("ouen");
   gStyle->SetOptFit(111);
   gStyle->SetCanvasColor(10);
   gStyle->SetCanvasBorderMode(0);
-  //gStyle->SetOptTitle(0);
   gStyle->SetPalette(1);
   gStyle->SetStatColor(0);
   gStyle->SetOptDate(0);
@@ -287,4 +261,7 @@ void electron_drawfits(const char* infile="CombinedElectrons.root", const char* 
 
   ps->Close();
 
+  // Delete pointers to decoder & geometry
+  if (mDecoder) delete mDecoder;
+  if (mEmcGeom) delete mEmcGeom;
 }
