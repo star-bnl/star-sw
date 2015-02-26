@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h>
 
-void fms_db_detectorposition(char* opt, char* dataspec) {
+void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
   // that's begin time for validity range for WRITING TO DB 
   // your data will be available from storeTime till 2037
   TString data(dataspec);
@@ -15,8 +15,10 @@ void fms_db_detectorposition(char* opt, char* dataspec) {
 	TString storeTime = "2009-01-16 00:00:00";
       else std::cout<<"Invalid year range"<<std::endl;
 
+  TString storeTime = "2014-12-20 00:00:00";
   // this is data and time for READING FROM DB
-  int readDate = 20091005;
+  //int readDate = 20140202;
+  int readDate = 20141220;
   int readTime = 0;
 
   TString option(opt);
@@ -103,7 +105,7 @@ void fms_db_detectorposition(char* opt, char* dataspec) {
       std::cout << "Reading fmsDetectorPosition table\n";
       fmsDetectorPosition_st *pptable = dbppmap->GetTable();
       for(int i=0; i<MAX; i++)
-	printf("%5d%8.1f%6.1%5.1f%6.3f%6.3f\n",pptable[i].detectorId,pptable[i].zoffset,pptable[i].xoffset,
+	printf("%5d%8.1f%6.1f%5.1f%6.3f%6.3f\n",pptable[i].detectorId,pptable[i].zoffset,pptable[i].xoffset,
 	       pptable[i].yoffset,pptable[i].xwidth,pptable[i].ywidth);
       memcpy(detposition,pptable,sizeof(detposition));
     }
@@ -131,6 +133,7 @@ void fms_db_detectorposition(char* opt, char* dataspec) {
     //putenv("DB_ACCESS_MODE=write");
     //char* env = getenv("DB_ACCESS_MODE");
     //cout <<  "Setting DB_ACCESS_MODE " << env << endl;
+    cout << "DB_ACCESS_MODE="<<gSystem->Getenv("DB_ACCESS_MODE")<<endl;
     StDbManager* mgr = StDbManager::Instance();
     StDbConfigNode* node = mgr->initConfig("Geometry_fms");
     StDbTable* table = node->addDbTable("fmsDetectorPosition");

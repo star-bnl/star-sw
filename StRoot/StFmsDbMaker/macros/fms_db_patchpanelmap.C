@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fms_db_patchpanelmap(char* opt) {
+void fms_db_patchpanelmap(char* opt = "readdb writetext") {
 
   // that's begin time for validity range for WRITING DB
   // your data will be available from storeTime till 
@@ -9,7 +9,7 @@ void fms_db_patchpanelmap(char* opt) {
   TString storeTime = "2007-11-09 00:00:01";
 
   // that's time for READING DB  /
-  int date = 20080301;
+  int date = 20141220;
   int time = 0;
  
   TString option(opt);
