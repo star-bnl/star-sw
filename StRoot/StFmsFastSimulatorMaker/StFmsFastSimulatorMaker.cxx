@@ -1,20 +1,22 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.2 2014/05/06 16:05:56 jeromel Exp $
-//
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.3 2015/02/26 23:53:04 yuxip Exp $                                            
+//                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
-// Revision 1.2  2014/05/06 16:05:56  jeromel
-// Adjust for include - there is no need to specify the path
-//
-// Revision 1.1  2014/05/06 16:02:04  jeromel
-// First version of StFmsFastSimulatorMaker deliverred upon review
-//
-//
+// Revision 1.3  2015/02/26 23:53:04  yuxip
+// new update from Akio
+//                                                                               
+// Revision 1.2  2014/05/06 16:05:56  jeromel                                                                          
+// Adjust for include - there is no need to specify the path                                                           
+//                                                                                                                     
+// Revision 1.1  2014/05/06 16:02:04  jeromel                                                                          
+// First version of StFmsFastSimulatorMaker deliverred upon review                                                     
+//                                                                                                                     
 /**
  \file StFmsFastSimulatorMaker.cxx
        Implementation of StFmsFastSimulatorMaker, the FMS fast simulator
  \author Pibero Djawotho <pibero@tamu.edu>
  \date 4 Jan 2011
  */
-#include "StFmsFastSimulatorMaker.h"
+#include "StFmsFastSimulatorMaker/StFmsFastSimulatorMaker.h"
 
 #include <algorithm>  // For std::fill(), std::max(), std::min()
 
@@ -26,10 +28,11 @@
 #include "tables/St_g2t_emc_hit_Table.h"
 
 /* Constructor. */
-StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : StMaker(name) { }
+StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : StMaker(name),mFpsNPhotonPerMIP(50) { }
 
 /* Process one event. */
 Int_t StFmsFastSimulatorMaker::Make() {
+  printf("StFmsFastSimulatorMaker::Make\n");
   // Check for the FMS database maker, bail out if it can't be located.
   if (!GetMaker("fmsDb")) {
     LOG_ERROR << "No StFmsDbMaker. StFmsDbMaker library not loaded?" << endm;
@@ -37,66 +40,112 @@ Int_t StFmsFastSimulatorMaker::Make() {
   }  // if
   // Get the existing StEvent, or add one if it doesn't exist.
   StEvent* event = static_cast<StEvent*>(GetDataSet("StEvent"));
-  if (!event) {
+  if (!event) {        
     event = new StEvent;
     AddData(event);
+    printf("Creating StEvent\n");
   }  // if
   // Add an FMS collection to the event if one does not already exist.
   if (!event->fmsCollection()) {
     event->setFmsCollection(new StFmsCollection);
+    printf("Creating StFmsCollection\n");
   }  // if
   // Digitize GEANT FPD/FMS hits
   fillStEvent(event);
-  printStEventSummary(event);
+  if(Debug()) printStEventSummary(event);
   return kStOk;
 }
 
 /* Fill an event with StFmsHits. */
 void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
+  // Existence of StFmsDbMaker was already checked in Make()
+  // so we don't confirm the pointer again here.
+  // Decode detector information from hit:
+  StFmsDbMaker* dbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
+  StFmsCollection * fmscollection = event->fmsCollection();
+
+  //table to keep pointer to hit for each det & channel
+  static const int NDET=16, NCH=600;
+  StFmsHit* map[NDET][NCH];
+  memset(map,0,sizeof(map));
+
   // Read the g2t table
-  St_g2t_emc_hit* hitTable =
-      static_cast<St_g2t_emc_hit*>(GetDataSet("g2t_fpd_hit"));
+  St_g2t_emc_hit* hitTable = static_cast<St_g2t_emc_hit*>(GetDataSet("g2t_fpd_hit"));
   if (!hitTable) {
     LOG_INFO << "g2t_fpd_hit table is empty" << endm;
     return;  // Nothing to do
   }  // if
-  // Loop over FPD hits
-  const Int_t nHits = hitTable->GetNRows();
-  // Point to the first hit in the table
-  const g2t_emc_hit_st* hitPointer = hitTable->GetTable();
-  // Loop through hits, incrementing pointer each time
-  for (Int_t i(0); i < nHits; ++i, ++hitPointer) {
-    if (hitPointer) {
-      event->fmsCollection()->addHit(makeFmsHit(*hitPointer));
-    }  // if
-  }  // for
-}
 
-/* Create and set all values in an StFmsHit from a g2t_emc_hit_st. */
-StFmsHit* StFmsFastSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) {
-  // Existence of StFmsDbMaker was already checked in Make()
-  // so we don't confirm the pointer again here.
-  StFmsDbMaker* dbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
-  // Decode detector information from hit:
-  const Int_t channel = hit.volume_id % 1000;
-  const Int_t detectorId = getDetectorId(hit);
-  // Get gain and correction from the database.
-  Float_t gain = dbMaker->getGain(detectorId, channel);
-  Float_t gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
-  // Check for ADC values outside the allowed range and cap.
-  Float_t energy = hit.de;
-  Int_t adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);
-  adc = std::max(adc, 0);  // Prevent negative ADC
-  adc = std::min(adc, 4095);  // Cap maximum ADC = 4,095
-  // Recalculate energy accounting for ADC range
-  energy = adc * gain * gainCorrection;
-  // Determine the QT crate, slot and channel for this detector and channel.
-  Int_t qtCrate, qtSlot, qtChannel;
-  dbMaker->getMap(detectorId, channel, &qtCrate, &qtSlot, &qtChannel);
-  // Create the hit.
-  Int_t tdc = 0;
-  return new StFmsHit(detectorId, channel, qtCrate, qtSlot, qtChannel, adc,
-                      tdc, energy);
+  // Loop over FPD hits and accumurate hits
+  const Int_t nHits = hitTable->GetNRows();
+  LOG_DEBUG << "g2t_fpd_hit table has " << nHits << " hits" << endm;
+  const g2t_emc_hit_st* hit = hitTable->GetTable();
+  StPtrVecFmsHit hits; //temp storage for hits
+  for (Int_t i=0; i < nHits; ++i, ++hit) {
+    if (hit) {
+      const Int_t detectorId = getDetectorId(*hit);
+      Int_t channel;
+      if(detectorId!=kFPS) channel=hit->volume_id % 1000;
+      else                 channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
+      if(detectorId<0 || detectorId>=NDET || channel<0 || channel>=NCH){
+	printf("det or ch out of range det=%d ch=%d",detectorId,channel);
+	continue;
+      }
+      Float_t energy = hit->de;
+      StFmsHit* fmshit=0;
+      if(map[detectorId][channel]==0){ // New hit
+	Int_t qtCrate, qtSlot, qtChannel, adc=0, tdc=0;
+	if(detectorId!=kFPS){
+	  dbMaker->getMap(detectorId, channel, &qtCrate, &qtSlot, &qtChannel);
+	}else{ //FPS
+	  qtCrate=6;
+	  dbMaker->fpsQTMap(channel,&qtSlot,&qtChannel);
+	}
+	fmshit = new StFmsHit(detectorId, channel, qtCrate, qtSlot, qtChannel, adc, tdc, energy);
+	hits.push_back(fmshit);
+	map[detectorId][channel]=fmshit;
+	//printf("Det=%2d Ch=%3d QTCrt=%2d Slot=%2d ch=%2d ADC=%4d TDC=%2d E=%f\n",detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
+      }else{ // Adding energy to old hit
+	fmshit = map[detectorId][channel];
+	fmshit->setEnergy(fmshit->energy() + energy);
+      }
+    }
+  }
+  int nfmshit=hits.size();
+
+  // Loop over hits and digitize
+  for(int i=0; i<nfmshit; i++){
+    const Int_t detectorId = hits[i]->detectorId();
+    const Int_t channel = hits[i]->channel();
+    Float_t energy=hits[i]->energy();
+    Float_t gain, gainCorrection;
+    int adc;
+    if(detectorId!=kFPS){
+      // Get gain and correction from the database.
+      gain = dbMaker->getGain(detectorId, channel);
+      gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
+    }else{ //FPS      
+      gain = 1.0/dbMaker->fpsGain(channel);    //fpsGain gives ADCch for MIP peak      
+      gainCorrection=0.002;                    //2MeV per MIP      
+    }
+    // Digitize                                                                                                                                                 
+    adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);    
+    // Check for ADC values outside the allowed range and cap.
+    adc = std::max(adc, 0);  // Prevent negative ADC
+    adc = std::min(adc, 4095);  // Cap maximum ADC = 4,095
+    // Recalculate energy accounting for ADC range
+    Float_t digi_energy = adc * gain * gainCorrection;
+    if(adc>0){ //store only if significant energy deposit to make adc>0
+      hits[i]->setAdc(adc);
+      hits[i]->setEnergy(digi_energy);
+      fmscollection->addHit(hits[i]);
+      if(Debug())
+	printf("Det=%2d Ch=%3d E=%f gain=%f ADC=%4d digiE=%f\n",detectorId,channel,energy,gain,adc,digi_energy);
+    }else{
+      delete hits[i];
+    }
+  }
+  LOG_INFO << Form("Found %d g2t hits in %d cells, created %d hits with ADC>0\n",nHits,nfmshit,fmscollection->numberOfHits()) <<endm;
 }
 
 /*
@@ -131,6 +180,8 @@ StFmsHit* StFmsFastSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) {
  http://online.star.bnl.gov/dbExplorer/# --> Geometry/fms/ChannelGeometry
  Look into pams/sim/g2t/g2t_volume_id.g
  and search for FLGR (small pbg) or FLXF (large pbg).
+ For FPS, there is no entry in fms/ChannelGeometry.
+ Just assign detector Id=15 here.
 
 Email from Akio describing decoding of the g2t volume ID, 16th Jan 2014:
 
@@ -145,44 +196,48 @@ Email from Akio describing decoding of the g2t volume ID, 16th Jan 2014:
        1=north large, 2=south large
        3=north small, 4=south small ch: channel#
 
- Once we add preshower, it will become
- id = det*100000 + ew*10000+nstb*1000+ch
+ For FPS where id>100000:
+   id = 100000+ew*10000+quad*1000+layr*100+slat
  where
- det: 0=fpd/fms, 1 for PS
- ch:  will be devided into layer & ch for PS
- so fms/fpd volume id should NOT change at all.
- */
+   ew = always 1 for west
+   quad = 1 to 4
+   layr = 1 to 3
+   slat = 1 to 21
+ Fms/fpd volume id does NOT change at all. 
+*/
+
 Int_t StFmsFastSimulatorMaker::getDetectorId(const g2t_emc_hit_st& hit) const {
+  enum { kFpd = 1, kFms = 2, kNorth = 0, kSouth = 1 };
   const Int_t volumeId = hit.volume_id;
   // Decode volume ID into detector type, fpd/fms and north/south locations
+  const Int_t isFPS    = volumeId / 100000;
   const Int_t fpdOrFms = (volumeId % 100000) / 10000;
-  const Int_t module = (volumeId % 10000) / 1000;
-  // FPD/FMS and north/south to determine the detector ID
-  enum { kFpd = 1, kFms = 2, kNorth = 0, kSouth = 1 };
+  const Int_t module   = (volumeId % 10000) / 1000;
+  if(isFPS) return kFPS;
   switch (fpdOrFms) {
-    case kFpd:
-      switch (module) {
-        case 1: return kFpdNorth;  // north
-        case 2: return kFpdSouth;  // south
-        case 5: return kFpdNorthPreshower;  // preshower north
-        case 6: return kFpdSouthPreshower;  // preshower south
-      }  // switch
-      break;
-    case kFms:
-      switch (module) {
-        case 1: return kFmsNorthLarge;  // north large cells
-        case 2: return kFmsSouthLarge;  // south large cells
-        case 3: return kFmsNorthSmall;  // north small cells
-        case 4: return kFmsSouthSmall;  // south small cells
-      }  // switch
-      break;
+  case kFpd:
+    switch (module) {
+    case 1: return kFpdNorth;  // north
+    case 2: return kFpdSouth;  // south
+    case 5: return kFpdNorthPreshower;  // preshower north
+    case 6: return kFpdSouthPreshower;  // preshower south
+    }  // switch
+    break;
+  case kFms:
+    switch (module) {
+    case 1: return kFmsNorthLarge;  // north large cells
+    case 2: return kFmsSouthLarge;  // south large cells
+    case 3: return kFmsNorthSmall;  // north small cells
+    case 4: return kFmsSouthSmall;  // south small cells
+    }  // switch
+    break;
   }  // switch
   return kFmsInvalidDetectorId;
 }
 
 /* Dump hit information to LOG_INFO. */
 void StFmsFastSimulatorMaker::printStEventSummary(const StEvent* event) {
-  const Int_t NDETECTORS = 14;
+  const Int_t NDETECTORS = 15;
   const Char_t* detectorNames[NDETECTORS] = {
       "FPD-North ",
       "FPD-South",
@@ -197,7 +252,8 @@ void StFmsFastSimulatorMaker::printStEventSummary(const StEvent* event) {
       "FMS-North-Small",
       "FMS-South-Small",
       "FHC-North",
-      "FHC-South"
+      "FHC-South",
+      "FMS-PreShower"
   };
   // Array of total hits per subdetector, initialised to all zeros
   Int_t nhits[NDETECTORS];
@@ -209,16 +265,15 @@ void StFmsFastSimulatorMaker::printStEventSummary(const StEvent* event) {
   const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
   for (size_t i = 0; i < hits.size(); ++i) {
     const StFmsHit* hit = hits[i];
-    if (Debug()) {
-      hit->print();
-    }  // if
     ++nhits[hit->detectorId()];
     detectorEnergy[hit->detectorId()] += hit->energy();
+    if(Debug()>1) hit->print();
   }  // for
   // Print detectors summary
   LOG_INFO << "ID\tNAME\t\tNHITS\tENERGY" << endm;
   for (Int_t detectorId = 0; detectorId < NDETECTORS; ++detectorId) {
-    LOG_INFO << detectorId << '\t' << detectorNames[detectorId] << '\t'
-             << nhits[detectorId] << '\t' << detectorEnergy[detectorId] << endm;
+    if(nhits[detectorId]>0)
+      LOG_INFO << detectorId << '\t' << detectorNames[detectorId] << '\t'
+	       << nhits[detectorId] << '\t' << detectorEnergy[detectorId] << endm;
   }  // for
 }

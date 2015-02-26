@@ -1,11 +1,8 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.2 2014/08/06 11:43:15 jeromel Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
-// Revision 1.2  2014/08/06 11:43:15  jeromel
-// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
-//
-// Revision 1.1  2014/05/06 16:02:04  jeromel
-// First version of StFmsFastSimulatorMaker deliverred upon review
+// Revision 1.3  2015/02/26 23:53:04  yuxip
+// new update from Akio
 //
 /**
  \file StFmsFastSimulatorMaker.h
@@ -59,12 +56,17 @@ class StFmsFastSimulatorMaker : public StMaker {
   explicit StFmsFastSimulatorMaker(const Char_t* name = "fmsSim");
   // Note we the use default copy constructor and assignment operator produced
   // by the compiler as we do not allocate any resources on the heap.
+
   /**
    Populate StEvent with FMS g2t Geant hits for the current event.
-
    Returns kStOk in case of success, kStError otherwise.
    */
   Int_t Make();
+  Int_t Clear(){};
+
+  // Setting average # of photon per MIP for FPS
+  void  setFpsNPhotonPerMIP(float v) {mFpsNPhotonPerMIP=v;}
+
   /**
    Standard overload of StMaker::GetCVS()
    */
@@ -90,37 +92,36 @@ class StFmsFastSimulatorMaker : public StMaker {
     kFmsSouthLarge = 9,
     kFmsNorthSmall = 10,
     kFmsSouthSmall = 11,
+    kFPS = 14,
     kFmsInvalidDetectorId = -1
   };
+
   /**
-   Returns the detector ID of an FPD or FMS detector subsystem.
-   
+   Returns the detector ID of an FPD or FMS detector subsystem.   
    Detector ID numbers are those used by StFmsChannelGeometry (or see
    StFmsDetectorID in this class).
    Returns kFmsInvalidDetectorId if the detector ID cannot be determined,
    or corresponds to an unsupported subdetector.
    */
   Int_t getDetectorId(const g2t_emc_hit_st& hit) const;
-  /**
-   Constructs and returns an StFmsHit from a g2t_emc_hit_st.
 
-   The StFmsHit is allocated via new and so needs to be deleted by the
-   user, or passed to a container that takes ownership of it.
-   */
-  StFmsHit* makeFmsHit(const g2t_emc_hit_st& hit);
   /**
    Fills the StFmsCollection of StEvent with hits from an StMcEvent.
    */
   void fillStEvent(StEvent* event);
+
   /**
    Prints the total number of hits and energy in each detector subsystem.
    */
   void printStEventSummary(const StEvent* event);
+
+  Float_t mFpsNPhotonPerMIP;
+  
   ClassDef(StFmsFastSimulatorMaker, 0)
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.2 2014/08/06 11:43:15 jeromel Exp $ built " __DATE__ " " __TIME__;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $ built "__DATE__" "__TIME__;
   return cvs;
 }
 
