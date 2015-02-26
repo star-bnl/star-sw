@@ -1,0 +1,34 @@
+#!/bin/csh
+
+set day=$1
+set startrun={$1}000
+set endrun={$1}999
+
+set dbserver=onldb2.starp.bnl.gov
+set dbport=3501
+
+if ( ! -e $day ) then
+   mkdir $day
+endif
+
+set file=$day/run.txt
+if ( -e $file ) then
+   \rm $file
+endif
+echo Creating $file for $startrun to $endrun
+mysql --skip-column-names -h $dbserver --port=$dbport > $file << END1
+connect RunLog;
+select runNumber,beginTime,startRunTime,endRunTime,glbSetupName,daqSetupName from runDescriptor where runNumber>=$startrun and runNumber<=$endrun;
+END1
+
+set file=$day/fpsrun.txt
+if ( -e $file ) then
+   \rm $file
+endif
+echo Creating $file for $startrun to $endrun
+mysql --skip-column-names -h $dbserver --port=$dbport > $file <<END2
+connect RunLog;
+select runNumber from detectorSet where runNumber>=$startrun and runNumber<=$endrun and detectorID=28;
+END2
+
+# mysql -h onldb.starp.bnl.gov --port=3501
