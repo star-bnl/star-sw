@@ -20,8 +20,6 @@ using namespace std;
 #include "tables/St_emcTriggerStatus_Table.h"
 #include "tables/St_emcTriggerPed_Table.h"
 #include "tables/St_emcTriggerLUT_Table.h"
-#include "tables/St_emcStatus_Table.h"
-#include "tables/St_emcPed_Table.h"
 
 #include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcUtil/database/StBemcTablesWriter.h"
@@ -29,9 +27,10 @@ using namespace std;
 char BITMASK[15][130];
 int PATCH[300], DSM[300], BIT[300], PA[300], HT[300], TOWER[30][160], PED[30][160], PEDRMS[30][160], BITCONV[30][10];
 int FORMULATAG[30][10],FORMULAPARAMETER[30][10][6];
+int PED4[4800];
 int PEDSHIFT;
 
-ClassImp(StOnlineTriggerMonitoring)
+ClassImp(StOnlineTriggerMonitoring);
 
 int unpackbits(char *data, int nbits, int index)
 {
@@ -79,8 +78,6 @@ void loadTriggerMasks(char* file,int start)
       TString result;
       makeString((unsigned char*) pointer,16, result);
       sprintf(BITMASK[dsm-1],"%s",result.Data());
-      //for(int i=0;i<16;i++) cout <<hex<<(unsigned int)mask[i]<<" "; cout <<dec<<endl;
-      //cout << "<" << result << ">" << endl;
     }
   cout <<"Decoding the data "<<endl;
   for(int patch = 1; patch<=150;patch++)
@@ -91,32 +88,12 @@ void loadTriggerMasks(char* file,int start)
       int pa = unpackbits((char*)BITMASK[dsm-1],6,128-bit-12);
       if(ht==63) HT[patch-1+start] = 1; else HT[patch-1+start] = 0;
       if(pa==63) PA[patch-1+start] = 1; else PA[patch-1+start] = 0;
-		
-      //cout <<endl; 
-      //cout <<"Patch = "<<patch-1+start<<" DSM = "<<dsm<<"  BIT = "<<bit
-      //     <<"  htv = "<<ht<<"  pav = "<<pa 
-      //     <<"  HT = "<<HT[patch-1+start]<<"  PA = "<<PA[patch-1+start]<<endl;
-      //cout <<"00000000011111111112222222222333333333344444444445555555555666666666677777777778888888888999999999900000000001111111111222222222\n";
-      //cout <<BITMASK[dsm-1]<<endl;
     }
   fclose(W);
 }
 
-void StOnlineTriggerMonitoring::saveTrigger(
-					    const Char_t *TS
-					    , Bool_t status
-					    , Bool_t pedestal
-					    , Bool_t lut
-					    , Bool_t statusOffline
-					    , Bool_t pedestalOffline
-					    , Bool_t saveDB
-					    , Bool_t saveTables
-					    , const Char_t *tables_dir
-					    , const Char_t *saved_dir
-					    , const Char_t *bemcStatusCopy
-					    , const Char_t *bceTable
-					    , const Char_t *bcwTable
-					    ) {
+void StOnlineTriggerMonitoring::saveTrigger(const Char_t *TS, Bool_t status, Bool_t pedestal, Bool_t lut, Bool_t saveDB, Bool_t saveTables, const Char_t *tables_dir, const Char_t *saved_dir, const Char_t *bemcStatusCopy, const Char_t *bceTable, const Char_t *bcwTable) 
+{
   cout << "tables dir     = " << tables_dir << endl;
   cout << "saved dir      = " << saved_dir << endl;
   cout << "bemcStatusCopy = " << bemcStatusCopy << endl;
@@ -127,10 +104,14 @@ void StOnlineTriggerMonitoring::saveTrigger(
 	
   cout << "Saving trigger tables in offline DB for TS = "<< TS <<endl;
 	
+  cout << "Creating StEmcDecoder..." << endl;
+  StEmcDecoder *decoder = new StEmcDecoder();
+  cout << "Decoder created " << decoder << endl;
+
   // trigger decoding map
   // load the files bcw_table.txt and bce_table.txt
   // used in John Nelson's conv_lut program
-	
+
   ifstream inw(bcwTable);
   for(int i=0;i<150;i++) {
     inw >> PATCH[i]>>DSM[i]>>BIT[i];
@@ -173,168 +154,164 @@ void StOnlineTriggerMonitoring::saveTrigger(
       sprintf(str,"%02x",crate);
       FILENAME+=str;
       FILENAME+=".dat";
-  
+      
       long id,flag,mod;
       Long64_t size;
-      if(gSystem->GetPathInfo(FILENAME.Data(),&id,&size,&flag,&mod)==0)
-	{
-	  cout <<FILENAME.Data()<<"  is Ok\n";
-	  ifstream in(FILENAME.Data());
-	  Char_t lineData[300];
-	  int towerid,ped4val;
-	  float ped, rms;
-	  for(int i=0;i<160;i++) 
-	    {
-	      in.getline(lineData,300);
-	      Int_t nColumns = sscanf(lineData,"%d %f %f %d",&towerid,&ped,&rms,&ped4val);
-	      if (nColumns == 3)
-		ped4val = 0;
-	      PED[crate-1][towerid] = (int)(ped*100);
-	      PEDRMS[crate-1][towerid] = (int)(rms*100);
-	    }
-	  in.close();
-	} else {
+      if(gSystem->GetPathInfo(FILENAME.Data(),&id,&size,&flag,&mod)==0){
+	cout <<FILENAME.Data()<<"  is Ok\n";
+	ifstream in(FILENAME.Data());
+	Char_t lineData[300];
+	int towerid,ped4val;
+	float ped, rms;
+	for(int i=0;i<160;i++){
+	  in.getline(lineData,300);
+	  Int_t nColumns = sscanf(lineData,"%d %f %f %d",&towerid,&ped,&rms,&ped4val);
+	  if (nColumns == 3)
+	    ped4val = 0;
+	  Int_t towerSoftId = 0;
+	  if (decoder && decoder->GetTowerIdFromCrate(crate, towerid, towerSoftId))
+	    PED4[towerSoftId-1]=ped4val;
+	  PED[crate-1][towerid] = (int)(ped*100);
+	  PEDRMS[crate-1][towerid] = (int)(rms*100);
+	}
+	in.close();
+      } else {
 	for(int i=0;i<160;i++) {
 	  PED[crate-1][i]=0;
 	  PEDRMS[crate-1][i]=0;
+	  Int_t towSoftId=0;
+	  if (decoder && decoder->GetTowerIdFromCrate(crate, i, towSoftId))
+	    PED4[towSoftId-1]=0;
 	}
       }
     }
-	
+  
   // reading BemcConfig.dat
   FILENAME = saved_dir; FILENAME+="/BemcConfig.dat";
   ifstream bemcConf(FILENAME.Data());
   PEDSHIFT = 0;
   char line[4096];
-  while(!bemcConf.eof())
-    { 
-      bemcConf.getline(line,4096);
-      //cout << line << endl;
-      TString L = line;
-      if(L.Index("TriggerPedestalShift")>=0)
-	{ 
-	  TString b = L(L.Index("TriggerPedestalShift")+21,L.Length());
-	  if(b.BeginsWith("0x")) PEDSHIFT = strtol(b.Data(),NULL,16);
-	  else PEDSHIFT = atoi(b.Data());
-	  PEDSHIFT*=100;
-	}
+  while(!bemcConf.eof()){ 
+    bemcConf.getline(line,4096);
+    //cout << line << endl;
+    TString L = line;
+    if(L.Index("TriggerPedestalShift")>=0){ 
+      TString b = L(L.Index("TriggerPedestalShift")+21,L.Length());
+      if(b.BeginsWith("0x")) PEDSHIFT = strtol(b.Data(),NULL,16);
+      else PEDSHIFT = atoi(b.Data());
+      PEDSHIFT*=100;
     }
-	
-  // reading single tower masks and trigger bit conversion mode
-  for(int crate = 1;crate<=30;crate++)
-    {
-      FILENAME = saved_dir; FILENAME+= "/config_crate0x";
-      char str[10];
-      sprintf(str,"%02x",crate);
-      FILENAME+=str;
-      FILENAME+=".dat";
+  }
   
-      long id,flag,mod;
-      Long64_t size;
-      if(gSystem->GetPathInfo(FILENAME.Data(),&id,&size,&flag,&mod)==0)
-	{
-	  cout <<FILENAME.Data()<<"  is Ok\n";
-	  ifstream in(FILENAME.Data());
-	  char tmp[50];
-	  short bit6[2][5],mask[2][5],formula[2][5],par[2][5][6];
-	  in >> tmp; // nodeId
-	  in >> tmp; // rhic clock latency
-	  in >> tmp; // led latency
-	  in >> tmp; // led amplitude
-	  in >> tmp; // led mask 1
-	  in >> tmp; // led mask 2
-	  in >> tmp; // pulser delay
-	  in >> tmp; // pulser latency
-						
-	  for(int board = 1; board<=5;board++)
-	    {
-	      in >> tmp; // fifo latency
-	      in >> tmp; // calibration pulser amplitude
-	      in >> tmp; // calibration pulser mask 1
-				
-	      for(int patch = 0;patch<2;patch++)
-		{
-		  in >> tmp; // trigger mask 1;
-		  TString A1 = tmp;
-		  if(A1.BeginsWith("0x")) mask[patch][board-1] = strtol(A1.Data(),NULL,16);
-		  else mask[patch][board-1] = atoi(A1.Data());
-				
-		  in >> tmp; // formula tag 1
-		  TString A11 = tmp;
-		  if(A11.BeginsWith("0x")) formula[patch][board-1] = strtol(A11.Data(),NULL,16);
-		  else formula[patch][board-1] = atoi(A11.Data());
-					
-		  for(int f = 0;f<6;f++) // formula parameters
-		    {  
-		      in >> tmp;
-		      TString A12 = tmp;
-		      if(A12.BeginsWith("0x")) par[patch][board-1][f] = strtol(A12.Data(),NULL,16);
-		      else par[patch][board-1][f] = atoi(A12.Data());
-		    }
-					
-		  in >> tmp; // high tower 6 bits 4
-		  TString A = tmp;
-		  if(A.BeginsWith("0x")) bit6[patch][board-1] = strtol(A.Data(),NULL,16);
-		  else bit6[patch][board-1] = atoi(A.Data());
-		  //cout << "!!!!!! " << bit6[patch][board-1] << endl;
-		}
-	    }
-	  if (!in.eof()) {
-	    for(int board = 0; board<=5;board++) {
-	      in >> tmp; // inrun
-	      in >> tmp; // ht
-	      if (board >= 1) {
-		Bool_t boardHT = atoi(tmp);
-		if (!boardHT) {
-		  cout << "Board " << board << " HT peds not configured" << endl;
-		  // zero out pedestals
-		}
-	      }
-	      in >> tmp; // jp
-	      if (board >= 1) {
-		Bool_t boardJP = atoi(tmp);
-		if (!boardJP) {
-		  cout << "Board " << board << " LUT not configured" << endl;
-		  formula[0][board-1] = 0; // LUT formula = 0
-		  formula[1][board-1] = 0; // LUT formula = 0
-		  par[0][board-1][0] = 1; // LUT scale = 1
-		  par[1][board-1][0] = 1; // LUT scale = 1
-		  par[0][board-1][1] = 0; // LUT ped = 0
-		  par[1][board-1][1] = 0; // LUT ped = 0
-		  par[0][board-1][2] = 0; // LUT sigma = 0
-		  par[1][board-1][2] = 0; // LUT sigma = 0
-		  par[0][board-1][3] = 1; // LUT powerup = 0
-		  par[1][board-1][3] = 1; // LUT powerup = 0
-		  par[0][board-1][4] = 0; // LUT par4 = 0
-		  par[1][board-1][4] = 0; // LUT par4 = 0
-		  par[0][board-1][5] = 0; // LUT par5 = 0
-		  par[1][board-1][5] = 0; // LUT par5 = 0
-		}
-	      }
-	      in >> tmp; // checkconfig
-	      in >> tmp; // checkped
-	      in >> tmp; // checklut
+  // reading single tower masks and trigger bit conversion mode
+  for(int crate = 1;crate<=30;crate++){
+    FILENAME = saved_dir; FILENAME+= "/config_crate0x";
+    char str[10];
+    sprintf(str,"%02x",crate);
+    FILENAME+=str;
+    FILENAME+=".dat";
+    
+    long id,flag,mod;
+    Long64_t size;
+    if(gSystem->GetPathInfo(FILENAME.Data(),&id,&size,&flag,&mod)==0){
+      cout <<FILENAME.Data()<<"  is Ok\n";
+      ifstream in(FILENAME.Data());
+      char tmp[50];
+      short bit6[2][5],mask[2][5],formula[2][5],par[2][5][6];
+      in >> tmp; // nodeId
+      in >> tmp; // rhic clock latency
+      in >> tmp; // led latency
+      in >> tmp; // led amplitude
+      in >> tmp; // led mask 1
+      in >> tmp; // led mask 2
+      in >> tmp; // pulser delay
+      in >> tmp; // pulser latency
+      
+      for(int board = 1; board<=5;board++){
+	in >> tmp; // fifo latency
+	in >> tmp; // calibration pulser amplitude
+	in >> tmp; // calibration pulser mask 1
+	
+	for(int patch = 0;patch<2;patch++){
+	  in >> tmp; // trigger mask 1;
+	  TString A1 = tmp;
+	  if(A1.BeginsWith("0x")) mask[patch][board-1] = strtol(A1.Data(),NULL,16);
+	  else mask[patch][board-1] = atoi(A1.Data());
+	  
+	  in >> tmp; // formula tag 1
+	  TString A11 = tmp;
+	  if(A11.BeginsWith("0x")) formula[patch][board-1] = strtol(A11.Data(),NULL,16);
+	  else formula[patch][board-1] = atoi(A11.Data());
+	  
+	  for(int f = 0;f<6;f++){ // formula parameters  
+	    in >> tmp;
+	    TString A12 = tmp;
+	    if(A12.BeginsWith("0x")) par[patch][board-1][f] = strtol(A12.Data(),NULL,16);
+	    else par[patch][board-1][f] = atoi(A12.Data());
+	  }
+	  
+	  in >> tmp; // high tower 6 bits 4
+	  TString A = tmp;
+	  if(A.BeginsWith("0x")) bit6[patch][board-1] = strtol(A.Data(),NULL,16);
+	  else bit6[patch][board-1] = atoi(A.Data());
+	  //cout << "!!!!!! " << bit6[patch][board-1] << endl;
+	}
+      }
+      if (!in.eof()){
+	for(int board = 0; board<=5;board++){
+	  in >> tmp; // inrun
+	  in >> tmp; // ht
+	  if (board >= 1) {
+	    Bool_t boardHT = atoi(tmp);
+	    if (!boardHT) {
+	      cout << "Board " << board << " HT peds not configured" << endl;
+	      // zero out pedestals
 	    }
 	  }
-	  for(int i=0;i<160;i++)
-	    {
-	      int board = i/32+1;
-	      int channel = i%32;
-	      int patch = channel/16;
-	      int m = mask[patch][board-1];
-	      int bit = channel-16*patch;
-	      FORMULATAG[crate-1][i/16] = formula[patch][board-1];
-	      for(int p = 0;p<6;p++)
-		FORMULAPARAMETER[crate-1][i/16][p] = par[patch][board-1][p];
-	      BITCONV[crate-1][i/16] = bit6[patch][board-1];
-	      if( ((m>>bit) & 0x1)==1 ) TOWER[crate-1][i] = 1; else  TOWER[crate-1][i] = 0;
-	      if(TOWER[crate-1][i] == 0) cout <<"  Masked out channel "<<i<<" from crate "<<crate<<endl;
+	  in >> tmp; // jp
+	  if (board >= 1) {
+	    Bool_t boardJP = atoi(tmp);
+	    if (!boardJP) {
+	      cout << "Board " << board << " LUT not configured" << endl;
+	      formula[0][board-1] = 0; // LUT formula = 0
+	      formula[1][board-1] = 0; // LUT formula = 0
+	      par[0][board-1][0] = 1; // LUT scale = 1
+	      par[1][board-1][0] = 1; // LUT scale = 1
+	      par[0][board-1][1] = 0; // LUT ped = 0
+	      par[1][board-1][1] = 0; // LUT ped = 0
+	      par[0][board-1][2] = 0; // LUT sigma = 0
+	      par[1][board-1][2] = 0; // LUT sigma = 0
+	      par[0][board-1][3] = 1; // LUT powerup = 0
+	      par[1][board-1][3] = 1; // LUT powerup = 0
+	      par[0][board-1][4] = 0; // LUT par4 = 0
+	      par[1][board-1][4] = 0; // LUT par4 = 0
+	      par[0][board-1][5] = 0; // LUT par5 = 0
+	      par[1][board-1][5] = 0; // LUT par5 = 0
 	    }
-	  in.close();
+	  }
+	  in >> tmp; // checkconfig
+	  in >> tmp; // checkped
+	  in >> tmp; // checklut
 	}
-      else for(int i=0;i<160;i++) { BITCONV[crate-1][i/16]=0; TOWER[crate-1][i]=0;}
+      }
+      for(int i=0;i<160;i++){
+	int board = i/32+1;
+	int channel = i%32;
+	int patch = channel/16;
+	int m = mask[patch][board-1];
+	int bit = channel-16*patch;
+	FORMULATAG[crate-1][i/16] = formula[patch][board-1];
+	for(int p = 0;p<6;p++)
+	  FORMULAPARAMETER[crate-1][i/16][p] = par[patch][board-1][p];
+	BITCONV[crate-1][i/16] = bit6[patch][board-1];
+	if( ((m>>bit) & 0x1)==1 ) TOWER[crate-1][i] = 1; else  TOWER[crate-1][i] = 0;
+	if(TOWER[crate-1][i] == 0) cout <<"  Masked out channel "<<i<<" from crate "<<crate<<endl;
+      }
+      in.close();
     }
-          
+    else for(int i=0;i<160;i++) { BITCONV[crate-1][i/16]=0; TOWER[crate-1][i]=0;}
+  }
+  
   // create tables and save them to the database
   int first=-1;
   TString TSp = TS;
@@ -350,95 +327,91 @@ void StOnlineTriggerMonitoring::saveTrigger(
   timestamp+=":";
   timestamp+=TSp(first+14,2);
   cout <<"TS = "<<TS<<"  TimeStamp = "<<timestamp<<endl;
-
+  
   int towerData[4800][8];
   for (int i = 0;i < 4800;i++) {
     for (int j = 0;j < 8;j++) {
       towerData[i][j] = 0;
     }
   }
-  {
-    cout << "Start writing " << bemcStatusCopy << endl;
-    ofstream bemcStatusStream(bemcStatusCopy);
-    bemcStatusStream << "##################################################################################" << endl;
-    bemcStatusStream << "# This plain text file contains the complete BEMC trigger configuration" << endl;
-    bemcStatusStream << "# Generated by the online BEMC trigger monitoring program on " << gSystem->HostName() << ":" << gSystem->WorkingDirectory() << endl;
-    bemcStatusStream << "# Timestamp: " << timestamp << endl;
-
-    cout << "Creating StEmcDecoder..." << endl;
-    StEmcDecoder *decoder = new StEmcDecoder();
-    cout << "Decoder created " << decoder << endl;
-    
-    for(int crate = 1;crate <= 30;crate++) {
-      for(int tower = 0;tower < 160;tower++) {
-	int softId;
-	if (decoder && decoder->GetTowerIdFromCrate(crate, tower, softId)) {
-	  towerData[softId - 1][0] = TOWER[crate - 1][tower];
-	  towerData[softId - 1][3] = PED[crate - 1][tower];
-	  towerData[softId - 1][7] = PEDRMS[crate - 1][tower];
-	  towerData[softId - 1][4] = crate;
-	  towerData[softId - 1][5] = tower;
-	}
-	int triggerPatch;
-	if (decoder && decoder->GetTriggerPatchFromCrate(crate, tower, triggerPatch)) {
-	  towerData[softId - 1][6] = triggerPatch;
-	  towerData[softId - 1][1] = HT[triggerPatch];
-	  towerData[softId - 1][2] = PA[triggerPatch];
-	}
+  cout << "Start writing " << bemcStatusCopy << endl;
+  ofstream bemcStatusStream(bemcStatusCopy);
+  bemcStatusStream << "##################################################################################" << endl;
+  bemcStatusStream << "# This plain text file contains the complete BEMC trigger configuration" << endl;
+  bemcStatusStream << "# Generated by the online BEMC trigger monitoring program on " << gSystem->HostName() << ":" << gSystem->WorkingDirectory() << endl;
+  bemcStatusStream << "# Timestamp: " << timestamp << endl;
+  
+  // Use StEmcDecoder    
+  for(int crate = 1;crate <= 30;crate++) {
+    for(int tower = 0;tower < 160;tower++) {
+      int softId;
+      if (decoder && decoder->GetTowerIdFromCrate(crate, tower, softId)) {
+	towerData[softId - 1][0] = TOWER[crate - 1][tower];
+	towerData[softId - 1][3] = PED[crate - 1][tower];
+	towerData[softId - 1][7] = PEDRMS[crate - 1][tower];
+	towerData[softId - 1][4] = crate;
+	towerData[softId - 1][5] = tower;
+      }
+      int triggerPatch;
+      if (decoder && decoder->GetTriggerPatchFromCrate(crate, tower, triggerPatch)) {
+	towerData[softId - 1][6] = triggerPatch;
+	towerData[softId - 1][1] = HT[triggerPatch];
+	towerData[softId - 1][2] = PA[triggerPatch];
       }
     }
-    bemcStatusStream << "#" << endl;
-    bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch unmasked in HT?\tPatch unmasked in sum?\tPedestal\ttriggerPatch" << endl;
-    for (int i = 0;i < 4800;i++) {
-      bemcStatusStream << "SoftId " << (i + 1) << "\t" << towerData[i][4] << "\t" << towerData[i][5] << "\t" << towerData[i][0] << "\t" << towerData[i][1] << "\t" << towerData[i][2] << "\t" << (Float_t(towerData[i][3]) / 100.0) << "\t" << towerData[i][6] << endl;
-    }
-    bemcStatusStream << "#" << endl;
-
-    bemcStatusStream << "TriggerPedestalShift " << (float(PEDSHIFT)/100.0) << endl;
-    bemcStatusStream << "#" << endl;
-    
-    bemcStatusStream << "# triggerPatch\tCrate\tCrate patch\tUnmasked in HT?\tUnmasked in sum?\tBit conversion mode\tLUT formula and parameters" << endl;
-    for(int crate = 1;crate <= 30;crate++) {
-      for(int patch = 0;patch < 10;patch++) {
-	int triggerPatch;
-	if (decoder->GetTriggerPatchFromCrate(crate, patch*16, triggerPatch)) {
-	  bemcStatusStream << "triggerPatch " << triggerPatch << "\t" << crate << "\t" << patch << "\t";
-	  bemcStatusStream << HT[triggerPatch] << "\t";
-	  bemcStatusStream << PA[triggerPatch] << "\t";
-	  bemcStatusStream << BITCONV[crate-1][patch] << "\t";
-	  bemcStatusStream << FORMULATAG[crate-1][patch] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][0] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][1] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][2] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][3] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][4] << "\t";
-	  bemcStatusStream << FORMULAPARAMETER[crate-1][patch][5];
-	  bemcStatusStream << endl;
-	}
-      }
-    }
-
-    cout << "Deleting decoder " << decoder << endl;
-    if (decoder) delete decoder; decoder = 0;
-    cout << "Decoder deleted " << decoder << endl;
-
-    bemcStatusStream << "# End of file" << endl;
-    bemcStatusStream << "##################################################################################" << endl;
-    bemcStatusStream.close();
-    cout << "Finished writing " << bemcStatusCopy << endl;
   }
-    
+  bemcStatusStream << "#" << endl;
+  bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch unmasked in HT?\tPatch unmasked in sum?\tPedestal\ttriggerPatch" << endl;
+  for (int i = 0;i < 4800;i++) {
+    bemcStatusStream << "SoftId " << (i+1) << "\t" 
+		     << towerData[i][4] << "\t" 
+		     << towerData[i][5] << "\t" 
+		     << towerData[i][0] << "\t"
+		     << towerData[i][1] << "\t" 
+		     << towerData[i][2] << "\t" 
+		     << (Float_t(towerData[i][3]) / 100.0) << "\t" 
+		     << towerData[i][6] << endl;
+  }
+  bemcStatusStream << "#" << endl;
+  bemcStatusStream << "TriggerPedestalShift " << (float(PEDSHIFT)/100.0) << endl;
+  bemcStatusStream << "#" << endl;
+  bemcStatusStream << "# triggerPatch\tCrate\tCrate patch\tUnmasked in HT?\tUnmasked in sum?\tBit conversion mode\tLUT formula and parameters" << endl;
+  for(int crate = 1;crate <= 30;crate++) {
+    for(int patch = 0;patch < 10;patch++) {
+      int triggerPatch;
+      if (decoder->GetTriggerPatchFromCrate(crate, patch*16, triggerPatch)) {
+	bemcStatusStream << "triggerPatch " << triggerPatch << "\t" << crate << "\t" << patch << "\t";
+	bemcStatusStream << HT[triggerPatch] << "\t";
+	bemcStatusStream << PA[triggerPatch] << "\t";
+	bemcStatusStream << BITCONV[crate-1][patch] << "\t";
+	bemcStatusStream << FORMULATAG[crate-1][patch] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][0] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][1] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][2] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][3] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][4] << "\t";
+	bemcStatusStream << FORMULAPARAMETER[crate-1][patch][5];
+	bemcStatusStream << endl;
+      }
+    }
+  }
+  
+  cout << "Deleting decoder " << decoder << endl;
+  if (decoder) delete decoder; decoder = 0;
+  cout << "Decoder deleted " << decoder << endl;
+  
+  bemcStatusStream << "# End of file" << endl;
+  bemcStatusStream << "##################################################################################" << endl;
+  bemcStatusStream.close();
+  cout << "Finished writing " << bemcStatusCopy << endl;
+  
   cout << "Started creating tables" << endl;
   St_emcTriggerPed *pedestals_t = new St_emcTriggerPed("bemcTriggerPed",1);
   St_emcTriggerStatus *status_t = new St_emcTriggerStatus("bemcTriggerStatus",1);
   St_emcTriggerLUT *lut_t = new St_emcTriggerLUT("bemcTriggerLUT",1);
-  St_emcPed *ped_t = new St_emcPed("bemcPed",1);
-  St_emcStatus *stat_t = new St_emcStatus("bemcStatus",1);
   emcTriggerPed_st* pedestals_st = pedestals_t ? pedestals_t->GetTable() : 0;
   emcTriggerStatus_st* status_st = status_t ? status_t->GetTable() : 0;
   emcTriggerLUT_st* lut_st = lut_t ? lut_t->GetTable() : 0;
-  emcPed_st* ped_st = ped_t ? ped_t->GetTable() : 0;
-  emcStatus_st* stat_st = stat_t ? stat_t->GetTable() : 0;
   cout << "Finished creating tables" << endl;
 	
   cout << "Started filling tables" << endl;
@@ -468,13 +441,11 @@ void StOnlineTriggerMonitoring::saveTrigger(
       status_st->HighTowerStatus[patch]=HT[patch];
     }
   }
-  cout << "... filling aux tables" << endl;
-  for (int i = 0;i < 4800;i++) {
-    ped_st->AdcPedestal[i] = towerData[i][3]; // ped*100
-    ped_st->AdcPedestalRMS[i] = towerData[i][7]; // ped rms*100
-    ped_st->Status[i] = towerData[i][0]; // ped status
-    stat_st->Status[i] = towerData[i][0]; // status
-  }
+
+  //for (int i = 0;i < 4800;i++) {
+  // add ped4 stuff here
+  //}
+
   cout << "Finished filling tables" << endl;
 
   cout << "Creating StBemcTablesWriter ..." << endl;
@@ -531,37 +502,4 @@ void StOnlineTriggerMonitoring::saveTrigger(
       LOG_INFO << "Finished saving table " << FILENAME << endm;
     }
   }
-    
-  if(statusOffline && stat_st) {
-    cout << "Setting bemcStatus table " << stat_st << endl;
-    writer.setTable("bemcStatus", stat_st);
-    if(saveDB) {
-      LOG_INFO << "Start uploading table bemcStatus" << endm;
-      writer.writeToDb("bemcStatus", timestamp.Data());
-      LOG_INFO << "Finished uploading table bemcStatus" << endm;
-    }
-    if(saveTables) {
-      FILENAME = tables_dir; FILENAME += "/bemcStatus."; FILENAME+=TS; FILENAME+=".root";
-      LOG_INFO << "Start saving table " << FILENAME << endm;
-      writer.writeToFile(FILENAME.Data());
-      LOG_INFO << "Finished saving table " << FILENAME << endm;
-    }
-  }
-    
-  if(pedestalOffline && ped_st) {
-    cout << "Setting bemcPed table " << ped_st << endl;
-    writer.setTable("bemcPed", ped_st);
-    if(saveDB) {
-      LOG_INFO << "Start uploading table bemcPed" << endm;
-      writer.writeToDb("bemcPed", timestamp.Data());
-      LOG_INFO << "Finished uploading table bemcPed" << endm;
-    }
-    if(saveTables) {
-      FILENAME = tables_dir; FILENAME += "/bemcPed."; FILENAME+=TS; FILENAME+=".root";
-      LOG_INFO << "Start saving table " << FILENAME << endm;
-      writer.writeToFile(FILENAME.Data());
-      LOG_INFO << "Finished saving table " << FILENAME << endm;
-    }
-  }
 }
-

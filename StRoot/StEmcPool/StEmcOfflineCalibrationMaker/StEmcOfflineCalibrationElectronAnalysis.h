@@ -87,7 +87,7 @@ class StEmcOfflineCalibrationElectronAnalysis : public StMaker {
   Bool_t trackPointsToHT(const map<Int_t, Int_t>&, Int_t);
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationElectronAnalysis.h,v 1.1 2015/02/23 22:07:08 jkadkins Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationElectronAnalysis.h,v 1.1 2015/02/23 22:07:08 jkadkins Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
