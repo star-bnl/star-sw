@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fms_db_ChannelGeometry(char* opt, int year) {
+void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
 
   TString option(opt);
   std::cout << "Opt =" << opt << "\n";
@@ -16,11 +16,17 @@ void fms_db_ChannelGeometry(char* opt, int year) {
     storeTime="2007-11-09 00:00:02";
     date = 20080301;
     time = 0;
-  }elseif(year==9){
+  }else if(year==9){
     storeTime="2008-11-09 00:00:01";
     date = 20090301;
     time = 0;
-  }else{
+  }else if(year=15){
+    storeTime="2014-12-20 00:00:00";
+    date = 20141220;
+//    date = 20140222;
+    time = 0;
+  }
+  else{
     std::cout << "Please specify year\n";
     exit;
   }
@@ -86,7 +92,7 @@ void fms_db_ChannelGeometry(char* opt, int year) {
     cout << "DB_ACCESS_MODE="<<gSystem->Getenv("DB_ACCESS_MODE")<<endl;
     StDbManager* mgr = StDbManager::Instance();
     StDbConfigNode* node = mgr->initConfig("Geometry_fms");
-    StDbTable* table = node->addDbTable("fmsChannelGeometry");	  
+    StDbTable* wtable = node->addDbTable("fmsChannelGeometry");	  
     mgr->setStoreTime(storeTime.Data());
 
     // input data
@@ -123,9 +129,9 @@ void fms_db_ChannelGeometry(char* opt, int year) {
     g[n].detectorId =11; g[n].type=0; g[n].ew=1; g[n].ns=1; g[n].nX=12; g[n].nY=24;    n++;
     
     // store data in the table
-    table->SetTable((char*)&g,n);
+    wtable->SetTable((char*)&g,n);
     // store table in dBase
-    mgr->storeDbTable(table); 
+    mgr->storeDbTable(wtable); 
     gSystem->Unsetenv("DB_ACCESS_MODE");
     std::cout << "Done with database upload \n";
  }
