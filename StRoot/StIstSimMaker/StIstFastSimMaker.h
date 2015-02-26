@@ -34,7 +34,7 @@ public:
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.18 2015/02/25 20:46:41 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
