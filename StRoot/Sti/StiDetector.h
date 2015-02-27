@@ -46,8 +46,8 @@ public:
     inline bool isActive(double dYlocal, double dZlocal) const {return (*isActiveFunctor)(dYlocal, dZlocal);}
     inline bool isActive()    const 		{ return isActiveFunctor->isActive();}
     bool isDiscreteScatterer() const 		{ return 0; }
-     int insideL(const double xl[3],int mode=1) const ;
-     int insideG(const double xl[3],int mode=1) const ;
+     int insideL(const double xl[3],int mode=1,double fakt=1) const ;
+     int insideG(const double xl[3],int mode=1,double fakt=1) const ;
   double getCenterX() const;
 //		Gas is under detector
     StiMaterial* getGas() const 		{ assert(gas); return gas; }
@@ -99,6 +99,8 @@ public:
     double getVolume() const;
     double getWeight() const;
 
+ static int    mgIndex;
+ static double mgValue[2];
 
  protected:
     
