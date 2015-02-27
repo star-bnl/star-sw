@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.12 2014/09/09 08:23:46 ypwang Exp $
+* $Id: StIstRawHit.cxx,v 1.13 2015/02/27 14:53:00 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.13  2015/02/27 14:53:00  ypwang
+* fixed a bug for the print() to list all time bin's charges and noises
+*
 * Revision 1.12  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *
@@ -193,9 +196,14 @@ void StIstRawHit::Print(int nTimeBins) const
 {
    // The usage of nTimeBins is a bit crazy here but I took it directly from the
    // former debug output at the end of StIstClusterMaker::Make()
-   LOG_DEBUG << " elecId=" << getChannelId()
-             << " Charge=" << getCharge(nTimeBins) << " ChargeErr=" << getChargeErr(nTimeBins)
-             << " decode0: at ladder=" << (short) getLadder() << " sensor=" << (short) getSensor()
+   LOG_DEBUG << " elecId=" << getChannelId() << " Charge=(" ;
+   for(int i=0; i<nTimeBins; i++)
+        LOG_DEBUG << getCharge(i) << " " ;
+   LOG_DEBUG << ") ChargeErr=(" ;
+
+   for(int i=0; i<nTimeBins; i++)
+        LOG_DEBUG << getChargeErr(i) << " " ;
+   LOG_DEBUG << ") decode0: at ladder=" << (short) getLadder() << " sensor=" << (short) getSensor()
              << " column=" << (short) getColumn() << " row=" << (short) getRow() << endm;
 }
 
