@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.6 2015/02/27 06:51:46 yuxip Exp $
+ * $Id: StFmsDbMaker.h,v 1.7 2015/02/27 07:03:15 yuxip Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,8 +9,8 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
- * Revision 1.6  2015/02/27 06:51:46  yuxip
- * added Akio's update on FPS tables
+ * Revision 1.7  2015/02/27 07:03:15  yuxip
+ * StFmsDbMaker/
  *
  * Revision 1.4  2014/08/06 11:43:15  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -33,7 +33,6 @@
 #include "StMaker.h"
 #endif
 #include "StThreeVectorF.hh"
-#include "StRoot/StFmsUtil/StFmsDbConfig.h"
 
 struct fmsDetectorPosition_st;
 struct fmsChannelGeometry_st;
@@ -42,7 +41,6 @@ struct fmsPatchPanelMap_st;
 struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
-struct fmsRec_st;
 struct fpsConstant_st;
 struct fpsChannelGeometry_st;
 struct fpsSlatId_st;
@@ -70,7 +68,6 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
-  fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
   fpsChannelGeometry_st** FpsChannelGeometry();
   fpsSlatId_st*           FpsSlatId();
@@ -115,10 +112,6 @@ class StFmsDbMaker : public StMaker {
   Int_t maxGainCorrection();
   Float_t getGain(Int_t detectorId, Int_t ch); //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch); //! get the gain correction for the channel
-  
-  //reference to StFmsDbConfig
-  StFmsDbConfig& getRecConfig();  
-
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value                                       
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value                                   
 
@@ -155,7 +148,6 @@ class StFmsDbMaker : public StMaker {
   void dumpFpsPosition        (const Char_t* filename="dumpFpsPosition.txt");
   void dumpFpsMap             (const Char_t* filename="dumpFpsMap.txt");
   void dumpFpsGain            (const Char_t* filename="dumpFpsGain.txt");
-  void dumpFmsRec             (const Char_t* filename="dumpFmsRec.txt");
 
  private:
   void                  deleteArrays();
@@ -186,11 +178,6 @@ class StFmsDbMaker : public StMaker {
   fmsGainCorrection_st  *mGainCorrection; //! gain correction table
   fmsGainCorrection_st  **mmGainCorrection;
   Int_t                   mMaxGainCorrection;
-
-  fmsRec_st             *mRecPar; //! rec. parameters table
-  Int_t                 mMaxRecPar;
-  StFmsDbConfig&        mRecConfig; //reference to StFmsDbConfig singleton, for accessing rec. parameter values by name
-
   Float_t                 mForceUniformGain; //!                                                                                                       
   Float_t                 mForceUniformGainCorrection; //!                                                                                             
 
