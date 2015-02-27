@@ -140,18 +140,20 @@ void StiHit::setGlobal(const StiDetector * detector,
       StiPlacement * placement = detector->getPlacement();
       mrefangle = placement->getLayerAngle();
       mposition = placement->getLayerRadius();
-      double togra = 180./M_PI;
-      double centerAngle = placement->getCenterRefAngle()*togra;
-      double myAngle = atan2(gy,gx)*togra;
-      double dif = myAngle-centerAngle;
-      if (dif > 180) dif-=360;
-      if (dif <-180) dif+=360;
-      if (fabs(dif) > 1.1*22) {
+      mx =  detector->_cos*gx + detector->_sin*gy;
+      my = -detector->_sin*gx + detector->_cos*gy;
+      mz = gz;
+      double dd[3]={mx,my,mz};
+
+
+      if (!detector->insideL(dd,7,1.2)) {
          LOG_ERROR <<
-           Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
-           ,detector->getName().c_str(),myAngle,centerAngle,dif)
+           Form("**** StiHit.%s outside (%d) by %g (%g) ****"
+           ,detector->getName().c_str()
+	   ,StiDetector::mgIndex
+	   ,StiDetector::mgValue[0],StiDetector::mgValue[1])
          << endm;
-          assert( fabs(dif) <55 );     // 30 for sixangle
+          assert( detector->insideL(dd,7,1.5));     // 
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
@@ -163,8 +165,8 @@ void StiHit::setGlobal(const StiDetector * detector,
       mposition = 0.; 
       mx =  gx;
       my =  gy;
+      mz = gz;
     }
-  mz = gz;
   msxx = -1.;//sxx;
   msyy = -1.;//syy;
   mszz = -1.;//szz;
@@ -177,30 +179,6 @@ void StiHit::setGlobal(const StiDetector * detector,
   mTimesUsed = 0;
   mdetector = detector;  msthit = stHit;
   _energy = energy;
-  if (!stHit   ) return;
-  if (!detector) return;
-  double deltaX = detector->getShape()->getThickness();
-  double deltaZ = detector->getShape()->getHalfDepth();
-  double deltaY = detector->getShape()->getHalfWidth(); 
-  double posX = detector->getPlacement()->getNormalRadius();
-  double posY = detector->getPlacement()->getNormalYoffset();
-  double posZ = detector->getPlacement()->getZcenter();
-
-  double difX = fabs(mx-posX)-deltaX/2;
-  double difY = fabs(my-posY)-deltaY;
-  double difZ = fabs(mz-posZ)-deltaZ;
-
-  double accX = posX*0.05+0.1;
-  double accY = deltaY*0.1+0.1;
-  double accZ = deltaZ*0.1+0.1;
-
-  if (difX<accX &&  difY<accY && difZ<accZ) return;
-  static int counts = 0; counts++; if (counts>100) return;
-  LOG_WARN <<
-     Form("**** %d StiHit.%s Outside of detector: dX=%f dY=%g dZ=%g ****"
-          ,counts,detector->getName().c_str(),difX,difY,difZ)
-  << endm;
-   assert(difX<10*accX && difY<10*accY && difZ<10*accZ );
 }
 
 
