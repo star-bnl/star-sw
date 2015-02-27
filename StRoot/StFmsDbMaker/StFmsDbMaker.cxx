@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.5 2015/02/27 06:51:46 yuxip Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.6 2015/02/27 07:03:15 yuxip Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,8 +8,8 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
- * Revision 1.5  2015/02/27 06:51:46  yuxip
- * added Akio's update on FPS tables
+ * Revision 1.6  2015/02/27 07:03:15  yuxip
+ * StFmsDbMaker/
  *
  * Revision 1.3  2011/01/13 02:56:34  jgma
  * Fixed bug in function nRow and nColumn
@@ -33,7 +33,6 @@
 #include "tables/St_fmsQTMap_Table.h"
 #include "tables/St_fmsGain_Table.h"
 #include "tables/St_fmsGainCorrection_Table.h"
-#include "tables/St_fmsRec_Table.h"
 #include "tables/St_fpsConstant_Table.h"
 #include "tables/St_fpsChannelGeometry_Table.h"
 #include "tables/St_fpsSlatId_Table.h"
@@ -47,8 +46,7 @@ ClassImp(StFmsDbMaker)
 
 StFmsDbMaker::StFmsDbMaker(const Char_t *name) : StMaker(name), mDebug(0),
   mChannelGeometry(0),mDetectorPosition(0),mMap(0),mmMap(0),mPatchPanelMap(0),
-  mQTMap(0),mGain(0),mmGain(0),mGainCorrection(0),mmGainCorrection(0),mRecPar(0),
-  mRecConfig(StFmsDbConfig::Instance()),
+  mQTMap(0),mGain(0),mmGain(0),mGainCorrection(0),mmGainCorrection(0),
   mForceUniformGain(0.0), mForceUniformGainCorrection(0.0),
   mFpsConstant(0),mMaxSlatId(0),mFpsChannelGeometry(0),mFpsSlatId(0),mFpsReverseSlatId(0),
   mFpsPosition(0),mFpsMap(0),mFpsReverseMap(0),mFpsGain(0)  
@@ -94,7 +92,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   St_fmsQTMap           *dbQTMap             =0;
   St_fmsGain            *dbGain              =0;
   St_fmsGainCorrection  *dbGainCorrection    =0;
-  St_fmsRec             *dbRec               =0;
   St_fpsConstant        *dbFpsConstant       =0;
   St_fpsChannelGeometry *dbFpsChannelGeometry=0;
   St_fpsSlatId          *dbFpsSlatId         =0;
@@ -109,7 +106,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbQTMap             = (St_fmsQTMap*)           DBmapping->Find("fmsQTMap");
   dbGain              = (St_fmsGain*)            DBcalibration->Find("fmsGain");
   dbGainCorrection    = (St_fmsGainCorrection*)  DBcalibration->Find("fmsGainCorrection");
-  dbRec             = (St_fmsRec*)               DBcalibration->Find("fmsRec");
   dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
   dbFpsChannelGeometry= (St_fpsChannelGeometry*) DBFpsGeom->Find("fpsChannelGeometry");
   dbFpsSlatId         = (St_fpsSlatId*)          DBFpsGeom->Find("fpsSlatId"); 
@@ -124,7 +120,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbQTMap)             {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsQTMap"        <<endm; return kStFatal;}
   if(!dbGain)              {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain"                 <<endm; return kStFatal;}
   if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
-  if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
   if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm; return kStFatal;}  
   if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm; return kStFatal;}
   if(!dbFpsSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsSlatId"                  <<endm; return kStFatal;}
@@ -273,12 +268,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
   
-  //!fmsRec
-  mMaxRecPar = 80; //dummy
-  mRecPar = (fmsRec_st*)dbRec->GetTable();
-  mRecConfig.readMap(*mRecPar); //read recPar into internal memory
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsRec "<< endm;
-
   //!fpsConstant
   fpsConstant_st *tFpsConstant = 0;
   tFpsConstant = (fpsConstant_st*) dbFpsConstant->GetTable();
@@ -317,12 +306,18 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     if(mL < tFpsSlatId[i].layer)  mL=tFpsSlatId[i].layer;
     if(mS < tFpsSlatId[i].slat)   mS=tFpsSlatId[i].slat;
   }
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more row than fpsConstant"<<endm;
+  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more raw than fpsConstant"<<endm;
   if(mI>fpsMaxSlatId())  LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slatId than fpsConstant"<<endm;
   if(mQ>fpsNQuad())      LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more quad than fpsConstant"<<endm;
   if(mL>fpsNLayer())     LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more layer than fpsConstant"<<endm;
   if(mS>fpsMaxSlat())    LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slat than fpsConstant"<<endm;
   mFpsSlatId = new fpsSlatId_st[max];
+  for(int i=0; i<max; i++){ 
+    mFpsSlatId[i].slatid=-1; 
+    mFpsSlatId[i].quad=-1; 
+    mFpsSlatId[i].layer=-1; 
+    mFpsSlatId[i].slat=-1; 
+  }
   mFpsReverseSlatId = new int**[fpsNQuad()]();
   for(int i=0; i<fpsNQuad(); i++) {
     mFpsReverseSlatId[i] = new int*[fpsNLayer()]();
@@ -340,7 +335,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   fpsPosition_st *tFpsPosition = 0;
   tFpsPosition = (fpsPosition_st*) dbFpsPosition->GetTable();
   max = dbFpsPosition->GetNRows();
-  mI=0;;
+  mI=0;
   for(Int_t i=0; i<max; i++){
     if(mI < tFpsPosition[i].slatid) mI=tFpsPosition[i].slatid;
   }
@@ -357,20 +352,23 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   fpsMap_st *tFpsMap = 0;
   tFpsMap = (fpsMap_st*) dbFpsMap->GetTable();
   max = dbFpsMap->GetNRows();
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatId than fpsConstant"<<endm;
+  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatId than fpsConstant max="<<max<<"/"<<fpsMaxSlatId()<<endm;
   int mA = 0, mC=0; mI=0;
   for(Int_t i=0; i<max; i++){
     if(mI < tFpsMap[i].slatid) mI=tFpsMap[i].slatid;
     if(mA < tFpsMap[i].QTaddr) mA=tFpsMap[i].QTaddr;
     if(mC < tFpsMap[i].QTch)   mC=tFpsMap[i].QTch;
   }
-  if(max>fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more row than fpsConstant"<<endm;
-  if(mI >fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatid than fpsConstant"<<endm;
-  if(mA>=fpsMaxQTaddr()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTaddr"<<endm;
-  if(mC>=fpsMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTch"<<endm;
+  if(max>fpsMaxSlatId())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more row than fpsConstant "<<max<<"/"<<fpsMaxSlatId()<<endm;
+  if(mI >fpsMaxSlatId())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatid than fpsConstant "<<mI<<"/"<<fpsMaxSlatId()<<endm;
+  if(mA>=fpsMaxQTaddr()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTaddr "<<mA<<endm;
+  if(mC>=fpsMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTch "<<mC<<endm;
   mFpsMap = new fpsMap_st[max];
   mFpsReverseMap = new int*[fpsMaxQTaddr()]();
-  for(int i=0; i<fpsMaxQTaddr(); i++) mFpsReverseMap[i] = new int[fpsMaxQTch()]();
+  for(int i=0; i<fpsMaxQTaddr(); i++) {
+    mFpsReverseMap[i] = new int[fpsMaxQTch()];  
+    for(int j=0; j<fpsMaxQTch(); j++){ mFpsReverseMap[i][j]=-1;}    
+  }
   for(Int_t i=0; i<max; i++){ 
     memcpy(&mFpsMap[tFpsMap[i].slatid],&tFpsMap[i],sizeof(fpsMap_st));
     if(tFpsMap[i].QTaddr>=0 && tFpsMap[i].QTch>=0)
@@ -404,7 +402,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsQTMap();
     dumpFmsGain();
     dumpFmsGainCorrection();
-    dumpFmsRec();
     dumpFpsConstant();
     dumpFpsChannelGeometry(); 
     dumpFpsSlatId();          
@@ -414,8 +411,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   }
   return kStOK;
 }
-
-StFmsDbConfig& StFmsDbMaker::getRecConfig(){ return mRecConfig; }
 
 void StFmsDbMaker::deleteArrays(){
   if(mChannelGeometry) delete [] mChannelGeometry;  
@@ -496,7 +491,6 @@ fmsPatchPanelMap_st*    StFmsDbMaker::PatchPanelMap()     {return mPatchPanelMap
 fmsQTMap_st*            StFmsDbMaker::QTMap()             {return mQTMap;}
 fmsGain_st*             StFmsDbMaker::Gain()              {return mGain;}
 fmsGainCorrection_st*   StFmsDbMaker::GainCorrection()    {return mGainCorrection;}
-fmsRec_st*              StFmsDbMaker::RecPar()            {return mRecPar;}
 fpsConstant_st*         StFmsDbMaker::FpsConstant()       {return mFpsConstant;}
 fpsChannelGeometry_st** StFmsDbMaker::FpsChannelGeometry(){return mFpsChannelGeometry;}
 fpsSlatId_st*           StFmsDbMaker::FpsSlatId()         {return mFpsSlatId;}
@@ -756,12 +750,6 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
   }      
 }
 
-void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
-
-  LOG_INFO << "writing "<<filename<<endm;
-  mRecConfig.writeMap(filename);
-
-}
 
 inline Int_t StFmsDbMaker::fpsNQuad()     {return mFpsConstant->nQuad;}
 inline Int_t StFmsDbMaker::fpsNLayer()    {return mFpsConstant->nLayer;}
