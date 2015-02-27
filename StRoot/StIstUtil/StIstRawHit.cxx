@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.13 2015/02/27 14:53:00 ypwang Exp $
+* $Id: StIstRawHit.cxx,v 1.14 2015/02/27 15:52:04 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.14  2015/02/27 15:52:04  ypwang
+* remove comment in the print()
+*
 * Revision 1.13  2015/02/27 14:53:00  ypwang
 * fixed a bug for the print() to list all time bin's charges and noises
 *
@@ -194,8 +197,6 @@ void StIstRawHit::setMaxTimeBin(int tb)
 
 void StIstRawHit::Print(int nTimeBins) const
 {
-   // The usage of nTimeBins is a bit crazy here but I took it directly from the
-   // former debug output at the end of StIstClusterMaker::Make()
    LOG_DEBUG << " elecId=" << getChannelId() << " Charge=(" ;
    for(int i=0; i<nTimeBins; i++)
         LOG_DEBUG << getCharge(i) << " " ;
