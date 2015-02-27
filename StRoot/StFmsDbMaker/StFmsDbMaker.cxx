@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.4 2015/02/26 23:48:29 yuxip Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.5 2015/02/27 06:51:46 yuxip Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,8 +8,8 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
- * Revision 1.4  2015/02/26 23:48:29  yuxip
- * fps functionalities added, interface to fms_rec table added
+ * Revision 1.5  2015/02/27 06:51:46  yuxip
+ * added Akio's update on FPS tables
  *
  * Revision 1.3  2011/01/13 02:56:34  jgma
  * Fixed bug in function nRow and nColumn
