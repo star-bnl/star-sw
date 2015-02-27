@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.5 2015/02/26 23:48:29 yuxip Exp $
+ * $Id: StFmsDbMaker.h,v 1.6 2015/02/27 06:51:46 yuxip Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,8 +9,8 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
- * Revision 1.5  2015/02/26 23:48:29  yuxip
- * fps functionalities added, interface to fms_rec table added
+ * Revision 1.6  2015/02/27 06:51:46  yuxip
+ * added Akio's update on FPS tables
  *
  * Revision 1.4  2014/08/06 11:43:15  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes

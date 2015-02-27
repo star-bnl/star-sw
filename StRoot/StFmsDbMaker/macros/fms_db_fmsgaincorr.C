@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h>
 
-void fms_db_fmsgaincorr(char* opt="readdb", char* dataspec) {
+void fms_db_fmsgaincorr(char* opt, char* dataspec) {
   // that's begin time for validity range for WRITING TO DB 
   // your data will be available from storeTime till 2037
   TString data(dataspec);
@@ -16,8 +16,7 @@ void fms_db_fmsgaincorr(char* opt="readdb", char* dataspec) {
       else std::cout<<"Invalid year range"<<std::endl;
 
   // this is data and time for READING FROM DB
-  //int readDate = 20130222;
-  int readDate = 20141220;
+  int readDate = 20091005;
   int readTime = 0;
 
   TString option(opt);
