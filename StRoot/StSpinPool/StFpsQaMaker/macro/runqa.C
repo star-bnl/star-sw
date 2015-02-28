@@ -21,14 +21,12 @@ int runqa(Int_t run=16020057,Int_t ped=0,Int_t nevents=0,const Char_t *evpdir = 
   sprintf(filename,"%s/%d",evpdir,run);
   //sprintf(filename,"%s/%d_DELETE",evpdir,run);
   daqRdr = new StFpsRawDaqReader( "daqReader", filename);
-  //  daqRdr->SetDebug();
+  //daqRdr->SetDebug();
   
-  /*
   cout << "Constructing the FPS QA maker" << endl;
   StFpsQaMaker *qaMkr=new StFpsQaMaker("FpsQa");  
   qaMkr->setRun(run);
   qaMkr->setPed(ped);
-  */
 
   cout << "Initializing" << endl;
   ierr = analysisChain->Init();
@@ -44,8 +42,8 @@ int runqa(Int_t run=16020057,Int_t ped=0,Int_t nevents=0,const Char_t *evpdir = 
   for( int i=0; i<nevents && !ierr; ++i ){
     if( i%100 == 0 ) cout << " Eevent= " << i << endl;
     //cout << " Eevent number " << i << endl;
-    analysisChain->Clear();
     ierr = analysisChain->Make();    
+    analysisChain->Clear();
   };
   cout << "Finish" << endl;
   analysisChain->Finish();
