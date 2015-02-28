@@ -46,16 +46,16 @@ Int_t StFpsQaMaker::Init(){
   if(mPed==0){
     mAdc2[0] = new TH2F("Adc2", "Adc2", 252,0.0,252.0,64,0.0,4096.0);
     mAdc2[1] = new TH2F("Adc2z","Adc2z",252,0.0,252.0,50,0.0,200.0);
-    for(int i=0; i<=mNID; i++){
+    for(int i=0; i<mNID; i++){
       sprintf(name,"ADC%03d",i);    
       mAdc[i][0]=new TH1F(name,name,128,0.0,4096.0);
       sprintf(name,"ADC%03dz",i);    
-      mAdc[i][1]=new TH1F(name,name,100,0.0,200.0);
+      mAdc[i][1]=new TH1F(name,name,150,0.0,300.0);
     }
   }else{
-    mAdc2[0] = new TH2F("Adc2", "Adc2", 252,0.0,252.0,100,64.0,4096.0);
-    mAdc2[1] = new TH2F("Adc2z","Adc2z",252,0.0,252.0,100,50.0,150.0);
-    for(int i=0; i<=mNID; i++){
+    mAdc2[0] = new TH2F("Adc2", "Adc2", 252,0.0,252.0, 100,64.0,4096.0);
+    mAdc2[1] = new TH2F("Adc2z","Adc2z",252,0.0,252.0, 100,50.0,150.0);
+    for(int i=0; i<mNID; i++){
       sprintf(name,"ADC%03d",i);    
       mAdc[i][0]=new TH1F(name,name,128,0.0,4096.0);
       sprintf(name,"ADC%03dz",i);    
@@ -77,6 +77,7 @@ Int_t StFpsQaMaker::Make() {
   }
   int nhit=mFmsCollectionPtr->numberOfHits();
   StSPtrVecFmsHit hits = mFmsCollectionPtr->hits(); 
+  //printf("StFpsQaMaker found %d hits\n",nhit);
   int nfpsdata=0;
   int nfpsdatatot=0;
   for (unsigned int i=0; i<nhit; i++){
@@ -126,8 +127,11 @@ Int_t StFpsQaMaker::Finish(){
 ClassImp(StFpsQaMaker);
 
 /*
- * $Id: StFpsQaMaker.cxx,v 1.1 2015/02/25 20:03:26 akio Exp $
+ * $Id: StFpsQaMaker.cxx,v 1.2 2015/02/28 02:55:35 akio Exp $
  * $Log: StFpsQaMaker.cxx,v $
+ * Revision 1.2  2015/02/28 02:55:35  akio
+ * fix a bug
+ *
  * Revision 1.1  2015/02/25 20:03:26  akio
  * new fps qa maker
  *
