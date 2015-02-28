@@ -19,7 +19,7 @@
 #include <time.h>
 
 StFpsRawDaqReader::StFpsRawDaqReader( const Char_t* name, const Char_t *daqFileName) :
-  StMaker(name),mFmsCollectionPtr(0),mDaqFileName(daqFileName),mRdr(0),mFmsDbMkr(0){
+  StMaker(name),mEvent(0),mFmsCollectionPtr(0),mDaqFileName(daqFileName),mRdr(0),mFmsDbMkr(0){
   std::string daqFileNameS( daqFileName );
 };
 
@@ -28,35 +28,28 @@ StFpsRawDaqReader::~StFpsRawDaqReader(){
 };
 
 Int_t StFpsRawDaqReader::prepareEnvironment(){
-  StEvent* eventPtr=0;
-  eventPtr= (StEvent*)GetInputDS("StEvent");
-  
-  mFmsCollectionPtr=NULL;
-  if(eventPtr) {
-    mFmsCollectionPtr=eventPtr->fmsCollection();
+  //mEvent = (StEvent*)GetInputDS("StEvent");  
+  if(mEvent) {
+    mFmsCollectionPtr=mEvent->fmsCollection();
     LOG_DEBUG <<"::prepareEnvironment() found StEvent"<<endm;
   } else {
-    eventPtr=new StEvent();
-    AddData(eventPtr);
+    mEvent=new StEvent();
+    AddData(mEvent);
     LOG_DEBUG <<"::prepareEnvironment() has added StEvent"<<endm;
-    mFmsCollectionPtr=eventPtr->fmsCollection();
-  };
+  }
   if(!mFmsCollectionPtr) {
     mFmsCollectionPtr=new StFmsCollection();
-    eventPtr->setFmsCollection(mFmsCollectionPtr);
+    mEvent->setFmsCollection(mFmsCollectionPtr);
     LOG_DEBUG <<"::prepareEnvironment() has added StFpsCollection"<<endm;
-    mFmsCollectionPtr->hits().clear();     
-    LOG_DEBUG <<"::prepareEnvironment() cleared hits nhit="<<mFmsCollectionPtr->numberOfHits()<<endm;
   } else {
     LOG_DEBUG <<"::prepareEnvironment() found FmsCollection"<<endm;
-    mFmsCollectionPtr->hits().clear();     
-    LOG_DEBUG <<"::prepareEnvironment() cleared hits nhit="<<mFmsCollectionPtr->numberOfHits()<<endm;
   };
   return kStOK;
 };
 
 Int_t StFpsRawDaqReader::Init(){
    GetEvtHddr()->SetEventNumber(1);
+   Int_t ierr = prepareEnvironment();
    LOG_INFO << "Opening "<< mDaqFileName.data() <<endm;
    mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
    if(!mRdr) {
@@ -68,7 +61,7 @@ Int_t StFpsRawDaqReader::Init(){
    struct tm* local = localtime((const time_t*)&unixtime);
    int date=(local->tm_year+1900)*10000 + (local->tm_mon+1)*100 + local->tm_mday;
    int time=local->tm_hour*10000 + local->tm_min*100 + local->tm_sec;
-   printf("Event Unix Time = %d %08d %06d\n",mRdr->evt_time,date,time);   
+   printf("Event Unix Time = %d %0d %06d\n",mRdr->evt_time,date,time);   
    mFmsDbMkr = static_cast< StFmsDbMaker*>(GetMaker("fmsDb"));
    if(!mFmsDbMkr){
      LOG_FATAL << "Error finding StFmsDbMaker"<< endm;
@@ -81,11 +74,7 @@ Int_t StFpsRawDaqReader::Init(){
 };
 
 Int_t StFpsRawDaqReader::Make() {
-  Int_t ierr = prepareEnvironment();
-  if( ierr || !mFmsCollectionPtr ) {
-    LOG_FATAL << "Error constructing FmsCollection" << endm;
-    return kStFatal;
-  };   
+  //Int_t ierr = prepareEnvironment();
   
   mRdr->get(0,EVP_TYPE_ANY);
   if(mRdr->status == EVP_STAT_EOR) {
@@ -138,14 +127,17 @@ Int_t StFpsRawDaqReader::Make() {
 };
 
 void StFpsRawDaqReader::Clear( Option_t *opts ){
-  StMaker::Clear(opts);
+  if(mFmsCollectionPtr) mFmsCollectionPtr->hits().clear();  
 };
 
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.1 2015/02/26 20:26:38 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.2 2015/02/28 02:58:56 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.2  2015/02/28 02:58:56  akio
+ * Some bug fixes
+ *
  * Revision 1.1  2015/02/26 20:26:38  akio
  * Adding raw daq file (or EVP) reader for FPS (not for offline BFC, but for online use)
  *
