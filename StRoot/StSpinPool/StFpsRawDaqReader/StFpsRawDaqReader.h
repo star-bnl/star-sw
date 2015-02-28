@@ -12,6 +12,7 @@
 class daqReader;
 class StFmsDbMaker;
 
+class StEvent;
 class StFmsCollection;
 
 class StFpsRawDaqReader : public StMaker {
@@ -31,6 +32,7 @@ class StFpsRawDaqReader : public StMaker {
 
  protected:
    Int_t mDate, mTime;
+   StEvent *mEvent;
    StFmsCollection *mFmsCollectionPtr;
 
  private:
@@ -44,15 +46,18 @@ class StFpsRawDaqReader : public StMaker {
 // inline functions
 inline void StFpsRawDaqReader::setFilename( std::string filename ){ mDaqFileName = filename; };
 inline const char *StFpsRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.1 2015/02/26 20:26:38 akio Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.2 2015/02/28 02:58:56 akio Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFpsRawDaqReader.h,v 1.1 2015/02/26 20:26:38 akio Exp $
+ * $Id: StFpsRawDaqReader.h,v 1.2 2015/02/28 02:58:56 akio Exp $
  * $Log: StFpsRawDaqReader.h,v $
+ * Revision 1.2  2015/02/28 02:58:56  akio
+ * Some bug fixes
+ *
  * Revision 1.1  2015/02/26 20:26:38  akio
  * Adding raw daq file (or EVP) reader for FPS (not for offline BFC, but for online use)
  *
