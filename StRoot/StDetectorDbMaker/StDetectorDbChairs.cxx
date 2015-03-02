@@ -67,6 +67,10 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
       if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
       else                                       X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
       break;
+    case 5:
+      if (x < 1e-7) X = -16.118;
+      else          X = TMath::Log(x);
+      break;
     default:      X = x;    break;
     }
   }
