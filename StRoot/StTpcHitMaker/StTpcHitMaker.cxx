@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.51 2014/06/26 21:31:41 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.52 2015/03/02 21:10:15 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.52  2015/03/02 21:10:15  genevb
+ * pad and timebucket sanity units were off by x64, mistakenly using units of StTpcHit data members (RT 3507)
+ *
  * Revision 1.51  2014/06/26 21:31:41  fisyak
  * New Tpc Alignment, v632
  *
@@ -1236,8 +1239,8 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
 
   // Check for sanity
-  if ( mntmbk<0 || mxtmbk<0 || mntmbk>32000 || mxtmbk>32000
-    || mnpad <0 || mxpad <0 || mnpad >32000 || mxpad >32000
+  if ( mntmbk<0 || mxtmbk<0 || mntmbk>500 || mxtmbk>500
+    || mnpad <0 || mxpad <0 || mnpad >500 || mxpad >500
     || mxpad-mnpad > 100
     || (Float_t) mntmbk>cl_t || (Float_t) mxtmbk<cl_t
     || (Float_t) mnpad >cl_x || (Float_t) mxpad <cl_x
