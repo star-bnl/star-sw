@@ -148,6 +148,9 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   mUseTrgData = 0;
   mUseMuDst = 0;
   mUseStEvent = 0;
+
+  //ADC=0xFFF counter
+  mNFFF=0;
 }
 
 void StFmsTriggerMaker::Clear(Option_t* option)
@@ -175,6 +178,11 @@ int StFmsTriggerMaker::InitRun(int runNumber){
   //mDBTime = GetDBTime();
   //mDBTime = TDatime();
   return loadRegisters(runNumber);
+}
+
+int StFmsTriggerMaker::Finish(){  
+  printf("%d  Number of ADC=0xFFF\n",mNFFF);
+  return kStOK;
 }
 
 int StFmsTriggerMaker::Make(){
@@ -245,7 +253,10 @@ int StFmsTriggerMaker::MakeTrgData(){
 	  if(adc>0) {
 	    writeQtCrate(crt,adr,ch,adc,t); 
 	    n++;
-	    //printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	    if(adc==0xFFF) {
+	      printf("0xFFF problem : Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	      mNFFF++;
+	    }
 	  }
 	}
       }

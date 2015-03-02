@@ -27,12 +27,13 @@ public:
   int Init();
   int InitRun(int runNumber);
   int Make();
+  int Finish();
 
   // Input mode
   void useTrgData() { mUseTrgData = 1;}
   void useMuDst() { mUseMuDst = 1;}
   void useStEvent() { mUseStEvent = 1; }
-
+  
   // Some controls
   void overwriteThr(char* name, int value);
   void forceRunNumber(int run) {mForceRun=run;}
@@ -193,7 +194,10 @@ private:
   // # of pre/post from data
   Int_t mNPre;
   Int_t mNPost;
- 
+
+  //number of ADC=0xFFF
+  Int_t mNFFF;
+
   ClassDef(StFmsTriggerMaker,0);
 };
 
