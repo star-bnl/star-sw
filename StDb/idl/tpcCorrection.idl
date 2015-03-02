@@ -13,6 +13,7 @@ struct tpcCorrection {
                 // type = 2 shifted  TChebyshev poly in range [min,max] => [ 0,1]  
                 // type = 3 X => Log(1 - |x|)                                       use only [min,max]
                 // type = 4 X => Log(1 - |x|)*sign(x)                                -"-
+                // type = 5 X => Log(x), for x <= 1 => 0
                 // type = 10 (== log(1. + OffSet/x) + poly(x,npar))                  -"-
                 // type = 11 (== log(1. + OffSet/x) + poly(x,npar) for log(ADC) and |Z|
                 // type = 200 cut on range [min,max]
