@@ -101,6 +101,9 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                stiHit->reset();
 
                stiHit->setGlobal(detector, hit, hit->position().x(), hit->position().y(), hit->position().z(), hit->charge());
+               // Allow the hit to be shared by up to 5 tracks
+               stiHit->setMaxTimes(5);
+
                _hitContainer->add( stiHit );
             } // end hits loop
          } //end sensors loop
