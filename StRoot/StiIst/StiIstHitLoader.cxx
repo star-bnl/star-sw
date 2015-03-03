@@ -101,8 +101,6 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                stiHit->reset();
 
                stiHit->setGlobal(detector, hit, hit->position().x(), hit->position().y(), hit->position().z(), hit->charge());
-//	define max times used
-               stiHit->setMaxTimes(5);
                _hitContainer->add( stiHit );
             } // end hits loop
          } //end sensors loop
