@@ -35,10 +35,11 @@ static  myDebMap_t  myDebMap;
 typedef std::map<std::string, TCanvas*>   myCanMap_t;
 typedef myCanMap_t::const_iterator myCanIter_t;
 myCanMap_t myCanMap;
-
-
-
-
+//______________________________________________________________________________
+int StiDebug::Debug()
+{
+return mgDebug;
+}
 //______________________________________________________________________________
 void StiDebug::Init()
 {
