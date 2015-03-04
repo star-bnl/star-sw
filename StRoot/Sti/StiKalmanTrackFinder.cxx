@@ -53,6 +53,9 @@ using namespace std;
 #ifdef DO_TPCCATRACKER
 #include "StiTPCCATrackerInterface.h"
 #endif /* DO_TPCCATRACKER */
+#include "StiHitTest.h"
+
+
 enum {kSeedTimg,kTrakTimg,kPrimTimg};
 enum {kMaxTrackPerm = 10000,kMaxEventPerm=10000000};
 
@@ -341,9 +344,10 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   if (trackExtended) {
     status = track->approx(1);
       //    if (status) return -1;
+StiHftHits::hftHist("HFTBefore",track);//???????????????????????
     status = track->refit();
+StiHftHits::hftHist("HFTAfter",track);//???????????????????????
     if (status) return abs(status)*100 + kRefitOutFail;
-track->test("AftRefi");
 
   }
     //cout << " find track done" << endl;
