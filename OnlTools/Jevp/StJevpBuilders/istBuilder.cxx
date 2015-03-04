@@ -86,7 +86,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
 	}
 	for ( int i=0; i<totCh; i++ )         {    maxAdc[i]          = 0; maxAdc_zs[i]          = 0;  }
 	for ( int i=0; i<totCh; i++ )         {    maxTimeBin[i]      = 0; maxTimeBin_zs[i]      = 0;  }
-	for ( int i=0; i<totAPV; i++ )        {    cmNoise[i]         = 0;   }
+	for ( int i=0; i<totAPV; i++ )        {    cmNoise[i]         = 0; isNoisyApv[i]         = false; }
 
 	// //////////////////////////////////add bad channels here///////////////////////
 	// ///////////////////isChannelBad[numAssembly*ChPerSec+channel]=true;
@@ -387,7 +387,8 @@ void istBuilder::initialize(int argc, char *argv[]) {
 	hSumContents.hHitMapVsAPV_ZS->GetXaxis()->SetTitle("Ladder geometry ID");
 	hSumContents.hHitMapVsAPV_ZS->GetYaxis()->SetTitle("APV geometry ID");
 
-	hSumContents.hMultVsLadder = new TH2S("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
+	//hSumContents.hMultVsLadder = new TH2S("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
+	hSumContents.hMultVsLadder = new TH2S("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 101, 1, 101);//
 	hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
 	hSumContents.hMultVsLadder->SetStats(false);
 	hSumContents.hMultVsLadder->GetXaxis()->SetTitle("Ladder Geometry ID");
@@ -563,14 +564,14 @@ void istBuilder::startrun(daqReader *rdr) {
 
 	file = fopen(paraDir, "r");
 	if (file==0) {
-		LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		tableFound = false;
 		sprintf(paraDir, "%s/ist/pedestals_local.txt", clientdatadir);
 		file = fopen(paraDir, "r");
 		if(file==0){
-			LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+			LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		}else{
-			LOG(U_IST,"loading pedestals from %s ", paraDir);
+			//LOG(U_IST,"loading pedestals from %s ", paraDir);
 			while(!feof(file)) {
 				int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
 				float pp=0., rr=0.;
@@ -598,7 +599,7 @@ void istBuilder::startrun(daqReader *rdr) {
 		}
 	}
 	else {
-		LOG(U_IST,"loading pedestals from %s ", paraDir);
+		//LOG(U_IST,"loading pedestals from %s ", paraDir);
 		while(!feof(file)) {
 			int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
 			float pp=0., rr=0.;
@@ -628,11 +629,11 @@ void istBuilder::startrun(daqReader *rdr) {
 
 
 	sprintf(paraDir, "%s/ist/ist_apv_bad.txt", clientdatadir);
-	LOG(U_IST,"Loading file %s",paraDir);
+	//LOG(U_IST,"Loading file %s",paraDir);
 	FILE *file1;
 	file1 = fopen(paraDir,"rb");
 	if(file1==0){
-		LOG(U_IST,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(WARN,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 	}else{
 		int c=0, ret=-1;
 		long offset=0;
@@ -649,8 +650,9 @@ void istBuilder::startrun(daqReader *rdr) {
 				if(ret!=6){ 
 					LOG(U_IST,"Wrong input:%s",buff);
 				}else{
-					if(runTemp<run) break;
+					if(runTemp<run&&runTemp>10000000) break;
 					else if(runTemp==run){
+						LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*numAPV/2+apvTemp);
 						int apvId = (rdoTemp-1)*numARM*numAPV + armTemp*numAPV + groupTemp*numAPV/2+apvTemp;
 						for(int i=0;i<ChPerApv;i++){
 							int chId = apvId*ChPerApv+i;
@@ -664,11 +666,12 @@ void istBuilder::startrun(daqReader *rdr) {
 				fgets(buff,256,file1);
 
 				ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
-				if(ret!=6) LOG(U_IST,"Wrong input:%s",buff);
+				if(ret!=6) LOG(WARN,"Wrong input:%s",buff);
 				else{
-					if(runTemp<run) break;
+					if(runTemp<run&&runTemp>10000000) break;
 					else if(runTemp==run){
 						int apvId = (rdoTemp-1)*numARM*numAPV + armTemp*numAPV + groupTemp*numAPV/2+apvTemp;
+						LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*numAPV/2+apvTemp);
 						for(int i=0;i<ChPerApv;i++){
 							int chId = apvId*ChPerApv+i;
 							int geoId    = istMapping[chId];
@@ -680,6 +683,121 @@ void istBuilder::startrun(daqReader *rdr) {
 			}
 		}
 	}
+
+	sprintf(paraDir, "%s/ist/ist_bad_channels.txt", clientdatadir);
+	//LOG(U_IST,"Loading file %s",paraDir);
+	FILE *file2;
+	file2 = fopen(paraDir,"rb");
+	if(file2==0){
+		LOG(WARN,"ped::ist bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	}else{
+		while(!feof(file2)) {
+			int r, arm, apv, ch  ;
+			int apvId, chId, geoId;
+			char buff[256] ;
+
+			if(fgets(buff,sizeof(buff),file2) == 0) continue ;
+			
+			switch(buff[0]) {
+			case '#' :
+			case '!' :
+			case '*' :
+			case '/' :
+			case '.' :
+				continue ;
+			}
+			   
+			int ret = sscanf(buff,"%d %d %d %d",&r,&arm,&apv,&ch) ;
+			if(ret != 4) continue ;
+
+			//check for negative 0!
+			char ca[4][16] ;
+			char n[4] ;
+			memset(n,0,sizeof(n)) ;
+			sscanf(buff,"%s %s %s %s",ca[0],ca[1],ca[2],ca[3]) ;
+			for(int i=0;i<4;i++) {
+				int dummy ;
+				if(sscanf(ca[i],"%d",&dummy)!=1) continue ;
+				if(dummy==0) {
+					if(index(ca[i],'-')) n[i] = '-' ;
+					else n[i] = '+' ;
+				}
+				else {
+					if(dummy<0) n[i] = '-' ;
+					else n[i] = '+' ;
+				}
+			}
+	
+			if(r<0) r *= -1 ;
+			if(arm < 0) arm *= -1 ;
+			if(apv < 0) apv *= -1 ;
+			if(ch < 0) ch *= -1 ;
+	
+			if(n[1]=='-') {	//nix ARM
+				for(int a=0;a<numAPV;a++) {
+				for(int c=0;c<ChPerApv;c++) {
+					apvId = (r-1)*numARM*numAPV + arm*numAPV + a;
+					chId  = apvId*ChPerApv + c;
+					geoId = istMapping[chId];
+					isChannelBad[geoId-1] = true;
+				}
+				LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, a);
+				}
+			}
+			else if(n[2]=='-') {	//nix APV
+				for(int c=0;c<ChPerApv;c++) {
+
+					apvId = (r-1)*numARM*numAPV + arm*numAPV + apv;
+					chId  = apvId*ChPerApv + c;
+					geoId = istMapping[chId];
+					isChannelBad[geoId-1] = true;
+				}
+				LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
+			}
+			else {
+					apvId = (r-1)*numARM*numAPV + arm*numAPV + apv;
+					chId  = apvId*ChPerApv + ch;
+					geoId = istMapping[chId];
+					isChannelBad[geoId-1] = true;
+					LOG(DBG,"mask rdo %d arm %d apv %d ch %d", r, arm, apv, ch);
+			}
+		}
+	}
+	fclose(file2);
+
+	sprintf(paraDir, "%s/ist/ist_noisy_chips.txt", clientdatadir);
+	//LOG(U_IST,"Loading file %s",paraDir);
+	FILE *file3;
+	file3 = fopen(paraDir,"rb");
+	if(file3==0){
+		LOG(WARN,"ped::ist noisy chip list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	}else{
+		while(!feof(file3)) {
+			int r, arm, apv, ch  ;
+			int apvId;
+			char buff[256] ;
+
+			if(fgets(buff,sizeof(buff),file3) == 0) continue ;
+			
+			switch(buff[0]) {
+			case '#' :
+			case '!' :
+			case '*' :
+			case '/' :
+			case '.' :
+				continue ;
+			}
+			   
+			int ret = sscanf(buff,"%d %d %d",&r,&arm,&apv) ;
+			if(ret != 3) continue ;
+
+			apvId = (r-1)*numARM*numAPV + arm*numAPV + apv;
+			isNoisyApv[apvId] = true;
+			LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
+
+		}
+	}
+	fclose(file3);
 
 	errorMsg->SetText("No Error Message");    
 	sumHistogramsFilled  = 0;  
@@ -853,6 +971,7 @@ void istBuilder::event(daqReader *rdr) {
 			Bool_t isBad = false;
 			if ( runningAvg[geoId-1] < minPedVal || runningAvg[geoId-1] > maxPedVal )    isBad = true;
 			if ( oldStdDevs[geoId-1] < minRMSVal || oldStdDevs[geoId-1] > maxRMSVal )    isBad = true;
+			if(isBad) continue;
 
 			//fill pedestal-subtracted ADC vs time bin index
 			if ( !isBad )     hTbVsAdcContents.tbVsAdcArray[sectionIdx]->Fill(f[i].tb, f[i].adc - (int)(runningAvg[geoId-1]+0.5));
@@ -927,16 +1046,18 @@ void istBuilder::event(daqReader *rdr) {
 		float rms        = oldStdDevs[geoIdx-1];
 		int adc_max      = maxAdc[geoIdx-1];
 		int tb_max       = maxTimeBin[geoIdx-1];
+			
+		if( adc_max<hitCut*rms || rms < minRMSVal || rms > maxRMSVal ) continue;
 
-		if( (adc_max>hitCut*rms) && (rms>rmsMin) ) {
-			//cout<<"rdo "<<elecRdo<<" arm "<<elecArm<<" apv "<<elecApv<<" chan "<<elecChan<<" sec "<<elecSec<<" ladder "<<ladderIdx<<" sensor "<<sensorIdx<<" column "<<columnIdx<<" apvGeoIdx "<<apvGeoIdx<<" ped = "<< runningAvg[geoIdx-1]<<" rms = "<<rms<<" adc_max = "<<maxAdc[geoIdx-1]<<" tb_max = "<<tb_max<<" hitCut*rms = "<<hitCut*rms<<" rmsMin = "<<rmsMin<<endl;
+		int apvId = (elecRdo-1)*numARM*numAPV + elecArm*numAPV + elecApv;
+		if( isNoisyApv[apvId] && adc_max<noiseChipCut*rms) continue;
+
 			HitCount[ladderIdx-1]++;
 			hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMap->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
 			hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
 			hEventSumContents.hMaxTimeBin->Fill(tb_max);
-		}
 
 		//ZS data
 		if( maxAdc_zs[geoIdx-1] > 0 ) {//roughly cut
@@ -951,7 +1072,7 @@ void istBuilder::event(daqReader *rdr) {
 	//fill hit multiplicity per ladder per event
 	for ( int i=0; i<numLadder; i++) { 
 		hMultContents.multArray[i]->Fill(HitCount[i]);
-		hSumContents.hMultVsLadder->Fill(i+1, HitCount[i]);
+		hSumContents.hMultVsLadder->Fill(i+1, HitCount[i]<101?HitCount[i]:100.5);
 	}
 
 	//getting MPV value and CM noise every 50 evts for each section
@@ -1197,7 +1318,5 @@ void istBuilder::stoprun(daqReader *rdr) {
 void istBuilder::main(int argc, char *argv[])
 {
 	istBuilder me;
-	//  cout <<"starting main" << endl;
 	me.Main(argc, argv);
-	//  cout <<"ending main" << endl;
 }
