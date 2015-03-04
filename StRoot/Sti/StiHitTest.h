@@ -33,6 +33,13 @@ private:
   char fEnd[1];
   
 };
+class StiKalmanTrack;
+class StiHftHits 
+{
+public:
+static void hftHist(const char *tit, const StiKalmanTrack* tk);
+};
+
 
 #endif
 
