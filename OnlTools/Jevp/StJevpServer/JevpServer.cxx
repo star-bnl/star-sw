@@ -1454,12 +1454,18 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     //}
 
     if(plot) {
+      CP;
       LOG(DBG, "Found plot %s",cnode->name);
+      CP;
       plot->draw();
+      CP;
     }
     else {
+      CP;
       LOG(DBG, "Can't find plot %s",cnode->name);
+      CP;
       DrawCrossOfDeath(cnode->name);
+      CP;
     }
 
     cnode = cnode->next;
