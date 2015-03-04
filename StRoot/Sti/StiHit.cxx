@@ -135,6 +135,8 @@ void StiHit::setGlobal(const StiDetector * detector,
 		       float gx, float gy, float gz,
 		       float energy)
 {
+static int nCall =0; nCall++;
+
   if (detector)
     {
       StiPlacement * placement = detector->getPlacement();
