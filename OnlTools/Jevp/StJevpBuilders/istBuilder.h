@@ -58,9 +58,9 @@ class istBuilder : public JevpPlotSet {
   static const int numTimeBin   = 9;//update from 7 to 9: YPWANG 25/1/2014
   static const int goodChCut    = 64;
   static const int minPedVal    = 200;
-  static const int maxPedVal    = 1500;
-  static const int minRMSVal    = 10;
-  static const int maxRMSVal    = 100;
+  static const int maxPedVal    = 2000;
+  static const int minRMSVal    = 12;
+  static const int maxRMSVal    = 40;
   //alarm threshold
   static const float minMipMpv_ZS    = 450;
   static const float minMipMpv_nonZS = 400;
@@ -75,7 +75,7 @@ class istBuilder : public JevpPlotSet {
   //cut setting
   static const float cmnCut	= 3.0;
   static const float hitCut	= 5.0;
-  static const float rmsMin     = 12.0;
+  static const float noiseChipCut = 10.0;
 
   //IST mapping
   int istMapping[totCh]; //IST channel mapping (electronics ID to geometry ID transform)
@@ -550,6 +550,7 @@ class istBuilder : public JevpPlotSet {
 
   float cmNoise[totAPV];
   bool isChannelBad[totCh];
+  bool isNoisyApv[totAPV];
   //int rmsVals[totCh];
 
   //num RDOs, ARM, APV, keep track of channel count per apv
