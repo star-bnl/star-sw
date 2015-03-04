@@ -195,7 +195,6 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
                      int distance1 = std::distance(clustersVec[sensorIdx][columnIdx1].begin(), clusterIt1);
                      clustersVec[sensorIdx][columnIdx1].erase(clusterIt1);
-		     if(clustersVec[sensorIdx][columnIdx1].empty()) continue;
 
                      if (distance1 == 0)
                         clusterIt1 = clustersVec[sensorIdx][columnIdx1].begin();
@@ -230,8 +229,8 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
-* Revision 1.14  2015/03/03 04:07:45  ypwang
-* empty check was added for the to-be-merged column-wise proto-clusters container, to fix the RT #3056 oberserved by Lidia
+* Revision 1.15  2015/03/04 16:17:07  smirnovd
+* Revert "empty check was added for the to-be-merged column-wise proto-clusters container, to fix the RT #3056 oberserved by Lidia"
 *
 * Revision 1.13  2014/09/18 06:27:25  ypwang
 * remove unneccessary check for raw hit electroincis ID check
