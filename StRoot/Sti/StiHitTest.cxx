@@ -5,6 +5,9 @@
 #include "TVectorD.h"
 #include "TMatrixDSym.h"
 #include "TMath.h"
+#include "StiHit.h"
+#include "StiKalmanTrack.h"
+#include "StiUtilities/StiDebug.h"
 //______________________________________________________________________________
 void StiHitTest::reset()
 {
@@ -73,6 +76,56 @@ double StiHitTest::zAngle() const
    if (dx<0) {dx=-dx;dz=-dz;}
    return TMath::ATan2(dz,dx);
 }
+//______________________________________________________________________________
+//______________________________________________________________________________
+//______________________________________________________________________________
+void StiHftHits::hftHist(const char *name, const StiKalmanTrack* tk)
+{
+//PXL 1 -- 2 < R < 4 cm
+//PXL 2 -- 7 < R < 9 cm
+//IST 3 -- 12 < R < 17 cm
+//SST 4 -- 21 < R < 28 cm 
+enum {kMinRadTpc = 50};
+if (StiDebug::Debug()<2) return;
 
 
+static double Rxy[]={5,10,19,30,0};
+  int nHits=0,nHft=0,tally[9]={0};
+  double lastR=0;
+  StiKTNIterator it;
+  for (it=tk->rbegin();it!=tk->rend();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    const StiDetector *detector = node->getDetector();
+    if (!detector) continue;
+    double rxy = node->getRxy();
+    if (rxy>kMinRadTpc) 	break;
+    if (!detector->isActive()) 	continue;
+    nHft++;
+    const StiHit *hit = node->getHit();
+    if (!hit ) 			continue;
+    if (!hit->detector())    	continue;
+    if (node->getChi2()>1000)	continue;
+    rxy = sqrt(pow(hit->x(),2)+pow(hit->y(),2));
+    if (rxy>kMinRadTpc) 	break;
+    if (rxy<lastR) 		{StiDebug::Count(name,"???"); return;}//wrong order, do not count at all
+    lastR = rxy;
+    int ih=0;
+    rxy = hit->x();
+    for (;Rxy[ih];ih++) { if (rxy<Rxy[ih]) break;}
+    tally[ih]++; nHits++;
+
+  }
+  if (!nHits) {
+    if (nHft) {StiDebug::Count(name,"000");}
+    else      {StiDebug::Count(name,"xxx");}
+    return;
+  }
+  TString ts;
+  for (int i=0;i<4;i++) {
+    if (tally[i]>3) tally[i]=3;
+    ts += tally[i];
+  }
+  StiDebug::Count(name,ts.Data());
+}
 
