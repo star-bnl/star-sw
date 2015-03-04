@@ -242,6 +242,14 @@ void StiDebug::Count(const char *key,double val)
   h->Fill(val);
 }
 //______________________________________________________________________________ 
+void StiDebug::Count(const char *key,const char *val)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH1F(key,key,0,0.,0.);}
+  h->Fill(val,1.);
+}
+//______________________________________________________________________________ 
 void StiDebug::Count(const char *key,double val,double left,double rite)
 {
   if (mgDebug<2) return;
@@ -283,29 +291,33 @@ void StiDebug::Sumary()
 
 
   TH1 *H[4];
-  nH = 0;n=0;
-  for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
-    TH1 *h = (*iter).second; n++;
-    if (h->IsA()->InheritsFrom("TH2")) continue;
+  for (int numCha = 0; numCha<2; numCha++) {
+    nH = 0;n=0;
+    for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+      TH1 *h = (*iter).second; n++;
+      if (!h->IsA()->InheritsFrom("TH1")) continue;
+      if ( h->IsA()->InheritsFrom("TH2")) continue;
 
-    int nEnt = h->GetEntries();
-    double mean = h->GetMean();
-    double rms  = h->GetRMS();
-    printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
-    if (rms<=0) continue;
-    if (nH==4) {Draw(nH,H);nH=0;}
-    H[nH++] = h;
+      int nEnt = h->GetEntries();
+      if (!nEnt) continue;
+      if ((h->GetXaxis()->GetLabels()==0) != (numCha == 0)) continue;
+      double mean = h->GetMean();
+      double rms  = h->GetRMS();
+      printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+      if (nH==4) {Draw(nH,H);nH=0;}
+      if (numCha) h->LabelsOption(">","X");
+      H[nH++] = h;
+    }
+    if (nH) Draw(nH,H);
   }
-  if (nH) Draw(nH,H);
-
   for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
     TH1 *h = (*iter).second; n++;
     if (!h->IsA()->InheritsFrom("TH2")) continue;
     int nEnt = h->GetEntries();
+    if (!nEnt) continue;
     double mean = h->GetMean();
     double rms  = h->GetRMS();
     printf("TH2 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
-    if (rms<=0) continue;
     H[0]=h;Draw(1,H);
   }
 
