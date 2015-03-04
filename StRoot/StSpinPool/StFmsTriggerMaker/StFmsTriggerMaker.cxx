@@ -181,7 +181,7 @@ int StFmsTriggerMaker::InitRun(int runNumber){
 }
 
 int StFmsTriggerMaker::Finish(){  
-  printf("%d  Number of ADC=0xFFF\n",mNFFF);
+  printf("%12d      Number of ADC=0xFFF\n",mNFFF);
   return kStOK;
 }
 

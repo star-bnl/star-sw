@@ -1,7 +1,7 @@
 cp StRoot/StSpinPool/StFmsTriggerMaker/macro/* .
 
 \rm crontab.txt
-\rm makeplot
+\rm runbitcheck
 \rm makepage.pl
 
 sed "s#/ldaphome/akio/fmstrg2015#$PWD#g" StRoot/StSpinPool/StFmsTriggerMaker/macros/crontab.txt > crontab.txt
