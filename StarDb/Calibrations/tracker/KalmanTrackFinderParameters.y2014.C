@@ -16,8 +16,13 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxNullCount	 =         13; // Maximum number of null hits on active detector layers;
     row.maxContigNullCount	 =          8; // Maximum number of contiguous null hits;
     row.minCountForReset	 =          2; // Number of adjacent layers with hits before nullContiguous is reset to zero ;
-    row.mHitRegions	 =     302010; // 302010 means 0<pxlHit<10, 10<istHit<20, 20<ssdHit<30;
-    row.mHitWeights	 =      12201; // Coeffs of nhits. sum must be >=20;
+//PXL 1 -- 2 < R < 4 cm
+//PXL 2 -- 7 < R < 9 cm
+//IST 3 -- 12 < R < 17 cm
+//SST 4 -- 21 < R < 28 cm 
+
+    row.mHitRegions	 =   28170904; // pxl1<4>pxl2<9<pxl3<17<SST<28;
+    row.mHitWeights	 =    1090309; // Coeffs of nhits. sum must be >=20;
     row.maxChi2Vertex	 =        900; // max vertex incremental chi2 value acceptable;
     row.massHypothesis	 =      0.139; // mass used in the tracking for mcs and eloss calculation purposes;
     row.maxDca2dZeroXY	 =          6; // max 2d dca to X=Y=0  for primary track;
