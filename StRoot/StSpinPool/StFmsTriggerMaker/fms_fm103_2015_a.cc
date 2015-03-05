@@ -38,7 +38,8 @@ void fms_fm103_2015_a(Board& fm103, int t, int simdat){
   int BS1B=getFM006_BS1E(B2);
   fm103.userdata[t][7]=(JJ>BSThr3);
   fm103.userdata[t][8]=(JJ>BSThr2);
-  fm103.userdata[t][9]=(JJ>BSThr1);
+  fm103.userdata[t][9]=BS1JJ;
+  //printf("BBB %s %d %d %d\n",fm103.name,fm103.userdata[t][7],fm103.userdata[t][8],fm103.userdata[t][9]);
 
   //Jp
   int JpT=getFM006_JpEF(T2)+getFM005_JpGH(T1)+getFM005_JpIJ(T1);
