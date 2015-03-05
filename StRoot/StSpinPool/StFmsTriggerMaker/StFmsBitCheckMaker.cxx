@@ -50,8 +50,10 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
   dmin=-(NPRE+NPOST); dmax=NPRE+NPOST;
   //  if(layer2==0){ dmin=-(NPRE+NPOST); dmax=NPRE+NPOST; }
   //else         { dmin=-NPRE;         dmax=NPOST;      }
-  int nt[MAXDT]; memset(nt,0,sizeof(nt));
-  int ng[MAXDT]; memset(ng,0,sizeof(ng));
+  int nt[MAXDT]; 
+  int ng[MAXDT]; 
+  memset(nt,0,sizeof(nt));
+  memset(ng,0,sizeof(ng));
   for(int dt=0; dt<MAXDT; dt++){
     int d=dt-MAXD;
     if(d<dmin || d>dmax) continue;
@@ -79,7 +81,7 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
     }
     printf("\n");
   }
-  printf("%8d %15s Mismatch\% = ",run,name); 
+  printf("%8d %15s MMdeltaT\% = ",run,name); 
   for(int dt=0; dt<MAXDT; dt++){
     int d=dt-MAXD;
     if(d<dmin || d>dmax) continue;
@@ -87,6 +89,13 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
     printf("%6.3f ",mm);
     MM[dt][id]=mm;
   }
+  printf("\n");
+  printf("%8d %15s Mismatch\% = ",run,name); 
+  int dt=MAXD;
+  int d=dt-MAXD;
+  float mm=float(nt[dt]-ng[dt])/float(nt[dt])*100.0;
+  printf("%6.3f ",mm);
+  MM[dt][id]=mm;
   printf("\n");
 }
 
@@ -262,17 +271,11 @@ int StFmsBitCheckMaker::Finish(){
   printCount(9,"QT3/FE  =>FM010",N0[9],mRun);
   printCount(10,"QT4/JIHG=>FM011",N0[10],mRun);
   printCount(11,"QT4/FE  =>FM012",N0[11],mRun);
-
-  //Layer0->Layer1                                                                                                                                                    
   printCount(12,"FM001/2 =>FM101", N1[0],mRun);
   printCount(13,"FM003/4 =>FM102", N1[1],mRun);
   printCount(14,"FM005/8 =>FM103", N1[2],mRun);
   printCount(15,"FM09/12 =>FM104", N1[3],mRun);
-
-  //Layer1->Layer2                                                                                                                                                   
-  printCount(16,"FM101/4 =>FP201", N2,mRun,1);
-
-  //Layer2->TCU                                                                                                                                                   
+  printCount(16,"FM101/4 =>FP201", N2,mRun,1);    
   printCount3(17,"FP201   =>TCU  ",N3,mRun);
   printMismatch(mRun);
 }

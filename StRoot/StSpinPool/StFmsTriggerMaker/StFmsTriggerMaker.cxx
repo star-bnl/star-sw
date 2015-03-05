@@ -30,8 +30,10 @@
 #include "fms_fm005_2015_a.hh"
 #include "fms_fm006_2015_a.hh"
 #include "fms_fm101_2015_a.hh"
+#include "fms_fm101_2015_b.hh"
 #include "fms_fm103_2015_a.hh"
 #include "l1_fp201_2015_a.hh"
+#include "l1_fp201_2015_b.hh"
 #include "StFmsTriggerMaker.h"
 
 using namespace std;
@@ -146,6 +148,9 @@ StFmsTriggerMaker::StFmsTriggerMaker(const char* name)
   mUseTrgData = 0;
   mUseMuDst = 0;
   mUseStEvent = 0;
+
+  //ADC=0xFFF counter
+  mNFFF=0;
 }
 
 void StFmsTriggerMaker::Clear(Option_t* option)
@@ -173,6 +178,11 @@ int StFmsTriggerMaker::InitRun(int runNumber){
   //mDBTime = GetDBTime();
   //mDBTime = TDatime();
   return loadRegisters(runNumber);
+}
+
+int StFmsTriggerMaker::Finish(){  
+  printf("%12d      Number of ADC=0xFFF\n",mNFFF);
+  return kStOK;
 }
 
 int StFmsTriggerMaker::Make(){
@@ -243,7 +253,10 @@ int StFmsTriggerMaker::MakeTrgData(){
 	  if(adc>0) {
 	    writeQtCrate(crt,adr,ch,adc,t); 
 	    n++;
-	    //printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	    if(adc==0xFFF) {
+	      printf("0xFFF problem : Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
+	      mNFFF++;
+	    }
 	  }
 	}
       }
@@ -305,6 +318,9 @@ void StFmsTriggerMaker::writeDsmData(int t){
 
   //FAKE!!! FM010 3rd int should be 0xFFFFFFFF since not connected... but shows some activities fake increasing mismatch%. Masking out -akio
   ((int*)fm010.dsmdata[t])[2] = 0xFFFFFFFF;
+  //FAKE!!! FP201 4th int bit0 is stuck high and not in use after 2015b algo is in. Masking out to get real mismatch% -akio
+  if(mForceRun>=16056024)
+    ((int*)fp201.dsmdata[t])[3] = (((int*)fp201.dsmdata[t])[3]) & 0xfffffffe;
 
   //printf("StFmsTriggerMaker::writeDsmData x=%d\n",x);
 }
@@ -474,8 +490,13 @@ void StFmsTriggerMaker::runFmsLayer1(int t){
     fms_fm102_2012_a(fm103,t);
     break;
   case 2015:
-    fms_fm101_2015_a(fm101,t,mUseDsmData);
-    fms_fm101_2015_a(fm102,t,mUseDsmData);
+    if(mForceRun<16056024){ 
+      fms_fm101_2015_a(fm101,t,mUseDsmData);
+      fms_fm101_2015_a(fm102,t,mUseDsmData);
+    }else{                
+      fms_fm101_2015_b(fm101,t,mUseDsmData);
+      fms_fm101_2015_b(fm102,t,mUseDsmData);
+    }
     fms_fm103_2015_a(fm103,t,mUseDsmData);
     fms_fm103_2015_a(fm104,t,mUseDsmData);
     break;
@@ -487,7 +508,10 @@ void StFmsTriggerMaker::runFpdLayer2(int t){
   case 2011: l1_fp201_2011_a(fp201,t); break;
   case 2012: l1_fp201_2012_b(fp201,t); break;
   case 2013: l1_fp201_2012_b(fp201,t); break;
-  case 2015: l1_fp201_2015_a(fp201,t,mUseDsmData); break;
+  case 2015: 
+    if(mForceRun<16056024)  {l1_fp201_2015_a(fp201,t,mUseDsmData);} 
+    else                    {l1_fp201_2015_b(fp201,t,mUseDsmData);}
+    break;
   }
 }
 

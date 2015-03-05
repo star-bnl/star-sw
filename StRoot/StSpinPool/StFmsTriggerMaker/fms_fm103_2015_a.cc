@@ -56,11 +56,11 @@ void fms_fm103_2015_a(Board& fm103, int t, int simdat){
   }
 }
 
-int getFM103_BS3(int out)  {return getbits(out, 0, 1);}
-int getFM103_BS2(int out)  {return getbits(out, 1, 1);}
-int getFM103_BS1T(int out) {return getbits(out, 2, 1);}
-int getFM103_BS1M(int out) {return getbits(out, 3, 1);}
-int getFM103_BS1B(int out) {return getbits(out, 4, 1);}
-int getFM103_JpT(int out) {return getbits(out, 5, 8);}
-int getFM103_JpM(int out) {return getbits(out,16, 8);}
-int getFM103_JpB(int out) {return getbits(out,24, 8);}
+int getFM103_2015a_BS3(int out)  {return getbits(out, 0, 1);}
+int getFM103_2015a_BS2(int out)  {return getbits(out, 1, 1);}
+int getFM103_2015a_BS1T(int out) {return getbits(out, 2, 1);}
+int getFM103_2015a_BS1M(int out) {return getbits(out, 3, 1);}
+int getFM103_2015a_BS1B(int out) {return getbits(out, 4, 1);}
+int getFM103_2015a_JpT(int out)  {return getbits(out, 5, 8);}
+int getFM103_2015a_JpM(int out)  {return getbits(out,16, 8);}
+int getFM103_2015a_JpB(int out)  {return getbits(out,24, 8);}

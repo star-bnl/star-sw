@@ -1,0 +1,33 @@
+#!/bin/csh
+
+set day=$1
+set startrun={$1}000
+set endrun={$1}999
+
+set dbserver=onldb2.starp.bnl.gov
+set dbport=3501
+
+if ( ! -e $day ) then
+   mkdir $day
+endif
+
+set file=$day/run.txt
+if ( -e $file ) then
+   /bin/rm $file
+endif
+echo Creating $file for $startrun to $endrun
+mysql --skip-column-names -h $dbserver --port=$dbport > $file << END1
+connect RunLog;
+select runNumber,beginTime,startRunTime,endRunTime,glbSetupName,daqSetupName from runDescriptor where runNumber>=$startrun and runNumber<=$endrun;
+END1
+
+set file=$day/fmsrun.txt
+if ( -e $file ) then
+   /bin/rm $file
+endif
+echo Creating $file for $startrun to $endrun
+mysql --skip-column-names -h $dbserver --port=$dbport > $file <<END2
+connect Conditions_rts;
+SELECT idx_rn from nodes where node in (0x800f) and inrun=1 and idx_rn>=$startrun and idx_rn<=$endrun;
+END2
+

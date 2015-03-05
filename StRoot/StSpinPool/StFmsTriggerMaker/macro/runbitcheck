@@ -1,0 +1,67 @@
+#!/bin/csh 
+
+set run=$1
+set nqa=$2
+
+set anadir=/ldaphome/akio/fmstrg2015
+set dir=$run
+@ dir /= 1000
+
+echo runbitcheck $run anadir=$anadir yearday=$dir nqa=$nqa
+
+stardev
+cd $anadir
+
+if ( ! -e $dir ) then 
+    mkdir $dir
+endif
+if ( ! -e www/$dir ) then 
+    mkdir www/$dir
+endif
+if ( -e $dir/$run.log ) then 
+    echo /bin/rm $dir/$run.log
+    /bin/rm $dir/$run.log
+endif
+
+set nfile=`ls -1 trg/run${run}.*.dat | wc -l`
+if ( $nfile > 1 ) then
+ @ nfile -= 1
+endif
+
+if ( $nqa == "nqa" ) then
+  echo NOQA
+else
+  echo root4star -b -q bitcheck.C"($run,$nfile,1000)" | grep -v 'StQAInfo: StIOMaker:'
+  root4star -b -q bitcheck.C"($run,$nfile,1000)" | grep -v 'StQAInfo: StIOMaker:' >  $dir/$run.log
+endif
+
+\mv *${run}*.png www/$dir/	
+\mv $dir/$run.log www/$dir/
+
+if ( -e www/$dir/$run.bitcheck.txt ) then
+  /bin/rm www/$dir/$run.bitcheck.txt
+endif 
+grep ' | ' www/$dir/$run.log > www/$dir/$run.bitcheck.txt
+
+if ( -e www/$dir/$run.summary.txt ) then
+  /bin/rm www/$dir/$run.summary.txt
+endif 
+grep ' :  0 ' www/$dir/$run.log > www/$dir/$run.summary.txt
+grep 'Run      Mismatch' www/$dir/$run.log >> www/$dir/$run.summary.txt
+grep 'mismatch' www/$dir/$run.log >> www/$dir/$run.summary.txt
+
+if ( -e www/$dir/$dir.mismatch.txt ) then
+  /bin/rm www/$dir/$dir.mismatch.txt   
+endif
+grep -h 'mismatch' www/$dir/*.log > www/$dir/$dir.mismatch.txt
+
+if ( -e www/$dir/$run.avgmm ) then
+  /bin/rm www/$dir/$run.avgmm
+endif
+grep -h 'AVGMM' www/$dir/$run.log | cut -c 1-9 > www/$dir/$run.avgmm
+
+if ( -e www/$dir/$run.Mismatch.txt ) then
+  /bin/rm www/$dir/$run.Mismatch.txt   
+endif
+grep -h 'Mismatch' www/$dir/$run.log | grep '=>' | cut -c 37- > www/$dir/$run.Mismatch.txt
+grep -h 'AVGMM' www/$dir/$run.log | cut -c 1-9 >> www/$dir/$run.Mismatch.txt
