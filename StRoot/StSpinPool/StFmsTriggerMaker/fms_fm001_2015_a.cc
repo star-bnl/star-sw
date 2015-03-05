@@ -45,12 +45,22 @@ void fms_fm001_2015_a(Board& fm001, int t, int simdat){
   bs[3] = C01 + C23; //C
   bs[4] = C23 + D01; //CD
   bs[5] = D01 + D23; //D
+  fm001.userdata[t][0]=bs[0];
+  fm001.userdata[t][1]=bs[1];
+  fm001.userdata[t][2]=bs[2];
+  fm001.userdata[t][3]=bs[3];
+  fm001.userdata[t][4]=bs[4];
+  fm001.userdata[t][5]=bs[5];
 
   //Compare BS to thresholds
   int BS3=0, BS2=0;
+  fm001.userdata[t][6]=0;
+  fm001.userdata[t][7]=0;
+  fm001.userdata[t][8]=0;
   for(int i=0; i<MAX; i++){
-    if(bs[i]>BSThr3) BS3=1;
-    if(bs[i]>BSThr2) BS2=1;
+    if(bs[i]>BSThr3) {BS3=1; fm001.userdata[t][7]+=(1<<i); }
+    if(bs[i]>BSThr2) {BS2=1; fm001.userdata[t][8]+=(1<<i); }
+    if(bs[i]>BSThr1) {       fm001.userdata[t][9]+=(1<<i); }
   }
   int BS1A  =(bs[0]>BSThr1);
   int BS1BCD=(bs[1]>BSThr1) | (bs[2]>BSThr1) | (bs[3]>BSThr1) | (bs[4]>BSThr1) | (bs[5]>BSThr1);

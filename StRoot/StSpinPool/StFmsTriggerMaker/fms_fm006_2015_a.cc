@@ -36,12 +36,19 @@ void fms_fm006_2015_a(Board& fm006, int t, int simdat){
   bs[0] = E01 + E23; //E
   bs[1] = E23 + F01; //EF
   bs[2] = F01 + F23; //F
+  fm006.userdata[t][0]=bs[0];
+  fm006.userdata[t][1]=bs[1];
+  fm006.userdata[t][2]=bs[2];
 
   //Compare BS to thresholds
   int BS3=0, BS2=0;
+  fm006.userdata[t][6]=0;
+  fm006.userdata[t][7]=0;
+  fm006.userdata[t][8]=0;
   for(int i=0; i<MAX; i++){
-    if(bs[i]>BSThr3) BS3=1;
-    if(bs[i]>BSThr2) BS2=1;
+    if(bs[i]>BSThr3) {BS3=1; fm006.userdata[t][7]+=(1<<i); }
+    if(bs[i]>BSThr2) {BS2=1; fm006.userdata[t][8]+=(1<<i); }
+    if(bs[i]>BSThr1) {       fm006.userdata[t][9]+=(1<<i); }
   }
   int BS1E =(bs[0]>BSThr1) | (bs[1]>BSThr1);
   int BS1F =(bs[2]>BSThr1);

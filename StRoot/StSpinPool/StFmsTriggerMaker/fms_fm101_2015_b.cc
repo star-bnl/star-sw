@@ -26,11 +26,15 @@ void fms_fm101_2015_b(Board& fm101, int t, int simdat){
 
   //Make 1 more BS sum
   int DD=getFM001_D23(T) + getFM001_D23(B);
+  fm101.userdata[t][0]=DD;
 
   //Compare to threshold and OR
   int BS3 = getFM001_BS3(T) | getFM001_BS3(B) | (DD>BSThr3);
   int BS2 = getFM001_BS2(T) | getFM001_BS2(B) | (DD>BSThr2);
   int BS1DD=(DD>BSThr1);
+  fm101.userdata[t][7]=(DD>BSThr3);
+  fm101.userdata[t][8]=(DD>BSThr2);
+  fm101.userdata[t][9]=(DD>BSThr1);
 
   //BS1 bits
   int BS1T=getFM001_BS1A(T);

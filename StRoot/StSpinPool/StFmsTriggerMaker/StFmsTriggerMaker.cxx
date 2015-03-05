@@ -873,6 +873,35 @@ int StFmsTriggerMaker::FM1xxdata(int number, int ch, int t) const{
   return 0;
 }
 
+int StFmsTriggerMaker::FM0xxuserdata(int number, int ch, int t) const{
+  switch(number){
+  case 1:  return ((int*)fm001.userdata[t])[ch];
+  case 2:  return ((int*)fm002.userdata[t])[ch];
+  case 3:  return ((int*)fm003.userdata[t])[ch];
+  case 4:  return ((int*)fm004.userdata[t])[ch];
+  case 5:  return ((int*)fm005.userdata[t])[ch];
+  case 6:  return ((int*)fm006.userdata[t])[ch];
+  case 7:  return ((int*)fm007.userdata[t])[ch];
+  case 8:  return ((int*)fm008.userdata[t])[ch];
+  case 9:  return ((int*)fm009.userdata[t])[ch];
+  case 10: return ((int*)fm010.userdata[t])[ch];
+  case 11: return ((int*)fm011.userdata[t])[ch];
+  case 12: return ((int*)fm012.userdata[t])[ch];
+  }
+}
+
+int StFmsTriggerMaker::FM1xxuserdata(int number, int ch, int t) const{
+  switch(number){
+  case 1:  return ((int*)fm101.userdata[t])[ch];
+  case 2:  return ((int*)fm102.userdata[t])[ch];
+  case 3:  return ((int*)fm103.userdata[t])[ch];
+  case 4:  return ((int*)fm104.userdata[t])[ch];
+  }
+  return 0;
+}
+
 int StFmsTriggerMaker::FP201userdata(int ch, int t) const{
   return fp201.userdata[MAXPP][ch];
 }
+
+
