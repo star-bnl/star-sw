@@ -9,14 +9,12 @@
  * the mean of the fit over the range [0,100]. This is the value
  * we calculate the MIP relative gains with. Also, now using fit
  * to calculate RMS, and subsequently the error on the mean
- * Most recent update: June 10, 2014
+ * Most recent update: Feb. 25, 2015
  */
 
 #include <iostream>
 #include <fstream>
 using namespace std;
-
-#include "CalibrationHelperFunctions.cxx"
 
 #include "TFile.h"
 #include "TMath.h"
@@ -29,15 +27,15 @@ using namespace std;
 #include "TString.h"
 #include "TLine.h"
 
-void drawTower(TH1D*, Int_t, Int_t, CalibrationHelperFunctions*);
+void drawTower(TH1D*, Int_t, Int_t, Float_t, Float_t);
 Bool_t isBadTower(Int_t);
-Float_t getTowerEta(Int_t id);
 
-void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root", 
-			  const Char_t* psName = "mip.ps", 
-			  const Char_t* rootFilename = "towerMipFits.2012.root",
-			  const Char_t* mipOutputName = "mip.gains")
+void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root", const Char_t* psName = "mip.ps", const Char_t* rootFilename = "towerMipFits.root", const Char_t* mipOutputName = "mip.gains")
 {
+  // Load StEmcGeom for tower eta & phi
+  gROOT->Macro("loadMuDst.C");
+  StEmcGeom *mEmcGeom = StEmcGeom::instance("bemc");
+
   const Int_t nTowers = 4800;
   Int_t towerStatus[nTowers];
   Double_t fitMean[nTowers], fitMeanError[nTowers];
@@ -45,7 +43,7 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
   cout << "Input Filename: " << mipRootfile << endl;
   cout << "Plot Filename: " << psName << endl;
   cout << "Gain Filename: " << mipOutputName << endl;
-	
+
   gStyle->SetCanvasColor(10);
   gStyle->SetCanvasBorderMode(0);
   gStyle->SetStatColor(10);
@@ -57,12 +55,10 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
 
   /* Declare pointers for histograms before output file. Instantiate after, 
      this allows us to use outfile->Write() to write everything at once */
-
   TH1D *towerHisto[nTowers];
   TH2F *etaPhiMean, *etaPhiStatus, *etaPhiRatio;
 
   TFile* outfile = new TFile(rootFilename,"RECREATE");
-  CalibrationHelperFunctions* calibHelper = new CalibrationHelperFunctions();
   Float_t pi = TMath::Pi();
 
   // Instantiate histograms
@@ -85,16 +81,18 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
 
   for(Int_t iTow = 0; iTow < nTowers; ++iTow){		
     Int_t softId = iTow+1;
+    Float_t mTowerEta = 0., mTowerPhi = 0.;
+    mEmcGeom->getEta(softId,mTowerEta);
+    mEmcGeom->getPhi(softId,mTowerPhi);
+
     towerStatus[iTow] = 0;
     fitMean[iTow] = 0.;
     fitMeanError[iTow] = 0.;
     towerHisto[iTow]->GetXaxis()->SetRangeUser(6.,100.);
 		
     if(softId%200 == 0) cout << "Now fitting softId: " << softId << endl;
-    //cout << "Now fitting softId: " << softId << endl;
 
-    sprintf(fitName,"towerFit_%i",softId);
-    
+    sprintf(fitName,"towerFit_%i",softId);    
     Double_t fitLow = towerHisto[iTow]->GetMean() - towerHisto[iTow]->GetRMS();
     Double_t fitHigh = towerHisto[iTow]->GetMean() + towerHisto[iTow]->GetRMS()/2.;
     towerFit[iTow] = new TF1(fitName,"[0]*Gaus(x,[1],[2])*Landau(x,[3],[4])",fitLow,fitHigh);
@@ -111,13 +109,12 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
     // If entries less than 25 we can't fit the tower, so we skip it
     if(towerHisto[iTow]->Integral(56,156) < 25){
       towerStatus[iTow] = 13;
-      etaPhiStatus->Fill(calibHelper->getEta(softId),calibHelper->getPhi(softId),towerStatus[iTow]);
+      etaPhiStatus->Fill(mTowerEta,mTowerPhi,towerStatus[iTow]);
       continue;
     }
     
     towerHisto[iTow]->Fit(towerFit[iTow],"RQ");
     towerStatus[iTow]+=1;
-    //fitMean[iTow] = towerFit[iTow]->Mean(fitLow,fitHigh);
     fitMean[iTow] = towerFit[iTow]->Mean(0.,100.);
 
     // Get the fit parameters in an array
@@ -128,14 +125,10 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
     fitParams[3] = towerFit[iTow]->GetParameter(3);
     fitParams[4] = towerFit[iTow]->GetParameter(4);
 
-    // Set the integer bin values that encompass the fitting points
-    Double_t binLow = ceil(fitLow) + 51;
-    Double_t binHigh = floor(fitHigh) + 51; // Bin 51 is centered over zero
-
     //Calculate the variance of the fit
     Double_t fitVariance = towerFit[iTow]->Variance(0., 100., fitParams);
     Double_t fitSigma = sqrt(fitVariance);
-    Double_t entriesInFit = towerHisto[iTow]->Integral(51,151); // Offset bins by 51 to deal with negative bins
+    Double_t entriesInFit = towerHisto[iTow]->Integral(51,151); // Bin 51 centered over zero
 
     //Set the status codes of the towers
     if(fitMean[iTow] < 6) towerStatus[iTow] += 10; //Bad mean
@@ -158,13 +151,12 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
 
     // Fill eta/phi for good statuses
     if (towerStatus[iTow] == 1){
-      etaPhiMean->Fill(calibHelper->getEta(softId),calibHelper->getPhi(softId),fitMean[iTow]);
-      etaPhiRatio->Fill(calibHelper->getEta(softId),calibHelper->getPhi(softId),fitMean[iTow]/towerHisto[iTow]->GetMean());
+      etaPhiMean->Fill(mTowerEta,mTowerPhi,fitMean[iTow]);
+      etaPhiRatio->Fill(mTowerEta,mTowerPhi,fitMean[iTow]/towerHisto[iTow]->GetMean());
     }
-    etaPhiStatus->Fill(calibHelper->getEta(softId),calibHelper->getPhi(softId),towerStatus[iTow]); // Will be weight of zero!
+    etaPhiStatus->Fill(mTowerEta,mTowerPhi,towerStatus[iTow]);
   }// Towers loop
-  /******************* End MIP Fitting for each Tower *******************/
-  
+  /******************** End MIP Fitting for each Tower ********************/
 
   /******************* Begin Drawing the Fitted Spectra *******************/
   TPostScript *ps = new TPostScript(psName);
@@ -174,6 +166,10 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
   cout << endl << "Begin Tower Drawing Loop" << endl;
   for (Int_t iTow = 0; iTow < nTowers; ++iTow){
     Int_t softId = iTow + 1;
+    Float_t mTowerEta = 0., mTowerPhi = 0.;
+    mEmcGeom->getEta(softId,mTowerEta);
+    mEmcGeom->getPhi(softId,mTowerPhi);
+
     if (softId%400 == 0) cout << "Drawing tower " << softId << endl;
     if(iTow%20 == 0){
       canvas->Update();
@@ -188,7 +184,7 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
       towerHisto[iTow]->SetLineColor(kRed);
 
     // Draw the tower onto the pad
-    drawTower(towerHisto[iTow],softId,towerStatus[iTow],calibHelper);
+    drawTower(towerHisto[iTow],softId,towerStatus[iTow],mTowerEta,mTowerPhi);
 
     Double_t lineMax = towerHisto[iTow]->GetBinContent(towerHisto[iTow]->GetMaximumBin()) + 30;
     if(towerStatus[iTow] == 1){
@@ -197,7 +193,6 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
       avgValueLine->SetLineWidth(1.25);
       avgValueLine->Draw("same");
     }
-
     pad++;
   }//End tower draw loop
 
@@ -268,10 +263,13 @@ void mip_histogram_fitter(const Char_t* mipRootfile = "combinedMips.root",
   cout << "Number of Good Statuses = " << nGood << endl;
   cout << "Number of Bad Statuses = " << 4800-nGood << endl;
   cout << "Number of Empty Towers = " << nZero << endl;
+
+  // Delete geometry pointer
+  if (mEmcGeom) delete mEmcGeom;
 } // End of main routine
 			
-void drawTower(TH1D* histo, Int_t id, Int_t status, CalibrationHelperFunctions* helper){
-
+void drawTower(TH1D* histo, Int_t id, Int_t status, Float_t towerEta, Float_t towerPhi)
+{
   // Set histogram options
   histo->GetXaxis()->SetTitle("ADC");
   histo->GetXaxis()->CenterTitle();
@@ -281,13 +279,13 @@ void drawTower(TH1D* histo, Int_t id, Int_t status, CalibrationHelperFunctions* 
   Char_t towerTitle[100];
   Char_t etaTitle[100];
   Char_t phiTitle[100];
-  sprintf(etaTitle,"e:%1.2f",helper->getEta(id));
-  sprintf(phiTitle,"p:%1.2f",helper->getPhi(id));
+  sprintf(etaTitle,"e:%1.2f",towerEta);
+  sprintf(phiTitle,"p:%1.2f",towerPhi);
   TLatex etaLatex;
   TLatex phiLatex;
   etaLatex.SetTextSize(0.1);
   phiLatex.SetTextSize(0.1);
-  sprintf(towerTitle,"%i",id);//,f->GetParameter(1));
+  sprintf(towerTitle,"%i",id);
   TLatex titleLatex;
   titleLatex.SetTextSize(0.15);
   if(status!=1) titleLatex.SetTextColor(kRed);
@@ -309,24 +307,17 @@ Bool_t isBadTower(Int_t id)
   // First pass
   if (id == 34   || id == 106  || id == 266  || id == 267  || id == 282  || id == 286  || id == 287  || id == 410  || id == 504  || id == 533  ||
       id == 561  || id == 615  || id == 616  || id == 633  || id == 637  || id == 638  || id == 650  || id == 653  || id == 657  || id == 673  ||
-      id == 789  || id == 806  || id == 812  || id == 813  || id == 814  || id == 821  || id == 822  || id == 823  || id == 824  || id == 829  ||
-      id == 830  || id == 831  || id == 832  || id == 837  || id == 841  || id == 842  || id == 843  || id == 844  || id == 849  || id == 850  || 
-      id == 857  || id == 899  || id == 939  || id == 953  || id == 954  || id == 993  || id == 1026 || id == 1046 || id == 1048 || id == 1080 || 
-      id == 1100 || id == 1199 || id == 1200 || id == 1207 || id == 1218 || id == 1219 || id == 1222 || id == 1223 || id == 1224 || id == 1198 || 
-      id == 1237 || id == 1241 || id == 1242 || id == 1243 || id == 1244 || id == 1257 || id == 1260 || id == 1312 || id == 1348 || id == 1353 || 
-      id == 1354 || id == 1388 || id == 1407 || id == 1409 || id == 1434 || id == 1448 || id == 1574 || id == 1597 || id == 1612 || id == 1654 || 
-      id == 1713 || id == 1765 || id == 1766 || id == 1877 || id == 1878 || id == 2073 || id == 2077 || id == 2092 || id == 2093 || id == 2097 || 
-      id == 2409 || id == 2589 || id == 2590 || id == 2969 || id == 3070 || id == 3071 || id == 3494 || id == 3495 || id == 3588 || id == 3668 || 
-      id == 3678 || id == 3679 || id == 4018 || id == 4019 || id == 4059 || id == 4331 || id == 4357 || id == 4500 || id == 4677 || id == 4678 || id == 4684)
+      id == 789  || id == 806  || id == 809  || id == 812  || id == 813  || id == 814  || id == 821  || id == 822  || id == 823  || id == 824  ||
+      id == 829  || id == 830  || id == 831  || id == 832  || id == 837  || id == 841  || id == 842  || id == 843  || id == 844  || id == 849  || 
+      id == 850  || id == 851  || id == 852  || id == 857  || id == 875  || id == 899  || id == 939  || id == 953  || id == 954  || id == 993  || 
+      id == 1026 || id == 1046 || id == 1048 || id == 1080 || id == 1100 || id == 1199 || id == 1200 || id == 1207 || id == 1218 || id == 1219 || 
+      id == 1222 || id == 1223 || id == 1224 || id == 1198 || id == 1237 || id == 1241 || id == 1242 || id == 1243 || id == 1244 || id == 1257 || 
+      id == 1260 || id == 1312 || id == 1348 || id == 1353 || id == 1354 || id == 1388 || id == 1407 || id == 1409 || id == 1434 || id == 1448 || 
+      id == 1574 || id == 1597 || id == 1612 || id == 1654 || id == 1713 || id == 1765 || id == 1766 || id == 1877 || id == 1878 || id == 2073 || 
+      id == 2077 || id == 2092 || id == 2093 || id == 2097 || id == 2409 || id == 2589 || id == 2590 || id == 2969 || id == 3070 || id == 3071 || 
+      id == 3494 || id == 3495 || id == 3588 || id == 3668 || id == 3678 || id == 3679 || id == 4018 || id == 4019 || id == 4059 || id == 4331 || 
+      id == 4357 || id == 4500 || id == 4677 || id == 4678 || id == 4684)
     return true;
 
   return false;
 }
-
-Float_t getTowerEta(Int_t id){
-  Float_t eta = (id%20)*0.05-0.025;
-  if(eta < 0.02) eta = 0.97;
-  return eta;
-}
-
-

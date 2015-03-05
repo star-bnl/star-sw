@@ -20,6 +20,10 @@ void fms_db_ChannelGeometry(char* opt, int year) {
     storeTime="2008-11-09 00:00:01";
     date = 20090301;
     time = 0;
+  }elseif(year==15){
+    storeTime="2014-12-05 00:00:00";
+    date = 20141215;
+    time = 0;
   }else{
     std::cout << "Please specify year\n";
     exit;

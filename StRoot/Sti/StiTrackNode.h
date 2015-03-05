@@ -20,6 +20,9 @@ void reset(){memset(this,0,sizeof(StiNodeMtx));}
 
 class StiNodeErrs {
 public:	
+enum {kBigLen = 20};
+
+
 void reset()				{memset(this,0,sizeof(StiNodeErrs));}
 double getDelta()  const 		{return sqrt(_cXX+_cYY+_cZZ);}
 double getDelta2() const 		{return     (_cXX+_cYY+_cZZ);}

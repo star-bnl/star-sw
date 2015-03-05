@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.225 2015/01/29 19:04:43 perev Exp $
+// $Id: StiMaker.cxx,v 1.226 2015/02/27 03:51:06 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -633,8 +633,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.225 2015/01/29 19:04:43 perev Exp $
+// $Id: StiMaker.cxx,v 1.226 2015/02/27 03:51:06 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.226  2015/02/27 03:51:06  perev
+// remove not used BTof
+//
 // Revision 1.225  2015/01/29 19:04:43  perev
 // Comments about treeSearch On/Off added
 //

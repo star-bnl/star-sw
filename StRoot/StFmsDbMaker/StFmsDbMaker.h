@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.4 2014/08/06 11:43:15 jeromel Exp $
+ * $Id: StFmsDbMaker.h,v 1.7 2015/02/27 07:03:15 yuxip Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.7  2015/02/27 07:03:15  yuxip
+ * StFmsDbMaker/
+ *
  * Revision 1.4  2014/08/06 11:43:15  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -22,8 +25,6 @@
  * This is the first check in of the code.
  *
  **************************************************************************/
-
-
 
 #ifndef STFMSDBMAKER_H
 #define STFMSDBMAKER_H
@@ -40,6 +41,12 @@ struct fmsPatchPanelMap_st;
 struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
+struct fpsConstant_st;
+struct fpsChannelGeometry_st;
+struct fpsSlatId_st;
+struct fpsPosition_st;
+struct fpsMap_st;
+struct fpsGain_st;
 
 class StFmsDbMaker : public StMaker {
  public: 
@@ -61,6 +68,12 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
+  fpsConstant_st*         FpsConstant();
+  fpsChannelGeometry_st** FpsChannelGeometry();
+  fpsSlatId_st*           FpsSlatId();
+  fpsPosition_st*         FpsPosition();
+  fpsMap_st*              FpsMap();
+  fpsGain_st*             FpsGain();
 
   //! Utility functions related to FMS ChannelGeometry
   Int_t maxDetectorId(); //! maximum value of detector Id
@@ -99,19 +112,46 @@ class StFmsDbMaker : public StMaker {
   Int_t maxGainCorrection();
   Float_t getGain(Int_t detectorId, Int_t ch); //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch); //! get the gain correction for the channel
+  void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value                                       
+  void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value                                   
+
+  //! FPS related
+  Int_t   fpsNQuad();
+  Int_t   fpsNLayer();
+  Int_t   fpsMaxSlat();
+  Int_t   fpsMaxQTaddr();
+  Int_t   fpsMaxQTch();
+  Int_t   fpsMaxSlatId();
+  Int_t   fpsNSlat(int quad, int layer);
+  Int_t   fpsSlatId(int quad, int layer, int slat);
+  void    fpsQLSfromSlatId(int slatid, int* quad, int* layer, int* slat);
+  void    fpsPosition(int slatid, float xyz[3], float dxyz[3]);
+  void    fpsPosition(int quad, int layer, int slat, float xyz[3], float dxyz[3]);
+  void    fpsQTMap(int slatid, int* QTaddr, int* QTch);
+  Int_t   fpsSlatidFromQT(int QTaddr, int QTch);
+  void    fpsQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat);
+  Float_t fpsGain(int slatid);
+  Float_t fpsGain(int quad, int layer, int slat);
+  Int_t   fpsSlatIdFromG2t(int g2tvolid);
 
   //! text dump for debugging
-  void dumpFmsChannelGeometry(const Char_t* filename="dumpFmsChannelGeometry.txt");
+  void dumpFmsChannelGeometry (const Char_t* filename="dumpFmsChannelGeometry.txt");
   void dumpFmsDetectorPosition(const Char_t* filename="dumpFmsDetectorPosition.txt");
-  void dumpFmsMap            (const Char_t* filename="dumpFmsMap.txt");
-  void dumpFmsPatchPanelMap  (const Char_t* filename="dumpFmsPatchPanelMap.txt");
-  void dumpFmsQTMap          (const Char_t* filename="dumpFmsQTMap.txt");
-  void dumpFmsGain           (const Char_t* filename="dumpFmsGain.txt");
-  void dumpFmsGainCorrection (const Char_t* filename="dumpFmsGainCorrection.txt");
+  void dumpFmsMap             (const Char_t* filename="dumpFmsMap.txt");
+  void dumpFmsPatchPanelMap   (const Char_t* filename="dumpFmsPatchPanelMap.txt");
+  void dumpFmsQTMap           (const Char_t* filename="dumpFmsQTMap.txt");
+  void dumpFmsGain            (const Char_t* filename="dumpFmsGain.txt");
+  void dumpFmsGainCorrection  (const Char_t* filename="dumpFmsGainCorrection.txt");
+  void dumpFpsConstant        (const Char_t* filename="dumpFpsConstant.txt");
+  void dumpFpsChannelGeometry (const Char_t* filename="dumpFpsChannelGeometry.txt");
+  void dumpFpsSlatId          (const Char_t* filename="dumpSlatId.txt"); 
+  void dumpFpsPosition        (const Char_t* filename="dumpFpsPosition.txt");
+  void dumpFpsMap             (const Char_t* filename="dumpFpsMap.txt");
+  void dumpFpsGain            (const Char_t* filename="dumpFpsGain.txt");
 
  private:
   void                  deleteArrays();
-  Int_t                  mDebug; //! >0 dump tables to text files
+  Int_t                 mDebug; //! >0 dump tables to text files
 
   fmsChannelGeometry_st *mChannelGeometry;  //! channel configuration for each detector
   Int_t                 mMaxDetectorId;  //! max detector Id
@@ -138,10 +178,21 @@ class StFmsDbMaker : public StMaker {
   fmsGainCorrection_st  *mGainCorrection; //! gain correction table
   fmsGainCorrection_st  **mmGainCorrection;
   Int_t                   mMaxGainCorrection;
+  Float_t                 mForceUniformGain; //!                                                                                                       
+  Float_t                 mForceUniformGainCorrection; //!                                                                                             
 
-
+  fpsConstant_st*         mFpsConstant;
+  Int_t                   mMaxSlatId;
+  fpsChannelGeometry_st** mFpsChannelGeometry;
+  fpsSlatId_st*           mFpsSlatId;
+  Int_t***                mFpsReverseSlatId;
+  fpsPosition_st*         mFpsPosition;
+  fpsMap_st*              mFpsMap;
+  Int_t**                 mFpsReverseMap;
+  fpsGain_st*             mFpsGain;
+  
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
-  ClassDef(StFmsDbMaker,1)   //StAF chain virtual base class for Makers
+  ClassDef(StFmsDbMaker,2)   //StAF chain virtual base class for Makers
 };
 
 //! Global pointners:

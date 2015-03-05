@@ -231,8 +231,8 @@ int StiTrackNodeHelper::propagateError()
 static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
   StiTrackNode::errPropag6(mPredErrs.A,mMtx.A,kNPars);
-
-  mPredErrs.recov();
+  int force = fabs(dl)> StiNodeErrs::kBigLen;
+  mPredErrs.recov(force);
   mPredErrs._cEE+=mMcs._cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
   mPredErrs._cTP+=mMcs._cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
@@ -1037,10 +1037,10 @@ static int nCall=0; nCall++;
     mFitdErrs._cEY-=k20*c00+k21*c10;mFitdErrs._cEZ-=k20*c10+k21*c11;mFitdErrs._cEE-=k20*c20+k21*c21;
     mFitdErrs._cPY-=k30*c00+k31*c10;mFitdErrs._cPZ-=k30*c10+k31*c11;mFitdErrs._cPE-=k30*c20+k31*c21;mFitdErrs._cPP-=k30*c30+k31*c31;
     mFitdErrs._cTY-=k40*c00+k41*c10;mFitdErrs._cTZ-=k40*c10+k41*c11;mFitdErrs._cTE-=k40*c20+k41*c21;mFitdErrs._cTP-=k40*c30+k41*c31;mFitdErrs._cTT-=k40*c40+k41*c41;
-    if (debug()) {
-      StiKalmanTrackNode::ResetComment(Form("%30s ",mDetector->getName().c_str()));
-    }
   }
+  mFitdErrs.recov(0);
+
+
   if (mFitdErrs.check()) return -12;
 //  mFitdErrs.recov();
   

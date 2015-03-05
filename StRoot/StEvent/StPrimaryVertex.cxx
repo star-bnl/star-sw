@@ -221,6 +221,7 @@ std::ostream&  operator<<(std::ostream& os,  const StPrimaryVertex& v) {
       nTpcTracks++; nGoodTpcTracks+=good;
     } 
   }
+  os << Form("#V[%3i]",v.key());
   const Char_t *beam = (v.isBeamConstrained()) ? "B" : " ";
   //  os << Form("%2s:C/P/X/T/E %i/%i/%i/%i/%i: %8.3f,%8.3f,%8.3f",
   os << Form("%1s:",beam);

@@ -541,7 +541,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     vector<StMuPrimaryVertex *>                 CloneVx; //  1 to many (>1) Mc to Rc match
     vector<StMuPrimaryVertex *>                 GhostVx; //  no Mc match
     vector<StMuMcVertex *>                      LostVx;  //  no Rc match
-    map<Id2KFVx,KFVertex*>                      Id2KFvx; // 
+    map<Int_t,KFVertex*>                        IdVx2KFVx; // 
+    map<KFVertex*,StMuPrimaryVertex*>           KFVx2RcVx;
     map<KFVertex*,StMuMcVertex *>               KFVx2McVx; 
     multimap<StMuMcVertex*,KFVertex*>           McVc2KFVx; 
     for (Int_t m = 0; m < NoMuMcVertices; m++) {
@@ -579,6 +580,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       if (! AcceptVX(RcVx)) continue;
+      PrPP(*RcVx);
       Int_t Id = RcVx->id();
       AccepedRcVx.push_back(RcVx);
       Id2RcVx[Id] = RcVx;
@@ -587,8 +589,11 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	GhostVx.push_back(RcVx);
       }
       StMuMcVertex *McVx = Id2McVx[IdMc]; 
-      RcVx2McVx[RcVx] = McVx;
-      McVx2RcVx.insert(make_pair(McVx,RcVx));
+      if (McVx) {
+	PrPP(*McVx);
+	RcVx2McVx[RcVx] = McVx;
+	McVx2RcVx.insert(make_pair(McVx,RcVx));
+      }
     }
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
@@ -626,8 +631,21 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     for (Int_t m = 0; m < NoKFVertices; m++) {
       KFVertex *KFVx = (KFVertex *) KFVertices->UncheckedAt(m);
       if (! KFVx) continue;
-      PrP(*KFVx);
-      
+      PrPP(*KFVx);
+      Int_t IdVx = KFVx->GetID(); // Rc Vertex Id
+      Int_t IdParentID = KFVx->GetParentID();
+      Int_t IdParentMcVx = KFVx->IdParentMcVx();
+      IdVx2KFVx[IdVx] = KFVx;
+      StMuPrimaryVertex* RcVx = Id2RcVx[IdVx];
+      if (RcVx) {
+	PrPP(*RcVx);
+	KFVx2RcVx[KFVx] = RcVx;
+      }
+      StMuMcVertex *McVx = RcVx2McVx[RcVx];
+      if (McVx) {
+	PrPP(*McVx);
+	McVc2KFVx.insert(pair<StMuMcVertex *,KFVertex *>(McVx,KFVx));
+      }
     }
     // Done with maps --------------------------------------------------------------------------------
     // Primary vertices:

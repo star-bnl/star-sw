@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.30 2014/10/14 21:06:15 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.31 2015/02/27 15:48:34 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -429,6 +429,7 @@ Int_t StIstRawHitMaker::Make()
                      if ( mDoCmnCorrection && dataFlag == mADCdata )
                         signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
 
+		     if(signalCorrected[iChan][iTBin]<0) signalCorrected[iChan][iTBin] = 0.1;
                      rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
                      rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
 
@@ -469,6 +470,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.31  2015/02/27 15:48:34  ypwang
+* Make sure the corrected ADC value is positive
+*
 * Revision 1.30  2014/10/14 21:06:15  smirnovd
 * No need to empty vectors in destructor as they will be destructed anyway
 *

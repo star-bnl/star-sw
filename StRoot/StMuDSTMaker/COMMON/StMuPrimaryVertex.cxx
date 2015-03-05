@@ -64,6 +64,7 @@ void StMuPrimaryVertex::Print(Option_t *option) const {
 #endif
 //________________________________________________________________________________
 ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
+  os << Form("#V[%3i]",v.id());
   const Char_t *beam = (v.isBeamConstrained()) ? "B" : " ";
   os << Form("%1s:",beam);
   if (v.nPostXtracks() < 10) os << Form("%i/",v.nPostXtracks());

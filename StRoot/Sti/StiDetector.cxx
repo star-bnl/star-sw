@@ -15,6 +15,9 @@
 #include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
 
+int    StiDetector::mgIndex=0;
+double StiDetector::mgValue[2]={0};
+
 
 //______________________________________________________________________________
 StiDetector::StiDetector()
@@ -145,37 +148,58 @@ return shape->getVolume();
 return shape->getVolume()*material->getDensity();
 }
 //______________________________________________________________________________
-int StiDetector::insideL(const double xl[3],int mode) const 
+int StiDetector::insideL(const double xl[3],int mode,double fakt) const 
 {
 static int nCall = 0; nCall++;
-static const double fakt = 1.;
 if (!mode) mode = 1;
 double rN = placement->getNormalRadius();
+double acc = rN*(fakt-1);
+if (acc<0.1) acc = 0.1;
+if (acc>10.) acc = 10.;
+
+
 double thick = shape->getThickness();
 do {
  if (shape->getShapeCode()==1) { //Planar
-   if (mode&1 && fabs(xl[0]-rN)>thick/2) 		break;
+   if (mode&1) { 
+     mgIndex = 1;
+     mgValue[1] = thick/2;
+     mgValue[0] = fabs(xl[0]-rN)-mgValue[1];
+     if (mgValue[0]>acc) return 0;
+   }
    if (mode&2) {
+     mgIndex = 2;
      double y = xl[1]-placement->getNormalYoffset();
-     double dy = shape->getHalfWidth()*fakt;
-     if (fabs(y)>dy) 					break;
+     mgValue[1] = shape->getHalfWidth();
+     mgValue[0]  = fabs(y)-mgValue[1];
+     if (mgValue[0]>acc) return 0;
    }
  } else {
    if (mode&1) {
+     mgIndex = 1;
+     mgValue[1] = thick/2;
      double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
-     if (fabs(rxy-rN)>thick/2) 				break;
+     mgValue[0] = (fabs(rxy-rN)-mgValue[1]);
+     if (mgValue[0]>acc) return 0;
    }
 
    if (mode&2) {
+     mgIndex = 2;
      double ang = atan2(xl[1],xl[0]);
      if (ang<-M_PI) ang +=M_PI*2;
      if (ang> M_PI) ang -=M_PI*2;
-     if (fabs(ang)>shape->getOpeningAngle()/2*fakt)	break;
+     mgValue[1] = shape->getOpeningAngle()/2;
+     mgValue[0] = (fabs(ang)-mgValue[1]);
+     if (mgValue[0]>acc/rN)	return 0;
    }
  } 
    if (!(mode&4)) return 1;
-   double z = xl[2]-placement->getZcenter();  
-   if (fabs(z)>shape->getHalfDepth()*fakt)		break;
+     mgIndex = 3;
+     mgValue[1] = shape->getHalfDepth();
+     double z = xl[2]-placement->getZcenter();  
+     mgValue[0] = (fabs(z)-mgValue[1]);
+     if (mgValue[0]>acc)	return 0;
+     
    return 1;
  } while(0);
   return 0;
@@ -198,12 +222,12 @@ void StiDetector::setProperties(std::string name, StiIsActiveFunctor* activeFunc
    setMaterial(material);
 }
 //______________________________________________________________________________
-int StiDetector::insideG(const double xl[3],int mode) const 
+int StiDetector::insideG(const double xl[3],int mode,double fakt) const 
 {
   TVector3 xg(xl);
   double alfa = getPlacement()->getNormalRefAngle();
   xg.RotateZ(-alfa);
-  return insideL(&xg[0],mode);
+  return insideL(&xg[0],mode,fakt);
 }
 //______________________________________________________________________________
 double StiDetector::getCenterX() const 

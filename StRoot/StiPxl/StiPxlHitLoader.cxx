@@ -1,7 +1,16 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.16 2015/01/21 23:10:59 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.19 2015/03/03 21:15:23 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.19  2015/03/03 21:15:23  smirnovd
+ * StiIst[Pxl]HitLoader: Allow tracks to share IST and PXL hits by up to 5 times
+ *
+ * Revision 1.18  2015/03/03 21:15:15  smirnovd
+ * Revert sloppy commits "StiIstHit reused 5 times" and "StiPxlHit reused in 5 times"
+ *
+ * The original author (Victor) admitted making a mistake by changing the
+ * warning and error messages. It was not intended
+ *
  * Revision 1.16  2015/01/21 23:10:59  smirnovd
  * Made all info/warn/error messages consistent across StiDetectorBuilder's
  *
@@ -229,6 +238,8 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                stiHit->setGlobal(detector, pxlHit,
                                  pxlHit->position().x(), pxlHit->position().y(),
                                  pxlHit->position().z(), pxlHit->charge());
+               // Allow the hit to be shared by up to 5 tracks
+               stiHit->setMaxTimes(5);
 
                _hitContainer->add(stiHit);
             }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.13 2010/01/27 21:39:51 perev Exp $
+ * $Id: StBemcTables.cxx,v 1.14 2015/03/02 20:25:51 jkadkins Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -17,25 +17,26 @@
 ClassImp(StBemcTables)
 
 StBemcTables::StBemcTables(Bool_t btowMapFix, Bool_t bprsMapFix):TObject() {
-  mBtowP = NULL;
-  mBprsP = NULL;
-  mSmdeP = NULL;
-  mSmdpP = NULL;
-  mBtowS = NULL;
-  mBprsS = NULL;
-  mSmdeS = NULL;
-  mSmdpS = NULL;
-  mBtowC = NULL;
-  mBprsC = NULL;
-  mSmdeC = NULL;
-  mSmdpC = NULL;
-  mBtowG = NULL;
-  mBprsG = NULL;
-  mSmdeG = NULL;
-  mSmdpG = NULL;
-  mTrigS = NULL;
-  mTrigP = NULL;
-  mTrigL = NULL;
+  mBtowP  = NULL;
+  mBprsP  = NULL;
+  mSmdeP  = NULL;
+  mSmdpP  = NULL;
+  mBtowS  = NULL;
+  mBprsS  = NULL;
+  mSmdeS  = NULL;
+  mSmdpS  = NULL;
+  mBtowC  = NULL;
+  mBprsC  = NULL;
+  mSmdeC  = NULL;
+  mSmdpC  = NULL;
+  mBtowG  = NULL;
+  mBprsG  = NULL;
+  mSmdeG  = NULL;
+  mSmdpG  = NULL;
+  mTrigS  = NULL;
+  mTrigP  = NULL;
+  mTrigL  = NULL;
+  mTrigP4 = NULL;
   
   mBtowMapFix = btowMapFix;
   mBprsMapFix = bprsMapFix;
@@ -223,6 +224,12 @@ void StBemcTables::loadTables(StMaker* maker) {
         if(bemcTriggerPed) {
             mTrigP = bemcTriggerPed->GetTable();
             updateValidity(maker, bemcTriggerPed);
+        }
+
+        St_bemcTriggerPed4* bemcTriggerPed4 = (St_bemcTriggerPed4*)DB->Find("bemcTriggerPed4");
+        if(bemcTriggerPed4) {
+	    mTrigP4 = bemcTriggerPed4->GetTable();
+            updateValidity(maker, bemcTriggerPed4);
         }
         
         St_emcTriggerLUT* bemcTriggerLUT = (St_emcTriggerLUT*)DB->Find("bemcTriggerLUT");
@@ -441,6 +448,12 @@ void StBemcTables::getTriggerPedestalShift(Int_t& pedestalShift) const {
   if (mTrigP) pedestalShift = (Int_t)mTrigP->PedShift / 100;
 }
 
+void StBemcTables::getTriggerPed4(Int_t softId, Short_t& PED4) const {
+  PED4 = 0;
+  if (mTrigP4 && softId>0 && softId<=4800) 
+    PED4 = (Short_t)mTrigP4->Ped4[softId];
+}
+
 void StBemcTables::getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula) const {
   if (mTrigL) formula = (Int_t)mTrigL->FormulaTag[crate-1][index];
 }
@@ -524,6 +537,12 @@ int StBemcTables::triggerPedestalShift() const {
     int val;
     getTriggerPedestalShift(val);
     return val;
+}
+
+short StBemcTables::triggerPed4(int softId) const {
+  short val;
+  getTriggerPed4(softId,val);
+  return val;
 }
 
 int StBemcTables::triggerFormulaTag(int crate, int patchSequence) const {
@@ -624,6 +643,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.14  2015/03/02 20:25:51  jkadkins
+ * Updates to include "bemcTriggerPed4" for BEMC online trigger monitoring
+ *
  * Revision 1.13  2010/01/27 21:39:51  perev
  * GetValidity now is static
  *

@@ -494,8 +494,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   const short VH[kMAXSEQ]   = { 1, 1, 0, 0, 1, 1, 0, 0 } ; /// Vertical = 0, Horizontal = 1
   const short UDOI[kMAXSEQ] = { 1, 0, 0, 1, 1, 0, 1, 0 } ; /// Up=0, Down=1; Outer=0, Inner=1
   // >=2015 --- W2U (~WVU) is sequencer 7 and W2D (~WVD) is sequencer 8
-  const short VH2[kMAXSEQ]   = { 1, 1, 0, 0, 1, 1, 0, 0 } ; 
-  const short UDOI2[kMAXSEQ] = { 1, 0, 0, 1, 1, 0, 0, 1 } ; 
+  const short UD[kMAXSEQ]  =  { 1, 0, 0, 1, 1, 0, 0, 1 } ; 
 
   Bool_t is_candidate_to_store ;
 
@@ -533,10 +532,10 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 					 (u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
 	}
 	else { // >= 2015
-	  pp2ppColl->romanPot(i)->setAdc((u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH2[i],UDOI2[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH2[i],UDOI2[i],1) ); 
-	  pp2ppColl->romanPot(i)->setTac((u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH2[i],UDOI2[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH2[i],UDOI2[i],1) ); 	  
+	  pp2ppColl->romanPot(i)->setAdc((u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// u_short -> u_int
+					 (u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 
+	  pp2ppColl->romanPot(i)->setTac((u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// u_short -> u_int
+					 (u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 	  
 	}
 
 	// for now (Jan. 2010) : use the status byte as "silicon_bunch - bunchId7Bit()"

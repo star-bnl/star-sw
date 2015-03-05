@@ -40,7 +40,7 @@ while ($j < 20)
     echo  \<\/command\> >> ${xmlname}
     echo \<SandBox installer=\"ZIP\"\> >> ${xmlname}
     echo \<Package name=\"mipAnalysisCode\"\> >> ${xmlname}
-    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcOfflineCalibrationMaker\/macros\/RunMipHistogramMaker.C \<\/File\> >> ${xmlname}
+    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcPool\/StEmcOfflineCalibrationMaker\/macros\/RunMipHistogramMaker.C \<\/File\> >> ${xmlname}
     echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/.sl64\_gcc447 \<\/File\> >> ${xmlname}
     echo \<\/Package\> >> ${xmlname}
     echo \<\/SandBox\> >> ${xmlname}

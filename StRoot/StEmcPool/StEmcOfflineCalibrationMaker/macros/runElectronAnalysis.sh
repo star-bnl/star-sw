@@ -43,9 +43,9 @@ while ($j < 200)
     echo \<\/command\> >> ${xmlname}
     echo \<SandBox installer=\"ZIP\"\> >> ${xmlname}
     echo \<Package name=\"electronAnalysisCode\"\> >> ${xmlname}
-    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcOfflineCalibrationMaker\/macros\/RunElectronAnalysis.C \<\/File\> >> ${xmlname}
-    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcOfflineCalibrationMaker\/macros\/mip.gains \<\/File\> >> ${xmlname}
-    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcOfflineCalibrationMaker\/macros\/geant_fits.root \<\/File\> >> ${xmlname}
+    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcPool\/StEmcOfflineCalibrationMaker\/macros\/RunElectronAnalysis.C \<\/File\> >> ${xmlname}
+    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcPool\/StEmcOfflineCalibrationMaker\/macros\/mip.gains \<\/File\> >> ${xmlname}
+    echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/StRoot\/StEmcPool\/StEmcOfflineCalibrationMaker\/macros\/geant_fits.root \<\/File\> >> ${xmlname}
     echo \<File\>file\:\/star\/u\/jkadkins\/bemcCalib2012\/.sl64\_gcc447 \<\/File\> >> ${xmlname}
     echo \<\/Package\> >> ${xmlname}
     echo \<\/SandBox\> >> ${xmlname}

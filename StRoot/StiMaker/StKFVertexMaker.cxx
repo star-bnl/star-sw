@@ -932,7 +932,7 @@ void StKFVertexMaker::ReFitToVertex() {
       primV->setTrackNumbers();
       CalculateRank(primV);
       pEvent->addPrimaryVertex(primV,orderByRanking);
-      toVertices->AddLast(new KFVertex(V->Vertex()));
+      toVertices->AddLast(new KFVertex(V->Vertex())); //<<<<<<<<<<<<<<<< ????????
     }
     delete [] tracks;   
     delete [] pTracks;

@@ -18,9 +18,10 @@ class StiDebug
 public:
 static void   Break(int kase);
 static void   FpeOn();
-static  int Debug() {return mgDebug;};
+static  int Debug();
 static void SetDebug(int idb) {mgDebug=idb;};
 static void Count(const char *key,double val);
+static void Count(const char *key,const char *val);
 static void Count(const char *key,double val,double left,double rite);
 static void Count(const char *key,double valx,double valy);
 static void Count(const char *key,double valx, double valy

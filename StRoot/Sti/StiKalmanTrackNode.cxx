@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.166 2015/02/25 02:35:26 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.167 2015/02/25 20:10:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.167  2015/02/25 20:10:20  perev
+ * In StiKalmanTrackNode::propagateError() recov(1) is called when length is bigger kBigLen
+ *
  * Revision 2.166  2015/02/25 02:35:26  perev
  * Some outdated asserts and debug lines removed
  * In propagateError recov is colled
@@ -1249,12 +1252,11 @@ void StiKalmanTrackNode::propagateMtx()
 /// \note This method must be called ONLY after a call to the propagate method.
 void StiKalmanTrackNode::propagateError()
 {  
-  enum {kBigLen = 20};
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
-  int force = (fabs(mgP.dl) > kBigLen); 
+  int force = (fabs(mgP.dl) > StiNodeErrs::kBigLen); 
   mFE.recov(force);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
 // now set hiterrors
