@@ -64,12 +64,13 @@ HeedMatterDef::HeedMatterDef(EnergyMesh* fenergy_mesh, GasDef* agas,
   check_econd11(agas->qmolec(), <= 0, mcerr);
   long qat = agas->qatom();
   apacs.put_qel(qat);
-  long qmol = agas->qmolec();
+  const long qmol = agas->qmolec();
   long nat = 0;
   for (long nmol = 0; nmol < qmol; ++nmol) {
     check_econd12(agas->molec(nmol)->tqatom(), !=, fampacs[nmol]->get_qatom(),
                   mcerr);
-    long qa = agas->molec(nmol)->qatom();  //quantity of different atoms in mol
+    // number of different atoms in mol
+    const long qa = agas->molec(nmol)->qatom();  
     for (long na = 0; na < qa; ++na) {
       apacs[nat].put(fampacs[nmol]->get_atom(na).getver());
       check_econd12(apacs[nat]->get_Z(), !=, agas->molec(nmol)->atom(na)->Z(),
