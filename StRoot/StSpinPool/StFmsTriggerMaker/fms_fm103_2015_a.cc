@@ -27,7 +27,8 @@ void fms_fm103_2015_a(Board& fm103, int t, int simdat){
 
   //From another 2*4 sum
   int JJ=getFM005_J23(T1) + getFM005_J23(B1);
-  
+  fm103.userdata[t][0]=JJ;
+
   //BS bits
   int BS3 = getFM005_BS3(T1) | getFM006_BS3(T2) | getFM005_BS3(B1) | getFM006_BS3(B2) | (JJ>BSThr3);
   int BS2 = getFM005_BS2(T1) | getFM006_BS2(T2) | getFM005_BS2(B1) | getFM006_BS2(B2) | (JJ>BSThr2);
@@ -35,7 +36,10 @@ void fms_fm103_2015_a(Board& fm103, int t, int simdat){
   int BS1T=getFM006_BS1E(T2);
   int BS1M=getFM006_BS1F(T2) | getFM005_BS1GHIJ(T1) | BS1JJ | getFM005_BS1GHIJ(B1) | getFM006_BS1F(B2);
   int BS1B=getFM006_BS1E(B2);
-  
+  fm103.userdata[t][7]=(JJ>BSThr3);
+  fm103.userdata[t][8]=(JJ>BSThr2);
+  fm103.userdata[t][9]=(JJ>BSThr1);
+
   //Jp
   int JpT=getFM006_JpEF(T2)+getFM005_JpGH(T1)+getFM005_JpIJ(T1);
   int JpM=getFM005_JpIJ(T1)+getFM005_JpIJ(B1);

@@ -74,7 +74,6 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
     | (getFM101_2015b_BS1B(fm102)<<3) | (getFM101_2015b_BS1M(fm102)<<4) | (getFM101_2015b_BS1T(fm102)<<5)
     | (getFM103_2015a_BS1T(fm103)<<6) | (getFM103_2015a_BS1M(fm103)<<7) | (getFM103_2015a_BS1B(fm103)<<8)
     | (getFM103_2015a_BS1B(fm104)<<9) | (getFM103_2015a_BS1M(fm104)<<10)| (getFM103_2015a_BS1T(fm104)<<12);
-  fp201.userdata[t][0]=bs1;
   for(int i=0; i<NBITBS; i++){
     if(btest(bs1,i)){
       for(int j=i+1; j<NBITBS; j++){
@@ -91,13 +90,22 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   jp[3] = getFM101_2015b_JpB(fm102) + getFM103_2015a_JpB(fm104); //NB
   jp[4] = getFM101_2015b_JpM(fm102) + getFM103_2015a_JpM(fm104); //NM
   jp[5] = getFM101_2015b_JpT(fm102) + getFM103_2015a_JpT(fm104); //NT
+  fp201.userdata[t][0]=jp[0];
+  fp201.userdata[t][1]=jp[1];
+  fp201.userdata[t][2]=jp[2];
+  fp201.userdata[t][3]=jp[3];
+  fp201.userdata[t][4]=jp[4];
+  fp201.userdata[t][5]=jp[5];
+
   int JP2=0, JP1=0, JP0=0, jp0=0;
+  fp201.userdata[t][6]=0;
+  fp201.userdata[t][7]=0;
+  fp201.userdata[t][8]=0;
   for(int i=0; i<NBITJp; i++){
-    if(jp[i]>JpThr2) JP2=1;
-    if(jp[i]>JpThr1) JP1=1;
-    if(jp[i]>JpThr0) {JP0=1; jp0+=(1<<i);}
+    if(jp[i]>JpThr2) {JP2=1; fp201.userdata[t][7]+=(1<<i); }
+    if(jp[i]>JpThr1) {JP1=1; fp201.userdata[t][8]+=(1<<i); }
+    if(jp[i]>JpThr0) {JP0=1; fp201.userdata[t][9]+=(1<<i); jp0+=(1<<i);}
   }
-  fp201.userdata[t][1]=jp0;
 
   //DiJp
   int DiJp=0;
@@ -152,5 +160,4 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   }
 }
 
-int getFP201_2015b_bs0bits(Board& fp201, int t) {return fp201.userdata[t][0];}
-int getFP201_2015b_jp1bits(Board& fp201, int t) {return fp201.userdata[t][1];}
+
