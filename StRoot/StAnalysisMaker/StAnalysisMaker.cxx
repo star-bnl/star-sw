@@ -685,7 +685,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 #else
     Int_t key = ipr;
 #endif
-    LOG_QA << Form("#V[%3i]",key) << *pVertex << endm;
+    LOG_QA << *pVertex << endm;
     // Report for jobTracking Db   (non-zero entry only)    
     if (pVertex->numberOfDaughters()) {
       //            LOG_QA << "SequenceValue=" << mEventCounter
@@ -934,6 +934,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	   << ":\tBad ones(!bit0): " << noBadFtpcHits 
 	   << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
   }
+#ifdef  StRnDHit_hh
   StRnDHitCollection* rndhits = event->rndHitCollection();
   if (rndhits) {
     StSPtrVecRnDHit&  hits = rndhits->hits();
@@ -971,6 +972,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       }
     }
   }
+#endif /*  StRnDHit_hh */
   StEmcCollection* emccol = event->emcCollection();
   if (emccol) {
     const Char_t *Names[2] = {"EMC ","EEMC"};
@@ -1060,13 +1062,13 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (event->numberOfPsds()) {
     LOG_QA << "# PSDs:                " << event->numberOfPsds() << endm;
   }
-#ifdef StTrackMassFit_hh
+#ifdef _ST_GMT_HIT_H_
   if (event->gmtCollection() && event->gmtCollection()->getNumHits()) {
     LOG_QA << "# GMT hits:           " << event->gmtCollection()->getNumHits() 
 	   << " points: " << event->gmtCollection()->getNumPoints()
 	   << endm;
   }
-#endif
+#endif /* _ST_GMT_HIT_H_ */
   LOG_QA << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << endm;
 }
 //________________________________________________________________________________
