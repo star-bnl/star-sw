@@ -5,6 +5,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 class StFmsTriggerMaker;
+class StTriggerData;
 
 class StFmsTrgQaMaker : public StMaker {
 public:
@@ -21,11 +22,16 @@ private:
   int mRun;
   int mPrint;
   StFmsTriggerMaker* mSIM;
-  
+  StTriggerData* mTrgd;
+
   void fillBSsum();
   void fillJPsum();
   void fillBS();
   void fillJP();
+
+  void readtrgid();
+  int isTrg(const char* trgname);
+  TString trgname[64];
 
   TFile *mFile;
   char mFilename[100];
