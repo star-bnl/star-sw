@@ -56,6 +56,7 @@ int StFmsTrgQaMaker::Make(){
   fillJP();
   fillBSsum();
   fillJPsum();
+  return kStOK;
 }
 
 void StFmsTrgQaMaker::fillJP(){
@@ -123,6 +124,7 @@ void StFmsTrgQaMaker::fillBSsum(){
   sum[10]=mSIM->FM0xxuserdata( 2,2); //SB-BC
   sum[11]=mSIM->FM0xxuserdata( 2,1); //SB-B
   sum[12]=mSIM->FM0xxuserdata( 2,0); //SB-A
+
   sum[13]=mSIM->FM0xxuserdata( 4,0); //NB-A
   sum[14]=mSIM->FM0xxuserdata( 4,1); //NB-B
   sum[15]=mSIM->FM0xxuserdata( 4,2); //NB-BC
@@ -136,6 +138,7 @@ void StFmsTrgQaMaker::fillBSsum(){
   sum[23]=mSIM->FM0xxuserdata( 3,2); //NT-BC
   sum[24]=mSIM->FM0xxuserdata( 3,1); //NT-B
   sum[25]=mSIM->FM0xxuserdata( 3,0); //NT-A
+
   sum[26]=mSIM->FM0xxuserdata( 6,0); //ST-E  
   sum[27]=mSIM->FM0xxuserdata( 6,1); //ST-EF 
   sum[28]=mSIM->FM0xxuserdata( 6,2); //ST-F  
@@ -157,6 +160,7 @@ void StFmsTrgQaMaker::fillBSsum(){
   sum[44]=mSIM->FM0xxuserdata( 8,2); //SB-F  
   sum[45]=mSIM->FM0xxuserdata( 8,1); //SB-EF 
   sum[46]=mSIM->FM0xxuserdata( 8,0); //SB-E  
+
   sum[47]=mSIM->FM0xxuserdata(12,0); //NB-E 
   sum[48]=mSIM->FM0xxuserdata(12,1); //NB-EF
   sum[49]=mSIM->FM0xxuserdata(12,2); //NB-F 
@@ -181,6 +185,5 @@ void StFmsTrgQaMaker::fillBSsum(){
   for(int i=0; i<NBS; i++){ 
     hBS[i]->Fill(float(sum[i]));
   }
-  return;
 }
 
