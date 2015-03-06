@@ -64,7 +64,7 @@ int StFmsTrgQaMaker::Make(){
 }
 
 void StFmsTrgQaMaker::fillJP(){
-  char trg[200];
+  char trg[20];
   for(int i=0; i<NTHR; i++){
     sprintf(trg,"FMS-JP%1d",2-i);
     if(isTrg(trg)){
@@ -79,7 +79,7 @@ void StFmsTrgQaMaker::fillJP(){
 inline int bt(int x, int pos) { return x >> pos & 1; }
 
 void StFmsTrgQaMaker::fillBS(){
-  char trg[200];
+  char trg[20];
   int k;
   for(int i=0; i<NTHR; i++){
     sprintf(trg,"FMS-sm-bs%1d",3-i);
@@ -96,7 +96,7 @@ void StFmsTrgQaMaker::fillBS(){
 
     sprintf(trg,"FMS-lg-bs%1d",3-i);
     if(isTrg(trg)){
-      k=26;
+      k=25;
       for(int j=0; j<3;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 6,i+7),j)) mBS[i]->Fill(float(k)); }
       for(int j=0; j<7;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 5,i+7),j)) mBS[i]->Fill(float(k)); }
       for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 3,i+7),j)) mBS[i]->Fill(float(k)); }
@@ -233,6 +233,7 @@ int StFmsTrgQaMaker::isTrg(const char* trgn){
   if(id==-1) return 0;
   unsigned long long flag=(mTrgd->l2sum() & (one << id));
   //if(flag) printf("Yes triggered by %s\n",trgn);
-  return flag;
+  if(flag>0) return 1;
+  return 0;
 }
 
