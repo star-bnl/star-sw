@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.27 2012/11/26 23:14:33 fisyak Exp $
+ * $Id: StMuEvent.cxx,v 1.28 2015/03/06 20:02:01 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -12,6 +12,11 @@
 #include "StEvent/StEventSummary.h" 
 #include "StEvent/StEventInfo.h" 
 #include "StEvent/StDetectorState.h" 
+#include "StEvent/StIstHitCollection.h"
+#include "StEvent/StSsdHitCollection.h"
+#include "StEvent/StPxlHitCollection.h"
+#include "StEvent/StPxlSectorHitCollection.h"
+#include "StEvent/StPxlLadderHitCollection.h"
 
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuFtpcRefMult.hh"
@@ -133,6 +138,34 @@ void StMuEvent::fill(const StEvent* event){
   // trigger data
   mTriggerData = const_cast<StTriggerData*>(event->triggerData());  
   if(mTriggerData!=0) mTriggerData->setDebug(0);
+
+  // HFT hits per layer - dongx
+  for(int i=0;i<4;i++) mNHitsHFT[i] = 0;
+  const StPxlHitCollection* PxlHitCollection = event->pxlHitCollection();
+  if(PxlHitCollection) {
+    UInt_t numberOfSectors=PxlHitCollection->numberOfSectors();
+    for(UInt_t i=0;i<numberOfSectors;i++){
+      const StPxlSectorHitCollection* PxlSectorHitCollection=PxlHitCollection->sector(i);
+      if(!PxlSectorHitCollection) continue;
+
+      UInt_t numberOfLadders=PxlSectorHitCollection->numberOfLadders();
+      for(UInt_t j=0;j<numberOfLadders;j++){
+        const StPxlLadderHitCollection* PxlLadderHitCollection=PxlSectorHitCollection->ladder(j);
+        if(!PxlLadderHitCollection) continue;
+
+        if(j==0) mNHitsHFT[0] += PxlLadderHitCollection->numberOfHits();
+        else     mNHitsHFT[1] += PxlLadderHitCollection->numberOfHits();
+      }
+    }
+  } // PXL hits
+
+  const StIstHitCollection *IstHitCollection = event->istHitCollection();
+  if(IstHitCollection) mNHitsHFT[2] += IstHitCollection->numberOfHits();
+
+  const StSsdHitCollection *SsdHitCollection = event->ssdHitCollection();
+  if(SsdHitCollection) mNHitsHFT[3] += SsdHitCollection->numberOfHits();
+  //  
+
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -267,6 +300,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.28  2015/03/06 20:02:01  jdb
+ * Added 4 unsigned shorts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
+ *
  * Revision 1.27  2012/11/26 23:14:33  fisyak
  * Replace GetEntries() by GetEntriesFast(), fix print outs
  *
