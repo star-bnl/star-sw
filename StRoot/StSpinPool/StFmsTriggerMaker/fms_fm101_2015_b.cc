@@ -13,7 +13,7 @@ void fms_fm101_2015_b(Board& fm101, int t, int simdat){
   //int BSThr1=Sm_BSThr1; 
   //int BSThr2=Sm_BSThr2; 
   //int BSThr3=Sm_BSThr3; 
-  printf("%s BSthr1=%d BSthr2=%d BSthr3=%d\n",fm101.name,BSThr1,BSThr2,BSThr3);
+  //printf("%s BSthr1=%d BSthr2=%d BSthr3=%d\n",fm101.name,BSThr1,BSThr2,BSThr3);
 
   //input
   int* in;

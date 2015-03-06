@@ -800,6 +800,7 @@ int StFmsTriggerMaker::FM0xxoutput(int number, int t) const{
   case 11: return fm011.output[t];
   case 12: return fm012.output[t];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxoutput(int number, int t) const{
@@ -809,6 +810,7 @@ int StFmsTriggerMaker::FM1xxoutput(int number, int t) const{
   case 3:  return fm103.output[t];
   case 4:  return fm104.output[t];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FP201input(int ch, int t) const{
@@ -830,6 +832,7 @@ int StFmsTriggerMaker::FM0xxinput(int number, int ch, int t) const{
   case 11: return ((int*)fm011.channels[t])[ch];
   case 12: return ((int*)fm012.channels[t])[ch];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxinput(int number, int ch, int t) const{
@@ -861,6 +864,7 @@ int StFmsTriggerMaker::FM0xxdata(int number, int ch, int t) const{
   case 11: return ((int*)fm011.dsmdata[t])[ch];
   case 12: return ((int*)fm012.dsmdata[t])[ch];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxdata(int number, int ch, int t) const{
@@ -888,6 +892,7 @@ int StFmsTriggerMaker::FM0xxuserdata(int number, int ch, int t) const{
   case 11: return ((int*)fm011.userdata[t])[ch];
   case 12: return ((int*)fm012.userdata[t])[ch];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxuserdata(int number, int ch, int t) const{
