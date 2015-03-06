@@ -39,7 +39,7 @@ while ($j < 200)
     echo \<\?xml version=\"1.0\" encoding=\"utf-8\" \?\> > ${xmlname}
     echo \<job name=\"elecjob\" simulateSubmission = \"false\"\> >> ${xmlname}
     echo \<command\> >> ${xmlname}
-    echo root4star -b -q RunElectronAnalysis.C\\\(1e6,\\\"${listname}\\\",\\\"${mipFile}\\\",\\\"${geantFile}\\\",\\\"${outname}\\\"\\\) \&gt\; \&amp\; electronLog_${j}.log >> ${xmlname}
+    echo root4star -b -q RunElectronAnalysis.C\\\(1e8,\\\"${listname}\\\",\\\"${mipFile}\\\",\\\"${geantFile}\\\",\\\"${outname}\\\"\\\) \&gt\; \&amp\; electronLog_${j}.log >> ${xmlname}
     echo \<\/command\> >> ${xmlname}
     echo \<SandBox installer=\"ZIP\"\> >> ${xmlname}
     echo \<Package name=\"electronAnalysisCode\"\> >> ${xmlname}
