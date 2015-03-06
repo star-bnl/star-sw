@@ -39,6 +39,7 @@ int StFmsTrgQaMaker::Init(){
   mDIJP=new TH2F("DiJP","DiJP",NJP,0.0,float(NJP),NJP,0.0,float(NJP));
   for(int i=0; i<NBS; i++){ hBS[i]=new TH1F(BSname[i],BSname[i],256,0.0,4096.0); }
   for(int i=0; i<NJP; i++){ hJP[i]=new TH1F(JPname[i],JPname[i],64,0.0,256.0); }  
+  readtrgid();
   return kStOk;
 }
 
@@ -50,8 +51,11 @@ int StFmsTrgQaMaker::Finish(){
 }
 
 int StFmsTrgQaMaker::Make(){
-  mSIM=(StFmsTriggerMaker*)GetMaker("fmstrigger");
+  mSIM=(StFmsTriggerMaker*)GetMaker("fmstrigger"); 
   if(!mSIM) { printf("No StFmsTriggerMaker found\n"); return kStErr;}
+  mTrgd=(StTriggerData*)GetDataSet("StTriggerData")->GetObject();
+  if(!mTrgd) { printf("No StTriggerData found\n"); return kStErr;}
+
   fillBS();
   fillJP();
   fillBSsum();
@@ -60,10 +64,14 @@ int StFmsTrgQaMaker::Make(){
 }
 
 void StFmsTrgQaMaker::fillJP(){
+  char trg[200];
   for(int i=0; i<NTHR; i++){
-    for(int j=0; j<NJP; j++){
-      int b= ((mSIM->FP201userdata(i+7)) >> j) & 0x1;
-      if(b) mJP[i]->Fill(float(j));
+    sprintf(trg,"FMS-JP%1d",2-i);
+    if(isTrg(trg)){
+      for(int j=0; j<NJP; j++){
+	int b= ((mSIM->FP201userdata(i+7)) >> j) & 0x1;
+	if(b) mJP[i]->Fill(float(j));
+      }
     }
   }
 }
@@ -71,27 +79,36 @@ void StFmsTrgQaMaker::fillJP(){
 inline int bt(int x, int pos) { return x >> pos & 1; }
 
 void StFmsTrgQaMaker::fillBS(){
+  char trg[200];
+  int k;
   for(int i=0; i<NTHR; i++){
-    int k=-1;
-    for(int j=0; j<6;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 1,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 1,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=5; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 2,i+7),j)) mBS[i]->Fill(float(k)); } 
-    
-    for(int j=0; j<6 ; j++){ k++; if(bt(mSIM->FM0xxuserdata( 4,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 2,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=5; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 3,i+7),j)) mBS[i]->Fill(float(k)); }
-    
-    for(int j=0; j<3;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 6,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<7;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 5,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 3,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=6; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 7,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=2; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 8,i+7),j)) mBS[i]->Fill(float(k)); }
-    
-    for(int j=0; j<3;  j++){ k++; if(bt(mSIM->FM0xxuserdata(12,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<7;  j++){ k++; if(bt(mSIM->FM0xxuserdata(11,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 4,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=6; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 9,i+7),j)) mBS[i]->Fill(float(k)); }
-    for(int j=2; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata(10,i+7),j)) mBS[i]->Fill(float(k)); }
+    sprintf(trg,"FMS-sm-bs%1d",3-i);
+    if(isTrg(trg)){
+      k=-1;
+      for(int j=0; j<6;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 1,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 1,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=5; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 2,i+7),j)) mBS[i]->Fill(float(k)); } 
+      
+      for(int j=0; j<6 ; j++){ k++; if(bt(mSIM->FM0xxuserdata( 4,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 2,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=5; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 3,i+7),j)) mBS[i]->Fill(float(k)); }
+    }
+
+    sprintf(trg,"FMS-lg-bs%1d",3-i);
+    if(isTrg(trg)){
+      k=26;
+      for(int j=0; j<3;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 6,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<7;  j++){ k++; if(bt(mSIM->FM0xxuserdata( 5,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 3,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=6; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 7,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=2; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 8,i+7),j)) mBS[i]->Fill(float(k)); }
+      
+      for(int j=0; j<3;  j++){ k++; if(bt(mSIM->FM0xxuserdata(12,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<7;  j++){ k++; if(bt(mSIM->FM0xxuserdata(11,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=0; j<1;  j++){ k++; if(bt(mSIM->FM1xxuserdata( 4,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=6; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata( 9,i+7),j)) mBS[i]->Fill(float(k)); }
+      for(int j=2; j>=0; j--){ k++; if(bt(mSIM->FM0xxuserdata(10,i+7),j)) mBS[i]->Fill(float(k)); }
+    }
   }
 }
 
@@ -185,5 +202,37 @@ void StFmsTrgQaMaker::fillBSsum(){
   for(int i=0; i<NBS; i++){ 
     hBS[i]->Fill(float(sum[i]));
   }
+}
+
+void StFmsTrgQaMaker::readtrgid(){
+  int i,yearday=mRun/1000;
+  char filename[200],trgn[200];
+  sprintf(filename,"%d/%d.trgid",yearday,mRun);
+  FILE* fp=fopen(filename,"r");
+  if(!fp) {printf("Cannot open %s\n",filename); return; }
+  while(!feof(fp)) {
+    fscanf(fp,"%d %s",&i,trgn);
+    printf("%d %s\n",i,trgn);
+    trgname[i]=trgn;
+  }
+}
+
+int StFmsTrgQaMaker::isTrg(const char* trgn){
+  int id=-1;
+  unsigned long long one=1;  
+  /*
+  printf("l2sum=%x   TRG=",mTrgd->l2sum());
+  for(int i=0; i<64; i++){
+    if(mTrgd->l2sum() & (one << i)) printf("%s ",trgname[i].Data());
+  }
+  printf("\n");
+  */
+  for(int i=0; i<64; i++){
+    if( trgname[i].EqualTo(trgn) ) {id=i; break;}
+  }
+  if(id==-1) return 0;
+  unsigned long long flag=(mTrgd->l2sum() & (one << id));
+  //if(flag) printf("Yes triggered by %s\n",trgn);
+  return flag;
 }
 

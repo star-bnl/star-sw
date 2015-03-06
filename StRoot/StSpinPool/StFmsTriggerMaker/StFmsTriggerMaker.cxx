@@ -744,10 +744,10 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   // Get register values
   // object=DSM crate, idx=DSM board
   sprintf(query,"select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
-  LOG_INFO << query << endm;
+  LOG_DEBUG << query << endm;
   mysql_query(&mysql,query);
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    LOG_INFO << setw(10) << "object" << setw(10) << "idx" << setw(10) << "reg" << setw(30) << "label" << setw(10) << "value" << setw(15) << "defaultvalue" << endm;
+    LOG_DEBUG<< setw(10) << "object" << setw(10) << "idx" << setw(10) << "reg" << setw(30) << "label" << setw(10) << "value" << setw(15) << "defaultvalue" << endm;
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int object = atoi(row[0]);
       int idx = atoi(row[1]);
@@ -763,9 +763,9 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
 	  }
 	}
       }
-      LOG_INFO << setw(10) << object << setw(10) << idx << setw(10) << reg << setw(30) << label << setw(10) << value << setw(15) << defaultvalue << endm;
+      LOG_DEBUG << setw(10) << object << setw(10) << idx << setw(10) << reg << setw(30) << label << setw(10) << value << setw(15) << defaultvalue << endm;
       if (object >= 1 && object <= NCRATES && idx >= 0x10) {
-	LOG_INFO << object << '\t' << idx << '\t' << reg << '\t' << label << '\t' << value << '\t' << defaultvalue << endm;
+	LOG_DEBUG << object << '\t' << idx << '\t' << reg << '\t' << label << '\t' << value << '\t' << defaultvalue << endm;
 	crateAt(object).boardAt(idx<<24).registerAt(reg<<24) = (value == -1) ? defaultvalue : value;
       }
     }
