@@ -326,8 +326,8 @@ MolecPhotoAbsCS COS_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_PACS, 1, Sulfur_PACS,
 MolecPhotoAbsCS BF3_MPACS(Boron_PACS, 1, Fluorine_PACS, 3);
 MolecPhotoAbsCS C2HF5_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 1,
                             Fluorine_PACS, 5);
-MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2, Hydrogen_for_H2_PACS, 2,
-                             Fluorine_PACS, 4);
+MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2, Fluorine_PACS, 4, 
+                             Hydrogen_for_H2_PACS, 2);
 MolecPhotoAbsCS CHF3_MPACS(Carbon_for_CF4_PACS, 1, Hydrogen_for_H2_PACS, 1,
                            Fluorine_PACS, 3);
 MolecPhotoAbsCS CF3Br_MPACS(Carbon_for_CF4_PACS, 1, Fluorine_PACS, 3,

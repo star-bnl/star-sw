@@ -1324,9 +1324,9 @@ void KFTopoPerformance::FillHistos()
     float dRPVr[3] = {vtx.X()-mcPVx[0],
                       vtx.Y()-mcPVx[1],
                       vtx.Z()-mcPVx[2]};
-    float dRPVp[3] = {dRPVr[0]/sqrt(errPV[0]),
-                      dRPVr[1]/sqrt(errPV[1]),
-                      dRPVr[2]/sqrt(errPV[2])};
+    float dRPVp[3] = {static_cast<float>(dRPVr[0]/sqrt(errPV[0])),
+                      static_cast<float>(dRPVr[1]/sqrt(errPV[1])),
+                      static_cast<float>(dRPVr[2]/sqrt(errPV[2]))};
 
     for(unsigned int iHPV=0; iHPV<3; ++iHPV)
       hPVFitQa[iPVType][iHPV]->Fill(dRPVr[iHPV]);
