@@ -19,13 +19,19 @@ namespace {
 
   /*
    Basic QT crate geometry.
-   Note that physically there are 16 slots per crate, but only 12
+   Note that physically there are 16 slots per crate, but only 11
    at most are currently actually used.
    */
-  const int kNQtSlotsPerCrate = 12;
+  const int kNQtSlotsPerCrate = 11;
   const int kNQtChannelsPerSlot = 32;
   const int kNChannels = kNQtSlotsPerCrate * kNQtChannelsPerSlot;
   const int kNAdc = 4096;
+  
+  /* plot aesthetics */
+  const float kAxisLabelSize = 0.04; // axis label size (default=0.04)
+  const int kNLargeDivisions = kNQtSlotsPerCrate; // number of vertical grid lines
+  const int kNMediumDivisions = 4; // number of medium tick marks per vertical grid line
+  const int kNSmallDivisions = 4; // number of small tick marks per medium tick mark
 
   /*
    Returns a string giving the position of a given QT crate.
@@ -58,10 +64,10 @@ namespace {
   /*
    Composes the name and title corresponding to a given QT crate number.
    */
-  std::pair<std::string, std::string> composeQtNameTitle(int qt, int evtype) {
+  std::pair<std::string, std::string> composeQtNameTitle(int qt, int evtype, int dim) {
     std::string name, title;
-    if(qt >= kQt1 and qt <= kQt4) {
-      std::stringstream stream;
+    std::stringstream stream;
+    if(qt >= kQt1 and qt <= kQt4 and dim == 2) {
       if(evtype == kADC) {
         stream << "fms_qt_channel_adc_crate_" << qt;
         name = stream.str();
@@ -79,6 +85,14 @@ namespace {
         title = stream.str();
       } // if
     } // if
+    else if(qt >= kQt1 and qt <= kQt4 and dim == 1) {
+      stream << "adc_critical_crate_" << qt;
+      name = stream.str();
+      stream.str("");
+      stream.clear();
+      stream << "ADC>4094 for QT crate " << qt << " (" << position(qt) << ")";
+      title = stream.str();
+    } // else if
     else if(kFpd == qt) {
       name = "fpd_channel_adc";
       title = "Input to FPD QT crate";
@@ -114,12 +128,16 @@ fmsBuilder::~fmsBuilder() {
 
 void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
   LOG(DBG, "fmsBuilder::initialize");
-  // Create histograms for each QT crate (1 to 5), including FPD (5).
+  // Create histograms for each QT crate:
+  // mPlots list entries:
+  //  - 0-3 = ADC vs. channel for QT 1-4
+  //  - 4-7 = LED ADC vs. channel for QT 1-4
+  //  - 8-11 = histograms which filled if ADC above saturation threshold
   for(int evtype = kADC; evtype <= kLED; ++evtype) {
     for(int qt = kQt1; qt <= kQt4; ++qt) {
       // Create the histogram.
       std::pair<std::string, std::string> nameTitle
-        = composeQtNameTitle(qt,evtype);
+        = composeQtNameTitle(qt,evtype,2);
       TH2F* h = new TH2F(nameTitle.first.c_str(),
                          nameTitle.second.c_str(),
                          kNChannels, 0., kNChannels,  // Channel axis bins
@@ -127,12 +145,37 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
       h->SetBit(TH1::kCanRebin);
       h->SetXTitle("slot * 32 + channel");
       h->SetYTitle("ADC");
+      h->GetXaxis()->SetNdivisions(kNLargeDivisions,kNMediumDivisions,kNSmallDivisions,0);
+      h->GetYaxis()->SetNdivisions(8,4,4,0);
+      h->GetXaxis()->SetLabelSize(kAxisLabelSize);
+      h->GetYaxis()->SetLabelSize(kAxisLabelSize);
       // Store the histogram.
       // Create a JevpPlot owning the histogram and add it to the collection.
       mHists.insert(std::make_pair(qt+4*evtype, h));
-      mPlots.push_back(new JevpPlot(h));
+      JevpPlot * j = new JevpPlot(h);
+      j->logz=1;
+      j->optstat=0;
+      mPlots.push_back(j);
       addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
     } // for
+  } // for
+  for(int qt = kQt1; qt <= kQt4; ++qt) {
+    std::pair<std::string, std::string> nameTitle
+      = composeQtNameTitle(qt,kADC,1);
+    TH1F* h = new TH1F(nameTitle.first.c_str(),
+                       nameTitle.second.c_str(),
+                       kNChannels, 0., kNChannels);
+    h->SetBit(TH1::kCanRebin);
+    h->SetXTitle("slot * 32 + channel");
+    h->SetLineWidth(5);
+    h->SetLineColor(kRed);
+    h->GetXaxis()->SetNdivisions(kNLargeDivisions,kNMediumDivisions,kNSmallDivisions,0);
+    h->GetXaxis()->SetLabelSize(kAxisLabelSize);
+    h->GetYaxis()->SetLabelSize(kAxisLabelSize);
+    mHists.insert(std::make_pair(qt+8, h));
+    mPlots.push_back(new JevpPlot(h));
+    (mPlots.back())->optstat=0;
+    addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
   } // for
 }
 
@@ -177,10 +220,11 @@ void fmsBuilder::event(daqReader* reader) {
           int index = slot * kNQtChannelsPerSlot + channel;
           float adc = trigger->fmsADC(crate, slot, channel, 0);
           histogram->Fill(index, adc);
+          if(adc>4094 and evtype==kADC) (mHists.at(ii+8))->Fill(index,adc);
         } // for
       } // for
-    } // for
-  } // if
+    } // if
+  } // for
 }
 
 void fmsBuilder::main(int argc, char *argv[]) {
