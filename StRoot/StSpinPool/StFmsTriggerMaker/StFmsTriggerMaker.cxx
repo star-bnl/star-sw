@@ -744,10 +744,10 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   // Get register values
   // object=DSM crate, idx=DSM board
   sprintf(query,"select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
-  LOG_INFO << query << endm;
+  LOG_DEBUG << query << endm;
   mysql_query(&mysql,query);
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    LOG_INFO << setw(10) << "object" << setw(10) << "idx" << setw(10) << "reg" << setw(30) << "label" << setw(10) << "value" << setw(15) << "defaultvalue" << endm;
+    LOG_DEBUG<< setw(10) << "object" << setw(10) << "idx" << setw(10) << "reg" << setw(30) << "label" << setw(10) << "value" << setw(15) << "defaultvalue" << endm;
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int object = atoi(row[0]);
       int idx = atoi(row[1]);
@@ -763,9 +763,9 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
 	  }
 	}
       }
-      LOG_INFO << setw(10) << object << setw(10) << idx << setw(10) << reg << setw(30) << label << setw(10) << value << setw(15) << defaultvalue << endm;
+      LOG_DEBUG << setw(10) << object << setw(10) << idx << setw(10) << reg << setw(30) << label << setw(10) << value << setw(15) << defaultvalue << endm;
       if (object >= 1 && object <= NCRATES && idx >= 0x10) {
-	LOG_INFO << object << '\t' << idx << '\t' << reg << '\t' << label << '\t' << value << '\t' << defaultvalue << endm;
+	LOG_DEBUG << object << '\t' << idx << '\t' << reg << '\t' << label << '\t' << value << '\t' << defaultvalue << endm;
 	crateAt(object).boardAt(idx<<24).registerAt(reg<<24) = (value == -1) ? defaultvalue : value;
       }
     }
@@ -800,6 +800,7 @@ int StFmsTriggerMaker::FM0xxoutput(int number, int t) const{
   case 11: return fm011.output[t];
   case 12: return fm012.output[t];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxoutput(int number, int t) const{
@@ -809,6 +810,7 @@ int StFmsTriggerMaker::FM1xxoutput(int number, int t) const{
   case 3:  return fm103.output[t];
   case 4:  return fm104.output[t];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FP201input(int ch, int t) const{
@@ -830,6 +832,7 @@ int StFmsTriggerMaker::FM0xxinput(int number, int ch, int t) const{
   case 11: return ((int*)fm011.channels[t])[ch];
   case 12: return ((int*)fm012.channels[t])[ch];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxinput(int number, int ch, int t) const{
@@ -861,6 +864,7 @@ int StFmsTriggerMaker::FM0xxdata(int number, int ch, int t) const{
   case 11: return ((int*)fm011.dsmdata[t])[ch];
   case 12: return ((int*)fm012.dsmdata[t])[ch];
   }
+  return 0;
 }
 
 int StFmsTriggerMaker::FM1xxdata(int number, int ch, int t) const{
@@ -873,6 +877,36 @@ int StFmsTriggerMaker::FM1xxdata(int number, int ch, int t) const{
   return 0;
 }
 
+int StFmsTriggerMaker::FM0xxuserdata(int number, int ch, int t) const{
+  switch(number){
+  case 1:  return ((int*)fm001.userdata[t])[ch];
+  case 2:  return ((int*)fm002.userdata[t])[ch];
+  case 3:  return ((int*)fm003.userdata[t])[ch];
+  case 4:  return ((int*)fm004.userdata[t])[ch];
+  case 5:  return ((int*)fm005.userdata[t])[ch];
+  case 6:  return ((int*)fm006.userdata[t])[ch];
+  case 7:  return ((int*)fm007.userdata[t])[ch];
+  case 8:  return ((int*)fm008.userdata[t])[ch];
+  case 9:  return ((int*)fm009.userdata[t])[ch];
+  case 10: return ((int*)fm010.userdata[t])[ch];
+  case 11: return ((int*)fm011.userdata[t])[ch];
+  case 12: return ((int*)fm012.userdata[t])[ch];
+  }
+  return 0;
+}
+
+int StFmsTriggerMaker::FM1xxuserdata(int number, int ch, int t) const{
+  switch(number){
+  case 1:  return ((int*)fm101.userdata[t])[ch];
+  case 2:  return ((int*)fm102.userdata[t])[ch];
+  case 3:  return ((int*)fm103.userdata[t])[ch];
+  case 4:  return ((int*)fm104.userdata[t])[ch];
+  }
+  return 0;
+}
+
 int StFmsTriggerMaker::FP201userdata(int ch, int t) const{
   return fp201.userdata[MAXPP][ch];
 }
+
+

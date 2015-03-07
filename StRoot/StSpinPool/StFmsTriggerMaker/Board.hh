@@ -18,7 +18,7 @@ struct Board {
   unsigned short dsmdata[MAXT][NCHANNELS];
   unsigned int registers[NREGISTERS];
   unsigned int output[MAXT];
-  int userdata[MAXT][10];
+  int userdata[MAXT][20];
 
   Board();
   unsigned int& registerAt(int i) { return registers[i>>24]; }

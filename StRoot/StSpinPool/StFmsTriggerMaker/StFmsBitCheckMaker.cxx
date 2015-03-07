@@ -4,8 +4,6 @@
 
 enum {MAXD=MAXPP*2, MAXDT=MAXD*2+1};
 
-//unsigned char* FMS;
-//unsigned short FP201[8];
 unsigned short TCU;
 StFmsTriggerMaker* SIM;
 static int PRINTLEVEL;
@@ -16,21 +14,6 @@ static unsigned int N1[4][MAXDT][4][32][4];
 static unsigned int N2[MAXDT][4][32][4];
 static unsigned int N3[16][4];
 static float MM[MAXDT][18];
-
-/*
-unsigned int getDSM(int slot, int ch){
-  static const int chadd[4]={7,3,15,11};
-  static const int chadd2[4]={3,1,7,5};
-  if(slot<16){
-    int add=slot*16+chadd[ch];
-    return FMS[add] + (FMS[add-1]<<8) + (FMS[add-2]<<16) + (FMS[add-3]<<24);
-  }else if(slot==16){
-    int add=chadd2[ch];
-    return FP201[add] + (FP201[add-1]<<16);
-  }
-  return 0;
-}
-*/
 
 void printMismatch(int run){
   printf("Run      Mismatch% =  FM001  FM002  FM003  FM004  FM005  FM006  FM007  FM008  FM009  FM010  FM011  FM012 |  FM101  FM102  FM03   FM104 |  FP201 |  TCU   | Average\n");

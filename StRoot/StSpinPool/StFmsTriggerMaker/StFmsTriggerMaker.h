@@ -60,6 +60,8 @@ public:
   int FM1xxdata(int number, int ch, int t=MAXPP) const;
 
   int FP201userdata(int ch, int t=MAXPP) const;
+  int FM0xxuserdata(int number, int ch, int t=MAXPP) const;
+  int FM1xxuserdata(int number, int ch, int t=MAXPP) const;
 
   int FmsHighTowerTh0(int t=MAXPP) const { return btest(fp201.output[t],0); } // Small cells
   int FmsHighTowerTh1(int t=MAXPP) const { return btest(fp201.output[t],1); } // Large cells
