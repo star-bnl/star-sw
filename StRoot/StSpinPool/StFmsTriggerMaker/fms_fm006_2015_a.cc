@@ -42,9 +42,9 @@ void fms_fm006_2015_a(Board& fm006, int t, int simdat){
 
   //Compare BS to thresholds
   int BS3=0, BS2=0;
-  fm006.userdata[t][6]=0;
   fm006.userdata[t][7]=0;
   fm006.userdata[t][8]=0;
+  fm006.userdata[t][9]=0;
   for(int i=0; i<MAX; i++){
     if(bs[i]>BSThr3) {BS3=1; fm006.userdata[t][7]+=(1<<i); }
     if(bs[i]>BSThr2) {BS2=1; fm006.userdata[t][8]+=(1<<i); }
