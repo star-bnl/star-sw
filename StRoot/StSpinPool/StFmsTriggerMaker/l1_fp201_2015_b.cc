@@ -98,9 +98,9 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   fp201.userdata[t][5]=jp[5];
 
   int JP2=0, JP1=0, JP0=0, jp0=0;
-  fp201.userdata[t][6]=0;
   fp201.userdata[t][7]=0;
   fp201.userdata[t][8]=0;
+  fp201.userdata[t][9]=0;
   for(int i=0; i<NBITJp; i++){
     if(jp[i]>JpThr2) {JP2=1; fp201.userdata[t][7]+=(1<<i); }
     if(jp[i]>JpThr1) {JP1=1; fp201.userdata[t][8]+=(1<<i); }
