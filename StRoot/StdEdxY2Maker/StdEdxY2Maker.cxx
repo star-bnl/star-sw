@@ -797,7 +797,7 @@ Int_t StdEdxY2Maker::Make(){
       if (! pTrack) continue; // reject non primary tracks
       if (! pEvent->primaryVertex()) continue; 
       if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
-      //      if (pEvent->primaryVertex()->ranking() < 0) continue;
+      if (pEvent->primaryVertex()->ranking() < 0) continue;
       //      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
       Histogramming(gTrack);
     }
