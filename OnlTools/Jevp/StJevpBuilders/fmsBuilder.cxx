@@ -153,7 +153,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
       // Create a JevpPlot owning the histogram and add it to the collection.
       mHists.insert(std::make_pair(qt+4*evtype, h));
       JevpPlot * j = new JevpPlot(h);
-      j->logz=1;
+      j->optlogz=1;
       j->optstat=0;
       mPlots.push_back(j);
       addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
