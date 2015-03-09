@@ -182,7 +182,7 @@ void fpsBuilder::event(daqReader *rdr)
       pre_trig = xing;
       first=-1;
     }
-    if( xing-pre_trig != 1 ) continue;
+    if( xing-pre_trig != 0 ) continue;
     int qt=dd->rdo;
     int n=dd->ncontent;
     // printf("FPS: sec %2d, rdo %d, pad %d\n",xing,qt,dd->pad);
@@ -224,7 +224,7 @@ void fpsBuilder::event(daqReader *rdr)
       if( layer==2 ) { n2++; contents.h31_adc2->Fill(adc); contents.h34_adc2_full->Fill(adc);  }
       if( layer==3 ) { n3++; contents.h32_adc3->Fill(adc); contents.h35_adc3_full->Fill(adc);  }
 
-      if( layer < 3 )
+      if( layer<3 && adc>50 )
 	slats[layer-1][quadrant-1].push_back(slat);
 
       //   printf("FPS: xing %2d, QT %4d, ch %2d: ADC %4d, TDC %2d\n",xing,qt,ch,adc,tdc);
