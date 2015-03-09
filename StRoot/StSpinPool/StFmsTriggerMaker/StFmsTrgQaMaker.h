@@ -28,6 +28,8 @@ private:
   void fillJPsum();
   void fillBS();
   void fillJP();
+  void fillDiBS();
+  void fillDiJp();
 
   void readtrgid();
   int isTrg(const char* trgname);
@@ -36,7 +38,8 @@ private:
   TFile *mFile;
   char mFilename[100];
 
-  static const int NBS=68; //6+1+6+6+1+6=26 for small, 10+1+10+10+1+10=42 for large
+  static const int NBS=68;   //6+1+6+6+1+6=26 for small, 10+1+10+10+1+10=42 for large
+  static const int NBSG=12;  //BS groups
   static const int NJP=6;   
   static const int NTHR=3;
 
@@ -44,6 +47,7 @@ private:
   TH1F *hJP[NJP];
   TH1F *mBS[NTHR];
   TH1F *mJP[NTHR];
+  TH2F *mDIBSg;
   TH2F *mDIBS;
   TH2F *mDIJP;
 

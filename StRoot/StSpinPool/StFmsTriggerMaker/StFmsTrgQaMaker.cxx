@@ -35,6 +35,7 @@ int StFmsTrgQaMaker::Init(){
   mJP[0]=new TH1F("JP2","JP2",NJP,0.0,float(NJP));
   mJP[1]=new TH1F("JP1","JP1",NJP,0.0,float(NJP));
   mJP[2]=new TH1F("JP0","JP0",NJP,0.0,float(NJP));
+  mDIBSg=new TH2F("DiBSg","DiBSg",NBSG,0.0,float(NBSG),NBSG,0.0,float(NBSG));
   mDIBS=new TH2F("DiBS","DiBS",NBS,0.0,float(NBS),NBS,0.0,float(NBS));
   mDIJP=new TH2F("DiJP","DiJP",NJP,0.0,float(NJP),NJP,0.0,float(NJP));
   for(int i=0; i<NBS; i++){ hBS[i]=new TH1F(BSname[i],BSname[i],256,0.0,4096.0); }
@@ -60,7 +61,45 @@ int StFmsTrgQaMaker::Make(){
   fillJP();
   fillBSsum();
   fillJPsum();
+  fillDiBS();
+  fillDiJp();
   return kStOK;
+}
+
+void StFmsTrgQaMaker::fillDiBS(){
+  if(isTrg("FMS-DiBS")){
+    union u_t{
+      int INT[36];
+      char DBS[NBSG][NBSG];
+    } u;
+    for(int i=0; i<36; i++) u.INT[i]=mSIM->FP201userdata(10+i);
+    for(int j=0; j<NBSG; j++){
+      if(mPrint) printf("** DiBSg ");
+      for(int i=0; i<NBSG; i++){
+	if(mPrint) printf(" %1s", u.DBS[j][i]?"1":"0");
+	if(u.DBS[j][i]) mDIBSg->Fill(float(i),float(NBSG-j-1));
+      }
+      if(mPrint) printf("\n");
+    }
+  }
+}
+
+void StFmsTrgQaMaker::fillDiJp(){
+  if(isTrg("FMS-DiJP")){
+    union u_t{
+      int INT[9];
+      char DJp[NJP][NJP];
+    } u;
+    for(int i=0; i<9; i++) u.INT[i]=mSIM->FP201userdata(50+i);
+    for(int j=0; j<NJP; j++){
+      if(mPrint) printf("** DiJp ");
+      for(int i=0; i<NJP; i++){
+	if(mPrint) printf(" %1s", u.DJp[j][i]?"1":"0");
+	if(u.DJp[j][i]) mDIJP->Fill(float(i),float(NJP-j-1));
+      }
+      if(mPrint) printf("\n");
+    }  
+  }
 }
 
 void StFmsTrgQaMaker::fillJP(){

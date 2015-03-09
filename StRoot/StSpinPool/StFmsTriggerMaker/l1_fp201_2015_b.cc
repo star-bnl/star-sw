@@ -8,7 +8,6 @@
 //#include "registerHack.hh"
 
 static const int NBITBS=12;
-static int DBS[NBITBS][NBITBS];
 static const int tableBS[NBITBS][NBITBS]={
   {0,0,0,0,0,0,0,0,0,0,0,0}, //SmST	 
   {0,0,0,0,0,0,0,0,0,0,0,0}, //SmSM	 
@@ -27,7 +26,6 @@ static const int tableBS[NBITBS][NBITBS]={
 // T M B B M T T M B B M T 
 
 static const int NBITJp=6;
-static int DJp[NBITJp][NBITJp];
 static const int tableJp[NBITJp][NBITJp]={
   {0,0,0,1,1,0}, //ST	 
   {0,0,0,1,1,1}, //SM	 
@@ -68,20 +66,25 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
 
   //DiBS
   int DiBS=0;
-  memset(DBS,0,sizeof(DBS));
+  union u_t{
+    int INT[36];
+    char DBS[NBITBS][NBITBS];
+  } u;
+  memset(u.INT,0,sizeof(u.INT));
   int bs1 
     = (getFM101_2015b_BS1T(fm101)<<0) | (getFM101_2015b_BS1M(fm101)<<1) | (getFM101_2015b_BS1B(fm101)<<2)
     | (getFM101_2015b_BS1B(fm102)<<3) | (getFM101_2015b_BS1M(fm102)<<4) | (getFM101_2015b_BS1T(fm102)<<5)
     | (getFM103_2015a_BS1T(fm103)<<6) | (getFM103_2015a_BS1M(fm103)<<7) | (getFM103_2015a_BS1B(fm103)<<8)
-    | (getFM103_2015a_BS1B(fm104)<<9) | (getFM103_2015a_BS1M(fm104)<<10)| (getFM103_2015a_BS1T(fm104)<<12);
+    | (getFM103_2015a_BS1B(fm104)<<9) | (getFM103_2015a_BS1M(fm104)<<10)| (getFM103_2015a_BS1T(fm104)<<11);
   for(int i=0; i<NBITBS; i++){
     if(btest(bs1,i)){
       for(int j=i+1; j<NBITBS; j++){
-	if(tableBS[j][i] & btest(bs1,j)) {DBS[j][i]=1; DiBS=1;}
+	if(tableBS[j][i] & btest(bs1,j)) {u.DBS[j][i]=1; DiBS=1;}
       }      
     }
   }
-  
+  for(int i=0; i<36; i++) fp201.userdata[t][10+i]=u.INT[i];
+
   //Jp
   int jp[NBITJp];
   jp[0] = getFM101_2015b_JpT(fm101) + getFM103_2015a_JpT(fm103); //ST
@@ -109,14 +112,19 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
 
   //DiJp
   int DiJp=0;
-  memset(DJp,0,sizeof(DJp));
+  union u2_t{
+    int INT[9];
+    char DJp[NBITJp][NBITJp];
+  } u2;
+  memset(u2.INT,0,sizeof(u2.INT));
   for(int i=0; i<NBITJp-1; i++){
     if(btest(jp0,i)){
       for(int j=i+1; j<NBITJp; j++){
-        if(tableJp[j][i] & btest(jp0,j)) {DJp[j][i]=1; DiJp=1;}
+        if(tableJp[j][i] & btest(jp0,j)) {u2.DJp[j][i]=1; DiJp=1;}
       }
     }
   }
+  for(int i=0; i<9; i++) fp201.userdata[t][50+i]=u2.INT[i];
 
   fp201.output[t]
     = smBS3<<0 | smBS2<<1 | smBS1<<2 
@@ -135,25 +143,31 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
 	   DiBS,
 	   JP2,JP1,JP0,
 	   DiJp);
-    
-    printf("%s DiBS bs1=%03x=",fp201.name,bs1);
+  }
+
+  if(PRINT){
+    //if(bs1> (1<<12) ){
+    printf("%s DiBS bs1=0x%03x=",fp201.name,bs1);
     for(int i=NBITBS-1; i>=0; i--) printf("%1x",btest(bs1,i));
     printf("\n"); 
     for(int j=0; j<NBITBS; j++){
       printf("DiBS ");
       for(int i=0; i<=j; i++){
-	printf(" %1d", DBS[j][i]);
+	printf(" %1s", u.DBS[j][i]?"1":"0");
       }
       printf("\n");
     }
-    
-    printf("%s DiJp jp1=%02x=",fp201.name,jp0);
+  }
+
+  if(PRINT){
+  //if(1){
+    printf("%s DiJp jp1=0x%02x=",fp201.name,jp0);
     for(int i=NBITJp-1; i>=0; i--) printf("%1x",btest(jp0,i));
     printf("\n");
     for(int j=0; j<NBITJp; j++){
       printf("DiJp ");
       for(int i=0; i<NBITJp; i++){
-	printf(" %1d", DJp[j][i]);
+	printf(" %1s", u2.DJp[j][i]?"1":"0");
       }
       printf("\n");
     }
