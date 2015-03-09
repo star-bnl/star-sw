@@ -255,8 +255,9 @@ int StFmsTriggerMaker::MakeTrgData(){
 	    n++;
 	    if(adc==0xFFF) {
 	      printf("0xFFF problem : Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
-	      mNFFF++;
+	      mNFFF++;	      
 	    }
+	    //	    if(crt==2 && adr==0) printf("Crt=%2d Adr=%2d ch=%2d ADC=%4d\n",crt,adr,ch,adc);
 	  }
 	}
       }
