@@ -564,12 +564,12 @@ void istBuilder::startrun(daqReader *rdr) {
 
 	file = fopen(paraDir, "r");
 	if (file==0) {
-		LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		tableFound = false;
 		sprintf(paraDir, "%s/ist/pedestals_local.txt", clientdatadir);
 		file = fopen(paraDir, "r");
 		if(file==0){
-			LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+			LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		}else{
 			//LOG(U_IST,"loading pedestals from %s ", paraDir);
 			while(!feof(file)) {
@@ -633,7 +633,7 @@ void istBuilder::startrun(daqReader *rdr) {
 	FILE *file1;
 	file1 = fopen(paraDir,"rb");
 	if(file1==0){
-		LOG(WARN,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(U_IST,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 	}else{
 		int c=0, ret=-1;
 		long offset=0;
@@ -689,7 +689,7 @@ void istBuilder::startrun(daqReader *rdr) {
 	FILE *file2;
 	file2 = fopen(paraDir,"rb");
 	if(file2==0){
-		LOG(WARN,"ped::ist bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(U_IST,"ped::ist bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 	}else{
 		while(!feof(file2)) {
 			int r, arm, apv, ch  ;
@@ -924,6 +924,8 @@ void istBuilder::event(daqReader *rdr) {
 
 		int sectionIdx = (dd->rdo-1)*6*2 + dd->sec*2 + dd->pad/12;
 		bool isFilled = false;
+		int cou[ChPerApv];
+		memset(cou,0,sizeof(cou));
 		for ( u_int i=0; i<dd->ncontent; i++ ) { //loop current APV chip
 			//non-ZS data
 			if ( f[i].ch  < 0 || f[i].ch  > 127 )       continue;      //valid Channel numbering: 0, 1, ..., 127 
@@ -942,6 +944,7 @@ void istBuilder::event(daqReader *rdr) {
 
 			Int_t channelId = (dd->rdo-1)*numARM*numAPV*ChPerApv + dd->sec*numAPV*ChPerApv + dd->pad*ChPerApv + f[i].ch;
 			if(channelId < 0 || channelId >= totCh)	continue;
+
 			Int_t geoId    = istMapping[channelId];     //numbering from 1 to 110592
 			Int_t ladder   = 1 + (geoId-1)/ChPerLadder; //numbering from 1 to 24
 			Int_t apvId    = (geoId-1) / ChPerApv;      //numbering from 0 to 863
@@ -950,6 +953,7 @@ void istBuilder::event(daqReader *rdr) {
 			currentAPV     = apvId;	
 
 			if ( isChannelBad[geoId-1] )     continue;  // No bad channels have been added so far
+
 
 			//fill ADC value vs channel index
 			hAdcContents.adcArray[ladder-1]->Fill(channel, f[i].adc);
@@ -985,6 +989,9 @@ void istBuilder::event(daqReader *rdr) {
 				maxAdc[geoId-1]     = f[i].adc - runningAvg[geoId-1];
 				maxTimeBin[geoId-1] = f[i].tb;
 			}
+			if ( f[i].adc > runningAvg[geoId-1] + hitCut * oldStdDevs[geoId-1] ){
+				cou[f[i].ch]++;
+			}
 
 			//counts for dynamical common mode noise calculation
 			if ( f[i].tb==(numTb-1) ) {       //only take last time bin
@@ -995,6 +1002,16 @@ void istBuilder::event(daqReader *rdr) {
 				}
 			}
 		} //end current APV chip loops
+
+		// zero out hits less than 3 TBs
+		for(int i=0;i<ChPerApv;i++){
+			if(cou[i]<3){
+				Int_t channelId = (dd->rdo-1)*numARM*numAPV*ChPerApv + dd->sec*numAPV*ChPerApv + dd->pad*ChPerApv + i;
+				Int_t geoId    = istMapping[channelId];     //numbering from 1 to 110592
+				maxAdc[geoId-1]     = 0;
+				maxTimeBin[geoId-1] = 0;
+			}
+		}
 
 		//calculate dynamical common mode noise for current event
 		if ( counterAdcPerEvent[currentAPV] > 0 && currentAPV > -1) {
