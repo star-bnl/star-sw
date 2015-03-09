@@ -110,5 +110,5 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
       } // end ladders loop
    }// end nIsthits cut
 
-   LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endm;
+//   LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endm;
 }
