@@ -86,9 +86,9 @@ protected:
 
 inline void StiLocalTrackSeedFinder::reset()
 {
-  cout <<"StiLocalTrackSeedFinder::reset() -I- Started"<<endl;
+//  cout <<"StiLocalTrackSeedFinder::reset() -I- Started"<<endl;
   _reset = true;
-  cout <<"StiLocalTrackSeedFinder::reset() -I- Done"<<endl;
+//  cout <<"StiLocalTrackSeedFinder::reset() -I- Done"<<endl;
 }
 
 inline bool StiLocalTrackSeedFinder::isReset()

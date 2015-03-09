@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.cxx,v 1.14 2015/01/24 04:43:41 smirnovd Exp $
+// $Id: StiSsdHitLoader.cxx,v 1.15 2015/03/09 21:44:26 perev Exp $
 // 
 // $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.15  2015/03/09 21:44:26  perev
+// Remove redundant printouts
+//
 // Revision 1.14  2015/01/24 04:43:41  smirnovd
 // StiSsdHitLoader: Just to be safe got rid of local variable 'ladder' shadowing the loop's counter having the same name
 //
@@ -50,13 +53,13 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 			       Filter<StiTrack> * trackFilter, 
 			       Filter<StiHit> * hitFilter)
 {
-  cout <<"StiSsdHitLoader::loadHits() - Started"<<endl;
+//  cout <<"StiSsdHitLoader::loadHits() - Started"<<endl;
   if (!source)
     throw runtime_error("StiSsdHitLoader::loadHits() - FATAL - source==0 ");
   StSsdHitCollection* ssdhits = source->ssdHitCollection();
   if (!ssdhits)
     {
-      cout << "StiSsdHitLoader::loadHits(StEvent* source) - WARNING - NO SSD hits"<<endl;
+//      cout << "StiSsdHitLoader::loadHits(StEvent* source) - WARNING - NO SSD hits"<<endl;
       return;
     }
   int compt = 0;
@@ -104,7 +107,7 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 	}
     }
 
-  cout <<"StiSsdHitLoader::loadHits() - I - Done <====> Number of SSD Hits = " <<compt<<endl; 
+//  cout <<"StiSsdHitLoader::loadHits() - I - Done <====> Number of SSD Hits = " <<compt<<endl; 
 }
 	
 
