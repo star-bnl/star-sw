@@ -288,6 +288,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
   log_dest = (char *)"172.16.0.1";
   log_port = 8004;
   log_level = (char *)WARN;
+  makepallete = 0;
 
   rtsLogOutput(log_output);
   rtsLogAddDest(log_dest, log_port);
@@ -331,6 +332,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
     }
     else if (strcmp(argv[i], "-log") == 0) {
       logevent=1;
+    }
+    else if (strcmp(argv[i], "-pallete") == 0) {
+      makepallete = 1;
     }
     else if (strcmp(argv[i], "-files") == 0) {
       i++;
@@ -1869,6 +1873,8 @@ void *JEVPSERVERreaderThread(void *)
   // via the socket.   I then wait for a response from the server before I 
   // next ask the reader for an event!
 
+  int nevts = 0;
+
   for(;;) {
     
     usleep(100);  // otherwise we can starve out clients...
@@ -1886,6 +1892,7 @@ void *JEVPSERVERreaderThread(void *)
 	LOG(DBG, "RDRThread: End of the run!");
 	readerThreadSend(socket, "stoprun");
 	readerThreadWait(socket);
+	nevts = 0;
 	continue;
 	
       case EVP_STAT_EVT:
@@ -1904,6 +1911,16 @@ void *JEVPSERVERreaderThread(void *)
     if(serv.rdr->status) {
       LOG(ERR, "Bad status on read?  rdr->status=%d",serv.rdr->status);
       continue;
+    }
+
+    nevts++;
+    if(serv.makepallete) {
+      if(nevts > 1) {
+	nevts = 0;
+	readerThreadSend(socket, "stoprun");
+	readerThreadWait(socket);
+	continue;
+      }
     }
 
     LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);

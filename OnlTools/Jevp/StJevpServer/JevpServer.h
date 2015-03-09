@@ -43,6 +43,7 @@ class JevpServer {
   int myport;
   int logevent;
   char *launchArgs;    // used to pass the lanuch arguments back to reader thread...
+  int makepallete;     // **JUST** make pallete
   daqReader *rdr;
 
   char *displays_fn;      // Display Information...
