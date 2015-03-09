@@ -27,8 +27,14 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : 
 
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
-   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+  //   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+   return kStOk;
+}
 
+//____________________________________________________________
+Int_t StIstFastSimMaker::InitRun(int runNo)
+{
+   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
    if (mBuildIdealGeom && !gGeoManager) {
 
       GetDataBase("VmcGeometry");
@@ -40,14 +46,6 @@ Int_t StIstFastSimMaker::Init() {
          return kFatal;
       }
    }
-
-   return kStOk;
-}
-
-//____________________________________________________________
-Int_t StIstFastSimMaker::InitRun(int runNo)
-{
-   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
    TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
    St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
