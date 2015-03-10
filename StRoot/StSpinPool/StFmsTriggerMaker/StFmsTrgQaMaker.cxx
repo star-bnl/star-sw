@@ -45,6 +45,8 @@ int StFmsTrgQaMaker::Init(){
 }
 
 int StFmsTrgQaMaker::Finish(){
+  printf("Nevent=%d NFMStriggeredEvent=%d NFSMtrg=%d overlap=%f\n",
+	 count[0],count[1],count[2],float(count[2])/float(count[1]));
   mFile->Write();
   mFile->Close();
   printf("StFmsTrgQaMaker::Finish - Closing %s\n",mFilename);
@@ -63,6 +65,7 @@ int StFmsTrgQaMaker::Make(){
   fillJPsum();
   fillDiBS();
   fillDiJp();
+  countOverlap();
   return kStOK;
 }
 
@@ -276,3 +279,16 @@ int StFmsTrgQaMaker::isTrg(const char* trgn){
   return 0;
 }
 
+void StFmsTrgQaMaker::countOverlap(){
+  static const int NTRG=11;
+  const char* tname[NTRG]={"FMS-sm-bs1","FMS-sm-bs2","FMS-sm-bs3",
+			   "FMS-lg-bs1","FMS-lg-bs2","FMS-lg-bs3",
+			   "FMS-JP0","FMS-JP1","FMS-JP2",
+			   "FMS-DiBS","FMS-DiJP"};
+  int flag=0;
+  for(int i=0; i<NTRG; i++){
+    if(isTrg(tname[i])) {count[2]++; flag=1;}
+  }
+  if(flag==1) count[1]++;
+  count[0]++;
+}
