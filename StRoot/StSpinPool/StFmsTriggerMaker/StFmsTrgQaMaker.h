@@ -31,9 +31,11 @@ private:
   void fillDiBS();
   void fillDiJp();
 
+  TString trgname[64];
+  int count[3];
   void readtrgid();
   int isTrg(const char* trgname);
-  TString trgname[64];
+  void countOverlap();  
 
   TFile *mFile;
   char mFilename[100];
