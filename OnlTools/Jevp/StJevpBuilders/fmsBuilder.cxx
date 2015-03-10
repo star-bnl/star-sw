@@ -220,7 +220,7 @@ void fmsBuilder::event(daqReader* reader) {
           int index = slot * kNQtChannelsPerSlot + channel;
           float adc = trigger->fmsADC(crate, slot, channel, 0);
           histogram->Fill(index, adc);
-          if(adc>4094 and evtype==kADC) (mHists.at(ii+8))->Fill(index,adc);
+          if(adc>4094 and evtype==kADC) (mHists.at(ii+8))->Fill(index);
         } // for
       } // for
     } // if
