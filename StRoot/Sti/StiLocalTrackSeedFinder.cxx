@@ -30,13 +30,13 @@ StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
     _detectorContainer(detectorContainer)
 {
   fRxyMin=0;
-  cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
+//  cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
 //______________________________________________________________________________
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
-  cout <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
+//  cout <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
 //______________________________________________________________________________
@@ -51,7 +51,7 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
   StiKalmanTrack* track = 0;  
   if (isReset())
     { 
-      cout << "StiLocalTrackSeedFinder::findTrack() -I- Getting iterator" << endl;
+//      cout << "StiLocalTrackSeedFinder::findTrack() -I- Getting iterator" << endl;
 
       _hitIter = StiSortedHitIterator(_hitContainer,_detectorContainer->begin(),_detectorContainer->end());
     }

@@ -35,9 +35,9 @@ VectorAndEnd::VectorAndEnd(): fEffectiveEndValid(false)
 //________________________________________
 void VectorAndEnd::TestId(int id)
 {
-   if ( fId == id) {
-       printf(" Id = %d \n",fId);
-   }   
+//    if ( fId == id) {
+//        printf(" Id = %d \n",fId);
+//    }   
 }
 //________________________________________
 void VectorAndEnd:: clear()
@@ -117,13 +117,13 @@ void StiHitContainer::reset()
  */
 void StiHitContainer::clear()
 {
-  cout<<"StiHitContainer::clear() -I- Started"<<endl;
+//  cout<<"StiHitContainer::clear() -I- Started"<<endl;
     HitMapToVectorAndEndType::iterator it;
     for (it=_map.begin(); it!=_map.end(); it++) 
 			{
              (*it).second.clear();
 			}
-    cout<<"StiHitContainer::clear() -I- Done"<<endl;
+//    cout<<"StiHitContainer::clear() -I- Done"<<endl;
 }
 
 /*! The time complexity of size is of O(logN) where N is the number of

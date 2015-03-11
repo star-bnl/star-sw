@@ -256,6 +256,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	Int_t    NTRACK = 100;
 	Int_t    ID = 5;
 	Double_t mass = 0.1057;
+	Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
+	Double_t bgMax  = 1e5;  // 1e2;// 1e5;
+	Double_t pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
+	Double_t pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
 	if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 
 	  if    (Opt.Contains("muon-",TString::kIgnoreCase))     ID =  6;}
 	else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
@@ -271,10 +275,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	else if (Opt.Contains("triton",TString::kIgnoreCase))   {ID = 46; mass = 2.80925;}
 	else if (Opt.Contains("He3",TString::kIgnoreCase))      {ID = 49; mass = 2.80925;}
 	else if (Opt.Contains("alpha",TString::kIgnoreCase))    {ID = 47; mass = 3.727;}
-	Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
-	Double_t bgMax  = 1e5;  // 1e2;// 1e5;
-	Double_t pTmin = mass*bgMin; if (pTmin <    0.05) pTmin =    0.05;
-	Double_t pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
+	else if (Opt.Contains("phi",TString::kIgnoreCase))      {ID = 10151; mass = 1.0194; NTRACK = 1; pTmin = 0.010, pTmax = 2.000;}
 	if (Opt.Contains("MIP",TString::kIgnoreCase))           {pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 4;}
 	if (Opt.Contains("1GeV",TString::kIgnoreCase))          {pTmin = pTmax = 1.0;}
 	if (Opt.Contains("0.5GeV",TString::kIgnoreCase))        {pTmin = pTmax = 0.5;}
@@ -293,7 +294,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	    Double_t bg10  = bgMin10 + (bgMax10 - bgMin10)*gRandom->Rndm();
 	    Double_t bg    = TMath::Power(10., bg10);
 	    pT = mass*bg;
-	    if (pT < 0.05 || pT > 1000.0) continue;
+	    if (pT < ptMin || pT > pTmax) continue;
 	    break;
 	  }
 	  TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pT,pT,TMath::TwoPi()));

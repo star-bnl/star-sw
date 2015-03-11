@@ -85,8 +85,14 @@ void StiMasterHitLoader<Source1, Detector>::loadEvent(Source1 *source1,
     throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
   this->_hitContainer->clear();
   HitLoaderConstIter iter;
-  for (iter=this->begin();iter!=this->end();iter++){
-    (*iter)->loadHits(source1,trackFilter, hitFilter);}
+  for (iter=this->begin();iter!=this->end();iter++)	{
+    unsigned nHitsBeforeLoad = this->_hitContainer->size();
+    (*iter)->loadHits(source1,trackFilter, hitFilter);
+    LOG_INFO << "StiMasterHitLoader::loadEvent() - " 
+    << (*iter)->getName() << " loaded "
+    << this->_hitContainer->size() - nHitsBeforeLoad
+    << " hits" << endm;
+  }
   this->_hitContainer->sortHits();
   this->_hitContainer->reset();//declare all hits as unused...
 }

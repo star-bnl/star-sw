@@ -34,7 +34,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 {
   static Int_t debug = 0;
   _maxRow = St_tpcPadPlanesC::instance()->padRows();
-  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
+//  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
     throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
   if(!_hitContainer)
@@ -95,6 +95,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       
     }
   }
-  cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done with " << noHitsLoaded << " hits" <<  endl;
+//    cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done with " << noHitsLoaded << " hits" <<  endl;
 }
 //________________________________________________________________________________

@@ -87,7 +87,7 @@ const char *TAttr::SAttr(const char *key) const
    if (att) { // we found the attribut
      int n = att->GetUniqueID();
      att->SetUniqueID(n+1);
-     if (n<13) Info("Found","%s = %s\n",att->GetName(),att->GetTitle());
+     if (n<13) Info("Found","%s = %s",att->GetName(),att->GetTitle());
    }
    return (att)? att->GetTitle():"";
 }   

@@ -1,10 +1,10 @@
 // $Id: StiTpcSeedFinder.cxx,v 2.7 2012/05/07 14:55:38 fisyak Exp $
 #ifdef DO_TPCCATRACKER
+#include "StMessMgr.h"
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
 #include "StiHit.h"
 #include "StTpcHit.h"
-#include "StMessMgr.h"
 #include "StTpcHit.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackFinder.h"
