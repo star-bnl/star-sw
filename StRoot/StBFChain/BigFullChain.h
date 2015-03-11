@@ -189,31 +189,63 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2013"        ,"","","TpcRS,TpxClu,y2013_1x,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big",      "","","",kFALSE},
-  {"MC.2014","","","P2014a,TpcRS,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,bbcSim,btofsim,emcY2,EEfs,evout"
-   ",IdTruth,geantout,big,MiniMcMk,AgML"                                             ,"","","",kFALSE}, 
-  {"MC.devT"        ,"","","TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,TpcHitMover"
+#if 0
+  {"MC.2014","","","P2014a,-in,TpcRS,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,bbcSim,btofsim,emcY2,EEfs,evout"
+   ",IdTruth,geantout,big,MiniMcMk,AgML"                                                  ,"","","",kFALSE}, 
+  {"MC.devT"        ,"","","P2014a,TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",        "","","",kFALSE},
-  {"MC.devTA"        ,"","","TpcRS,TpxClu,devTA,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTA"        ,"","","P2014a,TpcRS,TpxClu,devTA,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTB"        ,"","","TpcRS,TpxClu,devTB,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTB"        ,"","","P2014a,TpcRS,TpxClu,devTB,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTC"        ,"","","TpcRS,TpxClu,devTC,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTC"        ,"","","P2014a,TpcRS,TpxClu,devTC,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTD"        ,"","","TpcRS,TpxClu,devTD,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTD"        ,"","","P2014a,TpcRS,TpxClu,devTD,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTE"        ,"","","TpcRS,TpxClu,devTE,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTE"        ,"","","P2014a,TpcRS,TpxClu,devTE,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTF"        ,"","","TpcRS,TpxClu,devTF,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTF"        ,"","","P2014a,TpcRS,TpxClu,devTF,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
-  {"MC.devTX"        ,"","","TpcRS,TpxClu,devTX,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.devTX"        ,"","","P2014a,TpcRS,TpxClu,devTX,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
+  {"MC.2014","","","TpcRS,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+#endif
+  {"MC.2014","","","TpcRS,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTA","","","TpcRS,TpxClu,devTA,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTB","","","TpcRS,TpxClu,devTB,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTC","","","TpcRS,TpxClu,devTC,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTD","","","TpcRS,TpxClu,devTD,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTE","","","TpcRS,TpxClu,devTE,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTF","","","TpcRS,TpxClu,devTF,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTX","","","TpcRS,TpxClu,devTX,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,tags,emcY2,evout,IdTruth,geantout,big,fzin,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"RC.y2000"        ,"","","p2000,VFMinuit,CMuDst,NosvtIT,NossdIT"                       ,"","","",kFALSE},
   {"RC.y2001"        ,"","","P2001a,VFMinuit,ZDCvtx,CMuDst,NosvtIT,NossdIT"               ,"","","",kFALSE},
