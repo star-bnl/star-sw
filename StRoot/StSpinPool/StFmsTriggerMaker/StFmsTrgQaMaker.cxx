@@ -119,8 +119,10 @@ void StFmsTrgQaMaker::fillDiBS(){
       if(mPrint) printf("** DiBSg ");
       for(int i=0; i<NBSG; i++){
 	if(mPrint) printf(" %1s", u.DBS[j][i]?"1":"0");
-	if(u.DBS[j][i]){
-	  mDIBSg->Fill(float(i),float(NBSG-j-1));	  
+	if(u.DBS[j][i]) {
+	  float w=1.0;
+	  if(i==7 && j==10) w=0.2;
+	  mDIBSg->Fill(float(i),float(NBSG-j-1),w);
 	  //printf("BSbit=");
 	  for(int jj=0; jj<NBS; jj++){
 	    //printf("%1d",BSbit[jj]); if(BSGRP[jj]!=BSGRP[jj+1]) printf(" ");}
