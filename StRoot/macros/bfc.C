@@ -45,7 +45,7 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012,pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("P2014aPxLSim,gstar,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
-TString defChain("MC.y2014,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");
+TString defChain("MC.2014,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");
 //TString defChain("MC.y2012,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
