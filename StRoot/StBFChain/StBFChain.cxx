@@ -655,7 +655,7 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("NoTpxAfterBurner", 1);
     }
     if (maker == "StTpcDbMaker"){
-      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
+      //      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",1) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",1);// uses new laserDV
@@ -701,12 +701,13 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("EmbeddingShortCut", 1);
       mk->PrintAttr();
     }
+#if 0
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
       // If simulation running make sure pick up simu stuff from db
       if (GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetMode(1);
     }
-
+#endif
     // FTPC
     if ((maker == "StFtpcClusterMaker" ||
 	 maker == "StFtpcTrackMaker"    )  &&
@@ -1551,7 +1552,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 	r +=  DbAlias[i].tag;
 	if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
 	GeomVersion = DbAlias[i].geometry;
-	found = i;
+	found = i; 
 	break;
       }
       if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
@@ -1636,10 +1637,16 @@ void StBFChain::SetDbOptions(StMaker *mk){
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
       for (Int_t i = 0; DbAlias[i].tag; i++) {
-	if (GetOption(DbAlias[i].tag,kFALSE)) {
-	  db->SetDateTime(DbAlias[i].tag);
-	  found = i;
-	  break;
+	for (Int_t r = 0; r < 2; r++) {
+	  TString dbTag("");
+	  if (r) dbTag += "r";
+	  dbTag += DbAlias[i].tag;
+	  if (GetOption(dbTag,kFALSE)) {
+	    db->SetDateTime(DbAlias[i].tag);
+	    found = i;
+	    break;
+	  }
+	  if (found) break;
 	}
       }
       if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}

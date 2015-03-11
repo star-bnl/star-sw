@@ -189,8 +189,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2013"        ,"","","TpcRS,TpxClu,y2013_1x,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big",      "","","",kFALSE},
-  {"MC.y2014"        ,"","","P2014a,TpcRS,TpxClu,pxlfastsim,istsim,bbcSim,btofsim,emcSim,EEfs"
-   ",geantout,big,emcY2",                                                                  "","","",kFALSE},
+  {"MC.2014","","","P2014a,TpcRS,TpxClu,useXgeom,FieldOn,NoSsdIt,NoSvtIt,bbcSim,btofsim,emcY2,EEfs,evout"
+   ",IdTruth,geantout,big,MiniMcMk,AgML"                                             ,"","","",kFALSE}, 
   {"MC.devT"        ,"","","TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,TpcHitMover"
    ",bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom",        "","","",kFALSE},
   {"MC.devTA"        ,"","","TpcRS,TpxClu,devTA,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
@@ -346,6 +346,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                        "/star/rcf/simu/rcf12002_1_100evts.fzd",kFALSE},
   {"test_UU200.MC.y2012","","","MC.y2012,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf12002_1_100evts.fzd",kFALSE},
+  {"test_AuAu200.MC.y2014","","","MC.2014,fzin,TpcRS,Sti","",""
+   ,"/star/rcf/simu/rcf14020_100_50evts.fzd"                                                       ,kFALSE}, 
   {"test.RC.centr.y2000","","","RC.y2000,Sti","",""
    ,                                   "/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq",kFALSE},
   {"test.RC.minb.y2000","","","RC.y2000,Sti","",""
@@ -440,14 +442,25 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2012/115/st_physics_13115004_raw_2010002.daq",kFALSE},
   {"test.RC.pp500.y2013","","","RC.pp.y2013,Sti","",""
    ,                              "/star/rcf/test/daq/2013/079/st_physics_14079008_raw_1920004.daq",kFALSE},
+
   {"test.RC.AuAu15.y2014","","","RC.y2014,Sti","",""
    ,                              "/star/rcf/test/daq/2014/069/st_physics_15069008_raw_2500008.daq",kFALSE},
   {"test.RC.AuAu200.y2014","","","RC.y2014,Sti","",""
    ,                              "/star/rcf/test/daq/2014/086/st_physics_15086051_raw_2500017.daq",kFALSE},
+  {"test.RC.AuAu200.low.y2014","","","RC.y2014,-hitfilt,Sti"
+   ,                        "","","/star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq",kFALSE}, 
   {"test.RC.AuAu200.mid.y2014","","","RC.y2014,Sti","",""
    ,                                  "/star/rcf/test/daq/2014/146/st_mtd_15146050_raw_1000030.daq",kFALSE},
   {"test.RC.He3Au200.y2014","","","RC.y2014,Sti","",""
    ,                              "/star/rcf/test/daq/2014/171/st_physics_15171039_raw_2000008.daq",kFALSE},
+  {"test.RC.pp200long.y2015","","","pp2015,btof,mtd,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
+   ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/044/st_physics_16044038_raw_2000009.daq",kFALSE}, 
+  {"test.RC.pp200longA.y2015","","","pp2015,btof,mtd,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
+   ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
+  {"test.RC.pp200long.NoHFT.y2015","","","pp2015,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
+   ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/044/st_physics_16044038_raw_2000009.daq",kFALSE}, 
+  {"test.RC.pp200longA.NoHFT.y2015","","","pp2015,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,"
+   "-hitfilt,Sti","",""          ,"/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
   //_________ eval _____________
   {"eval_Sti_auau200.MC.y2007"  ,"","","MC.y2007,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf1296_02_100evts.fzd",kFALSE},
@@ -1258,6 +1271,42 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
+   ,                                                                           "read gstar fz-file",kFALSE},
+  {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
+   ,                                                                "gstar","read event from MuDst",kFALSE},
+  {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
+  {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF"
+   ,                                                      "Mag.field map with scale factor from Db",kFALSE},
+  {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker library",kFALSE},
+  {"tpcDB"   ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF,StEvent","StTpcDbMaker","StTpcDb","",kFALSE},
+  {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
+  {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
+  // both sst and ssd are in the same SsdX libraries
+  {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
+  {"sstDb"      ,"sstDb","","tpcDb,SsdUtil","StSstDbMaker","StSsdDbMaker","Load and run SstDbMaker",kFALSE},
+  {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
+  {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
+  {"fmsDb"       ,"fmsDb","","db",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+#if 0
+  {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+#endif
+  {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
+  {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
+  {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
+
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  // for simulation on fly Event time stamp is set outside of the simulation makers
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
@@ -1286,42 +1335,6 @@ Bfc_st BFC[] = { // standard chains
    ,"StarLight"
    ,                                         "Load StarLight in starsim, set AuAu 200 GeV with rho",kFALSE},
 #endif
-  {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
-  {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
-  {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
-   ,                                                                           "read gstar fz-file",kFALSE},
-  {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
-  {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF"
-   ,                                                      "Mag.field map with scale factor from Db",kFALSE},
-  {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker library",kFALSE},
-  {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
-   ,                                                                "gstar","read event from MuDst",kFALSE},
-  {"tpcDB"   ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF,StEvent","StTpcDbMaker","StTpcDb","",kFALSE},
-  {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
-  {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
-  // both sst and ssd are in the same SsdX libraries
-  {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
-  {"sstDb"      ,"sstDb","","tpcDb,SsdUtil","StSstDbMaker","StSsdDbMaker","Load and run SstDbMaker",kFALSE},
-  {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
-  {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
-  {"fmsDb"       ,"fmsDb","","db",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-#if 0
-  {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-#endif
-  {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
-  {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
-  {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  // for simulation on fly Event time stamp is set outside of the simulation makers
   {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
    ,                                                        "","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
