@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.16 2013/03/25 23:28:11 perev Exp $
+ * $Id: StMcEventTypes.hh,v 2.17 2015/03/12 23:13:28 perev Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -9,7 +9,12 @@
  *
  ***************************************************************************
  *
+ * Switch layers to ladders (Amilkar)
+ *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.17  2015/03/12 23:13:28  perev
+ * Layer ==> Ladder collections
+ *
  * Revision 2.16  2013/03/25 23:28:11  perev
  * Mustafa.Pxl corrs
  *
@@ -107,7 +112,7 @@
 #include "StMcPxlSectorHitCollection.hh"
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
-#include "StMcIstLayerHitCollection.hh"
+#include "StMcIstLadderHitCollection.hh"     
 #include "StMcFgtHit.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcFgtLayerHitCollection.hh"
