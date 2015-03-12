@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $
+ * $Id: StMcIstHitCollection.cc,v 2.3 2015/03/12 23:18:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -9,7 +9,12 @@
  *
  ***************************************************************************
  *
+ * Switch layers to ladders (Amilkar)
+ *
  * $Log: StMcIstHitCollection.cc,v $
+ * Revision 2.3  2015/03/12 23:18:06  perev
+ * Switch layers to ladders (Amilkar)
+ *
  * Revision 2.2  2005/05/11 20:54:29  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -32,7 +37,7 @@
 #include "StMcIstHitCollection.hh"
 #include "StMcIstHit.hh"
 
-static const char rcsid[] = "$Id: StMcIstHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHitCollection.cc,v 2.3 2015/03/12 23:18:06 perev Exp $";
 
 ClassImp(StMcIstHitCollection)
 
@@ -43,42 +48,45 @@ StMcIstHitCollection::~StMcIstHitCollection() { /* noop */ }
 bool
 StMcIstHitCollection::addHit(StMcIstHit* hit)
 {
-    unsigned int p;
-    if (hit && (p = hit->layer()-1) < mNumberOfLayers) {
-      mLayers[p].hits().push_back(hit);
-      return true;
-    }
+  unsigned int p, w;
+  if (hit && ((p = hit->ladder()-1) < mNumberOfLadders) &&
+              (w = hit->sensor()-1) < ladder(p)->numberOfSensors()) {
+    //mLadders[p].hits().push_back(hit);
+    ladder(p)->sensor(w)->hits().push_back(hit);
+    return true;
+    
+  }
     else
       return false;
 }
 
 unsigned int
-StMcIstHitCollection::numberOfLayers() const { return mNumberOfLayers; }
+StMcIstHitCollection::numberOfLadders() const { return mNumberOfLadders; }
 
 unsigned long
 StMcIstHitCollection::numberOfHits() const
 {
     unsigned long sum = 0;
-    for (int i=0; i<mNumberOfLayers; i++)
-      sum += mLayers[i].numberOfHits();
+    for (int i=0; i<mNumberOfLadders; i++)
+      sum += mLadders[i].numberOfHits();
 
     return sum;
 }
 
-StMcIstLayerHitCollection*
-StMcIstHitCollection::layer(unsigned int i)
+StMcIstLadderHitCollection*
+StMcIstHitCollection::ladder(unsigned int i)
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfLadders)
+        return &(mLadders[i]);
     else
         return 0;
 }
 
-const StMcIstLayerHitCollection*
-StMcIstHitCollection::layer(unsigned int i) const
+const StMcIstLadderHitCollection*
+StMcIstHitCollection::ladder(unsigned int i) const
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfLadders)
+        return &(mLadders[i]);
     else
         return 0;
 }
