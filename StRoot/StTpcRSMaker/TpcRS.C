@@ -294,7 +294,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	    Double_t bg10  = bgMin10 + (bgMax10 - bgMin10)*gRandom->Rndm();
 	    Double_t bg    = TMath::Power(10., bg10);
 	    pT = mass*bg;
-	    if (pT < ptMin || pT > pTmax) continue;
+	    if (pT < pTmin || pT > pTmax) continue;
 	    break;
 	  }
 	  TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pT,pT,TMath::TwoPi()));

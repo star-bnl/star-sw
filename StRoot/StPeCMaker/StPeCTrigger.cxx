@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.18 2015/02/25 01:18:22 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.19 2015/03/11 17:21:44 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.19  2015/03/11 17:21:44  ramdebbe
+// added run 15 RP triggers (only to MuDst filled method needs to be copied to StEvent filled method
+//
 // Revision 1.18  2015/02/25 01:18:22  ramdebbe
 // added trigger information for Roman Pot triggers 2015 pp200GeV
 //
@@ -602,17 +605,34 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
       if(runN>16041100 && runN<= 16770001){
 	if(triggerSel=="RP_trig"){
 
-
-	  if(ttid.isTrigger(470707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
-	  if(ttid.isTrigger(470708)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT
-	  if(ttid.isTrigger(470711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
-	  if(ttid.isTrigger(9)     ) trg_3000 = trg_3000 | (int)pow(2.0, 3.0); //RP_ET not elevated
-	  if(ttid.isTrigger(470704)) trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_RPZMU
-	  if(ttid.isTrigger(470701)) trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
-	  if(ttid.isTrigger(470703)) trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
-	  if(ttid.isTrigger(470702)) trg_3000 = trg_3000 | (int)pow(2.0, 7.0); //RP_SDZ
-	  if(ttid.isTrigger(470712)) trg_3000 = trg_3000 | (int)pow(2.0, 8.0); //RP_zerobias
-	  if(ttid.isTrigger(470709)) trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_RP2MU elevated to physics in run 16054061
+	  if(runN< 16064034) {                                                  //longitudinal polarization
+	    if(ttid.isTrigger(470707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
+	    if(ttid.isTrigger(470708)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT
+	    if(ttid.isTrigger(470711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
+	    if(ttid.isTrigger(9)     ) trg_3000 = trg_3000 | (int)pow(2.0, 3.0); //RP_ET not elevated
+	    if(ttid.isTrigger(470724)) trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_RPZMU changed ~4MAR
+	    if(ttid.isTrigger(470701)) trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
+	    if(ttid.isTrigger(470703)) trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
+	    if(ttid.isTrigger(470702)) trg_3000 = trg_3000 | (int)pow(2.0, 7.0); //RP_SDZ
+	    if(ttid.isTrigger(470712)) trg_3000 = trg_3000 | (int)pow(2.0, 8.0); //RP_zerobias
+	    if(ttid.isTrigger(470729)) trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_RP2MU elevated to physics in run 16054061 changed ~4MAR
+	    if(ttid.isTrigger(470730)) trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_RP2E  elevated to physics in run 160..
+	    if(ttid.isTrigger(470725)) trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_RPZE  elevated to physics in run 160..
+	  }
+	  if(runN>= 16064034) {                                                  //transverse polarization
+	    if(ttid.isTrigger(480707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
+	    if(ttid.isTrigger(480713)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT2
+	    if(ttid.isTrigger(480711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
+	    if(ttid.isTrigger(480706)) trg_3000 = trg_3000 | (int)pow(2.0, 3.0); //RP_ET
+	    if(ttid.isTrigger(480704)) trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_RPZMU changed ~4MAR
+	    if(ttid.isTrigger(480701)) trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
+	    if(ttid.isTrigger(480703)) trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
+	    if(ttid.isTrigger(480702)) trg_3000 = trg_3000 | (int)pow(2.0, 7.0); //RP_SDZ
+	    if(ttid.isTrigger(480712)) trg_3000 = trg_3000 | (int)pow(2.0, 8.0); //RP_zerobias
+	    if(ttid.isTrigger(480709)) trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_RP2MU elevated to physics in run 16054061 changed ~4MAR
+	    if(ttid.isTrigger(480710)) trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_RP2E  elevated to physics in run 160..
+	    if(ttid.isTrigger(480705)) trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_RPZE  elevated to physics in run 160..
+	  }
 
 	  LOG_INFO << "StPeCTrigger::value of trg_3000 RP triggers  ------------------------------------ " <<trg_3000<< endm;
 	}

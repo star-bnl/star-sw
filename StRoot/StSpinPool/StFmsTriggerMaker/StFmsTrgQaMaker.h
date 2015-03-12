@@ -43,7 +43,7 @@ private:
   static const int NBS=68;   //6+1+6+6+1+6=26 for small, 10+1+10+10+1+10=42 for large
   static const int NBSG=12;  //BS groups
   static const int NJP=6;   
-  static const int NTHR=3;
+  static const int NTHR=3; 
 
   TH1F *hBS[NBS];
   TH1F *hJP[NJP];

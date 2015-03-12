@@ -395,7 +395,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (QAmode) cutshist->Fill(18);
           // Multiple silicon hits destroy sDCA <-> SpaceCharge correlation,
           // and single hit in SVT is unreliable. Only good config is NO SVT!
-          if (map.hasHitInDetector(kSvtId) && TrackInfomode < 1) continue;
+          // Updated for HFT era to exclude anything with PXL or IST hits
+          if ((map.hasHitInDetector(kSvtId) ||
+               map.hasHitInDetector(kPxlId) ||
+               map.hasHitInDetector(kIstId)) && TrackInfomode < 1) continue;
           if (QAmode) cutshist->Fill(19);
           if (map.numberOfHits(kTpcId) < minTpcHits) continue;
           if (QAmode) cutshist->Fill(20);
@@ -1499,8 +1502,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.59 2014/11/17 20:49:09 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.60 2015/03/11 21:38:52 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.60  2015/03/11 21:38:52  genevb
+// HFT era: no tracks with PXL or IST hits in calibration
+//
 // Revision 1.59  2014/11/17 20:49:09  genevb
 // Store east and west gapf in the ntuple
 //

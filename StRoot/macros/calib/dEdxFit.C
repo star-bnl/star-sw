@@ -23,6 +23,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "THnSparse.h"
 #include "TStyle.h"
 #include "TF1.h"
 #include "TProfile.h"
@@ -1397,6 +1398,7 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   }
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
+  if (iok) return 0;
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     Double_t params[10];
     g2->GetParameters(params);
@@ -2097,8 +2099,15 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   TFile *fRootFile = (TFile *) next(); // gDirectory->GetFile();
   if (! fRootFile ) {printf("There is no opened file\n"); return;}
   TH1 *hist = 0;// = (TH1 *) fRootFile->Get(HistName);
-  fRootFile->GetObject(HistName,hist);
-  if (!hist) {printf("Cannot find %s\n", HistName); return;}
+  //  fRootFile->GetObject(HistName,hist);
+  TObject *obj = fRootFile->Get(HistName);
+  if (!obj) {printf("Cannot find %s\n", HistName); return;}
+  if (obj->IsA()->InheritsFrom( "TH1" )) {
+    hist = (TH1 *) obj;
+  } else if (obj->IsA()->InheritsFrom( "THnSparse" )) {
+    hist = ((THnSparse *) obj)->Projection(1,0);
+  }
+  if (! hist) return;
   TAxis *xax = hist->GetXaxis();
   Int_t nx = xax->GetNbins(); printf ("nx = %i",nx);
   Axis_t xmin = xax->GetXmin(); printf (" xmin = %f",xmin);

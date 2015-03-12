@@ -146,12 +146,12 @@ void l1_fp201_2015_b(Board& fp201, int t, int simdat){
   }
 
   if(PRINT){
-    //if(bs1> (1<<12) ){
+  //if(DiBS){
     printf("%s DiBS bs1=0x%03x=",fp201.name,bs1);
     for(int i=NBITBS-1; i>=0; i--) printf("%1x",btest(bs1,i));
     printf("\n"); 
     for(int j=0; j<NBITBS; j++){
-      printf("DiBS ");
+      printf("DiBS %2d : ",j);
       for(int i=0; i<=j; i++){
 	printf(" %1s", u.DBS[j][i]?"1":"0");
       }
