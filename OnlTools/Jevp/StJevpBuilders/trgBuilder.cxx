@@ -28,7 +28,18 @@
 //     May need to change each year!
 double h146_zdc_vertex_offset = 12.88 - .55; 
 
-
+//******************************************************************************
+// Values for the log scale y axes for various plots
+// 0 means linear, 1 means log scale
+//******************************************************************************
+const int logYunattenuated = 1; // unattenuated plots log scale y axis
+//msimko: the unattenuated plots are in log scale for pp collisions
+// may need to be changed to 0 for A+A
+const int logYSum = 1; // log scale for the ZDC hardware Sum plot
+//msimko: changed to log for pp collisions might want to change back for A+A
+const int logTimePlots = 1; // ZDC time plots
+//msimko: changed to log because of the peak at 50 in ZDC East
+//******************************************************************************
 
 ClassImp(trgBuilder);
   
@@ -160,24 +171,29 @@ void trgBuilder::initialize(int argc, char *argv[]) {
 
   // Build Root Histograms...
   // Trigger / ZDC
-  h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1000);
-  h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1000);
+  h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1500); 
+  //msimko: Upper limit was changed from 1000 to 1500 for pp (but 1000 makes more sense for A+A) collisions
+  h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1500); 
+  //msimko: Upper limit was changed from 1000 to 1500 for pp (but 1000 makes more sense for A+A) collisions
   h78_zdc_timediff_east_west = new TH1D("h78_zdc_timediff_east_west","ZDC Time (West - East)",200,-2000,2000);
   h146_zdc_Vertex_cm = new TH1D("h146_zdc_Vertex_cm","Vertex Position from ZDC (cm)",50, -100, 100);
-  h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,1000);
-  h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,1000);
+  //msimko: Upper limit changed to 300 for pp collisions (changed from 1000 for A+A)
+  h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,300);
+  h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,300);
   
   // Trigger / ZDC_seg
-  h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,1000);
-  h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,1000);
-  h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,1000);
-  h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,1000);
-  h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,1000);
-  h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,1000);
+  //msimko: Upper limit changed to 300 for pp collisions (changed from 1000 for A+A)
+  h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,300);
+  h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,300);
+  h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,300);
+  h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,300);
+  h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,300);
+  h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,300);
 
   // Trigger / ZDC sums
-  h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,3000);
-  h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC Hardware Sum Central",300,0,3000);
+  //msimko: Upper limit changed to 300 for pp collisions (changed from 3000 for A+A)
+  h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,300);
+  h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC Hardware Sum Central",300,0,300);
   
   // Trigger / Bunch Crossing Counter
   h266_bbc_bunchid_y = new TH1D("h266_bbc_bunchid_y","Bunch Crossing Counter (Yellow)",120,-0.5,119.5);
@@ -224,22 +240,33 @@ void trgBuilder::initialize(int argc, char *argv[]) {
   JevpPlot *plots[100];
   int n=0;
   plots[n] = new JevpPlot(h76_zdc_time_east);
+  plots[n]->logy = logTimePlots;
   plots[++n] = new JevpPlot(h77_zdc_time_west);
+  plots[n]->logy = logTimePlots;
   plots[++n] = new JevpPlot(h78_zdc_timediff_east_west);
   plots[++n] = new JevpPlot(h146_zdc_Vertex_cm);
   plots[++n] = new JevpPlot(h480_zdc_unatt_eastsum);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h481_zdc_unatt_westsum);
+  plots[n]->logy = logYunattenuated;
   
   plots[++n] = new JevpPlot(h474_zdc_unatt_east1);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h475_zdc_unatt_west1);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h476_zdc_unatt_east2);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h477_zdc_unatt_west2);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h478_zdc_unatt_east3);
+  plots[n]->logy = logYunattenuated;
   plots[++n] = new JevpPlot(h479_zdc_unatt_west3);
+  plots[n]->logy = logYunattenuated;
 
   plots[++n] = new JevpPlot(h482_zdc_sum_bbc);
   plots[n]->setDrawOpts("colz");
   plots[++n] = new JevpPlot(h483_zdc_hardwaresum);
+  plots[n]->logy = logYSum;
 
   plots[++n] = new JevpPlot();
   PlotHisto *ph = new PlotHisto(h266_bbc_bunchid_y);
