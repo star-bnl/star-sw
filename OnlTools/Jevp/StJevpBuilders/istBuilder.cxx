@@ -564,12 +564,12 @@ void istBuilder::startrun(daqReader *rdr) {
 
 	file = fopen(paraDir, "r");
 	if (file==0) {
-		LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		tableFound = false;
 		sprintf(paraDir, "%s/ist/pedestals_local.txt", clientdatadir);
 		file = fopen(paraDir, "r");
 		if(file==0){
-			LOG(U_IST,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+			LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 		}else{
 			//LOG(U_IST,"loading pedestals from %s ", paraDir);
 			while(!feof(file)) {
@@ -596,6 +596,7 @@ void istBuilder::startrun(daqReader *rdr) {
 				}
 			}
 			tableFound = true;
+			fclose(file);
 		}
 	}
 	else {
@@ -624,8 +625,8 @@ void istBuilder::startrun(daqReader *rdr) {
 			}
 		}
 		tableFound = true;
+		fclose(file);
 	}
-	fclose(file);
 
 
 	sprintf(paraDir, "%s/ist/ist_apv_bad.txt", clientdatadir);
@@ -633,7 +634,7 @@ void istBuilder::startrun(daqReader *rdr) {
 	FILE *file1;
 	file1 = fopen(paraDir,"rb");
 	if(file1==0){
-		LOG(U_IST,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(WARN,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 	}else{
 		int c=0, ret=-1;
 		long offset=0;
@@ -682,6 +683,7 @@ void istBuilder::startrun(daqReader *rdr) {
 				break;
 			}
 		}
+		fclose(file1);
 	}
 
 	sprintf(paraDir, "%s/ist/ist_bad_channels.txt", clientdatadir);
@@ -689,7 +691,7 @@ void istBuilder::startrun(daqReader *rdr) {
 	FILE *file2;
 	file2 = fopen(paraDir,"rb");
 	if(file2==0){
-		LOG(U_IST,"ped::ist bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+		LOG(WARN,"ped::ist bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
 	}else{
 		while(!feof(file2)) {
 			int r, arm, apv, ch  ;
@@ -762,8 +764,8 @@ void istBuilder::startrun(daqReader *rdr) {
 					LOG(DBG,"mask rdo %d arm %d apv %d ch %d", r, arm, apv, ch);
 			}
 		}
+		fclose(file2);
 	}
-	fclose(file2);
 
 	sprintf(paraDir, "%s/ist/ist_noisy_chips.txt", clientdatadir);
 	//LOG(U_IST,"Loading file %s",paraDir);
@@ -796,8 +798,8 @@ void istBuilder::startrun(daqReader *rdr) {
 			LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
 
 		}
+		fclose(file3);
 	}
-	fclose(file3);
 
 	errorMsg->SetText("No Error Message");    
 	sumHistogramsFilled  = 0;  
@@ -815,6 +817,12 @@ void istBuilder::startrun(daqReader *rdr) {
 void istBuilder::event(daqReader *rdr) {
 	StTriggerData *trgd = getStTriggerData(rdr);
 	if(!trgd) return;
+
+	long long int trgId = rdr->daqbits64;
+	//skip zerobias event
+	if((trgId>>60) & 0x1){
+		return;
+	}
 
 	//ZDC vertex
 	double mZdcTimeDiff = -9999;
@@ -892,6 +900,7 @@ void istBuilder::event(daqReader *rdr) {
 			Int_t channelId_zs = (ddZS->rdo-1)*numARM*numAPV*ChPerApv + ddZS->sec*numAPV*ChPerApv + ddZS->pad*ChPerApv + f_zs[i].ch;
 			if(channelId_zs < 0 || channelId_zs >= totCh)   continue;
 			Int_t geoId_zs    = istMapping[channelId_zs];     //numbering from 1 to 110592
+			if ( isChannelBad[geoId_zs-1] )     continue;  // 
 
 			//max ADC and its time bin index decision
 			if ( f_zs[i].adc > maxAdc_zs[geoId_zs-1] ) {
@@ -952,8 +961,7 @@ void istBuilder::event(daqReader *rdr) {
 			Int_t channel  = channelId%ChPerLadder;     //use to fill "per Ladder" histos in electronics index
 			currentAPV     = apvId;	
 
-			if ( isChannelBad[geoId-1] )     continue;  // No bad channels have been added so far
-
+			if ( isChannelBad[geoId-1] )     continue;  //
 
 			//fill ADC value vs channel index
 			hAdcContents.adcArray[ladder-1]->Fill(channel, f[i].adc);
@@ -1064,10 +1072,9 @@ void istBuilder::event(daqReader *rdr) {
 		int adc_max      = maxAdc[geoIdx-1];
 		int tb_max       = maxTimeBin[geoIdx-1];
 			
-		if( adc_max<hitCut*rms || rms < minRMSVal || rms > maxRMSVal ) continue;
-
 		int apvId = (elecRdo-1)*numARM*numAPV + elecArm*numAPV + elecApv;
-		if( isNoisyApv[apvId] && adc_max<noiseChipCut*rms) continue;
+		if( adc_max>hitCut*rms && rms > minRMSVal && rms < maxRMSVal ){
+		if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && adc_max>noiseChipCut*rms)){
 
 			HitCount[ladderIdx-1]++;
 			hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
@@ -1075,14 +1082,18 @@ void istBuilder::event(daqReader *rdr) {
 			hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
 			hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
 			hEventSumContents.hMaxTimeBin->Fill(tb_max);
+		}
+		}
 
 		//ZS data
-		if( maxAdc_zs[geoIdx-1] > 0 ) {//roughly cut
+		if( maxAdc_zs[geoIdx-1] > hitCut*rms && rms > minRMSVal && rms < maxRMSVal ) {//roughly cut
+			if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && maxAdc_zs[geoIdx-1] > noiseChipCut*rms)){
 			hMipContents.mipArray[elecSec+72]->Fill(short(maxAdc_zs[geoIdx-1]+0.5));
 			hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
 			hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
 			hSumContents.hHitMap_ZS->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMapVsAPV_ZS->Fill(ladderIdx, apvGeoIdx);
+		}
 		}
 	}
 
