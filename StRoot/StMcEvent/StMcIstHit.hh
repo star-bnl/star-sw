@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.11 2012/12/18 21:01:18 perev Exp $
+ * Erase layer, and wafer switch to sensor (Amilkar) 
+ *
+ * $Id: StMcIstHit.hh,v 2.12 2015/03/12 23:17:11 perev Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.12  2015/03/12 23:17:11  perev
+ * Erase layer, and wafer switch to sensor (Amilkar)
+ *
  * Revision 2.11  2012/12/18 21:01:18  perev
  * Ist development (Jonathan)
  *
@@ -70,19 +75,11 @@ public:
   void  operator delete(void* p) { mPool.free(p); }
 #endif
   
-  ULong_t layer()  const {return 1;} // 
   ULong_t ladder() const {return mVolumeId/1000000 -1;}
-  ULong_t wafer()  const {return  (mVolumeId%1000000)/10000;} 
+  ULong_t sensor()  const {return  (mVolumeId%1000000)/10000;} 
   ULong_t side()   {return (mVolumeId%10);} //1=inner; 2=outer;
-  
-  // Willie: Added function wafer() to return wafer number (1-12)
-  // unsigned long wafer() const;
-  // Willie: Added function wafer() to return wafer number (1-10,1-13 for layers 1,2)
-  // and side() to return ladder side (1=inner,2=outer)
-  // ULong_t wafer() {return ((mVolumeId/100)%20);}
-  // ULong_t side() {return (mVolumeId%10);} //1=inner; 2=outer;
 
-  virtual void Print(Option_t *option="") const; // *MENU* 
+  virtual void Print(Option_t *option="") const; 
   
 private:
   
