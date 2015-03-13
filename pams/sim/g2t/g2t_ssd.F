@@ -1,5 +1,8 @@
-* $Id: g2t_ssd.F,v 1.3 2005/10/17 18:33:23 potekhin Exp $
+* $Id: g2t_ssd.F,v 1.4 2015/03/13 15:10:23 jwebb Exp $
 * $Log: g2t_ssd.F,v $
+* Revision 1.4  2015/03/13 15:10:23  jwebb
+* Change SSD hits to use local coordinates, as requested by JB.
+*
 * Revision 1.3  2005/10/17 18:33:23  potekhin
 * Correct a typo (extraneous line commented out)
 *
@@ -13,7 +16,7 @@
 #include "g2t_ssd.inc"
 #include "genhit.h"
       INTEGER   G2T_SSD,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
-      logical   Local/.false./
+      logical   Local/.true./
 *
       G2T_SSD=STAFCV_OK
       if (g2t_ssd_hit_h.maxlen.le.0) return
@@ -24,7 +27,8 @@
 
       call G2R_GET_SYS ('SISD','SFSD',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
-       Local  = Idigi.ge.2
+       !Local  = Idigi.ge.2
+       ! -- commented out by JB Feb. 28, 2015
 
       Do While (G2R_GET_HIT('ssd') .eq. 0)
 * --maxim-- comment out excessive print out 20051017
