@@ -1,9 +1,9 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.27 2015/03/13 00:20:11 perev Exp $
+ * $Id: StAssociationMaker.h,v 1.28 2015/03/13 18:44:44 perev Exp $
  * $Log: StAssociationMaker.h,v $
- * Revision 1.27  2015/03/13 00:20:11  perev
- * Upload StMcIst Amilkar
+ * Revision 1.28  2015/03/13 18:44:44  perev
+ * Roll back
  *
  * Revision 1.26  2014/08/06 11:42:52  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -126,8 +126,6 @@
 class StTpcHit;
 class StSvtHit;
 class StSsdHit;
-class StIstHit;  //Amilkar
-class StPxlHit;  //Amilkar
 class StFtpcHit;
 class StGlobalTrack;
 class StVertex;
@@ -138,8 +136,6 @@ class StXiVertex;
 class StMcTpcHit;
 class StMcSvtHit;
 class StMcSsdHit;
-class StMcIstHit;  //Amilkar
-class StMcPxlHit;  //Amilkar
 class StMcFtpcHit;
 class StMcTrack;
 class StMcVertex;
@@ -149,13 +145,11 @@ class StTrackPairInfo;
 class TH2F;
     
 struct trackPing {
-  const StMcTrack* mcTrack;
-  unsigned int nPingsTpc;
-  unsigned int nPingsSvt;
-  unsigned int nPingsSsd;
-  unsigned int nPingsIst; //Amilkar
-  unsigned int nPingsPxl; //Amilkar
-  unsigned int nPingsFtpc;
+    const StMcTrack* mcTrack;
+    unsigned int nPingsTpc;
+    unsigned int nPingsSvt;
+    unsigned int nPingsSsd;
+    unsigned int nPingsFtpc;
 };
 
 
@@ -245,16 +239,6 @@ typedef  multimap<const StMcSvtHit*, const StSvtHit*, compMcHit> mcSvtHitMapType
 typedef  multimap<const StSsdHit*, const StMcSsdHit*, compHit>   rcSsdHitMapType;//!
 typedef  multimap<const StMcSsdHit*, const StSsdHit*, compMcHit> mcSsdHitMapType;//!
 //
-// IST        //Amilkar
-//
-typedef  multimap<const StIstHit*, const StMcIstHit*, compHit>   rcIstHitMapType;//!  //Amilkar
-typedef  multimap<const StMcIstHit*, const StIstHit*, compMcHit> mcIstHitMapType;//!  //Amilkar
-//
-// PXL        //Amilkar
-//
-typedef  multimap<const StPxlHit*, const StMcPxlHit*, compHit>   rcPxlHitMapType;//!  //Amilkar
-typedef  multimap<const StMcPxlHit*, const StPxlHit*, compMcHit> mcPxlHitMapType;//!  //Amilkar
-//
 // FTPC
 //
 typedef  multimap<const StFtpcHit*, const StMcFtpcHit*, compFtpcHit>   rcFtpcHitMapType;//!
@@ -323,32 +307,6 @@ typedef  multimap<rcSsdHitMapKey, rcSsdHitMapValue, compHit,
 typedef  multimap<mcSsdHitMapKey, mcSsdHitMapValue, compMcHit,
     allocator< OS_PAIR(mcSsdHitMapKey, mcSsdHitMapValue) > > mcSsdHitMapType;//!
 //
-// IST //Amilkar
-//
-typedef  const StIstHit*    rcIstHitMapKey;      //Amilkar
-typedef  const StIstHit*    mcIstHitMapValue;    //Amilkar
-typedef  const StMcIstHit*  rcIstHitMapValue;    //Amilkar
-typedef  const StMcIstHit*  mcIstHitMapKey;     //Amilkar
-
-typedef  multimap<rcIstHitMapKey, rcIstHitMapValue, compHit,
-    allocator< OS_PAIR(rcIstHitMapKey, rcIstHitMapValue) > > rcIstHitMapType;//!  //Amilkar  
-
-typedef  multimap<mcIstHitMapKey, mcIstHitMapValue, compMcHit,
-    allocator< OS_PAIR(mcIstHitMapKey, mcIstHitMapValue) > > mcIstHitMapType;//!  //Amilkar
-//
-// PXL //Amilkar
-//
-typedef  const StPxlHit*    rcPxlHitMapKey;      //Amilkar
-typedef  const StPxlHit*    mcPxlHitMapValue;    //Amilkar
-typedef  const StMcPxlHit*  rcPxlHitMapValue;    //Amilkar
-typedef  const StMcPxlHit*  mcPxlHitMapKey;     //Amilkar
-
-typedef  multimap<rcPxlHitMapKey, rcPxlHitMapValue, compHit,
-    allocator< OS_PAIR(rcPxlHitMapKey, rcPxlHitMapValue) > > rcPxlHitMapType;//!  //Amilkar  
-
-typedef  multimap<mcPxlHitMapKey, mcPxlHitMapValue, compMcHit,
-    allocator< OS_PAIR(mcPxlHitMapKey, mcPxlHitMapValue) > > mcPxlHitMapType;//!  //Amilkar
-//
 // FTPC
 //
 typedef  const StFtpcHit*    rcFtpcHitMapKey;
@@ -411,18 +369,12 @@ typedef  multimap<mcXiMapKey, mcXiMapValue, compMcVertex,
     allocator< OS_PAIR(mcXiMapKey, mcXiMapValue) > > mcXiMapType;//!
 
 #endif
-
-//////////////  ////Amilkar
 typedef  rcTpcHitMapType::iterator          rcTpcHitMapIter;     //!
 typedef  rcTpcHitMapType::value_type        rcTpcHitMapValType;  //!
 typedef  rcSvtHitMapType::iterator          rcSvtHitMapIter;     //!
 typedef  rcSvtHitMapType::value_type        rcSvtHitMapValType;  //!
 typedef  rcSsdHitMapType::iterator          rcSsdHitMapIter;     //!
 typedef  rcSsdHitMapType::value_type        rcSsdHitMapValType;  //!
-typedef  rcIstHitMapType::iterator          rcIstHitMapIter;     //!  //Amilkar
-typedef  rcIstHitMapType::value_type        rcIstHitMapValType;  //!  //Amilkar
-typedef  rcPxlHitMapType::iterator          rcPxlHitMapIter;     //!  //Amilkar
-typedef  rcPxlHitMapType::value_type        rcPxlHitMapValType;  //!  //Amilkar
 typedef  rcFtpcHitMapType::iterator         rcFtpcHitMapIter;    //!
 typedef  rcFtpcHitMapType::value_type       rcFtpcHitMapValType; //!
 typedef  rcTrackMapType::iterator           rcTrackMapIter;      //!
@@ -444,10 +396,6 @@ typedef  mcSvtHitMapType::iterator          mcSvtHitMapIter;     //!
 typedef  mcSvtHitMapType::value_type        mcSvtHitMapValType;  //!
 typedef  mcSsdHitMapType::iterator          mcSsdHitMapIter;     //!
 typedef  mcSsdHitMapType::value_type        mcSsdHitMapValType;  //!
-typedef  mcIstHitMapType::iterator          mcIstHitMapIter;     //!  //Amilkar
-typedef  mcIstHitMapType::value_type        mcIstHitMapValType;  //!  //Amilkar
-typedef  mcPxlHitMapType::iterator          mcPxlHitMapIter;     //!  //Amilkar
-typedef  mcPxlHitMapType::value_type        mcPxlHitMapValType;  //!  //Amilkar
 typedef  mcFtpcHitMapType::iterator         mcFtpcHitMapIter;    //!
 typedef  mcFtpcHitMapType::value_type       mcFtpcHitMapValType; //!
 typedef  mcTrackMapType::iterator           mcTrackMapIter;      //!
@@ -472,12 +420,6 @@ class rcSvtHitMapType;     //!
 class rcSsdHitMapType;     //!
 class rcSsdHitMapIter;     //!
 class rcSsdHitMapType;     //!
-class rcIstHitMapType;     //!  //Amilkar
-class rcIstHitMapIter;     //!  //Amilkar
-class rcIstHitMapType;     //! //Amilkar
-class rcPxlHitMapType;     //!  //Amilkar
-class rcPxlHitMapIter;     //!  //Amilkar
-class rcPxlHitMapType;     //! //Amilkar
 class rcFtpcHitMapType;    //!
 class rcFtpcHitMapIter;    //!
 class rcFtpcHitMapValType; //!
@@ -507,12 +449,6 @@ class mcSvtHitMapValType;  //!
 class mcSsdHitMapType;     //!
 class mcSsdHitMapIter;     //!
 class mcSsdHitMapValType;  //!
-class mcIstHitMapType;     //!  //Amilkar
-class mcIstHitMapIter;     //!  //Amilkar
-class mcIstHitMapValType;  //!  //Amilkar
-class mcPxlHitMapType;     //!  //Amilkar
-class mcPxlHitMapIter;     //!  //Amilkar
-class mcPxlHitMapValType;  //!  //Amilkar
 class mcFtpcHitMapType;    //!
 class mcFtpcHitMapIter;    //!
 class mcFtpcHitMapValType; //!
@@ -561,8 +497,6 @@ class StAssociationMaker : public StMaker {
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mSsdHitResolution;         //! Diff btw global x and z coords of SSD hits.
-    TH2F*     mIstHitResolution;         //! Diff btw global x and z coords of IST hits.  //Amilkar
-    TH2F*     mPxlHitResolution;         //! Diff btw global x and z coords of PXL hits.  //Amilkar
     TH2F*     mFtpcHitResolution;        //! Diff btw global r and phi coords of FTPC hits.
     
     // Have to tell CINT not to parse the Multimap stuff, or else it pukes.
@@ -573,10 +507,6 @@ class StAssociationMaker : public StMaker {
     mcSvtHitMapType*  mcSvtHitMap()  { return mMcSvtHitMap; }  //!
     rcSsdHitMapType*  rcSsdHitMap()  { return mRcSsdHitMap; }  //!
     mcSsdHitMapType*  mcSsdHitMap()  { return mMcSsdHitMap; }  //!
-    rcIstHitMapType*  rcIstHitMap()  { return mRcIstHitMap; }  //! //Amilkar
-    mcIstHitMapType*  mcIstHitMap()  { return mMcIstHitMap; }  //! //Amilkar
-    rcPxlHitMapType*  rcPxlHitMap()  { return mRcPxlHitMap; }  //! //Amilkar
-    mcPxlHitMapType*  mcPxlHitMap()  { return mMcPxlHitMap; }  //! //Amilkar
     rcFtpcHitMapType* rcFtpcHitMap() { return mRcFtpcHitMap; } //!
     mcFtpcHitMapType* mcFtpcHitMap() { return mMcFtpcHitMap; } //!
     rcTrackMapType*   rcTrackMap()   { return mRcTrackMap; }   //!
@@ -599,10 +529,6 @@ private:
     mcSvtHitMapType*  mMcSvtHitMap;  //!
     rcSsdHitMapType*  mRcSsdHitMap;  //!
     mcSsdHitMapType*  mMcSsdHitMap;  //!
-    rcIstHitMapType*  mRcIstHitMap;  //! //Amilkar
-    mcIstHitMapType*  mMcIstHitMap;  //! //Amilkar
-    rcPxlHitMapType*  mRcPxlHitMap;  //! //Amilkar
-    mcPxlHitMapType*  mMcPxlHitMap;  //! //Amilkar
     rcFtpcHitMapType* mRcFtpcHitMap; //!
     mcFtpcHitMapType* mMcFtpcHitMap; //!
     rcTrackMapType*   mRcTrackMap;   //!
@@ -615,12 +541,12 @@ private:
     mcXiMapType*      mMcXiMap;      //!
 
     Bool_t drawinit;
-    Bool_t             mL3TriggerOn; //!
-    Bool_t             mInTrackerOn; //!
-    Bool_t             mEstTracksOn; //!
-    Bool_t             mDistanceAssoc; //!
+    bool              mL3TriggerOn; //!
+    bool              mInTrackerOn; //!
+    bool              mEstTracksOn; //!
+    bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.27 2015/03/13 00:20:11 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.28 2015/03/13 18:44:44 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 
