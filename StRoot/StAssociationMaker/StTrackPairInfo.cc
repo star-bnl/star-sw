@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTrackPairInfo.cc,v 1.9 2011/04/01 19:40:07 perev Exp $
+ * $Id: StTrackPairInfo.cc,v 1.10 2015/03/13 00:20:12 perev Exp $
  * $Log: StTrackPairInfo.cc,v $
+ * Revision 1.10  2015/03/13 00:20:12  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.9  2011/04/01 19:40:07  perev
  * const++
  *
@@ -36,13 +39,15 @@
 #include "StMcTrack.hh"
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.9 2011/04/01 19:40:07 perev Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.10 2015/03/13 00:20:12 perev Exp $";
 
 StTrackPairInfo::StTrackPairInfo(const StGlobalTrack* rcTrk,
 				 const StMcTrack*     mcTrk,
 				 unsigned int tpcPings,
 				 unsigned int svtPings,
 				 unsigned int ssdPings,
+				 unsigned int istPings,      //Amilkar
+				 unsigned int pxlPings,      //Amilkar
 				 unsigned int ftpcPings)
     :
     mPartnerTrack(rcTrk),
@@ -50,6 +55,8 @@ StTrackPairInfo::StTrackPairInfo(const StGlobalTrack* rcTrk,
     mCommonTpcHits(tpcPings),
     mCommonSvtHits(svtPings),
     mCommonSsdHits(ssdPings),
+    mCommonIstHits(istPings),     //Amilkar
+    mCommonPxlHits(pxlPings),     //Amilkar
     mCommonFtpcHits(ftpcPings)
 {
     // Percent of Svt Hits
@@ -61,6 +68,16 @@ StTrackPairInfo::StTrackPairInfo(const StGlobalTrack* rcTrk,
     numPoints = rcTrk->detectorInfo()->numberOfPoints(kSsdId);
     mRatioCommonToTotalHitsSsd  =
 	(numPoints) ? static_cast<float>(mCommonSsdHits)/static_cast<float>(numPoints) : 0;
+
+    // Percent of Ist Hits                                                           //Amilkar
+    numPoints = rcTrk->detectorInfo()->numberOfPoints(kIstId);                       //Amilkar
+    mRatioCommonToTotalHitsIst  =
+      (numPoints) ? static_cast<float>(mCommonIstHits)/static_cast<float>(numPoints) : 0;    //Amilkar
+
+    // Percent of Pxl Hits                                                           //Amilkar
+    numPoints = rcTrk->detectorInfo()->numberOfPoints(kPxlId);                       //Amilkar
+    mRatioCommonToTotalHitsPxl  =
+      (numPoints) ? static_cast<float>(mCommonPxlHits)/static_cast<float>(numPoints) : 0;    //Amilkar
 
     // Percent of Tpc Hits
     numPoints = rcTrk->detectorInfo()->numberOfPoints(kTpcId);
@@ -92,6 +109,8 @@ void StTrackPairInfo::setCommonTpcHits(unsigned int val) { mCommonTpcHits = val;
 
 void StTrackPairInfo::setCommonSvtHits(unsigned int val) { mCommonSvtHits = val; }
 void StTrackPairInfo::setCommonSsdHits(unsigned int val) { mCommonSsdHits = val; }
+void StTrackPairInfo::setCommonIstHits(unsigned int val) { mCommonIstHits = val; }  //Amilkar
+void StTrackPairInfo::setCommonPxlHits(unsigned int val) { mCommonPxlHits = val; }  //Amilkar
 
 void StTrackPairInfo::setCommonFtpcHits(unsigned int val) { mCommonFtpcHits = val; }
 
@@ -100,6 +119,8 @@ ostream&  operator<<(ostream& os, const StTrackPairInfo& v) {
 	    << " Common Hits in Tpc :" << v.commonTpcHits() << "/" << v.percentOfPairedTpcHits()
 	    << "  Svt :" << v.commonSvtHits() << "/" << v.percentOfPairedSvtHits()
 	    << "  Ssd :" << v.commonSsdHits() << "/" << v.percentOfPairedSsdHits()
+	    << "  Ist :" << v.commonIstHits() << "/" << v.percentOfPairedIstHits()     //Amilkar
+	    << "  Pxl :" << v.commonPxlHits() << "/" << v.percentOfPairedPxlHits()     //Amilkar
 	    << "  Ftpc :" << v.commonFtpcHits() << "/" << v.percentOfPairedFtpcHits()
 	    << endl;
 }

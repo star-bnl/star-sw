@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlSimMaker.h,v 1.8 2015/03/13 00:21:54 perev Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.8  2015/03/13 00:21:54  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.7  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -85,12 +88,13 @@ class StPxlSimMaker : public StMaker
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.8 2015/03/13 00:21:54 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
 
     Bool_t mUseFastSim;
+    Bool_t mUseFastSimEmb;   //Amilkar
     Bool_t mUseDIGMAPSSim;
 
     Bool_t mUseIdealGeom;
@@ -103,11 +107,14 @@ private:
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlSimMaker.h,v 1.8 2015/03/13 00:21:54 perev Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.8  2015/03/13 00:21:54  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.7  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
