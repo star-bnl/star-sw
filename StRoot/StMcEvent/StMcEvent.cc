@@ -8,8 +8,13 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $
+ * Switch layers to ladders (Amilkar)
+ *
+ * $Id: StMcEvent.cc,v 2.37 2015/03/12 23:14:54 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.37  2015/03/12 23:14:54  perev
+ * Switch layers to ladders (Amilkar)
+ *
  * Revision 2.36  2013/03/25 23:26:39  perev
  * Mustafa.Pxl corrs+Cleanup
  *
@@ -175,8 +180,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.37 2015/03/12 23:14:54 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.37 2015/03/12 23:14:54 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -639,7 +644,7 @@ void StMcEvent::Print(Option_t *option) const {
   PrintHitCollection(BTof,btof);
   PrintHitCollection(Mtd,mtd);
   //PrintHitCollectionL(Pxl,pxl,sector,Sectors);
-  PrintHitCollectionL(Ist,ist,layer,Layers);
+  //PrintHitCollectionL(Ist,ist,layer,Layers);  
   PrintHitCollectionL(Fgt,fgt,layer,Layers);
   PrintHitCollection(Etr,etr);
   

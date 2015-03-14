@@ -764,7 +764,7 @@ TF1 *FitR5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
     g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
     iok = proj->Fit(g2,Opt.Data());
   }
-  if ( iok ) {
+  if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
@@ -1391,14 +1391,14 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,TMath::Pi()/2);
   g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
   Int_t iok = proj->Fit(g2,Opt.Data());
-  if ( iok ) {
+  if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
   }
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
-  if (iok) return 0;
+  if (iok < 0 ) return 0;
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     Double_t params[10];
     g2->GetParameters(params);
@@ -1551,7 +1551,7 @@ TF1 *FitL5(TH1 *proj, Option_t *opt="", Int_t nhyps = 5) { // fit by 5 landau co
     g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
     iok = proj->Fit(g2,Opt.Data());
   }
-  if ( iok ) {
+  if ( iok < 0) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
@@ -1702,7 +1702,7 @@ TF1 *FitGB(TH1 *proj, Option_t *opt="", Double_t dX = 2.364) {
   g2->FixParameter(7,total);
   g2->FixParameter(8,dX);
   Int_t iok = proj->Fit(g2,Opt.Data());
-  if ( iok ) {
+  if ( iok < 0 ) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());

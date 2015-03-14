@@ -306,6 +306,13 @@ if (! -r $libv) {
   push @items, "KFParticle";
   push @items, "TPCCATracker";
 }
+if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
+  push @items, "FmsDbMaker";
+  push @items, "FmsFastSimulatorMaker";
+  push @items, "FmsHitMaker";
+  push @items, "FmsPointMaker";
+  push @items, "FmsUtil";
+}
 #$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list

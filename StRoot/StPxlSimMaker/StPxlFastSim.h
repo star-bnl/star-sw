@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $
+ * $Id: StPxlFastSim.h,v 1.6 2015/03/13 00:21:53 perev Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.6  2015/03/13 00:21:53  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.5  2015/01/27 01:31:09  smirnovd
  * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
  *
@@ -40,9 +43,11 @@
 #define STAR_StPxlFastSim
 
 #include "StPxlISim.h"
+#include "StMcContainers.hh"     //Amilkar
 class StRandom;
 class StPxlDb;
 class TObjectSet;
+class StMcTrack;                //Amilkar
 
 class StPxlFastSim: public StPxlISim
 {
@@ -72,12 +77,23 @@ class StPxlFastSim: public StPxlISim
   */
   Int_t addPxlHits(const StMcPxlHitCollection&, StPxlHitCollection&);
 
+  //-->Amilkar
+  /*! \creates a StPxlHit object for every accepted projected Mctrack onto the  
+   *  reconstructed geometry, then fills the hit StPxlHitCollection container. 
+   * 
+   *  Returns:
+   *  kStOk: if projected McTracks  have been loaded to StPxlHitCollection successfully.
+  */
+  Int_t addPxlHitsEmb(const StSPtrVecMcTrack&, StMcPxlHitCollection&, StPxlHitCollection&);
+  Bool_t IsOnSensor(Double_t LocalPosisiton[3]);
+  void MatchHit(StMcPxlHitCollection&, StMcTrack *Trk, Double_t local[3], Double_t Mchiit[3], Int_t sec, Int_t lad, Int_t sen, Bool_t flag);
+  //<--Amilkar
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.6 2015/03/13 00:21:53 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
@@ -97,13 +113,16 @@ class StPxlFastSim: public StPxlISim
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $
+ * $Id: StPxlFastSim.h,v 1.6 2015/03/13 00:21:53 perev Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.6  2015/03/13 00:21:53  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.5  2015/01/27 01:31:09  smirnovd
  * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
  *

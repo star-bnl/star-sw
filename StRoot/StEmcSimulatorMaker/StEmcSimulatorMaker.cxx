@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.59 2010/10/14 21:18:57 ogrebeny Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.60 2015/03/13 01:02:05 perev Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -456,6 +456,9 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.60  2015/03/13 01:02:05  perev
+ *  remove delete which crashed BFC
+ *
  *  Revision 1.59  2010/10/14 21:18:57  ogrebeny
  *  Changes from Wenqin (wqxu@ucla.edu):
  *

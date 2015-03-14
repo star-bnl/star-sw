@@ -1,8 +1,11 @@
 /*****************************************
  *
- * $Id: StTrackPairInfo.hh,v 1.9 2011/04/01 19:40:07 perev Exp $
+ * $Id: StTrackPairInfo.hh,v 1.10 2015/03/13 00:20:12 perev Exp $
  *
  * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.10  2015/03/13 00:20:12  perev
+ * Upload StMcIst Amilkar
+ *
  * Revision 1.9  2011/04/01 19:40:07  perev
  * const++
  *
@@ -51,28 +54,36 @@ public:
 		  unsigned int tpcPings,
 		  unsigned int svtPings,
 		  unsigned int ssdPings,
+		  unsigned int istPings,   //Amilkar
+		  unsigned int pxlPings,   //Amilkar
 		  unsigned int ftpcPings);
-    virtual ~StTrackPairInfo();    
-
-    const StMcTrack* partnerMcTrack() const;
-    const StGlobalTrack* partnerTrack() const;
-
-    unsigned int commonTpcHits() const;
-    unsigned int commonSvtHits() const;
-    unsigned int commonSsdHits() const;
-    unsigned int commonFtpcHits() const;
-
-    float percentOfPairedTpcHits() const;
-    float percentOfPairedSvtHits() const;
-    float percentOfPairedSsdHits() const;
-    float percentOfPairedFtpcHits() const;
-    
+  virtual ~StTrackPairInfo();    
+  
+  const StMcTrack* partnerMcTrack() const;
+  const StGlobalTrack* partnerTrack() const;
+  
+  unsigned int commonTpcHits() const;
+  unsigned int commonSvtHits() const;
+  unsigned int commonSsdHits() const;
+  unsigned int commonIstHits() const;    //Amilkar
+  unsigned int commonPxlHits() const;    //Amilkar
+  unsigned int commonFtpcHits() const;
+  
+  float percentOfPairedTpcHits() const;
+  float percentOfPairedSvtHits() const;
+  float percentOfPairedSsdHits() const;
+  float percentOfPairedIstHits() const;   //Amilkar
+  float percentOfPairedPxlHits() const;   //Amilkar
+  float percentOfPairedFtpcHits() const;
+  
     void setPartnerMcTrack(const StMcTrack*);
     void setPartnerTrack(const StGlobalTrack*);
     
     void setCommonTpcHits(unsigned int);
     void setCommonSvtHits(unsigned int);
     void setCommonSsdHits(unsigned int);
+  void setCommonIstHits(unsigned int);    //Amilkar
+  void setCommonPxlHits(unsigned int);    //Amilkar
     void setCommonFtpcHits(unsigned int);
 private:
     const StGlobalTrack*  mPartnerTrack;
@@ -80,10 +91,14 @@ private:
     unsigned int    mCommonTpcHits;
     unsigned int    mCommonSvtHits;
     unsigned int    mCommonSsdHits;
+  unsigned int    mCommonIstHits;    //Amilkar
+  unsigned int    mCommonPxlHits;    //Amilkar
     unsigned int    mCommonFtpcHits;
     float           mRatioCommonToTotalHitsTpc;
     float           mRatioCommonToTotalHitsSvt;
     float           mRatioCommonToTotalHitsSsd;
+  float           mRatioCommonToTotalHitsIst;      //Amilkar
+  float           mRatioCommonToTotalHitsPxl;      //Amilkar
     float           mRatioCommonToTotalHitsFtpc;
 };
 
@@ -95,6 +110,8 @@ inline unsigned int StTrackPairInfo::commonTpcHits() const { return mCommonTpcHi
 
 inline unsigned int StTrackPairInfo::commonSvtHits() const { return mCommonSvtHits; }
 inline unsigned int StTrackPairInfo::commonSsdHits() const { return mCommonSsdHits; }
+inline unsigned int StTrackPairInfo::commonIstHits() const { return mCommonIstHits; }     //Amilkar
+inline unsigned int StTrackPairInfo::commonPxlHits() const { return mCommonPxlHits; }     //Amilkar
 
 inline unsigned int StTrackPairInfo::commonFtpcHits() const { return mCommonFtpcHits; }
 
@@ -102,6 +119,8 @@ inline float StTrackPairInfo::percentOfPairedTpcHits() const { return mRatioComm
 
 inline float StTrackPairInfo::percentOfPairedSvtHits() const { return mRatioCommonToTotalHitsSvt; }
 inline float StTrackPairInfo::percentOfPairedSsdHits() const { return mRatioCommonToTotalHitsSsd; }
+inline float StTrackPairInfo::percentOfPairedIstHits() const { return mRatioCommonToTotalHitsIst; }   //Amilkar
+inline float StTrackPairInfo::percentOfPairedPxlHits() const { return mRatioCommonToTotalHitsPxl; }   //Amilkar
 
 inline float StTrackPairInfo::percentOfPairedFtpcHits() const { return mRatioCommonToTotalHitsFtpc; }
 ostream&  operator<<(ostream& os, const StTrackPairInfo& v);

@@ -76,6 +76,7 @@ Bool_t doPrint = kFALSE;
 #define PrPP(B)     if (doPrint) {cout << (#B) << " = \t" << (B) << endl;}
 #define PrPP2(B,C)  if (doPrint) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
 #define PrPPD(B)    if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << endl;}
+#define PrPPDH(B)    if (doPrint && Debug() > 1) {cout << " =================== " << (#B) << " ===================== " << endl;}
 #define PrPP2D(B,C) if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
 StMuDstMaker* maker = 0;
 #include "Ask.h"
@@ -545,6 +546,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     map<KFVertex*,StMuPrimaryVertex*>           KFVx2RcVx;
     map<KFVertex*,StMuMcVertex *>               KFVx2McVx; 
     multimap<StMuMcVertex*,KFVertex*>           McVc2KFVx; 
+    PrPPDH(McVx);
     for (Int_t m = 0; m < NoMuMcVertices; m++) {
       StMuMcVertex *McVx = (StMuMcVertex *) MuMcVertices->UncheckedAt(m);
       if (! McVx) continue;
@@ -552,6 +554,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Int_t Id = McVx->Id();
       Id2McVx[Id] = McVx;
     }
+    PrPPDH(McTk);
     for (Int_t m = 0; m < NoMuMcTracks; m++) {
       StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(m);
       if (! McTrack) continue;
@@ -570,13 +573,13 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	McVx2Tracks.insert(pair<StMuMcVertex *,StMuMcTrack *>(mcVx,McTrack));
       }
       if (! mcEndVx) continue;
-      PrPPD(*mcEndVx);
       Int_t Ge = McTrack->GePid();
       Int_t pdg = TDatabasePDG::Instance()->ConvertGeant3ToPdg(Ge);
       if (pdg == 22 || pdg == 310 || TMath::Abs(pdg) == 3122) {
 	McV0Vx2McParentTrack[mcEndVx] = McTrack;
       }
     }
+    PrPPDH(RcVx);
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       if (! AcceptVX(RcVx)) continue;
@@ -595,6 +598,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	McVx2RcVx.insert(make_pair(McVx,RcVx));
       }
     }
+    PrPPDH(pTrack);
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
       if (! Accept(pTrack)) continue;
@@ -628,6 +632,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	}
       }
     }
+    PrPPDH(KFVx);
     for (Int_t m = 0; m < NoKFVertices; m++) {
       KFVertex *KFVx = (KFVertex *) KFVertices->UncheckedAt(m);
       if (! KFVx) continue;
@@ -774,9 +779,11 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       VerId2k[Id] = l;
     }
     map<Int_t,Int_t> ParId2k;
+    PrPPDH(particle);
     for (Int_t k = 0; k < NoKFTracks; k++) {
       const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
       if (! particle) continue;
+      PrPPD(*particle);
       Int_t Id = particle->GetID();
       ParId2k[Id] = k;
     }
