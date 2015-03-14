@@ -1155,8 +1155,8 @@ Bfc_st BFC[] = { // standard chains
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"clearmem"    ,""  ,"",""                           				  ,"","","Obsolete",kFALSE},
   {"adcOnly"     ,""  ,"",""                          ,"","","DAQMaker selects only TPC ADC events",kFALSE},
-  {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
-  {"OutTree"     ,""  ,"","Tree",""                                  ,"","bfcTree Output Tree name",kFALSE},
+  {"InTree"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"OutTree"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DstOut"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
@@ -1276,9 +1276,7 @@ Bfc_st BFC[] = { // standard chains
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
-#if 0
   {"FmsUtil"     ,""  ,"","",""                                       ,"StFmsUtil","Load StFmsUtil",kFALSE},
-#endif
   {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
   {"GmtUtil"     ,""  ,"","",""                                       ,"StGmtUtil","Load StGmtUtil",kFALSE},
   {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -1327,10 +1325,7 @@ Bfc_st BFC[] = { // standard chains
   {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
   {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
-  {"fmsDb"       ,"fmsDb","","db",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-#if 0
-  {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-#endif
+  {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1577,12 +1572,8 @@ Bfc_st BFC[] = { // standard chains
    "StFmsFastSimulatorMaker","StFmsFastSimulatorMaker","FMS Fast Simulator",                        kFALSE},
   {"fmsDat"     ,"","", "StEvent,fmsDb",
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
-#if 0
   {"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker","Fill FMS clusters",    kFALSE},
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
-#else
-  {"fpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-#endif
   // FGT
   {"fgt"        ,"FgtChain","","fgtDat,fgtClu,fgtAtoC"        ,"StMaker","StChain","Fgt data Chain",kFALSE},
   {"fgtDat"     ,"","", "event,fgtdb","StFgtRawMaker","StFgtRawMaker",            "FGT Data reader",kFALSE},
@@ -1812,7 +1803,7 @@ Bfc_st BFC[] = { // standard chains
   {"KeepTpcHit"  ,"", "","HitFilt",                   "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
   {"KeepSvtHit"  ,"", "","HitFilt",                   "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"KeepFgtHit"  ,"", "","HitFilt",                   "","","Keep all FGT hits in StHitFilterMaker",kFALSE},
-  {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
+  {"Tree"        ,"","","",       "StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"logger"      ,""  ,"",""            ,"","","Use log4cxx package to manage the program messages",kFALSE},
   {"NoSimuDb"    ,""  ,"",""                                 ,"","","Switch off Simu Option for DB",kFALSE},
   {"SimuDb"      ,""  ,"","-NoSimuDb"                         ,"","","Switch on Simu Option for DB",kFALSE},
