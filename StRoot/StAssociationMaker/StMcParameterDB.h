@@ -1,9 +1,9 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.8 2015/03/13 00:20:12 perev Exp $
+ * $Id: StMcParameterDB.h,v 1.9 2015/03/13 18:44:44 perev Exp $
  * $Log: StMcParameterDB.h,v $
- * Revision 1.8  2015/03/13 00:20:12  perev
- * Upload StMcIst Amilkar
+ * Revision 1.9  2015/03/13 18:44:44  perev
+ * Roll back
  *
  * Revision 1.7  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
@@ -72,17 +72,7 @@ public:
     float xCutSsd() const; // *MENU*
     float yCutSsd() const; // *MENU*
     float zCutSsd() const; // *MENU*
-    unsigned int reqCommonHitsSsd() const; // *MENU* 
-
-    float xCutIst() const; // *MENU*                      //Amilkar
-    float yCutIst() const; // *MENU*                      //Amilkar
-    float zCutIst() const; // *MENU*                      //Amilkar
-    unsigned int reqCommonHitsIst() const; // *MENU*      //Amilkar
-
-    float xCutPxl() const; // *MENU*                      //Amilkar
-    float yCutPxl() const; // *MENU*                      //Amilkar
-    float zCutPxl() const; // *MENU*                      //Amilkar
-    unsigned int reqCommonHitsPxl() const; // *MENU*      //Amilkar
+    unsigned int reqCommonHitsSsd() const; // *MENU*
 
     float rCutFtpc() const; // *MENU*
     float phiCutFtpc() const; // *MENU*
@@ -102,16 +92,6 @@ public:
     void setYCutSsd(float); // *MENU*
     void setZCutSsd(float); // *MENU*
     void setReqCommonHitsSsd(unsigned int); // *MENU*
-
-    void setXCutIst(float); // *MENU*                    //Amilkar
-    void setYCutIst(float); // *MENU*                   //Amilkar
-    void setZCutIst(float); // *MENU*                    //Amilkar
-    void setReqCommonHitsIst(unsigned int); // *MENU*    //Amilkar
-
-    void setXCutPxl(float); // *MENU*                    //Amilkar
-    void setYCutPxl(float); // *MENU*                   //Amilkar
-    void setZCutPxl(float); // *MENU*                    //Amilkar
-    void setReqCommonHitsPxl(unsigned int); // *MENU*    //Amilkar
     
     void setRCutFtpc(float); // *MENU*
     void setPhiCutFtpc(float); // *MENU*
@@ -137,16 +117,6 @@ private:
     float mYCutSsd;
     float mZCutSsd;
     unsigned int mReqCommonHitsSsd;
-
-    float mXCutIst;                      //Amilkar
-    float mYCutIst;                     //Amilkar
-    float mZCutIst;                     //Amilkar
-    unsigned int mReqCommonHitsIst;     //Amilkar
-
-    float mXCutPxl;                      //Amilkar
-    float mYCutPxl;                     //Amilkar
-    float mZCutPxl;                     //Amilkar
-    unsigned int mReqCommonHitsPxl;     //Amilkar
 
     float mRCutFtpc;
     float mPhiCutFtpc;
@@ -180,22 +150,6 @@ inline float StMcParameterDB::yCutSsd() const { return mYCutSsd; }
 inline float StMcParameterDB::zCutSsd() const { return mZCutSsd; }
 
 inline unsigned int StMcParameterDB::reqCommonHitsSsd() const { return mReqCommonHitsSsd; }
-
-inline float StMcParameterDB::xCutIst() const { return mXCutIst; }                          //Amilkar
-
-inline float StMcParameterDB::yCutIst() const { return mYCutIst; }                          //Amilkar
-
-inline float StMcParameterDB::zCutIst() const { return mZCutIst; }                          //Amilkar
- 
-inline unsigned int StMcParameterDB::reqCommonHitsIst() const { return mReqCommonHitsIst; }  //Amilkar
-
-inline float StMcParameterDB::xCutPxl() const { return mXCutPxl; }                          //Amilkar
-
-inline float StMcParameterDB::yCutPxl() const { return mYCutPxl; }                          //Amilkar
-
-inline float StMcParameterDB::zCutPxl() const { return mZCutPxl; }                          //Amilkar
- 
-inline unsigned int StMcParameterDB::reqCommonHitsPxl() const { return mReqCommonHitsPxl; }  //Amilkar
 
 inline float StMcParameterDB::rCutFtpc() const { return mRCutFtpc; }
 

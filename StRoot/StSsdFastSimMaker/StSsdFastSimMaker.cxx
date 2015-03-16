@@ -193,32 +193,30 @@ Int_t StSsdFastSimMaker::Make()
 	StThreeVectorF error(0.,0.,0.);
 	mHit = new StSsdHit(g2t[i].x,error,currWafId,g2t[i].de,c);
 	LOG_DEBUG<<Form("currWafId=%d currWafNum=%d currLadder=%d",currWafId,currWafNumb,currLadder)<<endm;
-	// now we get the position of this wafer    
-	Double_t xg[3] = {mHit->position().x(),mHit->position().y(),mHit->position().z()};
-	LOG_DEBUG <<Form("global position x=%f y=%f z=%f",xg[0],xg[1],xg[2])<<endm;
-	Double_t xl[3]={0.,0.,0.};
-	mySsd->mLadders[currLadder]->mWafers[currWafNumb]->MasterToLocal(xg,xl);
+	// now we get the position of this wafer  
+	// GEANT hits are saved in local coordinate  
+	Double_t xl[3] = {mHit->position().x(),mHit->position().y(),mHit->position().z()};
 	LOG_DEBUG <<Form("local position x=%f y=%f z=%f",xl[0],xl[1],xl[2])<<endm;
 	LOG_DEBUG <<"will smear X"<<endm;
 	Double_t xlSmear[3]={0.,0.,0.};
         xlSmear[0] = (distortHit(xl[0], mResXSsd));
-	LOG_DEBUG <<"will smear Y"<<endm;
-	xlSmear[1] = (distortHit(xl[1], mResZSsd));
-	xlSmear[2] = xl[2];
+	LOG_DEBUG <<"will smear Z"<<endm;
+	xlSmear[2] = (distortHit(xl[2], mResZSsd));
+	xlSmear[1] = xl[1];
 	LOG_DEBUG <<Form("smeared local position x=%f y=%f z=%f",xlSmear[0],xlSmear[1],xlSmear[2])<<endm;
 	Double_t xgSmear[3]={0.,0.,0.};
 	mySsd->mLadders[currLadder]->mWafers[currWafNumb]->LocalToMaster(xlSmear,xgSmear);
 	LOG_DEBUG<< "After : global position are :"<<endm;
 	LOG_DEBUG <<Form("x=%f y=%f z=%f",xgSmear[0],xgSmear[1],xgSmear[2])<<endm;
 	LOG_DEBUG <<Form("Smearing done...")<< endm;
-	in  = IsOnWafer(xlSmear[0],xlSmear[1]);
+	in  = IsOnWafer(xlSmear[0],xlSmear[2]);
 	if(in==0)continue;
 	LOG_DEBUG << "good hit in wafer active area " << endm;
-	iok = RemoveTriangle(xlSmear[0],xlSmear[1]);
+	iok = RemoveTriangle(xlSmear[0],xlSmear[2]);
 	if(iok==0)continue;
 	goodHits++;
 	LOG_DEBUG << "good hit after triangle rejection" << endm;
-	Local->Fill(xlSmear[0],xlSmear[1]);
+	Local->Fill(xlSmear[0],xlSmear[2]);
 	StSsdHit  *mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
 	//fill histograms
 	if(IAttr(".histos")){ 
@@ -235,7 +233,7 @@ Int_t StSsdFastSimMaker::Make()
 	8                                                                             
 	+         16 * idWaferToWaferNumb(currWafId);                                        
 	mSmearedhit->setHardwarePosition(hw);
-	mSmearedhit->setLocalPosition(xlSmear[0],xlSmear[1]);
+	mSmearedhit->setLocalPosition(xlSmear[0],xlSmear[2]);
 	mSmearedhit->setIdTruth(g2t[i].track_p,100);
 	inContainer+=mCol->addHit(mSmearedhit);
       }

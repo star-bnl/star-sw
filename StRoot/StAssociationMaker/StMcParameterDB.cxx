@@ -1,13 +1,13 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.cxx,v 1.10 2015/03/13 00:20:12 perev Exp $
+ * $Id: StMcParameterDB.cxx,v 1.11 2015/03/13 18:44:44 perev Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
  * $Log: StMcParameterDB.cxx,v $
- * Revision 1.10  2015/03/13 00:20:12  perev
- * Upload StMcIst Amilkar
+ * Revision 1.11  2015/03/13 18:44:44  perev
+ * Roll back
  *
  * Revision 1.9  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
@@ -71,8 +71,6 @@ StMcParameterDB::StMcParameterDB()
     :mXCutTpc(5.*millimeter),mYCutTpc(5.*millimeter),mZCutTpc(5.*millimeter),mReqCommonHitsTpc(3),
      mXCutSvt(1.*millimeter),mYCutSvt(1.*millimeter),mZCutSvt(1.*millimeter),mReqCommonHitsSvt(1),
      mXCutSsd(1.*millimeter),mYCutSsd(1.*millimeter),mZCutSsd(1.*millimeter),mReqCommonHitsSsd(1),
-     mXCutIst(1.*millimeter),mYCutIst(1.*millimeter),mZCutIst(1.*millimeter),mReqCommonHitsIst(1),   //Amilkar
-     mXCutPxl(1.*millimeter),mYCutPxl(1.*millimeter),mZCutPxl(1.*millimeter),mReqCommonHitsPxl(1),   //Amilkar
      mRCutFtpc(3.*millimeter),mPhiCutFtpc(5.*degree),mReqCommonHitsFtpc(2)
 { /*noop*/ }
 
@@ -90,16 +88,6 @@ void StMcParameterDB::setXCutSsd(float val) { mXCutSsd = val ;}
 void StMcParameterDB::setYCutSsd(float val) { mYCutSsd = val ;}
 void StMcParameterDB::setZCutSsd(float val) { mZCutSsd = val ;}
 void StMcParameterDB::setReqCommonHitsSsd(unsigned int val) { mReqCommonHitsSsd = val;}
-
-void StMcParameterDB::setXCutIst(float val) { mXCutIst = val ;}                             //Amilkar
-void StMcParameterDB::setYCutIst(float val) { mYCutIst = val ;}                             //Amilkar
-void StMcParameterDB::setZCutIst(float val) { mZCutIst = val ;}                             //Amilkar
-void StMcParameterDB::setReqCommonHitsIst(unsigned int val) { mReqCommonHitsIst = val;}     //Amilkar
-
-void StMcParameterDB::setXCutPxl(float val) { mXCutPxl = val ;}                             //Amilkar
-void StMcParameterDB::setYCutPxl(float val) { mYCutPxl = val ;}                             //Amilkar
-void StMcParameterDB::setZCutPxl(float val) { mZCutPxl = val ;}                             //Amilkar
-void StMcParameterDB::setReqCommonHitsPxl(unsigned int val) { mReqCommonHitsPxl = val;}     //Amilkar
 
 void StMcParameterDB::setRCutFtpc(float val)   { mRCutFtpc   = val ;}
 void StMcParameterDB::setPhiCutFtpc(float val) { mPhiCutFtpc = val ;}
@@ -128,16 +116,6 @@ ostream& operator<<(ostream &os, const StMcParameterDB& mcDb)
     os << " Y Cut   : " << mcDb.yCutSsd()/millimeter << " mm" << endl; 
     os << " Z Cut   : " << mcDb.zCutSsd()/millimeter << " mm" << endl; 
     os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsSsd() << endl;
-    os << " IST Cuts " << endl;                                              //Amilkar
-    os << " X Cut   : " << mcDb.xCutIst()/millimeter << " mm" << endl;       //Amilkar
-    os << " Y Cut   : " << mcDb.yCutIst()/millimeter << " mm" << endl;       //Amilkar
-    os << " Z Cut   : " << mcDb.zCutIst()/millimeter << " mm" << endl;       //Amilkar
-    os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsIst() << endl;  //Amilkar
-    os << " PXL Cuts " << endl;                                              //Amilkar
-    os << " X Cut   : " << mcDb.xCutPxl()/millimeter << " mm" << endl;       //Amilkar
-    os << " Y Cut   : " << mcDb.yCutPxl()/millimeter << " mm" << endl;       //Amilkar
-    os << " Z Cut   : " << mcDb.zCutPxl()/millimeter << " mm" << endl;       //Amilkar
-    os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsPxl() << endl;  //Amilkar
     os << " FTPC Cuts " << endl;
     os << " R Cut   : " << mcDb.rCutFtpc()/millimeter << " mm" << endl; 
     os << " Phi Cut : " << mcDb.phiCutFtpc()/degree << " degrees" << endl; 

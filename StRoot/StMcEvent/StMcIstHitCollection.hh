@@ -1,11 +1,9 @@
 /***************************************************************************
  *
- * Switch layers to ladders (Amilkar)
- *
- * $Id: StMcIstHitCollection.hh,v 2.7 2015/03/12 23:19:33 perev Exp $
+ * $Id: StMcIstHitCollection.hh,v 2.8 2015/03/13 18:44:58 perev Exp $
  * $Log: StMcIstHitCollection.hh,v $
- * Revision 2.7  2015/03/12 23:19:33  perev
- * Switch layers to ladders (Amilkar)
+ * Revision 2.8  2015/03/13 18:44:58  perev
+ * Roll back
  *
  * Revision 2.6  2012/12/18 21:02:06  perev
  * Ist development (Jonathan)
@@ -35,7 +33,7 @@
 #ifndef StMcIstHitCollection_hh
 #define StMcIstHitCollection_hh
 
-#include "StMcIstLadderHitCollection.hh"
+#include "StMcIstLayerHitCollection.hh"
 class StMcIstHit;
 
 class StMcIstHitCollection : public StObject {
@@ -46,13 +44,13 @@ public:
     
     bool addHit(StMcIstHit*);
     unsigned long numberOfHits() const;
-    unsigned int  numberOfLadders() const;
+    unsigned int  numberOfLayers() const;
     
-    StMcIstLadderHitCollection*       ladder(unsigned int);
-    const StMcIstLadderHitCollection* ladder(unsigned int) const;
+    StMcIstLayerHitCollection*       layer(unsigned int);
+    const StMcIstLayerHitCollection* layer(unsigned int) const;
 protected:
-    enum { mNumberOfLadders = 24 };
-    StMcIstLadderHitCollection mLadders[mNumberOfLadders];
+    enum { mNumberOfLayers = 24 };
+    StMcIstLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcIstHitCollection,1)
 };
 #endif

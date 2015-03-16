@@ -1,9 +1,9 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.60 2015/03/13 00:20:11 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.61 2015/03/13 18:44:44 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.60  2015/03/13 00:20:11  perev
- * Upload StMcIst Amilkar
+ * Revision 1.61  2015/03/13 18:44:44  perev
+ * Roll back
  *
  * Revision 1.59  2014/06/24 20:57:35  jeromel
  * Remove flush()
@@ -389,8 +389,6 @@ ostream& operator<<(ostream& out,
   out << "Common TPC  Hits : " << p.second->commonTpcHits()  << endl;
   out << "Common SVT  Hits : " << p.second->commonSvtHits()  << endl;
   out << "Common SSD  Hits : " << p.second->commonSsdHits()  << endl;
-  out << "Common IST  Hits : " << p.second->commonIstHits()  << endl;  //Amilkar
-  out << "Common PXL  Hits : " << p.second->commonPxlHits()  << endl;  //Amilkar
   out << "Common FTPC Hits : " << p.second->commonFtpcHits() << endl;
   
   return out;
@@ -403,8 +401,6 @@ ostream& operator<<(ostream& out,
   out << "Common TPC  Hits : " << p.second->commonTpcHits()  << endl;
   out << "Common SVT  Hits : " << p.second->commonSvtHits()  << endl;
   out << "Common SSD  Hits : " << p.second->commonSsdHits()  << endl;
-  out << "Common IST  Hits : " << p.second->commonIstHits()  << endl;  //Amilkar
-  out << "Common PXL  Hits : " << p.second->commonPxlHits()  << endl;  //Amilkar
   out << "Common FTPC Hits : " << p.second->commonFtpcHits() << endl;
   
   return out;
@@ -448,10 +444,6 @@ ClassImp(StAssociationMaker)
   mMcSvtHitMap  = 0;
   mRcSsdHitMap  = 0;
   mMcSsdHitMap  = 0;
-  mRcIstHitMap  = 0;   //Amilkar
-  mMcIstHitMap  = 0;   //Amilkar
-  mRcPxlHitMap  = 0;   //Amilkar
-  mMcPxlHitMap  = 0;   //Amilkar
   mRcFtpcHitMap = 0;
   mMcFtpcHitMap = 0;
   mRcTrackMap   = 0;
@@ -465,9 +457,7 @@ ClassImp(StAssociationMaker)
   
   mTpcLocalHitResolution = 0;   
   mSvtHitResolution      = 0;   
-  mSsdHitResolution      = 0;
-  mIstHitResolution      = 0;  //Amilkar
-  mPxlHitResolution      = 0;  //Amilkar   
+  mSsdHitResolution      = 0;   
   mFtpcHitResolution     = 0;
   
   doPrintMemoryInfo = kFALSE;
@@ -507,22 +497,6 @@ StAssociationMaker::~StAssociationMaker()
     mMcSsdHitMap->clear();
     SafeDelete(mMcSsdHitMap);
   }
-  if (mRcIstHitMap) {                //->Amilkar
-    mRcIstHitMap->clear();
-    SafeDelete(mRcIstHitMap);
-  }
-  if (mMcIstHitMap) {
-    mMcIstHitMap->clear();
-    SafeDelete(mMcIstHitMap);
-  }                                  //<-Amilkar
-  if (mRcPxlHitMap) {                //->Amilkar
-    mRcPxlHitMap->clear();
-    SafeDelete(mRcPxlHitMap);
-  }
-  if (mMcPxlHitMap) {
-    mMcPxlHitMap->clear();
-    SafeDelete(mMcPxlHitMap);
-  }                                  //<-Amilkar
   if (mRcFtpcHitMap) {
     mRcFtpcHitMap->clear();
     SafeDelete(mRcFtpcHitMap);
@@ -617,30 +591,6 @@ void StAssociationMaker::Clear(const char* c)
     if (doPrintMemoryInfo) 
       cout << "Deleted M.C. Ssd Hit Map" << endl;
   }
-  if (mRcIstHitMap) {                            //->Amilkar
-    mRcIstHitMap->clear();
-    SafeDelete(mRcIstHitMap);
-    if (doPrintMemoryInfo) 
-      cout << "Deleted Rec. Ist Hit Map" << endl;
-  }
-  if (mMcIstHitMap) {
-    mMcIstHitMap->clear();
-    SafeDelete(mMcIstHitMap);
-    if (doPrintMemoryInfo) 
-      cout << "Deleted M.C. Ist Hit Map" << endl;
-  }                                              //<-Amilkar
-  if (mRcPxlHitMap) {                            //->Amilkar
-    mRcPxlHitMap->clear();
-    SafeDelete(mRcPxlHitMap);
-    if (doPrintMemoryInfo) 
-      cout << "Deleted Rec. Pxl Hit Map" << endl;
-  }
-  if (mMcPxlHitMap) {
-    mMcPxlHitMap->clear();
-    SafeDelete(mMcPxlHitMap);
-    if (doPrintMemoryInfo) 
-      cout << "Deleted M.C. Pxl Hit Map" << endl;
-  }                                              //<-Amilkar
   if (mRcFtpcHitMap) {
     mRcFtpcHitMap->clear();
     SafeDelete(mRcFtpcHitMap);
@@ -749,7 +699,6 @@ Int_t StAssociationMaker::Init()
 			       50, -0.12, 0.12);
   mSvtHitResolution->SetXTitle("Xmc - Xrec (cm)");
   mSvtHitResolution->SetYTitle("Zmc - Zrec (cm)");
-
   //
   // SSD
   //
@@ -759,26 +708,6 @@ Int_t StAssociationMaker::Init()
 			       50, -0.12, 0.12);
   mSsdHitResolution->SetXTitle("Xmc - Xrec (cm)");
   mSsdHitResolution->SetYTitle("Zmc - Zrec (cm)");
-  
-  //                                                           //->Amilkar
-  // IST
-  //
-  mIstHitResolution = new TH2F("IstHitResolution",
-			       "Delta Z Vs Delta X for Nearby Hits",
-			       50, -0.12, 0.12,
-			       50, -0.12, 0.12);
-  mIstHitResolution->SetXTitle("Xmc - Xrec (cm)");
-  mIstHitResolution->SetYTitle("Zmc - Zrec (cm)");            //<-Amilkar
-  
-  //                                                           //->Amilkar
-  // PXL
-  //
-  mPxlHitResolution = new TH2F("PxlHitResolution",
-			       "Delta Z Vs Delta X for Nearby Hits",
-			       50, -0.12, 0.12,
-			       50, -0.12, 0.12);
-  mPxlHitResolution->SetXTitle("Xmc - Xrec (cm)");
-  mPxlHitResolution->SetYTitle("Zmc - Zrec (cm)");            //<-Amilkar
   
   //
   // FTPC
@@ -845,13 +774,7 @@ Int_t StAssociationMaker::Make()
   StMcSvtHitCollection* mcSvtHitColl; 
   // Ssd				
   StSsdHitCollection*   rcSsdHitColl; 
-  StMcSsdHitCollection* mcSsdHitColl;
-  // Ist		                  //Amilkar		
-  StIstHitCollection*   rcIstHitColl;     //Amilkar
-  StMcIstHitCollection* mcIstHitColl;     //Amilkar
-  // Pxl		                  //Amilkar		
-  StPxlHitCollection*   rcPxlHitColl;     //Amilkar
-  StMcPxlHitCollection* mcPxlHitColl;     //Amilkar
+  StMcSsdHitCollection* mcSsdHitColl; 
   // Ftpc
   StFtpcHitCollection*   rcFtpcHitColl;
   StMcFtpcHitCollection* mcFtpcHitColl;
@@ -865,9 +788,7 @@ Int_t StAssociationMaker::Make()
       // This case is for normal case, use hit collections from StEvent
       rcTpcHitColl = rEvent->tpcHitCollection();   
       rcSvtHitColl = rEvent->svtHitCollection();   
-      rcSsdHitColl = rEvent->ssdHitCollection();
-      rcIstHitColl = rEvent->istHitCollection();   //Amilkar 
-      rcPxlHitColl = rEvent->pxlHitCollection();   //Amilkar   
+      rcSsdHitColl = rEvent->ssdHitCollection();   
       rcFtpcHitColl = rEvent->ftpcHitCollection();
   }
   else {
@@ -885,8 +806,6 @@ Int_t StAssociationMaker::Make()
     
       rcSvtHitColl = 0;
       rcSsdHitColl = 0;
-      rcIstHitColl = 0;  //Amilkar
-      rcPxlHitColl = 0;  //Amilkar
       rcFtpcHitColl = 0;
       
   }
@@ -911,9 +830,7 @@ Int_t StAssociationMaker::Make()
   
   mcTpcHitColl = mEvent->tpcHitCollection();   
   mcSvtHitColl = mEvent->svtHitCollection();   
-  mcSsdHitColl = mEvent->ssdHitCollection();
-  mcIstHitColl = mEvent->istHitCollection();    //Amilkar
-  mcPxlHitColl = mEvent->pxlHitCollection();    //Amilkar   
+  mcSsdHitColl = mEvent->ssdHitCollection();   
   mcFtpcHitColl = mEvent->ftpcHitCollection();
   
   // Get the pointer to the parameter DB,
@@ -1231,182 +1148,6 @@ Int_t StAssociationMaker::Make()
       StMemoryInfo::instance()->print();
     }
   }
-  
-  //
-  // Loop over IST hits and make Associations
-  //
-  if (rcIstHitColl && mcIstHitColl) {
-    
-    if (Debug()) gMessMgr->Info() << "Making IST Hit Associations..." << endm;
-    
-    StIstHit*   rcIstHit;
-    StMcIstHit* mcIstHit;
-    
-    // Instantiate the Ist Hit maps
-    mRcIstHitMap = new rcIstHitMapType;
-    mMcIstHitMap = new mcIstHitMapType;
-    
-    float istHitDistance = 9999;
-    unsigned int nIstHits = rcIstHitColl->numberOfHits();
-    if (Debug()) cout << "In Ladder : ";
-    for (unsigned int iLadder=0;  nIstHits &&
-	   iLadder<24;iLadder++){                
-      //rcIstHitColl->numberOfLadders(); iLadder++) {
-      
-      if (Debug()) cout << iLadder + 1 << " "; 
-      
-      for (unsigned int iSensor=0;
-	   iSensor<6;                    //rcIstHitColl->ladder(iLadder)->numberOfSensors();
-	   iSensor++) {
-	//PR(iSensor);
-	
-	for (unsigned int iHit=0;
-	     iHit<rcIstHitColl->ladder(iLadder)->sensor(iSensor)->hits().size();
-	     iHit++){
-	  //PR(iHit); 
-	  rcIstHit = rcIstHitColl->ladder(iLadder)->sensor(iSensor)->hits()[iHit];
-	  
-	  StMcIstHit* closestIstHit = 0;
-	  float newDist = 0;
-	  for (unsigned int jHit=0;
-	       jHit<mcIstHitColl->ladder(iLadder)->sensor(iSensor)->hits().size();
-	       jHit++){
-	    //PR(jHit); 
-	    mcIstHit = mcIstHitColl->ladder(iLadder)->sensor(iSensor)->hits()[jHit];
-	    float xDiff = mcIstHit->position().x() - rcIstHit->position().x();
-	    float yDiff = mcIstHit->position().y() - rcIstHit->position().y();
-	    float zDiff = mcIstHit->position().z() - rcIstHit->position().z();
-	    if ( zDiff > parDB->zCutIst() ) break; //mc hits are sorted, save time!
-	    
-	    if (jHit==0) {
-	      istHitDistance=xDiff*xDiff+yDiff*yDiff+zDiff*zDiff;
-	      closestIstHit = mcIstHit;
-	    }
-	    if ( (newDist = xDiff*xDiff+yDiff*yDiff+zDiff*zDiff) < istHitDistance) {
-	      istHitDistance = newDist;
-	      closestIstHit = mcIstHit;
-	    }
-	    if (mDistanceAssoc || !rcIstHit->idTruth()) {
-	      if ( fabs(xDiff)>= parDB->xCutIst() ||
-		   fabs(yDiff)>= parDB->yCutIst() ||
-		   fabs(zDiff)>= parDB->zCutIst()) continue;
-	    } else 
-	      if (mcIstHit->parentTrack()->key() != rcIstHit->idTruth()) continue;
-	    // Make Associations  Use maps,
-	    mRcIstHitMap->insert(rcIstHitMapValType (rcIstHit, mcIstHit) );
-	    mMcIstHitMap->insert(mcIstHitMapValType (mcIstHit, rcIstHit) );
-	    rcIstHit->SetBit(StMcHit::kMatched,1);
-	    mcIstHit->SetBit(StMcHit::kMatched,1);
-	  } // End of Hits in Sensor loop for MC Hits
-	  if (closestIstHit)
-	    mIstHitResolution->Fill(closestIstHit->position().x()-
-				    rcIstHit->position().x(),
-				    closestIstHit->position().z()-
-				    rcIstHit->position().z() );
-	} // End of Hits in Sensor loop for Rec. Hits
-      } // End of Sensor Loop for Rec. Hits
-    } // End of Ladder Loop for Rec. Hits
-    
-    if (Debug())  {
-      cout << "\n";
-      gMessMgr->Info() << "Number of Entries in IST Hit Maps: " << mRcIstHitMap->size() << endm;
-    }
-    if (doPrintMemoryInfo) {
-      if (Debug()) gMessMgr->Info() << "End of IST Hit Associations\n" << endm;
-      StMemoryInfo::instance()->snapshot();
-      StMemoryInfo::instance()->print();
-    }
-  }                                                   //->1.1 Amilkar
-
-  //                                                  //->1 Amilkar
-  // Loop over PXL hits and make Associations
-  //
-  if (rcPxlHitColl && mcPxlHitColl) {
-    
-    if (Debug()) gMessMgr->Info() << "Making PXL Hit Associations..." << endm;
-    
-    StPxlHit*   rcPxlHit;
-    StMcPxlHit* mcPxlHit;
-    
-    // Instantiate the Pxl Hit maps
-    mRcPxlHitMap = new rcPxlHitMapType;
-    mMcPxlHitMap = new mcPxlHitMapType;
-    
-    float pxlHitDistance = 9999;
-    unsigned int nPxlHits = rcPxlHitColl->numberOfHits();
-    if (Debug()) cout << "In Sector : ";
-    for (unsigned int iSector=0;  nPxlHits &&
-	   iSector<rcPxlHitColl->numberOfSectors(); iSector++) {
-      if (Debug()) cout << iSector + 1 << " ";     
-      if (Debug()) cout << "In Ladder : ";
-      for (unsigned int iLadder=0;  nPxlHits &&
-	     iLadder<rcPxlHitColl->sector(iSector)->numberOfLadders(); iLadder++) {
-	
-	if (Debug()) cout << iLadder + 1 << " "; 
-	
-	for (unsigned int iSensor=0;
-	     iSensor<rcPxlHitColl->sector(iSector)->ladder(iLadder)->numberOfSensors();
-	     iSensor++) {
-	  //PR(iSensor);
-	  
-	  for (unsigned int iHit=0;
-	       iHit<rcPxlHitColl->sector(iSector)->ladder(iLadder)->sensor(iSensor)->hits().size();
-	       iHit++){
-	    //PR(iHit); 
-	    rcPxlHit = rcPxlHitColl->sector(iSector)->ladder(iLadder)->sensor(iSensor)->hits()[iHit];
-	    
-	    StMcPxlHit* closestPxlHit = 0;
-	    float newDist = 0;
-	    for (unsigned int jHit=0;
-		 jHit<mcPxlHitColl->sector(iSector)->ladder(iLadder)->sensor(iSensor)->hits().size();
-		 jHit++){
-	      //PR(jHit); 
-	      mcPxlHit = mcPxlHitColl->sector(iSector)->ladder(iLadder)->sensor(iSensor)->hits()[jHit];
-	      float xDiff = mcPxlHit->position().x() - rcPxlHit->position().x();
-	      float yDiff = mcPxlHit->position().y() - rcPxlHit->position().y();
-	      float zDiff = mcPxlHit->position().z() - rcPxlHit->position().z();
-	      if ( zDiff > parDB->zCutPxl() ) break; //mc hits are sorted, save time!
-	      
-	      if (jHit==0) {
-		pxlHitDistance=xDiff*xDiff+yDiff*yDiff+zDiff*zDiff;
-		closestPxlHit = mcPxlHit;
-	      }
-	      if ( (newDist = xDiff*xDiff+yDiff*yDiff+zDiff*zDiff) < pxlHitDistance) {
-		pxlHitDistance = newDist;
-		closestPxlHit = mcPxlHit;
-	      }
-	      if (mDistanceAssoc || !rcPxlHit->idTruth()) {
-		if ( fabs(xDiff)>= parDB->xCutPxl() ||
-		     fabs(yDiff)>= parDB->yCutPxl() ||
-		     fabs(zDiff)>= parDB->zCutPxl()) continue;
-	      } else 
-		if (mcPxlHit->parentTrack()->key() != rcPxlHit->idTruth()) continue;
-	      // Make Associations  Use maps,
-	      mRcPxlHitMap->insert(rcPxlHitMapValType (rcPxlHit, mcPxlHit) );
-	      mMcPxlHitMap->insert(mcPxlHitMapValType (mcPxlHit, rcPxlHit) );
-	      rcPxlHit->SetBit(StMcHit::kMatched,1);
-	      mcPxlHit->SetBit(StMcHit::kMatched,1);
-	    } // End of Hits in Sensor loop for MC Hits
-	    if (closestPxlHit)
-	      mPxlHitResolution->Fill(closestPxlHit->position().x()-
-				      rcPxlHit->position().x(),
-				      closestPxlHit->position().z()-
-				      rcPxlHit->position().z() );
-	  } // End of Hits in Wafer loop for Rec. Hits
-	} // End of Sensor Loop for Rec. Hits
-      } // End of Ladder Loop for Rec. Hits
-    } // End of Sector Loop for Rec. Hits
-    
-    if (Debug())  {
-      cout << "\n";
-      gMessMgr->Info() << "Number of Entries in PXL Hit Maps: " << mRcPxlHitMap->size() << endm;
-    }
-    if (doPrintMemoryInfo) {
-      if (Debug()) gMessMgr->Info() << "End of PXL Hit Associations\n" << endm;
-      StMemoryInfo::instance()->snapshot();
-      StMemoryInfo::instance()->print();
-    }
-  }                                                     //<-1 Amilkar
   //
   // Loop over FTPC hits and make Associations
   //
@@ -1505,8 +1246,8 @@ Int_t StAssociationMaker::Make()
   //
   // Check that Hit Maps are big enough to Make Track Maps
   //
-  bool smallTpcHitMap, smallSvtHitMap, smallSsdHitMap, smallIstHitMap, smallPxlHitMap, smallFtpcHitMap;   //Amilkar
-  smallTpcHitMap = smallSvtHitMap = smallSsdHitMap = smallIstHitMap = smallPxlHitMap = smallFtpcHitMap = false;     //Amilkar
+  bool smallTpcHitMap, smallSvtHitMap, smallSsdHitMap, smallFtpcHitMap;
+  smallTpcHitMap = smallSvtHitMap = smallSsdHitMap = smallFtpcHitMap = false;
   
   if (mRcTpcHitMap && mRcTpcHitMap->size()>0 && mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
     gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
@@ -1539,26 +1280,6 @@ Int_t StAssociationMaker::Make()
 			<< "Suggest increase distance cuts." << endm;
     smallSsdHitMap = true;
   }
-  if (mRcIstHitMap && mRcIstHitMap->size()>0 && mRcIstHitMap->size() < parDB->reqCommonHitsIst()) { //-->Amilkar
-    gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
-			<< "   The Ist Hit Map is too small for   \n"
-			<< "   any meaningful track association.  \n"
-			<< " ------------------------------------ \n"
-			<< "Entries in Hit Map  : " << mRcIstHitMap->size()       << "\n"
-			<< "Required Common Hits: " << parDB->reqCommonHitsIst()  << "\n"
-			<< "Suggest increase distance cuts." << endm;
-    smallIstHitMap = true;
-  }                                                                                                  //<--Amilkar
-  if (mRcPxlHitMap && mRcPxlHitMap->size()>0 && mRcPxlHitMap->size() < parDB->reqCommonHitsPxl()) { //-->Amilkar
-    gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
-			<< "   The Pxl Hit Map is too small for   \n"
-			<< "   any meaningful track association.  \n"
-			<< " ------------------------------------ \n"
-			<< "Entries in Hit Map  : " << mRcPxlHitMap->size()       << "\n"
-			<< "Required Common Hits: " << parDB->reqCommonHitsPxl()  << "\n"
-			<< "Suggest increase distance cuts." << endm;
-    smallPxlHitMap = true;
-  }                                                                                                  //<--Amilkar
   if (mRcFtpcHitMap && mRcFtpcHitMap->size()>0 && mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
     gMessMgr->Warning() << "\n-----------  WARNING ---------------\n"
 			<< "   The Ftpc Hit Map is too small for  \n"
@@ -1570,8 +1291,8 @@ Int_t StAssociationMaker::Make()
     smallFtpcHitMap = true;
   }
   
-  if ((smallTpcHitMap && smallSvtHitMap && smallSsdHitMap && smallIstHitMap && smallPxlHitMap && smallFtpcHitMap) ||    //Amilkar
-      (!mRcTpcHitMap && !mRcSvtHitMap && !mRcSsdHitMap && !mRcIstHitMap && !mRcPxlHitMap && !mRcFtpcHitMap)) {         //Amilkar
+  if ((smallTpcHitMap && smallSvtHitMap && smallSsdHitMap && smallFtpcHitMap) ||
+      (!mRcTpcHitMap && !mRcSvtHitMap && mRcSsdHitMap && !mRcFtpcHitMap)) {
     gMessMgr->Error() << "No Useful Hit Map to make Track Associations" << endm;
     return kStWarn;
   }
@@ -1587,29 +1308,21 @@ Int_t StAssociationMaker::Make()
   StTpcHit*  rcKeyTpcHit;
   StSvtHit*  rcKeySvtHit;
   StSsdHit*  rcKeySsdHit;
-  StIstHit*  rcKeyIstHit;     //Amilkar
-  StPxlHit*  rcKeyPxlHit;     //Amilkar
   StFtpcHit* rcKeyFtpcHit;
   
   pair<rcTpcHitMapIter,rcTpcHitMapIter>   boundsTpc;
   pair<rcSvtHitMapIter,rcSvtHitMapIter>   boundsSvt;
   pair<rcSsdHitMapIter,rcSsdHitMapIter>   boundsSsd;
-  pair<rcIstHitMapIter,rcIstHitMapIter>   boundsIst;   //Amilkar
-  pair<rcPxlHitMapIter,rcPxlHitMapIter>   boundsPxl;   //Amilkar
   pair<rcFtpcHitMapIter,rcFtpcHitMapIter> boundsFtpc;
   
   rcTpcHitMapIter  tpcHMIter;
   rcSvtHitMapIter  svtHMIter;
   rcSsdHitMapIter  ssdHMIter;
-  rcIstHitMapIter  istHMIter;                         //Amilkar
-  rcPxlHitMapIter  pxlHMIter;                         //Amilkar
   rcFtpcHitMapIter ftpcHMIter;
   
   const StMcTpcHit* mcValueTpcHit;
   const StMcSvtHit* mcValueSvtHit;
   const StMcSsdHit* mcValueSsdHit;
-  const StMcIstHit* mcValueIstHit;                     //Amilkar
-  const StMcPxlHit* mcValuePxlHit;                     //Amilkar
   const StMcFtpcHit* mcValueFtpcHit;
   
   const StMcTrack* trackCand;
@@ -1620,8 +1333,6 @@ Int_t StAssociationMaker::Make()
   initializedTrackPing.nPingsTpc = 0;
   initializedTrackPing.nPingsSvt = 0;
   initializedTrackPing.nPingsSsd = 0;
-  initializedTrackPing.nPingsIst = 0;                  //Amilkar
-  initializedTrackPing.nPingsPxl = 0;                  //Amilkar
   initializedTrackPing.nPingsFtpc = 0;
   
   
@@ -1833,122 +1544,6 @@ static int mykount=0; mykount++;
 	
       } // Ssd Hits from Track from StEvent loop
     }
-    
-    //                                                          //->2.1 Amilkar
-    // Loop over the IST hits of the track
-    //
-    if (mRcIstHitMap) {
-      StPtrVecHit recIstHits   = rcTrack->detectorInfo()->hits(kIstId);
-      unsigned int recIstHitI;
-      for (recIstHitI = 0; recIstHitI < recIstHits.size(); recIstHitI++) {
-	// Loop over the SSD hits of the track
-	
-	rcHit = recIstHits[recIstHitI];
-	rcKeyIstHit = dynamic_cast<StIstHit*>(rcHit);
-	
-	if (!rcKeyIstHit) continue;
-	boundsIst = mRcIstHitMap->equal_range(rcKeyIstHit);
-	
-	for (istHMIter=boundsIst.first; istHMIter!=boundsIst.second; ++istHMIter) {
-	  
-	  mcValueIstHit = (*istHMIter).second;
-	  trackCand = mcValueIstHit->parentTrack();
-	  
-	  // At this point we have a candidate Monte Carlo Track
-	  // If there are no candidates, create the first candidate.
-	  // If already there, increment its nPings.
-	  // If doesn't match any of the previous candidates, create new candidate.
-	  
-	  if (nCandidates == 0) {
-	    candidates[0].mcTrack    = trackCand;
-	    candidates[0].nPingsIst  = 1;
-	    nCandidates++;
-	    
-	  }
-	  
-	  else {
-	    for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-	      if (trackCand==candidates[iCandidate].mcTrack){
-		candidates[iCandidate].nPingsIst++;
-		break;
-	      }
-	      if (iCandidate == (nCandidates-1)){
-		candidates[nCandidates].mcTrack = trackCand;
-		candidates[nCandidates].nPingsIst  = 1;
-		nCandidates++;
-				// check that we don't overstep the bounds,
-				// if so increase the size of the vector in steps of 20 candidates
-		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
-		  if (Debug()) cout << "Resizing in the SSD hits of the track " << endl;
-		}
-		break;
-	      }
-	    } // candidate loop
-	    
-	  }
-	} // mc hits in multimap
-	
-      } // Ist Hits from Track from StEvent loop
-    }                                                     //<-2.1 Amilkar
-
-    //                                                    //->2 Amilkar
-    // Loop over the PXL hits of the track
-    //
-    if (mRcPxlHitMap) {
-      StPtrVecHit recPxlHits   = rcTrack->detectorInfo()->hits(kPxlId);
-      unsigned int recPxlHitI;
-      for (recPxlHitI = 0; recPxlHitI < recPxlHits.size(); recPxlHitI++) {
-	// Loop over the PXL hits of the track
-	
-	rcHit = recPxlHits[recPxlHitI];
-	rcKeyPxlHit = dynamic_cast<StPxlHit*>(rcHit);
-	
-	if (!rcKeyPxlHit) continue;
-	boundsPxl = mRcPxlHitMap->equal_range(rcKeyPxlHit);
-	
-	for (pxlHMIter=boundsPxl.first; pxlHMIter!=boundsPxl.second; ++pxlHMIter) {
-	  
-	  mcValuePxlHit = (*pxlHMIter).second;
-	  trackCand = mcValuePxlHit->parentTrack();
-	  
-	  // At this point we have a candidate Monte Carlo Track
-	  // If there are no candidates, create the first candidate.
-	  // If already there, increment its nPings.
-	  // If doesn't match any of the previous candidates, create new candidate.
-	  
-	  if (nCandidates == 0) {
-	    candidates[0].mcTrack    = trackCand;
-	    candidates[0].nPingsPxl  = 1;
-	    nCandidates++;
-	    
-	  }
-	  
-	  else {
-	    for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-	      if (trackCand==candidates[iCandidate].mcTrack){
-		candidates[iCandidate].nPingsPxl++;
-		break;
-	      }
-	      if (iCandidate == (nCandidates-1)){
-		candidates[nCandidates].mcTrack = trackCand;
-		candidates[nCandidates].nPingsPxl  = 1;
-		nCandidates++;
-				// check that we don't overstep the bounds,
-				// if so increase the size of the vector in steps of 20 candidates
-		if (nCandidates>=candidates.size()) {
-		  candidates.resize(nCandidates+20);
-		  if (Debug()) cout << "Resizing in the PXL hits of the track " << endl;
-		}
-		break;
-	      }
-	    } // candidate loop
-	    
-	  }
-	} // mc hits in multimap
-	
-      } // Pxl Hits from Track from StEvent loop
-    }                                                               //<-2 Amilkar
     //
     // Loop over the FTPC hits of the track.  Note that there are 2 loops,
     // one for the West and one for the East FTPC, but probably if there are hits in one
@@ -2080,8 +1675,6 @@ static int mykount=0; mykount++;
       if (candidates[iCandidate].nPingsTpc  >= parDB->reqCommonHitsTpc() ||
 	  candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
 	  candidates[iCandidate].nPingsSsd  >= parDB->reqCommonHitsSsd() ||
-	  candidates[iCandidate].nPingsIst  >= parDB->reqCommonHitsIst() ||    //Amilkar
-	  candidates[iCandidate].nPingsPxl  >= parDB->reqCommonHitsPxl() ||    //Amilkar
 	  candidates[iCandidate].nPingsFtpc >= parDB->reqCommonHitsFtpc()){
 	// We got a track pair !!
 	// Add it to multimap
@@ -2091,8 +1684,6 @@ static int mykount=0; mykount++;
 				      candidates[iCandidate].nPingsTpc,
 				      candidates[iCandidate].nPingsSvt,
 				      candidates[iCandidate].nPingsSsd,
-				      candidates[iCandidate].nPingsIst,        //Amilkar
-				      candidates[iCandidate].nPingsPxl,        //Amilkar
 				      candidates[iCandidate].nPingsFtpc);
 	mRcTrackMap->insert(rcTrackMapValType (rcTrack, trkPair));
 	mMcTrackMap->insert(mcTrackMapValType (candidates[iCandidate].mcTrack, trkPair));

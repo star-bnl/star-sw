@@ -1,8 +1,8 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.9  2015/03/13 00:21:54  perev
- * Upload StMcIst Amilkar
+ * Revision 1.10  2015/03/13 18:45:01  perev
+ * Roll back
  *
  * Revision 1.8  2014/07/17 01:47:43  mstftsm
  * Fix a bug in creating a new StPxlHitCollection.
@@ -72,8 +72,7 @@ Int_t StPxlSimMaker::Init()
    //else
    //{
    // temporary till DIGMAPS algorithm is added and option added in StMaker
-   mUseFastSim = kFALSE;//TRUE;
-   mUseFastSimEmb = kTRUE; //Amilkar
+   mUseFastSim = kTRUE;
    mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
 
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
@@ -161,23 +160,6 @@ Int_t StPxlSimMaker::Make()
       if(newCollection) rcEvent->setPxlHitCollection(pxlHitCol);
       LOG_DEBUG << " size of hit collection : " << pxlHitCol->numberOfHits() << endm;
    }
-   else if (mUseFastSimEmb)   //-->Amilkar
-     {
-       StPxlHitCollection *pxlHitCol = rcEvent->pxlHitCollection();
-       
-       bool newCollection = false;
-       if (!pxlHitCol)
-	 {
-	   LOG_INFO << "No existing StPxlHiCollection. Creating a new one..." <<endm;
-	   pxlHitCol = new StPxlHitCollection();
-	   newCollection = true;
-	 }
-       
-       mPxlSimulator->addPxlHitsEmb(mcEvent->tracks(), *mcPxlHitCol, *pxlHitCol);
-       
-       if(newCollection) rcEvent->setPxlHitCollection(pxlHitCol);
-       LOG_DEBUG << " size of hit collection : " << pxlHitCol->numberOfHits() << endm;
-     }//<--Amilkar
    else if (mUseDIGMAPSSim)
    {
       // for testing
@@ -212,8 +194,8 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.9  2015/03/13 00:21:54  perev
- * Upload StMcIst Amilkar
+ * Revision 1.10  2015/03/13 18:45:01  perev
+ * Roll back
  *
  * Revision 1.8  2014/07/17 01:47:43  mstftsm
  * Fix a bug in creating a new StPxlHitCollection.

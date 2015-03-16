@@ -1,11 +1,9 @@
 /***************************************************************************
  *
- * Erase layer, and wafer switch to sensor (Amilkar)
- *
- * $Id: StMcIstHit.cc,v 2.11 2015/03/12 23:16:09 perev Exp $
+ * $Id: StMcIstHit.cc,v 2.12 2015/03/13 18:44:58 perev Exp $
  * $Log: StMcIstHit.cc,v $
- * Revision 2.11  2015/03/12 23:16:09  perev
- * Switch layers to ladders (Amilkar)
+ * Revision 2.12  2015/03/13 18:44:58  perev
+ * Roll back
  *
  * Revision 2.10  2012/12/18 21:01:53  perev
  * Ist development (Jonathan)
@@ -54,7 +52,7 @@
 
 #include "StMcIstHit.hh"
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.11 2015/03/12 23:16:09 perev Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.12 2015/03/13 18:44:58 perev Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -63,8 +61,7 @@ ostream&  operator<<(ostream& os, const StMcIstHit& h)
 {
     os << "IstHit" << endl;
     os << *((StMcHit *) &h);
-    os << "Ladder           : " << h.ladder() << endl;
-    os << "Sensor           : " << h.sensor() << endl;
+    os << "Layer           : " << h.layer() << endl;
     return os;
 }
 
@@ -72,6 +69,5 @@ ostream&  operator<<(ostream& os, const StMcIstHit& h)
 void StMcIstHit::Print(Option_t *option) const {
   cout << "IstHit\t"; 
   StMcHit::Print();
-  cout  << "\tLadder: " << ladder(); 
-  cout  << "\tSensor: " << sensor();  
+  cout  << "\tLayer: " << layer();  
 }

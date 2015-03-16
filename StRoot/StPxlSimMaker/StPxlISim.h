@@ -11,7 +11,6 @@
 
 #include "StMessMgr.h" 
 #include "TNamed.h"
-#include "StMcContainers.hh"     //Amilkar
 
 class TDataSet;
 class TObjectSet;
@@ -34,13 +33,6 @@ public:
   /*! \brief this function is to be implemented by algorithms which create PXL hits points.
   */
     virtual Int_t addPxlHits(const StMcPxlHitCollection& in, StPxlHitCollection& out){LOG_INFO<<"StPxlISim::addPxlHits is not implemented in daughter class."<<endm; return 1;}
-
-    //-->Amilkar
- /*! \brief this function is to be implemented by algorithms which create PXL hits points from Mctrack projections.
-  */
-    virtual Int_t addPxlHitsEmb(const StSPtrVecMcTrack& in1, StMcPxlHitCollection& in, StPxlHitCollection& out){LOG_INFO<<"StPxlISim::addPxlHits is not implemented in daughter class."<<endm; return 1;}
-    //<--Amilkar
-
   /*! \brief this function is to be implemented by algorithms which create raw PXL hits
   */
     virtual Int_t addPxlRawHits(const StMcPxlHitCollection& in, StPxlRawHitCollection& out){LOG_INFO<<"StPxlISim::addPxlRawHits is not implemented in daughter class."<<endm; return 1;}
