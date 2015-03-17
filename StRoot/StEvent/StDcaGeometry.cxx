@@ -193,6 +193,7 @@ KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
   } 
   track.SetCharge(q);
   fParticle = KFParticle(track, pdg);
+  fParticle.SetPDG(pdg);
   fParticle.SetID(kg);
 #if 0
   Float_t d = fParticle.GetCovariance(0) + fParticle.GetCovariance(2) + fParticle.GetCovariance(5);
