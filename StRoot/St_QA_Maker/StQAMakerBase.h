@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.26 2015/03/18 21:43:17 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.26  2015/03/18 21:43:17  genevb
+// Introduce Roman Pots histograms (K. Yip)
+//
 // Revision 2.25  2015/01/21 17:49:40  genevb
 // Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
 //
@@ -96,7 +99,8 @@ enum StQAHistSetType {
   StQA_run12all = 6,
   StQA_run12 = 7,
   StQA_run13 = 8,
-  StQA_run14 = 9
+  StQA_run14 = 9,
+  StQA_run15 = 10
   // when adding more, search for StQAHistSetType for other changes
 };
 
@@ -121,6 +125,10 @@ const int kNQtChannelsPerSlot = 32;
 const int kNChannels = kNQtSlotsPerCrate * kNQtChannelsPerSlot;
 const int kNAdc = 4096;
 
+// RP Constants
+const int kRP_MAXSEQ = 8 ;
+const int kRP_MAXCHAIN = 4 ;
+
 class StQAMakerBase : public StMaker {
 
 // **************** Public Member Functions ***************************
@@ -134,7 +142,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.26 2015/03/18 21:43:17 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -173,6 +181,9 @@ class StQAMakerBase : public StMaker {
   // Stores both FMS and FPD histograms.
   TH1PtrMap mFMShistograms;
 
+  // Roman-Pot histograms
+  //  TH1F     *m_RP_ClusterLength; // testing
+  TH2F     *m_RP_clusters_xy[kRP_MAXSEQ] ; // cluster positions
 
 // **************** Members For Internal Use ***************************
  protected:
@@ -198,6 +209,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistFcl();
   virtual void BookHistFMS();
   virtual void BookHistDE();
+  virtual void BookHistRP();
 
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
@@ -216,6 +228,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistHFT() {}
   virtual void MakeHistPXL() {}
   virtual void MakeHistIST() {}
+  virtual void MakeHistRP () {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

@@ -317,7 +317,9 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=15) {
+  if (run_year >=16) {
+    if (realData) histsSet = StQA_run15; // for now, everything from run14 on uses this set
+  } else if (run_year >=15) {
     if (realData) histsSet = StQA_run14; // for now, everything from run14 on uses this set
   } else if (run_year >=14) {
     if (realData) histsSet = StQA_run13; // for now, everything from run13 on uses this set
@@ -359,6 +361,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run12):
       case (StQA_run13):
       case (StQA_run14):
+      case (StQA_run15):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -2749,10 +2752,59 @@ void StEventQAMaker::MakeHistMTD() {
     }
 
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistRP() {
+
+  const Int_t MAXHITS = 10 ; // maximum no. of hits per plane/chain to consider
+  Double_t POS[kRP_MAXSEQ][kRP_MAXCHAIN][MAXHITS] ;
+  Int_t NCluster[kRP_MAXSEQ][kRP_MAXCHAIN] ;
+  Int_t i, j, k, l, m ;
+
+  StRpsCollection *RpsColl = event->rpsCollection();
+
+  if( RpsColl ) {
+    if ( RpsColl->siliconBunch()==0 ||  RpsColl->siliconBunch()>8 ) {
+
+      for ( i=0; i<kRP_MAXSEQ ; i++ ) {
+
+	for ( j=0; j<kRP_MAXCHAIN ; j++ ) {
+
+	  NCluster[i][j] = 0 ;
+
+	  for ( k=0; k<RpsColl->romanPot(i)->plane(j)->numberOfClusters() ; k++ ) {
+	    //	    m_RP_ClusterLength->Fill( RpsColl->romanPot(i)->plane(j)->cluster(k)->length() ) ;
+	    if ( k<MAXHITS ) {
+	      NCluster[i][j]++ ;
+	      if ( (j%2)==0 )
+		// A or C : pitch_4svx = 0.00974 cm
+		POS[i][j][k] = RpsColl->romanPot(i)->plane(j)->cluster(k)->position()/9.74E-5 ;  
+	      else
+		// B or D : pitch_6svx = 0.01050 cm
+		POS[i][j][k] = RpsColl->romanPot(i)->plane(j)->cluster(k)->position()/1.050E-4 ;
+	    } // if ( k<MAXHITS )
+	  } // for ( Int_t k=0; k<RpsColl->romanPot(i)->plane(j)->numberOfClusters() ; k++ )
+
+	} // for ( j=0; j<kRP_MAXCHAIN ; j++ )
+
+	for ( l = 0; l<kRP_MAXCHAIN; l+=2 ) // 0 or 2
+	  for ( m = 1; m<kRP_MAXCHAIN; m+=2 ) // 1 or 3
+	    for ( k=0; k<NCluster[i][l] && k<MAXHITS ; k++ ) // A and C
+	      for ( j=0; j<NCluster[i][m] && j<MAXHITS ; j++ ) // B and D
+		m_RP_clusters_xy[i]->Fill( POS[i][m][j] , POS[i][l][k]) ;
+
+      } // for ( i=0; i<kRP_MAXSEQ ; i++ )
+
+    } // if ( RpsColl->siliconBunch()==0 &&  RpsColl->siliconBunch()>8 ) {
+  } // if( RpsColl ) {
+
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.117 2015/01/21 17:49:40 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.118 2015/03/18 21:43:17 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.118  2015/03/18 21:43:17  genevb
+// Introduce Roman Pots histograms (K. Yip)
+//
 // Revision 2.117  2015/01/21 17:49:40  genevb
 // Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
 //
