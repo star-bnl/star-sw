@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.44 2015/01/21 17:49:40 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.45 2015/03/18 21:43:17 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.45  2015/03/18 21:43:17  genevb
+// Introduce Roman Pots histograms (K. Yip)
+//
 // Revision 2.44  2015/01/21 17:49:40  genevb
 // Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
 //
@@ -187,6 +190,11 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 // TPC dE/dx over time
   m_dedx_Z3A=0; // dE/dx vs. drift distance
 
+// Roman-Pot histograms
+//  m_RP_ClusterLength=0; // testing
+  for (i=0; i<kRP_MAXSEQ; i++ )
+    m_RP_clusters_xy[i] = 0 ;
+
 }
 //_____________________________________________________________________________
 StQAMakerBase::~StQAMakerBase() {
@@ -270,6 +278,8 @@ Int_t StQAMakerBase::Make() {
     MakeHistPXL(); 
     MakeHistIST(); 
   }
+  // histograms from Roman-Pot in StEvent
+  if (histsSet>=StQA_run15) MakeHistRP();
 
   eventCount++;
   return kStOk;
@@ -321,6 +331,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run15) :
     case (StQA_run14) :
     case (StQA_run13) :
     case (StQA_run12) :
@@ -365,6 +376,7 @@ void StQAMakerBase::BookHist() {
   BookHistDE();
   BookHistFcl();
   if (histsSet>=StQA_run13) BookHistFMS(); 
+  if (histsSet>=StQA_run15) BookHistRP();
 
   Int_t tempClass2 = eventClass;
   // Must book the histograms with no special prefix now
@@ -536,3 +548,18 @@ void StQAMakerBase::BookHistFMS(){
 
 }
 //_____________________________________________________________________________
+void StQAMakerBase::BookHistRP(){
+
+  //  m_RP_ClusterLength = QAH::H1F("RP_ClusterLength","Number of strips in each cluster",50,0,50);
+  char rpname[kRP_MAXSEQ][5] = { "E1U", "E1D", "E2U", "E2D", "W1U", "W1D", "W2U", "W2D" }; // 2015
+
+  char strs[20], strl[100];
+  for ( Int_t i=0; i<kRP_MAXSEQ; i++ ) {
+     sprintf(strs,"RP_cluster_xy_%s", rpname[i] ) ;
+     sprintf(strl,"Clusters  Y vs X in %s", rpname[i] ) ;
+     m_RP_clusters_xy[i] = QAH::H2F(strs, strl, 96, 0., 768., 96, 0., 768. );
+  }
+
+}
+//_____________________________________________________________________________
+
