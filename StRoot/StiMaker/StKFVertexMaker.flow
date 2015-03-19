@@ -132,4 +132,11 @@ KFTracks:
                  [PrimaryTrack: Track] 
                  [TrackMassFit: Track]
                    -> [KFParticle]
-    
+================================================================================
+
+
+[Vertex>     
+ ||
+ | -> parent() [MassFit]
+  -> daughter() [Track>
+   

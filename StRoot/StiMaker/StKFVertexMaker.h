@@ -67,6 +67,7 @@ class StKFVertexMaker : public StMaker {
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
  private:
   TObjArray                     *fParticles; // KF particles = global tracks + decay particles
+  TObjArray                     *fVertices;  // KF vertices and decay particles
   Int_t     			 fPass;    
   Int_t     			 fNzBins;  
   Int_t     			 fNPasses; 

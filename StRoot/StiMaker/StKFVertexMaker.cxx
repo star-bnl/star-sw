@@ -62,6 +62,7 @@ static map<Int_t,StTrackNode*> TrackNodeMap;
 */
 //________________________________________________________________________________
 StKFVertexMaker::StKFVertexMaker(const char *name) : StMaker(name),
+						     fParticles(0), fVertices(0),
 						     fPass(0), fNzBins(2500),  fNPasses(2), fSpectrum(0), fzWindow(2), 
 						     fTempLog(2), fminBrent(0), func(0),
 						     mBeamLine(kFALSE), fVertexZPlot(0), fStack(0), fc1(0) , pEvent(0)
@@ -477,7 +478,9 @@ Int_t StKFVertexMaker::MakeParticles() {
   part->SetObject(fParticles);
   AddData(part);
   TObjectSet *vert = new TObjectSet("KFVertices");
-  vert->SetObject(new TObjArray());
+  fVertices = new TObjArray();
+  fVertices->SetOwner(kFALSE);
+  vert->SetObject(fVertices);
   AddData(vert);
   fNGoodGlobals = 0;
   if (mBeamLine) {AddBeamTrack();}
@@ -515,6 +518,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 #ifdef  __MakeV0__
   KFVertex V(*Vtx->parentMF()->kfParticle());
   PrPP(MakeV0,V);
+  StTrackNode* trackNode = Vtx->parentMF()->node();
   Int_t NoTracks =  Vtx->numberOfDaughters();
   if (NoTracks != 2) return kFALSE;
   if (V.GetQ() != 0)   return kFALSE;
@@ -542,7 +546,6 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   KFParticle *vDaughters[2] = {&pos, &neg}; // 0 -> positive, 1 -> negative
   StTrack *trks[2] = {0,0};
   StV0Vertex *V0Vx = 0;
-  StTrackNode* trackNode = 0;
   Int_t kg = fParticles->GetLast() + 1; // new track
   Int_t kgp = kg; // position in fParticle array
   Int_t flag = 0;
@@ -570,7 +573,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
     if (prob < probCut) continue;
     V0.SetPDG(pdgV0[l]);
-    V0.SetID(kg);
+    //    V0.SetID(kg);
     SafeDelete(V0s[l]); V0s[l] = new KFVertex(V0); PrPP(MakeV0,*V0s[l]);
     flag |= 1 << l;
   }
@@ -591,7 +594,10 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       PrPP(MakeV0,V02);
       Double_t prob2 = TMath::Prob(V02.GetChi2(),V02.GetNDF());
       if (prob2 < probCut) continue;
-      SafeDelete(V03s[l]); V03s[l] = new KFVertex(V02); V03s[l]->SetID(kg); V03s[l]->SetParentID(Vp->key());  PrPP(MakeV0,*V03s[l]);
+      SafeDelete(V03s[l]); 
+      V03s[l] = new KFVertex(V02); 
+      //      V03s[l]->SetID(kg); 
+      V03s[l]->SetParentID(Vp->key());  PrPP(MakeV0,*V03s[l]);
       if (prob2 > probBest) { 
 	probBest = prob2; 
 	lBest = l;
@@ -600,7 +606,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     }
     StTrackMassFit *V0track = 0;
     if (V03s[l] && probBest >= probCut) {
-      V03s[lBest]->SetID(kgp);
+      //      V03s[lBest]->SetID(kgp);
       KFVertex  Parent(*VpBest->parentMF()->kfParticle()); 
       PrPP(MakeV0 before fit,Parent);
       Parent.AddDaughter(*V03s[lBest]);
@@ -608,6 +614,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       Double_t prob = TMath::Prob(Parent.GetChi2(),Parent.GetNDF());
       if (prob >= probCut) {
 	V0track = new StTrackMassFit(V03s[lBest]->GetID(),V03s[lBest]); 
+	V0track->kfParticle()->SetParentID(VpBest->key());
 	V0track->setEndVertex(Vtx);
 	PrPP(MakeV0 before,*VpBest->parentMF());
 	*VpBest->parentMF() = StTrackMassFit(Parent.GetID(),((KFParticle *) &Parent));
@@ -620,7 +627,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 	V03s[l] = 0;
       }
     }
-    fParticles->AddAtAndExpand(V0s[l],kgp); 
+    fVertices->AddLast(V0s[l]); 
     kgp++;
     // V0 track 
     if (! V0track) {
@@ -628,13 +635,6 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
      V0track->setEndVertex(Vtx);
     }
     PrPP(MakeV0,*V0track);
-    if (! trackNode) {
-      trackNode = new StTrackNode;
-      StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
-      trNodeVec.push_back(trackNode);
-      TrackNodeMap[kgp] = trackNode;
-    }
-    trackNode->addTrack(V0track);
     StTrackNode *Nodes[2] = {TrackNodeMap[neg.GetID()], TrackNodeMap[pos.GetID()]};
     for (Int_t m = 0; m < 2; m++) {
       if (! Nodes[m]) {
@@ -656,8 +656,11 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       }
     }
     if (! trks[0] || ! trks[1]) continue;
-    // Fill StV0Vertex
+    V0s[l]->SetID(V.GetID());
     PrPP(MakeV0,*V0s[l]);
+#define __MakeV0Vertex__
+#ifdef __MakeV0Vertex__
+    // Fill StV0Vertex
     V0Vx = new StV0Vertex(); 
     V0Vx->setParent(V0track);
     StThreeVectorF XVertex(V0s[l]->X(),V0s[l]->Y(),V0s[l]->Z());
@@ -671,19 +674,24 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     V0Vx->setFlag(flag); // Set default values, will use for kinematical ambiguities
     StSPtrVecV0Vertex& v0Vertices = pEvent->v0Vertices();
     v0Vertices.push_back(V0Vx);
-    V0s[l]->SetID(V.GetID());
     V0track->setEndVertex(V0Vx);
     V0Vx->setPosition(StThreeVectorF(V0s[l]->GetX(), V0s[l]->GetY(), V0s[l]->GetZ()));;
     V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[negative]->track(primary))));
     V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[positive]->track(primary))));
-    // <<<<<<<<<< Add Mass Fits >>>>>>>>
-
     V0Vx->setDcaDaughterToPrimaryVertex(positive,trks[negative]->impactParameter());
     V0Vx->setDcaDaughterToPrimaryVertex(negative,trks[positive]->impactParameter());
     //3VectorF vs 3VectorD???
     V0Vx->setMomentumOfDaughter(positive,StThreeVectorF(pos.GetPx(),pos.GetPy(),pos.GetPz()));
     V0Vx->setMomentumOfDaughter(negative,StThreeVectorF(neg.GetPx(),neg.GetPy(),neg.GetPz()));
     PrPP(MakeV0, *V0Vx);
+#endif
+    if (! trackNode) {
+      trackNode = new StTrackNode;
+      StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
+      trNodeVec.push_back(trackNode);
+      TrackNodeMap[kgp] = trackNode;
+    }
+    trackNode->addTrack(V0track);
   }
 #endif /*  __MakeV0__ */
   return ok;
@@ -816,21 +824,18 @@ StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::ReFitToVertex() {
-  TObjectSet *vert = (TObjectSet *) GetDataSet("KFVertices");
-  assert(vert);
-  // Refit tracks to the vertex, clean up, and move to TObjArray
-  TObjArray *toVertices = (TObjArray *) vert->GetObject();
   Int_t NoVertices = fgcVertices->Vertices()->GetSize();
   for (Int_t l = fgcVertices->Vertices()->GetSize() - 1; l >= 0; l--) {
     StKFVertex *V = (StKFVertex *) fgcVertices->Vertices()->At(l);
     if (! V) continue;
     Bool_t ok = kTRUE;
     Int_t NoTracks = V->NoTracks();
+    KFVertex     &KVx = V->Vertex();
     if (NoTracks <= 1) ok = kFALSE;
     else {
-      if (V->Vertex().Covariance(0) < 0 ||
-	  V->Vertex().Covariance(2) < 0 ||
-	  V->Vertex().Covariance(5) < 0) ok = kFALSE;
+      if (KVx.Covariance(0) < 0 ||
+	  KVx.Covariance(2) < 0 ||
+	  KVx.Covariance(5) < 0) ok = kFALSE;
     }
     if (! ok) {
       delete fgcVertices->Vertices()->Remove(V);
@@ -838,13 +843,14 @@ void StKFVertexMaker::ReFitToVertex() {
     }
     // Store vertex
     StPrimaryVertex *primV  = new StPrimaryVertex;
-    StThreeVectorF XVertex(&V->Vertex().X());
+    StThreeVectorF XVertex(&KVx.X());
     primV->setKey(V->ID());
     primV->setPosition(XVertex);
-    primV->setChiSquared(V->Vertex().Chi2()/V->Vertex().GetNDF());  
-    primV->setProbChiSquared(TMath::Prob(V->Vertex().GetChi2(),V->Vertex().GetNDF()));
+    primV->setChiSquared(KVx.Chi2()/KVx.GetNDF());  
+    primV->setProbChiSquared(TMath::Prob(KVx.GetChi2(),KVx.GetNDF()));
+    primV->setIdTruth(KVx.IdTruth(), KVx.QaTruth());
     Float_t cov[6];
-    TCL::ucopy(&V->Vertex().Covariance(0), cov, 6);
+    TCL::ucopy(&KVx.Covariance(0), cov, 6);
     primV->setCovariantMatrix(cov); 
     primV->setVertexFinderId(KFVertexFinder);
     primV->setFlag(1); // Set default values
@@ -852,7 +858,7 @@ void StKFVertexMaker::ReFitToVertex() {
     primV->setNumTracksUsedInFinder(V->NoTracks());
     Bool_t beam = kFALSE;
     StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
-    Vertex->setGlobal(0, 0, V->Vertex().X(), V->Vertex().Y(), V->Vertex().Z(), 0);
+    Vertex->setGlobal(0, 0, KVx.X(), KVx.Y(), KVx.Z(), 0);
     Vertex->setError(cov);
 
     TArrayI indexT(NoTracks); Int_t *indexes = indexT.GetArray();
@@ -914,7 +920,7 @@ void StKFVertexMaker::ReFitToVertex() {
       delete fgcVertices->Vertices()->Remove(V);
     } else {
       // copy Point fit as MassFit
-      StTrackMassFit *pf = new StTrackMassFit(V->Vertex().GetID(),&V->Vertex());
+      StTrackMassFit *pf = new StTrackMassFit(KVx.GetID(),&KVx);
       primV->setParent(pf);
       StTrackNode *nodepf = new StTrackNode;
       nodepf->addTrack(pf);
@@ -924,7 +930,7 @@ void StKFVertexMaker::ReFitToVertex() {
 	StPrimaryTrack *t = pTracks[i];
 	if (! t) continue;
 	primV->addDaughter(t);
-	nodes[i]->addTrack(t);
+	// Done in FitTrack2Vertex    nodes[i]->addTrack(t);
 	StTrackMassFit *mf = new StTrackMassFit(tracks[i]->GetID(),&tracks[i]->Particle());
 	primV->addMassFit(mf);
 	nodes[i]->addTrack(mf);
@@ -932,7 +938,7 @@ void StKFVertexMaker::ReFitToVertex() {
       primV->setTrackNumbers();
       CalculateRank(primV);
       pEvent->addPrimaryVertex(primV,orderByRanking);
-      toVertices->AddLast(new KFVertex(V->Vertex())); //<<<<<<<<<<<<<<<< ????????
+      fVertices->AddLast(new KFVertex(KVx)); //<<<<<<<<<<<<<<<< ????????
     }
     delete [] tracks;   
     delete [] pTracks;
