@@ -55,6 +55,7 @@ ppBuilder::ppBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   memset(&contentsSVX, 0, sizeof(contentsSVX));
   memset(&mEntriesSVX, 0, sizeof(mEntriesSVX));
   memset(&mEntriesNCH, 0, sizeof(mEntriesNCH));
+  memset(&hitperbunch, 0, sizeof(hitperbunch)); // added by KY (2015-3-19)
 }
 
 ppBuilder::~ppBuilder() {
@@ -76,6 +77,7 @@ ppBuilder::~ppBuilder() {
   for(int i=0;i<n;i++) {
     if(contentsSVX.array[i]) delete contentsSVX.array[i];
   }
+  if ( hitperbunch ) delete hitperbunch ; // added by KY (2015-3-19)
 }
 
 void ppBuilder::initialize(int argc, char *argv[]) {
@@ -182,6 +184,15 @@ void ppBuilder::initialize(int argc, char *argv[]) {
       }
   }
 
+  // added by KY (2015-3-19) 
+  hitperbunch = new TProfile("hitperbunch", "Hits per bunch", 120,0.,120.,0.,1000.);
+  hitperbunch->SetLineColor(4);
+  hitperbunch->SetLineWidth(4);
+  hitperbunch->SetMarkerStyle(22);
+  hitperbunch->SetMarkerColor(4);
+  hitperbunch->SetStats(0);
+  np_Tot++ ;
+
   // Add root histograms to Plots
 
   JevpPlot *plots[np_Tot-1];
@@ -229,6 +240,11 @@ void ppBuilder::initialize(int argc, char *argv[]) {
     iNext++;
   }
 
+  // added by KY (2015-3-19) 
+  plots[iNext] = new JevpPlot(hitperbunch);
+  plots[iNext]->gridx = 0;
+  iNext++;
+
   // Add Plots to plot set...
   //
   assert ( np_Tot == iNext );
@@ -252,7 +268,7 @@ void ppBuilder::startrun(daqReader *rdr) {
 
 void ppBuilder::event(daqReader *rdr)
 {
- 
+  int bunch_number ; // added by KY (2015-3-19)
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) {  return; }
 
@@ -289,6 +305,9 @@ void ppBuilder::event(daqReader *rdr)
         else if ( adc_avr[2]>TAC_TRSHLD && adc_avr[7]>TAC_TRSHLD) contVIP.VTIM->Fill ( (tac_avr[7]-tac_avr[2]), (tac_avr[2]+tac_avr[7])); 
         else if ( adc_avr[3]>TAC_TRSHLD && adc_avr[6]>TAC_TRSHLD) contVIP.VTIM->Fill ( (tac_avr[6]-tac_avr[3]), (tac_avr[3]+tac_avr[6])); 
 
+    // added by KY (2015-3-19) 
+    bunch_number = trgd->bunchId7Bit();
+
     delete trgd;
   }
   //
@@ -299,6 +318,8 @@ void ppBuilder::event(daqReader *rdr)
   // changed by KY (2015-2-13) : read pedestal-subtracted ADC
   daq_dta *dd = rdr->det("pp2pp")->get("adc_ped_sub") ;  
 
+  // added by KY (2015-3-19) 
+  int Nhitsum = 0, silicon_bunch ;
 
   if ( dd ){
     while ( dd->iterate() ){
@@ -308,6 +329,9 @@ void ppBuilder::event(daqReader *rdr)
       u_char svx = ds->svx_id;
       // Added by KY (2015-1-30) : Correcting wrong svx_id
       if ( svx == 7 ) svx = 3 ; 
+
+      // added by KY (2015-3-19) 
+      silicon_bunch = ds->bunch_xing ;
       double sum = 0.;
       double nch_live = 0.;
 	  assert (rp_id >= 0 &&  rp_id < 8 );
@@ -326,6 +350,11 @@ void ppBuilder::event(daqReader *rdr)
 	      contentsSVX.array[idh]->Fill( chnum, d_adc);
               sum += d_adc;
               nch_live += 1.;
+
+	      // added by KY (2015-3-19) 
+	      if ( ( silicon_bunch==0 || silicon_bunch>8 ) & ( d_adc > 0 ) )
+		Nhitsum++ ;
+
 	    }       
 	  }
 	  double wt1 = contVIP.SVX->GetBinContent( svx+1, idh+1 );
@@ -342,6 +371,10 @@ void ppBuilder::event(daqReader *rdr)
 	  contVIP.SVX_NCH->SetBinContent( svx+1, idh+1, wt2 ); 
     }
   }
+
+  // added by KY (2015-3-19) 
+  hitperbunch->Fill(bunch_number, Nhitsum, 1.) ;
+
 }
 
 void ppBuilder::stoprun(daqReader *rdr) {

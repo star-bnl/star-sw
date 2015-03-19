@@ -62,6 +62,7 @@ public:
     };
   } contentsSVX;
 
+  TProfile *hitperbunch ;  // added by KY (2015-3-19) 
 
   //*** End Histogram Declarations...
 
