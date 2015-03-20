@@ -7,6 +7,10 @@
 #include "StiTrack.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
+#if 1
+#include "TRSymMatrix.h"
+#include "TRVector.h"
+#endif
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -488,7 +492,7 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     p=fabs(e1[i]);q=fabs(e2[i]);choice += (p-q)/(p+q+1e-10);
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
-
+#if 0
   do {//empty loop
 //  	Join errors
     TCL::vadd(e1,e2,sumE,nE1);
@@ -511,6 +515,35 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     TCL::tras(sumEIsubP,e1   ,PJ       ,1,nP2);
     TCL::vadd(PJ       ,p1   ,PJ         ,nP2);
   }
+#else
+  TRSymMatrix EE1(nP1,e1);
+  TRSymMatrix EE2(nP1,e2);
+  TRVector    PP1(nP1,p1);
+  TRVector    PP2(nP1,p2);
+  TRVector SubP(PP2);
+  SubP -= PP1;
+  //   Join errors
+  TRSymMatrix SumE(EE1);
+  SumE += EE2;
+  int negati = SumE[2]<0;
+  if (negati) SumE *= -1.;
+  int ign0re = SumE[0]<=0;
+  if (ign0re) SumE[0] = 1;
+  TRSymMatrix SumEI(SumE,TRArray::kInvertedA);
+  if (! SumEI.IsValid()) return chi2;
+  if (ign0re) {SumE[0]  = 0; SumEI[0] = 0;}
+  if (negati) {SumE *= -1.; SumEI *= -1.;}
+  chi2 = SumEI.Product(SubP);
+  if (!EJ) return chi2;
+  TRSymMatrix E1sumEIe1(EE1,TRArray::kRxSxR,SumEI);
+  TCL::vsub(EE1.GetArray(),E1sumEIe1.GetArray(),EJ,nE1);
+  //   Join params
+  if (PJ) {
+    TCL::tras(SubP.GetArray(),SumEI.GetArray(),sumEIsubP,1,nP1);
+    TCL::tras(sumEIsubP,EE1.GetArray()  ,PJ       ,1,nP2);
+    TCL::vadd(PJ       ,PP1.GetArray()  ,PJ         ,nP2);
+  }
+#endif
   return chi2;
 }
 #if 0
@@ -590,9 +623,16 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   enum {nP1=3,nE1=6,nP2=6,nE2=21};
 
   StiNodeErrs Ai=A;	//Inverted A
-  
+  double chi2 = 3e33;
   Ai._cXX=1;
+#if 0
   TCL::trsinv(Ai.A,Ai.A,nP2);
+#else
+  TRSymMatrix AA(nP2,Ai.A);
+  TRSymMatrix AI(AA,TRArray::kInvertedA);
+  if (! AI.IsValid()) return chi2;
+  TCL::ucopy(AI.GetArray(),Ai.A, nP2*(nP2+1)/2);
+#endif
   Ai._cXX=0;
 
 
@@ -608,7 +648,9 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   if (M) {TCL::ucopy(m,M->P,nP2); M->ready();}	//fill resulting params
 
   TCL::vsub(X.P,m,dif,nP2);			//dif = X - M
+#if 0
   double chi2;
+#endif
   TCL::trasat(dif,Ai.A,&chi2,1,nP2);		//calc chi2
   if (!C) return chi2;
 		// Error matrix calculation
@@ -902,6 +944,12 @@ double StiTrackNodeHelper::recvChi2()
   if (fabs(mJoinPars.eta())       >kMaxEta) 	return 1e41;
   if (fabs(mJoinPars.curv())      >kMaxCur)      return 1e41;
   if (!mDetector) {//Primary vertex
+#if 1
+    // Check positiveness of mHrr
+    TRSymMatrix A(3,&mHrr.hXX);
+    TRSymMatrix AI(A,TRArray::kInvertedA);
+    if (! AI.IsValid()) return 1e41;
+#endif
 //  double chi2 =joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
     double chi2 =joinVtx(mHitPars,mHrr  ,mPredPars  ,mPredErrs  );
     return chi2;
