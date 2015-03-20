@@ -35,6 +35,7 @@ private:
   int count[3];
   void readtrgid();
   int isTrg(const char* trgname);
+  void printTriggers();
   void countOverlap();  
 
   TFile *mFile;

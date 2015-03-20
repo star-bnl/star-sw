@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.13 2015/01/16 21:08:28 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.14 2015/03/18 21:43:17 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.14  2015/03/18 21:43:17  genevb
+// Introduce Roman Pots histograms (K. Yip)
+//
 // Revision 2.13  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //
@@ -329,4 +332,6 @@
  "QaFpdSums7",
 
  "QaPointSizeSSD"
-
+ /*
+ "RP_ClusterLength"
+ */

@@ -269,15 +269,36 @@ int StFmsBitCheckMaker::Make(){
   SIM=(StFmsTriggerMaker*)GetMaker("fmstrigger");
   if(!SIM) {printf("No StFmsTriggerMaker found\n"); return kStErr;}
   
+  static int dbc0 = -999;
   unsigned long long bxinghi,bxing1,bxinglo,bx,bxdiff;
-  static unsigned long long bxkeep=0;
   bxinghi = td->bcData(3);
   bxing1 =  td->bcData(10);
   bxinglo = (bxing1 << 16) + td->bcData(11);
   bx = (bxinghi << 32) + bxinglo;
-  bxdiff=bx-bxkeep;
-  if(PRINTLEVEL>0) printf("StFmsBitCheckMaker: Year=%d Version=%x Event=%d Token=%d BC=%lld BCDiff=%lld\n",td->year(),td->version(),td->eventNumber(),td->token(),bx,bxdiff);
-  bxkeep=bx;
+  int bunchid7  = td->bunchId7Bit();
+  int bunchid48 = td->bunchId48Bit();
+  if(bx%120 != bunchid48)
+    printf("BC48 check :  (BX from BCdata)\%120=%d is not consistent with  bunchId48Bit=%d\n",bx%120,bunchid48);
+  int dbc = bunchid7-bunchid48;
+  if(dbc<0) dbc+=120;
+  if(dbc0==-999) dbc0=dbc;
+  int dd=dbc-dbc0;
+  int bc48c=bunchid48+dbc0; if(bc48c<0) bc48c+=120;  if(bc48c>119)bc48c-=120;
+  if(dd!=0)
+    printf("BC7: bc7=%3d bc48%120=%3d bc48corr=%3d D=%3d D0=%3d DD=%3d BC48=%llx\n",bunchid7,bunchid48,bc48c,dbc,dbc0,dd,bx);
+  //if(td->bcData(1)>0)
+  if(td->bcData(12)&0x1==1 && bunchid7!=1) {
+    //if(bunchid7<4 || bunchid7>117)
+    printf("Revtick : bc7=%3d %3d RT1=%x %x %x %x %x %x RT2=%1d BC48=%llx\n",
+	   bunchid7,td->bcData(2)&0x7f,
+	   td->bcData(1),
+	   td->bcData(0),
+	   td->bcData(4),
+	   td->bcData(5),
+	   td->bcData(6),
+	   td->bcData(7),
+	   td->bcData(12)&0x1,bx);
+  }
 
   //FMS=td->getDsm_FMS();  
   //for(int i=0; i<8; i++) {FP201[i]=td->fpdLayer2DSMRaw(i);} // printf("FP201 %d %d\n",i,td->fpdLayer2DSMRaw(i));}

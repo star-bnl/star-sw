@@ -1,9 +1,10 @@
 #ifndef HftMatchedTree_h
 #define HftMatchedTree_h
 
-#include "StMaker.h"
 #include "TFile.h"
 #include "TTree.h"
+
+#include "StChain/StMaker.h"
 
 class EventT;
 
@@ -22,7 +23,7 @@ public:
    void SetMinNoHits(Int_t minNoHits = 0) { fMinNoHits = minNoHits; }
    void SetpCut(Double_t pCut = 0.0) { fpCut = pCut; }
 
-   virtual const char* GetCVS() const { static const char cvs[]="Tag $Name:  $ $Id: HftMatchedTree.h,v 1.14 2014/10/13 20:21:42 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs; }
+   virtual const char* GetCVS() const { static const char cvs[]="Tag $Name:  $ $Id: HftMatchedTree.h,v 1.15 2015/03/18 14:33:38 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs; }
 
 protected:
 
