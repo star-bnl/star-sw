@@ -36,7 +36,7 @@ StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",na
 
 Int_t StTriggerDataMaker::Make()
 {
-  LOG_INFO << "StTriggerDataMaker Make() starting..........Run=" 
+  LOG_DEBUG << "StTriggerDataMaker Make() starting..........Run=" 
         << GetRunNumber() << " : Event=" << GetEventNumber() << endm;
 
   int year=0, run=0;
@@ -136,7 +136,7 @@ Int_t StTriggerDataMaker::Make()
       if(pTrg){
 	//if(mDebug>0) pTrg->dump();
 	unsigned int err = pTrg->errorFlag();
-	LOG_INFO << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year <<" mErrorFlag="<<err<<endm;  
+	LOG_DEBUG << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year <<" mErrorFlag="<<err<<endm;  
 	if(err==0){
 	  return kStOK;
 	}else{
