@@ -4,6 +4,8 @@
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
+#include "StMuDstMaker.h"
+#include "StMuDst.h"
 #include "TRegexp.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
@@ -11,12 +13,13 @@
 #include "THack.h"
 #include "TROOT.h"
 #include "TVector3.h"
+#include "StEvent/StEventTypes.h"
+#if 0
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackNode.h"
 #include "StEvent/StRichSpectra.h"
 #include "StEvent/StDetectorState.h"
-#include "StEvent/StEventTypes.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StDcaGeometry.h"
@@ -24,6 +27,7 @@
 #include "StEvent/StFgtStrip.h"
 #include "StEvent/StFgtHit.h"
 #include "StEvent/StEnumerations.h"
+#endif
 #include "StFgtUtil/StFgtConsts.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
@@ -91,8 +95,6 @@
 #include "EztTrigBlob.h"
 #include "EztFpdBlob.h"
 
-#include "StMuDstMaker.h"
-#include "StMuDst.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -113,7 +115,6 @@ ClassImp(StMuDstMaker)
 #if !(ST_NO_NAMESPACES)
   using namespace units;
 #endif
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -416,15 +417,15 @@ StMuDstMaker::~StMuDstMaker() {
   SafeDelete(mTofUtil);
   SafeDelete(mBTofUtil);   /// dongx
   DEBUGMESSAGE3("after arrays");
-  saveDelete(mProbabilityPidAlgorithm);
-  saveDelete(mTrackFilter);
-  saveDelete(mL3TrackFilter);
+  SafeDelete(mProbabilityPidAlgorithm);
+  SafeDelete(mTrackFilter);
+  SafeDelete(mL3TrackFilter);
   DEBUGMESSAGE3("after filter");
   if (mIoMode== ioWrite ) closeWrite();
   if (mIoMode== ioRead ) closeRead();
   DEBUGMESSAGE3("after close");
-  saveDelete(mChain);
-//VP  saveDelete(mTTree);
+  SafeDelete(mChain);
+//VP  SafeDelete(mTTree);
   SafeDelete(mEmcCollectionArray);
   SafeDelete(mPmdCollectionArray);
   DEBUGMESSAGE3("out");
@@ -1027,6 +1028,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     }
   }
 #endif
+#ifndef __STORE_KFPARTICLES__
   TObjectSet *obj = (TObjectSet *) GetDataSet("KFTracks");
   if (obj) {
     TObjArray *oA = (TObjArray *) obj->GetObject();
@@ -1041,6 +1043,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
       fillKFVertices(oA);
     }
   }
+#endif
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixMtdTrackIndices(); 
@@ -1470,13 +1473,19 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
   StSPtrVecTrackNode& nodes= ev->trackNodes();
   DEBUGVALUE2(nodes.size());
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
+#ifndef __STORE_KFPARTICLES__
     addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], mArrays[muCovGlobTrack], mArrays[muCovPrimTrack], false);
+#else
+    addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], mArrays[muCovGlobTrack],                       0, false);
+#endif
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+#ifdef StTrackMassFit_hh
+#ifndef __STORE_KFPARTICLES__
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillKFTracks(TObjArray *obj) {
   if (!obj) return;
@@ -1504,6 +1513,25 @@ void StMuDstMaker::fillKFVertices(TObjArray *obj) {
   }
 }
 //-----------------------------------------------------------------------
+#else /* __STORE_KFPARTICLES__ */
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillKFTracks(const KFParticle *particle) {
+  if (!particle) return;
+  TClonesArray &KFTracks = *mStMuDst->KFTracks();
+  Int_t j = KFTracks.GetEntriesFast();
+  new (KFTracks[j++]) KFParticle(*particle);
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillKFVertices(const KFParticle *particle) {
+  if (!particle) return;
+  TClonesArray &KFVertices = *mStMuDst->KFVertices();
+  Int_t j = KFVertices.GetEntriesFast();
+  new (KFVertices[j++]) KFVertex(*particle);
+}
+#endif /* ! __STORE_KFPARTICLES__ */
+#endif /* StTrackMassFit_hh */
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
@@ -1542,37 +1570,43 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
 void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
 				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, TClonesArray* covgTCA, TClonesArray* covpTCA, bool l3) {
   DEBUGMESSAGE3("");
-  const StTrack* tr=0;
+  const StTrack* gTrack=0;
 
   /// do global track
   int index2Global =-1;
   int index;
-  if (gTCA) {
-    tr= dynamic_cast<const StGlobalTrack *>(node->track(global));
-    if (tr) {
-      const StTrack *pr_tr = node->track(primary);
-      const StVertex *vtx = 0;
-      if (pr_tr)
-	vtx = pr_tr->vertex();
-      if (vtx==0)
-	vtx = ev->primaryVertex();	
-      
-      if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3, covgTCA, covpTCA);
-      // do primary track track
-      if (pTCA) {
-	tr = node->track(primary);
-	if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
-      }
+  if (! gTCA) return;
+  gTrack= dynamic_cast<const StGlobalTrack *>(node->track(global));
+  if (gTrack) {
+    const StTrack *pTrack = node->track(primary);
+    const StVertex *vtx = 0;
+    if (pTrack)
+      vtx = pTrack->vertex();
+    if (vtx==0)
+      vtx = ev->primaryVertex();	
+    
+    if (gTrack && !gTrack->bad()) index2Global = addTrack(gTCA, ev, gTrack, vtx, cut, -1, l3, covgTCA, covpTCA);
+    // do primary track
+    if (pTCA) {
+      if (pTrack && !pTrack->bad()) index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
     }
-    // all other tracks
+  }
+  // all other tracks
+  const StTrack* track=0;
+  size_t nEntries = node->entries();
+  for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
+    track = node->track(j);
+    if (! track || (track->type() == global) || (track->type() == primary) ) continue; // exclude global and primary tracks
+    if (track->type() == massFitAtVx || track->type() == massFit) {
+      const KFParticle *particle = ((StTrackMassFit *) track)-> kfParticle();
+      if (! particle) continue;
+      if (track->type() == massFitAtVx)  fillKFTracks(particle);
+      else                               fillKFVertices(particle);
+      continue;
+    }
     if (oTCA) {
-      size_t nEntries = node->entries();
-      for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
-	tr = node->track(j);
-	if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
-	  index = addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
-	}
-      }
+      if (track->bad()) continue;
+      index = addTrack(oTCA, ev, track, track->vertex(), cut, index2Global, l3);
     }
   }
 }

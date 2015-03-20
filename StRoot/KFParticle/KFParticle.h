@@ -51,13 +51,13 @@ class KFParticle :public KFParticleBase
 
   //* Construction of mother particle by its 2-3-4 daughters
 
-  KFParticle( const KFParticle &d1, const KFParticle &d2, Bool_t gamma = false );
+  KFParticle( const KFParticle &d1, const KFParticle &d2 );
 
   KFParticle( const KFParticle &d1, const KFParticle &d2, 
-		 const KFParticle &d3 );
+              const KFParticle &d3 );
 
   KFParticle( const KFParticle &d1, const KFParticle &d2, 
-		 const KFParticle &d3, const KFParticle &d4 );
+              const KFParticle &d3, const KFParticle &d4 );
  
  //* Initialisation from "cartesian" coordinates ( X Y Z Px Py Pz )
  //* Parameters, covariance matrix, charge and PID hypothesis should be provided 
@@ -77,10 +77,6 @@ class KFParticle :public KFParticleBase
   //* Initialise covariance matrix and set current parameters to 0.0 
 
   void Initialize();
-
-  //* Set decay vertex parameters for linearisation 
-
-  void SetVtxGuess( float x, float y, float z );
 
   //*
   //*  ACCESSORS
@@ -257,21 +253,16 @@ class KFParticle :public KFParticleBase
 
   //* Transport the particle on dS parameter (SignedPath/Momentum) 
 
-  void TransportToDS( float dS );
+  void TransportToDS( float dS, const float* dsdr );
 
   //* Get dS to a certain space point 
 
-  float GetDStoPoint( const float xyz[] ) const ;
+  float GetDStoPoint( const float xyz[3], float dsdr[6] ) const ;
   
   //* Get dS to other particle p (dSp for particle p also returned) 
 
-  void GetDStoParticle( const KFParticle &p, 
-			float &DS, float &DSp ) const ;
+  void GetDStoParticle( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
   
-  //* Get dS to other particle p in XY-plane
-
-  void GetDStoParticleXY( const KFParticleBase &p, 
-			  float &DS, float &DSp ) const ;
   
   //* 
   //* OTHER UTILITIES
@@ -334,11 +325,6 @@ class KFParticle :public KFParticleBase
   void SubtractFromVertex( KFParticle &v ) const ;
   void SubtractFromParticle( KFParticle &v ) const;
 
-  //* Special method for creating gammas
-
-  void ConstructGamma( const KFParticle &daughter1,
-		       const KFParticle &daughter2  );
-
     // * Pseudo Proper Time of decay = (r*pt) / |pt| * M/|pt|
     // @primVertex - primary vertex
     // @mass - mass of the mother particle (in the case of "Hb -> JPsi" it would be JPsi mass)
@@ -347,7 +333,7 @@ class KFParticle :public KFParticleBase
 
   void GetFieldValue( const float xyz[], float B[] ) const ;
 
-  void Transport( float dS, float P[], float C[] ) const ;
+  void Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const ;
 
  protected: 
   
@@ -359,10 +345,7 @@ class KFParticle :public KFParticleBase
 #ifdef HomogeneousField
   static float GetFieldAlice();
 #endif
-  //* Other methods required by the abstract KFParticleBase class 
   
-  void GetDStoParticle( const KFParticleBase &p, float &DS, float &DSp )const ;
-
  private:
 #ifdef HomogeneousField
   static float fgBz;  //! Bz compoment of the magnetic field
@@ -420,11 +403,6 @@ inline void KFParticle::Initialize()
 { 
   KFParticleBase::Initialize(); 
 }
-
-inline void KFParticle::SetVtxGuess( float x, float y, float z )
-{
-  KFParticleBase::SetVtxGuess(x,y,z);
-}  
 
 inline float KFParticle::GetX    () const 
 { 
@@ -858,7 +836,9 @@ inline void KFParticle::TransportToProductionVertex()
 
 inline void KFParticle::TransportToPoint( const float xyz[] )
 { 
-  TransportToDS( GetDStoPoint(xyz) );
+  float dsdr[6] = {0.f};
+  float dS = GetDStoPoint(xyz, dsdr);
+  TransportToDS( dS, dsdr );
 }
 #ifdef HomogeneousField
 inline void KFParticle::TransportToVertex( const KFPVertex &v )
@@ -868,31 +848,25 @@ inline void KFParticle::TransportToVertex( const KFPVertex &v )
 #endif
 inline void KFParticle::TransportToParticle( const KFParticle &p )
 { 
-  float dS, dSp;
-  GetDStoParticle( p, dS, dSp );
-  TransportToDS( dS );
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );
+  TransportToDS( dS[0], dsdr[3] );
 }
 
-inline void KFParticle::TransportToDS( float dS )
+inline void KFParticle::TransportToDS( float dS, const float* dsdr )
 {
-  KFParticleBase::TransportToDS( dS );
+  KFParticleBase::TransportToDS( dS, dsdr );
 } 
 
-inline float KFParticle::GetDStoPoint( const float xyz[] ) const 
+inline float KFParticle::GetDStoPoint( const float xyz[], float* dsdr ) const 
 {
 #ifdef HomogeneousField
-  return KFParticleBase::GetDStoPointBz( GetFieldAlice(), xyz );
+  return KFParticleBase::GetDStoPointBz( GetFieldAlice(), xyz, dsdr );
 #endif
 #ifndef NonhomogeneousField
-  return KFParticleBase::GetDStoPointCBM( xyz );
+  return KFParticleBase::GetDStoPointCBM( xyz, dsdr );
 #endif
-}
-
-  
-inline void KFParticle::GetDStoParticle( const KFParticle &p, 
-					    float &DS, float &DSp ) const 
-{
-  GetDStoParticleXY( p, DS, DSp );
 }
 
 
@@ -970,60 +944,40 @@ inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const
 
 inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const 
 {
-#ifndef KFParticleStandalone
-  FairField *MF = CbmKF::Instance()->GetMagneticField();
-  const Double_t xyzDouble[3] = {xyz[0], xyz[1], xyz[2]};
-  Double_t BDouble[3]={0.};
-  MF->GetFieldValue( xyzDouble, BDouble );
-  B[0] = BDouble[0]; B[1] = BDouble[1]; B[2] = BDouble[2];
-#else
-  const float dz = (fieldRegion[9]-xyz[2]);
+// #ifndef KFParticleStandalone
+//   FairField *MF = CbmKF::Instance()->GetMagneticField();
+//   const Double_t xyzDouble[3] = {xyz[0], xyz[1], xyz[2]};
+//   Double_t BDouble[3]={0.};
+//   MF->GetFieldValue( xyzDouble, BDouble );
+//   B[0] = BDouble[0]; B[1] = BDouble[1]; B[2] = BDouble[2];
+// #else
+  const float dz = (xyz[2]-fieldRegion[9]);
   const float dz2 = dz*dz;
 
   B[0] = fieldRegion[0] + fieldRegion[1]*dz + fieldRegion[2]*dz2;
   B[1] = fieldRegion[3] + fieldRegion[4]*dz + fieldRegion[5]*dz2;
   B[2] = fieldRegion[6] + fieldRegion[7]*dz + fieldRegion[8]*dz2;
-#endif
+// #endif
 }
 #endif
 
-inline void KFParticle::GetDStoParticle( const KFParticleBase &p, 
-					    float &DS, float &DSp )const
-{
-  GetDStoParticleXY( p, DS, DSp );
-}
-
-inline void KFParticle::GetDStoParticleXY( const KFParticleBase &p, 
-				       float &DS, float &DSp ) const
+inline void KFParticle::GetDStoParticle( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const
 { 
 #ifdef HomogeneousField
-  KFParticleBase::GetDStoParticleBz( GetFieldAlice(), p, DS, DSp ) ;
+  KFParticleBase::GetDStoParticleBz( GetFieldAlice(), p, dS, dsdr ) ;
 #endif
 #ifdef NonhomogeneousField
-  KFParticleBase::GetDStoParticleCBM( p, DS, DSp ) ;
-#endif
-  //GetDStoParticleALICE( p, DS, DSp ) ;
-}
-
-inline void KFParticle::Transport( float dS, float P[], float C[] ) const 
-{
-#ifdef HomogeneousField
-  KFParticleBase::TransportBz( GetFieldAlice(), dS, P, C );
-#endif
-#ifdef NonhomogeneousField
-  KFParticleBase::TransportCBM( dS, P, C );
+  KFParticleBase::GetDStoParticleCBM( p, dS, dsdr ) ;
 #endif
 }
 
-inline void KFParticle::ConstructGamma( const KFParticle &daughter1,
-					   const KFParticle &daughter2  )
+inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const 
 {
 #ifdef HomogeneousField
-  KFParticleBase::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
+  KFParticleBase::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 #ifdef NonhomogeneousField
-  const KFParticle* daughters[2] = {&daughter1, &daughter2};
-  Construct(daughters,2);
+  KFParticleBase::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 }
 

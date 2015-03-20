@@ -78,7 +78,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           {
             TString parName[3] = {"X","Y","Z"};
             int nBins = 100;
-            float xMax[3] = {2., 2., 5.};
+            float xMax[3] = {0.5, 0.5, 2.};
   
             for( int iH=0; iH<3; iH++ ){
               hDSToParticleQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
@@ -153,10 +153,111 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                                     "y","Decay length [cm]","Life time c#tau [cm]",
                                                     "chi2/ndf","prob","#theta [rad]",
                                                     "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","Multiplicity"};
-            int nBins[nHistoPartParam] = {1000,100,100,100,100,100,100,100,100,100,100,1000,1000,1000,1000,1000, fParteff.partMaxMult[iPart]+1};
-            float xMin[nHistoPartParam] = {fParteff.partMHistoMin[iPart],  0.f, 0.f,-6.f, -5.f,  0.f,  0.f, 0.f, -2.f, -2.f, -200.f, -200.f, -200.f,   0.f,   0.f, -1.f, -0.5f};
-            float xMax[nHistoPartParam] = {fParteff.partMHistoMax[iPart], 10.f, 3.f, 6.f, 55.f, 30.f, 20.f, 1.f,  2.f,  2.f,  200.f,  200.f,  200.f, 200.f, 400.f, 35.f, float(fParteff.partMaxMult[iPart])+0.5f};
-                        
+#ifdef CBM
+            int nBins[nHistoPartParam] = {1000, // M
+                                           100, // p
+                                           100, // pt
+                                           100, // y
+                                           100, // DecayL
+                                           100, // ctau
+                                           100, // chi2/ndf
+                                           100, // prob
+                                           100, // theta
+                                           100, // phi
+                                           200, // X
+                                           200, // Y
+                                           360, // Z
+                                           200, // R
+                                           200, // L
+                                           200, // L/dL
+                                          fParteff.partMaxMult[iPart]+1};
+            float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
+                                              0.f, // p
+                                              0.f, // pt
+                                              0.f, // y
+                                             -5.f, // DecayL
+                                              0.f, // ctau
+                                              0.f, // chi2/ndf
+                                              0.f, // prob
+                                             -2.f, // theta
+                                             -2.f, // phi
+                                            -50.f, // X
+                                            -50.f, // Y
+                                            -10.f, // Z
+                                              0.f, // R
+                                              0.f, // L
+                                             -1.f, // L/dL
+                                             -0.5f };
+            float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
+                                              10.f, // p
+                                               3.f, // pt
+                                               6.f, // y
+                                              55.f, // DecayL
+                                              30.f, // ctau
+                                              20.f, // chi2/ndf
+                                               1.f, // prob
+                                               2.f, // theta
+                                               2.f, // phi
+                                              50.f, // X
+                                              50.f, // Y
+                                              80.f, // Z
+                                              50.f, // R
+                                             100.f, // L
+                                              35.f, // L/dL
+                                            float(fParteff.partMaxMult[iPart])+0.5f};
+#else
+            int nBins[nHistoPartParam] = {1000, // M
+                                           100, // p
+                                           100, // pt
+                                           100, // y
+                                           100, // DecayL
+                                           100, // ctau
+                                           100, // chi2/ndf
+                                           100, // prob
+                                           100, // theta
+                                           100, // phi
+                                           100, // X
+                                          1000, // Y
+                                          1000, // Z
+                                          1000, // R
+                                          1000, // L
+                                          1000, // L/dL
+                                          fParteff.partMaxMult[iPart]+1};
+            float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
+                                              0.f, // p
+                                              0.f, // pt
+                                             -6.f, // y
+                                             -5.f, // DecayL
+                                              0.f, // ctau
+                                              0.f, // chi2/ndf
+                                              0.f, // prob
+                                             -2.f, // theta
+                                             -2.f, // phi
+                                           -200.f, // X
+                                           -200.f, // Y
+                                           -200.f, // Z
+                                              0.f, // R
+                                              0.f, // L
+                                             -1.f, // L/dL
+                                             -0.5f };
+            float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
+                                              10.f, // p
+                                               3.f, // pt
+                                               6.f, // y
+                                              55.f, // DecayL
+                                              30.f, // ctau
+                                              20.f, // chi2/ndf
+                                               1.f, // prob
+                                               2.f, // theta
+                                               2.f, // phi
+                                             200.f, // X
+                                             200.f, // Y
+                                             200.f, // Z
+                                             200.f, // R
+                                             400.f, // L
+                                              35.f, // L/dL
+                                            float(fParteff.partMaxMult[iPart])+0.5f};
+#endif
             for(int iH=0; iH<nHistoPartParam; iH++)
             {
               hPartParam[iPart][iH]       = new TH1F(parName[iH].Data(),parName[iH].Data(),
@@ -169,7 +270,13 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                               nBins[2],xMin[2],xMax[2]);
             hPartParam2D[iPart][0]->GetXaxis()->SetTitle("y");
             hPartParam2D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-  
+
+            hPartParam2D[iPart][1] = new TH2F("Z-R","Z-R",
+                                              nBins[12],xMin[12],xMax[12],
+                                              nBins[13],xMin[13],xMax[13]);
+            hPartParam2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+            hPartParam2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+
             gDirectory->mkdir("Signal");
             gDirectory->cd("Signal");
             {
@@ -185,7 +292,13 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                                       nBins[2],xMin[2],xMax[2]);
               hPartParam2DSignal[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DSignal[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-  
+            
+              hPartParam2DSignal[iPart][1] = new TH2F("Z-R","Z-R",
+                                                      nBins[12],xMin[12],xMax[12],
+                                                      nBins[13],xMin[13],xMax[13]);
+              hPartParam2DSignal[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+              hPartParam2DSignal[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+            
               gDirectory->mkdir("QA");
               gDirectory->cd("QA");
               {
@@ -216,6 +329,12 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                                   nBins[2],xMin[2],xMax[2]);
               hPartParam2DBG[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DBG[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+              
+              hPartParam2DBG[iPart][1] = new TH2F("Z-R","Z-R",
+                                                  nBins[12],xMin[12],xMax[12],
+                                                  nBins[13],xMin[13],xMax[13]);
+              hPartParam2DBG[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+              hPartParam2DBG[iPart][1]->GetYaxis()->SetTitle("R [cm]");
             }
   //           gDirectory->cd(".."); // particle directory
   //           gDirectory->mkdir("CorrBG");
@@ -250,6 +369,12 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                                   nBins[2],xMin[2],xMax[2]);
               hPartParam2DGhost[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DGhost[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+              
+              hPartParam2DGhost[iPart][1] = new TH2F("Z-R","Z-R",
+                                                     nBins[12],xMin[12],xMax[12],
+                                                     nBins[13],xMin[13],xMax[13]);
+              hPartParam2DGhost[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+              hPartParam2DGhost[iPart][1]->GetYaxis()->SetTitle("R [cm]");
             }
             gDirectory->cd(".."); // particle directory
           }

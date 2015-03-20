@@ -280,10 +280,15 @@ std::ostream&  operator<<(std::ostream& os,  const StTrackNode& node) {
   const StTrack *track;
   UInt_t nR = node.referencedTracks().size();
   UInt_t nO = node.ownedTracks().size();
+#if 0
   os << "Track node : ";
   if (nR > 0) os << "Reference tracks:" << std::endl;
+#endif
   for (UInt_t k = 0; k < nR + nO; k++) {
+    if (k) os << std::endl;
+#if 0
     if (k == nR) os << "Owned  tracks:" << std::endl;
+#endif
     if (k < nR) track = node.referencedTracks()[k];
     else        track = node.ownedTracks()[k-nR];
     if (track->type() == primary) {
@@ -295,7 +300,6 @@ std::ostream&  operator<<(std::ostream& os,  const StTrackNode& node) {
     } else {
       os << *track;
     }
-    os << std::endl;
   }
   return os;
 }

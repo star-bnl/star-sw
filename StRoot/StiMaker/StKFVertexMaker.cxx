@@ -564,11 +564,15 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     PrPP(MakeV0,neg);
     // 2c-Fit => Global V0 tracks
     KFParticle V0(V);
+#if 0 /* removed SetVtxGuess from KFParticle */
     if (pdgV0[l] != 22) {
       V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
     } else {
       V0.ConstructGamma(*vDaughters[0],*vDaughters[1]);
     }
+#else
+    V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
+#endif
     PrPP(MakeV0,V0);
     Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
     if (prob < probCut) continue;
@@ -931,7 +935,9 @@ void StKFVertexMaker::ReFitToVertex() {
 	if (! t) continue;
 	primV->addDaughter(t);
 	// Done in FitTrack2Vertex    nodes[i]->addTrack(t);
+	PrPP(ReFitToVertex,tracks[i]->Particle());
 	StTrackMassFit *mf = new StTrackMassFit(tracks[i]->GetID(),&tracks[i]->Particle());
+	PrPP(ReFitToVertex,*mf);
 	primV->addMassFit(mf);
 	nodes[i]->addTrack(mf);
       }
@@ -1054,8 +1060,12 @@ void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *
   TRSymMatrix covPxyz(6);
   extended->getXYZ(Pxyz.GetArray(),covPxyz.GetArray());
   PrPP(UpdateParticleAtVertex before,*particle);
+#if 0
   particle->Create(Pxyz.GetArray(),covPxyz.GetArray(),particle->Q(),(Float_t) TDatabasePDG::Instance()->GetParticle(kTrack->pdgId())->Mass());
   particle->SetPDG(kTrack->pdgId());
+#else
+  particle->Create(Pxyz.GetArray(),covPxyz.GetArray(),particle->Q(),(Float_t) TDatabasePDG::Instance()->GetParticle(particle->GetPDG())->Mass());
+#endif
   particle->NDF() = 2;
   particle->Chi2() = extended->getChi2();
   PrPP(UpdateParticleAtVertex  after,*particle);

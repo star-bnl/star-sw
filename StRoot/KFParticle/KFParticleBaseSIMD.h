@@ -57,16 +57,26 @@ class KFParticleBaseSIMD {
  
   //* Get dS to xyz[] space point 
 
-  virtual float_v GetDStoPoint( const float_v xyz[] ) const = 0;
+  virtual float_v GetDStoPoint( const float_v xyz[3], float_v dsdr[6] ) const = 0;
+  
+  float_v GetDStoPointLine( const float_v xyz[3], float_v dsdr[6] ) const;
+  float_v GetDStoPointBz( float_v Bz, const float_v xyz[3], float_v dsdr[6], const float_v* param = 0 ) const;
+  float_v GetDStoPointBy( float_v By, const float_v xyz[3], float_v dsdr[6] ) const;
+  float_v GetDStoPointCBM( const float_v xyz[3], float_v dsdr[6] ) const;
 
   //* Get dS to other particle p (dSp for particle p also returned) 
 
-  virtual void GetDStoParticle( const KFParticleBaseSIMD &p, 
-				float_v &DS, float_v &DSp ) const = 0;
+  virtual void GetDStoParticle( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const = 0;
+  
+  void GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+  void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6], const float_v* param1 =0, const float_v* param2 =0  ) const ;
+  void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+//   void GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+  void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
   
   //* Transport on dS value along trajectory, output to P,C
 
-  virtual void Transport( float_v dS, float_v P[], float_v C[] ) const = 0;
+  virtual void Transport( float_v dS, const float_v dsdr[6], float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const = 0;
 
 
 
@@ -90,11 +100,6 @@ class KFParticleBaseSIMD {
   //* Initialise covariance matrix and set current parameters to 0.0 
 
   void Initialize();
-
-  //* Set decay vertex parameters for linearisation 
-
-  void SetVtxGuess( float_v x, float_v y, float_v z );
-  void SetVtxErrGuess( float_v& x, float_v& y, float_v& z );
 
   //* Set consruction method
 
@@ -187,11 +192,10 @@ class KFParticleBaseSIMD {
 
   //* Add daughter track to the particle 
 
-  void AddDaughter( const KFParticleBaseSIMD &Daughter, Bool_t isAtVtxGuess = 0 );
+  void AddDaughter( const KFParticleBaseSIMD &Daughter );
 
-  void AddDaughterWithEnergyFit( const KFParticleBaseSIMD &Daughter, Bool_t isAtVtxGuess );
-  void AddDaughterWithEnergyCalc( const KFParticleBaseSIMD &Daughter, Bool_t isAtVtxGuess );
-  void AddDaughterWithEnergyFitMC( const KFParticleBaseSIMD &Daughter, Bool_t isAtVtxGuess  ); 
+  void AddDaughterWithEnergyFit( const KFParticleBaseSIMD &Daughter );
+  void AddDaughterWithEnergyFitMC( const KFParticleBaseSIMD &Daughter ); 
   //with mass constrained
 
   //* Set production vertex 
@@ -210,9 +214,7 @@ class KFParticleBaseSIMD {
 
   //* Everything in one go  
 
-  void Construct( const KFParticleBaseSIMD *vDaughters[], Int_t nDaughters, 
-		  const KFParticleBaseSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0,
-                  Bool_t isAtVtxGuess = 0  );
+  void Construct( const KFParticleBaseSIMD *vDaughters[], Int_t nDaughters, const KFParticleBaseSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0);
 
 
   //*
@@ -233,26 +235,14 @@ class KFParticleBaseSIMD {
 
   //* Transport the particle on dS parameter (SignedPath/Momentum) 
 
-  void TransportToDS( float_v dS );
-  void TransportToDSLine( float_v dS );
+  void TransportToDS( float_v dS, const float_v* dsdr );
+  void TransportToDSLine( float_v dS, const float_v* dsdr );
   //* Particular extrapolators one can use 
-
-  float_v GetDStoPointBz( float_v Bz, const float_v xyz[], const float_v* param = 0 ) const;
-  float_v GetDStoPointBy( float_v By, const float_v xyz[] ) const;
+  void TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;
+  void TransportCBM( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;  
 
   void GetMaxDistanceToParticleBz(const float_v& B, const KFParticleBaseSIMD &p/*, float_v &r*/ ) const;
-  
-  void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1, const float_v* param1 =0, const float_v* param2 =0  ) const ;
-  void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;
-  void GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v &DS, float_v &DS1 ) const ;
 
-  float_v GetDStoPointCBM( const float_v xyz[] ) const;
-  void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;
-
-  void TransportBz( float_v Bz, float_v dS, float_v P[], float_v C[] ) const;
-  void TransportCBM( float_v dS, float_v P[], float_v C[] ) const;  
-
-  void CorrectErrorsOnS(const float_v* par, const float_v* vtx, float_v* covMatrix) const;
   //* 
   //* OTHER UTILITIES
   //*
@@ -275,11 +265,6 @@ class KFParticleBaseSIMD {
 
   void SubtractFromVertex( KFParticleBaseSIMD &Vtx ) const;
   void SubtractFromParticle( KFParticleBaseSIMD &Vtx ) const;
-
-  //* Special method for creating gammas
-
-  void ConstructGammaBz( const KFParticleBaseSIMD &daughter1,
-                         const KFParticleBaseSIMD &daughter2, float_v Bz  );
 
   //* return parameters for the Armenteros-Podolanski plot
   static void GetArmenterosPodolanski(KFParticleBaseSIMD& positive, KFParticleBaseSIMD& negative, float_v QtAlfa[2] );
@@ -304,6 +289,8 @@ class KFParticleBaseSIMD {
 
   void GetDistanceToVertexLine( const KFParticleBaseSIMD &Vertex, float_v &l, float_v &dl, float_m *isParticleFromVertex = 0 ) const;
 
+  static void MultQSQt( const float_v Q[], const float_v S[], float_v SOut[], const int kN  );
+
  protected:
 
   static Int_t IJ( Int_t i, Int_t j ){ 
@@ -312,23 +299,13 @@ class KFParticleBaseSIMD {
 
   float_v & Cij( Int_t i, Int_t j ){ return fC[IJ(i,j)]; }
 
-  void Convert( bool ToProduction );
-  void TransportLine( float_v S, float_v P[], float_v C[] ) const ;
-  float_v GetDStoPointLine( const float_v xyz[] ) const;
-  void GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v &dS, float_v &dS1 ) const ;
-
-  void GetDSIter(const KFParticleBaseSIMD &p, float_v const &dS, float_v x[3], float_v dx[3], float_v ddx[3]) const;
+  void TransportLine( float_v S, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const ;
 
   static void InvertCholetsky3(float_v a[6]);
 
-  static void MultQSQt( const float_v Q[], const float_v S[], 
-                        float_v SOut[] );
-
   static void multQSQt1( const float_v J[11], float_v S[] );
 
-  float_v GetSCorrection( const float_v Part[], const float_v XYZ[] ) const;
-
-  void GetMeasurement( const float_v XYZ[], float_v m[], float_v V[], Bool_t isAtVtxGuess = 0 ) const ;
+  void GetMeasurement( const KFParticleBaseSIMD& daughter, float_v m[], float_v V[], float_v D[3][3] ) ;
 
   //* Mass constraint function. is needed for the nonlinear mass constraint and a fit with mass constraint
   void SetMassConstraint( float_v *mP, float_v *mC, float_v mJ[7][7], float_v mass, float_m mask );
@@ -341,10 +318,6 @@ class KFParticleBaseSIMD {
 
   float_v fSFromDecay; //* Distance from decay vertex to current position
 
-  float_v fVtxGuess[3];  //* Guess for the position of the decay vertex 
-                          //* ( used for linearisation of equations )
-  float_v fVtxErrGuess[3]; //* Guess for the initial error of the decay vertex 
-  
   float_v SumDaughterMass;  //* sum of the daughter particles masses
   float_v fMassHypo;  //* sum of the daughter particles masses
   
@@ -352,10 +325,6 @@ class KFParticleBaseSIMD {
 
   Bool_t fAtProductionVertex; //* Flag shows that the particle error along
                               //* its trajectory is taken from production vertex    
-  Bool_t fIsVtxGuess;
-  Bool_t fIsVtxErrGuess;
-
-  Bool_t fIsLinearized;   //* Flag shows that the guess is present
 
   int_v fPDG; // pdg hypothesis
 

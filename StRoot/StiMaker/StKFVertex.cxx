@@ -104,6 +104,7 @@ Bool_t StKFVertex::Fit() {
   }
   PrPP(Fit before,Vertex());
   TArrayC Flag(N);
+#if 0 /* removed SetVtxGuess from KFParticle */
   KFVertex temp;
   temp.Clear();
   temp.SetVtxGuess(X(),Y(),Z());
@@ -112,6 +113,7 @@ Bool_t StKFVertex::Fit() {
 				  (Bool_t*) Flag.GetArray(),TMath::Sqrt(StAnneling::Chi2Cut()/2));
   //  PrPP(Fit after Fit,temp);
   SetVtxGuess(temp.X(),temp.Y(),temp.Z());
+#endif
   ConstructPrimaryVertex((const KFParticle **) particles, N, 
 				  (Bool_t*) Flag.GetArray(),TMath::Sqrt(StAnneling::Chi2Cut()/2));
 

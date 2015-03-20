@@ -13,7 +13,7 @@
 //#define  __TMVA__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #define KFPARTICLE
-//#define STIPV
+#define STIPV
 #include <assert.h>
 #include <map>
 #include <utility>

@@ -579,7 +579,7 @@ void StTrack::setIdTruth() // match with IdTruth
 
 std::ostream&  operator<<(std::ostream& os,  const StTrack& track) {
     os << Form("%4i ",track.key());
-    if      (track.type() == global )                 os << "global";
+    if      (track.type() == global )                 os << "global ";
     else if (track.type() == primary)                 os << "primary";
     else if (track.type() == massFit)                {os << "massFit"; return os;}
     else if (track.type() == massFitAtVx)            {os << "fitf@Vx"; return os;}

@@ -881,6 +881,7 @@ void KFTopoPerformance::FillHistos()
     multiplicities[iParticle]++;
 
     hPartParam2D[iParticle][0]->Fill(Rapidity,Pt,1);
+    hPartParam2D[iParticle][1]->Fill(Z,R,1);
 
     if(!RtoMCParticleId[iP].IsMatchedWithPdg()) //background
     {
@@ -907,6 +908,7 @@ void KFTopoPerformance::FillHistos()
         multiplicitiesGhost[iParticle]++;
         
         hPartParam2DGhost[iParticle][0]->Fill(Rapidity,Pt,1);
+        hPartParam2DGhost[iParticle][1]->Fill(Z,R,1);
       }
       else
       {
@@ -932,6 +934,7 @@ void KFTopoPerformance::FillHistos()
         multiplicitiesBG[iParticle]++;
         
         hPartParam2DBG[iParticle][0]->Fill(Rapidity,Pt,1);
+        hPartParam2DBG[iParticle][1]->Fill(Z,R,1);
       }
       continue;
     }
@@ -956,6 +959,7 @@ void KFTopoPerformance::FillHistos()
     multiplicitiesSignal[iParticle]++;
     
     hPartParam2DSignal[iParticle][0]->Fill(Rapidity,Pt,1);
+    hPartParam2DSignal[iParticle][1]->Fill(Z,R,1);
 
     int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
     KFMCParticle &mcPart = vMCParticles[iMCPart];
@@ -980,7 +984,7 @@ void KFTopoPerformance::FillHistos()
       const float mcPy = mcTrack.Par(4);
       const float mcPz = mcTrack.Par(5);
 
-      float decayVtx[3] = { mcX, mcY, mcZ };
+      float decayVtx[3] = { mcTrack.X(), mcTrack.Y(), mcTrack.Z() };
       float recParam[8] = { 0 };
       float errParam[8] = { 0 };
 
@@ -1005,7 +1009,7 @@ void KFTopoPerformance::FillHistos()
       Double_t Emc = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
       Double_t res[8] = {0}, 
                pull[8] = {0}, 
-               mcParam[8] = { decayVtx[0], decayVtx[1], decayVtx[2],
+               mcParam[8] = { mcX, mcY, mcZ,
                               mcPx, mcPy, mcPz, Emc, massMC };
       for(int iPar=0; iPar < 7; iPar++ )
       {
@@ -1044,22 +1048,40 @@ void KFTopoPerformance::FillHistos()
       const float mcPy = mcTrack.Py();
       const float mcPz = mcTrack.Pz();
 
-      float decayVtx[3] = {mcX, mcY, mcZ};
-      Daughter.TransportToPoint(decayVtx);
+      float_v decayVtx[3] = {mcX, mcY, mcZ};
+      //Daughter.TransportToPoint(decayVtx);
+      KFParticleSIMD DaughterSIMD(Daughter);
+      
+      float decayVtxScalar[3] = {mcX, mcY, mcZ};
+//       float dsdrscalar[6] = {0.f};
+//       const float dSscalar = Daughter.GetDStoPoint(decayVtxScalar, dsdrscalar);
+//       
+//       float_v dsdrvector[6] = {0.f};
+//       float_v dSvector = DaughterSIMD.GetDStoPoint(decayVtx, dsdrvector);
+//       
+//       //std::cout << "Scalar ds " << dSscalar  << " vector " << dSvector[0] << std::endl;
+//       for(int iVVV=0; iVVV<6; iVVV++)
+//         std::cout << "i " << iVVV << "  " << dsdrvector[iVVV][0] << " " <<  dsdrscalar[iVVV]<< " ";
+//       std::cout << std::endl;
+//       dSvector = dSscalar;
+//       DaughterSIMD.TransportToDS(dSvector, dsdrvector);
+      DaughterSIMD.TransportToPoint(decayVtx);
+      
 
       Double_t massMC = (particlePDG) ? particlePDG->Mass() :0.13957;
-
       Double_t Emc = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
+      
       Double_t res[8] = {0}, 
                pull[8] = {0}, 
                mcParam[8] = { mcX, mcY, mcZ,
                               mcPx, mcPy, mcPz, Emc, massMC };
       for(int iPar=0; iPar < 7; iPar++ )
       {
-        Double_t error = Daughter.GetCovariance(iPar,iPar);
+        Double_t error = DaughterSIMD.GetCovariance(iPar,iPar)[0];
         if(error < 0.) { error = 1.e20;}
         error = TMath::Sqrt(error);
-        res[iPar]  = Daughter.GetParameter(iPar) - mcParam[iPar];
+        Double_t recoPar = DaughterSIMD.GetParameter(iPar)[0];
+        res[iPar]  = recoPar - mcParam[iPar];
         if(fabs(error) > 1.e-20) pull[iPar] = res[iPar]/error;
       }
       res[7] = M - mcParam[7];
@@ -1080,33 +1102,117 @@ void KFTopoPerformance::FillHistos()
         KFParticle d1 = fTopoReconstructor->GetParticles()[daughterIndex[0]];
         KFParticle d2 = fTopoReconstructor->GetParticles()[daughterIndex[1]];
         
-        KFParticleSIMD daughters[2] = {d1, d2};
+        KFParticleSIMD daughters[2] = {d2, d1};
         
-        float_v dS[2] = {0.f};
-        daughters[0].GetDStoParticle(daughters[1], dS[0], dS[1]);
-        float_v pD[2][8] = {{0.f}, {0.f}}, cD[2][36] = {{0.f}, {0.f}};
-        for(int iDR=0; iDR<2; iDR++)
-          daughters[iDR].Transport(dS[iDR],pD[iDR],cD[iDR]);
-        
-        const float_v vtx[3] = {(pD[0][0] + pD[1][0])/2.f,
-                                (pD[0][1] + pD[1][1])/2.f,
-                                (pD[0][2] + pD[1][2])/2.f };
+        float_v dS[2] = {0.f, 0.f};
+        float_v dsdr[4][6];
+        for(int i1=0; i1<4; i1++)
+          for(int i2=0; i2<6; i2++)
+            dsdr[i1][i2] = 0.f;
+          
+        daughters[0].GetDStoParticle(daughters[1], dS, dsdr);
+        float_v pD[2][8], cD[2][36], corrPD[2][36], corrCD[2][36];
         
         for(int iDR=0; iDR<2; iDR++)
         {
-          daughters[iDR].CorrectErrorsOnS(pD[iDR], vtx, cD[iDR]);
+          for(int iPD = 0; iPD<8; iPD++)
+          {
+            pD[iDR][iPD] = 0;
+            corrPD[iDR][iPD] = 0;
+          }
+          for(int iCD=0; iCD<36; iCD++)
+          {
+            cD[iDR][iCD] = 0;
+            corrCD[iDR][iCD] = 0;
+          }
+        }
+        
+        float_v F[4][36];
+        {
+          for(int i1=0; i1<4; i1++)
+            for(int i2=0; i2<36; i2++)
+                F[i1][i2] = 0;
+        }
+        daughters[0].Transport(dS[0], dsdr[0], pD[0], cD[0], dsdr[1], F[0], F[1]);
+        daughters[1].Transport(dS[1], dsdr[3], pD[1], cD[1], dsdr[2], F[3], F[2]);
+        
+        daughters[0].MultQSQt( F[1], daughters[1].CovarianceMatrix(), corrCD[0], 6);
+        daughters[0].MultQSQt( F[2], daughters[0].CovarianceMatrix(), corrCD[1], 6);
+        for(int iDR=0; iDR<2; iDR++)
+          for(int iC=0; iC<6; iC++)
+            cD[iDR][iC] += corrCD[iDR][iC];
+        
+//         for(int iDR=0; iDR<2; iDR++)
+//         {
+//           float_v vtxMC[3] = {decayVtx[0][0], decayVtx[1][0], decayVtx[2][0]};
+//           daughters[iDR].TransportToPoint(vtxMC);
+// //           daughters[iDR].TransportToPoint(vtx);
+//           pD[iDR][0] = daughters[iDR].X();
+//           pD[iDR][1] = daughters[iDR].Y();
+//           pD[iDR][2] = daughters[iDR].Z();
+//           cD[iDR][0] = daughters[iDR].GetCovariance(0,0);
+//           cD[iDR][1] = daughters[iDR].GetCovariance(1,1);
+//           cD[iDR][2] = daughters[iDR].GetCovariance(2,2);
+//         }
 
-          Double_t err[3] = {cD[iDR][0][0], cD[iDR][2][0], cD[iDR][5][0]};
+        for(int iDR=0; iDR<2; iDR++)
+        {
+          cD[iDR][1] = cD[iDR][2];
+          cD[iDR][2] = cD[iDR][5];
           for(int iPar=0; iPar<3; iPar++)
           {
-            res[iPar] = pD[iDR][iPar][0] - decayVtx[iPar];
-            pull[iPar] = res[iPar] / err[iPar];
+            res[iPar] = pD[iDR][iPar][0] - decayVtx[iPar][0];
+            
+            Double_t error = cD[iDR][iPar][0];
+            if(error < 0.) { error = 1.e20;}
+            error = sqrt(error);
+            
+            pull[iPar] = res[iPar] / error;
             
             hDSToParticleQA[iParticle][iPar]->Fill(res[iPar]);
             hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
           }
         }
-
+        
+// #if 0
+//         KFParticle daughters[2] = {d1, d2};
+//         const KFParticle* daughtersP[2] = {&daughters[0], &daughters[1]};
+//         KFParticle mo;
+//         mo.Construct(daughtersP,2);
+//         res[0] = mo.X() - decayVtx[0][0];
+//         res[1] = mo.Y() - decayVtx[1][0];
+//         res[2] = mo.Z() - decayVtx[2][0];
+// 
+//         cD[0][0] = mo.CovarianceMatrix()[0];
+//         cD[0][1] = mo.CovarianceMatrix()[2];
+//         cD[0][2] = mo.CovarianceMatrix()[5];
+// #else
+//         {
+//           KFParticleSIMD daughters[2] = {d1, d2};
+//           const KFParticleSIMD* daughtersP[2] = {&daughters[0], &daughters[1]};
+//           KFParticleSIMD mo;
+//           mo.Construct(daughtersP,2);
+//           res[0] = mo.X()[0] - decayVtx[0][0];
+//           res[1] = mo.Y()[0] - decayVtx[1][0];
+//           res[2] = mo.Z()[0] - decayVtx[2][0];
+// 
+//           cD[0][0] = mo.CovarianceMatrix()[0][0];
+//           cD[0][1] = mo.CovarianceMatrix()[2][0];
+//           cD[0][2] = mo.CovarianceMatrix()[5][0];
+//         }
+// #endif
+//           for(int iPar=0; iPar<3; iPar++)
+//           {            
+//             Double_t error = cD[0][iPar];
+//             if(error < 0.) { error = 1.e20;}
+//             error = sqrt(error);
+//             
+//             pull[iPar] = res[iPar] / error;
+//             
+//             hDSToParticleQA[iParticle][iPar]->Fill(res[iPar]);
+//             hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
+//           }
+        
         Double_t dXds = pD[0][0][0] - pD[1][0][0];
         Double_t dYds = pD[0][1][0] - pD[1][1][0];
         Double_t dZds = pD[0][2][0] - pD[1][2][0];

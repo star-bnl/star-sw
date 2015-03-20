@@ -31,15 +31,12 @@ ClassImp(KFParticle);
 float KFParticle::fgBz = -5.;  //* Bz compoment of the magnetic field
 #endif
 
-KFParticle::KFParticle( const KFParticle &d1, const KFParticle &d2, Bool_t gamma ): KFParticleBase()
+KFParticle::KFParticle( const KFParticle &d1, const KFParticle &d2 ): KFParticleBase()
 {
-  if (!gamma) {
-    KFParticle mother;
-    mother+= d1;
-    mother+= d2;
-    *this = mother;
-  } else
-    ConstructGamma(d1, d2);
+  KFParticle mother;
+  mother+= d1;
+  mother+= d2;
+  *this = mother;
 }
 
 void KFParticle::Create( const float Param[], const float Cov[], Int_t Charge, float mass /*Int_t PID*/ )
@@ -131,8 +128,9 @@ Bool_t KFParticle::GetDistanceFromVertexXY( const float vtx[], const float Cv[],
   
   float mP[8];
   float mC[36];
-  
-  Transport( GetDStoPoint(vtx), mP, mC );  
+  float dsdr[6] = {0.f};
+  const float dS = GetDStoPoint(vtx, dsdr);
+  Transport( dS, dsdr, mP, mC );  
 
   float dx = mP[0] - vtx[0];
   float dy = mP[1] - vtx[1];
@@ -220,11 +218,12 @@ float KFParticle::GetDistanceFromParticleXY( const KFParticle &p ) const
 {
   //* Calculate distance to other particle [cm]
 
-  float dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );
   float mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
   float dx = mP[0]-mP1[0]; 
   float dy = mP[1]-mP1[1]; 
   return sqrt(dx*dx+dy*dy);
@@ -233,13 +232,15 @@ float KFParticle::GetDistanceFromParticleXY( const KFParticle &p ) const
 float KFParticle::GetDeviationFromParticleXY( const KFParticle &p ) const 
 {
   //* Calculate sqrt(Chi2/ndf) deviation from other particle
+  
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );
+  float mP[8], mC[36], mP1[8], mC1[36];
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
 
-  float dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
-  float mP1[8], mC1[36];
-  p.Transport( dS1, mP1, mC1 ); 
-
-  float d[2]={ fP[0]-mP1[0], fP[1]-mP1[1] };
+  float d[2]={ mP[0]-mP1[0], mP[1]-mP1[1] };
 
   float sigmaS = .1+10.*sqrt( (d[0]*d[0]+d[1]*d[1] )/
 					(mP1[3]*mP1[3]+mP1[4]*mP1[4] )  );
@@ -289,11 +290,12 @@ float KFParticle::GetAngle  ( const KFParticle &p ) const
 {
   //* Calculate the opening angle between two particles
 
-  float dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );   
   float mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
   float n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] + mP[5]*mP[5] );
   float n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] + mP1[5]*mP1[5] );
   n*=n1;
@@ -307,12 +309,12 @@ float KFParticle::GetAngle  ( const KFParticle &p ) const
 float KFParticle::GetAngleXY( const KFParticle &p ) const 
 {
   //* Calculate the opening angle between two particles in XY plane
-
-  float dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );   
   float mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
   float n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] );
   float n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] );
   n*=n1;
@@ -326,12 +328,12 @@ float KFParticle::GetAngleXY( const KFParticle &p ) const
 float KFParticle::GetAngleRZ( const KFParticle &p ) const 
 {
   //* Calculate the opening angle between two particles in RZ plane
-
-  float dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );   
   float mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 );  
   float nr = sqrt( mP[3]*mP[3] + mP[4]*mP[4] );
   float n1r= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4]  );
   float n = sqrt( nr*nr + mP[5]*mP[5] );

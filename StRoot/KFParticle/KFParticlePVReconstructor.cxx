@@ -55,9 +55,10 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     for ( int iTr = 0; iTr < fNParticles; iTr++ ) {
       
       float ds = 0.f;
+      float dsdr[6] = {0.f};
       if(iIter>0)
-        ds = fParticles[iTr].GetDStoPoint(pvEstimationTr);
-      fParticles[iTr].Transport( ds, parTmp, covTmp);
+        ds = fParticles[iTr].GetDStoPoint(pvEstimationTr, dsdr);
+      fParticles[iTr].Transport( ds, dsdr, parTmp, covTmp);
 
       float r2 = parTmp[0]*parTmp[0] + parTmp[1]*parTmp[1];
       if(r2 > 100 ) continue;  
@@ -86,7 +87,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     bool *vFlags = new bool[nPrimCand];  // flags returned by the vertex finder
 
     KFVertex primVtx;
-    primVtx.SetVtxGuess(pvEstimation[0], pvEstimation[1], pvEstimation[2]);
+//     primVtx.SetVtxGuess(pvEstimation[0], pvEstimation[1], pvEstimation[2]);
     primVtx.X() = pvEstimation[0];
     primVtx.Y() = pvEstimation[1];
     primVtx.Z() = pvEstimation[2];
@@ -118,8 +119,13 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
   {
     fParticles[iP].TransportToPoint(pvEstimation);
 
-    fWeight[iP] = 1.f/sqrt(fParticles[iP].CovarianceMatrix()[0]
-      + fParticles[iP].CovarianceMatrix()[2] + fParticles[iP].CovarianceMatrix()[5]);
+    fWeight[iP] = fParticles[iP].CovarianceMatrix()[0]
+      + fParticles[iP].CovarianceMatrix()[2] + fParticles[iP].CovarianceMatrix()[5];
+    
+    if(fWeight[iP] > 0.f)
+      fWeight[iP] = 1.f/sqrt(fWeight[iP]);
+    else
+      fWeight[iP] = -100;
     
     if( (fParticles[iP].X()*fParticles[iP].X() + fParticles[iP].Y()*fParticles[iP].Y()) > 100.f ) fWeight[iP] = -100.f;
   }
@@ -237,7 +243,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
       bool *vFlags = new bool[nPrimCand];  // flags returned by the vertex finder
       for(int iFl=0; iFl<nPrimCand; iFl++)
         vFlags[iFl] = true;
-      primVtx.SetVtxGuess(cluster.fP[0], cluster.fP[1], cluster.fP[2]);
+//       primVtx.SetVtxGuess(cluster.fP[0], cluster.fP[1], cluster.fP[2]);
       primVtx.SetConstructMethod(0);
       primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2Cut );
 

@@ -5,6 +5,7 @@
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
 #define StMuDstMaker_hh
+#define __STORE_KFPARTICLES__
 
 #include <string>
 
@@ -26,7 +27,7 @@ using namespace std;
 class StMuEvent;
 class StMuDst;
 class StMuCut;
-
+#if 1
 class StEvent;
 class StTrackNode;
 class StTrack;
@@ -34,7 +35,7 @@ class StVertex;
 class StRichSpectra;
 class StDetectorState;
 class StL3AlgorithmInfo;
-
+#endif
 class StuProbabilityPidAlgorithm;
 
 class StIOMaker;
@@ -52,6 +53,9 @@ class StKinkMc;
 class StStrangeAssoc;
 class StStrangeCuts;
 #endif
+#ifdef __STORE_KFPARTICLES__
+class KFParticle;
+#endif /* __STORE_KFPARTICLES__ */
 /// emc stuff
 #include "StMuEmcCollection.h"
 class StMuEmcUtil;
@@ -250,7 +254,7 @@ protected:
   StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 
 
-#define saveDelete(t) { delete t; t=0;}
+  //#define saveDelete(t) { delete t; t=0;}
 
   //! protected:
 
@@ -296,8 +300,13 @@ virtual   void closeRead();
   void fillBTof(StEvent* ev);
   void fillMtd(StEvent* ev);
   void fillFgt(StEvent* ev);
+#ifndef __STORE_KFPARTICLES__
   void fillKFTracks(TObjArray */* objA */);
   void fillKFVertices(TObjArray */* objA */);
+#else /* __STORE_KFPARTICLES__ */
+  void fillKFTracks(const KFParticle *p);
+  void fillKFVertices(const KFParticle *p);
+#endif /* ! __STORE_KFPARTICLES__ */
     void fillEzt(StEvent* ev);
 
   void fillHddr();

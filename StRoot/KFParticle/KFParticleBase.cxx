@@ -31,7 +31,7 @@ ClassImp(KFParticleBase)
 #include "TRVector.h"
 KFParticleBase::KFParticleBase() :fChi2(0), fSFromDecay(0), SumDaughterMass(0), fMassHypo(-1), fNDF(-3), 
                                   fId(-1), fParentID(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0),  
-                                  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
+                                  fIsLinearized(0), fQ(0), fConstructMethod(0), fPDG(0), fDaughtersIds()
 { 
 #if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   static Bool_t first = kTRUE;
@@ -68,19 +68,19 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     if (i == 6) continue;                                    // E
     if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
     if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
-    if (particle.GetCovariance(i,i) > 0) 
-      os << Form(" %s:%8.3f+/-%6.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
+    if (particle.GetCovariance(i,i) > 0 && particle.GetCovariance(i,i) < 1e5) 
+      os << Form(" %s:%8.3f+/-%5.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
   float Mtp[3], MtpErr[3];
-  particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
-  particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
-  particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
+  if (particle.GetMass(Mtp[0], MtpErr[0]))     {MtpErr[0] = -13;}
+  if (particle.GetLifeTime(Mtp[1], MtpErr[1])) {MtpErr[1] = -13;}
+  if (particle.GetMomentum(Mtp[2], MtpErr[2])) {MtpErr[2] = -13;}
   for (Int_t i = 8; i < 11; i++) {
     if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
-    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
-    else                                       os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
+    if (MtpErr[i-8] > 1e-6 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
+    else                                          os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
@@ -90,7 +90,7 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
 
 #ifndef __ROOT__
 KFParticleBase::KFParticleBase() : fChi2(0), fSFromDecay(0), 
-   SumDaughterMass(0), fMassHypo(-1), fNDF(-3), fId(-1), fAtProductionVertex(0),  fIsLinearized(0), fQ(0), fConstructMethod(2), fPDG(0), fDaughtersIds()
+   SumDaughterMass(0), fMassHypo(-1), fNDF(-3), fId(-1), fAtProductionVertex(0),  fIsLinearized(0), fQ(0), fConstructMethod(0), fPDG(0), fDaughtersIds()
 { 
   //* Constructor 
 
@@ -160,20 +160,9 @@ void KFParticleBase::Initialize()
   fQ = 0;
   fSFromDecay = 0;
   fAtProductionVertex = 0;
-  fVtxGuess[0]=fVtxGuess[1]=fVtxGuess[2]=0.;
   fIsLinearized = 0;
   SumDaughterMass = 0;
   fMassHypo = -1;
-}
-
-void KFParticleBase::SetVtxGuess( float x, float y, float z )
-{
-  //* Set decay vertex parameters for linearisation 
-
-  fVtxGuess[0] = x;
-  fVtxGuess[1] = y;
-  fVtxGuess[2] = z;
-  fIsLinearized = 1;
 }
 
 Int_t KFParticleBase::GetMomentum( float &p, float &error )  const 
@@ -401,64 +390,165 @@ void KFParticleBase::operator +=( const KFParticleBase &Daughter )
 
   AddDaughter( Daughter );
 }
-  
-float KFParticleBase::GetSCorrection( const float Part[], const float XYZ[] ) 
-{
-  //* Get big enough correction for S error to let the particle Part be fitted to XYZ point
-  
-  float d[3] = { XYZ[0]-Part[0], XYZ[1]-Part[1], XYZ[2]-Part[2] };
-  float p2 = Part[3]*Part[3]+Part[4]*Part[4]+Part[5]*Part[5];
-//  float sigmaS = (p2>1.e-4) ? ( 10.1+3.*sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2]) )/sqrt(p2) : 1.;
-  float sigmaS = (p2>1.e-4) ?   0.1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/p2 ) : 0.;
-  return sigmaS;
-}
 
-void KFParticleBase::GetMeasurement( const float XYZ[], float m[], float V[] ) const
+bool KFParticleBase::GetMeasurement( const KFParticleBase& daughter, float m[], float V[], float D[3][3] )
 {
   //* Get additional covariances V used during measurement
 
-  float b[3];
-  GetFieldValue( XYZ, b );
-  const float kCLight =  0.000299792458;
-  b[0]*=kCLight; b[1]*=kCLight; b[2]*=kCLight;
-// std::cout << "   DStoPoint "<< (GetDStoPoint(XYZ)) << std::endl;
-  Transport( GetDStoPoint(XYZ), m, V );
-//std::cout << "x " << XYZ[0] << " " << m[0] <<"   y " << XYZ[1] << " " << m[1] <<"   z " << XYZ[2] << " " << m[2] <<std::endl;
-  float sigmaS = GetSCorrection( m, XYZ );
+  if(fNDF == -1)
+  {
+    float ds[2] = {0.f,0.f};
+    float dsdr[4][6];
+    float F1[36], F2[36], F3[36], F4[36];
+    for(int i1=0; i1<36; i1++)
+    {
+      F1[i1] = 0;
+      F2[i1] = 0;
+      F3[i1] = 0;
+      F4[i1] = 0;
+    }
+    GetDStoParticle( daughter, ds, dsdr );
+    
+    if( fabs(ds[0]*fP[5]) > 1000.f || fabs(ds[1]*daughter.fP[5]) > 1000.f)
+      return 0;
 
-  float h[6];
+    float V0Tmp[36] = {0.};
+    float V1Tmp[36] = {0.};
 
-  h[0] = m[3]*sigmaS;
-  h[1] = m[4]*sigmaS;
-  h[2] = m[5]*sigmaS;
-  h[3] = ( h[1]*b[2]-h[2]*b[1] )*GetQ();
-  h[4] = ( h[2]*b[0]-h[0]*b[2] )*GetQ();
-  h[5] = ( h[0]*b[1]-h[1]*b[0] )*GetQ();
+    float C[36];
+    for(int iC=0; iC<36; iC++)
+      C[iC] = fC[iC];
+          
+             Transport(ds[0], dsdr[0], fP, fC, dsdr[1], F1, F2);
+    daughter.Transport(ds[1], dsdr[3],  m,  V, dsdr[2], F4, F3);
+    
+    MultQSQt(F2, daughter.fC, V0Tmp, 6);
+    MultQSQt(F3, C, V1Tmp, 6);
+        
+    for(int iC=0; iC<21; iC++)
+    {
+      fC[iC] += V0Tmp[iC];
+      V[iC]  += V1Tmp[iC];
+    }
+    
+    float C1F1T[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        C1F1T[i][j] = 0;
+        for(int k=0; k<6; k++)
+        {
+          C1F1T[i][j] +=  C[IJ(i,k)] * F1[j*6+k];
+        }
+      }
+    float F3C1F1T[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        F3C1F1T[i][j] = 0;
+        for(int k=0; k<6; k++)
+        {
+          F3C1F1T[i][j] += F3[i*6+k] * C1F1T[k][j];
+        }
+      }
+    float C2F2T[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        C2F2T[i][j] = 0;
+        for(int k=0; k<6; k++)
+        {
+          C2F2T[i][j] +=  daughter.fC[IJ(i,k)] * F2[j*6+k];
+        }
+      }
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        D[i][j] = F3C1F1T[i][j];
+        for(int k=0; k<6; k++)
+        {
+          D[i][j] += F4[i*6+k] * C2F2T[k][j];
+        }
+      }    
+  }
+  else
+  {
+    float dsdr[6];
+    float dS = daughter.GetDStoPoint(fP, dsdr);
+    
+    float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
+    
+    float F[36], F1[36];
+    for(int i2=0; i2<36; i2++)
+    {
+      F[i2]  = 0;
+      F1[i2] = 0;
+    }
+    daughter.Transport(dS, dsdr, m, V, dsdp, F, F1);
+    
+//     float V1Tmp[36] = {0.};
+//     MultQSQt(F1, fC, V1Tmp, 6);
+    
+//     for(int iC=0; iC<21; iC++)
+//       V[iC] += V1Tmp[iC];
+    
+    float VFT[3][6];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<6; j++)
+      {
+        VFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          VFT[i][j] +=  fC[IJ(i,k)] * F1[j*6+k];
+        }
+      }
+    
+    float FVFT[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        FVFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
+        }
+      }
+      
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        D[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          D[i][j] +=  fC[IJ(j,k)] * F1[i*6+k];
+        }
+      }
+      
+    V[0] += FVFT[0][0];
+    V[1] += FVFT[1][0];
+    V[2] += FVFT[1][1];
+    V[3] += FVFT[2][0];
+    V[4] += FVFT[2][1];
+    V[5] += FVFT[2][2];
+    
+    if(fNDF > 100)
+    {
+      float dx = fP[0] - m[0];
+      float dy = fP[1] - m[1];
+      float dz = fP[2] - m[2];
+      float sigmaS = 3.f*sqrt( (dx*dx + dy*dy + dz*dz) / (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]) );
+    
+      float h[3] = { m[3]*sigmaS, m[4]*sigmaS, m[5]*sigmaS };
+      V[0]+= h[0]*h[0];
+      V[1]+= h[1]*h[0];
+      V[2]+= h[1]*h[1];
+      V[3]+= h[2]*h[0];
+      V[4]+= h[2]*h[1];
+      V[5]+= h[2]*h[2];
+    }
+  }
   
-  V[ 0]+= h[0]*h[0];
-//  V[ 1]+= h[1]*h[0];
-  V[ 2]+= h[1]*h[1];
-//  V[ 3]+= h[2]*h[0];
-//  V[ 4]+= h[2]*h[1];
-  V[ 5]+= h[2]*h[2];
-
-  V[ 6]+= h[3]*h[0];
-  V[ 7]+= h[3]*h[1];
-  V[ 8]+= h[3]*h[2];
-  V[ 9]+= h[3]*h[3];
-
-  V[10]+= h[4]*h[0];
-  V[11]+= h[4]*h[1];
-  V[12]+= h[4]*h[2];
-  V[13]+= h[4]*h[3];
-  V[14]+= h[4]*h[4];
-
-  V[15]+= h[5]*h[0];
-  V[16]+= h[5]*h[1];
-  V[17]+= h[5]*h[2];
-  V[18]+= h[5]*h[3];
-  V[19]+= h[5]*h[4];
-  V[20]+= h[5]*h[5];
+  return 1;
 }
 
 void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
@@ -476,8 +566,6 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
 
   if(static_cast<int>(fConstructMethod) == 0)
     AddDaughterWithEnergyFit(Daughter);
-  else if(static_cast<int>(fConstructMethod) == 1)
-    AddDaughterWithEnergyCalc(Daughter);
   else if(static_cast<int>(fConstructMethod) == 2)
     AddDaughterWithEnergyFitMC(Daughter);
 
@@ -488,76 +576,54 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
 void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
 {
   //* Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass
-
   //* Add daughter 
 
-//   TransportToDecayVertex();
-
-  float b[3]; 
   Int_t maxIter = 1;
-
-  if( !fIsLinearized ){
-    if( fNDF==-1 ){
-      float ds, ds1;
-      GetDStoParticle(Daughter, ds, ds1);      
-      TransportToDS( ds );
-      float m[8];
-      float mCd[36];       
-      Daughter.Transport( ds1, m, mCd );    
-      fVtxGuess[0] = .5*( fP[0] + m[0] );
-      fVtxGuess[1] = .5*( fP[1] + m[1] );
-      fVtxGuess[2] = .5*( fP[2] + m[2] );
-    } else {
-      fVtxGuess[0] = fP[0];
-      fVtxGuess[1] = fP[1];
-      fVtxGuess[2] = fP[2]; 
-    }
-    maxIter = 3;
-  }
 
   for( Int_t iter=0; iter<maxIter; iter++ ){
 
-    {
-      GetFieldValue( fVtxGuess, b );
-      const float kCLight =  0.000299792458;
-      b[0]*=kCLight; b[1]*=kCLight; b[2]*=kCLight;
-    }
-
-    float *ffP = fP, *ffC = fC, tmpP[8], tmpC[36];
-    if( fNDF==-1 ){            
-      GetMeasurement( fVtxGuess, tmpP, tmpC );
-      ffP = tmpP;
-      ffC = tmpC;
-    }
-
     float m[8], mV[36];
 
-    if( Daughter.fC[35]>0 ){
-      Daughter.GetMeasurement( fVtxGuess, m, mV );
-    } else {
-      for( Int_t i=0; i<8; i++ ) m[i] = Daughter.fP[i];
-      for( Int_t i=0; i<36; i++ ) mV[i] = Daughter.fC[i];
-    }
-    //*
+    float D[3][3];
+    if(! GetMeasurement(Daughter, m, mV, D) )
+      return;
+
+//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
     
-    float mS[6]= { ffC[0]+mV[0], 
-                   ffC[1]+mV[1], ffC[2]+mV[2], 
-                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    float mS[6]= { fC[0]+mV[0], 
+                   fC[1]+mV[1], fC[2]+mV[2], 
+                   fC[3]+mV[3], fC[4]+mV[4], fC[5]+mV[5] };
+                   
     InvertCholetsky3(mS);
+
     //* Residual (measured - estimated)
 
-    float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
+    float zeta[3] = { m[0]-fP[0], m[1]-fP[1], m[2]-fP[2] };    
 
+    float dChi2 = (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+           +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+           +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]; 
+    if(fNDF > 100 && dChi2 > 9) return;
+    
+    float K[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        K[i][j] = 0;
+        for(int k=0; k<3; k++)
+          K[i][j] += fC[IJ(i,k)] * mS[IJ(k,j)];
+      }
+    
     //* CHt = CH' - D'
     float mCHt0[7], mCHt1[7], mCHt2[7];
 
-    mCHt0[0]=ffC[ 0] ;       mCHt1[0]=ffC[ 1] ;       mCHt2[0]=ffC[ 3] ;
-    mCHt0[1]=ffC[ 1] ;       mCHt1[1]=ffC[ 2] ;       mCHt2[1]=ffC[ 4] ;
-    mCHt0[2]=ffC[ 3] ;       mCHt1[2]=ffC[ 4] ;       mCHt2[2]=ffC[ 5] ;
-    mCHt0[3]=ffC[ 6]-mV[ 6]; mCHt1[3]=ffC[ 7]-mV[ 7]; mCHt2[3]=ffC[ 8]-mV[ 8];
-    mCHt0[4]=ffC[10]-mV[10]; mCHt1[4]=ffC[11]-mV[11]; mCHt2[4]=ffC[12]-mV[12];
-    mCHt0[5]=ffC[15]-mV[15]; mCHt1[5]=ffC[16]-mV[16]; mCHt2[5]=ffC[17]-mV[17];
-    mCHt0[6]=ffC[21]-mV[21]; mCHt1[6]=ffC[22]-mV[22]; mCHt2[6]=ffC[23]-mV[23];
+    mCHt0[0]=fC[ 0] ;       mCHt1[0]=fC[ 1] ;       mCHt2[0]=fC[ 3] ;
+    mCHt0[1]=fC[ 1] ;       mCHt1[1]=fC[ 2] ;       mCHt2[1]=fC[ 4] ;
+    mCHt0[2]=fC[ 3] ;       mCHt1[2]=fC[ 4] ;       mCHt2[2]=fC[ 5] ;
+    mCHt0[3]=fC[ 6]-mV[ 6]; mCHt1[3]=fC[ 7]-mV[ 7]; mCHt2[3]=fC[ 8]-mV[ 8];
+    mCHt0[4]=fC[10]-mV[10]; mCHt1[4]=fC[11]-mV[11]; mCHt2[4]=fC[12]-mV[12];
+    mCHt0[5]=fC[15]-mV[15]; mCHt1[5]=fC[16]-mV[16]; mCHt2[5]=fC[17]-mV[17];
+    mCHt0[6]=fC[21]-mV[21]; mCHt1[6]=fC[22]-mV[22]; mCHt2[6]=fC[23]-mV[23];
   
     //* Kalman gain K = mCH'*S
     
@@ -569,426 +635,128 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
       k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
     }
 
-   //* New estimation of the vertex position 
-
-    if( iter<maxIter-1 ){
-      for(Int_t i=0; i<3; ++i) 
-	fVtxGuess[i]= ffP[i] + k0[i]*zeta[0]+k1[i]*zeta[1]+k2[i]*zeta[2];
-      continue;
-    }
-
-    // last itearation -> update the particle
-
     //* Add the daughter momentum to the particle momentum
     
-    ffP[ 3] += m[ 3];
-    ffP[ 4] += m[ 4];
-    ffP[ 5] += m[ 5];
-    ffP[ 6] += m[ 6];
+    fP[ 3] += m[ 3];
+    fP[ 4] += m[ 4];
+    fP[ 5] += m[ 5];
+    fP[ 6] += m[ 6];
   
-    ffC[ 9] += mV[ 9];
-    ffC[13] += mV[13];
-    ffC[14] += mV[14];
-    ffC[18] += mV[18];
-    ffC[19] += mV[19];
-    ffC[20] += mV[20];
-    ffC[24] += mV[24];
-    ffC[25] += mV[25];
-    ffC[26] += mV[26];
-    ffC[27] += mV[27];
+    fC[ 9] += mV[ 9];
+    fC[13] += mV[13];
+    fC[14] += mV[14];
+    fC[18] += mV[18];
+    fC[19] += mV[19];
+    fC[20] += mV[20];
+    fC[24] += mV[24];
+    fC[25] += mV[25];
+    fC[26] += mV[26];
+    fC[27] += mV[27];
     
  
    //* New estimation of the vertex position r += K*zeta
     
     for(Int_t i=0;i<7;++i) 
-      fP[i] = ffP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
+      fP[i] = fP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
     
     //* New covariance matrix C -= K*(mCH')'
 
     for(Int_t i=0, k=0;i<7;++i){
       for(Int_t j=0;j<=i;++j,++k){
-	fC[k] = ffC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+	fC[k] = fC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
       }
     }
 
-    //* Calculate Chi^2 
-
-    fNDF  += 2;
-    fQ    +=  Daughter.GetQ();
-    fSFromDecay = 0;    
-    fChi2 += (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
-      +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
-      +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];     
-
-  }
-}
-
-void KFParticleBase::AddDaughterWithEnergyCalc( const KFParticleBase &Daughter )
-{
-  //* Energy considered as a dependent variable, calculated from the momentum and mass hypothesis
-
-  //* Add daughter 
-
-//   TransportToDecayVertex();
-
-  float b[3]; 
-  Int_t maxIter = 1;
-
-  if( !fIsLinearized ){
-    if( fNDF==-1 ){
-      float ds, ds1;
-      GetDStoParticle(Daughter, ds, ds1);      
-      TransportToDS( ds );
-      float m[8];
-      float mCd[36];       
-      Daughter.Transport( ds1, m, mCd );    
-      fVtxGuess[0] = .5*( fP[0] + m[0] );
-      fVtxGuess[1] = .5*( fP[1] + m[1] );
-      fVtxGuess[2] = .5*( fP[2] + m[2] );
-    } else {
-      fVtxGuess[0] = fP[0];
-      fVtxGuess[1] = fP[1];
-      fVtxGuess[2] = fP[2]; 
-    }
-    maxIter = 3;
-  }
-
-  for( Int_t iter=0; iter<maxIter; iter++ ){
-
-    {
-      GetFieldValue( fVtxGuess, b );
-      const float kCLight =  0.000299792458;
-      b[0]*=kCLight; b[1]*=kCLight; b[2]*=kCLight;
-    }
-
-    float *ffP = fP, *ffC = fC, tmpP[8], tmpC[36];
-    if( fNDF==-1 ){            
-      GetMeasurement( fVtxGuess, tmpP, tmpC );
-      ffP = tmpP;
-      ffC = tmpC;
-    }
-
-    float m[8], mV[36];
-
-    if( Daughter.fC[35]>0 ){
-      Daughter.GetMeasurement( fVtxGuess, m, mV );
-    } else {
-      for( Int_t i=0; i<8; i++ ) m[i] = Daughter.fP[i];
-      for( Int_t i=0; i<36; i++ ) mV[i] = Daughter.fC[i];
-    }
-
-    float massMf2 = m[6]*m[6] - (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]);
-    float massRf2 = fP[6]*fP[6] - (fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5]);
-
-    //*
-
-    float mS[6]= { ffC[0]+mV[0], 
-                   ffC[1]+mV[1], ffC[2]+mV[2], 
-                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
-    InvertCholetsky3(mS);
-
-    //* Residual (measured - estimated)
-
-    float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
-
-    //* CHt = CH' - D'
-
-    float mCHt0[6], mCHt1[6], mCHt2[6];
-
-    mCHt0[0]=ffC[ 0] ;       mCHt1[0]=ffC[ 1] ;       mCHt2[0]=ffC[ 3] ;
-    mCHt0[1]=ffC[ 1] ;       mCHt1[1]=ffC[ 2] ;       mCHt2[1]=ffC[ 4] ;
-    mCHt0[2]=ffC[ 3] ;       mCHt1[2]=ffC[ 4] ;       mCHt2[2]=ffC[ 5] ;
-    mCHt0[3]=ffC[ 6]-mV[ 6]; mCHt1[3]=ffC[ 7]-mV[ 7]; mCHt2[3]=ffC[ 8]-mV[ 8];
-    mCHt0[4]=ffC[10]-mV[10]; mCHt1[4]=ffC[11]-mV[11]; mCHt2[4]=ffC[12]-mV[12];
-    mCHt0[5]=ffC[15]-mV[15]; mCHt1[5]=ffC[16]-mV[16]; mCHt2[5]=ffC[17]-mV[17];
-
-    //* Kalman gain K = mCH'*S
-
-    float k0[6], k1[6], k2[6];
-
-    for(Int_t i=0;i<6;++i){
-      k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
-      k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
-      k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
-    }
-
-   //* New estimation of the vertex position 
-
-    if( iter<maxIter-1 ){
-      for(Int_t i=0; i<3; ++i) 
-	fVtxGuess[i]= ffP[i] + k0[i]*zeta[0]+k1[i]*zeta[1]+k2[i]*zeta[2];
-      continue;
-    }
-
-   //* find mf and mVf - optimum value of the measurement and its covariance matrix
-    //* mVHt = V*H'
-    float mVHt0[6], mVHt1[6], mVHt2[6];
-
-    mVHt0[0]= mV[ 0] ; mVHt1[0]= mV[ 1] ; mVHt2[0]= mV[ 3] ;
-    mVHt0[1]= mV[ 1] ; mVHt1[1]= mV[ 2] ; mVHt2[1]= mV[ 4] ;
-    mVHt0[2]= mV[ 3] ; mVHt1[2]= mV[ 4] ; mVHt2[2]= mV[ 5] ;
-    mVHt0[3]= mV[ 6] ; mVHt1[3]= mV[ 7] ; mVHt2[3]= mV[ 8] ;
-    mVHt0[4]= mV[10] ; mVHt1[4]= mV[11] ; mVHt2[4]= mV[12] ;
-    mVHt0[5]= mV[15] ; mVHt1[5]= mV[16] ; mVHt2[5]= mV[17] ;
-
-    //* Kalman gain Km = mCH'*S
-
-    float km0[6], km1[6], km2[6];
-
-    for(Int_t i=0;i<6;++i){
-      km0[i] = mVHt0[i]*mS[0] + mVHt1[i]*mS[1] + mVHt2[i]*mS[3];
-      km1[i] = mVHt0[i]*mS[1] + mVHt1[i]*mS[2] + mVHt2[i]*mS[4];
-      km2[i] = mVHt0[i]*mS[3] + mVHt1[i]*mS[4] + mVHt2[i]*mS[5];
-    }
-
-    float mf[7] = { m[0], m[1], m[2], m[3], m[4], m[5], m[6] };
-
-    for(Int_t i=0;i<6;++i) 
-      mf[i] = mf[i] - km0[i]*zeta[0] - km1[i]*zeta[1] - km2[i]*zeta[2];
-
-    float energyMf = sqrt( massMf2 + (mf[3]*mf[3] + mf[4]*mf[4] + mf[5]*mf[5]) );
-
-    float mVf[28];
-    for(Int_t iC=0; iC<28; iC++)
-      mVf[iC] = mV[iC];
-
-    //* hmf = d(energyMf)/d(mf)
-    float hmf[7];
-    if( fabs(energyMf) < 1.e-10) hmf[3] = 0; else hmf[3] = mf[3]/energyMf;
-    if( fabs(energyMf) < 1.e-10) hmf[4] = 0; else hmf[4] = mf[4]/energyMf;
-    if( fabs(energyMf) < 1.e-10) hmf[5] = 0; else hmf[5] = mf[5]/energyMf;
-//    if( fabs(energyMf) < 1.e-10) hmf[6] = 0; else hmf[6] = mf[6]/energyMf;
-    hmf[6] = 0;
-
-    for(Int_t i=0, k=0;i<6;++i){
-      for(Int_t j=0;j<=i;++j,++k){
-        mVf[k] = mVf[k] - (km0[i]*mVHt0[j] + km1[i]*mVHt1[j] + km2[i]*mVHt2[j] );
-      }
-    }
-    float mVf24 = mVf[24], mVf25 = mVf[25], mVf26 = mVf[26];
-    mVf[21] = mVf[6 ]*hmf[3] + mVf[10]*hmf[4] + mVf[15]*hmf[5] + mVf[21]*hmf[6];
-    mVf[22] = mVf[7 ]*hmf[3] + mVf[11]*hmf[4] + mVf[16]*hmf[5] + mVf[22]*hmf[6];
-    mVf[23] = mVf[8 ]*hmf[3] + mVf[12]*hmf[4] + mVf[17]*hmf[5] + mVf[23]*hmf[6];
-    mVf[24] = mVf[9 ]*hmf[3] + mVf[13]*hmf[4] + mVf[18]*hmf[5] + mVf[24]*hmf[6];
-    mVf[25] = mVf[13]*hmf[3] + mVf[14]*hmf[4] + mVf[19]*hmf[5] + mVf[25]*hmf[6];
-    mVf[26] = mVf[18]*hmf[3] + mVf[19]*hmf[4] + mVf[20]*hmf[5] + mVf[26]*hmf[6];
-    mVf[27] = mVf[24]*hmf[3] + mVf[25]*hmf[4] + mVf[26]*hmf[5] + (mVf24*hmf[3] + mVf25*hmf[4] + mVf26*hmf[5] + mVf[27]*hmf[6])*hmf[6]; //here mVf[] are already modified
-
-    mf[6] = energyMf;
-
-    //* find rf and mCf - optimum value of the measurement and its covariance matrix
-
-    //* mCCHt = C*H'
-    float mCCHt0[6], mCCHt1[6], mCCHt2[6];
-
-    mCCHt0[0]=ffC[ 0]; mCCHt1[0]=ffC[ 1]; mCCHt2[0]=ffC[ 3];
-    mCCHt0[1]=ffC[ 1]; mCCHt1[1]=ffC[ 2]; mCCHt2[1]=ffC[ 4];
-    mCCHt0[2]=ffC[ 3]; mCCHt1[2]=ffC[ 4]; mCCHt2[2]=ffC[ 5];
-    mCCHt0[3]=ffC[ 6]; mCCHt1[3]=ffC[ 7]; mCCHt2[3]=ffC[ 8];
-    mCCHt0[4]=ffC[10]; mCCHt1[4]=ffC[11]; mCCHt2[4]=ffC[12];
-    mCCHt0[5]=ffC[15]; mCCHt1[5]=ffC[16]; mCCHt2[5]=ffC[17];
-
-    //* Kalman gain Krf = mCH'*S
-
-    float krf0[6], krf1[6], krf2[6];
-
-    for(Int_t i=0;i<6;++i){
-      krf0[i] = mCCHt0[i]*mS[0] + mCCHt1[i]*mS[1] + mCCHt2[i]*mS[3];
-      krf1[i] = mCCHt0[i]*mS[1] + mCCHt1[i]*mS[2] + mCCHt2[i]*mS[4];
-      krf2[i] = mCCHt0[i]*mS[3] + mCCHt1[i]*mS[4] + mCCHt2[i]*mS[5];
-    }
-    float rf[7] = { ffP[0], ffP[1], ffP[2], ffP[3], ffP[4], ffP[5], ffP[6] };
-
-    for(Int_t i=0;i<6;++i) 
-      rf[i] = rf[i] + krf0[i]*zeta[0] + krf1[i]*zeta[1] + krf2[i]*zeta[2];
-
-    float energyRf = sqrt( massRf2 + (rf[3]*rf[3] + rf[4]*rf[4] + rf[5]*rf[5]) );
-
-    float mCf[28];
-    for(Int_t iC=0; iC<28; iC++)
-      mCf[iC] = ffC[iC];
-    //* hrf = d(Erf)/d(rf)
-    float hrf[7];
-    if( fabs(energyRf) < 1.e-10) hrf[3] = 0; else hrf[3] = rf[3]/energyRf;
-    if( fabs(energyRf) < 1.e-10) hrf[4] = 0; else hrf[4] = rf[4]/energyRf;
-    if( fabs(energyRf) < 1.e-10) hrf[5] = 0; else hrf[5] = rf[5]/energyRf;
-//    if( fabs(energyRf) < 1.e-10) hrf[6] = 0; else hrf[6] = rf[6]/energyRf;
-    hrf[6] = 0;
-
-    for(Int_t i=0, k=0;i<6;++i){
-      for(Int_t j=0;j<=i;++j,++k){
-        mCf[k] = mCf[k] - (krf0[i]*mCCHt0[j] + krf1[i]*mCCHt1[j] + krf2[i]*mCCHt2[j] );
-      }
-    }
-    float mCf24 = mCf[24], mCf25 = mCf[25], mCf26 = mCf[26];
-    mCf[21] = mCf[6 ]*hrf[3] + mCf[10]*hrf[4] + mCf[15]*hrf[5] + mCf[21]*hrf[6];
-    mCf[22] = mCf[7 ]*hrf[3] + mCf[11]*hrf[4] + mCf[16]*hrf[5] + mCf[22]*hrf[6];
-    mCf[23] = mCf[8 ]*hrf[3] + mCf[12]*hrf[4] + mCf[17]*hrf[5] + mCf[23]*hrf[6];
-    mCf[24] = mCf[9 ]*hrf[3] + mCf[13]*hrf[4] + mCf[18]*hrf[5] + mCf[24]*hrf[6];
-    mCf[25] = mCf[13]*hrf[3] + mCf[14]*hrf[4] + mCf[19]*hrf[5] + mCf[25]*hrf[6];
-    mCf[26] = mCf[18]*hrf[3] + mCf[19]*hrf[4] + mCf[20]*hrf[5] + mCf[26]*hrf[6];
-    mCf[27] = mCf[24]*hrf[3] + mCf[25]*hrf[4] + mCf[26]*hrf[5] + (mCf24*hrf[3] + mCf25*hrf[4] + mCf26*hrf[5] + mCf[27]*hrf[6])*hrf[6]; //here mCf[] are already modified
-
-    for(Int_t iC=21; iC<28; iC++)
-    {
-      ffC[iC] = mCf[iC];
-      mV[iC]  = mVf[iC];
-    }
-
-    fP[6] = energyRf + energyMf;
-    rf[6] = energyRf;
-
-    //float Dvv[3][3]; do not need this
-    float mDvp[3][3];
-//     float mDpv[3][3];
-    float mDpp[3][3];
-    float mDe[7];
-
+    float K2[3][3];
     for(int i=0; i<3; i++)
     {
       for(int j=0; j<3; j++)
+        K2[i][j] = -K[j][i];
+      K2[i][i] += 1;
+    }
+
+    float A[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
       {
-        mDvp[i][j] = km0[i+3]*mCCHt0[j] + km1[i+3]*mCCHt1[j] + km2[i+3]*mCCHt2[j];
-//         mDpv[i][j] = km0[i]*mCCHt0[j+3] + km1[i]*mCCHt1[j+3] + km2[i]*mCCHt2[j+3];
-        mDpp[i][j] = km0[i+3]*mCCHt0[j+3] + km1[i+3]*mCCHt1[j+3] + km2[i+3]*mCCHt2[j+3];
+        A[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          A[i][j] += D[i][k] * K2[k][j];
+        }
       }
-    }
-
-    mDe[0] = hmf[3]*mDvp[0][0] + hmf[4]*mDvp[1][0] + hmf[5]*mDvp[2][0];
-    mDe[1] = hmf[3]*mDvp[0][1] + hmf[4]*mDvp[1][1] + hmf[5]*mDvp[2][1];
-    mDe[2] = hmf[3]*mDvp[0][2] + hmf[4]*mDvp[1][2] + hmf[5]*mDvp[2][2];
-    mDe[3] = hmf[3]*mDpp[0][0] + hmf[4]*mDpp[1][0] + hmf[5]*mDpp[2][0];
-    mDe[4] = hmf[3]*mDpp[0][1] + hmf[4]*mDpp[1][1] + hmf[5]*mDpp[2][1];
-    mDe[5] = hmf[3]*mDpp[0][2] + hmf[4]*mDpp[1][2] + hmf[5]*mDpp[2][2];
-    mDe[6] = 2*(mDe[3]*hrf[3] + mDe[4]*hrf[4] + mDe[5]*hrf[5]);
-
-    // last itearation -> update the particle
-
-    //* Add the daughter momentum to the particle momentum
-
-    ffP[ 3] += m[ 3];
-    ffP[ 4] += m[ 4];
-    ffP[ 5] += m[ 5];
-
-    ffC[ 9] += mV[ 9];
-    ffC[13] += mV[13];
-    ffC[14] += mV[14];
-    ffC[18] += mV[18];
-    ffC[19] += mV[19];
-    ffC[20] += mV[20];
-    ffC[24] += mV[24];
-    ffC[25] += mV[25];
-    ffC[26] += mV[26];
-    ffC[27] += mV[27];
-
-    ffC[21] += mDe[0];
-    ffC[22] += mDe[1];
-    ffC[23] += mDe[2];
-    ffC[24] += mDe[3];
-    ffC[25] += mDe[4];
-    ffC[26] += mDe[5];
-    ffC[27] += mDe[6];
-
-   //* New estimation of the vertex position r += K*zeta
-
-    for(Int_t i=0;i<6;++i) 
-      fP[i] = ffP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
-
-    //* New covariance matrix C -= K*(mCH')'
-
-    for(Int_t i=0, k=0;i<6;++i){
-      for(Int_t j=0;j<=i;++j,++k){
-	fC[k] = ffC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+    
+    float M[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        M[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          M[i][j] += K[i][k] * A[k][j];
+        }
       }
-    }
 
-    for(int i=21; i<28; i++) fC[i] = ffC[i];
-
+    fC[0] += 2*M[0][0];
+    fC[1] += M[0][1] + M[1][0];
+    fC[2] += 2*M[1][1];
+    fC[3] += M[0][2] + M[2][0];
+    fC[4] += M[1][2] + M[2][1];
+    fC[5] += 2*M[2][2];
+  
     //* Calculate Chi^2 
 
     fNDF  += 2;
     fQ    +=  Daughter.GetQ();
     fSFromDecay = 0;    
-    fChi2 += (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
-      +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
-      +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];     
+    fChi2 += dChi2;    
+
   }
 }
 
 void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter )
 {
   //* Energy considered as an independent variable, fitted independently from momentum, without any constraints on mass
-
   //* Add daughter 
 
-//   TransportToDecayVertex();
-
-  float b[3]; 
   Int_t maxIter = 1;
-
-  if( !fIsLinearized ){
-    if( fNDF==-1 ){
-      float ds, ds1;
-      GetDStoParticle(Daughter, ds, ds1);      
-      TransportToDS( ds );
-      float m[8];
-      float mCd[36];       
-      Daughter.Transport( ds1, m, mCd );    
-      fVtxGuess[0] = .5*( fP[0] + m[0] );
-      fVtxGuess[1] = .5*( fP[1] + m[1] );
-      fVtxGuess[2] = .5*( fP[2] + m[2] );
-    } else {
-      fVtxGuess[0] = fP[0];
-      fVtxGuess[1] = fP[1];
-      fVtxGuess[2] = fP[2]; 
-    }
-    maxIter = 3;
-  }
 
   for( Int_t iter=0; iter<maxIter; iter++ ){
 
-    {
-      GetFieldValue( fVtxGuess, b );
-      const float kCLight =  0.000299792458;
-      b[0]*=kCLight; b[1]*=kCLight; b[2]*=kCLight;
-    }
-
-    float *ffP = fP, *ffC = fC, tmpP[8], tmpC[36];
-    if( fNDF==-1 ){            
-      GetMeasurement( fVtxGuess, tmpP, tmpC );
-      ffP = tmpP;
-      ffC = tmpC;
-    }
     float m[8], mV[36];
 
-    if( Daughter.fC[35]>0 ){
-      Daughter.GetMeasurement( fVtxGuess, m, mV );
-    } else {
-      for( Int_t i=0; i<8; i++ ) m[i] = Daughter.fP[i];
-      for( Int_t i=0; i<36; i++ ) mV[i] = Daughter.fC[i];
-    }
-    //*
-
-    float mS[6]= { ffC[0]+mV[0], 
-                   ffC[1]+mV[1], ffC[2]+mV[2], 
-                   ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    float D[3][3];
+    GetMeasurement(Daughter, m, mV, D);
+    
+    float mS[6]= { fC[0]+mV[0], 
+                   fC[1]+mV[1], fC[2]+mV[2], 
+                   fC[3]+mV[3], fC[4]+mV[4], fC[5]+mV[5] };
     InvertCholetsky3(mS);
     //* Residual (measured - estimated)
-    
-    float zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
+
+    float zeta[3] = { m[0]-fP[0], m[1]-fP[1], m[2]-fP[2] };    
+
+    float K[3][6];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        K[i][j] = 0;
+        for(int k=0; k<3; k++)
+          K[i][j] += fC[IJ(i,k)] * mS[IJ(k,j)];
+      }
 
     
     //* CHt = CH'
     
     float mCHt0[7], mCHt1[7], mCHt2[7];
     
-    mCHt0[0]=ffC[ 0] ; mCHt1[0]=ffC[ 1] ; mCHt2[0]=ffC[ 3] ;
-    mCHt0[1]=ffC[ 1] ; mCHt1[1]=ffC[ 2] ; mCHt2[1]=ffC[ 4] ;
-    mCHt0[2]=ffC[ 3] ; mCHt1[2]=ffC[ 4] ; mCHt2[2]=ffC[ 5] ;
-    mCHt0[3]=ffC[ 6] ; mCHt1[3]=ffC[ 7] ; mCHt2[3]=ffC[ 8] ;
-    mCHt0[4]=ffC[10] ; mCHt1[4]=ffC[11] ; mCHt2[4]=ffC[12] ;
-    mCHt0[5]=ffC[15] ; mCHt1[5]=ffC[16] ; mCHt2[5]=ffC[17] ;
-    mCHt0[6]=ffC[21] ; mCHt1[6]=ffC[22] ; mCHt2[6]=ffC[23] ;
+    mCHt0[0]=fC[ 0] ; mCHt1[0]=fC[ 1] ; mCHt2[0]=fC[ 3] ;
+    mCHt0[1]=fC[ 1] ; mCHt1[1]=fC[ 2] ; mCHt2[1]=fC[ 4] ;
+    mCHt0[2]=fC[ 3] ; mCHt1[2]=fC[ 4] ; mCHt2[2]=fC[ 5] ;
+    mCHt0[3]=fC[ 6] ; mCHt1[3]=fC[ 7] ; mCHt2[3]=fC[ 8] ;
+    mCHt0[4]=fC[10] ; mCHt1[4]=fC[11] ; mCHt2[4]=fC[12] ;
+    mCHt0[5]=fC[15] ; mCHt1[5]=fC[16] ; mCHt2[5]=fC[17] ;
+    mCHt0[6]=fC[21] ; mCHt1[6]=fC[22] ; mCHt2[6]=fC[23] ;
   
     //* Kalman gain K = mCH'*S
     
@@ -998,14 +766,6 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
       k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
       k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
       k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
-    }
-
-   //* New estimation of the vertex position 
-
-    if( iter<maxIter-1 ){
-      for(Int_t i=0; i<3; ++i) 
-	fVtxGuess[i]= ffP[i] + k0[i]*zeta[0]+k1[i]*zeta[1]+k2[i]*zeta[2];
-      continue;
     }
 
     // last itearation -> update the particle
@@ -1033,14 +793,14 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
     }
 
     for(Int_t i=0;i<7;++i) 
-      ffP[i] = ffP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
+      fP[i] = fP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
 
     for(Int_t i=0;i<7;++i) 
       m[i] = m[i] - km0[i]*zeta[0] - km1[i]*zeta[1] - km2[i]*zeta[2];
 
     for(Int_t i=0, k=0;i<7;++i){
       for(Int_t j=0;j<=i;++j,++k){
-	ffC[k] = ffC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+	fC[k] = fC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
       }
     }
 
@@ -1068,15 +828,15 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
       }
     }
 
-    float mMassParticle  = ffP[6]*ffP[6] - (ffP[3]*ffP[3] + ffP[4]*ffP[4] + ffP[5]*ffP[5]);
+    float mMassParticle  = fP[6]*fP[6] - (fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5]);
     float mMassDaughter  = m[6]*m[6] - (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]);
     if(mMassParticle > 0) mMassParticle = sqrt(mMassParticle);
     if(mMassDaughter > 0) mMassDaughter = sqrt(mMassDaughter);
 
     if( fMassHypo > -0.5)
-      SetMassConstraint(ffP,ffC,mJ1,fMassHypo);
-    else if((mMassParticle < SumDaughterMass) || (ffP[6]<0) )
-      SetMassConstraint(ffP,ffC,mJ1,SumDaughterMass);
+      SetMassConstraint(fP,fC,mJ1,fMassHypo);
+    else if((mMassParticle < SumDaughterMass) || (fP[6]<0) )
+      SetMassConstraint(fP,fC,mJ1,SumDaughterMass);
 
     if(Daughter.fMassHypo > -0.5)
       SetMassConstraint(m,mV,mJ2,Daughter.fMassHypo);
@@ -1105,44 +865,70 @@ void KFParticleBase::AddDaughterWithEnergyFitMC( const KFParticleBase &Daughter 
 
     //* Add the daughter momentum to the particle momentum
 
-    ffP[ 3] += m[ 3];
-    ffP[ 4] += m[ 4];
-    ffP[ 5] += m[ 5];
-    ffP[ 6] += m[ 6];
+    fP[ 3] += m[ 3];
+    fP[ 4] += m[ 4];
+    fP[ 5] += m[ 5];
+    fP[ 6] += m[ 6];
 
-    ffC[ 9] += mV[ 9];
-    ffC[13] += mV[13];
-    ffC[14] += mV[14];
-    ffC[18] += mV[18];
-    ffC[19] += mV[19];
-    ffC[20] += mV[20];
-    ffC[24] += mV[24];
-    ffC[25] += mV[25];
-    ffC[26] += mV[26];
-    ffC[27] += mV[27];
+    fC[ 9] += mV[ 9];
+    fC[13] += mV[13];
+    fC[14] += mV[14];
+    fC[18] += mV[18];
+    fC[19] += mV[19];
+    fC[20] += mV[20];
+    fC[24] += mV[24];
+    fC[25] += mV[25];
+    fC[26] += mV[26];
+    fC[27] += mV[27];
 
-    ffC[6 ] += mDf[3][0]; ffC[7 ] += mDf[3][1]; ffC[8 ] += mDf[3][2];
-    ffC[10] += mDf[4][0]; ffC[11] += mDf[4][1]; ffC[12] += mDf[4][2];
-    ffC[15] += mDf[5][0]; ffC[16] += mDf[5][1]; ffC[17] += mDf[5][2];
-    ffC[21] += mDf[6][0]; ffC[22] += mDf[6][1]; ffC[23] += mDf[6][2];
+    fC[6 ] += mDf[3][0]; fC[7 ] += mDf[3][1]; fC[8 ] += mDf[3][2];
+    fC[10] += mDf[4][0]; fC[11] += mDf[4][1]; fC[12] += mDf[4][2];
+    fC[15] += mDf[5][0]; fC[16] += mDf[5][1]; fC[17] += mDf[5][2];
+    fC[21] += mDf[6][0]; fC[22] += mDf[6][1]; fC[23] += mDf[6][2];
 
-    ffC[9 ] += mDf[3][3] + mDf[3][3];
-    ffC[13] += mDf[4][3] + mDf[3][4]; ffC[14] += mDf[4][4] + mDf[4][4];
-    ffC[18] += mDf[5][3] + mDf[3][5]; ffC[19] += mDf[5][4] + mDf[4][5]; ffC[20] += mDf[5][5] + mDf[5][5];
-    ffC[24] += mDf[6][3] + mDf[3][6]; ffC[25] += mDf[6][4] + mDf[4][6]; ffC[26] += mDf[6][5] + mDf[5][6]; ffC[27] += mDf[6][6] + mDf[6][6];
+    fC[9 ] += mDf[3][3] + mDf[3][3];
+    fC[13] += mDf[4][3] + mDf[3][4]; fC[14] += mDf[4][4] + mDf[4][4];
+    fC[18] += mDf[5][3] + mDf[3][5]; fC[19] += mDf[5][4] + mDf[4][5]; fC[20] += mDf[5][5] + mDf[5][5];
+    fC[24] += mDf[6][3] + mDf[3][6]; fC[25] += mDf[6][4] + mDf[4][6]; fC[26] += mDf[6][5] + mDf[5][6]; fC[27] += mDf[6][6] + mDf[6][6];
 
-   //* New estimation of the vertex position r += K*zeta
-
-    for(Int_t i=0;i<7;++i) 
-      fP[i] = ffP[i];
-
-    //* New covariance matrix C -= K*(mCH')'
-
-    for(Int_t i=0, k=0;i<7;++i){
-      for(Int_t j=0;j<=i;++j,++k){
-        fC[k] = ffC[k];
-      }
+    
+    float K2[3][3];
+    for(int i=0; i<3; i++)
+    {
+      for(int j=0; j<3; j++)
+        K2[i][j] = -K[j][i];
+      K2[i][i] += 1;
     }
+
+    float A[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        A[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          A[i][j] += D[i][k] * K2[k][j];
+        }
+      }
+    
+    float M[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        M[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          M[i][j] += K[i][k] * A[k][j];
+        }
+      }
+
+    fC[0] += 2*M[0][0];
+    fC[1] += M[0][1] + M[1][0];
+    fC[2] += 2*M[1][1];
+    fC[3] += M[0][2] + M[2][0];
+    fC[4] += M[1][2] + M[2][1];
+    fC[5] += 2*M[2][2];
+    
     //* Calculate Chi^2 
 
     fNDF  += 2;
@@ -1160,151 +946,178 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
 
   const float *m = Vtx.fP, *mV = Vtx.fC;
 
+  float decayPoint[3] = {fP[0], fP[1], fP[2]};
+  float decayPointCov[6] = { fC[0], fC[1], fC[2], fC[3], fC[4], fC[5] };
+
+  float D[6][6];
+  for(int iD1=0; iD1<6; iD1++)
+    for(int iD2=0; iD2<6; iD2++)
+      D[iD1][iD2] = 0.f;
+
   Bool_t noS = ( fC[35]<=0 ); // no decay length allowed
 
   if( noS ){ 
     TransportToDecayVertex();
     fP[7] = 0;
     fC[28] = fC[29] = fC[30] = fC[31] = fC[32] = fC[33] = fC[34] = fC[35] = 0;
-  } else {
-    TransportToDS( GetDStoPoint( m ) );
-    fP[7] = -fSFromDecay;
-    fC[28] = fC[29] = fC[30] = fC[31] = fC[32] = fC[33] = fC[34] = 0;
-    fC[35] = 0.1;
-
-    Convert(1);
   }
-
-  float mAi[6];
-
-  for(int i=0; i<6; i++) mAi[i] = fC[i];
-  InvertCholetsky3(mAi);
-
-  float mB[5][3];
-
-  mB[0][0] = fC[ 6]*mAi[0] + fC[ 7]*mAi[1] + fC[ 8]*mAi[3];
-  mB[0][1] = fC[ 6]*mAi[1] + fC[ 7]*mAi[2] + fC[ 8]*mAi[4];
-  mB[0][2] = fC[ 6]*mAi[3] + fC[ 7]*mAi[4] + fC[ 8]*mAi[5];
-
-  mB[1][0] = fC[10]*mAi[0] + fC[11]*mAi[1] + fC[12]*mAi[3];
-  mB[1][1] = fC[10]*mAi[1] + fC[11]*mAi[2] + fC[12]*mAi[4];
-  mB[1][2] = fC[10]*mAi[3] + fC[11]*mAi[4] + fC[12]*mAi[5];
-
-  mB[2][0] = fC[15]*mAi[0] + fC[16]*mAi[1] + fC[17]*mAi[3];
-  mB[2][1] = fC[15]*mAi[1] + fC[16]*mAi[2] + fC[17]*mAi[4];
-  mB[2][2] = fC[15]*mAi[3] + fC[16]*mAi[4] + fC[17]*mAi[5];
-
-  mB[3][0] = fC[21]*mAi[0] + fC[22]*mAi[1] + fC[23]*mAi[3];
-  mB[3][1] = fC[21]*mAi[1] + fC[22]*mAi[2] + fC[23]*mAi[4];
-  mB[3][2] = fC[21]*mAi[3] + fC[22]*mAi[4] + fC[23]*mAi[5];
-
-  mB[4][0] = fC[28]*mAi[0] + fC[29]*mAi[1] + fC[30]*mAi[3];
-  mB[4][1] = fC[28]*mAi[1] + fC[29]*mAi[2] + fC[30]*mAi[4];
-  mB[4][2] = fC[28]*mAi[3] + fC[29]*mAi[4] + fC[30]*mAi[5];
-
-  float z[3] = { m[0]-fP[0], m[1]-fP[1], m[2]-fP[2] };
-
+  else
   {
-    float mAVi[6] = { fC[0]-mV[0], fC[1]-mV[1], fC[2]-mV[2], 
-                        fC[3]-mV[3], fC[4]-mV[4], fC[5]-mV[5] };
+    float dsdr[6] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+    float dS = GetDStoPoint(Vtx.fP, dsdr);
     
-    InvertCholetsky3( mAVi);
+    float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
+    
+    float F[36], F1[36];
+    for(int i2=0; i2<36; i2++)
     {
-
-      float dChi2 = ( +(mAVi[0]*z[0] + mAVi[1]*z[1] + mAVi[3]*z[2])*z[0]
-                      +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
-                      +(mAVi[3]*z[0] + mAVi[4]*z[1] + mAVi[5]*z[2])*z[2] );
-      
-      // Take Abs(dChi2) here. Negative value of 'det' or 'dChi2' shows that the particle 
-      // was not used in the production vertex fit
-      
-      fChi2+= fabs( dChi2 );
+      F[i2]  = 0;
+      F1[i2] = 0;
     }
-    fNDF  += 2;
+    Transport( dS, dsdr, fP, fC, dsdp, F, F1 );
+    
+    float CTmp[36] = {0.};
+    MultQSQt(F1, fC, CTmp, 6);
+    
+    for(int iC=0; iC<21; iC++)
+      fC[iC] += CTmp[iC];
+          
+    for(int i=0; i<6; i++)
+      for(int j=0; j<3; j++)
+      {
+        D[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          D[i][j] +=  mV[IJ(j,k)] * F1[i*6+k];
+        }
+      }
+  }
+
+  float mS[6] = { fC[0] + mV[0],
+                 fC[1] + mV[1], fC[2] + mV[2],
+                 fC[3] + mV[3], fC[4] + mV[4], fC[5] + mV[5] };                 
+  InvertCholetsky3(mS);
+  
+  float res[3] = { m[0] - X(), m[1] - Y(), m[2] - Z() };
+  
+  float K[3][6];  
+  for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++)
+    {
+      K[i][j] = 0;
+      for(int k=0; k<3; k++)
+        K[i][j] += fC[IJ(i,k)] * mS[IJ(k,j)];
+    }
+  
+  float mCHt0[7], mCHt1[7], mCHt2[7];
+  mCHt0[0]=fC[ 0];        mCHt1[0]=fC[ 1];        mCHt2[0]=fC[ 3];
+  mCHt0[1]=fC[ 1];        mCHt1[1]=fC[ 2];        mCHt2[1]=fC[ 4];
+  mCHt0[2]=fC[ 3];        mCHt1[2]=fC[ 4];        mCHt2[2]=fC[ 5];
+  mCHt0[3]=fC[ 6];        mCHt1[3]=fC[ 7];        mCHt2[3]=fC[ 8];
+  mCHt0[4]=fC[10];        mCHt1[4]=fC[11];        mCHt2[4]=fC[12];
+  mCHt0[5]=fC[15];        mCHt1[5]=fC[16];        mCHt2[5]=fC[17];
+  mCHt0[6]=fC[21];        mCHt1[6]=fC[22];        mCHt2[6]=fC[23];
+  
+  float k0[7], k1[7], k2[7];
+  for(Int_t i=0;i<7;++i){
+    k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+    k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+    k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
   }
   
-  fP[0] = m[0];
-  fP[1] = m[1];
-  fP[2] = m[2];
-  fP[3]+= mB[0][0]*z[0] + mB[0][1]*z[1] + mB[0][2]*z[2];
-  fP[4]+= mB[1][0]*z[0] + mB[1][1]*z[1] + mB[1][2]*z[2];
-  fP[5]+= mB[2][0]*z[0] + mB[2][1]*z[1] + mB[2][2]*z[2];
-  fP[6]+= mB[3][0]*z[0] + mB[3][1]*z[1] + mB[3][2]*z[2];
-  fP[7]+= mB[4][0]*z[0] + mB[4][1]*z[1] + mB[4][2]*z[2];
+  for(Int_t i=0;i<7;++i) 
+    fP[i] = fP[i] + k0[i]*res[0] + k1[i]*res[1] + k2[i]*res[2];
+
+  for(Int_t i=0, k=0;i<7;++i){
+    for(Int_t j=0;j<=i;++j,++k){
+      fC[k] = fC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+    }
+  }
+
+  float K2[3][3];
+  for(int i=0; i<3; i++)
+  {
+    for(int j=0; j<3; j++)
+      K2[i][j] = -K[j][i];
+    K2[i][i] += 1;
+  }
+
+  float A[3][3];
+  for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++)
+    {
+      A[i][j] = 0;
+      for(int k=0; k<3; k++)
+      {
+        A[i][j] += D[k][i] * K2[k][j];
+      }
+    }
   
-  float d0, d1, d2;
-
-  fC[0] = mV[0];
-  fC[1] = mV[1];
-  fC[2] = mV[2];
-  fC[3] = mV[3];
-  fC[4] = mV[4];
-  fC[5] = mV[5];
-
-  d0= mB[0][0]*mV[0] + mB[0][1]*mV[1] + mB[0][2]*mV[3] - fC[ 6];
-  d1= mB[0][0]*mV[1] + mB[0][1]*mV[2] + mB[0][2]*mV[4] - fC[ 7];
-  d2= mB[0][0]*mV[3] + mB[0][1]*mV[4] + mB[0][2]*mV[5] - fC[ 8];
-
-  fC[ 6]+= d0;
-  fC[ 7]+= d1;
-  fC[ 8]+= d2;
-  fC[ 9]+= d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-
-  d0= mB[1][0]*mV[0] + mB[1][1]*mV[1] + mB[1][2]*mV[3] - fC[10];
-  d1= mB[1][0]*mV[1] + mB[1][1]*mV[2] + mB[1][2]*mV[4] - fC[11];
-  d2= mB[1][0]*mV[3] + mB[1][1]*mV[4] + mB[1][2]*mV[5] - fC[12];
-
-  fC[10]+= d0;
-  fC[11]+= d1;
-  fC[12]+= d2;
-  fC[13]+= d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-  fC[14]+= d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-
-  d0= mB[2][0]*mV[0] + mB[2][1]*mV[1] + mB[2][2]*mV[3] - fC[15];
-  d1= mB[2][0]*mV[1] + mB[2][1]*mV[2] + mB[2][2]*mV[4] - fC[16];
-  d2= mB[2][0]*mV[3] + mB[2][1]*mV[4] + mB[2][2]*mV[5] - fC[17];
-
-  fC[15]+= d0;
-  fC[16]+= d1;
-  fC[17]+= d2;
-  fC[18]+= d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-  fC[19]+= d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-  fC[20]+= d0*mB[2][0] + d1*mB[2][1] + d2*mB[2][2];
-
-  d0= mB[3][0]*mV[0] + mB[3][1]*mV[1] + mB[3][2]*mV[3] - fC[21];
-  d1= mB[3][0]*mV[1] + mB[3][1]*mV[2] + mB[3][2]*mV[4] - fC[22];
-  d2= mB[3][0]*mV[3] + mB[3][1]*mV[4] + mB[3][2]*mV[5] - fC[23];
-
-  fC[21]+= d0;
-  fC[22]+= d1;
-  fC[23]+= d2;
-  fC[24]+= d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-  fC[25]+= d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-  fC[26]+= d0*mB[2][0] + d1*mB[2][1] + d2*mB[2][2];
-  fC[27]+= d0*mB[3][0] + d1*mB[3][1] + d2*mB[3][2];
-
-  d0= mB[4][0]*mV[0] + mB[4][1]*mV[1] + mB[4][2]*mV[3] - fC[28];
-  d1= mB[4][0]*mV[1] + mB[4][1]*mV[2] + mB[4][2]*mV[4] - fC[29];
-  d2= mB[4][0]*mV[3] + mB[4][1]*mV[4] + mB[4][2]*mV[5] - fC[30];
-
-  fC[28]+= d0;
-  fC[29]+= d1;
-  fC[30]+= d2;
-  fC[31]+= d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-  fC[32]+= d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-  fC[33]+= d0*mB[2][0] + d1*mB[2][1] + d2*mB[2][2];
-  fC[34]+= d0*mB[3][0] + d1*mB[3][1] + d2*mB[3][2];
-  fC[35]+= d0*mB[4][0] + d1*mB[4][1] + d2*mB[4][2];
+  float M[3][3];
+  for(int i=0; i<3; i++)
+    for(int j=0; j<3; j++)
+    {
+      M[i][j] = 0;
+      for(int k=0; k<3; k++)
+      {
+        M[i][j] += K[i][k] * A[k][j];
+      }
+    }
+    
+  fC[0] += 2*M[0][0];
+  fC[1] += M[0][1] + M[1][0];
+  fC[2] += 2*M[1][1];
+  fC[3] += M[0][2] + M[2][0];
+  fC[4] += M[1][2] + M[2][1];
+  fC[5] += 2*M[2][2];
   
+  fChi2 += (mS[0]*res[0] + mS[1]*res[1] + mS[3]*res[2])*res[0]
+        +  (mS[1]*res[0] + mS[2]*res[1] + mS[4]*res[2])*res[1]
+        +  (mS[3]*res[0] + mS[4]*res[1] + mS[5]*res[2])*res[2];
+  fNDF += 2;
+   
   if( noS ){ 
     fP[7] = 0;
     fC[28] = fC[29] = fC[30] = fC[31] = fC[32] = fC[33] = fC[34] = fC[35] = 0;
-  } else {
-    TransportToDS( fP[7] );
-    Convert(0);
+    fSFromDecay = 0;
   }
+  else
+  {
+    float dsdr[6] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+    fP[7] = GetDStoPoint(decayPoint, dsdr);   
+    
+    float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
 
-  fSFromDecay = 0;
+    float F[36], F1[36];
+    for(int i2=0; i2<36; i2++)
+    {
+      F[i2]  = 0;
+      F1[i2] = 0;
+    }
+    float tmpP[8], tmpC[36]; 
+    Transport( fP[7], dsdr, tmpP, tmpC, dsdp, F, F1 );
+          
+    fC[35] = 0;
+    for(int iDsDr=0; iDsDr<6; iDsDr++)
+    {
+      float dsdrC = 0, dsdpV = 0;
+      
+      for(int k=0; k<6; k++)
+        dsdrC += dsdr[k] * fC[IJ(k,iDsDr)]; // (-dsdr[k])*fC[k,j]
+      
+      fC[iDsDr+28] = dsdrC;
+      fC[35] += dsdrC*dsdr[iDsDr] ;
+      if(iDsDr < 3)
+      {
+        for(int k=0; k<3; k++)
+          dsdpV -= dsdr[k] * decayPointCov[IJ(k,iDsDr)];  //
+        fC[35] -= dsdpV*dsdr[iDsDr];
+      }
+    }  
+    fSFromDecay = -fP[7];
+  }
+  
+  fAtProductionVertex = 1;
 }
 
 void KFParticleBase::SetMassConstraint( float *mP, float *mC, float mJ[7][7], float mass )
@@ -1492,200 +1305,103 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaugh
 				   const KFParticleBase *Parent,  float Mass, Bool_t IsConstrained         )
 { 
   //* Full reconstruction in one go
-
-  Int_t maxIter = 1;
-  bool wasLinearized = fIsLinearized;
-  if( !fIsLinearized || IsConstrained ){
-    //fVtxGuess[0] = fVtxGuess[1] = fVtxGuess[2] = 0;  //!!!!
-    float ds=0., ds1=0.;
-    float P[8], C[36];
-    vDaughters[0]->GetDStoParticle(*vDaughters[1], ds, ds1);
-    vDaughters[0]->Transport(ds,P,C);
-    fVtxGuess[0] = P[0];
-    fVtxGuess[1] = P[1];
-    fVtxGuess[2] = P[2];
-/*    fVtxGuess[0] = GetX();
-    fVtxGuess[1] = GetY();
-    fVtxGuess[2] = GetZ();*/
-
-    fIsLinearized = 1;
-    maxIter = 3;
-  }
-
-  float constraintC[6];
-
-  if( IsConstrained ){
-    for(Int_t i=0;i<6;++i) constraintC[i]=fC[i];
-  } else {
-    for(Int_t i=0;i<6;++i) constraintC[i]=0.;
-//    constraintC[0] = constraintC[2] = constraintC[5] = 100.;
-    constraintC[0] = 100.*vDaughters[0]->fC[0];
-    constraintC[2] = 100.*vDaughters[0]->fC[2];
-    constraintC[5] = 100.*vDaughters[0]->fC[5];
-  }
-
-
+  const int maxIter = 1;
   for( Int_t iter=0; iter<maxIter; iter++ ){
     fAtProductionVertex = 0;
     fSFromDecay = 0;
-    fP[0] = fVtxGuess[0];
-    fP[1] = fVtxGuess[1];
-    fP[2] = fVtxGuess[2];
-    fP[3] = 0;
-    fP[4] = 0;
-    fP[5] = 0;
-    fP[6] = 0;
-    fP[7] = 0;
     SumDaughterMass = 0;
 
-    for(Int_t i=0;i<6; ++i) fC[i]=constraintC[i];
-    for(Int_t i=6;i<36;++i) fC[i]=0.;
+    for(Int_t i=0;i<36;++i) fC[i]=0.;
     fC[35] = 1.;
     
-    fNDF  = IsConstrained ?0 :-3;
+    fNDF  = -3;
     fChi2 =  0.;
     fQ = 0;
-
+// std::cout << " nDaughters " << nDaughters << std::endl;
+// int ui;
+// std::cin >>ui;
+//     nDaughters = nDaughters < 200 ? nDaughters : 200;
+    
     for( Int_t itr =0; itr<nDaughters; itr++ ){
       AddDaughter( *vDaughters[itr] );    
     }
-    if( iter<maxIter-1){
-      for( Int_t i=0; i<3; i++ ) fVtxGuess[i] = fP[i];  
-    }
+// std::cout << "Vse! "<<std::endl;
+// std::cin>>ui;
+    
   }
-  fIsLinearized = wasLinearized;    
 
   if( Mass>=0 ) SetMassConstraint( Mass );
   if( Parent ) SetProductionVertex( *Parent );
 }
 
-
-void KFParticleBase::Convert( bool ToProduction )
-{
-  //* Tricky function - convert the particle error along its trajectory to 
-  //* the value which corresponds to its production/decay vertex
-  //* It is done by combination of the error of decay length with the position errors
-
-  float fld[3];
-  {
-    GetFieldValue( fP, fld );
-    const float kCLight =  fQ*0.000299792458;
-    fld[0]*=kCLight; fld[1]*=kCLight; fld[2]*=kCLight;
-  }
-
-  float h[6];
-  
-  h[0] = fP[3];
-  h[1] = fP[4];
-  h[2] = fP[5];
-  if( ToProduction ){ h[0]=-h[0]; h[1]=-h[1]; h[2]=-h[2]; } 
-  h[3] = h[1]*fld[2]-h[2]*fld[1];
-  h[4] = h[2]*fld[0]-h[0]*fld[2];
-  h[5] = h[0]*fld[1]-h[1]*fld[0];
-  
-  float c;
-
-  c = fC[28]+h[0]*fC[35];
-  fC[ 0]+= h[0]*(c+fC[28]);
-  fC[28] = c;
-
-  fC[ 1]+= h[1]*fC[28] + h[0]*fC[29];
-  c = fC[29]+h[1]*fC[35];
-  fC[ 2]+= h[1]*(c+fC[29]);
-  fC[29] = c;
-
-  fC[ 3]+= h[2]*fC[28] + h[0]*fC[30];
-  fC[ 4]+= h[2]*fC[29] + h[1]*fC[30];
-  c = fC[30]+h[2]*fC[35];
-  fC[ 5]+= h[2]*(c+fC[30]);
-  fC[30] = c;
-
-  fC[ 6]+= h[3]*fC[28] + h[0]*fC[31];
-  fC[ 7]+= h[3]*fC[29] + h[1]*fC[31];
-  fC[ 8]+= h[3]*fC[30] + h[2]*fC[31];
-  c = fC[31]+h[3]*fC[35];
-  fC[ 9]+= h[3]*(c+fC[31]);
-  fC[31] = c;
-  
-  fC[10]+= h[4]*fC[28] + h[0]*fC[32];
-  fC[11]+= h[4]*fC[29] + h[1]*fC[32];
-  fC[12]+= h[4]*fC[30] + h[2]*fC[32];
-  fC[13]+= h[4]*fC[31] + h[3]*fC[32];
-  c = fC[32]+h[4]*fC[35];
-  fC[14]+= h[4]*(c+fC[32]);
-  fC[32] = c;
-  
-  fC[15]+= h[5]*fC[28] + h[0]*fC[33];
-  fC[16]+= h[5]*fC[29] + h[1]*fC[33];
-  fC[17]+= h[5]*fC[30] + h[2]*fC[33];
-  fC[18]+= h[5]*fC[31] + h[3]*fC[33];
-  fC[19]+= h[5]*fC[32] + h[4]*fC[33];
-  c = fC[33]+h[5]*fC[35];
-  fC[20]+= h[5]*(c+fC[33]);
-  fC[33] = c;
-
-  fC[21]+= h[0]*fC[34];
-  fC[22]+= h[1]*fC[34];
-  fC[23]+= h[2]*fC[34];
-  fC[24]+= h[3]*fC[34];
-  fC[25]+= h[4]*fC[34];
-  fC[26]+= h[5]*fC[34];
-}
-
-
 void KFParticleBase::TransportToDecayVertex()
 {
   //* Transport the particle to its decay vertex 
-
-  if( fSFromDecay != 0 ) TransportToDS( -fSFromDecay );
-  if( fAtProductionVertex ) Convert(0);
+  float dsdr[6] = {0.f}; //TODO doesn't take into account errors of the previous extrapolation
+  if( fSFromDecay != 0 ) TransportToDS( -fSFromDecay, dsdr );
   fAtProductionVertex = 0;
 }
 
 void KFParticleBase::TransportToProductionVertex()
 {
   //* Transport the particle to its production vertex 
-  
-  if( fSFromDecay != -fP[7] ) TransportToDS( -fSFromDecay-fP[7] );
-  if( !fAtProductionVertex ) Convert( 1 );
+  float dsdr[6] = {0.f}; //TODO doesn't take into account errors of the previous extrapolation
+  if( fSFromDecay != -fP[7] ) TransportToDS( -fSFromDecay-fP[7], dsdr );
   fAtProductionVertex = 1;
 }
 
 
-void KFParticleBase::TransportToDS( float dS )
+void KFParticleBase::TransportToDS( float dS, const float* dsdr )
 { 
   //* Transport the particle on dS parameter (SignedPath/Momentum) 
  
-  Transport( dS, fP, fC );
+  Transport( dS, dsdr, fP, fC );
   fSFromDecay+= dS;
 }
 
 
-float KFParticleBase::GetDStoPointLine( const float xyz[] ) const 
+float KFParticleBase::GetDStoPointLine( const float xyz[3], float dsdr[6] ) const 
 {
   //* Get dS to a certain space point without field
 
   float p2 = fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5];  
   if( p2<1.e-4 ) p2 = 1;
-  return ( fP[3]*(xyz[0]-fP[0]) + fP[4]*(xyz[1]-fP[1]) + fP[5]*(xyz[2]-fP[2]) )/p2;
+  
+  const float& a = fP[3]*(xyz[0]-fP[0]) + fP[4]*(xyz[1]-fP[1]) + fP[5]*(xyz[2]-fP[2]);
+  dsdr[0] = -fP[3]/p2;
+  dsdr[1] = -fP[4]/p2;
+  dsdr[2] = -fP[5]/p2;
+  dsdr[3] = ((xyz[0]-fP[0])*p2 - 2.f* fP[3]*a)/(p2*p2);
+  dsdr[4] = ((xyz[1]-fP[1])*p2 - 2.f* fP[4]*a)/(p2*p2);
+  dsdr[5] = ((xyz[2]-fP[2])*p2 - 2.f* fP[5]*a)/(p2*p2);
+  
+  return a/p2;
 }
 
 
-float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* param) const
+float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6], const float* param) const
 { 
   
   if(!param)
     param = fP;
   //* Get dS to a certain space point for Bz field
+  
+  const float& x  = param[0];
+  const float& y  = param[1];
+  const float& z  = param[2];
+  const float& px = param[3];
+  const float& py = param[4];
+  const float& pz = param[5];
+  
   const float kCLight = 0.000299792458f;
   float bq = B*fQ*kCLight;
-  float pt2 = param[3]*param[3] + param[4]*param[4];
-  float p2 = pt2 + param[5]*param[5];  
+  float pt2 = px*px + py*py;
+  float p2 = pt2 + pz*pz;  
   
-  float dx = xyz[0] - param[0];
-  float dy = xyz[1] - param[1]; 
-  float dz = xyz[2] - param[2]; 
-  float a = dx*param[3]+dy*param[4];
+  float dx = xyz[0] - x;
+  float dy = xyz[1] - y; 
+  float dz = xyz[2] - z; 
+  float a = dx*px+dy*py;
   float dS(0.f);
   
   float abq = bq*a;
@@ -1693,11 +1409,22 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* p
   const float LocalSmall = 1.e-8f;
   bool mask = ( fabs(bq)<LocalSmall );
   if(mask && p2>1.e-4f)
-    dS = (a + dz*param[5])/p2;
+  {
+    dS = (a + dz*pz)/p2;
+    
+    dsdr[0] = -px/p2;
+    dsdr[1] = -py/p2;
+    dsdr[2] = -pz/p2;
+    dsdr[3] = (dx*p2 - 2.f* px *(a + dz *pz))/(p2*p2);
+    dsdr[4] = (dy*p2 - 2.f* py *(a + dz *pz))/(p2*p2);
+    dsdr[5] = (dz*p2 - 2.f* pz *(a + dz *pz))/(p2*p2);
+  }
   if(mask)
+  { 
     return dS;
+  }
   
-  dS = atan2( abq, pt2 + bq*(dy*param[3] -dx*param[4]) )/bq;
+  dS = atan2( abq, pt2 + bq*(dy*px -dx*py) )/bq;
 
   float bs= bq*dS;
 
@@ -1705,17 +1432,33 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* p
 
   if(fabs(bq) < LocalSmall)
     bq = LocalSmall;
-  float aCoeff = a;
-  float bCoeff = dx*param[4] - dy*param[3] - pt2/bq;
+  float bbq = bq*(dx*py - dy*px) - pt2;
+  
+  dsdr[0] = (px*bbq - py*abq)/(abq*abq + bbq*bbq);
+  dsdr[1] = (px*abq + py*bbq)/(abq*abq + bbq*bbq);
+  dsdr[2] = 0;
+  dsdr[3] = -(dx*bbq + dy*abq + 2.f*px*a)/(abq*abq + bbq*bbq);
+  dsdr[4] = (dx*abq - dy*bbq - 2.f*py*a)/(abq*abq + bbq*bbq);
+  dsdr[5] = 0;
   
   float sz(0.f);
-  if(fabs(param[5]) > 1.e-4f)
-    sz = dz/param[5];
-  float kz(0.f);
-  float cCoeff = ( sz * (bq*(bCoeff*c - aCoeff*s) - param[5]*param[5]) );
+  float cCoeff =  (bbq*c - abq*s) - pz*pz ;
   if(fabs(cCoeff) > 1.e-8f)
-    kz = (dS*param[5] - dz)*param[5] / cCoeff;
-  dS += sz*kz;
+    sz = (dS*pz - dz)*pz / cCoeff;
+
+  float dcdr[6] = {0.f};
+  dcdr[0] = -bq*py*c - bbq*s*bq*dsdr[0] + px*bq*s - abq*c*bq*dsdr[0];
+  dcdr[1] =  bq*px*c - bbq*s*bq*dsdr[1] + py*bq*s - abq*c*bq*dsdr[1];
+  dcdr[3] = (-bq*dy-2*px)*c - bbq*s*bq*dsdr[3] - dx*bq*s - abq*c*bq*dsdr[3];
+  dcdr[4] = ( bq*dx-2*py)*c - bbq*s*bq*dsdr[4] - dy*bq*s - abq*c*bq*dsdr[4];
+  dcdr[5] = -2*pz;
+  
+  for(int iP=0; iP<6; iP++)
+    dsdr[iP] += pz*pz/cCoeff*dsdr[iP] - sz/cCoeff*dcdr[iP];
+  dsdr[2] += pz/cCoeff;
+  dsdr[5] += (2.f*pz*dS - dz)/cCoeff;
+  
+  dS += sz;
   
   bs= bq*dS;
   s = sin(bs), c = cos(bs);
@@ -1734,21 +1477,17 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* p
     cB = .5f*sB*bs;
   }
 
-  const float px = param[3];
-  const float py = param[4];
-
   float p[5];
-  p[0] = param[0] + sB*px + cB*py;
-  p[1] = param[1] - cB*px + sB*py;
-  p[2] = param[2] +  dS*param[5];
+  p[0] = x + sB*px + cB*py;
+  p[1] = y - cB*px + sB*py;
+  p[2] = z +  dS*pz;
   p[3] =          c*px + s*py;
   p[4] =         -s*px + c*py;
 
   dx = xyz[0] - p[0];
   dy = xyz[1] - p[1];
   dz = xyz[2] - p[2];
-  a = dx*p[3]+dy*p[4] + dz*param[5];
-
+  a = dx*p[3]+dy*p[4] + dz*pz;
   abq = bq*a;
 
   dS += atan2( abq, p2 + bq*(dy*p[3] -dx*p[4]) )/bq;
@@ -1756,7 +1495,7 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[], const float* p
   return dS;
 }
 
-float KFParticleBase::GetDStoPointBy( float By, const float xyz[] ) const
+float KFParticleBase::GetDStoPointBy( float By, const float xyz[3], float dsdr[6] ) const
 { 
   
   //* Get dS to a certain space point for By field
@@ -1764,11 +1503,88 @@ float KFParticleBase::GetDStoPointBy( float By, const float xyz[] ) const
   const float param[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
   const float point[3] = { xyz[0], -xyz[2], xyz[1] };
   
-  return GetDStoPointBz(By, point, param);
+  float dsdrBz[6] = {0.f};
+  
+  const float dS = GetDStoPointBz(By, point, dsdrBz, param);
+  dsdr[0] =  dsdrBz[0];
+  dsdr[1] =  dsdrBz[2];
+  dsdr[2] = -dsdrBz[1];
+  dsdr[3] =  dsdrBz[3];
+  dsdr[4] =  dsdrBz[5];
+  dsdr[5] = -dsdrBz[4];
+  
+  return dS;
 }
 
-void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p, 
-                                        float &DS, float &DS1, const float* param1, const float* param2 )  const
+float KFParticleBase::GetDStoPointB( const float* B, const float xyz[3], float dsdr[6] ) const
+{ 
+  //* Get dS to a certain space point for By field
+
+  const float& Bx = B[0];
+  const float& By = B[1];
+  const float& Bz = B[2];
+  
+  const float& Bxz = sqrt(Bx*Bx + Bz*Bz);
+  const float& Br = sqrt(Bx*Bx + By*By + Bz*Bz);
+    
+  float cosA = 1;
+  float sinA = 0;
+  if(fabs(Bxz) > 1.e-8f)
+  {
+    cosA = Bz/Bxz;
+    sinA = Bx/Bxz;
+  }
+  
+  const float& sinP = By/Br;
+  const float& cosP = Bxz/Br;
+  
+  const float param[6] = { cosA*fP[0] - sinA*fP[2], 
+                          -sinA*sinP*fP[0] + cosP*fP[1] - cosA*sinP*fP[2], 
+                           cosP*sinA*fP[0] + sinP*fP[1] + cosA*cosP*fP[2],
+                           cosA*fP[3] - sinA*fP[5], 
+                          -sinA*sinP*fP[3] + cosP*fP[4] - cosA*sinP*fP[5], 
+                           cosP*sinA*fP[3] + sinP*fP[4] + cosA*cosP*fP[5]};
+  const float point[3] = { cosA*xyz[0] - sinA*xyz[2], 
+                          -sinA*sinP*xyz[0] + cosP*xyz[1] - cosA*sinP*xyz[2], 
+                           cosP*sinA*xyz[0] + sinP*xyz[1] + cosA*cosP*xyz[2] };
+  
+  float dsdrBz[6] = {0.f};
+  
+  const float dS = GetDStoPointBz(Br, point, dsdrBz, param);
+  dsdr[0] =  dsdrBz[0]*cosA - dsdrBz[1]*sinA*sinP + dsdrBz[2]*sinA*cosP;
+  dsdr[1] =                   dsdrBz[1]*cosP      + dsdrBz[2]*sinP;
+  dsdr[2] = -dsdrBz[0]*sinA - dsdrBz[1]*cosA*sinP + dsdrBz[2]*cosA*cosP;
+  dsdr[3] =  dsdrBz[3]*cosA - dsdrBz[4]*sinA*sinP + dsdrBz[5]*sinA*cosP;
+  dsdr[4] =                   dsdrBz[4]*cosP      + dsdrBz[5]*sinP;
+  dsdr[5] = -dsdrBz[3]*sinA - dsdrBz[4]*cosA*sinP + dsdrBz[5]*cosA*cosP;
+  
+  return dS;
+}
+
+float KFParticleBase::GetDStoPointCBM( const float xyz[3], float dsdr[3] ) const
+{
+  //* Transport the particle on dS, output to P[],C[], for CBM field
+
+  float dS = 0;
+  //Linear approximation
+
+  float fld[3];
+  GetFieldValue( fP, fld );
+  
+//   dS = GetDStoPointB( fld, xyz, dsdr);
+  dS = GetDStoPointBy( fld[1], xyz, dsdr );
+//   dS = GetDStoPointLine( xyz, dsdr );
+// 
+//   if( fQ==0 ){
+//     return dS;
+//   }
+// 
+//   dS = GetDStoPointBy( fld[1], xyz, dsdr );
+
+  return dS;
+}
+
+void KFParticleBase::GetDStoParticleBz( float Bz, const KFParticleBase &p, float dS[2], float dsdr[4][6], const float* param1, const float* param2 )  const
 { 
   if(!param1)
   {
@@ -1782,17 +1598,18 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
 
   //in XY plane
   //first root    
-  const float& bq1 = B*fQ*kCLight;
-  const float& bq2 = B*p.fQ*kCLight;
+  const float& bq1 = Bz*fQ*kCLight;
+  const float& bq2 = Bz*p.fQ*kCLight;
+
   const bool& isStraight1 = fabs(bq1) < 1.e-8f;
   const bool& isStraight2 = fabs(bq2) < 1.e-8f;
   
   if( isStraight1 && isStraight2 )
   {
-    GetDStoParticleLine(p, DS, DS1);
+    GetDStoParticleLine(p, dS, dsdr);
     return;
   }
-  
+    
   const float& px1 = param1[3];
   const float& py1 = param1[4];
   const float& pz1 = param1[5];
@@ -1844,25 +1661,167 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
   d2 = sqrt( d2 );
   
   // find two points of closest approach in XY plane
-  if(!isStraight1)
+  
+  float dS1dR1[2][6];
+  float dS2dR2[2][6];
+
+  float dS1dR2[2][6];
+  float dS2dR1[2][6];
+
+  float dk11dr1[6] = {bq2*px1, bq2*py1, 0, bq2*dx0 - py2, bq2*dy0 + px2, 0};
+  float dk11dr2[6] = {-bq2*px1, -bq2*py1, 0, py1, -px1, 0};
+  float dk12dr1[6] = {bq1*px2, bq1*py2, 0, -py2, px2, 0};
+  float dk12dr2[6] = {-bq1*px2, -bq1*py2, 0, bq1*dx0 + py1, bq1*dy0 - px1, 0};
+  float dk21dr1[6] = {bq1*bq2*py1, -bq1*bq2*px1, 0, 2*bq2*px1 + bq1*(-(bq2*dy0) - px2), 2*bq2*py1 + bq1*(bq2*dx0 - py2), 0};
+  float dk21dr2[6] = {-(bq1*bq2*py1), bq1*bq2*px1, 0, -(bq1*px1), -(bq1*py1), 0};
+  float dk22dr1[6] = {bq1*bq2*py2, -(bq1*bq2*px2), 0, bq2*px2, bq2*py2, 0};
+  float dk22dr2[6] = {-(bq1*bq2*py2), bq1*bq2*px2, 0, bq2*(-(bq1*dy0) + px1) - 2*bq1*px2, bq2*(bq1*dx0 + py1) - 2*bq1*py2, 0};
+  
+  float dkddr1[6] = {bq1*bq2*dx0 + bq2*py1 - bq1*py2, bq1*bq2*dy0 - bq2*px1 + bq1*px2, 0, -bq2*dy0 - px2, bq2*dx0 - py2, 0};
+  float dkddr2[6] = {-bq1*bq2*dx0 - bq2*py1 + bq1*py2, -bq1*bq2*dy0 + bq2*px1 - bq1*px2, 0, bq1*dy0 - px1, -bq1*dx0 - py1, 0};
+  
+  float dc1dr1[6] = {-(bq1*(bq1*bq2*dx0 + bq2*py1 - bq1*py2)), -(bq1*(bq1*bq2*dy0 - bq2*px1 + bq1*px2)), 0, -2*bq2*px1 - bq1*(-(bq2*dy0) - px2), -2*bq2*py1 - bq1*(bq2*dx0 - py2), 0};
+  float dc1dr2[6] = {-(bq1*(-(bq1*bq2*dx0) - bq2*py1 + bq1*py2)), -(bq1*(-(bq1*bq2*dy0) + bq2*px1 - bq1*px2)), 0, -(bq1*(bq1*dy0 - px1)), -(bq1*(-(bq1*dx0) - py1)), 0};
+  
+  float dc2dr1[6] = {bq2*(bq1*bq2*dx0 + bq2*py1 - bq1*py2), bq2*(bq1*bq2*dy0 - bq2*px1 + bq1*px2), 0, bq2*(-(bq2*dy0) - px2), bq2*(bq2*dx0 - py2), 0};
+  float dc2dr2[6] = {bq2*(-(bq1*bq2*dx0) - bq2*py1 + bq1*py2), bq2*(-(bq1*bq2*dy0) + bq2*px1 - bq1*px2), 0, bq2*(bq1*dy0 - px1) + 2*bq1*px2, bq2*(-(bq1*dx0) - py1) + 2*bq1*py2, 0};
+  
+  float dd1dr1[6] = {0,0,0,0,0,0};
+  float dd1dr2[6] = {0,0,0,0,0,0};
+  if(d1>0)
   {
-    dS1[0] = atan2( (bq1*k11*c1 + k21*d1*bq1), (bq1*k11*d1*bq1 - k21*c1) )/bq1;
-    dS1[1] = atan2( (bq1*k11*c1 - k21*d1*bq1), (-bq1*k11*d1*bq1 - k21*c1) )/bq1;
+    for(int i=0; i<6; i++)
+    {
+      dd1dr1[i] = -kd/d1*dkddr1[i];
+      dd1dr2[i] = -kd/d1*dkddr2[i];
+    }
+    dd1dr1[3] += px1/d1*pt22; dd1dr1[4] += py1/d1*pt22;
+    dd1dr2[3] += px2/d1*pt12; dd1dr2[4] += py2/d1*pt12;
+  }
+
+  if(!isStraight1)
+  {    
+    dS1[0] = atan2( bq1*(k11*c1 + k21*d1), (bq1*k11*d1*bq1 - k21*c1) )/bq1;
+    dS1[1] = atan2( bq1*(k11*c1 - k21*d1), (-bq1*k11*d1*bq1 - k21*c1) )/bq1;
+    
+    float a = bq1*(k11*c1 + k21*d1);
+    float b = bq1*k11*d1*bq1 - k21*c1;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
+      const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
+      const float dbdr1 = bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+      const float dbdr2 = bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      
+      dS1dR1[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+      dS1dR2[0][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+    }
+    
+    a = bq1*(k11*c1 - k21*d1);
+    b = -bq1*k11*d1*bq1 - k21*c1;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = bq1*( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - (dk21dr1[iP]*d1 + k21*dd1dr1[iP]) );
+      const float dadr2 = bq1*( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - (dk21dr2[iP]*d1 + k21*dd1dr2[iP]) );
+      const float dbdr1 = -bq1*bq1*( dk11dr1[iP]*d1 + k11*dd1dr1[iP] ) - ( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+      const float dbdr2 = -bq1*bq1*( dk11dr2[iP]*d1 + k11*dd1dr2[iP] ) - ( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      
+      dS1dR1[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+      dS1dR2[1][iP] = 1/bq1 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+    }
   }
   if(!isStraight2)
   {
     dS2[0] = atan2( (bq2*k12*c2 + k22*d2*bq2), (bq2*k12*d2*bq2 - k22*c2) )/bq2;
     dS2[1] = atan2( (bq2*k12*c2 - k22*d2*bq2), (-bq2*k12*d2*bq2 - k22*c2) )/bq2;
+    
+    float a = bq2*(k12*c2 + k22*d2);
+    float b = bq2*k12*d2*bq2 - k22*c2;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
+      const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
+      const float dbdr1 = bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
+      const float dbdr2 = bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
+      
+      dS2dR1[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+      dS2dR2[0][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+    }
+    
+    a = bq2*(k12*c2 - k22*d2);
+    b = -bq2*k12*d2*bq2 - k22*c2;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = bq2*( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - (dk22dr1[iP]*d1 + k22*dd1dr1[iP]) );
+      const float dadr2 = bq2*( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - (dk22dr2[iP]*d1 + k22*dd1dr2[iP]) );
+      const float dbdr1 = -bq2*bq2*( dk12dr1[iP]*d1 + k12*dd1dr1[iP] ) - (dk22dr1[iP]*c2 + k22*dc2dr1[iP]);
+      const float dbdr2 = -bq2*bq2*( dk12dr2[iP]*d1 + k12*dd1dr2[iP] ) - (dk22dr2[iP]*c2 + k22*dc2dr2[iP]);
+      
+      dS2dR1[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr1*b - dbdr1*a );
+      dS2dR2[1][iP] = 1/bq2 * 1/( b*b + a*a ) * ( dadr2*b - dbdr2*a );
+    }
   }
   if(isStraight1 && (pt12>0.f) )
   {
     dS1[0] = (k11*c1 + k21*d1)/(- k21*c1);
     dS1[1] = (k11*c1 - k21*d1)/(- k21*c1);
+    
+    float a = k11*c1 + k21*d1;
+    float b = -k21*c1;
+    
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] + dk21dr1[iP]*d1 + k21*dd1dr1[iP] );
+      const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] + dk21dr2[iP]*d1 + k21*dd1dr2[iP] );
+      const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+      const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+    
+      dS1dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
+      dS1dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+    }
+    
+    a = k11*c1 - k21*d1;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = ( dk11dr1[iP]*c1 + k11*dc1dr1[iP] - dk21dr1[iP]*d1 - k21*dd1dr1[iP] );
+      const float dadr2 = ( dk11dr2[iP]*c1 + k11*dc1dr2[iP] - dk21dr2[iP]*d1 - k21*dd1dr2[iP] );
+      const float dbdr1 = -( dk21dr1[iP]*c1 + k21*dc1dr1[iP] );
+      const float dbdr2 = -( dk21dr2[iP]*c1 + k21*dc1dr2[iP] );
+      
+      dS1dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
+      dS1dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+    }
   }
   if(isStraight2 && (pt22>0.f) )
   {
     dS2[0] = (k12*c2 + k22*d2)/(- k22*c2);
     dS2[1] = (k12*c2 - k22*d2)/(- k22*c2);  
+    
+    float a = k12*c2 + k22*d1;
+    float b = -k22*c2;
+    
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] + dk22dr1[iP]*d1 + k22*dd1dr1[iP] );
+      const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] + dk22dr2[iP]*d1 + k22*dd1dr2[iP] );
+      const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
+      const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
+    
+      dS2dR1[0][iP] = dadr1/b - dbdr1*a/(b*b) ;
+      dS2dR2[0][iP] = dadr2/b - dbdr2*a/(b*b) ;
+    }
+    
+    a = k12*c2 - k22*d1;
+    for(int iP=0; iP<6; iP++)
+    {
+      const float dadr1 = ( dk12dr1[iP]*c2 + k12*dc2dr1[iP] - dk22dr1[iP]*d1 - k22*dd1dr1[iP] );
+      const float dadr2 = ( dk12dr2[iP]*c2 + k12*dc2dr2[iP] - dk22dr2[iP]*d1 - k22*dd1dr2[iP] );
+      const float dbdr1 = -( dk22dr1[iP]*c2 + k22*dc2dr1[iP] );
+      const float dbdr2 = -( dk22dr2[iP]*c2 + k22*dc2dr2[iP] );
+    
+      dS2dR1[1][iP] = dadr1/b - dbdr1*a/(b*b) ;
+      dS2dR2[1][iP] = dadr2/b - dbdr2*a/(b*b) ;
+    }
   }
   
   //select a point which is close to the primary vertex (with the smallest r)
@@ -1920,38 +1879,54 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
   const bool isFirstRoot = dr2[0] < dr2[1];
   if(isFirstRoot)
   {
-    DS  = dS1[0];
-    DS1 = dS2[0];
+    dS[0]  = dS1[0];
+    dS[1] = dS2[0];
+    
+    for(int iP=0; iP<6; iP++)
+    {
+      dsdr[0][iP] = dS1dR1[0][iP];
+      dsdr[1][iP] = dS1dR2[0][iP];
+      dsdr[2][iP] = dS2dR1[0][iP];
+      dsdr[3][iP] = dS2dR2[0][iP];
+    }
   }
   else
   {
-    DS  = dS1[1];
-    DS1 = dS2[1];    
+    dS[0]  = dS1[1];
+    dS[1] = dS2[1];
+    
+    for(int iP=0; iP<6; iP++)
+    {
+      dsdr[0][iP] = dS1dR1[1][iP];
+      dsdr[1][iP] = dS1dR2[1][iP];
+      dsdr[2][iP] = dS2dR1[1][iP];      
+      dsdr[3][iP] = dS2dR2[1][iP];
+    }    
   }
-  
+    
   //find correct parts of helices
   int n1(0);
   int n2(0);
-  float dzMin = fabs( (z01-z02) + DS*pz1 - DS1*pz2 );
+  float dzMin = fabs( (z01-z02) + dS[0]*pz1 - dS[1]*pz2 );
   const float pi2(6.283185307f);
   
   //TODO optimise for loops for neutral particles
-  const float& i1Float = -bq1/pi2*(z01/pz1+DS);
+  const float& i1Float = -bq1/pi2*(z01/pz1+dS[0]);
   for(int di1=-1; di1<=1; di1++)
   {
     int i1(0);
     if(!isStraight1)
       i1 = int(i1Float) + di1;
     
-    const float& i2Float = ( ((z01-z02) + (DS+pi2*i1/bq1)*pz1)/pz2 - DS1) * bq2/pi2;
+    const float& i2Float = ( ((z01-z02) + (dS[0]+pi2*i1/bq1)*pz1)/pz2 - dS[1]) * bq2/pi2;
     for(int di2 = -1; di2<=1; di2++)
     {
       int i2(0);
       if(!isStraight2)
         i2 = int(i2Float) + di2;
       
-      const float& z1 = z01 + (DS+pi2*i1/bq1)*pz1;
-      const float& z2 = z02 + (DS1+pi2*i2/bq2)*pz2;
+      const float& z1 = z01 + (dS[0]+pi2*i1/bq1)*pz1;
+      const float& z2 = z02 + (dS[1]+pi2*i2/bq2)*pz2;
       const float& dz = fabs( z1-z2 );
     
       if(dz < dzMin)
@@ -1960,33 +1935,34 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
         n2 = i2;
         dzMin = dz;
       }
-//     std::cout << "!!!!! " << dz << std::endl;
     }
   }
 
   if(!isStraight1)
-    DS += float(n1)*pi2/bq1;
+    dS[0] += float(n1)*pi2/bq1;
   if(!isStraight2)
-    DS1 += float(n2)*pi2/bq2;
+    dS[1] += float(n2)*pi2/bq2;
 
+#if 0
+  //z correction
   {
-    const float& bs1 = bq1*DS;
-    const float& bs2 = bq2*DS1;
+    const float& bs1 = bq1*dS[0];
+    const float& bs2 = bq2*dS[1];
     
     float sss = sin(bs1), ccc = cos(bs1);
     const float& xr1 = sss*px1 - ccc*py1;
     const float& yr1 = ccc*px1 + sss*py1;
 
-    sss = sin(bs2), ccc = cos(bs2);
-    const float& xr2 = sss*px2 - ccc*py2;
-    const float& yr2 = ccc*px2 + sss*py2;
+    float sss1 = sin(bs2), ccc1 = cos(bs2);
+    const float& xr2 = sss1*px2 - ccc1*py2;
+    const float& yr2 = ccc1*px2 + sss1*py2;
     
     const float& br = xr1*xr2 + yr1*yr2;
     const float& dx0mod = dx0*bq1*bq2 + py1*bq2 - py2*bq1;
     const float& dy0mod = dy0*bq1*bq2 - px1*bq2 + px2*bq1;
     const float& ar1 = dx0mod*xr1 + dy0mod*yr1;
     const float& ar2 = dx0mod*xr2 + dy0mod*yr2;
-    const float& cz = (z01 - z02) + DS*pz1 - DS1*pz2;
+    const float& cz = (z01 - z02) + dS[0]*pz1 - dS[1]*pz2;
     
     const float& kz11 =  - ar1 + bq1*br + bq2*pz1*pz1;
     const float& kz12 =  -bq2*(br+pz1*pz2);
@@ -1998,71 +1974,247 @@ void KFParticleBase::GetDStoParticleBz( float B, const KFParticleBase &p,
     float sz2(0.f);
     if( fabs(delta) > 1.e-16f )
     {
-      sz1 = -cz*(pz1*bq2*kz22 - pz2*bq1*kz12) / delta;
-      sz2 = -cz*(pz2*bq1*kz11 - pz1*bq2*kz21) / delta;
+      const float aaa1 = -cz*(pz1*bq2*kz22 - pz2*bq1*kz12);
+      const float aaa2 = -cz*(pz2*bq1*kz11 - pz1*bq2*kz21);
+      sz1 = aaa1 / delta;
+      sz2 = aaa2 / delta;
+      
+      const float dkz11dr1[6] = {-(bq1*bq2*xr1), -(bq1*bq2*yr1), 0, 
+                                 -ccc*dy0mod - dx0mod*sss + bq2*yr1 + bq1*(sss*xr2 + ccc*yr2), 
+                                  ccc*dx0mod - dy0mod*sss - bq2*xr1 + bq1*(-ccc*xr2 + sss*yr2), 2*bq2*pz1};
+      const float dkz11dr2[6] = {bq1*bq2*xr1, bq1*bq2*yr1, 0, -bq1*yr1 + bq1*(sss1*xr1 + ccc1*yr1), bq1*xr1 + bq1*(-ccc1*xr1 + sss1*yr1), 0};
+      
+      const float dkz12dr1[6] = {0, 0, 0, -bq2*(sss*xr2 + ccc*yr2), -bq2*(-ccc*xr2 + sss*yr2), -bq2*pz2};
+      const float dkz12dr2[6] = {0, 0, 0, -bq2*(sss1*xr1 + ccc1*yr1), -bq2*(-ccc1*xr1 + sss1*yr1), -bq2*pz1};
+      
+      const float dkz21dr1[6] = {0, 0, 0, bq1*(sss*xr2 + ccc*yr2), bq1*(-ccc*xr2 + sss*yr2), -bq1*pz2};
+      const float dkz21dr2[6] = {0, 0, 0, bq1*(sss1*xr1 + ccc1*yr1), bq1*(-ccc1*xr1 + sss1*yr1), -bq1*pz1};
+      
+      const float dkz22dr1[6] = {bq1*bq2*xr2, bq1*bq2*yr2, 0, -bq2*yr2 - bq2*(sss*xr2 + ccc*yr2), bq2*xr2 - bq2*(-ccc*xr2 + sss*yr2), 0};
+      const float dkz22dr2[6] = {-bq1*bq2*xr2, -bq1*bq2*yr2, 0, 
+                                  ccc1*dy0mod + dx0mod*sss1 - bq2*(sss1*xr1 + ccc1*yr1) + bq1*yr2, 
+                                 -ccc1*dx0mod + dy0mod*sss1 - bq1*xr2 - bq2*(-ccc1*xr1 + sss1*yr1), -2*bq1*pz2};
+      
+      const float dczdr1[6] = {0, 0, 1, 0, 0, dS[0]};
+      const float dczdr2[6] = {0, 0, -1, 0, 0, -dS[1]};
+      
+      float daaa1dr1[6];
+      float daaa1dr2[6];
+      float daaa2dr2[6];
+      float daaa2dr1[6];
+      float dDeltadr1[6];
+      float dDeltadr2[6];
+      for(int iP=0; iP<6; iP++)
+      {
+        daaa1dr1[iP] = -( dczdr1[iP]*(pz1*bq2*kz22 - pz2*bq1*kz12) + cz*( bq2*pz1*dkz22dr1[iP] - bq1*pz2*dkz12dr1[iP] ) );
+        daaa1dr2[iP] = -( dczdr2[iP]*(pz1*bq2*kz22 - pz2*bq1*kz12) + cz*( bq2*pz1*dkz22dr2[iP] - bq1*pz2*dkz12dr2[iP] ) );
+
+        daaa2dr2[iP] = -( dczdr2[iP]*(pz2*bq1*kz11 - pz1*bq2*kz21) + cz*( bq1*pz2*dkz11dr2[iP] - bq2*pz1*dkz21dr2[iP] ) );
+        daaa2dr1[iP] = -( dczdr1[iP]*(pz2*bq1*kz11 - pz1*bq2*kz21) + cz*( bq1*pz2*dkz11dr1[iP] - bq2*pz1*dkz21dr1[iP] ) );
+        
+        dDeltadr1[iP] = kz11*dkz22dr1[iP] + dkz11dr1[iP]*kz11 - kz12*dkz21dr1[iP] - dkz12dr1[iP]*kz21;
+        dDeltadr2[iP] = kz11*dkz22dr2[iP] + dkz11dr2[iP]*kz11 - kz12*dkz21dr2[iP] - dkz12dr2[iP]*kz21;
+      }
+      daaa1dr1[5] -= cz*bq2*kz22;
+      daaa1dr2[5] += cz*bq1*kz12;
+      daaa2dr2[5] -= cz*bq1*kz11;
+      daaa2dr1[5] += cz*bq2*kz21;
+      
+      //derivatives by s0 and s1
+      const float dkz11ds0 = bq1*(dy0mod*xr1 - dx0mod*yr1 +  bq1*(xr2*yr1 - xr1*yr2));
+      const float dkz11ds1 = bq1*bq2*( xr1*yr2 - xr2*yr1 );
+      const float dkz12ds0 = bq2*bq1*( xr1*yr2 - xr2*yr1 );
+      const float dkz12ds1 = bq2*bq2*( xr2*yr1 - xr1*yr2 );
+      const float dkz21ds0 = bq1*bq1*( xr2*yr1 - xr1*yr2 );
+      const float dkz21ds1 = bq1*bq2*( xr1*yr2 - xr2*yr1 );
+      const float dkz22ds0 = bq1*bq2*( xr1*yr2 - xr2*yr1 );      
+      const float dkz22ds1 = -bq2*( dy0mod*xr2 - dx0mod*yr2 - bq2*(xr2*yr1 - xr1*yr2) );
+      const float dczds0   = pz1;
+      const float dczds1   = -pz2;
+      const float da1ds0   = -( dczds0*(pz1*bq2*kz22 - pz2*bq1*kz12) + cz*(pz1*bq2*dkz22ds0 - pz2*bq1*dkz12ds0));
+      const float da1ds1   = -( dczds1*(pz1*bq2*kz22 - pz2*bq1*kz12) + cz*(pz1*bq2*dkz22ds1 - pz2*bq1*dkz12ds1));
+      const float da2ds0   = -( dczds0*(pz2*bq1*kz11 - pz1*bq2*kz21) + cz*(pz2*bq1*dkz11ds0 - pz1*bq2*dkz21ds0));
+      const float da2ds1   = -( dczds1*(pz2*bq1*kz11 - pz1*bq2*kz21) + cz*(pz2*bq1*dkz11ds1 - pz1*bq2*dkz21ds1));
+      const float dDeltads0 = kz11*dkz22ds0 + dkz11ds0*kz11 - kz12*dkz21ds0 - dkz12ds0*kz21;
+      const float dDeltads1 = kz11*dkz22ds1 + dkz11ds1*kz11 - kz12*dkz21ds1 - dkz12ds1*kz21;
+      
+      const float dsz1ds0 = da1ds0/delta - aaa1*dDeltads0/(delta*delta);
+      const float dsz1ds1 = da1ds1/delta - aaa1*dDeltads1/(delta*delta);
+      const float dsz2ds0 = da2ds0/delta - aaa2*dDeltads0/(delta*delta);
+      const float dsz2ds1 = da2ds1/delta - aaa2*dDeltads1/(delta*delta);
+      
+      float dszdr[4][6];
+      for(int iP=0; iP<6; iP++)
+      {
+        dszdr[0][iP] = dsz1ds0*dsdr[0][iP] + dsz1ds1*dsdr[2][iP];
+        dszdr[1][iP] = dsz1ds0*dsdr[1][iP] + dsz1ds1*dsdr[3][iP];
+        dszdr[2][iP] = dsz2ds0*dsdr[0][iP] + dsz2ds1*dsdr[2][iP];
+        dszdr[3][iP] = dsz2ds0*dsdr[1][iP] + dsz2ds1*dsdr[3][iP];
+      }
+      
+      for(int iP=0; iP<6; iP++)
+      {
+        dsdr[0][iP] += daaa1dr1[iP]/delta - aaa1*dDeltadr1[iP]/(delta*delta) + dszdr[0][iP];
+        dsdr[1][iP] += daaa1dr2[iP]/delta - aaa1*dDeltadr2[iP]/(delta*delta) + dszdr[1][iP];
+        dsdr[2][iP] += daaa2dr1[iP]/delta - aaa2*dDeltadr1[iP]/(delta*delta) + dszdr[2][iP];
+        dsdr[3][iP] += daaa2dr2[iP]/delta - aaa2*dDeltadr2[iP]/(delta*delta) + dszdr[3][iP];
+      }
+    }
+    
+    dS[0]  += sz1;
+    dS[1] += sz2;
+  }
+#endif
+  //Line correction
+  {
+    const float& bs1 = bq1*dS[0];
+    const float& bs2 = bq2*dS[1];
+    float sss = sin(bs1), ccc = cos(bs1);
+    
+    const bool& bs1Big = fabs(bs1) > 1.e-8f;
+    const bool& bs2Big = fabs(bs2) > 1.e-8f;
+    
+    float sB(0.f), cB(0.f);
+    if(bs1Big)
+    {
+      sB = sss/bq1;
+      cB = (1.f-ccc)/bq1;
+    }
+    else
+    {
+      sB = ((1.f-bs1*kOvSqr6)*(1.f+bs1*kOvSqr6)*dS[0]);
+      cB = .5f*sB*bs1;
+    }
+  
+    const float& x1 = x01 + sB*px1 + cB*py1;
+    const float& y1 = y01 - cB*px1 + sB*py1;
+    const float& z1 = z01 + dS[0]*pz1;
+    const float& ppx1 =  ccc*px1 + sss*py1;
+    const float& ppy1 = -sss*px1 + ccc*py1;
+    const float& ppz1 = pz1;
+    
+    float sss1 = sin(bs2), ccc1 = cos(bs2);
+
+    float sB1(0.f), cB1(0.f);
+    if(bs2Big)
+    {
+      sB1 = sss1/bq2;
+      cB1 = (1.f-ccc1)/bq2;
+    }
+    else
+    {
+      sB1 = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*dS[1]);
+      cB1 = .5f*sB1*bs2;
     }
 
-    DS  += sz1;
-    DS1 += sz2;
-  }
+    const float& x2 = x02 + sB1*px2 + cB1*py2;
+    const float& y2 = y02 - cB1*px2 + sB1*py2;
+    const float& z2 = z02 + dS[1]*pz2;
+    const float& ppx2 =  ccc1*px2 + sss1*py2;
+    const float& ppy2 = -sss1*px2 + ccc1*py2;    
+    const float& ppz2 = pz2;
+
+    const float& p12  = ppx1*ppx1 + ppy1*ppy1 + ppz1*ppz1;
+    const float& p22  = ppx2*ppx2 + ppy2*ppy2 + ppz2*ppz2;
+    const float& lp1p2 = ppx1*ppx2 + ppy1*ppy2 + ppz1*ppz2;
+
+    const float& dx = (x2 - x1);
+    const float& dy = (y2 - y1);
+    const float& dz = (z2 - z1);
+    
+    const float& ldrp1 = ppx1*dx + ppy1*dy + ppz1*dz;
+    const float& ldrp2 = ppx2*dx + ppy2*dy + ppz2*dz;
+
+    float detp =  lp1p2*lp1p2 - p12*p22;
+    if( fabs(detp)<1.e-4 ) detp = 1; //TODO correct!!!
+    
+    //dsdr calculation
+    const float a1 = ldrp2*lp1p2 - ldrp1*p22;
+    const float a2 = ldrp2*p12 - ldrp1*lp1p2;
+    const float lp1p2_ds0 = bq1*( ppx2*ppy1 - ppy2*ppx1);
+    const float lp1p2_ds1 = bq2*( ppx1*ppy2 - ppy1*ppx2);
+    const float ldrp1_ds0 = -p12 + bq1*(ppy1*dx - ppx1*dy);
+    const float ldrp1_ds1 =  lp1p2;
+    const float ldrp2_ds0 = -lp1p2;
+    const float ldrp2_ds1 =  p22 + bq2*(ppy2*dx - ppx2*dy);
+    const float detp_ds0 = 2*lp1p2*lp1p2_ds0;
+    const float detp_ds1 = 2*lp1p2*lp1p2_ds1;
+    const float a1_ds0 = ldrp2_ds0*lp1p2 + ldrp2*lp1p2_ds0 - ldrp1_ds0*p22;
+    const float a1_ds1 = ldrp2_ds1*lp1p2 + ldrp2*lp1p2_ds1 - ldrp1_ds1*p22;
+    const float a2_ds0 = ldrp2_ds0*p12 - ldrp1_ds0*lp1p2 - ldrp1*lp1p2_ds0;
+    const float a2_ds1 = ldrp2_ds1*p12 - ldrp1_ds1*lp1p2 - ldrp1*lp1p2_ds1;
+    
+    const float dsl1ds0 = a1_ds0/detp - a1*detp_ds0/(detp*detp);
+    const float dsl1ds1 = a1_ds1/detp - a1*detp_ds1/(detp*detp);
+    const float dsl2ds0 = a2_ds0/detp - a2*detp_ds0/(detp*detp);
+    const float dsl2ds1 = a2_ds1/detp - a2*detp_ds1/(detp*detp);
+    
+    float dsldr[4][6];
+    for(int iP=0; iP<6; iP++)
+    {
+      dsldr[0][iP] = dsl1ds0*dsdr[0][iP] + dsl1ds1*dsdr[2][iP];
+      dsldr[1][iP] = dsl1ds0*dsdr[1][iP] + dsl1ds1*dsdr[3][iP];
+      dsldr[2][iP] = dsl2ds0*dsdr[0][iP] + dsl2ds1*dsdr[2][iP];
+      dsldr[3][iP] = dsl2ds0*dsdr[1][iP] + dsl2ds1*dsdr[3][iP];
+    }
+    
+    for(int iDS=0; iDS<4; iDS++)
+      for(int iP=0; iP<6; iP++)
+        dsdr[iDS][iP] += dsldr[iDS][iP];
+      
+    const float lp1p2_dr0[6] = {0, 0, 0, ccc*ppx2 - ppy2*sss, ccc*ppy2 + ppx2*sss, pz2};
+    const float lp1p2_dr1[6] = {0, 0, 0, ccc1*ppx1 - ppy1*sss1, ccc1*ppy1 + ppx1*sss1, pz1};
+    const float ldrp1_dr0[6] = {-ppx1, -ppy1, -pz1,  cB*ppy1 - ppx1*sB + ccc*dx - sss*dy, -cB*ppx1-ppy1*sB + sss*dx + ccc*dy, -dS[0]*pz1 + dz};
+    const float ldrp1_dr1[6] = { ppx1,  ppy1,  pz1, -cB1*ppy1 + ppx1*sB1, cB1*ppx1 + ppy1*sB1, dS[1]*pz1};
+    const float ldrp2_dr0[6] = {-ppx2, -ppy2, -pz2, cB*ppy2 - ppx2*sB, -cB*ppx2-ppy2*sB, -dS[0]*pz2};
+    const float ldrp2_dr1[6] = {ppx2, ppy2, pz2, -cB1*ppy2 + ppx2*sB1 + ccc1*dx- sss1*dy, cB1*ppx2 + ppy2*sB1 + sss1*dx + ccc1*dy, dz + dS[1]*pz2};
+    const float p12_dr0[6] = {0, 0, 0, 2*px1, 2*py1, 2*pz1};
+    const float p22_dr1[6] = {0, 0, 0, 2*px2, 2*py2, 2*pz2};
+    float a1_dr0[6], a1_dr1[6], a2_dr0[6], a2_dr1[6], detp_dr0[6], detp_dr1[6];
+    for(int iP=0; iP<6; iP++)
+    {
+      a1_dr0[iP] = ldrp2_dr0[iP]*lp1p2 + ldrp2*lp1p2_dr0[iP] - ldrp1_dr0[iP]*p22;
+      a1_dr1[iP] = ldrp2_dr1[iP]*lp1p2 + ldrp2*lp1p2_dr1[iP] - ldrp1_dr1[iP]*p22 - ldrp1*p22_dr1[iP];
+      a2_dr0[iP] = ldrp2_dr0[iP]*p12 + ldrp2*p12_dr0[iP] - ldrp1_dr0[iP]*lp1p2 - ldrp1*lp1p2_dr0[iP];
+      a2_dr1[iP] = ldrp2_dr1[iP]*p12 - ldrp1_dr1[iP]*lp1p2 - ldrp1*lp1p2_dr1[iP];
+      detp_dr0[iP] = 2*lp1p2*lp1p2_dr0[iP] - p12_dr0[iP]*p22;
+      detp_dr1[iP] = 2*lp1p2*lp1p2_dr1[iP] - p12*p22_dr1[iP];
+      
+      dsdr[0][iP] += a1_dr0[iP]/detp - a1*detp_dr0[iP]/(detp*detp);
+      dsdr[1][iP] += a1_dr1[iP]/detp - a1*detp_dr1[iP]/(detp*detp);
+      dsdr[2][iP] += a2_dr0[iP]/detp - a2*detp_dr0[iP]/(detp*detp);
+      dsdr[3][iP] += a2_dr1[iP]/detp - a2*detp_dr1[iP]/(detp*detp);
+    }
+    
+    dS[0] += (ldrp2*lp1p2 - ldrp1*p22) /detp;
+    dS[1] += (ldrp2*p12 - ldrp1*lp1p2)/detp;    
+  }  
 }
 
-void KFParticleBase::GetDStoParticleBy( float B, const KFParticleBase &p, 
-                                        float &DS, float &DS1 ) const
+void KFParticleBase::GetDStoParticleBy( float B,  const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const
 { 
   const float param1[6] = { fP[0], -fP[2], fP[1], fP[3], -fP[5], fP[4] };
   const float param2[6] = { p.fP[0], -p.fP[2], p.fP[1], p.fP[3], -p.fP[5], p.fP[4] };
   
-  return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
-}
-
-float KFParticleBase::GetDStoPointCBM( const float xyz[] ) const
-{
-  //* Transport the particle on dS, output to P[],C[], for CBM field
-
-  float dS = 0;
-  //Linear approximation
-
-  float fld[3];
-  GetFieldValue( fP, fld );
-// 
-//   GetDStoParticleBy(fld[1],p,dS,dS1);
-  dS = GetDStoPointLine( xyz );
-
-  if( fQ==0 ){
-    return dS;
+  float dsdrBz[4][6];
+  for(int i1=0; i1<4; i1++)
+    for(int i2=0; i2<6; i2++)
+      dsdrBz[i1][i2] = 0;
+  
+  GetDStoParticleBz(B, p, dS, dsdrBz, param1, param2);
+  
+  for(int iDs=0; iDs<4; iDs++)
+  {
+    dsdr[iDs][0] =  dsdrBz[iDs][0];
+    dsdr[iDs][1] =  dsdrBz[iDs][2];
+    dsdr[iDs][2] = -dsdrBz[iDs][1];
+    dsdr[iDs][3] =  dsdrBz[iDs][3];
+    dsdr[iDs][4] =  dsdrBz[iDs][5];
+    dsdr[iDs][5] = -dsdrBz[iDs][4];
   }
-
-  dS = GetDStoPointBy( fld[1],xyz );
-
-//  const float &px   = fP[3], &py   = fP[4], &pz   = fP[5];
-
-
-  // construct coefficients 
-// int NIt;
-//   for(int i=0; i<100; i++)
-//   {
-// //std::cout << "  dS temp "<<dS << std::endl;
-//     float x[3], dx[3], ddx[3];
-// 
-//     GetDSIter(*this, dS, x, dx, ddx);
-// 
-//     float dr[3] = { x[0] - xyz[0], x[1] - xyz[1], x[2] - xyz[2] };
-// 
-//     float dS0 = dS;
-// 
-//     float f  = dx[0] * dr[0] + dx[1] * dr[1] + dx[2] * dr[2];
-//     float df  = ddx[0] * dr[0] + ddx[1] * dr[1] + ddx[2] * dr[2] + dx[0]*dx[0] + dx[1]*dx[1] + dx[2]*dx[2];
-// 
-//     dS = dS - f/df;
-//     NIt++;
-//     if(fabs(dS - dS0) < fabs(dS)*0.001) break;
-//   }
-//std::cout << "NIt  " << NIt <<"  dS  "<<  dS << std::endl;
-  return dS;
 }
 
-void KFParticleBase::GetDStoParticleLine( const KFParticleBase &p, float &dS, float &dS1 ) const
+void KFParticleBase::GetDStoParticleLine( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const
 {
   float p12 = fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5];
   float p22 = p.fP[3]*p.fP[3] + p.fP[4]*p.fP[4] + p.fP[5]*p.fP[5];
@@ -2074,30 +2226,78 @@ void KFParticleBase::GetDStoParticleLine( const KFParticleBase &p, float &dS, fl
   float detp =  p1p2*p1p2 - p12*p22;
   if( fabs(detp)<1.e-4 ) detp = 1; //TODO correct!!!
 
-  dS  = (drp2*p1p2 - drp1*p22) /detp;
-  dS1 = (drp2*p12  - drp1*p1p2)/detp;
+  dS[0]  = (drp2*p1p2 - drp1*p22) /detp;
+  dS[1] = (drp2*p12  - drp1*p1p2)/detp;
+  
+  const float x01 = fP[0];
+  const float y01 = fP[1];
+  const float z01 = fP[2];
+  const float px1 = fP[3];
+  const float py1 = fP[4];
+  const float pz1 = fP[5];
+
+  const float x02 = p.fP[0];
+  const float y02 = p.fP[1];
+  const float z02 = p.fP[2];
+  const float px2 = p.fP[3];
+  const float py2 = p.fP[4];
+  const float pz2 = p.fP[5];
+  
+  const float drp1_dr1[6] = {-px1, -py1, -pz1, -x01 + x02, -y01 + y02, -z01 + z02};
+  const float drp1_dr2[6] = {px1, py1, pz1, 0, 0, 0};
+  const float drp2_dr1[6] = {-px2, -py2, -pz2, 0, 0, 0};
+  const float drp2_dr2[6] = {px2, py2, pz2, -x01 + x02, -y01 + y02, -z01 + z02};
+  const float dp1p2_dr1[6] = {0, 0, 0, px2, py2, pz2};
+  const float dp1p2_dr2[6] = {0, 0, 0, px1, py1, pz1};
+  const float dp12_dr1[6] = {0, 0, 0, 2*px1, 2*py1, 2*pz1};
+  const float dp12_dr2[6] = {0, 0, 0, 0, 0, 0};
+  const float dp22_dr1[6] = {0, 0, 0, 0, 0, 0};
+  const float dp22_dr2[6] = {0, 0, 0, 2*px2, 2*py2, 2*pz2};
+  const float ddetp_dr1[6] = {0, 0, 0, -2*p22*px1 + 2*p1p2*px2, -2*p22*py1 + 2*p1p2*py2, -2*p22*pz1 + 2*p1p2*pz2};
+  const float ddetp_dr2[6] = {0, 0, 0, 2*p1p2*px1 - 2*p12*px2,   2*p1p2*py1 - 2*p12*py2, 2*p1p2*pz1 - 2*p12*pz2};
+  
+  
+  float da1_dr1[6], da1_dr2[6], da2_dr1[6], da2_dr2[6];
+  
+  const float a1 = drp2*p1p2 - drp1*p22;
+  const float a2 = drp2*p12  - drp1*p1p2;
+  for(int i=0; i<6; i++)
+  {
+    da1_dr1[i] = drp2_dr1[i]*p1p2 + drp2*dp1p2_dr1[i] - drp1_dr1[i]*p22 - drp1*dp22_dr1[i];
+    da1_dr2[i] = drp2_dr2[i]*p1p2 + drp2*dp1p2_dr2[i] - drp1_dr2[i]*p22 - drp1*dp22_dr2[i];
+    
+    da2_dr1[i] = drp2_dr1[i]*p12 + drp2*dp12_dr1[i] - drp1_dr1[i]*p1p2 - drp1*dp1p2_dr1[i];
+    da2_dr2[i] = drp2_dr2[i]*p12 + drp2*dp12_dr2[i] - drp1_dr2[i]*p1p2 - drp1*dp1p2_dr2[i];
+    
+    dsdr[0][i] = da1_dr1[i]/detp - a1/(detp*detp)*ddetp_dr1[i];
+    dsdr[1][i] = da1_dr2[i]/detp - a1/(detp*detp)*ddetp_dr2[i];
+    
+    dsdr[2][i] = da2_dr1[i]/detp - a2/(detp*detp)*ddetp_dr1[i];
+    dsdr[3][i] = da2_dr2[i]/detp - a2/(detp*detp)*ddetp_dr2[i];
+  }
 }
 
-void KFParticleBase::GetDStoParticleCBM( const KFParticleBase &p, float &dS, float &dS1 ) const
+void KFParticleBase::GetDStoParticleCBM( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const
 {
   //* Transport the particle on dS, output to P[],C[], for CBM field
 
   float fld[3];
   GetFieldValue( fP, fld );
 
-  GetDStoParticleBy(fld[1],p,dS,dS1);
+  GetDStoParticleBy(fld[1], p, dS, dsdr);
 }
 
-void KFParticleBase::TransportCBM( float dS, 
-				 float P[], float C[] ) const
+void KFParticleBase::TransportCBM( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1) const
 {  
   //* Transport the particle on dS, output to P[],C[], for CBM field
  
   if( fQ==0 ){
-    TransportLine( dS, P, C );
+    TransportLine( dS, dsdr, P, C, dsdr1, F, F1 );
     return;
   }
 
+  if( fabs(dS*fP[5]) > 1000.f ) dS = 0;
+  
   const float kCLight = 0.000299792458;
 
   float c = fQ*kCLight;
@@ -2204,19 +2404,46 @@ void KFParticleBase::TransportCBM( float dS,
   P[0] = fP[0] + mJ[0][3]*px + mJ[0][4]*py + mJ[0][5]*pz;
   P[1] = fP[1] + mJ[1][3]*px + mJ[1][4]*py + mJ[1][5]*pz;
   P[2] = fP[2] + mJ[2][3]*px + mJ[2][4]*py + mJ[2][5]*pz;
-  P[3] =        mJ[3][3]*px + mJ[3][4]*py + mJ[3][5]*pz;
-  P[4] =        mJ[4][3]*px + mJ[4][4]*py + mJ[4][5]*pz;
-  P[5] =        mJ[5][3]*px + mJ[5][4]*py + mJ[5][5]*pz;
+  P[3] =         mJ[3][3]*px + mJ[3][4]*py + mJ[3][5]*pz;
+  P[4] =         mJ[4][3]*px + mJ[4][4]*py + mJ[4][5]*pz;
+  P[5] =         mJ[5][3]*px + mJ[5][4]*py + mJ[5][5]*pz;
   P[6] = fP[6];
   P[7] = fP[7];
 
-  MultQSQt( mJ[0], fC, C);
+  float mJds[6][6];
+  for( Int_t i=0; i<6; i++ ) for( Int_t j=0; j<6; j++) mJds[i][j]=0;
 
+  if(fabs(dS)>0)
+  {
+    mJds[0][3]= 1 - 3*ssyy/dS;          mJds[0][4]= 2*ssx/dS; mJds[0][5]= (4.f*ssyyy-2*ssy)/dS;
+    mJds[1][3]= -2.f*ssz/dS;            mJds[1][4]= 1;        mJds[1][5]= (2.f*ssx + 3.*ssyz)/dS;
+    mJds[2][3]= (2.f*ssy-4.f*ssyyy)/dS; mJds[2][4]=-2*ssx/dS; mJds[2][5]= 1 - 3.f*ssyy/dS;
+  
+    mJds[3][3]= -2.f*syy/dS;            mJds[3][4]= sx/dS;    mJds[3][5]= 3.f*syyy/dS - sy/dS;
+    mJds[4][3]= -sz/dS;                 mJds[4][4]=0;         mJds[4][5] = sx/dS + 2.f*syz/dS;
+    mJds[5][3]= sy/dS - 3.f*syyy/dS;    mJds[5][4]=-sx/dS;    mJds[5][5]= -2.f*syy/dS;
+  }
+  
+  for(int i1=0; i1<6; i1++)
+    for(int i2=0; i2<6; i2++)
+      mJ[i1][i2] += mJds[i1][3]*px*dsdr[i2] + mJds[i1][4]*py*dsdr[i2] + mJds[i1][5]*pz*dsdr[i2];
+  
+  MultQSQt( mJ[0], fC, C, 8);
+  
+  if(F)
+  {
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+        F[i*6+j] = mJ[i][j];
+
+    for(int i1=0; i1<6; i1++)
+      for(int i2=0; i2<6; i2++)
+        F1[i1*6 + i2] = mJds[i1][3]*px*dsdr1[i2] + mJds[i1][4]*py*dsdr1[i2] + mJds[i1][5]*pz*dsdr1[i2];
+  }
 }
 
 
-void KFParticleBase::TransportBz( float b, float t,
-				     float p[], float e[] ) const 
+void KFParticleBase::TransportBz( float b, float t, const float* dsdr, float p[], float e[], float* dsdr1, float* F, float* F1 ) const 
 { 
   //* Transport the particle on dS, output to P[],C[], for Bz field
  
@@ -2276,7 +2503,7 @@ void KFParticleBase::TransportBz( float b, float t,
   return;
   */
 
-  float 
+/*  float 
     c6=fC[6], c7=fC[7], c8=fC[8], c17=fC[17], c18=fC[18],
     c24 = fC[24], c31 = fC[31];
 
@@ -2332,7 +2559,43 @@ void KFParticleBase::TransportBz( float b, float t,
   e[32]= c*fC[32] - s*c31;
   e[33]= fC[33];
   e[34]= fC[34];
-  e[35]= fC[35];     
+  e[35]= fC[35];   */  
+
+  float mJ[8][8];
+  for( Int_t i=0; i<8; i++ ) for( Int_t j=0; j<8; j++) mJ[i][j]=0;
+
+  for(int i=0; i<8; i++) mJ[i][i]=1;
+  mJ[0][3] =  sB; mJ[0][4] = cB;
+  mJ[1][3] = -cB; mJ[1][4] = sB;
+  mJ[2][5] = t;
+  mJ[3][3] =  c; mJ[3][4] = s;
+  mJ[4][3] = -s; mJ[4][4] = c;
+  
+  
+  float mJds[6][6];
+  for( Int_t i=0; i<6; i++ ) for( Int_t j=0; j<6; j++) mJds[i][j]=0;
+  mJds[0][3] =  c; mJds[0][4] = s;
+  mJds[1][3] = -s; mJds[1][4] = c;
+  mJds[2][5] = 1;
+  mJds[3][3] = -b*s; mJds[3][4] =  b*c;
+  mJds[4][3] = -b*c; mJds[4][4] = -b*s;
+  
+  for(int i1=0; i1<6; i1++)
+    for(int i2=0; i2<6; i2++)
+      mJ[i1][i2] += mJds[i1][3]*px*dsdr[i2] + mJds[i1][4]*py*dsdr[i2] + mJds[i1][5]*pz*dsdr[i2];
+  
+  MultQSQt( mJ[0], fC, e, 8);
+  
+  if(F)
+  {
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+        F[i*6+j] = mJ[i][j];
+
+    for(int i1=0; i1<6; i1++)
+      for(int i2=0; i2<6; i2++)
+        F1[i1*6 + i2] = mJds[i1][3]*px*dsdr1[i2] + mJds[i1][4]*py*dsdr1[i2] + mJds[i1][5]*pz*dsdr1[i2];
+  }
 }
 
 
@@ -2348,7 +2611,11 @@ float KFParticleBase::GetDistanceFromVertex( const float vtx[] ) const
   //* Calculate distance from vertex [cm]
 
   float mP[8], mC[36];  
-  Transport( GetDStoPoint(vtx), mP, mC );
+  
+  float dsdr[6] = {0.f};
+  const float dS = GetDStoPoint(vtx, dsdr);
+  
+  Transport( dS, dsdr, mP, mC );
   float d[3]={ vtx[0]-mP[0], vtx[1]-mP[1], vtx[2]-mP[2]};
   return sqrt( d[0]*d[0]+d[1]*d[1]+d[2]*d[2] );
 }
@@ -2357,12 +2624,13 @@ float KFParticleBase::GetDistanceFromParticle( const KFParticleBase &p )
   const
 { 
   //* Calculate distance to other particle [cm]
-
-  float dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
+  
+  float dsdr[4][6];
+  float dS[2];
+  GetDStoParticle( p, dS, dsdr );   
   float mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
   float dx = mP[0]-mP1[0]; 
   float dy = mP[1]-mP1[1]; 
   float dz = mP[2]-mP1[2]; 
@@ -2384,88 +2652,95 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
 
   float mP[8];
   float mC[36];
+  float dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
+  const float dS = GetDStoPoint(v, dsdr);
+  float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
+  float F[36], F1[36];
+  for(int i2=0; i2<36; i2++)
+  {
+    F[i2]  = 0;
+    F1[i2] = 0;
+  }
+  Transport( dS, dsdr, mP, mC, dsdp, F, F1 );  
+
+  if(Cv)
+  {
+    float VFT[3][6];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<6; j++)
+      {
+        VFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          VFT[i][j] +=  Cv[IJ(i,k)] * F1[j*6+k];
+        }
+      }
   
-  Transport( GetDStoPoint(v), mP, mC );  
-
-// for(int i=0; i<8; i++)
-// mP[i] = fP[i];
-// 
-// for(int i=0; i<36; i++)
-// mC[i] = fC[i];
-
-  float d[3]={ v[0]-mP[0], v[1]-mP[1], v[2]-mP[2]};
-
-  float sigmaS = .1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/
-                             (mP[3]*mP[3]+mP[4]*mP[4]+mP[5]*mP[5])  );
-
-   
-  float h[3] = { mP[3]*sigmaS, mP[4]*sigmaS, mP[5]*sigmaS };       
-  
-  float mSi[6] = 
-    { mC[0] +h[0]*h[0], 
-      mC[1] +h[1]*h[0], mC[2] +h[1]*h[1], 
-      mC[3] +h[2]*h[0], mC[4] +h[2]*h[1], mC[5] +h[2]*h[2] };
-
-  if( Cv ){
-    mSi[0]+=Cv[0];
-    mSi[1]+=Cv[1];
-    mSi[2]+=Cv[2];
-    mSi[3]+=Cv[3];
-    mSi[4]+=Cv[4];
-    mSi[5]+=Cv[5];
+    float FVFT[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        FVFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
+        }
+      }
+    mC[0] += FVFT[0][0] + Cv[0];
+    mC[1] += FVFT[1][0] + Cv[1];
+    mC[2] += FVFT[1][1] + Cv[2];
+    mC[3] += FVFT[2][0] + Cv[3];
+    mC[4] += FVFT[2][1] + Cv[4];
+    mC[5] += FVFT[2][2] + Cv[5];
   }
   
-//   float mS[6]; 
-// 
-//   mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4]; 
-//   mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5]; 
-//   mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3]; 
-//   mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3]; 
-//   mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4]; 
-//   mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];          
-// 
-//   float s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] ); 
-//   s = ( s > 1.E-20 )  ?1./s :0;    
-// 
-//   return sqrt( fabs(s*( ( mS[0]*d[0] + mS[1]*d[1] + mS[3]*d[2])*d[0] 
-//                        +( mS[1]*d[0] + mS[2]*d[1] + mS[4]*d[2])*d[1] 
-//                        +( mS[3]*d[0] + mS[4]*d[1] + mS[5]*d[2])*d[2] ))/2);
-
-  InvertCholetsky3(mSi);
+  InvertCholetsky3(mC);
   
-  float chi2 = ( ( mSi[0]*d[0] + mSi[1]*d[1] + mSi[3]*d[2])*d[0]
-                +( mSi[1]*d[0] + mSi[2]*d[1] + mSi[4]*d[2])*d[1]
-                +( mSi[3]*d[0] + mSi[4]*d[1] + mSi[5]*d[2])*d[2] );
+  float d[3]={ v[0]-mP[0], v[1]-mP[1], v[2]-mP[2]};
 
-  return chi2;
+  return ( ( mC[0]*d[0] + mC[1]*d[1] + mC[3]*d[2])*d[0]
+           +(mC[1]*d[0] + mC[2]*d[1] + mC[4]*d[2])*d[1]
+           +(mC[3]*d[0] + mC[4]*d[1] + mC[5]*d[2])*d[2] );
 }
 
 
-float KFParticleBase::GetDeviationFromParticle( const KFParticleBase &p ) 
-  const
+float KFParticleBase::GetDeviationFromParticle( const KFParticleBase &p ) const
 { 
   //* Calculate Chi2 deviation from other particle
-
-  float dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
-  float mP1[8], mC1[36];
-  p.Transport( dS1, mP1, mC1 ); 
-
-  float d[3]={ fP[0]-mP1[0], fP[1]-mP1[1], fP[2]-mP1[2]};
-
-  float sigmaS = .1+10.*sqrt( (d[0]*d[0]+d[1]*d[1]+d[2]*d[2])/
-					(mP1[3]*mP1[3]+mP1[4]*mP1[4]+mP1[5]*mP1[5])  );
-
-  float h[3] = { mP1[3]*sigmaS, mP1[4]*sigmaS, mP1[5]*sigmaS };       
   
-  mC1[0] +=h[0]*h[0];
-  mC1[1] +=h[1]*h[0]; 
-  mC1[2] +=h[1]*h[1]; 
-  mC1[3] +=h[2]*h[0]; 
-  mC1[4] +=h[2]*h[1];
-  mC1[5] +=h[2]*h[2];
+  float ds[2] = {0.f,0.f};
+  float dsdr[4][6];
+  float F1[36], F2[36], F3[36], F4[36];
+  for(int i1=0; i1<36; i1++)
+  {
+    F1[i1] = 0;
+    F2[i1] = 0;
+    F3[i1] = 0;
+    F4[i1] = 0;
+  }
+  GetDStoParticle( p, ds, dsdr );
+  
+  float V0Tmp[36] = {0.};
+  float V1Tmp[36] = {0.};
 
-  return GetDeviationFromVertex( mP1, mC1 )*sqrt(2./1.);
+  
+  float mP1[8], mC1[36];
+  float mP2[8], mC2[36]; 
+  
+    Transport(ds[0], dsdr[0], mP1, mC1, dsdr[1], F1, F2);
+  p.Transport(ds[1], dsdr[3], mP2, mC2, dsdr[2], F4, F3);
+  
+  MultQSQt(F2, p.fC, V0Tmp, 6);
+  MultQSQt(F3,   fC, V1Tmp, 6);
+      
+  for(int iC=0; iC<6; iC++)
+    mC1[iC] += V0Tmp[iC] + mC2[iC] + V1Tmp[iC];
+
+  float d[3]={ mP2[0]-mP1[0], mP2[1]-mP1[1], mP2[2]-mP1[2]};
+  
+  return ( ( mC1[0]*d[0] + mC1[1]*d[1] + mC1[3]*d[2])*d[0]
+           +(mC1[1]*d[0] + mC1[2]*d[1] + mC1[4]*d[2])*d[1]
+           +(mC1[3]*d[0] + mC1[4]*d[1] + mC1[5]*d[2])*d[2] );
 }
 
 
@@ -2474,36 +2749,16 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
 {
   //* Subtract the particle from the vertex  
 
-  float fld[3];  
-  {
-    GetFieldValue( Vtx.fP, fld );
-    const float kCLight =  0.000299792458;
-    fld[0]*=kCLight; fld[1]*=kCLight; fld[2]*=kCLight;
-  }
-
+  //TODO this solution is an approximation, find exact solution
   float m[8];
   float mCm[36];
-
-  if( Vtx.fIsLinearized ){
-    GetMeasurement( Vtx.fVtxGuess, m, mCm );
-  } else {
-    GetMeasurement( Vtx.fP, m, mCm );
-  }
-
-  float mV[6];
-
-  mV[ 0] = mCm[ 0];
-  mV[ 1] = mCm[ 1];
-  mV[ 2] = mCm[ 2];
-  mV[ 3] = mCm[ 3];
-  mV[ 4] = mCm[ 4];
-  mV[ 5] = mCm[ 5];
-     
+  float D[3][3];
+  Vtx.GetMeasurement( *this, m, mCm, D );
   //* 
 	    
-  float mS[6] = { mV[0]-Vtx.fC[0], 
-                  mV[1]-Vtx.fC[1], mV[2]-Vtx.fC[2], 
-                  mV[3]-Vtx.fC[3], mV[4]-Vtx.fC[4], mV[5]-Vtx.fC[5] };
+  float mS[6] = { mCm[0] - Vtx.fC[0] + (D[0][0] + D[0][0]), 
+                  mCm[1] - Vtx.fC[1] + (D[1][0] + D[0][1]), mCm[2] - Vtx.fC[2] + (D[1][1] + D[1][1]), 
+                  mCm[3] - Vtx.fC[3] + (D[2][0] + D[0][2]), mCm[4] - Vtx.fC[4] + (D[1][2] + D[2][1]), mCm[5] - Vtx.fC[5] + (D[2][2] + D[2][2]) };
   InvertCholetsky3(mS);   
     
   //* Residual (measured - estimated)
@@ -2530,11 +2785,9 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
     
   //* New estimation of the vertex position r += K*zeta
     
-  float dChi2 = -(mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
-    +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
-    +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
-
-  if( Vtx.fChi2 - dChi2 < 0 ) return;
+  float dChi2 = ((mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+              +  (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+              +  (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]);
 
   for(Int_t i=0;i<3;++i) 
     Vtx.fP[i] -= k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];       
@@ -2555,19 +2808,17 @@ void KFParticleBase::SubtractFromVertex(  KFParticleBase &Vtx ) const
 void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
 {
   //* Subtract the particle from the mother particle  
+  //TODO this solution is an approximation, find exact solution
 
   float m[8];
   float mV[36];
 
-  if( Vtx.fIsLinearized ){
-    GetMeasurement( Vtx.fVtxGuess, m, mV );
-  } else {
-    GetMeasurement( Vtx.fP, m, mV );
-  }
+  float D[3][3];
+  Vtx.GetMeasurement( *this, m, mV, D );
 
-  float mS[6]= { mV[0] - Vtx.fC[0],
-                 mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
-                 mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
+  float mS[6] = { mV[0] - Vtx.fC[0] + (D[0][0] + D[0][0]), 
+                  mV[1] - Vtx.fC[1] + (D[1][0] + D[0][1]), mV[2] - Vtx.fC[2] + (D[1][1] + D[1][1]), 
+                  mV[3] - Vtx.fC[3] + (D[2][0] + D[0][2]), mV[4] - Vtx.fC[4] + (D[1][2] + D[2][1]), mV[5] - Vtx.fC[5] + (D[2][2] + D[2][2]) };
   InvertCholetsky3(mS);
 
   //* Residual (measured - estimated)
@@ -2623,7 +2874,7 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
 
     //* New covariance matrix C -= K*(mCH')'
 
-  float ffC[28] = { -mV[ 0],
+  float ffC[28] = {-mV[ 0],
                    -mV[ 1], -mV[ 2],
                    -mV[ 3], -mV[ 4], -mV[ 5],
                     mV[ 6],  mV[ 7],  mV[ 8], Vtx.fC[ 9],
@@ -2642,15 +2893,28 @@ void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
   Vtx.fQ    -= GetQ();
   Vtx.fSFromDecay = 0;    
   Vtx.fChi2 -= ((mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
-               +(mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
-               +(mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]);     
+             +  (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+             +  (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]);     
 }
 
-void KFParticleBase::TransportLine( float dS, 
-				       float P[], float C[] ) const 
+void KFParticleBase::TransportLine( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const 
 {
-  //* Transport the particle as a straight line
+  //* Transport the particle as a straight line 
+  
+  float mJ[8][8];
+  for( Int_t i=0; i<8; i++ ) for( Int_t j=0; j<8; j++) mJ[i][j]=0;
 
+  mJ[0][0]=1; mJ[0][1]=0; mJ[0][2]=0; mJ[0][3]=dS;  mJ[0][4]=0;  mJ[0][5]=0;
+  mJ[1][0]=0; mJ[1][1]=1; mJ[1][2]=0; mJ[1][3]=0;     mJ[1][4]=dS;  mJ[1][5]=0;
+  mJ[2][0]=0; mJ[2][1]=0; mJ[2][2]=1; mJ[2][3]=0; mJ[2][4]=0; mJ[2][5]=dS;
+  
+  mJ[3][0]=0; mJ[3][1]=0; mJ[3][2]=0; mJ[3][3]=1;   mJ[3][4]=0;  mJ[3][5]=0;
+  mJ[4][0]=0; mJ[4][1]=0; mJ[4][2]=0; mJ[4][3]=0;     mJ[4][4]=1;   mJ[4][5]=0;
+  mJ[5][0]=0; mJ[5][1]=0; mJ[5][2]=0; mJ[5][3]=0; mJ[5][4]=0; mJ[5][5]=1;
+  mJ[6][6] = mJ[7][7] = 1;
+  
+  float px = fP[3], py = fP[4], pz = fP[5];
+  
   P[0] = fP[0] + dS*fP[3];
   P[1] = fP[1] + dS*fP[4];
   P[2] = fP[2] + dS*fP[5];
@@ -2659,438 +2923,29 @@ void KFParticleBase::TransportLine( float dS,
   P[5] = fP[5];
   P[6] = fP[6];
   P[7] = fP[7];
- 
-  float c6  = fC[ 6] + dS*fC[ 9];
-  float c11 = fC[11] + dS*fC[14];
-  float c17 = fC[17] + dS*fC[20];
-  float sc13 = dS*fC[13];
-  float sc18 = dS*fC[18];
-  float sc19 = dS*fC[19];
-
-  C[ 0] = fC[ 0] + dS*( fC[ 6] + c6  );
-  C[ 2] = fC[ 2] + dS*( fC[11] + c11 );
-  C[ 5] = fC[ 5] + dS*( fC[17] + c17 );
-
-  C[ 7] = fC[ 7] + sc13;
-  C[ 8] = fC[ 8] + sc18;
-  C[ 9] = fC[ 9];
-
-  C[12] = fC[12] + sc19;
-
-  C[ 1] = fC[ 1] + dS*( fC[10] + C[ 7] );
-  C[ 3] = fC[ 3] + dS*( fC[15] + C[ 8] );
-  C[ 4] = fC[ 4] + dS*( fC[16] + C[12] ); 
-  C[ 6] = c6;
-
-  C[10] = fC[10] + sc13;
-  C[11] = c11;
-
-  C[13] = fC[13];
-  C[14] = fC[14];
-  C[15] = fC[15] + sc18;
-  C[16] = fC[16] + sc19;
-  C[17] = c17;
   
-  C[18] = fC[18];
-  C[19] = fC[19];
-  C[20] = fC[20];
-  C[21] = fC[21] + dS*fC[24];
-  C[22] = fC[22] + dS*fC[25];
-  C[23] = fC[23] + dS*fC[26];
-
-  C[24] = fC[24];
-  C[25] = fC[25];
-  C[26] = fC[26];
-  C[27] = fC[27];
-  C[28] = fC[28] + dS*fC[31];
-  C[29] = fC[29] + dS*fC[32];
-  C[30] = fC[30] + dS*fC[33];
-
-  C[31] = fC[31];
-  C[32] = fC[32];
-  C[33] = fC[33];
-  C[34] = fC[34];
-  C[35] = fC[35]; 
-}
-
-void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
-					  const KFParticleBase &daughter2, float Bz  )
-{ 
-  //* Create gamma
+  float mJds[6][6];
+  for( Int_t i=0; i<6; i++ ) for( Int_t j=0; j<6; j++) mJds[i][j]=0;
   
-  const KFParticleBase *daughters[2] = { &daughter1, &daughter2};
-
-  float v0[3];
+  mJds[0][3]= 1; 
+  mJds[1][4]= 1;
+  mJds[2][5]= 1;
   
-  if( !fIsLinearized ){
-    float ds, ds1;
-    float m[8];
-    float mCd[36];       
-    daughter1.GetDStoParticle(daughter2, ds, ds1);      
-    daughter1.Transport( ds, m, mCd );
-    fP[0] = m[0];
-    fP[1] = m[1];
-    fP[2] = m[2];
-    daughter2.Transport( ds1, m, mCd );
-    fP[0] = .5*( fP[0] + m[0] );
-    fP[1] = .5*( fP[1] + m[1] );
-    fP[2] = .5*( fP[2] + m[2] );
-  } else {
-    fP[0] = fVtxGuess[0];
-    fP[1] = fVtxGuess[1];
-    fP[2] = fVtxGuess[2];
+  for(int i1=0; i1<6; i1++)
+    for(int i2=0; i2<6; i2++)
+      mJ[i1][i2] += mJds[i1][3]*px*dsdr[i2] + mJds[i1][4]*py*dsdr[i2] + mJds[i1][5]*pz*dsdr[i2];
+  MultQSQt( mJ[0], fC, C, 8);
+  
+  if(F)
+  {
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+        F[i*6+j] = mJ[i][j];
+
+    for(int i1=0; i1<6; i1++)
+      for(int i2=0; i2<6; i2++)
+        F1[i1*6 + i2] = mJds[i1][3]*px*dsdr1[i2] + mJds[i1][4]*py*dsdr1[i2] + mJds[i1][5]*pz*dsdr1[i2];
   }
-
-  float daughterP[2][8], daughterC[2][36];
-  float vtxMom[2][3];
-
-  int nIter = fIsLinearized ?1 :2;
-
-  for( int iter=0; iter<nIter; iter++){
-
-    v0[0] = fP[0];
-    v0[1] = fP[1];
-    v0[2] = fP[2];
-    
-    fAtProductionVertex = 0;
-    fSFromDecay = 0;
-    fP[0] = v0[0];
-    fP[1] = v0[1];
-    fP[2] = v0[2];
-    fP[3] = 0;
-    fP[4] = 0;
-    fP[5] = 0;
-    fP[6] = 0;
-    fP[7] = 0;
-
-  
-    // fit daughters to the vertex guess  
-    
-    {  
-      for( int id=0; id<2; id++ ){
-	
-	float *p = daughterP[id];
-	float *mC = daughterC[id];
-	
-	daughters[id]->GetMeasurement( v0, p, mC );
-	
-	float mAi[6];
-        for(int i=0; i<6; i++) mAi[i] = mC[i];
-        InvertCholetsky3(mAi);	
-        
-	float mB[3][3];
-	
-	mB[0][0] = mC[ 6]*mAi[0] + mC[ 7]*mAi[1] + mC[ 8]*mAi[3];
-	mB[0][1] = mC[ 6]*mAi[1] + mC[ 7]*mAi[2] + mC[ 8]*mAi[4];
-	mB[0][2] = mC[ 6]*mAi[3] + mC[ 7]*mAi[4] + mC[ 8]*mAi[5];
-	
-	mB[1][0] = mC[10]*mAi[0] + mC[11]*mAi[1] + mC[12]*mAi[3];
-	mB[1][1] = mC[10]*mAi[1] + mC[11]*mAi[2] + mC[12]*mAi[4];
-	mB[1][2] = mC[10]*mAi[3] + mC[11]*mAi[4] + mC[12]*mAi[5];
-	
-	mB[2][0] = mC[15]*mAi[0] + mC[16]*mAi[1] + mC[17]*mAi[3];
-	mB[2][1] = mC[15]*mAi[1] + mC[16]*mAi[2] + mC[17]*mAi[4];
-	mB[2][2] = mC[15]*mAi[3] + mC[16]*mAi[4] + mC[17]*mAi[5];
-	
-	float z[3] = { v0[0]-p[0], v0[1]-p[1], v0[2]-p[2] };
-	
-	vtxMom[id][0] = p[3] + mB[0][0]*z[0] + mB[0][1]*z[1] + mB[0][2]*z[2];
-	vtxMom[id][1] = p[4] + mB[1][0]*z[0] + mB[1][1]*z[1] + mB[1][2]*z[2];
-	vtxMom[id][2] = p[5] + mB[2][0]*z[0] + mB[2][1]*z[1] + mB[2][2]*z[2];
-	
-	daughters[id]->Transport( daughters[id]->GetDStoPoint(v0), p, mC );
-      
-      }      
-      
-    } // fit daughters to guess
-
-    
-    // fit new vertex
-    {
-      
-      float mpx0 =  vtxMom[0][0]+vtxMom[1][0];
-      float mpy0 =  vtxMom[0][1]+vtxMom[1][1];
-      float mpt0 = sqrt(mpx0*mpx0 + mpy0*mpy0);
-      // float a0 = atan2(mpy0,mpx0);
-      
-      float ca0 = mpx0/mpt0;
-      float sa0 = mpy0/mpt0;
-      float r[3] = { v0[0], v0[1], v0[2] };
-      float mC[3][3] = {{1000., 0 ,   0  },
-			 {0,  1000.,   0  },
-			 {0,     0, 1000. } };
-      float chi2=0;
-      
-      for( int id=0; id<2; id++ ){		
-	const float kCLight = 0.000299792458;
-	float q = Bz*daughters[id]->GetQ()*kCLight;
-	float px0 = vtxMom[id][0];
-	float py0 = vtxMom[id][1];
-	float pz0 = vtxMom[id][2];
-	float pt0 = sqrt(px0*px0+py0*py0);
-	float mG[3][6], mB[3], mH[3][3];
-	// r = {vx,vy,vz};
-	// m = {x,y,z,Px,Py,Pz};
-	// V = daughter.C
-	// G*m + B = H*r;
-	// q*x + Py - q*vx - sin(a)*Pt = 0
-	// q*y - Px - q*vy + cos(a)*Pt = 0
-	// (Px*cos(a) + Py*sin(a) ) (vz -z) - Pz( cos(a)*(vx-x) + sin(a)*(vy-y)) = 0
-	
-	mG[0][0] = q;
-	mG[0][1] = 0;
-	mG[0][2] = 0;
-	mG[0][3] =   -sa0*px0/pt0;
-	mG[0][4] = 1 -sa0*py0/pt0;
-	mG[0][5] = 0;	
-	mH[0][0] = q;
-	mH[0][1] = 0;
-	mH[0][2] = 0;      
-	mB[0] = py0 - sa0*pt0 - mG[0][3]*px0 - mG[0][4]*py0 ;
-	
-	// q*y - Px - q*vy + cos(a)*Pt = 0
-	
-	mG[1][0] = 0;
-	mG[1][1] = q;
-	mG[1][2] = 0;
-	mG[1][3] = -1 + ca0*px0/pt0;
-	mG[1][4] =    + ca0*py0/pt0;
-	mG[1][5] = 0;      
-	mH[1][0] = 0;
-	mH[1][1] = q;
-	mH[1][2] = 0;      
-	mB[1] = -px0 + ca0*pt0 - mG[1][3]*px0 - mG[1][4]*py0 ;
-	
-	// (Px*cos(a) + Py*sin(a) ) (z -vz) - Pz( cos(a)*(x-vx) + sin(a)*(y-vy)) = 0
-      
-	mG[2][0] = -pz0*ca0;
-	mG[2][1] = -pz0*sa0;
-	mG[2][2] =  px0*ca0 + py0*sa0;
-	mG[2][3] = 0;
-	mG[2][4] = 0;
-	mG[2][5] = 0;
-	
-	mH[2][0] = mG[2][0];
-	mH[2][1] = mG[2][1];
-	mH[2][2] = mG[2][2];
-	
-	mB[2] = 0;
-	
-	// fit the vertex
-
-	// V = GVGt
-
-	float mGV[3][6];
-	float mV[6];
-	float m[3];
-	for( int i=0; i<3; i++ ){
-	  m[i] = mB[i];
-	  for( int k=0; k<6; k++ ) m[i]+=mG[i][k]*daughterP[id][k];
-	}
-	for( int i=0; i<3; i++ ){
-	  for( int j=0; j<6; j++ ){
-	    mGV[i][j] = 0;
-	    for( int k=0; k<6; k++ ) mGV[i][j]+=mG[i][k]*daughterC[id][ IJ(k,j) ];
-	  }
-	}
-	for( int i=0, k=0; i<3; i++ ){
-	  for( int j=0; j<=i; j++,k++ ){
-	    mV[k] = 0;
-	    for( int l=0; l<6; l++ ) mV[k]+=mGV[i][l]*mG[j][l];
-	  }
-	}
-	
-      
-	//* CHt
-	
-	float mCHt[3][3];
-	float mHCHt[6];
-	float mHr[3];
-	for( int i=0; i<3; i++ ){	  
-	  mHr[i] = 0;
-	  for( int k=0; k<3; k++ ) mHr[i]+= mH[i][k]*r[k];
-	}
-      
-	for( int i=0; i<3; i++ ){
-	  for( int j=0; j<3; j++){
-	    mCHt[i][j] = 0;
-	    for( int k=0; k<3; k++ ) mCHt[i][j]+= mC[i][k]*mH[j][k];
-	  }
-	}
-
-	for( int i=0, k=0; i<3; i++ ){
-	  for( int j=0; j<=i; j++, k++ ){
-	    mHCHt[k] = 0;
-	    for( int l=0; l<3; l++ ) mHCHt[k]+= mH[i][l]*mCHt[l][j];
-	  }
-	}
-      
-	float mS[6] = { mHCHt[0]+mV[0], 
-			   mHCHt[1]+mV[1], mHCHt[2]+mV[2], 
-			   mHCHt[3]+mV[3], mHCHt[4]+mV[4], mHCHt[5]+mV[5]    };	
-      
-
-	InvertCholetsky3(mS);
-	
-	//* Residual (measured - estimated)
-    
-	float zeta[3] = { m[0]-mHr[0], m[1]-mHr[1], m[2]-mHr[2] };
-            
-	//* Kalman gain K = mCH'*S
-    
-	float k[3][3];
-      
-	for(Int_t i=0;i<3;++i){
-	  k[i][0] = mCHt[i][0]*mS[0] + mCHt[i][1]*mS[1] + mCHt[i][2]*mS[3];
-	  k[i][1] = mCHt[i][0]*mS[1] + mCHt[i][1]*mS[2] + mCHt[i][2]*mS[4];
-	  k[i][2] = mCHt[i][0]*mS[3] + mCHt[i][1]*mS[4] + mCHt[i][2]*mS[5];
-	}
-
-	//* New estimation of the vertex position r += K*zeta
-    
-	for(Int_t i=0;i<3;++i) 
-	  r[i] = r[i] + k[i][0]*zeta[0] + k[i][1]*zeta[1] + k[i][2]*zeta[2];
-      
-	//* New covariance matrix C -= K*(mCH')'
-
-	for(Int_t i=0;i<3;++i){
-	  for(Int_t j=0;j<=i;++j){
-	    mC[i][j] = mC[i][j] - (k[i][0]*mCHt[j][0] + k[i][1]*mCHt[j][1] + k[i][2]*mCHt[j][2]);
-	    mC[j][i] = mC[i][j];
-	  }
-	}
-
-	//* Calculate Chi^2 
-	
-	chi2 += ( ( mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2] )*zeta[0]
-		  +(mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2] )*zeta[1]
-		  +(mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2] )*zeta[2]  );  
-      }
-    
-      // store vertex
-    
-      fNDF  = 2;
-      fChi2 = chi2;
-      for( int i=0; i<3; i++ ) fP[i] = r[i];
-      for( int i=0,k=0; i<3; i++ ){
-	for( int j=0; j<=i; j++,k++ ){
-	  fC[k] = mC[i][j];
-	}
-      }
-    }
-
-  } // iterations
-
-  // now fit daughters to the vertex
-  
-  fQ     =  0;
-  fSFromDecay = 0;    
-
-  for(Int_t i=3;i<8;++i) fP[i]=0.;
-  for(Int_t i=6;i<35;++i) fC[i]=0.;
-  fC[35] = 100.;
-
-  for( int id=0; id<2; id++ ){
-
-    float *p = daughterP[id];
-    float *mC = daughterC[id];      
-    daughters[id]->GetMeasurement( v0, p, mC );
-
-    const float *m = fP, *mV = fC;
-    
-    float mAi[6];
-    for(int i=0; i<6; i++) mAi[i] = mC[i];
-    InvertCholetsky3(mAi);
-    
-    float mB[4][3];
-
-    mB[0][0] = mC[ 6]*mAi[0] + mC[ 7]*mAi[1] + mC[ 8]*mAi[3];
-    mB[0][1] = mC[ 6]*mAi[1] + mC[ 7]*mAi[2] + mC[ 8]*mAi[4];
-    mB[0][2] = mC[ 6]*mAi[3] + mC[ 7]*mAi[4] + mC[ 8]*mAi[5];
-    
-    mB[1][0] = mC[10]*mAi[0] + mC[11]*mAi[1] + mC[12]*mAi[3];
-    mB[1][1] = mC[10]*mAi[1] + mC[11]*mAi[2] + mC[12]*mAi[4];
-    mB[1][2] = mC[10]*mAi[3] + mC[11]*mAi[4] + mC[12]*mAi[5];
-    
-    mB[2][0] = mC[15]*mAi[0] + mC[16]*mAi[1] + mC[17]*mAi[3];
-    mB[2][1] = mC[15]*mAi[1] + mC[16]*mAi[2] + mC[17]*mAi[4];
-    mB[2][2] = mC[15]*mAi[3] + mC[16]*mAi[4] + mC[17]*mAi[5];
-    
-    mB[3][0] = mC[21]*mAi[0] + mC[22]*mAi[1] + mC[23]*mAi[3];
-    mB[3][1] = mC[21]*mAi[1] + mC[22]*mAi[2] + mC[23]*mAi[4];
-    mB[3][2] = mC[21]*mAi[3] + mC[22]*mAi[4] + mC[23]*mAi[5];    
-
-
-    float z[3] = { m[0]-p[0], m[1]-p[1], m[2]-p[2] };
-
-//     {
-//       float mAV[6] = { mC[0]-mV[0], mC[1]-mV[1], mC[2]-mV[2], 
-// 			  mC[3]-mV[3], mC[4]-mV[4], mC[5]-mV[5] };
-//       
-//       float mAVi[6];
-//       if( !InvertSym3(mAV, mAVi) ){
-// 	float dChi2 = ( +(mAVi[0]*z[0] + mAVi[1]*z[1] + mAVi[3]*z[2])*z[0]
-// 			   +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
-// 			   +(mAVi[3]*z[0] + mAVi[4]*z[1] + mAVi[5]*z[2])*z[2] );
-// 	fChi2+= fabs( dChi2 );
-//       }
-//       fNDF  += 2;
-//     }
-
-    //* Add the daughter momentum to the particle momentum
- 
-    fP[3]+= p[3] + mB[0][0]*z[0] + mB[0][1]*z[1] + mB[0][2]*z[2];
-    fP[4]+= p[4] + mB[1][0]*z[0] + mB[1][1]*z[1] + mB[1][2]*z[2];
-    fP[5]+= p[5] + mB[2][0]*z[0] + mB[2][1]*z[1] + mB[2][2]*z[2];
-    fP[6]+= p[6] + mB[3][0]*z[0] + mB[3][1]*z[1] + mB[3][2]*z[2];
-  
-    float d0, d1, d2;
-   
-    d0= mB[0][0]*mV[0] + mB[0][1]*mV[1] + mB[0][2]*mV[3] - mC[ 6];
-    d1= mB[0][0]*mV[1] + mB[0][1]*mV[2] + mB[0][2]*mV[4] - mC[ 7];
-    d2= mB[0][0]*mV[3] + mB[0][1]*mV[4] + mB[0][2]*mV[5] - mC[ 8];
-
-    //fC[6]+= mC[ 6] + d0;
-    //fC[7]+= mC[ 7] + d1;
-    //fC[8]+= mC[ 8] + d2;
-    fC[9]+= mC[ 9] + d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-
-    d0= mB[1][0]*mV[0] + mB[1][1]*mV[1] + mB[1][2]*mV[3] - mC[10];
-    d1= mB[1][0]*mV[1] + mB[1][1]*mV[2] + mB[1][2]*mV[4] - mC[11];
-    d2= mB[1][0]*mV[3] + mB[1][1]*mV[4] + mB[1][2]*mV[5] - mC[12];
-
-    //fC[10]+= mC[10]+ d0;
-    //fC[11]+= mC[11]+ d1;
-    //fC[12]+= mC[12]+ d2;
-    fC[13]+= mC[13]+ d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-    fC[14]+= mC[14]+ d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-
-    d0= mB[2][0]*mV[0] + mB[2][1]*mV[1] + mB[2][2]*mV[3] - mC[15];
-    d1= mB[2][0]*mV[1] + mB[2][1]*mV[2] + mB[2][2]*mV[4] - mC[16];
-    d2= mB[2][0]*mV[3] + mB[2][1]*mV[4] + mB[2][2]*mV[5] - mC[17];
-
-    //fC[15]+= mC[15]+ d0;
-    //fC[16]+= mC[16]+ d1;
-    //fC[17]+= mC[17]+ d2;
-    fC[18]+= mC[18]+ d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-    fC[19]+= mC[19]+ d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-    fC[20]+= mC[20]+ d0*mB[2][0] + d1*mB[2][1] + d2*mB[2][2];
-
-    d0= mB[3][0]*mV[0] + mB[3][1]*mV[1] + mB[3][2]*mV[3] - mC[21];
-    d1= mB[3][0]*mV[1] + mB[3][1]*mV[2] + mB[3][2]*mV[4] - mC[22];
-    d2= mB[3][0]*mV[3] + mB[3][1]*mV[4] + mB[3][2]*mV[5] - mC[23];
-
-    //fC[21]+= mC[21] + d0;
-    //fC[22]+= mC[22] + d1;
-    //fC[23]+= mC[23] + d2;
-    fC[24]+= mC[24] + d0*mB[0][0] + d1*mB[0][1] + d2*mB[0][2];
-    fC[25]+= mC[25] + d0*mB[1][0] + d1*mB[1][1] + d2*mB[1][2];
-    fC[26]+= mC[26] + d0*mB[2][0] + d1*mB[2][1] + d2*mB[2][2];
-    fC[27]+= mC[27] + d0*mB[3][0] + d1*mB[3][1] + d2*mB[3][2];
-  }
-
-//  SetMassConstraint(0,0);
-  SetNonlinearMassConstraint(0);
 }
 
 void KFParticleBase::GetArmenterosPodolanski(KFParticleBase& positive, KFParticleBase& negative, float QtAlfa[2] )
@@ -3274,12 +3129,11 @@ void KFParticleBase::InvertCholetsky3(float a[6])
   a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
 }
 
-void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[] )
+void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[], const int kN )
 {
   //* Matrix multiplication Q*S*Q^T, Q - square matrix, S - symmetric
 
-  const Int_t kN= 8;
-  float mA[kN*kN];
+  float* mA = new float[kN*kN];
   
   for( Int_t i=0, ij=0; i<kN; i++ ){
     for( Int_t j=0; j<kN; j++, ++ij ){
@@ -3295,6 +3149,8 @@ void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[] )
       for( Int_t k=0; k<kN; k++ )  SOut[ij] += Q[ i*kN+k ] * mA[ k*kN+j ];
     }
   }
+  
+  if(mA) delete [] mA;
 }
 
 // 72-charachters line to define the printer border

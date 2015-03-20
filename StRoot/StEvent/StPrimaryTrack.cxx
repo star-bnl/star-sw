@@ -91,6 +91,7 @@ void StPrimaryTrack::Streamer(TBuffer &R__b)
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StPrimaryTrack& track) {
     os << *((StTrack *) &track);
+    if (! track.geometry()) return os;
     Double_t charge = track.geometry()->charge();
     StThreeVectorD g3 = track.geometry()->momentum(); // p of global track
     os << Form(" q/pT %8.3f eta %8.3f phi %8.3f",

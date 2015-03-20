@@ -824,6 +824,7 @@ class KFPartEfficiencies: public TNamed
   };
 
   void PrintEff(){
+    std::ios_base::fmtflags original_flags = std::cout.flags();
     std::cout.setf(std::ios::fixed);
     std::cout.setf(std::ios::showpoint);
     std::cout.precision(3);
@@ -857,6 +858,7 @@ class KFPartEfficiencies: public TNamed
              << "  | " << std::setw(6) << mc2.counters[iC]
              << "  | " << std::setw(6) << mc3.counters[iC]  << std::endl;
     }
+    std::cout.flags(original_flags); 
   };
 
   friend std::fstream & operator<<(std::fstream &strm, KFPartEfficiencies &a) {

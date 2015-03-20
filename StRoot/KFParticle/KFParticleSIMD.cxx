@@ -22,18 +22,15 @@ float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
 static const float_v Zero = 0.f;
 static const float_v One = 1.f;
 
-KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2, Bool_t gamma ): KFParticleBaseSIMD()
+KFParticleSIMD::KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2 ): KFParticleBaseSIMD()
 #ifdef NonhomogeneousField
 , fField()
 #endif
 {
-  if (!gamma) {
-    KFParticleSIMD mother;
-    mother+= d1;
-    mother+= d2;
-    *this = mother;
-  } else
-    ConstructGamma(d1, d2);
+  KFParticleSIMD mother;
+  mother+= d1;
+  mother+= d2;
+  *this = mother;
 }
 
 void KFParticleSIMD::Create( const float_v Param[], const float_v Cov[], float_v Charge, float_v mass /*Int_t PID*/ )
@@ -387,7 +384,6 @@ KFParticleSIMD::KFParticleSIMD( const KFPVertex &vertex ): KFParticleBaseSIMD()
   fNDF = 2*vertex.GetNContributors() - 3;
   fQ = Zero;
   fAtProductionVertex = 0;
-  fIsLinearized = 0;
   fSFromDecay = 0;
 }
 
@@ -479,8 +475,6 @@ KFParticleSIMD::KFParticleSIMD( KFParticle &part): KFParticleBaseSIMD()
  fQ = part.GetQ();
  fPDG = part.GetPDG();
  fAtProductionVertex = part.GetAtProductionVertex();
- fIsVtxGuess = 0;
- fIsVtxErrGuess = 0;
 
   SetNDaughters(part.NDaughters());
   for( int i = 0; i < part.NDaughters(); ++i ) {
@@ -505,7 +499,9 @@ float_m KFParticleSIMD::GetDistanceFromVertexXY( const float_v vtx[], const floa
   float_v mP[8];
   float_v mC[36];
   
-  Transport( GetDStoPoint(vtx), mP, mC );  
+  float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
+  const float_v dS = GetDStoPoint(vtx, dsdr);
+  Transport( dS, dsdr, mP, mC );  
 
   float_v dx = mP[0] - vtx[0];
   float_v dy = mP[1] - vtx[1];
@@ -591,11 +587,12 @@ float_v KFParticleSIMD::GetDistanceFromParticleXY( const KFParticleSIMD &p ) con
 {
   //* Calculate distance to other particle [cm]
 
-  float_v dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
+  float_v dS[2];
+  float_v dsdr[4][6];
+  GetDStoParticle( p, dS, dsdr );   
   float_v mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( dS[0], dsdr[0], mP, mC ); 
+  p.Transport( dS[1], dsdr[3], mP1, mC1 ); 
   float_v dx = mP[0]-mP1[0]; 
   float_v dy = mP[1]-mP1[1]; 
   return sqrt(dx*dx+dy*dy);
@@ -605,23 +602,38 @@ float_v KFParticleSIMD::GetDeviationFromParticleXY( const KFParticleSIMD &p ) co
 {
   //* Calculate sqrt(Chi2/ndf) deviation from other particle
 
-  float_v dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
-  float_v mP1[8], mC1[36];
-  p.Transport( dS1, mP1, mC1 ); 
-
-  float_v d[2]={ fP[0]-mP1[0], fP[1]-mP1[1] };
-
-  float_v sigmaS = .1f+10.f*sqrt( (d[0]*d[0]+d[1]*d[1] )/
-					(mP1[3]*mP1[3]+mP1[4]*mP1[4] )  );
-
-  float_v h[2] = { mP1[3]*sigmaS, mP1[4]*sigmaS };       
+  float_v ds[2] = {0.f,0.f};
+  float_v dsdr[4][6];
+  float_v F1[36], F2[36], F3[36], F4[36];
+  for(int i1=0; i1<36; i1++)
+  {
+    F1[i1] = 0;
+    F2[i1] = 0;
+    F3[i1] = 0;
+    F4[i1] = 0;
+  }
+  GetDStoParticle( p, ds, dsdr );
   
-  mC1[0] +=h[0]*h[0];
-  mC1[1] +=h[1]*h[0]; 
-  mC1[2] +=h[1]*h[1]; 
+  float_v V0Tmp[36] ;
+  float_v V1Tmp[36] ;
 
-  return GetDeviationFromVertexXY( mP1, mC1 )*float_v(sqrt(2.f));
+  
+  float_v mP1[8], mC1[36];
+  float_v mP2[8], mC2[36]; 
+  
+    Transport(ds[0], dsdr[0], mP1, mC1, dsdr[1], F1, F2);
+  p.Transport(ds[1], dsdr[3], mP2, mC2, dsdr[2], F4, F3);
+  
+  MultQSQt(F2, p.fC, V0Tmp, 6);
+  MultQSQt(F3,   fC, V1Tmp, 6);
+      
+  for(int iC=0; iC<3; iC++)
+    mC1[iC] += V0Tmp[iC] + mC2[iC] + V1Tmp[iC];
+
+  float_v d[3]={ mP2[0]-mP1[0], mP2[1]-mP1[1], mP2[2]-mP1[2]};
+  
+  return ( ( mC1[0]*d[0] + mC1[1]*d[1])*d[0]
+           +(mC1[1]*d[0] + mC1[2]*d[1])*d[1] );
 }
 
 
@@ -630,12 +642,56 @@ float_v KFParticleSIMD::GetDeviationFromVertexXY( const float_v vtx[], const flo
   //* Calculate sqrt(Chi2/ndf) deviation from vertex
   //* v = [xyz], Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix
 
-  float_v val, err;
-  float_m problem = GetDistanceFromVertexXY( vtx, Cv, val, err );
-  float_v ret = float_v(1.e4f);
-  float_m mask = (problem || (err<float_v(1.e-20)));
-  ret(!mask) = val/err;
-  return ret;
+  float_v mP[8];
+  float_v mC[36];
+  float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
+  const float_v dS = GetDStoPoint(vtx, dsdr);
+  float_v dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0.f, 0.f, 0.f};
+  float_v F[36], F1[36];
+  for(int i2=0; i2<36; i2++)
+  {
+    F[i2]  = 0.f;
+    F1[i2] = 0.f;
+  }
+  Transport( dS, dsdr, mP, mC, dsdp, F, F1 );  
+
+  if(Cv)
+  {
+    float_v VFT[3][6];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<6; j++)
+      {
+        VFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          VFT[i][j] +=  Cv[IJ(i,k)] * F1[j*6+k];
+        }
+      }
+  
+    float_v FVFT[6][6];
+    for(int i=0; i<6; i++)
+      for(int j=0; j<6; j++)
+      {
+        FVFT[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
+        }
+      }
+    mC[0] += FVFT[0][0] + Cv[0];
+    mC[1] += FVFT[1][0] + Cv[1];
+    mC[2] += FVFT[1][1] + Cv[2];
+    mC[3] += FVFT[2][0] + Cv[3];
+    mC[4] += FVFT[2][1] + Cv[4];
+    mC[5] += FVFT[2][2] + Cv[5];
+  }
+  
+  InvertCholetsky3(mC);
+  
+  float_v d[3]={ vtx[0]-mP[0], vtx[1]-mP[1], vtx[2]-mP[2]};
+
+  return ( ( mC[0]*d[0] + mC[1]*d[1] )*d[0]
+           +(mC[1]*d[0] + mC[2]*d[1] )*d[1] );
 }
 
 
@@ -662,11 +718,12 @@ float_v KFParticleSIMD::GetAngle  ( const KFParticleSIMD &p ) const
 {
   //* Calculate the opening angle between two particles
 
-  float_v dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
+  float_v ds[2] = {0.f,0.f};
+  float_v dsdr[4][6];
+  GetDStoParticle( p, ds, dsdr );   
   float_v mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( ds[0], dsdr[0], mP, mC ); 
+  p.Transport( ds[1], dsdr[3], mP1, mC1 ); 
   float_v n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] + mP[5]*mP[5] );
   float_v n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] + mP1[5]*mP1[5] );
   n*=n1;
@@ -685,11 +742,12 @@ float_v KFParticleSIMD::GetAngleXY( const KFParticleSIMD &p ) const
 {
   //* Calculate the opening angle between two particles in XY plane
 
-  float_v dS, dS1;
-  GetDStoParticleXY( p, dS, dS1 );   
+  float_v ds[2] = {0.f,0.f};
+  float_v dsdr[4][6];
+  GetDStoParticle( p, ds, dsdr );   
   float_v mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( ds[0], dsdr[0], mP, mC ); 
+  p.Transport( ds[1], dsdr[3], mP1, mC1 ); 
   float_v n = sqrt( mP[3]*mP[3] + mP[4]*mP[4] );
   float_v n1= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4] );
   n*=n1;
@@ -709,11 +767,12 @@ float_v KFParticleSIMD::GetAngleRZ( const KFParticleSIMD &p ) const
 {
   //* Calculate the opening angle between two particles in RZ plane
 
-  float_v dS, dS1;
-  GetDStoParticle( p, dS, dS1 );   
+  float_v ds[2] = {0.f,0.f};
+  float_v dsdr[4][6];
+  GetDStoParticle( p, ds, dsdr );   
   float_v mP[8], mC[36], mP1[8], mC1[36];
-  Transport( dS, mP, mC ); 
-  p.Transport( dS1, mP1, mC1 ); 
+  Transport( ds[0], dsdr[0], mP, mC ); 
+  p.Transport( ds[1], dsdr[3], mP1, mC1 );  
   float_v nr = sqrt( mP[3]*mP[3] + mP[4]*mP[4] );
   float_v n1r= sqrt( mP1[3]*mP1[3] + mP1[4]*mP1[4]  );
   float_v n = sqrt( nr*nr + mP[5]*mP[5] );
@@ -816,64 +875,4 @@ void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
 {
   for(int i=0; i<nPart; i++)
     GetKFParticle(Part[i],i);
-}
-
-void KFParticleSIMD::GetVertexApproximation(const KFParticleSIMD &particle, float_v* vtxGuess, float_v* vtxErrGuess) const
-{
-  float_v dS(Vc::Zero), dS1(Vc::Zero);
-  float_v par[2][8], cov[2][36];
-  GetDStoParticle(particle,dS,dS1);
-  
-  Transport(dS,par[0],cov[0]);
-  particle.Transport(dS1, par[1], cov[1]);
-  
-  for(int i=0; i<3; i++)
-    vtxGuess[i] = (par[0][i] + par[1][i]) / 2;
-  
-  for(int iP=0; iP<2; iP++)
-  {
-    float_v sigmaS = GetSCorrection( par[iP], vtxGuess );
-    
-    float_v h[3];
-    h[0] = par[iP][3]*sigmaS;
-    h[1] = par[iP][4]*sigmaS;
-    h[2] = par[iP][5]*sigmaS;
-    
-    cov[iP][0] += h[0]*h[0];
-    cov[iP][1] += h[1]*h[0];
-    cov[iP][2] += h[1]*h[1];
-    cov[iP][3] += h[2]*h[0];
-    cov[iP][4] += h[2]*h[1];
-    cov[iP][5] += h[2]*h[2];
-  }
-  
-  float_v mS[6]= { cov[0][0]+cov[1][0], 
-                   cov[0][1]+cov[1][1], cov[0][2]+cov[1][2], 
-                   cov[0][3]+cov[1][3], cov[0][4]+cov[1][4], cov[0][5]+cov[1][5] };
-  InvertCholetsky3(mS);
-
-  float_v zeta[3] = { par[1][0]-par[0][0], par[1][1]-par[0][1], par[1][2]-par[0][2] };    
-
-  float_v mCHt0[3], mCHt1[3], mCHt2[3];
-
-  mCHt0[0]=cov[0][ 0] ;       mCHt1[0]=cov[0][ 1] ;       mCHt2[0]=cov[0][ 3] ;
-  mCHt0[1]=cov[0][ 1] ;       mCHt1[1]=cov[0][ 2] ;       mCHt2[1]=cov[0][ 4] ;
-  mCHt0[2]=cov[0][ 3] ;       mCHt1[2]=cov[0][ 4] ;       mCHt2[2]=cov[0][ 5] ;
-
-
-  //* Kalman gain K = mCH'*S
-  
-  float_v k0[3], k1[3], k2[3];
-  
-  for(Int_t i=0;i<3;++i){
-    k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
-    k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
-    k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
-  }
-  
-  for(Int_t i=0;i<3;++i) 
-  {
-    vtxGuess[i] = par[0][i] + (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
-    vtxErrGuess[i] = sqrt(cov[0][i] - (k0[i]*mCHt0[i] + k1[i]*mCHt1[i] + k2[i]*mCHt2[i] ))*100.f;
-  }
 }

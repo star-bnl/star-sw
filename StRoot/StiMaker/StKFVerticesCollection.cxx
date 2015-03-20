@@ -33,7 +33,9 @@ void StKFVerticesCollection::AddVertex(Double_t x, Double_t y, Double_t z, Doubl
   vtx->Vertex().SetBeamConstraint(x, y, z, sigmaXY, sigmaXY, sigmaZ);
   vtx->Vertex().SetBeamConstraintOff();
   fVertices.AddLast(vtx);
+#if 0 /* removed SetVtxGuess from KFParticle */
   vtx->Vertex().SetVtxGuess(x,y,z);
+#endif
 }
 //________________________________________________________________________________
 void StKFVerticesCollection::operator +=(StKFVerticesCollection &col) {

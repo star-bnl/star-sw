@@ -152,12 +152,18 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
       for (UInt_t i = 0; i < NpVX; i++) {
 	const StPrimaryVertex *vx = pEvent->primaryVertex(i);
 	vx->Print(Form("Vertex: %3i ",i));
+#ifdef StTrackMassFit_hh
+	const StTrackMassFit *pf = vx->parent();
+	if (pf) cout << *pf << endl;
+#endif
 	if (opt.Contains("p",TString::kIgnoreCase)) {
 	  UInt_t nDaughters = vx->numberOfDaughters();
 	  for (UInt_t j = 0; j < nDaughters; j++) {
 	    const StTrack* track = vx->daughter(j);
 	    if (! track) continue;
 	    cout << *((const StPrimaryTrack *)track) << endl;
+	    const StVertex*  vxEnd =  track->endVertex();
+	    if (vxEnd) cout << *vxEnd << endl;
 	  }
 #ifdef StTrackMassFit_hh
 	  UInt_t nMassFits = vx->numberOfMassFits();
@@ -177,9 +183,14 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
     StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
     UInt_t nTracks = trackNode.size();
     StTrackNode *node = 0;
+#if 0
     cout << " Global tracks " << nTracks << endl;
+#endif
     for (UInt_t  i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
+#if 1
+      cout << *node << endl;
+#else
       UInt_t nentries = node->entries();
       for (UInt_t j = 0; j < nentries; j++) {
 	StTrack *track = node->track(j);
@@ -187,13 +198,17 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 	if (track->type() == global) {
 	  StGlobalTrack* gTrack = (StGlobalTrack* ) track;
 	  cout << *gTrack << endl;
+	} else if (track->type() == primary) {
+	  StPrimaryTrack* pTrack = (StPrimaryTrack* ) track;
+	  cout << *pTrack << endl;
 #ifdef StTrackMassFit_hh
-	} else if (track->type() == massFit) {
+	} else if (track->type() == massFit || track->type() == massFitAtVx) {
 	  StTrackMassFit* mTrack = (StTrackMassFit*) track;
 	  cout << *mTrack << endl;
 #endif
 	}
       } 
+#endif
     }
   }
   if (opt.Contains("l3",TString::kIgnoreCase)) {

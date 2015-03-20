@@ -106,8 +106,8 @@ class KFParticlePerformanceBase
   static const int nHistoPartParamQA = 3;
   TH1F *hPartParamQA[KFPartEfficiencies::nParticles][nHistoPartParamQA*2]; // residuals and pulls of these parameters
 
-  static const int nHistoPartParam2D = 1;
-  TH2F *hPartParam2D[KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt,
+  static const int nHistoPartParam2D = 2;
+  TH2F *hPartParam2D[KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r
   TH2F *hPartParam2DBG[KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DGhost[KFPartEfficiencies::nParticles][nHistoPartParam2D];
 //   TH2F *hPartParam2DCorrBG[KFPartEfficiencies::nParticles][nHistoPartParam2D];

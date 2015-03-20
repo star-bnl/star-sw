@@ -89,25 +89,28 @@ namespace KFPMath
 {
   static inline __attribute__((always_inline)) float_v Sin  ( const float_v &phi ) 
   {
-    const float_v pi(3.1415926535897932f);
-    int_v nTurns = int_v( (phi + pi) / (2.f*pi) );
-    nTurns( (nTurns<=int_v(Vc::Zero)) && int_m(phi<-pi)) -= 1;
+//     const float_v pi(3.1415926535897932f);
+//     int_v nTurns = int_v( (phi + pi) / (2.f*pi) );
+//     nTurns( (nTurns<=int_v(Vc::Zero)) && int_m(phi<-pi)) -= 1;
+//     
+//     const float_v& x = phi - nTurns*(2.f*pi);
+//     
+//     const float_v& B = 4.f/pi;
+//     const float_v& C = -B/pi;
+// 
+//     float_v y = (B + C * abs(x)) * x;
+// 
+//     const float_v& P = 0.218f;
+//     y = P * (y * abs(y) - y) + y;
+//     
+//     return y;
     
-    const float_v& x = phi - nTurns*(2.f*pi);
-    
-    const float_v& B = 4.f/pi;
-    const float_v& C = -B/pi;
-
-    float_v y = (B + C * abs(x)) * x;
-
-    const float_v& P = 0.218f;
-    y = P * (y * abs(y) - y) + y;
-    
-    return y;
+    return sin(phi);
   }
   static inline __attribute__((always_inline)) float_v Cos  ( const float_v &phi )
-  { 
-    return Sin( phi + 1.570796326795f ); //x + pi/2
+  {     
+    //return Sin( phi + 1.570796326795f ); //x + pi/2
+    return cos(phi);
   }
   static inline __attribute__((always_inline)) float_v ATan2( const float_v &y, const float_v &x )
   { 

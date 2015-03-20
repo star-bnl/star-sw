@@ -74,7 +74,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
 
   Construct( vDaughters, nDaughters, 0, -1, fIsConstrained );
 
-  SetVtxGuess( fVtxGuess[0], fVtxGuess[1], fVtxGuess[2] );
+//   SetVtxGuess( fVtxGuess[0], fVtxGuess[1], fVtxGuess[2] );
 
   for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 1;
 
@@ -111,7 +111,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
   }
 
   if( nRest>=2 ) {// final refit     
-    SetVtxGuess( fP[0], fP[1], fP[2] );
+//     SetVtxGuess( fP[0], fP[1], fP[2] );
     if( fIsConstrained ){
       fP[0] = constrP[0];
       fP[1] = constrP[1];

@@ -68,7 +68,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   //* Construction of mother particle by its 2-3-4 daughters
 
-  KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2, Bool_t gamma = false );
+  KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2 );
 
   KFParticleSIMD( const KFParticleSIMD &d1, const KFParticleSIMD &d2,  const KFParticleSIMD &d3 );
 
@@ -110,10 +110,6 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Initialise covariance matrix and set current parameters to 0.0 
 
   void Initialize();
-
-  //* Set decay vertex parameters for linearisation 
-
-  void SetVtxGuess( float_v x, float_v y, float_v z );
 
   //*
   //*  ACCESSORS
@@ -254,8 +250,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   //* Everything in one go  
 
   void Construct( const KFParticleSIMD *vDaughters[], int nDaughters, 
-                  const KFParticleSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0,
-                  Bool_t isAtVtxGuess = 0);
+                  const KFParticleSIMD *ProdVtx=0,   Float_t Mass=-1, Bool_t IsConstrained=0 );
 
   //*
   //*                   TRANSPORT
@@ -286,25 +281,16 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   //* Transport the particle on dS parameter (SignedPath/Momentum) 
 
-  void TransportToDS( float_v dS );
-  void TransportToDSLine( float_v dS );
+  void TransportToDS( float_v dS, const float_v* dsdr );
+  void TransportToDSLine( float_v dS, const float_v* dsdr );
 
   //* Get dS to a certain space point 
 
-  float_v GetDStoPoint( const float_v xyz[] ) const ;
+  float_v GetDStoPoint( const float_v xyz[3], float_v dsdr[6] ) const ;
   
   //* Get dS to other particle p (dSp for particle p also returned) 
 
-  void GetDStoParticle( const KFParticleSIMD &p, 
-			float_v &DS, float_v &DSp ) const ;
-  
-  //* Get dS to other particle p in XY-plane
-
-  void GetDStoParticleXY( const KFParticleBaseSIMD &p, 
-			  float_v &DS, float_v &DSp ) const ;
-
-  void GetDStoParticleLine( const KFParticleSIMD &p, 
-                            float_v &DS, float_v &DSp ) const ;
+  void GetDStoParticle( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
   //* 
   //* OTHER UTILITIES
   //*
@@ -366,11 +352,6 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   void SubtractFromVertex( KFParticleSIMD &v ) const ;
   void SubtractFromParticle( KFParticleSIMD &v ) const ;
 
-  //* Special method for creating gammas
-
-  void ConstructGamma( const KFParticleSIMD &daughter1,
-		       const KFParticleSIMD &daughter2  );
-
     // * Pseudo Proper Time of decay = (r*pt) / |pt| * M/|pt|
     // @primVertex - primary vertex
     // @mass - mass of the mother particle (in the case of "Hb -> JPsi" it would be JPsi mass)
@@ -379,8 +360,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   void GetFieldValue( const float_v xyz[], float_v B[] ) const ;
   
-  void Transport( float_v dS, float_v P[], float_v C[] ) const ;
-  void GetVertexApproximation(const KFParticleSIMD &particle, float_v* vtxGuess, float_v* vtxErrGuess) const;
+  void Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0  ) const ;
 
  protected: 
   
@@ -394,8 +374,6 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 #endif
   //* Other methods required by the abstract KFParticleBaseSIMD class 
   
-  void GetDStoParticle( const KFParticleBaseSIMD &p, float_v &DS, float_v &DSp )const ;
-
  private:
 #ifdef HomogeneousField
   static float_v fgBz;  //* Bz compoment of the magnetic field
@@ -455,11 +433,6 @@ inline void KFParticleSIMD::Initialize()
 { 
   KFParticleBaseSIMD::Initialize(); 
 }
-
-inline void KFParticleSIMD::SetVtxGuess( float_v x, float_v y, float_v z )
-{
-  KFParticleBaseSIMD::SetVtxGuess(x,y,z);
-}  
 
 inline float_v KFParticleSIMD::GetX    () const 
 { 
@@ -891,14 +864,13 @@ inline void KFParticleSIMD::SetNoDecayLength()
 }
 
 inline void KFParticleSIMD::Construct( const KFParticleSIMD *vDaughters[], int nDaughters, 
-                                       const KFParticleSIMD *ProdVtx,   Float_t Mass, Bool_t IsConstrained,
-                                       Bool_t isAtVtxGuess  )
+                                       const KFParticleSIMD *ProdVtx,   Float_t Mass, Bool_t IsConstrained )
 {
 #ifdef NonhomogeneousField
   fField = vDaughters[0]->fField;
 #endif
   KFParticleBaseSIMD::Construct( ( const KFParticleBaseSIMD**)vDaughters, nDaughters, 
-                                 ( const KFParticleBaseSIMD*)ProdVtx, Mass, IsConstrained, isAtVtxGuess );
+                                 ( const KFParticleBaseSIMD*)ProdVtx, Mass, IsConstrained );
 
 //   #ifdef NonhomogeneousField
 //   // calculate a field region for the constructed particle
@@ -935,7 +907,9 @@ inline void KFParticleSIMD::TransportToProductionVertex()
 
 inline void KFParticleSIMD::TransportToPoint( const float_v xyz[] )
 {
-  TransportToDS( GetDStoPoint(xyz) );
+  float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
+  const float_v dS = GetDStoPoint(xyz, dsdr);
+  TransportToDS( dS, dsdr );
 }
 #ifdef HomogeneousField
 inline void KFParticleSIMD::TransportToVertex( const KFPVertex &v )
@@ -945,42 +919,30 @@ inline void KFParticleSIMD::TransportToVertex( const KFPVertex &v )
 #endif
 inline void KFParticleSIMD::TransportToParticle( const KFParticleSIMD &p )
 { 
-  float_v dS, dSp;
-  GetDStoParticle( p, dS, dSp );
-  TransportToDS( dS );
+  float_v dsdr[4][6];
+  float_v dS[2];
+  GetDStoParticle( p, dS, dsdr );
+  TransportToDS( dS[0], dsdr[3] );
 }
 
-inline void KFParticleSIMD::TransportToDS( float_v dS )
+inline void KFParticleSIMD::TransportToDS( float_v dS, const float_v* dsdr )
 {
-  KFParticleBaseSIMD::TransportToDS( dS );
+  KFParticleBaseSIMD::TransportToDS( dS, dsdr );
 } 
 
-inline void KFParticleSIMD::TransportToDSLine( float_v dS )
+inline void KFParticleSIMD::TransportToDSLine( float_v dS, const float_v* dsdr )
 {
-  KFParticleBaseSIMD::TransportToDSLine( dS );
+  KFParticleBaseSIMD::TransportToDSLine( dS, dsdr );
 } 
 
-inline float_v KFParticleSIMD::GetDStoPoint( const float_v xyz[] ) const 
+inline float_v KFParticleSIMD::GetDStoPoint( const float_v xyz[3], float_v dsdr[6] ) const 
 {
 #ifdef HomogeneousField
-  return KFParticleBaseSIMD::GetDStoPointBz( GetFieldAlice(), xyz );
+  return KFParticleBaseSIMD::GetDStoPointBz( GetFieldAlice(), xyz, dsdr );
 #endif
 #ifdef NonhomogeneousField
-  return KFParticleBaseSIMD::GetDStoPointCBM( xyz );
+  return KFParticleBaseSIMD::GetDStoPointCBM( xyz, dsdr );
 #endif
-}
-
-  
-inline void KFParticleSIMD::GetDStoParticle( const KFParticleSIMD &p, 
-					    float_v &DS, float_v &DSp ) const 
-{
-  GetDStoParticleXY( p, DS, DSp );
-}
-
-inline void KFParticleSIMD::GetDStoParticleLine( const KFParticleSIMD &p, 
-                                                 float_v &DS, float_v &DSp ) const 
-{
-  KFParticleBaseSIMD::GetDStoParticleLine( p, DS, DSp );
 }
 
 inline float_v KFParticleSIMD::GetDistanceFromVertex( const float_v vtx[] ) const
@@ -1059,43 +1021,23 @@ inline void KFParticleSIMD::GetFieldValue( const float_v xyz[], float_v B[] ) co
 }
 #endif
 
-inline void KFParticleSIMD::GetDStoParticle( const KFParticleBaseSIMD &p, 
-					    float_v &DS, float_v &DSp )const
-{
-  GetDStoParticleXY( p, DS, DSp );
-}
-
-inline void KFParticleSIMD::GetDStoParticleXY( const KFParticleBaseSIMD &p, 
-				       float_v &DS, float_v &DSp ) const
-{ 
-#ifdef HomogeneousField
-  KFParticleBaseSIMD::GetDStoParticleBz( GetFieldAlice(), p, DS, DSp ) ;
-#endif
-#ifdef NonhomogeneousField
-  KFParticleBaseSIMD::GetDStoParticleCBM( p, DS, DSp ) ;
-#endif
-  //GetDStoParticleALICE( p, DS, DSp ) ;
-}
-
-inline void KFParticleSIMD::Transport( float_v dS, float_v P[], float_v C[] ) const 
+inline void KFParticleSIMD::GetDStoParticle( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] )const
 {
 #ifdef HomogeneousField
-  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, P, C );
+  KFParticleBaseSIMD::GetDStoParticleBz( GetFieldAlice(), p, dS, dsdr ) ;
 #endif
 #ifdef NonhomogeneousField
-  KFParticleBaseSIMD::TransportCBM( dS, P, C );
+  KFParticleBaseSIMD::GetDStoParticleCBM( p, dS, dsdr ) ;
 #endif
 }
 
-inline void KFParticleSIMD::ConstructGamma( const KFParticleSIMD &daughter1,
-					   const KFParticleSIMD &daughter2  )
+inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const 
 {
 #ifdef HomogeneousField
-  KFParticleBaseSIMD::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
+  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 #ifdef NonhomogeneousField
-  const KFParticleSIMD* daughters[2] = {&daughter1, &daughter2};
-  Construct(daughters,2);
+  KFParticleBaseSIMD::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );
 #endif
 }
 
