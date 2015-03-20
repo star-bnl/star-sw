@@ -46,7 +46,8 @@ FFLAGS += -g `root-config --ldflags` -fPIC
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
 
-all:	$(TARGETS)
+all:	$(LIBDIR)/libGarfield.so
+$(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 	@echo Creating library libGarfield...
 #	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
 #	$(wildcard $(OBJDIR)/Heed/*.o)
