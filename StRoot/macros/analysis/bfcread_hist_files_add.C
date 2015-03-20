@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.20 2013/03/14 17:28:31 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.21 2015/03/19 17:51:28 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.21  2015/03/19 17:51:28  genevb
+// Minimize dependencies (tpc_Tables, number of files)
+//
 // Revision 2.20  2013/03/14 17:28:31  genevb
 // StTpcDb.so now depends on StEvent.so
 //
@@ -106,7 +109,6 @@ void bfcread_hist_files_add(
   gSystem->Load("libglobal_Tables");
   gSystem->Load("libStDb_Tables");
   gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
@@ -147,6 +149,7 @@ void bfcread_hist_files_add(
   Int_t hCCount=0;
 
   StFile* fff = new StFile(fList);
+  nevents = TMath::Min(nevents,fff->GetNFiles());
   StIOMaker *IOMk = new StIOMaker("IO","r",fff,TopDirTree);
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
@@ -168,10 +171,12 @@ void bfcread_hist_files_add(
 
    IOMk->Clear();
    istat = IOMk->Open();
+   if (istat) goto EventLoop;
    istat = IOMk->Make();
+   if (istat) goto EventLoop;
  // from list_all macro
    Event = IOMk->GetDataSet("hist");
-    if (!Event) {
+   if (!Event) {
      cout << " No histogram branch found in file!" << endl;
    }
 
