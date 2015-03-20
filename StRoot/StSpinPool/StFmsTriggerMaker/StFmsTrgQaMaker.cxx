@@ -73,6 +73,10 @@ int StFmsTrgQaMaker::Make(){
   if(!mSIM) { printf("No StFmsTriggerMaker found\n"); return kStErr;}
   mTrgd=(StTriggerData*)GetDataSet("StTriggerData")->GetObject();
   if(!mTrgd) { printf("No StTriggerData found\n"); return kStErr;}
+  
+  int npre=mTrgd->numberOfPreXing();
+  int npost=mTrgd->numberOfPostXing();
+  //printf("Npre/Npost=%2d/%2d ",npre,npost); printTriggers();
 
   countOverlap();
   if(isTrg("FMS-LED")) return kStOK;
@@ -332,6 +336,17 @@ int StFmsTrgQaMaker::isTrg(const char* trgn){
   return 0;
 }
 
+void StFmsTrgQaMaker::printTriggers(){
+  int id=-1;
+  unsigned long long one=1;
+  printf("l2sum=%16llx  TRG=",mTrgd->l2sum());
+  for(int i=0; i<64; i++){                                                                                                                       
+    if(mTrgd->l2sum() & (one << i)) printf("%s ",trgname[i].Data());                                                                                
+  }
+  printf("\n");                                                                                                                                     
+  return;
+}
+
 void StFmsTrgQaMaker::countOverlap(){
   static const int NTRG=11;
   const char* tname[NTRG]={"FMS-sm-bs1","FMS-sm-bs2","FMS-sm-bs3",
@@ -345,3 +360,4 @@ void StFmsTrgQaMaker::countOverlap(){
   if(flag==1) count[1]++;
   count[0]++;
 }
+

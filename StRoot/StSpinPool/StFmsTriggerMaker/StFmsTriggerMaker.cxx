@@ -317,6 +317,8 @@ void StFmsTriggerMaker::writeDsmData(int t){
     if(x==0) ((int*)fp201.dsmdata[t])[ch] = getDSMdata(16,ch);
   }
 
+  //FAKE!!! FM006 4th int should be 0xFFFFFFFF since not connected... but shows some activities fake increasing mismatch%. Masking out -akio
+  ((int*)fm006.dsmdata[t])[3] = 0xFFFFFFFF;
   //FAKE!!! FM010 3rd int should be 0xFFFFFFFF since not connected... but shows some activities fake increasing mismatch%. Masking out -akio
   ((int*)fm010.dsmdata[t])[2] = 0xFFFFFFFF;
   //FAKE!!! FP201 4th int bit0 is stuck high and not in use after 2015b algo is in. Masking out to get real mismatch% -akio
