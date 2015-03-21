@@ -1,12 +1,16 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.26 2012/11/09 18:28:06 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.27 2015/03/21 02:16:53 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.27  2015/03/21 02:16:53  perev
+ * By Lidia request, addet printing number of used hits detector by detector
+ * No any modification of any algorithmes
+ *
  * Revision 2.26  2012/11/09 18:28:06  perev
  * fillpull development
  *
@@ -215,6 +219,7 @@ private:
     int mUseAux;
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
+    int mUsedHits[100];
     static map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
     static map<StTrackNode*, StiKalmanTrack*> mNodeTrkMap;
     unsigned short mStiEncoded;
