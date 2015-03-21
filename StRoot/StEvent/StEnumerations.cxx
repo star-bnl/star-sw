@@ -1,57 +1,50 @@
+#include <assert.h>
 #include "StEnumerations.h"
+#include "TROOT.h"
+#include "TSystem.h"
 #include "TString.h"
-struct myMap {int id; const char *name;};
-static myMap gMyMap[] = {
-{kUnknownId             ,"Unknown"  },
-{kTpcId       		,"Tpc"      },
-{kSvtId       		,"Svt"      },
-{kRichId      		,"Rich"     },
-{kFtpcWestId  		,"FtpcWest" },
-{kFtpcEastId  		,"FtpcEast" },
-{kTofId       		,"Tof"      },
-{kCtbId       		,"Ctb"      },
-{kSsdId       		,"Ssd"      },
-{kBarrelEmcTowerId     	,"BarrelEmcTower"    },
-{kBarrelEmcPreShowerId 	,"BarrelEmcPreShower"},
-{kBarrelSmdEtaStripId  	,"BarrelSmdEtaStrip" },
-{kBarrelSmdPhiStripId  	,"BarrelSmdPhiStrip" },
-{kEndcapEmcTowerId     	,"EndcapEmcTower"    },
-{kEndcapEmcPreShowerId 	,"EndcapEmcPreShower"},
-{kEndcapSmdUStripId    	,"EndcapSmdUStrip"   },
-{kEndcapSmdVStripId    	,"EndcapSmdVStrip"   },
-{kZdcWestId   		,"ZdcWest"  },
-{kZdcEastId   		,"ZdcEast"  },
-{kMwpcWestId  		,"MwpcWest" },
-{kMwpcEastId  		,"MwpcEast" },
-{kPhmdCpvId   		,"PhmdCpv"  },
-{kPhmdId      		,"Phmd"     },
-{kPxlId       		,"Pxl"      },
-{kIstId       		,"Ist"      },
-{kFgtId       		,"Fgt"      },
-{kEtrId       		,"Etr"      },
-{kFpdWestId   		,"FpdWest"  },
-{kFpdEastId   		,"FpdEast"  },
-{kFmsId       		,"Fms"      },
-{kRpsId       		,"Rps"      },
-{kMtdId       		,"Mtd"      },
-{0,0}};
+int         ids[100]={0};
+const char *cds[100]={0};
+static void detectorIdInit();
 //_____________________________________________________________________________
 const char *detectorNameById(StDetectorId id)
 {
-    for (int i=0;gMyMap[i].name;i++) { if (gMyMap[i].id==id) return gMyMap[i].name;}
-    return gMyMap[0].name;
+  if (ids[0]<0) return "Unknown";
+  if (!ids[0] ) detectorIdInit();
+
+    for (int i=1;i<=ids[0];i++) { if (ids[i]==id) return cds[i]+1;}
+    return "Unknown";
 }
 //_____________________________________________________________________________
 StDetectorId detectorIdByName(const char *name)
 {
-    int lmin=99,imin=0;
+  if (ids[0]<0) return kUnknownId;
+  if (!ids[0] ) detectorIdInit();
     
-    for (int i =0;gMyMap[i].name; i++) {
-        if (!TString(gMyMap[i].name).BeginsWith(name,TString::kIgnoreCase))
-            continue;
-        int l = strlen(gMyMap[i].name);
-        if (l>=lmin) 	continue;
-        lmin = l; imin=i;
+    for (int i=1;i<=ids[0];i++){
+        if (strcmp(name,cds[0])==0) return (StDetectorId)ids[i];
     }
-    return (StDetectorId)gMyMap[imin].id;
+    return kUnknownId;
 }
+//_____________________________________________________________________________
+void detectorIdInit()
+{
+const char *paths[] = {
+                  "./detectorId.C",
+    "./StRoot/macros/detectorId.C",
+"$STAR/StRoot/macros/detectorId.C",
+                                0};
+
+  ids[0] = -1;
+  for (int ifa=0;paths[ifa];ifa++) {
+    TString path(paths[ifa]);
+    gSystem->ExpandPathName(path);
+    int notExi = gSystem->AccessPathName(path.Data());
+    if (notExi) continue;
+    ids[0]=0;
+    TString com;
+    com.Form("%s((int*)%p,(const char**)%p)",path.Data(),ids,cds);
+    gROOT->Macro(com.Data());
+    assert(ids[0]);
+  }
+}  
