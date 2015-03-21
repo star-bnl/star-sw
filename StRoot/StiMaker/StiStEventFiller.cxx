@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.107 2015/01/23 20:07:08 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.108 2015/03/21 02:16:53 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.108  2015/03/21 02:16:53  perev
+ * By Lidia request, addet printing number of used hits detector by detector
+ * No any modification of any algorithmes
+ *
  * Revision 2.107  2015/01/23 20:07:08  perev
  * Debug++
  *
@@ -639,6 +643,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 
   if (mUseAux) { mAux = new StiAux; e->Add(mAux);}
   mTrackStore = t;
+  memset(mUsedHits,0,sizeof(mUsedHits));
   mTrkNodeMap.clear();  // need to reset for this event
   mNodeTrkMap.clear();
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
@@ -690,7 +695,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           }
 	  fillTrackCount2++;
           fillPulls(kTrack,gTrack,0);
-          if (gTrack->numberOfPossiblePoints()<10) continue;
+          if (gTrack->numberOfPossiblePoints()<15) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
           
@@ -714,9 +719,16 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
     cout << "There were "<<errorCount<<"runtime_error while filling StEvent"<<endl;
 
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(1):"<< fillTrackCount1<<endl;
-  cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
+//cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
+  for (int ij=1; ij<=mUsedHits[0]; ij++) {
+    if (!mUsedHits[ij]) continue;
+    const char *det =  detectorNameById((StDetectorId)ij);
+    cout <<"StiStEventFiller::fillEvent() -I- Number of used hit:"<< det << "(" << ij << ") :"<<mUsedHits[ij]
+         << " per track:"<<double(mUsedHits[ij])/fillTrackCount1 <<endl;
+  }  
+
 
   return;
 }
@@ -850,12 +862,18 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
+      if (!detector) 		continue;
       assert(detector == stiHit->detector());
-      assert(!detector || stiHit->timesUsed());
+      assert(stiHit->timesUsed());
+
+//		Count used hits
+      int gid = detector->getGroupId();
+      if (mUsedHits[0]<gid) mUsedHits[0]=gid;
+      mUsedHits[gid]++;
+
       if (!fistNode) fistNode = node;
       lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
-      if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
 #if 0
