@@ -171,6 +171,11 @@ my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 if ($OnlinePackage) {
   $CPPPATH = $main::PATH_SEPARATOR . "#OnlTools" . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
 }
+my @New_Daq_Readers = qw(muEztPanitkin StPmdReadMaker StBEMCPlots);
+my $New_Daq_Readers = join('|',@New_Daq_Readers);
+if ($pkg =~ /$New_Daq_Readers/) {
+  $CPPFLAGS .= " -DNEW_DAQ_READER";
+}
 #print "==> $pkg => $DAQ_pkgs =======\n";
 if ( $pkg =~ /$DAQ_pkgs/ )  {
   $CPPPATH = $main::PATH_SEPARATOR . "#" . $Dir . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH; 
@@ -198,7 +203,6 @@ if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
 
-$CPPFLAGS .= " -DNEW_DAQ_READER";
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
 }
