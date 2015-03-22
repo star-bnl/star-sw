@@ -16,14 +16,14 @@ public:
   virtual          ~StKFTrack() {}												              
   void              SetChi2(Double_t chi2=-1);										      
   void Reset()	    {fParticle = KFParticle(*fOrigKFParticle);}								      
-  Int_t       	    K()       const {return fOrigKFParticle ? fOrigKFParticle->GetID() : -1;}       // index in particle array     
+  Int_t       	    K()       const {return fOrigKFParticle ? fOrigKFParticle->Id() : -1;}       // index in particle array     
   Double_t    	    Weight()  const {return fWeight;}  // adaptive weight 							      
   Double_t    	    W()       const {return fW;}       // adaptive weigth for multi vertices					      
   Double_t    	    Chi2()    const {return fChi2;}										      
   const KFParticle &Particle()const {return *&fParticle;}// particle with modified covariance matrix accourdingly to weight	      
   KFParticle       &Particle()      {return *&fParticle;}// particle with modified covariance matrix accourdingly to weight	      
   const KFParticle *OrigParticle() const {return fOrigKFParticle;} // 
-  Int_t             GetID()   const {return fOrigKFParticle->GetID();}
+  Int_t             Id()   const {return fOrigKFParticle->Id();}
   Bool_t            IsWest()   const {return fWestOrEast > 0;}	
   Bool_t      	    IsEast()   const {return fWestOrEast < 0;}	
   Int_t       	    WestOrEast()const {return fWestOrEast;}		

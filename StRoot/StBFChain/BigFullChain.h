@@ -485,16 +485,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                  "/star/rcf/test/daq/2014/146/st_mtd_15146050_raw_1000030.daq",kFALSE},
   {"test.RC.He3Au200.y2014","","","RC.y2014,Sti","",""
    ,                              "/star/rcf/test/daq/2014/171/st_physics_15171039_raw_2000008.daq",kFALSE},
-#if 0
-  {"test.RC.pp200long.y2015","","","pp2015,btof,mtd,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
-   ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/044/st_physics_16044038_raw_2000009.daq",kFALSE}, 
-#endif
   {"test.RC.pp200long.y2015","","","pp2015,btof,mtd,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
    ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
-#if 0
-  {"test.RC.pp200long.NoHFT.y2015","","","pp2015,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
-   ",-hitfilt,Sti","",""         ,"/star/rcf/test/daq/2015/044/st_physics_16044038_raw_2000009.daq",kFALSE}, 
-#endif
   {"test.RC.pp200long.NoHFT.y2015","","","pp2015,btof,mtd,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,"
    "-hitfilt,Sti","",""          ,"/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
   //_________ eval _____________

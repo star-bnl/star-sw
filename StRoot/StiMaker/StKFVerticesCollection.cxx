@@ -277,7 +277,7 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   for (iter = ParticleM.begin(); iter != ParticleM.end(); ++iter) {
     const KFParticle* part = *iter;
     // Clean up all non beam tracks
-    if (! part->GetID()) continue;
+    if (! part->Id()) continue;
     if (Particle2Track.count(part) <= 1) continue;
     std::pair< std::multimap<const KFParticle*,Map_t>::iterator, std::multimap<const KFParticle*,Map_t>::iterator> ret;
     ret = Particle2Track.equal_range(part);
@@ -338,8 +338,8 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
       if (track->Chi2() < StAnneling::Chi2CutUniq()) {
 	UInt_t k = track->K();
 	if (k) {
-	  track->SetParent(vtxl->GetID());
-	  vtxl->AddDaughterId(track->GetID());
+	  track->SetParent(vtxl->Id());
+	  vtxl->AddDaughterId(track->Id());
 	}
 	if (! vtxl->NoTracks()) break;
 	continue;
@@ -421,10 +421,10 @@ void  StKFVerticesCollection::SetParents(Int_t *parents) const {
       if (track->Chi2() < StAnneling::Chi2CutUniq()) {
 	UInt_t k = track->K();
 	if (k) {
-	  if (parents) parents[k] = vtx->GetID();
+	  if (parents) parents[k] = vtx->Id();
 	  else        {
-	    track->SetParent(vtx->GetID());
-	    vtx->AddDaughterId(track->GetID());
+	    track->SetParent(vtx->Id());
+	    vtx->AddDaughterId(track->Id());
 	  }
 	}
       }

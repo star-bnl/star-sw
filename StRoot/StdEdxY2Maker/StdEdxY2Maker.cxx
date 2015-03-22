@@ -1969,7 +1969,7 @@ void StdEdxY2Maker::V0CrossCheck() {
       if (! mFJ) continue;
       const KFParticle *particleJ = mFJ->kfParticle();
       if (! particleJ) continue;
-      if (particleJ->GetID() == particle->GetID()) {
+      if (particleJ->Id() == particle->Id()) {
 	PiDkeyU3 = -1; break;
       }
     }

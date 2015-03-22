@@ -321,7 +321,7 @@ void MuPrmVtx(Int_t first, Int_t last, const Char_t *files, const Char_t* Out=""
       Int_t iWE  = 0;
       if (GlobalTracks_mEta[kg] > 0 &&  GlobalTracks_mFirstPoint_mX3[kg] > 0) iWE = 1;
       if (GlobalTracks_mEta[kg] < 0 &&  GlobalTracks_mFirstPoint_mX3[kg] < 0) iWE = 2;
-      particle->SetID(10000*iWE + kg+1);
+      particle->SetId(10000*iWE + kg+1);
       particle->SetIdTruth(GlobalTracks_mIdTruth[kg],GlobalTracks_mQuality[kg]);
       particle->SetIdParentVx(GlobalTracks_mIdParentVx[kg]);
 #ifdef DEBUG2

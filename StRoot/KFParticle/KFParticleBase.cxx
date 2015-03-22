@@ -63,7 +63,7 @@ void KFParticleBase::Print(Option_t *opt) const {
 
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
-  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
+  os << Form("p(%4i,%4i,%4i)",particle.Id(),particle.GetParentID(),particle.IdParentMcVx());
   for (Int_t i = 0; i < 8; i++) {
     if (i == 6) continue;                                    // E
     if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S

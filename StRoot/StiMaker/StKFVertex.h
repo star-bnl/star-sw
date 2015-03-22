@@ -14,7 +14,7 @@ std::ostream&  operator<<(std::ostream& os,  const StKFVertex& v);
 class StKFVertex : public KFVertex  {
 public:
   StKFVertex() : KFVertex(), fTimeMc(0), fNoDaughtersMc(0), fgePidMc(0)
-    { Clear(); Vertex().SetID(++fTotalNoVertices); fKFTracks.SetOwner(kTRUE);}
+    { Clear(); Vertex().SetId(++fTotalNoVertices); fKFTracks.SetOwner(kTRUE);}
     StKFVertex(const StKFVertex&);
   virtual     ~StKFVertex() {Clear();}
   void         AddTrack(const StKFTrack *track);
@@ -22,7 +22,7 @@ public:
   StKFTrack*   Remove(Int_t k=0)           {return (StKFTrack *) fKFTracks.RemoveAt(k);}
   StKFTrack*   Remove(StKFTrack *track)    {return (StKFTrack *) fKFTracks.Remove(track);}
   StKFTrack*   Remove(KFParticle *particle); 
-  Int_t        ID()                  const {return   Vertex().GetID();}
+  Int_t        ID()                  const {return   Vertex().Id();}
   KFVertex     Vertex()              const {return *(KFVertex *) this;}
   KFVertex    &Vertex()                    {return *(KFVertex *) this;}
   TList       &Tracks()                    {return *&fKFTracks;}

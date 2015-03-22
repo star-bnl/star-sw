@@ -53,7 +53,7 @@ Int_t StKFTrack::CorrectGePid(Int_t gePid) {
 }
 //________________________________________________________________________________
 void StKFTrack::NormW(Double_t Norm) {
-  if (OrigParticle()->GetID() > 0 || Norm > 0.0) {
+  if (OrigParticle()->Id() > 0 || Norm > 0.0) {
     fW = fWeight/Norm;
   } else {
     fW = 1;

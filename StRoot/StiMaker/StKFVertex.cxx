@@ -204,7 +204,7 @@ void StKFVertex::UpdateVertex2TrackChi2() {
       continue;
     }
     track.SetChi2(chi2il);
-    if (particle->GetID() > 0 && chi2il < StAnneling::Chi2CutUniq()) {
+    if (particle->Id() > 0 && chi2il < StAnneling::Chi2CutUniq()) {
       //      track.Particle().SetProductionVertex(Vertex());
       particle->SetParentID(Id());
     }
@@ -291,7 +291,7 @@ StKFVertex &StKFVertex::operator=(const KFVertex &vtx) {
 //________________________________________________________________________________
 void StKFVertex::PrintW(Option_t *option) const {
   Int_t N = NoTracks();
-  cout << Form("V[%5i] with %5i tracks\t",GetID(),N);
+  cout << Form("V[%5i] with %5i tracks\t",Id(),N);
   Print(option);
   if (_debug > 2) {
     cout   << Form("     i    k    Weight        W        Z       chi2") << endl;
@@ -316,7 +316,7 @@ void StKFVertex::CheckBeamConstraint() {
     const KFParticle *po = t->OrigParticle();
     if (! po) continue;
     //    PrPP(CheckBeamConstraint,*po);
-    Int_t kg = po->GetID();
+    Int_t kg = po->Id();
     if (kg < 1) {
       assert(! tbeam);
       tbeam = (StKFTrack*) t;

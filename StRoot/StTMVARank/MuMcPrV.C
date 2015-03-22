@@ -95,6 +95,64 @@ static TClonesArray *MuMcVertices     = 0; static Int_t NoMuMcVertices   = 0;
 static TClonesArray *MuMcTracks       = 0; static Int_t NoMuMcTracks     = 0;
 
 using namespace std;
+enum VertexMatchType {kMc, kMatched, kClone, kLost, kGhost,  kTotalVertexMatchTypes};
+const Char_t *VertexMatchNames[kTotalVertexMatchTypes] = {"Mc", "Matched", "Clone", "Lost", "Ghost"};
+enum VertexType {kPrimary, kSecondary, kGamma, kK0s, kLambda, kAntiLambda, kTotalVertexTypes};
+const Char_t *VertexTypeNames[kTotalVertexTypes] = {"Primary", "Secondary", "Gamma", "K0s", "Lambda", "AntiLambda"};
+enum VarType {kX, kY, kZ, kPx, kPy, kPz, kE, kS, kChi2, kNDF, kProb, kP, kEta, kPhi, kMass, kDecayLength, kDecayLengthXY, kLifeTime, kR, kTotalVarType};
+const Char_t *VarTypeName[kTotalVarType] = {"X", "Y", "Z", "Px", "Py", "Pz", "E", "S", "Chi2", "NDF", "Prob","P", "Eta", "Phi", "Mass", "DecL", "DecLXY", "t", "R"};
+struct PlotName_t {
+  VertexMatchType     k;
+  const Char_t    *Name;
+  const Char_t   *Title;
+};
+const  PlotName_t plotNameMatch[kTotalVertexMatchTypes] = {
+  {kMc,      "Mc"     , "Reconstractable Mc Vertex (> 1 tracks with 10 hits in Tpc)"},
+  {kMatched, "Matched", "Rc Vertex matched with only Mc one"},
+  {kClone,   "Clone",   "Mc Vertex matched with > 1 Rc Vertex (Clone)"},
+  {kLost,    "Lost",    "Mc Vertex not reconstucted"},
+  {kGhost,   "Ghost",   "Rc Vertex without Mc partner"}
+};
+struct VarName_t {
+  const Char_t *Name;
+  const Char_t *Title;
+  VarType x;
+  Int_t nx;
+  Double_t xmin, xmax;
+  VarType y;
+  Int_t ny;
+  Double_t ymin, ymax;
+  VarType z;
+  Int_t nz;
+  Double_t zmin, zmax;
+  //  Double_t  min,  max; // min and max for plots
+};
+const VarName_t plotPrVar[3] = {
+  {"xyz",  "xyz",        kX, 100, -100, 100,  kY, 100, -100, 100,    kZ, 100, -200, 200},
+  {"pxyz", "pxyz",      kPx, 100,   -2,   2, kPy, 100,   -2,   2,   kPz, 100,   -2,   2},
+  {"ESM",  "E, S and M", kE, 100,    0,   2,  kS, 100,    0, 100, kMass, 100,    0,   2}
+};
+#if 0
+  const float& X    () const { return fP[0]; }
+  const float& Y    () const { return fP[1]; }
+  const float& Z    () const { return fP[2]; }
+  const float& Px   () const { return fP[3]; }
+  const float& Py   () const { return fP[4]; }
+  const float& Pz   () const { return fP[5]; }
+  const float& E    () const { return fP[6]; }
+  const float& S    () const { return fP[7]; }
+  const float& Chi2 () const { return fChi2; }
+  const Int_t   & NDF  () const { return fNDF;  }
+  Int_t GetMomentum    ( float &P, float &SigmaP ) const ;
+  Int_t GetPt          ( float &Pt, float &SigmaPt ) const ;
+  Int_t GetEta         ( float &Eta, float &SigmaEta ) const ;
+  Int_t GetPhi         ( float &Phi, float &SigmaPhi ) const ;
+  Int_t GetMass        ( float &M, float &SigmaM ) const ;
+  Int_t GetDecayLength ( float &L, float &SigmaL ) const ;
+  Int_t GetDecayLengthXY ( float &L, float &SigmaL ) const ;
+  Int_t GetLifeTime    ( float &T, float &SigmaT ) const ;
+  Int_t GetR           ( float &R, float &SigmaR ) const ;
+#endif
 //________________________________________________________________________________
 static Int_t _debug = 0;
 void SetDebug(Int_t k) {_debug = k;}
@@ -297,63 +355,6 @@ void ForceAnimate(unsigned int times=0, int msecDelay=0) {
   unsigned int  counter = times;
   while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; if (msecDelay) gSystem->Sleep(msecDelay);} 
 }
-#if 0
-//________________________________________________________________________________
-void MapMcVx2McHitTracks(multimap<Int_t,Int_t> &McVx2McHitTracks) {
-  // Count no. track at a vertex with TPC reconstructable tracks.
-  for (Int_t m = 0; m < NoMuMcTracks; m++) {
-    StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(m);
-    if (McTrack->No_tpc_hit() < 15) continue;
-    McVx2McHitTracks.insert(pair<Int_t,Int_t>(McTrack->IdVx(),McTrack->Id()));
-  }
-}
-//________________________________________________________________________________
-void MapRc2McVertices(map<StMuPrimaryVertex *,StMuMcVertex *> &Rc2McVertices) {
-  // Map RC =>  MC vertex
-  PVgadgets_st &aData = *(TMVAdata::instance()->GetArray());
-  for (Int_t l = 0; l < NoPrimaryVertices; l++) {
-    StMuPrimaryVertex *Vtx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
-    if (! AcceptVX(Vtx)) continue;
-    //      Vtx->Print();
-    UShort_t noTracks = Vtx->noTracks();
-    Int_t idd = Vtx->idTruth();
-    // Check Mc
-    if (idd <= 0 || idd > NoMuMcVertices) continue;
-    StMuMcVertex *mcVertex = (StMuMcVertex *) MuMcVertices->UncheckedAt(idd-1);
-    if (mcVertex->Id() != idd) {
-      cout << "Mismatched idTruth " << idd << " and mcVertex Id " <<  mcVertex->Id() 
-	   << " The vertex is ignored" <<  endl;
-      continue;
-    }
-    Rc2McVertices[Vtx] = mcVertex;
-    if (Debug()) {
-      cout << Form("%4i",l) << *Vtx << endl;
-      if (idd) {
-	//	cout << "\t" << PrintMcVx(idd,MuMcVertices,MuMcTracks);
-	PrintMcVx(idd,MuMcVertices,MuMcTracks);
-	// Print info for tracks coming from wrong verticies
-	for (Int_t k = 0; k < NoPrimaryTracks; k++) {
-	  StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
-	  if (pTrack->vertexIndex() != l) continue;
-	  if (pTrack->idTruth() < 0 || pTrack->idTruth() > NoMuMcTracks) {
-	    cout << "Illegal idTruth " << pTrack->idTruth() << " The track is ignored" << endl;
-	    continue;
-	  }
-	  StMuMcTrack *mcTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(pTrack->idTruth()-1);
-	  if (mcTrack->Id() != pTrack->idTruth()) {
-	    cout << "Mismatched idTruth " << pTrack->idTruth() << " and mcTrack Id " <<  mcTrack->Id() 
-		 << " The track is ignored" <<  endl;
-	  }
-	  Int_t iddW = mcTrack->IdVx();
-	  if (iddW <= 0 || iddW > NoMuMcVertices) continue;
-	  if (iddW == idd) continue;
-	  cout << "Wrong vertex\t"; PrintMcVx(iddW,MuMcVertices,MuMcTracks);
-	}
-      } 
-    }
-  }
-}
-#endif
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
@@ -530,11 +531,12 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
     }
     // Build maps --------------------------------------------------------------------------------
-    map<Int_t,StMuMcVertex *>                   Id2McVx; // StMuMcVertex *McVx = Id2McVx[Id];
+    multimap<StMuMcVertex *,StMuMcTrack *>      McVx2Tracks; // Reconstructable Mc Tracks
+    map<StMuMcVertex *,StMuMcTrack *>           McEndVx2McParentTrack; 
+    map<Int_t,StMuMcVertex *>                   Id2McVx; // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id];
+    map<Int_t,StMuMcVertex *>                   Id2McVxR;// Reconstructable, i.e. contains > 1 Reconstructable Mc Tracks
     map<Int_t,StMuPrimaryVertex*>               Id2RcVx;
     multimap<StMuPrimaryVertex*, StMuTrack *>   RcVx2Tracks;
-    multimap<StMuMcVertex *,StMuMcTrack *>      McVx2Tracks; 
-    map<StMuMcVertex *,StMuMcTrack *>           McV0Vx2McParentTrack; 
     map<StMuPrimaryVertex*,StMuMcVertex *>      RcVx2McVx;
     multimap<StMuMcVertex *,StMuPrimaryVertex*> McVx2RcVx;
     vector<StMuPrimaryVertex *>                 AccepedRcVx;  // All accepted RcVx
@@ -542,58 +544,54 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     vector<StMuPrimaryVertex *>                 CloneVx; //  1 to many (>1) Mc to Rc match
     vector<StMuPrimaryVertex *>                 GhostVx; //  no Mc match
     vector<StMuMcVertex *>                      LostVx;  //  no Rc match
-    map<Int_t,KFParticle*>                        IdVx2KFVx; // 
-    map<KFParticle*,StMuPrimaryVertex*>           KFVx2RcVx;
-    map<KFParticle*,StMuMcVertex *>               KFVx2McVx; 
-    multimap<StMuMcVertex*,KFParticle*>           McVc2KFVx; 
-#if 0
+    map<Int_t,KFParticle*>                      IdVx2KFVx; // 
+    map<KFParticle*,StMuPrimaryVertex*>         KFVx2RcVx;
+    map<KFParticle*,StMuMcVertex *>             KFVx2McVx; 
+    multimap<StMuMcVertex*,KFParticle*>         McVx2KFVx; 
     PrPPDH(McVx);
-#endif
     for (Int_t m = 0; m < NoMuMcVertices; m++) {
       StMuMcVertex *McVx = (StMuMcVertex *) MuMcVertices->UncheckedAt(m);
       if (! McVx) continue;
-#if 0
       PrPPD(*McVx);
-#endif
       Int_t Id = McVx->Id();
       Id2McVx[Id] = McVx;
     }
-#if 0
+    PrPP(Id2McVx.size());
     PrPPDH(McTk);
-#endif
     for (Int_t m = 0; m < NoMuMcTracks; m++) {
       StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(m);
       if (! McTrack) continue;
+      Int_t IdEnd = McTrack->IdVxEnd();
+      StMuMcVertex *mcEndVx = Id2McVx[IdEnd];
+      if (! mcEndVx) { PrPPD(*McTrack);}
+      else           {PrPP2D(*McTrack,*mcEndVx);
+	McEndVx2McParentTrack[mcEndVx] = McTrack;
+      }
+      if (McTrack->No_tpc_hit() < 10) continue;
       Int_t Id = McTrack->IdVx();
       StMuMcVertex *mcVx = Id2McVx[Id];
       if (! mcVx) {
 	cout << "Missing vertex of origin"; PrP(*McTrack);
 	continue;
       }
-      Int_t IdEnd = McTrack->IdVxEnd();
-      StMuMcVertex *mcEndVx = Id2McVx[IdEnd];
-#if 0
-      if (! mcEndVx) { PrPPD(*McTrack);}
-      else           {PrPP2D(*McTrack,*mcEndVx);}
-#endif
-      if (McTrack->No_tpc_hit() > 10) {
-	if (! mcVx) continue;
-	McVx2Tracks.insert(pair<StMuMcVertex *,StMuMcTrack *>(mcVx,McTrack));
-      }
-      if (! mcEndVx) continue;
-      Int_t Ge = McTrack->GePid();
-      Int_t pdg = TDatabasePDG::Instance()->ConvertGeant3ToPdg(Ge);
-      if (pdg == 22 || pdg == 310 || TMath::Abs(pdg) == 3122) {
-	McV0Vx2McParentTrack[mcEndVx] = McTrack;
-      }
+      McVx2Tracks.insert(pair<StMuMcVertex *,StMuMcTrack *>(mcVx,McTrack));
     }
+    PrPP(McEndVx2McParentTrack.size());
+    PrPP(McVx2Tracks.size());
+    for (auto x : McVx2Tracks) {
+      Int_t n = McVx2Tracks.count(x.first);
+      if (n < 2) continue;
+      Int_t Id = x.first->Id();
+      Id2McVxR[Id] = x.first; 
+    }
+    PrPP(Id2McVxR.size());
     PrPPDH(RcVx);
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       if (! AcceptVX(RcVx)) continue;
       PrPP(*RcVx);
       Int_t Id = RcVx->id();
-      AccepedRcVx.push_back(RcVx);
+      AccepedRcVx.push_back(RcVx); 
       Id2RcVx[Id] = RcVx;
       Int_t IdMc = RcVx->idTruth();
       if (! IdMc) {
@@ -606,6 +604,10 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	McVx2RcVx.insert(make_pair(McVx,RcVx));
       }
     }
+    PrPP(AccepedRcVx.size());
+    PrPP(McVx2RcVx.size()); PrPP(Id2RcVx.size());
+    PrPP(GhostVx.size());
+
     PrPPDH(pTrack);
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
       StMuTrack *pTrack = (StMuTrack *) PrimaryTracks->UncheckedAt(k);
@@ -614,7 +616,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       StMuPrimaryVertex *RcVx = Id2RcVx[IdVx];
       RcVx2Tracks.insert(make_pair(RcVx,pTrack));      
     }
-    for (auto x: Id2McVx) {
+    for (auto x: Id2McVxR) {
       StMuMcVertex *McVx = x.second;
       if (! McVx) continue;
       pair<
@@ -640,17 +642,23 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	}
       }
     }
+    PrPP(LostVx.size());
+    PrPP(RecoVx.size());
+    PrPP(CloneVx.size());
+#if 0
     PrPPDH(KFTrack);
     for (Int_t m = 0; m < NoKFTracks; m++) {
       KFParticle *particle = (KFParticle *) KFTracks->UncheckedAt(m);
       if (! particle) continue;
-      PrPP(*particle);
+      PrPPD(*particle);
     }
+#endif
     PrPPDH(KFVx);
     for (Int_t m = 0; m < NoKFVertices; m++) {
       KFParticle *KFVx = (KFParticle *) KFVertices->UncheckedAt(m);
       if (! KFVx) continue;
       PrPP(*KFVx);
+#if 0
       if (doPrint) {
 	cout << "NDaughters = " << KFVx->NDaughters() << endl;
 	for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
@@ -659,7 +667,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	}
 	cout << endl;
       }
-      Int_t IdVx = KFVx->GetID(); // Rc Vertex Id
+#endif
+      Int_t IdVx = KFVx->Id(); // Rc Vertex Id
       Int_t IdParentID = KFVx->GetParentID();
       Int_t IdParentMcVx = KFVx->IdParentMcVx();
       IdVx2KFVx[IdVx] = KFVx;
@@ -671,9 +680,11 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       if (McVx) {
 	PrPP(*McVx);
-	McVc2KFVx.insert(pair<StMuMcVertex *,KFParticle *>(McVx,KFVx));
+	McVx2KFVx.insert(pair<StMuMcVertex *,KFParticle *>(McVx,KFVx));
       }
     }
+    PrPP(IdVx2KFVx.size());
+    PrPP(McVx2KFVx.size());
     // Done with maps --------------------------------------------------------------------------------
     // Primary vertices:
     StMuMcVertex *McVx1 = Id2McVx[1];
@@ -687,9 +698,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     UInt_t NoRcVertices = Id2RcVx.size();
     map<Int_t,PVgadgets_st> dataS;
     PVgadgets_st &aData = *(TMVAdata::instance()->GetArray());
-    Int_t NoAccepetedRcVx = AccepedRcVx.size();
-    TArrayF Ranks(NoAccepetedRcVx);
-    for (Int_t l = 0; l < NoAccepetedRcVx; l++) {
+    Int_t NoAcceptedRcVx = AccepedRcVx.size();
+    TArrayF Ranks(NoAcceptedRcVx);
+    for (Int_t l = 0; l < NoAcceptedRcVx; l++) {
       StMuPrimaryVertex *RcVx = AccepedRcVx[l];
       assert(RcVx);
       Int_t idd = RcVx->idTruth();
@@ -722,7 +733,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
       dataS[l] = aData;
     }
-    Int_t lBest = TMath::LocMax(NoAccepetedRcVx, Ranks.GetArray());
+    Int_t lBest = TMath::LocMax(NoAcceptedRcVx, Ranks.GetArray());
     if (lBest < 0 || Ranks[lBest] < -1e9) continue; // Any reconstructed  vertices ?
     StMuPrimaryVertex *RcVx = AccepedRcVx[lBest]; assert(RcVx);
     Double_t noTracks = RcVx->noTracks();
@@ -730,7 +741,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     Int_t NoMcTracksWithHitsL = NoMcTracksWithHitsAtMC1;
     StMuMcVertex *McVx = RcVx2McVx[RcVx];
     if (McVx) NoMcTracksWithHitsL = McVx2Tracks.count(McVx);
-    for (Int_t l = 0; l < NoAccepetedRcVx; l++) {
+    for (Int_t l = 0; l < NoAcceptedRcVx; l++) {
       StMuPrimaryVertex *RcVx = AccepedRcVx[l];
       assert(RcVx);
       Int_t idd = RcVx->idTruth();
@@ -787,7 +798,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
       hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
     }
-#define __V0__
+    //#define __V0__
 #ifdef __V0__
     // V0 section
     if (NoKFVertices < 2) continue;
@@ -797,7 +808,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     for (Int_t l = 0; l < NoKFVertices; l++) {
       const KFParticle *vertex = (const KFParticle *) KFVertices->UncheckedAt(l);
       if (! vertex) continue;
-      Int_t Id = vertex->GetID();
+      Int_t Id = vertex->Id();
       VerId2k[Id] = l;
     }
     map<Int_t,Int_t> ParId2k;
@@ -806,7 +817,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
       if (! particle) continue;
       PrPPD(*particle);
-      Int_t Id = particle->GetID();
+      Int_t Id = particle->Id();
       ParId2k[Id] = k;
     }
     Int_t noV0 = 0;
@@ -832,7 +843,30 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     if (noV0) {
       cout << "===================================" << endl;
     }
-#endif /* __V0__ */
+#else  /* ! __V0__ */
+    PrPPDH(RecoVx);
+    for (StMuPrimaryVertex *RcVx : RecoVx) {
+      PrPP(*RcVx);
+      StMuMcVertex *McVx = RcVx2McVx[RcVx];
+      assert(McVx);
+      PrPP(*McVx);
+    }
+    PrPPDH(CloneVx);
+    for (StMuPrimaryVertex *RcVx : RecoVx) {
+      PrPP(*RcVx);
+      StMuMcVertex *McVx = RcVx2McVx[RcVx];
+      assert(McVx);
+      PrPP(*McVx);
+    }
+    PrPPDH(Lost);
+    for (StMuMcVertex *McVx : LostVx) {
+      PrPP(*McVx);
+    }
+    PrPPDH(Ghost);
+    for (StMuPrimaryVertex *RcVx : GhostVx) {
+     PrPP(*RcVx); 
+    }
+#endif /* ! __V0__ */
     if (! gROOT->IsBatch()) {
       if (Ask()) return;
     } else {_debugAsk = 0;}

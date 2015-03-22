@@ -184,7 +184,7 @@ KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
   track.SetCovarianceMatrix(CovXyzF);
   track.SetNDF(1);
   //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
-  //  track.SetID(kg);
+  //  track.SetId(kg);
   Int_t q   = 1;
   Int_t pdg = 211;
   if (charge() < 0) {
@@ -194,7 +194,7 @@ KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
   track.SetCharge(q);
   fParticle = KFParticle(track, pdg);
   fParticle.SetPDG(pdg);
-  fParticle.SetID(kg);
+  fParticle.SetId(kg);
 #if 0
   Float_t d = fParticle.GetCovariance(0) + fParticle.GetCovariance(2) + fParticle.GetCovariance(5);
   if (d <= 0 || d >= 1e6) {
