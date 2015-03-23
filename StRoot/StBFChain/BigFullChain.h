@@ -1478,6 +1478,10 @@ Bfc_st BFC[] = { // standard chains
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
   //{"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker",
   // "Fill FMS clusters",                                                                             kFALSE},
+  //
+  {"fpsDat"     ,"","", "StEvent,fmsdb",
+   "StFpsRawHitMaker","StFpsRawHitMaker","Fill FPS struct",                                         kFALSE},
+
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
