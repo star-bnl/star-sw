@@ -1569,6 +1569,7 @@ Bfc_st BFC[] = { // standard chains
   {"fmsDat"     ,"","", "StEvent,fmsDb",
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
   {"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker","Fill FMS clusters",    kFALSE},
+  {"fpsDat"     ,"","", "StEvent,fmsdb","StFpsRawHitMaker","StFpsRawHitMaker","Fill FPS struct",    kFALSE},
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
   // FGT
   {"fgt"        ,"FgtChain","","fgtDat,fgtClu,fgtAtoC"        ,"StMaker","StChain","Fgt data Chain",kFALSE},

@@ -623,22 +623,21 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       multimap<StMuMcVertex *,StMuPrimaryVertex*>::iterator,
 	multimap<StMuMcVertex *,StMuPrimaryVertex*>::iterator> ret = McVx2RcVx.equal_range(McVx);
       Int_t ncount = 0;
-      Double_t HighestRank = -1e9;
       StMuPrimaryVertex *RcVx = 0;
       for (multimap<StMuMcVertex *,StMuPrimaryVertex*>::iterator it=ret.first; it != ret.second; ++it) {
 	StMuPrimaryVertex *aRcVx = it->second;
 	if (! aRcVx) continue;
 	ncount++;
-	if (! RcVx || RcVx->ranking() < aRcVx->ranking()) {RcVx = aRcVx;}
+	if (! RcVx) {RcVx = aRcVx;}
+	else if (RcVx->ranking() < aRcVx->ranking()) {RcVx = aRcVx;}
       }
-      if      (! ncount) 	LostVx.push_back(McVx);
-      else if (ncount == 1)     RecoVx.push_back(RcVx);
-      else {                 // Clone
-	RecoVx.push_back(RcVx);
+      if (ncount == 0) {
+	LostVx.push_back(McVx); 
+      } else {
 	for (multimap<StMuMcVertex *,StMuPrimaryVertex*>::iterator it=ret.first; it != ret.second; ++it) {
 	  StMuPrimaryVertex *aRcVx = it->second;
-	  if (RcVx == aRcVx) continue;
-	  CloneVx.push_back(aRcVx);
+	  if (RcVx == aRcVx)  RecoVx.push_back(aRcVx);
+	  else                CloneVx.push_back(aRcVx);
 	}
       }
     }
@@ -798,52 +797,6 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
       hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
     }
-    //#define __V0__
-#ifdef __V0__
-    // V0 section
-    if (NoKFVertices < 2) continue;
-    // Loop over KF Vetrices and KF particles
-    // Map between Id and position in Clones Array
-    map<Int_t,Int_t> VerId2k;
-    for (Int_t l = 0; l < NoKFVertices; l++) {
-      const KFParticle *vertex = (const KFParticle *) KFVertices->UncheckedAt(l);
-      if (! vertex) continue;
-      Int_t Id = vertex->Id();
-      VerId2k[Id] = l;
-    }
-    map<Int_t,Int_t> ParId2k;
-    PrPPDH(particle);
-    for (Int_t k = 0; k < NoKFTracks; k++) {
-      const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-      if (! particle) continue;
-      PrPPD(*particle);
-      Int_t Id = particle->Id();
-      ParId2k[Id] = k;
-    }
-    Int_t noV0 = 0;
-    for (Int_t k = 0; k < NoKFTracks; k++) {
-      const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-      if(abs(particle->GetPDG()) != 22 &&
-	 abs(particle->GetPDG()) != 310 &&
-	 abs(particle->GetPDG()) != 3122) continue;
-      cout << "KF V0: " << *particle << endl;
-      PrintMcVx(particle->IdTruth(),MuMcVertices,MuMcTracks);
-      if(particle->IdTruth()){
-	StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(particle->IdTruth()-1);
-	if(McTrack->GePid() != 1 &&
-	   McTrack->GePid() != 16 &&
-	   McTrack->GePid() != 18 &&
-	   McTrack->GePid() != 26){
-	  cout<<"MC track is not a V0: Ge = " << McTrack->GePid() << endl;
-	} else {
-	  noV0++;
-	}
-      } //if(particle->IdTruth())
-    } //for (Int_t k = 0; k < NoKFTracks; k++)
-    if (noV0) {
-      cout << "===================================" << endl;
-    }
-#else  /* ! __V0__ */
     PrPPDH(RecoVx);
     for (StMuPrimaryVertex *RcVx : RecoVx) {
       PrPP(*RcVx);
@@ -852,7 +805,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       PrPP(*McVx);
     }
     PrPPDH(CloneVx);
-    for (StMuPrimaryVertex *RcVx : RecoVx) {
+    for (StMuPrimaryVertex *RcVx : CloneVx) {
       PrPP(*RcVx);
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       assert(McVx);
@@ -866,7 +819,6 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     for (StMuPrimaryVertex *RcVx : GhostVx) {
      PrPP(*RcVx); 
     }
-#endif /* ! __V0__ */
     if (! gROOT->IsBatch()) {
       if (Ask()) return;
     } else {_debugAsk = 0;}
