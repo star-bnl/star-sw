@@ -810,6 +810,15 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  last;
 	}
       }
+   } elsif ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc492/) { # hack for Sti with gcc432
+      $envNoDeb = $env->clone('DEBUG' => '-g');
+      for ($i = 0; $i < $#src; $i++) {
+	if ($src[$i] =~ /StiTrackNode\.cxx/) {
+	  my @objfiles = Objects $envNoDeb ($src[$i]);
+	  $src[$i] = $objfiles[0];
+	  last;
+	}
+      }
     }
   }
   if ( $pkg =~ m/^StChain$/) {  
