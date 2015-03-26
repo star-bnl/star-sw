@@ -75,6 +75,7 @@ Bool_t doPrint = kFALSE;
 #define PrP(B)                   {cout << (#B) << " = \t" << (B) << endl;}
 #define PrPP(B)     if (doPrint) {cout << (#B) << " = \t" << (B) << endl;}
 #define PrPP2(B,C)  if (doPrint) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
+#define PrPP3(B,C,D)  if (doPrint) {cout << (#B) << " = \t" << (B) << "\t" << (C) << "\t" << (D) <<  endl;}
 #define PrPPD(B)    if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << endl;}
 #define PrPPDH(B)    if (doPrint && Debug() > 1) {cout << " =================== " << (#B) << " ===================== " << endl;}
 #define PrPP2D(B,C) if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
@@ -95,64 +96,55 @@ static TClonesArray *MuMcVertices     = 0; static Int_t NoMuMcVertices   = 0;
 static TClonesArray *MuMcTracks       = 0; static Int_t NoMuMcTracks     = 0;
 
 using namespace std;
-enum VertexMatchType {kMc, kMatched, kClone, kLost, kGhost,  kTotalVertexMatchTypes};
-const Char_t *VertexMatchNames[kTotalVertexMatchTypes] = {"Mc", "Matched", "Clone", "Lost", "Ghost"};
+enum VertexMatchType {kMc, kMatch, kClone, kLost, kGhost,  kTotalVertexMatchTypes};
+const Char_t *VertexMatchNames[kTotalVertexMatchTypes] = {"Mc", "Match", "Clone", "Lost", "Ghost"};
 enum VertexType {kPrimary, kSecondary, kGamma, kK0s, kLambda, kAntiLambda, kTotalVertexTypes};
 const Char_t *VertexTypeNames[kTotalVertexTypes] = {"Primary", "Secondary", "Gamma", "K0s", "Lambda", "AntiLambda"};
-enum VarType {kX, kY, kZ, kPx, kPy, kPz, kE, kS, kChi2, kNDF, kProb, kP, kEta, kPhi, kMass, kDecayLength, kDecayLengthXY, kLifeTime, kR, kTotalVarType};
-const Char_t *VarTypeName[kTotalVarType] = {"X", "Y", "Z", "Px", "Py", "Pz", "E", "S", "Chi2", "NDF", "Prob","P", "Eta", "Phi", "Mass", "DecL", "DecLXY", "t", "R"};
-struct PlotName_t {
+struct MatchType_t {
   VertexMatchType     k;
   const Char_t    *Name;
   const Char_t   *Title;
 };
-const  PlotName_t plotNameMatch[kTotalVertexMatchTypes] = {
-  {kMc,      "Mc"     , "Reconstractable Mc Vertex (> 1 tracks with 10 hits in Tpc)"},
-  {kMatched, "Matched", "Rc Vertex matched with only Mc one"},
-  {kClone,   "Clone",   "Mc Vertex matched with > 1 Rc Vertex (Clone)"},
-  {kLost,    "Lost",    "Mc Vertex not reconstucted"},
-  {kGhost,   "Ghost",   "Rc Vertex without Mc partner"}
+class Var_t {
+public:
+  Float_t X, Y, Z, Px, Py, Pz, E, S, P, Pt, Eta, Phi, M, L, LXY, T, R, Chi2;
+  Int_t NDF, Id, GePid;
 };
-struct VarName_t {
-  const Char_t *Name;
-  const Char_t *Title;
-  VarType x;
-  Int_t nx;
-  Double_t xmin, xmax;
-  VarType y;
-  Int_t ny;
-  Double_t ymin, ymax;
-  VarType z;
-  Int_t nz;
-  Double_t zmin, zmax;
-  //  Double_t  min,  max; // min and max for plots
+class Mc_t : public TObject {
+public:
+  Var_t Mc;
+  ClassDef(Mc_t,1)
 };
-const VarName_t plotPrVar[3] = {
-  {"xyz",  "xyz",        kX, 100, -100, 100,  kY, 100, -100, 100,    kZ, 100, -200, 200},
-  {"pxyz", "pxyz",      kPx, 100,   -2,   2, kPy, 100,   -2,   2,   kPz, 100,   -2,   2},
-  {"ESM",  "E, S and M", kE, 100,    0,   2,  kS, 100,    0, 100, kMass, 100,    0,   2}
+class Match_t : public TObject {
+public:
+  Var_t Mc;
+  Var_t V;
+  Var_t dV;
+  ClassDef(Match_t,1)
 };
-#if 0
-  const float& X    () const { return fP[0]; }
-  const float& Y    () const { return fP[1]; }
-  const float& Z    () const { return fP[2]; }
-  const float& Px   () const { return fP[3]; }
-  const float& Py   () const { return fP[4]; }
-  const float& Pz   () const { return fP[5]; }
-  const float& E    () const { return fP[6]; }
-  const float& S    () const { return fP[7]; }
-  const float& Chi2 () const { return fChi2; }
-  const Int_t   & NDF  () const { return fNDF;  }
-  Int_t GetMomentum    ( float &P, float &SigmaP ) const ;
-  Int_t GetPt          ( float &Pt, float &SigmaPt ) const ;
-  Int_t GetEta         ( float &Eta, float &SigmaEta ) const ;
-  Int_t GetPhi         ( float &Phi, float &SigmaPhi ) const ;
-  Int_t GetMass        ( float &M, float &SigmaM ) const ;
-  Int_t GetDecayLength ( float &L, float &SigmaL ) const ;
-  Int_t GetDecayLengthXY ( float &L, float &SigmaL ) const ;
-  Int_t GetLifeTime    ( float &T, float &SigmaT ) const ;
-  Int_t GetR           ( float &R, float &SigmaR ) const ;
-#endif
+class Clone_t : public TObject {
+public:
+  Var_t Mc;
+  Var_t V;
+  Var_t dV;
+  ClassDef(Clone_t,1)
+};
+class Lost_t : public TObject {
+public:
+  Var_t Mc;
+  ClassDef(Lost_t,1)
+};
+class Ghost_t : public TObject {
+public:
+  Var_t V;
+  Var_t dV;
+  ClassDef(Ghost_t,1)
+};
+static Mc_t Mc;        Mc_t    *pMc    = &Mc;
+static Match_t Match;  Match_t *pMatch = &Match;
+static Clone_t Clone;  Clone_t *pClone = &Clone;
+static Lost_t  Lost;   Lost_t  *pLost  = &Lost; 
+static Ghost_t Ghost;  Ghost_t *pGhost = &Ghost;
 //________________________________________________________________________________
 static Int_t _debug = 0;
 void SetDebug(Int_t k) {_debug = k;}
@@ -178,13 +170,13 @@ void Setup(const Char_t *xmlFile = "") {
   */
   delete StTMVARanking::instance();
   if (! TMVAdata::instance()->PileUp()) {
-    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
   } else {
     //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
-    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    //    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
   }
 }
@@ -258,7 +250,7 @@ void FillData(TMVAdata &Data, const StMuPrimaryVertex *Vtx, Float_t zVpd = -9999
   aData.NoMcTracksWithHits = NoMcTracksWithHits;
 }
 //________________________________________________________________________________
-void PrintMcVx(Int_t idVx = 1, TClonesArray *MuMcVertices = 0, TClonesArray *MuMcTracks = 0) {
+void PrintMcVx(Int_t idVx = 1) {
   if (! MuMcVertices) return;
   if (idVx > 0 && idVx <= MuMcVertices->GetEntriesFast()) {
     StMuMcVertex *mcVertex = (StMuMcVertex *) MuMcVertices->UncheckedAt(idVx-1);	
@@ -267,7 +259,7 @@ void PrintMcVx(Int_t idVx = 1, TClonesArray *MuMcVertices = 0, TClonesArray *MuM
       Int_t iMcTk = mcVertex->IdParTrk();
       if (iMcTk > 0 && iMcTk <= MuMcTracks->GetEntriesFast()) {
 	StMuMcTrack *mcTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(iMcTk-1);
-	if (mcTrack) {PrPP2(*mcVertex,mcTrack->GeName());}
+	if (mcTrack) {PrPP3(*mcVertex,*mcTrack,mcTrack->GeName());}
 	else         {PrPP(*mcVertex);}
       }
     } else {
@@ -346,19 +338,73 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   if (  Vtx->nCTBMatch()     + Vtx->nBTOFMatch() +
   	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 1) return kFALSE; // 22
 #endif
-  if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
+  //41  if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
   //21  if (  Vtx->position().perp() > 3.0) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
-void ForceAnimate(unsigned int times=0, int msecDelay=0) {
-  unsigned int  counter = times;
+void ForceAnimate(UInt_t times=0, Int_t msecDelay=0) {
+  UInt_t  counter = times;
   while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; if (msecDelay) gSystem->Sleep(msecDelay);} 
+}
+//________________________________________________________________________________
+void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KFParticle* KFVx = 0) {
+  Var_t VMC;  memset( &VMC, 0, sizeof(Var_t));
+  Var_t VKF;  memset( &VKF, 0, sizeof(Var_t));
+  Var_t dVKF; memset(&dVKF, 0, sizeof(Var_t)); 
+  if (McVx) {
+    VMC.X = McVx->XyzV().x();
+    VMC.Y = McVx->XyzV().y();
+    VMC.Z = McVx->XyzV().z();
+    VMC.R = McVx->XyzV().perp();
+    VMC.T = McVx->Time()*1e-9; // seconds
+    if (McTrack) {
+      VMC.Px = McTrack->Pxyz().x();
+      VMC.Py = McTrack->Pxyz().y();
+      VMC.Pz = McTrack->Pxyz().z();
+      VMC.P  = McTrack->Ptot();
+      VMC.E  = McTrack->E();
+      VMC.Pt = McTrack->pT();
+      VMC.Eta= McTrack->Eta();
+      VMC.Phi= TMath::ATan2(VMC.Py,VMC.Px);
+      VMC.M  = TMath::Sqrt(VMC.E*VMC.E - VMC.P*VMC.P);
+      VMC.GePid = McTrack->GePid();
+    }
+    VMC.Id = McVx->Id();
+    Mc.Mc = VMC;
+    Match.Mc = VMC;
+    Clone.Mc = VMC;
+    Lost.Mc = VMC;
+  }
+  if (KFVx) {
+    Float_t  *V =  &VKF.X;
+    Float_t *dV = &dVKF.X; 
+    for (Int_t i = 0; i < 8; i++) {
+      V[i] = KFVx->GetParameter(i);
+      if (KFVx->GetCovariance(i,i) > 0) dV[i] = TMath::Sqrt(KFVx->GetCovariance(i,i));
+    }
+    KFVx->GetMomentum(VKF.P, dVKF.P);
+    KFVx->GetPt(VKF.Pt, dVKF.Pt);
+    KFVx->GetEta(VKF.Eta, dVKF.Eta);
+    KFVx->GetPhi(VKF.Phi, dVKF.Phi);
+    KFVx->GetMass(VKF.M, dVKF.M);
+    KFVx->GetDecayLength(VKF.L, dVKF.L);
+    KFVx->GetDecayLengthXY(VKF.LXY, dVKF.LXY);
+    KFVx->GetLifeTime(VKF.T, dVKF.T);
+    KFVx->GetR(VKF.R, dVKF.R);
+    VKF.Chi2 = KFVx->GetChi2();
+    VKF.NDF = KFVx->GetNDF();
+    VKF.Id  = KFVx->Id();
+    Match.V = VKF; Match.dV = dVKF;
+    Clone.V = VKF; Clone.dV = dVKF;
+    Ghost.V = VKF; Ghost.dV = dVKF;
+  }
+  tree->Fill();
 }
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV41") { 
+	     const  char* outFile="MuMcPrV42") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -442,6 +488,17 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   TNtuple *Signal = 0, *Background = 0;
   Signal = new TNtuple("Signal","good vertex & global params info",TMVAdata::instance()->Names());
   Background = new TNtuple("Background","bad  vertex & global params info",TMVAdata::instance()->Names());
+  Int_t bufsize= 64000;
+  Int_t split  = -2;       // by default, split Event in sub branches
+  if (split)  bufsize /= 4;
+  Int_t branchStyle = 1; //new style by default
+  if (split < 0) {branchStyle = 0; split = -1-split;}
+  TTree::SetBranchStyle(branchStyle);
+  TTree *tMc    = new TTree("Mc"     , "Reconstractable Mc Vertex (> 1 tracks with 10 hits in Tpc)"); tMc   ->Branch("Vx","Mc_t",&pMc);
+  TTree *tMatch = new TTree("Match", "Rc Vertex matched with only Mc one");			      tMatch->Branch("Vx","Match_t",&pMatch);
+  TTree *tClone = new TTree("Clone",   "Mc Vertex matched with > 1 Rc Vertex (Clone)");		      tClone->Branch("Vx","Clone_t",&pClone);
+  TTree *tLost  = new TTree("Lost",    "Mc Vertex not reconstucted");				      tLost ->Branch("Vx","Lost_t",&pLost);
+  TTree *tGhost = new TTree("Ghost",   "Rc Vertex without Mc partner");				      tGhost->Branch("Vx","Ghost_t",&pGhost);
   // ----------------------------------------------
   StMuTimer timer;
   timer.start();
@@ -546,6 +603,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     vector<StMuMcVertex *>                      LostVx;  //  no Rc match
     map<Int_t,KFParticle*>                      IdVx2KFVx; // 
     map<KFParticle*,StMuPrimaryVertex*>         KFVx2RcVx;
+    map<StMuPrimaryVertex*,KFParticle*>         RcVx2KFVx;
     map<KFParticle*,StMuMcVertex *>             KFVx2McVx; 
     multimap<StMuMcVertex*,KFParticle*>         McVx2KFVx; 
     PrPPDH(McVx);
@@ -588,7 +646,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     PrPPDH(RcVx);
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
-      if (! AcceptVX(RcVx)) continue;
+      //      if (! AcceptVX(RcVx)) continue;
       PrPP(*RcVx);
       Int_t Id = RcVx->id();
       AccepedRcVx.push_back(RcVx); 
@@ -675,6 +733,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       if (RcVx) {
 	PrPP(*RcVx);
 	KFVx2RcVx[KFVx] = RcVx;
+	RcVx2KFVx[RcVx] = KFVx;
       }
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       if (McVx) {
@@ -710,7 +769,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       if (Debug()) {
 	cout << Form("%4i",l) << *RcVx << endl;
 	if (idd) {
-	  PrintMcVx(idd,MuMcVertices,MuMcTracks);
+	  PrintMcVx(idd);
 	  // loop over tracks which are not coming from the vertex and print these vertices
 	  
 	} 
@@ -797,27 +856,52 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
       hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
     }
+    for (auto x : McVx2Tracks) {
+      StMuMcVertex *McVx = x.first;
+      StMuMcTrack *McTrack = McEndVx2McParentTrack[McVx];
+      FillTrees(tMc,McVx,McTrack,0);
+    }
     PrPPDH(RecoVx);
     for (StMuPrimaryVertex *RcVx : RecoVx) {
       PrPP(*RcVx);
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       assert(McVx);
+      PrintMcVx(McVx->Id());
+      StMuMcTrack *McTrack = McEndVx2McParentTrack[McVx];
+#if 0
       PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif      
+      FillTrees(tMatch,McVx,McTrack,RcVx2KFVx[RcVx]);
     }
     PrPPDH(CloneVx);
     for (StMuPrimaryVertex *RcVx : CloneVx) {
       PrPP(*RcVx);
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       assert(McVx);
+      StMuMcTrack *McTrack = McEndVx2McParentTrack[McVx];
+      PrintMcVx(McVx->Id());
+#if 0
       PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif
+      FillTrees(tClone,McVx,McTrack,RcVx2KFVx[RcVx]);
+      tClone->Fill();
     }
     PrPPDH(Lost);
     for (StMuMcVertex *McVx : LostVx) {
+      StMuMcTrack *McTrack = McEndVx2McParentTrack[McVx];
+      PrintMcVx(McVx->Id());
+#if 0
       PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif
+      FillTrees(tLost,McVx,McTrack,0);
     }
     PrPPDH(Ghost);
     for (StMuPrimaryVertex *RcVx : GhostVx) {
      PrPP(*RcVx); 
+      FillTrees(tGhost,0,0,RcVx2KFVx[RcVx]);
     }
     if (! gROOT->IsBatch()) {
       if (Ask()) return;

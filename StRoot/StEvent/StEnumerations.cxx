@@ -46,5 +46,6 @@ const char *paths[] = {
     com.Form("%s((int*)%p,(const char**)%p)",path.Data(),ids,cds);
     gROOT->Macro(com.Data());
     assert(ids[0]);
+    break;
   }
 }  

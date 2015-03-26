@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.108 2015/03/21 02:16:53 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.109 2015/03/24 16:37:28 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.109  2015/03/24 16:37:28  perev
+ * fix printout hit: to hits:
+ *
  * Revision 2.108  2015/03/21 02:16:53  perev
  * By Lidia request, addet printing number of used hits detector by detector
  * No any modification of any algorithmes
@@ -725,7 +728,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   for (int ij=1; ij<=mUsedHits[0]; ij++) {
     if (!mUsedHits[ij]) continue;
     const char *det =  detectorNameById((StDetectorId)ij);
-    cout <<"StiStEventFiller::fillEvent() -I- Number of used hit:"<< det << "(" << ij << ") :"<<mUsedHits[ij]
+    cout <<"StiStEventFiller::fillEvent() -I- Number of used hits:"<< det << "(" << ij << ") :"<<mUsedHits[ij]
          << " per track:"<<double(mUsedHits[ij])/fillTrackCount1 <<endl;
   }  
 

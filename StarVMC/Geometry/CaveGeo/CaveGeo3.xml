@@ -197,12 +197,16 @@
 	Setup reference systems for STAR detector
     -->
     <Group name="TpcRefSys" /> <!-- TPC and attached detectors -->
-    <Group name="MagRefSys" /> <!-- Magnet and attached detectors -->
-    <Group name="CaveRefSys" /><!-- The cave floor -->
+
+    <Group name="MagRefSys" /> 
+    <Group name="CaveRefSys" />
+
+<!-- 
+    Remove E & W reference systems 
 
     <Group name="WestRefSys" />
     <Group name="EastRefSys" />
-
+-->
 
 
     CDIM_Rmax = cave_Rmax(1) 
