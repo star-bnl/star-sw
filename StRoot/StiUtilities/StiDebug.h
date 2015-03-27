@@ -27,7 +27,7 @@ static void Count(const char *key,double valx,double valy);
 static void Count(const char *key,double valx, double valy
                                  ,double leftx,double ritex
 				 ,double lefty,double ritey);
-static void Sumary();
+static void   Sumary(int nHist=4);
 static void   show(StiKalmanTrack *kt);
 static void   Init();
 static void   Finish();

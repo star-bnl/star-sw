@@ -277,8 +277,9 @@ void StiDebug::Count(const char *key,double valx,double valy)
   h->Fill(valx,valy);
 }
 //______________________________________________________________________________ 
-void StiDebug::Sumary()
+void StiDebug::Sumary(int nHist)
 {
+  if (!nHist) nHist=4;
   printf("StiDebug::Sumary()\n");
 
   int nH = 0,n=0;
@@ -291,7 +292,7 @@ void StiDebug::Sumary()
 
 
 
-  TH1 *H[4];
+  TH1 *H[10];
   for (int numCha = 0; numCha<2; numCha++) {
     nH = 0;n=0;
     for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
@@ -305,8 +306,8 @@ void StiDebug::Sumary()
       double mean = h->GetMean();
       double rms  = h->GetRMS();
       printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
-      if (nH==4) {Draw(nH,H);nH=0;}
-      if (numCha) h->LabelsOption(">","X");
+      if (nH==nHist) {Draw(nH,H);nH=0;}
+      if (numCha) h->LabelsOption(">V","X");
       H[nH++] = h;
     }
     if (nH) Draw(nH,H);
