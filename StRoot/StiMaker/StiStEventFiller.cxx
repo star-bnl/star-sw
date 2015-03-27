@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.109 2015/03/24 16:37:28 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.110 2015/03/27 20:13:43 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.110  2015/03/27 20:13:43  perev
+ * Add printout of good track hits
+ *
  * Revision 2.109  2015/03/24 16:37:28  perev
  * fix printout hit: to hits:
  *
@@ -532,6 +535,7 @@ using namespace std;
 #include "StiMaker/StiStEventFiller.h"
 #include "TMath.h"
 #include "StTrack2FastDetectorMatcher.h"
+#include "Sti/StiHitTest.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 map<StiKalmanTrack*, StTrackNode*> StiStEventFiller::mTrkNodeMap;
 map<StTrackNode*, StiKalmanTrack*> StiStEventFiller::mNodeTrkMap;
@@ -647,6 +651,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   if (mUseAux) { mAux = new StiAux; e->Add(mAux);}
   mTrackStore = t;
   memset(mUsedHits,0,sizeof(mUsedHits));
+  memset(mUsedGits,0,sizeof(mUsedGits));
   mTrkNodeMap.clear();  // need to reset for this event
   mNodeTrkMap.clear();
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
@@ -691,15 +696,17 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;  
           int ibad = gTrack->bad();
-	  errh.Add(ibad);
           if (ibad) {
-//VP	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
+	  errh.Add(ibad);
+	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
 //VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
+            continue;
           }
 	  fillTrackCount2++;
+if (kTrack->getPointCount(kTpcId)>10)
+StiHftHits::hftHist("HFTAfterAll",kTrack);//???????????????????????
           fillPulls(kTrack,gTrack,0);
-          if (gTrack->numberOfPossiblePoints()<15) continue;
-          if (gTrack->geometry()->momentum().mag()<0.1) continue;
+          if (kTrack->getPointCount()<15) continue;
 	  fillTrackCountG++;
           
 	}
@@ -722,14 +729,20 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
     cout << "There were "<<errorCount<<"runtime_error while filling StEvent"<<endl;
 
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(1):"<< fillTrackCount1<<endl;
-//cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
+  cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
   for (int ij=1; ij<=mUsedHits[0]; ij++) {
     if (!mUsedHits[ij]) continue;
     const char *det =  detectorNameById((StDetectorId)ij);
     cout <<"StiStEventFiller::fillEvent() -I- Number of used hits:"<< det << "(" << ij << ") :"<<mUsedHits[ij]
-         << " per track:"<<double(mUsedHits[ij])/fillTrackCount1 <<endl;
+         << " per track:"<<double(mUsedHits[ij])/fillTrackCount2 <<endl;
+  }  
+  for (int ij=1; ij<=mUsedGits[0]; ij++) {
+    if (!mUsedGits[ij]) continue;
+    const char *det =  detectorNameById((StDetectorId)ij);
+    cout <<"StiStEventFiller::fillEvent() -I- Number of GOOD hits:"<< det << "(" << ij << ") :"<<mUsedGits[ij]
+         << " per track:"<<double(mUsedHits[ij])/fillTrackCountG <<endl;
   }  
 
 
@@ -751,8 +764,6 @@ void StiStEventFiller::fillEventPrimaries()
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
   cout << "StiStEventFiller::fillEventPrimaries() -I- Tracks in container:" << mTrackStore->size() << endl;
   int mTrackN=0,mVertN=0;
-  int noPipe=0;
-  int ifcOK=0;
   int fillTrackCount1=0;
   int fillTrackCount2=0;
   int fillTrackCountG=0;
@@ -810,14 +821,15 @@ void StiStEventFiller::fillEventPrimaries()
 
       vertex->addDaughter(pTrack);
       fillPulls(kTrack,gTrack,1); 
-      fillTrackCount2++;
       int ibad = pTrack->bad();
       errh.Add(ibad);
       if (ibad) {
 //VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
 //VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
+      continue;
       }
-      if (pTrack->numberOfPossiblePoints()<10) 		break;
+      fillTrackCount2++;
+      if (kTrack->getPointCount()<15) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
       fillTrackCountG++;
       break;
@@ -830,7 +842,8 @@ void StiStEventFiller::fillEventPrimaries()
   for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {vertex->setTrackNumbers();}
 
   mTrkNodeMap.clear();  // need to reset for the next event
-  cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1 <<endl;
+  cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (2):"<< fillTrackCount2 <<endl;
   cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
   errh.Print();
   return;
@@ -846,6 +859,8 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   int dets[kMaxDetectorId][3];
   track->getAllPointCount(dets,kMaxDetectorId-1);
+  int nTotHits = dets[0][2];
+  int nTpcHits = dets[kTpcId][2];
   for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][1]) continue;
     detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
@@ -869,11 +884,15 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       assert(detector == stiHit->detector());
       assert(stiHit->timesUsed());
 
-//		Count used hits
-      int gid = detector->getGroupId();
-      if (mUsedHits[0]<gid) mUsedHits[0]=gid;
-      mUsedHits[gid]++;
-
+//		Count used hits for tracks tpc hits >10
+      if (nTpcHits > 10) {
+	int gid = detector->getGroupId();
+	if (mUsedHits[0]<gid) mUsedHits[0]=gid;
+	mUsedHits[gid]++;
+	if (nTotHits>=15) {
+          if (mUsedGits[0]<gid) mUsedGits[0]=gid;
+          mUsedGits[gid]++;
+      } }
       if (!fistNode) fistNode = node;
       lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
@@ -1051,7 +1070,8 @@ StiDebug::Count("Xi2Prim.node",chi2[1]);
 ///
 ///       = -x11 -> Short track pointing to EEMC
 
-void StiStEventFiller::fillFlags(StTrack* gTrack) {
+void StiStEventFiller::fillFlags(StTrack* gTrack) 
+{
   Int_t flag = 0;
   if (gTrack->type()==global) {
     flag = 101; //change: make sure flag is ok

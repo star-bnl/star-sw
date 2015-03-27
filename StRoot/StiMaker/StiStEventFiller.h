@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.27 2015/03/21 02:16:53 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.28 2015/03/27 20:12:58 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.28  2015/03/27 20:12:58  perev
+ * Add printout of good track hits
+ *
  * Revision 2.27  2015/03/21 02:16:53  perev
  * By Lidia request, addet printing number of used hits detector by detector
  * No any modification of any algorithmes
@@ -220,6 +223,7 @@ private:
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
     int mUsedHits[100];
+    int mUsedGits[100];
     static map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
     static map<StTrackNode*, StiKalmanTrack*> mNodeTrkMap;
     unsigned short mStiEncoded;
