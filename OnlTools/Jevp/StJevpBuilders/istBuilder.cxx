@@ -821,7 +821,8 @@ void istBuilder::event(daqReader *rdr) {
 	long long int trgId = rdr->daqbits64;
 	//skip zerobias event
 	if((trgId>>60) & 0x1){
-		return;
+	  if(trgd) delete(trgd);
+	  return;
 	}
 
 	//ZDC vertex
@@ -836,6 +837,7 @@ void istBuilder::event(daqReader *rdr) {
 
 		if(fabs(mZdcVertex) > 10.0) {
 			LOG(DBG, "Skipping evt %d in run %d with vertexZ = %f", trgd->eventNumber(), run, mZdcVertex);
+			if(trgd) delete trgd;
 			return;  //skip current event if its vertex Z was outside of +-10.0 cm
 		}
 	}

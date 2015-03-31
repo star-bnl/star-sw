@@ -138,6 +138,32 @@ void _JevpServerMain(int argc, char *argv[])
   JevpServer::main(argc, argv);
 }
 
+unsigned long long int JevpServer::getMemUse() {
+  FILE *f = fopen("/proc/self/status", "r");
+  if(!f) return 0;
+
+  unsigned long long int sz = 0;
+  char *line = (char *)malloc(128);
+  size_t lsz = 128;
+
+
+  for(;;) {
+    if(getline(&line, &lsz, f) == -1) {
+      fclose(f);
+      free(line);
+      return sz;
+    }
+
+    if(!strncmp(line, "VmData:", 7)) {
+      sz = atoll(&line[7]);
+      fclose(f);
+      free(line);
+      return sz;
+    }
+  }
+  return sz;
+}
+
 void JevpServer::debugBuilders(int line)
 {
 #ifdef DEBUG
@@ -831,7 +857,7 @@ void JevpServer::performStartRun()
 
   eventsThisRun = 0;
 
-  LOG("JEFF", "Start run #%d",runStatus.run);
+  LOG("JEFF", "Start run #%d  (mem: %d)",runStatus.run, getMemUse());
   clearForNewRun();
 
   runStatus.setStatus("running");

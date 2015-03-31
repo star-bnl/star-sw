@@ -67,6 +67,8 @@ class JevpServer {
 
   void debugBuilders(int line);
 
+  unsigned long long int getMemUse();
+
   JevpServer() {
     myport = JEVP_PORT;
     logevent = 0;
