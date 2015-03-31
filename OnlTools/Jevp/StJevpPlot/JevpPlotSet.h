@@ -36,7 +36,7 @@ class JevpPlotSet : public TObject {
  public:
   BuilderStatus builderStatus;
   JevpPlotSet(JevpServer *server = NULL);
-
+  unsigned long long int getMemUse();
   int dbgSourceLine;
   int dbgCallSourceLine;
 

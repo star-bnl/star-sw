@@ -316,17 +316,58 @@ void JevpPlotSet::stoprun(daqReader *rdr)
 {
 }
 
+unsigned long long int JevpPlotSet::getMemUse() {
+  FILE *f = fopen("/proc/self/status", "r");
+  if(!f) return 0;
+
+  unsigned long long int sz = 0;
+  char *line = (char *)malloc(128);
+  size_t lsz = 128;
+
+
+  for(;;) {
+    if(getline(&line, &lsz, f) == -1) {
+      fclose(f);
+      free(line);
+      return sz;
+    }
+
+    if(!strncmp(line, "VmData:", 7)) {
+      sz = atoll(&line[7]);
+      fclose(f);
+      free(line);
+      return sz;
+    }
+  }
+  return sz;
+}
+
 void JevpPlotSet::_event(daqReader *rdr)
 {
   if(disabled) return;
 
   processingTimer->record_time();
 
+  //unsigned long long prio_mem = getMemUse();
+
   PCPC;
   builderStatus.events++;
   builderStatus.lastEventTime = time(NULL);
   event(rdr);
   PCPC;
+
+  //unsigned long long int post_mem = getMemUse();
+
+  static int evt_cnt=0;
+  static int mem_leak_cnt=0;
+
+  //if(post_mem != prio_mem) {
+    //mem_leak_cnt++;
+    //LOG("JEFF", "Memory leak! [%s, cnt=%d/%d, post = %lld prio=%lld (%d)]", getPlotSetName(), mem_leak_cnt, evt_cnt, post_mem, prio_mem, post_mem-prio_mem);
+  // }
+
+  evt_cnt++;
+
 
   processingTime += processingTimer->record_time();
   numberOfEventsRun++;

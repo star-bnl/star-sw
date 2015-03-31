@@ -32,7 +32,6 @@ class PlotHisto : public TObject {
   void setLegText(const char *text);
   void setLegArgs(const char *text);
 
-
   virtual ~PlotHisto();
 
   ClassDef(PlotHisto, 1);

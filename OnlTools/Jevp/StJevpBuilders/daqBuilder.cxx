@@ -109,6 +109,7 @@ void daqBuilder::startrun(daqReader *rdr) {
 void daqBuilder::event(daqReader *rdr)
 {
   // Fill Histograms...
+  
   int tpc_size = rdr->getDetectorSize("tpx");
   int bemc_size = rdr->getDetectorSize("btow");
   //  int eemc_size = rdr->getDetectorSize("etow");
@@ -118,7 +119,7 @@ void daqBuilder::event(daqReader *rdr)
   int l3_size = rdr->getDetectorSize("hlt");
   int tof_size = rdr->getDetectorSize("tof");
   int sz = rdr->getDetectorSize("/");
-
+  
   //printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
 
   contents.h2_tpc->Fill(safelog(tpc_size));
