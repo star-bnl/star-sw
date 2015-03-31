@@ -411,8 +411,14 @@ int sfs_index::getDirSize(char *dir, SfsDirsize *sizes)
   sizes->dataSize += d->inode->sz;
   sizes->size += d->inode->sz + d->inode->overhead;
 
-  if(d->inode->fchild) return getInodeSize(d->inode->fchild,sizes);
-  return 0;
+  int dirsz = 0;
+  if(d->inode->fchild) {
+      dirsz = getInodeSize(d->inode->fchild,sizes);
+  }
+
+  closedir(d);
+
+  return dirsz;
 }
 
 int sfs_index::writeFsHeader()
