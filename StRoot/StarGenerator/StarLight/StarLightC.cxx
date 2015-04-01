@@ -1,4 +1,4 @@
-#include "StarLight.h"
+#include "StarLightC.h"
 ClassImp(StarLight);
 
 #include "randomgenerator.h"
