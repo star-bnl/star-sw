@@ -1,3 +1,4 @@
+
 /// \File StiKalmanTrackFinder.cxx
 /// \Author Claude A Pruneau, 2001-2003
 /// \Copyright(c) 2001, STAR  Experiment at BNL, All rights reserved.
@@ -277,37 +278,6 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
 void StiKalmanTrackFinder::extendTracks(double rMin)
 {
 assert(0);
-// static int nCall=0;nCall++;
-// 
-//   int nTKeep=0;
-//   int ntr = _trackContainer->size();
-//   int nTpcHits=0,nSvtHits=0,nSsdHits=0,nPxlHits=0,nIstHits=0, extended=0;
-//   
-//   for ( int itr=0;itr < ntr;itr++) {	//Track loop
-//     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
-//     if (track->getFlag()<=0) 	continue;
-// 
-//     extended = extendTrack(track,rMin);
-//     track->reduce();
-//     if (extended<0 || track->getFlag()<=0) {
-//       track->clear(); continue;
-//     } else {
-//       assert(track->getChi2()<1e3);
-//       StiHit dcaHit; dcaHit.makeDca();
-//       StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
-//       if (extenDca) track->add(extenDca,kOutsideIn);
-//     }
-//     nTKeep++;
-//     nTpcHits+=track->getFitPointCount(kTpcId);
-//     nSvtHits+=track->getFitPointCount(kSvtId);
-//     nSsdHits+=track->getFitPointCount(kSsdId);
-//     nPxlHits+=track->getFitPointCount(kPxlId);
-//     nIstHits+=track->getFitPointCount(kIstId);
-//     track->reserveHits();
-//   }// end track loop
-//    LOG_DEBUG << Form("***extendTracks***: nTKeep=%d", nTKeep) << endm;
-//    LOG_DEBUG << Form("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nPxlHits=%d nIstHits=%d",
-// 	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits) << endm;
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
@@ -323,36 +293,28 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
     if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) track);
     trackExtended = find(track,kOutsideIn,rMin);
     if (trackExtended) {
-      status = 0;
-      if(status) return abs(status)*100 + kRefitInFail;
+StiHftHits::hftHist("HFTBefore",track);//???????????????????????
+    status = track->refit();
+StiHftHits::hftHist("HFTAfter",track);//???????????????????????
+      if(status) return kNotRefitedIn;
     }	
 
   }
     // decide if an outward pass is needed.
-  const StiKalmanTrackNode * outerMostNode = track->getOuterMostNode(2);
+  const StiKalmanTrackNode * outerMostNode = track->getOuterMostNode(kGoodHit);
   if (!outerMostNode)
   {
     track->setFlag(-1);
-    return 0;
+    return kNotExtended;
   }
   if (outerMostNode->getX()<185. )
   {
     trackExtendedOut= find(track,kInsideOut);
-    if (debug()) cout << "StiKalmanTrackFinder::extendTrack (track,kInsideOut)" << *((StiTrack *) track);
-  }
-  trackExtended |=trackExtendedOut;
-  if (trackExtended) {
-    status = track->approx(1);
-      //    if (status) return -1;
-StiHftHits::hftHist("HFTBefore",track);//???????????????????????
+    if (!trackExtendedOut) return kExtended;
     status = track->refit();
-StiHftHits::hftHist("HFTAfter",track);//???????????????????????
-    if (status) return abs(status)*100 + kRefitOutFail;
-
+    if(status) return kNotRefitedOut;
   }
-    //cout << " find track done" << endl;
-  if ( trackExtended ) return kExtended;
-  return kNotExtended;
+  return kExtended;
 }
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
@@ -410,7 +372,7 @@ static int REFIT=2005;
     bestNode->setUntouched();
 if (REFIT) {
     ifail = track->refit();
-    ifail |= (track->getInnerMostHitNode(3)!=bestNode);
+    ifail |= (track->getInnerMostHitNode(kGoodHit)!=bestNode);
 }
     track->reduce();
 // something is wrong. It is not a primary
@@ -434,12 +396,35 @@ StiDebug::tally("PrimRefited");
 //______________________________________________________________________________
 class StiKalmanTrackFinder::QAFind {
 public: 
-  double rmin;  //minimal radius allowed for search
-  double sum; 	//summ of chi2
-  int    hits;  //total number of hits
-  int    nits;  //total number of no hits
-  int    wits;  //total weight of precision hits
-  int    qa;	// quality flag for current level
+  	QAFind()		{reset();                  }
+void 	reset()			{mRMin=0; mSum=0; mHits =0; mNits=0; mQA=0;mWits=0;mSits=0;}
+double  rmin() const            {return mRMin;}
+double  sum()  const            {return mSum ;}	//summ of chi2
+   int  hits() const 		{return mHits;} //total number of hits
+   int  nits() const  		{return mNits;} //total number of no hits
+   int  sits() const  		{return mSits;} //total number of silicon hits
+   int  wits() const  		{return mWits;} //total weight of precision hits
+   int  qa()   const  		{return mQA  ;} // quality flag for current level
+  void  setRMin(double rm) 	{mRMin = rm  ;}
+  void  addXi2(double Xi2)      {mSum += Xi2 ;}
+  void  addHit(const StiHit *hit){mHits++; mQA=1;
+                                 if (hit->x() < kRMinTpc) { mSits++;
+                                 mWits+=StiKalmanTrackFinderParameters::instance()->hitWeight((int)hit->x());}
+                                }
+  
+  void  setHits(int nHits){mHits=nHits; mQA=1;}
+  void  setNits(int nNits){mNits=nNits;}
+  void  addNit()		{mNits++; mQA=-1;}
+  void  setQA(int qa) 		{mQA = qa;}
+   int  compQA(const QAFind &qaTry) const;
+private:
+  double mRMin;  //minimal radius allowed for search
+  double mSum; 	//summ of chi2
+  int    mHits; //total number of hits
+  int    mNits; //total number of no hits
+  int    mSits; //total number of silicon hits
+  int    mWits; //total weight of precision hits
+  int    mQA;	// quality flag for current level
 		//   qa =  1 == new hit accepted
 		//   qa =  0 == no hits was expected. dead material or edge
 		//   qa = -1 == hit expected but not found
@@ -447,9 +432,29 @@ public:
 		//   qa = -3 == fake track, stop processing of it
 		//   qa = -4 == track can not be continued, stop processing of it
 
-  	QAFind()		{reset();                  }
-void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;wits=0;}
 };
+//______________________________________________________________________________
+int StiKalmanTrackFinder::QAFind::compQA(const QAFind &qaTry) const
+{
+static const StiKalmanTrackFinderParameters *tfp = StiKalmanTrackFinderParameters::instance();
+//	One SVT hit is worse than zero
+   if (!mWits        &&  qaTry.wits() &&  qaTry.wits() < tfp->sumWeight()) return -1;
+   if (!qaTry.wits() &&  mWits        &&  mWits        < tfp->sumWeight()) return  1;
+
+   int ians = qaTry.wits()-mWits;       if (ians)	return ians;
+   ians =  qaTry.sits()-mSits;		if (ians)	return ians;
+   ians =  qaTry.hits()-mHits;		if (ians)	return ians;
+   ians =  mNits- qaTry.nits();	        if (ians)	return ians;
+   if (mSum  <= qaTry.sum() ) 				return -1;
+   							return  1;
+}
+
+
+
+
+
+
+
 
 //______________________________________________________________________________
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction,double rmin) // throws runtime_error, logic_error
@@ -462,20 +467,25 @@ StiKalmanTrackNode::Break(nCall);
   
   if(direction) rmin=0; //no limitation to outside
   StiKalmanTrack *track = dynamic_cast<StiKalmanTrack *> (t);
-  nnBef = track->getNNodes(3);
+  nnBef = track->getNNodes(kGoodHit);
   lnBef = track->getTrackLength();
 
-  StiKalmanTrackNode *leadNode = track->getInnOutMostNode(direction,2);
+  StiKalmanTrackNode *leadNode = track->getInnOutMostNode(direction,kGoodHit);
   if (!leadNode) return 0;
   leadNode->cutTail(direction);
-  assert(leadNode->isValid());
-  QAFind qa; qa.rmin = rmin;
+  track->setFirstLastNode(leadNode);
+  QAFind qa; qa.setRMin(rmin);
   mTrackPerm = kMaxTrackPerm;
   mUseComb = useComb();
+  qa.setHits(track->getPointCount());
+  qa.setNits(track->getGapCount()   );
+  if (direction && qa.hits()<5) 	return 0;
   find(track,direction,leadNode,qa);
+assert(qa.hits()==track->getPointCount());
 
+  track->setCombUsed(mUseComb);
   track->setFirstLastNode(leadNode);
-  nnAft = track->getNNodes(3);
+  nnAft = track->getNNodes(kGoodHit);
   lnAft = track->getTrackLength();
   return (nnAft>nnBef || lnAft>(lnBef+0.5));
 }
@@ -491,6 +501,10 @@ static const double radToDeg = 180./3.1415927;
 static const double ref1  = 50.*degToRad;
 //static  const double ref2  = 2.*3.1415927-ref1;
 static  const double ref1a  = 110.*degToRad;
+assert(direction || leadNode==track->getLastNode());
+
+
+
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
   if (--mEventPerm <0) throw runtime_error("FATAL::TOO MANY permutations");
@@ -503,18 +517,11 @@ static  const double ref1a  = 110.*degToRad;
   StiHit * stiHit;
   double  leadAngle,leadRadius;
 
-  assert(leadNode->isValid());
   const StiDetector *leadDet = leadNode->getDetector();
   leadRadius = leadDet->getPlacement()->getLayerRadius();
   assert(leadRadius>0 && leadRadius<1000);
-  if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
-  leadAngle  = leadDet->getPlacement()->getLayerAngle();
-
-
-////  if ((!direction) && !nRefit && leadRadius <100 && track->getNNodes(3)>10) {
-////     nRefit++; track->refit(); if (!leadNode->isValid()) return 0;
-////  }
-  
+  if (leadRadius < qa.rmin()) {gLevelOfFind--;qa.setQA(-4);return;}
+  leadAngle  = leadDet->getPlacement()->getLayerAngle();  
   
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
@@ -548,8 +555,7 @@ static  const double ref1a  = 110.*degToRad;
        StiDetector * detector = (*sector)->getData();
        double angle  = detector->getPlacement()->getLayerAngle();
        double radius = detector->getPlacement()->getLayerRadius();
-       assert(radius>0 && radius<1000);
-       if (radius < qa.rmin) {gLevelOfFind--;return;}
+       if (radius < qa.rmin()) {gLevelOfFind--; qa.setQA(-4);return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
           LOG_DEBUG << Form("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)"
@@ -571,10 +577,10 @@ static  const double ref1a  = 110.*degToRad;
        if (fabs(diff) > OpenAngle)	continue;
        detectors.push_back(detector);
     }
-
+//		list of detectors candidates created
     int nDets = detectors.size(); 
-    if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
     if (!nDets) continue;
+//		and sorted by Phi angle
     if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
 
 //		There is additional loop. 1st loop for active only, second for non active
@@ -595,9 +601,8 @@ static  const double ref1a  = 110.*degToRad;
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
       if (position) { 
-	continue; // will try the next available volume on this layer
+	continue; // missed, will try the next available volume on this layer
       }
-      assert(testNode.isValid());
       testNode.setDetector(tDet);
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
@@ -611,18 +616,15 @@ static  const double ref1a  = 110.*degToRad;
 	// active detector may have a hit
 	vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
 	vector<StiHit*>::iterator hitIter;
-	if (debug() > 2) cout << " candidates:"<< candidateHits.size();
         
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
-          assert(!stiHit->isUsed());
           if (stiHit->detector() && stiHit->detector()!=tDet) continue;
           status = testNode.nudge(stiHit);
           testNode.setReady();
           if (status)		continue;
 	  chi2 = testNode.evaluateChi2(stiHit);
-	  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
 	  if (chi2>maxChi2) 	continue;
 	  hitCont.add(stiHit,chi2,testNode.getDeterm());
 	  if (debug() > 2) cout << " hit selected"<<endl;
@@ -630,7 +632,6 @@ static  const double ref1a  = 110.*degToRad;
       }//if(active)
 
       int nHits = hitCont.getNHits();
-      assert(nHits<100);
       testNode.setHitCand(nHits);
       if (direction) {
         nHits=1;
@@ -641,7 +642,7 @@ static  const double ref1a  = 110.*degToRad;
         
       }
 
-      QAFind qaBest,qaTry;
+      QAFind qaBest(qa),qaTry;
       for (int jHit=0;jHit<nHits; jHit++)
       {//Loop over Hits
         stiHit = hitCont.getHit(jHit);
@@ -651,34 +652,31 @@ static  const double ref1a  = 110.*degToRad;
         do {//fake do
           if (!stiHit) break;
           node->setIHitCand(jHit);
-          assert(node->getHitCand());
           node->setHit(stiHit);
           status = node->updateNode();
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
-	  if (debug() > 0) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 
         qaTry = qa;
+	track->add(node,direction,leadNode);
         nodeQA(node,position,active,qaTry);
-	leadNode->add(node,direction);
-        if (qaTry.qa>-2) find(track,direction,node,qaTry);
-        
+        find(track,direction,node,qaTry);
         if (jHit==0) { qaBest=qaTry; continue;}
-        int igor = compQA(qaBest,qaTry,maxChi2);
+        int igor = qaBest.compQA(qaTry);
         if (igor<0)  { leadNode->remove(0);}
         else         { leadNode->remove(1);qaBest=qaTry;}
       }
-      qa = qaBest; gLevelOfFind--; return;
+      qa = qaBest; gLevelOfFind--; qa.setQA(-4); return;
     }//End Detectors
     if (foundInDetLoop) break;		//activeNonActive
     } //End of activeNonActive loop;
   }while(0);
   if(!direction){++rlayer;}else{++layer;}}
 //end layers
-  gLevelOfFind--;
+  gLevelOfFind--;qa.setQA(-4);
   return;
 }
 //______________________________________________________________________________
@@ -692,11 +690,8 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
   if (hit) {
     if (debug() > 2)cout << " got Hit! "<<endl ;
 //  const StiDetector *detector = hit->detector();
-    qa.sum += node->getChi2() + log(node->getDeterm());
-    qa.hits++; qa.qa=1;
-    if (node->getRxy() < kRMinTpc) {
-      qa.wits+=StiKalmanTrackFinderParameters::instance()->hitWeight((int)node->getRxy());
-    }
+    qa.addXi2(node->getChi2() + log(node->getDeterm()));
+    qa.addHit(hit);
     node->incHitCount();
     node->incContigHitCount();
 
@@ -704,16 +699,16 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
        node->setContigNullCount();
 
   } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
-    qa.qa=0;
+    qa.setQA(0);
 
   } else {// there should have been a hit but we found none
       if (debug() > 2) cout << " no hit but expected one"<<endl;
       node->incNullCount(); 
       node->incContigNullCount();
       node->setContigHitCount();
-      qa.nits++; qa.qa=-1;
-      if (node->getNullCount()>maxNullCount) 			qa.qa= -3;
-      if (node->getContigNullCount()>maxContiguousNullCount)	qa.qa= -3;
+      qa.addNit();
+      if (node->getNullCount()>maxNullCount) 			qa.setQA(-3);
+      if (node->getContigNullCount()>maxContiguousNullCount)	qa.setQA(-3);
   }//node->getHit()
 
 //  double xg = node->x_g();
@@ -721,62 +716,12 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 //VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }
-//______________________________________________________________________________
-int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
-{
-   int ians;
-   ians = qaTry.wits-qaBest.wits;
-//	One SVT hit is worse than zero
-   if (!qaBest.wits &&  qaTry.wits &&  qaTry.wits < StiKalmanTrackFinderParameters::instance()->sumWeight()) return -1;
-   if ( !qaTry.wits && qaBest.wits && qaBest.wits < StiKalmanTrackFinderParameters::instance()->sumWeight()) return  1;
-   				        if (ians)	return ians;
-   ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
-   ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
-   if (qaBest.sum  <= qaTry.sum ) 			return -1;
-   							return  1;
-}
 
 //______________________________________________________________________________
 StiTrack * StiKalmanTrackFinder::findTrack(double rMin)
 {
-assert(0);
-  StiTrack * track = 0;
-  try
-    {
-      if (!_trackSeedFinder) throw runtime_error("StiKalmanTrackFinder::findTrack() -E- No Track seed finder instance available");
-      track = _trackSeedFinder->findTrack(rMin);
-      if (track)
-        {
-        track->find();
-        if (!_trackFilter || _trackFilter->filter(track) ) _trackContainer->push_back(track);
-        }
-    }
-  catch (runtime_error & rte)
-    {
-    cout << "StiKalmanTrackFinder::findTrack() - Run Time Error :\n" << rte.what() << endl;
-    }
-  return track;
+assert(0); return 0;
 }
-
-/*
- void StiKalmanTrackFinder::fitNextTrack()
- {
-   StiTrack * track = 0;
-   try
-     {
-       track = _trackSeedFinder->findTrack();
-       if (track)
-         {
-         track->fit(kOutsideIn);
-         if (!_trackFilter || _trackFilter->filter(track) ) _trackContainer->push_back(track);
-         }
-     }
-   catch (runtime_error & rte)
-     {
-     cout << "StiKalmanTrackFinder::fitNextTrack() - Run Time Error :" << rte.what() << endl;
-     }
- }
- */
 
 //______________________________________________________________________________
 void StiKalmanTrackFinder::setTiming()
@@ -844,7 +789,7 @@ void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack
          }
            break;
          case StiKalmanTrackFitter::kShortTrackAfterFit: {
-           if (track) cout << " Not enough hits can be fitted: " << track->getNNodes(3) << " .";
+           if (track) cout << " Not enough hits can be fitted: " << track->getNNodes(kGoodHit) << " .";
            else cout << " Not enough hits can be fitted.";
          }
            break;
