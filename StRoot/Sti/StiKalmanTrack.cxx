@@ -1,11 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
- * $Id: StiKalmanTrack.cxx,v 2.138 2015/02/09 15:47:59 genevb Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.139  2015/04/02 16:29:16  perev
+ * Member mCombUsed introdused to memorize combination of hits selected
+ * Enum keepHit and kGoodHir added instead of using 1 & 2.
+ * StiKalmanTrack::add added new parameter StiTrackNode *near. It allows
+ * to add node in the middle. It is important for combinatorics.
+ * It is not clear how it was working before, but there is no time to investigate
+ *
  * Revision 2.138  2015/02/09 15:47:59  genevb
  * Restore inversion of hh because it is used in multiple places
  *
@@ -485,6 +492,7 @@ static int mIdCount = 0;
   firstNode = 0;
   lastNode  = 0;
   mSeedHitCount = 0;
+  mCombUsed = 0;
   mVertex = 0;
   m      = -1.;
   mFlag  = 0;
@@ -723,6 +731,7 @@ int StiKalmanTrack::getPointCount(int detectorId) const
     if (!node->getHit())	continue;
     detector = node->getDetector();  
     if (!detector) 		continue;
+    if (node->getChi2()>=1000)  continue;
     if (detectorId && detector->getGroupId() != detectorId) 	continue;
     nPts++;
   }
@@ -1041,8 +1050,8 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
   for (;(node=it());it++){
     if (!node->isValid()) 				continue;
     StiHit *hit = node->getHit();
-    if ((qua&1) && !hit) 				continue;
-    if ((qua&2) && hit && node->getChi2()>10000.)	continue;
+    if (qua&kKeepHit) {if (!hit) continue;}
+    if (qua&kGoodHit) {if (!hit || node->getChi2()>10000.)continue;}
     return node;
   }
   cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
@@ -1110,8 +1119,8 @@ int StiKalmanTrack::getNNodes(int qua)  const
   for (;(node=it());it++){
     if (!node->isValid()) 				continue;
     StiHit *hit = node->getHit();
-    if ((qua&1) && !hit) 				continue;
-    if ((qua&2) && hit && node->getChi2()>10000.)	continue;
+    if (qua&kKeepHit) { if (!hit) continue;} 			
+    if (qua&kGoodHit) { if (!hit || node->getChi2()>10000.) continue;}
     nn++;
   }
   return nn;
@@ -1428,7 +1437,7 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
 }
 
 //_____________________________________________________________________________
-void StiKalmanTrack::add(StiTrackNode * node,int direction)
+void StiKalmanTrack::add(StiTrackNode * node,int direction,StiTrackNode *near)
 {
    
    StiKalmanTrackNode *Node = (StiKalmanTrackNode*)node;
@@ -1436,10 +1445,12 @@ void StiKalmanTrack::add(StiTrackNode * node,int direction)
      lastNode = firstNode = Node; return;
    }
    if (direction==0) {
-     lastNode->add(Node,direction);
+     if (!near) near = lastNode;
+     near->add(Node,direction);
      lastNode = Node;
   } else {
-     firstNode->add(Node,direction);
+     if (!near) near = firstNode;
+     near->add(Node,direction);
      firstNode = Node;
   }
 }
@@ -1623,7 +1634,7 @@ void StiKalmanTrack::unset()
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
 {
-  printf("Track %p",(void*)this);
+  printf("Track %p\n",(void*)this);
 
   StiKTNIterator it;
   int n=0;
