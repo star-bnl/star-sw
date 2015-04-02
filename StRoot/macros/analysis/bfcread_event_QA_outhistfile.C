@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.18 2013/11/22 16:31:20 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.19 2015/04/02 19:54:41 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.19  2015/04/02 19:54:41  genevb
+// Bichsel now needed for TPC dE/dx QA
+//
 // Revision 1.18  2013/11/22 16:31:20  genevb
 // Restore parallelism with bfcread_event_QAhist.C
 //
@@ -124,6 +127,7 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StBichsel");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
