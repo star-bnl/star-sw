@@ -815,10 +815,10 @@ void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack
            cout << " Check the code.";
          }
            break;
-         case StiKalmanTrackFinder::kRefitInFail:
-         case StiKalmanTrackFinder::kRefitOutFail: {
+         case StiKalmanTrackFinder::kNotRefitedIn:
+         case StiKalmanTrackFinder::kNotRefitedOut: {
            cout << " Track can't be refitted after extension ";
-           if (status2 == StiKalmanTrackFinder::kRefitInFail) cout << "inside.";
+           if (status2 == StiKalmanTrackFinder::kNotRefitedIn) cout << "inside.";
            else cout << "outside.";
 
            int status3 = status2r%100; // take only status of Fitter
