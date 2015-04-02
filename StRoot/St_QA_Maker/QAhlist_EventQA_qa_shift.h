@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.47 2014/07/22 20:39:28 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.48 2015/04/02 19:53:46 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.48  2015/04/02 19:53:46  genevb
+// TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
+//
 // Revision 2.47  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //
@@ -231,6 +234,7 @@
   ":tpx;tpc:QaGtrkZdcaTanl",
   ":tpx;tpc:QaPidGlobtrkDstdedxPVsDedx",
   ":tpx;tpc:QaDedxBBTTS",
+  ":tpx;tpc:QaDedxBTTS",
   ":tpx;tpc:Z3A",
   ":tpx;tpc:QaEvsumTotChg",
   ":tpx;tpc:QaGtrkRZf0",
