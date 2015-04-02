@@ -1,5 +1,8 @@
-// $Id: QAhlist_logx.h,v 2.3 2002/04/23 01:59:55 genevb Exp $
+// $Id: QAhlist_logx.h,v 2.4 2015/04/02 19:53:47 genevb Exp $
 // $Log: QAhlist_logx.h,v $
+// Revision 2.4  2015/04/02 19:53:47  genevb
+// TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
+//
 // Revision 2.3  2002/04/23 01:59:55  genevb
 // Addition of BBC/FPD histos
 //
@@ -20,5 +23,6 @@
  "QaGtrkRTS",
  "QaPtrkRT",
  "QaPtrkRTS",
- "QaDedxBBTTS"
+ "QaDedxBBTTS",
+ "QaDedxBTTS"
 
