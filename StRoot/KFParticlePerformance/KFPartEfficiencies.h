@@ -61,7 +61,9 @@ class KFPartEfficiencies: public TNamed
                                 4122,-4122, //Lambdac
                                 10421, -10421, 10411, -10411, 20411, -20411, 10428,
                                 3001, //H->Lambda p pi
+                                3003, -3003, 3004, -3004, 3005, -3005, 3006, -3006, 3007, -3007, // hyper nuclei
                                 11, -11, 13, -13, 211,  -211, 321, -321, 2212, -2212, // stable particles
+                                1000010020, -1000010020, 1000010030, -1000010030, 1000020030, -1000020030, 1000020040, -1000020040, // stable fragments
                                 123456789 //V0
                                };
     TString mPartName[nParticles] = {"ks","lambda","lambdab","xi-","xi+","xi0","xi0b","omega-","omega+","#Sigma^0","#Sigma^0b", "#Sigma^+", "#Sigma^+b",
@@ -82,7 +84,9 @@ class KFPartEfficiencies: public TNamed
                                      "lambdac", "lambdacb",
                                      "D*0", "D*0b", "D*+", "D*-", "D*+_4", "D*-_4", "D0*_{#pi0}",
                                      "H0",
+                                     "LambdaN","LambdaNb","H3L","H3Lb","H4L","H4Lb","He4L","He4Lb","He5L","He5Lb",
                                      "e-", "e+", "mu-", "mu+", "pi+", "pi-", "K+", "K-", "p+", "p-",
+                                     "d+", "d-", "t+", "t-", "He3+", "He3-", "He4+", "He4-",
                                      "V0"
                                     };
     TString mPartTitle[nParticles] = {"KShort   ", //0
@@ -150,17 +154,35 @@ class KFPartEfficiencies: public TNamed
                                       "D*-_4    ", //62
                                       "D0*_#pi0 ", //63
                                       "H0       ", //64
-                                      "e-       ", //65
-                                      "e+       ", //66
-                                      "mu-      ", //67
-                                      "mu+      ", //68
-                                      "pi+      ", //69
-                                      "pi-      ", //70
-                                      "K+       ", //71
-                                      "K-       ", //72
-                                      "p+       ", //73
-                                      "p-       ", //74
-                                      "V0       " //75
+                                      "LambdaN  ", //65
+                                      "LambdaN b", //66
+                                      "H3L      ", //67
+                                      "H3L b    ", //68
+                                      "H4L      ", //69
+                                      "H4L b    ", //70
+                                      "He4L     ", //71
+                                      "He4L b   ", //72
+                                      "He5L     ", //73
+                                      "He5L b   ", //74
+                                      "e-       ", //75
+                                      "e+       ", //76
+                                      "mu-      ", //77
+                                      "mu+      ", //78
+                                      "pi+      ", //79
+                                      "pi-      ", //80
+                                      "K+       ", //81
+                                      "K-       ", //82
+                                      "p+       ", //83
+                                      "p-       ", //84
+                                      "d+       ", //85
+                                      "d-       ", //86
+                                      "t+       ", //87
+                                      "t-       ", //88
+                                      "He3+     ", //89
+                                      "He3-     ", //90
+                                      "He4+     ", //91
+                                      "He4-     ", //92
+                                      "V0       " //93
                                      };
 
     float mPartMHistoMin[nParticles] = {0.3, 1., 1., 1., 1., 1., 1.,1.,1.,1.,1.,1.,1.,
@@ -181,7 +203,9 @@ class KFPartEfficiencies: public TNamed
                                         1.8,1.8,
                                         1.8,1.8,1.8,1.8,1.8,1.8,1.8,
                                         1.,
+                                        1., 1., 2., 2., 3., 3., 3., 3., 4., 4.,
                                         0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+                                        0., 0., 0., 0., 0., 0., 0., 0., 
                                         0.3 };
     float mPartMHistoMax[nParticles] = {1.3, 2., 2., 3., 3., 3., 3., 3., 3.,3.,3.,3.,3.,
                                         2.6, 2.6, 2.6, 2.6, 2.6, 2.6, 2.6,
@@ -201,22 +225,24 @@ class KFPartEfficiencies: public TNamed
                                         3.8,3.8,
                                         3.8,3.8,3.8,3.8,3.8,3.8,3.8,
                                         3.,
+                                        3., 3., 4., 4., 5., 5., 5., 5., 6., 6.,
                                         0.01, 0.01, 1., 1., 1., 1., 1., 1., 1.5, 1.5,
+                                        2.5, 2.5, 3.5, 3.5, 3.5, 3.5, 4.5, 4.5,
                                         1.3};
                                         
     int mPartMaxMult[nParticles];
     for(int i=0; i<nParticles; i++)
       mPartMaxMult[i] = 20;
-    mPartMaxMult[65] = 20;
-    mPartMaxMult[66] = 20;
-    mPartMaxMult[67] = 20;
-    mPartMaxMult[68] = 20;
-    mPartMaxMult[69] = 500;
-    mPartMaxMult[70] = 500;
-    mPartMaxMult[71] = 50;
-    mPartMaxMult[72] = 50;
-    mPartMaxMult[73] = 500;
-    mPartMaxMult[74] = 20;
+    mPartMaxMult[75] = 20;
+    mPartMaxMult[76] = 20;
+    mPartMaxMult[77] = 20;
+    mPartMaxMult[78] = 20;
+    mPartMaxMult[79] = 500;
+    mPartMaxMult[80] = 500;
+    mPartMaxMult[81] = 50;
+    mPartMaxMult[82] = 50;
+    mPartMaxMult[83] = 500;
+    mPartMaxMult[84] = 20;
 
     float mPartMass[nParticles] = { 0.497614, // 0 K0
                                     1.115683, // 1 Lambda
@@ -283,17 +309,35 @@ class KFPartEfficiencies: public TNamed
                                     2.01029,  //62 D*-
                                     2.00699,  //63 D*0 ->D0pi0
                                     2.21,     //64 H0
-                                    5.485799e-4, //65 e-
-                                    5.485799e-4, //66 e+
-                                    0.105658, //67 mu-
-                                    0.105658, //68 mu+
-                                    0.139570, //69 pi+
-                                    0.139570, //70 pi-
-                                    0.493677, //71 K+
-                                    0.493677, //72 K-
-                                    0.938272, //73 p
-                                    0.938272, //74 p-
-                                    0};       //75 V0
+                                    2.05395,  //65 LambdaN
+                                    2.05395,  //66 LambdaN b
+                                    2.99339,  //67 H3L
+                                    2.99339,  //68 H3L b
+                                    3.92975,  //69 H4L
+                                    3.92975,  //70 H4L b
+                                    3.93070,  //71 He4L
+                                    3.93070,  //72 He4L b
+                                    4.86824,  //73 He5L
+                                    4.86824,  //74 He5L b
+                                    5.485799e-4, //75 e-
+                                    5.485799e-4, //76 e+
+                                    0.105658, //77 mu-
+                                    0.105658, //78 mu+
+                                    0.139570, //79 pi+
+                                    0.139570, //80 pi-
+                                    0.493677, //81 K+
+                                    0.493677, //82 K-
+                                    0.938272, //83 p
+                                    0.938272, //84 p-
+                                    1.876124, //85 d+
+                                    1.876124, //86 d-
+                                    2.809432, //87 t+
+                                    2.809432, //88 t+
+                                    2.809413, //89 He3+
+                                    2.809413, //90 He3-
+                                    3.728400, //91 He4+
+                                    3.728400, //92 He4-
+                                    0};       //93 V0
                                     
     float mPartLifeTime[nParticles] = { 8.954e-11, // 0 K0
                                         2.632e-10, // 1 Lambda
@@ -360,17 +404,35 @@ class KFPartEfficiencies: public TNamed
                                         6.86e-21,   //62 D*-
                                         6.86e-21,   //63 D*0 ->D0pi0
                                         1.32e-10,   //64 H0
-                                        1.0e20,     //65 e-
-                                        1.0e20,     //66 e+
-                                        2.2e-6,     //67 mu-
-                                        2.2e-6,     //68 mu+
-                                        2.6e-8,     //69 pi+
-                                        2.6e-8,     //70 pi-
-                                        1.238e-8,   //71 K+
-                                        1.238e-8,   //72 K-
-                                        1.0e20,     //73 p
-                                        1.0e20,     //74 p-
-                                        0};         //75 V0
+                                        1.00e-10,   //65 LambdaN
+                                        1.00e-10,   //66 LambdaN b
+                                        1.85e-10,   //67 H3L
+                                        1.85e-10,   //68 H3L b
+                                        1.80e-10,   //69 H4L
+                                        1.80e-10,   //70 H4L b
+                                        1.50e-10,   //71 He4L
+                                        1.50e-10,   //72 He4L b
+                                        1.40e-10,   //73 He5L
+                                        1.40e-10,   //74 He5L b
+                                        1.0e20,     //75 e-
+                                        1.0e20,     //76 e+
+                                        2.2e-6,     //77 mu-
+                                        2.2e-6,     //78 mu+
+                                        2.6e-8,     //79 pi+
+                                        2.6e-8,     //80 pi-
+                                        1.238e-8,   //81 K+
+                                        1.238e-8,   //82 K-
+                                        1.0e20,     //83 p
+                                        1.0e20,     //84 p-
+                                        1.0e20,     //85 d+
+                                        1.0e20,     //86 d-
+                                        1.0e20,     //87 t+
+                                        1.0e20,     //88 t-
+                                        1.0e20,     //89 He3+
+                                        1.0e20,     //90 He3-
+                                        1.0e20,     //91 He4+
+                                        1.0e20,     //92 He4-
+                                        0};         //93 V0
                                         
     int   mPartCharge[nParticles] = { 0, // 0 K0
                                       0, // 1 Lambda
@@ -437,17 +499,35 @@ class KFPartEfficiencies: public TNamed
                                      -1,   //62 D*-
                                       0,   //63 D*0 ->D0pi0
                                       0,   //64 H0
-                                     -1,   //65 e-
-                                      1,   //66 e+
-                                     -1,   //67 mu-
-                                      1,   //68 mu+
-                                      1,   //69 pi+
-                                     -1,   //70 pi-
-                                      1,   //71 K+
-                                     -1,   //72 K-
-                                      1,   //73 p
-                                     -1,   //74 p-
-                                      0};  //75 V0                                      
+                                      0,   //65 LambdaN
+                                      0,   //66 LambdaN b
+                                      1,   //67 H3L
+                                     -1,   //68 H3L b
+                                      1,   //69 H4L
+                                     -1,   //70 H4L b
+                                      2,   //71 He4L
+                                     -2,   //72 He4L b
+                                      2,   //73 He5L
+                                     -2,   //74 He5L b                                      
+                                     -1,   //75 e-
+                                      1,   //76 e+
+                                     -1,   //77 mu-
+                                      1,   //78 mu+
+                                      1,   //79 pi+
+                                     -1,   //80 pi-
+                                      1,   //81 K+
+                                     -1,   //82 K-
+                                      1,   //83 p
+                                     -1,   //84 p-
+                                      1,   //85 d+
+                                     -1,   //86 d-
+                                      1,   //87 t+
+                                     -1,   //88 t-
+                                      2,   //89 He3+
+                                     -2,   //90 He3-
+                                      2,   //91 He4+
+                                     -2,   //92 He4-
+                                      0};  //93 V0                                      
     //set decay mode
     partDaughterPdg.resize(nParticles);
 
@@ -729,6 +809,49 @@ class KFPartEfficiencies: public TNamed
     partDaughterPdg[curPart].push_back( 2212);
     curPart++;
     
+    partDaughterPdg[curPart].push_back( 1000010020); //LambdaN -> d+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000010020); //LambdaN_bar-> d- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back( 1000020030); //H3Lambda -> He3+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020030); //H3Lambda_bar -> He3- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back( 1000020040); //H4Lambda -> He4+ pi-
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020040); //H4Lambda_bar -> He4- pi+
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 1000020030); //He4Lambda -> He3+ p+ pi-
+    partDaughterPdg[curPart].push_back( 2212);
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020030); //He4Lambda_bar -> He3- p- pi+
+    partDaughterPdg[curPart].push_back(-2212);
+    partDaughterPdg[curPart].push_back(  211);
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back( 1000020040); //He5Lambda -> He4+ p+ pi-
+    partDaughterPdg[curPart].push_back( 2212);
+    partDaughterPdg[curPart].push_back( -211);
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020040); //He5Lambda_bar -> He4- p- pi+
+    partDaughterPdg[curPart].push_back(-2212);
+    partDaughterPdg[curPart].push_back(  211);
+    
     for(int iP=0; iP<nParticles; iP++)
     {
       partPDG[iP] = mPartPDG[iP];
@@ -901,14 +1024,14 @@ class KFPartEfficiencies: public TNamed
 
   void AddFromFile(TString fileName)
   {
-    std::fstream file(fileName.Data(),std::fstream::in);
+    std::fstream file(fileName.Data(),fstream::in);
     file >> *this;
   }
   
   int GetNDaughters(int iParticle) const { return partDaughterPdg[iParticle].size(); }
   int GetDaughterPDG(int iParticle, int iDaughter) const { return partDaughterPdg[iParticle][iDaughter]; }
   
-  static const int nParticles = 76;
+  static const int nParticles = 94;
   int partPDG[nParticles];
   TString partName[nParticles];
   TString partTitle[nParticles];

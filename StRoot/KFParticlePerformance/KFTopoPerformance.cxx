@@ -174,16 +174,15 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
   if ( vMCTracks[part.GetMCTrackID()].IsOutOfDetector() ) return;
   
     // tracks
-  if ( part.GetPDG() ==  -211 ||
-       part.GetPDG() ==   211 ||
-       part.GetPDG() ==  2212 ||
-       part.GetPDG() == -2212 ||
-       part.GetPDG() ==   321 ||
-       part.GetPDG() ==  -321 ||
-       part.GetPDG() ==    11 ||
-       part.GetPDG() ==   -11 ||
-       part.GetPDG() ==    13 ||
-       part.GetPDG() ==   -13 ||
+  if ( fabs(part.GetPDG()) ==        211 ||
+       fabs(part.GetPDG()) ==       2212 ||
+       fabs(part.GetPDG()) ==        321 ||
+       fabs(part.GetPDG()) ==         11 ||
+       fabs(part.GetPDG()) ==         13 ||
+       fabs(part.GetPDG()) == 1000010020 ||
+       fabs(part.GetPDG()) == 1000010030 ||
+       fabs(part.GetPDG()) == 1000020030 ||
+       fabs(part.GetPDG()) == 1000020040 ||
        ( (part.GetPDG() == 22) && (vMCTracks[part.GetMCTrackID()].IsReconstructed()) ) )
   {
     part.SetAsReconstructable(0);
@@ -968,7 +967,7 @@ void KFTopoPerformance::FillHistos()
       int iMCTrack = mcPart.GetMCTrackID();
       KFMCTrack &mcTrack = vMCTracks[iMCTrack];
       int mcDaughterId = -1;
-      if(iParticle > 64 && iParticle <75)
+      if(iParticle > 74 && iParticle <93)
         mcDaughterId = iMCTrack;
       else if(mcTrack.PDG() == 22 && TempPart.NDaughters() == 1)
         mcDaughterId = iMCTrack;
@@ -1052,7 +1051,7 @@ void KFTopoPerformance::FillHistos()
       //Daughter.TransportToPoint(decayVtx);
       KFParticleSIMD DaughterSIMD(Daughter);
       
-      float decayVtxScalar[3] = {mcX, mcY, mcZ};
+//       float decayVtxScalar[3] = {mcX, mcY, mcZ};
 //       float dsdrscalar[6] = {0.f};
 //       const float dSscalar = Daughter.GetDStoPoint(decayVtxScalar, dsdrscalar);
 //       
@@ -1173,45 +1172,6 @@ void KFTopoPerformance::FillHistos()
             hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
           }
         }
-        
-// #if 0
-//         KFParticle daughters[2] = {d1, d2};
-//         const KFParticle* daughtersP[2] = {&daughters[0], &daughters[1]};
-//         KFParticle mo;
-//         mo.Construct(daughtersP,2);
-//         res[0] = mo.X() - decayVtx[0][0];
-//         res[1] = mo.Y() - decayVtx[1][0];
-//         res[2] = mo.Z() - decayVtx[2][0];
-// 
-//         cD[0][0] = mo.CovarianceMatrix()[0];
-//         cD[0][1] = mo.CovarianceMatrix()[2];
-//         cD[0][2] = mo.CovarianceMatrix()[5];
-// #else
-//         {
-//           KFParticleSIMD daughters[2] = {d1, d2};
-//           const KFParticleSIMD* daughtersP[2] = {&daughters[0], &daughters[1]};
-//           KFParticleSIMD mo;
-//           mo.Construct(daughtersP,2);
-//           res[0] = mo.X()[0] - decayVtx[0][0];
-//           res[1] = mo.Y()[0] - decayVtx[1][0];
-//           res[2] = mo.Z()[0] - decayVtx[2][0];
-// 
-//           cD[0][0] = mo.CovarianceMatrix()[0][0];
-//           cD[0][1] = mo.CovarianceMatrix()[2][0];
-//           cD[0][2] = mo.CovarianceMatrix()[5][0];
-//         }
-// #endif
-//           for(int iPar=0; iPar<3; iPar++)
-//           {            
-//             Double_t error = cD[0][iPar];
-//             if(error < 0.) { error = 1.e20;}
-//             error = sqrt(error);
-//             
-//             pull[iPar] = res[iPar] / error;
-//             
-//             hDSToParticleQA[iParticle][iPar]->Fill(res[iPar]);
-//             hDSToParticleQA[iParticle][iPar+3]->Fill(pull[iPar]);
-//           }
         
         Double_t dXds = pD[0][0][0] - pD[1][0][0];
         Double_t dYds = pD[0][1][0] - pD[1][1][0];
