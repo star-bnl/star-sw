@@ -506,6 +506,8 @@ else if ($?NODEBUG) then
   setenv MINE_lib        .${STAR_HOST_SYS}/LIB
   setenv STAR_BIN  $STAR/.${STAR_HOST_SYS}/BIN
   setenv MY_BIN          .${STAR_HOST_SYS}/BIN
+  setenv STAR_OBJ  $STAR/.${STAR_HOST_SYS}/OBJ
+  setenv MY_OBJ          .${STAR_HOST_SYS}/OBJ
 
 else
   if ( $STAR_LEVEL != "cal" ) then
