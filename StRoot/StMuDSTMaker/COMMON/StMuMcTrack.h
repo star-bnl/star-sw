@@ -9,7 +9,7 @@ class StMuMcTrack : public TObject {
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
 	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ktpcR, ktot};
   StMuMcTrack(const g2t_track_st &t);
-  StMuMcTrack() {}
+  StMuMcTrack();
   virtual ~StMuMcTrack() {}
   Int_t                 GePid()        const {return mGePid;} /* GEANT particle id */	        
   Int_t           	Id()           const {return mId;}    /* primary key */		       
@@ -53,6 +53,7 @@ class StMuMcTrack : public TObject {
   static Int_t          CorrectGePid(Int_t gePid);
   const Char_t         *GeName();
  private:
+  Char_t         mBeg[1];      //!
   Int_t          mGePid;       /* GEANT particle id */
   Int_t          mId;          /* primary key */
   Bool_t         mIsShower;    /* 1 if shower track, 0 if not */
@@ -63,11 +64,12 @@ class StMuMcTrack : public TObject {
   Char_t         mCharge;      /* Charge */
   Float_t        mE;           /* Energy */
   Float_t        mEta;         /* Pseudorapidity */
-  StThreeVectorF mPxyz;        /* Momentum */
   Float_t        mpT;          /* Transverse momentum */
   Float_t        mPtot;        /* Total momentum */
   Float_t        mRapidity;    /* Rapidity */
-  ClassDef(StMuMcTrack,2)
+  Char_t         mEnd[1];      //!
+  StThreeVectorF mPxyz;        /* Momentum */
+  ClassDef(StMuMcTrack,3)
 };
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif

@@ -1,9 +1,14 @@
 // $Id: StMuMcTrack.cxx,v 1.4 2014/08/06 19:19:02 perev Exp $
 #include "StMuMcTrack.h"
+#include <string.h>
 #include "Stiostream.h"
 #include "TString.h"
 #include "TMath.h"
 ClassImp(StMuMcTrack);
+//________________________________________________________________________________
+StMuMcTrack::StMuMcTrack() {
+  memset(mBeg,0,mEnd-mBeg+1);
+}
 //________________________________________________________________________________
 StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), mId(t.id), mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
 						  mIdVx(t.start_vertex_p), mIdVxEnd(t.stop_vertex_p), mCharge(t.charge), mE(t.e), mEta(t. eta), 

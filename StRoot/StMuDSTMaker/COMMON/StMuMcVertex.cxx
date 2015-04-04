@@ -11,6 +11,10 @@ ostream&              operator<<(ostream& os,  const StMuMcVertex& v) {
   return os;
 }
 //________________________________________________________________________________
+StMuMcVertex::StMuMcVertex() {
+  memset(mBeg,0,mEnd-mBeg+1);
+}
+//________________________________________________________________________________
 void StMuMcVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuMcVertex.cxx,v $

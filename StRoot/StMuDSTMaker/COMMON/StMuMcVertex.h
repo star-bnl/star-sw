@@ -5,9 +5,9 @@
 
 class StMuMcVertex : public TObject {
  public:
+  StMuMcVertex();
   StMuMcVertex(const g2t_vertex_st &v) : mId(v.id), mNoDaughters(v.n_daughter), mIdParTrk(v.parent_p), 
     mIsInterm(v.is_itrmd), mTime(v.ge_tof), mXyzV(v.ge_x) {}
-  StMuMcVertex() {}
   virtual ~StMuMcVertex() {}
   Int_t Id()                   const {return mId;}          /* primary key */			
   Int_t NoDaughters()          const {return mNoDaughters;} /* Number of daughter tracks */	
@@ -17,13 +17,16 @@ class StMuMcVertex : public TObject {
   Int_t IdParTrk()             const {return mIdParTrk;}
   virtual void Print(Option_t* option = "") const;          //
  private:
+  
+  Char_t         mBeg[1];      //!
   Int_t   mId;
   Int_t   mNoDaughters;
   Int_t   mIdParTrk;
   Int_t   mIsInterm;                    
   Float_t mTime;
+  Char_t         mEnd[1];      //!
   StThreeVectorF mXyzV;
-  ClassDef(StMuMcVertex,1)
+  ClassDef(StMuMcVertex,2)
 };
 ostream&              operator<<(ostream& os, StMuMcVertex const & v);
 #endif
