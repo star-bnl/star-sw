@@ -78,7 +78,7 @@ const char* StPicoDstMaker::mEW[nEW*nDet] = {"EE","EW","WE","WW","FarWest","West
 
 //-----------------------------------------------------------------------
 StPicoDstMaker::StPicoDstMaker(const char* name) : StMaker(name),
-  mMuDst(0), mMuEvent(0), mBTofHeader(0), mEmcCollection(0), mCentrality(0), mIoMode(1), mCreatingPhiWgt(0), mProdMode(0),
+  mMuDst(0), mMuEvent(0), mBTofHeader(0), mEmcCollection(0), mCentrality(0), mIoMode(0), mCreatingPhiWgt(0), mProdMode(0),
   mEmcMode(1),
   mOutputFile(0), mPhiWgtFile(0),
   mChain(0), mTTree(0), mSplit(99), mCompression(9), mBufferSize(65536*4)
@@ -597,6 +597,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   }
   else
     {
+      if(!mCreatingPhiWgt) {
+        fillEvent();
+        mTTree->Fill(); THack::IsTreeWritable(mTTree);
+      }
       //LOG_INFO << "Event did not pass " << endm;
     }
 

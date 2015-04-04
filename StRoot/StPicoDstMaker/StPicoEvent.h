@@ -23,8 +23,8 @@ public:
   Int_t    eventId() const          { return mEventId; }
   Int_t    fillId() const           { return (Int_t)mFillId; }
   Float_t  bField() const           { return mBField; }
-  StThreeVectorF primaryVertex() const { return mPrimaryVertex; }
-  StThreeVectorF primaryVertexError() const { return mPrimaryVertexError; }
+  StThreeVectorF const & primaryVertex() const { return mPrimaryVertex; }
+  StThreeVectorF const & primaryVertexError() const { return mPrimaryVertexError; }
   Int_t    triggerWord() const      { return mTriggerWord; }
   Int_t    triggerWordMtd() const   { return mTriggerWordMtd; }
   Int_t    refMultPos() const       { return (Int_t)mRefMultPos; }
