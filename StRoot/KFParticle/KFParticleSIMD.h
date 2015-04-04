@@ -77,7 +77,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
  //* Initialisation from "cartesian" coordinates ( X Y Z Px Py Pz )
  //* Parameters, covariance matrix, charge and PID hypothesis should be provided 
 
-  void Create( const float_v Param[], const float_v Cov[], float_v Charge, float_v mass /*Int_t PID*/ );
+  void Create( const float_v Param[], const float_v Cov[], int_v Charge, float_v mass /*Int_t PID*/ );
 
   void SetOneEntry(int iEntry, KFParticleSIMD& part, int iEntryPart);
 
@@ -125,7 +125,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   float_v GetPz   () const ; //* z-compoment of 3-momentum
   float_v GetE    () const ; //* energy
   float_v GetS    () const ; //* decay length / momentum
-  float_v GetQ    () const ; //* charge
+  int_v   GetQ    () const ; //* charge
   float_v GetChi2 () const ; //* chi^2
   int_v GetNDF  () const ; //* Number of Degrees of Freedom
 
@@ -139,7 +139,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   const float_v& Pz   () const { return fP[5]; }
   const float_v& E    () const { return fP[6]; }
   const float_v& S    () const { return fP[7]; }
-  const float_v& Q    () const { return fQ;    }
+  const int_v  & Q    () const { return fQ;    }
   const float_v& Chi2 () const { return fChi2; }
   const int_v& NDF  () const { return fNDF;  }
   
@@ -208,7 +208,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   float_v & Pz   () ;
   float_v & E    () ;
   float_v & S    () ;
-  float_v & Q    () ;
+  int_v   & Q    () ;
   float_v & Chi2 () ;
   int_v & NDF  () ;
 
@@ -474,7 +474,7 @@ inline float_v KFParticleSIMD::GetS    () const
   return KFParticleBaseSIMD::GetS();    
 }
 
-inline float_v    KFParticleSIMD::GetQ    () const 
+inline int_v    KFParticleSIMD::GetQ    () const 
 { 
   return KFParticleBaseSIMD::GetQ();    
 }
@@ -796,7 +796,7 @@ inline float_v & KFParticleSIMD::S()
   return KFParticleBaseSIMD::S();    
 }
 
-inline float_v    & KFParticleSIMD::Q() 
+inline int_v    & KFParticleSIMD::Q() 
 { 
   return KFParticleBaseSIMD::Q();    
 }

@@ -95,7 +95,7 @@ class KFParticleBaseSIMD {
  //* Initialisation from "cartesian" coordinates ( X Y Z Px Py Pz )
  //* Parameters, covariance matrix, charge, and mass hypothesis should be provided 
 
-  void Initialize( const float_v Param[], const float_v Cov[], float_v Charge, float_v Mass );
+  void Initialize( const float_v Param[], const float_v Cov[], int_v Charge, float_v Mass );
 
   //* Initialise covariance matrix and set current parameters to 0.0 
 
@@ -126,7 +126,7 @@ class KFParticleBaseSIMD {
   float_v GetPz   () const { return fP[5]; }
   float_v GetE    () const { return fP[6]; }
   float_v GetS    () const { return fP[7]; }
-  float_v GetQ    () const { return fQ;    }
+  int_v   GetQ    () const { return fQ;    }
   float_v GetChi2 () const { return fChi2; }
   int_v GetNDF  () const { return fNDF;  }
 
@@ -138,7 +138,7 @@ class KFParticleBaseSIMD {
   const float_v& Pz   () const { return fP[5]; }
   const float_v& E    () const { return fP[6]; }
   const float_v& S    () const { return fP[7]; }
-  const float_v& Q    () const { return fQ;    }
+  const int_v&   Q    () const { return fQ;    }
   const float_v& Chi2 () const { return fChi2; }
   const int_v& NDF  () const { return fNDF;  }
   
@@ -171,7 +171,7 @@ class KFParticleBaseSIMD {
   float_v & Pz   () { return fP[5]; }
   float_v & E    () { return fP[6]; }
   float_v & S    () { return fP[7]; }
-  float_v & Q    () { return fQ;    }
+  int_v   & Q    () { return fQ;    }
   float_v & Chi2 () { return fChi2; }
   int_v & NDF  () { return fNDF;  }
 
@@ -312,7 +312,7 @@ class KFParticleBaseSIMD {
 
   float_v fP[8];  //* Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
   float_v fC[36]; //* Low-triangle covariance matrix of fP
-  float_v fQ;     //* Particle charge 
+  int_v fQ;     //* Particle charge 
   int_v fNDF;   //* Number of degrees of freedom 
   float_v fChi2;  //* Chi^2
 

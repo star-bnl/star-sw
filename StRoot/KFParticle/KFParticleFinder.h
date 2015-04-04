@@ -189,6 +189,10 @@ class KFParticleFinder
   //vectors with temporary particles for H0
   std::vector<KFParticle> fLPi; //Lambda Pi+ combination
   std::vector<int> fLPiPIndex; //index of the proton in Labmda
+  std::vector<KFParticle> fHe3Pi; //He3+ Pi- combination
+  std::vector<KFParticle> fHe3PiBar; //He3- Pi+ combination
+  std::vector<KFParticle> fHe4Pi; //He4+ Pi- combination
+  std::vector<KFParticle> fHe4PiBar; //He4- Pi+ combination
   
   std::vector<KFParticle> fK0PiPlus;
   std::vector<int> fK0PiMinusIndex;

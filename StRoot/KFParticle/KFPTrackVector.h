@@ -21,7 +21,7 @@
 class KFPTrackVector
 {
  public:
-  KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0) { }
+  KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0), fND(0), fNT(0), fNHe3(0), fNHe4(0) { }
   ~KFPTrackVector() { }
 
   int Size() const { return fP[0].size(); }
@@ -71,24 +71,33 @@ class KFPTrackVector
   void SetLastPion    (int n) { fNPi = n; }
   void SetLastKaon    (int n) { fNK = n; }
   void SetLastProton  (int n) { fNP = n; }
+  void SetLastDeuteron(int n) { fND = n; }
+  void SetLastTritium (int n) { fNT = n; }
+  void SetLastHe3     (int n) { fNHe3 = n; }
+  void SetLastHe4     (int n) { fNHe4 = n; }
   
   void RecalculateLastIndex()
   {
-    fNE = 0;    fNMu = 0;    fNPi = 0;    fNK = 0;    fNP = 0;
+    fNE = 0; fNMu = 0; fNPi = 0; fNK = 0; fNP = 0; fND = 0; fNT = 0; fNHe3 = 0; fNHe4 = 0;
     for(int i=0; i<Size(); i++)
     {
       switch (abs(fPDG[i]))
       {
-        case   11: fNE++; break;
-        case   13: fNMu++; break;
-        case  211: fNPi++; break;
-        case    1: fNPi++; break;
-        case  321: fNK++; break;
-        case 2212: fNP++; break;
+        case         11: fNE++; break;
+        case         13: fNMu++; break;
+        case        211: fNPi++; break;
+        case          1: fNPi++; break;
+        case        321: fNK++; break;
+        case       2212: fNP++; break;
+        case 1000010020: fND++; break;
+        case 1000010030: fNT++; break;
+        case 1000020030: fNHe3++; break;
+        case 1000020040: fNHe4++; break;
       }
     }
     
-    fNMu += fNE;    fNPi += fNMu;    fNK  += fNPi;    fNP  += fNK;
+    fNMu += fNE; fNPi += fNMu; fNK  += fNPi; fNP  += fNK;
+    fND += fNP; fNT += fND; fNHe3 += fNT; fNHe4 += fNHe3;
   }
   
   int FirstElectron()  { return 0; }
@@ -106,12 +115,28 @@ class KFPTrackVector
   int FirstProton()  { return int(fNK/float_vLen)*float_vLen; }
   const int& LastProton()  const { return fNP; }
   int NProtons() { return fNP - fNK; }   
-
+  int FirstDeuteron()  { return int(fNP/float_vLen)*float_vLen; }
+  const int& LastDeuteron()  const { return fND; }
+  int NDeuterons() { return fND - fNP; } 
+  int FirstTritium()  { return int(fND/float_vLen)*float_vLen; }
+  const int& LastTritium()  const { return fNT; }
+  int NTritiums() { return fNT - fND; } 
+  int FirstHe3()  { return int(fNT/float_vLen)*float_vLen; }
+  const int& LastHe3()  const { return fNHe3; }
+  int NHe3s() { return fNHe3 - fNT; } 
+  int FirstHe4()  { return int(fNHe3/float_vLen)*float_vLen; }
+  const int& LastHe4()  const { return fNHe4; }
+  int NHe4s() { return fNHe4 - fNHe3; } 
+  
   void AddElectron() {fNE++;}
   void AddMuon()     {fNMu++;}
   void AddPion()     {fNPi++;}
   void AddKaon()     {fNK++;}
   void AddProton()   {fNP++;}
+  void AddDeuteron() {fND++;}
+  void AddTririum()  {fNT++;}
+  void AddHe3()      {fNHe3++;}
+  void AddHe4()      {fNHe4++;}
 
   void RotateXY( float_v alpha, int firstElement );
   
@@ -161,11 +186,15 @@ class KFPTrackVector
     for(int n=0; n<localSize; n++)
       fPVIndex[n] = track.fPVIndex[n];
         
-    fNE = track.fNE;
-    fNMu = track.fNMu;
-    fNPi = track.fNPi;
-    fNK = track.fNK;
-    fNP = track.fNP;
+    fNE   = track.fNE;
+    fNMu  = track.fNMu;
+    fNPi  = track.fNPi;
+    fNK   = track.fNK;
+    fNP   = track.fNP;
+    fND   = track.fND;
+    fNT   = track.fNT;
+    fNHe3 = track.fNHe3;
+    fNHe4 = track.fNHe4;
     
     return *this;
   }
@@ -183,7 +212,7 @@ class KFPTrackVector
   kfvector_float fField[10];
 #endif
   
-  int fNE, fNMu, fNPi, fNK, fNP;
+  int fNE, fNMu, fNPi, fNK, fNP, fND, fNT, fNHe3, fNHe4;
 };
 
 #endif

@@ -36,6 +36,10 @@ KFParticleDatabase::KFParticleDatabase():
   fMass[2] = 0.13957;
   fMass[3] = 0.493667;
   fMass[4] = 0.9382723;
+  fMass[5] = 1.876124;
+  fMass[6] = 2.809432;
+  fMass[7] = 2.809413;
+  fMass[8] = 3.728400;
 
   fMassSecPDG[0] = 0.497614; //K0
   fMassSecPDG[1] = 1.115683; //Lambda

@@ -27,11 +27,15 @@ class KFParticleDatabase
     int pdgIndex = 2;
     switch ( abs(pdg) )
     {
-      case   11: pdgIndex = 0; break;
-      case   13: pdgIndex = 1; break;
-      case  211: pdgIndex = 2; break;
-      case  321: pdgIndex = 3; break;
-      case 2212: pdgIndex = 4; break;
+      case         11: pdgIndex = 0; break;
+      case         13: pdgIndex = 1; break;
+      case        211: pdgIndex = 2; break;
+      case        321: pdgIndex = 3; break;
+      case       2212: pdgIndex = 4; break;
+      case 1000010020: pdgIndex = 5; break;
+      case 1000010030: pdgIndex = 6; break;
+      case 1000020030: pdgIndex = 7; break;
+      case 1000020040: pdgIndex = 8; break;
       default:   pdgIndex = 2; break;
     }
     
@@ -41,12 +45,16 @@ class KFParticleDatabase
   Vc::float_v GetMass(const Vc::int_v& pdg) const
   {
     Vc::int_v pdgIndex(2);
-    pdgIndex(Vc::abs(pdg) ==   11) = 0;    
-    pdgIndex(Vc::abs(pdg) ==   13) = 1;
-    pdgIndex(Vc::abs(pdg) ==  211) = 2;
-    pdgIndex(Vc::abs(pdg) ==  321) = 3;
-    pdgIndex(Vc::abs(pdg) == 2212) = 4;
-    
+    pdgIndex(Vc::abs(pdg) ==         11) = 0;    
+    pdgIndex(Vc::abs(pdg) ==         13) = 1;
+    pdgIndex(Vc::abs(pdg) ==        211) = 2;
+    pdgIndex(Vc::abs(pdg) ==        321) = 3;
+    pdgIndex(Vc::abs(pdg) ==       2212) = 4;
+    pdgIndex(Vc::abs(pdg) == 1000010020) = 5;
+    pdgIndex(Vc::abs(pdg) == 1000010030) = 6;
+    pdgIndex(Vc::abs(pdg) == 1000020030) = 7;
+    pdgIndex(Vc::abs(pdg) == 1000020040) = 8;
+
     Vc::float_v mass(fMass, pdgIndex);
     return mass;
   }
@@ -88,7 +96,7 @@ class KFParticleDatabase
   static const KFParticleDatabase* Instance() { return fDatabase; }
 
  private:
-  float fMass[5];
+  float fMass[9];
 
   float fMassSecPDG[4];
   float fMassSecPDGSigma[4];

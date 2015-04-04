@@ -23,7 +23,7 @@
 
 static const float_v small = 1.e-20f;
 
-KFParticleBaseSIMD::KFParticleBaseSIMD() :fQ(0.f), fNDF(-3), fChi2(0.f), fSFromDecay(0.f),
+KFParticleBaseSIMD::KFParticleBaseSIMD() :fQ(0), fNDF(-3), fChi2(0.f), fSFromDecay(0.f),
   SumDaughterMass(0.f), fMassHypo(-1.f), fId(-1), fAtProductionVertex(0), fPDG(0), fConstructMethod(0), fDaughterIds()
 { 
   //* Constructor 
@@ -31,7 +31,7 @@ KFParticleBaseSIMD::KFParticleBaseSIMD() :fQ(0.f), fNDF(-3), fChi2(0.f), fSFromD
   Initialize();
 }
 
-void KFParticleBaseSIMD::Initialize( const float_v Param[], const float_v Cov[], float_v Charge, float_v Mass )
+void KFParticleBaseSIMD::Initialize( const float_v Param[], const float_v Cov[], int_v Charge, float_v Mass )
 {
   // Constructor from "cartesian" track, particle mass hypothesis should be provided
   //
@@ -89,7 +89,7 @@ void KFParticleBaseSIMD::Initialize()
   fC[35] = 1.f;
   fNDF  = -3;
   fChi2 =  0.f;
-  fQ = 0.f;
+  fQ = 0;
   fSFromDecay = 0.f;
   fAtProductionVertex = 0;
   SumDaughterMass = 0.f;
@@ -339,7 +339,7 @@ void KFParticleBaseSIMD::GetMeasurement( const KFParticleBaseSIMD& daughter, flo
     
              Transport(ds[0], dsdr[0], fP, fC, dsdr[1], F1, F2);
     daughter.Transport(ds[1], dsdr[3],  m,  V, dsdr[2], F4, F3);
-        
+
     MultQSQt(F2, daughter.fC, V0Tmp, 6);
     MultQSQt(F3, C, V1Tmp, 6);
         
@@ -2273,7 +2273,7 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v 
 {  
   //* Transport the particle on dS, output to P[],C[], for CBM field
  
-  if( (int_v(fQ) == 0).isFull() ){
+  if( (fQ == 0).isFull() ){
     TransportLine( dS, dsdr, P, C, dsdr1, F, F1 );
     return;
   }
@@ -2428,13 +2428,13 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v 
   mJds[1][4]= 1.f;
   mJds[2][5]= 1.f;
   
-  mJds[0][3](abs(dS)>0)= 1.f - 3.f*ssyy/dS;      mJds[0][4](abs(dS)>0)= 2.f*ssx/dS; mJds[0][5](abs(dS)>0)= (4.f*ssyyy-2.f*ssy)/dS;
-  mJds[1][3](abs(dS)>0)= -2.f*ssz/dS;            mJds[1][4](abs(dS)>0)= 1.f;        mJds[1][5](abs(dS)>0)= (2.f*ssx + 3.f*ssyz)/dS;
-  mJds[2][3](abs(dS)>0)= (2.f*ssy-4.f*ssyyy)/dS; mJds[2][4](abs(dS)>0)=-2.f*ssx/dS; mJds[2][5](abs(dS)>0)= 1.f - 3.f*ssyy/dS;
+  mJds[0][3](abs(dS)>0.f)= 1.f - 3.f*ssyy/dS;      mJds[0][4](abs(dS)>0.f)= 2.f*ssx/dS; mJds[0][5](abs(dS)>0.f)= (4.f*ssyyy-2.f*ssy)/dS;
+  mJds[1][3](abs(dS)>0.f)= -2.f*ssz/dS;            mJds[1][4](abs(dS)>0.f)= 1.f;        mJds[1][5](abs(dS)>0.f)= (2.f*ssx + 3.f*ssyz)/dS;
+  mJds[2][3](abs(dS)>0.f)= (2.f*ssy-4.f*ssyyy)/dS; mJds[2][4](abs(dS)>0.f)=-2.f*ssx/dS; mJds[2][5](abs(dS)>0.f)= 1.f - 3.f*ssyy/dS;
   
-  mJds[3][3]= -2.f*syy/dS;         mJds[3][4]= sx/dS;  mJds[3][5]= 3.f*syyy/dS - sy/dS;
-  mJds[4][3]= -sz/dS;              mJds[4][4]=0.f;     mJds[4][5] = sx/dS + 2.f*syz/dS;
-  mJds[5][3]= sy/dS - 3.f*syyy/dS; mJds[5][4]=-sx/dS;  mJds[5][5]= -2.f*syy/dS;
+  mJds[3][3](abs(dS)>0.f)= -2.f*syy/dS;         mJds[3][4](abs(dS)>0.f)= sx/dS;  mJds[3][5](abs(dS)>0.f)= 3.f*syyy/dS - sy/dS;
+  mJds[4][3](abs(dS)>0.f)= -sz/dS;              mJds[4][4](abs(dS)>0.f)=0.f;     mJds[4][5](abs(dS)>0.f) = sx/dS + 2.f*syz/dS;
+  mJds[5][3](abs(dS)>0.f)= sy/dS - 3.f*syyy/dS; mJds[5][4](abs(dS)>0.f)=-sx/dS;  mJds[5][5](abs(dS)>0.f)= -2.f*syy/dS;
   
   for(int i1=0; i1<6; i1++)
     for(int i2=0; i2<6; i2++)
