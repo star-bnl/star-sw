@@ -75,6 +75,9 @@ class StiKalmanTrackNode;
   \see StiKalmanTrackFinder
   \author Claude A Pruneau (Wayne State University)
 */
+enum nodeQA {kKeepHit=1,kGoodHit=2};
+
+
 class StiKalmanTrack : public StiTrack 
 {
  public:
@@ -148,6 +151,13 @@ class StiKalmanTrack : public StiTrack
    * @return dca in cm.
    */
    double getDca(StiTrack *t)   const;
+
+  /*!
+   * Returns the combinatoric style used in track construction .
+   * and set this value.
+   */
+   int     combUsed() const 	{return mCombUsed  ;}
+   void setCombUsed(int comb)  	{mCombUsed = comb&7;}
   
   /*! 
    * Returns the distance of closest approach of this track to the primary vertex 
@@ -247,7 +257,7 @@ class StiKalmanTrack : public StiTrack
    
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
-   virtual void add(StiTrackNode * node,int direction);
+   virtual void add(StiTrackNode * node,int direction,StiTrackNode *near=0);
 
   /// Convenience method to initialize a track based on seed information 
   int initialize(const vector<StiHit*> &);
@@ -317,6 +327,7 @@ protected:
   StiKalmanTrackNode * lastNode;
 
   UShort_t  mSeedHitCount; //number of points used to seed the track (seed quality)
+  char      mCombUsed; 	  // save which combinatoric style was used
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
   double  _dca;

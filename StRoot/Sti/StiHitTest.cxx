@@ -8,6 +8,8 @@
 #include "StiHit.h"
 #include "StiKalmanTrack.h"
 #include "StiUtilities/StiDebug.h"
+#include "StEvent/StEnumerations.h"
+
 //______________________________________________________________________________
 void StiHitTest::reset()
 {
@@ -87,11 +89,13 @@ void StiHftHits::hftHist(const char *name, const StiKalmanTrack* tk)
 //SST 4 -- 21 < R < 28 cm 
 enum {kMinRadTpc = 50};
 if (StiDebug::Debug()<2) return;
-
+int nTpcHits = tk->getPointCount(kTpcId);
+if (nTpcHits<11) return;
 
 static double Rxy[]={5,10,19,30,0};
   int nHits=0,nHft=0,tally[9]={0};
   double lastR=0;
+  TString forRxy(name); forRxy+="_xLoc";
   StiKTNIterator it;
   for (it=tk->rbegin();it!=tk->rend();it++)  {
     StiKalmanTrackNode *node = &(*it);
@@ -108,17 +112,22 @@ static double Rxy[]={5,10,19,30,0};
     if (node->getChi2()>1000)	continue;
     rxy = sqrt(pow(hit->x(),2)+pow(hit->y(),2));
     if (rxy>kMinRadTpc) 	break;
-    if (rxy<lastR) 		{StiDebug::Count(name,"???"); return;}//wrong order, do not count at all
+    if (rxy<lastR) 		{StiDebug::Count(name,"????"); return;}//wrong order, do not count at all
     lastR = rxy;
     int ih=0;
     rxy = hit->x();
     for (;Rxy[ih];ih++) { if (rxy<Rxy[ih]) break;}
     tally[ih]++; nHits++;
-
+    StiDebug::Count(forRxy.Data(),rxy);
+  }
+  if (nHft) {
+assert(strstr(name,"After") || nHits==0 || nHits >=3);///???
+    TString ts(name);ts+="_siHits:siDets";
+    StiDebug::Count(ts.Data(),100.*nHits/nHft);
   }
   if (!nHits) {
-    if (nHft) {StiDebug::Count(name,"000");}
-    else      {StiDebug::Count(name,"xxx");}
+    if (nHft) {StiDebug::Count(name,"0000");}
+    else      {StiDebug::Count(name,"xxxx");}
     return;
   }
   TString ts;

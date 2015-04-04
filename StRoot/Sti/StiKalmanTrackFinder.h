@@ -95,8 +95,13 @@ public:
   typedef enum{ // type of return value for the extendTrack() procedure
     kExtended,
     kNotExtended,
+#if 0
     kRefitInFail,
     kRefitOutFail
+#else
+    kNotRefitedIn,
+    kNotRefitedOut
+#endif
   } TExtendStatus;
 
   
