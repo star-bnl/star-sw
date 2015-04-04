@@ -73,14 +73,15 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
-  float Mtp[3], MtpErr[3];
-  if (particle.GetMass(Mtp[0], MtpErr[0]))     {MtpErr[0] = -13;}
-  if (particle.GetLifeTime(Mtp[1], MtpErr[1])) {MtpErr[1] = -13;}
-  if (particle.GetMomentum(Mtp[2], MtpErr[2])) {MtpErr[2] = -13;}
-  for (Int_t i = 8; i < 11; i++) {
-    if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
-    if (MtpErr[i-8] > 1e-6 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
-    else                                          os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
+  for (Int_t i = 0; i < 3; i++) {
+    Float_t V, dV;
+    switch (i) {
+    case 0: if (particle.GetMass(V,dV))     continue; break;
+    case 1: if (particle.GetLifeTime(V,dV)) continue; break;
+    case 2: if (particle.GetMomentum(V,dV)) continue; break;
+    default: break;
+    }
+    os << Form(" %s:%8.3f+/-%7.3f", vn[i+8],V,dV);
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
@@ -277,7 +278,19 @@ Int_t KFParticleBase::GetR( float &r, float &error )  const
 Int_t KFParticleBase::GetMass( float &m, float &error ) const 
 {
   //* Calculate particle mass
-  
+  float m2 = (fP[6]*fP[6] - fP[3]*fP[3] - fP[4]*fP[4] - fP[5]*fP[5]);
+  if(m2<0.)
+  {
+    error = 1.e3;
+    m = -sqrt(-m2);
+    return 1;
+  }
+  if (m2 > 1e9) {
+    error = 1.e3;
+    m = sqrt(m2);
+    return 1;
+    
+  }
   // s = sigma^2 of m2/2
 
   float s = (  fP[3]*fP[3]*fC[9] + fP[4]*fP[4]*fC[14] + fP[5]*fP[5]*fC[20] 
@@ -294,14 +307,7 @@ Int_t KFParticleBase::GetMass( float &m, float &error ) const
 //     }
 //   }
 //   error = 1.e20;
-  float m2 = (fP[6]*fP[6] - fP[3]*fP[3] - fP[4]*fP[4] - fP[5]*fP[5]);
 
-  if(m2<0.)
-  {
-    error = 1.e3;
-    m = -sqrt(-m2);
-    return 1;
-  }
 
   m  = sqrt(m2);
   if( m>1.e-6 ){
@@ -1330,7 +1336,7 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaugh
     
   }
 
-  if( Mass>=0 ) SetMassConstraint( Mass );
+  if( Mass>-0.5 ) SetMassConstraint( Mass );
   if( Parent ) SetProductionVertex( *Parent );
 }
 
@@ -1410,14 +1416,16 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   bool mask = ( fabs(bq)<LocalSmall );
   if(mask && p2>1.e-4f)
   {
-    dS = (a + dz*pz)/p2;
+    float ap = a/p2;
+    float pzp = pz/p2;
+    dS = ap + dz*pzp;
     
     dsdr[0] = -px/p2;
     dsdr[1] = -py/p2;
-    dsdr[2] = -pz/p2;
-    dsdr[3] = (dx*p2 - 2.f* px *(a + dz *pz))/(p2*p2);
-    dsdr[4] = (dy*p2 - 2.f* py *(a + dz *pz))/(p2*p2);
-    dsdr[5] = (dz*p2 - 2.f* pz *(a + dz *pz))/(p2*p2);
+    dsdr[2] = -pzp;
+    dsdr[3] = (dx - 2.f* px *(ap + dz *pzp))/(p2);
+    dsdr[4] = (dy - 2.f* py *(ap + dz *pzp))/(p2);
+    dsdr[5] = (dz - 2.f* pz *(ap + dz *pzp))/(p2);
   }
   if(mask)
   { 
