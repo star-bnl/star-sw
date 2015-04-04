@@ -25,12 +25,8 @@
 #include "StMessMgr.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/others/StEmcMath.h"
-#if 0
-#include "StarClassLibrary/BetheBloch.h"
-#else
 #include "StBichsel/Bichsel.h"
 #include "TMath.h"
-#endif
 #include "StPmdUtil/StPmdCollection.h"
 #include "StPmdUtil/StPmdDetector.h"
 #include "StPmdUtil/StPmdMapUtil.h"
@@ -1534,11 +1530,16 @@ void StEventQAMaker::MakeHistPID() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling dE/dx histograms ");
   
+  if (vertExists <= 0) return;
+
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t cntrows=0;
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrack *theTrack = theNodes[i]->track(global);
-    if (!theTrack) continue;
+    if (!theTrack || theTrack->bad()) continue;
+    StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(theNodes[i]->track(primary));
+    if (!pTrack || pTrack->bad() || pTrack->vertex() != primVtx) continue;
+    
     cntrows++;
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
     StDedxPidTraits *dedxPidTr;
@@ -1553,17 +1554,11 @@ void StEventQAMaker::MakeHistPID() {
 	double dedx = dedxPidTr->mean();
 	double error = dedxPidTr->errorOnMean();
 	double p = abs(theTrack->geometry()->momentum());
-	double trackLength = dedxPidTr->length();
 	if (dedxPidTr->detector() == kTpcId) {
-	  // using BetheBloch::Sirrf method for curve normalized to 2.4 keV/cm
-#if 0
-	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
-						     pion_minus_mass_c2,trackLength);
-	  pionExpectedBB *= 1.e-6;
-#else
-	  Float_t pionExpectedBB = Bichsel::Instance()->GetI70M(TMath::Log10(theTrack->geometry()->momentum().mag()/pion_minus_mass_c2));
-#endif
-	  hists->m_dedxTTS->Fill(dedx/(pionExpectedBB+1.e-10));
+	  Float_t pionExpected = Bichsel::Instance()->GetI70M(
+            TMath::Log10(theTrack->geometry()->momentum().mag()/pion_minus_mass_c2));
+	  pionExpected *= 1.e-6;
+	  hists->m_dedxTTS->Fill(dedx/(pionExpected+1.e-10));
 	  hists->m_ndedxT->Fill(ndedx);
 	  hists->m_dedx0T->Fill(dedx);
 	  hists->m_dedx1T->Fill(error);
@@ -1573,11 +1568,10 @@ void StEventQAMaker::MakeHistPID() {
 	}
 #if 0
 	if (dedxPidTr->detector() == kTpcSvtId) {
-	  // using BetheBloch::Sirrf method for curve normalized to 2.4 keV/cm
-	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
-						     pion_minus_mass_c2,trackLength);
-	  pionExpectedBB *= 1.e-6;
-	  hists->m_dedxTTS->Fill(dedx/(pionExpectedBB+1.e-10));
+	  Float_t pionExpected = Bichsel::Instance()->GetI70M(
+            TMath::Log10(theTrack->geometry()->momentum().mag()/pion_minus_mass_c2));
+	  pionExpected *= 1.e-6;
+	  hists->m_dedxTTS->Fill(dedx/(pionExpected+1.e-10));
 	}
 #endif
 	if (dedxPidTr->detector() == kFtpcWestId) {
@@ -2781,7 +2775,7 @@ void StEventQAMaker::MakeHistRP() {
 
 	  NCluster[i][j] = 0 ;
 
-	  for ( k=0; k<RpsColl->romanPot(i)->plane(j)->numberOfClusters() ; k++ ) {
+	  for ( k=0; k<(Int_t) RpsColl->romanPot(i)->plane(j)->numberOfClusters() ; k++ ) {
 	    //	    m_RP_ClusterLength->Fill( RpsColl->romanPot(i)->plane(j)->cluster(k)->length() ) ;
 	    if ( k<MAXHITS ) {
 	      NCluster[i][j]++ ;
@@ -2810,8 +2804,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.118 2015/03/18 21:43:17 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.119 2015/04/02 19:53:47 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.119  2015/04/02 19:53:47  genevb
+// TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
+//
 // Revision 2.118  2015/03/18 21:43:17  genevb
 // Introduce Roman Pots histograms (K. Yip)
 //

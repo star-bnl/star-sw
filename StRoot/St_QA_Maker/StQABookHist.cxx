@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.71 2015/01/16 21:08:28 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.72 2015/04/02 19:53:47 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.72  2015/04/02 19:53:47  genevb
+// TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
+//
 // Revision 2.71  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //
@@ -487,7 +490,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_ndedxT=0;         //! number of point to find dE/dx
   m_dedx0T=0;         //! dE/dx [0] - mean
   m_dedx1T=0;         //! dE/dx [1] - sigma
-  m_dedxTTS=0;        //! <dE/dx>/(Bethe Bloch <dE/dx>), tpc, tpc+svt
+  m_dedxTTS=0;        //! <dE/dx>/(Bichsel <dE/dx>), tpc, tpc+svt
   // east and west on same plot
   m_ndedxF=0;         //! number of point to find dE/dx
   m_dedx0F=0;         //! dE/dx [0] - mean
@@ -1680,7 +1683,9 @@ void StQABookHist::BookHistDE(){
   m_ndedxT   = QAH::H1F("QaDedxNdedxT", "dedx: number of point to define dE/dx, tpc",50,0., 50.);  
   m_dedx0T   = QAH::H1F("QaDedxDedx0T", "dedx: dE/dx mean (GeV/cm), tpc", ndedx, 0., 0.0005);
   m_dedx1T   = QAH::H1F("QaDedxDedx1T", "dedx: dE/dx error on mean, tpc", ndedx, 0., 1);
-  m_dedxTTS  = QAH::H1F("QaDedxBBTTS",  "dedx: ratio <dE/dx> mean to Bethe Bloch <dE/dx>, tpc,tpc+svt",
+  //m_dedxTTS  = QAH::H1F("QaDedxBBTTS",  "dedx: ratio <dE/dx> mean to Bethe-Bloch <dE/dx>, tpc,tpc+svt",
+  //			50,0.,10.);
+  m_dedxTTS  = QAH::H1F("QaDedxBTTS",  "dedx: ratio <dE/dx> mean to Bichsel <dE/dx>, tpc,tpc+svt",
 			50,0.,10.);
   // east and west on same plot
   m_ndedxF   = QAH::MH1F("QaDedxNdedxF", "dedx: number of point to define dE/dx, ftpc",50,0.,10.,2);

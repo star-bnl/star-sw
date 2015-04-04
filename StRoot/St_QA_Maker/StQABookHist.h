@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.35 2015/01/16 21:08:28 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.36 2015/04/02 19:53:47 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.36  2015/04/02 19:53:47  genevb
+// TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
+//
 // Revision 2.35  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //
@@ -139,7 +142,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.35 2015/01/16 21:08:28 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.36 2015/04/02 19:53:47 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -390,7 +393,7 @@ class StQABookHist : public TObject {
   TH1F     *m_ndedxT;        //! number of point to find dE/dx, tpc
   TH1F     *m_dedx0T;        //! dE/dx [0], tpc
   TH1F     *m_dedx1T;        //! dE/dx [1], tpc
-  TH1F     *m_dedxTTS;       //! <dE/dx>/(Bethe-Bloch <dE/dx>), tpc,tpc+svt
+  TH1F     *m_dedxTTS;       //! <dE/dx>/(Bichsel <dE/dx>), tpc,tpc+svt
   // east and west on same plot
   TH2F     *m_ndedxF;        //! number of point to find dE/dx, ftpc
   TH2F     *m_dedx0F;        //! dE/dx [0], ftpc
