@@ -17,7 +17,7 @@ if ($?STAR_HOST_SYS == 0) setenv STAR_HOST_SYS `sys`
 set level = `echo $ROOT_LEVEL | $AWK -F. '{print $1$2}'`
 
 if (! $?ROOT) setenv ROOT ${STAR_ROOT}/ROOT
-
+if ($?ROOTROOT == 0)   setenv ROOTROOT ${ROOT}/${ROOT_LEVEL}
 if ($level >= 305 )  then
     # all is sorted out here actually
     set p = ""

@@ -374,6 +374,9 @@ setenv STAR_LIB  $STAR/.${STAR_HOST_SYS}/lib  ;   if ($ECHO) echo   "Setting up 
 setenv STAR_OBJ  $STAR/.${STAR_HOST_SYS}/obj  ;   if ($ECHO) echo   "Setting up STAR_OBJ  = ${STAR_OBJ}"
 setenv STAR_BIN  $STAR/.${STAR_HOST_SYS}/bin  ;   if ($ECHO) echo   "Setting up STAR_BIN  = ${STAR_BIN}"
 setenv STARL     $STAR_PATH/${STAR_VERSION}   
+setenv GARFIELD_HOME $STAR/garfield
+setenv HEED_DATABASE ${GARFIELD_HOME}/Heed/heed++/database
+
 if ( $STAR_LEVEL == "cal" ) then
     # do not redefine STAR in this case - this is used in cons
     # heavily for finding includes and such. But define lib
