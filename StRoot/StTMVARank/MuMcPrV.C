@@ -48,7 +48,7 @@ KFV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE
 #include "StTMVARank/StTMVARanking.h"
 #ifndef __RC__
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
-#include "StMuDSTMaker/COMMON/StMuPrimaryTrackCovariance.h"
+#include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #endif /* !__RC__ */
 #include "StBTofHeader.h"
 #include "StDcaGeometry.h"
@@ -105,39 +105,37 @@ struct MatchType_t {
   const Char_t    *Name;
   const Char_t   *Title;
 };
-class Var_t {
+class McVT_t : public TObject {
 public:
-  Float_t X, Y, Z, Px, Py, Pz, E, S, P, Pt, Eta, Phi, M, L, LXY, T, R, Chi2;
-  Int_t NDF, Id, GePid;
+  StMuMcVertex Vx;
+  StMuMcTrack  Tk;
+  ClassDef(McVT_t,1)
 };
 class Mc_t : public TObject {
 public:
-  Var_t Mc;
+  McVT_t  Mc;
   ClassDef(Mc_t,1)
 };
 class Match_t : public TObject {
 public:
-  Var_t Mc;
-  Var_t V;
-  Var_t dV;
+  McVT_t  Mc;
+  KFParticle V;
   ClassDef(Match_t,1)
 };
 class Clone_t : public TObject {
 public:
-  Var_t Mc;
-  Var_t V;
-  Var_t dV;
+  McVT_t  Mc;
+  KFParticle V;
   ClassDef(Clone_t,1)
 };
 class Lost_t : public TObject {
 public:
-  Var_t Mc;
+  McVT_t Mc;
   ClassDef(Lost_t,1)
 };
 class Ghost_t : public TObject {
 public:
-  Var_t V;
-  Var_t dV;
+  KFParticle V;
   ClassDef(Ghost_t,1)
 };
 static Mc_t Mc;        Mc_t    *pMc    = &Mc;
@@ -349,56 +347,16 @@ void ForceAnimate(UInt_t times=0, Int_t msecDelay=0) {
 }
 //________________________________________________________________________________
 void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KFParticle* KFVx = 0) {
-  Var_t VMC;  memset( &VMC, 0, sizeof(Var_t));
-  Var_t VKF;  memset( &VKF, 0, sizeof(Var_t));
-  Var_t dVKF; memset(&dVKF, 0, sizeof(Var_t)); 
-  if (McVx) {
-    VMC.X = McVx->XyzV().x();
-    VMC.Y = McVx->XyzV().y();
-    VMC.Z = McVx->XyzV().z();
-    VMC.R = McVx->XyzV().perp();
-    VMC.T = McVx->Time()*1e-9; // seconds
-    if (McTrack) {
-      VMC.Px = McTrack->Pxyz().x();
-      VMC.Py = McTrack->Pxyz().y();
-      VMC.Pz = McTrack->Pxyz().z();
-      VMC.P  = McTrack->Ptot();
-      VMC.E  = McTrack->E();
-      VMC.Pt = McTrack->pT();
-      VMC.Eta= McTrack->Eta();
-      VMC.Phi= TMath::ATan2(VMC.Py,VMC.Px);
-      VMC.M  = TMath::Sqrt(VMC.E*VMC.E - VMC.P*VMC.P);
-      VMC.GePid = McTrack->GePid();
-    }
-    VMC.Id = McVx->Id();
-    Mc.Mc = VMC;
-    Match.Mc = VMC;
-    Clone.Mc = VMC;
-    Lost.Mc = VMC;
-  }
-  if (KFVx) {
-    Float_t  *V =  &VKF.X;
-    Float_t *dV = &dVKF.X; 
-    for (Int_t i = 0; i < 8; i++) {
-      V[i] = KFVx->GetParameter(i);
-      if (KFVx->GetCovariance(i,i) > 0) dV[i] = TMath::Sqrt(KFVx->GetCovariance(i,i));
-    }
-    KFVx->GetMomentum(VKF.P, dVKF.P);
-    KFVx->GetPt(VKF.Pt, dVKF.Pt);
-    KFVx->GetEta(VKF.Eta, dVKF.Eta);
-    KFVx->GetPhi(VKF.Phi, dVKF.Phi);
-    KFVx->GetMass(VKF.M, dVKF.M);
-    KFVx->GetDecayLength(VKF.L, dVKF.L);
-    KFVx->GetDecayLengthXY(VKF.LXY, dVKF.LXY);
-    KFVx->GetLifeTime(VKF.T, dVKF.T);
-    KFVx->GetR(VKF.R, dVKF.R);
-    VKF.Chi2 = KFVx->GetChi2();
-    VKF.NDF = KFVx->GetNDF();
-    VKF.Id  = KFVx->Id();
-    Match.V = VKF; Match.dV = dVKF;
-    Clone.V = VKF; Clone.dV = dVKF;
-    Ghost.V = VKF; Ghost.dV = dVKF;
-  }
+  McVT_t MC;
+  KFParticle V;
+  if (McVx)    MC.Vx = *McVx;
+  if (McTrack) MC.Tk = *McTrack;
+  if (KFVx)    V     = *KFVx;
+  Mc.Mc = MC;
+  Match.Mc = MC; Match.V = V;
+  Clone.Mc = MC; Clone.V = V;
+  Lost.Mc  = MC;
+  Ghost.V  = V;
   tree->Fill();
 }
 //________________________________________________________________________________
