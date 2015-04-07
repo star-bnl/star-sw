@@ -10,7 +10,7 @@
 #include "TObject.h"
 #include "StThreeVectorF.hh"
 #include "StEnumerations.h"
-
+#include "TMath.h"
 class StPrimaryVertex;
 
 class StMuPrimaryVertex : public TObject {
@@ -40,7 +40,7 @@ class StMuPrimaryVertex : public TObject {
    UShort_t         nEEMCMatch()            	       const { return mNEEMCMatch; }	     
    UShort_t         numMatchesWithEEMC()      	       const { return nEEMCMatch(); }	     
    UShort_t         nPostXtracks()          	       const { return mNPostXTracks; }	     
-   UShort_t         numPostXTracks()        	       const { return numPostXTracks(); }	     
+   UShort_t         numPostXTracks()        	       const { return nPostXtracks(); }	     
    UShort_t         nPromptTracks()         	       const { return mNTracksWithPromptHit; }   
    UShort_t         numTracksWithPromptHit()	       const { return nPromptTracks(); }	     
    UShort_t         nBTOFNotMatch()         	       const { return mNBTOFNotMatch; }	     
@@ -61,7 +61,8 @@ class StMuPrimaryVertex : public TObject {
    Float_t          sumTrackPt()                       const { return mSumTrackPt; }
    Float_t          meanDip()                          const { return mMeanDip; }
    Float_t          chiSquared()                       const { return mChiSquared; }
-   UShort_t         noTracks()                         const {return mNTracks; }		      
+   Float_t          probChiSquared()                   const { return TMath::Prob(mChiSquared, 2*mNTracks -3);}
+   UShort_t         noTracks()                         const { return mNTracks; }		      
    UShort_t         refMultPos() 		       const { return mRefMultPos; }		      
    UShort_t         refMultNeg() 		       const { return mRefMultNeg; }		      
    UShort_t         refMult()    		       const { return refMultPos() + refMultNeg(); }
@@ -71,7 +72,7 @@ class StMuPrimaryVertex : public TObject {
    Int_t            idTruth()                          const { return mIdTruth; } 
    Int_t            qaTruth()  			       const { return mQuality; } 
    Int_t            idParent() 			       const { return mIdParent; }
-   Bool_t           isBeamConstrained()                const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
+   Bool_t           isBeamConstrained()                const { return TESTBIT(mFlag,kBEAMConstrVtxId);}
    void             setPosition(const StThreeVectorF &pos)     { mPosition = pos; }
    void             setPosError(const StThreeVectorF &pos_err) { mPosError = pos_err; }
    void             setType(StVertexId val) { mType = val; }							  
