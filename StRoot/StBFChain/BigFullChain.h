@@ -1524,11 +1524,10 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                               "BTOF Simulator",kFALSE},
   // MTD related chains
   {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
-  //{"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
-  // ,                                                                              "MTD hit maker",kFALSE},
   {"mtdDat"   ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
   {"mtdSim"    ,"","MtdChain","","StMtdSimMaker",           "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
+
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
@@ -1671,8 +1670,10 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                      "TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
 
-  {"mtdMatch" ,"","","db,MtdUtil",     "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
-  {"mtdCalib" ,"","","db",                    "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
+  {"mtdTrkMask"  ,"","","db",    "StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},
+  {"mtdMatch"    ,"","","db,MtdUtil",  "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
+  {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
+  {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
 
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
