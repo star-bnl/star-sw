@@ -1,14 +1,19 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.24 2014/11/12 22:27:23 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.25 2015/04/07 16:25:16 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
- * Description: BTof Match Maker to do the matching between the 
- *              fired celles and TPC tracks
+ * Description: MTD Match Maker to do the matching between the 
+ *              fired cells and TPC tracks
  *
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.25  2015/04/07 16:25:16  marr
+ * 1. Make use the constants defined in StMtdConstants
+ * 2. Disable the print-out when running in MuDst mode
+ * 3. Cleaning up
+ *
  * Revision 1.24  2014/11/12 22:27:23  marr
  * Clean up the matching information when running on StEvent in afterburner mode
  *
@@ -103,12 +108,6 @@
 #include "TTree.h"
 #include "TBranch.h"
 
-//Random generator
-//#include "Random.h"
-//#include "RanluxEngine.h"
-//#include "RandFlat.h"
-//#include "RandGauss.h"
-
 #include "StEvent.h"
 #include "StTrackNode.h"
 #include "StContainers.h"
@@ -119,7 +118,6 @@
 #include "StTrackPidTraits.h"
 #include "StTrackGeometry.h"
 #include "StTrackDetectorInfo.h"
-//#include "StMuMtdCollection.h"
 #include "StGlobalTrack.h"
 #include "StParticleTypes.hh"
 #include "StThreeVector.hh"
@@ -546,10 +544,7 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	double py   = p0*dydz;
 	double pz   = p0; // approximation: nx,ny<<0
 	StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-	//delete mBeamHelix;
 	mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-	//mBeamX = x0;
-	//mBeamY = y0;
 	return kStOK;
 }
 
@@ -868,9 +863,6 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		if(mSaveTree){
 
 			int nTrgIds(0);
-			//fg mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
-			// protect against zero pointers (in simulated data, should not be necessary for MuDST)
-			//fg      if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
 			for(int i=0;i<kMaxTriggerIds;i++){
 				int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
 				if(trgId>0){
@@ -878,7 +870,6 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 					nTrgIds++;
 				}
 			}
-			//fg	}
 			mMtdEvtData.nTrgIds = nTrgIds;       
 			mMtdEvtData.run = mMuDst->event()->runNumber();       // the run number
 			mMtdEvtData.evt = mMuDst->event()->eventId();       // the event number
@@ -1325,30 +1316,16 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 			if (mHisto) {
 
 				double stripPhiCen = 0.;
-				//int trayId=daqIter->module;
 				int channel = daqIter->cell;
-				//LOG_INFO<<" backleg = "<<daqIter->backleg<<", module = "<<daqIter->module<<" cell = "<<channel<<endm;
-				//double backLegPhiCen = mFirstBackLegPhi+(daqIter->backleg-1)*(backLegPhiWidth+backLegPhiGap);
-				//if(backLegPhiCen>2.*TMath::Pi()) backLegPhiCen -= 2.*TMath::Pi();
-				//if(trayId>0&&trayId<4){
-				//	stripPhiCen = backLegPhiCen-(mMtdGeom->GetNCells()/2.-0.5-channel)*(mCellWidth+mCellGap)/mtdRadius; // approximation
-				//}else{
-				//	stripPhiCen = backLegPhiCen+(mMtdGeom->GetNCells()/2.-0.5-channel)*(mCellWidth+mCellGap)/mtdRadius; 
-				//}
-				//if(stripPhiCen>2.*TMath::Pi()) stripPhiCen -= 2.*TMath::Pi();
-				//if(stripPhiCen<0.)    stripPhiCen += 2.*TMath::Pi();
 				stripPhiCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetCellPhiCenter(channel);
 
 				double mLeTimeWest = daqIter->leadingEdgeTime.first;
 				double mLeTimeEast = daqIter->leadingEdgeTime.second;
 				StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
-				double stripZCen   = modCen.z() - (mLeTimeWest-mLeTimeEast)/2./vDrift*1000.;
+				double stripZCen   = modCen.z() - (mLeTimeWest-mLeTimeEast)/2./gMtdCellDriftV*1000.;
 
 				double daqphi = stripPhiCen;
 				double daqz   = stripZCen;
-
-				//LOG_INFO<<"Test: strip phi center old = "<<stripPhiCen<<" new = "<<modCenPhi<<endm;
-				//LOG_INFO<<"Test: strip z center old = "<<stripZCen<<" new = "<<modCen.z()- (mLeTimeWest-mLeTimeEast)/2./vDrift*1000.<<endm;
 
 				hMtdZvsProj->Fill(proIter->hitPosition.z(),daqz);
 				hMtdPhivsProj->Fill(proIter->hitPosition.phi(),daqphi);
@@ -1383,14 +1360,12 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 			StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
 			double ysig = phisig*modCen.perp();
-			//StThreeVector<double> hitPos;
 
 			Int_t   ibackleg = daqIter->backleg;
 			Int_t   imodule  = daqIter->module;
 			Int_t   icell    = daqIter->cell;
 
-			double zdaq = (daqIter->leadingEdgeTime.second-daqIter->leadingEdgeTime.first)/2./mVDrift[(ibackleg-1)*mMtdGeom->GetNModules()+imodule-1][icell]*1e3;
-			//double ydaq = (daqIter->cell-mMtdGeom->GetNCells()/2.+0.5)*(mCellWidth+mCellGap);
+			double zdaq = (daqIter->leadingEdgeTime.second-daqIter->leadingEdgeTime.first)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
 			double ydaq = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
 			bool isMatch = false;
 
@@ -1416,7 +1391,6 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				double rDiff = 99.;
 				if(mCosmicFlag){
 					rDiff = 0.;
-					//rDiff = pow((ydaq-proIter->yhit)/mNSigReso/ysig,2.);
 				}else{ 
 					rDiff = pow((zdaq-proIter->zhit)/mNSigReso/zsig,2.)+pow((ydaq-proIter->yhit)/mNSigReso/ysig,2.);
 				}
@@ -1450,17 +1424,6 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 	mtdCellHitVector tempVec = matchHitCellsVec;
 	mtdCellHitVector erasedVec = tempVec;
 	mtdCellHitVector multiHitsCellsVec_temp;
-	//if(Debug()){
-	//	LOG_INFO<<" matchHitCellsVec: "<<endm; 
-	//	mtdCellHitVectorIter ij=tempVec.begin();
-	//	while (ij != tempVec.end()) { 
-	//		LOG_INFO<<" backleg = " << ij->backleg<<" module = "<<ij->module<<" cell = "<<ij->cell<<endm; 
-	//		LOG_INFO<<" trackIdVec: "<<endm;
-	//		idVector tIdVec = ij->trackIdVec;
-	//		for(int i=0;i<tIdVec.size();i++) LOG_INFO<<tIdVec[i]<<endm;
-	//		++ij; 
-	//	}
-	//}
 	while (tempVec.size() != 0) {
 		Int_t nTracks = 0;
 		idVector trackIdVec;
@@ -1544,36 +1507,22 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 		cellHit.expTof2MTD = tempIter->expTof2MTD;
 
 		if(mHisto) {
-			//Float_t ycenter = (tempIter->cell-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
 			Float_t ycenter = mMtdGeom->GetGeoModule(tempIter->backleg,tempIter->module)->GetCellLocalYCenter(tempIter->cell);
 			Float_t dy = tempIter->yhit - ycenter;
 			Float_t dz = tempIter->zhit;
 			mTracksPerCellMatch1->Fill(trackIdVec.size());
-			mDaqOccupancyMatch1->Fill((tempIter->module-1)*mMtdGeom->GetNCells()+tempIter->cell);
+			mDaqOccupancyMatch1->Fill((tempIter->module-1)*gMtdNCells+tempIter->cell);
 			mDeltaHitMatch1->Fill(dy, dz);
 		}
-
-		//double modLocalYCen = mMtdGeom->GetGeoModule(tempIter->backleg,tempIter->module)->GetCellLocalYCenter(tempIter->cell);
 
 		if (nTracks==1){
 			nSingleHitCells++;      
 			singleHitCellsVec.push_back(cellHit);
 		} else if (nTracks>1){
 			idVector tmpIdVec = trackIdVec;
-			//if(Debug()){
-			//	LOG_INFO<<" trackIdVec before: "<<endm; 
-			//	idVectorIter ij=tmpIdVec.begin();
-			//	while (ij != tmpIdVec.end()) { LOG_INFO<< " " << *ij<<endm; ++ij; }
-			//}
 			UInt_t temsize1 = tmpIdVec.size(); 
 			sort(tmpIdVec.begin(),tmpIdVec.end());
 			tmpIdVec.erase(unique(tmpIdVec.begin(),tmpIdVec.end()),tmpIdVec.end());
-			//if(Debug()){
-			//	LOG_INFO<<" trackIdVec after: "<<endm; 
-			//	idVectorIter ij=tmpIdVec.begin();
-			//	while (ij != tmpIdVec.end()) { LOG_INFO<< " " << *ij<<endm; ++ij; }
-			//}
-			//cellHit.trackIdVec = tmpIdVec;
 			if(tmpIdVec.size()!=temsize1)
 			{
 				if(Debug())
@@ -1708,7 +1657,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 					Float_t ll = fabs(yy-ycell);
 					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
 					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
-					float zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*mMtdGeom->GetNModules()+imodule-1][icell]*1e3;
+					float zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
 					Float_t zz = vzhit[ttCandidates[j]];
 					Float_t ww = fabs(zz-zcell);
 					Float_t rr = 9999.;
@@ -1769,8 +1718,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		mCellsPerEventMatch2->Fill(tempVec.size());
 		for(unsigned int ii=0;ii<tempVec.size();ii++) {
 			mTracksPerCellMatch2->Fill(tempVec[ii].trackIdVec.size());
-			mDaqOccupancyMatch2->Fill((tempVec[ii].module-1)*mMtdGeom->GetNCells()+tempVec[ii].cell);
-			//Float_t ycenter = (tempVec[ii].cell-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
+			mDaqOccupancyMatch2->Fill((tempVec[ii].module-1)*gMtdNCells+tempVec[ii].cell);
 			Float_t ycenter = mMtdGeom->GetGeoModule(tempVec[ii].backleg,tempVec[ii].module)->GetCellLocalYCenter(tempVec[ii].cell);
 			Float_t dy = tempVec[ii].yhit-ycenter;
 			Float_t dz = tempVec[ii].zhit;
@@ -1898,12 +1846,11 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 					Int_t   imodule = vmodule[ttCandidates[j]];
 					Int_t   icell = vcell[ttCandidates[j]];
 					Float_t yy = vyhit[ttCandidates[j]];
-					//Float_t ycell = (vcell[ttCandidates[j]]-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
 					Float_t ycell = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
 					Float_t ll = fabs(yy-ycell);
 					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
 					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
-					Float_t zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*mMtdGeom->GetNModules()+imodule-1][icell]*1e3;
+					Float_t zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
 
 					Float_t zz = vzhit[ttCandidates[j]];
 					Float_t ww = fabs(zz-zcell);
@@ -1981,20 +1928,18 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		if (finalMatchedCellsVec[ii].trackIdVec.size()!=1)
 			LOG_WARN << "F: WHAT!?!  mult.matched cell in single cell list " << backleg << " " << module << " " << cell << endm;
 
-		//Float_t ycenter = (cell-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
 		Float_t ycenter = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
 		Float_t yLocal = finalMatchedCellsVec[ii].yhit;
 		Float_t zLocal = finalMatchedCellsVec[ii].zhit;
 
 		Float_t LeTimeWest = finalMatchedCellsVec[ii].leadingEdgeTime.first;
 		Float_t LeTimeEast = finalMatchedCellsVec[ii].leadingEdgeTime.second;
-		Float_t fireZLocal = (LeTimeEast-LeTimeWest)/2./vDrift*1000.;
+		Float_t fireZLocal = (LeTimeEast-LeTimeWest)/2./gMtdCellDriftV*1000.;
 		Float_t dy = finalMatchedCellsVec[ii].yhit - ycenter;
 		Float_t dz = finalMatchedCellsVec[ii].zhit - fireZLocal;
 
 		if(mHisto) {
 			mTracksPerCellMatch3->Fill(finalMatchedCellsVec[ii].trackIdVec.size());
-			//      mDaqOccupancyMatch3->Fill((module-1)*mNCell+(cell-1));
 			mDeltaHitMatch3->Fill(dy, dz);
 			int hisIndex =  backleg-1;
 			mDeltaHitFinal[hisIndex]->Fill(dy,dz);      
@@ -2004,7 +1949,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Int_t trackNode = finalMatchedCellsVec[ii].trackIdVec[0];
 		if(mMuDstIn){
 
-			LOG_INFO<<"In StMuDst mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
+			LOG_DEBUG<<"In StMuDst mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
 
 			StMuTrack *gTrack = mMuDst->globalTracks(trackNode);
 			if(!gTrack) {
