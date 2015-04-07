@@ -214,55 +214,13 @@ void StKFVertexMaker::CalculateRank(StPrimaryVertex *primV) {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::TMVARank(StPrimaryVertex *primV) {    
-  PVgadgets_st &aData = *TMVAdata::instance()->GetArray();
-  memset(&aData.postx, 0, sizeof(PVgadgets_st));
-  Int_t noTracks = primV->numberOfDaughters();
-  if (! noTracks) return; 
-  aData.noTracks = noTracks;
-  aData.postx  =  primV->numPostXTracks(); // noTracks;
-  aData.prompt =  primV->numTracksWithPromptHit(); // noTracks;
-  aData.beam   =  primV->isBeamConstrained() ? 1 : 0;
-  aData.cross  =  primV->numTracksCrossingCentralMembrane(); // noTracks;
-  aData.tof    = (primV->numMatchesWithCTB()     + primV->numMatchesWithBTOF()); // noTracks;
-  aData.notof  = (primV->numNotMatchesWithCTB()  + primV->numNotMatchesWithBTOF()); // noTracks;
-  aData.BEMC   =  primV->numMatchesWithBEMC(); // noTracks;
-  aData.noBEMC =  primV->numNotMatchesWithBEMC(); // noTracks;
-  aData.EEMC   =  primV->numNotMatchesWithEEMC(); // noTracks;
-  aData.noEEMC =  primV->numNotMatchesWithEEMC(); // noTracks;
-  aData.iMc    =  primV->idTruth();
-  aData.EMC    =  aData.BEMC + aData.EEMC;
-  aData.noEMC  =  aData.noBEMC + aData.noEEMC;
-  aData.chi2   =  primV->chiSquared();
-  aData.nWE    =  0;
-  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
-    aData.nWE = TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());// noTracks;
-  aData.xV     =  primV->position().x();
-  aData.yV     =  primV->position().y();
-  aData.zV     =  primV->position().z();
-  aData.vR     =  primV->position().perp();
-  Float_t rank = StTMVARanking::instance()->Evaluate();
+  Float_t rank = StTMVARanking::TMVARank(primV);
   primV->setRanking(rank); 
   if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
 }
 //________________________________________________________________________________
 void StKFVertexMaker::SimpleMindedRank(StPrimaryVertex *primV) {    
-  // Calculation of veretx ranks to select 'best' (i.e. triggered)  vertex
-  // Simpilfied version (w/o weighting)
-  Float_t rank = primV->probChiSquared();
-  static Float_t Wveto = 1;
-  static Float_t Wmatch = 4;
-  if (primV->isBeamConstrained()) rank += Wmatch;
-  rank -= Wveto*primV->numPostXTracks();
-  rank += Wmatch*primV->numTracksWithPromptHit();
-  rank += Wmatch*primV->numTracksCrossingCentralMembrane();
-  rank += Wmatch*primV->numMatchesWithCTB()
-    -     Wveto*primV->numNotMatchesWithCTB();
-  rank += Wmatch*primV->numMatchesWithBTOF() 
-    -     Wveto*primV->numNotMatchesWithBTOF();
-  rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC());
-  rank -= Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
-  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
-    rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
+  Float_t rank = StTMVARanking::SimpleMindedRank(primV);
   primV->setRanking(rank); 
   if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
 }
