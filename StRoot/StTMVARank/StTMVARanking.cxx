@@ -30,6 +30,8 @@ using namespace TMVA;
 #include "TMVArank.h"
 TableImpl(TMVArank);
 #include "StTMVARanking.h"
+#include "StPrimaryVertex.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 ClassImp(StTMVARanking);
 StTMVARanking*  StTMVARanking::fgInstance = 0;
 TMVA::Reader*   StTMVARanking::fgReader = 0;
@@ -421,4 +423,108 @@ void StTMVARanking::TMVAClassification(TString myMethodList, TTree *signal, TTre
   std::cout << "==> TMVAClassification is done!" << std::endl;
   delete factory;
   
+}
+//________________________________________________________________________________
+Float_t StTMVARanking::TMVARank(StPrimaryVertex *primV) {    
+  PVgadgets_st &aData = *TMVAdata::instance()->GetArray();
+  memset(&aData.postx, 0, sizeof(PVgadgets_st));
+  Int_t noTracks = primV->numberOfDaughters();
+  if (! noTracks) return -999999; 
+  aData.noTracks = noTracks;
+  aData.postx  =  primV->numPostXTracks(); // noTracks;
+  aData.prompt =  primV->numTracksWithPromptHit(); // noTracks;
+  aData.beam   =  primV->isBeamConstrained() ? 1 : 0;
+  aData.cross  =  primV->numTracksCrossingCentralMembrane(); // noTracks;
+  aData.tof    = (primV->numMatchesWithCTB()     + primV->numMatchesWithBTOF()); // noTracks;
+  aData.notof  = (primV->numNotMatchesWithCTB()  + primV->numNotMatchesWithBTOF()); // noTracks;
+  aData.BEMC   =  primV->numMatchesWithBEMC(); // noTracks;
+  aData.noBEMC =  primV->numNotMatchesWithBEMC(); // noTracks;
+  aData.EEMC   =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.noEEMC =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.iMc    =  primV->idTruth();
+  aData.EMC    =  aData.BEMC + aData.EEMC;
+  aData.noEMC  =  aData.noBEMC + aData.noEEMC;
+  aData.chi2   =  primV->chiSquared();
+  aData.nWE    =  0;
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    aData.nWE = TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());// noTracks;
+  aData.xV     =  primV->position().x();
+  aData.yV     =  primV->position().y();
+  aData.zV     =  primV->position().z();
+  aData.vR     =  primV->position().perp();
+  Float_t rank = StTMVARanking::instance()->Evaluate();
+  return rank;
+}
+//________________________________________________________________________________
+Float_t StTMVARanking::SimpleMindedRank(StPrimaryVertex *primV) { 
+  // Calculation of veretx ranks to select 'best' (i.e. triggered)  vertex
+  // Simpilfied version (w/o weighting)
+  Float_t rank = primV->probChiSquared();
+  static Float_t Wveto = 1;
+  static Float_t Wmatch = 4;
+  if (primV->isBeamConstrained()) rank += Wmatch;
+  rank -= Wveto*primV->numPostXTracks();
+  rank += Wmatch*primV->numTracksWithPromptHit();
+  rank += Wmatch*primV->numTracksCrossingCentralMembrane();
+  rank += Wmatch*primV->numMatchesWithCTB()
+    -     Wveto*primV->numNotMatchesWithCTB();
+  rank += Wmatch*primV->numMatchesWithBTOF() 
+    -     Wveto*primV->numNotMatchesWithBTOF();
+  rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC());
+  rank -= Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
+  return rank;
+}
+//________________________________________________________________________________
+Float_t StTMVARanking::TMVARank(StMuPrimaryVertex *primV) {    
+  PVgadgets_st &aData = *TMVAdata::instance()->GetArray();
+  memset(&aData.postx, 0, sizeof(PVgadgets_st));
+  Int_t noTracks = primV->noTracks();
+  if (! noTracks) return -999999; 
+  aData.noTracks = noTracks;
+  aData.postx  =  primV->numPostXTracks(); // noTracks;
+  aData.prompt =  primV->numTracksWithPromptHit(); // noTracks;
+  aData.beam   =  primV->isBeamConstrained() ? 1 : 0;
+  aData.cross  =  primV->numTracksCrossingCentralMembrane(); // noTracks;
+  aData.tof    = (primV->numMatchesWithCTB()     + primV->numMatchesWithBTOF()); // noTracks;
+  aData.notof  = (primV->numNotMatchesWithCTB()  + primV->numNotMatchesWithBTOF()); // noTracks;
+  aData.BEMC   =  primV->numMatchesWithBEMC(); // noTracks;
+  aData.noBEMC =  primV->numNotMatchesWithBEMC(); // noTracks;
+  aData.EEMC   =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.noEEMC =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.iMc    =  primV->idTruth();
+  aData.EMC    =  aData.BEMC + aData.EEMC;
+  aData.noEMC  =  aData.noBEMC + aData.noEEMC;
+  aData.chi2   =  primV->chiSquared();
+  aData.nWE    =  0;
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    aData.nWE = TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());// noTracks;
+  aData.xV     =  primV->position().x();
+  aData.yV     =  primV->position().y();
+  aData.zV     =  primV->position().z();
+  aData.vR     =  primV->position().perp();
+  Float_t rank = StTMVARanking::instance()->Evaluate();
+  return rank;
+}
+//________________________________________________________________________________
+Float_t StTMVARanking::SimpleMindedRank(StMuPrimaryVertex *primV) { 
+  // Calculation of veretx ranks to select 'best' (i.e. triggered)  vertex
+  // Simpilfied version (w/o weighting)
+  Float_t rank = primV->probChiSquared();
+  static Float_t Wveto = 1;
+  static Float_t Wmatch = 4;
+  if (primV->isBeamConstrained()) rank += Wmatch;
+  rank -= Wveto*primV->numPostXTracks();
+  rank += Wmatch*primV->numTracksWithPromptHit();
+  rank += Wmatch*primV->numTracksCrossingCentralMembrane();
+  rank += Wmatch*primV->numMatchesWithCTB()
+    -     Wveto*primV->numNotMatchesWithCTB();
+  rank += Wmatch*primV->numMatchesWithBTOF() 
+    -     Wveto*primV->numNotMatchesWithBTOF();
+  rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC());
+  rank -= Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
+  return rank;
 }
