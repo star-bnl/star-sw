@@ -80,6 +80,7 @@ void StiDebug::Break(int kase)
 {
 static int myBreak=-2005;
 if (kase!=myBreak) return;
+if (kase!=-2005)
   printf("*** Break(%d) ***\n",kase);
 }		
 //______________________________________________________________________________

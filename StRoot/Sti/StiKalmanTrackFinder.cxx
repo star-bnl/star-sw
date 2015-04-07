@@ -286,7 +286,6 @@ assert(0);
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
 {
   static int nCall=0; nCall++;
-  StiDebug::Break(nCall);
   int trackExtended   =0;  
   int trackExtendedOut=0;
   int status = 0;
@@ -338,27 +337,19 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
     int bestVertex=0;
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
-{
     const StiKalmanTrackNode *dcaNode = track->getLastNode();
     if (!dcaNode->isDca()) 		continue;
-if (fabs(dcaNode->y())<10) {
-  StiDebug::Count("DCA00",fabs(dcaNode->y())); 		/////???????
-  StiDebug::Count("DCAYY",sqrt(dcaNode->getCyy())); 	/////???????
-  StiDebug::Count("DCAZZ",sqrt(dcaNode->getCzz())); 	/////???????
-}}
 
     if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
-StiDebug::tally("PrimCandidates");
       if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Start(0);
 
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
       if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Stop();
 
       if (!extended) 					continue;
-StiDebug::tally("PrimExtended");
       if (!bestNode) {bestNode=extended;bestVertex=iVertex+1;continue;}
       if (bestNode->getChi2()+log(bestNode->getDeterm())
          <extended->getChi2()+log(extended->getDeterm()))continue;
@@ -369,7 +360,6 @@ StiDebug::tally("PrimExtended");
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
     track->setPrimary(bestVertex);
-StiDebug::tally("PrimAdded");
     int         ifail = 0;
 static int REFIT=2005;
     bestNode->setUntouched();
@@ -381,7 +371,6 @@ if (REFIT) {
 // something is wrong. It is not a primary
     if (ifail) { track->removeLastNode(); track->setPrimary(0); continue;}
     goodCount++;
-StiDebug::tally("PrimRefited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
@@ -439,10 +428,14 @@ private:
 //______________________________________________________________________________
 int StiKalmanTrackFinder::QAFind::compQA(const QAFind &qaTry) const
 {
+// return > 0 qaTry is better
+// return < 0 qaTry is worse
+// return== 0 qaTry is the same
+
 static const StiKalmanTrackFinderParameters *tfp = StiKalmanTrackFinderParameters::instance();
-//     One SVT hit is worse than zero
-   if (!mWits        &&  qaTry.wits() &&  qaTry.wits() < tfp->sumWeight()) return -1;
-   if (!qaTry.wits() &&  mWits        &&  mWits        < tfp->sumWeight()) return  1;
+//	One SVT hit is worse than zero
+   if (!mWits        &&  qaTry.wits() &&  qaTry.wits() < tfp->sumWeight()) return -999;
+   if (!qaTry.wits() &&  mWits        &&  mWits        < tfp->sumWeight()) return  999;
 
    int ians = qaTry.wits()-mWits;       if (ians)      return ians;
    ians =  qaTry.sits()-mSits;         if (ians)       return ians;
@@ -905,3 +898,4 @@ void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack
    } // switch
 } // void StiKalmanTrackFinder::PrintFitStatus(const int status, const StiKalmanTrack* track)
 #endif /* DO_TPCCATRACKER */
+
