@@ -1507,6 +1507,10 @@ replace [exe TPCE05rX;] with [;"New version of the TPC backplane "; TpceConfig =
                               "gas density correction";            DensConfig = 1;
                               "radius correction";                 RmaxConfig = 1;
 	                      ;"Set the final TPAD config"; TpadConfig=7;]
+replace [exe TPCE05rY;] with [;"New version of the TPC backplane "; TpceConfig = 51;
+                              "gas density correction";            DensConfig = 1;
+                              "radius correction";                 RmaxConfig = 1;
+	                      ;"Set the final TPAD config"; TpadConfig=8;]
 replace [exe TPCE51;] with [;"                     "; TpceConfig = 51; ]
 
 
@@ -2542,6 +2546,9 @@ Replace [exe devTF;] with ["DEVTF TPC Upgrade Geometry";
 Replace [exe devTX;] with ["DEVTX TPC Upgrade Geometry";
        exe y2014a;    "Y2014A upgrade geometry";
        exe TPCE05rX;   "X : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; ]
+Replace [exe devTY;] with ["DEVTX TPC Upgrade Geometry";
+       exe y2014a;    "Y2014A upgrade geometry";
+       exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; ]
 
 ** Aliases to devE and devT geometries to work around the field bug **
 Replace [exe estar1;] with [exe devE;]
@@ -3468,6 +3475,9 @@ If LL>0
   Case DevTX  { devTX : TPC upgrade studies 40 inner pad rows 0.500 x 1.60;
                Geom = 'devTX';
                exe devTX; }
+  Case Devty  { devty : TPC upgrade studies 40 inner pad rows 0.500 x 1.60;
+               Geom = 'devty';
+               exe devty; }
 
   Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
   Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }
