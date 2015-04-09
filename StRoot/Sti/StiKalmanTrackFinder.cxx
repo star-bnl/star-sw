@@ -454,7 +454,6 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction,double rmin) // thro
 {
 static int nCall=0; nCall++;
   gLevelOfFind = 0;
-StiKalmanTrackNode::Break(nCall);
   int nnBef,nnAft;
   double lnBef,lnAft;
   
@@ -487,7 +486,6 @@ void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
                               ,StiKalmanTrackNode *leadNode,QAFind &qa) 
 {
 static int nCall=0; nCall++;
-StiKalmanTrackNode::Break(nCall);
 
 static const double degToRad = 3.1415927/180.;
 static const double radToDeg = 180./3.1415927;
@@ -650,6 +648,7 @@ assert(direction || leadNode==track->getLastNode());
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
+
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 
