@@ -181,7 +181,6 @@ public:
   int    getIHitCand()const		{return mIHitCand;}
       StiELoss *getELoss()  		{return mELoss;}
 const StiELoss *getELoss()const		{return mELoss;}
- static void Break(int kase);
   static void PrintStep();
   StThreeVector<double>getPoint() const;
   StThreeVector<double>getGlobalPoint() const;
@@ -223,7 +222,8 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StThreeVector<double> getPointAt(double xk) const;
   
   int nudge(StiHit *hit=0);
-  double evaluateChi2(const StiHit *hit); 
+  double evaluateChi2    (const StiHit *hit); 
+  double evaluateChi2Info(const StiHit *hit) const; 
   int updateNode(); 
   int rotate(double alpha); 
   int    getHelicity()const {return (mFP.curv() < 0) ? -1 : 1;}

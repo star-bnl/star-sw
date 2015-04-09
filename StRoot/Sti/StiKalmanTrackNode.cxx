@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.167 2015/02/25 20:10:20 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.168 2015/04/09 22:54:40 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.168  2015/04/09 22:54:40  perev
+ * new method evaluateChi2Info added to recalculate Xi2 for testing only
+ *
  * Revision 2.167  2015/02/25 20:10:20  perev
  * In StiKalmanTrackNode::propagateError() recov(1) is called when length is bigger kBigLen
  *
@@ -550,12 +553,6 @@ int    StiKalmanTrackNode::fDerivTestOn=-10;
 double StiKalmanTrackNode::fDerivTest[kNPars][kNPars];   
 int gCurrShape=0;
 
-void StiKalmanTrackNode::Break(int kase)
-{
-static int myBreak=-2005;
-if (kase!=myBreak) return;
-  LOG_DEBUG << Form("*** Break(%d) ***",kase)<< endm;
-}		
 /* bit mask for debug printout  
    0   => 1 - covariance and propagate matrices 
    1   => 2 - hit associated with the node
@@ -1073,7 +1070,7 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 {
 static int nCall=0; nCall++;
-StiDebug::StiDebug::Break(nCall);  
+StiDebug::Break(nCall);  
 
   _state = kTNProBeg;
 //  numeDeriv(xk,1,option,dir);
@@ -2388,5 +2385,44 @@ static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
     }
   }
   return time;
+}
+//________________________________________________________________________________
+//______________________________________________________________________________
+/*! same as evaluateChi2 but used only _info information\*/
+double StiKalmanTrackNode::evaluateChi2Info(const StiHit * hit) const
+{
+  if (!_inf) return 1e41;
+  const StiNodePars &myFP  = _inf->mPP;
+  const StiNodeErrs &myFE  = _inf->mPE;
+  StiHitErrs myHrr;
+  StiTrackNodeHelper::getHitErrors(hit,&myFP,&myHrr);
+
+  double r00, r01,r11,det;
+  //If required, recalculate the errors of the detector hits.
+  //Do not attempt this calculation for the main vertex.
+  double dsin =myFP.curv()*(hit->x()-myFP.x());
+  if (fabs(myFP._sinCA+dsin)>0.99)	return 1e41;
+  if (fabs(myFP.eta())   >kMaxEta) 	return 1e41;
+  if (fabs(myFP.curv())  >kMaxCur)      return 1e41;
+  if (myHrr.hYY>1000*myFE._cYY
+   && myHrr.hZZ>1000*myFE._cZZ)		return 1e41;
+  r00=myHrr.hYY+myFE._cYY;
+  r01=myHrr.hZY+myFE._cZY;  
+  r11=myHrr.hZZ+myFE._cZZ;
+
+  det=r00*r11 - r01*r01;
+  if (det<r00*r11*1.e-5) {
+    LOG_DEBUG << Form("StiKalmanTrackNode::evalChi2 *** zero determinant %g",_det)<< endm;
+    return 1e60;
+  }
+  double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
+  double deltaX = hit->x()-myFP.x();
+  double deltaL = deltaX/myFP._cosCA;
+  double deltaY = myFP._sinCA *deltaL;
+  double deltaZ = myFP.tanl()  *deltaL;
+  double dyt=(myFP.y()-hit->y()) + deltaY;
+  double dzt=(myFP.z()-hit->z()) + deltaZ;
+  double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/det;
+  return cc;
 }
 
