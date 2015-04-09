@@ -585,8 +585,8 @@
             
             <Attribute for="FXGT" seen="1" colo="7"  />
             <Shape type="BOX" dz="FMXG_G10Thick/2" dx="FMXG_G10Width/2" dy="FMXG_G10Height/2"  />
-            <Par name="CUTGAM" value="0.00001"  />
-            <Par name="CUTELE" value="0.00001"  />
+            <Cut name="CUTGAM" value="0.00001"  />
+            <Cut name="CUTELE" value="0.00001"  />
         </Block>
         
         <Block name="FHMS" comment="is sHower Max Strip"  >
@@ -594,9 +594,9 @@
             <Material name="Cpolystyren" isvol="1"  />
             <Attribute for="FHMS" seen="1" colo="2"  />
             <Shape type="TRD1" dz="fmxg_Sapex/2" dx2="fmxg_Sbase/2" dx1="0" dy="FMXG_G10Height/2"  />
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />

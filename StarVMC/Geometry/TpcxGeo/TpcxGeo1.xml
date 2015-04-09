@@ -2192,10 +2192,10 @@ iShape = kTrd1;
             <Medium name="TPAD_p10" isvol="1" stemax="2.5*tprs_width" deemax="0.00175367" stmin="0.0249056" />
             <Shape type="bbox" dz="0" dx="0" dy="0"  />
             
-            <Par name="CUTGAM" value="1e-4"  />
-            <Par name="CUTELE" value="1e-4"  />
-            <Par name="DCUTE" value="1e-4"  />
-            <Par name="DCUTM" value="1e-4"  />
+            <Cut name="CUTGAM" value="1e-4"  />
+            <Cut name="CUTELE" value="1e-4"  />
+            <Cut name="DCUTE" value="1e-4"  />
+            <Cut name="DCUTM" value="1e-4"  />
             <Par name="STRA" value="1."  />
 
 

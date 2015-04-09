@@ -1052,8 +1052,8 @@
             <Attribute for="EMGT" seen="1" lsty="2" colo="1"  />
             <Shape type="CONS" rmn1="(current)*tan_low-dd" rmn2="(current+megatile)*tan_low-dd" rmx2="(current+megatile)*tan_upp+dup" rmx1="(current)*tan_upp+dup" dz="megatile/2"  />
 
-            <Par name="CUTGAM" value="0.00001"  />
-            <Par name="CUTELE" value="0.00001"  />
+            <Cut name="CUTGAM" value="0.00001"  />
+            <Cut name="CUTELE" value="0.00001"  />
 
         <Export language="Mortran">
             Set EmCuts(EABS) 
@@ -1132,12 +1132,12 @@
             <Shape type="TRD1" dz="(rtop-rbot)/2-emcs_gapcel" dy="esec_scint/2"  />
 
 
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
-            <Par name="CUTNEU" value="0.001"  />
-            <Par name="CUTHAD" value="0.001"  />
-            <Par name="CUTMUO" value="0.001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
+            <Cut name="CUTNEU" value="0.001"  />
+            <Cut name="CUTHAD" value="0.001"  />
+            <Cut name="CUTMUO" value="0.001"  />
         <Export language="Mortran">
             Set EmCuts (ESEN) 
         </Export>
@@ -1174,12 +1174,12 @@
             <Attribute for="ELED" seen="1" colo="4" lsty="1" fill="1"  />
             <Shape type="TUBS" dz="emcs_pbplate/2" rmin="(current)*tan_low" rmax="(current+emcs_pbplate)*tan_upp"  />
 
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
-            <Par name="CUTNEU" value="0.001"  />
-            <Par name="CUTHAD" value="0.001"  />
-            <Par name="CUTMUO" value="0.001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
+            <Cut name="CUTNEU" value="0.001"  />
+            <Cut name="CUTHAD" value="0.001"  />
+            <Cut name="CUTMUO" value="0.001"  />
         <Export language="Mortran">
             Set EmCuts(EABS) 
         </Export>
@@ -1208,8 +1208,8 @@
             <Material name="ECAL_AluPlate" isvol="0"  />
             <Attribute for="EALP" seen="1" lsty="1" colo="1"  />
             <Shape type="TRD1" dz="(rtop-rbot)/2" dy="emcs_alincell/2"  />
-            <Par name="CUTGAM" value="0.00001"  />
-            <Par name="CUTELE" value="0.00001"  />
+            <Cut name="CUTGAM" value="0.00001"  />
+            <Cut name="CUTELE" value="0.00001"  />
             <Par name="LOSS" value="1."  />
             <Par name="STRA" value="1."  />
         <Export language="Mortran">
@@ -1358,9 +1358,9 @@
             <Attribute for="EHMS" seen="1" serial="cut" lsty="1" colo="2"  />
             <Shape type="TRD1" dz="emxg_Sapex/2" dx2="emxg_Sbase/2" dx1="0" dy="length/2"  />
 
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />

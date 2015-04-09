@@ -5,6 +5,18 @@
 #include "Mortran.h"
 #include "AgDetp.h"
 #include "AgStructure.h"
+#include <string>
+using namespace std;
+
+class TDataSet;
+
+struct HitSet_t {
+  Char_t meas[9]; // measurement
+  float  nb; // number of bins or bits
+  float  min; // min
+  float  max; // max
+  Char_t opts[4]; // Options    
+};
 
 class AgModule : public AgBlock
 {
@@ -24,11 +36,26 @@ class AgModule : public AgBlock
   /// Returns a pointer to the requested data structure
   AgStructure *GetStructure( const Char_t *name );
 
+  TDataSet *DataSet(){ return mDataSet; }
+  static TDataSet *Geom();
+
+  // Register a hit declaration in this module
+  Bool_t AddHit( string _for, string meas, Float_t bits, Float_t mn=0, Float_t mx=0, string opts="" );
+  Bool_t AddCut( string block, string cut, Float_t value );
+  Bool_t AddPar( string block, string par, Float_t value );
+
+
  private:
  protected:
 
   std::map< TString, AgBlock *>    mBlocks;
   static std::vector< TString, AgDetp * >    mDetectorParameters;
+
+  // Module dataset
+  TDataSet *mDataSet;
+  TDataSet *mHitsSet;
+  TDataSet *mBlocksSet;
+  static TDataSet *mGeomSet;
 
  public:
   virtual const Char_t *GetCVS() const {
