@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 class AgBlock;
 
@@ -32,7 +33,6 @@ class StarAgmlStacker : public TNamed
 
   virtual Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr )=0;
 			
-
   const std::vector<TString> &nicknames(const Char_t *name)
     {
       return mNicknames[ TString(name) ];

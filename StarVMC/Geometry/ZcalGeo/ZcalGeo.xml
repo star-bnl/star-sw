@@ -152,8 +152,8 @@
             <Material name="dirty_lead" isvol="0"  />
             <Attribute for="Qcal" seen="1" colo="4"  />
             <Shape type="BOX" dz="calp_qcdz" dx="calp_qcdx" dy="calp_qcdy"  />
-            <Par name="CUTGAM" value="0.0005"  />
-            <Par name="CUTELE" value="0.00015"  />
+            <Cut name="CUTGAM" value="0.0005"  />
+            <Cut name="CUTELE" value="0.00015"  />
             <Create block="QDIV"  />
         </Block>
         
@@ -170,8 +170,8 @@
             <Material name="scintillator" isvol="1"  />
             <Attribute for="QSCI" seen="1" colo="3"  />
             <Shape type="BOX" dz="calp_scdz"  />
-            <Par name="CUTGAM" value="0.0005"  />
-            <Par name="CUTELE" value="0.00015"  />
+            <Cut name="CUTGAM" value="0.0005"  />
+            <Cut name="CUTELE" value="0.00015"  />
             <Instrument block="QSCI">
                 <Hit meas="eloss" nbits="0" min="0" max="10" />
             </Instrument>

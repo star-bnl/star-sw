@@ -82,8 +82,8 @@
     <Medium name="sensitive" isvol="1 "  />
     <Attribute for="FSCT" seen="1" colo="7"  />
     <Shape type="BOX" dz="fscp_towerLength" dx="fscp_towerWidth" dy="fscp_towerWidth"  />
-    <Par name="CUTGAM" value="0.0005"  />
-    <Par name="CUTELE" value="0.00015"  />
+    <Cut name="CUTGAM" value="0.0005"  />
+    <Cut name="CUTELE" value="0.00015"  />
     <Instrument block="FSCT"  >
       <Hit meas="eloss" nbits="0" min="0" max="250"  />
     </Instrument>

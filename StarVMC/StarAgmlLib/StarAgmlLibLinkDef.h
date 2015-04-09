@@ -22,4 +22,9 @@
 #pragma link C++ class Array_t<int>;
 #pragma link C++ class Array_t<float>;
 #pragma link C++ class Array_t<double>;
+#pragma link C++ struct HitSet_t+;
+#pragma link C++ struct Gccuts_t+;
+#pragma link C++ struct Gcphys_t+;
+#pragma link C++ struct Gcbirk_t+;
+#pragma link C++ struct Gcphlt_t+;
 #endif
