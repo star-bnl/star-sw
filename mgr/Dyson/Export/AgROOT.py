@@ -2802,7 +2802,6 @@ class Instrument(Handler):
         self.block = attr.get('block', attr.get('volume', None))        
     def endElement(self,tag):
         block = self.block
-        print "Instrument %s"%block
         for hit in self.hit_list:
             attr = hit.attr
             meas = attr.get('meas',None)

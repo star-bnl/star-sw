@@ -53,7 +53,7 @@ Bool_t AgModule::AddCut( string block, string cut, Float_t value )
 
   if ( 0==G3cuts )
     {
-      cout << "Register new cut table for block " << block.c_str() << endl;
+      //      cout << "Register new cut table for block " << block.c_str() << endl;
       // Create the table and add default set of cuts
       THEBLOCK -> Add( G3cuts = new TGenericTable( "Gccuts_t", "G3cuts" ) );
       Gccuts_t cuts; /* new default cuts */ 
@@ -76,7 +76,7 @@ Bool_t AgModule::AddPar( string block, string cut, Float_t value )
 
   if ( 0==G3birk || 0==G3phlt )
     {
-      cout << "Register new par tables for block " << block.c_str() << endl;
+      //      cout << "Register new par tables for block " << block.c_str() << endl;
       // Create the table and add default set of cuts
       THEBLOCK -> Add( G3birk = new TGenericTable( "Gcbirk_t", "G3birk" ) );
       THEBLOCK -> Add( G3phlt = new TGenericTable( "Gcphlt_t", "G3phlt" ) );
