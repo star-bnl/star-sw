@@ -254,7 +254,7 @@ void MuMcKFP(Long64_t Nevent = 999999,
 #ifdef STIPV
       KFVertex &pv = PrimVertex[l];      
       pv = *vx;
-      pvIndexMap[vx->GetID()] = l;
+      pvIndexMap[vx->Id()] = l;
 #endif //STIPV
 //       cout << "KFV:" << *vx << endl;
     }

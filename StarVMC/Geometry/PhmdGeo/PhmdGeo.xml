@@ -570,8 +570,8 @@ xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary
             <Shape type="PARA" dz="pmdg_th_lead/2." dx="xlen0-ylen1*pmdg_boundary/(2.*root32)" dy="ylen0-ylen2*pmdg_boundary*root34/root32"  />
 
             <If expr="PMVR_Config.eq.1"  >
-                <Par name="CUTGAM" value=".0001"  />
-                <Par name="CUTELE" value=".0001"  />
+                <Cut name="CUTGAM" value=".0001"  />
+                <Cut name="CUTELE" value=".0001"  />
             </If>
             
         </Block>
@@ -583,8 +583,8 @@ xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary
             <Shape type="PARA" dz="pmdg_th_steel/2." dx="xlen0-ylen1*pmdg_boundary/(2.*root32)" dy="ylen0-ylen2*pmdg_boundary*root34/root32"  />
 
             <If expr="PMVR_Config.eq.1"  >
-                <Par name="CUTGAM" value=".0001"  />
-                <Par name="CUTELE" value=".0001"  />
+                <Cut name="CUTGAM" value=".0001"  />
+                <Cut name="CUTELE" value=".0001"  />
             </If>
             
         </Block>
@@ -602,8 +602,8 @@ xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary
             <Shape type="PARA" dz="pmdg_th_base/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
 
             <If expr="PMVR_Config.eq.1"  >
-                <Par name="CUTGAM" value=".0001"  />
-                <Par name="CUTELE" value=".0001"  />
+                <Cut name="CUTGAM" value=".0001"  />
+                <Cut name="CUTELE" value=".0001"  />
             </If>
             
         </Block>
@@ -621,8 +621,8 @@ xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary
             <Shape type="PARA" dz="pmdg_th_pcb/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
 
             <If expr="PMVR_Config.eq.1"  >
-                <Par name="CUTGAM" value=".0001"  />
-                <Par name="CUTELE" value=".0001"  />
+                <Cut name="CUTGAM" value=".0001"  />
+                <Cut name="CUTELE" value=".0001"  />
             </If>
             
         </Block>
@@ -649,8 +649,8 @@ xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary
             <Shape type="PGON" phi1="pmdg_hexd2(1)" rmn="{pmdg_hexd2(6),pmdg_hexd2(9)}" rmx="{pmdg_hexd2(7),pmdg_hexd2(10)}" nz="pmdg_hexd2(4)" npdiv="pmdg_hexd2(3)" dphi="pmdg_hexd2(2)" zi="{pmdg_hexd2(5),pmdg_hexd2(8)}"  />
 
             <If expr="PMVR_Config.eq.1"  >
-                <Par name="CUTGAM" value=".0001"  />
-                <Par name="CUTELE" value=".00001"  />
+                <Cut name="CUTGAM" value=".0001"  />
+                <Cut name="CUTELE" value=".00001"  />
             </If>
             
             <Instrument block="PDGS" >

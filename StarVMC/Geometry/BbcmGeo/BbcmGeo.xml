@@ -4,7 +4,7 @@
   attribute as its arguement.
 
   -->
-
+  
 
 <Module name="BbcmGeo" comment=" is the Beam Beam Counter Modules GEOmetry "  >
 <!-- 
@@ -16,7 +16,7 @@
   A mandatory comment attribute provides a short description of which detector
   is implemented by the module.
 
-  -->
+  --> 
 
   <Created date="15 march 2002"   />
   <Author  name="Yiqun Wang"      />
@@ -415,12 +415,12 @@
   <Attribute for="BPOL" seen="1" colo="4"  />
   <Shape type="PGON" phi1="0" rmn="{0,0}" rmx="{actr,actr}" nz="2" npdiv="6" dphi="360" zi="{-hexg_thick/2,hexg_thick/2}"  />
 
-  <Par name="CUTGAM" value="0.00008"  />
-  <Par name="CUTELE" value="0.001"  />
-  <Par name="BCUTE"  value="0.0001"  />
-  <Par name="CUTNEU" value="0.001"  />
-  <Par name="CUTHAD" value="0.001"  />
-  <Par name="CUTMUO" value="0.001"  />
+  <Cut name="CUTGAM" value="0.00008"  />
+  <Cut name="CUTELE" value="0.001"  />
+  <Cut name="BCUTE"  value="0.0001"  />
+  <Cut name="CUTNEU" value="0.001"  />
+  <Cut name="CUTHAD" value="0.001"  />
+  <Cut name="CUTMUO" value="0.001"  />
   <Par name="BIRK1"  value="1.000"  />
   <Par name="BIRK2"  value="0.013"  />
   <Par name="BIRK3"  value="9.6E-6"  />
@@ -428,7 +428,7 @@
     Parameters are the Geant3 paramters which may be set via a call to
     GSTPar.
     -->
-  
+   
   <Instrument block="BPOL">
     <Hit meas="tof"  nbits="16" opts="C" min="0" max="1.0E-6" />
     <Hit meas="birk" nbits="0"  opts="C" min="0" max="10"     />
@@ -436,9 +436,11 @@
   <!-- The instrument block indicates what information should be saved
        for this volume, and how the information should be packed. -->
   
-</Volume>
+</Volume> 
 
 
 </Module>
-</Document>
-
+</Document> 
+ 
+  
+ 

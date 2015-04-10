@@ -22,7 +22,6 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
 {
   enum {kMaxNErr=333};
   static Int_t nCall=0; nCall++;
-  StiKalmanTrackNode::Break(nCall);
 
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);

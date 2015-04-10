@@ -58,23 +58,12 @@
 
 const char* StMtdGeometry::backlegPref[4] = {"MTMT","MTMF","MTTG","MTT1"};
 const char* StMtdGeometry::modulePref   = "MTRA";
-Double_t	StMtdGeoNode::fCellWidth = 3.8; /// cm	
-Double_t	StMtdGeoNode::fCellGap = 0.6; /// cm	
-
-Double_t StMtdGeometry::mStripLength = 87.; /// cm
-
-Double_t StMtdGeometry::mMtdMinR = 392.802; /// mtd system minimum radius
-Double_t StMtdGeometry::mMtdMaxR = 418.865; /// mtd system maximum radius
-Double_t StMtdGeometry::mMagInR  = 303.290; /// magnet system inner radius
-Double_t StMtdGeometry::mMagOutR = 364.290; /// magnet system outer radius
-Double_t StMtdGeometry::mEmcInR  = 223.505; /// EMC system inner radius
-Double_t StMtdGeometry::mEmcOutR = 248.742; /// EMC system outer radius
-   
-Double_t StMtdGeometry::mEmcELoss  = 0.215; /// EMC    mom eloss (GeV/c)
-Double_t StMtdGeometry::mCoilELoss = 0.176; /// Coil   mom eloss (GeV/c)
-//Double_t StMtdGeometry::mMagELoss  = 0.824; /// avg. Magnet mom eloss (GeV/c)
-
-
+Double_t const StMtdGeometry::mMtdMinR = 392.802; /// mtd system minimum radius
+Double_t const StMtdGeometry::mMtdMaxR = 418.865; /// mtd system maximum radius
+Double_t const StMtdGeometry::mMagInR  = 303.290; /// magnet system inner radius
+Double_t const StMtdGeometry::mMagOutR = 364.290; /// magnet system outer radius
+Double_t const StMtdGeometry::mEmcInR  = 223.505; /// EMC system inner radius
+Double_t const StMtdGeometry::mEmcOutR = 248.742; /// EMC system outer radius
 //const char* StMtdGeometry::sensorPref  = "MIGG";
 
 //----------------------------------------------------//
@@ -438,8 +427,7 @@ void StMtdGeometry::Init(StMaker *maker){
 	  {
 	    LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
 
-	    TDataSet *dataset = maker->GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
-	    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
+	    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(maker->GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap"));
 	    if ( !mtdGeant2BacklegIDMap )
 	      {
 		LOG_ERROR << "No mtdGeant2BacklegIDMap found in database" << endm;

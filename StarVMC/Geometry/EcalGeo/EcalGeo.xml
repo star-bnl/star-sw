@@ -708,12 +708,12 @@
             <Shape type="CONS" rmn1="(current-diff)*Tan_Low-dd" rmn2="(current+mgt-diff)*Tan_Low-dd" rmx2="(current+mgt-diff)*Tan_Upp+dup" rmx1="(current-diff)*Tan_Upp+dup" dz="mgt/2"  />
 
             <If expr="myKase==1"  >
-                <Par name="CUTGAM" value="0.00001"  />
-                <Par name="CUTELE" value="0.00001"  />
+                <Cut name="CUTGAM" value="0.00001"  />
+                <Cut name="CUTELE" value="0.00001"  />
                 <Else  >
-                    <Par name="CUTGAM" value="0.00008"  />
-                    <Par name="CUTELE" value="0.001"  />
-                    <Par name="BCUTE" value="0.0001"  />
+                    <Cut name="CUTGAM" value="0.00008"  />
+                    <Cut name="CUTELE" value="0.001"  />
+                    <Cut name="BCUTE" value="0.0001"  />
                 </Else>
                 
             </If>
@@ -782,12 +782,12 @@
             <Material name="Cpolystyren" isvol="1"  />
             <Attribute for="ESCI" seen="1" colo="7" fill="0"  />
             <Shape type="TRD1" dz="(RTop-RBot)/2-emcs_GapCel" dy="esec_scint/2"  />
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
-            <Par name="CUTNEU" value="0.001"  />
-            <Par name="CUTHAD" value="0.001"  />
-            <Par name="CUTMUO" value="0.001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
+            <Cut name="CUTNEU" value="0.001"  />
+            <Cut name="CUTHAD" value="0.001"  />
+            <Cut name="CUTMUO" value="0.001"  />
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.013"  />
             <Par name="BIRK3" value="9.6E-6"  />
@@ -814,12 +814,12 @@
             <Attribute for="ELED" seen="1" colo="4" fill="1"  />
             <Shape type="TUBS" dz="emcs_Pbplate/2" rmin="(current)*Tan_Low" rmax="(current+emcs_Pbplate)*Tan_Upp"  />
 
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
-            <Par name="CUTNEU" value="0.001"  />
-            <Par name="CUTHAD" value="0.001"  />
-            <Par name="CUTMUO" value="0.001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
+            <Cut name="CUTNEU" value="0.001"  />
+            <Cut name="CUTHAD" value="0.001"  />
+            <Cut name="CUTMUO" value="0.001"  />
 
         </Block>
         
@@ -836,8 +836,8 @@
             <Material name="StrAluminium" isvol="0"  />
             <Attribute for="EALP" seen="1" colo="1"  />
             <Shape type="TRD1" dz="(RTop-RBot)/2" dy="emcs_AlinCell/2"  />
-            <Par name="CUTGAM" value="0.00001"  />
-            <Par name="CUTELE" value="0.00001"  />
+            <Cut name="CUTGAM" value="0.00001"  />
+            <Cut name="CUTELE" value="0.00001"  />
             <Par name="LOSS" value="1."  />
             <Par name="STRA" value="1."  />
         </Block>
@@ -1063,9 +1063,9 @@
             <Material name="Cpolystyren" isvol="1"  />
             <Attribute for="EHMS" seen="1" serial="cut" colo="2"  />
             <Shape type="TRD1" dz="emxg_Sapex/2" dx2="emxg_Sbase/2" dx1="0" dy="len/2"  />
-            <Par name="CUTGAM" value="0.00008"  />
-            <Par name="CUTELE" value="0.001"  />
-            <Par name="BCUTE" value="0.0001"  />
+            <Cut name="CUTGAM" value="0.00008"  />
+            <Cut name="CUTELE" value="0.001"  />
+            <Cut name="BCUTE" value="0.0001"  />
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />
@@ -1085,8 +1085,8 @@
             
             <Attribute for="EXGT" seen="1" colo="7"  />
             <Shape type="TUBS" rmin="(section-diff)*Tan_Low-1.526" rmax="(section+msecwd-diff)*Tan_Upp" dz="emxg_F4/2" phi2="emcs_PhiMax/emcs_Nsupsec" phi1="emcs_PhiMin/emcs_Nsupsec"  />
-            <Par name="CUTGAM" value="0.00001"  />
-            <Par name="CUTELE" value="0.00001"  />
+            <Cut name="CUTGAM" value="0.00001"  />
+            <Cut name="CUTELE" value="0.00001"  />
         </Block>
         
     </Module>

@@ -9,59 +9,17 @@ TDataSet *CreateTable() {
   St_tpcPadPlanes *tableSet = new St_tpcPadPlanes("tpcPadPlanes",1);
   /* 
      Jim Thomas 04/02/15 
+     pads = 2*(row + 24 - Int_t ((row - 1)/7)); // row = 1 - 40;
 
 Pads are spaced 0.5 x 1.6 cm with a 0.5 mm gap.
 Which means the actual copper size of the pad is 0.45 x 1.55 cm.
-
-Row 1: 56 pads
-Row 2: 58 pads
-Row 3: 60 pads
-Row 4: 62 pads
-Row 5: 62 pads
-Row 6: 64 pads
-Row 7: 66 pads
-Row 8: 68 pads
-Row 9: 70 pads
-Row 10: 72 pads
-Row 11: 74 pads
-Row 12: 74 pads
-Row 13: 76 pads
-Row 14: 78 pads
-Row 15: 80 pads
-Row 16: 82 pads
-Row 17: 84 pads
-Row 18: 86 pads
-Row 19: 86 pads
-Row 20: 88 pads
-Row 21: 90 pads
-Row 22: 92 pads
-Row 23: 94 pads
-Row 24: 96 pads
-Row 25: 98 pads
-Row 26: 98 pads
-Row 27: 100 pads
-Row 28: 102 pads
-Row 29: 104 pads
-Row 30: 106 pads
-Row 31: 108 pads
-Row 32: 110 pads
-Row 33: 112 pads
-Row 34: 112 pads
-Row 35: 114 pads
-Row 36: 116 pads
-Row 37: 118 pads
-Row 38: 120 pads
-Row 39: 122 pads
-Row 40: 122 pads
-grep Row tpcPadPlanes.devTY.C | grep pads | awk 'BEGIN {n=0;}{n += $3} END {print "Total =" n}' 
-
-Total =3580
 */
   enum {NinnerRows = 40};
-  Int_t nPadsInner[NinnerRows]  = { 56, 58, 60, 62, 62, 64, 66, 68, 70, 72,
-				    74, 74, 76, 78, 80, 82, 84, 86, 86, 88,
-				    90, 92, 94, 96, 98, 98,100,102,104,106,
-				   108,110,112,112,114,116,118,120,122,122};
+  Int_t nPadsInner[NinnerRows];
+  for (Int_t i = 0; i < NinnerRows; i++) {
+    Int_t r = i + 1;
+    nPadsInner[i] = 2*(r + 24 - Int_t ((r - 1)/7));
+  }
 
   Int_t nPadsOuter[32]  = {    98 ,    100,    102,    104,    106,    106,    108,    110,    112,    112,
 			       114,    116,    118,    120,    122,    122,    124,    126,    128,    128,

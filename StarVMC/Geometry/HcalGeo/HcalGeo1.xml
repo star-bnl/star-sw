@@ -674,9 +674,9 @@
       <Material name="FMSPS_scint" isvol="1"  />
       <Attribute for="FPSC" seen="1" colo="4" />
       <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-      <Par name="CUTGAM" value="0.00008" />
-      <Par name="CUTELE" value="0.001"   />
-      <Par name="BCUTE" value="0.0001"   />
+      <Cut name="CUTGAM" value="0.00008" />
+      <Cut name="CUTELE" value="0.001"   />
+      <Cut name="BCUTE" value="0.0001"   />
       <Par name="BIRK1" value="1."       />
       <Par name="BIRK2" value="0.013"    />
       <Par name="BIRK3" value="9.6E-6"   />

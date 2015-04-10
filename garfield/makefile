@@ -33,20 +33,21 @@ FFLAGS = -fpic -c
 # FFLAGS += -Os
 #CFLAGS += -O2
 #FFLAGS += -O2
-CFLAGS += -g `root-config --ldflags` -fPIC
-FFLAGS += -g `root-config --ldflags` -fPIC
+CFLAGS += -fPIC
+FFLAGS += `root-config --ldflags` -fPIC
 
 # Debug flags
-# CFLAGS += -g
-# FFLAGS += -g
+CFLAGS += -g
+FFLAGS += -g
 # Profiling flag
- CFLAGS += -pg
+# CFLAGS += -pg
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
-
-all:	$(LIBDIR)/libGarfield.so
+.PHONY:	all  
+all: heed lib
+lib:	$(LIBDIR)/libGarfield.so 
 $(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 	@echo Creating library libGarfield...
 #	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
@@ -54,10 +55,10 @@ $(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 #	ranlib $(LIBDIR)/libGarfield.a
 	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $(OBJECTS) \
 	$(wildcard $(OBJDIR)/Heed/*.o)
+#	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $<
 	touch $(OBJDIR)/last_updated_on
 	@echo Finished.
 
-.PHONY:	heed
 
 installdirs : 
 	@if [ ! -d $(LIBDIR) ] ; then mkdir -p $(LIBDIR); \

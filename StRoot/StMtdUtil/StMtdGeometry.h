@@ -70,22 +70,6 @@ const double muonMass= 0.105658389;
 //													  //
 //----------------------------------------------------//
 class StMtdGeoNode : public TObject {
-<<<<<<< StMtdGeometry.h
- protected:
-	 //TGeoNode 		*fNode;
-	 TGeoVolume 		*fVolume;
-	 TGeoHMatrix		*fMatrix;
-	 StThreeVectorD 	fPoint;
-	 StThreeVectorD 	fNormal;
-
-   	 const Double_t  	*fTransMRS;   //Translate vector in MRS
-   	 const Double_t  	*fRotMRS;     //RotateMatrix from MRS to this
-   	 Bool_t    			fTransFlag;     //Flag, kTRUE=if translation/matrix updated
-	 static Double_t	fCellWidth;
-	 static Double_t	fCellGap;
-	 Int_t				fNExtraCells;
-=======
->>>>>>> 1.7
 
 public:
   StMtdGeoNode(TGeoVolume *vol, TGeoHMatrix *mat, StThreeVectorD point, Int_t nExtraCells);
@@ -176,28 +160,12 @@ class StMtdGeoModule : public StMtdGeoNode {
 
 class StMtdGeometry : public TNamed{
  private:
-<<<<<<< StMtdGeometry.h
-  enum {mNBacklegs = 30, mNModules = 5, mNCells = 12};
-  static Double_t mStripLength;
-
-  static Double_t mMtdMinR;
-  static Double_t mMtdMaxR;
-  static Double_t mMagInR ;
-  static Double_t mMagOutR;
-  static Double_t mEmcInR ;
-  static Double_t mEmcOutR;
-   
-  static Double_t mEmcELoss ;
-  static Double_t mCoilELoss;
-   //static Double_t mMagELoss ;
-=======
-  static Double_t const mMtdMinR = 392.802; /// mtd system minimum radius
-  static Double_t const mMtdMaxR = 418.865; /// mtd system maximum radius
-  static Double_t const mMagInR  = 303.290; /// magnet system inner radius
-  static Double_t const mMagOutR = 364.290; /// magnet system outer radius
-  static Double_t const mEmcInR  = 223.505; /// EMC system inner radius
-  static Double_t const mEmcOutR = 248.742; /// EMC system outer radius
->>>>>>> 1.7
+  static Double_t const mMtdMinR;// =  392.802; /// mtd system minimum radius
+  static Double_t const mMtdMaxR;// =  418.865; /// mtd system maximum radius
+  static Double_t const mMagInR ;// =  303.290; /// magnet system inner radius
+  static Double_t const mMagOutR;// =  364.290; /// magnet system outer radius
+  static Double_t const mEmcInR ;// =  223.505; /// EMC system inner radius
+  static Double_t const mEmcOutR;// =  248.742; /// EMC system outer radius
 
  public:
   StMtdGeometry(const char* name="mtdGeo",

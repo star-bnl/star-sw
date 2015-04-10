@@ -18,5 +18,5 @@ if ($#src > -1) {
 #  Program      $env2 $pkg, @src;
 #  LinkedModule $env, $SO_PKG, @src;
 #  Install $env $LIB, $SO_PKG;
-  Command $env ($LIB . "/" . $SO_PKG), (@src, @hfiles, makefile),  qq(cd $obj_dir; make installdirs; make);
+  Command $env ($LIB . "/" . $SO_PKG), (@src, @hfiles, "makefile", "Heed/makefile"),  qq(cd $obj_dir; make heed; make);
 }

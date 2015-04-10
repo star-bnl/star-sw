@@ -2705,12 +2705,13 @@ class Par(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
     def startElement(self,tag,attr):
-        name = attr.get('name')
-        val  = attr.get('value').strip()
+        name   = attr.get('name')
+        value  = attr.get('value').strip()
 
         requireAttributes( tag, attr, ['name','value'] )
         
-        document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )        
+        #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
+        document.impl( 'module()->AddPar(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )        
 
 
 # ====================================================================================================        
@@ -2721,9 +2722,12 @@ class Cut(Handler):
 
         requireAttributes( tag, attr, ['name','value'] )
         
-        name = attr.get('name')
-        val  = attr.get('value')
-        document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
+        name   = attr.get('name')
+        value  = attr.get('value')
+
+        #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
+        document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+
 
 # ====================================================================================================        
 class Hits(Handler):
@@ -2779,11 +2783,15 @@ class Hit(Handler):
     def setParent(self,p):
         self.parent=p
     def startElement(self,tag,attr):
-        pass
+        self.attr = attr
+        self.parent.addHit(self)
     def endElement(self,tag):
         pass
     
 class Instrument(Handler):
+    """
+    Instrument is processed in scope of a block
+    """
     def __init__(self):
         Handler.__init__(self)
         self.hit_list = []
@@ -2791,11 +2799,25 @@ class Instrument(Handler):
         self.parent = p
     def addHit(self,hit):
         self.hit_list.append(hit)
-
     def startElement(self,tag,attr):
         self.block = attr.get('block', attr.get('volume', None))        
     def endElement(self,tag):
-        pass
+        block = self.block
+        for hit in self.hit_list:
+            attr = hit.attr
+            meas = attr.get('meas',None)
+            nbits=attr.get('nbits', attr.get('bins', '0') )
+            mn   = attr.get('min','0')
+            mx   = attr.get('max','0')
+            opts = attr.get('opts','')
+            # apply replacement table to calculated(-able) quantities
+            nbits=replacements(nbits).lower()
+            mn   =replacements(mn).lower()
+            mx   =replacements(mx).lower()
+            document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
+
+                            
+
 
 
         

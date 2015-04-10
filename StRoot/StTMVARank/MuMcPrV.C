@@ -362,7 +362,7 @@ void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KF
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV42") { 
+	     const  char* outFile="MuMcPrV43") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -564,6 +564,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     map<StMuPrimaryVertex*,KFParticle*>         RcVx2KFVx;
     map<KFParticle*,StMuMcVertex *>             KFVx2McVx; 
     multimap<StMuMcVertex*,KFParticle*>         McVx2KFVx; 
+    multimap<Int_t,StMuTrack *>                 IdMc2Tracks; // Reconstucted Track to IdTruth
     PrPPDH(McVx);
     for (Int_t m = 0; m < NoMuMcVertices; m++) {
       StMuMcVertex *McVx = (StMuMcVertex *) MuMcVertices->UncheckedAt(m);
@@ -573,6 +574,15 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Id2McVx[Id] = McVx;
     }
     PrPP(Id2McVx.size());
+    PrPPDH(IdTruth2RcTk);
+    for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+      StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+      if (! Accept(gTrack)) continue;
+      Int_t IdTruth = gTrack->idTruth();
+      if (! IdTruth) continue;
+      IdMc2Tracks.insert(pair<Int_t,StMuTrack *>(IdTruth,gTrack));
+    }
+    PrPP(IdMc2Tracks.size());
     PrPPDH(McTk);
     for (Int_t m = 0; m < NoMuMcTracks; m++) {
       StMuMcTrack *McTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(m);
@@ -583,9 +593,12 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       else           {PrPP2D(*McTrack,*mcEndVx);
 	McEndVx2McParentTrack[mcEndVx] = McTrack;
       }
-      if (McTrack->No_tpc_hit() < 10) continue;
-      Int_t Id = McTrack->IdVx();
-      StMuMcVertex *mcVx = Id2McVx[Id];
+      Int_t Id = McTrack->Id();
+      Int_t n  = IdMc2Tracks.count(Id);
+      if (! n) continue;
+      //      if (McTrack->No_tpc_hit() < 10) continue;
+      Int_t IdVx = McTrack->IdVx();
+      StMuMcVertex *mcVx = Id2McVx[IdVx];
       if (! mcVx) {
 	cout << "Missing vertex of origin"; PrP(*McTrack);
 	continue;
