@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.25 2015/04/07 16:25:16 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.26 2015/04/10 18:25:59 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,14 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.26  2015/04/10 18:25:59  marr
+ * 1. Use global coordinates, instead of local ones, to calculate the distances
+ * between projected track positions and MTD hits. Using local coordinates causes
+ * a unphysical shoulder at large DeltaZ.
+ * 2. Fix the following bug: if a track can be projected to two adjacent modules,
+ * the position in the module with a smaller module number gets dropped before
+ * matching. This caused an asymmetry in the local z distribution of matched tracks.
+ *
  * Revision 1.25  2015/04/07 16:25:16  marr
  * 1. Make use the constants defined in StMtdConstants
  * 2. Disable the print-out when running in MuDst mode
@@ -568,6 +576,8 @@ Int_t StMtdMatchMaker::Finish(){
 
 /// Make: match extrapolated TPC tracks to MRPCs in the MTD trays.
 Int_t StMtdMatchMaker::Make(){
+
+  //LOG_INFO<<" New Event =============================="<<endm;
 
 	mEvent=(StEvent *) GetInputDS("StEvent");
 	if(mEvent){
@@ -1281,6 +1291,8 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		allCellsHitVec.push_back(cellHit);
 		nCells++;
 
+		//printf("Add track %d, localz = %2.3f, (bl,mod,cell)=(%d,%d,%d)\n",iNode,ol.z(),iBL,iMod,iCell);
+
 		if(Debug()){
 			if(idVec.size()>1) LOG_INFO<<"iBL:iMod:iCell="<<iBL<<" "<<iMod<<" "<<iCell<<endm;
 		}
@@ -1409,511 +1421,462 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				cellHit.pathLength = proIter->pathLength;
 				cellHit.expTof2MTD = proIter->expTof2MTD;
 				matchHitCellsVec.push_back(cellHit);
+				//printf("Associate track %d with (bl,mod,cell)=(%d,%d,%d), localz=%2.3f\n",proIter->trackIdVec[0],daqIter->backleg,daqIter->module,daqIter->cell,proIter->zhit);
 			}
 		} 
 	} //end {sec. C}'
 }
 
 
+
 /// Loop over and identify single and multiple-hit cells
-void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,mtdCellHitVector& singleHitCellsVec,mtdCellHitVector& multiHitsCellsVec){
-	Int_t nSingleHitCells(0);
-	Int_t nMultiHitsCells(0);
-	StructCellHit cellHit;
-	StructCellHit cellHit_candidate;
-	mtdCellHitVector tempVec = matchHitCellsVec;
-	mtdCellHitVector erasedVec = tempVec;
-	mtdCellHitVector multiHitsCellsVec_temp;
-	while (tempVec.size() != 0) {
-		Int_t nTracks = 0;
-		idVector trackIdVec;
+void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,mtdCellHitVector& singleHitCellsVec,mtdCellHitVector& multiHitsCellsVec)
+{
+  StructCellHit cellHit;
+  StructCellHit cellHit_candidate;
+  mtdCellHitVector tempVec = matchHitCellsVec;
+  mtdCellHitVector erasedVec = tempVec;
+  mtdCellHitVector multiHitsCellsVec_temp;
+  while (tempVec.size() != 0)
+    {
+      Int_t nTracks = 0;
+      idVector trackIdVec;
 
-		mtdCellHitVectorIter tempIter=tempVec.begin();
-		mtdCellHitVectorIter erasedIter=erasedVec.begin();
-		while(erasedIter!= erasedVec.end()) {
-			if(tempIter->backleg == erasedIter->backleg &&
-					tempIter->module == erasedIter->module &&
-					tempIter->cell == erasedIter->cell) {
-				//
-				if(nTracks>0)
-				{
-					if(nTracks==1)
-					{
-						cellHit.cell = tempIter->cell;
-						cellHit.module = tempIter->module;
-						cellHit.backleg = tempIter->backleg;
-						cellHit.hitPosition = tempIter->hitPosition;
-						cellHit.trackIdVec.push_back(tempIter->trackIdVec.back());
-						cellHit.zhit = tempIter->zhit;
-						cellHit.matchFlag = -999; 
-						cellHit.yhit = tempIter->yhit;
-						cellHit.tot = tempIter->tot;
-						cellHit.leadingEdgeTime = tempIter->leadingEdgeTime;
-						cellHit.index2MtdHit = tempIter->index2MtdHit;
-						cellHit.theta = tempIter->theta;
-						cellHit.pathLength = tempIter->pathLength;
-						cellHit.expTof2MTD = tempIter->expTof2MTD;
-						if(Debug())
-						{
-							LOG_INFO<<"track Info: "<<cellHit.zhit<<" "<<cellHit.yhit<<endm;
-							LOG_INFO<<"hit Info: "<<cellHit.backleg<<" "<<cellHit.module<<" "<<cellHit.cell<<endm;
-						}
-						multiHitsCellsVec_temp.push_back(cellHit);
-					}
-
-					cellHit_candidate.cell = erasedIter->cell;
-					cellHit_candidate.module = erasedIter->module;
-					cellHit_candidate.backleg = erasedIter->backleg;
-					cellHit_candidate.hitPosition = erasedIter->hitPosition;
-					cellHit_candidate.trackIdVec.push_back(erasedIter->trackIdVec.back());
-					cellHit_candidate.zhit = erasedIter->zhit;
-					cellHit_candidate.matchFlag = -999; 
-					cellHit_candidate.yhit = erasedIter->yhit;
-					cellHit_candidate.tot = erasedIter->tot;
-					cellHit_candidate.leadingEdgeTime = erasedIter->leadingEdgeTime;
-					cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
-					cellHit_candidate.theta = erasedIter->theta;
-					cellHit_candidate.pathLength = erasedIter->pathLength;
-					cellHit_candidate.expTof2MTD = erasedIter->expTof2MTD;
-					multiHitsCellsVec_temp.push_back(cellHit_candidate);
-					if(Debug())
-					{
-						LOG_INFO<<"track Info: "<<cellHit_candidate.zhit<<" "<<cellHit_candidate.yhit<<endm;
-						LOG_INFO<<"hit Info: "<<cellHit_candidate.backleg<<" "<<cellHit_candidate.module<<" "<<cellHit_candidate.cell<<endm;
-					}
-				}
-				//
-				nTracks++;
-				trackIdVec.push_back(erasedIter->trackIdVec.back());  // merge
-				erasedVec.erase(erasedIter);
-				--erasedIter;
-			}
-			++erasedIter;
-		}
-
-		cellHit.cell = tempIter->cell;
-		cellHit.module = tempIter->module;
-		cellHit.backleg = tempIter->backleg;
-		cellHit.hitPosition = tempIter->hitPosition;
-		cellHit.trackIdVec = trackIdVec;
-		cellHit.zhit = tempIter->zhit;
-		cellHit.matchFlag = -999; 
-		cellHit.yhit = tempIter->yhit;
-		cellHit.tot = tempIter->tot;
-		cellHit.leadingEdgeTime = tempIter->leadingEdgeTime;
-		cellHit.index2MtdHit = tempIter->index2MtdHit;
-		cellHit.theta = tempIter->theta;
-		cellHit.pathLength = tempIter->pathLength;
-		cellHit.expTof2MTD = tempIter->expTof2MTD;
-
-		if(mHisto) {
-			Float_t ycenter = mMtdGeom->GetGeoModule(tempIter->backleg,tempIter->module)->GetCellLocalYCenter(tempIter->cell);
-			Float_t dy = tempIter->yhit - ycenter;
-			Float_t dz = tempIter->zhit;
-			mTracksPerCellMatch1->Fill(trackIdVec.size());
-			mDaqOccupancyMatch1->Fill((tempIter->module-1)*gMtdNCells+tempIter->cell);
-			mDeltaHitMatch1->Fill(dy, dz);
-		}
-
-		if (nTracks==1){
-			nSingleHitCells++;      
-			singleHitCellsVec.push_back(cellHit);
-		} else if (nTracks>1){
-			idVector tmpIdVec = trackIdVec;
-			UInt_t temsize1 = tmpIdVec.size(); 
-			sort(tmpIdVec.begin(),tmpIdVec.end());
-			tmpIdVec.erase(unique(tmpIdVec.begin(),tmpIdVec.end()),tmpIdVec.end());
-			if(tmpIdVec.size()!=temsize1)
-			{
-				if(Debug())
-				{
-					LOG_INFO<<"mark here ="<<temsize1<<"  "<<tmpIdVec.size()<<endm;
-				}
-			}
-			if(tmpIdVec.size()==1){
-				cellHit.trackIdVec = tmpIdVec;
-				nSingleHitCells++;      
-				singleHitCellsVec.push_back(cellHit);
-			}else if(tmpIdVec.size()>1){
-				mtdCellHitVector MutVec = multiHitsCellsVec_temp;
-				for(idVectorIter trkIdIter = tmpIdVec.begin();trkIdIter != tmpIdVec.end(); ++trkIdIter)
-				{	
-					int markflag = 0;
-					if(Debug()) LOG_INFO<<"trackId ="<<*trkIdIter<<endm;
-
-					for(mtdCellHitVectorIter temIter=MutVec.begin();temIter != MutVec.end(); ++temIter)
-					{
-						idVector ID = temIter->trackIdVec;
-						if(Debug()) LOG_INFO<<"MutVecId ="<<ID.back()<<endm;
-						if(*trkIdIter == ID.back())
-						{
-							markflag++;
-							if(markflag==1)
-							{
-								nMultiHitsCells++;
-								multiHitsCellsVec.push_back(*temIter);
-								if(Debug()){
-									LOG_INFO<<"Accept VecId ="<<ID.back()<<endm;
-								}
-							}
-						}
-					}
-				}
-			}else{
-				LOG_WARN<<"D: something wrong here!"<<endm;
-			}
-			// for multiple hit cells either discard (yes) or
-			// find the most likely candidate.
-		} else {
-			LOG_WARN << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
-		}
-		if(Debug()) { 
-			LOG_DEBUG << "D: backleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
-			idVectorIter ij=trackIdVec.begin();
-			while (ij != trackIdVec.end()) { LOG_DEBUG<< " " << *ij<<endm; ij++; }
-		}
-		tempVec = erasedVec;
-		multiHitsCellsVec_temp.clear();
-	}
-	if(Debug()){
-		LOG_INFO<<"multiHitsCellsVec size="<<multiHitsCellsVec.size()<<endm;
-	}
-	/////////////////////////////////////////////////////////////////////assign hits to the closest track
-	mtdCellHitVector tempVec_2Trck = multiHitsCellsVec;
-	mtdCellHitVector erasedVec_2Trck = tempVec_2Trck;
-	while(tempVec_2Trck.size()!=0)
+      mtdCellHitVectorIter tempIter=tempVec.begin();
+      mtdCellHitVectorIter erasedIter=erasedVec.begin();
+      while(erasedIter!= erasedVec.end()) 
 	{
-		StructCellHit Cellhit;
-		Int_t ntracks = 0;
-		idVector vTrackId;
-		vector<StThreeVectorD> vPosition;
-		vector<Int_t> vchannel, vbackleg, vmodule, vcell;
-		vector<Float_t> vzhit, vyhit;
-		vector<pairD> vtot; 
-		vector<pairD> vtdc; 
-		vector<Double_t> vtheta;
-		vector<Double_t> vpathLength;
-		vector<Double_t> vexpTof2MTD;
-		vector<Int_t> vindex2MtdHit;
-
-		mtdCellHitVectorIter temp_Iter=tempVec_2Trck.begin();
-		mtdCellHitVectorIter erased_Iter=erasedVec_2Trck.begin();
-
-		while(erased_Iter!= erasedVec_2Trck.end()) {
-			if(temp_Iter->backleg == erased_Iter->backleg &&
-					temp_Iter->module == erased_Iter->module &&
-					temp_Iter->cell == erased_Iter->cell) {
-				ntracks++;
-				vbackleg.push_back(erased_Iter->backleg);
-				vmodule.push_back(erased_Iter->module);
-				vcell.push_back(erased_Iter->cell);
-				vPosition.push_back(erased_Iter->hitPosition);
-				vTrackId.push_back(erased_Iter->trackIdVec.back());
-				vzhit.push_back(erased_Iter->zhit);
-				vyhit.push_back(erased_Iter->yhit);
-				vtot.push_back(erased_Iter->tot);
-				vtdc.push_back(erased_Iter->leadingEdgeTime);
-				vindex2MtdHit.push_back(erased_Iter->index2MtdHit);
-				vtheta.push_back(erased_Iter->theta);
-				vpathLength.push_back(erased_Iter->pathLength);
-				vexpTof2MTD.push_back(erased_Iter->expTof2MTD);
-				if(Debug())
-				{
-					LOG_INFO<<"ntracks ="<<ntracks<<endm;
-					LOG_INFO<<"tack INFO: "<<vzhit[ntracks-1]<<" "<<vyhit[ntracks-1]<<endm;
-					LOG_INFO<<"hits INFO: "<<vbackleg[ntracks-1]<<" "<<vmodule[ntracks-1]<<" "<<vcell[ntracks-1]<<endm;
-				}
-				erasedVec_2Trck.erase(erased_Iter);
-				erased_Iter--;
-			}
-			erased_Iter++;
-		}// end of the multitrack finding loop
-
-		if (ntracks<2)
-			LOG_INFO<<"multi::  what?  one hit just match with one track in multimatch!!!!!!! "<<endm;
-
-		if(ntracks>1){
-			Int_t thiscandidate(-99);
-			Int_t thisMatchFlag(0);
-
-			// sort on tot
-			vector<Int_t> ttCandidates;
-			for (Int_t i=0;i<ntracks;i++) {
-				ttCandidates.push_back(i);
-			}
-			if(Debug())
+	  if(tempIter->backleg == erasedIter->backleg &&
+	     tempIter->module == erasedIter->module &&
+	     tempIter->cell == erasedIter->cell) 
+	    {
+	      //
+	      if(nTracks>0)
+		{
+		  if(nTracks==1)
+		    {
+		      cellHit.cell = tempIter->cell;
+		      cellHit.module = tempIter->module;
+		      cellHit.backleg = tempIter->backleg;
+		      cellHit.hitPosition = tempIter->hitPosition;
+		      cellHit.trackIdVec.push_back(tempIter->trackIdVec.back());
+		      cellHit.zhit = tempIter->zhit;
+		      cellHit.matchFlag = -999; 
+		      cellHit.yhit = tempIter->yhit;
+		      cellHit.tot = tempIter->tot;
+		      cellHit.leadingEdgeTime = tempIter->leadingEdgeTime;
+		      cellHit.index2MtdHit = tempIter->index2MtdHit;
+		      cellHit.theta = tempIter->theta;
+		      cellHit.pathLength = tempIter->pathLength;
+		      cellHit.expTof2MTD = tempIter->expTof2MTD;
+		      if(Debug())
 			{
-				LOG_INFO<<"ttcandidates: "<<ttCandidates.size()<<endm;
+			  LOG_INFO<<"track Info: "<<cellHit.zhit<<" "<<cellHit.yhit<<endm;
+			  LOG_INFO<<"hit Info: "<<cellHit.backleg<<" "<<cellHit.module<<" "<<cellHit.cell<<endm;
 			}
-			if (ttCandidates.size()>1){  // sort on hitposition
-				Float_t ss(9999.);
-				vector<Int_t> ssCandidates;
-				for(int j=0;j<ntracks;j++) {
-					Int_t   ibackleg = vbackleg[ttCandidates[j]];
-					Int_t   imodule = vmodule[ttCandidates[j]];
-					Int_t   icell = vcell[ttCandidates[j]];
-					Float_t yy = vyhit[ttCandidates[j]];
-					Float_t ycell = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
-					Float_t ll = fabs(yy-ycell);
-					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
-					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
-					float zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
-					Float_t zz = vzhit[ttCandidates[j]];
-					Float_t ww = fabs(zz-zcell);
-					Float_t rr = 9999.;
-					if(Debug()){
-						LOG_INFO<<"hit information::"<<" "<<ibackleg<<" "<<imodule<<" "<<icell<<endm;
-						LOG_INFO<<"track information::"<<" "<<zz<<" "<<yy<<endm;
-					}
-					if(mCosmicFlag) rr = ll;
-					else rr = sqrt(ll*ll+ww*ww);
-					if(Debug()){
-						LOG_INFO<<"distance::"<<" "<<ww<<" "<<ll<<" "<<rr<<endm;
-					}
-					if(rr<ss){
-						ss = rr; 
-						ssCandidates.clear();
-						ssCandidates.push_back(ttCandidates[j]);
-					}else if(rr==ss)
-						ssCandidates.push_back(ttCandidates[j]);
-				}
-				if (ssCandidates.size()>=1){
-					thiscandidate = ssCandidates[0];
-					thisMatchFlag = 7;
-				}
-			}//sort on hitposition
-
-			if (thiscandidate>=0) {
-				Cellhit.backleg = vbackleg[thiscandidate];
-				Cellhit.module = vmodule[thiscandidate];
-				Cellhit.cell = vcell[thiscandidate];
-				Cellhit.trackIdVec.push_back(vTrackId[thiscandidate]);
-				Cellhit.hitPosition = vPosition[thiscandidate];
-				Cellhit.matchFlag = thisMatchFlag;
-				Cellhit.zhit = vzhit[thiscandidate];
-				Cellhit.yhit = vyhit[thiscandidate];
-				Cellhit.tot = vtot[thiscandidate];
-				Cellhit.leadingEdgeTime = vtdc[thiscandidate];
-				Cellhit.index2MtdHit = vindex2MtdHit[thiscandidate];
-				Cellhit.theta = vtheta[thiscandidate];
-				Cellhit.pathLength = vpathLength[thiscandidate];
-				Cellhit.expTof2MTD = vexpTof2MTD[thiscandidate];
-				singleHitCellsVec.push_back(Cellhit);
-				if(Debug())
-				{
-					LOG_INFO<<"flag 0:"<<thisMatchFlag<<endm;
-				}
-			}
+		      multiHitsCellsVec_temp.push_back(cellHit);
+		    }
+		  
+		  cellHit_candidate.cell = erasedIter->cell;
+		  cellHit_candidate.module = erasedIter->module;
+		  cellHit_candidate.backleg = erasedIter->backleg;
+		  cellHit_candidate.hitPosition = erasedIter->hitPosition;
+		  cellHit_candidate.trackIdVec.push_back(erasedIter->trackIdVec.back());
+		  cellHit_candidate.zhit = erasedIter->zhit;
+		  cellHit_candidate.matchFlag = -999; 
+		  cellHit_candidate.yhit = erasedIter->yhit;
+		  cellHit_candidate.tot = erasedIter->tot;
+		  cellHit_candidate.leadingEdgeTime = erasedIter->leadingEdgeTime;
+		  cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
+		  cellHit_candidate.theta = erasedIter->theta;
+		  cellHit_candidate.pathLength = erasedIter->pathLength;
+		  cellHit_candidate.expTof2MTD = erasedIter->expTof2MTD;
+		  multiHitsCellsVec_temp.push_back(cellHit_candidate);
+		  if(Debug())
+		    {
+		      LOG_INFO<<"track Info: "<<cellHit_candidate.zhit<<" "<<cellHit_candidate.yhit<<endm;
+		      LOG_INFO<<"hit Info: "<<cellHit_candidate.backleg<<" "<<cellHit_candidate.module<<" "<<cellHit_candidate.cell<<endm;
+		    }
 		}
-		tempVec_2Trck = erasedVec_2Trck;
-	}// end of the multihitscellsvec loop	
+
+	      nTracks++;
+	      trackIdVec.push_back(erasedIter->trackIdVec.back());  // merge
+	      erasedVec.erase(erasedIter);
+	      --erasedIter;
+	    }
+	  ++erasedIter;
+	}
+
+      cellHit.cell = tempIter->cell;
+      cellHit.module = tempIter->module;
+      cellHit.backleg = tempIter->backleg;
+      cellHit.hitPosition = tempIter->hitPosition;
+      cellHit.trackIdVec = trackIdVec;
+      cellHit.zhit = tempIter->zhit;
+      cellHit.matchFlag = -999; 
+      cellHit.yhit = tempIter->yhit;
+      cellHit.tot = tempIter->tot;
+      cellHit.leadingEdgeTime = tempIter->leadingEdgeTime;
+      cellHit.index2MtdHit = tempIter->index2MtdHit;
+      cellHit.theta = tempIter->theta;
+      cellHit.pathLength = tempIter->pathLength;
+      cellHit.expTof2MTD = tempIter->expTof2MTD;
+
+      if (nTracks==1)
+	{
+	  // hit is matched one track
+	  cellHit.matchFlag = 1; 
+	  singleHitCellsVec.push_back(cellHit);
+	} 
+      else if (nTracks>1)
+	{
+	  // hit is matched multiple tracks
+	  bool isMatchToSingleTrack = kFALSE;
+	  idVector tmpIdVec = trackIdVec; 
+	  sort(tmpIdVec.begin(),tmpIdVec.end());
+	  tmpIdVec.erase(unique(tmpIdVec.begin(),tmpIdVec.end()),tmpIdVec.end());
+	  if(tmpIdVec.size()==1)
+	    {
+	      isMatchToSingleTrack = kTRUE;
+	      if(Debug())
+		{
+		  LOG_INFO<<"A hit is matched to one track that is projected to two modules!"<<endm;
+		}
+	    }
+	  for(int iTrack = 0; iTrack < nTracks; iTrack++)
+	    {
+	      if(isMatchToSingleTrack) multiHitsCellsVec_temp[iTrack].matchFlag = 1;
+	      multiHitsCellsVec.push_back(multiHitsCellsVec_temp[iTrack]);
+	    }
+	}
+      else 
+	{
+	  LOG_WARN << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+	}
+
+      if(Debug())
+	{ 
+	  LOG_DEBUG << "D: backleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	  idVectorIter ij=trackIdVec.begin();
+	  while (ij != trackIdVec.end()) { LOG_DEBUG<< " " << *ij<<endm; ij++; }
+	}
+      tempVec = erasedVec;
+      multiHitsCellsVec_temp.clear();
+    }
+
+  if(Debug())
+    {
+      LOG_INFO<<"multiHitsCellsVec size="<<multiHitsCellsVec.size()<<endm;
+    }
+
+  /// ============================================
+  /// ===== assign hits to the closest track =====
+  mtdCellHitVector tempVec_2Trck = multiHitsCellsVec;
+  mtdCellHitVector erasedVec_2Trck = tempVec_2Trck;
+  while(tempVec_2Trck.size()!=0)
+    {
+      StructCellHit Cellhit;
+      Int_t ntracks = 0;
+      idVector vTrackId;
+      vector<StThreeVectorD> vPosition;
+      vector<Int_t> vchannel, vbackleg, vmodule, vcell;
+      vector<Int_t> vflag;
+      vector<Float_t> vzhit, vyhit;
+      vector<pairD> vtot; 
+      vector<pairD> vtdc; 
+      vector<Double_t> vtheta;
+      vector<Double_t> vpathLength;
+      vector<Double_t> vexpTof2MTD;
+      vector<Int_t> vindex2MtdHit;
+
+      mtdCellHitVectorIter temp_Iter=tempVec_2Trck.begin();
+      mtdCellHitVectorIter erased_Iter=erasedVec_2Trck.begin();
+
+      while(erased_Iter!= erasedVec_2Trck.end()) 
+	{
+	  if(temp_Iter->backleg == erased_Iter->backleg &&
+	     temp_Iter->module == erased_Iter->module &&
+	     temp_Iter->cell == erased_Iter->cell) 
+	    {
+	      ntracks++;
+	      vbackleg.push_back(erased_Iter->backleg);
+	      vmodule.push_back(erased_Iter->module);
+	      vcell.push_back(erased_Iter->cell);
+	      vflag.push_back(erased_Iter->matchFlag);
+	      vPosition.push_back(erased_Iter->hitPosition);
+	      vTrackId.push_back(erased_Iter->trackIdVec.back());
+	      vzhit.push_back(erased_Iter->zhit);
+	      vyhit.push_back(erased_Iter->yhit);
+	      vtot.push_back(erased_Iter->tot);
+	      vtdc.push_back(erased_Iter->leadingEdgeTime);
+	      vindex2MtdHit.push_back(erased_Iter->index2MtdHit);
+	      vtheta.push_back(erased_Iter->theta);
+	      vpathLength.push_back(erased_Iter->pathLength);
+	      vexpTof2MTD.push_back(erased_Iter->expTof2MTD);
+	      if(Debug())
+		{
+		  LOG_INFO<<"ntracks ="<<ntracks<<endm;
+		  LOG_INFO<<"tack INFO: "<<vzhit[ntracks-1]<<" "<<vyhit[ntracks-1]<<endm;
+		  LOG_INFO<<"hits INFO: "<<vbackleg[ntracks-1]<<" "<<vmodule[ntracks-1]<<" "<<vcell[ntracks-1]<<endm;
+		}
+	      erasedVec_2Trck.erase(erased_Iter);
+	      erased_Iter--;
+	    }
+	  erased_Iter++;
+	}// end of the multitrack finding loop
+
+      if (ntracks<2)
+	{
+	  LOG_INFO<<"What? one hit just match with one track in multimatch!!!!!!! "<<endm;
+	}
+
+      if(ntracks>1)
+	{
+	  // assign the closest track as the match
+
+	  Int_t thiscandidate = -99;
+	  Int_t thisMatchFlag = 0;
+	  Float_t maxR = 9999.;
+
+	  for(int j=0; j<ntracks; j++) 
+	    {
+	    Int_t   ibackleg = vbackleg[j];
+	    Int_t   imodule  = vmodule[j];
+	    Int_t   icell    = vcell[j];
+
+	    Float_t trkLocalY = vyhit[j];
+	    Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+	    Float_t dy = fabs(trkLocalY-hitLocalY);
+
+	    Float_t trkGlobalZ = vPosition[j].z();
+	    Float_t hitGlobalZ = getMtdHitGlobalZ(vtdc[j].first, vtdc[j].second, imodule);
+	    Float_t dz = fabs(trkGlobalZ-hitGlobalZ);
+
+	    Float_t rr = 9999.;
+	    if(mCosmicFlag) rr = dy;
+	    else            rr = sqrt(dy*dy+dz*dz);
+	    if(Debug())
+	      {
+		LOG_INFO<<"hit information::"<<" "<<ibackleg<<" "<<imodule<<" "<<icell<<endm;
+		LOG_INFO<<"track information::"<<" "<<vTrackId[j] << "  " << trkGlobalZ<<" "<<trkLocalY<<endm;
+		LOG_INFO<<"distance::"<<" "<<dz<<" "<<dy<<" "<<rr<<endm;
+	      }
+
+	    if(rr<maxR)
+	      {
+		maxR = rr; 
+		thiscandidate = j;
+		thisMatchFlag = (vflag[j]==1? 1 : 7);
+	      }
+	    }
+
+	  if (thiscandidate>=0) 
+	    {
+	      Cellhit.backleg = vbackleg[thiscandidate];
+	      Cellhit.module = vmodule[thiscandidate];
+	      Cellhit.cell = vcell[thiscandidate];
+	      Cellhit.trackIdVec.push_back(vTrackId[thiscandidate]);
+	      Cellhit.hitPosition = vPosition[thiscandidate];
+	      Cellhit.matchFlag = thisMatchFlag;
+	      Cellhit.zhit = vzhit[thiscandidate];
+	      Cellhit.yhit = vyhit[thiscandidate];
+	      Cellhit.tot = vtot[thiscandidate];
+	      Cellhit.leadingEdgeTime = vtdc[thiscandidate];
+	      Cellhit.index2MtdHit = vindex2MtdHit[thiscandidate];
+	      Cellhit.theta = vtheta[thiscandidate];
+	      Cellhit.pathLength = vpathLength[thiscandidate];
+	      Cellhit.expTof2MTD = vexpTof2MTD[thiscandidate];
+	      singleHitCellsVec.push_back(Cellhit);
+	      if(Debug())
+		{
+		  LOG_INFO<<"flag = "<<thisMatchFlag<<endm;
+		  LOG_INFO<<"Pick track " << vTrackId[thiscandidate] << " with local z" << vzhit[thiscandidate] << endm;
+		}
+	    }
+	}
+      tempVec_2Trck = erasedVec_2Trck;
+    }// end of the multihitscellsvec loop	
 }
 
 
 /// Sort and in the case of tracks with multiple matched cells pick the best candidate and set the MatchFlag
 void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mtdCellHitVector& finalMatchedCellsVec){
-	mtdCellHitVector tempVec = singleHitCellsVec;
-
-	if(mHisto) {
-		mCellsPerEventMatch2->Fill(tempVec.size());
-		for(unsigned int ii=0;ii<tempVec.size();ii++) {
-			mTracksPerCellMatch2->Fill(tempVec[ii].trackIdVec.size());
-			mDaqOccupancyMatch2->Fill((tempVec[ii].module-1)*gMtdNCells+tempVec[ii].cell);
-			Float_t ycenter = mMtdGeom->GetGeoModule(tempVec[ii].backleg,tempVec[ii].module)->GetCellLocalYCenter(tempVec[ii].cell);
-			Float_t dy = tempVec[ii].yhit-ycenter;
-			Float_t dz = tempVec[ii].zhit;
-			mDeltaHitMatch2->Fill(dy, dz);
+  mtdCellHitVector tempVec = singleHitCellsVec;
+  mtdCellHitVector erasedVec = tempVec;
+  
+  while (tempVec.size() != 0) 
+    {
+      StructCellHit cellHit;
+      Int_t nCells = 0;
+      idVector vTrackId;
+      vector<StThreeVectorD> vPosition;
+      vector<Int_t> vchannel, vbackleg, vmodule, vcell;
+      vector<Float_t> vzhit, vyhit;
+      vector<pairD> vtot; 
+      vector<pairD> vtdc; 
+      vector<Double_t> vtheta;
+      vector<Double_t> vpathLength;
+      vector<Double_t> vexpTof2MTD;
+      vector<Int_t> vindex2MtdHit;
+      vector<Int_t> vflag;
+      mtdCellHitVectorIter tempIter=tempVec.begin();
+      mtdCellHitVectorIter erasedIter=erasedVec.begin();
+      while(erasedIter!= erasedVec.end()) 
+	{
+	  if(tempIter->trackIdVec.back() == erasedIter->trackIdVec.back())
+	    {
+	      nCells++;
+	      vbackleg.push_back(erasedIter->backleg);
+	      vmodule.push_back(erasedIter->module);
+	      vcell.push_back(erasedIter->cell);
+	      vPosition.push_back(erasedIter->hitPosition);
+	      vTrackId.push_back(erasedIter->trackIdVec.back());
+	      vzhit.push_back(erasedIter->zhit);
+	      vyhit.push_back(erasedIter->yhit);
+	      vtot.push_back(erasedIter->tot);
+	      vtdc.push_back(erasedIter->leadingEdgeTime);
+	      vindex2MtdHit.push_back(erasedIter->index2MtdHit);
+	      vtheta.push_back(erasedIter->theta);
+	      vflag.push_back(erasedIter->matchFlag);
+	      vpathLength.push_back(erasedIter->pathLength);
+	      vexpTof2MTD.push_back(erasedIter->expTof2MTD);
+	      if(Debug())
+		{
+		  LOG_INFO<<"flag 1 ::"<<" "<<nCells<<" "<<erasedIter->matchFlag<<endm;
 		}
+
+	      erasedVec.erase(erasedIter);
+	      --erasedIter;
+	    }
+	  ++erasedIter;
 	}
+      
+      if (nCells==1)
+	{
+	  // for singly hit cell, copy data in singleHitCellsVec
+	  cellHit.backleg = vbackleg[0];
+	  cellHit.module = vmodule[0];
+	  cellHit.cell = vcell[0];
+	  cellHit.trackIdVec.push_back(vTrackId[0]);
+	  cellHit.hitPosition = vPosition[0];
+	  cellHit.matchFlag = vflag[0]; 
+	  cellHit.zhit = vzhit[0];
+	  cellHit.yhit = vyhit[0];
+	  cellHit.tot = vtot[0];
+	  cellHit.leadingEdgeTime = vtdc[0];
+	  cellHit.index2MtdHit = vindex2MtdHit[0];
+	  cellHit.theta = vtheta[0];
+	  cellHit.pathLength = vpathLength[0];
+	  cellHit.expTof2MTD = vexpTof2MTD[0];
+	  finalMatchedCellsVec.push_back(cellHit);
 
-	mtdCellHitVector erasedVec = tempVec;
+	  if(Debug())
+	    {
+	      LOG_INFO<<"flag 2::"<<vflag[0]<<endm;
+	    }
 
-	while (tempVec.size() != 0) {
-		StructCellHit cellHit;
-		Int_t nCells = 0;
-		idVector vTrackId;
-		vector<StThreeVectorD> vPosition;
-		vector<Int_t> vchannel, vbackleg, vmodule, vcell;
-		vector<Float_t> vzhit, vyhit;
-		vector<pairD> vtot; 
-		vector<pairD> vtdc; 
-		vector<Double_t> vtheta;
-		vector<Double_t> vpathLength;
-		vector<Double_t> vexpTof2MTD;
-		vector<Int_t> vindex2MtdHit;
-		vector<Int_t> vflag;
-		Int_t thisMatchFlag_tem(0);
-		mtdCellHitVectorIter tempIter=tempVec.begin();
-		mtdCellHitVectorIter erasedIter=erasedVec.begin();
-		while(erasedIter!= erasedVec.end()) {
-			if(tempIter->trackIdVec.back() == erasedIter->trackIdVec.back()) {
-				nCells++;
-				vbackleg.push_back(erasedIter->backleg);
-				vmodule.push_back(erasedIter->module);
-				vcell.push_back(erasedIter->cell);
-				vPosition.push_back(erasedIter->hitPosition);
-				vTrackId.push_back(erasedIter->trackIdVec.back());
-				vzhit.push_back(erasedIter->zhit);
-				vyhit.push_back(erasedIter->yhit);
-				vtot.push_back(erasedIter->tot);
-				vtdc.push_back(erasedIter->leadingEdgeTime);
-				vindex2MtdHit.push_back(erasedIter->index2MtdHit);
-				vtheta.push_back(erasedIter->theta);
-				vflag.push_back(erasedIter->matchFlag);
-				vpathLength.push_back(erasedIter->pathLength);
-				vexpTof2MTD.push_back(erasedIter->expTof2MTD);
-				if(Debug())
-				{
-					LOG_INFO<<"flag 1 ::"<<" "<<nCells<<" "<<erasedIter->matchFlag<<endm;
-				}
-				erasedVec.erase(erasedIter);
-				--erasedIter;
-			}
-			++erasedIter;
-		}
-
-		if (nCells==1){
-			// for singly hit cell, copy data in singleHitCellsVec
-			cellHit.backleg = vbackleg[0];
-			cellHit.module = vmodule[0];
-			cellHit.cell = vcell[0];
-			cellHit.trackIdVec.push_back(vTrackId[0]);
-			cellHit.hitPosition = vPosition[0];
-			cellHit.matchFlag = 1; 
-			cellHit.zhit = vzhit[0];
-			cellHit.yhit = vyhit[0];
-			cellHit.tot = vtot[0];
-			cellHit.leadingEdgeTime = vtdc[0];
-			cellHit.index2MtdHit = vindex2MtdHit[0];
-			cellHit.theta = vtheta[0];
-			cellHit.pathLength = vpathLength[0];
-			cellHit.expTof2MTD = vexpTof2MTD[0];
-
-			if(Debug())
-			{
-				LOG_INFO<<"flag 2::"<<vflag[0]<<endm;
-			}
-			if(cellHit.matchFlag==7)
-				finalMatchedCellsVec.push_back(cellHit);	
-			else
-			{
-				cellHit.matchFlag = 1; 
-				finalMatchedCellsVec.push_back(cellHit);
-			}
-
-			// debugging output
-			if(Debug()) {
-				LOG_DEBUG << "E: ibackleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
-				idVectorIter ij=vTrackId.begin();
-				while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
-				LOG_DEBUG << endm;
-			}
-		}
-		else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
-			Int_t thiscandidate(-99);
-			Int_t thisMatchFlag(0);
-
-			// sort on tot
-			vector<Int_t> ttCandidates;
-			for (Int_t i=0;i<nCells;i++) {
-				pair<Double_t,Double_t> tt = vtot[i];
-				if(tt.first<40.) {    // open the ToT cut to 40 ns
-					ttCandidates.push_back(i);
-				}
-			}
-			if (ttCandidates.size()==1) {
-				if(Debug())
-				{
-					LOG_INFO<<"flag 3 ::"<<vflag[ttCandidates[0]]<<endm;
-				}
-				if(vflag[ttCandidates[0]]==7)
-				{
-					thiscandidate = ttCandidates[0];
-					thisMatchFlag = 8;
-					thisMatchFlag_tem = thisMatchFlag;
-				}
-				else
-				{
-					thiscandidate = ttCandidates[0];
-					thisMatchFlag = 2;
-					thisMatchFlag_tem = thisMatchFlag;
-				}
-			} else if (ttCandidates.size()>1){  // sort on hitposition
-				Float_t ss(9999.);
-				vector<Int_t> ssCandidates;
-				for(size_t j=0;j<ttCandidates.size();j++) {
-					Int_t   ibackleg = vbackleg[ttCandidates[j]];
-					Int_t   imodule = vmodule[ttCandidates[j]];
-					Int_t   icell = vcell[ttCandidates[j]];
-					Float_t yy = vyhit[ttCandidates[j]];
-					Float_t ycell = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
-					Float_t ll = fabs(yy-ycell);
-					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
-					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
-					Float_t zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
-
-					Float_t zz = vzhit[ttCandidates[j]];
-					Float_t ww = fabs(zz-zcell);
-					Float_t rr = 9999.;
-					if(mCosmicFlag) rr = ll;
-					else rr = sqrt(ll*ll+ww*ww);
-					if(rr<ss){
-						ss = rr; 
-						ssCandidates.clear();
-						ssCandidates.push_back(ttCandidates[j]);
-					}else if(rr==ss)
-						ssCandidates.push_back(ttCandidates[j]);
-				}
-				if (ssCandidates.size()>=1){
-					if(Debug())
-					{
-						LOG_INFO<<"flag 4::"<<ssCandidates.size()<<" "<<vflag[ttCandidates[0]]<<endm;
-					}
-					if(vflag[ssCandidates[0]]==7)
-					{
-						thiscandidate = ssCandidates[0];
-						thisMatchFlag = 9;
-						thisMatchFlag_tem = thisMatchFlag;
-					}
-					else
-					{
-						thiscandidate = ssCandidates[0];
-						thisMatchFlag = 3;
-						thisMatchFlag_tem = thisMatchFlag;
-					}
-				}
-			}
-
-			if (thiscandidate>=0) {
-				cellHit.backleg = vbackleg[thiscandidate];
-				cellHit.module = vmodule[thiscandidate];
-				cellHit.cell = vcell[thiscandidate];
-				cellHit.trackIdVec.push_back(vTrackId[thiscandidate]);
-				cellHit.hitPosition = vPosition[thiscandidate];
-				cellHit.matchFlag = thisMatchFlag;
-				cellHit.zhit = vzhit[thiscandidate];
-				cellHit.yhit = vyhit[thiscandidate];
-				cellHit.tot = vtot[thiscandidate];
-				cellHit.leadingEdgeTime = vtdc[thiscandidate];
-				cellHit.index2MtdHit = vindex2MtdHit[thiscandidate];
-				cellHit.theta = vtheta[thiscandidate];
-				cellHit.pathLength = vpathLength[thiscandidate];
-				cellHit.expTof2MTD = vexpTof2MTD[thiscandidate];
-
-				finalMatchedCellsVec.push_back(cellHit);
-
-				// debugging output
-				if(Debug()) { LOG_DEBUG << "E: ibackleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
-			}
-
-		} else {
-			LOG_WARN << "E: no cells belong to this track ... should not happen!" << endm;
-		}
-
-		tempVec = erasedVec;
+	  // debugging output
+	  if(Debug()) 
+	    {
+	      LOG_DEBUG << "E: ibackleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	      idVectorIter ij=vTrackId.begin();
+	      while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
+	      LOG_DEBUG << endm;
+	    }
 	}
+      else if (nCells>1)
+	{
+	  // for multiple hit cells  find the most likely candidate.
+	  Int_t thiscandidate = -99;
+	  Int_t thisMatchFlag = 0;
 
-	// end of Sect.E
+	  // sort on tot
+	  vector<Int_t> ttCandidates;
+	  for (Int_t i=0;i<nCells;i++)
+	    {
+	      pair<Double_t,Double_t> tt = vtot[i];
+	      if(tt.first<40.) ttCandidates.push_back(i);
+	    }
+	  if (ttCandidates.size()==1) 
+	    {
+	      if(Debug())
+		{
+		  LOG_INFO<<"flag 3 ::"<<vflag[ttCandidates[0]]<<endm;
+		}
+	      thiscandidate = ttCandidates[0];
+	      thisMatchFlag = vflag[ttCandidates[0]] + 1;
+	    } 
+	  else if (ttCandidates.size()>1)
+	    {  // sort on hitposition
+	      Float_t ss(9999.);
+	      vector<Int_t> ssCandidates;
+	      for(size_t j=0;j<ttCandidates.size();j++) 
+		{
+		  Int_t   ibackleg = vbackleg[ttCandidates[j]];
+		  Int_t   imodule = vmodule[ttCandidates[j]];
+		  Int_t   icell = vcell[ttCandidates[j]];
+
+		  Float_t trkLocalY = vyhit[ttCandidates[j]];
+		  Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+		  Float_t dy = fabs(trkLocalY-hitLocalY);
+		  
+		  Float_t trkGlobalZ = vPosition[ttCandidates[j]].z();
+		  Float_t hitGlobalZ = getMtdHitGlobalZ(vtdc[ttCandidates[j]].first, vtdc[ttCandidates[j]].second, imodule);
+		  Float_t dz = fabs(trkGlobalZ-hitGlobalZ);
+
+		  Float_t rr = 9999.;
+		  if(mCosmicFlag) rr = dy;
+		  else rr = sqrt(dy*dy+dz*dz);
+		  if(rr<ss)
+		    {
+		      ss = rr; 
+		      ssCandidates.clear();
+		      ssCandidates.push_back(ttCandidates[j]);
+		    }
+		  else if(rr==ss)
+		    ssCandidates.push_back(ttCandidates[j]);
+		}
+	      if (ssCandidates.size()>=1)
+		{
+		  if(Debug())
+		    {
+		      LOG_INFO<<"flag 4::"<<ssCandidates.size()<<" "<<vflag[ttCandidates[0]]<<endm;
+		    }
+		  thiscandidate = ssCandidates[0];
+		  thisMatchFlag = vflag[ssCandidates[0]]+2;
+		}
+	    }
+
+	  if (thiscandidate>=0) 
+	    {
+	      cellHit.backleg = vbackleg[thiscandidate];
+	      cellHit.module = vmodule[thiscandidate];
+	      cellHit.cell = vcell[thiscandidate];
+	      cellHit.trackIdVec.push_back(vTrackId[thiscandidate]);
+	      cellHit.hitPosition = vPosition[thiscandidate];
+	      cellHit.matchFlag = thisMatchFlag;
+	      cellHit.zhit = vzhit[thiscandidate];
+	      cellHit.yhit = vyhit[thiscandidate];
+	      cellHit.tot = vtot[thiscandidate];
+	      cellHit.leadingEdgeTime = vtdc[thiscandidate];
+	      cellHit.index2MtdHit = vindex2MtdHit[thiscandidate];
+	      cellHit.theta = vtheta[thiscandidate];
+	      cellHit.pathLength = vpathLength[thiscandidate];
+	      cellHit.expTof2MTD = vexpTof2MTD[thiscandidate];
+	      
+	      finalMatchedCellsVec.push_back(cellHit);
+	      
+	      // debugging output
+	      if(Debug()) { LOG_DEBUG << "E: ibackleg=" << cellHit.backleg << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
+	    }
+	}
+      else
+	{
+	  LOG_WARN << "E: no cells belong to this track ... should not happen!" << endm;
+	}
+      
+      tempVec = erasedVec;
+    }	// end of Sect.E
 }
 
 
@@ -1928,15 +1891,18 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		if (finalMatchedCellsVec[ii].trackIdVec.size()!=1)
 			LOG_WARN << "F: WHAT!?!  mult.matched cell in single cell list " << backleg << " " << module << " " << cell << endm;
 
-		Float_t ycenter = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
-		Float_t yLocal = finalMatchedCellsVec[ii].yhit;
-		Float_t zLocal = finalMatchedCellsVec[ii].zhit;
+		Float_t trkLocalY  = finalMatchedCellsVec[ii].yhit;
+		Float_t trkLocalZ  = finalMatchedCellsVec[ii].zhit;
+		Float_t trkGlobalZ = finalMatchedCellsVec[ii].hitPosition.z();
 
+		Float_t hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
 		Float_t LeTimeWest = finalMatchedCellsVec[ii].leadingEdgeTime.first;
 		Float_t LeTimeEast = finalMatchedCellsVec[ii].leadingEdgeTime.second;
-		Float_t fireZLocal = (LeTimeEast-LeTimeWest)/2./gMtdCellDriftV*1000.;
-		Float_t dy = finalMatchedCellsVec[ii].yhit - ycenter;
-		Float_t dz = finalMatchedCellsVec[ii].zhit - fireZLocal;
+		Float_t hitGlobalZ = getMtdHitGlobalZ(LeTimeWest, LeTimeEast, module);
+
+		Float_t dy = trkLocalY  - hitLocalY;
+		Float_t dz = trkGlobalZ - hitGlobalZ;
+
 
 		if(mHisto) {
 			mTracksPerCellMatch3->Fill(finalMatchedCellsVec[ii].trackIdVec.size());
@@ -1969,8 +1935,8 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 
 			StMuMtdPidTraits pidMtd = gTrack->mtdPidTraits();
 			pidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-			pidMtd.setYLocal(yLocal);
-			pidMtd.setZLocal(zLocal);
+			pidMtd.setYLocal(trkLocalY);
+			pidMtd.setZLocal(trkLocalZ);
 			pidMtd.setDeltaY(dy);
 			pidMtd.setDeltaZ(dz);
 			pidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
@@ -1990,8 +1956,8 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				pTrack->setIndex2MtdHit(finalMatchedCellsVec[ii].index2MtdHit);
 				StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
 				ppidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-				ppidMtd.setYLocal(yLocal);
-				ppidMtd.setZLocal(zLocal);
+				ppidMtd.setYLocal(trkLocalY);
+				ppidMtd.setZLocal(trkLocalZ);
 				ppidMtd.setDeltaY(dy);
 				ppidMtd.setDeltaZ(dz);
 				ppidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
@@ -2029,8 +1995,8 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			StMtdPidTraits *pidMtd = new StMtdPidTraits();
 			pidMtd->setMtdHit(mtdHit);
 			pidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-			pidMtd->setYLocal(yLocal);
-			pidMtd->setZLocal(zLocal);
+			pidMtd->setYLocal(trkLocalY);
+			pidMtd->setZLocal(trkLocalZ);
 			pidMtd->setDeltaY(dy);
 			pidMtd->setDeltaZ(dz);
 			pidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
@@ -2043,8 +2009,8 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				StMtdPidTraits *ppidMtd = new StMtdPidTraits();
 				ppidMtd->setMtdHit(mtdHit);
 				ppidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-				ppidMtd->setYLocal(yLocal);
-				ppidMtd->setZLocal(zLocal);
+				ppidMtd->setYLocal(trkLocalY);
+				ppidMtd->setZLocal(trkLocalZ);
 				ppidMtd->setDeltaY(dy);
 				ppidMtd->setDeltaZ(dz);
 				ppidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
@@ -2072,7 +2038,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			mMtdEvtData.gmTotWest[iTrk] = finalMatchedCellsVec[ii].tot.first;
 			mMtdEvtData.gmTotEast[iTrk] = finalMatchedCellsVec[ii].tot.second;
 			mMtdEvtData.gmLocalZ[iTrk] = finalMatchedCellsVec[ii].zhit;
-			mMtdEvtData.gmLocalY[iTrk] = finalMatchedCellsVec[ii].yhit - ycenter;
+			mMtdEvtData.gmLocalY[iTrk] = finalMatchedCellsVec[ii].yhit - hitLocalY;
 		}
 
 	}
@@ -2112,6 +2078,12 @@ bool StMtdMatchMaker::validTrack(MtdTrack mtt){
 	if (ratio < mMinFitPointsOverMax) return kFALSE;
 
 	return kTRUE;
+}
+
+/// calculate global z of the MTD hits based on its timing information
+Float_t StMtdMatchMaker::getMtdHitGlobalZ(Float_t leadingWestTime, Float_t leadingEastTime, Int_t module)
+{
+   return (module-3)*gMtdCellLength + (leadingEastTime - leadingWestTime)/2./gMtdCellDriftV*1e3;
 }
 
 
