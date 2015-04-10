@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.26 2015/04/10 18:25:59 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.27 2015/04/10 18:30:42 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.27  2015/04/10 18:30:42  marr
+ * Remove lines that are commented out
+ *
  * Revision 1.26  2015/04/10 18:25:59  marr
  * 1. Use global coordinates, instead of local ones, to calculate the distances
  * between projected track positions and MTD hits. Using local coordinates causes
@@ -576,8 +579,6 @@ Int_t StMtdMatchMaker::Finish(){
 
 /// Make: match extrapolated TPC tracks to MRPCs in the MTD trays.
 Int_t StMtdMatchMaker::Make(){
-
-  //LOG_INFO<<" New Event =============================="<<endm;
 
 	mEvent=(StEvent *) GetInputDS("StEvent");
 	if(mEvent){
@@ -1291,8 +1292,6 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		allCellsHitVec.push_back(cellHit);
 		nCells++;
 
-		//printf("Add track %d, localz = %2.3f, (bl,mod,cell)=(%d,%d,%d)\n",iNode,ol.z(),iBL,iMod,iCell);
-
 		if(Debug()){
 			if(idVec.size()>1) LOG_INFO<<"iBL:iMod:iCell="<<iBL<<" "<<iMod<<" "<<iCell<<endm;
 		}
@@ -1421,7 +1420,6 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				cellHit.pathLength = proIter->pathLength;
 				cellHit.expTof2MTD = proIter->expTof2MTD;
 				matchHitCellsVec.push_back(cellHit);
-				//printf("Associate track %d with (bl,mod,cell)=(%d,%d,%d), localz=%2.3f\n",proIter->trackIdVec[0],daqIter->backleg,daqIter->module,daqIter->cell,proIter->zhit);
 			}
 		} 
 	} //end {sec. C}'
