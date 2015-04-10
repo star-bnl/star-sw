@@ -121,7 +121,7 @@ class StFmsFastSimulatorMaker : public StMaker {
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $ built "__DATE__" "__TIME__;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $ built " __DATE__ " " __TIME__;
   return cvs;
 }
 

@@ -46,7 +46,7 @@ class StFpsRawDaqReader : public StMaker {
 // inline functions
 inline void StFpsRawDaqReader::setFilename( std::string filename ){ mDaqFileName = filename; };
 inline const char *StFpsRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.2 2015/02/28 02:58:56 akio Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.2 2015/02/28 02:58:56 akio Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 };
 

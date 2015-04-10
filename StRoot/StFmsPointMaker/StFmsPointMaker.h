@@ -127,7 +127,7 @@ class StFmsPointMaker : public StMaker {
   TowerMap mTowers;  //!< One for each sub-detector, keyed by detector ID
   int mObjectCount;  //!< Object count in event for use with TRef
 
-  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:"__DATE__" "__TIME__ ; return cvs;}
+  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
 };
 #endif  // STROOT_STFMSPOINTMAKER_STFMSPOINTMAKER_H_
