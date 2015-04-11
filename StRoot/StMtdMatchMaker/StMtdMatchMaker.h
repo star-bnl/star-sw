@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.11 2015/04/10 18:21:38 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.11  2015/04/10 18:21:38  marr
+ * Comment on the meaning of different values of matchFlag
+ *
  * Revision 1.10  2014/09/09 14:00:39  marr
  * Fill the expected time-of-flight calculated via track extrapolation
  *
@@ -269,6 +272,9 @@ class StMtdMatchMaker: public StMaker
 		bool validTrack(StTrack *track);
 		bool validTrack(StMuTrack *track);
 
+                // calcuate global z of MTD hit
+                Float_t getMtdHitGlobalZ(Float_t leadingWestTime, Float_t leadingEastTime, Int_t module);
+
 
 	protected:
 		string		 mOutName;
@@ -372,7 +378,12 @@ class StMtdMatchMaker: public StMaker
 			Int_t cell;
 			StThreeVector<double> hitPosition;
 			idVector trackIdVec;
-			Int_t matchFlag;  // 1,2,3 for singly matched hits; 2 is for 1 track associated with 2 hits, drop the smaller tot one; 3 for same tots drop the larger distance hit.  7,8,9 for multi track matched hits, closest track is assigned.
+		        Int_t matchFlag;  // 1: one hit - one track 
+		                          // 2: multiple hits - one track; only 1 hit left after tot cut 
+		                          // 3: mulitple hits - one track; pick the cloest hit after tot cut 
+		                          // 7: one hit - multiple tracks; pick the closest track
+		                          // 8: multiple hits - multiple tracks; only 1 hit left after tot cut, pick the closest track
+		                          // 9: mulitple hits - multiple tracks; pick the closest track and cloest hit after tot cut 
 			Float_t zhit;
 			Float_t yhit;
 			pair<Double_t,Double_t> tot;
@@ -428,7 +439,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.11 2015/04/10 18:21:38 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
