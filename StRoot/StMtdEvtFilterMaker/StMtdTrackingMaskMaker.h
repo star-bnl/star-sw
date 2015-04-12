@@ -52,7 +52,7 @@ class StMtdTrackingMaskMaker : public StMaker {
   IntVec   findEastTpcSectors(const double hit_phi);
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__ " "__TIME__ ; return cvs;}
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
   Int_t    processStEvent();
