@@ -54,7 +54,7 @@ class StMtdEvtFilterMaker : public StMaker {
   { mMinNsigmaPi = min; mMaxNsigmaPi = max; }
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__ " "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
 
   typedef vector<int>  IntVec;
