@@ -182,7 +182,7 @@ class ComponentBase {
   void DisableDebugging() { debug = false; }
 
  protected:
-  std::string className;
+  std::string m_className;
 
   GeometryBase* theGeometry;
 

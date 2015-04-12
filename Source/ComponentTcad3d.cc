@@ -17,7 +17,7 @@ ComponentTcad3d::ComponentTcad3d()
       m_nElements(0),
       m_lastElement(0) {
 
-  className = "ComponentTcad3d";
+  m_className = "ComponentTcad3d";
 
   m_regions.clear();
   m_vertices.clear();
@@ -34,7 +34,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   m = 0;
   // Make sure the field map has been loaded.
   if (!ready) {
-    std::cerr << className << "::ElectricField:\n";
+    std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Field map is not available for interpolation.\n";
     status = -10;
     return;
@@ -95,7 +95,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   if (x < m_xMinBoundingBox || x > m_xMaxBoundingBox || y < m_yMinBoundingBox ||
       y > m_yMaxBoundingBox || z < m_zMinBoundingBox || z > m_zMaxBoundingBox) {
     if (debug) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") is outside the bounding box.\n";
     }
@@ -157,7 +157,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
       }
       break;
     default:
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Unknown element type (" << m_elements[i].type << ").\n";
       status = -11;
       return;
@@ -219,7 +219,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
         }
         break;
       default:
-        std::cerr << className << "::ElectricField:\n";
+        std::cerr << m_className << "::ElectricField:\n";
         std::cerr << "    Invalid element type (" << m_elements[i].type
                   << ").\n";
         status = -11;
@@ -229,7 +229,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   }
   // Point is outside the mesh.
   if (debug) {
-    std::cerr << className << "::ElectricField:\n";
+    std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Point (" << x << ", " << y << ", " << z
               << ") is outside the mesh.\n";
   }
@@ -251,7 +251,7 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
   m = 0;
   // Make sure the field map has been loaded.
   if (!ready) {
-    std::cerr << className << "::GetMedium:\n";
+    std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
     return false;
   }
@@ -322,7 +322,7 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
       }
       break;
     default:
-      std::cerr << className << "::GetMedium:\n";
+      std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Invalid element type (" << m_elements[i].type << ").\n";
       return false;
       break;
@@ -349,7 +349,7 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
         }
         break;
       default:
-        std::cerr << className << "::GetMedium:\n";
+        std::cerr << m_className << "::GetMedium:\n";
         std::cerr << "    Invalid element type (" << m_elements[i].type
                   << ").\n";
         return false;
@@ -366,14 +366,14 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   ready = false;
   // Import mesh data from .grd file.
   if (!LoadGrid(gridfilename)) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Importing mesh data failed.\n";
     return false;
   }
 
   // Import electric field and potential from .dat file.
   if (!LoadData(datafilename)) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Importing electric field and potential failed.\n";
     return false;
   }
@@ -411,7 +411,7 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
     }
   }
 
-  std::cout << className << "::Initialise:\n";
+  std::cout << m_className << "::Initialise:\n";
   std::cout << "    Bounding box:\n";
   std::cout << "      " << m_xMinBoundingBox << " < x [cm] < "
             << m_xMaxBoundingBox << "\n";
@@ -477,7 +477,7 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   }
 
   if (nDegenerate > 0) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    The following elements are degenerate:\n";
     for (int i = nDegenerate; i--;) {
       std::cerr << "      " << degenerateElements[i] << "\n";
@@ -486,7 +486,7 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   }
 
   if (nLoose > 0) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    The following elements are not part of any region:\n";
     for (int i = nLoose; i--;) {
       std::cerr << "      " << looseElements[i] << "\n";
@@ -494,7 +494,7 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
     ok = false;
   }
 
-  std::cout << className << "::Initialise:\n";
+  std::cout << m_className << "::Initialise:\n";
   std::cout << "    Number of regions: " << m_nRegions << "\n";
   for (int i = 0; i < m_nRegions; ++i) {
     std::cout << "      " << i << ": " << m_regions[i].name << ", "
@@ -588,18 +588,18 @@ void ComponentTcad3d::PrintRegions() {
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    std::cerr << className << "::PrintRegions:\n";
+    std::cerr << m_className << "::PrintRegions:\n";
     std::cerr << "    Field map not yet initialised.\n";
     return;
   }
 
   if (m_nRegions < 0) {
-    std::cerr << className << "::PrintRegions:\n";
+    std::cerr << m_className << "::PrintRegions:\n";
     std::cerr << "    No regions are currently defined.\n";
     return;
   }
 
-  std::cout << className << "::PrintRegions:\n";
+  std::cout << m_className << "::PrintRegions:\n";
   std::cout << "    Currently " << m_nRegions << " regions are defined.\n";
   std::cout << "      Index  Name      Medium\n";
   for (int i = 0; i < m_nRegions; ++i) {
@@ -620,7 +620,7 @@ void ComponentTcad3d::PrintRegions() {
 void ComponentTcad3d::GetRegion(const int i, std::string& name, bool& active) {
 
   if (i < 0 || i >= m_nRegions) {
-    std::cerr << className << "::GetRegion:\n";
+    std::cerr << m_className << "::GetRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
@@ -631,7 +631,7 @@ void ComponentTcad3d::GetRegion(const int i, std::string& name, bool& active) {
 void ComponentTcad3d::SetDriftRegion(const int i) {
 
   if (i < 0 || i >= m_nRegions) {
-    std::cerr << className << "::SetDriftRegion:\n";
+    std::cerr << m_className << "::SetDriftRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
@@ -641,7 +641,7 @@ void ComponentTcad3d::SetDriftRegion(const int i) {
 void ComponentTcad3d::UnsetDriftRegion(const int i) {
 
   if (i < 0 || i >= m_nRegions) {
-    std::cerr << className << "::UnsetDriftRegion:\n";
+    std::cerr << m_className << "::UnsetDriftRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
@@ -651,13 +651,13 @@ void ComponentTcad3d::UnsetDriftRegion(const int i) {
 void ComponentTcad3d::SetMedium(const int i, Medium* medium) {
 
   if (i < 0 || i >= m_nRegions) {
-    std::cerr << className << "::SetMedium:\n";
+    std::cerr << m_className << "::SetMedium:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
 
   if (medium == 0) {
-    std::cerr << className << "::SetMedium:\n";
+    std::cerr << m_className << "::SetMedium:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
   }
@@ -668,7 +668,7 @@ void ComponentTcad3d::SetMedium(const int i, Medium* medium) {
 bool ComponentTcad3d::GetMedium(const int i, Medium*& m) const {
 
   if (i < 0 || i >= m_nRegions) {
-    std::cerr << className << "::GetMedium:\n";
+    std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return false;
   }
@@ -682,7 +682,7 @@ bool ComponentTcad3d::GetElement(const int i, double& vol, double& dmin,
                                  double& dmax, int& type) {
 
   if (i < 0 || i >= m_nElements) {
-    std::cerr << className << "::GetElement:\n";
+    std::cerr << m_className << "::GetElement:\n";
     std::cerr << "    Element index (" << i << ") out of range.\n";
     return false;
   }
@@ -803,7 +803,7 @@ bool ComponentTcad3d::GetElement(const int i, double& vol, double& dmin,
       }
     }
   } else {
-    std::cerr << className << "::GetElement:\n";
+    std::cerr << m_className << "::GetElement:\n";
     std::cerr << "    Unexpected element type (" << type << ").\n";
     return false;
   }
@@ -831,7 +831,7 @@ bool ComponentTcad3d::GetNode(const int i, double& x, double& y, double& z,
                               double& v, double& ex, double& ey, double& ez) {
 
   if (i < 0 || i >= m_nVertices) {
-    std::cerr << className << "::GetNode:\n";
+    std::cerr << m_className << "::GetNode:\n";
     std::cerr << "    Node index (" << i << ") out of range.\n";
     return false;
   }
@@ -851,7 +851,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
   std::ifstream datafile;
   datafile.open(datafilename.c_str(), std::ios::in);
   if (!datafile) {
-    std::cerr << className << "::LoadData:\n";
+    std::cerr << m_className << "::LoadData:\n";
     std::cerr << "    Could not open file " << datafilename << ".\n";
     return false;
   }
@@ -884,7 +884,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
       pEq = line.find('=');
       if (pEq == std::string::npos) {
         // No "=" found.
-        std::cerr << className << "::LoadData:\n";
+        std::cerr << m_className << "::LoadData:\n";
         std::cerr << "    Error reading file " << datafilename << ".\n";
         std::cerr << "    Line:\n";
         std::cerr << "    " << line << "\n";
@@ -907,7 +907,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
         pKet = line.find(']');
         if (pKet < pBra || pBra == std::string::npos ||
             pKet == std::string::npos) {
-          std::cerr << className << "::LoadData:\n";
+          std::cerr << m_className << "::LoadData:\n";
           std::cerr << "    Error reading file " << datafilename << "\n";
           std::cerr << "    Line:\n";
           std::cerr << "    " << line << "\n";
@@ -929,7 +929,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
           }
         }
         if (index == -1) {
-          std::cerr << className << "::LoadData:\n";
+          std::cerr << m_className << "::LoadData:\n";
           std::cerr << "    Error reading file " << datafilename << "\n";
           std::cerr << "    Unknown region " << name << ".\n";
           continue;
@@ -940,7 +940,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
         pKet = line.find(')');
         if (pKet < pBra || pBra == std::string::npos ||
             pKet == std::string::npos) {
-          std::cerr << className << "::LoadData:\n";
+          std::cerr << m_className << "::LoadData:\n";
           std::cerr << "    Error reading file " << datafilename << "\n";
           std::cerr << "    Line:\n";
           std::cerr << "    " << line << "\n";
@@ -974,7 +974,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
           // Check if there is a mismatch between the number of m_vertices
           // and the number of potential values.
           if (ivertex >= m_nVertices) {
-            std::cerr << className << "::LoadData:\n";
+            std::cerr << m_className << "::LoadData:\n";
             std::cerr << "    Error reading file " << datafilename << "\n";
             std::cerr << "    Dataset has more values than "
                       << "there are vertices in region " << name << "\n";
@@ -996,7 +996,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
         pKet = line.find(']');
         if (pKet < pBra || pBra == std::string::npos ||
             pKet == std::string::npos) {
-          std::cerr << className << "::LoadData:\n";
+          std::cerr << m_className << "::LoadData:\n";
           std::cerr << "    Error reading file " << datafilename << ".\n";
           std::cerr << "    Line:\n";
           std::cerr << "    " << line << "\n";
@@ -1017,7 +1017,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
           }
         }
         if (index == -1) {
-          std::cerr << className << "::LoadData:\n";
+          std::cerr << m_className << "::LoadData:\n";
           std::cerr << "    Error reading file " << datafilename << "\n";
           std::cerr << "    Unknown region " << name << ".\n";
           continue;
@@ -1027,7 +1027,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
         pKet = line.find(')');
         if (pKet < pBra || pBra == std::string::npos ||
             pKet == std::string::npos) {
-          std::cerr << className << "::LoadData\n";
+          std::cerr << m_className << "::LoadData\n";
           std::cerr << "    Error reading file " << datafilename << "\n";
           std::cerr << "    Line:\n";
           std::cerr << "    " << line << "\n";
@@ -1058,7 +1058,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
             ++ivertex;
           }
           if (ivertex >= m_nVertices) {
-            std::cerr << className << "::LoadData\n"
+            std::cerr << m_className << "::LoadData\n"
                       << "    Error reading file " << datafilename << "\n"
                       << "    Dataset has more values than"
                       << " there are vertices in region " << name << ".\n";
@@ -1075,7 +1075,7 @@ bool ComponentTcad3d::LoadData(const std::string datafilename) {
     }
   }
   if (datafile.fail() && !datafile.eof()) {
-    std::cerr << className << "::LoadData\n";
+    std::cerr << m_className << "::LoadData\n";
     std::cerr << "    Error reading file " << datafilename << "\n";
     datafile.close();
     Cleanup();
@@ -1097,7 +1097,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
   std::ifstream gridfile;
   gridfile.open(gridfilename.c_str(), std::ios::in);
   if (!gridfile) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not open file " << gridfilename << ".\n";
     return false;
   }
@@ -1124,7 +1124,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       pEq = line.find('=');
       if (pEq == std::string::npos) {
         // No "=" sign found.
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read number of regions.\n";
         Cleanup();
         gridfile.close();
@@ -1140,7 +1140,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
   }
   if (gridfile.eof()) {
     // Reached end of file.
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find entry 'nb_regions' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
@@ -1148,7 +1148,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     return false;
   } else if (gridfile.fail()) {
     // Error reading from the file.
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1163,7 +1163,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
   }
 
   if (debug) {
-    std::cout << className << "::LoadGrid:\n";
+    std::cout << m_className << "::LoadGrid:\n";
     std::cout << "    Found " << m_nRegions << " regions.\n";
   }
 
@@ -1181,7 +1181,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets [].
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read region names.\n";
         Cleanup();
         gridfile.close();
@@ -1201,7 +1201,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
   }
   if (gridfile.eof()) {
     // Reached end of file.
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find entry 'regions' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
@@ -1209,7 +1209,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     return false;
   } else if (gridfile.fail()) {
     // Error reading from the file.
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1231,7 +1231,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets [].
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read number of vertices.\n";
         Cleanup();
         gridfile.close();
@@ -1255,14 +1255,14 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     }
   }
   if (gridfile.eof()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find section 'Vertices' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
     gridfile.close();
     return false;
   } else if (gridfile.fail()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1288,7 +1288,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets ()
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read number of edges.\n";
         Cleanup();
         gridfile.close();
@@ -1309,14 +1309,14 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     }
   }
   if (gridfile.eof()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find section 'Edges' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
     gridfile.close();
     return false;
   } else if (gridfile.fail()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1328,7 +1328,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     // Make sure the indices of the edge endpoints are not out of range.
     if (edgeP1[i] < 0 || edgeP1[i] >= m_nVertices || edgeP2[i] < 0 ||
         edgeP2[i] >= m_nVertices) {
-      std::cerr << className << "::LoadGrid:\n";
+      std::cerr << m_className << "::LoadGrid:\n";
       std::cerr << "    Vertex index of edge " << i << " out of range.\n";
       Cleanup();
       gridfile.close();
@@ -1336,7 +1336,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     }
     // Make sure the edge is non-degenerate.
     if (edgeP1[i] == edgeP2[i]) {
-      std::cerr << className << "::LoadGrid:\n";
+      std::cerr << m_className << "::LoadGrid:\n";
       std::cerr << "    Edge " << i << " is degenerate.\n";
       Cleanup();
       gridfile.close();
@@ -1362,7 +1362,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets ()
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read number of faces.\n";
         Cleanup();
         gridfile.close();
@@ -1377,7 +1377,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       for (int j = 0; j < nFaces; ++j) {
         gridfile >> faces[j].type;
         if (faces[j].type != 3 && faces[j].type != 4) {
-          std::cerr << className << "::LoadGrid:\n";
+          std::cerr << m_className << "::LoadGrid:\n";
           std::cerr << "    Face with index " << j
                     << " has invalid number of edges (" << faces[j].type
                     << ").\n";
@@ -1394,14 +1394,14 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     }
   }
   if (gridfile.eof()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find section 'Faces' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
     gridfile.close();
     return false;
   } else if (gridfile.fail()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1426,7 +1426,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets ().
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read number of elements.\n";
         Cleanup();
         gridfile.close();
@@ -1453,7 +1453,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           // Make sure the indices are not out of range.
           if (edge0 >= nEdges || -edge0 - 1 >= nEdges || edge1 >= nEdges ||
               -edge1 - 1 >= nEdges || edge2 >= nEdges || -edge2 - 1 >= nEdges) {
-            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << m_className << "::LoadGrid:\n";
             std::cerr << "    Error reading file " << gridfilename << " (line "
                       << iLine << ").\n";
             std::cerr << "    Edge index out of range.\n";
@@ -1482,7 +1482,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           if (face0 >= nFaces || -face0 - 1 >= nFaces || face1 >= nFaces ||
               -face1 - 1 >= nFaces || face2 >= nFaces || -face2 - 1 >= nFaces ||
               face3 >= nFaces || -face3 - 1 >= nFaces) {
-            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << m_className << "::LoadGrid:\n";
             std::cerr << "    Error reading file " << gridfilename << " (line "
                       << iLine << ").\n";
             std::cerr << "    Face index out of range.\n";
@@ -1501,7 +1501,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           if (edge2 < 0) edge2 = -edge2 - 1;
           // Make sure the edge indices are not out of range.
           if (edge0 >= nEdges || edge1 >= nEdges || edge2 >= nEdges) {
-            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << m_className << "::LoadGrid:\n";
             std::cerr << "    Error reading file " << gridfilename << "\n";
             std::cerr << "    Edge index in element " << j
                       << " out of range.\n";
@@ -1542,7 +1542,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
                      edgeP2[edge1] != m_elements[j].vertex[2]) {
             m_elements[j].vertex[3] = edgeP2[edge1];
           } else {
-            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << m_className << "::LoadGrid:\n";
             std::cerr << "    Error reading file " << gridfilename << "\n";
             std::cerr << "    Face 1 of element " << j << " is degenerate.\n";
             Cleanup();
@@ -1551,7 +1551,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           }
         } else {
           // Other element types are not allowed.
-          std::cerr << className << "::LoadGrid:\n"
+          std::cerr << m_className << "::LoadGrid:\n"
                     << "    Error reading file " << gridfilename << " (line "
                     << iLine << ").\n";
           if (type == 0 || type == 1) {
@@ -1573,14 +1573,14 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     }
   }
   if (gridfile.eof()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Could not find section 'Elements' in file\n";
     std::cerr << "    " << gridfilename << ".\n";
     Cleanup();
     gridfile.close();
     return false;
   } else if (gridfile.fail()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << " (line " << iLine
               << ").\n";
     Cleanup();
@@ -1601,7 +1601,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       pKet = line.find(')');
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Could not read region name.\n";
         Cleanup();
         gridfile.close();
@@ -1620,7 +1620,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       }
       if (index == -1) {
         // Specified region name is not in the list.
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Error reading file " << gridfilename << ".\n";
         std::cerr << "    Unknown region " << name << ".\n";
         continue;
@@ -1632,7 +1632,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       if (pKet < pBra || pBra == std::string::npos ||
           pKet == std::string::npos) {
         // No closed brackets ().
-        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << m_className << "::LoadGrid:\n";
         std::cerr << "    Error reading file " << gridfilename << ".\n";
         std::cerr << "    Could not read number of elements in region " << name
                   << ".\n";
@@ -1655,7 +1655,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
 
   gridfile.close();
   if (gridfile.fail() && !gridfile.eof()) {
-    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << m_className << "::LoadGrid:\n";
     std::cerr << "    Error reading file " << gridfilename << ".\n";
     Cleanup();
     return false;
@@ -1780,7 +1780,7 @@ bool ComponentTcad3d::CheckTetrahedron(const double x, const double y,
                       m_w[1] * m_vertices[m_elements[i].vertex[1]].z +
                       m_w[2] * m_vertices[m_elements[i].vertex[2]].z +
                       m_w[3] * m_vertices[m_elements[i].vertex[3]].z;
-    std::cout << className << "::CheckTetrahedron:\n";
+    std::cout << m_className << "::CheckTetrahedron:\n";
     std::cout << "    Original coordinates:      (" << x << ", " << y << ", "
               << z << ")\n";
     std::cout << "    Local coordinates:         (" << m_w[0] << ", " << m_w[1]
@@ -1851,41 +1851,41 @@ void ComponentTcad3d::Reset() {
 void ComponentTcad3d::UpdatePeriodicity() {
 
   if (!ready) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Field map not available.\n";
     return;
   }
 
   // Check for conflicts.
   if (xPeriodic && xMirrorPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along x requested; reset.\n";
     xPeriodic = xMirrorPeriodic = false;
   }
 
   if (yPeriodic && yMirrorPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along y requested; reset.\n";
     yPeriodic = yMirrorPeriodic = false;
   }
 
   if (zPeriodic && zMirrorPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along z requested; reset.\n";
     zPeriodic = zMirrorPeriodic = false;
   }
 
   if (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Axial symmetry is not supported; reset.\n";
     xAxiallyPeriodic = yAxiallyPeriodic = zAxiallyPeriodic = false;
   }
 
   if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Rotation symmetry is not supported; reset.\n";
     xRotationSymmetry = yRotationSymmetry = zRotationSymmetry = false;
   }
