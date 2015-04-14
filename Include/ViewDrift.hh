@@ -87,7 +87,7 @@ class ViewDrift {
     int n;  // what kind of particle?
   };
   std::vector<driftLine> m_driftLines;
-  std::vector<TPolyMarker3D*> m_driftLinePlots;
+  std::vector<TPolyLine3D*> m_driftLinePlots;
 
   unsigned int m_nTracks;
   struct track {
@@ -95,6 +95,7 @@ class ViewDrift {
   };
   std::vector<track> m_tracks;
   std::vector<TPolyMarker3D*> m_trackPlots;
+  std::vector<TPolyLine3D*> m_trackLinePlots;
 
   unsigned int m_nExcMarkers;
   std::vector<marker> m_excMarkers;

@@ -107,6 +107,10 @@ void ViewDrift::Clear() {
   for (unsigned int i = 0; i < nTrackPlots; ++i) {
     if (m_trackPlots[i]) delete m_trackPlots[i];
   }
+  const unsigned int nTrackLinePlots = m_trackLinePlots.size();
+  for (unsigned int i = 0; i < nTrackLinePlots; ++i) {
+    if (m_trackLinePlots[i]) delete m_trackLinePlots[i];
+  }
   const unsigned int nDriftLinePlots = m_driftLinePlots.size();
   for (unsigned int i = 0; i < nDriftLinePlots; ++i) {
     if (m_driftLinePlots[i]) delete m_driftLinePlots[i];
@@ -430,14 +434,14 @@ void ViewDrift::Plot3d(const bool axis) {
 
   for (unsigned int i = 0; i < m_nDriftLines; ++i) {
     const unsigned int nPoints = m_driftLines[i].vect.size();
-    TPolyMarker3D* t = new TPolyMarker3D(nPoints);
+    TPolyLine3D* t = new TPolyLine3D(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
       t->SetNextPoint(m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
                       m_driftLines[i].vect[j].z);
     }
-    t->SetMarkerColor(m_driftLines[i].n);
+    t->SetLineColor(m_driftLines[i].n);
     m_driftLinePlots.push_back(t);
-    t->Draw("Lsame");
+    t->Draw("same");
   }
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
   for (unsigned int i = 0; i < m_nTracks; ++i) {
@@ -458,6 +462,7 @@ void ViewDrift::Plot3d(const bool axis) {
     l->SetLineColor(trackCol);
     l->SetLineWidth(1);
     l->Draw("same");
+    m_trackLinePlots.push_back(l);
   }
   if (m_excPlot) {
     delete m_excPlot;
