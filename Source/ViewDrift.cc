@@ -32,11 +32,11 @@ ViewDrift::ViewDrift()
       m_markerSizeCluster(1.),
       m_markerSizeCollision(1.) {
 
-  m_driftLines.clear();
-  m_tracks.clear();
-  m_excMarkers.clear();
-  m_ionMarkers.clear();
-  m_attMarkers.clear();
+  m_driftLines.reserve(1000);
+  m_tracks.reserve(100);
+  m_excMarkers.reserve(1000);
+  m_ionMarkers.reserve(1000);
+  m_attMarkers.reserve(1000);
 }
 
 ViewDrift::~ViewDrift() {
@@ -62,8 +62,10 @@ void ViewDrift::SetCanvas(TCanvas* c) {
   m_hasExternalCanvas = true;
 }
 
-void ViewDrift::SetArea(double xmin, double ymin, double zmin, double xmax,
-                        double ymax, double zmax) {
+void ViewDrift::SetArea(const double& xmin, const double& ymin, 
+                        const double& zmin, 
+                        const double& xmax, const double& ymax,
+                        const double& zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
@@ -106,7 +108,7 @@ void ViewDrift::Clear() {
   }
 }
 
-void ViewDrift::SetClusterMarkerSize(const double size) {
+void ViewDrift::SetClusterMarkerSize(const double& size) {
 
   if (size > 0.) {
     m_markerSizeCluster = size;
@@ -116,7 +118,7 @@ void ViewDrift::SetClusterMarkerSize(const double size) {
   }
 }
 
-void ViewDrift::SetCollisionMarkerSize(const double size) {
+void ViewDrift::SetCollisionMarkerSize(const double& size) {
 
   if (size > 0.) {
     m_markerSizeCollision = size;
@@ -162,20 +164,16 @@ void ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
 
   const int col = plottingEngine.GetRootColorHole();
   driftLine d;
+  marker m0;
+  m0.x = x0;
+  m0.y = y0;
+  m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<marker> p(1);
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
+    std::vector<marker> p(1, m0);
     d.vect = p;
   } else {
-    std::vector<marker> p(np);
-    for (unsigned int i = 0; i < np; ++i) {
-      p[i].x = x0;
-      p[i].y = y0;
-      p[i].z = z0;
-    }
+    std::vector<marker> p(np, m0);
     d.vect = p;
   }
   d.n = col;
@@ -190,20 +188,16 @@ void ViewDrift::NewIonDriftLine(const unsigned int np, int& id, const double x0,
 
   const int col = 47;
   driftLine d;
+  marker m0;
+  m0.x = x0;
+  m0.y = y0;
+  m0.z = z0;
   if (np <= 0) {
     // Number of points is not yet known.
-    std::vector<marker> p(1);
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
+    std::vector<marker> p(1, m0);
     d.vect = p;
   } else {
-    std::vector<marker> p(np);
-    for (unsigned int i = 0; i < np; ++i) {
-      p[i].x = x0;
-      p[i].y = y0;
-      p[i].z = z0;
-    }
+    std::vector<marker> p(np, m0);
     d.vect = p;
   }
   d.n = col;
@@ -241,8 +235,8 @@ void ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
     newTrack.vect.resize(np);
   }
   newTrack.vect[0].x = x0;
-  newTrack.vect[1].y = y0;
-  newTrack.vect[2].z = z0;
+  newTrack.vect[0].y = y0;
+  newTrack.vect[0].z = z0;
   m_tracks.push_back(newTrack);
   // Return the index of this drift line.
   id = m_nTracks;
@@ -361,8 +355,9 @@ void ViewDrift::Plot2d(const bool axis) {
   m_canvas->Update();
 
   for (unsigned int i = 0; i < m_nDriftLines; ++i) {
-    TGraph t(m_driftLines[i].vect.size());
-    for (int j = m_driftLines[i].vect.size(); j--;) {
+    const unsigned int nPoints = m_driftLines[i].vect.size();
+    TGraph t(nPoints);
+    for (unsigned int j = 0; j < nPoints; ++j) {
       t.SetPoint(j, m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y);
     }
     t.SetLineColor(m_driftLines[i].n);
@@ -384,8 +379,9 @@ void ViewDrift::Plot2d(const bool axis) {
 
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
   for (unsigned int i = 0; i < m_nTracks; ++i) {
-    TGraph t(m_tracks[i].vect.size());
-    for (int j = m_tracks[i].vect.size(); j--;) {
+    const unsigned int nPoints = m_tracks[i].vect.size();
+    TGraph t(nPoints);
+    for (unsigned int j = 0; j < nPoints; ++j) {
       t.SetPoint(j, m_tracks[i].vect[j].x, m_tracks[i].vect[j].y);
     }
     t.SetLineColor(trackCol);
@@ -411,15 +407,15 @@ void ViewDrift::Plot3d(const bool axis) {
 
   std::cout << m_className << "::Plot:\n";
   std::cout << "    Plotting in 3D.\n";
-  if (m_canvas == 0) {
+  if (m_canvas == NULL) {
     m_canvas = new TCanvas();
     m_canvas->SetTitle(m_label.c_str());
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
   m_canvas->cd();
   if (axis) {
-    if (m_canvas->GetView() == 0) {
-      if (m_view == 0) m_view = TView::CreateView(1, 0, 0);
+    if (m_canvas->GetView() == NULL) {
+      if (m_view == NULL) m_view = TView::CreateView(1, 0, 0);
       m_view->SetRange(m_xMin, m_yMin, m_zMin, m_xMax, m_yMax, m_zMax);
       m_view->ShowAxis();
       m_view->Top();
@@ -427,10 +423,11 @@ void ViewDrift::Plot3d(const bool axis) {
     }
   }
   for (unsigned int i = 0; i < m_nDriftLines; ++i) {
-    TPointSet3D t(m_driftLines[i].vect.size());
-    for (int j = m_driftLines[i].vect.size(); j--;) {
-      t.SetPoint(j, m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
-                 m_driftLines[i].vect[j].z);
+    const unsigned int nPoints = m_driftLines[i].vect.size();
+    TPointSet3D t(nPoints);
+    for (unsigned int j = 0; j < nPoints; ++j) {
+      t.SetNextPoint(m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
+                     m_driftLines[i].vect[j].z);
     }
     t.SetMarkerColor(m_driftLines[i].n);
     t.DrawClone("Lsame");
@@ -438,15 +435,17 @@ void ViewDrift::Plot3d(const bool axis) {
   m_canvas->Update();
 
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
-  for (int i = m_nTracks; i--;) {
-    TPointSet3D t(m_tracks[i].vect.size(), 20);
-    TPolyLine3D l(m_tracks[i].vect.size());
-    for (int j = m_tracks[i].vect.size(); j--;) {
-      t.SetPoint(j, m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                 m_tracks[i].vect[j].z);
-      l.SetPoint(j, m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                 m_tracks[i].vect[j].z);
+  for (unsigned int i = 0; i < m_nTracks; ++i) {
+    const unsigned int nPoints = m_tracks[i].vect.size();
+    TPointSet3D t(nPoints);
+    TPolyLine3D l(nPoints);
+    for (unsigned int j = 0; j < nPoints; ++j) {
+      t.SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
+                     m_tracks[i].vect[j].z);
+      l.SetNextPoint( m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
+                     m_tracks[i].vect[j].z);
     }
+    t.SetMarkerStyle(20);
     t.SetMarkerColor(trackCol);
     t.SetMarkerSize(m_markerSizeCluster);
     t.DrawClone("same");

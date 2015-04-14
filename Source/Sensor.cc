@@ -406,9 +406,9 @@ void Sensor::ClearSignal() {
   m_nEvents = 0;
 }
 
-void Sensor::AddSignal(const double q, const double t, const double dt,
-                       const double x, const double y, const double z,
-                       const double vx, const double vy, const double vz) {
+void Sensor::AddSignal(const double& q, const double& t, const double& dt,
+                       const double& x, const double& y, const double& z,
+                       const double& vx, const double& vy, const double& vz) {
 
   // Get the time bin.
   if (t < m_tStart || dt <= 0.) {
@@ -431,7 +431,6 @@ void Sensor::AddSignal(const double q, const double t, const double dt,
   if (m_nEvents <= 0) m_nEvents = 1;
 
   double wx = 0., wy = 0., wz = 0.;
-  double cur, delta;
   if (m_debug) {
     std::cout << m_className << "::AddSignal:\n";
     std::cout << "    Time: " << t << "\n";
@@ -441,17 +440,17 @@ void Sensor::AddSignal(const double q, const double t, const double dt,
   }
   for (int i = m_nElectrodes; i--;) {
     // Calculate the weighting field for this electrode
-    m_electrodes[i]
-        .comp->WeightingField(x, y, z, wx, wy, wz, m_electrodes[i].label);
+    m_electrodes[i].comp->WeightingField(x, y, z, wx, wy, wz, 
+                                         m_electrodes[i].label);
     // Calculate the induced current
-    cur = -q * (wx * vx + wy * vy + wz * vz);
+    const double cur = -q * (wx * vx + wy * vy + wz * vz);
     if (m_debug) {
       std::cout << "    Electrode " << m_electrodes[i].label << ":\n";
       std::cout << "      Weighting field: (" << wx << ", " << wy << ", " << wz
                 << ")\n";
       std::cout << "      Induced charge: " << cur* dt << "\n";
     }
-    delta = m_tStart + (bin + 1) * m_tStep - t;
+    double delta = m_tStart + (bin + 1) * m_tStep - t;
     // Check if the provided timestep extends over more than one time bin
     if (dt > delta) {
       m_electrodes[i].signal[bin] += cur * delta;

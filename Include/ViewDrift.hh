@@ -3,7 +3,6 @@
 
 #include <string>
 #include <TGraph.h>
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
 #include <TPointSet3D.h>
@@ -12,8 +11,6 @@
 namespace Garfield {
 
 class ViewDrift {
-
-  RQ_OBJECT("ViewDrift")
 
  public:
   // Constructor
@@ -24,13 +21,13 @@ class ViewDrift {
   void SetCanvas(TCanvas* c);
 
   // Set area to be plotted.
-  void SetArea(double xmin, double ymin, double zmin, double xmax, double ymax,
-               double zmax);
+  void SetArea(const double& xmin, const double& ymin, const double& zmin, 
+               const double& xmax, const double& ymax, const double& zmax);
   void Clear();
   void Plot(const bool twod = false, const bool axis = true);
 
-  void SetClusterMarkerSize(const double size);
-  void SetCollisionMarkerSize(const double size);
+  void SetClusterMarkerSize(const double& size);
+  void SetCollisionMarkerSize(const double& size);
 
   // Functions to be used by transport classes.
   void NewElectronDriftLine(const unsigned int np, int& id, const double x0,

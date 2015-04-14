@@ -10,171 +10,173 @@ namespace Garfield {
 
 PlottingEngineRoot plottingEngine;
 
-PlottingEngineRoot::PlottingEngineRoot() : garfieldStyle(0) {
+PlottingEngineRoot::PlottingEngineRoot() 
+    : PlottingEngine(), 
+      m_garfieldStyle(NULL) {
 
-  colorElectronDefault = "orange";
-  colorHoleDefault = "red";
-  colorIonDefault = "dark-red";
-  colorPhotonDefault = "blue";
-  colorChargedParticleDefault = "dark-green";
-  colorLine1Default = "dark-blue";
-  colorLine2Default = "olive";
+  m_colorElectronDefault = "orange";
+  m_colorHoleDefault = "red";
+  m_colorIonDefault = "dark-red";
+  m_colorPhotonDefault = "blue";
+  m_colorChargedParticleDefault = "dark-green";
+  m_colorLine1Default = "dark-blue";
+  m_colorLine2Default = "olive";
 }
 
 PlottingEngineRoot::~PlottingEngineRoot() {
 
-  if (garfieldStyle != 0) {
-    delete garfieldStyle;
-    garfieldStyle = 0;
+  if (m_garfieldStyle != NULL) {
+    delete m_garfieldStyle;
+    m_garfieldStyle = NULL;
   }
 }
 
 void PlottingEngineRoot::SetDefaultStyle() {
 
-  if (garfieldStyle != 0) {
-    garfieldStyle->cd();
+  if (m_garfieldStyle != NULL) {
+    m_garfieldStyle->cd();
     return;
   }
-  garfieldStyle = new TStyle("Garfield", "Garfield Style");
-  garfieldStyle->Reset();
-  garfieldStyle->SetFillColor(1);
-  garfieldStyle->SetFillStyle(1001);
-  garfieldStyle->SetCanvasBorderMode(0);
-  garfieldStyle->SetCanvasColor(0);
-  garfieldStyle->SetCanvasPreferGL(kTRUE);
-  garfieldStyle->SetCanvasDefH(600);
-  garfieldStyle->SetCanvasDefW(600);
-  garfieldStyle->SetPadBorderMode(0);
-  garfieldStyle->SetPadColor(0);
-  garfieldStyle->SetPadLeftMargin(0.1);
-  garfieldStyle->SetPadBottomMargin(0.1);
-  garfieldStyle->SetPadRightMargin(0.1);
-  garfieldStyle->SetPadTopMargin(0.05);
-  garfieldStyle->SetPadTickX(1);
-  garfieldStyle->SetPadTickY(1);
-  garfieldStyle->SetFrameFillColor(0);
-  garfieldStyle->SetFrameBorderMode(0);
-  garfieldStyle->SetDrawBorder(0);
-  garfieldStyle->SetLegendBorderSize(0);
+  m_garfieldStyle = new TStyle("Garfield", "Garfield Style");
+  m_garfieldStyle->Reset();
+  m_garfieldStyle->SetFillColor(1);
+  m_garfieldStyle->SetFillStyle(1001);
+  m_garfieldStyle->SetCanvasBorderMode(0);
+  m_garfieldStyle->SetCanvasColor(0);
+  m_garfieldStyle->SetCanvasPreferGL(kTRUE);
+  m_garfieldStyle->SetCanvasDefH(600);
+  m_garfieldStyle->SetCanvasDefW(600);
+  m_garfieldStyle->SetPadBorderMode(0);
+  m_garfieldStyle->SetPadColor(0);
+  m_garfieldStyle->SetPadLeftMargin(0.1);
+  m_garfieldStyle->SetPadBottomMargin(0.1);
+  m_garfieldStyle->SetPadRightMargin(0.1);
+  m_garfieldStyle->SetPadTopMargin(0.05);
+  m_garfieldStyle->SetPadTickX(1);
+  m_garfieldStyle->SetPadTickY(1);
+  m_garfieldStyle->SetFrameFillColor(0);
+  m_garfieldStyle->SetFrameBorderMode(0);
+  m_garfieldStyle->SetDrawBorder(0);
+  m_garfieldStyle->SetLegendBorderSize(0);
 
-  garfieldStyle->SetGridColor(kGray);
-  garfieldStyle->SetGridStyle(3);
-  garfieldStyle->SetGridWidth(1);
-  garfieldStyle->SetPadGridX(kTRUE);
-  garfieldStyle->SetPadGridY(kTRUE);
+  m_garfieldStyle->SetGridColor(kGray);
+  m_garfieldStyle->SetGridStyle(3);
+  m_garfieldStyle->SetGridWidth(1);
+  m_garfieldStyle->SetPadGridX(kTRUE);
+  m_garfieldStyle->SetPadGridY(kTRUE);
 
   // const int font = 132;
   const int font = 42;
-  garfieldStyle->SetTextFont(font);
-  garfieldStyle->SetTitleStyle(0);
-  garfieldStyle->SetTitleBorderSize(0);
-  garfieldStyle->SetTitleColor(1, "xyz");
-  garfieldStyle->SetTitleColor(1, "t");
-  garfieldStyle->SetTitleFillColor(0);
-  garfieldStyle->SetTitleFont(font, "xyz");
-  garfieldStyle->SetTitleFont(font, "t");
-  garfieldStyle->SetTitleOffset(1.2, "xyz");
-  garfieldStyle->SetTitleSize(0.03, "xyz");
-  garfieldStyle->SetTitleSize(0.05, "t");
+  m_garfieldStyle->SetTextFont(font);
+  m_garfieldStyle->SetTitleStyle(0);
+  m_garfieldStyle->SetTitleBorderSize(0);
+  m_garfieldStyle->SetTitleColor(1, "xyz");
+  m_garfieldStyle->SetTitleColor(1, "t");
+  m_garfieldStyle->SetTitleFillColor(0);
+  m_garfieldStyle->SetTitleFont(font, "xyz");
+  m_garfieldStyle->SetTitleFont(font, "t");
+  m_garfieldStyle->SetTitleOffset(1.2, "xyz");
+  m_garfieldStyle->SetTitleSize(0.03, "xyz");
+  m_garfieldStyle->SetTitleSize(0.05, "t");
 
-  garfieldStyle->SetStatStyle(0);
-  garfieldStyle->SetStatBorderSize(0);
-  garfieldStyle->SetStatColor(0);
-  garfieldStyle->SetStatFont(font);
-  garfieldStyle->SetStatFontSize(0.03);
-  garfieldStyle->SetStatX(0.88);
-  garfieldStyle->SetStatY(0.88);
-  garfieldStyle->SetStatW(0.25);
-  garfieldStyle->SetStatH(0.1);
-  garfieldStyle->SetOptStat(111110);
-  garfieldStyle->SetStatFormat("6.3g");
-  garfieldStyle->SetLabelFont(font, "xyz");
-  garfieldStyle->SetLabelSize(0.03, "xyz");
-  garfieldStyle->SetLabelOffset(0.01, "xyz");
-  garfieldStyle->SetOptTitle(0);
-  garfieldStyle->SetPaperSize(TStyle::kA4);
-  garfieldStyle->SetFuncWidth(2);
-  garfieldStyle->SetHistLineColor(kOrange - 3);
-  garfieldStyle->SetPalette(1);
-  garfieldStyle->SetAxisColor(kBlack, "X");
-  garfieldStyle->SetAxisColor(kBlack, "Y");
-  garfieldStyle->SetAxisColor(kBlack, "Z");
+  m_garfieldStyle->SetStatStyle(0);
+  m_garfieldStyle->SetStatBorderSize(0);
+  m_garfieldStyle->SetStatColor(0);
+  m_garfieldStyle->SetStatFont(font);
+  m_garfieldStyle->SetStatFontSize(0.03);
+  m_garfieldStyle->SetStatX(0.88);
+  m_garfieldStyle->SetStatY(0.88);
+  m_garfieldStyle->SetStatW(0.25);
+  m_garfieldStyle->SetStatH(0.1);
+  m_garfieldStyle->SetOptStat(111110);
+  m_garfieldStyle->SetStatFormat("6.3g");
+  m_garfieldStyle->SetLabelFont(font, "xyz");
+  m_garfieldStyle->SetLabelSize(0.03, "xyz");
+  m_garfieldStyle->SetLabelOffset(0.01, "xyz");
+  m_garfieldStyle->SetOptTitle(0);
+  m_garfieldStyle->SetPaperSize(TStyle::kA4);
+  m_garfieldStyle->SetFuncWidth(2);
+  m_garfieldStyle->SetHistLineColor(kOrange - 3);
+  m_garfieldStyle->SetPalette(1);
+  m_garfieldStyle->SetAxisColor(kBlack, "X");
+  m_garfieldStyle->SetAxisColor(kBlack, "Y");
+  m_garfieldStyle->SetAxisColor(kBlack, "Z");
   const double lw = 2;
-  garfieldStyle->SetLineWidth(lw);
-  garfieldStyle->SetFrameLineWidth(lw);
-  garfieldStyle->SetHistLineWidth(lw);
-  garfieldStyle->SetFuncWidth(lw);
-  garfieldStyle->SetGridWidth(lw);
+  m_garfieldStyle->SetLineWidth(lw);
+  m_garfieldStyle->SetFrameLineWidth(lw);
+  m_garfieldStyle->SetHistLineWidth(lw);
+  m_garfieldStyle->SetFuncWidth(lw);
+  m_garfieldStyle->SetGridWidth(lw);
 
-  garfieldStyle->cd();
+  m_garfieldStyle->cd();
 }
 
 int PlottingEngineRoot::GetRootColorLine1() {
 
-  int rootcol;
-  if (!GetRootColor(colorLine1, rootcol)) {
-    colorLine1 = colorLine1Default;
-    GetRootColor(colorLine1, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorLine1, rootcol)) {
+    m_colorLine1 = m_colorLine1Default;
+    GetRootColor(m_colorLine1, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorLine2() {
 
-  int rootcol;
-  if (!GetRootColor(colorLine2, rootcol)) {
-    colorLine2 = colorLine2Default;
-    GetRootColor(colorLine2, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorLine2, rootcol)) {
+    m_colorLine2 = m_colorLine2Default;
+    GetRootColor(m_colorLine2, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorElectron() {
 
-  int rootcol;
-  if (!GetRootColor(colorElectron, rootcol)) {
-    colorElectron = colorElectronDefault;
-    GetRootColor(colorElectron, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorElectron, rootcol)) {
+    m_colorElectron = m_colorElectronDefault;
+    GetRootColor(m_colorElectron, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorHole() {
 
-  int rootcol;
-  if (!GetRootColor(colorHole, rootcol)) {
-    colorHole = colorHoleDefault;
-    GetRootColor(colorHole, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorHole, rootcol)) {
+    m_colorHole = m_colorHoleDefault;
+    GetRootColor(m_colorHole, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorIon() {
 
-  int rootcol;
-  if (!GetRootColor(colorIon, rootcol)) {
-    colorIon = colorIonDefault;
-    GetRootColor(colorIon, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorIon, rootcol)) {
+    m_colorIon = m_colorIonDefault;
+    GetRootColor(m_colorIon, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorPhoton() {
 
-  int rootcol;
-  if (!GetRootColor(colorPhoton, rootcol)) {
-    colorPhoton = colorPhotonDefault;
-    GetRootColor(colorPhoton, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorPhoton, rootcol)) {
+    m_colorPhoton = m_colorPhotonDefault;
+    GetRootColor(m_colorPhoton, rootcol);
   }
   return rootcol;
 }
 
 int PlottingEngineRoot::GetRootColorChargedParticle() {
 
-  int rootcol;
-  if (!GetRootColor(colorChargedParticle, rootcol)) {
-    colorChargedParticle = colorChargedParticleDefault;
-    GetRootColor(colorChargedParticle, rootcol);
+  int rootcol = 0;
+  if (!GetRootColor(m_colorChargedParticle, rootcol)) {
+    m_colorChargedParticle = m_colorChargedParticleDefault;
+    GetRootColor(m_colorChargedParticle, rootcol);
   }
   return rootcol;
 }
@@ -223,8 +225,8 @@ bool PlottingEngineRoot::GetRootColor(std::string color, int& rootcol) {
     rootcol = kSpring + 4;
     return true;
   }
-  if (debug) {
-    std::cerr << className << "::GetRootColor:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetRootColor:\n";
     std::cerr << "    Unknown color (" << color << ").\n";
   }
   return false;
