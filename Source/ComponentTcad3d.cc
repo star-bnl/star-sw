@@ -245,15 +245,14 @@ void ComponentTcad3d::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-bool ComponentTcad3d::GetMedium(const double xin, const double yin,
-                                const double zin, Medium*& m) {
+Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
+                                   const double& zin) {
 
-  m = 0;
   // Make sure the field map has been loaded.
   if (!ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
-    return false;
+    return NULL;
   }
 
   double x = xin, y = yin, z = zin;
@@ -301,7 +300,7 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
   // Check if the point is inside the bounding box.
   if (x < m_xMinBoundingBox || x > m_xMaxBoundingBox || y < m_yMinBoundingBox ||
       y > m_yMaxBoundingBox || z < m_zMinBoundingBox || z > m_zMaxBoundingBox) {
-    return false;
+    return NULL;
   }
 
   // Check if the point is still located in the previous element.
@@ -309,22 +308,18 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
   switch (m_elements[i].type) {
     case 2:
       if (CheckTriangle(x, y, z, i)) {
-        m = m_regions[m_elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
+        return m_regions[m_elements[i].region].medium;
       }
       break;
     case 5:
       if (CheckTetrahedron(x, y, z, i)) {
-        m = m_regions[m_elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
+        return m_regions[m_elements[i].region].medium;
       }
       break;
     default:
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Invalid element type (" << m_elements[i].type << ").\n";
-      return false;
+      return NULL;
       break;
   }
 
@@ -335,29 +330,25 @@ bool ComponentTcad3d::GetMedium(const double xin, const double yin,
       case 2:
         if (CheckTriangle(x, y, z, i)) {
           m_lastElement = i;
-          m = m_regions[m_elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return m_regions[m_elements[i].region].medium;
         }
         break;
       case 5:
         if (CheckTetrahedron(x, y, z, i)) {
           m_lastElement = i;
-          m = m_regions[m_elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return m_regions[m_elements[i].region].medium;
         }
         break;
       default:
         std::cerr << m_className << "::GetMedium:\n";
         std::cerr << "    Invalid element type (" << m_elements[i].type
                   << ").\n";
-        return false;
+        return NULL;
         break;
     }
   }
   // The point is outside the mesh.
-  return false;
+  return NULL;
 }
 
 bool ComponentTcad3d::Initialise(const std::string gridfilename,

@@ -22,8 +22,8 @@ class ComponentBase {
   virtual void Clear();
 
   // Get the medium at a given location (x, y, z)
-  virtual bool GetMedium(const double x, const double y, const double z,
-                         Medium*& m);
+  virtual Medium* GetMedium(const double& x, const double& y, 
+                            const double& z);
 
   // Electric field
   //

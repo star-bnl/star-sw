@@ -141,24 +141,22 @@ double Sensor::WeightingPotential(const double x, const double y,
 bool Sensor::GetMedium(const double x, const double y, const double z,
                        Medium*& m) {
 
-  m = 0;
+  m = NULL;
 
   // Make sure there is at least one component.
   if (m_lastComponent < 0) return false;
 
   // Check if we are still in the same component as in the previous call.
-  if (m_components[m_lastComponent].comp->GetMedium(x, y, z, m)) {
-    // Cross-check that the medium is defined.
-    if (m) return true;
-  }
+  m = m_components[m_lastComponent].comp->GetMedium(x, y, z);
+  // Cross-check that the medium is defined.
+  if (m) return true;
 
   for (int i = m_nComponents; i--;) {
-    if (m_components[i].comp->GetMedium(x, y, z, m)) {
-      // Cross-check that the medium is defined.
-      if (m) {
-        m_lastComponent = i;
-        return true;
-      }
+    m = m_components[i].comp->GetMedium(x, y, z);
+    // Cross-check that the medium is defined.
+    if (m) {
+      m_lastComponent = i;
+      return true;
     }
   }
   return false;

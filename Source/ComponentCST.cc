@@ -1031,9 +1031,9 @@ void ComponentCST::GetElementBoundaries(unsigned int element, double &xmin, doub
   zmax = m_zlines.at(k+1);
 }
 
-bool ComponentCST::GetMedium(const double xin, const double yin,
-                             const double zin, Medium*& m) {
-  unsigned int i,j,k;
+Medium* ComponentCST::GetMedium(const double& xin, const double& yin,
+                                const double& zin) {
+  unsigned int i, j, k;
   Coordinate2Index(xin,yin,zin,i,j,k);
   if(debug){
       std::cout << m_className << "::GetMedium:" << std::endl;
@@ -1044,8 +1044,7 @@ bool ComponentCST::GetMedium(const double xin, const double yin,
       std::cout << "    Element material index: " << Index2Element(i, j, k) << std::endl;
       std::cout << "    Element index: " << (int)m_elementMaterial.at(Index2Element(i,j,k)) << std::endl;
   }
-  m = materials.at(m_elementMaterial.at(Index2Element(i,j,k))).medium;
-  return true;
+  return materials.at(m_elementMaterial.at(Index2Element(i,j,k))).medium;
 }
 
 void ComponentCST::SetRange(){

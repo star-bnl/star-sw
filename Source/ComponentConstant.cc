@@ -36,14 +36,14 @@ void ComponentConstant::ElectricField(const double x, const double y,
   ex = fx;
   ey = fy;
   ez = fz;
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 
@@ -72,14 +72,14 @@ void ComponentConstant::ElectricField(const double x, const double y,
     }
   }
 
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 
@@ -137,8 +137,8 @@ void ComponentConstant::WeightingField(const double x, const double y,
 
   if (!hasWeightingField || label != wfield) return;
 
-  Medium* m;
-  if (!GetMedium(x, y, z, m)) {
+  Medium* m = GetMedium(x, y, z);
+  if (m == NULL) {
     wx = wy = wz = 0.;
     if (debug) {
       std::cout << m_className << "::WeightingField:\n";
@@ -157,8 +157,8 @@ double ComponentConstant::WeightingPotential(const double x, const double y,
 
   if (!hasWeightingPotential || label != wfield) return 0.;
 
-  Medium* m;
-  if (!GetMedium(x, y, z, m)) return 0.;
+  Medium* m = GetMedium(x, y, z); 
+  if (m == NULL) return 0.;
 
   return w0 - (x - wx0) * fwx - (y - wy0) * fwy - (z - wz0) * fwz;
 }

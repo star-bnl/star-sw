@@ -9,97 +9,96 @@
 
 namespace Garfield {
 
-GeometryRoot::GeometryRoot() : theGeoManager(0), nMaterials(0), debug(false) {
+GeometryRoot::GeometryRoot() 
+    : m_geoManager(NULL), nMaterials(0), debug(false) {
 
-  className = "GeometryRoot";
+  m_className = "GeometryRoot";
   materials.clear();
 }
 
 void GeometryRoot::SetGeometry(TGeoManager* geoman) {
 
-  if (geoman == 0) {
+  if (geoman == NULL) {
     std::cerr << "GeometryRoot::SetGeometry:\n";
     std::cerr << "    Pointer to TGeoManager is null.\n";
     return;
   }
 
-  theGeoManager = geoman;
+  m_geoManager = geoman;
   materials.clear();
   nMaterials = 0;
 }
 
-bool GeometryRoot::GetMedium(const double x, const double y, const double z,
-                             Medium*& m) {
+Medium* GeometryRoot::GetMedium(const double& x, const double& y, 
+                                const double& z) const {
 
-  m = 0;
-  if (theGeoManager == 0) return false;
-  theGeoManager->SetCurrentPoint(x, y, z);
-  if (theGeoManager->IsOutside()) return false;
-  TGeoNode* cnode = theGeoManager->GetCurrentNode();
+  if (m_geoManager == NULL) return NULL; 
+  m_geoManager->SetCurrentPoint(x, y, z);
+  if (m_geoManager->IsOutside()) return NULL;
+  TGeoNode* cnode = m_geoManager->GetCurrentNode();
   std::string name(cnode->GetMedium()->GetMaterial()->GetName());
 
   for (int i = nMaterials; i--;) {
     if (materials[i].name == name) {
-      m = materials[i].medium;
-      return true;
+      return materials[i].medium;
     }
   }
-  return false;
+  return NULL;
 }
 
 int GeometryRoot::GetNumberOfMaterials() {
 
-  if (theGeoManager == 0) {
+  if (m_geoManager == NULL) {
     std::cerr << "GeometryRoot::GetNumberOfMaterials:\n";
     std::cerr << "    ROOT geometry is not defined.\n";
     std::cerr << "    Call SetGeometry first.\n";
     return 0;
   }
 
-  return theGeoManager->GetListOfMaterials()->GetEntries();
+  return m_geoManager->GetListOfMaterials()->GetEntries();
 }
 
 TGeoMaterial* GeometryRoot::GetMaterial(const int i) {
 
-  if (theGeoManager == 0) {
+  if (m_geoManager == NULL) {
     std::cerr << "GeometryRoot::GetMaterial:\n";
     std::cerr << "    ROOT geometry is not defined.\n";
     std::cerr << "    Call SetGeometry first.\n";
-    return 0;
+    return NULL;
   }
 
-  return theGeoManager->GetMaterial(i);
+  return m_geoManager->GetMaterial(i);
 }
 
 TGeoMaterial* GeometryRoot::GetMaterial(const char* name) {
 
-  if (theGeoManager == 0) {
+  if (m_geoManager == NULL) {
     std::cerr << "GeometryRoot::GetMaterial:\n";
     std::cerr << "    ROOT geometry is not defined.\n";
     std::cerr << "    Call SetGeometry first.\n";
-    return 0;
+    return NULL;
   }
 
-  return theGeoManager->GetMaterial(name);
+  return m_geoManager->GetMaterial(name);
 }
 
 void GeometryRoot::SetMedium(const int imat, Medium* med) {
 
-  if (theGeoManager == 0) {
+  if (m_geoManager == NULL) {
     std::cerr << "GeometryRoot::SetMedium:\n";
     std::cerr << "    ROOT geometry is not defined.\n";
     std::cerr << "    Call SetGeometry first.\n";
     return;
   }
 
-  if (med == 0) {
+  if (med == NULL) {
     std::cerr << "GeometryRoot::SetMedium:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
   }
 
-  TGeoMaterial* mat = theGeoManager->GetMaterial(imat);
-  if (mat == 0) {
+  TGeoMaterial* mat = m_geoManager->GetMaterial(imat);
+  if (mat == NULL) {
     std::cerr << "GeometryRoot::SetMedium:\n";
     std::cerr << "    ROOT material with index " << imat
               << " does not exist.\n";
@@ -143,20 +142,20 @@ void GeometryRoot::SetMedium(const int imat, Medium* med) {
 
 void GeometryRoot::SetMedium(const char* name, Medium* med) {
 
-  if (theGeoManager == 0) {
+  if (m_geoManager == NULL) {
     std::cerr << "GeometryRoot::SetMedium:\n";
     std::cerr << "    ROOT geometry is not defined.\n";
     std::cerr << "    Call SetGeometry first.\n";
     return;
   }
 
-  if (med == 0) {
+  if (med == NULL) {
     std::cerr << "GeometryRoot::SetMedium:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
   }
 
-  int imat = theGeoManager->GetMaterialIndex(name);
+  const int imat = m_geoManager->GetMaterialIndex(name);
   if (imat < 0) {
     std::cerr << "GeometryRoot::SetMedium:" << std::endl;
     std::cerr << "    ROOT material " << name << " does not exist."
@@ -170,8 +169,8 @@ void GeometryRoot::SetMedium(const char* name, Medium* med) {
 bool GeometryRoot::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                   double& xmax, double& ymax, double& zmax) {
 
-  if (theGeoManager == 0) return false;
-  TGeoBBox* box = (TGeoBBox*)theGeoManager->GetTopVolume()->GetShape();
+  if (m_geoManager == NULL) return false;
+  TGeoBBox* box = (TGeoBBox*)m_geoManager->GetTopVolume()->GetShape();
   const double dx = box->GetDX();
   const double dy = box->GetDY();
   const double dz = box->GetDZ();

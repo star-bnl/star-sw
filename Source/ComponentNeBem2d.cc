@@ -37,7 +37,8 @@ void ComponentNeBem2d::ElectricField(const double x, const double y,
   ex = ey = ez = v = 0.;
   status = 0;
   // Check if the requested point is inside a medium
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     status = -6;
     return;
   }

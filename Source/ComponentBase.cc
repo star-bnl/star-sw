@@ -36,11 +36,11 @@ void ComponentBase::SetGeometry(GeometryBase* geo) {
   theGeometry = geo;
 }
 
-bool ComponentBase::GetMedium(const double x, const double y, const double z,
-                              Medium*& m) {
+Medium* ComponentBase::GetMedium(const double& x, const double& y, 
+                                 const double& z) {
 
-  if (theGeometry == 0) return false;
-  return theGeometry->GetMedium(x, y, z, m);
+  if (theGeometry == NULL) return NULL;
+  return theGeometry->GetMedium(x, y, z);
 }
 
 void ComponentBase::Clear() {

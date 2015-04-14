@@ -70,7 +70,7 @@ class ViewCell {
   void PlotTube(const double& x0, const double& y0, const double& r, 
                 const int& n);
 
-  void Reset3d();
+  void Reset();
 
 };
 }

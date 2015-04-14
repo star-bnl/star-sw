@@ -41,9 +41,9 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // If the field is ok, get the medium.
   if (status == 0) {
-    if (!GetMedium(x, y, z, m)) {
+    m = GetMedium(x, y, z);
+    if (m == NULL) {
       status = -6;
-      m = 0;
     } else if (!m->IsDriftable()) {
       status = -5;
     }
@@ -75,9 +75,9 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // If the field is ok, get the medium.
   if (status == 0) {
-    if (!GetMedium(x, y, z, m)) {
+    m = GetMedium(x, y, z);
+    if (m == NULL) {
       status = -6;
-      m = 0;
     } else if (!m->IsDriftable()) {
       status = -5;
     }

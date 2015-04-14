@@ -1127,8 +1127,8 @@ double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
          4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
 }
 
-bool ComponentAnsys123::GetMedium(const double xin, const double yin,
-                                  const double zin, Medium*& m) {
+Medium* ComponentAnsys123::GetMedium(const double& xin, const double& yin,
+                                     const double& zin) {
 
   // Copy the coordinates.
   double x = xin, y = yin, z = zin;
@@ -1139,14 +1139,11 @@ bool ComponentAnsys123::GetMedium(const double xin, const double yin,
   MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
                  rotation);
 
-  // Initial value
-  m = 0;
-
   // Do not proceed if not properly initialised.
   if (!ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
-    return false;
+    return NULL;
   }
   if (warning) {
     std::cerr << m_className << "::GetMedium:\n";
@@ -1162,7 +1159,7 @@ bool ComponentAnsys123::GetMedium(const double xin, const double yin,
       std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") not in the mesh.\n";
     }
-    return false;
+    return NULL;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials) {
     if (debug) {
@@ -1170,7 +1167,7 @@ bool ComponentAnsys123::GetMedium(const double xin, const double yin,
       std::cerr << "    Point (" << x << ", " << y << ", " << z << ")"
                 << " has out of range material number " << imap << ".\n";
     }
-    return false;
+    return NULL;
   }
 
   if (debug) {
@@ -1189,9 +1186,7 @@ bool ComponentAnsys123::GetMedium(const double xin, const double yin,
   }
 
   // Assign a medium.
-  m = materials[elements[imap].matmap].medium;
-  if (m == 0) return false;
-  return true;
+  return materials[elements[imap].matmap].medium;
 }
 
 double ComponentAnsys123::GetElementVolume(const int i) {

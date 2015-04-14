@@ -322,15 +322,14 @@ void ComponentTcad2d::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-bool ComponentTcad2d::GetMedium(const double xin, const double yin,
-                                const double zin, Medium*& m) {
+Medium* ComponentTcad2d::GetMedium(const double& xin, const double& yin,
+                                   const double& zin) {
 
-  m = 0;
   // Make sure the field map has been loaded.
   if (!ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
-    return false;
+    return NULL;
   }
 
   double x = xin, y = yin, z = zin;
@@ -365,11 +364,11 @@ bool ComponentTcad2d::GetMedium(const double xin, const double yin,
   // Check if the point is inside the bounding box.
   if (x < xMinBoundingBox || x > xMaxBoundingBox || y < yMinBoundingBox ||
       y > yMaxBoundingBox) {
-    return false;
+    return NULL;
   }
   if (hasRangeZ) {
     if (z < zMinBoundingBox || z > zMaxBoundingBox) {
-      return false;
+      return NULL;
     }
   }
 
@@ -378,29 +377,23 @@ bool ComponentTcad2d::GetMedium(const double xin, const double yin,
   switch (elements[i].type) {
     case 1:
       if (CheckLine(x, y, i)) {
-        m = regions[elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
+        return regions[elements[i].region].medium;
       }
       break;
     case 2:
       if (CheckTriangle(x, y, i)) {
-        m = regions[elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
+        return regions[elements[i].region].medium;
       }
       break;
     case 3:
       if (CheckRectangle(x, y, i)) {
-        m = regions[elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
+        return regions[elements[i].region].medium;
       }
       break;
     default:
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
-      return false;
+      return NULL;
       break;
   }
 
@@ -413,31 +406,25 @@ bool ComponentTcad2d::GetMedium(const double xin, const double yin,
       case 1:
         if (CheckLine(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       default:
         std::cerr << m_className << "::GetMedium:\n";
         std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
-        return false;
+        return NULL;
         break;
     }
   }
@@ -450,36 +437,30 @@ bool ComponentTcad2d::GetMedium(const double xin, const double yin,
       case 1:
         if (CheckLine(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
           lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
+          return regions[elements[i].region].medium;
         }
         break;
       default:
         std::cerr << m_className << "::GetMedium:\n";
         std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
-        return false;
+        return NULL;
         break;
     }
   }
   // The point is outside the mesh.
-  return false;
+  return NULL;
 }
 
 bool ComponentTcad2d::GetMobility(const double xin, const double yin,
@@ -998,17 +979,15 @@ void ComponentTcad2d::SetMedium(const int i, Medium* medium) {
   regions[i].medium = medium;
 }
 
-bool ComponentTcad2d::GetMedium(const int i, Medium*& m) const {
+Medium* ComponentTcad2d::GetMedium(const unsigned int& i) const {
 
-  if (i < 0 || i >= nRegions) {
+  if (i >= (unsigned int)nRegions) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
-    return false;
+    return NULL;
   }
 
-  m = regions[i].medium;
-  if (m == 0) return false;
-  return true;
+  return regions[i].medium;
 }
 
 bool ComponentTcad2d::GetElement(const int i, double& vol, double& dmin,

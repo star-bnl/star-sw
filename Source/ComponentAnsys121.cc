@@ -1134,8 +1134,8 @@ double ComponentAnsys121::WeightingPotential(const double xin, const double yin,
              2;
 }
 
-bool ComponentAnsys121::GetMedium(const double xin, const double yin,
-                                  const double zin, Medium*& m) {
+Medium* ComponentAnsys121::GetMedium(const double& xin, const double& yin,
+                                     const double& zin) {
 
   // Copy the coordinates.
   double x = xin, y = yin, z = 0.;
@@ -1146,18 +1146,15 @@ bool ComponentAnsys121::GetMedium(const double xin, const double yin,
   MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
                  rotation);
 
-  // Initial value
-  m = 0;
-
   if (zin < zMinBoundingBox || z > zMaxBoundingBox) {
-    return false;
+    return NULL;
   }
 
   // Do not proceed if not properly initialised.
   if (!ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
-    return false;
+    return NULL;
   }
   if (warning) {
     std::cerr << m_className << "::GetMedium:\n";
@@ -1172,7 +1169,7 @@ bool ComponentAnsys121::GetMedium(const double xin, const double yin,
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y << ") not in the mesh.\n";
     }
-    return false;
+    return NULL;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials) {
     if (debug) {
@@ -1180,7 +1177,7 @@ bool ComponentAnsys121::GetMedium(const double xin, const double yin,
       std::cerr << "    Point (" << x << ", " << y << ")"
                 << " has out of range material number " << imap << ".\n";
     }
-    return false;
+    return NULL;
   }
 
   if (debug) {
@@ -1199,9 +1196,7 @@ bool ComponentAnsys121::GetMedium(const double xin, const double yin,
   }
 
   // Assign a medium.
-  m = materials[elements[imap].matmap].medium;
-  if (m == 0) return false;
-  return true;
+  return materials[elements[imap].matmap].medium;
 }
 
 void ComponentAnsys121::SetRangeZ(const double zmin, const double zmax) {

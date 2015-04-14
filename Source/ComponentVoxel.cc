@@ -77,29 +77,25 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-bool ComponentVoxel::GetMedium(const double xin, const double yin,
-                               const double zin, Medium*& m) {
+Medium* ComponentVoxel::GetMedium(const double& xin, const double& yin,
+                                  const double& zin) {
 
-  m = 0;
   // Make sure the field map has been loaded.
   if (!ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
-    return false;
+    return NULL;
   }
 
   unsigned int i, j, k;
   bool xMirrored, yMirrored, zMirrored;
   if (!GetElement(xin, yin, zin, i, j, k, xMirrored, yMirrored, zMirrored)) {
-    return false;
+    return NULL;
   }
   if (media.count(mesh[i][j][k].region) < 1) {
-    m = 0;
-  } else {
-    m = media[mesh[i][j][k].region];
-  }
-  if (m == 0) return false;
-  return true;
+    return NULL;
+  } 
+  return media[mesh[i][j][k].region];
 }
 
 void ComponentVoxel::SetMesh(const unsigned int nx, const unsigned int ny,
@@ -448,17 +444,15 @@ void ComponentVoxel::SetMedium(const int i, Medium* m) {
   media[i] = m;
 }
 
-bool ComponentVoxel::GetMedium(const int i, Medium*& m) {
+Medium* ComponentVoxel::GetMedium(const unsigned int& i) {
 
   if (media.count(i) < 1) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Medium " << i << " does not exist.\n";
-    return false;
+    return NULL;
   }
 
-  m = media[i];
-  if (m == 0) return false;
-  return true;
+  return media[i];
 }
 
 bool ComponentVoxel::GetElement(const double xi, const double yi,

@@ -36,7 +36,7 @@ ViewCell::ViewCell()
 ViewCell::~ViewCell() {
 
   if (!m_hasExternalCanvas && m_canvas != NULL) delete m_canvas;
-  Reset3d();
+  Reset();
 
 }
 
@@ -162,7 +162,7 @@ bool ViewCell::Plot(const bool use3d) {
   }
 
   if (use3d) {
-    Reset3d();
+    Reset();
     m_geoManager = new TGeoManager("ViewCellGeoManager", m_label.c_str());
     TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.); 
     TGeoMaterial* matMetal = new TGeoMaterial("Metal", 63.546, 29., 8.92);
@@ -380,7 +380,7 @@ void ViewCell::PlotTube(const double& x0, const double& y0, const double& r,
   pline->Draw("");
 }
 
-void ViewCell::Reset3d() {
+void ViewCell::Reset() {
 
  for (std::vector<TGeoVolume*>::iterator it = m_volumes.begin();
       it != m_volumes.end(); ++it) {

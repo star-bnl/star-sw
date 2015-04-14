@@ -3,36 +3,14 @@
 
 #include <string>
 
-#include <RQ_OBJECT.h>
-#include <TObject.h>
 #include <TCanvas.h>
-#include <TBuffer3D.h>
+#include <TGeoManager.h>
 
 namespace Garfield {
 
 class GeometrySimple;
-class Solid;
 
-class ViewGeometryShape : public TObject {
-
- public:
-  ViewGeometryShape();
-  ~ViewGeometryShape() {}
-
-  void SetSolid(Solid* s);
-  void SetColor(int col);
-  TBuffer3D& GetBuffer(bool& ok);
-
- private:
-  std::string className;
-
-  Solid* solid;
-  int col;
-};
-
-class ViewGeometry : public TObject {
-
-  RQ_OBJECT("ViewGeometry")
+class ViewGeometry {
 
  public:
   // Constructor
@@ -46,31 +24,30 @@ class ViewGeometry : public TObject {
 
   void Plot();
 
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
-
- protected:
-  void Draw(Option_t* option);
-  void Paint(Option_t* option);
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string className;
+  std::string m_className;
 
   // Options
-  bool debug;
+  bool m_debug;
 
-  std::string label;
+  std::string m_label;
 
   // Canvas
-  TCanvas* canvas;
-  bool hasExternalCanvas;
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
 
-  GeometrySimple* geometry;
+  GeometrySimple* m_geometry;
 
-  int nShapes;
-  std::vector<ViewGeometryShape> shapes;
+  std::vector<TGeoVolume*> m_volumes;
+  std::vector<TGeoMedium*> m_media;
 
-  ClassDef(ViewGeometry, 0);
+  TGeoManager* m_geoManager;
+
+  void Reset();
+
 };
 }
 #endif

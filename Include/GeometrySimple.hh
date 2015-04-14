@@ -15,65 +15,66 @@ class GeometrySimple : public GeometryBase {
  public:
   // Constructor
   GeometrySimple();
-  ~GeometrySimple() {}
+  // Destructor
+  virtual ~GeometrySimple() {}
 
   // Add a solid to the geometry
   void AddSolid(Solid* s, Medium* m);
   // Get the solid at a given location (x, y, z)
-  bool GetSolid(const double x, const double y, const double z, Solid*& s);
+  Solid* GetSolid(const double& x, const double& y, const double& z) const;
   // Get the medium at a given location (x, y, z)
-  bool GetMedium(const double x, const double y, const double z, Medium*& m);
+  Medium* GetMedium(const double& x, const double& y, const double& z) const;
   // Number of solids/media in the geometry
-  int GetNumberOfSolids() const { return nSolids; }
-  int GetNumberOfMedia() const { return nMedia; }
+  unsigned int GetNumberOfSolids() const { return m_nSolids; }
+  unsigned int GetNumberOfMedia() const { return m_nMedia; }
   // Get a solid/medium from the list
-  bool GetSolid(const int i, Solid*& s) const;
-  virtual bool GetMedium(const int i, Medium*& m) const;
+  Solid* GetSolid(const unsigned int& i) const;
+  virtual Medium* GetMedium(const unsigned int& i) const;
   // Reset the geometry
   void Clear();
   void PrintSolids();
 
-  bool IsInside(const double x, const double y, const double z);
+  bool IsInside(const double& x, const double& y, const double& z) const;
   // Bounding box (envelope of geometry)
-  bool IsInBoundingBox(const double x, const double y, const double z);
+  bool IsInBoundingBox(const double& x, const double& y, const double& z) const;
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
                       double& ymax, double& zmax) {
-    xmin = xMinBoundingBox;
-    ymin = yMinBoundingBox;
-    zmin = zMinBoundingBox;
-    xmax = xMaxBoundingBox;
-    ymax = yMaxBoundingBox;
-    zmax = zMaxBoundingBox;
+    xmin = m_xMinBoundingBox;
+    ymin = m_yMinBoundingBox;
+    zmin = m_zMinBoundingBox;
+    xmax = m_xMaxBoundingBox;
+    ymax = m_yMaxBoundingBox;
+    zmax = m_zMaxBoundingBox;
     return true;
   }
 
   // Switch on/off debugging and warning messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
   // List of media
-  int nMedia;
+  unsigned int m_nMedia;
   struct medium {
     Medium* medium;
   };
-  std::vector<medium> media;
+  std::vector<medium> m_media;
 
   // List of solids
-  int nSolids;
+  unsigned int m_nSolids;
   struct solid {
     Solid* solid;
     int medium;
   };
-  std::vector<solid> solids;
+  std::vector<solid> m_solids;
 
   // Bounding box ranges
-  bool hasBoundingBox;
-  double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-  double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+  bool m_hasBoundingBox;
+  double m_xMinBoundingBox, m_yMinBoundingBox, m_zMinBoundingBox;
+  double m_xMaxBoundingBox, m_yMaxBoundingBox, m_zMaxBoundingBox;
 
   // Switch on/off debugging messages
-  bool debug;
+  bool m_debug;
 };
 }
 

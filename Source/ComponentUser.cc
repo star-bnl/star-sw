@@ -30,14 +30,14 @@ void ComponentUser::ElectricField(const double x, const double y,
   }
 
   field(x, y, z, ex, ey, ez);
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 
@@ -67,14 +67,14 @@ void ComponentUser::ElectricField(const double x, const double y,
     v = 0.;
   }
 
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 

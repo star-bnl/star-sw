@@ -1,10 +1,6 @@
 #include <iostream>
 #include <cmath>
 
-#include <TBuffer3D.h>
-#include <TBuffer3DTypes.h>
-#include <TVirtualViewer3D.h>
-
 #include "GeometrySimple.hh"
 #include "Solid.hh"
 #include "Plotting.hh"
@@ -14,373 +10,196 @@
 
 namespace Garfield {
 
-ViewGeometryShape::ViewGeometryShape() : TObject(), solid(0), col(kBlue) {
-
-  className = "ViewGeometryShape";
-}
-
-void ViewGeometryShape::SetSolid(Solid* s) {
-
-  if (s == 0) {
-    std::cerr << className << "::SetSolid:\n";
-    std::cerr << "    Solid pointer is null.\n";
-    return;
-  }
-
-  solid = s;
-}
-
-void ViewGeometryShape::SetColor(const int color) { col = color; }
-
-TBuffer3D& ViewGeometryShape::GetBuffer(bool& ok) {
-
-  ok = false;
-
-  static TBuffer3D buffer(TBuffer3DTypes::kGeneric);
-  buffer.ClearSectionsValid();
-  buffer.fID = this;
-  buffer.fColor = col;
-  buffer.fTransparency = 0;
-  buffer.fLocalFrame = kTRUE;
-  buffer.SetLocalMasterIdentity();
-  // Make sure the shape has been set.
-  if (solid == 0) {
-    std::cerr << className << "::GetBuffer:\n";
-    std::cerr << "    Solid is not defined.\n";
-    return buffer;
-  }
-  // Get the rotation.
-  double ctheta = 1., stheta = 0.;
-  double cphi = 1., sphi = 0.;
-  if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
-    std::cerr << className << "::GetBuffer:\n";
-    std::cerr << "    Could not determine solid orientation.\n";
-    return buffer;
-  }
-  buffer.fLocalMaster[0] = cphi * ctheta;
-  buffer.fLocalMaster[4] = sphi * ctheta;
-  buffer.fLocalMaster[8] = -stheta;
-  buffer.fLocalMaster[1] = -sphi;
-  buffer.fLocalMaster[5] = cphi;
-  buffer.fLocalMaster[9] = 0.;
-  buffer.fLocalMaster[2] = cphi * stheta;
-  buffer.fLocalMaster[6] = sphi * stheta;
-  buffer.fLocalMaster[10] = ctheta;
-  buffer.fReflection = kFALSE;
-  buffer.SetSectionsValid(TBuffer3D::kCore);
-
-  // Get the bounding box.
-  double bbxmin, bbymin, bbzmin;
-  double bbxmax, bbymax, bbzmax;
-  if (!solid->GetBoundingBox(bbxmin, bbymin, bbzmin, bbxmax, bbymax, bbzmax)) {
-    std::cerr << className << "::GetBuffer:\n";
-    std::cerr << "    Could not determine bounding box.\n";
-    return buffer;
-  }
-  double origin[3] = {0.5 * (bbxmin + bbxmax), 0.5 * (bbymin + bbymax),
-                      0.5 * (bbzmin + bbzmax)};
-  double halfLength[3] = {0.5 * (bbxmax - bbxmin), 0.5 * (bbymax - bbymin),
-                          0.5 * (bbzmax - bbzmin)};
-  buffer.SetAABoundingBox(origin, halfLength);
-  buffer.SetSectionsValid(TBuffer3D::kBoundingBox);
-
-  if (solid->IsTube()) {
-    static TBuffer3DTube tube;
-    tube.ClearSectionsValid();
-    tube.fID = this;
-    tube.fColor = col;
-    tube.fTransparency = 0;
-    tube.fLocalFrame = kTRUE;
-    tube.SetLocalMasterIdentity();
-    tube.fReflection = kFALSE;
-    // Get the center coordinates.
-    double x0 = 0., y0 = 0., z0 = 0.;
-    if (!solid->GetCenter(x0, y0, z0)) {
-      std::cerr << className << "::GetBuffer:\n";
-      std::cerr << "    Could not determine tube center.\n";
-      return tube;
-    }
-    tube.fLocalMaster[12] = x0;
-    tube.fLocalMaster[13] = y0;
-    tube.fLocalMaster[14] = z0;
-    // Get the rotation.
-    if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
-      std::cerr << className << "::GetBuffer:\n";
-      std::cerr << "    Could not determine tube orientation.\n";
-      return tube;
-    }
-    tube.fLocalMaster[0] = cphi * ctheta;
-    tube.fLocalMaster[4] = sphi * ctheta;
-    tube.fLocalMaster[8] = -stheta;
-    tube.fLocalMaster[1] = -sphi;
-    tube.fLocalMaster[5] = cphi;
-    tube.fLocalMaster[9] = 0.;
-    tube.fLocalMaster[2] = cphi * stheta;
-    tube.fLocalMaster[6] = sphi * stheta;
-    tube.fLocalMaster[10] = ctheta;
-    tube.SetSectionsValid(TBuffer3D::kCore);
-
-    tube.SetAABoundingBox(origin, halfLength);
-    tube.SetSectionsValid(TBuffer3D::kBoundingBox);
-
-    double rmin, rmax, lz;
-    if (!solid->GetDimensions(rmin, rmax, lz)) {
-      std::cerr << className << "::GetBuffer:\n";
-      std::cerr << "    Could not determine tube dimensions.\n";
-      return tube;
-    }
-    tube.fRadiusInner = rmin;
-    tube.fRadiusOuter = rmax;
-    tube.fHalfLength = lz;
-    tube.SetSectionsValid(TBuffer3D::kShapeSpecific);
-    ok = true;
-    return tube;
-  } else if (solid->IsBox()) {
-    buffer.SetRawSizes(8, 3 * 8, 12, 3 * 12, 6, 6 * 6);
-    buffer.SetSectionsValid(TBuffer3D::kRawSizes);
-    double dx, dy, dz;
-    double x0, y0, z0;
-    if (!solid->GetDimensions(dx, dy, dz) || !solid->GetCenter(x0, y0, z0)) {
-      std::cerr << className << "::GetBuffer:\n";
-      std::cerr << "    Could not determine box dimensions.\n";
-      return buffer;
-    }
-    // Points (8)
-    // 3 components: x,y,z
-    buffer.fPnts[0] = x0 - dx;
-    buffer.fPnts[1] = y0 - dy;
-    buffer.fPnts[2] = z0 - dz;  // 0
-    buffer.fPnts[3] = x0 + dx;
-    buffer.fPnts[4] = y0 - dy;
-    buffer.fPnts[5] = z0 - dz;  // 1
-    buffer.fPnts[6] = x0 + dx;
-    buffer.fPnts[7] = y0 + dy;
-    buffer.fPnts[8] = z0 - dz;  // 2
-    buffer.fPnts[9] = x0 - dx;
-    buffer.fPnts[10] = y0 + dy;
-    buffer.fPnts[11] = z0 - dz;  // 3
-    buffer.fPnts[12] = x0 - dx;
-    buffer.fPnts[13] = y0 - dy;
-    buffer.fPnts[14] = z0 + dz;  // 4
-    buffer.fPnts[15] = x0 + dx;
-    buffer.fPnts[16] = y0 - dy;
-    buffer.fPnts[17] = z0 + dz;  // 5
-    buffer.fPnts[18] = x0 + dx;
-    buffer.fPnts[19] = y0 + dy;
-    buffer.fPnts[20] = z0 + dz;  // 6
-    buffer.fPnts[21] = x0 - dx;
-    buffer.fPnts[22] = y0 + dy;
-    buffer.fPnts[23] = z0 + dz;  // 7
-
-    // Segments (12)
-    // 3 components: segment color (ignored),
-    //               start point index, end point index
-    // Indices reference the above points
-    buffer.fSegs[0] = col;
-    buffer.fSegs[1] = 0;
-    buffer.fSegs[2] = 1;  // 0
-    buffer.fSegs[3] = col;
-    buffer.fSegs[4] = 1;
-    buffer.fSegs[5] = 2;  // 1
-    buffer.fSegs[6] = col;
-    buffer.fSegs[7] = 2;
-    buffer.fSegs[8] = 3;  // 2
-    buffer.fSegs[9] = col;
-    buffer.fSegs[10] = 3;
-    buffer.fSegs[11] = 0;  // 3
-    buffer.fSegs[12] = col;
-    buffer.fSegs[13] = 4;
-    buffer.fSegs[14] = 5;  // 4
-    buffer.fSegs[15] = col;
-    buffer.fSegs[16] = 5;
-    buffer.fSegs[17] = 6;  // 5
-    buffer.fSegs[18] = col;
-    buffer.fSegs[19] = 6;
-    buffer.fSegs[20] = 7;  // 6
-    buffer.fSegs[21] = col;
-    buffer.fSegs[22] = 7;
-    buffer.fSegs[23] = 4;  // 7
-    buffer.fSegs[24] = col;
-    buffer.fSegs[25] = 0;
-    buffer.fSegs[26] = 4;  // 8
-    buffer.fSegs[27] = col;
-    buffer.fSegs[28] = 1;
-    buffer.fSegs[29] = 5;  // 9
-    buffer.fSegs[30] = col;
-    buffer.fSegs[31] = 2;
-    buffer.fSegs[32] = 6;  // 10
-    buffer.fSegs[33] = col;
-    buffer.fSegs[34] = 3;
-    buffer.fSegs[35] = 7;  // 11
-
-    // Polygons (6)
-    // 5 + (2 + n) components: polygon color (ignored),
-    //                         segment count (n = 3+),
-    //                         seg1, seg2 .... segn index
-    // Segment indices refer to the above 12 segments
-    // Here n = 4 - each polygon defines a rectangle - 4 sides.
-    buffer.fPols[0] = col;
-    buffer.fPols[1] = 4;
-    buffer.fPols[2] = 8;  // 0
-    buffer.fPols[3] = 4;
-    buffer.fPols[4] = 9;
-    buffer.fPols[5] = 0;
-    buffer.fPols[6] = col;
-    buffer.fPols[7] = 4;
-    buffer.fPols[8] = 9;  // 1
-    buffer.fPols[9] = 5;
-    buffer.fPols[10] = 10;
-    buffer.fPols[11] = 1;
-    buffer.fPols[12] = col;
-    buffer.fPols[13] = 4;
-    buffer.fPols[14] = 10;  // 2
-    buffer.fPols[15] = 6;
-    buffer.fPols[16] = 11;
-    buffer.fPols[17] = 2;
-    buffer.fPols[18] = col;
-    buffer.fPols[19] = 4;
-    buffer.fPols[20] = 11;  // 3
-    buffer.fPols[21] = 7;
-    buffer.fPols[22] = 8;
-    buffer.fPols[23] = 3;
-    buffer.fPols[24] = col;
-    buffer.fPols[25] = 4;
-    buffer.fPols[26] = 1;  // 4
-    buffer.fPols[27] = 2;
-    buffer.fPols[28] = 3;
-    buffer.fPols[29] = 0;
-    buffer.fPols[30] = col;
-    buffer.fPols[31] = 4;
-    buffer.fPols[32] = 7;  // 5
-    buffer.fPols[33] = 6;
-    buffer.fPols[34] = 5;
-    buffer.fPols[35] = 4;
-    buffer.SetSectionsValid(TBuffer3D::kRaw);
-    ok = true;
-    return buffer;
-  }
-
-  std::cerr << className << "::GetBuffer:\n";
-  std::cerr << "    Unknown type of solid.\n";
-
-  return buffer;
-}
-
 ViewGeometry::ViewGeometry()
-    : TObject(),
-      className("ViewGeometry"),
-      debug(false),
-      canvas(0),
-      hasExternalCanvas(false),
-      geometry(0),
-      nShapes(0) {
+    : m_className("ViewGeometry"),
+      m_debug(false),
+      m_canvas(NULL),
+      m_hasExternalCanvas(false),
+      m_geometry(NULL),
+      m_geoManager(NULL) {
 
   plottingEngine.SetDefaultStyle();
-  shapes.clear();
 }
 
 ViewGeometry::~ViewGeometry() {
 
-  if (!hasExternalCanvas && canvas != 0) delete canvas;
+  if (!m_hasExternalCanvas && m_canvas != NULL) delete m_canvas;
+  Reset();
 }
 
 void ViewGeometry::SetGeometry(GeometrySimple* geo) {
 
-  if (geo == 0) {
-    std::cerr << className << "::SetGeometry:\n";
+  if (geo == NULL) {
+    std::cerr << m_className << "::SetGeometry:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return;
   }
 
-  geometry = geo;
+  m_geometry = geo;
 }
 
 void ViewGeometry::SetCanvas(TCanvas* c) {
 
-  if (c == 0) return;
-  if (!hasExternalCanvas && canvas != 0) {
-    delete canvas;
-    canvas = 0;
+  if (c == NULL) return;
+  if (!m_hasExternalCanvas && m_canvas != NULL) {
+    delete m_canvas;
+    m_canvas = NULL;
   }
-  canvas = c;
-  hasExternalCanvas = true;
+  m_canvas = c;
+  m_hasExternalCanvas = true;
 }
 
 void ViewGeometry::Plot() {
 
-  if (geometry == 0) {
-    std::cerr << className << "::Plot:\n";
+  if (m_geometry == NULL) {
+    std::cerr << m_className << "::Plot:\n";
     std::cerr << "    Geometry is not defined.\n";
     return;
   }
 
-  if (canvas == 0) {
-    canvas = new TCanvas();
-    canvas->SetTitle(label.c_str());
-    if (hasExternalCanvas) hasExternalCanvas = false;
+  if (m_canvas == NULL) {
+    m_canvas = new TCanvas();
+    m_canvas->SetTitle(m_label.c_str());
+    if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
-  canvas->cd();
+  m_canvas->cd();
 
-  shapes.clear();
-  nShapes = 0;
-
-  const int nSolids = geometry->GetNumberOfSolids();
-  if (nSolids <= 0) {
-    std::cerr << className << "::Plot:\n";
+  const unsigned int nSolids = m_geometry->GetNumberOfSolids();
+  if (nSolids == 0) {
+    std::cerr << m_className << "::Plot:\n";
     std::cerr << "    Geometry is empty.\n";
     return;
   }
 
-  Solid* solid = 0;
-  for (int i = nSolids; i--;) {
-    solid = 0;
-    if (!geometry->GetSolid(i, solid)) {
-      std::cerr << className << "::Plot:\n";
+  // Get the bounding box.
+  double xMin = 0., yMin = 0., zMin = 0.;
+  double xMax = 0., yMax = 0., zMax = 0.; 
+  if (!m_geometry->GetBoundingBox(xMin, yMin, zMin, xMax, yMax, zMax)) {
+    std::cerr << m_className << "::Plot:\n";
+    std::cerr << "    Cannot retrieve bounding box.\n";
+    return;
+  }
+  m_geoManager = new TGeoManager("ViewGeometryGeoManager", m_label.c_str());
+  TGeoMaterial* matVacuum = new TGeoMaterial("Vacuum", 0., 0., 0.);
+  TGeoMedium* medVacuum = new TGeoMedium("Vacuum", 1, matVacuum);
+  m_media.push_back(medVacuum);
+  // Use silicon as "default" material.
+  TGeoMaterial* matDefault = new TGeoMaterial("Default", 28.085, 14., 2.329);
+  TGeoMedium* medDefault = new TGeoMedium("Default", 1, matDefault); 
+  TGeoVolume* world = m_geoManager->MakeBox("World", medVacuum,
+                                            std::max(fabs(xMin), fabs(xMax)),
+                                            std::max(fabs(yMin), fabs(yMax)),
+                                            std::max(fabs(zMin), fabs(zMax)));
+  m_geoManager->SetTopVolume(world);
+  m_volumes.push_back(world);
+
+  for (unsigned int i = 0; i < nSolids; ++i) {
+    Solid* solid = m_geometry->GetSolid(i);
+    if (solid == NULL) {
+      std::cerr << m_className << "::Plot:\n";
       std::cerr << "    Could not get solid " << i << " from geometry.\n";
       continue;
     }
-    if (solid == 0) {
-      std::cerr << className << "::Plot:\n";
-      std::cerr << "    Got null pointer from geometry.\n";
+    // Get the center coordinates.
+    double x0 = 0., y0 = 0., z0 = 0.;
+    if (!solid->GetCenter(x0, y0, z0)) {
+      std::cerr << m_className << "::Plot:\n";
+      std::cerr << "    Could not determine solid center.\n";
       continue;
     }
-    ViewGeometryShape newShape;
-    newShape.SetSolid(solid);
-    shapes.push_back(newShape);
-    ++nShapes;
+    // Get the rotation.
+    double ctheta = 1., stheta = 0.;
+    double cphi = 1., sphi = 0.;
+    if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
+      std::cerr << m_className << "::Plot:\n";
+      std::cerr << "    Could not determine solid orientation.\n";
+      continue;
+    }
+    double matrix[9] = {cphi * ctheta, -sphi, cphi * stheta,
+                        sphi * ctheta,  cphi, sphi * stheta,
+                              -stheta,     0,        ctheta};
+    TGeoVolume* volume = NULL;
+    if (solid->IsTube()) {
+      double rmin = 0., rmax = 0., lz = 0.;
+      if (!solid->GetDimensions(rmin, rmax, lz)) {
+        std::cerr << m_className << "::Plot:\n";
+        std::cerr << "    Could not determine tube dimensions.\n";
+        continue;
+      }
+      volume = m_geoManager->MakeTube("Tube", medDefault, rmin, rmax, lz);
+    } else if (solid->IsBox()) {
+      double dx = 0., dy = 0., dz = 0.;
+      if (!solid->GetDimensions(dx, dy, dz)) {
+        std::cerr << m_className << "::Plot:\n";
+        std::cerr << "    Could not determine box dimensions.\n";
+        continue;
+      }
+      volume = m_geoManager->MakeBox("Box", medDefault, dx, dy, dz);
+    } else if (solid->IsSphere()) {
+      double rmin = 0., rmax = 0., dummy = 0.;
+      if (!solid->GetDimensions(rmin, rmax, dummy)) {
+        std::cerr << m_className << "::Plot:\n";
+        std::cerr << "    Could not determine sphere dimensions.\n";
+        continue;
+      }
+      volume = m_geoManager->MakeSphere("Sphere", medDefault, rmin, rmax); 
+    } else {
+      std::cerr << m_className << "::Plot:\n";
+      std::cerr << "    Unknown solid type.\n";
+      continue;
+    }
+    Medium* medium = m_geometry->GetMedium(x0, y0, z0);
+    if (medium == NULL) {
+      volume->SetLineColor(kGreen + 2);
+      volume->SetTransparency(50);
+    } else if (medium->IsGas()) {
+      volume->SetLineColor(kBlue + medium->GetId());
+      volume->SetTransparency(50);
+    } else if (medium->IsSemiconductor()) {
+      volume->SetLineColor(kRed + medium->GetId());
+      volume->SetTransparency(50);
+    } else {
+      volume->SetLineColor(kViolet + medium->GetId());
+      volume->SetTransparency(0);
+    } 
+    TGeoRotation r;
+    r.SetMatrix(matrix);
+    TGeoTranslation t(x0, y0, z0);
+    TGeoCombiTrans* transform = new TGeoCombiTrans(t, r);
+    m_volumes.push_back(volume);
+    m_geoManager->GetTopVolume()->AddNode(volume, 1, transform);
   }
+  m_geoManager->CloseGeometry();
+  m_geoManager->GetTopNode()->Draw("ogl");
 
-  Draw("ogl");
 }
 
-void ViewGeometry::Paint(Option_t*) {
+void ViewGeometry::Reset() {
 
-  if (nShapes <= 0) {
-    std::cerr << className << "::Paint:\n";
-    std::cerr << "    There is nothing to paint.\n";
-    return;
-  }
-
-  TVirtualViewer3D* viewer = gPad->GetViewer3D();
-  viewer->BeginScene();
-
-  for (int i = nShapes; i--;) {
-    bool ok = false;
-    TBuffer3D& buffer = shapes[i].GetBuffer(ok);
-    int req = viewer->AddObject(buffer);
-
-    if (req != TBuffer3D::kNone) {
-      std::cerr << className << "::Paint:\n";
-      std::cerr << "    Could not pass object to viewer.\n";
+ for (std::vector<TGeoVolume*>::iterator it = m_volumes.begin();
+      it != m_volumes.end(); ++it) {
+    if (*it) {
+      TGeoShape* shape = (*it)->GetShape();
+      if (shape) delete shape;
+      delete *it;
     }
   }
+  m_volumes.clear();
+  for (std::vector<TGeoMedium*>::iterator it = m_media.begin();
+       it != m_media.end(); ++it) {
+    if (*it) {
+      TGeoMaterial* material = (*it)->GetMaterial();
+      if (material) delete material;
+      delete *it;
+    }
+  }
+  m_media.clear();
 
-  viewer->EndScene();
+  if (m_geoManager) {
+    delete m_geoManager;
+    m_geoManager = NULL;
+  }
+
 }
 
-void ViewGeometry::Draw(Option_t* option) {
-
-  TObject::Draw(option);
-  gPad->GetViewer3D(option);
-}
 }

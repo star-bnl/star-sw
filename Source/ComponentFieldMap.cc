@@ -155,18 +155,15 @@ void ComponentFieldMap::SetMedium(const int imat, Medium* m) {
   materials[imat].medium = m;
 }
 
-bool ComponentFieldMap::GetMedium(const int imat, Medium*& m) const {
+Medium* ComponentFieldMap::GetMedium(const unsigned int& imat) const {
 
-  if (imat < 0 || imat >= nMaterials) {
+  if (imat >= (unsigned int)nMaterials) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Material index " << imat << " is out of range.\n";
-    m = 0;
-    return false;
+    return NULL;
   }
 
-  m = materials[imat].medium;
-  if (!m) return false;
-  return true;
+  return materials[imat].medium;
 }
 
 bool ComponentFieldMap::GetElement(const int i, double& vol, double& dmin,
@@ -4056,7 +4053,7 @@ bool ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 void ComponentFieldMap::MapCoordinates(double& xpos, double& ypos, double& zpos,
                                        bool& xmirrored, bool& ymirrored,
                                        bool& zmirrored, double& rcoordinate,
-                                       double& rotation) {
+                                       double& rotation) const {
 
   // Initial values
   rotation = 0;

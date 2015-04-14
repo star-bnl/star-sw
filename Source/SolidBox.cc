@@ -59,7 +59,8 @@ SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
   }
 }
 
-bool SolidBox::IsInside(const double& x, const double& y, const double& z) const {
+bool SolidBox::IsInside(const double& x, const double& y, 
+                        const double& z) const {
 
   // Transform the point to local coordinates
   const double dx = x - m_cX;
