@@ -1,10 +1,10 @@
 #include <iostream>
-#include <RQ_OBJECT.h>
+
+#include <TAxis.h>
+#include <TH1F.h>
+
 #include "Plotting.hh"
 #include "ViewDrift.hh"
-#include "TMultiGraph.h"
-#include "TH1F.h"
-#include "TAxis.h"
 
 namespace Garfield {
 
@@ -33,7 +33,9 @@ ViewDrift::ViewDrift()
       m_markerSizeCollision(1.) {
 
   m_driftLines.reserve(1000);
+  m_driftLinePlots.reserve(1000);
   m_tracks.reserve(100);
+  m_trackPlots.reserve(100);
   m_excMarkers.reserve(1000);
   m_ionMarkers.reserve(1000);
   m_attMarkers.reserve(1000);
@@ -43,12 +45,7 @@ ViewDrift::~ViewDrift() {
 
   if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
   if (m_view) delete m_view;
-  delete m_excPlot;
-  m_excPlot = NULL;
-  delete m_ionPlot;
-  m_ionPlot = NULL;
-  delete m_attPlot;
-  m_attPlot = NULL;
+  Clear();
 }
 
 void ViewDrift::SetCanvas(TCanvas* c) {
@@ -105,6 +102,14 @@ void ViewDrift::Clear() {
   if (m_attPlot) {
     delete m_attPlot;
     m_attPlot = NULL;
+  }
+  const unsigned int nTrackPlots = m_trackPlots.size();
+  for (unsigned int i = 0; i < nTrackPlots; ++i) {
+    if (m_trackPlots[i]) delete m_trackPlots[i];
+  }
+  const unsigned int nDriftLinePlots = m_driftLinePlots.size();
+  for (unsigned int i = 0; i < nDriftLinePlots; ++i) {
+    if (m_driftLinePlots[i]) delete m_driftLinePlots[i];
   }
 }
 
@@ -422,44 +427,44 @@ void ViewDrift::Plot3d(const bool axis) {
       m_canvas->SetView(m_view);
     }
   }
+
   for (unsigned int i = 0; i < m_nDriftLines; ++i) {
     const unsigned int nPoints = m_driftLines[i].vect.size();
-    TPointSet3D t(nPoints);
+    TPolyMarker3D* t = new TPolyMarker3D(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
-      t.SetNextPoint(m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
-                     m_driftLines[i].vect[j].z);
+      t->SetNextPoint(m_driftLines[i].vect[j].x, m_driftLines[i].vect[j].y,
+                      m_driftLines[i].vect[j].z);
     }
-    t.SetMarkerColor(m_driftLines[i].n);
-    t.DrawClone("Lsame");
+    t->SetMarkerColor(m_driftLines[i].n);
+    m_driftLinePlots.push_back(t);
+    t->Draw("Lsame");
   }
-  m_canvas->Update();
-
   const int trackCol = plottingEngine.GetRootColorChargedParticle();
   for (unsigned int i = 0; i < m_nTracks; ++i) {
     const unsigned int nPoints = m_tracks[i].vect.size();
-    TPointSet3D t(nPoints);
-    TPolyLine3D l(nPoints);
+    TPolyMarker3D* t = new TPolyMarker3D(nPoints);
+    TPolyLine3D* l = new TPolyLine3D(nPoints);
     for (unsigned int j = 0; j < nPoints; ++j) {
-      t.SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                     m_tracks[i].vect[j].z);
-      l.SetNextPoint( m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
-                     m_tracks[i].vect[j].z);
+      t->SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
+                      m_tracks[i].vect[j].z);
+      l->SetNextPoint(m_tracks[i].vect[j].x, m_tracks[i].vect[j].y,
+                      m_tracks[i].vect[j].z);
     }
-    t.SetMarkerStyle(20);
-    t.SetMarkerColor(trackCol);
-    t.SetMarkerSize(m_markerSizeCluster);
-    t.DrawClone("same");
-    l.SetLineColor(trackCol);
-    l.SetLineWidth(1);
-    l.DrawClone("same");
+    t->SetMarkerStyle(20);
+    t->SetMarkerColor(trackCol);
+    t->SetMarkerSize(m_markerSizeCluster);
+    t->Draw("same");
+    m_trackPlots.push_back(t);
+    l->SetLineColor(trackCol);
+    l->SetLineWidth(1);
+    l->Draw("same");
   }
-
   if (m_excPlot) {
     delete m_excPlot;
     m_excPlot = NULL;
   }
   if (m_nExcMarkers > 0) {
-    m_excPlot = new TPointSet3D(m_nExcMarkers);
+    m_excPlot = new TPolyMarker3D(m_nExcMarkers);
     m_excPlot->SetMarkerColor(plottingEngine.GetRootColorLine2());
     m_excPlot->SetMarkerStyle(20);
     m_excPlot->SetMarkerSize(m_markerSizeCollision);
@@ -474,7 +479,7 @@ void ViewDrift::Plot3d(const bool axis) {
     m_ionPlot = NULL;
   }
   if (m_nIonMarkers > 0) {
-    m_ionPlot = new TPointSet3D(m_nIonMarkers);
+    m_ionPlot = new TPolyMarker3D(m_nIonMarkers);
     m_ionPlot->SetMarkerColor(plottingEngine.GetRootColorIon());
     m_ionPlot->SetMarkerStyle(20);
     m_ionPlot->SetMarkerSize(m_markerSizeCollision);
@@ -489,7 +494,7 @@ void ViewDrift::Plot3d(const bool axis) {
     m_attPlot = NULL;
   }
   if (m_nAttMarkers > 0) {
-    m_attPlot = new TPointSet3D(m_nAttMarkers);
+    m_attPlot = new TPolyMarker3D(m_nAttMarkers);
     m_attPlot->SetMarkerColor(plottingEngine.GetRootColorLine1());
     m_attPlot->SetMarkerStyle(20);
     m_attPlot->SetMarkerSize(m_markerSizeCollision);

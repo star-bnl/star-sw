@@ -5,7 +5,7 @@
 #include <TGraph.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
-#include <TPointSet3D.h>
+#include <TPolyMarker3D.h>
 #include <TView.h>
 
 namespace Garfield {
@@ -87,22 +87,24 @@ class ViewDrift {
     int n;  // what kind of particle?
   };
   std::vector<driftLine> m_driftLines;
+  std::vector<TPolyMarker3D*> m_driftLinePlots;
 
   unsigned int m_nTracks;
   struct track {
     std::vector<marker> vect;
   };
   std::vector<track> m_tracks;
+  std::vector<TPolyMarker3D*> m_trackPlots;
 
   unsigned int m_nExcMarkers;
   std::vector<marker> m_excMarkers;
-  TPointSet3D* m_excPlot;
+  TPolyMarker3D* m_excPlot;
   unsigned int m_nIonMarkers;
   std::vector<marker> m_ionMarkers;
-  TPointSet3D* m_ionPlot;
+  TPolyMarker3D* m_ionPlot;
   unsigned int m_nAttMarkers;
   std::vector<marker> m_attMarkers;
-  TPointSet3D* m_attPlot;
+  TPolyMarker3D* m_attPlot;
 
   double m_markerSizeCluster;
   double m_markerSizeCollision;
