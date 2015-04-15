@@ -286,9 +286,6 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
     const double r = sqrt(pow(xwc - x0, 2) + pow(yxc - y0, 2));
     const double rTrap = 0.5 * w[i].d * w[i].nTrap;
     if (r < rTrap) {
-      std::cout << m_className << "::IsInTrapRadius:\n";
-      std::cout << "    rTrap = " << rTrap << ", r = " << r
-                << ", nTrap = " << w[i].nTrap << "\n";
       xw = w[i].x;
       yw = w[i].y;
       rw = w[i].d * 0.5;

@@ -994,7 +994,6 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
   m_sensor->ElectricField(xe, ye, ze, ex, ey, ez, m_medium, status);
   if (status != 0) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
-    std::cerr << m_className << "::IntegrateTownsend:\n";
     std::cerr << "    End position (" << xi << ", " << yi << ", "
               << zi << ") not valid.\n";
     return 0.;
@@ -1027,7 +1026,8 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
     dy = y1 - y0;
     dz = z1 - z0;
     d = sqrt(dx * dx + dy * dy + dz * dz);
-    if (d < 1.e-6) {
+    const double tol = 1.e-6;
+    if (d < tol) {
       // Step length has become very small.
       if (m_debug) {
         std::cout << m_className << "::IntegrateTownsend: Small step.\n";
@@ -1037,7 +1037,8 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
       const double dxe = xe - x1;
       const double dye = ye - y1;
       const double dze = ze - z1;
-      if (sqrt(dxe * dxe + dye * dye + dze * dze) < 1.e-6) break;
+      const double tol2 = tol * tol;
+      if (dxe * dxe + dye * dye + dze * dze < tol2) break;
       // Proceed with the next step.
       x0 = x1;
       y0 = y1;
@@ -1088,7 +1089,9 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
       y0 = y1;
       z0 = z1;
       alpha0 = alpha1;
-      if (x0 == xe && y0 == ye && z0 == ze) {
+      if (fabs(x0 - xe) < BoundaryDistance &&
+          fabs(y0 - ye) < BoundaryDistance &&
+          fabs(z0 - ze) < BoundaryDistance) {
         keepGoing = false;
         break;
       }
