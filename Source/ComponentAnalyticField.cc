@@ -22,7 +22,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // Initialize electric field and medium.
   ex = ey = ez = 0.;
-  m = 0;
+  m = NULL;
 
   // Make sure the charges have been calculated.
   if (!cellset) {
@@ -57,7 +57,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // Initialize electric field and medium.
   ex = ey = ez = v = 0.;
-  m = 0;
+  m = NULL;
 
   // Make sure the charges have been calculated.
   if (!cellset) {

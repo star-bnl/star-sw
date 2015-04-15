@@ -69,50 +69,54 @@ void DriftLineRKF::DisablePlotting() {
   m_usePlotting = false;
 }
 
-void DriftLineRKF::DriftElectron(const double x0, const double y0,
-                                 const double z0, const double t0) {
+bool DriftLineRKF::DriftElectron(const double& x0, const double& y0,
+                                 const double& z0, const double& t0) {
 
   m_particleType = ParticleTypeElectron;
-  DriftLine(x0, y0, z0, t0);
+  if (!DriftLine(x0, y0, z0, t0)) return false;
   GetGain();
   ComputeSignal();
+  return true;
 }
 
-void DriftLineRKF::DriftHole(const double x0, const double y0, const double z0,
-                             const double t0) {
+bool DriftLineRKF::DriftHole(const double& x0, const double& y0, 
+                             const double& z0, const double& t0) {
 
   m_particleType = ParticleTypeHole;
-  DriftLine(x0, y0, z0, t0);
+  if (!DriftLine(x0, y0, z0, t0)) return false;
   ComputeSignal();
+  return true;
 }
 
-void DriftLineRKF::DriftIon(const double x0, const double y0, const double z0,
-                            const double t0) {
+bool DriftLineRKF::DriftIon(const double& x0, const double& y0, 
+                            const double& z0, const double& t0) {
 
   m_particleType = ParticleTypeIon;
-  DriftLine(x0, y0, z0, t0);
+  if (!DriftLine(x0, y0, z0, t0)) return false;
   ComputeSignal();
+  return true;
 }
 
-void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
+bool DriftLineRKF::DriftLine(const double& x0, const double& y0, 
+                             const double& z0, const double& t0) {
 
   // Check if the sensor is defined.
   if (!m_sensor) {
     std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Sensor is not defined.\n";
-    return;
+    return false;
   }
   // Get electric and magnetic field at initial position.
-  double ex, ey, ez;
-  double bx, by, bz;
-  int status;
+  double ex = 0., ey = 0., ez = 0.;
+  double bx = 0., by = 0., bz = 0.;
+  int status = 0;
   m_sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   m_sensor->ElectricField(x0, y0, z0, ex, ey, ez, m_medium, status);
   // Make sure the initial position is at a valid location.
   if (status != 0) {
     std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    No valid field at initial position.\n";
-    return;
+    return false;
   }
 
   // Start plotting a new line if requested.
@@ -164,13 +168,13 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
   if (!GetVelocity(ex, ey, ez, bx, by, bz, v0x, v0y, v0z)) {
     std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Failed to retrieve drift velocity.\n";
-    return;
+    return false;
   }
   const double vTot = sqrt(v0x * v0x + v0y * v0y + v0z * v0z);
   if (vTot < Small) {
     std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Zero velocity at initial position.\n";
-    return;
+    return false;
   }
   // Initialise time step and previous time step.
   double dt = m_accuracy / vTot;
@@ -199,7 +203,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
     m_sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
     m_sensor->ElectricField(x1, y1, z1, ex, ey, ez, m_medium, status);
     if (status != 0) {
-      EndDriftLine();
+      if (!EndDriftLine()) return false;
       break;
     }
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
@@ -211,13 +215,13 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
       break;
     }
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
-      DriftToWire(x1, y1, z1, xWire, yWire, rWire);
+      if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
       std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Failed to retrieve drift velocity.\n";
-      return;
+      return false;
     }
     // Get second estimate of new drift velocity.
     x1 = x + dt * (b20 * v0x + b21 * v1[0]);
@@ -226,7 +230,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
     m_sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
     m_sensor->ElectricField(x1, y1, z1, ex, ey, ez, m_medium, status);
     if (status != 0) {
-      EndDriftLine();
+      if (!EndDriftLine()) return false;
       break;
     }
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
@@ -238,13 +242,13 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
       break;
     }
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
-      DriftToWire(x1, y1, z1, xWire, yWire, rWire);
+      if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
       std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Failed to retrieve drift velocity.\n";
-      return;
+      return false;
     }
     // Get third estimate of new drift velocity.
     x1 = x + dt * (b30 * v0x + b31 * v1[0] + b32 * v2[0]);
@@ -253,7 +257,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
     m_sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
     m_sensor->ElectricField(x1, y1, z1, ex, ey, ez, m_medium, status);
     if (status != 0) {
-      EndDriftLine();
+      if (!EndDriftLine()) return false;
       break;
     }
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
@@ -265,13 +269,13 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
       break;
     }
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
-      DriftToWire(x1, y1, z1, xWire, yWire, rWire);
+      if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
       std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Failed to retrieve drift velocity.\n";
-      return;
+      return false;
     }
 
     // Calculate estimates of velocity over step.
@@ -312,7 +316,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
     m_path[counter].tf = m_path[counter].ti + dt;
     m_sensor->ElectricField(x, y, z, ex, ey, ez, m_medium, status);
     if (status != 0) {
-      EndDriftLine();
+      if (!EndDriftLine()) return false;
       break;
     }
 
@@ -337,7 +341,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
       std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Step size is zero (program bug).\n";
       std::cerr << "    The calculation is abandoned.\n";
-      return;
+      return false;
     }
     // Prevent step size from growing too fast.
     if (dt > 10. * pdt) dt = 10. * pdt;
@@ -346,7 +350,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
       std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Step size has become smaller than int. accuracy.\n";
       std::cerr << "    The calculation is abandoned.\n";
-      return;
+      return false;
     }
     // Update velocity.
     v0x = v3[0];
@@ -385,6 +389,7 @@ void DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0) {
     m_view->AddDriftLinePoint(iLine, m_path.back().xf, m_path.back().yf,
                               m_path.back().zf);
   }
+  return true;
 }
 
 double DriftLineRKF::GetArrivalTimeSpread() {
@@ -517,7 +522,7 @@ bool DriftLineRKF::GetTownsend(const double& ex, const double& ey,
   return false;
 }
 
-void DriftLineRKF::EndDriftLine() {
+bool DriftLineRKF::EndDriftLine() {
 
   m_path.back().status = StatusCalculationAbandoned;
   m_path.back().xf = m_path.back().xi;
@@ -526,37 +531,37 @@ void DriftLineRKF::EndDriftLine() {
   double x0 = m_path.back().xi;
   double y0 = m_path.back().yi;
   double z0 = m_path.back().zi;
-  double bx, by, bz;
-  double ex, ey, ez;
-  int status;
+  double bx = 0., by = 0., bz = 0.;
+  double ex = 0., ey = 0., ez = 0.;
+  int status = 0;
   m_sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   m_sensor->ElectricField(x0, y0, z0, ex, ey, ez, m_medium, status);
   if (status != 0) {
     std::cerr << m_className << "::EndDriftLine:\n";
     std::cerr << "    No valid field at initial point. Program bug!\n";
-    return;
+    return false;
   }
-  double vx, vy, vz;
+  double vx = 0., vy = 0., vz = 0.;
   if (!GetVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
     std::cerr << m_className << "::EndDriftLine:\n";
     std::cerr << "    Failed to retrieve initial drift velocity.\n";
-    return;
+    return false;
   }
   const double speed = sqrt(vx * vx + vy * vy + vz * vz);
   if (speed < Small) {
     std::cerr << m_className << "::EndDriftLine:\n";
     std::cerr << "    Zero velocity at initial position.\n";
-    return;
+    return false;
   }
   // Calculate the initial step size.
   if (m_path.size() > 1) {
     const double dx = x0 - m_path[m_path.size() - 2].xi;
     const double dy = y0 - m_path[m_path.size() - 2].yi;
     const double dz = z0 - m_path[m_path.size() - 2].zi;
-    const double lastStepLength = sqrt(dx * dx + dy * dy + dz * dz);
-    vx *= lastStepLength / speed;
-    vy *= lastStepLength / speed;
-    vz *= lastStepLength / speed;
+    const double scale = sqrt(dx * dx + dy * dy + dz * dz) / speed;
+    vx *= scale;
+    vy *= scale;
+    vz *= scale;
   } else {
     // This is the first step. Start with a small step size.
     vx *= m_accuracy / speed;
@@ -575,7 +580,7 @@ void DriftLineRKF::EndDriftLine() {
     m_sensor->ElectricField(x1, y1, z1, ex, ey, ez, m_medium, status);
     if (status != 0) inside = false;
   }
-  double x, y, z;
+  double x = 0., y = 0., z = 0.;
   const unsigned int nBisections = 100;
   for (unsigned int i = 0; i < nBisections; ++i) {
     x = x0 + 0.5 * (x1 - x0);
@@ -602,9 +607,10 @@ void DriftLineRKF::EndDriftLine() {
   const double dt = sqrt(dx * dx + dy * dy + dz * dz) / speed;
   m_path.back().tf = m_path.back().ti + dt;
   m_path.back().status = StatusLeftDriftMedium;
+  return true;
 }
 
-void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
+bool DriftLineRKF::DriftToWire(double x0, double y0, double z0,
                                const double& xw, const double& yw,
                                const double& rw) {
 
@@ -614,21 +620,23 @@ void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     std::cout << "    to wire at (" << xw << ", " << yw
               << ") with physical radius " << rw << " cm.\n";
   }
+  const double t0 = m_path.front().ti;
   m_path.back().xf = x0;
   m_path.back().yf = y0;
   m_path.back().zf = z0;
   m_path.back().tf = m_path.back().ti;
   m_path.back().status = StatusCalculationAbandoned;
+
   // Check initial position.
-  double ex, ey, ez;
-  double bx, by, bz;
-  int status;
+  double ex = 0., ey = 0., ez = 0.;
+  double bx = 0., by = 0., bz = 0.;
+  int status = 0;
   m_sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   m_sensor->ElectricField(x0, y0, z0, ex, ey, ez, m_medium, status);
   if (status != 0) {
     std::cerr << m_className << "::DriftToWire:\n";
     std::cerr << "    Initial position not valid. Abandoning.\n";
-    return;
+    return false;
   }
   // Calculate the drift velocity at the initial position.
   double vx0 = 0.;
@@ -636,57 +644,55 @@ void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
   double vy0 = 0.;
   if (!GetVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
     std::cerr << m_className << "::DriftToWire:\n";
-    std::cerr << "    Unable to retrieve drift velocity.\n";
-    return;
+    std::cerr << "    Cannot retrieve drift velocity at initial position.\n";
+    return false;
   }
   // Get a coarse estimate of the drift time
   // assuming a straight-line trajectory and constant velocity.
-  float dx0 = xw - x0;
-  float dy0 = yw - y0;
-  float dt0 = (sqrt(dx0 * dx0 + dy0 * dy0) - rw) / sqrt(vx0 * vx0 + vy0 * vy0);
-  if (dt0 < 1.e-6) {
-    // Estimated time step is very small. Stop.
-    m_path.back().tf = m_path.back().ti + dt0;
-    m_path.back().status = StatusLeftDriftMedium;
-    return;
-  }
+  double dx0 = xw - x0;
+  double dy0 = yw - y0;
+  double dt0 = (sqrt(dx0 * dx0 + dy0 * dy0) - rw - BoundaryDistance) / 
+               sqrt(vx0 * vx0 + vy0 * vy0);
   const unsigned int nMaxSteps = 10;
   for (unsigned int i = 0; i < nMaxSteps; ++i) {
+    if (dt0 < 1.e-6) {
+      if (m_debug) {
+        std::cout << m_className << "::DriftToWire:\n";
+        std::cout << "    Estimated time step: " << dt0 << " ns. Stop.\n";
+      }
+      // Estimated time step is very small. Stop.
+      m_path.back().tf = m_path.back().ti + dt0;
+      m_path.back().status = StatusLeftDriftMedium;
+      return true;
+    }
     // Calculate the estimated end-point.
     double x1 = x0 + dt0 * vx0;
     double y1 = y0 + dt0 * vy0;
     double z1 = z0 + dt0 * vz0;
-    double dx1 = xw - x1;
-    double dy1 = yw - y1;
+    if (m_debug) {
+      std::cout << m_className << "::DriftToWire:\n";
+      std::cout << "    Step " << i << " from (" << x0 << ", " << y0 
+                << ") to (" << x1 << ", " << y1 << ").\n";
+    }
     // Make sure we are not moving away from the wire.
     const double xin0 = (x1 - x0) * (xw - x0) + (y1 - y0) * (yw - y0);
     if (xin0 < 0.) {
       std::cerr << m_className << "::DriftToWire:\n";
       std::cerr << "    Particle moves away from the wire. Abandoning.\n";
-      return;
+      return false;
     }
-    // Check if this point is inside the wire.
-    double d1 = sqrt(dx1 * dx1 + dy1 * dy1);
-    if (d1 < rw) {
-      if (m_debug) std::cout << m_className << "::DriftToWire: Inside wire.\n";
-      // Move the point back just outside the wire.
-      x1 = xw - rw * dx1 / d1;
-      y1 = yw - rw * dy1 / d1;
-      dx1 = x1 - x0;
-      dy1 = y1 - y0;
-      dt0 = sqrt(dx1 * dx1 + dy1 * dy1) / (vx0 * vx0 + vy0 * vy0);
-      z1 = z0 + dt0 * vz0;
-    }
-    // Check if wire was crossed.
-    double xc, yc, zc;
+    // Check if the wire was crossed.
+    bool onwire = false;
+    double xc = 0., yc = 0., zc = 0.;
     if (m_sensor->IsWireCrossed(x0, y0, z0, x1, y1, z1, xc, yc, zc)) {
       if (m_debug) std::cout << m_className << "::DriftToWire: Wire crossed.\n";
       x1 = xc;
       y1 = yc;
       z1 = zc;
-      dx1 = x1 - x0;
-      dy1 = y1 - y0;
-      dt0 = sqrt(dx1 * dx1 + dy1 * dy1) / (vx0 * vx0 + vy0 * vy0);
+      onwire = true;
+      const double dx10 = x1 - x0;
+      const double dy10 = y1 - y0;
+      dt0 = sqrt(dx10 * dx10 + dy10 * dy10) / (vx0 * vx0 + vy0 * vy0);
     }
     m_path.back().xf = x1;
     m_path.back().yf = y1;
@@ -697,17 +703,18 @@ void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     m_sensor->ElectricField(x1, y1, z1, ex, ey, ez, m_medium, status);
     if (status != 0) {
       std::cerr << m_className << "::DriftToWire:\n";
-      std::cerr << "    Not in a valid drift medium. Abandoning.\n";
+      std::cerr << "    End point is not in a valid drift medium.\n"; 
+      std::cerr << "    Abandoning.\n";
       m_path.back().status = StatusCalculationAbandoned;
-      return;
+      return false;
     }
     // Calculate the drift velocity at this point.
     double vx1 = 0., vy1 = 0., vz1 = 0.;
     if (!GetVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
       std::cerr << m_className << "::DriftToWire:\n";
-      std::cerr << "    Unable to retrieve drift velocity.\n";
+      std::cerr << "    Cannot retrieve drift velocity at end point.\n";
       m_path.back().status = StatusCalculationAbandoned;
-      return;
+      return false;
     }
 
     // Get a point halfway between.
@@ -719,51 +726,54 @@ void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     m_sensor->ElectricField(xm, ym, zm, ex, ey, ez, m_medium, status);
     if (status != 0) {
       std::cerr << m_className << "::DriftToWire:\n";
-      std::cerr << "    Not in a valid drift medium. Abandoning.\n";
+      std::cerr << "    Mid point is not in a valid drift medium.\n";
+      std::cerr << "    Abandoning.\n";
       m_path.back().status = StatusCalculationAbandoned;
-      return;
+      return false;
     }
     // Calculate the drift velocity at this point.
     double vxm = 0., vym = 0., vzm = 0.;
     if (!GetVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)) {
       std::cerr << m_className << "::DriftToWire:\n";
-      std::cerr << "    Unable to retrieve drift velocity.\n";
+      std::cerr << "    Cannot retrieve drift velocity at mid point.\n";
       m_path.back().status = StatusCalculationAbandoned;
-      return;
+      return false;
     }
-    const double speed0 = sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
-    const double speed1 = sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
-    const double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm);
+    const double speed0 = sqrt(vx0 * vx0 + vy0 * vy0);
+    const double speed1 = sqrt(vx1 * vx1 + vy1 * vy1);
+    const double speedm = sqrt(vxm * vxm + vym * vym);
     // Make sure the velocities are non-zero.
     if (speed0 < Small || speed1 < Small || speedm < Small) {
       std::cerr << m_className << "::DriftToWire:\n";
       std::cerr << "    Zero velocity. Abandoning.\n";
-      return;
+      return false;
     }
-    // Cmpare first and second order estimates.
+    // Compare first and second order estimates.
     const double dx = x0 - x1;
     const double dy = y0 - y1;
-    const double dz = z0 - z1;
-    const double stepLength = sqrt(dx * dx + dy * dy + dz * dz);
-    if (stepLength * fabs(1. / speed0 - 2. / speedm + 1. / speed1) / 3. >
-            1.e-4 * (1. + m_path.back().ti) &&
+    const double dxy = sqrt(dx * dx + dy * dy);
+    if (dxy * fabs(1. / speed0 - 2. / speedm + 1. / speed1) / 3. >
+        1.e-4 * (1. + fabs(m_path.back().ti - t0)) &&
         i < nMaxSteps - 1) {
-      // Accuracy was not good enough so half the step time.
+      // Accuracy was not good enough so halve the step time.
+      if (m_debug) {
+        std::cout << m_className << "::DriftToWire: Reducing step size.\n";
+      }
       dt0 *= 0.5;
       continue;
     }
-    double timeStep =
-        stepLength * (1. / speed0 + 4. / speedm + 1. / speed1) / 6.;
     // Add point to the drift line.
-    m_path.back().tf = m_path.back().ti + timeStep;
+    m_path.back().tf = m_path.back().ti + 
+                       dxy * (1. / speed0 + 4. / speedm + 1. / speed1) / 6.; 
     m_path.back().xf = x1;
     m_path.back().yf = y1;
     m_path.back().zf = z1;
+    if (onwire) break;
     step newStep;
     newStep.xi = x1;
     newStep.yi = y1;
     newStep.zi = z1;
-    newStep.ti = m_path.back().ti;
+    newStep.ti = m_path.back().tf;
     m_path.push_back(newStep);
     // Proceed to the next step
     x0 = x1;
@@ -774,9 +784,10 @@ void DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     vz0 = vz1;
     dx0 = xw - x0;
     dy0 = yw - y0;
-    const double d0 = sqrt(dx0 * dx0 + dy0 * dy0) - rw;
-    dt0 = d0 / sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
+    dt0 = (sqrt(dx0 * dx0 + dy0 * dy0) - rw - BoundaryDistance) / 
+          sqrt(vx0 * vx0 + vy0 * vy0);
   }
+  return true;
 }
 
 void DriftLineRKF::GetEndPoint(double& x, double& y, double& z, double& t,
@@ -953,48 +964,52 @@ double DriftLineRKF::IntegrateDiffusion(const double& x, const double& y,
   return integral;
 }
 
-double DriftLineRKF::IntegrateTownsend(const double& x, const double& y,
-                                       const double& z, const double& xe,
-                                       const double& ye, const double& ze,
+double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
+                                       const double& zi, 
+                                       const double& xe, const double& ye, 
+                                       const double& ze,
                                        const double& tol) {
 
   // Make sure initial position is valid.
-  double ex, ey, ez;
-  double bx, by, bz;
-  int status;
-  m_sensor->MagneticField(x, y, z, bx, by, bz, status);
-  m_sensor->ElectricField(x, y, z, ex, ey, ez, m_medium, status);
+  double ex = 0., ey = 0., ez = 0.;
+  double bx = 0., by = 0., bz = 0.;
+  int status = 0;
+  m_sensor->MagneticField(xi, yi, zi, bx, by, bz, status);
+  m_sensor->ElectricField(xi, yi, zi, ex, ey, ez, m_medium, status);
   if (status != 0) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
-    std::cerr << "    Initial position not valid.\n";
+    std::cerr << "    Initial position (" << xi << ", " << yi << ", "
+              << zi << ") not valid.\n";
     return 0.;
   }
   // Determine Townsend coefficient at initial point.
   double alpha0 = 0.;
   if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha0)) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
-    std::cerr << "    Unable to retrieve Townsend coefficient.\n";
+    std::cerr << "    Cannot retrieve Townsend coefficient at initial point.\n";
     return 0.;
   }
   // Make sure end position is valid.
-  m_sensor->MagneticField(x, y, z, bx, by, bz, status);
-  m_sensor->ElectricField(x, y, z, ex, ey, ez, m_medium, status);
+  m_sensor->MagneticField(xe, ye, ze, bx, by, bz, status);
+  m_sensor->ElectricField(xe, ye, ze, ex, ey, ez, m_medium, status);
   if (status != 0) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
-    std::cerr << "    End position not valid.\n";
+    std::cerr << m_className << "::IntegrateTownsend:\n";
+    std::cerr << "    End position (" << xi << ", " << yi << ", "
+              << zi << ") not valid.\n";
     return 0.;
   }
   // Determine Townsend coefficient at end point.
   double alpha1 = 0.;
   if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha1)) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
-    std::cerr << "    Unable to retrieve Townsend coefficient.\n";
+    std::cerr << "    Cannot retrieve Townsend coefficient at end point.\n";
     return 0.;
   }
   // Start and end point coordinates of initial step.
-  double x0 = x;
-  double y0 = y;
-  double z0 = z;
+  double x0 = xi;
+  double y0 = yi;
+  double z0 = zi;
   double x1 = xe;
   double y1 = ye;
   double z1 = ze;
@@ -1044,7 +1059,7 @@ double DriftLineRKF::IntegrateTownsend(const double& x, const double& y,
     double alpha1 = 0.;
     if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha1)) {
       std::cerr << m_className << "::IntegrateTownsend:\n";
-      std::cerr << "    Unable to retrieve Townsend coefficient.\n";
+      std::cerr << "    Cannot retrieve Townsend coefficient at end point.\n";
       break;
     }
     // Calculate the Townsend coefficient at the mid point of the step.
@@ -1061,7 +1076,7 @@ double DriftLineRKF::IntegrateTownsend(const double& x, const double& y,
     double alpham = 0.;
     if (!GetTownsend(ex, ey, ez, bx, by, bz, alpham)) {
       std::cerr << m_className << "::IntegrateTownsend:\n";
-      std::cerr << "    Unable to retrieve Townsend coefficient.\n";
+      std::cerr << "    Cannot retrieve Townsend coefficient at mid point.\n";
       break;
     }
     // Check the accuracy of the result.

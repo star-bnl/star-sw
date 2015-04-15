@@ -104,8 +104,9 @@ bool ComponentBase::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 }
 
 bool ComponentBase::IsWireCrossed(const double x0, const double y0,
-                                  const double z0, const double x1,
-                                  const double y1, const double z1, double& xc,
+                                  const double z0, 
+                                  const double /*x1*/, const double /*y1*/, 
+                                  const double /*z1*/, double& xc,
                                   double& yc, double& zc) {
 
   xc = x0;
@@ -113,12 +114,6 @@ bool ComponentBase::IsWireCrossed(const double x0, const double y0,
   zc = z0;
   return false;
 
-  // Quiet compiler against unused variable warning
-  if (debug) {
-    std::cout << m_className << "::IsWireCrossed:\n";
-    std::cout << "    No wires between (" << x0 << ", " << y0 << ", " << z0
-              << ") and (" << x1 << ", " << y1 << ", " << z1 << ").\n";
-  }
 }
 
 bool ComponentBase::IsInTrapRadius(double x0, double y0, double z0, double& xw,

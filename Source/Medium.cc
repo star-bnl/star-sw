@@ -694,23 +694,20 @@ void Medium::GetElectronMomentum(const double e, double& px, double& py,
   band = -1;
 }
 
-double Medium::GetElectronNullCollisionRate(const int band) {
+double Medium::GetElectronNullCollisionRate(const int /*band*/) {
 
   if (m_debug) {
     std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
-    std::cerr << "    Electron null collision rate for band " << band
-              << " not available.\n";
     std::cerr << "    Function is not implemented.\n";
   }
   return 0.;
 }
 
-double Medium::GetElectronCollisionRate(const double e, const int band) {
+double Medium::GetElectronCollisionRate(const double /*e*/, 
+                                        const int /*band*/) {
 
   if (m_debug) {
     std::cerr << m_className << "::GetElectronCollisionRate:\n";
-    std::cerr << "    Electron collision rate at energy " << e << " eV (band "
-              << band << ") not available.\n";
     std::cerr << "    Function is not implemented.\n";
   }
   return 0.;

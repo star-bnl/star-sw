@@ -280,8 +280,8 @@ bool Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
                            double& xc, double& yc, double& zc) {
 
   for (int i = m_nComponents; i--;) {
-    if (m_components[i]
-            .comp->IsWireCrossed(x0, y0, z0, x1, y1, z1, xc, yc, zc)) {
+    if (m_components[i].comp->IsWireCrossed(x0, y0, z0, 
+                                            x1, y1, z1, xc, yc, zc)) {
       return true;
     }
   }

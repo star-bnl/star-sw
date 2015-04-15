@@ -24,14 +24,14 @@ class DriftLineRKF {
   void EnablePlotting(ViewDrift* view);
   void DisablePlotting();
 
-  void SetMaxSteps(const unsigned int m) { m_maxSteps = m; }
+  void SetMaxSteps(const unsigned int& m) { m_maxSteps = m; }
 
-  void DriftElectron(const double x0, const double y0, const double z0,
-                     const double t0);
-  void DriftHole(const double x0, const double y0, const double z0,
-                 const double t0);
-  void DriftIon(const double x0, const double y0, const double z0,
-                const double t0);
+  bool DriftElectron(const double& x0, const double& y0, const double& z0,
+                     const double& t0);
+  bool DriftHole(const double& x0, const double& y0, const double& z0,
+                 const double& t0);
+  bool DriftIon(const double& x0, const double& y0, const double& z0,
+                const double& t0);
 
   void GetEndPoint(double& x, double& y, double& z, double& t, int& st) const;
 
@@ -81,7 +81,8 @@ class DriftLineRKF {
   bool m_verbose;
 
   // Calculate a drift line starting at a given position.
-  void DriftLine(double x0, double y0, double z0, double t0);
+  bool DriftLine(const double& x0, const double& y0, const double& z0, 
+                 const double& t0);
   // Calculate transport parameters for the respective particle type.
   bool GetVelocity(const double& ex, const double& ey, const double& ez,
                    const double& bx, const double& by, const double& bz,
@@ -93,9 +94,9 @@ class DriftLineRKF {
                    const double& bx, const double& by, const double& bz,
                    double& alpha) const;
   // Terminate a drift line at the edge of a boundary.
-  void EndDriftLine();
+  bool EndDriftLine();
   // Drift a particle to a wire
-  void DriftToWire(double x0, double y0, double z0, const double& xw,
+  bool DriftToWire(double x0, double y0, double z0, const double& xw,
                    const double& yw, const double& rw);
   // Determine the longitudinal diffusion over the drift line.
   double IntegrateDiffusion(const double& x, const double& y, const double& z,
