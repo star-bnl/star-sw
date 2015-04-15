@@ -4,10 +4,9 @@
 #include <DAQ_READER/daq_det.h>
 
 #define FPS_FORMAT_VERSION	0x000001
-#define FPS_VME_PORT		3000
 
-#define FPS_QT_COU			8
-#define FPS_QT_MAX_TIMEBINS		41
+//#define FPS_VME_PORT		3000
+
 
 //raw data header
 struct fps_evt_hdr_t {
@@ -32,6 +31,11 @@ struct fps_evt_hdr_t {
 	u_int reserved[2] ;
 } ;
 
+#if 0
+
+#define FPS_QT_COU			8
+#define FPS_QT_MAX_TIMEBINS		41
+
 // raw data
 struct fps_dta_t {
 	char timebin ;	// relative to time of trigger!
@@ -49,6 +53,7 @@ struct fps_evt_t {
 	fps_evt_hdr_t hdr ;
 	fps_dta_t xing[FPS_QT_MAX_TIMEBINS] ;
 };
+#endif
 
 
 // transformed to ADC data
