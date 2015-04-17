@@ -21,8 +21,7 @@ class ComponentTcad2d : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
 
-  bool GetMedium(const double x, const double y, const double z,
-                 Medium*& medium);
+  Medium* GetMedium(const double& x, const double& y, const double& z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
@@ -42,7 +41,7 @@ class ComponentTcad2d : public ComponentBase {
   void UnsetDriftRegion(const int ireg);
   // Set/get the medium for a given region.
   void SetMedium(const int ireg, Medium* m);
-  bool GetMedium(const int ireg, Medium*& m) const;
+  Medium* GetMedium(const unsigned int& ireg) const;
 
   // Retrieve information about the mesh.
   int GetNumberOfElements() const { return nElements; }

@@ -46,9 +46,8 @@ class ComponentFieldMap : public ComponentBase {
   // Associate a material with a Medium class
   void SetMedium(const int imat, Medium* medium);
   // Returns the medium for a material
-  bool GetMedium(const int i, Medium*& m) const;
-  virtual bool GetMedium(const double x, const double y, const double z,
-                         Medium*& medium) = 0;
+  Medium* GetMedium(const unsigned int& i) const;
+  Medium* GetMedium(const double& x, const double& y, const double& z) = 0;
   int GetNumberOfMedia() { return nMaterials; }
 
   int GetNumberOfElements() const { return nElements; }
@@ -212,7 +211,7 @@ class ComponentFieldMap : public ComponentBase {
   // Move (xpos, ypos, zpos) to field map coordinates
   void MapCoordinates(double& xpos, double& ypos, double& zpos, bool& xmirrored,
                       bool& ymirrored, bool& zmirrored, double& rcoordinate,
-                      double& rotation);
+                      double& rotation) const;
   // Move (ex, ey, ez) to global coordinates
   void UnmapFields(double& ex, double& ey, double& ez, double& xpos,
                    double& ypos, double& zpos, bool& xmirrored, bool& ymirrored,

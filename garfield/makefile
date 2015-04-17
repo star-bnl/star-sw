@@ -21,10 +21,11 @@ TARGETS += heed
 FC = `root-config --f77`
 
 # Compilation flags
+CPPFLAGS = -I$(INCDIR) -I$(HEEDDIR)
 CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual \
 	 `root-config --cflags` \
         -fpic -fno-common -c \
-	-I$(INCDIR) -I$(HEEDDIR) -DINS_CRETURN 
+	$(CPPFLAGS) -DINS_CRETURN 
 
 FFLAGS = -fpic -c
 
@@ -82,7 +83,7 @@ clean:
 	$(RM) $(LIBDIR)/*.a
 	cd $(HEEDDIR); make clean
 	@echo Removing dictionary...
-	$(RM) $(SRCDIR)/GarfieldDict.C 
+	$(RM) $(OBJDIR)/GarfieldDict.C 
 
 $(OBJDIR)/AvalancheMicroscopic.o: \
 	$(SRCDIR)/AvalancheMicroscopic.cc \
@@ -332,10 +333,10 @@ $(OBJDIR)/Sensor.o: \
 	$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/GarfieldDict.o: \
-	$(SRCDIR)/GarfieldDict.C
+	$(OBJDIR)/GarfieldDict.C
 	@echo $@
 	$(CXX) $(CFLAGS) -DDICT_SKIP_HEED $< -o $@
 
-$(SRCDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
+$(OBJDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
 	@echo Creating dictionary...
-	rootcint -f $@ -c $(CFLAGS) -p $^ 
+	rootcint -f $@ -c $(CPPFLAGS) -p $^ 

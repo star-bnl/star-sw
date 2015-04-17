@@ -15,7 +15,7 @@ class PlottingEngineRoot : public PlottingEngine {
   // Constructor
   PlottingEngineRoot();
   // Destructor
-  ~PlottingEngineRoot();
+  virtual ~PlottingEngineRoot();
 
   void SetDefaultStyle();
 
@@ -30,15 +30,15 @@ class PlottingEngineRoot : public PlottingEngine {
   bool GetRootColor(std::string color, int& rootcol);
 
  private:
-  TStyle* garfieldStyle;
+  TStyle* m_garfieldStyle;
 
-  std::string colorLine1Default;
-  std::string colorLine2Default;
-  std::string colorElectronDefault;
-  std::string colorHoleDefault;
-  std::string colorIonDefault;
-  std::string colorPhotonDefault;
-  std::string colorChargedParticleDefault;
+  std::string m_colorLine1Default;
+  std::string m_colorLine2Default;
+  std::string m_colorElectronDefault;
+  std::string m_colorHoleDefault;
+  std::string m_colorIonDefault;
+  std::string m_colorPhotonDefault;
+  std::string m_colorChargedParticleDefault;
 };
 }
 

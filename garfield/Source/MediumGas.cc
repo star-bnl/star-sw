@@ -20,16 +20,16 @@ MediumGas::MediumGas()
       lambdaPenningGlobal(0.),
       pressureTable(m_pressure),
       temperatureTable(m_temperature),
-      hasExcRates(false),
-      hasIonRates(false),
+      m_hasExcRates(false),
+      m_hasIonRates(false),
       nExcListElements(0),
       nIonListElements(0),
-      extrLowExcRates(0),
-      extrHighExcRates(1),
-      extrLowIonRates(0),
-      extrHighIonRates(1),
-      intpExcRates(2),
-      intpIonRates(2) {
+      m_extrLowExcRates(0),
+      m_extrHighExcRates(1),
+      m_extrLowIonRates(0),
+      m_extrHighIonRates(1),
+      m_intpExcRates(2),
+      m_intpIonRates(2) {
 
   m_className = "MediumGas";
 
@@ -367,9 +367,9 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
         } else if (strcmp(token, "Dimension") == 0) {
           token = strtok(NULL, " :,%\t");
           if (strcmp(token, "F") == 0) {
-            map2d = false;
+            m_map2d = false;
           } else {
-            map2d = true;
+            m_map2d = true;
           }
           token = strtok(NULL, " :,%\t");
           eFieldRes = atoi(token);
@@ -383,7 +383,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           token = strtok(NULL, " :,%\t");
           angRes = atoi(token);
           // Check the number of angles.
-          if (map2d && angRes <= 0) {
+          if (m_map2d && angRes <= 0) {
             std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    Number of E-B angles out of range.\n";
             gasfile.close();
@@ -393,7 +393,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           token = strtok(NULL, " :,%\t");
           bFieldRes = atoi(token);
           // Check the number of B points.
-          if (map2d && bFieldRes <= 0) {
+          if (m_map2d && bFieldRes <= 0) {
             std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    Number of B fields out of range.\n";
             gasfile.close();
@@ -401,11 +401,11 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           }
 
           eFields.resize(eFieldRes);
-          nEfields = eFieldRes;
+          m_nEfields = eFieldRes;
           bFields.resize(bFieldRes);
-          nBfields = bFieldRes;
+          m_nBfields = bFieldRes;
           bAngles.resize(angRes);
-          nAngles = angRes;
+          m_nAngles = angRes;
 
           // Fill in the excitation/ionisation structs
           // Excitation
@@ -524,95 +524,95 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   }
 
   if (gasBits[0] == 'T') {
-    hasElectronVelocityE = true;
+    m_hasElectronVelocityE = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityE, 0.);
   } else {
-    hasElectronVelocityE = false;
+    m_hasElectronVelocityE = false;
     tabElectronVelocityE.clear();
   }
   if (gasBits[1] == 'T') {
-    hasIonMobility = true;
+    m_hasIonMobility = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonMobility, 0.);
   } else {
-    hasIonMobility = false;
+    m_hasIonMobility = false;
     tabIonMobility.clear();
   }
   if (gasBits[2] == 'T') {
-    hasElectronDiffLong = true;
+    m_hasElectronDiffLong = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronDiffLong, 0.);
   } else {
-    hasElectronDiffLong = false;
+    m_hasElectronDiffLong = false;
     tabElectronDiffLong.clear();
   }
   if (gasBits[3] == 'T') {
-    hasElectronTownsend = true;
+    m_hasElectronTownsend = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronTownsend, -30.);
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabTownsendNoPenning, -30.);
   } else {
-    hasElectronTownsend = false;
+    m_hasElectronTownsend = false;
     tabElectronTownsend.clear();
     tabTownsendNoPenning.clear();
   }
   // gasBits[4]: cluster size distribution; skipped
   if (gasBits[5] == 'T') {
-    hasElectronAttachment = true;
+    m_hasElectronAttachment = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronAttachment, -30.);
   } else {
-    hasElectronAttachment = false;
+    m_hasElectronAttachment = false;
     tabElectronAttachment.clear();
   }
   // gasBits[6]: Lorentz angle; skipped
   if (gasBits[7] == 'T') {
-    hasElectronDiffTrans = true;
+    m_hasElectronDiffTrans = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronDiffTrans, 0.);
   } else {
-    hasElectronDiffTrans = false;
+    m_hasElectronDiffTrans = false;
     tabElectronDiffTrans.clear();
   }
   if (gasBits[8] == 'T') {
-    hasElectronVelocityB = true;
+    m_hasElectronVelocityB = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityB, 0.);
   } else {
-    hasElectronVelocityB = false;
+    m_hasElectronVelocityB = false;
     tabElectronVelocityB.clear();
   }
   if (gasBits[9] == 'T') {
-    hasElectronVelocityExB = true;
+    m_hasElectronVelocityExB = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityExB, 0.);
   } else {
-    hasElectronVelocityExB = false;
+    m_hasElectronVelocityExB = false;
     tabElectronVelocityExB.clear();
   }
   if (gasBits[10] == 'T') {
-    hasElectronDiffTens = true;
+    m_hasElectronDiffTens = true;
     InitParamTensor(eFieldRes, bFieldRes, angRes, 6, tabElectronDiffTens, 0.);
   } else {
-    hasElectronDiffTens = false;
+    m_hasElectronDiffTens = false;
     tabElectronDiffTens.clear();
   }
   if (gasBits[11] == 'T') {
-    hasIonDissociation = true;
+    m_hasIonDissociation = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonDissociation, -30.);
   } else {
-    hasIonDissociation = false;
+    m_hasIonDissociation = false;
     tabIonDissociation.clear();
   }
   // gasBits[12]: SRIM; skipped
   // gasBits[13]: HEED; skipped
   if (gasBits[14] == 'T') {
-    hasExcRates = true;
+    m_hasExcRates = true;
     InitParamTensor(eFieldRes, bFieldRes, angRes, nExcListElements, tabExcRates,
                     0.);
   } else {
-    hasExcRates = false;
+    m_hasExcRates = false;
     tabExcRates.clear();
   }
   if (gasBits[15] == 'T') {
-    hasIonRates = true;
+    m_hasIonRates = true;
     InitParamTensor(eFieldRes, bFieldRes, angRes, nIonListElements, tabIonRates,
                     0.);
   } else {
-    hasIonRates = false;
+    m_hasIonRates = false;
     tabIonRates.clear();
   }
 
@@ -705,7 +705,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   double rate = 0.;
   double waste = 0.;
 
-  if (map2d) {
+  if (m_map2d) {
     if (m_debug) {
       std::cout << m_className << "::LoadGasFile:\n";
       std::cout << "    Gas table is 3D.\n";
@@ -719,46 +719,46 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
           ve *= 1.e-3;
           vb *= 1.e-3;
           vexb *= 1.e-3;
-          if (hasElectronVelocityE) tabElectronVelocityE[j][k][i] = ve;
-          if (hasElectronVelocityB) tabElectronVelocityB[j][k][i] = vb;
-          if (hasElectronVelocityExB) tabElectronVelocityExB[j][k][i] = vexb;
+          if (m_hasElectronVelocityE) tabElectronVelocityE[j][k][i] = ve;
+          if (m_hasElectronVelocityB) tabElectronVelocityB[j][k][i] = vb;
+          if (m_hasElectronVelocityExB) tabElectronVelocityExB[j][k][i] = vexb;
           // Longitudinal and transverse diffusion coefficient
           gasfile >> dl >> dt;
-          if (hasElectronDiffLong) tabElectronDiffLong[j][k][i] = dl;
-          if (hasElectronDiffTrans) tabElectronDiffTrans[j][k][i] = dt;
+          if (m_hasElectronDiffLong) tabElectronDiffLong[j][k][i] = dl;
+          if (m_hasElectronDiffTrans) tabElectronDiffTrans[j][k][i] = dt;
           // Townsend and attachment coefficient
           gasfile >> alpha >> alpha0 >> eta;
-          if (hasElectronTownsend) {
+          if (m_hasElectronTownsend) {
             tabElectronTownsend[j][k][i] = alpha;
             tabTownsendNoPenning[j][k][i] = alpha0;
           }
-          if (hasElectronAttachment) {
+          if (m_hasElectronAttachment) {
             tabElectronAttachment[j][k][i] = eta;
           }
           // Ion mobility
           gasfile >> mu;
           // Convert from cm2 / (V us) to cm2 / (V ns)
           mu *= 1.e-3;
-          if (hasIonMobility) tabIonMobility[j][k][i] = mu;
+          if (m_hasIonMobility) tabIonMobility[j][k][i] = mu;
           // Lorentz angle (unused)
           gasfile >> lor;
           // Ion dissociation
           gasfile >> diss;
-          if (hasIonDissociation) tabIonDissociation[j][k][i] = diss;
+          if (m_hasIonDissociation) tabIonDissociation[j][k][i] = diss;
           // Diffusion tensor
           for (int l = 0; l < 6; l++) {
             gasfile >> diff;
-            if (hasElectronDiffTens) tabElectronDiffTens[l][j][k][i] = diff;
+            if (m_hasElectronDiffTens) tabElectronDiffTens[l][j][k][i] = diff;
           }
           // Excitation rates
           for (int l = 0; l < nExcListElements; l++) {
             gasfile >> rate;
-            if (hasExcRates) tabExcRates[l][j][k][i] = rate;
+            if (m_hasExcRates) tabExcRates[l][j][k][i] = rate;
           }
           // Ionization rates
           for (int l = 0; l < nIonListElements; l++) {
             gasfile >> rate;
-            if (hasIonRates) tabIonRates[l][j][k][i] = rate;
+            if (m_hasIonRates) tabIonRates[l][j][k][i] = rate;
           }
         }
       }
@@ -775,45 +775,45 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
       ve *= 1.e-3;
       vb *= 1.e-3;
       vexb *= 1.e-3;
-      if (hasElectronVelocityE) tabElectronVelocityE[0][0][i] = ve;
-      if (hasElectronVelocityB) tabElectronVelocityB[0][0][i] = vb;
-      if (hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
+      if (m_hasElectronVelocityE) tabElectronVelocityE[0][0][i] = ve;
+      if (m_hasElectronVelocityB) tabElectronVelocityB[0][0][i] = vb;
+      if (m_hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
       // Longitudinal and transferse diffusion coefficients
       gasfile >> dl >> waste >> dt >> waste;
-      if (hasElectronDiffLong) tabElectronDiffLong[0][0][i] = dl;
-      if (hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
+      if (m_hasElectronDiffLong) tabElectronDiffLong[0][0][i] = dl;
+      if (m_hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
       // Townsend and attachment coefficients
       gasfile >> alpha >> waste >> alpha0 >> eta >> waste;
-      if (hasElectronTownsend) {
+      if (m_hasElectronTownsend) {
         tabElectronTownsend[0][0][i] = alpha;
         tabTownsendNoPenning[0][0][i] = alpha0;
       }
-      if (hasElectronAttachment) {
+      if (m_hasElectronAttachment) {
         tabElectronAttachment[0][0][i] = eta;
       }
       // Ion mobility
       gasfile >> mu >> waste;
       mu *= 1.e-3;
-      if (hasIonMobility) tabIonMobility[0][0][i] = mu;
+      if (m_hasIonMobility) tabIonMobility[0][0][i] = mu;
       // Lorentz angle (unused)
       gasfile >> lor >> waste;
       // Ion dissociation
       gasfile >> diss >> waste;
-      if (hasIonDissociation) tabIonDissociation[0][0][i] = diss;
+      if (m_hasIonDissociation) tabIonDissociation[0][0][i] = diss;
       // Diffusion tensor
       for (int j = 0; j < 6; j++) {
         gasfile >> diff >> waste;
-        if (hasElectronDiffTens) tabElectronDiffTens[j][0][0][i] = diff;
+        if (m_hasElectronDiffTens) tabElectronDiffTens[j][0][0][i] = diff;
       }
       // Excitation rates
       for (int j = 0; j < nExcListElements; j++) {
         gasfile >> rate >> waste;
-        if (hasExcRates) tabExcRates[j][0][0][i] = rate;
+        if (m_hasExcRates) tabExcRates[j][0][0][i] = rate;
       }
       // Ionization rates
       for (int j = 0; j < nIonListElements; j++) {
         gasfile >> rate >> waste;
-        if (hasIonRates) tabIonRates[j][0][0][i] = rate;
+        if (m_hasIonRates) tabIonRates[j][0][0][i] = rate;
       }
     }
   }
@@ -927,24 +927,24 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   for (int i = eFieldRes; i--;) {
     for (int j = angRes; j--;) {
       for (int k = bFieldRes; k--;) {
-        if (hasElectronDiffLong) {
+        if (m_hasElectronDiffLong) {
           tabElectronDiffLong[j][k][i] /= sqrtPressure;
         }
-        if (hasElectronDiffTrans) {
+        if (m_hasElectronDiffTrans) {
           tabElectronDiffTrans[j][k][i] /= sqrtPressure;
         }
-        if (hasElectronDiffTens) {
+        if (m_hasElectronDiffTens) {
           for (int l = 6; l--;) {
             tabElectronDiffTens[l][j][k][i] /= pressureTable;
           }
         }
-        if (hasElectronTownsend) {
+        if (m_hasElectronTownsend) {
           tabElectronTownsend[j][k][i] += logPressure;
         }
-        if (hasElectronAttachment) {
+        if (m_hasElectronAttachment) {
           tabElectronAttachment[j][k][i] += logPressure;
         }
-        if (hasIonDissociation) {
+        if (m_hasIonDissociation) {
           tabIonDissociation[j][k][i] += logPressure;
         }
       }
@@ -952,37 +952,37 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
   }
 
   // Decode the extrapolation and interpolation tables.
-  extrHighVelocity = hExtrap[0];
-  extrLowVelocity = lExtrap[0];
-  intpVelocity = interpMeth[0];
+  m_extrHighVelocity = hExtrap[0];
+  m_extrLowVelocity = lExtrap[0];
+  m_intpVelocity = interpMeth[0];
   // Indices 1 and 2 correspond to velocities along Bt and ExB.
-  extrHighDiffusion = hExtrap[3];
-  extrLowDiffusion = lExtrap[3];
-  intpDiffusion = interpMeth[3];
-  extrHighTownsend = hExtrap[4];
-  extrLowTownsend = lExtrap[4];
-  intpTownsend = interpMeth[4];
-  extrHighAttachment = hExtrap[5];
-  extrLowAttachment = lExtrap[5];
-  intpAttachment = interpMeth[5];
-  extrHighMobility = hExtrap[6];
-  extrLowMobility = lExtrap[6];
-  intpMobility = interpMeth[6];
+  m_extrHighDiffusion = hExtrap[3];
+  m_extrLowDiffusion = lExtrap[3];
+  m_intpDiffusion = interpMeth[3];
+  m_extrHighTownsend = hExtrap[4];
+  m_extrLowTownsend = lExtrap[4];
+  m_intpTownsend = interpMeth[4];
+  m_extrHighAttachment = hExtrap[5];
+  m_extrLowAttachment = lExtrap[5];
+  m_intpAttachment = interpMeth[5];
+  m_extrHighMobility = hExtrap[6];
+  m_extrLowMobility = lExtrap[6];
+  m_intpMobility = interpMeth[6];
   // Index 7, 8: Lorentz angle, transv. diff.
-  extrHighDissociation = hExtrap[9];
-  extrLowDissociation = lExtrap[9];
-  intpDissociation = interpMeth[9];
+  m_extrHighDissociation = hExtrap[9];
+  m_extrLowDissociation = lExtrap[9];
+  m_intpDissociation = interpMeth[9];
   // Index 10: diff. tensor
-  extrHighExcRates = hExtrap[11];
-  extrLowExcRates = lExtrap[11];
-  intpExcRates = interpMeth[11];
-  extrHighIonRates = hExtrap[12];
-  extrLowIonRates = lExtrap[12];
-  intpIonRates = interpMeth[12];
+  m_extrHighExcRates = hExtrap[11];
+  m_extrLowExcRates = lExtrap[11];
+  m_intpExcRates = interpMeth[11];
+  m_extrHighIonRates = hExtrap[12];
+  m_extrLowIonRates = lExtrap[12];
+  m_intpIonRates = interpMeth[12];
 
   // Ion diffusion
   if (ionDiffLong > 0.) {
-    hasIonDiffLong = true;
+    m_hasIonDiffLong = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonDiffLong, 0.);
     for (int i = eFieldRes; i--;) {
       for (int j = angRes; j--;) {
@@ -992,11 +992,11 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
       }
     }
   } else {
-    hasIonDiffLong = false;
+    m_hasIonDiffLong = false;
     tabIonDiffLong.clear();
   }
   if (ionDiffTrans > 0.) {
-    hasIonDiffTrans = true;
+    m_hasIonDiffTrans = true;
     InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonDiffTrans, 0.);
     for (int i = eFieldRes; i--;) {
       for (int j = angRes; j--;) {
@@ -1006,7 +1006,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
       }
     }
   } else {
-    hasIonDiffTrans = false;
+    m_hasIonDiffTrans = false;
     tabIonDiffTrans.clear();
   }
 
@@ -1035,9 +1035,9 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
     }
   }
 
-  const int eFieldRes = nEfields;
-  const int bFieldRes = nBfields;
-  const int angRes = nAngles;
+  const int eFieldRes = m_nEfields;
+  const int bFieldRes = m_nBfields;
+  const int angRes = m_nAngles;
 
   if (m_debug) {
     std::cout << m_className << "::WriteGasFile:\n";
@@ -1055,21 +1055,21 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
 
   // Assemble the GASOK bits.
   std::string gasBits = "FFFFFFFFFFFFFFFFFFFF";
-  if (hasElectronVelocityE) gasBits[0] = 'T';
-  if (hasIonMobility) gasBits[1] = 'T';
-  if (hasElectronDiffLong) gasBits[2] = 'T';
-  if (hasElectronTownsend) gasBits[3] = 'T';
+  if (m_hasElectronVelocityE) gasBits[0] = 'T';
+  if (m_hasIonMobility) gasBits[1] = 'T';
+  if (m_hasElectronDiffLong) gasBits[2] = 'T';
+  if (m_hasElectronTownsend) gasBits[3] = 'T';
   // Custer size distribution; skippped
-  if (hasElectronAttachment) gasBits[5] = 'T';
+  if (m_hasElectronAttachment) gasBits[5] = 'T';
   // Lorentz angle; skipped
-  if (hasElectronDiffTrans) gasBits[7] = 'T';
-  if (hasElectronVelocityB) gasBits[8] = 'T';
-  if (hasElectronVelocityExB) gasBits[9] = 'T';
-  if (hasElectronDiffTens) gasBits[10] = 'T';
-  if (hasIonDissociation) gasBits[11] = 'T';
+  if (m_hasElectronDiffTrans) gasBits[7] = 'T';
+  if (m_hasElectronVelocityB) gasBits[8] = 'T';
+  if (m_hasElectronVelocityExB) gasBits[9] = 'T';
+  if (m_hasElectronDiffTens) gasBits[10] = 'T';
+  if (m_hasIonDissociation) gasBits[11] = 'T';
   // SRIM, HEED; skipped
-  if (hasExcRates) gasBits[14] = 'T';
-  if (hasIonRates) gasBits[15] = 'T';
+  if (m_hasExcRates) gasBits[14] = 'T';
+  if (m_hasIonRates) gasBits[15] = 'T';
 
   // Get the current time.
   time_t rawtime = time(0);
@@ -1104,7 +1104,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
   buffer = std::string(80, ' ');
   outFile << " Clusters  : " << buffer << "\n";
   outFile << " Dimension : ";
-  if (map2d) {
+  if (m_map2d) {
     outFile << "T ";
   } else {
     outFile << "F ";
@@ -1165,39 +1165,39 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
     for (int j = 0; j < angRes; j++) {
       for (int k = 0; k < bFieldRes; k++) {
         double ve = 0., vb = 0., vexb = 0.;
-        if (hasElectronVelocityE) ve = tabElectronVelocityE[j][k][i];
-        if (hasElectronVelocityB) vb = tabElectronVelocityB[j][k][i];
-        if (hasElectronVelocityExB) vexb = tabElectronVelocityExB[j][k][i];
+        if (m_hasElectronVelocityE) ve = tabElectronVelocityE[j][k][i];
+        if (m_hasElectronVelocityB) vb = tabElectronVelocityB[j][k][i];
+        if (m_hasElectronVelocityExB) vexb = tabElectronVelocityExB[j][k][i];
         // Convert from cm / ns to cm / us.
         ve *= 1.e3;
         vb *= 1.e3;
         vexb *= 1.e3;
         double dl = 0., dt = 0.;
-        if (hasElectronDiffLong) dl = tabElectronDiffLong[j][k][i];
-        if (hasElectronDiffTrans) dt = tabElectronDiffTrans[j][k][i];
+        if (m_hasElectronDiffLong) dl = tabElectronDiffLong[j][k][i];
+        if (m_hasElectronDiffTrans) dt = tabElectronDiffTrans[j][k][i];
         dl *= sqrtPressure;
         dt *= sqrtPressure;
         double alpha = -30., alpha0 = -30., eta = -30.;
-        if (hasElectronTownsend) {
+        if (m_hasElectronTownsend) {
           alpha = tabElectronTownsend[j][k][i];
           alpha0 = tabTownsendNoPenning[j][k][i];
           alpha -= logPressure;
           alpha0 -= logPressure;
         }
-        if (hasElectronAttachment) {
+        if (m_hasElectronAttachment) {
           eta = tabElectronAttachment[j][k][i];
           eta -= logPressure;
         }
         // Ion mobility
         double mu = 0.;
-        if (hasIonMobility) mu = tabIonMobility[j][k][i];
+        if (m_hasIonMobility) mu = tabIonMobility[j][k][i];
         // Convert from cm2 / (V ns) to cm2 / (V us).
         mu *= 1.e3;
         // Lorentz angle
         double lor = 0.;
         // Dissociation coefficient
         double diss = -30.;
-        if (hasIonDissociation) {
+        if (m_hasIonDissociation) {
           diss = tabIonDissociation[j][k][i];
           diss -= logPressure;
         }
@@ -1208,7 +1208,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << ve;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1218,7 +1218,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << vb;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1228,7 +1228,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << vexb;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1238,7 +1238,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << dl;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1248,7 +1248,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << dt;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1258,7 +1258,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << alpha;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1273,7 +1273,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
         outFile << std::setw(15);
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << spl;
           ++cnt;
           if (cnt % 8 == 0) outFile << "\n";
@@ -1282,7 +1282,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << mu;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1292,7 +1292,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << lor;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1302,7 +1302,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << diss;
         ++cnt;
         if (cnt % 8 == 0) outFile << "\n";
-        if (!map2d) {
+        if (!m_map2d) {
           outFile << std::setw(15);
           outFile << spl;
           ++cnt;
@@ -1311,7 +1311,7 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
         outFile << std::setw(15);
         for (int l = 0; l < 6; ++l) {
           double diff = 0.;
-          if (hasElectronDiffTens) {
+          if (m_hasElectronDiffTens) {
             diff = tabElectronDiffTens[l][j][k][i];
             diff *= pressureTable;
           }
@@ -1319,32 +1319,32 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           outFile << diff;
           ++cnt;
           if (cnt % 8 == 0) outFile << "\n";
-          if (!map2d) {
+          if (!m_map2d) {
             outFile << std::setw(15) << spl;
             ++cnt;
             if (cnt % 8 == 0) outFile << "\n";
           }
         }
-        if (hasExcRates && nExcListElements > 0) {
+        if (m_hasExcRates && nExcListElements > 0) {
           for (int l = 0; l < nExcListElements; l++) {
             outFile << std::setw(15);
             outFile << tabExcRates[l][j][k][i];
             ++cnt;
             if (cnt % 8 == 0) outFile << "\n";
-            if (!map2d) {
+            if (!m_map2d) {
               outFile << std::setw(15) << spl;
               ++cnt;
               if (cnt % 8 == 0) outFile << "\n";
             }
           }
         }
-        if (hasIonRates && nIonListElements > 0) {
+        if (m_hasIonRates && nIonListElements > 0) {
           for (int l = 0; l < nIonListElements; l++) {
             outFile << std::setw(15);
             outFile << tabIonRates[l][j][k][i];
             ++cnt;
             if (cnt % 8 == 0) outFile << "\n";
-            if (!map2d) {
+            if (!m_map2d) {
               outFile << std::setw(15) << spl;
               ++cnt;
               if (cnt % 8 == 0) outFile << "\n";
@@ -1361,34 +1361,34 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
   int hExtrap[13], lExtrap[13];
   int interpMeth[13];
 
-  hExtrap[0] = hExtrap[1] = hExtrap[2] = extrHighVelocity;
-  lExtrap[0] = lExtrap[1] = lExtrap[2] = extrLowVelocity;
-  interpMeth[0] = interpMeth[1] = interpMeth[2] = intpVelocity;
-  hExtrap[3] = hExtrap[8] = hExtrap[10] = extrHighDiffusion;
-  lExtrap[3] = lExtrap[8] = lExtrap[10] = extrLowDiffusion;
-  interpMeth[3] = interpMeth[8] = interpMeth[10] = intpDiffusion;
-  hExtrap[4] = extrHighTownsend;
-  lExtrap[4] = extrLowTownsend;
-  interpMeth[4] = intpTownsend;
-  hExtrap[5] = extrHighAttachment;
-  lExtrap[5] = extrLowAttachment;
-  interpMeth[5] = intpAttachment;
-  hExtrap[6] = extrHighMobility;
-  lExtrap[6] = extrLowMobility;
-  interpMeth[6] = intpMobility;
+  hExtrap[0] = hExtrap[1] = hExtrap[2] = m_extrHighVelocity;
+  lExtrap[0] = lExtrap[1] = lExtrap[2] = m_extrLowVelocity;
+  interpMeth[0] = interpMeth[1] = interpMeth[2] = m_intpVelocity;
+  hExtrap[3] = hExtrap[8] = hExtrap[10] = m_extrHighDiffusion;
+  lExtrap[3] = lExtrap[8] = lExtrap[10] = m_extrLowDiffusion;
+  interpMeth[3] = interpMeth[8] = interpMeth[10] = m_intpDiffusion;
+  hExtrap[4] = m_extrHighTownsend;
+  lExtrap[4] = m_extrLowTownsend;
+  interpMeth[4] = m_intpTownsend;
+  hExtrap[5] = m_extrHighAttachment;
+  lExtrap[5] = m_extrLowAttachment;
+  interpMeth[5] = m_intpAttachment;
+  hExtrap[6] = m_extrHighMobility;
+  lExtrap[6] = m_extrLowMobility;
+  interpMeth[6] = m_intpMobility;
   // Lorentz angle
   hExtrap[7] = 1;
   lExtrap[7] = 0;
   interpMeth[7] = 2;
-  hExtrap[9] = extrHighDissociation;
-  lExtrap[9] = extrLowDissociation;
-  interpMeth[9] = intpDissociation;
-  hExtrap[11] = extrHighExcRates;
-  lExtrap[11] = extrLowExcRates;
-  interpMeth[11] = intpExcRates;
-  hExtrap[12] = extrHighIonRates;
-  lExtrap[12] = extrLowIonRates;
-  interpMeth[12] = intpIonRates;
+  hExtrap[9] = m_extrHighDissociation;
+  lExtrap[9] = m_extrLowDissociation;
+  interpMeth[9] = m_intpDissociation;
+  hExtrap[11] = m_extrHighExcRates;
+  lExtrap[11] = m_extrLowExcRates;
+  interpMeth[11] = m_intpExcRates;
+  hExtrap[12] = m_extrHighIonRates;
+  lExtrap[12] = m_extrLowIonRates;
+  interpMeth[12] = m_intpIonRates;
 
   outFile << " H Extr: ";
   for (int i = 0; i < 13; i++) {
@@ -1413,8 +1413,8 @@ bool MediumGas::WriteGasFile(const std::string& filename) {
           << " EMPROB=" << std::setw(15) << 0. << ","
           << " EPAIR =" << std::setw(15) << 0. << "\n";
   double ionDiffLong = 0., ionDiffTrans = 0.;
-  if (hasIonDiffLong) ionDiffLong = tabIonDiffLong[0][0][0];
-  if (hasIonDiffTrans) ionDiffTrans = tabIonDiffTrans[0][0][0];
+  if (m_hasIonDiffLong) ionDiffLong = tabIonDiffLong[0][0][0];
+  if (m_hasIonDiffTrans) ionDiffTrans = tabIonDiffTrans[0][0][0];
   outFile << " Ion diffusion: " << std::setw(15) << ionDiffLong << std::setw(15)
           << ionDiffTrans << "\n";
   outFile << " CMEAN =" << std::setw(15) << 0. << ","
@@ -1452,268 +1452,269 @@ void MediumGas::PrintGas() {
   std::cout << "    Gas file:\n";
   std::cout << "      Pressure:    " << pressureTable << " Torr\n";
   std::cout << "      Temperature: " << temperatureTable << " K\n";
-  if (nEfields > 1) {
+  if (m_nEfields > 1) {
     std::cout << "    Electric field range:  " << eFields[0] << " - "
-              << eFields[nEfields - 1] << " V/cm in " << nEfields - 1
+              << eFields[m_nEfields - 1] << " V/cm in " << m_nEfields - 1
               << " steps.\n";
-  } else if (nEfields == 1) {
+  } else if (m_nEfields == 1) {
     std::cout << "    Electric field:        " << eFields[0] << " V/cm\n";
   } else {
     std::cout << "    Electric field range: not set\n";
   }
-  if (nBfields > 1) {
+  if (m_nBfields > 1) {
     std::cout << "    Magnetic field range:  " << bFields[0] << " - "
-              << bFields[nBfields - 1] << " T in " << nBfields - 1
+              << bFields[m_nBfields - 1] << " T in " << m_nBfields - 1
               << " steps.\n";
-  } else if (nBfields == 1) {
+  } else if (m_nBfields == 1) {
     std::cout << "    Magnetic field:        " << bFields[0] << "\n";
   } else {
     std::cout << "    Magnetic field range: not set\n";
   }
-  if (nAngles > 1) {
+  if (m_nAngles > 1) {
     std::cout << "    Angular range:         " << bAngles[0] << " - "
-              << bAngles[nAngles - 1] << " in " << nAngles - 1 << " steps.\n";
-  } else if (nAngles == 1) {
+              << bAngles[m_nAngles - 1] << " in " << m_nAngles - 1 
+              << " steps.\n";
+  } else if (m_nAngles == 1) {
     std::cout << "    Angle between E and B: " << bAngles[0] << "\n";
   } else {
     std::cout << "    Angular range: not set\n";
   }
 
   std::cout << "    Available electron transport data:\n";
-  if (hasElectronVelocityE) {
+  if (m_hasElectronVelocityE) {
     std::cout << "      Velocity along E\n";
   }
-  if (hasElectronVelocityB) {
+  if (m_hasElectronVelocityB) {
     std::cout << "      Velocity along Bt\n";
   }
-  if (hasElectronVelocityExB) {
+  if (m_hasElectronVelocityExB) {
     std::cout << "      Velocity along ExB\n";
   }
-  if (hasElectronVelocityE || hasElectronVelocityB || hasElectronVelocityExB) {
+  if (m_hasElectronVelocityE || m_hasElectronVelocityB || m_hasElectronVelocityExB) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowVelocity == 0)
+    if (m_extrLowVelocity == 0)
       std::cout << " constant\n";
-    else if (extrLowVelocity == 1)
+    else if (m_extrLowVelocity == 1)
       std::cout << " linear\n";
-    else if (extrLowVelocity == 2)
+    else if (m_extrLowVelocity == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighVelocity == 0)
+    if (m_extrHighVelocity == 0)
       std::cout << " constant\n";
-    else if (extrHighVelocity == 1)
+    else if (m_extrHighVelocity == 1)
       std::cout << " linear\n";
-    else if (extrHighVelocity == 2)
+    else if (m_extrHighVelocity == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpVelocity << "\n";
+    std::cout << "        Interpolation order: " << m_intpVelocity << "\n";
   }
-  if (hasElectronDiffLong) {
+  if (m_hasElectronDiffLong) {
     std::cout << "      Longitudinal diffusion coefficient\n";
   }
-  if (hasElectronDiffTrans) {
+  if (m_hasElectronDiffTrans) {
     std::cout << "      Transverse diffusion coefficient\n";
   }
-  if (hasElectronDiffTens) {
+  if (m_hasElectronDiffTens) {
     std::cout << "      Diffusion tensor\n";
   }
-  if (hasElectronDiffLong || hasElectronDiffTrans || hasElectronDiffTens) {
+  if (m_hasElectronDiffLong || m_hasElectronDiffTrans || m_hasElectronDiffTens) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDiffusion == 0)
+    if (m_extrLowDiffusion == 0)
       std::cout << " constant\n";
-    else if (extrLowDiffusion == 1)
+    else if (m_extrLowDiffusion == 1)
       std::cout << " linear\n";
-    else if (extrLowDiffusion == 2)
+    else if (m_extrLowDiffusion == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDiffusion == 0)
+    if (m_extrHighDiffusion == 0)
       std::cout << " constant\n";
-    else if (extrHighDiffusion == 1)
+    else if (m_extrHighDiffusion == 1)
       std::cout << " linear\n";
-    else if (extrHighDiffusion == 2)
+    else if (m_extrHighDiffusion == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpDiffusion << "\n";
+    std::cout << "        Interpolation order: " << m_intpDiffusion << "\n";
   }
-  if (hasElectronTownsend) {
+  if (m_hasElectronTownsend) {
     std::cout << "      Townsend coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowTownsend == 0)
+    if (m_extrLowTownsend == 0)
       std::cout << " constant\n";
-    else if (extrLowTownsend == 1)
+    else if (m_extrLowTownsend == 1)
       std::cout << " linear\n";
-    else if (extrLowTownsend == 2)
+    else if (m_extrLowTownsend == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighTownsend == 0)
+    if (m_extrHighTownsend == 0)
       std::cout << " constant\n";
-    else if (extrHighTownsend == 1)
+    else if (m_extrHighTownsend == 1)
       std::cout << " linear\n";
-    else if (extrHighTownsend == 2)
+    else if (m_extrHighTownsend == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpTownsend << "\n";
+    std::cout << "        Interpolation order: " << m_intpTownsend << "\n";
   }
-  if (hasElectronAttachment) {
+  if (m_hasElectronAttachment) {
     std::cout << "      Attachment coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowAttachment == 0)
+    if (m_extrLowAttachment == 0)
       std::cout << " constant\n";
-    else if (extrLowAttachment == 1)
+    else if (m_extrLowAttachment == 1)
       std::cout << " linear\n";
-    else if (extrLowAttachment == 2)
+    else if (m_extrLowAttachment == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighAttachment == 0)
+    if (m_extrHighAttachment == 0)
       std::cout << " constant\n";
-    else if (extrHighAttachment == 1)
+    else if (m_extrHighAttachment == 1)
       std::cout << " linear\n";
-    else if (extrHighAttachment == 2)
+    else if (m_extrHighAttachment == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpAttachment << "\n";
+    std::cout << "        Interpolation order: " << m_intpAttachment << "\n";
   }
-  if (hasExcRates) {
+  if (m_hasExcRates) {
     std::cout << "      Excitation rates\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowExcRates == 0)
+    if (m_extrLowExcRates == 0)
       std::cout << " constant\n";
-    else if (extrLowExcRates == 1)
+    else if (m_extrLowExcRates == 1)
       std::cout << " linear\n";
-    else if (extrLowExcRates == 2)
+    else if (m_extrLowExcRates == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighExcRates == 0)
+    if (m_extrHighExcRates == 0)
       std::cout << " constant\n";
-    else if (extrHighExcRates == 1)
+    else if (m_extrHighExcRates == 1)
       std::cout << " linear\n";
-    else if (extrHighExcRates == 2)
+    else if (m_extrHighExcRates == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpExcRates << "\n";
+    std::cout << "        Interpolation order: " << m_intpExcRates << "\n";
   }
-  if (hasIonRates) {
+  if (m_hasIonRates) {
     std::cout << "      Ionisation rates\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowIonRates == 0)
+    if (m_extrLowIonRates == 0)
       std::cout << " constant\n";
-    else if (extrLowIonRates == 1)
+    else if (m_extrLowIonRates == 1)
       std::cout << " linear\n";
-    else if (extrLowIonRates == 2)
+    else if (m_extrLowIonRates == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighIonRates == 0)
+    if (m_extrHighIonRates == 0)
       std::cout << " constant\n";
-    else if (extrHighIonRates == 1)
+    else if (m_extrHighIonRates == 1)
       std::cout << " linear\n";
-    else if (extrHighIonRates == 2)
+    else if (m_extrHighIonRates == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpIonRates << "\n";
+    std::cout << "        Interpolation order: " << m_intpIonRates << "\n";
   }
-  if (!hasElectronVelocityE && !hasElectronVelocityB &&
-      !hasElectronVelocityExB && !hasElectronDiffLong &&
-      !hasElectronDiffTrans && !hasElectronDiffTens && !hasElectronTownsend &&
-      !hasElectronAttachment && !hasExcRates && !hasIonRates) {
+  if (!m_hasElectronVelocityE && !m_hasElectronVelocityB &&
+      !m_hasElectronVelocityExB && !m_hasElectronDiffLong &&
+      !m_hasElectronDiffTrans && !m_hasElectronDiffTens && !m_hasElectronTownsend &&
+      !m_hasElectronAttachment && !m_hasExcRates && !m_hasIonRates) {
     std::cout << "      none\n";
   }
 
   std::cout << "    Available ion transport data:\n";
-  if (hasIonMobility) {
+  if (m_hasIonMobility) {
     std::cout << "      Mobility\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowMobility == 0)
+    if (m_extrLowMobility == 0)
       std::cout << " constant\n";
-    else if (extrLowMobility == 1)
+    else if (m_extrLowMobility == 1)
       std::cout << " linear\n";
-    else if (extrLowMobility == 2)
+    else if (m_extrLowMobility == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighMobility == 0)
+    if (m_extrHighMobility == 0)
       std::cout << " constant\n";
-    else if (extrHighMobility == 1)
+    else if (m_extrHighMobility == 1)
       std::cout << " linear\n";
-    else if (extrHighMobility == 2)
+    else if (m_extrHighMobility == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpMobility << "\n";
+    std::cout << "        Interpolation order: " << m_intpMobility << "\n";
   }
-  if (hasIonDiffLong) {
+  if (m_hasIonDiffLong) {
     std::cout << "      Longitudinal diffusion coefficient\n";
   }
-  if (hasIonDiffTrans) {
+  if (m_hasIonDiffTrans) {
     std::cout << "      Transverse diffusion coefficient\n";
   }
-  if (hasIonDiffLong || hasIonDiffTrans) {
+  if (m_hasIonDiffLong || m_hasIonDiffTrans) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDiffusion == 0)
+    if (m_extrLowDiffusion == 0)
       std::cout << " constant\n";
-    else if (extrLowDiffusion == 1)
+    else if (m_extrLowDiffusion == 1)
       std::cout << " linear\n";
-    else if (extrLowDiffusion == 2)
+    else if (m_extrLowDiffusion == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDiffusion == 0)
+    if (m_extrHighDiffusion == 0)
       std::cout << " constant\n";
-    else if (extrHighDiffusion == 1)
+    else if (m_extrHighDiffusion == 1)
       std::cout << " linear\n";
-    else if (extrHighDiffusion == 2)
+    else if (m_extrHighDiffusion == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpDiffusion << "\n";
+    std::cout << "        Interpolation order: " << m_intpDiffusion << "\n";
   }
-  if (hasIonDissociation) {
+  if (m_hasIonDissociation) {
     std::cout << "      Dissociation coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDissociation == 0)
+    if (m_extrLowDissociation == 0)
       std::cout << " constant\n";
-    else if (extrLowDissociation == 1)
+    else if (m_extrLowDissociation == 1)
       std::cout << " linear\n";
-    else if (extrLowDissociation == 2)
+    else if (m_extrLowDissociation == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDissociation == 0)
+    if (m_extrHighDissociation == 0)
       std::cout << " constant\n";
-    else if (extrHighDissociation == 1)
+    else if (m_extrHighDissociation == 1)
       std::cout << " linear\n";
-    else if (extrHighDissociation == 2)
+    else if (m_extrHighDissociation == 2)
       std::cout << " exponential\n";
     else
       std::cout << " unknown\n";
-    std::cout << "        Interpolation order: " << intpDissociation << "\n";
+    std::cout << "        Interpolation order: " << m_intpDissociation << "\n";
   }
-  if (!hasIonMobility && !hasIonDiffLong && !hasIonDiffTrans &&
-      !hasIonDissociation) {
+  if (!m_hasIonMobility && !m_hasIonDiffLong && !m_hasIonDiffTrans &&
+      !m_hasIonDissociation) {
     std::cout << "      none\n";
   }
 }
 
-bool MediumGas::LoadIonMobility(const std::string filename) {
+bool MediumGas::LoadIonMobility(const std::string& filename) {
 
   // Open the file.
   std::ifstream infile;
@@ -1764,11 +1765,13 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
     if (token && strcmp(token, "//") != 0) {
       std::cerr << m_className << "::LoadIonMobility:\n";
       std::cerr << "    Unexpected non-comment characters after the mobility; "
-                   "line skipped.\n";
+                << "    line skipped.\n";
       std::cerr << "    " << filename << " (line " << i << ").\n";
       continue;
     }
-    // printf("E/N = %g Td: mu = %g cm2/(V.s)\n", field, mu);
+    if (m_debug) {
+      std::cout << "    E/N = " << field << " Td: mu = " << mu << " cm2/(V.s)\n";
+    }
     // Check if the data has been read correctly.
     if (infile.fail() && !infile.eof()) {
       std::cerr << m_className << "::LoadIonMobility:\n";
@@ -1822,15 +1825,15 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
 void MediumGas::SetExtrapolationMethodExcitationRates(
     const std::string extrLow, const std::string extrHigh) {
 
-  int iExtr;
+  unsigned int iExtr = 0;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrLowExcRates = iExtr;
+    m_extrLowExcRates = iExtr;
   } else {
     std::cerr << m_className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrHighExcRates = iExtr;
+    m_extrHighExcRates = iExtr;
   } else {
     std::cerr << m_className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -1840,15 +1843,15 @@ void MediumGas::SetExtrapolationMethodExcitationRates(
 void MediumGas::SetExtrapolationMethodIonisationRates(
     const std::string extrLow, const std::string extrHigh) {
 
-  int iExtr;
+  unsigned int iExtr = 0;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrLowIonRates = iExtr;
+    m_extrLowIonRates = iExtr;
   } else {
     std::cerr << m_className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrHighIonRates = iExtr;
+    m_extrHighIonRates = iExtr;
   } else {
     std::cerr << m_className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -1858,14 +1861,14 @@ void MediumGas::SetExtrapolationMethodIonisationRates(
 void MediumGas::SetInterpolationMethodExcitationRates(const int intrp) {
 
   if (intrp > 0) {
-    intpExcRates = intrp;
+    m_intpExcRates = intrp;
   }
 }
 
 void MediumGas::SetInterpolationMethodIonisationRates(const int intrp) {
 
   if (intrp > 0) {
-    intpIonRates = intrp;
+    m_intpIonRates = intrp;
   }
 }
 

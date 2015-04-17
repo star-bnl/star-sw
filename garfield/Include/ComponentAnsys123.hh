@@ -26,8 +26,7 @@ class ComponentAnsys123 : public ComponentFieldMap {
   double WeightingPotential(const double x, const double y, const double z,
                             const std::string label);
 
-  bool GetMedium(const double x, const double y, const double z,
-                 Medium*& medium);
+  Medium* GetMedium(const double& x, const double& y, const double& z);
 
   bool IsInBoundingBox(const double x, const double y, const double z) {
     return x >= xMinBoundingBox && x <= xMaxBoundingBox &&

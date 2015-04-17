@@ -13,8 +13,7 @@ class ComponentAnsys121 : public ComponentFieldMap {
   // Destructor
   ~ComponentAnsys121() {}
 
-  bool GetMedium(const double x, const double y, const double z,
-                 Medium*& medium);
+  Medium* GetMedium(const double& x, const double& y, const double& z);
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
   void ElectricField(const double x, const double y, const double z, double& ex,

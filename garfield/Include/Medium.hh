@@ -159,38 +159,57 @@ class Medium {
   void GetFieldGrid(std::vector<double>& efields, std::vector<double>& bfields,
                     std::vector<double>& angles);
 
-  bool GetElectronVelocityE(const int ie, const int ib, const int ia,
-                            double& v);
-  bool GetElectronVelocityExB(const int ie, const int ib, const int ia,
-                              double& v);
-  bool GetElectronVelocityB(const int ie, const int ib, const int ia,
-                            double& v);
-  bool GetElectronLongitudinalDiffusion(const int ie, const int ib,
-                                        const int ia, double& dl);
-  bool GetElectronTransverseDiffusion(const int ie, const int ib, const int ia,
-                                      double& dt);
-  bool GetElectronTownsend(const int ie, const int ib, const int ia,
-                           double& alpha);
-  bool GetElectronAttachment(const int ie, const int ib, const int ia,
-                             double& eta);
+  bool GetElectronVelocityE(const unsigned int& ie, 
+                            const unsigned int& ib, 
+                            const unsigned int& ia, double& v);
+  bool GetElectronVelocityExB(const unsigned int& ie, 
+                              const unsigned int& ib, 
+                              const unsigned int& ia, double& v);
+  bool GetElectronVelocityB(const unsigned int& ie, 
+                            const unsigned int& ib, 
+                            const unsigned int& ia, double& v);
 
-  bool GetHoleVelocityE(const int ie, const int ib, const int ia, double& v);
-  bool GetHoleVelocityExB(const int ie, const int ib, const int ia, double& v);
-  bool GetHoleVelocityB(const int ie, const int ib, const int ia, double& v);
-  bool GetHoleLongitudinalDiffusion(const int ie, const int ib, const int ia,
-                                    double& dl);
-  bool GetHoleTransverseDiffusion(const int ie, const int ib, const int ia,
-                                  double& dt);
-  bool GetHoleTownsend(const int ie, const int ib, const int ia, double& alpha);
-  bool GetHoleAttachment(const int ie, const int ib, const int ia, double& eta);
+  bool GetElectronLongitudinalDiffusion(const unsigned int& ie, 
+                                        const unsigned int& ib, 
+                                        const unsigned int& ia, double& dl);
+  bool GetElectronTransverseDiffusion(const unsigned int& ie, 
+                                      const unsigned int& ib, 
+                                      const unsigned int& ia, double& dt);
+  bool GetElectronTownsend(const unsigned int& ie, 
+                           const unsigned int& ib, 
+                           const unsigned int& ia, double& alpha);
+  bool GetElectronAttachment(const unsigned int& ie, 
+                             const unsigned int& ib, 
+                             const unsigned int& ia, double& eta);
 
-  bool GetIonMobility(const int ie, const int ib, const int ia, double& mu);
-  bool GetIonLongitudinalDiffusion(const int ie, const int ib, const int ia,
-                                   double& dl);
-  bool GetIonTransverseDiffusion(const int ie, const int ib, const int ia,
-                                 double& dt);
-  bool GetIonDissociation(const int ie, const int ib, const int ia,
-                          double& diss);
+  bool GetHoleVelocityE(const unsigned int& ie, const unsigned int& ib, 
+                        const unsigned int& ia, double& v);
+  bool GetHoleVelocityExB(const unsigned int& ie, const unsigned int& ib, 
+                          const unsigned int& ia, double& v);
+  bool GetHoleVelocityB(const unsigned int& ie, const unsigned int& ib, 
+                        const unsigned int& ia, double& v);
+  bool GetHoleLongitudinalDiffusion(const unsigned int& ie, 
+                                    const unsigned int& ib, 
+                                    const unsigned int& ia, double& dl);
+  bool GetHoleTransverseDiffusion(const unsigned int& ie, 
+                                  const unsigned int& ib, 
+                                  const unsigned int& ia, double& dt);
+  bool GetHoleTownsend(const unsigned int& ie, const unsigned int& ib, 
+                       const unsigned int& ia, double& alpha);
+  bool GetHoleAttachment(const unsigned int& ie, const unsigned int& ib, 
+                         const unsigned int& ia, double& eta);
+
+  bool GetIonMobility(const unsigned int& ie, const unsigned int& ib, 
+                      const unsigned int& ia, double& mu);
+  bool GetIonLongitudinalDiffusion(const unsigned int& ie, 
+                                   const unsigned int& ib, 
+                                   const unsigned int& ia, double& dl);
+  bool GetIonTransverseDiffusion(const unsigned int& ie, 
+                                 const unsigned int& ib, 
+                                 const unsigned int& ia, double& dt);
+  bool GetIonDissociation(const unsigned int& ie, 
+                          const unsigned int& ib, 
+                          const unsigned int& ia, double& diss);
 
   void ResetElectronVelocity();
   void ResetElectronDiffusion();
@@ -204,33 +223,33 @@ class Medium {
   void ResetIonDiffusion();
   void ResetIonDissociation();
 
-  bool SetIonMobility(const int ie, const int ib, const int ia,
-                      const double mu);
+  bool SetIonMobility(const unsigned int& ie, const unsigned int& ib, 
+                      const unsigned int& ia, const double& mu);
   bool SetIonMobility(const std::vector<double>& fields,
                       const std::vector<double>& mobilities);
 
   // Select extrapolation method for fields below/above the table range.
   // Options are "constant"/"linear"/"exponential".
-  void SetExtrapolationMethodVelocity(const std::string extrLow,
-                                      const std::string extrHigh);
-  void SetExtrapolationMethodDiffusion(const std::string extrLow,
-                                       const std::string extrHigh);
-  void SetExtrapolationMethodTownsend(const std::string extrLow,
-                                      const std::string extrHigh);
-  void SetExtrapolationMethodAttachment(const std::string extrLow,
-                                        const std::string extrHigh);
-  void SetExtrapolationMethodIonMobility(const std::string extrLow,
-                                         const std::string extrHigh);
-  void SetExtrapolationMethodIonDissociation(const std::string extrLow,
-                                             const std::string extrHigh);
+  void SetExtrapolationMethodVelocity(const std::string& extrLow,
+                                      const std::string& extrHigh);
+  void SetExtrapolationMethodDiffusion(const std::string& extrLow,
+                                       const std::string& extrHigh);
+  void SetExtrapolationMethodTownsend(const std::string& extrLow,
+                                      const std::string& extrHigh);
+  void SetExtrapolationMethodAttachment(const std::string& extrLow,
+                                        const std::string& extrHigh);
+  void SetExtrapolationMethodIonMobility(const std::string& extrLow,
+                                         const std::string& extrHigh);
+  void SetExtrapolationMethodIonDissociation(const std::string& extrLow,
+                                             const std::string& extrHigh);
 
   // Set the degree of polynomial interpolation (usually 2).
-  void SetInterpolationMethodVelocity(const int intrp);
-  void SetInterpolationMethodDiffusion(const int intrp);
-  void SetInterpolationMethodTownsend(const int intrp);
-  void SetInterpolationMethodAttachment(const int intrp);
-  void SetInterpolationMethodIonMobility(const int intrp);
-  void SetInterpolationMethodIonDissociation(const int intrp);
+  void SetInterpolationMethodVelocity(const unsigned int& intrp);
+  void SetInterpolationMethodDiffusion(const unsigned int& intrp);
+  void SetInterpolationMethodTownsend(const unsigned int& intrp);
+  void SetInterpolationMethodAttachment(const unsigned int& intrp);
+  void SetInterpolationMethodIonMobility(const unsigned int& intrp);
+  void SetInterpolationMethodIonDissociation(const unsigned int& intrp);
 
   // Scaling of fields and transport parameters.
   virtual double ScaleElectricField(const double& e) const { return e; }
@@ -300,20 +319,20 @@ class Medium {
   bool m_debug;
 
   // Field grids
-  int nEfields;
-  int nBfields;
-  int nAngles;
+  unsigned int m_nEfields;
+  unsigned int m_nBfields;
+  unsigned int m_nAngles;
 
   std::vector<double> eFields;
   std::vector<double> bFields;
   std::vector<double> bAngles;
 
   // Tables of transport parameters
-  bool map2d;
+  bool m_map2d;
   // Electrons
-  bool hasElectronVelocityE, hasElectronVelocityB, hasElectronVelocityExB;
-  bool hasElectronDiffLong, hasElectronDiffTrans, hasElectronDiffTens;
-  bool hasElectronTownsend, hasElectronAttachment;
+  bool m_hasElectronVelocityE, m_hasElectronVelocityB, m_hasElectronVelocityExB;
+  bool m_hasElectronDiffLong, m_hasElectronDiffTrans, m_hasElectronDiffTens;
+  bool m_hasElectronTownsend, m_hasElectronAttachment;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
@@ -326,9 +345,9 @@ class Medium {
       tabElectronDiffTens;
 
   // Holes
-  bool hasHoleVelocityE, hasHoleVelocityB, hasHoleVelocityExB;
-  bool hasHoleDiffLong, hasHoleDiffTrans, hasHoleDiffTens;
-  bool hasHoleTownsend, hasHoleAttachment;
+  bool m_hasHoleVelocityE, m_hasHoleVelocityB, m_hasHoleVelocityExB;
+  bool m_hasHoleDiffLong, m_hasHoleDiffTrans, m_hasHoleDiffTens;
+  bool m_hasHoleTownsend, m_hasHoleAttachment;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityE;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityExB;
   std::vector<std::vector<std::vector<double> > > tabHoleVelocityB;
@@ -340,9 +359,9 @@ class Medium {
   std::vector<std::vector<std::vector<std::vector<double> > > > tabHoleDiffTens;
 
   // Ions
-  bool hasIonMobility;
-  bool hasIonDiffLong, hasIonDiffTrans;
-  bool hasIonDissociation;
+  bool m_hasIonMobility;
+  bool m_hasIonDiffLong, m_hasIonDiffTrans;
+  bool m_hasIonDissociation;
   std::vector<std::vector<std::vector<double> > > tabIonMobility;
   std::vector<std::vector<std::vector<double> > > tabIonDiffLong;
   std::vector<std::vector<std::vector<double> > > tabIonDiffTrans;
@@ -357,45 +376,54 @@ class Medium {
   int thrIonDissociation;
 
   // Extrapolation methods
-  int extrLowVelocity, extrHighVelocity;
-  int extrLowDiffusion, extrHighDiffusion;
-  int extrLowTownsend, extrHighTownsend;
-  int extrLowAttachment, extrHighAttachment;
-  int extrLowMobility, extrHighMobility;
-  int extrLowDissociation, extrHighDissociation;
+  unsigned int m_extrLowVelocity, m_extrHighVelocity;
+  unsigned int m_extrLowDiffusion, m_extrHighDiffusion;
+  unsigned int m_extrLowTownsend, m_extrHighTownsend;
+  unsigned int m_extrLowAttachment, m_extrHighAttachment;
+  unsigned int m_extrLowMobility, m_extrHighMobility;
+  unsigned int m_extrLowDissociation, m_extrHighDissociation;
 
   // Interpolation methods
-  int intpVelocity;
-  int intpDiffusion;
-  int intpTownsend;
-  int intpAttachment;
-  int intpMobility;
-  int intpDissociation;
+  unsigned int m_intpVelocity;
+  unsigned int m_intpDiffusion;
+  unsigned int m_intpTownsend;
+  unsigned int m_intpAttachment;
+  unsigned int m_intpMobility;
+  unsigned int m_intpDissociation;
 
-  double Interpolate1D(const double e, const std::vector<double>& table,
-                       const std::vector<double>& fields, const int intpMeth,
-                       const int jExtr, const int iExtr);
-  bool GetExtrapolationIndex(std::string extrStr, int& extrNb);
+  double Interpolate1D(const double& e, const std::vector<double>& table,
+                       const std::vector<double>& fields, 
+                       const unsigned int& intpMeth,
+                       const int& jExtr, const int& iExtr);
+  bool GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb);
   void CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                   const std::vector<double>& efields,
                   const std::vector<double>& bfields,
-                  const std::vector<double>& angles, const int intp,
-                  const int extrLow, const int extrHigh, const double init,
+                  const std::vector<double>& angles, 
+                  const unsigned int& intp,
+                  const unsigned int& extrLow, const unsigned int& extrHigh, 
+                  const double init,
                   const std::string label);
   void CloneTensor(
       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-      const int n, const std::vector<double>& efields,
-      const std::vector<double>& bfields, const std::vector<double>& angles,
-      const int intp, const int extrLow, const int extrHigh, const double init,
-      const std::string label);
+      const unsigned int& n, 
+      const std::vector<double>& efields,
+      const std::vector<double>& bfields, 
+      const std::vector<double>& angles,
+      const unsigned int& intp, 
+      const unsigned int& extrLow, const unsigned int& extrHigh, 
+      const double& init,
+      const std::string& label);
 
-  void InitParamArrays(const int eRes, const int bRes, const int aRes,
+  void InitParamArrays(const unsigned int& eRes, const unsigned int& bRes, 
+                       const unsigned int& aRes,
                        std::vector<std::vector<std::vector<double> > >& tab,
-                       const double val);
+                       const double& val);
   void InitParamTensor(
-      const int eRes, const int bRes, const int aRes, const int tRes,
+      const unsigned int& eRes, const unsigned int& bRes, 
+      const unsigned int& aRes, const unsigned int& tRes,
       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-      const double val);
+      const double& val);
 };
 }
 

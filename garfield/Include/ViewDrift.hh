@@ -3,17 +3,14 @@
 
 #include <string>
 #include <TGraph.h>
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
-#include <TPointSet3D.h>
+#include <TPolyMarker3D.h>
 #include <TView.h>
 
 namespace Garfield {
 
 class ViewDrift {
-
-  RQ_OBJECT("ViewDrift")
 
  public:
   // Constructor
@@ -24,13 +21,13 @@ class ViewDrift {
   void SetCanvas(TCanvas* c);
 
   // Set area to be plotted.
-  void SetArea(double xmin, double ymin, double zmin, double xmax, double ymax,
-               double zmax);
+  void SetArea(const double& xmin, const double& ymin, const double& zmin, 
+               const double& xmax, const double& ymax, const double& zmax);
   void Clear();
   void Plot(const bool twod = false, const bool axis = true);
 
-  void SetClusterMarkerSize(const double size);
-  void SetCollisionMarkerSize(const double size);
+  void SetClusterMarkerSize(const double& size);
+  void SetCollisionMarkerSize(const double& size);
 
   // Functions to be used by transport classes.
   void NewElectronDriftLine(const unsigned int np, int& id, const double x0,
@@ -90,22 +87,25 @@ class ViewDrift {
     int n;  // what kind of particle?
   };
   std::vector<driftLine> m_driftLines;
+  std::vector<TPolyLine3D*> m_driftLinePlots;
 
   unsigned int m_nTracks;
   struct track {
     std::vector<marker> vect;
   };
   std::vector<track> m_tracks;
+  std::vector<TPolyMarker3D*> m_trackPlots;
+  std::vector<TPolyLine3D*> m_trackLinePlots;
 
   unsigned int m_nExcMarkers;
   std::vector<marker> m_excMarkers;
-  TPointSet3D* m_excPlot;
+  TPolyMarker3D* m_excPlot;
   unsigned int m_nIonMarkers;
   std::vector<marker> m_ionMarkers;
-  TPointSet3D* m_ionPlot;
+  TPolyMarker3D* m_ionPlot;
   unsigned int m_nAttMarkers;
   std::vector<marker> m_attMarkers;
-  TPointSet3D* m_attPlot;
+  TPolyMarker3D* m_attPlot;
 
   double m_markerSizeCluster;
   double m_markerSizeCollision;

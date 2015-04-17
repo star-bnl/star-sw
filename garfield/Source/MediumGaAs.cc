@@ -25,8 +25,8 @@ MediumGaAs::MediumGaAs()
       eTrapTime(0.),
       hTrapTime(0.),
       trappingModel(0),
-      hasUserMobility(false),
-      hasOpticalData(false),
+      m_hasUserMobility(false),
+      m_hasOpticalData(false),
       opticalDataFile("OpticalData_GaAs.txt") {
 
   m_className = "MediumGaAs";
@@ -117,7 +117,7 @@ bool MediumGaAs::ElectronVelocity(const double ex, const double ey,
                                   double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (hasElectronVelocityE) {
+  if (m_hasElectronVelocityE) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -148,7 +148,7 @@ bool MediumGaAs::ElectronTownsend(const double ex, const double ey,
                                   double& alpha) {
 
   alpha = 0.;
-  if (hasElectronTownsend) {
+  if (m_hasElectronTownsend) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -161,7 +161,7 @@ bool MediumGaAs::ElectronAttachment(const double ex, const double ey,
                                     double& eta) {
 
   eta = 0.;
-  if (hasElectronAttachment) {
+  if (m_hasElectronAttachment) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -191,7 +191,7 @@ bool MediumGaAs::HoleVelocity(const double ex, const double ey, const double ez,
                               double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (hasHoleVelocityE) {
+  if (m_hasHoleVelocityE) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -220,7 +220,7 @@ bool MediumGaAs::HoleTownsend(const double ex, const double ey, const double ez,
                               double& alpha) {
 
   alpha = 0.;
-  if (hasHoleTownsend) {
+  if (m_hasHoleTownsend) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -232,7 +232,7 @@ bool MediumGaAs::HoleAttachment(const double ex, const double ey,
                                 const double by, const double bz, double& eta) {
 
   eta = 0.;
-  if (hasHoleAttachment) {
+  if (m_hasHoleAttachment) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -265,7 +265,7 @@ void MediumGaAs::SetLowFieldMobility(const double mue, const double muh) {
 
   eMobility = mue;
   hMobility = muh;
-  hasUserMobility = true;
+  m_hasUserMobility = true;
   m_isChanged = true;
 }
 
@@ -278,13 +278,13 @@ bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetOpticalDataRange:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   emin = opticalDataTable[0].energy;
@@ -306,13 +306,13 @@ bool MediumGaAs::GetDielectricFunction(const double& e, double& eps1,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetDielectricFunction:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   // Make sure the requested energy is within the range of the table.

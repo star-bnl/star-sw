@@ -10,7 +10,7 @@ namespace Garfield {
 
 ComponentAnalyticField::ComponentAnalyticField() {
 
-  className = "ComponentAnalyticField";
+  m_className = "ComponentAnalyticField";
   chargeCheck = false;
   CellInit();
 }
@@ -22,7 +22,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // Initialize electric field and medium.
   ex = ey = ez = 0.;
-  m = 0;
+  m = NULL;
 
   // Make sure the charges have been calculated.
   if (!cellset) {
@@ -41,9 +41,9 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // If the field is ok, get the medium.
   if (status == 0) {
-    if (!GetMedium(x, y, z, m)) {
+    m = GetMedium(x, y, z);
+    if (m == NULL) {
       status = -6;
-      m = 0;
     } else if (!m->IsDriftable()) {
       status = -5;
     }
@@ -57,7 +57,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // Initialize electric field and medium.
   ex = ey = ez = v = 0.;
-  m = 0;
+  m = NULL;
 
   // Make sure the charges have been calculated.
   if (!cellset) {
@@ -75,9 +75,9 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
 
   // If the field is ok, get the medium.
   if (status == 0) {
-    if (!GetMedium(x, y, z, m)) {
+    m = GetMedium(x, y, z);
+    if (m == NULL) {
       status = -6;
-      m = 0;
     } else if (!m->IsDriftable()) {
       status = -5;
     }
@@ -89,7 +89,7 @@ bool ComponentAnalyticField::GetVoltageRange(double& pmin, double& pmax) {
   // Make sure the cell is prepared.
   if (!cellset) {
     if (!Prepare()) {
-      std::cerr << className << "::GetVoltageRange:\n";
+      std::cerr << m_className << "::GetVoltageRange:\n";
       std::cerr << "    Unable to return voltage range.\n";
       std::cerr << "   Cell could not be setup.\n";
       return false;
@@ -111,7 +111,7 @@ void ComponentAnalyticField::WeightingField(const double x, const double y,
   if (nReadout <= 0) return;
   if (!sigset) {
     if (!PrepareSignals()) {
-      std::cerr << className << "::WeightingField::\n";
+      std::cerr << m_className << "::WeightingField::\n";
       std::cerr << "    Unable to calculate weighting fields.\n";
       return;
     }
@@ -141,7 +141,7 @@ double ComponentAnalyticField::WeightingPotential(const double x,
   if (nReadout <= 0) return volt;
   if (!sigset) {
     if (!PrepareSignals()) {
-      std::cerr << className << "::WeightingPotential::\n";
+      std::cerr << m_className << "::WeightingPotential::\n";
       std::cerr << "    Unable to calculate weighting fields.\n";
       return volt;
     }
@@ -199,7 +199,7 @@ bool ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
 
   // Check if a whole period has been crossed.
   if ((perx && fabs(dx) >= sx) || (pery && fabs(dy) >= sy)) {
-    std::cerr << className << "::IsWireCrossed:\n";
+    std::cerr << m_className << "::IsWireCrossed:\n";
     std::cerr << "    Particle crossed more than one period.\n";
     return false;
   }
@@ -285,10 +285,7 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
     const double yxc = w[i].y;
     const double r = sqrt(pow(xwc - x0, 2) + pow(yxc - y0, 2));
     const double rTrap = 0.5 * w[i].d * w[i].nTrap;
-    if (debug) std::cout << "rTrap = " << rTrap << "\nr = " << r << "\n";
     if (r < rTrap) {
-      std::cout << "rTrap = " << rTrap << ", r = " << r
-                << ", nTrap = " << w[i].nTrap << "\n";
       xw = w[i].x;
       yw = w[i].y;
       rw = w[i].d * 0.5;
@@ -306,7 +303,7 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
       }
       if (perx) xw += sx * nX;
       if (debug) {
-        std::cout << className << "::IsInTrapRadius:\n";
+        std::cout << m_className << "::IsInTrapRadius:\n";
         std::cout << "    (" << xin << ", " << yin << ", " << zin << ")"
                   << " within trap radius of wire " << i << ".\n";
       }
@@ -326,31 +323,31 @@ void ComponentAnalyticField::AddWire(const double x, const double y,
 
   // Check if the provided parameters make sense.
   if (diameter <= 0.) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Unphysical wire diameter.\n";
     return;
   }
 
   if (tension <= 0.) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Unphysical wire tension.\n";
     return;
   }
 
   if (rho <= 0.0) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Unphysical wire density.\n";
     return;
   }
 
   if (length <= 0.0) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Unphysical wire length.\n";
     return;
   }
 
   if (ntrap <= 0) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Number of trap radii must be > 0.\n";
     return;
   }
@@ -380,20 +377,20 @@ void ComponentAnalyticField::AddTube(const double radius, const double voltage,
 
   // Check if the provided parameters make sense.
   if (radius <= 0.0) {
-    std::cerr << className << "::AddTube:\n";
+    std::cerr << m_className << "::AddTube:\n";
     std::cerr << "    Unphysical tube dimension.\n";
     return;
   }
 
   if (nEdges < 3 && nEdges != 0) {
-    std::cerr << className << "::AddTube:\n";
+    std::cerr << m_className << "::AddTube:\n";
     std::cerr << "    Unphysical number of tube edges (" << nEdges << ")\n";
     return;
   }
 
   // If there is already a tube defined, print a warning message.
   if (tube) {
-    std::cout << className << "::AddTube:\n";
+    std::cout << m_className << "::AddTube:\n";
     std::cout << "    Warning: Existing tube settings will be overwritten.\n";
   }
 
@@ -419,7 +416,7 @@ void ComponentAnalyticField::AddPlaneX(const double x, const double v,
                                        const std::string lab) {
 
   if (ynplan[0] && ynplan[1]) {
-    std::cerr << className << "::AddPlaneX:\n";
+    std::cerr << m_className << "::AddPlaneX:\n";
     std::cerr << "    There are already two x planes defined.\n";
     return;
   }
@@ -447,7 +444,7 @@ void ComponentAnalyticField::AddPlaneY(const double y, const double v,
                                        const std::string lab) {
 
   if (ynplan[2] && ynplan[3]) {
-    std::cerr << className << "::AddPlaneY:\n";
+    std::cerr << m_className << "::AddPlaneY:\n";
     std::cerr << "    There are already two y planes defined.\n";
     return;
   }
@@ -478,21 +475,21 @@ void ComponentAnalyticField::AddStripOnPlaneX(const char direction,
                                               const double gap) {
 
   if (!ynplan[0] && !ynplan[1]) {
-    std::cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << m_className << "::AddStripOnPlaneX:\n";
     std::cerr << "    There are no planes at constant x defined.\n";
     return;
   }
 
   if (direction != 'y' && direction != 'Y' && direction != 'z' &&
       direction != 'Z') {
-    std::cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << m_className << "::AddStripOnPlaneX:\n";
     std::cerr << "    Invalid direction (" << direction << ").\n";
     std::cerr << "    Only strips in y or z direction are possible.\n";
     return;
   }
 
   if (fabs(smax - smin) < Small) {
-    std::cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << m_className << "::AddStripOnPlaneX:\n";
     std::cerr << "    Strip width must be greater than zero.\n";
     return;
   }
@@ -531,21 +528,21 @@ void ComponentAnalyticField::AddStripOnPlaneY(const char direction,
                                               const double gap) {
 
   if (!ynplan[2] && !ynplan[3]) {
-    std::cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << m_className << "::AddStripOnPlaneY:\n";
     std::cerr << "    There are no planes at constant y defined.\n";
     return;
   }
 
   if (direction != 'x' && direction != 'X' && direction != 'z' &&
       direction != 'Z') {
-    std::cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << m_className << "::AddStripOnPlaneY:\n";
     std::cerr << "    Invalid direction (" << direction << ").\n";
     std::cerr << "    Only strips in x or z direction are possible.\n";
     return;
   }
 
   if (fabs(smax - smin) < Small) {
-    std::cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << m_className << "::AddStripOnPlaneY:\n";
     std::cerr << "    Strip width must be greater than zero.\n";
     return;
   }
@@ -580,7 +577,7 @@ void ComponentAnalyticField::AddStripOnPlaneY(const char direction,
 void ComponentAnalyticField::SetPeriodicityX(const double s) {
 
   if (s < Small) {
-    std::cerr << className << "::SetPeriodicityX:\n";
+    std::cerr << m_className << "::SetPeriodicityX:\n";
     std::cerr << "    Periodic length must be greater than zero.\n";
     return;
   }
@@ -593,7 +590,7 @@ void ComponentAnalyticField::SetPeriodicityX(const double s) {
 void ComponentAnalyticField::SetPeriodicityY(const double s) {
 
   if (s < Small) {
-    std::cerr << className << "::SetPeriodicityY:\n";
+    std::cerr << m_className << "::SetPeriodicityY:\n";
     std::cerr << "    Periodic length must be greater than zero.\n";
     return;
   }
@@ -634,7 +631,7 @@ void ComponentAnalyticField::UpdatePeriodicity() {
     sigset = false;
   } else if (!perx && xPeriodic) {
     if (sx < Small) {
-      std::cerr << className << "::UpdatePeriodicity:\n";
+      std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in x direction was enabled"
                 << " but periodic length is not set.\n";
     } else {
@@ -650,7 +647,7 @@ void ComponentAnalyticField::UpdatePeriodicity() {
     sigset = false;
   } else if (!pery && yPeriodic) {
     if (sy < Small) {
-      std::cerr << className << "::UpdatePeriodicity:\n";
+      std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in y direction was enabled"
                 << " but periodic length is not set.\n";
     } else {
@@ -662,22 +659,22 @@ void ComponentAnalyticField::UpdatePeriodicity() {
 
   // Check if symmetries other than x/y periodicity have been requested
   if (zPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Periodicity in z is not possible.\n";
   }
 
   if (xMirrorPeriodic || yMirrorPeriodic || zMirrorPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Mirror periodicity is not possible.\n";
   }
 
   if (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Axial periodicity is not possible.\n";
   }
 
   if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Rotation symmetry is not possible.\n";
   }
 }
@@ -705,7 +702,7 @@ void ComponentAnalyticField::ClearCharges() {
 
 void ComponentAnalyticField::PrintCharges() {
 
-  std::cout << className << "::PrintCharges:\n";
+  std::cout << m_className << "::PrintCharges:\n";
   if (n3d <= 0) {
     std::cout << "    No charges present.\n";
     return;
@@ -744,7 +741,7 @@ bool ComponentAnalyticField::GetWire(const int i, double& x, double& y,
                                      double& charge, int& ntrap) {
 
   if (i < 0 || i >= nWires) {
-    std::cerr << className << "::GetWire:\n";
+    std::cerr << m_className << "::GetWire:\n";
     std::cerr << "    Wire index is out of range.\n";
     return false;
   }
@@ -764,7 +761,7 @@ bool ComponentAnalyticField::GetPlaneX(const int i, double& x, double& voltage,
                                        std::string& label) {
 
   if (i < 0 || i >= 2 || (i == 1 && !ynplan[1])) {
-    std::cerr << className << "::GetPlaneX:\n";
+    std::cerr << m_className << "::GetPlaneX:\n";
     std::cerr << "    Plane index is out of range.\n";
     return false;
   }
@@ -779,7 +776,7 @@ bool ComponentAnalyticField::GetPlaneY(const int i, double& y, double& voltage,
                                        std::string& label) {
 
   if (i < 0 || i >= 2 || (i == 1 && !ynplan[3])) {
-    std::cerr << className << "::GetPlaneY:\n";
+    std::cerr << m_className << "::GetPlaneY:\n";
     std::cerr << "    Plane index is out of range.\n";
     return false;
   }
@@ -927,7 +924,7 @@ int ComponentAnalyticField::Field(const double xin, const double yin,
       break;
     default:
       // Unknown cell type
-      std::cerr << className << "::Field:\n";
+      std::cerr << m_className << "::Field:\n";
       std::cerr << "    Unknown cell type (id " << iCellType << ")\n";
       return -10;
       break;
@@ -1117,40 +1114,40 @@ bool ComponentAnalyticField::Prepare() {
 
   // Check that the cell makes sense.
   if (!CellCheck()) {
-    std::cerr << className << "::Prepare:\n";
+    std::cerr << m_className << "::Prepare:\n";
     std::cerr << "    The cell does not meet the requirements.\n";
     return false;
   }
   if (debug) {
-    std::cout << className << "::Prepare:\n";
+    std::cout << m_className << "::Prepare:\n";
     std::cout << "    Cell check ok.\n";
   }
 
   // Determine the cell type.
   if (!CellType()) {
-    std::cerr << className << "::Prepare:\n";
+    std::cerr << m_className << "::Prepare:\n";
     std::cerr << "    Type identification of the cell failed.\n";
     return false;
   }
   if (debug) {
-    std::cout << className << "::Prepare:\n";
+    std::cout << m_className << "::Prepare:\n";
     std::cout << "    Cell is of type " << cellType << ".\n";
   }
 
   // Calculate the charges.
   if (!Setup()) {
-    std::cerr << className << "::Prepare:\n";
+    std::cerr << m_className << "::Prepare:\n";
     std::cerr << "    Calculation of charges failed.\n";
     return false;
   }
   if (debug) {
-    std::cout << className << "::Prepare:\n";
+    std::cout << m_className << "::Prepare:\n";
     std::cout << "    Calculation of charges was successful.\n";
   }
 
   // Assign default strip widths.
   if (!PrepareStrips()) {
-    std::cerr << className << "::Prepare:\n";
+    std::cerr << m_className << "::Prepare:\n";
     std::cerr << "    Strip preparation failed.\n";
     return false;
   }
@@ -1186,7 +1183,7 @@ bool ComponentAnalyticField::CellCheck() {
     // Print some warnings if the planes have been moved.
     if ((conew1 != coplan[0] && ynplan[0]) ||
         (conew2 != coplan[1] && ynplan[1])) {
-      std::cout << className << "::CellCheck:\n";
+      std::cout << m_className << "::CellCheck:\n";
       std::cout << "    The planes in x or r are moved to the basic period.\n";
       std::cout << "    This should not affect the results.";
     }
@@ -1195,7 +1192,7 @@ bool ComponentAnalyticField::CellCheck() {
 
     // Two planes should now be separated by SX, cancel PERX if not.
     if (ynplan[0] && ynplan[1] && fabs(coplan[1] - coplan[0]) != sx) {
-      std::cerr << className << "::CellCheck:\n";
+      std::cerr << m_className << "::CellCheck:\n";
       std::cerr << "    The separation of the x or r planes"
                 << " does not match the period.\b";
       std::cerr << "    The periodicity is cancelled.\n";
@@ -1203,7 +1200,7 @@ bool ComponentAnalyticField::CellCheck() {
     }
     // If there are two planes left, they should have identical V's.
     if (ynplan[0] && ynplan[1] && vtplan[0] != vtplan[1]) {
-      std::cerr << className << "::CellCheck\n";
+      std::cerr << m_className << "::CellCheck\n";
       std::cerr << "    The voltages of the two x (or r) planes differ.\n";
       std::cerr << "    The periodicity is cancelled.\n";
       perx = false;
@@ -1224,7 +1221,7 @@ bool ComponentAnalyticField::CellCheck() {
     // Print some warnings if the planes have been moved.
     if ((conew3 != coplan[2] && ynplan[2]) ||
         (conew4 != coplan[3] && ynplan[3])) {
-      std::cout << className << "::CellCheck:\n";
+      std::cout << m_className << "::CellCheck:\n";
       std::cout << "    The planes in y are moved to the basic period.\n";
       std::cout << "    This should not affect the results.";
     }
@@ -1233,7 +1230,7 @@ bool ComponentAnalyticField::CellCheck() {
 
     // Two planes should now be separated by SY, cancel PERY if not.
     if (ynplan[2] && ynplan[3] && fabs(coplan[3] - coplan[2]) != sy) {
-      std::cerr << className << "::CellCheck:\n";
+      std::cerr << m_className << "::CellCheck:\n";
       std::cerr << "    The separation of the two y planes"
                 << " does not match the period.\b";
       std::cerr << "    The periodicity is cancelled.\n";
@@ -1241,7 +1238,7 @@ bool ComponentAnalyticField::CellCheck() {
     }
     // If there are two planes left, they should have identical V's.
     if (ynplan[2] && ynplan[3] && vtplan[2] != vtplan[3]) {
-      std::cerr << className << "::CellCheck\n";
+      std::cerr << m_className << "::CellCheck\n";
       std::cerr << "    The voltages of the two y planes differ.\n";
       std::cerr << "    The periodicity is cancelled.\n";
       pery = false;
@@ -1252,7 +1249,7 @@ bool ComponentAnalyticField::CellCheck() {
   for (int i = 0; i < 2; ++i) {
     for (int j = 2; j < 3; ++j) {
       if (ynplan[i] && ynplan[j] && vtplan[i] != vtplan[j]) {
-        std::cerr << className << "::CellCheck\n";
+        std::cerr << m_className << "::CellCheck\n";
         std::cerr << "    Conflicting potential of 2 crossing planes.\n";
         std::cerr << "    One y (or phi) plane is removed.\n";
         ynplan[j] = false;
@@ -1264,14 +1261,14 @@ bool ComponentAnalyticField::CellCheck() {
   for (int i = 0; i < 3; i += 2) {
     if (ynplan[i] && ynplan[i + 1]) {
       if (coplan[i] == coplan[i + 1]) {
-        std::cerr << className << "::CellCheck:\n";
+        std::cerr << m_className << "::CellCheck:\n";
         std::cerr << "    Two planes are on top of each other.\n";
         std::cerr << "    One of them is removed.\n";
         ynplan[i + 1] = false;
       }
       if (coplan[i] > coplan[i + 1]) {
         if (debug) {
-          std::cout << className << "::CellCheck:\n";
+          std::cout << m_className << "::CellCheck:\n";
           std::cout << "    Planes " << i << " and " << i + 1
                     << " are interchanged.\n";
         }
@@ -1299,7 +1296,7 @@ bool ComponentAnalyticField::CellCheck() {
         double xprt = w[i].x;
         double yprt = w[i].y;
         if (polar) RTheta2RhoPhi(xprt, yprt, xprt, yprt);
-        std::cout << className << "::CellCheck:\n";
+        std::cout << m_className << "::CellCheck:\n";
         std::cout << "    The " << w[i].type << "-wire at (" << xprt << ", "
                   << yprt << ") is moved to the basic x (or r) period.\n";
         std::cout << "    This should not affect the results.\n";
@@ -1315,7 +1312,7 @@ bool ComponentAnalyticField::CellCheck() {
       double ynew = w[i].y;
       Cartesian2Polar(xnew, ynew, xnew, ynew);
       if (int(round((Pi / ynew) / (sy * 180.))) != 0) {
-        std::cout << className << "::CellCheck:\n";
+        std::cout << m_className << "::CellCheck:\n";
         std::cout << "    The " << w[i].type << "-wire at (" << w[i].x << ", "
                   << w[i].y << ") is moved to the basic phi period.\n";
         std::cout << "    This should not affect the results.\n";
@@ -1330,7 +1327,7 @@ bool ComponentAnalyticField::CellCheck() {
         double xprt = w[i].x;
         double yprt = w[i].y;
         if (polar) RTheta2RhoPhi(xprt, yprt, xprt, yprt);
-        std::cout << className << "::CellCheck:\n";
+        std::cout << m_className << "::CellCheck:\n";
         std::cout << "    The " << w[i].type << "-wire at (" << xprt << ", "
                   << yprt << ") is moved to the basic y period.\n";
         std::cout << "    This should not affect the results.\n";
@@ -1448,7 +1445,7 @@ bool ComponentAnalyticField::CellCheck() {
     if (ynplan[3] && w[i].y + 0.5 * w[i].d >= coplan[3]) wrong[i] = true;
     if (tube) {
       if (!InTube(w[i].x, w[i].y, cotube, ntube)) {
-        std::cerr << className << "::CellCheck:\n";
+        std::cerr << m_className << "::CellCheck:\n";
         std::cerr << "    The " << w[i].type << "-wire at (" << w[i].x << ", "
                   << w[i].y << ") is located outside the tube.\n";
         std::cerr << "    This wire is removed.\n";
@@ -1458,7 +1455,7 @@ bool ComponentAnalyticField::CellCheck() {
       double xprt = w[i].x;
       double yprt = w[i].y;
       if (polar) RTheta2RhoPhi(xprt, yprt, xprt, yprt);
-      std::cerr << className << "::CellCheck:\n";
+      std::cerr << m_className << "::CellCheck:\n";
       std::cerr << "    The " << w[i].type << "-wire at (" << xprt << ", "
                 << yprt << ") is located outside the planes.\n";
       std::cerr << "    This wire is removed.\n";
@@ -1466,7 +1463,7 @@ bool ComponentAnalyticField::CellCheck() {
       double xprt = w[i].x;
       double yprt = w[i].y;
       if (polar) RTheta2RhoPhi(xprt, yprt, xprt, yprt);
-      std::cerr << className << "::CellCheck:\n";
+      std::cerr << m_className << "::CellCheck:\n";
       std::cerr << "    The diameter of the " << w[i].type << "-wire at ("
                 << xprt << ", " << yprt << ") exceeds 1 period.\n";
       std::cerr << "    This wire is removed.\n";
@@ -1509,7 +1506,7 @@ bool ComponentAnalyticField::CellCheck() {
         double yprtj = w[j].y;
         if (polar) RTheta2RhoPhi(xprti, yprti, xprti, yprti);
         if (polar) RTheta2RhoPhi(xprtj, yprtj, xprtj, yprtj);
-        std::cerr << className << "::CellCheck:\n";
+        std::cerr << m_className << "::CellCheck:\n";
         std::cerr << "    The " << w[i].type << "-wire at (" << xprti << ", "
                   << yprti << ")\n"
                   << "    and the " << w[j].type << "-wire at (" << xprtj
@@ -1547,7 +1544,7 @@ bool ComponentAnalyticField::CellCheck() {
   if (tube) ++nElements;
 
   if (nElements < 2) {
-    std::cerr << className << "::CellCheck:\n";
+    std::cerr << m_className << "::CellCheck:\n";
     std::cerr << "    At least 2 elements are necessary.\n";
     std::cerr << "    Cell rejected.\n";
     return false;
@@ -1679,14 +1676,14 @@ bool ComponentAnalyticField::CellCheck() {
 
   // Ensure that all dimensions are now set.
   if (!(setx && sety && setz)) {
-    std::cerr << className << "::CellCheck:\n";
+    std::cerr << m_className << "::CellCheck:\n";
     std::cerr << "    Unable to establish"
               << " default dimensions in all directions.\n";
   }
 
   // Check that at least some different voltages are present.
   if (vmin == vmax || !setv) {
-    std::cerr << className << "::CellCheck:\n";
+    std::cerr << m_className << "::CellCheck:\n";
     std::cerr << "    All potentials in the cell are the same.\n";
     std::cerr << "    There is no point in going on.\n";
     return false;
@@ -1717,7 +1714,7 @@ bool ComponentAnalyticField::CellType() {
         iCellType = 12;
       }
     } else {
-      std::cerr << className << "::CellType:\n";
+      std::cerr << m_className << "::CellType:\n";
       std::cerr << "    Potentials for tube with " << ntube
                 << " edges are not yet available.\n";
       std::cerr << "    Using a round tube instead.\n";
@@ -1919,7 +1916,7 @@ bool ComponentAnalyticField::PrepareStrips() {
         planes[i].strips1[j].gap = gapDef[i];
       }
       if (planes[i].strips1[j].gap < 0.) {
-        std::cerr << className << "::PrepareStrips:\n";
+        std::cerr << m_className << "::PrepareStrips:\n";
         std::cerr << "    Not able to set a default anode-cathode gap\n";
         std::cerr << "    for x/y-strip " << j << " of plane " << i << ".\n";
         return false;
@@ -1930,7 +1927,7 @@ bool ComponentAnalyticField::PrepareStrips() {
         planes[i].strips2[j].gap = gapDef[i];
       }
       if (planes[i].strips2[j].gap < 0.) {
-        std::cerr << className << "::PrepareStrips:\n";
+        std::cerr << m_className << "::PrepareStrips:\n";
         std::cerr << "    Not able to set a default anode-cathode gap\n";
         std::cerr << "    for z-strip " << j << " of plane " << i << ".\n";
         return false;
@@ -1946,7 +1943,7 @@ void ComponentAnalyticField::AddReadout(const std::string label) {
   // Check if this readout group already exists.
   for (int i = 0; i < nReadout; ++i) {
     if (readout[i] == label) {
-      std::cout << className << "::AddReadout:\n";
+      std::cout << m_className << "::AddReadout:\n";
       std::cout << "    Readout group " << label << " already exists.\n";
       return;
     }
@@ -1973,11 +1970,11 @@ void ComponentAnalyticField::AddReadout(const std::string label) {
   }
 
   if (nWiresFound == 0 && nPlanesFound == 0 && nStripsFound == 0) {
-    std::cerr << className << "::AddReadout:\n";
+    std::cerr << m_className << "::AddReadout:\n";
     std::cerr << "    At present there are no wires, planes or strips\n";
     std::cerr << "    associated to readout group " << label << ".\n";
   } else {
-    std::cout << className << "::AddReadout:\n";
+    std::cout << m_className << "::AddReadout:\n";
     std::cout << "    Readout group " << label << " comprises:\n";
     if (nWiresFound > 1) {
       std::cout << "      " << nWiresFound << " wires\n";
@@ -2079,7 +2076,7 @@ bool ComponentAnalyticField::Setup() {
   if (ok && dipole) {
     ok = SetupDipole();
     if (!ok) {
-      std::cerr << className << "::Setup:\n";
+      std::cerr << m_className << "::Setup:\n";
       std::cerr << "    Computing the dipole moments failed.\n";
     }
   }
@@ -2087,7 +2084,7 @@ bool ComponentAnalyticField::Setup() {
   a.clear();
 
   if (!ok) {
-    std::cerr << className << "::Setup:\n";
+    std::cerr << m_className << "::Setup:\n";
     std::cerr << "    Preparing the cell for field calculations"
               << " did not succeed.\n";
     return false;
@@ -2383,7 +2380,7 @@ bool ComponentAnalyticField::SetupC10() {
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
   if (debug) {
-    std::cout << className << "::SetupC10:\n";
+    std::cout << m_className << "::SetupC10:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
     std::cout << "    mode = " << mode << "\n";
@@ -2443,7 +2440,7 @@ bool ComponentAnalyticField::SetupC2X() {
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
   if (debug) {
-    std::cout << className << "::SetupC2X:\n";
+    std::cout << m_className << "::SetupC2X:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
     std::cout << "    mode = " << mode << "\n";
@@ -2507,7 +2504,7 @@ bool ComponentAnalyticField::SetupC2Y() {
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
   if (debug) {
-    std::cout << className << "::SetupC2Y:\n";
+    std::cout << m_className << "::SetupC2Y:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
     std::cout << "    mode = " << mode << "\n";
@@ -2571,7 +2568,7 @@ bool ComponentAnalyticField::SetupC30() {
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
   if (debug) {
-    std::cout << className << "::SetupC30:\n";
+    std::cout << m_className << "::SetupC30:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
     std::cout << "    mode = " << mode << "\n";
@@ -2762,7 +2759,7 @@ bool ComponentAnalyticField::Charge() {
     // Solve equations to yield charges, using KERNLIB (scalar).
     Numerics::Deqinv(nWires + 1, a, ifail, b);
     if (ifail != 0) {
-      std::cerr << className << "::Charge:\n";
+      std::cerr << m_className << "::Charge:\n";
       std::cerr << "    Matrix inversion failed.\n";
       return false;
     }
@@ -2775,7 +2772,7 @@ bool ComponentAnalyticField::Charge() {
         }
       }
     } else {
-      std::cerr << className << "::Charge:\n";
+      std::cerr << m_className << "::Charge:\n";
       std::cerr << "    True inverse of the capacitance matrix"
                 << " could not be calculated.\n";
       std::cerr << "    Use of the FACTOR instruction should be avoided.\n";
@@ -2792,7 +2789,7 @@ bool ComponentAnalyticField::Charge() {
 
   // Check the error condition flag.
   if (!ok) {
-    std::cerr << className << "::Charge:\n";
+    std::cerr << m_className << "::Charge:\n";
     std::cerr << "    Failure to solve the capacitance equations.\n";
     std::cerr << "    No charges are available.\n";
     return false;
@@ -2803,7 +2800,7 @@ bool ComponentAnalyticField::Charge() {
 
   // If debugging is on, print the capacitance matrix.
   if (debug) {
-    std::cout << className << "::Charge:\n";
+    std::cout << m_className << "::Charge:\n";
     std::cout << "    Dump of the capacitance matrix after inversion:\n";
     for (int i = 0; i < nWires; i += 10) {
       for (int j = 0; j < nWires; j += 10) {
@@ -2819,13 +2816,13 @@ bool ComponentAnalyticField::Charge() {
         std::cout << "\n";
       }
     }
-    std::cout << className << "::Charge:\n";
+    std::cout << m_className << "::Charge:\n";
     std::cout << "    End of the inverted capacitance matrix.\n";
   }
 
   // And also check the quality of the matrix inversion.
   if (chargeCheck) {
-    std::cout << className << "::Charge:\n";
+    std::cout << m_className << "::Charge:\n";
     std::cout << "    Quality check of the charge calculation.\n";
     std::cout << "    Wire       E as obtained        E reconstructed\n";
     for (int i = 0; i < nWires; ++i) {
@@ -3710,7 +3707,7 @@ bool ComponentAnalyticField::InTube(const double x0, const double y0,
   }
 
   if (n < 0 || n == 1 || n == 2) {
-    std::cerr << className << "::InTube:\n";
+    std::cerr << m_className << "::InTube:\n";
     std::cerr << "    Invalid number of edges (n = " << n << ")\n";
     return false;
   }
@@ -4241,7 +4238,7 @@ void ComponentAnalyticField::Field3dD10(const double xxpos, const double yypos,
 
   // Ensure that the routine can actually work.
   if (nWires < 1) {
-    std::cerr << className << "::Field3dD10:\n";
+    std::cerr << m_className << "::Field3dD10:\n";
     std::cerr << "    Inappropriate potential function.\n";
     return;
   }
@@ -4345,7 +4342,7 @@ bool ComponentAnalyticField::PrepareSignals() {
   //-----------------------------------------------------------------------
 
   if (nReadout <= 0) {
-    std::cerr << className << "::PrepareSignals:\n";
+    std::cerr << m_className << "::PrepareSignals:\n";
     std::cerr << "    There are no readout groups defined.\n";
     std::cerr << "    Calculation of weighting fields makes no sense.\n";
     return false;
@@ -4353,7 +4350,7 @@ bool ComponentAnalyticField::PrepareSignals() {
 
   if (!cellset) {
     if (!Prepare()) {
-      std::cerr << className << "::PrepareSignals:\n";
+      std::cerr << m_className << "::PrepareSignals:\n";
       std::cerr << "    Cell could not be set up.\n";
       std::cerr << "    No calculation of weighting fields possible.\n";
       return false;
@@ -4379,7 +4376,7 @@ bool ComponentAnalyticField::PrepareSignals() {
     cellTypeFourier = "D3 ";
   } else {
     // Other cases.
-    std::cerr << className << "::PrepareSignals:\n";
+    std::cerr << m_className << "::PrepareSignals:\n";
     std::cerr << "    No potentials available to handle cell type " << cellType
               << ".\n";
     return false;
@@ -4414,7 +4411,7 @@ bool ComponentAnalyticField::PrepareSignals() {
 
   // Print some debugging output if requested.
   if (debug) {
-    std::cout << className << "::PrepareSignals:\n";
+    std::cout << m_className << "::PrepareSignals:\n";
     std::cout << "    Cell type:           " << cellType << "\n";
     std::cout << "    Fourier cell type:   " << cellTypeFourier << "\n";
     std::cout << "    x convolutions:      " << fperx << "\n";
@@ -4425,13 +4422,13 @@ bool ComponentAnalyticField::PrepareSignals() {
 
   // Prepare the signal matrices.
   if (!SetupWireSignals()) {
-    std::cerr << className << "::PrepareSignals:\n";
+    std::cerr << m_className << "::PrepareSignals:\n";
     std::cerr << "    Preparing wire signal capacitance matrices failed.\n";
     sigmat.clear();
     return false;
   }
   if (!SetupPlaneSignals()) {
-    std::cerr << className << "::PrepareSignals:\n";
+    std::cerr << m_className << "::PrepareSignals:\n";
     std::cerr << "    Preparing plane charges failed.\n";
     sigmat.clear();
     qplane.clear();
@@ -4526,12 +4523,12 @@ bool ComponentAnalyticField::SetupWireSignals() {
       } else if (cellTypeFourier == "D3 ") {
         IprD30();
       } else {
-        std::cerr << className << "::SetupWireSignals:\n";
+        std::cerr << m_className << "::SetupWireSignals:\n";
         std::cerr << "    Unknown signal cell type " << cellTypeFourier << "\n";
         return false;
       }
       if (debug) {
-        std::cout << className << "::SetupWireSignals:\n";
+        std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Signal matrix MX = " << mx << ", MY = " << my
                   << " has been calculated.\n";
       }
@@ -4543,7 +4540,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
       }
       // Dump the signal matrix before inversion, if DEBUG is requested.
       if (debug) {
-        std::cout << className << "::SetupWireSignals:\n";
+        std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Dump of signal matrix (" << mx << ", " << my
                   << ") before inversion:\n";
         for (int i = 0; i < nWires; i += 10) {
@@ -4570,7 +4567,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
             std::cout << "\n";
           }
         }
-        std::cout << className << "::SetupWireSignals:\n";
+        std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    End of the uninverted capacitance matrix dump.\n";
       }
       // Next layer.
@@ -4662,7 +4659,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
         int ifail = 0;
         Numerics::Cinv(nWires, sigmat, ifail);
         if (ifail != 0) {
-          std::cerr << className << "::PrepareWireSignals:\n";
+          std::cerr << m_className << "::PrepareWireSignals:\n";
           std::cerr << "    Inversion of signal matrix (" << mx << ", " << my
                     << ") failed.\n";
           std::cerr << "    No reliable results.\n";
@@ -4755,7 +4752,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
   if (debug) {
     for (int mx = mxmin; mx <= mxmax; ++mx) {
       for (int my = mymin; my <= mymax; ++my) {
-        std::cout << className << "::SetupWireSignals:\n";
+        std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Dump of signal matrix (" << mx << ", " << my
                   << ") after inversion:\n";
         for (int i = 0; i < nWires; i += 10) {
@@ -4782,7 +4779,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
             std::cout << "\n";
           }
         }
-        std::cout << className << "::SetupWireSignals:\n";
+        std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    End of the inverted capacitance matrix dump.\n";
       }
     }
@@ -4940,7 +4937,7 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
 
   // Debugging output.
   if (debug) {
-    std::cout << className << "::SetupPlaneSignals:\n";
+    std::cout << m_className << "::SetupPlaneSignals:\n";
     std::cout << "    Charges for currents induced in the planes:\n";
     std::cout << "    Wire        x-Plane 1        x-Plane 2"
               << "        y-Plane 1        y-Plane 2"
@@ -4950,7 +4947,7 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
                 << "    " << qplane[2][i] << "    " << qplane[3][i] << "    "
                 << qplane[4][i] << "\n";
     }
-    std::cout << className << "::SetupPlaneSignals:\n";
+    std::cout << m_className << "::SetupPlaneSignals:\n";
     std::cout << "    Bias fields:\n";
     std::cout << "    Plane    x-Bias [1/cm]    y-Bias [1/cm]\n";
     for (int i = 0; i < 4; ++i) {
@@ -5309,7 +5306,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       // Load the layers of the wire matrices.
       // CALL IONIO(MX,MY,2,0,IFAIL)
       // if (!LoadWireLayers(mx, my)) {
-      //  std::cerr << className << "::LoadWireLayers:\n";
+      //  std::cerr << m_className << "::LoadWireLayers:\n";
       //  std::cerr << "    Wire matrix store error.\n";
       //  std::cerr << "    No weighting field returned.\n";
       //  exsum = eysum = ezsum = 0.;
@@ -5337,7 +5334,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
           } else if (cellTypeFourier == "D3 ") {
             WfieldWireD30(xpos, ypos, ex, ey, volt, iw, opt);
           } else {
-            std::cerr << className << "::Wfield:\n";
+            std::cerr << m_className << "::Wfield:\n";
             std::cerr << "    Unkown signal field type " << cellTypeFourier
                       << " received. Program error!\n";
             std::cerr << "    Encountered for wire " << iw
@@ -5354,7 +5351,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       // Load the layers of the plane matrices.
       // CALL IPLIO(MX,MY,2,IFAIL)
       // if (!LoadPlaneLayers(mx, my)) {
-      // std::cerr << className << "::Wfield:\n";
+      // std::cerr << m_className << "::Wfield:\n";
       //  std::cerr << "    Plane matrix store error.\n";
       //  std::cerr << "    No weighting field returned.\n";
       //  exsum = eysum = ezsum = 0.;
@@ -5380,7 +5377,7 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
           } else if (cellTypeFourier == "D3 ") {
             WfieldPlaneD30(xpos, ypos, ex, ey, volt, ip, opt);
           } else {
-            std::cerr << className << "::Wfield:\n";
+            std::cerr << m_className << "::Wfield:\n";
             std::cerr << "    Unkown field type " << cellTypeFourier
                       << " received. Program error!\n";
             std::cerr << "    Encountered for plane " << ip

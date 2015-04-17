@@ -15,7 +15,7 @@ ComponentUser::ComponentUser()
       hasWeightingPotential(false),
       wpot(0) {
 
-  className = "ComponentUser";
+  m_className = "ComponentUser";
 }
 
 void ComponentUser::ElectricField(const double x, const double y,
@@ -30,14 +30,14 @@ void ComponentUser::ElectricField(const double x, const double y,
   }
 
   field(x, y, z, ex, ey, ez);
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 
@@ -67,14 +67,14 @@ void ComponentUser::ElectricField(const double x, const double y,
     v = 0.;
   }
 
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     if (debug) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
     }
     status = -6;
-    m = 0;
     return;
   }
 
@@ -116,7 +116,7 @@ void ComponentUser::SetElectricField(void (*f)(const double, const double,
                                                double&)) {
 
   if (f == 0) {
-    std::cerr << className << "::SetElectricField:\n";
+    std::cerr << m_className << "::SetElectricField:\n";
     std::cerr << "    Function pointer is null.\n";
     return;
   }
@@ -129,7 +129,7 @@ void ComponentUser::SetPotential(void (*f)(const double, const double,
                                            const double, double&)) {
 
   if (f == 0) {
-    std::cerr << className << "::SetPotential:\n";
+    std::cerr << m_className << "::SetPotential:\n";
     std::cerr << "    Function pointer is null.\n";
     return;
   }
@@ -142,7 +142,7 @@ void ComponentUser::SetWeightingField(void (*f)(const double, const double,
                                                 double&, const std::string)) {
 
   if (f == 0) {
-    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << m_className << "::SetWeightingField:\n";
     std::cerr << "    Function pointer is null.\n";
     return;
   }
@@ -155,7 +155,7 @@ void ComponentUser::SetWeightingPotential(void (*f)(const double, const double,
                                                     const std::string)) {
 
   if (f == 0) {
-    std::cerr << className << "::SetWeightingPotential:\n";
+    std::cerr << m_className << "::SetWeightingPotential:\n";
     std::cerr << "    Function pointer is null.\n";
     return;
   }
@@ -179,7 +179,7 @@ void ComponentUser::Reset() {
 void ComponentUser::UpdatePeriodicity() {
 
   if (debug) {
-    std::cerr << className << "::UpdatePeriodicity:\n";
+    std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Periodicities are not supported.\n";
   }
 }

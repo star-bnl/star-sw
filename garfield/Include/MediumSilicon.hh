@@ -182,8 +182,8 @@ class MediumSilicon : public Medium {
   double hImpactB0, hImpactB1;
 
   // Models
-  bool hasUserMobility;
-  bool hasUserSaturationVelocity;
+  bool m_hasUserMobility;
+  bool m_hasUserSaturationVelocity;
   int latticeMobilityModel;
   int dopingMobilityModel;
   int saturationVelocityModel;
@@ -261,7 +261,7 @@ class MediumSilicon : public Medium {
   double fbDosMaxV, fbDosMaxC;
 
   // Optical data
-  bool hasOpticalData;
+  bool m_hasOpticalData;
   std::string opticalDataFile;
   struct opticalData {
     // Energy [eV]

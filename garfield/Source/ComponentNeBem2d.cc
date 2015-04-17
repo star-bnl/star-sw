@@ -23,7 +23,7 @@ ComponentNeBem2d::ComponentNeBem2d()
       nElements(0),
       matrixInversionFlag(false) {
 
-  className = "ComponentNeBem2d";
+  m_className = "ComponentNeBem2d";
 
   influenceMatrix.clear();
   inverseMatrix.clear();
@@ -37,14 +37,15 @@ void ComponentNeBem2d::ElectricField(const double x, const double y,
   ex = ey = ez = v = 0.;
   status = 0;
   // Check if the requested point is inside a medium
-  if (!GetMedium(x, y, z, m)) {
+  m = GetMedium(x, y, z);
+  if (m == NULL) {
     status = -6;
     return;
   }
 
   if (!ready) {
     if (!Initialise()) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Initialisation failed.\n";
       status = -11;
       return;
@@ -65,7 +66,7 @@ void ComponentNeBem2d::ElectricField(const double x, const double y,
     // Compute the potential
     if (!ComputePotential(elements[i].geoType, elements[i].len, xLoc, yLoc,
                           u)) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Potential contribution from element " << i
                 << " could not be calculated.\n";
       status = -11;
@@ -74,7 +75,7 @@ void ComponentNeBem2d::ElectricField(const double x, const double y,
     // Compute the field
     if (!ComputeFlux(elements[i].geoType, elements[i].len, elements[i].phi,
                      xLoc, yLoc, fx, fy)) {
-      std::cerr << className << "::ElectricField:\n";
+      std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Field contribution from element " << i
                 << " could not be calculated.\n";
       status = -11;
@@ -131,7 +132,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
   const double dx = x1 - x0;
   const double dy = y1 - y0;
   if (dx * dx + dy * dy <= Small) {
-    std::cerr << className << "::AddPanel:\n";
+    std::cerr << m_className << "::AddPanel:\n";
     std::cerr << "    Panel length must be greater than zero.\n";
     return;
   }
@@ -142,7 +143,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
   newPanel.x1 = x1;
   newPanel.y1 = y1;
   if (bctype < 0 || bctype > 3) {
-    std::cerr << className << "::AddPanel:\n";
+    std::cerr << m_className << "::AddPanel:\n";
     std::cerr << "    Unknown boundary condition type: " << bctype << "\n";
     return;
   }
@@ -153,7 +154,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
   ++nPanels;
 
   if (debug) {
-    std::cout << className << "::AddPanel:\n";
+    std::cout << m_className << "::AddPanel:\n";
     std::cout << "    From: (" << x0 << ", " << y0 << ")\n";
     std::cout << "    To:   (" << x1 << ", " << y1 << ")\n";
     switch (bctype) {
@@ -184,7 +185,7 @@ void ComponentNeBem2d::AddWire(const double x0, const double y0, const double d,
                                const double bcval) {
 
   if (d < Small) {
-    std::cerr << className << "::AddWire:\n";
+    std::cerr << m_className << "::AddWire:\n";
     std::cerr << "    Wire diameter must be greater than zero.\n";
     return;
   }
@@ -198,7 +199,7 @@ void ComponentNeBem2d::AddWire(const double x0, const double y0, const double d,
   ++nWires;
 
   if (debug) {
-    std::cout << className << "::AddWire:\n";
+    std::cout << m_className << "::AddWire:\n";
     std::cout << "    Center: (" << x0 << ", " << y0 << ")\n";
     std::cout << "    Diameter: " << d << " cm\n";
     std::cout << "    Potential: " << bcval << " V\n";
@@ -211,7 +212,7 @@ void ComponentNeBem2d::AddWire(const double x0, const double y0, const double d,
 void ComponentNeBem2d::SetNumberOfDivisions(const int ndiv) {
 
   if (ndiv <= 0) {
-    std::cerr << className << "::SetNumberOfDivisions:\n";
+    std::cerr << m_className << "::SetNumberOfDivisions:\n";
     std::cerr << "    Number of divisions must be greater than zero.\n";
     return;
   }
@@ -224,7 +225,7 @@ void ComponentNeBem2d::SetNumberOfDivisions(const int ndiv) {
 void ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
 
   if (ncoll <= 0) {
-    std::cerr << className << "::SetNumberOfCollocationPoints:\n";
+    std::cerr << m_className << "::SetNumberOfCollocationPoints:\n";
     std::cerr << "    Number of coll. points must be greater than zero.\n";
     return;
   }
@@ -237,7 +238,7 @@ void ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
 void ComponentNeBem2d::SetMinimumElementSize(const double min) {
 
   if (min < Small) {
-    std::cerr << className << "::SetMinimumElementSize:\n";
+    std::cerr << m_className << "::SetMinimumElementSize:\n";
     std::cerr << "    Provided element size is too small.\n";
     return;
   }
@@ -250,7 +251,7 @@ void ComponentNeBem2d::SetMinimumElementSize(const double min) {
 void ComponentNeBem2d::SetMaxNumberOfIterations(const int niter) {
 
   if (niter <= 0) {
-    std::cerr << className << "::SetMaxNumberOfIterations:\n";
+    std::cerr << m_className << "::SetMaxNumberOfIterations:\n";
     std::cerr << "    Number of iterations must be greater than zero.\n";
     return;
   }
@@ -262,12 +263,12 @@ bool ComponentNeBem2d::Initialise() {
 
   // Break up panels into elements
   if (!Discretise()) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Discretisation failed.\n";
     return false;
   }
   if (debug) {
-    std::cout << className << "::Initialise:\n";
+    std::cout << m_className << "::Initialise:\n";
     std::cout << "    Discretisation ok.\n";
   }
 
@@ -276,43 +277,43 @@ bool ComponentNeBem2d::Initialise() {
   while (!converged) {
     ++nIter;
     if (autoSize) {
-      std::cout << className << "::Initialise:\n";
+      std::cout << m_className << "::Initialise:\n";
       std::cout << "    Iteration " << nIter << "\n";
     }
     // Compute the influence matrix
     if (!ComputeInfluenceMatrix()) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << m_className << "::Initialise:\n";
       std::cerr << "     Error computing the influence matrix.\n";
       return false;
     }
 
     // Invert the influence matrix
     if (!InvertMatrix()) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << m_className << "::Initialise:\n";
       std::cerr << "     Error inverting the influence matrix.\n";
       return false;
     }
 
     if (debug) {
-      std::cout << className << "::Initialise:\n";
+      std::cout << m_className << "::Initialise:\n";
       std::cout << "    Matrix inversion ok.\n";
     }
 
     // Compute the right hand side vector
     if (!GetBoundaryConditions()) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << m_className << "::Initialise:\n";
       std::cerr << "     Error computing the potential vector.\n";
       return false;
     }
 
     // Solve for the charge distribution
     if (!Solve()) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << m_className << "::Initialise:\n";
       std::cerr << "    Error in Solve function.\n";
       return false;
     }
     if (debug) {
-      std::cout << className << "::Initialise:\n";
+      std::cout << m_className << "::Initialise:\n";
       std::cout << "    Solution ok.\n";
     }
 
@@ -331,7 +332,7 @@ bool ComponentNeBem2d::Discretise() {
   element newElement;
 
   if (debug) {
-    std::cout << className << "::Discretise:\n";
+    std::cout << m_className << "::Discretise:\n";
     std::cout << "  Panel  BC Type  Bc Value  Rotation  Length\n";
   }
   newElement.geoType = 0;
@@ -458,7 +459,7 @@ bool ComponentNeBem2d::ComputeInfluenceMatrix() {
           }
           break;
         default:
-          std::cerr << className << "::ComputeInfluenceMatrix:\n";
+          std::cerr << m_className << "::ComputeInfluenceMatrix:\n";
           std::cerr << "    Unknown boundary type: " << etF << ".\n";
           return false;
           break;
@@ -525,7 +526,7 @@ bool ComponentNeBem2d::InvertMatrix() {
 
   // Decompose the influence matrix
   if (!LUDecomposition()) {
-    std::cerr << className << "::InvertMatrix:\n";
+    std::cerr << m_className << "::InvertMatrix:\n";
     std::cerr << "    LU Decomposition failed.\n";
     return false;
   }
@@ -699,7 +700,7 @@ bool ComponentNeBem2d::Solve() {
   }
 
   if (debug) {
-    std::cout << className << "::Solve:\n";
+    std::cout << m_className << "::Solve:\n";
     std::cout << "  Element  Solution\n";
     for (i = 0; i < nElements; ++i) {
       std::cout << "  " << i << "  " << elements[i].solution << "\n";
@@ -727,7 +728,7 @@ bool ComponentNeBem2d::CheckConvergence() {
   double xLoc, yLoc;
 
   if (debug) {
-    std::cout << className << "::CheckConvergence:\n";
+    std::cout << m_className << "::CheckConvergence:\n";
     std::cout << "element #  type      LHS      RHS\n";
   }
   for (int i = nElements; i--;) {
@@ -909,7 +910,7 @@ void ComponentNeBem2d::Reset() {
 
 void ComponentNeBem2d::UpdatePeriodicity() {
 
-  std::cerr << className << "::UpdatePeriodicity:\n";
+  std::cerr << m_className << "::UpdatePeriodicity:\n";
   std::cerr << "    Periodicities are not supported.\n";
 }
 }

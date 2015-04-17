@@ -160,7 +160,7 @@ void AvalancheMC::GetDriftLinePoint(const unsigned int i, double& x, double& y,
   t = m_drift[i].t;
 }
 
-void AvalancheMC::GetHoleEndpoint(const unsigned int i, double& x0, double& y0,
+void AvalancheMC::GetHoleEndpoint(const unsigned int& i, double& x0, double& y0,
                                   double& z0, double& t0, double& x1,
                                   double& y1, double& z1, double& t1,
                                   int& status) const {
@@ -182,7 +182,7 @@ void AvalancheMC::GetHoleEndpoint(const unsigned int i, double& x0, double& y0,
   status = m_endpointsHoles[i].status;
 }
 
-void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
+void AvalancheMC::GetIonEndpoint(const unsigned int& i, double& x0, double& y0,
                                  double& z0, double& t0, double& x1, double& y1,
                                  double& z1, double& t1, int& status) const {
 
@@ -203,7 +203,7 @@ void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
   status = m_endpointsIons[i].status;
 }
 
-void AvalancheMC::GetElectronEndpoint(const unsigned int i, 
+void AvalancheMC::GetElectronEndpoint(const unsigned int& i, 
                                       double& x0, double& y0,
                                       double& z0, double& t0, double& x1,
                                       double& y1, double& z1, double& t1,
@@ -226,8 +226,8 @@ void AvalancheMC::GetElectronEndpoint(const unsigned int i,
   status = m_endpointsElectrons[i].status;
 }
 
-bool AvalancheMC::DriftElectron(const double x0, const double y0,
-                                const double z0, const double t0) {
+bool AvalancheMC::DriftElectron(const double& x0, const double& y0,
+                                const double& z0, const double& t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftElectron:\n";
@@ -251,8 +251,8 @@ bool AvalancheMC::DriftElectron(const double x0, const double y0,
   return true;
 }
 
-bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
-                            const double t0) {
+bool AvalancheMC::DriftHole(const double& x0, const double& y0, 
+                            const double& z0, const double& t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftHole:\n";
@@ -276,8 +276,8 @@ bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
   return true;
 }
 
-bool AvalancheMC::DriftIon(const double x0, const double y0, const double z0,
-                           const double t0) {
+bool AvalancheMC::DriftIon(const double& x0, const double& y0, 
+                           const double& z0, const double& t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftIon:\n";
@@ -428,6 +428,11 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
       abortReason = StatusCalculationAbandoned;
       return false;
     }
+    if (m_debug) {
+      std::cout << m_className << "::DriftLine:\n";
+      std::cout << "    Drift velocity at " << x << ", " << y << ", " << z
+                << ": " << vx << ", " << vy << ", " << vz << "\n";
+    }
     v = sqrt(vx * vx + vy * vy + vz * vz);
     if (v < Small) {
       std::cerr << m_className << "::DriftLine:\n";
@@ -469,7 +474,11 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
       dy = d * RndmGaussian(0., dt);
       dz = d * RndmGaussian(0., dt);
     }
-
+    if (m_debug) {
+      std::cout << m_className << "::DriftLine:\n";
+      std::cout << "    Adding diffusion step " 
+                << dx << ", " << dy << ", " << dz << "\n";
+    }
     // Compute the rotation angles to align the diffusion
     // and drift velocity vectors
     vt = sqrt(vx * vx + vy * vy);
@@ -491,6 +500,11 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
     y += delta * vy + sphi * ctheta * dx + cphi * dy - sphi * stheta * dz;
     z += delta * vz + stheta * dx + ctheta * dz;
 
+    if (m_debug) {
+      std::cout << m_className << "::DriftLine:\n";
+      std::cout << "    New point: " 
+                << x << ", " << y << ", " << z << "\n";
+    }
     // Compute the electric field at the new point.
     m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
 

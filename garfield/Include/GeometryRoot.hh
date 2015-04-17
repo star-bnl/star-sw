@@ -24,7 +24,8 @@ class GeometryRoot : public GeometryBase {
   void SetGeometry(TGeoManager* geoman);
 
   // Get the medium at a given point (x, y, z)
-  bool GetMedium(const double x, const double y, const double z, Medium*& m);
+  Medium* GetMedium(const double& x, const double& y, 
+                    const double& z) const;
 
   // Get the number of materials defined in the ROOT geometry
   int GetNumberOfMaterials();
@@ -35,11 +36,11 @@ class GeometryRoot : public GeometryBase {
   void SetMedium(const int imat, Medium* med);
   void SetMedium(const char* mat, Medium* med);
 
-  bool IsInside(const double x, const double y, const double z) {
+  bool IsInside(const double& x, const double& y, const double& z) const {
 
-    if (theGeoManager != 0) {
-      theGeoManager->SetCurrentPoint(x, y, z);
-      return !theGeoManager->IsOutside();
+    if (m_geoManager != NULL) {
+      m_geoManager->SetCurrentPoint(x, y, z);
+      return !m_geoManager->IsOutside();
     }
     return false;
   }
@@ -54,7 +55,7 @@ class GeometryRoot : public GeometryBase {
 
  protected:
   // ROOT geometry manager
-  TGeoManager* theGeoManager;
+  TGeoManager* m_geoManager;
 
   // List of ROOT materials associated to Garfield media
   int nMaterials;

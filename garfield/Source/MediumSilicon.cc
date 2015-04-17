@@ -52,8 +52,8 @@ MediumSilicon::MediumSilicon()
       hImpactA1(0.671e6),
       hImpactB0(2.036e6),
       hImpactB1(1.693e6),
-      hasUserMobility(false),
-      hasUserSaturationVelocity(false),
+      m_hasUserMobility(false),
+      m_hasUserSaturationVelocity(false),
       latticeMobilityModel(LatticeMobilityModelSentaurus),
       dopingMobilityModel(DopingMobilityModelMasetti),
       saturationVelocityModel(SaturationVelocityModelCanali),
@@ -79,7 +79,7 @@ MediumSilicon::MediumSilicon()
       eMinG(2.24),
       ieMinL(0),
       ieMinG(0),
-      hasOpticalData(false),
+      m_hasOpticalData(false),
       opticalDataFile("OpticalData_Si.txt") {
 
   m_className = "MediumSilicon";
@@ -248,7 +248,7 @@ bool MediumSilicon::ElectronVelocity(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasElectronVelocityE) {
+  if (m_hasElectronVelocityE) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -306,7 +306,7 @@ bool MediumSilicon::ElectronTownsend(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasElectronTownsend) {
+  if (m_hasElectronTownsend) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -343,7 +343,7 @@ bool MediumSilicon::ElectronAttachment(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasElectronAttachment) {
+  if (m_hasElectronAttachment) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -383,7 +383,7 @@ bool MediumSilicon::HoleVelocity(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasHoleVelocityE) {
+  if (m_hasHoleVelocityE) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -439,7 +439,7 @@ bool MediumSilicon::HoleTownsend(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasHoleTownsend) {
+  if (m_hasHoleTownsend) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -476,7 +476,7 @@ bool MediumSilicon::HoleAttachment(const double ex, const double ey,
     m_isChanged = false;
   }
 
-  if (hasHoleAttachment) {
+  if (m_hasHoleAttachment) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -511,42 +511,42 @@ void MediumSilicon::SetLowFieldMobility(const double mue, const double muh) {
 
   eMobility = mue;
   hMobility = muh;
-  hasUserMobility = true;
+  m_hasUserMobility = true;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetLatticeMobilityModelMinimos() {
 
   latticeMobilityModel = LatticeMobilityModelMinimos;
-  hasUserMobility = false;
+  m_hasUserMobility = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetLatticeMobilityModelSentaurus() {
 
   latticeMobilityModel = LatticeMobilityModelSentaurus;
-  hasUserMobility = false;
+  m_hasUserMobility = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetLatticeMobilityModelReggiani() {
 
   latticeMobilityModel = LatticeMobilityModelReggiani;
-  hasUserMobility = false;
+  m_hasUserMobility = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetDopingMobilityModelMinimos() {
 
   dopingMobilityModel = DopingMobilityModelMinimos;
-  hasUserMobility = false;
+  m_hasUserMobility = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetDopingMobilityModelMasetti() {
 
   dopingMobilityModel = DopingMobilityModelMasetti;
-  hasUserMobility = false;
+  m_hasUserMobility = false;
   m_isChanged = true;
 }
 
@@ -556,11 +556,11 @@ void MediumSilicon::SetSaturationVelocity(const double vsate,
   if (vsate <= 0. || vsath <= 0.) {
     std::cout << m_className << "::SetSaturationVelocity:\n";
     std::cout << "    Restoring default values.\n";
-    hasUserSaturationVelocity = false;
+    m_hasUserSaturationVelocity = false;
   } else {
     eSatVel = vsate;
     hSatVel = vsath;
-    hasUserSaturationVelocity = true;
+    m_hasUserSaturationVelocity = true;
   }
 
   m_isChanged = true;
@@ -569,21 +569,21 @@ void MediumSilicon::SetSaturationVelocity(const double vsate,
 void MediumSilicon::SetSaturationVelocityModelMinimos() {
 
   saturationVelocityModel = SaturationVelocityModelMinimos;
-  hasUserSaturationVelocity = false;
+  m_hasUserSaturationVelocity = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetSaturationVelocityModelCanali() {
 
   saturationVelocityModel = SaturationVelocityModelCanali;
-  hasUserSaturationVelocity = false;
+  m_hasUserSaturationVelocity = false;
   m_isChanged = true;
 }
 
 void MediumSilicon::SetSaturationVelocityModelReggiani() {
 
   saturationVelocityModel = SaturationVelocityModelReggiani;
-  hasUserSaturationVelocity = false;
+  m_hasUserSaturationVelocity = false;
   m_isChanged = true;
 }
 
@@ -1378,13 +1378,13 @@ bool MediumSilicon::GetOpticalDataRange(double& emin, double& emax,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetOpticalDataRange:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   emin = opticalDataTable[0].energy;
@@ -1406,13 +1406,13 @@ bool MediumSilicon::GetDielectricFunction(const double& e, double& eps1,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetDielectricFunction:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   // Make sure the requested energy is within the range of the table.
@@ -1501,7 +1501,7 @@ bool MediumSilicon::UpdateTransportParameters() {
       break;
   }
 
-  if (!hasUserMobility) {
+  if (!m_hasUserMobility) {
     // Calculate lattice mobility
     switch (latticeMobilityModel) {
       case LatticeMobilityModelMinimos:
@@ -1537,7 +1537,7 @@ bool MediumSilicon::UpdateTransportParameters() {
   }
 
   // Calculate saturation velocity
-  if (!hasUserSaturationVelocity) {
+  if (!m_hasUserSaturationVelocity) {
     switch (saturationVelocityModel) {
       case SaturationVelocityModelMinimos:
         UpdateSaturationVelocityMinimos();

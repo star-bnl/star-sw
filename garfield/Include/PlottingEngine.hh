@@ -13,53 +13,53 @@ class PlottingEngine {
  public:
   // Constructor
   PlottingEngine()
-      : className("PlottingEngine"),
-        colorLine1("dark-blue"),
-        colorLine2("olive"),
-        colorElectron("orange"),
-        colorHole("red"),
-        colorIon("dark-red"),
-        colorPhoton("blue"),
-        colorChargedParticle("dark-green"),
-        debug(false) {}
+      : m_className("PlottingEngine"),
+        m_colorLine1("dark-blue"),
+        m_colorLine2("olive"),
+        m_colorElectron("orange"),
+        m_colorHole("red"),
+        m_colorIon("dark-red"),
+        m_colorPhoton("blue"),
+        m_colorChargedParticle("dark-green"),
+        m_debug(false) {}
 
   // Destructor
   virtual ~PlottingEngine() {}
 
   // Set/get colors.
-  void SetLineColor1(const std::string col) { colorLine1 = col; }
-  void SetLineColor2(const std::string col) { colorLine2 = col; }
-  void SetElectronColor(const std::string col) { colorElectron = col; }
-  void SetHoleColor(const std::string col) { colorHole = col; }
-  void SetIonColor(const std::string col) { colorIon = col; }
-  void SetPhotonColor(const std::string col) { colorPhoton = col; }
-  void SetChargedParticleColor(const std::string col) {
-    colorChargedParticle = col;
+  void SetLineColor1(const std::string& col) { m_colorLine1 = col; }
+  void SetLineColor2(const std::string& col) { m_colorLine2 = col; }
+  void SetElectronColor(const std::string& col) { m_colorElectron = col; }
+  void SetHoleColor(const std::string& col) { m_colorHole = col; }
+  void SetIonColor(const std::string& col) { m_colorIon = col; }
+  void SetPhotonColor(const std::string& col) { m_colorPhoton = col; }
+  void SetChargedParticleColor(const std::string& col) {
+    m_colorChargedParticle = col;
   }
 
-  std::string GetLineColor1() { return colorLine1; }
-  std::string GetLineColor2() { return colorLine2; }
-  std::string GetElectronColor() { return colorElectron; }
-  std::string GetHoleColor() { return colorHole; }
-  std::string GetIonColor() { return colorIon; }
-  std::string GetPhotonColor() { return colorPhoton; }
-  std::string GetChargedParticleColor() { return colorChargedParticle; }
+  std::string GetLineColor1() const { return m_colorLine1; }
+  std::string GetLineColor2() const { return m_colorLine2; }
+  std::string GetElectronColor() const { return m_colorElectron; }
+  std::string GetHoleColor() const { return m_colorHole; }
+  std::string GetIonColor() const { return m_colorIon; }
+  std::string GetPhotonColor() const { return m_colorPhoton; }
+  std::string GetChargedParticleColor() const { return m_colorChargedParticle; }
 
   // Switch on/off debugging messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string className;
+  std::string m_className;
 
-  std::string colorLine1, colorLine2;
-  std::string colorElectron;
-  std::string colorHole;
-  std::string colorIon;
-  std::string colorPhoton;
-  std::string colorChargedParticle;
+  std::string m_colorLine1, m_colorLine2;
+  std::string m_colorElectron;
+  std::string m_colorHole;
+  std::string m_colorIon;
+  std::string m_colorPhoton;
+  std::string m_colorChargedParticle;
 
-  bool debug;
+  bool m_debug;
 };
 }
 

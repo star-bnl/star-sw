@@ -64,10 +64,10 @@ class MediumGaAs : public Medium {
   int trappingModel;
 
   // Models
-  bool hasUserMobility;
+  bool m_hasUserMobility;
 
   // Optical data
-  bool hasOpticalData;
+  bool m_hasOpticalData;
   std::string opticalDataFile;
   struct opticalData {
     // Energy [eV]

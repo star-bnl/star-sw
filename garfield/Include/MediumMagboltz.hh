@@ -170,7 +170,7 @@ class MediumMagboltz : public MediumGas {
   double tsGreenSawada[m_nMaxGases];
   double taGreenSawada[m_nMaxGases];
   double tbGreenSawada[m_nMaxGases];
-  bool hasGreenSawada[m_nMaxGases];
+  bool m_hasGreenSawada[m_nMaxGases];
   // Energy loss
   double energyLoss[nMaxLevels];
   // Cross-section type

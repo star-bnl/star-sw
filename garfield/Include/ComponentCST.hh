@@ -22,8 +22,7 @@ class ComponentCST : public ComponentFieldMap {
 
   void ShiftComponent(const double xShift, const double yShift, const double zShift);
 
-  bool GetMedium(const double x, const double y, const double z,
-                 Medium*& medium);
+  Medium* GetMedium(const double& x, const double& y, const double& z);
   void GetNumberOfMeshLines(unsigned int &n_x, unsigned int &n_y, unsigned int &n_z);
   void GetElementBoundaries(unsigned int element, double &xmin, double &xmax,
       double &ymin, double &ymax, double &zmin, double &zmax);

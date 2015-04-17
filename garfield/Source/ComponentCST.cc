@@ -19,7 +19,7 @@ namespace Garfield {
 
 ComponentCST::ComponentCST() : ComponentFieldMap() {
 
-  className = "ComponentCST";
+  m_className = "ComponentCST";
   ready = false;
   // Default bounding box
   zMinBoundingBox = -50.;
@@ -49,7 +49,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Could not open material file " << mplist
               << " for reading." << std::endl,
         std::cerr << "    The file perhaps does not exist." << std::endl;
@@ -75,7 +75,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
       token = strtok(NULL, " ");
       nMaterials = ReadInteger(token, -1, readerror);
       if (readerror) {
-        std::cerr << className << "::Initialise:" << std::endl;
+        std::cerr << m_className << "::Initialise:" << std::endl;
         std::cerr << "    Error reading file " << mplist << " (line " << il
                   << ")." << std::endl;
         fmplist.close();
@@ -89,7 +89,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
         materials[i].medium = NULL;
       }
       if (debug) {
-        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << m_className << "::Initialise:" << std::endl;
         std::cout << "    Number of materials: " << nMaterials << ""
                   << std::endl;
       }
@@ -97,14 +97,14 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
       token = strtok(NULL, " ");
       int imat = ReadInteger(token, -1, readerror);
       if (readerror) {
-        std::cerr << className << "::Initialise:" << std::endl;
+        std::cerr << m_className << "::Initialise:" << std::endl;
         std::cerr << "     Error reading file " << mplist << " (line " << il
                   << "." << std::endl;
         fmplist.close();
         ok = false;
         return false;
       } else if (imat < 1 || imat > nMaterials) {
-        std::cerr << className << "::Initialise:" << std::endl;
+        std::cerr << m_className << "::Initialise:" << std::endl;
         std::cerr << "    Found out-of-range material index " << imat << "in"
                   << std::endl;
         std::cerr << "    material properties file " << mplist << "."
@@ -118,7 +118,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
         } else if (strcmp(token, "RSVX") == 0) {
           itype = 2;
         } else {
-          std::cerr << className << "::Initialise:" << std::endl;
+          std::cerr << m_className << "::Initialise:" << std::endl;
           std::cerr << "    Found unknown material property flag " << token
                     << "" << std::endl;
           std::cerr << "    on material properties file " << mplist << "(line "
@@ -132,7 +132,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
           materials[imat - 1].ohm = ReadDouble(token, -1, readerror);
           token = strtok(NULL, " ");
           if (strcmp(token, "PERX") != 0) {
-            std::cerr << className << "::Initialise:" << std::endl;
+            std::cerr << m_className << "::Initialise:" << std::endl;
             std::cerr << "   Found unknown material property falg " << token
                       << "" << std::endl;
             std::cerr << "   on material file " << mplist << " (material "
@@ -144,7 +144,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
           }
         }
         if (readerror) {
-          std::cerr << className << "::Initialise:" << std::endl;
+          std::cerr << m_className << "::Initialise:" << std::endl;
           std::cerr << "     Error reading file " << mplist << "(line " << il
                     << ")." << std::endl;
           fmplist.close();
@@ -152,7 +152,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
           return false;
         }
         if (debug) {
-          std::cout << className << "::Initialise:" << std::endl;
+          std::cout << m_className << "::Initialise:" << std::endl;
           std::cout << "    Read material properties for material "
                     << (imat - 1) << "" << std::endl;
           if (itype == 2) {
@@ -175,7 +175,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
-      std::cout << className << "::Initialise:" << std::endl;
+      std::cout << m_className << "::Initialise:" << std::endl;
       std::cout << "    Material " << imat
                 << " has been assigned a permittivity" << std::endl;
       std::cout << "    equal to zero in " << mplist << "." << std::endl;
@@ -186,7 +186,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     }
   }
   if (iepsmin < 0) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "     No material with positive permittivity found in"
               << std::endl;
     std::cerr << "     material list " << mplist.c_str() << "." << std::endl;
@@ -201,7 +201,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     }
   }
   // Tell how many lines read
-  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << m_className << "::Initialise:" << std::endl;
   std::cout << "    Read properties of " << nMaterials << " materials"
             << std::endl;
   std::cout << "    from file " << mplist << "." << std::endl;
@@ -222,13 +222,13 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
              strcmp(unit.c_str(), "meter") == 0) {
     funit = 100.0;
   } else {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Unknown length unit " << unit << "." << std::endl;
     ok = false;
     funit = 1.0;
   }
   if (debug) {
-    std::cout << className << "::Initialise:" << std::endl;
+    std::cout << m_className << "::Initialise:" << std::endl;
     std::cout << "    Unit scaling factor = " << funit << "." << std::endl;
   }
 
@@ -236,7 +236,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   std::ifstream fnlist;
   fnlist.open(nlist.c_str(), std::ios::in);
   if (fnlist.fail()) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Could not open nodes file " << nlist << " for reading."
               << std::endl;
     std::cerr << "    The file perhaps does not exist." << std::endl;
@@ -274,7 +274,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     if (strcmp(token, "x-lines\n") == 0 || strcmp(token, "x-lines") == 0) {
       lines_type = 1;
       if (debug) {
-        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << m_className << "::Initialise:" << std::endl;
         std::cout << "    Reading x-lines from file  " << nlist << "."
                   << std::endl;
       }
@@ -283,7 +283,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     if (strcmp(token, "y-lines\n") == 0 || strcmp(token, "y-lines") == 0) {
       lines_type = 2;
       if (debug) {
-        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << m_className << "::Initialise:" << std::endl;
         std::cout << "    Reading y-lines from file  " << nlist << "."
                   << std::endl;
       }
@@ -292,7 +292,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     if (strcmp(token, "z-lines\n") == 0 || strcmp(token, "z-lines") == 0) {
       lines_type = 3;
       if (debug) {
-        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << m_className << "::Initialise:" << std::endl;
         std::cout << "    Reading z-lines from file  " << nlist << "."
                   << std::endl;
       }
@@ -306,7 +306,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     else if (lines_type == 3)
       m_zlines.push_back(line_tmp * funit);
     else {
-      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << m_className << "::Initialise:" << std::endl;
       std::cerr << "    Line type was not set in  " << nlist << " (line " << il
                 << ", token = " << token << ")." << std::endl;
       std::cerr << "    Maybe it is in the wrong format" << std::endl;
@@ -318,7 +318,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   }
   // Check syntax
   if (readerror) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Error reading file " << nlist << " (line " << il << ")."
               << std::endl;
     fnlist.close();
@@ -331,12 +331,12 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   if ((unsigned)xlines == m_xlines.size() &&
       (unsigned)ylines == m_ylines.size() &&
       (unsigned)zlines == m_zlines.size()) {
-    std::cout << className << "::Initialise:" << std::endl;
+    std::cout << m_className << "::Initialise:" << std::endl;
     std::cout << "    Found in file " << nlist << "\n    " << xlines
               << " x-lines\n    " << ylines << " y-lines\n    " << zlines
               << " z-lines" << std::endl;
   } else {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    There should be " << xlines << " x-lines, " << ylines
               << " y-lines and " << zlines << " z-lines in file " << nlist
               << " but I found :\n    " << m_xlines.size() << " x-lines, "
@@ -350,7 +350,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   nElements = (m_nx-1)*(m_ny-1)*(m_nz-1);
 
   // Tell how many lines read
-  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << m_className << "::Initialise:" << std::endl;
   std::cout << "    Read " << nNodes << " nodes from file " << nlist << "."
             << std::endl;
   // Check number of nodes
@@ -359,7 +359,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Could not open element file " << elist << " for reading."
               << std::endl;
     std::cerr << "    The file perhaps does not exist." << std::endl;
@@ -389,7 +389,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
       // Read element material - the number of the material is stored (1, 2, ...) but we need the index (0, 1, ...)
       m_elementMaterial.at(ielem) = (imat-1);
     } catch(...) {
-      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << m_className << "::Initialise:" << std::endl;
       std::cerr << "    Error reading file " << elist << " (line " << il << ")." << std::endl;
       std::cerr << "    The element index (" << ielem << ") is not in the expected range: 0 - " << nElements << std::endl;
       ok = false;
@@ -397,14 +397,14 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
     // Check the material number and ensure that epsilon is non-negative
 //    int check_mat = imat;
     if (imat < 1 || imat > nMaterials) {
-      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << m_className << "::Initialise:" << std::endl;
       std::cerr << "   Out-of-range material number on file " << elist
                 << " (line " << il << ")." << std::endl;
       std::cerr << "    Element: " << ielem << ", material: " << imat << std::endl;
       ok = false;
     }
     if (materials[imat - 1].eps < 0) {
-      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << m_className << "::Initialise:" << std::endl;
       std::cerr << "    Element " << ielem << " in element list " << elist
                 << " uses material " << imat << " which" << std::endl;
       std::cerr << "    has not been assigned a positive permittivity"
@@ -416,7 +416,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   // Close the file
   felist.close();
   // Tell how many lines read
-  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << m_className << "::Initialise:" << std::endl;
   std::cout << "    Read " << nElements << " elements from file " << elist
             << "," << std::endl;
 
@@ -425,7 +425,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Could not open potential file " << prnsol
               << " for reading." << std::endl;
     std::cerr << "    The file perhaps does not exist." << std::endl;
@@ -453,7 +453,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
       m_potential.at(inode-1) = volt;
       nread++;
     } catch (...){
-      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << m_className << "::Initialise:" << std::endl;
       std::cerr << "    Error reading file " << prnsol << " (line " << il << ")." << std::endl;
       std::cerr << "    The node index (" << inode-1 << ") is not in the expected range: 0 - " << nNodes << std::endl;
       ok = false;
@@ -462,12 +462,12 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   // Close the file
   fprnsol.close();
   // Tell how many lines read
-  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << m_className << "::Initialise:" << std::endl;
   std::cout << "    Read " << nread << "/" << nNodes << " (expected) potentials from file " << prnsol << "."
             << std::endl;
   // Check number of nodes
   if (nread != nNodes) {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Number of nodes read (" << nread << ") on potential file "
               << prnsol << " does not" << std::endl;
     std::cerr << "    match the node list (" << nNodes << ")." << std::endl;
@@ -477,7 +477,7 @@ bool ComponentCST::Initialise(std::string elist, std::string nlist,
   if (ok) {
     ready = true;
   } else {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Field map could not be read and cannot be interpolated."
               << std::endl;
     return false;
@@ -509,18 +509,18 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
              strcmp(unit.c_str(), "meter") == 0) {
     funit = 100.0;
   } else {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Unknown length unit " << unit << "." << std::endl;
     ok = false;
     funit = 1.0;
   }
   if (debug) {
-    std::cout << className << "::Initialise:" << std::endl;
+    std::cout << m_className << "::Initialise:" << std::endl;
     std::cout << "    Unit scaling factor = " << funit << "." << std::endl;
   }
 	FILE* f = fopen(dataFile.c_str(), "rb");
 	if (f == nullptr) {
-		std::cerr << className << "::Initilise:"  << std::endl;
+		std::cerr << m_className << "::Initilise:"  << std::endl;
 		std::cerr << "    Could not open file:" << dataFile.c_str() << std::endl;
 		return false;
 	}
@@ -531,7 +531,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 
 	if (fileSize < 1000) {
 		fclose(f);
-		std::cerr << className << "::Initilise:"  << std::endl;
+		std::cerr << m_className << "::Initilise:"  << std::endl;
 		std::cerr << "     Error. The file is extremely short and does not seem to contain a header or data." << std::endl;
 		ok = false;
 	}
@@ -561,7 +561,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 			&e_m,	&nMaterials);
 	if (filled != 16){
 		fclose(f);
-		std::cerr << className << "::Initilise:"  << std::endl;
+		std::cerr << m_className << "::Initilise:"  << std::endl;
 		std::cerr << "    Error. File header of " << dataFile.c_str() << " is broken."  << std::endl;
 		ok = false;
 	}
@@ -570,7 +570,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 		ok = false;
 	}
 	if(debug){
-	    std::cout << className << "::Initialise:" << std::endl;
+	    std::cout << m_className << "::Initialise:" << std::endl;
 	    std::cout << "  Information about the data stored in the given binary file:" << std::endl;
 		std::cout << "  Mesh (nx): " << nx << "\t Mesh (ny): " << ny << "\t Mesh (nz): " << nz << std::endl;
 		std::cout << "  Mesh (x_lines): " << m_x << "\t Mesh (y_lines): " << m_y << "\t Mesh (z_lines): " << m_z << std::endl;
@@ -608,7 +608,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 	result = fread(m_elementMaterial.data(), sizeof(unsigned char), m_elementMaterial.size(), f);
 	if (result != m_elementMaterial.size()) {fputs ("Reading error while reading element material",stderr); exit (3);}
 	std::stringstream st;
-	st << className << "::Initialise:" << std::endl;
+	st << m_className << "::Initialise:" << std::endl;
 	/*
 	 *  The material vector is filled according to the material id!
 	 *  Thus material.at(0) is material with id 0.
@@ -666,7 +666,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
       std::transform(m_zlines.begin(), m_zlines.end(), m_zlines.begin(), std::bind1st(std::multiplies<double>(),funit));
 	}
 
-	std::cout << className << "::Initialise" << std::endl;
+	std::cout << m_className << "::Initialise" << std::endl;
 	std::cout << "    x range: " << *(m_xlines.begin()) << " - " << *(m_xlines.end()-1) << std::endl;
 	std::cout << "    y range: " << *(m_ylines.begin()) << " - " << *(m_ylines.end()-1) << std::endl;
 	std::cout << "    z range: " << *(m_zlines.begin()) << " - " << *(m_zlines.end()-1) << std::endl;
@@ -675,7 +675,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
   if (ok) {
     ready = true;
   } else {
-    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << m_className << "::Initialise:" << std::endl;
     std::cerr << "    Field map could not be read and cannot be interpolated."
               << std::endl;
     return false;
@@ -689,7 +689,7 @@ bool ComponentCST::Initialise(std::string dataFile, std::string unit){
 bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool isBinary) {
   std::vector<float> potentials(nNodes);
   if (!ready) {
-    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << m_className << "::SetWeightingField:" << std::endl;
     std::cerr << "    No valid field map is present." << std::endl;
     std::cerr << "    Weighting field cannot be added." << std::endl;
     return false;
@@ -699,7 +699,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
-    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << m_className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Could not open potential file " << prnsol
               << " for reading." << std::endl;
     std::cerr << "    The file perhaps does not exist." << std::endl;
@@ -708,7 +708,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
   // Check if a weighting field with the same label already exists.
   std::map<std::string, std::vector<float> >::iterator it = m_weightingFields.find(label);
   if (it != m_weightingFields.end()) {
-    std::cout << className << "::SetWeightingField:" << std::endl;
+    std::cout << m_className << "::SetWeightingField:" << std::endl;
     std::cout << "    Replacing existing weighting field " << label << "."
               << std::endl;
   } else {
@@ -717,7 +717,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
   }
 
   if(std::distance(m_weightingFields.begin(),it) != std::distance(wfields.begin(),find(wfields.begin(),wfields.end(),label))){
-    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << m_className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Indexes of the weighting fields and the weighting field counter are not equal!" <<  std::endl;
     return false;
   }
@@ -726,11 +726,11 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
   bool ok = true;
 
   if(isBinary) {
-    std::cout <<  className << "::SetWeightingField:" << std::endl;
+    std::cout <<  m_className << "::SetWeightingField:" << std::endl;
     std::cout <<  "    Reading weighting field from binary file:" << prnsol.c_str() << std::endl;
     FILE* f = fopen(prnsol.c_str(), "rb");
     if (f == nullptr) {
-      std::cerr << className << "::Initilise:"  << std::endl;
+      std::cerr << m_className << "::Initilise:"  << std::endl;
       std::cerr << "    Could not open file:" << prnsol.c_str() << std::endl;
       return false;
     }
@@ -741,7 +741,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
 
     if (fileSize < 1000) {
       fclose(f);
-      std::cerr << className << "::SetWeightingField:"  << std::endl;
+      std::cerr << m_className << "::SetWeightingField:"  << std::endl;
       std::cerr << "     Error. The file is extremely short and does not seem to contain a header or data." << std::endl;
       ok = false;
     }
@@ -771,7 +771,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
         &e_m, &nMaterials);
     if (filled != 16){
       fclose(f);
-      std::cerr << className << "::SetWeightingField:"  << std::endl;
+      std::cerr << m_className << "::SetWeightingField:"  << std::endl;
       std::cerr << "    Error. File header of " << prnsol.c_str() << " is broken."  << std::endl;
       ok = false;
     }
@@ -780,7 +780,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
       ok = false;
     }
     if(debug){
-      std::cout << className << "::SetWeightingField:" << std::endl;
+      std::cout << m_className << "::SetWeightingField:" << std::endl;
       std::cout << "  Information about the data stored in the given binary file:" << std::endl;
       std::cout << "  Mesh (nx): " << nx << "\t Mesh (ny): " << ny << "\t Mesh (nz): " << nz << std::endl;
       std::cout << "  Mesh (x_lines): " << m_x << "\t Mesh (y_lines): " << m_y << "\t Mesh (z_lines): " << m_z << std::endl;
@@ -797,7 +797,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
     else if (result == 0) {fputs ("No wighting potentials are stored in the data file.",stderr); exit (3);}
     fprnsol.close();
   } else {
-    std::cout <<  className << "::SetWeightingField:" << std::endl;
+    std::cout <<  m_className << "::SetWeightingField:" << std::endl;
     std::cout <<  "    Reading weighting field from text file:" << prnsol.c_str() << std::endl;
     // Buffer for reading
     const int size = 100;
@@ -829,7 +829,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
         potentials.at(inode-1) =  volt;
         nread++;
       } catch (...){
-        std::cerr << className << "::SetWeightingField:" << std::endl;
+        std::cerr << m_className << "::SetWeightingField:" << std::endl;
         std::cerr << "    Node number " << inode << " out of range." << std::endl;
         std::cerr << "    on potential file " << prnsol << " (line " << il << ")." << std::endl;
         std::cerr << "    Size of the potential vector is: " << potentials.size() << std::endl;
@@ -840,12 +840,12 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
     fprnsol.close();
   }
   // Tell how many lines read
-  std::cout << className << "::SetWeightingField:" << std::endl;
+  std::cout << m_className << "::SetWeightingField:" << std::endl;
   std::cout << "    Read " << nread << "/" << nNodes << " (expected) potentials from file " << prnsol << "."
             << std::endl;
   // Check number of nodes
   if (nread != nNodes) {
-    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << m_className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Number of nodes read (" << nread << ")"
               << " on potential file (" << prnsol << ")" << std::endl;
     std::cerr << "     does not match the node list (" << nNodes << ")."
@@ -853,7 +853,7 @@ bool ComponentCST::SetWeightingField(std::string prnsol, std::string label, bool
     ok = false;
   }
   if (!ok) {
-    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << m_className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Field map could not be read "
               << "and cannot be interpolated." << std::endl;
     return false;
@@ -873,7 +873,7 @@ void ComponentCST::ShiftComponent(const double xShift, const double yShift, cons
   SetRange();
   UpdatePeriodicity();
 
-  std::cout << className << "::ShiftComponent:" << std::endl;
+  std::cout << m_className << "::ShiftComponent:" << std::endl;
   std::cout << "    Shifted component in x-direction: " << xShift
       << "\t y-direction: " << yShift
       << "\t z-direction: " << zShift << std::endl;
@@ -946,7 +946,7 @@ void ComponentCST::WeightingField(const double xin, const double yin,
   if(mirrored[2])
     fwz *= -1.;
   if (warning) {
-    std::cout << className << "::WeightingField:" << std::endl;
+    std::cout << m_className << "::WeightingField:" << std::endl;
     std::cout << "    Warnings have been issued for this field map."
               << std::endl;
   }
@@ -994,7 +994,7 @@ double ComponentCST::WeightingPotential(const double xin, const double yin,
   double potential = GetPotential(i, j, k, rx, ry, rz, &((*it).second));
 
   if (debug) {
-    std::cout << className << "::WeightingPotential:" << std::endl;
+    std::cout << m_className << "::WeightingPotential:" << std::endl;
     std::cout << "    Global: (" << x << "," << y << "," << z << "),"
               << std::endl;
     std::cout << "    Local: (" << rx << "," << ry << "," << rz
@@ -1031,12 +1031,12 @@ void ComponentCST::GetElementBoundaries(unsigned int element, double &xmin, doub
   zmax = m_zlines.at(k+1);
 }
 
-bool ComponentCST::GetMedium(const double xin, const double yin,
-                             const double zin, Medium*& m) {
-  unsigned int i,j,k;
+Medium* ComponentCST::GetMedium(const double& xin, const double& yin,
+                                const double& zin) {
+  unsigned int i, j, k;
   Coordinate2Index(xin,yin,zin,i,j,k);
   if(debug){
-      std::cout << className << "::GetMedium:" << std::endl;
+      std::cout << m_className << "::GetMedium:" << std::endl;
       std::cout << "    Found position (" << xin << ", " << yin << ", " << zin << "): " << std:: endl;
       std::cout << "    Indexes are: x: " << i << "/" << m_xlines.size()
           << "\t y: " << j << "/" << m_ylines.size()
@@ -1044,8 +1044,7 @@ bool ComponentCST::GetMedium(const double xin, const double yin,
       std::cout << "    Element material index: " << Index2Element(i, j, k) << std::endl;
       std::cout << "    Element index: " << (int)m_elementMaterial.at(Index2Element(i,j,k)) << std::endl;
   }
-  m = materials.at(m_elementMaterial.at(Index2Element(i,j,k))).medium;
-  return true;
+  return materials.at(m_elementMaterial.at(Index2Element(i,j,k))).medium;
 }
 
 void ComponentCST::SetRange(){
@@ -1081,7 +1080,7 @@ void ComponentCST::SetRange(){
 void ComponentCST::SetRangeZ(const double zmin, const double zmax) {
 
   if (fabs(zmax - zmin) <= 0.) {
-    std::cerr << className << "::SetRangeZ:" << std::endl;
+    std::cerr << m_className << "::SetRangeZ:" << std::endl;
     std::cerr << "    Zero range is not permitted." << std::endl;
     return;
   }
@@ -1124,7 +1123,7 @@ bool ComponentCST::Coordinate2Index(const double xin, const double yin, const do
   if(it_x == m_xlines.end() || it_y == m_ylines.end() || it_z == m_zlines.end() ||
      position_mapped[0] < m_xlines.at(0) || position_mapped[1] < m_ylines.at(0) || position_mapped[2] < m_zlines.at(0) ){
     if(debug){
-      std::cerr << className << "::ElectricFieldBinary:" << std::endl;
+      std::cerr << m_className << "::ElectricFieldBinary:" << std::endl;
       std::cerr << "    Could not find the given coordinate!" << std::endl;
       std::cerr << "    You ask for the following position: " << xin << ", " << yin << ", " << zin << std::endl;
       std::cerr << "    The mapped position is: " << position_mapped[0] << ", " << position_mapped[1] << ", " << position_mapped[2] << std::endl;
@@ -1220,7 +1219,7 @@ void ComponentCST::ElectricFieldBinary(const double xin, const double yin, const
   if(mirrored[2])
     fez *= -1.;
   if(debug){
-    std::cout << className << "::ElectricFieldBinary:" << std::endl;
+    std::cout << m_className << "::ElectricFieldBinary:" << std::endl;
     std::cout << "    Found position (" << x << ", " << y << ", " << z << "): " << std:: endl;
     std::cout << "    Indexes are: x: " << i << "/" << m_xlines.size()
         << "\t y: " << j << "/" << m_ylines.size()

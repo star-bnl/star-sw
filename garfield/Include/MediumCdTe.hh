@@ -70,11 +70,11 @@ class MediumCdTe : public Medium {
   int trappingModel;
 
   // Models
-  bool hasUserMobility;
-  bool hasUserSaturationVelocity;
+  bool m_hasUserMobility;
+  bool m_hasUserSaturationVelocity;
 
   // Optical data
-  bool hasOpticalData;
+  bool m_hasOpticalData;
   std::string opticalDataFile;
   struct opticalData {
     // Energy [eV]
