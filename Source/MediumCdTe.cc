@@ -28,9 +28,9 @@ MediumCdTe::MediumCdTe()
       eTrapTime(0.),
       hTrapTime(0.),
       trappingModel(0),
-      hasUserMobility(false),
-      hasUserSaturationVelocity(false),
-      hasOpticalData(false),
+      m_hasUserMobility(false),
+      m_hasUserSaturationVelocity(false),
+      m_hasOpticalData(false),
       opticalDataFile("OpticalData_Si.txt") {
 
   m_className = "MediumCdTe";
@@ -122,7 +122,7 @@ bool MediumCdTe::ElectronVelocity(const double ex, const double ey,
                                   double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (hasElectronVelocityE) {
+  if (m_hasElectronVelocityE) {
     // Interpolation in user table.
     return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -153,7 +153,7 @@ bool MediumCdTe::ElectronTownsend(const double ex, const double ey,
                                   double& alpha) {
 
   alpha = 0.;
-  if (hasElectronTownsend) {
+  if (m_hasElectronTownsend) {
     // Interpolation in user table.
     return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -166,7 +166,7 @@ bool MediumCdTe::ElectronAttachment(const double ex, const double ey,
                                     double& eta) {
 
   eta = 0.;
-  if (hasElectronAttachment) {
+  if (m_hasElectronAttachment) {
     // Interpolation in user table.
     return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -196,7 +196,7 @@ bool MediumCdTe::HoleVelocity(const double ex, const double ey, const double ez,
                               double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  if (hasHoleVelocityE) {
+  if (m_hasHoleVelocityE) {
     // Interpolation in user table.
     return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
@@ -225,7 +225,7 @@ bool MediumCdTe::HoleTownsend(const double ex, const double ey, const double ez,
                               double& alpha) {
 
   alpha = 0.;
-  if (hasHoleTownsend) {
+  if (m_hasHoleTownsend) {
     // Interpolation in user table.
     return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
@@ -237,7 +237,7 @@ bool MediumCdTe::HoleAttachment(const double ex, const double ey,
                                 const double by, const double bz, double& eta) {
 
   eta = 0.;
-  if (hasHoleAttachment) {
+  if (m_hasHoleAttachment) {
     // Interpolation in user table.
     return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }
@@ -270,7 +270,7 @@ void MediumCdTe::SetLowFieldMobility(const double mue, const double muh) {
 
   eMobility = mue;
   hMobility = muh;
-  hasUserMobility = true;
+  m_hasUserMobility = true;
   m_isChanged = true;
 }
 
@@ -279,11 +279,11 @@ void MediumCdTe::SetSaturationVelocity(const double vsate, const double vsath) {
   if (vsate <= 0. || vsath <= 0.) {
     std::cout << m_className << "::SetSaturationVelocity:\n";
     std::cout << "    Restoring default values.\n";
-    hasUserSaturationVelocity = false;
+    m_hasUserSaturationVelocity = false;
   } else {
     eSatVel = vsate;
     hSatVel = vsath;
-    hasUserSaturationVelocity = true;
+    m_hasUserSaturationVelocity = true;
   }
   m_isChanged = true;
 }
@@ -297,13 +297,13 @@ bool MediumCdTe::GetOpticalDataRange(double& emin, double& emax,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetOpticalDataRange:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   emin = opticalDataTable[0].energy;
@@ -325,13 +325,13 @@ bool MediumCdTe::GetDielectricFunction(const double& e, double& eps1,
   }
 
   // Make sure the optical data table has been loaded.
-  if (!hasOpticalData) {
+  if (!m_hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << m_className << "::GetDielectricFunction:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
-    hasOpticalData = true;
+    m_hasOpticalData = true;
   }
 
   // Make sure the requested energy is within the range of the table.

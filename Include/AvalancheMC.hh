@@ -95,25 +95,25 @@ class AvalancheMC {
     return m_nEndpointsIons; 
   }
 
-  void GetElectronEndpoint(const unsigned int i, 
+  void GetElectronEndpoint(const unsigned int& i, 
                            double& x0, double& y0, double& z0,
                            double& t0, double& x1, double& y1, double& z1,
                            double& t1, int& status) const;
-  void GetHoleEndpoint(const unsigned int i, 
+  void GetHoleEndpoint(const unsigned int& i, 
                        double& x0, double& y0, double& z0,
                        double& t0, double& x1, double& y1, double& z1,
                        double& t1, int& status) const;
-  void GetIonEndpoint(const unsigned int i, 
+  void GetIonEndpoint(const unsigned int& i, 
                       double& x0, double& y0, double& z0,
                       double& t0, double& x1, double& y1, double& z1,
                       double& t1, int& status) const;
 
-  bool DriftElectron(const double x0, const double y0, const double z0,
-                     const double t0);
-  bool DriftHole(const double x0, const double y0, const double z0,
-                 const double t0);
-  bool DriftIon(const double x0, const double y0, const double z0,
-                const double t0);
+  bool DriftElectron(const double& x0, const double& y0, const double& z0,
+                     const double& t0);
+  bool DriftHole(const double& x0, const double& y0, const double& z0,
+                 const double& t0);
+  bool DriftIon(const double& x0, const double& y0, const double& z0,
+                const double& t0);
   bool AvalancheElectron(const double x0, const double y0, const double z0,
                          const double t0, const bool hole = false);
   bool AvalancheHole(const double x0, const double y0, const double z0,

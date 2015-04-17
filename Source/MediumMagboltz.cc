@@ -157,7 +157,7 @@ void MediumMagboltz::SetSplittingFunctionGreenSawada() {
 
   bool allset = true;
   for (unsigned int i = 0; i < m_nComponents; ++i) {
-    if (!hasGreenSawada[i]) {
+    if (!m_hasGreenSawada[i]) {
       if (allset) {
         std::cout << m_className << "::SetSplittingFunctionGreenSawada:\n";
         allset = false;
@@ -1583,7 +1583,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     tsGreenSawada[i] = 0.;
     taGreenSawada[i] = 0.;
     tbGreenSawada[i] = 0.;
-    hasGreenSawada[i] = false;
+    m_hasGreenSawada[i] = false;
   }
   // Cross-sections
   // 0: total, 1: elastic,
@@ -2138,7 +2138,7 @@ void MediumMagboltz::SetupGreenSawada() {
 
   for (unsigned int i = 0; i < m_nComponents; ++i) {
     taGreenSawada[i] = 1000.;
-    hasGreenSawada[i] = true;
+    m_hasGreenSawada[i] = true;
     if (gas[i] == "He" || gas[i] == "He-3") {
       tsGreenSawada[i] = -2.25;
       gsGreenSawada[i] = 15.5;
@@ -2197,7 +2197,7 @@ void MediumMagboltz::SetupGreenSawada() {
       gbGreenSawada[i] = 13.8;
     } else {
       taGreenSawada[i] = 0.;
-      hasGreenSawada[i] = false;
+      m_hasGreenSawada[i] = false;
       if (useGreenSawada) {
         std::cout << m_className << "::SetupGreenSawada:\n";
         std::cout << "    Fit parameters for " << gas[i] << " not available.\n";
@@ -5569,36 +5569,36 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   temperatureTable = m_temperature;
 
   // Initialize the parameter arrays.
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityB, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityExB, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffLong, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronDiffTrans, 0.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronTownsend, -30.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabTownsendNoPenning, -30.);
-  InitParamArrays(nEfields, nBfields, nAngles, tabElectronAttachment, -30.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityE, 0.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityB, 0.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronVelocityExB, 0.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronDiffLong, 0.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronDiffTrans, 0.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronTownsend, -30.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabTownsendNoPenning, -30.);
+  InitParamArrays(m_nEfields, m_nBfields, m_nAngles, tabElectronAttachment, -30.);
 
-  hasElectronVelocityE = true;
-  hasElectronVelocityB = true;
-  hasElectronVelocityExB = true;
-  hasElectronDiffLong = true;
-  hasElectronDiffTrans = true;
-  hasElectronTownsend = true;
-  hasElectronAttachment = true;
+  m_hasElectronVelocityE = true;
+  m_hasElectronVelocityB = true;
+  m_hasElectronVelocityExB = true;
+  m_hasElectronDiffLong = true;
+  m_hasElectronDiffTrans = true;
+  m_hasElectronTownsend = true;
+  m_hasElectronAttachment = true;
 
-  hasExcRates = false;
+  m_hasExcRates = false;
   tabExcRates.clear();
   excitationList.clear();
   nExcListElements = 0;
-  hasIonRates = false;
+  m_hasIonRates = false;
   tabIonRates.clear();
   ionisationList.clear();
   nIonListElements = 0;
 
-  hasIonMobility = false;
-  hasIonDissociation = false;
-  hasIonDiffLong = false;
-  hasIonDiffTrans = false;
+  m_hasIonMobility = false;
+  m_hasIonDissociation = false;
+  m_hasIonDiffLong = false;
+  m_hasIonDiffTrans = false;
 
   // gasBits = "TFTTFTFTTTFFFFFF";
   // The version number is 11 because there are slight
@@ -5616,9 +5616,9 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   double alphatof = 0.;
 
   // Run through the grid of E- and B-fields and angles.
-  for (int i = 0; i < nEfields; ++i) {
-    for (int j = 0; j < nAngles; ++j) {
-      for (int k = 0; k < nBfields; ++k) {
+  for (unsigned int i = 0; i < m_nEfields; ++i) {
+    for (unsigned int j = 0; j < m_nAngles; ++j) {
+      for (unsigned int k = 0; k < m_nBfields; ++k) {
         if (m_debug) {
           std::cout << m_className << "::GenerateGasTable:\n";
           std::cout << "    E = " << eFields[i] << " V/cm, B = " << bFields[k]

@@ -46,7 +46,7 @@ class MediumGas : public Medium {
 
   void PrintGas();
 
-  bool LoadIonMobility(const std::string filename);
+  bool LoadIonMobility(const std::string& filename);
 
   void SetExtrapolationMethodExcitationRates(const std::string extrLow,
                                              const std::string extrHigh);
@@ -105,7 +105,7 @@ class MediumGas : public Medium {
   std::vector<std::vector<std::vector<double> > > tabTownsendNoPenning;
 
   // Tables for excitation and ionisation rates
-  bool hasExcRates, hasIonRates;
+  bool m_hasExcRates, m_hasIonRates;
   std::vector<std::vector<std::vector<std::vector<double> > > > tabExcRates;
   std::vector<std::vector<std::vector<std::vector<double> > > > tabIonRates;
 
@@ -128,10 +128,10 @@ class MediumGas : public Medium {
   std::vector<ionListElement> ionisationList;
 
   // Extrapolation/interpolation for excitation and ionisation rates.
-  int extrLowExcRates, extrHighExcRates;
-  int extrLowIonRates, extrHighIonRates;
-  int intpExcRates;
-  int intpIonRates;
+  unsigned int m_extrLowExcRates, m_extrHighExcRates;
+  unsigned int m_extrLowIonRates, m_extrHighIonRates;
+  unsigned int m_intpExcRates;
+  unsigned int m_intpIonRates;
 
   bool GetGasInfo(const std::string gasname, double& a, double& z) const;
   bool GetGasName(const int gasnumber, const int version, std::string& gasname);
