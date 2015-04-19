@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.19 2012/05/15 16:41:27 cpowell Exp $
+# $Id: get_embedding_xml.pl,v 1.20 2015/04/19 08:50:21 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.20  2015/04/19 08:50:21  zhux
+# Added 'sl64' support for PDSF.
+#
 # Revision 1.19  2012/05/15 16:41:27  cpowell
 # Added line to gzip log files
 #
@@ -410,10 +413,12 @@ print OUT "\n\n";
 #----------------------------------------------------------------------------------------------------
 print OUT "<!-- Make output and list directory (if they don't exist) -->\n";
 print OUT "if ( ! -f \$EMOUTPUT ) then \n";
+print OUT "  umask 2\n";
 print OUT "  mkdir -pv \$EMOUTPUT\n";
 print OUT "  chmod -R ug+rw \$EMOUTPUT\n";
 print OUT "endif\n";
 print OUT "if ( ! -f \$EMLIST ) then \n";
+print OUT "  umask 2\n";
 print OUT "  mkdir -pv \$EMLIST\n";
 print OUT "  chmod -R ug+rw \$EMLIST\n";
 print OUT "endif\n";
@@ -890,6 +895,9 @@ sub getLocalLibraryPath {
   }
   elsif ( $chos =~ "sl53" ){
     return ".sl53_gcc432";
+  }
+  elsif ( $chos =~ "sl64" ){
+    return ".sl64_gcc447";
   }
   else{
     print "Unknown OS : $chos. Set the sl44 path\n";
