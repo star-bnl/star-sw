@@ -185,6 +185,8 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
     StTrackNode *node = 0;
 #if 0
     cout << " Global tracks " << nTracks << endl;
+#else
+    cout << nTracks << " Track nodes" << endl;
 #endif
     for (UInt_t  i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
