@@ -64,24 +64,23 @@ void KFParticleBase::Print(Option_t *opt) const {
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
   os << Form("p(%4i,%4i,%4i)",particle.Id(),particle.GetParentID(),particle.IdParentMcVx());
-  for (Int_t i = 0; i < 8; i++) {
-    if (i == 6) continue;                                    // E
-    if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
-    if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
-    if (particle.GetCovariance(i,i) > 0 && particle.GetCovariance(i,i) < 1e5) 
+  for (Int_t i = 0; i < 6; i++) {
+    if (particle.GetCovariance(i,i) <= 0.0) continue;
+    if (particle.GetCovariance(i,i) < 1e5) 
       os << Form(" %s:%8.3f+/-%5.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
-  for (Int_t i = 0; i < 3; i++) {
-    Float_t V, dV;
+  for (Int_t i = 0; i < 4; i++) {
+    Float_t V, dV = -1;
     switch (i) {
-    case 0: if (particle.GetMass(V,dV))     continue; break;
-    case 1: if (particle.GetLifeTime(V,dV)) continue; break;
-    case 2: if (particle.GetMomentum(V,dV)) continue; break;
+    case 0: if (particle.GetParameter(7) == 0.0) break; particle.GetDecayLength(V,dV); break;
+    case 1:                                             particle.GetMass(V,dV);        break;
+    case 2: if (particle.GetParameter(7) == 0.0) break; particle.GetLifeTime(V,dV);    break;
+    case 3:                                             particle.GetMomentum(V,dV);    break;
     default: break;
     }
-    os << Form(" %s:%8.3f+/-%7.3f", vn[i+8],V,dV);
+    if (dV != 1.0 && dV > 0 && dV  < 1e3) os << Form(" %s:%8.3f+/-%7.3f", vn[i+7],V,dV);
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
@@ -213,27 +212,30 @@ Int_t KFParticleBase::GetEta( float &eta, float &error )  const
   float px = fP[3];
   float py = fP[4];
   float pz = fP[5];
-  float pt2 = px*px + py*py;
-  float p2 = pt2 + pz*pz;
-  float p = sqrt(p2);
-  float a = p + pz;
-  float b = p - pz;
   eta = 1.e10;
-  if( b > 1.e-8 ){
-    float c = a/b;
-    if( c>1.e-8 ) eta = 0.5*log(c);
+  float pt2 = px*px + py*py;
+  if (pt2 < 1e13) {
+    float p2 = pt2 + pz*pz;
+    if (p2 < 1e13) {
+      float p = sqrt(p2);
+      float a = p + pz;
+      float b = p - pz;
+      if( b > 1.e-8 ){
+	float c = a/b;
+	if( c>1.e-8 ) eta = 0.5*log(c);
+      }
+      float h3 = -px*pz;
+      float h4 = -py*pz;  
+      float pt4 = pt2*pt2;
+      float p2pt4 = p2*pt4;
+      error = (h3*h3*fC[9] + h4*h4*fC[14] + pt4*fC[20] + 2*( h3*(h4*fC[13] + fC[18]*pt2) + pt2*h4*fC[19] ) );
+      
+      if( error>0 && p2pt4>1.e-10 ){
+	error = sqrt(error/p2pt4);
+	return 0;
+      }
+    }
   }
-  float h3 = -px*pz;
-  float h4 = -py*pz;  
-  float pt4 = pt2*pt2;
-  float p2pt4 = p2*pt4;
-  error = (h3*h3*fC[9] + h4*h4*fC[14] + pt4*fC[20] + 2*( h3*(h4*fC[13] + fC[18]*pt2) + pt2*h4*fC[19] ) );
-
-  if( error>0 && p2pt4>1.e-10 ){
-    error = sqrt(error/p2pt4);
-    return 0;
-  }
-
   error = 1.e10;
   return 1;
 }
