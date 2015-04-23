@@ -149,6 +149,13 @@ Int_t StMtdTrackingMaskMaker::Make()
 
   SetAttr("TpcSectorsByMtd",mTpcSectorsForTracking);
 
+
+  if(mStEvent)
+    {
+      LOG_INFO << "Is di-muon event: " << mIsDiMuon << endm;
+      LOG_INFO << "Tracking mask by MTD: " << (bitset<24>)mTpcSectorsForTracking << endm;  
+    }
+
   return iret;
 }
 
@@ -554,8 +561,11 @@ void StMtdTrackingMaskMaker::bookHistos()
 }
 
 
-// $Id: StMtdTrackingMaskMaker.cxx,v 1.1 2015/04/07 14:10:37 jeromel Exp $
+// $Id: StMtdTrackingMaskMaker.cxx,v 1.2 2015/04/23 21:09:12 marr Exp $
 // $Log: StMtdTrackingMaskMaker.cxx,v $
+// Revision 1.2  2015/04/23 21:09:12  marr
+// Add print-out in reconstruction
+//
 // Revision 1.1  2015/04/07 14:10:37  jeromel
 // First version of StMtdEvtFilterMaker - R.Ma - review closed 2015/04/06
 //
