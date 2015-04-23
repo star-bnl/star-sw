@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.20 2015/04/19 08:50:21 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.21 2015/04/23 01:50:47 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.21  2015/04/23 01:50:47  zhux
+# force overwrite the log files.
+#
 # Revision 1.20  2015/04/19 08:50:21  zhux
 # Added 'sl64' support for PDSF.
 #
@@ -438,8 +441,8 @@ printDebug("Set errfilename: $errFileName ...");
 print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
-print OUT "gzip " . "\$EMOUTPUT/$logFileName\n";
-print OUT "gzip " . "\$EMOUTPUT/$errFileName\n";
+print OUT "gzip -f " . "\$EMOUTPUT/$logFileName\n";
+print OUT "gzip -f " . "\$EMOUTPUT/$errFileName\n";
 print OUT "mv -v $generatorDir/sched\$JOBID.csh \$EMLIST/\n";
 print OUT "rm -v $generatorDir/sched\$JOBID.list\n";
 print OUT "\n";
