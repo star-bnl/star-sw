@@ -45,6 +45,18 @@ StMtdEvtFilterMaker::StMtdEvtFilterMaker(const Char_t *name) : StMaker(name)
   mIsJpsiEvent           = kFALSE;
   mIsDiMuon              = kFALSE;
   mIsDiMuonOnly          = kFALSE;
+
+     
+   mMinTrkPtAll           = 1.0;
+   mMinTrkPtLead          = 0;
+   mMinNHitsFit           = 15;
+   mMinNHitsDedx          = 10;
+   mMinFitHitsFraction    = 0.52;
+   mMaxDca                = 1e4;
+   mMinNsigmaPi           = -1e4;
+   mMaxNsigmaPi           = 1e4;
+   mMaxDeltaZ             = 1e4;
+   nMinMuonCandidates     = 2;
 }
  
 //_____________________________________________________________________________
@@ -117,7 +129,7 @@ Int_t StMtdEvtFilterMaker::InitRun(const Int_t runNumber)
   mMinNsigmaPi           = table->minNsigmaPi;
   mMaxNsigmaPi           = table->maxNsigmaPi;
   mMaxDeltaZ             = table->maxDeltaZ;
-  nMinMuonCandidates     = table->minNMuons;
+  nMinMuonCandidates     = (int)table->minNMuons;
   if(Debug())
     {
       LOG_INFO << "minTrkPtAll    = " << mMinTrkPtAll        << endm;
@@ -173,10 +185,16 @@ Int_t StMtdEvtFilterMaker::Make()
   StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
   tagTable.tpcSectors = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U);
   tagTable.isRejectEvent = (isRejectEvent() ? 1 : 0);
-  tagTable.shouldHaveRejectEvent = (shouldHaveRejectEvent() ? 1 : 0);
+  tagTable.shouldHaveRejectEvent = shouldHaveRejectEvent();
   St_MtdTrackFilterTag* MtdTrackFilterTag = new St_MtdTrackFilterTag("MtdTrackFilterTag",1);
   MtdTrackFilterTag->AddAt(&tagTable,0);
   AddData(MtdTrackFilterTag);
+
+  if(mStEvent)
+    {
+      LOG_INFO << "Is event rejected:        " << tagTable.isRejectEvent << endm;
+      LOG_INFO << "Should event be rejected: " << tagTable.shouldHaveRejectEvent << endm;
+    }
 
   return iret;
 }
@@ -193,13 +211,19 @@ bool StMtdEvtFilterMaker::isRejectEvent()
 }
 
 //_____________________________________________________________________________
-bool StMtdEvtFilterMaker::shouldHaveRejectEvent()
+int StMtdEvtFilterMaker::shouldHaveRejectEvent()
 {
   ///
   /// check whether this event should have been discarded, had it
   /// not contain MTD triggers other than the di-muon trigger
   ///
-  return (mIsDiMuon && !mIsDiMuonOnly && !mIsJpsiEvent);
+
+  if(mIsDiMuon)
+    {
+      if(!mIsDiMuonOnly && !mIsJpsiEvent) return 1;
+      else return 2;
+    }
+  else return 0;
 }
 
 //_____________________________________________________________________________
@@ -218,7 +242,7 @@ void StMtdEvtFilterMaker::checkTriggerIDs(const vector<unsigned int> triggers)
   	}
     }
 
-  mIsDiMuonOnly = kTRUE;
+  mIsDiMuonOnly = mIsDiMuon;
   for(unsigned int i=0; mIsDiMuonOnly && i<triggers.size(); i++)
     {
       for(unsigned int j=0; mIsDiMuonOnly && j<mOtherTrigIDs.size(); j++)
@@ -378,16 +402,19 @@ bool StMtdEvtFilterMaker::isMuonCandidate(StTrack *track)
 
   if(!track) return kFALSE;
 
-  // nSigmaPi cut
-  double nSigmaPi = -999.;
-  StTpcDedxPidAlgorithm pidAlgorithm;
-  const StParticleDefinition *pd = track->pidTraits(pidAlgorithm);
-  if(pd && pidAlgorithm.traits())
+  if(mMaxNsigmaPi<1e4)
     {
-      static StPionPlus* Pion = StPionPlus::instance();
-      nSigmaPi = pidAlgorithm.numberOfSigma(Pion);
+      // nSigmaPi cut
+      double nSigmaPi = -999.;
+      StTpcDedxPidAlgorithm pidAlgorithm;
+      const StParticleDefinition *pd = track->pidTraits(pidAlgorithm);
+      if(pd && pidAlgorithm.traits())
+	{
+	  static StPionPlus* Pion = StPionPlus::instance();
+	  nSigmaPi = pidAlgorithm.numberOfSigma(Pion);
+	}
+      if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
     }
-  if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi) return kFALSE;
 
   // dz cut
   StMtdPidTraits* mtdpid = 0;
@@ -401,8 +428,11 @@ bool StMtdEvtFilterMaker::isMuonCandidate(StTrack *track)
 	}
     }
   if(!mtdpid) return kFALSE;
-  double dz = mtdpid->deltaZ();
-  if(dz > mMaxDeltaZ) return kFALSE;
+  if(mMaxDeltaZ<1e4)
+    {
+      double dz = mtdpid->deltaZ();
+      if(dz > mMaxDeltaZ) return kFALSE;
+    }
 
   return kTRUE;
  }
@@ -416,20 +446,21 @@ bool StMtdEvtFilterMaker::isMuonCandidate(StMuTrack *track)
 
   if(!track) return kFALSE;
 
-  // nSigmaPi cut
-  double nSigmaPi = track->nSigmaPion();
-  if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi)  return kFALSE;
+  if(mMaxNsigmaPi<1e4)
+    {
+      // nSigmaPi cut
+      double nSigmaPi = track->nSigmaPion();
+      if(nSigmaPi<mMinNsigmaPi || nSigmaPi>mMaxNsigmaPi)  return kFALSE;
+    }
 
   // dz cut
-  if(track->mtdHit()) 
+  const StMuMtdHit *hit = track->mtdHit(); 
+  if(!hit) return kFALSE;
+  if(mMaxDeltaZ<1e4)
     {
       const StMuMtdPidTraits mtdPid = track->mtdPidTraits();
       double dz = mtdPid.deltaZ();
       if(dz > mMaxDeltaZ) return kFALSE;
-    }
-  else
-    {
-      return kFALSE;
     }
 
   return kTRUE;
@@ -453,8 +484,12 @@ void StMtdEvtFilterMaker::bookHistos()
 
 }
 
-// $Id: StMtdEvtFilterMaker.cxx,v 1.1 2015/04/07 14:10:37 jeromel Exp $
+// $Id: StMtdEvtFilterMaker.cxx,v 1.2 2015/04/23 21:10:19 marr Exp $
 // $Log: StMtdEvtFilterMaker.cxx,v $
+// Revision 1.2  2015/04/23 21:10:19  marr
+// 1. remove dz and pTlead cuts in the filtering by default
+// 2. change the number scheme for shouldHaveRejectEvent()
+//
 // Revision 1.1  2015/04/07 14:10:37  jeromel
 // First version of StMtdEvtFilterMaker - R.Ma - review closed 2015/04/06
 //

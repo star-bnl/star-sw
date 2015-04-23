@@ -36,7 +36,7 @@ class StMtdEvtFilterMaker : public StMaker {
 
   void     setSaveHistos(const bool save)    { mSaveHistos = save; }
   bool     isRejectEvent();
-  bool     shouldHaveRejectEvent();
+  int      shouldHaveRejectEvent();
 
   bool     isMuonCandidate(StTrack *track);
   bool     isMuonCandidate(StMuTrack *track);
@@ -102,8 +102,12 @@ class StMtdEvtFilterMaker : public StMaker {
 #endif
 
 
-// $Id: StMtdEvtFilterMaker.h,v 1.1 2015/04/07 14:10:37 jeromel Exp $
+// $Id: StMtdEvtFilterMaker.h,v 1.2 2015/04/23 21:10:19 marr Exp $
 // $Log: StMtdEvtFilterMaker.h,v $
+// Revision 1.2  2015/04/23 21:10:19  marr
+// 1. remove dz and pTlead cuts in the filtering by default
+// 2. change the number scheme for shouldHaveRejectEvent()
+//
 // Revision 1.1  2015/04/07 14:10:37  jeromel
 // First version of StMtdEvtFilterMaker - R.Ma - review closed 2015/04/06
 //
