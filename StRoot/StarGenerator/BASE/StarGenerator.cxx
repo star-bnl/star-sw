@@ -148,6 +148,26 @@ void StarGenerator::SetOutputTree( TTree *tree )
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
+void StarGenerator::SetInputFile( const Char_t *filename, const Char_t *treename, const Char_t *branchname )
+{
+  TFile *file = TFile::Open( filename, "read" );
+  if ( 0 == file )
+    {
+      LOG_WARN << "-- WARNING: root event file " << filename << " not found." << endm;
+      return;
+    }
+  TTree *tree = (TTree *)file->Get(treename);
+  if ( 0 == tree )
+    {
+      LOG_WARN << "-- WARNING: tree "<< treename<< " not found in " << filename << endm;
+      return;
+    }
+  SetInputTree(tree, branchname);
+
+};
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 void StarGenerator::SetInputTree( TTree *tree, const Char_t *name )
 {
   mInputTree = tree;
@@ -157,8 +177,12 @@ void StarGenerator::SetInputTree( TTree *tree, const Char_t *name )
     {
       bname = name;
     }
-  TBranch *branch = mInputTree->GetBranch( bname );
-  branch -> SetAddress( &mEvent );
+
+  mInputTree -> SetBranchAddress( bname, &mEvent );
+  //  TBranch *branch = mInputTree->GetBranch( bname );
+  //  branch -> SetAddress( &mEvent );
+
+  LOG_INFO << "Input Tree with " << tree -> GetEntries() << " loaded" << endm;
   
 }
 // ----------------------------------------------------------------------------
