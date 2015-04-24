@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.27 2015/04/10 18:30:42 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.28 2015/04/24 19:55:16 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,11 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.28  2015/04/24 19:55:16  marr
+ * Add a member function cleanUpMtdPidTraits() to clean up the MTD pidTraits for
+ * all global and primary tracks before the matching process. This is needed when
+ * running MuDst in afterburner mode.
+ *
  * Revision 1.27  2015/04/10 18:30:42  marr
  * Remove lines that are commented out
  *
@@ -593,6 +598,11 @@ Int_t StMtdMatchMaker::Make(){
 	StTimer timer;
 	if(doPrintCpuInfo) timer.start();
 	if(doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
+
+	// clean up mtdPidTraits in MuDst
+	if(mMuDstIn) cleanUpMtdPidTraits();
+
+
 	// read data from StMtdHit
 	/// A. build vector of candidate cells
 	//
@@ -815,6 +825,47 @@ Int_t StMtdMatchMaker::Make(){
 	}
 
 	return kStOK;
+}
+
+//---------------------------------------------------------------------------
+/// clean up mtdPidTraits in MuDst when running afterburner mode
+void StMtdMatchMaker::cleanUpMtdPidTraits()
+{
+  index2Primary.clear();
+  for(Int_t ii=0;ii<(Int_t)mMuDst->array(muPrimary)->GetEntries();ii++)
+    {
+      StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(ii); 
+      if(!pTrack) continue;
+      Int_t index2Global = pTrack->index2Global();
+      if(index2Global<0) continue;
+      index2Primary[index2Global] = ii;
+    }
+
+  UInt_t Nnodes = mMuDst->numberOfGlobalTracks();
+  for(UInt_t iNode=0;iNode<Nnodes;iNode++)
+    {
+      StMuTrack *theTrack = mMuDst->globalTracks(iNode);
+      if(!theTrack) continue;
+      if(theTrack->index2MtdHit()<0) continue;
+
+      //clean up any association done before
+      StMuMtdPidTraits pidMtd;
+      theTrack->setMtdPidTraits(pidMtd);
+      theTrack->setIndex2MtdHit(-999);
+
+      Int_t pIndex = -999;
+      map<Int_t, Int_t>::iterator it = index2Primary.find(iNode);
+      if(it!=index2Primary.end()){
+	pIndex = it->second;
+      }
+      if(pIndex>=0){
+	StMuTrack *thePrimaryTrack= (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex);
+	if(thePrimaryTrack){
+	  thePrimaryTrack->setMtdPidTraits(pidMtd);
+	  thePrimaryTrack->setIndex2MtdHit(-999);
+	}
+      }
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -1104,53 +1155,29 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	float mField = 0;
 	UInt_t Nnodes = 0;
 	if(mMuDstIn){
-
-		index2Primary.clear();
-		for(Int_t ii=0;ii<(Int_t)mMuDst->array(muPrimary)->GetEntries();ii++){
-			StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(ii); 
-			if(!pTrack) continue;
-			Int_t index2Global = pTrack->index2Global();
-			if(index2Global<0) continue;
-			index2Primary[index2Global] = ii;
-		}
-
 		Nnodes = mMuDst->numberOfGlobalTracks();
 		mField = mMuDst->event()->runInfo().magneticField();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
-
 			StThreeVectorD globalPos(-999,-999,-999);
 			StMuTrack *theTrack=mMuDst->globalTracks(iNode);
 			if(!theTrack) continue;
-
-			//clean up any association done before
-			StMuMtdPidTraits pidMtd;
-			theTrack->setMtdPidTraits(pidMtd);
-			theTrack->setIndex2MtdHit(-999);
+			if(!validTrack(theTrack)) continue;
 
 			bool isPrimary=kFALSE;
 			Int_t pIndex = -999;
 			map<Int_t, Int_t>::iterator it = index2Primary.find(iNode);
-			if(it!=index2Primary.end()){
-				pIndex = it->second;
-			}
-			if(pIndex>=0){
-				isPrimary=kTRUE;
-				StMuTrack *thePrimaryTrack= (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex);
-				if(thePrimaryTrack){
-					thePrimaryTrack->setMtdPidTraits(pidMtd);
-					thePrimaryTrack->setIndex2MtdHit(-999);
-				}
-			}
-
-			if(!validTrack(theTrack)) continue;
+			if(it!=index2Primary.end())
+			  pIndex = it->second;
+			if(pIndex>=0) isPrimary=kTRUE;
+		
 			const StMuBTofPidTraits tofpid = theTrack->btofPidTraits();
 			globalPos = tofpid.position();
 			if(matchTrack2Mtd(daqCellsHitVec,theTrack->outerHelix(),theTrack->charge(),allCellsHitVec,iNode,globalPos)){
-				nAllTracks++;
-				if(isPrimary) nPrimaryHits++;
+			  nAllTracks++;
+			  if(isPrimary) nPrimaryHits++;
 			}
 			if(mSaveTree){
-				fillTrackInfo(theTrack, mField, iNode);
+			  fillTrackInfo(theTrack, mField, iNode);
 			}
 			ngTracks++;
 		}
