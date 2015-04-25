@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.22 2015/01/22 22:10:58 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.23 2015/04/25 03:04:05 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -836,12 +836,38 @@ UIntVec StMtdHitMaker::GetTrailingTdc(int backleg, int tray, int channel)
 void StMtdHitMaker::fillMtdHeader() 
 {
   /// fill the MTD header
+  int shouldHaveRejectEvent = -1;
+  unsigned int tpcSectorMask = 0;
+  if(mUseMuDst)
+    {
+      StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
+      StMuDst* mMuDst=mMuDstMaker->muDst();
+      StMuMtdCollection* muMtdCollection = mMuDst->MtdCollection();
+      StMuMtdHeader* muMtdHeader = NULL;     
+      if(muMtdCollection)
+	muMtdHeader = muMtdCollection->mtdHeader();
+      else
+	muMtdHeader = mMuDst->mtdHeader();
+      
+      shouldHaveRejectEvent = muMtdHeader->shouldHaveRejectEvent();
+      tpcSectorMask = muMtdHeader->tpcSectorMask();
+    }
+  else
+    {
+      StMaker* filterMk = GetMakerInheritsFrom("StMtdEvtFilterApplyMaker");
+      shouldHaveRejectEvent = (filterMk ? filterMk->UAttr("MtdShouldHaveRejectEvent") : -1);
+      tpcSectorMask = (filterMk ? filterMk->UAttr("TpcSectorsByMtd") : 0);
+    }
+
   StMtdHeader *mtdHeader = new StMtdHeader();
   for(int i=0;i<nTHUB;i++)
     {
       mtdHeader->setTriggerTime(mTriggerTimeStamp[i], i);
       LOG_DEBUG << "Trigger Time Stamp "<< i+1 <<": " << (unsigned int)mTriggerTimeStamp[i] << endm;
     }
+  mtdHeader->setShouldHaveRejectEvent(shouldHaveRejectEvent);
+  mtdHeader->setTpcSectorMask(tpcSectorMask);
+
   mMtdCollection->setHeader(mtdHeader);
 }
 
@@ -1074,8 +1100,12 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.22 2015/01/22 22:10:58 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.23 2015/04/25 03:04:05 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.23  2015/04/25 03:04:05  marr
+// Fill the two new data members mShouldHaveRejectEvent and mTpcSectorMask in
+// MTD header
+//
 // Revision 1.22  2015/01/22 22:10:58  marr
 // Fix the reserved ribbon cable in backleg 7 module 5 since 2014 run. This is
 // not fixed on the hardware level in 2015 run.
