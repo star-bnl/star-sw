@@ -11,6 +11,7 @@
 #else
 #include "TCernLib.h"
 #endif
+#include "TVector3.h"
 #include "TRandom.h"
 #include "TRandom2.h"
 #include "TRandomVector.h"
@@ -624,31 +625,49 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
 
 }
 //_____________________________________________________________________________
-double THelixTrack::Path(const THelixTrack &th,double *s2) const
+double THelixTrack::Path(const THelixTrack &th,double *path2) const
 {
-   double SxyMe,SxyHe,SMe,SHe,dSMe=0,dSHe=0;
-   TCircle tcMe,tcHe;
-   Fill(tcMe);th.Fill(tcHe);
-   SxyMe = tcMe.Path(tcHe,&SxyHe);
-   if (SxyMe>1e33) return 3e33;
-   THelixTrack thMe(fX,fP,fRho),thHe(th.fX,th.fP,th.fRho);
+static const double kMinAng = 0.1,kDeltaL=1e-4;
 
-   SMe = SxyMe/thMe.GetCos(); thMe.Move(SMe);
-   SHe = SxyHe/thHe.GetCos(); thHe.Move(SHe);
-   for (int ix=0;ix<3;ix++) {
-     if (fabs(thMe.Pos()[ix]-thHe.Pos()[ix])>100)return 3e33;}
-   for (int iter=0;iter<10; iter++) {
-     dSMe = thMe.Path(thHe.Pos());
-     if (dSMe>1e33) return 3e33;
-     SMe+=dSMe; thMe.Move(dSMe);
-     dSHe = thHe.Path(thHe.Pos());
-     if (dSHe>1e33) return 3e33;
-     SHe+=dSHe; thHe.Move(dSHe);
-     if(fabs(dSHe)+fabs(dSMe)<1e-5) break;
+   THelixTrack thMe(this),thHe(&th);
+   double Rho1=thMe.GetRho()*thMe.GetCos();
+   double Rho2=thHe.GetRho()*thHe.GetCos();
+
+   for (int ix=0;ix<3;ix++) 
+   {if (fabs(thMe.Pos()[ix]-thHe.Pos()[ix])>100)return 3e33;}
+   double sMe=0,sHe=0;
+   int conv = 0;
+   for (int iter=0;iter<20; iter++) {
+     TVector3 P1(thMe.Pos());
+     TVector3 P2(thHe.Pos());
+     TVector3 D1(thMe.Dir());
+     TVector3 D2(thHe.Dir());
+     TVector3 dP =  P1-P2;
+     TVector3 Dm = D1-D2;
+     TVector3 Dp = D1+D2;
+     double dPDm = dP.Dot(Dm);
+     double dPDp = dP.Dot(Dp);
+     double DDm = Dm.Mag2();
+     double DDp = Dp.Mag2();
+     if (DDm<1e-10) return 3e33;
+     double t1 = -(dPDm)/DDm;
+     double t2 = -(dPDp)/DDp;
+     double F = 1;
+     double s1 = t1+t2;
+     double s2 = t1-t2;
+     if (fabs(s1*Rho1*F) > kMinAng) F = kMinAng/fabs(s1*Rho1);
+     if (fabs(s2*Rho2*F) > kMinAng) F = kMinAng/fabs(s2*Rho2);
+     if (F<1) {s1*=F; s2*=F;}
+     thMe.Move(s1); sMe+=s1;
+     thHe.Move(s2); sHe+=s2;
+     if (F<1) continue;
+     if (fabs(s1)>kDeltaL) continue;
+     if (fabs(s2)>kDeltaL) continue;
+     conv = 1; break;
    }
-   if(fabs(dSHe)+fabs(dSMe)> 1e-5)  return 3e33;
-   if(s2) *s2=SHe;
-   return SMe;
+   if (!conv)  return 3e33;
+   if(path2) *path2=sHe;
+   return sMe;
 }
 //_____________________________________________________________________________
 double THelixTrack::PathX(const THelixTrack &th,double *s2, double *dst, double *xyz) const
@@ -3244,6 +3263,68 @@ double ans =  1./4*(d2f(i,j)*Rho2()  +df(j)*dRho2(i)
 return ans;
 }		    
 //______________________________________________________________________________
+void THelixTrack::TestTwoHlx() 
+{
+   TVector3 dif(0.1,0.,0.);
+   double rnd = gRandom->Rndm();
+   dif.RotateX(rnd);
+   rnd = gRandom->Rndm();
+   dif.RotateY(rnd);
+   rnd = gRandom->Rndm();
+   dif.RotateZ(rnd);
+   TVector3 D1 = dif.Orthogonal();
+   rnd = gRandom->Rndm();
+   D1.Rotate(rnd,dif);
+   TVector3 D2 = dif.Orthogonal();
+   rnd = gRandom->Rndm();
+   D2.Rotate(rnd,dif);
+   double pos[3]={0};
+   double &d1 = D1[0];
+   double R1=20,R2=100;
+   double shift1 = R1*gRandom->Rndm()*0.1; if (shift1>33) shift1=33;
+   double shift2 = R2*gRandom->Rndm()*0.1; if (shift2>33) shift2=33;
+   THelixTrack th1(pos,&d1,1./R1);
+   double &p2 = dif[0]; 
+   double &d2 = D2[0]; 
+   THelixTrack th2(&p2,&d2,1./R2);
+
+   {
+     TVector3 P1(th1.Pos()),P2(th2.Pos());
+//     TVector3 dP = (P1-P2).Unit();
+     TVector3 dP = (P1-P2);
+     TVector3 D1(th1.Dir());
+     TVector3 D2(th2.Dir());
+     double eps1 = dP.Dot(D1);
+     double eps2 = dP.Dot(D2);
+     printf("TestTwoHlx: Eps1 = %g Eps2 = %g\n",eps1,eps2);
+   }
+
+
+
+   th1.Move(shift1); th2.Move(shift2);
+   double s1=0,s2=0;
+   s1 = th1.Path(th2,&s2);
+   th1.Move(s1);
+   th2.Move(s2);
+
+   {
+     
+     TVector3 P1(th1.Pos()),P2(th2.Pos());
+     TVector3 dP = (P1-P2);
+     double dist = dP.Mag();
+     dP = dP.Unit();
+     TVector3 D1(th1.Dir());
+     TVector3 D2(th2.Dir());
+     double eps1 = dP.Dot(D1);
+     double eps2 = dP.Dot(D2);
+
+     printf("TestTwoHlx: Eps1 = %g Eps2 = %g dist = %g\n",eps1,eps2,dist);
+
+     printf("TestTwoHlx: s1=%g(%g),s2 = %g(%g)\n",s1,shift1,s2,shift2);
+   }
+   
+}
+//______________________________________________________________________________
 //______________________________________________________________________________
 void TCircleFitter::Show() const
 {
@@ -3666,7 +3747,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.75 2014/06/02 18:28:22 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.76 2015/04/28 20:36:37 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3682,6 +3763,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.76  2015/04/28 20:36:37  perev
+ * Crossing of two helices rewritten
+ *
  * Revision 1.75  2014/06/02 18:28:22  perev
  * Chec XX and YY for non zero error matrix
  *
