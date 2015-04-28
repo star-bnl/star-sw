@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.44 2015/04/28 16:05:32 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,15 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.44  2015/04/28 16:05:32  perev
+ * We have changed a default dEdx method in StMuDSTmaker from
+ * kTruncatedMeanId to kLikelihoodFitId since SL14a.
+ *   With TruncatedMean we are using only 70% of available dE/dx measurements and this is reflected in nHitsDedx
+ *   With LikelihoodFit we are using all available dE/dx measurements.
+ * Default in StMiniMcEvent is still old (kTruncatedMeanId).
+ * It is changed now to kLikelihoodFitId and to be back propagated to all releases >= SL14a
+ * Yuri
+ *
  * Revision 1.43  2014/07/28 17:20:11  jwebb
  * Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
  *
@@ -183,6 +192,15 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.44  2015/04/28 16:05:32  perev
+ * We have changed a default dEdx method in StMuDSTmaker from
+ * kTruncatedMeanId to kLikelihoodFitId since SL14a.
+ *   With TruncatedMean we are using only 70% of available dE/dx measurements and this is reflected in nHitsDedx
+ *   With LikelihoodFit we are using all available dE/dx measurements.
+ * Default in StMiniMcEvent is still old (kTruncatedMeanId).
+ * It is changed now to kLikelihoodFitId and to be back propagated to all releases >= SL14a
+ * Yuri
+ *
  * Revision 1.43  2014/07/28 17:20:11  jwebb
  * Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
  *
@@ -354,7 +372,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.44 2015/04/28 16:05:32 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -2451,7 +2469,7 @@ StDedxPidTraits* StMiniMcMaker::findDedxPidTraits(const StTrack* track)
   
   for (UInt_t i = 0; i < traits.size(); i++) {
     pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
-    if (pid && pid->method() == kTruncatedMeanId) break;
+    if (pid && pid->method() == kLikelihoodFitId) break;
   }
   return pid;
 }  
@@ -2694,9 +2712,18 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $
+// $Id: StMiniMcMaker.cxx,v 1.44 2015/04/28 16:05:32 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.44  2015/04/28 16:05:32  perev
+// We have changed a default dEdx method in StMuDSTmaker from
+// kTruncatedMeanId to kLikelihoodFitId since SL14a.
+//   With TruncatedMean we are using only 70% of available dE/dx measurements and this is reflected in nHitsDedx
+//   With LikelihoodFit we are using all available dE/dx measurements.
+// Default in StMiniMcEvent is still old (kTruncatedMeanId).
+// It is changed now to kLikelihoodFitId and to be back propagated to all releases >= SL14a
+// Yuri
+//
 // Revision 1.43  2014/07/28 17:20:11  jwebb
 // Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
 //
@@ -2732,6 +2759,15 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.44  2015/04/28 16:05:32  perev
+// We have changed a default dEdx method in StMuDSTmaker from
+// kTruncatedMeanId to kLikelihoodFitId since SL14a.
+//   With TruncatedMean we are using only 70% of available dE/dx measurements and this is reflected in nHitsDedx
+//   With LikelihoodFit we are using all available dE/dx measurements.
+// Default in StMiniMcEvent is still old (kTruncatedMeanId).
+// It is changed now to kLikelihoodFitId and to be back propagated to all releases >= SL14a
+// Yuri
+//
 // Revision 1.43  2014/07/28 17:20:11  jwebb
 // Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
 //
