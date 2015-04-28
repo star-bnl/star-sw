@@ -313,6 +313,7 @@ static  void Test4();
 static  void Test5();
 static	void TestMtx();
 static	void TestDer();
+static	void TestTwoHlx();
 private:
 ///     	Make transformatiom matrix to transform errors
 ///		called only after Eval()
