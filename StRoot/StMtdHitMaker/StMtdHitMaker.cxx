@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.23 2015/04/25 03:04:05 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.24 2015/05/01 20:04:33 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -854,9 +854,10 @@ void StMtdHitMaker::fillMtdHeader()
     }
   else
     {
-      StMaker* filterMk = GetMakerInheritsFrom("StMtdEvtFilterApplyMaker");
-      shouldHaveRejectEvent = (filterMk ? filterMk->UAttr("MtdShouldHaveRejectEvent") : -1);
-      tpcSectorMask = (filterMk ? filterMk->UAttr("TpcSectorsByMtd") : 0);
+      TDataSet* ds = FindDataSet("MtdShouldHaveRejectEvent");
+      shouldHaveRejectEvent = (ds ? atoi(ds->GetTitle()) : -1);
+      ds = FindDataSet("TpcSectorsByMtd");
+      tpcSectorMask = (ds ? (unsigned int) atoi(ds->GetTitle()) : 0U);
     }
 
   StMtdHeader *mtdHeader = new StMtdHeader();
@@ -1100,8 +1101,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.23 2015/04/25 03:04:05 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.24 2015/05/01 20:04:33 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.24  2015/05/01 20:04:33  marr
+// Use AddData() to pass the information from event filtering stage
+//
 // Revision 1.23  2015/04/25 03:04:05  marr
 // Fill the two new data members mShouldHaveRejectEvent and mTpcSectorMask in
 // MTD header
