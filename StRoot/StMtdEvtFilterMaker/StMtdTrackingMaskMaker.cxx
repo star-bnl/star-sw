@@ -22,6 +22,7 @@
 #include "StMuDSTMaker/COMMON/StMuMtdHit.h"
 
 #include "tables/St_mtdModuleToQTmap_Table.h"
+#include "tables/St_mtdQTSlewingCorr_Table.h"
 #include "tables/St_trgOfflineFilter_Table.h"
 #include "StMtdTrackingMaskMaker.h"
 
@@ -73,6 +74,7 @@ Int_t StMtdTrackingMaskMaker::InitRun(const Int_t runNumber)
   // initialize maps
   memset(mModuleToQT,-1,sizeof(mModuleToQT));
   memset(mModuleToQTPos,-1,sizeof(mModuleToQTPos));
+  memset(mQTtoModule,-1,sizeof(mQTtoModule));
 
   // obtain maps from DB
   LOG_INFO << "Retrieving mtdModuleToQTmap table from database ..." << endm;
@@ -102,8 +104,37 @@ Int_t StMtdTrackingMaskMaker::InitRun(const Int_t runNumber)
 	      if(channel%8==1) mModuleToQTPos[i][j] = 1 + channel/8 * 2;
 	      else             mModuleToQTPos[i][j] = 2 + channel/8 * 2;
 	    }
+
+	  if(mModuleToQT[i][j]>0 && mModuleToQTPos[i][j]>0)
+	    mQTtoModule[mModuleToQT[i][j]-1][mModuleToQTPos[i][j]-1] = j + 1;
 	}
     }
+
+  // online slewing correction for QT board
+  memset(mQTSlewBinEdge,-1,sizeof(mQTSlewBinEdge));
+  memset(mQTSlewCorr,-1,sizeof(mQTSlewCorr));
+  LOG_INFO << "Retrieving mtdQTSlewingCorr table from database ..." << endm;
+  dataset = GetDataBase("Calibrations/mtd/mtdQTSlewingCorr");
+  St_mtdQTSlewingCorr *mtdQTSlewingCorr = static_cast<St_mtdQTSlewingCorr*>(dataset->Find("mtdQTSlewingCorr"));
+  if(!mtdQTSlewingCorr)
+    {
+      LOG_ERROR << "No mtdQTSlewingCorr table found in database" << endm;
+      return kStErr;
+    }
+  mtdQTSlewingCorr_st *mtdQTSlewingCorrtable = static_cast<mtdQTSlewingCorr_st*>(mtdQTSlewingCorr->GetTable());
+  for(int j=0; j<4; j++)
+    {
+      for(int i=0; i<16; i++)
+	{
+	  for(Int_t k=0; k<8; k++)
+	    {
+	      Int_t index = j*16*8 + i*8 + k;
+	      mQTSlewBinEdge[j][i][k] = (int) mtdQTSlewingCorrtable->slewingBinEdge[index];
+	      mQTSlewCorr[j][i][k] = (int) mtdQTSlewingCorrtable->slewingCorr[index];
+	    }
+	}
+    }
+
   return kStOK;
 }
 
@@ -291,8 +322,8 @@ void StMtdTrackingMaskMaker::processTriggerData()
   mhNMIXsignals->Fill(nMixSignal);
 
   // QT
-  unsigned short mxq_tacsum[4][2];
-  int    mxq_tacsum_pos[4][2];
+  int mxq_tacsum[4][2];
+  int mxq_tacsum_pos[4][2];
   for(int i=0; i<4; i++)
     {
       for(int j=0; j<2; j++)
@@ -304,6 +335,7 @@ void StMtdTrackingMaskMaker::processTriggerData()
 
   // extract tac information for each QT board
   int mtdQTtac[4][16];
+  int mtdQTadc[4][16];
   for(int i=0; i<32; i++)
     {
       int type = (i/4)%2;
@@ -314,23 +346,53 @@ void StMtdTrackingMaskMaker::processTriggerData()
 	  mtdQTtac[2][i-i/4*2-2] = mTrigData->mtd3AtAddress(i,0);
 	  mtdQTtac[3][i-i/4*2-2] = mTrigData->mtd4AtAddress(i,0);
 	}
+      else
+	{
+	  mtdQTadc[0][i-i/4*2] = mTrigData->mtdAtAddress(i,0);
+	  mtdQTadc[1][i-i/4*2] = mTrigData->mtdgemAtAddress(i,0);
+	  mtdQTadc[2][i-i/4*2] = mTrigData->mtd3AtAddress(i,0);
+	  mtdQTadc[3][i-i/4*2] = mTrigData->mtd4AtAddress(i,0);
+	}
     }
 
   // In each QT board, find the two signals with
   // largest TacSum values
   int nQtSignal = 0;
+  int j[2], a[2];
   for(int im=0; im<4; im++)
     {
-      for(int i=0; i<16; i++)
+      for(int i=0; i<8; i++)
 	{
-	  if(i%2==1) continue;
-	  int j2 = mtdQTtac[im][i];
-	  int j3 = mtdQTtac[im][i+1];
+	  // slewing correction
+	  for(int k=0; k<2; k++)
+	    {
+	      j[k] = mtdQTtac[im][i*2+k];
+	      a[k] = mtdQTadc[im][i*2+k];
 
-	  if(j2<100 || j3<100) continue;
+	      int slew_bin = -1;
+	      if(a[k]>=0 && a[k]<=mQTSlewBinEdge[im][i*2+k][0]) slew_bin = 0;
+	      else
+		{
+		  for(int l=1; l<8; l++)
+		    {
+		      if(a[k]>mQTSlewBinEdge[im][i*2+k][l-1] && a[k]<=mQTSlewBinEdge[im][i*2+k][l])
+			{
+			  slew_bin = l;
+			  break;
+			}
+		    }
+		}
+	      if(slew_bin>=0)
+		j[k] += mQTSlewCorr[im][i*2+k][slew_bin];
+	    }
+
+	  if(j[0]<100 || j[1]<100) continue;
+	  if(abs(j[0]-j[1])>600) continue;
 	  nQtSignal++;
 	  
-	  int sumTac = j2+j3;
+	  // position correction
+	  int module = mQTtoModule[im][i];
+	  int sumTac = int( j[0] + j[1] + abs(module-3)*1./8 * (j[0]-j[1]) );
 
 	  if(mxq_tacsum[im][0] < sumTac)
 	    {
@@ -338,12 +400,12 @@ void StMtdTrackingMaskMaker::processTriggerData()
 	      mxq_tacsum[im][0] = sumTac;
 
 	      mxq_tacsum_pos[im][1] = mxq_tacsum_pos[im][0];
-	      mxq_tacsum_pos[im][0] = i/2+1;
+	      mxq_tacsum_pos[im][0] = i+1;
 	    }
 	  else if (mxq_tacsum[im][1] < sumTac)
 	    {
 	      mxq_tacsum[im][1]  = sumTac;
-	      mxq_tacsum_pos[im][1] = i/2+1;
+	      mxq_tacsum_pos[im][1] = i+1;
 	    }
 	}
     }
@@ -561,8 +623,12 @@ void StMtdTrackingMaskMaker::bookHistos()
 }
 
 
-// $Id: StMtdTrackingMaskMaker.cxx,v 1.2 2015/04/23 21:09:12 marr Exp $
+// $Id: StMtdTrackingMaskMaker.cxx,v 1.3 2015/05/01 21:37:20 marr Exp $
 // $Log: StMtdTrackingMaskMaker.cxx,v $
+// Revision 1.3  2015/05/01 21:37:20  marr
+// Apply online slewing correction and position correction to QT data to make
+// sure the correct trigger patches are found offline.
+//
 // Revision 1.2  2015/04/23 21:09:12  marr
 // Add print-out in reconstruction
 //
