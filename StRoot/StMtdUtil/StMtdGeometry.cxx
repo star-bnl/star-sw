@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.12 2015/04/07 16:23:33 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.13 2015/05/01 01:55:34 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.13  2015/05/01 01:55:34  marr
+ * Fix the geometry of shifted backleg 8 and 24
+ *
  * Revision 1.12  2015/04/07 16:23:33  marr
  * 1. Make use the constants defined in StMtdConstants.h
  * 2. Cleaning up
@@ -337,11 +340,14 @@ Float_t StMtdGeoModule::GetCellZCenter(Int_t iCell){
 }
 
 //_____________________________________________________________________________
-Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell){
-  if(mModuleIndex>0&&mModuleIndex<4)
-    return (iCell-gMtdNCells/2+0.5)*(gMtdCellWidth+gMtdCellGap);
-  else
-    return -1*(iCell-gMtdNCells/2+0.5)*(gMtdCellWidth+gMtdCellGap);
+Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell, Int_t iBL){
+  Float_t cell_width = gMtdCellWidth+gMtdCellGap;
+  Float_t y_center = (mModuleIndex<4? 1 : -1) * (iCell-gMtdNCells/2+0.5) * cell_width;
+
+  if(iBL==8)  y_center -= 3 * cell_width;
+  if(iBL==24) y_center += 2 * cell_width;
+
+  return y_center;
 }
 
 //----------------------------------------------------//
