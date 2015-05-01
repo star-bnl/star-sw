@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.28 2015/04/24 19:55:16 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.29 2015/05/01 01:55:02 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.29  2015/05/01 01:55:02  marr
+ * Fix the geometry of shifted backleg 8 and 24
+ *
  * Revision 1.28  2015/04/24 19:55:16  marr
  * Add a member function cleanUpMtdPidTraits() to clean up the MTD pidTraits for
  * all global and primary tracks before the matching process. This is needed when
@@ -1404,7 +1407,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 			Int_t   icell    = daqIter->cell;
 
 			double zdaq = (daqIter->leadingEdgeTime.second-daqIter->leadingEdgeTime.first)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
-			double ydaq = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+			double ydaq = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg);
 			bool isMatch = false;
 
 
@@ -1670,7 +1673,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 	    Int_t   icell    = vcell[j];
 
 	    Float_t trkLocalY = vyhit[j];
-	    Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+	    Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg);
 	    Float_t dy = fabs(trkLocalY-hitLocalY);
 
 	    Float_t trkGlobalZ = vPosition[j].z();
@@ -1842,7 +1845,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		  Int_t   icell = vcell[ttCandidates[j]];
 
 		  Float_t trkLocalY = vyhit[ttCandidates[j]];
-		  Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+		  Float_t hitLocalY = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg);
 		  Float_t dy = fabs(trkLocalY-hitLocalY);
 		  
 		  Float_t trkGlobalZ = vPosition[ttCandidates[j]].z();
@@ -1920,7 +1923,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Float_t trkLocalZ  = finalMatchedCellsVec[ii].zhit;
 		Float_t trkGlobalZ = finalMatchedCellsVec[ii].hitPosition.z();
 
-		Float_t hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
+		Float_t hitLocalY = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell,backleg);
 		Float_t LeTimeWest = finalMatchedCellsVec[ii].leadingEdgeTime.first;
 		Float_t LeTimeEast = finalMatchedCellsVec[ii].leadingEdgeTime.second;
 		Float_t hitGlobalZ = getMtdHitGlobalZ(LeTimeWest, LeTimeEast, module);
