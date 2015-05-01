@@ -1294,6 +1294,7 @@ Bfc_st BFC[] = { // standard chains
   {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
 
   // Note: MTD related chains - because of the TrkMask, need to happen before TpcHitMaker
+  {"mtdFilt"  ,"","","", "StMtdEvtFilterApplyMaker","StDataFilterMaker","MTD-based event filtering",kFALSE},
   {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
   {"mtdDat"   ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
