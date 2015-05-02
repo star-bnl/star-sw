@@ -35,6 +35,7 @@
            g2t_vpd_hit(i).p(3)        = p(3)
          endif
          g2t_vpd_hit(i).tof           = tof
+         g2t_vpd_hit(i).s_track       = Slen
          g2t_vpd_hit(i).de            = Elos
          g2t_vpd_hit(i).ds            = Step
          g2t_vpd_hit(i).track_p       = trac
