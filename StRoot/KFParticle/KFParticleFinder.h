@@ -200,6 +200,10 @@ class KFParticleFinder
   
   //pointer to the gamma EMC clusters
   KFPEmcCluster* fEmcClusters;
+
+  KFParticleFinder(const KFParticleFinder&);
+  KFParticleFinder& operator=(const KFParticleFinder&);
+
 };
 
 #endif /* !KFParticleFinder_h */
