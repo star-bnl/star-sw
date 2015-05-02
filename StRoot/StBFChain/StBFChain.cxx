@@ -43,7 +43,7 @@
 // NoChainOptions -> Number of chain options auto-calculated
 TableImpl(Bfc);
 ClassImp(StBFChain);
-
+static Int_t NoMakersWithInput = 0; // no. of makers which have time stamp 
 //_____________________________________________________________________________
 // Hack constructor.
 /*!
@@ -185,10 +185,12 @@ Int_t StBFChain::Load()
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  } else {
+#if 0
 	    if ( ! index(fBFC[i].Libs,',') || Debug() > 1 ) {
 	      LOG_WARN << "No path for Key=" << fBFC[i].Key << "-> Searched for [" << libL 
 		       << "] from Libs=" << fBFC[i].Libs << " (will proceed)" << endm;
 	    }
+#endif
 	  }
 	}
 	Libs.Delete();
@@ -219,6 +221,7 @@ Int_t StBFChain::Instantiate()
   if (! fNoChainOptions) return status;
   Long64_t maxsize = kMaxLong64;
   TTree::SetMaxTreeSize(maxsize);
+  St_db_Maker* dbMk = 0;
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     TString maker(fBFC[i].Maker);
@@ -254,7 +257,7 @@ Int_t StBFChain::Instantiate()
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	St_db_Maker* dbMk = (St_db_Maker *) mk;
+	dbMk = (St_db_Maker *) mk;
 	if (! dbMk) {
 	  TString MySQLDb("MySQL:StarDb");
 	  TString MainCintDb("$STAR/StarDb");
@@ -302,7 +305,6 @@ Int_t StBFChain::Instantiate()
 	  mk = dbMk;
 	}
 	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
-	SetDbOptions(dbMk);
       }
       goto Add2Chain;
     }
@@ -328,6 +330,7 @@ Int_t StBFChain::Instantiate()
 	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
 	}
         if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
+	NoMakersWithInput++;
 	goto Add2Chain;
       }
       goto Error;
@@ -363,6 +366,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
     if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
+      NoMakersWithInput++;
     }
 
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
@@ -393,6 +397,11 @@ Int_t StBFChain::Instantiate()
       } else mk->SetActive(kFALSE);
       if (! mk) goto Error;
       SetGeantOptions(mk);
+      if (GetOption("fzin")        || 
+	  GetOption("PrepEmbed")   || 
+	  GetOption("mtin")) {
+	NoMakersWithInput++;
+      }
     }
 
     // special maker options
@@ -809,6 +818,7 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
+  SetDbOptions(dbMk);
 
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
@@ -1219,7 +1229,6 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	if (file) {
 	  Warning("StBFChain::Init","File %s has been found as %s",CintF.Data(),file);
 	  SetAttr("GeneratorFile",file);
-	  SetOption("geant",TagC);
 	  delete [] file;
 	  continue;
 	}
@@ -1407,7 +1416,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-PxlIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
     }  
-    
+    if (TString(SAttr("GeneratorFile")) != "") {
+      SetOption("geant","GeneratorFile");
+      SetOption("-fzin","GeneratorFile");
+    }
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
@@ -1543,7 +1555,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     if (fRunG > 0) {
       geantMk->SetAttr("RunG",fRunG);
     }
-    if (!GetOption("fzin") || GetOption("ForceGeometry")) {
+    if (! (GetOption("fzin") || ! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
       GeomVersion = "y2004x";
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
@@ -1562,6 +1574,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
       GeometryOpt += ("detp geom ");
       GeometryOpt += GeomVersion;
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
+      
     }
     if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "")
       ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
@@ -1633,7 +1646,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    if (GetOption("simu")) {
+    if (GetOption("simu") || ! NoMakersWithInput) {
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
       for (Int_t i = 0; DbAlias[i].tag; i++) {
