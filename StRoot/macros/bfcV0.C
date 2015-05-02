@@ -41,9 +41,10 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012,pythia,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,Sti,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
-TString defChain("MC.y2012,PythiaPP200,tfs,StiCA,KFVertex,-hitfilt,useXgeom,beamline,evout,GeantOut,CmuDst");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,PythiaPP200,tfs,StiCA,KFVertex,-hitfilt,useXgeom,beamline,evout,GeantOut,CmuDst");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,tfs,StiCA,KFVertex,-hitfilt,useXgeom,beamline");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,tfs,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+TString defChain("MC.2014,PythiaPP200HFT,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 void bfcV0(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 //	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
