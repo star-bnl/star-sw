@@ -398,7 +398,11 @@ Int_t StKFVertexMaker::Make() {
     return kStOK;        // if no event, we're done
   }
   Double_t bField = 0;
+#if 0
   if (pEvent->runInfo() && ! IAttr("laserIT")) bField = pEvent->runInfo()->magneticField();
+#else
+  if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField();
+#endif
   KFParticle::SetField(bField);
   MakeParticles();
   if (fNGoodGlobals < 1) return kStOK;

@@ -698,7 +698,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           int ibad = gTrack->bad();
           if (ibad) {
 	  errh.Add(ibad);
-	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
+	  //YF	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
 //VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
             continue;
           }
