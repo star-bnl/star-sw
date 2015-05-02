@@ -283,7 +283,9 @@ void StVertex::removeMassFit(StTrackMassFit* p) {
 std::ostream&  operator<<(std::ostream& os,  const StVertex& v) {
     const StTrackMassFit *mF = v.parent();
     if (mF && mF->kfParticle()) {
-        os << *mF->kfParticle();
+      KFParticle p = *mF->kfParticle();
+      if (p.GetParameter(7) != 0.0) p.TransportToDecayVertex();
+      os << p;
     } 
     else {
         const Float_t *xyz = v.position().xyz();
