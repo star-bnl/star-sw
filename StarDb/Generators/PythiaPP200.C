@@ -5,9 +5,9 @@ TDataSet *CreateTable() {
   gSystem->Load("bpythia");
   geantMk->Do("call bpythia");
   //   ** These particles will be decayed by geant instead of pythia **
-  geantMk->Do("/PYTHIA/MDCY (102,1)=0");//  ! PI0 111
+  //  geantMk->Do("/PYTHIA/MDCY (102,1)=0");//  ! PI0 111
   geantMk->Do("/PYTHIA/MDCY (106,1)=0");//  ! PI+ 211
-  geantMk->Do("/PYTHIA/MDCY (109,1)=0");//  ! ETA 221
+  //  geantMk->Do("/PYTHIA/MDCY (109,1)=0");//  ! ETA 221
   geantMk->Do("/PYTHIA/MDCY (116,1)=0");//  ! K+ 321
   geantMk->Do("/PYTHIA/MDCY (112,1)=0");//  ! K_SHORT 310
   geantMk->Do("/PYTHIA/MDCY (105,1)=0");//  ! K_LONG 130

@@ -20,13 +20,13 @@ TDataSet *CreateTable() {
   geantMk->Do("/PYTHIA/MDCY (176,1)=0");//  ! OMEGA- 3334
   geantMk->Do("/PYTHIA/frame CMS");
   geantMk->Do("/PYTHIA/beam  p p");
-  Double_t sqrtS = 510;
-  //  Double_t sqrtS = 200;
+  //  Double_t sqrtS = 510;
+  Double_t sqrtS = 200;
   TString SqrtS(Form("/PYTHIA/ener  %f",sqrtS));
   cout << "Set sqrtS " << SqrtS << " GeV" <<endl;
   geantMk->Do(SqrtS.Data());
   geantMk->Do("CALL PyTUNE(329)"); // set the pythia tune
-  geantMk->Do("gspread   0.015 0.015 42.00");
+  geantMk->Do("gspread   0.015 0.015 5.00");
 #ifdef __Wenu__
   //  select W --> e nu production
   geantMk->Do("/PYTHIA/ckin 3=10.0");
