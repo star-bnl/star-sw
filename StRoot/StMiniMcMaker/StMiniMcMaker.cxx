@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.45 2015/04/30 16:03:31 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,359 +7,6 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  *
- * $Log: StMiniMcMaker.cxx,v $
- * Revision 1.43  2014/07/28 17:20:11  jwebb
- * Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
- *
- * Revision 1.42  2013/04/04 21:31:07  perev
- * The only MC Pairs added
- *
- * Revision 1.41  2012/05/25 18:35:30  perev
- * Wrong DcaGl fixed. Thanx #2362
- *
- * Revision 1.40  2012/03/15 23:37:36  perev
- * Uncorrected globals added(Chris)
- *
- * Revision 1.39  2011/10/05 23:07:50  perev
- * Commrnt++
- *
- * Revision 1.38  2011/07/19 19:18:05  perev
- * Error handling fixed
- *
- * Revision 1.37  2011/04/01 20:02:56  perev
- * IdTruth part rewritten
- *
- * Revision 1.36  2011/03/22 00:32:23  perev
- * Added impact,phi impact & trigger time
- *
- * Revision 1.35  2011/02/22 20:42:52  perev
- * now int parentParentGeantId
- *
- * Revision 1.34  2011/02/16 00:50:30  perev
- * mPdgId added
- *
- * Revision 1.33  2010/08/31 20:16:15  fisyak
- * Add track seedQuality
- *
- * Revision 1.32  2010/08/05 15:31:11  jwebb
- * Changed the check on valid towers during clustering to suppress the non-
- * error issued by StEmcGeom.
- *
- * Revision 1.31  2010/04/15 19:17:27  fisyak
- * Add corrections for AppendMCDaughterTrack from Masayuki Wada
- *
- * Revision 1.30  2010/01/27 21:28:10  perev
- * CleanUp
- *
- * Revision 1.29  2009/02/02 19:30:50  fisyak
- * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
- *
- * Revision 1.28  2008/07/17 22:50:52  calderon
- * Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
- * This cut was affecting heavy particles thrown flat in rapidity for embedding.
- *
- * Revision 1.27  2007/12/22 20:31:20  calderon
- * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
- *
- * Revision 1.26  2007/04/26 04:08:05  perev
- * Hide StBFChain dependency
- *
- * Revision 1.25  2007/04/17 05:09:07  perev
- * GetTFile()==>StMaker. Jerome request
- *
- * Revision 1.24  2007/02/23 17:07:41  fisyak
- * Resolve bug #682
- *
- * Revision 1.23  2007/02/21 23:19:36  calderon
- * Remove the forcing of the Ghost loop to be "off" by checking the filename.
- * This caused problems for embedding when the Ghost loop was requested (the check
- * overrode the request).  Now, the check only displays a message in the log
- * saying that the Ghost loop is turned on.
- *
- * Revision 1.22  2006/08/05 01:07:45  calderon
- * Modified some debugging printouts.
- *
- * Revision 1.21  2006/07/24 19:04:11  calderon
- * Added parent key data member to StTinyMcTrack.
- * Added reco key data member to StTinyRcTrack.
- * Added code to fill in those data members to StMiniMcMaker.  Parent key for
- * MC tracks is only filled when track has a valid parent().
- *
- * Revision 1.20  2006/05/22 18:55:16  calderon
- * Changes from the original code by Bum to comply with STAR coding standards.
- * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
- * This does not fully solve all possible hiccups, because all the functions
- * in the "helper" file are defined in global scope.
- *
- * Revision 1.19  2005/09/29 15:53:08  fisyak
- * Persistent StMcEvent
- *
- * Revision 1.18  2004/07/27 19:34:34  jeromel
- * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
- *
- * Revision 1.17  2004/05/03 23:28:39  perev
- * double delete of TTree fixed. TFile deletes it himself
- *
- * Revision 1.16  2004/03/31 23:44:36  calderon
- * Function to find the dominatrack, the number of hits belonging to the
- * dominatrack and the average hit quality of those hits (based on idTruth and
- * quality of StHit).
- *
- * Revision 1.15  2004/03/30 03:16:15  calderon
- * Modifications for running in bfc.
- *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
- *  - Cleaned up Init(), InitRun() to handle the changing file names.
- *  - Initialize lots of variables and pointers in constructor.
- *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
- *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
- *    so there will be many messages complaining about this.
- *  - Removed the mDebug data member, every Maker already has one, so change
- *    to use that throughout the package.
- *
- * Revision 1.14  2004/03/15 18:59:47  calderon
- * - Added support for encoded common hits.  Now the common hits of the TPC and
- * the SVT are stored, with the corresponding methods to decode and return these
- * values.
- * - Added protection for tracks with no particle definition.
- * - Added () around call to mcMergedPair[i] to make Insure++ happy.
- *
- * Revision 1.13  2004/01/26 13:59:26  calderon
- * Added the code to fill the global track matches of StMiniMcEvent.
- *
- * Revision 1.12  2003/09/02 17:58:43  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.11  2003/07/09 01:07:23  calderon
- * Addition of FTPC reference multiplicity
- * Addition of other multiplicity values for StMiniMcEvent
- * Changes to reflect the use of the setters and getters, no longer
- * access the data members directly.
- *
- * Revision 1.10  2003/05/14 00:12:20  calderon
- * The minimc replaces now whatever it finds between the first and last '.', not
- * just geant.root, in the creation of the output file name.
- *
- * Curvature, tan(lambda) and Covariance matrix diagonal elements are now stored
- * in rcTrack, for both primary and global tracks.
- *
- * Revision 1.9  2003/05/08 02:11:43  calderon
- * Set the data members for the Svt and Ftpc hits for constMcTrack and for the Svt and Ftpc
- * fit points for the RcTrack.
- * Use primary track for the fit points in all cases, not the global tracks.
- * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
- *
- * Revision 1.8  2002/06/28 22:15:12  calderon
- * Changes to deal with seg. faults in the file name handling:
- * Conventions:
- * StMiniMcMaker looks for the input file from the IO maker to figure out
- * if the file has changed.  This is done using TString::Contains() in Make().
- * Usually we will run one file at a time, but in order not to break Bum's scheme of being
- * able to process several files in one go, this is left as is.  However, for
- * embedding, the file name is not enough, in Eric's new scheme there are repeated
- * file names.  This is resolved by adding a prefix to the output file name.  However,
- * this prefix should not be overwritten, so the current code only replaces the
- * string inside the output file name pertaining to the input file name, and leaves
- * the prefix of the output file intact.  This was done for embedding looking for
- * st_physics, and here is where the problem arose: hijing files begin with a different
- * prefix.  To solve this problem, the input file name prefix is now an input parameter
- * in the macro.
- *
- * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
- * did not change its prototype, because all embedding files have st_phyics as prefix.
- * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
- * but in order not to break Jenn's scripts if she was already using this macro,
- * this parameter was added at the end and defaults to "rcf", which is appropriate
- * for hijing files reconstructed in rcf.
- *
- * Revision 1.7  2002/06/27 17:30:58  jeromel
- * Bug fix. NULL+1 caused a crash ...
- *
- * Revision 1.6  2002/06/11 19:09:35  calderon
- * Bug fix: the filename that was set in the macro was being overwritten
- * in InitRun, so the emb80x string which was added to the filename was lost.
- * This was fixed by not replacing the filename in InitRun and only replacing
- * the current filename starting from st_physics.
- *
- * Revision 1.5  2002/06/07 02:22:00  calderon
- * Protection against empty vector in findFirstLastHit
- * $Log: StMiniMcMaker.cxx,v $
- * Revision 1.43  2014/07/28 17:20:11  jwebb
- * Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
- *
- * Revision 1.42  2013/04/04 21:31:07  perev
- * The only MC Pairs added
- *
- * Revision 1.41  2012/05/25 18:35:30  perev
- * Wrong DcaGl fixed. Thanx #2362
- *
- * Revision 1.40  2012/03/15 23:37:36  perev
- * Uncorrected globals added(Chris)
- *
- * Revision 1.39  2011/10/05 23:07:50  perev
- * Commrnt++
- *
- * Revision 1.38  2011/07/19 19:18:05  perev
- * Error handling fixed
- *
- * Revision 1.37  2011/04/01 20:02:56  perev
- * IdTruth part rewritten
- *
- * Revision 1.36  2011/03/22 00:32:23  perev
- * Added impact,phi impact & trigger time
- *
- * Revision 1.35  2011/02/22 20:42:52  perev
- * now int parentParentGeantId
- *
- * Revision 1.34  2011/02/16 00:50:30  perev
- * mPdgId added
- *
- * Revision 1.33  2010/08/31 20:16:15  fisyak
- * Add track seedQuality
- *
- * Revision 1.32  2010/08/05 15:31:11  jwebb
- * Changed the check on valid towers during clustering to suppress the non-
- * error issued by StEmcGeom.
- *
- * Revision 1.31  2010/04/15 19:17:27  fisyak
- * Add corrections for AppendMCDaughterTrack from Masayuki Wada
- *
- * Revision 1.30  2010/01/27 21:28:10  perev
- * CleanUp
- *
- * Revision 1.29  2009/02/02 19:30:50  fisyak
- * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
- *
- * Revision 1.28  2008/07/17 22:50:52  calderon
- * Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
- * This cut was affecting heavy particles thrown flat in rapidity for embedding.
- *
- * Revision 1.27  2007/12/22 20:31:20  calderon
- * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
- *
- * Revision 1.26  2007/04/26 04:08:05  perev
- * Hide StBFChain dependency
- *
- * Revision 1.25  2007/04/17 05:09:07  perev
- * GetTFile()==>StMaker. Jerome request
- *
- * Revision 1.24  2007/02/23 17:07:41  fisyak
- * Resolve bug #682
- *
- * Revision 1.23  2007/02/21 23:19:36  calderon
- * Remove the forcing of the Ghost loop to be "off" by checking the filename.
- * This caused problems for embedding when the Ghost loop was requested (the check
- * overrode the request).  Now, the check only displays a message in the log
- * saying that the Ghost loop is turned on.
- *
- * Revision 1.22  2006/08/05 01:07:45  calderon
- * Modified some debugging printouts.
- *
- * Revision 1.21  2006/07/24 19:04:11  calderon
- * Added parent key data member to StTinyMcTrack.
- * Added reco key data member to StTinyRcTrack.
- * Added code to fill in those data members to StMiniMcMaker.  Parent key for
- * MC tracks is only filled when track has a valid parent().
- *
- * Revision 1.20  2006/05/22 18:55:16  calderon
- * Changes from the original code by Bum to comply with STAR coding standards.
- * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
- * This does not fully solve all possible hiccups, because all the functions
- * in the "helper" file are defined in global scope.
- *
- * Revision 1.19  2005/09/29 15:53:08  fisyak
- * Persistent StMcEvent
- *
- * Revision 1.18  2004/07/27 19:34:34  jeromel
- * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
- *
- * Revision 1.17  2004/05/03 23:28:39  perev
- * double delete of TTree fixed. TFile deletes it himself
- *
- * Revision 1.16  2004/03/31 23:44:36  calderon
- * Function to find the dominatrack, the number of hits belonging to the
- * dominatrack and the average hit quality of those hits (based on idTruth and
- * quality of StHit).
- *
- * Revision 1.15  2004/03/30 03:16:15  calderon
- * Modifications for running in bfc.
- *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
- *  - Cleaned up Init(), InitRun() to handle the changing file names.
- *  - Initialize lots of variables and pointers in constructor.
- *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
- *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
- *    so there will be many messages complaining about this.
- *  - Removed the mDebug data member, every Maker already has one, so change
- *    to use that throughout the package.
- *
- * Revision 1.14  2004/03/15 18:59:47  calderon
- * - Added support for encoded common hits.  Now the common hits of the TPC and
- * the SVT are stored, with the corresponding methods to decode and return these
- * values.
- * - Added protection for tracks with no particle definition.
- * - Added () around call to mcMergedPair[i] to make Insure++ happy.
- *
- * Revision 1.13  2004/01/26 13:59:26  calderon
- * Added the code to fill the global track matches of StMiniMcEvent.
- *
- * Revision 1.12  2003/09/02 17:58:43  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.11  2003/07/09 01:07:23  calderon
- * Addition of FTPC reference multiplicity
- * Addition of other multiplicity values for StMiniMcEvent
- * Changes to reflect the use of the setters and getters, no longer
- * access the data members directly.
- *
- * Revision 1.10  2003/05/14 00:12:20  calderon
- * The minimc replaces now whatever it finds between the first and last '.', not
- * just geant.root, in the creation of the output file name.
- *
- * Curvature, tan(lambda) and Covariance matrix diagonal elements are now stored
- * in rcTrack, for both primary and global tracks.
- *
- * Revision 1.9  2003/05/08 02:11:43  calderon
- * Set the data members for the Svt and Ftpc hits for constMcTrack and for the Svt and Ftpc
- * fit points for the RcTrack.
- * Use primary track for the fit points in all cases, not the global tracks.
- * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
- *
- * Revision 1.8  2002/06/28 22:15:12  calderon
- * Changes to deal with seg. faults in the file name handling:
- * Conventions:
- * StMiniMcMaker looks for the input file from the IO maker to figure out
- * if the file has changed.  This is done using TString::Contains() in Make().
- * Usually we will run one file at a time, but in order not to break Bum's scheme of being
- * able to process several files in one go, this is left as is.  However, for
- * embedding, the file name is not enough, in Eric's new scheme there are repeated
- * file names.  This is resolved by adding a prefix to the output file name.  However,
- * this prefix should not be overwritten, so the current code only replaces the
- * string inside the output file name pertaining to the input file name, and leaves
- * the prefix of the output file intact.  This was done for embedding looking for
- * st_physics, and here is where the problem arose: hijing files begin with a different
- * prefix.  To solve this problem, the input file name prefix is now an input parameter
- * in the macro.
- *
- * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
- * did not change its prototype, because all embedding files have st_phyics as prefix.
- * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
- * but in order not to break Jenn's scripts if she was already using this macro,
- * this parameter was added at the end and defaults to "rcf", which is appropriate
- * for hijing files reconstructed in rcf.
- *
- * Revision 1.7  2002/06/27 17:30:58  jeromel
- * Bug fix. NULL+1 caused a crash ...
- *
- * Revision 1.6  2002/06/11 19:09:35  calderon
- * Bug fix: the filename that was set in the macro was being overwritten
- * in InitRun, so the emb80x string which was added to the filename was lost.
- * This was fixed by not replacing the filename in InitRun and only replacing
- * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $ plus header comments for the macros
- *
- * Revision 1.4  2002/06/06 23:22:34  calderon
- * Changes from Jenn:
- * -Add needed libs in StMiniHijing.C
- * -Properly do an InitRun(int runnumber) method
  *  
  */
 #include "StMiniMcMaker.h"
@@ -2451,7 +2098,7 @@ StDedxPidTraits* StMiniMcMaker::findDedxPidTraits(const StTrack* track)
   
   for (UInt_t i = 0; i < traits.size(); i++) {
     pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
-    if (pid && pid->method() == kTruncatedMeanId) break;
+    if (pid && pid->method() == kLikelihoodFitId) break;
   }
   return pid;
 }  
@@ -2691,107 +2338,196 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
     dominatrackHits = DetectorList[kTpcId] + 100*(DetectorList[kSvtId] + 10*DetectorList[kSsdId]);
     return;
 }
-
-//______________________________________________________________________________
-//
-// $Id: StMiniMcMaker.cxx,v 1.43 2014/07/28 17:20:11 jwebb Exp $
-//
-// $Log: StMiniMcMaker.cxx,v $
-// Revision 1.43  2014/07/28 17:20:11  jwebb
-// Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
-//
-// Revision 1.42  2013/04/04 21:31:07  perev
-// The only MC Pairs added
-//
-// Revision 1.41  2012/05/25 18:35:30  perev
-// Wrong DcaGl fixed. Thanx #2362
-//
-// Revision 1.40  2012/03/15 23:37:36  perev
-// Uncorrected globals added(Chris)
-//
-// Revision 1.39  2011/10/05 23:07:50  perev
-// Commrnt++
-//
-// Revision 1.38  2011/07/19 19:18:05  perev
-// Error handling fixed
-//
-// Revision 1.37  2011/04/01 20:02:56  perev
-// IdTruth part rewritten
-//
-// Revision 1.3  2007/02/23 17:07:41  fisyak
-// Resolve bug #682
-//
-// Revision 1.2  2005/07/19 22:05:19  perev
-// MultiVertex
-//
-// Revision 1.1  2004/03/31 23:44:36  calderon
-// Function to find the dominatrack, the number of hits belonging to the
-// dominatrack and the average hit quality of those hits (based on idTruth and
-// quality of StHit).
-//
-//
-//
-// $Log: StMiniMcMaker.cxx,v $
-// Revision 1.43  2014/07/28 17:20:11  jwebb
-// Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
-//
-// Revision 1.42  2013/04/04 21:31:07  perev
-// The only MC Pairs added
-//
-// Revision 1.41  2012/05/25 18:35:30  perev
-// Wrong DcaGl fixed. Thanx #2362
-//
-// Revision 1.40  2012/03/15 23:37:36  perev
-// Uncorrected globals added(Chris)
-//
-// Revision 1.39  2011/10/05 23:07:50  perev
-// Commrnt++
-//
-// Revision 1.38  2011/07/19 19:18:05  perev
-// Error handling fixed
-//
-// Revision 1.37  2011/04/01 20:02:56  perev
-// IdTruth part rewritten
-//
-// Revision 1.36  2011/03/22 00:32:23  perev
-// Added impact,phi impact & trigger time
-//
-// Revision 1.35  2011/02/22 20:42:52  perev
-// now int parentParentGeantId
-//
-// Revision 1.34  2011/02/16 00:50:30  perev
-// mPdgId added
-//
-// Revision 1.33  2010/08/31 20:16:15  fisyak
-// Add track seedQuality
-//
-// Revision 1.32  2010/08/05 15:31:11  jwebb
-// Changed the check on valid towers during clustering to suppress the non-
-// error issued by StEmcGeom.
-//
-// Revision 1.31  2010/04/15 19:17:27  fisyak
-// Add corrections for AppendMCDaughterTrack from Masayuki Wada
-//
-// Revision 1.30  2010/01/27 21:28:10  perev
-// CleanUp
-//
-// Revision 1.29  2009/02/02 19:30:50  fisyak
-// Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
-//
-// Revision 1.28  2008/07/17 22:50:52  calderon
-// Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
-// This cut was affecting heavy particles thrown flat in rapidity for embedding.
-//
-// Revision 1.27  2007/12/22 20:31:20  calderon
-// Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
-//
-// Revision 1.26  2007/04/26 04:08:05  perev
-// Hide StBFChain dependency
-//
-// Revision 1.25  2007/04/17 05:09:07  perev
-// GetTFile()==>StMaker. Jerome request
-//
-// Revision 1.24  2007/02/23 17:07:41  fisyak
-// Resolve bug #682
-//
-//
+/*
+ * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.45  2015/04/30 16:03:31  perev
+ * Remove redundant automatic CVS comments
+ *
+ * Revision 1.44  2015/04/28 16:05:32  perev
+ * We have changed a default dEdx method in StMuDSTmaker from
+ * kTruncatedMeanId to kLikelihoodFitId since SL14a.
+ *   With TruncatedMean we are using only 70% of available dE/dx measurements and this is reflected in nHitsDedx
+ *   With LikelihoodFit we are using all available dE/dx measurements.
+ * Default in StMiniMcEvent is still old (kTruncatedMeanId).
+ * It is changed now to kLikelihoodFitId and to be back propagated to all releases >= SL14a
+ * Yuri
+ *
+ * Revision 1.43  2014/07/28 17:20:11  jwebb
+ * Explicit casts from (double) to (float) to satisfy c++ 11 compiler.
+ *
+ * Revision 1.42  2013/04/04 21:31:07  perev
+ * The only MC Pairs added
+ *
+ * Revision 1.41  2012/05/25 18:35:30  perev
+ * Wrong DcaGl fixed. Thanx #2362
+ *
+ * Revision 1.40  2012/03/15 23:37:36  perev
+ * Uncorrected globals added(Chris)
+ *
+ * Revision 1.39  2011/10/05 23:07:50  perev
+ * Commrnt++
+ *
+ * Revision 1.38  2011/07/19 19:18:05  perev
+ * Error handling fixed
+ *
+ * Revision 1.37  2011/04/01 20:02:56  perev
+ * IdTruth part rewritten
+ *
+ * Revision 1.36  2011/03/22 00:32:23  perev
+ * Added impact,phi impact & trigger time
+ *
+ * Revision 1.35  2011/02/22 20:42:52  perev
+ * now int parentParentGeantId
+ *
+ * Revision 1.34  2011/02/16 00:50:30  perev
+ * mPdgId added
+ *
+ * Revision 1.33  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
+ * Revision 1.32  2010/08/05 15:31:11  jwebb
+ * Changed the check on valid towers during clustering to suppress the non-
+ * error issued by StEmcGeom.
+ *
+ * Revision 1.31  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
+ * Revision 1.30  2010/01/27 21:28:10  perev
+ * CleanUp
+ *
+ * Revision 1.29  2009/02/02 19:30:50  fisyak
+ * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+ *
+ * Revision 1.28  2008/07/17 22:50:52  calderon
+ * Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
+ * This cut was affecting heavy particles thrown flat in rapidity for embedding.
+ *
+ * Revision 1.27  2007/12/22 20:31:20  calderon
+ * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
+ *
+ * Revision 1.26  2007/04/26 04:08:05  perev
+ * Hide StBFChain dependency
+ *
+ * Revision 1.25  2007/04/17 05:09:07  perev
+ * GetTFile()==>StMaker. Jerome request
+ *
+ * Revision 1.24  2007/02/23 17:07:41  fisyak
+ * Resolve bug #682
+ *
+ * Revision 1.23  2007/02/21 23:19:36  calderon
+ * Remove the forcing of the Ghost loop to be "off" by checking the filename.
+ * This caused problems for embedding when the Ghost loop was requested (the check
+ * overrode the request).  Now, the check only displays a message in the log
+ * saying that the Ghost loop is turned on.
+ *
+ * Revision 1.22  2006/08/05 01:07:45  calderon
+ * Modified some debugging printouts.
+ *
+ * Revision 1.21  2006/07/24 19:04:11  calderon
+ * Added parent key data member to StTinyMcTrack.
+ * Added reco key data member to StTinyRcTrack.
+ * Added code to fill in those data members to StMiniMcMaker.  Parent key for
+ * MC tracks is only filled when track has a valid parent().
+ *
+ * Revision 1.20  2006/05/22 18:55:16  calderon
+ * Changes from the original code by Bum to comply with STAR coding standards.
+ * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
+ * This does not fully solve all possible hiccups, because all the functions
+ * in the "helper" file are defined in global scope.
+ *
+ * Revision 1.19  2005/09/29 15:53:08  fisyak
+ * Persistent StMcEvent
+ *
+ * Revision 1.18  2004/07/27 19:34:34  jeromel
+ * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
+ *
+ * Revision 1.17  2004/05/03 23:28:39  perev
+ * double delete of TTree fixed. TFile deletes it himself
+ *
+ * Revision 1.16  2004/03/31 23:44:36  calderon
+ * Function to find the dominatrack, the number of hits belonging to the
+ * dominatrack and the average hit quality of those hits (based on idTruth and
+ * quality of StHit).
+ *
+ * Revision 1.15  2004/03/30 03:16:15  calderon
+ * Modifications for running in bfc.
+ *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
+ *  - Cleaned up Init(), InitRun() to handle the changing file names.
+ *  - Initialize lots of variables and pointers in constructor.
+ *  - Delete some pointers in Finish (deleting the TTree causes a seg fault, though.)
+ *  - Note that currently the StHits in the ITTF chain don't have a usedInFit() flag,
+ *    so there will be many messages complaining about this.
+ *  - Removed the mDebug data member, every Maker already has one, so change
+ *    to use that throughout the package.
+ *
+ * Revision 1.14  2004/03/15 18:59:47  calderon
+ * - Added support for encoded common hits.  Now the common hits of the TPC and
+ * the SVT are stored, with the corresponding methods to decode and return these
+ * values.
+ * - Added protection for tracks with no particle definition.
+ * - Added () around call to mcMergedPair[i] to make Insure++ happy.
+ *
+ * Revision 1.13  2004/01/26 13:59:26  calderon
+ * Added the code to fill the global track matches of StMiniMcEvent.
+ *
+ * Revision 1.12  2003/09/02 17:58:43  perev
+ * gcc 3.2 updates + WarnOff
+ *
+ * Revision 1.11  2003/07/09 01:07:23  calderon
+ * Addition of FTPC reference multiplicity
+ * Addition of other multiplicity values for StMiniMcEvent
+ * Changes to reflect the use of the setters and getters, no longer
+ * access the data members directly.
+ *
+ * Revision 1.10  2003/05/14 00:12:20  calderon
+ * The minimc replaces now whatever it finds between the first and last '.', not
+ * just geant.root, in the creation of the output file name.
+ *
+ * Curvature, tan(lambda) and Covariance matrix diagonal elements are now stored
+ * in rcTrack, for both primary and global tracks.
+ *
+ * Revision 1.9  2003/05/08 02:11:43  calderon
+ * Set the data members for the Svt and Ftpc hits for constMcTrack and for the Svt and Ftpc
+ * fit points for the RcTrack.
+ * Use primary track for the fit points in all cases, not the global tracks.
+ * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
+ *
+ * Revision 1.8  2002/06/28 22:15:12  calderon
+ * Changes to deal with seg. faults in the file name handling:
+ * Conventions:
+ * StMiniMcMaker looks for the input file from the IO maker to figure out
+ * if the file has changed.  This is done using TString::Contains() in Make().
+ * Usually we will run one file at a time, but in order not to break Bum's scheme of being
+ * able to process several files in one go, this is left as is.  However, for
+ * embedding, the file name is not enough, in Eric's new scheme there are repeated
+ * file names.  This is resolved by adding a prefix to the output file name.  However,
+ * this prefix should not be overwritten, so the current code only replaces the
+ * string inside the output file name pertaining to the input file name, and leaves
+ * the prefix of the output file intact.  This was done for embedding looking for
+ * st_physics, and here is where the problem arose: hijing files begin with a different
+ * prefix.  To solve this problem, the input file name prefix is now an input parameter
+ * in the macro.
+ *
+ * StMiniEmbed.C and StMiniHijing.C now conform to this convention.  StMiniEmbed.C
+ * did not change its prototype, because all embedding files have st_phyics as prefix.
+ * StMiniHijing.C changed its prototype, now it takes as an input argument the prefix,
+ * but in order not to break Jenn's scripts if she was already using this macro,
+ * this parameter was added at the end and defaults to "rcf", which is appropriate
+ * for hijing files reconstructed in rcf.
+ *
+ * Revision 1.7  2002/06/27 17:30:58  jeromel
+ * Bug fix. NULL+1 caused a crash ...
+ *
+ * Revision 1.6  2002/06/11 19:09:35  calderon
+ * Bug fix: the filename that was set in the macro was being overwritten
+ * in InitRun, so the emb80x string which was added to the filename was lost.
+ * This was fixed by not replacing the filename in InitRun and only replacing
+ * the current filename starting from st_physics.
+ * and $Id: StMiniMcMaker.cxx,v 1.45 2015/04/30 16:03:31 perev Exp $ plus header comments for the macros
+ *
+ * Revision 1.4  2002/06/06 23:22:34  calderon
+ * Changes from Jenn:
+ * -Add needed libs in StMiniHijing.C
+ * -Properly do an InitRun(int runnumber) method
+ *  
+*/
