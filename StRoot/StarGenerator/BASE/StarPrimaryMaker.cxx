@@ -419,6 +419,12 @@ void StarPrimaryMaker::SetCuts( Double_t ptmin,  Double_t ptmax,
 				    Double_t phimin, Double_t phimax,
 				    Double_t zmin,   Double_t zmax )
 {
+
+  LOG_INFO << "-- StarPrimaryMaker::SetCuts --" << " ptmin=" << ptmin << " ptmax=" << ptmax << endm;
+  LOG_INFO << "-- StarPrimaryMaker::SetCuts --" << "  ymin=" <<  ymin << "  ymax=" <<  ymax << endm;
+  LOG_INFO << "-- StarPrimaryMaker::SetCuts --" << " phimn=" << phimin << " phimx=" << phimax << endm;
+  LOG_INFO << "-- StarPrimaryMaker::SetCuts --" << "  zmin=" <<  zmin << "  zmax=" <<  zmax << endm;
+
   mPtMin = ptmin; mPtMax = ptmax;
   mRapidityMin = ymin; mRapidityMax = ymax;
   mPhiMin = phimin; mPhiMax = phimax;

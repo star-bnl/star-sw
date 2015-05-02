@@ -20,6 +20,10 @@ void PyHepc( Int_t mode );
 /// Initialize pythia
 void PyInit( string frame, string blue, string yellow, Double_t energy );
 
+void Py1Ent( int ip, int kf, double energy, double theta, double phi );
+int  PyComp( int kf );
+
+
 
 //
 // Interface to the PYJETS common block

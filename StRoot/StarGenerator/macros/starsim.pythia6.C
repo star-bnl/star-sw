@@ -42,7 +42,7 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
   
   //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
   gSystem->Load( "libPythia6_4_23.so");
-  gSystem->Load( "StarPythia6.so"   );
+  //  gSystem->Load( "StarPythia6.so"   );
 
   StarPythia6 *pythia6 = new StarPythia6("pythia6");
   if ( mode=="pp:W" )
@@ -120,12 +120,22 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 
   //
   // Setup cuts on which particles get passed to geant for
-  //   simulation.  (To run generator in standalone mode,
-  //   set ptmin=1.0E9.)
+  //   simulation.  
+  //
+  // If ptmax < ptmin indicates an infinite ptmax.
+  // ptmin will always be the low pT cutoff.
+  //
   //                    ptmin  ptmax
-  primary->SetPtRange  (1.0E9,  -1.0);         // GeV
+  primary->SetPtRange  (0.0,  -1.0);         // GeV
+  //
+  // If etamax < etamin, there is no cut in eta.
+  // otherwise, particles outside of the specified range are cut.
+  //
   //                    etamin etamax
-  primary->SetEtaRange ( -3.0, +3.0 );
+  //  primary->SetEtaRange ( -3.0, +3.0 );
+  //
+  //  phirange will be mapped into 0 to 2 pi internally.
+  //
   //                    phimin phimax
   primary->SetPhiRange ( 0., TMath::TwoPi() );
   

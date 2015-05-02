@@ -91,8 +91,8 @@ Int_t StarHijing::Init()
    *
    **/ 
 
-  ludat3().mdcy(102,1)=0; // PI0 111
-  ludat3().mdcy(109,1)=0; // ETA 221
+  //  ludat3().mdcy(102,1)=0; // PI0 111
+  //  ludat3().mdcy(109,1)=0; // ETA 221
   ludat3().mdcy(164,1)=0; // LAMBDA0 3122
   ludat3().mdcy(167,1)=0; // SIGMA0 3212
   ludat3().mdcy(162,1)=0; // SIGMA- 3112

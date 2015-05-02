@@ -20,11 +20,9 @@
   PySubs_t &pysubs = starpythia6->pysubs();
   pysubs.msel = 1; 
      
-  // Set pi0 (id=102), pi+ (id=106) and eta (id=109) stable
+  // Set pi+ (id=106) stable
   PyDat3_t &pydat3 = starpythia6->pydat3();
-  pydat3.mdcy(102,1) = 0;
   pydat3.mdcy(106,1) = 0;
-  pydat3.mdcy(109,1) = 0;
   \endcode
 
   For more information about pythia 6.4:
@@ -56,23 +54,22 @@ class StarPythia6 : public StarGenerator
   StarGenStats Stats();
 
   /// Returns a reference to the /PYJETS/ common block
-  PyJets_t &pyjets(){ return *address_of_pyjets(); }
+  static PyJets_t &pyjets(){ return *address_of_pyjets(); }
   /// Returns a reference to the /PYSUBS/ common block
-  PySubs_t &pysubs(){ return *address_of_pysubs(); }
+  static PySubs_t &pysubs(){ return *address_of_pysubs(); }
   /// Returns a reference to the /PYDAT3/ common block
-  PyDat3_t &pydat3(){ return *address_of_pydat3(); }
+  static PyDat3_t &pydat3(){ return *address_of_pydat3(); }
   /// Returns a reference to the /PYPARS/ common block
-  PyPars_t &pypars(){ return *address_of_pypars(); }
+  static PyPars_t &pypars(){ return *address_of_pypars(); }
   /// Returns a reference to the /PYINT5/ common block
-  PyInt5_t &pyint5(){ return *address_of_pyint5(); }
+  static PyInt5_t &pyint5(){ return *address_of_pyint5(); }
 
   /// Calls the pytune function
-  void PyTune( Int_t tune );
+  static void PyTune( Int_t tune );
   /// Calls the pystat function
-  void PyStat( Int_t stat );
+  static void PyStat( Int_t stat );
   /// Calls the pylist function
-  void PyList( Int_t list );
-
+  static void PyList( Int_t list );
 
  private:
  protected:

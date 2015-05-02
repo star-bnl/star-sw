@@ -144,7 +144,9 @@ class StarGenerator : public StMaker
   /// Sets the input tree. 
   /// @param tree Pointer to the TTree used for input
   /// @param bname Name of the branch to be used.  If not provided, will default to the name of the class.
-  void SetInputTree  ( TTree *tree, const Char_t *bname=0 );
+  void SetInputTree ( TTree *tree, const Char_t *bname=0 );
+
+  void SetInputFile ( const Char_t *name, const Char_t *treename="genevents", const Char_t *bname=0 );
 
   /// Returns the ID of this event generator
 
@@ -159,7 +161,7 @@ class StarGenerator : public StMaker
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.5 2014/08/06 11:43:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.6 2015/04/24 18:21:11 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  private:
