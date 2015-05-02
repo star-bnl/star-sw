@@ -14,7 +14,9 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TDataType.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,34,29)
 #include "Api.h"
+#endif
 #include "TMemberInspector.h"
 #include "TExMap.h"
 #include "TCollection.h"
@@ -63,8 +65,9 @@ std::map<long,long>  myMap;
 typedef std::pair <long,long> MyPair;
 std::map <long,long> :: const_iterator myFinder;
 
-
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,29)
+typedef TMemberInspector StEventInspector;
+#else
 
 class StEventInspector : public TMemberInspector {
 public:
@@ -79,7 +82,6 @@ TRegexp *fSkip;
 TString fOpt;
 
 };      
-
 //______________________________________________________________________________
 StEventInspector::StEventInspector(TExMap *map,Int_t &count,const char *opt):fCount(count)
 {  
@@ -218,6 +220,7 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
   obj->ShowMembers(insp);
 #endif
 }
+#endif /* ROOT_VERSION_CODE >= ROOT_VERSION(5,34,29) */
 //______________________________________________________________________________
 ClassImp(StEventHelper)
 //______________________________________________________________________________
@@ -246,6 +249,7 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
    Clear();
    myMap.clear();
    fMap->Delete();
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,34,29)
    if (!fObject) return;
    int kount=0;
    StEventInspector insp(fMap,kount,opt);
@@ -254,6 +258,7 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
    fObject->ShowMembers(insp,cbuf);
 #else
    fObject->ShowMembers(insp);
+#endif
 #endif
 }
 //______________________________________________________________________________
