@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.283 2015/01/06 19:45:16 jwebb Exp $
+* $Id: geometry.g,v 1.285 2015/04/17 19:14:51 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.285  2015/04/17 19:14:51  jwebb
+* ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
+*
+* Revision 1.284  2015/04/17 14:54:59  jwebb
+* Corrected configuration error in VPD in y2015/agml/agstar geometry.
+*
 * Revision 1.283  2015/01/06 19:45:16  jwebb
 * Correct version of VPD in 2015
 *
@@ -1529,11 +1535,11 @@ replace [exe tpcx16;] with ["TPC test version";     TpcxConfig=2;
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
 replace [exe VPDDof;] with [;VPDD=off;]
-replace [exe VPDD02;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=2;]
-replace [exe VPDD03;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=3;]
-replace [exe VPDD04;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=4;]
-replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7;]
-replace [exe VPDD08;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=8;]
+replace [exe VPDD02;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=2; VpddModule=0; ]
+replace [exe VPDD03;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=3; VpddModule=0; ]
+replace [exe VPDD04;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=4; VpddModule=0; ]
+replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7; VpddModule=2; ]
+replace [exe VPDD08;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7; VpddModule=3; ]
 
 
 replace [exe FGTDof;] with  [;FGTD=off;FgtdConfig=0; "FGT off";]
@@ -2747,6 +2753,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
               IstdConfig, PxstConfig, MagpConfig, HcalConfig
+
+   Integer                                        VpddModule/0/
 
    Integer    FpdmPosition / 0 /
 
@@ -5054,9 +5062,12 @@ c    write(*,*) 'BTOF'
    If (LL>0 & VPDD) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     if(VpddConfig <7) { CONSTRUCT vpddgeo; }
-     if(VpddConfig==7) { CONSTRUCT vpddgeo2;}
-     if(VpddConfig==8) { CONSTRUCT vpddgeo3;}
+!    if(VpddConfig <7) { CONSTRUCT vpddgeo; }
+!    if(VpddConfig==7) { CONSTRUCT vpddgeo2;}
+!    if(VpddConfig==8) { CONSTRUCT vpddgeo3;}
+     if VpddModule==0  { CONSTRUCT vpddgeo; }
+     if VpddModule==2  { CONSTRUCT vpddgeo2;}
+     if VpddModule==3  { CONSTRUCT vpddgeo3;}
    endif
 
 ********************** BARREL CALORIMETER ************************
