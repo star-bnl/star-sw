@@ -4,16 +4,22 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
-  call geometry
+    call geometry
 </Export>
 </Module>
 
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.43 2015/01/06 19:06:47 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.45 2015/04/17 19:14:51 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.45  2015/04/17 19:14:51  jwebb
+  ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
+
+  Revision 1.44  2015/04/17 14:54:58  jwebb
+  Corrected configuration error in VPD in y2015/agml/agstar geometry.
+
   Revision 1.43  2015/01/06 19:06:47  jwebb
   Added FGT to HCAL dev2016 geometry
 

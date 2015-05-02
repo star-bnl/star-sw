@@ -290,7 +290,7 @@ struct Gccuts_t {
 	       ppcutm( 0.01 ),
 	       tofmax( 1E+10 )
   {
-    for (Int_t i = 0; i < 5; i++) gcuts[i] = 0;
+    for ( unsigned int i=0;i<5; i++ ) gcuts[i] = 0;    
   };
 };
 
@@ -334,7 +334,9 @@ typedef struct {
 
 struct Gcbirk_t { // addition: birk's law parameterization
   Float_t birk[4];
-  Gcbirk_t() {for (Int_t i = 0; i < 4; i++) birk[i] = 0; }
+  Gcbirk_t() { 
+    for ( unsigned int i=0;i<4;i++ ) birk[i]=0;
+  }
   void set( string cut, float val ) { 
     setter( birk1, birk[0] );
     setter( birk2, birk[1] );
