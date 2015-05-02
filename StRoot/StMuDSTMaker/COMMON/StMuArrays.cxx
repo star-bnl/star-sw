@@ -163,10 +163,10 @@ StMuArrays::StMuArrays()
 {
 #ifndef __NO_STRANGE_MUDST__
   int i = strangeArrayNames-arrayNames-__NARRAYS__;
-  printf("strangeArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
+  //  printf("strangeArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
 #else
   int i = mcArrayNames-arrayNames-__NARRAYS__;
-  printf("mcArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
+  //  printf("mcArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
 #endif
   assert(i==0);
 }

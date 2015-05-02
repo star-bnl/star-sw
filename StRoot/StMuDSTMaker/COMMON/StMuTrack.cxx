@@ -56,6 +56,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mIdTruth = track->idTruth();
   mQuality = track->qaTruth();
   mIdParentVx = track->idParentVx();
+  mLengthInTracking = track->length();
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINES

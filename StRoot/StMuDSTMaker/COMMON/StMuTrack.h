@@ -114,6 +114,8 @@ class StMuTrack : public TObject {
     Double_t eta() const;  ///< Returns pseudo rapidity at point of dca to primary vertex.
     Double_t length() const; ///< Returns length of track (cm) from primary vertex to last measured point.
     Double_t lengthMeasured() const;  ///< Returns length of track (cm) from first to last measured point.
+    Double_t lengthInTracking() const {return mLengthInTracking;}
+    void     setLengthInTracking(Float_t length) {mLengthInTracking = length;}
     StTrackTopologyMap topologyMap() const; ///< Returns topology map.
     Short_t charge() const;  ///< Returns charge. 
     const StThreeVectorF &p() const; ///< Returns 3-momentum at dca to primary vertex.
@@ -198,6 +200,7 @@ protected:
   UShort_t         mIdTruth; // MC track id if any 
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
   Int_t         mIdParentVx;
+  Float_t mLengthInTracking;
   void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -212,7 +215,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,15)
+  ClassDef(StMuTrack,16)
 };
 
 inline short StMuTrack::id() const {return mId;}
