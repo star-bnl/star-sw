@@ -60,10 +60,10 @@ CKIN 4=[ptHigh]   ! pt max
 
 * Make the following stable:
 *
-MDCY (102,1)=0  ! PI0 111
+*MDCY (102,1)=0  ! PI0 111
 MDCY (106,1)=0  ! PI+ 211
 *
-MDCY (109,1)=0  ! ETA 221
+*MDCY (109,1)=0  ! ETA 221
 *
 MDCY (116,1)=0  ! K+ 321
 *
