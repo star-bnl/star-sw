@@ -61,7 +61,6 @@
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
 //#define SeparateWestandEast
-//#define ADJUSTABLE_BINNING
 //#define __Memberane__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
@@ -146,7 +145,7 @@ void MakeTable() {
     cout << "v = " << dv << " +/- " << ddv << endl;
     Run.ok = 2;
   }
-  if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000)) return;
+  if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000 && Run.date < 150000)) return;
   if (Run.ok == 2) { // try to drift length for Run XIII
     if (Run.dzWO > 2e-3 || Run.dzEO > 2e-3 ||
 	Run.zWO + Run.zEO < 409.9 ||
@@ -280,10 +279,10 @@ void Fit() {
 	fitN += "_1";
 	TH1D *fit = (TH1D *) gDirectory->Get(fitN);
 	if (! fit) continue;
-	Int_t status = fit->SetMarkerStyle(20);
+	fit->SetMarkerStyle(20);
+	TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
+	Int_t status =  fit->Fit(pol1);
 	if (! status) {
-	  TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
-	  fit->Fit(pol1);
 	  par[8*xy+4*io+2*we  ] = pol1->GetParameter(1)/210;
 	  par[8*xy+4*io+2*we+1] = pol1->GetParError(1)/210;
 	} else {

@@ -92,7 +92,8 @@ Int_t StLaserAnalysisMaker::Init(){
 #if ROOT_VERSION_CODE <= ROOT_VERSION(5,34,10)
     Int_t split = 99;
 #else
-    Int_t split  = -2;       // by default, split Event in sub branches << old style
+    //    Int_t split  = -2;       // by default, split Event in sub branches << old style
+    Int_t split = 99;
 #endif
     if (split)  bufsize /= 4;
     Int_t branchStyle = 1; //new style by default
