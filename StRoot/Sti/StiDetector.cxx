@@ -14,7 +14,8 @@
 #include "Sti/StiToolkit.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
-
+#include "TMath.h"
+#include "TString.h"
 int    StiDetector::mgIndex=0;
 double StiDetector::mgValue[2]={0};
 
@@ -55,9 +56,10 @@ ostream& operator<<(ostream& os, const StiDetector& d)
 {
   //    os << "StiDetector:" << endl
   os   << d.getName()
-       <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
-       <<d.getPlacement()->getNormalRefAngle()<< " radians";// << endl;
-    return os;
+       << Form("\tR: %7.3f cm ",d.getPlacement()->getNormalRadius()) 
+       << Form("\tA: %7.3f degree", TMath::RadToDeg()*d.getPlacement()->getNormalRefAngle()) 
+       << endl;
+  return os;
 }
 //______________________________________________________________________________
 int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)

@@ -671,14 +671,18 @@ double StiKalmanTrackNode::getHz() const
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
    if (fabs(mHz)<999) return mHz;
+#if 0
    if (! _laser) {
+#endif
      double h[3];
      StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
      h[2] = EC*h[2];
      if (fabs(h[2]) < ZEROHZ) h[2]=ZEROHZ;
      mHz = h[2];
+#if 0
    } else mHz = ZEROHZ;
    assert(mHz);
+#endif
    return mHz;
 }
 //______________________________________________________________________________

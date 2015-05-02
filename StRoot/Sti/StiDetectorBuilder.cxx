@@ -102,7 +102,7 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
     assert( !_detectors[row][sector]);
   }  
   _detectors[row][sector] = detector;
-  if (_debug || sector == 0) {
+  if (_debug || (sector == 0 && detector->isActive())) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
     else          cout << " NULL ??";
