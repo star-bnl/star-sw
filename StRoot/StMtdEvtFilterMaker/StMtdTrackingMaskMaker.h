@@ -69,7 +69,10 @@ class StMtdTrackingMaskMaker : public StMaker {
   StTriggerData  *mTrigData;                     // Trigger data pointer
 
   int            mModuleToQT[gMtdNBacklegs][gMtdNModules];     // Map from module to QT board index
-  int            mModuleToQTPos[gMtdNBacklegs][gMtdNModules];  // Map from module to the position on QA board
+  int            mModuleToQTPos[gMtdNBacklegs][gMtdNModules];  // Map from module to the position on QT board
+  int            mQTtoModule[4][8];                            // Map from QA board to module index
+  int            mQTSlewBinEdge[4][16][8];                     // Bin edges for online slewing correction for QT
+  int            mQTSlewCorr[4][16][8];                        // Slewing correction values for QT
   int            mTrigQTpos[4][2];               // Channel fires trigger in each QT
 
   IntVec         mFiredSectors;
@@ -93,8 +96,12 @@ class StMtdTrackingMaskMaker : public StMaker {
 #endif
 
 
-// $Id: StMtdTrackingMaskMaker.h,v 1.1 2015/04/07 14:10:37 jeromel Exp $
+// $Id: StMtdTrackingMaskMaker.h,v 1.2 2015/05/01 21:37:21 marr Exp $
 // $Log: StMtdTrackingMaskMaker.h,v $
+// Revision 1.2  2015/05/01 21:37:21  marr
+// Apply online slewing correction and position correction to QT data to make
+// sure the correct trigger patches are found offline.
+//
 // Revision 1.1  2015/04/07 14:10:37  jeromel
 // First version of StMtdEvtFilterMaker - R.Ma - review closed 2015/04/06
 //

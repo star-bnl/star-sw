@@ -6,11 +6,16 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.11 2015/04/10 18:21:38 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.12 2015/04/24 19:55:16 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.12  2015/04/24 19:55:16  marr
+ * Add a member function cleanUpMtdPidTraits() to clean up the MTD pidTraits for
+ * all global and primary tracks before the matching process. This is needed when
+ * running MuDst in afterburner mode.
+ *
  * Revision 1.11  2015/04/10 18:21:38  marr
  * Comment on the meaning of different values of matchFlag
  *
@@ -413,6 +418,8 @@ class StMtdMatchMaker: public StMaker
 		void bookHistograms();
 		/// set QA tree 
 		void bookTree();
+		/// clean up mtdPidTraits in MuDst when running afterburner mode
+		void cleanUpMtdPidTraits();
 		/// read mtd hits from StMuDst and StEvent
 		Bool_t readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& validModuleVec);
 		/// project a track to MTD geometry, return the hit position and strip index
@@ -439,7 +446,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.11 2015/04/10 18:21:38 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.12 2015/04/24 19:55:16 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 

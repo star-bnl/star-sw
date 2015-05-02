@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.7 2015/04/07 16:23:33 marr Exp $
+ * $Id: StMtdGeometry.h,v 1.8 2015/05/01 01:55:34 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.8  2015/05/01 01:55:34  marr
+ * Fix the geometry of shifted backleg 8 and 24
+ *
  * Revision 1.7  2015/04/07 16:23:33  marr
  * 1. Make use the constants defined in StMtdConstants.h
  * 2. Cleaning up
@@ -145,7 +148,7 @@ class StMtdGeoModule : public StMtdGeoNode {
   Int_t	       FindCellId(const Double_t *local);
   Float_t      GetCellPhiCenter(Int_t iCell);
   Float_t      GetCellZCenter(Int_t iCell);
-  Float_t      GetCellLocalYCenter(Int_t iCell);
+  Float_t      GetCellLocalYCenter(Int_t iCell, Int_t iBL);
 
  private:
   Int_t	       mMTRAIndex;
@@ -231,7 +234,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.7 2015/04/07 16:23:33 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.8 2015/05/01 01:55:34 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1);
 };
 
