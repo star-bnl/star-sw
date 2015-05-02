@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.46 2014/10/31 16:11:59 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.47 2015/04/13 19:43:43 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.47  2015/04/13 19:43:43  dmitry
+ * added new db domain: SST
+ *
  * Revision 1.46  2014/10/31 16:11:59  dmitry
  * adding FPS to the database domain list
  *
@@ -422,7 +425,7 @@ addDbDomain(dbPxl,"pxl");
 addDbDomain(dbMtd,"mtd"); 
 addDbDomain(dbIst,"ist"); 
 addDbDomain(dbFps,"fps"); 
-
+addDbDomain(dbSst,"sst");
 }
 
 ////////////////////////////////////////////////////////////////
