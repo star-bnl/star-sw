@@ -40,7 +40,7 @@ public:
    static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.6 2014/12/05 21:59:30 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.7 2015/04/23 21:06:01 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
