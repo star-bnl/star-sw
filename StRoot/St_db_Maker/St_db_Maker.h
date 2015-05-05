@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.46 2015/05/05 21:05:52 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.46  2015/05/05 21:05:52  dmitry
+// Updated db disconnect handling. Keep connection if less than 30 sec passed since last data retrieval
+//
 // Revision 1.45  2015/05/05 20:42:14  dmitry
 // dynamic db disconnects handling
 //
@@ -150,9 +153,9 @@ private:
   TStopwatch  fTimer[6];        //!Timer object
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
-  std::list<time_t> fConnTs;  // timestamps of recent db releases
+  time_t      fQueryTs;         // timestamps of recent db fetch
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.46 2015/05/05 21:05:52 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -206,7 +209,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.46 2015/05/05 21:05:52 dmitry Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
