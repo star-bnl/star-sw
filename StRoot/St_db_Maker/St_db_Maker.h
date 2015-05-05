@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $
+// $Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.45  2015/05/05 20:42:14  dmitry
+// dynamic db disconnects handling
+//
 // Revision 1.44  2014/08/06 11:43:54  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -123,6 +126,7 @@
 
 #include <map>
 #include <utility>
+#include <list>
 
 class TFileSet;
 class TList;
@@ -146,8 +150,9 @@ private:
   TStopwatch  fTimer[6];        //!Timer object
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
+  std::list<time_t> fConnTs;  // timestamps of recent db releases
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -201,7 +206,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.45 2015/05/05 20:42:14 dmitry Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
