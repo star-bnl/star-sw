@@ -224,6 +224,7 @@ ClassImp(StMcAnalysisMaker)
 StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
   StMaker(name,title), mNtupleFile(0)
 {
+#if 0
     //  StMcAnalysisMaker Constructor
     // - zero all pointers defined in the header file
     mAssociationCanvas = 0;
@@ -237,11 +238,13 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
     mTpcHitNtuple   = 0;
     mSvtHitNtuple   = 0;
     mSsdHitNtuple   = 0;
+#endif
 }
 
 //_________________________________________________
 StMcAnalysisMaker::~StMcAnalysisMaker()
 {
+#if 0
     //  StMcAnalysisMaker Destructor
     //  delete the histograms
     cout << "Inside StMcAnalysisMaker Destructor" << endl;
@@ -251,6 +254,7 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
 //     SafeDelete(coordRec);
 //     SafeDelete(coordMcPartner);
 //     SafeDelete(mTrackNtuple);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -266,10 +270,12 @@ void StMcAnalysisMaker::Clear(const char*)
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
+#if 0
   if (mNtupleFile) {
     mNtupleFile->Write();
     mNtupleFile->Close();
   }
+#endif
     return StMaker::Finish();
 }
 
@@ -277,6 +283,7 @@ Int_t StMcAnalysisMaker::Finish()
 //_________________________________________________
 Int_t StMcAnalysisMaker::Init()
 {
+#if 0
     // StMcAnalysisMaker - Init
     SetZones();  // This is my method to set the zones for the canvas.
 
@@ -330,11 +337,13 @@ Int_t StMcAnalysisMaker::Init()
       mSsdHitNtuple = new TNtuple("SsdHitNtuple","the SSD hit pairs Info",vSsdHitMRPair);
       mSsdHitNtuple->SetAutoSave(100000000);
     }
+#endif
     return StMaker::Init();
 }
 //_________________________________________________
 Int_t StMcAnalysisMaker::Make()
 {
+#if 0
   // Get the pointers we need, we have to use the titles we gave them in the
   // macro.  I just used the defaults.
   
@@ -940,6 +949,6 @@ Int_t StMcAnalysisMaker::Make()
   
   
   //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
-  
+#endif  
   return kStOK;
 }
