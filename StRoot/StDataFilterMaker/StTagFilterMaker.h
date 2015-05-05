@@ -1,11 +1,11 @@
 /*!
  * \class  StTagFilterMaker
- * \brief  Skip events using criteria in .pre.tags.root
+ * \brief  Skip events using criteria in .pretags.root
  * \author G. Van Buren
  * \date   Apr 2015
  *
  * Base class to skip production of events using
- * criteria stored in a .pre.tags.root Tag TTree
+ * criteria stored in a .pretags.root Tag TTree
  * 
  * Derived classes should implement SkipEvent()
  * to determine whether events should be skipped or not.
@@ -45,7 +45,7 @@ class StTagFilterMaker : public StMaker {
   virtual Int_t  Make();
   virtual void  Clear(const Option_t* = "");
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTagFilterMaker.h,v 1.1 2015/05/01 21:25:50 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StTagFilterMaker.h,v 1.2 2015/05/05 20:23:42 genevb Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   
@@ -61,10 +61,10 @@ class StTagFilterMaker : public StMaker {
  protected:
 
 
-  TString mTagFile; ///< Tags input file name, ending in .pre.tags.root by default
+  TString mTagFile; ///< Tags input file name, ending in .pretags.root by default
   TString mVarList; ///< List of colon-separated variables of interest
   int mSkippedEventCounter; ///< Number of events skipped
-  TFile *mFile; ///< Pointer to the .pre.tags.root input file
+  TFile *mFile; ///< Pointer to the .pretags.root input file
   TTree *mTree; ///< Pointer to the Tags TTree
   TEntryList* mEntryList; ///< Selection of run and event
 
@@ -73,8 +73,11 @@ class StTagFilterMaker : public StMaker {
 #endif
 
 /* -------------------------------------------------------------------------
- * $Id: StTagFilterMaker.h,v 1.1 2015/05/01 21:25:50 jeromel Exp $
+ * $Id: StTagFilterMaker.h,v 1.2 2015/05/05 20:23:42 genevb Exp $
  * $Log: StTagFilterMaker.h,v $
+ * Revision 1.2  2015/05/05 20:23:42  genevb
+ * pre.tags.root => pretags.root
+ *
  * Revision 1.1  2015/05/01 21:25:50  jeromel
  * First version of the DataFiler + one imp: MTD. Code from GVB reviewed & closed (VP+JL))
  *

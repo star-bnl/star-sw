@@ -2,7 +2,7 @@
  * StTagFilterMaker
  *
  * Base class to skip production of events using
- * criteria stored in a .pre.tags.root Tag TTree
+ * criteria stored in a .pretags.root Tag TTree
  * 
  * Derived classes should implement SkipEvent()
  * to determine whether events should be skipped or not.
@@ -58,19 +58,19 @@ Int_t StTagFilterMaker::Init()
 Int_t StTagFilterMaker::InitRun(const int runnum)
 {
 
-  /// Open the input .pre.tags.root file and get the Tag tree.
-  /// If an input .prep.tags.root file has not yet been defined
-  /// then default to using an input .pre.tags.root file which
+  /// Open the input .pretags.root file and get the Tag tree.
+  /// If an input .preptags.root file has not yet been defined
+  /// then default to using an input .pretags.root file which
   /// has the same specification as a tags.root file for the
   /// current chain's input data file, but with the ".tags.root"
-  /// suffix appropriately replaced by ".pre.tags.root"
+  /// suffix appropriately replaced by ".pretags.root"
 
   if (mTagFile.IsWhitespace()){
     mTagFile = GetTFile()->GetName();
-    mTagFile.ReplaceAll(".tags.root",".pre.tags.root");
+    mTagFile.ReplaceAll(".tags.root",".pretags.root");
   }
 
-  // Open the .pre.tags.root file
+  // Open the .pretags.root file
   mFile = TFile::Open(mTagFile);
   if (! mFile ) {
     LOG_ERROR << "Input TagFile : " << mTagFile << " cannot be opened" << endm;
@@ -148,8 +148,11 @@ void StTagFilterMaker::Clear(const Option_t*)
 }
 
 /* -------------------------------------------------------------------------
- * $Id: StTagFilterMaker.cxx,v 1.1 2015/05/01 21:25:50 jeromel Exp $
+ * $Id: StTagFilterMaker.cxx,v 1.2 2015/05/05 20:23:42 genevb Exp $
  * $Log: StTagFilterMaker.cxx,v $
+ * Revision 1.2  2015/05/05 20:23:42  genevb
+ * pre.tags.root => pretags.root
+ *
  * Revision 1.1  2015/05/01 21:25:50  jeromel
  * First version of the DataFiler + one imp: MTD. Code from GVB reviewed & closed (VP+JL))
  *

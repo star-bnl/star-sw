@@ -6,6 +6,6 @@ of real data to skip events.
 
 Files:
   StTagFilterMaker.h/cxx            : abstract base class for filtering using
-                                        .pre.tags.root input
+                                        .pretags.root input
   StMtdEvtFilterApplyMaker.h/cxx    : derived class of StTagFilterMaker
                                         implementing an MTD filter
