@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.96 2014/01/16 17:55:13 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.98 2014/01/17 16:33:04 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.98  2014/01/17 16:33:04  genevb
+ * Remove accidental change to B3DField for coordinates
+ *
+ * Revision 1.97  2014/01/17 03:52:41  genevb
+ * More careful check on updating SpaceCharge
+ *
  * Revision 1.96  2014/01/16 17:55:13  genevb
  * Two speed improvements: less calls to DB for SpaceCharge, avoid unnecessary cartesian/cylindrical coordinate conversions
  *
@@ -380,6 +386,7 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
@@ -567,12 +574,15 @@ void StMagUtilities::GetTPCVoltages ()
 void StMagUtilities::GetSpaceCharge ()  
 { 
   static spaceChargeCor_st* spaceTable = 0;
+  static St_trigDetSumsC* scalers = 0;
 
   StDetectorDbSpaceCharge* spaceChair = StDetectorDbSpaceCharge::instance();
   spaceChargeCor_st* new_spaceTable = spaceChair->Struct();
-  if (new_spaceTable == spaceTable) return;
+  St_trigDetSumsC* new_scalers = St_trigDetSumsC::instance();
+  if (new_spaceTable == spaceTable && new_scalers == scalers) return;
   fSpaceCharge =  spaceChair;
   spaceTable = new_spaceTable;
+  scalers = new_scalers;
 
   SpaceCharge    =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
 }
@@ -580,12 +590,15 @@ void StMagUtilities::GetSpaceCharge ()
 void StMagUtilities::GetSpaceChargeR2 ()  
 { 
   static spaceChargeCor_st* spaceTable = 0;
+  static St_trigDetSumsC* scalers = 0;
 
   StDetectorDbSpaceChargeR2* spaceChair = StDetectorDbSpaceChargeR2::instance();
   spaceChargeCor_st* new_spaceTable = spaceChair->Struct();
-  if (new_spaceTable == spaceTable) return;
+  St_trigDetSumsC* new_scalers = St_trigDetSumsC::instance();
+  if (new_spaceTable == spaceTable && new_scalers == scalers) return;
   fSpaceChargeR2 =  spaceChair;
   spaceTable = new_spaceTable;
+  scalers = new_scalers;
 
   SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
@@ -956,6 +969,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
 void StMagUtilities::BField( const Float_t x[], Float_t B[] )
 {                          
 
+  // NOTE: x[] must be Cartesian for this function!
+
   Float_t r, z, Br_value, Bz_value ;
 
   z  = x[2] ;
@@ -983,14 +998,16 @@ void StMagUtilities::BField( const Float_t x[], Float_t B[] )
 void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
 {                          
 
+  // NOTE: x[] must be Cartesian for this function!
+
   Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
 
   z  = x[2] ;
-  
-  if ( x[0] != 0.0 || ( usingCartesian && x[1] != 0.0 ) )
+  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+
+  if ( r != 0.0 )
     {
-      if (usingCartesian) Cart2Polar(x,r,phi);
-      else { r = x[0]; phi = x[1]; }
+      phi = TMath::ATan2( x[1], x[0] ) ;
       if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
       Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
       B[0] = Br_value * (x[0]/r) - Bphi_value * (x[1]/r) ;
@@ -999,7 +1016,8 @@ void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
     }
   else
     {
-      Interpolate3DBfield( 0, z, 0, Br_value, Bz_value, Bphi_value ) ;
+      phi = 0 ;
+      Interpolate3DBfield( r, z, 0, Br_value, Bz_value, Bphi_value ) ;
       B[0] = Br_value ;
       B[1] = Bphi_value ;
       B[2] = Bz_value ;
@@ -1263,7 +1281,7 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
-      B3DField( Xprime, B ) ;                          // Work in kGauss, cm
+      B3DField( Xprime, B ) ;                          // Work in kGauss, cm (uses Cartesian coordinates)
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
 	{
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
@@ -1306,7 +1324,7 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
-      BField( Xprime, B ) ;                            // Work in kGauss, cm
+      BField( Xprime, B ) ;                            // Work in kGauss, cm (uses Cartesian coordinates)
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
 	{
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;

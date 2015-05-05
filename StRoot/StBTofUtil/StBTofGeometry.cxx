@@ -1,7 +1,6 @@
-
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.12 2011/07/27 16:15:12 geurts Exp $
+ * $Id: StBTofGeometry.cxx,v 1.13 2014/02/06 21:21:13 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -11,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.13  2014/02/06 21:21:13  geurts
+ * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
+ *
  * Revision 1.12  2011/07/27 16:15:12  geurts
  * Alignment calibration modifications [Patrick Huck]:
  *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
@@ -827,6 +829,38 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
 
    InitFromStar(starHall);
    mStarHall = starHall;
+
+
+/* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
+ * This caused a shift in the module index for geant[1-24] instead of daqs [5-28].
+ * This is a correction to shift the geant modules such that they can match with daq info
+ *
+ * Be certain that you select the correct geometry tag when using this. Y2012 tag and Y2013+ data will generate a bug!
+ */ 
+   if( maker->GetDateTime().GetYear() >= 2013 ){
+     LOG_INFO << "StBTofGeometry::Init -- GEMTOF-tray module indexes will be corrected for year " <<  maker->GetDateTime().GetYear() << endm;
+     for(Int_t j=0;j<mModulesInTray;j++){
+       Int_t imod(0);
+       if(mBTofSensor[7][j]){
+	 imod = mBTofSensor[7][j]->Index();
+	 mBTofSensor[7][j]->SetIndex(imod+4);  //The shift is 4
+       }
+       if(mBTofSensor[22][j]){
+	 imod = mBTofSensor[22][j]->Index();
+	 mBTofSensor[22][j]->SetIndex(imod+4);
+       }
+       if(mBTofSensor[92][j]){
+	 imod = mBTofSensor[92][j]->Index();
+	 mBTofSensor[92][j]->SetIndex(imod+4);
+       }
+       if(mBTofSensor[107][j]){
+	 imod = mBTofSensor[107][j]->Index();
+	 mBTofSensor[107][j]->SetIndex(imod+4);
+       }  
+     }//for j
+   }//if Year
+
+
 }
 //_____________________________________________________________________________
 void StBTofGeometry::InitFromStar(TVolume *starHall)

@@ -81,6 +81,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2009c",      20081215,     3, "y2009c",   "TOF fix & TPCE redused,AgML"},
   {"y2009d",      20081215,     4, "y2009d",   "Honey sandwich fix,AgML"},
 
+  {"y2010x",      20091215,     0, "y2010x",   "Y2010 asymptotic, AgML"},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF,AgML"},
   {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag,AgML"},
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused,AgML"},
@@ -94,15 +95,27 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing),AgML"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD),AgML"},
 
-  {"y2013",       20121215,     0, "y2013_1x", "y2013 first cut geometry,AgML,xgeometry"},
-  {"y2013_1",     20121215,     1, "y2013_1x", "y2013 first cut geometry with pixel,AgML,xgeometry"},
-  {"y2013_2",     20121215,  1001, "y2013_2x", "y2013 first cut geometry sans pixel,AgML,xgeometry"},
-  {"y2013_1x",    20121215,  2001, "y2013_1x", "y2013 first cut geometry, new walls,AgML,xgeometry"},
-  {"y2013_2x",    20121215,  3001, "y2013_2x", "y2013 first cut geometry sans pixel, new walls,AgML,xgeometry"},
-  {"20130509.000000", 20130509, 0, "y2013_1x", "y2013 with pixel, real data,AgML,xgeometry"},
+  {"y2013",       20121215,     0, "y2013_1", "y2013 first cut geometry,AgML,xgeometry"},
+  {"y2013_1",     20121215,     1, "y2013_1", "y2013 first cut geometry with pixel,AgML,xgeometry"},
+  {"y2013_2",     20121215,  1001, "y2013_2", "y2013 first cut geometry sans pixel,AgML,xgeometry"},
+
+  {"y2013_1a",    20121215,     2, "y2013_1a", "y2013a first prod geometry,           AgML,xgeometry"},
+  {"y2013_2a",    20121215,  1002, "y2013_2a", "y2013a first prod geometry sans pixel,AgML,xgeometry"},
+
+  {"y2013_1b",    20121215,     3, "y2013_1b", "y2013b 2nd prod geometry,            AgML,xgeometry"},
+  {"y2013_2b",    20121215,  1003, "y2013_2b", "y2013b 2nd prod geometry sans pixel, AgML,xgeometry"},
+
+  {"y2013_1c",    20121215,     4, "y2013_1c", "y2013c production geometry == y2013x in SL14a (as run)"},
+  {"y2013_2c",    20121215,  1004, "y2013_2c", "y2013c production geometry == y2013x in SL14a (as run)"},
+
+  {"y2013_1x",   20121215,   2001, "y2013_1x", "y2013x asymptotic geometry.             WARNING: Geometry may change between releases."},
+  {"y2013_2x",   20121215,   3001, "y2013_2x", "y2013x asymptotic geometry sans pixel.  WARNING: Geometry may change between releases."},
+
+  {"20130509.000000", 20130509, 0, "y2013_1",  "y2013 with pixel, real data,AgML,xgeometry"},
+  {"20130509.000000", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
 
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
-
+ 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   //  {"complete",    20190101,     1, "complete", "non-production"},

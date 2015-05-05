@@ -31,6 +31,7 @@ class Geom_t : public AgStructure
   SetDetector(tpcx); // eXtended TPC
 
   SetDetector(pxst);
+  SetDetector(psup);
   SetDetector(dtub);
 
       ecalCuts=1;
@@ -67,6 +68,7 @@ class Geom_t : public AgStructure
   AddDetector(tpcx); // eXtended TPC
 
   AddDetector(pxst);
+  AddDetector(psup);
   AddDetector(dtub);
 
   Int_t ecalCuts;
@@ -534,6 +536,18 @@ class PxstGeom_t : public AgStructure
     TString module;
     Int_t config;
 };
+class PsupGeom_t : public AgStructure
+{ public:
+  ClassDef(PsupGeom_t,1);
+  PsupGeom_t(): AgStructure("PsupGeom_t","STAR PSUP Master Geometry Table")
+    {
+      //      select="PSUPon"; module="PsupGeo"; config=1; 
+      select="PSUPon"; module="PixlGeo"; config=1; 
+    }
+    TString select;
+    TString module;
+    Int_t config;
+};
 // ----------------------------------------------------------------------
 class PxldGeom_t : public AgStructure
 { public:
@@ -582,6 +596,7 @@ class Geometry : public AgModule
   Bool_t PxldInit(){ /* placeholder */ return false; }
 
   Bool_t PxstInit();
+  Bool_t PsupInit();
 
   Bool_t GeomInit();
 
@@ -618,6 +633,7 @@ class Geometry : public AgModule
   Bool_t ConstructPxst( const Char_t *flag, Bool_t go=false );
   Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false );
   Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
+  Bool_t ConstructPsup( const Char_t *flag, Bool_t go=false );
 
   // eSTAR Upgrades
   Bool_t ConstructFsce( const Char_t *flag, Bool_t go=true );

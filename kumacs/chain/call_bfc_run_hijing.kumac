@@ -1,0 +1,15 @@
+* 11/18/98 K. Turner (for 98i)
+* Run BFC in following manner:
+* - must have hijev.inp in top level directory
+* - run hijing
+* - write out xdf file
+*  
+* 
+ exec $STAR/kumacs/chain/bfc _
+   TOP=$STAR _
+   domain=' gen/hij' _
+   chain=' rhij egout ' _
+   no_events=5 _
+   output_file=hijing_output _
+   log=bfc_run_hijing.log
+

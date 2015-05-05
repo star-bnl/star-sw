@@ -1,24 +1,40 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
  
-<Export language="Mortran"> 
-  <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
-</Export>
-  
-
+<Export language="Mortran"><Import file="pams/geometry/geometry/geometry.g" verbatim="true" /></Export>
 
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
-<Export language="Mortran">
-call geometry 
-</Export>
+<Export language="Mortran">call geometry</Export>
 </Module>
 
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.27 2013/12/09 14:39:06 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.32 2014/03/17 21:29:32 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.32  2014/03/17 21:29:32  jwebb
+  Force AgSTAR library recompile.
+
+  Revision 1.31  2014/03/11 18:24:10  jwebb
+  Defined y2013_1a, _1b, _1c, _2a, _2b, _2c geometry tags.
+
+  y2013_1x and y2013_2x were mistakenly used in the y2013 data production, using
+  library SL14a.  The tags y2013_1c and y2013_2c freeze the y2013_1x and y2013_2x
+  geometry tags ase they exist in SL14a.  They are equivalent to the geometries
+  used in y2013 data production.
+
+  Added y2010x asymptotic tag for STV testing.
+
+  Revision 1.30  2014/02/11 21:40:59  jwebb
+  Force recompilation to pickup correct y2014 definition.
+
+  Revision 1.29  2014/01/24 19:45:08  jwebb
+  Revert to CaveGeo for y2014 geometry / force recompile.
+
+  Revision 1.28  2014/01/23 17:16:13  jwebb
+  Force recompilation to pickup y2013b series and y2014.
+
   Revision 1.27  2013/12/09 14:39:06  jwebb
   Changes to pixel detector for y2014.
 
