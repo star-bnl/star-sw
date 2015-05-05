@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.134 2015/05/05 20:42:14 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.135 2015/05/05 21:05:52 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.135  2015/05/05 21:05:52  dmitry
+// Updated db disconnect handling. Keep connection if less than 30 sec passed since last data retrieval
+//
 // Revision 1.134  2015/05/05 20:42:14  dmitry
 // dynamic db disconnects handling
 //
@@ -367,6 +370,7 @@ St_db_Maker::St_db_Maker(const char *name
    fDataBase = 0;
    fUpdateMode = 0;
    TUnixTime ut;
+   fQueryTs = time(NULL);
    fMaxEntryTime = ut.GetUTime();
 }
 //_____________________________________________________________________________
@@ -495,17 +499,8 @@ void St_db_Maker::Clear(const char *)
   fDataSize[1]+=fDataSize[0];
   fDataSize[0]=0;
 
-	if ( fConnTs.size() > 10 ) { fConnTs.pop_front(); } // limit buffer by 10 events only
-	fConnTs.push_back(time(NULL));
-	if ( fConnTs.size() > 3 ) { // check ts diff when 4+ events seen
-		std::vector<time_t> tsdiff;
-		std::adjacent_difference(fConnTs.begin(), fConnTs.end(), tsdiff.begin());
-		double sum = std::accumulate(tsdiff.begin(), tsdiff.end(), 0.0);
-		if ( !tsdiff.empty() && sum > 0 ) {
-			double mean = sum / tsdiff.size();
-			if ( mean < 2*60 ) { return; } // do not call dbbroker->release if less than 2 min between events
-		}
-	}
+  time_t now = time(NULL);
+  if ( ( now - fQueryTs ) < 30 ) { return; } // do not call dbbroker->release if less than 30 sec from last query
 
   fDBBroker->Release();
 }
@@ -650,6 +645,8 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
 
   assert(fDBBroker);assert(dat);
 
+  
+
   fDBBroker->SetDateTime(req.GetDate(),req.GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
   fTimer[1].Stop();
@@ -769,6 +766,7 @@ static int nCall=0; nCall++;
     assert(val->fTabId==val->fDat->GetUniqueID());
     int ierr = UpdateTable(val->fParId,(TTable*)val->fDat,currenTime,valsSQL );
     if (!ierr) kase = 1;
+	fQueryTs = time(NULL);
   }
 
   left = FindLeft(val,valsCINT,currenTime);
