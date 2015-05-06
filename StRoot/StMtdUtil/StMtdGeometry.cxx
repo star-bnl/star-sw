@@ -1,8 +1,15 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.11 2015/02/09 21:29:23 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.13 2015/05/01 01:55:34 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.13  2015/05/01 01:55:34  marr
+ * Fix the geometry of shifted backleg 8 and 24
+ *
+ * Revision 1.12  2015/04/07 16:23:33  marr
+ * 1. Make use the constants defined in StMtdConstants.h
+ * 2. Cleaning up
+ *
  * Revision 1.11  2015/02/09 21:29:23  marr
  * Fix an overlook in extracting geometry for 2015 during bfc chain running
  *
@@ -247,7 +254,7 @@ Bool_t StMtdGeoNode::IsLocalPointIn(const Double_t x, const Double_t y, const Do
 	TGeoBBox *brik = (TGeoBBox*)fVolume->GetShape();
 	Double_t dx = brik->GetDX();
 	Float_t nExtraCells = fNExtraCells>1.66?fNExtraCells-1.66:0;
-	Double_t dy = brik->GetDY()+nExtraCells*(fCellWidth+fCellGap);
+	Double_t dy = brik->GetDY()+nExtraCells*(gMtdCellWidth+gMtdCellGap);
 	Double_t dz = brik->GetDZ();
 	Bool_t ret = -dx<x && x<dx && -dy<y && y<dy && -dz<z && z<dz;
 
@@ -307,7 +314,7 @@ StMtdGeoModule::~StMtdGeoModule()
 Int_t StMtdGeoModule::FindCellId(const Double_t *local){
 	Int_t cellId = -99;
 	if ( IsLocalPointIn(local[0],local[1],local[2]) ) {
-		cellId = (int)((local[1]+(fCellWidth+fCellGap)*mCells/2.)/(fCellWidth+fCellGap));
+		cellId = (int)((local[1]+(gMtdCellWidth+gMtdCellGap)*gMtdNCells/2.)/(gMtdCellWidth+gMtdCellGap));
 	}
 	return cellId;
 }
@@ -318,9 +325,9 @@ Float_t StMtdGeoModule::GetCellPhiCenter(Int_t iCell){
 	Float_t r = fPoint.perp();
 	Float_t stripPhiCen = 0.;
 	if(mModuleIndex>0&&mModuleIndex<4){
-		stripPhiCen = phi-(mCells/2.-0.5-iCell)*(fCellWidth+fCellGap)/r; // approximation
+		stripPhiCen = phi-(gMtdNCells/2.-0.5-iCell)*(gMtdCellWidth+gMtdCellGap)/r; // approximation
 	}else{
-		stripPhiCen = phi+(mCells/2.-0.5-iCell)*(fCellWidth+fCellGap)/r; 
+		stripPhiCen = phi+(gMtdNCells/2.-0.5-iCell)*(gMtdCellWidth+gMtdCellGap)/r; 
 	}
 	if(stripPhiCen>2.*TMath::Pi()) stripPhiCen -= 2.*TMath::Pi();
 	if(stripPhiCen<0.)    stripPhiCen += 2.*TMath::Pi();
@@ -333,11 +340,14 @@ Float_t StMtdGeoModule::GetCellZCenter(Int_t iCell){
 }
 
 //_____________________________________________________________________________
-Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell){
-  if(mModuleIndex>0&&mModuleIndex<4)
-    return (iCell-mCells/2+0.5)*(fCellWidth+fCellGap);
-  else
-    return -1*(iCell-mCells/2+0.5)*(fCellWidth+fCellGap);
+Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell, Int_t iBL){
+  Float_t cell_width = gMtdCellWidth+gMtdCellGap;
+  Float_t y_center = (mModuleIndex<4? 1 : -1) * (iCell-gMtdNCells/2+0.5) * cell_width;
+
+  if(iBL==8)  y_center -= 3 * cell_width;
+  if(iBL==24) y_center += 2 * cell_width;
+
+  return y_center;
 }
 
 //----------------------------------------------------//
@@ -373,9 +383,9 @@ StMtdGeometry::StMtdGeometry(const char* name, const char* title)
 	fMagEloss = new TF1("f2","[0]*exp(-pow([1]/x,[2]))",0.,100);
 	fMagEloss->SetParameters(1.38147e+00,6.08655e-02,5.03337e-01);
 
-	for(int i=0;i<mNBacklegs;i++) {
+	for(int i=0;i<gMtdNBacklegs;i++) {
 		mMtdGeoBackleg[i] = 0;
-		for(int j=0;j<mNModules;j++) {
+		for(int j=0;j<gMtdNModules;j++) {
 			mMtdGeoModule[i][j] = 0;
 		}
 	}
@@ -635,8 +645,8 @@ void StMtdGeometry::Init(StMaker *maker){
 	}
 
 	if(IsDebugOn()){
-		for(int i=0;i<mNBacklegs;i++){
-			for(int j=0;j<mNModules;j++){
+		for(int i=0;i<gMtdNBacklegs;i++){
+			for(int j=0;j<gMtdNModules;j++){
 				if(mMtdGeoModule[i][j])
 					LOG_INFO<<"valid (backleg,module) = "<<i+1<<","<<j+1<<endm;
 			}
@@ -710,8 +720,8 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	StThreeVectorD EmcLayerMom = innerEmcMom;
 	Double_t  elossEmc = 0.;
 	if(mELossFlag){
-		if(mCosmicFlag&&EmcLayerPos.phi()>0&&EmcLayerPos.phi()<TMath::Pi()) elossEmc = -1.*mEmcELoss/nEmcStep;
-		else elossEmc = mEmcELoss/nEmcStep;
+		if(mCosmicFlag&&EmcLayerPos.phi()>0&&EmcLayerPos.phi()<TMath::Pi()) elossEmc = -1.*gMtdMuonELossInEmc/nEmcStep;
+		else elossEmc = gMtdMuonELossInEmc/nEmcStep;
 	}
 	for( int i=0; i<nEmcStep; i++){
 		double EmcLayerRadius = mEmcInR+rEmcStep*(i+1);
@@ -758,8 +768,8 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	StThreeVectorD CoilLayerMom = EmcLayerMom;
 	Double_t  elossCoil = 0.;
 	if(mELossFlag){
-		if(mCosmicFlag&&CoilLayerPos.phi()>0&&CoilLayerPos.phi()<TMath::Pi()) elossCoil = -1.*mCoilELoss/nCoilStep;
-		else elossCoil = mCoilELoss/nCoilStep;
+		if(mCosmicFlag&&CoilLayerPos.phi()>0&&CoilLayerPos.phi()<TMath::Pi()) elossCoil = -1.*gMtdMuonELossInCoil/nCoilStep;
+		else elossCoil = gMtdMuonELossInCoil/nCoilStep;
 	}
 	for( int i=0; i<nCoilStep; i++){
 		double CoilLayerRadius = mEmcOutR+rCoilStep*(i+1);
@@ -810,7 +820,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	Double_t elossMag = 0.;
 	double mMagELoss  = 0.;
 	if(mELossFlag){
-		mMagELoss = fMagEloss->Eval(innerEmcMom.mag())-mEmcELoss-mCoilELoss;
+		mMagELoss = fMagEloss->Eval(innerEmcMom.mag())-gMtdMuonELossInEmc-gMtdMuonELossInCoil;
 		if(mCosmicFlag&&MagLayerPos.phi()>0&&MagLayerPos.phi()<TMath::Pi()) elossMag = -1.*mMagELoss/nMagStep;
 		else elossMag = mMagELoss/nMagStep;
 	}
@@ -926,16 +936,16 @@ Bool_t StMtdGeometry::ProjToBLModVect(const StPhysicalHelixD helix, IntVec &blVe
 	for (Int_t i = 0; i < 2; i++) {
 		for(Int_t j=0;j<3;j++){
 			Int_t idx = iBL[i]-1+j;
-			if(idx>mNBacklegs) idx -= mNBacklegs;
-			if(idx<1) idx += mNBacklegs;
-			if(idx>0&&idx<=mNBacklegs)  blVect.push_back(idx);
+			if(idx>gMtdNBacklegs) idx -= gMtdNBacklegs;
+			if(idx<1) idx += gMtdNBacklegs;
+			if(idx>0&&idx<=gMtdNBacklegs)  blVect.push_back(idx);
 		}
 	}
 	RemoveDuplicate(blVect);
 	for (Int_t i = 0; i < 2; i++) {
 		for(Int_t j=0;j<3;j++){
 			Int_t idx = iMod[i]-1+j;
-			if(idx>0&&idx<=mNModules) modVect.push_back(idx);
+			if(idx>0&&idx<=gMtdNModules) modVect.push_back(idx);
 		}
 	}
 	RemoveDuplicate(modVect);
@@ -982,7 +992,7 @@ Int_t StMtdGeometry::FindModId(Double_t z){
 
 	Int_t iMod = -1;
 
-	iMod = (int)((z+2.5*mStripLength)/mStripLength+1);
+	iMod = (int)((z+2.5*gMtdCellLength)/gMtdCellLength+1);
 
 	if(iMod<0||iMod>6){
 		if(IsDebugOn()) LOG_WARN<<"Invalid Module id:"<<iMod<<" input z = "<<z<<endm;
@@ -1059,8 +1069,8 @@ Bool_t StMtdGeometry::HelixCrossCellIds(const StPhysicalHelixD helix, const StTh
 
 Int_t  StMtdGeometry::CalcCellId(Int_t iBL, Int_t iMod, Int_t iCel){
 	Int_t cellId = -999;	
-	if(iBL<1|| iBL>mNBacklegs) return cellId; 
-	if(iMod<1|| iMod>mNModules) return cellId; 
+	if(iBL<1|| iBL>gMtdNBacklegs) return cellId; 
+	if(iMod<1|| iMod>gMtdNModules) return cellId; 
 	if(iCel<-mNExtraCells || iCel>11+mNExtraCells) return cellId; 
 	cellId = iBL*1000+iMod*100+(iCel+50);
 
@@ -1074,8 +1084,8 @@ Bool_t StMtdGeometry::IsIdValid(Int_t id){
 	Int_t iMod  = (id%1000)/100;
 	Int_t iCell = id%100-50;
 
-	if(iBL<1 || iBL>mNBacklegs) return kFALSE; 
-	if(iMod<1 || iMod>mNModules) return kFALSE; 
+	if(iBL<1 || iBL>gMtdNBacklegs) return kFALSE; 
+	if(iMod<1 || iMod>gMtdNModules) return kFALSE; 
 	if(iCell<-mNExtraCells || iCell>11+mNExtraCells) return kFALSE; 
 	return kTRUE;
 }
@@ -1111,7 +1121,7 @@ Double_t StMtdGeometry::GetFieldZ(Double_t x, Double_t y, Double_t z) const{
 }
 
 StMtdGeoModule *StMtdGeometry::GetGeoModule(Int_t iBL, Int_t iMod) const{
-	if(iBL>0&&iBL<=mNBacklegs&&iMod>0&&iMod<=mNModules){
+	if(iBL>0&&iBL<=gMtdNBacklegs&&iMod>0&&iMod<=gMtdNModules){
 		return mMtdGeoModule[iBL-1][iMod-1];
 	}else{
 		return 0;

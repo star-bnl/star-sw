@@ -1,0 +1,11 @@
+Package: StDataFilterMaker
+
+Description:
+This library is for filters which may be run during production
+of real data to skip events.
+
+Files:
+  StTagFilterMaker.h/cxx            : abstract base class for filtering using
+                                        .pretags.root input
+  StMtdEvtFilterApplyMaker.h/cxx    : derived class of StTagFilterMaker
+                                        implementing an MTD filter
