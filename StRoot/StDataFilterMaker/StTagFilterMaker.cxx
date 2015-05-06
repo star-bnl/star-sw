@@ -75,9 +75,10 @@ Int_t StTagFilterMaker::InitRun(const int runnum)
   if (! mFile ) {
     LOG_ERROR << "Input TagFile : " << mTagFile << " cannot be opened" << endm;
     return kStErr;
-  } else {
-    LOG_INFO << "Input TagFile : " << mTagFile << " opened" << endm;
   }
+  LOG_INFO << "Input TagFile : " << mTagFile << " opened" << endm;
+  mEntryList->SetDirectory(mFile); // mEntryList's directory must not be an output file
+
 
   // Get the Tag tree
   mTree = static_cast<TTree*>(mFile->Get("Tag"));
@@ -97,8 +98,8 @@ Int_t StTagFilterMaker::Make()
     LOG_ERROR << "EvtHddr has not been found" << endm;
     return kStErr;
   }
-  mEntryList->SetDirectory(gDirectory);
   /// Use TTree::Draw() to fill a TEntryList
+  mEntryList->GetDirectory()->cd(); // must be in mEntryList's directory before TTree::Draw()
   int nFound = mTree->Draw(Form(">>%s",mEntryList->GetName()),
                            Form("mRunNumber==%i&&mEventNumber==%i",
                                 EvtHddr->GetRunNumber(),EvtHddr->GetEventNumber()),
@@ -148,8 +149,11 @@ void StTagFilterMaker::Clear(const Option_t*)
 }
 
 /* -------------------------------------------------------------------------
- * $Id: StTagFilterMaker.cxx,v 1.2 2015/05/05 20:23:42 genevb Exp $
+ * $Id: StTagFilterMaker.cxx,v 1.3 2015/05/06 18:10:22 genevb Exp $
  * $Log: StTagFilterMaker.cxx,v $
+ * Revision 1.3  2015/05/06 18:10:22  genevb
+ * Avoid letting TEntryList and histogram from TTree::Draw() getting into output files
+ *
  * Revision 1.2  2015/05/05 20:23:42  genevb
  * pre.tags.root => pretags.root
  *
