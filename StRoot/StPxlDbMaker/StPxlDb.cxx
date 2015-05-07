@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.8 2014/10/07 19:25:28 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.9 2015/05/07 04:33:32 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,12 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.9  2015/05/07 04:33:32  smirnovd
+ * StPxlDb: Set name of resulting matrix after copying from a temporary matrix object
+ *
+ * Due to the bug all matrices were given the same name. This inconsistency has
+ * been noted and reported by @MustafaMustafa
+ *
  * Revision 1.8  2014/10/07 19:25:28  smirnovd
  * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
  *
@@ -136,10 +142,10 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
-            mGeoHMatrixSensorOnGlobal[i][j][k].SetName(Form("sensorOnGlobal%03i%03i%03i", i + 1, j + 1, k + 1));
             mGeoHMatrixSensorOnGlobal[i][j][k] = (*mGeoHMatrixTpcOnGlobal) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
                                                  * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
                                                  * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+            mGeoHMatrixSensorOnGlobal[i][j][k].SetName(Form("sensorOnGlobal%03i%03i%03i", i + 1, j + 1, k + 1));
          }
 
 }
