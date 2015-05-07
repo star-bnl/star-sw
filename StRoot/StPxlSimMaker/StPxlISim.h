@@ -18,11 +18,6 @@ class StMcPxlHitCollection;
 class StPxlHitCollection;
 class StPxlRawHitCollection;
 
-//! coordinates of PXL sensor active area to restrict smeared hits to active area
-//! see doc/PXL_ultimate_sensor_flemming.pdf
-const Double_t PXL_ACTIVE_X_LENGTH = 1.921;
-const Double_t PXL_ACTIVE_Y_LENGTH = 1.9872;
-
 class StPxlISim : public TNamed
 {
 public:

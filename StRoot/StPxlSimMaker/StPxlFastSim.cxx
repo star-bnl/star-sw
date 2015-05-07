@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.11  2015/05/07 21:24:31  smirnovd
+ * StPxlSimMaker: Switched to using consts from StPxlUtil/
+ *
  * Revision 1.10  2015/03/13 18:45:01  perev
  * Roll back
  *
@@ -46,6 +49,7 @@
 #include "StarClassLibrary/StRandom.hh"
 #include "StThreeVectorF.hh"
 #include "StPxlDbMaker/StPxlDb.h"
+#include "StPxlUtil/StPxlConstants.h"
 
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
@@ -165,8 +169,8 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                LOG_DEBUG << "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endm;
                // please note that what is called local Y in the PXL sensor design
                // is actually called Z in STAR coordinates convention and vice-versa
-               smearedX = distortHit(localPixHitPos[0], mResXPix, PXL_ACTIVE_X_LENGTH / 2.0);
-               smearedZ = distortHit(localPixHitPos[2], mResZPix, PXL_ACTIVE_Y_LENGTH / 2.0);
+               smearedX = distortHit(localPixHitPos[0], mResXPix, StPxlConsts::kPxlActiveLengthX / 2.0);
+               smearedZ = distortHit(localPixHitPos[2], mResZPix, StPxlConsts::kPxlActiveLengthY / 2.0);
                if (mResYPix) smearedY = distortHit(localPixHitPos[1], mResYPix, 0.0020); // Not properly constrained yet
                else smearedY = localPixHitPos[1];
                localPixHitPos[0] = smearedX;
@@ -255,6 +259,9 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.11  2015/05/07 21:24:31  smirnovd
+ * StPxlSimMaker: Switched to using consts from StPxlUtil/
+ *
  * Revision 1.10  2015/03/13 18:45:01  perev
  * Roll back
  *
