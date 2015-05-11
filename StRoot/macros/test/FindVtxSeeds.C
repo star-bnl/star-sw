@@ -18,10 +18,11 @@ void load() {
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
+  gSystem->Load("StdEdxY2Maker");
   gSystem->Load("StPass0CalibMaker");
 }
 
-void FindVtxSeeds(const Int_t   mode=0,
+void FindVtxSeeds(
            const Int_t   nevents=10,
            const Char_t  *path="/star/data13/reco/dev/2001/10/",
            const Char_t  *file="st_physics_2304060_raw_0303.event.root",
@@ -46,11 +47,11 @@ void FindVtxSeeds(const Int_t   mode=0,
     IOMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
     IOMaker->SetBranch("eventBranch",0,"r");   //activate Event Branch
     new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
-    vtxSeedMk == (StVertexSeedMaker*) (new StEvtVtxSeedMaker());
+    vtxSeedMk = (StVertexSeedMaker*) (new StEvtVtxSeedMaker());
   } elseif (fstr.EndsWith("MuDst.root")) {
     new StMuDstMaker(0,0,path,file,"MuDst.root");
     new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
-    vtxSeedMk == (StVertexSeedMaker*) (new StMuDstVtxSeedMaker());
+    vtxSeedMk = (StVertexSeedMaker*) (new StMuDstVtxSeedMaker());
   } else {
     cout << "Unknown file type. Stopping." << endl;
     return 0;
@@ -73,8 +74,11 @@ void FindVtxSeeds(const Int_t   mode=0,
 
 }
 
-// $Id: FindVtxSeeds.C,v 1.1 2005/07/01 23:57:40 genevb Exp $
+// $Id: FindVtxSeeds.C,v 1.2 2015/05/11 21:51:41 genevb Exp $
 // $Log: FindVtxSeeds.C,v $
+// Revision 1.2  2015/05/11 21:51:41  genevb
+// Removed some bugs, added dEdx maker dependence
+//
 // Revision 1.1  2005/07/01 23:57:40  genevb
 // Allow use of StEvent/MuDst in finding vertex seed
 //
