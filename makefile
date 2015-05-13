@@ -198,7 +198,7 @@ $(OBJDIR)/ComponentVoxel.o: \
 	@$(CXX) $(CFLAGS) $< -o $@   
 $(OBJDIR)/ComponentUserMapBase.o: \
 	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh \
-	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh
+	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@    
 	

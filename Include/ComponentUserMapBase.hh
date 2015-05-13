@@ -51,7 +51,7 @@ class ComponentUserMapBase : public ComponentBase
                               double& u1z, double& u2z, double& u3z,
                               ComponentBase*& pComponent, 
                               std::string& label){
-	(void)label; // Suppress compiler warning
+    (void)label; // Suppress compiler warning
     MapCoordinates(p1, p2, p3, u1x, u2x, u3x, u1y, u2y, u3y, u1z, u2z, u3z, 
                    pComponent);
   }
