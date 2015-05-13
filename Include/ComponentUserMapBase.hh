@@ -20,7 +20,7 @@ class ComponentUserMapBase : public ComponentBase
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, double& v, Medium*& m,
                      int& status);
-  bool GetVoltageRange(double& vmin, double& vmax){ return false; }
+  bool GetVoltageRange(double& vmin, double& vmax){ vmin = vmax = 0.; return false; }
   
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
@@ -51,6 +51,7 @@ class ComponentUserMapBase : public ComponentBase
                               double& u1z, double& u2z, double& u3z,
                               ComponentBase*& pComponent, 
                               std::string& label){
+	(void)label; // Suppress compiler warning
     MapCoordinates(p1, p2, p3, u1x, u2x, u3x, u1y, u2y, u3y, u1z, u2z, u3z, 
                    pComponent);
   }
