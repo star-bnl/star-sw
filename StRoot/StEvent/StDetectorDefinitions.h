@@ -103,6 +103,11 @@
 #define kEtrIdentifier                35
 
 /*
+ **  The following are for the SST (Beware: not same as SSD)
+ */
+#define kSstIdentifier                36
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)
@@ -118,9 +123,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.10 2012/01/24 02:58:21 perev Exp $
+/* $Id: StDetectorDefinitions.h,v 2.11 2015/05/13 17:06:13 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.11  2015/05/13 17:06:13  ullrich
+** Added hooks and interfaces to Sst detector (part of HFT).
+**
 ** Revision 2.10  2012/01/24 02:58:21  perev
 ** Etr detector added
 **

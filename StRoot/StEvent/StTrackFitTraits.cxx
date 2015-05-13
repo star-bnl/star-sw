@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.28 2013/11/13 19:19:40 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.29 2015/05/13 17:06:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.29  2015/05/13 17:06:14  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.28  2013/11/13 19:19:40  ullrich
  * Removed cause of warnings.
  *
@@ -100,6 +103,7 @@
 #include "StParticleTypes.hh"
 #include "StParticleTable.hh"
 #include "TClass.h"
+
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -107,9 +111,8 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.28 2013/11/13 19:19:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.29 2015/05/13 17:06:14 ullrich Exp $";
 
-//_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits()
 {
     mPidHypothesis = 0;
@@ -119,6 +122,7 @@ StTrackFitTraits::StTrackFitTraits()
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsSst = 0;
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
@@ -126,9 +130,8 @@ StTrackFitTraits::StTrackFitTraits()
 }
 
 
-//_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
-                 float chi[2], float cov[15])
+                                   float chi[2], float cov[15])
 {
     mPidHypothesis = pid;
     mNumberOfFitPoints = 0x8000;
@@ -139,39 +142,38 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsSst = 0;
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
 }
 
-//_____________________________________________________________________________
-StTrackFitTraits::~StTrackFitTraits() {/* noop */}
+StTrackFitTraits::~StTrackFitTraits() {/* no op */}
 
-//_____________________________________________________________________________
 unsigned short StTrackFitTraits::numberOfFitPoints() const
 {
     int result;
- 
-// y2012 version
-   result = numberOfFitPoints(kTpcId) 		+
-	    numberOfFitPoints(kFtpcWestId) 	+
-	    numberOfFitPoints(kFtpcEastId) 	+
-	    numberOfFitPoints(kSvtId)      	+
-	    numberOfFitPoints(kSsdId) 		+	
-	    numberOfFitPoints(kPxlId) 		+
-	    numberOfFitPoints(kIstId);	
-   if (mNumberOfFitPoints&0x8000) result += (mNumberOfFitPoints&0x7FFF);
-   if (mPrimaryVertexUsedInFit) result++;
-   return (unsigned short)result;
+    
+    // y2012 version
+    result = numberOfFitPoints(kTpcId) 		+
+    numberOfFitPoints(kFtpcWestId) 	+
+    numberOfFitPoints(kFtpcEastId) 	+
+    numberOfFitPoints(kSvtId)      	+
+    numberOfFitPoints(kSsdId) 		+
+    numberOfFitPoints(kSstId) 		+
+    numberOfFitPoints(kPxlId) 		+
+    numberOfFitPoints(kIstId);
+    if (mNumberOfFitPoints&0x8000) result += (mNumberOfFitPoints&0x7FFF);
+    if (mPrimaryVertexUsedInFit) result++;
+    return (unsigned short)result;
 }
 
-//_____________________________________________________________________________
 unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 {
     //
     // Old and obsolete
     //
-    if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {    
+    if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {
         // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
         switch (det) {
             case kFtpcWestId:
@@ -189,6 +191,7 @@ unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
                 return 0;
         }
     }
+    
     //
     // New version
     //
@@ -209,6 +212,9 @@ unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
             case kSsdId:
                 return mNumberOfFitPointsSsd;
                 break;
+            case kSstId:
+                return mNumberOfFitPointsSst;
+                break;
             case kPxlId:
                 return mNumberOfFitPointsPxl;
                 break;
@@ -222,19 +228,18 @@ unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
                 + mNumberOfFitPointsTpc
                 + mNumberOfFitPointsSvt
                 + mNumberOfFitPointsSsd
+                + mNumberOfFitPointsSst
                 + mNumberOfFitPointsPxl
                 + mNumberOfFitPointsIst;
         }
     }
 }
 
-//_____________________________________________________________________________
 StParticleDefinition* StTrackFitTraits::pidHypothesis() const
 {
     return StParticleTable::instance()->findParticleByGeantId(mPidHypothesis);
 }
 
-//_____________________________________________________________________________
 double StTrackFitTraits::chi2(unsigned int i) const
 {
     if (i < 2)
@@ -243,7 +248,6 @@ double StTrackFitTraits::chi2(unsigned int i) const
         return 0;
 }
 
-//_____________________________________________________________________________
 StMatrixF StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
@@ -262,100 +266,95 @@ StMatrixF StTrackFitTraits::covariantMatrix() const
         m(3,4) = m(4,3) = mCovariantMatrix[10];
         m(3,5) = m(5,3) = mCovariantMatrix[11];
         m(4,4) = mCovariantMatrix[12];			//PsiPsi deg
-        m(4,5) = m(5,4) = mCovariantMatrix[13];		
+        m(4,5) = m(5,4) = mCovariantMatrix[13];
         m(5,5) = mCovariantMatrix[14];			//PtiPti
 #undef mCovariantMatrix                                 //temporary HACK VP
     }
     return m;
 }
 
-//_____________________________________________________________________________
 bool StTrackFitTraits::primaryVertexUsedInFit() const
 { return mPrimaryVertexUsedInFit;}
 
-//_____________________________________________________________________________
 void StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
     mNumberOfFitPoints|=  0x8000;  // make sure old method is NOT active
     switch (det) {
-    case kUnknownId:
-        break;
-    case kFtpcWestId:
-	mNumberOfFitPointsFtpcWest = val;
-	break;
-    case kFtpcEastId:
-	mNumberOfFitPointsFtpcEast = val;
-	break;
-    case kTpcId:
-	mNumberOfFitPointsTpc = val;
-	break;
-    case kSvtId:
-	mNumberOfFitPointsSvt = val;
-	break;
-    case kSsdId:
-	mNumberOfFitPointsSsd = val;
-	break;
-    case kPxlId:
-	mNumberOfFitPointsPxl = val;
-	break;
-    case kIstId:
-	mNumberOfFitPointsIst = val;
-	break;
-    default:
-        mNumberOfFitPoints += val; mNumberOfFitPoints|=0x8000;
-	break;
+        case kUnknownId:
+            break;
+        case kFtpcWestId:
+            mNumberOfFitPointsFtpcWest = val;
+            break;
+        case kFtpcEastId:
+            mNumberOfFitPointsFtpcEast = val;
+            break;
+        case kTpcId:
+            mNumberOfFitPointsTpc = val;
+            break;
+        case kSvtId:
+            mNumberOfFitPointsSvt = val;
+            break;
+        case kSsdId:
+            mNumberOfFitPointsSsd = val;
+            break;
+        case kSstId:
+            mNumberOfFitPointsSst = val;
+            break;
+        case kPxlId:
+            mNumberOfFitPointsPxl = val;
+            break;
+        case kIstId:
+            mNumberOfFitPointsIst = val;
+            break;
+        default:
+            mNumberOfFitPoints += val; mNumberOfFitPoints|=0x8000;
+            break;
     }
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setPrimaryVertexUsedInFit(bool val)
 {mPrimaryVertexUsedInFit = val;}
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setPidHypothesis(unsigned short val)
 {
     mPidHypothesis = val;
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setChi2(float val, unsigned int i)
 {
     if (i<2) mChi2[i] = val;
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setCovariantMatrix(float val[15])
 {
     mCovariantMatrix.Set(15, val);
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
-//        Stream an object of class StTrackFitTraits.
-
-  if (R__b.IsReading()) {
-    UInt_t R__s, R__c;
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-    if (R__v > 4) {
-       Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-       return;
+    //        Stream an object of class StTrackFitTraits.
+    
+    if (R__b.IsReading()) {
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 4) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        StObject::Streamer(R__b);
+        
+        R__b >> (unsigned short&)mPidHypothesis;
+        R__b >> (unsigned short&)mNumberOfFitPoints;
+        
+        if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
+        { Int_t dumy; R__b >> dumy;}
+        
+        R__b.ReadFastArray(mChi2,2);
+        mCovariantMatrix.Streamer(R__b);
+        
+    } else {
+        Class()->WriteBuffer(R__b,this);
     }
-    StObject::Streamer(R__b);
-
-    R__b >> (unsigned short&)mPidHypothesis;
-    R__b >> (unsigned short&)mNumberOfFitPoints;
-
-    if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
-       { Int_t dumy; R__b >> dumy;}
-
-    R__b.ReadFastArray(mChi2,2);
-    mCovariantMatrix.Streamer(R__b);
-
-  } else {
-    Class()->WriteBuffer(R__b,this);
-  }
 }

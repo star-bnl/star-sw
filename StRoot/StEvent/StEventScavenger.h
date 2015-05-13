@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.9 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.10 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.10  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.9  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -57,6 +60,7 @@ public:
     static bool removeFtpcHitCollection(StEvent*);
     static bool removeSvtHitCollection(StEvent*);
     static bool removeSsdHitCollection(StEvent*);
+    static bool removeSstHitCollection(StEvent*);
     static bool removeEmcCollection(StEvent*);
     static bool removeRichCollection(StEvent*);
     static bool removeTriggerDetectorCollection(StEvent*);

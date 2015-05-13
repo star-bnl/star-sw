@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.20 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StTrackFitTraits.h,v 2.21 2015/05/13 17:06:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -41,6 +41,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.21  2015/05/13 17:06:14  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.20  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -121,7 +124,7 @@ public:
     unsigned short         numberOfFitPoints(StDetectorId) const;
     StParticleDefinition*  pidHypothesis() const;
     StMatrixF              covariantMatrix() const;
-    const Float_t*         covariance() const {return mCovariantMatrix.GetArray();}
+    const float*           covariance() const {return mCovariantMatrix.GetArray();}
     double                 chi2(unsigned int = 0) const;
     bool                   primaryVertexUsedInFit() const;
 
@@ -141,6 +144,7 @@ protected:
     UChar_t  mNumberOfFitPointsFtpcEast;
     UChar_t  mNumberOfFitPointsSvt;
     UChar_t  mNumberOfFitPointsSsd;
+    UChar_t  mNumberOfFitPointsSst;
     UChar_t  mNumberOfFitPointsPxl;
     UChar_t  mNumberOfFitPointsIst;
     Bool_t   mPrimaryVertexUsedInFit;
