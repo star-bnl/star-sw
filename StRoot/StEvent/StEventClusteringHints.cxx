@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.34 2014/04/10 16:00:13 jeromel Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.35 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.35  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.34  2014/04/10 16:00:13  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
@@ -116,7 +119,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.34 2014/04/10 16:00:13 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.35 2015/05/13 17:06:13 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -164,6 +167,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StPhmdCollection",            "evt_aux",      7);
     setBranch("StRpsCollection",             "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
+    setBranch("StSstHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
     setBranch("StIstHitCollection",          "evt_hits",     8);
     setBranch("StPxlHitCollection",          "evt_hits",     8);
@@ -188,6 +192,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StFpdCollection",             "event", 1);
     setBranch("StRpsCollection",             "event", 1);
     setBranch("StSsdHitCollection",          "event", 1);
+    setBranch("StSstHitCollection",          "event", 1);
     setBranch("StSvtHitCollection",          "event", 1);
     setBranch("StIstHitCollection",          "event", 1);
     setBranch("StPxlHitCollection",          "event", 1);

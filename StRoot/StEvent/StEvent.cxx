@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $
+ * $Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.55  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.54  2014/04/10 16:00:12  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
@@ -198,6 +201,7 @@
 #include "StEtrHitCollection.h"
 #include "StSvtHitCollection.h"
 #include "StSsdHitCollection.h"
+#include "StSstHitCollection.h"
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StFmsCollection.h"
@@ -232,8 +236,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -507,6 +511,22 @@ const StSsdHitCollection*
 StEvent::ssdHitCollection() const
 {
     StSsdHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+
+StSstHitCollection*
+StEvent::sstHitCollection()
+{
+    StSstHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+
+const StSstHitCollection*
+StEvent::sstHitCollection() const
+{
+    StSstHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
@@ -1138,6 +1158,11 @@ StEvent::setSsdHitCollection(StSsdHitCollection* val)
     _lookupAndSet(val, mContent);
 }
 
+void
+StEvent::setSstHitCollection(StSstHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
 
 void
 StEvent::setEmcCollection(StEmcCollection* val)
@@ -1367,6 +1392,7 @@ void StEvent::statistics()
     cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
     cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStSstHitCollection:          " << static_cast<void*>(sstHitCollection());
     cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection());
     cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
