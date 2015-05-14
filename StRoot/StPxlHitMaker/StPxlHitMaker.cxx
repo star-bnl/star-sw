@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.19 2015/05/14 18:53:50 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.20 2015/05/14 18:57:52 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -18,6 +18,7 @@
 #include "StPxlClusterMaker/StPxlCluster.h"
 #include "StPxlClusterMaker/StPxlClusterCollection.h"
 #include "StPxlUtil/StPxlConstants.h"
+#include "StPxlUtil/StPxlDigiHit.h"
 #include "tables/St_pxlControl_Table.h"
 #include "StPxlDbMaker/StPxlDb.h"
 
@@ -102,21 +103,14 @@ Int_t StPxlHitMaker::Make()
                int vecSize = pxlClusterCollection->numberOfClusters(i + 1, j + 1, k + 1);
                for (int l = 0; l < vecSize; l++) {
                   const StPxlCluster *cluster = pxlClusterCollection->cluster(i + 1, j + 1, k + 1, l);
-                  StPxlHit *pxlHit = new StPxlHit();
-                  pxlHit->setSector(i + 1);
-                  pxlHit->setLadder(j + 1);
-                  pxlHit->setSensor(k + 1);
-                  pxlHit->setDetectorId(kPxlId);
-                  pxlHit->setMeanRow(cluster->rowCenter());
-                  pxlHit->setMeanColumn(cluster->columnCenter());
-                  pxlHit->setNRawHits(cluster->nRawHits());
-                  pxlHit->setIdTruth(cluster->idTruth());
 
-                  pxlHitCollection->addHit(pxlHit);
+                  pxlHitCollection->addHit(new StPxlDigiHit(*cluster, i+1, j+1, k+1));
                }
             }
 
-            // get hit positions
+            // Update global coordinates of all hits from sector i, ladder j, and sensor k
+            // Also, in case of real data (i.e. not MC or embedding) update the Y coordinate using
+            // the thin plane spline correction
             const TGeoHMatrix *geoMSensorOnGlobal = mPxlDb->geoHMatrixSensorOnGlobal(i + 1, j + 1, k + 1);
             int nHitsInSensor = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits().size();
             for (int l = 0; l < nHitsInSensor; l++) {
@@ -143,6 +137,22 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.20  2015/05/14 18:57:52  smirnovd
+ * Squashed commit of the following:
+ *
+ * StPxlFastSim: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlHitMaker: Updated comments
+ *
+ * StPxlHitMaker: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlDigiHit: A helper to manipulate local hit position in StPxlHit
+ *
+ * StPxlConsts: Define constants in namespace
+ *
+ * For safety reasons, the intentions is to move the constants into the namespace
+ * and get rid of those defined in the global space.
+ *
  * Revision 1.19  2015/05/14 18:53:50  smirnovd
  * StPxlHitMaker: Removed unused members and local variables
  *
