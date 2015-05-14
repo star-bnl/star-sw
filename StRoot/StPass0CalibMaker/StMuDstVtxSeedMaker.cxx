@@ -15,6 +15,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StBTofHeader.h"
 #include "StMessMgr.h"
 
 
@@ -84,6 +85,9 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   eyvertex = epvert.y();
   exvertex = epvert.x();
 
+  StBTofHeader* btofHeader = mudst->btofHeader();
+  vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
+
   // Number of good primary tracks for this vertex
   mudst->setVertexIndex(pvn);
   mult = mudst->numberOfPrimaryTracks();
@@ -125,14 +129,17 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.12 2015/05/14 20:29:25 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.12 2015/05/14 20:29:25 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.12  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.11  2013/08/14 21:42:48  genevb
 // Introduce time offsets, noclobber toggle, more matched-tracks controls
 //

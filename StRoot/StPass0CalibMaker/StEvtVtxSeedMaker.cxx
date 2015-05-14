@@ -82,6 +82,10 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
     if (!(primVtx->daughter(trkn)->bad())) mult++;
   rank = primVtx->ranking();
 
+  const StBTofCollection* btofColl = event->btofCollection();
+  const StBTofHeader* btofHeader = (btofColl ? btofColl->tofHeader() : 0);
+  vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
+
   // Determine sub-sectors of tracks associated with this vertex
   itpc = 0; otpc = 0; detmap = 0;
   bool ibits[24];
@@ -136,14 +140,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.9 2013/08/14 21:42:48 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.10 2015/05/14 20:29:25 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.9 2013/08/14 21:42:48 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.10 2015/05/14 20:29:25 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.10  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.9  2013/08/14 21:42:48  genevb
 // Introduce time offsets, noclobber toggle, more matched-tracks controls
 //
