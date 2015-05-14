@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.16 2015/05/14 18:53:28 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.17 2015/05/14 18:53:35 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -132,9 +132,7 @@ Int_t StPxlHitMaker::Make()
                double local[3] = {pxlHit->localPosition()[0], pxlHit->localPosition()[1], pxlHit->localPosition()[2]};
 
                // apply Tps correction if not embedding
-               if (embeddingShortCut && pxlHit->idTruth())
-                  local[1] = 0;
-               else {
+               if (!embeddingShortCut || !pxlHit->idTruth()) {
                   local[1] = mPxlDb->thinPlateSpline(i + 1, j + 1, k + 1)->z(local[2], local[0]); // the Tps x, y, z are sensor local z, x, y respectively
                   pxlHit->setLocalY(local[1]);
                }
@@ -152,6 +150,12 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.17  2015/05/14 18:53:35  smirnovd
+ * StPxlHitMaker: Update hit's Y coordinate only when hit is identified as coming from real data otherwise do nothing
+ *
+ * Do not set the Y coordinate to zero as before. Let the simulation makers decide
+ * and set the correct position
+ *
  * Revision 1.16  2015/05/14 18:53:28  smirnovd
  * StPxlHitMaker: Only hit's Y coordinate gets updated. The other two are just used as is
  *
