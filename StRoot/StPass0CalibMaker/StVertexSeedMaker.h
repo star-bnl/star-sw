@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.22 2015/05/14 20:29:25 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -112,7 +112,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.22 2015/05/14 20:29:25 genevb Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
@@ -144,6 +144,7 @@ class StVertexSeedMaker : public StMaker {
   float xvertex;
   float eyvertex;
   float exvertex;
+  float vpd_zvertex;
   float mult;
   float trig;
   float HIST_MIN;
@@ -205,8 +206,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $
+// $Id: StVertexSeedMaker.h,v 1.22 2015/05/14 20:29:25 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.22  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.21  2014/08/06 11:43:32  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
