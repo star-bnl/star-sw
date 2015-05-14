@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.h,v 1.8 2014/08/06 11:43:34 jeromel Exp $
+ * $Id: StPxlHitMaker.h,v 1.9 2015/05/14 18:53:50 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -32,13 +32,12 @@ public:
    Int_t InitRun(Int_t runnumber);
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.8 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.9 2015/05/14 18:53:50 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
 private:
    StPxlDb *mPxlDb;     ///< db structure containing geometry, status information and so on
-   Double_t mPixelSize; ///< size of a pixel
 
    ClassDef(StPxlHitMaker, 0)
 };
@@ -49,6 +48,11 @@ private:
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.h,v $
+ * Revision 1.9  2015/05/14 18:53:50  smirnovd
+ * StPxlHitMaker: Removed unused members and local variables
+ *
+ * These values are set now internaly in the new version of StEvent/StPxlHit
+ *
  * Revision 1.8  2014/08/06 11:43:34  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
