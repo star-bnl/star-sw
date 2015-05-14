@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlConstants.h,v 1.11 2015/05/07 20:58:20 smirnovd Exp $
+ * $Id: StPxlConstants.h,v 1.12 2015/05/14 18:57:52 smirnovd Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -16,6 +16,22 @@
  ***************************************************************************
  *
  * $Log: StPxlConstants.h,v $
+ * Revision 1.12  2015/05/14 18:57:52  smirnovd
+ * Squashed commit of the following:
+ *
+ * StPxlFastSim: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlHitMaker: Updated comments
+ *
+ * StPxlHitMaker: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlDigiHit: A helper to manipulate local hit position in StPxlHit
+ *
+ * StPxlConsts: Define constants in namespace
+ *
+ * For safety reasons, the intentions is to move the constants into the namespace
+ * and get rid of those defined in the global space.
+ *
  * Revision 1.11  2015/05/07 20:58:20  smirnovd
  * Defined dimensional constants for PXL sensitive sensor area
  *
@@ -36,6 +52,10 @@ const int kNumberOfPxlRowsOnSensor = 928;
 
 namespace StPxlConsts
 {
+
+const double kPixelSize = 20.7e-4;       ///< Nominal size of a pixel in the PXL detector, in cm. Must be greater than 0
+const int kPxlNumColumnsPerSensor = 960; ///< Number of pixels in a single row of a PXL sensor
+const int kPxlNumRowsPerSensor = 928;    ///< Number of pixels in a single column of a PXL sensor
 
 //@{
 /**

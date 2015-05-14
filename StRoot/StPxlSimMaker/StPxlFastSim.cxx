@@ -5,6 +5,22 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.12  2015/05/14 18:57:52  smirnovd
+ * Squashed commit of the following:
+ *
+ * StPxlFastSim: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlHitMaker: Updated comments
+ *
+ * StPxlHitMaker: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlDigiHit: A helper to manipulate local hit position in StPxlHit
+ *
+ * StPxlConsts: Define constants in namespace
+ *
+ * For safety reasons, the intentions is to move the constants into the namespace
+ * and get rid of those defined in the global space.
+ *
  * Revision 1.11  2015/05/07 21:24:31  smirnovd
  * StPxlSimMaker: Switched to using consts from StPxlUtil/
  *
@@ -50,6 +66,7 @@
 #include "StThreeVectorF.hh"
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlUtil/StPxlConstants.h"
+#include "StPxlUtil/StPxlDigiHit.h"
 
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
@@ -184,14 +201,12 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                StThreeVectorF mRndHitError(0., 0., 0.);
 
                UInt_t hw = sector * 10 + ladder; // needs to be updated later after clustering alogrithms are finalized
-               StPxlHit* tempHit = new StPxlHit(gpixpos, mRndHitError, hw, mcPix->dE() , 0);
-               tempHit->setSector(iSec + 1);
-               tempHit->setLadder(mcPix->ladder());
-               tempHit->setSensor(mcPix->sensor());
-               mcPix->parentTrack()? tempHit->setIdTruth(mcPix->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
-               tempHit->setDetectorId(kPxlId);
-               tempHit->setId(mcPix->key());
-               tempHit->setLocalPosition(localPixHitPos[0], localPixHitPos[1], localPixHitPos[2]);
+
+               unsigned short idTruth = mcPix->parentTrack() ? mcPix->parentTrack()->key() : -999;
+               unsigned short quality = mcPix->parentTrack() ? 100 : 0;
+
+               StPxlDigiHit* tempHit = new StPxlDigiHit(localPixHitPos, iSec+1, mcPix->ladder(), mcPix->sensor(),
+                  gpixpos, mRndHitError, hw, mcPix->dE(), 0, idTruth, quality, mcPix->key());
 
                LOG_DEBUG << "key() : " << mcPix->key() - 1 << " idTruth: " << mcPix->parentTrack()->key() << endm;
                LOG_DEBUG << "from StMcPxlHit : x= " << mcPix->position().x() << ";  y= " << mcPix->position().y() << ";  z= " << mcPix->position().z() << endm;
@@ -259,6 +274,22 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.12  2015/05/14 18:57:52  smirnovd
+ * Squashed commit of the following:
+ *
+ * StPxlFastSim: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlHitMaker: Updated comments
+ *
+ * StPxlHitMaker: Streamlined creation of PXL hits by making use of StPxlUtil/StPxlDigiHit
+ *
+ * StPxlDigiHit: A helper to manipulate local hit position in StPxlHit
+ *
+ * StPxlConsts: Define constants in namespace
+ *
+ * For safety reasons, the intentions is to move the constants into the namespace
+ * and get rid of those defined in the global space.
+ *
  * Revision 1.11  2015/05/07 21:24:31  smirnovd
  * StPxlSimMaker: Switched to using consts from StPxlUtil/
  *
