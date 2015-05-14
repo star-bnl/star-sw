@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.17 2015/05/14 18:53:35 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.18 2015/05/14 18:53:43 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -127,7 +127,6 @@ Int_t StPxlHitMaker::Make()
             int nHitsInSensor = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits().size();
             for (int l = 0; l < nHitsInSensor; l++) {
                StPxlHit *pxlHit = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits()[l];
-               double global[3];
 
                double local[3] = {pxlHit->localPosition()[0], pxlHit->localPosition()[1], pxlHit->localPosition()[2]};
 
@@ -137,9 +136,9 @@ Int_t StPxlHitMaker::Make()
                   pxlHit->setLocalY(local[1]);
                }
 
+               double global[3];
                geoMSensorOnGlobal->LocalToMaster(local, global); // rotation and shift from sensor local to STAR global coordinate
-               StThreeVectorF vecGlobal(global);
-               pxlHit->setPosition(vecGlobal);
+               pxlHit->setPosition(StThreeVectorF(global));
             }
          }
 
@@ -150,6 +149,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.18  2015/05/14 18:53:43  smirnovd
+ * StPxlHitMaker: Minor stylistic touches to the code
+ *
  * Revision 1.17  2015/05/14 18:53:35  smirnovd
  * StPxlHitMaker: Update hit's Y coordinate only when hit is identified as coming from real data otherwise do nothing
  *
