@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.15 2015/05/14 18:53:18 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.16 2015/05/14 18:53:28 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -127,20 +127,19 @@ Int_t StPxlHitMaker::Make()
             int nHitsInSensor = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits().size();
             for (int l = 0; l < nHitsInSensor; l++) {
                StPxlHit *pxlHit = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits()[l];
-               double local[3];
                double global[3];
 
-               local[2] = firstPixelZ + mPixelSize * pxlHit->meanColumn(); // local z
-               local[0] = firstPixelX - mPixelSize * pxlHit->meanRow(); // local x
+               double local[3] = {pxlHit->localPosition()[0], pxlHit->localPosition()[1], pxlHit->localPosition()[2]};
 
                // apply Tps correction if not embedding
                if (embeddingShortCut && pxlHit->idTruth())
                   local[1] = 0;
-               else
+               else {
                   local[1] = mPxlDb->thinPlateSpline(i + 1, j + 1, k + 1)->z(local[2], local[0]); // the Tps x, y, z are sensor local z, x, y respectively
+                  pxlHit->setLocalY(local[1]);
+               }
 
                geoMSensorOnGlobal->LocalToMaster(local, global); // rotation and shift from sensor local to STAR global coordinate
-               pxlHit->setLocalPosition(local[0], local[1], local[2]);
                StThreeVectorF vecGlobal(global);
                pxlHit->setPosition(vecGlobal);
             }
@@ -153,6 +152,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.16  2015/05/14 18:53:28  smirnovd
+ * StPxlHitMaker: Only hit's Y coordinate gets updated. The other two are just used as is
+ *
  * Revision 1.15  2015/05/14 18:53:18  smirnovd
  * Revert "Bug #3083 fixed. It happened when StPxlHits created in StPxlSimu"
  *
