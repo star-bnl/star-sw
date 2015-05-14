@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.14 2015/04/21 23:54:15 perev Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.15 2015/05/14 18:53:18 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -129,16 +129,6 @@ Int_t StPxlHitMaker::Make()
                StPxlHit *pxlHit = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits()[l];
                double local[3];
                double global[3];
-//			for simulated hit column & raw are not defined
-//			it is better to define them in simulation maker, but as a temporary hack 
-//			I am doing it here (Victor)
-               if (pxlHit->idTruth()) { //It is simulated hit
-	         int meanColumn =  (pxlHit->localPosition(2)-firstPixelZ)/mPixelSize;
-                 int meanRaw    = -(pxlHit->localPosition(0)-firstPixelX)/mPixelSize;
-                 pxlHit->setMeanColumn(meanColumn);
-                 pxlHit->setMeanRow   (meanRaw   );
-               }
-//			End of hack
 
                local[2] = firstPixelZ + mPixelSize * pxlHit->meanColumn(); // local z
                local[0] = firstPixelX - mPixelSize * pxlHit->meanRow(); // local x
@@ -149,7 +139,6 @@ Int_t StPxlHitMaker::Make()
                else
                   local[1] = mPxlDb->thinPlateSpline(i + 1, j + 1, k + 1)->z(local[2], local[0]); // the Tps x, y, z are sensor local z, x, y respectively
 
-for (int i=0;i<3;i++) { assert(fabs(local[i])<333);}
                geoMSensorOnGlobal->LocalToMaster(local, global); // rotation and shift from sensor local to STAR global coordinate
                pxlHit->setLocalPosition(local[0], local[1], local[2]);
                StThreeVectorF vecGlobal(global);
@@ -164,14 +153,10 @@ for (int i=0;i<3;i++) { assert(fabs(local[i])<333);}
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
- * Revision 1.14  2015/04/21 23:54:15  perev
- * Bug #3083 fixed. It happened when StPxlHits created in StPxlSimu
- * MeanColumn & meanRaw is not defined. Afterwards in StPxhHitMaker on the
- * base of these non defined numbers calculated x,y,z and assigned to hit.
- * Result is completely wrong. I have made a hack. Using x & z local coordinates
- * meanColumn & meanRaw is calculated. It is not a best choise. It is better
- * to do it in Simu maker. But I do not know, do we have such info from Geant or not.
- * Let HFTiers will do it. (Victor)
+ * Revision 1.15  2015/05/14 18:53:18  smirnovd
+ * Revert "Bug #3083 fixed. It happened when StPxlHits created in StPxlSimu"
+ *
+ * This reverts commit 26325ed704a000bd2ff32e237725b3cbbf4f7142.
  *
  * Revision 1.13  2014/05/08 15:10:49  smirnovd
  * PXL DB dataset has been renamed to avoid conflict with StPxlDbMaker's name
