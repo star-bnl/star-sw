@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.18 2015/05/14 18:53:43 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.19 2015/05/14 18:53:50 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -25,7 +25,7 @@ ClassImp(StPxlHitMaker)
 
 
 StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name),
-   mPxlDb(0), mPixelSize(20.7e-4)
+   mPxlDb(0)
 {
 }
 
@@ -42,8 +42,6 @@ Int_t StPxlHitMaker::InitRun(Int_t runnumber)
       LOG_ERROR << "InitRun : not pxlDb" << endm;
       return kStErr;
    }
-
-   mPixelSize = mPxlDb->pxlControl()->pixelSize;
 
    return kStOk;
 }
@@ -95,10 +93,6 @@ Int_t StPxlHitMaker::Make()
       pEvent->setPxlHitCollection(pxlHitCollection);
    }
 
-   // pixel local x, z at the sensor left lower corner
-   double firstPixelZ = -(kNumberOfPxlColumnsOnSensor - 1) * mPixelSize / 2;
-   double firstPixelX = (kNumberOfPxlRowsOnSensor - 1) * mPixelSize / 2;
-
    // loop over the detector
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
@@ -149,6 +143,11 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.19  2015/05/14 18:53:50  smirnovd
+ * StPxlHitMaker: Removed unused members and local variables
+ *
+ * These values are set now internaly in the new version of StEvent/StPxlHit
+ *
  * Revision 1.18  2015/05/14 18:53:43  smirnovd
  * StPxlHitMaker: Minor stylistic touches to the code
  *
