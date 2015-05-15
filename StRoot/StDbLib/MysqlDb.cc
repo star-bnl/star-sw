@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.66 2014/06/10 14:52:12 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.67 2015/05/15 18:55:02 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.67  2015/05/15 18:55:02  dmitry
+ * redundant pointer check removed
+ *
  * Revision 1.66  2014/06/10 14:52:12  dmitry
  * Jeff L. spotted INSERT DELAYED in our API (thanks!), and I removed DELAYED keyword
  *
@@ -815,7 +818,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
   aBuff->SetStorageMode();
-  if (aBuff) {
+  //if (aBuff) {
     *this << "select * from " << table << " where null"<< endsql;
     *this << "insert into " << table << " set ";
     bool tFirst=true;
@@ -878,7 +881,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
       *this << endsql;
       if(mqueryState)tRetVal=true;
     };
-  };
+  //};
   //  if (!tRetVal) cout << "insert Failed"<< endl;
   if (change) aBuff->SetClientMode();
   aBuff->SetClientMode();
