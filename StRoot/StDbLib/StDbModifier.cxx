@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.7 2007/08/20 18:21:29 deph Exp $
+ * $Id: StDbModifier.cxx,v 1.8 2015/05/15 18:34:39 dmitry Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.8  2015/05/15 18:34:39  dmitry
+ * now deallocating memory in destructor of StDbModifier + cleanup
+ *
  * Revision 1.7  2007/08/20 18:21:29  deph
  * New Version of Load Balancer
  *
@@ -69,7 +72,8 @@
 ClassImp(StDbModifier)
 
 //_____________________________________________________________________________
-  StDbModifier::StDbModifier() : funixTime(0), fTimestamp(0)
+  StDbModifier::StDbModifier() : funixTime(0), fTimestamp(0),
+	 fDebug(0), fDbName(0), fTableName(0), fVersionName(0), fFlavorName(0)
 {
   // constructor of StDbModifier
 
@@ -79,16 +83,16 @@ ClassImp(StDbModifier)
   // Timestamp of the data requested.
   // To get recent one, here, it is assigned as end of UNIX time.
 
-  fDebug = 0;        // set No-debug mode.
+  //fDebug = 0;        // set No-debug mode.
 
-  fDbName    = 0;    // set Database name on DB server  as brank.
-  fTableName = 0;    // set Table name on DB server  as brank.
+  //fDbName    = 0;    // set Database name on DB server  as brank.
+  //fTableName = 0;    // set Table name on DB server  as brank.
                      // If either fDbName or fTableName is still 0 
                      // in ReadDataFromBD() and WriteDataToDB(),
                      // the program will be terminated.
-  fVersionName = 0;
+  //fVersionName = 0;
 
-  fFlavorName = 0;
+  //fFlavorName = 0;
 
   fOutputFileName = new char[200];
   strcpy(fOutputFileName,"./database_data.C");
@@ -103,8 +107,13 @@ ClassImp(StDbModifier)
 StDbModifier::~StDbModifier()
 {
   // destructor of StDbModifier
-  if(fTimestamp) delete [] fTimestamp;
-
+  delete [] fTimestamp;
+  delete [] fDbName;
+  delete [] fTableName;
+  delete [] fVersionName;
+  delete [] fFlavorName;
+  delete [] fOutputFileName;
+  delete [] fInputFileName;
 }
 
 //_____________________________________________________________________________
@@ -293,8 +302,7 @@ Int_t StDbModifier::WriteDataToDB()
 
   int retVal=0;
   if(mgr -> storeDbTable(dbtable)) retVal=1;             // Fetch the data 
-  if(eidList) delete [] eidList;
-
+  delete [] eidList;
 
   return retVal;
 }
