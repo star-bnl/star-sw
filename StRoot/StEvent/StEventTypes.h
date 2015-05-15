@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.46 2015/05/15 14:48:56 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.47 2015/05/15 14:59:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.47  2015/05/15 14:59:46  ullrich
+ * Corrected typo.
+ *
  * Revision 2.46  2015/05/15 14:48:56  ullrich
  * Added Sst.
  *
@@ -242,7 +245,7 @@
 #include "StSsdLadderHitCollection.h"
 #include "StSsdWaferHitCollection.h"
 #include "StSstHit.h"
-#include "StSstdHitCollection.h"
+#include "StSstHitCollection.h"
 #include "StSstLadderHitCollection.h"
 #include "StSstWaferHitCollection.h"
 #include "StSvtHit.h"
