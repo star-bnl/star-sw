@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.63 2012/11/07 21:54:37 fisyak Exp $
+// $Id: StSsdPointMaker.cxx,v 1.64 2015/05/15 18:31:10 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.64  2015/05/15 18:31:10  bouchet
+// possible infinite loop fixed
+//
 // Revision 1.63  2012/11/07 21:54:37  fisyak
 // Remove check for .histos
 //
@@ -1591,7 +1594,7 @@ void StSsdPointMaker::FillWaferTable(){
 void StSsdPointMaker::FillDefaultWaferTable(){
   LOG_INFO << " The wafer configuration table will not be used." << endm;
   for(Int_t i=0; i<20;i++){ 
-    for(Int_t j=0; i<16;j++){  
+    for(Int_t j=0; j<16;j++){  
       WafStatus[i][j] = 1; 
       LOG_DEBUG << Form("wafer=%d gain=%f",i,CalibArray[i])<<endm; 
     }
