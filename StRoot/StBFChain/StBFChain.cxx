@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.618 2015/05/05 20:23:42 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.619 2015/05/15 17:44:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -396,7 +396,7 @@ Int_t StBFChain::Instantiate()
 	}
       }
       else mk->SetActive(kFALSE);
-      if (! mk) goto Error;
+      //if (! mk) goto Error;
       SetGeantOptions(mk);
     }
 
