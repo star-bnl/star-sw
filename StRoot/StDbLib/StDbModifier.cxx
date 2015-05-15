@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.8 2015/05/15 18:34:39 dmitry Exp $
+ * $Id: StDbModifier.cxx,v 1.9 2015/05/15 19:47:16 dmitry Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.9  2015/05/15 19:47:16  dmitry
+ * proper delete added before overwrite
+ *
  * Revision 1.8  2015/05/15 18:34:39  dmitry
  * now deallocating memory in destructor of StDbModifier + cleanup
  *
@@ -310,6 +313,7 @@ Int_t StDbModifier::WriteDataToDB()
 //_____________________________________________________________________________
 void StDbModifier::SetDateTime(const char* timestamp)
 {
+  delete [] fTimestamp;
   fTimestamp = new char[strlen(timestamp)+1];
   strcpy(fTimestamp,timestamp);
 }
@@ -319,6 +323,7 @@ void StDbModifier::SetTime(unsigned int time){ funixTime=time;}
 //_____________________________________________________________________________
 void StDbModifier::SetDbName(const char* dbname)
 {
+  delete [] fDbName;
   fDbName = new char[strlen(dbname)+1];
   strcpy(fDbName,dbname);
 }
@@ -326,6 +331,7 @@ void StDbModifier::SetDbName(const char* dbname)
 //_____________________________________________________________________________
 void StDbModifier::SetInputFileName(const char* inputfilename)
 {
+  delete [] fInputFileName;
   fInputFileName = new char[strlen(inputfilename)+1];
   strcpy(fInputFileName,inputfilename);
 }
@@ -333,6 +339,7 @@ void StDbModifier::SetInputFileName(const char* inputfilename)
 //_____________________________________________________________________________
 void StDbModifier::SetOutputFileName(const char* outputfilename)
 {
+  delete [] fOutputFileName;
   fOutputFileName = new char[strlen(outputfilename)+1];
   strcpy(fOutputFileName,outputfilename);
 }
@@ -340,6 +347,7 @@ void StDbModifier::SetOutputFileName(const char* outputfilename)
 //_____________________________________________________________________________
 void StDbModifier::SetTableName(const char* tablename)
 {
+  delete [] fTableName;
   fTableName = new char[strlen(tablename)+1];
   strcpy(fTableName,tablename);
 }
@@ -347,6 +355,7 @@ void StDbModifier::SetTableName(const char* tablename)
 //_____________________________________________________________________________
 void StDbModifier::SetVersionName(const char* versionname)
 {
+  delete [] fVersionName;
   fVersionName = new char[strlen(versionname)+1];
   strcpy(fVersionName,versionname);
 }
@@ -354,6 +363,7 @@ void StDbModifier::SetVersionName(const char* versionname)
 //_____________________________________________________________________________
 void StDbModifier::SetFlavor(const char* flavorname)
 {
+  delete [] fFlavorName;
   fFlavorName = new char[strlen(flavorname)+1];
   strcpy(fFlavorName,flavorname);
   cout << "       Flavor is set " << flavorname  << endl;
