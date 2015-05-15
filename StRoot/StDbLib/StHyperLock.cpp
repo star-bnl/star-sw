@@ -16,7 +16,7 @@ StHyperLock::~StHyperLock()
 	unlock();
 }
 
-bool StHyperLock::try_lock(useconds_t usec) { // 1 second = 1000000 usec
+bool StHyperLock::try_lock(int32_t usec) { // 1 second = 1000000 usec
 	if ( usec < 0 || mFileName.empty() ) return false;
 	int flags = O_RDONLY;
 	if (mCreateLockFile) {
