@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.9 2015/05/15 19:47:16 dmitry Exp $
+ * $Id: StDbModifier.cxx,v 1.10 2015/05/15 19:56:09 dmitry Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.10  2015/05/15 19:56:09  dmitry
+ * more cleanup
+ *
  * Revision 1.9  2015/05/15 19:47:16  dmitry
  * proper delete added before overwrite
  *
@@ -75,8 +78,8 @@
 ClassImp(StDbModifier)
 
 //_____________________________________________________________________________
-  StDbModifier::StDbModifier() : funixTime(0), fTimestamp(0),
-	 fDebug(0), fDbName(0), fTableName(0), fVersionName(0), fFlavorName(0)
+  StDbModifier::StDbModifier() : fDbName(0), fDebug(0), fTableName(0), funixTime(0), fTimestamp(0), fVersionName(0),
+	fOutputFileName(0), fInputFileName(0), fFlavorName(0)
 {
   // constructor of StDbModifier
 

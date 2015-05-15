@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.68 2015/05/15 19:47:16 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.69 2015/05/15 19:56:09 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.69  2015/05/15 19:56:09  dmitry
+ * more cleanup
+ *
  * Revision 1.68  2015/05/15 19:47:16  dmitry
  * proper delete added before overwrite
  *
@@ -317,8 +320,8 @@
 namespace {
 
 time_t get_time_nanosec() {
-    timespec ts;
 #ifdef HAVE_CLOCK_GETTIME
+    timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec*1000 + ts.tv_nsec/1000000);
 #else
@@ -338,8 +341,8 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
 
 	if (mdbuser == NULL && getenv("USE_LB_LOGIN") != NULL) {
-		mdbuser = "loadbalancer";
-		mdbpw = "lbdb";
+		mdbuser = (char*)"loadbalancer";
+		mdbpw = (char*)"lbdb";
 	}
 
 mhasConnected=false;
