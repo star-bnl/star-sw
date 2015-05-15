@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.16 2015/05/15 19:07:09 dmitry Exp $
+ * $Id: StDbXmlReader.cc,v 1.17 2015/05/15 19:11:44 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.17  2015/05/15 19:11:44  dmitry
+ * typo, now doing proper deallocation
+ *
  * Revision 1.16  2015/05/15 19:07:09  dmitry
  * small memory leak fixed
  *
@@ -407,7 +410,7 @@ if(p1){
    memcpy(hlen,p1,len);
    hlen[len-1]='\0';
    e->size.isize = atoi(hlen);
-   delete hlen;
+   delete [] hlen;
 } 
  if(e->size.isize==0)e->size.isize=1; // <length> not required for len=1
 
