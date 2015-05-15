@@ -146,7 +146,7 @@ void StVertexSeedMaker::Reset() {
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch:vpdz");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch:pmatch:pct:vpdz");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
 
   date = 0;
@@ -196,6 +196,8 @@ void StVertexSeedMaker::Clear(Option_t *option){
   tmatch = 0;
   cmatch = 0;
   hmatch = 0;
+  pmatch = 0;
+  pct = 0;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Make(){
@@ -238,7 +240,7 @@ Int_t StVertexSeedMaker::Make(){
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
 
-    float XX[22];
+    float XX[24];
     XX[0]  = (float) GetEventNumber();
     XX[1]  = xvertex;
     XX[2]  = yvertex;
@@ -251,7 +253,7 @@ Int_t StVertexSeedMaker::Make(){
     XX[9]  = rank;
     XX[10] = (float) itpc;
     XX[11] = (float) otpc;
-    XX[12] = (float) detmap;
+    XX[12] = (float) detmap; // likely to be valid only up to ~23 bits
     XX[13] = exvertex;
     XX[14] = eyvertex;
     XX[15] = (float) pvn;
@@ -260,7 +262,9 @@ Int_t StVertexSeedMaker::Make(){
     XX[18] = (float) tmatch;
     XX[19] = (float) cmatch;
     XX[20] = (float) hmatch;
-    XX[21] = vpd_zvertex;
+    XX[21] = (float) pmatch;
+    XX[22] = (float) pct;
+    XX[23] = vpd_zvertex;
     resNtuple->Fill(XX);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
     sumzdc += zdc;
@@ -329,7 +333,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.56 2015/05/14 20:29:25 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -607,6 +611,14 @@ TNtupleD* StVertexSeedMaker::newBLpars() {
     "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
 }
 //_____________________________________________________________________________
+void StVertexSeedMaker::Packer(int firstbit, int nbits, int& var, unsigned short val) {
+  var = val;
+  // erase nbits of detmap, starting at firstbit,
+  // and fill the bits with val, capped at 2^nbits-1
+  int cap = ~((~0)<<nbits); // e.g. nbits=3 => cap=7
+  (detmap &= ~(cap<<firstbit)) |= (TMath::Min(var,cap)<<firstbit);
+}
+//_____________________________________________________________________________
 Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t offset) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
@@ -705,8 +717,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
             vals2[19] = (float) cmatch;
             vals2[20] = (float) hmatch;
           }
-          if (nvar < 22)
-            vals2[21] = vpd_zvertex;
+          if (nvar < 22) {
+            vals2[21] = (float) pmatch;
+            vals2[22] = (float) pct;
+            vals2[23] = vpd_zvertex;
+          }
           resNtuple->Fill(vals2);
         } else
           resNtuple->Fill(vals);
@@ -735,8 +750,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.56 2015/05/14 20:29:25 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.57  2015/05/15 05:38:21  genevb
+// Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
+//
 // Revision 1.56  2015/05/14 20:29:25  genevb
 // Add z of VPD vertex
 //
