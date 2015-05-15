@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StTreeMaker class, Star IO                                      	//
@@ -379,8 +380,9 @@ Int_t StTreeMaker::Finish()
     fTree->WriteEvent((ULong_t)(-2));	
     fTree->Clear(); 
   }
-  Close(); return 0;
+  Close(); 
   StIOInterFace::Finish();
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t StTreeMaker::Save()
