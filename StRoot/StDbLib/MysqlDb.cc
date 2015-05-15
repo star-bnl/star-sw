@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.67 2015/05/15 18:55:02 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.68 2015/05/15 19:47:16 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.68  2015/05/15 19:47:16  dmitry
+ * proper delete added before overwrite
+ *
  * Revision 1.67  2015/05/15 18:55:02  dmitry
  * redundant pointer check removed
  *
@@ -1065,7 +1068,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
   *tWrite='\0';
   char *tRetVal=new char[strlen(tTempVal)+1];
   strcpy(tRetVal,tTempVal);
-  if (tTempVal) delete [] tTempVal;
+  delete [] tTempVal;
   return tRetVal;
 };
   
