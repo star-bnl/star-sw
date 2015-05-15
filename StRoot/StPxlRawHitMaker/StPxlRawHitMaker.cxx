@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.9 2014/05/29 22:55:28 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.10 2015/05/15 05:31:44 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.10  2015/05/15 05:31:44  qiuh
+ * add c in wrong sector/ladder/sensor/row/column warning
+ *
  * Revision 1.9  2014/05/29 22:55:28  qiuh
  * print warnings for wrong rows / columns and deserialization errors only when debug > 2
  *
@@ -372,7 +375,7 @@ Int_t StPxlRawHitMaker::decodeStateN(Int_t val)
          }
       }
       else if (mColumn != mDummyState && Debug() > 2) { // 1023: dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
-	LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn << endm;
+          LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn <<"+"<<c<< endm;
       }
    }
    return 0;
