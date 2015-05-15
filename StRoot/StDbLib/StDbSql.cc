@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.36 2015/05/15 19:02:21 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.37 2015/05/15 19:05:12 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.37  2015/05/15 19:05:12  dmitry
+ * missed instance, assign zero to the pointer after delete
+ *
  * Revision 1.36  2015/05/15 19:02:21  dmitry
  * assign zero to the pointer after delete
  *
@@ -1285,12 +1288,15 @@ char* tmpString;
 	} 
         table->setElementID(tmpElements,len);
         delete [] tmpElements;
+        tmpElements = 0;
       } else {
        delete [] tmpString;
+	   tmpString = 0;
        if(!buff.ReadScalar(tmpString,"indexName")) return false;
        table->setElementName(tmpString);
       }
       delete [] tmpString;
+      tmpString = 0;
     }
 
 
