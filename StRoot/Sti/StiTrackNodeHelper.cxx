@@ -388,12 +388,12 @@ if (!oldJoinPrim) {
         kase = -1; 
 	break;
 
-      case kOLdValid|kNewFitd|kJoiUnFit:	// Old valid & New Fitd & Join UnFit
-        mChi2 = 3e33;
-        mFitdPars = mPredPars;
-        mFitdErrs = mPredErrs;
-        mState = StiTrackNode::kTNReady;
-     
+//       case kOLdValid|kNewFitd|kJoiUnFit:	// Old valid & New Fitd & Join UnFit
+//         mChi2 = 3e33;
+//         mFitdPars = mPredPars;
+//         mFitdErrs = mPredErrs;
+//         mState = StiTrackNode::kTNReady;
+//      
       case kOLdValid:;				// Old valid & New UnFitd
       case kOLdValid|kNewFitd:;			// Old valid & New Fitd
 
