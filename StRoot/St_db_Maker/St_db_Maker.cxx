@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.135 2015/05/05 21:05:52 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.136 2015/05/16 02:34:05 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.136  2015/05/16 02:34:05  perev
+// bug #3101 Cleanup
+//
 // Revision 1.135  2015/05/05 21:05:52  dmitry
 // Updated db disconnect handling. Keep connection if less than 30 sec passed since last data retrieval
 //
@@ -927,7 +930,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 {
   TDataSet *set;
-  StValiSet *pseudo;
+  StValiSet *pseudo = 0;
   const char *dsname,*filename,*dot;
   char psname[100];
   //int ldsname,lpsname;
@@ -975,6 +978,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 
     set->Shunt(pseudo);
     if (isSql) {
+      assert(pseudo);
       pseudo->fTabId = set->GetUniqueID();      // save SQL  Id
       pseudo->fDat=set;                         // save SQL  object
                                                 // for future validity requests
