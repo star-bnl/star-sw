@@ -99,7 +99,7 @@ void TRArray::AdoptA(Int_t n, Double_t *arr) {
    // in TRArray. User may delete arr, TRArray dtor will not do it.
    fN     = n;
    if (fArray == arr) return;
-   if (fArray && arr != arr && ! fIsNotOwn) delete [] fArray;
+   if (fArray && ! fIsNotOwn) delete [] fArray;
    fIsNotOwn = kTRUE;
    fArray = arr;
 }
