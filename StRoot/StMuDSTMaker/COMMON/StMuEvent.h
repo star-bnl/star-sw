@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.31 2015/03/06 20:02:01 jdb Exp $
+ * $Id: StMuEvent.h,v 1.32 2015/05/05 18:32:12 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -164,7 +164,7 @@ class StMuEvent : public TObject {
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,15)
+  ClassDef(StMuEvent,16)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -232,6 +232,9 @@ inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.32  2015/05/05 18:32:12  jeromel
+ * mNHitsHFT added but class version not incremented - fixed
+ *
  * Revision 1.31  2015/03/06 20:02:01  jdb
  * Added 4 unsigned shorts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
  *
