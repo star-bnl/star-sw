@@ -66,8 +66,7 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"
-#include "tables/St_vpdTotCorr_Table.h"
-
+#include "StDetectorDbMaker/St_vpdTotCorrC.h"
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -113,11 +112,6 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
 
   setCreateHistoFlag(kFALSE);
   setHistoFileName(""); //"vpdana.root");
-
-  // default initialization from database
-  mInitFromFile = kFALSE;
-  // assign default locations and names to the calibration files 
-  setCalibFilePvpd("/star/institutions/rice/calib/default/pvpdCali_4DB.dat");
   // use vpd as start by default;
   mUseVpdStart = kTRUE;
   mForceTofStart = kFALSE; // flag indicates user-override for TOF Start time calculation
@@ -130,8 +124,6 @@ StVpdCalibMaker::~StVpdCalibMaker()
 //_____________________________________________________________________________
 void StVpdCalibMaker::resetPars()
 {
-  memset(mVPDTotEdge, 0, sizeof(mVPDTotEdge));
-  memset(mVPDTotCorr, 0, sizeof(mVPDTotCorr));
 }
 
 //_____________________________________________________________________________
@@ -197,43 +189,7 @@ Int_t StVpdCalibMaker::InitRun(Int_t runnumber)
 //_____________________________________________________________________________
 Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 {
-  /// initialize the calibrations parameters from dbase
-  /// read in and check the size
-  if (mInitFromFile){
-    LOG_INFO << "Initializing VPD calibration parameters from file"
-    		 << "(" << mCalibFilePvpd << ")" << endm;  
-    ifstream inData;
-    inData.open(mCalibFilePvpd.c_str());
-    int nchl, nbin;
-    for(int i=0;i<NVPD*2;i++) {
-      inData>>nchl;
-      inData>>nbin;
-      if (nbin>NBinMax) {
-		LOG_ERROR << "nummer of bins (" << nbin << ") out of range ("
-			  << NBinMax << ") for vpd channel " << i << endm;
-		return kStErr;
-      }	
-      for(int j=0;j<=nbin;j++) inData>>mVPDTotEdge[i][j];
-      for(int j=0;j<=nbin;j++) inData>>mVPDTotCorr[i][j];
-    }
-    inData.close();
-  }
-  else {
-    /// Get all calibration parameters from the database
-    LOG_INFO << "Initializing VPD calibration parameters from database" << endm;
-
-    // read vpdTotCorr table
-    TDataSet *dbDataSet = GetDataBase("Calibrations/tof/vpdTotCorr");
-    if (dbDataSet){
-      St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
-      if(!vpdTotCorr) {
-	LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
-	//    assert(vpdTotCorr);
-	return kStErr;
-      }
-      vpdTotCorr_st* totCorr = static_cast<vpdTotCorr_st*>(vpdTotCorr->GetArray());
-      Int_t numRows = vpdTotCorr->GetNRows();
-
+      Int_t numRows = St_vpdTotCorrC::instance()->getNumRows();
       if(numRows!=NVPD*2) {
 	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
 		  << " (exp:" << NVPD*2 << ")" << endm;
@@ -244,7 +200,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       for (Int_t i=0;i<numRows;i++) {
 	if (!mForceTofStart){
 	  if(i==0) {  // identify once only, for the first tube
-	    short flag = totCorr[i].corralgo;
+	    short flag = St_vpdTotCorrC::instance()->corralgo(i);
 	    if(flag==0) {
 	      mUseVpdStart=kTRUE;
 	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
@@ -258,26 +214,20 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	    }
 	  }
 	  else { // verify that all other entries agree
-	    if (totCorr[0].corralgo==0 && (totCorr[i].corralgo!=0))
-	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
-	    if (totCorr[0].corralgo==1 && (totCorr[i].corralgo!=1))
-	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	    if (St_vpdTotCorrC::instance()->corralgo(0)==0 && (St_vpdTotCorrC::instance()->corralgo(i)!=0))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << St_vpdTotCorrC::instance()->corralgo(i) << endm;}
+	    if (St_vpdTotCorrC::instance()->corralgo(0)==1 && (St_vpdTotCorrC::instance()->corralgo(i)!=1))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << St_vpdTotCorrC::instance()->corralgo(i) << endm;}
 	  }
 	}
-
-	short tubeId = totCorr[i].tubeId;
+	short tubeId = St_vpdTotCorrC::instance()->tubeId(i);
+	assert(tubeId == i+1);
 	// check index range
 	if (tubeId>2*NVPD) {
 	  LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
 		    << 2*NVPD << ")" << endm;
 	  return kStErr;
 	}
-
-	for(Int_t j=0;j<NBinMax;j++) {
-	  mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
-	  mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
-	  LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
-	} // end j 0->NBinMax
       } // end i 0->numRows
 
       // Let the user know what is used for calculating TOF Start (and how we got there)
@@ -288,19 +238,6 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       else {
 	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
       }
-    }
-    else {
-    // Note: this construction addresses RT#1996 and allows backward compatibility with older database
-    //       timestamps at which these database structures did not exist. All values will be zero (hence the ERROR)
-    //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode 
-      LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm; 
-      resetPars();
-      mUseVpdStart=kFALSE;
-      LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
-      return kStErr;
-    }
-  }
-
   return kStOK;
 }
 
@@ -482,8 +419,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
 
 
 //_____________________________________________________________________________
-void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
-{
+void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time) {
   /// Sum vpd informations
   mTSumEast = 0.;
   mTSumWest = 0.;
@@ -491,54 +427,36 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
   mNWest = 0;
   mVPDHitPatternWest = 0;
   mVPDHitPatternEast = 0;
-
+  
   bool vpdEast=false;
   for(int i=0;i<2*NVPD;i++) {
+    assert (St_vpdTotCorrC::instance()->tubeId(i) == i+1);
     if (i>=NVPD) vpdEast=true;
-
-    if( time[i]>0. && tot[i]>0. ) {
-
-      int ibin = -1;
-      for(int j=0;j<NBinMax-1;j++) {
-	if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
-	  ibin = j;
-	  break;
-	}
-      }
-      if(ibin>=0&&ibin<NBinMax) {
-	Double_t x1 = mVPDTotEdge[i][ibin];
-	Double_t x2 = mVPDTotEdge[i][ibin+1];
-	Double_t y1 = mVPDTotCorr[i][ibin];
-	Double_t y2 = mVPDTotCorr[i][ibin+1];
-	Double_t dcorr = y1 + (tot[i]-x1)*(y2-y1)/(x2-x1);
-
-	if (vpdEast){
-	  mNEast++;
-	  mVPDLeTime[i] = time[i] - dcorr;
-	  mTSumEast += mVPDLeTime[i];
-	  mVPDHitPatternEast |= 1<<(i-NVPD);
-          mFlag[i] = 1;
-	} else {
-	  mNWest++;
-	  mVPDLeTime[i] = time[i] - dcorr;
-	  mTSumWest += mVPDLeTime[i];
-	  mVPDHitPatternWest |= 1<<i;
-          mFlag[i] = 1;
-	}
-
+    if (time[i] <= 0.0 || tot[i] <= 0. ) continue;
+    Double_t dcorr = St_vpdTotCorrC::instance()->Corr(i,tot[i]);
+    if (dcorr > -9999.0) {
+      if (vpdEast){
+	mNEast++;
+	mVPDLeTime[i] = time[i] - dcorr;
+	mTSumEast += mVPDLeTime[i];
+	mVPDHitPatternEast |= 1<<(i-NVPD);
+	mFlag[i] = 1;
       } else {
-	if (vpdEast){
-	  LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT ("<< ibin
-		   << ") out of range (0-"<<NBinMax<<") !" << endm;
-	} else{
-	  LOG_WARN << " Vpd West tube " << i+1 << " TOT ("<< ibin
-		   << ") out of range (0-"<<NBinMax<<") !" << endm;
-	}
-        mVPDLeTime[i] = 0.; // out of range, remove this hit
+	mNWest++;
+	mVPDLeTime[i] = time[i] - dcorr;
+	mTSumWest += mVPDLeTime[i];
+	mVPDHitPatternWest |= 1<<i;
+	mFlag[i] = 1;
       }
+    } else {
+      if (vpdEast){
+	LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT  out of range  !" << endm;
+      } else{
+	LOG_WARN << " Vpd West tube " << i+1      << " TOT  out of range  !" << endm;
+      }
+      mVPDLeTime[i] = 0.; // out of range, remove this hit
     }
   }
-
 }
 
 

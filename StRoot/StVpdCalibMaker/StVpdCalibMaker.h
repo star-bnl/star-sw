@@ -73,9 +73,6 @@ public:
                 
   /// read calibration parameters from file
     // note: the default value will be changed back to kFALSE
-  void setInitFromFile(const Bool_t initFromFile= kTRUE);
-  void setCalibFilePvpd(const Char_t* filename);
-
   /// set the VPD # of hits cut
   void setVPDHitsCut(const Int_t eastVpdCut, const Int_t westVpdCut);
   /// switch to read in StEvent/MuDst
@@ -133,10 +130,6 @@ private:
   
   Int_t      mVPDEastHitsCut;
   Int_t      mVPDWestHitsCut;
-
-  Double_t   mVPDTotEdge[2*NVPD][NBinMax];
-  Double_t   mVPDTotCorr[2*NVPD][NBinMax];
-
   Double_t   mVPDLeTime[2*NVPD];
   Double_t   mVPDTot[2*NVPD];
 
@@ -163,8 +156,6 @@ private:
   TH1D*    mhVpdAll;
   TH2D*    mhNVpdHits;         //! nhits west vs east
 
-  Bool_t mInitFromFile;  //! switch for reading from files
-  string mCalibFilePvpd; //! filename for pvpd calibration parameters
   Bool_t mUseVpdStart;   //! switch for using Vpd as the start time (true by default)
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
@@ -178,8 +169,6 @@ inline void StVpdCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest)
 inline void StVpdCalibMaker::setMuDstIn() { mMuDstIn = kTRUE; }
 inline void StVpdCalibMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 inline void StVpdCalibMaker::setCreateHistoFlag(const Bool_t histos){mHisto = histos;}
-inline void StVpdCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
-inline void StVpdCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
 inline void StVpdCalibMaker::setUseVpdStart(const Bool_t val) {mUseVpdStart = val; mForceTofStart = kTRUE;}
 inline Bool_t StVpdCalibMaker::useVpdStart() const { return mUseVpdStart; }
 #endif
