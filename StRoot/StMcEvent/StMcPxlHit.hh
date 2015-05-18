@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPxlHit.hh,v 2.1 2013/03/25 23:50:36 perev Exp $
+ * $Id: StMcPxlHit.hh,v 2.2 2015/05/12 18:46:12 perev Exp $
  * $Log: StMcPxlHit.hh,v $
+ * Revision 2.2  2015/05/12 18:46:12  perev
+ * Change return uchar ==> int
+ *
  * Revision 2.1  2013/03/25 23:50:36  perev
  * Mustafa.Pxl add
  *
@@ -27,15 +30,15 @@ public:
   ///
   /// Returns sector number (sectors are numbered CW 1-10 when viewed from East. see drupal.star.bnl.gov/STAR/system/files/HFT%20numbering%20scheme_v5_0.pdf)
   ///
-  UChar_t sector() const {return mVolumeId/1000000;}
+  int sector() const {return mVolumeId/1000000;}
   ///
   /// Returns ladder number (ladders are numbered CW 1-4 when viewed from East, 4 is inner ladder)
   ///
-  UChar_t ladder() const {return  (mVolumeId%1000000)/10000;} 
+  int ladder() const {return  (mVolumeId%1000000)/10000;} 
   ///
   /// Returns sensor number (sensors are numbered 1-10 from East to West)
   ///
-  UChar_t sensor() const {return  (mVolumeId - sector()*1000000 - ladder()*10000)/100;} 
+  int sensor() const {return  (mVolumeId - sector()*1000000 - ladder()*10000)/100;} 
 
 
   virtual void Print(Option_t *option="") const; // *MENU* 
@@ -50,8 +53,11 @@ ostream&  operator<<(ostream& os, const StMcPxlHit&);
 
 /***************************************************************************
  *
- * $Id: StMcPxlHit.hh,v 2.1 2013/03/25 23:50:36 perev Exp $
+ * $Id: StMcPxlHit.hh,v 2.2 2015/05/12 18:46:12 perev Exp $
  * $Log: StMcPxlHit.hh,v $
+ * Revision 2.2  2015/05/12 18:46:12  perev
+ * Change return uchar ==> int
+ *
  * Revision 2.1  2013/03/25 23:50:36  perev
  * Mustafa.Pxl add
  *
