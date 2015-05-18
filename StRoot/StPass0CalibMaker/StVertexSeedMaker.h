@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -46,7 +46,7 @@
  * - ematch : uncapped number of daughter tracks matched to EEMC
  * - tmatch : uncapped number of daughter tracks matched to BTOF
  * - cmatch : uncapped number of daughter tracks matched across the TPC CM
- * - hmatch : uncapped number of daughter tracks matched to HFT (not yet implemented)
+ * - hmatch : uncapped number of daughter tracks matched to HFT
  * - pmatch : uncapped number of daughter tracks with TPC prompt hits
  * - pct    : uncapped number of daughter post-crossing tracks
  * - detmap : packed information on daughter tracks matched in detectors
@@ -117,7 +117,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $ built " __DATE__ " " __TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
@@ -214,8 +214,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.24  2015/05/18 21:25:47  genevb
+// Use HFT hits
+//
 // Revision 1.23  2015/05/15 05:38:21  genevb
 // Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
 //
