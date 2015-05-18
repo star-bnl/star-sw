@@ -13,6 +13,7 @@
 #include "StEvtVtxSeedMaker.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 
 
 ClassImp(StEvtVtxSeedMaker)
@@ -76,38 +77,42 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   xvertex = pvert.x();
   eyvertex = epvert.y();
   exvertex = epvert.x();
-  // Number of good primary tracks for this vertex
-  mult = 0;
-  for (unsigned int trkn=0; trkn<primVtx->numberOfDaughters(); trkn++)
-    if (!(primVtx->daughter(trkn)->bad())) mult++;
+
   rank = primVtx->ranking();
+  mult = 0;
+  hmatch = 0;
+  itpc = 0; otpc = 0;
+  for (unsigned int trkn=0; trkn<primVtx->numberOfDaughters(); trkn++) {
+    StTrack* primTrk = primVtx->daughter(trkn);
+    if (!(primTrk->bad())) {
+      // Number of good primary tracks for this vertex
+      mult++;
+      // primary vertex class doesn't store track count with HFT hits...
+      // ...find it ourselves
+      const StTrackFitTraits& fitTraits = primTrk->fitTraits();
+      if (fitTraits.numberOfFitPoints(kPxlId) +
+          fitTraits.numberOfFitPoints(kIstId) +
+          fitTraits.numberOfFitPoints(kSsdId))
+        hmatch++;
+    }
+    // Determine TPC sub-sectors of tracks associated with this vertex
+    // pack into bits 0..23
+    StPtrVecHit hits = primTrk->detectorInfo()->hits(kTpcId);
+    for (unsigned int hitn=0; hitn<hits.size(); hitn++) {
+      StTpcHit* hit = (StTpcHit*) (hits[hitn]);
+      // TPC padrow and sector indices use 1..n
+      int mask = 1<<(hit->sector()-1);
+      if (hit->padrow() <= St_tpcPadPlanesC::instance()->innerPadRows()) itpc |= mask;
+      else otpc |= mask;
+    }
+  }
 
   const StBTofCollection* btofColl = event->btofCollection();
   const StBTofHeader* btofHeader = (btofColl ? btofColl->tofHeader() : 0);
   vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
 
-  // Determine sub-sectors of tracks associated with this vertex
-  itpc = 0; otpc = 0; detmap = 0;
-  bool ibits[24];
-  bool obits[24];
-  unsigned int hitn,trkn;
-  for (trkn=0; trkn<24; trkn++) { ibits[trkn] = false; obits[trkn] = false; }
-  for (trkn=0; trkn<primVtx->numberOfDaughters(); trkn++) {
-    StTrack* trk = primVtx->daughter(trkn);
-    StPtrVecHit hits = trk->detectorInfo()->hits(kTpcId);
-    for (hitn=0; hitn<hits.size(); hitn++) {
-      StTpcHit* hit = (StTpcHit*) (hits[hitn]);
-      if (hit->padrow() < 14) ibits[hit->sector()-1] = true;
-      else obits[hit->sector()-1] = true;
-    }
-  }
-  // pack into bits 0..23
-  for (trkn=0; trkn<24; trkn++) {
-    if (ibits[trkn]) itpc += (int) (::pow(2,trkn));
-    if (obits[trkn]) otpc += (int) (::pow(2,trkn));
-  }
-
   //detmap will store number of matches in other detectors
+  detmap = 0;
 
   // cap at 7 in detmap (bits 0,1,2)
   Packer( 0,3,bmatch,primVtx->numMatchesWithBEMC());
@@ -122,7 +127,7 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   Packer( 9,2,cmatch,primVtx->numTracksCrossingCentralMembrane());
 
   // cap at 7 in detmap (bits 11,12,13)
-  Packer(11,3,hmatch,0); // HFT matches not yet implemented
+  Packer(11,3,hmatch,hmatch);
 
   // cap at 3 in detmap (bits 14,15)
   Packer(14,2,pmatch,primVtx->numTracksWithPromptHit());
@@ -135,14 +140,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.11 2015/05/15 05:38:21 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.12 2015/05/18 21:25:31 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.11 2015/05/15 05:38:21 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.12 2015/05/18 21:25:31 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.12  2015/05/18 21:25:31  genevb
+// Use HFT hits, some streamlining of for-loops
+//
 // Revision 1.11  2015/05/15 05:38:21  genevb
 // Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
 //
