@@ -288,6 +288,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	TRandom3 R(0);
 	Double_t bgMin10 = TMath::Log10(bgMin);
 	Double_t bgMax10 = TMath::Log10(bgMax);
+#if 1
+	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+	cout << "Set kinematics: " << Kine.Data() << endl;
+	geant->Do(Kine.Data());
+	chain->EventLoop(First,Last);
+#else
 	for (Int_t ev = First; ev <= Last; ev++) {
 	  Double_t pT = -1;
 	  for (;;) {
@@ -302,6 +308,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	  geant->Do(Kine.Data());
 	  if (chain->MakeEvent()) break;
 	}
+#endif
       }
       return;
     }
