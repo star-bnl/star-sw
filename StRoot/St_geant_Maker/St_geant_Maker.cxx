@@ -688,6 +688,7 @@ St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 static TTreeIter *MuDstIter = 0;
 TString   St_geant_Maker::fgVertex("");
 TString   St_geant_Maker::fgSpread("");
+Bool_t    St_geant_Maker::fInitRunDone = kFALSE;
 
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
@@ -859,10 +860,9 @@ Int_t St_geant_Maker::Init(){
 }
 //________________________________________________________________________________
 Int_t St_geant_Maker::InitRun(Int_t run){
-  static Bool_t InitRunDone = kFALSE;
-  if (InitRunDone) return kStOK;
-  InitRunDone = kTRUE;
-  if (mInitialization != "") {
+  if (fInitRunDone) return kStOK;
+  fInitRunDone = kTRUE;
+  if (! ifz) {
     // Default cuts
     //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
     Do("CUTS     1e-3   1e-3   1e-3   1e-3   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3 50.e-6");
@@ -1714,7 +1714,7 @@ void St_geant_Maker::ClearRootGeoms()
 //_____________________________________________________________________________
 TDataSet *St_geant_Maker::Work()
 {  
-  if (mInitialization != "") {
+  if (! fInitRunDone ) {
     InitRun(-1);
   }
   struct  Medium 
@@ -2060,9 +2060,10 @@ void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
 }
 //______________________________________________________________________________
 void St_geant_Maker::Geometry() {
-   // Move the becoming obsolete ROOT representations if any
-   ClearRootGeoms();
-   geometry();
+  // Move the becoming obsolete ROOT representations if any
+  ClearRootGeoms();
+  GetDataBase("StarDb/starsim/geometry");
+  geometry();
 }
 //______________________________________________________________________________
 Int_t St_geant_Maker::Agstroot() {
