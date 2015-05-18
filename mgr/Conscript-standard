@@ -951,6 +951,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }	else { # AgiGeometry
 	foreach my $geom (@versionList) { # create geometries itself
+#	  if ( -d "./StarDb/starsim") {
+#	    my $starsim_geom = "./StarDb/starsim/geometry." . $geom . ".C";
+#	    if (! -r $starsim_geom) {
+#	      open (Out, ">$starsim_geom") or die "Can't open $starsim_geom";
+#	      print Out "
+#TDataSet *CreateTable() {
+#  if (!gROOT->GetClass(\"St_geant_Maker\")) return 0;
+#  St_geant_Maker *geant = (St_geant_Maker *) StMaker::GetChain()->Maker(\"geant\");
+#  if (! geant) return 0;
+#  TDataSet *geom = new TDataSet(\"geometry\");
+#  geant->Do(\"detp $geom\");
+#  return geom;
+#};";
+#	      close(Out);
+#	    }
+#	  }
 	  my $geom_h = $geom . ".h";
 	  my $rz = lc($geom . ".rz");
 	  if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
