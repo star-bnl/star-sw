@@ -78,11 +78,11 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
-#include "tables/St_tofTOffset_Table.h"
-#include "tables/St_tofTotbCorr_Table.h"
-#include "tables/St_tofZbCorr_Table.h"
+#include "StDetectorDbMaker/St_tofTOffsetC.h"
+#include "StDetectorDbMaker/St_tofTotbCorrC.h"
+#include "StDetectorDbMaker/St_tofZbCorrC.h"
 
-#include "tables/St_vertexSeed_Table.h"
+#include "StDetectorDbMaker/St_vertexSeedC.h"
 
 #include "StBTofUtil/tofPathLength.hh"
 #include "StBTofUtil/StBTofHitCollection.h"
@@ -97,7 +97,6 @@
 
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
-
 #ifdef __ROOT__
 ClassImp(StBTofCalibMaker)
 #endif
@@ -137,13 +136,6 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
   setCreateHistoFlag(kFALSE);
   //  setHistoFileName("btofcalib.root");
 #endif
-  // default initialization from database
-  mInitFromFile = kFALSE;
-
-  // assign default locations and names to the calibration files 
-  setCalibFileTot("/star/institutions/rice/calib/default/totCali_4DB.dat");
-  setCalibFileZhit("/star/institutions/rice/calib/default/zCali_4DB.dat");
-  setCalibFileT0("/star/institutions/rice/calib/default/t0_4DB.dat");  
 
 
   StThreeVectorD MomFstPt(0.,0.,9999.);
@@ -158,11 +150,6 @@ StBTofCalibMaker::~StBTofCalibMaker()
 //_____________________________________________________________________________
 void StBTofCalibMaker::resetPars()
 {
-  memset(mTofTotEdge, 0, sizeof(mTofTotEdge));
-  memset(mTofTotCorr, 0, sizeof(mTofTotCorr));
-  memset(mTofZEdge,   0, sizeof(mTofZEdge)  );
-  memset(mTofZCorr,   0, sizeof(mTofZCorr)  );
-  memset(mTofTZero,   0, sizeof(mTofTZero)  );
 }
 
 //_____________________________________________________________________________
@@ -252,477 +239,41 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
 //_____________________________________________________________________________
 Int_t StBTofCalibMaker::initParameters(int runnumber)
 {
-  /// initialize the calibrations parameters from dbase
-  /// read in and check the size
-
-  if (mInitFromFile){
-    LOG_INFO << "Initializing calibration parameters from files" << endm;
-    ifstream inData;
-
-    /// open file and read Time-over-Threshold calibration parameters
-    LOG_INFO << " - ToT : " << mCalibFileTot << endm;  
-    inData.open(mCalibFileTot.c_str());
-    int trayId, moduleId, cellId, boardId;
-    int nbin;
-    int iCalibType; //9=cell,8=module,7=board--Inset the number at the top of the .dat
-    inData >> iCalibType;
-
-    // move enumeration to include file
-    //enum calibtype {board=960, module=3840, cell=23040} calibType;
-    mTotCalibType = calibtype(iCalibType);
-
-    //    switch(CalibType){ //selecting the calibration parameter format 
-    switch(mTotCalibType) {
-      //cell based format
-    case CELLCALIB:
-      for(int i=0;i<mNTray;i++) {
-	for(int j=0;j<mNModule;j++) {
-	  for(int l=0;l<mNCell;l++){
-	    inData>>trayId>>moduleId>>cellId;
-	    inData>>nbin;
-	    for(int k=0;k<=nbin;k++) inData>>mTofTotEdge[trayId-1][moduleId-1][cellId-1][k];
-	    for(int k=0;k<=nbin;k++) {
-	      inData>>mTofTotCorr[trayId-1][moduleId-1][cellId-1][k];
-	      if(k%10==0&&Debug()) {
-		LOG_DEBUG << " ijlk= " << i << " " << j << " " << l << " " << k << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][k] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][k] << endm; 
-	      }
-	    }
-	  }//cell
-	}//module
-      }//tray
-      break;
-
-     case MODULECALIB: //module based
-     for(int i=0;i<mNTray;i++) {
-      for(int j=0;j<mNModule;j++) {
-        inData>>trayId>>moduleId;
-        inData>>nbin;
-
-        for(int k=0;k<=nbin;k++){
-			 inData>>mTofTotEdge[trayId-1][moduleId-1][0][k];
-				for(int l=0;l<mNCell;l++){
-				mTofTotEdge[trayId-1][moduleId-1][l][k]=mTofTotEdge[trayId-1][moduleId-1][0][k];
-				}
-	}
-        for(int k=0;k<=nbin;k++) {
-          inData>>mTofTotCorr[trayId-1][moduleId-1][0][k];
-		for(int l=0;l<mNCell;l++){
-                       mTofTotCorr[trayId-1][moduleId-1][l][k]=mTofTotCorr[trayId-1][moduleId-1][0][k];
-                }
-
-          if(k%10==0&&Debug()) {
-            LOG_DEBUG << " ijlk= " << i << " " << j << " " << 0 << " " << k << " tot " << mTofTotEdge[trayId-1][moduleId-1][0][k] << " corr " << mTofTotCorr[trayId-1][moduleId-1][0][k] << endm;
-          }
-        }
-        
-      }//module
-     }//tray
-     break;
-
-     case BOARDCALIB: //tdig based
-     for(int i=0;i<mNTray;i++) {
-      for(int j=0;j<mNTDIG;j++) {
-        inData>>trayId>>boardId;
-        inData>>nbin;
-
-        for(int k=0;k<=nbin;k++){
-	  inData>>mTofTotEdge[trayId-1][(boardId-1)*4][0][k];
-	  for(int m=0;m<4;m++){
-	    for(int l=0;l<mNCell;l++){
-	      mTofTotEdge[trayId-1][(boardId-1)*4+m][l][k] = mTofTotEdge[trayId-1][(boardId-1)*4][0][k];
-	    }//cell
-	  }//modules per board
-	}
-	for(int k=0;k<=nbin;k++) {
-	  inData>>mTofTotCorr[trayId-1][(boardId-1)*4][0][k];
-	  for(int m=0;m<4;m++){
-	    for(int l=0;l<mNCell;l++){
-	      mTofTotCorr[trayId-1][(boardId-1)*4+m][l][k] = mTofTotCorr[trayId-1][(boardId-1)*4][0][k];
-	    }//cell
-	  }//modules per board
-	  if(k%10==0&&Debug()) {
-	    LOG_DEBUG << " ijlk= " << i << " " << j*4 << " " << 0 << " " << k << " tot " << mTofTotEdge[trayId-1][(boardId-1)*4][0][k] << " corr " << mTofTotCorr[trayId-1][(boardId-1)*4][0][k] << endm;
-	  }
-	}
-     }//board
-    }//tray
-    break;
-
-  default:
-    LOG_WARN << "Please check the top of your TOT.dat file for the Calibration format.  9=cell,8=module,7=tdig. Your's is : " << mTotCalibType << endl;
-
-  }//switch
-
-    inData.close();
-
-    /// open file and read local Zhit calibration parameters
-    LOG_INFO << " - Zhit : " << mCalibFileZhit << endm;  
-    inData.open(mCalibFileZhit.c_str());
-
-    inData>>iCalibType;
-    mZCalibType = calibtype(iCalibType);
-
-    switch(mZCalibType){ //selecting the calibration parameter format 
-     case CELLCALIB: //cell based format
-     for(int i=0;i<mNTray;i++) {
-      for(int j=0;j<mNModule;j++) {
-        for(int l=0;l<mNCell;l++){
-        inData>>trayId>>moduleId>>cellId;
-        inData>>nbin;
-        for(int k=0;k<=nbin;k++) inData>>mTofZEdge[trayId-1][moduleId-1][cellId-1][k];
-        for(int k=0;k<=nbin;k++) {
-          inData>>mTofZCorr[trayId-1][moduleId-1][cellId-1][k];
-          if(k%10==0&&Debug()) {
-            LOG_DEBUG << " ijlk= " << i << " " << j << " " << l << " " << k << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][k] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][k] << endm;
-          }
-        }
-        }//cell
-      }//module
-    }//tray
-     break;
-
-     case MODULECALIB: //module based
-     for(int i=0;i<mNTray;i++) {
-      for(int j=0;j<mNModule;j++) {
-        inData>>trayId>>moduleId;
-        inData>>nbin;
-
-        for(int k=0;k<=nbin;k++){
-	  inData>>mTofZEdge[trayId-1][moduleId-1][0][k];
-	  for(int l=0;l<mNCell;l++){
-	    mTofZEdge[trayId-1][moduleId-1][l][k]=mTofZEdge[trayId-1][moduleId-1][0][k];
-	  }
-	}
-        for(int k=0;k<=nbin;k++) {
-          inData>>mTofZCorr[trayId-1][moduleId-1][0][k];
-	  for(int l=0;l<mNCell;l++){
-	    mTofZCorr[trayId-1][moduleId-1][l][k]=mTofZCorr[trayId-1][moduleId-1][0][k];
-	  }
-          if(k%10==0&&Debug()) {
-            LOG_DEBUG << " ijlk= " << i << " " << j << " " << 0 << " " << k << " tot " << mTofZEdge[trayId-1][moduleId-1][0][k] << " corr " << mTofZCorr[trayId-1][moduleId-1][0][k] << endm;
-          }
-        }
-      }//module
-     }//tray
-     break;
-
-     case BOARDCALIB: //tdig based
-     for(int i=0;i<mNTray;i++) {
-       for(int j=0;j<mNTDIG;j++) {
-	 inData>>trayId>>boardId;
-	 inData>>nbin;
-
-	 for(int k=0;k<=nbin;k++){
-           inData>>mTofZEdge[trayId-1][(boardId-1)*4][0][k];
-	   for(int m=0;m<4;m++){
-	     for(int l=0;l<mNCell;l++){
-	       mTofZEdge[trayId-1][(boardId-1)*4+m][l][k] = mTofZEdge[trayId-1][(boardId-1)*4][0][k];
-	     }//cell
-	   }//modules per board
-	 }
-	 for(int k=0;k<=nbin;k++) {
-           inData>>mTofZCorr[trayId-1][(boardId-1)*4][0][k];
-	   for(int m=0;m<4;m++){
-	     for(int l=0;l<mNCell;l++){
-	       mTofZCorr[trayId-1][(boardId-1)*4+m][l][k] = mTofZCorr[trayId-1][(boardId-1)*4][0][k];
-	     }//cell
-	   }//modules per board
-	   if(k%10==0&&Debug()) {
-            LOG_DEBUG << " ijlk= " << i << " " << j*4 << " " << 0 << " " << k << " tot " << mTofTotEdge[trayId-1][(boardId-1)*4][0][k] << " corr " << mTofTotCorr[trayId-1][(boardId-1)*4][0][k] << endm;
-	   }
-	 }//bin
-      }//board
-     }//tray
-
-
-     break;
-     default:
-        LOG_WARN << "Please check the top of your Zhit.dat file for the Calibration format.  9=cell,8=module,7=tdig. Your's is : " << mZCalibType << endl;
-
-    }//switch
-    inData.close();
-
-    /// open file and read T0 calibration parameters
-    LOG_INFO << " - T0 : " << mCalibFileT0 << endm;  
-    inData.open(mCalibFileT0.c_str());
-    //int moduleId, cellId;
-    for(int i=0;i<mNTray;i++) {
-      for(int j=0;j<mNModule;j++) {
-	for(int k=0;k<mNCell;k++) {
-	  inData>>trayId>>moduleId>>cellId;
-	  inData>>mTofTZero[trayId-1][moduleId-1][cellId-1];
-	  int index = i*mNModule*mNCell+j*mNCell+k;
-	  if(index%100==0&&Debug()) {
-	    LOG_DEBUG << " ijk= " << i << " " << j << " " << k << " t0 " << mTofTZero[trayId-1][moduleId-1][cellId-1] << endm; 
-	  }
-	}
-      }
-    }
-    inData.close();
-  }
-  else {
-
-    /// Get all calibration parameters from the database
-    LOG_INFO << "Initializing calibration parameters from database" << endm;
   
-  // read tofTotbCorr table
-    TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTotbCorr");
-    St_tofTotbCorr* tofTotCorr = static_cast<St_tofTotbCorr*>(mDbDataSet->Find("tofTotbCorr"));
-    if(!tofTotCorr) {
-      LOG_ERROR << "unable to get tof TotbCorr table parameters" << endm;
-      //    assert(tofTotCorr);
-      return kStErr;
-    }
-    tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotCorr->GetArray());
-    Int_t numRows = tofTotCorr->GetNRows();
-
-    if(numRows!=mNTray*mNTDIG && numRows!=mNTray*mNModule*mNCell && numRows!=mNTray*mNModule) {
-      LOG_WARN  << " Mis-matched number of rows in tofTotbCorr table! "  << numRows 
-		<< " (exp:" << mNTray*mNTDIG << " or " << mNTray*mNModule*mNCell << " or "<< mNTray*mNModule << ")" << endm;
-    }
-
-    LOG_INFO << " Number of rows read in: " << numRows << " for ToT correction" << endm;
-
-    // convert to calibtype
-    mTotCalibType = calibtype(numRows);
-
-    switch(mTotCalibType){
-    case CELLCALIB://cell
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      //short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-        if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell){ // trays
-	  mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].tot[j];
-	  mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
-        } 
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    case MODULECALIB://module
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      //short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-        if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule){ // trays
-	  for(Int_t k=0;k<mNCell;k++){
-          mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].tot[j];
-          mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
-	  }//duplicating entries into each cell
-        }	  
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    case BOARDCALIB://board
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-        if(trayId>0&&trayId<=mNTray&&boardId>0&&boardId<=mNTDIG){ // trays
-	  for(Int_t k=0; k<4;k++){
-	    for(Int_t l=0;l<mNCell;l++){
-              mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].tot[j];
-              mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].corr[j];
-              if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
-	   }//duplicating into cells
-	  }//duplication into modules  
-        }
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    default:
-	LOG_WARN << "Number of rows in tofTotbCorr table mis-matched. "<<endl;
-	}//end of switch
-
-
-    // read tofZbCorr table
-    mDbDataSet = GetDataBase("Calibrations/tof/tofZbCorr");
-    St_tofZbCorr* tofZCorr = static_cast<St_tofZbCorr*>(mDbDataSet->Find("tofZbCorr"));
-    if(!tofZCorr) {
-      LOG_ERROR << "unable to get tof ZbCorr table parameters" << endm;
-      //    assert(tofZCorr);
-      return kStErr;
-    }
-    tofZbCorr_st* zCorr = static_cast<tofZbCorr_st*>(tofZCorr->GetArray());
-    numRows = tofZCorr->GetNRows();
-    
-    if(numRows!=mNTray*mNTDIG && numRows!=mNTray*mNModule*mNCell && numRows !=mNTray*mNModule) {
-      LOG_WARN << " Mis-matched number of rows in tofZbCorr table! "  << numRows 
-		<< " (exp:" << mNTray*mNTDIG << " or " << mNTray*mNModule*mNCell << " or "<< mNTray*mNModule << ")" << endm;
-    }
-    LOG_INFO << " Number of rows read in: " << numRows << " for Z correction" << endm;
-
-    // convert to calibtype
-    mZCalibType = calibtype(numRows);
-
-    switch(mZCalibType){
-    case CELLCALIB://cell
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      //short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-	if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell) {  // trays
-	  mTofZEdge[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].z[j];
-	  mTofZCorr[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
-	}
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    case MODULECALIB://module
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-        if(trayId>0&&trayId<=mNTray&&boardId>0&&moduleId<=mNModule) {  // trays
-	  for(Int_t k=0;k<mNCell;k++){
-            mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].z[j];
-            mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].corr[j];
-            if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
-	  }//duplicating info to all cells
-        }
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    case BOARDCALIB://board
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short moduleId = totCorr[i].moduleId;
-      short cellId = totCorr[i].cellId;
-      short boardId = (moduleId-1)/4+1;      // used for trays
-
-      LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
-      for(Int_t j=0;j<mNBinMax;j++) {
-        if(trayId>0&&trayId<=mNTray&&boardId>0&&boardId<=mNTDIG) {  // trays
-	  for(Int_t k=0;k<4;k++){
-	    for(Int_t l=0;l<mNCell;l++){
-              mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].z[j];
-              mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
-	    }//duplicating info to cell lvl
-	  }//duplicating info to module lvl
-        }
-      } // end j 0->mNBinMax
-    } // end i 0->numRows
-    break;
-
-    default:
-	LOG_WARN << "Number of rows in tofZbCorr table mis-matched. "<<endl;
-    }//switch
-    // read tofTOffset table
-    mDbDataSet = GetDataBase("Calibrations/tof/tofTOffset");
-    St_tofTOffset* tofTOffset = static_cast<St_tofTOffset*>(mDbDataSet->Find("tofTOffset"));
-    if(!tofTOffset) {
-      LOG_ERROR << "unable to get tof TOffset table parameters" << endm;
-      //    assert(tofTOffset);
-      return kStErr;
-    }
-    tofTOffset_st* tZero = static_cast<tofTOffset_st*>(tofTOffset->GetArray());
-    numRows = tofTOffset->GetNRows();
-
-    LOG_DEBUG << " Number of rows read in: " << numRows << " for TOffset correction" << endm;
-
-    if(numRows!=mNTray) {
-      LOG_WARN << " Mis-matched number of rows in tofTOffset table! " << numRows 
-		<< " (exp:" << mNTray << ")" << endm;
-      //      return kStErr;
-    }
-    for (Int_t i=0;i<numRows;i++) {
-      short trayId = tZero[i].trayId;
-      LOG_DEBUG << " tray " << trayId << endm;
-      
-      if(trayId>0&&trayId<=mNTray) {
-	for(int j=0;j<mNTOF;j++) {
-	  mTofTZero[trayId-1][j/6][j%6] = tZero[i].T0[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; }
-	}
-      }
-    }
-  }
-
-
   // ========== Set Beam Line =====================
-    double x0 = 0.;
-    double y0 = 0.;
-    double dxdz = 0.;
-    double dydz = 0.;
-
-    // Get Current Beam Line Constraint from database
-    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
-
-    if (dbDataSet) {
-      vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
-
-      x0 = vSeed->x0;
-      y0 = vSeed->y0;
-      dxdz = vSeed->dxdz;
-      dydz = vSeed->dydz;
-    }
-    else {
-      LOG_WARN << "No database for beamline (Calibrations/rhic/vertexSeed)" << endm;
-    }
-
-    LOG_INFO << "BeamLine Constraint: " << endm;
-    LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
-    LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
-
-    //**********
-    //beam line not be calibrated yet
-    //x0 shift by 0.5
-    //x0 = 0.5;
-    //**********
-    StThreeVectorD origin(x0,y0,0.0);
-    double pt = 88889999;
-    double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
-    if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      LOG_WARN << "Beam line must be tilted!" << endm;
-      nxy=dxdz=1.e-5;
-    }
-    double p0=pt/nxy;
-    double px   = p0*dxdz;
-    double py   = p0*dydz;
-    double pz   = p0; // approximation: nx,ny<<0
-    StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-    if(mBeamHelix) delete mBeamHelix;
-    mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-
-
+  St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+  Float_t x0   = vSeed->x0()  ; 
+  Float_t y0   = vSeed->y0()  ; 
+  Float_t dxdz = vSeed->dxdz(); 
+  Float_t dydz = vSeed->dydz(); 
+  LOG_INFO << "BeamLine Constraint: " << endm;
+  LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+  LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
+  StThreeVectorD origin(x0,y0,0.0);
+  double pt = 88889999;
+  double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
+  if(nxy<1.e-5){ // beam line _MUST_ be tilted
+    LOG_WARN << "Beam line must be tilted!" << endm;
+    nxy=dxdz=1.e-5;
+  }
+  double p0=pt/nxy;
+  double px   = p0*dxdz;
+  double py   = p0*dydz;
+  double pz   = p0; // approximation: nx,ny<<0
+  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+  if(mBeamHelix) delete mBeamHelix;
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
+  
+  
   return kStOK;
 }
 
 //____________________________________________________________________________
 Int_t StBTofCalibMaker::FinishRun(int runnumber)
 {
- if(mBeamHelix) delete mBeamHelix;  
+  if(mBeamHelix) delete mBeamHelix;  
   mBeamHelix = 0;
-
+  
   return kStOK;
 }
 
@@ -743,18 +294,18 @@ Int_t StBTofCalibMaker::Make()
     LOG_WARN << "No valid calibration parameters. Skip ... " << endm;
     return kStOK;
   }
-
+  
   initEvent();
   resetVpd();
   if(mUseVpdStart) {
     loadVpdData();
   }
-
+  
   if(!mMuDstIn) processStEvent();
   else          processMuDst();
-
+  
   writeStartTime();
-
+  
   return kStOK;
 }
 
@@ -765,34 +316,34 @@ void StBTofCalibMaker::processStEvent()
   if( !mEvent ) {LOG_WARN << "No StEvent" << endm; return;}
   if (!mEvent->btofCollection()) {LOG_WARN << "No BTOFCollection" << endm; return;}
   if (!mEvent->btofCollection()->hitsPresent()) {LOG_WARN << "No hits present" << endm; return;}
-
+  
   StBTofCollection *theTof = mEvent->btofCollection();
   StSPtrVecBTofHit &tofHits = theTof->tofHits();
   Int_t nhits = tofHits.size();
   LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
-
+  
   if(mUseVpdStart) {
-
+    
     mEvtVtxZ = -9999.;
     mProjVtxZ = -9999.;
     float dcaRmin = 9999.;   
-//    float rankHmax = -1.e9;
-
+    //    float rankHmax = -1.e9;
+    
     if(mUseEventVertex) {
-//      ///
-//      /// select the vertex with highest positive rank within the VPDVtxZ cut range
-//      ///
-//       int nVtx = mEvent->numberOfPrimaryVertices();
-//       for(int i=0;i<nVtx;i++) {
-//         StPrimaryVertex *pVtx = mEvent->primaryVertex(i);
-//         if(!pVtx) continue;
-// //        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
-//         if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
-//         if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
-//         if(pVtx->ranking()<rankHmax) continue;
-//         mEvtVtxZ = pVtx->position().z();
-//         rankHmax = pVtx->ranking();
-//       }
+      //      ///
+      //      /// select the vertex with highest positive rank within the VPDVtxZ cut range
+      //      ///
+      //       int nVtx = mEvent->numberOfPrimaryVertices();
+      //       for(int i=0;i<nVtx;i++) {
+      //         StPrimaryVertex *pVtx = mEvent->primaryVertex(i);
+      //         if(!pVtx) continue;
+      // //        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+      //         if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
+      //         if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
+      //         if(pVtx->ranking()<rankHmax) continue;
+      //         mEvtVtxZ = pVtx->position().z();
+      //         rankHmax = pVtx->ranking();
+      //       }
       /// Select default primary vertex.
       //  (Future version should allow for non-default vertex selections)
       StPrimaryVertex *pVtx = mEvent->primaryVertex();
@@ -802,9 +353,9 @@ void StBTofCalibMaker::processStEvent()
       else {
         LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
       };
-
+      
       tstart(mEvtVtxZ, &mTStart, &mTDiff);
-
+      
     } else {
       ///
       /// select the projection position with smallest dcaR within the VPDVtxZ cut range
@@ -813,54 +364,54 @@ void StBTofCalibMaker::processStEvent()
         StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
         if(!aHit) continue;
         int trayId = aHit->tray();
-        if(trayId>0&&trayId<=mNTray) {
+        if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
           StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
           if(!gTrack) continue;
           StTrackGeometry *theTrackGeometry = gTrack->geometry();
- 
+	  
           StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
           StThreeVectorD beamPos = mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
           StThreeVectorD dcatof = tofPos - beamPos;
-
+	  
 	  LOG_DEBUG<<" tofPos(x,y,z) = "<<tofPos.x()<<","<<tofPos.y()<<","<<tofPos.z()<<endm;
 	  LOG_DEBUG<<"beamPos(x,y,z) = "<<beamPos.x()<<","<<beamPos.y()<<","<<beamPos.z()<<endm;
 	  LOG_DEBUG<<"  dca  (x,y,z) = "<<dcatof.x()<<","<<dcatof.y()<<","<<dcatof.z()<<endm;
 	  LOG_DEBUG<<" 2D dca        = "<<sqrt(pow(dcatof.x(),2)+pow(dcatof.y(),2))<<endm;
 	  LOG_DEBUG<<" 2D signed dca = "<<theTrackGeometry->helix().geometricSignedDistance(beamPos.x(),beamPos.y())<<endm;
-
+	  
           /// track projection z should be close to vzvpd
-          if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
-
-          if(dcaRmin>dcatof.perp()) {
-            mProjVtxZ = tofPos.z();
-            dcaRmin = dcatof.perp();
-          }
+	    if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
+	    
+	    if(dcaRmin>dcatof.perp()) {
+	      mProjVtxZ = tofPos.z();
+	      dcaRmin = dcatof.perp();
+	    }
         } // end if
       } // end loop tofhits
-
+      
       if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
       tstart(mProjVtxZ, &mTStart, &mTDiff);
-
+      
     } // end if (mUseEventVertex)
-
+    
   } else {   // Don't use VPD as the start time
-
+    
     StPrimaryVertex *pVtx = mEvent->primaryVertex();
     if(!pVtx) {
       LOG_WARN << " No primary vertex ... bye-bye" << endm;
       return;
     }
     mEvtVtxZ = pVtx->position().z();
-
+    
     tstart_NoVpd(theTof, pVtx, &mTStart);
-
+    
   }  // end if(mUseVpdStart)
   
   LOG_INFO << "primVz = " << mEvtVtxZ << " projVz = " << mProjVtxZ << "  vpdVz = " << mVPDVtxZ << endm;
   LOG_INFO << "Tstart = " << mTStart << " Tdiff = " << mTDiff  << "  NTzero = " << mNTzero << endm;
   LOG_INFO << "NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
   
-
+  
   if(mTStart<-1000.) {
     LOG_INFO << "No valid start time for this event. Skip ..." << endm;
     mValidStartTime = kFALSE;
@@ -868,150 +419,150 @@ void StBTofCalibMaker::processStEvent()
   } else {
     mValidStartTime = kTRUE;
   }
-
+  
   //---------------------------------------
   // BTof calibration
   //---------------------------------------
-
+  
   for(int i=0;i<nhits;i++) {
     StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
     if(!aHit) continue;
     int trayId = aHit->tray();
-    if(trayId<=0 || trayId>mNTray) continue;
-
+    if(trayId<=0 || trayId>St_tofCorrC::mNTray) continue;
+    
     StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
     if(!gTrack) {
       LOG_DEBUG << " No associated Track with this hit." << endm;
       continue;
     }
-
+    
     const StPtrVecTrackPidTraits& theTofPidTraits = gTrack->pidTraits(kTofId);
     if(!theTofPidTraits.size()) continue;
-
+    
     StTrackPidTraits *theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
     if(!theSelectedTrait) continue;
-
+    
     StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
     if(!pidTof) continue;
-
+    
     double tot = aHit->tot(); // ns
     double tdc = aHit->leadingEdgeTime();
     double tof = tdc - mTStart; 
     Double_t zhit = pidTof->zLocal();
-
+    
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
     Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
     if(tofcorr<0.) {
       LOG_DEBUG << " Calibration failed! ... " << endm;
       continue;
     }
-
+    
     pidTof->setTimeOfFlight((Float_t)tofcorr);
-
+    
     /// find the primary track if any
-    StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack *>(gTrack->node()->track(primary));
-    StBTofPidTraits *ppidTof = 0;
-    if(pTrack) {
-      const StPtrVecTrackPidTraits& pTofPidTraits = pTrack->pidTraits(kTofId);
-      if(!pTofPidTraits.size()) continue;
-
-      StTrackPidTraits *pSelectedTrait = pTofPidTraits[pTofPidTraits.size()-1];
-      if(!pSelectedTrait) continue;
-
-      ppidTof = dynamic_cast<StBTofPidTraits *>(pSelectedTrait);
-
-      if(ppidTof && mUseEventVertex) {
-        ppidTof->setTimeOfFlight((Float_t)tofcorr);
+      StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack *>(gTrack->node()->track(primary));
+      StBTofPidTraits *ppidTof = 0;
+      if(pTrack) {
+	const StPtrVecTrackPidTraits& pTofPidTraits = pTrack->pidTraits(kTofId);
+	if(!pTofPidTraits.size()) continue;
+	
+	StTrackPidTraits *pSelectedTrait = pTofPidTraits[pTofPidTraits.size()-1];
+	if(!pSelectedTrait) continue;
+	
+	ppidTof = dynamic_cast<StBTofPidTraits *>(pSelectedTrait);
+	
+	if(ppidTof && mUseEventVertex) {
+	  ppidTof->setTimeOfFlight((Float_t)tofcorr);
+	}
       }
-    }
-
-    /// PID calculation if the track is a "primary" track.
-    Double_t L = -9999.;
-    Double_t ptot = -9999.;
-    Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
-    if(mUseEventVertex) {
-      if(!pTrack) {
-        LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
-      } else {
-        StTrackGeometry *theTrackGeometry = pTrack->geometry();
-        const StVertex *thisVertex = pTrack->vertex();
-        if(!thisVertex) {
-          LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
-        } else {
-          StThreeVectorF primPos = thisVertex->position();
-          L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
-          ptot = pTrack->geometry()->momentum().mag();
-          doPID = kTRUE;
-        }
-      }
-
-    } else {
-
-      StTrackGeometry *theTrackGeometry = gTrack->geometry();
-      StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
-      StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
-      if(dcatof.perp()>DCARCUT) {
-        LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
-      } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
-        LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm; 
-      } else {
-        L = tofPathLength(&tofPos, &pidTof->position(), theTrackGeometry->helix().curvature());
-        ptot = gTrack->geometry()->momentum().mag();
-        if(gTrack->dcaGeometry()) {
-          ptot = gTrack->dcaGeometry()->momentum().mag();
-        }
-        doPID = kTRUE;
-      }
-
-    }
-
-    if(!doPID) continue;
-
-    Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
-
-    Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
-    Double_t b_pi = ptot/sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS);
-    Double_t b_k  = ptot/sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS);
-    Double_t b_p  = ptot/sqrt(ptot*ptot+M_PROTON*M_PROTON);
-
-    float sigmae = -9999.;
-    float sigmapi = -9999.;
-    float sigmak = -9999.; 
-    float sigmap = -9999.; 
-    float res = 0.013;  // 0.013 by default - 1/beta resolution
-    if(fabs(res)>1.e-5) {
-      sigmae = (Float_t)((1./beta-1./b_e)/res);
-      sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-      sigmak = (Float_t)((1./beta-1./b_k)/res);  
-      sigmap = (Float_t)((1./beta-1./b_p)/res);  
-    }
-
-    pidTof->setPathLength((Float_t)L);
-    pidTof->setBeta((Float_t)beta);
-    pidTof->setSigmaElectron(sigmae);
-    pidTof->setSigmaPion(sigmapi);
-    pidTof->setSigmaKaon(sigmak);
-    pidTof->setSigmaProton(sigmap);
-
-    LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
-
-    if(mUseEventVertex) {
-
-      if(ppidTof) {
-
-        ppidTof->setPathLength((Float_t)L);
-        ppidTof->setBeta((Float_t)beta);
-        ppidTof->setSigmaElectron(sigmae);
-        ppidTof->setSigmaPion(sigmapi);
-        ppidTof->setSigmaKaon(sigmak);
-        ppidTof->setSigmaProton(sigmap);
-
-        LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
-      } // end if ppidTof
-    }  // end if mUseEventVertex
-
+      
+      /// PID calculation if the track is a "primary" track.
+	Double_t L = -9999.;
+	Double_t ptot = -9999.;
+	Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
+	if(mUseEventVertex) {
+	  if(!pTrack) {
+	    LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
+	  } else {
+	    StTrackGeometry *theTrackGeometry = pTrack->geometry();
+	    const StVertex *thisVertex = pTrack->vertex();
+	    if(!thisVertex) {
+	      LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
+	    } else {
+	      StThreeVectorF primPos = thisVertex->position();
+	      L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
+	      ptot = pTrack->geometry()->momentum().mag();
+	      doPID = kTRUE;
+	    }
+	  }
+	  
+	} else {
+	  
+	  StTrackGeometry *theTrackGeometry = gTrack->geometry();
+	  StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+	  StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
+	  if(dcatof.perp()>DCARCUT) {
+	    LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
+	  } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
+	    LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm; 
+	  } else {
+	    L = tofPathLength(&tofPos, &pidTof->position(), theTrackGeometry->helix().curvature());
+	    ptot = gTrack->geometry()->momentum().mag();
+	    if(gTrack->dcaGeometry()) {
+	      ptot = gTrack->dcaGeometry()->momentum().mag();
+	    }
+	    doPID = kTRUE;
+	  }
+	  
+	}
+	
+	if(!doPID) continue;
+	
+	Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
+	
+	Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
+	Double_t b_pi = ptot/sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS);
+	Double_t b_k  = ptot/sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS);
+	Double_t b_p  = ptot/sqrt(ptot*ptot+M_PROTON*M_PROTON);
+	
+	float sigmae = -9999.;
+	float sigmapi = -9999.;
+	float sigmak = -9999.; 
+	float sigmap = -9999.; 
+	float res = 0.013;  // 0.013 by default - 1/beta resolution
+	if(fabs(res)>1.e-5) {
+	  sigmae = (Float_t)((1./beta-1./b_e)/res);
+	  sigmapi = (Float_t)((1./beta-1./b_pi)/res);
+	  sigmak = (Float_t)((1./beta-1./b_k)/res);  
+	  sigmap = (Float_t)((1./beta-1./b_p)/res);  
+	}
+	
+	pidTof->setPathLength((Float_t)L);
+	pidTof->setBeta((Float_t)beta);
+	pidTof->setSigmaElectron(sigmae);
+	pidTof->setSigmaPion(sigmapi);
+	pidTof->setSigmaKaon(sigmak);
+	pidTof->setSigmaProton(sigmap);
+	
+	LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
+	
+	if(mUseEventVertex) {
+	  
+	  if(ppidTof) {
+	    
+	    ppidTof->setPathLength((Float_t)L);
+	    ppidTof->setBeta((Float_t)beta);
+	    ppidTof->setSigmaElectron(sigmae);
+	    ppidTof->setSigmaPion(sigmapi);
+	    ppidTof->setSigmaKaon(sigmak);
+	    ppidTof->setSigmaProton(sigmap);
+	    
+	    LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
+	  } // end if ppidTof
+	}  // end if mUseEventVertex
+	
   }  // end tof hits
-
+  
   return;
 }
 
@@ -1022,34 +573,34 @@ void StBTofCalibMaker::processMuDst()
     LOG_WARN << " No MuDst ... bye-bye" << endm;
     return;
   }
-
+  
   cleanCalibMuDst();
-
+  
   Int_t nhits = mMuDst->numberOfBTofHit();
   LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
-
+  
   if(mUseVpdStart) {
-
+    
     mEvtVtxZ  = -9999.;
     mProjVtxZ = -9999.;
     float dcaRmin = 9999.;
-//    float rankHmax = -1.e9;
-
+    //    float rankHmax = -1.e9;
+    
     if(mUseEventVertex) {
-//      ///
-//      /// select the vertex with highest positive rank within the VPDVtxZ cut range
-//      ///
-//       int nVtx = mMuDst->numberOfPrimaryVertices();
-//       for(int i=0;i<nVtx;i++) {
-//         StMuPrimaryVertex* pVtx = mMuDst->primaryVertex(i);
-//         if(!pVtx) continue;
-// //        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
-//         if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
-//         if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
-//         if(pVtx->ranking()<rankHmax) continue;
-//         mEvtVtxZ = pVtx->position().z();
-//         rankHmax = pVtx->ranking();
-//       }
+      //      ///
+      //      /// select the vertex with highest positive rank within the VPDVtxZ cut range
+      //      ///
+      //       int nVtx = mMuDst->numberOfPrimaryVertices();
+      //       for(int i=0;i<nVtx;i++) {
+      //         StMuPrimaryVertex* pVtx = mMuDst->primaryVertex(i);
+      //         if(!pVtx) continue;
+      // //        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+      //         if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
+      //         if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
+      //         if(pVtx->ranking()<rankHmax) continue;
+      //         mEvtVtxZ = pVtx->position().z();
+      //         rankHmax = pVtx->ranking();
+      //       }
       /// Select default primary vertex.
       //  (Future version should allow for non-default vertex selections)
       StMuPrimaryVertex* pVtx = mMuDst->primaryVertex();
@@ -1057,11 +608,11 @@ void StBTofCalibMaker::processMuDst()
         mEvtVtxZ = pVtx->position().z();
       }
       else {
-       LOG_WARN << "No (default) primary vertex information for this (mudst) event"  << endm;
+	LOG_WARN << "No (default) primary vertex information for this (mudst) event"  << endm;
       }
-
+      
       tstart(mEvtVtxZ, &mTStart, &mTDiff);
-
+      
     } else {
       ///
       /// select the projection position with smallest dcaR within the VPDVtxZ cut range
@@ -1070,46 +621,46 @@ void StBTofCalibMaker::processMuDst()
         StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
         if(!aHit) continue;
         int trayId = aHit->tray();
-        if(trayId>0&&trayId<=mNTray) {
+        if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
           StMuTrack *gTrack = aHit->globalTrack();
           if(!gTrack) continue;
-
+	  
           StPhysicalHelixD thisHelix = gTrack->helix();
-
+	  
           StThreeVectorD tofPos =  thisHelix.at(thisHelix.pathLengths(*mBeamHelix).first);
           StThreeVectorD dcatof = tofPos - mBeamHelix->at(thisHelix.pathLengths(*mBeamHelix).second);
-
+	  
           /// track projection z should be close to vzvpd
-          if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
-
-          if(dcaRmin>dcatof.perp()) {
-            mProjVtxZ = tofPos.z();
-            dcaRmin = dcatof.perp();
-          }
+	    if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
+	    
+	    if(dcaRmin>dcatof.perp()) {
+	      mProjVtxZ = tofPos.z();
+	      dcaRmin = dcatof.perp();
+	    }
         } // end if
       } // end loop tofhits
-
+      
       if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
       tstart(mProjVtxZ, &mTStart, &mTDiff);
-
+      
     } // end if(mUseEventVertex)
   } else { // don't use vpd as the start time
-
+    
     StMuPrimaryVertex *pVtx = mMuDst->primaryVertex();
     if(!pVtx) {
       LOG_WARN << " No primary vertex ... bye-bye" << endm;
       return;
     }
     mEvtVtxZ = pVtx->position().z();
-
+    
     tstart_NoVpd(mMuDst, pVtx, &mTStart);
   }
-
+  
   LOG_INFO << "primVz = " << mEvtVtxZ << " projVz = " << mProjVtxZ << "  vpdVz = " << mVPDVtxZ  << endm;
   LOG_INFO << "Tstart = " << mTStart << " Tdiff = " << mTDiff << "  NTzero = " << mNTzero << endm;
   LOG_INFO << "NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
-
-
+  
+  
   if(mTStart<-1000.) {
     LOG_INFO << " No valid start time for this event. Skip ..." << endm;
     mValidStartTime = kFALSE;
@@ -1117,133 +668,133 @@ void StBTofCalibMaker::processMuDst()
   } else {
     mValidStartTime = kTRUE;
   }
-
+  
   //---------------------------------------
   // BTof calibration
   //---------------------------------------
-
+  
   for(int i=0;i<nhits;i++) {
     StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
     if(!aHit) continue;
     int trayId = aHit->tray();
-    if(trayId<=0 || trayId>mNTray) continue;
-
+    if(trayId<=0 || trayId>St_tofCorrC::mNTray) continue;
+    
     StMuTrack *gTrack = aHit->globalTrack();
     if(!gTrack) {
       LOG_DEBUG << " No associated Track with this hit." << endm;
       continue;
     }
-
+    
     StMuBTofPidTraits pidTof = gTrack->btofPidTraits();
-
+    
     double tot = aHit->tot(); // ns
     double tdc = aHit->leadingEdgeTime();
     while(tdc>TMAX) tdc -= TMAX;
     double tof = tdc - mTStart;
     Double_t zhit = pidTof.zLocal();
-
+    
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
     Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
     if(tofcorr<0.) {
       LOG_DEBUG << " Calibration failed! ... " << endm;
       continue;
     }
-
+    
     /// store the corrected tof information for all global matches
-    pidTof.setTimeOfFlight((Float_t)tofcorr);
-
-    /// find the primary track if any
-    StMuTrack *pTrack = aHit->primaryTrack();
-    StMuBTofPidTraits ppidTof;
-    if(pTrack) {
-      ppidTof = pTrack->btofPidTraits();
-      if(mUseEventVertex) ppidTof.setTimeOfFlight((Float_t)tofcorr);
-    }
-
-    /// PID calculation if the track is a "primary" track.
-    Double_t L = -9999.;
-    Double_t ptot = -9999.;
-    Bool_t doPID = kFALSE;
-    if(mUseEventVertex) {
-      if(!pTrack) {
-        LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
-      } else {
-        int iv = pTrack->vertexIndex();
-        StMuPrimaryVertex *thisVertex = mMuDst->primaryVertex(iv);
-        if(!thisVertex) {
-          LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
-        } else {
-          StThreeVectorF primPos = thisVertex->position();
-          StPhysicalHelixD thisHelix = pTrack->helix();
-          L = tofPathLength(&primPos, &pidTof.position(), thisHelix.curvature());
-          ptot = pTrack->momentum().mag();
-          doPID = kTRUE;
-        }
-      }
-
-    } else {
-
-      StPhysicalHelixD gHelix = gTrack->helix();
-      StThreeVectorD tofPos =  gHelix.at(gHelix.pathLengths(*mBeamHelix).first);
-      StThreeVectorD dcatof = tofPos - mBeamHelix->at(gHelix.pathLengths(*mBeamHelix).second);
-      if(dcatof.perp()>DCARCUT) {
-        LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
-      } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
-        LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm;
-      } else {
-        L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
-        ptot = gTrack->momentum().mag();
-        doPID = kTRUE;
-      }
-    }
-
-    if(doPID) {
-      Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
-
-      Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
-      Double_t b_pi = ptot/sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS);
-      Double_t b_k  = ptot/sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS);
-      Double_t b_p  = ptot/sqrt(ptot*ptot+M_PROTON*M_PROTON);
-
-      float sigmae = -9999.;
-      float sigmapi = -9999.;
-      float sigmak = -9999.;
-      float sigmap = -9999.;
-      float res = 0.013;  // 0.013 by default - 1/beta resolution
-      if(fabs(res)>1.e-5) {
-        sigmae = (Float_t)((1./beta-1./b_e)/res);
-        sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-        sigmak = (Float_t)((1./beta-1./b_k)/res);
-        sigmap = (Float_t)((1./beta-1./b_p)/res);
-      }
-
-      pidTof.setPathLength((Float_t)L);
-      pidTof.setBeta((Float_t)beta);
-      pidTof.setSigmaElectron(sigmae);
-      pidTof.setSigmaPion(sigmapi);
-      pidTof.setSigmaKaon(sigmak);
-      pidTof.setSigmaProton(sigmap);
-
-      if(mUseEventVertex && pTrack) {
-
-        ppidTof.setPathLength((Float_t)L);
-        ppidTof.setBeta((Float_t)beta);
-        ppidTof.setSigmaElectron(sigmae);
-        ppidTof.setSigmaPion(sigmapi);
-        ppidTof.setSigmaKaon(sigmak);
-        ppidTof.setSigmaProton(sigmap);
-      }
-    }
-
-    gTrack->setBTofPidTraits(pidTof);
-    LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
-
-    if(mUseEventVertex && pTrack) {
-      pTrack->setBTofPidTraits(ppidTof);
-      LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
-    }
+      pidTof.setTimeOfFlight((Float_t)tofcorr);
+      
+      /// find the primary track if any
+	StMuTrack *pTrack = aHit->primaryTrack();
+	StMuBTofPidTraits ppidTof;
+	if(pTrack) {
+	  ppidTof = pTrack->btofPidTraits();
+	  if(mUseEventVertex) ppidTof.setTimeOfFlight((Float_t)tofcorr);
+	}
+	
+	/// PID calculation if the track is a "primary" track.
+	  Double_t L = -9999.;
+	  Double_t ptot = -9999.;
+	  Bool_t doPID = kFALSE;
+	  if(mUseEventVertex) {
+	    if(!pTrack) {
+	      LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
+	    } else {
+	      int iv = pTrack->vertexIndex();
+	      StMuPrimaryVertex *thisVertex = mMuDst->primaryVertex(iv);
+	      if(!thisVertex) {
+		LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
+	      } else {
+		StThreeVectorF primPos = thisVertex->position();
+		StPhysicalHelixD thisHelix = pTrack->helix();
+		L = tofPathLength(&primPos, &pidTof.position(), thisHelix.curvature());
+		ptot = pTrack->momentum().mag();
+		doPID = kTRUE;
+	      }
+	    }
+	    
+	  } else {
+	    
+	    StPhysicalHelixD gHelix = gTrack->helix();
+	    StThreeVectorD tofPos =  gHelix.at(gHelix.pathLengths(*mBeamHelix).first);
+	    StThreeVectorD dcatof = tofPos - mBeamHelix->at(gHelix.pathLengths(*mBeamHelix).second);
+	    if(dcatof.perp()>DCARCUT) {
+	      LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
+	    } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
+	      LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm;
+	    } else {
+	      L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
+	      ptot = gTrack->momentum().mag();
+	      doPID = kTRUE;
+	    }
+	  }
+	  
+	  if(doPID) {
+	    Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
+	    
+	    Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
+	    Double_t b_pi = ptot/sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS);
+	    Double_t b_k  = ptot/sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS);
+	    Double_t b_p  = ptot/sqrt(ptot*ptot+M_PROTON*M_PROTON);
+	    
+	    float sigmae = -9999.;
+	    float sigmapi = -9999.;
+	    float sigmak = -9999.;
+	    float sigmap = -9999.;
+	    float res = 0.013;  // 0.013 by default - 1/beta resolution
+	    if(fabs(res)>1.e-5) {
+	      sigmae = (Float_t)((1./beta-1./b_e)/res);
+	      sigmapi = (Float_t)((1./beta-1./b_pi)/res);
+	      sigmak = (Float_t)((1./beta-1./b_k)/res);
+	      sigmap = (Float_t)((1./beta-1./b_p)/res);
+	    }
+	    
+	    pidTof.setPathLength((Float_t)L);
+	    pidTof.setBeta((Float_t)beta);
+	    pidTof.setSigmaElectron(sigmae);
+	    pidTof.setSigmaPion(sigmapi);
+	    pidTof.setSigmaKaon(sigmak);
+	    pidTof.setSigmaProton(sigmap);
+	    
+	    if(mUseEventVertex && pTrack) {
+	      
+	      ppidTof.setPathLength((Float_t)L);
+	      ppidTof.setBeta((Float_t)beta);
+	      ppidTof.setSigmaElectron(sigmae);
+	      ppidTof.setSigmaPion(sigmapi);
+	      ppidTof.setSigmaKaon(sigmak);
+	      ppidTof.setSigmaProton(sigmap);
+	    }
+	  }
+	  
+	  gTrack->setBTofPidTraits(pidTof);
+	  LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
+	  
+	  if(mUseEventVertex && pTrack) {
+	    pTrack->setBTofPidTraits(ppidTof);
+	    LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
+	  }
   }  // end tof hits
-
+  
   return;
 }
 
@@ -1251,7 +802,7 @@ void StBTofCalibMaker::processMuDst()
 void StBTofCalibMaker::cleanCalibMuDst()
 {
   if(!mMuDst) return;
-
+  
   Int_t nPrimary = mMuDst->numberOfPrimaryTracks();
   Int_t nGlobal = mMuDst->numberOfGlobalTracks();
   for(int i=0;i<nPrimary;i++) {
@@ -1261,7 +812,7 @@ void StBTofCalibMaker::cleanCalibMuDst()
     cleanCalib(pid);
     pTrack->setBTofPidTraits(pid);
   }
- for(int i=0;i<nGlobal;i++) {
+  for(int i=0;i<nGlobal;i++) {
     StMuTrack *gTrack = (StMuTrack *)mMuDst->globalTracks(i);
     if(!gTrack) continue;
     StMuBTofPidTraits pid = gTrack->btofPidTraits();
@@ -1329,7 +880,7 @@ void StBTofCalibMaker::loadVpdData()
    mNEast = mBTofHeader->numberOfVpdHits(east);
    mVPDVtxZ = mBTofHeader->vpdVz();
 
-   for(int i=0;i<mNVPD;i++) {
+   for(int i=0;i<St_tofCorrC::mNVPD;i++) {
      mVPDLeTime[i] = mBTofHeader->vpdTime(west, i+1);
      if(mVPDLeTime[i]>0.) mTSumWest += mVPDLeTime[i];
      if(Debug()) {
@@ -1337,11 +888,11 @@ void StBTofCalibMaker::loadVpdData()
      }
    }
 
-   for(int i=0;i<mNVPD;i++) {
-     mVPDLeTime[i+mNVPD] = mBTofHeader->vpdTime(east, i+1);
-     if(mVPDLeTime[i+mNVPD]>0.) mTSumEast += mVPDLeTime[i+mNVPD];
+   for(int i=0;i<St_tofCorrC::mNVPD;i++) {
+     mVPDLeTime[i+St_tofCorrC::mNVPD] = mBTofHeader->vpdTime(east, i+1);
+     if(mVPDLeTime[i+St_tofCorrC::mNVPD]>0.) mTSumEast += mVPDLeTime[i+St_tofCorrC::mNVPD];
      if(Debug()) {
-       LOG_DEBUG << " loading VPD East tubeId = " << i+1 << " time = " << mVPDLeTime[i+mNVPD] << endm;
+       LOG_DEBUG << " loading VPD East tubeId = " << i+1 << " time = " << mVPDLeTime[i+St_tofCorrC::mNVPD] << endm;
      }
    }
 
@@ -1371,60 +922,23 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
   	     << "\tDoing Calibration in BTOF Tray " << tray << " Module " << module << " Cell " << cell
 	     << "\n\tinput tof = " << tof
 	     << "  TOT = " << tot << "  Zlocal = " << z << endm;
-
-  
   Double_t tofcorr = tof;
-
-  tofcorr -= mTofTZero[tray-1][module-1][cell-1];
-
-  LOG_DEBUG << "T0 correction: "<<mTofTZero[tray-1][module-1][cell-1]<<endm;
-
+  tofcorr -= St_tofTOffsetC::instance()->t0(tray,module,cell);
   if(mSlewingCorr) {
-    int iTotBin = -1;
-    for(int i=0;i<mNBinMax-1;i++) {
-      if(tot>=mTofTotEdge[tray-1][module-1][cell-1][i] && tot<mTofTotEdge[tray-1][module-1][cell-1][i+1]) {
-	iTotBin = i;
-	break;
-      }
-    }
-    if(iTotBin>=0&&iTotBin<mNBinMax) {
-      double x1 = mTofTotEdge[tray-1][module-1][cell-1][iTotBin];
-      double x2 = mTofTotEdge[tray-1][module-1][cell-1][iTotBin+1];
-      double y1 = mTofTotCorr[tray-1][module-1][cell-1][iTotBin];
-      double y2 = mTofTotCorr[tray-1][module-1][cell-1][iTotBin+1];
-      double dcorr = y1 + (tot-x1)*(y2-y1)/(x2-x1);
-      LOG_DEBUG << "TOT correction: "<<dcorr<<endm; 
-
-      tofcorr -= dcorr;
-    } else {
+    Double_t dcorr = St_tofTotbCorrC::instance()->Corr(tray,module,cell,tot);
+    if (dcorr <= -9999.0) {
       LOG_DEBUG << " TOT out of range! EXIT! " << endm;
       return -9999.;
     }
-
-    int iZBin = -1;
-    for(int i=0;i<mNBinMax-1;i++) {
-      if(z>=mTofZEdge[tray-1][module-1][cell-1][i] && z<mTofZEdge[tray-1][module-1][cell-1][i+1]) {
-	iZBin = i;
-	break;
-      }
-    }
-    if(iZBin>=0&&iZBin<mNBinMax) {
-      double x1 = mTofZEdge[tray-1][module-1][cell-1][iZBin];
-      double x2 = mTofZEdge[tray-1][module-1][cell-1][iZBin+1];
-      double y1 = mTofZCorr[tray-1][module-1][cell-1][iZBin];
-      double y2 = mTofZCorr[tray-1][module-1][cell-1][iZBin+1];
-      double dcorr = y1 + (z-x1)*(y2-y1)/(x2-x1);
-
-      tofcorr -= dcorr;
-      LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
-
-    } else {
+    tofcorr -= dcorr;
+    dcorr = St_tofZbCorrC::instance()->Corr(tray,module,cell,z);
+    if (dcorr <= -9999.0) {
       LOG_DEBUG << " Z out of range! EXIT! " << endm;
       return -9999.;
     }
-    
+    tofcorr -= dcorr;
+    LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
   }
-
   LOG_DEBUG << "  Corrected tof: tofcorr = " << tofcorr << endm;
   return tofcorr;
 }
@@ -1464,7 +978,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
     StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
     if(!aHit) continue;
     int trayId = aHit->tray();
-    if(trayId>0&&trayId<=mNTray) {
+    if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
       StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
       if(!gTrack) continue;
       StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(gTrack->node()->track(primary));
@@ -1555,7 +1069,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
     StMuBTofHit *aHit = (StMuBTofHit*)muDst->btofHit(i);
     if(!aHit) continue;
     int trayId = aHit->tray();
-    if(trayId>0&&trayId<=mNTray) {
+    if(trayId>0&&trayId<=St_tofCorrC::mNTray) {
       StMuTrack *gTrack = aHit->globalTrack();
       if(!gTrack) continue;
       StMuTrack *pTrack = aHit->primaryTrack();

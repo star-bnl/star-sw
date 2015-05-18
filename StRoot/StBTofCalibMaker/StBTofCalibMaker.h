@@ -68,6 +68,7 @@ class StMuDst;
 class StMuPrimaryVertex;
 class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
+#include "StDetectorDbMaker/St_tofCorrC.h"
 
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
@@ -159,19 +160,6 @@ private:
   void writeHistograms();
         
 private:
-  enum{
-    mNTOF = 192,        // 192 for tof in Run 8++
-    mNTDIG = 8,         // 8 per tray in Run 8++
-    mNModule = 32,      // 32 for tofr5++ 
-    mNVPD = 19,         // 19 tubes at each side
-    mNCell = 6,         // 6 cells per module
-    mNBinMax = 60,      // 60 bins for T-Tot, T-Z correction
-
-    mNTray = 120,        // 120 trays in full
-    mWestVpdTrayId = 121,
-    mEastVpdTrayId = 122
-  };
-
   static const Double_t VHRBIN2PS; // Very High resolution mode, pico-second per bin
                                    // 1000*25/1024 (ps/chn)
   static const Double_t HRBIN2PS;  // High resolution mode, pico-second per bin
@@ -187,15 +175,8 @@ private:
 
     Int_t      mVPDEastHitsCut;
     Int_t      mVPDWestHitsCut;
+    Double_t   mVPDLeTime[2*St_tofCorrC::mNVPD];
 
-    Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t 
-    Float_t   mTofTotCorr[mNTray][mNModule][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
-    Float_t   mTofZEdge[mNTray][mNModule][mNCell][mNBinMax];//! boards now filled 24 times
-    Float_t   mTofZCorr[mNTray][mNModule][mNCell][mNBinMax];
-    Double_t  mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
-
-    Double_t   mVPDLeTime[2*mNVPD];
-    
     Double_t   mTSumEast;
     Double_t   mTSumWest;
     UInt_t     mVPDHitPatternEast;
@@ -219,7 +200,6 @@ private:
     Bool_t            mOuterGeometry;
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
     Bool_t            mUseEventVertex; //! switch for using event vertices
-    Bool_t            mInitFromFile; //! switch for reading from files
     Bool_t            mUseVpdStart;  //! switch for vpd start
 
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
@@ -244,7 +224,6 @@ inline void StBTofCalibMaker::setUseEventVertex(const bool val) { mUseEventVerte
 inline void StBTofCalibMaker::setMuDstIn(const bool val) { mMuDstIn = val; }
 inline void StBTofCalibMaker::setHistoFileName(const Char_t* filename){ mHistoFileName=filename; }
 inline void StBTofCalibMaker::setCreateHistoFlag(Bool_t histos)  { mHisto = histos; }
-inline void StBTofCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
 inline void StBTofCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
 inline void StBTofCalibMaker::setCalibFileTot(const Char_t* filename)  {mCalibFileTot = filename;}
 inline void StBTofCalibMaker::setCalibFileZhit(const Char_t* filename) {mCalibFileZhit = filename;}
