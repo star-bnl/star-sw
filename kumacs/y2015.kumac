@@ -41,10 +41,10 @@ macro xcut
   next
   for/file 67 y2015a-x.eps
   meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2015a)  x-cut = 1cm'
-  null -2000 2000 -1000 1000
+  title_g 'STAR Wide Angle Hall (y2015a)  x-cut'
+  null 0 400 0 400
   atitle 'Z (cm)' 'Y (cm)'
-  dcut hall x 1 0 0 1 1
+  dcut hall x 0 0 0 1 1
   close 67
 return
 macro rcut
