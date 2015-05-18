@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.15 2012/06/11 14:33:47 fisyak Exp $
+ * $Id: StDbXmlReader.cc,v 1.17 2015/05/15 19:11:44 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.17  2015/05/15 19:11:44  dmitry
+ * typo, now doing proper deallocation
+ *
+ * Revision 1.16  2015/05/15 19:07:09  dmitry
+ * small memory leak fixed
+ *
  * Revision 1.15  2012/06/11 14:33:47  fisyak
  * std namespace
  *
@@ -365,7 +371,7 @@ StDbXmlReader::fillElements(accessor* a){
 
 elem* e;
 int len,j;
-char *p1,*p2,*hlen;
+char *p1 = 0, *p2 = 0, *hlen = 0;
 int ilist;
 int iline;
 
@@ -404,6 +410,7 @@ if(p1){
    memcpy(hlen,p1,len);
    hlen[len-1]='\0';
    e->size.isize = atoi(hlen);
+   delete [] hlen;
 } 
  if(e->size.isize==0)e->size.isize=1; // <length> not required for len=1
 

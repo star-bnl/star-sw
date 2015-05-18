@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.66 2014/06/10 14:52:12 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.69 2015/05/15 19:56:09 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.69  2015/05/15 19:56:09  dmitry
+ * more cleanup
+ *
+ * Revision 1.68  2015/05/15 19:47:16  dmitry
+ * proper delete added before overwrite
+ *
+ * Revision 1.67  2015/05/15 18:55:02  dmitry
+ * redundant pointer check removed
+ *
  * Revision 1.66  2014/06/10 14:52:12  dmitry
  * Jeff L. spotted INSERT DELAYED in our API (thanks!), and I removed DELAYED keyword
  *
@@ -332,8 +341,8 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
 
 	if (mdbuser == NULL && getenv("USE_LB_LOGIN") != NULL) {
-	  mdbuser = (char *) "loadbalancer";
-	  mdbpw   = (char *) "lbdb";
+		mdbuser = (char*)"loadbalancer";
+		mdbpw = (char*)"lbdb";
 	}
 
 mhasConnected=false;
@@ -815,7 +824,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
   aBuff->SetStorageMode();
-  if (aBuff) {
+  //if (aBuff) {
     *this << "select * from " << table << " where null"<< endsql;
     *this << "insert into " << table << " set ";
     bool tFirst=true;
@@ -878,7 +887,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
       *this << endsql;
       if(mqueryState)tRetVal=true;
     };
-  };
+  //};
   //  if (!tRetVal) cout << "insert Failed"<< endl;
   if (change) aBuff->SetClientMode();
   aBuff->SetClientMode();
@@ -1062,7 +1071,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
   *tWrite='\0';
   char *tRetVal=new char[strlen(tTempVal)+1];
   strcpy(tRetVal,tTempVal);
-  if (tTempVal) delete [] tTempVal;
+  delete [] tTempVal;
   return tRetVal;
 };
   
