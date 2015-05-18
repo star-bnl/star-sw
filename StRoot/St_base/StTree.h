@@ -71,7 +71,7 @@ protected:
   void SetParAll(TList *savList);
   Int_t fNEvents; 		//  Number of written events in file
   StUKey  fUKey;          	//! Current RunEvent number 
-  char fIOMode;		//! r=ReadOnly; w=WriteOnly; u=Update;0=do nothing
+  char fIOMode;		        //! 1=ReadOnly; 2=WriteOnly; 1+2=Update;0=do nothing
   TString fFile;		//  File name
   TString fOption;		//  Option string
   TFile   *fTFile;		//! Opened TFile
