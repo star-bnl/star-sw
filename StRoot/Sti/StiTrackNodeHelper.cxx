@@ -390,14 +390,15 @@ if (!oldJoinPrim) {
       case kNewFitd: 				// Old invalid & New Fitd
         mJoinPars = mFitdPars;
         mJoinErrs = mFitdErrs;
-        kase = -1; break;
+        kase = -1; 
+	break;
 
-      case kOLdValid|kNewFitd|kJoiUnFit:	// Old valid & New Fitd & Join UnFit
-        mChi2 = 3e33;
-        mFitdPars = mPredPars;
-        mFitdErrs = mPredErrs;
-        mState = StiTrackNode::kTNReady;
-     
+//       case kOLdValid|kNewFitd|kJoiUnFit:	// Old valid & New Fitd & Join UnFit
+//         mChi2 = 3e33;
+//         mFitdPars = mPredPars;
+//         mFitdErrs = mPredErrs;
+//         mState = StiTrackNode::kTNReady;
+//      
       case kOLdValid:;				// Old valid & New UnFitd
       case kOLdValid|kNewFitd:;			// Old valid & New Fitd
 
@@ -411,8 +412,6 @@ if (!oldJoinPrim) {
 
 
 	if (kase == (kOLdValid|kNewFitd)) {	//Check errors improvements
-//VP	  assert(mHrr.hYY > mJoinErrs._cYY);
-//VP	  assert(mHrr.hZZ > mJoinErrs._cZZ);
           if (mHrr.hYY <= mJoinErrs._cYY) {
             LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
                    ,mHrr.hYY,mFitdErrs._cYY)<< endm;
@@ -433,7 +432,7 @@ if (!oldJoinPrim) {
 	chi2 = recvChi2();		//Test join Chi2
         mChi2 = 3e33;
         if (chi2>mChi2Max && mTargetNode!=mVertexNode) 
-	   				{ kase |=kJoiUnFit; break;} //join Chi2 too big
+	   				{ kase |=kJoiUnFit; return 99;} //join Chi2 too big
         mChi2 = (chi2>999)? 999:chi2;
         mState = StiTrackNode::kTNFitEnd;
         kase = -1; break;
@@ -942,7 +941,7 @@ double StiTrackNodeHelper::recvChi2()
 {
   if (fabs(mJoinPars._sinCA)>0.99        )	return 1e41;
   if (fabs(mJoinPars.eta())       >kMaxEta) 	return 1e41;
-  if (fabs(mJoinPars.curv())      >kMaxCur)      return 1e41;
+  if (fabs(mJoinPars.curv())      >kMaxCur)     return 1e41;
   if (!mDetector) {//Primary vertex
 #if 1
     // Check positiveness of mHrr

@@ -57,8 +57,8 @@ ostream& operator<<(ostream& os, const StiDetector& d)
   //    os << "StiDetector:" << endl
   os   << d.getName()
        << Form("\tR: %7.3f cm ",d.getPlacement()->getNormalRadius()) 
-       << Form("\tA: %7.3f degree", TMath::RadToDeg()*d.getPlacement()->getNormalRefAngle()) 
-       << endl;
+       << Form("\tA: %7.3f degree", TMath::RadToDeg()*d.getPlacement()->getNormalRefAngle());
+  //       << endl;
   return os;
 }
 //______________________________________________________________________________
