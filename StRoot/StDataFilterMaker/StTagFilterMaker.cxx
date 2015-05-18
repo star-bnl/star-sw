@@ -2,7 +2,7 @@
  * StTagFilterMaker
  *
  * Base class to skip production of events using
- * criteria stored in a .pre.tags.root Tag TTree
+ * criteria stored in a .pretags.root Tag TTree
  * 
  * Derived classes should implement SkipEvent()
  * to determine whether events should be skipped or not.
@@ -58,26 +58,27 @@ Int_t StTagFilterMaker::Init()
 Int_t StTagFilterMaker::InitRun(const int runnum)
 {
 
-  /// Open the input .pre.tags.root file and get the Tag tree.
-  /// If an input .prep.tags.root file has not yet been defined
-  /// then default to using an input .pre.tags.root file which
+  /// Open the input .pretags.root file and get the Tag tree.
+  /// If an input .preptags.root file has not yet been defined
+  /// then default to using an input .pretags.root file which
   /// has the same specification as a tags.root file for the
   /// current chain's input data file, but with the ".tags.root"
-  /// suffix appropriately replaced by ".pre.tags.root"
+  /// suffix appropriately replaced by ".pretags.root"
 
   if (mTagFile.IsWhitespace()){
     mTagFile = GetTFile()->GetName();
-    mTagFile.ReplaceAll(".tags.root",".pre.tags.root");
+    mTagFile.ReplaceAll(".tags.root",".pretags.root");
   }
 
-  // Open the .pre.tags.root file
+  // Open the .pretags.root file
   mFile = TFile::Open(mTagFile);
   if (! mFile ) {
     LOG_ERROR << "Input TagFile : " << mTagFile << " cannot be opened" << endm;
     return kStErr;
-  } else {
-    LOG_INFO << "Input TagFile : " << mTagFile << " opened" << endm;
   }
+  LOG_INFO << "Input TagFile : " << mTagFile << " opened" << endm;
+  mEntryList->SetDirectory(mFile); // mEntryList's directory must not be an output file
+
 
   // Get the Tag tree
   mTree = static_cast<TTree*>(mFile->Get("Tag"));
@@ -97,8 +98,8 @@ Int_t StTagFilterMaker::Make()
     LOG_ERROR << "EvtHddr has not been found" << endm;
     return kStErr;
   }
-  mEntryList->SetDirectory(gDirectory);
   /// Use TTree::Draw() to fill a TEntryList
+  mEntryList->GetDirectory()->cd(); // must be in mEntryList's directory before TTree::Draw()
   int nFound = mTree->Draw(Form(">>%s",mEntryList->GetName()),
                            Form("mRunNumber==%i&&mEventNumber==%i",
                                 EvtHddr->GetRunNumber(),EvtHddr->GetEventNumber()),
@@ -148,8 +149,14 @@ void StTagFilterMaker::Clear(const Option_t*)
 }
 
 /* -------------------------------------------------------------------------
- * $Id: StTagFilterMaker.cxx,v 1.1 2015/05/01 21:25:50 jeromel Exp $
+ * $Id: StTagFilterMaker.cxx,v 1.3 2015/05/06 18:10:22 genevb Exp $
  * $Log: StTagFilterMaker.cxx,v $
+ * Revision 1.3  2015/05/06 18:10:22  genevb
+ * Avoid letting TEntryList and histogram from TTree::Draw() getting into output files
+ *
+ * Revision 1.2  2015/05/05 20:23:42  genevb
+ * pre.tags.root => pretags.root
+ *
  * Revision 1.1  2015/05/01 21:25:50  jeromel
  * First version of the DataFiler + one imp: MTD. Code from GVB reviewed & closed (VP+JL))
  *
