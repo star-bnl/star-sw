@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.62 2014/07/01 20:28:32 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.63 2015/05/17 22:53:52 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.63  2015/05/17 22:53:52  fisyak
+ * Remove duplicted line
+ *
  * Revision 1.62  2014/07/01 20:28:32  fisyak
  * Add alternative (B) table for new TPC alignment
  *
@@ -420,8 +423,7 @@ void StTpcDb::SetTpcRotations() {
 	    rotm->RotateZ(iphi);
 	  }
 	  rotA = (*mSwap[part]) * (*mHalf[part]) * (*rotm);
-	  if (mOldScheme) rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
-	  else           rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
+	  rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
 	  break;
