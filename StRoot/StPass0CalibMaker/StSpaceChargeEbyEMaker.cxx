@@ -529,8 +529,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           UInt_t prow = 0;
           Float_t rerrors[64];
           Float_t rphierrors[64];
-          memset(rerrors,64*sizeof(Float_t),0);
-          memset(rphierrors,64*sizeof(Float_t),0);
+          memset(rerrors,0,64*sizeof(Float_t));
+          memset(rphierrors,0,64*sizeof(Float_t));
           StPtrVecHit& hits = tri->detectorInfo()->hits();
           for (k=0;k<hits.size();k++) {
             StHit* hit = hits[k];
@@ -1502,8 +1502,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.60 2015/03/11 21:38:52 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.61 2015/05/15 14:34:45 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.61  2015/05/15 14:34:45  genevb
+// Fix incorrect memset usage (RT 3093)
+//
 // Revision 1.60  2015/03/11 21:38:52  genevb
 // HFT era: no tracks with PXL or IST hits in calibration
 //

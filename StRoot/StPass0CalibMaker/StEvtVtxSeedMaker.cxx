@@ -82,6 +82,10 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
     if (!(primVtx->daughter(trkn)->bad())) mult++;
   rank = primVtx->ranking();
 
+  const StBTofCollection* btofColl = event->btofCollection();
+  const StBTofHeader* btofHeader = (btofColl ? btofColl->tofHeader() : 0);
+  vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
+
   // Determine sub-sectors of tracks associated with this vertex
   itpc = 0; otpc = 0; detmap = 0;
   bool ibits[24];
@@ -105,45 +109,46 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 
   //detmap will store number of matches in other detectors
 
-  unsigned short nBEMC = primVtx->numMatchesWithBEMC();
-  bmatch = nBEMC;
-  if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
-  // pack into bits 0,1,2
-  detmap += nBEMC;
+  // cap at 7 in detmap (bits 0,1,2)
+  Packer( 0,3,bmatch,primVtx->numMatchesWithBEMC());
 
-  unsigned short nEEMC = primVtx->numMatchesWithEEMC();
-  ematch = nEEMC;
-  if (nEEMC>7) nEEMC=7; // 7 should be enough to convince
-  // pack into bits 3,4,5
-  detmap += 8*nEEMC;
+  // cap at 7 in detmap (bits 3,4,5)
+  Packer( 3,3,ematch,primVtx->numMatchesWithEEMC());
 
-  unsigned short nBTOF = primVtx->numMatchesWithBTOF();
-  tmatch = nBTOF;
-  if (nBTOF>7) nBTOF=7; // 7 should be enough to convince
-  // pack into bits 6,7,8
-  detmap += 64*nBTOF;
+  // cap at 7 in detmap (bits 6,7,8)
+  Packer( 6,3,tmatch,primVtx->numMatchesWithBTOF());
 
-  unsigned short nCRCM = primVtx->numTracksCrossingCentralMembrane();
-  cmatch = nCRCM;
-  if (nCRCM>3) nCRCM=3; // 3 should be enough to convince
-  // pack into bits 9,10
-  detmap += 512*nCRCM;
+  // cap at 3 in detmap (bits 9,10)
+  Packer( 9,2,cmatch,primVtx->numTracksCrossingCentralMembrane());
 
-  hmatch = 0; // reserved for HFT matches
+  // cap at 7 in detmap (bits 11,12,13)
+  Packer(11,3,hmatch,0); // HFT matches not yet implemented
+
+  // cap at 3 in detmap (bits 14,15)
+  Packer(14,2,pmatch,primVtx->numTracksWithPromptHit());
+
+  // cap at 3 in detmap (bits 16,17,18)
+  Packer(16,3,pct   ,primVtx->numPostXTracks());
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.9 2013/08/14 21:42:48 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.11 2015/05/15 05:38:21 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.9 2013/08/14 21:42:48 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.11 2015/05/15 05:38:21 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.11  2015/05/15 05:38:21  genevb
+// Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
+//
+// Revision 1.10  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.9  2013/08/14 21:42:48  genevb
 // Introduce time offsets, noclobber toggle, more matched-tracks controls
 //

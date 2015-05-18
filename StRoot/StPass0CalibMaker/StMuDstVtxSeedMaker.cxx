@@ -15,6 +15,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StBTofHeader.h"
 #include "StMessMgr.h"
 
 
@@ -84,6 +85,9 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   eyvertex = epvert.y();
   exvertex = epvert.x();
 
+  StBTofHeader* btofHeader = mudst->btofHeader();
+  vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
+
   // Number of good primary tracks for this vertex
   mudst->setVertexIndex(pvn);
   mult = mudst->numberOfPrimaryTracks();
@@ -94,45 +98,46 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
 
   //detmap will store number of matches in other detectors
 
-  unsigned short nBEMC = primVtx->nBEMCMatch();
-  bmatch = nBEMC;
-  if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
-  // pack into bits 0,1,2
-  detmap += nBEMC;
+  // cap at 7 in detmap (bits 0,1,2)
+  Packer( 0,3,bmatch,primVtx->nBEMCMatch());
 
-  unsigned short nEEMC = primVtx->nEEMCMatch();
-  ematch = nEEMC;
-  if (nEEMC>7) nEEMC=7; // 7 should be enough to convince
-  // pack into bits 3,4,5
-  detmap += 8*nEEMC;
+  // cap at 7 in detmap (bits 3,4,5)
+  Packer( 3,3,ematch,primVtx->nEEMCMatch());
 
-  unsigned short nBTOF = primVtx->nBTOFMatch();
-  tmatch = nBTOF;
-  if (nBTOF>7) nBTOF=7; // 7 should be enough to convince
-  // pack into bits 6,7,8
-  detmap += 64*nBTOF;
+  // cap at 7 in detmap (bits 6,7,8)
+  Packer( 6,3,tmatch,primVtx->nBTOFMatch());
 
-  unsigned short nCRCM = primVtx->nCrossCentralMembrane();
-  cmatch = nCRCM;
-  if (nCRCM>3) nCRCM=3; // 3 should be enough to convince
-  // pack into bits 9,10
-  detmap += 512*nCRCM;
+  // cap at 3 in detmap (bits 9,10)
+  Packer( 9,2,cmatch,primVtx->nCrossCentralMembrane());
 
-  hmatch = 0; // reserved for HFT matches
+  // cap at 7 in detmap (bits 11,12,13)
+  Packer(11,3,hmatch,0); // HFT matches not yet implemented
+
+  // cap at 3 in detmap (bits 14,15)
+  Packer(14,2,pmatch,primVtx->nPromptTracks());
+
+  // cap at 3 in detmap (bits 16,17,18)
+  Packer(16,3,pct   ,primVtx->nPostXtracks());
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.13 2015/05/15 05:38:21 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.13 2015/05/15 05:38:21 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.13  2015/05/15 05:38:21  genevb
+// Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
+//
+// Revision 1.12  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.11  2013/08/14 21:42:48  genevb
 // Introduce time offsets, noclobber toggle, more matched-tracks controls
 //

@@ -105,6 +105,7 @@ ClassImp(StVertexSeedMaker)
 //_____________________________________________________________________________
 StVertexSeedMaker::StVertexSeedMaker(const char *name,
     const char* defaultDir):StMaker(name){
+  // items which should be initialized only once
   xdist = new TH1F("xdist","xdist",1000,HIST_MIN,HIST_MAX);
   ydist = new TH1F("ydist","ydist",1000,HIST_MIN,HIST_MAX);
   xerr  = new TH1F("xerr","x measured - x guess",1000,HIST_MIN,HIST_MAX);
@@ -120,24 +121,21 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   UseEventDateTime(); // By default, use the data & time from the first event
   useAllTriggers = kFALSE;
   dbTriggersTable = 0;
-  Reset();
-}
-//_____________________________________________________________________________
-void StVertexSeedMaker::Reset() {
-  minEntries = 100;   //require 100 valid verts for a seed determination
+  minEntries = 100;    //require 100 valid verts for a seed determination
   maxX0Err     = 0.05; //vertex x should be good to 500 microns
   maxY0Err     = 0.05; //vertex y should be good to 500 microns
   mHistOut=kTRUE;
   zVertexMax = 100.0;
   zVertexMin = -100.0;
   r2VertexMax = 15.0;
-  nverts = 0;
-  sumzdc = 0;
-  Clear("");
-  xguess = 0;
-  yguess = 0;
   HIST_MIN = -3.0;
   HIST_MAX =  3.0;
+  Reset();
+}
+//_____________________________________________________________________________
+void StVertexSeedMaker::Reset() {
+  // items which should be initialized for every new calibration measurement
+  Clear("");
   xdist->Reset();
   ydist->Reset();
   xerr->Reset();
@@ -148,24 +146,14 @@ void StVertexSeedMaker::Reset() {
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch:pmatch:pct:vpdz");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
 
   date = 0;
   time = 0;
-  fill = -1;
-  run = -1;
-  zdc = -1;
-  rank = 0;
-  pvn = 0;
-  itpc = 0;
-  otpc = 0;
-  detmap = 0;
-  bmatch = 0;
-  ematch = 0;
-  tmatch = 0;
-  cmatch = 0;
-  hmatch = 0;
+  nverts = 0;
+  sumzdc = 0;
+
   a[0]   = -888.0;
   //a[0]   = 0.0;
   a[1] = 0.0;
@@ -186,6 +174,10 @@ Int_t StVertexSeedMaker::Init(){
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::Clear(Option_t *option){
+  // items which should be initialized for every event
+  fill = -1;
+  run = -1;
+  zdc = -1;
   xguess = 0;
   yguess = 0;
   zvertex = -999.0;
@@ -193,6 +185,19 @@ void StVertexSeedMaker::Clear(Option_t *option){
   xvertex = -999.0; 
   exvertex = 0;
   eyvertex = 0;
+  vpd_zvertex = -999.0;
+  rank = 0;
+  pvn = 0;
+  itpc = 0;
+  otpc = 0;
+  detmap = 0;
+  bmatch = 0;
+  ematch = 0;
+  tmatch = 0;
+  cmatch = 0;
+  hmatch = 0;
+  pmatch = 0;
+  pct = 0;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Make(){
@@ -235,7 +240,7 @@ Int_t StVertexSeedMaker::Make(){
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
 
-    float XX[21];
+    float XX[24];
     XX[0]  = (float) GetEventNumber();
     XX[1]  = xvertex;
     XX[2]  = yvertex;
@@ -248,7 +253,7 @@ Int_t StVertexSeedMaker::Make(){
     XX[9]  = rank;
     XX[10] = (float) itpc;
     XX[11] = (float) otpc;
-    XX[12] = (float) detmap;
+    XX[12] = (float) detmap; // likely to be valid only up to ~23 bits
     XX[13] = exvertex;
     XX[14] = eyvertex;
     XX[15] = (float) pvn;
@@ -257,6 +262,9 @@ Int_t StVertexSeedMaker::Make(){
     XX[18] = (float) tmatch;
     XX[19] = (float) cmatch;
     XX[20] = (float) hmatch;
+    XX[21] = (float) pmatch;
+    XX[22] = (float) pct;
+    XX[23] = vpd_zvertex;
     resNtuple->Fill(XX);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
     sumzdc += zdc;
@@ -325,7 +333,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.55 2013/08/14 21:42:48 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -603,6 +611,14 @@ TNtupleD* StVertexSeedMaker::newBLpars() {
     "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
 }
 //_____________________________________________________________________________
+void StVertexSeedMaker::Packer(int firstbit, int nbits, int& var, unsigned short val) {
+  var = val;
+  // erase nbits of detmap, starting at firstbit,
+  // and fill the bits with val, capped at 2^nbits-1
+  int cap = ~((~0)<<nbits); // e.g. nbits=3 => cap=7
+  (detmap &= ~(cap<<firstbit)) |= (TMath::Min(var,cap)<<firstbit);
+}
+//_____________________________________________________________________________
 Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t offset) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
@@ -677,27 +693,35 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
     TEventList* elist = (TEventList*) gDirectory->Get("elistVtxSeed");
     Int_t nentries = (elist ? (Int_t) elist->GetN() : 0);
     Int_t nvar = curNtuple->GetNvar();
+    Int_t rvar = resNtuple->GetNvar();
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
       unsigned int tid = (unsigned int) vals[5];
       if (ValidTrigger(tid)) {
-        if (nvar < 20) {
-          // detmap should be converted...
+        if (nvar < rvar) {
           float vals2[32];
           memset(vals2,0,32*sizeof(float));
           memcpy(vals2,vals,nvar*sizeof(float));
-          detmap = (int) (vals[12]);
-          bmatch = (detmap)&7;
-          ematch = (detmap>>3)&7;
-          tmatch = (detmap>>6)&7;
-          cmatch = (detmap>>9)&3;
-          hmatch = (detmap>>11)&7;
-          vals2[16] = (float) bmatch;
-          vals2[17] = (float) ematch;
-          vals2[18] = (float) tmatch;
-          vals2[19] = (float) cmatch;
-          vals2[20] = (float) hmatch;
+          if (nvar < 20) {
+            // detmap should be converted...
+            detmap = (int) (vals[12]);
+            bmatch = (detmap)&7;
+            ematch = (detmap>>3)&7;
+            tmatch = (detmap>>6)&7;
+            cmatch = (detmap>>9)&3;
+            hmatch = (detmap>>11)&7;
+            vals2[16] = (float) bmatch;
+            vals2[17] = (float) ematch;
+            vals2[18] = (float) tmatch;
+            vals2[19] = (float) cmatch;
+            vals2[20] = (float) hmatch;
+          }
+          if (nvar < 22) {
+            vals2[21] = (float) pmatch;
+            vals2[22] = (float) pct;
+            vals2[23] = vpd_zvertex;
+          }
           resNtuple->Fill(vals2);
         } else
           resNtuple->Fill(vals);
@@ -726,8 +750,14 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.55 2013/08/14 21:42:48 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.57  2015/05/15 05:38:21  genevb
+// Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
+//
+// Revision 1.56  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.55  2013/08/14 21:42:48  genevb
 // Introduce time offsets, noclobber toggle, more matched-tracks controls
 //

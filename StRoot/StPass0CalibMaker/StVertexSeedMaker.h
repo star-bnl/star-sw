@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -39,22 +39,27 @@
  * - rank   : ranking assigned to the vertex by the vertex-finder used
  * - index  : ranking order among vertices in an event (0 = highest)
  * - mult   : number of daughter tracks for the vertex
+ * - vpdz   : z coordinate of the highest ranked VPD vertex
  * - i/otpc : bitmaps of inner/outer TPC sectors where daughter tracks have hits
  *   (bits 0-23 represent sectors 1-24)
- * - bmatch : number of daughter tracks matched to BEMC
- * - ematch : number of daughter tracks matched to EEMC
- * - tmatch : number of daughter tracks matched to BTOF
- * - cmatch : number of daughter tracks matched across the TPC CM
- * - hmatch : number of daughter tracks matched to HFT (not yet implemented)
+ * - bmatch : uncapped number of daughter tracks matched to BEMC
+ * - ematch : uncapped number of daughter tracks matched to EEMC
+ * - tmatch : uncapped number of daughter tracks matched to BTOF
+ * - cmatch : uncapped number of daughter tracks matched across the TPC CM
+ * - hmatch : uncapped number of daughter tracks matched to HFT (not yet implemented)
+ * - pmatch : uncapped number of daughter tracks with TPC prompt hits
+ * - pct    : uncapped number of daughter post-crossing tracks
  * - detmap : packed information on daughter tracks matched in detectors
  *   (the number of matched tracks is always a subset of mult)...
- *   <table>
+ *   <table cellspacing=0 cellpadding=3>
  *   <tr><th>    bits  </th><th> store the number of </th><th> capped at </th></tr>
  *   <tr><td>    0,1,2 </td><td> BEMC matches        </td><td>     7     </td></tr>
  *   <tr><td>    3,4,5 </td><td> EEMC matches        </td><td>     7     </td></tr>
  *   <tr><td>    6,7,8 </td><td> BTOF matches        </td><td>     7     </td></tr>
  *   <tr><td>     9,10 </td><td> TPC CM crossers     </td><td>     3     </td></tr>
  *   <tr><td> 11,12,13 </td><td> HFT  matches        </td><td>     7     </td></tr>
+ *   <tr><td>    14,15 </td><td> TPC prompt hits     </td><td>     3     </td></tr>
+ *   <tr><td> 16,17,18 </td><td> post-crossing tracks</td><td>     7     </td></tr>
  *   </table>
  *   ...where a cap at N means values larger than N are recorded as N.<br><br>
  *   Using TTree::Draw() methods allows the bit-shifting operator in selection cuts:<br>
@@ -112,7 +117,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
@@ -130,6 +135,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void AddResults(TNtupleD* ntup);
    virtual TString NameFile(const char* type, const char* prefix, const char* suffix);
    virtual TNtupleD* newBLpars();
+   virtual void Packer(int firstbit, int nbits, int& var, unsigned short val);
 
   TH1F* xdist;
   TH1F* ydist;
@@ -144,6 +150,7 @@ class StVertexSeedMaker : public StMaker {
   float xvertex;
   float eyvertex;
   float exvertex;
+  float vpd_zvertex;
   float mult;
   float trig;
   float HIST_MIN;
@@ -169,6 +176,8 @@ class StVertexSeedMaker : public StMaker {
   int    tmatch; // matches with BTOF
   int    cmatch; // matches across TPC Central Membrane
   int    hmatch; // matches with HFT
+  int    pmatch; // matches with TPC prompt hits
+  int    pct; // post-crossing tracks
   float  rank;
   unsigned int pvn; // primery vertex index number
   int    minEntries;
@@ -205,8 +214,14 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.21 2014/08/06 11:43:32 jeromel Exp $
+// $Id: StVertexSeedMaker.h,v 1.23 2015/05/15 05:38:21 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.23  2015/05/15 05:38:21  genevb
+// Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
+//
+// Revision 1.22  2015/05/14 20:29:25  genevb
+// Add z of VPD vertex
+//
 // Revision 1.21  2014/08/06 11:43:32  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
