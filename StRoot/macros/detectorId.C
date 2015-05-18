@@ -56,9 +56,11 @@ void detectorId(int *ids=0,const char** cds=0)
    if (tb[myE]=='}') 			break;
  }
  fclose(fp);
+#if 0
  for (int i=1;i<=ids[0];i++) {
    printf("%d = %s\n",ids[i],cds[i]);
-}   
+}
+#endif   
 
 
 
