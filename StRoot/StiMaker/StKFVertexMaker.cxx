@@ -357,8 +357,8 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (! status && cVert.NDF() <= 2) {
     extended = (StiKalmanTrackNode*) kTrack->extendToVertex(Vertex);
     if (extended) kTrack->add(extended,kOutsideIn);
+    status |= (kTrack->getInnerMostHitNode(3) != extended);
   }
-  status |= (kTrack->getInnerMostHitNode(3) != extended);
   kTrack->reduce();
   if (status) {
     kTrack->removeLastNode();
