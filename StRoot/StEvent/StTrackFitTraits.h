@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 2.21 2015/05/13 17:06:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -41,7 +41,11 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
+ * Revision 2.21  2015/05/13 17:06:14  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
+ * Revision 2.20  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  *
  * Revision 2.19  2013/07/16 14:29:04  fisyak
@@ -151,6 +155,7 @@ protected:
     UChar_t  mNumberOfFitPointsFtpcEast;
     UChar_t  mNumberOfFitPointsSvt;
     UChar_t  mNumberOfFitPointsSsd;
+    UChar_t  mNumberOfFitPointsSst;
     UChar_t  mNumberOfFitPointsPxl;
     UChar_t  mNumberOfFitPointsIst;
     Bool_t   mPrimaryVertexUsedInFit;

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.3 2014/04/10 16:00:13 jeromel Exp $
+ * $Id: StPxlHit.h,v 2.4 2015/05/13 18:05:25 ullrich Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,11 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.4  2015/05/13 18:05:25  ullrich
+ * New constructors for setting local hit position, proper initialization
+ * of all data member, modified existing constructor, new getter and
+ * setter for local hit coordinates.
+ *
  * Revision 2.3  2014/04/10 16:00:13  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
@@ -25,7 +30,6 @@
  * Initial Revision.
  * 
  **************************************************************************/
-
 #ifndef StPxlHit_hh
 #define StPxlHit_hh
 #include "StHit.h"
@@ -39,7 +43,15 @@ public:
     StPxlHit(const StThreeVectorF& position,
              const StThreeVectorF& error,
              unsigned int hwPosition, float charge, 
-             unsigned char trackRefCount = 0);
+             unsigned char trackRefCount = 0) :  StHit(position, error, hwPosition, charge, trackRefCount) {}
+    StPxlHit(const double localPos[3], unsigned int sector, unsigned int ladder,
+             unsigned int sensor, const StThreeVectorF& position, const StThreeVectorF& error,
+             unsigned int hwPosition, float charge, unsigned char trackRefCount = 0,
+             unsigned short idTruth=0, unsigned short quality=0, unsigned short id=0);
+    StPxlHit(const double localPos[3], unsigned int sector, unsigned int ladder,
+             unsigned int sensor, unsigned short idTruth);
+    StPxlHit(float meanRow, float meanColumn, unsigned int sector, unsigned int ladder,
+             unsigned int sensor);
     ~StPxlHit();
     
     virtual StDetectorId detector() const;
@@ -53,7 +65,9 @@ public:
     unsigned char layer() const ;
     
     float localPosition(unsigned int) const;
-    void setLocalPosition(float, float, float);
+    const float* localPosition() const;
+    void  setLocalPosition(float, float, float);
+    void  setLocalY(float y);
     
     void setSector(unsigned char);
     void setLadder(unsigned char);
@@ -98,7 +112,8 @@ inline float StPxlHit::meanRow() const {return mMeanRow;}
 inline float StPxlHit::meanColumn()  const {return mMeanColumn;}
 inline unsigned char StPxlHit::nRawHits() const {return mNRawHits;}
 inline unsigned char StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
-
+inline const Float_t* StPxlHit::localPosition() const { return mLocalPosition; }
+inline void StPxlHit::setLocalY(float y) { mLocalPosition[1] = y; }
 inline void StPxlHit::setSector(unsigned char v) {mSector = v;}
 inline void StPxlHit::setLadder(unsigned char v) {mLadder = v;}
 inline void StPxlHit::setSensor(unsigned char v) {mSensor = v;}

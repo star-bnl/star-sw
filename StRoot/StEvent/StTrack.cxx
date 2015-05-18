@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 1.2 2014/01/14 14:48:24 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.45 2015/05/13 17:06:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 1.2  2014/01/14 14:48:24  fisyak
- * Freeze
+ * Revision 2.45  2015/05/13 17:06:14  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
+ * Revision 2.44  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  * Revision 1.1.1.1  2013/07/23 14:13:29  fisyak
  *
@@ -163,7 +166,7 @@
 #include "StG2TrackVertexMap.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 1.2 2014/01/14 14:48:24 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.45 2015/05/13 17:06:14 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -230,11 +233,11 @@ StTrack::~StTrack()
     delete mOuterGeometry;
 }
 
-Short_t
+short
 StTrack::flag() const { return mFlag; }
 
 
-UShort_t
+unsigned short
 StTrack::encodedMethod() const { return mEncodedMethod; }
 
 bool
@@ -246,7 +249,7 @@ StTrack::finderMethod(StTrackFinderMethod bit) const
 StTrackFittingMethod
 StTrack::fittingMethod() const
 {
-    Int_t method = mEncodedMethod & 0xf;
+    int method = mEncodedMethod & 0xf;
     switch(method) {
         case kHelix2StepId:
             return kHelix2StepId;
@@ -282,25 +285,26 @@ StTrack::impactParameter() const { return mImpactParameter; }
 float
 StTrack::length() const { return mLength; }
 
-UShort_t
+unsigned short
 StTrack::numberOfPossiblePoints() const
 {
-    UShort_t result;
+    unsigned short result;
     result = numberOfPossiblePoints(kTpcId) +
     numberOfPossiblePoints(kFtpcWestId) +
     numberOfPossiblePoints(kFtpcEastId) +
     numberOfPossiblePoints(kSvtId) +
     numberOfPossiblePoints(kSsdId) +	
+    numberOfPossiblePoints(kSstId) +
     numberOfPossiblePoints(kPxlId) +
     numberOfPossiblePoints(kIstId);	
     if (type() == primary || type() == estPrimary) result++;
     return result;
 }
 
-UShort_t
+unsigned short
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
-	switch (det) {
+    switch (det) {
         case kFtpcWestId:
             return mNumberOfPossiblePointsFtpcWest;
             break;
@@ -316,6 +320,9 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
         case kSsdId:
             return mNumberOfPossiblePointsSsd;
             break;
+        case kSstId:
+            return mNumberOfPossiblePointsSst;
+            break;
         case kPxlId:
             return mNumberOfPossiblePointsPxl;
             break;
@@ -324,7 +331,7 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
             break;
         default:
             return 0;
-    }  
+    }
 }
 
 const StTrackTopologyMap&
@@ -364,7 +371,7 @@ StPtrVecTrackPidTraits
 StTrack::pidTraits(StDetectorId det) const
 {
     StPtrVecTrackPidTraits vec;
-    for (UInt_t i=0; i<mPidTraitsVec.size(); i++)
+    for (unsigned int i=0; i<mPidTraitsVec.size(); i++)
         if (mPidTraitsVec[i]->detector() == det)
             vec.push_back(mPidTraitsVec[i]);
     return vec;
@@ -383,17 +390,17 @@ StTrackNode*
 StTrack::node() { return mNode; }
 
 void
-StTrack::setFlag(Short_t val) { mFlag = val; }
+StTrack::setFlag(short val) { mFlag = val; }
 
 
 void
-StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
+StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
 
 void
-StTrack::setImpactParameter(Float_t val) { mImpactParameter = val; }
+StTrack::setImpactParameter(float val) { mImpactParameter = val; }
 
 void
-StTrack::setLength(Float_t val) { mLength = val; }
+StTrack::setLength(float val) { mLength = val; }
 
 void
 StTrack::setTopologyMap(const StTrackTopologyMap& val) { mTopologyMap = val; }
@@ -441,6 +448,9 @@ StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
         case kSsdId:
             mNumberOfPossiblePointsSsd = val;
             break;
+        case kSstId:
+            mNumberOfPossiblePointsSst = val;
+            break;
         case kPxlId:
             mNumberOfPossiblePointsPxl = val;
             break;
@@ -456,10 +466,10 @@ void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
 #include "StHelixModel.h"
-Int_t StTrack::bad() const
+int StTrack::bad() const
 {
     static const double world = 1.e+5;
-    Int_t ierr;
+    int ierr;
     if (!StMath::Finite(mImpactParameter))	return   12;
     if (!StMath::Finite(mLength)         )    	return   13;
     if (mFlag  <0                        )	return   21;
@@ -500,7 +510,7 @@ void StTrack::Streamer(TBuffer &R__b)
     // Stream an object of class .
     
     if (R__b.IsReading()) {
-        UInt_t R__s, R__c;
+        unsigned int R__s, R__c;
         Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
         if (R__v > 1) {
             Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
@@ -538,9 +548,8 @@ void StTrack::Streamer(TBuffer &R__b)
     } else {
         Class()->WriteBuffer(R__b,this);
     }
-} 
+}
 
-//________________________________________________________________________________
 
 void StTrack::setIdTruth() // match with IdTruth
 {
@@ -550,28 +559,29 @@ void StTrack::setIdTruth() // match with IdTruth
     const StPtrVecHit& vh = di->hits();
     
     typedef std::map< int,float>  myMap_t;
+    typedef std::pair<int,float>  myPair_t;
     typedef myMap_t::const_iterator myIter_t;
     myMap_t  idTruths;
     
     // 		Loop to store all the mc track keys and quality of every reco hit on the track.
-    Int_t nHits = vh.size(),id=0,qa=0;
-    for (Int_t hi=0;hi<nHits; hi++) {
-        const StHit* rHit = vh[hi]; 
+    int nHits = vh.size(),id=0,qa=0;
+    for (int hi=0;hi<nHits; hi++) {
+        const StHit* rHit = vh[hi];
         id = rHit->idTruth(); if (!id) continue;
         qa = rHit->qaTruth(); if (!qa) qa = 1;
         idTruths[id]+=qa;
     }
     if (! idTruths.size()) return;		//no simu hits
-    Int_t tkBest=-1; Float_t qaBest=0,qaSum=0;
+    int tkBest=-1; float qaBest=0,qaSum=0;
     for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
         qaSum+=(*it).second;
         if ((*it).second<qaBest)	continue;
         tkBest=(*it).first; qaBest=(*it).second;
     }
     if (tkBest < 0 || tkBest> 0xffff) return;
-    Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
+    int avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
     setIdTruth(tkBest,avgQua);
-    Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
+    int IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
     setIdParentVx(IdVx);
 }
 

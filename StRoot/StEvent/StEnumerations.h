@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.57 2015/02/14 18:57:24 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.58 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.58  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.57  2015/02/14 18:57:24  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
@@ -232,7 +235,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kBarrelSmdEtaStripId  = kBarrelSmdEtaStripIdentifier,
                    kBarrelSmdPhiStripId  = kBarrelSmdPhiStripIdentifier,
                    kEndcapEmcTowerId     = kEndcapEmcTowerIdentifier,
-                   kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier, // 16
+                   kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier,
                    kEndcapSmdUStripId    = kEndcapSmdUStripIdentifier,
                    kEndcapSmdVStripId    = kEndcapSmdVStripIdentifier,
                    kZdcWestId   = kZdcWestIdentifier,
@@ -248,13 +251,14 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kPxlId       = kPxlIdentifier,
                    kIstId       = kIstIdentifier,
                    kFgtId       = kFgtIdentifier,
-                   kEtrId       = kEtrIdentifier,                         // 32
+                   kEtrId       = kEtrIdentifier,
                    kFpdWestId   = kFpdWestIdentifier,
                    kFpdEastId   = kFpdEastIdentifier, 
                    kFmsId       = kFmsIdentifier,  
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
 		   kGmtId       = kGmtIdentifier,
+                   kSstId       = kSstIdentifier,
                    kMaxDetectorId = 40};
 
 /*!

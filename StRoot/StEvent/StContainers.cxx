@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.32 2015/02/14 18:57:24 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.33 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.33  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
  * Revision 2.32  2015/02/14 18:57:24  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
@@ -111,6 +114,7 @@
 #include "StDetectorState.h"
 #include "StSvtHit.h"
 #include "StSsdHit.h"
+#include "StSstHit.h"
 #include "StTpcHit.h"
 #include "StFtpcHit.h"
 #include "StEtrHit.h"
@@ -177,6 +181,7 @@ StCollectionImp(PrimaryVertex)
 StCollectionImp(Psd)
 StCollectionImp(SvtHit)
 StCollectionImp(SsdHit)
+StCollectionImp(SstHit)
 StCollectionImp(TpcHit)
 StCollectionImp(FtpcHit)
 StCollectionImp(EtrHit)

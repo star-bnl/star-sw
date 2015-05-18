@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.45 2015/02/14 18:57:24 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.47 2015/05/15 14:59:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.47  2015/05/15 14:59:46  ullrich
+ * Corrected typo.
+ *
+ * Revision 2.46  2015/05/15 14:48:56  ullrich
+ * Added Sst.
+ *
  * Revision 2.45  2015/02/14 18:57:24  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
@@ -244,6 +250,10 @@
 #include "StSsdHitCollection.h"
 #include "StSsdLadderHitCollection.h"
 #include "StSsdWaferHitCollection.h"
+#include "StSstHit.h"
+#include "StSstHitCollection.h"
+#include "StSstLadderHitCollection.h"
+#include "StSstWaferHitCollection.h"
 #include "StSvtHit.h"
 #include "StSvtHitCollection.h"
 #include "StSvtLadderHitCollection.h"

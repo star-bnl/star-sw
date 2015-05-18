@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.29 2015/05/13 17:06:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,7 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
+ * Revision 2.29  2015/05/13 17:06:14  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
+ *
+ * Revision 2.28  2013/11/13 19:19:40  ullrich
+ * Removed cause of warnings.
  *
  *
  * Revision 2.26  2013/07/16 14:29:04  fisyak
@@ -109,9 +113,8 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.29 2015/05/13 17:06:14 ullrich Exp $";
 
-//_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits()
 {
     mPidHypothesis = 0;
@@ -121,6 +124,7 @@ StTrackFitTraits::StTrackFitTraits()
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsSst = 0;
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
@@ -141,6 +145,7 @@ StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsSst = 0;
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
@@ -163,8 +168,7 @@ StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
     mPrimaryVertexUsedInFit = false;
 }
 
-//_____________________________________________________________________________
-StTrackFitTraits::~StTrackFitTraits() {/* noop */}
+StTrackFitTraits::~StTrackFitTraits() {/* no op */}
 
 //_____________________________________________________________________________
 UShort_t StTrackFitTraits::numberOfFitPoints() const
@@ -190,7 +194,7 @@ UShort_t StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
     //
     // Old and obsolete
     //
-    if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {    
+    if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {
         // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
         switch (det) {
             case kFtpcWestId:
@@ -208,6 +212,7 @@ UShort_t StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
                 return 0;
         }
     }
+    
     //
     // New version
     //
@@ -228,6 +233,9 @@ UShort_t StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
             case kSsdId:
                 return mNumberOfFitPointsSsd;
                 break;
+            case kSstId:
+                return mNumberOfFitPointsSst;
+                break;
             case kPxlId:
                 return mNumberOfFitPointsPxl;
                 break;
@@ -241,13 +249,13 @@ UShort_t StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
                 + mNumberOfFitPointsTpc
                 + mNumberOfFitPointsSvt
                 + mNumberOfFitPointsSsd
+                + mNumberOfFitPointsSst
                 + mNumberOfFitPointsPxl
                 + mNumberOfFitPointsIst;
         }
     }
 }
 
-//_____________________________________________________________________________
 StParticleDefinition* StTrackFitTraits::pidHypothesis() const
 {
     return StParticleTable::instance()->findParticleByGeantId(mPidHypothesis);
@@ -262,7 +270,6 @@ Double_t StTrackFitTraits::chi2(UInt_t i) const
         return 0;
 }
 
-//_____________________________________________________________________________
 StMatrixF StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
@@ -312,7 +319,7 @@ StMatrixF StTrackFitTraits::covariantMatrix() const
         m(3,4) = m(4,3) = mCovariantMatrix[10];
         m(3,5) = m(5,3) = mCovariantMatrix[11];
         m(4,4) = mCovariantMatrix[12];			//PsiPsi deg
-        m(4,5) = m(5,4) = mCovariantMatrix[13];		
+        m(4,5) = m(5,4) = mCovariantMatrix[13];
         m(5,5) = mCovariantMatrix[14];			//PtiPti
     } 
     else if (mCovariantMatrix.GetSize() == 9) {
@@ -336,10 +343,8 @@ StMatrixF StTrackFitTraits::covariantMatrix() const
 bool StTrackFitTraits::primaryVertexUsedInFit() const
 { return mPrimaryVertexUsedInFit;}
 
-//_____________________________________________________________________________
 void StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
     mNumberOfFitPoints|=  0x8000;  // make sure old method is NOT active
@@ -361,6 +366,9 @@ void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
         case kSsdId:
             mNumberOfFitPointsSsd = val;
             break;
+        case kSstId:
+            mNumberOfFitPointsSst = val;
+            break;
         case kPxlId:
             mNumberOfFitPointsPxl = val;
             break;
@@ -373,7 +381,6 @@ void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
     }
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::setPrimaryVertexUsedInFit(bool val)
 {mPrimaryVertexUsedInFit = val;}
 
@@ -400,7 +407,6 @@ void StTrackFitTraits::setCovariantMatrix(TArrayF &cov)
     mCovariantMatrix = cov;
 }
 
-//_____________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
     //        Stream an object of class StTrackFitTraits.

@@ -104,10 +104,15 @@
 #define kEtrIdentifier                35
 
 /*
+ **  The following are for the SST (Beware: not same as SSD)
+ */
+#define kSstIdentifier                36
+/*
 **  The following is the addition of the GEM chambers
 **  to improve TPC tracking and alignment. RW (Mar 27, 2013)
 */
-#define kGmtIdentifier                36
+#define kGmtIdentifier                37
+
 
 /*
 **  The following are more or less virtual detectors.
@@ -125,14 +130,11 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 1.2 2013/08/31 12:42:34 fisyak Exp $
+/* $Id: StDetectorDefinitions.h,v 2.11 2015/05/13 17:06:13 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
-** Revision 1.2  2013/08/31 12:42:34  fisyak
-** Add Gmt
-**
-** Revision 1.1.1.1  2013/07/23 14:13:29  fisyak
-**
+** Revision 2.11  2015/05/13 17:06:13  ullrich
+** Added hooks and interfaces to Sst detector (part of HFT).
 **
 ** Revision 2.10  2012/01/24 02:58:21  perev
 ** Etr detector added

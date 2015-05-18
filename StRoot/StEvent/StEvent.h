@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.2 2013/08/31 12:42:34 fisyak Exp $
+ * $Id: StEvent.h,v 2.48 2015/05/13 17:06:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,11 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.2  2013/08/31 12:42:34  fisyak
- * Add Gmt
+ * Revision 2.48  2015/05/13 17:06:13  ullrich
+ * Added hooks and interfaces to Sst detector (part of HFT).
  *
- * Revision 1.1.1.1  2013/07/23 14:13:29  fisyak
- *
+ * Revision 2.47  2014/04/10 16:00:13  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
  * Revision 2.46  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
@@ -182,6 +182,7 @@ class StTpcHitCollection;
 class StFtpcHitCollection;
 class StSvtHitCollection;
 class StSsdHitCollection;
+class StSstHitCollection;
 class StEtrHitCollection;
 class StEmcCollection;
 class StFmsCollection;
@@ -241,6 +242,8 @@ public:
     const StSvtHitCollection*           svtHitCollection() const;
     StSsdHitCollection*                 ssdHitCollection();
     const StSsdHitCollection*           ssdHitCollection() const;
+    StSstHitCollection*                 sstHitCollection();
+    const StSstHitCollection*           sstHitCollection() const;
     StEmcCollection*                    emcCollection();
     const StEmcCollection*              emcCollection() const;
     StFmsCollection*                    fmsCollection();
@@ -343,6 +346,7 @@ public:
     void setFtpcHitCollection(StFtpcHitCollection*);
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);
+    void setSstHitCollection(StSstHitCollection*);
     void setPxlHitCollection(StPxlHitCollection*);
     void setIstHitCollection(StIstHitCollection*);
     void setEmcCollection(StEmcCollection*);
