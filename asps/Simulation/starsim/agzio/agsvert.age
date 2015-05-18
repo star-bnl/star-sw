@@ -38,8 +38,8 @@
      Integer  NtBeam,NtTarg,NU,IVmode,Iv,Nv,Iprin,
               LgVERT,JVERT,JV,IDevt0/-999/
      Real     RNDM,VDIST,VMOD,Vertex(4),UBUF(*),Vxyz(4)
-     REAL     a,b,d,z,d1,Vcut/0.0001/,Xscale/1./,Tscale/1./
-     Real     my_x, my_y
+     REAL     a,b,d,z,d1,Vcut/0.0005/,Xscale/1./,Tscale/1./
+     Real     my_x, my_y, dist12
      character cmod*15
 *
      Iprin=Idebug; Nv=0
@@ -72,7 +72,10 @@
           Check NtBeam == Q(JV+5)
           Check NtTarg == Q(JV+6)
           If NtBeam!=0 { If (D1>0) Call UCOPY(Vxyz,Q(JV+1),4); }
-          else         { If (VDIST(Q(JV+1),Vxyz,4)>Vcut) Next; }
+          else { 
+	    dist12 = VDIST(Q(JV+1),Vxyz,4)
+            If (dist12>Vcut) Next; 
+	  }
           Nv=Iv; Return
         Enddo
       endif
@@ -85,9 +88,9 @@
 *       set units for external vertex
       Entry agsvertset (IvMode)
       Iprin=Idebug
-      If IvMode==0 { cmod='geant native'; VCUT=.0001; Xscale=1;  Tscale=1;  }
-      If IvMode==1 { cmod='ATLAS GENZ';  VCUT=.0001; Xscale=100; Tscale=1;  }
-      If IvMode==2 { cmod='STAR PYTHYA'; VCUT=.0001; Xscale=.1; Tscale=.33e-11}
+      If IvMode==0 { cmod='geant native'; VCUT=0.0005; Xscale=1;  Tscale=1;  }
+      If IvMode==1 { cmod='ATLAS GENZ';  VCUT=0.0005; Xscale=100; Tscale=1;  }
+      If IvMode==2 { cmod='STAR PYTHYA'; VCUT=0.0005; Xscale=.1; Tscale=.33e-11}
       Prin2 IvMode,Cmod,Vcut,Xscale,Tscale;
       (' AgSVERT Mode=',i3,2x,a,' cut=',F8.4,',  scale=',F7.1,'cm  ',G12.3,'s')
 END
