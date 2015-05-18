@@ -293,6 +293,7 @@ Int_t StBTofSimMaker::VpdResponse(g2t_vpd_hit_st* vpd_hit)
 
 	// module '0' below means VPD hit 
 	StMcBTofHit *mcHit = new StMcBTofHit(itray,0,itube,de,pathL,t0,tof,q);
+	mcHit->setParentTrackId(TrackId);
 	storeMcBTofHit(mcHit);
 	mVpdHitFlag[(itray-121)*mNVPD+(itube-1)] = 1;
 
@@ -677,7 +678,7 @@ Int_t StBTofSimMaker::fillEvent()
 	    aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
 	    aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
 	    aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
-	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 0);
+	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 100);
 	    mBTofCollection->addHit(new StBTofHit(aBTofHit));
 
 	    //Fill the StBTofRawHit
@@ -692,6 +693,7 @@ Int_t StBTofSimMaker::fillEvent()
 
 	  //Fill StBTofHeader -- 	
 	  StBTofHeader aHead;
+	  
 	  mBTofCollection->setHeader(new StBTofHeader(aHead));
 
 
