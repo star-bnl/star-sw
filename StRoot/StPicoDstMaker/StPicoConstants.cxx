@@ -179,7 +179,7 @@ Int_t Pico::mTriggerIdMtd[nTriggerMtd] = {
   // track selection
    Float_t Pico::mPtMin = 0.1;
    Int_t   Pico::mNHitsFitMin = 15;               // >=
-   Float_t Pico::mRatioMin = 0.52;
+   Float_t Pico::mRatioMin = 0.;
    Float_t Pico::mGDcaMax = 10.;
 
    Float_t Pico::mPtTpcFlowMax = 2.0;

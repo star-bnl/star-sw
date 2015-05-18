@@ -11,9 +11,9 @@ ClassImp(StPicoTrack)
 
 //----------------------------------------------------------------------------------
 StPicoTrack::StPicoTrack() : mId(0), mChi2(Pico::USHORTMAX), mPMomentum(0., 0., 0.), mDedx(0),
-   mNHitsFit(0), mNHitsDedx(0), mNSigmaPion(Pico::SHORTMAX), mNSigmaKaon(Pico::SHORTMAX),
-   mNSigmaProton(Pico::SHORTMAX), mNSigmaElectron(Pico::SHORTMAX), mNHitsMapHFT(0),
-   mFirstTpcHitRow(0), mLastTpcHitRow(0), mPar(), mErrMatrix(), mEmcPidTraitsIndex(-1),
+   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mNSigmaPion(Pico::SHORTMAX), mNSigmaKaon(Pico::SHORTMAX),
+   mNSigmaProton(Pico::SHORTMAX), mNSigmaElectron(Pico::SHORTMAX),
+   mMap0(0), mMap1(0), mPar(), mErrMatrix(), mEmcPidTraitsIndex(-1),
    mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1)
 {
 }
@@ -24,9 +24,9 @@ StPicoTrack::StPicoTrack() : mId(0), mChi2(Pico::USHORTMAX), mPMomentum(0., 0., 
 //----------------------------------------------------------------------------------
 StPicoTrack::StPicoTrack(StMuTrack* t, StMuTrack* p, float phi_weight, int flowFlag, double B, StDcaGeometry* dcaG)
 : mId(0), mChi2(Pico::USHORTMAX), mPMomentum(0., 0., 0.), mDedx(0),
-   mNHitsFit(0), mNHitsDedx(0), mNSigmaPion(Pico::SHORTMAX), mNSigmaKaon(Pico::SHORTMAX),
-   mNSigmaProton(Pico::SHORTMAX), mNSigmaElectron(Pico::SHORTMAX), mNHitsMapHFT(0),
-   mFirstTpcHitRow(0), mLastTpcHitRow(0), mPar(), mErrMatrix(), mEmcPidTraitsIndex(-1),
+   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0), mNSigmaPion(Pico::SHORTMAX), mNSigmaKaon(Pico::SHORTMAX),
+   mNSigmaProton(Pico::SHORTMAX), mNSigmaElectron(Pico::SHORTMAX),                 
+   mMap0(0), mMap1(0), mPar(), mErrMatrix(), mEmcPidTraitsIndex(-1),                   
    mBTofPidTraitsIndex(-1), mMtdPidTraitsIndex(-1)
 
 {
@@ -47,17 +47,20 @@ StPicoTrack::StPicoTrack(StMuTrack* t, StMuTrack* p, float phi_weight, int flowF
       int flag = t->flag();
       if (flag / 100 < 7) // TPC tracks
       {
-         mNHitsFit  = (UChar_t)(t->nHitsFit(kTpcId) * q);
+         mNHitsFit  = (Char_t)(t->nHitsFit(kTpcId) * q);
+         mNHitsMax  = (UChar_t)(t->nHitsPoss(kTpcId));
       }
       else     // FTPC tracks
       {
          if (t->helix().momentum(B * kilogauss).pseudoRapidity() > 0.)
          {
-            mNHitsFit  = (UChar_t)(t->nHitsFit(kFtpcWestId) * q);
+            mNHitsFit  = (Char_t)(t->nHitsFit(kFtpcWestId) * q);
+            mNHitsMax  = (UChar_t)(t->nHitsPoss(kFtpcWestId));
          }
          else
          {
-            mNHitsFit  = (UChar_t)(t->nHitsFit(kFtpcEastId) * q);
+            mNHitsFit  = (Char_t)(t->nHitsFit(kFtpcEastId) * q);
+            mNHitsMax  = (UChar_t)(t->nHitsPoss(kFtpcEastId));
          }
       }
       mNHitsDedx = (Char_t)(t->nHitsDedx());
@@ -66,6 +69,10 @@ StPicoTrack::StPicoTrack(StMuTrack* t, StMuTrack* p, float phi_weight, int flowF
       mNSigmaProton   = (fabs(t->nSigmaProton() * 100.) > Pico::SHORTMAX) ? Pico::SHORTMAX : (Short_t)(TMath::Nint(t->nSigmaProton() * 100.));
       mNSigmaElectron = (fabs(t->nSigmaElectron() * 100.) > Pico::SHORTMAX) ? Pico::SHORTMAX : (Short_t)(TMath::Nint(t->nSigmaElectron() * 100.));
 
+      mMap0 = (UInt_t)(t->topologyMap().data(0));
+      mMap1 = (UInt_t)(t->topologyMap().data(1));
+
+/*
       unsigned int map0 = t->topologyMap().data(0);
       unsigned int map1 = t->topologyMap().data(1);
       mNHitsMapHFT = map0 >> 1 & 0x7F; // see hitMap definition in StTrackTopologyMap
@@ -109,7 +116,7 @@ StPicoTrack::StPicoTrack(StMuTrack* t, StMuTrack* p, float phi_weight, int flowF
             }
          }
       }
-
+*/
 
       if (dcaG)
       {

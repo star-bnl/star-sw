@@ -19,30 +19,31 @@ StPicoCut::~StPicoCut() {}
 bool StPicoCut::passEvent( StMuEvent *ev )
 {
   if(!ev){
-//    LOG_INFO << "StPicoCut::passEvent  No StMuEvent" << endm;
+    LOG_INFO << "StPicoCut::passEvent  No StMuEvent" << endm;
     return kFALSE;
   }
-  StThreeVectorF pVertex = ev->eventSummary().primaryVertexPosition();
+//  StThreeVectorF pVertex = ev->eventSummary().primaryVertexPosition();
+  StThreeVectorF pVertex = ev->primaryVertexPosition();
   if(fabs(pVertex.x())<1.e-5 && fabs(pVertex.y())<1.e-5 && fabs(pVertex.z())<1.e-5){
-//   LOG_INFO << "StPicoCut::passEvent  bad vertices (x,y,z) = ("
-//            << pVertex.x() << ","
-//            << pVertex.y() << ","
-//            << pVertex.z() << ")"
-//            << endm;
+   LOG_INFO << "StPicoCut::passEvent  bad vertices (x,y,z) = ("
+            << pVertex.x() << ","
+            << pVertex.y() << ","
+            << pVertex.z() << ")"
+            << endm;
     return kFALSE;
   }
   if(fabs(pVertex.z())>Pico::mVzMax){
-//    LOG_INFO << "StPicoCut::passEvent  z-vertex out of range, vz = " << pVertex.z() << endm;
+    LOG_INFO << "StPicoCut::passEvent  z-vertex out of range, vz  (evtSum)=" << pVertex.z() << " (direct)=" << ev->primaryVertexPosition().z() << endm;
     return kFALSE;
   }
 
   const Float_t vx = pVertex.x() ;
   const Float_t vy = pVertex.y() ;
   if(sqrt(vx*vx+vy*vy)>Pico::mVrMax){
-//    LOG_INFO << "StPicoCut::passEvent  vr-vertex out of range, vr = " << sqrt(vx*vx+vy*vy)
-//      << ",  vx = " << vx
-//      << ",  vy = " << vy
-//      << endm;
+    LOG_INFO << "StPicoCut::passEvent  vr-vertex out of range, vr = " << sqrt(vx*vx+vy*vy)
+      << ",  vx = " << vx
+      << ",  vy = " << vy
+      << endm;
     return kFALSE ;
   }
 
@@ -63,9 +64,15 @@ bool StPicoCut::passEvent( StMuEvent *ev )
     }
   }
 
-  if(!isTrg) return kFALSE;
+  if(!isTrg) {
+    LOG_INFO << "StPicoCut::passEvent trigger not fired " << endm;
+    return kFALSE;
+  }
 
-  if(ev->refMult()<Pico::mRefMultMin) return kFALSE;
+  if(ev->refMult()<Pico::mRefMultMin) {
+    LOG_INFO << "StPicoCut::passEvent refMult out of range, refMult = " << ev->refMult() << endm;
+    return kFALSE;
+  }
 
   return kTRUE;
 }

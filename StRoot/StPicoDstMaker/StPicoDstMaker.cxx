@@ -569,9 +569,13 @@ Int_t StPicoDstMaker::MakeWrite() {
   mCentrality = centrality(refMult);
   mBField = mMuEvent->magneticField();
 
+  StThreeVectorF pVtx(0.,0.,0.);
+  if(mMuDst->primaryVertex()) pVtx = mMuDst->primaryVertex()->position();
 
+  LOG_DEBUG << " eventId = " << mMuEvent->eventId() << " refMult = " << refMult << " vtx = " << pVtx << endm;
 
   if(mPicoCut->passEvent(mMuEvent)) {  // keep all events in pp collisions to monitor triggers
+
     fillTracks();
 
     if(!mCreatingPhiWgt) {
@@ -699,6 +703,8 @@ void StPicoDstMaker::fillTracks() {
 	picoTrk->setMtdPidTraitsIndex(emc_index);
       }
   }
+
+//  cout << "   ++ track branch size = " <<  mPicoArrays[picoTrack]->GetEntries() << endl;
 }
 
 //-----------------------------------------------------------------------

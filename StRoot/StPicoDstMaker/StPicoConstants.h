@@ -72,7 +72,7 @@ public:
   // track selection
   static Float_t mPtMin;// = 0.1;
   static Int_t mNHitsFitMin;// = 15;                 // >=
-  static Float_t mRatioMin;// = 0.52;
+  static Float_t mRatioMin;// = 0; //0.52;  -> removed for Run14 AuAu200GeV
   static Float_t mGDcaMax;// = 10.;
     
   static Float_t mPtTpcFlowMax;// = 2.0;
