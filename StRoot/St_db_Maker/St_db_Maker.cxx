@@ -10,8 +10,17 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.133 2014/07/28 14:19:36 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.136 2015/05/16 02:34:05 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.136  2015/05/16 02:34:05  perev
+// bug #3101 Cleanup
+//
+// Revision 1.135  2015/05/05 21:05:52  dmitry
+// Updated db disconnect handling. Keep connection if less than 30 sec passed since last data retrieval
+//
+// Revision 1.134  2015/05/05 20:42:14  dmitry
+// dynamic db disconnects handling
+//
 // Revision 1.133  2014/07/28 14:19:36  dmitry
 // fixed templated call to make it compliant with gcc 4.8.2
 //
@@ -289,6 +298,7 @@
 #include "TAttr.h"
 #include "StValiSet.h"
 
+#include <numeric>
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
 
@@ -363,6 +373,7 @@ St_db_Maker::St_db_Maker(const char *name
    fDataBase = 0;
    fUpdateMode = 0;
    TUnixTime ut;
+   fQueryTs = time(NULL);
    fMaxEntryTime = ut.GetUTime();
 }
 //_____________________________________________________________________________
@@ -490,6 +501,9 @@ void St_db_Maker::Clear(const char *opt)
   if (fDataSize[0]) fEvents[1]++;
   fDataSize[1]+=fDataSize[0];
   fDataSize[0]=0;
+
+  time_t now = time(NULL);
+  if ( ( now - fQueryTs ) < 30 ) { return; } // do not call dbbroker->release if less than 30 sec from last query
 
   fDBBroker->Release();
   StMaker::Clear(opt);
@@ -635,6 +649,8 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
 
   assert(fDBBroker);assert(dat);
 
+  
+
   fDBBroker->SetDateTime(req.GetDate(),req.GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
   fTimer[1].Stop();
@@ -754,6 +770,7 @@ static int nCall=0; nCall++;
     assert(val->fTabId==val->fDat->GetUniqueID());
     int ierr = UpdateTable(val->fParId,(TTable*)val->fDat,currenTime,valsSQL );
     if (!ierr) kase = 1;
+	fQueryTs = time(NULL);
   }
 
   left = FindLeft(val,valsCINT,currenTime);
@@ -914,7 +931,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 {
   TDataSet *set;
-  StValiSet *pseudo;
+  StValiSet *pseudo = 0;
   const char *dsname,*filename,*dot;
   char psname[100];
   //int ldsname,lpsname;
@@ -962,6 +979,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 
     set->Shunt(pseudo);
     if (isSql) {
+      assert(pseudo);
       pseudo->fTabId = set->GetUniqueID();      // save SQL  Id
       pseudo->fDat=set;                         // save SQL  object
                                                 // for future validity requests
