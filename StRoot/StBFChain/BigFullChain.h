@@ -215,6 +215,9 @@ Bfc_st BFC[] = { // standard chains
   {"MC.devTX"        ,"","","P2014a,TpcRS,TpxClu,devTX,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
    ,                                                                                       "","","",kFALSE},
+  {"MC.devTY"        ,"","","P2014a,TpcRS,TpxClu,devTY,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+   "TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big,useXGeom"     
+   ,                                                                                       "","","",kFALSE},
   {"MC.2014","","","TpcRS,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                       "","","/",kFALSE},
@@ -244,6 +247,9 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                       "","","/",kFALSE},
   {"MC.devTX","","","TpcRS,TpxClu,devTX,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
+   ,                                                                                       "","","/",kFALSE},
+  {"MC.devTY","","","TpcRS,TpxClu,devTY,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                       "","","/",kFALSE},
   {"RC----------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1641,24 +1647,17 @@ Bfc_st BFC[] = { // standard chains
   {"HLTCA"    ,""  ,"","",                     "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
-  {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
-   ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker"
-   ,                                                                                          "Stv",kFALSE},
-  {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
-  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
-   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
-  {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
   {"laserIT"  ,"","","","",                              "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"    ,"","","ITTF"                                              ,"","","Sti tracking: TPC",kFALSE},
   {"SvtIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SVT",kFALSE},
   {"SsdIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SSD",kFALSE},
 
-  {"HpdIT"  ,""  ,"","ITTF",""                                   ,"StiRnD","Sti tracking: Hpd geom",kFALSE},
+  {"HpdIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Hpd geom",kFALSE},
   {"PixelIT",""  ,"","PxlIT",""                                               ,"","Alias for PxlIT",kFALSE},
-  {"PxlIT"  ,""  ,"","ITTF",""                                 ,"StiPxl","Sti tracking: Pixel geom",kFALSE},
-  {"IstIT"  ,""  ,"","ITTF",""                                   ,"StiIst","Sti tracking: Ist geom",kFALSE},
-  {"SstIT"  ,""  ,"","ITTF",""                                   ,"StiSsd","Sti tracking: Sst geom",kFALSE},
-  {"BTofIT"  ,""  ,"","ITTF",""                                ,"StiBTof","Sti tracking: BTof geom",kFALSE},
+  {"PxlIT"  ,""  ,"","ITTF",""                                       ,"","Sti tracking: Pixel geom",kFALSE},
+  {"IstIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Ist geom",kFALSE},
+  {"SstIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Sst geom",kFALSE},
+  {"BTofIT"  ,""  ,"","ITTF",""                                       ,"","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
   {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
@@ -1666,6 +1665,13 @@ Bfc_st BFC[] = { // standard chains
   {"NoIstIT"     ,""  ,"","-IstIT",""                    ,"","ITTF: track with switch off IST geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
+  {"Stv"     ,"Stv","","-StiLibs,-StiLibsHft,-StiTpc,-StiSvt,-StiSsd,-stiSst,-StiIst,-StiPxl,gen_T,sim_T","StvMaker"
+   ,"libHist,libHistPainter,libVMC,minicern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker"
+   ,                                                                                          "Stv",kFALSE},
+  {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
+  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
+   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
+  {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},
   {"Cosmics"  ,"","","",                         "","", "Ignore events without recostructed tracks",kFALSE},
   {"StiPulls" ,"","","",                                         "","", "Request to make Sti Pulls",kFALSE},

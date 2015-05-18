@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.616 2015/02/23 20:08:19 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.619 2015/05/15 17:44:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1533,6 +1533,8 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       TString TagsName = fFileOut;
       if( GetOption("lana") ){
 	TagsName.ReplaceAll(".root",".laser.root");
+      } else if ( GetOption("mtdEvtFilt") ){
+	TagsName.ReplaceAll(".root",".pretags.root");
       } else {
 	TagsName.ReplaceAll(".root",".tags.root");
       }
