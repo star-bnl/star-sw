@@ -15,6 +15,7 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StBTofHeader.h"
 #include "StMessMgr.h"
 
@@ -88,15 +89,28 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   StBTofHeader* btofHeader = mudst->btofHeader();
   vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
 
-  // Number of good primary tracks for this vertex
   mudst->setVertexIndex(pvn);
-  mult = mudst->numberOfPrimaryTracks();
   rank = primVtx->ranking();
 
+  // Number of good primary tracks for this vertex
+  mult = mudst->numberOfPrimaryTracks();
+
+  // primary vertex class doesn't store track count with HFT hits...
+  // ...find it ourselves
+  hmatch = 0;
+  for (int trkn=0; trkn<mult; trkn++) {
+    StMuTrack* primTrk = mudst->primaryTracks(trkn);
+    if (primTrk->nHitsFit(kPxlId) +
+        primTrk->nHitsFit(kIstId) +
+        primTrk->nHitsFit(kSsdId))
+      hmatch++;
+  }
+
   // hits not saved in MuDst
-  itpc = 0; otpc = 0; detmap = 0;
+  itpc = 0; otpc = 0;
 
   //detmap will store number of matches in other detectors
+  detmap = 0;
 
   // cap at 7 in detmap (bits 0,1,2)
   Packer( 0,3,bmatch,primVtx->nBEMCMatch());
@@ -111,7 +125,7 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   Packer( 9,2,cmatch,primVtx->nCrossCentralMembrane());
 
   // cap at 7 in detmap (bits 11,12,13)
-  Packer(11,3,hmatch,0); // HFT matches not yet implemented
+  Packer(11,3,hmatch,hmatch);
 
   // cap at 3 in detmap (bits 14,15)
   Packer(14,2,pmatch,primVtx->nPromptTracks());
@@ -124,14 +138,17 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.13 2015/05/15 05:38:21 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.14 2015/05/18 21:25:47 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.13 2015/05/15 05:38:21 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.14 2015/05/18 21:25:47 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.14  2015/05/18 21:25:47  genevb
+// Use HFT hits
+//
 // Revision 1.13  2015/05/15 05:38:21  genevb
 // Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
 //
