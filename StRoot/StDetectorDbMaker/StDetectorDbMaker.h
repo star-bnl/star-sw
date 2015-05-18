@@ -10,7 +10,7 @@ class StDetectorDbMaker : public StMaker {
   StDetectorDbMaker(const char *name="DetectorDb") : StMaker(name) {}
   virtual       ~StDetectorDbMaker() {}
   virtual Int_t  Make();
-  
+  static  Int_t  _debug;  
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag $Name:  $ $Id: StDetectorDbMaker.h,v 1.4 2014/08/06 11:42:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   

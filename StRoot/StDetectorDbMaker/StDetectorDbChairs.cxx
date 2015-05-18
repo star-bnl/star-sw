@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "StDetectorDbMaker.h"
 #include "StarChairDefs.h"
 #include "TEnv.h"
 #include "St_db_Maker/St_db_Maker.h"
@@ -865,47 +866,160 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
 #include "St_vertexSeedC.h"
 MakeChairInstance(vertexSeed,Calibrations/rhic/vertexSeed);
 //__________________Calibrations/tof______________________________________________________________
+#include "St_tofCorrC.h"
+ClassImp(St_tofCorrC);
+St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET)  {
+}
+//________________________________________________________________________________
+Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray) {
+  Float_t dcorr = -9999;
+  if (N <= 0 || ! xArray || ! yArray) return dcorr;
+  Int_t NN = N;
+#if 0
+  for (Int_t bin = N-1; bin >= 0; bin--) {
+    if (xArray[bin] && yArray[bin]) break;
+    NN--;
+  }
+  if (! NN) return dcorr;
+  if (NN == 1) {return yArray[NN-1];}
+  Int_t bin = TMath::BinarySearch(NN, xArray, x);
+#else
+  Int_t bin = -1;
+  for (Int_t i = 0; i < N-1; i++) {
+    if (x >= xArray[i] && x < xArray[i+1]) {
+      bin = i;
+      break;
+    }
+  }
+#endif
+  if (bin >= 0 && bin < NN) {
+    if (bin == NN) bin--;
+    Double_t x1 = xArray[bin];
+    Double_t x2 = xArray[bin+1];
+    Double_t y1 = yArray[bin];
+    Double_t y2 = yArray[bin+1];
+    dcorr = y1 + (x-x1)*(y2-y1)/(x2-x1);
+  }
+  return dcorr;
+}
+//________________________________________________________________________________
+Int_t St_tofCorrC::Index(Int_t tray, Int_t module, Int_t cell) const {
+  Int_t i = -1;
+  switch (mCalibType) {
+  case CELLCALIB:   i = cell - 1 + mNCell*(module - 1 + mNModule*(tray - 1))  ; break;
+  case MODULECALIB: i =                    module - 1 + mNModule*(tray - 1)   ; break;
+  case BOARDCALIB:  i =                   (module - 1 + mNModule*(tray - 1))/4; break;
+  default: assert(0); break;
+  }
+  return i;
+}
+#include "St_tofTotbCorrC.h"
+MakeChairInstance(tofTotbCorr,Calibrations/tof/tofTotbCorr);
+St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
+  Int_t N = 0;
+  if (table) N = getNumRows();
+  mCalibType = calibtype(N);
+  mIndxArray.Set(N);
+  for (Int_t i =  0; i < N; i++) {
+    Int_t j = Index(trayId(i), moduleId(i), cellId(i));
+    if (j >= 0) {
+      if (! mIndxArray[j]) mIndxArray[j] = i + 1;
+      else {
+	Int_t m = mIndxArray[j]-1;
+	LOG_ERROR << "St_tofTotbCorrC duplicated rows " 
+		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) << " cell:" << cellId(m) << " tot[0] = " << tot(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
+		  << "                                                       "
+		  << i << " tray:" << trayId(i) << " module:" << moduleId(i) << " cell:" << cellId(i) << " tot[0] = " << tot(i)[0] << " corr[0] = " << corr(i)[0] << endm;
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) const {
+  Int_t idx = Index(tray,module,cell);
+  Int_t i = mIndxArray[idx] - 1; 
+  if (i < 0) return 0;
+  Int_t Tray   = trayId(i);
+  Int_t Module = moduleId(i);
+  Int_t Cell   = cellId(i);
+  assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
+  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i));
+}
+#include "St_tofZbCorrC.h"
+MakeChairInstance(tofZbCorr,Calibrations/tof/tofZbCorr);
+St_tofZbCorrC::St_tofZbCorrC(St_tofZbCorr *table) : St_tofCorrC(table) {
+  Int_t N = 0;
+  if (table) N = getNumRows();
+  mCalibType = calibtype(N);
+  mIndxArray.Set(N);
+  for (Int_t i =  0; i < N; i++) {
+    Int_t j = Index(trayId(i), moduleId(i), cellId(i));
+    if (j >= 0) {
+      if (! mIndxArray[j]) mIndxArray[j] = i + 1;
+      else {
+	Int_t m = mIndxArray[j]-1;
+	LOG_ERROR << "St_tofZbCorrC duplicated rows " 
+		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) << " cell:" << cellId(m) << " z[0] = " << z(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
+		  << "                                                       "
+		  << i << " tray:" << trayId(i) << " module:" << moduleId(i) << " cell:" << cellId(i) << " z[0] = " << z(i)[0] << " corr[0] = " << corr(i)[0] << endm;
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) const {
+  Int_t idx = Index(tray,module,cell);
+  Int_t i = mIndxArray[idx] - 1; 
+  if (i < 0) return 0;
+  Int_t Tray   = trayId(i);
+  Int_t Module = moduleId(i);
+  Int_t Cell   = cellId(i);
+  assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
+  return St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i));
+}
 #include "St_tofGeomAlignC.h"
 MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
 #include "St_tofTrayConfigC.h"
 MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
 #include "St_tofStatusC.h"
-#if 1
 MakeChairInstance(tofStatus,Calibrations/tof/tofStatus);
-#else
-ClassImp(St_tofStatusC); 
-St_tofStatusC *St_tofStatusC::fgInstance = 0; 
-St_tofStatusC *St_tofStatusC::instance() { 
-  if (! fgInstance) {
-    St_tofStatus *table = (St_tofStatus *) StMaker::GetChain()->GetDataBase("Calibrations/tof/tofStatus"); 
-    if (! table) {							
-      LOG_WARN << "St_tofStatusC::instance " << "Calibrations/tof/tofStatus" << "\twas not found" 
-	       << "c struct address " << table->GetTable()
-	       << endm; 
-      assert(table);							
-    }									
-    TDatime t[2];								
-    if (St_db_Maker::GetValidity(table,t) > 0) {				
-      Int_t Nrows = table->GetNRows();					
-      LOG_WARN << "St_tofStatusC::instance found table " << table->GetName() 
-	       << " with NRows = " << Nrows << " in db" << endm;		
-      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
-	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	
-      if (Nrows > 10) Nrows = 10;						
-      static Int_t maxsize = 256;
-      if (table->GetRowSize() < maxsize) 
-	table->Print(0,Nrows);		
-    }
-    fgInstance = new St_tofStatusC(table);				
-  }
-  LOG_WARN << "St_tofStatusC::instance c struct address " << ((St_tofStatus *) fgInstance->Table())->GetTable() << endm;
-  static Bool_t d = kFALSE;
-  if (d) {
-    fgInstance->Print(0,1);
-  }
-  return fgInstance;							
+#include "St_pvpdStrobeDefC.h"
+MakeChairInstance(pvpdStrobeDef,Calibrations/tof/pvpdStrobeDef);
+#include "St_tofCamacDaqMapC.h"
+MakeChairInstance(tofCamacDaqMap,Calibrations/tof/tofCamacDaqMap);
+#include "St_tofDaqMapC.h"
+MakeChairInstance(tofDaqMap,Calibrations/tof/tofDaqMap);
+#include "St_tofINLCorrC.h"
+MakeChairInstance(tofINLCorr,Calibrations/tof/tofINLCorr);
+#include "St_tofINLSCorrC.h"
+MakeChairInstance(tofINLSCorr,Calibrations/tof/tofINLSCorr);
+#include "St_tofModuleConfigC.h"
+MakeChairInstance(tofModuleConfig,Calibrations/tof/tofModuleConfig);
+#include "St_tofPedestalC.h"
+MakeChairInstance(tofPedestal,Calibrations/tof/tofPedestal);
+#include "St_tofr5MaptableC.h"
+MakeChairInstance(tofr5Maptable,Calibrations/tof/tofr5Maptable);
+#include "St_tofTDIGOnTrayC.h"
+MakeChairInstance(tofTDIGOnTray,Calibrations/tof/tofTDIGOnTray);
+#include "St_tofTOffsetC.h"
+MakeChairInstance(tofTOffset,Calibrations/tof/tofTOffset);
+Float_t St_tofTOffsetC::t0(Int_t tray, Int_t module, Int_t cell) const {
+  //        [mNTray][mNModule][mNCell]
+  Int_t j = cell - 1 + mNCell*(module - 1); 
+  return T0(tray-1)[j];
 }
-#endif
+#include "St_tofTrgWindowC.h"
+MakeChairInstance(tofTrgWindow,Calibrations/tof/tofTrgWindow);
+#include "St_tofTzeroC.h"
+MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
+#include "St_vpdDelayC.h"
+MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
+#include "St_vpdTotCorrC.h"
+MakeChairInstance(vpdTotCorr,Calibrations/tof/vpdTotCorr);
+Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) const {
+  assert(tubeId(i) == i + 1);
+  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i));
+}
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
 MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);
