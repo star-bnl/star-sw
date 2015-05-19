@@ -20,9 +20,10 @@ StDetectorId detectorIdByName(const char *name)
 {
   if (ids[0]<0) return kUnknownId;
   if (!ids[0] ) detectorIdInit();
-    
+  TString tName(name); tName.ReplaceAll("Id","");  
     for (int i=1;i<=ids[0];i++){
-        if (strcmp(name,cds[0])==0) return (StDetectorId)ids[i];
+      TString tds(cds[i]+1); tds.ReplaceAll("Id","");
+      if (tName.Contains(tds,TString::kIgnoreCase)) return (StDetectorId)ids[i];
     }
     return kUnknownId;
 }
