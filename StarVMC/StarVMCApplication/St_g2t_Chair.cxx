@@ -90,6 +90,7 @@ void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
  }
 //________________________________________________________________________________
 void St_g2t_emc_hitC::Fill(GHit_t &vect) {
+#if 0
   static g2t_emc_hit_st g2t_emc_hit;
   memset(&g2t_emc_hit, 0, sizeof(g2t_emc_hit_st));
   St_g2t_emc_hit *table = (St_g2t_emc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
@@ -207,6 +208,7 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
     }
   }
   table->AddAt(&g2t_emc_hit);    
+#endif
 }
 //________________________________________________________________________________
 void St_g2t_fst_hitC::Fill(GHit_t &vect) {
