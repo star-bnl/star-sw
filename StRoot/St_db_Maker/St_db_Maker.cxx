@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.136 2015/05/16 02:34:05 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.137 2015/05/19 20:34:47 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.137  2015/05/19 20:34:47  perev
+// Remove old commented coded
+//
 // Revision 1.136  2015/05/16 02:34:05  perev
 // bug #3101 Cleanup
 //
@@ -961,13 +964,6 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
       }
       if (!k){ delete set;         continue;}
       set->SetTitle(newTitle);
-//       if (k==2) {	//case of *.C
-//         TString command( FullFileName(set));
-//         command.Insert(0,"grep -l CreateTable ");
-//         command.Append(" >& /dev/null");
-// 	int myerr = gSystem->Exec(command);
-// 	if (myerr) {delete set;    continue;};
-//       }
       lpsname = dot - filename;
     }
     if (strncmp(filename,psname+1,lpsname)) {// make new pseudo directory
