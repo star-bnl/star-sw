@@ -1,18 +1,24 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
+
 <Export language="Mortran"><Import file="pams/geometry/geometry/geometry.g" verbatim="true" /></Export>
+
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
     call geometry
 </Export>
+
 </Module>
 
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.45 2015/04/17 19:14:51 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.46 2015/05/19 19:29:20 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.46  2015/05/19 19:29:20  jwebb
+  Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
+
   Revision 1.45  2015/04/17 19:14:51  jwebb
   ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
 
