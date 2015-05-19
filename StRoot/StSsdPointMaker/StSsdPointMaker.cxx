@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.65 2015/05/19 13:44:17 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.66 2015/05/19 19:11:18 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.66  2015/05/19 19:11:18  perev
+// Avoid leak by useng standard array instead of new and delete
+//
 // Revision 1.65  2015/05/19 13:44:17  bouchet
 // ticket 3105 + warning fixed when printing the size of gain table
 //
@@ -409,9 +412,9 @@ Int_t StSsdPointMaker::Make()
   LOG_DEBUG << Form("Make : begin")<< endm;
   // 		Create output tables
   Int_t res = 0; 
-  char* myLabel  = new char[100];
-  char* myTime = new char[100]; 
-  char* myDate = new char[100];
+  char myLabel[100];
+  char myTime[100]; 
+  char myDate[100];
   if (GetTime()<999)
     sprintf(myTime,"000%d",GetTime());
   else
@@ -563,11 +566,6 @@ Int_t StSsdPointMaker::Make()
 	  }
 	}
     }
-  //clear stuff
-  mySsd->Reset();
-  delete myLabel;
-  delete myTime;
-  delete myDate;
   if(res!=kStOK){
     LOG_WARN <<"Make : no output" << endm;;
     return kStWarn;
