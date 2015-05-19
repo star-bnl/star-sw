@@ -36,7 +36,7 @@ inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const
 
 inline double StiPixelDetectorBuilder::phiForPixelSector(unsigned int sector) const
 {
-    if(sector<0 || sector>=24)
+    if(sector>=24)
 	{
 	    cout << "phiForPixelSector(" << sector << "): invalid sector" << endl;
 	    throw runtime_error("StiPixelDetectorBuilder::phiForPixelSector - ERROR - Invalid Sector");
