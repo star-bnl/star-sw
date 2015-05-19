@@ -73,7 +73,7 @@ ClassImp(StSpaceChargeEbyEMaker)
   
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
-    event(0),
+    event(0),runinfo(0),
     Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE),
     QAmode(kFALSE), TrackInfomode(0), Asymmode(kFALSE),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE), doSecGaps(kFALSE),
@@ -96,6 +96,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   MAXDIFFA = 2*SCALER_ERROR; // should be about equal to SCALER_ERROR, no?
            // Present uncetainties with scalers demands greater tolerance
 
+  // initializations needed at the start
   runid = 0;
   memset(evts,0,SCHN*sizeof(int));
   memset(times,0,SCHN*sizeof(int));
@@ -126,6 +127,38 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     gapZhistnegS[i] = 0;
     gapZhistposS[i] = 0;
   }
+
+  // other initializations for safety (will be set later anyhow)
+  evt = 0;
+  curhist = 0;
+  lasttime = 0;
+  memset(scS,0,24*sizeof(float));
+  memset(escS,0,24*sizeof(float));
+  sc = 0; esc = 0;
+  scE = 0; escE = 0;
+  scW = 0; escW = 0;
+  lastsc = 0;
+  lastEWRatio = 0;
+  oldevt = 0;
+  memset(ntrks ,0,SCHN*sizeof(float));
+  memset(ntrksE,0,SCHN*sizeof(float));
+  memset(ntrksW,0,SCHN*sizeof(float));
+  memset(ntrksS,0,24*sizeof(float));
+  gapZfitslope = 0; gapZfitintercept = 0; gapZdivslope = 0;
+  egapZfitslope = 0; egapZfitintercept = 0; egapZdivslope = 0;
+  gapZfitslopeneg = 0; gapZfitinterceptneg = 0; gapZdivslopeneg = 0;
+  gapZfitslopepos = 0; gapZfitinterceptpos = 0; gapZdivslopepos = 0;
+  gapZfitslopeeast = 0; gapZfitintercepteast = 0; gapZdivslopeeast = 0;
+  gapZfitslopewest = 0; gapZfitinterceptwest = 0; gapZdivslopewest = 0;
+  memset(gapZfitslopeS,0,24*sizeof(float));
+  memset(gapZfitinterceptS,0,24*sizeof(float));
+  memset(gapZdivslopeS,0,24*sizeof(float));
+  memset(gapZfitslopenegS,0,24*sizeof(float));
+  memset(gapZfitinterceptnegS,0,24*sizeof(float));
+  memset(gapZdivslopenegS,0,24*sizeof(float));
+  memset(gapZfitslopeposS,0,24*sizeof(float));
+  memset(gapZfitinterceptposS,0,24*sizeof(float));
+  memset(gapZdivslopeposS,0,24*sizeof(float));
 }
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::~StSpaceChargeEbyEMaker() {
@@ -220,7 +253,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   lastEWRatio = m_ExB->CurrentSpaceChargeEWRatio();
 
   // Get StEvent and related info, determine if things are OK
-  event = (StEvent*) GetInputDS("StEvent");
+  event = static_cast<StEvent*>(GetInputDS("StEvent"));
   if (!event) {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: no StEvent; skipping event.");
     return kStWarn;
@@ -1120,8 +1153,6 @@ int StSpaceChargeEbyEMaker::imodHN(int i) {
 float StSpaceChargeEbyEMaker::oldness(int i, int j) {
   // Deterime how to treat relative "age" of event
   // In PrePassmode, earliest events are most important!
-  static float decay_const = -0.12;
-  //static float decay_const = -0.15;
   float s = 1.0;
   if (!PrePassmode) { // Weight newest the most (or evenly for PrePass)
     if (j<0) j = curhist;
@@ -1138,6 +1169,8 @@ float StSpaceChargeEbyEMaker::oldness(int i, int j) {
     // # seconds + fraction of a second:
     float time_factor = (times[j]-times[i]) + (1.-(evtstbin[i]/evtstbin[k]));
     //float time_factor = (times[j]-times[i]);
+    float decay_const = -0.12;
+    // float decay_const = -0.15;
     s = exp( decay_const * time_factor );
   }
   return s;
@@ -1413,9 +1446,9 @@ TString StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
 float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
 
   if (hdir) {
-    dcehist = (TH2F*) (hdir->Get("DcaEve"));
-    timehist = (TH1F*) (hdir->Get("EvtTime"));
-    scehist = (TH1F*) (hdir->Get("SpcChgEvt"));
+    dcehist = static_cast<TH2F*>(hdir->Get("DcaEve"));
+    timehist = static_cast<TH1F*>(hdir->Get("EvtTime"));
+    scehist = static_cast<TH1F*>(hdir->Get("SpcChgEvt"));
     if (!(dcehist && timehist && scehist)) {
       LOG_ERROR << "Problems finding SC histograms" << endm;
       return 999.;
@@ -1427,7 +1460,7 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   float dcc = (float) (dcehist->GetEntries());
   float evc = (float) (timehist->GetEntries());
 
-  float hm=0,hw=0,hd=0,gm=0,gw=0,gm1=0,gw1=0,gme=0,gwe=0,pm=0,pw=0,epsec=0,frac=0,wid=9.99;
+  float hm=0,hw=0,gm=0,gw=0,gm1=0,gw1=0,gme=0,gwe=0,pm=0,pw=0,epsec=0,frac=0,wid=9.99;
   TF1* pl0 = 0;
 
   if (dcc>0) {
@@ -1438,7 +1471,7 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
     dcaproj->Fit(&ga1,"Q");
     hm = ga1.GetParameter(1);
     hw = TMath::Abs(ga1.GetParameter(2));
-    hd = 0.6*hw;
+    float hd = 0.6*hw;
     ga1.SetRange(hm-hd,hm+hd);
     dcaproj->Fit(&ga1,"RQ");
     gm = ga1.GetParameter(1);
@@ -1502,8 +1535,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.61 2015/05/15 14:34:45 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.62 2015/05/19 19:36:09 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.62  2015/05/19 19:36:09  genevb
+// Code cleanup in preparation for C++11
+//
 // Revision 1.61  2015/05/15 14:34:45  genevb
 // Fix incorrect memset usage (RT 3093)
 //

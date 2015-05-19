@@ -334,7 +334,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.58 2015/05/19 17:58:15 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.59 2015/05/19 19:36:09 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -460,7 +460,7 @@ Int_t StVertexSeedMaker::FillAssumed(){
     return kStErr;
   }
   St_vertexSeed* dbTableC =
-    (St_vertexSeed*) (dbDataSet->FindObject("vertexSeed"));
+    static_cast<St_vertexSeed*>(dbDataSet->FindObject("vertexSeed"));
   if (!dbTableC) {
     LOG_ERROR << "Could not find vertexSeed in database" << endm;
     return kStErr;
@@ -490,7 +490,7 @@ Int_t StVertexSeedMaker::GetVertexSeedTriggers(){
     return kStErr;
   }
   dbTriggersTable =
-    (St_vertexSeedTriggers*) (dbDataSet->FindObject("vertexSeedTriggers"));
+    static_cast<St_vertexSeedTriggers*>(dbDataSet->FindObject("vertexSeedTriggers"));
   if (!dbTriggersTable) {
     LOG_ERROR << "Could not find vertexSeedTriggers in database" << endm;
     return kStErr;
@@ -551,7 +551,7 @@ void StVertexSeedMaker::GetFillDateTime() {
     sprintf(queryStr,
       " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
       thisFill);
-    ts = db->QueryDb(tab,queryStr);
+    db->QueryDb(tab,queryStr);
 
     // Extract date and time at start of fill
     char* start = tab->getBeginDateTime();
@@ -696,7 +696,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
     LOG_INFO << "Now opening file:\n  " << fileName << endm;
     if (currentFile) currentFile->Close();
     currentFile = new TFile(fileName);
-    TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
+    TNtuple* curNtuple = static_cast<TNtuple*>(currentFile->Get("resNtuple"));
     if (!curNtuple) {
       LOG_ERROR << "No resNtuple found in " << fileName << endm;
       continue;
@@ -760,8 +760,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.58 2015/05/19 17:58:15 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.59 2015/05/19 19:36:09 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.59  2015/05/19 19:36:09  genevb
+// Code cleanup in preparation for C++11
+//
 // Revision 1.58  2015/05/19 17:58:15  genevb
 // Better garbage collection
 //
