@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.15 2012/08/03 23:42:24 perev Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.16 2015/05/19 20:09:40 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.16  2015/05/19 20:09:40  perev
+ * added Ist & Pxl
+ *
  * Revision 2.15  2012/08/03 23:42:24  perev
  * ClassDef vers++
  *
@@ -129,9 +132,12 @@ private:
     UChar_t        mNumberOfPointsSvt;
     UChar_t        mNumberOfPointsSsd;
     UChar_t        mNumberOfPointsOth;	// Other hits 
+    UChar_t        mNumberOfPointsIst;
+    UChar_t        mNumberOfPointsPxl;
+
     StPtrVecHit    mHits;
 
-    ClassDef(StTrackDetectorInfo,3)
+    ClassDef(StTrackDetectorInfo,4)
 };
 
 #endif

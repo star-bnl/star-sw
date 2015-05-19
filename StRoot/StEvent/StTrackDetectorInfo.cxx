@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.17 2012/07/21 03:33:58 perev Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.18 2015/05/19 20:09:45 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.18  2015/05/19 20:09:45  perev
+ * added Ist & Pxl
+ *
  * Revision 2.17  2012/07/21 03:33:58  perev
  * Add Other hits
  *
@@ -70,7 +73,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.17 2012/07/21 03:33:58 perev Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.18 2015/05/19 20:09:45 perev Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -78,7 +81,9 @@ StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsFtpcEast(0),
 					     mNumberOfPointsSvt(0),
 					     mNumberOfPointsSsd(0),
-					     mNumberOfPointsOth(0)
+					     mNumberOfPointsOth(0),
+					     mNumberOfPointsIst(0),
+					     mNumberOfPointsPxl(0)
 { /* noop */ }
 
 StTrackDetectorInfo::~StTrackDetectorInfo() { /* noop */ }
@@ -102,7 +107,9 @@ StTrackDetectorInfo::numberOfPoints() const
 		numberOfPoints(kFtpcWestId) +
 		numberOfPoints(kFtpcEastId) +
 		numberOfPoints(kSvtId) +
-		numberOfPoints(kSsdId));	
+		numberOfPoints(kSsdId) +	
+		numberOfPoints(kIstId) +	
+		numberOfPoints(kPxlId));	
     }
 }
 
@@ -143,6 +150,12 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 	    break;
 	case kSsdId:
 	    return mNumberOfPointsSsd;
+	    break;
+	case kIstId:
+	    return mNumberOfPointsIst;
+	    break;
+	case kPxlId:
+	    return mNumberOfPointsPxl;
 	    break;
 	default:
 	    return mNumberOfPointsOth;
@@ -227,6 +240,10 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned char val, StDetectorId det)
     case kSsdId:
 	mNumberOfPointsSsd = val;
 	break;
+    case kIstId:
+	mNumberOfPointsIst = val;
+    case kPxlId:
+	mNumberOfPointsPxl = val;
     default:
 	mNumberOfPointsOth+= val;
 
