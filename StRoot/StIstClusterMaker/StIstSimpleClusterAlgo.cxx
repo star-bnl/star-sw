@@ -765,9 +765,9 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection &istCollection,
 
             maxTb       = (*rawHitIt)->getMaxTimeBin();
 
-            if (maxTb < 0 || maxTb >= nTimeBins)       maxTb = (*rawHitIt)->getDefaultTimeBin();
+            if (maxTb >= nTimeBins)       maxTb = (*rawHitIt)->getDefaultTimeBin();
 
-            if (mTimeBin >= 0 && mTimeBin < nTimeBins) {
+            if (mTimeBin < nTimeBins) {
                usedTb  = mTimeBin;
             }
             else
@@ -822,6 +822,9 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection &istCollection,
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.14  2015/05/19 16:19:47  perev
+* bug #3102 Clearup
+*
 * Revision 1.13  2014/09/18 06:27:25  ypwang
 * remove unneccessary check for raw hit electroincis ID check
 *
