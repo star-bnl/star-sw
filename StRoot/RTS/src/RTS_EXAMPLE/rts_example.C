@@ -76,6 +76,8 @@ static int sst_doer(daqReader *rdr, const char *do_print) ;
 static int fps_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
+static int bad ;
+static int nfs_loops ;
 
 static int run_number ;
 
@@ -112,21 +114,36 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	class daqReader *evp ;			// tha main guy
-	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
-	if(mountpoint) {
+	class daqReader *evp = 0 ;			// tha main guy
+
+	if(optind >= argc) {	// no arguments -- NFS
+		LOG(INFO,"Using direct access via NFS directory %s",mountpoint) ;
+
+		evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
+
 		evp->setEvpDisk((char *)mountpoint);
+
+		optind = argc - 1 ;	//hack up 1 loop
+
 	}
 
 
-	good=0;
-	int bad=0;
-	
+	while(optind < argc) {
+
+	if(evp==0) {
+		LOG(INFO,"Opening file %s",argv[optind]) ;
+		evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
+	}
+
+
+	optind++ ;
+
 	for(;;) {
 	        char *ret = evp->get(0,EVP_TYPE_ANY);
        
 		if(ret) {
 		  if(evp->status) {
+			bad++ ;
 			LOG(ERR,"evp status is non-null [0x08X, %d dec]",evp->status,evp->status) ;
 			continue ;
 		  }
@@ -141,6 +158,10 @@ int main(int argc, char *argv[])
 		    if(evp->IsEvp()) {   // but event pool, keep trying...
 		      LOG(DBG, "Wait a second...");
 		      sleep(1);
+		      nfs_loops++ ;
+		      if((nfs_loops%5)==0) {
+				LOG(WARN,"Still waiting for Event Pool...") ;
+		      }
 		      continue;
 		    }
 		    break;        // file, we're done...
@@ -150,8 +171,9 @@ int main(int argc, char *argv[])
 		    sleep(1);
 		    continue;
 		  case EVP_STAT_CRIT:
+		    bad++ ;
 		    LOG(CRIT,"evp->status CRITICAL (?)") ;
-		    return -1;
+		    break ;
 		  }
 		}
 
@@ -342,9 +364,15 @@ int main(int argc, char *argv[])
 
 	}
 
-//	delete evp ;	// cleanup i.e. if running through a set of files.
+	delete evp ;	// cleanup i.e. if running through a set of files.
+	evp = 0 ;
+	run_number = -1 ;
 
-	sst_test(0,2) ;
+	}
+
+	LOG(INFO,"Found %d good, %d bad events",good,bad) ;
+
+//	sst_test(0,2) ;
 	return 0 ;
 }
 
@@ -553,8 +581,8 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				sec_found = 1 ;
 				adc_found = 1 ;	// any sector...
 
-
-
+				if(dd->row > 8) continue ;
+				
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
@@ -1741,7 +1769,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 {
 	int adc_found = 0 ;
 	int pedrms_found = 0 ;
-
+	const u_int cpu_clock = 2166872000 ;
 
 	daq_dta *dd ;
 
@@ -1754,11 +1782,9 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 	dd = rdr->det("fps")->get("adc") ;
 	if(dd) {
-		
+		u_int ev_ch = 0 ;	//count of channels
+
 		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
-		if(do_print) {
-			printf("FPS META: delta %u us, xing %d\n",hdr->delta,hdr->xing) ;
-		}
 
 		while(dd->iterate()) {	//per xing and per RDO
 			adc_found = 1 ;
@@ -1783,6 +1809,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 				if(ix>=0 && ix<21) tot_charge[ix] += sum ;
 
+				if(xing==0) ev_ch += dd->ncontent;;
 
 			}
 
@@ -1795,6 +1822,25 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 				}
 			}
 		}
+
+		// moved it to the end, when I know the channel count
+		if(do_print && adc_found) {
+			//time of arrival of the STP command
+			double stp = (double) hdr->tick * 1024.0 ;	//in clocks
+
+			stp /= (double)cpu_clock ;
+			stp *= 1000000.0 ;
+
+			//time at the end of the full event readout
+			double readout = (double) hdr->delta * 1024.0 ;
+
+			readout /= (double)cpu_clock ;
+			readout *= 1000000.0 ;
+			
+			printf("FPS META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us), ch count  %u\n",
+			       stp, readout, readout-stp, ev_ch) ;
+		}
+
 
 	}
 
