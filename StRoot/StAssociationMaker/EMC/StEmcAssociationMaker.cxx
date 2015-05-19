@@ -148,51 +148,46 @@ Int_t StEmcAssociationMaker::Make()
           default: { gMessMgr->Warning()<<"Detector does not exist"<<endm; break; }
         }
 
-        if (hits.size()!=0);
-        {
+        if (hits.size()!=0){
           // Calculating track energy by summing over hits energies
           Float_t energy=0;
           for (UInt_t i2=0; i2<hits.size(); i2++)
-          {
-            Float_t hitEnergy=dEToEnergy(hits[i2],detnum);
-            energy+=hitEnergy;
-          } 
+	    {
+	      Float_t hitEnergy=dEToEnergy(hits[i2],detnum);
+	      energy+=hitEnergy;
+	    } 
           
-          for (UInt_t j=0; j<clusters.size(); j++)
-          {
-            StPtrVecEmcRawHit& clHits=clusters[j]->hit();
+          for (UInt_t j=0; j<clusters.size(); j++){
+	    StPtrVecEmcRawHit& clHits=clusters[j]->hit();
 	    Float_t trackEnergyFraction=0;
 	    Float_t clusterEnergyFraction=0;
 	    Int_t assoc=0;
-            for (UInt_t k=0; k<hits.size(); k++)
-            {
-              UInt_t module=hits[k]->module();
-              UInt_t eta=hits[k]->eta();
-              Int_t sub=hits[k]->sub();
-              
-              for (UInt_t l=0; l<clHits.size(); l++)
-              {
-                UInt_t clModule=clHits[l]->module();
-                UInt_t clEta=clHits[l]->eta();
-                Int_t clSub=abs(clHits[l]->sub());
-                //Doing comparision between hit track and hit cluster
-                if (module==clModule && eta==clEta && sub==clSub)
-                {
+	    for (UInt_t k=0; k<hits.size(); k++){
+	      UInt_t module=hits[k]->module();
+	      UInt_t eta=hits[k]->eta();
+	      Int_t sub=hits[k]->sub();
+	      
+	      for (UInt_t l=0; l<clHits.size(); l++){
+		UInt_t clModule=clHits[l]->module();
+		UInt_t clEta=clHits[l]->eta();
+		Int_t clSub=abs(clHits[l]->sub());
+		//Doing comparision between hit track and hit cluster
+		if (module==clModule && eta==clEta && sub==clSub){
 		  assoc=1;
-                  Float_t hitEnergy=dEToEnergy(hits[k],detnum);
-                  trackEnergyFraction+=hitEnergy/energy;
-                  Float_t clEnergy=clusters[j]->energy();
-                  clusterEnergyFraction+=hitEnergy/clEnergy;
-                }
-              }
+		  Float_t hitEnergy=dEToEnergy(hits[k],detnum);
+		  trackEnergyFraction+=hitEnergy/energy;
+		  Float_t clEnergy=clusters[j]->energy();
+		  clusterEnergyFraction+=hitEnergy/clEnergy;
+		}
+	      }
 	    }
 	    if (assoc) {
 	      StEmcClusterAssociation *c=new StEmcClusterAssociation(tracks[i],clusters[j],trackEnergyFraction,clusterEnergyFraction);
 	      mTrackCluster[detnum]->insert(multiEmcTrackClusterValue(tracks[i],c));
-
+	      
 	      mClusterTrack[detnum]->insert(multiEmcClusterTrackValue(clusters[j],c));
 	    }		  
-          }
+	  }
         }
       }
     }
