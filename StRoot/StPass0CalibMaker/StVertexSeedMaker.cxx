@@ -141,8 +141,8 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
 
-  if (mTempOut) delete mTempOut;
-  else if (resNtuple) delete resNtuple;
+  delete mTempOut;
+  delete resNtuple;
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
@@ -163,6 +163,7 @@ void StVertexSeedMaker::Reset() {
 }
 //_____________________________________________________________________________
 StVertexSeedMaker::~StVertexSeedMaker(){
+  delete parsNtuple;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Init(){
@@ -333,7 +334,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.58 2015/05/19 17:58:15 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -342,8 +343,11 @@ void StVertexSeedMaker::PrintInfo() {
 void StVertexSeedMaker::WriteTableToFile(){
   TString fileName = NameFile("table","vertexSeed","C");
   ofstream *out = new ofstream(fileName.Data());
-  VertexSeedTable()->SavePrimitive(*out,"");
+  St_vertexSeed* vertexSeedTable = VertexSeedTable();
+  vertexSeedTable->SavePrimitive(*out,"");
   if (parsNtuple) AddResults(parsNtuple);
+  delete out;
+  delete vertexSeedTable;
   return;
 }
 //_____________________________________________________________________________
@@ -362,6 +366,7 @@ void StVertexSeedMaker::AddResults(TNtupleD* ntup){
 }
 //_____________________________________________________________________________
 St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
+  // up to the user of this function to delete the table
   St_vertexSeed* table = new St_vertexSeed("vertexSeed",1);
   vertexSeed_st* row = table->GetTable();
   row->x0 = p[0];
@@ -393,15 +398,20 @@ void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
         gSystem->Unlink(mTempOut->GetName())) {
       LOG_ERROR << "Could not copy and/or delete temp vertexseedhist file!" << endm;
     }
+    delete resNtuple;
     resNtuple = 0;
+    delete mTempOut;
+    mTempOut = 0;
   }
   TFile out(fileName.Data(),"UPDATE");
   GetHistList()->Write();
+  TNtupleD* parsNtuple1 = 0;
   if (writeFit) {
-    AddResults(newBLpars());
+    AddResults((parsNtuple1 = newBLpars()));
     out.Write();
   }
   out.Close();
+  delete parsNtuple1;
 }
 //_____________________________________________________________________________
 TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const char* suffix) {
@@ -607,6 +617,7 @@ void StVertexSeedMaker::FitData() {
 }
 //_____________________________________________________________________________
 TNtupleD* StVertexSeedMaker::newBLpars() {
+  // up to the user of this function to delete the ntuple
   return new TNtupleD("BLpars","BeamLine parameters",
     "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
 }
@@ -627,7 +638,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   // offset will be applied as a time offset in the date.time use in writing new files
   SetOffset(offset);
 
-  TFile* parsOut = new TFile("BLpars.root","RECREATE");
+  TFile parsOut("BLpars.root","RECREATE");
   parsNtuple = newBLpars();
 
   const char* defaultDir = "./";
@@ -646,6 +657,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
       fileList.Add(new TNamed(fileName,fileName));
     }
   }
+  fileList.SetOwner();
   fileList.Sort();
 
   TFile* currentFile=0;
@@ -738,20 +750,21 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   }
   if (currentFile) {
     currentFile->Close();
+    delete currentFile;
     currentFile = 0;
     FindResult(kFALSE);
   }
-  if (parsOut) {
-    parsOut->Write();
-    parsOut->Close();
-    parsOut = 0;
-  }
+  parsOut.Write();
+  parsOut.Close();
   LOG_INFO << "Examined " << nfiles << " files" << endm;
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.57 2015/05/15 05:38:21 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.58 2015/05/19 17:58:15 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.58  2015/05/19 17:58:15  genevb
+// Better garbage collection
+//
 // Revision 1.57  2015/05/15 05:38:21  genevb
 // Include prompt hits and post-crossing tracks, simplify detmap packing, update doxygen documentation
 //
