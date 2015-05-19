@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.64 2015/05/15 18:31:10 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.65 2015/05/19 13:44:17 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.65  2015/05/19 13:44:17  bouchet
+// ticket 3105 + warning fixed when printing the size of gain table
+//
 // Revision 1.64  2015/05/15 18:31:10  bouchet
 // possible infinite loop fixed
 //
@@ -560,7 +563,11 @@ Int_t StSsdPointMaker::Make()
 	  }
 	}
     }
+  //clear stuff
   mySsd->Reset();
+  delete myLabel;
+  delete myTime;
+  delete myDate;
   if(res!=kStOK){
     LOG_WARN <<"Make : no output" << endm;;
     return kStWarn;
@@ -1547,7 +1554,7 @@ void StSsdPointMaker::FillCalibTable(){
   if(mGain){ 
     ssdGainCalibWafer_st *g  = mGain->GetTable() ;
     Int_t size = mGain->GetNRows();
-    LOG_INFO<<Form("Size of gain table = %d",mGain->GetNRows())<<endm;
+    LOG_INFO<<Form("Size of gain table = %d",(int)mGain->GetNRows())<<endm;
     for(Int_t i=0; i<size;i++){
       LOG_DEBUG<<Form(" Print entry %d : ladder=%d gain =%lf wafer=%d",i,g[i].nLadder,g[i].nGain,g[i].nWafer)<<endm;
       CalibArray[i] = g[i].nGain;
