@@ -1832,7 +1832,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 			stp *= 1000000.0 ;
 
 			//time at the end of the full event readout
-			double readout = (double) hdr->delta * 1024.0 ;
+			double readout = (double) (u_int) hdr->delta * 1024.0 ;
 
 			readout /= (double)cpu_clock ;
 			readout *= 1000000.0 ;
