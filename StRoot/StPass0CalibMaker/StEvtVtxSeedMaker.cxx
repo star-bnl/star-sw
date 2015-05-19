@@ -23,7 +23,7 @@ StEvtVtxSeedMaker::StEvtVtxSeedMaker(const char *name):
 }
 //_____________________________________________________________________________
 Int_t StEvtVtxSeedMaker::Make() {
-  event = (StEvent*) GetInputDS("StEvent");
+  event = static_cast<StEvent*>(GetInputDS("StEvent"));
   if (!event) {
     gMessMgr->Error("StEvtVtxSeedMaker: No StEvent found!");
     return kStErr;
@@ -140,14 +140,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.12 2015/05/18 21:25:31 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.13 2015/05/19 19:36:09 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.12 2015/05/18 21:25:31 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.13 2015/05/19 19:36:09 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.13  2015/05/19 19:36:09  genevb
+// Code cleanup in preparation for C++11
+//
 // Revision 1.12  2015/05/18 21:25:31  genevb
 // Use HFT hits, some streamlining of for-loops
 //
