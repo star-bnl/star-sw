@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.17 2006/09/20 00:44:55 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.18 2015/05/20 16:57:00 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.18  2015/05/20 16:57:00  ullrich
+ * Correct logic in if statement.
+ *
  * Revision 2.17  2006/09/20 00:44:55  ullrich
  * Modified method to return length of L2 results.
  *
@@ -628,11 +631,7 @@ unsigned short StTriggerData2004::zdcSMD(StBeamDirection eastwest, int verthori,
     };
     //  if(eastwest<0 || eastwest>1) return 0;
     if(verthori<0 || verthori>1) return 0;
-    if(verthori==0){
-	if(strip<1 || strip>8) return 0; //the last one in vertical strips is for LED. Could be used for Forward counter later. T.A.H.
-    }else{
-	if(strip<1 || strip>8) return 0;
-    }
+    if(strip<1 || strip>8) return 0; //the last one in vertical strips is for LED. Could be used for Forward counter later. T.A.H.
     return mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[zdcsmd_map[eastwest][verthori][strip-1]];  
 };
 
