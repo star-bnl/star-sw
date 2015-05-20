@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.22 2013/11/13 19:17:01 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.23 2015/05/20 16:57:00 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.23  2015/05/20 16:57:00  ullrich
+ * Correct logic in if statement.
+ *
  * Revision 2.22  2013/11/13 19:17:01  ullrich
  * Added mtd4AtAddress() and dsmTF201Ch(). (Akio)
  *
@@ -79,7 +82,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.22 2013/11/13 19:17:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.23 2015/05/20 16:57:00 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -100,7 +103,7 @@ int StTriggerData::prepostAddress(int prepost) const
     int npost = numberOfPostXing();
     if (prepost > 0 &&  prepost <= npost) return npre+prepost;
     gMessMgr->Warning() << "Wrong prepost " << prepost << " (pre=" << numberOfPreXing() << ", post=" << numberOfPostXing() << ")" << endm;
-    return -1;
+    return 0;
 }
 
 unsigned short StTriggerData::decodeEmc12bit(const int dsm, const int channel, const unsigned char *raw) const
