@@ -27,8 +27,8 @@ public:
    size_t getNumRawHits( int ladder) const;      // per ladder
    size_t getNumClusters() const;                  // overall
    size_t getNumClusters( int ladder ) const;    // per ladder
-   size_t getNumTimeBins() const;
-   void setNumTimeBins(size_t nTimebin);
+   unsigned char getNumTimeBins() const;
+   void setNumTimeBins(unsigned char nTimebin);
 
    StIstRawHitCollection *getRawHitCollection( int ladder );
    const StIstRawHitCollection *getRawHitCollection( int ladder ) const;
@@ -39,7 +39,7 @@ public:
 protected:
    StIstRawHitCollection mRawHitCollection[kIstNumLadders];
    StIstClusterCollection mClusterCollection[kIstNumLadders];
-   size_t mNumTimeBins;
+   unsigned char mNumTimeBins;
 
    ClassDef(StIstCollection, 1);
 };
@@ -50,6 +50,12 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.11  2015/05/20 20:53:45  smirnovd
+* Changed type for the number of time bins for consistency
+*
+* and to avoid explicit type conversions. The unsigned char range is more than
+* enough to keep expected physical values, and it is not used in any calculations
+*
 * Revision 1.10  2014/11/18 23:11:36  smirnovd
 * [Minor] Coding style clean-up. Removed unconstructive comments
 *
