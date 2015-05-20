@@ -116,7 +116,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
             if (maxTb < 0 || maxTb >= nTimeBins)         maxTb  = rawHitMaxAdcTemp->getDefaultTimeBin();
 
-            if (mTimeBin >= 0 && mTimeBin < nTimeBins)   usedTb = mTimeBin;
+            if (mTimeBin < nTimeBins)                    usedTb = mTimeBin;
             else                                         usedTb = maxTb;
 
             ladder      	= rawHitMaxAdcTemp->getLadder();
@@ -229,6 +229,11 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.17  2015/05/20 20:53:57  smirnovd
+* Removed a priori true condition without changing the logic
+*
+* mTimeBin is unsigned char always >= 0
+*
 * Revision 1.16  2015/03/04 16:17:16  smirnovd
 * Added a check for empty container of to-be-merged proto-clusters
 *
