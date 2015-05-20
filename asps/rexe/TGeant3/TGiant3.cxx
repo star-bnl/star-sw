@@ -14,6 +14,9 @@
  **************************************************************************/
 /*
 $Log: TGiant3.cxx,v $
+Revision 1.2  2015/05/19 18:36:14  jwebb
+Fix typo in obscure, unused method.
+
 Revision 1.1  2005/02/07 21:08:51  fisyak
 rename antique TGeant3 to TGiant3
 
@@ -3945,7 +3948,7 @@ void TGiant3::WriteEuclid(const char* filnam, const char* topvol,
 	  Gfmate(imat,namate,a,z,dens,radl,absl,par,npar);
 	  if(!strcmp(namatec,namate)) {
 	    if(az==a && zc==z && densc==dens && radlc==radl 
-	       && abslc==absl && nparc==nparc) {
+	       && abslc==absl && nparc==npar) {
 	      iomate[imat]=imatc;
 	      flag=1;
 	      printf("*** GWEUCL *** material : %3d '%s' restored as %3d\n",imat,namate,imatc);

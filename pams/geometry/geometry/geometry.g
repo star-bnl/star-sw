@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.285 2015/04/17 19:14:51 jwebb Exp $
+* $Id: geometry.g,v 1.286 2015/05/19 19:29:20 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.286  2015/05/19 19:29:20  jwebb
+* Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
+*
 * Revision 1.285  2015/04/17 19:14:51  jwebb
 * ... also need to be careful to call the right geometry module.  Needed an extra flag in geometry.g to handle this.
 *
@@ -5156,6 +5159,9 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
         CONSTRUCT MagpGeo
    }
 
+
+  Call AgSFlag('SIMU',2) ! Save hits from all secondaries in SSD, PXL, IST 
+
   if(SISD) {
        sisd_level=0
        call AgDETP new ('SISD')
@@ -5201,9 +5207,12 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF IstdConfig==2 { CONSTRUCT istdgeo1; }
    }
 
+  Call AgSFlag('SIMU',1) ! Return to association of 2ndary hits on primary tracks 
+
    IF  PXST {
      IF PxstConfig==0 { CONSTRUCT pxstgeo1; }
    }
+
 
    IF MUTD {
      Call AgDetp NEW ('MUTD')
