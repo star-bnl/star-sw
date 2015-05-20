@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.8 2014/09/09 08:23:46 ypwang Exp $
+* $Id: StIstCollection.cxx,v 1.9 2015/05/20 20:53:45 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -32,12 +32,12 @@ StIstCollection::~StIstCollection()
    }
 };
 
-size_t StIstCollection::getNumTimeBins() const
+unsigned char StIstCollection::getNumTimeBins() const
 {
    return mNumTimeBins;
 };
 
-void StIstCollection::setNumTimeBins(size_t nTimeBins)
+void StIstCollection::setNumTimeBins(unsigned char nTimeBins)
 {
    mNumTimeBins = nTimeBins;
 };
@@ -103,6 +103,12 @@ ClassImp(StIstCollection);
 /***************************************************************************
 *
 * $Log: StIstCollection.cxx,v $
+* Revision 1.9  2015/05/20 20:53:45  smirnovd
+* Changed type for the number of time bins for consistency
+*
+* and to avoid explicit type conversions. The unsigned char range is more than
+* enough to keep expected physical values, and it is not used in any calculations
+*
 * Revision 1.8  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *
