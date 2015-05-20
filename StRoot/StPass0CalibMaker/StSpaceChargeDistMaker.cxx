@@ -243,7 +243,7 @@ Int_t StSpaceChargeDistMaker::Make() {
   }
 
   // Get StEvent and related info, determine if things are OK
-  event = (StEvent*) GetInputDS("StEvent");
+  event = static_cast<StEvent*>(GetInputDS("StEvent"));
   if (!event) {
     LOG_WARN << "StSpaceChargeDistMaker: no StEvent; skipping event." << endm;
     return kStWarn;
@@ -589,8 +589,11 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.5 2012/11/28 02:08:52 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.6 2015/05/19 19:36:09 genevb Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.6  2015/05/19 19:36:09  genevb
+// Code cleanup in preparation for C++11
+//
 // Revision 1.5  2012/11/28 02:08:52  genevb
 // Remove de-smearing bias in z and treat z more differentially
 //

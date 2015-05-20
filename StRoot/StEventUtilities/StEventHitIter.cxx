@@ -464,7 +464,7 @@ protected:
 //..............................................................................
 class StIstLadderHitIter : public StHitIter {
 public:
-                StIstLadderHitIter();
+                StIstLadderHitIter(){;}
 virtual        ~StIstLadderHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -473,7 +473,7 @@ protected:
 //..............................................................................
 class StIstSensorHitIter : public StHitIter {
 public:
-                StIstSensorHitIter();
+                StIstSensorHitIter(){;}
 virtual        ~StIstSensorHitIter(){;}
 virtual const TObject *GetObject (int idx) const;
 virtual           int  GetSize () const;
@@ -734,6 +734,110 @@ Int_t StFgtPointHitIter::GetSize() const
 } 
 // -------------------------------------------------------------------------------
 
+//_______PXL_______PXL_______PXL_______PXL_______PXL_______PXL_______PXL_______PXL
+//________________________________________________________________________________
+#include "StEvent/StPxlHitCollection.h"
+#include "StEvent/StPxlHit.h"
+#include "StEvent/StPxlLadderHitCollection.h"
+#include "StEvent/StPxlSectorHitCollection.h"
+#include "StEvent/StPxlSensorHitCollection.h"
+//Sector/Ladder/Sensor/Hit
+
+
+//..............................................................................
+class StPxlHitIter : public StHitIter {
+public:
+                StPxlHitIter();
+virtual        ~StPxlHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kPxlId;}
+protected:
+};
+//..............................................................................
+class StPxlSectorHitIter : public StHitIter {
+public:
+                StPxlSectorHitIter(){;}
+virtual        ~StPxlSectorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StPxlLadderHitIter : public StHitIter {
+public:
+                StPxlLadderHitIter(){;}
+virtual        ~StPxlLadderHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StPxlSensorHitIter : public StHitIter {
+public:
+                StPxlSensorHitIter(){;}
+virtual        ~StPxlSensorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//________________________________________________________________________________
+StPxlHitIter::StPxlHitIter()
+{
+  StHitIter *iter = this,*jter=0;
+  iter->SetDowIter((jter=new StPxlSectorHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StPxlLadderHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StPxlSensorHitIter ()));
+}
+//________________________________________________________________________________
+const TObject *StPxlHitIter::Reset(const TObject *cont)
+{
+  const StPxlHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->pxlHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StPxlHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StPxlHitCollection*)fCont)->sector(idx);
+}
+//________________________________________________________________________________
+const TObject *StPxlSectorHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StPxlSectorHitCollection*)fCont)->ladder(idx);
+}
+//________________________________________________________________________________
+int StPxlHitIter::GetSize () const
+{
+  return ((StPxlHitCollection*)fCont)->numberOfSectors();
+}
+//________________________________________________________________________________
+int StPxlSectorHitIter::GetSize () const
+{
+  return ((StPxlSectorHitCollection*)fCont)->numberOfLadders();
+}
+//________________________________________________________________________________
+const TObject *StPxlLadderHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StPxlLadderHitCollection*)fCont)->sensor(idx);
+}
+//________________________________________________________________________________
+int StPxlLadderHitIter::GetSize () const
+{
+  return ((StPxlLadderHitCollection*)fCont)->numberOfSensors();
+}
+//________________________________________________________________________________
+const TObject *StPxlSensorHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StPxlSensorHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StPxlSensorHitIter::GetSize () const
+{
+  return ((StPxlSensorHitCollection*)fCont)->hits().size();
+}
+
 
 //________________________________________________________________________________
 //_______EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____TOF
@@ -747,8 +851,8 @@ int StEventHitIter::AddDetector(StDetectorId detId)
    case kSsdId: Add(new StSsdHitIter());break;
    case kFtpcWestId:; 
    case kFtpcEastId:
-     Add(new StFtpcHitIter());break;
-   case kPxlId: 
+                Add(new StFtpcHitIter());break;
+   case kPxlId: Add(new StPxlHitIter()) ;break;
    case kIstId: Add(new StIstHitIter()) ;break; 
      /* case kFgtId: n.b. This will be removing the RnD version of the FGT */ 
    case kFmsId: 
