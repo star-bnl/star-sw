@@ -1,3 +1,5 @@
+#include <climits>
+
 #include "StIstClusterMaker.h"
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
@@ -10,7 +12,7 @@
 #include "StRoot/StIstClusterMaker/StIstIClusterAlgo.h"
 #include "StRoot/StIstClusterMaker/StIstScanClusterAlgo.h"
 
-StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(true)
+StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(UCHAR_MAX), mSplitCluster(true)
 {
    /* nothing to do */
 };
@@ -107,6 +109,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.30  2015/05/20 20:53:53  smirnovd
+* Set default value of unsigned variables in a more explicit way
+*
 * Revision 1.29  2014/10/14 21:06:40  smirnovd
 * Updated debug and log messages, added doxygen comments. Also other minor whitespace and style changes
 *
