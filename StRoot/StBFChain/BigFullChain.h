@@ -1176,7 +1176,8 @@ Bfc_st BFC[] = { // standard chains
   {"minicern"    ,"" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
   {"mysql"       ,"" ,"","",""                                            ,"libmysqlclient","MySQL",kFALSE},
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
-  {"geant3"      ,"" ,"","",""   ,"Geom,EG,Pythia6,EGPythia6,VMC,geant3","TGeo version of geant321",kFALSE},
+  {"geant3vmc"   ,"" ,"","-usexgeom,-xgeometry","",        "libGeom,libVMC,libgeant3", "VMC geant3",kFALSE},
+  {"geant3"      ,"" ,"","geant3vmc",""   ,"EG,Pythia6,EGPythia6","VMC geant3 plus ROOT EG,pythia6",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
@@ -1557,8 +1558,8 @@ Bfc_st BFC[] = { // standard chains
   {"HLTCA"    ,""  ,"Sti","",                  "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
-  {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
-   ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker"
+  {"Stv"     ,"Stv","","geant3vmc,-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T",    "StvMaker",
+   "libHist,libHistPainter,GeoTestMaker,StvUtil,Stv,StvMaker"
    ,                                                                                          "Stv",kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
