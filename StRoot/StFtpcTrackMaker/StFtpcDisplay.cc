@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.19 2009/08/25 19:41:19 fine Exp $
+// $Id: StFtpcDisplay.cc,v 1.20 2015/05/21 21:53:38 genevb Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.20  2015/05/21 21:53:38  genevb
+// Fixing memory leak (note: vers. 1.16 modifcations for old compilers no longer necessary)
+//
 // Revision 1.19  2009/08/25 19:41:19  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //
@@ -2000,6 +2003,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, Bool_t st, MIntArray *split, MI
   delete[] x;
   delete[] y;
   delete[] z;
+  delete[] good_track_to_show;
 
   return;
 }
