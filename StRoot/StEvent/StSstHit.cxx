@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSstHit.cxx,v 2.1 2015/05/13 16:50:59 ullrich Exp $
+ * $Id: StSstHit.cxx,v 2.2 2015/05/21 14:11:43 ullrich Exp $
  *
  * Author: Jonathan Bouchet, Thomas Ullrich, May 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSstHit.cxx,v $
+ * Revision 2.2  2015/05/21 14:11:43  ullrich
+ * Changed mADC from int to unsigned short.
+ *
  * Revision 2.1  2015/05/13 16:50:59  ullrich
  * Initial Revision.
  *
@@ -18,7 +21,7 @@
 #include "StSstHit.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StSstHit.cxx,v 2.1 2015/05/13 16:50:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StSstHit.cxx,v 2.2 2015/05/21 14:11:43 ullrich Exp $";
 
 StMemoryPool StSstHit::mPool(sizeof(StSstHit));
 
@@ -100,7 +103,7 @@ StSstHit::setLocalPosition(float u, float v, float w)
     mLocalPosition[2] = w;
 }
 
-void StSstHit::setADC(int adcp, int adcn) 
+void StSstHit::setADC(unsigned short adcp, unsigned short adcn) 
 { 
     mADC[0] = adcp; 
     mADC[1] = adcn; 

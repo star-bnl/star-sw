@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstHit.h,v 2.1 2015/05/13 16:50:59 ullrich Exp $
+ * $Id: StSstHit.h,v 2.2 2015/05/21 14:11:43 ullrich Exp $
  *
  * Author: Jonathan Bouchet, Thomas Ullrich, May 2015
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSstHit.h,v $
+ * Revision 2.2  2015/05/21 14:11:43  ullrich
+ * Changed mADC from int to unsigned short.
+ *
  * Revision 2.1  2015/05/13 16:50:59  ullrich
  * Initial Revision.
  *
@@ -49,7 +52,7 @@ public:
     static unsigned int sector(unsigned int);
     unsigned int sector() const;
     void         setLocalPosition(float, float, float);
-    void         setADC(int, int); 
+    void         setADC(unsigned short, unsigned short); 
     int          getADC(unsigned int) const; 
     virtual int  volumeID() const;
     void         Print(const Option_t *option="") const;
@@ -57,12 +60,12 @@ public:
 protected:
     static StMemoryPool mPool;  //!
     Float_t mLocalPosition[3];
-    Int_t   mADC[2]; 
+    UShort_t   mADC[2]; 
     
 private:
     enum {mWaferPerLadder=16};
     
-    ClassDef(StSstHit,1)
+    ClassDef(StSstHit,2)
 };
 
 inline unsigned int
