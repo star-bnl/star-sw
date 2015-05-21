@@ -1,6 +1,11 @@
-// $Id: StSsdPointMaker.cxx,v 1.66 2015/05/19 19:11:18 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.67 2015/05/21 02:54:00 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.67  2015/05/21 02:54:00  perev
+// bug #3106 By mistake, fixing memory leak was removed by me line mySsd->Reset()
+// Now I put it back
+// Victor
+//
 // Revision 1.66  2015/05/19 19:11:18  perev
 // Avoid leak by useng standard array instead of new and delete
 //
@@ -566,7 +571,9 @@ Int_t StSsdPointMaker::Make()
 	  }
 	}
     }
-  if(res!=kStOK){
+ //clear stuff 	 
+    mySsd->Reset(); 	 
+    if(res!=kStOK){
     LOG_WARN <<"Make : no output" << endm;;
     return kStWarn;
   }
