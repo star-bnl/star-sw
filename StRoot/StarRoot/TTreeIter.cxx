@@ -667,8 +667,8 @@ void TTreeIter::WhichTree(const char *fileName)
      &&  strcmp("TNtuple",key->GetClassName())!=0) continue;
      ttName = key->GetName(); break;
    }  
-   printf(" Got TTree = %s\n",ttName);
    if (ttName==0) return;
+   printf(" Got TTree = %s\n",ttName);
 
    fTree = new TChain(ttName);
    delete tfile;
