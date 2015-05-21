@@ -152,22 +152,23 @@ std::string resolve_path(const std::string& path)
 }
 
 void create_dir_recursive(std::string path) {
-        char opath[256];
-        char *p;
-        size_t len;
-        strncpy(opath, path.c_str(), sizeof(opath));
-        len = strlen(opath);
-        if(opath[len - 1] == '/')
+		char *opath = strdup(path.c_str());
+        size_t len = strlen(opath);
+        if (opath[len - 1] == '/') {
                 opath[len - 1] = '\0';
-        for(p = opath; *p; p++)
-                if(*p == '/') {
-                        *p = '\0';
-                        if(access(opath, F_OK))
-                                mkdir(opath, S_IRWXU);
-                        *p = '/';
-                }
-        if(access(opath, F_OK))         /* if path is not terminated with / */
-                mkdir(opath, S_IRWXU);
+		}
+        for (char* p = opath; *p; p++) {
+            if (*p == '/') {
+                *p = '\0';
+                if(access(opath, F_OK)) {
+                    mkdir(opath, S_IRWXU);
+				}
+                *p = '/';
+            }
+		}
+        if(access(opath, F_OK)) {        /* if path is not terminated with / */
+            mkdir(opath, S_IRWXU);
+		}
 }
 
 unsigned long remove_dir_recursive(std::string unlink_path, const std::string& base_path)
