@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.67 2015/05/21 02:54:00 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.68 2015/05/21 18:49:50 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.68  2015/05/21 18:49:50  bouchet
+// arrayIndex out of bounds fixed
+//
 // Revision 1.67  2015/05/21 02:54:00  perev
 // bug #3106 By mistake, fixing memory leak was removed by me line mySsd->Reset()
 // Now I put it back
@@ -656,7 +659,7 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 		matchisto_[i]->Fill(a,b);
 	      }
 	    
-	    for(Int_t k=0;k<=11;k++)
+	    for(Int_t k=0;k<11;k++)
 	      {
 		if(pSpt->getNMatched()==conversion[k])
 		  {
@@ -902,7 +905,7 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	    hitNtuple[1] = b;
 	    hitNtuple[2] = i+1;
 	    hitNtuple[3] = j+1;
-	    for(Int_t k=0;k<=11;k++)
+	    for(Int_t k=0;k<11;k++)
 	      {
 		if(pSpt->getNMatched()==conversion[k])
 		  {
