@@ -1354,8 +1354,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 
 double StFgtGeom::rStrip_Phi_High(int rindex){
   
-  double phi;
-
+  double phi=0.0;
   
   double hold[25]={0.19153084,
 		   0.19847378,
@@ -1408,7 +1407,7 @@ double StFgtGeom::rStrip_Phi_High(int rindex){
 
 double StFgtGeom::rStrip_Phi_Low(int rindex){
   
-  double phi;
+  double phi=0.0;
 
   double low[kFgtNumStrips]={0.8905733,
 				     0.88363036,
@@ -4205,8 +4204,11 @@ void StFgtGeom::getQuadCenterXYZ(Short_t disc, Short_t quad, TVector3 &xyz){
 }
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.37 2013/01/31 15:44:27 akio Exp $
+ *  $Id: StFgtGeom.cxx,v 1.38 2015/05/21 19:46:19 akio Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.38  2015/05/21 19:46:19  akio
+ *  fixes to pass cppcheck
+ *
  *  Revision 1.37  2013/01/31 15:44:27  akio
  *  Adding getQuadCenterXYZ
  *

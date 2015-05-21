@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.10 2014/03/05 18:28:59 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.11 2015/05/21 19:46:15 akio Exp $
  *
  */
 
@@ -2672,7 +2672,7 @@ void StFgtAlignmentMaker::doAlignment(fgtAlignment_st* input,
 
   if(mFillHist>0){
     int np=NPAR;
-    double *gin, f;
+    double *gin=0, f=0;
     double *par = (double *) input;
     if     (trackType==0) { funcLine (np,gin,f,par,iflag);}
     else if(trackType==1) { funcHelix(np,gin,f,par,iflag);}
