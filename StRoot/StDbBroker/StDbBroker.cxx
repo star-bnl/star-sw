@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.59 2014/07/28 14:58:27 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.60 2015/05/21 18:29:06 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.60  2015/05/21 18:29:06  dmitry
+ * small memory leak and type conversion warnings fixed
+ *
  * Revision 1.59  2014/07/28 14:58:27  dmitry
  * fixed templated call to make it compliant with gcc 4.8.2
  *
@@ -684,9 +687,10 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
      if(table)break;
    }
 
-   if(!table){
+   if (!table){
      em<<"Write Failed table="<<m_tableName<<" not found in db="<<dbName;
      delete [] path;
+     delete [] aword;
      return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
    }
 
@@ -696,6 +700,7 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
    bool iswritten=mgr->storeDbTable(table);
    delete table;
 
+   delete [] aword;
    return (iswritten) ? 1 : 0;
 #undef __METHOD__
 }
