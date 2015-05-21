@@ -82,6 +82,16 @@ Int_t StFpsRawDaqReader::Make() {
     return kStEOF;	
   }
   
+  mTrgMask = mRdr->daqbits64;
+  if(Debug()){
+    printf("daqbits64="); 
+    for(int i=63; i>=0; i--){     
+      if(i%10==9) printf(" ");
+      printf("%1x",(mTrgMask>>i)&0x1);
+    }; 
+    printf("\n");
+  }
+
   daq_dta *dd = 0;
   dd = mRdr->det("fps")->get("adc");
   int ndata=0;
@@ -133,8 +143,11 @@ void StFpsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFpsRawDaqReader);
 
 /*
- * $Id: StFpsRawDaqReader.cxx,v 1.2 2015/02/28 02:58:56 akio Exp $
+ * $Id: StFpsRawDaqReader.cxx,v 1.3 2015/05/21 18:23:51 akio Exp $
  * $Log: StFpsRawDaqReader.cxx,v $
+ * Revision 1.3  2015/05/21 18:23:51  akio
+ * *** empty log message ***
+ *
  * Revision 1.2  2015/02/28 02:58:56  akio
  * Some bug fixes
  *
