@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.60 2015/05/21 18:29:06 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.61 2015/05/21 21:51:34 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.61  2015/05/21 21:51:34  dmitry
+ * avoid memleak by moving check to the entrance of the func
+ *
  * Revision 1.60  2015/05/21 18:29:06  dmitry
  * small memory leak and type conversion warnings fixed
  *
@@ -235,11 +238,11 @@ ClassImp(StDbBroker)
 //the only remaining St_Table dependence is in this function 
 char **StDbBroker::GetComments(St_Table *parentTable)
 {
-  char **ElementComment = new char*[m_nElements]; 
   if (!parentTable) {
     //    MakeZombie();
     return NULL;
   }
+  char **ElementComment = new char*[m_nElements]; 
   
   TClass *classPtr = parentTable->GetRowClass();
   if (!classPtr) return NULL;
