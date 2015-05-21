@@ -1,9 +1,15 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.20 2015/05/19 20:40:27 perev Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.21 2015/05/21 03:08:46 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
- * Revision 1.20  2015/05/19 20:40:27  perev
- * Remove throw
+ * Revision 1.21  2015/05/21 03:08:46  smirnovd
+ * Revert "Remove throw"
+ *
+ * No value can be immediately seen in the changes.
+ * We need to hear more arguments on why it is better to remove the throw. What is
+ * the point in adding a dummy static local variable that does nothing?
+ * Even if some changes can be defended to be appropriate the same must be done in
+ * StiIstHitLoader and StiSsdHitLoader
  *
  * Revision 1.19  2015/03/03 21:15:23  smirnovd
  * StiIst[Pxl]HitLoader: Allow tracks to share IST and PXL hits by up to 5 times
@@ -190,14 +196,15 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
             StSPtrVecPxlHit &pxlHits = PxlSensorHitCollection->hits();
 
             LOG_DEBUG << "StiPxlHitLoader::loadHits() - Collection size: " << pxlHits.size() << endm;
-            size_t nPxlHits = pxlHits.size();
-            for (unsigned int iPxlHit = 0; iPxlHit < nPxlHits; iPxlHit++)
+
+            for (unsigned int iPxlHit = 0; iPxlHit < pxlHits.size(); iPxlHit++)
             {
-static int myCount=0; myCount++;
                StPxlHit *pxlHit = pxlHits[iPxlHit];
-               assert (pxlHit);
-               assert(pxlHit->detector() == kPxlId);
-assert(fabs(pxlHit->position().x())<300);
+
+               if (!pxlHit)
+                  throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
+
+               if (pxlHit->detector() != kPxlId) continue;
 
                // Extract individual sti detector by using the stiRow/stiSensor keys
                int stiRow    = 0;
