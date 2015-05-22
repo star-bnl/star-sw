@@ -12,7 +12,7 @@ TRVector::TRVector(Int_t nrows,const Double_t *fArray): TRMatrix(nrows,1,fArray)
 TRVector::TRVector(Int_t nrows,const Float_t *fArray): TRMatrix(nrows,1,fArray){;}
 //________________________________________________________________________________
 TRVector::TRVector(const TRMatrix& A, ETRMatrixCreatorsOp kop,const TRVector& B) :
-    TRMatrix(A, kop, B) {assert (kop = kAxB);}
+    TRMatrix(A, kop, B) {assert (kop == kAxB);}
 //________________________________________________________________________________
 TRVector::TRVector(const TRMatrix& S, Int_t I) {// get I'th row
   if (I == 0) {::Error("TRVector::TRVector(const TRMatrix&)", "index i %d out of bounds (size: %d, this: %p)", 
