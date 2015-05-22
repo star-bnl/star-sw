@@ -549,6 +549,8 @@ fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz, int overh
 {
   n_inodes++;
   fs_inode *n = (fs_inode *)malloc(sizeof(fs_inode));
+  if(!n) return NULL ;
+
   n->parent = NULL;
   n->fchild = NULL;
   n->lchild = NULL;
@@ -558,7 +560,11 @@ fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz, int overh
   n->overhead = overhead;
   n->sz = sz;
   n->name = (char *)malloc(strlen(name)+1);
-  if(!n->name) return NULL;
+  if(!n->name) {
+	free(n) ;
+	return NULL;
+  }
+
   strcpy(n->name,name);
 
   return n;
