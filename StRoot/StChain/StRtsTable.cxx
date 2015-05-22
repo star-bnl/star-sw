@@ -28,7 +28,7 @@ public:
 }; 
 //________________________________________________________
 StRtsTable::StRtsTable(size_t structLength, Int_t n) : 
- TGenericTable(*(TTableDescriptor *)&StRtsTableDescriptor(structLength),1)
+ TGenericTable(StRtsTableDescriptor(structLength),1)
  {
    TTableDescriptor *dsc = GetDescriptorPointer();
    if (dsc)  fSize = dsc->Sizeof();
