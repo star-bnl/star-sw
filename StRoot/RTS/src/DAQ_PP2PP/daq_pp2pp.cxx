@@ -199,6 +199,8 @@ daq_dta *daq_pp2pp::handle_pedrms(int sec)
 		
 			pedrms->finalize(1, obj[i].sec, ped->seq_id, ped->chain_id) ;
 		}
+
+		free(mem) ;
 	}
 
 
