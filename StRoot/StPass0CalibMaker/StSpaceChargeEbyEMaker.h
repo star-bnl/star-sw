@@ -48,6 +48,8 @@ public:
           void   DoTrackInfo(Int_t mode=1) { TrackInfomode = mode; }
           void   DoAsym() { Asymmode = kTRUE; }
 
+          void   setVtxVpdAgree(float x) { vtxVpdAgree = x; }
+          void   setVtxPCTs(UInt_t x) { vtxPCTs = x; }
           void   setVtxEmcMatch(UInt_t x) { vtxEmcMatch = x; }
           void   setVtxTofMatch(UInt_t x) { vtxTofMatch = x; }
           void   setVtxMinTrks(UInt_t x) { vtxMinTrks = x; }
@@ -61,7 +63,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.20 2014/10/23 21:07:23 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.21 2015/05/23 04:26:07 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
 
 protected:
@@ -96,6 +98,8 @@ protected:
   Bool_t doGaps;
   Bool_t doSecGaps;
   UInt_t inGapRow;
+  float  vtxVpdAgree;
+  UInt_t vtxPCTs;
   UInt_t vtxEmcMatch;
   UInt_t vtxTofMatch;
   UInt_t vtxMinTrks;
@@ -216,8 +220,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.20 2014/10/23 21:07:23 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.21 2015/05/23 04:26:07 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.21  2015/05/23 04:26:07  genevb
+// More vertex selection criteria: PCT daughters, and VPD z agreement
+//
 // Revision 1.20  2014/10/23 21:07:23  genevb
 // Add GridLeak-by-sector codes, East/WestOff handling, and some code reformatting
 //
