@@ -36,37 +36,44 @@ void FindVtxSeeds(
 
   // Set up VertexSeedMaker
   StVertexSeedMaker* vtxSeedMk=0;
+  TString pstr = path;
+  if (pstr.Length() > 0 && !(pstr.EndsWith("/"))) pstr.Append("/");
   TString fstr = file;
   if (fstr.EndsWith("event.root")) {
-    TString fullname = path;
-    if (fullname.Length() > 0 && !(fullname.EndsWith("/"))) fullname.Append("/");
-    fullname.Append(file);
-
-    StIOMaker* IOMaker = new StIOMaker("IO","r",fullname.Data(),"bfcTree");
+    pstr += fstr;
+    StIOMaker* IOMaker = new StIOMaker("IO","r",pstr.Data(),"bfcTree");
     IOMaker->SetBranch("*",0,"0");           //deactivate all branches
     IOMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
     IOMaker->SetBranch("eventBranch",0,"r");   //activate Event Branch
     new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
     vtxSeedMk = (StVertexSeedMaker*) (new StEvtVtxSeedMaker());
-  } elseif (fstr.EndsWith("MuDst.root")) {
-    new StMuDstMaker(0,0,path,file,"MuDst.root");
+  } else if (fstr.EndsWith("MuDst.root")) {
+    dstMaker = new StMuDstMaker(0,0,pstr.Data(),file,"MuDst.root");
+    dstMaker->SetStatus("*",0);
+    dstMaker->SetStatus("MuEvent",1);
+    dstMaker->SetStatus("PrimaryVertices",1);
+    dstMaker->SetStatus("PrimaryTracks",1);
+    dstMaker->SetStatus("BTofHeader",1);
     new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
     vtxSeedMk = (StVertexSeedMaker*) (new StMuDstVtxSeedMaker());
+  } else if (fstr.EndsWith("daq")) {
+    cout << "Please process with a BFC chain. Stopping." << endl;
+    return;
   } else {
     cout << "Unknown file type. Stopping." << endl;
-    return 0;
+    return;
   }
   vtxSeedMk->SetDefDir(outDir);
 
   // Do init
-  Int_t istatus = chain.Init();
-  if( istatus ) { chain.Fatal(istatus,"on init"); return; }
+  int status = chain.Init();
+  if (status) { chain.Fatal(status,"on init"); return; }
 
   // Loop over events
   for( Int_t i=0; i<nevents; i++ ) {
-    int status = chain.Make();
-    if (status!=0) break;
     chain.Clear();
+    status = chain.Make();
+    if (status) break;
   }
 
   // Finish
@@ -74,8 +81,11 @@ void FindVtxSeeds(
 
 }
 
-// $Id: FindVtxSeeds.C,v 1.2 2015/05/11 21:51:41 genevb Exp $
+// $Id: FindVtxSeeds.C,v 1.3 2015/05/23 02:39:21 genevb Exp $
 // $Log: FindVtxSeeds.C,v $
+// Revision 1.3  2015/05/23 02:39:21  genevb
+// Reduce number of MuDst branches to read
+//
 // Revision 1.2  2015/05/11 21:51:41  genevb
 // Removed some bugs, added dEdx maker dependence
 //
