@@ -16,6 +16,9 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
+Revision 1.6  2015/05/26 14:56:42  jwebb
+PopStar Initial Version
+
 Revision 1.5  2009/02/02 14:28:21  fisyak
 Add protection wrt new method introduced in ROOT 5.22.0
 
@@ -474,6 +477,9 @@ Cleanup of code
 # define gcomad  GCOMAD
 
 #endif
+
+#include <iostream>
+using namespace std;
 
 //____________________________________________________________________________
 extern "C"
@@ -2093,6 +2099,12 @@ void TGeant3TGeo::FinishGeometry()
       Double_t stmin  = med->GetParam(7);
       G3Medium(kmed, med->GetName(), nmat, isvol, ifield, fieldm, tmaxfd,
                stemax,deemax, epsil, stmin);
+
+      if ( med->GetId() != kmed ) {
+	cout << "WARNING: Medium id=" << med->GetId() << " becomes id=" << kmed << endl;
+	assert(0);
+      };
+
       med->SetId(kmed);
     }
     if (gDebug > 0) printf("FinishGeometry, geometry retreived from file, materials/media mapped to G3\n");

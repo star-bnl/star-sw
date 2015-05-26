@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.4 2009/02/01 17:29:50 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.5 2015/05/26 14:56:41 jwebb Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -28,6 +28,9 @@
 class TGeoHMatrix;
 class TArrayD;
 class TString;
+
+#include <string>
+using namespace std;
 
 //______________________________________________________________
 //
@@ -274,10 +277,11 @@ typedef struct {
   Int_t    nbit;
 } Gcnum_t;
 
+#define setter( tag, var ) if ( #tag == cut ) { var = val; return; }
 //----------GCCUTS
 //  COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM
 //   +             ,DCUTE ,DCUTM ,PPCUTM,TOFMAX,GCUTS(5)
-typedef struct {
+struct Gccuts_t {
   Float_t cutgam;
   Float_t cutele;
   Float_t cutneu;
@@ -290,7 +294,36 @@ typedef struct {
   Float_t ppcutm;
   Float_t tofmax;
   Float_t gcuts[5];
-} Gccuts_t;
+#if 0
+  void set( string cut, float val ) { 
+    if ( "cutgam" == cut ) cutgam = val;
+    if ( "cutele" == cut ) cutele = val;
+    if ( "cutneu" == cut ) cutneu = val;
+    if ( "cuthad" == cut ) cuthad = val;
+    if ( "cutmuo" == cut ) cutmuo = val;
+    if ( "bcute"  == cut ) bcute  = val;
+    if ( "bcutm"  == cut ) bcutm  = val;
+    if ( "dcute"  == cut ) dcute  = val; 
+    if ( "dcutm"  == cut ) dcutm  = val;
+    if ( "ppcutm" == cut ) ppcutm = val;
+    if ( "tofmax" == cut ) tofmax = val;
+  };
+  Gccuts_t() : cutgam( 0.001 ), 
+	       cutele( 0.001 ),
+	       cutneu( 0.001 ),
+	       cuthad( 0.001 ),
+	       cutmuo( 0.001 ),
+	       bcute ( -1.0 ),
+	       bcutm ( -1.0 ),
+	       dcute ( -1.0 ),
+	       dcutm ( -1.0 ),
+	       ppcutm( 0.01 ),
+	       tofmax( 1E+10 )
+  {
+    for ( unsigned int i=0;i<5; i++ ) gcuts[i] = 0;    
+  };
+#endif
+};
 
 //----------GCMORE
 //      COMMON/GCMORE/GCALPHA,ICLOSE,PFINAL(3),DSTRT,WIRE1(3),WIRE2(3),
@@ -342,6 +375,7 @@ typedef struct {
 //     +             ,ILOSS,SLOSS,SOLOSS,STLOSS,DPHYS2
 //     +             ,IMULS,SMULS,SOMULS,STMULS,DPHYS3
 //     +             ,IRAYL,SRAYL,SLRAYL,ZINTRA,STEPRA
+#if 1
 typedef struct {
   Int_t    ipair;
   Float_t  spair;
@@ -409,20 +443,183 @@ typedef struct {
   Float_t  zintra;
   Float_t  stepra;
 } Gcphys_t;
+#endif
+
+#if 0
+struct Gcphys_t {
+  Int_t    ipair;
+  Float_t  spair;
+  Float_t  slpair;
+  Float_t  zintpa;
+  Float_t  steppa;
+  Int_t    icomp;
+  Float_t  scomp;
+  Float_t  slcomp;
+  Float_t  zintco;
+  Float_t  stepco;
+  Int_t    iphot;
+  Float_t  sphot;
+  Float_t  slphot;
+  Float_t  zintph;
+  Float_t  stepph;
+  Int_t    ipfis;
+  Float_t  spfis;
+  Float_t  slpfis;
+  Float_t  zintpf;
+  Float_t  steppf;
+  Int_t    idray;
+  Float_t  sdray;
+  Float_t  sldray;
+  Float_t  zintdr;
+  Float_t  stepdr;
+  Int_t    ianni;
+  Float_t  sanni;
+  Float_t  slanni;
+  Float_t  zintan;
+  Float_t  stepan;
+  Int_t    ibrem;
+  Float_t  sbrem;
+  Float_t  slbrem;
+  Float_t  zintbr;
+  Float_t  stepbr;
+  Int_t    ihadr;
+  Float_t  shadr;
+  Float_t  slhadr;
+  Float_t  zintha;
+  Float_t  stepha;
+  Int_t    imunu;
+  Float_t  smunu;
+  Float_t  slmunu;
+  Float_t  zintmu;
+  Float_t  stepmu;
+  Int_t    idcay;
+  Float_t  sdcay;
+  Float_t  slife;
+  Float_t  sumlif;
+  Float_t  dphys1;
+  Int_t    iloss;
+  Float_t  sloss;
+  Float_t  soloss;
+  Float_t  stloss;
+  Float_t  dphys2;
+  Int_t    imuls;
+  Float_t  smuls;
+  Float_t  somuls;
+  Float_t  stmuls;
+  Float_t  dphys3;
+  Int_t    irayl;
+  Float_t  srayl;
+  Float_t  slrayl;
+  Float_t  zintra;
+  Float_t  stepra;
+  Gcphys_t() :
+    ipair(0),
+    spair(0),
+    slpair(0),
+    zintpa(0),
+    steppa(0),
+    icomp(0),
+    scomp(0),
+    slcomp(0),
+    zintco(0),
+    stepco(0),
+    iphot(0),
+    sphot(0),
+    slphot(0),
+    zintph(0),
+    stepph(0),
+    ipfis(0),
+    spfis(0),
+    slpfis(0),
+    zintpf(0),
+    steppf(0),
+    idray(0),
+    sdray(0),
+    sldray(0),
+    zintdr(0),
+    stepdr(0),
+    ianni(0),
+    sanni(0),
+    slanni(0),
+    zintan(0),
+    stepan(0),
+    ibrem(0),
+    sbrem(0),
+    slbrem(0),
+    zintbr(0),
+    stepbr(0),
+    ihadr(0),
+    shadr(0),
+    slhadr(0),
+    zintha(0),
+    stepha(0),
+    imunu(0),
+    smunu(0),
+    slmunu(0),
+    zintmu(0),
+    stepmu(0),
+    idcay(0),
+    sdcay(0),
+    slife(0),
+    sumlif(0),
+    dphys1(0),
+    iloss(0),
+    sloss(0),
+    soloss(0),
+    stloss(0),
+    dphys2(0),
+    imuls(0),
+    smuls(0),
+    somuls(0),
+    stmuls(0),
+    dphys3(0),
+    irayl(0),
+    srayl(0),
+    slrayl(0),
+    zintra(0),
+    stepra(0)  {    };
+  void set( string cut, float val ) { 
+    setter( pair, ipair );
+    setter( comp, icomp );
+    setter( phot, iphot );
+    setter( pfis, ipfis );
+    setter( dray, idray );
+    setter( anni, ianni );
+    setter( brem, ibrem );
+    setter( hadr, ihadr );
+    setter( munu, imunu );
+    setter( dcay, idcay );
+    setter( loss, iloss );
+    setter( muls, imuls ); 
+    setter( rayl, irayl );
+    
+  };
+}; 
+#endif
 
 //----------GCPHLT
 //      COMMON/GCPHLT/ILABS,SLABS,SLLABS,ZINTLA,STEPLA
 //     +             ,ISYNC
 //     +             ,ISTRA
-typedef struct {
-  Int_t ilabs;
+struct Gcphlt_t {
+  Int_t   ilabs;
   Float_t slabs;
   Float_t sllabs;
   Float_t zintla;
   Float_t stepla;
   Int_t isync;
   Int_t istra;
-} Gcphlt_t;
+#if 0
+  Gcphlt_t() : ilabs(1), slabs(0), sllabs(0), zintla(0), stepla(0), isync(1), istra(1)
+  {      };
+  void set( string cut, float val ) { 
+    setter( labs, ilabs );
+    setter( sync, isync );
+    setter( stra, istra );
+    setter( labs, slabs );
+  }
+#endif
+};
 
 //----------GCOPTI
 //      COMMON/GCOPTI/IOPTIM
@@ -706,6 +903,9 @@ public:
                       Double_t phiy, Double_t thez, Double_t phiz);
 
   virtual void   SetRootGeometry();
+
+
+  void Gptmed( Int_t itmed );
 
 ////////////////////////////////////////////////////////////////////////
 //                                                                    //

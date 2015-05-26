@@ -1,7 +1,10 @@
 *
-* $Id: gstpar.F,v 1.1.1.2 2009/02/01 17:10:19 fisyak Exp $
+* $Id: gstpar.F,v 1.2 2015/05/26 14:56:42 jwebb Exp $
 *
 * $Log: gstpar.F,v $
+* Revision 1.2  2015/05/26 14:56:42  jwebb
+* PopStar Initial Version
+*
 * Revision 1.1.1.2  2009/02/01 17:10:19  fisyak
 * Merge with .DEV2
 *
@@ -89,6 +92,7 @@ C.
          Q(JTMN+10+23)=ISTRA
       ENDIF
 C
+
       ITPAR=0
       IF(CHPAR.EQ.'CUTGAM')ITPAR=1
       IF(CHPAR.EQ.'CUTELE')ITPAR=2
