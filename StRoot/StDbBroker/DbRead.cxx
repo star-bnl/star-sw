@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbRead.cxx,v 1.8 2007/05/16 22:47:54 deph Exp $
+ * $Id: DbRead.cxx,v 1.9 2015/05/21 18:29:06 dmitry Exp $
  *
  * Author: S. Vanyashin 
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: DbRead.cxx,v $
+ * Revision 1.9  2015/05/21 18:29:06  dmitry
+ * small memory leak and type conversion warnings fixed
+ *
  * Revision 1.8  2007/05/16 22:47:54  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -63,8 +66,8 @@ char row[128];
 char currentDateTime[20];
 char time[7];
 
-sprintf(currentDateTime,"%.8d",datetime[0]);
-sprintf(time,"%.6d",datetime[1]);
+sprintf(currentDateTime,"%.8d",(int)datetime[0]);
+sprintf(time,"%.6d",(int)datetime[1]);
 strcat(currentDateTime,time);
 
 currentDateTime[19]='\0';
