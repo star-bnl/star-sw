@@ -48,11 +48,12 @@ endif
 # CFLAGS += -pg
 
 # Linking flags
-LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
+LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom
 ifeq (,$(findstring darwin,$(STAR_HOST_SYS)))
-LDFLAGS += -shared -Wl,-Bdynamic -lgfortran
+LDFLAGS += -shared -Wl,-Bdynamic -lgfortran -lm
 else
-LDFLAGS += -shared -Wl,-Bdynamic `gfortran -print-file-name=libgfortran.a`
+lgfortran = $(shell gfortran -print-file-name=libgfortran.dylib)
+LDFLAGS += $(lgfortran) -lm
 endif
 .PHONY:	all  showbuild 
 all: heed lib
