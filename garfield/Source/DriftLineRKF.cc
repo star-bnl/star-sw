@@ -1104,6 +1104,8 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
       y1 = ym;
       z1 = zm;
       alpha1 = alpham;
+      if(stepCounter>10000)
+	return integral;
     }
   }
   return integral;
