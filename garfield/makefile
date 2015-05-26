@@ -3,7 +3,7 @@ OBJDIR = $(STAR_OBJ)/garfield
 SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
 #LIBDIR = $(GARFIELD_HOME)/.$(STAR_HOST_SYS)/Library
-LIBDIR = ./
+LIBDIR = .
 HEEDDIR = $(GARFIELD_HOME)/Heed
 
 HEADERS = $(wildcard $(INCDIR)/*.hh)
@@ -51,7 +51,7 @@ endif
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
 DYNAMIC = 
-ifeq ($(findstring $(STAR_SYS),darwin),)
+ifeq ($(findstring $(STAR_HOST_SYS),darwin),)
 DYNAMIC = -Wl,-Bdynamic
 endif
 .PHONY:	all  showbuild 
