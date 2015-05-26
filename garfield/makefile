@@ -50,7 +50,8 @@ endif
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
-ifeq ($(findstring $(STAR_HOST_SYS),darwin),)
+DYNAMIC = 
+ifeq ($(findstring $(STAR_SYS),darwin),)
 DYNAMIC = -Wl,-Bdynamic
 endif
 .PHONY:	all  showbuild 
