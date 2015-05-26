@@ -279,13 +279,10 @@ messVec* StMessageManager::FindMessageList(const char* s1, const char* s2,
 // which contain matches to the strings s1,s2,s3,s4.
 //
   size_t s1_len = strlen(s1);
-  char* s1a = new char[(s1_len+1)];
-  strcpy(s1a,s1);
   if ((s1_len==1) && (!list)) {
     int typeN = messTypeList->FindTypeNum(s1);
     if (typeN) {
       list = messCollection[typeN];
-      *s1a = 0;
       s1_len = 0;
     }
   }
@@ -439,7 +436,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.49 2012/06/11 15:05:34 fisyak Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.50 2015/05/21 21:22:40 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -469,8 +466,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.49 2012/06/11 15:05:34 fisyak Exp $
+// $Id: StMessageManager.cxx,v 1.50 2015/05/21 21:22:40 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.50  2015/05/21 21:22:40  genevb
+// Fix memory leak: unnecessary char array in FindMessageList()
+//
 // Revision 1.49  2012/06/11 15:05:34  fisyak
 // std namespace
 //
