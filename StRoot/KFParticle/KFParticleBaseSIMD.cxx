@@ -1847,7 +1847,7 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
   //find correct parts of helices
   int_v n1(Vc::Zero);
   int_v n2(Vc::Zero);
-  float_v dzMin = abs( (z01-z02) + dS[0]*pz1 - dS[1]*pz2 );
+//  float_v dzMin = abs( (z01-z02) + dS[0]*pz1 - dS[1]*pz2 );
   const float_v pi2(6.283185307f);
   
 //   //TODO optimise for loops for neutral particles

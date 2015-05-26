@@ -30,6 +30,7 @@ using std::ofstream;
 KFParticleTopoReconstructor::~KFParticleTopoReconstructor()
 {
   if (fKFParticlePVReconstructor) delete fKFParticlePVReconstructor;
+  if (fKFParticleFinder) delete fKFParticleFinder;
   if(fTracks) delete [] fTracks;
 }
 
