@@ -72,7 +72,7 @@ class StEmcOfflineCalibrationElectronAnalysis : public StMaker {
   Int_t maxClusterId;
 
   TF1 *mGeantFits[20];
-  TH1D *ringHisto[40];
+  TH1D *ringHisto[40], *ringHisto_Unbiased[40], *ringHisto_HT[40];
   TH1D *cratesliceHisto[30][20];
 
  public: 
@@ -87,7 +87,7 @@ class StEmcOfflineCalibrationElectronAnalysis : public StMaker {
   Bool_t trackPointsToHT(const map<Int_t, Int_t>&, Int_t);
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationElectronAnalysis.h,v 1.1 2015/02/23 22:07:08 jkadkins Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationElectronAnalysis.h,v 1.2 2015/05/26 16:08:05 jkadkins Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
