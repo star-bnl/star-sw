@@ -51,7 +51,7 @@ endif
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
 DYNAMIC = 
-ifeq (,$(findstring darwin,$(STAR_HOST_SYS))
+ifeq (,$(findstring darwin,$(STAR_HOST_SYS)))
 DYNAMIC = -Wl,-Bdynamic
 endif
 .PHONY:	all  showbuild 
