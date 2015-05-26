@@ -49,10 +49,10 @@ endif
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
-	-lgfortran -lm
-DYNAMIC = 
 ifeq (,$(findstring darwin,$(STAR_HOST_SYS)))
-DYNAMIC = -Wl,-Bdynamic
+LDFLAGS += -shared -Wl,-Bdynamic -lgfortran
+else
+LDFLAGS += -shared -Wl,-Bdynamic `gfortran -print-file-name=libgfortran.a`
 endif
 .PHONY:	all  showbuild 
 all: heed lib
@@ -62,7 +62,7 @@ $(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 #	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
 #	$(wildcard $(OBJDIR)/Heed/*.o)
 #	ranlib $(LIBDIR)/libGarfield.a
-	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared $(DYNAMIC) -lgfortran $(OBJECTS) \
+	`root-config --ld` -o $(LIBDIR)/libGarfield.so $(LDFLAGS)  $(OBJECTS) \
 	$(wildcard $(OBJDIR)/Heed/*.o)
 #	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $<
 	touch $(OBJDIR)/last_updated_on
