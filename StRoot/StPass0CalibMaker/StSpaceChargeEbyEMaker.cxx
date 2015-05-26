@@ -78,7 +78,8 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     QAmode(kFALSE), TrackInfomode(0), Asymmode(kFALSE),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE), doSecGaps(kFALSE),
     inGapRow(0),
-    vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5), minTpcHits(25),
+    vtxVpdAgree(5.0), vtxPCTs(0), vtxEmcMatch(1), vtxTofMatch(0),
+    vtxMinTrks(5), minTpcHits(25),
     reqEmcMatch(kFALSE), reqTofMatch(kFALSE), reqEmcOrTofMatch(kTRUE),
     m_ExB(0), SCcorrection(0), GLcorrection(0), SCEWRatio(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
@@ -140,6 +141,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   lastsc = 0;
   lastEWRatio = 0;
   oldevt = 0;
+  did_auto = kTRUE;
   memset(ntrks ,0,SCHN*sizeof(float));
   memset(ntrksE,0,SCHN*sizeof(float));
   memset(ntrksW,0,SCHN*sizeof(float));
@@ -281,43 +283,52 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   unsigned int numVtxCandidates = 0;
   unsigned int totVertices = event->numberOfPrimaryVertices();
   if (TrackInfomode>1) numVtxCandidates=1;
-  else
-  for (unsigned int vtxIdx = 0; vtxIdx < totVertices; vtxIdx++) {
-    pvtx = event->primaryVertex(vtxIdx);
-    if (QAmode) cutshist->Fill(3);
-    if (! (IAttr("EastOff") || IAttr("WestOff"))) {
-      // vertex ranking & ordering break for East/West off
-      StVertexFinderId vtxFindID = pvtx->vertexFinderId();
-      float min_rank = -1e6;
-      switch (vtxFindID) {
-        case minuitVertexFinder   : min_rank = -5; break;
-        case ppvVertexFinder      :
-        case ppvNoCtbVertexFinder : min_rank = 0; break;
-        default                   : break;
+  else {
+    const StBTofCollection* btofColl = event->btofCollection();
+    const StBTofHeader* btofHeader = (btofColl ? btofColl->tofHeader() : 0);
+    float vpd_zvertex = (btofHeader ? btofHeader->vpdVz() : -999);
+    for (unsigned int vtxIdx = 0; vtxIdx < totVertices; vtxIdx++) {
+      pvtx = event->primaryVertex(vtxIdx);
+      if (QAmode) cutshist->Fill(3);
+      if (! (IAttr("EastOff") || IAttr("WestOff"))) {
+        // vertex ranking & ordering break for East/West off
+        StVertexFinderId vtxFindID = pvtx->vertexFinderId();
+        float min_rank = -1e6;
+        switch (vtxFindID) {
+          case minuitVertexFinder   : min_rank = -5; break;
+          case ppvVertexFinder      :
+          case ppvNoCtbVertexFinder : min_rank = 0; break;
+          default                   : break;
+        }
+        // only one chance for MinuitVF
+        if (vtxFindID == minuitVertexFinder) totVertices = 1;
+        // vertices are rank ordered, so once it fails, we're done
+        if (pvtx->ranking() < min_rank) break;
       }
-      // only one chance for MinuitVF
-      if (vtxFindID == minuitVertexFinder) totVertices = 1;
-      // vertices are rank ordered, so once it fails, we're done
-      if (pvtx->ranking() < min_rank) break;
+      if (QAmode) cutshist->Fill(4);
+      if (pvtx->numberOfDaughters()  < vtxMinTrks) continue;
+      if (QAmode) cutshist->Fill(5);
+      if (pvtx->numMatchesWithBEMC() < vtxEmcMatch) continue;
+      if (QAmode) cutshist->Fill(6);
+      if (pvtx->numMatchesWithBTOF() < vtxTofMatch) continue;
+      if (QAmode) cutshist->Fill(7);
+      if (pvtx->numTracksCrossingCentralMembrane() > vtxPCTs) continue;
+      if (QAmode) cutshist->Fill(8);
+      if (vtxVpdAgree > 0 && // set vtxVpdAgree negative to skip this cut
+          TMath::Abs(pvtx->position().z() - vpd_zvertex) > vtxVpdAgree) continue;
+      if (QAmode) cutshist->Fill(9);
+      vtxCandidates[numVtxCandidates] = vtxIdx;
+      numVtxCandidates++;
+      if (numVtxCandidates == MAXVTXCANDIDATES) break;
     }
-    if (QAmode) cutshist->Fill(4);
-    if (pvtx->numberOfDaughters()  < vtxMinTrks) continue;
-    if (QAmode) cutshist->Fill(5);
-    if (pvtx->numMatchesWithBEMC() < vtxEmcMatch) continue;
-    if (QAmode) cutshist->Fill(6);
-    if (pvtx->numMatchesWithBTOF() < vtxTofMatch) continue;
-    if (QAmode) cutshist->Fill(7);
-    vtxCandidates[numVtxCandidates] = vtxIdx;
-    numVtxCandidates++;
-    if (numVtxCandidates == MAXVTXCANDIDATES) break;
   }
   if (!numVtxCandidates) return kStOk;
-  if (QAmode) cutshist->Fill(8);
+  if (QAmode) cutshist->Fill(10);
   
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
-  if (QAmode) cutshist->Fill(9);
+  if (QAmode) cutshist->Fill(11);
 
   // Store and setup event-wise info
   evt++;
@@ -1535,8 +1546,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.62 2015/05/19 19:36:09 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.63 2015/05/23 04:26:07 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.63  2015/05/23 04:26:07  genevb
+// More vertex selection criteria: PCT daughters, and VPD z agreement
+//
 // Revision 1.62  2015/05/19 19:36:09  genevb
 // Code cleanup in preparation for C++11
 //

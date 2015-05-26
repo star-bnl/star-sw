@@ -141,8 +141,8 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
 
-  delete mTempOut;
-  delete resNtuple;
+  if (mTempOut) delete mTempOut;
+  else delete resNtuple;
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
@@ -163,7 +163,6 @@ void StVertexSeedMaker::Reset() {
 }
 //_____________________________________________________________________________
 StVertexSeedMaker::~StVertexSeedMaker(){
-  delete parsNtuple;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Init(){
@@ -334,7 +333,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.59 2015/05/19 19:36:09 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.60 2015/05/23 02:38:07 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -398,20 +397,20 @@ void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
         gSystem->Unlink(mTempOut->GetName())) {
       LOG_ERROR << "Could not copy and/or delete temp vertexseedhist file!" << endm;
     }
-    delete resNtuple;
-    resNtuple = 0;
     delete mTempOut;
     mTempOut = 0;
-  }
+    // resNtuple disappears if & when mTempOut->Close() is called
+  } else delete resNtuple;
+  resNtuple = 0;
+
   TFile out(fileName.Data(),"UPDATE");
   GetHistList()->Write();
-  TNtupleD* parsNtuple1 = 0;
   if (writeFit) {
-    AddResults((parsNtuple1 = newBLpars()));
+    // no need to garbage collect from newBLpars(): out.Close() takes care of it
+    AddResults(newBLpars());
     out.Write();
   }
   out.Close();
-  delete parsNtuple1;
 }
 //_____________________________________________________________________________
 TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const char* suffix) {
@@ -608,7 +607,7 @@ void StVertexSeedMaker::FitData() {
    LOG_INFO << "beamWidth = " << beamWidth << ", chisq = " << amin << ", chisq/dof = " << chi <<
      "\n  *****************************************************" << endm;
 
-   beamWidth += 0.005; // 50 micron steps
+   beamWidth += 0.005 * TMath::Min((int) (chi*0.1+1),10); // 50 micron steps
    } while (chi>1.1 && beamWidth<=0.15);
    
    char pname[10];
@@ -760,8 +759,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.59 2015/05/19 19:36:09 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.60 2015/05/23 02:38:07 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.60  2015/05/23 02:38:07  genevb
+// Ntuples attached to files should not get deleted, more rapid chi2 convergence
+//
 // Revision 1.59  2015/05/19 19:36:09  genevb
 // Code cleanup in preparation for C++11
 //
