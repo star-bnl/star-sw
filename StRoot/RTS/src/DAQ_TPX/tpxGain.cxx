@@ -825,8 +825,11 @@ int tpxGain::from_file(char *fname, int sec)
 	else {
 		LOG(DBG,"Wont relaod") ;
 		LOG(INFO,"Keeping cached copy of gains...") ;
+		fclose(f) ;
 		return 0 ;	// no change
 	}
+
+
 
 	// we don't know yet what those values were...
 	c_run = 0 ;
@@ -999,7 +1002,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.30 2013/03/17 21:40:24 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.31 2015/05/22 08:08:01 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1070,6 +1073,7 @@ void tpxGain::compare(char *fname, int mysec)
 	
 	if(f_bad == 0) {
 		LOG(ERR,"Malloc failed? Wha? [%s]",strerror(errno)) ;
+		fclose(f) ;
 		return ;
 	}
 

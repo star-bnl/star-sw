@@ -868,26 +868,26 @@ int tpxPed::special_setup(int run_type, int sub_type)
 	case RUN_TYPE_PED_A :
 	case RUN_TYPE_PED_B :
 
-		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
 		break ;
 	case RUN_TYPE_HLT_DEBUG :
 		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
 		hlt_debug_setup(sub_type) ;
 		return 1 ; 
 	case RUN_TYPE_LASER :
-		if(sub_type == 100) {
-			LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+		if(sub_type) {
 			break ;
 		}
 		return 1 ;
 	default :
-		if(sub_type == 100) {
-			LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+		if(sub_type) {
 			break ;
 
 		}
 		return 1 ;
 	}
+
+
+	LOG(ERR,"Special Pedestal setup: %d, %d (just a warning)",run_type, sub_type) ;
 
 	for(int rl0=0;rl0<4;rl0++) {
 	for(r=0;r<=45;r++) {
@@ -896,8 +896,10 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		if(ped==0) continue ;
 		
 		switch(run_type) {
-		case RUN_TYPE_PHYS :
-			for(t=100;t<104;t++) ped->ped[t] -= 10 ;
+		case RUN_TYPE_PHYS :	//occupancy increase
+			for(t=30;t<(30+sub_type);t++) {
+				ped->ped[t] -= 10 ;
+			}
 			break ;
 		case RUN_TYPE_PULSER_A :
 			// make it about 5% occupancy

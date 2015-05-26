@@ -209,7 +209,7 @@ int SFS_ittr::next()
 
   // expect a FILE record, LRHD or DATAP...  jump the rest...
   for(;;) {
-    char buff[10];
+    char buff[16];
     int ret = wfile->read(buff, 8);
     
     if(ret == 0) {      // done...
