@@ -1144,6 +1144,7 @@
 		      'IVROOT'          => $IVROOT,
 		      'HOME'            => $HOME,
 		      'GARFIELD_HOME'   => $GARFIELD_HOME,
+		      'NODEBUG'         => $NODEBUG,
 		      'CC'       => $CC, #         C compiler command
 		      'CFLAGS'   => $CFLAGS, #     C compiler flags
 	              'LDFLAGS'  => $LDFLAGS, #    linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>
