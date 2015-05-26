@@ -314,6 +314,7 @@ void StFmsTrgQaMaker::readtrgid(){
     printf("%d %s\n",i,trgn);
     trgname[i]=trgn;
   }
+  fclose(fp);
 }
 
 int StFmsTrgQaMaker::isTrg(const char* trgn){
