@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.62 2014/06/26 21:32:57 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.63 2015/05/21 21:48:22 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.63  2015/05/21 21:48:22  fisyak
+ * Fix array out of bound, comment out tpcGlobalPosition field dependence
+ *
  * Revision 1.62  2014/06/26 21:32:57  fisyak
  * New Tpc Alignment, v632
  *
@@ -347,7 +350,7 @@ Int_t StTpcDbMaker::Make(){
 	  Int_t TriggerId = 0;
 	  StTpcDb::instance()->SetTriggerId(TriggerId);
 	  static Int_t goodIds[2] = {9200,9201}; // Laser trigger IDs
-	  for (Int_t i = 0; i < 5; i++) {
+	  for (Int_t i = 0; i < 2; i++) {
 	    if (nominal->isTrigger(goodIds[i])) {TriggerId = goodIds[i]; break;}
 	  }
 	  if (TriggerId) {
