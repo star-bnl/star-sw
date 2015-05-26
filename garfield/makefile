@@ -3,7 +3,7 @@ OBJDIR = $(STAR_OBJ)/garfield
 SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
 #LIBDIR = $(GARFIELD_HOME)/.$(STAR_HOST_SYS)/Library
-LIBDIR = $(STAR_LIB)
+LIBDIR = ./
 HEEDDIR = $(GARFIELD_HOME)/Heed
 
 HEADERS = $(wildcard $(INCDIR)/*.hh)

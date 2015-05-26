@@ -7,7 +7,7 @@ $build =~ s/\\/\//g;          #   print "build = $build\n";
 (my $obj_dir = DirPath '.') =~ s/\\/\//g;# print "obj_dir = $obj_dir\n";
 (my $Dir = $obj_dir) =~ s/$build\///g;# print "Dir = $Dir\n";
 my $pkg = "Garfield";
-my $SO_PKG= $pkg . "." . $env1->{SUFSOLIB};
+my $SO_PKG= "lib" . $pkg . "." . $env1->{SUFSOLIB};
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @src = script::find_sources($Dir);# print "src = @src\n";
@@ -17,6 +17,7 @@ if ($#src > -1) {
   script::Keep $SO_PKG;
 #  Program      $env2 $pkg, @src;
 #  LinkedModule $env, $SO_PKG, @src;
-#  Install $env $LIB, $SO_PKG;
-  Command $env ($LIB . "/" . $SO_PKG), (@src, @hfiles, "makefile", "Heed/makefile"),  qq(cd $obj_dir; make heed; make);
+#
+  Command $env ($SO_PKG), (@src, @hfiles, "makefile", "Heed/makefile"),  qq(cd $obj_dir; make heed; make);
+  Install $env $LIB, $SO_PKG;
 }

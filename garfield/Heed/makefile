@@ -2,8 +2,6 @@
 OBJDIR = $(STAR_OBJ)/garfield
 SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
-#LIBDIR = $(GARFIELD_HOME)/.$(STAR_HOST_SYS)/Library
-LIBDIR = $(STAR_LIB)
 HEEDDIR = $(GARFIELD_HOME)/Heed
 
 HEEDOBJS = \
@@ -446,4 +444,4 @@ showbuild:
 	@echo "CFLAGS             = $(CFLAGS)"
 	@echo "FFLAGS             = $(FFLAGS)"
 	@echo "NODEBUG            = $(NODEBUG)"
-	@echo "DYNAMIC            = $(DYNAMIC)"
+
