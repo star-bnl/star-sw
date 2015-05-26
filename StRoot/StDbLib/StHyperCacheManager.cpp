@@ -422,8 +422,9 @@ char** StHyperCacheManager::DecodeStrArray(const char* strinput , int &aLen) {
         //   cout<< "null input string from mysql " << endl;
         char** tmparr = new char*[1];
         aLen = 1;
-        *tmparr = new char[2];
-        strcpy(*tmparr,"0");
+		tmparr[0] = (char*)"0";
+        //*tmparr = new char[2];
+        //strcpy(*tmparr,"0");
         return tmparr;
     }
 

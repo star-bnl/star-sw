@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.69 2015/05/15 19:56:09 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.70 2015/05/21 20:01:15 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.70  2015/05/21 20:01:15  dmitry
+ * fixed false positive aka uninitialized use of memory
+ *
  * Revision 1.69  2015/05/15 19:56:09  dmitry
  * more cleanup
  *
@@ -983,8 +986,9 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
     //   cout<< "null input string from mysql " << endl;
     char** tmparr = new char*[1];
     aLen = 1;
-    *tmparr = new char[2];
-    strcpy(*tmparr,"0");
+    //*tmparr = new char[2];
+    //strcpy(*tmparr,"0");
+    tmparr[0] = (char*)"0";
     return tmparr;
   }
 
