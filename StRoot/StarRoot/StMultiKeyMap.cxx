@@ -197,6 +197,7 @@ int StMultiKeyNode::ls(const char *file) const
        for (int j=0;j<mNKey;j++) {fprintf(out," %g",node->mKeys[j]);}}
      fprintf(out,"\n");
    } 
+   if (*file) fclose(out);
    return n;
 }
 

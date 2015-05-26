@@ -1599,7 +1599,7 @@ void TCircle::Test4()
     TCircle tc2(pars[ip][1],pars[ip][1]+2,pars[ip][1][4]); 
     tc1.Move(-20);
     tc2.Move(-20);
-    double s2;
+    double s2=0;
     double s1 = tc1.Path(tc2,&s2);
     printf("s1=%g s2=%g \n",s1,s2);
   }  
@@ -3747,7 +3747,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.76 2015/04/28 20:36:37 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.77 2015/05/21 23:37:01 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3763,6 +3763,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.77  2015/05/21 23:37:01  perev
+ * CheckCpp fixes. No real bugs
+ *
  * Revision 1.76  2015/04/28 20:36:37  perev
  * Crossing of two helices rewritten
  *
