@@ -1,0 +1,191 @@
+* ********************************************************************
+* run_gstar_g2t.kumac
+* 
+* This kumac reads from a file and runs gstar then g2t.
+* 
+******************************************************************
+* 
+* created 6/5/98 Kathy Turner
+* editted 6/8/98 Kathy Turner - put tables in correct directories
+*                             - and make so can enter values by hand
+* editted 6/9/98 Kathy Turner - don't need to move directories anymore
+* editted 6/26/98 Kathy Turner - now open input file using "dummy" - now
+*                                you must make sure that you have correct
+*                                extension on your file! (see note below)
+* editted 7/8/98 Kathy Turner - put in default STAR geometry
+*                               and make kumac more standard
+* editted 7/10/98 Kathy Turner - change directories where tables get written
+* editted 7/21/98 Kathy Turner - changed names of kumacs to make them
+*                                   more standard 
+* editted 7/29/98 K. Turner - use more of standard utility kumacs
+* editted 8/3/98  K. Turner - use detp to setup geometry
+* 
+* *******************************************************************
+* ---------available values of input parameters ---------------
+* 
+* phystype = hadr_on, hadr_off, decay_only
+* geomtype = tpc_only, field_only, complete, 4th_off (for svt 4th layer off)
+* *** there are many other commands setup in geometry.g
+*     which you can find out about by doing 'detp geometry help' in staf and
+*     then seeing the list when geometry libraries are loaded
+* 
+* intype = file,phase
+*    The input file can be from an event generator or a txt file 
+*    OR: can enter values by hand and use "phase" - use intype=phase
+* 
+* *****************************************************************
+* ***** IMPORTANT NOTE *************
+* - See also notes from Pavel Nevski on his WWW page about this:
+* - The extension of the input file (first letter) tells Geant
+*   what type of file it is and can therefore read it correctly.
+*    .t is text file
+*    .x is xdf file - if you are reading directly from xdf file use this
+*    .s is staf tables  - if you are using commands to write a staf table
+*                   to use for geant OR to read from a staf table file,
+*                   then use this extension.
+* 
+* ******************************************************************
+* input_data_dir=$AFS_RHIC/star/data/samples/ _
+* input_file=muons_central_2.txt _
+* output_file=muons_central.xdf
+* 
+* input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
+* input_file=auau_ce_b0-2_1_200.xdf _
+* output_file=auau_central_hijing.xdf
+* 
+ macro run__
+   TOP=/star/u2d/akio/staf _
+   domain='sim/g2t' _
+   chain='rg2t' _
+   num_events=1 _
+   debugger=off _
+   intype=file _
+   input_data_dir=/star/data/akio/ _
+   input_file=pythia_pp_jet_10gev.fzd _
+   background_file=pythia_pp_minbias.fzd _
+   output_file=/star/data/akio/pythia_pp_jet_10gev_with_overlap.xdf
+  
+*    
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_gstar_g2t
+* 
+  debug on; trace on
+   
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** chain to use -->                       ' [chain]
+  message ' *** physics type -->                       ' [phystype]
+  message ' *** geometry type -->                      ' [geomtype]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** debugger on/off -->                    ' [debugger]
+  message ' *** input type: phase, file -->            ' [intype]
+  message ' *** Input Data directory -->               ' [INPUT_DATA_DIR]
+  message ' *** Input file -->                         ' [input_file] 
+  message ' *** background file -->                    ' [background_file]
+  message ' *** output file -->                        ' [output_file]
+
+* ----------- General setup stuff ------------------------*
+  macro/global/create TOP           [TOP]
+  macro/global/create phystype [phystype]
+          
+* setup default directories to search for kumacs in
+* exec $STAR/kumacs/util/setup_defaults 
+ exec $STAR/kumacs/util/setup_defaults 
+          
+* setup default table directory structure in STAF
+     exec setup#setup
+     
+*  must have this after setup!
+   macro/global/import *
+       
+* THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
+   detp geometry [phystype] [geomtype]
+* exec bfc_util#bfc_gstar_setup    [chain]
+   exec bfc_util#bfc_g2t_b4_load    [chain]
+   exec load_libraries#run          [domain]
+   exec bfc_util#bfc_g2t_after_load [chain]
+ 
+******** turn debugger on just for GSTAR! ******************************
+ if [debugger].eq.on then
+   debug on
+ endif
+    
+****************** OPEN OUTPUT FILE *******************
+ exec write_table_to_file#init outunit [output_file]
+ 
+*********** WRITE RUN INFO TO OUTPUT FILE ***************
+* write Run information to output file - already in staf format 
+ exec write_table_to_file#write outunit [geant_Run] 
+ 
+************* FOR DEBUGGING *********************************
+*  just for looking at output of gstar
+ if [debugger].eq.on then
+  swit 2 3
+  next;  gr/del 1; dopen  1
+  dcut cave x 0 10 10 0.03 0.03
+* dcut cave z 225 10 10 .04 .04
+  dclose 1; dshow 1
+ endif
+ 
+
+* ************ OPEN INPUT FILE *********************************
+* open input file - this in in GEANT format!
+ 
+ if [intype].eq.file then
+   user/input dummy [input_data_dir][input_file]
+   message ' use input file to run '
+ elseif [intype].eq.fzd then
+   gfile PZ [input_data_dir][input_file]
+ else
+   message 'invalid input type'
+ endif
+ 
+ if [background_file].ne.'' then
+   mode all back 99
+   gback 2 2 2.0 100 1
+   gfile BZ [input_data_dir][background_file]
+ endif
+ 
+*------------------- process events ------------------------------*
+  
+ do i = 1,[num_events]
+   message ' run_gstar: merging event  '  [i]  
+* clear all event tables
+  tabclear [event]
+* if inputting values by hand:
+* if [intype].eq.phase then
+* exec gstar_input_phase#init
+* endif
+*  do for debugging:
+     if [debugger].eq.on then 
+       next; dshow 1
+     endif
+* trig 1 - automatically reads next event and runs gstar
+* g2t - go to geantE directory, then transform geant structures
+*       to staf tables which will be put in event/geant/Event
+     trig 1 
+     cd [geantE]
+     for/call g2t
+     cd /dui
+* write out to output_file
+ exec write_table_to_file#write outunit [geant_Event]
+ enddo
+   
+* -------------------- end stuff -----------------------------*
+   
+   exec write_table_to_file#close outunit
+   cd [geantE]; ls
+* 
+   return
+* ***************************************************************
+
+
+
+
+
+
+
