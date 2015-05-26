@@ -74,10 +74,14 @@ CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
 	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN 
 # Debugging flags
 CFLAGS += -g
+ifneq ($(NODEBUG),) 
+CFLAGS += -O
+endif 
 
 # Linking flags
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 
+.PHONY:	all  showbuild 
 all:	$(HEEDOBJS) 
 
 clean:
@@ -435,3 +439,11 @@ $(OBJDIR)/Heed/PhotoAbsCSLib.o: \
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 
+showbuild:
+	@echo "ROOTSYS            = $(ROOTSYS)"
+	@echo "STAR_HOST_SYS      = $(STAR_HOST_SYS)"
+	@echo "GARFIELD_HOME      = $(GARFIELD_HOME)"
+	@echo "CFLAGS             = $(CFLAGS)"
+	@echo "FFLAGS             = $(FFLAGS)"
+	@echo "NODEBUG            = $(NODEBUG)"
+	@echo "DYNAMIC            = $(DYNAMIC)"

@@ -36,17 +36,24 @@ FFLAGS = -fpic -c
 #FFLAGS += -O2
 CFLAGS += -fPIC
 FFLAGS += `root-config --ldflags` -fPIC
-
 # Debug flags
+
 CFLAGS += -g
 FFLAGS += -g
+ifneq ($(NODEBUG),) 
+CFLAGS += -O
+FFLAGS += -O
+endif 
 # Profiling flag
 # CFLAGS += -pg
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom \
 	-lgfortran -lm
-.PHONY:	all  
+ifeq ($(findstring $(STAR_HOST_SYS),darwin),)
+DYNAMIC = -Wl,-Bdynamic
+endif
+.PHONY:	all  showbuild 
 all: heed lib
 lib:	$(LIBDIR)/libGarfield.so 
 $(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
@@ -54,7 +61,7 @@ $(LIBDIR)/libGarfield.so:	$(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 #	ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
 #	$(wildcard $(OBJDIR)/Heed/*.o)
 #	ranlib $(LIBDIR)/libGarfield.a
-	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $(OBJECTS) \
+	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared $(DYNAMIC) -lgfortran $(OBJECTS) \
 	$(wildcard $(OBJDIR)/Heed/*.o)
 #	`root-config --ld` -o $(LIBDIR)/libGarfield.so `root-config --ldflags` -shared -Wl,-Bdynamic -lgfortran $<
 	touch $(OBJDIR)/last_updated_on
@@ -205,12 +212,6 @@ $(OBJDIR)/ComponentVoxel.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@   
-$(OBJDIR)/ComponentUserMapBase.o: \
-	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@    
-	
 $(OBJDIR)/GeometrySimple.o: \
 	$(SRCDIR)/GeometrySimple.cc $(INCDIR)/GeometrySimple.hh
 	@echo $@
@@ -351,3 +352,11 @@ $(OBJDIR)/GarfieldDict.o: \
 $(OBJDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
 	@echo Creating dictionary...
 	rootcint -f $@ -c $(CPPFLAGS) -p $^ 
+showbuild:
+	@echo "ROOTSYS            = $(ROOTSYS)"
+	@echo "STAR_HOST_SYS      = $(STAR_HOST_SYS)"
+	@echo "GARFIELD_HOME      = $(GARFIELD_HOME)"
+	@echo "CFLAGS             = $(CFLAGS)"
+	@echo "FFLAGS             = $(FFLAGS)"
+	@echo "NODEBUG            = $(NODEBUG)"
+	@echo "DYNAMIC            = $(DYNAMIC)"
