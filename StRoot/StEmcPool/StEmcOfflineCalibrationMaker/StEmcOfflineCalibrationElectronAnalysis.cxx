@@ -112,6 +112,16 @@ Int_t StEmcOfflineCalibrationElectronAnalysis::Init()
     sprintf(ringTitle,"Ring %i E/p",ringId);
     ringHisto[iRing] = new TH1D(ringName,ringTitle, 60, 0., 3.);
     ringHisto[iRing]->Sumw2();
+
+    sprintf(ringName,"ringHisto_Unbiased_%i",ringId);
+    sprintf(ringTitle,"Ring %i E/p",ringId);
+    ringHisto_Unbiased[iRing] = new TH1D(ringName,ringTitle, 60, 0., 3.);
+    ringHisto_Unbiased[iRing]->Sumw2();
+
+    sprintf(ringName,"ringHisto_HT_%i",ringId);
+    sprintf(ringTitle,"Ring %i E/p",ringId);
+    ringHisto_HT[iRing] = new TH1D(ringName,ringTitle, 60, 0., 3.);
+    ringHisto_HT[iRing]->Sumw2();
   }
 
   // Initialize crate-slice E/p histograms
@@ -242,15 +252,23 @@ Int_t StEmcOfflineCalibrationElectronAnalysis::Make()
       if (maxClusterId != 0) continue;
       nGoodElectrons++;
 
-      // Use unbiased for inner eta rings (use sliceEtaIndex to define)
-      if (sliceEtaIndex <= 12 && trackP < 5. && (((!mBHT0 && !mBHT1 && !mBHT0) || (mBHT0 && !mBHT0->didFire()) || (mBHT1 && !mBHT1->didFire()) || (mBHT2 && !mBHT2->didFire())) || (!triggerFire(mBHT0) && !triggerFire(mBHT1) && triggerFire(mBHT2)))){
+      // Only use unbiased for inner eta rings (use sliceEtaIndex to define)
+      if (sliceEtaIndex <= 12 && trackP < 5. && (((!mBHT0 && !mBHT1 && !mBHT2) || (mBHT0 && !mBHT0->didFire()) || (mBHT1 && !mBHT1->didFire()) || (mBHT2 && !mBHT2->didFire())))){
 	ringHisto[ringIndex]->Fill(trackEnergy/trackP);
 	cratesliceHisto[towerCrate-1][sliceEtaIndex]->Fill(trackEnergy/trackP);
       }
-      // Use BHT2 triggers for the outer 7 eta rings on either side
-      else if (sliceEtaIndex >= 13 && trackP > 5. && !triggerFire(mBHT0) && !triggerFire(mBHT1) && triggerFire(mBHT2)){
+      // Use BHT2 triggers for ALL rings if track momentum greater than 5 GeV
+      else if (trackP > 5. && !triggerFire(mBHT0) && !triggerFire(mBHT1) && triggerFire(mBHT2)){
 	ringHisto[ringIndex]->Fill(trackEnergy/trackP);
 	cratesliceHisto[towerCrate-1][sliceEtaIndex]->Fill(trackEnergy/trackP);
+      }
+
+      // QA histograms for ALL eta ring slices
+      if (trackP < 5. && (((!mBHT0 && !mBHT1 && !mBHT2) || (mBHT0 && !mBHT0->didFire()) || (mBHT1 && !mBHT1->didFire()) || (mBHT2 && !mBHT2->didFire())))){
+	ringHisto_Unbiased[ringIndex]->Fill(trackEnergy/trackP);
+      }
+      if (trackP > 5. && !triggerFire(mBHT0) && !triggerFire(mBHT1) && triggerFire(mBHT2)){
+	ringHisto_HT[ringIndex]->Fill(trackEnergy/trackP);
       }
     }// Tracks Loop
   }// Vertex Loop

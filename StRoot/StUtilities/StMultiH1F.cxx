@@ -41,6 +41,8 @@ void StMultiH1F::Draw(Option_t *option) {
     fXaxis.Copy(*taxis);
     taxis->SetRange(x0,x1);
     fXaxis.SetRange(x0,x1);
+    if (fMinimum != -1111)  temp0->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  temp0->SetMaximum(fMaximum);
     temp0->Draw();
     return;
   }
@@ -102,6 +104,8 @@ void StMultiH1F::Draw(Option_t *option) {
   // can't use the option argument in Draw() since this is called from
   // StHistUtil::DrawHists(), which defaults 2D histograms to a box plot
   if (maxbin == minbin) {
+    if (fMinimum != -1111)  temp[maxbin]->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  temp[maxbin]->SetMaximum(fMaximum);
     temp[maxbin]->Draw();
   } else {
     TH1F* tempb = new TH1F(*(temp[maxbin]));
@@ -109,6 +113,8 @@ void StMultiH1F::Draw(Option_t *option) {
     tempb->SetBinContent(1,maxval);
     tempb->SetBinContent(2,minval);
     tempb->SetMarkerStyle(1); tempb->SetMarkerColor(0);
+    if (fMinimum != -1111)  tempb->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  tempb->SetMaximum(fMaximum);
     tempb->Draw("p");
     maxbin = -1;
   }
@@ -145,7 +151,7 @@ TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
   TAttLine::Copy(*temp);
   TAttFill::Copy(*temp);
   TAttMarker::Copy(*temp);
-  return temp;
+  return temp; // up to the user to delete
 }
 
 void StMultiH1F::SetBarOffset(Float_t offset) {
@@ -266,8 +272,11 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH1F.cxx,v 1.15 2013/11/21 22:22:47 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.16 2015/05/26 15:40:30 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.16  2015/05/26 15:40:30  genevb
+// Handle set min/maxima
+//
 // Revision 1.15  2013/11/21 22:22:47  genevb
 // Protect against array out-of-bounds, use inherited axis handles
 //
