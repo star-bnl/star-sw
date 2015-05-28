@@ -4,6 +4,9 @@
 /*   -- from Jeff list 04/26/12 -- zdc always in
                                    fpd   (>=2003) is in TriggerMaker
 				   l3raw (=>2004) is empty
+fpd: Forward Pi0 Detector 
+fms: Forward Meson Spectrometer
+fps: Forward Preshower 
 year : active detector list                                                                | Data samples
 ______________________________________________________________________________________________________________
 y2000: tpc ctb                                                                             | AuAu130, HF
@@ -16,12 +19,20 @@ y2007: tpc ctb      bbc	svt     btow fms ftpc pmd ssd etow       bsmd esmd      
 y2008: tpc ctb      bbc	    tof btow fms ftpc pmd     etow pp2pp bsmd esmd tpx	       vpd | pp200;AuAu9;dAu200	         -"-
 y2009:     ctb      bbc	    tof btow fms ftpc         etow pp2pp bsmd esmd tpx	       vpd | pp500,200;pp2pp
 y2010:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx	       vpd | AuAu200,62,39,7.7,11.5
-y2011:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx mtd     vpd | AuAu19.6,27,200;pp500
-y2012:              bbc	    tof btow fms              etow       bsmd esmd tpx mtd fgt vpd | pp500,200,UU193
-y2013               bbc     tof btow fms              etow       bsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
-y2014               bbc     tof btow                  etow       bsmd esmd tpx mtd     vpd gmt  | no fgt and fms
-y2015               bbc     tof btow fms              etow       bsmd esmd tpx mtd     vpd gmt fps | no fgt 
 ______________________________________________________________________________________________________________
+Jeff List, 05/27/15
+2011-12:{ "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd", "fgt", "gmt", "hlt" };
+2013:   { "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd", "fgt", "gmt", "pxl", "l4" };
+2014:   { "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd",        "gmt", "pxl", "sst", "ist", "l4" };
+2015:   { "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd",        "gmt", "pxl", "sst", "ist", "rp", "fps", "l4" };
+______________________________________________________________________________________________________________
+y2010:     tpx    btow    bsmd    etow    esmd    tof                                                        bbc  fms ftpc pmd vpd | AuAu200,62,39,7.7,11.5	     
+y2011:     tpx    btow    bsmd    etow    esmd 	  tof    mtd    fgt    gmt    hlt               	     bbc  fms      pmd vpd | AuAu19.6,27,200;pp500	     
+y2012:     tpx    btow    bsmd    etow    esmd 	  tof    mtd  	fgt    gmt    hlt			     bbc  fms          vpd | pp500,200,UU193		     
+y2013      tpx    btow    bsmd    etow    esmd    tof    mtd  	fgt    gmt    pxl    			     bbc  fms          vpd | - fpd, pp500	     
+y2014      tpx    btow    bsmd    etow    esmd    tof    mtd  	       gmt    pxl    sst    ist	   	     bbc               vpd | no fgt and fms   
+y2015      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt    pxl    sst    ist	   rp    fps bbc  fms          vpd | no fgt       
+______________________________________________________________________________________________________________     
  */
 #endif
 //#define __NoStrangeMuDst__
@@ -839,10 +850,10 @@ Bfc_st BFC[] = { // standard chains
   // B2001 is a base-chain for 2001 (with tpc+rhic).
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,svtDb","",""
    ,"Base chain for 2001 (tpc+rhic)"                                                               ,kFALSE},
-  {"P2001"       ,""  ,"","B2001,l3onl,tofDat,Corr2,OSpaceZ","",""
-   ,                                            "Production chain for summer 2001 data (+ l3, tof)",kFALSE},
-  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,Corr2,OSpaceZ","",""
-   ,                                 "Production chain for summer 2001 data (+ ftpc, svt, l3, tof)",kFALSE},
+  {"P2001"       ,""  ,"","B2001,l3onl,Corr2,OSpaceZ","",""
+   ,                                                 "Production chain for summer 2001 data (+ l3)",kFALSE},
+  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,Corr2,OSpaceZ","",""
+   ,                                      "Production chain for summer 2001 data (+ ftpc, svt, l3)",kFALSE},
   // pp Chains
   {"pp2001","","","ppOpt,B2001,-PreVtx,l3onl,tofDat,Corr2"            ,"","" ,"pp 2001 (+ l3, tof)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""        ,"pp 2001 (+ ftpc, svt, l3, tof)",kFALSE},
