@@ -7,7 +7,7 @@ $build =~ s/\\/\//g;          #   print "build = $build\n";
 (my $obj_dir = DirPath '.') =~ s/\\/\//g;# print "obj_dir = $obj_dir\n";
 (my $Dir = $obj_dir) =~ s/$build\///g;# print "Dir = $Dir\n";
 my $pkg = "Garfield";
-my $SO_PKG= "lib" . $pkg . "." . $env1->{SUFSOLIB};
+my $SO_PKG= "lib" . $pkg . "." . $env->{SUFSOLIB};
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my @src = script::find_sources($Dir);# print "src = @src\n";
