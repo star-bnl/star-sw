@@ -7,14 +7,14 @@
 #include "StiUtilities/StiDebug.h"
 #include "Stiostream.h"
 #include "TMath.h"
-static double gsigma2(double ZoverA,double DENS,double CHARGE2
-                     ,double AMASS ,double BET2,double STEP  );
-static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
+static Double_t gsigma2(Double_t ZoverA,Double_t DENS,Double_t CHARGE2
+                     ,Double_t AMASS ,Double_t BET2,Double_t STEP  );
+static Double_t gdrelx (Double_t A     ,Double_t Z   ,Double_t DENS ,Double_t T,Double_t HMASS);
 
-StiElossCalculator::StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens) 
+StiElossCalculator::StiElossCalculator(Double_t zOverA, Double_t ionization, Double_t A, Double_t Z, Double_t Dens) 
     : _zOverA(zOverA), _ionization2(ionization*ionization), _A(A), _Z(Z), _Dens(Dens) 
 {
-static int nCall=0; nCall++;
+static Int_t nCall=0; nCall++;
   assert(_A<=0 || _Z >0);
   mId=nCall;
 }
@@ -40,28 +40,28 @@ StiElossCalculator::~StiElossCalculator(){}
 ///\throw runtime_error whenever beta2==1
 ///\return energy loss in GeV*cm^2/g.
 //______________________________________________________________________________
-double StiElossCalculator::calculate(double z2, double m, double beta2) const
+Double_t StiElossCalculator::calculate(Double_t z2, Double_t m, Double_t beta2) const
 {
-static int nCall=0; nCall++;
-static int noEloss = StiDebug::iFlag("NOELOSS");
+static Int_t nCall=0; nCall++;
+static Int_t noEloss = StiDebug::iFlag("NOELOSS");
 if (noEloss) return 0;
 
   if (_A <=0.) return 0.;
-  double beta21 = 1 - beta2; if (beta21 < 1.e-10) beta21 = 1.e-10; 
-  double T = m*(1./::sqrt(beta21) - 1);
-  double dedx = gdrelx(_A,_Z,_Dens,T,m)*z2*_Dens;
+  Double_t beta21 = 1 - beta2; if (beta21 < 1.e-10) beta21 = 1.e-10; 
+  Double_t T = m*(1./TMath::Sqrt(beta21) - 1);
+  Double_t dedx = gdrelx(_A,_Z,_Dens,T,m)*z2*_Dens;
 assert(!TMath::IsNaN(dedx));
 assert(dedx>=0 && dedx<1e3);
   return dedx;
 }
 //______________________________________________________________________________
-double StiElossCalculator::calcError(double z2, double m, double beta2) const
+Double_t StiElossCalculator::calcError(Double_t z2, Double_t m, Double_t beta2) const
 {
-static int noEloss = StiDebug::iFlag("NOELOSS");
+static Int_t noEloss = StiDebug::iFlag("NOELOSS");
 if (noEloss) return 0;
 
   if (_A<=0.) return 0.;
-  double err2=gsigma2(_Z/_A,1.,z2,m ,beta2,1.);
+  Double_t err2=gsigma2(_Z/_A,1.,z2,m ,beta2,1.);
 assert(!TMath::IsNaN(err2));
 assert(err2>=0 && err2<1e3);
   return err2;
@@ -86,7 +86,7 @@ ostream& operator<<(ostream& os, const StiElossCalculator& m) {
 //*-- Author :
 //______________________________________________________________________________
 //      SUBROUTINE GDRELX(A,Z,DENS,T,HMASS,dedx)
-double gdrelx(double A,double Z,double DENS,double T,double HMASS)
+Double_t gdrelx(Double_t A,Double_t Z,Double_t DENS,Double_t T,Double_t HMASS)
 {
 //
 //    ******************************************************************
@@ -112,13 +112,13 @@ double gdrelx(double A,double Z,double DENS,double T,double HMASS)
 //#include "geant321/gconsp.inc"
 //#include "geant321/gccuts.inc"
 //#include "geant321/gcunit.inc"
-static const double  AMUKEV=931494.32,AMUKEV50=pow(AMUKEV,0.50),AMUKEV45=pow(AMUKEV,0.45);
-static const double  D=0.000153537,T1L=0.00001,T2L=0.002;
-static const double  AVO=0.60221367,EMPROT=0.9382723,EMASS=0.0005109990615;
-static const double  DCUTM=9999.;
+static const Double_t  AMUKEV=931494.32,AMUKEV50=TMath::Power(AMUKEV,0.50),AMUKEV45=TMath::Power(AMUKEV,0.45);
+static const Double_t  D=0.000153537,T1L=0.00001,T2L=0.002;
+static const Double_t  AVO=0.60221367,EMPROT=0.9382723,EMASS=0.0005109990615;
+static const Double_t  DCUTM=9999.;
 //DIMENSION B(6,92),C(6,92),CECOF[6]
 //*
-static const double B[93][6]={ 
+static const Double_t B[93][6]={ 
   {0.},
   {1.262	,1.44	,242.6	,12000.	,0.1159		,18.8},
   {1.229	,1.397	,484.5	,5873.	,0.05225	,41.7},
@@ -213,22 +213,22 @@ static const double B[93][6]={
   {7.407	,8.336	,19010.	,586.3	,0.002603	,837.},
   {7.29		,8.204	,19180.	,586.3	,0.002573	,847.}};
 
-static const double CECOF[7]={0.,0.42237,0.0304,-0.00038,3.858,-0.1668,0.00158};
-double C[6]={0};
+static const Double_t CECOF[7]={0.,0.42237,0.0304,-0.00038,3.858,-0.1668,0.00158};
+Double_t C[6]={0};
 
-double poti,p,e,beta,bet2,tau,sl,sh,eta,eta2,b2g2,tmax,cc,x0,x1,xa,xm,delta;
-double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
+Double_t poti,p,e,beta,bet2,tau,sl,sh,eta,eta2,b2g2,tmax,cc,x0,x1,xa,xm,delta;
+Double_t f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*     ------------------------------------------------------------------
 //*      in the case of non-integer Z the low energy parameters
 //*      and the ionization potential are taken at INT(Z) !
 //*
-  int iz=(int)(Z+1e-8); if (iz == 92) iz = 91;
-  double wt1=Z-iz,wt0 = 1-wt1;
+  Int_t iz=(Int_t)(Z+1e-8); if (iz == 92) iz = 91;
+  Double_t wt1=Z-iz,wt0 = 1-wt1;
   assert((iz>0)&&(iz<92));
 //*
 //*     Calculate coefficients C(I,J) if it has not been done already
 //*
-    double fac=AVO/A;
+    Double_t fac=AVO/A;
     C[0]=fac*AMUKEV50*(B[iz][0]*wt0+B[iz+1][0]*wt1);
     C[1]=fac*AMUKEV45*(B[iz][1]*wt0+B[iz+1][1]*wt1);
     C[2]=fac*         (B[iz][2]*wt0+B[iz+1][2]*wt1)/AMUKEV;
@@ -238,30 +238,30 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
     C[5]=             (B[iz][5]*wt0+B[iz+1][5]*wt1)*1.E-9;
 //*
 //*     ----------------------------------------------------------------
-  double hmass2 = HMASS*HMASS;
-  double T1LIM=HMASS*T1L/EMPROT;
-  double T2LIM=HMASS*T2L/EMPROT;
+  Double_t hmass2 = HMASS*HMASS;
+  Double_t T1LIM=HMASS*T1L/EMPROT;
+  Double_t T2LIM=HMASS*T2L/EMPROT;
 //*
 //*     Calculate dE/dx
 //*     ---> for T .le. T1LIM (very low energy)
 //*
   if(T<=T1LIM) {
      tau=T/HMASS;
-     dedx=C[0]*pow(tau,0.5);
+     dedx=C[0]*TMath::Power(tau,0.5);
   } else {
 //*
 //*     ---> for T1LIM .lt. T   and  T .le. T2LIM (low energy)
 //*
      if(T<=T2LIM) {
        tau=T/HMASS;
-       sl=C[1]*pow(tau,0.45);
-       sh=C[2]*log(1.+C[3]/tau+C[4]*tau)/tau;
+       sl=C[1]*TMath::Power(tau,0.45);
+       sh=C[2]*TMath::Log(1.+C[3]/tau+C[4]*tau)/tau;
        dedx=sl*sh/(sl+sh);
 //*
 //*     ---> for T .gt. T2LIM ( "high " energy , Bethe-Bloch formula)
 //*
      } else {
-       p=sqrt(T*(T+2.*HMASS));
+       p=TMath::Sqrt(T*(T+2.*HMASS));
        e=T+HMASS;
        beta=p/e;
        bet2=beta*beta;
@@ -279,7 +279,7 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*         density correction
 //*
        poti=C[5];
-       cc=1.+2.*log(poti/(28.8E-9*sqrt(DENS*Z/A)));
+       cc=1.+2.*TMath::Log(poti/(28.8E-9*TMath::Sqrt(DENS*Z/A)));
 //*         condensed material ? ( dens .gt. 0.05 ? )
        if(DENS>0.05) {
          if(poti < 1.E-7) {
@@ -300,7 +300,7 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*         gas ?   ( dens . le . 0.05 ? )
        } else {
           if(cc<=12.25) {
-             int ip=(int)((cc-10.)/0.5)+1;
+             Int_t ip=(Int_t)((cc-10.)/0.5)+1;
              if(ip < 0) ip=0;
              if(ip>4) ip=4;
              x0=1.6+0.1*ip;
@@ -318,18 +318,18 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*
        xa=cc/4.606;
        xm=3.;
-       double aa=4.606*(xa-x0)/pow(x1-x0,xm);
+       Double_t aa=4.606*(xa-x0)/TMath::Power(x1-x0,xm);
 //*
-       double x=log10(eta);
+       Double_t x=TMath::Log10(eta);
        delta=0.;
        if(x>x0) {
           delta=4.606*x-cc;
-          if(x < x1) delta=delta+aa*pow(x1-x,xm);
+          if(x < x1) delta=delta+aa*TMath::Power(x1-x,xm);
        }
 //*
 //*         calculate shell correction
 //*
-       double potsq=poti*poti;
+       Double_t potsq=poti*poti;
        if(eta>0.13) {
           f1=1./eta2;
           f2=f1*f1;
@@ -345,7 +345,7 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
           f4=(f1*CECOF[1]+f2*CECOF[2]+f3*CECOF[3])*1.E+12;
           f5=(f1*CECOF[4]+f2*CECOF[5]+f3*CECOF[6])*1.E+18;
           ce=f4*potsq+f5*potsq*poti;
-          ce=ce*log(T/T2LIM)/log(0.0079/T2LIM);
+          ce=ce*TMath::Log(T/T2LIM)/TMath::Log(0.0079/T2LIM);
        }
 //*
        f1=D*Z/(A*bet2);
@@ -354,20 +354,20 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*
 //*+++  correction of the next few lines
 //*           if(DCUTM.GE.tmax) {
-//*              f2=2.*(log(tmax/poti)-bet2)
+//*              f2=2.*(TMath::Log(tmax/poti)-bet2)
 //*           } else {
-//*              f2=log(tmax*DCUTM/potsq)-bet2*(1.+DCUTM/tmax)
+//*              f2=TMath::Log(tmax*DCUTM/potsq)-bet2*(1.+DCUTM/tmax)
 //*           }
        tupp=DCUTM;
        if(tmax < DCUTM) tupp=tmax;
-       f2=log(2.*EMASS*b2g2/poti)+log(tupp/poti)-bet2*(1.+tupp/tmax);
+       f2=TMath::Log(2.*EMASS*b2g2/poti)+TMath::Log(tupp/poti)-bet2*(1.+tupp/tmax);
 //*+++ end of correction
        dedx=f1*(f2-delta-2.*ce/Z);
 //*
 //*
        tau=T2LIM/HMASS;
-       sl=C[1]*pow(tau,0.45);
-       sh=C[2]*log(1.+C[3]/tau+C[4]*tau)/tau;
+       sl=C[1]*TMath::Power(tau,0.45);
+       sh=C[2]*TMath::Log(1.+C[3]/tau+C[4]*tau)/tau;
        st=sl*sh/(sl+sh);
 //*
        tmax=2.*EMASS*T2LIM*(T2LIM+2.*HMASS);
@@ -375,10 +375,10 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*           tmax=tmax/(HMASS**2+EMASS**2+EMASS*(T2LIM+HMASS));
        tmax=tmax/(HMASS*HMASS+EMASS*EMASS+2.*EMASS*(T2LIM+HMASS));
 //*+++  end of correction
-       bet2=T2LIM*(T2LIM+2.*HMASS)/pow(T2LIM+HMASS,2);
-       sbb=2.*(log(tmax/poti)-bet2);
+       bet2=T2LIM*(T2LIM+2.*HMASS)/TMath::Power(T2LIM+HMASS,2);
+       sbb=2.*(TMath::Log(tmax/poti)-bet2);
        sbb=D*Z*sbb/(A*bet2);
-       double corbb=(st/sbb-1.)*T2LIM;
+       Double_t corbb=(st/sbb-1.)*T2LIM;
 //*
        dedx=dedx*(1.+corbb/T);
 //*
@@ -393,18 +393,18 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 //-- Author :
 //______________________________________________________________________________
-double gsigma2(double ZoverA,double DENS,double CHARGE2
-              ,double AMASS ,double BET2,double STEP  )
+Double_t gsigma2(Double_t ZoverA,Double_t DENS,Double_t CHARGE2
+              ,Double_t AMASS ,Double_t BET2,Double_t STEP  )
 {
 //      SUBROUTINE GFLUCT(DEMEAN,DE)
 
-static const double DGEV=0.153536E-3,EMASS=0.0005109990615;
+static const Double_t DGEV=0.153536E-3,EMASS=0.0005109990615;
 //
-  double gamm2 = 1./(1.-BET2);
-  double gamma = sqrt(gamm2);
+  Double_t gamm2 = 1./(1.-BET2);
+  Double_t gamma = TMath::Sqrt(gamm2);
 //
 // ***    low energy transfer
-  double xi = DGEV*CHARGE2*STEP*DENS*ZoverA/(BET2);
+  Double_t xi = DGEV*CHARGE2*STEP*DENS*ZoverA/(BET2);
 //
 //  Energy straggling using Gaussian
 //  STEP   =  current step-length (cm)
@@ -412,13 +412,13 @@ static const double DGEV=0.153536E-3,EMASS=0.0005109990615;
 //
 //
 //     Maximum energy transfer to atomic electron (GeV).
-   double eta2 = BET2*gamm2;
-   double ratio = EMASS/AMASS;
-   double emax =(2*EMASS*eta2)/(1+2*ratio*gamma+ratio*ratio); 
+   Double_t eta2 = BET2*gamm2;
+   Double_t ratio = EMASS/AMASS;
+   Double_t emax =(2*EMASS*eta2)/(1+2*ratio*gamma+ratio*ratio); 
 //
 //     +-----------------------------------+
 //     I Sample from Gaussian distribution I
 //     +-----------------------------------+
-   double sigma2 = xi*(1.-0.5*BET2)*emax;
+   Double_t sigma2 = xi*(1.-0.5*BET2)*emax;
    return sigma2;
 }

@@ -2,6 +2,7 @@
 #ifndef StiElossCalculator_H_INCLUDED
 #define StiElossCalculator_H_INCLUDED
 #include "Stiostream.h"
+#include "Rtypes.h"
 /*! Energy Loss Calculator
   <p>
   Service class used to calculate the specific energy loss (dEdx) of 
@@ -28,27 +29,27 @@ using namespace std;
 class StiElossCalculator
 {
  public:
-  StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens); 
+  StiElossCalculator(Double_t zOverA, Double_t ionization, Double_t A, Double_t Z, Double_t Dens); 
 
   virtual ~StiElossCalculator();
-  double calculate(double charge2, double m, double beta2) const;
-  double calcError(double charge2, double m, double beta2) const;
-  double getzOverA() const 	{return _zOverA;}
-  double getionization2() const {return _ionization2;}
-  double getA() const 		{return _A;} 
-  double getZ() const 		{return _Z;}
-  double getDens() const 	{return _Dens;}
+  Double_t calculate(Double_t charge2, Double_t m, Double_t beta2) const;
+  Double_t calcError(Double_t charge2, Double_t m, Double_t beta2) const;
+  Double_t getzOverA() const 	{return _zOverA;}
+  Double_t getionization2() const {return _ionization2;}
+  Double_t getA() const 		{return _A;} 
+  Double_t getZ() const 		{return _Z;}
+  Double_t getDens() const 	{return _Dens;}
  protected:  
-  static const double _k;
+  static const Double_t _k;
 
   /// Ratio of Z to A of the scattering material
-  double _zOverA;
+  Double_t _zOverA;
   /// square of the ionization potential.
-  double _ionization2;
-  double _A;
-  double _Z;
-  double _Dens;
-  int    mId;
+  Double_t _ionization2;
+  Double_t _A;
+  Double_t _Z;
+  Double_t _Dens;
+  Int_t    mId;
 };
 ostream& operator<<(ostream& os, const StiElossCalculator& m);
 typedef StiElossCalculator StiELossCalculator;
