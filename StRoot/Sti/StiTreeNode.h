@@ -3,7 +3,6 @@
 
 #include <Stiostream.h>
 #include <stdlib.h>
-#include "StiTreeNode.h"
 
 
 /*! \class StiTreeNode
