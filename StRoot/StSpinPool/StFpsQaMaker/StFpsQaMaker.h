@@ -40,20 +40,28 @@ class StFpsQaMaker : public StMaker {
    static const int mNL=3;
    static const int mNS=21;
    static const int mNID=4*3*21;
+   static const int mNTRG=64;
 
    TH1F* mDataSize[2];
    TH1F* mXing[mNPREPOST*2+1];
    TH2F* mAdc2[2];   
    TH1F* mAdc[mNID][2];
-   
+   TH1F* mNHit[mNQ][mNL];
+   TH1F* mHit[mNQ][mNL];
+   TH1F* mNHitTrg[mNTRG+1];
+   TH2F* mNHitTrg2;
+
    ClassDef(StFpsQaMaker,1);
 };
 
 #endif
 
 /*
- * $Id: StFpsQaMaker.h,v 1.1 2015/02/25 20:03:26 akio Exp $
+ * $Id: StFpsQaMaker.h,v 1.2 2015/05/30 16:08:00 akio Exp $
  * $Log: StFpsQaMaker.h,v $
+ * Revision 1.2  2015/05/30 16:08:00  akio
+ * *** empty log message ***
+ *
  * Revision 1.1  2015/02/25 20:03:26  akio
  * new fps qa maker
  *

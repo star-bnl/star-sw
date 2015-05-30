@@ -11,6 +11,7 @@
 #include "StRoot/StEvent/StFmsCollection.h"
 #include "StRoot/StEvent/StFmsHit.h"
 #include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
+#include "StRoot/StSpinPool/StFpsRawDaqReader/StFpsRawDaqReader.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -62,6 +63,20 @@ Int_t StFpsQaMaker::Init(){
       mAdc[i][1]=new TH1F(name,name,100,50.0,150.0);
     }
   }
+  for(int q=0; q<mNQ; q++){
+    for(int l=0; l<mNL; l++){
+      sprintf(name,"NHIT_Q%1dL%1d",q+1,l+1);
+      mNHit[q][l]=new TH1F(name,name,22,0.0,22.0);
+      sprintf(name,"HIT_Q%1dL%1d",q+1,l+1);
+      mHit[q][l]=new TH1F(name,name,21,0.5,21.5);
+    }
+  }
+  for(int t=0; t<mNTRG+1; t++){
+    sprintf(name,"NHIT_TRG%02d",t);
+    mNHitTrg[t]=new TH1F(name,name,241,0.0,241.0);
+  }
+  sprintf(name,"NHIT_TRG");
+  mNHitTrg2=new TH2F(name,name,241,0.0,241.0,64,0.0,64.0);
   return kStOK;
 };
 
@@ -80,6 +95,8 @@ Int_t StFpsQaMaker::Make() {
   //printf("StFpsQaMaker found %d hits\n",nhit);
   int nfpsdata=0;
   int nfpsdatatot=0;
+  int nh[mNQ][mNL]; memset(nh,0,sizeof(nh));
+  int nhtot=0;
   for (unsigned int i=0; i<nhit; i++){
     int det = hits[i]->detectorId();
     if(det==15){
@@ -99,6 +116,15 @@ Int_t StFpsQaMaker::Make() {
 	  mAdc2[1]->Fill((float)slatid,(float)adc);
 	  mAdc[slatid][0]->Fill((float)adc);
 	  mAdc[slatid][1]->Fill((float)adc);
+	  if( (l!=3 && adc>50) || (l==3 && adc>25) ){
+	    nhtot++;
+	    nh[q-1][l-1]++; 
+	    if(l==1 && (q==2 || q==4)){
+	      mHit[q-1][l-1]->Fill(float(s+2));
+	    }else{
+	      mHit[q-1][l-1]->Fill(float(s));
+	    }
+	  }
 	}
       }
       //hits[i]->print();      
@@ -106,6 +132,22 @@ Int_t StFpsQaMaker::Make() {
   }
   mDataSize[0]->Fill(log10(nfpsdatatot));
   mDataSize[1]->Fill(log10(nfpsdata));
+  for(int q=0; q<mNQ; q++){
+    for(int l=0; l<mNL; l++){
+      mNHit[q][l]->Fill(float(nh[q][l]));
+    }
+  }  
+  //total multiplicity by triggers
+  mNHitTrg[64]->Fill(float(nhtot));
+  unsigned long long one=1;
+  StFpsRawDaqReader* fpsraw=(StFpsRawDaqReader*)GetMaker("fpsRawDaqReader");
+  unsigned long long tmask = fpsraw->trgMask();
+  for(int t=0; t<mNTRG; t++){
+    if(tmask & (one<<t)) {
+      mNHitTrg[t]->Fill(float(nhtot));
+      mNHitTrg2->Fill(float(nhtot),float(t));
+    }
+  }
   //printf("NFMSHIT=%4d NFPSHITTOT=%4d NFPSHIT(xing=0)=%d\n",nhit,nfpsdatatot,nfpsdata); 
   return kStOK;
 };
@@ -127,8 +169,11 @@ Int_t StFpsQaMaker::Finish(){
 ClassImp(StFpsQaMaker);
 
 /*
- * $Id: StFpsQaMaker.cxx,v 1.2 2015/02/28 02:55:35 akio Exp $
+ * $Id: StFpsQaMaker.cxx,v 1.3 2015/05/30 16:08:00 akio Exp $
  * $Log: StFpsQaMaker.cxx,v $
+ * Revision 1.3  2015/05/30 16:08:00  akio
+ * *** empty log message ***
+ *
  * Revision 1.2  2015/02/28 02:55:35  akio
  * fix a bug
  *
