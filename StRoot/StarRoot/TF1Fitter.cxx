@@ -17,8 +17,11 @@ void TF1Fitter::Copy(TObject& f1) const
 //_____________________________________________________________________________
 double TF1Fitter::operator()(const double* x, const double* params)
 {
-  if (!params) params = fParams;
-  return EvalPar(x,params);
+  if (!params) {
+    return EvalPar(x,params);
+  } else {
+    return EvalPar(x,fParams);
+  }
 }
 //_____________________________________________________________________________
 double TF1Fitter::EvalPar(const double *x,const double *par)
