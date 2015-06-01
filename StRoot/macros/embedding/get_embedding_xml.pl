@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.22 2015/05/31 12:02:10 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.23 2015/06/01 02:15:17 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.23  2015/06/01 02:15:17  zhux
+# added 'starprod' group write permission for embedding data files.
+#
 # Revision 1.22  2015/05/31 12:02:10  zhux
 # added group write permission for all embedding files at eliza disks.
 #
@@ -420,6 +423,7 @@ print OUT "  .L $bfcMixer\n";
 print OUT "  $execute_bfcMixer\n";
 print OUT "  .q\n";
 print OUT "EOF\n";
+print OUT "chmod g+w *.root\n";
 print OUT "ls -la .\n";
 print OUT "\n\n";
 
