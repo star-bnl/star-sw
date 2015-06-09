@@ -376,7 +376,7 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
     const double eb = bx * ex + by * ey + bz * ez;
     const double nom = 1. + pow(mu * b, 2);
     vx = mu * (ex + mu * (ey * bz - ez * by) + mu * mu * bx * eb) / nom;
-    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu * mu * bx * eb) / nom;
+    vy = mu * (ey + mu * (ez * bx - ex * bz) + mu * mu * by * eb) / nom;
     vz = mu * (ez + mu * (ex * by - ey * bx) + mu * mu * bz * eb) / nom;
   }
 
