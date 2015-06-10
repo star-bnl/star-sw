@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.10 2014/03/11 19:56:53 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.11 2015/06/10 22:03:20 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -812,7 +812,7 @@ void StTGeoProxy::Test()
     StHitPlane *hp = hpi->GetHitPlane(path);
     assert(hp);
     num++;
-    hlp.AddHit((void*)hp,hp->GetPnt(),num,1);
+    hlp.AddHit((void*)hp,hp->GetDetId(),hp->GetPnt(),num,1);
   }
   hlp.InitHits();
   hlp.ls("p");
@@ -825,14 +825,14 @@ if (kase!=myKase) return;
 printf("Break(%d)\n",kase); 
 }
 //_____________________________________________________________________________
-const StHitPlane *StTGeoProxy::AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed)
+const StHitPlane *StTGeoProxy::AddHit(void *hit,StDetectorId detId,const float xyz[3],unsigned int hardw,int seed)
 {
 static int nCall = 0;  nCall++;  
 //		Test of hardware id assignment quality
 enum 		{kMaxTest=1000,kMaxFail=100};
-static int 	nFail=0,detId=0;
 //
 //   Break(nCall);
+  fDetId = detId;
   StHitPlane *hp=0,*hpGeo=0;
   fGoodHit = 0;
   if (fHitLoadActor) fHitLoadActor->SetHit(hit);
@@ -845,10 +845,8 @@ static int 	nFail=0,detId=0;
     return 0;
   }
   hp = hpGeo;
-  if (hp->GetDetId() != detId) { // New detector started
-    nFail=0; detId = hp->GetDetId();
-  }
   assert(hp);
+  assert(hp->GetDetId() == detId);
 
    fAllHits->push_back(hit);
    if (seed) {//add to seed hit collection
@@ -948,12 +946,13 @@ static int nCall=0; nCall++;
     myDir[1] = dirs[idir][0]*mySin + dirs[idir][1]*myCos; 
     myDir[2] = dirs[idir][2];
     double myStep = Look(minDist,pnt,myDir);
-    if (myStep > minDist) continue;
+    if (myStep > minDist) 			continue;
     hp = GetCurrentHitPlane();     
-    if (!hp ) 		  continue;
-    if (!hp->GetHitErrCalc()) hp = 0;	
-    if (hp && !IsHitted(gGeoManager->GetLastPoint()))hp=0;;
-    minDist = myStep; minHitPlane = hp; 	break;
+    if (!hp ) 		  			continue;
+    if (!hp->GetHitErrCalc())			continue;	
+    if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
+    if (fDetId != hp->GetDetId())		continue;
+    minDist = myStep; minHitPlane = hp; 	
   }
   return minHitPlane;  
 }       
