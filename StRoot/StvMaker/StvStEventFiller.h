@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.6 2013/10/02 20:23:00 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.7 2015/06/10 17:28:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.7  2015/06/10 17:28:08  perev
+ * Print of used hits (from Sti) added
+ *
  * Revision 1.6  2013/10/02 20:23:00  perev
  * kMinFitPoints 10 ==> 11 to be like Sti
  *
@@ -100,6 +103,8 @@ private:
     int mUseAux;
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
+    int mUsedHits[100];
+    int mUsedGits[100];
 
     unsigned short mStvEncoded;
 

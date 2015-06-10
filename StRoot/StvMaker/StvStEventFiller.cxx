@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.36 2013/10/31 16:11:19 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.37 2015/06/10 17:28:21 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.37  2015/06/10 17:28:21  perev
+ * Print of used hits (from Sti) added
+ *
  * Revision 1.36  2013/10/31 16:11:19  perev
  * test for minDca ==> fabs(minDca)
  *
@@ -843,6 +846,8 @@ void StvStEventFiller::fillEvent()
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
   int errorCount=0; 
 
+  memset(mUsedHits,0,sizeof(mUsedHits));
+  memset(mUsedGits,0,sizeof(mUsedGits));
   int fillTrackCount1=0;
   int fillTrackCount2=0;
   int fillTrackCountG=0;
@@ -898,7 +903,18 @@ void StvStEventFiller::fillEvent()
   cout <<"StvStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StvStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
-
+  for (int ij=1; ij<=mUsedHits[0]; ij++) {
+    if (!mUsedHits[ij]) continue;
+    const char *det =  detectorNameById((StDetectorId)ij);
+    cout <<"StvStEventFiller::fillEvent() -I- Number of used hits:"<< det << "(" << ij << ") :"<<mUsedHits[ij]
+         << " per track:"<<double(mUsedHits[ij])/fillTrackCount2 <<endl;
+  }  
+  for (int ij=1; ij<=mUsedGits[0]; ij++) {
+    if (!mUsedGits[ij]) continue;
+    const char *det =  detectorNameById((StDetectorId)ij);
+    cout <<"StvStEventFiller::fillEvent() -I- Number of GOOD hits:"<< det << "(" << ij << ") :"<<mUsedGits[ij]
+         << " per track:"<<double(mUsedHits[ij])/fillTrackCountG <<endl;
+  }
   return;
 }
 //_____________________________________________________________________________
@@ -1008,6 +1024,8 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   //cout << "StvStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
+  int nTotHits = dets[0][2];
+  int nTpcHits = dets[kTpcId][2];
   const StvNode *node = 0;
   for (int i=0;i<kMaxDetectorId;i++) {
     int np = dets[i][1];
@@ -1024,6 +1042,19 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
       if (node->GetType() != StvNode::kRegNode) continue;
       const StvHit *stiHit = GetHit(node);
       if (!stiHit)		continue;
+
+
+//		Count used hits for tracks tpc hits >10
+      if (nTpcHits > 10) {
+	int gid = node->GetDetId();
+	if (mUsedHits[0]<gid) mUsedHits[0]=gid;
+	mUsedHits[gid]++;
+	if (nTotHits>=15) {
+          if (mUsedGits[0]<gid) mUsedGits[0]=gid;
+          mUsedGits[gid]++;
+      } }
+
+
 
 // 	EXCEPTION Fill StHit errors for Gene
       StHit *hh = (StHit*)stiHit->stHit();
