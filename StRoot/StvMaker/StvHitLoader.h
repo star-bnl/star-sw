@@ -31,6 +31,7 @@ class StvHitLoader : public TNamed
     StvHit *MakeStvHit(const StHit *stHit,UInt_t upath,int &sure); 
     int     TpcHitTest(const StHit *stHit);    
  private:
+ StDetectorId    mDetId;
  StEventHitIter *mHitIter;
  StvStEventHitSelector *mHitSelector;
  StActorFunctor *mHitLoadActor;
