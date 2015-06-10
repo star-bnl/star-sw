@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.47 2014/03/14 18:17:59 perev Exp $
+// $Id: StvMaker.cxx,v 1.48 2015/06/10 17:29:24 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -150,6 +150,10 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
+  if (IAttr("activeIst")) { assert(tgh->SetActive(kIstId                   ));}
+  if (IAttr("activePxl")) { assert(tgh->SetActive(kPxlId                   ));}
+  if (IAttr("activePixel")){assert(tgh->SetActive(kPxlId                   ));}
+
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
   if (yGeo>=2009) { 	//no prompt hits for geo <y2009
@@ -227,7 +231,29 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kFgtId,hec,0);
     Info("Init","%s: %d Hitplanes", "FgtHitErrs", nHP);
   }
+  if (IAttr("activeIst")) {    // IST error calculator
+    TString myName("IstHitErrs"); if (mFETracks) myName+="FE";
+    StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
+    TString ts("Calibrations/tracker/Stv");ts+=myName;
+    TTable *tt = (TTable*)GetDataBase(ts);
+    if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
+    assert(tt);
+    hec->SetPars((double*)tt->GetArray());
+    Int_t nHP = tgh->SetHitErrCalc(kIstId,hec,0);
+    Info("Init","%s: %d Hitplanes", "IstHitErrs", nHP);
+  }
      
+  if (IAttr("activePxl")) {    // PXL error calculator
+    TString myName("PxlHitErrs"); if (mFETracks) myName+="FE";
+    StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
+    TString ts("Calibrations/tracker/Stv");ts+=myName;
+    TTable *tt = (TTable*)GetDataBase(ts);
+    if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
+    assert(tt);
+    hec->SetPars((double*)tt->GetArray());
+    Int_t nHP = tgh->SetHitErrCalc(kPxlId,hec,0);
+    Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
+  }
 
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
