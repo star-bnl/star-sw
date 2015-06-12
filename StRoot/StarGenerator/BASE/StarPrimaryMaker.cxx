@@ -451,8 +451,9 @@ Bool_t StarPrimaryMaker::Simulate( StarGenParticle *particle )
     if ( mRapidityMin < mRapidityMax )
       {
 	if ( p.Eta() < mRapidityMin ) return false;
-	if ( p.Eta() > mRapidityMax ) return true;
-      }
+	if ( p.Eta() > mRapidityMax ) return false;
+      } // else, no cut
+  
 
   // Extend this ... add phi and z-vertex range cuts.
 
