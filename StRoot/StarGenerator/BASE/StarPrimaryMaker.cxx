@@ -49,7 +49,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mPrimaryEvent(0),
   mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0), mVdxdz(0), mVdydz(0),
   mDoBeamline(0),
-  mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(0), mZMax(-1),
+  mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(-999), mZMax(+999),
   mPrimaryVertex(0,0,0,0),
   mFilter(0),mAccepted(0)
 {
@@ -491,12 +491,11 @@ Int_t StarPrimaryMaker::Finalize()
     }
 
   //
-  // Generate the primary vertex
+  // Generate the primary vertex within allowed limits
   //
-  TLorentzVector primary = Vertex(); 
+  TLorentzVector primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
+
   mPrimaryVertex = primary;
-
-
 
   //
   // Next loop over all generators and push their tracks onto the particle stack.

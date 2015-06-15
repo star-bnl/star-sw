@@ -148,7 +148,7 @@ class StarPrimaryMaker : public StMaker
   void SetCuts( Double_t ptmin,    Double_t ptmax=-1, 
 		Double_t ymin=0,   Double_t ymax=-1,
 		Double_t phimin=0, Double_t phimax=-1,
-		Double_t zmin=0,   Double_t zmax=-1 );
+		Double_t zmin=-999,   Double_t zmax=+999 );
 
   /// Set PT range.  Particles falling outside this range will be dropped from simulation.
   void SetPtRange( Double_t ptmin, Double_t ptmax=-1 ){ LOG_INFO << " -- StarPrimaryMaker -- ptmin=" << (mPtMin = ptmin) << " ptmax=" << (mPtMax = ptmax) << endm; }
@@ -156,14 +156,15 @@ class StarPrimaryMaker : public StMaker
   void SetEtaRange( Double_t etamin, Double_t etamax ){ LOG_INFO << " -- StarPrimaryMaker --  ymin=" << (mRapidityMin = etamin) << "  ymax= " << (mRapidityMax = etamax) << endm; }
   /// Set phi range.  Particles falling outside this range will be dropped from simulation.
   void SetPhiRange( Double_t phimin, Double_t phimax ){ LOG_INFO << " -- StarPrimaryMaker -- phimn=" << (mPhiMin = phimin) << " phimx=" <<  (mPhiMax = phimax) << endm; }
-  /// Set z-vertex range.  Particles falling outside this range will be dropped from simulation.
+
+  /// Set z-vertex range.  Primary vertices outside these bounds will be rejected.
   void SetZvertexRange( Double_t zmin, Double_t zmax ){ LOG_INFO << " -- StarPrimaryMaker --  zmin=" << (mZMin = zmin) << "  zmax=" << (mZMax = zmax) << endm; }
 
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.7 2015/04/16 15:05:11 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.8 2015/06/15 13:23:00 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
  protected:
