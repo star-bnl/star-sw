@@ -308,7 +308,8 @@ assert(fabs(_z)<999);
    _x += MOM[0]*dT-MOM[1]*dH;
    _y += MOM[1]*dT+MOM[0]*dH;
    _psi  += dA;
-   if (_psi<-M_PI) {_psi+=2*M_PI;} else if (_psi> M_PI) {_psi-=2*M_PI;}
+   while (_psi<-M_PI) { _psi+=2*M_PI;}
+   while (_psi> M_PI) { _psi-=2*M_PI;}
 assert(fabs(_psi)<=M_PI);
    _curv += _curv*dRho;
    _ptin  =_curv/_hz;
