@@ -18,6 +18,7 @@ void geometry( TString tag, Bool_t agml=true )
   TString cmd = "DETP GEOM "; cmd += tag;
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
   geant_maker -> LoadGeometry(cmd);
+  
   //  if ( agml ) command("gexec $STAR_LIB/libxgeometry.so");
 }
 // ----------------------------------------------------------------------------
@@ -32,6 +33,7 @@ void trig( Int_t n=0 )
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     chain->Make();
+    primary -> event() -> Print();
   }
 }
 // ----------------------------------------------------------------------------
@@ -69,7 +71,7 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
+void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
