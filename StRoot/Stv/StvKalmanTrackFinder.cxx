@@ -291,13 +291,23 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       minXi2[1]=minXi2[0]; minXi2[0] = myXi2;
       minHit[1]=minHit[0]; minHit[0] = hit; minIdx = ihit;
     }
+if (minHit[0] && minHit[0]->getRxy()<10) {
+  StvDebug::Count("PxlXi2__1",minXi2[0]);
+  assert(minHit[0]->detector()->GetDetId() == kPxlId);
+}
+
     if (mySkip) break; 		//Track Errors too big
+
+
     curNode->SetMem(minHit ,minXi2);
-    if (minHit[0] && minXi2[1]> minXi2[0]*1.2) {	// Fit succesful
+    if (minHit[0] ) 		{	// Fit succesful
+//  if (minHit[0] && minXi2[1]> minXi2[0]*1.2) {	// Fit succesful
+if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__2",minXi2[0]);}
       
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
+if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0]);}
         hitCount->AddHit();
 	nHits++;nTotHits++;assert(nHits<=100);
         curNode->SetHE(fitt->GetHitErrs());
@@ -309,6 +319,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       myXi2 = 1e11;
       hitCount->AddNit(); 
     }
+if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__4",minXi2[0]);}
     curNode->SetHit(minHit[0]); 
     curNode->SetXi2(myXi2,0);
     
