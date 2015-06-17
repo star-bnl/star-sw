@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.186 2013/12/20 18:48:54 genevb Exp $
+// $Id: bfc.C,v 1.187 2015/06/17 01:37:42 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -33,26 +33,26 @@ void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
-void Load(const Char_t *options){
+void Load(const Char_t *options)
+{
   cout << "Load system libraries\t";
-  if ( gClassTable->GetID("TGiant3") < 0) { // ! root4star
-    if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	 TString(options).Contains("pgf77",TString::kIgnoreCase)) {
+  int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
+
+
+  if ( TString(gProgName)!="root4star") { // ! root4star
+    if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
       const Char_t *pgf77 = "libpgf77VMC";
       if (gSystem->DynamicPathName(pgf77,kTRUE) ) {
 	gSystem->Load(pgf77); cout << " " << pgf77 << " + ";
       }
     }
-    if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	TString(options).Contains("cern",TString::kIgnoreCase)) {
-      gSystem->Load("libminicern"); 
-      cout << "libminicern" ;
+    if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
+        gSystem->Load("libStarMiniCern"); 
+        cout << "libStarMiniCern" ;
     }
 
     
-    if (!strstr(gProgName,"root4star")                               ||
-	!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	TString(options).Contains("mysql",TString::kIgnoreCase)) {
+    if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
 
