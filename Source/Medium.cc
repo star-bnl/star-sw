@@ -348,6 +348,8 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                            m_extrLowVelocity, m_extrHighVelocity);
     }
     const double q = -1.;
+    if (ex * bx + ey * by + ez * bz > 0.) vbt = fabs(vbt);
+     else vbt = -fabs(vbt);
     vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
     vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
     vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
@@ -887,6 +889,8 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
                            m_extrLowVelocity, m_extrHighVelocity);
     }
     const double q = 1.;
+    if (ex * bx + ey * by + ez * bz > 0.) vbt = fabs(vbt);
+     else vbt = -fabs(vbt);
     vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
     vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
     vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
