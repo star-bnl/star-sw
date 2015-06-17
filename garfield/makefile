@@ -4,7 +4,8 @@ SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
 #LIBDIR = $(GARFIELD_HOME)/.$(STAR_HOST_SYS)/Library
 LIBDIR = .
-HEEDDIR = $(GARFIELD_HOME)/Heed
+#HEEDDIR = $(GARFIELD_HOME)/Heed
+HEEDDIR = $(OBJDIR)/Heed
 
 HEADERS = $(wildcard $(INCDIR)/*.hh)
 
@@ -82,7 +83,7 @@ installdirs :
         
 heed:	
 	@echo Compiling Heed...
-	cd $(HEEDDIR); make; cd $(GARFIELD_HOME)
+	cd $(HEEDDIR); make; cd $(OBJDIR)
 	@touch $(OBJDIR)/last_updated_on
 
 clean:
