@@ -71,7 +71,7 @@ public:
    void Clear(const Option_t * = "");
    virtual Int_t Finish();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
