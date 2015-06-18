@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.16 2015/06/18 02:12:09 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.17 2015/06/18 23:31:26 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -21,6 +21,7 @@ static double gsigma2(double ZoverA,double DENS,double CHARGE2
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
+static const double kMaxFak=1,kMaxTheta2=1,kMaxPartOfE = 0.1;
 static const double kMomTol=1e-2;
 
 ClassImp(StvELossTrak)
@@ -59,9 +60,9 @@ void StvELossTrak::Clear(const char*)
 void StvELossTrak::Set(double A, double Z, double dens, double x0, double p,const TGeoMaterial *mate)
 {
   fdEdX=0;
-  assert(p>0 || fP>0);
   if (p<=0) p = fP[1];
   if (p<kMinP) p=kMinP;
+  if (p>kMaxP) p=kMaxP;
   if (A<=0) x0 = 1e+11;
   if (!Same(A,Z,dens,x0,p)) {
   // Normal, non update mode. Save material data
@@ -82,7 +83,7 @@ assert(mate);
   double p2 = fP[1]*fP[1],m2 = fM*fM;
   fE = sqrt(p2+m2);
   fFak = (14.1*14.1)*(p2+m2)/(p2*p2*1e6);
-  if (fFak<1) fFak = 1;
+  if (fFak>kMaxFak) fFak = kMaxFak;
   double T = fE-fM;
   if (A>0) {
     double charge2 = fCharge*fCharge;
@@ -136,8 +137,6 @@ void StvELossTrak::Add(double len)
 // fMCS[2] = Thet2*L1;
 // return fMCS[0]+L*(fMCS[1]+L*fMCS[2]); 
 static int nCall=0; nCall++;
-
-
 StvDebug::Break(nCall);
   double myLen = len;
   while (1) {
@@ -151,20 +150,22 @@ StvDebug::Break(nCall);
     aux.fLen+=dL;
     double QQ = fFak/fMats.back().fX0;
     double theta2  	= QQ*dL;
-    if (theta2>1) return;
-    if (fMCS[2]>1) return;
-    if (fMCS[2]+theta2>1) return;
+    if (theta2 >kMaxTheta2) theta2 = kMaxTheta2;
+    if (fMCS[2]+theta2>kMaxTheta2) theta2 = kMaxTheta2-fMCS[2];
     fMCS[2] += theta2;
     fMCS[1] += theta2*(-2*fTotLen - dL);
     fMCS[0] += theta2*(dL*dL/3+fTotLen*(fTotLen+dL));
-assert(fMCS[2]<1);
+assert(fMCS[2]< kMaxTheta2*1.1);
     double ELoss  = fdEdX *dL;
+    if (    ELoss > kMaxPartOfE*fE)     ELoss = kMaxPartOfE*fE;
     fTotELoss += ELoss;
+    if (fTotELoss > kMaxPartOfE*fE) fTotELoss = kMaxPartOfE*fE;
+
     fTotELossErr2 += fdEdXErr2*dL;
     dP = ELoss*fE/fP[1];
     if (fDir) { fP[1]-=dP; if (fP[1]<kMinP) fP[1]=kMinP; fE-=ELoss;} else { fP[1]+=dP; fE+=ELoss;}
 
-    fP[1] = fP[0]; ///??????????????????????????????????????????????????????????????????
+//    fP[1] = fP[0]; ///??????????????????????????????????????????????????????????????????
 
     fTotLen+=dL;  myLen-=dL;
     if (myLen<=1e-5) break;
