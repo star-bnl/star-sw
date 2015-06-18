@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.37 2015/06/10 17:28:21 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.38 2015/06/18 02:17:14 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.38  2015/06/18 02:17:14  perev
+ * Fix  printout of counting used hits
+ *
  * Revision 1.37  2015/06/10 17:28:21  perev
  * Print of used hits (from Sti) added
  *
@@ -890,8 +893,12 @@ void StvStEventFiller::fillEvent()
           }
 	  fillTrackCount2++;
           fillPulls(kTrack,gTrack,0);
-          if (gTrack->numberOfPossiblePoints()<10) 	continue;
-          if (gTrack->geometry()->momentum().mag()<0.1) continue;
+
+assert(gTrack->fitTraits().numberOfFitPoints(kTpcId)<=gTrack->numberOfPossiblePoints(kTpcId));
+assert(gTrack->fitTraits().numberOfFitPoints(      )<=gTrack->numberOfPossiblePoints(      ));
+          if (gTrack->fitTraits().numberOfFitPoints(kTpcId)<15) 	continue;
+//          if (gTrack->numberOfPossiblePoints()<15) 	continue;
+//          if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
           
 	}
@@ -911,6 +918,7 @@ void StvStEventFiller::fillEvent()
   }  
   for (int ij=1; ij<=mUsedGits[0]; ij++) {
     if (!mUsedGits[ij]) continue;
+assert(fillTrackCountG);
     const char *det =  detectorNameById((StDetectorId)ij);
     cout <<"StvStEventFiller::fillEvent() -I- Number of GOOD hits:"<< det << "(" << ij << ") :"<<mUsedGits[ij]
          << " per track:"<<double(mUsedHits[ij])/fillTrackCountG <<endl;
@@ -993,8 +1001,9 @@ void StvStEventFiller::fillEventPrimaries()
 //VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
 //VP	        throw runtime_error("StvStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
       }
-      if (pTrack->numberOfPossiblePoints()<10) 		break;
-      if (pTrack->geometry()->momentum().mag()<0.1) 	break;
+      if (pTrack->numberOfPossiblePoints(kTpcId)<15) 		break;
+      if (pTrack->fitTraits().numberOfFitPoints(kTpcId)<15) 	break;
+//      if (pTrack->geometry()->momentum().mag()<0.1) 	break;
       StDcaGeometry *myDca = gTrack->dcaGeometry();
       if (!myDca)					break;
 
