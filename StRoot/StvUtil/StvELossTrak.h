@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.10 2014/08/20 01:12:34 perev Exp $
+// $Id: StvELossTrak.h,v 1.11 2015/06/18 02:10:39 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -17,6 +17,8 @@ class StvELossTrak : public TObject
 public:
 class Aux {
 public:
+Aux(){memset(this,0,sizeof(*this));}
+
 const TGeoMaterial* fMat;
 float fLen,fP,fdEdX,fA,fZ,fDens,fX0;
 };
@@ -27,7 +29,7 @@ public:
     void Reset(int dir,double mass=PiMASS, double charge=1);
     void Clear(const char *opt="");
      int Same(double A, double Z, double dens, double x0, double p) const;
-    void Set (double A, double Z, double Dens, double x0, double p,const TGeoMaterial *mate=0);
+    void Set (double A, double Z, double Dens, double x0, double p,const TGeoMaterial *mate);
     void Set (const TGeoMaterial *mate,                   double p);
     void Set (double p);
     void Add(double len);
