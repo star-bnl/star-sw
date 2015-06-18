@@ -1168,7 +1168,7 @@ void test()
 
     geom.tpcRefSys = false; // Create TPC reference system
 
-    geom.caveFlag = "CAVE04";
+    geom.caveFlag = "CAVE05";  geom.caveStat = 1;
 
     geom.sconFlag = "SCONof";  geom.sconStat = 0;
     geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
@@ -1192,20 +1192,35 @@ void test()
     geom.zcalFlag = "ZCALof";  geom.zcalStat = 0;
     geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
     // ================================================
-    geom.pixlFlag = "PIXLof";  geom.pixlFlag = 0;
-    geom.pxstFlag = "PXSTof";  geom.pxstFlag = 0;
+    geom.pixlFlag = "PIXLof";  geom.pixlStat = 0;
+    geom.pxstFlag = "PXSTof";  geom.pxstStat = 0;
+    geom.psupFlag = "PSUPof";  geom.psupStat = 0; // pixel support off
 
-    geom.dtubFlag = "DTUBof";  geom.dtubFlag = 0;
+    geom.dtubFlag = "DTUBof";  geom.dtubStat = 0;
     // ================================================
     geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
     geom.svttFlag = "SISDof"; geom.svttStat = 0;
     geom.istdFlag = "ISTDof"; geom.istdStat = 0; // ISTD off by default
 
+
     setTitle("== test geometry ==");
     // ================================================
     geom.fill();
   }
+
+
+
+  geom.select="hctest"; { // HCAL test setup
+    geom.hcalFlag = "HCALvF"; geom.hcalStat = 1;
+    setTitle("HCAL test setup");
+    geom.fill();
+  };
+
+  // switch back off
+  geom.hcalFlag = "HCALof"; geom.hcalStat = 0;
+
 }
+
 
 
 
@@ -1516,6 +1531,7 @@ void y2014()
     geom.hcalFlag = "HCALv0"; geom.hcalStat = 1; // HCAL prototype
     geom.fill();
   }
+
 
 }
 
