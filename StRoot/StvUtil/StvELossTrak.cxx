@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.15 2014/08/21 02:17:42 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.16 2015/06/18 02:12:09 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -73,6 +73,7 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0, double p,cons
     M.fDens=dens;
     M.fX0=x0; 
     M.fP = p;
+assert(mate);
     M.fMat = mate;
   }  
   if (fP[0]<=0) fP[0] = p; 
@@ -81,6 +82,7 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0, double p,cons
   double p2 = fP[1]*fP[1],m2 = fM*fM;
   fE = sqrt(p2+m2);
   fFak = (14.1*14.1)*(p2+m2)/(p2*p2*1e6);
+  if (fFak<1) fFak = 1;
   double T = fE-fM;
   if (A>0) {
     double charge2 = fCharge*fCharge;
@@ -149,10 +151,13 @@ StvDebug::Break(nCall);
     aux.fLen+=dL;
     double QQ = fFak/fMats.back().fX0;
     double theta2  	= QQ*dL;
+    if (theta2>1) return;
+    if (fMCS[2]>1) return;
+    if (fMCS[2]+theta2>1) return;
     fMCS[2] += theta2;
     fMCS[1] += theta2*(-2*fTotLen - dL);
     fMCS[0] += theta2*(dL*dL/3+fTotLen*(fTotLen+dL));
-assert(fMCS[2]<100);
+assert(fMCS[2]<1);
     double ELoss  = fdEdX *dL;
     fTotELoss += ELoss;
     fTotELossErr2 += fdEdXErr2*dL;
@@ -164,8 +169,8 @@ assert(fMCS[2]<100);
     fTotLen+=dL;  myLen-=dL;
     if (myLen<=1e-5) break;
     const TGeoMaterial *mat = aux.fMat;
-    Set(aux.fA, aux.fZ, aux.fDens, aux.fX0, fP[1]);
-    fMats.back().fMat = mat;
+assert(mat);
+    Set(aux.fA, aux.fZ, aux.fDens, aux.fX0, fP[1],mat);
   }
 
 }
@@ -225,9 +230,9 @@ StvDebug::Break(nCall);
   AuxVect mats; mats.swap(fMats);
   for (int jMat=jBeg; jMat!=jEnd; jMat+=jStp) {
     Aux &M = mats[jMat];
-    Set(M.fA, M.fZ, M.fDens, M.fX0,p);
+    Set(M.fA, M.fZ, M.fDens, M.fX0,p,M.fMat);
     Add(M.fLen);
-    fMats.back().fMat = M.fMat;
+assert(M.fMat);
     p = 0;
   }
   double pNow =  fP[0]; 
