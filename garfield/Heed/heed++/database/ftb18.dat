@@ -1,0 +1,353 @@
+Editted this file, added main shell numbers in shell names. (IS)
+ COMPLEX OF COMPUTER PROGRAMS RAINE BY BAND AND TRZHASKOVSKAYA
+ PHOTOIONIZATION CROSS SECTION IN A DIPOLE APPROACH
+ DIRAC-FOCK WAVE FUNCTIONS OF BINDING AND FREE ELECTRONS ARE USED
+ HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ K1SHELL
+ BINDING ENERGY IS THEOR EBIND =     3.2416 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     3.2436    3.8924    4.6708    5.6050    6.7260    8.0712    9.6854
+    11.6225   13.9470
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   1K1 SHELL EBIND =    3.2416keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+
+$
+9	3.2416
+           3.2436              0.4694E-01
+           3.8924              0.4926E-01
+           4.6708              0.3122E-01
+           5.6050              0.1932E-01
+           6.7260              0.1173E-01
+           8.0712              0.7034E-02
+           9.6854              0.4175E-02
+          11.6225              0.2452E-02
+          13.9470              0.1427E-02
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ L1SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.3377 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.3397    0.4077    0.4892    0.5871    0.7045    0.8454    1.0145
+     1.2173    1.4608    1.7530    2.1036    2.5243    3.0291    3.6350
+     4.3620    5.2344    6.2812    7.5375    9.0450   10.8540   13.0248
+    15.6297
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   2L1 SHELL EBIND =    0.3377keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+
+$
+22 0.3377
+           0.3397              0.1788E+00
+           0.4077              0.2102E+00
+           0.4892              0.1774E+00
+           0.5871              0.1454E+00
+           0.7045              0.1110E+00
+           0.8454              0.8224E-01
+           1.0145              0.5965E-01
+           1.2173              0.4208E-01
+           1.4608              0.2924E-01
+           1.7530              0.1991E-01
+           2.1036              0.1336E-01
+           2.5243              0.8839E-02
+           3.0291              0.5764E-02
+           3.6350              0.3706E-02
+           4.3620              0.2353E-02
+           5.2344              0.1476E-02
+           6.2812              0.9160E-03
+           7.5375              0.5620E-03
+           9.0450              0.3411E-03
+          10.8540              0.2049E-03
+          13.0248              0.1218E-03
+          15.6297              0.7174E-04
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ L2SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.2621 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.2641    0.3169    0.3803    0.4564    0.5476    0.6572    0.7886
+     0.9463    1.1356    1.3627    1.6352    1.9623    2.3548    2.8257
+     3.3908    4.0690    4.8828    5.8594    7.0313    8.4375   10.1250
+    12.1500   14.5800
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   2L2 SHELL EBIND =    0.2621keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+
+$
+23	0.2621
+           0.2641              0.1662E+00
+           0.3169              0.8403E+00
+           0.3803              0.5834E+00
+           0.4564              0.4025E+00
+           0.5476              0.2601E+00
+           0.6572              0.1594E+00
+           0.7886              0.9678E-01
+           0.9463              0.5719E-01
+           1.1356              0.3330E-01
+           1.3627              0.1913E-01
+           1.6352              0.1082E-01
+           1.9623              0.6057E-02
+           2.3548              0.3342E-02
+           2.8257              0.1820E-02
+           3.3908              0.9800E-03
+           4.0690              0.5219E-03
+           4.8828              0.2749E-03
+           5.8594              0.1431E-03
+           7.0313              0.7377E-04
+           8.4375              0.3766E-04
+          10.1250              0.1904E-04
+          12.1500              0.9543E-05
+          14.5800              0.4739E-05
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ L3SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.2598 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.2618    0.3141    0.3770    0.4524    0.5428    0.6514    0.7817
+     0.9380    1.1257    1.3508    1.6209    1.9451    2.3342    2.8010
+     3.3612    4.0334    4.8401    5.8081    6.9697    8.3637   10.0364
+    12.0437   14.4525
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   2L3 SHELL EBIND =    0.2598keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+$
+23	0.2598
+           0.2618              0.3394E+00
+           0.3141              0.1704E+01
+           0.3770              0.1182E+01
+           0.4524              0.8131E+00
+           0.5428              0.5251E+00
+           0.6514              0.3215E+00
+           0.7817              0.1950E+00
+           0.9380              0.1152E+00
+           1.1257              0.6696E-01
+           1.3508              0.3845E-01
+           1.6209              0.2173E-01
+           1.9451              0.1215E-01
+           2.3342              0.6697E-02
+           2.8010              0.3644E-02
+           3.3612              0.1960E-02
+           4.0334              0.1042E-02
+           4.8401              0.5482E-03
+           5.8081              0.2851E-03
+           6.9697              0.1467E-03
+           8.3637              0.7473E-04
+          10.0364              0.3771E-04
+          12.0437              0.1886E-04
+          14.4525              0.9340E-05
+
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ M1SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.0350 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.0370    0.0444    0.0533    0.0640    0.0767    0.0921    0.1105
+     0.1326    0.1591    0.1910    0.2292    0.2750    0.3300    0.3960
+     0.4752    0.5702    0.6843    0.8211    0.9853    1.1824    1.4189
+     1.7027    2.0432    2.4518    2.9422    3.5306    4.2367    5.0841
+     6.1009    7.3211    8.7853   10.5424   12.6509   15.1810
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   3M1 SHELL EBIND =    0.0350keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+$
+34 	0.0350
+             0.0370              0.1652E-03
+             0.0444              0.3138E-01
+             0.0533              0.9238E-01
+             0.0640              0.1484E+00
+             0.0767              0.1824E+00
+             0.0921              0.1920E+00
+             0.1105              0.1828E+00
+             0.1326              0.1625E+00
+             0.1591              0.1375E+00
+             0.1910              0.1121E+00
+             0.2292              0.8833E-01
+             0.2750              0.6736E-01
+             0.3300              0.4983E-01
+             0.3960              0.3601E-01
+             0.4752              0.2577E-01
+             0.5702              0.1841E-01
+             0.6843              0.1308E-01
+             0.8211              0.9184E-02
+             0.9853              0.6394E-02
+             1.1824              0.4419E-02
+             1.4189              0.3009E-02
+             1.7027              0.2033E-02
+             2.0432              0.1359E-02
+             2.4518              0.8986E-03
+             2.9422              0.5862E-03
+             3.5306              0.3777E-03
+             4.2367              0.2406E-03
+             5.0841              0.1515E-03
+             6.1009              0.9435E-04
+             7.3211              0.5809E-04
+             8.7853              0.3538E-04
+            10.5424              0.2132E-04
+            12.6509              0.1272E-04
+            15.1810              0.7517E-05
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ M2SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.0162 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.0182    0.0218    0.0262    0.0315    0.0377    0.0453    0.0543
+     0.0652    0.0783    0.0939    0.1127    0.1352    0.1623    0.1947
+     0.2337    0.2804    0.3365    0.4038    0.4846    0.5815    0.6978
+     0.8374    1.0048    1.2058    1.4470    1.7363    2.0836    2.5003
+     3.0004    3.6005    4.3206    5.1847    6.2216    7.4660    8.9592
+    10.7510   12.9012   15.4814
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   3M2 SHELL EBIND =    0.0162keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+$
+38	0.0162
+             0.0182              0.1199E+02
+             0.0218              0.9647E+01
+             0.0262              0.6391E+01
+             0.0315              0.3665E+01
+             0.0377              0.1797E+01
+             0.0453              0.7130E+00
+             0.0543              0.2278E+00
+             0.0652              0.1087E+00
+             0.0783              0.1386E+00
+             0.0939              0.1837E+00
+             0.1127              0.1996E+00
+             0.1352              0.1882E+00
+             0.1623              0.1613E+00
+             0.1947              0.1288E+00
+             0.2337              0.9645E-01
+             0.2804              0.6800E-01
+             0.3365              0.4573E-01
+             0.4038              0.2997E-01
+             0.4846              0.1940E-01
+             0.5815              0.1238E-01
+             0.6978              0.7746E-02
+             0.8374              0.4772E-02
+             1.0048              0.2899E-02
+             1.2058              0.1727E-02
+             1.4470              0.1014E-02
+             1.7363              0.5879E-03
+             2.0836              0.3356E-03
+             2.5003              0.1882E-03
+             3.0004              0.1040E-03
+             3.6005              0.5676E-04
+             4.3206              0.3052E-04
+             5.1847              0.1619E-04
+             6.2216              0.8484E-05
+             7.4660              0.4394E-05
+             8.9592              0.2252E-05
+            10.7510              0.1142E-05
+            12.9012              0.5713E-06
+            15.4814              0.2811E-06
+
+ INPUTE INFORMATION
+ NUCLEAR CHARGE =  18
+ M3SHELL
+ BINDING ENERGY IS THEOR EBIND =     0.0160 KEV
+ PHOTON ENERGIES (IN KEV) ARE
+
+     0.0180    0.0216    0.0259    0.0311    0.0373    0.0448    0.0537
+     0.0645    0.0774    0.0929    0.1114    0.1337    0.1604    0.1925
+     0.2310    0.2773    0.3327    0.3992    0.4791    0.5749    0.6899
+     0.8279    0.9935    1.1922    1.4306    1.7167    2.0600    2.4720
+     2.9665    3.5597    4.2717    5.1260    6.1512    7.3815    8.8578
+    10.6293   12.7552   15.3063
+
+
+         PHOTOIONIZATION CROSS SECTION
+               DIPOLE APPROACH
+     HOLE-EFFECT IS NOT TAKEN INTO ACCOUNT
+  TERM DEPENDENT IS TAKEN INTO ACCOUNT
+         Z = 18   3M3 SHELL EBIND =    0.0160keV
+
+    PHOTON ENERGY (keV)   CROSS SECTION (Mbarn)
+$
+38	0.0160
+             0.0180              0.2434E+02
+             0.0216              0.1945E+02
+             0.0259              0.1286E+02
+             0.0311              0.7374E+01
+             0.0373              0.3622E+01
+             0.0448              0.1445E+01
+             0.0537              0.4636E+00
+             0.0645              0.2213E+00
+             0.0774              0.2802E+00
+             0.0929              0.3717E+00
+             0.1114              0.4043E+00
+             0.1337              0.3813E+00
+             0.1604              0.3268E+00
+             0.1925              0.2611E+00
+             0.2310              0.1956E+00
+             0.2773              0.1381E+00
+             0.3327              0.9286E-01
+             0.3992              0.6080E-01
+             0.4791              0.3931E-01
+             0.5749              0.2507E-01
+             0.6899              0.1568E-01
+             0.8279              0.9649E-02
+             0.9935              0.5860E-02
+             1.1922              0.3489E-02
+             1.4306              0.2046E-02
+             1.7167              0.1186E-02
+             2.0600              0.6766E-03
+             2.4720              0.3792E-03
+             2.9665              0.2093E-03
+             3.5597              0.1141E-03
+             4.2717              0.6132E-04
+             5.1260              0.3249E-04
+             6.1512              0.1701E-04
+             7.3815              0.8791E-05
+             8.8578              0.4499E-05
+            10.6293              0.2277E-05
+            12.7552              0.1141E-05
+            15.3063              0.5658E-06
