@@ -2,21 +2,23 @@
 <Export language="Mortran">
 <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
-                  
+                   
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
     call geometry
 </Export>
-
 </Module>
-
-      
+  
+        
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.48 2015/06/09 14:15:09 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.49 2015/06/19 13:48:25 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.49  2015/06/19 13:48:25  jwebb
+  Added HCAL test configuration (hctest)
+
   Revision 1.48  2015/06/09 14:15:09  jwebb
   Note to self.  Do not place a double dash into CVS comment log when checking in XML files.
 
