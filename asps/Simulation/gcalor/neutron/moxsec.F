@@ -86,7 +86,7 @@ C check if all isotopes have been found in the x-section file(s)
       XSTOP = .FALSE.
       DO 50  I=1,NMIX
         IF(LD(LFP19+I-1).EQ.0) THEN
-         WRITE(IOUT,10100)LD(LFP19+I-1)
+         WRITE(IOUT,10000)LD(LFP19+I-1)
 10000    FORMAT(' MICAP: Could not find x-section of element ',I8)
          XSTOP = .TRUE.
         ENDIF
