@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevoztchikov, G.V. Buren, L. Didenko //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.186 2013/12/20 18:48:54 genevb Exp $
+// $Id: bfc.C,v 1.187 2015/06/17 01:37:42 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -41,15 +41,14 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012,pythia,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,Sti,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,pythia,tfs,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+TString defChain("MC.y2012,pythia,beamline,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("P2014aPxLSim,gstar,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
 //TString defChain("MC.2014,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 //TString defChain("MC.2014,Pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 //"P2014a,Stv,mtd,btof,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,-SsdIt","/star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq")'
-
-TString defChain("MC.y2012,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 //	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
@@ -57,26 +56,26 @@ void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
-void Load(const Char_t *options){
+void Load(const Char_t *options)
+{
   cout << "Load system libraries\t";
-  if ( gClassTable->GetID("TGiant3") < 0) { // ! root4star
-    if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	 TString(options).Contains("pgf77",TString::kIgnoreCase)) {
+  int nodefault = TString(options).Contains("nodefault",TString::kIgnoreCase);
+
+
+  if ( TString(gProgName)!="root4star") { // ! root4star
+    if (!nodefault || TString(options).Contains("pgf77",TString::kIgnoreCase)) {
       const Char_t *pgf77 = "libpgf77VMC";
       if (gSystem->DynamicPathName(pgf77,kTRUE) ) {
 	gSystem->Load(pgf77); cout << " " << pgf77 << " + ";
       }
     }
-    if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	TString(options).Contains("cern",TString::kIgnoreCase)) {
-      gSystem->Load("libminicern"); 
-      cout << "libminicern" ;
+#if 0
+    if (!nodefault || TString(options).Contains("cern" ,TString::kIgnoreCase)) {
+        gSystem->Load("libStarMiniCern"); 
+        cout << "libStarMiniCern" ;
     }
-
-    
-    if (!strstr(gProgName,"root4star")                               ||
-	!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
-	TString(options).Contains("mysql",TString::kIgnoreCase)) {
+#endif
+    if (!nodefault || TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
 
