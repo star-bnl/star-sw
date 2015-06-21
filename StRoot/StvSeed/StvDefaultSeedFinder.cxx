@@ -269,7 +269,7 @@ StvDebug::Break(nCall);
   
     case 0: {
       
-static int myDir = 1;
+static int myDir = 0;
 if      ( myDir == 0) { Mul(mX[0]  ,-1./sqrt(Dot(mX[0],mX[0])),mDir);}   
 else if ( myDir == 1) { Mul(mHitDir,-1.                       ,mDir);}
 else                  { mDir[0]= mX[0][0]; mDir[1]= mX[0][1];mDir[2]= mX[0][2]/2;

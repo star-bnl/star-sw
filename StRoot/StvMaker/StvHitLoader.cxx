@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.23 2013/08/16 22:24:37 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.24 2015/06/10 17:30:35 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -27,6 +27,8 @@ Main tasks:
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StEvent.h"
 #include "StHit.h"
+#include "StIstHit.h"	////????
+#include "StPxlHit.h"	////????
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StEventHitIter.h"
 #include "StvUtil/StvDebug.h"
@@ -119,6 +121,7 @@ if (myGraph) { //create canvas
     }
     if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
+    mDetId = did;
     int sure;
     StvHit *stvHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
 //     if (!sure && stvHit) { //Non reliable hit
@@ -157,9 +160,58 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    }
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
-   const StHitPlane *hp = tgh->AddHit(stvHit,xyz,hard,seed);
+   const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
+  
+if (did == kIstId) {
+  StIstHit *IstHit = (StIstHit*)stHit;
+  int sec = 1;
+  int lad = IstHit->getLadder();
+  int sen = IstHit->getSensor();
+  int myPath = 0;
+  const char* path = strstr(hp->GetName(),"IBMO");
+  static int nk=0;
+  for (int jk=0;jk<3;jk++) {
+    path= strstr(path,"_");
+    assert(path);
+    path++;
+    myPath = myPath*100+atoi(path);
+  }
+  int ihPath = sen+100*(lad+100*sec);
+static int ihPathWas=0,myPathWas=0;
+
+  if (myPath!=ihPath){
+     nk++;
+     if (myPath!=myPathWas || ihPath!=ihPathWas)
+       printf("%5d - IST: %s = %d %d\n",nk,hp->GetName(),myPath,ihPath);
+     myPathWas =myPath; ihPathWas=ihPath;
+} }
+
+if (did == kPxlId) {
+  StPxlHit *pxlHit = (StPxlHit*)stHit;
+  int sec = pxlHit->sector();
+  int lad = pxlHit->ladder();
+  int sen = pxlHit->sensor();
+  int myPath = 0;
+  const char* path = strstr(hp->GetName(),"PXLA");
+  static int nk=0;
+  for (int jk=0;jk<3;jk++) {
+    path= strstr(path,"_");
+    assert(path);
+    path++;
+    myPath = myPath*100+atoi(path);
+  }
+  int ihPath = sen+100*(lad+100*sec);
+static int ihPathWas=0,myPathWas=0;
+
+  if (myPath!=ihPath){
+     nk++;
+     if (myPath!=myPathWas || ihPath!=ihPathWas)
+       printf("%5d - PXL: %s = %d %d\n",nk,hp->GetName(),myPath,ihPath);
+     myPathWas =myPath; ihPathWas=ihPath;
+} }
+
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
