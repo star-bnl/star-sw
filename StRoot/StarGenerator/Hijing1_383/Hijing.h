@@ -19,6 +19,9 @@ void Hijing( string frame, float bmin, float bmax );
 /// Lookup particle mass given jetset code
 float Ulmass( int jetsetid );
 
+/// Access compressed particle code from jetset particle code
+int Lucomp( int jetsetid );
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //

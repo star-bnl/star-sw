@@ -75,14 +75,17 @@ void Hijing()
   hijing->SetBlue("Au");
   hijing->SetYell("Au");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
-  hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
-  hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
-  hijing->hiparnt().hipr1(10) = 2.0;  //    pT jet
-  hijing->hiparnt().ihpr2(8)  = 10;   // Max number of jets / nucleon
-  hijing->hiparnt().ihpr2(11) = 1;    // Set baryon production
-  hijing->hiparnt().ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
-  hijing->hiparnt().ihpr2(18) = 1;    // Turn on/off B production
-  hijing->hiparnt().hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+  HiParnt_t &hiparnt = hijing->hiparnt();
+  {
+    hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
+    hiparnt.ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
+    hiparnt.hipr1(10) = 2.0;  //    pT jet
+    hiparnt.ihpr2(8)  = 10;   // Max number of jets / nucleon
+    hiparnt.ihpr2(11) = 1;    // Set baryon production
+    hiparnt.ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
+    hiparnt.ihpr2(18) = 0;    // 0=charm production, 1=bottom prouction
+    hiparnt.hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+  };
 
   // For more configuration options, see the HIJING manual
   // http://ntc0.lbl.gov/~xnwang/hijing/doc.html

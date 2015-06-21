@@ -10,6 +10,18 @@ ClassImp(StarPythia6);
 #include <map>
 #include <iostream>
 
+#include "TGenericTable.h"
+
+StMaker *_maker = 0;
+
+TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
+{
+  TGenericTable *table = new TGenericTable(type,name);
+  table->Adopt( 1, address );
+  _maker -> AddData( table, ".const" );
+  return table;
+};
+
 // ----------------------------------------------------------------------------
 // Remap pythia's random number generator to StarRandom
 extern "C" {
@@ -36,6 +48,13 @@ StarPythia6::StarPythia6( const Char_t *name ) : StarGenerator(name)
       mStatusCode[docum[i]]=StarGenParticle::kDocumentation;
     }
 
+  _maker = this;
+
+  regtable("PyJets_t", "pyjets", address_of_pyjets() );
+  regtable("PySubs_t", "pysubs", address_of_pysubs() );
+  regtable("PyDat3_t", "pydat3", address_of_pydat3() );
+  regtable("PyPars_t", "pypars", address_of_pypars() );
+  regtable("PyInt5_t", "pyint5", address_of_pyint5() );
 
 }
 // ----------------------------------------------------------------------------

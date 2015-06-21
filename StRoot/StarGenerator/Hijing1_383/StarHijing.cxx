@@ -13,7 +13,17 @@ ClassImp(StarHijing);
 #include <iostream>
 using namespace std;
 
+#include "TGenericTable.h"
 
+StMaker *_maker = 0;
+
+TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
+{
+  TGenericTable *table = new TGenericTable(type,name);
+  table->Adopt( 1, address );
+  _maker -> AddData( table, ".const" );
+  return table;
+};
 
 // ----------------------------------------------------------------------------
 // Remap hijing's random number generator to StarRandom
@@ -27,6 +37,14 @@ Double_t rndm(){ return StarRandom::Instance().flat(); }
 // ----------------------------------------------------------------------------
 StarHijing::StarHijing( const Char_t *name ) : StarGenerator(name)
 {
+
+  _maker = this;
+
+  // Register configuration commons
+  regtable("HiParnt_t", "hiparnt", (void *)address_of_hiparnt() );
+  regtable("HiMain1_t", "himain1", (void *)address_of_himain1() );
+  //regtable("HiMain2_t", "himain2", (void *)address_of_himain2() ); // Probably too big to be useful
+  regtable("Ludat3_t",  "ludat3",  (void *)address_of_hiparnt() );
 
   // Setup a map between HIJING status codes and HepMC status codes
   // katt(i,4)... all other codes should map to kUnknown
@@ -71,6 +89,10 @@ Int_t StarHijing::pdgid( const Int_t &jetid )
 
 
 
+Int_t StarHijing::LuComp( Int_t jetsetid )
+{
+  return Lucomp( jetsetid );
+};
 
 
 Int_t StarHijing::Init()
@@ -91,8 +113,27 @@ Int_t StarHijing::Init()
    *
    **/ 
 
-  //  ludat3().mdcy(102,1)=0; // PI0 111
-  //  ludat3().mdcy(109,1)=0; // ETA 221
+  Int_t pdgCodes[] = { 
+#if 0
+    111, // pi0
+    221, // eta
+#endif
+    3122,// Lambda0
+    3212,// Sigma0
+    3112,// Sigma-
+    3222,// Sigma+
+    3312,// Xi-
+    3322,// Xi0
+    3334 // Omega-
+  };
+  for ( UInt_t ii=0;ii<sizeof(pdgCodes);ii++) 
+    {
+      ludat3().mdcy( Lucomp( pdgCodes[ii] ), 1 ) = 0;
+    }
+
+  /*
+  ludat3().mdcy(102,1)=0; // PI0 111
+  ludat3().mdcy(109,1)=0; // ETA 221
   ludat3().mdcy(164,1)=0; // LAMBDA0 3122
   ludat3().mdcy(167,1)=0; // SIGMA0 3212
   ludat3().mdcy(162,1)=0; // SIGMA- 3112
@@ -100,7 +141,7 @@ Int_t StarHijing::Init()
   ludat3().mdcy(172,1)=0; // Xi- 3312
   ludat3().mdcy(174,1)=0; // Xi0 3322
   ludat3().mdcy(176,1)=0; // OMEGA- 3334
-
+  */
   // Double check indexing here
   /*
   ludat3().mdcy(106,1)=0; // PI+ 211   (not decayed anyhow)
@@ -120,7 +161,7 @@ Int_t StarHijing::Init()
 
   ////////////////////////////////////
   // Initialize the hijing
-  ////////////////////////////////////
+  ///////////////////////////////////
   
   // Map typical species run at RHIC
   map<TString,Int_t> A, Z;  map<TString,string> type;
@@ -139,7 +180,7 @@ Int_t StarHijing::Init()
   A["neutron"]  =1;    Z["neutron"]  =0;   type["neutron"]  ="N       ";
   A["deuteron"] =2;    Z["deuteron"] =1;   type["deuteron"] ="A       ";
 
-  hiparnt().ihpr2(12) = 1;
+  hiparnt().ihpr2(12) = 0; // 0=particle decays on 1=off
 
   string frame = mFrame.Data();
   if(frame =="FIXT") frame="LAB";
@@ -181,10 +222,8 @@ Int_t StarHijing::Init()
   //
   // Keep all information for all particles, even those which decay
   //
-  //$$$  hiparnt().ihpr2(21)=1;
-
+  hiparnt().ihpr2(21)=1;
   hiparnt().ihpr2(10)=1; // show error msgs
-
 
   return StMaker::Init();
 
@@ -232,6 +271,8 @@ Int_t StarHijing::Generate()
   // Loop over all particles in the event
   //
   mNumberOfParticles = himain1().natt;
+  StarGenParticle *particles[ mNumberOfParticles ]; // temporary list of particles
+  StarGenParticle *current = 0;
   for ( Int_t idx=1; idx<=mNumberOfParticles; idx++ )
     {
 
@@ -256,7 +297,16 @@ Int_t StarHijing::Generate()
       Double_t vz = himain2().vatt(idx, 3);
       Double_t vt = himain2().vatt(idx, 4);
 
-      mEvent -> AddParticle( stat, id, m1, m2, d1, d2, px, py, pz, E, M, vx, vy, vz, vt );
+      particles[idx] = mEvent -> AddParticle( stat, id, m1, m2, d1, d2, px, py, pz, E, M, vx, vy, vz, vt );
+      if ( m1 > 0 ) { // 
+	current = particles[m1]; 
+	assert(current);
+	// Set first daughter if it hasn't been set
+	if (  -1 == current->GetFirstDaughter() ) current->SetFirstDaughter(idx);
+	// Set last daughter if it's larger than the current idx
+	if ( idx  > current->GetLastDaughter()  ) current->SetLastDaughter(idx);
+      }
+	
 
       // count spectators
       Int_t code = himain2().katt(idx, 2 );

@@ -50,11 +50,11 @@ extern "C" PyJets_t *address_of_pyjets();
 //
 #define address_of_pysubs F77_NAME( address_of_pysubs, ADDRESS_OF_PYSUBS )
 struct PySubs_t {
-  Int_t    msel;
-  Int_t    padding;
-  Int_t    _msub[500];
-  Int_t    _kfin[81][2];
-  Double_t _ckin[200];
+  Int_t    msel; // Process selection switch
+  Int_t    padding; // 
+  Int_t    _msub[500]; // Individual processes (indexed from zero)
+  Int_t    _kfin[81][2]; //
+  Double_t _ckin[200]; //
   Int_t    &msub( Int_t i ){ return _msub[i-1]; }
   Int_t    &kfin( Int_t i, Int_t j ){ return _kfin[j-40][i-1]; }
   Double_t &ckin( Int_t i ){ return _ckin[i-1]; }

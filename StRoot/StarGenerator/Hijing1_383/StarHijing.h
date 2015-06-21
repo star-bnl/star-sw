@@ -65,6 +65,10 @@ class StarHijing : public StarGenerator
   /// Returns a reference to the ludat3 (pydat3) common block
   Ludat3_t &ludat3(){ return *address_of_ludat3(); }
 
+  /// Returns the compressed particle code (used in mdcy, mdme,... )
+  /// from the jetset id of the particle
+  Int_t LuComp( Int_t jetsetid );
+
  private:
  protected:
   ClassDef(StarHijing,1);

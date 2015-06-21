@@ -18,6 +18,7 @@ void geometry( TString tag, Bool_t agml=true )
   TString cmd = "DETP GEOM "; cmd += tag;
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
   geant_maker -> LoadGeometry(cmd);
+  
   //  if ( agml ) command("gexec $STAR_LIB/libxgeometry.so");
 }
 // ----------------------------------------------------------------------------
@@ -32,6 +33,7 @@ void trig( Int_t n=0 )
   for ( Int_t i=0; i<n+1; i++ ) {
     chain->Clear();
     chain->Make();
+    primary -> event() -> Print();
   }
 }
 // ----------------------------------------------------------------------------
@@ -45,14 +47,19 @@ void Hijing()
   hijing->SetBlue("Au");
   hijing->SetYell("Au");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
-  hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
-  hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
-  hijing->hiparnt().hipr1(10) = 2.0;  //    pT jet
-  hijing->hiparnt().ihpr2(8)  = 10;   // Max number of jets / nucleon
-  hijing->hiparnt().ihpr2(11) = 1;    // Set baryon production
-  hijing->hiparnt().ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
-  hijing->hiparnt().ihpr2(18) = 1;    // Turn on/off B production
-  hijing->hiparnt().hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+
+  // Configure HIJING simulation
+  HiParnt_t &hiparnt = hijing->hiparnt();
+  {
+    hiparnt.ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
+    hiparnt.ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
+    hiparnt.hipr1(10) = 2.0;  //    pT jet
+    hiparnt.ihpr2(8)  = 10;   // Max number of jets / nucleon
+    hiparnt.ihpr2(11) = 1;    // Set baryon production
+    hiparnt.ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
+    hiparnt.ihpr2(18) = 0;    // 1=B quark production.  0=C quark production.
+    hiparnt.hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+  }
 
   // For more configuration options, see the HIJING manual
   // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
@@ -64,7 +71,7 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
+void starsim( Int_t nevents=10,Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");

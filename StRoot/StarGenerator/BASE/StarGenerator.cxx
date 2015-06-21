@@ -37,6 +37,7 @@ StarGenerator::StarGenerator( const Char_t *name )//, StarGenEvent *event )
 {
 
   //  mEvent = (event)? event : new StarGenEvent("default");
+  mEvent = new StarGenEvent("default");
   for ( Int_t i=0;i<4;i++ ) { mBlueMomentum[i]=0;
                               mYellMomentum[i]=0; }
 

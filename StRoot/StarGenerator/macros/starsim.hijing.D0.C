@@ -64,14 +64,20 @@ void Hijing()
   hijing->SetBlue("Au");
   hijing->SetYell("Au");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
-  hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
-  hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
-  hijing->hiparnt().hipr1(10) = 2.0;  //    pT jet
-  hijing->hiparnt().ihpr2(8)  = 10;   // Max number of jets / nucleon
-  hijing->hiparnt().ihpr2(11) = 1;    // Set baryon production
-  hijing->hiparnt().ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
-  hijing->hiparnt().ihpr2(18) = 1;    // Turn on/off B production
-  hijing->hiparnt().hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+  HiParnt_t &hiparnt = hijing->hiparnt();
+  {
+    hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
+    hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
+    hijing->hiparnt().hipr1(10) = 2.0;  //    pT jet
+    hijing->hiparnt().ihpr2(8)  = 10;   // Max number of jets / nucleon
+    hijing->hiparnt().ihpr2(11) = 1;    // Set baryon production
+    hijing->hiparnt().ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
+    hijing->hiparnt().ihpr2(18) = 0;    // 0=Charm, 1=Bottom production
+    hijing->hiparnt().hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
+  };
+    
+
+  hijing->hiparnt().ihpr2(50) = 12345; // unused entry
 
   // For more configuration options, see the HIJING manual
   // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
@@ -142,6 +148,9 @@ void starsim( Int_t nevents=1, Int_t rngSeed=4321 )
   // Initialize primary event generator and all sub makers
   //
   _primary -> Init();
+
+
+  return;
 
   //
   // Setup geometry and set starsim to use agusread for input

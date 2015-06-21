@@ -3,6 +3,7 @@
 #define hijing F77_NAME(hijing, HIJING)
 #define hijset F77_NAME(hijset, HIJSET)
 #define ulmass F77_NAME(ulmass, ULMASS)
+#define lucomp F77_NAME(lucomp, LUCOMP)
 
 
 extern "C" {
@@ -20,6 +21,7 @@ extern "C" {
 	       int    syell );  // number of characters in "yell"   
 
   float ulmass( int &code );
+  int   lucomp( int &code );
 
 };
 
@@ -43,3 +45,8 @@ float Ulmass( int code )
 {
   return ulmass(code);
 }
+
+int Lucomp( int code )
+{
+  return lucomp(code);
+};
