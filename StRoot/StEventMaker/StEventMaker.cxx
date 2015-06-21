@@ -458,6 +458,7 @@ StEventMaker::makeEvent()
 		}
 	      }
 	      StTpcDb::instance()->SetTriggerId(TriggerId);
+	      if (! TriggerId && IAttr("laserIT")) return kStSkip;
 	    }
 
             // Allow trigger filtering to skip events

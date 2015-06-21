@@ -191,7 +191,6 @@
  *
  **************************************************************************/
 
-//#define StTpc_STATIC_ARRAYS
 #include <assert.h>
 #include "StTpcDbMaker.h"
 #include "StTpcDb.h"
@@ -214,28 +213,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   // Create Needed Tables:    
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
-#if 0
-  if (gFactor<-0.8) {
-    gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
-  }
-  else if (gFactor<-0.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
-  }
-  else if (gFactor<0.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
-  }
-  else if (gFactor<0.8) {
-    gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
-  }
-  else if (gFactor<1.2) {
-    gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-    SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
-  }
-#endif
   if         (IAttr("useLDV")) {
     SetFlavor("laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
@@ -291,42 +268,6 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
-#ifdef StTpc_STATIC_ARRAYS
-  //Here I fill in the arrays for the row parameterization ax+by=1
-  if (StTpcDb::instance()->GlobalPosition()) {
-    for (int i=0;i<24;i++){
-      for (int j=0;j<45;j++){
-	int time[1] = {10}; 
-	int ipad[2] = {20,40};
-	StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
-	StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-	StGlobalCoordinate gc1,gc2;
-	StTpcCoordinateTransform transform(gStTpcDb);
-	transform(pad1,gc1);
-	transform(pad2,gc2);
-	double x1,y1,x2,y2;
-	double m,bb; // y = mx + bb
-	x1 = gc1.position().x();
-	y1 = gc1.position().y();
-	x2 = gc2.position().x();
-	y2 = gc2.position().y();
-	if (fabs(x2-x1)<0.000001) {
-	  aline[i][j] = 1/x1;
-	  bline[i][j] = 0.;
-	  continue;
-	}
-	m = (y2 - y1)/(x2 - x1);
-	bb = y1 - m*x1;
-	if (bb == 0) {
-	  gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
-	  continue;
-	}
-	aline[i][j] = (float) -m/bb;
-	bline[i][j] = (float) 1.0/bb;
-      }
-    }
-  }
-#endif /* StTpc_STATIC_ARRAYS */
   return 0;
 }
 //_____________________________________________________________________________
@@ -337,10 +278,9 @@ Int_t StTpcDbMaker::Make(){
     return kStEOF;
   }
   StTpcDb::instance()->SetDriftVelocity();
-  St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
+#if 0
   if (IAttr("laserIT")) {
-    St_trgTimeOffsetC::instance()->SetLaser(kTRUE);
-  } else {
+    St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
     StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
     if (pEvent) {
       const StTriggerIdCollection* trig = pEvent->triggerIdCollection();
@@ -360,7 +300,9 @@ Int_t StTpcDbMaker::Make(){
 	}
       }
     }
+    if (! St_trgTimeOffsetC::instance()->IsLaser()) return kStSkip;
   }
+#endif
   //  SetTpcRotations();
   return kStOK;
 }

@@ -200,9 +200,10 @@ class StTpcDb {
   St_tpcPadGainT0BC     *tpcGain() {return St_tpcPadGainT0BC::instance();}
   St_tpcPadGainT0BC     *tpcT0()   {return St_tpcPadGainT0BC::instance();}
   St_tpcPadResponseC    *PadResponse() {return St_tpcPadResponseC::instance();}
-  Float_t                triggerTimeOffset()     {return St_trgTimeOffsetC::instance()->triggerTimeOffset();}
-  Float_t                triggerTimeOffsetWest() {return St_trgTimeOffsetC::instance()->triggerTimeOffsetWest();}
-  static Bool_t          IsOldScheme()    {return mOldScheme;}
+  Float_t                triggerTimeOffset()     {return 1e-6*(IsLaser() ? St_trgTimeOffsetC::instance()->laserOffset() : St_trgTimeOffsetC::instance()->offset());} // usec
+  Float_t                triggerTimeOffsetWest() {return 1e-6*(IsLaser() ? St_trgTimeOffsetC::instance()->laserOffsetW():         0);} // usec
+  Bool_t                 IsLaser()               {return mTriggerId != 0;}
+  static Bool_t          IsOldScheme()           {return mOldScheme;}
 #if 0
   Float_t                ScaleY();
 #endif
@@ -224,7 +225,7 @@ class StTpcDb {
   }
   void  SetDebug(Int_t m) {m_Debug = m;}
   Int_t Debug() {return m_Debug;}
-  void  SetTriggerId(Int_t m) {mTriggerId = m;}
+  void  SetTriggerId(Int_t m) {mTriggerId = m;} // Laser Trigger
   Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &TpcHalf(StBeamDirection part)    const {return *mHalf[part];}
