@@ -1043,7 +1043,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // December 04: The second element of the array will now hold the incremental chi2 of adding
   // the vertex for primary tracks
   if (gTrack->type()==primary) {
-    assert(node->getDetector()==0);
+    //yf 06/13/15 ?    assert(node->getDetector()==0);
     chi2[1]=node->getChi2();
 StiDebug::Count("Xi2Prim.node",chi2[1]);
 
