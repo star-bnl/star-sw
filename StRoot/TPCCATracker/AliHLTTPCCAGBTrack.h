@@ -13,7 +13,7 @@
 
 #include "AliHLTTPCCADef.h"
 #include "AliHLTTPCCATrackParam.h"
-
+#if 0
 namespace std
 {
   template<typename T> struct char_traits;
@@ -22,7 +22,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-
+#endif
 /**
  * @class AliHLTTPCCAGBTrack
  *
