@@ -783,6 +783,7 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
     if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
+    if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
       TString FiltTrgFlavor = fFiltTrg(1,128);
