@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.286 2015/05/19 19:29:20 jwebb Exp $
+* $Id: geometry.g,v 1.288 2015/06/19 13:48:25 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.288  2015/06/19 13:48:25  jwebb
+* Added HCAL test configuration (hctest)
+*
+* Revision 1.287  2015/06/08 18:10:38  jwebb
+* Enable secondary tracking (hit association) for pixel (and FGT) -- AgSFlag('SIMU',2).
+*
 * Revision 1.286  2015/05/19 19:29:20  jwebb
 * Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
 *
@@ -1285,6 +1291,7 @@ replace [exe FPDM04;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 4
 replace [exe HCALof;] with [; "HCAL off"; HCAL=off; HcalConfig=0; ]
 replace [exe HCALv0;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; ]
 replace [exe HCALv1;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; ]
+replace [exe HCALvF;] with [; "HCAL on "; HCAL=on;  HcalConfig=15;]
 
 *                                                                                          Forward TPC 
 
@@ -2721,6 +2728,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
               PXST,PSUP,HCAL
 
+
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
               on/.true./,off/.false./
@@ -3495,6 +3503,21 @@ If LL>0
   Case eStar2  { eStar2 : eStar development geometry;     Geom = 'eStar2  ';  exe eStar2; }
 
 
+  Case hctest  {
+
+  "Switch off all detectors" 
+  {PIPE,SVTT,SISD,TPCE,FTPC,BTOF,VPDD,MAGP,CALB,ECAL,UPST,
+   RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
+   SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON,IDSM,FSCE,EIDD,ISTD, 
+   PXST,PSUP,HCAL}=off;
+
+   MFLD = on;
+   exe CAVE04
+   exe HCALvF
+
+
+
+  }
 ****************************************************************************************
 ****************************************************************************************
 ****************************************************************************************
@@ -5147,8 +5170,9 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
    }
 
    IF (HCAL)   {
-      IF HcalConfig==0 { CONSTRUCT HcalGeo; }
-      IF HcalConfig==1 { CONSTRUCT HcalGeo1; }
+      IF HcalConfig==0  { CONSTRUCT HcalGeo; }
+      IF HcalConfig==1  { CONSTRUCT HcalGeo1; }
+      IF HcalConfig==15 { CONSTRUCT HcalGeoF; }
    }
 
 
@@ -5207,14 +5231,15 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF IstdConfig==2 { CONSTRUCT istdgeo1; }
    }
 
-  Call AgSFlag('SIMU',1) ! Return to association of 2ndary hits on primary tracks 
 
    IF  PXST {
      IF PxstConfig==0 { CONSTRUCT pxstgeo1; }
    }
 
 
-   IF MUTD {
+  Call AgSFlag('SIMU',1) ! Return to association of 2ndary hits on primary tracks 
+
+   IF MUTD { 
      Call AgDetp NEW ('MUTD')
      IF MutdConfig=1 { CONSTRUCT mutdgeo; }
      IF MutdConfig=2 { CONSTRUCT mutdgeo2;}
@@ -5230,6 +5255,8 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      }
 
    }
+
+   Call AgSFlag('SIMU',2) ! Save hits from all secondaries in SSD, PXL, IST 
 
    IF PIXL {
      IF PixlConfig==-1 { CONSTRUCT pixlgeo00; }
@@ -5311,6 +5338,7 @@ IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
 
    ENDIF
 
+   Call AgSFlag('SIMU',1) ! Return to association of 2ndary hits on primary tracks 
 
    """The Foward Spaghetti Calorimeter"""    
    IF FSCE {  CONSTRUCT fscegeo;  }
