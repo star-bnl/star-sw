@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.7 2014/03/11 19:56:49 perev Exp $
+// $Id: StTGeoProxy.h,v 1.8 2015/06/10 22:03:13 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -306,7 +306,7 @@ StHitPlane    * GetCurrentHitPlane ();
   StHitPlaneInfo *MakeHitPlaneInfo(const StTGeoIter &iter);
         void  AddHitPlane(StHitPlane *pla);
 
-const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed);
+const StHitPlane *AddHit(void *hit,StDetectorId detId, const float xyz[3],unsigned int hardw,int seed);
       StHitPlane *FindHitPlane(const float xyz[3],int &sure);
 
 
@@ -324,6 +324,7 @@ char fBeg[1];
 int fMode;     //0=fill infos + hitShape, 1= hit planes
 int fOpt;      //0=Optimisation Off, !=0= Optimization ON
 int fGoodHit;  //1=last loaded hit inside of sensitive volume
+StDetectorId    fDetId;
 Long64_t	fActiveModu;
 StVoluInfoMap  *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
