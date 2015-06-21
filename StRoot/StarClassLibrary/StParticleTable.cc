@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.22 2014/06/25 14:19:24 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.24 2015/06/08 16:24:34 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.24  2015/06/08 16:24:34  jwebb
+ * Correct mapping between G3 id and pdg id.  The G3 is the key and must be unique.  THe pdg id is the value, and can repeat.
+ *
+ * Revision 1.23  2015/06/05 14:01:34  jwebb
+ * JPsi (id=168, dimuon channel) added to particle table
+ *
  * Revision 1.22  2014/06/25 14:19:24  jwebb
  * Added psi prime --> e+e-
  *
@@ -274,6 +280,8 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 164,    553, Upsilon1S); // Upsilon(1S) -- mu+ mu- channel w/ incorrect partial width
        Geant2Pdg( 165, 100553, Upsilon2S); // Upsilon(2S) -- mu+ mu- channel w/ incorrect partial width
        Geant2Pdg( 166, 200553, Upsilon3S); // Uspilon(3S) -- mu+ mu- channel w/ incorrect partial width
+
+       Geant2Pdg( 168,    443, JPsi); // JPsi -- mu+ mu- channel w/ incorrect partial widths
     ///@}
 
     ///@addtogroup NONSTANDARD_DECAY_MODES
