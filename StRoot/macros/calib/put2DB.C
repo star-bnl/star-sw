@@ -205,7 +205,7 @@ void put2DB(const char* file=
     mgr->setStoreTime(DT);
     status = mgr->storeDbTable(dbTable);
     if(!status) {
-      cout<<" ------> error storing in DB --> try to change TimeStamp by 1 sec"<<endl;
+      if (i+1 < maxIter)  cout<<" ------> error storing in DB --> try to change TimeStamp by 1 sec"<<endl;
     } else {break;}
   }
   if (status) cout << " ------> Done" << endl;
