@@ -654,7 +654,7 @@ StDbTable::createMemory(int nrows) {
       char * ptr;
       for(int i=0; i<max;i++){
         getElementSpecs(i,ptr,name,length,type);
-        if(type==Stchar)ptr=0;
+        if(type==Stchar)ptr='\0';
         delete [] name;
       }
      }
