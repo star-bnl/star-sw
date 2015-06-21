@@ -1390,6 +1390,7 @@ Bool_t Geometry::HcalInit()
   hcalGeom.select="HCALof"; hcalGeom.config=0; hcalGeom.module="NONE";     hcalGeom.fill();
   hcalGeom.select="HCALv0"; hcalGeom.config=0; hcalGeom.module="HcalGeo";  hcalGeom.fill();
   hcalGeom.select="HCALv1"; hcalGeom.config=1; hcalGeom.module="HcalGeo1"; hcalGeom.fill();
+  hcalGeom.select="HCALvF"; hcalGeom.config=1; hcalGeom.module="HcalGeoF"; hcalGeom.fill(); // FermiTBF
   return true;
 }
 // ----------------------------------------------------------------------------

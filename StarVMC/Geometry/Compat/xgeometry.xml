@@ -1,22 +1,30 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
-
 <Export language="Mortran">
-<Import file="pams/geometry/geometry/geometry.g" verbatim="true" /></Export>
-
+<Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
+</Export>
+                   
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
     call geometry
 </Export>
-
 </Module>
-
-      
+  
+        
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.46 2015/05/19 19:29:20 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.49 2015/06/19 13:48:25 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.49  2015/06/19 13:48:25  jwebb
+  Added HCAL test configuration (hctest)
+
+  Revision 1.48  2015/06/09 14:15:09  jwebb
+  Note to self.  Do not place a double dash into CVS comment log when checking in XML files.
+
+  Revision 1.47  2015/06/08 18:10:38  jwebb
+  Enable secondary tracking (hit association) for pixel (and FGT) :: AgSFlag('SIMU',2).
+
   Revision 1.46  2015/05/19 19:29:20  jwebb
   Associate hits on 2ndary tracks to the track, not the primary track which initiates decay/shower.  https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3092
 
