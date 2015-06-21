@@ -36,6 +36,8 @@ class KFParticleDatabase
       case 1000010030: pdgIndex = 6; break;
       case 1000020030: pdgIndex = 7; break;
       case 1000020040: pdgIndex = 8; break;
+      case       3112: pdgIndex = 9; break;
+      case       3222: pdgIndex = 10; break;
       default:   pdgIndex = 2; break;
     }
     
@@ -54,7 +56,8 @@ class KFParticleDatabase
     pdgIndex(Vc::abs(pdg) == 1000010030) = 6;
     pdgIndex(Vc::abs(pdg) == 1000020030) = 7;
     pdgIndex(Vc::abs(pdg) == 1000020040) = 8;
-
+    pdgIndex(Vc::abs(pdg) ==       3112) = 9;
+    pdgIndex(Vc::abs(pdg) ==       3222) = 10;
     Vc::float_v mass(fMass, pdgIndex);
     return mass;
   }
@@ -96,7 +99,7 @@ class KFParticleDatabase
   static const KFParticleDatabase* Instance() { return fDatabase; }
 
  private:
-  float fMass[9];
+  float fMass[11];
 
   float fMassSecPDG[4];
   float fMassSecPDGSigma[4];

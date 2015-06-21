@@ -147,7 +147,7 @@ class KFPInputData
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
     fCluster = data.fCluster;
-    fBz = fBz;
+    fBz = data.fBz;
     
     return *this;
   }
@@ -157,7 +157,7 @@ class KFPInputData
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
     fCluster = data.fCluster;
-    fBz = fBz;
+    fBz = data.fBz;
   }
   
  protected:
