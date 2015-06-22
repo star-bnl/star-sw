@@ -126,7 +126,7 @@
       <var name="version" value="1.0"       comment="face center of calorimeter"/>
       <var name="x"       value="0.0"     comment="x cdt from center of TPC"/>
       <var name="y"       value="0.0"       comment="y cdt from center of TPC"/>
-      <var name="z"       value="0.0"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 748.9 + (117/2) + Les's correction(-30)  -->
+      <var name="z"       value="750.0"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 748.9 + (117/2) + Les's correction(-30)  -->
       <var name="dx"      value="30/2."     comment="HCMO width"/>
       <var name="dy"      value="(30)/2." comment="HCMO height + shild hight"/>
       <var name="dz"      value="117/2."    comment="HCMO length"/>
@@ -190,7 +190,7 @@
     <Fill name="trap" comment=" Beam Content">
       <var name="version"  value="1.0"        comment="pixels dimention"/>
 
-      <var name="xF"       value="8.35"      comment="x cdt from center of TPC"/>
+      <var name="xF"       value="-8.35"      comment="x cdt from center of TPC"/>
       <var name="yF"       value="0.0"        comment="y cdt from center of TPC"/>
       <var name="zF"       value="-86.5"        comment="z cdt from center of TPC"/>  
 
@@ -223,7 +223,7 @@
       <Material  name="Air"      /> 
       <Medium    name="Standard" />
 
-      <Attribute seen="0" colo="2" />
+      <Attribute for="HCMO" seen="0" colo="2" />
 
       <Shape type="Box" dx="mcdt_dx" dy="mcdt_dy" dz="mcdt_dz" />
 
@@ -238,7 +238,7 @@
     <Placement block="LEDG" x="lgla_x" y="lgla_y" z="lgla_z"/> 
 
     <Create block="BBCF" />
-    <Placement block="BBCF" x="trap_xF" y="trap_yF" z="trap_zF"><Rotation alphax="-90"/> <Rotation alphaz="90"/></Placement> 
+    <Placement block="BBCF" x="trap_xF" y="trap_yF" z="trap_zF"><Rotation alphax="-90"/> <Rotation alphaz="-90"/></Placement> 
 
     <Create block="BBCB" />
     <Placement block="BBCB" x="trap_xB" y="trap_yB" z="trap_zB"><Rotation alphax="-90"/></Placement> 
@@ -252,7 +252,7 @@
     <Volume name="HTWR" comment="Towrs  of Calorimeter">
       <Material name="Lead"  />
       <Medium name="standard"  />
-      <Attribute seen="0" colo="4" />
+      <Attribute for="HTWR" seen="0" colo="4" />
       <Shape type="Box" dx="towr_dx" dy="towr_dy" dz="towr_dz" />
 
       xtemp=fibr_startX1;
@@ -288,7 +288,7 @@
     <Volume name="HCES" comment="3*3 cell in tower, HCES has 15*15 fibers">
       <Material name="Lead"            /> <!-- copy parameters -->
       <Material name="Lead"  isvol="1" /> <!-- save copy with new name and declare active -->
-      <Attribute seen="1" colo="4" />
+      <Attribute for="HCES" seen="1" colo="4" />
       <Shape     type="Box" dx="cell_dx" dy="cell_dy" dz="cell_dz" />
 
       <Create    block="HCSX" />
@@ -304,7 +304,7 @@
     <Volume name="HCEL" comment="3*3 cell in tower, HCES has 16*16 fibers">
       <Material name="Lead"            /> <!-- copy paramters -->
       <Material name="Lead"  isvol="1" /> <!-- save copy with new name and declare active -->
-      <Attribute seen="1" colo="4" />
+      <Attribute for="HCEL" seen="1" colo="4" />
       <Shape type="Box" dx="cell_dx" dy="cell_dy" dz="cell_dz" />
 
       <Create    block="HCLX" />
@@ -321,7 +321,7 @@
 
     <Volume name="HCSX" comment="3*3 cell in tower x divisions">
       <Material name="Lead"  isvol="0" />
-      <Attribute seen="0" colo="4" />
+      <Attribute for="HCSX" seen="0" colo="4" />
       <Shape type= "Division" iaxis = "1" ndiv  = "cell_nFiberXS" />
       <Create block="HCSY" />
     </Volume>
@@ -329,7 +329,7 @@
 
     <Volume name="HCSY" comment="3*3 cell in tower y divisions">
       <Material name="Lead"  isvol="0" />
-      <Attribute seen="0" colo="4" />
+      <Attribute for="HCSY" seen="0" colo="4" />
       <Shape type  = "Division" iaxis = "2" ndiv  = "cell_nFiberYS" />
       <Create block="HFIB" />  
       <Placement block="HFIB" x="0" y="0" z="0.0" />
@@ -338,7 +338,7 @@
 
     <Volume name="HCLX" comment="3*3 cell in tower x divisions">
       <Material name="Lead"  isvol="0" />
-      <Attribute seen="0" colo="4" />
+      <Attribute for="HCLX" seen="0" colo="4" />
       <Shape type  = "Division" iaxis = "1" ndiv  = "cell_nFiberXL" />
       <Create block="HCLY" />
     </Volume>
@@ -346,7 +346,7 @@
 
     <Volume name="HCLY" comment="3*3 cell in tower y divisions">
       <Material name="Lead"  isvol="0" />
-      <Attribute seen="0" colo="4" />
+      <Attribute for="HCLY" seen="1" colo="4" />
       <Shape type  = "Division" iaxis = "2" ndiv  = "cell_nFiberYL" />
       <Create block="HFIC" />  
       <Placement block="HFIC" x="0" y="0" z="0.0" />
@@ -356,7 +356,7 @@
       <Material name="Polystyren"  />
       <Material name="SensPoly"  isvol="1" />
       <Medium name="standard"  />
-      <Attribute seen="1" colo="7" />
+      <Attribute for="HFIB" seen="0" colo="7" />
       <Shape type="TUBE" rmin="fibr_rmin" rmax="fibr_rmax" dz="fibr_dz" />
 
       <!--
@@ -374,7 +374,7 @@
       <Material name="Polystyren"  />
       <Material name="SensPoly"  isvol="1" />
       <Medium name="standard"  />
-      <Attribute seen="0" colo="7" />
+      <Attribute for="HFIC" seen="0" colo="7" />
       <Shape type="TUBE" rmin="fibr_rmin" rmax="fibr_rmax" dz="fibr_dz" />
 
       <!-- Attach hits to volume HCES.  Hits are cumulative -->
@@ -397,9 +397,10 @@
 	<Component name="O" a="15.999" z="8" w=".29330"  />
 	<Component name="Na" a="22.990" z="11" w=".03710"  />
       </Mixture>
+      <Material name="F2" isvol="1" />
 
       <Medium name="leadglass" isvol="1"  />
-      <Attribute seen="1" colo="4"  />
+      <Attribute for="LEDG" seen="1" colo="4"  />
       <Shape type="BOX" dz="lgla_dz" dx="lgla_dx" dy="lgla_dy"  />
 
       <Instrument block="LEDG">
@@ -411,7 +412,8 @@
 
     <Volume name="BBCF" comment="Beam Counter front"  >
       <Material name="Polystyren"  />
-      <Attribute seen="1" colo="4"/>
+      <Material name="Polystyren" isvol="1" />
+      <Attribute for="BBCF" seen="1" colo="4"/>
       <Shape type="TRD1" dx1="trap_dx1" dx2="trap_dx2" dy="trap_dy" dz="trap_dz" />
       <Instrument block="BBCF">
 	<Hit meas="birk" nbits="0" opts="C" min="0" max="250" />
@@ -421,7 +423,8 @@
 
     <Volume name="BBCB" comment="Beam Counter front"  >
       <Material name="Polystyren"  />
-      <Attribute seen="1" colo="4"/>
+      <Material name="Polystyren" isvol="1" />
+      <Attribute for="BBCB" seen="1" colo="4"/>
       <Shape type="TRD1" dx1="trap_dx1" dx2="trap_dx2" dy="trap_dy" dz="trap_dz" />
       <Instrument block="BBCB">
 	<Hit meas="birk" nbits="0" opts="C" min="0" max="250" />
