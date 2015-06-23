@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.43 2012/12/12 21:59:19 fisyak Exp $
+ * $Id: StDbTable.cc,v 1.44 2015/06/23 20:21:12 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.44  2015/06/23 20:21:12  dmitry
+ * char type: null-terminator assignment fixed
+ *
  * Revision 1.43  2012/12/12 21:59:19  fisyak
  * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
  *
@@ -183,6 +186,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.44  2015/06/23 20:21:12  dmitry
+ * char type: null-terminator assignment fixed
+ *
  * Revision 1.43  2012/12/12 21:59:19  fisyak
  * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
  *
@@ -654,7 +660,7 @@ StDbTable::createMemory(int nrows) {
       char * ptr;
       for(int i=0; i<max;i++){
         getElementSpecs(i,ptr,name,length,type);
-        if(type==Stchar)ptr='\0';
+        if (type==Stchar) { *ptr='\0'; }
         delete [] name;
       }
      }
