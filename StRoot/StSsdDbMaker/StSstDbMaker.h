@@ -4,43 +4,47 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class St_ssdDimensions;
-class St_ssdWafersPosition;
-class St_slsCtrl;
-class slsCtrl_st;
-class ssdConfiguration_st;
-#include "StSsdUtil/StSsdBarrel.hh"
+class St_sstWafersPosition;
+class sstSlsCtrl_st;
+class sstConfiguration_st;
+class sstMaskChip_st;
+#include "StSstUtil/StSstBarrel.hh"
 #include "THashList.h"
 
 class StSstDbMaker : public StMaker
 {
 private:
-   StSsdBarrel           *mySsd;
-   St_ssdDimensions      *m_dimensions;//!
-   St_ssdWafersPosition  *m_positions;//!
-   ssdConfiguration_st   *m_config;//!
-   slsCtrl_st            *m_ctrl;//!
-   Int_t                   mode;//!
+   StSstBarrel           *mySst;
+   St_sstDimensions      *m_dimensions;//!
+   sstConfiguration_st   *config;//!
+   sstSlsCtrl_st         *ctrl;//!
+   Int_t                  mode;//!
    EReturnCodes           mReady; ///< Status code returned by Make(). It is !kStOk if failed to access DB tables
-   static THashList *fRotList;
+   static THashList      *fRotList;
+   map<unsigned int,short> mMapMaskChips; //!
 
 public:
    StSstDbMaker(const char *name = "SstDb");
-   virtual       ~StSstDbMaker();
+   virtual     ~StSstDbMaker();
    virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
-   virtual THashList *GetRotations() {return fRotList;}
-   virtual St_ssdWafersPosition *CalculateWafersPosition();
-   virtual StSsdBarrel  *GetSsd() {return mySsd;}
-   virtual slsCtrl_st   *GetSlsCtrl() {return m_ctrl;}
-   virtual Int_t        GetMode() {return mode;}
-   virtual St_ssdWafersPosition *GetssdWafersPos() {return m_positions;}
-   virtual St_ssdDimensions     *GetssdDimensions() {return m_dimensions;}
+   virtual THashList            *getRotations(){return fRotList;}
+   virtual St_sstWafersPosition *calculateWafersPosition();
+   virtual StSstBarrel          *getSst(){return mySst;}
+   virtual sstSlsCtrl_st        *getSlsCtrl(){return ctrl;}
+   virtual Int_t                 getMode(){return mode;}
+   virtual St_sstWafersPosition *getSstWafersPos(){return m_positions;}
+   virtual St_sstDimensions     *getSstDimensions(){return m_dimensions;}
 
-   static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
+   static const TGeoHMatrix     *getHMatrixSensorOnGlobal(int ladder, int sensor);
+
+   Int_t maskChip(Int_t side, Int_t ladder, Int_t wafer, Int_t chip) const; 
+   void  setMaskChips(sstMaskChip_st *maskChipTable);
+
+   St_sstWafersPosition  *m_positions;//!
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.7 2015/04/23 21:06:01 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.8 2015/06/23 17:17:46 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
