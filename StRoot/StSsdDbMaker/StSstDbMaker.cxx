@@ -1,79 +1,106 @@
+//$Id: StSstDbMaker.cxx,v 1.19 2015/06/23 17:17:38 bouchet Exp $
+//
+//$Log: StSstDbMaker.cxx,v $
+//Revision 1.19  2015/06/23 17:17:38  bouchet
+//move to SST tables ; cpp-checked
+//
+//Revision 1.6  2015/06/10 13:59:15  bouchet
+//cppcheck style-issues for pointer casting ; properly renamed some methods
+//
+//Revision 1.5  2015/05/20 13:29:25  bouchet
+//mapping fixed when decoding and setting the maskChip table
+//
+//Revision 1.4  2015/05/08 14:14:34  bouchet
+//cosmetic
+//
+//Revision 1.3  2015/04/27 20:07:51  bouchet
+//ssdHotChip --> sstMaskChip (final name) ; get and set methods enabled
+//
+//Revision 1.2  2015/04/21 20:02:24  bouchet
+//CVS tags added
+//
 /***************************************************************************
  * Author: J. Bouchet (KSU)
  * Description: SST DB access Maker
  **************************************************************************/
-
 #include "StSstDbMaker.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
-#include "tables/St_ssdWafersPosition_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
-#include "tables/St_ssdDimensions_Table.h"
-#include "tables/St_slsCtrl_Table.h"
+#include "tables/St_sstWafersPosition_Table.h"
+#include "tables/St_sstConfiguration_Table.h"
+#include "tables/St_sstDimensions_Table.h"
+#include "tables/St_sstMaskChip_Table.h"
+#include "tables/St_sstSlsCtrl_Table.h"
 #include "tables/St_Survey_Table.h"
 #include "TMath.h"
 #include "TVector3.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StSsdUtil/StSstConsts.h"
+#include "StSstUtil/StSstConsts.h"
 
 StSstDbMaker *gStSstDbMaker = NULL;
 THashList *StSstDbMaker::fRotList = 0;
 
 ClassImp(StSstDbMaker)
 //_____________________________________________________________________________
-StSstDbMaker::StSstDbMaker(const char *name) :
-   StMaker(name), mySsd(0), m_dimensions(0), m_positions(0), m_config(0), m_ctrl(0), mode(0),
-   mReady(kStErr)
+  StSstDbMaker::StSstDbMaker(const char *name):
+    StMaker(name), mySst(0), m_dimensions(0), config(0), ctrl(0), mode(0),
+    mReady(kStErr)
 {
-   gStSstDbMaker = this;
+  gStSstDbMaker = this;
 }
 //_____________________________________________________________________________
-StSstDbMaker::~StSstDbMaker() {SafeDelete(mySsd); gStSstDbMaker = 0;}
-
-
+StSstDbMaker::~StSstDbMaker() {SafeDelete(mySst); gStSstDbMaker = 0;}
 //_____________________________________________________________________________
 Int_t StSstDbMaker::InitRun(Int_t runNumber)
 {
    mode = m_Mode;
-   m_ctrl = ((St_slsCtrl *) GetInputDB("Geometry/ssd/slsCtrl"))->GetTable();
-
+   
+   St_sstMaskChip *maskChipTable = (St_sstMaskChip*)GetDataBase("Calibrations/sst/sstMaskChip");
+   if (maskChipTable) {
+     LOG_INFO << "sst mask chips table found ... initialize" << endm;
+     setMaskChips(maskChipTable->GetTable());}
+   else {LOG_ERROR << " no sst masking chips table " << endm; 
+     mReady = kStFatal;
+     return kStFatal;}  
+   
+   St_sstSlsCtrl *m_ctrl = (St_sstSlsCtrl *)GetDataBase("Geometry/sst/sstSlsCtrl");
    if (!m_ctrl) {
-      LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/slsCtrl' table" << endm;
-      mReady = kStFatal;
-      return kStFatal;
+   LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/sst/sstSlsCtrl' table" << endm;
+   mReady = kStFatal;
+   return kStFatal;
    }
+   ctrl = m_ctrl->GetTable();
 
-   m_dimensions = (St_ssdDimensions *) GetInputDB("Geometry/ssd/ssdDimensions");
+   St_sstDimensions *m_dimensions = (St_sstDimensions *) GetDataBase("Geometry/sst/sstDimensions");
 
    if (!m_dimensions) {
-      LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/ssdDimensions' table" << endm;
+      LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/sst/sstDimensions' table" << endm;
       mReady = kStFatal;
       return kStFatal;
    }
 
-   m_positions = CalculateWafersPosition();
+   m_positions = calculateWafersPosition();
 
    if (!m_positions) {
       mReady = kStFatal;
       return kStFatal;
    }
 
-   St_ssdConfiguration *configTable = (St_ssdConfiguration *) GetInputDB("Geometry/ssd/ssdConfiguration");
+   St_sstConfiguration *configTable = (St_sstConfiguration *) GetDataBase("Geometry/sst/sstConfiguration");
 
    if (!configTable) {
-      LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/ssdConfiguration' table" << endm;
+      LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/sst/sstConfiguration' table" << endm;
       mReady = kStFatal;
       return kStFatal;
    }
 
-   //mConfig = new StSsdConfig();
-   m_config = (ssdConfiguration_st *) configTable->GetTable() ;
-   ssdDimensions_st *dimensions = m_dimensions->GetTable();
-   mySsd = new StSsdBarrel(dimensions, m_config);
+   config = configTable->GetTable() ;
+   sstDimensions_st *dimensions = m_dimensions->GetTable();
+   mySst = new StSstBarrel(dimensions, config);
 
-   if (Debug()) mySsd->SetDebug(Debug());
+   if (Debug()) mySst->SetDebug(Debug());
 
-   mySsd->initLadders(m_positions);
+   mySst->initLadders(m_positions);
 
    // Set the return code for Make() to kStOk since we managed to get to the end of this routine
    mReady = kStOk;
@@ -85,10 +112,8 @@ Int_t StSstDbMaker::Make()
 {
    return mReady;
 }
-
-
 //_____________________________________________________________________________
-St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
+St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
 {
    SafeDelete(fRotList);
    fRotList = new THashList(320, 0);
@@ -99,48 +124,48 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
    const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
 
    // SSD
-   St_Survey *SsdOscOnGlobal = (St_Survey *) GetDataBase("Geometry/ssd/SsdOscOnGlobal");  // OSC in IDS
+   St_Survey *sstOnOsc = (St_Survey *) GetDataBase("Geometry/sst/sstOnOsc");  // OSC in IDS
 
-   if (!SsdOscOnGlobal) {
-      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdOscOnGlobal' table" << endm;
+   if (!sstOnOsc) {
+      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstOnOsc' table" << endm;
       return 0;
    }
 
-   St_Survey *SsdLaddersOnOsc = (St_Survey *) GetDataBase("Geometry/ssd/SsdLaddersOnOsc");// ladders in the SSD sector coordinate systems
+   St_Survey *sstLadderOnSst = (St_Survey *) GetDataBase("Geometry/sst/sstLadderOnSst");// ladders in the SST sector coordinate systems
 
-   if (!SsdLaddersOnOsc) {
-      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdLaddersOnOsc' table" << endm;
+   if (!sstLadderOnSst) {
+      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstLadderOnSst' table" << endm;
       return 0;
    }
 
-   St_Survey *SsdSensorsOnLadders = (St_Survey *) GetDataBase("Geometry/ssd/SsdSensorsOnLadders");  // wafers in the SSD ladder coordinate systems
+   St_Survey *sstSensorOnLadder = (St_Survey *) GetDataBase("Geometry/sst/sstSensorOnLadder");  // wafers in the SST ladder coordinate systems
 
-   if (!SsdSensorsOnLadders) {
-      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdSensorsOnLadders' table" << endm;
+   if (!sstSensorOnLadder) {
+      LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/sst/sstSensorOnLadder' table" << endm;
       return 0;
    }
 
-   Survey_st *OscOnGlobal      = SsdOscOnGlobal->GetTable();
-   Survey_st *LaddersOnOsc     = SsdLaddersOnOsc->GetTable();
-   Survey_st *SensorsOnLadders = SsdSensorsOnLadders->GetTable();
+   Survey_st *oscOnGlobal    = sstOnOsc->GetTable();
+   Survey_st *ladderOnIds    = sstLadderOnSst->GetTable();
+   Survey_st *sensorOnLadder = sstSensorOnLadder->GetTable();
 
-   Int_t NoOsc     = SsdOscOnGlobal->GetNRows();
-   Int_t NoLadders = SsdLaddersOnOsc->GetNRows();
-   Int_t NoSensors = SsdSensorsOnLadders->GetNRows();
+   Int_t NoOsc     = sstOnOsc->GetNRows();
+   Int_t NoLadders = sstLadderOnSst->GetNRows();
+   Int_t NoSensors = sstSensorOnLadder->GetNRows();
 
    LOG_DEBUG << "CalculateWafersPosition:\n"
              << "   Number of Osc:     " << NoOsc << "\n"
              << "   Number of Ladders: " << NoLadders << "\n"
              << "   Number of Sensors: " << NoSensors << endm;
 
-   St_ssdWafersPosition *ssdwafer = new St_ssdWafersPosition("ssdWafersPosition", NoSensors);
-   AddConst(ssdwafer);
+   St_sstWafersPosition *sstwafer = new St_sstWafersPosition("sstWafersPosition", NoSensors);
+   AddConst(sstwafer);
    Int_t num = 0;
+   sstWafersPosition_st row;
+   memset (&row, 0, sizeof(sstWafersPosition_st));
 
-   for (Int_t i = 0; i < NoSensors; i++, SensorsOnLadders++) {
-      Int_t Id = SensorsOnLadders->Id;
-      ssdWafersPosition_st row;
-      memset (&row, 0, sizeof(ssdWafersPosition_st));
+   for (Int_t i = 0; i < NoSensors; i++, sensorOnLadder++) {
+      Int_t Id = sensorOnLadder->Id;
 
       TGeoHMatrix *comb = (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", Id));
 
@@ -153,8 +178,8 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 
       Int_t ladder  = Id % 100;
       TGeoHMatrix WLL;
-      WLL.SetRotation(&SensorsOnLadders->r00);
-      WLL.SetTranslation(&SensorsOnLadders->t0);
+      WLL.SetRotation(&sensorOnLadder->r00);
+      WLL.SetTranslation(&sensorOnLadder->t0);
 
       if (Debug() >= 2) {
          LOG_DEBUG << "CalculateWafersPosition: WL" << endm;
@@ -175,17 +200,17 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
          fRotList->Add(WL);
       }
 
-      LaddersOnOsc = SsdLaddersOnOsc->GetTable();
+      ladderOnIds = sstLadderOnSst->GetTable();
       Int_t Ladder = 0;
       Int_t OSC    = 0;
 
-      for (Int_t l = 0; l < NoLadders; l++, LaddersOnOsc++) {
-         Ladder = LaddersOnOsc->Id % 100;
+      for (Int_t l = 0; l < NoLadders; l++, ladderOnIds++) {
+         Ladder = ladderOnIds->Id % 100;
 
          if (Ladder == ladder) {
-            OSC = LaddersOnOsc->Id / 100;
-            LS.SetRotation(&LaddersOnOsc->r00);
-            LS.SetTranslation(&LaddersOnOsc->t0);
+            OSC = ladderOnIds->Id / 100;
+            LS.SetRotation(&ladderOnIds->r00);
+            LS.SetTranslation(&ladderOnIds->t0);
 
             if (Debug() >= 2) {
                LOG_DEBUG << "CalculateWafersPosition: LS" << endm;
@@ -201,19 +226,19 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
          continue;
       }
 
-      OscOnGlobal = SsdOscOnGlobal->GetTable();
+      oscOnGlobal = sstOnOsc->GetTable();
       Int_t osc = 0;
 
-      for (Int_t s = 0; s < NoOsc; s++, OscOnGlobal++) {
-         if (OscOnGlobal->Id != OSC) continue;
+      for (Int_t s = 0; s < NoOsc; s++, oscOnGlobal++) {
+         if (oscOnGlobal->Id != OSC) continue;
 
          osc = OSC;
-         SG.SetRotation(&OscOnGlobal->r00);
-         SG.SetTranslation(&OscOnGlobal->t0);
+         SG.SetRotation(&oscOnGlobal->r00);
+         SG.SetTranslation(&oscOnGlobal->t0);
          break;
       }
 
-      if (! osc) {
+      if (!osc) {
          LOG_WARN << "CalculateWafersPosition: OSC " << OSC << " has not been found. Skipping to next sensor..." << endm;
          continue;
       }
@@ -230,36 +255,40 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
          WG.Print();
       }
 
-      row.id = Id;
-      row.id_shape  = 2;
-      row.ladder = ladder;
-      row.layer  = layer;
-      num++;
-      row.num_chip  = (num - 1) % 16 + 1;
       Double_t *r = WG.GetRotationMatrix();
-      row.driftDirection[0] = r[0]; row.normalDirection[0] = r[1]; row.transverseDirection[0] = r[2];
-      row.driftDirection[1] = r[3]; row.normalDirection[1] = r[4]; row.transverseDirection[1] = r[5];
-      row.driftDirection[2] = r[6]; row.normalDirection[2] = r[7]; row.transverseDirection[2] = r[8];
+      Int_t index = num*3;
+      row.driftDirection[index+0]      = r[0];
+      row.driftDirection[index+1]      = r[3];
+      row.driftDirection[index+2]      = r[6];
+      
+      row.normalDirection[index+0]     = r[1];
+      row.normalDirection[index+1]     = r[4];
+      row.normalDirection[index+2]     = r[7];
+      
+      row.transverseDirection[index+0] = r[2];
+      row.transverseDirection[index+1] = r[5];
+      row.transverseDirection[index+2] = r[8];
 
       Double_t *wgtr = WG.GetTranslation();
-      memcpy(row.centerPosition, wgtr, 3 * sizeof(Double_t));
-      comb->SetRotation(WG.GetRotationMatrix());
+      row.centerPosition[index+0]      = wgtr[0];
+      row.centerPosition[index+1]      = wgtr[1];
+      row.centerPosition[index+2]      = wgtr[2];
 
+      comb->SetRotation(WG.GetRotationMatrix());
       comb->SetTranslation(WG.GetTranslation());
 
       fRotList->Add(comb);
-      ssdwafer->AddAt(&row);
+      num++;
 
       if (Debug() >= 1) {
          LOG_DEBUG << "CalculateWafersPosition: R" << endm;
          comb->Print();
       }
    }
-
-   return ssdwafer;
+   sstwafer->AddAt(&row);
+   return sstwafer;
 }
-
-
+//_____________________________________________________________________________
 /**
  * Returns TGeoHMatrix with complete set of transformations from the sensor
  * local coordinate system to the global one. The ladder and the sensor id's are
@@ -278,3 +307,27 @@ const TGeoHMatrix *StSstDbMaker::getHMatrixSensorOnGlobal(int ladder, int sensor
    int id = 7000 + 100*sensor + ladder;
    return fRotList ? (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", id)) : 0;
 }
+//_____________________________________________________________________________
+Int_t StSstDbMaker::maskChip(Int_t side, Int_t ladder, Int_t wafer, Int_t chip) const
+{
+  map<unsigned int,short>::const_iterator got;
+  got = mMapMaskChips.find(side*1920 + ladder*96 + wafer*6 + chip);
+  if ( got == mMapMaskChips.end() ) {
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+//_____________________________________________________________________________ 
+void StSstDbMaker::setMaskChips(sstMaskChip_st *maskChipTable)
+{
+  for(Int_t i=0; i<3840; ++i){ 
+    if(maskChipTable[0].chip[i]>0){ 
+      mMapMaskChips.insert ( std::pair<unsigned long, short>(i,maskChipTable[0].chip[i]) );
+      LOG_DEBUG <<" found chip to mask : adress : " << i << endm; 
+    } 
+    //else break;
+  }
+}
+
