@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $
+ * $Id: StSstDaqMaker.h,v 1.2 2015/06/24 19:41:54 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.2  2015/06/24 19:41:54  smirnovd
+ * StSstDaqMaker: Removed undefined method Finish()
+ *
  * Revision 1.1  2015/06/09 18:32:00  jeromel
  * Clean check-in vrsion of long time ago reviewed SST daq code
  *
@@ -69,9 +72,8 @@ public:
    virtual Int_t InitRun(Int_t runumber);
    virtual Int_t Make();
    void Clear(const Option_t * = "");
-   virtual Int_t Finish();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.2 2015/06/24 19:41:54 smirnovd Exp $ built "__DATE__" "__TIME__;
       return cvs;
    }
 
