@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.2 2015/06/24 19:41:54 smirnovd Exp $
+ * $Id: StSstDaqMaker.h,v 1.3 2015/06/24 20:58:11 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.3  2015/06/24 20:58:11  bouchet
+ * added codes for using sstChipCorrect and sstMaskChip tables ; replaced StSsdConfig by StSstConfig
+ *
  * Revision 1.2  2015/06/24 19:41:54  smirnovd
  * StSstDaqMaker: Removed undefined method Finish()
  *
@@ -56,13 +59,12 @@
 
 class St_spa_strip;
 class St_ssdPedStrip;
-class StSsdConfig;
-class St_ssdConfiguration;
-class ssdConfiguration_st;
+class StSstConfig;
+class St_sstConfiguration;
+class sstConfiguration_st;
 class St_ssdStripCalib;
 class St_ssdNoise;
-class St_ssdChipCorrect;
-class ssdChipCorrect_st;
+class sstChipCorrect_st;
 
 class StSstDaqMaker : public StRTSBaseMaker
 {
@@ -73,7 +75,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.2 2015/06/24 19:41:54 smirnovd Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.3 2015/06/24 20:58:11 bouchet Exp $ built "__DATE__" "__TIME__;
       return cvs;
    }
 
@@ -89,7 +91,7 @@ private:
    void   FindLadderSide(int RDO, int channel, int &ladder, int &side);
    void   FindStripNumber(int &strip);
    void   DeclareNTuple();
-   void   PrintConfiguration(Int_t runumber, ssdConfiguration_st *config);
+   void   PrintConfiguration(Int_t runumber, sstConfiguration_st *config);
    void   FillData(vector<vector<int> > vadc, vector<vector<float> > vcmnoise, Int_t id_side, Int_t ladder, Int_t valength);
    Float_t CalculateCommonModeNoise(vector<int> vtemp);
    Float_t CalculateCommonModeNoiseSimple(vector<int> vtemp);
@@ -97,18 +99,17 @@ private:
    void   FillDefaultReadOutPedTable();
    void   FillNoiseTable();
    void   FillDefaultNoiseTable();
-   void   FillChipNoiseTable();
+   void   FillChipNoiseTable(sstChipCorrect_st *mChipCorrectTable);
    void   FillDefaultChipNoiseTable();
    Int_t  idWaferToWafer(Int_t idWafer);
    Int_t  idWaferToLadderNumb(Int_t idWafer);
 
-   StSsdConfig       *mConfig;
-   St_ssdChipCorrect* mChipCorrect;//!< Pointer to the ssdChipCorrectio table (noise status)) 
+   StSstConfig       *mConfig;
+   sstConfiguration_st *mConfigTable;//!
    St_spa_strip      *spa_strip;
    St_ssdPedStrip    *ssdPedStrip;
    St_ssdStripCalib  *strip_calib;
    St_ssdNoise       *mNoise;
-   ssdChipCorrect_st *chip_correct;
 
    Int_t   mUseChipCorrect;
    Int_t   mUsePedSubtraction;
