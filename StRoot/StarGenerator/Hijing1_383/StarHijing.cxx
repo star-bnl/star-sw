@@ -20,6 +20,7 @@ StMaker *_maker = 0;
 TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
 {
   TGenericTable *table = new TGenericTable(type,name);
+  table->SetBit(TTable::kIsNotOwn);
   table->Adopt( 1, address );
   _maker -> AddData( table, ".const" );
   return table;
