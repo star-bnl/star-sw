@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.1 2015/06/09 18:32:00 jeromel Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.2 2015/06/24 20:37:59 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.2  2015/06/24 20:37:59  smirnovd
+ * Use explicit comparison in order to disable compiler warning
+ *
  * Revision 1.1  2015/06/09 18:32:00  jeromel
  * Clean check-in vrsion of long time ago reviewed SST daq code
  *
@@ -177,7 +180,7 @@ Int_t StSstDaqMaker::Make()
    mEventnumber++;
 
    //raw data mode
-   while (rts_table = GetNextDaqElement("sst/raw")) {
+   while ( (rts_table = GetNextDaqElement("sst/raw")) != 0 ) {
       //each DAQ element record one RDO data
       //one event will loop all the 5 RDOs
       mMode = 0;//0-physic run,1-pedestal run
@@ -191,7 +194,7 @@ Int_t StSstDaqMaker::Make()
 
    //pedestal mode
 
-   while (rts_table = GetNextDaqElement("sst/pedrms")) {
+   while ( (rts_table = GetNextDaqElement("sst/pedrms")) != 0 ) {
       mMode    = 1;
       mRdoData = (UInt_t *)rts_table->At(0);
       mRdoDataLength = rts_table->GetNRows();
