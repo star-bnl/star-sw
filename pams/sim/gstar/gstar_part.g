@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.50 2014/07/17 15:17:44 jwebb Exp $
+* $Id: gstar_part.g,v 1.51 2015/06/23 14:41:56 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.51  2015/06/23 14:41:56  jwebb
+* Define H0 strangelet (m=2210 MeV) with 100% BR to Sigma- proton
+*
 * Revision 1.50  2014/07/17 15:17:44  jwebb
 * Added (Xi0Xi-) dibaryon with hacked decay modes... should be 4 body phase space, but G3 doesn't support easily.
 *
@@ -781,6 +784,15 @@ Particle H_dibaryon               code      = 60001,
                        trktyp = kGtHadr  mass = 2.6346       ,
                        charge = +1       tlife = 1.6378e-10  ,
                        bratio = {0.5, 0.5}  mode = { 30 26 08, 31 26 07 }
+
+
+***************************************************************************
+**
+** Strangelets.  ANumbering scheme adopted from strangelet.txt
+**
+  Particle H0strangelet code=60801  TrkTyp=3 mass=2.21,
+                        charge=0 tlife=1.335E-10,
+                        pdg=801  bratio = { 1.00, } mode = { 1421, }
                         
 
 

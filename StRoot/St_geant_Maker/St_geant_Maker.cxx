@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.152 2015/01/13 19:02:47 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.153 2015/06/23 20:27:53 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.153  2015/06/23 20:27:53  jwebb
+// Added hits for FTBF version of HCAL
+//
 // Revision 1.152  2015/01/13 19:02:47  jwebb
 // Read out sensitive layer from FgtdGeoV.xml
 //
@@ -1453,11 +1456,16 @@ Int_t St_geant_Maker::Make() {
       iRes = g2t_etr( g2t_track, g2t_etr_hit); 
       if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
     }
-  nhits = 0; nhit1=nhit2=0;
-  geant3 -> Gfnhit("HCAH","HCEL", nhit1);
-  geant3 -> Gfnhit("HCAH","HCES", nhit2);
-  geant3 -> Gfnhit("HCAH","FPSC", nhit3);
-  nhits=nhit1+nhit2+nhit3;
+  
+
+
+  nhits = 0; nhit1=nhit2=0;  
+  geant3 -> Gfnhit("HCAH","HCEL", nhit1); nhits+=nhit1;
+  geant3 -> Gfnhit("HCAH","HCES", nhit1); nhits+=nhit1;
+  geant3 -> Gfnhit("HCAH","FPSC", nhit1); nhits+=nhit1;
+  geant3 -> Gfnhit("HCAH","BBCF", nhit1); nhits+=nhit1;
+  geant3 -> Gfnhit("HCAH","BBCB", nhit1); nhits+=nhit1;
+  geant3 -> Gfnhit("HCAH","LEDG", nhit1); nhits+=nhit1; 
   if ( nhits > 0 ) 
      {
         St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);

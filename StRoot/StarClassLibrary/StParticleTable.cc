@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.24 2015/06/08 16:24:34 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.25 2015/06/23 14:53:36 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.25  2015/06/23 14:53:36  jwebb
+ * StarClassLibrary support for H0 dibaryon.
+ *
  * Revision 1.24  2015/06/08 16:24:34  jwebb
  * Correct mapping between G3 id and pdg id.  The G3 is the key and must be unique.  THe pdg id is the value, and can repeat.
  *
@@ -374,6 +377,9 @@ StParticleTable::StParticleTable()
     ///Definitions of exotics, e.g. H-dibaryon
     ///@{
        Geant2Pdg( 60001, kUndefined,         H-Dibaryon --> Lambda + piminus + proton );
+
+       Geant2Pdg( 60801, 801,                H0-strangelet --> proton + Sigma- );
+
     ///@}
 
 
