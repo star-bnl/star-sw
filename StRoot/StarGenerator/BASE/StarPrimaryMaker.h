@@ -101,11 +101,11 @@ class StarPrimaryMaker : public StMaker
   StarPrimaryMaker();
   ~StarPrimaryMaker();
   
-  Int_t InitRun( Int_t runnumber );
-  Int_t Init();
-  Int_t Make();
-  void  Clear( const Option_t *opts="" );
-  Int_t Finish();
+  virtual Int_t InitRun( Int_t runnumber );
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void  Clear( const Option_t *opts="" );
+  virtual Int_t Finish();
 
   /// Set the filename of the output TTree
   void  SetFileName( const Char_t *name ){ mFileName = name; }
