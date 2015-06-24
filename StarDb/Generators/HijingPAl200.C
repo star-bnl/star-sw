@@ -22,7 +22,7 @@ TDataSet *CreateTable() {
   // Setup collision frame, energy and beam species
   hijing->SetFrame("CMS",200.0);
   hijing->SetBlue("p");
-  hijing->SetYell("Au");  
+  hijing->SetYell("Al");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
   hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
   hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)

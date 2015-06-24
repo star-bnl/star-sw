@@ -20,8 +20,8 @@ TDataSet *CreateTable() {
   hijing->SetTitle("Hijing 1.383");
 
   // Setup collision frame, energy and beam species
-  hijing->SetFrame("CMS",200.0);
-  hijing->SetBlue("p");
+  hijing->SetFrame("FIXT",-19.082);
+  hijing->SetBlue("Au");
   hijing->SetYell("Au");  
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
   hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
@@ -44,6 +44,14 @@ TDataSet *CreateTable() {
   //
   primary -> Init();
   geantMk->Do("gkine -4 0");
+#if 0
+  geantMk->Do("gvertex -0.556 -1.928 211.6");
+  geantMk->Do("gspread  0.155  0.079   0.1");
+#else
+  primary->SetVertex(-0.556, -1.928, 211.6);
+  primary->SetSigma ( 0.155,  0.079,   0.1);
+#endif
+
   TDataSet *tableSet = new TDataSet("Hijing");
   return (TDataSet *)tableSet;
 }
