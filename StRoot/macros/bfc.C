@@ -41,7 +41,7 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012,pythia,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,Sti,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
-TString defChain("MC.y2012,pythia,beamline,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,pythia,beamline,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("P2014aPxLSim,gstar,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
@@ -49,8 +49,10 @@ TString defChain("MC.y2012,pythia,beamline,StiCA,KFVertex,-hitfilt,useXgeom");//
 //TString defChain("MC.2014,Pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 //"P2014a,Stv,mtd,btof,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,-SsdIt","/star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq")'
 //TString defChain("MC.y2012,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
+//TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
+TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
+void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
+	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
 //	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.619 2015/05/15 17:44:10 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.620 2015/06/23 17:13:10 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -233,7 +233,7 @@ Int_t StBFChain::Instantiate()
     StMaker *mk = 0;
     // Require only instance for the following named makers
     if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
-	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" ||
+	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || maker == "StSstDbMaker" ||
 	maker == "StDetectorDbMaker" ||
 	maker == "StMagFMaker"    ||
 	maker == "StEEmcDbMaker"  ||
@@ -1749,14 +1749,15 @@ void StBFChain::SetDbOptions(StMaker *mk){
   if (this == GetTopChain()) {
     // Db blacklist (remove black listed system from St_Db_Maker Calibrations configuration)
     if (! GetOption("TpcDb")                        ) {mk->SetAttr("blacklist", "tpc");  gMessMgr->QAInfo() << "blacklist tpc" << endm;}
-    if (! GetOption("SvtDb")&&!GetOption("SvtCalDb")) {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
-    if (! GetOption("SsdDb")&&!GetOption("SsdCalDb" &&
-	! GetOption("SstDb"))) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
+    if (! GetOption("SvtDb")||!GetOption("SvtCalDb")) {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
+    if (! GetOption("SsdDb")||!GetOption("SsdCalDb")) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
+    if (! GetOption("SstDb")||!GetOption("SstCalDb")) {mk->SetAttr("blacklist", "sst");  gMessMgr->QAInfo() << "blacklist sst" << endm;}
     if (! GetOption("EemcDb")                       ) {mk->SetAttr("blacklist", "eemc"); gMessMgr->QAInfo() << "blacklist eemc"<< endm;}
     if (! GetOption("FmsDb")                        ) {mk->SetAttr("blacklist", "fms");  gMessMgr->QAInfo() << "blacklist fms" << endm;}
   } else {// for Embedding chain trigger black list by NoSsdIT and NoSvtIT, could be some problems if you try to run svt or ssd clusters, ...
-    if (! GetOption("SvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
-    if (! GetOption("SsdIt") && ! GetOption("SstIt")) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
+    if (GetOption("NoSvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
+    if (GetOption("NoSsdIt"))                         {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
+    if (GetOption("NoSstIt"))                         {mk->SetAttr("blacklist", "sst");  gMessMgr->QAInfo() << "blacklist sst" << endm;}
   }
 }
 //_____________________________________________________________________
