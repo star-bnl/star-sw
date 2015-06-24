@@ -1,6 +1,9 @@
-//$Id: StSstConfig.hh,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstConfig.hh,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
 //
 //$Log: StSstConfig.hh,v $
+//Revision 1.2  2015/06/24 17:37:21  smirnovd
+//StSstUtil: Prepend included headers with path to submodule
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -15,7 +18,7 @@
 
 #define MaxNumberOfLadders 20
 
-#include "StObject.h"
+#include "St_base/StObject.h"
 #include "TString.h"
 
 class ssdConfiguration_st;

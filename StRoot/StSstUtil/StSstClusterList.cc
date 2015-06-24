@@ -1,6 +1,9 @@
-//$Id: StSstClusterList.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstClusterList.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
 //
 //$Log: StSstClusterList.cc,v $
+//Revision 1.2  2015/06/24 17:37:21  smirnovd
+//StSstUtil: Prepend included headers with path to submodule
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -14,7 +17,7 @@
 #include "StSstUtil/StSstClusterControl.h"
 #include "StSstUtil/StSstCluster.hh"
 #include "StSstStripList.hh"
-#include <Stiostream.h>
+#include "St_base/Stiostream.h"
 #include <math.h>
 
 StSstClusterList::StSstClusterList()
