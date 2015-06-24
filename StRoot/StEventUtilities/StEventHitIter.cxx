@@ -19,6 +19,11 @@
 #include "StFgtHitCollection.h"
 #include "StFgtPointCollection.h"
 #include "StIstHitCollection.h"
+
+ClassImp(StHitIter)
+ClassImp(StHitIterGroup)
+ClassImp(StEventHitIter)
+
 //________________________________________________________________________________
 StHitIter::StHitIter()
 {
