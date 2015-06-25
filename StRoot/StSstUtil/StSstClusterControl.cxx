@@ -1,6 +1,9 @@
-//$Id: StSstClusterControl.cxx,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstClusterControl.cxx,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
 //
 //$Log: StSstClusterControl.cxx,v $
+//Revision 1.2  2015/06/24 17:37:21  smirnovd
+//StSstUtil: Prepend included headers with path to submodule
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -9,7 +12,7 @@
 //
 
 //fork from the SSD code, move along - see history therein
-#include <Stiostream.h>
+#include "St_base/Stiostream.h"
 #include "StSstUtil/StSstClusterControl.h"
 #include "StMessMgr.h"
 #include "tables/St_clusterControl_Table.h"

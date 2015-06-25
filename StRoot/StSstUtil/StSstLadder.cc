@@ -1,6 +1,9 @@
-//$Id: StSstLadder.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstLadder.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
 //
 //$Log: StSstLadder.cc,v $
+//Revision 1.2  2015/06/24 17:37:21  smirnovd
+//StSstUtil: Prepend included headers with path to submodule
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -9,7 +12,7 @@
 //
 //fork from the SSD code, move along - see history therein
 #include "StSstUtil/StSstLadder.hh"
-#include <Stiostream.h>
+#include "St_base/Stiostream.h"
 #include "tables/St_sstWaferConfiguration_Table.h"
 
 StSstLadder::StSstLadder(Int_t rLadderNumb,Int_t rSstLayer,Int_t rNWaferPerLadder,Int_t rNStripPerSide) : mDebug(0)

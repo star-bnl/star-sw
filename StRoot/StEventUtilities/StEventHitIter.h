@@ -113,6 +113,9 @@ const TObject *fCont;
 StHitIter  *fDowIter;
 int fJIter;
 int fNIter;
+
+ClassDef(StHitIter,0)//
+
 };
 //..............................................................................
 class StHitIterGroup : public StHitIter {
@@ -132,6 +135,9 @@ virtual void Add(StHitIter* iter);
 protected:
 mutable StDetectorId fDetectorId;
 std::vector<StHitIter*> fGroup;
+
+ClassDef(StHitIterGroup,0)//
+
 };
 
 //..............................................................................
@@ -155,6 +161,8 @@ public:
   int   AddDetector(StDetectorId detId);
   int   AddDetector(const char *name);
 private:
+ClassDef(StEventHitIter,0)//
+
 };
 
 //}// QWERTY

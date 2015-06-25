@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstWafer.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.2  2015/06/24 17:37:21  smirnovd
+//StSstUtil: Prepend included headers with path to submodule
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -13,7 +16,7 @@
 
 //fork from the SSD code, move along - see history therein
 #include "StSstUtil/StSstWafer.hh"
-#include <Stiostream.h>
+#include "St_base/Stiostream.h"
 #include "TMath.h"
 #include "StMessMgr.h"
 const int thresholdSideP = 10 ;
