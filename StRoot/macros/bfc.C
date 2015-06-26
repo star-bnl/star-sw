@@ -51,8 +51,10 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
 TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
+//void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
+//	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
-	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
+	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 //	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);

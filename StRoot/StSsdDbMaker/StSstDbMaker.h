@@ -44,7 +44,7 @@ public:
    St_sstWafersPosition  *m_positions;//!
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.8 2015/06/23 17:17:46 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.9 2015/06/25 23:20:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
