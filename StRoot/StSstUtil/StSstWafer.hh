@@ -1,6 +1,9 @@
-//$Id: StSstWafer.hh,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstWafer.hh,v 1.2 2015/06/26 20:13:46 smirnovd Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.2  2015/06/26 20:13:46  smirnovd
+//Removed unused St_sdm_condition_db_Table header
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -18,7 +21,6 @@
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdDimensions_Table.h"
-#include "tables/St_sdm_condition_db_Table.h"
 #include "StSstStripList.hh"
 #include "StSstStrip.hh"
 #include "StSpaNoise.hh"
