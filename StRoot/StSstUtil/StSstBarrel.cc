@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstBarrel.cc,v 1.2 2015/06/27 19:48:51 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.2  2015/06/27 19:48:51  bouchet
+//removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -45,9 +48,6 @@
 #include "tables/St_sstSlsCtrl_Table.h"
 //
 #include "tables/St_sls_strip_Table.h"
-#include "tables/St_ssdDimensions_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
-#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
 #include "tables/St_slsCtrl_Table.h"
 #include "tables/St_sls_strip_Table.h"
@@ -67,9 +67,7 @@
 #include "TMath.h"
 #include "StMessMgr.h"
 
-#include "tables/St_ssdGainCalibWafer_Table.h"
 #include "tables/St_ssdNoise_Table.h"
-#include "tables/St_ssdWaferConfiguration_Table.h"
 //new
 #include "tables/St_sstGainCalibWafer_Table.h"
 #include "tables/St_sstNoise_Table.h"
@@ -83,7 +81,7 @@
 
 #include "TDataSetIter.h"
 
-StSstBarrel* StSstBarrel::fSsdBarrel = 0;
+StSstBarrel* StSstBarrel::fSstBarrel = 0;
 //________________________________________________________________________________
 /*!
 Constructor using the sstDimensions_st and sstConfiguration_st tables from the db
@@ -91,7 +89,7 @@ Constructor using the sstDimensions_st and sstConfiguration_st tables from the d
 StSstBarrel::StSstBarrel(sstDimensions_st  *dimensions, sstConfiguration_st *config ) : mDebug(0)
 {
   memset (first, 0, last-first);
-  fSsdBarrel = this;
+  fSstBarrel = this;
   setSstParameters(dimensions);
   // Set the Lorentz shift for holes and electrons
   setLorentzShift(dimensions);
@@ -110,7 +108,7 @@ StSstBarrel::StSstBarrel(sstDimensions_st  *dimensions, sstConfiguration_st *con
   }
 }
 //________________________________________________________________________________
-StSstBarrel::~StSstBarrel(){for (Int_t iLad = 0 ; iLad < mNLadder; iLad++) delete mLadders[iLad]; fSsdBarrel = 0;}
+StSstBarrel::~StSstBarrel(){for (Int_t iLad = 0 ; iLad < mNLadder; iLad++) delete mLadders[iLad]; fSstBarrel = 0;}
 //________________________________________________________________________________
 void StSstBarrel::setSstParameters(sstDimensions_st *geom_par){
   mDimensions          = geom_par;
