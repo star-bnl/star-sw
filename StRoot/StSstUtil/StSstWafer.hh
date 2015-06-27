@@ -1,6 +1,9 @@
-//$Id: StSstWafer.hh,v 1.2 2015/06/26 20:13:46 smirnovd Exp $
+//$Id: StSstWafer.hh,v 1.3 2015/06/27 19:30:12 bouchet Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.3  2015/06/27 19:30:12  bouchet
+//re-enable St_sdm_condition_db table (used in StSstBarrel) ; last commit did not check compilation
+//
 //Revision 1.2  2015/06/26 20:13:46  smirnovd
 //Removed unused St_sdm_condition_db_Table header
 //
@@ -21,6 +24,7 @@
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_sdm_condition_db_Table.h"
 #include "StSstStripList.hh"
 #include "StSstStrip.hh"
 #include "StSpaNoise.hh"
