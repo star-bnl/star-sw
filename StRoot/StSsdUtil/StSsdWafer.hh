@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.8 2015/06/26 20:13:45 smirnovd Exp $
+// $Id: StSsdWafer.hh,v 1.9 2015/06/28 13:50:48 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.9  2015/06/28 13:50:48  bouchet
+// re-enable St_sdm_condition_db table (used in StSsdBarrel)
+//
 // Revision 1.8  2015/06/26 20:13:45  smirnovd
 // Removed unused St_sdm_condition_db_Table header
 //
@@ -58,6 +61,7 @@ The Clusters are first found on both sides of the wafer. The clusters are then c
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_sdm_condition_db_Table.h"
 #include "StSsdStripList.hh"
 #include "StSsdStrip.hh"
 #include "StSpaNoise.hh"
