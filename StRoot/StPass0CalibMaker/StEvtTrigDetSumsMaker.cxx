@@ -29,6 +29,10 @@ Int_t StEvtTrigDetSumsMaker::Make(){
     LOG_ERROR << "StEvtTrigDetSumsMaker: no StEvent" << endm;
     return kStErr;
   } 
+  if (event->Find("trigDetSums")) {
+    LOG_WARN << "StEvtTrigDetSumsMaker: StEvent already contains trigDetSums...skipping" << endm;
+    return kStOK;
+  }
   StRunInfo* runInfo = event->runInfo();
   if (!runInfo) {
     LOG_ERROR << "StEvtTrigDetSumsMaker: no runInfo" << endm;
@@ -55,8 +59,11 @@ Int_t StEvtTrigDetSumsMaker::Make(){
 }
 
 //_____________________________________________________________________________
-// $Id: StEvtTrigDetSumsMaker.cxx,v 1.2 2012/10/15 17:38:34 genevb Exp $
+// $Id: StEvtTrigDetSumsMaker.cxx,v 1.3 2015/06/26 21:38:00 genevb Exp $
 // $Log: StEvtTrigDetSumsMaker.cxx,v $
+// Revision 1.3  2015/06/26 21:38:00  genevb
+// Not necessary when trigDetSums is already available from StEvent
+//
 // Revision 1.2  2012/10/15 17:38:34  genevb
 // Add CVS logging
 //
