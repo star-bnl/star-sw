@@ -9,6 +9,8 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiUtilities/StiDebug.h"
+#include "Sti/StiElossCalculator.h"
+#include "StiMaker/StiDetectorVolume.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
@@ -160,6 +162,20 @@ void StiDetectorBuilder::del(UInt_t row, UInt_t sector)
 void StiDetectorBuilder::build(StMaker& source)
 {
   buildDetectors(source);
+
+  do {
+// 		Save built Sti geometry in a root file
+    if (source.GetDebug() <2) 			break;
+    std::string out("sti2rootgeo_");
+    out+= getName();
+    if (out.find("Star")!=std::string::npos) 	break;
+    size_t jk = out.find("Builder");
+    if (jk == std::string::npos) 		break;
+    out.erase(jk,999);
+    out+=".root";
+    SaveGeometry(out);
+ } while(0);
+
   mDetectorIterator = mDetectorMap.begin();
 }
 
@@ -323,6 +339,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
 ///distributed.
+//________________________________________________________________________________
 UInt_t  StiDetectorBuilder::getNSectors(UInt_t row) const
 {
   assert(row<_detectors.size());
@@ -330,6 +347,7 @@ UInt_t  StiDetectorBuilder::getNSectors(UInt_t row) const
 }
 
 
+//________________________________________________________________________________
 StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
 {
   assert(row<_detectors.size());
@@ -337,9 +355,41 @@ StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
   return _detectors[row][sector];
 }
 
+//________________________________________________________________________________
 void StiDetectorBuilder::setDetector(UInt_t row, UInt_t sector, StiDetector *detector)
 {
   setNSectors(row+1,sector+1);
 assert(!_detectors[row][sector]);
    _detectors[row][sector] = detector;
+}
+
+
+
+/*!
+ * Save Sti geometry created by this builder in a root file. The Sti volumes are
+ * converted into drawable root objects with the help of StiMaker/StiDetectorBuilder.
+ * Note: The StiDetectorVolume object is created on the heap in order to avoid
+ * disturbance in the current BFC library linking order.
+ */
+//________________________________________________________________________________
+void StiDetectorBuilder::SaveGeometry(const std::string fileName) const
+{
+   TFile fileTmp(fileName.c_str(), "RECREATE");
+   StiDetectorVolume *stiDetVol = new StiDetectorVolume(*this);
+   stiDetVol->Write();
+   fileTmp.Close();
+   delete stiDetVol;
+}
+
+
+void StiDetectorBuilder::Print() const
+{
+   std::cout << "StiDetectorBuilder::Print(): " << getName() << std::endl;
+   std::copy(mDetectorMap.begin(), mDetectorMap.end(), std::ostream_iterator<DetectorMapPair>(std::cout, "\n"));
+}
+
+
+ostream& operator<<(ostream& os, const DetectorMapPair& detMapEntry)
+{
+   return os << *detMapEntry.second;
 }

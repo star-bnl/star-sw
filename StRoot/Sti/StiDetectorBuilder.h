@@ -31,7 +31,7 @@ typedef shapeMap::value_type shapeMapValType;
 typedef map<NameMapKey, StiDetector*> detectorMap;
 typedef detectorMap::const_iterator detectorIterator;
 typedef detectorMap::value_type detectorMapValType;
-
+typedef std::pair<NameMapKey, StiDetector*> DetectorMapPair;
 /*!
   Class defines the notion of a detector builder. It creates the various components of
   a detector and set their shape, placement, and material properties.
@@ -81,13 +81,16 @@ public:
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
   StiMaterial *getGasMat()   				{return _gasMat;}
   void setSplit(double relThick=0.5, int maxSplit=20)	{mThkSplit=relThick;mMaxSplit=maxSplit;}
-
+  void SaveGeometry(const std::string fileName="sti2rootgeo.root") const;
 //		Static methodes
   static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}
   static StiDetectorBuilder *GetCurrentDetectorBuilder(){return fCurrentDetectorBuilder;}
   static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
               {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
+  void Print() const;
+
+  friend ostream& operator<<(ostream &os, const DetectorMapPair &detMapEntry);
 
  protected:
   float               mThkSplit;	//wide/thickness/mThkSplit = nSplits
