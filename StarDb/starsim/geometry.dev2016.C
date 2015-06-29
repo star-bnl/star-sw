@@ -4,6 +4,6 @@ TDataSet *CreateTable() {
   St_geant_Maker *geant = (St_geant_Maker *) StMaker::GetChain()->Maker("geant");
   if (! geant) return 0;
   TDataSet *geom = new TDataSet("geometry");
-  geant->Do("detp dev2016");
+  geant->Do("detp geom dev2016");
   return geom;
 };
