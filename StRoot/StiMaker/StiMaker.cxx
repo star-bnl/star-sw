@@ -94,6 +94,7 @@ More detailed: 				<br>
 #include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiSsd/StiSstDetectorGroup.h"
 #include "StiPxl/StiPxlDetectorGroup.h"
+#include "StiBTof/StiBTofDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
@@ -311,12 +312,12 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst")));
       group->setGroupId(kIstId);
     }
-//  if (IAttr("useBTof"))
-//     {
-//       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
-//       group->setGroupId(kBTofId);
-//     }
+ if (IAttr("useBTof"))
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
+      _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
+      group->setGroupId(kBTofId);
+    }
   return kStOk;
 }
 
