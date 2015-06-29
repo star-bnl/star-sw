@@ -1,6 +1,12 @@
-// $Id: StSsdWafer.hh,v 1.7 2014/10/18 19:31:56 smirnovd Exp $
+// $Id: StSsdWafer.hh,v 1.9 2015/06/28 13:50:48 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.9  2015/06/28 13:50:48  bouchet
+// re-enable St_sdm_condition_db table (used in StSsdBarrel)
+//
+// Revision 1.8  2015/06/26 20:13:45  smirnovd
+// Removed unused St_sdm_condition_db_Table header
+//
 // Revision 1.7  2014/10/18 19:31:56  smirnovd
 // Revert "1st commit" asked by Jonathan
 //
