@@ -1,6 +1,6 @@
 macro y2014
 *  starsim -w 1 -b y2014.kumac
-  DETP geom y2014a  
+  DETP geom y2014c  
 #  DETP geom y2014
 * field=-5  hadr_off=1
   gexec $STAR_LIB/StarMagFieldNoDict.so
@@ -17,9 +17,9 @@ return
 macro ycut
 ************  Y ************
  next
- for/file 67 y2014aC-y.eps
+ for/file 67 y2014cC-y.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  y-cut = 0'
+  title_g 'STAR Wide Angle Hall (y2014c)  y-cut = 0'
   null -2000 2000 -1500 1500
   atitle 'Z (cm)' 'X (cm)'
   dcut hall y 0 0 0 1 1
@@ -28,9 +28,9 @@ return
 macro ycutFarAway
 ************  Y ************
   next
- for/file 67 y2014aC-yFarAway.eps
+ for/file 67 y2014cC-yFarAway.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  y-cut = -390 cm'
+  title_g 'STAR Wide Angle Hall (y2014c)  y-cut = -390 cm'
   null -2000 2000 -1500 1500
   atitle 'Z (cm)' 'X (cm)'
   dcut hall y -390 0 0 1 1
@@ -39,9 +39,9 @@ return
 macro xcut
 ************  X ************
   next
-  for/file 67 y2014a-x.eps
+  for/file 67 y2014c-x.eps
   meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  x-cut = 1cm'
+  title_g 'STAR Wide Angle Hall (y2014c)  x-cut = 1cm'
   null -2000 2000 -1000 1000
   atitle 'Z (cm)' 'Y (cm)'
   dcut hall x 1 0 0 1 1
@@ -50,9 +50,9 @@ return
 macro rcut
 ************  X ************
   next
- for/file 67 y2014a-r.eps
+ for/file 67 y2014c-r.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  x-cut = 1 cm'
+  title_g 'STAR Wide Angle Hall (y2014c)  x-cut = 1 cm'
   null -2000 2000 0 1500
 * atitle 'Z (cm)' 'R (cm)'
   dcut hall x 1 0 0 1 1
@@ -61,9 +61,9 @@ return
 macro zcut 
 ************  Z ************
   next
- for/file 67 y2014a-z.eps
+ for/file 67 y2014c-z.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  z-cut = 1 cm'
+  title_g 'STAR Wide Angle Hall (y2014c)  z-cut = 1 cm'
   null -600 600 -600 600
   atitle 'X (cm)' 'Y (cm)'
   dcut hall z 1 0 0 1 1
@@ -72,9 +72,9 @@ return
 macro zcut2 
 ************  Z ************
   next
- for/file 67 y2014a-z2.eps
+ for/file 67 y2014c-z2.eps
  meta 67 -113
-  title_g 'STAR Wide Angle Hall (y2014a)  z-cut = 53 cm'
+  title_g 'STAR Wide Angle Hall (y2014c)  z-cut = 53 cm'
   null -600 600 -600 600
   atitle 'X (cm)' 'Y (cm)'
   dcut hall z 53 0 0 1 1
