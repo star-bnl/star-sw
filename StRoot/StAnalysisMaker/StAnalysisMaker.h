@@ -120,6 +120,7 @@ public:
   static void PrintToFHits();
   static void PrintSvtHits();
   static void PrintSsdHits();
+  static void PrintSstHits();
   static void PrintRnDHits();
   static void PrintEmcHits(Int_t det=-1, Int_t mod=-1, const Option_t *opt = "AdcClustersPoints");
   virtual const char *GetCVS() const {

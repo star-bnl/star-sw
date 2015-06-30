@@ -539,6 +539,42 @@ void StAnalysisMaker::PrintSsdHits() {
   }
 }
 //________________________________________________________________________________
+void StAnalysisMaker::PrintSstHits() {
+  UInt_t i,k,l;
+  //  Double_t zPrim = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  //  if (pEvent->numberOfPrimaryVertices() != 1) return;
+  StPrimaryVertex *primaryVertex = pEvent->primaryVertex();
+  if ( primaryVertex) {
+    const StThreeVectorF &primXYZ = primaryVertex->position();
+    //  cout << "primaryVertex " << primXYZ << endl;
+    cout << "primaryVertex \t" << primXYZ.x() << "\t" << primXYZ.y() << "\t" << primXYZ.z() << endl;
+  }
+  //  Int_t TotalNoOfSstHits = 0;
+  StSstHitCollection* SstHitCollection = pEvent->sstHitCollection();
+  if (! SstHitCollection) { cout << "No SST Hit Collection" << endl; return;}
+  UInt_t numberOfLadders = SstHitCollection->numberOfLadders();
+  //  Int_t vers = gClassTable->GetID("StSstHit");
+  for ( i = 0; i< numberOfLadders; i++) {
+    StSstLadderHitCollection* ladderCollection = SstHitCollection->ladder(i);
+    if (ladderCollection) {
+      UInt_t numberOfWafers = ladderCollection->numberOfWafers();
+      for (k = 0; k < numberOfWafers; k++) {
+	StSstWaferHitCollection* waferCollection = ladderCollection->wafer(k);
+	StSPtrVecSstHit &hits = waferCollection->hits();
+	UInt_t NoHits = hits.size();
+	for (l = 0; l < NoHits; l++) {
+	  StSstHit *hit = hits[l];
+	  if (hit) {
+	    hit->Print("");
+	  }
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
 void StAnalysisMaker::PrintToFHits() {
   //  Double_t zPrim = 0;
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
@@ -909,6 +945,32 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	   << ":\tBad ones(flag>3): " << noBadSsdHits 
 	   << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
   }
+  UInt_t TotalNoOfSstHits = 0, noBadSstHits = 0, noSstHitsUsedInFit = 0;
+  StSstHitCollection* ssthits = event->sstHitCollection();
+  if (ssthits) {
+    StSstHit* hit;
+    for (UInt_t ladder=0; ladder<ssthits->numberOfLadders(); ++ladder) {
+      StSstLadderHitCollection* ladderhits = ssthits->ladder(ladder);
+      if (!ladderhits) continue;
+      for (UInt_t wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	StSstWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	if (!waferhits) continue;
+	const StSPtrVecSstHit& hits = waferhits->hits();
+	for (const_StSstHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	  hit = static_cast<StSstHit*>(*it);
+	  if (!hit) continue;
+	  TotalNoOfSstHits++;
+	  if (hit->flag() >3) noBadSstHits++;
+	  if (hit->usedInFit()) noSstHitsUsedInFit++;
+	}
+      }
+    }
+  }
+  if (TotalNoOfSstHits) {
+    LOG_QA << "# SST hits:          " << TotalNoOfSstHits 
+	   << ":\tBad ones(flag>3): " << noBadSstHits 
+	   << ":\tUsed in Fit:      " << noSstHitsUsedInFit << endm;
+  }
   UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
   StFtpcHitCollection* ftpchits = event->ftpcHitCollection();
   if (ftpchits) {
@@ -1086,6 +1148,10 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	   << endm;
   }
 #endif /* _ST_GMT_HIT_H_ */
+  if (event->rpsCollection()) {
+    LOG_QA << "# RPS hits:            " << event->rpsCollection()->clusters().size() << endm;
+  }
+  
   LOG_QA << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << endm;
 }
 //________________________________________________________________________________
