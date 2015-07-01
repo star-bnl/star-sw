@@ -179,17 +179,17 @@ StHltTrack::setTrackNode(StHltTrackNode* val)
 }
 
 
-std::ostream& 
+ostream& 
 operator<<(ostream &os, const StHltTrack& trk)
 {
 	os << " primary key "  << trk.id()<<" innerMostRow "<<trk.innerMostRow()
-    << " outerMostRow " << trk.outerMostRow()<<std::endl
-    << " nhits "<<trk.nHits() << " ndedx "<<trk.ndedx() << " q "<< trk.q()<<std::endl
+    << " outerMostRow " << trk.outerMostRow()<<endl
+    << " nhits "<<trk.nHits() << " ndedx "<<trk.ndedx() << " q "<< trk.q()<<endl
     << " chi2[0] "<<trk.chi2(0)<< " chi2[1] "<<trk.chi2(1)
     << " dedx "<<trk.dedx()<<" pt "<<trk.pt()<<" phi0 "<<trk.phi0()
     << " psi "<<trk.psi()<<" r0 "<<trk.r0()<<" tanl "<<trk.tanl()
     << " z0 "<<trk.z0()<<" length "<<trk.length()<<" dpt "<<trk.dpt()
-    << " dz0 "<<trk.dz0()<<" dtanl "<<trk.dtanl()<<std::endl;
+    << " dz0 "<<trk.dz0()<<" dtanl "<<trk.dtanl()<<endl;
 	return os;
 }
 

@@ -40,8 +40,8 @@ StRichPhotonInfo::StRichPhotonInfo(double d, double s, double psi)
 
 StRichPhotonInfo::~StRichPhotonInfo() {/* nopt */}
 
-std::ostream&
-operator<<(std::ostream& os, const StRichPhotonInfo& hit)
+ostream&
+operator<<(ostream& os, const StRichPhotonInfo& hit)
 {
     return (os << "StRichPhotonInfo::>"
             << " d= " << hit.d()

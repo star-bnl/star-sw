@@ -29,6 +29,6 @@ public:
     ClassDef(StHltTriggerReasonCapable,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StHltTriggerReasonCapable&); ///< print operator
+ostream& operator<<(ostream&, const StHltTriggerReasonCapable&); ///< print operator
 
 #endif

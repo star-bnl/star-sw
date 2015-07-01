@@ -136,7 +136,7 @@ inline StHltTrackNode* StHltTrack::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltTrack::trackNode() const {return mTrackNode;}
 
 
-std::ostream& operator<<(std::ostream&, const StHltTrack&); ///< Printting operator
+ostream& operator<<(ostream&, const StHltTrack&); ///< Printting operator
 
 #endif
 

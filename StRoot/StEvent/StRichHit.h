@@ -130,6 +130,6 @@ inline void StRichHit::unSetBit(StRichHitFlag f) { mReservedLong &= ~(f);}
 inline unsigned int StRichHit::flags() const{ return (mReservedLong); }
 
 //non-members
-std::ostream& operator<<(std::ostream& os, const StRichHit& hit);
+ostream& operator<<(ostream& os, const StRichHit& hit);
 
 #endif

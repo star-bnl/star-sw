@@ -106,5 +106,5 @@ StTofMCSlat::setTof(float tof)
     mTofMCInfo.mTof = tof;
 }
 
-std::ostream& operator<<(std::ostream& os, const StTofMCSlat&);
+ostream& operator<<(ostream& os, const StTofMCSlat&);
 #endif

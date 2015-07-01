@@ -107,10 +107,10 @@ void StHltHighPt::setBeta(float val) { mBeta = val; }
 void StHltHighPt::setTof(float val) { mTof = val; }
 
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltHighPt& trigger)
 {
-	os << " bemcMatchPhiDiff " << trigger.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<trigger.bEmcMatchZEdge()<< " bTofProjChannel "<<trigger.bTofProjChannel() << " bTofCellLocalY "<< trigger.bTofCellLocalY() <<" bTofCellLocalZ "<<trigger.bTofCellLocalZ()<< " bTofPathLength "<<trigger.bTofPathLength()<<" beta "<<trigger.beta()<<" tof "<<trigger.tof()<<std::endl;
+	os << " bemcMatchPhiDiff " << trigger.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<trigger.bEmcMatchZEdge()<< " bTofProjChannel "<<trigger.bTofProjChannel() << " bTofCellLocalY "<< trigger.bTofCellLocalY() <<" bTofCellLocalZ "<<trigger.bTofCellLocalZ()<< " bTofPathLength "<<trigger.bTofPathLength()<<" beta "<<trigger.beta()<<" tof "<<trigger.tof()<<endl;
 	return os;
 }
 

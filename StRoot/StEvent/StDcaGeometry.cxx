@@ -133,7 +133,7 @@ THelixTrack StDcaGeometry::thelix() const
     return myHelx;
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os, const StDcaGeometry& dca) {
+ostream&  operator<<(ostream& os, const StDcaGeometry& dca) {
   const Float_t *errMx =  dca.errMatrix();
   return os << Form("Dca: imp %7.2f +/-%7.2f,Z:%7.2f +/-%7.2f,psi:%7.2f +/-%7.2f,pT/q:%7.2f +/-%6.1f%%,TanL:%8.3f +/-%8.3f",
 		    dca.impact(),    (errMx[0] >= 0)  ? TMath::Sqrt(errMx[0]) : -13,
@@ -143,7 +143,7 @@ std::ostream&  operator<<(std::ostream& os, const StDcaGeometry& dca) {
 		    dca.tanDip(),    (errMx[14] >= 0) ? TMath::Sqrt(errMx[14]): -13);
 }
 //________________________________________________________________________________
-void   StDcaGeometry::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StDcaGeometry::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 void   StDcaGeometry::GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const {
   static const Float_t one = 1;

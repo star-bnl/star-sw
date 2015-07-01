@@ -67,5 +67,5 @@ protected:
     ClassDef(StFmsHit,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StFmsHit&);
+ostream& operator<<(ostream&, const StFmsHit&);
 #endif

@@ -167,7 +167,7 @@ StEmcRawHit::setAdc(const unsigned int adc) {mAdc=adc;}
 void
 StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
 
-std::ostream&  operator<<(std::ostream& os, const StEmcRawHit& v) {
+ostream&  operator<<(ostream& os, const StEmcRawHit& v) {
   os << Form("EmcRawHit d/m %3i/%3i eta/sub  %3i/%3i adc/enery %4i/%f",v.detector(),v.module(), v.eta(), v.sub(), v.adc(), v.energy());
   if (v.detector() == kBarrelEmcTowerId || v.detector() == kEndcapEmcTowerId) {
     if      (v.energy() <=  0.0) os << " Junk";
@@ -182,4 +182,4 @@ std::ostream&  operator<<(std::ostream& os, const StEmcRawHit& v) {
   }
   return os;
 }
-void   StEmcRawHit::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StEmcRawHit::Print(Option_t *option) const {cout << *this << endl;}

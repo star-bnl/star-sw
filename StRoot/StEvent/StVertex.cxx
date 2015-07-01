@@ -245,7 +245,7 @@ void StVertex::setIdTruth() { // match with IdTruth
 }
 //______________________________________________________________________________
 void StVertex::NotImplemented(const Char_t *method) const {
-    std::cout << "StVertex::" << method << " is no implemented" <<  std::endl;
+    cout << "StVertex::" << method << " is no implemented" <<  endl;
 }
 //______________________________________________________________________________
 StTrackMassFit* StVertex::massFit(UInt_t i){
@@ -280,7 +280,7 @@ void StVertex::removeMassFit(StTrackMassFit* p) {
     }
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StVertex& v) {
+ostream&  operator<<(ostream& os,  const StVertex& v) {
     const StTrackMassFit *mF = v.parent();
     if (mF && mF->kfParticle()) {
       KFParticle p = *mF->kfParticle();

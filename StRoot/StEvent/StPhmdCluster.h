@@ -78,7 +78,7 @@ private:
     ClassDef(StPhmdCluster,1)
 };
 
-ostream &operator<<(std::ostream&, StPhmdCluster&); // Printing operator
+ostream &operator<<(ostream&, StPhmdCluster&); // Printing operator
 
 
 inline   int    StPhmdCluster::module() const    {return mModule;}
@@ -101,7 +101,7 @@ inline   void   StPhmdCluster::setEnergyPid(int var) {mEnergyPID=var;}
 inline   void   StPhmdCluster::setPid(int var)       {mPID=var;}
 inline   void   StPhmdCluster::setMcPid(int var)     {mMcPID=var;}
 
-std::ostream& operator<<(ostream &, const StPhmdCluster&);
+ostream& operator<<(ostream &, const StPhmdCluster&);
 
 #endif
 

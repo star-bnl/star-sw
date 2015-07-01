@@ -103,7 +103,7 @@ protected:
     ClassDef(StPxlHit,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StPxlHit&);
+ostream& operator<<(ostream&, const StPxlHit&);
 
 inline unsigned char StPxlHit::sector() const {return mSector;}
 inline unsigned char StPxlHit::ladder() const {return mLadder;}

@@ -55,11 +55,11 @@ StDetectorId StRnDHit::detector() const {return mDetectorId;}
 
 void StRnDHit::setDetectorId(StDetectorId id) {mDetectorId = id;}
 
-std::ostream& operator<<(std::ostream& os, const StRnDHit& hit)
+ostream& operator<<(ostream& os, const StRnDHit& hit)
 {
     return os << "HFT Hit -I- \tLayer:"<<hit.mLayer<<" ladder: "<<hit.mLadder
 	    << " wafer: "<< hit.mWafer<<"\n\t\t"<<((StHit)hit)
 	    <<" \n\t\tExtraByte0: "<<hit.mExtraByte0<<" ExtraByte1: "<<hit.mExtraByte1
 	    <<"\n\t\tDoubles: "<< hit.mDouble0<< " "<<hit.mDouble1<<" "<<hit.mDouble2
-	    << hit.mDouble3 << " " << hit.mDouble4<<std::endl;
+	    << hit.mDouble3 << " " << hit.mDouble4<<endl;
 }

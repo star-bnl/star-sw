@@ -69,6 +69,6 @@ inline int StTofMCInfo::operator!=(const StTofMCInfo& MCInfo) const
     return !(*this == MCInfo);  // use operator==()
 }
 
-std::ostream& operator<<(std::ostream& os, const StTofMCInfo& MCInfo);
+ostream& operator<<(ostream& os, const StTofMCInfo& MCInfo);
 
 #endif

@@ -78,7 +78,7 @@ inline float StHltBEmcTowerHit::daqId() const {return mDaqId;}
 inline StHltTrackNode* StHltBEmcTowerHit::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltBEmcTowerHit::trackNode() const {return mTrackNode;}
 
-std::ostream& operator<<(std::ostream&, const StHltBEmcTowerHit&); ///< Printting operator
+ostream& operator<<(ostream&, const StHltBEmcTowerHit&); ///< Printting operator
 
 #endif
 

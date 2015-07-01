@@ -587,7 +587,7 @@ void StTrack::setIdTruth() // match with IdTruth
 
 //________________________________________________________________________________
 
-std::ostream&  operator<<(std::ostream& os,  const StTrack& track) {
+ostream&  operator<<(ostream& os,  const StTrack& track) {
     os << Form("%4i ",track.key());
     if      (track.type() == global )                 os << "global ";
     else if (track.type() == primary)                 os << "primary";

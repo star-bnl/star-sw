@@ -109,7 +109,7 @@ private:
     ClassDef(StHltTrackNode,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StHltTrackNode&);
+ostream& operator<<(ostream&, const StHltTrackNode&);
 
 
 #endif

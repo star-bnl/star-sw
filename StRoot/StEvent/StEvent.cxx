@@ -1373,7 +1373,7 @@ StEvent::addPsd(StPsd* p)
 {
     if (p) {
         if (psd(p->pwg(), p->id()))
-            std::cerr << "StEvent::addPsd(): Error, PSD with same identifiers already exist. Nothing added." << std::endl;
+            cerr << "StEvent::addPsd(): Error, PSD with same identifiers already exist. Nothing added." << endl;
         else
 	    mContent.push_back(p);
     }
@@ -1398,61 +1398,62 @@ void StEvent::Browse(TBrowser* b)
 
 void StEvent::statistics()
 {
-    std::cout << "Statistics and information for event " << id() << std::endl;
-    std::cout << "\tthis:                        " << static_cast<void*>(this) << std::endl;
-//  std::cout << "\tcvsTag:                      " << cvsTag() << std::endl;
-    std::cout << "\ttype:                        " << type() << std::endl;
-    std::cout << "\tid:                          " << id() << std::endl;
-    std::cout << "\trunId:                       " << runId() << std::endl;
-    std::cout << "\ttime:                        " << time() << std::endl;
-    std::cout << "\ttriggerMask:                 " << triggerMask() << std::endl;
-    std::cout << "\tbunchCrossingNumber(0):      " << bunchCrossingNumber(0) << std::endl;
-    std::cout << "\tbunchCrossingNumber(1):      " << bunchCrossingNumber(1) << std::endl;
-    std::cout << "\tStEventSummary:              " << static_cast<void*>(summary());
-    std::cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
-    std::cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection());
-    std::cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
-    std::cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
-    std::cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
-    std::cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection());
-    std::cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
-    std::cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
-    std::cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
-    std::cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
-    std::cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
-    std::cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
-    std::cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
-    std::cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
-    std::cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
-    std::cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
-    std::cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
-    std::cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
-    std::cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
-    std::cout << "\tStHltEvent:                  " << static_cast<void*>(hltEvent());
-    std::cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
-    std::cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
-    std::cout << "\tStTriggerData:               " << static_cast<void*>(triggerData());
-    std::cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
-    std::cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << std::endl;
-    std::cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
-    std::cout << "\tnumberOfCalibrationVertices: " << numberOfCalibrationVertices() << std::endl;
-    std::cout << "\t# of TPC hits:               " << (tpcHitCollection() ? tpcHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of SSD hits:               " << (ssdHitCollection() ? ssdHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of PXL hits:               " << (pxlHitCollection() ? pxlHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of IST hits:               " << (istHitCollection() ? istHitCollection()->numberOfHits() : 0) << std::endl;
-    std::cout << "\t# of track nodes:            " << trackNodes().size() << std::endl;
-    std::cout << "\t# of primary tracks:         " << (primaryVertex(0) ? primaryVertex(0)->numberOfDaughters() : 0) << std::endl;
-    std::cout << "\t# of V0s:                    " << v0Vertices().size() << std::endl;
-    std::cout << "\t# of Xis:                    " << xiVertices().size() << std::endl;
-    std::cout << "\t# of Kinks:                  " << kinkVertices().size() << std::endl;
-    std::cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << std::endl;
-    std::cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << std::endl;
-    std::cout << "\t# of hits in FGT:            " << (fgtCollection() ? fgtCollection()->getNumHits() : 0) << std::endl;
-    std::cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << std::endl;
-    std::cout << "\t# of PSDs:                   " << numberOfPsds() << std::endl;
-    std::cout << "\t# of hits in GMT:            " << (gmtCollection() ? gmtCollection()->getNumHits() : 0) << std::endl;
+    cout << "Statistics and information for event " << id() << endl;
+    cout << "\tthis:                        " << static_cast<void*>(this) << endl;
+//  cout << "\tcvsTag:                      " << cvsTag() << endl;
+    cout << "\ttype:                        " << type() << endl;
+    cout << "\tid:                          " << id() << endl;
+    cout << "\trunId:                       " << runId() << endl;
+    cout << "\ttime:                        " << time() << endl;
+    cout << "\ttriggerMask:                 " << triggerMask() << endl;
+    cout << "\tbunchCrossingNumber(0):      " << bunchCrossingNumber(0) << endl;
+    cout << "\tbunchCrossingNumber(1):      " << bunchCrossingNumber(1) << endl;
+    cout << "\tStEventSummary:              " << static_cast<void*>(summary());
+    cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
+    cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection());
+    cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
+    cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
+    cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStSstHitCollection:          " << static_cast<void*>(sstHitCollection());
+    cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection());
+    cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
+    cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
+    cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
+    cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
+    cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
+    cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
+    cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
+    cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
+    cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
+    cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
+    cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
+    cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
+    cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
+    cout << "\tStHltEvent:                  " << static_cast<void*>(hltEvent());
+    cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
+    cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
+    cout << "\tStTriggerData:               " << static_cast<void*>(triggerData());
+    cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
+    cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
+    cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
+    cout << "\tnumberOfCalibrationVertices: " << numberOfCalibrationVertices() << endl;
+    cout << "\t# of TPC hits:               " << (tpcHitCollection() ? tpcHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of SSD hits:               " << (ssdHitCollection() ? ssdHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of IST hits:               " << (istHitCollection() ? istHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of PXL hits:               " << (pxlHitCollection() ? pxlHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of track nodes:            " << trackNodes().size() << endl;
+    cout << "\t# of primary tracks:         " << (primaryVertex(0) ? primaryVertex(0)->numberOfDaughters() : 0) << endl;
+    cout << "\t# of V0s:                    " << v0Vertices().size() << endl;
+    cout << "\t# of Xis:                    " << xiVertices().size() << endl;
+    cout << "\t# of Kinks:                  " << kinkVertices().size() << endl;
+    cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << endl;
+    cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << endl;
+    cout << "\t# of hits in FGT:            " << (fgtCollection() ? fgtCollection()->getNumHits() : 0) << endl;
+    cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
+    cout << "\t# of PSDs:                   " << numberOfPsds() << endl;
+    cout << "\t# of hits in GMT:            " << (gmtCollection() ? gmtCollection()->getNumHits() : 0) << endl;
 }
 
 void StEvent::Split()
@@ -1536,8 +1537,8 @@ void StEvent::addHitCollection(StSPtrVecHit* p, const Char_t *name) {
   if (p) {
     TObjectSet *set = (TObjectSet *) FindByName(name);
     if (set) 
-      std::cerr << "StEvent::addHitCollection(): Error, HitCollection with " 
-	   <<  name << " already exist. Nothing added."  << std::endl;
+      cerr << "StEvent::addHitCollection(): Error, HitCollection with " 
+	   <<  name << " already exist. Nothing added."  << endl;
     else {
       set = new TObjectSet(name,p,kTRUE);
       Add(set);

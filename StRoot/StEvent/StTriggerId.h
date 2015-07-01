@@ -66,7 +66,7 @@ public:
     void addTrigger(UInt_t, UInt_t,
 	          UInt_t, UInt_t, UInt_t);
 
-    friend std::ostream& operator<<(std::ostream&, const StTriggerId&);
+    friend ostream& operator<<(ostream&, const StTriggerId&);
     
 private:
     UInt_t index(UInt_t) const;

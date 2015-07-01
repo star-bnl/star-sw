@@ -30,9 +30,9 @@ void StHltTriggerReason::setReasonBit(StHltTriggerReasonType val) { mReasonBit =
 
 void StHltTriggerReason::setReason(StHltTriggerReasonCapable* val) { mReason = val; }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltTriggerReason& r)
 {
-	os << " reasonBit " << r.reasonBit() << std::endl;
+	os << " reasonBit " << r.reasonBit() << endl;
 	return os;
 }

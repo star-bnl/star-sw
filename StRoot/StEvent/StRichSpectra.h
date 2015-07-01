@@ -191,5 +191,5 @@ inline float StRichSpectra::getReserved() const {return  mReserved;}
 inline int   StRichSpectra::getVersion() const {return  mVersion;}
 
 //non-members
-std::ostream& operator<<(std::ostream&, const StRichSpectra&);
+ostream& operator<<(ostream&, const StRichSpectra&);
 #endif

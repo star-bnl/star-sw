@@ -176,7 +176,7 @@
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
 class StTrack;
-std::ostream&  operator<<(std::ostream& os,  const StTrack& t);
+ostream&  operator<<(ostream& os,  const StTrack& t);
 
 class StParticleDefinition;
 class StVertex;
@@ -292,7 +292,7 @@ public:
     Bool_t       testBit(UInt_t f) const { return (Bool_t) ((mFlagExtension & f) != 0); }
     Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
     void         invertBit(UInt_t f) { mFlagExtension ^= f; }
-    void Print(Option_t *option="") const {std::cout << option << (*this) << std::endl; }
+    void Print(Option_t *option="") const {cout << option << (*this) << endl; }
     
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete

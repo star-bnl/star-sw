@@ -260,11 +260,11 @@ StHltTrackNode::setTof(float val)
 	mTof = val;
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltTrackNode& node)
 {
-	os << " bemcMatchPhiDiff " << node.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<node.bEmcMatchZEdge()<<std::endl
-    << " bTofProjChannel "<<node.bTofProjChannel() << " bTofCellLocalY "<< node.bTofCellLocalY() <<" bTofCellLocalZ "<<node.bTofCellLocalZ()<< " bTofPathLength "<<node.bTofPathLength()<<" beta "<<node.beta()<<" tof "<<node.tof()<<std::endl;
+	os << " bemcMatchPhiDiff " << node.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<node.bEmcMatchZEdge()<<endl
+    << " bTofProjChannel "<<node.bTofProjChannel() << " bTofCellLocalY "<< node.bTofCellLocalY() <<" bTofCellLocalZ "<<node.bTofCellLocalZ()<< " bTofPathLength "<<node.bTofPathLength()<<" beta "<<node.beta()<<" tof "<<node.tof()<<endl;
 	return os;
     
 }

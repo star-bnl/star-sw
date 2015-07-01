@@ -42,7 +42,7 @@ StTofMCInfo::StTofMCInfo(int trkId,   int gId,       int nHits,
       mPmLength(pmLenght), mTof(tof),   mTime(time),   mMTime(mTime), 
       mMTimeL(mTimeL)                                         {/* noop */ }
 
-std::ostream& operator<<(std::ostream& os, const StTofMCInfo& MCInfo)
+ostream& operator<<(ostream& os, const StTofMCInfo& MCInfo)
 {
     return (os << "  trkId= " << MCInfo.mTrkId << ", gId=  " << MCInfo.mGId 
 	    << ", nHits= " << MCInfo.mNHits << ", nPhe= " << MCInfo.mNPhe  

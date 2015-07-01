@@ -47,8 +47,8 @@ StRichSpectra::StRichSpectra(float x,   float y,   float dx,    float dy,
       mVersion(version)
 {/*nopt*/}
     
-std::ostream&
-operator<<(std::ostream& os, const StRichSpectra& t)
+ostream&
+operator<<(ostream& os, const StRichSpectra& t)
 {
     return (os << "StRichSpectra::>"
             << "\n\tExtrapolatedX:  " << t.getExtrapolatedX() << ", " << t.getExtrapolatedY()

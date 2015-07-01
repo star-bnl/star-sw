@@ -107,8 +107,8 @@ StRichPidTraits::getPid(StParticleDefinition* part) const {
     return 0;
 }
 
-std::ostream&
-operator<<(std::ostream& os, const StRichPidTraits& t)
+ostream&
+operator<<(ostream& os, const StRichPidTraits& t)
 {
     return (os << "StrichPidTraits::> #Pids= " << t.getAllPids().size()
             << "\n\tProduction Version: " << t.productionVersion()

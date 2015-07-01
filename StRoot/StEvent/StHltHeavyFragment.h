@@ -99,7 +99,7 @@ private:
     ClassDef(StHltHeavyFragment,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StHltHeavyFragment&);
+ostream& operator<<(ostream&, const StHltHeavyFragment&);
 
 
 #endif

@@ -1430,7 +1430,7 @@ void StTriggerData2009::Streamer(TBuffer &R__b)
     
     if (R__b.IsReading()) {
         R__b.ReadClassBuffer(StTriggerData2009::Class(),this);
-   //     std::cout << "StTriggerData2009::Streamer read trigger data!!!"<<std::endl;
+   //     cout << "StTriggerData2009::Streamer read trigger data!!!"<<endl;
         if(mData) readData();
     }
     else {

@@ -89,6 +89,6 @@ StTofMCCell::setTof(float tof)
     mTofMCInfo.mTof = tof;
 }
 
-std::ostream& operator<<(std::ostream& os, const StTofMCCell&);
+ostream& operator<<(ostream& os, const StTofMCCell&);
 
 #endif

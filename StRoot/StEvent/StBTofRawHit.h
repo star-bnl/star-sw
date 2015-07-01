@@ -64,7 +64,7 @@ protected:
     ClassDef(StBTofRawHit,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StBTofRawHit&); // Printing operator
+ostream& operator<<(ostream&, const StBTofRawHit&); // Printing operator
 
 inline void
 StBTofRawHit::setFlag(char iflag)

@@ -30,8 +30,8 @@ StTofMCHit::StTofMCHit()  {/* noop */}
 
 StTofMCHit::~StTofMCHit() {/* noop */}
 
-std::ostream&
-operator<<(std::ostream& os, const StTofMCHit& hit)
+ostream&
+operator<<(ostream& os, const StTofMCHit& hit)
 {
   return (os << "StTofMCHit::> " << ", trayId= " 
 	  << hit.trayIndex() << ", moduleId= "

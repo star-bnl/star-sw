@@ -103,7 +103,7 @@ Int_t StTpcDigitalSector::cleanup() {
       numberOfEmptyRows++;
     }
   } // Rows are now clean
-    //std::cout << "This sector had " << numberOfEmptyRows << " empty rows." << std::endl;
+    //cout << "This sector had " << numberOfEmptyRows << " empty rows." << endl;
   if (numberOfEmptyRows==mData.size()) return 1;
   else return 0;
 }
@@ -243,14 +243,14 @@ Int_t StTpcDigitalSector::PrintTimeAdc(Int_t row, Int_t pad) const {
   const StDigitalTimeBins &trsPadData = *TrsPadData;
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
-  std::cout << "Time/Adc/IdTruth for row " << row << "\tpad " << pad << std::endl;
+  cout << "Time/Adc/IdTruth for row " << row << "\tpad " << pad << endl;
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
     StDigitalPair digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
     UInt_t tb   = digPair.time();
     for (UInt_t j = 0; j < ntbk; j++, tb++) {
       if (digPair.adc()[j] <= 0) continue;
-      std::cout << "\t" << tb << "\t" << digPair.adc()[j] << "\t" << digPair.idt()[j] << std::endl;
+      cout << "\t" << tb << "\t" << digPair.adc()[j] << "\t" << digPair.idt()[j] << endl;
     }
   }
   return nTimeSeqs;
@@ -305,13 +305,13 @@ StTpcDigitalSector &StTpcDigitalSector::operator= (const StTpcDigitalSector& v) 
 void StTpcDigitalSector::Print(const Option_t *opt) const {
   TString Opt(opt);
   for (Int_t row = 1; row <= mNoRows; row++) {
-    //    std::cout << "sector/row " << mSector << "/" << row << std::endl;
+    //    cout << "sector/row " << mSector << "/" << row << endl;
     Int_t npads = numberOfPadsInRow(row);
     for (Int_t pad = 1; pad <= npads; pad++) {
-      //      std::cout << "sector/row/pad = " << mSector << "/" << row << "/" << pad << std::endl;
+      //      cout << "sector/row/pad = " << mSector << "/" << row << "/" << pad << endl;
       Int_t ntb = numberOfTimeBins(row,pad);
       if (! ntb) continue;
-      std::cout << "sector/row/pad = " << mSector << "/" << row << "/" << pad << " = " << ntb << " time sequences" << std::endl;
+      cout << "sector/row/pad = " << mSector << "/" << row << "/" << pad << " = " << ntb << " time sequences" << endl;
       if (Opt.Contains("all",TString::kIgnoreCase)) PrintTimeAdc(row,pad);
     }
   }

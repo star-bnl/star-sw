@@ -174,7 +174,7 @@ inline float StHltDiElectron::psi() const {return mPsi;}
 inline float StHltDiElectron::tanl() const {return mTanl;}
 
 
-std::ostream& operator<<(std::ostream&, const StHltDiElectron&);///< print operator
+ostream& operator<<(ostream&, const StHltDiElectron&);///< print operator
 
 #endif
 

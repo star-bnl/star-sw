@@ -183,5 +183,5 @@ inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition
 inline int  	       StHit::id()      const {return mId;}
 inline const StHit*    StHit::nextHit() const {return mNextHit;}
 
-std::ostream&              operator<<(std::ostream& os, StHit const & v);
+ostream&              operator<<(ostream& os, StHit const & v);
 #endif

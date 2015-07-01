@@ -249,15 +249,15 @@ void
 StFpdCollection::dump()
 {
     unsigned int i;
-    std::cout << "FPD data dump     token " << mToken << std::endl;
-    std::cout << "North  ADC "; for(i=1; i<13;  i++){std::cout << north(i)  << " ";}; std::cout << std::endl;
-    std::cout << "South  ADC "; for(i=1; i<17;  i++){std::cout << south(i)  << " ";}; std::cout << std::endl;
-    std::cout << "Top    ADC "; for(i=1; i<17;  i++){std::cout << top(i)    << " ";}; std::cout << std::endl;
-    std::cout << "Bottom ADC "; for(i=1; i<17;  i++){std::cout << bottom(i) << " ";}; std::cout << std::endl;
-    std::cout << "PreShower1 "; for(i=1; i<13;  i++){std::cout << pres1(i) << " ";}; std::cout << std::endl;
-    std::cout << "PreShower2 "; for(i=1; i<13;  i++){std::cout << pres2(i) << " ";}; std::cout << std::endl;
-    std::cout << "SMD X      "; for(i=1; i<61;  i++){std::cout << smdx(i) << " ";}; std::cout << std::endl;
-    std::cout << "SMD Y      "; for(i=1; i<101; i++){std::cout << smdy(i) << " ";}; std::cout << std::endl;
-    std::cout << "South Veto  " << southVeto() << std::endl;
-    std::cout << "Scalers    "; for(i=0; i<128; i++){printf(" %x ",mScl[i]);}; std::cout << std::endl;
+    cout << "FPD data dump     token " << mToken << endl;
+    cout << "North  ADC "; for(i=1; i<13;  i++){cout << north(i)  << " ";}; cout << endl;
+    cout << "South  ADC "; for(i=1; i<17;  i++){cout << south(i)  << " ";}; cout << endl;
+    cout << "Top    ADC "; for(i=1; i<17;  i++){cout << top(i)    << " ";}; cout << endl;
+    cout << "Bottom ADC "; for(i=1; i<17;  i++){cout << bottom(i) << " ";}; cout << endl;
+    cout << "PreShower1 "; for(i=1; i<13;  i++){cout << pres1(i) << " ";}; cout << endl;
+    cout << "PreShower2 "; for(i=1; i<13;  i++){cout << pres2(i) << " ";}; cout << endl;
+    cout << "SMD X      "; for(i=1; i<61;  i++){cout << smdx(i) << " ";}; cout << endl;
+    cout << "SMD Y      "; for(i=1; i<101; i++){cout << smdy(i) << " ";}; cout << endl;
+    cout << "South Veto  " << southVeto() << endl;
+    cout << "Scalers    "; for(i=0; i<128; i++){printf(" %x ",mScl[i]);}; cout << endl;
 }

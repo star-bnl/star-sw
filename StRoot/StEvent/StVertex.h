@@ -79,7 +79,7 @@
 class StTrack;
 class StTrackFilter;
 class StVertex;
-std::ostream&  operator<<(std::ostream& os,  const StVertex& v);
+ostream&  operator<<(ostream& os,  const StVertex& v);
 
 class StVertex : public StMeasuredPoint {
 public:
@@ -139,7 +139,7 @@ public:
     Bool_t        isKinkVertex()      const {return TESTBIT(mFlag,kKinkVtxId);}    
     Bool_t        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
     Bool_t        isRejected()        const {return TESTBIT(mFlag,kRejectedVtxId);}
-    virtual  void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    virtual  void Print(Option_t *option="") const {cout << option << *this << endl; }
     static void   SetNoFitPointCutForGoodTrack(UInt_t val) {fgNoFitPointCutForGoodTrack = val;}
     static UInt_t NoFitPointCutForGoodTrack() {return fgNoFitPointCutForGoodTrack;}
 

@@ -29,11 +29,11 @@
 #include "StTpcPixel.h"
 
 void StTpcPixel::Print(Option_t *option) const {
-      std::cout << option << "\t" << *this << std::endl;
+      cout << option << "\t" << *this << endl;
     }
 
 static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.5 2004/08/06 15:37:43 fisyak Exp $";
-std::ostream& operator<< (std::ostream& os, const StTpcPixel& m)
+ostream& operator<< (ostream& os, const StTpcPixel& m)
 {
   os << "d:" << (int) m.detector() 
      << "/s:" << (int) m.sector() 
@@ -43,7 +43,7 @@ std::ostream& operator<< (std::ostream& os, const StTpcPixel& m)
      << "/a:" << m.adc() 
      << "/i:" << m.idTruth() 
      << "/ClId:" << m.id() 
-     << std::endl;
+     << endl;
     return os;
 }
 

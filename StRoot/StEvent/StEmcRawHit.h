@@ -88,7 +88,7 @@ protected:
 
     ClassDef(StEmcRawHit,1)
 }; 
-std::ostream&              operator<<(std::ostream& os, StEmcRawHit const & v);
+ostream&              operator<<(ostream& os, StEmcRawHit const & v);
 #endif
 
 

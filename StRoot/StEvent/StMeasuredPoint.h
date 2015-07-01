@@ -69,5 +69,5 @@ protected:
     StThreeVectorF mPosition;
     ClassDef(StMeasuredPoint,1)
 };
-std::ostream&              operator<<(std::ostream& os, StMeasuredPoint const & v);
+ostream&              operator<<(ostream& os, StMeasuredPoint const & v);
 #endif

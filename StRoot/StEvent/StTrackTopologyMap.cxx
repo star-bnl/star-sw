@@ -433,7 +433,7 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
     return *max_element(diffs.begin()+1, diffs.end()) - 1;  // skip first
 }
 
-std::ostream& operator<< (std::ostream& os, const StTrackTopologyMap& m)
+ostream& operator<< (ostream& os, const StTrackTopologyMap& m)
 {
     for (int i=0; i<64; i++) {
         if (i>31)

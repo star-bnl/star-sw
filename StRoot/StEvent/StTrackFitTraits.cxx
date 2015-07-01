@@ -181,6 +181,7 @@ UShort_t StTrackFitTraits::numberOfFitPoints() const
     numberOfFitPoints(kFtpcEastId) 	+
     numberOfFitPoints(kSvtId)      	+
     numberOfFitPoints(kSsdId) 		+	
+    numberOfFitPoints(kSstId)           +
     numberOfFitPoints(kPxlId) 		+
     numberOfFitPoints(kIstId);	
     if (mNumberOfFitPoints&0x8000) result += (mNumberOfFitPoints&0x7FFF);

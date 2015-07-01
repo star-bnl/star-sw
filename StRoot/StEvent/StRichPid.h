@@ -189,5 +189,5 @@ inline void StRichPid::setBit(StRichPidFlag f)   { (mFlags |= f);}
 inline void StRichPid::unSetBit(StRichPidFlag f) { (mFlags &= ~(f));}
 
 //non-members
-//std::ostream& operator<<(std::ostream& os, const StRichPid& hit);
+//ostream& operator<<(ostream& os, const StRichPid& hit);
 #endif

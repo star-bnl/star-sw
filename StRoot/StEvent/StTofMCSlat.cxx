@@ -52,11 +52,11 @@ StTofMCSlat::operator!=(const StTofMCSlat& MCSlat) const
     return !(*this == MCSlat);  // use operator==()
 }
 
-std::ostream&
-operator<<(std::ostream& os, const StTofMCSlat& slat)
+ostream&
+operator<<(ostream& os, const StTofMCSlat& slat)
 {
     return (os << "StTofMCSlat::> " << "  Id=  " << slat.slatIndex()   
 	    << ", adc= " << slat.adc()  
-	    << ", tdc= " << slat.tdc() << std::endl  
+	    << ", tdc= " << slat.tdc() << endl  
 	    << "MCInfo: " << slat.mcInfo());
 }

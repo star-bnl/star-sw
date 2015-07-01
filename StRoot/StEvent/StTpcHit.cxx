@@ -90,7 +90,7 @@ void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxp
   mMaxtmbk = mxtmbk - time;
 }
 
-std::ostream&  operator<<(std::ostream& os, const StTpcHit& v)
+ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
 	      << *((StHit *)&v)
@@ -99,4 +99,4 @@ std::ostream&  operator<<(std::ostream& os, const StTpcHit& v)
 		      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),
 		      v.timeBucket(),v.pad(), v.adc());  
 }
-void   StTpcHit::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StTpcHit::Print(Option_t *option) const {cout << *this << endl;}

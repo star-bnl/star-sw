@@ -165,5 +165,5 @@ protected:
     StThreeVectorF mPositionL; //! lower position = y_local - padlength/2.
     ClassDef(StTpcHit,9)
 };
-std::ostream&              operator<<(std::ostream& os, StTpcHit const & v);
+ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif

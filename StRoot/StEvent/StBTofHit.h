@@ -78,5 +78,5 @@ class StBTofHit : public StHit {
 #endif //__CINT__
   ClassDef(StBTofHit,2)
 };
-std::ostream& operator<<(std::ostream&, const StBTofHit&); // Printing operator
+ostream& operator<<(ostream&, const StBTofHit&); // Printing operator
 #endif

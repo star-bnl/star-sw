@@ -106,7 +106,7 @@ StEmcPoint::getDetId(const StDetectorId id) const{
   }else if(id>=kEndcapEmcTowerId && id<=kEndcapSmdVStripId){
     return id-kEndcapEmcTowerId;
   }else{
-    std::cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<std::endl;
+    cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<endl;
     return 0;
   }
 }
@@ -117,7 +117,7 @@ StEmcPoint::getDetId(Int_t id) const{
   }else if(id>=kEndcapEmcTowerId && id<=kEndcapSmdVStripId){
     return id-kEndcapEmcTowerId;
   }else{
-    std::cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<std::endl;
+    cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<endl;
     return 0;
   }
 }
@@ -221,29 +221,29 @@ StEmcPoint::addTrack(StTrack* track)
 // 11-nov-03 by PAI
 void StEmcPoint::print()
 { // for debugging 
-  std::cout << "Point energy " << mEnergy << std::endl;
-  std::cout << "size         " << mSize   << std::endl;
-  std::cout << "#tracks " << mTracks.size() << std::endl;
+  cout << "Point energy " << mEnergy << endl;
+  cout << "size         " << mSize   << endl;
+  cout << "#tracks " << mTracks.size() << endl;
   for(int det=0; det<4; det++){
-    std::cout << " det " << det << " #clusters " << mCluster[det].size()<<std::endl;
+    cout << " det " << det << " #clusters " << mCluster[det].size()<<endl;
   }
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StEmcPoint& pnt)
 {
   os << "Point Energy " << pnt.energy() 
-     << " size "    << pnt.size() << " #tracks " << pnt.nTracks() << std::endl; 
+     << " size "    << pnt.size() << " #tracks " << pnt.nTracks() << endl; 
   Int_t Ids[4] = {kBarrelEmcTowerId, kBarrelEmcPreShowerId, kEndcapEmcTowerId, kEndcapEmcPreShowerId};
   for (Int_t k = 0; k < 4; k++) {
     const StPtrVecEmcCluster &cl = pnt.cluster(Ids[k]);
     Int_t ncl = (Int_t) cl.size();
     for (Int_t i = 0; i < ncl; i++) {
-      std::cout << *cl[i] << std::endl;
+      cout << *cl[i] << endl;
     }
   }
   os << *((StHit *)&pnt);
   return os;
 }
-void   StEmcPoint::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StEmcPoint::Print(Option_t *option) const {cout << *this << endl;}
 

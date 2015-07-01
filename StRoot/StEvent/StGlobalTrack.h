@@ -46,7 +46,7 @@
 #include "StTrack.h"
 #include "StDcaGeometry.h"
 class StGlobalTrack;
-std::ostream&  operator<<(std::ostream& os,  const StGlobalTrack& t);
+ostream&  operator<<(ostream& os,  const StGlobalTrack& t);
 
 class StGlobalTrack : public StTrack {
  public:
@@ -62,7 +62,7 @@ class StGlobalTrack : public StTrack {
   StDcaGeometry* dcaGeometry()  {return mDcaGeometry;}
   void setDcaGeometry(StDcaGeometry* dca) {mDcaGeometry=dca;}
   
-  void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+  void Print(Option_t *option="") const {cout << option << *this << endl; }
  protected:
   StDcaGeometry *mDcaGeometry;
   

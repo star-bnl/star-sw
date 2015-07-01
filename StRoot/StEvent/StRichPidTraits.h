@@ -159,5 +159,5 @@ inline const StRichSpectra* StRichPidTraits::getRichSpectra() const {return mRic
 inline void StRichPidTraits::setRichSpectra(StRichSpectra* sp) {mRichSpectra = sp;}
 
 //non-members
-std::ostream& operator<<(std::ostream& os, const StRichPidTraits& t);
+ostream& operator<<(ostream& os, const StRichPidTraits& t);
 #endif

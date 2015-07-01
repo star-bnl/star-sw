@@ -27,7 +27,7 @@ StGmtStripCollection::~StGmtStripCollection() {/* no op */}
 void StGmtStripCollection::removeFlagged(){
     if( !mStripVec.empty() ){
         // container to hold a copy
-        std::vector< StGmtStrip* > copy;
+        vector< StGmtStrip* > copy;
         copy.reserve( mStripVec.size() );
         sortByGeoId();
         
@@ -45,7 +45,7 @@ void StGmtStripCollection::removeFlagged(){
             // this deletes the objects
             mStripVec.clear();
             // note: ownership of new objects passed to StSPtrVec
-            std::vector< StGmtStrip* >::iterator copyIter;
+            vector< StGmtStrip* >::iterator copyIter;
             for( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
                 mStripVec.push_back( *copyIter );
         }

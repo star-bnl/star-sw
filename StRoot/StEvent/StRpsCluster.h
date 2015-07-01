@@ -61,6 +61,6 @@ protected:
     ClassDef(StRpsCluster,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StRpsCluster&);
+ostream& operator<<(ostream&, const StRpsCluster&);
 
 #endif

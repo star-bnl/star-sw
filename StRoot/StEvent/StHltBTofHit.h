@@ -78,7 +78,7 @@ inline short StHltBTofHit::cell() const {return mChannel%6;}
 inline StHltTrackNode* StHltBTofHit::trackNode() {return mTrackNode;}
 inline const StHltTrackNode* StHltBTofHit::trackNode() const {return mTrackNode;}
 
-std::ostream& operator<<(std::ostream&, const StHltBTofHit&); ///< Printting operator
+ostream& operator<<(ostream&, const StHltBTofHit&); ///< Printting operator
 
 #endif
 

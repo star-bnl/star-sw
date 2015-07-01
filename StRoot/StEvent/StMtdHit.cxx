@@ -98,14 +98,14 @@ StMtdHit::setIdTruth(int idtru,int qatru)
     mQuality = static_cast<UShort_t>(qatru);
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StMtdHit& hit)
 {
     os << " Backleg:" << hit.backleg() << "  Module:" << hit.module()
-       << " Cell:" << hit.cell() << std::endl
+       << " Cell:" << hit.cell() << endl
        << " LeTime " << hit.leadingEdgeTime().first << " " << hit.leadingEdgeTime().second
-       << " TeTime " << hit.trailingEdgeTime().first << " " << hit.trailingEdgeTime().second << std::endl
-       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) << std::endl
-       << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth() << std::endl;
+       << " TeTime " << hit.trailingEdgeTime().first << " " << hit.trailingEdgeTime().second << endl
+       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) << endl
+       << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth() << endl;
     return os;
 }

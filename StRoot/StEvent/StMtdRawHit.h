@@ -56,7 +56,7 @@ protected:
     ClassDef(StMtdRawHit,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StMtdRawHit&); // Printing operator
+ostream& operator<<(ostream&, const StMtdRawHit&); // Printing operator
 inline void StMtdRawHit::setFlag(char iflag) { mFlag = iflag;}
 inline void StMtdRawHit::setBackleg(unsigned char ibackleg) { mBackLeg = ibackleg;}
 inline void StMtdRawHit::setChannel(unsigned char ichannel){ mChannel = ichannel;}

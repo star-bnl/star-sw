@@ -45,11 +45,11 @@ StTofMCCell::operator!=(const StTofMCCell& MCCell) const
     return !(*this == MCCell);  // use operator==()
 }
 
-std::ostream&
-operator<<(std::ostream& os, const StTofMCCell& cell)
+ostream&
+operator<<(ostream& os, const StTofMCCell& cell)
 {
     return (os << "StTofMCCell::> "  << ", tray= " << cell.trayIndex()
 	    << ", module= " << cell.moduleIndex() << ", cell= "
 	    << cell.cellIndex() << ", adc= " << cell.adc()  
-	    << ", tdc= " << cell.tdc() << std::endl << "MCInfo:  " << cell.mcInfo());
+	    << ", tdc= " << cell.tdc() << endl << "MCInfo:  " << cell.mcInfo());
 }

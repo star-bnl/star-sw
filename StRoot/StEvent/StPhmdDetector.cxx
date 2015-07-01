@@ -131,7 +131,7 @@ StPhmdDetector::setCluster(StPhmdClusterCollection* val)
     mClusters = val;
 }
 
-std::ostream&  operator<<(std::ostream& os, const StPhmdHit& h)
+ostream&  operator<<(ostream& os, const StPhmdHit& h)
 {
     os << "super="         << h.superModule();
     os << "\tsubDetector=" << h.subDetector();

@@ -89,7 +89,7 @@ void StPrimaryTrack::Streamer(TBuffer &R__b)
     }
 } 
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StPrimaryTrack& track) {
+ostream&  operator<<(ostream& os,  const StPrimaryTrack& track) {
     os << *((StTrack *) &track);
     if (! track.geometry()) return os;
     Double_t charge = track.geometry()->charge();

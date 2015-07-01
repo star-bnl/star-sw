@@ -68,7 +68,7 @@
 #define StPrimaryVertex_hh
 #include "StVertex.h"
 class StPrimaryVertex;
-std::ostream&  operator<<(std::ostream& os,  const StPrimaryVertex& v);
+ostream&  operator<<(ostream& os,  const StPrimaryVertex& v);
 class StPrimaryVertex : public StVertex {
 public:
     StPrimaryVertex();
@@ -130,7 +130,7 @@ public:
     void setNumPostXTracks(UShort_t p)              {mNumPostXTracks = p;}
     void setNumTracksTpcWestOnly(UShort_t val) {mNumTracksTpcWestOnly = val;}
     void setNumTracksTpcEastOnly(UShort_t val) {mNumTracksTpcEastOnly = val;}
-    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    void Print(Option_t *option="") const {cout << option << *this << endl; }
 private:
     void init();
 protected:

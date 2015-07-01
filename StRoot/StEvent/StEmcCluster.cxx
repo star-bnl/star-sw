@@ -114,7 +114,7 @@ StEmcCluster::addNeighbor(StEmcCluster* cluster) {mNeighbors.push_back(cluster);
 void
 StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
 {
   return os << Form("EmcCluster Energy %5.2f Eta %7.4f +/- %6.4f", cl.energy(), cl.eta(),cl.sigmaEta())
@@ -122,5 +122,5 @@ operator<<(ostream &os, const StEmcCluster& cl)
 	    << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors();
     //	    << *((StHit *)&cl);
 }
-void   StEmcCluster::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StEmcCluster::Print(Option_t *option) const {cout << *this << endl;}
 

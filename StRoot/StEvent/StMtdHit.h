@@ -72,6 +72,6 @@ public:
     ClassDef(StMtdHit,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StMtdHit&); // Printing operator
+ostream& operator<<(ostream&, const StMtdHit&); // Printing operator
 
 #endif

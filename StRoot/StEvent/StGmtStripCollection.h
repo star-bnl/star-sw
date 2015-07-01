@@ -120,25 +120,25 @@ inline const StSPtrVecGmtStrip& StGmtStripCollection::getStripVec() const{
 
 // sort by geoId
 inline void StGmtStripCollection::sortByGeoId(){
-    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitGeoIdLessThan );
     return;
 };
 
 // sort by layer (X first then Y)
 inline void StGmtStripCollection::sortByLayer(){
-    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitLayerLessThan );
     return;
 };
 
 // sort by coordinate number
 inline void StGmtStripCollection::partialSortByCoord(){
-    std::partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
+    partial_sort( mStripVec.begin(), mStripVec.begin()+kGmtNumStrips, mStripVec.begin()+kGmtNumStrips, &StGmtStripCollection::hitCoordLessThan );
     return;
 };
 
 // sort by coordinate number
 inline void StGmtStripCollection::sortByCoord(){
-    std::sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
+    sort( mStripVec.begin(), mStripVec.end(), &StGmtStripCollection::hitCoordLessThan );
     return;
 };
 

@@ -77,6 +77,6 @@ inline float StRichPhotonInfo::sigma() const {return mSigma;}
 inline float StRichPhotonInfo::azimuth() const {return mAzimuth;}
 
 //non-members
-std::ostream& operator<<(std::ostream& os, const StRichPhotonInfo& hit);
+ostream& operator<<(ostream& os, const StRichPhotonInfo& hit);
 
 #endif

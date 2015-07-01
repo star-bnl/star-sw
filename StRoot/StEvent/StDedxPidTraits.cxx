@@ -144,13 +144,13 @@ StDedxPidTraits::method() const
 }
 //________________________________________________________________________________
 void StDedxPidTraits::Print(Option_t *opt) const {
-  std::cout << "StDedxPidTraits : \t method" << method()
+  cout << "StDedxPidTraits : \t method" << method()
        << "\t encodedMethod :  " << encodedMethod()
        << "\t numberOfPoints : " << numberOfPoints() 
        << "\t length : "         << length()         
        << "\t mean : "           << mean()           
        << "\t errorOnMean : "    << errorOnMean()  
-       << "\t Log2<dX> : "       << log2dX() << std::endl;
+       << "\t Log2<dX> : "       << log2dX() << endl;
        
  }
 

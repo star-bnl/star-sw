@@ -46,7 +46,7 @@ ClassImp(StFmsTriggerDetector)
     
 StFmsTriggerDetector::StFmsTriggerDetector()
 {
-    //std::cout << "StFmsTriggerDetector default constructor" << std::endl;
+    //cout << "StFmsTriggerDetector default constructor" << endl;
     memset(mBeg,0,mEnd-mBeg);
     mNumHeader=-1;
     mNumQTdata=0;
@@ -54,7 +54,7 @@ StFmsTriggerDetector::StFmsTriggerDetector()
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
-    //std::cout << "StFmsTriggerDetector constructor with StTriggerData" << std::endl;
+    //cout << "StFmsTriggerDetector constructor with StTriggerData" << endl;
     const unsigned char  *c=0;
     const unsigned short *s=0;
     const unsigned int   *i=0;
@@ -81,14 +81,14 @@ StFmsTriggerDetector::~StFmsTriggerDetector() {/* noop */}
 
 void
 StFmsTriggerDetector::clearFlag() { 
-    //std::cout << "StFmsTriggerDetector::clearFlag" << std::endl;
+    //cout << "StFmsTriggerDetector::clearFlag" << endl;
     mNumHeader=-1;
 }
 
 void
 StFmsTriggerDetector::decode()
 {
-    //std::cout << "FMS data decode!!!" << std::endl;
+    //cout << "FMS data decode!!!" << endl;
     mNumHeader=0;
     if (mNumQTdata==0) return;
     memset(mADC,0,sizeof(mADC));
@@ -183,10 +183,10 @@ StFmsTriggerDetector::tdc(int crate,  int addr,  int dcard,  int dch)
 void
 StFmsTriggerDetector::dump()
 {
-    std::cout << "FMS data dump" << std::endl;
-    std::cout << "mNumHeader = "<<mNumHeader<<std::endl;
+    cout << "FMS data dump" << endl;
+    cout << "mNumHeader = "<<mNumHeader<<endl;
     if (mNumHeader==-1) decode();
-    std::cout << "Number of data lines = " << mNumQTdata << std::endl;
+    cout << "Number of data lines = " << mNumQTdata << endl;
     if (mNumQTdata>0){
         printf("Number of header lines = %d\n", mNumHeader);
         printf("Last check line (should be 0xAC10) = %x\n",mQTdata[mNumQTdata-1]);

@@ -22,7 +22,7 @@ StHltTriggerReasonCapable::StHltTriggerReasonCapable() { }
 
 StHltTriggerReasonCapable::~StHltTriggerReasonCapable() {/* noop */}
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltTriggerReasonCapable& r)
 {
 	return os;

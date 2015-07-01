@@ -214,7 +214,7 @@ StBbcTriggerDetector::nHitEast()
         for (int i=0; i<16; i++) {if (adc(i)>5)                {nhit++;}}
     }
     else {
-        std::cerr << "StBbcTriggerDetector::nHitEast: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::nHitEast: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -230,7 +230,7 @@ StBbcTriggerDetector::nHitWest()
         for (int i=0; i<16; i++) {if (adc(i+24)>5)                   {nhit++;}}
     }
     else{
-        std::cerr << "StBbcTriggerDetector::nHitWest: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::nHitWest: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -246,7 +246,7 @@ StBbcTriggerDetector::nHitEastLarge()
         for (int i=16; i<24; i++) {if (adc(i)>5)                {nhit++;}}
     }
     else{
-        std::cerr << "StBbcTriggerDetector::nHitEastlarge: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::nHitEastlarge: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -262,7 +262,7 @@ StBbcTriggerDetector::nHitWestLarge()
         for (int i=16; i<24; i++) {if (adc(i+24)>5)                   {nhit++;}}
     }
     else {
-        std::cerr << "StBbcTriggerDetector::nHitWestLarge: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::nHitWestLarge: No longer supported after 2003. Do not use!" << endl;
     }
     return nhit;
 }
@@ -361,7 +361,7 @@ StBbcTriggerDetector::tdcEarliestEast()
 	    return -9999;
     }
     else{
-        std::cerr << "StBbcTriggerDetector::tdcEarliestEast: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::tdcEarliestEast: No longer supported after 2003. Do not use!" << endl;
     }
     return -9999;
 }
@@ -390,7 +390,7 @@ StBbcTriggerDetector::tdcEarliestWest()
 	    return -8888;
     }
     else{
-        std::cerr << "StBbcTriggerDetector::tdcEarliestWest: No longer supported after 2003. Do not use!" << std::endl;
+        cerr << "StBbcTriggerDetector::tdcEarliestWest: No longer supported after 2003. Do not use!" << endl;
     }
     return -8888;
 }
@@ -448,36 +448,36 @@ void
 StBbcTriggerDetector::dump()
 {
     unsigned int i;
-    std::cout << "BBC data (" << mYear << ") dump" << std::endl;
+    cout << "BBC data (" << mYear << ") dump" << endl;
     if (mYear==2002){
-        std::cout << "East small tile ADC "; for (i=0; i<8; i++){std::cout << adc(i)    << " ";}; std::cout << std::endl;
-        std::cout << "East large tile ADC "; for (i=0; i<8; i++){std::cout << adc(i+8)  << " ";}; std::cout << std::endl;
-        std::cout << "West small tile ADC "; for (i=0; i<8; i++){std::cout << adc(i+16) << " ";}; std::cout << std::endl;
-        std::cout << "West large tile ADC "; for (i=0; i<8; i++){std::cout << adc(i+24) << " ";}; std::cout << std::endl;
-        std::cout << "East small tile TDC "; for (i=0; i<8; i++){std::cout << tdc(i)    << " ";}; std::cout << std::endl;
-        std::cout << "East large tile TDC "; for (i=0; i<8; i++){std::cout << tdc(i+8)  << " ";}; std::cout << std::endl;
-        std::cout << "West small tile TDC "; for (i=0; i<8; i++){std::cout << tdc(i+16) << " ";}; std::cout << std::endl;
-        std::cout << "West large tile TDC "; for (i=0; i<8; i++){std::cout << tdc(i+24) << " ";}; std::cout << std::endl;
-        std::cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << std::endl;
-        std::cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << std::endl;
-        std::cout << "z vertex position = " << zVertex() << " cm" << std::endl;
-        std::cout << "Registers = "; for (i=0; i<mMaxRegisters; i++){std::cout << bbcRegister(i) << " ";}; std::cout << std::endl;
-        std::cout << "Scalars = "; for (i=0; i<mMaxScalars; i++){std::cout << scalar(i) << " ";}; std::cout << std::endl;
+        cout << "East small tile ADC "; for (i=0; i<8; i++){cout << adc(i)    << " ";}; cout << endl;
+        cout << "East large tile ADC "; for (i=0; i<8; i++){cout << adc(i+8)  << " ";}; cout << endl;
+        cout << "West small tile ADC "; for (i=0; i<8; i++){cout << adc(i+16) << " ";}; cout << endl;
+        cout << "West large tile ADC "; for (i=0; i<8; i++){cout << adc(i+24) << " ";}; cout << endl;
+        cout << "East small tile TDC "; for (i=0; i<8; i++){cout << tdc(i)    << " ";}; cout << endl;
+        cout << "East large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+8)  << " ";}; cout << endl;
+        cout << "West small tile TDC "; for (i=0; i<8; i++){cout << tdc(i+16) << " ";}; cout << endl;
+        cout << "West large tile TDC "; for (i=0; i<8; i++){cout << tdc(i+24) << " ";}; cout << endl;
+        cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
+        cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
+        cout << "z vertex position = " << zVertex() << " cm" << endl;
+        cout << "Registers = "; for (i=0; i<mMaxRegisters; i++){cout << bbcRegister(i) << " ";}; cout << endl;
+        cout << "Scalars = "; for (i=0; i<mMaxScalars; i++){cout << scalar(i) << " ";}; cout << endl;
     }
     else if (mYear>2002) {
-        std::cout << "East small tile ADC "; for (i=0; i<16; i++){std::cout << adc(i)    << " ";}; std::cout << std::endl;
-        std::cout << "West small tile ADC "; for (i=0; i<16; i++){std::cout << adc(i+24) << " ";}; std::cout << std::endl;
-        std::cout << "East small tile TDC "; for (i=0; i<16; i++){std::cout << tdc(i)    << " ";}; std::cout << std::endl;
-        std::cout << "West small tile TDC "; for (i=0; i<16; i++){std::cout << tdc(i+24) << " ";}; std::cout << std::endl;
-        std::cout << "East large tile ADC "; for (i=0; i<8; i++) {std::cout << adc(i+16) << " ";}; std::cout << std::endl;
-        std::cout << "West large tile ADC "; for (i=0; i<8; i++) {std::cout << adc(i+40) << " ";}; std::cout << std::endl;
+        cout << "East small tile ADC "; for (i=0; i<16; i++){cout << adc(i)    << " ";}; cout << endl;
+        cout << "West small tile ADC "; for (i=0; i<16; i++){cout << adc(i+24) << " ";}; cout << endl;
+        cout << "East small tile TDC "; for (i=0; i<16; i++){cout << tdc(i)    << " ";}; cout << endl;
+        cout << "West small tile TDC "; for (i=0; i<16; i++){cout << tdc(i+24) << " ";}; cout << endl;
+        cout << "East large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+16) << " ";}; cout << endl;
+        cout << "West large tile ADC "; for (i=0; i<8; i++) {cout << adc(i+40) << " ";}; cout << endl;
         if (mYear>2004) {
-	  std::cout << "East large tile TDC "; for (i=0; i<8; i++) {std::cout << tdc(i+16) << " ";}; std::cout << std::endl;
-	  std::cout << "West large tile TDC "; for (i=0; i<8; i++) {std::cout << tdc(i+40) << " ";}; std::cout << std::endl;
+	  cout << "East large tile TDC "; for (i=0; i<8; i++) {cout << tdc(i+16) << " ";}; cout << endl;
+	  cout << "West large tile TDC "; for (i=0; i<8; i++) {cout << tdc(i+40) << " ";}; cout << endl;
         }
-        std::cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << std::endl;
-        std::cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << std::endl;
-        std::cout << "Earliest TDC east " << tdcEarliestEast() << " west " << tdcEarliestWest() << std::endl;
-        std::cout << "z vertex position = " << zVertex() << " cm" << std::endl;
+        cout << "Number of hits east " << nHitEast() << " west " << nHitWest() << " Total " << nHit() << endl;
+        cout << "ADC sum east " << adcSumEast() << " west " << adcSumWest() << " Total " << adcSum() << endl;
+        cout << "Earliest TDC east " << tdcEarliestEast() << " west " << tdcEarliestWest() << endl;
+        cout << "z vertex position = " << zVertex() << " cm" << endl;
     }
 }

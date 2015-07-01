@@ -33,7 +33,7 @@
 #include "KFParticle/KFParticle.h"
 
 class StTrackMassFit;
-std::ostream&  operator<<(std::ostream& os,  const StTrackMassFit& t);
+ostream&  operator<<(ostream& os,  const StTrackMassFit& t);
 class StTrackMassFit : public StTrack {
 public:
   StTrackMassFit(int key = 0, KFParticle *particle = 0)  : mKFParticle((particle) ? new KFParticle(*particle) : 0) {setKey(key);}
@@ -45,7 +45,7 @@ public:
     const KFParticle* kfParticle() const {return mKFParticle;}
     KFParticle*       kfParticle()       {return mKFParticle;}
     void setKFParticle(KFParticle* particle = 0) {mKFParticle = (particle) ? new KFParticle(*particle) : 0;}
-    virtual void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    virtual void Print(Option_t *option="") const {cout << option << *this << endl; }
     
 protected:
     KFParticle *mKFParticle;

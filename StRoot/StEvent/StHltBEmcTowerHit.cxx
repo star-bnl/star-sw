@@ -81,9 +81,9 @@ StHltBEmcTowerHit::setTrackNode(StHltTrackNode* val)
 	mTrackNode = val;
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltBEmcTowerHit& hit)
 {
-	os << " adc "<<hit.adc()<<" energy "<<hit.energy()<<" phi "<<hit.phi()<<" eta "<<hit.eta()<<" z "<<hit.z()<<" softId "<<hit.softId()<<" daqId "<<hit.daqId()<<std::endl;
+	os << " adc "<<hit.adc()<<" energy "<<hit.energy()<<" phi "<<hit.phi()<<" eta "<<hit.eta()<<" z "<<hit.z()<<" softId "<<hit.softId()<<" daqId "<<hit.daqId()<<endl;
 	return os;
 }

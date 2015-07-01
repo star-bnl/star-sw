@@ -80,6 +80,6 @@ StTofMCHit::gId() const
 }
 
 //non-members
-std::ostream& operator<<(std::ostream&, const StTofMCHit&);
+ostream& operator<<(ostream&, const StTofMCHit&);
 
 #endif

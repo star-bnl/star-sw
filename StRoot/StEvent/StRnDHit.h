@@ -76,7 +76,7 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
     
-    friend std::ostream& operator<<(std::ostream& os, const StRnDHit& h);
+    friend ostream& operator<<(ostream& os, const StRnDHit& h);
     
 protected:
     Short_t mLayer; ///Layer

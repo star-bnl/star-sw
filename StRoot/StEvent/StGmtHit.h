@@ -21,7 +21,7 @@
 // strips.  Clustering algos require these to be ordered by geoId.
 // Note also, the gmtStripWeightMap_t is only used in memory, and is not
 // streamed.
-typedef std::map< StGmtStrip*, float, gmtStripPtrLessThan > gmtStripWeightMap_t;
+typedef map< StGmtStrip*, float, gmtStripPtrLessThan > gmtStripWeightMap_t;
 
 class StGmtHit : public StHit {
 public:

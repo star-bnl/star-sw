@@ -55,7 +55,7 @@ StMeasuredPoint::setPosition(const StThreeVectorF& val) { mPosition = val; }
 const StThreeVectorF&
 StMeasuredPoint::position() const { return mPosition; }
 
-std::ostream&  operator<<(std::ostream& os, const StMeasuredPoint& v)
+ostream&  operator<<(ostream& os, const StMeasuredPoint& v)
 {
   return os << Form("xyz:%10.3f%10.3f%10.3f",
                     v.position().x(),
@@ -63,4 +63,4 @@ std::ostream&  operator<<(std::ostream& os, const StMeasuredPoint& v)
                     v.position().z());
 }
 
-void StMeasuredPoint::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void StMeasuredPoint::Print(Option_t *option) const {cout << *this << endl;}

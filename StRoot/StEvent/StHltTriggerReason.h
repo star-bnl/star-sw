@@ -62,6 +62,6 @@ inline StHltTriggerReasonType StHltTriggerReason::reasonBit() const {return mRea
 inline StHltTriggerReasonCapable* StHltTriggerReason::reason() { return mReason; }
 inline const StHltTriggerReasonCapable* StHltTriggerReason::reason() const { return mReason; }
 
-std::ostream& operator<<(std::ostream&, const StHltTriggerReason&); ///< print operator
+ostream& operator<<(ostream&, const StHltTriggerReason&); ///< print operator
 
 #endif

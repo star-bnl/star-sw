@@ -57,7 +57,7 @@ const StThreeVectorF& StBTofHit::position() const {
   return *&pos;
 }
 //________________________________________________________________________________
-std::ostream& operator<<(ostream &os, const StBTofHit& hit) {
+ostream& operator<<(ostream &os, const StBTofHit& hit) {
   os << Form("Tray:%3i",hit.tray()) 
      << Form(" Module:%2i",hit.module())
      << Form(" Cell:%2i",hit.cell())

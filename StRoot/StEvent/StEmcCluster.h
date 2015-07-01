@@ -99,7 +99,7 @@ private:
     ClassDef(StEmcCluster,2)
 };
 
-std::ostream& operator<<(std::ostream&, const StEmcCluster&); // Printing operator
+ostream& operator<<(ostream&, const StEmcCluster&); // Printing operator
 #endif
 
 

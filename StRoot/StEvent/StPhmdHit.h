@@ -85,7 +85,7 @@ inline void   StPhmdHit::setColumn(int var)  {mCol = var;}
 inline void   StPhmdHit::setEnergy(float var){mEnergy = var;}
 inline void   StPhmdHit::setAdc(int var)     {mAdc = var;}
 
-std::ostream&  operator<<(std::ostream&, const StPhmdHit&);
+ostream&  operator<<(ostream&, const StPhmdHit&);
 #endif
 
 

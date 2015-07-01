@@ -272,11 +272,11 @@ StSvtHit::shell() const {return shell(barrel(), ladder());}
 int
 StSvtHit::volumeID() const {return 10000 * shell() + 1000 * layer() + 100 * wafer() + ladder();}
 
-std::ostream&  operator<<(std::ostream& os, const StSvtHit& v)
+ostream&  operator<<(ostream& os, const StSvtHit& v)
 {
     return os << Form("Svt b:%2i l:%2i w:%2i h:%1i",v.barrel(),v.ladder(), v.wafer(), v.hybrid())
 	    << *((StHit *)&v)
 	    << Form(" P:%8.3f",v.peakADC())
 	    << Form(" Luv: %8.3f %8.3f anode %8.3f timeb %8.3f",v.localPosition(0),v.localPosition(1),v.anode(),v.timebucket());
 }
-void   StSvtHit::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void   StSvtHit::Print(Option_t *option) const {cout << *this << endl;}

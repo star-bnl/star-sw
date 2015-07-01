@@ -65,7 +65,7 @@ inline short StHltVpdHit::module() const {return mChannel/6;}
 inline short StHltVpdHit::cell() const {return mChannel%6;}
 
 
-std::ostream& operator<<(std::ostream&, const StHltVpdHit&); ///< Printting operator
+ostream& operator<<(ostream&, const StHltVpdHit&); ///< Printting operator
 
 #endif
 

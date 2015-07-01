@@ -94,7 +94,7 @@ StTrackNode::addTrack(StTrack* track)
                 mOwnedTracks.push_back(track);
                 break;
             default:
-                std::cerr << "StTrackNode::addTrack(): cannot add, unknown track type." << std::endl;
+                cerr << "StTrackNode::addTrack(): cannot add, unknown track type." << endl;
                 return;
                 break;
         }
@@ -127,7 +127,7 @@ StTrackNode::removeTrack(StTrack* track)
                     if (*iterS == track) mOwnedTracks.erase(iterS);
                 break;
             default:
-                std::cerr << "StTrackNode::removeTrack(): cannot remove, unknown track type." << std::endl;
+                cerr << "StTrackNode::removeTrack(): cannot remove, unknown track type." << endl;
                 break;
         }
         track->setNode(0);
@@ -194,7 +194,7 @@ StTrackNode::entries(StTrackType type) const
             return counter;
             break;
         default:
-            std::cerr << "StTrackNode::entries(): unknown track type." << std::endl;
+            cerr << "StTrackNode::entries(): unknown track type." << endl;
             return 0;
             break;
     }
@@ -232,7 +232,7 @@ StTrackNode::track(StTrackType type, unsigned int i) const
             return 0;
             break;
         default:
-            std::cerr << "StTrackNode::track(): unknown track type." << std::endl;
+            cerr << "StTrackNode::track(): unknown track type." << endl;
             return 0;
             break;
     }
@@ -270,24 +270,24 @@ StTrackNode::track(StTrackType type, unsigned int i)
             return 0;
             break;
         default:
-            std::cerr << "StTrackNode::track(): unknown track type." << std::endl;
+            cerr << "StTrackNode::track(): unknown track type." << endl;
             return 0;
             break;
     }
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StTrackNode& node) {
+ostream&  operator<<(ostream& os,  const StTrackNode& node) {
   const StTrack *track;
   UInt_t nR = node.referencedTracks().size();
   UInt_t nO = node.ownedTracks().size();
 #if 0
   os << "Track node : ";
-  if (nR > 0) os << "Reference tracks:" << std::endl;
+  if (nR > 0) os << "Reference tracks:" << endl;
 #endif
   for (UInt_t k = 0; k < nR + nO; k++) {
-    if (k) os << std::endl;
+    if (k) os << endl;
 #if 0
-    if (k == nR) os << "Owned  tracks:" << std::endl;
+    if (k == nR) os << "Owned  tracks:" << endl;
 #endif
     if (k < nR) track = node.referencedTracks()[k];
     else        track = node.ownedTracks()[k-nR];

@@ -300,14 +300,14 @@ StEventClusteringHints::listOfClasses(const char* branchname) const
 }
 
 void
-StEventClusteringHints::print(std::ostream& os)
+StEventClusteringHints::print(ostream& os)
 {
     vector<string> branches = listOfBranches();
     for (unsigned int j=0; j<branches.size(); j++) {
 	vector<string> classes = listOfClasses(branches[j].c_str());
-	std::cout << branches[j] << "[id=" << branchId(branches[j].c_str()) << "]" << std::endl;
+	cout << branches[j] << "[id=" << branchId(branches[j].c_str()) << "]" << endl;
 	for (unsigned int k=0; k<classes.size(); k++)
-	    std::cout << '\t' << classes[k] << std::endl;
+	    cout << '\t' << classes[k] << endl;
     }
 }
 

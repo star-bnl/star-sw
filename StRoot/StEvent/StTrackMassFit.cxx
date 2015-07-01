@@ -41,7 +41,7 @@ StTrackMassFit& StTrackMassFit::operator=(const StTrackMassFit& track)
     return *this;
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StTrackMassFit& track) {
+ostream&  operator<<(ostream& os,  const StTrackMassFit& track) {
     os << *((StTrack *) &track);
     const KFParticle* kfParticle    = track.kfParticle();
     if (kfParticle) os << " " << *kfParticle;

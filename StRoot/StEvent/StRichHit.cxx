@@ -50,8 +50,8 @@ StRichHit::StRichHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
 
 StRichHit::~StRichHit() {/* nopt */}
 
-std::ostream&
-operator<<(std::ostream& os, const StRichHit& hit)
+ostream&
+operator<<(ostream& os, const StRichHit& hit)
 {
     return (os << "StRichHit::> " << hit.internal() << ", q= "
                                   << hit.charge()   << ", (#"

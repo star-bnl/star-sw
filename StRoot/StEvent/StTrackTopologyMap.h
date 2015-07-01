@@ -105,5 +105,5 @@ private:
     ClassDef(StTrackTopologyMap,1)
 };
 
-std::ostream& operator<< (std::ostream&, const StTrackTopologyMap&);
+ostream& operator<< (ostream&, const StTrackTopologyMap&);
 #endif

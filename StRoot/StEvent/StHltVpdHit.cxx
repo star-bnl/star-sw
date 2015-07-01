@@ -67,12 +67,12 @@ StHltVpdHit::setTriggerTime(float val)
 	mTriggerTime = val;
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltVpdHit& hit)
 {
 	os << " direction "<<hit.direction()<<" channel "<<hit.channel()
-    << " module "<<hit.module()<<" cell "<<hit.cell()<<std::endl
-    << " tdc "<<hit.tdc()<<" tot "<<hit.tot()<<" tof "<<hit.tof()<<" triggerTime "<<hit.triggerTime()<<std::endl;
+    << " module "<<hit.module()<<" cell "<<hit.cell()<<endl
+    << " tdc "<<hit.tdc()<<" tot "<<hit.tot()<<" tof "<<hit.tof()<<" triggerTime "<<hit.triggerTime()<<endl;
 	return os;
 }
 

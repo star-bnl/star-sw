@@ -49,10 +49,10 @@ int StMtdRawHit::operator!=(const StMtdRawHit& p) const {
     return !(*this == p);  // use operator==()
 }
 
-std::ostream& operator<<(ostream &os, const StMtdRawHit& hit) {
-    os << " Flag " << hit.flag() << std::endl
-       << " BackLeg " << hit.backleg() << std::endl
-       << " Channel " << hit.channel() << std::endl
-       << " Tdc " << hit.tdc() << std::endl ;
+ostream& operator<<(ostream &os, const StMtdRawHit& hit) {
+    os << " Flag " << hit.flag() << endl
+       << " BackLeg " << hit.backleg() << endl
+       << " Channel " << hit.channel() << endl
+       << " Tdc " << hit.tdc() << endl ;
     return os;
 }

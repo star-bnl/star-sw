@@ -161,7 +161,7 @@ StTriggerId::addTrigger(UInt_t id, UInt_t v,
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const StTriggerId& id)
+ostream& operator<<(ostream& os, const StTriggerId& id)
 {
     for (UInt_t i=0; i<id.maxTriggerIds(); i++) {
         os << i << '\t'
@@ -169,7 +169,7 @@ std::ostream& operator<<(std::ostream& os, const StTriggerId& id)
            << id.mVersion[i] << '\t'
            << id.mNameVersion[i] << '\t'
            << id.mThresholdVersion[i] << '\t'
-           << id.mPrescaleVersion[i] << std::endl;
+           << id.mPrescaleVersion[i] << endl;
     }
     return os;
 }

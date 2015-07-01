@@ -75,12 +75,12 @@ StHltBTofHit::setTrackNode(StHltTrackNode* val)
 }
 
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltBTofHit& hit)
 {
 	os << " trayId "<<hit.trayId()<<" channel "<<hit.channel()
-    << " module "<<hit.module()<<" cell "<<hit.cell()<<std::endl
-    << " tdc "<<hit.tdc()<<" tot "<<hit.tot()<<" tof "<<hit.tof()<<" triggerTime "<<hit.triggerTime()<<std::endl;
+    << " module "<<hit.module()<<" cell "<<hit.cell()<<endl
+    << " tdc "<<hit.tdc()<<" tot "<<hit.tot()<<" tof "<<hit.tof()<<" triggerTime "<<hit.triggerTime()<<endl;
 	return os;
 }
 

@@ -106,10 +106,10 @@ void StHltHeavyFragment::setBeta(float val) { mBeta = val; }
 void StHltHeavyFragment::setTof(float val) { mTof = val; }
 
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltHeavyFragment& trigger)
 {
-	os << " bemcMatchPhiDiff " << trigger.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<trigger.bEmcMatchZEdge()<< " bTofProjChannel "<<trigger.bTofProjChannel() << " bTofCellLocalY "<< trigger.bTofCellLocalY() <<" bTofCellLocalZ "<<trigger.bTofCellLocalZ()<< " bTofPathLength "<<trigger.bTofPathLength()<<" beta "<<trigger.beta()<<" tof "<<trigger.tof()<<std::endl;
+	os << " bemcMatchPhiDiff " << trigger.bEmcMatchPhiDiff()<<" bemcMatchZEdge "<<trigger.bEmcMatchZEdge()<< " bTofProjChannel "<<trigger.bTofProjChannel() << " bTofCellLocalY "<< trigger.bTofCellLocalY() <<" bTofCellLocalZ "<<trigger.bTofCellLocalZ()<< " bTofPathLength "<<trigger.bTofPathLength()<<" beta "<<trigger.beta()<<" tof "<<trigger.tof()<<endl;
 	return os;
 }
 

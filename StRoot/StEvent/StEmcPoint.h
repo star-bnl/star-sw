@@ -125,7 +125,7 @@ protected:
     int getDetId(Int_t /* id */) const;
     ClassDef(StEmcPoint,2)
 };
-std::ostream& operator<<(std::ostream&, const StEmcPoint&); // Printing operator
+ostream& operator<<(ostream&, const StEmcPoint&); // Printing operator
 #endif
 
 

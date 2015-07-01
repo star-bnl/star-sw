@@ -131,7 +131,7 @@ void StPxlHit::setLocalPosition(float u, float v, float w)
 	mLocalPosition[2] = w;
 }
 
-std::ostream& operator<<(std::ostream& os, const StPxlHit& hit)
+ostream& operator<<(ostream& os, const StPxlHit& hit)
 {
     os << "HFT Hit -I- \tSector:"<< static_cast<int>(hit.sector()) 
        << " ladder: "<< static_cast<int>(hit.ladder())
@@ -140,6 +140,6 @@ std::ostream& operator<<(std::ostream& os, const StPxlHit& hit)
        << "/" << hit.localPosition(1) 
        << "/" << hit.localPosition(2)
        << " kDetectorId : " << hit.detector() 
-       << std::endl;
+       << endl;
     return os;
 }

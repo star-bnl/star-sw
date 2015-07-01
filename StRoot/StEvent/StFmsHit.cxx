@@ -88,9 +88,9 @@ void StFmsHit::setFmsHit(unsigned short det, unsigned short ch,
     encodeQTCrtSlotCh(qtcrate, qtslot, qtch);
 }
 
-void StFmsHit::print(Option_t *option) const {std::cout<< *this <<std::endl;}
+void StFmsHit::print(Option_t *option) const {cout<< *this <<endl;}
 
-std::ostream& operator<<(std::ostream& os, const StFmsHit& v)
+ostream& operator<<(ostream& os, const StFmsHit& v)
 {
     return os <<"StFmsHit: mDetectorId\t"<<v.detectorId()
 	    <<"\tmChannel\t"             <<v.channel()

@@ -86,14 +86,14 @@ StRpsCluster::setRomanPotId(unsigned char val) { mRomanPotId = val; }
 // 
 // Non class methods
 //
-std::ostream& operator<<(std::ostream& os, const StRpsCluster& cluster)
+ostream& operator<<(ostream& os, const StRpsCluster& cluster)
 {
-    os << "position = " << cluster.position() << std::endl;
-    os << "length = " << cluster.length() << std::endl;
-    os << "energy = " << cluster.energy() << std::endl;
-    os << "xy = " << cluster.xy() << std::endl;
-    os << "quality = " << static_cast<unsigned int>(cluster.quality()) << std::endl;
-    os << "roman pot id = " << cluster.romanPotId() << std::endl;
-    os << "plane id = " << cluster.planeId() << std::endl;
+    os << "position = " << cluster.position() << endl;
+    os << "length = " << cluster.length() << endl;
+    os << "energy = " << cluster.energy() << endl;
+    os << "xy = " << cluster.xy() << endl;
+    os << "quality = " << static_cast<unsigned int>(cluster.quality()) << endl;
+    os << "roman pot id = " << cluster.romanPotId() << endl;
+    os << "plane id = " << cluster.planeId() << endl;
     return os;
 }

@@ -215,10 +215,10 @@ void  StHltDiElectron::setPsi(float val) { mPsi = val; }
 
 void  StHltDiElectron::setTanl(float val) { mTanl = val; }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StHltDiElectron& de)
 {
-	os <<" invariantMass "<<de.invariantMass()<<" pt "<<de.pt()<<" psi "<<de.psi()<<" tanl "<<de.tanl()<<std::endl;
+	os <<" invariantMass "<<de.invariantMass()<<" pt "<<de.pt()<<" psi "<<de.psi()<<" tanl "<<de.tanl()<<endl;
 	return os;
 }
 

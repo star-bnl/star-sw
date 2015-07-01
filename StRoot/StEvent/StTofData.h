@@ -160,6 +160,6 @@ StTofData::trailingTdc() const
   return mTrailingTdc;
 }
 
-std::ostream& operator<<(std::ostream& os, const StTofData&);
+ostream& operator<<(ostream& os, const StTofData&);
 
 #endif

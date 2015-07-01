@@ -55,7 +55,7 @@ int StTofData::operator!=(const StTofData& p) const
     return !(*this == p);  // use operator==()
 }
 
-std::ostream& operator<<(std::ostream& os, const StTofData& d)
+ostream& operator<<(ostream& os, const StTofData& d)
 {
     return (os << "StTofData::> "<< " ID=" << d.dataIndex()
                                  << ", adc=" << d.adc()

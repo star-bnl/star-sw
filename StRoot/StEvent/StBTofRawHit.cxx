@@ -57,12 +57,12 @@ int StBTofRawHit::operator!=(const StBTofRawHit& p) const
     return !(*this == p);  // use operator==()
 }
 
-std::ostream&
+ostream&
 operator<<(ostream &os, const StBTofRawHit& hit)
 {
-    os << " Flag " << hit.flag() << std::endl
-       << " Tray " << hit.tray() << std::endl
-       << " Channel " << hit.channel() << std::endl
-       << " Tdc " << hit.tdc() << std::endl ;
+    os << " Flag " << hit.flag() << endl
+       << " Tray " << hit.tray() << endl
+       << " Channel " << hit.channel() << endl
+       << " Tdc " << hit.tdc() << endl ;
     return os;
 }

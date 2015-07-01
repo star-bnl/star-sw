@@ -212,7 +212,7 @@ int StHit::idTruth() const
 }
 
 //______________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os, const StHit& v)
+ostream&  operator<<(ostream& os, const StHit& v)
 {
   os << Form("id %5i ",v.id()) << *((const StMeasuredPoint *)&v );
   if (v.charge() > 1) os << Form(" q(ADC) %6.1f", v.charge());
@@ -222,4 +222,4 @@ std::ostream&  operator<<(std::ostream& os, const StHit& v)
 }
 
 //______________________________________________________________________________
-void StHit::Print(Option_t *option) const {std::cout << *this << std::endl;}
+void StHit::Print(Option_t *option) const {cout << *this << endl;}

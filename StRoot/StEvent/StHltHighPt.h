@@ -98,7 +98,7 @@ private:
     ClassDef(StHltHighPt,1)
 };
 
-std::ostream& operator<<(std::ostream&, const StHltHighPt&);
+ostream& operator<<(ostream&, const StHltHighPt&);
 
 
 #endif

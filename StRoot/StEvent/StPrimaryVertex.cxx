@@ -210,7 +210,7 @@ void StPrimaryVertex::setTrackNumbers() {
   if (n_trk_vtx > 0) mMeanDip /= n_trk_vtx;
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StPrimaryVertex& v) {
+ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
   UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
   UInt_t nDaughters = v.numberOfDaughters();
   for (UInt_t i=0; i < nDaughters; i++) {

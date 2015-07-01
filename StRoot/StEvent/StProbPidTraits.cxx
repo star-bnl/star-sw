@@ -88,13 +88,13 @@ void StProbPidTraits::Print(Option_t *opt) const {
   Int_t N = mPidArray->GetSize();
   const Float_t *Array = mPidArray->GetArray();
   Int_t i;
-  std::cout << "\tNDF = \t" << mNDF << std::endl;
+  cout << "\tNDF = \t" << mNDF << endl;
   for (i = kPidElectron; i < N; i++) {
-    std::cout << "Particle : \t" << mPidParticleDefinitions[i]->name();
-    if (mFractions) std::cout << "\tFraction : \t" << mFractions[i];
-    std::cout << "\tProbability :\t" << This->GetProbability(i)
+    cout << "Particle : \t" << mPidParticleDefinitions[i]->name();
+    if (mFractions) cout << "\tFraction : \t" << mFractions[i];
+    cout << "\tProbability :\t" << This->GetProbability(i)
 	 << "\tChisq :\t" << Array[i];
-    if (mNDF > 0) std::cout << "\t Chisq Prob:\t" << GetChi2Prob(i);
-    std::cout << std::endl;
+    if (mNDF > 0) cout << "\t Chisq Prob:\t" << GetChi2Prob(i);
+    cout << endl;
   }
 }

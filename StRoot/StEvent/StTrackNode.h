@@ -49,7 +49,7 @@
 #include "Stiostream.h"
 class StTrack;
 class StTrackNode;
-std::ostream&  operator<<(std::ostream& os,  const StTrackNode& t);
+ostream&  operator<<(ostream& os,  const StTrackNode& t);
 class StTrackNode : public StObject {
 public:
     StTrackNode();
@@ -65,7 +65,7 @@ public:
     unsigned int   entries(StTrackType) const;
     StTrack*       track(StTrackType, unsigned int = 0);
     const StTrack* track(StTrackType, unsigned int = 0) const;
-    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    void Print(Option_t *option="") const {cout << option << *this << endl; }
     const StSPtrVecTrack& ownedTracks() const {return *&mOwnedTracks;}
     const StPtrVecTrack&  referencedTracks() const {return *&mReferencedTracks;}
 private:

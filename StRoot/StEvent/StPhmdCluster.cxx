@@ -43,7 +43,7 @@ StPhmdCluster::hit() const {return mHits;}
 void
 StPhmdCluster::addHit(StPhmdHit* hit) {mHits.push_back(hit);}
 
-std::ostream& operator<<(ostream &os, const StPhmdCluster& c)
+ostream& operator<<(ostream &os, const StPhmdCluster& c)
 {
     os << "module="     << c.module();
     os << "\tcells="    << c.numberOfCells();

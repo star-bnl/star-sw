@@ -60,7 +60,7 @@
 class StPrimaryVertex;
 class StPrimaryTrack;
 
-std::ostream&  operator<<(std::ostream& os,  const StPrimaryTrack& t);
+ostream&  operator<<(ostream& os,  const StPrimaryTrack& t);
 
 class StPrimaryTrack : public StTrack {
 public:
@@ -68,7 +68,7 @@ public:
     ~StPrimaryTrack() {/* noop */}
     
     StTrackType type() const {return primary; }
-    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    void Print(Option_t *option="") const {cout << option << *this << endl; }
     
     ClassDef(StPrimaryTrack,3)
 };

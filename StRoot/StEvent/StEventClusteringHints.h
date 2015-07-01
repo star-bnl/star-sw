@@ -87,7 +87,7 @@ public:
 #endif    
     
     void setBranch(const char*, const char*, int);   // assign classname with a branch name (incl. ID)
-    void print(std::ostream& = std::cout);                     // print current configuration
+    void print(ostream& = cout);                     // print current configuration
     
 private:
     StEventClusteringHints(const StEventClusteringHints&);

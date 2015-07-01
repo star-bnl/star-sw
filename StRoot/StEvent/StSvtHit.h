@@ -142,6 +142,6 @@ inline float StSvtHit::timebucket() const { return mTimebucket; }
 inline void StSvtHit::setPeak(float val) { mPeak = val; }
 inline void StSvtHit::setAnode(float val) { mAnode = val; }
 inline void StSvtHit::setTimebucket(float val) { mTimebucket = val; }
-std::ostream&              operator<<(std::ostream& os, StSvtHit const & v);
+ostream&              operator<<(ostream& os, StSvtHit const & v);
 
 #endif

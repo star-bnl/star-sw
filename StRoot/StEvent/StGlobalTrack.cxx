@@ -75,7 +75,7 @@ StGlobalTrack& StGlobalTrack::operator=(const StGlobalTrack& track)
     return *this;
 }
 //________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os,  const StGlobalTrack& track) {
+ostream&  operator<<(ostream& os,  const StGlobalTrack& track) {
     os << *((StTrack *) &track);
     const StDcaGeometry* dca    = track.dcaGeometry();
     if (dca) os << " " << *dca;

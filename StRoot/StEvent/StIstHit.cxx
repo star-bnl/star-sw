@@ -69,7 +69,7 @@ ostream &operator<<(ostream &os, const StIstHit &hit)
       << "/" << hit.localPosition(2)
       << " ADC : " << hit.charge() << "+-" << hit.getChargeErr()
       << " detector: " << hit.detector()
-      << std::endl;
+      << endl;
    return os;
 }
 

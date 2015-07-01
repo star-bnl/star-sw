@@ -99,6 +99,6 @@ private:
     
     ClassDef(StDcaGeometry,3)
 };
-std::ostream&  operator<<(std::ostream& os, StDcaGeometry const & dca);
+ostream&  operator<<(ostream& os, StDcaGeometry const & dca);
 
 #endif

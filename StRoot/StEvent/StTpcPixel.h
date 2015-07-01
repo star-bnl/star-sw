@@ -86,5 +86,5 @@ inline UShort_t  StTpcPixel::adc()      const {return mAdc;}
 inline UShort_t  StTpcPixel::idTruth()  const {return mIdTruth;}  
 inline Short_t   StTpcPixel::id()       const {return mId;}  
 
-std::ostream& operator<< (std::ostream&, const StTpcPixel&);
+ostream& operator<< (ostream&, const StTpcPixel&);
 #endif
