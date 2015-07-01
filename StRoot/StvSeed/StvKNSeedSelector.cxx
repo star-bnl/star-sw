@@ -8,7 +8,7 @@
 
 static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
 static const float kMinAng =  1*3.14/180;;	//KN angle allowed
-static const float kMaxRatio=   3;		//ratio 
+static const float kMaxRatio=   5;		//ratio 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
 #define Sq(x) ((x)*(x))
@@ -88,7 +88,7 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
   mMinIdx = -1;
   mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
   mErr = SEED_ERR(mStartRad)*kErrFact;
-  
+  Zer(mAveDir);  
 }
 //_____________________________________________________________________________
 /// Add new hit to selector
@@ -142,14 +142,17 @@ static int nCall=0; nCall++;
       mKNNDist=qwe; mMinIdx = i;
     }
     if (mMinIdx<0) return 0;
+
+
+StvDebug::Count("AllKNNDis",mKNNDist *57);
+
     if (mKNNDist > kMinAng*kMaxRatio) return 0;	
-    memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
-
-
-
   ///		define the best direction
-    std::map<float,int>::iterator myIt;
-    mNHits=0; Zer(mAveDir);
+    memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
+    assert(fabs(mAveDir[0])+fabs(mAveDir[1])+fabs(mAveDir[2])>0.1);
+
+
+    mNHits=0; 
     Pass(mMinIdx,mKNNDist);
     double wid = Width();
     if (mKNNDist*wid > kMinAng) return 0;	
@@ -157,10 +160,18 @@ static int nCall=0; nCall++;
 double ei0 = sqrt(mEigen[0])*57;
 double ei1 = sqrt(mEigen[1])*57;
 StvDebug::Count("KNNDis",mKNNDist *57);
-StvDebug::Count("MinEig",sqrt(mEigen[0])*57);
-StvDebug::Count("KNNDis:MinEig" ,ei0,mKNNDist*57);
+StvDebug::Count("MinEig",ei0);
+StvDebug::Count("KNNDis:MinEig",ei0,mKNNDist*57);
 StvDebug::Count("MaxEig:MinEig",ei0,ei1);
 
+ 	 
+    mSel.push_back(mStartHit); 	 
+    std::map<float,int>::iterator myIt;
+    for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) 
+    { 	 
+      int i = (*myIt).second; 	 
+      mSel.push_back(mAux[i].mHit); 	 
+    } 	 
     return mSel.size();
   }//end while
   return 0;
@@ -213,7 +224,7 @@ static int nCall = 0; nCall++;
   }
   double dN = mMapLen.size();
   G[0]/=dN;G[1]/=dN;G[2]/=dN; uv[0]/=dN;uv[1]/=dN;
-  G[0]-=uv[0]*uv[0];G[1]-=uv[0]*uv[1];G[0]-=uv[1]*uv[1];
+  G[0]-=uv[0]*uv[0];G[1]-=uv[0]*uv[1];G[2]-=uv[1]*uv[1];
 
   double bb = 0.5*(G[0]+G[2]);
   double cc = G[0]*G[2]-G[1]*G[1];
