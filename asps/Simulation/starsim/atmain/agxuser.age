@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.7 2014/10/07 18:27:43 jwebb Exp $
+* $Id: agxuser.age,v 1.8 2015/07/01 13:39:41 jwebb Exp $
 * $Log: agxuser.age,v $
+* Revision 1.8  2015/07/01 13:39:41  jwebb
+* make geometry is now disabled.  no geometry will be built via makefile.
+*
 * Revision 1.7  2014/10/07 18:27:43  jwebb
 * Added warning when user invokes GEXE in such a way that inconsistent library may be linked/compiled.  Propose to deprecate feature by next library release.
 *
@@ -506,10 +509,11 @@
      }
      else
      { 
-       <W> stringL; ('Warning: linking potentially inconsistent ', A20);
-       <W> '$STAR_LIB/'//trim(stringL)//'.so'; ('Use GEXE ',A32);
+       <W> Command, stringL; ('ERROR: ',A6,' geometry is **deprecated**. ', A20 );
+       <W> '$STAR_LIB/xgeometry.so'; ('Use instead: GEXEC ',A32);
+       <W> 'No geometry created.'; (' ',A32)
        call AfNAME(mname,'.makefile')
-       If LENOCC(Mname)==0 | Mname='makefile'
+       If (.false.)                         "LENOCC(Mname)==0 | Mname='makefile'"
        { * old fashion - rely on existing gnu-makefile
          Prin1  'make '//stringL(1:L)//'.sl';  ('gexec: ',a)
          Ier = SystemF('gmake '//stringL(1:L)//'.sl')
@@ -520,7 +524,7 @@
          CALL  PAWFCA(stringL(1:L)//'.csl',L+4,JAD,max(0,Idebug-1))
 #endif
        }
-       else  " new fashion - explicitly selected gnu-makefile "
+       else  if (.false.)  " new fashion - explicitly selected gnu-makefile "
        { cline = 'gmake -s -f ' // %L(mname) // ' input="' // _
                                    %L(stringL) // '" ' // %L(library)
          Prin1 %L(cline); ('gexec: ',a);      Ier = SystemF(%L(cline))
