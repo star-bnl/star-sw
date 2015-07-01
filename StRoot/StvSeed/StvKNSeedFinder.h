@@ -4,6 +4,7 @@
 #define StvKNSeedFinder_HH
 #ifndef __NOSTV__
 #include "Stv/StvSeedFinder.h"
+#include "StvGoneRejector.h"
 #include "StvConeRejector.h"
 #include "StvKNSeedSelector.h"
 #endif
@@ -43,7 +44,8 @@ StMultiKeyMapIter 	*fMultiIter;
 Stv1stHitMap  		*f1stHitMap;
 Stv1stHitMapIter  	*f1stHitMapIter;
 char mEnd[1];
-StvConeRejector       mRej;
+StvGoneRejector       mRej;
+//StvConeRejector       mRej;
 StvKNSeedSelector     mSel;
 #ifndef __NOSTV__
 ClassDef(StvKNSeedFinder,0);
