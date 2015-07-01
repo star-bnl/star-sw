@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.105 2014/07/24 06:58:32 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.106 2015/06/30 21:43:40 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.106  2015/06/30 21:43:40  genevb
+ * Allow for a (dummy) initialization call of UndoDistortion()
+ *
  * Revision 1.105  2014/07/24 06:58:32  fisyak
  * Add exact cast for CXX11
  *
@@ -1019,6 +1022,18 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
   // Control by flags JCD Oct 4, 2001
   //
   // NOTE: x[],Xprime[] must be Cartesian for this function!
+
+  if (!x) {
+    // dummy call, e.g. UndoDistortion(0,0,0)
+    // makes sure everything is initialized for current timestamp
+    const Float_t Xtemp1[3] = {100.,0.,100.};
+    Float_t Xtemp2[3];
+    Bool_t tempIterDist = iterateDistortion;
+    iterateDistortion = kFALSE; // Do not iterate for dummy call
+    UndoDistortion(Xtemp1,Xtemp2,3);
+    iterateDistortion = tempIterDist;
+    return;
+  }
 
   Float_t Xprime1[3], Xprime2[3] ;
 

@@ -251,6 +251,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
 #endif /* __NEW_MagUtilities__ */
   }
+  m_ExB->UndoDistortion(0,0,0); // initialize for this event in case it wasn't used
   lastsc = m_ExB->CurrentSpaceChargeR2();
   lastEWRatio = m_ExB->CurrentSpaceChargeEWRatio();
 
@@ -1546,8 +1547,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.63 2015/05/23 04:26:07 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.64 2015/06/30 21:44:31 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.64  2015/06/30 21:44:31  genevb
+// Use an initialization call for StMagUtilities for each event
+//
 // Revision 1.63  2015/05/23 04:26:07  genevb
 // More vertex selection criteria: PCT daughters, and VPD z agreement
 //

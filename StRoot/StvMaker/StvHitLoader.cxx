@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.24 2015/06/10 17:30:35 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.25 2015/07/01 18:40:48 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -163,7 +163,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
-  
+#if 0  
 if (did == kIstId) {
   StIstHit *IstHit = (StIstHit*)stHit;
   int sec = 1;
@@ -211,7 +211,7 @@ static int ihPathWas=0,myPathWas=0;
        printf("%5d - PXL: %s = %d %d\n",nk,hp->GetName(),myPath,ihPath);
      myPathWas =myPath; ihPathWas=ihPath;
 } }
-
+#endif
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
