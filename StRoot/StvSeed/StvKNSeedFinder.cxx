@@ -91,10 +91,14 @@ static int nCall=0; nCall++;
     if (fstHit->timesUsed()) continue;
     fSeedHits.clear();
     const float *hPos = fstHit->x();
+    float Rxy2 = hPos[0]*hPos[0]+hPos[1]*hPos[1];
     const StHitPlane *hp = fstHit->detector();
     float lay = hp->GetLayer();
-    const float *hDir = hp->GetDir(hPos)[0];
-    mRej.Reset(hPos,hDir,lay*kMaxHits);
+    float hDir[3]; 
+    TCL::ucopy(hp->GetDir(hPos)[0],hDir,3);
+    if (TCL::vdot(hDir,hPos,3)>0) { TCL::vscale(hDir,-1.,hDir,3);}
+//    mRej.Reset(hPos,hDir,lay*kMaxHits*3);
+    mRej.Reset(hPos);
     mRej.Prepare();
     fMultiIter->Set(fMultiHits->GetTop(),mRej.mLim[0],mRej.mLim[1]);
     mSel.Reset(fstHit->x(),fstHit);
@@ -107,14 +111,46 @@ static int nCall=0; nCall++;
       StvHit *nexHit = (StvHit*)node->GetObj();
       if (nexHit==fstHit)		continue;
       if (nexHit->timesUsed()) 		continue;
-      if (nexHit->detector()==hp)	continue;;
+      if (nexHit->detector()==hp)	continue;
+      const float *f = nexHit->x();
+      if (f[0]*f[0]+f[1]*f[1]>=Rxy2)  	continue;
       nTotHits++;
+      
       int ans = mRej.Reject(nexHit->x());
       if (ans) continue;
       nAccHits++;
+
       mSel.Add(nexHit->x(),nexHit);
 
     } //endMultiIter loop
+
+#if 0
+    StMultiKeyMapIter myMultiIter(fMultiHits->GetTop(),0,0);
+    int myTotHits = 0,myAccHits=0;
+    for (StMultiKeyNode *node=0;(node = *(myMultiIter)) ;++(myMultiIter)){ 
+      StvHit *nexHit = (StvHit*)node->GetObj();
+      if (nexHit==fstHit)		continue;
+      if (nexHit->timesUsed()) 		continue;
+      if (nexHit->detector()==hp)	continue;;
+      const float *x = nexHit->x();
+      int jk=0;
+      for (int j=0;j<3;j++) {
+        jk = 1;
+        if (x[j]<mRej.mLim[0][j]) break;
+        if (x[j]>mRej.mLim[1][j]) break;
+        jk = 0;
+      }
+      if (jk) continue;
+      myTotHits++;
+      int ans = mRej.Reject(nexHit->x());
+      if (ans) continue;
+      myAccHits++;
+
+    } //endMultiIter loop
+
+    assert (abs(nTotHits-myTotHits)<=1);
+    assert (abs(nAccHits-myAccHits)<=1);
+#endif //0
 
     int nHits = mSel.Select();
     if (nHits < kMinHits) continue;
