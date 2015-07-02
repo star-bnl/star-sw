@@ -173,6 +173,8 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 	int max_tb = -1 ;
 
+	total_charge = 0 ;
+
 	for(int arm=0;arm<FGT_ARM_COU;arm++) {
 	for(int apv=0;apv<FGT_APV_COU;apv++) {
 #if 0
@@ -309,17 +311,18 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 					for(int i=0;i<cou_tb;i++) {
 
 						if(do_ped_sub) {
-							*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
+							short adc = (short) ((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
+							*d16++ = adc ;
+
+							if(adc > 0) total_charge++ ;
+							
 						}
 						else {
 							*d16++ = f[i_save+i].adc ;
 						}
 						
 
-//						printf("   *** ch %d: %d %d\n",
-//						       f[i_save+i].ch,
-//						       f[i_save+i].tb,
-//						       f[i_save+i].adc) ;
+
 					}
 				}
 
@@ -363,18 +366,13 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 
 				if(do_ped_sub) {
-					*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
+					short adc = (short) ((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
+					*d16++ = adc ;
 				}
 				else {
 					*d16++ = f[i_save+i].adc ;
 				}
 
-				//*d16++ = f[i_save+i].adc ;
-
-//				printf("   *** ch %d: %d %d\n",
-//				       f[i_save+i].ch,
-//				       f[i_save+i].tb,
-//				       f[i_save+i].adc) ;
 			}
 		}
 
@@ -1039,6 +1037,15 @@ int fgtPed::to_cache(char *fname, u_int run, int dont_cache)
 	}
 
 	fclose(f) ;	
+	
+	{
+		char cmd[128] ;
+
+		sprintf(cmd,"/bin/cp /RTScache/pedestals.txt /RTScache/%s_pedestals_%08u_loaded.txt",rts2name(rts_id),run) ;
+		system(cmd) ;
+	}
+
+			
 
 //	if(do_ln) {
 //		char cmd[128] ;
