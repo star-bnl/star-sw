@@ -124,7 +124,7 @@ assert(Vn.Mag2()>=0.999);
     }
   }
 {
-   for (uint ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
+   for (UInt_t ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
      assert(!Reject(mPoint[ip]));
    }  
 }
@@ -199,7 +199,7 @@ assert(Vn.Mag2()>=0.999);
    float myX[3];
    for (int j=0;j<3;j++) {myX[j]=mPos[j]+mDir[j]*mOutRad*0.5;}
    assert(!Reject(myX));
-   for (uint ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
+   for (UInt_t ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
      assert(!Reject(mPoint[ip]));
    }  
 
