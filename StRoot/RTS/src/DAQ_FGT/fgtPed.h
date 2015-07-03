@@ -45,6 +45,7 @@ public:
 	int tb_cou_xpect ;	// as set in the conf file "ntimebins"!
 	int tb_cou_ped ;	// as in the pedestals/load file!
 
+	u_int total_charge ;	// summed up in the do_zs
 
 	u_char ch_status[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
 

@@ -1,6 +1,9 @@
-//$Id: StSstLadder.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstLadder.cc,v 1.3 2015/07/02 18:18:46 bouchet Exp $
 //
 //$Log: StSstLadder.cc,v $
+//Revision 1.3  2015/07/02 18:18:46  bouchet
+//fixed the decoding of sstWafersPosition table
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -54,8 +57,8 @@ void StSstLadder::initWafers(St_sstWafersPosition *Position)
   sstWafersPosition_st *position = Position->GetTable();
   Int_t N = 320;
   for (Int_t i = 0; i < N; i++){
-    iWaf = i%16;
-    iLad = i/16;
+    iWaf = i/20;
+    iLad = i%20;
     idWafer = 7000 + (iWaf+1)*100 + (iLad)+1;
     int counter = i*3;
     if (mLadderNumb == idWafer%100-1){

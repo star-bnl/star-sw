@@ -41,7 +41,7 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
 {
   
   //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
-  gSystem->Load( "libPythia6_4_23.so");
+  gSystem->Load( "libPythia6_4_28.so");
   //  gSystem->Load( "StarPythia6.so"   );
 
   StarPythia6 *pythia6 = new StarPythia6("pythia6");
