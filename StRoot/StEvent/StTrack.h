@@ -292,7 +292,7 @@ public:
     Bool_t       testBit(UInt_t f) const { return (Bool_t) ((mFlagExtension & f) != 0); }
     Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
     void         invertBit(UInt_t f) { mFlagExtension ^= f; }
-    void Print(Option_t *option="") const {cout << option << (*this) << endl; }
+    virtual void Print(Option_t *option="") const {cout << option << (*this) << endl; }
     
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete

@@ -163,6 +163,7 @@ StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsSst = 0;
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
@@ -342,7 +343,9 @@ StMatrixF StTrackFitTraits::covariantMatrix() const
 }
 //_____________________________________________________________________________
 bool StTrackFitTraits::primaryVertexUsedInFit() const
-{ return mPrimaryVertexUsedInFit;}
+{ 
+  return mPrimaryVertexUsedInFit;
+}
 
 void StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 
