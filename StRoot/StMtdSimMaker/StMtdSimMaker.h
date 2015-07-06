@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.9 2014/12/10 17:29:19 marr Exp $
+ * $Id: StMtdSimMaker.h,v 1.10 2015/07/01 17:51:54 marr Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.10  2015/07/01 17:51:54  marr
+ * Add data member mWriteHisto to control the output of histograms
+ *
  * Revision 1.9  2014/12/10 17:29:19  marr
  * 1. Use localz and time-of-flight information from GEANT to determine the
  * leading times on east and west sides for MC MTD hits. With this change, the
@@ -80,6 +83,7 @@ class StMtdSimMaker : public StMaker
 
   const static float kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
   Bool_t mBookHisto;
+  Bool_t mWriteHisto;
   Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
 
 
@@ -152,8 +156,8 @@ class StMtdSimMaker : public StMaker
 			      Int_t &ibackleg,Int_t &imodule,Int_t &icell);
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.9 2014/12/10 17:29:19 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.10 2015/07/01 17:51:54 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
-    ClassDef(StMtdSimMaker,1)
+    ClassDef(StMtdSimMaker,2)
 };
 #endif
