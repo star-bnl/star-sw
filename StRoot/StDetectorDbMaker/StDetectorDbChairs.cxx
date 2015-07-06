@@ -424,9 +424,9 @@ StTpcHitErrors *StTpcHitErrors::fgInstance = 0;
 StTpcHitErrors *StTpcHitErrors::instance() {
   if (! fgInstance) {
     StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcHitErrors");
-    cout << "StTpcHitErrors have been instantiated with" << endl
-	 << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << "," 
-	 << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endl;
+    LOG_INFO << "StTpcHitErrors have been instantiated with\n"
+	     << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << "," 
+	     << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endm;
   }
   return fgInstance;
 }
@@ -875,23 +875,32 @@ Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yA
   Float_t dcorr = -9999;
   if (N <= 0 || ! xArray || ! yArray) return dcorr;
   Int_t NN = N;
-#if 0
+  Bool_t IsSorted = kTRUE;
   for (Int_t bin = N-1; bin >= 0; bin--) {
-    if (xArray[bin] && yArray[bin]) break;
-    NN--;
+    if (TMath::Abs(xArray[bin]) < 1e-7 && TMath::Abs(yArray[bin]) < 1e-7) {
+      NN--; // trailing entries
+      if (! IsSorted) break;
+      continue;
+    }
+    if (bin > 0 && xArray[bin] < xArray[bin-1]) IsSorted = kFALSE;
   }
+  if (! IsSorted) LOG_WARN << " St_tofCorrC::Correction xArray[" << NN << "] is not sorted" << endm;
   if (! NN) return dcorr;
   if (NN == 1) {return yArray[NN-1];}
-  Int_t bin = TMath::BinarySearch(NN, xArray, x);
-#else
+  if (x < xArray[0] || x > xArray[NN-1]) {
+    if (TMath::Abs(x) < 1e-7) dcorr = 0; // Simulation
+    return dcorr;
+  }
   Int_t bin = -1;
-  for (Int_t i = 0; i < N-1; i++) {
-    if (x >= xArray[i] && x < xArray[i+1]) {
-      bin = i;
+  if (IsSorted) bin = TMath::BinarySearch(NN, xArray, x);
+  else {
+    for (Int_t i = 0; i < NN-1; i++) {
+      if (x >= xArray[i] && x < xArray[i+1]) {
+	bin = i;
       break;
+      }
     }
   }
-#endif
   if (bin >= 0 && bin < NN) {
     if (bin == NN) bin--;
     Double_t x1 = xArray[bin];
@@ -907,8 +916,10 @@ Int_t St_tofCorrC::Index(Int_t tray, Int_t module, Int_t cell) const {
   Int_t i = -1;
   switch (mCalibType) {
   case CELLCALIB:   i = cell - 1 + mNCell*(module - 1 + mNModule*(tray - 1))  ; break;
+#if 0
   case MODULECALIB: i =                    module - 1 + mNModule*(tray - 1)   ; break;
   case BOARDCALIB:  i =                   (module - 1 + mNModule*(tray - 1))/4; break;
+#endif
   default: assert(0); break;
   }
   return i;
@@ -979,8 +990,6 @@ Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) con
 }
 #include "St_tofGeomAlignC.h"
 MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
-#include "St_tofTrayConfigC.h"
-MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
 #include "St_tofStatusC.h"
 MakeChairInstance(tofStatus,Calibrations/tof/tofStatus);
 #include "St_pvpdStrobeDefC.h"
@@ -989,6 +998,8 @@ MakeChairInstance(pvpdStrobeDef,Calibrations/tof/pvpdStrobeDef);
 MakeChairInstance(tofCamacDaqMap,Calibrations/tof/tofCamacDaqMap);
 #include "St_tofDaqMapC.h"
 MakeChairInstance(tofDaqMap,Calibrations/tof/tofDaqMap);
+#include "St_tofTrayConfigC.h"
+MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
 #include "St_tofINLCorrC.h"
 MakeChairInstance(tofINLCorr,Calibrations/tof/tofINLCorr);
 #include "St_tofINLSCorrC.h"
