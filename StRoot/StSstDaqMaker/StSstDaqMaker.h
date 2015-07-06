@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.3 2015/06/24 20:58:11 bouchet Exp $
+ * $Id: StSstDaqMaker.h,v 1.4 2015/07/06 18:38:19 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.4  2015/07/06 18:38:19  bouchet
+ * initialization of variables and pointers (Thanks Yuri)
+ *
  * Revision 1.3  2015/06/24 20:58:11  bouchet
  * added codes for using sstChipCorrect and sstMaskChip tables ; replaced StSsdConfig by StSstConfig
  *
@@ -75,7 +78,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.3 2015/06/24 20:58:11 bouchet Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.4 2015/07/06 18:38:19 bouchet Exp $ built "__DATE__" "__TIME__;
       return cvs;
    }
 
@@ -104,13 +107,14 @@ private:
    Int_t  idWaferToWafer(Int_t idWafer);
    Int_t  idWaferToLadderNumb(Int_t idWafer);
 
-   StSstConfig       *mConfig;
+   Char_t              mBeg[1]; //!
+   StSstConfig         *mConfig;
    sstConfiguration_st *mConfigTable;//!
-   St_spa_strip      *spa_strip;
-   St_ssdPedStrip    *ssdPedStrip;
-   St_ssdStripCalib  *strip_calib;
-   St_ssdNoise       *mNoise;
-
+   St_spa_strip        *spa_strip;
+   St_ssdPedStrip      *ssdPedStrip;
+   St_ssdStripCalib    *strip_calib;
+   St_ssdNoise         *mNoise;
+   
    Int_t   mUseChipCorrect;
    Int_t   mUsePedSubtraction;
    Int_t   mUseIntrinsicNoise;
@@ -145,6 +149,8 @@ private:
    Int_t   mPEventTime;// Previous event RHIC cloc
    Int_t   mCorrectFactor[1920][2]; //chip correction table.
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
+   Char_t  mEnd[1];        //!
+
    map<Int_t, Int_t> mReadOutPed; //ReadOut Pedestal.
    map<Int_t, Int_t> mIntrinsicRms; //Intrinsic Rms
    //DAQ File parameters(please look at the SSD data formata document. )
