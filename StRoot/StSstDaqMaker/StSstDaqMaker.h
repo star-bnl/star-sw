@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.4 2015/07/06 18:38:19 bouchet Exp $
+ * $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.5  2015/07/06 18:53:10  bouchet
+ * blanks removed to make C++ compiler happy (Thanks Yuri)
+ *
  * Revision 1.4  2015/07/06 18:38:19  bouchet
  * initialization of variables and pointers (Thanks Yuri)
  *
@@ -78,7 +81,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.4 2015/07/06 18:38:19 bouchet Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
