@@ -4,10 +4,10 @@
 #define StvKNSeedFinder_HH
 #ifndef __NOSTV__
 #include "Stv/StvSeedFinder.h"
+#endif
 #include "StvGoneRejector.h"
 #include "StvConeRejector.h"
 #include "StvKNSeedSelector.h"
-#endif
 #include <map>
 #include <vector>
 /// \class StvKNSeedFinder
