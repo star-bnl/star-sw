@@ -734,9 +734,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   for (Int_t ipr=0;(pVertex=event->primaryVertex(ipr));ipr++) {
 #ifdef StTrackMassFit_hh
     Int_t key = pVertex->key();
-    if (key <= 0) key = ipr;
-#else
-    Int_t key = ipr;
+    if (key <= 0)  pVertex->setKey(ipr);
 #endif
     LOG_QA << *pVertex << endm;
     // Report for jobTracking Db   (non-zero entry only)    
