@@ -1,6 +1,9 @@
-//$Id: StSstLadder.cc,v 1.3 2015/07/02 18:18:46 bouchet Exp $
+//$Id: StSstLadder.cc,v 1.4 2015/07/06 13:46:21 bouchet Exp $
 //
 //$Log: StSstLadder.cc,v $
+//Revision 1.4  2015/07/06 13:46:21  bouchet
+//revert to initial (and correct) decoding of iLad,iWaf
+//
 //Revision 1.3  2015/07/02 18:18:46  bouchet
 //fixed the decoding of sstWafersPosition table
 //
@@ -57,8 +60,8 @@ void StSstLadder::initWafers(St_sstWafersPosition *Position)
   sstWafersPosition_st *position = Position->GetTable();
   Int_t N = 320;
   for (Int_t i = 0; i < N; i++){
-    iWaf = i/20;
-    iLad = i%20;
+    iWaf = i%16;
+    iLad = i/16;
     idWafer = 7000 + (iWaf+1)*100 + (iLad)+1;
     int counter = i*3;
     if (mLadderNumb == idWafer%100-1){

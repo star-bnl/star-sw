@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.3 2015/06/24 20:58:11 bouchet Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.4 2015/07/06 18:38:19 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.4  2015/07/06 18:38:19  bouchet
+ * initialization of variables and pointers (Thanks Yuri)
+ *
  * Revision 1.3  2015/06/24 20:58:11  bouchet
  * added codes for using sstChipCorrect and sstMaskChip tables ; replaced StSsdConfig by StSstConfig
  *
@@ -113,8 +116,9 @@ const Int_t StSstDaqMaker::ReadOutMap[128] = {
 };
 //-----------------------------------------------
 StSstDaqMaker::StSstDaqMaker(const Char_t *name)
-   : StRTSBaseMaker("sst", name), spa_strip(0)
+  : StRTSBaseMaker("sst", name)
 {
+  memset(mBeg,0,mEnd-mBeg+1);
 }
 //-----------------------------------------------
 StSstDaqMaker::~StSstDaqMaker()

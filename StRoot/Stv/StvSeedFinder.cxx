@@ -12,11 +12,12 @@
 
 //Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
-                  , kBAD_XI2    = 8;		// max Xi2 (with errs)
-const double BAD_RHO=0.1;
-static double gWk[10];
+                  , kBAD_XI2    = 8		// max Xi2 (with errs)
+                  , kBAD_RHO=0.1		// max curvature
+                  , kMIN_Rxy=50;		// minimal radius for seed hits
 
 ClassImp(StvSeedFinder)
+
 //_____________________________________________________________________________
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
 { fDraw=0;
@@ -97,7 +98,7 @@ static int nCall=0; nCall++;
   }  
   fXi2[0] =circ.Fit();
   if (fXi2[0]>kBAD_XI2cm2) 		return 0; //Xi2 too bad, no updates
-  if (fabs(circ.GetRho()) >BAD_RHO) 	return 0; //Too big curvature
+  if (fabs(circ.GetRho()) >kBAD_RHO) 	return 0; //Too big curvature
 
   const double dBeg[3]={fBeg[0],fBeg[1],fBeg[2]};
   double l = circ.Path(dBeg); circ.Move(l);
@@ -133,42 +134,6 @@ static int nCall=0; nCall++;
   l*= (nNode+1.)/(nNode-1.);
   fHelix.Move(l);
 
-//#define KNNDEBUG 1
-#ifdef KNNDEBUG
-static int myKNN = 1;
-  if (!myKNN) return &fHelix;
-  int nNei = (nNode<6)? 3:5; 
-  StvKNNUtil knn(2,nNei);
-  float var[2]={0,0};
-//  knn.Add(-1,var);
-  for (int iNode = 0; iNode<nNode ;iNode++) {
-    const StvHit * hit = fSeedHits[iNode];
-    const float *fx = hit->x();
-    const double dx[3]={fx[0],fx[1],fx[2]};
-    double l = circ.Path(dx); circ.Move(l);
-//		Set position for helix
-    const double cosL = circ.GetCos();
-    const double *dir = circ.Dir();
-    const double *pos = circ.Pos();
-    var[1] = (fx[2]-pos[2])*cosL;
-    var[0] = ((fx[0]-pos[0])*(-dir[1])+(fx[1]-pos[1])*(dir[0]))/cosL;
-    knn.Add(iNode,var);
-
-  }
-// double fak = sqrt(double(nNode)/nNei);
-// mKNNMiMax[0] = sqrt(knn.GetBest(mKNNIdx[0]))*fak;  
-// mKNNMiMax[1] = sqrt(knn.GetWost(mKNNIdx[1]))*fak;  
-// mKNNMiMax[1]/=mKNNMiMax[0]/100;
-
-float xKnn[2];
-gWk[0] = knn.BestPos(xKnn);
-gWk[1] = knn.WostDis(xKnn);
-StvDebug::Count("KNN_Best:Wost",gWk[0],gWk[1]);
-
-
-#endif // KNNDEBUG
-
-
   return &fHelix;
 }    
 //_____________________________________________________________________________
@@ -185,20 +150,14 @@ void StvSeedFinders::Reset()
 //_____________________________________________________________________________
 void StvSeedFinder::FeedBack(int success)
 {
-#ifdef KNNDEBUG
-   int nHits =fSeedHits.size();     
-   if (success<=0)    {
-     StvDebug::Count("Fail_KnnMiMax",mKNNMiMax[0],mKNNMiMax[1]);
-     StvDebug::Count("Fail_Hits",nHits);
-     StvDebug::Count("Fail_WostDis:BestDis",gWk[0],gWk[1]);
-    }
-   else  {
-       StvDebug::Count("Good_KnnMiMax",mKNNMiMax[0],mKNNMiMax[1]);    
-       StvDebug::Count("Good_Hits",nHits);
-       StvDebug::Count("Good_WostDis:BestDis",gWk[0],gWk[1]);
-   }
-#endif //KNNDEBUG
+  if (StvDebug::Debug()<2) return;
 
+  if (success<=0) { //
+  StvDebug::Count("BadXi2:Xi2E",fXi2[1],fXi2[0]);
+
+  } else {
+  StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
+  }
 }
  
  
