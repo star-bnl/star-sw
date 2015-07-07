@@ -71,7 +71,7 @@ void StiKalmanTrackFinder::initialize()
   _toolkit = StiToolkit::instance();
   _trackNodeFactory  = _toolkit->getTrackNodeFactory();
   _detectorContainer = _toolkit->getDetectorContainer();
-  _detectorContainer->reset();
+  _detectorContainer->clear();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
@@ -143,7 +143,9 @@ void StiKalmanTrackFinder::clear()
 {
   //cout << "StiKalmanTrackFinder::clear() -I- Starting" <<endl;
   _hitContainer->clear();
-  reset();
+  _detectorContainer->clear();
+  _trackContainer->clear();
+  _trackSeedFinder->clear();
   //cout << "StiKalmanTrackFinder::clear() -I- Done" <<endl;
 }
 
@@ -163,9 +165,9 @@ void StiKalmanTrackFinder::findTracks()
 
   assert(_trackContainer );
   assert(_trackSeedFinder);
-  _trackSeedFinder->reset();
-  _trackContainer->clear();
-  if (_trackFilter) _trackFilter->reset();
+//   _trackSeedFinder->reset();
+//   _trackContainer->clear();
+//   if (_trackFilter) _trackFilter->reset();
 #ifdef DO_TPCCATRACKER 
   StiTPCCATrackerInterface& caTrackerInt = StiTPCCATrackerInterface::Instance();
   caTrackerInt.SetNewEvent();
@@ -607,7 +609,6 @@ assert(direction || leadNode==track->getLastNode());
 	// active detector may have a hit
 	vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
 	vector<StiHit*>::iterator hitIter;
-        
 	for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
 	{
 	  stiHit = *hitIter;
@@ -623,6 +624,14 @@ assert(direction || leadNode==track->getLastNode());
       }//if(active)
 
       int nHits = hitCont.getNHits();
+
+if (nHits)
+{
+StiDebug::Count("HitCand:Rxy",testNode.getRxy(),nHits);
+StiDebug::Count("HitCand",nHits);
+
+
+}       
       testNode.setHitCand(nHits);
       if (direction) {
         nHits=1;
