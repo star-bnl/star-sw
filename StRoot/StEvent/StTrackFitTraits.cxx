@@ -115,7 +115,7 @@ ClassImp(StTrackFitTraits)
 
 static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.29 2015/05/13 17:06:14 ullrich Exp $";
 
-StTrackFitTraits::StTrackFitTraits()
+void StTrackFitTraits::init()
 {
     mPidHypothesis = 0;
     mNumberOfFitPoints = 0x8000;
@@ -130,43 +130,24 @@ StTrackFitTraits::StTrackFitTraits()
     mPrimaryVertexUsedInFit = false;
     fill_n(mChi2, 2, 0);
 }
-
-
 //_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
                                    Float_t chi[2], Float_t cov[15])
 {
+  init();
     mPidHypothesis = pid;
-    mNumberOfFitPoints = 0x8000;
     copy(chi, chi+2, mChi2);
     mCovariantMatrix.Set(15, cov);
-    mNumberOfFitPointsTpc = 0;
-    mNumberOfFitPointsFtpcWest = 0;
-    mNumberOfFitPointsFtpcEast = 0;
-    mNumberOfFitPointsSvt = 0;
-    mNumberOfFitPointsSsd = 0;
-    mNumberOfFitPointsSst = 0;
-    mNumberOfFitPointsPxl = 0;
-    mNumberOfFitPointsIst = 0;
-    mPrimaryVertexUsedInFit = false;
 }
 //_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
                                    Float_t chi[2], TArrayF &cov)
 {
+  init();
     mPidHypothesis = pid;
     mNumberOfFitPoints = nfp|0x8000;
     copy(chi, chi+2, mChi2);
     mCovariantMatrix = cov;
-    mNumberOfFitPointsTpc = 0;
-    mNumberOfFitPointsFtpcWest = 0;
-    mNumberOfFitPointsFtpcEast = 0;
-    mNumberOfFitPointsSvt = 0;
-    mNumberOfFitPointsSsd = 0;
-    mNumberOfFitPointsSst = 0;
-    mNumberOfFitPointsPxl = 0;
-    mNumberOfFitPointsIst = 0;
-    mPrimaryVertexUsedInFit = false;
 }
 
 StTrackFitTraits::~StTrackFitTraits() {/* no op */}

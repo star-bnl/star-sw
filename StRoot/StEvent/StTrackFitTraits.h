@@ -119,7 +119,7 @@ class StParticleDefinition;
 
 class StTrackFitTraits : public StObject {
 public:
-    StTrackFitTraits();
+  StTrackFitTraits() {init();}
     StTrackFitTraits(UShort_t, UShort_t, Float_t[2], Float_t[15]);
     StTrackFitTraits(UShort_t, UShort_t, Float_t[2], TArrayF&);
     // StTrackFitTraits(const StTrackFitTraits&);            use default
@@ -146,7 +146,7 @@ public:
     StThreeVectorF         momentum();
     StThreeVectorF         momentumErrors();
     StMatrixF              momentumCovariance();
-    
+    void                   init();
 protected:
     UShort_t mPidHypothesis;       // GeantId
     UShort_t mNumberOfFitPoints;   // obsolete since ITTF
