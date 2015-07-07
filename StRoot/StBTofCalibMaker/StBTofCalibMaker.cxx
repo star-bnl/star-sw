@@ -156,6 +156,8 @@ void StBTofCalibMaker::resetPars()
 void StBTofCalibMaker::resetVpd()
 {
   memset(mVPDLeTime, 0, sizeof(mVPDLeTime));
+  mTSumWest = 0;
+  mTSumEast = 0;
   mTStart = -9999.;
   mTDiff  = -9999.;
   mProjVtxZ = -9999.;
