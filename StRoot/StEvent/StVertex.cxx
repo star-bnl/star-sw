@@ -96,7 +96,8 @@ StVertex::StVertex()
 Int_t
 StVertex::operator==(const StVertex& v) const
 {
-    return mType == v.mType &&
+    return mType == v.mType && 
+      mKey == v.mKey &&
     mFlag == v.mFlag &&
     mPosition == v.mPosition &&
     mChiSquared == v.mChiSquared;
