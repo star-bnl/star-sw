@@ -19,7 +19,7 @@ class St_tofCorrC : public TChair {
     mEastVpdTrayId = 122
   };
   enum calibtype {NOTSET=0, BOARDCALIB=mNTray*(mNModule/4), MODULECALIB=mNTray*mNModule, CELLCALIB=mNTray*mNModule*mNCell};
-  static Float_t Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray);
+  static Float_t Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray, UChar_t &NN);
   Int_t   Index(Int_t tray, Int_t module, Int_t cell) const;
  protected:
   St_tofCorrC(TTable *table=0);

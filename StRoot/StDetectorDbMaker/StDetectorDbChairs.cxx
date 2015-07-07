@@ -871,10 +871,10 @@ ClassImp(St_tofCorrC);
 St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET)  {
 }
 //________________________________________________________________________________
-Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray) {
+Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray, UChar_t &NN) {
   Float_t dcorr = -9999;
   if (N <= 0 || ! xArray || ! yArray) return dcorr;
-  Int_t NN = N;
+  NN = N;
   Bool_t IsSorted = kTRUE;
   for (Int_t bin = N-1; bin >= 0; bin--) {
     if (TMath::Abs(xArray[bin]) < 1e-7 && TMath::Abs(yArray[bin]) < 1e-7) {
@@ -954,7 +954,7 @@ Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) 
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i));
+  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i), N(i));
 }
 #include "St_tofZbCorrC.h"
 MakeChairInstance(tofZbCorr,Calibrations/tof/tofZbCorr);
@@ -986,7 +986,7 @@ Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) con
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  return St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i));
+  return St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i), N(i));
 }
 #include "St_tofGeomAlignC.h"
 MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
@@ -1029,7 +1029,7 @@ MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 MakeChairInstance(vpdTotCorr,Calibrations/tof/vpdTotCorr);
 Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) const {
   assert(tubeId(i) == i + 1);
-  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i));
+  return St_tofCorrC::Correction(128, tot(i), x, corr(i), N(i));
 }
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
