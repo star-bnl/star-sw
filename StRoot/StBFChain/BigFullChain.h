@@ -26,12 +26,12 @@ Jeff List, 05/27/15
 2014:   { "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd",        "gmt", "pxl", "sst", "ist", "l4" };
 2015:   { "tpx", "btow", "bsmd", "etow", "esmd", "tof", "mtd",        "gmt", "pxl", "sst", "ist", "rp", "fps", "l4" };
 ______________________________________________________________________________________________________________
-y2010:     tpx    btow    bsmd    etow    esmd    tof                                                        bbc  fms ftpc pmd vpd | AuAu200,62,39,7.7,11.5	     
-y2011:     tpx    btow    bsmd    etow    esmd 	  tof    mtd           gmt    hlt               	     bbc  fms ftpc pmd vpd | AuAu19.6,27,200;pp500	     
-y2012:     tpx    btow    bsmd    etow    esmd 	  tof    mtd  	fgt    gmt    hlt			     bbc  fms          vpd | pp500,200,UU193		     
-y2013      tpx    btow    bsmd    etow    esmd    tof    mtd  	fgt    gmt    pxl    			     bbc  fms          vpd | - fpd, pp500	     
-y2014      tpx    btow    bsmd    etow    esmd    tof    mtd  	       gmt    pxl    sst    ist	   	     bbc               vpd | no fgt and fms   
-y2015      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt    pxl    sst    ist	   rp    fps bbc  fms          vpd | no fgt       
+y2010:     tpx    btow    bsmd    etow    esmd    tof                                                        bbc  fms ftpc pmd vpd | AuAu200,62,39,7.7,11.5
+y2011:     tpx    btow    bsmd    etow    esmd 	  tof    mtd           gmt    hlt               	     bbc  fms ftpc pmd vpd | AuAu19.6,27,200;pp500
+y2012:     tpx    btow    bsmd    etow    esmd 	  tof    mtd  	fgt    gmt    hlt			     bbc  fms          vpd | pp500,200,UU193
+y2013      tpx    btow    bsmd    etow    esmd    tof    mtd  	fgt    gmt    pxl    			     bbc  fms          vpd | - fpd, pp500
+y2014      tpx    btow    bsmd    etow    esmd    tof    mtd  	       gmt    pxl    sst    ist	   	     bbc               vpd | no fgt and fms
+y2015      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt    pxl    sst    ist	   rp    fps bbc  fms          vpd | no fgt
 ______________________________________________________________________________________________________________     
  */
 #endif
@@ -233,10 +233,10 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
 #endif
-  {"MC.2014","","","TpcRS,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.2014","","","TpcRS,pxlFastSim,istSim,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
-  {"MC.2015","","","TpcRS,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+  {"MC.2015","","","TpcRS,pxlFastSim,istSim,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
   {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
@@ -330,8 +330,14 @@ Bfc_st BFC[] = { // standard chains
    ",-hitfilt",                                                                            "","","",kFALSE},
   {"RC.pp.y2013","","","pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,"
    "OSpaceZ2,OGridLeak3D,-hitfilt",                                                        "","","",kFALSE},
-  {"RC.y2014","","","P2014a,pxlHit,istHit,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
+  {"RC.y2014.nohft","","","P2014a,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
    ,                                                                                       "","","",kFALSE},
+  {"RC.y2014","","","RC.y2014.nohft,pxlHit,istHit",                                        "","","",kFALSE},
+
+  {"RC.pp2015.nohft","","","pp2015,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt"
+   ,                                                                                       "","","",kFALSE},
+  {"RC.pp2015","","","RC.pp2015.nohft,pxlHit,istHit",                                      "","","",kFALSE},
+
 
   {"MC nightlies and Eval","--","-----------","------------------------------------------","","","",kFALSE},
   {"test_MC.stan.y2000","","","MC.y2000,Sti,fzin,MiniMcMk","",""
@@ -400,7 +406,7 @@ Bfc_st BFC[] = { // standard chains
   {"test_UU200.MC.y2012","","","MC.y2012,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf12002_1_100evts.fzd",kFALSE},
   {"test_AuAu200.MC.y2014","","","MC.2014,fzin,TpcRS,Sti","",""
-   ,"/star/rcf/simu/rcf14020_100_50evts.fzd"                                                       ,kFALSE}, 
+   ,"/star/rcf/simu/rcf15000_1_100evts.fzd"                                                       ,kFALSE}, 
   {"test.RC.centr.y2000","","","RC.y2000,Sti","",""
    ,                                   "/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq",kFALSE},
   {"test.RC.minb.y2000","","","RC.y2000,Sti","",""
@@ -496,20 +502,20 @@ Bfc_st BFC[] = { // standard chains
   {"test.RC.pp500.y2013","","","RC.pp.y2013,Sti","",""
    ,                              "/star/rcf/test/daq/2013/079/st_physics_14079008_raw_1920004.daq",kFALSE},
 
-  {"test.RC.AuAu15.y2014","","","RC.y2014,Sti","",""
+  {"test.RC.AuAu15.y2014","","","RC.y2014.nohft,Sti","",""
    ,                              "/star/rcf/test/daq/2014/069/st_physics_15069008_raw_2500008.daq",kFALSE},
-  {"test.RC.AuAu200.y2014","","","RC.y2014,Sti","",""
+  {"test.RC.AuAu200.y2014","","","RC.y2014.nohft,Sti","",""
    ,                              "/star/rcf/test/daq/2014/086/st_physics_15086051_raw_2500017.daq",kFALSE},
   {"test.RC.AuAu200.low.y2014","","","RC.y2014,-hitfilt,Sti"
    ,                        "","","/star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq",kFALSE}, 
-  {"test.RC.AuAu200.mid.y2014","","","RC.y2014,Sti","",""
+  {"test.RC.AuAu200.mid.y2014","","","RC.y2014.nohft,Sti","",""
    ,                                  "/star/rcf/test/daq/2014/146/st_mtd_15146050_raw_1000030.daq",kFALSE},
-  {"test.RC.He3Au200.y2014","","","RC.y2014,Sti","",""
+  {"test.RC.He3Au200.y2014","","","RC.y2014.nohft,Sti","",""
    ,                              "/star/rcf/test/daq/2014/171/st_physics_15171039_raw_2000008.daq",kFALSE},
-  {"test.RC.pp200long.y2015","","","pp2015,btof,mtd,pp2pp,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D"
-   ",-hitfilt,Sti","","","/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq"         ,kFALSE}, 
-  {"test.RC.pp200long.NoHFT.y2015","","","pp2015,btof,mtd,pp2pp,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,"
-   "-hitfilt,Sti","",""          ,"/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
+  {"test.RC.pp200long.y2015","","","RC.pp2015,-hitfilt,Sti","",""
+   ,                              "/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
+  {"test.RC.pp200long.NoHFT.y2015","","","RC.pp2015.nohft,-hitfilt,Sti","",""          
+   ,                              "/star/rcf/test/daq/2015/060/st_physics_16060046_raw_5000015.daq",kFALSE}, 
   //_________ eval _____________
   {"eval_Sti_auau200.MC.y2007"  ,"","","MC.y2007,Sti,fzin,MiniMcMk","",""
    ,                                                        "/star/rcf/simu/rcf1296_02_100evts.fzd",kFALSE},
@@ -911,13 +917,13 @@ Bfc_st BFC[] = { // standard chains
   {"pp2005b","","",   "B2005b,IAna,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,emcDY2,ftpc,trgd,ZDCvtx,Corr4"
    ,                     "","","Production chain for 2005 pp data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
-  {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Idst,tags,Tree,evout,ssdDb","",""
+  {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,UseXgeom,svt_daq,SvtD,Idst,tags,Tree,evout,ssdDb","",""
    ,                                                           "Base chain for 2006 ITTF (tpc+svt)",kFALSE},
-  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Idst,tags,Tree,evout,svtDb,ssdDb","",""
+  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,UseXgeom,Idst,tags,Tree,evout,svtDb,ssdDb","",""
    ,                                          "Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
-  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Idst,l0,tags,Tree,evout,svtDb,ssdDb","",""
+  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,UseXgeom,Idst,l0,tags,Tree,evout,svtDb,ssdDb","",""
    ,                                                          "Base chain for 2006 ITTF (tpc only)",kFALSE},
-  {"B2006g"      ,""       ,"","ry2006g,in,tpc_daq,tpcI,Idst,l0,tags,Tree,evout,svtDb,ssdDb","",""
+  {"B2006g"      ,""       ,"","ry2006g,in,tpc_daq,tpcI,UseXgeom,Idst,l0,tags,Tree,evout,svtDb,ssdDb","",""
    ,                                                    "Base chain for 2006 ITTF geo g (tpc only)",kFALSE},
   {"pp2006a"      ,"" ,"",   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
    "B2006a,IAna,fcf,ppOpt,VFPPVnoCTB,beamline,emcDY2,ftpc,trgd,ZDCvtx,Corr3"
@@ -929,11 +935,11 @@ Bfc_st BFC[] = { // standard chains
    "B2006g,IAna,fcf,ppOpt,VFPPVnoCTB,beamline,emcDY2,ftpc,trgd,ZDCvtx,Corr4,BeamBack"
    ,               "","","Production chain for 2005 pp data geo g (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
   // Year 7 chains - Geometry 2007 hopefully fine
-  {"T2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,Tree,evout"
+  {"T2007","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,UseXgeom,fcf,Tree,evout"
    ,                                                             "","","TPC only chain,  2007 ITTF",kFALSE},
-  {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,sptd,Idst,tags,Tree,evout"
+  {"B2007","","","ry2007,MakeEvent,in,tpc_daq,tpcI,UseXgeom,fcf,svt_daq,SvtD,ssddat,sptd,Idst,tags,Tree,evout"
    ,                                                 "","","Base chain for 2007 ITTF (tpc+svt+ssd)",kFALSE},
-  {"B2007g","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,fcf,svt_daq,SvtD,ssddat,sptd,Idst,tags,Tree,evout"
+  {"B2007g","","","ry2007g,MakeEvent,in,tpc_daq,tpcI,UseXgeom,fcf,svt_daq,SvtD,ssddat,sptd,Idst,tags,Tree,evout"
    ,                                           "","","Base chain for 2007 ITTF geo g (tpc+svt+ssd)",kFALSE},
   {"P2007"       ,"" ,"",
    "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr5"
@@ -949,9 +955,9 @@ Bfc_st BFC[] = { // standard chains
   {"P2007b"      ,"" ,"",
    "B2007,IAna,KeepSvtHit,hitfilt,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,svtIT,ssdIT,Corr4"
    ,                  "","","Production chain for 2007 data Corr4 (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
-  {"B2008" ,"","","ry2008,in,tpc_daq,tpcI,fcf,Idst,tags,Tree,evout","",""
+  {"B2008" ,"","","ry2008,in,tpc_daq,tpcI,UseXgeom,fcf,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2008 ITTF (tpc)",kFALSE},
-  {"B2008a","","","ry2008,in,tpcX,ToFx,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2008a","","","ry2008,in,tpcX,UseXgeom,ToFx,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                           "Base chain for 2008 ITTF (tpc+tof)",kFALSE},
   // startup for calib
   {"P2008a"       ,"" ,"",
@@ -982,11 +988,11 @@ Bfc_st BFC[] = { // standard chains
   // Chains for 2009 run p+p essentially
   // Note that we always need to start with VFMinuit as VFPPV is full of asserts
   //
-  {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2009.1","","","ry2009,in,tpcX,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2009 ITTF (tpc)",kFALSE},
-  {"B2009.2","","","ry2009a,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2009.2","","","ry2009a,in,tpcX,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2009 ITTF (tpc)",kFALSE},
-  {"B2009.3","","","ry2009d,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2009.3","","","ry2009d,in,tpcX,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2009 ITTF (tpc)",kFALSE},
 
   {"pp2009a"      ,"" ,"",
@@ -1004,9 +1010,9 @@ Bfc_st BFC[] = { // standard chains
 
 
   // chains for year 10
-  {"B2010","","","ry2010,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2010","","","ry2010,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2010 ITTF (tpc)",kFALSE},
-  {"B2010c","","","ry2010c,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2010c","","","ry2010c,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2010 ITTF (tpc)",kFALSE},
 
   {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
@@ -1024,7 +1030,7 @@ Bfc_st BFC[] = { // standard chains
 
 
   // chains for year 11
-  {"B2011","","","ry2011,in,tpcX,ftpc,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2011","","","ry2011,in,tpcX,UseXgeom,ftpc,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2011 ITTF (tpc)",kFALSE},
 
   {"P2011a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
@@ -1036,7 +1042,7 @@ Bfc_st BFC[] = { // standard chains
 
 
   // chains for year 12
-  {"B2012","","","ry2012,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2012","","","ry2012,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2012 ITTF (tpc)",kFALSE},
   {"pp2012a","" ,"","B2012,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,        "","",                "Production chain for 2012 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
@@ -1044,7 +1050,7 @@ Bfc_st BFC[] = { // standard chains
   {"P2012a","" ,"",
    "B2012,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                               "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc)",kFALSE},
-  {"B2012b","","","ry2012a,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2012b","","","ry2012a,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2012 ITTF (tpc)",kFALSE},
   {"pp2012b","" ,"",
    "B2012b,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
@@ -1088,17 +1094,17 @@ Bfc_st BFC[] = { // standard chains
 
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
-   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,StiHftC,analysis,"
+   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   // Year 15 chains
   {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
   {"pp2015","" ,"",
-   "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   {"P2015","" ,"",
-   "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
