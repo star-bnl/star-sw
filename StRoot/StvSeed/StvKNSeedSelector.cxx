@@ -144,8 +144,6 @@ static int nCall=0; nCall++;
     if (mMinIdx<0) return 0;
 
 
-StvDebug::Count("AllKNNDis",mKNNDist *57);
-
     if (mKNNDist > kMinAng*kMaxRatio) return 0;	
   ///		define the best direction
     memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
@@ -156,14 +154,6 @@ StvDebug::Count("AllKNNDis",mKNNDist *57);
     Pass(mMinIdx,mKNNDist);
     double wid = Width();
     if (mKNNDist*wid > kMinAng) return 0;	
-
-double ei0 = sqrt(mEigen[0])*57;
-double ei1 = sqrt(mEigen[1])*57;
-StvDebug::Count("KNNDis",mKNNDist *57);
-StvDebug::Count("MinEig",ei0);
-StvDebug::Count("KNNDis:MinEig",ei0,mKNNDist*57);
-StvDebug::Count("MaxEig:MinEig",ei0,ei1);
-
  	 
     mSel.push_back(mStartHit); 	 
     std::map<float,int>::iterator myIt;
