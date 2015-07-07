@@ -74,7 +74,7 @@ class StBTofDaqMap{
   ~StBTofDaqMap();
 
   /// Initial function, need a maker to access the data base
-  void Init(StMaker *maker);
+  void Init(StMaker *maker=0 );
   void Reset();
   
   /// Set the number valid trays

@@ -29,8 +29,8 @@
  *
  *******************************************************************/
 #include <iostream>
-#include "tables/St_tofDaqMap_Table.h"
-#include "tables/St_tofTrayConfig_Table.h"
+#include "StDetectorDbMaker/St_tofDaqMapC.h"
+#include "StDetectorDbMaker/St_tofTrayConfigC.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StBTofDaqMap.h"
@@ -48,66 +48,43 @@ StBTofDaqMap::~StBTofDaqMap()
 /*!
  * Main initial function to access data base to retrieve the daq map parameters
  */
-void StBTofDaqMap::Init(StMaker *maker) {
+void StBTofDaqMap::Init(StMaker */* maker */) {
 
   LOG_INFO << "[StBTofDaqMap] retrieving BTOF DAQ map and tray config ..." << endm;
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
-
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
-  St_tofDaqMap* tofDaqMap = static_cast<St_tofDaqMap*>(mDbTOFDataSet->Find("tofDaqMap"));
-  if(!tofDaqMap) {
-    LOG_ERROR << "unable to get tof Module map table" << endm;
-    return; // kStErr;
-  }
-  tofDaqMap_st* daqmap = static_cast<tofDaqMap_st*>(tofDaqMap->GetArray());
   for (Int_t i=0;i<mNTOF;i++) {
-    mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
+    mMRPC2TDIGChan[i] = (Int_t) St_tofDaqMapC::instance()->MRPC2TDIGChanMap()[i];
     mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
-    if(maker->Debug()) {
-      LOG_DEBUG << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
-    }
+    LOG_DEBUG << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
   }
   for (Int_t i=0;i<mNVPD;i++) {
-    mWestPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
-    mWestPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
-    if(maker->Debug()) {
-      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
-    }
+    mWestPMT2TDIGLeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGLeChanMap()[i];
+    mWestPMT2TDIGTeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGTeChanMap()[i];
+    LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
     mTDIGLe2WestPMTChan[mWestPMT2TDIGLeChan[i]] = i;
     mTDIGTe2WestPMTChan[mWestPMT2TDIGTeChan[i]] = i;
-
+    
     int j=i+mNVPD;
-
-    mEastPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[j]);
-    mEastPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[j]);
-    if(maker->Debug()) {
-      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
-    }
+    
+    mEastPMT2TDIGLeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGLeChanMap()[j];
+    mEastPMT2TDIGTeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGTeChanMap()[j];
+    LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
     mTDIGLe2EastPMTChan[mEastPMT2TDIGLeChan[i]] = i;
     mTDIGTe2EastPMTChan[mEastPMT2TDIGTeChan[i]] = i;
   }
-
+  
   // valid tray Id
-  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
-  St_tofTrayConfig* trayConfig = static_cast<St_tofTrayConfig*>(mDbTOFDataSet->Find("tofTrayConfig"));
-  if(!trayConfig) {
-    LOG_ERROR << "unable to get tof tray configuration" << endm;
-    return; // kStErr;
-  }
-  tofTrayConfig_st* trayconf = static_cast<tofTrayConfig_st*>(trayConfig->GetArray());
-  if(maker->Debug()) { LOG_DEBUG << " Valid Trays: " << endm; }
-  mNValidTrays = (Int_t)(trayconf[0].entries);
+  LOG_DEBUG << " Valid Trays: " << endm; 
+  mNValidTrays = (Int_t)(St_tofTrayConfigC::instance()->entries());
   for (Int_t i=0;i<mNValidTrays;i++) {
-    mValidTrayId[i] = (Int_t)(trayconf[0].iTray[i]);
-    if(maker->Debug()) {
-      LOG_DEBUG << " " << mValidTrayId[i];
-    }
+    mValidTrayId[i] = (Int_t)(St_tofTrayConfigC::instance()->iTray()[i]);
+    LOG_DEBUG << " " << mValidTrayId[i];
   }
-  if(maker->Debug()) { LOG_DEBUG << endm; }
-
+  LOG_DEBUG << endm;
+  
   LOG_DEBUG << "[StBTofDaqMap] ... done." << endm;
   return;
 }

@@ -97,6 +97,7 @@ class TVolumeView;
    \class StBTofNode
    Basic TOF geometry class
  */ 
+R__EXTERN  StBTofGeometry* gBTofGeometry;
 class StBTofNode : public TObject {
  protected:
   TVolumeView *fView;
@@ -325,7 +326,7 @@ class StBTofGeometry : public TNamed {
    StBTofGeometry(const char* name="btofGeo",
                   const char* title="Simplified BTof Geometry");
    ~StBTofGeometry();
-
+   StBTofGeometry *instance() {return gBTofGeometry;}
    Bool_t IsBSEC(const TVolume* element) const
      { return !(strcmp(element->GetName(), sectorPref)); }
    Bool_t IsBTRA(const TVolume* element) const
@@ -401,6 +402,5 @@ class StBTofGeometry : public TNamed {
 #endif
 };
 
-R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 #endif  //end of STBTOFGEOMETRY_H
