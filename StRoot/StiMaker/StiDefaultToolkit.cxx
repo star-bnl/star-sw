@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.42 2009/03/18 19:55:39 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.43 2015/07/07 14:52:45 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.43  2015/07/07 14:52:45  perev
+ * Added selection of KNN Seed finder
+ *
  * Revision 2.42  2009/03/18 19:55:39  fisyak
  * remove StiDetectorFinder class
  *
@@ -126,6 +129,7 @@
  *
  */
 
+#include "TSystem.h"
 #include "StiDefaultToolkit.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
@@ -138,7 +142,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
-//#include "Sti/StiTrackSeedFinder.h"
+#include "Sti/StiKNNSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiTrackFitter.h"
@@ -390,11 +394,17 @@ StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
   if (_trackSeedFinder)
     return _trackSeedFinder;
+  if (!gSystem->Getenv("StiKNN")) {
+
   _trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
 						 "Local Track Seed Finder",
 						 getTrackFactory(),
 						 getHitContainer(), 
 						 getDetectorContainer());  
+  } else {
+  _trackSeedFinder = new StiKNNSeedFinder();
+
+  }
   return _trackSeedFinder;
 }
 
