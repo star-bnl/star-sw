@@ -94,6 +94,7 @@ class StiDetectorContainer : public Named, public Described
   ///This performs a full internal reset of interator structure.
   void reset();
   void unset(){;}
+  void clear(){;}
   ///Dereference current iterator and return a pointer to current StiDetector.
   StiDetector* operator*() const;
   StiDetector* getCurrentDetector() const;

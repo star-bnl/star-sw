@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.226 2015/02/27 03:51:06 perev Exp $
+// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -412,9 +412,11 @@ Int_t StiMaker::Make()
     _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
 
-    _seedFinder->reset();
     StMaker *HLT = GetMaker("HLTCA");
-    if (HLT) HLT->Make();
+    if (HLT) {
+      _seedFinder->reset();
+      HLT->Make();
+    }
     iAnz = MakeGlobalTracks(event);
     if (iAnz) {MyClear(); return iAnz;}
 
@@ -443,6 +445,7 @@ Int_t StiMaker::Make()
 //_____________________________________________________________________________
 Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
+  _tracker->reset();    // get the rest
   _tracker->findTracks();    // get the rest
   FinishTracks(0);
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
@@ -634,8 +637,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.226 2015/02/27 03:51:06 perev Exp $
+// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.227  2015/07/07 23:31:52  perev
+// Clean mess of reset and clear methods
+//
 // Revision 1.226  2015/02/27 03:51:06  perev
 // remove not used BTof
 //
