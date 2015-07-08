@@ -1,0 +1,10 @@
+* starsim -w 1 -b kumacs/geom.kumac vers=y2001 
+macro geom vers=y2000 geometry=xgeometry
+gdrop *
+detp geom [vers];
+gexec $STAR_LIB/StarMagFieldNoDict.so
+gexec $STAR_LIB/[geometry].so
+null -200 200 -200 200
+satt * seen 1
+dcut cave z 10 0 0 1 1
+return

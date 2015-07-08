@@ -7,7 +7,7 @@ RAYL 1; LOSS 1; DRAY 1; MULS 1;
 STRA 0
 *
 CUTS .0001 .0001 .0001 .0001 .0001  .001 .001 .001 .001 .001  1.0e-4
-make geometry
+gexec $STAR_LIB/geometry.so
 gclos all
 *
 option nbox;
