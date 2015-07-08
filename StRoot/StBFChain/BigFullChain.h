@@ -32,6 +32,10 @@ y2012:     tpx    btow    bsmd    etow    esmd 	  tof    mtd  	fgt    gmt    hlt
 y2013      tpx    btow    bsmd    etow    esmd    tof    mtd  	fgt    gmt    pxl    			     bbc  fms          vpd | - fpd, pp500
 y2014      tpx    btow    bsmd    etow    esmd    tof    mtd  	       gmt    pxl    sst    ist	   	     bbc               vpd | no fgt and fms
 y2015      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt    pxl    sst    ist	   rp    fps bbc  fms          vpd | no fgt
+y2016      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt    pxl    sst    ist	   rp?   fps bbc  fms          vpd | the same as y2015
+y2017      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt                         rp    fps bbc  fms          vpd | no HFT, old beam pipe, old cone
+y2019      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt                         rp?   fps bbc  fms          vpd | -"-
+y2020      tpx    btow    bsmd    etow    esmd    tof    mtd   	       gmt                         rp?   fps bbc  fms          vpd | -"-
 ______________________________________________________________________________________________________________     
  */
 #endif
