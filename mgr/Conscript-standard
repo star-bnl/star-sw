@@ -335,6 +335,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }
       my $xgeometry = "xgeometry" . "." . $env1->{SUFSOLIB};
+      Depends $env1 [$xgeometry], qw(#pams/geometry/geometry/geometry.g);
       LinkedModule $env1 $xgeometry, @srcE;
       Install $env1 $LIB, $xgeometry;
     }
