@@ -17,8 +17,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"y1e",         19991201,     0, "year2000", ""}, 
 //{"year_1e",     19991201,     0, "year2000", ""},                   //       {"year_1e",     19991201,     0}
 //{"dc99",        19991206, 80000, "year2000", ""},                   //       {"dc99",        19991206, 80000}
-  {"y1h",         20000614,175430, "year2000", "xgeometry"}, 
-  {"y2000",       20000614,175430, "year2000", "xgeometry"},                   //       {"y2000",       20000614,175430}
+  {"y1h",         20000614,175430, "year2000", ""}, 
+  {"y2000",       20000614,175430, "year2000", ""},                   //       {"y2000",       20000614,175430}
 //{"y2b",         20010501,     0, "year_2b",  ""},
   {"y2001",       20010501,     0, "year2001", "xgeometry"},
 //{"year_2b",     20010501,     0, "year_2b",  ""},                   //       {"year_2b",     20010501,     0}
@@ -132,15 +132,17 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
-  {"devT",        20180101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
-  {"devTA",       20180101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
-  {"devTB",       20180101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
-  {"devTC",       20180101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
-  {"devTD",       20180101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4,xgeometry"}, // 
-  {"devTE",       20180101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-  {"devTF",       20180101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-  {"devTX",       20180101,     7, "devTX",     "dev geo for Inner Tpc Sector Upgrade, Tonko 09/05/14,xgeometry"}, // 
-  {"devTY",       20180101,     8, "devTY",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
+  {"dev2018",     20180101,     0, "dev2018",   "dev2018, no HFT,xgeometry"}, // 
+  {"devT",        20180101,     1, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
+  {"devTA",       20180101,     2, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
+  {"devTB",       20180101,     3, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
+  {"devTC",       20180101,     4, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
+  {"devTD",       20180101,     5, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4,xgeometry"}, // 
+  {"devTE",       20180101,     6, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
+  {"devTF",       20180101,     7, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
+  {"devTX",       20180101,     8, "devTX",     "dev geo for Inner Tpc Sector Upgrade, Tonko 09/05/14,xgeometry"}, // 
+  {"devTY",       20180101,     9, "devTY",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
+  {"devTZ",       20180101,    10, "devTZ",     "devTY with no HFT,xgeometry"}, // 
 
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
