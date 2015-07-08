@@ -873,34 +873,43 @@ St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET)  {
 //________________________________________________________________________________
 Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray, UChar_t &NN) {
   Float_t dcorr = -9999;
-  if (N <= 0 || ! xArray || ! yArray) return dcorr;
-  NN = N;
-  Bool_t IsSorted = kTRUE;
-  for (Int_t bin = N-1; bin >= 0; bin--) {
-    if (TMath::Abs(xArray[bin]) < 1e-7 && TMath::Abs(yArray[bin]) < 1e-7) {
-      NN--; // trailing entries
-      if (! IsSorted) break;
-      continue;
+  if (! NN) {// Sort
+    if (N <= 0 || ! xArray || ! yArray) return dcorr;
+    NN = N;
+    Bool_t IsSorted = kTRUE;
+    Int_t nonzero = 0;
+    for (Int_t bin = N-1; bin >= 0; bin--) {
+      if (! nonzero && TMath::Abs(xArray[bin]) < 1e-7 && TMath::Abs(yArray[bin]) < 1e-7) {
+	NN--; // trailing entries
+	if (! IsSorted) break;
+	continue;
+      }
+      nonzero++;
+      if (bin > 0 && xArray[bin] < xArray[bin-1]) IsSorted = kFALSE;
     }
-    if (bin > 0 && xArray[bin] < xArray[bin-1]) IsSorted = kFALSE;
+    if (! NN) {
+      LOG_ERROR << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] is empty" << endm;
+      return dcorr;
+    }
+    if (! IsSorted) {
+      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] has not been sorted" << endm;
+      TArrayI Indx(NN);
+      TMath::Sort((Int_t) NN,xArray,Indx.GetArray(),0);
+      TArrayF X(NN,xArray);
+      TArrayF Y(NN,yArray);
+      for (Int_t i = 0; i < NN; i++) {
+	xArray[i] = X[Indx[i]];
+	yArray[i] = Y[Indx[i]];
+      }
+      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] is sorted now" << endm;
+    }
   }
-  if (! IsSorted) LOG_WARN << " St_tofCorrC::Correction xArray[" << NN << "] is not sorted" << endm;
-  if (! NN) return dcorr;
   if (NN == 1) {return yArray[NN-1];}
   if (x < xArray[0] || x > xArray[NN-1]) {
     if (TMath::Abs(x) < 1e-7) dcorr = 0; // Simulation
     return dcorr;
   }
-  Int_t bin = -1;
-  if (IsSorted) bin = TMath::BinarySearch(NN, xArray, x);
-  else {
-    for (Int_t i = 0; i < NN-1; i++) {
-      if (x >= xArray[i] && x < xArray[i+1]) {
-	bin = i;
-      break;
-      }
-    }
-  }
+  Int_t bin = TMath::BinarySearch(NN, xArray, x);
   if (bin >= 0 && bin < NN) {
     if (bin == NN) bin--;
     Double_t x1 = xArray[bin];
@@ -954,7 +963,11 @@ Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) 
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  return St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i), N(i));
+  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i), N(i));
+  if (dcorr <= -9999.0) {
+    LOG_ERROR << "St_tofTotbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
+  }
+  return dcorr;
 }
 #include "St_tofZbCorrC.h"
 MakeChairInstance(tofZbCorr,Calibrations/tof/tofZbCorr);
@@ -986,7 +999,11 @@ Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) con
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  return St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i), N(i));
+  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i), N(i));
+  if (dcorr <= -9999.0) {
+    LOG_ERROR << "tofZbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
+  }
+  return dcorr;
 }
 #include "St_tofGeomAlignC.h"
 MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
@@ -1029,7 +1046,11 @@ MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 MakeChairInstance(vpdTotCorr,Calibrations/tof/vpdTotCorr);
 Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) const {
   assert(tubeId(i) == i + 1);
-  return St_tofCorrC::Correction(128, tot(i), x, corr(i), N(i));
+  Float_t dcorr = St_tofCorrC::Correction(128, tot(i), x, corr(i), N(i));
+  if (dcorr <= -9999.0) {
+    LOG_ERROR << "St_vpdTotCorrC::Corr(" << i << "," << x << ") is rejected." << endm;
+  }
+  return dcorr;
 }
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
