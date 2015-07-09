@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.43 2015/07/07 14:52:45 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.44 2015/07/09 17:22:54 jeromel Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.44  2015/07/09 17:22:54  jeromel
+ * Back-step from StiKNNSeedFinder / will branch
+ *
  * Revision 2.43  2015/07/07 14:52:45  perev
  * Added selection of KNN Seed finder
  *
@@ -142,7 +145,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
-#include "Sti/StiKNNSeedFinder.h"
+//#include "Sti/StiKNNSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiTrackFitter.h"
@@ -402,8 +405,8 @@ StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 						 getHitContainer(), 
 						 getDetectorContainer());  
   } else {
-  _trackSeedFinder = new StiKNNSeedFinder();
-
+    //_trackSeedFinder = new StiKNNSeedFinder();
+    LOG_WARN << "StiKNNSeedFinder not yet integrated" << endm;
   }
   return _trackSeedFinder;
 }
