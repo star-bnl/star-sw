@@ -1,6 +1,0 @@
-struct asic_thresholds_tpx {
- long 	thresh_lo;
- long   thresh_hi;
- long   n_seq_lo;
- long   n_seq_hi;
-};
