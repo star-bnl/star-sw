@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.29 2015/05/01 01:55:02 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.30 2015/07/10 16:07:40 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,10 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.30  2015/07/10 16:07:40  marr
+ * Add the distance along radius to the calculation of the distance between
+ * a MTD hit and a projected track position
+ *
  * Revision 1.29  2015/05/01 01:55:02  marr
  * Fix the geometry of shifted backleg 8 and 24
  *
@@ -1680,9 +1684,12 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 	    Float_t hitGlobalZ = getMtdHitGlobalZ(vtdc[j].first, vtdc[j].second, imodule);
 	    Float_t dz = fabs(trkGlobalZ-hitGlobalZ);
 
+	    Int_t   projMod = getProjModule(vzhit[j],vPosition[j].z());
+	    Float_t dr = abs(imodule-projMod)*gMtdRadiusDiff;
+
 	    Float_t rr = 9999.;
 	    if(mCosmicFlag) rr = dy;
-	    else            rr = sqrt(dy*dy+dz*dz);
+	    else            rr = sqrt(dy*dy+dz*dz+dr*dr);
 	    if(Debug())
 	      {
 		LOG_INFO<<"hit information::"<<" "<<ibackleg<<" "<<imodule<<" "<<icell<<endm;
@@ -1852,9 +1859,12 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		  Float_t hitGlobalZ = getMtdHitGlobalZ(vtdc[ttCandidates[j]].first, vtdc[ttCandidates[j]].second, imodule);
 		  Float_t dz = fabs(trkGlobalZ-hitGlobalZ);
 
+		  Int_t   projMod = getProjModule(vzhit[ttCandidates[j]],vPosition[ttCandidates[j]].z());
+		  Float_t dr = abs(imodule-projMod)*gMtdRadiusDiff;
+
 		  Float_t rr = 9999.;
 		  if(mCosmicFlag) rr = dy;
-		  else rr = sqrt(dy*dy+dz*dz);
+		  else rr = sqrt(dy*dy+dz*dz+dr*dr);
 		  if(rr<ss)
 		    {
 		      ss = rr; 
@@ -2112,6 +2122,21 @@ bool StMtdMatchMaker::validTrack(MtdTrack mtt){
 Float_t StMtdMatchMaker::getMtdHitGlobalZ(Float_t leadingWestTime, Float_t leadingEastTime, Int_t module)
 {
    return (module-3)*gMtdCellLength + (leadingEastTime - leadingWestTime)/2./gMtdCellDriftV*1e3;
+}
+
+/// calculate module of projected position 
+Int_t StMtdMatchMaker::getProjModule(Float_t local_z, Float_t global_z)
+{
+  int module = 0;
+  for(int i=0; i<5; i++)
+    {
+      if(abs(global_z-(i-2)*gMtdCellLength-local_z)<5)
+	{
+	  module = i+1;
+	  break;
+	}
+    }
+  return module;
 }
 
 
