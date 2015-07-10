@@ -6,11 +6,15 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.12 2015/04/24 19:55:16 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.13 2015/07/10 16:07:40 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.13  2015/07/10 16:07:40  marr
+ * Add the distance along radius to the calculation of the distance between
+ * a MTD hit and a projected track position
+ *
  * Revision 1.12  2015/04/24 19:55:16  marr
  * Add a member function cleanUpMtdPidTraits() to clean up the MTD pidTraits for
  * all global and primary tracks before the matching process. This is needed when
@@ -279,6 +283,7 @@ class StMtdMatchMaker: public StMaker
 
                 // calcuate global z of MTD hit
                 Float_t getMtdHitGlobalZ(Float_t leadingWestTime, Float_t leadingEastTime, Int_t module);
+		Int_t   getProjModule(Float_t local_z, Float_t global_z);
 
 
 	protected:
@@ -444,7 +449,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.12 2015/04/24 19:55:16 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.13 2015/07/10 16:07:40 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
