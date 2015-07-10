@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.70 2015/05/21 20:01:15 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.71 2015/07/10 18:58:57 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.71  2015/07/10 18:58:57  dmitry
+ * fixing warning - MYSQL_RES pointer is not supposed to be deleted by client in destructor
+ *
  * Revision 1.70  2015/05/21 20:01:15  dmitry
  * fixed false positive aka uninitialized use of memory
  *
@@ -373,7 +376,7 @@ MysqlDb::~MysqlDb(){
 if(mQuery) delete [] mQuery;
 if(mQueryLast) delete [] mQueryLast;
 Release();
-if(mRes) delete mRes;
+//if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
 
 //if(mdbhost) delete [] mdbhost; // no guarantee that we own this data, really
