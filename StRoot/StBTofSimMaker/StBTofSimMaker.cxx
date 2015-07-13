@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.5 2011/02/03 19:01:01 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.5.2.1 2015/07/13 16:47:28 didenko Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.5.2.1  2015/07/13 16:47:28  didenko
+ * updated StBTofSimMaker for embedding
+ *
  * Revision 1.5  2011/02/03 19:01:01  geurts
  * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
  *
@@ -78,8 +81,9 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mBookHisto=kFALSE;// histograms 
 	mSlow=kTRUE;
 	mCellXtalk=kTRUE;
-	mWriteStEvent=kFALSE;
+	mWriteStEvent=kTRUE;
 	mDaqMap=0;
+	mMcBTofHitCollection = 0;
 	Reset();
 
 }
@@ -111,7 +115,7 @@ void StBTofSimMaker::Reset()
 	mEvent  = 0;
 	mMcEvent = 0;
 	//mBTofCollection = 0;
-	if (mWriteStEvent) delete mBTofCollection;
+	//if (mWriteStEvent) delete mBTofCollection;
 	delete mMcBTofHitCollection;
 	mSimDb  = 0;
 
@@ -208,7 +212,7 @@ Int_t StBTofSimMaker::Make()
 		LOG_WARN << " No TOF hits in GEANT" << endm; }
 	else {
 		Int_t nhits = g2t_tfr_hits->GetNRows();
-		LOG_DEBUG << " Found TOF hits: " << nhits << endm;
+		LOG_DEBUG << " Found GEANT TOF hits: " << nhits << endm;
 		g2t_ctf_hit_st* tofHitsFromGeant = g2t_tfr_hits->begin();
 
 		if(mSlow) {
@@ -589,10 +593,16 @@ Int_t StBTofSimMaker::fillEvent()
 
 	/// send off to StEvent
 	if (mWriteStEvent){
-	  mBTofCollection= new StBTofCollection();
 	  mEvent = (StEvent*)GetInputDS("StEvent");
 	  if (!mEvent) {
 	    LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	  } else { // mEvent non-zero
+
+	  //Store Collections
+	  mBTofCollection = mEvent->btofCollection();
+	  if(!mBTofCollection) {
+	    mBTofCollection = new StBTofCollection();
+	    mEvent->setBTofCollection(mBTofCollection);
 	  }
 
 	  /// creat StBTofHit / tofRawData / tofData collection
@@ -625,7 +635,7 @@ Int_t StBTofSimMaker::fillEvent()
 	    Float_t eff = 1.;
 	    if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
 	    else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
-	    if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
+	    if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
 
 
 	    //Fill the StBTofHit
@@ -657,10 +667,8 @@ Int_t StBTofSimMaker::fillEvent()
 	  StBTofHeader aHead;
 	  mBTofCollection->setHeader(new StBTofHeader(aHead));
 
-	  //Store Collections
-	  mEvent->setBTofCollection(mBTofCollection);
-
 	  LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
+          } // mEvent non-zero
 	}
 
 	/// check StMcEvent and StEvent
