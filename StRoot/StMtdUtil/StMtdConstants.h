@@ -14,6 +14,7 @@ const Double_t gMtdCellLength            = 87.0; // Length of a MTD cell (cm)
 const Double_t gMtdCellWidth             = 3.8;  // Width of a MTD cell (cm)
 const Double_t gMtdCellGap               = 0.6;  // Gap between MTD cells (cm)
 const Double_t gMtdCellDriftV            = 56.;  // Drift velocity of electronic signal travelling on MTD cells (ps/cm)
+const Double_t gMtdRadiusDiff            = 4.99; // Relative differece of difference modules in radius (cm)
 
 const Double_t gMtdBacklegPhiWidth       = 8.*(TMath::Pi())/180.;   // Width of backleg in phi (rad)
 const Double_t gMtdBacklegPhiGap         = 4.*(TMath::Pi())/180.;   // Gap between backleg in phi (rad)
