@@ -86,9 +86,9 @@ $ENV{PATH} = $PATH;
 $env2 = $env->clone();
 $env2->{ENV}->{PATH} = $PATH;
 if ($qt4) {
-  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} $DEBUG);
+  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} $DEBUG);
 } else {
-  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro), qq(cd $obj_dir; qmake $DEBUG);
+  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir; qmake $DEBUG);
 }
 Command $env2 [(@DepsL, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
 # Command $env2 ["Makefile"], qw(qtExamples/qtExamples.pro), qq(cd $obj_dir; qmake $DEBUG; make);
