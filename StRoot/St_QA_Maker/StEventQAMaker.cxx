@@ -35,7 +35,7 @@
 #include "StPhmdModule.h"
 
 #include "StTofUtil/tofPathLength.hh"
-#include "tables/St_tofTotCorr_Table.h"
+#include "tables/St_tofTotbCorr_Table.h"
 // btof
 #include "StBTofCollection.h"
 #include "StBTofHit.h"
@@ -122,12 +122,12 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
   }
 
   // vpd calibration parameters
-  St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(GetDataBase("Calibrations/tof/tofTotCorr"));
-  if(!tofTotCorr) {
+  St_tofTotbCorr* tofTotbCorr = static_cast<St_tofTotbCorr*>(GetDataBase("Calibrations/tof/tofTotbCorr"));
+  if(!tofTotbCorr) {
     gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
     return kStWarn;
   }
-  tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
+  tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotbCorr->GetArray());
   
   for(Int_t i=0;i<mNVPD;i++) {
     short trayId = totCorr[i].trayId;

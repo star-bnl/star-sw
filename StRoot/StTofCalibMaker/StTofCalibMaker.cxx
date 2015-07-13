@@ -118,8 +118,8 @@
 #include "tables/St_tofResolution_Table.h"
 
 #include "tables/St_tofr5INLtable_Table.h"
-#include "tables/St_tofTotCorr_Table.h"
-#include "tables/St_tofZCorr_Table.h"
+#include "tables/St_tofTotbCorr_Table.h"
+#include "tables/St_tofZbCorr_Table.h"
 
 #include "tables/St_vertexSeed_Table.h"
 
@@ -570,20 +570,20 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
             
     }
 
-    // read tofTotCorr table
-    St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
-    if(!tofTotCorr) {
+    // read tofTotbCorr table
+    St_tofTotbCorr* tofTotbCorr = static_cast<St_tofTotbCorr*>(mDbDataSet->Find("tofTotbCorr"));
+    if(!tofTotbCorr) {
       gMessMgr->Error("unable to get tofr5 TotCorr table parameters","OS");
-      //    assert(tofTotCorr);
+      //    assert(tofTotbCorr);
       return kStErr;
     }
-    tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
-    numRows = tofTotCorr->GetNRows();
+    tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotbCorr->GetArray());
+    numRows = tofTotbCorr->GetNRows();
 
     if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for ToT correction" << endm;
 
     if(numRows!=mNTOFr5+mNPVPD) {
-      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! Return! " << endm;
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotbCorr table! Return! " << endm;
       //      return kStErr;
     }
 
@@ -609,20 +609,20 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     } // end i 0->numRows
 
 
-    // read tofZCorr table
-    St_tofZCorr* tofZCorr = static_cast<St_tofZCorr*>(mDbDataSet->Find("tofZCorr"));
-    if(!tofZCorr) {
+    // read tofZbCorr table
+    St_tofZbCorr* tofZbCorr = static_cast<St_tofZbCorr*>(mDbDataSet->Find("tofZbCorr"));
+    if(!tofZbCorr) {
       gMessMgr->Error("unable to get tofr5 ZCorr table parameters","OS");
-      //    assert(tofZCorr);
+      //    assert(tofZbCorr);
       return kStErr;
     }
-    tofZCorr_st* zCorr = static_cast<tofZCorr_st*>(tofZCorr->GetArray());
-    numRows = tofZCorr->GetNRows();
+    tofZbCorr_st* zCorr = static_cast<tofZbCorr_st*>(tofZbCorr->GetArray());
+    numRows = tofZbCorr->GetNRows();
 
     if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for Z correction" << endm;
 
     if(numRows!=mNTOFr5) {   // only for TOFr5 tray
-      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZCorr table! Return! " << endm;
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZbCorr table! Return! " << endm;
       //      return kStErr;
     }
 
@@ -650,18 +650,18 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
   }  else if(mYear8) {
     gMessMgr->Info("","OS") << "     loading parameters for Run VIII" << endm;
 
-    // read tofTotCorr table
-    St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
-    if(!tofTotCorr) {
+    // read tofTotbCorr table
+    St_tofTotbCorr* tofTotbCorr = static_cast<St_tofTotbCorr*>(mDbDataSet->Find("tofTotbCorr"));
+    if(!tofTotbCorr) {
       gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
-      //    assert(tofTotCorr);
+      //    assert(tofTotbCorr);
       return kStErr;
     }
-    tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
-    Int_t numRows = tofTotCorr->GetNRows();
+    tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotbCorr->GetArray());
+    Int_t numRows = tofTotbCorr->GetNRows();
 
     if(numRows!=mNTray8*mNTDIG+mNVPD*2) {
-      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! " << endm;
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotbCorr table! " << endm;
       //      return kStErr;
     }
 
@@ -689,18 +689,18 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     } // end i 0->numRows
 
 
-    // read tofZCorr table
-    St_tofZCorr* tofZCorr = static_cast<St_tofZCorr*>(mDbDataSet->Find("tofZCorr"));
-    if(!tofZCorr) {
+    // read tofZbCorr table
+    St_tofZbCorr* tofZbCorr = static_cast<St_tofZbCorr*>(mDbDataSet->Find("tofZbCorr"));
+    if(!tofZbCorr) {
       gMessMgr->Error("unable to get tof ZCorr table parameters","OS");
-      //    assert(tofZCorr);
+      //    assert(tofZbCorr);
       return kStErr;
     }
-    tofZCorr_st* zCorr = static_cast<tofZCorr_st*>(tofZCorr->GetArray());
-    numRows = tofZCorr->GetNRows();
+    tofZbCorr_st* zCorr = static_cast<tofZbCorr_st*>(tofZbCorr->GetArray());
+    numRows = tofZbCorr->GetNRows();
 
     if(numRows!=mNTray8*mNTDIG) {
-      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZCorr table! " << endm;
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZbCorr table! " << endm;
       //      return kStErr;
     }
     if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for Z correction" << endm;

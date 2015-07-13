@@ -35,8 +35,7 @@
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 #include "phys_constants.h"
-#include "tables/St_tofTotCorr_Table.h"
-#include "tables/St_tofZCorr_Table.h"
+#include "tables/St_tofTotbCorr_Table.h"
 #include "tables/St_tofTOffset_Table.h"
 #include "tables/St_tofPhaseOffset_Table.h"
 
@@ -157,7 +156,7 @@ Int_t StVpdAnalysisMaker::initParameters(int runnumber)
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   LOG_INFO << "   -- retrieving run parameters from Calibrations_tof" << endm;
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTotCorr");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTotbCorr");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
     return kStErr;
@@ -166,18 +165,18 @@ Int_t StVpdAnalysisMaker::initParameters(int runnumber)
   if(mYear8) {
     gMessMgr->Info("","OS") << "     loading parameters for Run VIII" << endm;
 
-    // read tofTotCorr table
-    St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
-    if(!tofTotCorr) {
+    // read tofTotbCorr table
+    St_tofTotbCorr* tofTotbCorr = static_cast<St_tofTotbCorr*>(mDbDataSet->Find("tofTotbCorr"));
+    if(!tofTotbCorr) {
       gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
-      //    assert(tofTotCorr);
+      //    assert(tofTotbCorr);
       return kStErr;
     }
-    tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
-    Int_t numRows = tofTotCorr->GetNRows();
+    tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotbCorr->GetArray());
+    Int_t numRows = tofTotbCorr->GetNRows();
 
     if(numRows!=mNTray8*mNTDIG+mNVPD*2) {
-      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! " << endm;
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotbCorr table! " << endm;
       //      return kStErr;
     }
 
