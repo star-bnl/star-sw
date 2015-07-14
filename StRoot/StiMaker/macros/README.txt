@@ -1,4 +1,4 @@
-README.tx
+README.txt
 
 ------------------------- Simple geant documenation ----------------------
 
