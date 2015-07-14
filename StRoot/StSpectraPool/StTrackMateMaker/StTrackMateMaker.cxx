@@ -3,9 +3,7 @@
 //
 #include <iostream>
 #include <algorithm>
-#include <vector>
 #include <set>
-#include <map>
 
 #include "StTrackMateMaker.h"
 #include "StTrackPing.hh"
@@ -13,7 +11,7 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "TTree.h"
-
+#include "TObjArray.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "StTpcHitCollection.h"
@@ -37,8 +35,12 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StGlobalTrack*>& htMap);
-Float_t getTpcDedx(StTrack* trk);
+
+struct CompareHits {
+  bool operator() (StTpcHit* hit1,StTpcHit* hit2) { 
+    if (! hit1) return kTRUE;
+    return hit1->Compare(hit2);}
+} comp;
 
 static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
 ClassImp(StTrackMateMaker)
@@ -219,7 +221,7 @@ Int_t StTrackMateMaker::Make(){
   
   
   // It is easy in StEvent to go from a track to its hits, but it is
-  // rather time consuming to call StHit::relatedTracks several times
+  // rather time consuming to call StTpcHit::relatedTracks several times
   // as this will loop over all tracks, then for each track loop over all its
   // hits.  It is better to construct a way to navigate from hit to track in an
   // easy way.  We can do it via a map.  We don't need a multimap, to keep it
@@ -232,12 +234,15 @@ Int_t StTrackMateMaker::Make(){
   // - hit 1 to hit 2, assuming they are in the same sector, padrow and have the same index
   // - hit 2 to track 2, using the map we will build next
   
-  //map<StHit*,StTrack*> hitTrackMap1;
-  //buildRecHitTrackMap(trackNodes1,hitTrackMap1);
-  map<StHit*,StGlobalTrack*> hitTrackMap2;
-  size_t failedTries = buildRecHitTrackMap(trackNodes2,hitTrackMap2);
-  LOG_INFO << "Hits used by more than 1 track: " << failedTries << endm;
-  
+  map<StTpcHit*,StGlobalTrack*> hitTrackMap1;
+  size_t failedTries1 = buildRecHitTrackMap(trackNodes1,hitTrackMap1);
+  LOG_INFO << "Hits1 used by more than 1 track: " << failedTries1 << endm;
+  map<StTpcHit*,StGlobalTrack*> hitTrackMap2;
+  size_t failedTries2 = buildRecHitTrackMap(trackNodes2,hitTrackMap2);
+  LOG_INFO << "Hits2 used by more than 1 track: " << failedTries2 << endm;
+  map<StTpcHit*,StTpcHit*> Hit2ToHit1;
+  map<StTpcHit*,StTpcHit*> Hit1ToHit2;
+  buildHit2HitMaps(hitTrackMap1,hitTrackMap2,Hit1ToHit2,Hit2ToHit1);
   // Do Track association.
   LOG_INFO << "Begin Track Association..." << endm;
   Int_t matcTrkCounter = 0;
@@ -277,7 +282,8 @@ Int_t StTrackMateMaker::Make(){
     
     for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
       // get the hit from the track
-      const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
+      StTpcHit* hit1 = static_cast<StTpcHit*>(*hIterTrk);
+#if 0
       // go to the hit collection and get the hit container for its sector,padrow
       if (! tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)) continue;
       const StSPtrVecTpcHit& hits1 = tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)->hits();
@@ -292,6 +298,10 @@ Int_t StTrackMateMaker::Make(){
       if (! hits2.size()) continue;
       // use the index found above to find the hit in event 2
       StTpcHit* hit2 = hits2[index];
+#else
+      StTpcHit* hit2 = Hit1ToHit2[hit1];
+      if (! hit2) continue;
+#endif
       // use the map to find its track!
       StTrack* trackCand = hitTrackMap2[hit2];
       if (!trackCand) {
@@ -492,7 +502,7 @@ void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalT
   trackTree->Fill();
 }
 //________________________________________________________________________________
-size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StGlobalTrack*>& htMap){
+size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StTpcHit*,StGlobalTrack*>& htMap){
   size_t failedInserts = 0;
   for (size_t it = 0; it<nodes.size(); ++it) {
     StGlobalTrack* track = (StGlobalTrack*)nodes[it]->track(global);
@@ -501,15 +511,71 @@ size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StGlobalTr
     if (! track->detectorInfo()) continue;
     StPtrVecHit hits = track->detectorInfo()->hits(kTpcId);
     for (StPtrVecHitIterator hIterTrk = hits.begin(); hIterTrk != hits.end(); ++hIterTrk) {
-      StHit* hit = *hIterTrk;
-      pair<map<StHit*,StGlobalTrack*>::iterator,bool> insRes = htMap.insert(map<StHit*,StGlobalTrack*>::value_type(hit,track));
+      StHit* h = *hIterTrk;
+      if (! h) continue;
+      StTpcHit* hit = (StTpcHit*) h;
+      pair<map<StTpcHit*,StGlobalTrack*>::iterator,bool> insRes = htMap.insert(map<StTpcHit*,StGlobalTrack*>::value_type(hit,track));
       if (insRes.second==false) ++failedInserts;	    
     }//hits in track loop
   }// track loop
   return failedInserts;
 }
 //________________________________________________________________________________
-Float_t getTpcDedx(StTrack* trk) {
+void StTrackMateMaker::buildHit2HitMaps(map<StTpcHit*,StGlobalTrack*> &hitTrackMap1,map<StTpcHit*,StGlobalTrack*> &hitTrackMap2,
+		       map<StTpcHit*,StTpcHit*> &Hit1ToHit2,map<StTpcHit*,StTpcHit*> &Hit2ToHit1) {
+  TObjArray *vecHits1[24][72]; memset (vecHits1, 0, sizeof(vecHits1));
+  TObjArray *vecHits2[24][72]; memset (vecHits2, 0, sizeof(vecHits1));
+  //  vector<StTpcHit *> vecHits1, vecHits2;
+  for (map<StTpcHit*,StGlobalTrack*>::iterator it1=hitTrackMap1.begin(); it1!=hitTrackMap1.end(); ++it1) {
+    StTpcHit *hit1 = it1->first;
+    if (! hit1) continue;
+    UInt_t s = hit1->sector() - 1;
+    UInt_t r = hit1->padrow() - 1;
+    if (! vecHits1[s][r]) {vecHits1[s][r] = new TObjArray(); vecHits1[s][r]->SetOwner(kFALSE);}
+    vecHits1[s][r]->Add(hit1);
+  }
+  for (map<StTpcHit*,StGlobalTrack*>::iterator it2=hitTrackMap2.begin(); it2!=hitTrackMap2.end(); ++it2) {
+    StTpcHit *hit2 = it2->first;
+    if (! hit2) continue;
+    UInt_t s = hit2->sector() - 1;
+    UInt_t r = hit2->padrow() - 1;
+    if (! vecHits2[s][r]) {vecHits2[s][r] = new TObjArray(); vecHits2[s][r]->SetOwner(kFALSE);}
+    vecHits2[s][r]->Add(hit2);
+  }
+  for (Int_t s = 0; s < 24; s++) {
+    for (Int_t r = 0; r < 72; r++) {
+      if (! vecHits1[s][r] || ! vecHits2[s][r]) continue;
+      UInt_t N1  = vecHits1[s][r]->GetEntriesFast();
+      UInt_t N2  = vecHits2[s][r]->GetEntriesFast();
+      for (UInt_t it1 = 0; it1 < N1; it1++) {
+	StTpcHit *hit1 = (StTpcHit *) vecHits1[s][r]->UncheckedAt(it1);
+	for (UInt_t it2 = 0; it2 < N2; it2++) {
+	  StTpcHit *hit2 = (StTpcHit *) vecHits2[s][r]->UncheckedAt(it2);
+	  assert(hit1->sector() == hit2->sector() &&
+		 hit1->padrow() == hit2->padrow());
+	  if (TMath::Abs(hit1->pad()        - hit2->pad()) < 1 &&
+	      TMath::Abs(hit1->timeBucket() - hit2->timeBucket()) < 1) {
+	    Hit1ToHit2.insert(map<StTpcHit*,StTpcHit*>::value_type(hit1,hit2));
+	    Hit2ToHit1.insert(map<StTpcHit*,StTpcHit*>::value_type(hit2,hit1));
+#if 0
+	    Hit1ToHit2[hit1] = hit2;
+	    Hit2ToHit1[hit2] = hit1;
+#endif
+	    break;
+	  }
+	}
+      }
+    }
+  }
+  for (Int_t s = 0; s < 24; s++) {
+    for (Int_t r = 0; r < 72; r++) {
+      delete vecHits1[s][r];
+      delete vecHits2[s][r];
+    }
+  }  
+}
+//________________________________________________________________________________
+Float_t StTrackMateMaker::getTpcDedx(StTrack* trk) {
   const StSPtrVecTrackPidTraits& vec = trk->pidTraits();
   const StDedxPidTraits* mTraits = 0;
   for (unsigned int i=0; i<vec.size(); i++) {
