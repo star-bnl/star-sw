@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.288 2015/06/19 13:48:25 jwebb Exp $
+* $Id: geometry.g,v 1.289 2015/07/14 21:12:53 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.289  2015/07/14 21:12:53  jwebb
+* Added y2015a production geometry, initial release
+*
 * Revision 1.288  2015/06/19 13:48:25  jwebb
 * Added HCAL test configuration (hctest)
 *
@@ -1347,6 +1350,7 @@ replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
 replace [exe PIXL05;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=50; ]
 replace [exe PIXL06;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=60; ]
+replace [exe PIXL62;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=62; ]
 
 replace [exe DTUB01;] with [ "Add DTUB (no op)"; ]
 
@@ -2358,6 +2362,34 @@ REPLACE [exe y2015;] with ["Y2015 first cut geometry";
     exe FPDM04;      "FMS plus preshower";
 ]
 
+REPLACE [exe y2015a;] with ["Y2015 production geometry";
+    exe FGTDof;      "switch off FGT";
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+
+    exe VPDD08;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD14;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe IDSM14;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL62;      "Full config of the pixl detector with Al cables";
+    exe DTUB01;      "DTUB";
+    exe PSUP01;      "1st version of pixl supports";
+    exe FPDM04;      "FMS plus preshower";
+]
+
+
 REPLACE [exe dev2016;] with ["Y2016 development tag";
 
     exe TPCE31;      "agstar version of yf model with reduced Rmax";
@@ -3338,6 +3370,9 @@ If LL>0
 
   Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
                   Geom = 'y2015     '; exe y2015;  }
+
+  Case y2015a   { y2015a : y2015a production baseline, is y2015 with pixel Al cables;
+                  Geom = 'y2015a    '; exe y2015a;  }
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
@@ -5132,6 +5167,7 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
            CONSTRUCT pixlgeo4;
      }
 
+
      IF PixlConfig==50 {               "Y2013 Pixel Configuration"
            call AgDetp new ('PIXL')
            call AgDetp add ('PXLW.LadrConfig=',   1.0, 1);
@@ -5148,6 +5184,15 @@ IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
            CONSTRUCT DtubGeo1   """ Electronics etc... """
 IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
      }
+     IF PixlConfig==62 {               "Dev14 Pixel Configuration"
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLW.SecVersion=',   1.0, 1); 
+           call AgDetp add ('PXLW.LadrConfig=',   2.0, 1);
+           CONSTRUCT PixlGeo6   """ Pixl Detector """
+           CONSTRUCT DtubGeo1   """ Electronics etc... """
+IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
+     }
+
 
    }
 

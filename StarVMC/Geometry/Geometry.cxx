@@ -1431,6 +1431,9 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
   pixlGeom.module="PixlGeo6";
   pixlGeom.select="PIXL06"; pixlGeom.config=60; pixlGeom.ladrconfig=1; pixlGeom.secversion=1; pixlGeom.fill();
 
+  pixlGeom.module="PixlGeo6";
+  pixlGeom.select="PIXL62"; pixlGeom.config=62; pixlGeom.ladrconfig=2; pixlGeom.secversion=1; pixlGeom.fill();
+
 
   dtubGeom.module="DtubGeo1";    
   dtubGeom.select="DTUB01"; dtubGeom.config=1; dtubGeom.location=2.0; dtubGeom.fill();

@@ -1581,7 +1581,17 @@ void y2015()
     geom.fpdmFlag = "FPDM04";  geom.fpdmStat = 1;  
     // ================================================
     geom.fill();
-  }     
+  }    
+
+  geom.select = "y2015a"; /* y2015a production reference */ {
+    //
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.pixlFlag = "PIXL62";  geom.pixlStat = 1;
+    //
+    geom.fill();
+  }    
+
+ 
 }
 void y2016()
 { 
