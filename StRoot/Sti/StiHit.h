@@ -188,11 +188,11 @@ struct StiHitRadiusLessThan
   {
     double x1 = h1->x_g();
     double y1 = h1->y_g();
-    double r1 = sqrt(x1*x1+y1*y1);
+    double r1 = /*sqrt*/(x1*x1+y1*y1);
     double x2 = h2->x_g();
     double y2 = h2->y_g();
-    double r2 = sqrt(x2*x2+y2*y2);
-    return r1<r2;
+    double r2 = /*sqrt*/(x2*x2+y2*y2); 
+    return r1<r2; // same result w/out sqrt call
   }
 };
 
