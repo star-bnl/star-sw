@@ -1,3 +1,6 @@
+//#define KNNMAP
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -34,7 +37,8 @@ enum {kMinRxy = 50};
 StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 {
   memset(mBeg,0,mEnd-mBeg+1);
-  fMultiHits	= new StMultiKeyMap(3);
+//fMultiHits	= new StMultiKeyMap(3);
+  fMultiHits	= new StMultiKeyMap(6);
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
@@ -52,26 +56,21 @@ void StvKNSeedFinder::Clear(const char*)
 void StvKNSeedFinder::Reset()
 {
 #ifndef __NOSTV__
+  assert(!f1stHitMap->size());
   memset(mBeg,0,mMed-mBeg+1);
-  std::map<double,StvHit*> myMap;
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *hit = (StvHit*)(*hitArr)[iHit];
     if (hit->timesUsed()) continue;
     const float *x = hit->x();
-    double qwe = x[0]+300*(x[1]+300*x[2]);
-    myMap[qwe]=hit;
-  }  
-
-  for (std::map<double,StvHit*>::const_iterator it=myMap.begin()
-    ;it != myMap.end();++it) {
-    StvHit *hit = (*it).second;
-    const float *x = hit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + 1e-2*x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
-    fMultiHits->Add(hit,x);
-  } 
+//    fMultiHits->Add(hit,x);
+    float xx[6]={x[0],x[1],x[2],x[0]-x[1],x[1]-x[2],x[2]-x[0]};
+    fMultiHits->Add(hit,xx);
+  }  
+
   fMultiHits->MakeTree();
   *f1stHitMapIter = f1stHitMap->begin();
 #endif
@@ -163,21 +162,20 @@ void StvKNSeedFinder::FeedBack(int success)
 {
   StvSeedFinder::FeedBack(success);
 
-  double dis = mSel.mKNNDist;
-  double ei0 = sqrt(mSel.mEigen[0]);
-  double ei1 = sqrt(mSel.mEigen[1]);
-
-  double all = log10(fXi2[1]*ei0*ei1);
+  double nHits = mSel.GetNHits();
+  double dis = mSel.mKNNDist*nHits;
+  double ei0 = sqrt(mSel.mEigen[0])*nHits;
+  double ei1 = sqrt(mSel.mEigen[1])*nHits;
 
   if (success>0) {
-    StvDebug::Count("GooEigMax:EigMin",ei0*57,ei1*57);
-    StvDebug::Count("GooKNNDis",dis *57);
-    StvDebug::Count("GooAll",all);
+    StvDebug::Count("GooEigMax*nHits",(ei1*57));
+    StvDebug::Count("GooEigMin*nHits",(ei0*57));
+    StvDebug::Count("GooKNNDis*nHits",(dis*57));
 
   } else {
-    StvDebug::Count("BadEigMax:EigMin",ei0*57,ei1*57);
-    StvDebug::Count("BadKNNDis",dis *57);
-    StvDebug::Count("BadAll",all);
+    StvDebug::Count("BadEigMax*nHits",(ei1*57));
+    StvDebug::Count("BadEigMin*nHits",(ei0*57));
+    StvDebug::Count("BadKNNDis*nHits",(dis*57));
   }
 }     
   
