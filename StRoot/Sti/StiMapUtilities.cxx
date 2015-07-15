@@ -79,7 +79,7 @@ void SetHitUsed::operator()(StiTrackNode& node)
     StiHit* hit = node.getHit();
     if(!hit) 			return;
     if ( !node.isValid() || node.getChi2()>1e3)	{node.setHit(0); return;} 
-    assert(!hit->isUsed());
+//    assert(!hit->isUsed());
     hit->addTimesUsed();
 }
 
