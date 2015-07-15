@@ -90,9 +90,13 @@ class ComponentFieldMap : public ComponentBase {
     // Material
     int matmap;
     bool degenerate;
+    // Bounding box of the element
+    double xmin, ymin, zmin, xmax, ymax, zmax;
   };
   std::vector<element> elements;
   int lastElement;
+  // Flag to check if bounding boxes of elements are cached 
+  bool cacheElemBoundingBoxes;
 
   // Nodes
   int nNodes;
@@ -222,6 +226,9 @@ class ComponentFieldMap : public ComponentBase {
 
   virtual double GetElementVolume(const int i) = 0;
   virtual void GetAspectRatio(const int i, double& dmin, double& dmax) = 0;
+
+  // Calculate the bounding boxes of all elements after initialization
+  void CalculateElementBoundingBoxes(void);
 };
 }
 

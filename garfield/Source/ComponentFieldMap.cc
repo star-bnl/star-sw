@@ -16,6 +16,7 @@ ComponentFieldMap::ComponentFieldMap()
     : is3d(true),
       nElements(-1),
       lastElement(-1),
+      cacheElemBoundingBoxes(false),
       nNodes(-1),
       nMaterials(-1),
       nWeightingFields(0),
@@ -185,6 +186,15 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
                                     double& t3, double& t4, double jac[4][4],
                                     double& det) {
 
+  // Check if bounding boxes of elements have been computed
+  if(!cacheElemBoundingBoxes) {
+    std::cerr << m_className << "::FindElement5:\n";
+    std::cerr << "    Caching the bounding box calculations of all elements.\n";
+
+    CalculateElementBoundingBoxes();
+    cacheElemBoundingBoxes = true;
+  }
+
   // Backup
   double jacbak[4][4], detbak = 1.;
   double t1bak = 0., t2bak = 0., t3bak = 0., t4bak = 0.;
@@ -216,29 +226,11 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
   const double f = 0.2;
 
   // Scan all elements
-  double xmin, ymin, zmin, xmax, ymax, zmax;
   for (int i = 0; i < nElements; ++i) {
-    xmin = std::min(
-        std::min(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
-        std::min(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
-    xmax = std::max(
-        std::max(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
-        std::max(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
-    ymin = std::min(
-        std::min(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
-        std::min(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
-    ymax = std::max(
-        std::max(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
-        std::max(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
-    zmin = std::min(
-        std::min(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
-        std::min(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
-    zmax = std::max(
-        std::max(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
-        std::max(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
-    if (x < xmin - f * (xmax - xmin) || x > xmax + f * (xmax - xmin) ||
-        y < ymin - f * (ymax - ymin) || y > ymax + f * (ymax - ymin) ||
-        z < zmin - f * (zmax - zmin) || z > zmax + f * (zmax - zmin))
+    element& e = elements[i];
+    if (x < e.xmin - f * (e.xmax - e.xmin) || x > e.xmax + f * (e.xmax - e.xmin) ||
+        y < e.ymin - f * (e.ymax - e.ymin) || y > e.ymax + f * (e.ymax - e.ymin) ||
+        z < e.zmin - f * (e.zmax - e.zmin) || z > e.zmax + f * (e.zmax - e.zmin))
       continue;
 
     if (elements[i].degenerate) {
@@ -365,7 +357,15 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
                                      const double z, double& t1, double& t2,
                                      double& t3, double& t4, double jac[4][4],
                                      double& det) {
-
+  // Check if bounding boxes of elements have been computed
+  if(!cacheElemBoundingBoxes) {
+    std::cerr << m_className << "::FindElement13:\n";
+    std::cerr << "    Caching the bounding box calculations of all elements.\n";
+  
+    CalculateElementBoundingBoxes();
+    cacheElemBoundingBoxes = true;
+  }
+  
   // Backup
   double jacbak[4][4];
   double detbak = 1.;
@@ -392,30 +392,13 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   const double f = 0.2;
 
   // Scan all elements
-  double xmin, ymin, zmin, xmax, ymax, zmax;
   for (int i = 0; i < nElements; i++) {
-    xmin = std::min(
-        std::min(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
-        std::min(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
-    xmax = std::max(
-        std::max(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
-        std::max(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
-    ymin = std::min(
-        std::min(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
-        std::min(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
-    ymax = std::max(
-        std::max(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
-        std::max(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
-    zmin = std::min(
-        std::min(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
-        std::min(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
-    zmax = std::max(
-        std::max(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
-        std::max(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
-    if (x < xmin - f * (xmax - xmin) || x > xmax + f * (xmax - xmin) ||
-        y < ymin - f * (ymax - ymin) || y > ymax + f * (ymax - ymin) ||
-        z < zmin - f * (zmax - zmin) || z > zmax + f * (zmax - zmin))
+    element& e = elements[i];
+    if (x < e.xmin - f * (e.xmax - e.xmin) || x > e.xmax + f * (e.xmax - e.xmin) ||
+        y < e.ymin - f * (e.ymax - e.ymin) || y > e.ymax + f * (e.ymax - e.ymin) ||
+        z < e.zmin - f * (e.zmax - e.zmin) || z > e.zmax + f * (e.zmax - e.zmin))
       continue;
+
     rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, i);
 
     if (rc == 0 && t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 &&
@@ -4261,5 +4244,39 @@ double ComponentFieldMap::ReadDouble(char* token, double def, bool& error) {
     return def;
   }
   return atof(token);
+}
+
+void ComponentFieldMap::CalculateElementBoundingBoxes(void) {
+
+  // Do not proceed if not properly initialised.
+  if (!ready) {
+    std::cerr << m_className << "::CalculateElementBoundingBoxes:\n";
+    std::cerr << "    Field map not yet initialised.\n";
+    std::cerr << "    Bounding boxes of elements cannot be computed.\n";
+    return;
+  }
+
+  // Calculate the bounding boxes of all elements
+  for (int i = 0; i < nElements; ++i) {
+    element& elem = elements[i];
+    elem.xmin = std::min(
+        std::min(nodes[elem.emap[0]].x, nodes[elem.emap[1]].x),
+        std::min(nodes[elem.emap[2]].x, nodes[elem.emap[3]].x));
+    elem.xmax = std::max(
+        std::max(nodes[elem.emap[0]].x, nodes[elem.emap[1]].x),
+        std::max(nodes[elem.emap[2]].x, nodes[elem.emap[3]].x));
+    elem.ymin = std::min(
+        std::min(nodes[elem.emap[0]].y, nodes[elem.emap[1]].y),
+        std::min(nodes[elem.emap[2]].y, nodes[elem.emap[3]].y));
+    elem.ymax = std::max(
+        std::max(nodes[elem.emap[0]].y, nodes[elem.emap[1]].y),
+        std::max(nodes[elem.emap[2]].y, nodes[elem.emap[3]].y));
+    elem.zmin = std::min(
+        std::min(nodes[elem.emap[0]].z, nodes[elem.emap[1]].z),
+        std::min(nodes[elem.emap[2]].z, nodes[elem.emap[3]].z));
+    elem.zmax = std::max(
+        std::max(nodes[elem.emap[0]].z, nodes[elem.emap[1]].z),
+        std::max(nodes[elem.emap[2]].z, nodes[elem.emap[3]].z));
+  }
 }
 }
