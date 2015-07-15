@@ -4,8 +4,17 @@
 #define StvKNSeedSelector_HH
 #include <assert.h>
 #include <vector>
+#include <map>
+
+typedef std::multimap <float,int> MyPhiDiv;
+
+typedef std::map <float,MyPhiDiv> MyTheDiv;
+
+
+
 #include "TNamed.h"
 /// \class StvKNSeedSelector
+
 
 typedef std::vector<void*> VoidVec;
 enum {kKNumber=4};
@@ -19,6 +28,9 @@ public:
   float mLen;			//distance from the 1st hit
   float mDir[3];		//direction from the 1st hit
   float mDist[kKNumber];	//sorted angles to nearest hits
+  float mPhi;
+  float mThe;
+  float mCosThe;
   int   mNbor[kKNumber];	//indices in Aux array to nearest hits
   int   mSel;			//hit selected
 };
@@ -33,7 +45,8 @@ public:
      void  Reset(const float startPos[3],void *voidHit);
      void  Add  (const float      pos[3],void *voidHit);
       int  Select();  
-const VoidVec &Get() const { return mSel; } 
+const VoidVec &Get() const { return mSel;} 
+       int GetNHits() const{ return mSel.size();}
       void Show() const;
 private:
       void Relink();
@@ -59,7 +72,7 @@ int   mNHits;	//number of selected hits
 VoidVec mSel;
 std::vector<StvKNAux> mAux;
 std::map<float,int> mMapLen;
-
+MyTheDiv mTheDiv;
 };
 
 
