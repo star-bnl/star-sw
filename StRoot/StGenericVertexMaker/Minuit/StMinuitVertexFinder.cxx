@@ -239,21 +239,21 @@ StMinuitVertexFinder::setFlagBase(){
 Int_t StMinuitVertexFinder::findSeeds() {
   mNSeed = 0;
 
-  Int_t zImpactArr[400]; // simple array to 'histogram' zImpacts
-  for (Int_t i=0; i < 400; i++)
+  Int_t zImpactArr[500]; // simple array to 'histogram' zImpacts
+  for (Int_t i=0; i < 500; i++)
     zImpactArr[i]=0;
 
   Int_t nTrk = mZImpact.size();
   for (Int_t iTrk=0; iTrk < nTrk; iTrk++) {
-    if (fabs(mZImpact[iTrk]) < 200)
-      zImpactArr[int(mZImpact[iTrk]+200)]++;
+    if (fabs(mZImpact[iTrk]) < 250)
+      zImpactArr[int(mZImpact[iTrk]+250)]++;
   }
 
   // Search for maxima using sliding 3-bin window
   Int_t nOldBin = 0;
   Int_t slope = 0;
   Int_t nBinZ = 3;
-  for (Int_t iBin=0; iBin < 400 - nBinZ; iBin++) {
+  for (Int_t iBin=0; iBin < 500 /*400*/ - nBinZ; iBin++) { //Modified by Chris Flores 1/9/2015
     Int_t nTrkBin = 0;
     for (Int_t iBin2=0; iBin2 < nBinZ; iBin2++) {
       nTrkBin += zImpactArr[iBin + iBin2];
@@ -263,7 +263,7 @@ Int_t StMinuitVertexFinder::findSeeds() {
     else if (nTrkBin < nOldBin) {
       if (slope == 1) {
 	if (mNSeed < maxSeed) {
-	  Float_t seed_z = -200 + iBin + (Float_t)nBinZ / 2 - 1;
+	  Float_t seed_z = -250 /*-200*/ + iBin + (Float_t)nBinZ / 2 - 1; //Modified by Chris Flores 1/9/2015
 	  Double_t meanZ = 0;
 	  Int_t nTrkZ = 0;
 	  for (Int_t iTrk = 0; iTrk < nTrk; iTrk ++ ) {
@@ -785,8 +785,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 	
 	// LSB Really error in x and y should come from error on constraint
 	// At least this way it is clear that those were fixed paramters
-	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
-	XVertex.setY(beamY(val));  cov[2]=0.1;
+	XVertex.setX(beamX(val));  cov[0]=0.01; // non-zero error values needed for Sti
+	XVertex.setY(beamY(val));  cov[2]=0.01;
       }
       StPrimaryVertex primV;
       primV.setPosition(XVertex);
