@@ -105,11 +105,19 @@ StPrimaryVertex::numberOfDaughters() const
 {
     return mDaughters.size();
 }
+UInt_t StPrimaryVertex::numberOfFittedTracks() const {
+  UInt_t no = 0;
+  for (UInt_t i=0; i<mDaughters.size(); i++) {
+    const StTrack *track = daughter(i);
+    if (track && ! track->isRejected()) no++;
+  }  
+  return no;
+}
 UInt_t StPrimaryVertex::numberOfGoodTracks() const {
   UInt_t no = 0;
   for (UInt_t i=0; i<mDaughters.size(); i++) {
     const StTrack *track = daughter(i);
-    if (track && track->flag() >= 0 && track->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack()) no++;
+    if (track && ! track->isRejected() && track->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack()) no++;
   }  
   return no;
 }
@@ -213,10 +221,12 @@ void StPrimaryVertex::setTrackNumbers() {
 ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
   UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
   UInt_t nDaughters = v.numberOfDaughters();
+  UInt_t nFitted    = v.numberOfFittedTracks();
+  UInt_t nGood      = v.numberOfGoodTracks();
   for (UInt_t i=0; i < nDaughters; i++) {
     StPrimaryTrack* pTrack = (StPrimaryTrack*) v.daughter(i);
     if (! pTrack) continue;
-    Int_t good = (pTrack->flag() > 0 && pTrack->fitTraits().numberOfFitPoints() >=  StVertex::NoFitPointCutForGoodTrack()) ? 1 : 0;
+    Int_t good = (! pTrack->isRejected() && pTrack->fitTraits().numberOfFitPoints() >=  StVertex::NoFitPointCutForGoodTrack()) ? 1 : 0;
     if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
       nTpcTracks++; nGoodTpcTracks+=good;
     } 
@@ -246,8 +256,11 @@ ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
     else                  os << Form("%8.3f+/-9.999,",xyz[i],dxyz[i]);
   }
   os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
-     << " Rank: "      << Form("%8.1f",v.ranking())
-    << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
+     << " Rank: "      << Form("%8.1f",v.ranking());
+  if (nDaughters == nFitted) 
+    os << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,nGood);
+  else 
+    os << Form(" U/T/F/G: %4i,%4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,nFitted,nGood);
   if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
     os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
   }

@@ -78,6 +78,7 @@ public:
     
     StVertexId                   type() const;
     UInt_t                       numberOfDaughters() const;
+    UInt_t                       numberOfFittedTracks() const; 
     UInt_t                       numberOfGoodTracks() const; 
     StTrack*                     daughter(UInt_t); 
     const StTrack*               daughter(UInt_t) const;

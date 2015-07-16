@@ -101,6 +101,7 @@ public:
     StTrackMassFit*        parentMF()        { return parent(); }
     const StTrackMassFit*  parentMF() const  { return parent(); }
     virtual UInt_t         numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
+    virtual UInt_t         numberOfFittedTracks() const {NotImplemented("numberOfFittedTracks"); return 0;}
     virtual UInt_t         numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
     virtual StTrack*       daughter(UInt_t)       {NotImplemented("daughter"); return 0;}
     virtual const StTrack* daughter(UInt_t) const {NotImplemented("daughter"); return 0;}
