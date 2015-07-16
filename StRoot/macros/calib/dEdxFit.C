@@ -2156,10 +2156,12 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   NewRootFile += "/";
   NewRootFile += HistName;
   NewRootFile += FitName;
+#if 0
   if (mergeX != 1) NewRootFile += Form("_x%i",mergeX);
   if (mergeY != 1) NewRootFile += Form("_y%i",mergeY);
   if (ix >= 0) NewRootFile += Form("_X%i",ix);
   if (jy >= 0) NewRootFile += Form("_Y%i",jy);
+#endif
   //  NewRootFile += "_2_";
   NewRootFile += gSystem->BaseName(fRootFile->GetName());
   TFile *f = 0;
@@ -2170,45 +2172,41 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
    else {cout << "Failed to open " << NewRootFile << endl; return;}
   //  TString TupName(HistName);
   // TupName += "FitP";
-#if 0
-  if (TString(FitName) == "GF")
-    FitP = new TNtuple("FitP","Fit results",
-		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:pi:P:K:e:d:a5:Npar:dpeak:dmu:dsigma:dpi:dP:dK:de:dd:da5");
-  else if (TString(FitName) == "GB")
-    FitP = new TNtuple("FitP","Fit results",
-		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:pi:P:K:e:d:dX:Npar:dpeak:dmu:dsigma:dpi:dP:dK:de:dd:ddX");
-  else 
-#endif
+  FitP = (TNtuple *) f->Get("FitP");
+  if (! FitP) {
     FitP = new TNtuple("FitP","Fit results",
 		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
-  FitP->SetMarkerStyle(20);
-  FitP->SetLineWidth(2);
-  TH1 *mean;   
-  TH1 *rms;    
-  TH1 *entries;
-  TH1 *mu;
-  TH1 *sigma;  
-  TH1 *chisq; 
-  if (dim == 3) {
-    mean    = new TH2D("mean",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
-    rms     = new TH2D("rms",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
-    entries = new TH2D("entries",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
-    mu      = new TH2D("mu",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
-    sigma   = new TH2D("sigma",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
-    chisq   = new TH2D("chisq",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+    FitP->SetMarkerStyle(20);
+    FitP->SetLineWidth(2);
   }
-  else {
-    if (dim == 2 || dim == 1) {
-      mean    = new TH1D("mean",hist->GetTitle(),nx,xmin,xmax);
-      rms     = new TH1D("rms",hist->GetTitle(),nx,xmin,xmax);
-      entries = new TH1D("entries",hist->GetTitle(),nx,xmin,xmax);
-      mu      = new TH1D("mu",hist->GetTitle(),nx,xmin,xmax);
-      sigma   = new TH1D("sigma",hist->GetTitle(),nx,xmin,xmax);
-      chisq   = new TH1D("chisq",hist->GetTitle(),nx,xmin,xmax);
+  TH1 *mean = (TH1 *) f->Get("mean");
+  TH1 *rms  = (TH1 *) f->Get("rms");    
+  TH1 *entries = (TH1 *) f->Get("entries");
+  TH1 *mu   = (TH1 *) f->Get("mu");
+  TH1 *sigma= (TH1 *) f->Get("sigma");
+  TH1 *chisq= (TH1 *) f->Get("chisq");
+  if (! mu) {
+    if (dim == 3) {
+      mean    = new TH2D("mean",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      rms     = new TH2D("rms",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      entries = new TH2D("entries",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      mu      = new TH2D("mu",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      sigma   = new TH2D("sigma",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      chisq   = new TH2D("chisq",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
     }
     else {
-      printf("Histogram %s has wrong dimension %i\n", hist->GetName(),dim);
-      return;
+      if (dim == 2 || dim == 1) {
+	mean    = new TH1D("mean",hist->GetTitle(),nx,xmin,xmax);
+	rms     = new TH1D("rms",hist->GetTitle(),nx,xmin,xmax);
+	entries = new TH1D("entries",hist->GetTitle(),nx,xmin,xmax);
+	mu      = new TH1D("mu",hist->GetTitle(),nx,xmin,xmax);
+	sigma   = new TH1D("sigma",hist->GetTitle(),nx,xmin,xmax);
+	chisq   = new TH1D("chisq",hist->GetTitle(),nx,xmin,xmax);
+      }
+      else {
+	printf("Histogram %s has wrong dimension %i\n", hist->GetName(),dim);
+	return;
+      }
     }
   }
   Double_t params[20];
