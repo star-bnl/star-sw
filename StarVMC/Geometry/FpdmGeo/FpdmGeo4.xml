@@ -1457,7 +1457,7 @@
     <Placement block="FPPB" x="-x2" y="-y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
     <Placement block="FPBB" x="-x2" y="-y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
     
-    <Export language="Mortran"> write(*,*) 'Done serN=',serN</Export>	   
+    <!-- Export language="Mortran"> write(*,*) 'Done serN=',serN</Export -->	   
   </Block>
   
   <Block name="FPBB" comment="is the G10 back board"  >
