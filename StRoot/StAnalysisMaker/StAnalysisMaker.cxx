@@ -162,8 +162,10 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 	    const StTrack* track = vx->daughter(j);
 	    if (! track) continue;
 	    cout << *((const StPrimaryTrack *)track) << endl;
+#ifdef StTrackMassFit_hh
 	    const StVertex*  vxEnd =  track->endVertex();
 	    if (vxEnd) cout << *vxEnd << endl;
+#endif
 	  }
 #ifdef StTrackMassFit_hh
 	  UInt_t nMassFits = vx->numberOfMassFits();
@@ -183,14 +185,14 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
     StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
     UInt_t nTracks = trackNode.size();
     StTrackNode *node = 0;
-#if 0
+#ifndef StTrackMassFit_hh
     cout << " Global tracks " << nTracks << endl;
 #else
     cout << nTracks << " Track nodes" << endl;
 #endif
     for (UInt_t  i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
-#if 1
+#ifdef StTrackMassFit_hh
       cout << *node << endl;
 #else
       UInt_t nentries = node->entries();
@@ -203,11 +205,6 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
 	} else if (track->type() == primary) {
 	  StPrimaryTrack* pTrack = (StPrimaryTrack* ) track;
 	  cout << *pTrack << endl;
-#ifdef StTrackMassFit_hh
-	} else if (track->type() == massFit || track->type() == massFitAtVx) {
-	  StTrackMassFit* mTrack = (StTrackMassFit*) track;
-	  cout << *mTrack << endl;
-#endif
 	}
       } 
 #endif
@@ -262,7 +259,7 @@ void StAnalysisMaker::PrintVertex(Int_t ivx) {
   cout << "Event: Run "<< pEvent->runId() << " Event No: " << pEvent->id() << endl;
   UInt_t NpVX = pEvent->numberOfPrimaryVertices();
   if (NpVX) {
-    for (UInt_t i = 0; i < NpVX; i++) {
+    for (Int_t i = 0; i < NpVX; i++) {
       if (ivx >= 0 && i != ivx) continue;
       const StPrimaryVertex *vx = pEvent->primaryVertex(i);
       vx->Print(Form("Vertex: %3i ",i));
@@ -735,8 +732,10 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 #ifdef StTrackMassFit_hh
     Int_t key = pVertex->key();
     if (key <= 0)  pVertex->setKey(ipr);
-#endif
     LOG_QA << *pVertex << endm;
+#else
+    LOG_QA << Form("#V[%3i]",ipr) << *pVertex << endm;
+#endif
     // Report for jobTracking Db   (non-zero entry only)    
     if (pVertex->numberOfDaughters()) {
       //            LOG_QA << "SequenceValue=" << mEventCounter
@@ -762,7 +761,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     for (Int_t iv0=0;iv0<nv0;iv0++) {
       StV0Vertex *v0Vertex = v0Vertices[iv0];
       if (! v0Vertex) continue;
-#if 1
+#ifdef  StTrackMassFit_hh
       Int_t key = v0Vertex->key();
       if (key <= 0) key = iv0;
       LOG_QA << Form("#V[%3i]",key) << *v0Vertex << endm;
