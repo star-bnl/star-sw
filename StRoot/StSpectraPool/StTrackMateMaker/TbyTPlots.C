@@ -412,7 +412,7 @@ void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
     if (pTEf[i]) pTEfP[i] = pTEf[i]->ProjectionX(Form("%s_all",pTEf[i]->GetName()),-1,-1,"e");
     else         pTEfP[i] = 0;
   }
-  Double_t emin = 0.6;
+  Double_t emin = 0.5;
   //  if (k == 1) emin = 0.9;
   cTitle  = gTitle;
   TString hTitle("");
@@ -482,7 +482,7 @@ void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
     dummyeff3->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
     effOldP->Draw("same");
     effNewP->Draw("same");
-    TLegend* leg5 = new TLegend(.2,.15,.8,.35);
+    TLegend* leg5 = new TLegend(0.6,0.75,0.9,.9);
     leg5->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
     leg5->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
     leg5->Draw();
@@ -504,8 +504,8 @@ void DrawPhiEfficiency(Int_t k = 0) {
     if (PhiEf[i]) PhiEfP[i] = PhiEf[i]->ProjectionX(Form("%s_all",PhiEf[i]->GetName()),-1,-1,"e");
     else          PhiEfP[i] = 0;
   }
-  Double_t emin = 0.7;
-  if (k == 1) emin = 0.9;
+  Double_t emin = 0.5;
+  //  if (k == 1) emin = 0.9;
   cTitle  = gTitle;
   TString hTitle("");
   hTitle += GPTitle[k]; hTitle +=" track efficiencies vs #phi"; 
@@ -516,7 +516,7 @@ void DrawPhiEfficiency(Int_t k = 0) {
   dummyeff->SetTitle(hTitle);
   dummyeff->SetXTitle("#phi (degree)");
   dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-  TLegend* leg4 = new TLegend(.2,.15,.5,.4);
+  TLegend* leg4 = new TLegend(0.6,0.75,0.9,.9);
   TAxis *y = PhiEf[0]->GetYaxis();
   Int_t ny = y->GetNbins();
   Double_t yMin = y->GetXmin();
@@ -574,7 +574,7 @@ void DrawPhiEfficiency(Int_t k = 0) {
     dummyeff3->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
     effOldP->Draw("same");
     effNewP->Draw("same");
-    TLegend* leg5 = new TLegend(.2,.15,.8,.35);
+    TLegend* leg5 = new TLegend(0.6,0.75,0.9,.9);
     leg5->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
     leg5->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
     leg5->Draw();
@@ -606,7 +606,7 @@ void DrawEffVsMult(Int_t k = 0) {
   dummyeff->SetTitle(hTitle);
   dummyeff->SetXTitle("(uncorrected) Multiplicity");
   dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-  TLegend* leg4 = new TLegend(.2,.15,.5,.4);
+  TLegend* leg4 = new TLegend(0.6,0.75,0.9,.9);
   TAxis *x = pTEf[0]->GetXaxis();
   Double_t xMin = x->GetXmin();
   Double_t xMax = x->GetXmax();

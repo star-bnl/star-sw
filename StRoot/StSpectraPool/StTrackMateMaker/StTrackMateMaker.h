@@ -17,6 +17,7 @@ class StGlobalTrack;
 class StPrimaryTrack;
 class StTpcHit;
 class StSPtrVecTrackNode;
+class StTpcHitCollection;
 class StTrackMateMaker : public StMaker {
 
 public: 
@@ -25,10 +26,12 @@ public:
     Int_t  Init();
     virtual void Clear(const char* opt="");
     Int_t  Make();
-    size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StTpcHit*,StGlobalTrack*>& htMap);
-    void   buildHit2HitMaps(map<StTpcHit*,StGlobalTrack*> &hitTrackMap1,map<StTpcHit*,StGlobalTrack*> &hitTrackMap2,
-			    map<StTpcHit*,StTpcHit*>        &Hit1ToHit2,map<StTpcHit*,StTpcHit*>        &Hit2ToHit1);
+    size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<const StTpcHit*,StGlobalTrack*>& htMap);
+    void   buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, const StTpcHitCollection *tpchitcoll2,
+			    map<const StTpcHit*,const StTpcHit*>        &Hit1ToHit2,map<const StTpcHit*,const StTpcHit*>        &Hit2ToHit1);
     Float_t getTpcDedx(StTrack* trk);
+    Bool_t  GoodTrack(StTrack* trk);
+    Bool_t  GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings);
     virtual const char *GetCVS() const {
       static const char cvs[]= "Tag $Name:  $ $Id: StTrackMateMaker.h,v 1.2 2009/11/10 20:57:28 fisyak Exp $ built __DATE__ __TIME__" ; 
       return cvs;
