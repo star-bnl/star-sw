@@ -18,6 +18,14 @@ inline static float Dot(const float A[3],const float B[3])
    return A[0]*B[0]+A[1]*B[1]+A[2]*B[2];
 }
 //_____________________________________________________________________________
+inline static float Dis2(const float A[3],const float B[3])
+{
+   float d = (A[0]-B[0])*(A[0]-B[0])
+           + (A[1]-B[1])*(A[1]-B[1])
+           + (A[2]-B[2])*(A[2]-B[2]);
+   return d;
+}
+//_____________________________________________________________________________
 inline static void Cop(float A[3],const float B[3])
 {   
    A[0]=B[0];A[1]=B[1];A[2]=B[2];
@@ -63,11 +71,11 @@ void StvGoneRejector::Reset(const float pos[3],const float dir[3]
     if (mOutRad<kMinLen) mOutRad=kMinLen;
     if (mOutRad>kMaxLen) mOutRad=kMaxLen;
   }
-  mOutRad2 = mOutRad*mOutRad;
   mRxy2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
   mRxy  = sqrt(mRxy2);
 
   mErr = SEED_ERR(mRxy);
+  mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
 
   if (dir) { 	//Direction defined
     Cop(mDir,dir);
@@ -93,11 +101,20 @@ void StvGoneRejector::Prepare()
   mPoint[1][2] = mOutRad;
   float dZ = mOutRad*mCos;
   float dR = mOutRad*mSin;
-  for (int i=2;i<6;i++) {mPoint[i][2]=dZ;}
+
+
   mPoint[2][0] =  dR;
-  mPoint[3][1] =  dR;
-  mPoint[4][0] = -dR;
-  mPoint[5][1] = -dR;
+  mPoint[2][2] =  dZ;
+
+  mPoint[3][2] =  mOutRad;
+  float tau = (mPoint[3][2]-mPoint[2][2])/mPoint[2][0];
+  mPoint[3][0] =  mPoint[2][0]-tau*mPoint[2][2];
+  for (int k=2;k<kNPonts-2;k+=2) {  
+    for (int kk=k;kk<k+2;kk++) {
+     mPoint[kk+2][0] =-mPoint[kk][1];
+     mPoint[kk+2][1] = mPoint[kk][0];
+     mPoint[kk+2][2] = mPoint[kk][2];
+  } }
 
   memset(mPlane[0],0,sizeof(mPlane));
   mPlane[0][2]=-1; // mPlane[0][3]=0;
@@ -105,26 +122,41 @@ void StvGoneRejector::Prepare()
 
   TVector3 Vi(0,0,mOutRad/2);
   int ipl = 1;
-  for (int iside=0;iside<2;iside++) { //1st and end poin of track
-    TVector3 V0(mPoint[iside]);
-    for (int i1pnt=2;i1pnt<6;i1pnt++) {
-      int i2pnt = (i1pnt+1); if (i2pnt>=6) i2pnt = 2;
-      TVector3 V1(mPoint[i1pnt]); V1-=V0;
-      TVector3 V2(mPoint[i2pnt]); V2-=V0;
-      TVector3 Vn = V1.Cross(V2);
-      Vn = Vn.Unit();
+ 
+//		Planes for 1st group of points
+  for (int i1pnt=2;i1pnt<kNPonts;i1pnt+=2) {
+    int i2pnt = (i1pnt+2); if (i2pnt>=kNPonts) i2pnt = 2;
+    TVector3 V1(mPoint[i1pnt]);
+    TVector3 V2(mPoint[i2pnt]);
+    TVector3 Vn = V1.Cross(V2);
+    Vn = Vn.Unit();
 assert(Vn.Mag2()>=0.999);
-      ipl++;
-      float *pl = mPlane[ipl];
-      pl[3] = Vn.Dot(V0);
-      if (Vn.Dot(Vi)-pl[3]>0) 	{ Vn*=-1.; pl[3]*=-1.;}
-      for (int j=0;j<3;j++)	{ pl[j] = Vn[j];}
-      assert(Vn.Dot(Vi)-pl[3]<=0);
-
-    }
+    float *pl = mPlane[++ipl];
+    pl[3] = 0;
+    if (Vn.Dot(Vi)>0) 	{ Vn*=-1.;}
+    for (int j=0;j<3;j++)	{ pl[j] = Vn[j];}
+    assert(Vn.Dot(Vi)-pl[3]<=0);
   }
+//		Planes for 2nd group of points
+  for (int i0pnt=2;i0pnt<kNPonts;i0pnt+=2) {
+    int i1pnt = (i0pnt+1); 
+    int i2pnt = (i1pnt+2); if (i2pnt>=kNPonts) i2pnt = 2+1;
+    TVector3 V0(mPoint[i0pnt]);
+    TVector3 V1(mPoint[i1pnt]); V1-=V0;
+    TVector3 V2(mPoint[i2pnt]); V2-=V0;
+    TVector3 Vn = V1.Cross(V2);
+    Vn = Vn.Unit();
+    float *pl = mPlane[++ipl];
+    pl[3] = Vn.Dot(V0);
+    if (Vn.Dot(Vi)-pl[3]>0) 	{ Vn*=-1.; pl[3]*=-1.;}
+    for (int j=0;j<3;j++)	{ pl[j] = Vn[j];}
+    assert(Vn.Dot(Vi)-pl[3]<=0);
+   }
+ 
+ 
+ 
 {
-   for (UInt_t ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
+   for (uint ip=0;ip<kNPonts;ip++) {
      assert(!Reject(mPoint[ip]));
    }  
 }
@@ -138,7 +170,7 @@ assert(Vn.Mag2()>=0.999);
   if (cosL>1e-5) { cosP=mDir[0]/cosL; sinP=mDir[1]/cosL;}
 
 // Convert points into global sys
-  for (int ip=0;ip<6;ip++) {
+  for (int ip=0;ip<kNPonts;ip++) {
     float *p = mPoint[ip];
 
     float zz = p[2];
@@ -156,7 +188,7 @@ assert(Vn.Mag2()>=0.999);
 
 
 // Convert planes into global sys
-  for (int ip=0;ip<10;ip++) {
+  for (int ip=0;ip<kNPlans;ip++) {
     float *p = mPlane[ip];
 
     float zz = p[2];
@@ -180,7 +212,7 @@ assert(Vn.Mag2()>=0.999);
   Set(mLim[0], 1e11,6);
   Set(mLim[1],-1e11,6);
   
-  for (int ip=0;ip<6;ip++) {
+  for (int ip=0;ip<kNPonts;ip++) {
     const float *p = mPoint[ip];
     for (int j=0;j<3;j++) {
       if (mLim[0][j]>p[j]) mLim[0][j]=p[j];
@@ -199,7 +231,7 @@ assert(Vn.Mag2()>=0.999);
    float myX[3];
    for (int j=0;j<3;j++) {myX[j]=mPos[j]+mDir[j]*mOutRad*0.5;}
    assert(!Reject(myX));
-   for (UInt_t ip=0;ip<sizeof(mPoint)/(sizeof(mPoint[0][0])*3);ip++) {
+   for (uint ip=0;ip<kNPonts;ip++) {
      assert(!Reject(mPoint[ip]));
    }  
 
@@ -208,11 +240,13 @@ assert(Vn.Mag2()>=0.999);
 }
 
 
-}   
+}
+
 //_____________________________________________________________________________
 int StvGoneRejector::Reject(const float x[3]) const
 {
-  for (int ipl=0;ipl<10;ipl++) {
+//  if (Dis2(x,mPos)>mOutRad2) return 66;
+  for (int ipl=0;ipl<kNPonts;ipl++) {
     const float *p = mPlane[ipl];
     if (Dot(p,x)-p[3]>mErr) return 77;
   }

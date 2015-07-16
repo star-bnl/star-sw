@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.38 2014/01/24 16:30:45 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.39 2015/07/11 02:04:02 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.39  2015/07/11 02:04:02  zhux
+// chain for Run14 Au+Au 14.5 added.
+//
 // Revision 1.38  2014/01/24 16:30:45  zhux
 // added chain for run12 p+p 200GeV
 //
@@ -118,7 +121,11 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run12 U+U 193 GeV chain
   TString prodP12idUU193("DbV20120921,P2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu -VFMinuit -hitfilt");
 
+  // Run12 pp200 chain
   TString prodP12idpp200("DbV20130212,pp2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-hitfilt");
+
+  // Run14 AuAu15 chain
+  TString prodP14iiAuAu15("DbV20150110,P2014a,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
@@ -126,10 +133,11 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString geomP11id("ry2011");
   TString geomP12id("ry2012a");
+  TString geomP14ii("ry2014a");
 
+  TString xgeom(" useXgeom");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
-//  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
 	if(bPythia){
 		chain2Opt += ",fzin";
 	}
@@ -162,6 +170,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11idpp500")   { chain3Opt = prodP11idpp500;    chain2Opt += geomP11id;}
   else if (prodName == "P12idUU193")   { chain3Opt = prodP12idUU193;    chain2Opt += geomP12id;}
   else if (prodName == "P12idpp200")   { chain3Opt = prodP12idpp200;    chain2Opt += geomP12id;}
+  else if (prodName == "P14iiAuAu15")  { chain1Opt += xgeom; chain3Opt = prodP14iiAuAu15;   chain2Opt += geomP14ii;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
@@ -301,6 +310,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   	// Default is no event selections
   	embMk->SetSkipMode(kTRUE);
+
+  	embMk->SetTemp(0.35);
 
   	// Make trigger and z-vertex cuts (only if SkipMode is true)
   	// Trigger cut

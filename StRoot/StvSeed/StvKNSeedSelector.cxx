@@ -6,9 +6,23 @@
 #include "StvKNSeedSelector.h"
 #include "StvSeedConst.h"
 
-static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kMinAng =  1*3.14/180;;	//KN angle allowed
-static const float kMaxRatio=   5;		//ratio 
+//static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kMaxAng =  15*3.14/180;	//???Maximal angle allowed for connected hits
+
+//static const float kMinAng =  1*3.14/180;;	//KN angle allowed
+//static const float kMinAng =  2*3.14/180;;	//KN angle allowed
+//static const float kMinAng =  9*3.14/180;;	//KN angle allowed
+static const float kMinAng =  5*3.14/180;;	//KN angle allowed
+//static const float kMinAng =  3*3.14/180;;	//KN angle allowed
+//static const float kMinAng =  12*3.14/180;;	//KN angle allowed
+
+//static const float kDisRatio=   1.0;		//ratio for KNN distance
+//static const float kDisRatio=   0.7;		//ratio for KNN distance
+//static const float kDisRatio=   0.6;		//ratio for KNN distance
+//static const float kDisRatio=   0.8;		//ratio for KNN distance
+//static const float kDisRatio=   0.9;		//ratio for KNN distance
+static const float kDisRatio=   0.8;		//ratio for KNN distance
+
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
 #define Sq(x) ((x)*(x))
@@ -17,10 +31,11 @@ static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 //_____________________________________________________________________________
 static inline double Ang( const float A[3],const float B[3]) 
 {
-  double ang = (A[0]-B[0])*(A[0]-B[0])+(A[1]-B[1])*(A[1]-B[1])+(A[2]-B[2])*(A[2]-B[2]);
-  ang = sqrt(ang);
-  if (ang>0.5) 		{ ang  = 2.*asin(ang/2);}
-  else if (ang>0.1) 	{ ang *= (1+ang*ang/24);}
+  double cang = ((A[0]-B[0])*A[0]+(A[1]-B[1])*A[1]+(A[2]-B[2])*A[2]);
+  if (cang<0) cang = 0;
+  double ang = 2*sqrt(cang/2);
+       if (ang>1.99) { ang = M_PI;}
+  else if (ang>0.1 ) { ang = 2.*asin(ang/2); }
   return ang;
 }
 //_____________________________________________________________________________
@@ -82,6 +97,7 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
   mState = 0;
   mAux.clear();
   mSel.clear();
+  mTheDiv.clear();
   mStartHit = startHit;
   memcpy(mStartPos,startPos,sizeof(mStartPos));
   mKNNDist = 1e11;
@@ -105,8 +121,49 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
   for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
   nor = sqrt(nor);
   for (int i=0;i<3;i++) {myDir[i]/=nor;}
+  aux.mPhi = atan2(myDir[1],myDir[0]);
+  aux.mCosThe = sqrt(myDir[0]*myDir[0]+myDir[1]*myDir[1]);
+  aux.mThe = asin(myDir[2]);
   aux.mLen = nor;aux.mSel = 0;
+  float stp = M_PI/20;
+  float iThe = int(aux.mThe/stp)*stp;
+
+//mTheDiv[iThe].emplace(aux.mPhi,last);
+  mTheDiv[iThe].insert(std::pair<float,int>(aux.mPhi,last));
+
+
 }  
+#ifdef KNNMAP
+//_____________________________________________________________________________
+void  StvKNSeedSelector::Relink()
+{
+
+  for (int i1=0;i1<(int)mAux.size();i1++) {
+    if (!mAux[i1].mHit) continue;
+    if ( mAux[i1].mSel) continue;
+    mAux[i1].Reset(); mAux[i1].mSel=0; 
+    
+    MyTheDiv::iterator it1 = mTheDiv.lower_bound(mAux[i1].mThe-kMaxAng);
+    for (;it1!=mTheDiv.end();++it1) {
+       
+      if ((*it1).first>mAux[i1].mThe+kMaxAng) break;
+      MyPhiDiv &myPhiDiv = (*it1).second;
+      MyPhiDiv::iterator it2 = myPhiDiv.lower_bound(mAux[i1].mPhi-kMaxAng/mAux[i1].mCosThe);
+      for (;it2!=myPhiDiv.end();++it2) { 
+        if ((*it2).first >mAux[i1].mPhi+kMaxAng/mAux[i1].mCosThe) break;
+        int i2 = (*it2).second;
+        assert(fabs((*it2).first-mAux[i2].mPhi)<1e-4);
+        if (i1==i2) 		continue;
+        if (fabs(mAux[i1].mThe-mAux[i2].mThe)>kMaxAng) continue;
+        if (fabs(mAux[i1].mPhi-mAux[i2].mPhi)>kMaxAng/mAux[i1].mCosThe) continue;
+        if (!mAux[i2].mHit) 	continue;
+        if ( mAux[i2].mSel) 	continue;
+        Update(i1,i2);
+    } } }
+
+}  
+#endif
+#ifndef KNNMAP
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
@@ -120,8 +177,9 @@ void  StvKNSeedSelector::Relink()
       if ( mAux[i2].mSel) continue;
       Update(i1,i2);
   } }
+}
+#endif
 
-}  
 //_____________________________________________________________________________
 int StvKNSeedSelector::Select()
 {
@@ -144,14 +202,13 @@ static int nCall=0; nCall++;
     if (mMinIdx<0) return 0;
 
 
-    if (mKNNDist > kMinAng*kMaxRatio) return 0;	
   ///		define the best direction
     memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
     assert(fabs(mAveDir[0])+fabs(mAveDir[1])+fabs(mAveDir[2])>0.1);
 
 
     mNHits=0; 
-    Pass(mMinIdx,mKNNDist);
+    Pass(mMinIdx,mKNNDist*kDisRatio);
     double wid = Width();
     if (mKNNDist*wid > kMinAng) return 0;	
  	 

@@ -34,13 +34,14 @@ float mCos;		// cos(mThet)
 float mSin;		// sin(mThet)
 float mTan2;		// tan(mThet)**2
 float mErr;		// 3d accuracy to be inside of cone
-float mPlane[10][4];  	// Planes 	[0]=at start track & ort to it
+enum {kNPonts = 2+4+4, kNPlans = 2+4+4};
+float mPlane[kNPlans][4];  	// Planes 	[0]=at start track & ort to it
  			// 		[1]=at end   track & ort to it
  			// 		[>1]=surroundings
 			// Plane format:
 			// mPlane[0]*x+mPlane[1]*y+mPlane[2]*z<mPlane[3]
 			// point inside of gone
-float mPoint[ 6][3];	// points surrounding Gone
+float mPoint[kNPonts][3];	// points surrounding Gone
 float mLim[2][6];       // xyz min and xyz max of cube around the gone
 char  mEnd[1];
 };
