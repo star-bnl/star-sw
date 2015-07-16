@@ -279,13 +279,16 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (! node) {
     return pTrack;
   }
-  StiKalmanTrack* kTrack = (*StiStEventFiller::Node2TrackMap())[node];
-  if (! kTrack) return pTrack;
+  StiKalmanTrack* kTrack = StiToolkit::instance()->getTrackFactory()->getInstance();
+  const StiKalmanTrack* kTrackC = (*StiStEventFiller::Node2TrackMap())[node];
+  if (! kTrackC) return pTrack;
+  *kTrack = *kTrackC;
   StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
   if (! gTrack) return pTrack;
   // Replace dca node by a primary vertex
   StiKalmanTrackNode *tNode = kTrack->getInnerMostNode();
-  if (! tNode || tNode->getDetector()) {// Track has to be fittted to a vertex or to be Dca 
+  if (! tNode || tNode->getDetector()) {// Track has to be fitted to a vertex or to be Dca 
+    BFactory::Free(kTrack);
     return pTrack;
   }
   if (Debug() > 1) {
@@ -319,16 +322,16 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   Int_t fail = 0;
   while ((lastNode = kTrack->getLastNode())) {
     const StiDetector *tdet = lastNode->getDetector();
-    if (! tdet) { // remove vertex of Dca node
-      kTrack->removeLastNode();
-      continue;
+    if ( tdet) { // remove Dca node or nodes below the vertex
+      const StiPlacement* pl = tdet->getPlacement();
+      if (pl->getNormalRadius() > R) break;
+      // Check for hits at radius less than Vertex
+      if (lastNode->getHit()) {fail = 1; break;}
     }
-    const StiPlacement* pl = tdet->getPlacement();
-    if (pl->getNormalRadius() > R) break;
-    if (lastNode->getHit()) {fail = 1; break;}
     kTrack->removeLastNode();
   }
   if (fail) {
+    BFactory::Free(kTrack);
     return pTrack;
   }
   StiKalmanTrackNode *extended = (StiKalmanTrackNode*) kTrack->extendToVertex(Vertex);
@@ -342,6 +345,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     if (extended && extended->getChi2()>1000)  {extended=0;}
   } 
   if (! extended) {
+    BFactory::Free(kTrack);
     return pTrack;
   }
   kTrack->setPrimary(V->ID());
@@ -361,7 +365,8 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   }
   kTrack->reduce();
   if (status) {
-    kTrack->removeLastNode();
+    //    kTrack->removeLastNode();
+    BFactory::Free(kTrack);    
     return pTrack; // failed to refit
   }
   if (Debug() > 2) {
@@ -388,6 +393,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   StSPtrVecTrackDetectorInfo& detInfoVec = pEvent->trackDetectorInfo(); 
   detInfoVec.push_back(detInfo);
   UpdateParticleAtVertex(kTrack, &track->Particle());
+  BFactory::Free(kTrack);
   return pTrack;
 }
 //________________________________________________________________________________
@@ -507,6 +513,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   //  PrPP(MakeV0,particles[0]);
   //  PrPP(MakeV0,particles[1]);
   StTrack *trks[2] = {0,0};
+  StTrack *ptrks[2] = {0,0};
   StTrackNode *Nodes[2] = {TrackNodeMap[particles[negative]->Id()], TrackNodeMap[particles[positive]->Id()]};
   for (Int_t m = 0; m < 2; m++) {
     if (! Nodes[m]) {
@@ -514,14 +521,17 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     }
   }
   if (! Nodes[0] || ! Nodes[1]) return ok;
+  if (! Nodes[0] || ! Nodes[1]) return ok;
   for (Int_t m = 0; m < 2; m++) {
     trks[m] = Nodes[m]->track(global);
-    if (! trks[m]) {
-      cout << "Lost global for track " << *particles[m] << endl;
+    ptrks[m] = Nodes[m]->track(primary); 
+    if (! trks[m] || !  ptrks[m]) {
+      cout << "Lost global/primary for track " << *particles[m] << endl;
       cout << *Nodes[m] << endl;
     }
   }
   if (! trks[0] || ! trks[1]) return ok;
+  if (! ptrks[0] || ! ptrks[1]) return ok;
   StV0Vertex *V0Vx = 0;
   Int_t kg = fParticles->GetLast() + 1; // new track
   Int_t kgp = kg; // position in fParticle array
@@ -849,9 +859,11 @@ void StKFVertexMaker::ReFitToVertex() {
       }
       if (P.GetQ()) {
 	pTracks[itk] =  FitTrack2Vertex(V, track);
+#if 0
 	if (! pTracks[itk]) {
 	  delete V->Remove((StKFTrack*) track);
 	}
+#endif
       }
     }
     if (beam ) primV->setBeamConstrained();
@@ -880,10 +892,12 @@ void StKFVertexMaker::ReFitToVertex() {
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
       for (UInt_t i = 0; i < NoTracks; i++) {
+	if (! nodes[i]) continue;
 	StPrimaryTrack *t = pTracks[i];
-	if (! t) continue;
-	primV->addDaughter(t);
-	// Done in FitTrack2Vertex    nodes[i]->addTrack(t);
+	if (t) {
+	  primV->addDaughter(t);
+	  // Done in FitTrack2Vertex    nodes[i]->addTrack(t);
+	}
 	PrPP(ReFitToVertex,tracks[i]->Particle());
 	StTrackMassFit *mf = new StTrackMassFit(tracks[i]->Id(),&tracks[i]->Particle());
 	PrPP(ReFitToVertex,*mf);
@@ -972,6 +986,7 @@ void StKFVertexMaker::SecondaryVertices() {
     Double_t R = TMath::Sqrt(X*X + Y*Y);
     if (R > 200 ) {SafeDelete(vtx); continue;}
     SecondaryVertices->AddVertex(vtx);
+#if 0 /* ??? */
     Double_t prob = TMath::Prob(vtx->Vertex().GetChi2(),vtx->Vertex().GetNDF());
     if (N > 2 || prob > 1.e-5) {// Allow V2 to share tracks
       TIter next(&vtx->Tracks());
@@ -980,7 +995,8 @@ void StKFVertexMaker::SecondaryVertices() {
 	KFParticle *particle = (KFParticle *) Track->OrigParticle();;
 	Int_t k = Track->K();
       }
-    } 
+    }
+#endif 
   }
   Int_t No = SecondaryVertices->NoVertices();
   if ( No ) {
