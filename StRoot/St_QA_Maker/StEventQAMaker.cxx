@@ -2544,20 +2544,20 @@ void StEventQAMaker::MakeHistHFT() {
                 LOG_WARN << "No StIstHitCollection" << endm;
         }
 
-        StSsdHitCollection *ssdHitCollection = event->ssdHitCollection();
+        StSstHitCollection *sstHitCollection = event->sstHitCollection();
 
-        if (!ssdHitCollection) {
-                LOG_WARN << "No StSsdHitCollection" << endm;
+        if (!sstHitCollection) {
+                LOG_WARN << "No StSstHitCollection" << endm;
         }
 
         if(pxlHitCollection && istHitCollection){
-                hists->m_nhit_Pxl_Its->Fill(pxlHitCollection->numberOfHits(),istHitCollection->numberOfHits());
+                hists->m_nhit_Pxl_Ist->Fill(pxlHitCollection->numberOfHits(),istHitCollection->numberOfHits());
         }
-        if(pxlHitCollection && ssdHitCollection){
-                hists->m_nhit_Pxl_Ssd->Fill(pxlHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        if(pxlHitCollection && sstHitCollection){
+                hists->m_nhit_Pxl_Sst->Fill(pxlHitCollection->numberOfHits(),sstHitCollection->numberOfHits());
         }
-        if(istHitCollection && ssdHitCollection){
-                hists->m_nhit_Its_Ssd->Fill(istHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        if(istHitCollection && sstHitCollection){
+                hists->m_nhit_Ist_Sst->Fill(istHitCollection->numberOfHits(),sstHitCollection->numberOfHits());
         }
 
 
@@ -2646,12 +2646,12 @@ void StEventQAMaker::MakeHistPXL() {
                 Int_t nTofHits = btofcol->tofHits().size();
                 hists->m_pxl_nhit_Pxl1_tof_mult->Fill(nHitsPxl1, nTofHits);
                 hists->m_pxl_nhit_Pxl2_tof_mult->Fill(nHitsPxl2, nTofHits);
-                hists->m_pxl_nhit_Pxl1_Pxl2->Fill(nHitsPxl1,nHitsPxl2);
     }
+    hists->m_pxl_nhit_Pxl1_Pxl2->Fill(nHitsPxl1,nHitsPxl2);
 
-        Int_t tpcMult = event->trackNodes().size();
-        hists->m_pxl_nhit_Pxl1_tpc_mult->Fill(nHitsPxl1,tpcMult);
-        hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
+    Int_t tpcMult = event->trackNodes().size();
+    hists->m_pxl_nhit_Pxl1_tpc_mult->Fill(nHitsPxl1,tpcMult);
+    hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
 
 
   // Normalizations
@@ -2728,6 +2728,43 @@ void StEventQAMaker::MakeHistIST() {
   hists->m_ist_hit_ladder_sensor->SetEntries(hists->m_ist_hit_ladder_sensor->GetEntries()-1);
 }
 //_____________________________________________________________________________
+void StEventQAMaker::MakeHistSST(){
+  StSstHitCollection* sstHitCollection = event->sstHitCollection();
+  
+  if (!sstHitCollection) {
+    LOG_WARN << "Error getting pointer to StSstHitCollection" << endm;
+    return;
+  }
+  hists->m_pnt_sst->Fill(sstHitCollection->numberOfHits());
+  for (UInt_t ladder=0; ladder<sstHitCollection->numberOfLadders(); ladder++) {
+    StSstLadderHitCollection* sstladder = sstHitCollection->ladder(ladder);
+    for (UInt_t wafer=0; wafer<sstladder->numberOfWafers(); wafer++) {
+      StSPtrVecSstHit& sstwaferhits = sstladder->wafer(wafer)->hits();
+      for (UInt_t l=0; l<sstwaferhits.size(); l++) {
+	StSstHit* ssthit = sstwaferhits[l];
+	const StThreeVectorF &hitPos = ssthit->position();
+	//	hitPos = ssthit->position();
+	Float_t x = hitPos.x();
+	Float_t y = hitPos.y();
+	Float_t phi = hitPos.phi()/degree;
+	if (phi<0) phi += 360.;
+	hists->m_pnt_phiSST->Fill(phi);
+	hists->m_pnt_lwSST->Fill(ladder+1,wafer+1);
+	hists->m_pnt_xyS->Fill(x,y);
+	hists->m_pnt_sizeSST->Fill(ssthit->clusterSizePSide(),0);
+	hists->m_pnt_sizeSST->Fill(ssthit->clusterSizeNSide(),1);
+	hists->m_pnt_eSST->Fill(TMath::Log10(fabs(ssthit->charge())+1e-33));
+      }
+    }
+  }
+  // Normalizations
+  Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+  hists->m_pnt_phiSST->SetBinContent(0,Nevents);
+  hists->m_pnt_lwSST->SetBinContent(0,Nevents);
+  hists->m_pnt_phiSST->SetEntries(hists->m_pnt_phiSST->GetEntries()-1);
+  hists->m_pnt_lwSST->SetEntries(hists->m_pnt_lwSST->GetEntries()-1);
+}
+//_____________________________________________________________________________
 void StEventQAMaker::MakeHistMTD() {
 
   StMtdCollection *mtdCollection = event->mtdCollection();
@@ -2802,8 +2839,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.119 2015/04/02 19:53:47 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.120 2015/07/17 19:09:03 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.120  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.119  2015/04/02 19:53:47  genevb
 // TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
 //

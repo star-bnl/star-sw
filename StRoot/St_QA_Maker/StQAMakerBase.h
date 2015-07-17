@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.26 2015/03/18 21:43:17 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.27 2015/07/17 19:09:03 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.27  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.26  2015/03/18 21:43:17  genevb
 // Introduce Roman Pots histograms (K. Yip)
 //
@@ -142,7 +145,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.26 2015/03/18 21:43:17 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.27 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -228,6 +231,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistHFT() {}
   virtual void MakeHistPXL() {}
   virtual void MakeHistIST() {}
+  virtual void MakeHistSST() {}
   virtual void MakeHistRP () {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT

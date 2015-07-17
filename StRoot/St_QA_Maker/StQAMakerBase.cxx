@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.45 2015/03/18 21:43:17 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.46 2015/07/17 19:09:03 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.46  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.45  2015/03/18 21:43:17  genevb
 // Introduce Roman Pots histograms (K. Yip)
 //
@@ -272,11 +275,12 @@ Int_t StQAMakerBase::Make() {
   if (histsSet>=StQA_run13) MakeHistFMS(); 
   // histograms from MTD in StEvent
   if (histsSet>=StQA_run12all) MakeHistMTD(); 
-  // histograms from HFT (PXL and IST) in StEvent
+  // histograms from HFT (PXL, IST, SST) in StEvent
   if (histsSet>=StQA_run14) {
     MakeHistHFT(); 
     MakeHistPXL(); 
     MakeHistIST(); 
+    MakeHistSST(); 
   }
   // histograms from Roman-Pot in StEvent
   if (histsSet>=StQA_run15) MakeHistRP();
