@@ -955,14 +955,11 @@ void StEventQAMaker::MakeHistGlob() {
       if (histsSet>=StQA_run14) {
         // HFT Histograms
         hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
-        //hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));    // number of IST hits per global track
-        hists->m_global_ist_hit->Fill(detInfo->hits(kIstId).size());
+        hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));      // number of IST hits per global track
         if(map.hasHitInPxlLayer(1))hists->m_global_hft_hit->Fill(1);  // PXL layer=1
         if(map.hasHitInPxlLayer(2))hists->m_global_hft_hit->Fill(2);  // PXL layer=2
-        //hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));  // it should work in priciple, but it does not on 20.02.2014 (DK)
-        hists->m_global_hft_hit->Fill(3,detInfo->hits(kIstId).size());
-        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSsdId));
-        //hists->m_global_hft_hit->Fill(4,detInfo->hits(kSsdId).size());
+        hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));
+        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSstId));
       }
 
     }
@@ -1466,14 +1463,11 @@ void StEventQAMaker::MakeHistPrim() {
         if (histsSet>=StQA_run14 ){
           // HFT Histograms
           hists->m_primary_pxl_hit->Fill(map.numberOfHits(kPxlId));   // number of PIXEL hits per primary track
-          //hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId)); // number of IST hits per primary track
-          hists->m_primary_ist_hit->Fill(detInfo->hits(kIstId).size());
-
+          hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId));   // number of IST hits per primary track
           if(map.hasHitInPxlLayer(1))hists->m_primary_hft_hit->Fill(1);        // PXL layer=1
           if(map.hasHitInPxlLayer(2))hists->m_primary_hft_hit->Fill(2);        // PXL layer=2
-          //hists->m_primary_hft_hit->Fill(3,map.numberOfHits(kIstId));
-          hists->m_primary_hft_hit->Fill(3,detInfo->hits(kIstId).size());
-          hists->m_primary_hft_hit->Fill(4,map.numberOfHits(kSsdId));
+          hists->m_primary_hft_hit->Fill(3,map.numberOfHits(kIstId));
+          hists->m_primary_hft_hit->Fill(4,map.numberOfHits(kSstId));
         }
 
       }
@@ -2839,8 +2833,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.120 2015/07/17 19:09:03 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.121 2015/07/17 20:18:14 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.121  2015/07/17 20:18:14  genevb
+// More SSD=>SST (on tracks)
+//
 // Revision 2.120  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
