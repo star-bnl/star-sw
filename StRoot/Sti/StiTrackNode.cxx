@@ -134,14 +134,17 @@ int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double R
 static int nCall=0;nCall++;
 StiDebug::Break(nCall);
 
+ int sRho = (Rho<0) ? -1:1;
+ double aRho = fabs(Rho), rr=r*r,d=0;
 
-int sRho = (Rho<0) ? -1:1;
-double aRho = fabs(Rho), rr=r*r,d=0;
-TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
-TVector3 C,Cd,Cn,N;
-double XX,XN,L;
-N[0] = -D[1]; N[1] = D[0];
-XX = X*X; XN = X*N;
+//TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
+ static TVector3 D, X, C, Cd, Cn, N;
+ D.SetXYZ( Dp[0], Dp[1], 0.0 );
+ X.SetXYZ( Xp[0], Xp[1], 0.0 );
+
+ double XX,XN,L;
+ N[0] = -D[1]; N[1] = D[0];  N[2] = 0.0;
+ XX = X*X; XN = X*N;
 
 double LLmRR = XX*aRho+2*XN*sRho;
 double LL = LLmRR*aRho+1; L = sqrt(LL);
@@ -151,13 +154,13 @@ double p = ((r-d)*(r+d));
 if (p<=0) return 0;
 p = sqrt(p);
 
-C = X*aRho+N*sRho;
-Cd = C.Unit(); Cn[0] = -Cd[1];   Cn[1] = Cd[0];
+ C = X*aRho+N*sRho;
+ Cd = C.Unit(); Cn[0] = -Cd[1];   Cn[1] = Cd[0];  Cn[2] = 0;
 
-TVector3 Out[2];
-for (int ix = 0;ix<2; ix++) {
-  Out[ix] = Cd*d + Cn*p; p = -p;
-}
+ static TVector3 Out[2];  
+ for (int ix = 0;ix<2; ix++) {
+   Out[ix] = Cd*d + Cn*p; p = -p;
+ }
 
 for (int ix = 0;ix<2; ix++) {
   double len = (Out[ix]-X).Mag();
