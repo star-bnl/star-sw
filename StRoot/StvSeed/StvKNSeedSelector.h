@@ -59,7 +59,6 @@ private:
 void *mStartHit;
 float mStartPos[3];
 float mAveDir[3];
-float mSidDir[3];
 float mStartRad;
 float mKNNDist;	//minimal KN distance
 int   mMinIdx;	//index of aux with minimal KN distance
