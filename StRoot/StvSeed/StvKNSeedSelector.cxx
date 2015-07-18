@@ -4,8 +4,9 @@
 #include <map>
 #include "StvUtil/StvDebug.h"
 #include "StvKNSeedSelector.h"
-#include "StvSeedConst.h"
+#include "Stv/StvHit.h"
 
+#include "StvSeedConst.h"
 //static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
 static const float kMaxAng =  15*3.14/180;	//???Maximal angle allowed for connected hits
 
@@ -32,6 +33,7 @@ static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 static inline double Ang( const float A[3],const float B[3]) 
 {
   double cang = ((A[0]-B[0])*A[0]+(A[1]-B[1])*A[1]+(A[2]-B[2])*A[2]);
+assert(cang>-0.01);
   if (cang<0) cang = 0;
   double ang = 2*sqrt(cang/2);
        if (ang>1.99) { ang = M_PI;}
@@ -212,12 +214,26 @@ static int nCall=0; nCall++;
     double wid = Width();
     if (mKNNDist*wid > kMinAng) return 0;	
  	 
+    const void *hpPre = 0;
     mSel.push_back(mStartHit); 	 
     std::map<float,int>::iterator myIt;
+    int iPre = 0;
+
     for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) 
     { 	 
       int i = (*myIt).second; 	 
-      mSel.push_back(mAux[i].mHit); 	 
+      const void *hp = ((StvHit*)(mAux[i].mHit))->detector();
+      if (hpPre != hp ) {
+         mSel.push_back(mAux[i].mHit);
+	 iPre = i;hpPre = hp;
+	 continue;
+      }
+      //Hit from the same detector
+      float ang0 =  Ang(mAveDir, mAux[iPre].mDir);   
+      float ang1 =  Ang(mAveDir, mAux[i   ].mDir);   
+      if (ang0<ang1) continue;  //Old friend is better
+      mSel.back() = mAux[i].mHit;
+      iPre = i; hpPre = hp;
     } 	 
     return mSel.size();
   }//end while
