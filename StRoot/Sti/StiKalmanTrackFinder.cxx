@@ -536,11 +536,14 @@ assert(direction || leadNode==track->getLastNode());
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
 
-  
+  static vector<StiDetector *> detectors(100); // scratch space to save list of detectors
+
   while (((!direction)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
     vector<StiDetectorNode*>::const_iterator sector;
-    vector<StiDetector*> detectors;
+    //vector<StiDetector*> detectors;
+    detectors.clear(); // clear on each call?
+
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
 
       //find all relevant detectors to visit.
