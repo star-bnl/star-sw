@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.41 2014/07/01 20:29:02 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.42 2015/07/19 22:20:42 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.42  2015/07/19 22:20:42  fisyak
+ * Add recalculation of pad row during transformation
+ *
  * Revision 1.41  2014/07/01 20:29:02  fisyak
  * Clean up
  *
