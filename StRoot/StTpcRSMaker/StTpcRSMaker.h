@@ -128,14 +128,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.26 2015/07/19 22:14:07 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.26 2015/07/19 22:14:07 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.26  2015/07/19 22:14:07  fisyak
+// Clean up __PAD_BLOCK__, recalculate no. of real hits in g2t_track n_tpc_hit (excluding pseudo pad row), add current and accumulated charge in dE/dx correction
+//
 // Revision 1.25  2012/05/07 15:36:22  fisyak
 // Remove hardcoded TPC parameters
 //

@@ -59,12 +59,12 @@
 //#define Old_dNdx_Table
 #define __DEBUG__
 #if defined(__DEBUG__)
-#define __ClusterProfile__
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.69 2014/10/21 15:33:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.70 2015/07/19 22:14:07 fisyak Exp $";
+#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -504,7 +504,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
       else if (i == 19) checkList[io][i] = new TH2D(Name,Title,173,-.5,172.5,200,-10,10);
       else if (i == 20) checkList[io][i] = new TH2D(Name,Title,120,-0.5,5.5,500,0.,20.);
       else              checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,"");  
-
     }
   }
   
@@ -1703,8 +1702,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.69 2014/10/21 15:33:48 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.70 2015/07/19 22:14:07 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.70  2015/07/19 22:14:07  fisyak
+// Clean up __PAD_BLOCK__, recalculate no. of real hits in g2t_track n_tpc_hit (excluding pseudo pad row), add current and accumulated charge in dE/dx correction
+//
 // Revision 1.69  2014/10/21 15:33:48  fisyak
 // Clean up, fix bug found by gcc482
 //
