@@ -28,17 +28,17 @@ class StiKalmanTrackFinderParameters : public TChair {
   Int_t         minContiguousHitCountForNullReset() {return minCountForReset();}
   void          setHitRegions(Int_t rs) {
     Int_t i=0;
-    for (i=0;rs;i++) {mHitRegions[i]=rs%100; rs/=100;}
+    for (i=0;rs&&i<4;i++) {mHitRegions[i]=rs%100; rs/=100;}
     mHitRegions[i]=10000;
   }
   void          setHitWeights(Int_t ws) {
     Int_t i=0;
-    for (i=0;ws;i++) {mHitWeights[i]=ws%100; ws/=100;}
+    for (i=0;ws&&i<4;i++) {mHitWeights[i]=ws%100; ws/=100;}
     mHitWeights[i]=0;
   }
   Int_t         hitWeight(Int_t rxy) const {
     if (rxy>50) return 0;
-    Int_t i=0; for (i=0;rxy>mHitRegions[i];i++) {}
+    Int_t i=0; for (i=0;rxy>mHitRegions[i]&&i<4;i++) {}
     return mHitWeights[i];
   }
   Int_t         sumWeight()	  const {return 20;}
@@ -52,8 +52,8 @@ class StiKalmanTrackFinderParameters : public TChair {
   }
   virtual ~StiKalmanTrackFinderParameters() {fgInstance = 0;}
   Char_t   mBeg[1];
-  Int_t    mHitRegions[4];	//20,50 means 0<svtHit<20, 20<ssdHit<50
-  Int_t    mHitWeights[4];	//Coeffs of nhits. sum must be >=20
+  Int_t    mHitRegions[5];	//20,50 means 0<svtHit<20, 20<ssdHit<50
+  Int_t    mHitWeights[5];	//Coeffs of nhits. sum must be >=20
   Char_t   mEnd[1];
  private:
   static StiKalmanTrackFinderParameters* fgInstance;
