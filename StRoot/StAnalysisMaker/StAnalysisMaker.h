@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.14 2014/08/06 11:42:52 jeromel Exp $
+ * $Id: StAnalysisMaker.h,v 2.15 2015/07/19 23:02:44 fisyak Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.15  2015/07/19 23:02:44  fisyak
+ * Add print out for Sst, Gmt, pp2pp
+ *
  * Revision 2.14  2014/08/06 11:42:52  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -113,16 +116,18 @@ public:
   Int_t  Make();                      // invoked for every event
   Int_t  Finish();                    // called once at the end
   static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
-  static void PrintStEvent(TString opt="vpg");
-  static void PrintVertex(UInt_t ivx = 0);
+  static void PrintStEvent(TString opt="vpgl3");
+  static void PrintVertex(Int_t ivx = -1);
+  static void PrintGlobalTrack(Int_t itk = 0);
   static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Int_t plot = 0, Int_t IdTruth=-1);
   static void PrintToFHits();
   static void PrintSvtHits();
   static void PrintSsdHits();
+  static void PrintSstHits();
   static void PrintRnDHits();
   static void PrintEmcHits(Int_t det=-1, Int_t mod=-1, const Option_t *opt = "AdcClustersPoints");
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.14 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.15 2015/07/19 23:02:44 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   
