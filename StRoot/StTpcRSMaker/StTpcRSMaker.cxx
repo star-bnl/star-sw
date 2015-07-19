@@ -43,6 +43,8 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcGainCorrectionC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -786,18 +788,47 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (m_TpcdEdxCorrection) {
 	  dEdxY2_t CdEdx;
 	  memset (&CdEdx, 0, sizeof(dEdxY2_t));
+	  CdEdx.DeltaZ = 5.2; 
+	  CdEdx.QRatio = -2;
+	  CdEdx.QRatioA = -2.;
+	  CdEdx.QSumA = 0;
 	  CdEdx.sector = TrackSegmentHits[iSegHits].Pad.sector(); 
 	  CdEdx.row    = TrackSegmentHits[iSegHits].Pad.row();
+	  Double_t              Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(CdEdx.sector,CdEdx.row); // C/cm
 	  CdEdx.pad    = TMath::Nint(TrackSegmentHits[iSegHits].Pad.pad());
-	  Double_t edge = CdEdx.pad;
-	  if (edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(CdEdx.row)) 
-	    edge -= gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(CdEdx.row) + 1;
-	  CdEdx.edge = edge;
+	  CdEdx.edge   = CdEdx.pad;
+	  if (CdEdx.edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
+	  CdEdx.edge += 1 - gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
 	  CdEdx.dE     = 1;
+#if 0
+	  CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
+	  Int_t p1 = tpcHit->minPad();
+	  Int_t p2 = tpcHit->maxPad();
+	  Int_t t1 = tpcHit->minTmbk();
+	  Int_t t2 = tpcHit->maxTmbk();
+	  CdEdx.rCharge=  0.5*m_TpcdEdxCorrection->Adc2GeV()*TMath::Pi()/4.*(p2-p1+1)*(t2-t1+1);
+	  if (TESTBIT(m_Mode, kEmbeddingShortCut) && 
+	      (tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx.lSimulated = tpcHit->idTruth();
+#endif
 	  CdEdx.dx     = dStep;
 	  CdEdx.xyz[0] = TrackSegmentHits[iSegHits].xyzG.position().x();
 	  CdEdx.xyz[1] = TrackSegmentHits[iSegHits].xyzG.position().y();
 	  CdEdx.xyz[2] = TrackSegmentHits[iSegHits].xyzG.position().z();
+	  Double_t probablePad = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)/2;
+	  Double_t pitch = (row <= NumberOfInnerRows) ?
+	    gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch() :
+	    gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
+	  Double_t PhiMax = TMath::ATan2(probablePad*pitch, gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(row));
+	  CdEdx.PhiR   = TMath::ATan2(CdEdx.xyz[0],CdEdx.xyz[1])/PhiMax;
+	  CdEdx.xyzD[0] = TrackSegmentHits[nSegHits].dirLS.position().x();
+	  CdEdx.xyzD[1] = TrackSegmentHits[nSegHits].dirLS.position().y();
+	  CdEdx.xyzD[2] = TrackSegmentHits[nSegHits].dirLS.position().z();
+	  CdEdx.ZdriftDistance = CdEdx.xyzD[2];
+	  CdEdx.zG      = CdEdx.xyz[2];
+	  CdEdx.Qcm     = 1e6*Qcm; // uC/cm
+	  CdEdx.Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+	  if (St_trigDetSumsC::instance())	CdEdx.Zdc     = St_trigDetSumsC::instance()->zdcX();
+	  
 	  CdEdx.ZdriftDistance = TrackSegmentHits[iSegHits].coorLS.position().z(); // drift length
 	  St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
 	  if (tpcGas)
