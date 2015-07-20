@@ -77,7 +77,7 @@ class StTpcRTSHitMaker : public StMaker {
   UChar_t *mTpx_RowLen;
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $ $Id: $  built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };
