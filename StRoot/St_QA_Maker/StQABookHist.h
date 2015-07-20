@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.36 2015/04/02 19:53:47 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.37 2015/07/17 19:09:03 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.37  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.36  2015/04/02 19:53:47  genevb
 // TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
 //
@@ -142,7 +145,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.36 2015/04/02 19:53:47 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.37 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -628,15 +631,10 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_id;      //! detector ID of the hit
 
   TH1F     *m_pnt_tpc;   //! number of hits tpc
-  TH1F     *m_pnt_svt;   //! number of hits svt
-  TH1F     *m_pnt_ssd;   //! number of hits ssd
   TH2F     *m_pnt_ftpc;    //! number of hits ftpc
   TH1F     *m_pnt_ftpcE;   //! number of hits ftpcE
   TH1F     *m_pnt_ftpcW;   //! number of hits ftpcW
 
-  TH2F     *m_pnt_svtLaser;     //! laser spots in svt
-  TH3F     *m_pnt_svtLaserDiff; //! diff of laser spots in svt
-    
   // for method MakeHistEval
   TH1F *m_geant_reco_pvtx_x;  //! prim vtx x, diff geant - reco
   TH1F *m_geant_reco_pvtx_y;  //! prim vtx y, diff geant - reco
@@ -699,9 +697,13 @@ class StQABookHist : public TObject {
   TH2F* m_cpv_total_adc;       //!
 
   // Hists for SVT
+  TH1F* m_pnt_svt;             //! number of hits svt
+  TH2F* m_pnt_svtLaser;        //! laser spots in svt
+  TH3F* m_pnt_svtLaserDiff;    //! diff of laser spots in svt
   TH2F* m_svt_loc;             //! SVT drift
 
   // Hists for SSD
+  TH1F* m_pnt_ssd;             //! number of hits ssd
   TH1F* m_pnt_phiSSD;          //!
   TH2F* m_pnt_lwSSD;           //!
   TH1F* m_glb_ssd_phi;         //!
@@ -709,11 +711,20 @@ class StQABookHist : public TObject {
   TH2F* m_pnt_sizeSSD;         //!
   TH1F* m_pnt_eSSD;            //!
 
+  // Hists for SST
+  TH1F* m_pnt_sst;             //! number of hits sst
+  TH1F* m_pnt_phiSST;          //!
+  TH2F* m_pnt_lwSST;           //!
+  TH1F* m_glb_sst_phi;         //!
+  TH1F* m_prim_sst_phi;        //!
+  TH2F* m_pnt_sizeSST;         //!
+  TH1F* m_pnt_eSST;            //!
+
   // Hists for HFT
   // correlation plots: hits in HFT subsystems
-  TH2F* m_nhit_Pxl_Its;         //!     # of hits in PIXEL vs hits in ITS
-  TH2F* m_nhit_Pxl_Ssd;         //!     # of hits in PIXEL vs hits in SSD
-  TH2F* m_nhit_Its_Ssd;         //!     # of hits in ITS vs hits in ITS
+  TH2F* m_nhit_Pxl_Ist;         //!     # of hits in PIXEL vs hits in IST
+  TH2F* m_nhit_Pxl_Sst;         //!     # of hits in PIXEL vs hits in SST
+  TH2F* m_nhit_Ist_Sst;         //!     # of hits in ITS vs hits in ITS
   TH1F* m_global_hft_hit;       //! HFT hits per global track
   TH1F* m_primary_hft_hit;      //!     HFT hits per primary track
 
