@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.14 2014/08/06 11:42:52 jeromel Exp $
+ * $Id: StAnalysisMaker.h,v 2.15 2015/07/19 23:02:44 fisyak Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.15  2015/07/19 23:02:44  fisyak
+ * Add print out for Sst, Gmt, pp2pp
+ *
  * Revision 2.14  2014/08/06 11:42:52  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -124,7 +127,7 @@ public:
   static void PrintRnDHits();
   static void PrintEmcHits(Int_t det=-1, Int_t mod=-1, const Option_t *opt = "AdcClustersPoints");
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.14 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.15 2015/07/19 23:02:44 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   

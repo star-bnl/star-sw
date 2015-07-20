@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 1.2 2014/01/15 23:12:46 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.24 2015/07/19 23:02:44 fisyak Exp $
  *
  */
 
@@ -1154,6 +1154,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.24  2015/07/19 23:02:44  fisyak
+ * Add print out for Sst, Gmt, pp2pp
+ *
  * Revision 1.2  2014/01/15 23:12:46  fisyak
  * Freeze
  *
