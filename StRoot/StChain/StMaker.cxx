@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.262 2013/10/09 21:58:52 fisyak Exp $
+// $Id: StMaker.cxx,v 1.263 2015/07/19 23:01:21 fisyak Exp $
 //
 //
 /*!
@@ -1112,8 +1112,11 @@ void StMaker::lsMakers(const StMaker *top)
     Int_t l=iter.GetDepth();
     N++;
     Char_t space[20]; memset(space,' ',sizeof(space));space[l]=0;
-    
+#ifdef STAR_LOGGER       
+    LOG_QA << Form("%s %s::%s",space,mk->ClassName(),mk->GetName()) << endm;
+#else    
     printf("%3d(%d) - %s %s::%s\n",N,l/2,space,mk->ClassName(),mk->GetName());
+#endif
   }
 }
 
@@ -1827,6 +1830,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.263  2015/07/19 23:01:21  fisyak
+// Remove numbers from lsMakers
+//
 // Revision 1.262  2013/10/09 21:58:52  fisyak
 // Print hidden maker
 //
