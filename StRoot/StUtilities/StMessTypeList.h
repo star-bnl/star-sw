@@ -9,6 +9,7 @@
 #ifndef ClassStMessTypeList
 #define ClassStMessTypeList
 
+#include <stdlib.h>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -64,8 +65,11 @@ class StMessTypeList {
 
 #endif
 
-// $Id: StMessTypeList.h,v 1.9 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessTypeList.h,v 1.10 2015/07/20 18:34:31 genevb Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.10  2015/07/20 18:34:31  genevb
+// Include stdlib to get size_t
+//
 // Revision 1.9  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //
