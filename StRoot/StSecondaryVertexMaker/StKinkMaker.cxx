@@ -280,7 +280,7 @@ Int_t StKinkMaker::Make(){//called for each event
 	           //paths containes the path lengths for this solution with
 		    //that for track 1 stores in 'first', and the track2 stored in 'second'
 		  path2 = parentHelix.pathLength(rad_2,xc2.X(),xc2.Y());
-		  if (!isnan(path2.first)){
+		  if (!std::isnan(path2.first)){
                       paths.first = path2.first;
 		      x1 = parentHelix.at(paths.first);
 		      paths.second = daughterHelix.pathLength(x1.x(),x1.y());
@@ -288,7 +288,7 @@ Int_t StKinkMaker::Make(){//called for each event
                       dca_12 = x1.z()-x2.z();
 		      distanceOne = (x1-myDaughterGeometry1->origin()).mag();
 		  }
-		  if ((!isnan(path2.second))&&(path2.second!=path2.first))
+		  if ((!std::isnan(path2.second))&&(path2.second!=path2.first))
 		       { paths1.first = path2.second;
 		         x1i = parentHelix.at(paths1.first);
 		         paths1.second = daughterHelix.pathLength(x1i.x(),x1i.y());
@@ -305,7 +305,7 @@ Int_t StKinkMaker::Make(){//called for each event
 	                 paths = paths1;
 		      }//distance
 		  
-                   }else if (isnan(path2.second))//no solution
+                   }else if (std::isnan(path2.second))//no solution
 		      { continue;}
 	    }
 	    
