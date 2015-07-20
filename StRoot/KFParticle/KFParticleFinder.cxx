@@ -1508,10 +1508,11 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         
         if(isCharm)
         {
+          track.Load(vTracks, iTr, trackPDG);
           const float_v& trackPt = track.Px()*track.Px() + track.Py()*track.Py();
           active[iPDGPos] &= int_m(trackPt >= fCutCharmPt*fCutCharmPt) && int_m(reinterpret_cast<const float_v&>((*ChiToPrimVtx)[iTr]) > fCutCharmChiPrim );
         }
-                  
+        
         for(int iV=0; iV<NTracks; iV++)
         {
           if(!(active[iPDGPos][iV])) continue;
