@@ -200,11 +200,10 @@ assert(Vn.Mag2()>=0.999);
     p[1] = sinP*xx + cosP*p[1];
 
     p[3] +=Dot(p,mPos);
-    if (ip) continue;
-//		Test first plane N == mDir
-    assert(fabs(p[0]+mDir[0])+fabs(p[1]+mDir[1])+fabs(p[2]+mDir[2])<1e-5);
-
   }
+//		Test first 2 planes N == +-mDir
+  assert(fabs(Dot(mPlane[0],mDir)+1)<1e-5);
+  assert(fabs(Dot(mPlane[1],mDir)-1)<1e-5);
 
 
 //	Create limits
@@ -234,9 +233,6 @@ assert(Vn.Mag2()>=0.999);
    for (uint ip=0;ip<kNPonts;ip++) {
      assert(!Reject(mPoint[ip]));
    }  
-
-
-
 }
 
 
