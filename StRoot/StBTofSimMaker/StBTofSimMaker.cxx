@@ -71,6 +71,10 @@
 #include "StEventTypes.h"
 #include "StEvent/StBTofCollection.h"
 #include "StDetectorDbMaker/St_tofStatusC.h"
+#include "StDetectorDbMaker/St_tofTOffsetC.h"
+#include "StDetectorDbMaker/St_tofTotbCorrC.h"
+#include "StDetectorDbMaker/St_tofZbCorrC.h"
+#include "StDetectorDbMaker/St_vpdTotCorrC.h"
 
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
@@ -319,7 +323,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 
 	// accepty TOF hit
 	if(tofHitsFromGeant->s_track<=0.0 || tofHitsFromGeant->de <=0.0) {
-		LOG_DEBUG << " No deposited energy in this TOF hit!" << endm;
+		LOG_WARN << " No deposited energy in this TOF hit!" << endm;
 		return kStWarn;
 	}
 
@@ -676,17 +680,40 @@ Int_t StBTofSimMaker::fillEvent()
 	    if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
 
 
+	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
+	    static  Float_t tot  = 15;
+	    static  Float_t tStart = 0;
+	    Float_t tdc = mcTof;
+	    Float_t corr;
+	    if (aMcBTofHit->module() > 0) { // Tof
+	      corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
+	      if (corr < -9999.) continue;
+	      tdc += corr;
+	      corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
+	      if (corr < -9999.) continue;
+	      tdc += corr;
+	      corr = St_tofTotbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),tot);
+	      if (corr < -9999.) continue;
+	      tdc += corr;
+	      corr = St_tofZbCorrC::instance()->Corr(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell(),aMcBTofHit->position().z());
+	      if (corr < -9999.) continue;
+	      tdc += corr;
+	    } else { // (aMcBTofHit->module() = 0 -> VPD
+	      corr = St_vpdTotCorrC::instance()->Corr(aMcBTofHit->cell(),tot);
+	      if (corr < -9999.) continue;
+	      tdc += corr;
+	    }
+	    tdc += tStart;
 	    //Fill the StBTofHit
 	    StBTofHit aBTofHit;
 	    aBTofHit.Clear();
-
-	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
 	    aBTofHit.setHardwarePosition(kBTofId);
 	    aBTofHit.setTray((Int_t)aMcBTofHit->tray());
 	    aBTofHit.setModule((unsigned char)aMcBTofHit->module());
 	    aBTofHit.setCell((Int_t)aMcBTofHit->cell());
-	    aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
-	    aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
+
+	    aBTofHit.setLeadingEdgeTime(tdc);
+	    aBTofHit.setTrailingEdgeTime(tdc+tot);
 	    aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
 	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 100);
 	    mBTofCollection->addHit(new StBTofHit(aBTofHit));
