@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.82 2011/09/09 21:32:42 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.83 2015/07/20 17:37:01 jeromel Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.83  2015/07/20 17:37:01  jeromel
+// Use std::isnan to satisfy C++11
+//
 // Revision 1.82  2011/09/09 21:32:42  jcs
 // Undo rev 1.81 since different cluster finding parameters are used for laser and t0 calibration
 // Comment out the different parameters when studying cluster finding and/or tracking
@@ -1335,11 +1338,11 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
       }
 
 /*
-      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
-!isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
+      if(!std::isnan(Peak->x) && !std::isnan(Peak->y) && !std::isnan(Peak->PadSigma) &&
+!std::isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
 	 && Peak->Rad <= mDb->sensitiveVolumeOuterRadius() && Peak->Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
-      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
+      if(!std::isnan(Peak->x) && !std::isnan(Peak->y) && !std::isnan(Peak->PadSigma) && !std::isnan(Peak->TimeSigma))
 	//&& (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
 	//&& Peak->Sequence.Length<=MAXTIMELENGTH )
 
@@ -1851,13 +1854,13 @@ if (mcldebug){
 	     with errors while the rest of the cluster is okay, don't fill 
 	     these hits into array: */
 /*
-	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
-!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma) // && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
+	  if(!std::isnan(Peak[iPeakIndex].x) && !std::isnan(Peak[iPeakIndex].y) &&
+!std::isnan(Peak[iPeakIndex].PadSigma) && !std::isnan(Peak[iPeakIndex].TimeSigma) // && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
 	     && Peak[iPeakIndex].Rad <= mDb->sensitiveVolumeOuterRadius() 
              && Peak[iPeakIndex].Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
-          if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) 
-	     &&	!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
+          if(!std::isnan(Peak[iPeakIndex].x) && !std::isnan(Peak[iPeakIndex].y) 
+	     &&	!std::isnan(Peak[iPeakIndex].PadSigma) && !std::isnan(Peak[iPeakIndex].TimeSigma))
 	    //&& (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
 	    //&& Peak[iPeakIndex].Sequence.Length<=MAXTIMELENGTH)
 	    {
