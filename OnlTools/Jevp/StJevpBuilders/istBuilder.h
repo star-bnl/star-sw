@@ -12,6 +12,11 @@
 #include <string>
 #include <math.h>
 
+#if __cplusplus <= 199711L
+#define constexpr
+#endif
+
+
 class istBuilder : public JevpPlotSet {
  public:
   int run;
