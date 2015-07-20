@@ -1,12 +1,12 @@
 #include "StiSsd/StiSstDetectorGroup.h"
-#include "StiSsd/StiSsdHitLoader.h"
+#include "StiSsd/StiSstHitLoader.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
 #include "StiSsd/StiSstDetectorBuilder1.h"
 #include "StEvent/StEvent.h"
 
 
 StiSstDetectorGroup::StiSstDetectorGroup(bool active, SstDetectorBuilderImpl sstImpl, bool buildIdealGeom)
-  : StiDetectorGroup<StEvent>("SSD")
+  : StiDetectorGroup<StEvent>("SST")
 {
    switch(sstImpl) {
    case kFirstPro:
@@ -17,7 +17,7 @@ StiSstDetectorGroup::StiSstDetectorGroup(bool active, SstDetectorBuilderImpl sst
       _detectorBuilder = new StiSstDetectorBuilder(active, buildIdealGeom);
    }
 
-   _hitLoader = active ? new StiSsdHitLoader() : 0;
+   _hitLoader = active ? new StiSstHitLoader() : 0;
 
    if (_hitLoader)
       _hitLoader->setDetector(_detectorBuilder);
