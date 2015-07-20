@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.hh,v 1.15 2009/11/23 16:38:11 fisyak Exp $
+// $Id: StFtpcVertex.hh,v 1.16 2015/07/20 17:21:31 jeromel Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.16  2015/07/20 17:21:31  jeromel
+// Use std::isnan instead for C++11
+//
 // Revision 1.15  2009/11/23 16:38:11  fisyak
 // Remove dependence on dst_vertex_st
 //
@@ -143,11 +146,11 @@ public:
   void SetIFlag(Int_t f)   { mIFlag = f;     }
   void SetId(Int_t f)      { mId = f;        }
   
-    void CheckXerr()  { if (isnan(mError.x())) mError.SetX(0.); }
-    void CheckYerr()  { if (isnan(mError.y())) mError.SetY(0.); }
-    void CheckZerr()  { if (isnan(mError.z())) mError.SetZ(0.); }
-    void CheckErr()   { CheckXerr(); CheckYerr(); CheckZerr();  }
-  Bool_t CoordIsNan() { return (Bool_t)(isnan(GetX()) || isnan(GetY()) || isnan(GetZ())); }
+  void CheckXerr()  { if ( std::isnan( mError.x()) ) mError.SetX(0.); }
+  void CheckYerr()  { if ( std::isnan( mError.y()) ) mError.SetY(0.); }
+  void CheckZerr()  { if ( std::isnan( mError.z()) ) mError.SetZ(0.); }
+  void CheckErr()   { CheckXerr(); CheckYerr(); CheckZerr();  }
+  Bool_t CoordIsNan() { return (Bool_t)( std::isnan(GetX()) || std::isnan(GetY()) || std::isnan(GetZ())); }
    Int_t CheckVertex();
 
   StFtpcVertex& operator=(const StFtpcVertex &vertex);    // Assignment operator
