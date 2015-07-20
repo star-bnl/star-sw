@@ -37,45 +37,45 @@ class istBuilder : public JevpPlotSet {
   int t_120min;
  
   //constants declarations...
-  static const int totSec       = 72;    // 24 ladders * 3 sections
-  static const int totSensor    = 144;   // 24 ladders * 6 sensors
-  static const int ChPerSec     = 1536;  // channels/section - 128 channels * 12 APV chips
-  static const int ChPerSensor  = 768;   // 128 channels * 6 APV chips
-  static const int ApvPerSec    = 12;
-  static const int ChPerLadder  = 4608;  // channels/section - 128 channels * 12 APV chips
-  static const int ApvPerLadder = 36;
-  static const int ChPerApv     = 128;
-  static const int totCh        = 110592;  // Total channels in IST - totSec*ChPerSec
-  static const int totAPV       = 864;     // Total APVs in IST - totSec*12
-  static const int numRDO       = 6;
-  static const int numARM       = 6;
-  static const int numAPV       = 24;
-  static const int numLadder    = 24;
-  static const int numSensor    = 6;
-  static const int numColumn    = 12;
-  static const int numRow       = 64;
+  constexpr static const int totSec       = 72;    // 24 ladders * 3 sections
+  constexpr static const int totSensor    = 144;   // 24 ladders * 6 sensors
+  constexpr static const int ChPerSec     = 1536;  // channels/section - 128 channels * 12 APV chips
+  constexpr static const int ChPerSensor  = 768;   // 128 channels * 6 APV chips
+  constexpr static const int ApvPerSec    = 12;
+  constexpr static const int ChPerLadder  = 4608;  // channels/section - 128 channels * 12 APV chips
+  constexpr static const int ApvPerLadder = 36;
+  constexpr static const int ChPerApv     = 128;
+  constexpr static const int totCh        = 110592;  // Total channels in IST - totSec*ChPerSec
+  constexpr static const int totAPV       = 864;     // Total APVs in IST - totSec*12
+  constexpr static const int numRDO       = 6;
+  constexpr static const int numARM       = 6;
+  constexpr static const int numAPV       = 24;
+  constexpr static const int numLadder    = 24;
+  constexpr static const int numSensor    = 6;
+  constexpr static const int numColumn    = 12;
+  constexpr static const int numRow       = 64;
 
-  static const int numTimeBin   = 9;//update from 7 to 9: YPWANG 25/1/2014
-  static const int goodChCut    = 64;
-  static const int minPedVal    = 200;
-  static const int maxPedVal    = 2000;
-  static const int minRMSVal    = 12;
-  static const int maxRMSVal    = 40;
+  constexpr static const int numTimeBin   = 9;//update from 7 to 9: YPWANG 25/1/2014
+  constexpr static const int goodChCut    = 64;
+  constexpr static const int minPedVal    = 200;
+  constexpr static const int maxPedVal    = 2000;
+  constexpr static const int minRMSVal    = 12;
+  constexpr static const int maxRMSVal    = 40;
   //alarm threshold
-  static const float minMipMpv_ZS    = 450;
-  static const float minMipMpv_nonZS = 400;
-  static const float maxMipMpv    = 800;
-  static const float minMipSigma_ZS     = 80;
-  static const float minMipSigma_nonZS  = 60;
-  static const float maxMipSigma  = 200;
-  static const float maxTbFracOK  = 0.9;
+  constexpr static const float minMipMpv_ZS    = 450;
+  constexpr static const float minMipMpv_nonZS = 400;
+  constexpr static const float maxMipMpv    = 800;
+  constexpr static const float minMipSigma_ZS     = 80;
+  constexpr static const float minMipSigma_nonZS  = 60;
+  constexpr static const float maxMipSigma  = 200;
+  constexpr static const float maxTbFracOK  = 0.9;
   //landau fitting range
-  static const float landauFit_dn = 400.0;
-  static const float landauFit_up = 2000.0;
+  constexpr static const float landauFit_dn = 400.0;
+  constexpr static const float landauFit_up = 2000.0;
   //cut setting
-  static const float cmnCut	= 3.0;
-  static const float hitCut	= 5.0;
-  static const float noiseChipCut = 10.0;
+  constexpr static const float cmnCut	= 3.0;
+  constexpr static const float hitCut	= 5.0;
+  constexpr static const float noiseChipCut = 10.0;
 
   //IST mapping
   int istMapping[totCh]; //IST channel mapping (electronics ID to geometry ID transform)
