@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.621 2015/06/25 20:55:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.622 2015/07/19 23:21:20 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1428,8 +1428,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
   AddRunco(Bfc);
   for (k = 1; k<fNoChainOptions;k++) {
     if (GetOption(k)) {
-      gMessMgr->QAInfo() << Form("================== %4d %15s\tis ON \t: %s",
-				 k, (char *) fBFC[k].Key, (char *) fBFC[k].Comment) << endm;
+      gMessMgr->QAInfo() << Form("==================  %20s\tis ON \t: %s",
+				 (char *) fBFC[k].Key, (char *) fBFC[k].Comment) << endm;
       Bfc->AddAt(&fBFC[k]);
     }
   }
