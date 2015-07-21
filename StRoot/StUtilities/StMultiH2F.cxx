@@ -177,7 +177,7 @@ void StMultiH2F::SavePrimitive(ostream& out, Option_t* option) {
   else
     out << "," << GetXaxis()->GetXmin()
         << "," << GetXaxis()->GetXmax();
-  if (nonEqiX)
+  if (nonEqiY)
     out << ", yAxis";
   else
     out << "," << GetYaxis()->GetXmin()
@@ -212,8 +212,11 @@ void StMultiH2F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH2F.cxx,v 1.6 2013/11/21 22:22:48 genevb Exp $
+// $Id: StMultiH2F.cxx,v 1.7 2015/07/20 18:27:47 genevb Exp $
 // $Log: StMultiH2F.cxx,v $
+// Revision 1.7  2015/07/20 18:27:47  genevb
+// fix minor bug with SavePrimitive
+//
 // Revision 1.6  2013/11/21 22:22:48  genevb
 // Protect against array out-of-bounds, use inherited axis handles
 //
