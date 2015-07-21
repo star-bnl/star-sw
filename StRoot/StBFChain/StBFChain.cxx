@@ -782,7 +782,10 @@ Int_t StBFChain::Instantiate()
       if (mode)
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
-    if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
+    if (maker == "StBTofCalibMaker") {
+      if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
+      if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",1);
+    }
     if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
