@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.30 2015/04/22 18:02:01 ullrich Exp $
+ * $Id: StHelix.cc,v 1.31 2015/07/20 17:30:51 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.31  2015/07/20 17:30:51  jeromel
+ * Use std::isnan to satisfy C++11
+ *
  * Revision 1.30  2015/04/22 18:02:01  ullrich
  * Added two default argument to dca of two helices for HFT.
  *
@@ -407,7 +410,7 @@ pair<double, double> StHelix::pathLength(double r) const
 	//
 	double p = period();
 #ifndef __ROOT__
-	if (!isnan(value.first)) {
+	if (! std::isnan(value.first)) {
 #else
 	if (!TMath::IsNaN(value.first)) {
 #endif
@@ -415,7 +418,7 @@ pair<double, double> StHelix::pathLength(double r) const
 	    else if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
 	}
 #ifndef __ROOT__
-	if (!isnan(value.second)) {
+	if (! std::isnan(value.second)) {
 #else
 	if (!TMath::IsNaN(value.second)) {
 #endif
