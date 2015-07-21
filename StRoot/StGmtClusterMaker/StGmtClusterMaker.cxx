@@ -15,9 +15,9 @@
 Int_t StGmtClusterMaker::gmtStat = 0;
 
 StGmtClusterMaker::StGmtClusterMaker( const Char_t* name ) : //StMaker(name),
-	  StRTSBaseMaker( "clustser", name ),						     
-          mClusterAlgoPtr(0), ftriviafile(0), ftriviatree(0),
-	  ftriviahit(NULL)
+	StRTSBaseMaker( "clustser", name ),						     
+	mClusterAlgoPtr(0),
+	ftriviahit(NULL)
 {
 StGmtClusterMaker::gmtStat = 0;
 // noop
@@ -159,9 +159,9 @@ Int_t StGmtClusterMaker::Make()
 	   }
        ftriviatree->Write();
        ftriviafile->Write();
-       
+
      }//end   if(clustVec.size()){
-     }     
+   }
      //      // ..... print all 2D clusters (aka GMT HITs) ....
      //      int ih=0;
      //      LOG_INFO << "AFTER CLUSTERING : " << clustVec.size() << " cl. from " << ih1 << "Strips " << endm; 
@@ -190,7 +190,7 @@ Int_t StGmtClusterMaker::Make()
 }
 
 
- Int_t StGmtClusterMaker::setClusterAlgo(StGmtIClusterAlgo* algo)
+Int_t StGmtClusterMaker::setClusterAlgo(StGmtIClusterAlgo* algo)
 {
   
   mClusterAlgoPtr=algo;
@@ -232,19 +232,18 @@ Int_t StGmtClusterMaker::Init()
   // if(eventPtr) runid = eventPtr->runId();
 //   char filtmp[500];
 //   sprintf(filtmp,"treeGMT%d.root",runid);
-  if (Debug()) {
-    ftriviafile  = new TFile("treeGMT.root","RECREATE");
-    LOG_INFO << "======\n\n\n\n\n\n\n\n==\n\n\n\n\n==\n\n Opening file treeGMT" << endm;
-    if (ftriviafile->IsZombie()) {
-      LOG_INFO << "======\n\n\n\n\n\n\n\n==\n\n\n\n\n==\n\n Error opening file treeGMT" << endm;}
-    
-    ftriviatree  = new TTree("tGMT","A Tree with Trivia");
-    ftriviahit = new StGmtTrivia();
-    ftriviatree->Branch("Hits","StGmtTrivia", &ftriviahit);//t,32000,0);
-  }
+  ftriviafile  = new TFile("treeGMT.root","RECREATE");
+  LOG_INFO << "======\n\n\n\n\n\n\n\n==\n\n\n\n\n==\n\n Opening file treeGMT" << endm;
+  if (ftriviafile->IsZombie()) {
+	  LOG_INFO << "======\n\n\n\n\n\n\n\n==\n\n\n\n\n==\n\n Error opening file treeGMT" << endm;}
+
+  ftriviatree  = new TTree("tGMT","A Tree with Trivia");
+  ftriviatree->SetAutoSave(1000000);
+  ftriviahit = new StGmtTrivia();
+  ftriviatree->Branch("Hits","StGmtTrivia", &ftriviahit);//t,32000,0);
   if( !ierr )
-    ierr = mClusterAlgoPtr->Init();
-  
+	  ierr = mClusterAlgoPtr->Init();
+
   return ierr;
 }
   

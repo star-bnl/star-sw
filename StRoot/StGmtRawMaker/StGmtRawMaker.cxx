@@ -24,6 +24,17 @@
 
 #include "StGmtRawMaker.h"
 
+const Int_t mChIdToSeqId[128] = {
+	0,16,32,48,64,80,96,112,4,20,36,52,68,84,100,116,8,
+	24,40,56,72,88,104,120,12,28,44,60,76,92,108,124,1,
+	17,33,49,65,81,97,113,5,21,37,53,69,85,101,117,9,
+	25,41,57,73,89,105,121,13,29,45,61,77,93,109,125,2,
+	18,34,50,66,82,98,114,6,22,38,54,70,86,102,118,10,
+	26,42,58,74,90,106,122,14,30,46,62,78,94,110,126,3,
+	19,35,51,67,83,99,115,7,23,39,55,71,87,103,119,11,
+	27,43,59,75,91,107,123,15,31,47,63,79,95,111,127
+};
+
 
 /**
 Function to get pointer to StEvent datastructures. Creates them if they do not exist already.
@@ -124,8 +135,10 @@ Int_t StGmtRawMaker::fillHits()
 	{
 	  fgt_adc_t *mGmtRawData=(fgt_adc_t*)*it;
 	  rdo=rts_tbl->Rdo();
+	  Int_t seqId = count/7;
+	  Int_t chanTmp=mGmtRawData->ch;
+	  channel=mChIdToSeqId[chanTmp];	
 	  //this is different from rts_example
-	  channel=mGmtRawData->ch;
 	  timebin=mGmtRawData->tb;
 	  //look at rts_example for the mapping 
 	  adc=mGmtRawData->adc;
@@ -140,6 +153,20 @@ Int_t StGmtRawMaker::fillHits()
 //		  cout<<"APV "<<apv<<endl;
 	    port = 1;
 	  }
+
+	  if(Debug()){
+		  LOG_INFO << "StGmtRawMaker::fillHits() Got: \n" <<
+			  "rdo: " << rdo <<
+			  "  arm: " << arm <<
+			  "  apv: " << apv <<
+			  "  port: " << port <<
+			  "  seq: " << seqId <<
+			  "  channel: " << channel <<
+			  "  timebin: " << timebin <<
+			  "  adc: " << adc <<
+			  endm;
+	  }
+
 
 // 	  LOG_INFO << "StGmtRawMaker::fillHits() Got: \n" << 
 // 	  "rdo: " << rdo << 
