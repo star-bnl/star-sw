@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstWafer.cc,v 1.3 2015/07/21 14:54:23 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.3  2015/07/21 14:54:23  bouchet
+//removed unused variables ; Int_t doLorentzShiftSide moved to void()
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -391,18 +394,15 @@ Does the loretnz shift of the mean strip of the cluster
  */
 void StSstWafer::doLorentzShift(sstDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec)
 {
-  Int_t rejected_sideP = 0 ;
-  Int_t rejected_sideN = 0 ;
-  Int_t iSide          = 0;
-  rejected_sideP = doLorentzShiftSide(iSide,mShift_hole,dimensions);
+  Int_t iSide = 0;
+  doLorentzShiftSide(iSide,mShift_hole,dimensions);
   iSide = 1;
-  rejected_sideN = doLorentzShiftSide(iSide,mShift_elec,dimensions);
+  doLorentzShiftSide(iSide,mShift_elec,dimensions);
 }
 //___________________________________________________________________________________________
-Int_t StSstWafer::doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions){
+void StSstWafer::doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions){
   StSstClusterList *CurrentClusterList =  0;
   Float_t pitch          = dimensions[0].stripPitch;
-  Float_t waferActLength = dimensions[0].waferHalfActLength;
   switch (side)
     {
     case 0:
@@ -412,20 +412,16 @@ Int_t StSstWafer::doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *
       CurrentClusterList =  mClusterN;
       break;
     }
-  Int_t ClusterListSize = CurrentClusterList->getSize();
-  if(!ClusterListSize) return 0;
-  Int_t iCluster   = 0;
-  Int_t n_rejected = 0;
-  StSstCluster *CurrentCluster = CurrentClusterList->first();
-  
-  for(iCluster = 0 ; iCluster < ClusterListSize ; iCluster++)
-    {   
+  if(CurrentClusterList->getSize()>0) {
+    Int_t iCluster   = 0;
+    StSstCluster *CurrentCluster = CurrentClusterList->first();
+    
+    for(iCluster = 0 ; iCluster < CurrentClusterList->getSize(); iCluster++){   
       Float_t StripMean = CurrentCluster->getStripMean();
       CurrentCluster->setStripMean(StripMean-(shift/pitch));
-      if(CurrentCluster->getStripMean()*pitch>waferActLength) {n_rejected++;}
       CurrentCluster = CurrentClusterList->next(CurrentCluster);
     }
-  return n_rejected;
+  }
 }
 //________________________________________________________________________________
 /*!
