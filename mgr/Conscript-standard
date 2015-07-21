@@ -933,6 +933,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	                .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
 			.  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
     }
+    if ( $pkg eq 'StMuDSTMaker'){
+	$EXTRA_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
+    }
+
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
     if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
