@@ -1,6 +1,9 @@
-//$Id: StSstWafer.hh,v 1.4 2015/06/27 19:48:51 bouchet Exp $
+//$Id: StSstWafer.hh,v 1.5 2015/07/21 14:54:28 bouchet Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.5  2015/07/21 14:54:28  bouchet
+//removed unused variables ; Int_t doLorentzShiftSide moved to void()
+//
 //Revision 1.4  2015/06/27 19:48:51  bouchet
 //removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
 //
@@ -102,7 +105,7 @@ class StSstWafer: public TGeoHMatrix {
   Int_t             doSolvePerfect(sstDimensions_st *dimensions, StSstClusterControl *clusterControl,Float_t CalibArray);
   void              doStatPerfect(Int_t nPerfectPoint, StSstClusterControl *clusterControl);
   void              doLorentzShift(sstDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec);
-  Int_t             doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions);
+  void              doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions);
   void              convertAnalogToDigit(Double_t pairCreationEnergy);
   void              convertAnalogToDigit(Long_t nElectronInAMip,Long_t adcDynamic,Long_t nbitEncoding, Float_t daqCutValue);
   Int_t             convertDigitToAnalog(Double_t pairCreationEnergy);
