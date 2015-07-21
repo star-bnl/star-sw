@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.2 2015/06/27 19:48:51 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.3 2015/07/21 14:29:22 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.3  2015/07/21 14:29:22  bouchet
+//removed unused variables
+//
 //Revision 1.2  2015/06/27 19:48:51  bouchet
 //removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
 //
@@ -697,7 +700,7 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection* sstHitColl,St_scf_cluster *scf_cluster,StSstDynamicControl *mDynamicControl,StMcEvent *mcEvent){
   vector<const StMcSsdHit*> hitCol;
   StMcSsdHitCollection *myCol;
-  int totRatio, ratio, idTruth;
+  int totRatio, idTruth;
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   if(mcEvent)
     {
@@ -735,7 +738,6 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 	StSstPointList *sptList = mLadders[iLad]->mWafers[iWaf]->getPoint();//loop over StSstPoint list
 	StSstPoint *pSpt = sptList->first();
 	totRatio = 0;
-	ratio    = 0;
 	while (pSpt){
 	  if(mcEvent){
 	    
@@ -743,7 +745,6 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 	    //jb : we fill StEvent after getting the IdMctrack
 	    //jb : as it was done too for the strip and clusters --> see StSpaBarrel.cc and StScfBarrel.cc
 	    //printf("Now we find the idMcTrack from the cluster\n");	
-	    Int_t idCLUSTER = 0; 
 	    int idClusP     = 0;
 	    int idClusN     = 0;
 	    for (i = 0 ; i < 5 ; i++)
@@ -758,7 +759,6 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 		  for(j = 0 ; j < scf_cluster->GetNRows(); j++){
 		    if(spt.id_mchit[i] == on_cluster[j].id_mchit[i]){
 		      spt.id_mctrack[i] = on_cluster[j].id_mctrack[i];
-		      idCLUSTER = on_cluster[j].id_mchit[i];
 		      idClusP = 	    10000*(10*pSpt->getIdClusterP() + 0)+idCurrentWaf;
 		      idClusN = 	    10000*(10*pSpt->getIdClusterN() + 1)+idCurrentWaf;
 		      break;
@@ -777,7 +777,7 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 	    hw = idCurrentWaf;
 	    q =  pSpt->getDe(0);
 	    currentSstHit = new StSstHit(gPos,gPosError,hw,q,c);
-	    //currentSstHit->setIdTruth(spt.id_mctrack[0],(int)ratio);// need to check first = most probable! ; new : qATruth is set with the ratio chargeCLUSTER/chargeGEANT
+	    //qATruth is set with the ratio chargeCLUSTER/chargeGEANT
 	    currentSstHit->setIdTruth(idTruth,(int)totRatio);
 	    // Start of Point Loop
 	    
