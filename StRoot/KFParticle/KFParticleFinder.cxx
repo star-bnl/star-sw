@@ -20,7 +20,8 @@ using std::vector;
 #include <iomanip>
 
 KFParticleFinder::KFParticleFinder():
-  fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(6.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
+//  fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(6.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
+  fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(85.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
   fD0(0), fD0bar(0), fD04(0), fD04bar(0), fDPlus(0), fDMinus(0), fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), fK0PiPlus(),
   fK0PiMinusIndex(), fK0PiPi(), fEmcClusters(0)
 {
@@ -37,8 +38,9 @@ KFParticleFinder::KFParticleFinder():
 #endif
   //track + particle
   //                ldl          chi2_topo                        chi2_geo
-  fCutsTrackV0[0][0] = 10;     fCutsTrackV0[0][1] = 5;        fCutsTrackV0[0][2] = 6;  //Xi
-  fCutsTrackV0[1][0] = 10;     fCutsTrackV0[1][1] = 3;        fCutsTrackV0[1][2] = 3;  //Omega, charm, H0, Sigma+
+  fCutsTrackV0[0][0] = 5;     fCutsTrackV0[0][1] = 5;        fCutsTrackV0[0][2] = 6;  //Xi
+//  fCutsTrackV0[1][0] = 10;     fCutsTrackV0[1][1] = 3;        fCutsTrackV0[1][2] = 3;  //Omega, charm, H0, Sigma+
+  fCutsTrackV0[1][0] = 5;     fCutsTrackV0[1][1] = 5;        fCutsTrackV0[1][2] = 6;  //Omega, charm, H0, Sigma+
   fCutsTrackV0[2][0] = -100.;  fCutsTrackV0[2][1] = 10000.;   fCutsTrackV0[2][2] = 3;  //resonances
   
   //charm
@@ -1500,9 +1502,9 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         
         active[iPDGPos] &= (motherPDG != -1);
         
-        if(ChiToPrimVtx)
-          active[iPDGPos] &= ( ( abs(motherPDG) != 3334) ||
-                             ( abs(motherPDG) == 3334 && reinterpret_cast<const float_v&>((*ChiToPrimVtx)[iTr]) > 7 ) );
+//         if(ChiToPrimVtx)
+//           active[iPDGPos] &= ( ( abs(motherPDG) != 3334) ||
+//                              ( abs(motherPDG) == 3334 && reinterpret_cast<const float_v&>((*ChiToPrimVtx)[iTr]) > 7 ) );
         
         if(active[iPDGPos].isEmpty()) continue;
         
