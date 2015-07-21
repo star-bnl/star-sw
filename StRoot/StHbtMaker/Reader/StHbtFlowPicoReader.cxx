@@ -1,7 +1,7 @@
 #include "StHbtFlowPicoReader.h"
 #include "StThreeVectorD.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
-#include "StHbtMaker/doc/Make/math_constants.h"
+#include "math_constants.h"
 #include "SystemOfUnits.h"
 #include <fstream>
 
