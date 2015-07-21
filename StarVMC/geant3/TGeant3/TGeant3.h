@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.6 2015/05/26 15:39:27 jwebb Exp $ */
+/* $Id: TGeant3.h,v 1.7 2015/07/21 16:22:21 jwebb Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -602,6 +602,10 @@ public:
   void  GeomIter();
   Int_t CurrentMaterial(Float_t &a, Float_t &z, Float_t &dens, 
                         Float_t &radl, Float_t &absl) const;
+
+  Bool_t   CurrentBoundaryNormal( Double_t &x, Double_t &y, Double_t &z) const { return false; /* added to ROOT */ }
+
+
   Int_t NextVolUp(Text_t *name, Int_t &copy);
   Int_t CurrentVolID(Int_t &copy) const;
   Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
@@ -721,10 +725,20 @@ public:
   Bool_t GetShape(const TString &volumePath,TString &shapeType,TArrayD &par);
   // Returns the material parameters for the volume specified by
   // the volume name.
-  Bool_t GetMaterial(const TString &volumeName,
+  virtual Bool_t GetMaterial(const TString &volumeName,
                      TString &name,Int_t &imat,
                      Double_t &a,Double_t &z,Double_t &den,
                      Double_t &radl,Double_t &inter,TArrayD &par);
+
+  virtual Bool_t GetMaterial( Int_t imat, TString &name,
+		      Double_t &a,Double_t &z,Double_t &den,
+		      Double_t &radl,Double_t &inter,TArrayD &par)
+  {
+    return false; // Added to ROOT base class
+  };
+    
+
+
   // Returns the medium parameters for the volume specified by the
   // volume name.
   Bool_t GetMedium(const TString &volumeName,TString &name,Int_t &imed,
