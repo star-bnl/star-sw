@@ -27,6 +27,7 @@
 #include <fstream>
 using std::vector;
 //
+float StGmtMatchMaker::tofRadius=210.968+3.6;
 //
 const Int_t mSeqIdToChId[128] = {
 	0,32,64,96,8,40,72,104,16,48,80,112,24,56,88,120,1,

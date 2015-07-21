@@ -46,7 +46,7 @@ public:
   //
   Int_t  mEventCounter;  //!
   
-  static float const tofRadius=210.968+3.6;
+  static float tofRadius;
   StEvent* event;
 
   TH2D *hADCvsChannel[nModules*2];
