@@ -93,7 +93,6 @@ my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
-
 #my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir); # print "find_idlL: ======== @idlL ======\n";
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
@@ -202,7 +201,7 @@ if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
 
-$CPPFLAGS .= " -DNEW_DAQ_READER";
+$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
 }
@@ -933,9 +932,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	                .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
 			.  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
     }
-    if ( $pkg eq 'StMuDSTMaker'){
-	$EXTRA_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
-    }
+
+    # Many packages depend on the StMuEvent including StrangeMuDst
+    #if ( $pkg eq 'StMuDSTMaker'){
+    #	$ROOTCINT_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
+    #}
 
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
@@ -961,7 +962,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     if (! $LIBS) {$libpath = "";}
 #  print "CPPPATH => $CPPPATH \tCPPFLAGS => $CPPFLAGS\n";
     $env2 = $env1->clone('Package'  => $pkg,
-			 'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+			 'EXTRA_CPPFLAGS'    => $EXTRA_CPPFLAGS,
+			 'ROOTCINT_CPPFLAGS' => $ROOTCINT_CPPFLAGS,  # introduced 2015/07 for .h skipping via -D
 			 'CPPPATH'  => $CPPPATH,
 			 'CFLAGS'   => $CFLAGS,
 			 'CXXFLAGS' => $CXXFLAGS,
