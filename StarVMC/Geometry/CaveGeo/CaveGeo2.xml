@@ -21,7 +21,7 @@
   <Created date="May 2013" />
   <CDE> AgeCom, GcUnit </CDE>
 
-  <Content>HALL, CAVE, WALL, HOLE, SHLD, CRAT, MGWP, MGWT, HELC, HELG, HESL</Content>
+  <Content>HALL, CAVE, WALL, HOLE, SHLD, CRAT, MGWP, MGWT</Content>
 
   <Structure name="CVCF"  >
             <var name="version"   />
@@ -509,44 +509,6 @@
 	<Placement y="wall_yy" x="wall_xx" block="MGWP" in="CAVE" />
       </Do>      
     </Do>
-    <Create block="HELC" /> 
-     wall_xx = 732/2 + 2.54*25  <!-- 1-st position z = 0 R = 732/2 + 25'' = 429.5) sourth and 6' up from beam line -->
-     wall_yy = 6*2.54*12
-     wall_zz = 0
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-       <Rotation thetaz="-90" thetax="90" thetay="0"  phiz="90" phiy="0"  phix="0"  />
-   </Placement>
-     
-     wall_xx = 2.54*12*6      <!-- 2-nd position z = 1' before face of FMS (706.3 - 30.48 = 675.82) and 6' = 1.8 m south from beam line -->
-     wall_yy = 0
-     wall_zz = 706.3 - 2.54*12
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-       <Rotation thetaz="-90" thetax="90" thetay="0"  phiz="90" phiy="0"  phix="0"  />
-   </Placement>             
-     wall_xx = 2.54*53         <!-- 3-rd position z = 4' before wall, y = -8'' below beam, x = 53'' sourth from beam -->
-     wall_yy = -2.54*8
-     wall_zz = -808 + 2.54*12*4
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-       <Rotation thetaz="-90" thetax="90" thetay="0"  phiz="90" phiy="0"  phix="0"  />
-   </Placement>
-     
-     wall_xx = -732/2 - 2.54*12*2.5         <!-- 4-th position z = 0 Y = 6' + 15"/2; x = 2.5' from MDT outer most -->
-     wall_yy = 2.54*12*6 + 2.54*15./2
-     wall_zz = 0
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-       <Rotation thetaz="-90" thetax="90" thetay="0"  phiz="90" phiy="0"  phix="0"  />
-    </Placement>
-     wall_xx = 2.54*6         <!-- 5-th position z = +21"; y = floor + 16"; x = on external leg of MDT module #3 from x = 0 -->
-     wall_yy = -431 + 2.54*16
-     wall_zz = 2.54*21
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-       <Rotation thetaz="-90" thetax="90" thetay="0"  phiz="90" phiy="0"  phix="0"  />
-    </Placement>
-     wall_xx = -970         <!-- 6-th position  -->
-     wall_yy = -431 + 2.54*16
-     wall_zz = -750
-    <Placement block="HELC" x="wall_xx" y="wall_yy" z="wall_zz" >
-    </Placement>
   </Volume>
 
         <Volume name="WALL" comment="is the floor (or bottom) of the cave"  >
@@ -625,56 +587,6 @@
             <Shape type="TUBE" dz="310" rmin="0" rmax="10"  />
         </Volume>
 
-       <Volume name="HELC" comment="He3 counter">
-            <Mixture name="Steel" dens="7.87"  >
-                <Component name="Fe" a="55.85" z="26" w="1"  />
-            </Mixture>
-            D3 = 43.18/2
-            D1 = 5.08/2
-            <Shape type="TUBE" dz="D3" rmin="0" rmax="D1"  />
-            <Create block="HELG" />
-            <Placement block="HELG" in="HELC" />
-       </Volume>
-
-       <Volume name="HELG" comment="He3 counter, gas">
-<!--            <Mixture name="He3Krypton" dens="0.00743571"  > -->
-            <Mixture name="He3Krypton" dens="0.000341807"  >
-               <Component name="He3" a="3" z="2" w="1.00" />
-<!--           <Component name="He3" a="3" z="2" w="0.35" />
-               <Component name="Krypton" a="83.8" z="36" w="0.65" /> -->
-            </Mixture>
-            D3 = (43.18-0.4)/2
-            D1 = (5.08-0.4)/2
-            <Shape type="TUBE" dz="D3" rmin="0" rmax="D1"  />
-            <Create block="HESL" />
-            <Placement block="HESL" in="HELG" />
-       </Volume>
-
-        <Volume name="HESL" comment="He3 counter, sensitive gas">
-            <Material name="He3Krypton"  />
-            <Material isvol="1" name="He3Krypton_sensitive_gas"  />
-            <Medium name="He3Krypton_senistive" isvol="1" />
-            D3 = 34.45/2
-            D1 = (5.08-0.4)/2
-            <Shape type="TUBE" dz="D3" rmin="0" rmax="D1"  />
-            <Instrument block="HESL">
-
-                 <!-- x,y,z coordinate.  S option always reats the hit as a single step -->
-                 <Hit meas="z" bins="0.0005" opts="s" />
-                 <Hit meas="y" bins="0.0005"          />
-                 <Hit meas="x" bins="0.0005"          />
-
-                 <!-- cosines of the angle in x, y, z with 10bit precision -->
-                 <Hit meas="cx" nbits="10" />
-                 <Hit meas="cy" nbits="10" />
-                 <Hit meas="cz" nbits="10" />
-
-                 <Hit meas="tof"   nbits="16"  min="0"  max="1.0E-6" />
-                 <Hit meas="step"  bins=".01" />
-                 <Hit meas="eloss"  nbits="22"  min="0." max="0.01" />
-
-            </Instrument>            
-       </Volume>
   
 
 </Module>

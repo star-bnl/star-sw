@@ -1595,7 +1595,7 @@
                 <Hit meas="tof"   nbits="16"  min="0.0" max="1.0E-7" />
                 <Hit meas="step"   bins="0.01" />
                 
-                <Hit meas="eloss" nbits="16" min="0.0" max="1.0E-6"    />
+                <Hit meas="eloss" nbits="21" min="0.0" max="1.0E-6"    />
                 
             </Instrument>
         </Block>
