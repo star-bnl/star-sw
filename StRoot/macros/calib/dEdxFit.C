@@ -1358,6 +1358,10 @@ Double_t gfFunc(Double_t *x, Double_t *par) {
 }
 //________________________________________________________________________________
 TF1 *FitGF(TH1 *proj, Option_t *opt="") {
+  static TSpectrum *fSpectrum = 0;
+  if (! fSpectrum) {
+    fSpectrum = new TSpectrum(6);
+  }
   // fit in momentum range p = 0.45 - 0.50 GeV/c
   if (! proj) return 0;
   TString Opt(opt);
@@ -1366,9 +1370,9 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   if (! g2) {
     g2 = new TF1("GF",gfFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
-    g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
+    g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
-    g2->SetParName(3,"P"); 
+    g2->SetParName(3,"P");      g2->SetParLimits(3,0,0.5);
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);
     g2->SetParName(6,"d");      g2->SetParLimits(6,0.0,0.5);
@@ -1376,13 +1380,36 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
     g2->SetParName(8,"Case");
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
   }
-  
+  // Find pion peak
+  Int_t nfound = fSpectrum->Search(proj,2.0,"",10);
+  if (nfound < 1) return 0;
+  Int_t npeaks = 0;
+#if ROOT_VERSION_CODE > 336641 /* ROOT_VERSION(5,35,1) */
+  Double_t *xpeaks = fSpectrum->GetPositionX();
+  Double_t xp = 0;
+#else
+  Float_t *xpeaks = fSpectrum->GetPositionX();
+  Float_t xp = 0;
+#endif
+  if (nfound > 2) nfound = 2;
+  Double_t xpi = 9999;
+  for (Int_t p = 0; p < nfound; p++) {
+    xp = xpeaks[p];
+    Int_t bin = proj->GetXaxis()->FindBin(xp);
+    Double_t yp = proj->GetBinContent(bin);
+    Double_t ep = proj->GetBinError(bin);
+    if (yp-5*ep < 0) continue;
+    if (xp < xpi) xpi = xp;
+  }
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  g2->SetParameters(0, proj->GetMean(), proj->GetRMS(), 0.1, 0.1, 0.1, 0.1,0.1,-1.);
-  g2->FixParameter(3,2.86731e-01);
-  g2->FixParameter(4,4.27788e-01);
+  //  g2->SetParameters(0, proj->GetMean(), proj->GetRMS(), 0.1, 0.1, 0.1, 0.1,0.1,-1.);
+//   Int_t binmax = proj->GetMaximumBin();
+//   Double_t xmax = proj->GetXaxis()->GetBinCenter(binmax);
+  g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.);
+  //  g2->FixParameter(3,2.86731e-01);
+  g2->FixParameter(4,1e-6);
   g2->FixParameter(5,1e-6);
-  g2->FixParameter(6,5.77664e-02);
+  g2->FixParameter(6,1e-6);
   g2->FixParameter(7,total);
   g2->FixParameter(8,-1);
   proj->Fit(g2,Opt.Data());
