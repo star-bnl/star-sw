@@ -159,7 +159,7 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
              << "   Number of Sensors: " << NoSensors << endm;
 
    St_sstWafersPosition *sstwafer = new St_sstWafersPosition("sstWafersPosition", NoSensors);
-   AddConst(sstwafer);
+   // yf AddConst(sstwafer);
    Int_t num = 0;
    sstWafersPosition_st row;
    memset (&row, 0, sizeof(sstWafersPosition_st));

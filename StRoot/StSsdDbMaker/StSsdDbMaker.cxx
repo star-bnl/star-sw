@@ -188,7 +188,7 @@ St_ssdWafersPosition *StSsdDbMaker::CalculateWafersPosition()
    Int_t NoLadders = SsdLaddersOnSectors->GetNRows();
    Int_t NoWafers  = SsdWafersOnLadders->GetNRows();
    St_ssdWafersPosition *ssdwafer = new St_ssdWafersPosition("ssdWafersPosition", NoWafers);
-   AddConst(ssdwafer);
+   //yf AddConst(ssdwafer);
    Int_t num = 0;
 
    //#if 1
