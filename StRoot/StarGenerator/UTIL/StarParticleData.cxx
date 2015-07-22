@@ -70,7 +70,7 @@ StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
 
   TParticlePDG *particle = 0;
 
-  Int_t g3new = 100;
+  //Int_t g3new = 100;
   while(  (particle=(TParticlePDG *)Next())  )
     {
 

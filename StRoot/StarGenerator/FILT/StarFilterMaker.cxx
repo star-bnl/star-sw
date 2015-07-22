@@ -34,11 +34,11 @@ using namespace std;
 // --------------------------------------------------------------------------------------------------------------
 StarFilterMaker::StarFilterMaker( const Char_t *name )  :
   StMaker(name),
-  bFlag(false),
   NumberofEvents(0),
   AcceptedEvents(0),
   RejectedEvents(0),
-  RejectedSinceLast(0)
+  RejectedSinceLast(0),
+  bFlag(false)
 {
 }
 // --------------------------------------------------------------------------------------------------------------
