@@ -78,15 +78,15 @@ StMcMtdHit::StMcMtdHit(g2t_mtd_hit_st* pt):
 	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
 	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0)
 {
-const static float kMtdPadWidth = 3.8 + 0.6;  	//! Pad Width: 38mm padwidth + 6mm innerspacing
-const static   int kNCell       = 12,     	//! 12 cells per box
+  const static float kMtdPadWidth = 3.8 + 0.6;  	//! Pad Width: 38mm padwidth + 6mm innerspacing
+  const static   int kNCell       = 12;     	//! 12 cells per box
 
-   mPathLength = pt->s_track;
-   int volume_id = pt->volume_id;
-   Int_t ires = volume_id/100;
-   mModule = ires%10;
-   mBackleg =ires/10;
-   mCell = Int_t((pt->x[1] + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
+  int volume_id = pt->volume_id;
+  int ires      = volume_id/100;
+  mPathLength   = pt->s_track;
+  mModule       = ires%10;
+  mBackleg      = ires/10;
+  mCell         = Int_t((pt->x[1] + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
 
 }        
     
