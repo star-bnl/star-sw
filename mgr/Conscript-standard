@@ -96,8 +96,7 @@ my $LD      = $env1->{LD};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
-
-#my $ROOTCINT_CPPFLAGS = "";
+my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir); # print "find_idlL: ======== @idlL ======\n";
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -860,6 +859,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  "
       .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
 	.  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
+  }
+  if ($pkg eq 'StMuDSTMaker') {
+    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
   }
   if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
     $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
