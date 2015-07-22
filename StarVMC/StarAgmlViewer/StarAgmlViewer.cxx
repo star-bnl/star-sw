@@ -66,7 +66,7 @@ Bool_t StarAgmlViewer::LoadGeometry()
 {
 
   std::map<Int_t,Int_t> cmap;
-  Int_t i = kBlue;
+  //Int_t i = kBlue;
   cmap[ 0] = kBlue;
   cmap[ 1] = kBlue - 1;
   cmap[ 2] = kBlue + 1;
