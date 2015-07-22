@@ -415,9 +415,15 @@ void StBTofCalibMaker::processStEvent()
   
   
   if(mTStart<-1000.) {
-    LOG_INFO << "No valid start time for this event. Skip ..." << endm;
-    mValidStartTime = kFALSE;
-    return;
+    if (IAttr("UseMCTstart")) {
+      mTStart = 0;
+      LOG_INFO << "use MC start time = " << mTStart << " for this event." << endm;
+      mValidStartTime = kTRUE;
+    } else {
+      LOG_INFO << "No valid start time for this event. Skip ..." << endm;
+      mValidStartTime = kFALSE;
+      return;
+    }
   } else {
     mValidStartTime = kTRUE;
   }

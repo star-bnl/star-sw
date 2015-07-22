@@ -682,13 +682,10 @@ Int_t StBTofSimMaker::fillEvent()
 
 	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
 	    static  Float_t tot  = 15;
-	    static  Float_t tStart = 0;
+	    static  Float_t tStart = 0; // MC start time
 	    Float_t tdc = mcTof;
 	    Float_t corr;
 	    if (aMcBTofHit->module() > 0) { // Tof
-	      corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
-	      if (corr < -9999.) continue;
-	      tdc += corr;
 	      corr = St_tofTOffsetC::instance()->t0(aMcBTofHit->tray(),aMcBTofHit->module(),aMcBTofHit->cell());
 	      if (corr < -9999.) continue;
 	      tdc += corr;
