@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.19 2015/03/11 17:21:44 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.20 2015/07/22 18:47:22 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.20  2015/07/22 18:47:22  ramdebbe
+// added trigger for pA part of run 15
+//
 // Revision 1.19  2015/03/11 17:21:44  ramdebbe
 // added run 15 RP triggers (only to MuDst filled method needs to be copied to StEvent filled method
 //
@@ -120,9 +123,9 @@ Int_t StPeCTrigger::process(StEvent *event, string triggerSel)
   runN   = event->runId(); 
   LOG_INFO << "StPeCTrigger::reading StEvent ---------- " << endm;
   l0_2000->setInfoLevel ( infoLevel );
-//  l0_2000Corrected->setInfoLevel ( infoLevel );
 
-  StL0Trigger* l0Data = event->l0Trigger();
+
+//   StL0Trigger* l0Data = event->l0Trigger();
 
 
   // read trigger information with up to date methods
@@ -190,7 +193,7 @@ Int_t StPeCTrigger::process(StEvent *event, string triggerSel)
   StMwcTriggerDetector& mwc = trg->mwc();
   StZdcTriggerDetector& zdc = trg->zdc();
   StBbcTriggerDetector& bbc = trg->bbc();
-  StEmcTriggerDetector& emc = trg->emc();
+//   StEmcTriggerDetector& emc = trg->emc();
 
 
 //   if ( l0Data && infoLevel > 0 ){
@@ -605,7 +608,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
       if(runN>16041100 && runN<= 16770001){
 	if(triggerSel=="RP_trig"){
 
-	  if(runN< 16064034) {                                                  //longitudinal polarization
+	  if(runN< 16064034) {                                                  //longitudinal polarization -----------------
 	    if(ttid.isTrigger(470707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
 	    if(ttid.isTrigger(470708)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT
 	    if(ttid.isTrigger(470711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
@@ -619,7 +622,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 	    if(ttid.isTrigger(470730)) trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_RP2E  elevated to physics in run 160..
 	    if(ttid.isTrigger(470725)) trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_RPZE  elevated to physics in run 160..
 	  }
-	  if(runN>= 16064034) {                                                  //transverse polarization
+	  if(runN>= 16064034 && runN< 16124016) {                                                  //transverse polarization   -----------------
 	    if(ttid.isTrigger(480707)) trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //RP_CP
 	    if(ttid.isTrigger(480713)) trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //RP_CPT2
 	    if(ttid.isTrigger(480711)) trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //RP_CPX
@@ -634,9 +637,75 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 	    if(ttid.isTrigger(480705)) trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_RPZE  elevated to physics in run 160..
 	  }
 
-	  LOG_INFO << "StPeCTrigger::value of trg_3000 RP triggers  ------------------------------------ " <<trg_3000<< endm;
-	}
+	  if(runN>= 16125033 && runN<16160013) {                                                  //transverse polarization  p + Au starts
+
+	    if(runN>= 16125033 && runN< 16138047 &&ttid.isTrigger(500704)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_ZMU changed ~4MAR
+	      cout<<" ZMU "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(500701)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
+	      cout<<" SD "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(500703)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
+	      cout<<" SDT "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16125033 && runN< 16138047 &&ttid.isTrigger(500709)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_2MU elevated to physics in run 16054061 changed ~4MAR
+	      cout<<" 2MU "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16138047 && runN< 16142049 &&ttid.isTrigger(500729)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_2MU elevated to physics in run 16054061 changed ~4MAR
+	      cout<<" 2MU B "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16142049 &&                  ttid.isTrigger(500749)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_2MU elevated to physics in run 16054061 changed ~4MAR
+	      cout<<" ZMU "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16138044 &&                  ttid.isTrigger(500710)){
+	      trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_2E  elevated to physics in run 160..
+	      cout<<" 2E "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16128030 &&                  ttid.isTrigger(500000)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_UPC  elevated to physics in run 160..
+	      cout<<" UPC "<<trg_3000<<endl;
+	    }
+	  }
+
+	  if(runN>= 16160012) {                                                  //transverse polarization  p + Al starts
+
+	    if(                                    ttid.isTrigger(510704)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_ZMU changed ~4MAR
+	      cout<<" ZMU "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(510701)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 5.0); //RP_SD
+	      cout<<" SD "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(510703)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 6.0); //RP_SDT
+	      cout<<" SDT "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(510709)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 9.0); //RP_2MU elevated to physics in run 16054061 changed ~4MAR
+	      cout<<" 2MU "<<trg_3000<<endl;
+	    }
+
+
+	    if(                                    ttid.isTrigger(510710)){
+	      trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_2E  elevated to physics in run 160..
+	      cout<<" 2E "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(510714)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_UPC  elevated to physics in run 160..
+	      cout<<" UPC "<<trg_3000<<endl;
+	    }
+	  }
+
+	LOG_INFO << "StPeCTrigger::value of trg_3000 RP triggers  ------------------------------------ " <<trg_3000<< endm;
       }
+    }
       //ignore trigger selection
       if(triggerSel=="Ignore"){
 
@@ -665,21 +734,21 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
     }
   } //                 if(&tt)
 
-    int bit5  = trigData->lastDSM(5/16)  & (1<<(5  %16)) ? 1 : 0;
-    int bit6  = trigData->lastDSM(6/16)  & (1<<(6  %16)) ? 1 : 0;
-    int bit17 = trigData->lastDSM(17/16) & (1<<(17 %16)) ? 1 : 0;
-    int bit18 = trigData->lastDSM(18/16) & (1<<(18 %16)) ? 1 : 0;
-    int bit22 = trigData->lastDSM(22/16) & (1<<(22 %16)) ? 1 : 0;
-    int bit23 = trigData->lastDSM(23/16) & (1<<(23 %16)) ? 1 : 0;
-    int bit24 = trigData->lastDSM(24/16) & (1<<(24 %16)) ? 1 : 0;
-    int bit25 = trigData->lastDSM(25/16) & (1<<(25 %16)) ? 1 : 0;
-    int bit96 = trigData->lastDSM(96/16) & (1<<(96 %16)) ? 1 : 0;
+//     int bit5  = trigData->lastDSM(5/16)  & (1<<(5  %16)) ? 1 : 0;
+//     int bit6  = trigData->lastDSM(6/16)  & (1<<(6  %16)) ? 1 : 0;
+//     int bit17 = trigData->lastDSM(17/16) & (1<<(17 %16)) ? 1 : 0;
+//     int bit18 = trigData->lastDSM(18/16) & (1<<(18 %16)) ? 1 : 0;
+//     int bit22 = trigData->lastDSM(22/16) & (1<<(22 %16)) ? 1 : 0;
+//     int bit23 = trigData->lastDSM(23/16) & (1<<(23 %16)) ? 1 : 0;
+//     int bit24 = trigData->lastDSM(24/16) & (1<<(24 %16)) ? 1 : 0;
+//     int bit25 = trigData->lastDSM(25/16) & (1<<(25 %16)) ? 1 : 0;
+//     int bit96 = trigData->lastDSM(96/16) & (1<<(96 %16)) ? 1 : 0;
 
 
   l0_2000->setInfoLevel ( infoLevel );
 
 
-  StL0Trigger* l0Data = &mudst->event()->l0Trigger();
+//   StL0Trigger* l0Data = &mudst->event()->l0Trigger();
 
   StCtbTriggerDetector& ctb = mudst->event()->ctbTriggerDetector();
 //  StMwcTriggerDetector& mwc = &mudst->event()->ctbTriggerDetector();
@@ -807,7 +876,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
      assert(V);
      mudst->setVertexIndex(verti);
      const StThreeVectorF &r=V->position();
-     LOG_INFO <<" number of Tracks used "<<V->nTracksUsed()<<"  number TOF hits matched "<<V->nBTOFMatch()<<" number all tracks "<<V->noTracks() <<endm;
+//      LOG_INFO <<" number of Tracks used "<<V->nTracksUsed()<<"  number TOF hits matched "<<V->nBTOFMatch()<<" number all tracks "<<V->noTracks() <<endm;
 //      cout<<" z vertex "<<r.z()<<endl;
    }
 //   StThreeVectorF  vtx = vertex->position(); 
@@ -872,7 +941,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
   nBTOFhits =  mudst->numberOfBTofHit();
   nPrimaryTracks = mudst->numberOfPrimaryTracks();
   
-  double leadingT ;
+//   double leadingT ;
   for(int itof=0;itof<tofMult;itof++) {
    StMuBTofHit * leading = mudst->btofHit(itof);    //->leadingEdgeTime(); 
    //leadingT = leading->leadingEdgeTime();
