@@ -15,7 +15,7 @@ void loadMuDst() {
   gSystem->Load("StEmcUtil");
   gSystem->Load("StTofUtil");
   gSystem->Load("StPmdUtil");
-  gSystem->Load("StStrangeMuDstMaker");
+  //gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");  
   cout << " loading of shared libraries done" << endl;
  }
