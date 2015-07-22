@@ -303,7 +303,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          206.75/cos15    ! TPC outer envelope 
+        Rmax =          206.75    ! TPC outer envelope 
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
