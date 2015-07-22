@@ -5,7 +5,7 @@
 #include "StMcEtrHit.hh"
 #include "tables/St_g2t_etr_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcEtrHit.cc,v 2.1 2012/03/22 01:06:09 perev Exp $";
+static const char rcsid[] = "$Id: StMcEtrHit.cc,v 2.2 2015/07/22 19:29:17 jwebb Exp $";
 
 ClassImp(StMcEtrHit)
 
@@ -32,7 +32,9 @@ int StMcEtrHit::layer() const
   // volumeId encoded in UPGR16, section+100*layer+10000*sector
   int ilayer = (volumeId()/100)%100; 	// 3 disk in TRD, iLayer=0, 1, 2
   assert (ilayer <=2 || ilayer >=0);
-  return iLayer;
+  // NOTE:  Return ilayer (lower-case "l") here instead of the uninitialized
+  // iLayer (upper "L").  May indicate a bug in the code.
+  return iLayer=ilayer; 
 }
 
  
