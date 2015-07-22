@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $
+ * $Id: StMcTrack.cc,v 2.37 2015/07/22 19:30:02 jwebb Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.37  2015/07/22 19:30:02  jwebb
+ * Fix minor compiler warnings.
+ *
  * Revision 2.36  2014/08/06 19:08:49  perev
  * Warnoff
  *
@@ -86,8 +89,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $
+ * $Id: StMcTrack.cc,v 2.37 2015/07/22 19:30:02 jwebb Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.37  2015/07/22 19:30:02  jwebb
+ * Fix minor compiler warnings.
+ *
  * Revision 2.36  2014/08/06 19:08:49  perev
  * Warnoff
  *
@@ -229,7 +235,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.37 2015/07/22 19:30:02 jwebb Exp $";
 
 ClassImp(StMcTrack);
 
@@ -411,37 +417,37 @@ void StMcTrack::Print(Option_t *option) const {
   Double_t y = rapidity();
   if (TMath::Abs(y) > 999.999) y = TMath::Sign(999.999, y);
     cout << 
-      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3li%6li%3li%3li%6li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li",
+      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3li%6li%3li%3li%6li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li",
 	   Name.Data(),
 	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
 	   pt(),
 	   y,
 	   eta,
-	   geantId(),
-	   pdgId(),
-	   eventGenLabel(),
-	   key(),  
-	   tpcHits().size(),
-	   svtHits().size(),
-	   ssdHits().size(),
-	   ftpcHits().size(),
-	   richHits().size(),
-	   ctbHits().size(),
-	   bemcHits().size(),
-	   bprsHits().size(),
-	   bsmdeHits().size(),
-	   bsmdpHits().size(),
-	   tofHits().size(),
-	   mtdHits().size(),
-	   eemcHits().size(),
-	   eprsHits().size(),
-	   esmduHits().size(),
-	   esmdvHits().size(),
-	   pxlHits().size(),
-	   istHits().size(),
-	   fgtHits().size(),
-	   etrHits().size(),
-	   isShower())
+	   (long int)(geantId()),
+	   (long int)(pdgId()),
+	   (long int)(eventGenLabel()),
+	   (long int)(key()),
+	   (long int)(tpcHits().size()),
+	   (long int)(svtHits().size()),
+	   (long int)(ssdHits().size()),
+	   (long int)(ftpcHits().size()),
+	   (long int)(richHits().size()),
+	   (long int)(ctbHits().size()),
+	   (long int)(bemcHits().size()),
+	   (long int)(bprsHits().size()),
+	   (long int)(bsmdeHits().size()),
+	   (long int)(bsmdpHits().size()),
+	   (long int)(tofHits().size()),
+	   (long int)(mtdHits().size()),
+	   (long int)(eemcHits().size()),
+	   (long int)(eprsHits().size()),
+	   (long int)(esmduHits().size()),
+	   (long int)(esmdvHits().size()),
+	   (long int)(pxlHits().size()),
+	   (long int)(istHits().size()),
+	   (long int)(fgtHits().size()),
+	   (long int)(etrHits().size()),
+	   (long int)(isShower()))
 	 << endl;
 }
 void StMcTrack::setFourMomentum(const StLorentzVectorF& val) { mFourMomentum = val; }

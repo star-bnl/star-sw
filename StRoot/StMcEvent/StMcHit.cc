@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.13 2014/08/06 19:07:34 perev Exp $
+ * $Id: StMcHit.cc,v 2.14 2015/07/22 19:30:00 jwebb Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.14  2015/07/22 19:30:00  jwebb
+ * Fix minor compiler warnings.
+ *
  * Revision 2.13  2014/08/06 19:07:34  perev
  * Warnoff
  *
@@ -51,7 +54,7 @@
  **************************************************************************/
 #include "StMcHit.hh"
 #include "TString.h"
-static const Char_t rcsid[] = "$Id: StMcHit.cc,v 2.13 2014/08/06 19:07:34 perev Exp $";
+static const Char_t rcsid[] = "$Id: StMcHit.cc,v 2.14 2015/07/22 19:30:00 jwebb Exp $";
 ClassImp(StMcHit);
     
 int StMcHit::operator==(const StMcHit& h) const
@@ -65,7 +68,8 @@ ostream& operator<<(ostream& os, const StMcHit& h)
     if (h.parentTrack())
       os << "Key, parent Key : " << Form("%5i/%5i",(int)h.key(),(int)h.parentTrack()->key()) << endl;
     else 
-      os << "Key             : " << Form("%5i/undef",h.key()) << endl;
+      os << "Key             : " << Form("%5i/undef",int(h.key())) << endl;
+    
     os << "Position xyz    : " << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
     os << "Local Momentum  : " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  << endl;
     os << "dE              : " << Form("%8.2f keV",1e6*h.dE())  << endl;
