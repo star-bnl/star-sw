@@ -791,6 +791,11 @@ struct RHIC_Trigger {
   int mask;
 };
 
+struct PrescaleReturnInfo {
+    float ps[TRIGGERS_MAX];
+    float measured_rate[TRIGGERS_MAX];
+};
+
 #endif
 
 
