@@ -1,7 +1,7 @@
 setenv  GROUP_DIR /afs/rhic.bnl.gov/star/packages/.DEV2/group
 #source ${GROUP_DIR}/setup    gcc482
 #source ${GROUP_DIR}/setup    32b
-setup gcc492
+#setup gcc492
 setup 32b
 source ${GROUP_DIR}/.starver .DEV2
 #setup   64b
