@@ -323,7 +323,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 
 	// accepty TOF hit
 	if(tofHitsFromGeant->s_track<=0.0 || tofHitsFromGeant->de <=0.0) {
-		LOG_WARN << " No deposited energy in this TOF hit!" << endm;
+		LOG_DEBUG << " No deposited energy in this TOF hit!" << endm;
 		return kStWarn;
 	}
 
