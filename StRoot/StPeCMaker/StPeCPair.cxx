@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.18 2014/12/23 20:43:10 ramdebbe Exp $
+// $Id: StPeCPair.cxx,v 1.19 2015/07/22 19:55:20 ramdebbe Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.19  2015/07/22 19:55:20  ramdebbe
+// stopped doing extrapolation to TOF, now copy information from StMuBTofPidTraits, needs to do the same for fill(mudst, stevent)
+//
 // Revision 1.18  2014/12/23 20:43:10  ramdebbe
 // copied the fill functionality of method with both inputs to the one with MuDst input. This gives TOF extrapolation in the pPairs branch
 //
@@ -160,8 +163,8 @@ StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2,
 
 
   bFld=event->eventSummary().magneticField()/10.;  
-
-//   cout<<" StPeCPair StEvent StMuEvent ************  Mag field from summary:    "<<bFld<<endl;
+  pairTOFgeoLocal = pairTOFgeo; 
+  cout<<" StPeCPair StEvent StMuEvent ************  Mag field from summary:    "<<bFld<<"   TOF geometry pointer: "<<pairTOFgeo<<endl;
 //   // Get EMC calorimeter clusters from StEvent
 
 //   // check if there is a collection
@@ -408,7 +411,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
    StPhysicalHelixD h2, hOuter2 ;
 
    short charge1, charge2 ;
-   Int_t mod,eta,sub; 
+//    Int_t mod,eta,sub; 
    StThreeVectorD position,momentum;
 //
 
@@ -480,12 +483,25 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
      tr1.set(1,muTrack1, event); // 1=primary
      tr2.set(1,muTrack2, event);
 #endif
-   tr1_timeOfFlight = mBTofPidTraits_1.timeOfFlight();
-   tr1_pathLength   = mBTofPidTraits_1.pathLength();
-   tr1_Beta         = mBTofPidTraits_1.beta();
-   tr2_timeOfFlight = mBTofPidTraits_2.timeOfFlight();
-   tr2_pathLength   = mBTofPidTraits_2.pathLength();
-   tr2_Beta         = mBTofPidTraits_2.beta();
+     tr1_timeOfFlight = mBTofPidTraits_1.timeOfFlight();
+     tr1_pathLength   = mBTofPidTraits_1.pathLength();
+     tr1_Beta         = mBTofPidTraits_1.beta();
+     const float a     = mBTofPidTraits_1.position().x();
+     const float b     = mBTofPidTraits_1.position().y();
+     const float c     = mBTofPidTraits_1.position().z();
+     tr1_extrapolatedTOF_mX     = a;
+     tr1_extrapolatedTOF_mY     = b;
+     tr1_extrapolatedTOF_mZ     = c;
+
+     tr2_timeOfFlight = mBTofPidTraits_2.timeOfFlight();
+     tr2_pathLength   = mBTofPidTraits_2.pathLength();
+     tr2_Beta         = mBTofPidTraits_2.beta();
+     const float a2   = mBTofPidTraits_2.position().x();
+     const float b2   = mBTofPidTraits_2.position().y();
+     const float c2   = mBTofPidTraits_2.position().z();
+     tr2_extrapolatedTOF_mX     = a2;
+     tr2_extrapolatedTOF_mY     = b2;
+     tr2_extrapolatedTOF_mZ     = c2;
    //
    //extrapolate tracks to TOF
    //
@@ -494,30 +510,30 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
    PointVec  crossVec; 
 
 
+   //no more private extrapolation; commented out 18-June-2015 RD
 
 
+//    if(pairTOFgeoLocal->HelixCrossCellIds(hOuter1,idVec,pathVec,crossVec)) 
+//      {
 
-   if(pairTOFgeoLocal->HelixCrossCellIds(hOuter1,idVec,pathVec,crossVec)) 
-     {
-
-       Int_t cellId    = -999;
-       Int_t  moduleId = -999; 
-       Int_t  trayId   = -999;
-       pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
-       tr1_extrapolatedTOF_mX     = crossVec[0].x();
-       tr1_extrapolatedTOF_mY     = crossVec[0].y();
-       tr1_extrapolatedTOF_mZ = crossVec[0].z();
-     }  
-   if(pairTOFgeoLocal->HelixCrossCellIds(hOuter2,idVec,pathVec,crossVec)) 
-     {
-       Int_t cellId    = -999;
-       Int_t  moduleId = -999; 
-       Int_t  trayId   = -999;
-       pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
-       tr2_extrapolatedTOF_mX     = crossVec[0].x();
-       tr2_extrapolatedTOF_mY     = crossVec[0].y();
-       tr2_extrapolatedTOF_mZ = crossVec[0].z();
-     }  
+//        Int_t cellId    = -999;
+//        Int_t  moduleId = -999; 
+//        Int_t  trayId   = -999;
+//        pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
+//        tr1_extrapolatedTOF_mX     = crossVec[0].x();
+//        tr1_extrapolatedTOF_mY     = crossVec[0].y();
+//        tr1_extrapolatedTOF_mZ = crossVec[0].z();
+//      }  
+//    if(pairTOFgeoLocal->HelixCrossCellIds(hOuter2,idVec,pathVec,crossVec)) 
+//      {
+//        Int_t cellId    = -999;
+//        Int_t  moduleId = -999; 
+//        Int_t  trayId   = -999;
+//        pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
+//        tr2_extrapolatedTOF_mX     = crossVec[0].x();
+//        tr2_extrapolatedTOF_mY     = crossVec[0].y();
+//        tr2_extrapolatedTOF_mZ = crossVec[0].z();
+//      }  
 
    return 0 ;
    
@@ -606,6 +622,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
   //
   //EMC detector information
   //
+  cout<<" in StPeCPair fill "<<" TOF geo pointer inside fill: "<<pairTOFgeoLocal<<endl;
   StEmcDetector* EMCdetector = emcStEvent->detector(kBarrelEmcTowerId);     //kBarrelSmdEtaStripId);  
   if (!EMCdetector)
     {cout<<"There is no kBarrelSmdEtaStripId Detector ---------"<<endl;}
@@ -629,13 +646,13 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
 	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
 	     unsigned int module=hits[k]->module(); 
 	     unsigned int Eta=hits[k]->eta();	
-	     float energyT=hits[k]->energy();
+// 	     float energyT=hits[k]->energy();
 	     int s=fabs(hits[k]->sub());
 	     int did(0);
 	     if (module==fabs(mod) &&  Eta == fabs(eta)){
 	       float energyT1=hits[k]->energy();
 	       mGeom2->getId(module,Eta,s,did);
-	       // cout<<"Matched  hit no "<<k<<"::module no::"<<module<<"::Eta is::"<<Eta<<"::Energy is::"<<energyT1<<endl; 
+ 
 	       tr1_bemcModule = module;
 	       tr1_bemcEtabin = Eta;
 	       tr1_bemcEtaValue = position.pseudoRapidity();
@@ -663,7 +680,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
 	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
 	     unsigned int module=hits[k]->module(); 
 	     unsigned int Eta=hits[k]->eta();	
-	     float energyT=hits[k]->energy();
+// 	     float energyT=hits[k]->energy();
 	     int s=fabs(hits[k]->sub());
 	     int did(0);
 	     if (module==fabs(mod) &&  Eta == fabs(eta)){
@@ -702,7 +719,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
 	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
 	     unsigned int module=hits[k]->module(); 
 	     unsigned int Eta=hits[k]->eta();	
-	     float energyT=hits[k]->energy();
+// 	     float energyT=hits[k]->energy();
 	     int s=fabs(hits[k]->sub());
 	     int did(0);
 	     if (module==fabs(mod) &&  Eta == fabs(eta)){
@@ -755,6 +772,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
        tr1_extrapolatedTOF_mX     = crossVec[0].x();
        tr1_extrapolatedTOF_mY     = crossVec[0].y();
        tr1_extrapolatedTOF_mZ = crossVec[0].z();
+       cout<<" extrapolated first track"<<endl;
      }  
    if(pairTOFgeoLocal->HelixCrossCellIds(hOuter2,idVec,pathVec,crossVec)) 
      {

@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.33 2015/02/25 01:19:38 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.34 2015/07/22 18:29:51 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.34  2015/07/22 18:29:51  ramdebbe
+// added choice to skip writting the tree to output file and added summary histograms
+//
 // Revision 1.33  2015/02/25 01:19:38  ramdebbe
 // added a setter to select writing Roman Pot Collection to output tree
 //
@@ -140,7 +143,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.33 2015/02/25 01:19:38 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.34 2015/07/22 18:29:51 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -166,14 +169,15 @@ Int_t StPeCMaker::Init() {
    LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
    LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
    LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
-   LOG_INFO <<"trigger to be selected: "      << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" )
+   LOG_INFO <<"trigger to be selected: "      << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest (const char * selectTrigger = "UPC_Main" )
+   LOG_INFO <<"choice for output: "           << treeOff << endm;         // if argument of setter setSuppressTreeOut is kTRUE, the TTree will not be writte in output file
 
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
    m_outfile->SetCompressionLevel(1);
 
 
-   uDstTree = new TTree("uDst", "Pcol uDst", 99);
+   if(!treeOff)uDstTree = new TTree("uDst", "Pcol uDst", 99);
 
    //Instantiate StPeCEvent
 
@@ -188,11 +192,13 @@ Int_t StPeCMaker::Init() {
     LOG_INFO << "StPeCMaker Init: before branch add ---------- " << endm;
 
    //Add branches
-   uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
-    LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
-   uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
-   uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
-    LOG_INFO << "StPeCMaker Init: after last branch add ---------- " << endm;
+    if(!treeOff) {
+      uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
+      uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
+      LOG_INFO << "StPeCMaker Init: after Geant branch add ---------- " << endm;
+      uDstTree->Branch("Event", "StPeCEvent", &pevent, 64000, 99);
+      LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
+    }
    //define 2-D histogram to display snapshots of individual events
    //store then in another directory
    TDirectory * saveDir = gDirectory;
@@ -204,7 +210,22 @@ Int_t StPeCMaker::Init() {
 
      fSnapShots->Add(new TH2F(Form("snapShot%d",i), Form("y z view of event %d", i) , 100, -250., 250., 100, -200., 200.));
    }
-   fSnapShots->Add(new TH1F("hNumVtx", "number of vertices in event" , 100, 0., 20.));
+   hNumVtx           = new TH1F("hNumVtx", "number of vertices in event" , 10, -0.5, 9.5);
+   hNumAccVtx        = new TH1F("hNumAccVtx", "number of accepted vertices in event" , 10, -0.5, 9.5);
+   hNumAccWithTOF    = new TH1F("hNumAccWithTOF", "number of accepted vertices with at least one TOF hit" , 10, -0.5, 9.5);
+   hNumRejecWithTOF  = new TH1F("hNumRejecWithTOF", "number of rejected vertices with TOF hits" , 10, -0.5, 9.5);
+   hNumTrkRejecVtx   = new TH1F("hNumTrkRejecVtx", "number of tracks in rejected vertex with TOF hits" , 100, 1., 1000.);
+   hzVertexAccTOF    = new TH1F("hzVertexAccTOF", "z vertex accepted with TOF  hits" , 100, -200., 200.);
+   hzVertexRejectTOF = new TH1F("hzVertexRejectTOF", "z vertex rejected with TOF  hits" , 100, -200., 200.);
+
+   fSnapShots->Add(hNumVtx);
+   fSnapShots->Add(hNumAccVtx);
+   fSnapShots->Add(hNumAccWithTOF);
+   fSnapShots->Add(hNumRejecWithTOF);
+   fSnapShots->Add(hNumTrkRejecVtx);
+   fSnapShots->Add(hzVertexAccTOF);
+   fSnapShots->Add(hzVertexRejectTOF);
+
    gDirectory = saveDir;
 
 
@@ -282,7 +303,7 @@ Int_t StPeCMaker::Make()
    if(readStMuDst){
     if(!muDst )  LOG_INFO << "StPeCMaker make: muDst not present "  << endm;
 
-//       LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
+
 //       LOG_INFO << "StPeCMaker make: trigger selected ---------- "  << triggerChoice<< endm;
       NTracks = muDst->globalTracks()->GetEntries();
        
@@ -296,11 +317,10 @@ Int_t StPeCMaker::Make()
       //
       // read MC information from MuDst
    //Fill geant simulations             //RD
-
+      LOG_INFO << "StPeCMaker make: using muDst to fill Geant +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=---------- "  << endm;
       gReturn = geant->fill(muDst);
-   }   // was commented up to here  //commented mudst ends here
-//    else
-//   {                                           //this needs fix RD 9DEC09
+   }   
+
    if(readStEvent){
      LOG_INFO << "StPeCMaker make: using StEvent---------- "  << endm;  //to read StEvent 18-NOV-2012
      event = (StEvent *)GetInputDS("StEvent");
@@ -321,6 +341,7 @@ Int_t StPeCMaker::Make()
 
    }         //rd 9DEC09
    if(readStMuDst_and_StEvent){
+
      event = (StEvent *)GetInputDS("StEvent");
      if (!event)
        {
@@ -337,27 +358,19 @@ Int_t StPeCMaker::Make()
       pevent->setTOFgeometry(mBTofGeom);
       LOG_INFO << "StPeCMaker make: using both StMuDst and StEvent  mBTofGeom after set  "  << mBTofGeom<<endm;
 
-      ok = pevent->fill(event, muDst);        
+      std::vector<int> v = pevent->fill(event, muDst);  
+      LOG_INFO << "StPeCMaker make: vector return "<<v.size()<<" first element "<<v.at(0)<<" second el: "<<v.at(1)<<" rejected with TOF hits "<<v.at(2)<<endm;
+
+      hNumAccVtx->Fill(v.at(0));
+      hNumAccWithTOF->Fill(v.at(1));
+      hNumRejecWithTOF->Fill(v.at(2));
+      hNumVtx->Fill(v.at(3));
+      hNumTrkRejecVtx->Fill(v.at(4));
+      hzVertexAccTOF->Fill(v.at(5));
+      hzVertexRejectTOF->Fill(v.at(6));
    }   
    
-//    //Fill geant simulations             //RD
-//    TDataSet* geantBranch = GetInputDS("geantBranch");
-//    if (geantBranch)
-//    {
-//      geant->fill(geantBranch);
-//    }                                   //RD 15-SEP-2012
-   
 
-
-   //Fill StPeCEvent
-   // old: event flag was set from global multiplicities above
-   // if ( geantBranch || (flag == kStOk) ) {
-     
-
-//    if (event) ok = pevent->fill(event);
-//    else       ok = pevent->fill(muDst);
-//    if (event) ok = pevent->fill(event, muDst);  //RD 
-   //   ok = pevent->fill(muDst); // 11-DEC-2011 for embedding work
    LOG_INFO << "ok returnValue " <<ok<<"  "<<returnValue<< endm;
 
 
@@ -366,7 +379,7 @@ Int_t StPeCMaker::Make()
 
 //    if ( returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  //25MAR2013 to read pp fast offline  //turn off trigger check
      LOG_INFO << "Fill Event to Tree!**********************" << endm;
-     uDstTree->Fill();
+     if(!treeOff)uDstTree->Fill();
    }
 
      

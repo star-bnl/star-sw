@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.21 2015/02/25 01:19:45 ramdebbe Exp $
+// $Id: StPeCMaker.h,v 1.22 2015/07/23 11:52:27 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.22  2015/07/23 11:52:27  ramdebbe
+// added flag to suppress tree to output and includes summary histograms
+//
 // Revision 1.21  2015/02/25 01:19:45  ramdebbe
 // added a setter to select writing Roman Pot Collection to output tree
 //
@@ -119,9 +122,11 @@ public:
 	void setUseTracks ( Bool_t includeTracks = kFALSE ) { useTracks = includeTracks ; } ;
 	void setRomanPots ( Bool_t includeRP     = kFALSE ) { useRP     = includeRP ; } ;
 
-	void setReadStMuDst    ( Bool_t includeStMuDst = kFALSE ) { readStMuDst             = includeStMuDst ; } ;
-	void setReadStEvent    ( Bool_t includeStEvent = kFALSE ) { readStEvent             = includeStEvent ; } ;
-	void setReadBothInputs ( Bool_t includeBoth = kFALSE )    { readStMuDst_and_StEvent = includeBoth ; } ;
+	void setReadStMuDst     ( Bool_t includeStMuDst = kFALSE ) { readStMuDst             = includeStMuDst ; } ;
+	void setReadStEvent     ( Bool_t includeStEvent = kFALSE ) { readStEvent             = includeStEvent ; } ;
+	void setReadBothInputs  ( Bool_t includeBoth = kFALSE )    { readStMuDst_and_StEvent = includeBoth ; } ;
+	void setSuppressTreeOut ( Bool_t suppressTree = kFALSE )   { treeOff = suppressTree ; } ;
+
 	void setOutputPerRun ( Int_t in = 1 ) { outputPerRun = in ; } ;
 
 	void setStarHall ( TVolume * pointer ) { mstarHall = pointer ; } ;
@@ -136,11 +141,14 @@ public:
 	Bool_t readStMuDst;               //if TRUE will work with information passed in StMuDst format
 	Bool_t readStEvent;               //if TRUE will work with information passed in StEvent format
 	Bool_t readStMuDst_and_StEvent;   //if TRUE will work with information passed in both StMuDst and StEvent format
-
+	Bool_t treeOff;                   //if TRUE the pico dst TTree will not be present in output files
 
 	void setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" ) { triggerChoice = selectTrigger ; } ;
 
+	int countAcceptedVtx ;
+	TH1F * hNumVtx, * hNumAccVtx, * hNumAccWithTOF, * hNumRejecWithTOF, *  hNumTrkRejecVtx, * hzVertexAccTOF, * hzVertexRejectTOF;
 	friend class StPeCPair;
+
 
 protected:
 	TFile* m_outfile;
@@ -162,6 +170,8 @@ protected:
 	Int_t   outputPerRun ; // 1=output per run 0(default)=one output file
 	TList * fSnapShots;
 
+
+
 private:
 	StMuDst* muDst;
 	string triggerChoice;             // default is UPC_Main,  it will recognize UPC_Topo, ZDC_Main
@@ -172,7 +182,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.21 2015/02/25 01:19:45 ramdebbe Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.22 2015/07/23 11:52:27 ramdebbe Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,2)
 };

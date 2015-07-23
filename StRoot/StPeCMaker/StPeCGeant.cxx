@@ -12,6 +12,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+#include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 
 
 ClassImp(StPeCGeant)
@@ -117,6 +118,7 @@ Int_t StPeCGeant::fill ( StMuDst * mu  ) {
    }
 
     TClonesArray *MuMcTracks     = mu->mcArray(1); 
+    TClonesArray *MuMcVertices   = mu->mcArray(0);
 
    int nTracks = MuMcTracks->GetEntriesFast(); 
    LOG_INFO << "StPeCGeant::fill: "<<nTracks<<"  tracks found "<<endm;
@@ -134,14 +136,16 @@ for (Int_t kg = 0; kg < nTracks; kg++) {
   StMuMcTrack *mcTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(kg);
 
   new(pParticle[nPart++]) StPeCParticle(mcTrack) ;
-//   new((*tofTracks)[globalTrackCounter]) StMuTrack((const StMuTrack &) *TofGlobalTrack);
-      
+
+  LOG_INFO << "StPeCGeant::fill Geant pid: "<<mcTrack->GePid()<<endm;  
   //       vert = trkT[i].start_vertex_p ;
   //       if ( vert != 1 ) continue ;
-  px  += mcTrack->Pxyz().x();
-  py  += mcTrack->Pxyz().y();
-  gPz += mcTrack->Pxyz().z();
-  e   += mcTrack->E();
+  if(mcTrack->GePid()==8 || mcTrack->GePid()==9){
+    px  += mcTrack->Pxyz().x();
+    py  += mcTrack->Pxyz().y();
+    gPz += mcTrack->Pxyz().z();
+    e   += mcTrack->E();
+  }
  }
    
    gPt  = ::sqrt(px*px+py*py);
@@ -161,7 +165,9 @@ for (Int_t kg = 0; kg < nTracks; kg++) {
 //    }
 //    g2t_vertex_st* vtxT = vtx->GetTable() ;
 
-//    gZVertex = vtxT->ge_x[2] ;
+    StMuMcVertex *mcVertex = (StMuMcVertex *) MuMcVertices->UncheckedAt(0);
+
+   gZVertex = mcVertex->XyzV().z() ;
    
    return 0 ;
 }

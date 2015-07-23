@@ -268,7 +268,7 @@ void StarUrQMD::InitializeUrQMD()
         inputfile << i->first << " " << i->second << endl;
       }
     /// Set particles to not decay
-    for(int i = 0; i< StableParticles.size(); i++)
+    for(unsigned int i = 0; i< StableParticles.size(); i++)
       {
         inputfile << "stb " << StableParticles[i] << endl;
       }

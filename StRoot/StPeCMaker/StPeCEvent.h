@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.15 2015/02/25 01:34:26 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.16 2015/07/22 20:11:43 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.16  2015/07/22 20:11:43  ramdebbe
+// removed RP container copy to output, needs to come back
+//
 // Revision 1.15  2015/02/25 01:34:26  ramdebbe
 // added copy of the Roman Pot StMuRpsCollection to output tree
 //
@@ -74,6 +77,7 @@
 #include "StEpcMaker/StEpcMaker.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 #include "StBTofUtil/StBTofGeometry.h"
+#include "StMuDSTMaker/COMMON/StMuRpsCollection.h"
 
 
 class StPeCEvent: public TObject {
@@ -104,7 +108,7 @@ public:
   void                            addPair(StPeCPair* pair) const;
   Int_t                           fill ( StEvent* event ) ;
   Int_t                           fill(StMuDst* mudst);
-  Int_t                           fill(StEvent* event, StMuDst* mudst);
+  std::vector<int>                fill(StEvent* event, StMuDst* mudst);
   Int_t                           infoLevel ;
   void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
   void                            setTOFgeometry(StBTofGeometry * mTOFgeo) {mTOFgeoEv = mTOFgeo; };
@@ -155,7 +159,7 @@ private:
   TClonesArray                   *tofHits;
   TClonesArray                   *tofTracks;
   TClonesArray                   *vertices;
-  TClonesArray                   *romanPots;
+/*   StMuRpsCollection              *romanPots; */
 
   StBTofGeometry                 *mTOFgeoEv;   //!
   Int_t                           shotCount;

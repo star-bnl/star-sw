@@ -34,7 +34,7 @@ public:
   void                   clear (  ) ; 
 #ifndef __CINT__
   Int_t                  fill  ( TDataSet* geant ) ; 
-  Int_t                  fill  (StMuDst * mu ) ; 
+  Int_t                  fill  ( StMuDst * mu ) ; 
 #endif /* __CINT__ */
 
   Float_t                gPt ;
