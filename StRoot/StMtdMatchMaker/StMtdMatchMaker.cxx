@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.31 2015/07/24 16:03:25 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.32 2015/07/24 16:21:24 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.32  2015/07/24 16:21:24  marr
+ * Create geometry in InitRun(), which is needed to use StMtdGeometry class.
+ *
  * Revision 1.31  2015/07/24 16:03:25  marr
  * *** empty log message ***
  *
@@ -507,8 +510,35 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	//  			MTD Geometry initialization
 	//=======================================================//
         LOG_INFO << "Initializing MTD Geometry:" << endm;
-	if(gGeoManager==0) GetDataBase("VmcGeometry");
+	if(gGeoManager)
+	  {
+	    LOG_INFO << "TGeoManager (" << gGeoManager->GetName() << "," << gGeoManager->GetTitle() << ") exists" << endm;
+	  }
+	else
+	  {
+	    GetDataBase("VmcGeometry");
+	    if(!gGeoManager)
+	      {
+		int year = GetDateTime().GetYear();
+		if(mGeomTag.Length()==0)
+		  {
+		    mGeomTag = Form("y%da",year);
+		    if(year<2012) mGeomTag = "y2014a";
+		    LOG_INFO << "Load default geometry " << mGeomTag.Data() << " for year " << year << endm;
+		  }
+		else
+		  {
+		    LOG_INFO << "Load input geometry " << mGeomTag.Data() << " for year " << year << endm;
+		  }
+
+		TString ts = Form("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C(\"%s\",1)",mGeomTag.Data());
+		int ierr=0;
+		gROOT->Macro(ts.Data(),&ierr);
+		assert(!ierr);
+	      }
+	  }
 	assert(gGeoManager);
+
 	if(!gMtdGeometry)
 	  {
 	    mMtdGeom = new StMtdGeometry("mtdGeometry","mtdGeometry in StMtdMatchMaker",gGeoManager);
