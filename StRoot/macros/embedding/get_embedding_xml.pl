@@ -4,8 +4,12 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.23 2015/06/01 02:15:17 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.24 2015/07/24 03:33:24 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.24  2015/07/24 03:33:24  zhux
+# Embedding output disk is set to /global/projecta/projectdirs/starprod/embedding, and '-eliza' option is dropped.
+# temporary log files is stored in /global/projecta/projectdirs/starprod/log.
+#
 # Revision 1.23  2015/06/01 02:15:17  zhux
 # added 'starprod' group write permission for embedding data files.
 #
@@ -59,7 +63,7 @@ my $staroflDir    = "/home/starofl"; # starofl home
 
 # Common log/generator area under /project directory at PDSF
 #   The directories only used for the temporary storage for log files
-$EMLOGS = "/project/projectdirs/star/embedding";
+$EMLOGS = "/global/projecta/projectdirs/starprod/log";
 
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
 my $production    = "P08ic";                                        # Default production
@@ -87,8 +91,8 @@ my $daqEvents     = "$staroflDir/embedding/$production";            # File list 
 my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
 
 # Output path will be the following structure
-# $elizaDisk/star/starprod/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}
-my $elizaDisk     = "/eliza14" ;                                    # Default eliza disk (is /eliza14)
+# $elizaDisk/starprod/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}
+my $elizaDisk     = "/global/projecta/projectdirs" ;                # Default eliza disk (is /global/projecta/projectdirs)
 $verbose          = 0 ;                                             # verbose flag (defalt is false)
 
 my $maxFilesPerProcess = 1 ;       # 1 file per job
@@ -113,7 +117,7 @@ GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
     'force' => \$force,                    # Flag for overwrite
     'geantid=i' => \$pid,                  # Geantid
-    'eliza=s' => \$elizaDisk,              # Target eliza disk
+#    'eliza=s' => \$elizaDisk,              # Target eliza disk
     'help' => \$help,
     'library=s' => \$library,              # Library
     'local' => \$local,                    # Make local test script
@@ -796,9 +800,15 @@ sub getGeneratorDirectory {
     print "  Create generator directory : $target\n";
     system("mkdir -pv $target");
 
-    my $command = "chmod ug+rw -R $dir";
-    print "  Make target directory group readable, executing: $command \n";
+    my $command = "chmod ug+rw -R $dir/..";
+    print "  Make production directory is group readable/writable, executing: $command \n";
     system("$command");
+    my $command1 = "chmod ug+rw -R $dir";
+    print "  Make generator directory group readable/writable, executing: $command1 \n";
+    system("$command1");
+    my $command2 = "chmod ug+rw -R $target";
+    print "  Make list directory group readable/writable, executing: $command2 \n";
+    system("$command2");
   }
 
   return "$target" ;
@@ -827,7 +837,7 @@ sub getTempLogDirectory {
     system("mkdir -pv $target");
 
     my $command = "chmod ug+rw -R $target";
-    print "  Make target directory group readable, executing: $command \n";
+    print "  Make target directory group readable/writable, executing: $command \n";
     system("$command");
   }
 
@@ -858,7 +868,7 @@ sub getOutputDirectory {
   my $requestNumber = shift @_ ;
   my $production    = shift @_ ;
   my $library       = shift @_ ;
-  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY";
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -873,7 +883,7 @@ sub getOutputDirectoryPt {
   my $library       = shift @_ ;
   my $ptmin 	      = shift @_ ;
   my $ptmax 	      = shift @_ ;
-  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/Pt\_$ptmin\_$ptmax";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/Pt\_$ptmin\_$ptmax";
 }
 #----------------------------------------------------------------------------------------------------
 # Get list directory
@@ -885,7 +895,7 @@ sub getListDirectory {
   my $requestNumber = shift @_ ;
   my $production    = shift @_ ;
   my $library       = shift @_ ;
-  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR";
 }
 #----------------------------------------------------------------------------------------------------
 # Get list directory (with pt hard bin)
@@ -899,7 +909,7 @@ sub getListDirectoryPt {
   my $library       = shift @_ ;
   my $ptmin 	      = shift @_ ;
   my $ptmax 	      = shift @_ ;
-  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR/Pt\_$ptmin\_$ptmax";
+  return "$elizadisk/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR/Pt\_$ptmin\_$ptmax";
 }
 
 #----------------------------------------------------------------------------------------------------
