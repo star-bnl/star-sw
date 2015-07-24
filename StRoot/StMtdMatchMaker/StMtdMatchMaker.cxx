@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.30 2015/07/10 16:07:40 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.31 2015/07/24 16:03:25 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.31  2015/07/24 16:03:25  marr
+ * *** empty log message ***
+ *
  * Revision 1.30  2015/07/10 16:07:40  marr
  * Add the distance along radius to the calculation of the distance between
  * a MTD hit and a projected track position
@@ -130,6 +133,7 @@
 #include "TSystem.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "TGeoManager.h"
 
 #include "StEvent.h"
 #include "StTrackNode.h"
@@ -499,36 +503,24 @@ void StMtdMatchMaker::bookTree(){
 /// InitRun: initialize geometries (retrieve beam line constraint from database)
 Int_t StMtdMatchMaker::InitRun(int runnumber) {
 
-	LOG_INFO << "Initializing MTD Geometry:" << endm;
 	//=======================================================//
 	//  			MTD Geometry initialization
 	//=======================================================//
-	mMtdGeom = 0;
-	mMtdGeom = new StMtdGeometry("mtdGeometry","mtdGeometry in StMtdMatchMaker");
-	mMtdGeom->SetCosmicFlag(mCosmicFlag);
-	mMtdGeom->SetELossFlag(mELossFlag);
-	mMtdGeom->SetNExtraCells(mNExtraCells);
-	if(mGeomTag.Length()>0)
-		mMtdGeom->SetGeomTag(mGeomTag);
-
-	Float_t fScale = -1.;
-	if(mLockBField){
-		mMtdGeom->SetLockBField(mLockBField);
-		LOG_INFO<<" Initializing locked mag.field for simulation! "<<endm;
-	}else if(StarMagField::Instance()){
-		//fScale = St_MagFactorC::instance()->ScaleFactor();
-		fScale = StarMagField::Instance()->GetFactor();
-		if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
-		else{
-			mMtdGeom->SetBFactor(fScale);
-			LOG_INFO<<" Initializing mag.field from StarMagField! fScale = "<<fScale<<endm;
-		}
-	}else{
-		assert(StarMagField::Instance());
-		LOG_ERROR<<" ******* MagField uninitialized, have you loaded StMagFMaker ?! *******"<<endm;
-	}
-	mMtdGeom->Init(this);
-	LOG_INFO<<" Created a new mtdGeometry ..."<<endm;
+        LOG_INFO << "Initializing MTD Geometry:" << endm;
+	if(gGeoManager==0) GetDataBase("VmcGeometry");
+	assert(gGeoManager);
+	if(!gMtdGeometry)
+	  {
+	    mMtdGeom = new StMtdGeometry("mtdGeometry","mtdGeometry in StMtdMatchMaker",gGeoManager);
+	    mMtdGeom->SetCosmicFlag(mCosmicFlag);
+	    mMtdGeom->SetELossFlag(mELossFlag);
+	    mMtdGeom->SetNExtraCells(mNExtraCells);
+	    if(mLockBField) mMtdGeom->SetLockBField(mLockBField);
+	    mMtdGeom->Init(this);
+	    LOG_INFO<<" Created a new mtdGeometry ..."<<endm;
+	  }
+	assert(gMtdGeometry);
+	mMtdGeom = gMtdGeometry;
 
 	//========== Set Beam Line ===================== 
 	double x0 = 0.;
