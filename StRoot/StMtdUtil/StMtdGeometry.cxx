@@ -1,8 +1,15 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.13 2015/05/01 01:55:34 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.14 2015/07/24 15:56:05 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.14  2015/07/24 15:56:05  marr
+ * 1. Remove calling a macro in Init() to create geometry. It should be done within
+ * the maker that uses this utility class.
+ * 2. Add the TGeoManager parameter to the default constructor to force the existance
+ * of the gometry when using this utility class.
+ * 3. Simplify the code for getting the pointer to the magnetic field
+ *
  * Revision 1.13  2015/05/01 01:55:34  marr
  * Fix the geometry of shifted backleg 8 and 24
  *
@@ -363,7 +370,7 @@ ClassImp(StMtdGeometry)
 #endif
 
 // ___________________________________________________________________________
-StMtdGeometry::StMtdGeometry(const char* name, const char* title)
+StMtdGeometry::StMtdGeometry(const char* name, const char* title, TGeoManager *manager)
 : TNamed(name,title)
 {
 	//
@@ -378,7 +385,8 @@ StMtdGeometry::StMtdGeometry(const char* name, const char* title)
 	mStarBField = 0;
 	mBFactor = -1.;
 	mLockBField = 0;
-	mGeomTag = "";
+	assert(manager);
+	mGeoManager = manager;
 
 	fMagEloss = new TF1("f2","[0]*exp(-pow([1]/x,[2]))",0.,100);
 	fMagEloss->SetParameters(1.38147e+00,6.08655e-02,5.03337e-01);
@@ -417,6 +425,16 @@ void StMtdGeometry::Init(StMaker *maker){
 		LOG_INFO<<"Input data from year "<<mYear<<endm;
 	}
 
+	// Get magnetic field map
+	if(!StarMagField::Instance() && mLockBField)
+	  {
+	    LOG_INFO<<" Initializing locked mag.field for simulation! "<<endm;
+	    new StarMagField ( StarMagField::kMapped, mBFactor);
+	  }
+	assert(StarMagField::Instance());
+	mStarBField = StarMagField::Instance();
+	LOG_INFO<<" Initializing mag.field from StarMagField! fScale = "<<mStarBField->GetFactor()<<endm;
+	
 	// Load geant2backlegID Map 
 	// Extract MTD maps from database
 	if(mYear<=2012)
@@ -463,56 +481,18 @@ void StMtdGeometry::Init(StMaker *maker){
 	      }
 	  }
 
-	// Load geometry
-	if(IsDebugOn())
-	  {
-	    Info("Init","testing access to TGeoManager");
-	  }
-	
-	if (gGeoManager) 
-	  { // Geom already there
-	    if(IsDebugOn())
-	      {
-		Info("Load","TGeoManager(%s,%s) is already there",gGeoManager->GetName(),gGeoManager->GetTitle());
-	      }
-	  }
-	else 
-	  {
-	    if(mGeomTag.Length()==0)
-	      {
-		mGeomTag = Form("y%da",mYear);
-		if(mYear<2012)
-		  mGeomTag = "y2014a";
-		LOG_INFO << "Load default geometry " << mGeomTag.Data() << " for year " << mYear << endm;
-	      }
-	    else
-	      {
-		LOG_INFO << "Load input geometry " << mGeomTag.Data() << " for year " << mYear << endm;
-	      }
-
-	    TString ts = Form("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C(\"%s\",1)",mGeomTag.Data());
-	    if(IsDebugOn())
-	      {
-		Warning("Init","add  TGeoManager");
-		Info("Init","WILL execute macro=%s=\n",ts.Data()); 
-	      }
-	    Int_t ierr=0;
-	    gROOT->Macro(ts.Data(),&ierr);
-	    assert(!ierr);
-	  }
-	assert(gGeoManager);
 	Int_t mGeoYear = 0;
-	if(gGeoManager->CheckPath("/HALL_1/CAVE_1/MUTD_1/MTMT_1")){
+	if(mGeoManager->CheckPath("/HALL_1/CAVE_1/MUTD_1/MTMT_1")){
 		LOG_INFO<<"found y2012 geometry"<<endm;
 	   	mGeoYear=2012;
 	}
-	else if(gGeoManager->CheckPath("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1")){
+	else if(mGeoManager->CheckPath("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1")){
 		LOG_INFO<<"found y2015 geometry"<<endm;
 	   	mGeoYear=2015;
 	}
 
 	// intialize backleg/module geometry
-	TGeoVolume *mMtdGeom = gGeoManager->FindVolumeFast("MUTD");
+	TGeoVolume *mMtdGeom = mGeoManager->FindVolumeFast("MUTD");
 	const char *elementName = mMtdGeom->GetName();
 	if(elementName){
 		if(IsDebugOn()) LOG_INFO <<" found detector:"<<elementName<<endm;
@@ -531,12 +511,12 @@ void StMtdGeometry::Init(StMaker *maker){
 			TString name = node->GetName();
 			TString path;
 			next.GetPath(path);
-			if(!gGeoManager->CheckPath(path.Data())){ 
+			if(!mGeoManager->CheckPath(path.Data())){ 
 				LOG_WARN<<"Path "<<path.Data()<<" is not found"<<endm;
 				continue;
 			}
-			gGeoManager->cd(path.Data());
-			TGeoVolume *detVol = gGeoManager->GetCurrentVolume();	
+			mGeoManager->cd(path.Data());
+			TGeoVolume *detVol = mGeoManager->GetCurrentVolume();	
 			Bool_t found = ( IsMTTG(detVol) || IsMTRA(detVol) );
 			if (found) {
 				detVol->SetVisibility(kTRUE);
@@ -546,7 +526,7 @@ void StMtdGeometry::Init(StMaker *maker){
 				detVol->SetVisibility(kFALSE);
 				continue;
 			}
-			if(IsDebugOn()) LOG_INFO<<"currentpath = "<<gGeoManager->GetPath()<<" node name="<<gGeoManager->GetCurrentNode()->GetName()<<endm;
+			if(IsDebugOn()) LOG_INFO<<"currentpath = "<<mGeoManager->GetPath()<<" node name="<<mGeoManager->GetCurrentNode()->GetName()<<endm;
 
 			//fill GeoBLs and GeoModules
 			if(IsMTTG(detVol)){
@@ -585,9 +565,9 @@ void StMtdGeometry::Init(StMaker *maker){
 					  }
 					Double_t op[3];
 					Double_t local[3] = {0,0,0};
-					gGeoManager->LocalToMaster(local,op);
+					mGeoManager->LocalToMaster(local,op);
 					++mNValidBLs;
-					TGeoHMatrix *mat = gGeoManager->GetCurrentMatrix();
+					TGeoHMatrix *mat = mGeoManager->GetCurrentMatrix();
 					StThreeVectorD point(op[0],op[1],op[2]);
 					if(mGeoYear==2012)
 					  {
@@ -617,13 +597,13 @@ void StMtdGeometry::Init(StMaker *maker){
 					}
 					Double_t op[3];
 					Double_t local[3] = {0,0,0};
-					gGeoManager->LocalToMaster(local,op);
+					mGeoManager->LocalToMaster(local,op);
 					++imodule;
 					double R = sqrt(op[0]*op[0]+op[1]*op[1]);
 					if(R<minR) minR = R;
 					if(R>maxR) maxR = R;
 
-					TGeoHMatrix *mat = gGeoManager->GetCurrentMatrix();
+					TGeoHMatrix *mat = mGeoManager->GetCurrentMatrix();
 					StThreeVectorD point(op[0],op[1],op[2]);
 					if(mGeoYear==2012)
 					  {
@@ -651,20 +631,6 @@ void StMtdGeometry::Init(StMaker *maker){
 					LOG_INFO<<"valid (backleg,module) = "<<i+1<<","<<j+1<<endm;
 			}
 		}
-	}
-
-	// Get magnetic field map
-	if(!StarMagField::Instance()){
-		LOG_ERROR<<"StarMagField has not been initialized!"<<endm;
-		if(mLockBField){
-			new StarMagField ( StarMagField::kMapped, mBFactor);
-			mStarBField = StarMagField::Instance();
-		}
-		assert(StarMagField::Instance());
-	}else{
-		Float_t  fScale = StarMagField::Instance()->GetFactor();
-		if(TMath::Abs(mBFactor-fScale)>0.01) LOG_ERROR<<"Inconsistent StarMagField scale factor! mBFactor = "<<mBFactor<<" fScale = "<<fScale<<" Please do SetBFactor()"<<endm;
-		mStarBField = StarMagField::Instance();
 	}
 }
 

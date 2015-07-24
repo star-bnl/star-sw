@@ -1,8 +1,15 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.8 2015/05/01 01:55:34 marr Exp $
+ * $Id: StMtdGeometry.h,v 1.9 2015/07/24 15:56:05 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.9  2015/07/24 15:56:05  marr
+ * 1. Remove calling a macro in Init() to create geometry. It should be done within
+ * the maker that uses this utility class.
+ * 2. Add the TGeoManager parameter to the default constructor to force the existance
+ * of the gometry when using this utility class.
+ * 3. Simplify the code for getting the pointer to the magnetic field
+ *
  * Revision 1.8  2015/05/01 01:55:34  marr
  * Fix the geometry of shifted backleg 8 and 24
  *
@@ -32,6 +39,7 @@
 #include "TNamed.h"
 #include "TObject.h"
 #include "TF1.h"
+#include "TGeoManager.h"
 #include "TGeoNode.h"
 #include "TGeoMatrix.h"
 #include "TGeoShape.h"
@@ -172,7 +180,8 @@ class StMtdGeometry : public TNamed{
 
  public:
   StMtdGeometry(const char* name="mtdGeo",
-		const char* title="Simplified Mtd Geometry");
+		const char* title="Simplified Mtd Geometry",
+		TGeoManager *manager = 0);
   ~StMtdGeometry();
   
   void	 Init(StMaker *maker);
@@ -204,7 +213,6 @@ class StMtdGeometry : public TNamed{
   Double_t 	 GetFieldZ(StThreeVectorD pos) const;
   Double_t 	 GetFieldZ(Double_t x, Double_t y, Double_t z) const;
   StMtdGeoModule *GetGeoModule(Int_t iBL, Int_t iMod) const;
-  void           SetGeomTag(const char *tag){mGeomTag=tag;}
 
  protected:
   Bool_t   mDebug;        //!Control message printing of this class
@@ -224,7 +232,7 @@ class StMtdGeometry : public TNamed{
    
   static const char* backlegPref[4];//= "MTMT,MTMF,MTTG,MTT1";
   static const char* modulePref  ;//= "MTRA";
-  TString mGeomTag;
+  TGeoManager *mGeoManager;
 
   Bool_t 		IsMTTG(const TGeoVolume * vol) const;
   Bool_t 		IsMTRA(const TGeoVolume * vol) const { return !(strcmp(vol->GetName(), modulePref));}
@@ -234,7 +242,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.8 2015/05/01 01:55:34 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.9 2015/07/24 15:56:05 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1);
 };
 
