@@ -14,7 +14,7 @@ class StrangeMuDstPlayer {
   void DoFileSplit(Bool_t val = kTRUE);
   void DoMC(Bool_t val = kTRUE);
   void DoT0Abort(Bool_t val = kTRUE);
-  void DoTopMapFix(Bool_t val = kTRUE);
+  //   void DoTopMapFix(Bool_t val = kTRUE); // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
   void DoReadDST(Bool_t val = kTRUE);
   void DoV0(Bool_t val = kTRUE);
   void DoXi(Bool_t val = kTRUE);
@@ -90,8 +90,9 @@ inline void StrangeMuDstPlayer::DoMC(Bool_t val)
             { doMC = val; }
 inline void StrangeMuDstPlayer::DoT0Abort(Bool_t val)
             { doT0Abort = val; }
-inline void StrangeMuDstPlayer::DoTopMapFix(Bool_t val)
-            { doTopMapFix = val; }
+// RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
+// inline void StrangeMuDstPlayer::DoTopMapFix(Bool_t val)
+//             { doTopMapFix = val; }
 inline void StrangeMuDstPlayer::DoReadDST(Bool_t val)
             { doReadDST = val; }
 inline void StrangeMuDstPlayer::DoV0(Bool_t val)
