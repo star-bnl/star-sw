@@ -501,6 +501,10 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,1);
       mk->PrintAttr();
     }
+    if (maker== "StGmtClusterMaker") {
+      if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  1);
+      if (GetOption("gmtClusTree")) mk->SetAttr("gmtClusTree", 1);
+    }
     if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {

@@ -1403,11 +1403,15 @@ Bfc_st BFC[] = { // standard chains
 
   // Note: MTD related chains - because of the TrkMask, need to happen before TpcHitMaker
   {"mtdFilt"  ,"","","", "StMtdEvtFilterApplyMaker","StDataFilterMaker","MTD-based event filtering",kFALSE},
-  {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
-  {"mtdDat"   ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
-   ,                                                                                "MTD hit maker",kFALSE},
-  {"mtdTrkMask","","","db","StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},  
-
+  {"mtd"      ,"","","mtdDat,mtdMatch","",                                           "","MTD Chain",kFALSE},
+  {"mtdDat"   ,"mtd_raw","","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker",     "MTD hit maker",kFALSE},
+  {"mtdTrkMask","","","db",      "StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},  
+  // GMT
+  {"gmt"        ,"","","gmtDat,gmtClu"                                      ,"","","Gmt data Chain",kFALSE},
+  {"gmtDat"     ,"","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
+  {"gmtClu"     ,"","","gmtutil","StGmtClusterMaker","StGmtClusterMaker"       ,"GMT cluster maker",kFALSE},
+  {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
+  {"gmtClusTree","","","gmtClu","","",                                "Fill TTree for GMT clusters",kFALSE},
 
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
@@ -1433,10 +1437,6 @@ Bfc_st BFC[] = { // standard chains
    ,                  "StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
 
 
-  // GMT
-  {"gmt"        ,"GmtChain","","gmtDat,gmtClu"                ,"StMaker","StChain","Gmt data Chain",kFALSE},
-  {"gmtDat"     ,"","GmtChain", "event","StGmtRawMaker","StGmtRawMaker",          "GMT Data reader",kFALSE},
-  {"gmtClu"    ,"","GmtChain","gmtutil","StGmtClusterMaker","StGmtClusterMaker","GMT cluster maker",kFALSE},
 
   {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
    ,                                                                                                kFALSE},
@@ -1563,7 +1563,7 @@ Bfc_st BFC[] = { // standard chains
 
 
   // left MTD chain for sumulation alone here
-  {"mtdSim"    ,"","MtdChain","","StMtdSimMaker",           "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
+  {"mtdSim"    ,"","","","StMtdSimMaker",                   "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
 
 
   // Time Of Flight related options
