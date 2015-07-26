@@ -290,9 +290,9 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,xL,yL,zL;
+    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL;
   };
-  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth"
+  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks"
 #ifdef __TPC_LOCAL_COORDINATES__
     ":xL:yL:zL"
 #endif /* __TPC_LOCAL_COORDINATES__ */
@@ -377,6 +377,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.pad = tpcHit->pad();
 		    BPoint.timebucket = tpcHit->timeBucket();
 		    BPoint.IdTruth =  tpcHit->idTruth();
+		    BPoint.npads   =  tpcHit->padsInHit();
+		    BPoint.ntbks   =  tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
 		    Nt->Fill(&BPoint.sector);
 		  }
 		}
@@ -570,6 +572,29 @@ void StAnalysisMaker::PrintSstHits() {
       }
     }
   }
+}
+//________________________________________________________________________________
+void StAnalysisMaker::PrintGmtHits() {
+#ifdef _ST_GMT_HIT_H_
+  //  Double_t zPrim = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  const StGmtCollection* GmtCollection = pEvent->gmtCollection();
+  if (! GmtCollection) return;
+  UShort_t NumModules = GmtCollection->getNumModules();
+  for (UShort_t m = 0; m < NumModules; m++) {
+    const StGmtHitCollection *coll = GmtCollection->getHitCollection(m);
+    if (! coll) continue;
+    const StSPtrVecGmtHit &hits = coll->getHitVec();
+    UInt_t NoHits = hits.size();
+    for (UInt_t l = 0; l < NoHits; l++) {
+      const StGmtHit *hit = hits[l];
+      if (hit) {
+	hit->Print("");
+      }
+    }
+  }
+#endif /* _ST_GMT_HIT_H_ */
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintToFHits() {
@@ -1139,9 +1164,12 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     LOG_QA << "# PSDs:                " << event->numberOfPsds() << endm;
   }
 #ifdef _ST_GMT_HIT_H_
-  if (event->gmtCollection() && event->gmtCollection()->getNumHits()) {
+  if (event->gmtCollection() && 
+      (event->gmtCollection()->getNumHits() || event->gmtCollection()->getNumStrips())
+      ) {
     LOG_QA << "# GMT hits:           " << event->gmtCollection()->getNumHits() 
-	   << " points: " << event->gmtCollection()->getNumPoints()
+	   << " points: " << event->gmtCollection()->getNumPoints() 
+	   << " strips: " << event->gmtCollection()->getNumStrips()
 	   << endm;
   }
 #endif /* _ST_GMT_HIT_H_ */
