@@ -12,7 +12,7 @@
 #include "TCernLib.h"
 #endif
 
-#define __NOCHECK__ // Disable unused paramter and error checks
+//#define __CHECKIT__ // Enable unused paramter and error checks
 
 #define NICE(a) ( ((a) <= -M_PI)? ((a)+2*M_PI) :\
                   ((a) >   M_PI)? ((a)-2*M_PI) : (a))
@@ -69,12 +69,12 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
     assert(fabs(mParentHz-mParentNode->mFP.hz()) < EC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
-#ifndef __NOCHECK__
+#ifdef __CHECKIT__
     mParentNode->mFP.check("2StiTrackNodeHelper::set");
 #endif
   }
   if (mTargetNode->isValid()) {
-#ifndef __NOCHECK__
+#ifdef __CHECKIT__
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
 #endif
     assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
@@ -101,7 +101,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
-#ifndef __NOCHECK__
+#ifdef __CHECKIT__
   parPars.check("1propagatePars");
 #endif
   rotPars = parPars;
@@ -124,7 +124,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     rotPars._sinCA /= nor;
     rotPars.eta()= NICE(parPars.eta()-alpha); 
   }// end of rotation part
-
   ierr = rotPars.check(); // check parameter validity to continue
   if (ierr) return 1;
   
@@ -165,7 +164,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
 
   ierr = proPars.check();
   if (ierr) return 2;
-
   return 0;
 } 
 //______________________________________________________________________________
@@ -279,12 +277,12 @@ StiDebug::Break(nCall);
       mBestDelta = sqrt(er1*er2/(er1+er2));
 
     }
-#ifndef __NOCHECK__
+#ifdef __CHECKIT__
     mBestParentPars.check("1makeFit"); 
 #endif
     mFitdParentPars = mFitdPars;
     mFitdParentErrs = mFitdErrs;
-#ifndef __NOCHECK__
+#ifdef __CHECKIT__
     mFitdParentPars.check("2makeFit");
     mFitdParentErrs.check("3makeFit");
 #endif
