@@ -161,13 +161,15 @@ assert(Vn.Mag2()>=0.999);
    }  
 }
   double sinL = mDir[2];
+  assert(fabs(sinL)<1.001);
+  if (sinL<-1) sinL=-1;
+  if (sinL> 1) sinL= 1;
   double cosL = (1-sinL)*(1+sinL);
-  if (cosL <0) 		{cosL = 0;}
-  else if (cosL >1) 	{cosL = 1;}
-  else 			{cosL = sqrt(cosL);}
+  cosL = sqrt(cosL);
 
   double cosP = 1,sinP=0;;
   if (cosL>1e-5) { cosP=mDir[0]/cosL; sinP=mDir[1]/cosL;}
+  assert(fabs(cosP*cosP+sinP*sinP-1)<1e-5);
 
 // Convert points into global sys
   for (int ip=0;ip<kNPonts;ip++) {
@@ -248,3 +250,30 @@ int StvGoneRejector::Reject(const float x[3]) const
   }
   return 0;
 }
+//_____________________________________________________________________________
+int StvGoneRejector::Test()
+{
+  StvGoneRejector R[2];
+//  float pos[3] = { 50,100,150 };
+  float pos[3] = { 50,0,150 };
+
+  for (int jk=0;jk<2;jk++) {
+    R[jk].Reset(pos);
+    R[jk].Prepare();
+    pos[2]*=-1;
+  }   
+//		Check points
+
+  for (int ip1=0;ip1<kNPonts;ip1++) {
+    int found = 0;
+    for (int ip2=0;ip2<kNPonts;ip2++) {
+      if (fabs(R[0].mPoint[ip1][0]-R[1].mPoint[ip2][0])>1e-5) continue;
+      if (fabs(R[0].mPoint[ip1][1]-R[1].mPoint[ip2][1])>1e-5) continue;
+      if (fabs(R[0].mPoint[ip1][2]+R[1].mPoint[ip2][2])>1e-5) continue;
+      found = 1; break;
+    }
+    assert(found);
+  }
+  return 0;
+}
+    
