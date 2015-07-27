@@ -1214,17 +1214,17 @@ Bfc_st BFC[] = { // standard chains
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
 
-  //#ifndef  __NoStrangeMuDst__
+#ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
    ,                                     "StStrangeMuDstMaker,Tree","Load MuDST misc. dependencies",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
-  //#else /* __NoStrangeMuDst__  
-  // If NoStrangeMuDst, StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__*/
-  //{"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
-  //{"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
-  // ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
-  //#endif /* __NoStrangeMuDst__ */
+#else /* __NoStrangeMuDst__  
+  // If NoStrangeMuDst, StMuDSTMaker has to be c with -D__NO_STRANGE_MUDST__*/
+  {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
+  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
+   ,                                                   "StMuDSTMakerNoStrange","Load MuDST library",kFALSE},
+#endif /* __NoStrangeMuDst__ */
 
   {"geantL","","","geomT,gen_T,sim_T,StarMagField","","geometry,Geom,St_db_Maker,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
@@ -1655,18 +1655,18 @@ Bfc_st BFC[] = { // standard chains
   {"pmdDis"    ,"pmdDis","pmdReco","PmdClust","StPmdDiscriminatorMaker"
    ,                                              "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 
-  //#ifndef __NoStrangeMuDst__
-  //{"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
-  // ,                                                                      "Find Kinks from StEvent",kFALSE},
-  //{"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker"
-  // ,                                                                        "Find V0s from StEvent",kFALSE},
-  //{"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker"
-  // ,                                                                     "Xis AND V0s from StEvent",kFALSE},
-  //#else /* ! __NoStrangeMuDst__ */
+#ifndef __NoStrangeMuDst__
+  {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
+   ,                                                                      "Find Kinks from StEvent",kFALSE},
+  {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker"
+   ,                                                                        "Find V0s from StEvent",kFALSE},
+  {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker"
+   ,                                                                     "Xis AND V0s from StEvent",kFALSE},
+#else /* ! __NoStrangeMuDst__ */
   {"Kink2"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"V02"         ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"Xi2"         ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  //#endif /* __NoStrangeMuDst__ */
+#endif /* __NoStrangeMuDst__ */
 
   {"V0svt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"Xisvt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
@@ -1706,19 +1706,19 @@ Bfc_st BFC[] = { // standard chains
 
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
 
-  //#ifndef __NoStrangeMuDst__
-  //{"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
-  //#else
+#ifndef __NoStrangeMuDst__
+  {"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
+#else
   {"StrngMuDST","","",""                                                 ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  //#endif /* __NoStrangeMuDst__ */
+#endif /* __NoStrangeMuDst__ */
 
   {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
 
-  //#ifndef __NoStrangeMuDst__
-  //{"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST,Tree",    "StMuDstMaker","","Writes Common MuDST",kFALSE},
-  //#else /* ! __NoStrangeMuDst__ */
+#ifndef __NoStrangeMuDst__
+  {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST,Tree",    "StMuDstMaker","","Writes Common MuDST",kFALSE},
+#else /* ! __NoStrangeMuDst__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
-  //#endif /* __NoStrangeMuDst__ */
+#endif /* __NoStrangeMuDst__ */
 
   {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
