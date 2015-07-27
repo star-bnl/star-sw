@@ -949,7 +949,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  my $geometry = "Geometry." . $tag . ".root";
 	  Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
 				      $LIB . "/" . "Geometry" . "." . $env1->{SUFSOLIB}),
-					qq(cd %>:d;root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null) ;
+					qq(cd %>:d;root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null &);
 	ENDL:
 	}
       }	else { # AgiGeometry
