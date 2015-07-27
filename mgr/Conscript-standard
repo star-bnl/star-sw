@@ -860,9 +860,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
 	.  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
   }
-  if ($pkg eq 'StMuDSTMaker') {
-    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
-  }
+#  if ($pkg eq 'StMuDSTMaker') {
+#    $CPPFLAGS .= " -D__NO_STRANGE_MUDST__";
+#  }
   if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
     $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
     $CPPPATH .= $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/base"
