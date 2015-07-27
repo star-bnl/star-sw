@@ -236,7 +236,7 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     track->setFlag(1);
     _trackContainer->push_back(track);
     track->setId(_trackContainer->size());
-    track->reserveHits();
+//VP    track->reserveHits();
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     nSsdHits+=track->getFitPointCount(kSsdId);
@@ -270,6 +270,7 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
     nTTot++;
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
     Int_t errType = Fit(track,rMin);
+    _trackSeedFinder->FeedBack(errType == kNoErrors);
     if (errType != kNoErrors) {BFactory::Free(track);}
     else                      {assert(track->getChi2()<1000);}
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
@@ -536,14 +537,10 @@ assert(direction || leadNode==track->getLastNode());
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
 
-  static vector<StiDetector *> detectors(100); // scratch space to save list of detectors
-
   while (((!direction)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
     vector<StiDetectorNode*>::const_iterator sector;
-    //vector<StiDetector*> detectors;
-    detectors.clear(); // clear on each call?
-
+    vector<StiDetector*> detectors;
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
 
       //find all relevant detectors to visit.
@@ -630,13 +627,6 @@ assert(direction || leadNode==track->getLastNode());
 
       int nHits = hitCont.getNHits();
 
-if (nHits)
-{
-StiDebug::Count("HitCand:Rxy",testNode.getRxy(),nHits);
-StiDebug::Count("HitCand",nHits);
-
-
-}       
       testNode.setHitCand(nHits);
       if (direction) {
         nHits=1;
