@@ -6,6 +6,10 @@
 * as the TPC may have more.
 *
   coeff[6] : a list of 6 coefficients which meaning changes for each detector
+  The simplest errors in local frame, where x=const is detector plane:
+  coeff[0] => Yerr**2 
+  coeff[1] => Zerr**2 
+
   For TPC coeff is in  cm^2 and 
   there are two instances of this struct i.e. one for the inner and outer sectors.
   coeff[0] =>  Intrinsic resolution, padrow direction
