@@ -171,34 +171,20 @@ Int_t StTpcAlignerMaker::Init(){
   }
   gMessMgr->Warning() << "StTpcAlignerMaker::Init found " << f->GetName() << " Create TpcInOutTree" << endm;
   f->cd();
-   Int_t comp   = 1;       // by default file is compressed
-   f->SetCompressionLevel(comp);
-   Int_t split  = 9;       // by default, split Event in sub branches
-   //   Int_t split  = -2;       // by default, split Event in sub branches << old style
-#if 0
-   Int_t write  = 1;       // by default the tree is filled
-   Int_t hfill  = 0;       // by default histograms are not filled
-   Int_t read   = 0;
-   Int_t arg4   = 1;
-   Int_t arg5   = 600;     //default number of tracks per event
-   Int_t netf   = 0;
-   Int_t punzip = 0;
-   Double_t told = 0;
-   Double_t tnew = 0;
-   Int_t printev = 100;
-   if (arg5 < 100) printev = 1000;
-   if (arg5 < 10)  printev = 10000;
-#endif
-   Int_t bufsize = 64000;
+  Int_t comp   = 1;       // by default file is compressed
+  f->SetCompressionLevel(comp);
+  Int_t split  = 9;       // by default, split Event in sub branches
+  //   Int_t split  = -2;       // by default, split Event in sub branches << old style
+  Int_t bufsize = 64000;
   if (split)  bufsize /= 4;
 #if 1
    Int_t branchStyle = 1; //new style by default
    if (split < 0) {branchStyle = 0; split = -1-split;}
-      TTree::SetBranchStyle(branchStyle);
+   TTree::SetBranchStyle(branchStyle);
 #endif
   TpcInOutTree = new TTree("TpcInOutTree","the TPC residuals between Inner and Outer sub sectors");
-      TpcInOutTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
-      TpcInOutTree->SetCacheSize(10000000);  // set a 10 MBytes cache (useless when writing local files)
+  TpcInOutTree->SetAutoSave(1000000000); // autosave when 1 Gbyte written
+  TpcInOutTree->SetCacheSize(10000000);  // set a 10 MBytes cache (useless when writing local files)
 #if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   StTpcInOutMatch::Class()->IgnoreTObjectStreamer();
   HelixPar_t::Class()->IgnoreTObjectStreamer();
