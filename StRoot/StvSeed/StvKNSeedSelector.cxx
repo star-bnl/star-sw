@@ -26,6 +26,9 @@ static const float kDisRatio=   0.8;		//ratio for KNN distance
 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
+enum { kNumTheDiv = 20 };			//number of divisions in theta
+static float kStpTheDiv = M_PI/kNumTheDiv;	//step in theta map
+
 #define Sq(x) ((x)*(x))
 
 
@@ -127,8 +130,7 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
   aux.mCosThe = sqrt(myDir[0]*myDir[0]+myDir[1]*myDir[1]);
   aux.mThe = asin(myDir[2]);
   aux.mLen = nor;aux.mSel = 0;
-  float stp = M_PI/20;
-  float iThe = int(aux.mThe/stp)*stp;
+  float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
 
 //mTheDiv[iThe].emplace(aux.mPhi,last);
   mTheDiv[iThe].insert(std::pair<float,int>(aux.mPhi,last));
@@ -139,30 +141,46 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
+  MyTheDiv::iterator it2The = mTheDiv.begin();
+  for (MyTheDiv::iterator it1The = mTheDiv.begin();
+       it1The != mTheDiv.end();++it1The) 	//Main loop over theta	
+  {
+    float the1 = (*it1The).first;
+    for (;it2The!=mTheDiv.end();++it2The) {
+      if ((*it2The).first>the1-kMaxAng) break;
+    }
+    if (it2The==mTheDiv.end()) continue;
 
-  for (int i1=0;i1<(int)mAux.size();i1++) {
-    if (!mAux[i1].mHit) continue;
-    if ( mAux[i1].mSel) continue;
-    mAux[i1].Reset(); mAux[i1].mSel=0; 
-    
-    MyTheDiv::iterator it1 = mTheDiv.lower_bound(mAux[i1].mThe-kMaxAng);
-    for (;it1!=mTheDiv.end();++it1) {
-       
-      if ((*it1).first>mAux[i1].mThe+kMaxAng) break;
-      MyPhiDiv &myPhiDiv = (*it1).second;
-      MyPhiDiv::iterator it2 = myPhiDiv.lower_bound(mAux[i1].mPhi-kMaxAng/mAux[i1].mCosThe);
-      for (;it2!=myPhiDiv.end();++it2) { 
-        if ((*it2).first >mAux[i1].mPhi+kMaxAng/mAux[i1].mCosThe) break;
-        int i2 = (*it2).second;
-        assert(fabs((*it2).first-mAux[i2].mPhi)<1e-4);
-        if (i1==i2) 		continue;
-        if (fabs(mAux[i1].mThe-mAux[i2].mThe)>kMaxAng) continue;
-        if (fabs(mAux[i1].mPhi-mAux[i2].mPhi)>kMaxAng/mAux[i1].mCosThe) continue;
-        if (!mAux[i2].mHit) 	continue;
-        if ( mAux[i2].mSel) 	continue;
-        Update(i1,i2);
-    } } }
 
+    MyPhiDiv &my1PhiDiv = (*it1The).second;
+    for (MyPhiDiv::iterator it1Phi=my1PhiDiv.begin();
+         it1Phi!=  my1PhiDiv.end();  
+         ++it1Phi) 					{//Main loop over phi
+      int i1 = (*it1Phi).second;
+      StvKNAux & aux1 = mAux[i1];
+
+      for (MyTheDiv::iterator it3The=it2The;it3The!=mTheDiv.end();++it3The) 
+      {
+	if ((*it3The).first>aux1.mThe+kMaxAng) break;
+	MyPhiDiv &my3PhiDiv = (*it3The).second;
+
+	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.lower_bound(aux1.mPhi-kMaxAng/aux1.mCosThe);
+             it3Phi !=my3PhiDiv.end();
+	     ++it3Phi) { 		//loop over Phi partner
+          if ((*it3Phi).first > aux1.mPhi+kMaxAng/aux1.mCosThe) break;
+          int i2 = (*it3Phi).second;
+          if (i1==i2) continue;
+          StvKNAux & aux2 = mAux[i2];
+          if (!mAux[i2].mHit) 	continue;
+          if ( mAux[i2].mSel) 	continue;
+          if (fabs(aux1.mThe-aux2.mThe) > kMaxAng) continue;
+          if ( Ang(aux1.mDir,aux2.mDir) > kMaxAng) continue;
+          Update(i1,i2);
+	}//end of it3Phi loop
+      }// end of it3The loop
+    }//End of main Phi loop
+
+  }//End of main theta loop
 }  
 #endif
 #ifndef KNNMAP
