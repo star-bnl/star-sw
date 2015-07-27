@@ -223,6 +223,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRnDHitCollection",          "event", 1);
     setBranch("StHltEvent",                  "event", 1);
     setBranch("StFgtCollection",             "event", 1);
+    setBranch("StGmtCollection",             "event", 1);
 } 
 
 void

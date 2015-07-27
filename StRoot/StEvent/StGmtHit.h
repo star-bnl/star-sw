@@ -69,7 +69,7 @@ virtual StDetectorId detector() const 		{return kGmtId;};
     void setErrorLocalY( double error );
     void setModule( short module );
     void setChargeUncert( double sigma );
-    
+    void     Print(Option_t *option="") const;
 protected:
     void update2error();                          // set x,y part of inherited mPositionError
     
@@ -89,7 +89,7 @@ protected:
 private:   
     ClassDef(StGmtHit,1)
 }; 
-
+ostream&              operator<<(ostream& os, StGmtHit const & v);
 
 // inline functions
 

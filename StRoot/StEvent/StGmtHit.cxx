@@ -11,6 +11,7 @@
 
 #include "StGmtHit.h"
 #include <cmath>
+ClassImp(StGmtHit)
 
 // constructor
 StGmtHit::StGmtHit( int key, short module, int adcX, int adcY,
@@ -63,5 +64,12 @@ void StGmtHit::update2error(){
     mPositionError.setY( mErrLocalY );  //////// FIX ME!!!!!!!!!!
 
 }
+ostream&  operator<<(ostream& os, const StGmtHit& v)
+{
+    return os << Form("Gmt m %3i ",v.getModule())
+	      << *((StHit *)&v)
+	      << Form(" Adc X/Y  %4i/%4i t X/Y %4i/%4i locX = %8.3f +/- %7.3f locY = %8.3f +/- %7.3f",
+		      v.getAdcX(), v.getAdcY(), v.getTbX(), v.getTbY(), v.getLocalX(), v.getErrorLocalX(), v.getLocalY(), v.getErrorLocalY()); 
+}
+void   StGmtHit::Print(Option_t *option) const {cout << *this << endl;}
 
-ClassImp(StGmtHit)
