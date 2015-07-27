@@ -425,11 +425,11 @@ if ($h_files) {
     #}
 
     #if ( defined($ENV{ROOTCINT_CPPFLAGS}) ){
-	$cmd  = "rootcint -f $Cint_cxx -c  -D__NO_STRANGE_MUDST__ -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-	print "cmd (+extra) = ",$cmd,"\n";
+    #	$cmd  = "rootcint -f $Cint_cxx -c  -D__NO_STRANGE_MUDST__ -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    #	print "cmd (+extra) = ",$cmd,"\n";
     #} else {
-    #	$cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-    # 	print "cmd (normal)= ",$cmd,"\n";
+    	$cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+     	print "cmd (normal)= ",$cmd,"\n";
     #	die;
     #}
 
