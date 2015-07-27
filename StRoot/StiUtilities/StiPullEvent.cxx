@@ -140,7 +140,8 @@ void StiPullEvent::Clear(const char*)
   memset(mVtx,0,sizeof(mVtx));
   memset(mEtx,0,sizeof(mEtx));
   mRun=0; mEvt=0;
-  memset(mNTrks,0,sizeof(mNTrks)+sizeof(mNHits));
+  memset(mNTrks,0,sizeof(mNTrks));
+  memset(mNHits,0,sizeof(mNHits));
   
 }
 //_____________________________________________________________________________
