@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.168 2015/04/09 22:54:40 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.168.2.1 2015/07/27 20:11:08 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.168.2.1  2015/07/27 20:11:08  perev
+ * print method improved. Print Hit pointer added
+ *
  * Revision 2.168  2015/04/09 22:54:40  perev
  * new method evaluateChi2Info added to recalculate Xi2 for testing only
  *
@@ -2214,8 +2217,8 @@ static const char *txt = "xyzeptchrXYZED";
 //locals  xyz, e=Psi,p=1/pt, c=curvature, h=mag field, r=rxy
 //global  XYZ, E=Psi D= direction +=outside
 
-static const char *hhh = "uvwUVW";
-static const char *HHH = "xyzXYZ";
+static const char *hhh = "uvwUVWH";
+static const char *HHH = "xyzXYZH";
   if (!opt || !opt[0]) opt = "2xh";
   StiHit *hit = getHit();
   TString ts;
@@ -2242,6 +2245,7 @@ static const char *HHH = "xyzXYZ";
 
   for (int i=0;hit && hhh[i];i++) {
     if (!strchr(opt,hhh[i])) continue;
+    val = -999;
     switch(i) {
       case 0:val = hit->x(); 	break;
       case 1:val = hit->y(); 	break;
@@ -2249,8 +2253,9 @@ static const char *HHH = "xyzXYZ";
       case 3:val = hit->x_g(); 	break;
       case 4:val = hit->y_g(); 	break;
       case 5:val = hit->z_g();	break;
+      case 6: printf(" Hit=%p",hit); break;
     }
-    printf("\th%c=%g",HHH[i],val);
+    if (fabs(val+999)>1e-5) printf("\th%c=%g",HHH[i],val);
   }
   if (isValid()) printf(" valid");
   if (getDetector()) {printf(" %s",getDetector()->getName().c_str());}
