@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.30 2015/07/10 16:07:40 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.32 2015/07/24 16:21:24 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,12 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.32  2015/07/24 16:21:24  marr
+ * Create geometry in InitRun(), which is needed to use StMtdGeometry class.
+ *
+ * Revision 1.31  2015/07/24 16:03:25  marr
+ * *** empty log message ***
+ *
  * Revision 1.30  2015/07/10 16:07:40  marr
  * Add the distance along radius to the calculation of the distance between
  * a MTD hit and a projected track position
@@ -130,6 +136,7 @@
 #include "TSystem.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "TGeoManager.h"
 
 #include "StEvent.h"
 #include "StTrackNode.h"
@@ -499,36 +506,51 @@ void StMtdMatchMaker::bookTree(){
 /// InitRun: initialize geometries (retrieve beam line constraint from database)
 Int_t StMtdMatchMaker::InitRun(int runnumber) {
 
-	LOG_INFO << "Initializing MTD Geometry:" << endm;
 	//=======================================================//
 	//  			MTD Geometry initialization
 	//=======================================================//
-	mMtdGeom = 0;
-	mMtdGeom = new StMtdGeometry("mtdGeometry","mtdGeometry in StMtdMatchMaker");
-	mMtdGeom->SetCosmicFlag(mCosmicFlag);
-	mMtdGeom->SetELossFlag(mELossFlag);
-	mMtdGeom->SetNExtraCells(mNExtraCells);
-	if(mGeomTag.Length()>0)
-		mMtdGeom->SetGeomTag(mGeomTag);
+        LOG_INFO << "Initializing MTD Geometry:" << endm;
+	if(gGeoManager)
+	  {
+	    LOG_INFO << "TGeoManager (" << gGeoManager->GetName() << "," << gGeoManager->GetTitle() << ") exists" << endm;
+	  }
+	else
+	  {
+	    GetDataBase("VmcGeometry");
+	    if(!gGeoManager)
+	      {
+		int year = GetDateTime().GetYear();
+		if(mGeomTag.Length()==0)
+		  {
+		    mGeomTag = Form("y%da",year);
+		    if(year<2012) mGeomTag = "y2014a";
+		    LOG_INFO << "Load default geometry " << mGeomTag.Data() << " for year " << year << endm;
+		  }
+		else
+		  {
+		    LOG_INFO << "Load input geometry " << mGeomTag.Data() << " for year " << year << endm;
+		  }
 
-	Float_t fScale = -1.;
-	if(mLockBField){
-		mMtdGeom->SetLockBField(mLockBField);
-		LOG_INFO<<" Initializing locked mag.field for simulation! "<<endm;
-	}else if(StarMagField::Instance()){
-		//fScale = St_MagFactorC::instance()->ScaleFactor();
-		fScale = StarMagField::Instance()->GetFactor();
-		if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
-		else{
-			mMtdGeom->SetBFactor(fScale);
-			LOG_INFO<<" Initializing mag.field from StarMagField! fScale = "<<fScale<<endm;
-		}
-	}else{
-		assert(StarMagField::Instance());
-		LOG_ERROR<<" ******* MagField uninitialized, have you loaded StMagFMaker ?! *******"<<endm;
-	}
-	mMtdGeom->Init(this);
-	LOG_INFO<<" Created a new mtdGeometry ..."<<endm;
+		TString ts = Form("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C(\"%s\",1)",mGeomTag.Data());
+		int ierr=0;
+		gROOT->Macro(ts.Data(),&ierr);
+		assert(!ierr);
+	      }
+	  }
+	assert(gGeoManager);
+
+	if(!gMtdGeometry)
+	  {
+	    mMtdGeom = new StMtdGeometry("mtdGeometry","mtdGeometry in StMtdMatchMaker",gGeoManager);
+	    mMtdGeom->SetCosmicFlag(mCosmicFlag);
+	    mMtdGeom->SetELossFlag(mELossFlag);
+	    mMtdGeom->SetNExtraCells(mNExtraCells);
+	    if(mLockBField) mMtdGeom->SetLockBField(mLockBField);
+	    mMtdGeom->Init(this);
+	    LOG_INFO<<" Created a new mtdGeometry ..."<<endm;
+	  }
+	assert(gMtdGeometry);
+	mMtdGeom = gMtdGeometry;
 
 	//========== Set Beam Line ===================== 
 	double x0 = 0.;
