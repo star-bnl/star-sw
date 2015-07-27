@@ -201,7 +201,9 @@ if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
 
-$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
+#$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
+$CPPFLAGS .= " -DNEW_DAQ_READER ";
+
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
 }
@@ -934,10 +936,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
 
     # Many packages depend on the StMuEvent including StrangeMuDst
-    if ( $pkg eq 'StMuDSTMaker'  ){
-    	$ROOTCINT_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
-	#die;
-    }
+    #if ( $pkg eq 'StMuDSTMaker'  ){
+    #	$ROOTCINT_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
+    #	#die;
+    #}
 
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
