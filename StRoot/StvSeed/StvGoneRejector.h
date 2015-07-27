@@ -17,7 +17,7 @@ void Prepare();
 
 // 0=accepted
 int  Reject(const float x[3]) const;	
-				
+static int Test();				
 private:
 
 public:
