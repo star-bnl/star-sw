@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.25 2015/07/01 18:40:48 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.26 2015/07/27 21:38:30 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -148,7 +148,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
    stvHit->set(stHit,xyz);
-   int seed = 1;
+   int seed = 0;
    if (did == kTpcId) {	// Special case for TPCHit. Prompt info added
 //   enum {zPrompt = 205,rMiddle=124};
      enum {zPrompt = 205,rMiddle=0};
@@ -160,6 +160,8 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
+
+
 #if 0  
 if (did == kIstId) {
   StIstHit *IstHit = (StIstHit*)stHit;
@@ -209,6 +211,8 @@ static int ihPathWas=0,myPathWas=0;
      myPathWas =myPath; ihPathWas=ihPath;
 } }
 #endif
+
+
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
