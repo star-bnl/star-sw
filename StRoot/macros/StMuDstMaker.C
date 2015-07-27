@@ -101,7 +101,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   }
 
   gSystem->Load("StMcAnalysisMaker");
-  //gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
 
   if( mode & 0x2 ){
