@@ -1,5 +1,5 @@
 //
-//  \class StGmtSimpleClusterAlgo
+// \class StGmtSimpleClusterAlgo
 // \authors K.S. Engle and Richard Witt (witt@usna.edu)
 // based on StFgtSimpleClusterAlgo
 //
@@ -7,31 +7,26 @@
 //
 //
 //
-
-
 #ifndef STAR_StGmtSimpleClusterAlgo_HH
 #define STAR_StGmtSimpleClusterAlgo_HH
-
-#include "StGmtIClusterAlgo.h"
-
-
 /**
-This class implements the IClusterAlgo interface, in particular the doClustering function.
-The implemented algo (simple) agregates all strips that are above threshold to clusters. It respects the fact that at the inner radius only every second P-Strip exist.
-There is a cutoff on the maximum numbers of strips per cluster as a safety in case of noisy data.
-
-
-Copy constructor and assignment operator omitted deliberately 
+   This class implements the IClustberAlgo interface, in particular the doClustering function.
+   The implemented algo (simple) agregates all strips that are above threshold to clusters. It respects the fact that at the inner radius only every second P-Strip exist.
+   There is a cutoff on the maximum numbers of strips per cluster as a safety in case of noisy data.
+   Copy constructor and assignment operator omitted deliberately 
 */
-class StGmtSimpleClusterAlgo :public StGmtIClusterAlgo
-{
+#include "Stypes.h"
+class StGmtStripCollection;
+class StGmtHitCollection;
+
+class StGmtSimpleClusterAlgo  {
 
  public:
-  StGmtSimpleClusterAlgo();
+  StGmtSimpleClusterAlgo() {}
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
   virtual Int_t doClustering(  UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& clusters );
   virtual Int_t Init();
-  virtual ~StGmtSimpleClusterAlgo();
+  virtual ~StGmtSimpleClusterAlgo() {}
   virtual Bool_t IsPedOk()const {return mCalcOk;}
 
  protected:

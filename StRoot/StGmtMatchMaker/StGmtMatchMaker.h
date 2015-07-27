@@ -1,6 +1,6 @@
 #ifndef StGmtMatchMaker_hh     
 #define StGmtMatchMaker_hh
-
+#include <string.h>
 #include "StMaker.h"
 #include "TString.h"
 #include "TH2D.h"
@@ -19,13 +19,10 @@ class StTrack;
 class StGmtMatchMaker : public StMaker {
 public:
   
-  StGmtMatchMaker(const Char_t *name="gmtMatchMaker");     // constructor
+  StGmtMatchMaker(const Char_t *name="gmtMatchMaker") : StMaker(name), mEventCounter(0) {memset(mBeg,0,mEnd-mBeg+1);}     // constructor
   ~StGmtMatchMaker() {}                               // destructor
-  
   Int_t  Make();                      // invoked for every event
-  Int_t  Finish();                    // called once at the end
-  virtual Int_t Init();
-  void setHistoFileName(const Char_t* filename){mOutputFile=filename;}
+  virtual Int_t InitRun(Int_t run);
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StGmtMatchMaker.h,v 1.00 2014/07/08 17:16:26 $ built " __DATE__ " " __TIME__ ; 
     return cvs;
@@ -41,12 +38,8 @@ public:
   void local2Global(int mid, double coordNX, double coordNY, double &phi, double &z);
   void global2Local(StThreeVector<double> global, StThreeVector<double> & local, int id);
   void getCoord(StThreeVector<double> local, StThreeVector<float> & coord);
-
-  //
-  //
+  Char_t                mBeg[1];        //!
   Int_t  mEventCounter;  //!
-  
-  static float tofRadius;
   StEvent* event;
 
   TH2D *hADCvsChannel[nModules*2];
@@ -70,10 +63,10 @@ public:
   
   Double_t  mPeds[nModules*2][128];
   Double_t  mPedDevs[nModules*2][128];
-  TString   mOutputFile;
-  StGmtData mGmtData;
   TTree     *mGmtTuple; //! Gmt ntuple
-  TFile     *mGmtFile; //! Gmt ntuple
+  Char_t                mEnd[1];        //!
+  StGmtData mGmtData;
+  static float tofRadius;
 
   ClassDef(StGmtMatchMaker,0)
 };

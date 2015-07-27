@@ -29,8 +29,8 @@ class StGmtClusterPlotter : public StMaker {
   //   Bool_t checkPulse(StGmtHit* pClus);
   //virtual const char *GetCVS() const
   //{static const char cvs[]="Tag $Name:  $ $Id: StGmtClusterPlotter.h,v 1.1.1.1 2013/09/02 15:01:31 fisyak Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
- protected:
   void DrawBoxes();
+ protected:
   
   void ProjOnModule(const int module, const TVector3 &vloc, TVector3 &vdet); //convert tpc local coordinate into gmt detector coordinate
   // for accessing the data

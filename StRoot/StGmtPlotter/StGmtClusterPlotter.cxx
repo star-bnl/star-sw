@@ -63,6 +63,7 @@ Int_t StGmtClusterPlotter::Make()
       StSPtrVecGmtHitConstIterator hitIter;
       for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
 	{
+	  if (Debug()) (*hitIter)->Print("");
 	  //get XY hit
 	  Double_t X=(*hitIter)->getLocalX();
 	  Double_t Y=(*hitIter)->getLocalY();
@@ -71,10 +72,11 @@ Int_t StGmtClusterPlotter::Make()
 	  Double_t AX=(*hitIter)->getAdcX();
 	  Double_t AY=(*hitIter)->getAdcY();
 	  
-	  if(AX<200 || AY<200) continue; //noise cut
-	  
  	  hGmtAmpX->Fill(AX);
 	  hGmtAmpY->Fill(AY);
+
+	  if(AX<100 || AY<100) continue; //noise cut
+	  
 	  if(AX>AY)
 	    hGmtAmpRatio->Fill(AY/AX);
 	  else
@@ -108,7 +110,7 @@ Int_t StGmtClusterPlotter::Make()
 	  nGmtHits++;
 	  //if (nGmtHits==32) break;
 	}
-      
+      if (! nGmtHits) return kStOK;
       StSPtrVecTrackNode& theNodes = eventPtr->trackNodes();
       unsigned int nnodes = theNodes.size();
       
