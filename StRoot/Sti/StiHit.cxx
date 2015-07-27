@@ -239,12 +239,14 @@ static int nCall =0; nCall++;
 //_____________________________________________________________________________
  void StiHit::addTimesUsed()
 {
+    if (!mdetector) return;
     mTimesUsed++;
-//    assert(mTimesUsed<=mMaxTimes);
+    assert(mTimesUsed<=mMaxTimes);
 }
 //_____________________________________________________________________________
  void StiHit::subTimesUsed()
 {
+    if (!mdetector) return;
     mTimesUsed--;
     assert(mTimesUsed>=0);
 }
