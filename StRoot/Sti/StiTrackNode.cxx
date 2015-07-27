@@ -41,9 +41,6 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
   double g[NE];      memcpy(g,    G,sizeof( g));
   double fg[NP][NP]; memset(fg[0],0,sizeof(fg));
 
-  double myF[6][6];  memcpy(myF[0],F[0],sizeof(fg));
-  for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
-
   for (int i=0;i<nF;i++) {
   for (int j=0;j<nF;j++) {
     if (!F[i][j]) 	continue;

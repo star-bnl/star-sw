@@ -31,6 +31,7 @@ public:
   /// Set the vertex finder used by this tracker
   void setComb(int comb=7)		{mComb = comb;}
   int  useComb() const			{return mComb;}
+  virtual void FeedBack(int badGood){;};
   
 
 protected:

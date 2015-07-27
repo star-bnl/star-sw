@@ -273,6 +273,7 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
     nTTot++;
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
     Int_t errType = Fit(track,rMin);
+    _trackSeedFinder->FeedBack(errType == kNoErrors);
     if (errType != kNoErrors) {BFactory::Free(track);}
     else                      {assert(track->getChi2()<1000);}
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
