@@ -142,7 +142,7 @@ virtual double y()    const	=0;
 virtual double z()    const	=0;			
   
   StiHit * getHit() const 		{return _hit;}
-  void  setHit(StiHit* hit)		{_hit   =hit;}
+  void  setHit(StiHit* hit);		
   const StiDetector *getDetector() const; 
   void  setDetector(const StiDetector *detector);
   double getChi2 ()  const		{return _chi2;} 		
