@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.h,v 1.21 2015/04/15 18:36:02 perev Exp $ */
+/* $Id: StIstFastSimMaker.h,v 1.22 2015/07/27 18:51:18 huangbc Exp $ */
 
 #ifndef StIstFastSimMaker_h
 #define StIstFastSimMaker_h
@@ -34,7 +34,7 @@ public:
    void buildIdealGeom(Bool_t isIdealGeom) {mBuildIdealGeom = isIdealGeom;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.21 2015/04/15 18:36:02 perev Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.22 2015/07/27 18:51:18 huangbc Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 

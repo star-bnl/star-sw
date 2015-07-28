@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $
+* $Id: StIstRawHitMaker.h,v 1.15 2015/07/27 18:51:01 huangbc Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -46,7 +46,11 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
+<<<<<<< StIstRawHitMaker.h
       static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
+=======
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.15 2015/07/27 18:51:01 huangbc Exp $ built " __DATE__ " " __TIME__  ;
+>>>>>>> 1.15
       return cvs;
    }
 
@@ -79,6 +83,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.15  2015/07/27 18:51:01  huangbc
+* Add space before and after "__DATE__" and "__TIME__" for compling under gcc4.8.2
+*
 * Revision 1.14  2014/10/13 22:33:05  smirnovd
 * Minor adjustments to the code and comments
 *

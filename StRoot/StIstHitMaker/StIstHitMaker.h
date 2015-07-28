@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.15 2015/07/27 18:50:49 huangbc Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
@@ -23,7 +23,7 @@ public:
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.15 2015/07/27 18:50:49 huangbc Exp $ built " __DATE__ " " __TIME__  ; return cvs;}
 
 protected:
 
@@ -38,6 +38,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.15  2015/07/27 18:50:49  huangbc
+* Add space before and after "__DATE__" and "__TIME__" for compling under gcc4.8.2
+*
 * Revision 1.14  2014/10/13 22:33:04  smirnovd
 * Minor adjustments to the code and comments
 *
