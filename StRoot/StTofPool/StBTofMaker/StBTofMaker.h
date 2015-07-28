@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofMaker.h,v 1.2 2009/03/06 19:25:40 dongx Exp $
+ * $Id: StBTofMaker.h,v 1.3 2015/07/28 22:50:03 smirnovd Exp $
  * StBTofMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -89,7 +89,7 @@ class StBTofMaker : public StMaker
   /// cvs
   virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+      static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
     }
   
   ClassDef(StBTofMaker, 1)    ///StBTofMaker - class to fille the StEvent from DAQ reader
