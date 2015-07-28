@@ -160,6 +160,8 @@ Int_t StGmtRawMaker::fillHits() {
 	  stripPtr->setPedErr( 0 );
 	} else  {// these are connected (mapping in StGmtGeom.cxx)
 	  if(layer) {// layer here is just an indicator for either a X ( i.e. strip (=0) ) or Y ( i.e. pad (=1) ) element
+	    stripPtr->setCoordNum( coordNum + kGmtNumStrips ); // map Y into 128-255
+	    //never returns more certain ids
 	    if(channel==100) {LOG_INFO << "Str.=" << channel << "\tLay0\tgeoid=" << geoId<< "\tposition=" << position << endl;}
 	  }  else   {
 	    stripPtr->setCoordNum( coordNum );  // map X into 0-127
@@ -174,8 +176,7 @@ Int_t StGmtRawMaker::fillHits() {
 	  stripPtr->setPosition( position );
 	  stripPtr->setElecCoords( rdo, arm, apv, channel );
 	}
-      }
-      else { LOG_WARN << "StGmtRawMaker::Make() -- Could not access module " << moduleIdx << endm; }
+      } else { LOG_WARN << "StGmtRawMaker::Make() -- Could not access module " << moduleIdx << endm; }
     }
   }
   return kStOK;

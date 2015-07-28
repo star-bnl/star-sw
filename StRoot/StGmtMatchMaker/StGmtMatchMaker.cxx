@@ -287,7 +287,8 @@ Int_t StGmtMatchMaker::Make() {
 	hADCvsChannel[iApv]->Fill(xj,adc);
 	int ich = mSeqIdToChId[aStrip->getChannel()];
 	int icoord = aStrip->getCoordNum();
-	double pedMin = mPeds[iApv][ich]+12.*mPedDevs[iApv][ich];
+	//	double pedMin = mPeds[iApv][ich]+12.*mPedDevs[iApv][ich];
+	double pedMin = mPeds[iApv][ich]+3.*mPedDevs[iApv][ich];
 	if(adc>pedMin&&adc<4000){
 	  double adcCor = adc - mPeds[iApv][ich];
 	  if(icoord<128){
@@ -357,20 +358,21 @@ Int_t StGmtMatchMaker::Make() {
       int iArm = aStrip->getArm();
       if(iArm>0) iApv+=8;
       int iMod = iApv/2;
-      for (int j = 0; j < nTimebins; j++) {
-	double adc = aStrip->getAdc(j);
-	int ich = mSeqIdToChId[aStrip->getChannel()];
-	int icoord = aStrip->getCoordNum();
-	if((icoord<128&&abs(icoord-maxChan[iMod][0])<=kMaxNgbhrChan)|| 
-	   (icoord>=128&&abs(icoord-maxChan[iMod][1])<=kMaxNgbhrChan)){
-	  double pedMin = mPeds[iApv][ich]+12.*mPedDevs[iApv][ich];
-	  //if(pedMin<1000) pedMin = 1000;
-	  int idx = -1;
-	  if(icoord<128) idx = icoord-maxChan[iMod][0] + kMaxNgbhrChan;
-	  else           idx = icoord-maxChan[iMod][1] + kMaxNgbhrChan;
-	  if(idx<0||idx>10){
-	    LOG_INFO<<"ERROR: idx out of range! idx = "<<idx<<endm;
-	  }
+      int ich = mSeqIdToChId[aStrip->getChannel()];
+      int icoord = aStrip->getCoordNum();
+      if((icoord<128&&abs(icoord-maxChan[iMod][0])<=kMaxNgbhrChan)|| 
+	 (icoord>=128&&abs(icoord-maxChan[iMod][1])<=kMaxNgbhrChan)){
+	//	double pedMin = mPeds[iApv][ich]+12.*mPedDevs[iApv][ich];
+	double pedMin = mPeds[iApv][ich]+3.*mPedDevs[iApv][ich];
+	//if(pedMin<1000) pedMin = 1000;
+	int idx = -1;
+	if(icoord<128) idx = icoord-maxChan[iMod][0] + kMaxNgbhrChan;
+	else           idx = icoord-maxChan[iMod][1] + kMaxNgbhrChan;
+	if(idx<0||idx>10){
+	  LOG_INFO<<"ERROR: idx out of range! idx = "<<idx<<endm;
+	}
+	for (int j = 0; j < nTimebins; j++) {
+	  double adc = aStrip->getAdc(j);
 	  if(adc>pedMin&&adc<4000){
 	    double adcCor = adc - mPeds[iApv][ich];
 	    if(icoord<128){
