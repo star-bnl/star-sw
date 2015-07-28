@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.44 2015/07/09 17:22:54 jeromel Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.45 2015/07/28 00:43:57 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.45  2015/07/28 00:43:57  perev
+ * Added StiKNNSeedFinder. There is no direct dependency, new made by CINT
+ *
  * Revision 2.44  2015/07/09 17:22:54  jeromel
  * Back-step from StiKNNSeedFinder / will branch
  *
@@ -133,6 +136,7 @@
  */
 
 #include "TSystem.h"
+#include "TROOT.h"
 #include "StiDefaultToolkit.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
@@ -405,9 +409,11 @@ StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 						 getHitContainer(), 
 						 getDetectorContainer());  
   } else {
-    //_trackSeedFinder = new StiKNNSeedFinder();
-    LOG_WARN << "StiKNNSeedFinder not yet integrated" << endm;
+  _trackSeedFinder  =   (StiTrackFinder*)gROOT->ProcessLineFast("new StiKNNSeedFinder");
+  if ( !_trackSeedFinder) 
+     LOG_WARN << "StiKNNSeedFinder not yet integrated" << endm;
   }
+  assert(_trackSeedFinder);
   return _trackSeedFinder;
 }
 
