@@ -1,10 +1,13 @@
 /****************************************************************
- * $Id: StBTofHitCollection.h,v 1.2 2015/07/28 14:45:55 jeromel Exp $
+ * $Id: StBTofHitCollection.h,v 1.3 2015/07/28 22:55:43 smirnovd Exp $
  *****************************************************************
  * Author: Xin Dong, Dec 2008
  * Description: Local Barrel TOF hits collection
  *****************************************************************
  * $Log: StBTofHitCollection.h,v $
+ * Revision 1.3  2015/07/28 22:55:43  smirnovd
+ * Added cstddef C++ header defining size_t type
+ *
  * Revision 1.2  2015/07/28 14:45:55  jeromel
  * Ill-defined size_t ambiguity removed by adding cstddef
  *
@@ -16,6 +19,7 @@
 #ifndef ST_BTOF_HIT_COLLECTION_H
 #define ST_BTOF_HIT_COLLECTION_H
 
+#include <cstddef>
 #include <vector>
 #include <cstddef>
 #ifndef ST_NO_NAMESPACES
