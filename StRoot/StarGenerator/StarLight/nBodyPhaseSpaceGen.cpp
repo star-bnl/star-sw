@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:32 $: date of last commit
+// $Date: 2015/07/28 14:43:13 $: date of last commit
 //
 // Description:
 //     see nBodyPhaseSpaceGen.h
@@ -187,7 +187,7 @@ nBodyPhaseSpaceGen::calcWeight()
 	_weight = _norm * pow(massInterval, (int)_n - 2) * momProd / _M[_n - 1];
 	if (_weight > _maxWeightObserved)
 		_maxWeightObserved = _weight;
-	if (isnan(_weight))
+	if (std::isnan(_weight))
 		printWarn << "weight = " << _weight << endl;
 	return _weight;
 }
