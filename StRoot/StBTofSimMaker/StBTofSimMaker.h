@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.5 2014/08/06 11:42:54 jeromel Exp $
+ * $Id: StBTofSimMaker.h,v 1.6 2015/07/28 22:49:55 smirnovd Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.6  2015/07/28 22:49:55  smirnovd
+ * Initialize static constants outside of class definition
+ *
+ *  C++ forbids initialization of non-integral static const members within the class
+ *  definition. The syntax is allowed only for integral type variables.
+ *
  * Revision 1.5  2014/08/06 11:42:54  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -83,9 +89,9 @@ class StBTofSimMaker : public StMaker{
 			mADCBINWIDTH = 25,
 			mTDCBINWIDTH = 50
 		};
-		const static float mVHRBIN2PS = 24.4;  //! Very High resolution mode, ps/bin
-		const static float mHRBIN2PS = 97.7;     //! High resolution mode, ps/bin
-		const static float mBTofPadWidth = 3.45;        //! Pad Width                                                              
+		static const float mVHRBIN2PS;    //! Very High resolution mode, ps/bin
+		static const float mHRBIN2PS;     //! High resolution mode, ps/bin
+		static const float mBTofPadWidth; //! Pad Width
 
 
 		Bool_t mCellXtalk;     //! switch for cell xtalk
@@ -209,7 +215,7 @@ class StBTofSimMaker : public StMaker{
 		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.5 2014/08/06 11:42:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.6 2015/07/28 22:49:55 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 		ClassDef(StBTofSimMaker,1)
 };
