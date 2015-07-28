@@ -16,7 +16,7 @@ void loadMuDst() {
   gSystem->Load("StEmcUtil");
   gSystem->Load("StTofUtil");
   gSystem->Load("StPmdUtil");
-  //gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");  
 #else
   gROOT->LoadMacro("bfc.C");
