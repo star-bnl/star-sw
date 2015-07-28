@@ -38,4 +38,5 @@
 #pragma link C++ class StiVertexFinder;
 #pragma link C++ class StiTrackNodeHelper;
 #pragma link C++ namespace StiVMCToolKit;
+#pragma link C++ class StiKNNSeedFinder;
 #endif
