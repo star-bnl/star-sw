@@ -411,7 +411,6 @@ c  Type declarations for variables used in function entro.
 c
       real*8 e,n,entro,et0,temp
       real*8 de,dn,p1,p2,p3,p4,p13,p24
-      real*8 CHEM
 c      real*8 p12,p34
 c
 c  Common-blocks.
