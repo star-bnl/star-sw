@@ -25,6 +25,9 @@ protected:
 vector<StiHit*>        _seedHits;
 double fRxyMin;
 myStvKNSeedFinder *fStvKNSeedFinder;
+#if 0
+ClassDef(StiKNNSeedFinder,0)
+#endif
 };
 
 
