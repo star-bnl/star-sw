@@ -1,10 +1,13 @@
 /****************************************************************  
- * $Id: StBTofRawHitCollection.h,v 1.1 2009/02/02 21:57:21 dongx Exp $
+ * $Id: StBTofRawHitCollection.h,v 1.2 2015/07/28 14:45:55 jeromel Exp $
  *****************************************************************
  * Author: Xin Dong
  * Description: Local TOF raw hit collection
  *****************************************************************
  * $Log: StBTofRawHitCollection.h,v $
+ * Revision 1.2  2015/07/28 14:45:55  jeromel
+ * Ill-defined size_t ambiguity removed by adding cstddef
+ *
  * Revision 1.1  2009/02/02 21:57:21  dongx
  * first release
  *
@@ -14,6 +17,7 @@
 #define ST_BTOF_RAWHIT_COLLECTION_H
 
 #include <vector>
+#include <cstddef>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 using std::copy;
