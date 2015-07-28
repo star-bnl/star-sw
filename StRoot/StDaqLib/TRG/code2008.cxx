@@ -1,4 +1,4 @@
-// This is 2008 specific code for restoring packed(zero suppressed) trigger 
+// This is 2008 specific code for restoring packed(zero suppressed) trigger
 // data from daq file to full size trigger structure, and byte swap if needed.
 
 #include <assert.h>
@@ -8,7 +8,7 @@ using namespace OLDEVP;
 
 int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   int returnValue,npre,npost,swap,res;
-  
+
   if ( ! pTRGP){
     printf("TRG_Reader::UnpackTrg2008 - not pTRGP\n");
     return -1;
@@ -24,7 +24,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
     returnValue=pTRGP->header.swap();
   }
   if(pTRGP->header.ByteOrder!=0x04030201){
-    printf("TRG_Reader::UnpackTrg2008: Swap Header error %s %d.\n",__FILE__,__LINE__);    
+    printf("TRG_Reader::UnpackTrg2008: Swap Header error %s %d.\n", __FILE__ , __LINE__ );
     assert(0);
   }
   printf("TRG_Reader::UnpackTrg2008: Token from Bank=%d\n",pTRGP->header.Token);
@@ -39,7 +39,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   int size_raw  = sizeof(RawTrgDet2008);
   //  printf("TRG_Reader::UnpackTrg2008: offset, header, trg, desc, sum, raw = %d %d %d %d %d %d\n",
   //	 ,size_off,size_head,size_trg,size_desc,size_sum,size_raw);
-  
+
   // New TrgTowerTrnfer structure and find trigger data itself
   char* cttt = (char*)pTRGP + size_off + size_head;
   TrgTowerTrnfer2008* ttt=(TrgTowerTrnfer2008*)cttt;
@@ -62,16 +62,16 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   printf("TRG_Reader::UnpackTrg2008: trg_version = 0x%x\n",*trg_version);
   if(*trg_version != 0x32) {
     printf("TRG_Reader::UnpackTrg2008: Trigger version error %s %d.\n",*trg_version,__FILE__,__LINE__);
-    return -1;    
+    return -1;
   }
 
   //Create memory space for unpacked trigger bank
   if(pBankUnp!=0) delete[] pBankUnp;
   int sizeUnp = size_off + size_head + size_trg;
-  pBankUnp = new char[sizeUnp];  
+  pBankUnp = new char[sizeUnp];
   char *trgd = pBankUnp + size_off + size_head; //pointer for trgdata
   TrgDataType2008* p=(TrgDataType2008*)trgd;
-  
+
   //Copy Header, EvtDesc and TrgSum and byte swap
   memcpy(pBankUnp, pTRGP, size_off+size_head);
   memcpy(pBankUnp+size_off+size_head, (char*)pTRGP+size_off+size_head+offset, size_desc+size_sum);
@@ -99,10 +99,10 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   //Set pointers for daq data and new unpacked data
   char* p_daq = (char *)pTRGP    + size_off + size_head + size_desc + size_sum + offset;
   char* p_unp = (char *)pBankUnp + size_off + size_head + size_desc + size_sum;
-  
+
   //Zero out all raw data memory before copying partial data
   memset(p_unp, 0, 11*size_raw);
-  
+
   //Loop over # of crossings available and copy
   for(int i=0; i<1+npre+npost; i++){
     unsigned short *nbytes = (unsigned short *)p_daq;
@@ -126,10 +126,10 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
     //printf("-> Doing memcpy to %p from %p\n",p_unp,p_daq);
     memcpy(p_unp, p_daq, n);
 
-    p_daq += n; 
+    p_daq += n;
     p_unp += size_raw;
   }
-    
+
   //Byte Swap (if needed) for all raw data section
   //printf("-> Checking if swap is necessary\n");
   if(swap){
@@ -140,11 +140,11 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
       return -1;
     }
   }
-  
+
   //Switch bank pointer to fully restored data
   //printf("-> pBankTRGP set to (Bank_TRGP *) %p\n",pBankUnp);
-  pBankTRGP = (Bank_TRGP *)pBankUnp; 
-  
+  pBankTRGP = (Bank_TRGP *)pBankUnp;
+
   return 0;
 };
 
@@ -182,7 +182,7 @@ int TRG_Reader::Swap2008_DescSum(char *ptr){
   pTRGD->swapHerb2bytes(&(p->TrgSum.L0SumBytes),1);
   pTRGD->swapHerb2bytes(&(p->TrgSum.L0SumHeader),1);
   pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.MTD[0]),8);
-  pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.VPD[0]),8); 
+  pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.VPD[0]),8);
   pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.CPA[0]),16);
   pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.CTB[0]),8);
   pTRGD->swapHerb2bytes(&(p->TrgSum.DSMdata.lastDSM[0]),8);
@@ -204,7 +204,7 @@ int TRG_Reader::Swap2008_DescSum(char *ptr){
 
   return 0;
 };
-  
+
 int TRG_Reader::Swap2008_Raw(char *ptr) {
   int numToSwap,i;
   TrgDataType2008* p=(TrgDataType2008*)ptr;
@@ -237,7 +237,7 @@ int TRG_Reader::Swap2008_Raw(char *ptr) {
     printf("NQTdata = %d, Last word check = 0x%x (should be ac10)\n",nqt,ac10);
     if(nqt>0 && ac10 != 0xAC10){
       printf("Last word of QT data is not 0xAC10 but 0x%x\n ",ac10);
-      return -1; 
+      return -1;
     }
   }
   return 0;
@@ -252,7 +252,7 @@ int TRG_Reader::Swap2008_Raw(char *ptr) {
   between versions of trgStructures.h .
 
 */
-void TRG_Reader::SanityCheck2008(char *ptr, int check_s=1) { 
+void TRG_Reader::SanityCheck2008(char *ptr, int check_s=1) {
   unsigned short x;
   TrgDataType2008* p=(TrgDataType2008*)ptr;
 
@@ -260,12 +260,12 @@ void TRG_Reader::SanityCheck2008(char *ptr, int check_s=1) {
   x=p->TrgSum.L2SumBytes; assert(x==0x0084||x==0x8400);
 
   if (check_s){
-    assert( p->rawTriggerDet[0].RawDetHeader[0]  =='R');   
-    assert( p->rawTriggerDet[0].RawDetHeader[1]  =='D');   
-    assert( p->rawTriggerDet[0].CTBdataHeader[0] =='C');   
-    assert( p->rawTriggerDet[0].CTBdataHeader[1] =='T');   
-    assert( p->rawTriggerDet[0].BEMCdataHeader[0]=='E'); 
-    assert( p->rawTriggerDet[0].BEMCdataHeader[1]=='M');  
+    assert( p->rawTriggerDet[0].RawDetHeader[0]  =='R');
+    assert( p->rawTriggerDet[0].RawDetHeader[1]  =='D');
+    assert( p->rawTriggerDet[0].CTBdataHeader[0] =='C');
+    assert( p->rawTriggerDet[0].CTBdataHeader[1] =='T');
+    assert( p->rawTriggerDet[0].BEMCdataHeader[0]=='E');
+    assert( p->rawTriggerDet[0].BEMCdataHeader[1]=='M');
   } else {
     cout << "TRG_Reader::SanityCheck2008 : Data position sanity check is disabled" << endl;
   }
