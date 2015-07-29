@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.11 2015/07/01 17:51:54 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.12 2015/07/29 01:11:24 smirnovd Exp $
  *
  * Author: Frank Geurts
  *
@@ -46,6 +46,8 @@ static RandGauss ranGauss(engine);
 Int_t geant2backlegIDMap[30]; 
 
 ClassImp(StMtdSimMaker)
+
+const float StMtdSimMaker::kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
 
 //_____________________________________________________________________________
 StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name),
