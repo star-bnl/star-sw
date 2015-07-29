@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.45 2015/04/30 16:03:31 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.46 2015/07/29 16:34:15 smirnovd Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -371,7 +371,7 @@ Bool_t StMiniMcMaker::initVertex()
   // if there was no primary vertex before embedding,
   // the mc vertex position for each coordinate is equal
   //
-  return !((isnan(mRcVertexPos->x()) || isnan(mRcVertexPos->y())));
+  return !((std::isnan(mRcVertexPos->x()) || std::isnan(mRcVertexPos->y())));
 }
   
 /*
@@ -2087,7 +2087,7 @@ Float_t StMiniMcMaker::computeZDca(const StThreeVectorF* point, const StTrack* t
   const StThreeVectorD dis2 = *point - pos2;
   
   double dcaZ = (dis1.mag() < dis2.mag()) ? dis1.z() : dis2.z();
-  if(isnan(dcaZ)) return 999;
+  if(std::isnan(dcaZ)) return 999;
   return dcaZ;
 }
 //______________________________________________________________________________
@@ -2340,6 +2340,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 }
 /*
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.46  2015/07/29 16:34:15  smirnovd
+ * Added std:: to resolve ambiguity for isnan for g++ (4.8)
+ *
  * Revision 1.45  2015/04/30 16:03:31  perev
  * Remove redundant automatic CVS comments
  *
@@ -2523,7 +2526,7 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.45 2015/04/30 16:03:31 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.46 2015/07/29 16:34:15 smirnovd Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
