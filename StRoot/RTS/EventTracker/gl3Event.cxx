@@ -127,7 +127,6 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   }
 
   int i;
-  int ret;
   for(i=0;i<24;i++) {
     if(what & GL3_READ_TPC_TRACKS) {
       if((i%2) == 0) {
@@ -140,7 +139,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 
     // Read the data....
 #ifdef OLD_DAQ_READER
-    ret = tpcReader(mem, i);
+    int ret = tpcReader(mem, i);
     if(ret < 0) { 
       LOG(NOTE, "No data for sector %d",i+1,0,0,0,0);
 #else /* OLD_DAQ_READER */
