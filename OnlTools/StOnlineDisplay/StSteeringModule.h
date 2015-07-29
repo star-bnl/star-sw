@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.8 2010/03/11 00:38:42 fine Exp $
+// $Id: StSteeringModule.h,v 1.9 2015/07/29 16:53:19 smirnovd Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -66,7 +66,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.8 2010/03/11 00:38:42 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.9 2015/07/29 16:53:19 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
           
   }
