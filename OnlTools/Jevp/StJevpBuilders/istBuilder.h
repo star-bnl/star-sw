@@ -67,20 +67,20 @@ class istBuilder : public JevpPlotSet {
   static const int minRMSVal    = 12;
   static const int maxRMSVal    = 40;
   //alarm threshold
-  static const float minMipMpv_ZS    = 450;
-  static const float minMipMpv_nonZS = 400;
-  static const float maxMipMpv    = 800;
-  static const float minMipSigma_ZS     = 80;
-  static const float minMipSigma_nonZS  = 60;
-  static const float maxMipSigma  = 200;
-  static const float maxTbFracOK  = 0.9;
+  static const float minMipMpv_ZS;
+  static const float minMipMpv_nonZS;
+  static const float maxMipMpv;
+  static const float minMipSigma_ZS;
+  static const float minMipSigma_nonZS;
+  static const float maxMipSigma;
+  static const float maxTbFracOK;
   //landau fitting range
-  static const float landauFit_dn = 400.0;
-  static const float landauFit_up = 2000.0;
+  static const float landauFit_dn;
+  static const float landauFit_up;
   //cut setting
-  static const float cmnCut	= 3.0;
-  static const float hitCut	= 5.0;
-  static const float noiseChipCut = 10.0;
+  static const float cmnCut;
+  static const float hitCut;
+  static const float noiseChipCut;
 
   //IST mapping
   int istMapping[totCh]; //IST channel mapping (electronics ID to geometry ID transform)
