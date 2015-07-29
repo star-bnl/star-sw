@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.46 2015/07/29 16:34:15 smirnovd Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.47 2015/07/29 16:34:24 smirnovd Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -914,7 +914,6 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 
 
   typedef std::map< int,StTinyMcTrack*>  	McTinyMap_t;
-  typedef std::pair<int,StTinyMcTrack*>  	McTrackPair_t;
   typedef McTinyMap_t::iterator 		McTinyMapIter_t;
 
 //  struct MyHolder_t { public: const StTrack *gl;const StTrack *pr;int hits; float qa;};
@@ -2307,7 +2306,6 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
   int DetectorList[kMaxDetectorId]={0};
   typedef std::map< int,float>  myMap_t;
-  typedef std::pair<int,float>  myPair_t;
   typedef myMap_t::const_iterator myIter_t;
   myMap_t  idTruths;
     
@@ -2340,6 +2338,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 }
 /*
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.47  2015/07/29 16:34:24  smirnovd
+ * Removed defined but not unused local typedefs
+ *
  * Revision 1.46  2015/07/29 16:34:15  smirnovd
  * Added std:: to resolve ambiguity for isnan for g++ (4.8)
  *
@@ -2526,7 +2527,7 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.46 2015/07/29 16:34:15 smirnovd Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.47 2015/07/29 16:34:24 smirnovd Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
