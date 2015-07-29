@@ -1,4 +1,4 @@
-// $Id: gl3Data.cxx,v 1.3 2010/04/19 23:59:27 fine Exp $
+// $Id: gl3Data.cxx,v 1.4 2015/07/29 16:53:27 smirnovd Exp $
 
 #include "gl3Data.h"
 
@@ -469,7 +469,7 @@ void Gl3Data::resetTpcTrackPos() {
     mCurrentRadius = innerRadius - mTPCTrackStepSize;
     char outerRow = track->outerMostRow;
     float outerRadius = transformer->GetRadialDistanceAtRow((int)outerRow);
-    mTPCTrackStopRadius = min(outerRadius,198);
+    mTPCTrackStopRadius = std::min<float>(outerRadius,198);
   }
 }
 
