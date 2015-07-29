@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.10 2015/07/01 17:51:54 marr Exp $
+ * $Id: StMtdSimMaker.h,v 1.11 2015/07/29 01:11:24 smirnovd Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.11  2015/07/29 01:11:24  smirnovd
+ * Initialize static constants outside of class definition
+ *
+ * C++ forbids initialization of non-integral static const members within the class
+ * definition. The syntax is allowed only for integral type variables.
+ *
  * Revision 1.10  2015/07/01 17:51:54  marr
  * Add data member mWriteHisto to control the output of histograms
  *
@@ -81,7 +87,7 @@ class StMtdSimMaker : public StMaker
    kTDCBINWIDTH = 50
  };
 
-  const static float kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
+  static const float kMtdPadWidth; 	//!< Pad Width: 38mm padwidth + 6mm innerspacing
   Bool_t mBookHisto;
   Bool_t mWriteHisto;
   Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
@@ -156,7 +162,7 @@ class StMtdSimMaker : public StMaker
 			      Int_t &ibackleg,Int_t &imodule,Int_t &icell);
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.10 2015/07/01 17:51:54 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.11 2015/07/29 01:11:24 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,2)
 };
