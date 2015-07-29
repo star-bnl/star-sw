@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.15 2015/07/29 01:11:25 smirnovd Exp $
+ * $Id: StMtdGeometry.cxx,v 1.16 2015/07/29 14:52:47 smirnovd Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.16  2015/07/29 14:52:47  smirnovd
+ * Added class scope to static members (overlooked in previous commit)
+ *
  * Revision 1.15  2015/07/29 01:11:25  smirnovd
  * Initialize static constants outside of class definition
  *
@@ -73,12 +76,12 @@
 #include "tables/St_mtdGeant2BacklegIDMap_Table.h"
 
 
-const Double_t mMtdMinR = 392.802; /// mtd system minimum radius
-const Double_t mMtdMaxR = 418.865; /// mtd system maximum radius
-const Double_t mMagInR  = 303.290; /// magnet system inner radius
-const Double_t mMagOutR = 364.290; /// magnet system outer radius
-const Double_t mEmcInR  = 223.505; /// EMC system inner radius
-const Double_t mEmcOutR = 248.742; /// EMC system outer radius
+const Double_t StMtdGeometry::mMtdMinR = 392.802; /// mtd system minimum radius
+const Double_t StMtdGeometry::mMtdMaxR = 418.865; /// mtd system maximum radius
+const Double_t StMtdGeometry::mMagInR  = 303.290; /// magnet system inner radius
+const Double_t StMtdGeometry::mMagOutR = 364.290; /// magnet system outer radius
+const Double_t StMtdGeometry::mEmcInR  = 223.505; /// EMC system inner radius
+const Double_t StMtdGeometry::mEmcOutR = 248.742; /// EMC system outer radius
 
 const char* StMtdGeometry::backlegPref[4] = {"MTMT","MTMF","MTTG","MTT1"};
 const char* StMtdGeometry::modulePref   = "MTRA";
