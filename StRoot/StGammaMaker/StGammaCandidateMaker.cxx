@@ -389,7 +389,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
                         smdEtaGeom->getEta(id, eta);
              
-                        StGammaStrip *strip = mGammaEvent->newStrip();
+                        strip = mGammaEvent->newStrip();
          
                         strip->index = id;
                         strip->sector = module;
@@ -462,7 +462,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
                         smdPhiGeom->getPhi(id, phi);
 
-                        StGammaStrip *strip = mGammaEvent->newStrip();
+                        strip = mGammaEvent->newStrip();
 
                         strip->index = id;
                         strip->sector = module;
