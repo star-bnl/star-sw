@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.8 2010/02/20 10:51:19 fine Exp $
+// $Id: StDataReadModule.h,v 1.9 2015/07/29 16:53:18 smirnovd Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -130,7 +130,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.8 2010/02/20 10:51:19 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.9 2015/07/29 16:53:18 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   
