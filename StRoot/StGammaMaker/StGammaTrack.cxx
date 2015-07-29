@@ -60,7 +60,7 @@ TVector3 StGammaTrack::positionAtRadius(Double_t radius) const
         
             double s = 0;
             
-            if(ss.first > 0 && ss.second > 0 || ss.first >= 0 && ss.second < 0)
+            if( (ss.first > 0 && ss.second > 0) || (ss.first >= 0 && ss.second < 0) )
             {
                 s = ss.first;
             }

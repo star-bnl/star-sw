@@ -82,7 +82,7 @@ Int_t StGammaTreeMaker::Init()
     // Create a tree if necessary
     if(!mGammaTree) 
     {
-        TString title = "Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.11 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__;
+        TString title = "Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.12 2015/07/29 19:10:12 smirnovd Exp $ built " __DATE__ " " __TIME__;
         mGammaTree = new TTree("gammas", title);    
         mGammaTree->SetDirectory(mGammaFile);
     }
@@ -170,7 +170,7 @@ Int_t StGammaTreeMaker::Finish()
     mVersion.mMakerTags.push_back( cvstag );
     
     StMaker *maker;
-    while(maker = (StMaker*)next()) 
+    while( (maker = (StMaker*)next()) )
     {
         cvstag = maker->GetCVS();
         mVersion.mMakerTags.push_back(cvstag);
