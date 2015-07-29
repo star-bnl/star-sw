@@ -29,6 +29,21 @@
 
 ClassImp(istBuilder);
 
+
+const float istBuilder::minMipMpv_ZS      = 450;
+const float istBuilder::minMipMpv_nonZS   = 400;
+const float istBuilder::maxMipMpv         = 800;
+const float istBuilder::minMipSigma_ZS    = 80;
+const float istBuilder::minMipSigma_nonZS = 60;
+const float istBuilder::maxMipSigma       = 200;
+const float istBuilder::maxTbFracOK       = 0.9;
+const float istBuilder::landauFit_dn      = 400.0;
+const float istBuilder::landauFit_up      = 2000.0;
+const float istBuilder::cmnCut            = 3.0;
+const float istBuilder::hitCut            = 5.0;
+const float istBuilder::noiseChipCut      = 10.0;
+
+
 istBuilder::istBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
 	plotsetname = (char *)"ist";
 	// start with histograms undefined...
