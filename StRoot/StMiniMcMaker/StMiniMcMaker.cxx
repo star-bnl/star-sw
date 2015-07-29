@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.47 2015/07/29 16:34:24 smirnovd Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.48 2015/07/29 16:34:31 smirnovd Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -1380,12 +1380,12 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setErrGl(errorGl);
     double vtx[3]={mRcVertexPos[0][0],mRcVertexPos[0][1],mRcVertexPos[0][2]};
     double dcaXY,dcaZ;
-    double s = glHelix.Dca(vtx,dcaXY,dcaZ,0);
+    glHelix.Dca(vtx,dcaXY,dcaZ,0);
     tinyRcTrack->setDcaXYGl(dcaXY);
     tinyRcTrack->setDcaZGl(dcaZ);
     tinyRcTrack->setDcaGl(sqrt(dcaXY*dcaXY+dcaZ*dcaZ));
     double mcv[3]={mMcVertexPos[0][0],mMcVertexPos[0][1],mMcVertexPos[0][2]};
-    s = glHelix.Dca(mcv,dcaXY,dcaZ,0);
+    glHelix.Dca(mcv,dcaXY,dcaZ,0);
     tinyRcTrack->setDcaXYGlMcV(dcaXY);
     tinyRcTrack->setDcaZGlMcV(dcaZ);
   } else {
@@ -2338,6 +2338,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 }
 /*
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.48  2015/07/29 16:34:31  smirnovd
+ * Do not store output from function call as it is not used anyway
+ *
  * Revision 1.47  2015/07/29 16:34:24  smirnovd
  * Removed defined but not unused local typedefs
  *
@@ -2527,7 +2530,7 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.47 2015/07/29 16:34:24 smirnovd Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.48 2015/07/29 16:34:31 smirnovd Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
