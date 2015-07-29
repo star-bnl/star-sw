@@ -73,7 +73,7 @@ StiMasterHitLoader<Source1, Detector>::~StiMasterHitLoader()
 template<class Source1,class Detector>
 void StiMasterHitLoader<Source1, Detector>::addLoader(StiHitLoader<Source1, Detector>*loader)
 {
-  push_back(loader);
+  this->push_back(loader);
 }
 
 template<class Source1, class Detector>
