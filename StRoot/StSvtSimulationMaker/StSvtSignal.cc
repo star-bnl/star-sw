@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.18 2009/08/10 05:23:14 baumgart Exp $
+ * $Id: StSvtSignal.cc,v 1.19 2015/07/29 01:48:02 smirnovd Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.19  2015/07/29 01:48:02  smirnovd
+ * Added std:: to resolve ambiguity for isnan for g++ (4.8)
+ *
  * Revision 1.18  2009/08/10 05:23:14  baumgart
  * Adjust mPasaGain due to adjustments in initial cloud size
  *
@@ -342,7 +345,7 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
  mTimeWidth = ::sqrt((timeWidth2/driftVel2) + GAP_TWIDTH);          //micro seconds 
  //cout<<"mTimeWidth = "<<mTimeWidth<<endl;
 
- if(isnan(mTimeWidth))
+ if(std::isnan(mTimeWidth))
    return 1;
  else return 0;
  
