@@ -53,7 +53,7 @@ public:
   virtual Int_t Finish();
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationMipAnalysis.h,v 1.1 2015/02/23 22:08:28 jkadkins Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEmcOfflineCalibrationMipAnalysis.h,v 1.2 2015/07/28 14:49:07 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   
