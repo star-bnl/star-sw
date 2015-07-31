@@ -2,6 +2,7 @@
 
 #include <curl/curl.h>
 
+#include <unistd.h>
 #include <cstdio>
 #include <ctime>
 #include <cstdlib>
