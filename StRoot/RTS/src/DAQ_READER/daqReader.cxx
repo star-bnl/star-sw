@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.59 2014/06/04 15:20:31 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.60 2015/07/29 16:49:39 smirnovd Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -876,7 +876,6 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     MemMap headermap;
     char *m;
     int swap;
-    int padding_check;
 
     int ret = -1;    // lets be a pessimist and assume failure...
     long long int offset = 0;
@@ -925,7 +924,6 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     LOG(DBG, "OFFSET = %lld", offset);
 
     // Wait, we might not have a LRHD or DATAP...
-    padding_check=0;
     while((memcmp(m, "LRHD", 4) != 0) &&
 	  (memcmp(m, "DATAP", 5) != 0)) {
     

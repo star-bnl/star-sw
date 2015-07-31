@@ -112,7 +112,6 @@ int main(int argc, char *argv[])
 
   int ret = 0;
   
-  l3_t *l3_datafile;
   l3_t l3_legacy;
 
   rtsLogOutput(RTS_LOG_STDERR);
