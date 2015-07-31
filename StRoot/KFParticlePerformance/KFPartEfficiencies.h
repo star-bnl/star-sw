@@ -1024,7 +1024,7 @@ class KFPartEfficiencies: public TNamed
 
   void AddFromFile(TString fileName)
   {
-    std::fstream file(fileName.Data(),fstream::in);
+    std::fstream file(fileName.Data(),std::fstream::in);
     file >> *this;
   }
   
