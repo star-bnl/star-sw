@@ -776,6 +776,10 @@ MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSecto
 MakeChairAltInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
 MakeChairInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
+//____________________________Geometry/gmt____________________________________________________
+#include "StGmtSurveyC.h"
+MakeChairInstance2(Survey,StGmtOnTpc,Geometry/gmt/GmtOnTpc);
+MakeChairInstance2(Survey,StGmtOnModule,Geometry/gmt/GmtOnModule);
 //____________________________Geometry/ist____________________________________________________
 #include "StIstSurveyC.h"
 MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);                      
