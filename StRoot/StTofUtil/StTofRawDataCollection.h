@@ -1,10 +1,13 @@
 /****************************************************************  
- * $Id: StTofRawDataCollection.h,v 1.1 2005/04/12 17:29:29 dongx Exp $
+ * $Id: StTofRawDataCollection.h,v 1.2 2015/07/28 22:55:44 smirnovd Exp $
  *****************************************************************
  * Author: Xin Dong
  * Description: Local TOF raw data collection - only valid hits
  *****************************************************************
  * $Log: StTofRawDataCollection.h,v $
+ * Revision 1.2  2015/07/28 22:55:44  smirnovd
+ * Added cstddef C++ header defining size_t type
+ *
  * Revision 1.1  2005/04/12 17:29:29  dongx
  * first release, a new data format in StEvent for year 5
  *
@@ -13,6 +16,7 @@
 #ifndef ST_TOF_RAWDATA_COLLECTION_H
 #define ST_TOF_RAWDATA_COLLECTION_H
 
+#include <cstddef>
 #include <vector>
 #include <cstring>
 #ifndef ST_NO_NAMESPACES

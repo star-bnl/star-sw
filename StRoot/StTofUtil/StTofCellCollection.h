@@ -1,10 +1,13 @@
 /****************************************************************
- * $Id: StTofCellCollection.h,v 1.1 2003/08/06 22:59:36 geurts Exp $
+ * $Id: StTofCellCollection.h,v 1.2 2015/07/28 22:55:43 smirnovd Exp $
  *****************************************************************
  * Description: Local TOF cells collection
  *
  *****************************************************************
  * $Log: StTofCellCollection.h,v $
+ * Revision 1.2  2015/07/28 22:55:43  smirnovd
+ * Added cstddef C++ header defining size_t type
+ *
  * Revision 1.1  2003/08/06 22:59:36  geurts
  * First Release
  *  - used by TOF MatchMakers
@@ -14,6 +17,7 @@
 #ifndef ST_TOF_CELL_COLLECTION_H
 #define ST_TOF_CELL_COLLECTION_H
 
+#include <cstddef>
 #include <vector>
 #include <cstring>
 #ifndef ST_NO_NAMESPACES

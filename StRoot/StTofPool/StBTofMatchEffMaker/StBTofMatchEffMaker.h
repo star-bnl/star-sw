@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchEffMaker.h,v 1.2 2010/01/28 18:17:53 perev Exp $
+ * $Id: StBTofMatchEffMaker.h,v 1.3 2015/07/28 22:50:03 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchEffMaker.h,v $
+ * Revision 1.3  2015/07/28 22:50:03  smirnovd
+ * C++11 requires a space between literal and identifier
+ *
  * Revision 1.2  2010/01/28 18:17:53  perev
  * WarningOff
  *
@@ -107,7 +110,7 @@ private:
     TH2D* mAntiPNum;
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchEffMaker.h,v 1.2 2010/01/28 18:17:53 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchEffMaker.h,v 1.3 2015/07/28 22:50:03 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchEffMaker,1)
 };

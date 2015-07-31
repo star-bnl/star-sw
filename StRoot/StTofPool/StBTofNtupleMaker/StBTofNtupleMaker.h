@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofNtupleMaker.h,v 1.1 2010/04/09 00:28:48 dongx Exp $
+ * $Id: StBTofNtupleMaker.h,v 1.2 2015/07/28 22:50:03 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofNtupleMaker.h,v $
+ * Revision 1.2  2015/07/28 22:50:03  smirnovd
+ * C++11 requires a space between literal and identifier
+ *
  * Revision 1.1  2010/04/09 00:28:48  dongx
  * First release
  *
@@ -107,7 +110,7 @@ private:
   TTree *mCellTuple; //! BTof calibration ntuple
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofNtupleMaker.h,v 1.1 2010/04/09 00:28:48 dongx Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofNtupleMaker.h,v 1.2 2015/07/28 22:50:03 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StBTofNtupleMaker,1)
 };
