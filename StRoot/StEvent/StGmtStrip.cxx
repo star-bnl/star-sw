@@ -10,6 +10,7 @@
  ***************************************************************************/
 
 #include "StGmtStrip.h"
+ClassImp(StGmtStrip)
 
 bool gmtStripPtrLessThan::operator() (const StGmtStrip* strip1, const StGmtStrip* strip2) const
 {
@@ -22,7 +23,7 @@ StGmtStrip::StGmtStrip() : StObject(), mGeoId(-1),
 mModule(-1),  mCoordNum(-1), mIsY(0), mPosition(0.0), mMaxAdc(-9999),
 mMaxPedSubtractedAdc(-9999), mMaxAdcTB(-1), mMaxPedSubtractedAdcTB(-1),
 mCharge(kInvalidChargeValue), mChargeUncert(kInvalidChargeValue),
-			   mRdo(0), mArm(0), mApv(0), mChan(0), mPed(0), mPedErr(0), mIsC(0) 
+			   mRdo(0), mArm(0), mApv(0), mChan(0), mPed(0), mPedStdDev(0), mPedErr(0), mIsC(0) 
 {
     for( int i = 0; i < kGmtNumTimeBins; ++i )
     {
@@ -94,5 +95,11 @@ StGmtStrip& StGmtStrip::operator=( const StGmtStrip& h) {
 }
 
 int StGmtStrip::mDefaultTimeBin = 7;  // was 2 for the FGT, RW 03/15/13
+ostream&  operator<<(ostream& os, const StGmtStrip& v)
+{
+  return os << Form("GmtStrip gId %3i m %3i C %3i Y %1i C %1i p %8.3f",v.getGeoId(), v.getModule(), v.getCoordNum(), v.isY(), v.isC(), v.getPosition())
+	    << Form(" Rdo: %2i,Arm: %2i, Apv: %2i, cha: %3i",v.getRdo(), v.getArm(), v.getApv(), v.getChannel()); 
+}
+void   StGmtStrip::Print(Option_t *option) const {cout << *this << endl;}
 
-ClassImp(StGmtStrip)
+

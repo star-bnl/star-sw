@@ -75,7 +75,7 @@ public:
     // query default time bin
     static void setDefaultTimeBin( int tb );
     static int getDefaultTimeBin();
-    
+    void     Print(Option_t *option="") const;
 protected:
     // data members
     Int_t   mGeoId;                // indexing: 8 modules * 2 APV * 128 channels = 2048
@@ -107,6 +107,7 @@ protected:
 private:   
     ClassDef(StGmtStrip,1)
 };
+ostream&              operator<<(ostream& os, StGmtStrip const & v);
 
 // Functor for sorting the strips in the strip weight map.
 struct gmtStripPtrLessThan {
