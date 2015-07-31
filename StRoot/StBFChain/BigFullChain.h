@@ -1722,6 +1722,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"gmtMatch"    ,"","","db,GmtUtil",  "StGmtMatchMaker","StGmtMatchMaker","TPC-GMT track matching",kFALSE},
   {"gmtPlotter"    ,"","","db,GmtUtil", "StGmtClusterPlotter","StGmtPlotter","GMT cluster plotting",kFALSE},
+  {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
