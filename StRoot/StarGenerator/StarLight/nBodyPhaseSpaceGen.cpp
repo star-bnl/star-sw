@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:32 $: date of last commit
+// $Date: 2015/07/28 14:43:13 $: date of last commit
 //
 // Description:
 //     see nBodyPhaseSpaceGen.h
