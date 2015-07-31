@@ -102,8 +102,11 @@ class StMtdEvtFilterMaker : public StMaker {
 #endif
 
 
-// $Id: StMtdEvtFilterMaker.h,v 1.2 2015/04/23 21:10:19 marr Exp $
+// $Id: StMtdEvtFilterMaker.h,v 1.3 2015/07/29 01:11:15 smirnovd Exp $
 // $Log: StMtdEvtFilterMaker.h,v $
+// Revision 1.3  2015/07/29 01:11:15  smirnovd
+// C++11 requires a space between user-defined and string literals
+//
 // Revision 1.2  2015/04/23 21:10:19  marr
 // 1. remove dz and pTlead cuts in the filtering by default
 // 2. change the number scheme for shouldHaveRejectEvent()

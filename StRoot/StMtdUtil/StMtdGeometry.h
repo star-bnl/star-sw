@@ -1,8 +1,14 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.9 2015/07/24 15:56:05 marr Exp $
+ * $Id: StMtdGeometry.h,v 1.10 2015/07/29 01:11:25 smirnovd Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.10  2015/07/29 01:11:25  smirnovd
+ * Initialize static constants outside of class definition
+ *
+ * C++ forbids initialization of non-integral static const members within the class
+ * definition. The syntax is allowed only for integral type variables.
+ *
  * Revision 1.9  2015/07/24 15:56:05  marr
  * 1. Remove calling a macro in Init() to create geometry. It should be done within
  * the maker that uses this utility class.
@@ -171,12 +177,12 @@ class StMtdGeoModule : public StMtdGeoNode {
 
 class StMtdGeometry : public TNamed{
  private:
-  static Double_t const mMtdMinR;// =  392.802; /// mtd system minimum radius
-  static Double_t const mMtdMaxR;// =  418.865; /// mtd system maximum radius
-  static Double_t const mMagInR ;// =  303.290; /// magnet system inner radius
-  static Double_t const mMagOutR;// =  364.290; /// magnet system outer radius
-  static Double_t const mEmcInR ;// =  223.505; /// EMC system inner radius
-  static Double_t const mEmcOutR;// =  248.742; /// EMC system outer radius
+  static const Double_t mMtdMinR; /// mtd system minimum radius
+  static const Double_t mMtdMaxR; /// mtd system maximum radius
+  static const Double_t mMagInR;  /// magnet system inner radius
+  static const Double_t mMagOutR; /// magnet system outer radius
+  static const Double_t mEmcInR;  /// EMC system inner radius
+  static const Double_t mEmcOutR; /// EMC system outer radius
 
  public:
   StMtdGeometry(const char* name="mtdGeo",
@@ -242,7 +248,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.9 2015/07/24 15:56:05 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.10 2015/07/29 01:11:25 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1);
 };
 

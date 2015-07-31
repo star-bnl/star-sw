@@ -96,8 +96,11 @@ class StMtdTrackingMaskMaker : public StMaker {
 #endif
 
 
-// $Id: StMtdTrackingMaskMaker.h,v 1.2 2015/05/01 21:37:21 marr Exp $
+// $Id: StMtdTrackingMaskMaker.h,v 1.3 2015/07/29 01:11:16 smirnovd Exp $
 // $Log: StMtdTrackingMaskMaker.h,v $
+// Revision 1.3  2015/07/29 01:11:16  smirnovd
+// C++11 requires a space between user-defined and string literals
+//
 // Revision 1.2  2015/05/01 21:37:21  marr
 // Apply online slewing correction and position correction to QT data to make
 // sure the correct trigger patches are found offline.

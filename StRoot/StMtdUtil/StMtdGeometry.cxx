@@ -1,8 +1,17 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.14 2015/07/24 15:56:05 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.16 2015/07/29 14:52:47 smirnovd Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.16  2015/07/29 14:52:47  smirnovd
+ * Added class scope to static members (overlooked in previous commit)
+ *
+ * Revision 1.15  2015/07/29 01:11:25  smirnovd
+ * Initialize static constants outside of class definition
+ *
+ * C++ forbids initialization of non-integral static const members within the class
+ * definition. The syntax is allowed only for integral type variables.
+ *
  * Revision 1.14  2015/07/24 15:56:05  marr
  * 1. Remove calling a macro in Init() to create geometry. It should be done within
  * the maker that uses this utility class.
