@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 #include <assert.h>
-#include <math.h>
-#include "StiElossCalculator.h"
+#include "Sti/StiElossCalculator.h"
 #include "StiUtilities/StiDebug.h"
 #include "Stiostream.h"
 #include "TMath.h"

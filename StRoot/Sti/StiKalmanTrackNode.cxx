@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.168 2015/04/09 22:54:40 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.169 2015/07/29 01:28:05 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.169  2015/07/29 01:28:05  smirnovd
+ * Added std:: to resolve ambiguity for isnan in g++ (4.8.2)
+ *
+ * Also switched to standard c++ header <cmath>
+ *
  * Revision 2.168  2015/04/09 22:54:40  perev
  * new method evaluateChi2Info added to recalculate Xi2 for testing only
  *
