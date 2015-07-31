@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.8 2015/06/30 18:00:38 genevb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.9 2015/07/28 22:49:55 smirnovd Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.9  2015/07/28 22:49:55  smirnovd
+ *  Initialize static constants outside of class definition
+ *
+ *  C++ forbids initialization of non-integral static const members within the class
+ *  definition. The syntax is allowed only for integral type variables.
+ *
  * Revision 1.8  2015/06/30 18:00:38  genevb
  * Enable MC hits in embedding (RT ticket 3116, Geurts approval)
  *
