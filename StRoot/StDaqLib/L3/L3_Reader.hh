@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.9 2001/09/24 21:42:56 struck Exp $
+ * $Id: L3_Reader.hh,v 1.10 2015/07/29 01:34:57 smirnovd Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
+ * Revision 1.10  2015/07/29 01:34:57  smirnovd
+ * C++11 requires a space between literal and identifier
+ *
  * Revision 1.9  2001/09/24 21:42:56  struck
  * cs: changed vertex info to float (unit [cm]) in Bank_L3_GTD
  *
@@ -73,10 +76,9 @@ class GlobalTrackReader;
 class Sl3ClusterReader;
 class Sl3TrackReader;
 class L3_Reader;
-
-#define L3ERROR(x, text) {errnum = x; sprintf(errstr0,"ERROR: #text %s::%d",__FILE__,__LINE__); }
-#define L3secERROR(x, text, s) {errnum = x; sprintf(errstr0,"ERROR: #text in sector %d, %s::%d",s,__FILE__,__LINE__); }
-#define pL3secERROR(x, text, s) {mL3->errnum = x; sprintf(mL3->errstr0,"ERROR: #text in sector %d, %s::%d",s,__FILE__,__LINE__); }
+#define L3ERROR(x, text) {errnum = x; sprintf(errstr0,"ERROR: " text " %s::%d",__FILE__,__LINE__); }
+#define L3secERROR(x, text, s) {errnum = x; sprintf(errstr0,"ERROR: " text " in sector %d, %s::%d",s,__FILE__,__LINE__); }
+#define pL3secERROR(x, text, s) {mL3->errnum = x; sprintf(mL3->errstr0,"ERROR: " text " in sector %d, %s::%d",s,__FILE__,__LINE__); }
 
 #define maxClusterPerSector 100000
 
