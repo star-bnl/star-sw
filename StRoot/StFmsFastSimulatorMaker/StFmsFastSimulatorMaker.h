@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.4 2015/07/28 14:50:05 jeromel Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.4  2015/07/28 14:50:05  jeromel
+// Fix string literal spacing for C++11 compliance
+//
 // Revision 1.3  2015/02/26 23:53:04  yuxip
 // new update from Akio
 //
@@ -121,7 +124,7 @@ class StFmsFastSimulatorMaker : public StMaker {
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.3 2015/02/26 23:53:04 yuxip Exp $ built " __DATE__ " " __TIME__;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.4 2015/07/28 14:50:05 jeromel Exp $ built " __DATE__ " " __TIME__ ;
   return cvs;
 }
 
