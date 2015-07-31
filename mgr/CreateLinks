@@ -157,12 +157,26 @@ foreach arch ( _ _x8664_ )
 	    end
 	end
     endif
-    # special consideration before transition to gcc 4.8.2
-    set refos2="sl64"$arch"gcc481"
-    if ( ! -e .$refos2 && -e .$refos ) then
+
+    #+
+    # Special consideration before transition to sl64/gcc 4.8.2
+    # If a native directory does not exists, create links
+    #-
+    set refos2="sl64"$arch"gcc482"
+    if (! -e .$refos2 && -e .$refos ) then
+	#if ( -l .$refos ) then
+	#    # read link
+	#    set TRGT=`/bin/ls -l .$refos | /usr/bin/awk '{print $11}'`
+        #else
+	#    set TRGT=.$refos
+	#endif
 	foreach ospf ( sl rh )
-	    set dir=$ospf$vers$arch"gcc482"
-	    echo " /bin/ln -s .$refos .$dir  ! to consider";
+	    set dir=$ospf"64"$arch"gcc482"
+	    if ( ! -e .$dir ) then
+		echo " /bin/ln -s .$refos .$dir  ! to consider";
+	    else
+		echo "DEBUG There is a .$dir"
+            endif
 	end
     endif
 end
