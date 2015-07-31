@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.25 2015/06/23 14:53:36 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.26 2015/07/31 21:32:58 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.26  2015/07/31 21:32:58  jwebb
+ * Attempt to propagate a PDG id for antideuteron.
+ *
  * Revision 1.25  2015/06/23 14:53:36  jwebb
  * StarClassLibrary support for H0 dibaryon.
  *
@@ -141,6 +144,21 @@ StParticleTable* StParticleTable::mParticleTable = 0;
 
 StParticleTable::~StParticleTable() {/* noop */}
 
+/// Helper function to define PDG ids for heavy ions                                                                                                                                                           
+/// @param z Charge of the heavy ion                                                                                                                                                                           
+/// @param a Atomic number of the heavy ion                                                                                                                                                                    
+/// @param l Number of lambdas in a hypernucleus                                                                                                                                                               
+Int_t hid( Int_t z, Int_t a, Int_t l=0 )
+{
+  //         10LZZZAAAI                                                                                                                                                                                        
+  return (   1000000000
+         +     10000000*l
+         +        10000*z
+	     +           10*a );
+}
+
+
+
 StParticleTable::StParticleTable()
 {
     //
@@ -208,14 +226,14 @@ StParticleTable::StParticleTable()
     Geant2Pdg(43, -24,   W- );    // W-  (STAR def.)
     Geant2Pdg(44, 23,    Z0 );     // Z0  (STAR def.)
 
-    Geant2Pdg(45, kUndefined, Deuteron ); // The deuteron
-    Geant2Pdg(46, kUndefined, Triton )  ; // The triton
-    Geant2Pdg(47, kUndefined, Alpha )   ; // The alpha
+    Geant2Pdg(45, hid(1,2)  , Deuteron ); // The deuteron
+    Geant2Pdg(46, hid(1,3)  , Triton )  ; // The triton
+    Geant2Pdg(47, hid(2,4)  , Alpha )   ; // The alpha
     Geant2Pdg(48, kUndefined, Geantino ); // The mythical geantino 
-    Geant2Pdg(49, kUndefined, Helium3  ); // Helium3
+    Geant2Pdg(49, hid(2,3)  , Helium3  ); // Helium3
     Geant2Pdg(50, 22,         Cerenkov ); // Cerenkov photons
 
-    Geant2Pdg(54, kUndefined, AntiHelium3 ); // AntiHelium3 );
+    Geant2Pdg(54, -hid(2,3) , AntiHelium3 ); // AntiHelium3 );
 
     ///@} 
 
@@ -358,10 +376,10 @@ StParticleTable::StParticleTable()
     ///@addtogroup ANTINUCLEI
     /// Definitions of anti nuclei
     ///@{
-       Geant2Pdg( 50045, kUndefined, anti-deuteron );
-       Geant2Pdg( 50046, kUndefined, anti-triton );
-       Geant2Pdg( 50047, kUndefined, anti-alpha );
-       Geant2Pdg( 50048, kUndefined, anti-He3 );
+       Geant2Pdg( 50045, -hid(1,2) , anti-deuteron );
+       Geant2Pdg( 50046, -hid(1,3) , anti-triton );
+       Geant2Pdg( 50047, -hid(2,4) , anti-alpha );
+       Geant2Pdg( 50048, -hid(2,3) , anti-He3 );
     ///@}
 
     ///@addtogroup ANTIHYPERNUCLEI
