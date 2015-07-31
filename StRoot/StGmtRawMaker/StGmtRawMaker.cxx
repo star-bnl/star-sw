@@ -97,7 +97,9 @@ Int_t StGmtRawMaker::fillHits() {
   
   ////// FIX ME!!!!!!!!!!!!!!!!!!
   //now grab the constants from the header file, loop over the raw data and fill the hits...
-  while(GetNextDaqElement("gmt/adc"))    {
+  TString query("gmt/adc");
+  //  TString query("gmt/zs");
+  while(GetNextDaqElement(query.Data()))    {
     StRtsTable* rts_tbl=DaqDta();
     Int_t count = 0;
     for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)	{
@@ -175,6 +177,10 @@ Int_t StGmtRawMaker::fillHits() {
 	  stripPtr->setIsY( layer );
 	  stripPtr->setPosition( position );
 	  stripPtr->setElecCoords( rdo, arm, apv, channel );
+	}
+	if (Debug()) {
+	 LOG_INFO << "StGmtRawMaker::fillHits() Set: " 
+		  <<  *stripPtr << endm;
 	}
       } else { LOG_WARN << "StGmtRawMaker::Make() -- Could not access module " << moduleIdx << endm; }
     }
