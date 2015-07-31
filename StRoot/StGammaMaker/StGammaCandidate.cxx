@@ -568,11 +568,6 @@ TVector3 StGammaCandidate::momentum1x1c()
         Int_t sec,sub,eta;
         if(!geom.getTower( position(), sec, sub, eta )) return TVector3(0.0, 0.0, -999.0);
         
-        Int_t mysec,mysub,myeta;
-        myeta = mTowerId % 12;
-        mysec = (mTowerId / 12) / 5;
-        mysub = (mTowerId / 12) % 5;
-        
         TVector3 tower = geom.getTowerCenter( (UInt_t)sec, (UInt_t)sub, (UInt_t)eta );
         
         Float_t frac = shape->expectation( position() );
