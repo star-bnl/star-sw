@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.13 2014/09/09 08:33:28 ypwang Exp $
+* $Id: StIstCluster.cxx,v 1.14 2015/08/03 14:26:03 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -15,7 +15,7 @@
 
 StIstCluster::StIstCluster(int key, int ladder, int sensor,
                            float meanRow, float meanColumn, float totCharge, float totChargeErr,
-           		   int clusteringType):
+                           int clusteringType):
    mKey(key),
    mMeanRow(meanRow),
    mMeanColumn(meanColumn),
@@ -132,6 +132,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.14  2015/08/03 14:26:03  smirnovd
+* Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
+*
 * Revision 1.13  2014/09/09 08:33:28  ypwang
 * minor update the data member initialization order
 *
