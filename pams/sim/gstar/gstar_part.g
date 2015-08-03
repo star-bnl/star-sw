@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.51 2015/06/23 14:41:56 jwebb Exp $
+* $Id: gstar_part.g,v 1.52 2015/07/31 21:32:58 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.52  2015/07/31 21:32:58  jwebb
+* Attempt to propagate a PDG id for antideuteron.
+*
 * Revision 1.51  2015/06/23 14:41:56  jwebb
 * Define H0 strangelet (m=2210 MeV) with 100% BR to Sigma- proton
 *
@@ -205,6 +208,18 @@
 ***********************************************************************
 *
 
+INTEGER FUNCTION PDG_ION_ID( Z, A )
+   PDG_ION_ID = 1000000000 + 
+                     10000 * Z +
+                        10 * A
+   RETURN
+END FUNCTION PDG_ION_ID
+
+INTEGER FUNCTION PDG_HYP_ID( Z, A, L )
+   PDG_HYP_ID = PDG_ION_ID + 10000000 * L
+END FUNCTION PDG_HYP_ID
+
+
 MODULE gstar_part Is the STAR Particle Database
 
    CREATED A long time ago
@@ -214,6 +229,8 @@ MODULE gstar_part Is the STAR Particle Database
 
    Integer UNDEFINED / 0       /
    Real    STABLE    / 1.0E+15 /
+
+   Integer pdg_ion_id
 
    !-- Flags which specify the propagator used for the particle
    Integer kGtGAMA / 1 /! A photon
@@ -632,14 +649,14 @@ MODULE gstar_part Is the STAR Particle Database
                         mass      = 1.876            ,
                         charge    = -1.0             ,
                         tlife     = STABLE           ,
-                        pdg       = UNDEFINED        ,
+                        pdg       = -PDG_ION_ID(1,2) ,
                         trktyp    = kGtHION
 
   PARTICLE antiDeuteron code      = 53               , 
                         mass      = 1.876            ,
                         charge    = -1.0             ,
                         tlife     = STABLE           ,
-                        pdg       = UNDEFINED        ,
+                        pdg       = -PDG_ION_ID(1,2) ,
                         trktyp    = kGtHION
 
 
@@ -648,7 +665,7 @@ MODULE gstar_part Is the STAR Particle Database
                         mass      = 2.809            ,
                         charge    = -1.0             ,
                         tlife     = STABLE           ,
-                        pdg       = UNDEFINED        ,
+                        pdg       = -PDG_ION_ID(1,3) ,
                         trktyp    = kGtHION                
 
   PARTICLE antiAlpha    code      = 50047            ,
@@ -662,14 +679,14 @@ MODULE gstar_part Is the STAR Particle Database
                         mass      = 2.809            ,
                         charge    = -2.0             ,
                         tlife     = STABLE           ,
-                        pdg       = UNDEFINED        ,
+                        pdg       = -PDG_ION_ID(2,3) ,
                         trktyp    = kGtHION
 
        PARTICLE antiHelium3  code      = 54               ,
                              mass      = 2.809            ,
                              charge    = -2.0             ,
                              tlife     = STABLE           ,
-                             pdg       = UNDEFINED        ,
+                             pdg       = -PDG_ION_ID(2,3) ,
                              trktyp    = kGtHION
 
 
