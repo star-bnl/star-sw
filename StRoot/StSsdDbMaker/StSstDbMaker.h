@@ -6,6 +6,7 @@
 #endif
 class St_sstWafersPosition;
 class sstSlsCtrl_st;
+class sstDimensions_st;
 class sstConfiguration_st;
 class sstMaskChip_st;
 #include "StSstUtil/StSstBarrel.hh"
@@ -15,7 +16,7 @@ class StSstDbMaker : public StMaker
 {
 private:
    StSstBarrel           *mySst;
-   St_sstDimensions      *m_dimensions;//!
+   sstDimensions_st      *dimensions;//!
    sstConfiguration_st   *config;//!
    sstSlsCtrl_st         *ctrl;//!
    Int_t                  mode;//!
@@ -34,7 +35,7 @@ public:
    virtual sstSlsCtrl_st        *getSlsCtrl(){return ctrl;}
    virtual Int_t                 getMode(){return mode;}
    virtual St_sstWafersPosition *getSstWafersPos(){return m_positions;}
-   virtual St_sstDimensions     *getSstDimensions(){return m_dimensions;}
+   virtual sstDimensions_st     *getSstDimensions(){return dimensions;}
 
    static const TGeoHMatrix     *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
@@ -44,7 +45,7 @@ public:
    St_sstWafersPosition  *m_positions;//!
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.9 2015/06/25 23:20:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.10 2015/08/03 13:07:20 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
