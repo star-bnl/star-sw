@@ -1,6 +1,6 @@
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_Survey") || !gROOT->GetClass("TGeoRotation")) return 0;
-  Survey_st row = {0, 1,0,0, 0,1,0, 0,0,1, 0,0,0, 1e-5,1e-5,1e-4,4e-3,4e-3,4e-3,"Ideal"};
+  Survey_st row = {0, 1,0,0, 0,1,0, 0,0,1, 0,0,0, 1e-5,1e-5,1e-4,4e-3,4e-3,4e-3,"Pass 5"};
   //   
   /* A.Lebedev 07/28/15
     GMT modules installed
@@ -26,10 +26,9 @@ TDataSet *CreateTable() {
   TGeoRotation *rotm = 0;
   for (Int_t m = 0; m < noModules; m++) {
     row.Id = m;
-    TGeoRotation *rotm;
-    if (z[m] > 0) {Rot = Form("R%03i",phi[m]); rotm = new TGeoRotation(Rot);}
-    else          {Rot = Form("Y%03i",phi[m]); rotm = new TGeoRotation(Rot,   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00);}
-    rotm->RotateZ(phi[m]);
+    TGeoRotation *rotm = new TGeoRotation(Rot);
+    //    rotm->RotateZ(-phi[m]); // Pass 6
+    rotm->RotateZ(phi[m]); // Pass 5, 7
     Double_t *rotaion = rotm->GetRotationMatrix();
     memcpy(&row.r00, rotm->GetRotationMatrix(), 9*sizeof(Double_t));
     Double_t xyz[3] = {R*inch, 0, z[m]*inch};
