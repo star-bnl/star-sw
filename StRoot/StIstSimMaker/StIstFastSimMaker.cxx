@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.34 2015/08/03 14:25:06 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.35 2015/08/03 14:25:13 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -73,6 +73,15 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
       return kStFatal;
    }
 
+   if(mBuildIdealGeom)
+   {
+     LOG_DEBUG << " Using ideal geometry" << endm;
+   }
+   else
+   {
+     LOG_DEBUG << " Using geometry tables from the DB." << endm;
+   }
+
    return kStOk;
 }
 
@@ -144,6 +153,8 @@ Int_t StIstFastSimMaker::Make()
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
          Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
 
+         LOG_DEBUG << "ladder/wafer = " << mcI->ladder() << " / " << mcI->wafer() << endm;
+         LOG_DEBUG << "x/y/z before smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
          if (mSmear) { // smearing on
             localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
             localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
@@ -159,6 +170,7 @@ Int_t StIstFastSimMaker::Make()
             localIstHitPos[0] = kIstSensorActiveSizeRPhi / 2.0 - rPhiPos;
             localIstHitPos[2] = zPos - kIstSensorActiveSizeZ / 2.0;
          }
+         LOG_DEBUG << "x/y/z after smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
 
          //YPWANG: do local-->global transform with geometry table
          combI->LocalToMaster(localIstHitPos, globalIstHitPos);
