@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.33 2015/03/13 18:44:47 perev Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.34 2015/08/03 14:25:06 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -20,7 +20,7 @@
 
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
    mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
 }
