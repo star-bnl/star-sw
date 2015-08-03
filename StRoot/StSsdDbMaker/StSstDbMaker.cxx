@@ -1,6 +1,9 @@
-//$Id: StSstDbMaker.cxx,v 1.19 2015/06/23 17:17:38 bouchet Exp $
+//$Id: StSstDbMaker.cxx,v 1.20 2015/08/03 13:07:20 bouchet Exp $
 //
 //$Log: StSstDbMaker.cxx,v $
+//Revision 1.20  2015/08/03 13:07:20  bouchet
+//getSstDimensions() returns the table data, not the structure
+//
 //Revision 1.19  2015/06/23 17:17:38  bouchet
 //move to SST tables ; cpp-checked
 //
@@ -43,7 +46,7 @@ THashList *StSstDbMaker::fRotList = 0;
 ClassImp(StSstDbMaker)
 //_____________________________________________________________________________
   StSstDbMaker::StSstDbMaker(const char *name):
-    StMaker(name), mySst(0), m_dimensions(0), config(0), ctrl(0), mode(0),
+    StMaker(name), mySst(0), dimensions(0), config(0), ctrl(0), mode(0),
     mReady(kStErr)
 {
   gStSstDbMaker = this;
@@ -78,6 +81,8 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
       mReady = kStFatal;
       return kStFatal;
    }
+
+   dimensions = m_dimensions->GetTable();
 
    m_positions = calculateWafersPosition();
 
