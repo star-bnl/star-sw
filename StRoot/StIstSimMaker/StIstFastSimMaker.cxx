@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.35 2015/08/03 14:25:13 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.36 2015/08/03 14:25:18 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -133,7 +133,6 @@ Int_t StIstFastSimMaker::Make()
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
          Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
-         LOG_DEBUG << " matIst : " << matIst << endm;
 
          TGeoHMatrix *combI = NULL;
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
@@ -153,8 +152,8 @@ Int_t StIstFastSimMaker::Make()
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
          Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
 
-         LOG_DEBUG << "ladder/wafer = " << mcI->ladder() << " / " << mcI->wafer() << endm;
-         LOG_DEBUG << "x/y/z before smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
+         LOG_DEBUG << "ladder/wafer = " << mcI->ladder() << " / " << mcI->wafer() << "\n"
+                   << "x/y/z before smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
          if (mSmear) { // smearing on
             localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
             localIstHitPos[2] = distortHit(localIstHitPos[2], mResZIst1, kIstSensorActiveSizeZ / 2.0);
