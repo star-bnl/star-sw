@@ -1,4 +1,4 @@
-// $Id: GeoTestMaker.h,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: GeoTestMaker.h,v 1.2 2015/08/04 21:13:40 jwebb Exp $
 
 #ifndef STAR_GeoTestMaker
 #define STAR_GeoTestMaker
@@ -36,7 +36,7 @@ class GeoTestMaker : public StMaker {
   TString fGeo;
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: GeoTestMaker.h,v 1.1 2009/03/25 23:15:10 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: GeoTestMaker.h,v 1.2 2015/08/04 21:13:40 jwebb Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
