@@ -111,7 +111,7 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
   TH2F *hist = (TH2F *)set->GetObject();
   TString name = hist->GetName(); // name of the histogram/volume being probed
 
-  Double_t the, eta, phi, step, matprop, x;
+  Double_t the, eta, phi, step, matprop;//, x;
   Double_t start[3], dir[3];
   TGeoNode *startnode = 0, *endnode = 0;
 
@@ -129,7 +129,7 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
       { 
 
 	ngen++; // count total number of events
-	x = 0;  // reset radiation length counter
+	//x = 0;  // reset radiation length counter
 	eta  = hist->GetXaxis()->GetBinCenter(jeta);
 	phi  = hist->GetYaxis()->GetBinCenter(iphi);    // in rad
 	the  = 2.0 * TMath::ATan( TMath::Exp( -eta ) ); // in rad
