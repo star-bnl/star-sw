@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: TGeoDrawHelper.cxx,v 1.3 2009/02/03 15:55:44 fisyak Exp $
+** $Id: TGeoDrawHelper.cxx,v 1.4 2015/08/04 21:03:36 jwebb Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -119,7 +119,7 @@ public:
       }
    }
 #endif    
-   virtual void    SetPoints(Float_t *buff) const {
+   virtual void    SetPoints(Double_t *buff) const {
 
       //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*Create ARB8 points*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
       //*-*                            ==================
