@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.5 2012/06/11 16:17:42 fisyak Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.6 2015/08/04 21:13:40 jwebb Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -22,7 +22,7 @@
 #include "TRegexp.h"
 #include "StMCStack.h"
 
-
+#include "StMessMgr.h"
 
 ClassImp(StMCConstructGeometry)
 
@@ -56,7 +56,8 @@ int  StMCConstructGeometry::Fun()
     }
     gSystem->ExpandPathName(ts);
     int fail=gROOT->LoadMacro(ts);
-    if (fail) Printf("operator()","fail=%d path=%s",fail,ts.Data());
+    //if (fail) Printf("operator()","fail=%d path=%s",fail,ts.Data());
+    if (fail) LOG_FATAL << "operator() fail=" << fail << " path=" << ts.Data() << endm;
     assert(fail==0);
     gROOT->ProcessLine("CreateTable()");
   }
