@@ -1,5 +1,8 @@
-// $Id: StarMCHits.cxx,v 1.10 2009/02/03 16:01:05 fisyak Exp $
+// $Id: StarMCHits.cxx,v 1.11 2015/08/04 21:00:39 jwebb Exp $
 // $Log: StarMCHits.cxx,v $
+// Revision 1.11  2015/08/04 21:00:39  jwebb
+// Improved const-ness.  Removed unused struct.
+//
 // Revision 1.10  2009/02/03 16:01:05  fisyak
 // Add includes
 //
@@ -97,11 +100,11 @@ enum EDetectorTypes {
 };
 struct Detector_G2T_t {
   EDetectorTypes kType;
-  Char_t        *Name;
-  Char_t        *G2T_type;
-  Char_t        *G2T_name;
-  Char_t        *G2T_sys;
-  Char_t        *G2T_geom;
+  const Char_t        *Name;
+  const Char_t        *G2T_type;
+  const Char_t        *G2T_name;
+  const Char_t        *G2T_sys;
+  const Char_t        *G2T_geom;
 };
 static const Detector_G2T_t g2t[kALL] = {
   //              type(cd)      name          sys    geom version
@@ -372,7 +375,7 @@ void StarMCHits::StepLegacy() {
   static Double_t    Gold  = 0;
   static St_det_user *user = 0;
   static St_det_path *path = 0;
-  static St_det_hit  *hit  = 0;
+  //  static St_det_hit  *hit  = 0;
 
   TGeoNode *nodeT  = gGeoManager->GetCurrentNode();  assert(nodeT);
   TGeoVolume *volT = nodeT->GetVolume();             assert(volT);
@@ -419,7 +422,7 @@ void StarMCHits::StepLegacy() {
     fHit.Nva     = User->Nva;
     fHit.Nvb     = User->Nvb;
     path = fCurrentDetector->GetPathDesc();
-    hit  = fCurrentDetector->GetHitDesc();
+    //    hit  = fCurrentDetector->GetHitDesc();
     fHit.Entry = fHit.Current;
     fHit.Sleng = gMC->TrackLength();
     fHit.Charge = (Int_t) gMC->TrackCharge();
