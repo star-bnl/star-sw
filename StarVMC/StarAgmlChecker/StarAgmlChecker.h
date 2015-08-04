@@ -33,7 +33,7 @@ class CheckSum_t
 { 
 public:
   CheckSum_t(){ mCount=0; };
-  ~CheckSum_t(){ };
+  virtual ~CheckSum_t(){ };
 
   operator TMD5()   { TMD5 final = mResult; final.Final(); return final; }      /// Cast to TMD5
   operator TString(){ TMD5 final = *((TMD5 *)this); return final.AsString(); }  /// Cast to TString.
