@@ -1414,7 +1414,7 @@ Bfc_st BFC[] = { // standard chains
   // GMT
   {"gmt"        ,"","","gmtDat,gmtClu"                                      ,"","","Gmt data Chain",kFALSE},
   {"gmtDat"     ,"","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
-  {"gmtClu"     ,"","","gmtutil","StGmtClusterMaker","StGmtClusterMaker"       ,"GMT cluster maker",kFALSE},
+  {"gmtClu"   ,"","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
   {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
   {"gmtClusTree","","","gmtClu","","",                                "Fill TTree for GMT clusters",kFALSE},
 
