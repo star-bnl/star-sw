@@ -7,7 +7,7 @@ TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
 tpcCorrection_st row;
 St_tpcCorrection *tableSet = new St_tpcCorrection("TpcAdcCorrectionB",2);
-/* 
+/* TpcT::AdcCorrections()
 06/25/10 y2010_AuAu_200GeV_1200_1evts_y2010_TpcRS_sdt20100107.110000_Bichsel_1_100.ADC.root
 Fit innerM      log(simulated ADC) versus log(recon. ADC) and Z
  PARAMETER NUMBER   6 NOT A VARIABLE. IGNORED.
