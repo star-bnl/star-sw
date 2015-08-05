@@ -1,4 +1,4 @@
-/* $Id: StIstDb.h,v 1.11 2014/11/18 23:11:57 smirnovd Exp $ */
+/* $Id: StIstDb.h,v 1.12 2015/08/03 14:26:03 smirnovd Exp $ */
 
 #ifndef StIstDb_hh
 #define StIstDb_hh
@@ -52,7 +52,7 @@ public:
    const TGeoHMatrix *getGeoHMatrixIstOnPst() const     	{return &mGeoHMatrixIstOnPst; }
    const TGeoHMatrix *getGeoHMatrixLadderOnIst(Int_t ladder) const     {return &mGeoHMatrixLadderOnIst[ladder - 1]; }
    const TGeoHMatrix *getGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
-   static const TGeoHMatrix* getHMatrixSensorOnGlobal(int ladder, int sensor);
+   static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
    const istPedNoise_st *getPedNoise() const 		{return mIstPedNoise;}
    const istGain_st *getGain() const     		{return mIstGain;    }
@@ -70,7 +70,7 @@ public:
    virtual void Print(Option_t *opt = "") const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.11 2014/11/18 23:11:57 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.12 2015/08/03 14:26:03 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList; ///< A list of TGeoHMatrix transormations for each IST sensor
@@ -97,6 +97,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.12  2015/08/03 14:26:03  smirnovd
+* Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
+*
 * Revision 1.11  2014/11/18 23:11:57  smirnovd
 * StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
 *

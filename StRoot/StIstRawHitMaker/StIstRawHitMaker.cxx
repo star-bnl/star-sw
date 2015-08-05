@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.31 2015/02/27 15:48:34 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.32 2015/08/03 14:26:03 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -190,7 +190,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
  * Make(): main functional part of the raw hit maker, which contains the below three functions:
  * (1) un-pack the IST raw ADC data (ZS or non-ZS) from daq data via daq reader;
  * (2) pedestal subtraction for the non-ZS data and dynamical common-mode noise calculation;
- * (3) raw hit decision and ADC-to-dE/dx translation, then written to corresponding collection in physics mode; 
+ * (3) raw hit decision and ADC-to-dE/dx translation, then written to corresponding collection in physics mode;
  *     While in offline calibrarion mode, ADC information was directly saved without any raw hit processing.
  */
 Int_t StIstRawHitMaker::Make()
@@ -254,7 +254,7 @@ Int_t StIstRawHitMaker::Make()
       Float_t signalCorrected[kIstNumApvChannels][kIstNumTimeBins];    //signal w/ pedestal subtracted
 
       for (int l = 0; l < kIstNumApvChannels; l++)    {
-	 for (int m = 0; m < kIstNumTimeBins; m++)    {
+         for (int m = 0; m < kIstNumTimeBins; m++)    {
             signalUnCorrected[l][m]  = 0;
             signalCorrected[l][m]    = 0.;
          }
@@ -429,7 +429,8 @@ Int_t StIstRawHitMaker::Make()
                      if ( mDoCmnCorrection && dataFlag == mADCdata )
                         signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
 
-		     if(signalCorrected[iChan][iTBin]<0) signalCorrected[iChan][iTBin] = 0.1;
+                     if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
+
                      rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
                      rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
 
@@ -470,6 +471,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.32  2015/08/03 14:26:03  smirnovd
+* Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
+*
 * Revision 1.31  2015/02/27 15:48:34  ypwang
 * Make sure the corrected ADC value is positive
 *

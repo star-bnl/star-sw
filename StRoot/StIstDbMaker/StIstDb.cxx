@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.13 2014/12/17 19:37:47 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.14 2015/08/03 14:26:03 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -43,12 +43,13 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
 
    //get TPC positionement relative to STAR
    if (gStTpcDb) {
-   	mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
+      mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
    }
    else {
-	if (mGeoHMatrixTpcOnGlobal) delete mGeoHMatrixTpcOnGlobal;
-        mGeoHMatrixTpcOnGlobal = new TGeoHMatrix("tpcOnGlobal");
-        LOG_WARN << "No gStTpcDb, use null transformation for tpc on global" << endm;
+      if (mGeoHMatrixTpcOnGlobal) delete mGeoHMatrixTpcOnGlobal;
+
+      mGeoHMatrixTpcOnGlobal = new TGeoHMatrix("tpcOnGlobal");
+      LOG_WARN << "No gStTpcDb, use null transformation for tpc on global" << endm;
    }
 
    //obtain IST geomery tables
@@ -131,13 +132,13 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
  * local coordinate system to the global one. The ladder and sensor id-s are
  * expected to follow the human friendly numbering scheme, i.e. >= 1.
  */
-const TGeoHMatrix* StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
+const TGeoHMatrix *StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
 {
    if (ladder < 1 || ladder > kIstNumLadders || sensor < 1 || sensor > kIstNumSensorsPerLadder)
       return 0;
 
-   int id = 1000 + (ladder-1)*kIstNumSensorsPerLadder + sensor;
-   return mgRotList ? (const TGeoHMatrix*) mgRotList->FindObject(Form("R%04i", id)) : 0;
+   int id = 1000 + (ladder - 1) * kIstNumSensorsPerLadder + sensor;
+   return mgRotList ? (const TGeoHMatrix *) mgRotList->FindObject(Form("R%04i", id)) : 0;
 }
 
 
@@ -168,6 +169,9 @@ void StIstDb::Print(Option_t *opt) const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.14  2015/08/03 14:26:03  smirnovd
+* Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
+*
 * Revision 1.13  2014/12/17 19:37:47  smirnovd
 * StiIstDb: Corrected mapping of ladder/sensor to global aggregate sensor id.
 *

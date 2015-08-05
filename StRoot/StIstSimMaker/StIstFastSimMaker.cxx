@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.33 2015/03/13 18:44:47 perev Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.37 2015/08/03 14:26:03 smirnovd Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -20,7 +20,7 @@
 
 ClassImp(StIstFastSimMaker)
 
-StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kTRUE),
+StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
    mRandom(useRandomSeed ? time(0) : 65539), mSmear(kTRUE)
 {
 }
@@ -41,8 +41,8 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
 
       if (!gGeoManager) {
          LOG_ERROR << "Init() - "
-            "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
-            "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
+                   "Cannot initialize StIstFastSimMaker due to missing global object of TGeoManager class. "
+                   "Make sure STAR geometry is properly loaded with BFC AgML option" << endm;
          return kFatal;
       }
    }
@@ -69,6 +69,13 @@ Int_t StIstFastSimMaker::InitRun(int runNo)
    if (!mIstRot) {
       LOG_FATAL << "InitRun(): mIstRot is not initialized" << endm;
       return kStFatal;
+   }
+
+   if (mBuildIdealGeom) {
+      LOG_DEBUG << " Using ideal geometry" << endm;
+   }
+   else {
+      LOG_DEBUG << " Using geometry tables from the DB." << endm;
    }
 
    return kStOk;
@@ -122,25 +129,28 @@ Int_t StIstFastSimMaker::Make()
          StMcIstHit *mcI = dynamic_cast<StMcIstHit *>(mcH);
 
          Int_t matIst = 1000 + (mcI->ladder() - 1) * kIstNumSensorsPerLadder + mcI->wafer();
-         LOG_DEBUG << " matIst : " << matIst << endm;
 
          TGeoHMatrix *combI = NULL;
+
          //Access VMC geometry once no IST geometry Db tables available or using ideal geoemtry is set
          if (mBuildIdealGeom) {
-  	  TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-  	  path += Form("/IBAM_%ld/IBLM_%ld/IBSS_1", mcI->ladder(), mcI->wafer());
-  	  gGeoManager->RestoreMasterVolume();
-  	  gGeoManager->CdTop();
-  	  gGeoManager->cd(path);
-  	  combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
+            TString path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+            path += Form("/IBAM_%ld/IBLM_%ld/IBSS_1", mcI->ladder(), mcI->wafer());
+            gGeoManager->RestoreMasterVolume();
+            gGeoManager->CdTop();
+            gGeoManager->cd(path);
+            combI = (TGeoHMatrix *)gGeoManager->GetCurrentMatrix();
          }
          else { //using mis-aligned gemetry from IST geometry DB tables
-  	  combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));  
+            combI = (TGeoHMatrix *)mIstRot->FindObject(Form("R%04i", matIst));
          }
 
          //YPWANG: McIstHit stored local position
          Double_t globalIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
          Double_t localIstHitPos[3] = {mcI->position().x(), mcI->position().y(), mcI->position().z()};
+
+         LOG_DEBUG << "ladder/wafer = " << mcI->ladder() << " / " << mcI->wafer() << "\n"
+                   << "x/y/z before smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
 
          if (mSmear) { // smearing on
             localIstHitPos[0] = distortHit(localIstHitPos[0], mResXIst1, kIstSensorActiveSizeRPhi / 2.0);
@@ -158,6 +168,8 @@ Int_t StIstFastSimMaker::Make()
             localIstHitPos[2] = zPos - kIstSensorActiveSizeZ / 2.0;
          }
 
+         LOG_DEBUG << "x/y/z after smearing" << localIstHitPos[0] << "/" << localIstHitPos[1] << "/" << localIstHitPos[2] << endm;
+
          //YPWANG: do local-->global transform with geometry table
          combI->LocalToMaster(localIstHitPos, globalIstHitPos);
          StThreeVectorF gistpos(globalIstHitPos);
@@ -166,7 +178,7 @@ Int_t StIstFastSimMaker::Make()
          StIstHit *tempHit = new StIstHit(gistpos, mHitError, hw, mcI->dE(), 0);
          tempHit->setDetectorId(kIstId);
          tempHit->setId(mcI->key());
-         mcI->parentTrack()? tempHit->setIdTruth(mcI->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
+         mcI->parentTrack() ? tempHit->setIdTruth(mcI->parentTrack()->key(), 100) : tempHit->setIdTruth(-999);
          tempHit->setLocalPosition(localIstHitPos[0], localIstHitPos[1], localIstHitPos[2]);
          istHitCollection->addHit(tempHit);
       }//MC hits loop over
@@ -196,7 +208,8 @@ Double_t StIstFastSimMaker::distortHit(const Double_t x, const Double_t res, con
 
    do {
       smeared_x = mRandom.Gaus(x, res);
-   } while ( fabs(smeared_x) > detLength);
+   }
+   while ( fabs(smeared_x) > detLength);
 
    return smeared_x;
 }
