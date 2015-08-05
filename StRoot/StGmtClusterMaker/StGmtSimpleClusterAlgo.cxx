@@ -17,25 +17,24 @@
 ClassImp(StGmtSimpleClusterAlgo);
 //________________________________________________________________________________
 Int_t StGmtSimpleClusterAlgo::Init() {
-  mPedestals = new Double_t *[kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; //TO BE MODULE WISE !! HERE
-  mPedestalStdDev = new Double_t*[kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
-  mPedestalRMS = new Double_t*[kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
-  mCalculated = new Bool_t*[kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
+  mPedestals = new Double_t* [kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; //TO BE MODULE WISE !! HERE
+  mPedestalStdDev = new Double_t* [kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
+  mPedestalRMS = new Double_t* [kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
+  mCalculated = new Bool_t* [kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];//[kGmtNumModules]; 
   mEv=0;
-  mCalcOk= new Bool_t[kGmtNumModules];   for( Int_t imx=0; imx <  kGmtNumModules; imx++) mCalcOk[imx]=false;
+  mCalcOk = new Bool_t[kGmtNumModules];   for(Int_t imx=0; imx < kGmtNumModules; imx++) mCalcOk[imx]=false;
   Int_t loopMax = kGmtNumConnectedStripsX + kGmtNumConnectedStripsY;  
-  for( Int_t idx=0; idx < loopMax; idx++){
+  for(Int_t idx=0; idx < loopMax; idx++) {
     mPedestals[idx] = new Double_t[kGmtNumModules];
     mPedestalStdDev[idx]= new Double_t[kGmtNumModules];
     mPedestalRMS[idx]= new Double_t[kGmtNumModules];
     mCalculated[idx]= new Bool_t[kGmtNumModules];
-    for( Int_t imx=0; imx <  kGmtNumModules; imx++)
-      {
+    for(Int_t imx=0; imx <  kGmtNumModules; imx++) {
 	mPedestals[idx][imx] = -99.0;
 	mPedestalStdDev[idx][imx] = -99.0;
 	mPedestalRMS[idx][imx] = -99.0;
 	mCalculated[idx][imx] = false;
-      }
+    }
   }//end init arrays
   return kStOk;
 };
@@ -48,7 +47,7 @@ Int_t StGmtSimpleClusterAlgo::Init() {
     So no weighting by charge yet. 
     The code gets called for each disk separately, so global coordinates have to be set later by the calling cluster maker.
 */
-Int_t StGmtSimpleClusterAlgo::doClustering( UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& clusters ) {
+Int_t StGmtSimpleClusterAlgo::doClustering(UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& clusters) {
   strips.sortByCoord();
   Int_t rdo, arm, apv, channel;
   Double_t localX=0.0, localY=0.0; 
@@ -127,12 +126,12 @@ void StGmtSimpleClusterAlgo::applyPedestals( StGmtStripCollection& strips, UInt_
     stripPtr->setPedErr(mPedestalRMS[mapIdx][module]);
     for( Int_t timebin = 0; timebin < kGmtNumTimeBins; timebin++)	{
       // mSum[mapIdx][module] += stripPtr->getAdc(timebin);
-      stripPtr->setPedSubtractedAdc( stripPtr->getAdc(timebin) - stripPtr->getPed(), timebin ); 
+      stripPtr->setPedSubtractedAdc( stripPtr->getAdc(timebin) - stripPtr->getPed(), timebin );
     } 
   }
 }
 //________________________________________________________________________________
-void StGmtSimpleClusterAlgo::calculatePedestals( StGmtStripCollection& strips, UInt_t module ) {
+void StGmtSimpleClusterAlgo::calculatePedestals(StGmtStripCollection& strips, UInt_t module) {
 #if 0
   LOG_INFO << " StGmtSimpleClusterAlgo::calculatePedestals Ev:" << mEv << "\tmOk:" << mCalcOk[module]  << "\tmod:" << module<< endm; 
 #endif
@@ -141,34 +140,34 @@ void StGmtSimpleClusterAlgo::calculatePedestals( StGmtStripCollection& strips, U
   Int_t mCounters[kGmtNumConnectedStripsX + kGmtNumConnectedStripsY];
   Int_t loopMax = kGmtNumConnectedStripsX + kGmtNumConnectedStripsY;
   double usedtb = kGmtNumTimeBins;
-  for( Int_t idx=0; idx < loopMax; idx++)    {
+  for(Int_t idx=0; idx < loopMax; idx++)    {
     mSum[idx] = 0.0;
     mSqrSum[idx] = 0.0;  
     mCounters[idx] = 0;
   }
-  for( Int_t mapIdx=0; mapIdx < loopMax; mapIdx++)
+  for(Int_t mapIdx=0; mapIdx < loopMax; mapIdx++)
     if(!mCalculated[mapIdx][module]) {//only calculate for needed ones
-      StGmtStrip* stripPtr = strips.getSortedStrip( mapIdx );    
-      for( Int_t timebin = 0; timebin < usedtb; timebin++)	  {
+      StGmtStrip* stripPtr = strips.getSortedStrip(mapIdx);    
+      for(Int_t timebin = 0; timebin < usedtb; timebin++) {
 	int adc = stripPtr->getAdc(timebin);
 	if(adc<0) continue;
-	mSum[mapIdx] += stripPtr->getAdc(timebin);
-	mSqrSum[mapIdx] += pow(stripPtr->getAdc(timebin),2);
+	mSum[mapIdx] += adc;
+	mSqrSum[mapIdx] += pow(adc,2);
 	mCounters[mapIdx]++;
 	// if (a<25 && !module){ LOG_INFO << "Module=" << module << "\tgeoid=" 
 	//<< stripPtr->getGeoId() << "\ttb="<< timebin<< "\tadc=" << stripPtr->getAdc(timebin) << endm;a++;}
       }
     }
-  for( Int_t mapIdx=0; mapIdx < loopMax; mapIdx++)
-    if(!mCalculated[mapIdx][module])      {    
+  for(Int_t mapIdx=0; mapIdx < loopMax; mapIdx++)
+    if(!mCalculated[mapIdx][module]) {    
       // and calculate the average pedestal, sigma and RMS for each channel
-      double pedtmp =  mSum[mapIdx] / mCounters[mapIdx];
-      double stddevtmp =  sqrt( ( mSqrSum[mapIdx] - (double)mCounters[mapIdx] * pedtmp * pedtmp)  
-				/ (double)( mCounters[mapIdx] - 1 ));
+      double pedtmp = mSum[mapIdx] / mCounters[mapIdx];
+      double stddevtmp = sqrt((mSqrSum[mapIdx] - (double)mCounters[mapIdx] * pedtmp * pedtmp) 
+				/ (double)(mCounters[mapIdx] - 1));
       //saving
-      mPedestals[mapIdx][module] = (mPedestals[mapIdx][module]*mEv +  pedtmp)/(mEv+1);
-      mPedestalStdDev[mapIdx][module] =  (mEv*mPedestalStdDev[mapIdx][module] + stddevtmp)/(mEv+1); 
-      mPedestalRMS[mapIdx][module]    = sqrt(TMath::Max(0.0, mPedestals[mapIdx][module] * mPedestals[mapIdx][module] 
+      mPedestals[mapIdx][module] = (mPedestals[mapIdx][module]*mEv + pedtmp)/(mEv+1);
+      mPedestalStdDev[mapIdx][module] = (mEv*mPedestalStdDev[mapIdx][module] + stddevtmp)/(mEv+1); 
+      mPedestalRMS[mapIdx][module]  = sqrt(TMath::Max(0.0, mPedestals[mapIdx][module] * mPedestals[mapIdx][module] 
 							- mPedestalStdDev[mapIdx][module] * mPedestalStdDev[mapIdx][module]));
     }
 }
@@ -225,11 +224,11 @@ void StGmtSimpleClusterAlgo::findClusters( StGmtStripCollection& strips, UInt_t 
   Double_t clusterLocalX = 0;
   Double_t clusterLocalY = 0;
   // will find seeds and marks nearest neighbors for exclusion
-  for( Int_t idx=0; idx < kGmtNumStripsPerModule; idx++)  {
-    StGmtStrip* stripPtr = strips.getSortedStrip( idx );
-    if( idx < kGmtNumConnectedStripsX-1 )    {
-      if( stripPtr->getMaxPedSubtractedAdc() > sigXAdc && 
-	  stripPtr->getMaxPedSubtractedAdc() > kGmtHitCut * stripPtr->getPedStdDev() )      {
+  for(Int_t idx=0; idx < kGmtNumStripsPerModule; idx++)  {
+    StGmtStrip* stripPtr = strips.getSortedStrip(idx);
+    if(idx < kGmtNumConnectedStripsX-1) {
+      if(stripPtr->getMaxPedSubtractedAdc() > sigXAdc && 
+	  stripPtr->getMaxPedSubtractedAdc() > kGmtHitCut * stripPtr->getPedStdDev()) {
 	sigXAdc = stripPtr->getMaxPedSubtractedAdc();
 	sigXTb = stripPtr->getMaxPedSubtractedAdcTB();
 	sigXIndex = idx;
@@ -249,39 +248,39 @@ void StGmtSimpleClusterAlgo::findClusters( StGmtStripCollection& strips, UInt_t 
     LOG_INFO << "\t sigXAdc " << sigXAdc << " sigYAdc " << sigYAdc << endm;
     LOG_INFO << "\t sigXTb " << sigXTb << " sigYTb " << sigYTb << endm;
 #endif
-    if( sigXTb <= sigYTb+1 && sigXTb >= sigYTb-1 )	{
-      StGmtStrip* stripPtrX = strips.getSortedStrip( sigXIndex ); stripPtrX->setIsC(1);
+    if(sigXTb <= sigYTb+1 && sigXTb >= sigYTb-1) {
+      StGmtStrip* stripPtrX = strips.getSortedStrip(sigXIndex); stripPtrX->setIsC(1);
       StGmtStrip* stripPtrXNext = 0;
       StGmtStrip* stripPtrXPrev = 0;
-      StGmtStrip* stripPtrY = strips.getSortedStrip( sigYIndex );stripPtrY->setIsC(11);
+      StGmtStrip* stripPtrY = strips.getSortedStrip(sigYIndex); stripPtrY->setIsC(11);
       StGmtStrip* stripPtrYNext = 0;
       StGmtStrip* stripPtrYPrev = 0;
       clusterLocalX = stripPtrX->getPedSubtractedAdc(sigXTb) * stripPtrX->getPosition();
       clusterLocalY = stripPtrY->getPedSubtractedAdc(sigYTb) * stripPtrY->getPosition();
       Double_t sumX = stripPtrX->getPedSubtractedAdc(sigXTb);
       Double_t sumY = stripPtrY->getPedSubtractedAdc(sigYTb);
-      if( sigXIndex+1 < kGmtNumConnectedStripsX-1 )	    {
-	stripPtrXNext = strips.getSortedStrip( sigXIndex+1 ); stripPtrXNext->setIsC(2);
+      if(sigXIndex+1 < kGmtNumConnectedStripsX-1)	    {
+	stripPtrXNext = strips.getSortedStrip(sigXIndex+1); stripPtrXNext->setIsC(2);
 	clusterLocalX += stripPtrXNext->getPedSubtractedAdc(sigXTb) * stripPtrXNext->getPosition();
 	sumX += stripPtrXNext->getPedSubtractedAdc(sigXTb);
       }
-      if( sigXIndex-1 > 0 )	    {
-	stripPtrXPrev = strips.getSortedStrip( sigXIndex-1 );stripPtrXPrev->setIsC(3);
+      if(sigXIndex-1 > 0) {
+	stripPtrXPrev = strips.getSortedStrip(sigXIndex-1);stripPtrXPrev->setIsC(3);
 	clusterLocalX += stripPtrXPrev->getPedSubtractedAdc(sigXTb) * stripPtrXPrev->getPosition();
 	sumX += stripPtrXPrev->getPedSubtractedAdc(sigXTb);
       }
-      if( sigYIndex+1 < kGmtNumConnectedStripsX + kGmtNumConnectedStripsY - 1 )	    {
-	stripPtrYNext = strips.getSortedStrip( sigYIndex+1 );stripPtrYNext->setIsC(12);
+      if(sigYIndex+1 < kGmtNumConnectedStripsX + kGmtNumConnectedStripsY-1) {
+	stripPtrYNext = strips.getSortedStrip(sigYIndex+1);stripPtrYNext->setIsC(12);
 	clusterLocalY += stripPtrYNext->getPedSubtractedAdc(sigYTb) * stripPtrYNext->getPosition();
 	sumY += stripPtrYNext->getPedSubtractedAdc(sigYTb);
       }
-      if( sigYIndex-1 > kGmtNumConnectedStripsX )	    {
-	stripPtrYPrev = strips.getSortedStrip( sigYIndex-1 ); stripPtrYPrev->setIsC(13);
+      if(sigYIndex-1 > kGmtNumConnectedStripsX)	    {
+	stripPtrYPrev = strips.getSortedStrip(sigYIndex-1); stripPtrYPrev->setIsC(13);
 	clusterLocalY += stripPtrYPrev->getPedSubtractedAdc(sigYTb) * stripPtrYPrev->getPosition();
 	sumY += stripPtrYPrev->getPedSubtractedAdc(sigYTb);
       }
-      if( (stripPtrXNext || stripPtrXPrev) && (stripPtrYNext || stripPtrYPrev) )	    {
-	if (TMath::Abs(sumX) > 1e-7 && TMath::Abs(sumY) > 1e-7) {
+      if((stripPtrXNext || stripPtrXPrev) && (stripPtrYNext || stripPtrYPrev)) {
+	if(TMath::Abs(sumX) > 1e-7 && TMath::Abs(sumY) > 1e-7) {
 	  clusterLocalX /= sumX;
 	  clusterLocalY /= sumY;
 #if 0	      
@@ -316,7 +315,7 @@ void StGmtSimpleClusterAlgo::subtractPedestals( StGmtStripCollection& strips, UI
   int a = 0;
   // First pass over everything in the module (including hits)
   double usedtb = kGmtNumTimeBins;
-  for( Int_t idx=0; idx < loopMax; idx++)    {
+  for(Int_t idx=0; idx < loopMax; idx++) {
     mSum[idx] = 0.0;
     mSqrSum[idx] = 0.0;
     mPedestals[idx][module] = 0.0;

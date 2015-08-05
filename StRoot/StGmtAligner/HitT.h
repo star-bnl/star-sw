@@ -36,7 +36,12 @@ class HitT : public TObject {
   Double32_t uM, vM;
   Double32_t anode, timeb;
   Int_t      NoHitPerTrack;
-  Double32_t uD, vD;
+  Double32_t uD, vD;       // positions of hits from detector
+  Double32_t duD, dvD;     // errors in positions
+  Double32_t suD, svD;     // sigma
+  Double32_t dsuD, dsvD;   // errors in sigma
+  Double32_t uAdcD, vAdcD;   // Adc
+  Double32_t duAdcD, dvAdcD; // errors in adc
   Double32_t uHat;
   Double32_t vHat;
   Int_t      NofHits; // total no. of hits per wafer
@@ -85,7 +90,12 @@ class HitT : public TObject {
   void SetDirG(const Double_t *x) {Double32_t *dirPG = &cxPG;for (Int_t i = 0; i < 3; i++) dirPG[i] = x[i];}
   void SetXyzL(const Double_t *x) {Double32_t *xyzPL = &xPL; for (Int_t i = 0; i < 3; i++) xyzPL[i] = x[i];}
   void SetRDO(Int_t r) {rdo = r;}
-  void SetuvD(Double_t u, Double_t v) {uD = u; vD = v;};
+  void SetuvD(Double32_t u, Double32_t v) {uD = u; vD = v;}
+  void SetuvDError(Double32_t du, Double32_t dv) {duD = du; dvD = dv;}
+  void SetSigma(Double32_t su, Double32_t sv) {suD = su; svD = sv;}
+  void SetSigmaError(Double32_t dsu, Double32_t dsv) {dsuD = dsu; dsvD = dsv;}
+  void SetAdc(Double32_t uAdc, Double32_t vAdc) {uAdcD = uAdc; vAdcD = vAdc;}
+  void SetAdcError(Double32_t duAdc, Double32_t dvAdc) {duAdcD = duAdc; dvAdcD = dvAdc;}
 #ifdef __USE_GLOBAL__
   void SetUVPredGl(Double32_t u, Double32_t v) {uPGl = u; vPGl = v;}
   void SettUVPredGl(Double32_t tu, Double32_t tv) {tuPGl = tu; tvPGl = tv;}

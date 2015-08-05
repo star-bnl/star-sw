@@ -24,7 +24,7 @@ class StGmtSimpleClusterAlgo  {
  public:
   StGmtSimpleClusterAlgo() {}
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
-  virtual Int_t doClustering(  UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& clusters );
+  virtual Int_t doClustering(UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& clusters);
   virtual Int_t Init();
   virtual ~StGmtSimpleClusterAlgo() {}
   virtual Bool_t IsPedOk()const {return mCalcOk;}

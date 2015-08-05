@@ -9,9 +9,23 @@
 #include "StGmtTrivia.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TH1.h"
+#include "TProfile.h"
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TPolyMarker.h"
 #include "StRoot/StChain/StRTSBaseMaker.h"
+#include "Stypes.h"
+#include "TSpectrum.h"
+#include "TF1.h"
+#include "TMath.h"
+#include "TVirtualFitter.h"
+
 class StGmtTrivia;
 class StGmtSimpleClusterAlgo;
+class StGmtStripCollection;
+class StGmtHitCollection;
+
 class StGmtClusterMaker :  public StRTSBaseMaker {
   //omitted assignment operator and copy constructor on purpose
  public:
@@ -29,8 +43,15 @@ class StGmtClusterMaker :  public StRTSBaseMaker {
   static Int_t gmtStat;
  protected:
   StGmtSimpleClusterAlgo* mClusterAlgoPtr;
-  TTree * ftriviatree;
+  TTree* ftriviatree;
   StGmtTrivia * ftriviahit;
+  TH1F* phClusXDebug;
+  TH1F* phClusYDebug;
+  TTree* pClusTree;
+  
+  void ClusterBuilder(unsigned long events, UInt_t module, StGmtStripCollection& strips, StGmtHitCollection& hits);
+  TF1* FindPeaks(TH1F* hist);
+
   ClassDef(StGmtClusterMaker,1)
 };
 #endif

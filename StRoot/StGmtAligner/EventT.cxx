@@ -182,7 +182,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
 	StHit *hit = hitvec[l];
 	if (hit) {
 	  //if (hit->flag()>=4) continue;
-	  //if (hit->flag()< 0) continue;
+	  //if (hit->flag()< 0) continu;
 	  //	  cout << "hitFlag=" << hit->flag() << endl;
 	  HitT *h = AddHitT();
 	  h->SetHitFlag(UInt_t(hit->flag()));
@@ -279,7 +279,12 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     StGmtHit *ht = (StGmtHit *) hit;
     B = ht->getModule();
     h->SetId(B,L,l,W,H);
-    h->SetuvD(ht->getLocalX(), ht->getLocalY() );			
+    h->SetuvD(ht->getLocalX(), ht->getLocalY());
+    h->SetuvDError(ht->getErrorLocalX(), ht->getErrorLocalY());
+    h->SetSigma(ht->getSigmaX(), ht->getSigmaY());
+    h->SetSigmaError(ht->getErrorSigmaX(), ht->getErrorSigmaY());
+    h->SetAdc(ht->getAdcX(), ht->getAdcY());
+    h->SetAdcError(ht->getErrorAdcX(), ht->getErrorAdcY());
     h->SetUsedInFit(hit->usedInFit());
   }
   StThreeVectorF position = hit->position();

@@ -58,7 +58,7 @@ class EventT : public TObject {
   void              SetNhit(UInt_t n) { fNhit = n; }							     
   void              SetFlag(UInt_t f) { fFlag = f; }							     
   void              SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field);				     
-  TrackT           *AddTrackT();										      
+  TrackT           *AddTrackT();									      
   HitT             *AddHitT();										      
   HitT             *SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track);
   Double32_t        GetVertex(UInt_t i=0) {return (i<3)?fVertex[i]:0;}  
