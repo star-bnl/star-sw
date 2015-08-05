@@ -1384,13 +1384,8 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   Int_t nfound = fSpectrum->Search(proj,2.0,"",10);
   if (nfound < 1) return 0;
   Int_t npeaks = 0;
-#if ROOT_VERSION_CODE > 336641 /* ROOT_VERSION(5,35,1) */
-  Double_t *xpeaks = fSpectrum->GetPositionX();
-  Double_t xp = 0;
-#else
   Float_t *xpeaks = fSpectrum->GetPositionX();
   Float_t xp = 0;
-#endif
   if (nfound > 2) nfound = 2;
   Double_t xpi = 9999;
   for (Int_t p = 0; p < nfound; p++) {
