@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.3 2015/07/21 14:54:23 bouchet Exp $
+//$Id: StSstWafer.cc,v 1.4 2015/08/06 17:46:54 smirnovd Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.4  2015/08/06 17:46:54  smirnovd
+//Removed unused local variables
+//
 //Revision 1.3  2015/07/21 14:54:23  bouchet
 //removed unused variables ; Int_t doLorentzShiftSide moved to void()
 //
@@ -2834,7 +2837,6 @@ float* StSstWafer::findAngle(Float_t *p, Float_t *alpha)
   Float_t spN = 0.;
   Float_t spD = 0.;
 
-  Float_t npT = 0.;
   Float_t npN = 0.;
   Float_t npD = 0.;
 
@@ -2851,7 +2853,6 @@ float* StSstWafer::findAngle(Float_t *p, Float_t *alpha)
       pD[i] = d(i)*spD  ;
     }
 
-  npT = sqrt(pT[0]*pT[0]+pT[1]*pT[1]+pT[2]*pT[2]);
   npD = sqrt(pD[0]*pD[0]+pD[1]*pD[1]+pD[2]*pD[2]);
   npN = sqrt(pN[0]*pN[0]+pN[1]*pN[1]+pN[2]*pN[2]);
 
