@@ -27,19 +27,22 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"year_2a",     20010610,     0, "year_2a",  ""},                   //       {"year_2a",     20010610,     0}
   {"y2001n",      20010615,     0, "year2001", "xgeometry"}, 
 //{"year2001",    20010615,     0, "year2001", ""},                   //       {"year2001",    20010615,     0}
-  {"y2003",       20021115,     0, "year2003", "xgeometry"}, 
-//{"year2003",    20021115,     0, "year2003", ""},                   //       {"year2003",    20021115,     0}
-  {"y2003x",      20021115,     1, "y2003x",   "xgeometry"},                   //       {"y2003x",      20021115,     0}
-//{"y2003a",      20021115,     2, "y2003a",   ""},                   //       {"y2003a",      20021115,     0}
-//{"y2003b",      20021115,     3, "y2003b",   ""},                   //       {"y2003b",      20021115,     0}
-//{"y2003c",      20021115,     4, "y2003c",   "new SVT"}, 
-  {"y2004",       20031120,     0, "y2004",    "xgeometry"},                   //       {"y2004",       20031120,     0}
-//{"y2004x",      20031120,     1, "y2004x",   ""},                   //       {"y2004x",      20031120,     0}
-  {"y2004y",      20031120,     2, "y2004y",   "xgeometry"},  
-  {"y2004a",      20031120,     3, "y2004a",   "xgeometry"},                   //       {"y2004a",      20031120,     0}
-//{"y2004b",      20031120,     4, "y2004b",   ""},                   //       {"y2004b",      20031120,     0}
-  {"y2004c",      20031125,     0, "y2004c",   "xgeometry"},                   //       {"y2004c",      20031125,     0}
-//{"y2004d",      20031125,     1, "y2004d",   "new SVT"},
+  {"y2003",       20021215,     0, "year2003", "xgeometry"}, 
+//{"year2003",    20021215,     0, "year2003", ""},                   //       {"year2003",    20021215,     0}
+  {"y2003x",      20021215,     1, "y2003x",   "xgeometry"},                   //       {"y2003x",      20021215,     0}
+//{"y2003a",      20021215,     2, "y2003a",   ""},                   //       {"y2003a",      20021215,     0}
+//{"y2003b",      20021215,     3, "y2003b",   ""},                   //       {"y2003b",      20021215,     0}
+//{"y2003c",      20021215,     4, "y2003c",   "new SVT"}, 
+  {"r2003",       20021120,     0, "y2003x", "xgeometry"}, 
+  {"y2004",       20031215,     0, "y2004",    "xgeometry"},                   //       {"y2004",       20031120,     0}
+//{"y2004x",      20031215,     1, "y2004x",   ""},                   //       {"y2004x",      20031120,     0}
+  {"y2004y",      20031215,     2, "y2004y",   "xgeometry"},  
+  {"y2004a",      20031215,     3, "y2004a",   "xgeometry"},                   //       {"y2004a",      20031120,     0}
+//{"y2004b",      20031215,     4, "y2004b",   ""},                   //       {"y2004b",      20031120,     0}
+  {"y2004c",      20031216,     0, "y2004c",   "xgeometry"},                   //       {"y2004c",      20031125,     0}
+//{"y2004d",      20031216,     1, "y2004d",   "new SVT"},
+  {"r2004",       20031220,     0, "y2004c",   "xgeometry"},                   //       {"y2004c",      20031125,     0}
+  
   // Dead area in SSD, in version y2005f
   {"y2005x",      20041030,     0, "y2005x",   "xgeometry"},                   //       {"y2005x",      20041030,     0}
   {"y2005",       20041030,     0, "y2005",    "xgeometry"},                   //       {"y2005",       20041030,     0}
@@ -51,6 +54,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material,AgML,xgeometry"},//{"y2005e",      20041201,     0}
   {"y2005h",      20041201,     5, "y2005h",   "y2005g + TPC2009 ,AgML,xgeometry"},
   {"y2005i",      20041201,     6, "y2005i",   "y2005h + ECALv6  ,AgML,xgeometry"},
+  {"r2005",       20041220,     0, "y2005i",   "y2005h + ECALv6  ,AgML,xgeometry"},
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane,AgML,xgeometry"},
@@ -59,12 +63,14 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD,AgML,xgeometry"},// 
   {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material,AgML,xgeometry"},
   {"y2006h",      20051201,     5, "y2006h",   "y2006g + ecal6+tpc2009(JW),AgML,xgeometry"},
+  {"r2006",       20051220,     0, "y2006h",   "y2006g + ecal6+tpc2009(JW),AgML,xgeometry"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007,AgML,xgeometry"}, // advertized simu 20061101
 //{"y2007a",      20061105,     1, "y2007a",    "the material of the water channels is now carbon "}, // advertized simu 20061101
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material,AgML,xgeometry"},
   {"y2007h",      20061105,     5, "y2007h",   "y2007g + TPC2009,AgML,xgeometry"},
+  {"r2007",       20061220,     0, "y2007h",   "y2007g + TPC2009,AgML,xgeometry"},
 
   // SVT/SSD is out
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost,AgML,xgeometry"},
@@ -73,6 +79,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008c",      20071101,     3, "y2008c",   "TOF fix & TPCE redused,AgML,xgeometry"},
   {"y2008d",      20071101,     4, "y2008d",   "Honey sandwich fix,AgML,xgeometry"},
   {"y2008e",      20071101,     5, "y2008e",   "LOW_EM central calorimter cuts,AgML,xgeometry"},
+  {"r2008",       20071220,     0, "y2008e",   "LOW_EM central calorimter cuts,AgML,xgeometry"},
   // 
 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF,AgML,xgeometry"},
@@ -80,21 +87,25 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc.,AgML,xgeometry"},
   {"y2009c",      20081215,     3, "y2009c",   "TOF fix & TPCE redused,AgML,xgeometry"},
   {"y2009d",      20081215,     4, "y2009d",   "Honey sandwich fix,AgML,xgeometry"},
+  {"r2009",       20081220,     0, "y2009d",   "Honey sandwich fix,AgML,xgeometry"},
 
   {"y2010x",      20091215,     0, "y2010x",   "Y2010 asymptotic, AgML,xgeometry"},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF,AgML,xgeometry"},
   {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag,AgML,xgeometry"},
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused,AgML,xgeometry"},
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix,AgML,xgeometry"},
+  {"r2010",       20091220,     0, "y2010c",   "Honey sandwich fix,AgML,xgeometry"},
 
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey,AgML,xgeometry"},
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now ,AgML,xgeometry"},
   {"y2011b",      20101215,     2, "y2011b",   "y2011a + new TPC + Extended Cave and tunnel,xgeometry"},
+  {"r2011",       20101220,     0, "y2011b",   "y2011a + new TPC + Extended Cave and tunnel,xgeometry"},
 
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary,AgML,xgeometry"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing),AgML,xgeometry"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry, now with MTD,AgML,xgeometry"},
   {"y2012c",      20111215,     3, "y2012c",   "y2012 geometry, now with MTD, Extended Cave and tunnel, new TPC,xgeometry"},
+  {"r2012",       20111220,     0, "y2012c",   "y2012 geometry, now with MTD, Extended Cave and tunnel, new TPC,xgeometry"},
 
   {"y2013",       20121215,     0, "y2013_1", "y2013 first cut geometry,AgML,xgeometry"},
   {"y2013_1",     20121215,     1, "y2013_1", "y2013 first cut geometry with pixel,AgML,xgeometry"},
@@ -117,16 +128,21 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
   {"20130509.000000", 20130509, 0, "y2013_1",  "y2013 with pixel, real data,AgML,xgeometry"},
   {"20130509.000000", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
+  {"r2013",      20121220,      0, "y2013_2x", "y2013x asymptotic geometry sans pixel.  WARNING: Geometry may change between releases,AgML,xgeometry"},
+    
 
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
   {"y2014a",      20131215,     1, "y2014a",   "y2014a 2014 preview geometry,AgML,xgeometry"},
   {"y2014b",      20131215,     2, "y2014b",   "y2014b production plus hcal prototype,AgML,xgeometry"},
   {"y2014c",      20131215,     3, "y2014c",   "y2014c new TPC rows,xgeometry"},
+  {"r2014",       20131220,     0, "y2014c",   "y2014c new TPC rows,xgeometry"},
 
   {"y2015",       20141215,     0, "y2015",    "y2015 first cut geometry, AgML,xgeometry"},
   {"y2015a",      20141215,     1, "y2015a",   "y2015a prouction geometry, AgML,xgeometry"},
+  {"ry2015",      20141220,     0, "y2015a",   "y2015a prouction geometry, AgML,xgeometry"},
 
   {"dev2016",     20151215,     0, "dev2016",    "y2016 development geometry, AgML,xgeometry"},
+  {"r2016",       20151220,     0, "dev2016",    "y2016 development geometry, AgML,xgeometry"},
  
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
