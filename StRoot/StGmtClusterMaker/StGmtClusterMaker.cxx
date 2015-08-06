@@ -116,7 +116,8 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
   if(!histY) histY=new TH1F("ClusterY","ClusterY",CLUS_BINS,CLUS_MIN,CLUS_MAX);
 
   if(Debug()>3) {
-    if(!canv) canv=new TCanvas("canv","Clusters",768,768);
+    canv = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("GmtClusters");
+    if(!canv) canv=new TCanvas("GmtClusters","GmtClusters",768,768);
     else      canv->Clear();
   }
   
