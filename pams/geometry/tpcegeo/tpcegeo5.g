@@ -1888,9 +1888,12 @@ block TPAD is a real padrow with dimensions defined at positioning time
                      LPtot:18:(-3,2)      Sleng:.1:(0,800),
                      ToF:16:(0,32.e-6)     LGAM:16:(-2,2),
                      Step:11:(0,10)       USER:21:(-.01,.01)
+#if 0
       create and position TDEA  dx=dx dy=dy z=z1 dz=dz1
 !//	write(*,*) 	'TDEA, dx,dy,dz1,z1=',dx,dy,dz1,z1
+#endif
 endblock
+#if 0
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 block TDEA is a dead region in pad row
       attribute TDEA seen=1 colo=4
@@ -1898,4 +1901,5 @@ block TDEA is a dead region in pad row
       SHAPE    BOX dx=0 dy=0 dz=0 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#endif
       end
