@@ -1452,7 +1452,7 @@ Double_t fun1r(Double_t *x, Double_t *par) {
   return fun2r(xz,par);
 }
 //________________________________________________________________________________
-void DrawF1(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
+void DrawF1(const Char_t *name = "innerM", Int_t i = 111, const Char_t *opt="") {
   TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
   if (! hist) return;
   TF2 *f2 = (TF2 *) hist->GetListOfFunctions()->FindObject("f2");
@@ -1469,7 +1469,7 @@ void DrawF1(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
   f1->SetParameters(params);  f1->Draw("same");
 }
 //________________________________________________________________________________
-void DrawF1r(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
+void DrawF1r(const Char_t *name = "innerM", Int_t i = 111, const Char_t *opt="") {
   TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
   if (! hist) return;
   TF2 *f2 = (TF2 *) hist->GetListOfFunctions()->FindObject("f2r");
@@ -3905,7 +3905,9 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
     if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") || File.Contains("minimc") ||
+	File.Contains("hist") || 
+	//	File.Contains("tags") || 
+	File.Contains("MuMc") || File.Contains("minimc") ||
 	File.Contains("minimc") || File.Contains("event") ||
 	File.Contains("Sparse") ||
 	File.Contains("All") ||
