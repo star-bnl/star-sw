@@ -107,18 +107,16 @@ TDataSet *CreateTable() {
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
-  // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
-  // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
-  // The corection has to be added                                                                    M             P
-  //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   // root.exe T0offset.C
-  // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
-  // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03;
+  row.T0offsetI =  1.1588e-01; //TpcRS_2014_AuAu200Z2
+  row.T0offsetO = -0.1283e-01; //TpcRS_2014_AuAu200Z2
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
 }
+/*  Mustafa 08/05/15
+                   Ideal                          Real
+  row.T0offsetI =  8.429e-02;    row.T0offsetI =  9.823e-02;
+  row.T0offsetO = -4.008e-02;    row.T0offsetO = -3.209e-02;
+ */
