@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.cc,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+// $Id: StSpaListNoise.cc,v 1.2 2015/08/06 17:46:54 smirnovd Exp $
 //
 // $Log: StSpaListNoise.cc,v $
+// Revision 1.2  2015/08/06 17:46:54  smirnovd
+// Removed unused local variables
+//
 // Revision 1.1  2015/06/23 16:26:19  jeromel
 // First version created from the SSD code and reshaped
 //
@@ -187,9 +190,7 @@ void StSpaListNoise::sortStrip()
   Int_t temp = 0;
   if (localSize<2) return;
   StSpaNoise *ptCurr = this->first();
-  StSpaNoise *ptNext;
   temp++;
-  ptNext = this->next(ptCurr);
   ptCurr = this->next(ptCurr);
   for ( ; ptCurr!=0 ; )
     {

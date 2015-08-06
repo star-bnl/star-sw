@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.68 2015/05/21 18:49:50 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.69 2015/08/06 17:46:53 smirnovd Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.69  2015/08/06 17:46:53  smirnovd
+// Removed unused local variables
+//
 // Revision 1.68  2015/05/21 18:49:50  bouchet
 // arrayIndex out of bounds fixed
 //
@@ -586,9 +589,7 @@ Int_t StSsdPointMaker::Make()
 void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
   Float_t convAdcToE = (mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip())/(pow(2.0,mDynamicControl->getnbitEncoding()));
-  found=0;
   Int_t ClustersP_tot = 0;
   Int_t ClustersN_tot = 0;
   Int_t pSize         = 0;
@@ -636,10 +637,8 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
   Int_t conversion[11]={11,12,21,13,31,221,222,223,23,32,33};
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
-  found=0;
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -802,7 +801,6 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  Int_t found=0; if(found){}
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -840,8 +838,6 @@ void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
-  found=0;
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -886,10 +882,8 @@ void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
   Int_t conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
-  found=0;
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -1226,12 +1220,9 @@ void StSsdPointMaker::Read_Strip(St_ssdNoise *strip)
 {
   ssdNoise_st *noise = strip->GetTable();
   LOG_INFO << " ReadStrip : printing few pedestal/noise values "<< endm;
-  Int_t  mNWaferPerLadder = 16;
-  Int_t iWaf              = 0;
   Int_t iLad              = 0;
   for (Int_t i = 0 ; i < strip->GetNRows(); i++)
     {
-      iWaf = noise[i].id-(noise[i].id/mNWaferPerLadder)*mNWaferPerLadder;
       iLad = noise[i].id/16;
       Int_t idWaf = noise[i].id;
       if (idWaf==1)
@@ -1253,8 +1244,6 @@ void StSsdPointMaker::Read_Strip(St_ssdNoise *strip)
 void StSsdPointMaker::WriteMatchedStrips(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
-  found=0;
   for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -1374,8 +1363,6 @@ void StSsdPointMaker::WriteMatchedStrips(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteMatchedClusters(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
-  found=0;
   Int_t clusP = 0;
   Int_t clusN = 0;
   for (Int_t i=0;i<20;i++) 
@@ -1473,8 +1460,6 @@ void StSsdPointMaker::WriteMatchedClusters(StSsdBarrel *mySsd)
 void StSsdPointMaker::EvaluateEfficiency(StSsdBarrel *mySsd)
 {
   //Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  Int_t found;
-  found=0;
   Int_t clusP = 0;
   Int_t clusN = 0;
   for (Int_t i=0;i<20;i++) 

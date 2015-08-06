@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.20 2014/12/05 16:43:01 smirnovd Exp $
+// $Id: StSsdBarrel.cc,v 1.21 2015/08/06 17:46:53 smirnovd Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.21  2015/08/06 17:46:53  smirnovd
+// Removed unused local variables
+//
 // Revision 1.20  2014/12/05 16:43:01  smirnovd
 // Deleted pointless print statement
 //
@@ -856,7 +859,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster,St_spa_strip *spa_strip,StSsdDynamicControl *mDynamicControl,StMcEvent *mcEvent){
   vector<const StMcSsdHit*> hitCol;
   StMcSsdHitCollection *myCol;
-  int totRatio, ratio, idTruth;
+  int totRatio, idTruth;
   if(mcEvent)
     {
       if(Debug()){cout << "McEvent exists" << endl;}
@@ -893,7 +896,6 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	StSsdPointList *sptList = mLadders[iLad]->mWafers[iWaf]->getPoint();//loop over StSsdPoint list
 	StSsdPoint *pSpt = sptList->first();
 	totRatio = 0;
-	ratio    = 0;
 	while (pSpt){
 	  if(mcEvent){
 	    
@@ -901,7 +903,6 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	    //jb : we fill StEvent after getting the IdMctrack
 	    //jb : as it was done too for the strip and clusters --> see StSpaBarrel.cc and StScfBarrel.cc
 	    //printf("Now we find the idMcTrack from the cluster\n");	
-	    Int_t idCLUSTER = 0; 
 	    int idClusP     = 0;
 	    int idClusN     = 0;
 	    for (i = 0 ; i < 5 ; i++)
@@ -916,7 +917,6 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 		  for(j = 0 ; j < scf_cluster->GetNRows(); j++){
 		    if(spt.id_mchit[i] == on_cluster[j].id_mchit[i]){
 		      spt.id_mctrack[i] = on_cluster[j].id_mctrack[i];
-		      idCLUSTER = on_cluster[j].id_mchit[i];
 		      idClusP = 	    10000*(10*pSpt->getIdClusterP() + 0)+idCurrentWaf;
 		      idClusN = 	    10000*(10*pSpt->getIdClusterN() + 1)+idCurrentWaf;
 		      break;
