@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.32 2015/08/03 14:26:03 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.33 2015/08/06 17:48:10 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -261,7 +261,6 @@ Int_t StIstRawHitMaker::Make()
       }
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
-      Float_t cmNoisePerChip = 0.;                              //common mode noise of the APV chip
       Float_t sumAdcPerEvent[kIstNumTimeBins];
       Int_t counterAdcPerEvent[kIstNumTimeBins];
 
@@ -387,7 +386,6 @@ Int_t StIstRawHitMaker::Make()
          Int_t geoId  = mMappingVec[elecId]; // channel geometry ID which is numbering from 1 to 110592
          Int_t ladder = 1 + (geoId - 1) / (kIstApvsPerLadder * kIstNumApvChannels); // ladder geometry ID: 1, 2, ..., 24
          Int_t apvId  = 1 + (geoId - 1) / kIstNumApvChannels; // APV geometry ID: 1, ..., 864 (numbering from ladder 1 to ladder 24)
-         cmNoisePerChip = mCmnVec[apvId - 1];
 
          //store raw hits information
          StIstRawHitCollection *rawHitCollectionPtr = mIstCollectionPtr->getRawHitCollection( ladder - 1 );
@@ -471,6 +469,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.33  2015/08/06 17:48:10  smirnovd
+* StIstRawHitMaker: Removed unused variable
+*
 * Revision 1.32  2015/08/03 14:26:03  smirnovd
 * Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
 *
