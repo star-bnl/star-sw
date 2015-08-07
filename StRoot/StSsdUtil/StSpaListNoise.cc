@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.cc,v 1.3 2009/02/23 21:10:40 bouchet Exp $
+// $Id: StSpaListNoise.cc,v 1.4 2015/08/06 17:46:53 smirnovd Exp $
 //
 // $Log: StSpaListNoise.cc,v $
+// Revision 1.4  2015/08/06 17:46:53  smirnovd
+// Removed unused local variables
+//
 // Revision 1.3  2009/02/23 21:10:40  bouchet
 // increase NSaturationSignal to reflect the energy increase of the GEANT hit
 //
@@ -178,9 +181,7 @@ void StSpaListNoise::sortStrip()
   Int_t temp = 0;
   if (localSize<2) return;
   StSpaNoise *ptCurr = this->first();
-  StSpaNoise *ptNext;
   temp++;
-  ptNext = this->next(ptCurr);
   ptCurr = this->next(ptCurr);
   for ( ; ptCurr!=0 ; )
     {

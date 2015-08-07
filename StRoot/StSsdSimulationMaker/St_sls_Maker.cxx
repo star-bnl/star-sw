@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.22 2013/11/19 14:48:55 jeromel Exp $
+ * $Id: St_sls_Maker.cxx,v 1.23 2015/08/06 17:46:53 smirnovd Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.23  2015/08/06 17:46:53  smirnovd
+ * Removed unused local variables
+ *
  * Revision 1.22  2013/11/19 14:48:55  jeromel
  * Corrections for %d format use for long int
  *
@@ -472,7 +475,6 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
   Int_t   FinalLadder   = 0;
   Int_t   FinalWafer    = 0;
   Int_t   idWafer       = 0;
-  Int_t   iWaf          = 0;
   Float_t Flag_Energy   = 1.0;
   N         = m_positions->GetNRows();
   NumOfHits = g2t_ssd_hit->GetNRows();
@@ -495,7 +497,6 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	for (Int_t i = 0; i < N; i++)    // loop over the full wafer table now.
 	  {
 	    idWafer = positions[i].id;
-	    iWaf    = idWaferToWafer(idWafer);
 	    if ((idWafer > mSsdLayer*1000)&&
 		(idWafer == currWafId)){ // find the good wafer
 	      if(Debug()){

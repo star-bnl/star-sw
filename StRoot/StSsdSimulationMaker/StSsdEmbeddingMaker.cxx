@@ -300,8 +300,7 @@ void StSsdEmbeddingMaker::CheckTables(){
   Int_t iLad          = 0;
   Int_t nStrip        = 0;
   Int_t iSide         = 0;
-  Int_t idMcHit[5]    = {0,0,0,0,0};
-  Int_t i=0 ,e = 0;
+  Int_t i=0;
   LOG_DEBUG<<"check simu table :" << endm;
   for (i = 0 ; i < mSsdSimuData->GetNRows(); i++)
     {
@@ -310,7 +309,6 @@ void StSsdEmbeddingMaker::CheckTables(){
       iWaf    = idWaferToWafer(idWaf);
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
-      for (e = 0 ; e < 5;e++) {idMcHit[e] = strip[i].id_mchit[e];}
       LOG_DEBUG<<Form("side=%d idWafer=%d Ladder=%d wafer=%d nstrip=%d signal=%d",iSide,idWaf,iLad,iWaf,nStrip,strip[i].adc_count)<<endm;
       for(Int_t ii=0;ii<5;ii++){printf("id_mchit[%d] =%d\n",ii,strip[i].id_mchit[ii]);}
     }
@@ -324,9 +322,7 @@ void StSsdEmbeddingMaker::CheckTables(){
 	iWaf    = idWaferToWafer(idWaf);
 	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
 	iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
-	for (e = 0 ; e < 5;e++) {idMcHit[e] = strip[i].id_mchit[e];
 	LOG_DEBUG<<Form("side=%d Ladder=%d wafer=%d nstrip=%d signal=%d",iSide,iLad,iWaf,nStrip,strip[i].adc_count)<<endm;
-	}
       }
   }
 }
