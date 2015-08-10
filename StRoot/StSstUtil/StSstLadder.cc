@@ -1,6 +1,15 @@
-//$Id: StSstLadder.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstLadder.cc,v 1.5 2015/07/21 14:27:43 bouchet Exp $
 //
 //$Log: StSstLadder.cc,v $
+//Revision 1.5  2015/07/21 14:27:43  bouchet
+//removed unused variable ; cleanup
+//
+//Revision 1.4  2015/07/06 13:46:21  bouchet
+//revert to initial (and correct) decoding of iLad,iWaf
+//
+//Revision 1.3  2015/07/02 18:18:46  bouchet
+//fixed the decoding of sstWafersPosition table
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -57,18 +66,12 @@ void StSstLadder::initWafers(St_sstWafersPosition *Position)
     iWaf = i%16;
     iLad = i/16;
     idWafer = 7000 + (iWaf+1)*100 + (iLad)+1;
-    int counter = i*3;
     if (mLadderNumb == idWafer%100-1){
-      //std::cout <<" i/iWaf/idWafer/counter : " << i <<" " << iWaf <<" " << idWafer << " " << counter << std::endl; 
       Double_t rr[3] = {position[0].driftDirection[i*3],      position[0].driftDirection[i*3+1],      position[0].driftDirection[i*3+2]};
       Double_t nn[3] = {position[0].normalDirection[i*3],     position[0].normalDirection[i*3+1],     position[0].normalDirection[i*3+2]};
       Double_t tr[3] = {position[0].transverseDirection[i*3], position[0].transverseDirection[i*3+1], position[0].transverseDirection[i*3+2]};
       Double_t cr[3] = {position[0].centerPosition[i*3],      position[0].centerPosition[i*3+1],      position[0].centerPosition[i*3+2]};      
       mWafers[iWaf]->init(idWafer,rr,nn,tr,cr);
-      //cout <<"driftDirection      : " << position[0].driftDirection[counter] <<" " <<position[0].driftDirection[counter+1] <<" " <<position[0].driftDirection[counter+2]<< endl;
-      //cout <<"normalDirection     : " << position[0].normalDirection[counter] <<" " <<position[0].normalDirection[counter+1] <<" " <<position[0].normalDirection[counter+2]<< endl;
-      //cout <<"transverseDirection : " << position[0].transverseDirection[counter] <<" " <<position[0].transverseDirection[counter+1] <<" " <<position[0].transverseDirection[counter+2]<< endl;
-      //cout <<"centerPosition      : " << position[0].centerPosition[counter] <<" " <<position[0].centerPosition[counter+1] <<" " <<position[0].centerPosition[counter+2]<< endl;
     }
   }
 }

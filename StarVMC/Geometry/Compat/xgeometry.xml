@@ -1,6 +1,6 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
 <Export language="Mortran">
-<Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
+  <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
                    
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
@@ -13,9 +13,12 @@
         
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.49 2015/06/19 13:48:25 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.50 2015/07/14 21:12:53 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.50  2015/07/14 21:12:53  jwebb
+  Added y2015a production geometry, initial release
+
   Revision 1.49  2015/06/19 13:48:25  jwebb
   Added HCAL test configuration (hctest)
 

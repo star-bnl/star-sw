@@ -11,7 +11,7 @@
 #include "StMessMgr.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
-#include "StHbtMaker/StRandyTopMapMaker.h"
+// #include "StHbtMaker/StRandyTopMapMaker.h" // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
 
 ClassImp(StrangeMuDstPlayer)
 
@@ -61,7 +61,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   StEventMaker *eventMaker;
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
-  StRandyTopMapMaker *topoMapFixer;
+//   StRandyTopMapMaker *topoMapFixer;  // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
   Char_t *file, *dir, *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
@@ -85,9 +85,10 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
     mcEventReader = new StMcEventMaker; 
     associator    = new StAssociationMaker;
   }
-  // The following is needed for MDC3 files with incorrect topology maps
-  if( doTopMapFix ) 
-    topoMapFixer = new StRandyTopMapMaker();
+  // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
+//   // The following is needed for MDC3 files with incorrect topology maps
+//   if( doTopMapFix ) 
+//     topoMapFixer = new StRandyTopMapMaker();
   
   if( doFileSplit ) {
     if( doV0 ) {
@@ -376,7 +377,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   StEventMaker *eventMaker;
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
-  StRandyTopMapMaker *topoMapFixer;
+  //   StRandyTopMapMaker *topoMapFixer; // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
   Char_t *file, *dir, *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
@@ -400,9 +401,10 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
     mcEventReader = new StMcEventMaker; 
     associator    = new StAssociationMaker;
   }
-  // The following is needed for MDC3 files with incorrect topology maps
-  if( doTopMapFix ) 
-    topoMapFixer = new StRandyTopMapMaker();
+  // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
+  //   // The following is needed for MDC3 files with incorrect topology maps
+  //   if( doTopMapFix ) 
+  //     topoMapFixer = new StRandyTopMapMaker();
 
   // The maker for the new micro DST must be constructed _before_ the 
   // maker to read the old micro DST. This is because the copying is

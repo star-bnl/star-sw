@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.32 2015/05/05 18:32:12 jeromel Exp $
+ * $Id: StMuEvent.h,v 1.34 2015/07/21 22:27:35 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -30,7 +30,9 @@
 #include "StEvent/StTriggerIdCollection.h"
 #include "StEvent/StDetectorState.h"
 
+#ifndef __NO_STRANGE_MUDST__
 #include "StStrangeMuDstMaker/StStrangeMuDst.hh"
+#endif
 //#include "StarClassLibrary/StThreeVectorD.hh"
 
 class StEvent;
@@ -230,6 +232,12 @@ inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.34  2015/07/21 22:27:35  jeromel
+ * Direct use of -D and one misisng NO_STRANGE_MUDST added
+ *
+ * Revision 1.33  2015/07/21 20:47:46  jeromel
+ * Brute force removal of include file (this include is compiled in many package + rootcint)
+ *
  * Revision 1.32  2015/05/05 18:32:12  jeromel
  * mNHitsHFT added but class version not incremented - fixed
  *

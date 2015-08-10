@@ -106,69 +106,80 @@ while ( defined($arg = shift(@ARGV))) {
 $ADDMESS="";
 print "Checking etc/ files\n";
 foreach $file (("system.rootrc","root.mimes")){
-    # if we have a .new file as link and a plain config file
-    if ( -l "etc/$file.new" && ! -l "etc/$file"){
-	if ($FIXIT){
-	    print "  Establishing etc/$file\n";
-	    $link = readlink("etc/$file.new");
-	    $link =~ s/\.new//;
-	    if ( -f "etc/$file" ){  
-		if ( ! unlink("etc/$file") ){  &Die("etc/$file");}
+    if ( $FIXIT ){
+	# In the final operation, we want to make sure to remove any 
+	# of those files created during the make process and replace 
+	# by a backup file we created - to simplify
+	if ( ! -e "etc/$file.new"){
+	    die "  ERROR We could not find a backup file $file.new (step missing?)\n";
+	} elsif ( -l "etc/$file.new"){
+	    unlink("etc/$file") if ( -e "etc/$file");
+	    $ofile = readlink("etc/$file.new");
+	    $ofile =~ s/.new//;
+
+	    if ( -e $ofile ){
+		system("/bin/ln -s $ofile etc/$file");
+		print "  Linked etc/$file to $ofile\n";
+	    } else {
+		system("/bin/cp -p etc/$file.new etc/$file");
+		print "  WARNING created a local etc/$file from etc/$file.new (no link found)\n";
 	    }
-	    system("/bin/ln -s $link etc/$file");
+
 	} else {
-	    print 
-		" + Native etc/$file - we could establish a link to common file\n".
-		"   Use -fix if you want to do that (but after all is compiled)\n";
+	    # it is -e but not -l
+	    die "  ERROR File etc/$file.new is local\n";
 	}
 
-    } elsif ( -e "etc/$file"){
-	# else at least we need the config file existing (and a link)
-	if ( ! -e "etc/$file.new" && $FIXIT ){
-	    print "  WARNING Could not find $file.new\n";
-	} else {
-	    # ! $FIXIT or -e etc/$file.new
-	    if ( ! -e "etc/$file.new" && -e "etc/$file" ){
-		#if ($FIXIT){
-		    # create one
-		if ( -l "etc/$file"){
-		    $ilink = $link  = readlink("etc/$file");
+    } else {
+	# In this mode, we need to be sure we create a .new does not exist
+	# so we can restore later - we also need to unlink the file in our
+	# list as the make process will override
+
+	# we first take care of creating a .new if it does not exists
+	# but we will ONLY assume one exists in the original source dir and
+	# abort otherwise
+	if ( ! -e "etc/$file.new"){
+	    if ( -l "etc/$file"){
+		$ofile = readlink("etc/$file");
+		if ( -e "$ofile.new"){
+		    # We can create it from the source dir via link
+		    system("/bin/ln -s $ofile.new etc/$file.new");
+		    print "  Linked etc/$file.new to $ofile.new\n";
 		} else {
-		    $ilink = $link = "etc/$file";
+		    # we do not want to copy $file as a local $file.new as this
+		    # may complicate the propagation of changes in $file to each
+		    # OS specific directories
+		    print "  WARNING There are no $ofile.new\n";
 		}
-		$link .= ".new";
-
-		if ( ! -e $link ){
-		    # create a copy of $ROOT/$ROOT_LEVEL/root/etc/$file
-		    if ( ! open(FI,"$ilink") ){  die "Cannot open R $ilink ($!)\n";}
-		    if ( ! open(FO,">$link") ){  die "Cannot open W $link ($!)\n";}
-		    while ( defined($line = <FI>)){
-			chomp($line);
-			print FO "$line\n";
-		    }
-		    close(FI); close(FO);
-		    print " INFO $link created from $ilink\n";
-		} 
-		if ( link($link,"etc/$file.new") ){
-		    print " INFO etc/$file.new created\n";
-		}
-		#}
-	    }
-
-	    # This also requires an arg because we do not want to alter anything
-	    # by accident if the post-comoiation actions were all made
-	    if ( $ULINK ){
-		print "  Unlinking $file\n";
-		if ( ! unlink("etc/$file") ){  	&Die("etc/$file");}
 	    } else {
-		print 
-		    " + etc/$file is a link - you may want to remove using -unlink\n";
-		$ADDMESS = " * WARNING you MUST do this before starting compilation\n";
+		if ( -e "etc/$file"){
+		    die "  ERROR We could not find etc/$file.new and etc/$file is local\n";
+		} else {
+		    die "  ERROR We could not find etc/$file.new and there is no etc/$file\n";
+		}
+	    }
+	}
+
+	# We then take care of etc/$file
+	if ( -l "etc/$file" ){
+	    $ofile = readlink("etc/$file");
+	    unlink("etc/$file");
+	    system("/bin/cp -p $ofile etc/$file");
+	    print "  Creating a local etc/$file\n";
+	} elsif ( -e "etc/$file" ){
+	    print "  There is already a local etc/$file\n";
+	} else {
+	    # Nothing exists?? Search for a .new and create
+	    if ( -e "etc/$file.new"){
+		system("/bin/cp -p etc/$file.new etc/$file");
+		print "  Created etc/$file from etc/$file.new\n";
+	    } else {
+		die "  ERROR Cannot find nor generate etc/$file\n";
 	    }
 	}
     }
 }
-print $ADDMESS if ($ADDMESS ne "");
+
 
 
 #+

@@ -1,6 +1,9 @@
-//$Id: StSstPointMaker.h,v 1.1 2015/06/23 16:29:04 jeromel Exp $
+//$Id: StSstPointMaker.h,v 1.2 2015/07/20 19:56:37 bouchet Exp $
 //
 //$Log: StSstPointMaker.h,v $
+//Revision 1.2  2015/07/20 19:56:37  bouchet
+//inserted blanks to make C++11 happy
+//
 //Revision 1.1  2015/06/23 16:29:04  jeromel
 //Version of the SSD code for the SST - strated revision 1
 //
@@ -111,7 +114,7 @@ class StSstPointMaker : public StMaker {
   int                      mWaferStatus[20][16];
   int                      mEventCounter; 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSstPointMaker.h,v 1.1 2015/06/23 16:29:04 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSstPointMaker.h,v 1.2 2015/07/20 19:56:37 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StSstPointMaker, 1)   //StAF chain virtual base class for Makers
     };

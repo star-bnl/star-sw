@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.hh,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstBarrel.hh,v 1.2 2015/06/27 19:48:51 bouchet Exp $
 //
 //$Log: StSstBarrel.hh,v $
+//Revision 1.2  2015/06/27 19:48:51  bouchet
+//removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -38,9 +41,6 @@ class sstConfiguration_st;
 class sstWafersPosition_st;
 class sstSlsCtrl_st;
 class sstStripCalib_st;
-class ssdDimensions_st;
-class ssdConfiguration_st;
-class ssdWafersPosition_st;
 class slsCtrl_st;
 class St_sls_strip;
 class St_spa_strip;
@@ -150,7 +150,7 @@ class StSstBarrel
   Char_t   first[1];
  public:
   StSstLadder** mLadders;
-  static StSstBarrel* Instance() {return fSsdBarrel;}
+  static StSstBarrel* Instance() {return fSstBarrel;}
  private:
   Int_t    mSstLayer;
   Int_t    mNLadder;
@@ -167,6 +167,6 @@ class StSstBarrel
   StSstClusterControl *mClusterControl;
   Int_t    mDebug;
   Char_t   last[1];
-  static   StSstBarrel* fSsdBarrel;
+  static   StSstBarrel* fSstBarrel;
 };
 #endif

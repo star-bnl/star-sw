@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $
+ * $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,18 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.5  2015/07/06 18:53:10  bouchet
+ * blanks removed to make C++ compiler happy (Thanks Yuri)
+ *
+ * Revision 1.4  2015/07/06 18:38:19  bouchet
+ * initialization of variables and pointers (Thanks Yuri)
+ *
+ * Revision 1.3  2015/06/24 20:58:11  bouchet
+ * added codes for using sstChipCorrect and sstMaskChip tables ; replaced StSsdConfig by StSstConfig
+ *
+ * Revision 1.2  2015/06/24 19:41:54  smirnovd
+ * StSstDaqMaker: Removed undefined method Finish()
+ *
  * Revision 1.1  2015/06/09 18:32:00  jeromel
  * Clean check-in vrsion of long time ago reviewed SST daq code
  *
@@ -53,13 +65,12 @@
 
 class St_spa_strip;
 class St_ssdPedStrip;
-class StSsdConfig;
-class St_ssdConfiguration;
-class ssdConfiguration_st;
+class StSstConfig;
+class St_sstConfiguration;
+class sstConfiguration_st;
 class St_ssdStripCalib;
 class St_ssdNoise;
-class St_ssdChipCorrect;
-class ssdChipCorrect_st;
+class sstChipCorrect_st;
 
 class StSstDaqMaker : public StRTSBaseMaker
 {
@@ -69,9 +80,8 @@ public:
    virtual Int_t InitRun(Int_t runumber);
    virtual Int_t Make();
    void Clear(const Option_t * = "");
-   virtual Int_t Finish();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.1 2015/06/09 18:32:00 jeromel Exp $ built "__DATE__" "__TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -87,7 +97,7 @@ private:
    void   FindLadderSide(int RDO, int channel, int &ladder, int &side);
    void   FindStripNumber(int &strip);
    void   DeclareNTuple();
-   void   PrintConfiguration(Int_t runumber, ssdConfiguration_st *config);
+   void   PrintConfiguration(Int_t runumber, sstConfiguration_st *config);
    void   FillData(vector<vector<int> > vadc, vector<vector<float> > vcmnoise, Int_t id_side, Int_t ladder, Int_t valength);
    Float_t CalculateCommonModeNoise(vector<int> vtemp);
    Float_t CalculateCommonModeNoiseSimple(vector<int> vtemp);
@@ -95,19 +105,19 @@ private:
    void   FillDefaultReadOutPedTable();
    void   FillNoiseTable();
    void   FillDefaultNoiseTable();
-   void   FillChipNoiseTable();
+   void   FillChipNoiseTable(sstChipCorrect_st *mChipCorrectTable);
    void   FillDefaultChipNoiseTable();
    Int_t  idWaferToWafer(Int_t idWafer);
    Int_t  idWaferToLadderNumb(Int_t idWafer);
 
-   StSsdConfig       *mConfig;
-   St_ssdChipCorrect* mChipCorrect;//!< Pointer to the ssdChipCorrectio table (noise status)) 
-   St_spa_strip      *spa_strip;
-   St_ssdPedStrip    *ssdPedStrip;
-   St_ssdStripCalib  *strip_calib;
-   St_ssdNoise       *mNoise;
-   ssdChipCorrect_st *chip_correct;
-
+   Char_t              mBeg[1]; //!
+   StSstConfig         *mConfig;
+   sstConfiguration_st *mConfigTable;//!
+   St_spa_strip        *spa_strip;
+   St_ssdPedStrip      *ssdPedStrip;
+   St_ssdStripCalib    *strip_calib;
+   St_ssdNoise         *mNoise;
+   
    Int_t   mUseChipCorrect;
    Int_t   mUsePedSubtraction;
    Int_t   mUseIntrinsicNoise;
@@ -142,6 +152,8 @@ private:
    Int_t   mPEventTime;// Previous event RHIC cloc
    Int_t   mCorrectFactor[1920][2]; //chip correction table.
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
+   Char_t  mEnd[1];        //!
+
    map<Int_t, Int_t> mReadOutPed; //ReadOut Pedestal.
    map<Int_t, Int_t> mIntrinsicRms; //Intrinsic Rms
    //DAQ File parameters(please look at the SSD data formata document. )

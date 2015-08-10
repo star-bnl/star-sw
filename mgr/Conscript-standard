@@ -93,8 +93,7 @@ my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
-
-#my $ROOTCINT_CPPFLAGS = "";
+my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir); # print "find_idlL: ======== @idlL ======\n";
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -202,7 +201,9 @@ if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
 
-$CPPFLAGS .= " -DNEW_DAQ_READER";
+#$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
+$CPPFLAGS .= " -DNEW_DAQ_READER ";
+
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
 }
@@ -933,6 +934,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	                .  " -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\" "
 			.  " -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
     }
+
+    # Many packages depend on the StMuEvent including StrangeMuDst
+    #if ( $pkg eq 'StMuDSTMaker'  ){
+    #	$ROOTCINT_CPPFLAGS .= " -D__NO_STRANGE_MUDST__ ";
+    #	#die;
+    #}
+
     #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
 
     if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
@@ -956,8 +964,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $libpath = $LIBPATH;
     if (! $LIBS) {$libpath = "";}
 #  print "CPPPATH => $CPPPATH \tCPPFLAGS => $CPPFLAGS\n";
+    #print "DEBUG Passing $ROOTCINT_CPPFLAGS\n";
     $env2 = $env1->clone('Package'  => $pkg,
-			 'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+			 'EXTRA_CPPFLAGS'    => $EXTRA_CPPFLAGS,
 			 'CPPPATH'  => $CPPPATH,
 			 'CFLAGS'   => $CFLAGS,
 			 'CXXFLAGS' => $CXXFLAGS,
@@ -974,6 +983,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			 'ObjDir'   => $obj_dir,
 			 'DEBUG'    => $DEBUG
 			 );
+
+    #print "DEBUG ".$env2->{ROOTCINT_CPPFLAGS}."\n";
+    # 'ROOTCINT_CPPFLAGS' => $ROOTCINT_CPPFLAGS,
+
 #    bless $env2, "cons"; #?
 #  print "env2 : CPPPATH => $env2->{CPPPATH} \tCPPFLAGS => $env2->{CPPFLAGS}\n";
 #    if ($CC eq 'icc') {$EXTRA_CPPFLAGS .= " " . "-DR__NO_CLASS_TEMPLATE_SPECIALIZATION";}

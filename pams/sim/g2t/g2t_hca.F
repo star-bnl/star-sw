@@ -29,9 +29,7 @@
          IF (isys==5) { call G2R_GET_SYS ('HCAL','BBCB',Iprin,Idigi) } ! Back scint paddle 
          if (isys==6) { call G2R_GET_SYS ('HCAL','LEDG',Iprin,Idigi) } ! Lead glass
 
-         if (Iprin.lt.0) { 
-            cycle " Next iteration of the loop "
-         }
+         if (Iprin.lt.0) return
          Local  = Idigi.ge.2
 
          Do While (G2R_GET_HIT('hca') .eq. 0)

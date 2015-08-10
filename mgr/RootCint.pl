@@ -6,6 +6,7 @@
 #
 use Env;
 use File::Basename;
+
 #
 my $Cint_cxx = shift;
 my $Cint_h  = $Cint_cxx;
@@ -418,9 +419,21 @@ if ($h_files) {
 
     $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
     
-    my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    my $cmd;
+    #foreach (keys %ENV){
+    #	print "DEBUG ".$_." ".$ENV{$_}."\n";
+    #}
 
-    print "cmd = ",$cmd,"\n";
+    #if ( defined($ENV{ROOTCINT_CPPFLAGS}) ){
+    #	$cmd  = "rootcint -f $Cint_cxx -c  -D__NO_STRANGE_MUDST__ -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    #	print "cmd (+extra) = ",$cmd,"\n";
+    #} else {
+    	$cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+     	print "cmd (normal)= ",$cmd,"\n";
+    #	die;
+    #}
+
+
     my $flag = `$cmd`; if ($?) {exit 2;}
 }
 

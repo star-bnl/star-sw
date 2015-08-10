@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.1 2015/06/09 18:32:00 jeromel Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.4 2015/07/06 18:38:19 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,15 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.4  2015/07/06 18:38:19  bouchet
+ * initialization of variables and pointers (Thanks Yuri)
+ *
+ * Revision 1.3  2015/06/24 20:58:11  bouchet
+ * added codes for using sstChipCorrect and sstMaskChip tables ; replaced StSsdConfig by StSstConfig
+ *
+ * Revision 1.2  2015/06/24 20:37:59  smirnovd
+ * Use explicit comparison in order to disable compiler warning
+ *
  * Revision 1.1  2015/06/09 18:32:00  jeromel
  * Clean check-in vrsion of long time ago reviewed SST daq code
  *
@@ -66,11 +75,13 @@
 #include "StMessMgr.h"
 #include "StRtsTable.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
 #include "tables/St_spa_strip_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
+#include "tables/St_sstConfiguration_Table.h"
 #include "tables/St_ssdPedStrip_Table.h"
-#include "StSsdUtil/StSsdConfig.hh"
+#include "StSstUtil/StSstConfig.hh"
 #include "StIOMaker/StIOMaker.h"
+#include "tables/St_sstChipCorrect_Table.h"
 #include <map>
 
 ClassImp(StSstDaqMaker)
@@ -105,8 +116,9 @@ const Int_t StSstDaqMaker::ReadOutMap[128] = {
 };
 //-----------------------------------------------
 StSstDaqMaker::StSstDaqMaker(const Char_t *name)
-   : StRTSBaseMaker("sst", name), spa_strip(0)
+  : StRTSBaseMaker("sst", name)
 {
+  memset(mBeg,0,mEnd-mBeg+1);
 }
 //-----------------------------------------------
 StSstDaqMaker::~StSstDaqMaker()
@@ -119,48 +131,48 @@ Int_t StSstDaqMaker::InitRun(Int_t runumber)
    LOG_INFO << "InitRun(Int_t runumber) - Read now Databases" << endm;
    Int_t run = (runumber / 1000000) - 1;
 
-   St_ssdConfiguration *configuration = dynamic_cast<St_ssdConfiguration *>(GetDataBase("Geometry/ssd/ssdConfiguration"));
+   St_sstChipCorrect *mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
+   if (mChipCorrect) {
+     LOG_INFO << "sst mask chips table found ... initialize" << endm;
+     FillChipNoiseTable(mChipCorrect->GetTable());}
+   else {
+     LOG_WARN << " no sst masking chips table " << endm;      
+     FillDefaultChipNoiseTable();}
 
-   if (!configuration) {
-      LOG_ERROR << "InitRun(" << runumber << ") - ERROR - ssdConfiguration==0" << endm;
-      return kStErr;
+   St_sstConfiguration *configTable = (St_sstConfiguration *) GetInputDB("Geometry/sst/sstConfiguration");
+   
+   if (!configTable) {
+     LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/sst/sstConfiguration' table" << endm;
+     return kStFatal;
    }
-
-   ssdConfiguration_st *config  = dynamic_cast<ssdConfiguration_st *>(configuration->GetTable()) ;
-
-   if (!config) {
-      LOG_ERROR << "InitRun(" << runumber << ") - ERROR - config==0" << endm;
-      return kStErr;
-   }
-
-   mConfig = new StSsdConfig();
+   
+   mConfigTable = (sstConfiguration_st *) configTable->GetTable() ;
+   mConfig      = new StSstConfig();
 
    Int_t totLadderPresent = 0;
 
-   for (Int_t ladder = 1; ladder <= config->nMaxLadders; ladder++) {
-      LOG_INFO << " on sector = " << config->ladderIsPresent[ladder - 1];
-
-      if (config->ladderIsPresent[ladder - 1] != 0)
-         totLadderPresent++;
-
-      mConfig->setLadderIsActive(ladder, config->ladderIsPresent[ladder - 1]);
+   for (Int_t ladder = 1; ladder <= mConfigTable->nMaxLadders; ladder++) {
+     if (mConfigTable->ladderIsPresent[ladder - 1] != 0)
+       totLadderPresent++;
+     
+     mConfig->setLadderIsActive(ladder, mConfigTable->ladderIsPresent[ladder - 1]);
    }
-
-   PrintConfiguration(run, config);
+   
+   PrintConfiguration(run, mConfigTable);
    mConfig->setNumberOfLadders(totLadderPresent);
-   mConfig->setNumberOfWafers(config->nMaxWafers / config->nMaxLadders);
+   mConfig->setNumberOfWafers(mConfigTable->nMaxWafers / mConfigTable->nMaxLadders);
    mConfig->setNumberOfHybrids(2);
    mConfig->setTotalNumberOfHybrids(nSstSide * nSstWaferPerLadder * totLadderPresent);
-   mConfig->setTotalNumberOfLadders(config->nMaxLadders);
+   mConfig->setTotalNumberOfLadders(mConfigTable->nMaxLadders);
    mConfig->setNumberOfStrips(nSstStripsPerWafer);
    mConfig->setConfiguration();
    mEventnumber = 0;
 
    LOG_INFO << "_____________________________" << endm;
    LOG_INFO << "       Via  Datababase......." << endm;
-   LOG_INFO << ".......numberOfSectors =     " << config->nMaxSectors << endm;
+   LOG_INFO << ".......numberOfSectors =     " << mConfigTable->nMaxSectors << endm;
    LOG_INFO << ".......numberOfLadders =     " << totLadderPresent << endm;
-   LOG_INFO << " .numberOfWafersPerLadder =  " << config->nMaxWafers / config->nMaxLadders << endm;
+   LOG_INFO << " .numberOfWafersPerLadder =  " << mConfigTable->nMaxWafers / mConfigTable->nMaxLadders << endm;
    LOG_INFO << "_____________________________" << endm;
    LOG_INFO << "      InitRun() - Done       " << endm;
    LOG_INFO << "StSstDaqMaker initialization." << endm;
@@ -177,7 +189,7 @@ Int_t StSstDaqMaker::Make()
    mEventnumber++;
 
    //raw data mode
-   while (rts_table = GetNextDaqElement("sst/raw")) {
+   while ( (rts_table = GetNextDaqElement("sst/raw")) != 0 ) {
       //each DAQ element record one RDO data
       //one event will loop all the 5 RDOs
       mMode = 0;//0-physic run,1-pedestal run
@@ -191,7 +203,7 @@ Int_t StSstDaqMaker::Make()
 
    //pedestal mode
 
-   while (rts_table = GetNextDaqElement("sst/pedrms")) {
+   while ( (rts_table = GetNextDaqElement("sst/pedrms")) != 0 ) {
       mMode    = 1;
       mRdoData = (UInt_t *)rts_table->At(0);
       mRdoDataLength = rts_table->GetNRows();
@@ -624,6 +636,8 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
 	    strip_number[n] = nSstStripsPerWafer - strip[n];	
          }
 
+	 if (gStSstDbMaker->maskChip(id_side, ladder, wafer[n], strip[n] / 128)) continue;
+ 
          out_strip.id          = count;
          out_strip.adc_count   = data[n];
          out_strip.id_strip    = 10000 * (10 * strip_number[n] + id_side) + id_wafer[n]; //id_side:0-->p,1-->N
@@ -717,7 +731,13 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
          LOG_INFO << "First readout channel in old LC FPGA is not usable." << endm;
          continue;
       }
+      int chip      = strip/nSstStripsPerChip;
+      int chipIndex = ladder*nSstWaferPerLadder*nSstChipPerWafer + wafer*nSstChipPerWafer + chip;
 
+      //chipCorrect table
+      if(data<mNoiseCut[chipIndex][id_side]) data = 0; //remove noise.
+      else data = data - mCorrectFactor[chipIndex][id_side]; //data correction.
+      
       readout = strip;
 
       FindStripNumber(strip);//convert to physic strip number
@@ -730,28 +750,31 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
          id_wafer = 7000 + 100 * ((wafer) + 1) + ladder + 1;
 	 strip_number = nSstStripsPerWafer - strip;	
       }
-
-
-      out_strip.id          = count;
-      out_strip.adc_count   = data;
-      out_strip.id_strip    = 10000 * (10 * strip_number + id_side) + id_wafer;
-      out_strip.id_mchit[0] = 0 ;
-      out_strip.id_mchit[1] = 0 ;
-      out_strip.id_mchit[2] = 0 ;
-      out_strip.id_mchit[3] = 0 ;
-      out_strip.id_mchit[4] = 0 ;
-      spa_strip->AddAt(&out_strip);
-
-      if (id_side == 0) {
-         ladderCountP[ladder]++;
+      //chipMask table      
+      if (gStSstDbMaker->maskChip(id_side, ladder, wafer, chip)) continue;
+      //save only strips with data>0, otherwise it increases the datastrip volume for nothing
+      if(data>0){
+	out_strip.id          = count;
+	out_strip.adc_count   = data;
+	out_strip.id_strip    = 10000 * (10 * strip_number + id_side) + id_wafer;
+	out_strip.id_mchit[0] = 0 ;
+	out_strip.id_mchit[1] = 0 ;
+	out_strip.id_mchit[2] = 0 ;
+	out_strip.id_mchit[3] = 0 ;
+	out_strip.id_mchit[4] = 0 ;
+	spa_strip->AddAt(&out_strip);
+	
+	if (id_side == 0) {
+	  ladderCountP[ladder]++;
+	}
+	else {
+	  ladderCountN[ladder]++;
+	}
+	
+	count = count + 1;
       }
-      else {
-         ladderCountN[ladder]++;
-      }
-
-      count = count + 1;
    }
-
+   
    if (readout > nSstStripsPerWafer) {
       LOG_WARN << "Strip number is larger than 768, ERROR" << endm;
       return;
@@ -828,7 +851,7 @@ void StSstDaqMaker::FindStripNumber(Int_t &strip)
 
 //--------------------------------------------------
 
-void StSstDaqMaker::PrintConfiguration(Int_t runumber, ssdConfiguration_st *config)
+void StSstDaqMaker::PrintConfiguration(Int_t runumber, sstConfiguration_st *config)
 {
    switch (runumber) {
    case 4 : {
@@ -889,4 +912,45 @@ void StSstDaqMaker::Clear(const Option_t *)
    }
 
    return StMaker::Clear();
+}
+
+void StSstDaqMaker::FillChipNoiseTable(sstChipCorrect_st *mChipCorrectTable){
+  int side=0,ladder=0,wafer=0,chip=0;
+  //mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
+  //if(mChipCorrect){
+  LOG_DEBUG<<"New ChipNoiseTable was used! "<<endm;
+  int totChipSst       = nSstSide*nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
+  int totChipSstSide   = nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
+  int totChipSstLadder = nSstWaferPerLadder*nSstChipPerWafer;
+  
+  //sstChipCorrect_st *g  = mChipCorrect->GetTable() ;
+  for(Int_t i=0; i<totChipSst;i++){
+    side   = i/totChipSstSide;
+    ladder = (i - side*totChipSstSide)/totChipSstLadder;
+    wafer  = (i - side*totChipSstSide - ladder*totChipSstLadder)/nSstChipPerWafer;
+    chip   = (i - side*totChipSstSide - ladder*totChipSstLadder - wafer*nSstChipPerWafer);
+    
+    LOG_DEBUG <<" i/side/ladder/wafer/chip/correct/CutPos : " 
+	      <<i      << " " 
+	      <<side   << " " 
+	      <<ladder << " " 
+	      <<wafer  << " "  
+	      <<chip   << " " 	       
+	      <<mChipCorrectTable[0].nCorrect[i] << " " 	       
+	      <<mChipCorrectTable[0].nCutPos[i]  << " "  <<endm;	       
+    
+    mCorrectFactor[ladder*totChipSstLadder+wafer*nSstChipPerWafer+chip][side] = mChipCorrectTable[0].nCorrect[i];
+    mNoiseCut[ladder*totChipSstLadder+wafer*nSstChipPerWafer+chip][side]      = mChipCorrectTable[0].nCutPos[i];
+  }
+}			       
+//------------------------------------------------
+void StSstDaqMaker::FillDefaultChipNoiseTable(){
+  LOG_DEBUG <<" Default is no any correction ." << endm;
+  Int_t size = nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
+  for(Int_t s=0;s<nSstSide;s++) {
+    for(Int_t i=0;i<size;i++) {
+      mCorrectFactor[i][s] = 0;
+      mNoiseCut[i][s]      = 0;
+    }
+  }
 }

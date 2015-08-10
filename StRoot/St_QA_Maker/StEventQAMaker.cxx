@@ -955,14 +955,11 @@ void StEventQAMaker::MakeHistGlob() {
       if (histsSet>=StQA_run14) {
         // HFT Histograms
         hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
-        //hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));    // number of IST hits per global track
-        hists->m_global_ist_hit->Fill(detInfo->hits(kIstId).size());
+        hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));      // number of IST hits per global track
         if(map.hasHitInPxlLayer(1))hists->m_global_hft_hit->Fill(1);  // PXL layer=1
         if(map.hasHitInPxlLayer(2))hists->m_global_hft_hit->Fill(2);  // PXL layer=2
-        //hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));  // it should work in priciple, but it does not on 20.02.2014 (DK)
-        hists->m_global_hft_hit->Fill(3,detInfo->hits(kIstId).size());
-        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSsdId));
-        //hists->m_global_hft_hit->Fill(4,detInfo->hits(kSsdId).size());
+        hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));
+        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSstId));
       }
 
     }
@@ -1466,14 +1463,11 @@ void StEventQAMaker::MakeHistPrim() {
         if (histsSet>=StQA_run14 ){
           // HFT Histograms
           hists->m_primary_pxl_hit->Fill(map.numberOfHits(kPxlId));   // number of PIXEL hits per primary track
-          //hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId)); // number of IST hits per primary track
-          hists->m_primary_ist_hit->Fill(detInfo->hits(kIstId).size());
-
+          hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId));   // number of IST hits per primary track
           if(map.hasHitInPxlLayer(1))hists->m_primary_hft_hit->Fill(1);        // PXL layer=1
           if(map.hasHitInPxlLayer(2))hists->m_primary_hft_hit->Fill(2);        // PXL layer=2
-          //hists->m_primary_hft_hit->Fill(3,map.numberOfHits(kIstId));
-          hists->m_primary_hft_hit->Fill(3,detInfo->hits(kIstId).size());
-          hists->m_primary_hft_hit->Fill(4,map.numberOfHits(kSsdId));
+          hists->m_primary_hft_hit->Fill(3,map.numberOfHits(kIstId));
+          hists->m_primary_hft_hit->Fill(4,map.numberOfHits(kSstId));
         }
 
       }
@@ -1616,11 +1610,11 @@ void StEventQAMaker::MakeHistVertex() {
       
       if (aPrimVtx == primVtx) {
         hists->m_pv_vtxid->Fill(primVtx->type());
-	if (!isnan(double(pvert.x())))
+	if (!std::isnan(double(pvert.x())))
 	  hists->m_pv_x->Fill(pvert.x());
-	if (!isnan(double(pvert.y())))
+	if (!std::isnan(double(pvert.y())))
 	  hists->m_pv_y->Fill(pvert.y());
-	if (!isnan(double(pvert.z())))
+	if (!std::isnan(double(pvert.z())))
 	  hists->m_pv_z->Fill(pvert.z());
         hists->m_pv_pchi2->Fill(primVtx->chiSquared());
         hists->m_pv_r->Fill(pvert.x()*pvert.x() +
@@ -1629,11 +1623,11 @@ void StEventQAMaker::MakeHistVertex() {
       } else {
         StThreeVectorF apvert = aPrimVtx->position();
         hists->m_v_vtxid->Fill(aPrimVtx->type());
-	if (!isnan(double(apvert.x())))
+	if (!std::isnan(double(apvert.x())))
 	  hists->m_v_x->Fill(apvert.x());     
-	if (!isnan(double(apvert.y())))
+	if (!std::isnan(double(apvert.y())))
 	  hists->m_v_y->Fill(apvert.y());     
-	if (!isnan(double(apvert.z())))
+	if (!std::isnan(double(apvert.z())))
 	  hists->m_v_z->Fill(apvert.z());     
         hists->m_v_pchi2->Fill(aPrimVtx->chiSquared());
         hists->m_v_r->Fill(apvert.x()*apvert.x() +
@@ -1683,18 +1677,18 @@ void StEventQAMaker::MakeHistVertex() {
       hists->m_ev0_k0ma_hist->Fill(inv_mass_k0);
       
       hists->m_v_vtxid->Fill(v0->type());
-      if (!isnan(double(v0->position().x())))
+      if (!std::isnan(double(v0->position().x())))
         hists->m_v_x->Fill(v0->position().x());     
-      if (!isnan(double(v0->position().y())))
+      if (!std::isnan(double(v0->position().y())))
         hists->m_v_y->Fill(v0->position().y());     
-      if (!isnan(double(v0->position().z())))
+      if (!std::isnan(double(v0->position().z())))
         hists->m_v_z->Fill(v0->position().z());     
       hists->m_v_pchi2->Fill(v0->chiSquared());
       hists->m_v_r->Fill(v0->position().x()*v0->position().x() +
 			 v0->position().y()*v0->position().y());
       
-      if (!(isnan(double(v0->position().x())) ||
-            isnan(double(v0->position().y())))) {
+      if (!(std::isnan(double(v0->position().x())) ||
+            std::isnan(double(v0->position().y())))) {
         Float_t phi = atan2(v0->position().y() - pvert.y(),
 	                    v0->position().x() - pvert.x())
 	* 180./M_PI;
@@ -1733,11 +1727,11 @@ void StEventQAMaker::MakeHistVertex() {
       hists->m_xi_ma_hist->Fill(inv_mass_xi);
       
       hists->m_v_vtxid->Fill(xi->type());
-      if (!isnan(double(xi->position().x())))
+      if (!std::isnan(double(xi->position().x())))
         hists->m_v_x->Fill(xi->position().x());     
-      if (!isnan(double(xi->position().y())))
+      if (!std::isnan(double(xi->position().y())))
         hists->m_v_y->Fill(xi->position().y());     
-      if (!isnan(double(xi->position().z())))
+      if (!std::isnan(double(xi->position().z())))
         hists->m_v_z->Fill(xi->position().z());     
       hists->m_v_pchi2->Fill(xi->chiSquared());
       hists->m_v_r->Fill(xi->position().x()*xi->position().x() +
@@ -1758,11 +1752,11 @@ void StEventQAMaker::MakeHistVertex() {
     if (kink) {
       //hists->m_v_detid->Fill(kink->det_id); 
       hists->m_v_vtxid->Fill(kink->type());
-      if (!isnan(double(kink->position().x())))
+      if (!std::isnan(double(kink->position().x())))
         hists->m_v_x->Fill(kink->position().x());
-      if (!isnan(double(kink->position().y())))
+      if (!std::isnan(double(kink->position().y())))
         hists->m_v_y->Fill(kink->position().y());
-      if (!isnan(double(kink->position().z())))
+      if (!std::isnan(double(kink->position().z())))
         hists->m_v_z->Fill(kink->position().z());
       hists->m_v_pchi2->Fill(kink->chiSquared());
       hists->m_v_r->Fill(kink->position().x()*kink->position().x() +
@@ -1998,7 +1992,7 @@ void StEventQAMaker::MakeHistEMC() {
           StSPtrVecEmcRawHit& rawHit=module->hits();
 	  
           Int_t m,e,s,adc;
-          Float_t eta,phi,E;
+          Float_t eta(0),phi(0),E(0);
           nh += rawHit.size();
           for(UInt_t k=0;k<rawHit.size();k++){
             m   = rawHit[k]->module();
@@ -2544,20 +2538,20 @@ void StEventQAMaker::MakeHistHFT() {
                 LOG_WARN << "No StIstHitCollection" << endm;
         }
 
-        StSsdHitCollection *ssdHitCollection = event->ssdHitCollection();
+        StSstHitCollection *sstHitCollection = event->sstHitCollection();
 
-        if (!ssdHitCollection) {
-                LOG_WARN << "No StSsdHitCollection" << endm;
+        if (!sstHitCollection) {
+                LOG_WARN << "No StSstHitCollection" << endm;
         }
 
         if(pxlHitCollection && istHitCollection){
-                hists->m_nhit_Pxl_Its->Fill(pxlHitCollection->numberOfHits(),istHitCollection->numberOfHits());
+                hists->m_nhit_Pxl_Ist->Fill(pxlHitCollection->numberOfHits(),istHitCollection->numberOfHits());
         }
-        if(pxlHitCollection && ssdHitCollection){
-                hists->m_nhit_Pxl_Ssd->Fill(pxlHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        if(pxlHitCollection && sstHitCollection){
+                hists->m_nhit_Pxl_Sst->Fill(pxlHitCollection->numberOfHits(),sstHitCollection->numberOfHits());
         }
-        if(istHitCollection && ssdHitCollection){
-                hists->m_nhit_Its_Ssd->Fill(istHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        if(istHitCollection && sstHitCollection){
+                hists->m_nhit_Ist_Sst->Fill(istHitCollection->numberOfHits(),sstHitCollection->numberOfHits());
         }
 
 
@@ -2646,12 +2640,12 @@ void StEventQAMaker::MakeHistPXL() {
                 Int_t nTofHits = btofcol->tofHits().size();
                 hists->m_pxl_nhit_Pxl1_tof_mult->Fill(nHitsPxl1, nTofHits);
                 hists->m_pxl_nhit_Pxl2_tof_mult->Fill(nHitsPxl2, nTofHits);
-                hists->m_pxl_nhit_Pxl1_Pxl2->Fill(nHitsPxl1,nHitsPxl2);
     }
+    hists->m_pxl_nhit_Pxl1_Pxl2->Fill(nHitsPxl1,nHitsPxl2);
 
-        Int_t tpcMult = event->trackNodes().size();
-        hists->m_pxl_nhit_Pxl1_tpc_mult->Fill(nHitsPxl1,tpcMult);
-        hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
+    Int_t tpcMult = event->trackNodes().size();
+    hists->m_pxl_nhit_Pxl1_tpc_mult->Fill(nHitsPxl1,tpcMult);
+    hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
 
 
   // Normalizations
@@ -2728,6 +2722,43 @@ void StEventQAMaker::MakeHistIST() {
   hists->m_ist_hit_ladder_sensor->SetEntries(hists->m_ist_hit_ladder_sensor->GetEntries()-1);
 }
 //_____________________________________________________________________________
+void StEventQAMaker::MakeHistSST(){
+  StSstHitCollection* sstHitCollection = event->sstHitCollection();
+  
+  if (!sstHitCollection) {
+    LOG_WARN << "Error getting pointer to StSstHitCollection" << endm;
+    return;
+  }
+  hists->m_pnt_sst->Fill(sstHitCollection->numberOfHits());
+  for (UInt_t ladder=0; ladder<sstHitCollection->numberOfLadders(); ladder++) {
+    StSstLadderHitCollection* sstladder = sstHitCollection->ladder(ladder);
+    for (UInt_t wafer=0; wafer<sstladder->numberOfWafers(); wafer++) {
+      StSPtrVecSstHit& sstwaferhits = sstladder->wafer(wafer)->hits();
+      for (UInt_t l=0; l<sstwaferhits.size(); l++) {
+	StSstHit* ssthit = sstwaferhits[l];
+	const StThreeVectorF &hitPos = ssthit->position();
+	//	hitPos = ssthit->position();
+	Float_t x = hitPos.x();
+	Float_t y = hitPos.y();
+	Float_t phi = hitPos.phi()/degree;
+	if (phi<0) phi += 360.;
+	hists->m_pnt_phiSST->Fill(phi);
+	hists->m_pnt_lwSST->Fill(ladder+1,wafer+1);
+	hists->m_pnt_xyS->Fill(x,y);
+	hists->m_pnt_sizeSST->Fill(ssthit->clusterSizePSide(),0);
+	hists->m_pnt_sizeSST->Fill(ssthit->clusterSizeNSide(),1);
+	hists->m_pnt_eSST->Fill(TMath::Log10(fabs(ssthit->charge())+1e-33));
+      }
+    }
+  }
+  // Normalizations
+  Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+  hists->m_pnt_phiSST->SetBinContent(0,Nevents);
+  hists->m_pnt_lwSST->SetBinContent(0,Nevents);
+  hists->m_pnt_phiSST->SetEntries(hists->m_pnt_phiSST->GetEntries()-1);
+  hists->m_pnt_lwSST->SetEntries(hists->m_pnt_lwSST->GetEntries()-1);
+}
+//_____________________________________________________________________________
 void StEventQAMaker::MakeHistMTD() {
 
   StMtdCollection *mtdCollection = event->mtdCollection();
@@ -2802,8 +2833,17 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.119 2015/04/02 19:53:47 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.122 2015/07/20 18:00:41 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.122  2015/07/20 18:00:41  genevb
+// isnan => std::isnan
+//
+// Revision 2.121  2015/07/17 20:18:14  genevb
+// More SSD=>SST (on tracks)
+//
+// Revision 2.120  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.119  2015/04/02 19:53:47  genevb
 // TPC dE/dx changes: Bethe-Bloch => Bichsel, and tighter cuts against pile-up tracks
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.7 2013/06/13 14:00:51 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.8 2015/06/30 18:00:38 genevb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.8  2015/06/30 18:00:38  genevb
+ * Enable MC hits in embedding (RT ticket 3116, Geurts approval)
+ *
  * Revision 1.7  2013/06/13 14:00:51  geurts
  * improve log message for inefficiency cuts
  *
@@ -86,6 +89,7 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mCellXtalk=kTRUE;
 	mWriteStEvent=kTRUE;
 	mDaqMap=0;
+	mMcBTofHitCollection = 0;
 	Reset();
 
 }
@@ -117,7 +121,7 @@ void StBTofSimMaker::Reset()
 	mEvent  = 0;
 	mMcEvent = 0;
 	//mBTofCollection = 0;
-	if (mWriteStEvent) delete mBTofCollection;
+	//if (mWriteStEvent) delete mBTofCollection;
 	delete mMcBTofHitCollection;
 	mSimDb  = 0;
 
@@ -214,7 +218,7 @@ Int_t StBTofSimMaker::Make()
 		LOG_WARN << " No TOF hits in GEANT" << endm; }
 	else {
 		Int_t nhits = g2t_tfr_hits->GetNRows();
-		LOG_DEBUG << " Found TOF hits: " << nhits << endm;
+		LOG_DEBUG << " Found GEANT TOF hits: " << nhits << endm;
 		g2t_ctf_hit_st* tofHitsFromGeant = g2t_tfr_hits->begin();
 
 		if(mSlow) {
@@ -595,10 +599,16 @@ Int_t StBTofSimMaker::fillEvent()
 
 	/// send off to StEvent
 	if (mWriteStEvent){
-	  mBTofCollection= new StBTofCollection();
 	  mEvent = (StEvent*)GetInputDS("StEvent");
 	  if (!mEvent) {
 	    LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	  } else { // mEvent non-zero
+
+	  //Store Collections
+	  mBTofCollection = mEvent->btofCollection();
+	  if(!mBTofCollection) {
+	    mBTofCollection = new StBTofCollection();
+	    mEvent->setBTofCollection(mBTofCollection);
 	  }
 
 	  /// creat StBTofHit / tofRawData / tofData collection
@@ -664,10 +674,8 @@ Int_t StBTofSimMaker::fillEvent()
 	  StBTofHeader aHead;
 	  mBTofCollection->setHeader(new StBTofHeader(aHead));
 
-	  //Store Collections
-	  mEvent->setBTofCollection(mBTofCollection);
-
 	  LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
+          } // mEvent non-zero
 	}
 
 	/// check StMcEvent and StEvent

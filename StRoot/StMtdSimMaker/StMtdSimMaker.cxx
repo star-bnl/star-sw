@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.10 2014/12/10 17:29:19 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.11 2015/07/01 17:51:54 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -106,6 +106,7 @@ StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name),
   memset(mModuleChannel,0,5*24*sizeof(Int_t));
 
   mBookHisto=kTRUE;
+  mWriteHisto=kFALSE;
   mHistFile="mtdsim.root";
   mWriteStEvent=kTRUE;
   Reset();
@@ -167,7 +168,7 @@ Int_t StMtdSimMaker::FinishRun(Int_t runnumber) {
 
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::Finish() {
-  if(mBookHisto){
+  if(mWriteHisto){
     LOG_INFO << "StMtdSimMaker::Finish  writing mtdsim.root ...";
     TFile theFile(mHistFile.c_str(),"RECREATE","mtdsim");
     theFile.cd();

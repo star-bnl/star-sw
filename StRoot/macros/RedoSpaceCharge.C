@@ -183,8 +183,14 @@ void RedoSpaceCharge(const int NEvts,
 }
 
 //----------------------------------------------------------
-// $Id: RedoSpaceCharge.C,v 1.3 2010/02/22 20:05:16 genevb Exp $
+// $Id: RedoSpaceCharge.C,v 1.5 2015/07/27 15:29:56 jeromel Exp $
 // $Log: RedoSpaceCharge.C,v $
+// Revision 1.5  2015/07/27 15:29:56  jeromel
+// LOad StrangeMuDstMkaer again (restored)
+//
+// Revision 1.4  2015/07/22 17:39:47  jeromel
+// Comment out loading StStrangeMuDstMaker as disabled
+//
 // Revision 1.3  2010/02/22 20:05:16  genevb
 // Using StTpcDbMaker now requires StMagFMaker
 //

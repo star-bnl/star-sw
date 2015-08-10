@@ -72,6 +72,7 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistHFT();
   virtual void   MakeHistPXL();
   virtual void   MakeHistIST();
+  virtual void   MakeHistSST();
   virtual void   MakeHistRP();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }
@@ -80,15 +81,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.21 2015/03/18 21:43:17 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.22 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.21 2015/03/18 21:43:17 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.22 2015/07/17 19:09:03 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.22  2015/07/17 19:09:03  genevb
+// SSD copied for SST, and HFT histogams use SST now too
+//
 // Revision 2.21  2015/03/18 21:43:17  genevb
 // Introduce Roman Pots histograms (K. Yip)
 //

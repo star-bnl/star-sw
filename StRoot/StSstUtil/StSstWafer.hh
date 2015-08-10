@@ -1,6 +1,18 @@
-//$Id: StSstWafer.hh,v 1.1 2015/06/23 16:26:19 jeromel Exp $
+//$Id: StSstWafer.hh,v 1.5 2015/07/21 14:54:28 bouchet Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.5  2015/07/21 14:54:28  bouchet
+//removed unused variables ; Int_t doLorentzShiftSide moved to void()
+//
+//Revision 1.4  2015/06/27 19:48:51  bouchet
+//removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
+//
+//Revision 1.3  2015/06/27 19:30:12  bouchet
+// re-enable St_sdm_condition_db table (used in StSstBarrel) ; last commit did not check compilation
+//
+//Revision 1.2  2015/06/26 20:13:46  smirnovd
+//Removed unused St_sdm_condition_db_Table header
+//
 //Revision 1.1  2015/06/23 16:26:19  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -15,9 +27,6 @@
 #include "tables/St_sstWafersPosition_Table.h"
 #include "tables/St_sstConfiguration_Table.h"
 #include "tables/St_sstDimensions_Table.h"
-#include "tables/St_ssdWafersPosition_Table.h"
-#include "tables/St_ssdConfiguration_Table.h"
-#include "tables/St_ssdDimensions_Table.h"
 #include "tables/St_sdm_condition_db_Table.h"
 #include "StSstStripList.hh"
 #include "StSstStrip.hh"
@@ -32,7 +41,6 @@
 #include "StSstUtil/StSstClusterControl.h"
 #include "StSstDynamicControl.h"
 #include "TGeoMatrix.h"
-class St_sstGainCalib;
 
 class StSstWafer: public TGeoHMatrix {
  public:
@@ -97,7 +105,7 @@ class StSstWafer: public TGeoHMatrix {
   Int_t             doSolvePerfect(sstDimensions_st *dimensions, StSstClusterControl *clusterControl,Float_t CalibArray);
   void              doStatPerfect(Int_t nPerfectPoint, StSstClusterControl *clusterControl);
   void              doLorentzShift(sstDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec);
-  Int_t             doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions);
+  void              doLorentzShiftSide(Int_t side,Float_t shift,sstDimensions_st *dimensions);
   void              convertAnalogToDigit(Double_t pairCreationEnergy);
   void              convertAnalogToDigit(Long_t nElectronInAMip,Long_t adcDynamic,Long_t nbitEncoding, Float_t daqCutValue);
   Int_t             convertDigitToAnalog(Double_t pairCreationEnergy);

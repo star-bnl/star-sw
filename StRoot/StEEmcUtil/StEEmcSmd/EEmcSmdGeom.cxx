@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.16 2010/08/26 22:48:55 ogrebeny Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.17 2015/07/21 17:10:02 jeromel Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -325,7 +325,7 @@ void EEmcSmdGeom::setSectors(const intVec sectorIdVec) {
 
 // instance and initialize a strip
 StructEEmcStrip EEmcSmdGeom::initStrip() const {
-    TVector3  zero = 0.0;
+    TVector3  zero(0,0,0);
     StructEEmcStrip strip; 
     strip.stripStructId.stripId = 0;
     strip.stripStructId.UVId = 0;
@@ -772,6 +772,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip &strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.17  2015/07/21 17:10:02  jeromel
+ * Wrong init of TVector3 zero corrected
+ *
  * Revision 1.16  2010/08/26 22:48:55  ogrebeny
  * Improved constness
  *

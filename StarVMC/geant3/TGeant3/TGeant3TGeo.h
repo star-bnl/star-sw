@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3TGeo.h,v 1.5 2013/08/08 17:20:00 jwebb Exp $ */
+/* $Id: TGeant3TGeo.h,v 1.6 2015/07/21 16:22:22 jwebb Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -172,7 +172,15 @@ public:
 	 	         TString& name, Int_t& imat,
 		         Double_t& a, Double_t& z, Double_t& density,
 		         Double_t& radl, Double_t& inter, TArrayD& par);
-		     
+
+  virtual Bool_t GetMaterial( Int_t imat, TString &name,
+			      Double_t &a,Double_t &z,Double_t &den,
+			      Double_t &radl,Double_t &inter,TArrayD &par)
+  {
+    return false; // Added to ROOT base class
+  };
+ 
+
     // Returns the medium parameters for the volume specified by the
     // volume name.
     virtual Bool_t GetMedium(const TString& volumeName,
