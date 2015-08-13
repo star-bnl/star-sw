@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 #include <unistd.h>
+#include <stdint.h>
 
 class StHyperLock {
 	public:
