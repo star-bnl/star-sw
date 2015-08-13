@@ -135,7 +135,7 @@ foreach arch ( _ _x8664_ )
     #+
     # SL64
     #-
-    set refos="sl64"$arch"gcc447"
+    set refos="sl64"$arch"gcc482"
     echo "Checking possible compatibility through refos $refos"
     if ( -e .$refos || -e $refos ) then
         # *** PLACEHOLDER ***
