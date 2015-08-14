@@ -46,7 +46,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   if(swap){
     res=Swap2008_TrgTowerTrnfer(cttt);
     if(res<0) {
-      printf("TRG_Reader::UnpackTrg2008: Swap TrgTowerTrnfer error %s %d.\n",__FILE__,__LINE__);
+      printf("TRG_Reader::UnpackTrg2008: Swap TrgTowerTrnfer error %s %d.\n", __FILE__ , __LINE__ );
       return -1;
     }
   }
@@ -55,13 +55,13 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   printf("TRG_Reader::UnpackTrg2008: TrgTowerTrnfer byet_version=0x%x offset=%d length=%d\n",
 	 ttt->byteCount_Version,offset,length);
   if(length<=0) {
-    printf("TRG_Reader::UnpackTrg2008: No Trigger Data %s %d.\n",__FILE__,__LINE__);
+    printf("TRG_Reader::UnpackTrg2008: No Trigger Data %s %d.\n", __FILE__ , __LINE__ );
     return 0;
   }
   char* trg_version = (char*)pTRGP + size_off + size_head + offset + 3;
   printf("TRG_Reader::UnpackTrg2008: trg_version = 0x%x\n",*trg_version);
   if(*trg_version != 0x32) {
-    printf("TRG_Reader::UnpackTrg2008: Trigger version error %s %d.\n",*trg_version,__FILE__,__LINE__);
+    printf("TRG_Reader::UnpackTrg2008: Trigger version error %s %d.\n",*trg_version, __FILE__ , __LINE__ );
     return -1;
   }
 
@@ -83,7 +83,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
   printf("TRG_Reader::UnpackTrg2008: TCUdataBytes = %d Token = %d Npre/Npost=%d/%d\n",
 	 p->EvtDesc.TCUdataBytes, p->EvtDesc.TrgToken, npre,npost);
   if(swap && res<0) {
-    printf("TRG_Reader::UnpackTrg2008: Swap DescSum error %s %d.\n",__FILE__,__LINE__);
+    printf("TRG_Reader::UnpackTrg2008: Swap DescSum error %s %d.\n", __FILE__ , __LINE__ );
     return -1;
   }
 
@@ -136,7 +136,7 @@ int TRG_Reader::UnpackTrg2008(Bank_TRGP *pTRGP){
     //printf("-> Swap2008_Raw on %p\n",trgd);
     res = Swap2008_Raw(trgd);
     if(res<0){
-      printf("TRG_Reader::UnpackTrg2008: Swap RawData error %s %d.\n",__FILE__,__LINE__);
+      printf("TRG_Reader::UnpackTrg2008: Swap RawData error %s %d.\n", __FILE__ , __LINE__ );
       return -1;
     }
   }
