@@ -49,15 +49,18 @@ class StFpsRawDaqReader : public StMaker {
 // inline functions
 inline void StFpsRawDaqReader::setFilename( std::string filename ){ mDaqFileName = filename; };
 inline const char *StFpsRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.3 2015/05/21 18:23:51 akio Exp $ built " __DATE__ " " __TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFpsRawDaqReader.h,v 1.4 2015/08/13 16:45:48 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFpsRawDaqReader.h,v 1.3 2015/05/21 18:23:51 akio Exp $
+ * $Id: StFpsRawDaqReader.h,v 1.4 2015/08/13 16:45:48 jeromel Exp $
  * $Log: StFpsRawDaqReader.h,v $
+ * Revision 1.4  2015/08/13 16:45:48  jeromel
+ * Quick fix for spin folks
+ *
  * Revision 1.3  2015/05/21 18:23:51  akio
  * *** empty log message ***
  *
