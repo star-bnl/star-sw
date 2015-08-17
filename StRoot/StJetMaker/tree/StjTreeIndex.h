@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeIndex.h,v 1.5 2008/10/22 19:50:06 tai Exp $
+// $Id: StjTreeIndex.h,v 1.6 2015/08/14 16:37:32 rfatemi Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEINDEX_H
 #define STJTREEINDEX_H
@@ -8,36 +8,29 @@
 #include <TObject.h>
 #include <ostream>
 
-#if 0 /* clash with  gnu_dev_major & gnu_dev_minor */
-#ifdef major
-#undef major
-#endif
 
-#ifdef minor
-#undef minor
-#endif
-#endif
 class StjTreeIndex : public TObject {
 
 public:
-  StjTreeIndex(Int_t major = 0, Int_t minor = 0) : m_major(major), m_minor(minor) { }
+  StjTreeIndex(Int_t big = 0, Int_t small = 0) : Big(big), Small(small) { }
   virtual ~StjTreeIndex() { }
 
-  Int_t Major() const { return m_major; }
-  Int_t Minor() const { return m_minor; }
+
+  Int_t big() const { return Big; }
+  Int_t small() const { return Small; }
 
 private:
 
-  Int_t m_major;
-  Int_t m_minor;
+  Int_t Big;
+  Int_t Small;
 
   ClassDef(StjTreeIndex, 1)
 
 };
 
 inline bool operator<(const StjTreeIndex& v1, const StjTreeIndex& v2) {
-  if(v1.Major() != v2.Major()) return v1.Major() < v2.Major();
-  return v1.Minor() < v2.Minor();
+  if(v1.big() != v2.big()) return v1.big() < v2.big();
+  return v1.small() < v2.small();
 }
 
 inline bool operator>(const StjTreeIndex& v1, const StjTreeIndex& v2) {
@@ -55,7 +48,7 @@ inline bool operator!=(const StjTreeIndex& v1, const StjTreeIndex& v2)
 
 inline std::ostream& operator<<(std::ostream& out, const StjTreeIndex& v)
 {
-  out << "StjTreeIndex: " << v.Major() << " " << v.Minor();
+  out << "StjTreeIndex: " << v.big() << " " << v.small();
   return out;
 }
 

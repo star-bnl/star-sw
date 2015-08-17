@@ -1,7 +1,13 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.21 2015/05/21 03:08:46 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.22 2015/08/14 13:38:07 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.22  2015/08/14 13:38:07  smirnovd
+ * StiPxlHitLoader: Removed unused code
+ *
+ * This should have been removed when commit 9512a2ea "Reimplemented segmentation
+ * of PXL sensor to two halves." was introduced.
+ *
  * Revision 1.21  2015/05/21 03:08:46  smirnovd
  * Revert "Remove throw"
  *
@@ -205,26 +211,6 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
                if (pxlHit->detector() != kPxlId) continue;
-
-               // Extract individual sti detector by using the stiRow/stiSensor keys
-               int stiRow    = 0;
-               int stiSensor = 0;
-
-               if (pxlHit->ladder() == 1) {
-                  stiRow = 0;
-
-                  if (pxlHit->localPosition(0) > 0)
-                     stiRow += 1;
-
-                  stiSensor = (pxlHit->sector() - 1);
-               } else {
-                  stiRow = 2;
-
-                  if (pxlHit->localPosition(0) < 0)
-                     stiRow += 1;
-
-                  stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
-               }
 
                LOG_DEBUG << "StiPxlHitLoader::loadHits() - \n"
                          << *pxlHit << "\n"

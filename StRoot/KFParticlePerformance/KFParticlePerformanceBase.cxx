@@ -98,13 +98,17 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 50;
-           float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
+            float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
 //             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
-  
+            float mult[nFitQA/2]={1.f,1.f,1.f,1.f,1.f,1.f,1.f,1.f};
+            if(iPart>63 && iPart<75)
+              for(int iMult=3; iMult<nFitQA/2; iMult++)
+                mult[iMult] = 3;
+            
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
                                             (res+parName[iH]).Data(), 
-                                            nBins, -xMax[iH],xMax[iH]);
+                                            nBins, -mult[iH]*xMax[iH],mult[iH]*xMax[iH]);
               hFitQA[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
                                             (pull+parName[iH]).Data(), 
                                             nBins, -6,6);
