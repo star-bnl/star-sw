@@ -217,7 +217,6 @@ void StiStarDetectorBuilder::HftBeamPipe() {
 					density,
 					density*pipeMaterial->GetRadLen(),
 					PotI));
-    Double_t ionization = _pipeMaterial->getIonization();
     StiMaterial *_pipeMaterial2 = 0;
     Double_t Rmax, Rmin, radius, dZ, Z;
     Int_t Nz = pcon->GetNz();
@@ -251,7 +250,6 @@ void StiStarDetectorBuilder::HftBeamPipe() {
 					dens,
 					density*pipeMaterial->GetRadLen(),
 					PotI));
-	ionization = _pipeMaterial2->getIonization();
       }
       radius = (Rmin + Rmax)/2;
       _beamPipeShape = new StiCylindricalShape;
