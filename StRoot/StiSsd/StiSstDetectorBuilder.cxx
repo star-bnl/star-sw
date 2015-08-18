@@ -42,10 +42,6 @@ StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
 }
 
 
-StiSstDetectorBuilder::~StiSstDetectorBuilder()
-{}
-
-
 /**
  * Creates all Sti volumes of the SST detector.
  */
