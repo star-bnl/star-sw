@@ -46,7 +46,9 @@ StiSstDetectorBuilder::~StiSstDetectorBuilder()
 {}
 
 
-/** Build the SST detector components. */
+/**
+ * Creates all Sti volumes of the SST detector.
+ */
 void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
@@ -86,7 +88,10 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 
 
 /**
- * Builds the sensors of the SST detector.
+ * Builds active Sti volumes by creating Sti shapes corresponding to the sensors
+ * of the SST detector. The created Sti detectors are positioned using either
+ * the ideal (ROOT's TGeo gGeoManager) or missaligned geometry from the STAR
+ * database via object of the StSstDbMaker class.
  */
 void StiSstDetectorBuilder::useVMCGeometry()
 {
@@ -178,7 +183,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
  * The inner radius of the central tube is increased by 0.85 cm to avoid overlap
  * with sensitive layers, and the density of that volume is scaled accordingly.
  *
- * \author Dmitri Smirnov
+ * \author Dmitri Smirnov, BNL
  */
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
