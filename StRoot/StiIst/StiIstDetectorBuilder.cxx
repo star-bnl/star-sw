@@ -49,6 +49,9 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
 }
 
 
+/**
+ * Creates all Sti volumes of the IST detector.
+ */
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
    if (!gGeoManager)
@@ -86,6 +89,12 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
+/**
+ * Builds active Sti volumes by creating Sti shapes corresponding to the sensors
+ * of the IST detector. The created Sti detectors are positioned using either
+ * the ideal (ROOT's TGeo gGeoManager) or missaligned geometry from the STAR
+ * database via object of the StIstDb class.
+ */
 void StiIstDetectorBuilder::useVMCGeometry()
 {
    // Define silicon material used in manual construction of sensitive layers in this builder
