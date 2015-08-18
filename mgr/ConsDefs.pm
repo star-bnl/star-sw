@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.138 2015/08/18 01:38:19 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.139 2015/08/18 02:01:15 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -598,7 +598,22 @@
 		} elsif ( $2 <= 82){
 		    # Note: 4.8.2 is picky, we may ned to adjust options here
 		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
-		    $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp"
+		    $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    # Other possible options part of O1
+		    #   -fmerge-all-constants (implies merge-contstants)
+		    #   -finline-functions-called-once
+		    #   -fcombine-stack-adjustments
+		    #   -fcompare-elim
+		    #   -fcprop-registers
+		    #   -fdce -fdse
+		    #   -ftree-dce -ftree-dse 
+		    #   -frerun-cse-after-loop
+		    #   -ftree-dominator-opts
+		    # With O2
+		    #   -fpartial-inlining
+		    #   -foptimize-sibling-calls
+		    #  With O3
+		    #   -finline-functions
 		}
 	    }
 
