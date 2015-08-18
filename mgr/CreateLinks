@@ -135,48 +135,36 @@ foreach arch ( _ _x8664_ )
     #+
     # SL64
     #-
-    set refos="sl64"$arch"gcc447"
-    echo "Checking possible backward compatibility through refos $refos"
+    set refos="sl64"$arch"gcc482"
+    echo "Checking possible compatibility through refos $refos"
     if ( -e .$refos || -e $refos ) then
         # *** PLACEHOLDER ***
 	foreach ospf ( sl rh )
-	    foreach vers ( 65 66 )
-		set dir=$ospf$vers$arch"gcc447"
-		if ( ! -e .$dir && -e .$refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s .$refos .$dir
-		else
-		    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
-		endif
-		if ( ! -e $dir && -e $refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s $refos $dir
-		else
-		    if ( -e $refos && -e $dir )   echo " $dir exists"
-		endif
+	    foreach vers ( 64 65 66 )
+		# since we introduced a forward compatible gcc4.8.2 compiler, we 
+		# can create equivalenece links for all the below
+		foreach cmpl ( 482 447 )
+		    if ($cmpl == "482" && $vers == "64" && $ospf == "sl") then
+			# this is the reference OS, skip ...
+			goto next_tag;
+		    endif
+		     set dir=$ospf$vers$arch"gcc"$cmpl
+		     if ( ! -e .$dir && -e .$refos ) then
+			echo "  Compatibility assumed between $dir -> $refos "
+			/bin/ln -s .$refos .$dir
+		     else
+			if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+		     endif
+		     if ( ! -e $dir && -e $refos ) then
+			echo "  Compatibility assumed between $dir -> $refos "
+			/bin/ln -s $refos $dir
+		     else
+			if ( -e $refos && -e $dir )   echo " $dir exists"
+		     endif
+                    endif
+		    next_tag:
+		end
 	    end
-	end
-    endif
-
-    #+
-    # Special consideration before transition to sl64/gcc 4.8.2
-    # If a native directory does not exists, create links
-    #-
-    set refos2="sl64"$arch"gcc482"
-    if (! -e .$refos2 && -e .$refos ) then
-	#if ( -l .$refos ) then
-	#    # read link
-	#    set TRGT=`/bin/ls -l .$refos | /usr/bin/awk '{print $11}'`
-        #else
-	#    set TRGT=.$refos
-	#endif
-	foreach ospf ( sl rh )
-	    set dir=$ospf"64"$arch"gcc482"
-	    if ( ! -e .$dir ) then
-		echo " /bin/ln -s .$refos .$dir  ! to consider";
-	    else
-		echo "DEBUG There is a .$dir"
-            endif
 	end
     endif
 end
