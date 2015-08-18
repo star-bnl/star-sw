@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.139 2015/08/18 02:01:15 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.140 2015/08/18 13:50:28 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -248,7 +248,7 @@
 	# gcc specific). The rest is treated later
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = "-O2 -g";
+	    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
 	    $FDEBUG= $DEBUG;
 	    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
 	}
@@ -570,7 +570,7 @@
 	#
 	# Additional GCC optimization flags if NODEBUG
 	#
-	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+	if ( (defined( $ARG{NODEBUG} ) or $NODEBUG) && !defined($ENV{DEBUG_OPTIONS}) ) {
 	    my $optflags = "";
 
 	    if ($CXX_VERSION < 3){
