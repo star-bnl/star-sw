@@ -27,7 +27,6 @@ class StiSstDetectorBuilder : public StiDetectorBuilder
 public:
 
    StiSstDetectorBuilder(bool active, bool buildIdealGeom=true);
-   virtual ~StiSstDetectorBuilder();
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
 
