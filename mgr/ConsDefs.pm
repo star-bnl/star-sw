@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.137 2014/08/06 12:09:14 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.138 2015/08/18 01:38:19 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -244,18 +244,13 @@
 	$GPROF         = "yes";
     } else {
 	# GPROF will imply that we do not allow optimized
+	# ATTENTION - the debug options below are global for any compiler (not
+	# gcc specific). The rest is treated later
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = "-O -g";
-	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
-	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-		print "Notice: Enabling gcc patch for V4.x series\n";
-		if ( $2 <= 49 ){
-		    $DEBUG .= " -fno-inline";
-		}
-	    }
+	    $DEBUG = "-O2 -g";
 	    $FDEBUG= $DEBUG;
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
 	}
     }
 
@@ -544,8 +539,8 @@
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
         # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
-	my $optflags = "";
 
         if ($CXX_VERSION < 3) {
 	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
@@ -567,30 +562,51 @@
 	}
 
         # -fpermissive ?
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
-	#	  else {
-	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
-	#	}
-
+	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {
+	    $CXXFLAGS    .= " -pedantic"; 
+	}
 	$CXXFLAGS    .= " -Wno-long-long";
 
-	# Additional optimization flags if NODEBUG
+	#
+	# Additional GCC optimization flags if NODEBUG
+	#
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+	    my $optflags = "";
+
 	    if ($CXX_VERSION < 3){
 		$optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	    } else {
-		# this na1ming convention starts at gcc 3.2 which happens to
-		# have a change in the options
+	    } elsif ( $CXX_VERSION < 4.5 ){
+		# this naiming convention starts at gcc 3.2 which happens to
+		# have a change in the options.
+		# Valid and used up to 4.4.7
 		$optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	    } else {
+		# 4.8.2
+		# leave the alignement to the compiler.
+		#   2015 NB: does it make sense to align on 2 bytes nowadays?
+		$optflags = "-falign-loops -falign-jumps -falign-functions";
 	    }
+
+	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
+	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
+		print "Notice: Enabling gcc patch for V4.x series\n";
+		if ( $2 <= 49 ){
+		    # Note: all inlining failed with gcc 4.4.7 with no indication
+		    # of a resolve up to 4.4.9 . Symbols would be removed and
+		    # linking would fail.
+		    $DEBUG .= " -fno-inline";
+		} elsif ( $2 <= 82){
+		    # Note: 4.8.2 is picky, we may ned to adjust options here
+		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
+		    $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp"
+		}
+	    }
+
+	    $DEBUG .= " ".$optflags;
+	    $FDEBUG = $DEBUG;
 	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
 
-	if ($optflags) {
-	    $CFLAGS   .= " " . $optflags;
-	    $CXXFLAGS .= " " . $optflags;
-	    $G77FLAGS .= " " . $optflags;
-	}
         $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
         $SOFLAGS  .= " -shared -Wl,-Bdynamic";
 
