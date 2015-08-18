@@ -1,5 +1,5 @@
 *
-* $Id: asldetba.age,v 1.1.1.1 2004/01/12 23:49:49 potekhin Exp $
+* $Id: asldetba.age,v 1.2 2015/08/18 22:19:15 jwebb Exp $
 *
 * $Name:  $
 *
@@ -34,6 +34,7 @@
       INTEGER      Npar,Mpar,IND,LDETE,LdetP,NEED,NS,IL,JL,NF,INAM,LOLD,I,N
       CHARACTER*4  CHdet,CBank
       REAL         DUMMY/-787878/
+      REAL         keepit/0/
 *
   LdetP=0
   Mpar=ABS(Npar)
@@ -76,7 +77,13 @@
        If (LdetP>0) IQ(LdetP-5)=N
     }
 * Fill new words in the bank with DUMMY value
-  IF NEED>0  {  DO I=LOLD+1,Mpar { Q(LdetP+I)=DUMMY } }
+  IF NEED>0  
+  {  
+     DO I=LOLD+1,Mpar { 
+        Q(LdetP+I)=DUMMY 
+        keepit = keepit + Q(LdetP+I)        "Hack to make sure compiler doesn't optimize this loop away"
+     } 
+  }
    END
 
 
