@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.1 2015/03/10 14:40:49 jeromel Exp $
+// $Id: StFmsPointMaker.h,v 1.2 2015/08/19 10:58:47 jeromel Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.2  2015/08/19 10:58:47  jeromel
+// Fix spacing for literals
+//
 // Revision 1.1  2015/03/10 14:40:49  jeromel
 // Adding first version of FmsPointMaker (Yuix Pan) - review closinge
 //
@@ -127,7 +130,7 @@ class StFmsPointMaker : public StMaker {
   TowerMap mTowers;  //!< One for each sub-detector, keyed by detector ID
   int mObjectCount;  //!< Object count in event for use with TRef
 
-  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag "__DATE__" "__TIME__ ; return cvs;}
+  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
 };
 #endif  // STROOT_STFMSPOINTMAKER_STFMSPOINTMAKER_H_
