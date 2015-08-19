@@ -1,0 +1,13 @@
+/*    fmsPositionModel.idl
+*
+*  Table: fmsPositionModel
+*
+*       description: // FMS detector position Model
+*               model=0   uniform and regular matrix (just column# (or row#) * cell width + offsets)
+*               model=1   c code provided by S. Trentrange for pp2015
+*               model=2   c code provided by S. Trentrange for pA2015
+*/ 
+
+struct fmsPositionModel {   
+  unsigned short model;     /* Detector Position Model */
+};  
