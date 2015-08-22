@@ -67,7 +67,7 @@ C matching isotope found
      +                ''file detected - Z = '',I4)') IZ
          WRITE(6,'('' MICAP : Error in x-section file '',
      +             '' detected -> STOP '')')
-         STOP
+         CALL ABEND
       ENDIF
       RETURN
       END

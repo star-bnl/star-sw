@@ -83,7 +83,7 @@ C.    ------------------------------------------------------------------
       IF (IEORUN.NE.0) THEN
          WRITE (CHMAIL, 1001)
          CALL GMAIL (0, 0)
-         STOP
+         CALL ABEND
       ENDIF
 *
       IF (NVOLUM.LE.0) THEN

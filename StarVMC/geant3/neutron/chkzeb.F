@@ -37,7 +37,7 @@ C
          PRINT *,'*                                        *'
          PRINT *,'*             RUN TERMINATED             *'
          PRINT *,'******************************************'
-         STOP
+         CALL ABEND
       ENDIF
       RETURN
       END

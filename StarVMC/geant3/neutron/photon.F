@@ -381,5 +381,5 @@ C end photon production when energy is used up  CZ 13.8.92
 10100 FORMAT(' PHOTON: NO SECONDARY ENERGY ',
      +   'DISTRIBUTION WAS FOUND FOR THE CONTINUUM REACTION CHOSEN')
   390 WRITE(6,*) ' CALOR: ERROR in PHOTON ===> STOP '
-      STOP
+      CALL ABEND
       END

@@ -48,7 +48,7 @@ C first check, if ZEBRA still in order
          WRITE(6,*) ' CALOR: ZEBRA banks screwed up --> STOP'
          WRITE(IOUT,'('' MICAP: Magic number '',I12,'' not found: '',  '
      +   //'      2I12)') NMAGIC,LD(LMAG1),LD(LMAG2)
-         STOP
+         CALL ABEND
       ENDIF
 C Set the ID according to the process
       ID = IDCODE(ILNMEC-IBLOWN)

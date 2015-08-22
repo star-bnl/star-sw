@@ -30,7 +30,7 @@ C--------------    END CDE                             --------------
    11 LUN = IQLOG
    12 WRITE (LUN,9001)
       IF (LUN.NE.IQLOG)            GO TO 11
-      STOP
+      CALL ABEND
 
  9001 FORMAT ('0!!!!!    DUMMY ROUTINE QNEXT REACHED.')
       END

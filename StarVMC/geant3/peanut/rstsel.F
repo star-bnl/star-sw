@@ -63,10 +63,10 @@
       LABRST = .TRUE.
       IF ( KPROJ .EQ. 2 ) THEN
          NTARGT = 1
-         STOP 'pbar_rest'
+         CALL ABEND !'pbar_rest'
       ELSE IF ( KPROJ .EQ. 9 ) THEN
          NTARGT = 1
-         STOP 'nbar_rest'
+         CALL ABEND !'nbar_rest'
       ELSE IF ( KPROJ .EQ. 14 ) THEN
          CALL GRNDM(RNDM,1)
          IF ( RNDM (1) .LT. RADPIM * ( ABTAR + RDPMHL ) / ABTAR )
@@ -96,9 +96,9 @@
       ELSE IF ( KPROJ .EQ. 15 ) THEN
          NTARGT = 1
          NTARGT = 2
-         STOP 'K-_rest'
+         CALL ABEND !'K-_rest'
       ELSE
-         STOP '???_rest'
+         CALL ABEND !'???_rest'
       END IF
       CALL GRNDM(RNDM,1)
       RNDMAB = RNDM (1)

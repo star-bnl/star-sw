@@ -145,7 +145,7 @@
          ELSE IF ( KPROJ .EQ. 14 .AND. PTTOT .LE. 0.D+00 ) THEN
             LEXPLC = .TRUE.
          ELSE
-            STOP 'LEXPLC'
+            CALL ABEND! 'LEXPLC'
          END IF
       ELSE
          LEXPLC = .TRUE.
@@ -199,7 +199,7 @@
      &                    LBCHCK, ICYCL , NHOLE , NPROT , NNEUT ,
      &                    LEXIT , LNWINT )
          ELSE
-            STOP 'Int_kind'
+            CALL ABEND! 'Int_kind'
          END IF
          IF ( LNWINT ) GO TO 100
          BBRES = IBRES
@@ -478,7 +478,7 @@
                GO TO 200
             ELSE
                LTRPPD = .TRUE.
-               STOP 'KPNUCL_TRAPPED'
+               CALL ABEND! 'KPNUCL_TRAPPED'
             END IF
          ELSE
             LTRPPD = .FALSE.
@@ -712,7 +712,7 @@
             END IF
             NHOLE = NHOLE + 1
          ELSE
-            STOP 'KPROJ'
+            CALL ABEND! 'KPROJ'
          END IF
       END IF
       ICYCL  = 0

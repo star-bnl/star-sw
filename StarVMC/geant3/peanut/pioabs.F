@@ -63,7 +63,7 @@
       NTARLD = NTARGT
       ICYCL  = ICYCL + 1
       IF ( NTARGT .EQ. 1 ) THEN
-         IF ( .NOT. LABRST )  STOP '???_rad_flight_abs'
+         IF ( .NOT. LABRST )  CALL ABEND! '???_rad_flight_abs'
          LABRST = .FALSE.
          LABSRP = .FALSE.
          PFROUT = PFRIMP / PFRCEN (1) * PFRCEN (2)

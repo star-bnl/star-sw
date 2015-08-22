@@ -31,7 +31,7 @@ C--------------    END CDE                             --------------
       IF (NQERR.EQ.0)              GO TO 99
       CALL ABEND
    99 CONTINUE
-      STOP
+      CALL ABEND
       END
 *      ==================================================
 #include "zebra/qcardl.inc"

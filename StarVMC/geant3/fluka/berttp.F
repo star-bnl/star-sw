@@ -80,7 +80,7 @@ C---------------------------------------------------------------------
            PRINT*,'*   Check G3SYS environment      *'
            PRINT*,'*           variable             *'
            PRINT*,'**********************************'
-           STOP
+           CALL ABEND
          ENDIF
          OPEN(NBERTP,FILE=FILNAM,STATUS='OLD')
 #endif
@@ -101,7 +101,7 @@ C---------------------------------------------------------------------
            PRINT*,'*   Check CERN_ROOT environment  *'
            PRINT*,'*           variable             *'
            PRINT*,'**********************************'
-           STOP
+           CALL ABEND
          ENDIF
          OPEN(NBERTP,FILE=FILNAM,STATUS='OLD',READONLY)
 #endif
@@ -143,7 +143,7 @@ C A. Ferrari: first of all read isotopic data
       IF ( AHELP .NE. ALPHA0 .OR. BHELP .NE. GAMSK0 ) THEN
          WRITE (LUNOUT,*)
      &         ' *** Inconsistent Nuclear Geometry data on file ***'
-         STOP
+         CALL ABEND
       END IF
       READ (NBERTP,2000) RHOTAB, RHATAB, ALPTAB, RADTAB, SKITAB, HALTAB,
      &              EKATAB, PFATAB, PFRTAB

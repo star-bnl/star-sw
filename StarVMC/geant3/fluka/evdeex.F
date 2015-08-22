@@ -196,7 +196,7 @@
      &                      ' program stopped ****'
          WRITE ( LUNERR, * )' **** Finuc overflow in Evdeex,',
      &                      ' program stopped ****'
-         STOP
+         CALL ABEND
       END IF
  3000 CONTINUE
          IF ( TVCMS .LE. ( 6 + 2 * JPAR ) * ROTEN0 ) THEN
@@ -314,7 +314,7 @@
      &                      ' program stopped ****'
          WRITE ( LUNERR, * )' **** Finuc overflow in Evdeex,',
      &                      ' program stopped ****'
-         STOP
+         CALL ABEND
       END IF
       TVRECL = EKRES
       P2RES = PXRES * PXRES + PYRES * PYRES + PZRES * PZRES

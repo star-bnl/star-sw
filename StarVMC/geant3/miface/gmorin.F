@@ -119,7 +119,7 @@ C open MICAP I/O units
            PRINT*,'*   Check CERN_ROOT environment  *'
            PRINT*,'*           variable             *'
            PRINT*,'**********************************'
-           STOP
+           CALL ABEND
          ENDIF
          OPEN(UNIT=MICROS,FILE=XSFILE, STATUS='OLD',READONLY)
 #endif
@@ -143,7 +143,7 @@ C open MICAP I/O units
            PRINT*,'*   Check CERN_ROOT environment  *'
            PRINT*,'*           variable             *'
            PRINT*,'**********************************'
-           STOP
+           CALL ABEND
          ENDIF
          OPEN(UNIT=MICROS,FILE=XSFILE,STATUS='OLD')
 #endif
@@ -573,7 +573,7 @@ C check if bound hydrogen has been selected
   230 CONTINUE
       IF(NMIX.LE.0) THEN
          PRINT *,' GCALOR: NO tracking media found ===> STOP '
-         STOP
+         CALL ABEND
       ENDIF
 C read cross-sections and perform mixing and thinning
       CALL MOXSEC

@@ -208,7 +208,7 @@ C---  AFB301I: Argument for DLGAMA is out of range
       IF(ERC .EQ. CODE(I))  GOTO 21
    20 CONTINUE
       WRITE(*,100) ERC
-      STOP 'in MTLSET'
+      CALL ABEND! 'in MTLSET'
       RETURN
 
    21 LMF=KNTM(I) .GE. 1

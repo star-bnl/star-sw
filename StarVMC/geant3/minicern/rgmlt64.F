@@ -55,7 +55,7 @@
       IF(NI .LE. 0) THEN
        WRITE(ERRTXT,101) NI
        CALL MTLPRT(NAME,'D110.1',ERRTXT)
-       STOP
+       CALL ABEND
       END IF
       M0=NG
       IF(M0 .NE. 8) M0=6
@@ -203,7 +203,7 @@
       IF(NI .LE. 0) THEN
        WRITE(ERRTXT,101) NI
        CALL MTLPRT(NAME,'D110.1',ERRTXT)
-       STOP
+       CALL ABEND
       END IF
       M0=NG
       IF(M0 .NE. 8) M0=6
@@ -277,7 +277,7 @@
       IF(NI .LE. 0) THEN
        WRITE(ERRTXT,101) NI
        CALL MTLPRT(NAME,'D110.1',ERRTXT)
-       STOP
+       CALL ABEND
       END IF
       M0=NG
       IF(M0 .NE. 8) M0=6
@@ -351,7 +351,7 @@
       IF(NI .LE. 0) THEN
        WRITE(ERRTXT,101) NI
        CALL MTLPRT(NAME,'D110.1',ERRTXT)
-       STOP
+       CALL ABEND
       END IF
       M0=NG
       IF(M0 .NE. 8) M0=6
@@ -425,7 +425,7 @@
       IF(NI .LE. 0) THEN
        WRITE(ERRTXT,101) NI
        CALL MTLPRT(NAME,'D110.1',ERRTXT)
-       STOP
+       CALL ABEND
       END IF
       M0=NG
       IF(M0 .NE. 8) M0=6

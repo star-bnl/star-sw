@@ -90,7 +90,7 @@
       CALL GMAIL(0,0)
       WRITE(CHMAIL,'('' CADINT cannot proceed. Program terminated '')')
       CALL GMAIL(0,0)
-      STOP
+      CALL ABEND
 *
 10000 FORMAT('@9900#9900,''Z68-300.89.06'',''2.0'',''
      +CADINT'',''1.20'',''',A,''',''',A,''',''',A,

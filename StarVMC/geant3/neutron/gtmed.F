@@ -30,6 +30,6 @@ C get MICAP material number
    10 CONTINUE
       WRITE(IOUT,'('' MICAP GTMED: GEANT Medium '',I5,
      +             '' not found ==> STOP'')') MEDGEA
-      STOP
+      CALL ABEND
    20 RETURN
       END

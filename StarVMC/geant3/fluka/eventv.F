@@ -103,7 +103,7 @@
 *  +-------------------------------------------------------------------*
 *  |  Heavy ions are treated in eventa: now switched off!!
       IF (IJIJ .EQ. 30) THEN
-         STOP 'HEAVY ION'
+         CALL ABEND ! 'HEAVY ION'
       END IF
 *  |
 *  +-------------------------------------------------------------------*
@@ -1869,5 +1869,5 @@ C
       WRITE(LUNOUT,490)
  490  FORMAT(1X,'OVERFLOW IN EVENTQ - INCREASE THE SIZE OF THE',
      1' COMMON BLOCK FINUC.')
-      STOP
+      CALL ABEND
       END

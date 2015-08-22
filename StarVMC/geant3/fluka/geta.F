@@ -76,13 +76,13 @@
 *  |  smoothly going into the Ignatyuk high energy limit, according
 *  |  to the Ignatyuk interpolation formula
    20 CONTINUE
-         STOP 'GETA:20'
+         CALL ABEND! 'GETA:20'
 ***      GO TO 40
 *  |
 *  +-------------------------------------------------------------------*
 *  |  Julich zero energy A-dependent level density:
    30 CONTINUE
-         STOP 'GETA:30'
+         CALL ABEND! 'GETA:30'
    40 CONTINUE
 *  |
 *  +-------------------------------------------------------------------*

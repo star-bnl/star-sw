@@ -340,7 +340,7 @@ C.    ------------------------------------------------------------------
          CALL GNOCTU (XT,Q(JPAR+1),IACT,SNEXT,SNXT,SAFE)
       ELSE
          PRINT *, ' GNEXT : No code for shape ', ISHT
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)
@@ -402,7 +402,7 @@ C.    ------------------------------------------------------------------
                   CALL GNCTUB (XC, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
                ELSE
                   PRINT *, ' GNEXT : No code for shape ', ISH
-                  STOP
+                  CALL ABEND
                ENDIF
 *
                safe=max(safe,0.)
@@ -759,7 +759,7 @@ C.    ------------------------------------------------------------------
          CALL GNOCTU (XT, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
       ELSE
          PRINT *, ' GNEXT : No code for shape ', ISHT
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)
@@ -825,7 +825,7 @@ C.    ------------------------------------------------------------------
          CALL GNCTUB (XC, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
       ELSE
          PRINT *, ' GNEXT : No code for shape ', ISH
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)

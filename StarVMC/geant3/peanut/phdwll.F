@@ -89,7 +89,7 @@
             PZPROJ = PPRWLL * ( COSTHE * CZIMPC - SINTHE * WBIMPT )
          END IF
       ELSE IF ( PDIFF .GT. ANGLGB ) THEN
-         STOP 'PHDWLL'
+         CALL ABEND! 'PHDWLL'
       ELSE
          PXPROJ = PPRWLL * CXIMPC
          PYPROJ = PPRWLL * CYIMPC

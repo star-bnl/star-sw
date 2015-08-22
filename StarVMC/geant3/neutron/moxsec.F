@@ -107,7 +107,7 @@ C check if all isotopes have been found in the x-section file(s)
    50 CONTINUE
       IF(XSTOP) THEN
         PRINT '('' CALOR : Neutron x-section not found ===> STOP '')'
-        STOP
+        CALL ABEND
       ENDIF
       LFP21=LFP20+NNUC
 C store xs accuracy at LFP210 (used for thinning  in XSECN3)

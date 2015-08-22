@@ -372,7 +372,7 @@ C
             WRITE (LUNOUT,1101) NNHAD
 1101        FORMAT('  NHAD IN NUCEVT TOO BIG CHANGE DIMENSION',
      *             '  NNHAD=',I10)
-            STOP
+            CALL ABEND
          END IF
 *  |  |
 *  |  +----------------------------------------------------------------*
@@ -553,7 +553,7 @@ C
 *  |
       IF ( NNHAD + NHAD .GT. MXPNUC ) THEN
          WRITE (LUNOUT,1101) NNHAD
-         STOP
+         CALL ABEND
       END IF
 *  |
 *  +-------------------------------------------------------------------*

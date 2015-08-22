@@ -395,7 +395,7 @@ C*****  End of Code Expanded From Routine:  GRMTD
          CALL GNOCTU (XT,Q(JPAR+1),IACT,SNEXT,SNXT,SAFE)
       ELSE
          PRINT *, ' GTNEXT : No code for shape ', ISHT
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)
@@ -465,7 +465,7 @@ C*****  End of Code Expanded From Routine:  GRMTD
                   CALL GNCTUB (XC, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
                ELSE
                   PRINT *, ' GTNEXT : No code for shape ', ISH
-                  STOP
+                  CALL ABEND
                ENDIF
 *
                safe=max(safe,0.)
@@ -834,7 +834,7 @@ C*****  End of Code Expanded From Routine:  GRMTD
          CALL GNOCTU (XT, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
       ELSE
          PRINT *, ' GTNEXT : No code for shape ', ISHT
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)
@@ -904,7 +904,7 @@ C*****  End of Code Expanded From Routine:  GRMTD
          CALL GNCTUB (XC, Q(JPAR+1), IACT, SNEXT, SNXT, SAFE)
       ELSE
          PRINT *, ' GTNEXT : No code for shape ', ISH
-         STOP
+         CALL ABEND
       ENDIF
 *
       safe=max(safe,0.)

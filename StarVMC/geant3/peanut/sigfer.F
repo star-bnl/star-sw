@@ -72,7 +72,7 @@
      &        1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700,
      &        2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600,
      &        3700, 3800, 3900 ), KP
-      STOP 'GEO-KP'
+      CALL ABEND !'GEO-KP'
   100 CONTINUE
          IF ( EKEMIN .LE. 0.700D+00 ) THEN
             BETAPR = PPRMIN / ( EKEMIN + AM (KP) )
@@ -94,7 +94,7 @@
      &                + 42.9D+00
             END IF
          ELSE
-            STOP 'Sigfer: EKE'
+            CALL ABEND !'Sigfer: EKE'
          END IF
       GO TO 4000
   200 CONTINUE
@@ -132,7 +132,7 @@
      &                + 42.9D+00
             END IF
          ELSE
-            STOP 'Sigfer: EKE'
+            CALL ABEND !'Sigfer: EKE'
          END IF
       GO TO 4000
   900 CONTINUE

@@ -105,7 +105,7 @@ C
      +       A4,' IVO = ',I6)
          CALL GMAIL(0,0)
          CALL MZDROP(IXCONS,LQ(JVOLUM-IVO),' ')
-         STOP
+         CALL ABEND
       ENDIF
       GO TO 30
 C
