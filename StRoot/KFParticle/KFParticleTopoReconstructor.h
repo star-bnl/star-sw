@@ -64,7 +64,7 @@ class KFParticleTopoReconstructor{
   void Init(KFPTrackVector &tracks);
 
   void SetEmcClusters(KFPEmcCluster* clusters) { fKFParticleFinder->SetEmcClusters(clusters); }
-
+  void SetMixedEventAnalysis() { fKFParticleFinder->SetMixedEventAnalysis(); }
   
   void DeInit() { fTracks = 0; }
   

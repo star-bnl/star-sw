@@ -159,6 +159,9 @@ class KFParticleFinder
   //Set Emc clusters containing gammas
   void SetEmcClusters(KFPEmcCluster* clusters) { fEmcClusters = clusters; }
   
+  // Mixed Event Analysis
+  void SetMixedEventAnalysis() { fMixedEventAnalysis = 1; }
+  
  private:
 
   short int fNPV;
@@ -201,6 +204,8 @@ class KFParticleFinder
   //pointer to the gamma EMC clusters
   KFPEmcCluster* fEmcClusters;
 
+  bool fMixedEventAnalysis;
+  
   KFParticleFinder(const KFParticleFinder&);
   KFParticleFinder& operator=(const KFParticleFinder&);
 

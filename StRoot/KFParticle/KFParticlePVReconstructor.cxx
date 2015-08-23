@@ -61,13 +61,14 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       fParticles[iTr].Transport( ds, dsdr, parTmp, covTmp);
 
       float r2 = parTmp[0]*parTmp[0] + parTmp[1]*parTmp[1];
+      if(r2!=r2) continue;
       if(r2 > 100 ) continue;  
       
       const float V[3] = {covTmp[0], covTmp[2], covTmp[5]}; 
       for(int iComp=0; iComp<3; iComp++)
       {
         float K = C[iComp]/(C[iComp]+V[iComp]);
-        if (K == 1) continue;
+        if (fabs(V[iComp]) < 1.e-8) continue;
         if(C[iComp] > 16*V[iComp])
           K = 1.f - V[iComp]/C[iComp];
         const float dzeta = parTmp[iComp]-pvEstimation[iComp];
@@ -97,8 +98,15 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
     {
       const KFParticle &p = fParticles[iP];
       float chi = p.GetDeviationFromVertex( primVtx );      
-      if( chi >= fChi2CutPreparation )
-        continue;
+       
+      bool isBadDaughter=0;
+      for(int iP=0; iP<8; iP++)
+        isBadDaughter|= p.GetParameter(iP) != p.GetParameter(iP);
+      for(int iC=0; iC<36; iC++)
+        isBadDaughter|= p.GetCovariance(iC) != p.GetCovariance(iC);
+
+      if( chi >= fChi2CutPreparation || isBadDaughter)
+         continue;
       
       pParticles[nPrimCand] = &fParticles[iP];
       vFlags[nPrimCand] = 1;

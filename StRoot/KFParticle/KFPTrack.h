@@ -144,7 +144,7 @@ public:
   char fQ;     //charge
   short fNDF;  //degree of freedom number
 
-  short fId;
+  int fId;
   
 #ifdef NonhomogeneousField
   float fieldRegion[10];

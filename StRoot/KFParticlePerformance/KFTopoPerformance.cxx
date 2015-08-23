@@ -852,6 +852,9 @@ void KFTopoPerformance::FillHistos()
     X = TempPart.GetX();
     Y = TempPart.GetY();
     Z = TempPart.GetZ();
+#ifdef CBM
+    if(Z>=1. && iParticle>=46 && iParticle<=56) continue;
+#endif
     R = sqrt(X*X+Y*Y);
 
     KFParticleSIMD tempSIMDPart(TempPart);

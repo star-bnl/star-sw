@@ -25,7 +25,7 @@ using std::ifstream;
 
 struct KFPTrackIndex
 {
-  short fIndex;
+  int fIndex;
   short fPdg;
   
   static bool Compare(const KFPTrackIndex& a, const KFPTrackIndex& b)
