@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.1 2015/03/10 14:40:49 jeromel Exp $
+// $Id: StFmsPointMaker.h,v 1.2 2015/08/19 10:58:47 jeromel Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.2  2015/08/19 10:58:47  jeromel
+// Fix spacing for literals
+//
 // Revision 1.1  2015/03/10 14:40:49  jeromel
 // Adding first version of FmsPointMaker (Yuix Pan) - review closinge
 //
