@@ -40,8 +40,6 @@ ________________________________________________________________________________
  */
 #endif
 
-#define STAR_CHAIN_OBSOLETE "WARNING *** Option is OBSOLETE ***"
-
 //#define __NoStrangeMuDst__
 #define __NoDisplay__
 //#define __AgMLonFly__
@@ -86,10 +84,10 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"Physics"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"LaserTest"   ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"PulserSvt"   ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"alltrigger"  ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"Physics"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"LaserTest"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"PulserSvt"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"alltrigger"  ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"phys_off"    ,"","",""                                  ,"","","Turn off physics in simulation",kFALSE},
   {"hadr_off"    ,"","",""                    ,"","","Turn off hadronic interactions in simulation",kFALSE},
   {"TObjTable"   ,"","",""                          ,"","","Do gObjectTable->Print() after Clean()",kFALSE},
@@ -1153,7 +1151,7 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"ITTF"      ,"","","","","","request to use one of Sti(default), StiCA, Stv,StvCA, ... trackers",kFALSE},
   {"NoHits"      ,""  ,"",""                           ,"","","Don\'t write hits into Event.Branch",kFALSE},
-  {"Kalman"      ,""  ,"",""                            ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"Kalman"      ,""  ,"",""                            ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
@@ -1187,9 +1185,9 @@ Bfc_st BFC[] = { // standard chains
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"clearmem"    ,""  ,"",""                           				  ,"","","Obsolete",kFALSE},
   {"adcOnly"     ,""  ,"",""                          ,"","","DAQMaker selects only TPC ADC events",kFALSE},
-  {"InTree"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"OutTree"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"DstOut"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"InTree"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"OutTree"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"DstOut"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
@@ -1226,17 +1224,17 @@ Bfc_st BFC[] = { // standard chains
   {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
-  {"AlignSectors",""  ,"","",                                             "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"AlignSectors",""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"          ,""  ,"","",                                             "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"pp"          ,""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppOpt"       ,""  ,"","TrsPileUp","","",             "pp option without enabling special cases",kFALSE},
   {"TrsPileUp"   ,""  ,"","","","",                                              "Trs pile up mode",kFALSE},
   {"TrsToF"      ,""  ,"","","","",                       "Trs account for particle time of flight",kFALSE},
-  {"SvtMatchVtx" ,""  ,"","",                                             "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"SvtMatchVtx" ,""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
@@ -1268,12 +1266,12 @@ Bfc_st BFC[] = { // standard chains
   {"geomT"       ,""  ,"","",""                           ,"geometry_Tables","Load geometry_Tables",kFALSE},
   {"globT"       ,""  ,"","",""                               ,"global_Tables","Load global_Tables",kFALSE},
   {"l3_T"        ,"",  "","",""                                       ,"l3_Tables","Load l3_Tables",kFALSE},
-  {"mwc_T"       ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"mwc_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"sim_T"       ,""  ,"","",""                                     ,"sim_Tables","Load sim_Tables",kFALSE},
   {"svt_T"       ,""  ,"","",""                                     ,"svt_Tables","Load svt_Tables",kFALSE},
-  {"tpc_T"       ,""  ,"","",                                             "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"trg_T"       ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"vpd_T"       ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"tpc_T"       ,""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"trg_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"vpd_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Embedding"   ,"","","-Simu"                                              ,"","","Embedding run",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1292,8 +1290,8 @@ Bfc_st BFC[] = { // standard chains
   {"xgeometry"   ,"" ,"","-geometry,-geomNoField"         ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"vpd"         ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"tls"         ,""  ,"","",""                                           "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"vpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"tls"         ,""  ,"","",""                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"rts"         ,""  ,"","",""                                                ,"RTS","load libRTS",kFALSE},
   {"daq"         ,""  ,"","rts",""                         ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
@@ -1313,7 +1311,7 @@ Bfc_st BFC[] = { // standard chains
   {"FmsUtil"     ,""  ,"","",""                                       ,"StFmsUtil","Load StFmsUtil",kFALSE},
   {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
   {"GmtUtil"     ,""  ,"","",""                                       ,"StGmtUtil","Load StGmtUtil",kFALSE},
-  {"l3Util"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
 
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
@@ -1337,8 +1335,8 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tdaq"        ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE}, 
-  {"miniDAQ"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE}, 
+  {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
   {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
@@ -1423,8 +1421,8 @@ Bfc_st BFC[] = { // standard chains
   {"LaserAvCl"          ,"","",""               ,"StLaserAvClusterMaker","StLaserAvClusterMaker","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
   {"ctf"     ,"ctf","l0Chain","ctf_T,db" ,"St_ctf_Maker","ctf,St_ctf,St_ctf_Maker","ToF simulation",kFALSE},
-  {"mwc"         ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ppMCTrig"    ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
 
   // Note: MTD related chains - because of the TrkMask, need to happen before TpcHitMaker
@@ -1452,8 +1450,8 @@ Bfc_st BFC[] = { // standard chains
   {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
   {"McEvent" ,"","","StEvent,tpcDb,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker","StMcEventMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
-  {"St_tpc"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"St_svt"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"St_tpc"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"St_svt"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 
   {"tpc_daq"  ,"","","TpxRaw",        "","","WARNING *** Option is OBSOLETE *** use TpxRaw instead",kFALSE},
   {"tcl","","","TpxRaw,TpxClu,MakeEvent","",""
@@ -1466,7 +1464,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
    ,                                                                                                kFALSE},
-  {"TpxPadMonitor","","","",                                              "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"TpxPadMonitor","","","",                             "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"TpxAvLaser","TpxAvLaser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
    ,                        "TPC+TPX averaging laser events into Sparse histogram on pixels level", kFALSE},
   {"TpxDumpPxls2Nt","TpxDumpPxls2Nt","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker"
@@ -1485,10 +1483,10 @@ Bfc_st BFC[] = { // standard chains
    ,                  "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
   {"tpt","","ITTF","",                          "","","WARNING *** Option is OBSOLETE *** use ITTF",kFALSE},
   {"tpt_old","","ITTF","",                      "","","WARNING *** Option is OBSOLETE *** use ITTF",kFALSE},
-  {"TpcT0"  ,"","","",                                                    "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ChargeStep","","","",                                                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"laser"  ,"","","",                                                    "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"PreVtx"  ,"","","",                                                   "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"TpcT0"  ,"","","",                                   "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ChargeStep","","","",                                "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"laser"  ,"","","",                                   "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"PreVtx"  ,"","","",                                  "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"svt"         ,"svtChain","","svt_T,SvtCL"                               ,"StMaker","StChain","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","daq,SvtCL"              ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
@@ -1507,8 +1505,8 @@ Bfc_st BFC[] = { // standard chains
   {"SvtClu"   ,"SvtClu","svtChain","svt_T,StEvent,SvtCL","StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
-  {"SvtVtx"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"stk"         ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"SvtVtx"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"stk"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Est"         ,"","","SvtIT",       "","","WARNING *** Option is OBSOLETE *** use SvtIT instead",kFALSE},
   {"global"      ,"","","ITTF",          "","","WARNING *** Option is OBSOLETE use ITTF instead***",kFALSE},
   {"Match"       ,"","","ITTF",          "","","WARNING *** Option is OBSOLETE use ITTF instead***",kFALSE},
@@ -1517,11 +1515,11 @@ Bfc_st BFC[] = { // standard chains
   {"V0"          ,"","","V02",            "","","WARNING *** Option is OBSOLETE use V02 instead***",kFALSE},
   {"Xi"          ,"","","Xi2",            "","","WARNING *** Option is OBSOLETE use Xi2 instead***",kFALSE},
   {"Kink"        ,"","","Kink2",        "","","WARNING *** Option is OBSOLETE use Kink2 instead***",kFALSE},
-  {"dst"         ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"Fglobal"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"Fprimary"    ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"dEdx"        ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"svtdEdx"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"dst"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Fglobal"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Fprimary"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"dEdx"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
   {"pxlFastSim"  ,"","","McEvent,StEvent",     "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
@@ -1561,7 +1559,7 @@ Bfc_st BFC[] = { // standard chains
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2"   ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker",                                    "B/E EMC data common maker",kFALSE},
-  {"eemcD"       ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"eemcD"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"emcY2"    ,"","","emc_T,tpc_T,db,emcSim,PreEcl,epc,-emcDY2,-daq","","" //no  emcAtoE in simulation
    ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","","emc_T,EmcUtil,McEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker"
@@ -1611,19 +1609,19 @@ Bfc_st BFC[] = { // standard chains
    "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",                                   kFALSE},
   {"FiltEemcGamma" ,"","","StEvent,StMcEvent,EmcUtil",
    "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",                               kFALSE},
-  {"rich"        ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"Rrs"         ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"rch"         ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"RichPiD"     ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"l3"          ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"l3cl"        ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"l3t"         ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"rich"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Rrs"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"rch"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"RichPiD"     ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"l3"          ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"l3cl"        ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"l3t"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #if 1 /* keep for y2001 and y2003 data */
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
 #else
-  {"l3onl"       ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"l3count"     ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"l3onl"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"l3count"     ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"bbcSim"         ,"","","db","StBbcSimulationMaker"      ,"StBbcSimulationMaker","BBC Simulator",kFALSE},
   // FMS
@@ -1723,7 +1721,7 @@ Bfc_st BFC[] = { // standard chains
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","Minuit,StBeamBackMaker"
    ,                                                           "Beam background tracker in the TPC",kFALSE},
 #else
-  {"BeamBack" ,"","","StEvent",                                           "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"BeamBack" ,"","","StEvent",                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
@@ -1778,13 +1776,13 @@ Bfc_st BFC[] = { // standard chains
   {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker"
    ,                                                                     "Xis AND V0s from StEvent",kFALSE},
 #else /* ! __NoStrangeMuDst__ */
-  {"Kink2"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"V02"         ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"Xi2"         ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"Kink2"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"V02"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Xi2"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif /* __NoStrangeMuDst__ */
 
-  {"V0svt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"Xisvt"       ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"V0svt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Xisvt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"SCEbyE"      ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
    ,                                                     "Determine EbyE SpaceCharge using StEvent",kFALSE},
   {"SCScalerCal" ,"scscalercal","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
@@ -1793,20 +1791,20 @@ Bfc_st BFC[] = { // standard chains
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
   {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
-  {"RichSpectra"         ,"","",""                      ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"RichSpectra"         ,"","",""                      ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
-  {"TpcTag"      ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"TpcTag"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Flow"        ,"","TagsChain","StEvent,Stu"                      ,"StFlowMaker","StFlowMaker","",kFALSE},
-  {"FlowTag"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"FlowTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
 #ifndef __NoStrangeMuDst__
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
 #endif
-  {"SpectraTag"  ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"SpectraTag"  ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
-  {"EbyeScaTags" ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"EbyeScaTags" ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"HighPtTags"  ,"","TagsChain","StEVent"              ,"StHighPtTagsMaker","StHighPtTagsMaker","",kFALSE},
-  {"PCollTag"    ,"","",""                              ,                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"PCollTag"    ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #ifndef __NoStrangeMuDst__
   {"tags"        ,"","TagsChain",      "globT,Event,StrangeTags,HeavyTags,PCollTag,HighPtTags"
    ,                                        "StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
@@ -1821,7 +1819,7 @@ Bfc_st BFC[] = { // standard chains
 #ifndef __NoStrangeMuDst__
   {"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
 #else
-  {"StrngMuDST","","",""                                                 ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"StrngMuDST","","",""                                ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif /* __NoStrangeMuDst__ */
 
   {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
@@ -1862,13 +1860,13 @@ Bfc_st BFC[] = { // standard chains
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
-  {"SpinTag"     ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ppLPfind1"   ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"SpinSortA"   ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ppLPprojectA","","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ppDAQfilter1","","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"ppLPeval1"   ,"","","",                                               "","",STAR_CHAIN_OBSOLETE,kFALSE},
-  {"QA"     ,"","",                                   "",                 "","",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ppLPfind1"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"SpinSortA"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ppLPprojectA","","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ppDAQfilter1","","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"ppLPeval1"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"QA"     ,"","",                                   "","","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"QAalltrigs"  ,"", "","",                                     "","","Analyze all triggers in QA",kFALSE},

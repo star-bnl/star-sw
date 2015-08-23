@@ -1343,7 +1343,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     gMessMgr->QAInfo() << "\tPossible Chain Options are:" << endm;
     for (k=0;k<fNoChainOptions;k++)
     gMessMgr->QAInfo()
-      << Form(" %3d: %-30s:%-12s:%-12s:%s:%s:%s:%s"
+      << Form(" %4d: %-30s:%-12s:%-12s:%s:%s:%s:%s"
 	      ,k,fBFC[k].Key,fBFC[k].Name,fBFC[k].Chain,fBFC[k].Opts,fBFC[k].Maker,fBFC[k].Libs,fBFC[k].Comment)
       << endm;
 
