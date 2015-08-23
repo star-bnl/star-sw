@@ -49,6 +49,9 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
 }
 
 
+/**
+ * Creates all Sti volumes of the IST detector.
+ */
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
    if (!gGeoManager)
@@ -86,6 +89,12 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
+/**
+ * Builds active Sti volumes by creating Sti shapes corresponding to the sensors
+ * of the IST detector. The created Sti detectors are positioned using either
+ * the ideal (ROOT's TGeo gGeoManager) or missaligned geometry from the STAR
+ * database via object of the StIstDb class.
+ */
 void StiIstDetectorBuilder::useVMCGeometry()
 {
    // Define silicon material used in manual construction of sensitive layers in this builder
@@ -94,8 +103,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
    StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
-   // Build active sti volumes for SST sensors
-   int stiRow = getNRows(); // Put all sensitive volumes in the same (and next available) Sti row
    // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kIstNumSensorsPerLadder/2);
 

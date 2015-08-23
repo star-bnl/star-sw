@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.113 2015/02/24 19:10:25 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.114 2015/08/18 17:41:42 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -45,7 +45,9 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
 }
 
 
-/** Build the pixel detector components. */
+/**
+ * Creates all Sti volumes of the PXL detector.
+ */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
    if (!gGeoManager)
@@ -84,7 +86,12 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
-/** Builds the sensors of the pixel detector. */
+/**
+ * Builds active Sti volumes by creating Sti shapes corresponding to the sensors
+ * of the PXL detector. The created Sti detectors are positioned using either
+ * the ideal (ROOT's TGeo gGeoManager) or missaligned geometry from the STAR
+ * database via object of the StPxlDb class.
+ */
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
    // Define silicon material used in manual construction of sensitive layers in this builder
@@ -93,7 +100,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
-   // Build active sti volumes for pixel sensors
    // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kNumberOfPxlSensorsPerLadder/2);
 
@@ -107,7 +113,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder..." << endm;
+            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (PXL sensitive) node. Skipping to next ladder..." << endm;
             continue;
          }
 
@@ -187,7 +193,7 @@ const StiDetector* StiPxlDetectorBuilder::getActiveDetector(int sector, int ladd
 }
 
 
-/** Creates inactive sti volumes for the pixel support material. */
+/** Creates inactive sti volumes for the PXL support material. */
 void StiPxlDetectorBuilder::buildInactiveVolumes()
 {
    // Build average inactive volumes
