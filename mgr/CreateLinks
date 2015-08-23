@@ -1,10 +1,11 @@
-#!/bin/csh 
+#!/bin/csh
 
-# This file will be kept up to date
-# per library so we can create the links
-# appropriate for the supported platform and
-# the backward compatible ones. 
+# This file will be kept up to date per library so we can create the links
+# appropriate for the supported platform and the backward compatible ones.
 # Added comments a MUST (thanks)
+#
+set arg=$#argv
+#echo "Argument is [$arg]";
 
 
 # Solaris
@@ -50,7 +51,7 @@ else
     echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
 
-# 
+#
 # Redhat 9.0
 #
 if ( -e .rh80_gcc32) then
@@ -87,14 +88,16 @@ endif
 
 
 #
-# Scientific Linux
+# Scientific Linux, SL53, SL6
 #
 foreach arch ( _ _x8664_ )
+    #+
+    # SL53
+    #-
     set refos="sl53"$arch"gcc432"
     echo "Checking possible backward compatibility through refos $refos"
+
     if ( -e .$refos || -e $refos ) then
-<<<<<<< CreateLinks
-=======
 	if ( "$arg" == "1") then
             # for transition to SL6
             set Urefos="sl64"$arch"gcc447"
@@ -136,29 +139,8 @@ foreach arch ( _ _x8664_ )
     echo "Checking possible compatibility through refos $refos"
     if ( -e .$refos || -e $refos ) then
         # *** PLACEHOLDER ***
->>>>>>> 1.31
 	foreach ospf ( sl rh )
-<<<<<<< CreateLinks
-<<<<<<< CreateLinks
-	    foreach vers ( 55 56 57 58 59 )
-		set dir=$ospf$vers$arch"gcc432"
-		if ( ! -e .$dir && -e .$refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s .$refos .$dir
-		else
-		    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
-		endif
-		if ( ! -e $dir && -e $refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s $refos $dir
-		else
-		    if ( -e $refos && -e $dir )   echo " $dir exists"
-		endif
-=======
-	    foreach vers ( 65 66 )
-=======
 	    foreach vers ( 64 65 66 )
->>>>>>> 1.32
 		# since we introduced a forward compatible gcc4.8.2 compiler, we 
 		# can create equivalenece links for all the below
 		foreach cmpl ( 482 447 )
@@ -182,7 +164,6 @@ foreach arch ( _ _x8664_ )
                     endif
 		    next_tag:
 		end
->>>>>>> 1.31
 	    end
 	end
     endif
@@ -205,12 +186,12 @@ if ( -e .sl44_gcc346) then
     	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
     if ( ! -e .rh4_gcc346) then
-	# Legacy RH4 
+	# Legacy RH4
 	echo "Backward compatibility assumed between RH4 -> SL404"
     	/bin/ln -s .sl44_gcc346 .rh4_gcc346
     endif
     if ( ! -e .i386_sl4) then
-	# Generic RH4 
+	# Generic RH4
 	echo "Assuming standard SL4 is compatible with default SL44 GCC-346"
     	/bin/ln -s .sl44_gcc346 .i386_sl4
     endif
@@ -253,15 +234,15 @@ if ( -e .sl302_gcc323) then
     if ( ! -e .sl303_gcc323) then
     	echo "Backward compatibility assumed between SL303 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl303_gcc323
-    endif    
+    endif
     if ( ! -e .sl304_gcc323) then
     	echo "Backward compatibility assumed between SL304 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl304_gcc323
-    endif    
+    endif
     if ( ! -e .sl305_gcc323) then
     	echo "Backward compatibility assumed between SL305 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl305_gcc323
-    endif    
+    endif
 
     # Any early SL
     if ( ! -e .rh3_gcc323 ) then
