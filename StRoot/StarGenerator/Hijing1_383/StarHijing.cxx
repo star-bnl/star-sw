@@ -113,24 +113,23 @@ Int_t StarHijing::Init()
    *  These particles will be decayed by geant instead of hijing
    *
    **/ 
-
-  Int_t pdgCodes[] = { 
+#define STABLE(x) ludat3().mdcy( Lucomp( x ), 1 ) = 0
 #if 0
-    111, // pi0
-    221, // eta
+  STABLE( 111 );
+  STABLE( 221 );
 #endif
-    3122,// Lambda0
-    3212,// Sigma0
-    3112,// Sigma-
-    3222,// Sigma+
-    3312,// Xi-
-    3322,// Xi0
-    3334 // Omega-
-  };
-  for ( UInt_t ii=0;ii<sizeof(pdgCodes);ii++) 
-    {
-      ludat3().mdcy( Lucomp( pdgCodes[ii] ), 1 ) = 0;
-    }
+  STABLE( 3122 );
+  STABLE( 3212 );
+  STABLE( 3112 );
+  STABLE( 3222 );
+  STABLE( 3312 );
+  STABLE( 3322 );
+  STABLE( 3334 );
+#undef STABLE
+
+
+
+
 
   /*
   ludat3().mdcy(102,1)=0; // PI0 111
