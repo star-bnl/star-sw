@@ -410,7 +410,7 @@ printf("\nGot %d. Bounds OK, Touched %d %d %d\n",n
 //______________________________________________________________________________
 void StMultyKeyMap::Test2()
 {
-printf("StMultyKeyMap::Test2() started\n");
+  printf("StMultyKeyMap::Test2() started\n");
    int nBin = 50;
    StMultyKeyMap map(4,nBin);
    float key[4];
@@ -438,25 +438,25 @@ printf("StMultyKeyMap::Test2() started\n");
    float dow[4]={0,  0.1,0.2,0.3};
    float upp[4]={0.2,0.3,0.4,0.5};
    double ev = nEvts;for (int i=0;i<4;i++){ev*=(upp[i]-dow[i]);};
-printf("\n%d ~evts \n",int(ev+0.5));
+   printf("\n%d ~evts \n",int(ev+0.5));
    int nk = map.GetNKey();
    int nSel = 0,nBad=0;
    StMultyKeyMapIter iter(map.GetTop(),dow,upp);
 
    TW.Start(1);
    int nkl = 10000;
-for (int jkl=0;jkl<nkl;jkl++) {
-   iter.Reset();
-   nSel = 0;nBad=0;
-   for (StMultyKeyNode *node=0;(node = *iter);++iter)
-   {
-     nSel++; int good = 0;
-//      const float *key = node->GetKeys();
-//      for (int j=0;j<nk;j++) {if (key[j]>=dow[j] && key[j]<upp[j]) good++;}
-//      nBad += (good!=nk); 
-//     printf("%4d - %g %g %g %g \n",nSel,key[0],key[1],key[2],key[3]);
-   }
-}//end jkl
+   for (int jkl=0;jkl<nkl;jkl++) {
+     iter.Reset();
+     nSel = 0;nBad=0;
+     for (StMultyKeyNode *node=0;(node = *iter);++iter){
+       nSel++; 
+       // int good = 0;
+       // const float *key = node->GetKeys();
+       // for (int j=0;j<nk;j++) {if (key[j]>=dow[j] && key[j]<upp[j]) good++;}
+       // nBad += (good!=nk); 
+       // printf("%4d - %g %g %g %g \n",nSel,key[0],key[1],key[2],key[3]);
+     }
+   } //end jkl
    TW.Stop();
    printf ( "Search Cpu = %g\n",TW.CpuTime()/nkl);
    int nb = map.Size();
