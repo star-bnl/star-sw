@@ -193,7 +193,7 @@ class StBTofSimMaker : public StMaker{
 
 
 	public:
-		StBTofSimMaker(const char *name="TofSim");
+		StBTofSimMaker(const char *name="BTofSim");
 
 
 		virtual ~StBTofSimMaker();
