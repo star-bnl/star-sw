@@ -169,15 +169,25 @@ Int_t StEandBDirMaker::Make(){
       c2->cd(1);
       secXY->Draw("colz");
     }
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,5,1)
     Float_t *xpeaks = spectr->GetPositionX();
     Float_t *ypeaks = spectr->GetPositionY();
+#else
+    Double_t *xpeaks = spectr->GetPositionX();
+    Double_t *ypeaks = spectr->GetPositionY();
+#endif
     static Double_t windowX = 5;
     static Double_t windowY = 5;
     for (Int_t pf = 0; pf < nfound; pf++) {
       // Check significance
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,5,1)
       Float_t xp = xpeaks[pf];
-      Int_t binx = secXY->GetXaxis()->FindBin(xp);
       Float_t yp = ypeaks[pf];
+#else
+      Double_t xp = xpeaks[pf];
+      Double_t yp = ypeaks[pf];
+#endif
+      Int_t binx = secXY->GetXaxis()->FindBin(xp);
       Int_t biny = secXY->GetYaxis()->FindBin(yp);
       Double_t zp = secXY->GetBinContent(binx,biny);
       Double_t ep = secXY->GetBinError(binx,biny);
