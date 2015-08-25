@@ -1,3 +1,9 @@
+#include <assert.h>
+#include "TH1.h"
+#include "TH2.h"
+#include "TStyle.h"
+#include "TCanvas.h"
+#include "TF1.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "StEventInfo.h"
@@ -21,6 +27,7 @@
 #include "StGmtHit.h"
 #include "StGmtHitCollection.h"
 #include "StGmtCollection.h"
+
 ClassImp(EventTHeader);
 ClassImp(EventT);
 ClassImp(TrackT);
@@ -101,7 +108,10 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     static const Double_t EC = 2.9979251E-4;
     Double_t Rho = - EC*InvpT*field;
     track->SetRho(Rho);
-
+    track->SetLength(gTrackT->length());
+    StTrackDetectorInfo* dinfo=gTrackT->detectorInfo();
+    track->SetNpoint(dinfo->numberOfPoints());
+    track->SetNPpoint(gTrackT->numberOfPossiblePoints());
     track->SetN(0);
     Int_t NoHitPerTrack = 0;
     THashList *fRotList = RotMatrices();
@@ -177,7 +187,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
       if (_debug) cout << "StHelix tU/tV =  " << tuvPred[0] << "\t" << tuvPred[1] << endl; 
       if (TMath::Abs(uvPred[0]) > dx[k] + 1.0) continue;
       if (TMath::Abs(uvPred[1]) > dz[k] + 1.0) continue;
-
+      
       for (UInt_t l = 0; l < NoHits; l++) {
 	StHit *hit = hitvec[l];
 	if (hit) {
@@ -316,7 +326,7 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     rotL->LocalToMaster(uvwP,xyzLadder);
     h->SetXyzL(xyzLadder);
 #ifdef __USE_GLOBAL__
-
+    
     Double_t uvwPGl[3] = {h->GetPredGlU(),h->GetPredGlV(),0};
     rotL->LocalToMaster(uvwPGl,xyzLadder);
     h->SetXyzGlL(xyzLadder);
@@ -362,7 +372,156 @@ void EventT::RestoreListOfRotations() {
   while ((key = (TKey*) nextkey())) {
     TObject *obj = key->ReadObj();
     if ( obj->IsA()->InheritsFrom( "TGeoHMatrix" ) ) {
-     fRotList->Add(obj);
+      fRotList->Add(obj);
     }
   }
 }
+//________________________________________________________________________________
+void TBase::Loop(Int_t Nevents) {  
+#if 1
+  struct PlotPar_t {
+    Char_t *Name;
+    Char_t *Title;
+    Int_t    nx;
+    Int_t    ny;
+    Double_t xmin; 
+    Double_t xmax; 
+    Double_t ymin;
+    Double_t ymax;  
+  };
+  const  PlotPar_t plotUP = // plots for uP
+    { "uP","track u", 320, 3, -5.,5., 0.,3. };
+  
+  const  PlotPar_t plotDu = // plots for u-uP
+    { "Du","Du before cut", 250, 3, -2.,2., 0.,3. };
+  
+  const  PlotPar_t plotDuv = // plots for du & dv
+    { "Du","Du cuts", 200, 3, -1.,1., 0.,3. };
+  
+  TFile *fOut = new TFile(fOutFileName,"recreate");
+  TString Name;
+  TString Title;
+  TString uName;
+  TString uTitle;
+  enum {NM = 8}; // no. of modules
+  //              B 
+  TH1F *LocPlots[NM];
+  TH1F *  uPlots[NM];
+  TH1F *    hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
+  TH1F *    hpM = new TH1F( "Ptot", "ptot", 200,  0., 5.);
+  TH1F * uPAll  = new TH1F("UPall","uPall", plotUP.nx, plotUP.xmin, plotUP.xmax);
+  TH1F * uAll   = new TH1F("Uall", "ua",    plotUP.nx, plotUP.xmin, plotUP.xmax);
+  TH1F * duB[NM][2];
+  TH1F * dvB[NM];
+  TH1F * uCuts[NM];
+  TH1F * xCuts[NM];
+  TH1F * uCut   = new TH1F("Ucut","uc", plotDu.nx, plotDu.xmin, plotDu.xmax);
+  TH1F * vCut   = new TH1F("Vcut","vc", 200, -3., 3.);
+  TH2F * dMin   = new TH2F("DMin","vumin",100,-0.75,0.75,100,-0.75,0.75); 
+  TH1F * vMin   = new TH1F("VMin","vmin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
+  TH1F * uMin   = new TH1F("UMin","umin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
+  TH1F * uMinC  = new TH1F("UMinC","umC", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
+  memset(LocPlots,0,NM*sizeof(TH1F *));
+  memset(  uPlots,0,NM*sizeof(TH1F *));
+  for (int M = 0; M < NM; M++) {// over gmt Modules
+    uName  = Form("UModule%i", M+1);
+    uTitle = Form("du for M%i", M+1);
+    duB[M][0] =  new TH1F(uName, uTitle, plotDuv.nx, plotDuv.xmin, plotDuv.xmax );
+    uName  = Form("VModule%i", M+1);
+    uTitle = Form("dv for M%i", M+1);
+    dvB[M] =  new TH1F(uName, uTitle, plotDuv.nx, plotDuv.xmin, plotDuv.xmax );
+    uName  = Form("UModule%iVcut", M+1);
+    uTitle = Form("du for M%i after Vcut", M+1);
+    duB[M][1] =  new TH1F(uName, uTitle, plotDuv.nx, plotDuv.xmin, plotDuv.xmax );
+    Int_t module    = M;
+    uName  = plotUP.Name;
+    uName += Form("M%i", module);
+    uTitle = Form("uP for Module %i", module);
+    uPlots[module] = 
+      new TH1F(uName, uTitle, plotUP.nx, plotUP.xmin, plotUP.xmax );
+    uName  = Form("%sM%i", plotDu.Name, module);
+    uTitle = Form("u-uP for M %i", module);
+    uCuts[module]= 
+      new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+    uName  = Form("%sxM%i", plotDu.Name, module);
+    uTitle = Form("u-uP corr M %i", module);
+    xCuts[module]= 
+      new TH1F(uName, uTitle, plotDu.nx, plotDu.xmin, plotDu.xmax );
+  }
+  Long64_t nentries = fChain->GetEntriesFast();
+  if (Nevents > 0 && nentries > Nevents) nentries = Nevents;
+  Long64_t nbytes = 0, nb = 0;
+  Int_t TreeNo = -1;
+  TString currentFile("");
+  
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    if (! jentry%1000 || TreeNo != fChain->GetTreeNumber()) {
+      cout << "Read event \t" << jentry 
+	   << " so far, switch to file " << fChain->GetCurrentFile()->GetName() 
+	   << endl;
+      cout << " current TreeNo: " << TreeNo
+	   <<  " new TreeNo: " << fChain->GetTreeNumber() << endl;
+      TreeNo = fChain->GetTreeNumber();
+    }
+    //     if (VertexZCut > 0 && TMath::Abs(fVertex[2]) > VertexZCut) continue;
+    UInt_t Ntrack = fEvent->GetTracks()->GetEntriesFast();
+    //     int k_used[100000] = {0};    
+    for (UInt_t trk = 0; trk < Ntrack; trk++) {
+      TrackT *track = (TrackT *)fEvent->GetTracks()->UncheckedAt(trk);
+      if (! track) continue;
+      Int_t Npoints = track->GetNpoint();
+#if 0
+      if (minNoFitPoints > 0 && Npoints%100 < minNoFitPoints) continue;
+      if (UseSsd && Npoints < 1000) continue; 
+      if (UseSvt && Npoints <  100) continue; 
+#endif
+      Int_t Nsp = track->GetN();
+      double dvmin = 1000.;
+      double dumin = 1000.;
+      int kmin;
+      for (Int_t hit = 0; hit < Nsp; hit++) {
+	Int_t k = track->GetHitTId(hit) - 1;
+	//	 assert(k>=0);
+	HitT *hitT = (HitT *) fEvent->GetHitT(k);
+	if ( k < 0) cout <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< endl;
+	if ( k < 0) continue;
+	Int_t module  = hitT->Barrel();
+	Double32_t u = hitT->GetU();       
+	Double32_t v = hitT->GetV();
+	Double32_t uP = hitT->GetPredU();       
+	Double32_t vP = hitT->GetPredV();
+	Double32_t du = u - uP;
+	Double32_t dv = v - vP;
+#if 0	   
+	hpT->Fill(hitT->GetXyzPGl());
+	hpM->Fill(hitT->GetpMom());
+	if (TMath::Abs(hitT->GetpT()) < 0.2) continue;
+#endif
+	if ( TMath::Abs(dv) < TMath::Abs(dvmin) ) {dvmin = dv; dumin= du; kmin = k;}
+	uPAll->Fill( uP );
+	uPlots[module]->Fill( uP );
+	
+	duB[module][0]->Fill(du);
+	dvB[module]->Fill(dv);
+	vCut->Fill(dv);
+	//	if (TMath::Abs(dv) > rCut ) continue;
+	uCut->Fill(du);
+	
+	duB[module][1]->Fill(du);
+	//	if (TMath::Abs(du) > 2.*rCut) continue;
+	
+      } //hits loop
+      if (TMath::Abs(dvmin) < 1000.) {
+	dMin->Fill(dvmin,dumin);
+	vMin->Fill(dvmin);
+	uMin->Fill(dumin);
+	//	if (TMath::Abs(dvmin) < rCut ) uMinC->Fill(dumin);
+      }	 
+    } //track loop
+  } //jentry loop (event loop)
+  fOut->Write();
+#endif
+} //end of Loop()

@@ -66,6 +66,7 @@ class TrackT : public TObject {
   virtual void SetNpoint(UInt_t p)     {fNpoint = p; }
   virtual void SetNPpoint(UInt_t p)    {fNPpoint = p; }
   virtual void SetValid(Short_t p=1)   {fValid = p; }
+  virtual void SetLength(Double_t L)   {fLength = L;}
   virtual void SetN(UInt_t n) {if (n <= NSP) fNsp = n; else fNsp = NSP;}
   virtual void SetHitTId(UInt_t i) {fIdHitT[fNsp] = i+1; if ( fNsp < NSP) fNsp++;}
   virtual void SetdEdx(Double_t I70, Double_t L) {fdEdx = I70; fLength = L;}
