@@ -1,5 +1,6 @@
 /* 
    root.exe -q -b lMuDst.C MuMcPrV.C+; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE)'; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.1)'
+
    root.exe TMVA.root  $ROOTROOT/root/tmva/test/TMVAGui.C
 PPV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.250)' >& MuMcPrV28TMVAR.log &
 KFV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.183)' >& MuMcPrV28TMVAR.log &
@@ -174,16 +175,16 @@ void Setup(const Char_t *xmlFile = "") {
   delete StTMVARanking::instance();
   if (! TMVAdata::instance()->PileUp()) {
 #if 1
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #else
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
     else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #endif
   } else {
 #if 1
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("beam:postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #else
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
     else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
@@ -835,7 +836,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Int_t NoMcTracksWithHits = 0;
       if (McVx) NoMcTracksWithHits = McVx2McTkR.count(McVx);
       FillData(*TMVAdata::instance(),RcVx,VpdZ,McVx, NoMcTracksWithHits);
-      
+      if (! TMVAdata::instance()->PPV() && ! aData.beam) continue;
       Ranks[l] = aData.Rank;
       Bool_t good = (l == lMcBest);
       if (! good) {// try pileup one
