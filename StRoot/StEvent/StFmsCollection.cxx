@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.cxx,v 2.2 2015/02/14 18:57:24 ullrich Exp $
+ * $Id: StFmsCollection.cxx,v 2.3 2015/08/26 16:51:59 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.cxx,v $
+ * Revision 2.3  2015/08/26 16:51:59  ullrich
+ * Added print out fct and operator.
+ *
  * Revision 2.2  2015/02/14 18:57:24  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
@@ -19,7 +22,11 @@
  **************************************************************************/
 #include "StEvent/StFmsCollection.h"
 
-static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.2 2015/02/14 18:57:24 ullrich Exp $";
+#include "StEvent/StFmsHit.h"
+#include "StEvent/StFmsCluster.h"
+#include "StEvent/StFmsPoint.h"
+
+static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.3 2015/08/26 16:51:59 ullrich Exp $";
 
 StFmsCollection::StFmsCollection() { /* no op */ }
 
@@ -72,3 +79,11 @@ StSPtrVecFmsPoint& StFmsCollection::points() {
 const StSPtrVecFmsPoint& StFmsCollection::points() const {
     return mPoints;
 }
+
+void StFmsCollection::print(Option_t *option) const {
+    cout << Form("NHit=%3d NCluster=%3d NPoint=%3d\n",numberOfHits(),numberOfClusters(),numberOfPoints());
+    for(unsigned int i=0; i<numberOfHits(); i++)    {hits()[i]->print();}
+    for(unsigned int i=0; i<numberOfClusters(); i++){clusters()[i]->print();}
+    for(unsigned int i=0; i<numberOfPoints(); i++)  {points()[i]->print();}
+}
+
