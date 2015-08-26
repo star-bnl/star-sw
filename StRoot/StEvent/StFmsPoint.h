@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPoint.h,v 2.2 2015/08/19 19:22:35 ullrich Exp $
+ * $Id: StFmsPoint.h,v 2.3 2015/08/26 16:51:25 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  **************************************************************************
@@ -11,6 +11,9 @@
  **************************************************************************
  *
  * $Log: StFmsPoint.h,v $
+ * Revision 2.3  2015/08/26 16:51:25  ullrich
+ * Fixed bug in cluster() and added print out fct and operator.
+ *
  * Revision 2.2  2015/08/19 19:22:35  ullrich
  * Major update (PID) by Akio.
  *
@@ -77,6 +80,8 @@ public:
     void  resetFps();
     void  orderFpsCandidates(); //order Fps hit candidates from near to far
     
+    void print(Option_t *option="") const;
+
 private:
     UShort_t mDetectorId;  ///< Detector starts from 1
     Float_t  mEnergy;  ///< Fitted energy
@@ -103,13 +108,15 @@ private:
     ClassDef(StFmsPoint, 3)
 };
 
+ostream& operator<<(ostream&, const StFmsPoint&);
+
 inline unsigned short StFmsPoint::detectorId() const { return mDetectorId; }
 inline float StFmsPoint::energy() const { return mEnergy; }
 inline float StFmsPoint::x() const { return mX; } // x position in cm at which point intersects the sub-detector.
 inline float StFmsPoint::y() const { return mY; } // y position in cm at which point intersects the sub-detector.
 inline int StFmsPoint::id() const { return mId; } // ID of the point in the current event.
-inline StFmsCluster* StFmsPoint::cluster() { return cluster(); } //  Parent cluster of the photon.
-inline const StFmsCluster* StFmsPoint::cluster() const { return cluster(); }
+inline StFmsCluster* StFmsPoint::cluster() { return mCluster; } //  Parent cluster of the photon.
+inline const StFmsCluster* StFmsPoint::cluster() const { return mCluster; }
 inline int StFmsPoint::parentClusterId() const { return mParentClusterId; } // ID of the parent cluster
                                                                             // containing this point.
 inline int StFmsPoint::nParentClusterPhotons() const { return mNParentClusterPhotons; } // Number of points
