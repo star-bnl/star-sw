@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.16 2015/02/22 18:10:10 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.17 2015/08/26 13:49:28 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -25,6 +25,7 @@ class StRpsCollection;
 class pp2pp_t;
 class pp2ppOffset_st;
 class pp2ppZ_st;
+class pp2ppRPpositions_st;
 
 class St_pp2pp_Maker : public StRTSBaseMaker {
 
@@ -59,6 +60,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   Int_t readZPerplane() ;
   pp2ppOffset_st *mOffsetTable ;
   pp2ppZ_st *mZTable ;
+  pp2ppRPpositions_st *mRPpositionsTable ;
 
   UChar_t mSiliconBunch ;
 
@@ -103,12 +105,17 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   */
   Int_t  MakeClusters();
 
+  /*!
+    MakeTracks() actually makes the tracks and store into StRpsCollection
+  */
+  Int_t  MakeTracks(const StRpsCollection &RpsColl);
+
   virtual Int_t InitRun  (int runumber); /// Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.16 2015/02/22 18:10:10 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.17 2015/08/26 13:49:28 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

@@ -20,6 +20,7 @@
 #include "tables/St_pp2ppPedestal160_Table.h" // K. Yip : Feb. 20, 2015 : New pedestal table (one per SVX)
 #include "tables/St_pp2ppOffset_Table.h"
 #include "tables/St_pp2ppZ_Table.h"
+#include "tables/St_pp2ppRPpositions_Table.h" // K. Yip : Aug. 10, 2015 : LVDT readings for RP positions
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRpsCollection.h"
@@ -58,6 +59,9 @@ Int_t St_pp2pp_Maker::InitRun(int runumber) {
     mVersion = 1 ; // from 2009 to < 2015
   else
     mVersion = 2 ; // >= 2015
+
+  cout << "St_pp2pp_Maker: Timestamp - Day: " << GetDateTime().GetDate() << " , DB-Time: " << GetDBTime().GetDate() << endl ;
+  cout << "St_pp2pp_Maker: Timestamp - Time: " << GetDateTime().GetTime() << " , DB-Date: " << GetDBTime().GetTime() << endl ;
 
   if ( mLDoCluster ) {
     readPedestalPerchannel() ;
@@ -211,6 +215,32 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
       */
     } else {
       LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppOffset table (wrong timestamp?). Nothing to return, then" << endm ;
+    }
+
+  }
+
+  if ( mVersion >= 2 ) { // only for >=2015
+
+    DB = GetInputDB("Calibrations/pp2pp");
+    if (!DB) {
+      LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+    }
+    else {
+      // fetch ROOT descriptor of db table
+      St_pp2ppRPpositions *descr = 0;
+      descr = (St_pp2ppRPpositions*) DB->Find("pp2ppRPpositions"); 
+      if (descr) {
+	LOG_DEBUG << "St_pp2pp_Maker : Reading pp2ppRPpositions table with nrows = " << descr->GetNRows() << endm ;
+	mRPpositionsTable = descr->GetTable();
+	/*
+	  for (Int_t i = 0; i < descr->GetNRows(); i++) {
+	  std::cout << i << "th row : " << mRPpositionsTable[i].b_left_W1D << " "  << mRPpositionsTable[i].b_right_W1U
+	  << " " << mRPpositionsTable[i].b_bot_W2D << " "  << mRPpositionsTable[i].b_top_W2U
+	  << " " << mRPpositionsTable[i].y_left_E1D << " "  << mRPpositionsTable[i].y_right_E1U
+	  << " " << mRPpositionsTable[i].y_bot_E2D << " "  << mRPpositionsTable[i].y_top_E2U << std::endl;
+	  }
+	*/
+      }
     }
 
   }
@@ -485,7 +515,12 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   //  const Int_t MAX_Cls_L = 5 ;
   //  const Int_t MIN_Charge = 20 ;
   /// Orientations for each silicon plane
+  // 2009
+  //                                               EHI          EHO          EVU        EVD         WHI          WHO          WVD        WVU
   const short orientations[kMAXCHAIN*kMAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
+  // >=2015
+  //                                               E1U          E1D          E2U        E2D         W1U          W1D          W2U        W2D
+  const short orientations2[kMAXCHAIN*kMAXSEQ] = {1,1,1,1,  -1,-1,-1,-1,  1,1,1,1, -1,-1,-1,-1,  1,-1,1,-1,  -1,1,-1,1,  1,-1,1,-1, -1,1,-1,1 };
   /// Assume 4 planes have the same z at least for now
   const double zcoordinates[kMAXSEQ] = { -55.496, -55.496, -58.496, -58.496, 55.496, 55.496, 58.496, 58.496 };
 
@@ -565,7 +600,10 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
       pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
 
-      pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations[4*i+j] ) ;
+      if ( mVersion < 2 )
+	pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations[4*i+j] ) ;
+      else
+	pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations2[4*i+j] ) ;
 
       it = (mValidHits[i][j]).begin() ;
 
@@ -601,15 +639,24 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    oneStCluster->setEnergy(ECluster);
 	    oneStCluster->setLength(NCluster_Length);
-	    if ( (j % 2) == 0 ) // A or C : pitch_4svx = 0.00974 cm
-	      position = POStimesE/ECluster*9.74E-5 ; // in m
+	    if ( (j % 2) == 0 ) { // A or C : pitch_4svx = 0.00974 cm
+	      // K. Yip : Aug. 14, 2015 : 
+	      // The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it, where _all_ SVX channels were connected to the silicon and the pitch is smaller.
+	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
+		position = POStimesE/ECluster*9.55E-5 ; // in m
+	      else
+		position = POStimesE/ECluster*9.74E-5 ; // in m
+	    }
 	    else                // B or D : pitch_6svx = 0.01050 cm
 	      position = POStimesE/ECluster*1.050E-4; // in m
 
 
 	    oneStCluster->setPosition(position); // in m
 	   
-	    oneStCluster->setXY( offset + orientations[4*i+j]*position ) ; // all in m
+	    if ( mVersion < 2 )
+	      oneStCluster->setXY( offset + orientations[4*i+j]*position ) ; // all in m
+	    else
+	      oneStCluster->setXY( offset + orientations2[4*i+j]*position ) ; // all in m
 
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
@@ -633,6 +680,8 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
     } // for ( Int_t j=0; j<kMAXCHAIN; j++) {
 
+  if ( mVersion>1 )
+    MakeTracks(*pp2ppColl);
 
   mEvent = (StEvent *) GetInputDS("StEvent");
   if ( mEvent ) {
@@ -646,6 +695,22 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 }
 
+Int_t St_pp2pp_Maker::MakeTracks(const StRpsCollection &RpsColl) {
+
+  /*
+  UInt_t k, s, c ;
+
+  for ( s=0; s<St_pp2pp_Maker::kMAXSEQ; s++)
+    for ( c=0; c<St_pp2pp_Maker::kMAXCHAIN; c++)
+      for ( k=0; k<RpsColl.romanPot(s)->plane(c)->numberOfClusters() && k<1; k++) { // Just print 1
+	LOG_INFO << "Length : " << RpsColl.romanPot(s)->plane(c)->cluster(k)->length()
+		 << ", Energy : " << RpsColl.romanPot(s)->plane(c)->cluster(k)->energy() << endm ;
+  }
+  */
+
+  return kStOk ;
+
+}
 
 Int_t St_pp2pp_Maker::Finish() {
 
