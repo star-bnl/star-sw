@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- * $Id: StFmsCluster.h,v 2.1 2015/02/14 18:56:00 ullrich Exp $
+ * $Id: StFmsCluster.h,v 2.2 2015/08/26 16:51:59 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  ****************************************************************************
@@ -12,6 +12,9 @@
  ****************************************************************************
  *
  * $Log: StFmsCluster.h,v $
+ * Revision 2.2  2015/08/26 16:51:59  ullrich
+ * Added print out fct and operator.
+ *
  * Revision 2.1  2015/02/14 18:56:00  ullrich
  * Initial Revision.
  *
@@ -62,7 +65,9 @@ public:
     const StPtrVecFmsHit& hits() const;
     StPtrVecFmsPoint& points();
     const StPtrVecFmsPoint& points() const;
-    
+   
+    void print(Option_t *option="") const;
+
 private:
     UShort_t mDetectorId;  // Detector starts from 1
     Int_t mCategory;  // Category of cluster (see StFmsClusterCategory)
