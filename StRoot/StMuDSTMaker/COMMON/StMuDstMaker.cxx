@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.122 2014/08/18 19:53:52 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.123 2015/08/28 18:36:03 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -9,7 +9,6 @@
 #include "Stsstream.h"
 #include "StChain.h"
 #include "THack.h"
-#include "TVector3.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackNode.h"
@@ -448,7 +447,6 @@ void  StMuDstMaker::streamerOff() {
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
-  StMuFmsHit::Class()->IgnoreTObjectStreamer();
    StMuPmdHit::Class()->IgnoreTObjectStreamer();
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
   EztEventHeader::Class()->IgnoreTObjectStreamer();
@@ -513,6 +511,16 @@ int StMuDstMaker::Init(){
 //-----------------------------------------------------------------------
 void StMuDstMaker::Clear(const char *){
   DEBUGMESSAGE2("");
+  // We need to clear the StMuFmsCluster array even when reading events, in
+  // order to clear the TRefArrays of hits and photons it holds. Otherwise
+  // the references from the previous event may be re-used.
+  const int fmsClusterIndex = __NARRAYS__ +
+#ifndef __NO_STRANGE_MUDST__
+    __NSTRANGEARRAYS__ +
+#endif
+    // FMS arrays follow PMD arrays. Hits = 0th, clusters = 1st, photons = 2nd
+    __NMCARRAYS__ + __NEMCARRAYS__ + __NPMDARRAYS__ + 1;
+  mAArrays[fmsClusterIndex]->Clear("C");  // "C" calls StMuFmsCluster::Clear
   if (mIoMode==ioRead)
     return;
   clearArrays();
@@ -704,6 +712,7 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   TString ts;
   Int_t emc_oldformat=0;
   Int_t pmd_oldformat=0;
+  chain->BranchRef();  // Activate autoloading of TRef-referenced objects
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
     const char *bname=StMuArrays::arrayNames[i];
@@ -890,6 +899,7 @@ void StMuDstMaker::openWrite(string fileName) {
   if (mSplit) bufsize /= 4;
   //  all stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
+  mTTree->BranchRef();  // Activate autoloading of TRef-referenced objects
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
   Long64_t MAXLONG=100000000000LL; // 100 GB
   LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
@@ -1064,6 +1074,7 @@ void StMuDstMaker::fillFms(StEvent* ev) {
     connectFmsCollection();
     mStMuDst->set(this);
   }
+  LOG_DEBUG << "StMuDSTMaker filling StMuFmsCollection from StEvent" << endm;
   mFmsUtil->fillMuFms(mFmsCollection,fmscol);
 
   timer.stop();
@@ -1610,8 +1621,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 }
 #endif
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillMC() 
-{
+void StMuDstMaker::fillMC() {
   St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  if (!g2t_track)  return;
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); if (!g2t_vertex) return;
   StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
@@ -1623,19 +1633,7 @@ void StMuDstMaker::fillMC()
   for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
-  for (UInt_t i = 0; i < NT; i++) {
-//     if (track[i].pt<=1e-3) {
-//        TVector3 v(track[i].p);
-//        float pt = v.Perp();
-//        if (pt>0.01) { // try to recover
-//          track[i].pt=pt;
-//          track[i].eta=v.Eta();
-//          track[i].rapidity=v.Eta();
-//        }
-//     }
-    if (track[i].pt<=1e-3) track[i].pt = -999;
-    addType(mMCArrays[MCTrack], track[i], mctr);
-  }   
+  for (UInt_t i = 0; i < NT; i++) addType(mMCArrays[MCTrack], track[i], mctr);   
   
 }
 //-----------------------------------------------------------------------
@@ -1819,6 +1817,8 @@ void StMuDstMaker::connectEmcCollection() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectFmsCollection() {
   mFmsCollection->setFmsHitArray(mFmsArrays[muFmsHit]);
+  mFmsCollection->setFmsClusterArray(mFmsArrays[muFmsCluster]);
+  mFmsCollection->setFmsPointArray(mFmsArrays[muFmsPoint]);
 }
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectPmdCollection() {
@@ -1831,19 +1831,8 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.122  2014/08/18 19:53:52  perev
- * remove recovery -ve pt tracks. They are secondaries
- *
- * Revision 1.121  2014/08/08 15:46:31  perev
- * Remove the previous correction, which destroyed non official
- * feature that idTruth is an index in array of tracks.
- * Some applications use this (VP)
- *
- * Revision 1.120  2014/08/07 19:00:01  perev
- * Skip MC tracks pt<=0
- *
- * Revision 1.119  2014/08/06 19:11:56  perev
- * Recover -ve pt
+ * Revision 1.123  2015/08/28 18:36:03  jdb
+ * Added Akios FMS codes
  *
  * Revision 1.118  2013/12/04 19:56:32  jdb
  * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
