@@ -1,5 +1,10 @@
-// $Id: StObject.cxx,v 1.27 2012/06/11 15:08:41 fisyak Exp $
+// $Id: StObject.cxx,v 1.28 2015/08/28 19:54:18 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.28  2015/08/28 19:54:18  perev
+// Add specific copy constructor to StObject.
+// This ctr set zero to bit 1<<22. This boit means that object belongs
+// to structured container. But copy obviously not.
+//
 // Revision 1.27  2012/06/11 15:08:41  fisyak
 // std namespace, warn off for x64
 //
@@ -84,10 +89,21 @@ StXRefManager 	 *StXRefManager::fgManager=0;
 UInt_t 	          StObject::fgTally=0;
 StXRefManagerList StXRefManager::fgManagerList;
 int StXRefManager::fgRWmode=-1;
-
+enum {kBelongs = (1<<22)};
 
 
 ClassImp(StObject)
+//_____________________________________________________________________________
+StObject::StObject(const StObject &sto):TObject(sto)
+{
+  SetBit(kBelongs,0);
+}
+//_____________________________________________________________________________
+StObject &StObject::operator=(const StObject &sto)
+{
+  TObject::operator=(sto);
+  SetBit(kBelongs,0); return *this;
+}
 //_____________________________________________________________________________
 StObject::~StObject()
 {
