@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.45 2015/07/28 00:43:57 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.46 2015/08/28 23:57:53 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.46  2015/08/28 23:57:53  perev
+ * Cleanup
+ *
  * Revision 2.45  2015/07/28 00:43:57  perev
  * Added StiKNNSeedFinder. There is no direct dependency, new made by CINT
  *
@@ -149,7 +152,6 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiTrackContainer.h"
-//#include "Sti/StiKNNSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiTrackFitter.h"
