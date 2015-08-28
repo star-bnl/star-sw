@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.31 2013/07/23 11:02:59 jeromel Exp $
+ * $Id: StMuArrays.h,v 1.32 2015/08/28 18:36:03 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -20,7 +20,7 @@ enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu
 /// @enum fgtTypes enumeration to to index the fgtArrays
 enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations, muFgtAdcs };
 
-enum fmsTypes {muFmsHit=0};
+enum fmsTypes {muFmsHit=0, muFmsCluster, muFmsPoint};
 #ifndef __NO_STRANGE_MUDST__
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
@@ -54,7 +54,7 @@ __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClo
 __NMCARRAYS__ =2,	///< size of the MCness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
- __NFMSARRAYS__    =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
+ __NFMSARRAYS__    =3 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
@@ -141,6 +141,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.32  2015/08/28 18:36:03  jdb
+ * Added Akios FMS codes
+ *
  * Revision 1.31  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)
  *
