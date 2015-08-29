@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.cxx,v 1.5 2003/04/30 20:37:32 perev Exp $                                      
+ * $Id: StHiMicroMaker.cxx,v 1.6 2015/08/29 00:00:42 perev Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.cxx,v $
+ * Revision 1.6  2015/08/29 00:00:42  perev
+ * ::isnan new gcc
+ *
  * Revision 1.5  2003/04/30 20:37:32  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -436,7 +439,7 @@ StHiMicroMaker::fillTracks(StEvent* stEvent)
           SET_ON = 1 << val;  //Moves "1" over by val places
           inner = inner | SET_ON;
         } else { 
-         SET_ON = 1 << val-14;  //Moves "1" over by val places
+         SET_ON = (1 << (val-14));  //Moves "1" over by val places
          outer = outer | SET_ON;
         }
         innerPadList=inner; outerPadList=outer;
@@ -774,7 +777,7 @@ StHiMicroMaker::dcaz(const StPhysicalHelixD& helix, const StThreeVectorF& point)
   const StThreeVectorD dis2 = point - pos2;
   
   double dcaZ = (dis1.mag() < dis2.mag()) ? dis1.z() : dis2.z();
-  if(isnan(dcaZ)) return 999;
+  if(::isnan(dcaZ)) return 999;
   return dcaZ;
 }
 
