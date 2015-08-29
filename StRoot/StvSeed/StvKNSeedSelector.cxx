@@ -9,6 +9,7 @@
 #include "StvSeedConst.h"
 //static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
 static const float kMaxAng =  15*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kSinHalfAng = sin(kMaxAng/2);
 
 //static const float kMinAng =  1*3.14/180;;	//KN angle allowed
 //static const float kMinAng =  2*3.14/180;;	//KN angle allowed
@@ -86,6 +87,9 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
    for (;jk<kKNumber;jk++) 			{if (dis < a[jk]) break;}
    for (int jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
    a[jk]=dis; n[jk] = iB;
+   if (mKNNDist < a[kKNumber-1]) return;
+   mKNNDist = a[kKNumber-1];
+   mMinIdx = iA;
 }
 //_____________________________________________________________________________
 StvKNSeedSelector::StvKNSeedSelector()
@@ -131,48 +135,62 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
   aux.mThe = asin(myDir[2]);
   aux.mLen = nor;aux.mSel = 0;
   float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
-
-//mTheDiv[iThe].emplace(aux.mPhi,last);
   mTheDiv[iThe].insert(std::pair<float,int>(aux.mPhi,last));
-
-
+  float myMaxPhi = kSinHalfAng/aux.mCosThe;
+        myMaxPhi = (myMaxPhi<0.99)? 2*asin(myMaxPhi): M_PI;
+  if (aux.mPhi-myMaxPhi<-M_PI) {
+    last = mAux.size(); mAux.resize(last+1); mAux.back() = aux;
+    mAux.back().mPhi = aux.mPhi+2*M_PI;
+    mTheDiv[iThe].insert(std::pair<float,int>(mAux.back().mPhi,last));
+  }
+  if (aux.mPhi+myMaxPhi> M_PI) {
+    last = mAux.size();  mAux.resize(last+1); mAux.back() = aux;
+    mAux.back().mPhi = aux.mPhi-2*M_PI;
+    mTheDiv[iThe].insert(std::pair<float,int>(mAux.back().mPhi,last));
+  }
 }  
 #ifdef KNNMAP
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
+  mKNNDist = kMaxAng;
+  mMinIdx = -1;
   MyTheDiv::iterator it2The = mTheDiv.begin();
   for (MyTheDiv::iterator it1The = mTheDiv.begin();
        it1The != mTheDiv.end();++it1The) 	//Main loop over theta	
   {
     float the1 = (*it1The).first;
     for (;it2The!=mTheDiv.end();++it2The) {
-      if ((*it2The).first>the1-kMaxAng) break;
+      float the2 = (*it2The).first;
+      if (the2>the1-kMaxAng) break;
     }
     if (it2The==mTheDiv.end()) continue;
 
 
-    MyPhiDiv &my1PhiDiv = (*it1The).second;
+    MyPhiDiv &my1PhiDiv = (*it1The).second;	//Main phi loop
     for (MyPhiDiv::iterator it1Phi=my1PhiDiv.begin();
-         it1Phi!=  my1PhiDiv.end();  
+         it1Phi !=  my1PhiDiv.end();  
          ++it1Phi) 					{//Main loop over phi
       int i1 = (*it1Phi).second;
-      StvKNAux & aux1 = mAux[i1];
-
+      StvKNAux &aux1 = mAux[i1];
+      float myMaxPhi = kSinHalfAng/aux1.mCosThe;
+      myMaxPhi = (myMaxPhi<0.99)? 2*asin(myMaxPhi): M_PI;
+		// Secondary theta loop
       for (MyTheDiv::iterator it3The=it2The;it3The!=mTheDiv.end();++it3The) 
       {
-	if ((*it3The).first>aux1.mThe+kMaxAng) break;
+	if ((*it3The).first>aux1.mThe+kStpTheDiv+kMaxAng) break;
 	MyPhiDiv &my3PhiDiv = (*it3The).second;
 
-	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.lower_bound(aux1.mPhi-kMaxAng/aux1.mCosThe);
+//	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.begin();
+	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.lower_bound(aux1.mPhi-myMaxPhi);
              it3Phi !=my3PhiDiv.end();
 	     ++it3Phi) { 		//loop over Phi partner
-          if ((*it3Phi).first > aux1.mPhi+kMaxAng/aux1.mCosThe) break;
+          if ((*it3Phi).first > aux1.mPhi+myMaxPhi) break;
           int i2 = (*it3Phi).second;
-          if (i1==i2) continue;
+          if (i2>=i1) continue;
           StvKNAux & aux2 = mAux[i2];
-          if (!mAux[i2].mHit) 	continue;
-          if ( mAux[i2].mSel) 	continue;
+          if (!aux2.mHit) 	continue;
+          if ( aux2.mSel) 	continue;
           if (fabs(aux1.mThe-aux2.mThe) > kMaxAng) continue;
           if ( Ang(aux1.mDir,aux2.mDir) > kMaxAng) continue;
           Update(i1,i2);
@@ -208,17 +226,17 @@ static int nCall=0; nCall++;
     mSel.clear();
     mMapLen.clear();
     Relink();
-    mKNNDist = kMaxAng;
-///		Find most dense place
-    mMinIdx  = -1;
-    for (int i=0;i<(int)mAux.size();i++) 
-    { 
-      if (!mAux[i].mHit) continue;		//ignore discarded hit
-      if ( mAux[i].mSel) continue;		//ignore used hit
-      float qwe = mAux[i].mDist[kKNumber-1];
-      if (qwe>=mKNNDist) continue;
-      mKNNDist=qwe; mMinIdx = i;
-    }
+//     mKNNDist = kMaxAng;
+// ///		Find most dense place
+//     mMinIdx  = -1;
+//     for (int i=0;i<(int)mAux.size();i++) 
+//     { 
+//       if (!mAux[i].mHit) continue;		//ignore discarded hit
+//       if ( mAux[i].mSel) continue;		//ignore used hit
+//       float qwe = mAux[i].mDist[kKNumber-1];
+//       if (qwe>=mKNNDist) continue;
+//       mKNNDist=qwe; mMinIdx = i;
+//     }
     if (mMinIdx<0) return 0;
 
 
@@ -371,6 +389,7 @@ static TGraph  *slGraph  = 0;
     slGraph->SetMarkerColor(kRed);
     slGraph->Draw("Same *");}
 
+#if 0
 static StvDraw *myDraw = new StvDraw;
   myDraw->Clear();
   myDraw->Hits((const std::vector<StvHit*>&)Get(),kUsedHit);
@@ -385,7 +404,7 @@ static StvDraw *myDraw = new StvDraw;
 
 
   myDraw->UpdateModified();
-
+#endif
   myCanvas->Modified();
   myCanvas->Update();
   while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
