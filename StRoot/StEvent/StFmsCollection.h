@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.2 2015/02/14 18:57:25 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.3 2015/08/26 16:51:59 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.3  2015/08/26 16:51:59  ullrich
+ * Added print out fct and operator.
+ *
  * Revision 2.2  2015/02/14 18:57:25  ullrich
  * Big upgrade after adding StFmPoint and StFmsCluster.
  *
@@ -20,6 +23,7 @@
 #ifndef StFmsCollection_hh
 #define StFmsCollection_hh
 
+#include "Stiostream.h"
 #include "StObject.h"
 #include "StContainers.h"  // StSPtrVecFmsHit/Cluster/Point definitions
 
@@ -58,6 +62,8 @@ public:
     
     StSPtrVecFmsPoint& points();    // Return the cluster list
     const StSPtrVecFmsPoint& points() const;
+  
+    void print(Option_t *option="") const;
     
 private:
     StSPtrVecFmsHit mHits;  // Owns all FMS hits
