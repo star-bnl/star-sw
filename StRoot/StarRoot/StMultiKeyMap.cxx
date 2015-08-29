@@ -376,25 +376,27 @@ printf("\nGot %d. Bounds OK, Touched %d %d %d\n",n
 //______________________________________________________________________________
 void StMultiKeyMap::Test2()
 {
+enum {kNKeys = 3};
+
 printf("StMultiKeyMap::Test2() started\n");
-   StMultiKeyMap map(4);
-   float key[4];
+   StMultiKeyMap map(kNKeys);
+   float key[kNKeys];
    int nEvts = 50000;
 
    for (int iEv=0;iEv<nEvts ;iEv++) {
-     for (int ik=0;ik<4;ik++) { key[ik]= gRandom->Rndm();}
+     for (int ik=0;ik<kNKeys;ik++) { key[ik]= gRandom->Rndm();}
      map.Add((void*)1,key);
    }  
    map.MakeTree();
    assert(nEvts==map.Size());
 //   map.ls();
 
-   float dow[4]={0,  0.1,0.2,0.3};
-   float upp[4]={0.2,0.3,0.4,0.5};
-   double ev = nEvts;for (int i=0;i<4;i++){ev*=(upp[i]-dow[i]);};
+   float dow[6]={0  ,0.1,0.2,0.1,0.2,0.3};
+   float upp[6]={0.2,0.3,0.4,0.2,0.3,0.4};
+   double ev = nEvts;for (int i=0;i<kNKeys;i++){ev*=(upp[i]-dow[i]);};
 printf("\n%d ~evts \n",int(ev+0.5));
 
-   int nk = 4;
+   int nk = kNKeys;
    int nSel = 0,nBad=0;
    StMultiKeyMapIter iter(map.GetTop(),dow,upp);
 
