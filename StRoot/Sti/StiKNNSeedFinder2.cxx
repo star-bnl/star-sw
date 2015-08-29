@@ -1,3 +1,7 @@
+int gMyEta =0;
+int myKont = 0;
+int gMyNextSeed=0;
+
 ///\file StiKNNSeedFinder.cxx 
 ///\author Victor Perev (BNL Software) 11/2012
 #include <math.h>
@@ -11,20 +15,23 @@
 #include "StiKalmanTrack.h"
 #include "StarRoot/StMultiKeyMap.h"
 #include "StiUtilities/StiDebug.h"
+#include "StEvent/StEnumerations.h"
+
 #define __NOSTV__
 
 #define StvHit_HH 1
 #define ST_TGEOHELPER_H
 
 #include "Stv/StvStl.h"
+
 typedef  StiDetector StHitPlane;
 class StvHit: private StiHit
 {
 public:
-  int timesUsed() const 	{ return StiHit::isUsed();}
-  void setTimesUsed(int i) 	{ StiHit::setTimesUsed(i);}
-  const StiDetector* detector() const {return StiHit::detector();}
-  const float *x() const	{ return &_xg            ;}
+  int timesUsed() const 		{ return StiHit::isUsed();}
+  void setTimesUsed(int i) 		{ StiHit::setTimesUsed(i);}
+  const StiDetector* detector() const 	{ return StiHit::detector();}
+  const float *x() const		{ return &_xg            ;}
 };
 
 
@@ -46,14 +53,19 @@ protected:
 class StvDebug
 {
 public:
-static void Count(const char*,double){;}
-static void Count(const char*,double,double){;}
-static int  Flag (const char*){return 0;}
-static int  iFlag (const char *flagName, int dflt=0){ return StiDebug::iFlag(flagName,dflt);}
+static void Count(const char *name,double x)		{StiDebug::Count(name,x);}
+static void Count(const char *name,double x,double y)	{StiDebug::Count(name,x,y);}
+static int  Flag (const char*)				{return 0;}
+static int  iFlag (const char *flagName, int dflt=0)	{return StiDebug::iFlag(flagName,dflt);}
 };
 
 
-#include "StvSeed/StvGoneRejector.h"
+#ifdef KNNGONE
+#include "StvSeed/StvGoneRejector.cxx"
+#endif
+#ifndef KNNGONE
+#include "StvSeed/StvConeRejector.cxx"
+#endif
 #include "StvSeed/StvKNSeedSelector.h"
 #include "StvSeed/StvKNSeedFinder.h"
 
@@ -92,6 +104,7 @@ static StiToolkit *kit = StiToolkit::instance();
   while(1) {
     fTrack = 0;
     const THelixTrack *hel = fStvKNSeedFinder->NextSeed();
+gMyNextSeed++;
     if (!hel) 		return 0;
     const std::vector<StiHit*> *hits = (const std::vector<StiHit*>*)fStvKNSeedFinder->GetHits();
     if (!hits)		continue;
@@ -102,6 +115,16 @@ static StiToolkit *kit = StiToolkit::instance();
     int ifail = ((StiKalmanTrack*)fTrack)->initialize(*hits);
     if (ifail) 		continue;
     fEta = fTrack->getPseudoRapidity();
+
+    gMyEta = 0;
+    if (fabs(fEta) < 0.1 ) {
+      StiKalmanTrackNode *node=fTrack->getInnerMostHitNode();
+      if (fabs(node->z_g())<20) {
+       gMyEta = ++myKont;
+    } }
+
+
+
     return  fTrack;
   }
 }
@@ -155,15 +178,28 @@ void StiKNNSeedFinder::FeedBack(int badGood)
   if (badGood<=0) {
     StiDebug::Count("BadEta",fEta);
   } else {
+    fEta = fTrack->getPseudoRapidity();
+    int nHits = fTrack->getPointCount(kPxlId);
+    nHits    += fTrack->getPointCount(kIstId);
+    nHits    += fTrack->getPointCount(kSstId);
     StiDebug::Count("GoodEta",fEta);
+
+    if (gMyEta) {
+      StiKalmanTrackNode *node=fTrack->getInnerMostHitNode();
+      if (fabs(node->z_g())<10) {
+    printf("UUUUUUU=%d\n",gMyEta);
+    }}
+
+    if (nHits>=2) StiDebug::Count("HftEta",fEta);
   }
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
+#include "StvSeed/StvSeedConst.h"
 #include "Stv/StvStl.cxx"
 #define Cop CopRej
-#include "StvSeed/StvGoneRejector.cxx"
+
 #undef Cop
 #define Cop CopSel
 #include "StvSeed/StvKNSeedSelector.cxx"
@@ -172,6 +208,5 @@ void StiKNNSeedFinder::FeedBack(int badGood)
 #include "TVector3.h"
 #include "StMultiKeyMap.h"
 #include "THelixTrack.h"
-#include "StvSeed/StvSeedConst.h"
 #undef Cop
 #include "StvSeed/StvKNSeedFinder.cxx"
