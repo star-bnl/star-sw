@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.10 2014/03/05 19:10:16 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.11 2015/08/29 03:37:26 perev Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.11  2015/08/29 03:37:26  perev
+ * __
+ *
  * Revision 1.10  2014/03/05 19:10:16  akio
  * added getting StFgtCollection from dataset called FGTCOLLECTION made from MuDST
  *
@@ -76,7 +79,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.10 2014/03/05 19:10:16 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.11 2015/08/29 03:37:26 perev Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   };
   
