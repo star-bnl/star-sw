@@ -7,6 +7,7 @@ class StvConst : public StvKonst_st
 {
 public:	
 StvConst();
+virtual ~StvConst(){;}
 static const StvConst *Inst(){ return mgConst;}
 
 private:
