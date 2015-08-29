@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventMaker.h,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructEventMaker.h,v 1.2 2015/08/29 03:24:18 perev Exp $
  *
  * Author: Jeff Porter rework of Jeff Reid's code
  *
@@ -64,7 +64,7 @@ public:
   StEStructEvent* event();
   bool  writeEvent(StEStructEvent* e);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEStructEventMaker.h,v 1.1 2003/10/15 18:20:51 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEStructEventMaker.h,v 1.2 2015/08/29 03:24:18 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEStructEventMaker, 1)
 };
@@ -75,6 +75,9 @@ public:
 /**********************************************************************
  *
  * $Log: StEStructEventMaker.h,v $
+ * Revision 1.2  2015/08/29 03:24:18  perev
+ * __DATE
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *

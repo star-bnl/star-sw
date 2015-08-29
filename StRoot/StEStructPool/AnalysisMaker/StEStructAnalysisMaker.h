@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.9 2012/11/16 21:19:05 prindle Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.10 2015/08/29 03:23:47 perev Exp $
  *   
  *
  *
@@ -81,7 +81,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.9 2012/11/16 21:19:05 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.10 2015/08/29 03:23:47 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -206,6 +206,9 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.10  2015/08/29 03:23:47  perev
+ * __DATE
+ *
  * Revision 1.9  2012/11/16 21:19:05  prindle
  * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
  * Added support to write and read EStructEvents.
