@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.168.2.1 2015/07/27 20:11:08 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.168.2.2 2015/08/29 03:27:58 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.168.2.2  2015/08/29 03:27:58  perev
+ * new gcc isnan
+ *
  * Revision 2.168.2.1  2015/07/27 20:11:08  perev
  * print method improved. Print Hit pointer added
  *
@@ -651,7 +654,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  assert(!isnan(mFP.ptin()));
+  assert(!::isnan(mFP.ptin()));
   return (fabs(mFP.ptin())<1e-3) ? 1e3: 1./fabs(mFP.ptin());
 }
 //______________________________________________________________________________
