@@ -7,7 +7,8 @@
 #include "StvSeedConst.h"
 
 
-enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=5};
+enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=3};
+//enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=5};
 static const double kFstCos = cos(kFstAng*M_PI/180);
 static const double kFstSin = cos(kFstAng*M_PI/180);
 
