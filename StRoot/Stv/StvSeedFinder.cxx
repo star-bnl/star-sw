@@ -4,6 +4,8 @@
 #include "TSystem.h"
 #include "StvUtil/StvDebug.h"
 #include "StvDraw.h"
+#include "StvTrack.h"
+#include "StvNode.h"
 #include "StvHit.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "vector"
@@ -12,7 +14,7 @@
 
 //Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
-                  , kBAD_XI2    = 8		// max Xi2 (with errs)
+                  , kBAD_XI2    = 25		// max Xi2 (with errs)
                   , kBAD_RHO=0.1		// max curvature
                   , kMIN_Rxy=50;		// minimal radius for seed hits
 
@@ -148,15 +150,25 @@ void StvSeedFinders::Reset()
   for (int i=0;i<(int)size();i++) {(*this)[i]->Reset();}
 }
 //_____________________________________________________________________________
-void StvSeedFinder::FeedBack(int success)
+void StvSeedFinder::FeedBack(const StvTrack *tk)
 {
   if (StvDebug::Debug()<2) return;
 
-  if (success<=0) { //
+  if (!tk) { //
   StvDebug::Count("BadXi2:Xi2E",fXi2[1],fXi2[0]);
 
   } else {
   StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
+  const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
+  double P[3];
+  node->GetFP().getMom(P);
+  
+  double eta = TVector3(P).Eta();
+  int nHits = tk->GetNHits(kPxlId);
+  nHits    += tk->GetNHits(kIstId);
+  nHits    += tk->GetNHits(kSstId);
+  StvDebug::Count("GoodEta",eta);
+  if (nHits>=2) StvDebug::Count("HftEta",eta);
   }
 }
  
