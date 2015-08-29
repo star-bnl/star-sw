@@ -47,11 +47,11 @@ public:
 
   void findTracks(){}; 
   bool find(StiTrack *track, int direction,double rmin=0){return false;};
-
+  virtual void FeedBack(int badGood);
   friend ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f);
 
 protected:
-  StiKalmanTrack*makeTrack(StiHit* hit);
+  StiKalmanTrack *makeTrack(StiHit* hit);
   ///Extend hit looking for closest neighbor in z
   bool extendHit(StiHit & hit);
   ///Extrapolate to next layer using straight line, add hit closest in z
@@ -72,7 +72,12 @@ protected:
 //VP  StiHelixCalculator     _helixCalculator;
 //VP  StiHelixFitter         _helixFitter;
   StiDefaultTrackFilter  _trackFilter;
+//	varisbles for FeedBack
   double fRxyMin;
+  double fEta;
+  StiKalmanTrack *fTrack;
+
+
  private:
   //The following are not implemented, as they are non-trivial
   //and the default compiler generated versions will be wrong.

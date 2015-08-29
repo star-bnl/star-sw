@@ -2,6 +2,8 @@
 ///\author M.L. Miller (Yale Software) 10/01
 #include <stdexcept>
 #include <math.h>
+#include "StEvent/StEnumerations.h"
+#include "StiUtilities/StiDebug.h"
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVector.hh"
@@ -48,21 +50,21 @@ StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
 {
   fRxyMin = rMin;
-  StiKalmanTrack* track = 0;  
+  fTrack = 0;  
   if (isReset())
     { 
 //      cout << "StiLocalTrackSeedFinder::findTrack() -I- Getting iterator" << endl;
 
       _hitIter = StiSortedHitIterator(_hitContainer,_detectorContainer->begin(),_detectorContainer->end());
     }
-  for (;_hitIter!=StiSortedHitIterator() && track==0;++_hitIter)
+  for (;_hitIter!=StiSortedHitIterator() && fTrack==0;++_hitIter)
     {
       try 
 	{
           StiHit *hit = &(*_hitIter);
 	  if (hit->isUsed()) continue;
 	  if (fRxyMin && pow(hit->x(),2)+pow(hit->y(),2)<fRxyMin*fRxyMin) continue;
-	  track = makeTrack(&*_hitIter);
+	  fTrack = makeTrack(&*_hitIter);
 	}
       catch(runtime_error & rte )
 	{
@@ -71,7 +73,11 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
     }
   //cout <<"StiLocalTrackSeedFinder::findTrack() -I- Done"<<endl;
   fRxyMin = 0;
-  return track;
+  fEta = 0;
+  if (fTrack) {
+    fEta = fTrack->getPseudoRapidity();
+  }
+  return fTrack;
 }
 
 //______________________________________________________________________________
@@ -365,7 +371,21 @@ void StiLocalTrackSeedFinder::print() const
   cout <<"\n Search Window in Y:\t"<<StiLocalTrackSeedFinderParameters::instance()->deltaY()<<endl;
   cout <<"\n Search Window in Z:\t"<<StiLocalTrackSeedFinderParameters::instance()->deltaZ()<<endl;
 }
-
+//______________________________________________________________________________
+void StiLocalTrackSeedFinder::FeedBack(int badGood) 
+{
+  if (!fEta) return;
+  if (badGood<=0) {
+    StiDebug::Count("BadEta",fEta);
+  } else {
+    fEta = fTrack->getPseudoRapidity();
+    int nHits = fTrack->getPointCount(kPxlId);
+    nHits    += fTrack->getPointCount(kIstId);
+    nHits    += fTrack->getPointCount(kSstId);
+    StiDebug::Count("GoodEta",fEta);
+    if (nHits>=2) StiDebug::Count("HftEta",fEta);
+  }
+}
 //______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f)
 {
