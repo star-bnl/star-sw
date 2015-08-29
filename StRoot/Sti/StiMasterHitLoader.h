@@ -28,9 +28,10 @@ diverse sources.
 */
 template<class Source1, class Detector>
 class StiMasterHitLoader : public StiHitLoader<Source1, Detector>,
-public vector< StiHitLoader<Source1, Detector> *>
+public std::vector< StiHitLoader<Source1, Detector> *>
 {
 public:
+class StiHitLoader<Source1, Detector>;
 
   StiMasterHitLoader();
   StiMasterHitLoader(const string& name,
@@ -71,9 +72,9 @@ StiMasterHitLoader<Source1, Detector>::~StiMasterHitLoader()
 {}
 
 template<class Source1,class Detector>
-void StiMasterHitLoader<Source1, Detector>::addLoader(StiHitLoader<Source1, Detector>*loader)
+void StiMasterHitLoader<Source1, Detector>::addLoader(StiHitLoader<Source1,Detector>* loader)
 {
-  push_back(loader);
+  this->push_back(loader);
 }
 
 template<class Source1, class Detector>
