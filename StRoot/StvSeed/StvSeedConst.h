@@ -4,8 +4,8 @@
 
 #ifndef StvSeedConst_HH
 #define StvSeedConst_HH
-//#define KNNMAP 1
-#define KNNGONE 1
+#define KNNMAP 1
+//#define KNNGONE 1
 
 
 enum ESeeds {kMinHits=5,kMaxHits = 10};
