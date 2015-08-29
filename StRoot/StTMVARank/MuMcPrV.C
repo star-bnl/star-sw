@@ -76,13 +76,13 @@ class StMuDstMaker;
 #endif /* __MAKECINT__ */
 #endif /* !defined(__CINT__) || defined(__MAKECINT__) */
 Bool_t doPrint = kFALSE;
-#define PrP(B)                   {cout << (#B) << " = \t" << (B) << endl;}
-#define PrPP(B)     if (doPrint) {cout << (#B) << " = \t" << (B) << endl;}
-#define PrPP2(B,C)  if (doPrint) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
-#define PrPP3(B,C,D)  if (doPrint) {cout << (#B) << " = \t" << (B) << "\t" << (C) << "\t" << (D) <<  endl;}
-#define PrPPD(B)    if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << endl;}
+#define PrP(B)                                   {cout << (#B) << " = \t" << (B) << endl;}				  
+#define PrPP(B)      if (doPrint)                {cout << (#B) << " = \t" << (B) << endl;}				  
+#define PrPP2(B,C)   if (doPrint) 		 {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}		  
+#define PrPP3(B,C,D) if (doPrint) 		 {cout << (#B) << " = \t" << (B) << "\t" << (C) << "\t" << (D) <<  endl;}
+#define PrPPD(B)     if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << endl;}                  
 #define PrPPDH(B)    if (doPrint && Debug() > 1) {cout << " =================== " << (#B) << " ===================== " << endl;}
-#define PrPP2D(B,C) if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
+#define PrPP2D(B,C)  if (doPrint && Debug() > 1) {cout << (#B) << " = \t" << (B) << "\t" << (C) << endl;}
 StMuDstMaker* maker = 0;
 #include "Ask.h"
 const Char_t *TMVAMethod = "BDT";
@@ -542,18 +542,15 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       cout << "\tCovGlobTrack "  << CovGlobTrack->GetEntriesFast();
       cout << "\tKFVertices "    << NoKFVertices;
       cout << "\tKFTracks "      << NoKFTracks;
+      cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices;
+      cout << "\t" << StMuArrays::mcArrayTypes[1] << " " << NoMuMcTracks;
+      cout << endl;
     }
     //    const Double_t field = muEvent->magneticField()*kilogauss;
     if (! NoMuMcVertices || ! NoMuMcTracks) {
       cout << "Ev. " << ev << " has no MC information ==> skip it" << endl;
       continue;
     } else {
-      if (doPrint) {
-	cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices;
-	cout << "\t" << StMuArrays::mcArrayTypes[1] << " " << NoMuMcTracks;
-	cout << endl;
-      }
-    }
     Double_t VpdZ = -9999;
     StBTofHeader* BTofHeader = mu->btofHeader();
     if ( BTofHeader) {
@@ -635,6 +632,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       PrPP2D(*McTrack,*McVx);
       McVx2McParentTk[McVx] = McTrack;
     }
+    
     PrPP(Id2McTk.size());
     // McVx => McTkR
     for (auto x : Id2McTk) {

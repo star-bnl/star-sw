@@ -50,6 +50,7 @@ class HitT : public TObject {
   Int_t      isTrack; 
   Int_t      isUsedInFit;
   UInt_t     hitFlag;
+  Double32_t sLength; 
   Char_t end;
  public:
   HitT(Int_t B = 0, Int_t L = 0, Int_t l = 0, Int_t W = 0, Int_t H = 0,
@@ -65,6 +66,7 @@ class HitT : public TObject {
     xG = X; yG = Y; zG = Z; 
     uM = XL; vM = YL; w = ZL;
   }
+  void SetHitLength(Double_t sh) {sLength = sh;}
   void SetHitFlag(const UInt_t flag) {hitFlag = flag;}
   void SetL(Double32_t X, Double32_t Y, Double32_t Z) {xL = X; yL = Y; zL = Z;}
   void SetGC(Double32_t X, Double32_t Y, Double32_t Z) {xGC = X; yGC = Y; zGC = Z;}

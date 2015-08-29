@@ -14,6 +14,7 @@
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
 #include "StTrackGeometry.h"
+#include "StDcaGeometry.h"
 #include "TGeoMatrix.h"
 #include "StarRoot/THelixTrack.h"
 #include "EventT.h"
@@ -27,7 +28,7 @@
 #include "StGmtHit.h"
 #include "StGmtHitCollection.h"
 #include "StGmtCollection.h"
-
+#define __OnlyGlobal__
 ClassImp(EventTHeader);
 ClassImp(EventT);
 ClassImp(TrackT);
@@ -89,9 +90,17 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
   for (UInt_t i=0; i<nnodes; i++) {
     StTrackNode *node = theNodes[i];
     if (! node) continue;
-    StGlobalTrack *gTrackT = (StGlobalTrack *) node->track(global);
-    if (! gTrackT) continue;
-    StThreeVectorD g3 = gTrackT->geometry()->momentum();
+    StTrack *Track = node->track(global);
+    if (! Track) continue;
+    StGlobalTrack *gTrack = (StGlobalTrack *) Track;
+    StDcaGeometry *dca = gTrack->dcaGeometry();
+    if (! dca) continue;
+    StPrimaryTrack *pTrack = (StPrimaryTrack *) node->track(primary);
+#ifndef __OnlyGlobal__
+    if (! pTrack) continue;
+    Track = (StTrack *) pTrack;
+#endif
+    StThreeVectorD g3 = Track->geometry()->momentum();
     Double_t pT = g3.perp();
     Double_t pMom = g3.mag();
     if (pMom < pCut) continue;
@@ -99,7 +108,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     Double_t InvpT = 0;
     Double_t TanL = 999999;
     if (TMath::Abs(pT) > 1.e-7) {
-      InvpT = gTrackT->geometry()->charge()/pT;
+      InvpT = Track->geometry()->charge()/pT;
       TanL = g3.z()/pT;
     }
     track->SetInvpT(InvpT);
@@ -108,11 +117,17 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     static const Double_t EC = 2.9979251E-4;
     Double_t Rho = - EC*InvpT*field;
     track->SetRho(Rho);
-    track->SetLength(gTrackT->length());
-    StTrackDetectorInfo* dinfo=gTrackT->detectorInfo();
+    track->SetLength(Track->length());
+    StTrackDetectorInfo* dinfo=Track->detectorInfo();
     track->SetNpoint(dinfo->numberOfPoints());
-    track->SetNPpoint(gTrackT->numberOfPossiblePoints());
+    track->SetNPpoint(Track->numberOfPossiblePoints());
     track->SetN(0);
+    StPhysicalHelixD helixO = Track->outerGeometry()->helix();
+    Double_t R_tof[2]= {210., 216.};  // inner and outer surfaces
+    pair<Double_t,Double_t> shR = helixO.pathLength(0.5*(R_tof[0]+R_tof[1]));
+    Double_t stepR = (shR.first > 0) ? shR.first : shR.second;
+    StThreeVectorD xyzR = helixO.at(stepR);
+    if (_debug) cout << "\t shR " << shR.first << "\t" << shR.second << "StHelix xyzR\t" << xyzR << endl;
     Int_t NoHitPerTrack = 0;
     THashList *fRotList = RotMatrices();
     if (! fRotList) continue;
@@ -124,59 +139,78 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
       Int_t Id;
       sscanf(comb->GetName()+1,"%i",&Id);
       UInt_t module = Id;
-      if (_debug) {
-	cout << comb->GetName() << "\tmodule = " << module << endl;
-	comb->Print();
-      }
       StGmtHitCollection* GmtHitCollection = GmtCollection->getHitCollection(module);
       if (! GmtHitCollection) { cout << "No GMT HitT Collections for mudule " << module << endl; continue;}
       StSPtrVecGmtHit& hitvec = GmtHitCollection->getHitVec();
       UInt_t NoHits = hitvec.size();
       if (! NoHits) continue;
+      if (_debug) {
+	cout << comb->GetName() << "\tmodule = " << module << endl;
+	comb->Print();
+      }
       static Double_t dz[2] = {50.00, 2.10};
       static Double_t dx[2] = {50.00, 3.65};
       Int_t k = 0; // gmt
-#if 0
-      // check straight line
-      const Double_t *X = &XyzDirRho[0]; // Global
-      Double_t x0[3];               // Local
-      comb->MasterToLocal(X,x0);
-      Double_t CosL = 1./TMath::Sqrt(1. + XyzDirRho[3]*XyzDirRho[3]);
-      Double_t SinL = XyzDirRho[3]*CosL;
-      Double_t CosP = TMath::Cos(XyzDirRho[4]);
-      Double_t SinP = TMath::Sin(XyzDirRho[4]);
-      Double_t dir[3], d[3];
-      dir[0] = CosL*CosP;
-      dir[1] = CosL*SinP;
-      dir[2] = SinL;
-      comb->MasterToLocalVect(dir,d);
-      if (TMath::Abs(d[2]) < 1.e-7) continue;
-      Double_t s = - x0[2]/d[2]; if (_debug) cout << "straight line s " << s << endl;;
-      if (s < 0) continue;
-      TRVector uvP(3,x0);
-      TRVector tuvP(2,d[0]/d[2],d[1]/d[2]);
-      TRVector DD(3,d);
-      DD *= s;
-      uvP += DD;                  if (_debug) cout << "straight line uvP\t" << uvP << "\ttuvP \t" << tuvP << endl;
-      //                        svt   ssd
-      if (TMath::Abs(uvP[0]) > dx[k] + 1.0) continue;
-      if (TMath::Abs(uvP[1]) > dz[k] + 1.0) continue;
-      // 	if (_debug) {
-      StThreeVectorD n, m;
-      comb->LocalToMasterVect(unit.xyz(),n.xyz());
-      comb->LocalToMaster(zero.xyz(),m.xyz());
-#endif
       Double_t *rot = comb->GetRotationMatrix();
       Double_t *tra = comb->GetTranslation();
       const StThreeVectorD unit(0.,0.,1.);
       const StThreeVectorD zero(0.,0.,0.);
       const StThreeVectorD normal(rot[2],      rot[5],      rot[8]);
       const StThreeVectorD middle(tra);
-      StPhysicalHelixD helixO = gTrackT->outerGeometry()->helix();
-      Double_t sh = helixO.pathLength(middle, normal); if (_debug) cout << "StHelix sh " << sh << endl;
+#if 0
+      if (_debug) {
+	Double_t XyzDirRho[6] = {0, 0, 0, track->GetTanL(), track->GetPhi(), track->GetRho()};
+	if ( Track->detectorInfo() ) {
+	   const StThreeVectorF lastPoint = Track->detectorInfo()->lastPoint();
+	   XyzDirRho[0] = lastPoint.x();
+	   XyzDirRho[1] = lastPoint.y();
+	   XyzDirRho[2] = lastPoint.z();
+	}
+	// check straight line
+	const Double_t *X = &XyzDirRho[0]; // Global
+	Double_t x0[3];               // Local
+	comb->MasterToLocal(X,x0);
+	Double_t CosL = 1./TMath::Sqrt(1. + XyzDirRho[3]*XyzDirRho[3]);
+	Double_t SinL = XyzDirRho[3]*CosL;
+	Double_t CosP = TMath::Cos(XyzDirRho[4]);
+	Double_t SinP = TMath::Sin(XyzDirRho[4]);
+	Double_t dir[3], d[3];
+	dir[0] = CosL*CosP;
+	dir[1] = CosL*SinP;
+	dir[2] = SinL;
+	comb->MasterToLocalVect(dir,d);
+	if (TMath::Abs(d[2]) < 1.e-7) continue;
+	Double_t s = - x0[2]/d[2]; if (_debug) cout << "straight line s " << s << endl;;
+	if (s < 0) continue;
+	TRVector uvP(3,x0);
+	TRVector tuvP(2,d[0]/d[2],d[1]/d[2]);
+	TRVector DD(3,d);
+	DD *= s;
+	uvP += DD;                  if (_debug) cout << "straight line uvP\t" << uvP << "\ttuvP \t" << tuvP << endl;
+	//                        svt   ssd
+	if (TMath::Abs(uvP[0]) > dx[k] + 1.0) continue;
+	if (TMath::Abs(uvP[1]) > dz[k] + 1.0) continue;
+	// 	if (_debug) {
+	StThreeVectorD n, m;
+	comb->LocalToMasterVect(unit.xyz(),n.xyz());
+	comb->LocalToMaster(zero.xyz(),m.xyz());
+      }
+#endif
+      Double_t sh = helixO.pathLength(middle, normal); 
+      if (_debug) {
+	cout << "StHelix sh " << sh 
+	     << "\t shR " << shR.first << "\t" << shR.second
+	     << endl;
+      }
       if (sh <= 0 || sh > 1e3) continue;
       StThreeVectorD xyzG = helixO.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
-      Double_t xyzGPred[3] = {xyzG.x(),xyzG.y(),xyzG.z()};
+      if (_debug) { 
+	StThreeVectorD dX = xyzG - helixO.at(0); 
+	cout << "Qi: " << Track->geometry()->charge() 
+	     << "\tQo: " << Track->outerGeometry()->charge()
+	     << "\tdX " << dX << endl;
+	cout << *dca << endl;
+      }
       Double_t uvPred[3];
       comb->MasterToLocal(xyzG.xyz(),uvPred);
       TRVector xyzL(3,uvPred); if (_debug) cout << "StHelix xyzL\t" << xyzL << endl;
@@ -194,11 +228,13 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
 	  //if (hit->flag()>=4) continue;
 	  //if (hit->flag()< 0) continu;
 	  //	  cout << "hitFlag=" << hit->flag() << endl;
+	  
 	  HitT *h = AddHitT();
+	  h->SetHitLength(sh);
 	  h->SetHitFlag(UInt_t(hit->flag()));
 	  h->SetUVPred (uvPred[0],uvPred[1]);
 	  h->SettUVPred(tuvPred[0],tuvPred[1]);
-	  h->SetXyzG(xyzGPred);
+	  h->SetXyzG(xyzG.xyz());
 	  h->SetDirG(dirGPred);
 	  SetHitT(h, hit, comb, track);
 	  NoHitPerTrack++;
@@ -325,20 +361,11 @@ HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
     Double_t uvwP[3] = {h->GetPredU(),h->GetPredV(),0};
     rotL->LocalToMaster(uvwP,xyzLadder);
     h->SetXyzL(xyzLadder);
-#ifdef __USE_GLOBAL__
-    
-    Double_t uvwPGl[3] = {h->GetPredGlU(),h->GetPredGlV(),0};
-    rotL->LocalToMaster(uvwPGl,xyzLadder);
-    h->SetXyzGlL(xyzLadder);
-#endif
   } else {
     
     cout << Form("WL%s",comb->GetName()+1) << " has not been found" << endl;
     h->SetL(xyzLadder[0],xyzLadder[1],xyzLadder[2]);
     h->SetXyzL(xyzLadder);
-#ifdef __USE_GLOBAL__
-    h->SetXyzGlL(xyzLadder);
-#endif
   }
   return h;
 }
