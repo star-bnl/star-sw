@@ -268,6 +268,15 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
     if (mTimg[kSeedTimg]) mTimg[kSeedTimg]->Stop();
     if (!track) break; // no more seeds
     nTTot++;
+
+{
+StiKalmanTrackNode *node = track->getInnerMostNode();
+StThreeVector<double> p =node->getGlobalPoint();
+StThreeVector<double> m =node->getGlobalMomentum();
+if (p.dot(m)<=0) continue;
+}
+
+
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
     Int_t errType = Fit(track,rMin);
     _trackSeedFinder->FeedBack(errType == kNoErrors);
