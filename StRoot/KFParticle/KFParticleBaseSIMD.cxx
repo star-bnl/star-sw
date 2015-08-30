@@ -2415,9 +2415,9 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v 
   P[0] = fP[0] + mJ[0][3]*px + mJ[0][4]*py + mJ[0][5]*pz;
   P[1] = fP[1] + mJ[1][3]*px + mJ[1][4]*py + mJ[1][5]*pz;
   P[2] = fP[2] + mJ[2][3]*px + mJ[2][4]*py + mJ[2][5]*pz;
-  P[3] =        mJ[3][3]*px + mJ[3][4]*py + mJ[3][5]*pz;
-  P[4] =        mJ[4][3]*px + mJ[4][4]*py + mJ[4][5]*pz;
-  P[5] =        mJ[5][3]*px + mJ[5][4]*py + mJ[5][5]*pz;
+  P[3] =         mJ[3][3]*px + mJ[3][4]*py + mJ[3][5]*pz;
+  P[4] =         mJ[4][3]*px + mJ[4][4]*py + mJ[4][5]*pz;
+  P[5] =         mJ[5][3]*px + mJ[5][4]*py + mJ[5][5]*pz;
   P[6] = fP[6];
   P[7] = fP[7];
 

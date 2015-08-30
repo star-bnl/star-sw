@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.60 2014/08/06 11:43:31 jeromel Exp $
+ * $Id: StMuDstMaker.h,v 1.61 2015/08/28 18:36:03 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -182,7 +182,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.60 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.61 2015/08/28 18:36:03 jdb Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -414,8 +414,8 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
- * Revision 1.60  2014/08/06 11:43:31  jeromel
- * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ * Revision 1.61  2015/08/28 18:36:03  jdb
+ * Added Akios FMS codes
  *
  * Revision 1.59  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)

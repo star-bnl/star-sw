@@ -124,12 +124,12 @@ StvTrack bakwTrak(*mCurrTrak);
 	if (nHits < myMinHits)	fail+=100;		;
         if (fail) nHits=0;
 	if (fail) 	{//Track is failed, release hits & continue
-          mSeedFinder->FeedBack(-1);
+          mSeedFinder->FeedBack(0);
 	  mCurrTrak->CutTail();			continue;
         }
 	StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
 
-        mSeedFinder->FeedBack(nHits);
+        mSeedFinder->FeedBack(mCurrTrak);
 
         mCurrTrak->AddId(10*seedFinder+repeat);
 	kit->GetTracks().push_back(mCurrTrak);
@@ -178,6 +178,13 @@ hitCount->Clear();
     err[0].Set(mSeedHelx,Hz); err[0]*= kKalmanErrFact; 
     par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
     err[0].Backward();
+// {
+// static int when=0; when++;
+// if ((when%100)==1) {
+//   double d[3];par[0].getDir(d);
+//   assert(TCL::vdot(d,par[0].P,3)>0);
+// }}
+
   } else 	{//Forward or backward tracking
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
@@ -246,7 +253,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     assert(curNode != mCurrTrak->back ());
 
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
-    else        {mCurrTrak->push_back (curNode);innNode=preNode;outNode=curNode;}
+    else        {mCurrTrak->push_back(curNode);innNode=preNode;outNode=curNode;}
     nNode++;		// assert(nNode<200);
     if (nNode>200) { //Something very wrong
       Error("FindTrack","Too many nodes =200 Skip track");
@@ -370,7 +377,7 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
 {
-static double kOneMEV = 1e-3;
+//static double kOneMEV = 1e-3;
 static StvToolkit *kit = StvToolkit::Inst();
 //static const StvConst  *kons = StvConst::Inst();
 
@@ -394,11 +401,11 @@ static StvToolkit *kit = StvToolkit::Inst();
     dcaNode->SetELoss(eld,0);
     dcaErrs.Add(eld,dcaPars,0);
 
-    double p0 = start->GetFP().getP();
-    double p1 = dcaPars.getP();
-    double PiMASS=0.13956995;      
-    double e0 = sqrt(p0*p0+PiMASS*PiMASS);
-    double e1 = sqrt(p1*p1+PiMASS*PiMASS);
+//    double p0 = start->GetFP().getP();
+//    double p1 = dcaPars.getP();
+//    double PiMASS=0.13956995;      
+//    double e0 = sqrt(p0*p0+PiMASS*PiMASS);
+//    double e1 = sqrt(p1*p1+PiMASS*PiMASS);
 //???assert(e1>e0);
 //??assert(fabs((e1-e0)-eld->ELoss()) <0.3*eld->ELoss()+kOneMEV);
 

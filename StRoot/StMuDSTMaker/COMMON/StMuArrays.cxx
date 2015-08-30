@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.30 2013/07/16 14:30:29 fisyak Exp $
+ * $Id: StMuArrays.cxx,v 1.32 2015/08/28 18:36:03 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -30,7 +30,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 /*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdHit","CpvHit",
 							   "PmdCluster",
 							   "CpvCluster",
-/*fmsArrayNames    [__NFMSARRAYS__    ]*/                  "FmsHit",
+/*fmsArrayNames    [__NFMSARRAYS__    ]*/                  "FmsHit","FmsCluster","FmsPoint",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData",
 							   "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
@@ -72,7 +72,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
 							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
-/*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit",							   
+/*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit","StMuFmsCluster","StMuFmsPoint",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
 /*mtdArrayNames   [__NMTDARRAYS__     ]*/                  "StMuMtdHit","StMuMtdRawHit","StMuMtdHeader",
@@ -105,7 +105,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*mcArraySizes[__NMCARRAYS__]*/                            10,1000,
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
-/*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,
+/*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,1,1,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
 /*mtdArraySizes    [__NMTDARRAYS__    ]*/                  1000,1000,1,
@@ -135,7 +135,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*mcArrayCounterss    [__NMCARRAYS__]*/                    0,0,
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
-/*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,
+/*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
 /*mtdArrayCounters    [__NMTDARRAYS__    ]*/               0, 0, 0,
@@ -184,8 +184,11 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
- * Revision 1.30  2013/07/16 14:30:29  fisyak
- * Restore mass fit tracks
+ * Revision 1.32  2015/08/28 18:36:03  jdb
+ * Added Akios FMS codes
+ *
+ * Revision 1.31  2013/07/23 11:02:59  jeromel
+ * Undo changes (KF and other)
  *
  * Revision 1.28  2013/04/08 18:07:54  fisyak
  * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks

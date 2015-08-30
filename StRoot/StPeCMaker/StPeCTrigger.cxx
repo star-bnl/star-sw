@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.20 2015/07/22 18:47:22 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.21 2015/08/29 00:02:43 perev Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.21  2015/08/29 00:02:43  perev
+// Account non trigger events
+//
 // Revision 1.20  2015/07/22 18:47:22  ramdebbe
 // added trigger for pA part of run 15
 //
@@ -466,6 +469,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 
   if(!trigData) {
     LOG_ERROR << "StTriggerData not available in StMuDst "<< endm;
+    return 0;
   }
     lastDSM0 = trigData->lastDSM(0);
     lastDSM1 = trigData->lastDSM(1);

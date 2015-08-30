@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsHit.h,v 1.1 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuFmsHit.h,v 1.2 2015/08/28 18:36:04 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsHit.h,v $
+ * Revision 1.2  2015/08/28 18:36:04  jdb
+ * Added Akios FMS codes
+ *
  * Revision 1.1  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *
@@ -17,10 +20,11 @@
 #ifndef StMuFmsHit_hh
 #define StMuFmsHit_hh
 
-#include "Stiostream.h"
-#include "StObject.h"
+#include <TObject.h>
 
-class StMuFmsHit : public StObject {
+#include "Stiostream.h"
+
+class StMuFmsHit : public TObject {
 public:
     StMuFmsHit();
     StMuFmsHit(unsigned short det, unsigned short ch,

@@ -58,9 +58,10 @@ void reset();
 Abstract* getInstance();
 static StvFactory*  myInstance();
 
-  ~StvFactory(){clear();}
-private:
+protected:
    StvFactory();
+  ~StvFactory(){this->clear();}
+
 StvBlock<Concrete>  *fBTop;
 StvHolder<Concrete> *fHTop;
 
@@ -72,7 +73,7 @@ template <class Object>
 StvBlock<Object>::StvBlock(StvBlock **bTop,StvHolder<Object> **hTop,char *buf)
 {
   fBuff=buf;
-  reset(bTop,hTop);
+  this->reset(bTop,hTop);
 }
 template <class Object>
 void StvBlock<Object>::reset(StvBlock **bTop,StvHolder<Object> **hTop)
