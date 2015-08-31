@@ -100,8 +100,8 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
       float chi = p.GetDeviationFromVertex( primVtx );      
        
       bool isBadDaughter=0;
-      for(int iP=0; iP<8; iP++)
-        isBadDaughter|= p.GetParameter(iP) != p.GetParameter(iP);
+      for(int iParam=0; iParam<8; iParam++)
+        isBadDaughter|= p.GetParameter(iParam) != p.GetParameter(iParam);
       for(int iC=0; iC<36; iC++)
         isBadDaughter|= p.GetCovariance(iC) != p.GetCovariance(iC);
 

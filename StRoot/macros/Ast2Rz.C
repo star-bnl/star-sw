@@ -16,4 +16,15 @@ void Ast2Rz(const Char_t *vers="y2005x", const Char_t *geom = "") {
   geant->InitRun(1);
   TString cmd("grfile"); 
   geant->Do(cmd.Data());
+  ofstream out;
+  TString fOut("Geometry.");
+  fOut += vers;
+  fOut += ".C";
+  out.open(fOut.Data());
+  out << "#include \"CreateGeometry.h\"" << endl;
+  out << "TDataSet *CreateTable() {" << endl;
+  geant->Version(out);
+  out << "  return CreateGeometry(\"" << vers << "\");" << endl;
+  out << "}" << endl;
+  out.close(); 
 }

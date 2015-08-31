@@ -1,5 +1,10 @@
-// $Id: StObject.h,v 1.19 2012/06/11 15:08:41 fisyak Exp $
+// $Id: StObject.h,v 1.20 2015/08/28 19:54:18 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.20  2015/08/28 19:54:18  perev
+// Add specific copy constructor to StObject.
+// This ctr set zero to bit 1<<22. This boit means that object belongs
+// to structured container. But copy obviously not.
+//
 // Revision 1.19  2012/06/11 15:08:41  fisyak
 // std namespace, warn off for x64
 //
@@ -45,14 +50,15 @@ enum EStObjectDrawBit { kMark2Draw = BIT(24)}; // mark object to be rendered by 
 class StObject : public TObject {
 
 public:
+          StObject(){;}
+          StObject(const StObject &sto);
+          StObject &operator=(const StObject &sto);
   virtual ~StObject();
   virtual void Browse(TBrowser *b);
   
-  virtual Bool_t IsFolder() const;
-  virtual TObject *clone() const {return ((TObject*)this)->Clone();}
-  Int_t   isZombie() const {return IsZombie();}
-//  Int_t   IsMarked2Draw() const { return TestBit(kMark2Draw) ;}
-//  void    Mark2Draw(int flag=1) { if (flg) SetBit(kMark2Draw) else ResetBit(kMark2Draw) ;}
+  virtual Bool_t IsFolder() 	const;
+  virtual TObject *clone() 	const {return ((TObject*)this)->Clone();}
+  Int_t   isZombie() 		const {return IsZombie();}
   virtual void makeZombie(int flg=1)
     {if (flg) {MakeZombie();} else {((UInt_t*)this)[1] &=~(kZombie);}} 
   UInt_t  Ztreamer(TBuffer &R__b);

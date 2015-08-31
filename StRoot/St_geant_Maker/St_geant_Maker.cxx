@@ -611,6 +611,7 @@
 #define    acfromr       F77_NAME(acfromr,ACFROMR)
 #endif
 #define    dstkine       F77_NAME(dstkine,DSTKINE)
+#define    g2t_version   F77_NAME(g2t_version,G2T_VERSION)
 #endif
 typedef long int (*addrfun)(); 
 R__EXTERN "C" {
@@ -655,6 +656,7 @@ R__EXTERN "C" {
   void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
   void type_of_call agfpath(Int_t *);
   void type_of_call dstkine();
+  Float_t type_of_call g2t_version(DEFCHARD DEFCHARL);
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
 
@@ -1717,7 +1719,6 @@ void St_geant_Maker::ClearRootGeoms()
       delete fTopGeoVolume;
       fTopGeoVolume = 0;
    }
-
 }
 //_____________________________________________________________________________
 TDataSet *St_geant_Maker::Work()
@@ -2478,6 +2479,39 @@ void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Cha
 //________________________________________________________________________________
 void dstkine() {
   St_geant_Maker::instance()->KinematicsFromMuDst();
+}
+//________________________________________________________________________________
+void St_geant_Maker::Version(ostream& os) {
+  const Char_t *names[] = {
+    "svtg_version",  
+    "tpcg_version", "tpcg_tpadconfig",    
+    "vpdg_version",  
+    "btog_version", "btog_choice",     "btog_posit1(1)",   "btog_posit1(2)",   "btog_posit2",     "btog_posit3",     "btog_version",  
+    "calg_version", "calg_nmodule(1)", "calg_nmodule(2)",  
+    "calg_netaT",    "calg_maxmodule",  "calg_nsub",       "calg_netasmdp",    "calg_nphistr",    "calg_netfirst",    "calg_netsecon",  
+    "emcg_version", "emcg_onoff",     "emcg_fillmode",  
+    "ismg_layer",   "ismg_rin",        "ismg_rout",       "ismg_totallength",  "ismg_code",   
+    "fmcg_version",  
+    "fpdg_version",  
+    "fscg_version",  
+    "mtdg_version", 0};
+  Int_t i = 0;
+  while (names[i]) {
+    Float_t version = g2t_version(names[i] PASSCHARL(names[i]));
+    if (version) {
+      os << "  gEnv->SetValue(\"" << names[i] << "\"," << version << ");" << endl;
+    }
+    i++;
+  }
+}
+//________________________________________________________________________________
+Bool_t St_geant_Maker::GeometryVersion() {
+  if (! fInitRunDone) {
+    LOG_ERROR << "GeometryVersion: geometry has not been initialized" << endm;
+    return kFALSE;
+  }
+  Version(cout);
+  return kTRUE;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::SetDatimeFromMuDst() {

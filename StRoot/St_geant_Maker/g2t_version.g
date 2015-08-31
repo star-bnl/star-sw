@@ -13,10 +13,10 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
-      integer  g2t_version
+      real  g2t_version
 +CDE,gcunit.
 * 
-      Integer          Csys
+      Character*(*)    Csys
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
       Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
       Integer          istVersion/0/,istLayer/0/
@@ -42,6 +42,8 @@
       logical    printOnce/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
+      if (first) then
+	  first = .false.
           call RBPUSHD
 
 *         in simulations done in MDC1 (1998) btog_posit1 was not saved
@@ -71,6 +73,42 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+      endif	
 *
       g2t_version = 0
+      if (csys == 'svtg_version')    g2t_version = svtg_version
+      if (csys == 'tpcg_version')    g2t_version = tpcg_version
+      if (csys == 'tpcg_tpadconfig') g2t_version = tpcg_tpadconfig
+      if (csys == 'vpdg_version')    g2t_version = vpdg_version
+      if (csys == 'btog_version')    g2t_version = btog_version
+      if (csys == 'btog_choice')     g2t_version = btog_choice
+      if (csys == 'btog_posit1(1)')  g2t_version = btog_posit1(1)
+      if (csys == 'btog_posit1(2)')  g2t_version = btog_posit1(2)
+      if (csys == 'btog_posit2')     g2t_version = btog_posit2
+      if (csys == 'btog_posit3')     g2t_version = btog_posit3
+      if (csys == 'btog_version')    g2t_version = btog_version
+      if (csys == 'calg_version')    g2t_version = calg_version
+      if (csys == 'calg_nmodule(1)') g2t_version = calg_nmodule(1)
+      if (csys == 'calg_nmodule(2)') g2t_version = calg_nmodule(2)
+      if (csys == 'calg_netaT')      g2t_version = calg_netaT
+      if (csys == 'calg_maxmodule')  g2t_version = calg_maxmodule
+      if (csys == 'calg_nsub')       g2t_version = calg_nsub
+      if (csys == 'calg_netasmdp')   g2t_version = calg_netasmdp
+      if (csys == 'calg_nphistr')    g2t_version = calg_nphistr
+      if (csys == 'calg_netfirst')   g2t_version = calg_netfirst
+      if (csys == 'calg_netsecon')   g2t_version = calg_netsecon
+      if (csys == 'emcg_version')    g2t_version = emcg_version
+      if (csys == 'emcg_onoff')      g2t_version = emcg_onoff
+      if (csys == 'emcg_fillmode')   g2t_version = emcg_fillmode
+      if (csys == 'emcg_version')    g2t_version = emcg_version
+      if (csys == 'ismg_layer')      g2t_version = ismg_layer
+      if (csys == 'ismg_rin')        g2t_version = ismg_rin
+      if (csys == 'ismg_rout')       g2t_version = ismg_rout
+      if (csys == 'ismg_totallength')g2t_version = ismg_totallength
+      if (csys == 'ismg_code')       g2t_version = ismg_code
+
+      if (csys == 'fmcg_version')    g2t_version = fmcg_version
+      if (csys == 'fpdg_version')    g2t_version = fpdg_version
+      if (csys == 'fscg_version')    g2t_version = fscg_version
+      if (csys == 'mtdg_version')    g2t_version = mtdg_version
       end      

@@ -1,6 +1,3 @@
-//#define KNNMAP
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -15,6 +12,8 @@
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvKNSeedFinder.h"
 #include "Stv/StvHit.h"
+#include "Stv/StvNode.h"
+#include "Stv/StvTrack.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 #endif
@@ -37,8 +36,11 @@ enum {kMinRxy = 50};
 StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 {
   memset(mBeg,0,mEnd-mBeg+1);
-//fMultiHits	= new StMultiKeyMap(3);
+#ifndef KNNGONE
+  fMultiHits	= new StMultiKeyMap(3);
+#else
   fMultiHits	= new StMultiKeyMap(6);
+#endif
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
   f1stHitMapIter= new Stv1stHitMapIter;
@@ -64,7 +66,7 @@ void StvKNSeedFinder::Reset()
     StvHit *hit = (StvHit*)(*hitArr)[iHit];
     if (hit->timesUsed()) continue;
     const float *x = hit->x();
-    float r2 = x[0]*x[0] + x[1]*x[1] + 1e-2*x[2]*x[2];
+    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
 //    fMultiHits->Add(hit,x);
     float xx[6]={x[0],x[1],x[2],x[0]-x[1],x[1]-x[2],x[2]-x[0]};
@@ -156,26 +158,22 @@ void StvKNSeedFinder::Show()
 {
      mSel.Show();
 }     
-     
 //_____________________________________________________________________________
-void StvKNSeedFinder::FeedBack(int success)  	
+void StvKNSeedFinder::FeedBack(const StvTrack *tk)  	
 {
-  StvSeedFinder::FeedBack(success);
-
-  double nHits = mSel.GetNHits();
-  double dis = mSel.mKNNDist*nHits;
-  double ei0 = sqrt(mSel.mEigen[0])*nHits;
-  double ei1 = sqrt(mSel.mEigen[1])*nHits;
-
-  if (success>0) {
-    StvDebug::Count("GooEigMax*nHits",(ei1*57));
-    StvDebug::Count("GooEigMin*nHits",(ei0*57));
-    StvDebug::Count("GooKNNDis*nHits",(dis*57));
-
-  } else {
-    StvDebug::Count("BadEigMax*nHits",(ei1*57));
-    StvDebug::Count("BadEigMin*nHits",(ei0*57));
-    StvDebug::Count("BadKNNDis*nHits",(dis*57));
-  }
+#ifndef __NOSTV__
+  StvSeedFinder::FeedBack(tk);
+  if (!tk) return;
+  const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
+  double P[3];
+  node->GetFP().getMom(P);
+  
+  double eta = TVector3(P).Eta();
+  int nHits = tk->GetNHits(kPxlId);
+  nHits    += tk->GetNHits(kIstId);
+  nHits    += tk->GetNHits(kSstId);
+  StvDebug::Count("GoodEta",eta);
+  if (nHits>=2) StvDebug::Count("HftEta",eta);
+#endif
 }     
   

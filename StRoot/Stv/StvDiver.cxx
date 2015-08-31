@@ -284,8 +284,7 @@ StMCStepping::Print(opt);
 //_____________________________________________________________________________
 int StvMCStepping::Fun()
 {
-static int nCall = 0,iCall=0;
-nCall++;
+static int nCall = 0,iCall = 0; nCall++;
 static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
 static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
 static       TVirtualMC     *virtualMC	= TVirtualMC::GetMC();
@@ -324,7 +323,7 @@ SWITCH: int myKaze = fKaze;
 if (GetDebug()) {printf("%d - ",nCall); Print();}
   switch (fKaze) {
     case kNEWtrack:;
-myInfo.clear();
+         myInfo.clear();
          iCall = nCall;
          meAgain = (fPrevPath == tgh->GetPath());
 

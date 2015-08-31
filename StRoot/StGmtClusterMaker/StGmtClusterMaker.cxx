@@ -138,49 +138,54 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
     histPointer->Fill(position,adc);
     histPointer->SetBinError(bin,error);
   }
-  
+  if (events < 5) return;
   histX->Add(&profXold,-1.0); histY->Add(&profYold,-1.0);
   
   TF1 *fitX=0, *fitY=0;
-  if(events) {
-    fitX = FindPeaks(histX); fitY = FindPeaks(histY);
-    UInt_t idx[MAX_PEAKS], idy[MAX_PEAKS];
-    UInt_t nClusX=0, nClusY=0;
-    if(fitX) {
-      for(UInt_t i=0; i<fitX->GetParameter(0); i++) {
-        if(fitX->GetParameter(3*i+3) <= 0.4) idx[nClusX++]=i;
-      }
-      if (nClusX) *profX[module]=profXold;      
-      if (Debug()) {LOG_INFO << "######XPEAKS found =" << fitX->GetParameter(0) << ", Clusters fitted =" << nClusX << endm;}
-    } else if (Debug()) {LOG_INFO << "######XNULL" <<  endm; }
-    if(fitY) {
-      for(UInt_t i=0; i<fitY->GetParameter(3*i+3); i++) {
-	if(fitY->GetParameter(3*i+3) <= 0.4) idy[nClusY++]=i;
-      }
-      if (nClusY) *profY[module]=profYold;
-      if (Debug()) {LOG_INFO << "######YPEAKS found =" << fitY->GetParameter(0) << ", Clusters fitted =" << nClusY << endm;}
-    } else if (Debug()) {LOG_INFO << "######YNULL" << endm; }
-    if(nClusX && nClusY) { 
-      for(UInt_t nx=0; nx<nClusX; nx++) {
-	for(UInt_t ny=0; ny<nClusY; ny++) {
-	  StGmtHit* newCluster = new StGmtHit(
-					      hits.getHitVec().size(),
-					      module, 
-					      TMath::Exp(fitX->GetParameter(3*nx+1)), // adcX
-					      TMath::Exp(fitY->GetParameter(3*ny+1)), // adcY
-					      fitX->GetParError(3*nx+1),              // error(adcX)
-					      fitY->GetParError(3*ny+1),              // error(adcY)
-					      fitX->GetParameter(3*nx+2), // meanX
-					      fitY->GetParameter(3*ny+2), // meanY
-					      fitX->GetParError(3*nx+2),  // error(meanX)
-					      fitY->GetParError(3*ny+2),  // error(meanY)
-					      fitX->GetParameter(3*nx+3), // sigmaX
-					      fitY->GetParameter(3*ny+3), // sigmaY
-					      fitX->GetParError(3*nx+3),  // error(sigmaX)
-					      fitY->GetParError(3*ny+3)); // error(sigmaY)
-	  hits.getHitVec().push_back(newCluster);
-	}
-      }
+  fitX = FindPeaks(histX); fitY = FindPeaks(histY);
+  UInt_t idx[MAX_PEAKS], idy[MAX_PEAKS];
+  UInt_t nClusX=0, nClusY=0;
+  if(fitX) {
+    for(UInt_t i=0; i<fitX->GetParameter(0); i++) {
+      if (fitX->GetParameter(3*i+3) > 0.4) continue;
+      if (fitX->GetParameter(3*i+1) < 5.0) continue;
+      idx[nClusX] = i;
+      nClusX++;
+    }
+    if (nClusX) *profX[module]=profXold;      
+    if (Debug()) {LOG_INFO << "######XPEAKS found =" << fitX->GetParameter(0) << ", Clusters fitted =" << nClusX << endm;}
+  } else if (Debug()) {LOG_INFO << "######XNULL" <<  endm; }
+  if(fitY) {
+    for(UInt_t i=0; i<fitY->GetParameter(3*i+3); i++) {
+      if (fitY->GetParameter(3*i+3) > 0.4) continue;
+      if (fitY->GetParameter(3*i+1) < 5.0) continue;
+      idy[nClusY] = i;
+      nClusY++;
+    }
+    if (nClusY) *profY[module]=profYold;
+    if (Debug()) {LOG_INFO << "######YPEAKS found =" << fitY->GetParameter(0) << ", Clusters fitted =" << nClusY << endm;}
+  } else if (Debug()) {LOG_INFO << "######YNULL" << endm; }
+  for(UInt_t i=0; i < nClusX; i++) {
+    UInt_t nx = idx[i];
+    for(UInt_t j = 0; j < nClusY; j++) {
+      UInt_t ny = idy[j];
+      StGmtHit* newCluster = new StGmtHit(
+					  hits.getHitVec().size(),
+					  module, 
+					  TMath::Exp(fitX->GetParameter(3*nx+1)), // adcX
+					  TMath::Exp(fitY->GetParameter(3*ny+1)), // adcY
+					  fitX->GetParError(3*nx+1),              // error(adcX)
+					  fitY->GetParError(3*ny+1),              // error(adcY)
+					  fitX->GetParameter(3*nx+2), // meanX
+					  fitY->GetParameter(3*ny+2), // meanY
+					  fitX->GetParError(3*nx+2),  // error(meanX)
+					  fitY->GetParError(3*ny+2),  // error(meanY)
+					  fitX->GetParameter(3*nx+3), // sigmaX
+					  fitY->GetParameter(3*ny+3), // sigmaY
+					  fitX->GetParError(3*nx+3),  // error(sigmaX)
+					  fitY->GetParError(3*ny+3)); // error(sigmaY)
+      if (Debug()) newCluster->Print();
+      hits.getHitVec().push_back(newCluster);
     }
   }
   
@@ -200,8 +205,9 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
     canv->Modified();
     canv->Update();
     canv->Draw();
-    
-    while (!gSystem->ProcessEvents()){gSystem->Sleep(200);}
+    if (nClusX || nClusY) {
+      while (!gSystem->ProcessEvents()){gSystem->Sleep(200);}
+    }
   }
 }
 //________________________________________________________________________________
@@ -226,6 +232,7 @@ Int_t StGmtClusterMaker::Make() {
     LOG_WARN << "Error getting pointer to StGmtCollection from '" << ClassName() << "'" << endm;
     return kStWarn;
   }
+  UInt_t noModWithGMT = 0;
   for(UInt_t moduleIdx=0; moduleIdx<gmtCollectionPtr->getNumModules(); moduleIdx++) {
     if(Debug()) {
       LOG_INFO << "module: " << moduleIdx << " has strips: \t" <<  gmtCollectionPtr->getNumStrips(moduleIdx) << endm;
@@ -242,13 +249,14 @@ Int_t StGmtClusterMaker::Make() {
     StGmtStripCollection *stripCollectionPtr = gmtCollectionPtr->getStripCollection(moduleIdx);
     StGmtHitCollection *hitCollectionPtr = gmtCollectionPtr->getHitCollection(moduleIdx);
     ClusterBuilder(nEvents,moduleIdx,*stripCollectionPtr,*hitCollectionPtr);
+    noModWithGMT++;
     if(stripCollectionPtr && hitCollectionPtr && hitCollectionPtr->getHitVec().size()) {
       if(Debug()) {
 	LOG_INFO << "Cluster " << stripCollectionPtr->getNumStrips() << "strips\tin module" << stripCollectionPtr->getModule() << endm;
       }
     }
   }
-  nEvents++;
+  if (noModWithGMT) nEvents++;
   
   if(Debug()) {
     LOG_INFO << "End of gmt-clust-maker, print all strips & clusters: " << endm;

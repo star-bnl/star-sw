@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.6 2009/11/24 19:29:13 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.7 2015/08/28 23:59:28 perev Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -455,7 +455,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.6 2009/11/24 19:29:13 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.7 2015/08/28 23:59:28 perev Exp $");
 
   return StMaker::Init();
 }
@@ -884,7 +884,7 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	    reDiv = div.Re();
 	    V1SqTheta = -8. * Flow::j01 / (Flow::epsV1*Flow::epsV1) / TMath::Power(r0,3.) * reDiv; // DF Eq. 7 for each theta2
 	    V1Sq += V1SqTheta;
-	    if (!isnan(V1SqTheta) && V1SqTheta != 0.) {
+	    if (!::isnan(V1SqTheta) && V1SqTheta != 0.) {
 	      Vtheta = TMath::Sqrt(fabs(V1SqTheta)); // absolute values of negatives
 	    }
 	  } else {
@@ -936,7 +936,7 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	    numer(reNumer,imNumer); 
 	    
 	    reDiv = (numer / denom).Re();
-	    if (!isnan(reDiv) && reDiv != 0.) {
+	    if (!::isnan(reDiv) && reDiv != 0.) {
 	      if (k && !j && mV1Mixed) { // v1 from mixed harmonics: selection 2, harmonic 1
 		_v = v1DiffConst * reDiv /perCent; // DF Eq. 9
 	      } else {
@@ -971,7 +971,7 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 		v[binEta-1] = BesselRatio[m-1] * reDiv * Vtheta /perCent; // BP Eq. 12
 	      }
 	    }
-	    if (!isnan(reDiv) && reDiv != 0.) {
+	    if (!::isnan(reDiv) && reDiv != 0.) {
 	      if (oddHar) {
 		_v = (F * v[1] - B * v[0]) / T; // weighted forward minus back
 	      } else { 

@@ -5,6 +5,7 @@
 #ifndef __NOSTV__
 #include "Stv/StvSeedFinder.h"
 #endif
+#include "StvSeedConst.h"
 #include "StvGoneRejector.h"
 #include "StvConeRejector.h"
 #include "StvKNSeedSelector.h"
@@ -14,6 +15,7 @@
 
 class StvHit;
 class StvHits;
+class StvTrack;
 class StMultiKeyMap;
 typedef std::multimap<float,StvHit*> Stv1stHitMap;
 typedef Stv1stHitMap::iterator Stv1stHitMapIter;
@@ -29,7 +31,7 @@ public:
   void      Clear(const char *opt="");
   int       Again(int repeat);
   void      Reset();
-  void      FeedBack(int success);
+  void      FeedBack(const StvTrack *tk);
   void      Print(const char *opt="") const {;}
   const StvHits *GetHits() const; 	
   virtual void Show();
@@ -44,8 +46,12 @@ StMultiKeyMapIter 	*fMultiIter;
 Stv1stHitMap  		*f1stHitMap;
 Stv1stHitMapIter  	*f1stHitMapIter;
 char mEnd[1];
+#ifdef KNNGONE
 StvGoneRejector       mRej;
-//StvConeRejector       mRej;
+#endif
+#ifndef KNNGONE
+StvConeRejector       mRej;
+#endif
 StvKNSeedSelector     mSel;
 #ifndef __NOSTV__
 ClassDef(StvKNSeedFinder,0);

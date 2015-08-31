@@ -20,6 +20,7 @@
 /// \class StvSeedFinder
 class StvDraw;
 class StvHit;
+class StvTrack;
 
 
 
@@ -38,7 +39,7 @@ public:
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
   virtual int       Again(int){return 0;}
-  virtual void      FeedBack(int success);
+  virtual void      FeedBack(const StvTrack *tk);
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
