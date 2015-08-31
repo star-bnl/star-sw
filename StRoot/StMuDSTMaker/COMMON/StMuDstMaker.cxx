@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.123 2015/08/28 18:36:03 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.124 2015/08/31 20:01:10 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1633,7 +1633,10 @@ void StMuDstMaker::fillMC() {
   for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
-  for (UInt_t i = 0; i < NT; i++) addType(mMCArrays[MCTrack], track[i], mctr);   
+  for (UInt_t i = 0; i < NT; i++) {
+    if (track[i].pt<=1e-3) track[i].pt = -999;
+    addType(mMCArrays[MCTrack], track[i], mctr);   
+  }
   
 }
 //-----------------------------------------------------------------------
@@ -1831,6 +1834,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.124  2015/08/31 20:01:10  jdb
+ * Added pT check back to StMuDstMaker::fillMC() - its removal was causing the test failure reported in [www.star.bnl.gov #3136] Assertion failed in StMuMcTrack.cxx for year 2009 MC test in DEV
+ *
  * Revision 1.123  2015/08/28 18:36:03  jdb
  * Added Akios FMS codes
  *
