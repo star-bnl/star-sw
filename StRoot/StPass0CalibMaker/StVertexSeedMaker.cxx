@@ -333,7 +333,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.60 2015/05/23 02:38:07 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.61 2015/08/31 19:17:00 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -361,7 +361,7 @@ void StVertexSeedMaker::AddResults(TNtupleD* ntup){
                 ((double) ((hr*60+mn)*60+se))/(24.*60.*60.);
   ntup->Fill(days,p[0],ep[0],p[2],ep[2],p[1],ep[1],p[3],ep[3],
              (double) nverts, datetime, (double) fill,
-             sumzdc/((double) nverts));
+             sumzdc/((double) nverts),chi,beamWidth);
 }
 //_____________________________________________________________________________
 St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
@@ -618,7 +618,7 @@ void StVertexSeedMaker::FitData() {
 TNtupleD* StVertexSeedMaker::newBLpars() {
   // up to the user of this function to delete the ntuple
   return new TNtupleD("BLpars","BeamLine parameters",
-    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
+    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc:chi:beamwidth");
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::Packer(int firstbit, int nbits, int& var, unsigned short val) {
@@ -759,8 +759,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.60 2015/05/23 02:38:07 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.61 2015/08/31 19:17:00 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.61  2015/08/31 19:17:00  genevb
+// Add chi and beamwidth to BLpars ntuple
+//
 // Revision 1.60  2015/05/23 02:38:07  genevb
 // Ntuples attached to files should not get deleted, more rapid chi2 convergence
 //
