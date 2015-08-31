@@ -583,8 +583,8 @@
       # Extras
       if (-d $FINK_DIR) {
 	if (-d "$FINK_DIR/include") {
-	  $FINK_CXXFLAGS = "-I$FINK_DIR/include";
-	  $FINK_CFLAGS = "-I$FINK_DIR/include";
+	  $FINK_CXXFLAGS = "-I$FINK_DIR/include"; $CXXFLAGS .= " -fno-stack-protector";
+	  $FINK_CFLAGS = "-I$FINK_DIR/include";   $CFLAGS   .= " -fno-stack-protector";
 	}
 	if (-d "$FINK_DIR/lib") {$FINK_LDFLAGS = "-L$FINK_DIR/lib";}
       }
