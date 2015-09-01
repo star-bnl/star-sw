@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.45 2013/08/16 20:49:38 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.46 2015/08/31 20:28:02 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -347,7 +347,7 @@ StPPVertexFinder::printInfo(ostream& os) const
       << Form("    Btof %3d,%d,%d",t->btofBin,btofList->getFired(t->btofBin),btofList->getTrack(t->btofBin))   // dongx
       << Form("    CTB  %3d,%d,%d",t->ctbBin,ctbList->getFired(t->ctbBin),ctbList->getTrack(t->ctbBin))
       << Form("    Bemc %3d,%d,%d",t->bemcBin,bemcList->getFired(t->bemcBin),bemcList->getTrack(t->bemcBin))
-      << Form("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),bemcList->getTrack(t->bemcBin))
+      << Form("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),eemcList->getTrack(t->eemcBin))
       << Form("    TPC %d",t->mTpc)
       <<endm;
   }
@@ -1387,6 +1387,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.46  2015/08/31 20:28:02  genevb
+ * Correct a typo in a print statement present since version 1.1 : bemc->eemc
+ *
  * Revision 1.45  2013/08/16 20:49:38  perev
  * PPV with only StEvent dependency
  *
