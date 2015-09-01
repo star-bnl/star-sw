@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.36 2015/05/13 17:06:13 ullrich Exp $
+ * $Id: StContainers.h,v 2.37 2015/09/01 18:29:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.37  2015/09/01 18:29:01  ullrich
+ * Changes due to adding StFpsSlat and interconnection between slats and points.
+ *
  * Revision 2.36  2015/05/13 17:06:13  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -148,6 +151,7 @@ class StEmcPoint;
 class StFmsHit;
 class StFmsCluster;
 class StFmsPoint;
+class StFpsSlat;
 class StTofHit;
 class StTofSlat;
 class StTofCell;
@@ -209,6 +213,7 @@ StCollectionDef(EmcPoint)
 StCollectionDef(FmsHit)
 StCollectionDef(FmsCluster)
 StCollectionDef(FmsPoint)
+StCollectionDef(FpsSlat)
 StCollectionDef(TofHit)
 StCollectionDef(TofSlat)
 StCollectionDef(TofCell)

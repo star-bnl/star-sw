@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.47 2015/05/15 14:59:46 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.48 2015/09/01 18:29:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.48  2015/09/01 18:29:01  ullrich
+ * Changes due to adding StFpsSlat and interconnection between slats and points.
+ *
  * Revision 2.47  2015/05/15 14:59:46  ullrich
  * Corrected typo.
  *
@@ -174,6 +177,7 @@
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
+#include "StFpsSlat.h"
 #include "StFmsTriggerDetector.h"
 #include "StFpdCollection.h"
 #include "StFpdTriggerDetector.h"
