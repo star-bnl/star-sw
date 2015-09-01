@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPoint.h,v 2.3 2015/08/26 16:51:25 ullrich Exp $
+ * $Id: StFmsPoint.h,v 2.4 2015/09/01 18:29:01 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  **************************************************************************
@@ -11,13 +11,14 @@
  **************************************************************************
  *
  * $Log: StFmsPoint.h,v $
+ * Revision 2.4  2015/09/01 18:29:01  ullrich
+ * Changes due to adding StFpsSlat and interconnection between slats and points.
+ *
  * Revision 2.3  2015/08/26 16:51:25  ullrich
  * Fixed bug in cluster() and added print out fct and operator.
  *
  * Revision 2.2  2015/08/19 19:22:35  ullrich
  * Major update (PID) by Akio.
- *
- *
  **************************************************************************/
 #ifndef StFmsPoint_h
 #define StFmsPoint_h
@@ -26,6 +27,7 @@
 #include "StThreeVectorF.hh"
 #include "StObject.h"
 #include "StFmsCluster.h"
+#include "StEnumerations.h"
 
 class StFmsPoint : public StObject {
 public:
@@ -33,7 +35,8 @@ public:
     ~StFmsPoint();
 
     enum StFmsPointPidFlag {
-        kFpsPidBad=0,         // hit bad slat or no slat
+        kFpsPidNoFps=0,       // hit bad no slat
+        kFpsPidBad=1,         // hit bad slat or no slat
         kFpsPidGamma1=10,     // L1==0 L2==0 L3==0    gamma which did not convert
         kFpsPidGamma2=11,     // L1==0 L2==0 L3>=1    golden gamma
         kFpsPidGamma3=12,     // L1>=1 L2==0 L3==0    gamma with extra hit in layer1
@@ -47,7 +50,8 @@ public:
         kFpsPidElectron3=32,  // L1>=2 L2==1 L3>=5    electron
         kFpsPidUnknown=90     // L1>=1 L2>=1 L3==0    not sure what to do
     };
-
+    
+    const char* pidName(int i);
     unsigned short detectorId() const;
     float energy() const;
     float x() const;  // x position in cm at which point intersects the sub-detector in local coordinate
@@ -71,44 +75,42 @@ public:
     void setFourMomentum(const StLorentzVectorF& p4);
     
     int   fpsPid();                                //PID see enum above
+    int   fpsNCandidate(int layer);
     float fpsMip(int layer, int candidate=0);
     int   fpsSlatid(int layer, int candidate=0);
     float fpsDistance(int layer, int candidate=0); // distance from edge to projected
                                                    // location (negative means inside, positive outside)
     void  setFpsPid(int v);
-    void  setFps(int layer, int candidate, float mip, int slatid, float dist);
+    void  setFps(int layer, float mip, int slatid, float dist);
     void  resetFps();
-    void  orderFpsCandidates(); //order Fps hit candidates from near to far
+    void  orderFpsCandidates(int layer=0); //order Fps hit candidates from near to far (layer=0 for sorting all layers)
     
-    void print(Option_t *option="") const;
+    void print(int option=0);
 
 private:
     UShort_t mDetectorId;  ///< Detector starts from 1
-    Float_t  mEnergy;  ///< Fitted energy
-    Float_t  mX;  ///< Fitted x-position in local coordinate
-    Float_t  mY;  ///< Fitted y-position in local coordinate
-    Int_t    mId;  ///< Photon ID within event
+    Float_t  mEnergy;      ///< Fitted energy
+    Float_t  mX;           ///< Fitted x-position in local coordinate
+    Float_t  mY;           ///< Fitted y-position in local coordinate
+    Int_t    mId;          ///< Photon ID within event
     Int_t    mParentClusterId;  ///< ID of the parent cluster within event
     Int_t    mNParentClusterPhotons;  ///< Number of photons in the parent cluster
 #ifdef __CINT__
     StObjLink             mCluster;   // Parent cluster of this photon
 #else
-    StLink<StFmsCluster>  mCluster;   // Parent cluster of this photon
+    StLink<StFmsCluster>  mCluster;
 #endif //__CINT__
     StLorentzVectorF mFourMomentum;  ///< Photon 4-momentum
-    StThreeVectorF   mXYZ;  //Photon position in STAR coordinate
+    StThreeVectorF   mXYZ;           //Photon position in STAR coordinate
     
-    //for FPS 3 layers and 2 candidates
-    static const int NLayer=3, NCandidate=2;
-    Int_t   mFpsPid;                           // see enum above
-    Float_t mFpsMip[NLayer][NCandidate];       // # of MIPs
-    Int_t   mFpsSlatid[NLayer][NCandidate];    // slatid
-    Float_t mFpsDistance[NLayer][NCandidate];  // distance from edge to projected location
-                                               // (negative means inside, positive outside)
+    Int_t   mFpsPid;                                  // see enum above
+    Int_t   mFpsNCandidate[kFpsNLayer];               // # of possible slat related to this point
+    Float_t mFpsMip[kFpsNLayer][kFpsNCandidate];      // # of MIPs
+    Int_t   mFpsSlatid[kFpsNLayer][kFpsNCandidate];   // slatid
+    Float_t mFpsDistance[kFpsNLayer][kFpsNCandidate]; // distance from edge to projected location
+                                                      // (negative means inside, positive outside)
     ClassDef(StFmsPoint, 3)
 };
-
-ostream& operator<<(ostream&, const StFmsPoint&);
 
 inline unsigned short StFmsPoint::detectorId() const { return mDetectorId; }
 inline float StFmsPoint::energy() const { return mEnergy; }
@@ -135,55 +137,26 @@ inline void StFmsPoint::setXYZ(const StThreeVectorF& p3) { mXYZ = p3; }
 inline void StFmsPoint::setFourMomentum(const StLorentzVectorF& p4) { mFourMomentum = p4; }
 inline int  StFmsPoint::fpsPid() {return mFpsPid;}
 inline void StFmsPoint::setFpsPid(int v) {mFpsPid=v;}
-inline float StFmsPoint::fpsMip(int layer, int candidate) {
-    if(layer>=1 && layer<=3) {
-        return mFpsMip[layer-1][candidate];
-    }
-    return -1;
-}
-inline int StFmsPoint::fpsSlatid(int layer, int candidate) {
-    if(layer>=1 && layer<=3) {
-        return mFpsSlatid[layer-1][candidate];
-    }
-    return -1;
-}
-inline float StFmsPoint::fpsDistance(int layer, int candidate) {
-    if(layer>=1 && layer<=3) {
-        return mFpsDistance[layer-1][candidate];
-    }
-    return -1;
-}
-inline void StFmsPoint::setFps(int layer, int candidate, float mip, int slatid, float d) {
-    if(layer>=1 && layer<=NLayer && candidate>=0 && candidate<NCandidate){
-        mFpsMip[layer-1][candidate] = mip;
-        mFpsSlatid[layer-1][candidate] = slatid;
-        mFpsDistance[layer-1][candidate] = d;
+inline const char* StFmsPoint::pidName(int i) {
+    switch(i){
+        case kFpsPidNoFps:     return "NoDet  ";
+        case kFpsPidBad:       return "Bad    ";
+        case kFpsPidGamma1:    return "GNC    ";
+        case kFpsPidGamma2:    return "GC     ";
+        case kFpsPidGamma3:    return "GNCwL1H";
+        case kFpsPidGamma4:    return "GNCwL2H";
+        case kFpsPidGamma5:    return "GCwL1H ";
+        case kFpsPidGamma6:    return "GCwL2H ";
+        case kFpsPidGamma7:    return "G2e+e- ";
+        case kFpsPidMip:       return "MIP    ";
+        case kFpsPidElectron1: return "Egolden";
+        case kFpsPidElectron2: return "EwL1H  ";
+        case kFpsPidElectron3: return "EwL2H  ";
+        case kFpsPidUnknown:   return "NOL3   ";
+        default:               return "????   ";
     }
 }
-inline void StFmsPoint::resetFps() {
-    mFpsPid = 0;
-    for(int l=0; l<NLayer; l++){
-        for(int c=0; c<NCandidate; c++){
-            mFpsMip[l][c] = -2.0;
-            mFpsSlatid[l][c] = -1;
-            mFpsDistance[l][c] = 999.0;
-        }
-    }
-}
-inline void StFmsPoint::orderFpsCandidates() {
-    for(int l=0; l<NLayer; l++){
-        if(mFpsDistance[l][0]>mFpsDistance[l][1]){
-            float mip = mFpsMip[l][0];
-            float slatid = mFpsSlatid[l][0];
-            float d = mFpsDistance[l][0];
-            mFpsMip[l][0] = mFpsMip[l][1];
-            mFpsSlatid[l][0] = mFpsSlatid[l][1];
-            mFpsDistance[l][0] = mFpsDistance[l][1];
-            mFpsMip[l][1] = mip;
-            mFpsSlatid[l][1] = slatid;
-            mFpsDistance[l][1] = d;
-        }
-    }
-}
+
+
 #endif  // StFmsPoint_h
 
