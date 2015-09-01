@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.cxx,v 2.4 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StFmsCollection.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.cxx,v $
+ * Revision 2.5  2015/09/01 21:01:47  ullrich
+ * Minor changes to format of print statments and \nchange to naming of data member.
+ *
  * Revision 2.4  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -30,7 +33,7 @@
 #include "StEvent/StFmsPoint.h"
 #include "StEvent/StFpsSlat.h"
 
-static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.4 2015/09/01 18:29:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $";
 
 StFmsCollection::StFmsCollection() :
 mFpsSlatFilled(false), mFpsAssociationFilled(false) { /* no op */ }
@@ -118,7 +121,7 @@ void StFmsCollection::fillFpsAssociation(){
     for(unsigned int i=0; i<numberOfPoints(); i++) {
         for(int l=1; l<=kFpsNLayer; l++) {
             for(int c=0; c<kFpsNCandidate; c++) {
-                int slatid=mPoints[i]->fpsSlatid(l,c);
+                int slatid=mPoints[i]->fpsSlatId(l,c);
                 if (slatid>=0){
                     mFpsSlats[slatid]->addPoint(mPoints[i],c);
                 }
@@ -140,11 +143,11 @@ void StFmsCollection::sortPointsByET(){
     });
 }
 
-void StFmsCollection::print(Option_t *option) {
+void StFmsCollection::print(int option) {
     cout << Form("NHit=%3d NCluster=%3d NPoint=%3d\n",numberOfHits(),numberOfClusters(),numberOfPoints());
-    for(unsigned int i=0; i<numberOfHits(); i++)     {hits()[i]->print();}
-    for(unsigned int i=0; i<numberOfClusters(); i++) {clusters()[i]->print();}
-    for(unsigned int i=0; i<numberOfPoints(); i++)   {points()[i]->print();}
-    for(unsigned int i=0; i<mFpsSlats.size(); i++)   {fpsSlats()[i]->print();}
+    if(option>3) for(unsigned int i=0; i<numberOfHits(); i++)     {hits()[i]->print();}
+    if(option>2) for(unsigned int i=0; i<numberOfClusters(); i++) {clusters()[i]->print();}
+    if(option>1) for(unsigned int i=0; i<mFpsSlats.size(); i++)   {fpsSlats()[i]->print();}
+    if(option>0) for(unsigned int i=0; i<numberOfPoints(); i++)   {points()[i]->print();}
 }
 

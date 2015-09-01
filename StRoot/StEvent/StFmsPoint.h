@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPoint.h,v 2.4 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StFmsPoint.h,v 2.5 2015/09/01 21:01:47 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  **************************************************************************
@@ -11,6 +11,9 @@
  **************************************************************************
  *
  * $Log: StFmsPoint.h,v $
+ * Revision 2.5  2015/09/01 21:01:47  ullrich
+ * Minor changes to format of print statments and \nchange to naming of data member.
+ *
  * Revision 2.4  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -77,7 +80,7 @@ public:
     int   fpsPid();                                //PID see enum above
     int   fpsNCandidate(int layer);
     float fpsMip(int layer, int candidate=0);
-    int   fpsSlatid(int layer, int candidate=0);
+    int   fpsSlatId(int layer, int candidate=0);
     float fpsDistance(int layer, int candidate=0); // distance from edge to projected
                                                    // location (negative means inside, positive outside)
     void  setFpsPid(int v);
@@ -106,7 +109,7 @@ private:
     Int_t   mFpsPid;                                  // see enum above
     Int_t   mFpsNCandidate[kFpsNLayer];               // # of possible slat related to this point
     Float_t mFpsMip[kFpsNLayer][kFpsNCandidate];      // # of MIPs
-    Int_t   mFpsSlatid[kFpsNLayer][kFpsNCandidate];   // slatid
+    Int_t   mFpsSlatId[kFpsNLayer][kFpsNCandidate];   // slatid
     Float_t mFpsDistance[kFpsNLayer][kFpsNCandidate]; // distance from edge to projected location
                                                       // (negative means inside, positive outside)
     ClassDef(StFmsPoint, 3)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.4 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.5 2015/09/01 21:01:47 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.5  2015/09/01 21:01:47  ullrich
+ * Minor changes to format of print statments and \nchange to naming of data member.
+ *
  * Revision 2.4  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -67,19 +70,19 @@ public:
     void fillFpsAssociation();     //update FPS-FMS association info based on FMS points
     StSPtrVecFpsSlat& fpsSlats();  //Return the fps slats array
     StFpsSlat* fps(int slatid);    //return FPS slat for a given slatid
-  
+
     void sortPointsByEnergy();
     void sortPointsByET();
 
-    void print(Option_t *option="");
+    void print(int option=1);
     
 private:
     StSPtrVecFmsHit     mHits;      // Owns all FMS hits
     StSPtrVecFmsCluster mClusters;  // Owns all FMS clusters
     StSPtrVecFmsPoint   mPoints;    // Owns all FMS points (photons)
     StSPtrVecFpsSlat   mFpsSlats;   //! Owns, but does not save it to file but auto generate on fly
-    bool mFpsSlatFilled;
-    bool mFpsAssociationFilled;
+    bool mFpsSlatFilled;            //!
+    bool mFpsAssociationFilled;     //!
 
     ClassDef(StFmsCollection, 2)
 };
