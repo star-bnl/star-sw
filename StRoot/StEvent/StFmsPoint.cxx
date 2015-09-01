@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPoint.cxx,v 2.4 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StFmsPoint.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPoint.cxx,v $
+ * Revision 2.5  2015/09/01 21:01:47  ullrich
+ * Minor changes to format of print statments and \nchange to naming of data member.
+ *
  * Revision 2.4  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -26,7 +29,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.4 2015/09/01 18:29:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $";
 
 StFmsPoint::StFmsPoint()
 : mDetectorId(0), mEnergy(-1.0), mX(-99.0), mY(-99.0),
@@ -58,9 +61,9 @@ float StFmsPoint::fpsMip(int layer, int candidate) {
     return -1;
 }
 
-int StFmsPoint::fpsSlatid(int layer, int candidate) {
+int StFmsPoint::fpsSlatId(int layer, int candidate) {
     if (layer>=1 && layer<=kFpsNLayer && candidate>=0 && candidate<mFpsNCandidate[layer-1]){
-        return mFpsSlatid[layer-1][candidate];
+        return mFpsSlatId[layer-1][candidate];
     }
     return -1;
 }
@@ -81,7 +84,7 @@ void StFmsPoint::setFps(int layer, float mip, int slatid, float d) {
             return;
         }
         mFpsMip[layer-1][n] = mip;
-        mFpsSlatid[layer-1][n] = slatid;
+        mFpsSlatId[layer-1][n] = slatid;
         mFpsDistance[layer-1][n] = d;
         mFpsNCandidate[layer-1]++;
     }
@@ -94,7 +97,7 @@ void StFmsPoint::resetFps() {
         mFpsNCandidate[l]=0;
         for(int c=0; c<kFpsNCandidate; c++){
             mFpsMip[l][c] = -2.0;
-            mFpsSlatid[l][c] = -1;
+            mFpsSlatId[l][c] = -1;
             mFpsDistance[l][c] = 999.0;
         }
     }
@@ -106,23 +109,23 @@ void StFmsPoint::orderFpsCandidates(int layer) {  //order candidates by distance
     for(int l=l1; l<l2; l++){
         int n=mFpsNCandidate[l];
         cout << Form("orderFpsCandidates layer=%1d n=%d\n",layer, n);
-        for(int i=0; i<n; i++) cout << Form(" id=%3d mip=%6.2f d=%6.2f\n",mFpsSlatid[l][i],mFpsMip[l][i],mFpsDistance[l][i]);
+        for(int i=0; i<n; i++) cout << Form(" id=%3d mip=%6.2f d=%6.2f\n",mFpsSlatId[l][i],mFpsMip[l][i],mFpsDistance[l][i]);
         if(n<2) continue;
         int index[kFpsNCandidate];
         TMath::Sort(n,mFpsDistance[l],index,false); //flase=increasing order
         for(int i=0; i<n; i++)
-            cout << Form(" id=%3d mip=%6.2f d=%6.2f index=%d\n",mFpsSlatid[l][i],mFpsMip[l][i],mFpsDistance[l][i],index[i]);
+            cout << Form(" id=%3d mip=%6.2f d=%6.2f index=%d\n",mFpsSlatId[l][i],mFpsMip[l][i],mFpsDistance[l][i],index[i]);
         for(int i=0; i<n-1; i++) {   //swap contents based on index
             int j=index[i];
             if(j!=i){
                 float mip = mFpsMip[l][i];
-                int slatid = mFpsSlatid[l][i];
+                int slatid = mFpsSlatId[l][i];
                 float d = mFpsDistance[l][i];
                 mFpsMip[l][i] = mFpsMip[l][j];
-                mFpsSlatid[l][i] = mFpsSlatid[l][j];
+                mFpsSlatId[l][i] = mFpsSlatId[l][j];
                 mFpsDistance[l][i] = mFpsDistance[l][j];
                 mFpsMip[l][j] = mip;
-                mFpsSlatid[l][j] = slatid;
+                mFpsSlatId[l][j] = slatid;
                 mFpsDistance[l][j] = d;
                 for(int k=i+i; k<n; k++){  // swap index as well
                     if(index[k]==i) {
@@ -132,7 +135,7 @@ void StFmsPoint::orderFpsCandidates(int layer) {  //order candidates by distance
                     }
                 }
                 for(int ii=0; ii<n; ii++)
-                    cout << Form(" swap=%1d id=%3d mip=%6.2f d=%6.2f index=%d\n",i,mFpsSlatid[l][ii],mFpsMip[l][ii],mFpsDistance[l][ii],index[ii]);
+                    cout << Form(" swap=%1d id=%3d mip=%6.2f d=%6.2f index=%d\n",i,mFpsSlatId[l][ii],mFpsMip[l][ii],mFpsDistance[l][ii],index[ii]);
             }
         }
     }
@@ -152,13 +155,13 @@ void StFmsPoint::print(int opt) {
     cout << Form(" PID=%2d(%s) ",fpsPid(),pidName(fpsPid()));
     for(int l=1; l<=kFpsNLayer; l++){
         for(int j=0; j<fpsNCandidate(l); j++){
-            int slatid=fpsSlatid(l,j);
+            int slatid=fpsSlatId(l,j);
             int mip=int(fpsMip(l,j)+0.5);
             int slat=slatid%21+1;
             int layer=(slatid/21)%3+1;
             int quad=(slatid/21/3)+1;
             cout << Form(" Q%1dL%1dS%02d=%2d ",quad,layer,slat,mip);
-        }    
+        }
     }
     cout << endl;
 }
