@@ -1739,8 +1739,8 @@ Bfc_st BFC[] = { // standard chains
   {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
 
-  {"gmtMatch"    ,"","","db,GmtUtil",  "StGmtMatchMaker","StGmtMatchMaker","TPC-GMT track matching",kFALSE},
-  {"gmtPlotter"    ,"","","db,GmtUtil", "StGmtClusterPlotter","StGmtPlotter","GMT cluster plotting",kFALSE},
+  {"gmtMatch"                                 ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"gmtPlotter"                               ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
