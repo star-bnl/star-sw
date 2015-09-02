@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.7 2015/02/27 07:03:15 yuxip Exp $
+ * $Id: StFmsDbMaker.h,v 1.8 2015/09/02 14:45:14 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,8 +9,8 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
- * Revision 1.7  2015/02/27 07:03:15  yuxip
- * StFmsDbMaker/
+ * Revision 1.8  2015/09/02 14:45:14  akio
+ * Adding new functions for un-uniform grid cell positions, switched based on DB fmsPositionModel
  *
  * Revision 1.4  2014/08/06 11:43:15  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
@@ -33,6 +33,7 @@
 #include "StMaker.h"
 #endif
 #include "StThreeVectorF.hh"
+#include "StRoot/StFmsUtil/StFmsDbConfig.h"
 
 struct fmsDetectorPosition_st;
 struct fmsChannelGeometry_st;
@@ -41,12 +42,18 @@ struct fmsPatchPanelMap_st;
 struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
+struct fmsRec_st;
 struct fpsConstant_st;
 struct fpsChannelGeometry_st;
 struct fpsSlatId_st;
 struct fpsPosition_st;
 struct fpsMap_st;
 struct fpsGain_st;
+struct fpsStatus_st;
+
+//! Global pointners
+//class StFmsDbMaker;
+//R__EXTERN StFmsDbMaker* gStFmsDbMaker;
 
 class StFmsDbMaker : public StMaker {
  public: 
@@ -57,6 +64,8 @@ class StFmsDbMaker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   Clear(const Char_t *opt);
+  
+  //static StFmsDbMaker* instance() {return gStFmsDbMaker;};
 
   void setDebug(Int_t debug); ///< debug mode, 0 for minimal message, >0 for more debug messages
 
@@ -68,18 +77,21 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
+  fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
   fpsChannelGeometry_st** FpsChannelGeometry();
   fpsSlatId_st*           FpsSlatId();
   fpsPosition_st*         FpsPosition();
   fpsMap_st*              FpsMap();
   fpsGain_st*             FpsGain();
+  fpsStatus_st*           FpsStatus();
 
   //! Utility functions related to FMS ChannelGeometry
   Int_t maxDetectorId(); //! maximum value of detector Id
   Int_t detectorId(Int_t ew, Int_t ns, Int_t type);  //! convert to detector Id
   Int_t eastWest(Int_t detectorId); //! east or west to the STAR IP
   Int_t northSouth(Int_t detectorId); //! north or south side
+  Int_t largeSmall(Int_t detectorId); //! large or small cells for FMS
   Int_t type(Int_t detectorId); //! type of the detector
   Int_t nRow(Int_t detectorId); //! number of rows
   Int_t nColumn(Int_t detectorId); //! number of column
@@ -92,9 +104,12 @@ class StFmsDbMaker : public StMaker {
   StThreeVectorF getDetectorOffset(Int_t detectorId);  //! get the offset of the detector
   Float_t getXWidth(Int_t detectorId); //! get the X width of the cell
   Float_t getYWidth(Int_t detectorId); //! get the Y width of the cell
-  StThreeVectorF getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t FmsY); //! get the STAR frame coordinates
+  StThreeVectorF getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t FmsY);   //! get the STAR frame coordinates from local X/Y
+  StThreeVectorF getStarXYZ(Int_t detectorId,Double_t FmsX, Double_t FmsY); //! get the STAR frame coordinates from local X/Y
+  StThreeVectorF getStarXYZ(Int_t detectorId,Int_t column, int row);        //! get the STAR frame coordinates from column/row
+  StThreeVectorF getStarXYZ(Int_t detectorId,Int_t ch);                     //! get the STAR frame cooridnates for center of the cell
   Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY); //! get the STAR frame phi angle
-  Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity assuming vertex is at (0,0,0)
+  Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity from the vertex
 
   //! fmsMap related
   Int_t maxMap();
@@ -112,8 +127,13 @@ class StFmsDbMaker : public StMaker {
   Int_t maxGainCorrection();
   Float_t getGain(Int_t detectorId, Int_t ch); //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch); //! get the gain correction for the channel
-  void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value                                       
-  void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value                                   
+    
+  //reference to StFmsDbConfig
+  StFmsDbConfig& getRecConfig();  
+
+  void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
+  void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
+  void readGainFromText(int v=1)           {mReadGainFile=v;}               //! force gain to be read from FmsGain.txt
 
   //! FPS related
   Int_t   fpsNQuad();
@@ -132,6 +152,8 @@ class StFmsDbMaker : public StMaker {
   void    fpsQLSFromQT(int QTaddr, int QTch, int* quad, int* layer, int* slat);
   Float_t fpsGain(int slatid);
   Float_t fpsGain(int quad, int layer, int slat);
+  UShort_t fpsStatus(int slatid);
+  UShort_t fpsStatus(int quad, int layer, int slat);
   Int_t   fpsSlatIdFromG2t(int g2tvolid);
 
   //! text dump for debugging
@@ -148,6 +170,8 @@ class StFmsDbMaker : public StMaker {
   void dumpFpsPosition        (const Char_t* filename="dumpFpsPosition.txt");
   void dumpFpsMap             (const Char_t* filename="dumpFpsMap.txt");
   void dumpFpsGain            (const Char_t* filename="dumpFpsGain.txt");
+  void dumpFpsStatus          (const Char_t* filename="dumpFpsStatus.txt");
+  void dumpFmsRec             (const Char_t* filename="dumpFmsRec.txt");
 
  private:
   void                  deleteArrays();
@@ -157,6 +181,8 @@ class StFmsDbMaker : public StMaker {
   Int_t                 mMaxDetectorId;  //! max detector Id
 
   fmsDetectorPosition_st *mDetectorPosition;  //! position (in STAR frame) of each detector
+
+  unsigned int          mPositionModel; //! Position model (0=uniform, 1=run15pp, 2=run15pA)
 
   fmsMap_st             *mMap;    //! detector map
   fmsMap_st             **mmMap;
@@ -178,8 +204,14 @@ class StFmsDbMaker : public StMaker {
   fmsGainCorrection_st  *mGainCorrection; //! gain correction table
   fmsGainCorrection_st  **mmGainCorrection;
   Int_t                   mMaxGainCorrection;
-  Float_t                 mForceUniformGain; //!                                                                                                       
-  Float_t                 mForceUniformGainCorrection; //!                                                                                             
+
+  fmsRec_st             *mRecPar; //! rec. parameters table
+  Int_t                 mMaxRecPar;
+  StFmsDbConfig&        mRecConfig; //reference to StFmsDbConfig singleton, for accessing rec. parameter values by name
+
+  Float_t                 mForceUniformGain; //!
+  Float_t                 mForceUniformGainCorrection; //!
+  Int_t                   mReadGainFile; //!             
 
   fpsConstant_st*         mFpsConstant;
   Int_t                   mMaxSlatId;
@@ -190,13 +222,12 @@ class StFmsDbMaker : public StMaker {
   fpsMap_st*              mFpsMap;
   Int_t**                 mFpsReverseMap;
   fpsGain_st*             mFpsGain;
+  fpsStatus_st*           mFpsStatus;
   
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsDbMaker,2)   //StAF chain virtual base class for Makers
 };
 
-//! Global pointners:
-R__EXTERN StFmsDbMaker* gStFmsDbMaker;
 #endif
-
+  
 
