@@ -18,8 +18,9 @@ y2009:     ctb      bbc	    tof btow fms ftpc         etow pp2pp bsmd esmd tpx	 
 y2010:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx	       vpd | AuAu200,62,39,7.7,11.5
 y2011:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx mtd     vpd | AuAu19.6,27,200;pp500
 y2012:              bbc	    tof btow fms              etow       bsmd esmd tpx mtd fgt vpd | pp500,200,UU193
-y2013               bbc     tof btow fms              etow       nsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
-y2014               bbc     tof btow                  etow       nsmd esmd tpx mtd     vpd gmt  | no fgt and fms
+y2013:              bbc     tof btow fms              etow       nsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
+y2014:              bbc     tof btow                  etow       nsmd esmd tpx mtd     vpd gmt  | no fgt and fms
+y2015:              bbc     tof btow fms              etow       nsmd esmd tpx mtd     vpd gmt fps | +fms and fps                                        
 ______________________________________________________________________________________________________________
  */
 #endif
@@ -1216,7 +1217,7 @@ Bfc_st BFC[] = { // standard chains
   {"SstUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSstUtil","Load SST Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
-  //{"FmsUtil"     ,""  ,"","",""                                       ,"StFmsUtil","Load StFmsUtil",kFALSE},
+  {"FmsUtil"     ,""  ,"","",""                             ,"StFmsUtil,libMinuit","Load StFmsUtil",kFALSE},
   {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
   {"GmtUtil"     ,""  ,"","",""                                       ,"StGmtUtil","Load StGmtUtil",kFALSE},
   {"l3Util"      ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
@@ -1279,8 +1280,7 @@ Bfc_st BFC[] = { // standard chains
   {"sstCalDb"    ,""     ,"","sstDb"         ,"","","Declare Calibrations/sst as while list member",kFALSE},
 
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
-  {"fmsDb"       ,"fmsDb","","db"                  ,"StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
-  //{"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+  {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1521,11 +1521,10 @@ Bfc_st BFC[] = { // standard chains
    "StFmsFastSimulatorMaker","StFmsFastSimulatorMaker","FMS Fast Simulator",                        kFALSE},
   {"fmsDat"     ,"","", "StEvent,fmsDb",
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
-  //{"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker",
-  // "Fill FMS clusters",                                                                             kFALSE},
-  //
   {"fpsDat"     ,"","", "StEvent,fmsdb",
    "StFpsRawHitMaker","StFpsRawHitMaker","Fill FPS struct",                                         kFALSE},
+  {"fmsPoint"   ,"","", "event,fmsDb",
+   "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters",                                         kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
