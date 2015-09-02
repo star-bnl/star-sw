@@ -1,14 +1,15 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fms_db_map(char* opt) {
+void fms_db_map(char* opt = "readdb") {
 
   // that's begin time for validity range for WRITING TO DB 
   // your data will be available from storeTime till 2037 
   TString storeTime = "2007-11-09 00:00:00";
   
   // this is data and time for READING FROM DB
-  int readDate = 20080301;
+  int readDate = 20141220;
+  //int readDate = 20140222;
   int readTime = 0;
 
   TString option(opt);
