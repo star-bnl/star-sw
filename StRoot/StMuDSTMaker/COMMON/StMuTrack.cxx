@@ -191,7 +191,11 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
       mPt = mP.perp();
       mPhi = mP.phi();
       mEta = mP.pseudoRapidity();
-
+      if (TMath::Abs(mDCA.x()) > 999 ||
+	  TMath::Abs(mDCA.y()) > 999 ||
+	  TMath::Abs(mDCA.z()) > 999) {
+	mDCA = StThreeVectorF(-999,-999,-999);
+      }
       if (!l3) { // L3TRACKS seem to break pid    
 	Int_t charge = track->geometry()->charge();
 	//	StParticleDefinition* pc = (*mProbabilityPidAlgorithm)( *track, track->pidTraits() );
