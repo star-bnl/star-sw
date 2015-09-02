@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.h,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsTowerCluster.h,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsTowerCluster.h,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -54,7 +57,7 @@ class StFmsTowerCluster {
   explicit StFmsTowerCluster(StFmsCluster* cluster);
   // Use default copy constructor and assignment operator
   /** Destructor */
-  ~StFmsTowerCluster();
+  virtual ~StFmsTowerCluster();
   /* Clear photon and tower lists and reset other values to defaults */
   void Clear(const char* optionNotUsed = "");
   /**

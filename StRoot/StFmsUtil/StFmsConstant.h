@@ -17,7 +17,7 @@
 #define CORNER_LOW_COL GetPar("CORNER_LOW_COL",float)
 #define CLUSTER_BASE GetPar("CLUSTER_BASE",int)
 #define CLUSTER_ID_FACTOR_DET GetPar("CLUSTER_ID_FACTOR_DET",int)
-#define TOTAL_TOWERS GetPar("TOTAL_TOWERS",int)
+#define TOTAL_TOWERS GetPar("TOTAL_TOWERS",unsigned int)
 #define PEAK_TOWER_FACTOR GetPar("PEAK_TOWER_FACTOR",float)
 #define TOWER_E_THRESHOLD GetPar("TOWER_E_THRESHOLD",float)
 #define BAD_2PH_CHI2 GetPar("BAD_2PH_CHI2",float)

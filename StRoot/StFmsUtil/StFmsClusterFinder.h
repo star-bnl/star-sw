@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFinder.h,v 1.1 2015/03/10 14:38:53 jeromel Exp $
+// $Id: StFmsClusterFinder.h,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsClusterFinder.h,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:53  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -48,7 +51,7 @@ class StFmsClusterFinder {
   StFmsClusterFinder(double energyCutoff = 0.5);
   // Use default copy constructor and assignment operator.
   /** Destructor */
-  ~StFmsClusterFinder();
+  virtual ~StFmsClusterFinder();
   /**
    Calculate moments (mean and sigma of tower (x, y) positions) for a cluster.
    

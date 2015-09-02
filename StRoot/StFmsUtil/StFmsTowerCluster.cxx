@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.cxx,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsTowerCluster.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsTowerCluster.cxx,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -31,8 +34,7 @@ StFmsTowerCluster::StFmsTowerCluster(StFmsCluster* cluster)
   Clear();
 }
 
-StFmsTowerCluster::~StFmsTowerCluster() {
-}
+StFmsTowerCluster::~StFmsTowerCluster() {}
 
 void StFmsTowerCluster::Clear(const char* /* option */) {
   mSigmaX = mSigmaY = mSigmaXY = mChiSquare = -1.;

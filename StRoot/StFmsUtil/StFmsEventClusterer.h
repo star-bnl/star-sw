@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.h,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsEventClusterer.h,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -23,10 +26,12 @@
 
 #include "StFmsClusterFinder.h"
 
+class StFmsDbMaker;
+
 namespace FMSCluster {  // $NMSPC
 class StFmsClusterFitter;
 class StFmsFittedPhoton;
-class StFmsGeometry;
+  //class StFmsGeometry;
 
 /**
  Performs clustering and photon-fitting for a single detector and event.
@@ -45,7 +50,9 @@ class StFmsEventClusterer: public TObject {
 
    See FMSCluster::StFmsDetectorId for valid detector IDs.
    */
-  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
+
+  //  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
+  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -185,10 +192,13 @@ class StFmsEventClusterer: public TObject {
   std::unique_ptr<StFmsClusterFitter> mFitter;   ///< Performs photon fits
 #endif  // __CINT__
   StFmsClusterFinder mClusterFinder;   ///< Cluster-finding routine
-  const StFmsGeometry* mGeometry;   ///< FMS geometry for current run
+  //const StFmsGeometry* mGeometry;   ///< FMS geometry for current run
   Int_t mDetectorId;   ///< ID of this FMS sub-detector
   std::vector<FMSCluster::StFmsTower>* mTowers;   ///< Towers to cluster
   std::vector<Double_t> mTowerWidthXY;   ///< Geometry for this sub-detector (cm)
+
+  StFmsDbMaker *mFmsDbMaker; //!
+
   ClassDef(StFmsEventClusterer, 0)
 };
 }  // namespace FMSCluster
