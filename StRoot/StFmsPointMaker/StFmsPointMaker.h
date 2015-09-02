@@ -1,11 +1,8 @@
-// $Id: StFmsPointMaker.h,v 1.2 2015/08/19 10:58:47 jeromel Exp $
+// $Id: StFmsPointMaker.h,v 1.3 2015/09/02 14:52:15 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
-// Revision 1.2  2015/08/19 10:58:47  jeromel
-// Fix spacing for literals
-//
-// Revision 1.1  2015/03/10 14:40:49  jeromel
-// Adding first version of FmsPointMaker (Yuix Pan) - review closinge
+// Revision 1.3  2015/09/02 14:52:15  akio
+// Adding readMuDst() to give options when reading back from mudst
 //
 /**
  \file      StFmsPointMaker.h
@@ -21,7 +18,7 @@
 #include <vector>
 
 #include "StMaker.h"
-#include "StRoot/StFmsUtil/StFmsGeometry.h"
+//#include "StRoot/StFmsUtil/StFmsGeometry.h"
 
 class StFmsCollection;
 class StFmsDbMaker;
@@ -58,6 +55,10 @@ class StFmsPointMaker : public StMaker {
   /** Called after each event to reset values. */
   void Clear(Option_t* option = "");
 
+  /** Set to read MuDST, then only this maker does is recalc point position using DB values */
+  /** and does NOT perform cluster finding nor fitting */
+  void SetReadMuDst(int v=1) {mReadMuDst=v;} 
+  
  private:
   /** Definition of a collection of towers. */
   typedef std::vector<FMSCluster::StFmsTower> TowerList;
@@ -125,10 +126,14 @@ class StFmsPointMaker : public StMaker {
   */
   bool isValidChannel(int detector, int row, int col);
   StFmsDbMaker* mFmsDbMaker;  //!< Access to FMS database information
-  FMSCluster::StFmsGeometry mGeometry;  //!< Access to current FMS geometry
+  //FMSCluster::StFmsGeometry mGeometry;  //!< Access to current FMS geometry
   StFmsCollection* mFmsCollection; //!< StFmsCollection as retrieved from StEvent
   TowerMap mTowers;  //!< One for each sub-detector, keyed by detector ID
   int mObjectCount;  //!< Object count in event for use with TRef
+
+  Int_t readMuDst();
+  Int_t mReadMuDst;   //! 0= Do clustering and make Fms points
+                      //! 1= Just recalc positions based on DB values
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
