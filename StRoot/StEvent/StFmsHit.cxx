@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsHit.cxx,v 2.1 2010/01/08 22:42:31 ullrich Exp $
+ * $Id: StFmsHit.cxx,v 2.2 2015/09/01 21:01:47 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsHit.cxx,v $
+ * Revision 2.2  2015/09/01 21:01:47  ullrich
+ * Minor changes to format of print statments and \nchange to naming of data member.
+ *
  * Revision 2.1  2010/01/08 22:42:31  ullrich
  * Initial Revision.
  *
@@ -92,12 +95,7 @@ void StFmsHit::print(Option_t *option) const {cout<< *this <<endl;}
 
 ostream& operator<<(ostream& os, const StFmsHit& v)
 {
-    return os <<"StFmsHit: mDetectorId\t"<<v.detectorId()
-	    <<"\tmChannel\t"             <<v.channel()
-	    <<"\tQTCrate\t"              <<v.qtCrate()
-	    <<"\tQTSlot\t"               <<v.qtSlot()
-	    <<"\tQTCh\t"                 <<v.qtChannel()
-	    <<"\tmAdc\t"                 <<v.adc()
-	    <<"\tmTdc\t"                 <<v.tdc()
-	    <<"\tmEnergy\t"              <<v.energy();
+  return os << Form("StFmsHit: detId=%2d ch=%3d QTCrt=%1d QTSlot=%2d QTCh=%2d adc=%4d tdc=%4d E=%6.2f",
+		    v.detectorId(),v.channel(),v.qtCrate(),v.qtSlot(),v.qtChannel()
+		    ,v.adc(),v.tdc(),v.energy());
 }
