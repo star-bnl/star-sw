@@ -1,8 +1,11 @@
 // \class StFmsFpsMaker
 // \author Akio Ogawa
 //
-//  $Id: StFmsFpsMaker.cxx,v 1.1 2015/09/02 14:56:12 akio Exp $
+//  $Id: StFmsFpsMaker.cxx,v 1.2 2015/09/02 16:12:29 akio Exp $
 //  $Log: StFmsFpsMaker.cxx,v $
+//  Revision 1.2  2015/09/02 16:12:29  akio
+//  fix typo
+//
 //  Revision 1.1  2015/09/02 14:56:12  akio
 //  Initial version of FMS-FPS correation analysis
 //
@@ -131,7 +134,6 @@ void StFmsFpsMaker::corrFmsFps(){
 
   //loop over FMS points
   for(int i=0; i<npoint; i++) { 
-    float e=points[i]->energy();
     float x=points[i]->XYZ().x();
     float y=points[i]->XYZ().y();
     float z=points[i]->XYZ().z();
@@ -215,7 +217,7 @@ void StFmsFpsMaker::pid(int opt){  //opt: 0=take closest only, 1=closest + 2nd c
       else if(i1==1 && i2>=2 && i3>=5) pid=StFmsPoint::kFpsPidElectron2;// e+e-
       else if(i1>=2 && i2==1 && i3>=5) pid=StFmsPoint::kFpsPidElectron3;// e+e-
       else if(i1>=2 && i2>=2 && i3>=5) pid=StFmsPoint::kFpsPidGamma7;   // gamma converted to e+e- pair?
-      else                             LOG WARN << Form("Leaking selection : %1d %1d %1d\n",i1,i2,i3)<<endm;
+      else                             LOG_WARN << Form("Leaking selection : %1d %1d %1d\n",i1,i2,i3)<<endm;
     }    
     points[i]->setFpsPid(pid);
   } // loop over FMS points
