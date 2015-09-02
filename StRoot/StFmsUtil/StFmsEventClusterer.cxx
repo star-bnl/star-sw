@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -33,7 +36,7 @@
 
 #include "StFmsClusterFitter.h"
 #include "StFmsFittedPhoton.h"
-#include "StFmsGeometry.h"
+//#include "StFmsGeometry.h"
 #include "StFmsTower.h"
 #include "StFmsTowerCluster.h"
 #include "StFmsConstant.h"
@@ -234,22 +237,30 @@ struct GlobalPhotonFitParameters {
 }  // unnamed namespace
 
 namespace FMSCluster {
-StFmsEventClusterer::StFmsEventClusterer(const StFmsGeometry* geometry,
-                                         Int_t detectorId)
-    : mClusterFinder(0.5), mGeometry(geometry), mDetectorId(detectorId) { }
+  StFmsEventClusterer::StFmsEventClusterer( //const StFmsGeometry* geometry,
+					   StFmsDbMaker* db, Int_t detectorId)
+    : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db) { }
 
-StFmsEventClusterer::~StFmsEventClusterer() {
-}
+StFmsEventClusterer::~StFmsEventClusterer() {}
 
 Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
   mTowers = towerList;
-  mTowerWidthXY = mGeometry->towerWidths(mDetectorId);
+  //mTowerWidthXY = mGeometry->towerWidths(mDetectorId);
+  if(!mFmsDbMaker){
+    LOG_ERROR << "StFmsEventCusterer cannot find StFmsDbMaker !!!!!!"<<endm;
+    return false;
+  }
+  Float_t xw = mFmsDbMaker->getXWidth(mDetectorId);
+  Float_t yw = mFmsDbMaker->getYWidth(mDetectorId);    
+  mTowerWidthXY.clear();
+  mTowerWidthXY.push_back(xw);
+  mTowerWidthXY.push_back(yw);
   /** \todo Test of number of towers should be detector-dependent */
   if (mTowers->size() > TOTAL_TOWERS) {
     LOG_ERROR << "Too many towers for Fit" << endm;
     return false;
   }  // if
-  mFitter.reset(new StFmsClusterFitter(mGeometry, mDetectorId));
+  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw));
   return fitEvent();  // Return true for success
 }
 
@@ -266,17 +277,20 @@ Int_t StFmsEventClusterer::findClusters() {
     towerList.push_back(&(*i));
   }  // for
   mClusterFinder.findClusters(&towerList, &mClusters);
-  switch (mDetectorId) {
-    case kFmsNorthLarge:  // Deliberate fall-through
-    case kFmsSouthLarge:
-      mClusters.remove_if(IsBadCluster(BAD_MIN_E_LRG, BAD_MAX_TOW_LRG));
-      break;
-    case kFmsNorthSmall:  // Deliberate fall-through
-    case kFmsSouthSmall:
-      mClusters.remove_if(IsBadCluster(BAD_MIN_E_SML, BAD_MAX_TOW_SML));
-      break;
-    default:
-      break;
+  //  switch (mDetectorId) {
+  switch(mFmsDbMaker->largeSmall(mDetectorId)){
+    //case kFmsNorthLarge:  // Deliberate fall-through
+    //case kFmsSouthLarge:
+  case 0:
+    mClusters.remove_if(IsBadCluster(BAD_MIN_E_LRG, BAD_MAX_TOW_LRG));
+    break;
+    //case kFmsNorthSmall:  // Deliberate fall-through
+    //case kFmsSouthSmall:
+  case 1:
+    mClusters.remove_if(IsBadCluster(BAD_MIN_E_SML, BAD_MAX_TOW_SML));
+    break;
+  default:
+    break;
   }  // switch
   // Must do moment analysis before catagorization
   for (auto i = mClusters.begin(); i != mClusters.end(); ++i) {

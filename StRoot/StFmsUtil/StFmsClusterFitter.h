@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.1 2015/03/10 14:38:53 jeromel Exp $
+// $Id: StFmsClusterFitter.h,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:53  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -33,7 +36,7 @@ class TString;
 
 namespace FMSCluster {  // $NMSPC
 typedef std::list<StFmsFittedPhoton> PhotonList;
-class StFmsGeometry;
+  //class StFmsGeometry;
 class StFmsTower;
 /**
  Photon shower-shape fitting routine for FMS clusters.
@@ -58,7 +61,7 @@ class StFmsTower;
 class StFmsClusterFitter : public TObject {
  public:
   /** Constructor using detector geometry for a single sub-detector */
-  StFmsClusterFitter(const StFmsGeometry* geometry, Int_t detectorId);
+  StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw);
   /**
    Default constructor.
 
@@ -66,7 +69,7 @@ class StFmsClusterFitter : public TObject {
    */
   StFmsClusterFitter() { }
   /** Destructor */
-  ~StFmsClusterFitter();
+  virtual ~StFmsClusterFitter();
   /**
    Return the shower shape function.
    
