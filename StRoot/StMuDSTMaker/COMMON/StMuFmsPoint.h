@@ -1,6 +1,6 @@
 /*****************************************************************************
  * 
- * $Id: StMuFmsPoint.h,v 1.1 2015/08/28 18:36:04 jdb Exp $
+ * $Id: StMuFmsPoint.h,v 1.2 2015/09/02 22:09:58 jdb Exp $
  *
  * Author: Thomas Burton, 2014
  *****************************************************************************
@@ -10,8 +10,8 @@
  *****************************************************************************
  *  
  * $Log: StMuFmsPoint.h,v $
- * Revision 1.1  2015/08/28 18:36:04  jdb
- * Added Akios FMS codes
+ * Revision 1.2  2015/09/02 22:09:58  jdb
+ * Added Akios changes to Fms
  *
  *
  *****************************************************************************/
@@ -19,6 +19,7 @@
 #define STROOT_STMUDSTMAKER_COMMON_STMUFMSPOINT_H_
 
 #include "StLorentzVectorF.hh"
+#include "StThreeVectorF.hh"
 #include <TObject.h>
 #include <TRef.h>
 
@@ -38,34 +39,36 @@ class StMuFmsCluster;
 class StMuFmsPoint : public TObject {
  public:
   StMuFmsPoint(int detectorId = 0, float energy = 0.f,
-               float x = 0.f, float y = 0.f, float z = 0.f);
+               float x = 0.f, float y = 0.f, int id = 0);
   explicit StMuFmsPoint(const StFmsPoint&);
   virtual ~StMuFmsPoint();
 
-  StThreeVectorF momentum(float m = 0.f) const;
-  StLorentzVectorF fourMomentum(float m = 0.f) const;
+  StThreeVectorF momentum(float m = 0.f, float zvertex=0.f) const;
+  StLorentzVectorF fourMomentum(float m = 0.f, float zvertex=0.f) const;
   StMuFmsCluster* cluster();
   const StMuFmsCluster* cluster() const;
   unsigned short detectorId() const;
   float energy() const;
-  float x() const; // x "center of gravity" of the point (cm).
-  float y() const; // y "center of gravity" of the point (cm).
-  float z() const;
-  StThreeVectorF xyz() const;
+  float x() const; // x "center of gravity" of the point (cm) in local coordinate
+  float y() const; // y "center of gravity" of the point (cm) in local coordinate
+  int id() const;
+  StThreeVectorF xyz() const; // XYZ in STAR coordinate
   void setDetectorId(unsigned short detector);
   void setEnergy(float energy);
   void setX(float x);
   void setY(float y);
-  void setZ(float z);
-  void set(const StFmsPoint&);
+  void setId(int id);
+  void set(const StFmsPoint& point);
+  void setXYZ(const StThreeVectorF xyz);
   void setCluster(StMuFmsCluster* cluster);
-
+  
  protected:
   UShort_t mDetectorId;  ///< Detector ID as defined in database
   Float_t mEnergy;  ///< Total energy contained in the point
   Float_t mX;  ///< Mean x ("center of gravity")
   Float_t mY;  ///< Mean y ("center of gravity")
-  Float_t mZ;  ///< z at front face of sub-detector
+  Int_t mId;   ///point Id
+  StThreeVectorF mXYZ;  // STAR coodinate XYZ
   TRef mCluster;  ///< Parent cluster of this photon
 
  private:
@@ -88,12 +91,13 @@ class StMuFmsPoint : public TObject {
   inline float StMuFmsPoint::energy() const { return mEnergy; }
   inline float StMuFmsPoint::x() const { return mX; } // x "center of gravity" of the point (cm).
   inline float StMuFmsPoint::y() const { return mY; } // y "center of gravity" of the point (cm).
-  inline float StMuFmsPoint::z() const { return mZ; }
-  inline StThreeVectorF StMuFmsPoint::xyz() const { return StThreeVectorF(mX, mY, mZ); }
+  inline int   StMuFmsPoint::id() const { return mId; }
+  inline StThreeVectorF StMuFmsPoint::xyz() const { return mXYZ; }
   inline void StMuFmsPoint::setDetectorId(unsigned short detector) { mDetectorId = detector; } 
   inline void StMuFmsPoint::setEnergy(float energy) { mEnergy = energy; }
   inline void StMuFmsPoint::setX(float x) { mX = x; }
   inline void StMuFmsPoint::setY(float y) { mY = y; }
-  inline void StMuFmsPoint::setZ(float z) { mZ = z; }
+  inline void StMuFmsPoint::setId(int id) { mId = id; }
+  inline void StMuFmsPoint::setXYZ(StThreeVectorF xyz) {mXYZ = xyz;}
 
 #endif  // STROOT_STMUDSTMAKER_COMMON_STMUFMSPOINT_H_

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.2 2015/08/28 18:36:04 jdb Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.3 2015/09/02 22:09:58 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.3  2015/09/02 22:09:58  jdb
+ * Added Akios changes to Fms
+ *
  * Revision 1.2  2015/08/28 18:36:04  jdb
  * Added Akios FMS codes
  *
@@ -73,7 +76,7 @@ StMuFmsUtil::~StMuFmsUtil()
 
 StMuFmsCollection* StMuFmsUtil::getMuFms(StFmsCollection *fmscol)
 {
-  LOG_INFO << "StMuFmsUtil::getMuFms" << endm;
+  LOG_DEBUG << "StMuFmsUtil::getMuFms" << endm;
   if(!fmscol) return NULL;
   StMuFmsCollection* muFms=new StMuFmsCollection();
   fillMuFms(muFms,fmscol);
@@ -156,6 +159,12 @@ void StMuFmsUtil::fillMuFmsClusters(StMuFmsCollection* muFms,
     muCluster->setEnergy(cluster->energy());
     muCluster->setX(cluster->x());
     muCluster->setY(cluster->y());
+    muCluster->setSigmaMin(cluster->sigmaMin());
+    muCluster->setSigmaMax(cluster->sigmaMax());
+    muCluster->setChi2Ndf1Photon(cluster->chi2Ndf1Photon());
+    muCluster->setChi2Ndf2Photon(cluster->chi2Ndf2Photon());
+    muCluster->setId(cluster->id());
+    
     // Propagate hits-in-cluster information
     // Remember, clusters don't *own* hits, they just reference them.
     // For each StFmsHit in the cluster, find the index of that hit in the main
@@ -192,13 +201,13 @@ void StMuFmsUtil::fillMuFmsPoints(StMuFmsCollection* muFms,
 
 void StMuFmsUtil::setMuFmsPointParentClusters(StMuFmsCollection* muFms,
                                               StFmsCollection* fmscol) {
-  LOG_INFO << "setMuFmsPointParentClusters" << endm;
+  LOG_DEBUG << "setMuFmsPointParentClusters" << endm;
   for (unsigned i(0); i < muFms->numberOfPoints(); ++i) {
     // Points and clusters in the StMuFmsCollection and StFmsCollection are in
     // the same order, so we get the corresponding objects just by index
     const StFmsPoint* point = fmscol->points().at(i);
     if (!point) {
-      LOG_INFO << Form("  No point\n") << endm;
+      //LOG_WARN << Form("  No point") << endm;
       continue;
     }  // if
     // Find the index of the point's parent cluster in the main cluster list
@@ -248,11 +257,25 @@ void StMuFmsUtil::fillFmsClusters(StFmsCollection* fmscol,
     cluster->setEnergy(muCluster->energy());
     cluster->setX(muCluster->x());
     cluster->setY(muCluster->y());
-    // StMuFmsCluster does not store all the information in StFmsCluster, so
-    // sigmaMin, sigmaMax, chi2Ndf1Photon, chi2Ndf2Photon and id will not be
-    // filled
+    cluster->setSigmaMin(muCluster->sigmaMin());
+    cluster->setSigmaMax(muCluster->sigmaMax());
+    cluster->setChi2Ndf1Photon(muCluster->chi2Ndf1Photon());
+    cluster->setChi2Ndf2Photon(muCluster->chi2Ndf2Photon());
+    cluster->setId(muCluster->id());
+
+    //get pointers to fms points
+    TIter next(muCluster->photons());
+    StMuFmsPoint* muPoint(NULL);
+    while ((muPoint = static_cast<StMuFmsPoint*>(next()))) {
+      if(!muPoint) continue;
+      const int index = muFms->getPointArray()->IndexOf(muPoint);
+      if(index != -1) {
+	StFmsPoint* point = fmscol->points().at(index);
+	cluster->points().push_back(point);
+      }
+    }
     /** \todo fill 4-momentum. Requires adding z field to StMuFmsPoint */
-    /** \todo propagate hit- and photon-in-cluster information */
+    /** \todo propagate hit pointers information */
   }  // while
 }
 
@@ -270,6 +293,8 @@ void StMuFmsUtil::fillFmsPoints(StFmsCollection* fmscol,
     point->setEnergy(energy);
     point->setX(muPoint->x());
     point->setY(muPoint->y());
+    point->setId(muPoint->id());
+    point->setXYZ(muPoint->xyz());
     //StThreeVectorF xyz(muPoint->x(),muPoint->y(),muPoint->z());
     //StThreeVectorF p = xyz.unit() * energy;
     //point->setFourMomentum(StLorentzVectorF(p, energy));
@@ -289,7 +314,10 @@ void StMuFmsUtil::setFmsPointParentClusters(StFmsCollection* fmscol,
     if (index != -1) {
       StFmsPoint* point = fmscol->points().at(i);
       if (point) {
-        point->setCluster(fmscol->clusters().at(index));
+	StFmsCluster* cluster=fmscol->clusters().at(index);
+        point->setCluster(cluster);
+	point->setParentClusterId(cluster->id());
+	point->setNParentClusterPhotons(cluster->nPhotons());
       }  // if
     }  // if
   }  // for
