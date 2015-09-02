@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: StFmsCluster.cxx,v 2.2 2015/08/26 16:51:59 ullrich Exp $
+ * $Id: StFmsCluster.cxx,v 2.3 2015/09/01 18:29:01 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  * ***************************************************************************
@@ -10,6 +10,9 @@
  * ***************************************************************************
  *
  * $Log: StFmsCluster.cxx,v $
+ * Revision 2.3  2015/09/01 18:29:01  ullrich
+ * Changes due to adding StFpsSlat and interconnection between slats and points.
+ *
  * Revision 2.2  2015/08/26 16:51:59  ullrich
  * Added print out fct and operator.
  *
@@ -22,7 +25,7 @@
 
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.2 2015/08/26 16:51:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.3 2015/09/01 18:29:01 ullrich Exp $";
 
 StFmsCluster::StFmsCluster()
 : StObject(), mCategory(0), mNTowers(0), mEnergy(0.), mX(0.),
@@ -34,8 +37,8 @@ StFmsCluster::~StFmsCluster() { /* no op */ }
 void StFmsCluster::print(Option_t *option) const {cout<< *this <<endl;}
 
 ostream& operator<<(ostream &os, const StFmsCluster& cluster) {
-    os << Form("StFmsCluster(%08x) id=%4d catag=%1d nTow=%2d nPhoton=%1d x=%7.2f y=%7.2f E=%7.2f sigMax=%7.2f sigMin=%7.2f",
-               reinterpret_cast<ULong_t>(&cluster), cluster.id(), cluster.category(), cluster.nTowers(), cluster.nPhotons(),
-               cluster.x(), cluster.y(), cluster.energy(), cluster.sigmaMax(), cluster.sigmaMin());
+    os << Form("StFmsCluster id=%4d categ=%1d nTow=%2d nPhoton=%1d loc=%7.2f %7.2f E=%7.2f sigMin/max=%7.2f %7.2f",
+               cluster.id(), cluster.category(), cluster.nTowers(), cluster.nPhotons(),
+               cluster.x(), cluster.y(), cluster.energy(), cluster.sigmaMin(), cluster.sigmaMax());
     return os;
 }

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.58 2015/05/13 17:06:13 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.59 2015/09/01 18:29:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.59  2015/09/01 18:29:01  ullrich
+ * Changes due to adding StFpsSlat and interconnection between slats and points.
+ *
  * Revision 2.58  2015/05/13 17:06:13  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -549,6 +552,15 @@ enum StFmsClusterCategory {
   kInvalidClusterCategory  ///< For default/unknown/error value
 };  // enum StFmsClusterCategory
 
+/** FPS basic constants */
+enum StFpsConstants {
+    kFpsDetId=14,
+    kFpsNQuad=4,
+    kFpsNLayer=3,
+    kFpsNSlat=21,
+    kFpsMaxSlat=252,
+    kFpsNCandidate=4
+};
 
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
 namespace StIstConsts
