@@ -18,6 +18,7 @@ private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
 	class daq_dta *handle_legacy(int sec, int rdo) ;
 	class daq_dta *handle_adc(int sec, int rdo) ;
+	class daq_dta *handle_altro(int sec, int rdo) ;
 	class daq_dta *handle_cld(int sec, int rdo) ;
 	class daq_dta *handle_cld_raw(int sec, int rdo) ;
 	class daq_dta *handle_cld_sim(int sec, int row) ;
@@ -50,6 +51,8 @@ private:
 	// calculated via algorithm at end-run
 	class daq_dta *ped_c ;	// in ped runs 
 	class daq_dta *gain_c ;	// in pulser runs
+
+	class daq_dta *altro ;
 
 
 	// algorithms
