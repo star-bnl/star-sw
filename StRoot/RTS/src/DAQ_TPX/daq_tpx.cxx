@@ -115,6 +115,8 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	gain_c = new daq_dta ;
 
 
+	altro = new daq_dta ;
+
 	gain_algo = new tpxGain() ;	// always needed for bad pads...
 	stat_algo = 0 ;
 	ped_algo = 0 ;
@@ -140,6 +142,7 @@ daq_tpx::~daq_tpx()
 	delete raw ;
 	delete cld_raw ;
 	delete ped_raw ;
+	delete altro ;
 
 	LOG(DBG,"%s: DEstructor done",name) ;
 
@@ -514,6 +517,9 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	}
 	else if(strcasecmp(bank,"legacy")==0) {
 		return handle_legacy(sec,row) ;	// actually sec, rdo:
+	}
+	else if(strcasecmp(bank,"altro")==0) {
+		return handle_altro(sec,row) ;	// actually sec, rdo:
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -994,6 +1000,135 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 	
 
 	return adc ;
+
+}
+
+daq_dta *daq_tpx::handle_altro(int sec, int rdo)
+{
+
+	int min_sec, max_sec ;
+	int min_rdo, max_rdo ;
+
+
+	// sanity
+	if(sec <= 0) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
+	}
+	else if((sec<1) || (sec>24)) return 0 ;
+	else {
+		min_sec = sec ;
+		max_sec = sec ;
+	}
+
+	if(rdo <= 0) {
+		min_rdo = 1 ;
+		max_rdo = 6 ;
+	}
+	else if((rdo<0) || (rdo>6)) return 0 ;
+	else {
+		min_rdo = max_rdo = rdo ;
+	}
+
+	// get a size estimate
+	int rdos = 0 ;
+	
+	for(int s=min_sec;s<=max_sec;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+		rdos++ ;
+	}
+	}
+
+	// guess the byte size...
+	int guess_bytes = rdos * 1152 * (sizeof(daq_store) + 10*sizeof(daq_adc_tb)) ;
+
+	altro->create(guess_bytes,(char *)"adc",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
+
+	for(int s=min_sec;s<=max_sec;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+		daq_dta *rdo_dta ;
+
+
+		char *rdo_ptr ;
+		struct tpx_rdo_event rdo ;
+		struct tpx_altro_struct a ;
+		int rdo_words ;
+
+		LOG(NOTE,"Calling handle_raw for %d:%d",s,r) ;		
+		rdo_dta = handle_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
+
+
+		if(rdo_dta == 0) {
+			LOG(WARN,"rdo_dta NULL?") ;
+			continue ;	// sorry, not found...
+		}
+
+		int ret = rdo_dta->iterate() ;	// move from the header...
+		if(ret==0) {	// no content
+			continue ;
+		}
+
+		LOG(DBG,"Called handle_raw for %d:%d, iterate %d, returned %d objs",s,r,ret,rdo_dta->ncontent) ;				
+		if(rdo_dta->ncontent == 0) continue ;	// nothing found...
+
+		rdo_ptr = (char *)rdo_dta->Byte ;
+		rdo_words = rdo_dta->ncontent / 4 ;
+
+		int token = tpx_get_start(rdo_ptr, rdo_words, &rdo, 0) ;
+
+		if(token <= 0) {
+			LOG(ERR,"horrible error, token is %d?",token) ;
+			continue ;
+		}
+
+		if(rdo.rdo != r) {
+			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
+		}
+
+		u_int *data_end = rdo.data_end ;
+
+		a.rdo = rdo.rdo -1 ;
+		a.t = token ;
+		a.what = TPX_ALTRO_DO_ADC ;
+		a.log_err = 0 ;
+		a.sector = s ;
+
+		do {
+			data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
+
+			if(a.count == 0) continue ;	// no data for this guy...
+
+			// unallowed rows, pads...
+			//if((a.row>45) || (a.pad==0) || (a.pad>182)) {
+			//	LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
+			//}
+
+			daq_adc_tb *at = (daq_adc_tb *) altro->request(a.count) ;
+	
+			//LOG(DBG,"%d: %d:%d %d",altro->obj_cou,a.row,a.pad,a.count) ;
+
+			for(u_int i=0 ; i < a.count ; i++) {
+				at[i].adc = a.adc[i] ;
+				at[i].tb = a.tb[i] ;
+
+			}
+
+			altro->finalize(a.count, s, a.id, a.ch) ;
+
+		} while(data_end && (data_end > rdo.data_start)) ;	
+
+
+	}
+	}
+
+
+	altro->rewind() ;	// wind data pointers to the beginning so that they can be used
+
+
+	
+
+	return altro ;
 
 }
 
