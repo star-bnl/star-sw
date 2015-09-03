@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 			break ;
 		case 'm' :
 			mountpoint = _mountpoint;
-			strcpy(_mountpoint, (char *)optarg);
+			strncpy(_mountpoint, (char *)optarg,sizeof(_mountpoint)-1);
 			break;
 		  
 		default :
@@ -581,7 +581,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				sec_found = 1 ;
 				adc_found = 1 ;	// any sector...
 
-				if(dd->row > 8) continue ;
+				//if(dd->row > 8) continue ;
 				
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
@@ -671,6 +671,18 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				}
 			}
 		}
+
+		//new ALTRO bank, for a test
+		for(int r=1;r<=6;r++) {
+			dd = rdr->det("tpx")->get("altro",s,r) ;
+			while(dd && dd->iterate()) {
+				if(do_print) {
+					printf("TPX ALTRO: sec %02d, RDO %d: ALTRO %3d, ch %2d: %3d pixels\n",dd->sec,r,dd->row,dd->pad,dd->ncontent) ;
+				}
+			}
+		}
+
+				
 
 	}
 
@@ -1769,8 +1781,8 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 {
 	int adc_found = 0 ;
 	int pedrms_found = 0 ;
-	const u_int cpu_clock = 2166872000 ;
-
+//	const double cpu_clock = 2166872000.0 ;
+	const double cpu_clock = 2166855000.0 ;
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"fps")) ;	// leave as is...
@@ -1826,19 +1838,23 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 		// moved it to the end, when I know the channel count
 		if(do_print && adc_found) {
 			//time of arrival of the STP command
-			double stp = (double) hdr->tick * 1024.0 ;	//in clocks
+			double stp = ((double) hdr->tick) * 1024.0 ;	//in clocks
 
-			stp /= (double)cpu_clock ;
+			stp /= cpu_clock ;
 			stp *= 1000000.0 ;
 
 			//time at the end of the full event readout
-			double readout = (double) (u_int) hdr->delta * 1024.0 ;
+			double readout = ((double) (u_int) hdr->delta) * 1024.0 ;
 
-			readout /= (double)cpu_clock ;
+			readout /= cpu_clock ;
 			readout *= 1000000.0 ;
 			
-			printf("FPS META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us), ch count  %u\n",
-			       stp, readout, readout-stp, ev_ch) ;
+			double just_readout = ((double)(u_int) hdr->reserved[0]) * 1024.0 ;
+			just_readout /= cpu_clock ;
+			just_readout *= 1000000.0 ;
+
+			printf("FPS META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), ch count  %u\n",
+			       stp, readout, readout-stp, readout-just_readout, ev_ch) ;
 		}
 
 
