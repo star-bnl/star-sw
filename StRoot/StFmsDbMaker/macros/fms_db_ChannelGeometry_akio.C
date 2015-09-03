@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
+void fms_db_ChannelGeometry_akio(char* opt="writedb", int year=15) {
 
   TString option(opt);
   std::cout << "Opt =" << opt << "\n";
@@ -20,13 +20,11 @@ void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
     storeTime="2008-11-09 00:00:01";
     date = 20090301;
     time = 0;
-  }else if(year=15){
+  }else if(year==15){
     storeTime="2014-12-20 00:00:00";
     date = 20141220;
-//    date = 20140222;
     time = 0;
-  }
-  else{
+  }else{
     std::cout << "Please specify year\n";
     exit;
   }
@@ -39,7 +37,7 @@ void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
   gSystem->Load("StDbLib.so");
 
   // max index dimensions
-  const Int_t MAXINDEX = 12;
+  const Int_t MAXINDEX = 20;
   int n=0;
 
   // structure to fill up
@@ -92,7 +90,7 @@ void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
     cout << "DB_ACCESS_MODE="<<gSystem->Getenv("DB_ACCESS_MODE")<<endl;
     StDbManager* mgr = StDbManager::Instance();
     StDbConfigNode* node = mgr->initConfig("Geometry_fms");
-    StDbTable* wtable = node->addDbTable("fmsChannelGeometry");	  
+    StDbTable* table = node->addDbTable("fmsChannelGeometry");	  
     mgr->setStoreTime(storeTime.Data());
 
     // input data
@@ -111,6 +109,7 @@ void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
     /* FMS-South-Small     11       1   1   0     12   24  */
     /* FHC-North           12       1   0   5      9   12  */
     /* FHC-South           13       1   1   5      9   12  */
+    /* FHC-South           15       1   0   6      0    0  See fpsChannelGeometry for more details*/
 
     int n=0;
     g[n].detectorId = 0; g[n].type=0; g[n].ew=0; g[n].ns=0; g[n].nX= 7; g[n].nY= 7;    n++;
@@ -127,11 +126,12 @@ void fms_db_ChannelGeometry(char* opt="readdb", int year = 15) {
     g[n].detectorId = 9; g[n].type=4; g[n].ew=1; g[n].ns=1; g[n].nX=17; g[n].nY=34;    n++;
     g[n].detectorId =10; g[n].type=0; g[n].ew=1; g[n].ns=0; g[n].nX=12; g[n].nY=24;    n++;
     g[n].detectorId =11; g[n].type=0; g[n].ew=1; g[n].ns=1; g[n].nX=12; g[n].nY=24;    n++;
+    g[n].detectorId =15; g[n].type=6; g[n].ew=1; g[n].ns=0; g[n].nX= 0; g[n].nY= 0;    n++;
     
     // store data in the table
-    wtable->SetTable((char*)&g,n);
+    table->SetTable((char*)&g,n);
     // store table in dBase
-    mgr->storeDbTable(wtable); 
+    mgr->storeDbTable(table); 
     gSystem->Unsetenv("DB_ACCESS_MODE");
     std::cout << "Done with database upload \n";
  }

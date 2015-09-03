@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.cxx,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.2  2015/09/02 15:01:32  akio
+// Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -29,7 +32,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/StEvent/StFmsHit.h"
 
-#include "StFmsGeometry.h"
+//#include "StFmsGeometry.h"
 #include "StFmsTower.h"
 #include "StFmsConstant.h"
 
@@ -71,11 +74,13 @@ namespace FMSCluster {
 // Instantiate static members
 StFmsTowerCluster::Towers* StFmsClusterFitter::mTowers(nullptr);
 
-StFmsClusterFitter::StFmsClusterFitter(const StFmsGeometry* geometry,
-                                       Int_t detectorId)
+StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
+                                       Int_t detectorId, Float_t xw, Float_t yw)
     : mMinuit(3 * kMaxNPhotons + 1) {
   // Set tower (x, y) widths for this detector
-  towerWidths = geometry->towerWidths(detectorId);
+  towerWidths.clear();
+  towerWidths.push_back(xw);
+  towerWidths.push_back(yw);
   fitParameters.front() = towerWidths.at(0);
   showerShapeFitFunction.SetParameters(fitParameters.data());
   mMinuit.SetPrintLevel(-1);  // Quiet, including suppression of warnings

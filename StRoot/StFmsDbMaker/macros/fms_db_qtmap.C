@@ -1,7 +1,7 @@
 #include <iostream.h> 
 #include <fstream.h> 
 
-void fms_db_qtmap(char* opt,int year) {
+void fms_db_qtmap(char* opt = "readdb writetext",int year = 15) {
 
   TString option(opt);
   std::cout << "Opt =" << opt << "\n";
@@ -21,12 +21,19 @@ void fms_db_qtmap(char* opt,int year) {
     storeTime="2007-11-09 00:00:00";
     date = 20080301;
     time = 0;
-  }elseif(year==9){
+  }else if(year==9){
     filename="qtmap2009V1.txt";
     storeTime="2008-11-09 00:00:00";
     date = 20090301;
     time = 0;
-  }else{
+  }else if(year==15){
+    filename="qtmap2009V1.txt";
+    storeTime="2014-12-20 00:00:00";
+    //date = 20140222;
+    date = 20141220;
+    time = 0;
+  }
+  else{
     std::cout << "Please specify year\n";
     exit;
   }
@@ -152,7 +159,7 @@ void fms_db_qtmap(char* opt,int year) {
 				    qtmap[ns].qtCrate[pp][row][col],
 				    qtmap[ns].qtSlot[pp][row][col],
 				    qtmap[ns].qtChannel[pp][row][col]);
-		if(year==9) fprintf(fp,"%3d %3d %4d %4d %4d %4d %4d\n",ns+1,pp+1,row+1,col+1,
+		if(year==9||year==15) fprintf(fp,"%3d %3d %4d %4d %4d %4d %4d\n",ns+1,pp+1,row+1,col+1,
 				    qtmap[ns].qtCrate[pp][row][col],
 				    qtmap[ns].qtSlot[pp][row][col],
 				    qtmap[ns].qtChannel[pp][row][col]);
