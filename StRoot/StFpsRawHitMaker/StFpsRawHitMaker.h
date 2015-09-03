@@ -4,17 +4,17 @@
 //   This is the hit maker for the FPS data. 
 //   It makes use of its base class functions to read daq files into the StEvent Data structure.
 // 
-//  $Id: StFpsRawHitMaker.h,v 1.1 2015/03/23 11:33:20 jeromel Exp $
+//  $Id: StFpsRawHitMaker.h,v 1.2 2015/09/02 14:55:18 akio Exp $
 //  $Log: StFpsRawHitMaker.h,v $
-//  Revision 1.1  2015/03/23 11:33:20  jeromel
-//  Peer review closed 2015/03/20 - content added
+//  Revision 1.2  2015/09/02 14:55:18  akio
+//  Modified to work with StFmsDbMaker
 //
 
 #ifndef STAR_StFpsRawHitMaker_HH
 #define STAR_StFpsRawHitMaker_HH
 
 #include "StRoot/StChain/StRTSBaseMaker.h"
-
+class StFmsDbMaker;
 class StFmsCollection;
 
 class StFpsRawHitMaker : public StRTSBaseMaker{
@@ -26,12 +26,13 @@ public:
   void setPrePost(int v) {mPrePost=v;} //if 0 (default) takes only triggered crossing. none-0 accept prepost as well,
   
 private:
-  enum {kFpsDetId=15, kFpsQtCrate=8};
+  enum {kFpsDetId=14, kFpsQtCrate=8};
 
   int mPrePost;
   Int_t prepareEnvironment();
   StFmsCollection *mFmsCollection; //!
-  
+  StFmsDbMaker *mFmsDbMaker; //!
+
   ClassDef(StFpsRawHitMaker,0);
 };
 

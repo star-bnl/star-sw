@@ -1,10 +1,10 @@
 // \class StFpsRawHitMaker
 // \author Akio Ogawa
 //
-//  $Id: StFpsRawHitMaker.cxx,v 1.1 2015/03/23 11:33:20 jeromel Exp $
+//  $Id: StFpsRawHitMaker.cxx,v 1.2 2015/09/02 14:55:18 akio Exp $
 //  $Log: StFpsRawHitMaker.cxx,v $
-//  Revision 1.1  2015/03/23 11:33:20  jeromel
-//  Peer review closed 2015/03/20 - content added
+//  Revision 1.2  2015/09/02 14:55:18  akio
+//  Modified to work with StFmsDbMaker
 //
 
 #include "StFpsRawHitMaker.h"
@@ -17,18 +17,19 @@
 #include "StEvent/StEvent.h"
 #include "StEvent/StFmsCollection.h"
 #include "StEvent/StFmsHit.h"
-#include "StFmsDbMaker/StFmsDbMaker.h"
+#include "StRoot/StFmsDbMaker/StFmsDbMaker.h"
 
 StFpsRawHitMaker::StFpsRawHitMaker(const Char_t* name) :
-  StRTSBaseMaker( "adc", name ), mPrePost(0), mFmsCollection(0){}
+  StRTSBaseMaker( "adc", name ), mPrePost(0), mFmsCollection(0), mFmsDbMaker(0) {}
 
 StFpsRawHitMaker::~StFpsRawHitMaker(){}
 
 /// Check if global pointer for StFmsDbMaker is available
 Int_t StFpsRawHitMaker::InitRun(Int_t runNumber){
   LOG_DEBUG << "StFpsRawHitMaker::InitRun with run = "  << runNumber << endm;
-  if(!gStFmsDbMaker){
-    LOG_ERROR  << "StFpsRawHitMaker::InitRun Failed to get gStFmsDbMaker" << endm;
+  mFmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb")); 
+  if(!mFmsDbMaker){
+    LOG_ERROR  << "StFpsRawHitMaker::InitRun Failed to get StFmsDbMaker" << endm;
     return kStFatal;
   }
   return kStOK;
@@ -80,9 +81,9 @@ Int_t StFpsRawHitMaker::Make(){
       int ch=a->ch;
       int adc=a->adc;
       int tdc=a->tdc;  
-      int slatid = gStFmsDbMaker->fpsSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
+      int slatid = mFmsDbMaker->fpsSlatidFromQT(qt,ch); //Get SlatId from QT address and channel
       int q,l,s;
-      gStFmsDbMaker->fpsQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
+      mFmsDbMaker->fpsQLSfromSlatId(slatid,&q,&l,&s); //Get Quad/Layer/Slat#s from SlatId
       LOG_DEBUG << Form("FPS: xing=%4d QT%02d ch%02d Slaiid=%3d Q%1dL%1dS%02d ADC=%4d TDC=%2d",xing,qt,ch,slatid,q,l,s,adc,tdc)<<endm;
       n++;
       int flag=0;	
@@ -97,7 +98,10 @@ Int_t StFpsRawHitMaker::Make(){
 	hit->setQtChannel(ch);
 	hit->setAdc(adc);
 	hit->setTdc(tdc);
-	hit->setEnergy(0.0);
+	float gain=mFmsDbMaker->fpsGain(slatid);
+	float nmip=0.0;
+	if(gain>0.0) nmip=adc/gain;
+	hit->setEnergy(nmip);
 	mFmsCollection->addHit(hit);
 	if(Debug()) hit->print();	 
 	ngood++;

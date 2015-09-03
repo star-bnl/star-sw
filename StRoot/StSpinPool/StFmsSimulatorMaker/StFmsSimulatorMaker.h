@@ -13,6 +13,7 @@ class StMcCalorimeterHit;
 class StMcEvent;
 class StFmsHit;
 class StEvent;
+class StFmsDbMaker;
 
 #include "StMaker.h"
 
@@ -26,6 +27,8 @@ private:
   StFmsHit* makeFmsHit(const StMcCalorimeterHit*) const;
   void fillStEvent(const StMcEvent*, StEvent*);
   void printStEventSummary(const StEvent*);
+
+  StFmsDbMaker*      mFmsDbMaker;  //!
 
   ClassDef(StFmsSimulatorMaker,0);
 };

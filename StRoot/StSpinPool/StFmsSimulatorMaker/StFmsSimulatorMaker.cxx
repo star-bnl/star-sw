@@ -72,10 +72,10 @@ StFmsHit* StFmsSimulatorMaker::makeFmsHit(const StMcCalorimeterHit* hit) const
   const int nstb = hit->sub();
   const int channel = hit->eta();
   int detectorId = getDetectorId(ew,nstb);
-  int qtCrate, qtSlot, qtChannel;
-  gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
-  float gain = gStFmsDbMaker->getGain(detectorId,channel);
-  float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
+  int qtCrate, qtSlot, qtChannel;  
+  mFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
+  float gain = mFmsDbMaker->getGain(detectorId,channel);
+  float gainCorrection = mFmsDbMaker->getGainCorrection(detectorId,channel);
   int adc = int(hit->dE()/(gain*gainCorrection)+0.5);
   if (adc < 0) adc = 0; // underflow
   if (adc > MAX_ADC) adc = MAX_ADC; // overflow
@@ -106,12 +106,13 @@ int StFmsSimulatorMaker::Make()
   // Get FMS collection
   if (!event->fmsCollection()) event->setFmsCollection(new StFmsCollection);
 
-  // Digitize GEANT FPD/FMS hits
-  if (!gStFmsDbMaker) {
-    LOG_ERROR << "No gStFmsDbMaker. StFmsDbMaker library not loaded?" << endm;
+  mFmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb")); 
+  if(!mFmsDbMaker){
+    LOG_ERROR  << "No StFmsDbMaker" << endm;
     return kStErr;
   }
 
+  // Digitize GEANT FPD/FMS hits
   fillStEvent(mcEvent,event);
   printStEventSummary(event);
 
