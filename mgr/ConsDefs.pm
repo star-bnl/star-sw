@@ -283,7 +283,7 @@
     if ($CC eq 'clang') {
 #      $CFLAGS .= " -fcolor-diagnostics"; $CXXFLAGS .= " -fcolor-diagnostics";
       #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
-    } elsif ($cxx_version >= 4.9) {
+    } elsif ($cxx_version >= 4.8) {
 #      $CFLAGS .= " -fdiagnostics-color=always"; $CXXFLAGS .= " -fdiagnostics-color=always";
     }  elsif (-e "$STAR/mgr/gccfilter") { 
       $gccfilter = "$STAR/mgr/gccfilter -c -w -a ";
