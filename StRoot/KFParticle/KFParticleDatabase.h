@@ -29,6 +29,7 @@ class KFParticleDatabase
     {
       case         11: pdgIndex = 0; break;
       case         13: pdgIndex = 1; break;
+      case         19: pdgIndex = 1; break;
       case        211: pdgIndex = 2; break;
       case        321: pdgIndex = 3; break;
       case       2212: pdgIndex = 4; break;
@@ -49,6 +50,7 @@ class KFParticleDatabase
     Vc::int_v pdgIndex(2);
     pdgIndex(Vc::abs(pdg) ==         11) = 0;    
     pdgIndex(Vc::abs(pdg) ==         13) = 1;
+    pdgIndex(Vc::abs(pdg) ==         19) = 1;
     pdgIndex(Vc::abs(pdg) ==        211) = 2;
     pdgIndex(Vc::abs(pdg) ==        321) = 3;
     pdgIndex(Vc::abs(pdg) ==       2212) = 4;

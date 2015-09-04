@@ -883,7 +883,10 @@ void KFTopoPerformance::FillHistos()
     multiplicities[iParticle]++;
 
     hPartParam2D[iParticle][0]->Fill(Rapidity,Pt,1);
-    hPartParam2D[iParticle][1]->Fill(Z,R,1);
+    
+    bool drawZR = (iParticle<5) || (iParticle==41);
+    if(drawZR)
+      hPartParam2D[iParticle][1]->Fill(Z,R,1);
 
     if(!RtoMCParticleId[iP].IsMatchedWithPdg()) //background
     {
@@ -910,7 +913,8 @@ void KFTopoPerformance::FillHistos()
         multiplicitiesGhost[iParticle]++;
         
         hPartParam2DGhost[iParticle][0]->Fill(Rapidity,Pt,1);
-        hPartParam2DGhost[iParticle][1]->Fill(Z,R,1);
+        if(drawZR)
+          hPartParam2DGhost[iParticle][1]->Fill(Z,R,1);
       }
       else
       {
@@ -936,7 +940,8 @@ void KFTopoPerformance::FillHistos()
         multiplicitiesBG[iParticle]++;
         
         hPartParam2DBG[iParticle][0]->Fill(Rapidity,Pt,1);
-        hPartParam2DBG[iParticle][1]->Fill(Z,R,1);
+        if(drawZR)
+          hPartParam2DBG[iParticle][1]->Fill(Z,R,1);
       }
       continue;
     }
@@ -961,7 +966,8 @@ void KFTopoPerformance::FillHistos()
     multiplicitiesSignal[iParticle]++;
     
     hPartParam2DSignal[iParticle][0]->Fill(Rapidity,Pt,1);
-    hPartParam2DSignal[iParticle][1]->Fill(Z,R,1);
+    if(drawZR)
+      hPartParam2DSignal[iParticle][1]->Fill(Z,R,1);
 
     int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
     KFMCParticle &mcPart = vMCParticles[iMCPart];
@@ -978,7 +984,6 @@ void KFTopoPerformance::FillHistos()
         mcDaughterId = mcPart.GetDaughterIds()[0];
       KFMCTrack &mcDaughter = vMCTracks[mcDaughterId];
 
-      TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(mcTrack.PDG());
       const float mcX =  mcDaughter.X();
       const float mcY =  mcDaughter.Y();
       const float mcZ =  mcDaughter.Z();
@@ -1006,8 +1011,9 @@ void KFTopoPerformance::FillHistos()
         errParam[iPar] = TMath::Sqrt(error);
       }
 
-      Double_t massMC = (particlePDG) ? particlePDG->Mass() :0.13957;
-
+      int jParticlePDG = fParteff.GetParticleIndex(mcTrack.PDG());      
+      Double_t massMC = (jParticlePDG>=0) ? fParteff.partMass[jParticlePDG] :0.13957;
+      
       Double_t Emc = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
       Double_t res[8] = {0}, 
                pull[8] = {0}, 
@@ -1042,7 +1048,6 @@ void KFTopoPerformance::FillHistos()
       KFParticle Daughter = fTopoReconstructor->GetParticles()[recDaughterId];
       Daughter.GetMass(M,ErrM);
 
-      TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(mcTrack.PDG());
       const float mcX =  mcTrack.X();
       const float mcY =  mcTrack.Y();
       const float mcZ =  mcTrack.Z();
@@ -1069,8 +1074,8 @@ void KFTopoPerformance::FillHistos()
 //       DaughterSIMD.TransportToDS(dSvector, dsdrvector);
       DaughterSIMD.TransportToPoint(decayVtx);
       
-
-      Double_t massMC = (particlePDG) ? particlePDG->Mass() :0.13957;
+      int jParticlePDG = fParteff.GetParticleIndex(mcTrack.PDG());      
+      Double_t massMC = (jParticlePDG>=0) ? fParteff.partMass[jParticlePDG] :0.13957;
       Double_t Emc = sqrt(mcTrack.P()*mcTrack.P() + massMC*massMC);
       
       Double_t res[8] = {0}, 

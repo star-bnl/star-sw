@@ -109,8 +109,11 @@ void KFParticleFinder::FindParticles(KFPTrackVector *vRTracks, kfvector_float* C
       for(int iTr=0; iTr < vRTracks[iV].Size(); iTr++)
       {
         vRTracks[iV].GetTrack(kfTrack, iTr);
-        KFParticle tmp(kfTrack, vRTracks[iV].PDG()[iTr]);
-        tmp.SetPDG(vRTracks[iV].PDG()[iTr]);//vTrackPDG[iTr]);
+        int pdg = vRTracks[iV].PDG()[iTr];
+        if( pdg == 19 ) pdg =  13;
+        if( pdg ==-19 ) pdg = -13;
+        KFParticle tmp(kfTrack, pdg);
+        tmp.SetPDG(pdg);
         tmp.SetId(Particles.size());
         vRTracks[iV].SetId(Particles.size(),iTr);
         tmp.AddDaughterId( kfTrack.Id() );
@@ -601,7 +604,7 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
       float negPt2 = negDaughter.Px()[iv]*negDaughter.Px()[iv] + negDaughter.Py()[iv]*negDaughter.Py()[iv];
       float posPt2 = posDaughter.Px()[iv]*posDaughter.Px()[iv] + posDaughter.Py()[iv]*posDaughter.Py()[iv];
       
-      if( (negPt2 >fCutJPsiPt*fCutJPsiPt) && (posPt2 >fCutJPsiPt*fCutJPsiPt) )
+      if( (negPt2 >fCutJPsiPt*fCutJPsiPt) && (posPt2 >fCutJPsiPt*fCutJPsiPt) && (abs(daughterPosPDG[iv]) == 13) && (abs(daughterNegPDG[iv]) == 13))
       {
         mother_temp.SetPDG(100443);
         mother_temp.SetId(Particles.size());
@@ -931,7 +934,8 @@ void KFParticleFinder::Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_floa
                   if(iTC==0)
                     motherPDG(                (abs(trackPdgPos[iPDGPos])==   11) && int_m(abs(trackPdgNeg) ==   11) ) =    22; //gamma -> e+ e-
                   else if(iTC==1)
-                    motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])==   13) && int_m(abs(trackPdgNeg) ==   13) ) =   200113; //rho -> mu+ mu-
+                    motherPDG( isPrimary   && (abs(trackPdgPos[iPDGPos])== 13 || abs(trackPdgPos[iPDGPos])==19)
+                                           && (int_m(abs(trackPdgNeg) == 13) || int_m(abs(trackPdgNeg) == 19)) ) =   200113; //rho -> mu+ mu-
                   else if(iTC==2)
                   {
                     motherPDG( isSecondary && (abs(trackPdgPos[iPDGPos])==        211) && int_m(abs(trackPdgNeg) ==  211) ) =   310; //K0 -> pi+ pi-

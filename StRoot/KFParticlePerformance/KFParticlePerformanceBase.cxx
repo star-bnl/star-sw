@@ -104,6 +104,21 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
             if(iPart>63 && iPart<75)
               for(int iMult=3; iMult<nFitQA/2; iMult++)
                 mult[iMult] = 3;
+            if(iPart>45 && iPart<64)
+            {
+              for(int iMult=0; iMult<3; iMult++)
+                mult[iMult] = 0.03;
+              for(int iMult=3; iMult<nFitQA/2; iMult++)
+                mult[iMult] = 3;
+            }
+            if(iPart==44 || iPart==45)
+            {
+              mult[0] = 0.25;
+              mult[1] = 0.5;
+              mult[2] = 0.15;
+              for(int iMult=3; iMult<nFitQA/2; iMult++)
+                mult[iMult] = 4;
+            }
             
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
@@ -268,18 +283,22 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
                                               nBins[iH],xMin[iH],xMax[iH]);
               hPartParam[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
             }
-  
+    
             hPartParam2D[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
                                               nBins[3],xMin[3],xMax[3],
                                               nBins[2],xMin[2],xMax[2]);
             hPartParam2D[iPart][0]->GetXaxis()->SetTitle("y");
             hPartParam2D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
 
-            hPartParam2D[iPart][1] = new TH2F("Z-R","Z-R",
-                                              nBins[12],xMin[12],xMax[12],
-                                              nBins[13],xMin[13],xMax[13]);
-            hPartParam2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-            hPartParam2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+            bool drawZR = (iPart<5) || (iPart==41);
+            if(drawZR)
+            {
+              hPartParam2D[iPart][1] = new TH2F("Z-R","Z-R",
+                                                nBins[12],xMin[12],xMax[12],
+                                                nBins[13],xMin[13],xMax[13]);
+              hPartParam2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+              hPartParam2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+            }
 
             gDirectory->mkdir("Signal");
             gDirectory->cd("Signal");
@@ -297,25 +316,14 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               hPartParam2DSignal[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DSignal[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
             
-              hPartParam2DSignal[iPart][1] = new TH2F("Z-R","Z-R",
-                                                      nBins[12],xMin[12],xMax[12],
-                                                      nBins[13],xMin[13],xMax[13]);
-              hPartParam2DSignal[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-              hPartParam2DSignal[iPart][1]->GetYaxis()->SetTitle("R [cm]");
-            
-              gDirectory->mkdir("QA");
-              gDirectory->cd("QA");
+              if( drawZR )
               {
-                int nBinsQA = 50;
-                float xMaxQA[nHistoPartParamQA] = {0.01,0.001,0.001};
-                for( int iH=0; iH<nHistoPartParamQA; iH++ ){
-                  hPartParamQA[iPart][iH] = 
-                    new TH1F((res+parName[iH]).Data(), (res+parName[iH]).Data(), nBinsQA, -xMaxQA[iH],xMaxQA[iH]);
-                  hPartParamQA[iPart][iH+nHistoPartParamQA] = 
-                    new TH1F((pull+parName[iH]).Data(), (pull+parName[iH]).Data(), nBinsQA, -6,6);
-                }
+                hPartParam2DSignal[iPart][1] = new TH2F("Z-R","Z-R",
+                                                        nBins[12],xMin[12],xMax[12],
+                                                        nBins[13],xMin[13],xMax[13]);
+                hPartParam2DSignal[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+                hPartParam2DSignal[iPart][1]->GetYaxis()->SetTitle("R [cm]");
               }
-              gDirectory->cd(".."); // particle directory / Parameters / Signal
             }
             gDirectory->cd(".."); // particle directory / Parameters
             gDirectory->mkdir("Background");
@@ -334,11 +342,14 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               hPartParam2DBG[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DBG[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
               
-              hPartParam2DBG[iPart][1] = new TH2F("Z-R","Z-R",
-                                                  nBins[12],xMin[12],xMax[12],
-                                                  nBins[13],xMin[13],xMax[13]);
-              hPartParam2DBG[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-              hPartParam2DBG[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+              if( drawZR )
+              {
+                hPartParam2DBG[iPart][1] = new TH2F("Z-R","Z-R",
+                                                    nBins[12],xMin[12],xMax[12],
+                                                    nBins[13],xMin[13],xMax[13]);
+                hPartParam2DBG[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+                hPartParam2DBG[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+              }
             }
   //           gDirectory->cd(".."); // particle directory
   //           gDirectory->mkdir("CorrBG");
@@ -374,11 +385,14 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               hPartParam2DGhost[iPart][0]->GetXaxis()->SetTitle("y");
               hPartParam2DGhost[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
               
-              hPartParam2DGhost[iPart][1] = new TH2F("Z-R","Z-R",
-                                                     nBins[12],xMin[12],xMax[12],
-                                                     nBins[13],xMin[13],xMax[13]);
-              hPartParam2DGhost[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-              hPartParam2DGhost[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+              if( drawZR )
+              {
+                hPartParam2DGhost[iPart][1] = new TH2F("Z-R","Z-R",
+                                                       nBins[12],xMin[12],xMax[12],
+                                                       nBins[13],xMin[13],xMax[13]);
+                hPartParam2DGhost[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+                hPartParam2DGhost[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+              }
             }
             gDirectory->cd(".."); // particle directory
           }

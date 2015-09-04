@@ -85,6 +85,7 @@ class KFPTrackVector
       {
         case         11: fNE++; break;
         case         13: fNMu++; break;
+        case         19: fNMu++; break;
         case        211: fNPi++; break;
         case          1: fNPi++; break;
         case        321: fNK++; break;
