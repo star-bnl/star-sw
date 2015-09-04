@@ -68,7 +68,7 @@ protected:
     UShort_t mTdc;         // TDC values
     Float_t  mEnergy;      // corrected energy
     
-    ClassDef(StMuFmsHit,1)
+    ClassDef(StMuFmsHit,2)
 };
 
 ostream& operator<<(ostream&, const StMuFmsHit&);
