@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $
+ * $Id: StSstDaqMaker.h,v 1.6 2015/09/08 21:25:12 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.6  2015/09/08 21:25:12  smirnovd
+ * StSstDaqMaker: Removed unused and unimplemented class members
+ *
  * Revision 1.5  2015/07/06 18:53:10  bouchet
  * blanks removed to make C++ compiler happy (Thanks Yuri)
  *
@@ -81,7 +84,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.5 2015/07/06 18:53:10 bouchet Exp $ built " __DATE__ " " __TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.6 2015/09/08 21:25:12 smirnovd Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -90,40 +93,21 @@ private:
    void   DecodeRdoData();
    void   DecodeHitsData();
    void   DecodeRawWords(UInt_t *val, int vallength, int channel);
-   void   DecodeRawWords_r15(UInt_t *val, int vallength, int channel);
    void   DecodeCompressedWords(UInt_t *val, int valength, int channel);
    UInt_t Mid(Int_t start, Int_t end, UInt_t input);
    Int_t  Shift(int runnumber, int &channel);
    void   FindLadderSide(int RDO, int channel, int &ladder, int &side);
    void   FindStripNumber(int &strip);
-   void   DeclareNTuple();
    void   PrintConfiguration(Int_t runumber, sstConfiguration_st *config);
-   void   FillData(vector<vector<int> > vadc, vector<vector<float> > vcmnoise, Int_t id_side, Int_t ladder, Int_t valength);
-   Float_t CalculateCommonModeNoise(vector<int> vtemp);
-   Float_t CalculateCommonModeNoiseSimple(vector<int> vtemp);
-   void   FillReadOutPedTable();
-   void   FillDefaultReadOutPedTable();
-   void   FillNoiseTable();
-   void   FillDefaultNoiseTable();
    void   FillChipNoiseTable(sstChipCorrect_st *mChipCorrectTable);
    void   FillDefaultChipNoiseTable();
-   Int_t  idWaferToWafer(Int_t idWafer);
-   Int_t  idWaferToLadderNumb(Int_t idWafer);
 
    Char_t              mBeg[1]; //!
    StSstConfig         *mConfig;
    sstConfiguration_st *mConfigTable;//!
    St_spa_strip        *spa_strip;
    St_ssdPedStrip      *ssdPedStrip;
-   St_ssdStripCalib    *strip_calib;
-   St_ssdNoise         *mNoise;
    
-   Int_t   mUseChipCorrect;
-   Int_t   mUsePedSubtraction;
-   Int_t   mUseIntrinsicNoise;
-   Int_t   mReverse; //reverse Wafer and Strip ordering
-   Int_t   mReverseChip; // Reverse readout mapping.
-   Int_t   mDynamicMask; // Dynamic Masking hot chip.
    UInt_t *mRdoData;
    Int_t   mRdoDataLength;
    UInt_t *mHeaderData;
@@ -142,8 +126,6 @@ private:
    Float_t mPed;
    Float_t mRms;
    Int_t   mRDO;//RDO number
-   Int_t   mWafer[16];
-   Int_t   mStrip[768];
    Int_t   mChannel[8];
    UInt_t  mDataMode[8];// Raw or Compressed data .
    Int_t   mEventnumber;
@@ -154,8 +136,6 @@ private:
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
    Char_t  mEnd[1];        //!
 
-   map<Int_t, Int_t> mReadOutPed; //ReadOut Pedestal.
-   map<Int_t, Int_t> mIntrinsicRms; //Intrinsic Rms
    //DAQ File parameters(please look at the SSD data formata document. )
    static const UInt_t  HEADER_LENGTH       = 8;
    static const UInt_t  FIBER_HEADER_LENGTH = 10;
