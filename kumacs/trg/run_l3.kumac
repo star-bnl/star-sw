@@ -1,0 +1,155 @@
+* *************************************************************************
+* run_l3.kumac
+* 
+* 7/31/98 K. Turner - created
+* 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+* 
+************************************************************************
+************************************************************************
+
+ macro run__
+          TOP=/star/scr2e/yepes/l3 _
+          domain='trg' _
+          INPUT_DATA_DIR=/star/tof/data/ _
+          input_file=event_050_slow.dsl _
+          no_events=1 _
+          funit=21 _
+          nfile=l3.ntup _
+          nid=111 _
+          table=l3/track       
+    
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_l3
+* 
+* ***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+    
+
+ ***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** Input file              --> ' [input_file]        
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ 
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table] 
+
+
+***********************************************************
+* GLOBAL VARIABLES 
+***********************************************************
+    
+ macro/global/create input_file  [INPUT_DATA_DIR][input_file]   'Input file name'
+ macro/global/create TOP              [TOP]
+
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
+   
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup 
+ 
+ macro/global/import *
+   
+ exec load_libraries#run  [domain]  
+
+**************************************************************
+* OPEN FILES
+****************************************************************
+ 
+* open input file from simulation
+       exec read_table_from_file#init inev [input_file]
+       exec read_table_from_file#read inev 
+       exec read_table_from_file#read inev 
+
+ wait
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+  
+* **************************************************************
+*  Setup L3 
+* **************************************************************
+*
+*   Cluster finder
+*
+  exec l3cl_init
+*
+*   Tracker
+*
+  exec l3t_init
+*
+  exec create_tables_l3
+
+* **************************************************************
+*  Run l3 code
+* ****************************************************************
+
+  
+* read event and then process thru l3
+  do i=1,[no_events]
+    message 'run_l3: processing event ' [i]
+* zero all tables
+    tabclear [event]
+* read input file
+    exec read_table_from_file#read inev 
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+*
+*   Cluster finder  
+*
+    exec l3cl_run
+*
+*  Tracker
+*
+    exec ftf_run
+
+* write table to ntuple 
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+  
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+    if [i].lt.[no_events] then
+    message ' End of input file'
+  endif  
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit] [nid]
+
+* close input file
+  message ' close input file'
+  exec read_table_from_file#close inev
+
+return
+ 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
