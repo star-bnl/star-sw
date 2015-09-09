@@ -274,7 +274,10 @@ so we keep it here for source compatibility
 #define FPS_SYSTEM       28
 #define FPS_ID           FPS_SYSTEM
 
-#define RTS_NUM_SYSTEMS	29	/* current maximum. Can not be greater than 32! */
+#define STRXXX_SYSTEM       29
+#define STRXXX_ID           STRXXX_SYSTEM
+
+#define RTS_NUM_SYSTEMS	30	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -315,6 +318,8 @@ so we keep it here for source compatibility
 #define TOKEN_MANAGER_INSTANCE	5
 
 #define TCD_LX_INSTANCE		6
+
+#define CONTROLS_INSTANCE	7
 
 //#define BB2_INSTANCE    5
 //#define TM_INSTANCE     GB_INSTANCE
@@ -423,7 +428,7 @@ so we keep it here for source compatibility
 
 #define TCD_LX_NODE	((DAQ_SYSTEM<<12) | TCD_LX_INSTANCE)
 
-
+#define CONTROLS_NODE	((DAQ_SYSTEM<<12) | CONTROLS_INSTANCE)
 
 /* singular detectors */
 #define RIC01_NODE	((RIC_SYSTEM<<12) | 1)
@@ -572,6 +577,8 @@ so we keep it here for source compatibility
 
 #define FPS_NODES(x)     ((EXT2_SYSTEM<<12) | (FPS_SYSTEM<<7) | (x))
 
+#define STRXXX_NODES(x)  ((EXT2_SYSTEM<<12) | (STRXXX_SYSTEM<<7) | (x))
+
 extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
@@ -629,6 +636,8 @@ extern inline const char *rts2name(int rts_id)
 		return "L4" ;
 	case FPS_SYSTEM :
 		return "FPS" ;
+	case STRXXX_SYSTEM :
+		return "STRXXX" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -691,6 +700,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "l4" ;
 	case FPS_SYSTEM :
 		return "fps" ;
+	case STRXXX_SYSTEM :
+		return "strxxx";
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -736,6 +747,7 @@ extern inline int rts2det(int ix)
 //	case RPII_ID :
 	case GMT_ID :
 	case FPS_ID:
+	case STRXXX_ID:
 		return ix ;
 	default :
 		return -1 ;
@@ -832,7 +844,8 @@ extern inline int tcd2rts(int tcd)
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SST_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID)
+		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SST_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID) |\
+			(1<<STRXXX_ID) 
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
