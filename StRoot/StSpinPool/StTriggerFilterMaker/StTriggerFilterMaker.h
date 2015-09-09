@@ -1,7 +1,7 @@
 #ifndef ST_TRIGGER_FILTER_MAKER_HH
 #define ST_TRIGGER_FILTER_MAKER_HH
 
-// $Id: StTriggerFilterMaker.h,v 1.3 2014/08/06 11:43:40 jeromel Exp $
+// $Id: StTriggerFilterMaker.h,v 1.4 2015/09/09 20:29:39 akio Exp $
 
 /*****************************************************************************
  * @class StTriggerFilterMaker
@@ -29,15 +29,20 @@ public:
     //virtual Int_t Finish();
     
     void addTrigger(unsigned int trigId) { mGoodTriggers.push_back(trigId); }
-    
+    void addVetoTrigger(unsigned int trigId) { mVetoTriggers.push_back(trigId); }
+    void printTriggerId(int v=1) {mPrint=v;}
+
     const vector<unsigned int> getTriggers() const {return mGoodTriggers;}
+    const vector<unsigned int> getVetoTriggers() const {return mGoodTriggers;}
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.3 2014/08/06 11:43:40 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.4 2015/09/09 20:29:39 akio Exp $ built " __DATE__ " " __TIME__; return cvs;}
     
 private:
     vector<unsigned int> mGoodTriggers; //!
-    
+    vector<unsigned int> mVetoTriggers; //!
+    int mPrint; //!
+
     ClassDef(StTriggerFilterMaker,1)
 };
 
@@ -45,6 +50,10 @@ private:
 
 /*****************************************************************************
  * $Log: StTriggerFilterMaker.h,v $
+ * Revision 1.4  2015/09/09 20:29:39  akio
+ * Adding Vetoing TriggerId
+ * Also adding printing if option is set
+ *
  * Revision 1.3  2014/08/06 11:43:40  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
