@@ -136,7 +136,6 @@
     # be cleaned later). USE_64BITS defined externally.
     #
     # $USE_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
-    
     #
     $XMACHOPT = "";
   
@@ -257,19 +256,14 @@
 	$EXTRA_SOFLAGS = " -pg ";
 	$GPROF         = "yes";
     } else {
-	# GPROF will imply that we do not allow optimized
+       # GPROF will imply that we do not allow optimized
+       # ATTENTION - the debug options below are global for any compiler (not
+       # gcc specific). The rest is treated later
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = "-O -g";
-	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
-	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-		print "Notice: Enabling gcc patch for V4.x series\n";
-		if ( $2 <= 49 ){
-		    $DEBUG .= " -fno-inline";
-		}
-	    }
+	    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
 	    $FDEBUG= $DEBUG;
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
 	}
     }
 
@@ -288,21 +282,8 @@
     }  elsif (-e "$STAR/mgr/gccfilter") { 
       $gccfilter = "$STAR/mgr/gccfilter -c -w -a ";
       my $flag = system($gccfilter);
-#      print "$gccfilter   ===========> $flag\n";
       if ($flag) { $gccfilter = "";}
-#      print "gccfilter = $gccfilter ==============\n";
-#      die;
     } 
-#    if ($cxx_version >= 4.7) {
-#      print "C++11 activated.\n";
-#      $CXXFLAGS    .= " -std=c++11"; #gnu++11
-#    } elsif (defined($ENV{CXX11}) or $cxx_version .= 4.3) {
-#      print "C++0x activated. If you get any errors update to a compiler which fully supports C++11\n";
-#      $CXXFLAGS    .= " -std=c++0x"; # gnu++0x
-#    } else {
-#      print "C++11 needed. Therefore a gcc compiler with a version higher than 4.3 is needed.\n";
-#      $CXXFLAGS    .= " -ansi"; # == -std=c89
-#    }
 
     $CXXCOM = $gccfilter .
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
@@ -497,25 +478,61 @@
 	}
 
         # -fpermissive ?
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
-	#	  else {
-	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
-	#	}
+#	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
 
-	$CXXFLAGS    .= " -Wno-long-long";
- #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
+	#
+	# Additional GCC optimization flags if NODEBUG
+	#
+	if ( (defined( $ARG{NODEBUG} ) or $NODEBUG) && !defined($ENV{DEBUG_OPTIONS}) ) {
+           my $optflags = "";
+#	$CXXFLAGS    .= " -Wno-long-long";
+#       print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
 
-	# Additional optimization flags if NODEBUG
-	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-	    if ($CXX_VERSION < 3){
-		$optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	    } else {
-		# this naming convention starts at gcc 3.2 which happens to
-		# have a change in the options
-		$optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
-	    }
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	if ($CXX_VERSION < 3){
+	  $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
+	} elsif ( $CXX_VERSION < 4.5 ){
+	  # this naiming convention starts at gcc 3.2 which happens to
+	  # have a change in the options.
+	  # Valid and used up to 4.4.7
+	  $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	} elsif ( $CXX_VERSION == 4.8 ){
+	  # 4.8.2
+	  # leave the alignement to the compiler.
+	  #   2015 NB: does it make sense to align on 2 bytes nowadays?
+	  $optflags = "-falign-loops -falign-jumps -falign-functions";
 	}
+
+           # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
+           if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
+	     print "Notice: Enabling gcc patch for V4.x series\n";
+	     if ( $2 <= 49 ){
+	       # Note: all inlining failed with gcc 4.4.7 with no indication
+	       # of a resolve up to 4.4.9 . Symbols would be removed and
+	       # linking would fail.
+	       $DEBUG .= " -fno-inline";
+	     } elsif ( $2 <= 82){
+	       # Note: 4.8.2 is picky, we may ned to adjust options here
+	       #$DEBUG  =  "-O1 -g -fno-merge-constants";
+	       $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+	       # Other possible options part of O1
+	       #   -fmerge-all-constants (implies merge-contstants)
+	       #   -finline-functions-called-once
+	       #   -fcombine-stack-adjustments
+	       #   -fcompare-elim
+	       #   -fcprop-registers
+	       #   -fdce -fdse
+	       #   -ftree-dce -ftree-dse 
+	       #   -frerun-cse-after-loop
+	       #   -ftree-dominator-opts
+	       # With O2
+	       #   -fpartial-inlining
+	       #   -foptimize-sibling-calls
+	       #  With O3
+	       #   -finline-functions
+	     }
+	   }
+	   print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	 }
 
 	if ($optflags) {
 	    $CFLAGS   .= " " . $optflags;
@@ -803,12 +820,50 @@
     # Note - there is a trick here - the first element uses mysqllibdir
     #        which is dreived from where the INC is found hence subject to 
     #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-     my ($MYSQLLIBDIR,$MYSQLLIB) =
-                  script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-		  $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
-		  "libmysqlclient");
+    # my ($MYSQLLIBDIR,$MYSQLLIB) =
+    #  script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
+    #                   $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
+    #                   "libmysqlclient");
     #			 # "libmysqlclient_r libmysqlclient");
     # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
+
+    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
+    if ( $mysqlconf ){
+       $mysqlconf = "$MYSQLCONFIG/$mysqlconf";
+       # if ( 1==1 ){
+       # Do not guess, just take it - this leads to a cons error though TBC
+       chomp($MYSQLLIB = `$mysqlconf  --libs`);
+       # but remove -L which are treated separately by cons
+       my(@libs) = split(" ", $MYSQLLIB);
+       my($test) = shift(@libs);
+       if ( $test =~ /-L/){
+           $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+           $MYSQLLIB = "";
+           foreach my $el (@libs){
+               $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+           }
+       }
+
+       # here is a check for libmysqlclient
+
+
+       # die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
+
+       # mysqlconf returns (on SL5, 64 bits)
+       #  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
+       # } else {
+       #    $MYSQLLIB .= " -L/usr/$LLIB";
+       #    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+       #    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+       #    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+       #    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
+       #    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
+       #    $MYSQLLIB .= " -lz";
+       #    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+       # }
+    } else {
+       die "No mysql_config found\n";
+    }
      print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
           if ! $param::quiet;
 
@@ -977,35 +1032,9 @@
  #Vc check SSE support
  my $cmd = "touch /tmp/temp_gccflags.c; $CXX -E -dM -o - /tmp/temp_gccflags.c | grep -q SSE";
  my $VcCPPFLAGS = " -DVC_IMPL=SSE";
-#$VcCPPFLAGS .= " -msse -mfpmath=sse";
  if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
    $VcCPPFLAGS = " -DVC_IMPL=Scalar";
  } else {# check Vc from ROOT
-#   my $configFile = $ROOTSYS . "/config/Makefile.config";
-#   if (! -r $configFile) {
-#     $configFile = $ROOTSYS . "/Build/config/Makefile.config";
-#   }
-#   if (-r $configFile) {
-#      open (In, $configFile) or die "Can't open $configFile";
-#      $VcCPPFLAGS = "";
-#      while (my $line = <In>) {
-#	chop($line);
-#	print "line: $line\n";
-#	if ($line =~ /SIMDCXXFLAGS/) {
-#	  $line =~ s/^.*:=//; 
-#	  $VcCPPFLAGS .= " " . $line; print "VcCPPFLAGS = $VcCPPFLAGS\n";
-#	} elsif ($line =~ /AVXCXXFLAG/) {
-##	  $line =~ s/^.*:=//; 
-##	  $VcCPPFLAGS .= " " . $line; print "VcCPPFLAGS = $VcCPPFLAGS\n";
-#	} elsif ($line =~ /VCFLAGS/) {
-#	  $line =~ s/^.*:=//; 
-#	  $VcCPPFLAGS .= " " . $line; print "VcCPPFLAGS = $VcCPPFLAGS\n";
-#	}
-#      }
-#      close(In);
-#   } else {
-#     print "configFile : $configFile is not found\n";
-#   }
  }
  if (-r "/tmp/temp_gccflags.c") {`rm /tmp/temp_gccflags.c`;}
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
