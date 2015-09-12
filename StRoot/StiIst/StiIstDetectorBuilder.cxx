@@ -111,13 +111,14 @@ void StiIstDetectorBuilder::useVMCGeometry()
       std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
 
-      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
+      bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
       if (!isAvail) {
-         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node:" 
+		  << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
          continue;
       }
-
+      gGeoManager->cd(geoPath.str().c_str());
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
       TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
@@ -229,13 +230,14 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       // Save first part of geoPath to reuse in new detector names
       std::string pfx(ssPfx.str());
 
-      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
+      bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
       if (!isAvail) {
-         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder..." << endm;
+         LOG_WARN << "StiIstDetectorBuilder::useVMCGeometry() - Cannot find path to IBSS (IST sensitive) node:"
+		  << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
          continue;
       }
-
+      gGeoManager->cd(geoPath.str().c_str());
       TGeoHMatrix transMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
       // Temporarily save the translation for this sensor in Z so, we can center
