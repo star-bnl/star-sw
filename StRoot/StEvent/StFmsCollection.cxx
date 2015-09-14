@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $
+ * $Id: StFmsCollection.cxx,v 2.6 2015/09/14 16:59:53 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.cxx,v $
+ * Revision 2.6  2015/09/14 16:59:53  ullrich
+ * Added StFmsPointPair collection.
+ *
  * Revision 2.5  2015/09/01 21:01:47  ullrich
  * Minor changes to format of print statments and \nchange to naming of data member.
  *
@@ -32,13 +35,19 @@
 #include "StEvent/StFmsCluster.h"
 #include "StEvent/StFmsPoint.h"
 #include "StEvent/StFpsSlat.h"
+#include "StEvent/StFmsPointPair.h"
+#include "StarClassLibrary/StParticleTypes.hh"
 
-static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.6 2015/09/14 16:59:53 ullrich Exp $";
 
 StFmsCollection::StFmsCollection() :
-mFpsSlatFilled(false), mFpsAssociationFilled(false) { /* no op */ }
+mFpsSlatFilled(false), mFpsAssociationFilled(false), mFmsPointPairFilled(false) {
+}
 
-StFmsCollection::~StFmsCollection() { /* no op */ }
+StFmsCollection::~StFmsCollection() {
+    for(unsigned int i=0; i<mPointPairs.size(); i++) {delete (mPointPairs[i]);}
+    mPointPairs.clear();
+}
 
 unsigned int StFmsCollection::numberOfHits() const {
     return mHits.size();
@@ -131,13 +140,66 @@ void StFmsCollection::fillFpsAssociation(){
     mFpsAssociationFilled=true;
 }
 
-void StFmsCollection::sortPointsByEnergy(){
+void StFmsCollection::fillFmsPointPair(){
+    int np=numberOfPoints();
+    if(np<=1) return;
+    sortPointsByEnergy(); //first sort points by energy
+    for(int i=0; i<np-1; i++){
+        for(int j=i+1; j<np; j++){
+            mPointPairs.push_back(new StFmsPointPair(mPoints[i],mPoints[j]));
+        }
+    }
+    
+    mPointPairsEnergySorted = mPointPairs;
+    std::sort(mPointPairsEnergySorted.begin(), mPointPairsEnergySorted.end(), [](StFmsPointPair* a, StFmsPointPair* b) {
+        return b->energy() < a->energy();
+    });
+    
+    mPointPairsETSorted = mPointPairs;
+    std::sort(mPointPairsETSorted.begin(), mPointPairsETSorted.end(), [](StFmsPointPair* a, StFmsPointPair* b) {
+        return b->pT() < a->pT();
+    });
+    
+    mPointPairsPi0MassSorted = mPointPairs;
+    std::sort(mPointPairsPi0MassSorted.begin(), mPointPairsPi0MassSorted.end(), [](StFmsPointPair* a, StFmsPointPair* b) {
+        return fabs(b->mass() - StPionZero::instance()->mass()) > fabs(a->mass() -  StPionZero::instance()->mass());
+    });
+    
+    mFmsPointPairFilled=true;
+}
+
+unsigned int StFmsCollection::numberOfPointPairs() {
+    if(!mFmsPointPairFilled) fillFmsPointPair();
+    return mPointPairs.size();
+}
+
+vector<StFmsPointPair*>& StFmsCollection::pointPairs() {
+    if(!mFmsPointPairFilled) fillFmsPointPair();
+    return mPointPairs;
+}
+
+vector<StFmsPointPair*>& StFmsCollection::pointPairsEnergySorted() {
+    if(!mFmsPointPairFilled) fillFmsPointPair();
+    return mPointPairsEnergySorted;
+}
+
+vector<StFmsPointPair*>& StFmsCollection::pointPairsETSorted() {
+    if(!mFmsPointPairFilled) fillFmsPointPair();
+    return mPointPairsETSorted;
+}
+
+vector<StFmsPointPair*>& StFmsCollection::pointPairsPi0MassSorted() {
+    if(!mFmsPointPairFilled) fillFmsPointPair();
+    return mPointPairsPi0MassSorted;
+}
+
+void StFmsCollection::sortPointsByEnergy() {
     std::sort(mPoints.begin(), mPoints.end(), [](StFmsPoint* a, StFmsPoint* b) {
         return b->energy() < a->energy();
     });
 }
 
-void StFmsCollection::sortPointsByET(){
+void StFmsCollection::sortPointsByET() {
     std::sort(mPoints.begin(), mPoints.end(), [](StFmsPoint* a, StFmsPoint* b) {
         return b->fourMomentum().perp() < a->fourMomentum().perp();
     });
@@ -145,9 +207,10 @@ void StFmsCollection::sortPointsByET(){
 
 void StFmsCollection::print(int option) {
     cout << Form("NHit=%3d NCluster=%3d NPoint=%3d\n",numberOfHits(),numberOfClusters(),numberOfPoints());
-    if(option>3) for(unsigned int i=0; i<numberOfHits(); i++)     {hits()[i]->print();}
-    if(option>2) for(unsigned int i=0; i<numberOfClusters(); i++) {clusters()[i]->print();}
-    if(option>1) for(unsigned int i=0; i<mFpsSlats.size(); i++)   {fpsSlats()[i]->print();}
-    if(option>0) for(unsigned int i=0; i<numberOfPoints(); i++)   {points()[i]->print();}
+    if(option>=5) for(unsigned int i=0; i<numberOfHits(); i++)       {hits()[i]->print();}
+    if(option>=4) for(unsigned int i=0; i<numberOfClusters(); i++)   {clusters()[i]->print();}
+    if(option>=3) for(unsigned int i=0; i<mFpsSlats.size(); i++)     {fpsSlats()[i]->print();}
+    if(option>=2) for(unsigned int i=0; i<numberOfPoints(); i++)     {points()[i]->print();}
+    if(option>=1) for(unsigned int i=0; i<numberOfPointPairs(); i++) {pointPairs()[i]->print();}
 }
 
