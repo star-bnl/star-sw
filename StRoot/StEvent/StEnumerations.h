@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.59 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.60 2015/09/14 16:58:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.60  2015/09/14 16:58:13  ullrich
+ * Added items to StFmsDetectorId enumeration
+ *
  * Revision 2.59  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -340,15 +343,15 @@ enum ETrackStatusBits {
  */
 enum StVertexId {kUndefinedVtxId   = kUndefinedVertexIdentifier,
                  kEventVtxId       = kEventVertexIdentifier,
-		 kPrimaryVtxId     = kEventVertexIdentifier,
+		         kPrimaryVtxId     = kEventVertexIdentifier,
                  kV0VtxId          = kV0DecayIdentifier,
                  kXiVtxId          = kXiDecayIdentifier,
                  kKinkVtxId        = kKinkDecayIdentifier,
                  kOtherVtxId       = kOtherTypeIdentifier,
                  kFtpcEastCalVtxId = kFtpcEastCalibrationVertexIdentifier,
                  kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier,
-		 kBEAMConstrVtxId,
-		 kRejectedVtxId};
+		         kBEAMConstrVtxId,
+                 kRejectedVtxId};
 
 /*!
  * \enum StRichPidFlag
@@ -434,8 +437,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         minuitVertexFinder,
                         ppvVertexFinder,
                         ppvNoCtbVertexFinder,
-		    	mcEventVertexFFinder,
-			KFVertexFinder};
+		    	        mcEventVertexFFinder,
+			            KFVertexFinder};
 
 
 /*!
@@ -453,22 +456,24 @@ enum StL2AlgorithmId { l2Diagnostic = 0,
 /*!
  * \enum StPrimaryVertexOrder
  */
-enum StPrimaryVertexOrder { 
-  orderByNumberOfDaughters = 0, /**< enum value for sorting based on NumberOfDaughters (default)  */
-  orderByRanking                /**< enum value to switch ordering based on assigned rank         */
+enum StPrimaryVertexOrder {
+    orderByNumberOfDaughters = 0, /**< enum value for sorting based on NumberOfDaughters (default)  */
+    orderByRanking                /**< enum value to switch ordering based on assigned rank         */
 };
 
 
 /*!
  * \enum StL2TriggerResultType
  */
-enum StL2TriggerResultType {	l2Trg2006BEMCGammaPi = 0,
-		         	l2Trg2006BEMCGammaPiRandom,
-		         	l2Trg2006EEMCGammaPi,
-		         	l2Trg2006EEMCGammaPiRandom,
-		         	l2Trg2006MonoJet,
-		         	l2Trg2006DiJet,
-		         	l2Trg2006RandomJet};
+enum StL2TriggerResultType {
+    l2Trg2006BEMCGammaPi = 0,
+    l2Trg2006BEMCGammaPiRandom,
+    l2Trg2006EEMCGammaPi,
+    l2Trg2006EEMCGammaPiRandom,
+    l2Trg2006MonoJet,
+    l2Trg2006DiJet,
+    l2Trg2006RandomJet
+};
 
 /*!
  * \enum StFgtElecConsts
@@ -540,17 +545,35 @@ enum StFgtClusterSeedType {
     kFgtKeepStrip
 };
 
+/** FPS/FMS/FHC/FPS detectorId */
+enum StFmsDetectorId{
+    kFpdNorthDetId=0,
+    kFpdSouthDetId=1,
+    kFpdNorthPrsDetId=2,
+    kFpdSouthPrsDetId=3,
+    kFpdNorthSMDVDetId=4,
+    kFpdSouthSMDVDetId=5,
+    kFpdNorthSMDHDetId=6,
+    kFpdSouthSMDHDetId=7,
+    kFmsNorthLargeDetId=8,
+    kFmsSouthLargeDetId=9,
+    kFmsNorthSmallDetId=10,
+    kFmsSouthSmallDetId=11,
+    kFhcNorthDetId=12,
+    kFhcSouthDetId=13,
+    kFpsDetId=14
+};
+
 /** Categorization of a FMS tower cluster as 1- or 2-photon, or "not sure". */
 enum StFmsClusterCategory {
-  kAmbiguousCluster = 0,  ///< Could be 1- or 2-photon, needs to be fitted
-  k1PhotonCluster = 1,  ///< A cluster created by 1 photon
-  k2PhotonCluster = 2,  ///< A cluster created by 2 photons
-  kInvalidClusterCategory  ///< For default/unknown/error value
+    kAmbiguousCluster = 0,  ///< Could be 1- or 2-photon, needs to be fitted
+    k1PhotonCluster = 1,  ///< A cluster created by 1 photon
+    k2PhotonCluster = 2,  ///< A cluster created by 2 photons
+    kInvalidClusterCategory  ///< For default/unknown/error value
 };  // enum StFmsClusterCategory
 
 /** FPS basic constants */
 enum StFpsConstants {
-    kFpsDetId=14,
     kFpsNQuad=4,
     kFpsNLayer=3,
     kFpsNSlat=21,
@@ -561,12 +584,12 @@ enum StFpsConstants {
 /** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
 namespace StIstConsts
 {
-   const int kIstNumLadders = 24;          ///< 24 IST Ladders
-   const int kIstNumSensorsPerLadder = 6;  ///< 6 sensor per one IST Ladder
-   const int kIstNumSensors = 144;         ///< 144 sensors
-   const int kIstNumPadsPerSensor = 768;   ///< 768 pads in each sensor
-   const int kIstNumRowsPerSensor = 64;    ///< 64 rows in r-phi direction per each sensor
-   const int kIstNumColumnsPerSensor = 12; ///< 12 columns in beam direction per each sensor
+    const int kIstNumLadders = 24;          ///< 24 IST Ladders
+    const int kIstNumSensorsPerLadder = 6;  ///< 6 sensor per one IST Ladder
+    const int kIstNumSensors = 144;         ///< 144 sensors
+    const int kIstNumPadsPerSensor = 768;   ///< 768 pads in each sensor
+    const int kIstNumRowsPerSensor = 64;    ///< 64 rows in r-phi direction per each sensor
+    const int kIstNumColumnsPerSensor = 12; ///< 12 columns in beam direction per each sensor
 }
 
 const char *detectorNameById(StDetectorId id);
