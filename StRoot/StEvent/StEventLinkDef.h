@@ -156,5 +156,7 @@
 #pragma link C++ function operator<<(ostream&, const StRnDHit&);        
 #pragma link C++ function operator<<(ostream&, const StRpsCluster&);        
 #pragma link C++ function operator<<(ostream&, const StFmsHit&);        
+
+#pragma link C++ class vector<StFmsPointPair*>+;
 #endif
 
