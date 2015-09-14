@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPoint.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $
+ * $Id: StFmsPoint.cxx,v 2.6 2015/09/14 16:59:22 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPoint.cxx,v $
+ * Revision 2.6  2015/09/14 16:59:22  ullrich
+ * Added comments and modified print out.
+ *
  * Revision 2.5  2015/09/01 21:01:47  ullrich
  * Minor changes to format of print statments and \nchange to naming of data member.
  *
@@ -29,7 +32,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.5 2015/09/01 21:01:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.6 2015/09/14 16:59:22 ullrich Exp $";
 
 StFmsPoint::StFmsPoint()
 : mDetectorId(0), mEnergy(-1.0), mX(-99.0), mY(-99.0),
@@ -40,7 +43,7 @@ mId(-1), mParentClusterId(-1), mNParentClusterPhotons(-1), mCluster(0)
 
 StFmsPoint::~StFmsPoint() { /* no op */ }
 
-int   StFmsPoint::fpsNCandidate(int layer){
+int   StFmsPoint::fpsNCandidate(int layer) {
     if (layer>=1 && layer<=kFpsNLayer) {
         return mFpsNCandidate[layer-1];
     }
@@ -108,13 +111,9 @@ void StFmsPoint::orderFpsCandidates(int layer) {  //order candidates by distance
     if(layer>0) {l1=layer-1; l2=layer;}
     for(int l=l1; l<l2; l++){
         int n=mFpsNCandidate[l];
-        cout << Form("orderFpsCandidates layer=%1d n=%d\n",layer, n);
-        for(int i=0; i<n; i++) cout << Form(" id=%3d mip=%6.2f d=%6.2f\n",mFpsSlatId[l][i],mFpsMip[l][i],mFpsDistance[l][i]);
         if(n<2) continue;
         int index[kFpsNCandidate];
         TMath::Sort(n,mFpsDistance[l],index,false); //flase=increasing order
-        for(int i=0; i<n; i++)
-            cout << Form(" id=%3d mip=%6.2f d=%6.2f index=%d\n",mFpsSlatId[l][i],mFpsMip[l][i],mFpsDistance[l][i],index[i]);
         for(int i=0; i<n-1; i++) {   //swap contents based on index
             int j=index[i];
             if(j!=i){
@@ -134,8 +133,6 @@ void StFmsPoint::orderFpsCandidates(int layer) {  //order candidates by distance
                         break;
                     }
                 }
-                for(int ii=0; ii<n; ii++)
-                    cout << Form(" swap=%1d id=%3d mip=%6.2f d=%6.2f index=%d\n",i,mFpsSlatId[l][ii],mFpsMip[l][ii],mFpsDistance[l][ii],index[ii]);
             }
         }
     }
