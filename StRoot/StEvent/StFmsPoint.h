@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPoint.h,v 2.5 2015/09/01 21:01:47 ullrich Exp $
+ * $Id: StFmsPoint.h,v 2.6 2015/09/14 16:59:22 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  **************************************************************************
@@ -11,6 +11,9 @@
  **************************************************************************
  *
  * $Log: StFmsPoint.h,v $
+ * Revision 2.6  2015/09/14 16:59:22  ullrich
+ * Added comments and modified print out.
+ *
  * Revision 2.5  2015/09/01 21:01:47  ullrich
  * Minor changes to format of print statments and \nchange to naming of data member.
  *
@@ -47,11 +50,11 @@ public:
         kFpsPidGamma5=14,     // L1>=1 L2==0 L3>=1    gamma with extra hit in layer1
         kFpsPidGamma6=15,     // L1==0 L2>=1 L3>=1    gamma with extra hit in layer2
         kFpsPidGamma7=16,     // L1>=2 L2>=2 L3>=5    gamma converted to e+e-
-        kFpsPidMip=20,        // L1==1 L2==1 L3==1    MIP
-        kFpsPidElectron1=30,  // L1==1 L2==1 L3>=5    golden electron
+        kFpsPidMip=20,        // L1==1 L2==1 L3==1    MIP (charged hadron or muon)
+        kFpsPidElectron1=30,  // L1==1 L2==1 L3>=5    golden electron/positron
         kFpsPidElectron2=31,  // L1==1 L2>=2 L3>=5    electron
         kFpsPidElectron3=32,  // L1>=2 L2==1 L3>=5    electron
-        kFpsPidUnknown=90     // L1>=1 L2>=1 L3==0    not sure what to do
+        kFpsPidUnknown=40     // L1>=1 L2>=1 L3==0    not sure what to do
     };
     
     const char* pidName(int i);
