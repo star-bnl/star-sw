@@ -38,17 +38,17 @@ class ComponentVoxel : public ComponentBase {
                const double zmax);
   // Import electric field and potential values from a file.
   // The file is supposed to contain one line for each mesh point starting with
-  //   - either three floating point numbers,
+  //   - either two or three floating point numbers,
   //     specifying the coordinates (in cm) of the element centre or
-  //   - three integers specifying the index of the element in the mesh,
+  //   - two or three integers specifying the index of the element in the mesh,
   // followed by
-  //   - three floating point numbers for the electric field (in V/cm),
+  //   - two or three floating point numbers for the electric field (in V/cm),
   // and (depending on the values of withPotential and withRegion),
   //   - a floating point number specifying the potential (in V), and
   //   - an integer specifying the "region" of the element.
   // Format types are:
-  // "xyz": elements is specified by the coordinates of their centres
-  // "ijk": elements are specified by its index
+  // "xy", "xyz": elements are specified by the coordinates of their centres
+  // "ij", "ijk": elements are specified by their indices
   bool LoadData(const std::string filename, std::string format,
                 const bool withPotential, const bool withRegion,
                 const double scaleX = 1., const double scaleE = 1.,
@@ -67,7 +67,7 @@ class ComponentVoxel : public ComponentBase {
 
  private:
 #ifndef __CINT__
-  std::map<int, Medium*> media;
+  std::map<int, Medium*> m_media;
 #endif
   struct element {
     // Electric field
@@ -77,18 +77,18 @@ class ComponentVoxel : public ComponentBase {
     // Index of region
     int region;
   };
-  std::vector<std::vector<std::vector<element> > > mesh;
+  std::vector<std::vector<std::vector<element> > > m_mesh;
   // Dimensions of the mesh
-  unsigned int nX, nY, nZ;
-  double xMin, yMin, zMin;
-  double xMax, yMax, zMax;
+  unsigned int m_nX, m_nY, m_nZ;
+  double m_xMin, m_yMin, m_zMin;
+  double m_xMax, m_yMax, m_zMax;
 
-  bool hasMesh;
-  bool hasPotential;
-  bool hasField;
+  bool m_hasMesh;
+  bool m_hasPotential;
+  bool m_hasField;
 
   // Voltage range
-  double pMin, pMax;
+  double m_pMin, m_pMax;
 
   // Reset the component
   void Reset();

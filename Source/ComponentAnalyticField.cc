@@ -1433,12 +1433,9 @@ bool ComponentAnalyticField::CellCheck() {
     planes[2] = planes[3];
   }
 
-  std::vector<bool> wrong;
-  wrong.clear();
-  wrong.resize(nWires);
+  std::vector<bool> wrong(nWires, false);
   // Second pass for the wires, check position relative to the planes.
   for (int i = 0; i < nWires; ++i) {
-    wrong[i] = false;
     if (ynplan[0] && w[i].x - 0.5 * w[i].d <= coplan[0]) wrong[i] = true;
     if (ynplan[1] && w[i].x + 0.5 * w[i].d >= coplan[1]) wrong[i] = true;
     if (ynplan[2] && w[i].y - 0.5 * w[i].d <= coplan[2]) wrong[i] = true;
@@ -2696,10 +2693,7 @@ bool ComponentAnalyticField::SetupD30() {
   //   (Last changed on 21/ 2/94.)
   //-----------------------------------------------------------------------
 
-  wmap.resize(nWires);
-  for (int i = nWires; i--;) {
-    wmap[i] = std::complex<double>(0., 0.);
-  }
+  wmap.assign(nWires, std::complex<double>(0., 0.));
 
   std::complex<double> wd = std::complex<double>(0., 0.);
 
@@ -3730,9 +3724,7 @@ void ComponentAnalyticField::InitializeCoefficientTables() {
   const int nterms = 16;
 
   // Tables of coefficients used by ConformalMap
-  cc1.clear();
   cc1.resize(6);
-  cc2.clear();
   cc2.resize(6);
   for (int i = 0; i < 6; ++i) {
     cc1[i].clear();
@@ -4477,7 +4469,6 @@ bool ComponentAnalyticField::SetupWireSignals() {
   //   (Last changed on  4/10/06.)
   //-----------------------------------------------------------------------
 
-  sigmat.clear();
   sigmat.resize(nWires);
   for (int i = 0; i < nWires; ++i) {
     sigmat[i].clear();
@@ -4796,7 +4787,6 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
   //-----------------------------------------------------------------------
 
   const int nPlanes = 5;
-  qplane.clear();
   qplane.resize(nPlanes);
   for (int i = 0; i < nPlanes; ++i) {
     qplane[i].resize(nWires);
