@@ -1,6 +1,10 @@
-// $Id: StFmsPointMaker.cxx,v 1.2 2015/09/02 14:52:15 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.3 2015/09/18 18:46:47 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.3  2015/09/18 18:46:47  akio
+// Move energy sum check for killing LED tail event to whole FMS, not each module
+// Also make it not dependent on beam energy, so that it runs on simulation as well.
+//
 // Revision 1.2  2015/09/02 14:52:15  akio
 // Adding readMuDst() to give options when reading back from mudst
 //
@@ -41,7 +45,7 @@ namespace {
 }  // unnamed namespace
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
-  : StMaker(name), mObjectCount(0), mReadMuDst(0) { }
+    : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0) { }
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -70,14 +74,15 @@ Int_t StFmsPointMaker::Make() {
       however we do it in StFmsPointMaker for now until we can verify changes
       with the MuDST coordinator. It should work OK as I don't think any other
       STAR makers use TRef. */
-  LOG_INFO << "StFmsPointMaker making" << endm;
+  LOG_DEBUG << "StFmsPointMaker making" << endm;
   if(mReadMuDst) return readMuDst();
 
   mObjectCount = TProcessID::GetObjectCount();
   if (!populateTowerLists()) { //this also assigns mFmsCollection
-    LOG_ERROR << "StFmsPointMaker::Make() - failed to initialise tower " <<
-      "lists for the event" << endm;
-    return kStErr;
+      return kStOK; //return ok even if energy sum exceed max
+      //LOG_ERROR << "StFmsPointMaker::Make() - failed to initialise tower " <<
+      //  "lists for the event" << endm;
+      //return kStErr;
   }  // if
   clusterEvent();
   return StMaker::Make();
@@ -109,9 +114,11 @@ int StFmsPointMaker::clusterEvent() {
     return kStErr;
   }  // if
   for (auto i = mTowers.begin(); i != mTowers.end(); ++i) {
+    /* Removing LED tail was moved to populateTowerList()      
     if (!validateTowerEnergySum(i->second)) {
       continue;  // To remove LED trails
     }  // if
+    */
     clusterDetector(&i->second, i->first);
   }  // for
   mFmsCollection->sortPointsByET();
@@ -123,34 +130,41 @@ int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
   FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId);
   // Perform tower clustering, skip this subdetector if an error occurs
-  if (!clustering.cluster(towers)) {  // Cluster tower list
-    return kStWarn;
+  if (!clustering.cluster(towers)) {  // Cluster tower list      
+    LOG_DEBUG << Form("clusterDetector failed for det=%d",detectorId)<<endm;
+    return kStOk; //mostly low energy which makes this fail. Returning ok.
   }  // if
   // Saved cluster info into StFmsCluster
   auto& clusters = clustering.clusters();
   for (auto cluster = clusters.begin(); cluster != clusters.end(); ++cluster) {
     processTowerCluster(cluster->get(), detectorId);
   }  // for
+  LOG_INFO << Form("Found %d clusters for detid=%d",clusters.size(),detectorId)<<endm;
   return kStOk;
 }
 
 bool StFmsPointMaker::validateTowerEnergySum(const TowerList& towers) const {
-  // Attempt to get center-of-mass energy from StRunInfo.
-  // If it can't be accessed assume 500 GeV running.
-  double centerOfMassEnergy(500.);
-  const StEvent* event = static_cast<const StEvent*>(GetInputDS("StEvent"));
-  if (event) {
+    /* remove acceing centerOfMassEnergy in StEvent, which can be
+       garbage for MC. BTW, shouldn't this be 1/2 of 510/200GeV?
+    // Attempt to get center-of-mass energy from StRunInfo.
+    // If it can't be accessed assume 500 GeV running.
+    double centerOfMassEnergy(500.);
+    const StEvent* event = static_cast<const StEvent*>(GetInputDS("StEvent"));
+    if (event) {
     if (event->runInfo()) {
-      centerOfMassEnergy = event->runInfo()->centerOfMassEnergy();
+    centerOfMassEnergy = event->runInfo()->centerOfMassEnergy();
     }  // if
-  }  // if
-  // Sum tower energies and test validity of the sum
-  double Esum = 0.f;
-  typedef TowerList::const_iterator TowerIter;
-  for (TowerIter i = towers.begin(); i != towers.end(); ++i) {
-    Esum += i->hit()->energy();
-  }  // for
-  return Esum >= 0.f && Esum <= centerOfMassEnergy;
+    }  // if
+    */
+
+    // Sum tower energies and test validity of the sum
+    double Esum = 0.f;
+    typedef TowerList::const_iterator TowerIter;
+    for (TowerIter i = towers.begin(); i != towers.end(); ++i) {
+	Esum += i->hit()->energy();
+    }  // for
+    LOG_DEBUG << Form("Esum=%f Max=%f",Esum,mMaxEnergySum) <<endm;
+    return Esum >= 0.f && Esum <= mMaxEnergySum;
 }
 
 bool StFmsPointMaker::processTowerCluster(
@@ -166,10 +180,8 @@ bool StFmsPointMaker::processTowerCluster(
   cluster->setDetectorId(detectorId);
   // Cluster id is id of the 1st photon, not necessarily the highest-E photon
   cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * detectorId + mFmsCollection->numberOfPoints());
-  // Cluster locations are in column-row coordinates so convert to cm
-  //StThreeVectorF xyz = mGeometry.columnRowToGlobalCoordinates(
-  //    cluster->x(), cluster->y(), detectorId);
-  StThreeVectorF xyz = mFmsDbMaker->getStarXYZ(detectorId,cluster->x(), cluster->y());
+  // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
+  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(detectorId,cluster->x(),cluster->y());
   cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
@@ -219,11 +231,12 @@ StFmsPoint* StFmsPointMaker::makeFmsPoint(
 bool StFmsPointMaker::populateTowerLists() {
   mFmsCollection = getFmsCollection();
   if (!mFmsCollection) {
-      LOG_INFO << "mFmsCollection is null" << endm;
+      LOG_ERROR << "mFmsCollection is null" << endm;
       return false;
   }  // if
   auto& hits = mFmsCollection->hits();
-  LOG_INFO << "nhits = " << hits.size() << endm;
+  LOG_DEBUG << "Found nhits = " << hits.size() << endm;
+  float sumE=0.0;
   for (auto i = hits.begin(); i != hits.end(); ++i) {
     StFmsHit* hit = *i;
     const int detector = hit->detectorId();
@@ -233,6 +246,7 @@ bool StFmsPointMaker::populateTowerLists() {
       continue;
     }  // if
     if (hit->adc() > 0) {
+      sumE+=hit->energy();
       // Insert a tower list for this detector ID if there isn't one already
       // This method is faster than using find() followed by insert()
       // http://stackoverflow.com/questions/97050/stdmap-insert-or-stdmap-find
@@ -247,6 +261,12 @@ bool StFmsPointMaker::populateTowerLists() {
       }  // if
     }  // if
   }  // for
+  cout << Form("Esum=%f Max=%f\n",sumE,mMaxEnergySum);
+  if(sumE<0.0 || sumE>mMaxEnergySum) {
+      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?)",sumE,mMaxEnergySum)<< endm;
+      LOG_INFO << "Skipping clustering and fitting photons"<< endm;
+      return false;
+  }
   return true;
 }
 
@@ -305,16 +325,7 @@ Int_t StFmsPointMaker::readMuDst(){
   for (unsigned i(0); i < fmscol->numberOfPoints(); ++i) {
     StFmsPoint* p = fmscol->points()[i];
     if(p){
-      //StThreeVectorF xyz  = mGeometry.localToGlobalCoordinates(p->x(),p->y(),p->detectorId(),0);
-      //StThreeVectorF xyz  = mGeometry.localToGlobalCoordinates(p->x(),p->y(),p->detectorId(),1);
       StThreeVectorF xyz  = mFmsDbMaker->getStarXYZ(p->detectorId(),p->x(),p->y());
-      /*
-	StThreeVectorF xyz1 = mGeometry.localToGlobalCoordinates(p->x(),p->y(),p->detectorId());
-	StThreeVectorF xyz2 = mGeometry.localToGlobalCoordinates(p->x(),p->y(),p->detectorId(),1);
-	printf("XYZ %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f\n",
-	xyz1.x(),xyz1.y(),xyz1.z(),
-	xyz2.x(),xyz2.y(),xyz2.z()); 
-      */
       p->setXYZ(xyz);
       p->setFourMomentum(compute4Momentum(xyz, p->energy()));
     }
