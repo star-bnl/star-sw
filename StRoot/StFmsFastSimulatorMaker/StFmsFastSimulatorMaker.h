@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.4 2015/07/28 14:50:05 jeromel Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.5 2015/09/18 18:44:28 akio Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.5  2015/09/18 18:44:28  akio
+// uses StEnumeration
+//
 // Revision 1.4  2015/07/28 14:50:05  jeromel
 // Fix string literal spacing for C++11 compliance
 //
@@ -65,7 +68,6 @@ class StFmsFastSimulatorMaker : public StMaker {
    Returns kStOk in case of success, kStError otherwise.
    */
   Int_t Make();
-  Int_t Clear(){};
 
   // Setting average # of photon per MIP for FPS
   void  setFpsNPhotonPerMIP(float v) {mFpsNPhotonPerMIP=v;}
@@ -76,6 +78,8 @@ class StFmsFastSimulatorMaker : public StMaker {
   virtual const char* GetCVS() const;
 
  private:
+
+
   /**
    Enumeration for FPD and FMS subdetectors.
    
@@ -86,6 +90,7 @@ class StFmsFastSimulatorMaker : public StMaker {
    subdetectors, but they are not valid return values (hits corresponding
    to these subdetectors will return kFmsInvalidDetectorId).
    */
+  /* See StRoot/StEvent/StEnumerations.h   
   enum StFmsDetectorId {
     kFpdNorth = 0,
     kFpdSouth = 1,
@@ -98,6 +103,7 @@ class StFmsFastSimulatorMaker : public StMaker {
     kFPS = 14,
     kFmsInvalidDetectorId = -1
   };
+    */
 
   /**
    Returns the detector ID of an FPD or FMS detector subsystem.   
@@ -124,7 +130,7 @@ class StFmsFastSimulatorMaker : public StMaker {
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.4 2015/07/28 14:50:05 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.5 2015/09/18 18:44:28 akio Exp $ built " __DATE__ " " __TIME__ ;
   return cvs;
 }
 

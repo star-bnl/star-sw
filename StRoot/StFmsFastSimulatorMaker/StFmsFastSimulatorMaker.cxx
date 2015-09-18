@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.3 2015/02/26 23:53:04 yuxip Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.4 2015/09/18 18:44:28 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.4  2015/09/18 18:44:28  akio
+// uses StEnumeration
+//
 // Revision 1.3  2015/02/26 23:53:04  yuxip
 // new update from Akio
 //                                                                               
@@ -32,7 +35,7 @@ StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : StMaker(n
 
 /* Process one event. */
 Int_t StFmsFastSimulatorMaker::Make() {
-  printf("StFmsFastSimulatorMaker::Make\n");
+  LOG_DEBUG << "StFmsFastSimulatorMaker::Make" << endm;
   // Check for the FMS database maker, bail out if it can't be located.
   if (!GetMaker("fmsDb")) {
     LOG_ERROR << "No StFmsDbMaker. StFmsDbMaker library not loaded?" << endm;
@@ -43,12 +46,12 @@ Int_t StFmsFastSimulatorMaker::Make() {
   if (!event) {        
     event = new StEvent;
     AddData(event);
-    printf("Creating StEvent\n");
+    LOG_DEBUG << "Creating StEvent" << endm;
   }  // if
   // Add an FMS collection to the event if one does not already exist.
   if (!event->fmsCollection()) {
     event->setFmsCollection(new StFmsCollection);
-    printf("Creating StFmsCollection\n");
+    LOG_DEBUG << "Creating StFmsCollection" << endm;
   }  // if
   // Digitize GEANT FPD/FMS hits
   fillStEvent(event);
@@ -85,17 +88,17 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     if (hit) {
       const Int_t detectorId = getDetectorId(*hit);
       Int_t channel;
-      if(detectorId!=kFPS) channel=hit->volume_id % 1000;
-      else                 channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
+      if(detectorId!=kFpsDetId) channel=hit->volume_id % 1000;
+      else                      channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
       if(detectorId<0 || detectorId>=NDET || channel<0 || channel>=NCH){
-	printf("det or ch out of range det=%d ch=%d",detectorId,channel);
+	  LOG_DEBUG << Form("det or ch out of range det=%d ch=%d",detectorId,channel) << endm;
 	continue;
       }
       Float_t energy = hit->de;
       StFmsHit* fmshit=0;
       if(map[detectorId][channel]==0){ // New hit
 	Int_t qtCrate, qtSlot, qtChannel, adc=0, tdc=0;
-	if(detectorId!=kFPS){
+	if(detectorId!=kFpsDetId){
 	  dbMaker->getMap(detectorId, channel, &qtCrate, &qtSlot, &qtChannel);
 	}else{ //FPS
 	  qtCrate=6;
@@ -104,7 +107,6 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	fmshit = new StFmsHit(detectorId, channel, qtCrate, qtSlot, qtChannel, adc, tdc, energy);
 	hits.push_back(fmshit);
 	map[detectorId][channel]=fmshit;
-	//printf("Det=%2d Ch=%3d QTCrt=%2d Slot=%2d ch=%2d ADC=%4d TDC=%2d E=%f\n",detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
       }else{ // Adding energy to old hit
 	fmshit = map[detectorId][channel];
 	fmshit->setEnergy(fmshit->energy() + energy);
@@ -120,7 +122,7 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     Float_t energy=hits[i]->energy();
     Float_t gain, gainCorrection;
     int adc;
-    if(detectorId!=kFPS){
+    if(detectorId!=kFpsDetId){
       // Get gain and correction from the database.
       gain = dbMaker->getGain(detectorId, channel);
       gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
@@ -134,18 +136,23 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     adc = std::max(adc, 0);  // Prevent negative ADC
     adc = std::min(adc, 4095);  // Cap maximum ADC = 4,095
     // Recalculate energy accounting for ADC range
-    Float_t digi_energy = adc * gain * gainCorrection;
+    Float_t digi_energy;
+    if(detectorId!=kFpsDetId){
+	digi_energy = adc * gain * gainCorrection;
+    }else{
+	digi_energy = adc * gain; //for FPS, this is not really energy but # of MIPs
+    }
     if(adc>0){ //store only if significant energy deposit to make adc>0
       hits[i]->setAdc(adc);
       hits[i]->setEnergy(digi_energy);
       fmscollection->addHit(hits[i]);
       if(Debug())
-	printf("Det=%2d Ch=%3d E=%f gain=%f ADC=%4d digiE=%f\n",detectorId,channel,energy,gain,adc,digi_energy);
+	  cout << Form("Det=%2d Ch=%3d E=%8.3f gain=%6.3f ADC=%4d digiE=%8.3f\n",detectorId,channel,energy,gain,adc,digi_energy);
     }else{
       delete hits[i];
     }
   }
-  LOG_INFO << Form("Found %d g2t hits in %d cells, created %d hits with ADC>0\n",nHits,nfmshit,fmscollection->numberOfHits()) <<endm;
+  LOG_INFO << Form("Found %d g2t hits in %d cells, created %d hits with ADC>0",nHits,nfmshit,fmscollection->numberOfHits()) <<endm;
 }
 
 /*
@@ -213,26 +220,26 @@ Int_t StFmsFastSimulatorMaker::getDetectorId(const g2t_emc_hit_st& hit) const {
   const Int_t isFPS    = volumeId / 100000;
   const Int_t fpdOrFms = (volumeId % 100000) / 10000;
   const Int_t module   = (volumeId % 10000) / 1000;
-  if(isFPS) return kFPS;
+  if(isFPS) return kFpsDetId;
   switch (fpdOrFms) {
   case kFpd:
     switch (module) {
-    case 1: return kFpdNorth;  // north
-    case 2: return kFpdSouth;  // south
-    case 5: return kFpdNorthPreshower;  // preshower north
-    case 6: return kFpdSouthPreshower;  // preshower south
+    case 1: return kFpdNorthDetId;     // north
+    case 2: return kFpdSouthDetId;     // south
+    case 5: return kFpdNorthPrsDetId;  // preshower north
+    case 6: return kFpdSouthPrsDetId;  // preshower south
     }  // switch
     break;
   case kFms:
     switch (module) {
-    case 1: return kFmsNorthLarge;  // north large cells
-    case 2: return kFmsSouthLarge;  // south large cells
-    case 3: return kFmsNorthSmall;  // north small cells
-    case 4: return kFmsSouthSmall;  // south small cells
+    case 1: return kFmsNorthLargeDetId;  // north large cells
+    case 2: return kFmsSouthLargeDetId;  // south large cells
+    case 3: return kFmsNorthSmallDetId;  // north small cells
+    case 4: return kFmsSouthSmallDetId;  // south small cells
     }  // switch
     break;
   }  // switch
-  return kFmsInvalidDetectorId;
+  return -1;
 }
 
 /* Dump hit information to LOG_INFO. */
