@@ -1,6 +1,10 @@
-// $Id: StFmsPointMaker.h,v 1.3 2015/09/02 14:52:15 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.4 2015/09/18 18:46:47 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.4  2015/09/18 18:46:47  akio
+// Move energy sum check for killing LED tail event to whole FMS, not each module
+// Also make it not dependent on beam energy, so that it runs on simulation as well.
+//
 // Revision 1.3  2015/09/02 14:52:15  akio
 // Adding readMuDst() to give options when reading back from mudst
 //
@@ -54,6 +58,9 @@ class StFmsPointMaker : public StMaker {
   Int_t Make();
   /** Called after each event to reset values. */
   void Clear(Option_t* option = "");
+
+  /** Set max energy on sum of all cell to kill tail of LED */
+    void setMaxEnergySum(Float_t v) {mMaxEnergySum=v;}
 
   /** Set to read MuDST, then only this maker does is recalc point position using DB values */
   /** and does NOT perform cluster finding nor fitting */
@@ -130,6 +137,8 @@ class StFmsPointMaker : public StMaker {
   StFmsCollection* mFmsCollection; //!< StFmsCollection as retrieved from StEvent
   TowerMap mTowers;  //!< One for each sub-detector, keyed by detector ID
   int mObjectCount;  //!< Object count in event for use with TRef
+
+  Float_t mMaxEnergySum; //! max energy cut on sum of all cells
 
   Int_t readMuDst();
   Int_t mReadMuDst;   //! 0= Do clustering and make Fms points
