@@ -2784,8 +2784,7 @@ void Medium::InitParamArrays(
   for (unsigned int i = 0; i < aRes; ++i) {
     tab[i].resize(bRes);
     for (unsigned int j = 0; j < bRes; ++j) {
-      tab[i][j].clear();
-      tab[i][j].resize(eRes, val);
+      tab[i][j].assign(eRes, val);
     }
   }
 }
@@ -2808,8 +2807,7 @@ void Medium::InitParamTensor(
     for (unsigned int i = 0; i < aRes; ++i) {
       tab[l][i].resize(bRes);
       for (unsigned int j = 0; j < bRes; ++j) {
-        tab[l][i][j].clear();
-        tab[l][i][j].resize(eRes, val);
+        tab[l][i][j].assign(eRes, val);
       }
     }
   }

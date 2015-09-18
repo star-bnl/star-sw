@@ -47,7 +47,7 @@ void TPCAnodeWires(ComponentAnalyticField* comp, const Char_t *setup,
 		   Double_t df,      	/* field wire diameter */	      
 		   Double_t V,	     	/* Voltage */                    
 		   Bool_t zFLW = kFALSE /* kTRUE if Zero field last wire */
-			) {    
+		   ) {    
   cout << "TPCAnodeWires: " << setup << " total no. of anode wires = " << na + 1
        << " no. of field wires from each side " << nf 
        << " X position of zero wire " << xW 
@@ -79,17 +79,18 @@ void TPCAnodeWires(ComponentAnalyticField* comp, const Char_t *setup,
 //________________________________________________________________________________
 void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   TString PWD(gSystem->WorkingDirectory());
-  TString Geometry(gSystem->BaseName(gSystem->DirName(PWD)));
-  TString cdir(gSystem->BaseName(PWD));
+  TString Geometry(gSystem->BaseName(PWD)); cout << "Directory : " << Geometry.Data() << endl;
   TString Region("IO");
-  if (cdir.Contains("II"))      Region = "II";
-  else if (cdir.Contains("OO")) Region = "OO";  cout << "Region\t" << Region.Data() << endl;
+  if (Geometry.Contains("II"))      Region = "II";
+  else if (Geometry.Contains("OO")) Region = "OO";  
+  cout << "Region\t" << Region.Data() << endl;
   if (! (Geometry.BeginsWith("TPC") ||
 	 Geometry.BeginsWith("iTPC_3x125mkm") ||
 	 Geometry.BeginsWith("iTPC_3x250mkm") ||
 	 Geometry.BeginsWith("iTPC_3x500mkm") ||
-	 Geometry.BeginsWith("iTPC_3x1mm")    
-	 )
+	 Geometry.BeginsWith("iTPC_3x1mm")    ||    
+	 Geometry.BeginsWith("iTPC_3x125mkm_JT_091515") ||
+	 Geometry.BeginsWith("iTPC_3x125mkm_JT_091715"))
       )                                 {cout << "Geometry has not been recognized" << endl; return;}
   cout << "Geometry\t" << Geometry.Data() << endl;
   // STAR coordinate system (xS,yS,zS) => Garfield (yS,zG,xG,yG); Garfield(xG,yG,zG) = > Star(y,z,x)
@@ -212,7 +213,7 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   const Double_t dSens = 2*anodeWireRadius;
   const Double_t dFG   = 2*frischGridWireRadius;
   const Double_t dGG   = 2*gatingGridWireRadius;
-  const Double_t dFW   = 0.0125; // Field Wire
+  const Double_t dFW   = 2*fieldWireRadius; // Field Wire
   const Int_t nBinsAngular = 360;
   const Int_t nBinsRadial = 100;
   const Int_t nBinsGain = 100;
@@ -243,10 +244,23 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   comp->SetMagneticField(0., BField, 0.);
   //  comp->SetPeriodicityX(nRep * perSens);
   // 
+  Double_t dXWall = 0.18; // Jim Thomas wall 
+  Double_t VWall  = -115;
+  Double_t VWall2 = 0;
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091515_200V")) VWall2 = -200;
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_230V")) VWall  = -230;
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_460V")) VWall  = -460;
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_690V")) VWall  = -690;
+  cout << "VWall = " << VWall << "\tVWall2 = " << VWall2 << endl;
   Double_t xGGmin[2] = {xMinInnerGGWire, xMinOuterGGWire};
   Double_t vAnode[2] = {vAnodeI, vAnodeO};
   Double_t xSBmin[2] = {xMinInnerStrongBack, xMinOuterStrongBack};
   Double_t xSBmax[2] = {xMaxInnerStrongBack, xMaxOuterStrongBack};
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_09")) {
+    cout << "Correct xSBmax[0] = " << xSBmax[0] << " by dXWall = " << dXWall;
+    xSBmax[0] -= dXWall;
+    cout << " new xSBmax[0] = " << xSBmax[0] << endl;
+  }
   Int_t        ng[2] = {(Int_t) ((xMaxInnerGGWire - xMinInnerGGWire)/ggWpitch), 
 			(Int_t) ((xMaxOuterGGWire - xMinOuterGGWire)/ggWpitch)};
   Int_t        na[2];
@@ -350,28 +364,107 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
 	  comp->AddWire(x, y, dPseudoWire, 0., "W");
 	}
       }
-    }
+    }    
     comp->AddReadout("W");
-  } else {
-    // Cover side of Inner Strong Back 
-    Double_t ystep       = 0.10;
-    Double_t dPseudoWire = ystep/2;
-    for (Int_t j = 0; j < 2; j++) {
-      x = xMaxInnerStrongBack + ystep*(2*j+3)/2.;
+  } else { // not TShape
+    if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091515")) {
+      // Wall
+      // 1. zero potential till cathode wire plane
+      Double_t ystep       = 0.0100;
+      Double_t dPseudoWire = ystep/2;
+      for (Int_t j = 0; j < 2; j++) {
+	x = xSBmax[0] + ystep*(2*j+3)/2.;
+	if (j) x = xSBmax[0] + dXWall - ystep*(2*j+3)/2.;
+	if (! (x < xmin || x > xmax)) {
+	  Double_t Ymax  = yPad[1]+ ystep/2;
+	  Double_t Ymin  = yFG;
+	  Int_t    Nw    = (Ymax - Ymin)/ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    Double_t y = Ymin + ystep*(i+0.5*j);
+	    if (! j) comp->AddWire(x, y, dPseudoWire, 0, "Z");
+	    else     comp->AddWire(x, y, dPseudoWire, VWall2, "V");
+	  }
+	}
+      }
+      comp->AddReadout("Z");
+      comp->AddReadout("V");
+      for (Int_t j = 0; j < 2; j++) {
+	x = xSBmax[0] + ystep*(2*j+3)/2.;
+	if (j) x = xSBmax[0] + dXWall - ystep*(2*j+3)/2.;
+	if (! (x < xmin || x > xmax)) {
+	  Double_t Ymax  = yFG+ ystep/2;
+	  Double_t Ymin  = ystep/2;
+	  Int_t    Nw    = (Ymax - Ymin)/ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    Double_t y = Ymin + ystep*(i+0.5*j);
+	    comp->AddWire(x, y, dPseudoWire, VWall, "W");
+	  }
+	}
+      }
+      comp->AddReadout("W");
+    } else if (  Geometry.BeginsWith("iTPC_3x125mkm_JT_091715" )) {
+      // Wall
+      // 1. zero potential till cathode wire plane
+      Double_t ystep       = 0.0100;
+      Double_t dPseudoWire = ystep/2 - 0.0010;
+      // from inner to outer
+      x = xSBmax[0] + ystep/2;
       if (! (x < xmin || x > xmax)) {
-	Double_t Ymax  = yPad[1]+ ystep/2;
-	Double_t Ymin  = yPad[0];
+	Double_t Ymax  = yPad[1] - 3*ystep/2;
+	Double_t Ymin  = yFG/2   + ystep/2;
+	Double_t Xmin = xSBmax[0]          + ystep/2;
+	Double_t Xmax = xSBmax[0] + dXWall - ystep/2;
 	Int_t    Nw    = (Ymax - Ymin)/ystep;
 	for (Int_t i = 0; i < Nw; i++) {
-	  Double_t y = Ymin + ystep*(i+0.5*j);
-	  comp->AddWire(x, y, dPseudoWire, 0, "W");
+	  Double_t y = Ymax - ystep*i;
+	  comp->AddWire(x, y, dPseudoWire, 0, "Z");
+	}
+	Ymax  = yFG/2 - ystep/2;
+	Ymin  = ystep/2;
+	Nw    = (Ymax - Ymin)/ystep;
+	for (Int_t i = 0; i < Nw; i++) {
+	  Double_t y = Ymax - ystep*i;
+	  comp->AddWire(Xmin, y, dPseudoWire, vGG, "X");
+	  comp->AddWire(Xmax, y, dPseudoWire, vGG, "X");
+	}
+	Int_t nx = (Xmax - Xmin)/ystep;
+	for (Int_t i = 0; i < nx; i++) {
+	  Double_t xx = Xmax - ystep*i;
+	  comp->AddWire(xx, Ymin, dPseudoWire, vGG, "X");
+	}
+	Double_t xw = xSBmax[0] + dXWall - ystep/2;
+	Ymin  = yFG/2 + ystep/2;
+	Ymax  = yPad[1] - 3*ystep/2;
+	Nw    = (Ymax - Ymin)/ystep;
+	for (Int_t i = 0; i < Nw; i++) {
+	  Double_t y = Ymax - ystep*i;
+	  comp->AddWire(xw, y, dPseudoWire, VWall, "W");
+	}
+      }
+      comp->AddReadout("W");
+      comp->AddReadout("Z");
+      comp->AddReadout("V");
+      comp->AddReadout("X");
+    } else {
+      // Cover side of Inner Strong Back 
+      Double_t ystep       = 0.0100;
+      Double_t dPseudoWire = ystep/2;
+      for (Int_t j = 0; j < 2; j++) {
+	x = xSBmax[0] + ystep*(2*j+3)/2.;
+	if (! (x < xmin || x > xmax)) {
+	  Double_t Ymax  = yPad[1]+ ystep/2;
+	  Double_t Ymin  = yPad[0];
+	  Int_t    Nw    = (Ymax - Ymin)/ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    Double_t y = Ymin + ystep*(i+0.5*j);
+	    comp->AddWire(x, y, dPseudoWire, 0, "W");
+	  }
 	}
       }
     }
-    
   }
+  // Cathode plane
   comp->AddPlaneY(yC, vC, "q");
-  
   comp->AddReadout("s");
   comp->AddReadout("p");
   comp->AddReadout("S");
@@ -384,6 +477,10 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   ViewDrift *v_e = 0, *v_i = 0;
   if (! gROOT->IsBatch()) {
     c_e = new TCanvas("Cell","Cell");
+    TH1F *frame = c_e->DrawFrame(xmin-1.0,ymin-0.5,xmax+1.0,ymax+0.5);
+    frame->SetXTitle("X (cm)");
+    frame->SetYTitle("Y (cm)");
+    frame->SetTitle("Cell structure");
     ViewCell *cellView = new ViewCell();
     cellView->SetComponent(comp);
     cellView->SetArea(xmin, ymin, zmin,
