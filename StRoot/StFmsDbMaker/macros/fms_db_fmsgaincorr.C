@@ -1,104 +1,97 @@
 #include <iostream.h> 
 #include <fstream.h>
 
-void fms_db_fmsgaincorr(char* opt="readdb", char* dataspec) {
+// max index dimensions
+static const Int_t MAX = 2500;
+static const Int_t MAXD = 14;
+static const Int_t MAXCH= 578;
+
+int getDetectorId(int ew, int nstb) {return (ew-1)*8+nstb-1;}
+int getEW(int detid) {return detid/8 + 1;}
+int getNSTB(int detid) {return detid%8 + 1;}
+
+void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone") {
   // that's begin time for validity range for WRITING TO DB 
-  // your data will be available from storeTime till 2037
+  // your data will be available from storeTime till 2037    
+  TString opt(option);
   TString data(dataspec);
-  if(data.Contains("run8") && data.Contains("dAu200"))
-    TString storeTime = "2007-11-09 12:00:00";
-  else
-    if(data.Contains("run8") && data.Contains("pp200"))
+  int readDatte=20071210, readTime=0, isSim=0;
+  if(opt.Contains("run8") && opt.Contains("dAu200")){
+      TString storeTime = "2007-11-09 12:00:00";
+  }else if(opt.Contains("run8") && opt.Contains("pp200")){
       TString storeTime = "2008-01-28 12:00:00";
-    else
-      if(data.Contains("run9") && data.Contains("pp200"))  
-	TString storeTime = "2009-01-16 00:00:00";
-      else std::cout<<"Invalid year range"<<std::endl;
-
-  // this is data and time for READING FROM DB
-  //int readDate = 20130222;
-  int readDate = 20141220;
-  int readTime = 0;
-
-  TString option(opt);
-  std::cout << "Opt =" << opt << "\n";
-  std::cout << "testinput = " << option.Contains("testinput")  << "\n";
-  std::cout << "readtext  = " << option.Contains("readtext")  << "\n";
-  std::cout << "readdb    = " << option.Contains("readdb")    << "\n";
-  std::cout << "writedb   = " << option.Contains("writedb")   << "\n";
-  std::cout << "writetext = " << option.Contains("writetext") << "\n";
+  }else if(opt.Contains("run9") && opt.Contains("pp200")){
+      TString storeTime = "2009-01-16 00:00:00";
+  }else if(opt.Contains("15sim")){
+      TString storeTime = "2014-12-10 00:00:01"; readDate = 20141215; readTime = 0; isSim=1;
+  }else if(opt.Contains("15ofl")){
+      TString storeTime = "2014-12-20 00:00:00"; readDate = 20141225; readTime = 0;
+  }      
+  else std::cout<<"Invalid year range"<<std::endl;
+  
+  std::cout << "Opt =" << option << "\n";
+  std::cout << "testinput = " << opt.Contains("testinput")  << "\n";
+  std::cout << "readtext  = " << opt.Contains("readtext")  << "\n";
+  std::cout << "readdb    = " << opt.Contains("readdb")    << "\n";
+  std::cout << "writedb   = " << opt.Contains("writedb")   << "\n";
+  std::cout << "writetext = " << opt.Contains("writetext") << "\n";
   
   gROOT->Macro("LoadLogger.C");
   gSystem->Load("St_base.so");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StDbLib.so");
 
-  // max index dimensions
-   const Int_t MAX = 2500;
-
   // structure to fill up
-  fmsGainCorrection_st gaincorr[MAX];
+  fmsGainCorrection_st corr[MAX];
+  int idx[MAXD][MAXCH];
+  memset(idx,-1,sizeof(idx));
+  for(int i=0; i<MAX; i++){
+      corr[i].detectorId=-1;
+      corr[i].ch        =-1;
+      corr[i].corr      =-1.0;
+  }
   
-  if(option.Contains("testinput")){
-    // fill only first entry out of 548 for testing purposes:
-    gaincorr[0].detectorId = 2; // 1-2
-    gaincorr[0].ch = 7; // 1-20
-    gaincorr[0].corr = .15; // 1-16
-    
-    gaincorr[1].detectorId = 1; // 1-2
-    gaincorr[1].ch = 3; // 1-20
-    gaincorr[1].corr = .7; // 1-16
-    
-    gaincorr[2].detectorId = 2; // 1-2
-    gaincorr[2].ch = 20; // 1-20
-    gaincorr[2].corr = .15; // 1-16
-    
-    gaincorr[3].detectorId = 1; // 1-2
-    gaincorr[3].ch = 13; // 1-20
-    gaincorr[3].corr = .9; // 1-16
-  }
-
-  int ew[2] = {0,1};
-  int detId[14] =   { 0,  1, 2, 3,  4,  5,  6,  7,   8,   9,   10,  11,  12,  13};
-  int detType[14] = { 0,  0, 1, 1,  2,  2,  3,  3,   4,   4,    4,   4,   5,   5};
-  int detNx[14] =   { 7,  7, 7, 7, 48, 48,  1,  1,  17,  17,   12,  12,   9,   9};
-  int detNy[14] =   { 7,  7, 1, 1,  1,  1, 48, 48,  34,  34,   24,  24,  12,  12};
-  //int module[14] =  { 1,  2, 3, 4,  5,  6,  7,  8,   1,   2,    3,   4,   5,   6};
-  //int maxch[14]  =  {49, 49, 7, 7, 48, 48, 48, 48, 578, 578,  288, 288, 108, 108};
-  int module[8] =  { 1,  2, 5,  6,  1,   2,    3,   4};
-  int maxch[8]  =  {49, 49, 7, 7, 578, 578,  288, 288};
-  int ngc = 0;
-
-  if(option.Contains("readtext")){
-    FILE* fp;
-    int rew,rmod,rch;
-    float rgaincorr;
-    ngc = 0;
-    cout << "Reading "<<dataspec<<"\n";
-    if(fp=fopen(dataspec,"r")){
-      for(int iew=0; iew<2; iew++){
-	for(int mod=0; mod<4; mod++){
-	  for(int ch0=0; ch0<maxch[mod+iew*4]; ch0++){
-	    if(!feof(fp)) fscanf(fp,"%d %d %d %f",&rew,&rmod,&rch,&rgaincorr);
-	    //printf("%5d %5d %5d %6.4f\n",rew,rmod,rch,rgaincorr);
-	    if(rmod!=module[mod+iew*4]) cout << "Error mod# ="<<rmod<<" "<<module[mod+iew*4]<<"\n";
-	    if(rch !=ch0 +1) cout << "Error ch#  ="<<rch <<" "<<ch0+1<<"\n";
-	    gaincorr[ngc].detectorId=(rew-1)*8+rmod-1;
-	    gaincorr[ngc].ch=rch;
-	    if(data.Contains("run8"))
-	      gaincorr[ngc].corr=rgaincorr; 
-	    else
-	      if(data.Contains("run9"))  
-		gaincorr[ngc].corr=1.;  //temporary for run9
-	    ngc++;
-	  }
-	}
+  int detId[MAXD]  = { 0,  1, 2, 3,  4,  5,  6,  7,   8,   9,   10,  11,  12,  13};
+  int detType[MAXD]= { 0,  0, 1, 1,  2,  2,  3,  3,   4,   4,    4,   4,   5,   5};
+  int detNx[MAXD]  = { 7,  7, 7, 7, 48, 48,  1,  1,  17,  17,   12,  12,   9,   9};
+  int detNy[MAXD]  = { 7,  7, 1, 1,  1,  1, 48, 48,  34,  34,   24,  24,  12,  12};
+  int ew[MAXD]     = { 0,  0, 0, 0,  0,  0,  0,  0,   1,   1,    1,   1,   1,   1};
+  int nstb[MAXD]   = { 1,  2, 5, 6,  3,  4,  7,  8,   1,   2,    3,   4,   1,   2};
+  int maxch[MAXD]  = {49, 49, 7, 7, 48, 48, 48, 48, 578, 578,  288, 288, 108, 108};
+  
+  int index=0;
+  for(int det=0; det<MAXD; det++){
+      for(int ch=0; ch<maxch[det]; ch++){
+	  corr[index].detectorId=det;
+	  corr[index].ch        =ch+1;
+	  idx[det][ch]          =index;	  
+	  if(data.Contains("allone")) corr[index].corr=1.0;	      
+	  index++;	  
       }
-    }
-    fclose(fp);
+  }
+   
+  if(opt.Contains("readtext")){
+      FILE* fp;
+      int rew,rnstb,rch;
+      float rcorr;
+      int nread = 0;
+      cout << "Reading "<<dataspec<<"\n";
+      if(fp=fopen(dataspec,"r")){
+	  while(fscanf(fp,"%d %d %d %f",&rew,&rnstb,&rch,&rcorr) != EOF){
+	      int detid=getDetectorId(rew,rnstb);
+	      int index=idx[detid][rch-1];
+	      //printf("EW=%5d NSTB=%5d CH=%5d Gain=%6.4f | det=%2d idx=%4d\n",rew,rnstb,rch,rgain,detid,index);	  
+	      if(detid != corr[index].detectorId) printf("ERR DetId %d != %d\n",detid,corr[index].detectorId); 
+	      if(rch   != corr[index].ch)         printf("ERR Ch    %d != %d\n",rch,corr[index].ch);
+	      corr[index].corr=rcorr;
+	      nread++;
+	  }
+      }
+      fclose(fp);
+      printf("read %d channels of gain corr\n",nread);
   }
 
-  if(option.Contains("readdb")){
+  if(opt.Contains("readdb")){
     gSystem->Load("StChain");
     gSystem->Load("StBFChain");
     gSystem->Load("StUtilities");
@@ -128,55 +121,50 @@ void fms_db_fmsgaincorr(char* opt="readdb", char* dataspec) {
     St_fmsGainCorrection *dbppmap = 0;
     dbppmap = (St_fmsGainCorrection*) DB->Find("fmsGainCorrection");
     // fetch data and place it to appropriate structure
-    ngc = 0;
+    int ngain = 0;
     if (dbppmap) {
       std::cout << "Reading fmsGainCorrection table\n";
       fmsGainCorrection_st *pptable = dbppmap->GetTable();
       for(int iew=0; iew<2; iew++){
 	for(int mod=0; mod<4; mod++){
 	  for(int ch0=0; ch0<maxch[mod+iew*4]; ch0++){
-	    printf("%3d%8d%8d%8.4f\n",int(pptable[ngc].detectorId/8+1),int(pptable[ngc].detectorId%8+1),
-		   int(pptable[ngc].ch),float(pptable[ngc].corr) );
-	    ngc++;
+	    printf("%3d%8d%8d%8.4f\n",int(pptable[ngain].detectorId/8+1),int(pptable[ngain].detectorId%8+1),
+		   int(pptable[ngain].ch),float(pptable[ngain].corr) );
+	    ngain++;
 	  }
 	}
       }
-      memcpy(gaincorr,pptable,sizeof(gaincorr));
+      memcpy(corr,pptable,sizeof(corr));
     }
     else {
-      std::cout << "WARNING: No data in fmsGainCorrection table (wrong timestamp?). Nothing to return, then.\n";
+      std::cout << "WARNING: No data in fmsGain table (wrong timestamp?). Nothing to return, then.\n";
     }
   }
 
-
-  if(option.Contains("writetext")){
+  if(opt.Contains("writetext")){
     int ii = data.Length();
     data.Insert(ii-4,"_out");
     char* file=data.Data();
     FILE* fp;
     cout << "Writing "<<file<<"\n";
-    ngc = 0;
+    int ngain = 0;
     if(fp=fopen(file,"w")){
-      for(int iew=0; iew<2; iew++){
-	for(int mod=0; mod<4; mod++){
-	  for(int ch0=0; ch0<maxch[mod+iew*4]; ch0++){
-	    if(gaincorr[ngc].detectorId/8==0)
-	      fprintf(fp,"%2d%2d%3d%6.2f\n",gaincorr[ngc].detectorId/8+1,gaincorr[ngc].detectorId%8+1,
-		      gaincorr[ngc].ch,gaincorr[ngc].corr);
-	    else
-	      if(gaincorr[ngc].detectorId/8==1)
-		fprintf(fp,"%3d%8d%8d%8.4f\n",gaincorr[ngc].detectorId/8+1,gaincorr[ngc].detectorId%8+1,
-			gaincorr[ngc].ch,gaincorr[ngc].corr);
-	      else printf("ERROR: detectorId %d not recognized.\n",gaincorr[ngc].detectorId);
-	    ngc++;
-	  }
+	for(int i=0; i<MAX; i++){
+	    if(corr[i].corr>=0.0){
+		int detid=corr[i].detectorId;
+		int iew=getEW(detid);
+		int instb=getNSTB(detid);
+		fprintf(fp,"%d %d %d %5.3f\n",iew,instb,
+			corr[i].ch,corr[i].corr);
+		ngain++;
+	    }
 	}
-      }
     }
     fclose(fp);
+    printf("Write %d channels\n",ngain);
   }
 
-  if(option.Contains("writedb")) {
+  if(opt.Contains("writedb")) {
     gSystem->Setenv("DB_ACCESS_MODE","write");
     //putenv("DB_ACCESS_MODE=write");
     //char* env = getenv("DB_ACCESS_MODE");
@@ -186,12 +174,13 @@ void fms_db_fmsgaincorr(char* opt="readdb", char* dataspec) {
     StDbTable* table = node->addDbTable("fmsGainCorrection");
     mgr->setStoreTime(storeTime.Data());
     // store data in the table
-    table->SetTable((char*)&gaincorr,ngc);
+    table->SetTable((char*)&corr,index+1);
     // set store time
     // store table in dBase
+    if(isSim) table->setFlavor("sim");
     mgr->storeDbTable(table);
-    //StDbTable* table = node->findTable("fmsGainCorrection");
-    //node->removeTable(table);
+    //StDbTable* table = node->findTable("fmsGain");
+     //node->removeTable(table);
     gSystem->Unsetenv("DB_ACCESS_MODE");
     //unsetenv("DB_ACCESS_MODE");
     std::cout << "Done with database upload \n";
