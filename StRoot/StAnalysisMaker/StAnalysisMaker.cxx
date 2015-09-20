@@ -28,6 +28,7 @@
 //  you need to use StEvent.
 //
 //#define __TPC_LOCAL_COORDINATES__
+//#define __TRIGGER_ID__
 #include "StAnalysisMaker.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
@@ -290,13 +291,9 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL;
+    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL,trigId;
   };
-  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks"
-#ifdef __TPC_LOCAL_COORDINATES__
-    ":xL:yL:zL"
-#endif /* __TPC_LOCAL_COORDINATES__ */
-    ;
+  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:trigId";
   BPoint_t BPoint;
   static TNtuple *Nt = 0;
   if (plot && Nt == 0) {
@@ -305,6 +302,11 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   }
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
+#ifdef __TRIGGER_ID__
+  const StTriggerIdCollection* triggerCol = pEvent->triggerIdCollection();
+  const StTriggerId* nominal = 0;
+  if (triggerCol)    nominal = triggerCol->nominal();
+#endif /*  __TRIGGER_ID__ */
   //  StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   Int_t TotalNoOfTpcHits = 0;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
@@ -366,6 +368,10 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.xL = lTpc.position().x();
 		    BPoint.yL = lTpc.position().y();
 		    BPoint.zL = lTpc.position().z();
+#else
+		    BPoint.xL = 0;
+		    BPoint.yL = 0;
+		    BPoint.zL = 0;
 #endif /* __TPC_LOCAL_COORDINATES__ */
 		    BPoint.sector = i+1;
 		    BPoint.row = j+1;
@@ -379,7 +385,18 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.IdTruth =  tpcHit->idTruth();
 		    BPoint.npads   =  tpcHit->padsInHit();
 		    BPoint.ntbks   =  tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
+		    BPoint.trigId  = 0;
 		    Nt->Fill(&BPoint.sector);
+#ifdef __TRIGGER_ID__
+		    if (nominal) {
+		      UInt_t maxTriggers = nominal->maxTriggerIds();
+		      for (UInt_t i = 0; i < maxTriggers; i++) {
+			if (! nominal->triggerId(i)) continue;
+			BPoint.trigId  = nominal->triggerId(i);
+			Nt->Fill(&BPoint.sector);
+		      }
+		    }
+#endif /*  __TRIGGER_ID__ */
 		  }
 		}
 	      }
