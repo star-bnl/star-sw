@@ -393,36 +393,36 @@ switch ($pkg)
 #      setenv IVROOT $OPTSTAR
       setenv STARCMPL "gcc"; starver $STAR_LEVEL
       breaksw
-    case "gcc482":
-	    unsetenv QTDIR
-      if ( -x $GROUP_DIR/dropit ) then
-	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
-	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
-	setenv OPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
-	setenv XOPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
-	setenv PATH             ${PATH}:${XOPTSTAR}/bin
-	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${XOPTSTAR}/lib
-      endif
-      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/bin:$PATH
-      if (! $USE_64BITS) then
-	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
-	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
-#	setenv OPTSTAR $PREFIX
-#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
-      else
-	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
-    # special Valery version of opt/star for gcc45 64bits
+#    case "gcc482":
+#	    unsetenv QTDIR
+#      if ( -x $GROUP_DIR/dropit ) then
+#	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
+#	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
+#	setenv OPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+#	setenv XOPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+#	setenv PATH             ${PATH}:${XOPTSTAR}/bin
+#	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${XOPTSTAR}/lib
+#      endif
+#      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/bin:$PATH
+#      if (! $USE_64BITS) then
+#	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
 #	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
-#	setenv OPTSTAR $PREFIX
-#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
-      endif
-#      setenv QTDIR /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/.sl64_gcc482/opt/qt
-#      setenv IVROOT $OPTSTAR      
-      setenv STARCMPL "gcc"; 
-      starver $STAR_LEVEL
-#      setenv PATH ${QTDIR}/bin:${PATH}
-#      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
-      breaksw
+##	setenv OPTSTAR $PREFIX
+##	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#      else
+#	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+#    # special Valery version of opt/star for gcc45 64bits
+##	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+##	setenv OPTSTAR $PREFIX
+##	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#      endif
+##      setenv QTDIR /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/.sl64_gcc482/opt/qt
+##      setenv IVROOT $OPTSTAR      
+#      setenv STARCMPL "gcc"; 
+#      starver $STAR_LEVEL
+##      setenv PATH ${QTDIR}/bin:${PATH}
+##      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
+#      breaksw
     case "gcc492":
 	    unsetenv QTDIR
       if ( -x $GROUP_DIR/dropit ) then
