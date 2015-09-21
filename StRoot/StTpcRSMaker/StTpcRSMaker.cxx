@@ -494,19 +494,35 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     {"adc","adc"},// 17
     {"NE","Total no. of generated electors"}, // 18
     {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
-    {"nPdT","Total no. of conducting electrons per primary one no. versus log10(no. primary electrons)"} // 20 
+    {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus no. primary electrons"} // 20 
   };
+  const Int_t Npbins  = 101;
+  const Int_t NpbinsL =  10;
+  const Double_t Xmax = 1e4;
+  Double_t    dX = TMath::Log(Xmax/10)/(Npbins - NpbinsL);
+  Double_t *pbins = new Double_t[Npbins];
+  pbins[0] = 0.5;
+  
+  for (Int_t bin = 1; bin < Npbins; bin++) {
+    if (bin <= NpbinsL) {
+      pbins[bin] = pbins[bin-1] + 1;
+    } else {
+      Int_t nM = 0.5*(pbins[NpbinsL-2] + pbins[NpbinsL-1])*TMath::Exp(dX*(bin-NpbinsL)); 
+      pbins[bin] = pbins[bin-1] + TMath::Nint(nM - pbins[bin-1]);
+      if (pbins[bin] - pbins[bin-1] < 0.1) pbins[bin]++;
+    }
+  }
   for (Int_t io = 0; io < 2; io++) {
     for (Int_t i = 0; i < nChecks; i++) {
       TString Name(Checks[i].Name); Name += InOut[4+io].Name;
       TString Title(Checks[i].Title); Title += InOut[4+io].Title;
-      if (i == 11)      checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
+      if      (i == 11) checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
       else if (i == 19) checkList[io][i] = new TH2D(Name,Title,173,-.5,172.5,200,-10,10);
-      else if (i == 20) checkList[io][i] = new TH2D(Name,Title,120,-0.5,5.5,500,0.,20.);
+      else if (i == 20) checkList[io][i] = new TH2D(Name,Title,Npbins-1,pbins,500,-2.0,8.0);
       else              checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,"");  
     }
   }
-  
+  delete [] pbins;
 #endif /* __ClusterProfile__ */
   mHeed = fEc(St_TpcResponseSimulatorC::instance()->W());
   return kStOK;
@@ -1196,7 +1212,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  checkList[io][17]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),tpc_hitC->adc);
 	  checkList[io][18]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),nTotal);
 	  if (tpc_hitC->adc > 1.0) {
-	    checkList[io][20]->Fill(TMath::Log10(nP),((Double_t ) nTotal)/nP);
+	    checkList[io][20]->Fill(nP,TMath::Log(nTotal) - TMath::Log(nP));
 	  }
 #endif  /* __ClusterProfile__ */
 	}
