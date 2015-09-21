@@ -829,19 +829,23 @@
 
     # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
     if ( $mysqlconf ){
-       $mysqlconf = "$MYSQLCONFIG/$mysqlconf";
+       $mysqlconf = "$MYSQLCONFIG/$mysqlconf";# print "mysqlconf = $mysqlconf\n";
        # if ( 1==1 ){
        # Do not guess, just take it - this leads to a cons error though TBC
-       chomp($MYSQLLIB = `$mysqlconf  --libs`);
+       chomp($MYSQLLIB = `$mysqlconf  --libs`);# print "MYSQLLIB = $MYSQLLIB\n";
        # but remove -L which are treated separately by cons
        my(@libs) = split(" ", $MYSQLLIB);
-       my($test) = shift(@libs);
-       if ( $test =~ /-L/){
-           $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
-           $MYSQLLIB = "";
-           foreach my $el (@libs){
-               $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
-           }
+       foreach my $test (@libs) {
+	 if ($test !~ /^-L/) {next;}
+#	 print "test = $test\n";
+	 $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;# print "MYSQLLIBDIR = $MYSQLLIBDIR\n";
+	 $MYSQLLIBDIR =~ s/lib64\//$LLIB\//;# print "MYSQLLIBDIR = $MYSQLLIBDIR\n";
+	 $MYSQLLIBDIR =~ s/lib\//$LLIB\//;# print "MYSQLLIBDIR = $MYSQLLIBDIR\n";
+	 $MYSQLLIB = "";
+	 foreach my $el (@libs){
+	   $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+	 }
+	 last;
        }
 
        # here is a check for libmysqlclient
