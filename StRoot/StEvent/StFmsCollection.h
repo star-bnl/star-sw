@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.5 2015/09/01 21:01:47 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.6 2015/09/14 16:59:53 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.6  2015/09/14 16:59:53  ullrich
+ * Added StFmsPointPair collection.
+ *
  * Revision 2.5  2015/09/01 21:01:47  ullrich
  * Minor changes to format of print statments and \nchange to naming of data member.
  *
@@ -42,6 +45,7 @@
 class StFmsHit;
 class StFmsCluster;
 class StFmsPoint;
+class StFmsPointPair;
 class StFpsSlat;
 
 class StFmsCollection : public StObject {
@@ -66,11 +70,18 @@ public:
     StSPtrVecFmsPoint& points();    // Return the point list
     const StSPtrVecFmsPoint& points() const;
    
-    void fillFpsSlat();   //update FPS slat info based on FMS hits
+    void fillFpsSlat();            //update FPS slat info based on FMS hits
     void fillFpsAssociation();     //update FPS-FMS association info based on FMS points
     StSPtrVecFpsSlat& fpsSlats();  //Return the fps slats array
     StFpsSlat* fps(int slatid);    //return FPS slat for a given slatid
 
+    void fillFmsPointPair();
+    unsigned int numberOfPointPairs();    
+    vector<StFmsPointPair*>& pointPairs();    
+    vector<StFmsPointPair*>& pointPairsEnergySorted();    
+    vector<StFmsPointPair*>& pointPairsETSorted();    
+    vector<StFmsPointPair*>& pointPairsPi0MassSorted();    
+    
     void sortPointsByEnergy();
     void sortPointsByET();
 
@@ -80,9 +91,16 @@ private:
     StSPtrVecFmsHit     mHits;      // Owns all FMS hits
     StSPtrVecFmsCluster mClusters;  // Owns all FMS clusters
     StSPtrVecFmsPoint   mPoints;    // Owns all FMS points (photons)
-    StSPtrVecFpsSlat   mFpsSlats;   //! Owns, but does not save it to file but auto generate on fly
+    StSPtrVecFpsSlat    mFpsSlats;  //! Owns, but does not save it to file but auto generate on fly
+
+    vector<StFmsPointPair*> mPointPairs;              //! Pairs of points, all combinations, sorted by decending E1 then E2
+    vector<StFmsPointPair*> mPointPairsEnergySorted;  //! sorted by total decending E
+    vector<StFmsPointPair*> mPointPairsETSorted;      //!  sorted by total decending ET
+    vector<StFmsPointPair*> mPointPairsPi0MassSorted; //! sotted from close to pi0 mass to far
+
     bool mFpsSlatFilled;            //!
     bool mFpsAssociationFilled;     //!
+    bool mFmsPointPairFilled;       //!
 
     ClassDef(StFmsCollection, 2)
 };
