@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.21 2015/08/29 00:02:43 perev Exp $
+// $Id: StPeCTrigger.cxx,v 1.22 2015/09/15 15:58:14 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.22  2015/09/15 15:58:14  ramdebbe
+// added 2E trigger
+//
 // Revision 1.21  2015/08/29 00:02:43  perev
 // Account non trigger events
 //
@@ -469,7 +472,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 
   if(!trigData) {
     LOG_ERROR << "StTriggerData not available in StMuDst "<< endm;
-    return 0;
+    return 0 ;   // this will reject the event 
   }
     lastDSM0 = trigData->lastDSM(0);
     lastDSM1 = trigData->lastDSM(1);
@@ -675,9 +678,19 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 	      trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_UPC  elevated to physics in run 160..
 	      cout<<" UPC "<<trg_3000<<endl;
 	    }
+	    //
+	    // reserve for inclusion of trigger 2E starting on run 16149001 with id 500750 at run 16149044 before that it is 500730
+	    if(runN>= 16149001 &&   runN< 16149044  &&     ttid.isTrigger(500730)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0,12.0); //2E  elevated to physics in run 16149001
+	      cout<<" UPC "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16149044 &&   runN< 16159025 &&  ttid.isTrigger(500750)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0,12.0); //2E  modified starting 16149044
+	      cout<<" UPC "<<trg_3000<<endl;
+	    }
 	  }
 
-	  if(runN>= 16160012) {                                                  //transverse polarization  p + Al starts
+	  if(runN>= 16160012) {                                                  //transverse polarization  p + Al starts  
 
 	    if(                                    ttid.isTrigger(510704)){
 	      trg_3000 = trg_3000 | (int)pow(2.0, 4.0); //RP_ZMU changed ~4MAR
@@ -696,13 +709,16 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 	      cout<<" 2MU "<<trg_3000<<endl;
 	    }
 
-
 	    if(                                    ttid.isTrigger(510710)){
 	      trg_3000 = trg_3000 | (int)pow(2.0,10.0); //RP_2E  elevated to physics in run 160..
 	      cout<<" 2E "<<trg_3000<<endl;
 	    }
 	    if(                                    ttid.isTrigger(510714)) {
 	      trg_3000 = trg_3000 | (int)pow(2.0,11.0); //RP_UPC  elevated to physics in run 160..
+	      cout<<" UPC "<<trg_3000<<endl;
+	    }
+	    if(runN>= 16160032 &&    runN< 16169095 &&  ttid.isTrigger(510710)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0,12.0); //2E  elevated to physics in run 16149001
 	      cout<<" UPC "<<trg_3000<<endl;
 	    }
 	  }
