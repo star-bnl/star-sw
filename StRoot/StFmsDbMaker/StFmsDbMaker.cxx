@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.7 2015/09/02 14:45:14 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.8 2015/09/18 18:34:35 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,12 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.8  2015/09/18 18:34:35  akio
+ * Adding getStarXYZfromColumnRow() to convert from local grid space [cell width unit, not cm]
+ * Adding protection for fmsGain and fmsGainCorrection when table length get shorter and can
+ * overwritten by old values.
+ * Removing some error log
+ *
  * Revision 1.7  2015/09/02 14:45:14  akio
  * Adding new functions for un-uniform grid cell positions, switched based on DB fmsPositionModel
  *
@@ -45,6 +51,8 @@
 
 #include "getCellPosition2015pp.h"
 #include "getCellPosition2015pA.h"
+
+#include "StEvent/StFmsHit.h"
 
 ClassImp(StFmsDbMaker)
 
@@ -232,8 +240,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       continue;
     }
     if(d<0 || d>mMaxDetectorId){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
-      continue;
+	//LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
+	continue;
     }
     if(c<1 || c>maxChannel(d)){
       LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
@@ -243,7 +251,11 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       mmGain[d] = new fmsGain_st [maxChannel(d)];
       memset(mmGain[d],0,sizeof(fmsGain_st)*maxChannel(d));
     }
-    memcpy(&mmGain[d][c-1],&mGain[i],sizeof(fmsGain_st));
+    if(mmGain[d][c-1].ch==0){
+	memcpy(&mmGain[d][c-1],&mGain[i],sizeof(fmsGain_st));
+    }else{
+	LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+    }
     if(mForceUniformGain>0.0){
       static int first=0;
       if(first<3){
@@ -287,8 +299,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       continue;
     }
     if(d<0 || d>mMaxDetectorId){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
-      continue;
+	//LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
+	continue;
     }
     if(c<1 || c>maxChannel(d)){
       LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection ch="<<c<<" exceed max="<<maxChannel(d)<<endm; 
@@ -298,7 +310,11 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       mmGainCorrection[d] = new fmsGainCorrection_st [maxChannel(d)];
       memset(mmGainCorrection[d],0,sizeof(fmsGainCorrection_st)*maxChannel(d));
     }
-    memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
+    if(mmGain[d][c-1].ch==0){
+	memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
+    }else{
+	LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
+    }
     if(mForceUniformGainCorrection>0.0){
       static int first=0;
       if(first<3){
@@ -363,7 +379,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   mFpsReverseSlatId = new int**[fpsNQuad()]();
   for(int i=0; i<fpsNQuad(); i++) {
     mFpsReverseSlatId[i] = new int*[fpsNLayer()]();
-    for(int j=0; j<fpsNLayer(); j++) mFpsReverseSlatId[i][j] = new int[fpsMaxSlat()]();
+    for(int j=0; j<fpsNLayer(); j++) {
+	mFpsReverseSlatId[i][j] = new int[fpsMaxSlat()]();
+	for(int k=0; k<fpsMaxSlat(); k++) mFpsReverseSlatId[i][j][k]=-1;
+    }    
   }
   for(Int_t i=0; i<max; i++){ 
     memcpy(&mFpsSlatId[tFpsSlatId[i].slatid],&tFpsSlatId[i],sizeof(fpsSlatId_st));
@@ -531,9 +550,20 @@ StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId, Int_t ch){
     return getStarXYZ(detectorId,getColumnNumber(detectorId,ch),getRowNumber(detectorId,ch));   
 }
 
-//! get coordinates of center of tthe cell STAR frame from detectorId/row/column
+//! get coordinates of center of the cell STAR frame from detectorId/row/column
 StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId, Int_t column, Int_t row){
-  return getStarXYZ(detectorId,float(column-0.5)*getXWidth(detectorId),float(row-0.5)*getYWidth(detectorId)); 
+  return getStarXYZfromColumnRow(detectorId,float(column-0.5),float(row-0.5)); 
+}
+
+
+//! get coordinates of center of the cell STAR frame from detectorId/row/column grid space [unit is cell size]
+StThreeVectorF StFmsDbMaker::getStarXYZfromColumnRow(Int_t detectorId, Float_t column, Float_t row){
+  return getStarXYZ(detectorId,column*getXWidth(detectorId),row*getYWidth(detectorId)); 
+}
+
+//! get coordinates of center of the cell STAR frame from StFmsHit
+StThreeVectorF StFmsDbMaker::getStarXYZ(StFmsHit* hit){
+  return getStarXYZ(hit->detectorId(),hit->channel());
 }
 
 //! get coordinates in STAR frame from local XY (in row/column space [cm]) 
@@ -543,20 +573,22 @@ StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId,Double_t FmsX, Double_t
 
 //! get coordinates in STAR frame from local XY (in row/column space [cm])
 StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t FmsY){
-  Float_t x = 0, y=0, z=0;
+  Float_t x = 0.0, y=0.0, z=0.0;
   //printf("getStarXYZ mPositionModel=%d\n",mPositionModel);
   if(mPositionModel==0){ //simple uniform model with xyz offsets and widthes from DB
+    //printf("getStarXYZ XOFF=%f YOFF=%f\n",mDetectorPosition[detectorId].xoffset,mDetectorPosition[detectorId].yoffset); 
     if(northSouth(detectorId) == 0) //! north side
-      x = mDetectorPosition[detectorId].xoffset - FmsX*mDetectorPosition[detectorId].xwidth;
+	x = mDetectorPosition[detectorId].xoffset - FmsX;
     else  //! south side
-      x = mDetectorPosition[detectorId].xoffset + FmsX*mDetectorPosition[detectorId].xwidth;
-    y = mDetectorPosition[detectorId].yoffset - FmsY*mDetectorPosition[detectorId].ywidth;
+	x = mDetectorPosition[detectorId].xoffset + FmsX; 
+    //y = mDetectorPosition[detectorId].yoffset - FmsY;
+    y = FmsY - mDetectorPosition[detectorId].yoffset; //row# start from bottom 
     z = mDetectorPosition[detectorId].zoffset;
   }else{
     //printf("getStarXYZ input XY=%f %f\n",FmsX,FmsY);
     float x1,x2,y1,y2;
     float lx = FmsX/getXWidth(detectorId);         
-    float ly = nRow(detectorId) - FmsY/getYWidth(detectorId);
+    float ly = nRow(detectorId) - FmsY/getYWidth(detectorId); //row# in getCellPosition2015xx start from top, so reverse it
     //printf("getStarXYZ local XY=%f %f\n",lx,ly);
     int   c  = int(lx);
     int   r  = int(ly);
@@ -599,7 +631,7 @@ Int_t StFmsDbMaker::maxDetectorId()             {return mMaxDetectorId;}
 Int_t StFmsDbMaker::eastWest(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].ew;
   else{
-    LOG_WARN<<"StFmsDbMaker::eastWest: Corresponding channel geometry not found."<<endm;
+    //LOG_WARN<<"StFmsDbMaker::eastWest: Corresponding channel geometry not found."<<endm;
     return -1;
   }
 }
@@ -607,7 +639,7 @@ Int_t StFmsDbMaker::eastWest(Int_t detectorId){
 Int_t StFmsDbMaker::northSouth(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].ns;
   else{
-    LOG_WARN<<"StFmsDbMaker::northSouth: Corresponding channel geometry not found."<<endm;
+    //LOG_WARN<<"StFmsDbMaker::northSouth: Corresponding channel geometry not found."<<endm;
     return -1;
   }
 }
@@ -622,7 +654,7 @@ Int_t StFmsDbMaker::largeSmall(Int_t detectorId){
 Int_t StFmsDbMaker::type(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].type;
   else{
-    LOG_WARN<<"StFmsDbMaker::type: Corresponding channel geometry not found."<<endm;
+    //LOG_WARN<<"StFmsDbMaker::type: Corresponding channel geometry not found."<<endm;
     return -1;
   }
 }
@@ -630,7 +662,7 @@ Int_t StFmsDbMaker::type(Int_t detectorId){
 Int_t StFmsDbMaker::nRow(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nY;
   else{
-    LOG_WARN<<"StFmsDbMaker::nRow: Corresponding channel geometry not found."<<endm;
+    //LOG_WARN<<"StFmsDbMaker::nRow: Corresponding channel geometry not found."<<endm;
     return -1;
   }
 }
@@ -639,7 +671,7 @@ Int_t StFmsDbMaker::nColumn(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0)
     return mChannelGeometry[detectorId].nX;
   else{
-    LOG_WARN<<"StFmsDbMaker::nColumn: Corresponding channel geometry not found."<<endm;
+    //LOG_WARN<<"StFmsDbMaker::nColumn: Corresponding channel geometry not found."<<endm;
     return -1;
   }
 }
@@ -659,13 +691,13 @@ Int_t StFmsDbMaker::detectorId(Int_t ew, Int_t ns, Int_t type){
       if(mChannelGeometry[i].ew   == ew && mChannelGeometry[i].ns   == ns && mChannelGeometry[i].type == type)
 	return mChannelGeometry[i].detectorId;
     }
-  LOG_WARN<<"StFmsDbMaker::detectorId: Corresponding channel geometry not found."<<endm;
+  //LOG_WARN<<"StFmsDbMaker::detectorId: Corresponding channel geometry not found."<<endm;
   return -1;
 }
 
 Int_t StFmsDbMaker::getRowNumber(Int_t detectorId, Int_t ch){
   if(maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nY - (ch-1)/mChannelGeometry[detectorId].nX;
-  return -1;
+  return -1;                   //channel# start from top, but row# start from  bottom
 }
 
 Int_t StFmsDbMaker::getColumnNumber(Int_t detectorId, Int_t ch){

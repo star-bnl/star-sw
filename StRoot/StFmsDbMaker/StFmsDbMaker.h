@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.8 2015/09/02 14:45:14 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.9 2015/09/18 18:34:35 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,12 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.9  2015/09/18 18:34:35  akio
+ * Adding getStarXYZfromColumnRow() to convert from local grid space [cell width unit, not cm]
+ * Adding protection for fmsGain and fmsGainCorrection when table length get shorter and can
+ * overwritten by old values.
+ * Removing some error log
+ *
  * Revision 1.8  2015/09/02 14:45:14  akio
  * Adding new functions for un-uniform grid cell positions, switched based on DB fmsPositionModel
  *
@@ -51,9 +57,7 @@ struct fpsMap_st;
 struct fpsGain_st;
 struct fpsStatus_st;
 
-//! Global pointners
-//class StFmsDbMaker;
-//R__EXTERN StFmsDbMaker* gStFmsDbMaker;
+class StFmsHit;
 
 class StFmsDbMaker : public StMaker {
  public: 
@@ -65,8 +69,6 @@ class StFmsDbMaker : public StMaker {
   virtual Int_t  Finish();
   virtual void   Clear(const Char_t *opt);
   
-  //static StFmsDbMaker* instance() {return gStFmsDbMaker;};
-
   void setDebug(Int_t debug); ///< debug mode, 0 for minimal message, >0 for more debug messages
 
   //! getting the whole table
@@ -104,11 +106,14 @@ class StFmsDbMaker : public StMaker {
   StThreeVectorF getDetectorOffset(Int_t detectorId);  //! get the offset of the detector
   Float_t getXWidth(Int_t detectorId); //! get the X width of the cell
   Float_t getYWidth(Int_t detectorId); //! get the Y width of the cell
-  StThreeVectorF getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t FmsY);   //! get the STAR frame coordinates from local X/Y
-  StThreeVectorF getStarXYZ(Int_t detectorId,Double_t FmsX, Double_t FmsY); //! get the STAR frame coordinates from local X/Y
+  StThreeVectorF getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t FmsY);   //! get the STAR frame coordinates from local X/Y [cm]
+  StThreeVectorF getStarXYZ(Int_t detectorId,Double_t FmsX, Double_t FmsY); //! get the STAR frame coordinates from local X/Y [cm]
   StThreeVectorF getStarXYZ(Int_t detectorId,Int_t column, int row);        //! get the STAR frame coordinates from column/row
+  StThreeVectorF getStarXYZfromColumnRow(Int_t detectorId,Float_t column, Float_t row); 
+                                                                            //! get the STAR frame coordinates from column/row grid space [unit is cell size]
+  StThreeVectorF getStarXYZ(StFmsHit*);                                     //! get the STAR frame coordinates from StFmsHit
   StThreeVectorF getStarXYZ(Int_t detectorId,Int_t ch);                     //! get the STAR frame cooridnates for center of the cell
-  Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY); //! get the STAR frame phi angle
+  Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY);              //! get the STAR frame phi angle
   Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity from the vertex
 
   //! fmsMap related
