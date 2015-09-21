@@ -1026,22 +1026,6 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     }
   }
 #endif
-#ifndef __STORE_KFPARTICLES__
-  TObjectSet *obj = (TObjectSet *) GetDataSet("KFTracks");
-  if (obj) {
-    TObjArray *oA = (TObjArray *) obj->GetObject();
-    if (oA) {
-      fillKFTracks(oA);
-    }
-  }
-  obj = (TObjectSet *) GetDataSet("KFVertices");
-  if (obj) {
-    TObjArray *oA = (TObjArray *) obj->GetObject();
-    if (oA) {
-      fillKFVertices(oA);
-    }
-  }
-#endif
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixMtdTrackIndices(); 
@@ -1472,11 +1456,7 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
   StSPtrVecTrackNode& nodes= ev->trackNodes();
   DEBUGVALUE2(nodes.size());
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
-#ifndef __STORE_KFPARTICLES__
     addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], mArrays[muCovGlobTrack], mArrays[muCovPrimTrack], false);
-#else
-    addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], mArrays[muCovGlobTrack],                       0, false);
-#endif
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1484,35 +1464,6 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 #ifdef StTrackMassFit_hh
-#ifndef __STORE_KFPARTICLES__
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillKFTracks(TObjArray *obj) {
-  if (!obj) return;
-  TClonesArray &KFTracks = *mStMuDst->KFTracks();
-  Int_t N = obj->GetLast();
-  Int_t j = 0;
-  for (Int_t i = 0; i <= N; i++) {
-    KFParticle *particle = (KFParticle *) (*obj)[i];
-    if (! particle) continue;
-    new (KFTracks[j++]) KFParticle(*particle);
-  }
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillKFVertices(TObjArray *obj) {
-  if (!obj) return;
-  TClonesArray &KFVertices = *mStMuDst->KFVertices();
-  Int_t N = obj->GetLast();
-  Int_t j = 0;
-  for (Int_t i = 0; i <= N; i++) {
-    KFVertex *particle = (KFVertex *) (*obj)[i];
-    if (! particle) continue;
-    new (KFVertices[j++]) KFVertex(*particle);
-  }
-}
-//-----------------------------------------------------------------------
-#else /* __STORE_KFPARTICLES__ */
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillKFTracks(const KFParticle *particle) {
   if (!particle) return;
@@ -1529,7 +1480,6 @@ void StMuDstMaker::fillKFVertices(const KFParticle *particle) {
   Int_t j = KFVertices.GetEntriesFast();
   new (KFVertices[j++]) KFVertex(*particle);
 }
-#endif /* ! __STORE_KFPARTICLES__ */
 #endif /* StTrackMassFit_hh */
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1570,14 +1520,21 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
 				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, TClonesArray* covgTCA, TClonesArray* covpTCA, bool l3) {
   DEBUGMESSAGE3("");
   const StTrack* gTrack=0;
-
+  const StTrack *pTrack=0;
   /// do global track
   int index2Global =-1;
   int index;
   if (! gTCA) return;
   gTrack= dynamic_cast<const StGlobalTrack *>(node->track(global));
+  // check that there is KFParticle fit at vertex
+  const StTrack* KFatVx=0;
+  size_t nEntries = node->entries();
+  for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
+    const StTrack* track = node->track(j);
+    if (track->type() == massFitAtVx) {KFatVx = track; break;}
+  }  
   if (gTrack) {
-    const StTrack *pTrack = node->track(primary);
+    pTrack = node->track(primary);
     const StVertex *vtx = 0;
     if (pTrack)
       vtx = pTrack->vertex();
@@ -1587,12 +1544,16 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     if (gTrack && !gTrack->bad()) index2Global = addTrack(gTCA, ev, gTrack, vtx, cut, -1, l3, covgTCA, covpTCA);
     // do primary track
     if (pTCA) {
-      if (pTrack && !pTrack->bad()) index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
+      if (pTrack && !pTrack->bad())      {
+	if (! KFatVx) 
+	  index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
+	else 
+	  index = addTrack(pTCA, ev, pTrack, pTrack->vertex(), cut, index2Global, l3, covgTCA, 0);
+      }
     }
   }
   // all other tracks
   const StTrack* track=0;
-  size_t nEntries = node->entries();
   for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
     track = node->track(j);
     if (! track || (track->type() == global) || (track->type() == primary) ) continue; // exclude global and primary tracks
