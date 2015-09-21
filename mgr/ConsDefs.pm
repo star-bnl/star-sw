@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.140 2015/08/18 13:50:28 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.141 2015/09/21 21:40:47 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -538,7 +538,7 @@
 	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
-        # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+        print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
 
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 
@@ -547,22 +547,24 @@
 	} else {
 	    # can do elsif () later but for now, enable if CXX11 is defined
 	    # AND version is al least 4.4 
-	    if ( $CXX_VERSION lt "4.4" ){   # || ! defined($ENV{CXX11}) ) {
+	    if ( $CXX_MAJOR <= 4 && $CXX_MINOR <= 4 ){   # || ! defined($ENV{CXX11}) ) {
 		# ansi works only with gcc3.2 actually ... may be removed later ...
+		print "\tCXX version implies using C++ ansi syntax standards\n";
 		$CXXFLAGS    .= " -ansi";
 	    } else {
 		# Starting from 4.4, c++0x has been implemented - feature metric
 		# is not even though - see https://gcc.gnu.org/gcc-4.4/cxx0x_status.html
 		# and related documents
 		#   SL5 we had  4.3.2 supporting a weak set of c++11
-		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations
-		# print "EXPERIMENTAL *** will use C++11 standards\n" unless ($param::quiet);
+		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations via std=c++0x
+		#   SL6 with gcc 4.8.2 supports all c++11 features via std=c++0x - for backward compat, 
 		$CXXFLAGS    .= " -std=c++0x"; # -fpermissive";
+		print "\tCXX version implies using C++/C++11 c++0x standard\n";
 	    }
 	}
 
         # -fpermissive ?
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {
+	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
 	    $CXXFLAGS    .= " -pedantic"; 
 	}
 	$CXXFLAGS    .= " -Wno-long-long";
@@ -808,8 +810,54 @@
 
     $SYSLIBS   .= $threadlib;
     $CLIBS     .= $threadlib;
-    $CFLAGS    .= $ROOTCFLAGS;
-    $CXXFLAGS  .= $ROOTCFLAGS;
+
+    #+
+    # Option clean-up - JL 2015
+    #-
+    # Cleanup conflicting or redundant -ansi -std
+    if ( $ROOTCFLAGS =~ m/std=/ && $CXXFLAGS =~ m/std=/ || $CXXFLAGS =~ /ansi/){
+	# trim so we do not duplicate
+	# NOTE: chosing to remove from ROOTCFLAGS though this may be a problem too. 
+	#       Decided this as we begun introducing C++11 with a forward compatible
+	#       compiler and ROOTCFLAGS are added to both CXXFLAGS and CFLAGS
+	#
+	my $tmp=$ROOTCFLAGS;
+	$tmp =~ s/-std=[\w+-]*\s//;
+	#print "DEBUG >> APPEND $tmp to CFLAGS and CXXFLAGS\n";
+	$CFLAGS    .= $tmp;
+	$CXXFLAGS  .= $tmp;
+    } else {
+	#print "DEBUG >> APPEND $tmp to CFLAGS [$CFLAGS] and CXXFLAGS [$CXXFLAGS]\n";
+	$CFLAGS    .= $ROOTCFLAGS;
+	$CXXFLAGS  .= $ROOTCFLAGS;
+    }
+    # remove duplicates options coming from ROOTCFLAGS - used block to be sure
+    # vars are gone when we go out of scope
+    {
+	my(@ARGS)  =($CFLAGS ,$CXXFLAGS);    # to clean for duplicates / restore below in the same order
+	my(@LABELS)=("CFLAGS","CXXFLAGS");   # labels should also relate to @ARGS order - for printing
+	for ($i =0 ; $i <= $#ARGS ; $i++){
+	    my $Arg =  $ARGS[$i]; 
+	    my(@CmpArgs)=split(" ",$Arg);
+	    my(%CmpOpts)=undef; 
+	    $ARGS[$i] = "";
+	    
+	    foreach $tmp (@CmpArgs){
+		if ( ! defined($CmpOpts{$tmp}) ){
+		    $ARGS[$i] .= $tmp." ";
+		    $CmpOpts{$tmp} = 1;
+		    #print "DEBUG found $tmp\n";
+		} else {
+		    print "\tRemoving duplicate $tmp from $LABELS[$i]\n" unless ($param::quiet);
+		}
+	    }
+	}
+	# restore  
+	($CFLAGS,$CXXFLAGS) = @ARGS;        # <--- same order than above
+    }
+
+
+
 #    $OSFID .= " " . $STAR_SYS; $OSFCFID .= " " . $STAR_SYS;
 #    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
     $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
