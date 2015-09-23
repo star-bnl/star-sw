@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.9 2015/09/18 18:34:35 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.10 2015/09/23 17:34:01 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.10  2015/09/23 17:34:01  akio
+ * Adding distanceFromEdge() for fiducial volume cut
+ *
  * Revision 1.9  2015/09/18 18:34:35  akio
  * Adding getStarXYZfromColumnRow() to convert from local grid space [cell width unit, not cm]
  * Adding protection for fmsGain and fmsGainCorrection when table length get shorter and can
@@ -113,8 +116,20 @@ class StFmsDbMaker : public StMaker {
                                                                             //! get the STAR frame coordinates from column/row grid space [unit is cell size]
   StThreeVectorF getStarXYZ(StFmsHit*);                                     //! get the STAR frame coordinates from StFmsHit
   StThreeVectorF getStarXYZ(Int_t detectorId,Int_t ch);                     //! get the STAR frame cooridnates for center of the cell
-  Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY);              //! get the STAR frame phi angle
-  Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity from the vertex
+  Float_t getPhi(Int_t detectorId,Float_t FmsX, Float_t FmsY);              //! get the STAR frame phi angle from from local X/Y [cm]
+  Float_t getEta(Int_t detectorId,Float_t FmsX, Float_t FmsY, Float_t Vertex); //! get the STAR frame pseudo rapidity from the vertex from local X/Y [cm]
+  
+  // Distance(unit is incell space) from edge for given local X/Y [cm] for fiducial volume cut                        
+  // return negative distance if inside, positive outside
+  // edge: 0=well inside (more than 1 cell)
+  //       1=inner edge
+  //       2=outer edge
+  //       3=between north and south
+  //       4=between small and large
+  //       4=large cell corner
+  Float_t distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge);
+  Int_t nCellHole(Int_t det);
+  Int_t nCellCorner(Int_t det);
 
   //! fmsMap related
   Int_t maxMap();
