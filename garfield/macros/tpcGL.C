@@ -90,7 +90,9 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
 	 Geometry.BeginsWith("iTPC_3x500mkm") ||
 	 Geometry.BeginsWith("iTPC_3x1mm")    ||    
 	 Geometry.BeginsWith("iTPC_3x125mkm_JT_091515") ||
-	 Geometry.BeginsWith("iTPC_3x125mkm_JT_091715"))
+	 Geometry.BeginsWith("iTPC_3x125mkm_JT_091715") ||
+	 Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal") 
+	 )
       )                                 {cout << "Geometry has not been recognized" << endl; return;}
   cout << "Geometry\t" << Geometry.Data() << endl;
   // STAR coordinate system (xS,yS,zS) => Garfield (yS,zG,xG,yG); Garfield(xG,yG,zG) = > Star(y,z,x)
@@ -232,6 +234,51 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
     xmin = 0.0100*(TMath::Nint((xMaxOuterGGWire - 3.0)/0.0100) - 1); // Outer
     xmax = 0.0100*(TMath::Nint((xMaxOuterGGWire + 3.0)/0.0100) + 1); //
   }
+  /*
+y
+^ 
+-> x
+       Inner                                Outer
+       
+                                        | | ____________________________             yPad[1]
+                                        | | xSBmin[1]                   xSBmax[1]
+					| |                 
+					| |
+					| |
+					| |              gapO
+					| |
+					| |
+					| |
+                             dXWall	| |
+yPad[0] ________________________| |	| | ..........................    AnodeW ySens[1], 
+    xSBmin[0]          xSBmax[0]| |     | |
+                                | |     | |
+       gapI                     | |     | |
+                                | |     | |
+      ........................  | |     | |                               AnodeW ySens[0]
+                                | |     | |
+                                | |     | |
+                                | |     | |
+                                | |     | |
+      ************************  |-|     |-|-- **************************    yFG
+                                         
+
+
+
+
+      ........................               ..........................    yGG = 0
+      xGGmin[0]                              xGGmin[1]
+
+      ------------------------------------------------------------- Cathode  
+ 
+
+
+
+
+
+
+
+   */
   // Build the geometry, in this case just a box.
   GeometrySimple* geo = new GeometrySimple(); // geo->EnableDebugging();
   SolidBox* box = new SolidBox(0.5*(xmax + xmin), 0.5*(ymax + ymin), 0.5*(zmax + zmin), 
@@ -251,12 +298,19 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_230V")) VWall  = -230;
   if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_460V")) VWall  = -460;
   if (Geometry.BeginsWith("iTPC_3x125mkm_JT_091715_690V")) VWall  = -690;
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal")) VWall = 0;
   cout << "VWall = " << VWall << "\tVWall2 = " << VWall2 << endl;
   Double_t xGGmin[2] = {xMinInnerGGWire, xMinOuterGGWire};
+  Double_t xGGmax[2] = {xMaxInnerGGWire, xMaxOuterGGWire};
   Double_t vAnode[2] = {vAnodeI, vAnodeO};
   Double_t xSBmin[2] = {xMinInnerStrongBack, xMinOuterStrongBack};
   Double_t xSBmax[2] = {xMaxInnerStrongBack, xMaxOuterStrongBack};
-  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_09")) {
+  if (Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal")) {
+    cout << "Correct xSBmax[0] = " << xSBmax[0] << " and xSBmin[1] = " << xSBmin[1] << " by dXWall = " << dXWall << endl;
+    xSBmax[0] -= dXWall;
+    xSBmin[1] += dXWall; 
+    cout << " new xSBmax[0] = " << xSBmax[0] << " and xSBmin[1] = " << xSBmin[1] << endl;
+  } else if (Geometry.BeginsWith("iTPC_3x125mkm_JT_09")) {
     cout << "Correct xSBmax[0] = " << xSBmax[0] << " by dXWall = " << dXWall;
     xSBmax[0] -= dXWall;
     cout << " new xSBmax[0] = " << xSBmax[0] << endl;
@@ -445,6 +499,68 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
       comp->AddReadout("Z");
       comp->AddReadout("V");
       comp->AddReadout("X");
+    } else if (  Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal" )) {
+      // Wall
+      // 1. zero potential till cathode wire plane
+      Double_t ystep       = 0.0100;
+      Double_t dPseudoWire = ystep/2 - 0.0010;
+      // from inner to outer
+      x = xSBmax[0] + ystep/2;
+      if (! (x < xmin || x > xmax)) {
+	Double_t Ymax  = yPad[1] - 3*ystep/2;
+	Double_t Ymin  = yFG   + ystep/2;
+	if ( Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal_3" )) {
+	  Ymin = yFG/2   + ystep/2;
+	}
+	Double_t Xmin  = xSBmax[0]          + ystep/2 + 0.0010;
+	Double_t Xmax  = xSBmax[0] + dXWall - ystep/2 - 0.0010;
+	Double_t XminO = xSBmin[1] - dXWall - ystep/2 + 0.0010;
+	Double_t XmaxO = xSBmin[1]          + ystep/2 - 0.0010;
+	Int_t    Nw    = (Ymax - Ymin)/ystep;
+	for (Int_t i = 0; i < Nw; i++) {
+	  Double_t y = Ymax - ystep*i;
+	  // inner sector Wall
+	  comp->AddWire(Xmin, y, dPseudoWire, 0, "z");
+	  comp->AddWire(Xmax, y, dPseudoWire, 0, "z");
+	  // outer sector wall
+	  comp->AddWire(XminO, y, dPseudoWire, 0, "z");
+	  comp->AddWire(XmaxO, y, dPseudoWire, 0, "z");
+	}
+	if ( Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal_2" )) {
+	  Xmin = xSBmax[0]          + ystep/2;
+	  Xmax = xSBmax[0] + dXWall - ystep/2;
+	  Nw    = (Xmax - Xmin)/ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    Double_t x = Xmax - ystep*i;
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	  }
+	  Xmin = xSBmin[1] - dXWall + ystep/2;
+	  Xmax = xGGmin[1] - 0.2; // position of the first outer GG wire - 2 mm 
+	  Nw = (Xmax - Xmin) / ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    x = Xmin + ystep*(i + 0.5);
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	  }
+	} else if ( Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal_3" )) {
+	  Xmin = xGGmax[0] - 0.2    + ystep/2;
+	  Xmax = xSBmax[0] + dXWall - ystep/2;
+	  Nw    = (Xmax - Xmin)/ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    Double_t x = Xmax - ystep*i;
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	  }
+	  Xmin = xSBmin[1] - dXWall + ystep/2;
+	  Xmax = xGGmin[1] + 0.2; // position of the first outer GG wire - 2 mm 
+	  Nw = (Xmax - Xmin) / ystep;
+	  for (Int_t i = 0; i < Nw; i++) {
+	    x = Xmin + ystep*(i + 0.5);
+	    comp->AddWire(x, Ymin, dPseudoWire, 0, "z");
+	  }
+	}
+	comp->AddReadout("z");
+      }
     } else {
       // Cover side of Inner Strong Back 
       Double_t ystep       = 0.0100;
@@ -468,7 +584,9 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   comp->AddReadout("s");
   comp->AddReadout("p");
   comp->AddReadout("S");
-  comp->AddReadout("Z");
+  if (!  Geometry.BeginsWith("iTPC_3x125mkm_JT_092215_Proposal" )) {
+    comp->AddReadout("Z");
+  }
   comp->AddReadout("P");
   //  comp->AddReadout("f");
   //  comp->AddReadout("F");
