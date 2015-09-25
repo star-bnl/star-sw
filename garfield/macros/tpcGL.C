@@ -503,7 +503,7 @@ yPad[0] ________________________| |	| | ..........................    AnodeW ySe
       // Wall
       // 1. zero potential till cathode wire plane
       Double_t ystep       = 0.0100;
-      Double_t dPseudoWire = ystep/2 - 0.0010;
+      Double_t dPseudoWire = ystep - 0.0010;
       // from inner to outer
       x = xSBmax[0] + ystep/2;
       if (! (x < xmin || x > xmax)) {
