@@ -198,7 +198,7 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   const Double_t vCathode =  -27950;
   const Double_t yCathode =-208.707; // move into system where yGG = 0
   const Double_t eDrift   = (vCathode - vGG)/(yCathode - yGG); 
-  const Double_t yC       = -0.5;     // pseudo cathode
+  const Double_t yC       = -1.0;     // pseudo cathode
   const Double_t vC       = vGG + eDrift*(yC - yGG);
   const Double_t gapI     = 0.2; // Anode pad plane gap Inner
   const Double_t gapO     = 0.4; // Anode pad plane gap Outer
