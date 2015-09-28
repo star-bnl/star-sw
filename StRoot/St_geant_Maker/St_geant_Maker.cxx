@@ -849,7 +849,7 @@ Int_t St_geant_Maker::Init(){
 	assert(!ee);
       } else {
 	// gkine #particles partid ptrange yrange phirange vertexrange
-	Do("gkine        80      6    1. 1. -2. 2. 0 6.28      0. 0.;");
+	Do("gkine        20      6    1. 1. -1. 1. 0 6.28      0. 0.;");
       }
       Do("mode g2tm prin 1;");
       //  Do("next;");
@@ -915,10 +915,9 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     }
     LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
-    Do(mInitialization.Data()); 
+    if (mInitialization != "") {Do(mInitialization.Data()); mInitialization = "";}
     Geometry();
     Do("physi");
-    mInitialization = "";
     Do("gclose all");
   }
   Agstroot();
@@ -1041,6 +1040,12 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	Do(Form("gslope  %f %f", dxdz, dydz));
       }
     }
+  }
+  if (IAttr("fzout") && GetChain()->GetTFile()) {
+    TString  fzname("gfile o ");
+    fzname += GetChain()->GetTFile()->GetName();
+    fzname.ReplaceAll(".root",".fz");
+    Do(fzname);
   }
   return kStOK;
 }
