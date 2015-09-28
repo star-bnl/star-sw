@@ -325,11 +325,14 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     if ( tdet) { // remove Dca node or nodes below the vertex
       const StiPlacement* pl = tdet->getPlacement();
       if (pl->getNormalRadius() > R) break;
+#if 0
       // Check for hits at radius less than Vertex
       if (lastNode->getHit()) {fail = 1; break;}
+#endif
     }
     kTrack->removeLastNode();
   }
+  if (! kTrack->getFirstNode() || ! kTrack->getLastNode()) fail = 1;
   if (fail) {
     BFactory::Free(kTrack);
     return pTrack;

@@ -121,7 +121,7 @@ More detailed: 				<br>
 #include "TDataSet.h"
 #include "TGeometry.h"
 #include "Sti/StiTimer.h"
-#include "StiDetectorVolume.h"
+#include "Sti/StiDetectorVolume.h"
 #include "StarMagField.h"
 #include "StG2TrackVertexMap.h"
 #include "StTpcDb/StTpcDb.h"
@@ -425,6 +425,7 @@ Int_t StiMaker::Make()
       if (iAnz) {MyClear(); return iAnz;}
     } else {
       iAnz = StMaker::Make();
+      FinishTracks(1);
     }
     if (mPullTTree) {iAns = FillPulls();}
     cout<< "StiMaker::Make() -I- Done"<<endl;
@@ -589,7 +590,7 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
 //_____________________________________________________________________________
 void StiMaker::FinishTracks (int gloPri) 
 {
-// Added new method FonishTracks(int gloPri) 0=global 1=primary tracks
+// Added new method FinishTracks(int gloPri) 0=global 1=primary tracks
 // In this method:
 // 1. loop over nodes
 // 2. Move node to the center volume along x or r  local
