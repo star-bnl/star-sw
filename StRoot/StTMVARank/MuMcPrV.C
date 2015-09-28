@@ -170,21 +170,21 @@ void Setup(const Char_t *xmlFile = "") {
   cout << "iYear set to " << iYear << endl;
   TMVAdata::instance()->Init();
   /* default : "postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:nWE:chi2"
-     KFV : postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2
+     KFV      : postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2
   */
   delete StTMVARanking::instance();
   if (! TMVAdata::instance()->PileUp()) {
 #if 1
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #else
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2",xmlFile);
+    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
     else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #endif
   } else {
 #if 1
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
+    else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
 #else
     if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
     else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
@@ -379,7 +379,7 @@ void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KF
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV50") { 
+	     const  char* outFile="MuMcPrV51") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -550,7 +550,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     if (! NoMuMcVertices || ! NoMuMcTracks) {
       cout << "Ev. " << ev << " has no MC information ==> skip it" << endl;
       continue;
-    } else {
+    } 
     Double_t VpdZ = -9999;
     StBTofHeader* BTofHeader = mu->btofHeader();
     if ( BTofHeader) {
