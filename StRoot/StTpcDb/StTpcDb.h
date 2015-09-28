@@ -170,7 +170,6 @@ class StTpcDb {
 			       kTotalTpcSectorRotaions =14}; 
  private:
   Char_t                mBeg[1];        //!
-  StMagUtilities*       mExB;           //!
   Int_t                 m_Debug;        //!
   TGeoTranslation      *mSwap[2];       //! 
   TGeoHMatrix          *mFlip;          //!
@@ -215,8 +214,6 @@ class StTpcDb {
 #else
   Float_t DriftVelocity(Int_t sector=24);
 #endif
-  StMagUtilities* ExB() {return mExB;}
-  void SetExB(StMagUtilities *m) {mExB = m;}
   void SetTpcRotations();
   void SetTpc2GlobalMatrix(TGeoHMatrix *m) {SetTpcRotationMatrix(m);}
   void SetTpcRotationMatrix(TGeoHMatrix *m, Int_t sector = 0, Int_t k = kSupS2Tpc) {

@@ -261,11 +261,10 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
 #ifndef __NEW_MagUtilities__
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+    new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
 #else
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
+    new StMagUtilities(gStTpcDb, option);
 #endif
-    StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
   return 0;

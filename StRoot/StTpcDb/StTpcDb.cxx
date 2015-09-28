@@ -228,7 +228,6 @@ StTpcDb::~StTpcDb() {
   SafeDelete(mHalf[1]);
   SafeDelete(mSwap[0]);  
   SafeDelete(mSwap[1]);
-  SafeDelete(mExB);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
   gStTpcDb = 0;
