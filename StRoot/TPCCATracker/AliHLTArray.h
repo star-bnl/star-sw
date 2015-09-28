@@ -594,8 +594,10 @@ namespace AliHLTInternal
   inline AliHLTArray<T, 1> ArrayBase<T, 2>::operator[]( int x )
   {
     x *= fStride;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 1> AT1;
     BOUNDS_CHECK( x, AT1() );
+#endif
     AliHLTArray<T, 1> a;
     a.fData = &fData[x];
     a.ArrayBoundsCheck::operator=( *this );
@@ -607,8 +609,10 @@ namespace AliHLTInternal
   inline const AliHLTArray<T, 1> ArrayBase<T, 2>::operator[]( int x ) const
   {
     x *= fStride;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 1> AT1;
     BOUNDS_CHECK( x, AT1() );
+#endif
     AliHLTArray<T, 1> a;
     a.fData = &fData[x];
     a.ArrayBoundsCheck::operator=( *this );
@@ -632,8 +636,10 @@ namespace AliHLTInternal
   inline AliHLTArray<T, 2> ArrayBase<T, 3>::operator[]( int x )
   {
     x *= fStrideX;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 2> AT2;
     BOUNDS_CHECK( x, AT2() );
+#endif
     AliHLTArray<T, 2> a;
     a.fData = &fData[x];
     a.fStride = fStrideY;
@@ -645,8 +651,10 @@ namespace AliHLTInternal
   inline const AliHLTArray<T, 2> ArrayBase<T, 3>::operator[]( int x ) const
   {
     x *= fStrideX;
+#ifdef ENABLE_ARRAY_BOUNDS_CHECKING
     typedef AliHLTArray<T, 2> AT2;
     BOUNDS_CHECK( x, AT2() );
+#endif
     AliHLTArray<T, 2> a;
     a.fData = &fData[x];
     a.fStride = fStrideY;
