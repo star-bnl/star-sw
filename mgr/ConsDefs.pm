@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.5 2014/10/06 14:15:07 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.141 2015/09/21 21:40:47 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -478,7 +478,10 @@
 	}
 
         # -fpermissive ?
-#	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
+	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
+	    $CXXFLAGS    .= " -pedantic"; 
+	}
+	$CXXFLAGS    .= " -Wno-long-long";
 
 	#
 	# Additional GCC optimization flags if NODEBUG
@@ -531,15 +534,12 @@
 	       #   -finline-functions
 	     }
 	   }
+
+           $DEBUG .= " ".$optflags;
+           $FDEBUG = $DEBUG;
 	   print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	 }
 
-	if ($optflags) {
-	    $CFLAGS   .= " " . $optflags;
-	    $CXXFLAGS .= " " . $optflags;
-	    $G77FLAGS .= " " . $optflags;
-	}
- #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
         $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
         $SOFLAGS  .= " -shared -Wl,-Bdynamic";
 
@@ -733,7 +733,34 @@
 
     $SYSLIBS   .= $threadlib;
     $CLIBS     .= $threadlib;
-    $CFLAGS     =~ s/-stdlib=libc\+\+//;
+
+    # remove duplicates options coming from ROOTCFLAGS - used block to be sure
+    # vars are gone when we go out of scope
+    {
+	my(@ARGS)  =($CFLAGS ,$CXXFLAGS);    # to clean for duplicates / restore below in the same order
+	my(@LABELS)=("CFLAGS","CXXFLAGS");   # labels should also relate to @ARGS order - for printing
+	for ($i =0 ; $i <= $#ARGS ; $i++){
+	    my $Arg =  $ARGS[$i]; 
+	    my(@CmpArgs)=split(" ",$Arg);
+	    my(%CmpOpts)=undef; 
+	    $ARGS[$i] = "";
+	    
+	    foreach $tmp (@CmpArgs){
+		if ( ! defined($CmpOpts{$tmp}) ){
+		    $ARGS[$i] .= $tmp." ";
+		    $CmpOpts{$tmp} = 1;
+		    #print "DEBUG found $tmp\n";
+		} else {
+		    print "\tRemoving duplicate $tmp from $LABELS[$i]\n" unless ($param::quiet);
+		}
+	    }
+	}
+	# restore  
+	($CFLAGS,$CXXFLAGS) = @ARGS;        # <--- same order than above
+    }
+
+
+
 #    $OSFID .= " " . $STAR_SYS; $OSFCFID .= " " . $STAR_SYS;
 #    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
     $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
