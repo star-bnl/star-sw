@@ -50,7 +50,7 @@ ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
   static Int_t iBreak = 0;
-  mExB = gStTpcDb->ExB();
+  mExB = StMagUtilities::Instance();
   if (! gRandom) gRandom = new TRandom();
   // Get the input data structures from StEvent
   StEvent *rEvent =  (StEvent*) GetInputDS("StEvent");
