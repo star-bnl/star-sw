@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.8 2015/09/18 18:34:35 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.9 2015/09/23 17:34:01 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.9  2015/09/23 17:34:01  akio
+ * Adding distanceFromEdge() for fiducial volume cut
+ *
  * Revision 1.8  2015/09/18 18:34:35  akio
  * Adding getStarXYZfromColumnRow() to convert from local grid space [cell width unit, not cm]
  * Adding protection for fmsGain and fmsGainCorrection when table length get shorter and can
@@ -53,6 +56,7 @@
 #include "getCellPosition2015pA.h"
 
 #include "StEvent/StFmsHit.h"
+#include "StEvent/StEnumerations.h"
 
 ClassImp(StFmsDbMaker)
 
@@ -235,13 +239,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   for(Int_t i=0; i<mMaxGain; i++){
     Int_t d=mGain[i].detectorId;
     Int_t c=mGain[i].ch;
-    if(maxChannel(d)<1){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain invalid max number of channel = "<<maxChannel(d)<<endm; 
-      continue;
-    }
     if(d<0 || d>mMaxDetectorId){
-	//LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
+	LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" exceed max = "<<mMaxDetectorId<<endm; 
 	continue;
+    }
+    if(maxChannel(d)<1){
+      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain invalid max number of channel = "<<maxChannel(d)
+		<<"for det="<<d<<endm; 
+      continue;
     }
     if(c<1 || c>maxChannel(d)){
       LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGain detectorId="<<d<<" ch="<<c<<" exceed max = "<<maxChannel(d)<<endm; 
@@ -294,13 +299,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   for(Int_t i=0; i<mMaxGainCorrection; i++){
     Int_t d=mGainCorrection[i].detectorId;
     Int_t c=mGainCorrection[i].ch;
-    if(maxChannel(d)<1){
-      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection invalid max number of channel = "<<maxChannel(d)<<endm; 
-      continue;
-    }
     if(d<0 || d>mMaxDetectorId){
-	//LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
+	LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection detectorId="<<d<<" exceed max="<<mMaxDetectorId<<endm; 
 	continue;
+    }
+    if(maxChannel(d)<1){
+      LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection invalid max number of channel = "<<maxChannel(d)
+		<<"for det="<<d<<endm; 
+      continue;
     }
     if(c<1 || c>maxChannel(d)){
       LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection ch="<<c<<" exceed max="<<maxChannel(d)<<endm; 
@@ -310,14 +316,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       mmGainCorrection[d] = new fmsGainCorrection_st [maxChannel(d)];
       memset(mmGainCorrection[d],0,sizeof(fmsGainCorrection_st)*maxChannel(d));
     }
-    if(mmGain[d][c-1].ch==0){
+    if(mmGainCorrection[d][c-1].ch==0){
 	memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
     }else{
 	LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorr detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
     }
     if(mForceUniformGainCorrection>0.0){
       static int first=0;
-      if(first<3){
+      if(first==0){
         LOG_INFO << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrection overwritten to uniform value="<<mForceUniformGainCorrection<<endm;
         first++;
       }
@@ -645,8 +651,8 @@ Int_t StFmsDbMaker::northSouth(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::largeSmall(Int_t detectorId){
-  if (detectorId>= 8 && detectorId<= 9 && maxChannel(detectorId)>0) return 0;
-  if(detectorId>=10 && detectorId<=11 && maxChannel(detectorId)>0) return 1;
+  if(detectorId>=kFmsNorthLargeDetId && detectorId<=kFmsSouthLargeDetId && maxChannel(detectorId)>0) return 0;
+  if(detectorId>=kFmsNorthSmallDetId && detectorId<=kFmsSouthSmallDetId && maxChannel(detectorId)>0) return 1;
   //LOG_WARN<<"StFmsDbMaker::largeSmall: Corresponding channel geometry not found."<<endm;
   return -1;
 }
@@ -1101,3 +1107,73 @@ void StFmsDbMaker::dumpFpsStatus(const Char_t* filename){
     fclose(fp);
   }
 }
+
+inline Int_t StFmsDbMaker::nCellHole(Int_t det){
+    switch(det){
+    case kFmsNorthLargeDetId: 
+    case kFmsSouthLargeDetId: return 8; 
+    case kFmsNorthSmallDetId:
+    case kFmsSouthSmallDetId: return 5;
+    default: return 0;
+    }
+}	   
+
+inline Int_t StFmsDbMaker::nCellCorner(Int_t det){
+    switch(det){
+    case kFmsNorthLargeDetId: 
+    case kFmsSouthLargeDetId: return 7; 
+    default: return 0;
+    }
+}	   
+
+Float_t StFmsDbMaker::distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge){
+    //Input x/y should be local coordinate in cm, NOT STAR coordinate
+    //  x=0 is closest to beam edge, and x=nColumn(det) is far from beam edge
+    //  y=0 is bottom edge, and y=nRow(det) is top edge
+    //Return value is distance from edge in cell width unit
+    //  negative is inside detector, positive is outside
+    //  typical fiducail volume cut would be distance<-0.5.
+    //  Return int edge is 0=inside detector, 1=inner edge, 2=outer, 3=north south gap, 4=large/small edge, 5=corner
+    edge=-1;
+    if(det<kFmsNorthLargeDetId || det>kFmsSouthSmallDetId) return -99.0;
+    //convert input float(x/y) to int(column/row) space
+    //for row#, subtract nRow/2 so 0 is at beam, and take abs to work on a quadrant  
+    float xx=x/getXWidth(det);
+    float yy=abs(y/getYWidth(det) - nRow(det)/2.0);    
+    int column=int(xx); 
+    int row=int(yy);    
+    if(row>=nRow(det)/2-1.0){ //top or bottom edge
+	if(largeSmall(det)==0) {edge=2;}
+	else                   {edge=4;}
+	return yy - nRow(det)/2;	
+    }
+    if(column>=nColumn(det)-1.0){ //far from beam edge
+	if(largeSmall(det)==0) {edge=2;}
+	else                   {edge=4;}
+	return xx - nColumn(det);
+    }
+    if(column<=0 && row>nCellHole(det)){ //north-south gap
+	edge=3;
+	return -xx;
+    }
+    if(xx>yy && column<=nCellHole(det)){ //edge inner hole at side
+	if(largeSmall(det)==0) {edge=4;}
+	else                   {edge=1;}
+	return nCellHole(det)-xx;
+    }
+    if(xx<yy && row<=nCellHole(det)) { //edge to inner hole below/above beam pipe
+	if(largeSmall(det)==0) {edge=4;}
+	else                   {edge=1;}
+	return nCellHole(det)-yy;
+    }
+    if(largeSmall(det)==0 && xx+yy>=nRow(det)-nCellCorner(det)-2.0){ //corner for large cell
+	edge=5;
+	//approximation... just diagonal cut
+	// not doing distance from zigzag for now... maybe later	
+	return xx + yy - (nRow(det)-nCellCorner(det)-1.0);
+    } 
+    //more than 1 cell inside
+    edge=0;
+    return -1.0;
+}
+
