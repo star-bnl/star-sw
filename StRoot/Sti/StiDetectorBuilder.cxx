@@ -10,7 +10,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiUtilities/StiDebug.h"
 #include "Sti/StiElossCalculator.h"
-#include "StiMaker/StiDetectorVolume.h"
+#include "Sti/StiDetectorVolume.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
