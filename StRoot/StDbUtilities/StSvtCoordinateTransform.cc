@@ -48,7 +48,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
 //_____________________________________________________________________________
 
-StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
+StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* /* gStTpcDb */) {
   mFlag=0;
   mPoly9=0;
 }
