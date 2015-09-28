@@ -367,7 +367,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     status |= (kTrack->getInnerMostHitNode(3) != extended);
   }
   kTrack->reduce();
-  if (status) {
+  if (status || kTrack->getChi2() >= 100) {
     //    kTrack->removeLastNode();
     BFactory::Free(kTrack);    
     return pTrack; // failed to refit
