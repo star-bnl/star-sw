@@ -102,7 +102,9 @@ int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double R
 {
 //Circles crossing
 //==========================================================
-
+#define DOT(a,b) a[0]*b[0]+a[1]*b[1]
+#define MAG2(a) DOT(a,a)
+#define MAG(a) sqrt(MAG2(a))
 // Rho -curvature
 // r - cyl radius
 //L - distance between centers
@@ -131,39 +133,67 @@ int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double R
 static int nCall=0;nCall++;
 StiDebug::Break(nCall);
 
+ int sRho = (Rho<0) ? -1:1;
+ double aRho = fabs(Rho), rr=r*r,d=0;
 
-int sRho = (Rho<0) ? -1:1;
-double aRho = fabs(Rho), rr=r*r,d=0;
-TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
-TVector3 C,Cd,Cn,N;
-double XX,XN,L;
-N[0] = -D[1]; N[1] = D[0];
-XX = X*X; XN = X*N;
+//TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
+// static TVector3  C, Cd, Cn, N;
+ double C[2], Cd[2], Cn[2], N[2];
+ //D.SetXYZ( Dp[0], Dp[1], 0.0 );
+ // X.SetXYZ( Xp[0], Xp[1], 0.0 );
 
-double LLmRR = XX*aRho+2*XN*sRho;
-double LL = LLmRR*aRho+1; L = sqrt(LL);
-d = (rr*aRho+LLmRR)/(2*L);
+ double XX,XN,L;
+ N[0] = -Dp[1];
+ N[1] =  Dp[0];  
+ N[2] =  0.0;
+ XX = MAG2(Xp); //X*X;  
+ XN = DOT(Xp,N);//X*N;
 
-double p = ((r-d)*(r+d));
-if (p<=0) return 0;
-p = sqrt(p);
+ double LLmRR = XX*aRho+2*XN*sRho;
+ double LL = LLmRR*aRho+1; L = sqrt(LL);
+ d = (rr*aRho+LLmRR)/(2*L);
 
-C = X*aRho+N*sRho;
-Cd = C.Unit(); Cn[0] = -Cd[1];   Cn[1] = Cd[0];
+ double p = ((r-d)*(r+d));
+ if (p<=0) return 0;
+ p = sqrt(p);
 
-TVector3 Out[2];
+ C[0] = Xp[0]*aRho+N[0]*sRho;
+ C[1] = Xp[1]*aRho+N[1]*sRho;
+
+ //Cd = C.Unit(); 
+ double CMag = MAG(C);
+ Cd[0] = C[0] / CMag;
+ Cd[1] = C[1] / CMag;
+
+ Cn[0] = -Cd[1];   
+ Cn[1] =  Cd[0];  
+
+ 
+ // static TVector3 Out[2];  
+ //for (int ix = 0;ix<2; ix++) {
+ //   Out[ix] = Cd*d + Cn*p; p = -p;
+ // }
+ double Out[2][2];
+ Out[0][0] = Cd[0]*d + Cn[0]*p;
+ Out[0][1] = Cd[1]*d + Cn[1]*p;
+ Out[1][0] = Cd[0]*d - Cn[0]*p;
+ Out[1][1] = Cd[1]*d - Cn[1]*p;
+
+ // static TVector3 tmp;
+ double tmp[2];
 for (int ix = 0;ix<2; ix++) {
-  Out[ix] = Cd*d + Cn*p; p = -p;
-}
-
-for (int ix = 0;ix<2; ix++) {
-  double len = (Out[ix]-X).Mag();
+  tmp[0] = Out[ix][0] - Xp[0];
+  tmp[1] = Out[ix][1] - Xp[1];
+  //double len = (Out[ix]-X).Mag();
+  double len = MAG(tmp); 
   double lenaRho =len*aRho; if (lenaRho>2) lenaRho = 1.999;
   if (lenaRho > 0.01) len = 2*asin(0.5*lenaRho)/aRho;
-  if ((Out[ix]-X).Dot(D)<0) len = -len;
+  //if ((Out[ix]-X).Dot(D)<0) len = -len;
+  double tst = tmp[0]*Dp[0] + tmp[1]*Dp[1];
+  if ( tst < 0 ) len = -len;
 
-  double tst = (X-Out[ix])*D;
-  if (dir) tst = -tst;
+  //double tst = (X-Out[ix])*D;
+  //if (dir) tst = -tst;
 //VP  if (tst<0) len = M_PI*2*aR-len;
   out[ix][2] = len; 
   out[ix][0] = Out[ix][0];
@@ -176,17 +206,15 @@ for (int ix = 0;ix<2; ix++) {
       out[1][j] = t; 
   } }
 
-
-
-  for (int i=0;i<2;i++) {
-//  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
-  double dif = (Out[i]*aRho-C).Mag()-1.;
-//  printf("SolAcc=%g\n",dif);
-  assert(fabs(dif)<1e3);
-  dif = (Out[i]).Mag()/r-1;
-//  printf("SolAcc=%g\n",dif);
-  assert(fabs(dif)<1e3);
-  }
+//   for (int i=0;i<2;i++) {
+// //  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
+//   double dif = (Out[i]*aRho-C).Mag()-1.;
+// //  printf("SolAcc=%g\n",dif);
+//   assert(fabs(dif)<1e3);
+//   dif = (Out[i]).Mag()/r-1;
+// //  printf("SolAcc=%g\n",dif);
+//   assert(fabs(dif)<1e3);
+//   }
   return 2;
 }
 
