@@ -58,6 +58,7 @@ class StiToolkit
 {
 public:
   StiToolkit(); 
+  virtual ~StiToolkit(){ /* nada */ }
   virtual Factory<StiHit> * getHitFactory()=0;
   virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
