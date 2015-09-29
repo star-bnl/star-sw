@@ -1,6 +1,11 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.4 2015/09/18 18:44:28 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.5 2015/09/29 16:28:58 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.5  2015/09/29 16:28:58  akio
+// setFmsZS(int v) and if ADC<v, drop the hit (default=2)
+// adding poisson distribution for FPS, with setFpsNPhotonPerMIP(float v)
+//  (default=0 for now, which turns this off. It should be around 100?)
+//
 // Revision 1.4  2015/09/18 18:44:28  akio
 // uses StEnumeration
 //
@@ -30,8 +35,11 @@
 #include "StFmsDbMaker/StFmsDbMaker.h"
 #include "tables/St_g2t_emc_hit_Table.h"
 
+#include "TRandom2.h"
+
 /* Constructor. */
-StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : StMaker(name),mFpsNPhotonPerMIP(50) { }
+StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : 
+    StMaker(name),mFmsZSch(2),mFpsDEPerMIP(0.0016),mFpsNPhotonPerMIP(0.0) { }
 
 /* Process one event. */
 Int_t StFmsFastSimulatorMaker::Make() {
@@ -128,7 +136,14 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
       gainCorrection = dbMaker->getGainCorrection(detectorId, channel);
     }else{ //FPS      
       gain = 1.0/dbMaker->fpsGain(channel);    //fpsGain gives ADCch for MIP peak      
-      gainCorrection=0.002;                    //2MeV per MIP      
+      gainCorrection=mFpsDEPerMIP;             //about 1.6MeV per MIP      
+      //add smering with poisson distriubtion
+      if(mFpsNPhotonPerMIP>0.0){
+	  static TRandom2 rnd;
+	  int nPixel=static_cast<Int_t>(energy/gainCorrection*mFpsNPhotonPerMIP);
+	  int nPixelMod = rnd.Poisson(nPixel);
+	  energy = nPixelMod*gainCorrection/mFpsNPhotonPerMIP;
+      }
     }
     // Digitize                                                                                                                                                 
     adc = static_cast<Int_t>(energy / (gain * gainCorrection) + 0.5);    
@@ -142,7 +157,7 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
     }else{
 	digi_energy = adc * gain; //for FPS, this is not really energy but # of MIPs
     }
-    if(adc>0){ //store only if significant energy deposit to make adc>0
+    if(adc>mFmsZSch){ //store only if significant energy deposit : adc>mFmsZSch(default=2)
       hits[i]->setAdc(adc);
       hits[i]->setEnergy(digi_energy);
       fmscollection->addHit(hits[i]);
