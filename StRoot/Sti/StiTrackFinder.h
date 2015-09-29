@@ -10,7 +10,8 @@ template<class Filtered>class Filter;
 class StiTrackFinder 
 {
 public:
-   StiTrackFinder(){mComb=7;}
+  StiTrackFinder(){mComb=7;}
+  virtual ~StiTrackFinder(){ /* nada*/ }
   /// Initialize the finder
   virtual void initialize()=0;
   /// Find all tracks of the currently loaded event
