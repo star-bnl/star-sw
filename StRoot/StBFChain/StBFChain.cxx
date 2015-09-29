@@ -1561,37 +1561,44 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   Please, change SetDbOptions()
 */
 void StBFChain::SetGeantOptions(StMaker *geantMk){
-  if (geantMk && geantMk->InheritsFrom("St_geant_Maker")) {
-    SetInput("geant",".make/geant/.data");
-    TString GeomVersion("");
-    if (fRunG > 0) {
-      geantMk->SetAttr("RunG",fRunG);
-    }
-    if (! (GetOption("fzin") || ! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
-      GeomVersion = "y2004x";
-      const DbAlias_t *DbAlias = GetDbAliases();
-      Int_t found = 0;
-      for (Int_t i = 0; DbAlias[i].tag; i++) {
-	TString r("r");
-	r +=  DbAlias[i].tag;
-	if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
-	GeomVersion = DbAlias[i].geometry;
-	found = i; 
-	break;
-      }
-      if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
-      TString GeometryOpt;
-      if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",1);}
-      if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",1);}
-      GeometryOpt += ("detp geom ");
-      GeometryOpt += GeomVersion;
-      ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
-      
-    }
-    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "")
-      ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
+  if (! geantMk || ! geantMk->InheritsFrom("St_geant_Maker")) return;
+  SetInput("geant",".make/geant/.data");
+  TString GeomVersion("");
+  if (fRunG > 0) {
+    geantMk->SetAttr("RunG",fRunG);
   }
-  if (GetOption("ntin")) { //	  ** Setup interaction region 
+#if 0
+  if (! (GetOption("fzin") || ! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
+    GeomVersion = "y2004x";
+    const DbAlias_t *DbAlias = GetDbAliases();
+    Int_t found = 0;
+    for (Int_t i = 0; DbAlias[i].tag; i++) {
+      TString r("r");
+      r +=  DbAlias[i].tag;
+      if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
+      GeomVersion = DbAlias[i].geometry;
+      found = i; 
+      break;
+    }
+    if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
+    TString GeometryOpt;
+    if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",1);}
+    if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",1);}
+    GeometryOpt += ("detp geom ");
+    GeometryOpt += GeomVersion;
+    ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
+  }
+#else
+  if (! GetOption("fzin")) {
+    if (GetOption("phys_off")) {geantMk->SetAttr("phys_off",1);}
+    if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",1);}
+  }
+#endif      
+  if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
+    ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
+  }
+  
+  if (! GetOption("fzin") && ! GetOption("mtin")) { //	  ** Setup interaction region 
     Double_t XVERTEX =  0.31;
     Double_t YVERTEX = -0.35;
     Double_t ZVERTEX = -1.40;

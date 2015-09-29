@@ -913,9 +913,11 @@ Int_t St_geant_Maker::InitRun(Int_t run){
       //      Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e-3");
       Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     1e3");
     }
+#if 0
     LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
     if (mInitialization != "") {Do(mInitialization.Data()); mInitialization = "";}
+#endif
     Geometry();
     Do("physi");
     Do("gclose all");
@@ -1526,7 +1528,9 @@ Int_t St_geant_Maker::Make() {
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(const Char_t *option){
+#if 0
   mInitialization = option; 
+#endif
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Draw(const char* opt)
