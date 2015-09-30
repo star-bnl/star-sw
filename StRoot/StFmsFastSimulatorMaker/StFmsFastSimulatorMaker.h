@@ -1,6 +1,11 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.5 2015/09/18 18:44:28 akio Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.6 2015/09/29 16:28:58 akio Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.6  2015/09/29 16:28:58  akio
+// setFmsZS(int v) and if ADC<v, drop the hit (default=2)
+// adding poisson distribution for FPS, with setFpsNPhotonPerMIP(float v)
+//  (default=0 for now, which turns this off. It should be around 100?)
+//
 // Revision 1.5  2015/09/18 18:44:28  akio
 // uses StEnumeration
 //
@@ -69,6 +74,12 @@ class StFmsFastSimulatorMaker : public StMaker {
    */
   Int_t Make();
 
+  // Setting zero suppression # of channels
+  void setFmsZS(int v) {mFmsZSch=v;}
+
+  // Setting average energy loss per MIP for FPS
+  void  setFpsDEPerMIP(float v) {mFpsDEPerMIP=v;}
+
   // Setting average # of photon per MIP for FPS
   void  setFpsNPhotonPerMIP(float v) {mFpsNPhotonPerMIP=v;}
 
@@ -124,13 +135,15 @@ class StFmsFastSimulatorMaker : public StMaker {
    */
   void printStEventSummary(const StEvent* event);
 
+  Int_t mFmsZSch;
+  Float_t mFpsDEPerMIP;
   Float_t mFpsNPhotonPerMIP;
   
   ClassDef(StFmsFastSimulatorMaker, 0)
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.5 2015/09/18 18:44:28 akio Exp $ built " __DATE__ " " __TIME__ ;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.6 2015/09/29 16:28:58 akio Exp $ built " __DATE__ " " __TIME__ ;
   return cvs;
 }
 
