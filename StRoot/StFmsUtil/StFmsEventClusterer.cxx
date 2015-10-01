@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.3 2015/10/01 18:08:58 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.4 2015/10/01 18:19:59 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.4  2015/10/01 18:19:59  akio
+// fixed typo
+//
 // Revision 1.3  2015/10/01 18:08:58  akio
 // adding warning if removing cluster with too many towers
 //
@@ -451,7 +454,7 @@ Double_t StFmsEventClusterer::fitGlobalClusters(unsigned int nPhotons,
   GlobalPhotonFitParameters parameters(nPhotons, first, end);
   PhotonList photons;
   Double_t chiSquare = mFitter->fitNPhoton(parameters.start, parameters.lower,
-                                           parametersglobal.upper, &photons);
+                                           parameters.upper, &photons);
   if (photons.size() == nPhotons) {
     // Put the fit result back in the clusters
     auto photon = photons.begin();
