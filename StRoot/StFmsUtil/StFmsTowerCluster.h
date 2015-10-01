@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.h,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsTowerCluster.h,v 1.3 2015/10/01 19:55:48 akio Exp $
 //
 // $Log: StFmsTowerCluster.h,v $
+// Revision 1.3  2015/10/01 19:55:48  akio
+// *** empty log message ***
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -106,7 +109,7 @@ class StFmsTowerCluster {
   /** \overload */
   const StFmsCluster* cluster() const { return mCluster.get(); }
   /** Return and give up ownership of the StEvent cluster structure. */
-  StFmsCluster* release() { return mCluster.release(); }
+  StFmsCluster* release(); 
 
  protected:
   /** Determine cluster axis. */
