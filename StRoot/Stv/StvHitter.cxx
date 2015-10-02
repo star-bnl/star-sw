@@ -78,7 +78,7 @@ static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
   { 
     StvHit *nexHit = (StvHit*)node->GetObj();
-    if (nexHit->timesUsed()) continue;
+    if (nexHit->isUsed()) continue;
     mHits.push_back(nexHit);
   }
   return &mHits;

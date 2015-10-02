@@ -302,7 +302,7 @@ void  StvDraw::All(const char *opt)
     std::vector<const StvHit*> sHits;
     for (int ihit=0;ihit<(int)vHits->size();ihit++) {
       const StvHit *stvHit = (StvHit*)(*vHits)[ihit];
-      if (stvHit->timesUsed()) continue;
+      if (stvHit->isUsed()) continue;
       sHits.push_back(stvHit);
     }
     Hits(sHits,kUnusedHit);

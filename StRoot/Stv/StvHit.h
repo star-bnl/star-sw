@@ -89,7 +89,7 @@ public:
 
     ///Set the number of times used
     ///Return the number of times this hit was assigned to a track
-    virtual int timesUsed() const 	{ return (int)mTimesUsed;}
+    virtual int  isUsed() const 	{ return (int)mTimesUsed;}
     virtual void addTimesUsed(int add=1){ mTimesUsed+=add ;}
     virtual void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
     virtual void reset();
