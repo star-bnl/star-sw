@@ -68,11 +68,7 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 //______________________________________________________________________________
 void StiTrackNode::setHit( StiHit *hit )
 {
-  if (_hit == hit ) return;
-  if (_hit) { _hit->subTimesUsed();}
   _hit = hit;
-  if (!_hit) return;
-  _hit->addTimesUsed();
 }
 
 

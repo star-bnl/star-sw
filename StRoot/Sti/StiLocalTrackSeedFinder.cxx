@@ -40,7 +40,7 @@ StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
 //  cout <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
-
+#if 1
 //______________________________________________________________________________
 /// Produce the next track seed 
 /// Loop through available hits and attempt to form a track seed
@@ -77,8 +77,61 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
   if (fTrack) {
     fEta = fTrack->getPseudoRapidity();
   }
+  ++_hitIter;
   return fTrack;
 }
+#endif //0
+#if 0
+typedef std::multimap<float,StiHit*> Stv1stHitMap;
+typedef Stv1stHitMap::iterator Stv1stHitMapIter;
+Stv1stHitMap                  *f1stHitMap=0;
+Stv1stHitMapIter              *f1stHitMapIter=0;
+
+//______________________________________________________________________________
+StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
+{
+  fRxyMin = rMin;
+  fTrack = 0;  
+  if (isReset())
+  { 
+    if (!f1stHitMap) {
+      f1stHitMap     = new Stv1stHitMap;
+      f1stHitMapIter = new Stv1stHitMapIter;
+    }
+    f1stHitMap->clear();
+    _hitIter = StiSortedHitIterator(_hitContainer,_detectorContainer->begin(),_detectorContainer->end());
+  
+    for (;_hitIter!=StiSortedHitIterator();++_hitIter)
+    {
+      StiHit *hit = &(*_hitIter);
+      if (hit->isUsed()) continue;
+      if (fRxyMin && pow(hit->x(),2)+pow(hit->y(),2)<fRxyMin*fRxyMin) continue;
+      float x[3] = {hit->x_g(),hit->y_g(),hit->z_g()};
+//    double qwe = x[0]*x[0]+x[1]*x[1]- 0.01*x[2]*x[2];
+      double qwe = x[0]*x[0]+x[1]*x[1]+      x[2]*x[2];
+      f1stHitMap->insert(std::pair<float,StiHit*>(-qwe, hit));
+      *f1stHitMapIter = f1stHitMap->begin();
+  }  }
+
+  StiHit *fstHit=0; 
+
+  for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
+    fstHit = (*(*f1stHitMapIter)).second;
+    assert(fstHit);
+    if (fstHit->isUsed()) 		continue;
+    fTrack = makeTrack(fstHit);
+    if (fTrack) break;
+  }
+  //cout <<"StiLocalTrackSeedFinder::findTrack() -I- Done"<<endl;
+  fRxyMin = 0;
+  fEta = 0;
+  if (fTrack) {
+    fEta = fTrack->getPseudoRapidity();
+  }
+  ++(*f1stHitMapIter);
+  return fTrack;
+}
+#endif //1
 
 //______________________________________________________________________________
 /// Extend the track seed starting from the given hit.

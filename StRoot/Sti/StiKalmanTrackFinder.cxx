@@ -234,9 +234,9 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     track->reduce();
     nTAdd++;
     track->setFlag(1);
+    track->reserveHits();
     _trackContainer->push_back(track);
     track->setId(_trackContainer->size());
-//VP    track->reserveHits();
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     nSsdHits+=track->getFitPointCount(kSsdId);
@@ -304,10 +304,8 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
     if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) track);
     trackExtended = find(track,kOutsideIn,rMin);
     if (trackExtended) {
-//StiHftHits::hftHist("HFTBefore",track);//???????????????????????
     if (track->getFitPointCount()<5) return kNotRefitedIn;
     status = track->refit();
-//StiHftHits::hftHist("HFTAfter",track);//???????????????????????
       if(status) return kNotRefitedIn;
     }	
 
@@ -715,10 +713,6 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
       if (node->getNullCount()>maxNullCount) 			qa.setQA(-3);
       if (node->getContigNullCount()>maxContiguousNullCount)	qa.setQA(-3);
   }//node->getHit()
-
-//  double xg = node->x_g();
-//  double yg = node->y_g();
-//VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }
 

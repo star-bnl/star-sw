@@ -74,14 +74,6 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
   return( name < key2.name );
 }
 
-void SetHitUsed::operator()(StiTrackNode& node)
-{
-    StiHit* hit = node.getHit();
-    if(!hit) 			return;
-    if ( !node.isValid() || node.getChi2()>1e3)	{node.setHit(0); return;} 
-//    assert(!hit->isUsed());
-    hit->addTimesUsed();
-}
 
 
 //----------------------- Streamers -------------------------------------------------

@@ -132,7 +132,7 @@ enum eTrackNodeFlags {
   virtual double getPt() const=0;
   const StiTrackNode& operator=(const StiTrackNode& node);  
   void reset();
-  void unset(){;}
+virtual void unset(){StiTreeNode::unset();}
 
 virtual double x_g()  const	=0;
 virtual double y_g()  const	=0;
@@ -170,6 +170,7 @@ static double  sinX(double x);  // (sin(x)-x)/x**3
   double _det;
   double _chi2;
 public:
+  StiHit* fstHit;
 static int mgFlag;
 };
 

@@ -39,11 +39,6 @@ struct StiDetectorNodePositionLessThan
     bool operator() (const StiCompositeTreeNode<StiDetector> *, const StiCompositeTreeNode<StiDetector> *) const;
 };
 
-struct SetHitUsed
-{
-    void operator() (StiTrackNode&);
-};
-
 #endif
 
 

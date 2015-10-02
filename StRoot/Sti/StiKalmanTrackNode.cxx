@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.168.2.2 2015/08/29 03:27:58 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.168.2.3 2015/10/02 00:59:53 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.168.2.3  2015/10/02 00:59:53  perev
+ * reserveHits called + cleanupStiKalmanTrackFinder.cxx
+ *
  * Revision 2.168.2.2  2015/08/29 03:27:58  perev
  * new gcc isnan
  *
@@ -584,6 +587,7 @@ void StiKalmanTrackNode::unset()
 { 
   reduce();
   if (_inf) BFactory::Free(_inf); _inf=0;
+  StiTrackNode::unset();
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::resetError(double fak)
@@ -2256,7 +2260,7 @@ static const char *HHH = "xyzXYZH";
       case 3:val = hit->x_g(); 	break;
       case 4:val = hit->y_g(); 	break;
       case 5:val = hit->z_g();	break;
-      case 6: printf(" Hit=%p",hit); break;
+      case 6: printf(" Hit=%p(%d)",hit,hit->getCount()); break;
     }
     if (fabs(val+999)>1e-5) printf("\th%c=%g",HHH[i],val);
   }
