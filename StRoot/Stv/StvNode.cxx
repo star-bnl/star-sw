@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.34 2014/08/07 16:53:10 perev Exp $
+ * $Id: StvNode.cxx,v 1.35 2015/10/02 16:44:37 perev Exp $
  *
  * /author Victor Perev
  */
@@ -174,7 +174,7 @@ void StvNode::SetHit(StvHit *hit)
    if (mHit) mHit->setTimesUsed(0);
    mHit = hit;
    if (!mHit)           return;
-   assert(!mHit->timesUsed());
+   assert(!mHit->isUsed());
    mHit->setTimesUsed(1);
 } 
 //________________________________________________________________________________
