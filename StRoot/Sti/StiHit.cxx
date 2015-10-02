@@ -15,7 +15,7 @@
 #include "StiShape.h"
 #include "StiUtilities/StiDebug.h"
 
-
+int StiHit::gmTimesUsed=0;
 //_____________________________________________________________________________
 StiHit::StiHit()
 {
@@ -237,17 +237,24 @@ static int nCall =0; nCall++;
 }
 
 //_____________________________________________________________________________
+ void StiHit::setTimesUsed(int n)
+{
+    if (!mdetector) return;
+    assert(!n);
+    assert(!mTimesUsed);
+}
+//_____________________________________________________________________________
  void StiHit::addTimesUsed()
 {
     if (!mdetector) return;
-    mTimesUsed++;
+    mTimesUsed++; gmTimesUsed++;
     assert(mTimesUsed<=mMaxTimes);
 }
 //_____________________________________________________________________________
  void StiHit::subTimesUsed()
 {
     if (!mdetector) return;
-    mTimesUsed--;
+    mTimesUsed--; gmTimesUsed--;
     assert(mTimesUsed>=0);
 }
 
