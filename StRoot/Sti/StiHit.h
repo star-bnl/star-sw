@@ -137,7 +137,7 @@ public:
     void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
     void setMaxTimes(int set)	{mMaxTimes = set;}
-    void setTimesUsed(int set){mTimesUsed=set;}///???
+    void setTimesUsed(int set=0);
     void addTimesUsed();
     void subTimesUsed();
     ///Return a boolean that marks whether or not this hit is assigned to a
@@ -152,6 +152,7 @@ public:
     double getPseudoRapidity() const;
     Float_t  vz() const {return _vz;}
     Float_t  vy() const {return _vy;}
+    int  getCount() const { return mCount; }
     friend ostream& operator<<(ostream& os, const StiHit& h);
 protected:
     char  mBeg[1];
@@ -179,6 +180,8 @@ protected:
     char  mEnd[1];
 public:
     Int_t mCount;
+    int   mMark;
+static int gmTimesUsed;
 };
 
 //Functors for ordering hits
@@ -211,14 +214,5 @@ struct StizHitLessThan
     return (lhs->z() < rhs->z()) ? true : false;
   }
 };
-
-struct StiHitIsUsed
-{
-  bool operator() (const StiHit*hit) const
-  {
-    return (hit->isUsed()==0);
-  }
-};
-
 
 #endif
