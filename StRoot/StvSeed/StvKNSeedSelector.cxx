@@ -6,31 +6,65 @@
 #include "StvKNSeedSelector.h"
 #include "Stv/StvHit.h"
 
-#include "StvSeedConst.h"
-//static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kMaxAng =  15*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kSinHalfAng = sin(kMaxAng/2);
+#include "TStopwatch.h"
 
-//static const float kMinAng =  1*3.14/180;;	//KN angle allowed
-//static const float kMinAng =  2*3.14/180;;	//KN angle allowed
-//static const float kMinAng =  9*3.14/180;;	//KN angle allowed
-static const float kMinAng =  5*3.14/180;;	//KN angle allowed
-//static const float kMinAng =  3*3.14/180;;	//KN angle allowed
-//static const float kMinAng =  12*3.14/180;;	//KN angle allowed
+
+#include "StvSeedConst.h"
+//static const float kMaxDis =  9*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kMaxDis =  15*3.14/180;	//???Maximal angle allowed for connected hits
+//static const float kMaxDis =  30*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kMaxLam = (M_PI-kMaxDis)/2;
+static const float kSinDis = sin(kMaxDis/2);
+
+//static const float kMinDis =  1*3.14/180;;	//KN angle allowed
+//static const float kMinDis =  2*3.14/180;;	//KN angle allowed
+//static const float kMinDis =  9*3.14/180;;	//KN angle allowed
+static const float kMinDis =  5*3.14/180;;	//KN angle allowed
+//static const float kMinDis =  3*3.14/180;;	//KN angle allowed
+//static const float kMinDis =  12*3.14/180;;	//KN angle allowed
 
 //static const float kDisRatio=   1.0;		//ratio for KNN distance
 //static const float kDisRatio=   0.7;		//ratio for KNN distance
 //static const float kDisRatio=   0.6;		//ratio for KNN distance
 //static const float kDisRatio=   0.8;		//ratio for KNN distance
 //static const float kDisRatio=   0.9;		//ratio for KNN distance
-static const float kDisRatio=   0.8;		//ratio for KNN distance
+static const float kDisRatio=   1.1;		//ratio for KNN distance
 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
-enum { kNumTheDiv = 20 };			//number of divisions in theta
+//enum { kNumTheDiv = 20 };			//number of divisions in theta
+enum { kNumTheDiv = 40 };			//number of divisions in theta
 static float kStpTheDiv = M_PI/kNumTheDiv;	//step in theta map
 
+TStopwatch SW;
+
+
 #define Sq(x) ((x)*(x))
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+static void Eigen2(const double err[3], float lam[2], float eig[2][2])
+{
+
+  double spur = err[0]+err[2];
+  double det  = err[0]*err[2]-err[1]*err[1];
+  double dis  = spur*spur-4*det;
+  if (dis<0) dis = 0;
+  dis = sqrt(dis);
+  lam[0] = 0.5*(spur+dis);
+  lam[1] = 0.5*(spur-dis);
+  if (!eig) return;
+  eig[0][0] = 1; eig[0][1]=0;
+  if (dis>1e-6*spur) {// eigenvalues are different
+    if (fabs(err[0]-lam[0])>fabs(err[2]-lam[0])) {
+     eig[0][1] = 1; eig[0][0]= -err[1]/(err[0]-lam[0]);
+    } else {
+     eig[0][0] = 1; eig[0][1]= -err[1]/(err[2]-lam[0]);
+    }
+    double tmp = sqrt(eig[0][0]*eig[0][0]+eig[0][1]*eig[0][1]);
+    eig[0][0]/=tmp; eig[0][1]/=tmp;
+  }
+  eig[1][0]=-eig[0][1];  eig[1][1]= eig[0][0];
+}
 
 
 //_____________________________________________________________________________
@@ -41,7 +75,7 @@ assert(cang>-0.01);
   if (cang<0) cang = 0;
   double ang = 2*sqrt(cang/2);
        if (ang>1.99) { ang = M_PI;}
-  else if (ang>0.1 ) { ang = 2.*asin(ang/2); }
+  else if (ang>1.0 ) { ang = 2.*asin(ang/2); }
   return ang;
 }
 //_____________________________________________________________________________
@@ -84,8 +118,16 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
    int   *n = mAux[iA].mNbor;
    if (dis >= a[kKNumber-1]) return;
    int jk=0;
-   for (;jk<kKNumber;jk++) 			{if (dis < a[jk]) break;}
-   for (int jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
+   for (;jk<kKNumber;jk++) {
+     if (dis > a[jk])	continue;
+     if (n[jk]<0) break;
+     if (iA == n[jk]) return;
+     if (mAux[iA].mHit==mAux[n[jk]].mHit) 	return;
+     break;
+   }
+   if (n[jk]>=0) {
+     for (int jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
+   }
    a[jk]=dis; n[jk] = iB;
    if (mKNNDist < a[kKNumber-1]) return;
    mKNNDist = a[kKNumber-1];
@@ -107,6 +149,9 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
   mAux.clear();
   mSel.clear();
   mTheDiv.clear();
+#ifdef KNNMAP2
+  mTheMap.clear();
+#endif
   mStartHit = startHit;
   memcpy(mStartPos,startPos,sizeof(mStartPos));
   mKNNDist = 1e11;
@@ -124,20 +169,26 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
 {
   int last = mAux.size();
   mAux.resize(last+1);
-  StvKNAux &aux = mAux.back(); 
+  auto &aux = mAux.back(); 
   aux.mHit = voidHit; 
   float *myDir=aux.mDir,nor=0;
   for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
   nor = sqrt(nor);
   for (int i=0;i<3;i++) {myDir[i]/=nor;}
   aux.mPhi = atan2(myDir[1],myDir[0]);
-  aux.mCosThe = sqrt(myDir[0]*myDir[0]+myDir[1]*myDir[1]);
+  aux.mCosThe = sqrt((1-myDir[2])*(1+myDir[2]));
+  if (aux.mCosThe<=1e-6) { mAux.resize(last); return;}
   aux.mThe = asin(myDir[2]);
   aux.mLen = nor;aux.mSel = 0;
+#ifdef KNNMAP1
   float iThe = floor(aux.mThe/kStpTheDiv)*kStpTheDiv;
+
   mTheDiv[iThe].insert(std::pair<float,int>(aux.mPhi,last));
-  float myMaxPhi = kSinHalfAng/aux.mCosThe;
-        myMaxPhi = (myMaxPhi<0.99)? 2*asin(myMaxPhi): M_PI;
+
+  float  myMaxPhi = 2*kSinDis/aux.mCosThe;
+  if (myMaxPhi>=2) 		{myMaxPhi = M_PI;}
+  else if (myMaxPhi> 0.5) 	{myMaxPhi = 2*asin(myMaxPhi/2);}
+
   if (aux.mPhi-myMaxPhi<-M_PI) {
     last = mAux.size(); mAux.resize(last+1); mAux.back() = aux;
     mAux.back().mPhi = aux.mPhi+2*M_PI;
@@ -148,13 +199,36 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
     mAux.back().mPhi = aux.mPhi-2*M_PI;
     mTheDiv[iThe].insert(std::pair<float,int>(mAux.back().mPhi,last));
   }
+#endif
+#ifdef KNNMAP2
+  mTheMap.insert(std::pair<float,int>(aux.mThe,last));
+#endif
 }  
-#ifdef KNNMAP
+#ifdef KNNMAP0
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
-  mKNNDist = kMaxAng;
   mMinIdx = -1;
+  mKNNDist = kMaxDis;
+  for (int i1=0;i1<(int)mAux.size();i1++) {
+//    if ( mAux[i1].mSel) continue;
+    mAux[i1].Reset();  
+    for (int i2=0;i2<i1;i2++) {
+//      if ( mAux[i2].mSel) continue;
+      if (fabs(mAux[i1].mThe-mAux[i2].mThe)>mKNNDist)	continue;
+      float dang = fabs(mAux[i1].mPhi-mAux[i2].mPhi);
+      if (dang > M_PI) dang -= 2*M_PI;
+      if (fabs(dang)*mAux[i1].mCosThe>mKNNDist) 		continue;
+      Update(i1,i2);
+  } }
+}
+#endif
+#ifdef KNNMAP1
+//_____________________________________________________________________________
+void  StvKNSeedSelector::Relink()
+{
+  mMinIdx = -1;
+  mKNNDist = kMaxDis;
   MyTheDiv::iterator it2The = mTheDiv.begin();
   for (MyTheDiv::iterator it1The = mTheDiv.begin();
        it1The != mTheDiv.end();++it1The) 	//Main loop over theta	
@@ -162,7 +236,7 @@ void  StvKNSeedSelector::Relink()
     float the1 = (*it1The).first;
     for (;it2The!=mTheDiv.end();++it2The) {
       float the2 = (*it2The).first;
-      if (the2>the1-kMaxAng) break;
+      if (the2>=the1-mKNNDist) break;
     }
     if (it2The==mTheDiv.end()) continue;
 
@@ -173,27 +247,34 @@ void  StvKNSeedSelector::Relink()
          ++it1Phi) 					{//Main loop over phi
       int i1 = (*it1Phi).second;
       StvKNAux &aux1 = mAux[i1];
-      float myMaxPhi = kSinHalfAng/aux1.mCosThe;
-      myMaxPhi = (myMaxPhi<0.99)? 2*asin(myMaxPhi): M_PI;
+      void* hit1 = aux1.mHit;
+//      if (aux1.mSel) 	continue;
 		// Secondary theta loop
       for (MyTheDiv::iterator it3The=it2The;it3The!=mTheDiv.end();++it3The) 
       {
-	if ((*it3The).first>aux1.mThe+kStpTheDiv+kMaxAng) break;
+        float the3 = (*it3The).first;
+	if (the3>aux1.mThe) break;
 	MyPhiDiv &my3PhiDiv = (*it3The).second;
-
-//	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.begin();
-	for (MyPhiDiv::iterator it3Phi = my3PhiDiv.lower_bound(aux1.mPhi-myMaxPhi);
-             it3Phi !=my3PhiDiv.end();
-	     ++it3Phi) { 		//loop over Phi partner
-          if ((*it3Phi).first > aux1.mPhi+myMaxPhi) break;
-          int i2 = (*it3Phi).second;
-          if (i2>=i1) continue;
-          StvKNAux & aux2 = mAux[i2];
-          if (!aux2.mHit) 	continue;
-          if ( aux2.mSel) 	continue;
-          if (fabs(aux1.mThe-aux2.mThe) > kMaxAng) continue;
-          if ( Ang(aux1.mDir,aux2.mDir) > kMaxAng) continue;
-          Update(i1,i2);
+  
+        float  myMaxPhi = 2*kSinDis/aux1.mCosThe;
+        if (myMaxPhi>=2) 		{myMaxPhi = M_PI;}
+        else if (myMaxPhi> 0.5) 	{myMaxPhi = 2*asin(myMaxPhi/2);}
+        int n = my3PhiDiv.size();
+        MyPhiDiv::iterator it3Phi = (myMaxPhi<M_PI && n>5)? my3PhiDiv.lower_bound(aux1.mPhi-myMaxPhi)
+	                                                  : my3PhiDiv.begin();
+	
+	for (;it3Phi !=my3PhiDiv.end(); ++it3Phi) { 		//loop over Phi partner
+          if ((*it3Phi).first > aux1.mPhi) break;
+          int i3 = (*it3Phi).second;
+          if (i3==i1) continue;
+          StvKNAux & aux3 = mAux[i3];
+//          if ( aux3.mSel) 	continue;
+          if ( aux3.mHit==hit1) continue;
+          if (fabs(aux1.mThe-aux3.mThe) > mKNNDist) 	continue;
+          float dang = fabs(aux1.mPhi-aux3.mPhi);
+          if (dang > M_PI) dang -= 2*M_PI;
+          if (fabs(dang)*aux1.mCosThe>mKNNDist) 		continue;
+          Update(i1,i3);
 	}//end of it3Phi loop
       }// end of it3The loop
     }//End of main Phi loop
@@ -201,23 +282,48 @@ void  StvKNSeedSelector::Relink()
   }//End of main theta loop
 }  
 #endif
-#ifndef KNNMAP
+#ifdef KNNMAP2
 //_____________________________________________________________________________
 void  StvKNSeedSelector::Relink()
 {
+  mMinIdx = -1;
+  mKNNDist = kMaxDis;
+  auto  it2The = mTheMap.begin();
+  for (auto it1The = mTheMap.begin();
+       it1The != mTheMap.end();++it1The) 	//Main loop over theta	
+  {
+    float the1 = (*it1The).first;
+    int     i1 = (*it1The).second;
+    auto &aux1 = mAux[i1];
+//    if ( aux1.mSel) 	continue;
+    for (;it2The!=mTheMap.end();++it2The) {
+      float the2 = (*it2The).first;
+//    if (the2>=the1-kMaxDis) break;
+      if (the2>=the1-mKNNDist) break;
+    }
+    if (it2The==mTheMap.end()) continue;
+    for (auto it3The=it2The;it3The!=mTheMap.end();++it3The) 
+    {
+      float the3 = (*it3The).first;
+      if (the3>the1) 	break;
+      int i3 = (*it3The).second;
+      if (i1 == i3) 			continue;
+//    if (fabs(the3-the1)>kMaxDis) 	continue;
+      if (fabs(the3-the1)>mKNNDist) 	continue;
+      auto &aux3 = mAux[i3];
+//      if ( aux3.mSel) 	continue;
+      float dang = fabs(aux1.mPhi-aux3.mPhi);
+      if (dang > M_PI) dang -= 2*M_PI;
+//    if (fabs(dang)*aux1.mCosThe>kMaxDis) 	continue;
+      if (fabs(dang)*aux1.mCosThe>mKNNDist) 	continue;
+      Update(i1,i3);
+    }// end of it3The loop
 
-  for (int i1=0;i1<(int)mAux.size();i1++) {
-    if (!mAux[i1].mHit) continue;
-    if ( mAux[i1].mSel) continue;
-    mAux[i1].Reset(); mAux[i1].mSel=0; 
-    for (int i2=0;i2<i1;i2++) {
-      if (!mAux[i2].mHit) continue;
-      if ( mAux[i2].mSel) continue;
-      Update(i1,i2);
-  } }
-}
+  }//End of main theta loop
+}  
 #endif
-
+    
+    
 //_____________________________________________________________________________
 int StvKNSeedSelector::Select()
 {
@@ -225,20 +331,32 @@ static int nCall=0; nCall++;
   while (1) {
     mSel.clear();
     mMapLen.clear();
-    Relink();
-//     mKNNDist = kMaxAng;
-// ///		Find most dense place
-//     mMinIdx  = -1;
-//     for (int i=0;i<(int)mAux.size();i++) 
-//     { 
-//       if (!mAux[i].mHit) continue;		//ignore discarded hit
-//       if ( mAux[i].mSel) continue;		//ignore used hit
-//       float qwe = mAux[i].mDist[kKNumber-1];
-//       if (qwe>=mKNNDist) continue;
-//       mKNNDist=qwe; mMinIdx = i;
-//     }
+//    int n = mAux.size();
+// #ifdef KNNMAP0
+// const char *tit = "RelinkTimeMap0";
+// #endif
+// #ifdef KNNMAP1
+// const char *tit = "RelinkTimeMap1";
+// #endif
+// 
+// #ifdef KNNMAP2
+// const char *tit = "RelinkTimeMap2";
+// #endif
+// 
+// 
+// SW.Start();
+// for (int jk=0;jk<100;jk++) {
+// for (int i=0;i<n;i++) {
+//     mAux[i].mDist[0]=1e11; mAux[i].mDist[1]=1e11; mAux[i].mDist[2]=1e11; mAux[i].mDist[3]=1e11;
+//     mAux[i].mNbor[0]=  -1; mAux[i].mNbor[1]=  -1; mAux[i].mNbor[2]=  -1; mAux[i].mNbor[3]=  -1;
+// }
+// 
+     Relink();
+// }
+// SW.Stop();
+// 
+// StvDebug::Count(tit,mAux.size(),SW.CpuTime());
     if (mMinIdx<0) return 0;
-
 
   ///		define the best direction
     memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
@@ -248,7 +366,7 @@ static int nCall=0; nCall++;
     mNHits=0; 
     Pass(mMinIdx,mKNNDist*kDisRatio);
     double wid = Width();
-    if (mKNNDist*wid > kMinAng) return 0;	
+    if (mKNNDist*wid > kMinDis) return 0;	
  	 
     const void *hpPre = 0;
     mSel.push_back(mStartHit); 	 
@@ -296,7 +414,8 @@ void StvKNSeedSelector::Update(int ia,int ib)
   float *bDir = mAux[ib].mDir;
 
   double dis = Ang(aDir,bDir);
-  if (dis>kMaxAng) return;
+//if (dis>kMaxDis) return;
+  if (dis>mKNNDist) return;
   Insert(ia,ib,dis);
   Insert(ib,ia,dis);
 }  
@@ -324,13 +443,8 @@ static int nCall = 0; nCall++;
   double dN = mMapLen.size();
   G[0]/=dN;G[1]/=dN;G[2]/=dN; uv[0]/=dN;uv[1]/=dN;
   G[0]-=uv[0]*uv[0];G[1]-=uv[0]*uv[1];G[2]-=uv[1]*uv[1];
-
-  double bb = 0.5*(G[0]+G[2]);
-  double cc = G[0]*G[2]-G[1]*G[1];
-  double dis = bb*bb - cc*cc; if (dis<0) dis = 0;
-  mEigen[0] = cc/(bb+sqrt(dis));
-  mEigen[1] = G[0]+G[2]-mEigen[0];
-  return sqrt(mEigen[0]/(mEigen[1]+1e-11));
+  Eigen2(G,mEigen,0);
+  return sqrt(mEigen[1]/(mEigen[0]+1e-11));
 
 }
 #if 1
