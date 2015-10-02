@@ -28,10 +28,11 @@ typedef  StiDetector StHitPlane;
 class StvHit: private StiHit
 {
 public:
-  int timesUsed() const 		{ return StiHit::isUsed();}
-  void setTimesUsed(int i) 		{ StiHit::setTimesUsed(i);}
-  const StiDetector* detector() const 	{ return StiHit::detector();}
-  const float *x() const		{ return &_xg            ;}
+  int  isUsed() const 			{ return StiHit::isUsed()	;}
+  void setTimesUsed(int i) 		{ StiHit::setTimesUsed(i)	;}
+  const StiDetector* detector() const 	{ return StiHit::detector()	;}
+  const float *x() const		{ return &_xg            	;}
+  int getCount() const                  { return StiHit::getCount()	;}
 };
 
 
@@ -73,6 +74,7 @@ class myStvKNSeedFinder: public StvKNSeedFinder
 //______________________________________________________________________________
 {
   public:
+  virtual  ~myStvKNSeedFinder(){}
   void Reset();
   void Clear();
 };
@@ -108,14 +110,18 @@ gMyNextSeed++;
     if (!hel) 		return 0;
     const std::vector<StiHit*> *hits = (const std::vector<StiHit*>*)fStvKNSeedFinder->GetHits();
     if (!hits)		continue;
-    if (hits->size()<5)	continue;
+    fNHits = hits->size();
+    if (fNHits <5)	continue;
 
     fTrack = kit->getTrackFactory()->getInstance();
     fEta=0;
     int ifail = ((StiKalmanTrack*)fTrack)->initialize(*hits);
     if (ifail) 		continue;
     fEta = fTrack->getPseudoRapidity();
-
+    fPt  = fTrack->getPt();
+    fRho = fTrack->getCurvature();
+    fTanL = fTrack->getTanL();
+    fEigen = fStvKNSeedFinder->Eigen();
     gMyEta = 0;
     if (fabs(fEta) < 0.1 ) {
       StiKalmanTrackNode *node=fTrack->getInnerMostHitNode();
@@ -134,6 +140,7 @@ void myStvKNSeedFinder::Reset()
 {
 static StiToolkit *kit = StiToolkit::instance();  
 assert(!f1stHitMap->size()); 
+  StvKNSeedFinder::Reset();
 
   StiHitContainer      *hitContainer     = kit->getHitContainer();
   const HitMapToVectorAndEndType& mymap = hitContainer->hits();
@@ -143,9 +150,10 @@ assert(!f1stHitMap->size());
     const vector<StiHit*> &vh = (*it).second.hits();
     for (int ih=0;ih<(int)vh.size();ih++) {
       StvHit *hit = (StvHit*)vh[ih];
-      if (hit->timesUsed()) continue;
+      if (hit->isUsed()) continue;
       const float *x = hit->x();
-      double qwe = x[0]*x[0]+x[1]*x[1]+x[2]*x[2];
+//      double qwe = x[0]*x[0]+x[1]*x[1]- 0.01*x[2]*x[2];
+      double qwe = x[0]*x[0]+x[1]*x[1]+      x[2]*x[2];
       f1stHitMap->insert(std::pair<float,StvHit*>(-qwe, hit));
       float xx[6] = {x[0],x[1],x[2],x[0]-x[1],x[1]-x[2],x[2]-x[0]};
       fMultiHits->Add(hit,xx);
@@ -175,22 +183,26 @@ f1stHitMap->clear();
 void StiKNNSeedFinder::FeedBack(int badGood)
 {
   if (!fEta) return;
+  double ratio = sqrt(fEigen[0]/(fEigen[1]+1e-11));
+  if (ratio>100) ratio=100;
   if (badGood<=0) {
     StiDebug::Count("BadEta",fEta);
+    StiDebug::Count("BadNHits",fNHits);
   } else {
     fEta = fTrack->getPseudoRapidity();
+    fPt  = fTrack->getPt();
     int nHits = fTrack->getPointCount(kPxlId);
     nHits    += fTrack->getPointCount(kIstId);
     nHits    += fTrack->getPointCount(kSstId);
     StiDebug::Count("GoodEta",fEta);
-
-    if (gMyEta) {
-      StiKalmanTrackNode *node=fTrack->getInnerMostHitNode();
-      if (fabs(node->z_g())<10) {
-    printf("UUUUUUU=%d\n",gMyEta);
-    }}
-
-    if (nHits>=2) StiDebug::Count("HftEta",fEta);
+    StiDebug::Count("GoodNHits",fNHits);
+    fTanL = fTrack->getTanL();
+    fRho = fTrack->getCurvature();
+    
+    if (nHits>=2) {
+      StiDebug::Count("HftEta",fEta);
+      StiDebug::Count("HftHits",fNHits);
+    }     
   }
 }
 //______________________________________________________________________________
