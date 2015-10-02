@@ -6,6 +6,7 @@
 #include "Stiostream.h"
 #include <vector>
 #include "Sti/StiTrackFinder.h"
+#include "StvSeed/StvSeedConst.h"
 
 class StiKalmanTrack;
 class myStvKNSeedFinder;
@@ -23,12 +24,16 @@ public:
   virtual void clear();
   virtual Filter<StiTrack>* getTrackFilter(){return 0;}
   virtual void FeedBack(int badGood);
-
 protected:
 vector<StiHit*>        _seedHits;
 StiKalmanTrack *fTrack;
 double fEta;
 double fRxyMin;
+double fPt;
+double fRho;
+double fTanL;
+const float *fEigen;
+   int fNHits;
 myStvKNSeedFinder *fStvKNSeedFinder;
 #if 0
 ClassDef(StiKNNSeedFinder,0)
