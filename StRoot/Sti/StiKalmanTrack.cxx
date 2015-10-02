@@ -1,11 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.2.1 2015/10/02 00:56:40 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.2.1 2015/10/02 00:56:40 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.139.2.1  2015/10/02 00:56:40  perev
+ * Method reserveHits added(placed back). Now hits marked as used only
+ * in one place where track is comletely ready
+ * Also some cleanup made
+ *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
  * Enum keepHit and kGoodHir added instead of using 1 & 2.
@@ -652,9 +657,6 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
 //_____________________________________________________________________________
 StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
-  double px,py,pz;
-  px=py=pz=0;
-
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
@@ -1176,10 +1178,23 @@ vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
   node (when there is a hit) is set to "used".
 */	
 //_____________________________________________________________________________
-void StiKalmanTrack::reserveHits()
+void StiKalmanTrack::reserveHits() 
 {
-  StiKTNForwardIterator it(lastNode);
-  for_each( it, it.end(), SetHitUsed() );
+  StiKTNIterator source;
+  for (source=begin();source!=end();source++) {
+    StiKalmanTrackNode *node = &(*source);
+    StiHit *hit = node->getHit();
+    if (!hit) 			continue;
+    if (!hit->detector())	continue;
+
+    if (node->getChi2()<1000) 	{ 
+      if (hit->isUsed()) {
+        node->setHit(0); continue;}
+      hit->addTimesUsed();  }
+    else {			
+      node->setHit(0);	
+    }
+  }
 }
 
 /*! Extend track to the given vertex.
@@ -1532,7 +1547,7 @@ int StiKalmanTrack::refit()
     break;
       //	The last resource
       //    errConfidence = 0.5*(errConfidence+1);
-      //    if (errConfidence>0.99) 					break;
+      //    if (errConfidence>0.99) 				break;
   }
   StiKalmanTrackNode *vertexNode= sTNH.getVertexNode();
 
@@ -1547,23 +1562,23 @@ int StiKalmanTrack::refit()
     fail = 98;			//too many dropped nodes
     errType = kTooManyDroppedNodes;    
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
-        &&  nNEnd+kHitLoss < nNBeg)					break;
+        &&  nNEnd+kHitLoss < nNBeg)				break;
     fail = 0;
     errType = kNoErrors;
     break;    
   }
-  if (!fail) { //Cleanup. Hits of bad nodes set to zero
+  { //Cleanup. Hits of bad nodes set to zero
     StiKalmanTrackNode *node;
     StiKTNIterator it = begin();
     for (;(node=it());it++){
-      if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
-      if(!hit) 						continue;
-      if (node->isValid() && node->getChi2()<10000. ) 	continue;
+      if(!hit) 				continue;
+      if (!hit->detector())		continue;
+      if (node->getChi2()<10000. ) 	continue;
       node->setHit(0);
     }
   }
-
+  if (errType) {}
   if (fail) setFlag(-1);
 #ifdef DO_TPCCATRACKER
   return errType;
@@ -1628,7 +1643,11 @@ void StiKalmanTrack::unset()
 {
   if (!lastNode) return;
   StiKTNIterator source;
-  for (source=begin();source!=end();source++) {BFactory::Free(&(*source));}
+  for (source=begin();source!=end();source++) {
+    StiKalmanTrackNode *node = &(*source);
+    node->setHit(0);
+    BFactory::Free(node);
+  }
   lastNode=0; firstNode=0;
 }
 //_____________________________________________________________________________
