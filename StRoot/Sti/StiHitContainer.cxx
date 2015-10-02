@@ -96,9 +96,9 @@ void StiHitContainer::add(StiHit* hit)
 
 void StiHitContainer::reset()
 {
+   StiHit::gmTimesUsed = 0;
    HitMapToVectorAndEndType::iterator it;
    vector<StiHit*>::iterator iter;
-   //cout << "StiHitContainer::reset() -i- XXXXXXXXXXXXXXXXXXXXXXXX _map.size() ="<<_map.size()<<endl;
    for (it=_map.begin(); it!=_map.end(); it++) 
      {
        vector<StiHit*> &hits = (*it).second.hits();
@@ -280,16 +280,6 @@ void StiHitContainer::sortHits()
   return;
 }
 
-void StiHitContainer::partitionUsedHits()
-{
-    for (HitMapToVectorAndEndType::iterator it=_map.begin(); it!=_map.end(); ++it)
-      {
-      vector<StiHit*>& tempvec = (*it).second.hits();
-      vector<StiHit*>::iterator where =
-        stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
-      (*it).second.setEnd(where);
-    }
-}
 
 ostream& operator<<(ostream& os, const vector<StiHit*>& vec)
 {
