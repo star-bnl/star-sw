@@ -691,8 +691,6 @@ TDataSet *St_geant_Maker::fgGeom = 0;
 TGiant3  *St_geant_Maker::geant3 = 0;
 St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 static TTreeIter *MuDstIter = 0;
-TString   St_geant_Maker::fgVertex("");
-TString   St_geant_Maker::fgSpread("");
 Bool_t    St_geant_Maker::fInitRunDone = kFALSE;
 
 //_____________________________________________________________________________
@@ -807,8 +805,6 @@ Int_t St_geant_Maker::Init(){
       kuip = "user/input user "; 
       kuip += InputFile; 
       SetAttr("user/input",kTRUE);
-      if (fgVertex != "") {Do(fgVertex.Data());  LOG_INFO << "St_geant_Maker::" << fgVertex.Data() << endm;}
-      if (fgSpread != "") {Do(fgSpread.Data());  LOG_INFO << "St_geant_Maker::" << fgSpread.Data() << endm;}
     }
     else if (InputFile.Contains(".MuDst")) {
       if (! MuDstIter) MuDstIter = new TTreeIter();
@@ -847,10 +843,7 @@ Int_t St_geant_Maker::Init(){
 	command.ReplaceAll(".L ",".U ");
 	gInterpreter->ProcessLine(command,&ee);
 	assert(!ee);
-      } else {
-	// gkine #particles partid ptrange yrange phirange vertexrange
-	Do("gkine        20      6    1. 1. -1. 1. 0 6.28      0. 0.;");
-      }
+      }	
       Do("mode g2tm prin 1;");
       //  Do("next;");
       //  Do("dcut cave z 1 10 10 0.03 0.03;");
@@ -1032,13 +1025,13 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     if (! ifz && IAttr("beamLine")) {
       St_vertexSeedC* vSeed = St_vertexSeedC::instance();
       if (vSeed) {
-	Double_t x0   = vSeed->x0()  ; Double_t err_x0   = vSeed->err_x0();
-	Double_t y0   = vSeed->y0()  ; Double_t err_y0   = vSeed->err_y0();
-	Double_t z0   = 0            ; Double_t err_z0   = 60; 
+	Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
+	Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
+	Double_t z0   = 0            ;// Double_t err_z0   = 60; 
 	Double_t dxdz = vSeed->dxdz();
 	Double_t dydz = vSeed->dydz(); 
 	Do(Form("gvertex   %f %f %f",x0,y0,z0)); // ** setup the vertex
-	Do(Form("gspread %f %f %f",err_x0,err_y0,err_z0));
+	//	Do(Form("gspread %f %f %f",err_x0,err_y0,err_z0));
 	Do(Form("gslope  %f %f", dxdz, dydz));
       }
     }
