@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.34 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.35 2015/10/02 19:48:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.35  2015/10/02 19:48:53  ullrich
+ * Added Rps tracks and points
+ *
  * Revision 2.34  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -115,129 +118,132 @@
 #include "StCalibrationVertex.h"
 #include "StContainers.h"
 #include "StDetectorState.h"
-#include "StSvtHit.h"
-#include "StSsdHit.h"
-#include "StSstHit.h"
-#include "StTpcHit.h"
-#include "StFtpcHit.h"
-#include "StEtrHit.h"
-#include "StRichHit.h"
-#include "StRichPixel.h"
-#include "StRichPid.h"
-#include "StRichPhotonInfo.h"
-#include "StRichCluster.h"
-#include "StRichMCInfo.h"
-#include "StRpsCluster.h"
-#include "StEmcRawHit.h"
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
-#include "StFmsHit.h"
+#include "StEmcRawHit.h"
+#include "StEtrHit.h"
+#include "StFgtHit.h"
+#include "StFgtPoint.h"
+#include "StFgtStrip.h"
 #include "StFmsCluster.h"
+#include "StFmsHit.h"
 #include "StFmsPoint.h"
 #include "StFpsSlat.h"
-#include "StTofHit.h"
-#include "StTofSlat.h"
-#include "StTofCell.h"
-#include "StTofData.h"
-#include "StTofRawData.h"
-#include "StPrimaryTrack.h"
-#include "StTrackMassFit.h"
-#include "StPrimaryVertex.h"
-#include "StPsd.h"
-#include "StTrackNode.h"
-#include "StTrackFitTraits.h"
-#include "StTrackPidTraits.h"
-#include "StTrackDetectorInfo.h"
-#include "StV0Vertex.h"
-#include "StXiVertex.h"
-#include "StKinkVertex.h"
-#include "StL3AlgorithmInfo.h"
-#include "StPhmdHit.h"
-#include "StPhmdCluster.h"
-#include "StRnDHit.h"
+#include "StFtpcHit.h"
 #include "StHltBEmcTowerHit.h"
 #include "StHltBTofHit.h"
-#include "StHltVpdHit.h"
+#include "StHltDiElectron.h"
+#include "StHltHeavyFragment.h"
+#include "StHltHighPt.h"
 #include "StHltTrack.h"
 #include "StHltTrackNode.h"
-#include "StHltHighPt.h"
-#include "StHltHeavyFragment.h"
-#include "StHltDiElectron.h"
 #include "StHltTriggerReason.h"
+#include "StHltVpdHit.h"
+#include "StIstHit.h"
+#include "StKinkVertex.h"
+#include "StL3AlgorithmInfo.h"
 #include "StMtdHit.h"
 #include "StMtdRawHit.h"
-#include "StFgtStrip.h"
-#include "StFgtPoint.h"
-#include "StFgtHit.h"
+#include "StPhmdCluster.h"
+#include "StPhmdHit.h"
+#include "StPrimaryTrack.h"
+#include "StPrimaryVertex.h"
+#include "StPsd.h"
 #include "StPxlHit.h"
-#include "StIstHit.h"
+#include "StRichCluster.h"
+#include "StRichHit.h"
+#include "StRichMCInfo.h"
+#include "StRichPhotonInfo.h"
+#include "StRichPid.h"
+#include "StRichPixel.h"
+#include "StRnDHit.h"
+#include "StRpsCluster.h"
+#include "StRpsTrack.h"
+#include "StRpsTrackPoint.h"
+#include "StSsdHit.h"
+#include "StSstHit.h"
+#include "StSvtHit.h"
+#include "StTofCell.h"
+#include "StTofData.h"
+#include "StTofHit.h"
+#include "StTofRawData.h"
+#include "StTofSlat.h"
+#include "StTpcHit.h"
+#include "StTrackDetectorInfo.h"
+#include "StTrackNode.h"
+#include "StTrackPidTraits.h"
+#include "StV0Vertex.h"
+#include "StXiVertex.h"
 #include "StGmtStrip.h"
 #include "StGmtPoint.h"
 #include "StGmtHit.h"
 
-StCollectionImp(Object)
+StCollectionImp(BTofHit)
+StCollectionImp(BTofRawHit)
 StCollectionImp(CalibrationVertex)
 StCollectionImp(DetectorState)
+StCollectionImp(EmcCluster)
+StCollectionImp(EmcPoint)
+StCollectionImp(EmcRawHit)
+StCollectionImp(EtrHit)
+StCollectionImp(FgtHit)
+StCollectionImp(FgtPoint)
+StCollectionImp(FgtStrip)
+StCollectionImp(FmsCluster)
+StCollectionImp(FmsHit)
+StCollectionImp(FmsPoint)
+StCollectionImp(FpsSlat)
+StCollectionImp(FtpcHit)
 StCollectionImp(Hit)
+StCollectionImp(HltBEmcTowerHit)
+StCollectionImp(HltBTofHit)
+StCollectionImp(HltDiElectron)
+StCollectionImp(HltHeavyFragment)
+StCollectionImp(HltHighPt)
+StCollectionImp(HltTrack)
+StCollectionImp(HltTrackNode)
+StCollectionImp(HltTriggerReason)
+StCollectionImp(HltVpdHit)
+StCollectionImp(IstHit)
+StCollectionImp(KinkVertex)
+StCollectionImp(L3AlgorithmInfo)
+StCollectionImp(MtdHit)
+StCollectionImp(MtdRawHit)
+StCollectionImp(Object)
+StCollectionImp(PhmdCluster)
+StCollectionImp(PhmdHit)
 StCollectionImp(PrimaryTrack)
 StCollectionImp(TrackMassFit)
 StCollectionImp(PrimaryVertex)
 StCollectionImp(Psd)
-StCollectionImp(SvtHit)
+StCollectionImp(PxlHit)
+StCollectionImp(RichCluster)
+StCollectionImp(RichHit)
+StCollectionImp(RichMCInfo)
+StCollectionImp(RichPhotonInfo)
+StCollectionImp(RichPid)
+StCollectionImp(RichPixel)
+StCollectionImp(RnDHit)
+StCollectionImp(RpsCluster)
+StCollectionImp(RpsTrack)
+StCollectionImp(RpsTrackPoint)
 StCollectionImp(SsdHit)
 StCollectionImp(SstHit)
-StCollectionImp(TpcHit)
-StCollectionImp(FtpcHit)
-StCollectionImp(EtrHit)
-StCollectionImp(RichHit)
-StCollectionImp(RichCluster)
-StCollectionImp(RichPixel)
-StCollectionImp(RichPid)
-StCollectionImp(RichPhotonInfo)
-StCollectionImp(RichMCInfo)
-StCollectionImp(RpsCluster)
-StCollectionImp(EmcRawHit)
-StCollectionImp(EmcCluster)
-StCollectionImp(EmcPoint)
-StCollectionImp(FmsHit)
-StCollectionImp(FmsCluster)
-StCollectionImp(FmsPoint)
-StCollectionImp(FpsSlat)
-StCollectionImp(TofHit)
-StCollectionImp(TofSlat)
+StCollectionImp(SvtHit)
 StCollectionImp(TofCell)
 StCollectionImp(TofData)
+StCollectionImp(TofHit)
 StCollectionImp(TofRawData)
-StCollectionImp(BTofHit)
-StCollectionImp(BTofRawHit)
-StCollectionImp(MtdHit)
-StCollectionImp(MtdRawHit)
+StCollectionImp(TofSlat)
+StCollectionImp(TpcHit)
 StCollectionImp(Track)
+StCollectionImp(TrackDetectorInfo)
 StCollectionImp(TrackNode)
 StCollectionImp(TrackFitTraits)
 StCollectionImp(TrackPidTraits)
-StCollectionImp(TrackDetectorInfo)
 StCollectionImp(V0Vertex)
 StCollectionImp(XiVertex)
-StCollectionImp(KinkVertex)
-StCollectionImp(L3AlgorithmInfo)
-StCollectionImp(PhmdHit)
-StCollectionImp(PhmdCluster)
-StCollectionImp(RnDHit)
-StCollectionImp(HltBEmcTowerHit)
-StCollectionImp(HltBTofHit)
-StCollectionImp(HltVpdHit)
-StCollectionImp(HltTrack)
-StCollectionImp(HltTrackNode)
-StCollectionImp(HltHighPt)
-StCollectionImp(HltHeavyFragment)
-StCollectionImp(HltDiElectron)
-StCollectionImp(HltTriggerReason)
-StCollectionImp(FgtHit)
-StCollectionImp(FgtStrip)
-StCollectionImp(FgtPoint)
-StCollectionImp(PxlHit)
-StCollectionImp(IstHit)
 StCollectionImp(GmtHit)
 StCollectionImp(GmtStrip)
 StCollectionImp(GmtPoint)
+

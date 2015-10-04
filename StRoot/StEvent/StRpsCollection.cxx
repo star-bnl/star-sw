@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsCollection.cxx,v 2.2 2010/02/04 18:16:09 ullrich Exp $
+ * $Id: StRpsCollection.cxx,v 2.3 2015/10/02 19:50:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRpsCollection.cxx,v $
+ * Revision 2.3  2015/10/02 19:50:50  ullrich
+ * Added containers for tracks and points.
+ *
  * Revision 2.2  2010/02/04 18:16:09  ullrich
  * Added new member mSiliconBunch and referring access methods.
  *
@@ -20,11 +23,11 @@
 #include "StRpsCollection.h"
 #include "StRpsPlane.h"
 
-static const char rcsid[] = "$Id: StRpsCollection.cxx,v 2.2 2010/02/04 18:16:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StRpsCollection.cxx,v 2.3 2015/10/02 19:50:50 ullrich Exp $";
 
 ClassImp(StRpsCollection)
 
-StRpsCollection::StRpsCollection() 
+StRpsCollection::StRpsCollection()
 {
     //
     // Set up all the roman pot and plane IDs
@@ -39,45 +42,61 @@ StRpsCollection::StRpsCollection()
     mSiliconBunch = 0;
 }
 
-StRpsCollection::~StRpsCollection() { /* noop */ }
+StRpsCollection::~StRpsCollection() { /* no op */ }
 
-unsigned int 
+unsigned int
 StRpsCollection::numberOfRomanPots() const
 {
-    return mNumberOfRomanPots; 
+    return mNumberOfRomanPots;
 }
 
-const StRpsRomanPot* 
+const StRpsRomanPot*
 StRpsCollection::romanPot(unsigned int i) const
 {
-    if (i < mNumberOfRomanPots) 
+    if (i < mNumberOfRomanPots)
         return &mRomanPots[i];
     else
         return 0;
 }
 
-StRpsRomanPot* 
+StRpsRomanPot*
 StRpsCollection::romanPot(unsigned int i)
 {
-    if (i < mNumberOfRomanPots) 
+    if (i < mNumberOfRomanPots)
         return &mRomanPots[i];
     else
         return 0;
 }
 
-StPtrVecRpsCluster 
-StRpsCollection::clusters() const 
+StPtrVecRpsCluster
+StRpsCollection::clusters() const
 {
     StPtrVecRpsCluster vec;
-    for (unsigned int i=0; i<mNumberOfRomanPots; i++) { 
+    for (unsigned int i=0; i<mNumberOfRomanPots; i++) {
         const StRpsRomanPot *seq = &mRomanPots[i];
         for (unsigned int j=0; j<seq->numberOfPlanes(); j++) {
             const StRpsPlane *plane = seq->plane(j);
-            for (unsigned int k=0; k<plane->numberOfClusters(); k++) 
+            for (unsigned int k=0; k<plane->numberOfClusters(); k++)
                 vec.push_back(plane->cluster(k));
         }
     }
     return vec;
+}
+
+StPtrVecRpsTrackPoint StRpsCollection::trackPoints() const {
+    StPtrVecRpsTrackPoint trackPointsVec;
+    for (unsigned int i=0; i<mTrackPoints.size(); ++i) {
+        trackPointsVec.push_back( mTrackPoints[i] );
+    }
+    return trackPointsVec;
+}
+
+StPtrVecRpsTrack StRpsCollection::tracks() const {
+    StPtrVecRpsTrack tracksVec;
+    for(unsigned int i=0; i<mTracks.size(); ++i){
+        tracksVec.push_back( mTracks[i] );
+    }
+    return tracksVec;
 }
 
 unsigned char
@@ -86,9 +105,9 @@ StRpsCollection::siliconBunch() const
     return mSiliconBunch;
 }
 
-
 void
 StRpsCollection::setSiliconBunch(unsigned char val)
 {
     mSiliconBunch = val;
 }
+
