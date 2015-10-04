@@ -22,7 +22,7 @@ enum {kKNumber=4};
 class StvKNAux {
 public:
   StvKNAux() 		{ Reset();}
-  void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;};}
+  void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;mNbor[i]=-1;}}
 public:
   void *mHit;			//void pointer to hit
   float mLen;			//distance from the 1st hit
@@ -54,7 +54,8 @@ private:
       void Insert(int ia,int ib,float dis);
       void Pass(int iux,double accuAng);
     double Width();
-private:  
+const float *Eigen() const {return mEigen;}
+protected:  
  int  mState;		//Status, &1 =narrow trace
 void *mStartHit;
 float mStartPos[3];

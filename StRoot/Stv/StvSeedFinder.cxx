@@ -48,7 +48,7 @@ void StvSeedFinder::ShowRest(EDraw3DStyle style)
    int nHits =  hitArr->size();
    for (int iHit=0;iHit<nHits;iHit++) {
      StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
-     if (stiHit->timesUsed()) continue;
+     if (stiHit->isUsed()) continue;
      myHits.push_back(stiHit);
    }
    fDraw->Hits(myHits,style);

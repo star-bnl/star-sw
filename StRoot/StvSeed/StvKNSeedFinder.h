@@ -34,12 +34,14 @@ public:
   void      FeedBack(const StvTrack *tk);
   void      Print(const char *opt="") const {;}
   const StvHits *GetHits() const; 	
+  const float *Eigen(){return mSel.Eigen();}
   virtual void Show();
 protected:
 
 protected:
 char mBeg[1];
-int fIPass,fNSeeds[2],fNUsed[2];
+int fNSeeds[2],fNUsed[2];
+StvHit *fstHit;
 char mMed[1];
 StMultiKeyMap 		*fMultiHits;
 StMultiKeyMapIter 	*fMultiIter;

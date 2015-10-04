@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "TCernLib.h"
+#include "TSystem.h"
 #include "TVector3.h"
 #include "StMultiKeyMap.h"
 #include "THelixTrack.h"
@@ -57,14 +58,14 @@ void StvKNSeedFinder::Clear(const char*)
 //_____________________________________________________________________________
 void StvKNSeedFinder::Reset()
 {
+  memset(mBeg,0,mMed-mBeg+1);
 #ifndef __NOSTV__
   assert(!f1stHitMap->size());
-  memset(mBeg,0,mMed-mBeg+1);
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *hit = (StvHit*)(*hitArr)[iHit];
-    if (hit->timesUsed()) continue;
+    if (hit->isUsed()) continue;
     const float *x = hit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
@@ -87,38 +88,42 @@ int StvKNSeedFinder::Again(int)
 const THelixTrack* StvKNSeedFinder::NextSeed()
 {
 static int nCall=0; nCall++;
-  StvHit *fstHit; 
+  int nTotHits=0,nAccHits=0;
 
+  if (fstHit)  ++(*f1stHitMapIter); 	//Next seed if success
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
+
     fstHit = (*(*f1stHitMapIter)).second;
     assert(fstHit);
-    if (fstHit->timesUsed()) 		continue;
+    if (fstHit->isUsed()) 		continue;
     fSeedHits.clear();
-    const float *hPos = fstHit->x();
-    float Rxy2 = hPos[0]*hPos[0]+hPos[1]*hPos[1];
-    if (Rxy2 < kMinRxy*kMinRxy) 	continue;
-    const StHitPlane *hp = fstHit->detector();
-//    mRej.Reset(hPos,hDir,lay*kMaxHits*3);
-    mRej.Reset(hPos);
+    const float *fstPos = fstHit->x();
+    float fstRxy2 = fstPos[0]*fstPos[0]+fstPos[1]*fstPos[1];
+    float fstRxy = sqrt(fstRxy2);
+    if (fstRxy < kMinRxy) 		continue;	//Non Tpc hit
+//VP    const StHitPlane *hp = fstHit->detector();
+    float        fstDir[2]={fstPos[0]/fstRxy,fstPos[1]/fstRxy};
+    mRej.Reset(fstPos);
     mRej.Prepare();
     fMultiIter->Set(fMultiHits->GetTop(),mRej.mLim[0],mRej.mLim[1]);
     mSel.Reset(fstHit->x(),fstHit);
-    int nTotHits=0,nAccHits=0;
+    nTotHits=0;nAccHits=0;
 
 //		Add all near hits 
     for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
     { 
 //		Search next hit 
       StvHit *nexHit = (StvHit*)node->GetObj();
+
+      if (nexHit->isUsed()) 		continue;
       if (nexHit==fstHit)		continue;
-      if (nexHit->timesUsed()) 		continue;
-      if (nexHit->detector()==hp)	continue;
       const float *f = nexHit->x();
       float myRxy2 = f[0]*f[0]+f[1]*f[1];
-      if (myRxy2 >=Rxy2)  		continue;
-      if (myRxy2 < kMinRxy*kMinRxy)  	continue;
+      if (myRxy2 >=fstRxy2)  		continue;
+      float proj = fstDir[0]*f[0]+fstDir[1]*f[1];
+      if (proj < kMinRxy) 		continue;
+
       nTotHits++;
-      
       int ans = mRej.Reject(nexHit->x());
       if (ans) continue;
       nAccHits++;
@@ -126,26 +131,15 @@ static int nCall=0; nCall++;
       mSel.Add(nexHit->x(),nexHit);
 
     } //endMultiIter loop
-
+    if (nAccHits<kMinHits) 	continue;
 
     int nHits = mSel.Select();
-    if (nHits < kMinHits) continue;
-{
-int myShow = StvDebug::iFlag("StvKNShow");
-if (myShow) mSel.Show();
-}
+    if (nHits < kMinHits) 	continue;
     fSeedHits.clear();
     fSeedHits+=mSel.Get();
-
-
     const THelixTrack *hel =  Approx();
-    if (hel) { fNSeeds[0]++; ++(*f1stHitMapIter); return hel;}	//Good boy
- //		Bad boy
-    fNUsed[0] -= fSeedHits.size();
-
-
+    if (hel)  return hel;	//Good boy
   }// end 1st hit loop
-  fNSeeds[1]+=fNSeeds[0]; fNUsed[1]+= fNUsed[0];
   return 0;
 }
 //_____________________________________________________________________________
