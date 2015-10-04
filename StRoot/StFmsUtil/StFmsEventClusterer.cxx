@@ -1,6 +1,12 @@
-// $Id: StFmsEventClusterer.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.4 2015/10/01 18:19:59 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.4  2015/10/01 18:19:59  akio
+// fixed typo
+//
+// Revision 1.3  2015/10/01 18:08:58  akio
+// adding warning if removing cluster with too many towers
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -72,8 +78,14 @@ struct IsBadCluster {
   IsBadCluster(double minEnergy, unsigned maxTowers)
       : energy(minEnergy), towers(maxTowers) { }
   bool operator()(const fms::ClusterList::value_type& cluster) const {
-    return cluster->cluster()->energy() <= energy ||
-           cluster->towers().size() > towers;
+      if(cluster->cluster()->energy() <= energy){
+	  LOG_DEBUG << Form("Removing cluster because E=%f <= %f (NTower=%d)",cluster->cluster()->energy(),energy,cluster->towers().size()) << endm;
+      }
+      if(cluster->towers().size() > towers){
+	  LOG_INFO << Form("Removing cluster because NTower=%d > %d (E=%f)",cluster->towers().size(),towers,cluster->cluster()->energy()) << endm;
+      }      
+      return cluster->cluster()->energy() <= energy ||
+	     cluster->towers().size() > towers;
   }
   double energy;
   unsigned towers;

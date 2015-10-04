@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsTowerCluster.cxx,v 1.3 2015/10/01 19:55:48 akio Exp $
 //
 // $Log: StFmsTowerCluster.cxx,v $
+// Revision 1.3  2015/10/01 19:55:48  akio
+// *** empty log message ***
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -123,4 +126,11 @@ Double_t StFmsTowerCluster::getSigma(Double_t theta) const {
   }  // for
   return wnew > 0 ? sqrt(sigma / wnew) : 0;
 }
+
+StFmsCluster* StFmsTowerCluster::release(){
+    mCluster->setChi2Ndf1Photon(mChiSquare);
+    mCluster->setChi2Ndf2Photon(mChiSquare);
+    return mCluster.release();
+}
+    
 }  // namespace FMSCluster
