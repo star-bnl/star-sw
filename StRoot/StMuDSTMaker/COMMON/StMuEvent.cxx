@@ -128,12 +128,22 @@ void StMuEvent::fill(const StEvent* event){
   // calibrated vpd for TOF - X.Dong
   mVpdEast = mVpdWest = 0;
   mVpdTstart = mVpdTdiff = 0.;
+  mVpdVz = 0;
   if (event->tofCollection()) {
     mVpdEast = event->tofCollection()->vpdEast();
     mVpdWest = event->tofCollection()->vpdWest();
     mVpdTstart = event->tofCollection()->tstart();
     mVpdTdiff = event->tofCollection()->tdiff();
     mVpdVz = event->tofCollection()->vzVpd();
+  } else if (event->btofCollection()) {
+    const StBTofHeader*  tofHeader = event->btofCollection()->tofHeader();
+    if (tofHeader) {
+      mVpdEast = tofHeader->vpdHitPattern(east);
+      mVpdWest = tofHeader->vpdHitPattern(west);
+      mVpdTstart = tofHeader->tStart();
+      mVpdTdiff  = tofHeader->tDiff();
+      mVpdVz     = tofHeader->vpdVz();
+    }
   }
   // trigger data
   mTriggerData = const_cast<StTriggerData*>(event->triggerData());  
