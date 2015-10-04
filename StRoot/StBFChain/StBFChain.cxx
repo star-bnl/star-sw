@@ -1597,19 +1597,6 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
   if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
     ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
-  
-  if (! GetOption("fzin") && ! GetOption("mtin")) { //	  ** Setup interaction region 
-    Double_t XVERTEX =  0.31;
-    Double_t YVERTEX = -0.35;
-    Double_t ZVERTEX = -1.40;
-    TString cmd = Form("((St_geant_Maker *) %p)->SetgVertex(\"GVERTEX %f %f %f\")",geantMk,XVERTEX,YVERTEX,ZVERTEX);
-    ProcessLine(cmd.Data());
-    Double_t XSIGMA  =  0.1; 
-    Double_t YSIGMA  =  0.1;
-    Double_t ZSIGMA  = 36.680;
-    cmd = Form("((St_geant_Maker *) %p)->SetgSpread(\"GSPREAD %f %f %f\")",geantMk,XSIGMA,YSIGMA,ZSIGMA);
-    ProcessLine(cmd.Data());
-  }
 }
 //_____________________________________________________________________
 /// Treats the DbV options used for database timestamp.
