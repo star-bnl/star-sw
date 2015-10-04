@@ -51,6 +51,9 @@ endif
 LDFLAGS = `root-config --glibs` `root-config --ldflags` -lGeom
 ifeq (,$(findstring darwin,$(STAR_HOST_SYS)))
 LDFLAGS += -shared -Wl,-Bdynamic -lgfortran -lm
+#lgfortran = $(shell gfortran `root-config --ldflags` -print-file-name=libgfortran.a)
+#LDFLAGS += -shared -Wl,-Bdynamic $(lgfortran) -lm
+#LDFLAGS += -shared  -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs $(lgfortran)  -Wl,--no-whole-archive -Wl,-Bdynamic -lm
 else
 lgfortran = $(shell gfortran -print-file-name=libgfortran.dylib)
 LDFLAGS += $(lgfortran) -lm

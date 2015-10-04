@@ -1,4 +1,6 @@
 Int_t pythia6(TString mode="pp:W:510", Int_t tune=320) {
+  
+  if (!gROOT->GetClass("St_geant_Maker")) return 0;
   gSystem->Load( "libVMC");
   gSystem->Load( "libgen_Tables");
   gSystem->Load( "StarGeneratorUtil" );
