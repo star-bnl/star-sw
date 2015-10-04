@@ -1378,8 +1378,8 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
-   ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
+  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL,20Muons","St_geant_Maker"
+   ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
    ,                                                                                "StarGenerator",kFALSE}, 
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},
