@@ -107,7 +107,7 @@ int StFmsHitMaker::Make(){
 	//3rd try to get StTriggerData from StMuEvent, works for produced data (.MuDst.root) --Yuxi
 	StMuDst* muDst = (StMuDst*)GetInputDS("MuDst");
 	if(flag==0){
-		if(muDst){
+		if(muDst && muDst->event()){
     	mCurrentRunNumber = muDst->event()->runNumber();
 			triggerData = (StTriggerData*)StMuDst::event()->triggerData();
 			if(triggerData){
