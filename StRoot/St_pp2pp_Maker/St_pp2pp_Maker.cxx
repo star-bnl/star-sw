@@ -717,7 +717,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 }
 
-Int_t St_pp2pp_Maker::MakeTracks(const StRpsCollection &RpsColl, float blue_beamenergy, float yellow_beamenergy) {
+Int_t St_pp2pp_Maker::MakeTracks(StRpsCollection &RpsColl, float blue_beamenergy, float yellow_beamenergy) {
 
   /*
   UInt_t k, s, c ;
