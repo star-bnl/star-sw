@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.17 2015/08/26 13:49:28 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.19 2015/10/05 12:09:05 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -108,14 +108,14 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   /*!
     MakeTracks() actually makes the tracks and store into StRpsCollection
   */
-  Int_t  MakeTracks(const StRpsCollection &RpsColl);
+  Int_t  MakeTracks(StRpsCollection &RpsColl, float blue_beamenergy, float yellow_beamenergy);
 
   virtual Int_t InitRun  (int runumber); /// Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.17 2015/08/26 13:49:28 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.19 2015/10/05 12:09:05 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

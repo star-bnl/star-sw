@@ -7,6 +7,9 @@
  *
  * Revision 2015/2/22 (Kin Yip) : Now it can deal with 2009 as well as >=2015 data
  *                                which read in different database for pedestal/rms
+ *
+ * Revision 2015/10/3 (Kin Yip) : Add positionRMS to each cluster
+ *
  */                                                                      
 
 #include "St_pp2pp_Maker.h"
@@ -23,6 +26,7 @@
 #include "tables/St_pp2ppRPpositions_Table.h" // K. Yip : Aug. 10, 2015 : LVDT readings for RP positions
 
 #include "StEvent/StEvent.h"
+#include "StEvent/StRunInfo.h"
 #include "StEvent/StRpsCollection.h"
 #include "StEvent/StRpsCluster.h"
 
@@ -534,7 +538,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   Bool_t is_candidate_to_store ;
 
   Int_t NCluster_Length, Diff_Bunch ;
-  Double_t ECluster, POStimesE, position, offset ;
+  Double_t ECluster, POStimesE, POStimesESq, position, positionRMS, offset, pitch ;
 
   StTriggerData* trg_p = 0 ;
   /// Fetching the pointer to the Trigger Data
@@ -586,6 +590,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       NCluster_Length = 0 ;
       ECluster = 0 ;
       POStimesE = 0 ;
+      POStimesESq = 0 ;
 
       if ( mZTable )
 	pp2ppColl->romanPot(i)->plane(j)->setZ( mZTable[0].rp_z_plane[4*i+j] ) ; /// z coordinates all in m
@@ -613,7 +618,8 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	NCluster_Length++ ;
 	ECluster += it->second ;
 	POStimesE += it->first*it->second ;
-	
+	POStimesESq += it->first * it->first * it->second ;
+
 	it_next = it + 1 ;
 
 	is_candidate_to_store = kFALSE ;
@@ -639,19 +645,33 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    oneStCluster->setEnergy(ECluster);
 	    oneStCluster->setLength(NCluster_Length);
+	    position = POStimesE/ECluster ;
+	    // K. Yip : Oct. 3, 2015 : Added positionRMS
+	    positionRMS = POStimesESq/ECluster - position*position ; 
+	    if ( positionRMS > 0 ) // protecting against possibly numbers very close to 0 which may be -ve
+	      positionRMS = TMath::Sqrt( positionRMS ) ;
+	    else
+	      positionRMS = 0.0 ;
+
 	    if ( (j % 2) == 0 ) { // A or C : pitch_4svx = 0.00974 cm
 	      // K. Yip : Aug. 14, 2015 : 
 	      // The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it, where _all_ SVX channels were connected to the silicon and the pitch is smaller.
-	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
-		position = POStimesE/ECluster*9.55E-5 ; // in m
-	      else
-		position = POStimesE/ECluster*9.74E-5 ; // in m
+	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) { // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
+		pitch = 9.55E-5 ; // in m
+	      }
+	      else {
+		pitch = 9.74E-5 ; // in m
+	      }
 	    }
-	    else                // B or D : pitch_6svx = 0.01050 cm
-	      position = POStimesE/ECluster*1.050E-4; // in m
+	    else {               // B or D : pitch_6svx = 0.01050 cm
+	      pitch = 1.050E-4 ; // in m
+	    }
 
+	    position = position*pitch ;
+	    positionRMS = positionRMS*pitch ;
 
 	    oneStCluster->setPosition(position); // in m
+	    oneStCluster->setPositionRMS(positionRMS); // in m
 	   
 	    if ( mVersion < 2 )
 	      oneStCluster->setXY( offset + orientations[4*i+j]*position ) ; // all in m
@@ -670,6 +690,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	  ECluster = 0 ;
 	  POStimesE = 0 ;
+	  POStimesESq = 0 ;
 	  NCluster_Length = 0 ;
 
 	}
@@ -680,11 +701,12 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
     } // for ( Int_t j=0; j<kMAXCHAIN; j++) {
 
-  if ( mVersion>1 )
-    MakeTracks(*pp2ppColl);
-
   mEvent = (StEvent *) GetInputDS("StEvent");
   if ( mEvent ) {
+
+   if ( mVersion>1 )
+     MakeTracks(*pp2ppColl, mEvent->runInfo()->beamEnergy(StBeamDirection::blue), mEvent->runInfo()->beamEnergy(StBeamDirection::yellow) );
+
     // Store into StEvent
     mEvent->setRpsCollection(pp2ppColl);
   }
@@ -695,7 +717,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 }
 
-Int_t St_pp2pp_Maker::MakeTracks(const StRpsCollection &RpsColl) {
+Int_t St_pp2pp_Maker::MakeTracks(StRpsCollection &RpsColl, float blue_beamenergy, float yellow_beamenergy) {
 
   /*
   UInt_t k, s, c ;
