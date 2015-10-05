@@ -132,7 +132,7 @@ void StTrackMateMaker::Clear(const char* c)
 Bool_t StTrackMateMaker::GoodTrack(StTrack* trk) {
   if (! trk || trk->flag()<=0 || trk->topologyMap().trackFtpc()) return kFALSE;
   if (! trk->detectorInfo())  return kFALSE;
-  if ( trk->fitTraits().numberOfFitPoints() < 15) return kFALSE;
+  if ( trk->fitTraits().numberOfFitPoints() < 10) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
