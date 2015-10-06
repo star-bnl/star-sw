@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.78 2015/01/08 21:24:18 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.79 2015/10/06 19:38:52 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.79  2015/10/06 19:38:52  jwebb
+* g2t updates to readout preshower in HCAL
+*
 * Revision 1.78  2015/01/08 21:24:18  jwebb
 * Support FMS preshower detector in HCAL.
 *
@@ -230,6 +233,7 @@
       Integer hcal_tower  "HCAL towers 6x6"
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
+      Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
  
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
@@ -940,42 +944,61 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 *******************************************************************************************
-
+*26* 				Prashanth Shanmuganathan(HCAL)
       elseif (Csys=='hca') then
-     
-          hcal_tower = numbv(1)
-          hcal_cell  = numbv(2)
+      """  Volume_Id """
+      """ HCAL             1 000  """
+      """ FPSC           100 000  """
+      """ FTB             10 000  """
+      """ PreShower 2014     100  """
 
-          " Calorimeter cell volume ID "
- 	  if (cd=='HCEL') hcal_cell = hcal_cell +5000
- 	  if (cd=='HCES') hcal_cell = hcal_cell +0
+          " Hcal lead scintilationg fiber cells"
+	  if (cd=='HCEL' .or. cd=='HCES') then
+	      hcal_tower = numbv(1)
+	      hcal_cell  = numbv(2)
 
-          volume_id  =    hcal_cell  + 10000 *  hcal_tower
+	      " Calorimeter cell volume ID "
+	      if (cd=='HCEL') hcal_sl = 2 
+	      if (cd=='HCES') hcal_sl = 1 
 
-          " Preshower volume ID "
-          if (cd=='FPSC') then
-             n1 = numbv(1); n2 = numbv(2); ew = 2; layr = n1; 
-             if ( layr==4 ) layr = 3;
-             if ( n2 <= 21 ) then
-                quad = 1
-                slat = n2
-             else if ( n2 <= 21+19 ) then
-                quad = 2
-                slat = n2 - 21
-             else if ( n2 <= 21+19+21 ) then
-                quad = 3 
-                slat = n2 - 21 - 19
-             else
-                quad = 4;
-                slat = n2 - 21 - 19 - 21
-             endif
+	      volume_id  =    100 * hcal_tower + 10 * hcal_sl + hcal_cell 
+	  endif
 
-          volume_id = 100000+ew*10000+quad*1000+layr*100+slat
-          endif
+	  " Preshower volume ID dev16"
+	  if (cd=='FPSC') then
+	     n1 = numbv(1)
+	     n2 = numbv(2)
+	     ew = 2
+	     layr = n1 
+	     if ( layr==4 ) layr = 3
+	     if ( n2 <= 21 ) then
+		quad = 1
+		slat = n2
+	     else if ( n2 <= 21+19 ) then
+		quad = 2
+		slat = n2 - 21
+	     else if ( n2 <= 21+19+21 ) then
+		quad = 3 
+		slat = n2 - 21 - 19
+	     else
+		quad = 4
+		slat = n2 - 21 - 19 - 21
+	     endif
 
+	  volume_id = 100000+ew*10000+quad*1000+layr*100+slat
+	  endif
 
+	  " FTBF setup hctest"
+	  if (cd=='BBCF') volume_id = 10001
+	  if (cd=='BBCB') volume_id = 10002
+	  if (cd=='LEDG') volume_id = 10003
 
- 
+	  "Preshower for y2014b"
+	  if (cd=='HSTP') then
+	     if(numbv(1) == 1) volume_id = 21 - numbv(2)
+	     if(numbv(1) == 2) volume_id = 41 - numbv(2)
+	  endif
+
 
 *******************************************************************************************
       

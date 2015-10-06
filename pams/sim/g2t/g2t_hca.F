@@ -17,7 +17,7 @@
       i=0
       g2t_emc_hit_h.nok = 0
 
-      DO isys=1,6 """ Loop over all sensitive fibers """ 
+      DO isys=1,7 """ Loop over all sensitive fibers """ 
 
          " STAR implementation HcalGeo, HcalGeo1 "
          IF (isys==1) { call G2R_GET_SYS ('HCAL','HCEL',Iprin,Idigi) }
@@ -28,6 +28,9 @@
          IF (isys==4) { call G2R_GET_SYS ('HCAL','BBCF',Iprin,Idigi) } ! Front scint paddle 
          IF (isys==5) { call G2R_GET_SYS ('HCAL','BBCB',Iprin,Idigi) } ! Back scint paddle 
          if (isys==6) { call G2R_GET_SYS ('HCAL','LEDG',Iprin,Idigi) } ! Lead glass
+
+         "For Preshower HcalGeo"
+         if (isys==7) { call G2R_GET_SYS ('HCAL','HSTP',Iprin,Idigi) } !  preshower 
 
          if (Iprin.lt.0) { 
             cycle " Next iteration of the loop "
@@ -70,6 +73,11 @@
             if isys .eq. 6 { """Unattenuated hit for pbglass"""
             g2t_emc_hit(i).de = elos
             }
+
+            if isys .eq. 7 { """2014 preshower"""
+            g2t_emc_hit(i).de = hits(khit); 
+            }
+
 
 *        <W> i,trac,volume,hits(khit);( 'g2t_hca: ', I4, I4, I8, F8.4);
 *
