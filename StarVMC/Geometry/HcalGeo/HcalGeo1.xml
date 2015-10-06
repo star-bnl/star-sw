@@ -1,8 +1,8 @@
 <Document file="StarVMC/Geometry/HcalGeo/HcalGeo1.xml">
 
   <Module name="HcalGeo1" comment=" forward hadronic calorimeter, Proposed Full Geometry, 2016"  >
-    <Author name="Prashanth S (KSU)" />
-    <Created date="12/30/2013" />
+    <Author name="Prashanth S (KSU), FPS by Akio" />
+    <Created date="01/12/2014" />
 
     <!--
     west   -> +ve Z
@@ -27,11 +27,12 @@
       HFIC,     <!-- fibers for Long cell, bcoz of the limitation of STAR AgML -->  
       HACL,      <!-- Aluminum suporting cells at bottom -->     
       <!-- Pre Shower -->
-      FPRS,FPLY,FPPB,FPSC,FPBB,FSTB,
+      FPRS,FPLY,FPPB,FPSC,FPBB,
       FLIG,FLBA,FLCO,FPMT,FFEE,
       FLLG,FBLL,FCLL,
       WPPL,WPIS,WPUF,WPUN,WPUS,WPAR
       <!-- End of  Pre Shower -->
+
     </Content>
 
     <varlist type="int">
@@ -49,7 +50,7 @@
 
     <varlist type="int">
       i,j <!-- temporary variables:-  Towr count -->
-      m,n <!-- temporary variables:-  Cell count -->
+      m,l <!-- temporary variables:-  Cell count -->
       <!--  p,q temporary variables:-  Fibr count -->
     </varlist>
 
@@ -58,20 +59,61 @@
       ytemp    <!-- temporary variables:- fiber y position -->
     </varlist>
 
+
     <!-- Pre Shower -->
+    <!--
     <varlist type="INTEGER"  >
-      Type,
-      <!--i,j -->
-      k,serN,lr,tb,rot
+      ChkvSim,iMod,iType,Type,PbPlate
+    </varlist>
+    -->
+
+    <varlist type="INTEGER"  >
+      <!-- i,j,m,flag -->
+      k,kk,serN,lr,tb,col,kmod,rot,id,layr,quad,slat(4,3)
+      debug,npstype,pstype(20),cpstype(20)
     </varlist>
 
     <varlist type="REAL"  >
-      xx,yy,zz,x1,y1,z1,ztot,dx,dy,dz,dxx,dyy,dzz,
-      dx1,dy1,dz1,dx2,dy2,dz2,x2,y2,z2,dz3,dx1a,dx1b,dzsb,psdim(20,2),
+      xx,yy,zz,x1,y1,z1,ztot,rtot,wid,widx,widy,bwid,x0,widL,dx,dy,dz,dxx,dyy,dzz,xxx,yyy,dxxx,dyyy,xpmt,ypmt
+      dx1,dy1,dz1,dx2,dy2,dz2,x2,y2,z2,dz3,dx1a,dx1b,dzsb,psdim(20,2)
+    </varlist>
+
+    <varlist type="REAL">    ztotsmd,wtotsmd,zsmd,zsmd2,wsmd  </varlist>
+    <varlist type="REAL"  >  xsmdh,ysmdh,zsmdh,xsmdv,ysmdv,zsmdv  </varlist>
+    <varlist type="REAL"  >  xlcOffSet,BZOffSet  </varlist>
+    <varlist type="REAL"  >  basewidth,distancer,xoffFECC,xoffFEDC,xshift  </varlist>
+    <varlist type="REAL"  >  xoffFENC,yoffFENC,zoffFENC,zoffFECC  </varlist>
+    <varlist type="REAL"  >  tmp(7)  </varlist>
+
+
+    <varlist   type="INTEGER"> N  </varlist>
+    <Parameter name="N" value="12" />
+
+    <varlist type="REAL"> E(N)  </varlist>
+    <varlist type="REAL"> rindex_PbG(N)  </varlist>
+    <varlist type="REAL"> rindex_SiRub(N)  </varlist>
+    <varlist type="REAL"> rindex_PhCath(N)  </varlist>
+    <varlist type="REAL"> rindex_Alm(N)  </varlist>
+    <varlist type="REAL"> rindex_MuMet(N)  </varlist>
+    <varlist type="REAL"> absco_PbG(N)  </varlist>
+    <varlist type="REAL"> absco_SiRub(N)  </varlist>
+    <varlist type="REAL"> absco_PhCath(N)  </varlist>
+    <varlist type="REAL"> absco_Alm(N)  </varlist>
+    <varlist type="REAL"> absco_MuMet(N)  </varlist>
+    <varlist type="REAL"> effic_PhCath(N)  </varlist>
+    <varlist type="REAL"> effic_all(N)  </varlist>
+
+
+
+    <varlist type="REAL"  >
       lprs1,lprs2,lprs3,lprs4,pwid,x,y,z,dlg
     </varlist>
-    <!-- End of  Pre Shower -->
 
+
+    <External routine="FFPDSTEP"  />
+    <External routine="FPCTSTEP"  />
+
+    <!-- End of  Pre Shower -->
 
     <Structure name="mcdt" comment="Mother calorimeter coordinates and dimentions ">
       <!-- x,y,z are body center of HCMO in cave --> 
@@ -121,6 +163,7 @@
       <var name="stepY"    type="float"/> <!-- distance between two fibers, center to center y direction-->
     </Structure>
 
+
     <!-- Pre Shower -->
     <Structure name="PRSW"  >
       <var name="DBox(3)"  type="float"  />
@@ -154,7 +197,6 @@
       <var name="UstSD(4)" type="float"  />
       <var name="UstSP(3)" type="float"  />
     </Structure>
-
     <!-- End of  Pre Shower -->
 
 
@@ -208,21 +250,21 @@
 
     <!-- Pre Shower -->
     <Fill name="PRSW" comment="Pre Shower geometry" >
-      <var name="DBox"    value="{220.0,220,17.0}"  />
+      <var name="DBox"    value="{225.0,250,22.0}"  />
       <var name="Xoff"    value="{ 1.0,1.0,1.0,1.0}"  />
       <var name="Yoff"    value="{ 0.0,0.0,0.0,0.0}"  />
-      <var name="Zoff"    value="{674.68,677.54,687.39,688.66}"  />
-      <var name="Dz"      value="{1.0,1.0,0.6,1.0}"  />
+      <var name="Zoff"    value="{675.64,678.52,690.29,692.22}"  />
+      <var name="Dz"      value="{1.0,1.0,0.635,1.0}"  />
       <var name="DHole"   value="20.25"  />
       <var name="NType"   value="2"  />
       <var name="NPrs"    value="{12,9}"  />
       <var name="DPrs"    value="{4.0,5.8,0.05}"  />    ! 1=narrow, 2=wide, 3=gap
       <var name="NSkipV"  value="2" />
-      <var name="NSkipH"  value="1" />
+      <var name="NSkipH"  value="2" />
       <var name="DyCut"   value="3.0+5.8" />            ! virtical bottom will be shorter due to constrain from floor
       <var name="DLG"     value="{0.3,6.0,1.0}"  />     ! 1=size of SiPM, 2=height for cone, 3=height for base
       <var name="DSIPM"   value="{0.5,3.5,1.0,7.0}"  /> ! 1=thickness for board, 2=width, 3=length, 4=length for FEE board
-      <var name="DzBbd"   value="{2.54/8.0,2.54/4.0,2*2.54*0.075,2.54/4.0}" /> ! dz(thickness) of back board
+      <var name="DzBbd"   value="{2.54/8.0,2.54/4.0,2*2.54/4.0,2.54/4.0}" /> ! dz(thickness) of back board
       <var name="DxBbd"   value="{2.54, 2.54+7.0}" />   ! backboard 1=inside extend, 2=outside extend
     </Fill>
 
@@ -252,7 +294,7 @@
 
     <!-- Pre Shower -->
     <Create    block="FPRS"  />
-    <Placement block="FPRS" in="CAVE" konly="MANY" group="WestRefSys" x="0.0" y="0.0" z="PRSW_Zoff(1)+PRSW_Dbox(3)/2.0" />
+    <Placement block="FPRS" in="CAVE" konly="MANY" group="WestRefSys" x="0.0" y="0.0" z="PRSW_Zoff(1)-PRSW_DSIPM(1)+PRSW_Dbox(3)/2.0" />
 
     <Create    block="WPPL"  />
     <Placement block="WPPL" in="CAVE" group="WestRefSys" x="+WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
@@ -264,14 +306,12 @@
 
     <Create    block="WPUF"  />
     <Placement block="WPUF" in="CAVE" group="WestRefSys" x="+WPFM_UstFP(1)" y="WPFM_UstFP(2)" z="WPFM_UstFP(3)" />
-
     <Create    block="WPUN"  />
     <Placement block="WPUN" in="CAVE" group="WestRefSys" x="+WPFM_UstNP(1)" y="WPFM_UstNP(2)" z="WPFM_UstNP(3)" />
-
     <Create    block="WPUS"  />
     <Placement block="WPUS" in="CAVE" group="WestRefSys" x="+WPFM_UstSP(1)" y="WPFM_UstSP(2)" z="WPFM_UstSP(3)" />
-
     <!-- End of  Pre Shower -->
+
 
 
     <Volume name="HCMO" comment="Mother Calorimeter">
@@ -362,7 +402,7 @@
       xtemp=fibr_startX1;
       <For var="m" from="0" to="cell_nCellX-1">
 	ytemp=fibr_startY1;
-	<For var="n" from="0" to="cell_nCellY-1">
+	<For var="l" from="0" to="cell_nCellY-1">
 
 	  <!-- Short and Long cell assembly configaration view from +z towards STAR
 	  16  16  15
@@ -372,12 +412,12 @@
 
 	  <!-- <Info format="at center {1.1f}">m</Info> -->
 
-	  <If expr="m.eq.n">
+	  <If expr="m.eq.l">
 	    <Create block="HCES" />
-	    <Placement block="HCES" x="-3.33+(3.33*m)" y="-3.33+(n*3.33)" z="0.0" />
+	    <Placement block="HCES" x="-3.33+(3.33*m)" y="-3.33+(l*3.33)" z="0.0" />
 	    <Else>
 	      <Create block="HCEL" />
-	      <Placement block="HCEL" x="-3.33+(3.33*m)" y="-3.33+(n*3.33)" z="0.0" />
+	      <Placement block="HCEL" x="-3.33+(3.33*m)" y="-3.33+(l*3.33)" z="0.0" />
 	    </Else>
 	  </If>
 	  ytemp=fibr_startY2;
@@ -387,336 +427,6 @@
       </For>
 
     </Volume>
-
-
-
-    <!-- Pre Shower -->
-    <!-- Pre Shower -->
-    <!-- Pre Shower -->
-
-    <!-- == == FMS Preshower Detector ==        -->
-
-
-    <Block name="FPRS" comment="is box for plastic schinti FMS pre-shower detectors"  >
-
-      <Material  name="Air"  />
-      <Medium    name="standard"  />
-      <Attribute for="FPRS" seen="0" colo="2"  />
-
-      <Shape type="PGON"
-	phi1="45" dphi="360" npdiv="4" nz="2"
-	zi="{-PRSW_DBox(3)/2.0,PRSW_DBox(3)/2.0}"
-	rmn="{PRSW_DHole - PRSW_DxBbd(1),PRSW_DHole - PRSW_DxBbd(1)}"
-	rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}"
-	/>
-
-
-      <!-- .......................................................... First Layer -->
-      serN=1
-      dx=PRSW_DBox(1)/2.0
-      dy=PRSW_DBox(2)/2.0
-      dz=PRSW_Dz(1)/2.0+PRSW_DzBbd(1)/2.0
-      zz=-PRSW_Dbox(3)/2.0+dz
-      <Create    block="FPLY"  />
-      <Placement block="FPLY" in="FPRS" z="zz" konly="MANY"/>
-      <!-- ........................................................  Second Layer -->
-      serN=2
-      dx=PRSW_DBox(1)/2.0
-      dy=PRSW_DBox(2)/2.0
-      dz=PRSW_Dz(2)/2.0+PRSW_DzBbd(2)/2.0
-      zz=-PRSW_Dbox(3)/2.0+dz+PRSW_Zoff(2)-PRSW_Zoff(1)
-      <Create    block="FPLY"  />
-      <Placement block="FPLY" in="FPRS" z="zz" konly="MANY" />
-
-      <!-- .......................................................... Third Layer -->
-      serN=3
-      dx=PRSW_DBox(1)/2.0
-      dy=PRSW_DBox(2)/2.0
-      dz=PRSW_Dz(3)/2.0+PRSW_DzBbd(3)/2.0
-      zz=-PRSW_Dbox(3)/2.0+dz+PRSW_Zoff(3)-PRSW_Zoff(1)
-      dzsb = PRSW_Dz(3)/2.0+PRSW_DzBbd(3)/4.0
-      <Create     block="FPLY"  />
-      <Placement  block="FPLY" in="FPRS" z="zz" konly="MANY" />
-
-      <!-- ......................................................... Fourth Layer -->
-      serN=4
-      dx=PRSW_DBox(1)/2.0
-      dy=PRSW_DBox(2)/2.0
-      dz=PRSW_Dz(4)/2.0+PRSW_DzBbd(4)/2.0
-      zz=-PRSW_Dbox(3)/2.0+dz+PRSW_Zoff(4)-PRSW_Zoff(1)-PRSW_DzBbd(4)
-      <Create     block="FPLY"  />
-      <Placement  block="FPLY" in="FPRS" z="zz" konly="MANY" />
-
-
-    </Block>
-
-
-    <!--                                                    Preshower Layer:  FPLY -->
-    <Block name="FPLY" comment="is a layer of FMS Preshower"  >
-      <Material  name="Air"  />
-      <Medium    name="standard"  />
-      <Attribute for="FPLY" seen="0" colo="3" serial="serN" />
-      <!-- <Shape type="BOX" dx="dx" dy="dy" dz="dz" /> -->
-      <Shape type="PGON"
-	phi1="45" dphi="360" npdiv="4" nz="2"
-	zi="{-dz,dz}"
-	rmn="{PRSW_DHole - PRSW_DxBbd(1),PRSW_DHole - PRSW_DxBbd(1)}"
-	rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}"
-	/>
-
-      lprs1=PRSW_NPrs(1)*(PRSW_DPrs(1)+PRSW_DPrs(3))                       <!-- width of narrow section -->
-      lprs2=PRSW_NPrs(2)*(PRSW_DPrs(2)+PRSW_DPrs(3))+lprs1                 <!-- width of narrow+wide section -->
-      lprs3=(PRSW_NPrs(2)-PRSW_NSkipH)*(PRSW_DPrs(2)+PRSW_DPrs(3))+lprs1   <!-- width of narrow+wide for bottom horizontal -->
-      lprs4=(PRSW_NPrs(1)-PRSW_NSkipV)*(PRSW_DPrs(1)+PRSW_DPrs(3))+PRSW_NPrs(2)*(PRSW_DPrs(2)+PRSW_DPrs(3))
-      <!-- width of narrow+wide for bottom vertical -->
-      dlg=(PRSW_DLG(2)+PRSW_DLG(3)+PRSW_DSIPM(1))/2.0
-
-      k   = 0
-      dzz = PRSW_DZ(serN)/2.0
-      <If expr="serN.eq.4">               ! back board first for layer3
-	z1=-dz+PRSW_DzBbd(serN)+dzz       ! z for schinti
-	z2=-dz+PRSW_DzBbd(serN)/2.0       ! z for back board
-	<Else>                              ! back board 2nd for layer1,2
-	  z1=-dz+dzz                        ! z for schinti
-	  z2=-dz+dzz*2+PRSW_DzBbd(serN)/2.0 ! z for back board
-      </Else></If>
-      z = PRSW_Zoff(serN)
-
-      <!-- Blocks can be created once.  Sized at position time -->
-      <Create block="FPSC" />
-      <Create block="FLIG" />
-      <Create block="FLLG" />
-      <Create block="WPAR" />
-      <Create block="FPBB" />
-      <Create block="FPPB" />
-      <Create block="FSTB" />
-      <If expr="serN.eq.1"> <Then> <!-- vertical plane -->
-	  <Do var="lr" from="1" to="2"  > <!-- left and right half -->
-	    <Do var="tb" from="1" to="2"> <!-- top and bottom quad -->
-	      x=0.0
-	      <Do var="j" from="1" to="2"> <!-- narrow/wide -->
-		<Do var="i" from="1" to="PRSW_NPrs(j)"> <!-- cell -->
-		  k   = k+1
-		  dxx = PRSW_DPrs(j)/2.0
-		  x = x + dxx + PRSW_DPrs(3)/2.0
-		  <If expr="tb.eq.1">
-		    pwid=lprs2
-		    <Else>
-		      pwid=lprs3-PRSW_DyCut
-		  </Else></If>
-		  <If expr="x.le.PRSW_DHole">
-		    dyy = (pwid-PRSW_DHole)/2.0
-		    y   = dyy+PRSW_DHole
-		    <Else>
-		      dyy = pwid/2.0
-		      y   = dyy
-		  </Else></If>
-		  yy=y+dyy+dlg
-		  <If expr="tb.eq.1"> rot=-90</If>
-		  <If expr="tb.eq.2"> y=-y; yy=-yy; rot=90</If>
-		  <If expr="lr.eq.1"> xx=+x+PRSW_Xoff(serN)</If>
-		  <If expr="lr.eq.2"> xx=-x-PRSW_Xoff(serN)</If>
-		  y=y+PRSW_Yoff(serN); yy=yy+PRSW_Yoff(serN);
-		  <If expr="tb.eq.1 .or. j.eq.2 .or. i.gt.PRSW_NSkipV">
-		    <Placement block="FPSC" x="xx" y="y" z="z1" dx="dxx" dy="dyy" dz="dzz" />
-		    <Placement block="FLIG" x="xx" y="yy" z="z1" if="j.eq.1"> <Rotation alphax="rot" /> </Placement>
-		    <Placement block="FLLG" x="xx" y="yy" z="z1" if="j.eq.2"> <Rotation alphax="rot" /> </Placement>
-		  </If>
-		  x = x + dxx
-		</Do>
-	      </Do>
-	    </Do>
-	  </Do>
-	</Then>
-	<Elif expr="serN.eq.2 .or. serN.eq.4"> <!-- horizontal plane -->
-	  <Do var="lr" from="1" to="2"  > <!-- left and right half -->
-	    <Do var="tb" from="1" to="2"> <!-- top and bottom quad -->
-	      y=0.0
-	      <Do var="j" from="1" to="2"> <!-- narrow/wide -->
-		<Do var="i" from="1" to="PRSW_NPrs(j)"> <!-- cell -->
-		  k   = k+1
-		  dyy = PRSW_DPrs(j)/2.0
-		  y = y + dyy + PRSW_DPrs(3)/2.0
-		  pwid=lprs2
-		  <If expr="y.le.PRSW_DHole">
-		    dxx = (pwid-PRSW_DHole)/2.0
-		    x   = dxx+PRSW_DHole
-		    <Else>
-		      <If expr="tb.eq.1">
-			dxx = pwid/2.0
-			x   = dxx
-			<Else>
-			  dxx = lprs4/2.0
-			  x   = dxx+2*PRSW_DPrs(1)
-		      </Else></If>
-		  </Else></If>
-		  xx=x+dxx+dlg
-		  <If expr="tb.eq.1"> yy=+y; </If>
-		  <If expr="tb.eq.2"> yy=-y; </If>
-		  <If expr="lr.eq.1"> x=+x+PRSW_Xoff(serN); xx=+xx+PRSW_Xoff(serN); rot=90</If>
-		  <If expr="lr.eq.2"> x=-x-PRSW_Xoff(serN); xx=-xx-PRSW_Xoff(serN); rot=-90</If>
-		  yy=yy+PRSW_Yoff(serN);
-		  <If expr="tb.eq.1 .or. j.eq.1 .or. i.le.PRSW_NPrs(j)-PRSW_NSkipH">
-		    <Placement block="FPSC" x="x"  y="yy" z="z1" dx="dxx" dy="dyy" dz="dzz" />
-		    <Placement block="FLIG" x="xx" y="yy" z="z1" if="j.eq.1" > <Rotation alphax="rot" /> <Rotation alphaz="90" /></Placement>
-		    <Placement block="FLLG" x="xx" y="yy" z="z1" if="j.eq.2" > <Rotation alphax="rot" /> <Rotation alphaz="90" /></Placement>
-		  </If>
-		  y = y + dyy
-		</Do>
-	      </Do>
-	    </Do>
-	  </Do>
-      </Elif></If>
-
-      <!-- back plates and conveter -->
-      dz1=PRSW_DzBbd(serN)/2.0
-      dz3=PRSW_Dz(3)+PRSW_DzBbd(3)
-      <!-- above beam pipe -->
-      dx1=(PRSW_DHole-PRSW_DxBbd(1))/2.0
-      dy1=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
-      x2=PRSW_xoff(serN)+dx1
-      y2=PRSW_DHole-PRSW_DxBbd(1)+dy1
-      dxx=dx1; dyy=dy1;
-      <Placement block="FPBB" x="x2"  y="y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
-      <Placement block="FPBB" x="-x2" y="y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
-      <Placement block="FSTB" x="x2"  y="y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="x2"  y="y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="x2"  y="y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="-x2" y="y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-
-      <!-- top far -->
-      dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
-      dy2=(lprs2+PRSW_DxBbd(2))/2.0
-      x2=PRSW_xoff(serN)+dx1*2+dx2
-      y2=dy2
-      dxx=dx2; dyy=dy2;
-      <Placement block="FPBB" x="x2"  y="y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
-      <Placement block="FPBB" x="-x2" y="y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
-      <Placement block="FSTB" x="x2"  y="y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="x2"  y="y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="x2"  y="y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="-x2" y="y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-
-      <!-- below beam pipe -->
-      dx1a=(PRSW_DHole-PRSW_DxBbd(1)-PRSW_NSkipV*PRSW_Dprs(1))/2.0
-      dx1b=(PRSW_DHole-PRSW_DxBbd(1))/2.0
-      <If expr="serN.le.4">
-	dx1=dx1a
-	x2=PRSW_xoff(serN)+PRSW_NSkipV*PRSW_Dprs(1)+dx1
-	<Else>
-	  dx1=dx1b
-	  x2=PRSW_xoff(serN)+dx1
-      </Else></If>
-      dy1=(lprs3-PRSW_DHole-PRSW_DyCut+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
-      y2=PRSW_DHole-PRSW_DxBbd(1)+dy1
-      dxx=dx1; dyy=dy1;
-      <Placement block="FPBB" x="x2"  y="-y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
-      <Placement block="FPBB" x="-x2" y="-y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
-      <Placement block="FSTB" x="x2"  y="-y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="x2"  y="-y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="x2"  y="-y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="-y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="-x2" y="-y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="-y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-
-      <!-- bottom far -->
-      <If expr="serN.le.2">
-	dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
-	<Else>
-	  dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
-      </Else></If>
-      dy2=(lprs3-PRSW_DyCut+PRSW_DxBbd(2))/2.0
-      x2=PRSW_xoff(serN)+dx1b*2+dx2
-      y2=dy2
-      dxx=dx2; dyy=dy2;
-      <Placement block="FPBB" x="x2"  y="-y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
-      <Placement block="FPBB" x="-x2" y="-y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
-      <Placement block="FSTB" x="x2"  y="-y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="x2"  y="-y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="x2"  y="-y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="-y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-      <Placement block="FPPB" x="-x2" y="-y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
-      <Placement block="FSTB" x="-x2" y="-y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
-
-      <Export language="Mortran"> write(*,*) 'Done serN=',serN</Export>
-    </Block>
-
-    <Block name="FPBB" comment="is the G10 back board"  >
-      <Mixture name="g10" dens="1.7"  >
-	<Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-	<Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-	<Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-	<Component name="H" a="1" z="1" w="0.4*14*1./174."  />
-	<Component name="O" a="16" z="8" w="0.4*4*16./174."  />
-      </Mixture>
-      <Attribute for="FPBB" seen="1" colo="7"  />
-      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-    </Block>
-
-    <Block name="FSTB" comment="is steel back board for pB converter" >
-      <Material name="IRON"  />
-      <Attribute for="FSTB" seen="1" colo="5"  />
-      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-    </Block>
-
-    <Block name="FPPB" comment="is FMS PS Pb converter"  >
-      <Material name="LEAD"  />
-      <Attribute for="FPPB" seen="1" colo="6"  />
-      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-    </Block>
-
-    <Block name="FPSC" comment="is a piece of scintillator in FMS Preshower"  >
-      <Material name="Polystyren"  />
-      <Material name="FMSPS_scint" isvol="1"  />
-      <Attribute for="FPSC" seen="1" colo="4" />
-      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-      <Cut name="CUTGAM" value="0.00008" />
-      <Cut name="CUTELE" value="0.001"   />
-      <Cut name="BCUTE" value="0.0001"   />
-      <Par name="BIRK1" value="1."       />
-      <Par name="BIRK2" value="0.013"    />
-      <Par name="BIRK3" value="9.6E-6"   />
-      <Instrument block="FPSC">
-	<Hit meas="birk" nbits="0" min="0" max="10" />
-      </Instrument>
-    </Block>
-
-    <Block name="FLIG" comment="is a light guide + SiPM board for Preshower"  >
-      <Material name="Air"  />
-      <Attribute for="FLIG" seen="1" colo="6" serial="1"/>
-      <Shape type="BOX" dx="PRSW_DPRS(1)/2.0" dy="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)" dz="dlg" />
-      <Create block="FLBA" />
-      <Create block="FLCO" />
-      <Create block="FPMT" />
-      <Create block="FFEE" />
-      <Placement block="FLBA" x="0" y="0" z="PRSW_DLG(3)/2.0-dlg" />
-      <Placement block="FLCO" x="-PRSW_DPRS(1)/4.0" y="0" z="PRSW_DLG(3)+PRSW_DLG(2)/2.0-dlg" />
-      <Placement block="FLCO" x="+PRSW_DPRS(1)/4.0" y="0" z="PRSW_DLG(3)+PRSW_DLG(2)/2.0-dlg" />
-      <Placement block="FPMT" x="0" y="0" z="dlg-PRSW_DSIPM(1)/2.0" />
-      <Placement block="FFEE" x="0" y="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)/2.0" z="dlg-PRSW_DSIPM(4)/2.0" />
-    </Block>
-
-    <Block name="FLLG" comment="is a light guide + SiPM board for Preshower for large"  >
-      <Material name="Air"  />
-      <Attribute for="FLLG" seen="1" colo="6" serial="1"/>
-      <Shape type="BOX" dx="PRSW_DPRS(2)/2.0" dy="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)" dz="dlg" />
-      <Create block="FBLL" />
-      <Create block="FCLL" />
-      <Create block="FPMT" />
-      <Create block="FFEE" />
-      <Placement block="FBLL" x="0" y="0" z="PRSW_DLG(3)/2.0-dlg" />
-      <Placement block="FCLL" x="-PRSW_DPRS(2)/4.0" y="0" z="PRSW_DLG(3)+PRSW_DLG(2)/2-dlg" />
-      <Placement block="FCLL" x=" PRSW_DPRS(2)/4.0" y="0" z="PRSW_DLG(3)+PRSW_DLG(2)/2-dlg" />
-      <Placement block="FPMT" x="0" y="0" z="dlg-PRSW_DSIPM(1)/2.0" />
-      <Placement block="FFEE" x="0" y="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)/2.0" z="dlg-PRSW_DSIPM(4)/2.0" />
-    </Block>
-    <!-- End of  Pre Shower -->
-    <!-- End of  Pre Shower -->
-    <!-- End of  Pre Shower -->
 
 
     <Volume name="HCES" comment="3*3 cell in tower, HCES has 15*15 fibers">
@@ -830,10 +540,432 @@
     </Volume>
 
 
+    <!-- Pre Shower -->
+    <Block name="FPRS" comment="is box for plastic schinti FMS pre-shower detectors"  >
 
-    <!-- Pre Shower -->
-    <!-- Pre Shower -->
-    <!-- Pre Shower -->
+      <Material  name="Air"  />
+      <Medium    name="standard"  />
+      <Attribute for="FPRS" 
+	seen="0" 
+	colo="2"  
+	/>
+
+      <Shape type="PGON" 
+	phi1="45" dphi="360" npdiv="4" nz="2" 
+	zi="{-PRSW_DBox(3)/2.0,PRSW_DBox(3)/2.0}" 
+	rmn="{PRSW_DHole - PRSW_DxBbd(1),PRSW_DHole - PRSW_DxBbd(1)}" 
+	rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}" 
+	/>  
+
+      debug=0	     
+      <If expr="debug.ge.1" > 
+	npstype=0 
+	cpstype(1)=1
+	cpstype(2)=2
+	cpstype(3)=6
+	cpstype(4)=3
+	cpstype(5)=4
+	cpstype(6)=7
+	cpstype(7)=5
+	cpstype(8)=8
+	<Export language="Mortran"> open(11,file='fpsgeom.txt',status='REPLACE')</Export>
+      </If>
+
+      <!-- .......................................................... First Layer -->
+      serN=1 
+      dx=PRSW_DBox(1)/2.0
+      dy=PRSW_DBox(2)/2.0
+      dz=PRSW_Dz(1)/2.0+PRSW_DzBbd(1)/2.0+PRSW_DSIPM(1)/2.0
+      zz=-PRSW_Dbox(3)/2.0+dz
+      <Create    block="FPLY"  />
+      <Placement block="FPLY" in="FPRS" z="zz" konly="MANY"/>
+      <!-- ........................................................  Second Layer -->
+      serN=2 
+      dx=PRSW_DBox(1)/2.0
+      dy=PRSW_DBox(2)/2.0
+      dz=PRSW_Dz(2)/2.0+PRSW_DzBbd(2)/2.0+PRSW_DSIPM(1)/2.0
+      zz=-PRSW_Dbox(3)/2.0+dz+PRSW_Zoff(2)-PRSW_Zoff(1)
+      <Create    block="FPLY"  />
+      <Placement block="FPLY" in="FPRS" z="zz" konly="MANY" />
+
+      <!-- .......................................................... Third Layer -->
+      serN=3 
+      dx=PRSW_DBox(1)/2.0
+      dy=PRSW_DBox(2)/2.0
+      dz=PRSW_Dz(3)/2.0+PRSW_DzBbd(3)/2.0
+      zz=-PRSW_Dbox(3)/2.0+PRSW_DSIPM(1)+dz-PRSW_DzBbd(3)/2.0+PRSW_Zoff(3)-PRSW_Zoff(1)
+      dzsb = PRSW_Dz(3)/2.0+PRSW_DzBbd(3)/4.0
+      <Create     block="FPLY"  />
+      <Placement  block="FPLY" in="FPRS" z="zz" konly="MANY" />
+
+      <!-- ......................................................... Fourth Layer -->
+      serN=4 
+      dx=PRSW_DBox(1)/2.0
+      dy=PRSW_DBox(2)/2.0
+      dz=PRSW_Dz(4)/2.0+PRSW_DzBbd(4)/2.0+PRSW_DSIPM(1)/2.0
+      zz=-PRSW_Dbox(3)/2.0+dz+PRSW_DSIPM(1)+PRSW_Zoff(4)-PRSW_Zoff(1)-PRSW_DzBbd(4) 
+      <Create     block="FPLY"  />
+      <Placement  block="FPLY" in="FPRS" z="zz" konly="MANY" />
+      <!--
+      <If expr="debug.ge.1" > 
+	<Export language="Mortran"> open(10,file='prs.txt',status='REPLACE')</Export>
+	k=0
+	<Do var="i" from="1" to="npstype" >
+	  <Do var="j" from="1" to="npstype" >
+	    <If expr="i.eq.cpstype(j)">
+	      <Export language="Mortran"> 
+		write(*,'(A5,A1,I5,F8.2,F8.2,F8.2)') 'Type=',char(ichar('A')+cpstype(j)-1),pstype(j),psdim(j,1)*2,psdim(j,2)*2,1.0
+		write(10,'(A5,A1,I5,F8.2,F8.2,F8.2)') 'Type=',char(ichar('A')+cpstype(j)-1),pstype(j),psdim(j,1)*2,psdim(j,2)*2,1.0
+	      </Export>
+	      k=k+pstype(j)
+	    </If>
+	  </Do>		 
+	</Do>
+	<Export language="Mortran"> write(10,*) 'Total=',k </Export> 
+	<Export language="Mortran"> close(10)</Export>
+	<Export language="Mortran"> close(11)</Export>
+      </If>
+      -->
+    </Block>
+
+    <!--                                                    Preshower Layer:  FPLY -->
+    <Block name="FPLY" comment="is a layer of FMS Preshower"  >         
+      <Material  name="Air"  />
+      <Medium    name="standard"  />
+      <Attribute for="FPLY" seen="0" colo="3" serial="serN" />
+      <!-- <Shape type="BOX" dx="dx" dy="dy" dz="dz" /> -->
+      <Shape type="PGON"
+	phi1="45" dphi="360" npdiv="4" nz="2"
+	zi="{-dz,dz}"
+	rmn="{PRSW_DHole - PRSW_DxBbd(1),PRSW_DHole - PRSW_DxBbd(1)}"
+	rmx="{PRSW_DBox(1)/2.0,PRSW_DBox(1)/2.0}"
+	/>
+
+      lprs1=PRSW_NPrs(1)*(PRSW_DPrs(1)+PRSW_DPrs(3))                       <!-- width of narrow section -->
+      lprs2=PRSW_NPrs(2)*(PRSW_DPrs(2)+PRSW_DPrs(3))+lprs1                 <!-- width of narrow+wide section --> 
+      lprs3=(PRSW_NPrs(2)-PRSW_NSkipH)*(PRSW_DPrs(2)+PRSW_DPrs(3))+lprs1   <!-- width of narrow+wide for bottom horizontal -->
+      lprs4=(PRSW_NPrs(1)-PRSW_NSkipV)*(PRSW_DPrs(1)+PRSW_DPrs(3))+PRSW_NPrs(2)*(PRSW_DPrs(2)+PRSW_DPrs(3))
+      <!-- width of narrow+wide for bottom vertical -->
+      dlg=(PRSW_DLG(2)+PRSW_DLG(3)+PRSW_DSIPM(1))/2.0
+
+      k   = 0
+      dzz = PRSW_DZ(serN)/2.0
+      <If expr="serN.eq.3">               ! Pb in middle, back plate in front and back
+	z1=0
+	z2=0
+	<Elif expr="serN.eq.4">             ! back board first for layer3
+	  z1=-dz+PRSW_DzBbd(serN)+dzz       ! z for schinti
+	  z2=-dz+PRSW_DzBbd(serN)/2.0       ! z for back board
+	</Elif>
+	<Else>                              ! back board 2nd for layer1,2
+	  z1=-dz+PRSW_DSIPM(1)+dzz          ! z for schinti
+	  z2=-dz+PRSW_DSIPM(1)+dzz*2+PRSW_DzBbd(serN)/2.0 ! z for back board
+      </Else></If> 
+      z = PRSW_Zoff(serN)
+
+      <!-- Blocks can be created once.  Sized at position time -->
+      <Create block="FPSC" />
+      <Create block="FLIG" />
+      <Create block="FLLG" />
+      <Create block="WPAR" />
+      <Create block="FPBB" />
+      <Create block="FPPB" />
+
+      <If expr="debug.ge.1 .and. serN.eq.1"> <Export language="Mortran"> open(1,file='prs1map.txt',status='REPLACE')</Export></If>
+      <If expr="debug.ge.1 .and. serN.eq.2"> <Export language="Mortran"> open(2,file='prs2map.txt',status='REPLACE')</Export></If>
+      <If expr="debug.ge.1 .and. serN.eq.3"> <Export language="Mortran"> open(3,file='prsCmap.txt',status='REPLACE')</Export></If>
+      <If expr="debug.ge.1 .and. serN.eq.4"> <Export language="Mortran"> open(4,file='prs3map.txt',status='REPLACE')</Export></If>
+
+      <If expr="serN.le.2" >
+	layr=serN
+	<Else>
+	  layr=serN-1
+      </Else> </If>
+
+      <If expr="serN.eq.1"> <Then> <!-- vertical plane --> 
+	  <Do var="lr" from="1" to="2"  > <!-- left and right half -->
+	    <Do var="tb" from="1" to="2"> <!-- top and bottom quad -->
+	      x=0.0
+	      quad=(lr-1)*2+tb
+	      slat(quad,layr)=0
+	      <Do var="j" from="1" to="2"> <!-- narrow/wide -->
+		<Do var="i" from="1" to="PRSW_NPrs(j)"> <!-- cell -->
+		  dxx = PRSW_DPrs(j)/2.0
+		  x = x + dxx + PRSW_DPrs(3)/2.0
+		  <If expr="tb.eq.1"> 
+		    pwid=lprs2
+		    <Else>
+		      pwid=lprs3-PRSW_DyCut
+		  </Else></If>
+		  <If expr="x.le.PRSW_DHole">
+		    dyy = (pwid-PRSW_DHole)/2.0
+		    y   = dyy+PRSW_DHole
+		    <Else>
+		      dyy = pwid/2.0
+		      y   = dyy
+		  </Else></If>
+		  yy=y+dyy+dlg
+		  <If expr="tb.eq.1"> rot=0</If>
+		  <If expr="tb.eq.2"> y=-y; yy=-yy; rot=180</If>
+		  <If expr="lr.eq.1"> xx=+x+PRSW_Xoff(serN)</If>
+		  <If expr="lr.eq.2"> xx=-x-PRSW_Xoff(serN)</If>
+		  y=y+PRSW_Yoff(serN); yy=yy+PRSW_Yoff(serN);
+		  <If expr="tb.eq.1 .or. j.eq.2 .or. i.gt.PRSW_NSkipV">
+		    <If expr="debug.ge.1"> 
+		      k   = k+1
+		      slat(quad,layr)=slat(quad,layr)+1
+		      id=(quad-1)*3*21+(layr-1)*21+(slat(quad,layr)-1)
+		      flag=0
+		      <Do var="kk" from="1" to="npstype"> 
+			<If expr="(psdim(kk,1).eq.dxx.and.psdim(kk,2).eq.dyy).or.(psdim(kk,1).eq.dyy.and.psdim(kk,2).eq.dxx)">
+			  flag=kk
+			  pstype(kk)=pstype(kk)+1
+			</If>
+		      </Do>
+		      <If expr="flag.eq.0">
+			npstype=npstype+1
+			flag=npstype
+			pstype(flag)=1
+			<If expr="dxx.gt.dyy">
+			  psdim(npstype,1)=dyy
+			  psdim(npstype,2)=dxx
+			  <Else>
+			    psdim(npstype,1)=dxx
+			    psdim(npstype,2)=dyy
+			</Else></If>
+		      </If>
+		      <!--
+		      <Export language="Mortran"> 
+			write(serN,'(I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2,2X,A1)') serN,k,dxx*2,dyy*2,dzz*2,xx,y,z,char(ichar('A')+cpstype(flag)-1)
+			write(11,'(I3,I2,I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2)') id,quad,layr,slat(quad,layr),dxx*2,dyy*2,dzz*2,xx,y,z
+		      </Export> 
+		      -->
+		    </If>
+		    <Placement block="FPSC" x="xx" y="y" z="z1" dx="dxx" dy="dyy" dz="dzz" /> 
+		    <Placement block="FLIG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.1"> <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
+		    <Placement block="FLLG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.2"> <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
+		  </If>
+		  x = x + dxx
+		</Do>
+	      </Do>
+	    </Do>
+	  </Do>
+	</Then> 
+	<Elif expr="serN.eq.2 .or. serN.eq.4"> <!-- horizontal plane --> 
+	  <Do var="lr" from="1" to="2"  > <!-- left and right half -->  
+	    <Do var="tb" from="1" to="2"> <!-- top and bottom quad -->
+	      y=0.0
+	      quad=(lr-1)*2+tb
+	      slat(quad,layr)=0
+	      <Do var="j" from="1" to="2"> <!-- narrow/wide -->
+		<Do var="i" from="1" to="PRSW_NPrs(j)"> <!-- cell -->
+		  dyy = PRSW_DPrs(j)/2.0		     
+		  y = y + dyy + PRSW_DPrs(3)/2.0
+		  pwid=lprs2
+		  <If expr="y.le.PRSW_DHole">
+		    dxx = (pwid-PRSW_DHole)/2.0
+		    x   = dxx+PRSW_DHole
+		    <Else>
+		      <If expr="tb.eq.1">
+			dxx = pwid/2.0
+			x   = dxx
+			<Else>
+			  dxx = lprs4/2.0
+			  x   = dxx+2*PRSW_DPrs(1)
+		      </Else></If>
+		  </Else></If> 
+		  xx=x+dxx+dlg
+		  <If expr="tb.eq.1"> yy=+y; </If>
+		  <If expr="tb.eq.2"> yy=-y; </If>
+		  <If expr="lr.eq.1"> x=+x+PRSW_Xoff(serN); xx=+xx+PRSW_Xoff(serN); rot=-90</If>
+		  <If expr="lr.eq.2"> x=-x-PRSW_Xoff(serN); xx=-xx-PRSW_Xoff(serN); rot=90</If>
+		  yy=yy+PRSW_Yoff(serN);
+		  <If expr="tb.eq.1 .or. j.eq.1 .or. i.le.PRSW_NPrs(j)-PRSW_NSkipH">
+		    <If expr="debug.ge.1"> 
+		      k   = k+1
+		      slat(quad,layr)=slat(quad,layr)+1
+		      id=(quad-1)*3*21+(layr-1)*21+(slat(quad,layr)-1)
+		      flag=0
+		      <Do var="kk" from="1" to="npstype"> 
+			<If expr="(psdim(kk,1).eq.dxx.and.psdim(kk,2).eq.dyy).or.(psdim(kk,1).eq.dyy.and.psdim(kk,2).eq.dxx)">
+			  flag=kk
+			  pstype(kk)=pstype(kk)+1
+			</If>
+		      </Do>
+		      <If expr="flag.eq.0">
+			npstype=npstype+1
+			flag=npstype
+			pstype(flag)=1
+			<If expr="dxx.gt.dyy">
+			  psdim(npstype,1)=dyy
+			  psdim(npstype,2)=dxx
+			  <Else>
+			    psdim(npstype,1)=dxx
+			    psdim(npstype,2)=dyy
+			</Else></If>
+		      </If>		  
+		      <!--
+		      <Export language="Mortran"> 
+			write(serN,'(I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2,2X,A1)') serN,k,dxx*2,dyy*2,dzz*2,x,yy,z,char(ichar('A')+cpstype(flag)-1)
+			write(11,'(I3,I2,I2,I3,F8.2,F8.2,F8.2,F8.2,F8.2,F8.2)') id,quad,layr,slat(quad,layr),dxx*2,dyy*2,dzz*2,xx,y,z
+		      </Export>
+		      -->
+		    </If>
+		    <Placement block="FPSC" x="x"  y="yy" z="z1" dx="dxx" dy="dyy" dz="dzz" /> 
+		    <Placement block="FLIG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.1.and.serN.eq.2" > <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
+		    <Placement block="FLLG" x="xx" y="yy" z="z1-PRSW_DSIPM(1)/2.0" if="j.eq.2.and.serN.eq.2" > <Rotation alphax="-90" /> <Rotation alphaz="rot" /></Placement>
+		    <Placement block="FLIG" x="xx" y="yy" z="z1+PRSW_DSIPM(1)/2.0" if="j.eq.1.and.serN.eq.4" > <Rotation alphax="90" /> <Rotation alphaz="-rot" /></Placement>
+		    <Placement block="FLLG" x="xx" y="yy" z="z1+PRSW_DSIPM(1)/2.0" if="j.eq.2.and.serN.eq.4" > <Rotation alphax="90" /> <Rotation alphaz="-rot" /></Placement>
+		  </If>
+		  y = y + dyy
+		</Do>
+	      </Do>
+	    </Do>
+	  </Do>
+      </Elif></If>	   
+      <If expr="debug.ge.1"> <Export language="Mortran"> close(serN) </Export> </If>
+
+      <!-- back plates and conveter -->
+      dz1=PRSW_DzBbd(serN)/2.0
+      dz3=PRSW_Dz(3)+PRSW_DzBbd(3)
+      <!-- above beam pipe -->
+      dx1=(PRSW_DHole-PRSW_DxBbd(1))/2.0
+      dy1=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
+      x2=PRSW_xoff(serN)+dx1
+      y2=PRSW_DHole-PRSW_DxBbd(1)+dy1
+      dxx=dx1; dyy=dy1;
+      <Placement block="FPBB" x="x2"  y="y2" z="z2"      dx="dx1" dy="dy1" dz="dz1"               if="serN.ne.3" />
+      <Placement block="FPBB" x="-x2" y="y2" z="z2"      dx="dx1" dy="dy1" dz="dz1"               if="serN.ne.3" />
+      <Placement block="FPBB" x="x2"  y="y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="x2"  y="y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />	   
+      <Placement block="FPBB" x="x2"  y="y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+      <Placement block="FPBB" x="-x2" y="y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="-x2" y="y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
+      <Placement block="FPBB" x="-x2" y="y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+
+      <!-- top far -->
+      dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0                    
+      dy2=(lprs2+PRSW_DxBbd(2))/2.0
+      x2=PRSW_xoff(serN)+dx1*2+dx2
+      y2=dy2                                                                                                                           
+      dxx=dx2; dyy=dy2;
+      <Placement block="FPBB" x="x2"  y="y2" z="z2"      dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
+      <Placement block="FPBB" x="-x2" y="y2" z="z2"      dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />	   
+      <Placement block="FPBB" x="x2"  y="y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="x2"  y="y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />	   
+      <Placement block="FPBB" x="x2"  y="y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+      <Placement block="FPBB" x="-x2" y="y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="-x2" y="y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
+      <Placement block="FPBB" x="-x2" y="y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+
+      <!-- below beam pipe -->
+      dx1a=(PRSW_DHole-PRSW_DxBbd(1)-PRSW_NSkipV*PRSW_Dprs(1))/2.0
+      dx1b=(PRSW_DHole-PRSW_DxBbd(1))/2.0
+      <If expr="serN.le.4">
+	dx1=dx1a
+	x2=PRSW_xoff(serN)+PRSW_NSkipV*PRSW_Dprs(1)+dx1
+	<Else>
+	  dx1=dx1b
+	  x2=PRSW_xoff(serN)+dx1
+      </Else></If>
+      dy1=(lprs3-PRSW_DHole-PRSW_DyCut+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
+      y2=PRSW_DHole-PRSW_DxBbd(1)+dy1
+      dxx=dx1; dyy=dy1;
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2" dx="dx1" dy="dy1" dz="dz1" if="serN.ne.3" />
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="x2"  y="-y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />	   
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2-dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="-x2" y="-y2" z="z2"      dx="dx1" dy="dy1" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2+dzsb" dx="dx1" dy="dy1" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+
+      <!-- bottom far -->
+      <If expr="serN.le.2"> 
+	dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0
+	<Else>
+	  dx2=(lprs2-PRSW_DHole+PRSW_DxBbd(1)+PRSW_DxBbd(2))/2.0                    
+      </Else></If>
+      dy2=(lprs3-PRSW_DyCut+PRSW_DxBbd(2))/2.0
+      x2=PRSW_xoff(serN)+dx1b*2+dx2
+      y2=dy2                                                                                                                           
+      dxx=dx2; dyy=dy2;
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2" dx="dx2" dy="dy2" dz="dz1" if="serN.ne.3" />
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="x2"  y="-y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />	   
+      <Placement block="FPBB" x="x2"  y="-y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2-dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />
+      <Placement block="FPPB" x="-x2" y="-y2" z="z2"      dx="dx2" dy="dy2" dz="PRSW_Dz(3)/2.0"    if="serN.eq.3" />
+      <Placement block="FPBB" x="-x2" y="-y2" z="z2+dzsb" dx="dx2" dy="dy2" dz="PRSW_DzBbd(3)/4.0" if="serN.eq.3" />	   
+
+      <!-- <Export language="Mortran"> write(*,*) 'Done serN=',serN</Export>	-->   
+    </Block>
+
+    <Block name="FPBB" comment="is the G10 back board"  >
+      <Mixture name="g10" dens="1.7"  >
+	<Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
+	<Component name="O" a="16" z="8" w="0.6*2*16./60."  />
+	<Component name="C" a="12" z="6" w="0.4*8*12./174."  />
+	<Component name="H" a="1" z="1" w="0.4*14*1./174."  />
+	<Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+      </Mixture>
+      <Attribute for="FPBB" seen="1" colo="7"  />
+      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+    </Block>
+
+    <Block name="FPPB" comment="is FMS PS Pb converter"  >
+      <Material name="LEAD"  />
+      <Attribute for="FPPB" seen="1" colo="6"  />
+      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+    </Block>
+
+    <Block name="FPSC" comment="is a piece of scintillator in FMS Preshower"  >
+      <Material name="Polystyren"  />
+      <Material name="FMSPS_scint" isvol="1"  />
+      <Attribute for="FPSC" seen="1" colo="4" />
+      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+      <Par name="CUTGAM" value="0.00008" />
+      <Par name="CUTELE" value="0.001"   />
+      <Par name="BCUTE" value="0.0001"   />
+      <Par name="BIRK1" value="1."       />
+      <Par name="BIRK2" value="0.013"    />
+      <Par name="BIRK3" value="9.6E-6"   />
+      <Instrument block="FPSC">
+	<Hit meas="birk" nbits="0" min="0" max="10" />
+      </Instrument>
+    </Block>
+
+    <Block name="FLIG" comment="is a light guide + SiPM board for Preshower"  >
+      <Material name="Air"  />
+      <Attribute for="FLIG" seen="1" colo="6" serial="1"/>            
+      <Shape type="BOX" dx="PRSW_DPRS(1)/2.0" dy="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)/2.0" dz="dlg" />      
+      <Create block="FLBA" />
+      <Create block="FLCO" />
+      <Create block="FPMT" />
+      <Create block="FFEE" />
+      <Placement block="FLBA" x="0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)/2.0-dlg" /> 
+      <Placement block="FLCO" x="-PRSW_DPRS(1)/4.0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)+PRSW_DLG(2)/2.0-dlg" /> 
+      <Placement block="FLCO" x="+PRSW_DPRS(1)/4.0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)+PRSW_DLG(2)/2.0-dlg" /> 
+      <Placement block="FPMT" x="0" y="-PRSW_DSIPM(1)/2.0" z="dlg-PRSW_DSIPM(1)/2.0" /> 
+      <Placement block="FFEE" x="0" y="PRSW_Dz(1)/2.0" z="dlg-PRSW_DSIPM(4)/2.0" /> 
+    </Block>
+
+    <Block name="FLLG" comment="is a light guide + SiPM board for Preshower for large"  >
+      <Material name="Air"  />
+      <Attribute for="FLLG" seen="1" colo="6" serial="1"/>            
+      <Shape type="BOX" dx="PRSW_DPRS(2)/2.0" dy="PRSW_Dz(1)/2.0+PRSW_DSIPM(1)/2.0" dz="dlg" />      
+      <Create block="FBLL" />
+      <Create block="FCLL" />
+      <Create block="FPMT" />
+      <Create block="FFEE" />
+      <Placement block="FBLL" x="0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)/2.0-dlg" /> 
+      <Placement block="FCLL" x="-PRSW_DPRS(2)/4.0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)+PRSW_DLG(2)/2-dlg" /> 
+      <Placement block="FCLL" x=" PRSW_DPRS(2)/4.0" y="-PRSW_DSIPM(1)/2.0" z="PRSW_DLG(3)+PRSW_DLG(2)/2-dlg" /> 
+      <Placement block="FPMT" x="0" y="-PRSW_DSIPM(1)/2.0" z="dlg-PRSW_DSIPM(1)/2.0" /> 
+      <Placement block="FFEE" x="0" y="PRSW_Dz(1)/2.0" z="dlg-PRSW_DSIPM(4)/2.0" /> 
+    </Block>
+
     <Block name="FLBA" comment="is a light guide base for Preshower"  >
       <Material name="Polystyren"  />
       <Attribute for="FLBA" seen="1" colo="4" serial="1"/>
@@ -874,7 +1006,7 @@
       <Material name="Iron"  />
       <Attribute for="WPPL" seen="1" colo="4"  />
       <Shape type="BOX" dx="WPFM_PoleD(1)/2.0" dy="WPFM_PoleD(2)/2.0" dz="WPFM_PoleD(3)/2.0" />
-      <Placement block="WPAR" dx="WPFM_PoleD(1)/2.0-WPFM_PoleD(4)" dy="WPFM_PoleD(2)/2.0" dz="WPFM_PoleD(3)/2.0-WPFM_PoleD(4)"
+      <Placement block="WPAR" dx="WPFM_PoleD(1)/2.0-WPFM_PoleD(4)" dy="WPFM_PoleD(2)/2.0" dz="WPFM_PoleD(3)/2.0-WPFM_PoleD(4)" 
 	x="0.0" y="0.0" z="0.0" />
     </Block>
 
@@ -882,16 +1014,17 @@
       <Material name="Iron"  />
       <Attribute for="WPIS" seen="1" colo="4"  />
       <Shape type="BOX" dx="WPFM_IstrD(1)/2.0" dy="WPFM_IstrD(2)/2.0" dz="WPFM_IstrD(3)/2.0" />
-      <Placement block="WPAR" dx="WPFM_IstrD(1)/2.0" dy="WPFM_IstrD(2)/2.0-WPFM_IstrD(4)" dz="(WPFM_IstrD(3)/2.0-WPFM_IstrD(4)/2.0)/2.0"
+      <Placement block="WPAR" dx="WPFM_IstrD(1)/2.0" dy="WPFM_IstrD(2)/2.0-WPFM_IstrD(4)" dz="(WPFM_IstrD(3)/2.0-WPFM_IstrD(4)/2.0)/2.0" 
 	x="0.0" y="0.0" z="+(WPFM_IstrD(3)/4.0-WPFM_IstrD(4)/2.0)" />
-      <Placement block="WPAR" dx="WPFM_IstrD(1)/2.0" dy="WPFM_IstrD(2)/2.0-WPFM_IstrD(4)" dz="(WPFM_IstrD(3)/2.0-WPFM_IstrD(4)/2.0)/2.0"
+      <Placement block="WPAR" dx="WPFM_IstrD(1)/2.0" dy="WPFM_IstrD(2)/2.0-WPFM_IstrD(4)" dz="(WPFM_IstrD(3)/2.0-WPFM_IstrD(4)/2.0)/2.0" 
 	x="0.0" y="0.0" z="-(WPFM_IstrD(3)/4.0-WPFM_IstrD(4)/2.0)" />
     </Block>
+
     <Block name="WPUF" comment="is a front U-struct for west platform"  >
       <Material name="Iron"  />
       <Attribute for="WPUF" seen="1" colo="4"  />
       <Shape type="BOX" dx="WPFM_UstFD(1)/2.0" dy="WPFM_UstFD(2)/2.0" dz="WPFM_UstFD(3)/2.0" />
-      <Placement block="WPAR" dx="WPFM_UstFD(1)/2.0" dy="WPFM_UstFD(2)/2.0-WPFM_UstFD(4)" dz="WPFM_UstFD(3)/2.0-WPFM_UstFD(4)/2.0"
+      <Placement block="WPAR" dx="WPFM_UstFD(1)/2.0" dy="WPFM_UstFD(2)/2.0-WPFM_UstFD(4)" dz="WPFM_UstFD(3)/2.0-WPFM_UstFD(4)/2.0" 
 	x="0.0" y="0.0" z="WPFM_UstFD(4)/2.0" />
     </Block>
 
@@ -899,7 +1032,7 @@
       <Material name="Iron"  />
       <Attribute for="WPUN" seen="1" colo="4"  />
       <Shape type="BOX" dx="WPFM_UstND(1)/2.0" dy="WPFM_UstND(2)/2.0" dz="WPFM_UstND(3)/2.0" />
-      <Placement block="WPAR" dx="WPFM_UstND(1)/2.0-WPFM_UstND(4)/2.0" dy="WPFM_UstND(2)/2.0-WPFM_UstND(4)" dz="WPFM_UstND(3)/2.0"
+      <Placement block="WPAR" dx="WPFM_UstND(1)/2.0-WPFM_UstND(4)/2.0" dy="WPFM_UstND(2)/2.0-WPFM_UstND(4)" dz="WPFM_UstND(3)/2.0" 
 	x="+WPFM_UstND(4)/2.0" y="0.0" z="0.0" />
     </Block>
 
@@ -907,7 +1040,7 @@
       <Material name="Iron"  />
       <Attribute for="WPUS" seen="1" colo="4"  />
       <Shape type="BOX" dx="WPFM_UstSD(1)/2.0" dy="WPFM_UstSD(2)/2.0" dz="WPFM_UstSD(3)/2.0" />
-      <Placement block="WPAR" dx="WPFM_UstSD(1)/2.0-WPFM_UstSD(4)/2.0" dy="WPFM_UstSD(2)/2.0-WPFM_UstSD(4)" dz="WPFM_UstSD(3)/2.0"
+      <Placement block="WPAR" dx="WPFM_UstSD(1)/2.0-WPFM_UstSD(4)/2.0" dy="WPFM_UstSD(2)/2.0-WPFM_UstSD(4)" dz="WPFM_UstSD(3)/2.0" 
 	x="-WPFM_UstSD(4)/2.0" y="0.0" z="0.0" />
     </Block>
 
@@ -917,9 +1050,9 @@
       <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
     </Block>
 
+
     <!-- End of  Pre Shower -->
-    <!-- End of  Pre Shower -->
-    <!-- End of  Pre Shower -->
+
 
   </Module>
 

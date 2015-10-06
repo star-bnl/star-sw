@@ -189,15 +189,15 @@
       <var name="version"   value="1.0"    coment="pre-shower dimention" />
       <var name="xP1"       value="0.0"    coment="cdt of outer pre shower"/>
       <var name="yP1"       value="0.0"    coment=""     />
-      <var name="zP1"       value="-70.2"  coment=""     />
+      <var name="zP1"       value="707.2"  coment=""     />
       <var name="rP1"       value="45.0"   coment=""     />
       <var name="xP2"       value="0.0"    coment="i cdt of inner(close to hcal) pre shower"     />
       <var name="yP2"       value="0.0"    coment=""     />
-      <var name="zP2"       value="-66.2"   coment=""     />
+      <var name="zP2"       value="711.2"   coment=""     />
       <var name="rP2"       value="-45.0"  coment=""     />
       <var name="xFe"       value="0.0"    coment=" cdt of metal plate between pre shower"     />
       <var name="yFe"       value="0.0"    coment=""     />
-      <var name="zFe"       value="-68.2"   coment=""     />
+      <var name="zFe"       value="709.2"   coment=""     />
       <var name="rFe"       value="45.0"   coment=""     />
       <var name="strpXd"    value="1.25"   coment=" dim. of each strp"     />
       <var name="strpYd"    value="45.0"   coment=""     />
@@ -221,6 +221,22 @@
     <Create    block="HCMO"/>
     <Placement block="HCMO" in="CAVE" x="mcdt_x" y="mcdt_y" z="mcdt_z"/> 
 
+    <Create    block="HSWR"/><!-- pre shower closer to hcal -->
+    <Placement block="HSWR" in="CAVE" x="pres_xP2" y="pres_yP2" z="pres_zP2"> 
+      <Rotation alphaz="pres_rP2"  />
+    </Placement>
+
+    <Create    block="HSFE"/> <!-- metal plate in between two pre-shower -->
+    <Placement block="HSFE" in="CAVE" x="pres_xFe" y="pres_yFe" z="pres_zFe"> 
+      <Rotation alphaz="pres_rFe"  />
+    </Placement>
+
+    <Create    block="HSWR"/> <!-- outer pre shower -->
+    <Placement block="HSWR" in="CAVE" x="pres_xP1" y="pres_yP1" z="pres_zP1"> 
+      <Rotation alphaz="pres_rP1"  />
+    </Placement>
+
+
 
     <Volume name="HCMO" comment="Mother Calorimeter">
       <Material  name="Air"      /> 
@@ -237,23 +253,9 @@
 	</For>
       </For>
 
-    <Create    block="HSLD"/>
-    <Placement block="HSLD" x="shld_xd" y="shld_yd" z="shld_zd"/> 
+      <Create    block="HSLD"/>
+      <Placement block="HSLD" x="shld_xd" y="shld_yd" z="shld_zd"/> 
 
-    <Create    block="HSWR"/><!-- pre shower closer to hcal -->
-    <Placement block="HSWR" x="pres_xP2" y="pres_yP2" z="pres_zP2"> 
-      <Rotation alphaz="pres_rP2"  />
-    </Placement>
-
-    <Create    block="HSFE"/> <!-- metal plate in between two pre-shower -->
-    <Placement block="HSFE" x="pres_xFe" y="pres_yFe" z="pres_zFe"> 
-      <Rotation alphaz="pres_rFe"  />
-    </Placement>
-
-    <Create    block="HSWR"/> <!-- outer pre shower -->
-    <Placement block="HSWR" x="pres_xP1" y="pres_yP1" z="pres_zP1"> 
-      <Rotation alphaz="pres_rP1"  />
-    </Placement>
 
     </Volume>
 
@@ -424,7 +426,7 @@
       <Shape type="Box" dx="pres_strpXd" dy="pres_strpYd" dz="pres_strpZd" />
       
       <Instrument block="HSTP" comment="Hit declaration ">	
-	<Hit meas="birk" opts="C" nbits="0" min="0" max="100.0"  />
+	<Hit meas="birk" opts="C" nbits="0" min="0" max="250.0"  />
       </Instrument>
       
     </Volume>
