@@ -15,7 +15,6 @@ public:
 StvHits &operator+=(      StvHit  *add)		{push_back(add);return *this;}
 StvHits &operator+=(const StvHits &add);
 StvHits &operator+=(const std::vector<void*> &add);
-void unused();
 void Print(const char *txt="");
 };
 class StvConstHits : public std::vector<const StvHit*>
@@ -43,5 +42,14 @@ typedef std::list<StvTrack*>::const_iterator 	StvTrackConstIter;
 class StvTracks : public std::list<StvTrack*>{
 public:
 };
-
+//_____________________________________________________________________________
+inline StvHits &StvHits::operator+=(const StvHits &add)
+{ insert(end(),add.begin(),add.end()); return *this;}
+//_____________________________________________________________________________
+inline StvHits &StvHits::operator+=(const std::vector<void*> &add)
+{
+  const StvHits &myAdd = (const StvHits &)add;
+  (*this)+=myAdd;
+  return *this;
+}
 #endif

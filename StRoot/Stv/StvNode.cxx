@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.35 2015/10/02 16:44:37 perev Exp $
+ * $Id: StvNode.cxx,v 1.36 2015/10/07 02:51:33 perev Exp $
  *
  * /author Victor Perev
  */
@@ -170,12 +170,9 @@ void StvNode::SetDer(const StvFitDers &der, int dir)
 //________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
 {
-   if (mHit == hit)     return;
-   if (mHit) mHit->setTimesUsed(0);
    mHit = hit;
    if (!mHit)           return;
    assert(!mHit->isUsed());
-   mHit->setTimesUsed(1);
 } 
 //________________________________________________________________________________
 void StvNode::SetMem(StvHit *hit[2],double xi2[2])

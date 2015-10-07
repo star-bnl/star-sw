@@ -1,3 +1,4 @@
+#if 0 	///Temporary disabled
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -7,7 +8,10 @@
 #include "StvSeedConst.h"
 
 
-enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=3};
+enum {kFstAng=88,kMinLen=20,kMaxLen=50,kDivLen=3};
+//enum {kFstAng=88,kMinLen=9,kMaxLen=30,kDivLen=3};
+//enum {kFstAng=88,kMinLen=9,kMaxLen=90,kDivLen=3};
+//enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=3};
 //enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=5};
 static const double kFstCos = cos(kFstAng*M_PI/180);
 static const double kFstSin = cos(kFstAng*M_PI/180);
@@ -62,33 +66,43 @@ void StvGoneRejector::Reset(const float pos[3],const float dir[3]
 ///	Definition of start position, direction and radius of cone sector
 ///	if direction,radius,angle or error are not defined, then
 ///	they are calculated automatically.
-
 {
   Cop(mPos,pos);
-  float nor = sqrt(Dot(mPos,mPos));
-  if (rad ) { mOutRad = rad;}	//rad is defined, use it
-  else      { 			//rad is no defined, estimate it
-    mOutRad = nor/kDivLen;
-    if (mOutRad<kMinLen) mOutRad=kMinLen;
-    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
-  }
   mRxy2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
   mRxy  = sqrt(mRxy2);
-
   mErr = SEED_ERR(mRxy);
-  mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
 
+  double nor=0;
   if (dir) { 	//Direction defined
     Cop(mDir,dir);
+    nor = pos[2]/mDir[2];
+    mThet = (theta) ? theta : kFstAng*M_PI/180;
+    assert(nor>0);
   } else   {	//Estimate dir as direction to 0,0,0
-    Mul(mDir,-1./nor,mPos);
+
+    double norL = 1./sqrt(mRxy2+pow(pos[2]-kZRange,2)); 
+    double norR = 1./sqrt(mRxy2+pow(pos[2]+kZRange,2)); 
+    double norQ = (norL+norR);
+    mDir[0]= pos[0]*norQ;
+    mDir[1]= pos[1]*norQ;
+    mDir[2]= pos[2]*norQ +kZRange*(norR-norL);
+    nor = sqrt(mDir[0]*mDir[0]+mDir[1]*mDir[1]+mDir[2]*mDir[2]);
+    for (int i=0;i<3;i++) {mDir[i]/=(-nor);}
+    mThet = acos(-(mDir[0]*pos[0]+mDir[0]*pos[1]+mDir[2]*(pos[2]+kZRange))*norR);
+
   }
-  mThet = (theta) ? theta : kFstAng*M_PI/180;
+  if (rad ) { mOutRad = rad;}	//rad is defined, use it
+  else      { 			//rad is no defined, estimate it
+    mOutRad = mRxy/kDivLen;
+    if (mOutRad<kMinLen) mOutRad=kMinLen;
+    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
+    mOutRad *= nor/mRxy;
+  }
+  mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
   mSin = sin(mThet);
   mCos = cos(mThet);
   mTan2 = pow(mSin/mCos,2);
 }
-
 //_____________________________________________________________________________
 void StvGoneRejector::Prepare()
 {
@@ -277,4 +291,4 @@ int StvGoneRejector::Test()
   }
   return 0;
 }
-    
+#endif //0    

@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.153 2015/06/23 20:27:53 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.154 2015/10/06 19:43:23 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.154  2015/10/06 19:43:23  jwebb
+// Added HCAL preshower to readout in St_geant_Maker.
+//
 // Revision 1.153  2015/06/23 20:27:53  jwebb
 // Added hits for FTBF version of HCAL
 //
@@ -1468,11 +1471,12 @@ Int_t St_geant_Maker::Make() {
   geant3 -> Gfnhit("HCAH","BBCF", nhit1); nhits+=nhit1;
   geant3 -> Gfnhit("HCAH","BBCB", nhit1); nhits+=nhit1;
   geant3 -> Gfnhit("HCAH","LEDG", nhit1); nhits+=nhit1; 
+  geant3 -> Gfnhit("HCAH","HSTP", nhit1); nhits+=nhit1;
   if ( nhits > 0 ) 
-     {
-        St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
-        m_DataSet->Add(g2t_hca_hit);
-        iRes = g2t_hca( g2t_track, g2t_hca_hit);
+  {
+    St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
+    m_DataSet->Add(g2t_hca_hit);
+    iRes = g2t_hca( g2t_track, g2t_hca_hit);
      } 
 
 

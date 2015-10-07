@@ -40,7 +40,7 @@ StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
 #ifndef KNNGONE
   fMultiHits	= new StMultiKeyMap(3);
 #else
-  fMultiHits	= new StMultiKeyMap(6);
+  fMultiHits	= new StMultiKeyMap(5);
 #endif
   fMultiIter	= new StMultiKeyMapIter(0);
   f1stHitMap 	= new Stv1stHitMap;
@@ -60,6 +60,7 @@ void StvKNSeedFinder::Reset()
 {
   memset(mBeg,0,mMed-mBeg+1);
 #ifndef __NOSTV__
+static const float kSqrHlf = sqrt(0.5);
   assert(!f1stHitMap->size());
   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
@@ -69,8 +70,7 @@ void StvKNSeedFinder::Reset()
     const float *x = hit->x();
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
-//    fMultiHits->Add(hit,x);
-    float xx[6]={x[0],x[1],x[2],x[0]-x[1],x[1]-x[2],x[2]-x[0]};
+    float xx[5] = {x[0],x[1],x[2],(x[0]+x[1])*kSqrHlf,(-x[0]+x[1])*kSqrHlf};
     fMultiHits->Add(hit,xx);
   }  
 

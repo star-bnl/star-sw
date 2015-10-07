@@ -73,7 +73,7 @@ double GetRes() const;		// Average residual
    int IsPrimary() const 	{return mPrimary ;}
   void Print(const char *opt) const;
 
-   int SetUsed(int use=1); 	
+   int SetUsed(); 	
 
   double Approx(int mode=0);
   double ToBeam() const;
