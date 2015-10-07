@@ -89,13 +89,18 @@ public:
 
     ///Set the number of times used
     ///Return the number of times this hit was assigned to a track
-    virtual int  isUsed() const 	{ return (int)mTimesUsed;}
-    virtual void addTimesUsed(int add=1){ mTimesUsed+=add ;}
-    virtual void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
+    void setMaxTimes(int set)	{mMaxTimes = set;}
+    void setTimesUsed(int set=0);
+    void addTimesUsed();
+    void subTimesUsed();
+    ///Return a boolean that marks whether or not this hit is assigned to a
+    ///track >= than max times.
+    int  isUsed() const {return mTimesUsed>=mMaxTimes;}
     virtual void reset();
     void unset(){;}
 protected:
     char  mBeg[1];
+    unsigned char mMaxTimes;
     unsigned char mTimesUsed;
     float mGlo[3]; 			//global position
     const void *msthit;
@@ -135,6 +140,6 @@ public:
 
 protected:
     float mErr[6];			//error matrix
-    int   mKount;
+    int mKount;
 };
 #endif
