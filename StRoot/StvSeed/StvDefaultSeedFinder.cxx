@@ -171,7 +171,7 @@ std::vector<TObject*> mySeedObjs;
     while (1) { //Search next hit 
 //		Add info from selected hit
       nTally++;
-      fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
+      fSeedHits.push_back(selHit); fNUsed[0]++;
       if (fSeedHits.size()>=kMaxHits) break;
       const StHitPlane *hp = selHit->detector();
       const float *hd = hp->GetDir(selHit->x())[0];
@@ -222,7 +222,7 @@ std::vector<TObject*> mySeedObjs;
     }// end NextHit loop
 //		Mark hits as unused when seed is created. Only tracker
 //		has right to deside to use or not to use
-    fSeedHits.unused();
+//    fSeedHits.unused();
 //		If no hits found, go to next 1st hit
     if ((int)fSeedHits.size()<=1) {mNDejavu = 99; continue;}
 
