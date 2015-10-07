@@ -28,7 +28,7 @@ static const float kMinDis =  5*3.14/180;;	//KN angle allowed
 //static const float kDisRatio=   0.6;		//ratio for KNN distance
 //static const float kDisRatio=   0.8;		//ratio for KNN distance
 //static const float kDisRatio=   0.9;		//ratio for KNN distance
-static const float kDisRatio=   1.1;		//ratio for KNN distance
+static const float kDisRatio=   1.5;		//ratio for KNN distance
 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
@@ -186,8 +186,8 @@ void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
   mTheDiv[iThe].insert(std::pair<float,int>(aux.mPhi,last));
 
   float  myMaxPhi = 2*kSinDis/aux.mCosThe;
-  if (myMaxPhi>=2) 		{myMaxPhi = M_PI;}
-  else if (myMaxPhi> 0.5) 	{myMaxPhi = 2*asin(myMaxPhi/2);}
+  if      (myMaxPhi>=2*0.99) 	{myMaxPhi = M_PI;}
+  else if (myMaxPhi> 2*0.50) 	{myMaxPhi = 2*asin(myMaxPhi/2);}
 
   if (aux.mPhi-myMaxPhi<-M_PI) {
     last = mAux.size(); mAux.resize(last+1); mAux.back() = aux;
@@ -400,7 +400,7 @@ void StvKNSeedSelector::Pass(int iux, double accuAng)
   aux.mSel=1; mNHits++;
   mMapLen[aux.mLen]=iux;
   for (int ifan=0;ifan<kKNumber;ifan++) {
-    if (aux.mDist[ifan]>accuAng)	continue;
+    if (aux.mDist[ifan]>accuAng)	break;	// the rest even bigger
     int idx = aux.mNbor[ifan];
     if (mAux[idx].mSel) 		continue; 
     Pass(idx,accuAng);
