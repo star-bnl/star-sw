@@ -42,42 +42,59 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
 ///	Definition of start position, direction and radius of cone sector
 ///	if direction,radius,angle or error are not defined, then
 ///	they are calculated automatically.
-
 {
   Cop(mPos,pos);
-  float nor = sqrt(Dot(mPos,mPos));
-  if (rad ) { mOutRad = rad;}	//rad is defined, use it
-  else      { 			//rad is no defined, estimate it
-    mOutRad = nor/kDivLen;
-    if (mOutRad<kMinLen) mOutRad=kMinLen;
-    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
-  }
-  mOutRad2 = mOutRad*mOutRad;
   mRxy2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
   mRxy  = sqrt(mRxy2);
+  mErr = SEED_ERR(mRxy);
 
   if (dir) { 	//Direction defined
     Cop(mDir,dir);
+    mThet = (theta) ? theta : kFstAng*M_PI/180;
   } else   {	//Estimate dir as direction to 0,0,0
-    Mul(mDir,-1./nor,mPos);
+
+    double norL = 1./sqrt(mRxy2+pow(pos[2]-kZRange,2)); 
+    double norR = 1./sqrt(mRxy2+pow(pos[2]+kZRange,2)); 
+    double norQ = (norL+norR);
+    mDir[0]= pos[0]*norQ;
+    mDir[1]= pos[1]*norQ;
+    mDir[2]= pos[2]*norQ +kZRange*(norR-norL);
+    norQ = 1./sqrt(mDir[0]*mDir[0]+mDir[1]*mDir[1]+mDir[2]*mDir[2]);
+    for (int i=0;i<3;i++) {mDir[i]*=(-norQ);}
+    mThet = acos(-(mDir[0]*pos[0]+mDir[1]*pos[1]+mDir[2]*(pos[2]+kZRange))*norR);
+    assert(mThet< M_PI/2);
   }
-  mThet = (theta) ? theta : kFstAng*M_PI/180;
+  double nor = -(mPos[0]*mDir[0]+mPos[1]*mDir[1])
+               /(mDir[0]*mDir[0]+mDir[1]*mDir[1]);
+  assert(nor>10);
+  if (rad ) { mOutRad = rad;}	//rad is defined, use it
+  else      { 			//rad is no defined, estimate it
+    mOutRad = mRxy/kDivLen;
+    if (mOutRad<kMinLen) mOutRad=kMinLen;
+    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
+    mOutRad *= nor/mRxy;
+  }
+  mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
   mSin = sin(mThet);
   mCos = cos(mThet);
-  mErr = (err)? err : SEED_ERR(nor);
   mTan2 = pow(mSin/mCos,2);
 }
-
 //_____________________________________________________________________________
 void StvConeRejector::Prepare()
 {
 /// 	Calculation of brik sarrounding our cone sector
 ///	Parameters of brik are used for selection in multy key iterator
 ///	of hits
-
+static const double kSqrHlf = sqrt(0.5);
   double along = mOutRad*mCos;
   double ortho = mOutRad*mSin;
-  for (int i=0;i<3;i++) {
+  mPos[3] = ( mPos[0] + mPos[1])*kSqrHlf;
+  mPos[4] = (-mPos[0] + mPos[1])*kSqrHlf;
+  mDir[3] = ( mDir[0] + mDir[1])*kSqrHlf;
+  mDir[4] = (-mDir[0] + mDir[1])*kSqrHlf;
+
+  
+  for (int i=0;i<5;i++) {
     mLim[0][i] = -mErr;
     mLim[1][i] =  mErr;
     float qwe = along*mDir[i];
@@ -96,6 +113,17 @@ void StvConeRejector::Prepare()
     mLim[0][i]+= mPos[i];
     mLim[1][i]+= mPos[i];
   }
+static int mytimes = 20;
+  if (mytimes >0) {
+    mytimes--;
+    double fullVol = M_PI*200*200*400/100;
+    double vol1=1/fullVol; for (int i=0;i<3;i++) 	{ vol1*=mLim[1][i]-mLim[0][i];}
+    double vol2=1/fullVol; for (int i: {2,3,4}  ) 	{ vol2*=mLim[1][i]-mLim[0][i];}
+    printf (" vol1 = %g Vol2 = %g\n",vol1,vol2);
+  }
+
+
+
 }   
 //_____________________________________________________________________________
 int StvConeRejector::Reject(const float x[3]) const

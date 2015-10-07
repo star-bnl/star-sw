@@ -23,8 +23,8 @@ private:
 public:
 //		Input data
 char  mBeg[1];
-float mPos[3]; 		// start position 
-float mDir[3]; 		// track direction
+float mPos[5]; 		// start position 
+float mDir[5]; 		// track direction
 float mOutRad;		// cone radius of limitation (similar to height)
 float mOutRad2;		// mOutRad**2
 float mRxy;		// Rxy    ofstart position
@@ -34,7 +34,7 @@ float mCos;		// cos(mThet)
 float mSin;		// sin(mThet)
 float mTan2;		// tan(mThet)**2
 float mErr;		// 3d accuracy to be inside of cone
-float mLim[2][3];  	// xyz min and xyz max of cube around the cone
+float mLim[2][5];  	// xyz min and xyz max of cube around the cone
 char  mEnd[1];
 };
 
