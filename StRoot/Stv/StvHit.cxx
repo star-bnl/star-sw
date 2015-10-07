@@ -38,6 +38,7 @@ StvHit::~StvHit()
 void StvHit::reset()
 {
   memset(mBeg,0,mEnd-mBeg+1);
+  mMaxTimes = 1;
 static unsigned int myCount=0;  
   mCount = ++myCount;
 }
@@ -68,6 +69,28 @@ void StvVertex::reset()
   memset(mErr,0,sizeof(mErr)); mKount=0;
   StvHit::reset();
 }
+//_____________________________________________________________________________
+ void StvHit::setTimesUsed(int n)
+{
+    if (!mDetector) return;
+    assert(!n);
+    assert(!mTimesUsed);
+}
+//_____________________________________________________________________________
+ void StvHit::addTimesUsed()
+{
+    if (!mDetector) return;
+    mTimesUsed++; 
+    assert(mTimesUsed<=mMaxTimes);
+}
+//_____________________________________________________________________________
+ void StvHit::subTimesUsed()
+{
+    if (!mDetector) return;
+    mTimesUsed--; 
+    assert(mTimesUsed>=0);
+}
+
 
 
 
