@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsTrack.cxx,v 2.1 2015/10/02 19:48:14 ullrich Exp $
+ * $Id: StRpsTrack.cxx,v 2.2 2015/10/07 17:30:11 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrack.cxx,v $
+ * Revision 2.2  2015/10/07 17:30:11  ullrich
+ * Changed const to enums and related changes.
+ *
  * Revision 2.1  2015/10/02 19:48:14  ullrich
  * Initial Revision.
  *
@@ -53,7 +56,7 @@ unsigned int StRpsTrack::planesUsed() const {
     return nPlanes;
 }
 
-double StRpsTrack::thetaRp(const unsigned int coordinate) const {
+double StRpsTrack::thetaRp(unsigned int coordinate) const {
     if(coordinate>rpsAngleTheta) return 0.0;
     if(mType==rpsLocal) return theta(coordinate);
     StThreeVectorF deltaVector = mTrackPoints[1]->positionVec() - mTrackPoints[0]->positionVec();
@@ -66,7 +69,7 @@ double StRpsTrack::phiRp() const{
     return deltaVector.phi();
 }
 
-double StRpsTrack::t(const double beamMomentum) const{
+double StRpsTrack::t(double beamMomentum) const{
     double xiValue = xi(beamMomentum);
     return 2*beamMomentum*beamMomentum*(xiValue*xiValue-1+(1-xiValue)*cos(theta(rpsAngleTheta)));
 }
@@ -76,7 +79,7 @@ double StRpsTrack::time() const{
     unsigned int numberOfPmtsWithSignal=0;
     for(unsigned int i=0; i<mNumberOfStationsInBranch; ++i){
         if(mTrackPoints[i])
-            for(unsigned int j=0; j<mTrackPoints[i]->numberOfPmtsInRp(); ++j){
+            for(int j=0; j<mTrackPoints[i]->mNumberOfPmtsInRp; ++j){
                 if(mTrackPoints[i]->time(j)>0){
                     sumTime += mTrackPoints[i]->time(j);
                     ++numberOfPmtsWithSignal;

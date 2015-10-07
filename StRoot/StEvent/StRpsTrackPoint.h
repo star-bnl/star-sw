@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsTrackPoint.h,v 2.1 2015/10/02 19:48:14 ullrich Exp $
+ * $Id: StRpsTrackPoint.h,v 2.2 2015/10/07 17:30:13 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrackPoint.h,v $
+ * Revision 2.2  2015/10/07 17:30:13  ullrich
+ * Changed const to enums and related changes.
+ *
  * Revision 2.1  2015/10/02 19:48:14  ullrich
  * Initial Revision.
  *
@@ -38,8 +41,6 @@ public:
     double time(unsigned int) const;
     StRpsTrackPointQuality quality() const;
     unsigned int planesUsed() const;
-    unsigned int numberOfPmtsInRp() const;
-    unsigned int numberOfPlanesInRp() const;
     
     double x() const;
     double y() const;
@@ -49,12 +50,11 @@ public:
     void setRpId(int);
     void setClusterId(int, unsigned int);
     void setTime(double, unsigned int);
-    void setQuality(const StRpsTrackPointQuality);
+    void setQuality(StRpsTrackPointQuality);
+
+    enum {mNumberOfPmtsInRp = 2, mNumberOfPlanesInRp = 4};
     
 private:
-    static const unsigned int mNumberOfPmtsInRp = 2;   //!
-    static const unsigned int mNumberOfPlanesInRp = 4; //!
-    
     int mRpId;
     int mClusterId[mNumberOfPlanesInRp];
     double mTime[mNumberOfPmtsInRp];
@@ -76,8 +76,6 @@ inline double StRpsTrackPoint::time(unsigned int pmtId) const
     return pmtId<mNumberOfPmtsInRp ? mTime[pmtId] : -1;
 }
 inline StRpsTrackPoint::StRpsTrackPointQuality StRpsTrackPoint::quality() const { return mQuality; }
-inline unsigned int StRpsTrackPoint::numberOfPmtsInRp() const { return mNumberOfPmtsInRp; }
-inline unsigned int StRpsTrackPoint::numberOfPlanesInRp() const { return mNumberOfPlanesInRp; }
 inline double StRpsTrackPoint::x() const { return mPosition.x(); }
 inline double StRpsTrackPoint::y() const { return mPosition.y(); }
 inline double StRpsTrackPoint::z() const { return mPosition.z(); }
@@ -96,7 +94,7 @@ inline void StRpsTrackPoint::setTime(double timeVal, unsigned int pmtId)
 {
     if( pmtId<mNumberOfPmtsInRp ) mTime[pmtId] = timeVal;
 }
-inline void StRpsTrackPoint::setQuality(StRpsTrackPointQuality quality )
+inline void StRpsTrackPoint::setQuality(StRpsTrackPoint::StRpsTrackPointQuality quality )
 {
     mQuality = quality;
 }
