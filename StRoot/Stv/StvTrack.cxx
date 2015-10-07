@@ -84,14 +84,19 @@ int StvTrack::GetNFits(int dir) const
   return n;
 }   
 //______________________________________________________________________________
-int StvTrack::SetUsed(int use) 
+int StvTrack::SetUsed() 
 {  
   int n = 0;
   for (StvNodeConstIter it = begin(); it !=end();++it) {
-    const StvNode *node = *it; 
+    StvNode *node = *it; 
     StvHit *hit = node->GetHit();
     if (!hit) continue;
-    hit->setTimesUsed(use); n++;
+    if (!hit->detector())	continue;
+    if (node->GetXi2()<1000 && !hit->isUsed()) 	{ 
+      hit->addTimesUsed();n++;  }
+    else {			
+      node->SetHit(0);	
+    }
   }
   return n;
 }   
