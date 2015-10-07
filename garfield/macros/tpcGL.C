@@ -697,13 +697,13 @@ yPad[0] ________________________| |	| | ..........................    AnodeW ySe
     gBenchmark->Start("tpcGL");
     gas->ResetCollisionCounters();
     sensor->NewSignal();
-    x0 = xmin + RndmUniform() * (xmax - xmin);
-    eX->Fill(x0);
-    y0 = yGG + 0.1;
-    z0 = t0 = 0.;
-    e0 = 0.1; // eV
-    t0 = 0;
-    aval->AvalancheElectron(x0, y0, z0, t0, e0, 0., 0., 0.);
+    Double_t xStart = xmin + RndmUniform() * (xmax - xmin);
+    eX->Fill(xStart);
+    Double_t yStart = yGG + 0.1;
+    Double_t zStart = 0;
+    Double_t tStart = 0.;
+    Double_t eStart = 0.1; // eV
+    aval->AvalancheElectron(xStart, yStart, zStart, tStart, eStart, 0., 0., 0.);
     //    v_e->Plot(true,false);
     //    c_e->Update();
     aval->GetAvalancheSize(ne, ni);
@@ -719,6 +719,11 @@ yPad[0] ________________________| |	| | ..........................    AnodeW ySe
     for (Int_t j = nEndpoints; j--;) {
       aval->GetElectronEndpoint(j, x0, y0, z0, t0, e0,
                                    x1, y1, z1, t1, e1, status);
+      Double_t dist0 = TMath::Sqrt((x0 - xStart)*(x0 - xStart) + (y0 - yStart)*(y0 - yStart) + (z0 - zStart)*(z0 - zStart));
+      Double_t dist1 = TMath::Sqrt((x1 - xStart)*(x1 - xStart) + (y1 - yStart)*(y1 - yStart) + (z1 - zStart)*(z1 - zStart));
+      if (dist0 < 1e-7 || dist1 < 1e-7) {
+	continue;
+      }
       tElectrons->Fill(t1);
       el_status->Fill(status);
       Double_t X = (x1 + x0)/2;
