@@ -38,7 +38,7 @@ StRnDHit::StRnDHit()
 StRnDHit::StRnDHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    unsigned int hw, float q, unsigned char c,
-	         unsigned short idTruth,  unsigned short quality,
+	         Int_t idTruth,  unsigned short quality,
 	         unsigned short id, StDetectorId dId)
     : StHit(p, e, hw, q, c, idTruth, quality, id)
 { 

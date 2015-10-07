@@ -121,28 +121,28 @@ public:
     StHit();
     StHit(const StThreeVectorF& position,
           const StThreeVectorF& errors,
-          unsigned int hardware,
-	  float    charge, 
-	  unsigned char trakRefCount = 0,
-	  UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
+          UInt_t                hardware,
+	  Float_t               charge, 
+	  UChar_t               trakRefCount = 0,
+	  Int_t idTruth=0, UShort_t quality=0, UShort_t id =0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
 
-    int operator==(const StHit&) const;
-    int operator!=(const StHit&) const;
+    Int_t operator==(const StHit&) const;
+    Int_t operator!=(const StHit&) const;
     
-    float           charge() const;
-    unsigned int    trackReferenceCount() const;
-    unsigned int    flag() const;
+    Float_t         charge() const;
+    UInt_t          trackReferenceCount() const;
+    UInt_t          flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
-    int             usedInFit() const;
-    int             idTruth() const;
-    int             qaTruth() const { return mQuality; }
-    int  	          id()      const;
+    Int_t           usedInFit() const;
+    Int_t           idTruth() const;
+    Int_t           qaTruth() const { return mQuality; }
+    Int_t           id()      const;
     const StHit*    nextHit() const;
-    unsigned int    hardwarePosition() const;
+    UInt_t          hardwarePosition() const;
     
     
     void setCharge(float);
@@ -151,7 +151,7 @@ public:
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
-    void setId(int Id)			{mId = Id;}
+    void setId(Int_t Id)			{mId = Id;}
     void setIdTruth(Int_t idtru,Int_t qatru=0);
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
@@ -159,28 +159,28 @@ public:
     virtual void           Print(Option_t *option="") const;
     
 protected:
-    unsigned int bits(unsigned int, unsigned int) const;
+    UInt_t bits(unsigned int, unsigned int) const;
     
     UInt_t         mHardwarePosition;
     StThreeVectorF mPositionError; 
     Float_t        mCharge;
     Int_t          mId;
-    UShort_t       mIdTruth; // simulation track id 
+    Int_t          mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
     UChar_t        mFitFlag;
     UChar_t        mTrackRefCount;
     UShort_t       mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,7)
+    ClassDef(StHit,8)
 };
 
-inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
+inline UInt_t StHit::bits(UInt_t bit, UInt_t nbits) const
 {
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }
 
-inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
-inline int  	       StHit::id()      const {return mId;}
+inline UInt_t          StHit::hardwarePosition() const {return mHardwarePosition;}
+inline Int_t  	       StHit::id()      const {return mId;}
 inline const StHit*    StHit::nextHit() const {return mNextHit;}
 
 ostream&              operator<<(ostream& os, StHit const & v);

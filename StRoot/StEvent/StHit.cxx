@@ -119,7 +119,7 @@ StHit::StHit()
 //______________________________________________________________________________
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality, UShort_t id)
+             UInt_t hp, float q, UChar_t c, Int_t idTruth, UShort_t quality, UShort_t id)
             :StMeasuredPoint(p),mHardwarePosition(hp),mPositionError(e),mCharge(q),
              mId(id),mIdTruth(idTruth),mQuality(quality),mFitFlag(0),mTrackRefCount(c),mFlag(0),mNextHit(0)
 {
@@ -129,7 +129,7 @@ StHit::StHit(const StThreeVectorF& p,
 StHit::~StHit() { /* noop */ }
 
 //______________________________________________________________________________
-int StHit::operator==(const StHit& h) const
+Int_t StHit::operator==(const StHit& h) const
 {
     return h.mPosition         == mPosition &&
            h.mPositionError    == h.mPositionError &&
@@ -143,37 +143,37 @@ int StHit::operator==(const StHit& h) const
 }
 
 //______________________________________________________________________________
-int StHit::operator!=(const StHit& h) const
+Int_t StHit::operator!=(const StHit& h) const
 {
     return !(*this == h);  // use operator==()
 }
 
 //______________________________________________________________________________
-void StHit::setCharge(float val) { mCharge = val; }
+void StHit::setCharge(Float_t val) { mCharge = val; }
 
 //______________________________________________________________________________
-void StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
+void StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
     
 //______________________________________________________________________________
-void StHit::setFitFlag(unsigned char val) { mFitFlag = val; }
+void StHit::setFitFlag(UChar_t val) { mFitFlag = val; }
     
 //______________________________________________________________________________
-void StHit::setHardwarePosition(unsigned int val) { mHardwarePosition = val; }
+void StHit::setHardwarePosition(UInt_t val) { mHardwarePosition = val; }
 
 //______________________________________________________________________________
 void StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
     
 //______________________________________________________________________________
-float StHit::charge() const { return mCharge; }
+Float_t StHit::charge() const { return mCharge; }
 
 //______________________________________________________________________________
-unsigned int StHit::flag() const { return static_cast<unsigned int>(mFlag); }
+UInt_t StHit::flag() const { return static_cast<UInt_t>(mFlag); }
 
 //______________________________________________________________________________
-int StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
+Int_t StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
 
 //______________________________________________________________________________
-unsigned int StHit::trackReferenceCount() const { return static_cast<unsigned int>(mTrackRefCount); }
+UInt_t  StHit::trackReferenceCount() const { return static_cast<UInt_t>(mTrackRefCount); }
 
 //______________________________________________________________________________
 StDetectorId StHit::detector() const
@@ -197,16 +197,14 @@ StMatrixF StHit::covariantMatrix() const
 
 
 //______________________________________________________________________________
-void StHit::setIdTruth(int idtru,int qatru) 
+void StHit::setIdTruth(Int_t idtru,Int_t qatru) 
 {
-    if (qatru==0) qatru = (idtru>>16);
-    idtru    = idtru&((1<<16)-1);
-    mIdTruth = (UShort_t)(idtru);
+    mIdTruth =           (idtru);
     mQuality = (UShort_t) qatru;
 }
 
 //______________________________________________________________________________
-int StHit::idTruth() const
+Int_t StHit::idTruth() const
 {
   return mIdTruth;
 }

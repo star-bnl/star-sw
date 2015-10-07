@@ -42,40 +42,40 @@ public:
     StPxlHit();
     StPxlHit(const StThreeVectorF& position,
              const StThreeVectorF& error,
-             unsigned int hwPosition, float charge, 
+             UInt_t hwPosition, Float_t charge, 
              unsigned char trackRefCount = 0) :  StHit(position, error, hwPosition, charge, trackRefCount) {}
-    StPxlHit(const double localPos[3], unsigned int sector, unsigned int ladder,
-             unsigned int sensor, const StThreeVectorF& position, const StThreeVectorF& error,
-             unsigned int hwPosition, float charge, unsigned char trackRefCount = 0,
-             unsigned short idTruth=0, unsigned short quality=0, unsigned short id=0);
-    StPxlHit(const double localPos[3], unsigned int sector, unsigned int ladder,
-             unsigned int sensor, unsigned short idTruth);
-    StPxlHit(float meanRow, float meanColumn, unsigned int sector, unsigned int ladder,
-             unsigned int sensor);
+    StPxlHit(const double localPos[3], UInt_t sector, UInt_t ladder,
+             UInt_t sensor, const StThreeVectorF& position, const StThreeVectorF& error,
+             UInt_t hwPosition, Float_t charge, UChar_t trackRefCount = 0,
+             Int_t idTruth=0, UShort_t quality=0, UShort_t id=0);
+    StPxlHit(const double localPos[3], UInt_t sector, UInt_t ladder,
+             UInt_t sensor, Int_t idTruth);
+    StPxlHit(Float_t meanRow, Float_t meanColumn, UInt_t sector, UInt_t ladder,
+             UInt_t sensor);
     ~StPxlHit();
     
     virtual StDetectorId detector() const;
     
-    unsigned char sector() const;
-    unsigned char ladder() const;
-    unsigned char sensor() const;
-    float meanRow() const;
-    float meanColumn() const;
-    unsigned char nRawHits() const;
-    unsigned char layer() const ;
+    UChar_t sector() const;
+    UChar_t ladder() const;
+    UChar_t sensor() const;
+    Float_t meanRow() const;
+    Float_t meanColumn() const;
+    UChar_t nRawHits() const;
+    UChar_t layer() const ;
     
-    float localPosition(unsigned int) const;
+    Float_t localPosition(UInt_t) const;
     const float* localPosition() const;
     void  setLocalPosition(float, float, float);
-    void  setLocalY(float y);
+    void  setLocalY(Float_t y);
     
-    void setSector(unsigned char);
-    void setLadder(unsigned char);
-    void setSensor(unsigned char);
+    void setSector(UChar_t);
+    void setLadder(UChar_t);
+    void setSensor(UChar_t);
     void setDetectorId(StDetectorId);
     void setMeanRow(float);
     void setMeanColumn(float);
-    void setNRawHits(unsigned char);
+    void setNRawHits(UChar_t);
     
     virtual bool isSortable() const;
     
@@ -105,21 +105,21 @@ protected:
 
 ostream& operator<<(ostream&, const StPxlHit&);
 
-inline unsigned char StPxlHit::sector() const {return mSector;}
-inline unsigned char StPxlHit::ladder() const {return mLadder;}
-inline unsigned char StPxlHit::sensor() const {return mSensor;}
-inline float StPxlHit::meanRow() const {return mMeanRow;}
-inline float StPxlHit::meanColumn()  const {return mMeanColumn;}
-inline unsigned char StPxlHit::nRawHits() const {return mNRawHits;}
-inline unsigned char StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
+inline UChar_t StPxlHit::sector() const {return mSector;}
+inline UChar_t StPxlHit::ladder() const {return mLadder;}
+inline UChar_t StPxlHit::sensor() const {return mSensor;}
+inline Float_t StPxlHit::meanRow() const {return mMeanRow;}
+inline Float_t StPxlHit::meanColumn()  const {return mMeanColumn;}
+inline UChar_t StPxlHit::nRawHits() const {return mNRawHits;}
+inline UChar_t StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
 inline const Float_t* StPxlHit::localPosition() const { return mLocalPosition; }
-inline void StPxlHit::setLocalY(float y) { mLocalPosition[1] = y; }
-inline void StPxlHit::setSector(unsigned char v) {mSector = v;}
-inline void StPxlHit::setLadder(unsigned char v) {mLadder = v;}
-inline void StPxlHit::setSensor(unsigned char v) {mSensor = v;}
-inline void StPxlHit::setMeanRow(float v) {mMeanRow = v;}
-inline void StPxlHit::setMeanColumn(float v) {mMeanColumn = v;}
-inline void StPxlHit::setNRawHits(unsigned char v) {mNRawHits = v;}
+inline void StPxlHit::setLocalY(Float_t y) { mLocalPosition[1] = y; }
+inline void StPxlHit::setSector(UChar_t v) {mSector = v;}
+inline void StPxlHit::setLadder(UChar_t v) {mLadder = v;}
+inline void StPxlHit::setSensor(UChar_t v) {mSensor = v;}
+inline void StPxlHit::setMeanRow(Float_t v) {mMeanRow = v;}
+inline void StPxlHit::setMeanColumn(Float_t v) {mMeanColumn = v;}
+inline void StPxlHit::setNRawHits(UChar_t v) {mNRawHits = v;}
 
 inline bool StPxlHit::isSortable() const { return true; }
 

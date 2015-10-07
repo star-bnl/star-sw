@@ -109,7 +109,7 @@ public:
     StTpcHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c = 0,
-	     UShort_t IdTruth=0, UShort_t quality=0,
+	     Int_t IdTruth=0, UShort_t quality=0,
 	     UShort_t Id =0,
 	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
 	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 

@@ -48,10 +48,10 @@ StPxlHit::StPxlHit() : StHit(),
 { /* no op */ }
 
 
-StPxlHit::StPxlHit(const double localPos[3], unsigned sector, unsigned ladder, unsigned sensor,
+StPxlHit::StPxlHit(const Double_t localPos[3], UInt_t sector, UInt_t ladder, UInt_t sensor,
    const StThreeVectorF& position, const StThreeVectorF& error,
-   unsigned int hwPosition, float charge, unsigned char trackRefCount,
-   unsigned short idTruth, unsigned short quality, unsigned short id) :
+   UInt_t hwPosition, Float_t charge, UChar_t trackRefCount,
+   Int_t idTruth, UShort_t quality, UShort_t id) :
    StHit(position, error, hwPosition, charge, trackRefCount, idTruth, quality, id),
    mSector(sector),
    mLadder(ladder),
@@ -73,8 +73,8 @@ StPxlHit::StPxlHit(const double localPos[3], unsigned sector, unsigned ladder, u
  * StEvent. One can use the daughter class StPxlUtil/StPxlDigiHit with a more
  * automated initialization.
  */
-StPxlHit::StPxlHit(const double localPos[3], unsigned sector, unsigned ladder, unsigned sensor,
-   unsigned short idTruth) :
+StPxlHit::StPxlHit(const Double_t localPos[3], UInt_t sector, UInt_t ladder, UInt_t sensor,
+   Int_t idTruth) :
    StHit(),
    mSector(sector),
    mLadder(ladder),
@@ -97,8 +97,8 @@ StPxlHit::StPxlHit(const double localPos[3], unsigned sector, unsigned ladder, u
  * StEvent. One can use the daughter class StPxlUtil/StPxlDigiHit with a more
  * automated initialization.
  */
-StPxlHit::StPxlHit(float meanRow, float meanColumn, unsigned int sector, unsigned int ladder,
-   unsigned sensor) :
+StPxlHit::StPxlHit(Float_t meanRow, Float_t meanColumn, UInt_t sector, UInt_t ladder,
+   UInt_t sensor) :
    StHit(),
    mSector(sector),
    mLadder(ladder),
@@ -116,7 +116,7 @@ StDetectorId StPxlHit::detector() const {return mDetectorId;}
 
 void StPxlHit::setDetectorId(StDetectorId id) {mDetectorId = id;}
 
-float StPxlHit::localPosition(unsigned int i) const
+Float_t StPxlHit::localPosition(UInt_t i) const
 {
 	if (i<3)
 		return mLocalPosition[i];
@@ -124,7 +124,7 @@ float StPxlHit::localPosition(unsigned int i) const
         return 0;
 }
 
-void StPxlHit::setLocalPosition(float u, float v, float w)
+void StPxlHit::setLocalPosition(Float_t u, Float_t v, Float_t w)
 {
 	mLocalPosition[0] = u;	
 	mLocalPosition[1] = v;

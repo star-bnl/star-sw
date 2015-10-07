@@ -233,11 +233,11 @@ StTrack::~StTrack()
     delete mOuterGeometry;
 }
 
-short
+Short_t
 StTrack::flag() const { return mFlag; }
 
 
-unsigned short
+UShort_t
 StTrack::encodedMethod() const { return mEncodedMethod; }
 
 bool
@@ -249,7 +249,7 @@ StTrack::finderMethod(StTrackFinderMethod bit) const
 StTrackFittingMethod
 StTrack::fittingMethod() const
 {
-    int method = mEncodedMethod & 0xf;
+    Int_t method = mEncodedMethod & 0xf;
     switch(method) {
         case kHelix2StepId:
             return kHelix2StepId;
@@ -285,10 +285,10 @@ StTrack::impactParameter() const { return mImpactParameter; }
 float
 StTrack::length() const { return mLength; }
 
-unsigned short
+UShort_t
 StTrack::numberOfPossiblePoints() const
 {
-    unsigned short result;
+    UShort_t result;
     result = numberOfPossiblePoints(kTpcId) +
     numberOfPossiblePoints(kFtpcWestId) +
     numberOfPossiblePoints(kFtpcEastId) +
@@ -301,7 +301,7 @@ StTrack::numberOfPossiblePoints() const
     return result;
 }
 
-unsigned short
+UShort_t
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
     switch (det) {
@@ -371,7 +371,7 @@ StPtrVecTrackPidTraits
 StTrack::pidTraits(StDetectorId det) const
 {
     StPtrVecTrackPidTraits vec;
-    for (unsigned int i=0; i<mPidTraitsVec.size(); i++)
+    for (UInt_t i=0; i<mPidTraitsVec.size(); i++)
         if (mPidTraitsVec[i]->detector() == det)
             vec.push_back(mPidTraitsVec[i]);
     return vec;
@@ -390,17 +390,17 @@ StTrackNode*
 StTrack::node() { return mNode; }
 
 void
-StTrack::setFlag(short val) { mFlag = val; }
+StTrack::setFlag(Short_t val) { mFlag = val; }
 
 
 void
-StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
+StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
 
 void
-StTrack::setImpactParameter(float val) { mImpactParameter = val; }
+StTrack::setImpactParameter(Float_t val) { mImpactParameter = val; }
 
 void
-StTrack::setLength(float val) { mLength = val; }
+StTrack::setLength(Float_t val) { mLength = val; }
 
 void
 StTrack::setTopologyMap(const StTrackTopologyMap& val) { mTopologyMap = val; }
@@ -466,10 +466,10 @@ void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
 #include "StHelixModel.h"
-int StTrack::bad() const
+Int_t StTrack::bad() const
 {
     static const double world = 1.e+5;
-    int ierr;
+    Int_t ierr;
     if (!StMath::Finite(mImpactParameter))	return   12;
     if (!StMath::Finite(mLength)         )    	return   13;
     if (mFlag  <0                        )	return   21;
@@ -564,24 +564,24 @@ void StTrack::setIdTruth() // match with IdTruth
     myMap_t  idTruths;
     
     // 		Loop to store all the mc track keys and quality of every reco hit on the track.
-    int nHits = vh.size(),id=0,qa=0;
-    for (int hi=0;hi<nHits; hi++) {
+    Int_t nHits = vh.size(),id=0,qa=0;
+    for (Int_t hi=0;hi<nHits; hi++) {
         const StHit* rHit = vh[hi];
         id = rHit->idTruth(); if (!id) continue;
         qa = rHit->qaTruth(); if (!qa) qa = 1;
         idTruths[id]+=qa;
     }
     if (! idTruths.size()) return;		//no simu hits
-    int tkBest=-1; float qaBest=0,qaSum=0;
+    Int_t tkBest=-1; Float_t qaBest=0,qaSum=0;
     for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
         qaSum+=(*it).second;
         if ((*it).second<qaBest)	continue;
         tkBest=(*it).first; qaBest=(*it).second;
     }
     if (tkBest < 0 || tkBest> 0xffff) return;
-    int avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
+    Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
     setIdTruth(tkBest,avgQua);
-    int IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
+    Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
     setIdParentVx(IdVx);
 }
 

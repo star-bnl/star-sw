@@ -34,7 +34,7 @@ public:
     StRnDHit(const StThreeVectorF& position,
 	   const StThreeVectorF& error,
 	   unsigned int hwPosition, float charge, unsigned char trackRefCount = 0,
-	   unsigned short idTruth=0,  unsigned short quality=0,  unsigned short id =0,
+	   Int_t idTruth=0,  unsigned short quality=0,  unsigned short id =0,
 	   StDetectorId = kUnknownId);
     ~StRnDHit();
 

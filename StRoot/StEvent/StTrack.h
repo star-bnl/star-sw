@@ -281,7 +281,7 @@ public:
     int          idTruth() const 			{ return mIdTruth;}
     int          qaTruth() const 			{ return mQuality; }
     int          idParentVx() const {return mIdParentVx;}
-    void         setIdTruth(int idtru,int qatru=0) 	{mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdTruth(int idtru,int qatru=0) 	{mIdTruth = idtru; mQuality = (UShort_t) qatru;}
     void         setIdTruth(); 				//setting on hits info
     void         setIdParentVx(Int_t id) {mIdParentVx = id;}
     void         setVertex(StVertex* /* val */);
@@ -314,7 +314,7 @@ protected:
     Float_t                 mLength;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
-    UShort_t                mIdTruth; // MC track id 
+    Int_t                   mIdTruth; // MC track id 
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
     StVertex               *mEndVertex;
@@ -337,6 +337,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
-    ClassDef(StTrack,10)
+    ClassDef(StTrack,11)
 };
 #endif

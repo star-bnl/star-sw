@@ -66,10 +66,10 @@ public:
 #else
     StLink<StTrack>  mAssociatedTrack;		
 #endif //__CINT__
-    UShort_t  mIdTruth;  // simulation associated track id
+    Int_t     mIdTruth;  // simulation associated track id
     UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
 
-    ClassDef(StMtdHit,1)
+    ClassDef(StMtdHit,2)
 };
 
 ostream& operator<<(ostream&, const StMtdHit&); // Printing operator

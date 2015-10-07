@@ -123,7 +123,7 @@ public:
     Int_t            idTruth() const { return mIdTruth;}
     Int_t            qaTruth() const { return mQuality; }
     Int_t            idParent() const { return mIdParent;}
-    void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = idtru; mQuality = (UShort_t) qatru;}
     void          setIdParent(Int_t id) {mIdParent = id;}
     void          setIdTruth(); 				//setting on track info
 
@@ -153,7 +153,7 @@ protected:
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;
-    UShort_t      mIdTruth; // MC vertex id if any 
+    Int_t         mIdTruth; // MC vertex id if any 
     UShort_t      mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
     Int_t         mIdParent;// Id of MC parent track
     StTrackMassFit*mParent;// 

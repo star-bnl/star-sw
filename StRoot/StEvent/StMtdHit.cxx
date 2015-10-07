@@ -93,8 +93,7 @@ void
 StMtdHit::setIdTruth(int idtru,int qatru)
 {
     if (qatru==0) qatru = (idtru>>16);
-    idtru    = idtru&((1<<16)-1);
-    mIdTruth = static_cast<UShort_t>(idtru);
+    mIdTruth =                      (idtru);
     mQuality = static_cast<UShort_t>(qatru);
 }
 
