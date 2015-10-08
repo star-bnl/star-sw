@@ -63,8 +63,9 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.70 2015/07/19 22:14:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.71 2015/10/08 13:58:45 fisyak Exp $";
 #define __ClusterProfile__
+static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -76,7 +77,6 @@ TF1F*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
 static const Int_t nx[2] = {200,500};
 static const Double_t xmin[2] =  {-10., -6};
 static const Double_t xmax[2] =  { 10., 44};
-#ifdef __ClusterProfile__
 static const Int_t nz = 42;
 static const Double_t zmin = -210;
 static const Double_t zmax = -zmin;
@@ -84,7 +84,6 @@ static const Double_t zmax = -zmin;
 static TProfile2D *hist[5][2];
 static const Int_t nChecks = 21;
 static TH1  *checkList[2][21];
-#endif /* __ClusterProfile__ */
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -426,18 +425,22 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
   // tss
   mGG = new TF1F("GaitingGridTransperency","TMath::Max(0.,1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",10,56);
   if (Debug()) Print();
-#ifdef __ClusterProfile__
   memset (hist, 0, sizeof(hist));
   memset (checkList, 0, sizeof(checkList));
+#ifdef __ClusterProfile__
   if (GetTFile()) {
     GetTFile()->cd();
-  } else {
-    new TFile("TpcRSCheckList.root","recreate");
+    ClusterProfile = kTRUE;
   }
+#endif /* __ClusterProfile__ */
 #if 0
   StMagUtilities::SetDoDistortionT(gFile);
   StMagUtilities::SetUnDoDistortionT(gFile);
 #endif
+  mHeed = fEc(St_TpcResponseSimulatorC::instance()->W());
+  if ( ! ClusterProfile) {
+    return kStOK;
+  }
   Int_t color = 1;
   struct Name_t {
     const Char_t *Name;
@@ -523,9 +526,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     }
   }
   delete [] pbins;
-#endif /* __ClusterProfile__ */
-  mHeed = fEc(St_TpcResponseSimulatorC::instance()->W());
-  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
@@ -703,10 +703,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (tpc_hitC->length == 0 && nSegHits > 0) {
 	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + TrackSegmentHits[nSegHits].tpc_hitC->ds;
 	}
-#ifdef __ClusterProfile__
+
+    if (ClusterProfile) {
 	checkList[io][0]->Fill(TrackSegmentHits[nSegHits].tpc_hitC->x[2],TMath::Abs(TrackSegmentHits[nSegHits].tpc_hitC->de));
 	checkList[io][1]->Fill(TrackSegmentHits[nSegHits].tpc_hitC->x[2],           TrackSegmentHits[nSegHits].tpc_hitC->ds );
-#endif	/* __ClusterProfile__ */
+    }
 	TrackSegmentHits[nSegHits].sMin = TrackSegmentHits[nSegHits].s - TrackSegmentHits[nSegHits].tpc_hitC->ds;
 	TrackSegmentHits[nSegHits].sMax = TrackSegmentHits[nSegHits].s;
 	if (TrackSegmentHits[nSegHits].sMin < sMin) sMin = TrackSegmentHits[nSegHits].sMin;
@@ -787,16 +788,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t yRmax = transform.yFromRow(rowMax);
 	if (yRmin > yLmax) continue;
 	if (yRmax < yLmin) continue;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][2]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
-#endif	/* __ClusterProfile__ */
+    }
 	Double_t GainXCorrectionL = AdditionalMcCorrection[iowe] + row*AdditionalMcCorrection[iowe+1];
 	Gain *= TMath::Exp(-GainXCorrectionL);
 	Double_t GainXSigma = AddSigmaMcCorrection[iowe] + row*AddSigmaMcCorrection[iowe+1];
 	if (GainXSigma > 0) Gain *= TMath::Exp(gRandom->Gaus(0.,GainXSigma));
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][3]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
-#endif	/* __ClusterProfile__ */
+    }
 	// dE/dx correction
 	Double_t dEdxCor = 1;
 	Double_t dStep =  TMath::Abs(tpc_hitC->ds);
@@ -853,10 +854,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 	  if (dEdxCor <= 0.) continue;
 	}
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][4]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),dEdxCor);
 	hist[4][0]->Fill(TrackSegmentHits[iSegHits].Pad.sector(),TrackSegmentHits[iSegHits].Pad.row(),dEdxCor);
-#endif	/* __ClusterProfile__ */
+    }
 	// Apply Gating Grid
 	if (TrackSegmentHits[iSegHits].Pad.timeBucket() > mGG->GetXmin() && 
 	    TrackSegmentHits[iSegHits].Pad.timeBucket() < mGG->GetXmax()) {
@@ -899,9 +900,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (St_tpcAltroParamsC::instance()->N(sector-1) >= 0) ioH += 2;
 	Double_t TotalSignal  = 0;
 	Double_t lgam = tpc_hitC->lgam;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][5]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),lgam);
-#endif	/* __ClusterProfile__ */
+    }
 	Double_t gamma = TMath::Power(10.,lgam) + 1;
 	Double_t betaGamma = TMath::Sqrt(gamma*gamma - 1.);
 	StThreeVectorD       pxyzG(tpc_hitC->p[0],tpc_hitC->p[1],tpc_hitC->p[2]);
@@ -924,17 +925,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t tbkH = TrackSegmentHits[iSegHits].Pad.timeBucket(); 
 	tpc_hitC->pad = padH;
 	tpc_hitC->timebucket = tbkH;
-#ifdef __ClusterProfile__
         Int_t pad0 = TMath::Nint(padH + xmin[0]);
 	Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
-#endif  /* __ClusterProfile__ */
 	Double_t OmegaTau =St_TpcResponseSimulatorC::instance()->OmegaTau()*
 	  TrackSegmentHits[iSegHits].BLS.position().z()/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
 	Double_t NP = TMath::Abs(tpc_hitC->de/tpc_hitC->ds)/(St_TpcResponseSimulatorC::instance()->W()*eV*
 							     St_TpcResponseSimulatorC::instance()->Cluster()); // from GEANT
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][6]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
-#endif	/* __ClusterProfile__ */
+    }
 	Double_t driftLength = TMath::Abs(TrackSegmentHits[iSegHits].coorLS.position().z());
 	Double_t D = 1. + OmegaTau*OmegaTau;
 	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
@@ -952,18 +951,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 #endif
 	}
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	checkList[io][7]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
-#endif	/* __ClusterProfile__ */
+    }
 	Int_t nP = 0; 
 	Double_t xOnWire, yOnWire, zOnWire;
 	Double_t dESum = 0;
 	Double_t dSSum = 0;
 	Int_t   nTotal = 0;
-#ifdef __ClusterProfile__
 	Double_t padsdE[kPadMax]; memset (padsdE, 0, sizeof(padsdE));
 	Double_t tbksdE[kTimeBacketMax]; memset (tbksdE,  0, sizeof(tbksdE));
-#endif  /* __ClusterProfile__ */
 	Float_t dEr = 0;
 	TArrayF rs(10); 
 	do {// Clusters
@@ -1019,10 +1016,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Nt++;
 	  }
 	  if (! Nt) continue;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	  checkList[io][8]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Nt);
 	  checkList[io][11]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Nt);
-#endif	/* __ClusterProfile__ */
+    }
 	  StThreeVectorD xyzC = track.at(newPosition);
 	  Double_t phiXY = 2*TMath::Pi()*gRandom->Rndm();
 	  Double_t rX = TMath::Cos(phiXY);
@@ -1080,9 +1077,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    zOnWire += TMath::Abs(distFocused);
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	    checkList[io][9]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),QAv);
-#endif	/* __ClusterProfile__ */
+    }
 	    for(Int_t r = rowMin; r <= rowMax; r++) {              
 	      if (NoOfRows == 45) { // ! iTpx
 		Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(r);
@@ -1102,9 +1099,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);  // #1
 	      Double_t dely[1]      = {transform.yFromRow(r)-yOnWire};            
 	      Double_t localYDirectionCoupling = mChargeFraction[io]->GetSaveL(dely);
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	      checkList[io][10]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),localYDirectionCoupling);
-#endif	/* __ClusterProfile__ */
+    }
 	      if(localYDirectionCoupling < minSignal) continue;
 	      Float_t padX = Pad.pad();
 	      Int_t CentralPad = TMath::Nint(padX);
@@ -1126,20 +1123,20 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		  if (gain <= 0.0) continue;
 		  dt -= St_tpcPadGainT0BC::instance()->T0(sector,r,pad);
 		}
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 		checkList[io][12]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),gain);
 		hist[4][1]->Fill(sector,r,gain);
-#endif	/* __ClusterProfile__ */
+    }
 		//		Double_t localXDirectionCoupling = localXDirectionCouplings[pad-padMin];
 		Double_t localXDirectionCoupling = gain*XDirectionCouplings[pad-padMin];
 		if (localXDirectionCoupling < minSignal) continue;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 		checkList[io][13]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),localXDirectionCoupling);
-#endif	/* __ClusterProfile__ */
+    }
 		Double_t XYcoupling = localYDirectionCoupling*localXDirectionCoupling;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 		checkList[io][14]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),XYcoupling);
-#endif	/* __ClusterProfile__ */
+    }
 		if(XYcoupling < minSignal)  continue;
 		Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
 		Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
@@ -1152,13 +1149,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		  if (signal < minSignal)  continue;
 		  TotalSignalInCluster += signal;
 		  SignalSum[index].Sum += signal;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 		  if (pad >= pad0 && pad < pad0 + kPadMax && 
 		      itbin >= tbk0 &&  itbin < tbk0 + kTimeBacketMax) {
 		    padsdE[pad-pad0]   += signal;
 		    tbksdE[itbin-tbk0] += signal;
 		  }
-#endif  /* __ClusterProfile__ */
+    }
 		  if ( TrackSegmentHits[iSegHits].TrackId ) {
 		    if (! SignalSum[index].TrackId ) SignalSum[index].TrackId = TrackSegmentHits[iSegHits].TrackId;
 		    else  // switch TrackId, works only for 2 tracks, more tracks ?
@@ -1180,9 +1177,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      } // pad limits
 	    } // r limits
 	  }  // electrons in Cluster
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	  if (TotalSignalInCluster > 0 && checkList[io][19]) checkList[io][19]->Fill(WireIndex,TMath::Log(TotalSignalInCluster));
-#endif /* __ClusterProfile__ */
+    }
 	  TotalSignal += TotalSignalInCluster;
 	} while (kTRUE); // Clusters
 	tpc_hitC->adc = -99;
@@ -1196,7 +1193,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  tpc_hitC->de = dESum*eV; 
 	  tpc_hitC->ds = dSSum; 
 	  tpc_hitC->adc = TotalSignal;
-#ifdef __ClusterProfile__
+    if (ClusterProfile) {
 	  if (TotalSignal > 0) {
 	    if (hist[ioH][0]) {
 	      for (Int_t p = 0; p < kPadMax; p++) 
@@ -1214,7 +1211,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (tpc_hitC->adc > 1.0) {
 	    checkList[io][20]->Fill(nP,TMath::Log(nTotal) - TMath::Log(nP));
 	  }
-#endif  /* __ClusterProfile__ */
+    }
 	}
 	NoHitsInTheSector++;
       } // end do loop over segments for a given particle
@@ -1718,8 +1715,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.70 2015/07/19 22:14:07 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.71 2015/10/08 13:58:45 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.71  2015/10/08 13:58:45  fisyak
+// Add requirement for Check Plots for TTree file
+//
 // Revision 1.70  2015/07/19 22:14:07  fisyak
 // Clean up __PAD_BLOCK__, recalculate no. of real hits in g2t_track n_tpc_hit (excluding pseudo pad row), add current and accumulated charge in dE/dx correction
 //
