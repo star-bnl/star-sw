@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: StRpsTrack.h,v 2.1 2015/10/02 19:48:14 ullrich Exp $
+ * $Id: StRpsTrack.h,v 2.2 2015/10/07 17:30:13 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrack.h,v $
+ * Revision 2.2  2015/10/07 17:30:13  ullrich
+ * Changed const to enums and related changes.
+ *
  * Revision 2.1  2015/10/02 19:48:14  ullrich
  * Initial Revision.
  *
@@ -53,14 +56,14 @@ public:
     double eta() const;
     double time() const;
 
-    void setTrackPoint(StRpsTrackPoint* const, unsigned int);
+    void setTrackPoint(StRpsTrackPoint*, unsigned int);
     void setP(const StThreeVectorF&);
     void setBranch(int);
     void setType(StRpsTrackType);
 
+    enum {mNumberOfStationsInBranch = 2};
+
 private:
-    static const unsigned int mNumberOfStationsInBranch = 2;  //!
-  
     StPtrVecRpsTrackPoint mTrackPoints;	 // pointers to track points (local tracks)
     StThreeVectorF mP;				// three-vector with reconstructed track momentum
     Int_t          mBranch;			// detectors branch, EU=0, WU=1, ED=2, WD=3
@@ -85,13 +88,13 @@ inline double StRpsTrack::p() const { return mP.mag(); }
 inline double StRpsTrack::pt() const { return mP.perp(); }
 inline double StRpsTrack::eta() const { return mP.pseudoRapidity(); }
 
-inline void StRpsTrack::setTrackPoint(StRpsTrackPoint* const trackPoint, unsigned int station)
+inline void StRpsTrack::setTrackPoint(StRpsTrackPoint* trackPoint, unsigned int station)
 {
     if (station<mNumberOfStationsInBranch)
         mTrackPoints[station] = trackPoint;
 }
 inline void StRpsTrack::setP(const StThreeVectorF& P) { mP = P; }
 inline void StRpsTrack::setBranch(int branch) { mBranch = branch; }
-inline void StRpsTrack::setType(const StRpsTrack::StRpsTrackType type) { mType = type; }
+inline void StRpsTrack::setType(StRpsTrack::StRpsTrackType type) { mType = type; }
 
 #endif
