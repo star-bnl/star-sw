@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: StRpsTrack.h,v 2.2 2015/10/07 17:30:13 ullrich Exp $
+ * $Id: StRpsTrack.h,v 2.3 2015/10/08 20:53:34 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrack.h,v $
+ * Revision 2.3  2015/10/08 20:53:34  ullrich
+ * Changed comment of mBranch
+ *
  * Revision 2.2  2015/10/07 17:30:13  ullrich
  * Changed const to enums and related changes.
  *
@@ -66,7 +69,7 @@ public:
 private:
     StPtrVecRpsTrackPoint mTrackPoints;	 // pointers to track points (local tracks)
     StThreeVectorF mP;				// three-vector with reconstructed track momentum
-    Int_t          mBranch;			// detectors branch, EU=0, WU=1, ED=2, WD=3
+    Int_t          mBranch;			// detectors branch, EU=0, ED=1, WU=2, WD=3 
     StRpsTrackType mType;			// type of the track
     
     ClassDef(StRpsTrack, 1)
