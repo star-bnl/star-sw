@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPixel.cxx,v 2.5 2004/08/06 15:37:43 fisyak Exp $
+ * $Id: StTpcPixel.cxx,v 2.6 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcPixel.cxx,v $
+ * Revision 2.6  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.5  2004/08/06 15:37:43  fisyak
  * Add clster id
  *
@@ -32,7 +35,7 @@ void StTpcPixel::Print(Option_t *option) const {
       cout << option << "\t" << *this << endl;
     }
 
-static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.5 2004/08/06 15:37:43 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcPixel.cxx,v 2.6 2015/10/09 17:46:14 ullrich Exp $";
 ostream& operator<< (ostream& os, const StTpcPixel& m)
 {
   os << "d:" << (int) m.detector() 
@@ -46,6 +49,5 @@ ostream& operator<< (ostream& os, const StTpcPixel& m)
      << endl;
     return os;
 }
-
 
 ClassImp(StTpcPixel)

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMtdHit.h,v 2.1 2011/04/25 21:24:02 ullrich Exp $
+ * $Id: StMtdHit.h,v 2.2 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMtdHit.h,v $
+ * Revision 2.2  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.1  2011/04/25 21:24:02  ullrich
  * Initial Revision.
  *
@@ -52,7 +55,7 @@ public:
     void setTrailingEdgeTime(pair<double,double>);
     void setTof(double);
     void setAssociatedTrack(StTrack*);
-    void setIdTruth(Int_t idtru, Int_t qatru=0);
+    void setIdTruth(int idtru, int qatru=0);
 
  protected:
     UChar_t   mBackLeg;
@@ -66,10 +69,10 @@ public:
 #else
     StLink<StTrack>  mAssociatedTrack;		
 #endif //__CINT__
-    UShort_t  mIdTruth;  // simulation associated track id
+    Int_t  mIdTruth;  // simulation associated track id
     UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
 
-    ClassDef(StMtdHit,1)
+    ClassDef(StMtdHit,2)
 };
 
 ostream& operator<<(ostream&, const StMtdHit&); // Printing operator

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.17 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StVertex.cxx,v 2.18 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.18  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.17  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -74,7 +77,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.17 2013/07/23 11:21:49 jeromel Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.18 2015/10/09 17:46:15 ullrich Exp $";
 UInt_t StVertex::fgNoFitPointCutForGoodTrack = 15;
 StVertex::StVertex()
 {
@@ -122,70 +125,71 @@ void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMat
 void StVertex::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
-
+    
     if (R__b.IsReading()) {
-       UInt_t R__s, R__c;
-       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-       if (R__v > 1) {
-          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-          return;
-       }
-       //====process old versions before automatic schema evolution
-       StMeasuredPoint::Streamer(R__b);
-       R__b >> (Int_t&)mType;
-       R__b >> mFlag;
-       Int_t dumy;
-       if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
-       R__b.ReadFastArray(mCovariantMatrix,6);
-       R__b >> mChiSquared;
-       R__b >> mProbChiSquared;
-//     R__b >> mParent;
-       R__b >> (StTrack*&)mParent;
-
-       R__b.CheckByteCount(R__s, R__c, Class());
-       //====end of old versions
-      
-    } else {
-       Class()->WriteBuffer(R__b,this);
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StMeasuredPoint::Streamer(R__b);
+        R__b >> (Int_t&)mType;
+        R__b >> mFlag;
+        Int_t dumy;
+        if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
+        R__b.ReadFastArray(mCovariantMatrix,6);
+        R__b >> mChiSquared;
+        R__b >> mProbChiSquared;
+        //     R__b >> mParent;
+        R__b >> (StTrack*&)mParent;
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    }
+    else {
+        Class()->WriteBuffer(R__b,this);
     }
 } 
-//________________________________________________________________________________
+
 void StVertex::setIdTruth() { // match with IdTruth
-  typedef std::map< Int_t,Float_t>  myMap_t;
-  typedef std::pair<Int_t,Float_t>  myPair_t;
-  typedef myMap_t::const_iterator myIter_t;
-  myMap_t  idTruths;
-  // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
-  UInt_t Ntracks = numberOfDaughters();
-  Int_t IdVx = 0;
-  Int_t qa = 0;
-  for (UInt_t l = 0; l < Ntracks; l++) {
-    const StTrack *pTrack = daughter(l);
-    if (! pTrack) continue;
-    Int_t IdTk = pTrack->idTruth();
-    if (IdTk <= 0) continue;
-    IdVx = pTrack->idParentVx();
-    if (IdVx <= 0) continue;
-    qa = pTrack->qaTruth(); if (!qa) qa = 1;
-    idTruths[IdVx] += qa;
-  }
-  if (! idTruths.size()) return;		//no simu info
-  Int_t vxBest = 0; 
-  Float_t qaBest = 0, qaSum = 0;
-  for (myIter_t it=idTruths.begin(); it!=idTruths.end(); ++it) {
-    qaSum += (*it).second;
-    if ((*it).second < qaBest) continue;
-    vxBest = (*it).first; qaBest = (*it).second;
-  }
-  if (vxBest <= 0 || vxBest > 0xffff) return;
-  Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
-  setIdTruth(vxBest,avgQua);
-  Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
-  setIdParent(IdParentTk);
+    typedef std::map< Int_t,Float_t>  myMap_t;
+    typedef std::pair<Int_t,Float_t>  myPair_t;
+    typedef myMap_t::const_iterator myIter_t;
+    myMap_t  idTruths;
+    // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
+    UInt_t Ntracks = numberOfDaughters();
+    Int_t IdVx = 0;
+    Int_t qa = 0;
+    for (UInt_t l = 0; l < Ntracks; l++) {
+        const StTrack *pTrack = daughter(l);
+        if (! pTrack) continue;
+        Int_t IdTk = pTrack->idTruth();
+        if (IdTk <= 0) continue;
+        IdVx = pTrack->idParentVx();
+        if (IdVx <= 0) continue;
+        qa = pTrack->qaTruth(); if (!qa) qa = 1;
+        idTruths[IdVx] += qa;
+    }
+    if (! idTruths.size()) return;		//no simu info
+    Int_t vxBest = 0;
+    Float_t qaBest = 0, qaSum = 0;
+    for (myIter_t it=idTruths.begin(); it!=idTruths.end(); ++it) {
+        qaSum += (*it).second;
+        if ((*it).second < qaBest) continue;
+        vxBest = (*it).first; qaBest = (*it).second;
+    }
+    if (vxBest <= 0 || vxBest > 0xffff) return;
+    Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
+    setIdTruth(vxBest,avgQua);
+    Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
+    setIdParent(IdParentTk);
 }
-//______________________________________________________________________________
-void StVertex::NotImplemented(const Char_t *method) const {
-  cout << "StVertex::" << method << " is no implemented" <<  endl;
+
+void StVertex::NotImplemented(const char *method) const {
+    cout << "StVertex::" << method << " is no implemented" <<  endl;
 }
 
 

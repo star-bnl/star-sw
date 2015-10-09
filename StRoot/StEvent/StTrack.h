@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.35 2015/05/13 17:06:14 ullrich Exp $
+ * $Id: StTrack.h,v 2.36 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.36  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.35  2015/05/13 17:06:14  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -276,7 +279,7 @@ public:
     int          idTruth() const 			{ return mIdTruth;}
     int          qaTruth() const 			{ return mQuality; }
     int          idParentVx() const {return mIdParentVx;}
-    void         setIdTruth(int idtru,int qatru=0) 	{mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdTruth(int idtru,int qatru=0) 	{mIdTruth = idtru; mQuality = static_cast<unsigned short>(qatru);}
     void         setIdTruth(); 				//setting on hits info
     void         setIdParentVx(int id) {mIdParentVx = id;}
    //----- bit manipulation
@@ -308,7 +311,7 @@ protected:
     Float_t                 mLength;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
-    UShort_t                mIdTruth; // MC track id 
+    Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
     Char_t                  mEnd[1]; //!
@@ -327,6 +330,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,9)
+    ClassDef(StTrack,10)
 };
 #endif
