@@ -61,7 +61,7 @@ switch ($pkg)
       unsetenv OPTSTAR
       unsetenv QTDIR
       source $GROUP_DIR/group_env.csh
-      setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /usr/lib /opt/star/lib opt/star/qt4/lib`
+      setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /usr/lib /opt/star`
       setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
 #      setenv ValeryOptStar /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
 #      setenv LD_LIBRARY_PATH $ValeryOptStar/lib:$OPTSTAR/lib:$LD_LIBRARY_PATH
@@ -81,7 +81,7 @@ switch ($pkg)
       unsetenv XOPTSTAR
       if (-x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS opt`
-        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS opt /usr/lib64`
+        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star /usr/lib64`
       endif
 #      setenv OPTSTAR /afs/rhic.bnl.gov/star/packages/.DEV2/misc/opt/star/$STAR_HOST_SYS
       source $GROUP_DIR/STAR_SYS
