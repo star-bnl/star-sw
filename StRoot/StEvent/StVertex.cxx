@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 1.2 2014/01/14 14:48:24 fisyak Exp $
+ * $Id: StVertex.cxx,v 2.18 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 1.2  2014/01/14 14:48:24  fisyak
- * Freeze
+ * Revision 2.18  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
+ * Revision 2.17  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
  *
@@ -82,8 +85,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 1.2 2014/01/14 14:48:24 fisyak Exp $";
-
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.18 2015/10/09 17:46:15 ullrich Exp $";
 UInt_t StVertex::fgNoFitPointCutForGoodTrack = 15;
 
 StVertex::StVertex()
@@ -206,12 +208,12 @@ void StVertex::Streamer(TBuffer &R__b)
         R__b.CheckByteCount(R__s, R__c, Class());
         //====end of old versions
         
-    } 
+    }
     else {
         Class()->WriteBuffer(R__b,this);
     }
 } 
-//________________________________________________________________________________
+
 void StVertex::setIdTruth() { // match with IdTruth
     typedef std::map< Int_t,Float_t>  myMap_t;
     typedef myMap_t::const_iterator myIter_t;

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $
+ * $Id: StVertex.h,v 2.18 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,7 +14,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
+ * Revision 2.18  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
+ * Revision 2.17  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  *
  * Revision 2.16  2013/07/16 14:29:04  fisyak
@@ -86,8 +90,8 @@ public:
     StVertex();
     virtual ~StVertex() {}
     
-    Int_t operator==(const StVertex&) const;
-    Int_t operator!=(const StVertex&) const;
+    int operator==(const StVertex&) const;
+    int operator!=(const StVertex&) const;
 
     virtual StVertexId     type() const {return mType; }
     virtual Int_t          key()  const {return mKey;}
@@ -153,7 +157,7 @@ protected:
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;
-    Int_t         mIdTruth; // MC vertex id if any 
+    Int_t         mIdTruth; // MC vertex id if any
     UShort_t      mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
     Int_t         mIdParent;// Id of MC parent track
     StTrackMassFit*mParent;// 

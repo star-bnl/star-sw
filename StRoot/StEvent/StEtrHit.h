@@ -29,7 +29,6 @@
 #define StEtrHit_hh
 
 #include "StHit.h"
-#include "StMemoryPool.hh"
 
 class StEtrPoint;
 

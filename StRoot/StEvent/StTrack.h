@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.35 2015/05/13 17:06:14 ullrich Exp $
+ * $Id: StTrack.h,v 2.36 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.36  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.35  2015/05/13 17:06:14  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -314,7 +317,7 @@ protected:
     Float_t                 mLength;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
-    Int_t                   mIdTruth; // MC track id 
+    Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
     StVertex               *mEndVertex;

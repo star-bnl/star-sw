@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.28 2012/01/24 03:04:22 perev Exp $
+ * $Id: StHit.h,v 2.29 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.29  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.28  2012/01/24 03:04:22  perev
  * Cleanup
  *
@@ -146,7 +149,7 @@ public:
     
     
     void setCharge(float);
-    void setFlag(UShort_t val) { mFlag = val; }
+    void setFlag(unsigned short val) { mFlag = val; }
     void setFitFlag(unsigned char);
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
@@ -171,7 +174,7 @@ protected:
     UChar_t        mTrackRefCount;
     UShort_t       mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,8)
+    ClassDef(StHit,9)
 };
 
 inline UInt_t StHit::bits(UInt_t bit, UInt_t nbits) const

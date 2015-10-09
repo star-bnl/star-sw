@@ -1,4 +1,6 @@
-/* $Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $
+/***************************************************************************
+ *
+ * $Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.56  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.55  2015/05/13 17:06:13  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -235,8 +240,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.55 2015/05/13 17:06:13 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.56 2015/10/09 17:46:15 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -1497,82 +1502,84 @@ void StEvent::Streamer(TBuffer &R__b)
     
     UInt_t R__s, R__c;
     if (R__b.IsReading()) {
-	
-	Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-	if (R__v == 1) {
-	    TDataSet::Streamer(R__b); 
-	    mContent.Streamer(R__b);
-	    R__b.CheckByteCount(R__s, R__c, Class());
-	    Split();
-	    return;
-	} else { // version >=2
-	    StXRefMain::Streamer(R__b);
-	    R__b.CheckByteCount(R__s, R__c, Class());
-	}
-	
-    }  else /*writing*/ {
-	
-	TDataSetIter next(this);
-	TDataSet *ds;
-	while ((ds=next())) {
-	    if (ds->IsA()==StEventBranch::Class()) break;
-	}
-	if (!ds) {//Not splited yet
-	  Split();}
-	
-	R__c = R__b.WriteVersion(Class(), kTRUE);
-	StXRefMain::Streamer(R__b);
-	R__b.SetByteCount(R__c, kTRUE);   
+        
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v == 1) {
+            TDataSet::Streamer(R__b);
+            mContent.Streamer(R__b);
+            R__b.CheckByteCount(R__s, R__c, Class());
+            Split();
+            return;
+        }
+        else { // version >=2
+            StXRefMain::Streamer(R__b);
+            R__b.CheckByteCount(R__s, R__c, Class());
+        }
+        
+    }
+    else /*writing*/ {
+        
+        TDataSetIter next(this);
+        TDataSet *ds;
+        while ((ds=next())) {
+            if (ds->IsA()==StEventBranch::Class()) break;
+        }
+        if (!ds) {//Not splited yet
+            Split();}
+        
+        R__c = R__b.WriteVersion(Class(), kTRUE);
+        StXRefMain::Streamer(R__b);
+        R__b.SetByteCount(R__c, kTRUE);   
     } 
 }
 //________________________________________________________________________________
 StSPtrVecHit* StEvent::hitCollection(const Char_t *name) {
-  StSPtrVecHit *theHitCollection = 0;
-  TObjectSet *set = (TObjectSet *) FindByName(name);
-  if (set) theHitCollection = (StSPtrVecHit *) set->GetObject();
-  return theHitCollection;
+    StSPtrVecHit *theHitCollection = 0;
+    TObjectSet *set = (TObjectSet *) FindByName(name);
+    if (set) theHitCollection = (StSPtrVecHit *) set->GetObject();
+    return theHitCollection;
 }
 //________________________________________________________________________________
 void StEvent::addHitCollection(StSPtrVecHit* p, const Char_t *name) {
-  if (p) {
-    TObjectSet *set = (TObjectSet *) FindByName(name);
-    if (set) 
-      cerr << "StEvent::addHitCollection(): Error, HitCollection with " 
-	   <<  name << " already exist. Nothing added."  << endl;
-    else {
-      set = new TObjectSet(name,p,kTRUE);
-      Add(set);
+    if (p) {
+        TObjectSet *set = (TObjectSet *) FindByName(name);
+        if (set)
+            cerr << "StEvent::addHitCollection(): Error, HitCollection with "
+            <<  name << " already exist. Nothing added."  << endl;
+        else {
+            set = new TObjectSet(name,p,kTRUE);
+            Add(set);
+        }
     }
-  }
 }
 //________________________________________________________________________________
 void StEvent::removeHitCollection(const Char_t *name) {
-  TObjectSet *set = (TObjectSet *) FindByName(name);
-  if (set) set->Delete();
+    TObjectSet *set = (TObjectSet *) FindByName(name);
+    if (set) set->Delete();
 }
 //________________________________________________________________________________
 void StEvent::setIdTruth() {
-  StSPtrVecTrackNode& trackNode = trackNodes();
-  UInt_t nTracks = trackNode.size();
-  StTrackNode *node=0;
-  for (UInt_t i = 0; i < nTracks; i++) {
-    node = trackNode[i]; 
-    if (!node) continue;
-    UInt_t notr = node->entries();
-    for (UInt_t t = 0; t < notr; t++) {
-      StTrack *track = node->track(t);
-      track->setIdTruth();
+    StSPtrVecTrackNode& trackNode = trackNodes();
+    UInt_t nTracks = trackNode.size();
+    StTrackNode *node=0;
+    for (UInt_t i = 0; i < nTracks; i++) {
+        node = trackNode[i];
+        if (!node) continue;
+        UInt_t notr = node->entries();
+        for (UInt_t t = 0; t < notr; t++) {
+            StTrack *track = node->track(t);
+            track->setIdTruth();
+        }
     }
-  }
-  // loop over all type of vertices
-  Int_t noOfPrimaryVertices = numberOfPrimaryVertices();
-  for (Int_t i = 0;  i < noOfPrimaryVertices; i++) primaryVertex(i)->setIdTruth();
-  Int_t noOfCalibrationVertices = numberOfCalibrationVertices();
-  for (Int_t i = 0;  i < noOfCalibrationVertices; i++) calibrationVertex(i)->setIdTruth();
-  Int_t noOfv0Vertices = v0Vertices().size();
-  for (Int_t i = 0;  i < noOfv0Vertices; i++) ((StVertex *) v0Vertices()[i])->setIdTruth();
-  Int_t noOfxiVertices = xiVertices().size();
-  for (Int_t i = 0;  i < noOfxiVertices; i++) ((StVertex *) xiVertices()[i])->setIdTruth();
-  Int_t noOfkinkVertices = kinkVertices().size();
-  for (Int_t i = 0;  i < noOfkinkVertices; i++) ((StVertex *) kinkVertices()[i])->setIdTruth();
+    // loop over all type of vertices
+    Int_t noOfPrimaryVertices = numberOfPrimaryVertices();
+    for (Int_t i = 0;  i < noOfPrimaryVertices; i++) primaryVertex(i)->setIdTruth();
+    Int_t noOfCalibrationVertices = numberOfCalibrationVertices();
+    for (Int_t i = 0;  i < noOfCalibrationVertices; i++) calibrationVertex(i)->setIdTruth();
+    Int_t noOfv0Vertices = v0Vertices().size();
+    for (Int_t i = 0;  i < noOfv0Vertices; i++) ((StVertex *) v0Vertices()[i])->setIdTruth();
+    Int_t noOfxiVertices = xiVertices().size();
+    for (Int_t i = 0;  i < noOfxiVertices; i++) ((StVertex *) xiVertices()[i])->setIdTruth();
+    Int_t noOfkinkVertices = kinkVertices().size();
+    for (Int_t i = 0;  i < noOfkinkVertices; i++) ((StVertex *) kinkVertices()[i])->setIdTruth();
 }

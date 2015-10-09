@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.21 2010/01/26 22:36:31 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.22 2015/10/09 18:54:02 genevb Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.22  2015/10/09 18:54:02  genevb
+ * Use new vertex-finding parameters ZMin,ZMax
+ *
  * Revision 1.21  2010/01/26 22:36:31  fisyak
  * Fix bracket
  *
@@ -218,10 +221,19 @@ void StMinuitVertexFinder::InitRun(Int_t runumber) {
   mDcaZMax                     = cuts->DcaZMax();     // Note: best to use integer numbers
   mMinTrack                    = (mMinTrack<0 ? cuts->MinTrack() : mMinTrack);
   mRImpactMax                  = cuts->RImpactMax();
+  mZMin                        = cuts->ZMin();        // note: best to use integer numbers
+  mZMax                        = cuts->ZMax();        // note: best to use integer numbers
+  if (mZMin == mZMax) {
+    // historical defaults
+    mZMin = -250.0;
+    mZMax =  250.0;
+  }
   LOG_INFO << "Set cuts: MinNumberOfFitPointsOnTrack = " << mMinNumberOfFitPointsOnTrack
 	   << " DcaZMax = " << mDcaZMax
 	   << " MinTrack = " << mMinTrack  
 	   << " RImpactMax = " << mRImpactMax
+	   << " ZMin = " << mZMin
+	   << " ZMax = " << mZMax
 	   << endm;
 }
 //________________________________________________________________________________
@@ -239,21 +251,23 @@ StMinuitVertexFinder::setFlagBase(){
 Int_t StMinuitVertexFinder::findSeeds() {
   mNSeed = 0;
 
-  Int_t zImpactArr[500]; // simple array to 'histogram' zImpacts
-  for (Int_t i=0; i < 500; i++)
+  int zIdxMax = (int) (mZMax - mZMin); 
+  Int_t zImpactArr[zIdxMax]; // simple array to 'histogram' zImpacts
+  for (Int_t i=0; i < zIdxMax; i++)
     zImpactArr[i]=0;
 
   Int_t nTrk = mZImpact.size();
   for (Int_t iTrk=0; iTrk < nTrk; iTrk++) {
-    if (fabs(mZImpact[iTrk]) < 250)
-      zImpactArr[int(mZImpact[iTrk]+250)]++;
+    if ((mZImpact[iTrk] > mZMin) &&
+        (mZImpact[iTrk] < mZMax))
+      zImpactArr[int(mZImpact[iTrk]-mZMin)]++;
   }
 
   // Search for maxima using sliding 3-bin window
   Int_t nOldBin = 0;
   Int_t slope = 0;
   Int_t nBinZ = 3;
-  for (Int_t iBin=0; iBin < 500 /*400*/ - nBinZ; iBin++) { //Modified by Chris Flores 1/9/2015
+  for (Int_t iBin=0; iBin < zIdxMax - nBinZ; iBin++) {
     Int_t nTrkBin = 0;
     for (Int_t iBin2=0; iBin2 < nBinZ; iBin2++) {
       nTrkBin += zImpactArr[iBin + iBin2];
@@ -263,7 +277,7 @@ Int_t StMinuitVertexFinder::findSeeds() {
     else if (nTrkBin < nOldBin) {
       if (slope == 1) {
 	if (mNSeed < maxSeed) {
-	  Float_t seed_z = -250 /*-200*/ + iBin + (Float_t)nBinZ / 2 - 1; //Modified by Chris Flores 1/9/2015
+	  Float_t seed_z = mZMin + iBin + (Float_t)nBinZ / 2 - 1;
 	  Double_t meanZ = 0;
 	  Int_t nTrkZ = 0;
 	  for (Int_t iTrk = 0; iTrk < nTrk; iTrk ++ ) {

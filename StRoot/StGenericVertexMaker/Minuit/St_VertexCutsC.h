@@ -15,6 +15,8 @@ class St_VertexCutsC : public TChair {
   Double_t 	RImpactMax(Int_t i = 0) 	{return Struct(i)->RImpactMax;}
   Float_t	MinFracOfPossFitPointsOnTrack(Int_t i = 0)	{return Struct(i)->MinFracOfPossFitPointsOnTrack;}
   Float_t 	MinTrackPt(Int_t i = 0) 	{return Struct(i)->MinTrackPt;}
+  Float_t 	ZMin(Int_t i = 0) 	{return Struct(i)->ZMin;}
+  Float_t 	ZMax(Int_t i = 0) 	{return Struct(i)->ZMax;}
  protected:
   St_VertexCutsC(St_VertexCuts *table=0) : TChair(table) {}
   virtual ~St_VertexCutsC() {fgInstance = 0;}

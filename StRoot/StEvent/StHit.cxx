@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.26 2012/10/23 20:18:33 fisyak Exp $
+ * $Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.27  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.26  2012/10/23 20:18:33  fisyak
  * Add/modify print outs
  *
@@ -100,7 +103,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.26 2012/10/23 20:18:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $";
 
 ClassImp(StHit)
 
