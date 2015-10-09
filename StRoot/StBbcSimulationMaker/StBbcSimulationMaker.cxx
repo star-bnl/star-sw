@@ -327,7 +327,7 @@ Int_t StBbcSimulationMaker::Make()
  assert(ds);
  StEvent* event = (StEvent*)GetInputDS("StEvent");
  assert(event);
- St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*)ds->Find("g2t_bbc_hit");
+ St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*) GetDataSet("geant/g2t_bbc_hit");
  if (g2t_bbc_hit) 
    {
      St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
