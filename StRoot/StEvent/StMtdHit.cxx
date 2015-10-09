@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHit.cxx,v 2.2 2012/02/28 01:24:51 perev Exp $
+ * $Id: StMtdHit.cxx,v 2.3 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdHit.cxx,v $
+ * Revision 2.3  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.2  2012/02/28 01:24:51  perev
  * tof() implementation added
  *
@@ -94,7 +97,7 @@ StMtdHit::setIdTruth(int idtru,int qatru)
 {
     if (qatru==0) qatru = (idtru>>16);
     idtru    = idtru&((1<<16)-1);
-    mIdTruth = static_cast<UShort_t>(idtru);
+    mIdTruth = idtru;
     mQuality = static_cast<UShort_t>(qatru);
 }
 

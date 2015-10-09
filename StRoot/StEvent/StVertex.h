@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.17 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StVertex.h,v 2.18 2015/10/09 17:46:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.18  2015/10/09 17:46:15  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.17  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -80,36 +83,36 @@ public:
     StVertex();
     virtual ~StVertex() {}
     
-    Int_t operator==(const StVertex&) const;
-    Int_t operator!=(const StVertex&) const;
+    int operator==(const StVertex&) const;
+    int operator!=(const StVertex&) const;
 
     virtual StVertexId     type() const {return mType; }
-    Int_t                  flag() const {return mFlag; }
-    Float_t                chiSquared() const { return mChiSquared; }
-    Float_t                probChiSquared() const { return mProbChiSquared; }
+    int                    flag() const {return mFlag; }
+    float                  chiSquared() const { return mChiSquared; }
+    float                  probChiSquared() const { return mProbChiSquared; }
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
     StTrack*               parent()        { return mParent; }
     const StTrack*         parent() const  { return mParent; }
-    virtual UInt_t         numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
-    virtual UInt_t         numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
+    virtual unsigned int   numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
+    virtual unsigned int   numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
     virtual StTrack*       daughter(unsigned int)       {NotImplemented("daughter"); return 0;}
     virtual const StTrack* daughter(unsigned int) const {NotImplemented("daughter"); return 0;}
     virtual StPtrVecTrack  daughters(StTrackFilter&)    {NotImplemented("daughters"); return 0;}
 
-    virtual void setFlag(Int_t val) { mFlag = val; }
-    virtual void setCovariantMatrix(Float_t[6]);
-    virtual void setChiSquared(Float_t val) { mChiSquared = val; }
-    virtual void setProbChiSquared(Float_t val) { mProbChiSquared = val; }
+    virtual void setFlag(int val) { mFlag = val; }
+    virtual void setCovariantMatrix(float[6]);
+    virtual void setChiSquared(float val) { mChiSquared = val; }
+    virtual void setProbChiSquared(float val) { mProbChiSquared = val; }
     virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) = 0;
     virtual void removeDaughter(StTrack*) = 0;
-    Int_t            idTruth() const { return mIdTruth;}
-    Int_t            qaTruth() const { return mQuality; }
-    Int_t            idParent() const { return mIdParent;}
-    void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
-    void          setIdParent(Int_t id) {mIdParent = id;}
-    void          setIdTruth(); 				//setting on track info
+    int          idTruth() const { return mIdTruth;}
+    int          qaTruth() const { return mQuality; }
+    int          idParent() const { return mIdParent;}
+    void         setIdTruth(int idtru, int qatru=0) {mIdTruth = idtru; mQuality = static_cast<unsigned short>(qatru);}
+    void         setIdParent(Int_t id) {mIdParent = id;}
+    void         setIdTruth(); 				//setting on track info
 
     virtual void setPrimaryVtx()      {SETBIT(mFlag,kPrimaryVtxId);} 
     virtual void setV0Vtx()           {SETBIT(mFlag,kV0VtxId);}	   
@@ -118,35 +121,37 @@ public:
     virtual void setBeamConstrained() {SETBIT(mFlag,kBEAMConstrVtxId);}
     virtual void setRejected()        {SETBIT(mFlag,kRejectedVtxId);}
 
-    Bool_t        isPrimaryVtx()      const {return TESTBIT(mFlag,kPrimaryVtxId);} 
-    Bool_t        isV0Vtx()           const {return TESTBIT(mFlag,kV0VtxId);}	   
-    Bool_t        isXiVtx()           const {return TESTBIT(mFlag,kXiVtxId);}	   
-    Bool_t        isKinkVertex()      const {return TESTBIT(mFlag,kKinkVtxId);}    
-    Bool_t        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
-    Bool_t        isRejected()        const {return TESTBIT(mFlag,kRejectedVtxId);}
+    bool        isPrimaryVtx()      const {return TESTBIT(mFlag,kPrimaryVtxId);}
+    bool        isV0Vtx()           const {return TESTBIT(mFlag,kV0VtxId);}
+    bool        isXiVtx()           const {return TESTBIT(mFlag,kXiVtxId);}
+    bool        isKinkVertex()      const {return TESTBIT(mFlag,kKinkVtxId);}
+    bool        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
+    bool        isRejected()        const {return TESTBIT(mFlag,kRejectedVtxId);}
     void Print(Option_t *option="") const {cout << option << *this << endl; }
     static void   SetNoFitPointCutForGoodTrack(UInt_t val) {fgNoFitPointCutForGoodTrack = val;}
     static UInt_t NoFitPointCutForGoodTrack() {return fgNoFitPointCutForGoodTrack;}
+    
 protected:
-    void          NotImplemented(const Char_t *method) const;
+    void          NotImplemented(const char *method) const;
+
+protected:
     StVertexId    mType;
     Char_t        mBeg[1]; //!
     Int_t         mFlag;
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;
-    UShort_t      mIdTruth; // MC vertex id if any 
+    Int_t         mIdTruth; // MC vertex id if any
     UShort_t      mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
     Int_t         mIdParent;// Id of MC parent track
     Char_t        mEnd[1]; //!
-    static        UInt_t fgNoFitPointCutForGoodTrack;
-//  StTrack*      mParent;           	//$LINK
+    static UInt_t fgNoFitPointCutForGoodTrack;
 #ifdef __CINT__
     StObjLink     mParent;            
 #else
     StLink<StTrack> mParent;            
 #endif //__CINT__
 
-    ClassDef(StVertex,4)
+    ClassDef(StVertex,5)
 };
 #endif

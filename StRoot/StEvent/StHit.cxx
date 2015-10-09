@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.26 2012/10/23 20:18:33 fisyak Exp $
+ * $Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.27  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.26  2012/10/23 20:18:33  fisyak
  * Add/modify print outs
  *
@@ -100,7 +103,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.26 2012/10/23 20:18:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -119,7 +122,7 @@ StHit::StHit()
 //______________________________________________________________________________
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality, UShort_t id)
+             unsigned int hp, float q, unsigned char c, int idTruth, unsigned short quality, unsigned short id)
             :StMeasuredPoint(p),mHardwarePosition(hp),mPositionError(e),mCharge(q),
              mId(id),mIdTruth(idTruth),mQuality(quality),mFitFlag(0),mTrackRefCount(c),mFlag(0),mNextHit(0)
 {
@@ -201,7 +204,7 @@ void StHit::setIdTruth(int idtru,int qatru)
 {
     if (qatru==0) qatru = (idtru>>16);
     idtru    = idtru&((1<<16)-1);
-    mIdTruth = (UShort_t)(idtru);
+    mIdTruth = idtru;
     mQuality = (UShort_t) qatru;
 }
 

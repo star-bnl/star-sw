@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.28 2012/01/24 03:04:22 perev Exp $
+ * $Id: StHit.h,v 2.29 2015/10/09 17:46:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.29  2015/10/09 17:46:14  ullrich
+ * Changed type of mIdTruth from ushort to int.
+ *
  * Revision 2.28  2012/01/24 03:04:22  perev
  * Cleanup
  *
@@ -121,10 +124,12 @@ public:
     StHit();
     StHit(const StThreeVectorF& position,
           const StThreeVectorF& errors,
-          unsigned int hardware,
-	  float    charge, 
-	  unsigned char trakRefCount = 0,
-	  UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
+          unsigned int   hardware,
+	      float          charge,
+	      unsigned char  trakRefCount = 0,
+	      int            idTruth=0,
+          unsigned short quality=0, 
+          unsigned short id =0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -140,19 +145,19 @@ public:
     int             usedInFit() const;
     int             idTruth() const;
     int             qaTruth() const { return mQuality; }
-    int  	          id()      const;
+    int  	        id()      const;
     const StHit*    nextHit() const;
     unsigned int    hardwarePosition() const;
     
     
     void setCharge(float);
-    void setFlag(UShort_t val) { mFlag = val; }
+    void setFlag(unsigned short val) { mFlag = val; }
     void setFitFlag(unsigned char);
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
     void setId(int Id)			{mId = Id;}
-    void setIdTruth(Int_t idtru,Int_t qatru=0);
+    void setIdTruth(int idtru, int qatru=0);
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
     virtual StDetectorId   detector() const;
@@ -165,13 +170,13 @@ protected:
     StThreeVectorF mPositionError; 
     Float_t        mCharge;
     Int_t          mId;
-    UShort_t       mIdTruth; // simulation track id 
+    Int_t          mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
     UChar_t        mFitFlag;
     UChar_t        mTrackRefCount;
     UShort_t       mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,7)
+    ClassDef(StHit,8)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
