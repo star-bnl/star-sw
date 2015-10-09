@@ -79,7 +79,7 @@ StvELossTrak *StvToolkit::GetELossTrak()
 {
   if (!mELossTrakFactory) {
     mELossTrakFactory = (StvELossTrakFactory*)StvELossTrakFactory::myInstance();
-    mELossTrakFactory->setMaxIncrementCount(1000000);
+    mELossTrakFactory->setMaxIncrementCount(4000000);
   }
   return mELossTrakFactory->getInstance();	
 }
