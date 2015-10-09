@@ -23,13 +23,7 @@ StvTrack::StvTrack()
 //______________________________________________________________________________
 StvTrack::~StvTrack()
 {
-static StvToolkit *kit = StvToolkit::Inst();
-  for (StvNodeIter it = begin();it != end();++it) 
-  {
-    StvNode *node = *it;
-    kit->FreeNode(node);		
-  }
-  clear(); 		
+  unset(); 		
 }
 //______________________________________________________________________________
 void StvTrack::reset()
@@ -41,6 +35,12 @@ void StvTrack::reset()
 //______________________________________________________________________________
 void StvTrack::unset()
 {
+static StvToolkit *kit = StvToolkit::Inst();
+  for (StvNodeIter it = begin();it != end();++it) 
+  {
+    StvNode *node = *it;
+    kit->FreeNode(node);		
+  }
   clear();
 }
 //______________________________________________________________________________
