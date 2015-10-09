@@ -109,17 +109,16 @@ enum {kRepeatSeedFinder = 2};
           if (nAdded<=0)			continue;;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
-StvTrack bakwTrak(*mCurrTrak);
 // 			few hits added. Refit track to beam again 
 //=============================
 	  ans = Refit(0);
 //=============================
 	  if (ans) {
 	    *mCurrTrak = refiTrak; 
-	    nHits = mCurrTrak->SetUsed();
 	  } 
 
 	} while((fail=0));		
+
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
         if (fail) nHits=0;
@@ -132,6 +131,7 @@ StvTrack bakwTrak(*mCurrTrak);
         mSeedFinder->FeedBack(mCurrTrak);
 
         mCurrTrak->AddId(10*seedFinder+repeat);
+        mCurrTrak->SetUsed();
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
         aveHits+= nHits;
