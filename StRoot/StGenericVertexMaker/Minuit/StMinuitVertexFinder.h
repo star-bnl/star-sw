@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.12 2010/12/06 20:07:23 fisyak Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.13 2015/10/09 18:54:02 genevb Exp $
  *
  */
 
@@ -156,6 +156,8 @@ private:
     Double_t               mWeight ;          // Weight in fit for vertex contraint
     Double_t               mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
     Int_t                  mMinTrack;         // Min number of tracks
+    Float_t                mZMin;             // Min z of possible vertex positions
+    Float_t                mZMax;             // Max z of possible vertex positions
 
     StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
     
@@ -189,6 +191,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.13  2015/10/09 18:54:02  genevb
+ * Use new vertex-finding parameters ZMin,ZMax
+ *
  * Revision 1.12  2010/12/06 20:07:23  fisyak
  * Increase maximum number of possible seeds
  *
