@@ -354,10 +354,59 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
+#include "St_TpcAvgPowerSupplyC.h"
+MakeChairOptionalInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
+//________________________________________________________________________________
+Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
+  Int_t e1 = 0, e2 = 0;
+  Float_t f2 = 0;
+  St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
+  if (e1==0) return -99;
+#if 0
+  Float_t v1=Voltage(e1-1);
+  if (f2==0) return v1;
+  Float_t v2=Voltage(e2-1);
+  if (v2==v1) return v1;
+  // different voltages on influencing HVs
+  // effective voltage is a sum of exponential gains
+  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
+  Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
+  return v_eff;
+#endif
+  return 0;
+}
+//________________________________________________________________________________
+Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
+  //  static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
+  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
+  // L Inner = 190222, Outer = 347303
+  static Float_t Length[8] = {
+    1307.59, //   Channel 1 
+    1650.57, //   Channel 2 
+    1993.54, //   Channel 3 
+    2974.24, //   Channel 4 
+    3324.59, //   Channel 5 
+    3202.42, //   Channel 6 
+    3545.4 , //   Channel 7 
+    4398.53};//   Channel 8 
+
+  return AcCharge(sector,channel)/Length[channel-1];
+}
+
 #include "St_tpcAnodeHVavgC.h"
 MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
 //________________________________________________________________________________
+Bool_t St_tpcAnodeHVavgC::tripped(Int_t sector, Int_t padrow) const {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->tripped(sector,padrow);
+  }
+  return (voltage() < -100);
+}
+//________________________________________________________________________________
 Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,padrow);
+  }
   Int_t e1 = 0, e2 = 0;
   Float_t f2 = 0;
   St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
@@ -513,6 +562,9 @@ Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
 }
 //________________________________________________________________________________
 Float_t St_TpcAvgCurrentC::AcChargeL(Int_t sector, Int_t channel) {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->AcChargeL(sector,channel);
+  }
   //  static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
   //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
   // L Inner = 190222, Outer = 347303
@@ -525,8 +577,23 @@ Float_t St_TpcAvgCurrentC::AcChargeL(Int_t sector, Int_t channel) {
     3202.42, //   Channel 6 
     3545.4 , //   Channel 7 
     4398.53};//   Channel 8 
-
   return AcCharge(sector,channel)/Length[channel-1];
+}
+//________________________________________________________________________________
+Float_t St_TpcAvgCurrentC::AvCurrent(Int_t sector, Int_t channel) {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->AvCurrent(sector,channel);
+  }
+  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ? 
+    Struct()->AvCurrent[8*(sector-1)+channel-1] :     0;
+}
+//________________________________________________________________________________
+Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->AcCharge(sector,channel);
+  }
+  return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ? 
+    Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
