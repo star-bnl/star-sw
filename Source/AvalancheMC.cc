@@ -658,11 +658,9 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
   unsigned int nHolesOld = m_nHoles;
   unsigned int nIonsOld = m_nIons;
   if ((type == -1 || type == 1) && (aval || m_useAttachment)) {
-
     // Compute Townsend and attachment coefficient
     validAlphaEta = ComputeAlphaEta(type);
     if (ok) ok = validAlphaEta;
-
     // Subdivision of a step
     const double probth = 0.01;
 
@@ -1050,23 +1048,18 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
   double alpha = 0., eta = 0.;
 
   // Integrated drift velocity
-  double vdx = 0., vdy = 0., vdz = 0., vd = 0.;
-  // Length of the step
-  double delx = 0., dely = 0., delz = 0., del = 0.;
-
-  // Scaling factor for projected length
-  double scale = 1.;
+  double vdx = 0., vdy = 0., vdz = 0.;
 
   // Loop a first time over the drift line.
   for (int i = m_nDrift - 1; i--;) {
     // Compute the step length.
-    delx = m_drift[i + 1].x - m_drift[i].x;
-    dely = m_drift[i + 1].y - m_drift[i].y;
-    delz = m_drift[i + 1].z - m_drift[i].z;
-    del = sqrt(delx * delx + dely * dely + delz * delz);
+    const double delx = m_drift[i + 1].x - m_drift[i].x;
+    const double dely = m_drift[i + 1].y - m_drift[i].y;
+    const double delz = m_drift[i + 1].z - m_drift[i].z;
+    const double del = sqrt(delx * delx + dely * dely + delz * delz);
     // Compute the integrated drift velocity,
     // Townsend coefficient and attachment coefficient.
-    vdx = 0., vdy = 0., vdz = 0., vd = 0.;
+    vdx = 0., vdy = 0., vdz = 0.;
     m_drift[i].alpha = 0.;
     m_drift[i].eta = 0.;
     for (int j = 6; j--;) {
@@ -1109,17 +1102,22 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
       m_drift[i].eta += wg[j] * eta;
     }
     // Compute the scaling factor for the projected length.
-    scale = 1.;
+    double scale = 1.;
     if (m_useEquilibration) {
-      vd = sqrt(vdx * vdx + vdy * vdy + vdz * vdz);
+      const double vd = sqrt(vdx * vdx + vdy * vdy + vdz * vdz);
       if (vd * del <= 0.) {
         scale = 0.;
       } else {
-        scale = (delx * vdx + dely * vdy + delz * vdz) / (vd * del);
+        const double dinv = delx * vdx + dely * vdy + delz * vdz;
+        if (dinv < 0.) {
+          scale = 0.;
+        } else {
+          scale = (delx * vdx + dely * vdy + delz * vdz) / (vd * del);
+        }
       }
     }
-    m_drift[i].alpha *= del * scale / 2.;
-    m_drift[i].eta *= del * scale / 2.;
+    m_drift[i].alpha *= 0.5 * del * scale;
+    m_drift[i].eta *= 0.5 * del * scale;
   }
 
   // Skip equilibration if projection has not been requested.
