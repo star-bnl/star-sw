@@ -35,6 +35,8 @@ class Geom_t : public AgStructure
   SetDetector(dtub);
   SetDetector(hcal);
 
+  SetDetector(ftsd); // Forward tracking system
+
       ecalCuts=1;
       calbCuts=1;
       
@@ -73,6 +75,8 @@ class Geom_t : public AgStructure
   AddDetector(dtub);
 
   AddDetector(hcal);
+
+  AddDetector(ftsd); // Forward calo system
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -226,6 +230,19 @@ class FtpcGeom_t : public AgStructure
   TString module;    
   TString supportModule;
   Int_t     config, supo;
+};
+
+// ----------------------------------------------------------------------
+class FtsdGeom_t : public AgStructure
+{ public:
+  ClassDef(FtsdGeom_t,1);
+  FtsdGeom_t(): AgStructure("FtsdGeom_t","STAR Forward Tracking System Master Geometry Table")
+    {
+      select="default"; module="FtsdGeo";  
+    };
+    ~FtsdGeom_t(){ };
+  TString select;
+  TString module;    
 };
 
 // ----------------------------------------------------------------------
@@ -612,6 +629,8 @@ class Geometry : public AgModule
 
   Bool_t PxstInit();
   Bool_t PsupInit();
+  
+  Bool_t FtsdInit();
 
   Bool_t GeomInit();
 
@@ -654,6 +673,8 @@ class Geometry : public AgModule
   Bool_t ConstructFsce( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructEidd( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructHcal( const Char_t *flag, Bool_t go=true );
+
+  Bool_t ConstructFtsd( const Char_t *flag, Bool_t go=true );
 
   // TPC Upgrade
   Bool_t ConstructTpcx( const Char_t *flag, Bool_t go=true );

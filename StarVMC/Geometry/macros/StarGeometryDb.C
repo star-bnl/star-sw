@@ -58,6 +58,8 @@ void StarGeometryDb()
   // Setup upgrade geometries
   upgrade();
 
+  // Setup development geometries
+  devel();
 
 
   //
@@ -1703,6 +1705,22 @@ void dev15()
 
   // switch off experimental 
   geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
+
+}
+
+void devel()
+{
+
+  // DEV 15 baseline is y2015
+  geom.Use("select","y2015a");
+  geom.select = "dev2020"; {
+    // ================================================
+    geom.ftsdFlag = "FTSDv0"; geom.ftsdStat = 1;
+    geom.ecalStat = 0;
+    // ================================================
+    geom.fill();
+  }
+
 
 }
 
