@@ -214,7 +214,7 @@
 	   rmin="0"
 	   rmax="0"
 	   dz="0" />
-        <Instrument block="PLAC"  >
+        <Instrument block="FTSA"  >
              <Hit meas="z" opts="S" bins=".00001"  />
              <Hit meas="y" opts="S" bins=".00001"  />
              <Hit meas="x" opts="S" bins=".00001"  />
