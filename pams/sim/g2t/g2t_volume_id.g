@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.79 2015/10/06 19:38:52 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.80 2015/10/12 20:46:57 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.80  2015/10/12 20:46:57  jwebb
+* Hit definition and starsim to root interface for FTS.
+*
 * Revision 1.79  2015/10/06 19:38:52  jwebb
 * g2t updates to readout preshower in HCAL
 *
@@ -360,6 +363,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       nv        = nvb(1)  ! number of real volume levels in NUMBV
 *
 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+
+**      write (*,*) 'g2t volume id: csys=', csys, ' numbv=', numbv
+
 
       If (Csys=='svt') then
 *1*                                          Ken Wilson
@@ -1001,8 +1008,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 *******************************************************************************************
-      
+** 27                                                                            Jason Webb
 
+      ELSE IF (CSYS=='fts') THEN
+         
+           "Disk number is 1st entry in numbv"
+           volume_id = numbv(1)
+      
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif

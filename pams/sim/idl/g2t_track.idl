@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.17 2014/05/14 20:01:23 jwebb Exp $
+  /* $Id: g2t_track.idl,v 1.18 2015/10/12 20:46:58 jwebb Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.18  2015/10/12 20:46:58  jwebb
+     Hit definition and starsim to root interface for FTS.
+
      Revision 1.17  2014/05/14 20:01:23  jwebb
      More support for HCAL.  Also note... last checkin of g2t_volume_id was to support FMS preshower.
 
@@ -67,6 +70,7 @@ struct g2t_track {
        long      hit_vpd_p;  /* Id of first vpd hit on track linked list */
        long      hit_etr_p;  /* Id of first etr hit on track linked list */
        long      hit_hca_p;  /* Id of first hca hit on track linked list */
+       long      hit_fts_p;  /* Id of first hca hit on track linked list */
        long      id;         /* primary key */
        long      is_shower;  /* 1 if shower track, 0 if not */
        long      itrmd_vertex_p; /* First intermediate vertex */
@@ -96,6 +100,7 @@ struct g2t_track {
        long      n_vpd_hit;  /* Nhits in vpd */
        long      n_etr_hit;  /* Nhits on etr */
        long      n_hca_hit;  /* Nhits on hca */
+       long      n_fts_hit;  /* Nhits on hca */
        long      next_parent_p; /* Id of next parent track */
        long      next_vtx_trk_p; /* Next daughter track of start vertex */
        long      start_vertex_p; /* Id of start vertex of track */
