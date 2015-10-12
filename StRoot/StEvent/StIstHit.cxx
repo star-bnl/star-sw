@@ -11,9 +11,9 @@
 #include "StIstHit.h"
 
 
+#ifdef ST_MEMORY_POOL_HH
 StMemoryPool StIstHit::mPool(sizeof(StIstHit));
-
-
+#endif
 StIstHit::StIstHit(unsigned char ladder, unsigned char sensor, float charge, float chargeErr, unsigned char maxTB,
    unsigned char nRawHits, unsigned char nRawHitsZ, unsigned char nRawHitsRPhi) : StHit(),
    mMaxTimeBin(maxTB),

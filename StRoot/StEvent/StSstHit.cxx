@@ -22,9 +22,9 @@
 #include "StTrack.h"
 
 static const char rcsid[] = "$Id: StSstHit.cxx,v 2.2 2015/05/21 14:11:43 ullrich Exp $";
-
+#ifdef ST_MEMORY_POOL_HH
 StMemoryPool StSstHit::mPool(sizeof(StSstHit));
-
+#endif
 ClassImp(StSstHit)
 
 StSstHit::StSstHit()

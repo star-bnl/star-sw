@@ -75,9 +75,9 @@
 #include "StTpcHit.h"
 #include "StTrack.h"
 static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.19 2011/10/17 00:13:49 fisyak Exp $";
-
+#ifdef ST_MEMORY_POOL_HH
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
-
+#endif
 ClassImp(StTpcHit)
 
 void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk) {

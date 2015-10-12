@@ -60,7 +60,9 @@
 
 static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.13 2009/11/23 16:34:06 fisyak Exp $";
 
+#ifdef ST_MEMORY_POOL_HH
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
+#endif
 
 ClassImp(StFtpcHit)
 

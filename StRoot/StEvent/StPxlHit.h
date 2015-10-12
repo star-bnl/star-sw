@@ -33,7 +33,7 @@
 #ifndef StPxlHit_hh
 #define StPxlHit_hh
 #include "StHit.h"
-#include "StMemoryPool.hh"
+//#include "StMemoryPool.hh"
 #include "StEnumerations.h"
 
 class StPxlHit : public StHit
@@ -78,11 +78,11 @@ public:
     void setNRawHits(UChar_t);
     
     virtual bool isSortable() const;
-    
+#ifdef ST_MEMORY_POOL_HH
     void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-    
+#endif 
 protected:
     UChar_t mSector; //Sector : 1-10
     UChar_t mLadder; //Ladder : 1-4 
@@ -97,9 +97,9 @@ protected:
     // this has to go once the playing and testing is over.
     // should be hard wired in member function.
     StDetectorId mDetectorId;
-    
+#ifdef ST_MEMORY_POOL_HH    
     static StMemoryPool mPool;  //!
-    
+#endif  
     ClassDef(StPxlHit,1)
 };
 

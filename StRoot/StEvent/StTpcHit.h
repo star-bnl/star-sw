@@ -101,7 +101,7 @@
 #define StTpcHit_hh
 
 #include "StHit.h"
-#include "StMemoryPool.hh"
+//#include "StMemoryPool.hh"
 #include "TMath.h"
 class StTpcHit : public StHit {
 public:
@@ -116,10 +116,11 @@ public:
       :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
     ~StTpcHit() {}
 
+#ifdef ST_MEMORY_POOL_HH
     void* operator new(size_t /* sz */,void *p) { return p;}
     void* operator new(size_t) { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-
+#endif
     void     setChargeModified(Float_t Charge) {mChargeModified = Charge;}
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
@@ -152,7 +153,9 @@ public:
     virtual void setPositionU(const StThreeVectorF& p) {mPositionU = p;}
     virtual void setPositionL(const StThreeVectorF& p) {mPositionL = p;}
 protected:
+#ifdef ST_MEMORY_POOL_HH
     static StMemoryPool mPool;  //!
+#endif
     UChar_t     mMinpad;     /* central pad - lowest pad id in this hit*/
     UChar_t     mMaxpad;     /* highest pad id in this hit - central pad */
     UChar_t     mMintmbk;    /* central timebucket - lowest time bucket in hit*/
