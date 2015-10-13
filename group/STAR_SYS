@@ -253,6 +253,9 @@ if ( $?STAR_SYS_pself ) then
     set self=$STAR_SYS_pself
     unset STAR_SYS_pself
 endif
+# trick to handle non STAR nodes
+if ("${STAR_SYS}" == "sl64_gcc447"      ) setenv STAR_HOST_SYS sl64_gcc482
+if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
 
 
 #  $Log: STAR_SYS,v $
