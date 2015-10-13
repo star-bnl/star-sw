@@ -12,9 +12,6 @@
 
 static const char rcsid[] = "$Id: StMcPxlHit.cc,v 2.1 2013/03/25 23:50:35 perev Exp $";
 
-#ifdef POOL
-StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
-#endif
 ClassImp(StMcPxlHit);
 ostream&  operator<<(ostream& os, const StMcPxlHit& h)
 {

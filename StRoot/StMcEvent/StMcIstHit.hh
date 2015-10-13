@@ -68,11 +68,6 @@ public:
 	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
   ~StMcIstHit() {}
   
-#ifdef POOL
-  void* operator new(size_t)     { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
-#endif
-  
   ULong_t layer()  const {return 1;} // 
   ULong_t ladder() const {return mVolumeId/1000000 -1;}
   ULong_t wafer()  const {return  (mVolumeId%1000000)/10000;} 

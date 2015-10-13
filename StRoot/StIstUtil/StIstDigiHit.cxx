@@ -29,9 +29,6 @@
 #include "StIstDigiHit.h"
 
 
-StMemoryPool StIstDigiHit::mPool(sizeof(StIstDigiHit));
-
-
 StIstDigiHit::StIstDigiHit() : StIstHit(), mApv(0), mMeanColumn(-1),
    mMeanRow(-1), mClusterSizeFlag(false)
 { }

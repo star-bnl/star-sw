@@ -60,7 +60,6 @@
 #define StFtpcHit_hh
 
 #include "StHit.h"
-//#include "StMemoryPool.hh"
 
 class StFtpcPoint;
 
@@ -74,11 +73,6 @@ public:
     // StFtpcHit(const StFtpcHit&);            use default
     // StFtpcHit& operator=(const StFtpcHit&); use default
     ~StFtpcHit();
-#ifdef ST_MEMORY_POOL_HH
-    void* operator new(size_t sz,void *p)     { return p;}
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif  
     unsigned int sector() const;        // 1-6
     unsigned int plane() const;         // 1-20
     unsigned int padsInHit() const;
@@ -97,9 +91,6 @@ public:
     void setSigmaTimePosition(float);
 
 protected:
-#ifdef ST_MEMORY_POOL_HH
-    static StMemoryPool mPool;  //!
-#endif
     Float_t    mPadPos;        // pad position of hit
     Float_t    mTimePos;       // time position of hit
     Float_t    mPadPosSigma;   // sigma pad position of hit

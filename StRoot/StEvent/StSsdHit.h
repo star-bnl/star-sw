@@ -57,7 +57,6 @@
 #define StSsdHit_hh
 
 #include "StHit.h"
-//#include "StMemoryPool.hh"
 
 class StSsdHit : public StHit {
 public:
@@ -68,11 +67,6 @@ public:
     // StSsdHit(const StSsdHit&);            use default
     // StSsdHit& operator=(const StSsdHit&); use default
     ~StSsdHit();
-#ifdef ST_MEMORY_POOL_HH
-    void* operator new(size_t sz,void *p)     { return p;}
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }    
-#endif
     unsigned int ladder() const;              // ladder=[1-20]
     unsigned int wafer() const;               // wafer=[1-16]
     unsigned int centralStripNSide() const;  
@@ -89,9 +83,6 @@ public:
     void         Print(const Option_t *option="") const;
 
 protected:
-#ifdef ST_MEMORY_POOL_HH
-    static StMemoryPool mPool;  //!
-#endif
     Float_t mLocalPosition[3];
     Int_t   mADC[2];
     

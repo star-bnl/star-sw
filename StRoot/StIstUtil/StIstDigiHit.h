@@ -50,18 +50,12 @@ public:
    float getMeanRow() const;
    bool  getClusterSizeFlag() const;
    float localPositionErr(unsigned int i) const;
-
-   void* operator new(size_t sz, void *p) { return p; }
-   void* operator new(size_t)             { return mPool.alloc(); }
-   void  operator delete(void* p)         { mPool.free(p); }
-
 private:
    UChar_t mApv;
    Float_t mMeanColumn;
    Float_t mMeanRow;
    Bool_t  mClusterSizeFlag; //0: cluster Size in r-phi < 2; 1: cluster Size in Z
 
-   static StMemoryPool mPool;  //! Hide inherited static member and assign a new value
 };
 
 #endif

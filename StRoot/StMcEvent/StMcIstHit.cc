@@ -53,9 +53,6 @@
 #include "StMcIstHit.hh"
 
 static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.12 2015/03/13 18:44:58 perev Exp $";
-#ifdef POOL
-StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
-#endif
 ClassImp(StMcIstHit);
 ostream&  operator<<(ostream& os, const StMcIstHit& h)
 {

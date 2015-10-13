@@ -31,9 +31,6 @@
 #include "StPxlHit.h"
 
 ClassImp(StPxlHit)
-#ifdef ST_MEMORY_POOL_HH
-StMemoryPool StPxlHit::mPool(sizeof(StPxlHit));
-#endif
 StPxlHit::~StPxlHit() { /* noop */ }
 
 StPxlHit::StPxlHit() : StHit(),

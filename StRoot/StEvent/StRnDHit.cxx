@@ -21,9 +21,6 @@
 #include "StRnDHit.h"
 
 ClassImp(StRnDHit)
-#ifdef ST_MEMORY_POOL_HH
-StMemoryPool StRnDHit::mPool(sizeof(StRnDHit));
-#endif  
 StRnDHit::~StRnDHit() { /* noop */ }
 
 StRnDHit::StRnDHit()

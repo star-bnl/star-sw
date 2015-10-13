@@ -31,9 +31,6 @@
  */
 #include "StMcCtbHit.hh"
 static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.7 2011/10/17 00:24:00 fisyak Exp $";
-#ifdef POOL
-StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
-#endif
 ClassImp(StMcCtbHit)
 
 ostream&  operator<<(ostream& os, const StMcCtbHit& h)
