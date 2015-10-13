@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.289 2015/07/14 21:12:53 jwebb Exp $
+* $Id: geometry.g,v 1.290 2015/10/12 18:36:35 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.290  2015/10/12 18:36:35  jwebb
+* Initial version of dev2020 geometry tag including forward tracking system.
+*
 * Revision 1.289  2015/07/14 21:12:53  jwebb
 * Added y2015a production geometry, initial release
 *
@@ -1296,6 +1299,9 @@ replace [exe HCALv0;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; ]
 replace [exe HCALv1;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; ]
 replace [exe HCALvF;] with [; "HCAL on "; HCAL=on;  HcalConfig=15;]
 
+replace [exe FTSDof;] with [; "FTSD off"; FTSD=off; FtsdConfig=0; ]
+replace [exe FTSDv0;] with [; "FTSD on" ; FTSD=on ; FtsdConfig=0; ]
+
 *                                                                                          Forward TPC 
 
 replace [exe FTPCof;] with ["ftpc configuration"; FTPC=off;]
@@ -2533,6 +2539,10 @@ REPLACE [exe dev2018;] with ["Y2018 development tag";
 
 ];    
 
+REPLACE [exe dev2020;] with ["DEV 2020 first cut";
+     exe y2015a;
+     exe FTSDv0;
+];
 
 
 REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2014."
@@ -2792,7 +2802,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
-              PXST,PSUP,HCAL
+              PXST,PSUP,HCAL,FTSD
 
 
 * Qualifiers:  TPC        TOF         etc
@@ -2829,7 +2839,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
-              IstdConfig, PxstConfig, MagpConfig, HcalConfig
+              IstdConfig, PxstConfig, MagpConfig, HcalConfig, FtsdConfig
 
    Integer                                        VpddModule/0/
 
@@ -2932,6 +2942,7 @@ replace[;Case#{#;] with [
    IdsmConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
    HcalConfig  = 0 ! 0 means HcalGeo, 1 HcalGeo1, etc...
+   FtsdConfig  = 0 ! 0 means FtsdGeo
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
@@ -2976,7 +2987,8 @@ replace[;Case#{#;] with [
     FTRO,FGTD,SHLD,QUAD,
     MUTD,IGTD,HPDT,ITSP,
     DUMM,SCON,IDSM,FSCE,
-    EIDD,ISTD,PXST,HCAL} = off;
+    EIDD,ISTD,PXST,HCAL,
+    FTSD}=off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -3537,6 +3549,10 @@ If LL>0
 
   Case dev15b   { dev15a : y2014 a plus a bare naked hadron calo;
                   Geom = 'dev15b    '; exe dev15b; }
+
+  Case dev2020  { dev2020: y2015a base plus FTSD;
+                  Geom = 'dev2020   '; exe dev2020;}
+
 
   Case devE  { devE : eSTAR development geometry;
                  Geom = 'devE    ';
@@ -5379,6 +5395,11 @@ IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
 
 
    }
+
+   IF FTSD {
+        CONSTRUCT FtsdGeo
+   }
+
 
    IF ISTB {
 

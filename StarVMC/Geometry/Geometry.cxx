@@ -221,6 +221,8 @@ ClassImp(VPDDGEO2::VpddGeo2);
 ClassImp(VPDDGEO::VpddGeo);
 ClassImp(ZCALGEO::ZcalGeo);
 
+/* ClassImp(FtsdGeom_t); */ FtsdGeom_t ftsdGeom;
+
 #include "StMessMgr.h"
 
 // ----------------------------------------------------------------------
@@ -233,6 +235,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
   FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit(); PsupInit(); HcalInit();
+  FtsdInit();
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -336,6 +339,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_eidd = ConstructEidd( geom.eiddFlag, geom.eiddStat );
   geom.success_fsce = ConstructFsce( geom.fsceFlag, geom.fsceStat );
   geom.success_hcal = ConstructHcal( geom.hcalFlag, geom.hcalStat );
+  geom.success_ftsd = ConstructFtsd( geom.ftsdFlag, geom.ftsdStat );
 
   // Place the upstream areas
   geom.success_upst = ConstructUpst( geom.upstFlag, geom.upstStat );
@@ -806,6 +810,25 @@ Bool_t Geometry::ConstructHcal( const Char_t *flag, Bool_t go )
   if (!CreateModule( hcalGeom.module ) )
     {
       Warning(GetName(),"Could not create module "+hcalGeom.module );
+      return false;
+    }
+  return true;
+}
+
+Bool_t Geometry::ConstructFtsd( const Char_t *flag, Bool_t go )
+{ if (!go) return false;
+  //
+
+  LOG_INFO << "Creating FTSD" << endm;
+
+  if (! ftsdGeom.Use("select",flag) )
+    {
+      Error(GetName(), Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+  if (!CreateModule( ftsdGeom.module ) )
+    {
+      Warning(GetName(),"Could not create module "+ftsdGeom.module );
       return false;
     }
   return true;
@@ -1391,6 +1414,16 @@ Bool_t Geometry::HcalInit()
   hcalGeom.select="HCALv0"; hcalGeom.config=0; hcalGeom.module="HcalGeo";  hcalGeom.fill();
   hcalGeom.select="HCALv1"; hcalGeom.config=1; hcalGeom.module="HcalGeo1"; hcalGeom.fill();
   hcalGeom.select="HCALvF"; hcalGeom.config=1; hcalGeom.module="HcalGeoF"; hcalGeom.fill(); // FermiTBF
+  return true;
+}
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+Bool_t Geometry::FtsdInit()
+{
+  ftsdGeom.SetTitle("FTSD Prototype Tracker");
+  ftsdGeom.select="FTSDof"; ftsdGeom.module="NONE";      ftsdGeom.fill();
+  ftsdGeom.select="FTSDv0"; ftsdGeom.module="FtsdGeo";   ftsdGeom.fill();
   return true;
 }
 // ----------------------------------------------------------------------------
