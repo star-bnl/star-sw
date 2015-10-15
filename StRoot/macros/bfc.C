@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevoztchikov, G.V. Buren, L. Didenko //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.187 2015/06/17 01:37:42 perev Exp $
+// $Id: bfc.C,v 1.188 2015/10/14 21:45:48 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -193,14 +193,14 @@ void bfc(Int_t First, Int_t Last,
   if (Last < -3) return;
   chain->SetFlags(Chain);
   if (tChain == "" || ! tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
-  chain->Set_IO_Files(infile,outfile);
-  if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   gMessMgr->QAInfo() << Form("Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endm;
   if (Last < -2) return;
   if (chain->Load() > kStOk) {
     gMessMgr->Error() << "Problems with loading of shared library(ies)" << endm;
     gSystem->Exit(1);
   }
+  chain->Set_IO_Files(infile,outfile);
+  if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
   if (Last < -1) return;
   if (chain->Instantiate() > kStOk)  { 
     gMessMgr->Error() << "Problems with instantiation of Maker(s)" << endm;
