@@ -952,34 +952,34 @@ class KFPartEfficiencies: public TNamed
     std::cout.setf(std::ios::showpoint);
     std::cout.precision(3);
     std::cout << "Particle        : "
-         << "  Eff1 "
-         <<" / "<< "  Eff2 "
-         <<" / "<< "  Eff3 "
-         <<" / "<< " Ghost "
-         <<" / "<< "BackGr "
-         <<" / "<< "N Ghost"
-         <<" / "<< "N BackGr"
-         <<" / "<< "N Reco "
-         <<" / "<< "N Clone "
-         <<" | "<< " N MC1 " 
-         <<" | "<< " N MC2 " 
-         <<" | "<< " N MC3 "  << std::endl;
+         <<        "   Eff 4pi "
+         <<" / "<< " Eff accept"
+         <<" / "<< "  Eff KFPF "
+         <<" / "<< "     Ghost "
+         <<" / "<< "    BackGr "
+         <<" / "<< "   N Ghost "
+         <<" / "<< "  N BackGr "
+         <<" / "<< "    N Reco "
+         <<" / "<< "   N Clone "
+         <<" | "<< "  N MC 4pi " 
+         <<" | "<< "N MC accept" 
+         <<" | "<< " N MC KFPF "  << std::endl;
     
     int NCounters = mc1.NCounters;
     for (int iC = 0; iC < NCounters; iC++){
         std::cout << names[iC]
-             << "  : " << std::setw(6) << ratio_reco1.counters[iC]    
-             << "  / " << std::setw(6) << ratio_reco2.counters[iC]
-             << "  / " << std::setw(6) << ratio_reco3.counters[iC]
-             << "  / " << std::setw(6) << ratio_ghost.counters[iC]  // particles w\o MCParticle
-             << "  / " << std::setw(6) << ratio_bg.counters[iC]     // particles with incorrect MCParticle
-             << "  / " << std::setw(6) << ghost.counters[iC]
-             << "  / " << std::setw(7) << bg.counters[iC]
-             << "  / " << std::setw(6) << reco.counters[iC]
-             << "  / " << std::setw(7) << clone.counters[iC]
-             << "  | " << std::setw(6) << mc1.counters[iC] 
-             << "  | " << std::setw(6) << mc2.counters[iC]
-             << "  | " << std::setw(6) << mc3.counters[iC]  << std::endl;
+             << "  : " << std::setw(10) << ratio_reco1.counters[iC]    
+             << "  / " << std::setw(10) << ratio_reco2.counters[iC]
+             << "  / " << std::setw(10) << ratio_reco3.counters[iC]
+             << "  / " << std::setw(10) << ratio_ghost.counters[iC]  // particles w\o MCParticle
+             << "  / " << std::setw(10) << ratio_bg.counters[iC]     // particles with incorrect MCParticle
+             << "  / " << std::setw(10) << ghost.counters[iC]
+             << "  / " << std::setw(10) << bg.counters[iC]
+             << "  / " << std::setw(10) << reco.counters[iC]
+             << "  / " << std::setw(10) << clone.counters[iC]
+             << "  | " << std::setw(10) << mc1.counters[iC] 
+             << "  | " << std::setw(10) << mc2.counters[iC]
+             << "  | " << std::setw(10) << mc3.counters[iC]  << std::endl;
     }
     std::cout.flags(original_flags); 
   };
