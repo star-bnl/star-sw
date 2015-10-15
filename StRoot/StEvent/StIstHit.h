@@ -11,6 +11,7 @@
 #ifndef StIstHit_hh
 #define StIstHit_hh
 
+#include "StarClassLibrary/StMemoryPool.hh"
 #include "StEvent/StHit.h"
 #include "StEvent/StEnumerations.h"
 
@@ -44,6 +45,11 @@ public:
    void setNRawHitsZ(unsigned char nRawHitsZ);
    void setNRawHitsRPhi(unsigned char nRawHitsRPhi);
    void setLocalPosition(float, float, float);
+    
+   void* operator new(size_t sz, void *p) { return p; }
+   void* operator new(size_t)             { return mPool.alloc(); }
+   void  operator delete(void* p)         { mPool.free(p); }
+
 protected:
    UChar_t mMaxTimeBin;        ///< max charge time bin
    Float_t mChargeErr;         ///< charge uncertainty
@@ -52,6 +58,9 @@ protected:
    UChar_t mNRawHitsRPhi;      ///< cluster size in r-phi direction
    Float_t mLocalPosition[3];  ///< local position of hit inside the sensor
    StDetectorId mDetectorId;
+
+   static StMemoryPool mPool;  //!
+
    ClassDef(StIstHit, 1)
 };
 

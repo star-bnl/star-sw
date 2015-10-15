@@ -26,6 +26,7 @@
 #define StSstHit_hh
 
 #include "StHit.h"
+#include "StMemoryPool.hh"
 
 class StSstHit : public StHit {
 public:
@@ -36,6 +37,11 @@ public:
     // StSstHit(const StSstHit&);            use default
     // StSstHit& operator=(const StSstHit&); use default
     ~StSstHit();
+
+    void* operator new(size_t sz,void *p)     { return p;}
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }    
+
     unsigned int ladder() const;              // ladder=[1-20]
     unsigned int wafer() const;               // wafer=[1-16]
     unsigned int centralStripNSide() const;  
@@ -52,6 +58,7 @@ public:
     void         Print(const Option_t *option="") const;
 
 protected:
+    static StMemoryPool mPool;  //!
     Float_t mLocalPosition[3];
     UShort_t   mADC[2]; 
     

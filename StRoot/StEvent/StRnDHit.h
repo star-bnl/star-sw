@@ -24,6 +24,7 @@
 #ifndef StRnDHit_hh
 #define StRnDHit_hh
 #include "StHit.h"
+#include "StMemoryPool.hh"
 #include "StEnumerations.h"
 
 class StRnDHit : public StHit
@@ -70,6 +71,11 @@ public:
     void setDouble2(double);
     void setDouble3(double);
     void setDouble4(double);
+
+    void* operator new(size_t sz,void *p)     { return p;}
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+    
     friend ostream& operator<<(ostream& os, const StRnDHit& h);
     
 protected:
@@ -95,6 +101,9 @@ protected:
     // this has to go once the playing and testing is over.
     // should be hard wired in member function.
     StDetectorId mDetectorId;
+    
+    static StMemoryPool mPool;  //!
+    
     ClassDef(StRnDHit,1)        
 };
 

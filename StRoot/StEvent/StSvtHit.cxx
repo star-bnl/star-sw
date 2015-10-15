@@ -74,6 +74,9 @@
 static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.18 2009/11/23 22:20:51 ullrich Exp $";
 
 ClassImp(StSvtHit)
+    
+StMemoryPool StSvtHit::mPool(sizeof(StSvtHit));
+
 StSvtHit::StSvtHit()
 {
     mPeak = 0;

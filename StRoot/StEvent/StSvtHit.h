@@ -74,6 +74,7 @@
 #define StSvtHit_hh
 
 #include "StHit.h"
+#include "StMemoryPool.hh"
 
 class StSvtHit : public StHit {
 public:
@@ -84,6 +85,11 @@ public:
     // StSvtHit(const StSvtHit&);            use default
     // StSvtHit& operator=(const StSvtHit&); use default
     ~StSvtHit();
+
+    void* operator new(size_t sz,void *p)     { return p;}
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+
     unsigned int layer() const;      // layer=[1,6]
     static unsigned int layer(unsigned int barrel, unsigned int ladder);
     unsigned int ladder() const;     // ladder=[1-8]
@@ -111,6 +117,7 @@ public:
     void Print(Option_t *option="") const;
 
 protected:
+    static StMemoryPool mPool;  //!
     Float_t mPeak;
     Float_t mAnode;
     Float_t mTimebucket;
