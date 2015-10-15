@@ -764,8 +764,13 @@ u_int DisplayFile::getTabIdxAtDepth(u_int idx, u_int depth)
 // TabDescriptor *tab;     // if *isCanvas=0
 // CanvasDescriptor *can;  // if *isCanvas=1
 //
+
+
+
 DisplayNode *DisplayFile::getTab(u_int combo_index)
 {
+  LOG("JEFF", "get: %d", combo_index);
+
   // "1" == first child...
   DisplayNode *node = displayRoot->child;
 
@@ -773,12 +778,17 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
     int idx = getTabIdxAtDepth(combo_index, depth);
     int next_idx = getTabIdxAtDepth(combo_index, depth+1);
 
-    LOG(DBG,"idx(%d @ %d)=%d   next=%d  (%s)\n",combo_index,depth,idx,next_idx,node ? node->name : "null");
+    LOG("JEFF","A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
     
-    LOG(DBG, "ignore=%d match=%d %s",ignoreServerTags, node->matchTags(serverTags), serverTags);
-
     while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
-      node = node->next;
+      node = node->next;   
+      if(node) {
+	LOG("JEFF","B:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
+      }
+      else {
+	LOG("JEFF", "no siblings");
+	continue;
+      }
     }
     
     if(!node) return NULL;
@@ -814,7 +824,24 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
   }
 }
 
-int DisplayNode::matchTags(char *tags)
+int DisplayNode::matchTags(char *tags) {
+  if(!_matchTags(tags)) return 0;
+
+  // Ok if a leaf
+  if(leaf) return 1;
+
+  // If a tab, some subtab must be filled...
+  DisplayNode *node = child;
+
+  while(node) {
+    if(node->matchTags(tags)) return 1;
+    node = node->next;
+  }
+
+  return 0;
+}
+
+int DisplayNode::_matchTags(char *tags)
 {
   if(!tags) return 0;
 

@@ -273,6 +273,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   PresenterSuspend suspend;
 
   DisplayNode *mynode = jl_getTab(idx);
+  LOG("JEFF", "getTab(%d)=0x%x",idx, mynode);
   u_int child_idx = jl_getTabChildIdx(idx);
   if(!mynode) {
     LOG(DBG, "Didn't find mynode for %d",idx);
@@ -282,6 +283,8 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   LOG(DBG, "Mynode is %s",mynode->name);
 
   DisplayNode *childnode = jl_getTab(child_idx);
+  LOG("JEFF", "getTab(%d)=0x%x",child_idx, childnode);
+
   if(!childnode) {
     LOG(DBG, "Didn't find child in %s for %d",mynode->name,child_idx);
     return;
