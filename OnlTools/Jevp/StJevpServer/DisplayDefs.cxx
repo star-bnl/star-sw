@@ -769,7 +769,7 @@ u_int DisplayFile::getTabIdxAtDepth(u_int idx, u_int depth)
 
 DisplayNode *DisplayFile::getTab(u_int combo_index)
 {
-  LOG("JEFF", "get: %d", combo_index);
+  //LOG("JEFF", "get: %d", combo_index);
 
   // "1" == first child...
   DisplayNode *node = displayRoot->child;
@@ -778,15 +778,15 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
     int idx = getTabIdxAtDepth(combo_index, depth);
     int next_idx = getTabIdxAtDepth(combo_index, depth+1);
 
-    LOG("JEFF","A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
+    //LOG("JEFF","A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
     
     while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
       node = node->next;   
       if(node) {
-	LOG("JEFF","B:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
+	//LOG("JEFF","B:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
       }
       else {
-	LOG("JEFF", "no siblings");
+	//LOG("JEFF", "no siblings");
 	continue;
       }
     }
