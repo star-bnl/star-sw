@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.19 2015/10/05 12:09:05 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.20 2015/10/15 20:39:50 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -70,6 +70,14 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   Int_t mVersion ; // K. Yip (2015-2-22) : to deal with different (years of) data
 
+  // K. Yip (2015-10-15) : Make constants for the class so that MakeTrack can use, too.
+  // For A & C planes
+  const double pitch_4svx = 9.74E-5; //! 
+  // For E2D.A >= 2015
+  const double pitch_4svx2 = 9.55E-5; //!
+  // For B & D planes
+  const double pitch_6svx = 1.050E-4; //! 
+
  public: 
 
   St_pp2pp_Maker(const char *name="PP2PP") ;
@@ -115,14 +123,14 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.19 2015/10/05 12:09:05 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.20 2015/10/15 20:39:50 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
   // obtain the whole list of leading edge hits
   // to obtain the published result use StMaker::GetDataSet("pp2ppRawHits");
 
-  ClassDef(St_pp2pp_Maker,0)   //StAF chain virtual base class for Makers
+  ClassDef(St_pp2pp_Maker,1)   //StAF chain virtual base class for Makers
 
 };
 
