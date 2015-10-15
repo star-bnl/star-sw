@@ -46,6 +46,7 @@ class DisplayNode {
   const char *_getProperty(const char *s);
   const char *getProperty(const char *s);
   int matchTags(char *tags);
+  int _matchTags(char *tags);
 
   int nSiblings() { 
     LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned long) next);
