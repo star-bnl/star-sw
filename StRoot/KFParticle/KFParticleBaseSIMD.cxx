@@ -1837,10 +1837,10 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     
     for(int iP=0; iP<6; iP++)
     {
-      dsdr[0][iP](!isFirstRoot) = (dS1dR1[1][iP] + dS1dR1[0][iP])/2.f;
-      dsdr[1][iP](!isFirstRoot) = (dS1dR2[1][iP] + dS1dR2[0][iP])/2.f;
-      dsdr[2][iP](!isFirstRoot) = (dS2dR1[1][iP] + dS2dR1[0][iP])/2.f;      
-      dsdr[3][iP](!isFirstRoot) = (dS2dR2[1][iP] + dS2dR2[0][iP])/2.f;
+      dsdr[0][iP](isMiddlePoint) = (dS1dR1[1][iP] + dS1dR1[0][iP])/2.f;
+      dsdr[1][iP](isMiddlePoint) = (dS1dR2[1][iP] + dS1dR2[0][iP])/2.f;
+      dsdr[2][iP](isMiddlePoint) = (dS2dR1[1][iP] + dS2dR1[0][iP])/2.f;      
+      dsdr[3][iP](isMiddlePoint) = (dS2dR2[1][iP] + dS2dR2[0][iP])/2.f;
     }  
   }
         
