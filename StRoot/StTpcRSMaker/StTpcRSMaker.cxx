@@ -499,9 +499,9 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
     {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus no. primary electrons"} // 20 
   };
-  const Int_t Npbins  = 101;
+  const Int_t Npbins  = 201;
   const Int_t NpbinsL =  10;
-  const Double_t Xmax = 1e4;
+  const Double_t Xmax = 1e5;
   Double_t    dX = TMath::Log(Xmax/10)/(Npbins - NpbinsL);
   Double_t *pbins = new Double_t[Npbins];
   pbins[0] = 0.5;
@@ -511,8 +511,9 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
       pbins[bin] = pbins[bin-1] + 1;
     } else {
       Int_t nM = 0.5*(pbins[NpbinsL-2] + pbins[NpbinsL-1])*TMath::Exp(dX*(bin-NpbinsL)); 
-      pbins[bin] = pbins[bin-1] + TMath::Nint(nM - pbins[bin-1]);
-      if (pbins[bin] - pbins[bin-1] < 0.1) pbins[bin]++;
+      Double_t dbin = TMath::Nint(nM - pbins[bin-1]);
+      if (dbin < 1.0) dbin = 1.0;
+      pbins[bin] = pbins[bin-1] + dbin;
     }
   }
   for (Int_t io = 0; io < 2; io++) {
