@@ -16,6 +16,7 @@ int gMyNextSeed=0;
 #include "StarRoot/StMultiKeyMap.h"
 #include "StiUtilities/StiDebug.h"
 #include "StEvent/StEnumerations.h"
+#include "StvSeed/StvSeedConst.h"
 
 #define __NOSTV__
 
@@ -138,6 +139,8 @@ gMyNextSeed++;
 //______________________________________________________________________________
 void myStvKNSeedFinder::Reset()
 {
+static const float kSqrHlf = sqrt(0.5);
+
 static StiToolkit *kit = StiToolkit::instance();  
 assert(!f1stHitMap->size()); 
   StvKNSeedFinder::Reset();
@@ -155,7 +158,7 @@ assert(!f1stHitMap->size());
 //      double qwe = x[0]*x[0]+x[1]*x[1]- 0.01*x[2]*x[2];
       double qwe = x[0]*x[0]+x[1]*x[1]+      x[2]*x[2];
       f1stHitMap->insert(std::pair<float,StvHit*>(-qwe, hit));
-      float xx[6] = {x[0],x[1],x[2],x[0]-x[1],x[1]-x[2],x[2]-x[0]};
+      float xx[6] = {x[0],x[1],x[2],(x[0]+x[1])*kSqrHlf,(-x[0]+x[1])*kSqrHlf};
       fMultiHits->Add(hit,xx);
   } }
 
@@ -208,8 +211,6 @@ void StiKNNSeedFinder::FeedBack(int badGood)
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
-#include "StvSeed/StvSeedConst.h"
-#include "Stv/StvStl.cxx"
 #define Cop CopRej
 
 #undef Cop
