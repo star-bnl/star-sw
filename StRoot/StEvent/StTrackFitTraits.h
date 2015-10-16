@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.21 2015/05/13 17:06:14 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.22 2015/10/16 00:30:22 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -41,6 +41,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.22  2015/10/16 00:30:22  perev
+ * ClassDef++, schema evolution
+ *
  * Revision 2.21  2015/05/13 17:06:14  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
  *
@@ -162,6 +165,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,8) 
+    ClassDef(StTrackFitTraits,9) 
 };
 #endif
