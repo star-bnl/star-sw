@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.32 2015/07/24 16:21:24 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.33 2015/10/16 19:04:55 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.33  2015/10/16 19:04:55  marr
+ * Remove filling trees
+ *
  * Revision 1.32  2015/07/24 16:21:24  marr
  * Create geometry in InitRun(), which is needed to use StMtdGeometry class.
  *
@@ -226,12 +229,10 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 	mNExtraCells = 3;
 	//mZLocalCut = 43.5;
 	mNSigReso = 3.; // n sigma of z and y resolution.
-	mSaveTree = kFALSE;
 	mHisto = kFALSE;
 	ngTracks = 0;
 	mEvent = NULL;
 	mMuDst = NULL;
-	mMtdEvt = NULL;
 	mGeomTag = "";
 
 	fZReso = new TF1("fZReso","sqrt([0]/x/x+[1])",0,100);
@@ -260,8 +261,6 @@ Int_t StMtdMatchMaker::Init(){
 		}
 	}
 	if(mHisto) bookHistograms();
-
-	if(mSaveTree) bookTree();
 
 	return StMaker::Init();
 }
@@ -401,108 +400,6 @@ void StMtdMatchMaker::bookHistograms(){
 	return;
 }
 
-void StMtdMatchMaker::bookTree(){
-
-	mMtdEvt = new TTree("mtdEvent","mtdEvent");
-	mMtdEvt->SetAutoSave(1000000);
-	mMtdEvt->Branch("run",&mMtdEvtData.run,"run/I");
-	mMtdEvt->Branch("evt",&mMtdEvtData.evt,"evt/I");
-	mMtdEvt->Branch("nTrgIds",&mMtdEvtData.nTrgIds,"nTrgIds/I");
-	mMtdEvt->Branch("trgId",&mMtdEvtData.trgId,"trgId[nTrgIds]/I");
-	mMtdEvt->Branch("bField",&mMtdEvtData.bField,"bField/F");
-	mMtdEvt->Branch("vertexX",&mMtdEvtData.vertexX,"vertexX/F");
-	mMtdEvt->Branch("vertexY",&mMtdEvtData.vertexY,"vertexY/F");
-	mMtdEvt->Branch("vertexZ",&mMtdEvtData.vertexZ,"vertexZ/F");
-	mMtdEvt->Branch("triggerTime",&mMtdEvtData.triggerTime,"triggerTime[2]/D");
-	mMtdEvt->Branch("vpdVz",&mMtdEvtData.vpdVz,"vpdVz/F");
-	mMtdEvt->Branch("tStart",&mMtdEvtData.tStart,"tStart/F");
-	mMtdEvt->Branch("refMult",&mMtdEvtData.refMult,"refMult/I");
-
-	/// raw hits
-	mMtdEvt->Branch("nMtdRawHits",&mMtdEvtData.nMtdRawHits,"nMtdRawHits/I");
-	mMtdEvt->Branch("flag",&mMtdEvtData.flag,"flag[nMtdRawHits]/B");
-	mMtdEvt->Branch("backlegRaw",&mMtdEvtData.backlegRaw,"backlegRaw[nMtdRawHits]/b");
-	mMtdEvt->Branch("chn",&mMtdEvtData.chn,"chn[nMtdRawHits]/b");
-	mMtdEvt->Branch("tdc",&mMtdEvtData.tdc,"tdc[nMtdRawHits]/D");
-
-	/// sorted hits
-	mMtdEvt->Branch("nMtdHits",&mMtdEvtData.nMtdHits,"nMtdHits/I");
-	mMtdEvt->Branch("backleg",&mMtdEvtData.backleg,"backleg[nMtdHits]/b");
-	mMtdEvt->Branch("module",&mMtdEvtData.module,"module[nMtdHits]/b");
-	mMtdEvt->Branch("cell",&mMtdEvtData.cell,"cell[nMtdHits]/b");
-
-	mMtdEvt->Branch("leTimeWest",&mMtdEvtData.leTimeWest,"leTimeWest[nMtdHits]/D");
-	mMtdEvt->Branch("leTimeEast",&mMtdEvtData.leTimeEast,"leTimeEast[nMtdHits]/D");
-	mMtdEvt->Branch("totWest",&mMtdEvtData.totWest,"totWest[nMtdHits]/D");
-	mMtdEvt->Branch("totEast",&mMtdEvtData.totEast,"totEast[nMtdHits]/D");
-
-	/// global tracks
-	mMtdEvt->Branch("ngTrks",&mMtdEvtData.ngTrks,"ngTrks/I");
-	mMtdEvt->Branch("gpt",&mMtdEvtData.gpt,"gpt[ngTrks]/F");
-	mMtdEvt->Branch("geta",&mMtdEvtData.geta,"geta[ngTrks]/F");
-	mMtdEvt->Branch("gphi",&mMtdEvtData.gphi,"gphi[ngTrks]/F");
-	mMtdEvt->Branch("ppt",&mMtdEvtData.ppt,"ppt[ngTrks]/F");
-	mMtdEvt->Branch("peta",&mMtdEvtData.peta,"peta[ngTrks]/F");
-	mMtdEvt->Branch("pphi",&mMtdEvtData.pphi,"pphi[ngTrks]/F");
-
-	mMtdEvt->Branch("ghelixpx",&mMtdEvtData.ghelixpx,"ghelixpx[ngTrks]/F");
-	mMtdEvt->Branch("ghelixpy",&mMtdEvtData.ghelixpy,"ghelixpy[ngTrks]/F");
-	mMtdEvt->Branch("ghelixpz",&mMtdEvtData.ghelixpz,"ghelixpz[ngTrks]/F");
-	mMtdEvt->Branch("ghelixox",&mMtdEvtData.ghelixox,"ghelixox[ngTrks]/F");
-	mMtdEvt->Branch("ghelixoy",&mMtdEvtData.ghelixoy,"ghelixoy[ngTrks]/F");
-	mMtdEvt->Branch("ghelixoz",&mMtdEvtData.ghelixoz,"ghelixoz[ngTrks]/F");
-
-	mMtdEvt->Branch("gdedx",&mMtdEvtData.gdedx,"gdedx[ngTrks]/F");
-	mMtdEvt->Branch("gnSigmaPi",&mMtdEvtData.gnSigmaPi,"gnSigmaPi[ngTrks]/F");
-	mMtdEvt->Branch("gnSigmaK",&mMtdEvtData.gnSigmaK,"gnSigmaK[ngTrks]/F");
-	mMtdEvt->Branch("gnSigmaP",&mMtdEvtData.gnSigmaP,"gnSigmaP[ngTrks]/F");
-	mMtdEvt->Branch("gnSigmaE",&mMtdEvtData.gnSigmaE,"gnSigmaE[ngTrks]/F");
-	mMtdEvt->Branch("gq",&mMtdEvtData.gq,"gq[ngTrks]/B");
-	mMtdEvt->Branch("gtrackId",&mMtdEvtData.gtrackId,"gtrackId[ngTrks]/I");
-	mMtdEvt->Branch("gIndex2Primary",&mMtdEvtData.gIndex2Primary,"gIndex2Primary[ngTrks]/I");
-	mMtdEvt->Branch("gnFtPts",&mMtdEvtData.gnFtPts,"gnFtPts[ngTrks]/B");
-	mMtdEvt->Branch("gnDedxPts",&mMtdEvtData.gnDedxPts,"gnDedxPts[ngTrks]/B");
-
-	mMtdEvt->Branch("gchannel",&mMtdEvtData.gchannel,"gchannel[ngTrks]/I");
-	mMtdEvt->Branch("gyLocal",&mMtdEvtData.gyLocal,"gyLocal[ngTrks]/F");
-	mMtdEvt->Branch("gzLocal",&mMtdEvtData.gzLocal,"gzLocal[ngTrks]/F");
-	mMtdEvt->Branch("gtdc",&mMtdEvtData.gtdc,"gtdc[ngTrks]/F");
-	mMtdEvt->Branch("gtot",&mMtdEvtData.gtot,"gtot[ngTrks]/F");
-	mMtdEvt->Branch("gtof",&mMtdEvtData.gtof,"gtof[ngTrks]/F");
-	mMtdEvt->Branch("gpathLength",&mMtdEvtData.gpathLength,"gpathLength[ngTrks]/F");
-	mMtdEvt->Branch("gbeta",&mMtdEvtData.gbeta,"gbeta[ngTrks]/F");
-	mMtdEvt->Branch("gtdiff",&mMtdEvtData.gtdiff,"gtdiff[ngTrks]/F");
-
-
-	/// project to MTD
-	mMtdEvt->Branch("gdca",&mMtdEvtData.gdca,"gdca[ngTrks]/F");
-	mMtdEvt->Branch("gtrackindex",&mMtdEvtData.gtrackindex,"gtrackindex[ngTrks]/I");//
-	mMtdEvt->Branch("gTrkMatchNum",&mMtdEvtData.gTrkMatchNum,"gTrkMatchNum[ngTrks]/I");
-
-	mMtdEvt->Branch("gprojMtdBackLeg",&mMtdEvtData.gprojMtdBackLeg,"gprojMtdBackLeg[ngTrks][2]/b");
-	mMtdEvt->Branch("gprojMtdModule",&mMtdEvtData.gprojMtdModule,"gprojMtdModule[ngTrks][2]/b");
-	mMtdEvt->Branch("gprojMtdCell",&mMtdEvtData.gprojMtdCell,"gprojMtdCell[ngTrks][2]/b");
-	mMtdEvt->Branch("gprojMtdPhi",&mMtdEvtData.gprojMtdPhi,"gprojMtdPhi[ngTrks][2]/F");
-	mMtdEvt->Branch("gprojMtdZ",&mMtdEvtData.gprojMtdZ,"gprojMtdZ[ngTrks][2]/F");
-	mMtdEvt->Branch("gprojMtdLength",&mMtdEvtData.gprojMtdLength,"gprojMtdLength[ngTrks][2]/F");
-	mMtdEvt->Branch("gtof2Mtd",&mMtdEvtData.gtof2Mtd,"gtof2Mtd[ngTrks][2]/F");
-
-
-	/// Matched Mtd Hits
-	mMtdEvt->Branch("gnMatchMtdHits",&mMtdEvtData.gnMatchMtdHits,"gnMatchMtdHits[ngTrks]/I");
-	mMtdEvt->Branch("gmMtdHitIndex",&mMtdEvtData.gmMtdHitIndex,"gmMtdHitIndex[ngTrks]/I");
-	mMtdEvt->Branch("gmBackLeg",&mMtdEvtData.gmBackLeg,"gmBackLeg[ngTrks]/b");
-	mMtdEvt->Branch("gmModule",&mMtdEvtData.gmModule,"gmModule[ngTrks]/b");
-	mMtdEvt->Branch("gmCell",&mMtdEvtData.gmCell,"gmCell[ngTrks]/b");
-	mMtdEvt->Branch("gmLeTimeWest",&mMtdEvtData.gmLeTimeWest,"gmLeTimeWest[ngTrks]/F");
-	mMtdEvt->Branch("gmTotWest",&mMtdEvtData.gmTotWest,"gmTotWest[ngTrks]/F");
-	mMtdEvt->Branch("gmLeTimeEast",&mMtdEvtData.gmLeTimeEast,"gmLeTimeEast[ngTrks]/F");
-	mMtdEvt->Branch("gmTotEast",&mMtdEvtData.gmTotEast,"gmTotEast[ngTrks]/F");
-	mMtdEvt->Branch("gmLocalZ",&mMtdEvtData.gmLocalZ,"gmLocalZ[ngTrks]/F");
-	mMtdEvt->Branch("gmLocalY",&mMtdEvtData.gmLocalY,"gmLocalY[ngTrks]/F");
-	AddObj(mMtdEvt,".hist");
-}
-
 /// InitRun: initialize geometries (retrieve beam line constraint from database)
 Int_t StMtdMatchMaker::InitRun(int runnumber) {
 
@@ -621,7 +518,6 @@ Int_t StMtdMatchMaker::Make(){
 		mMuDst = (StMuDst *)GetInputDS("MuDst");
 		mMuDstIn = kTRUE;
 	}
-	if(mSaveTree) initEventData();
 
 	if(mHisto) mEventCounterHisto->Fill(0);
 	StTimer timer;
@@ -846,9 +742,6 @@ Int_t StMtdMatchMaker::Make(){
 		LOG_INFO<< "CPU time for StMtdMatchMaker::Make():"
 			<<timer.elapsedTime()<< "sec"<<endm;
 	}
-	if(mSaveTree){
-		mMtdEvt->Fill();
-	}
 	if(Debug()){
 		LOG_INFO<<"StMtdMatchMaker -- bye--bye"<<endm;
 	}
@@ -941,95 +834,6 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 				mDaqOccupancy[hisIndex]->Fill((moduleId-1)*12+cellId);
 			}
 		}
-		StMuMtdHeader* mtdHeader=mMuDst->mtdHeader();
-		unsigned int trgTime[2] = {0,0};
-		if(mtdHeader){
-			trgTime[0]=mtdHeader->triggerTime(1);
-			trgTime[1]=mtdHeader->triggerTime(2);
-		}
-		Double_t triggerTime[2]={0};
-		triggerTime[0]=25.*(trgTime[0]&0xfff);//ns
-		triggerTime[1]=25.*(trgTime[1]&0xfff);//ns
-
-		if(mSaveTree){
-
-			int nTrgIds(0);
-			for(int i=0;i<kMaxTriggerIds;i++){
-				int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
-				if(trgId>0){
-					mMtdEvtData.trgId[nTrgIds] = trgId;
-					nTrgIds++;
-				}
-			}
-			mMtdEvtData.nTrgIds = nTrgIds;       
-			mMtdEvtData.run = mMuDst->event()->runNumber();       // the run number
-			mMtdEvtData.evt = mMuDst->event()->eventId();       // the event number
-			mMtdEvtData.bField= mMuDst->event()->runInfo().magneticField()/10.; 
-			mMtdEvtData.refMult = mMuDst->event()->refMult();
-
-			StMuPrimaryVertex *pVtx = mMuDst->primaryVertex();
-			float xvtx = -999.;
-			float yvtx = -999.;
-			float zvtx = -999.;
-			if(pVtx){
-				xvtx = pVtx->position().x();
-				yvtx = pVtx->position().y();
-				zvtx = pVtx->position().z();
-			}else {
-				LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
-			};
-
-			mMtdEvtData.vertexX = xvtx;        
-			mMtdEvtData.vertexY = yvtx;              
-			mMtdEvtData.vertexZ = zvtx;              
-
-			StBTofHeader *mBTofHeader = mMuDst->btofHeader();
-			if(mBTofHeader) {
-				mMtdEvtData.vpdVz  = mBTofHeader->vpdVz();
-				mMtdEvtData.tStart = mBTofHeader->tStart();
-			}
-			mMtdEvtData.triggerTime[0] = triggerTime[0]; // ns 
-			mMtdEvtData.triggerTime[1] = triggerTime[1]; // ns 
-
-			int nMtdRawHits = mMuDst->numberOfBMTDRawHit();
-			mMtdEvtData.nMtdRawHits = nMtdRawHits;  
-			mMtdEvtData.nMtdHits = nMtdHits; 
-
-			for(Int_t i=0;i<nMtdRawHits;i++){
-				StMuMtdRawHit* aRawHit=mMuDst->mtdRawHit(i);
-				int mrflag=aRawHit->flag();
-				int mrbackleg=aRawHit->backleg();
-				int mrchn=aRawHit->channel();
-				int mrtdc=aRawHit->tdc();
-				mMtdEvtData.flag[i] = mrflag;
-				mMtdEvtData.backlegRaw[i] = mrbackleg;
-				mMtdEvtData.chn[i] = mrchn;
-				mMtdEvtData.tdc[i] = mrtdc;
-			}
-
-			LOG_DEBUG << "Number of Mtd Raw Hits = " << nMtdRawHits <<endm;
-			LOG_DEBUG << "Number of Mtd Hits = " << nMtdHits <<endm;
-			for(Int_t i=0;i<nMtdHits;i++){
-				StMuMtdHit* aHit = mMuDst->mtdHit(i);
-				if(!aHit) continue;
-				if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
-				int backlegId = aHit->backleg();
-				int moduleId = aHit->module();
-				int cellId = aHit->cell();
-
-				float mleadingwest=aHit->leadingEdgeTime().first;
-				float mleadingeast=aHit->leadingEdgeTime().second;
-				float mtrailingwest=aHit->trailingEdgeTime().first;
-				float mtrailingeast=aHit->trailingEdgeTime().second;
-				mMtdEvtData.backleg[i] = backlegId;
-				mMtdEvtData.module[i] = moduleId;
-				mMtdEvtData.cell[i] = cellId;
-				mMtdEvtData.leTimeWest[i] = mleadingwest;
-				mMtdEvtData.leTimeEast[i] = mleadingeast;
-				mMtdEvtData.totWest[i] = mtrailingwest-mleadingwest;
-				mMtdEvtData.totEast[i] = mtrailingeast-mleadingeast;
-			}
-		}
 	}else{  
 		if(!mEvent||!(mEvent->mtdCollection())||!(mEvent->mtdCollection()->hitsPresent())){
 			if(!mEvent){LOG_INFO << "no StEvent" <<endm; return kFALSE;}
@@ -1046,98 +850,11 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		//.........................................................................
 		/// check for mtdCollection and fill local copy with ADC and TDC data
 		StMtdCollection *theMtd = mEvent->mtdCollection();
-		StMtdHeader* mtdHeader=theMtd->mtdHeader();
-		unsigned int trgTime[2] = {0,0};
-		if(mtdHeader){
-			trgTime[0]=mtdHeader->triggerTime(0);
-			trgTime[1]=mtdHeader->triggerTime(1);
-		}
-		Double_t triggerTime[2]={0};
-		triggerTime[0]=25.*(trgTime[0]&0xfff);//ns
-		triggerTime[1]=25.*(trgTime[1]&0xfff);//ns
 
 		//.........................................................................
 		/// read data from StMtdHit
 		StSPtrVecMtdHit& mtdHits= theMtd->mtdHits();
-		StSPtrVecMtdRawHit& mtdRawHits=theMtd->mtdRawHits();
 
-		if(mSaveTree){
-
-			int nTrgIds(0);
-			mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
-			// protect against zero pointers (in simulated data)
-			if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
-				for(int i=0;i<kMaxTriggerIds;i++){
-					int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
-					if(trgId>0){ 
-						mMtdEvtData.trgId[nTrgIds] = trgId;
-						nTrgIds++;
-					}
-				}
-			}
-			mMtdEvtData.nTrgIds = nTrgIds;       
-			mMtdEvtData.run = mEvent->runId();       // the run number
-			mMtdEvtData.evt = mEvent->id();       // the event number
-			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
-
-			StPrimaryVertex *pVtx = mEvent->primaryVertex();
-			float xvtx = -999.;
-			float yvtx = -999.;
-			float zvtx = -999.;
-			if (pVtx){
-				xvtx = pVtx->position().x();
-				yvtx = pVtx->position().y();
-				zvtx = pVtx->position().z();
-			}
-			else {
-				LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
-			};
-
-			mMtdEvtData.vertexX = xvtx;        
-			mMtdEvtData.vertexY = yvtx;              
-			mMtdEvtData.vertexZ = zvtx;              
-
-			mMtdEvtData.triggerTime[0] = triggerTime[0]; // ns 
-			mMtdEvtData.triggerTime[1] = triggerTime[1]; // ns 
-			mMtdEvtData.nMtdRawHits = mtdRawHits.size();  
-			mMtdEvtData.nMtdHits = mtdHits.size(); 
-			for(size_t i=0;i<mtdRawHits.size();i++){
-				StMtdRawHit* aRawHit=mtdRawHits[i];
-				int mrflag=aRawHit->flag();
-				int mrbackleg=aRawHit->backleg();
-				int mrchn=aRawHit->channel();
-				int mrtdc=aRawHit->tdc();
-				mMtdEvtData.flag[i] = mrflag;
-				mMtdEvtData.backlegRaw[i] = mrbackleg;
-				mMtdEvtData.chn[i] = mrchn;
-				mMtdEvtData.tdc[i] = mrtdc;
-			}
-
-			if(Debug()){
-				LOG_INFO << "Number of Mtd Raw Hits = " << mtdRawHits.size() <<endm;
-				LOG_INFO << "Number of Mtd Hits = " << mtdHits.size() <<endm;
-			}
-			for(size_t i=0;i<mtdHits.size();i++){
-				StMtdHit* aHit = mtdHits[i];
-				if(!aHit) continue;
-				if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
-				int backlegId = aHit->backleg();
-				int moduleId = aHit->module();
-				int cellId = aHit->cell();
-
-				float mleadingwest=aHit->leadingEdgeTime().first;
-				float mleadingeast=aHit->leadingEdgeTime().second;
-				float mtrailingwest=aHit->trailingEdgeTime().first;
-				float mtrailingeast=aHit->trailingEdgeTime().second;
-				mMtdEvtData.backleg[i] = backlegId;
-				mMtdEvtData.module[i] = moduleId;
-				mMtdEvtData.cell[i] = cellId;
-				mMtdEvtData.leTimeWest[i] = mleadingwest;
-				mMtdEvtData.leTimeEast[i] = mleadingeast;
-				mMtdEvtData.totWest[i] = mtrailingwest-mleadingwest;
-				mMtdEvtData.totEast[i] = mtrailingeast-mleadingeast;
-			}
-		}
 		for(size_t i=0;i<mtdHits.size();i++){
 			StMtdHit* aHit = mtdHits[i];
 			if(!aHit) continue;
@@ -1181,11 +898,9 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	int nAllTracks=0;
 	ngTracks = 0;
 
-	float mField = 0;
 	UInt_t Nnodes = 0;
 	if(mMuDstIn){
 		Nnodes = mMuDst->numberOfGlobalTracks();
-		mField = mMuDst->event()->runInfo().magneticField();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
 			StThreeVectorD globalPos(-999,-999,-999);
 			StMuTrack *theTrack=mMuDst->globalTracks(iNode);
@@ -1205,14 +920,10 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			  nAllTracks++;
 			  if(isPrimary) nPrimaryHits++;
 			}
-			if(mSaveTree){
-			  fillTrackInfo(theTrack, mField, iNode);
-			}
 			ngTracks++;
 		}
 	}else{
 		Nnodes = mEvent->trackNodes().size();
-		mField = mEvent->runInfo()->magneticField();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
 			StSPtrVecTrackNode& nodes=mEvent->trackNodes();
 			StGlobalTrack *theTrack = dynamic_cast<StGlobalTrack*>(nodes[iNode]->track(global));
@@ -1260,17 +971,9 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 				nAllTracks++;
 				if(isPrimary) nPrimaryHits++;
 			}
-
-			if(mSaveTree){
-				fillTrackInfo(theTrack, mField, iNode);
-			}
 			ngTracks++;
 		} // end for
 	} // end if (mMuDstIn)
-
-	if(mSaveTree){
-		mMtdEvtData.ngTrks = ngTracks;
-	}
 
 }
 
@@ -1314,8 +1017,6 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		return kFALSE; 
 	}
 
-	mMtdEvtData.gdca[ngTracks] = dca.mag();	
-	mMtdEvtData.gTrkMatchNum[ngTracks] = idVec.size();	
 	int nCells = 0;
 	if(Debug()){
 		LOG_INFO<<"dca:"<<dca.mag()<<endm;
@@ -1350,18 +1051,6 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 
 		if(Debug()){
 			if(idVec.size()>1) LOG_INFO<<"iBL:iMod:iCell="<<iBL<<" "<<iMod<<" "<<iCell<<endm;
-		}
-		//attention: only saved last matched hit
-		if(mSaveTree){
-
-			mMtdEvtData.gprojMtdBackLeg[ngTracks][i] = iBL;	
-			mMtdEvtData.gprojMtdModule[ngTracks][i] = iMod;	
-			mMtdEvtData.gtrackindex[ngTracks]= (Int_t)iNode;//test Qian Yang
-			mMtdEvtData.gprojMtdCell[ngTracks][i] = iCell;
-			mMtdEvtData.gprojMtdPhi[ngTracks][i] = crossVec[i].phi();	
-			mMtdEvtData.gprojMtdZ[ngTracks][i] = crossVec[i].z();	
-			mMtdEvtData.gprojMtdLength[ngTracks][i] = pathVec[i];	
-			mMtdEvtData.gtof2Mtd[ngTracks][i] = tofVec[i];	
 		}
 	}
 	return kTRUE;
@@ -1412,28 +1101,22 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				}
 			}
 
-			double p = 0.;
+			/*
 			int iNode = proIter->trackIdVec[0];
 			if(mMuDstIn){
 				StMuTrack *theTrack=mMuDst->globalTracks(iNode);
-				p	= theTrack->momentum().mag();
 			}else{
 				StSPtrVecTrackNode& nodes=mEvent->trackNodes();
 				StGlobalTrack *theTrack = dynamic_cast<StGlobalTrack*>(nodes[iNode]->track(global));
-				p	= theTrack->geometry()->momentum().mag();
 			}
-			double zsig = fZReso->Eval(p);
-			double phisig = fPhiReso->Eval(p);
-
+			*/
 			StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
-			double ysig = phisig*modCen.perp();
 
 			Int_t   ibackleg = daqIter->backleg;
 			Int_t   imodule  = daqIter->module;
 			Int_t   icell    = daqIter->cell;
 
 			double zdaq = (daqIter->leadingEdgeTime.second-daqIter->leadingEdgeTime.first)/2./mVDrift[(ibackleg-1)*gMtdNModules+imodule-1][icell]*1e3;
-			double ydaq = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell,ibackleg);
 			bool isMatch = false;
 
 
@@ -1455,13 +1138,6 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 
 			if(isMatch){
-				double rDiff = 99.;
-				if(mCosmicFlag){
-					rDiff = 0.;
-				}else{ 
-					rDiff = pow((zdaq-proIter->zhit)/mNSigReso/zsig,2.)+pow((ydaq-proIter->yhit)/mNSigReso/ysig,2.);
-				}
-				//if(rDiff>1.) continue; // dr selection not use yet.
 				cellHit.backleg = daqIter->backleg;
 				cellHit.module = daqIter->module;
 				cellHit.cell = daqIter->cell;
@@ -2080,27 +1756,6 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				primaryTrack->addPidTraits(ppidMtd);
 			}
 		}
-
-		if(mSaveTree){
-			int iNode = trackNode;	
-			int iTrk;
-			for(iTrk=0;iTrk<ngTracks;iTrk++){
-				if(mMtdEvtData.gtrackId[iTrk] == iNode) break;
-			}
-			mMtdEvtData.gnMatchMtdHits[iTrk] = 1;
-			mMtdEvtData.gmMtdHitIndex[iTrk] = finalMatchedCellsVec[ii].index2MtdHit;
-
-			mMtdEvtData.gmBackLeg[iTrk] = backleg;
-			mMtdEvtData.gmModule[iTrk] = module;
-			mMtdEvtData.gmCell[iTrk] = cell;
-			mMtdEvtData.gmLeTimeWest[iTrk] = finalMatchedCellsVec[ii].leadingEdgeTime.first;
-			mMtdEvtData.gmLeTimeEast[iTrk] = finalMatchedCellsVec[ii].leadingEdgeTime.second;
-			mMtdEvtData.gmTotWest[iTrk] = finalMatchedCellsVec[ii].tot.first;
-			mMtdEvtData.gmTotEast[iTrk] = finalMatchedCellsVec[ii].tot.second;
-			mMtdEvtData.gmLocalZ[iTrk] = finalMatchedCellsVec[ii].zhit;
-			mMtdEvtData.gmLocalY[iTrk] = finalMatchedCellsVec[ii].yhit - hitLocalY;
-		}
-
 	}
 }
 
@@ -2159,268 +1814,6 @@ Int_t StMtdMatchMaker::getProjModule(Float_t local_z, Float_t global_z)
 	}
     }
   return module;
-}
-
-
-/// initialize MTD Event Data
-void StMtdMatchMaker::initEventData(){
-	memset(&mMtdEvtData,0,sizeof(mMtdEvtData));
-}
-
-/// fill track info to QA tree 
-void StMtdMatchMaker::fillTrackInfo(StTrack *t, float mField, UInt_t iNode){
-	if(!t) return;
-	float gdEdx=-999.;
-	float gpt=-999.,geta=-999.,gphi=-999.;
-	float ppt=-999.,peta=-999.,pphi=-999.;
-	float nSigmaE = -999.,nSigmaPi = -999.,nSigmaK = -999.,nSigmaP = -999.;
-	float gyLocal=-999.,gzLocal=-999.;
-	float gtdc=-999.,gtof=-999.,gtot=-999.;
-	float gpathLength=-999.,gbeta=-999.;
-	int   gq = 0,gndEdxpts=0,gnFtPts=0;
-	int idx2primary = -1;
-	int gchannel=-1;
-	float ghelixpx  = -999.;
-	float ghelixpy  = -999.;
-	float ghelixpz  = -999.;
-	float ghelixox  = -999.;
-	float ghelixoy  = -999.;
-	float ghelixoz  = -999.;
-
-	bool isPrimary =kFALSE;
-	StPrimaryTrack *pTrack =dynamic_cast<StPrimaryTrack*>(t->node()->track(primary));
-	if(pTrack) isPrimary = kTRUE;
-	if(!validTrack(t)) return;
-
-	static StTpcDedxPidAlgorithm PidAlgorithm;
-	static StElectron* Electron = StElectron::instance();
-	static StPionPlus* Pion = StPionPlus::instance();
-	static StKaonPlus* Kaon = StKaonPlus::instance();
-	static StProton* Proton = StProton::instance();
-	const StParticleDefinition* pd = t->pidTraits(PidAlgorithm);
-
-	if (pd) {
-		nSigmaE  = PidAlgorithm.numberOfSigma(Electron);
-		nSigmaPi = PidAlgorithm.numberOfSigma(Pion);
-		nSigmaK  = PidAlgorithm.numberOfSigma(Kaon);
-		nSigmaP  = PidAlgorithm.numberOfSigma(Proton);
-	}
-
-	if(PidAlgorithm.traits()){
-		gdEdx = PidAlgorithm.traits()->mean();
-		gndEdxpts=PidAlgorithm.traits()->numberOfPoints();
-	}
-
-	gq		= t->geometry()->charge();
-	gpt		= t->geometry()->momentum().perp();
-	geta 	= t->geometry()->momentum().pseudoRapidity();
-	gphi 	= t->geometry()->momentum().phi();
-	//LOG_INFO  <<" project2MTD() Found track: gpt "<< gpt << " gq:"<<gq<<" geta:"<<geta<<" gphi:"<<gphi<<" gnFtPts:"<<gnFtPts<<endm;
-	if(isPrimary){
-
-		ppt		= pTrack->geometry()->momentum().perp();
-		peta 	= pTrack->geometry()->momentum().pseudoRapidity();
-		pphi 	= pTrack->geometry()->momentum().phi();
-
-	}
-	gnFtPts	= t->fitTraits().numberOfFitPoints(kTpcId);
-	while(gphi<0.)gphi+=2.*(TMath::Pi());
-	while(gphi>2*(TMath::Pi()))gphi-=2.*(TMath::Pi());
-
-	if(isPrimary) idx2primary = pTrack->key();
-
-	StPhysicalHelixD helix = t->outerGeometry()->helix();
-	StThreeVector<double> helixOrigin = helix.origin();
-	StThreeVector<double> helixMomentum = helix.momentum(mField*kilogauss);
-	ghelixpx  = helixMomentum.x();
-	ghelixpy  = helixMomentum.y();
-	ghelixpz  = helixMomentum.z();
-	ghelixox  = helixOrigin.x();
-	ghelixoy  = helixOrigin.y();
-	ghelixoz  = helixOrigin.z();
-
-	StSPtrVecTrackPidTraits& traits = t->pidTraits();
-	LOG_DEBUG <<" project2MTD() Found track: gpt "<< gpt << " gq:"<<gq<<" geta:"<<geta<<" gphi:"<<gphi<<" gnFtPts:"<<gnFtPts<<endm;
-	for (unsigned int it=0;it<traits.size();it++){
-		if (traits[it]->detector() == kTofId) {
-			StBTofPidTraits* tofpid = dynamic_cast<StBTofPidTraits*>(traits[it]);
-
-			if(tofpid){
-				StBTofHit* aHit = tofpid->tofHit();
-
-				if(tofpid && aHit){
-					int tray = aHit->tray();	
-					int module = aHit->module();	
-					int cell = aHit->cell();	
-					gchannel = (tray-1)*192+(module-1)*6+cell-1;
-					gyLocal  = tofpid->yLocal();
-					gzLocal  = tofpid->zLocal();
-					gtdc = aHit->leadingEdgeTime();
-					gtot = aHit->tot();
-					gtof = tofpid->timeOfFlight();
-					gpathLength = tofpid->pathLength();
-					gbeta = tofpid->beta();
-					LOG_DEBUG <<" project2MTD() Found matched TOF hit: tray:"<< tray << " module:"<<module<<" cell:"<<cell<<" gtdc:"<<gtdc<<" gtof:"<<gtot<<" gtof:"<<gtof<<" gpathLength:"<<gpathLength<<" gbeta:"<<gbeta<<endm;
-				}
-			}
-		}
-	}
-
-	if(mHisto){
-		mTrackPtEta->Fill(gpt, geta);
-		mTrackPtPhi->Fill(gpt, gphi);
-		mTrackNFitPts->Fill(gnFtPts);
-		if(gdEdx>0.) mTrackdEdxvsp->Fill(gpt, gdEdx*1.e6);
-		if(fabs(nSigmaPi)<5.) mNSigmaPivsPt->Fill(gpt, nSigmaPi+5.*gq);
-	}
-
-
-	mMtdEvtData.gq[ngTracks] = gq;
-	mMtdEvtData.gtrackId[ngTracks] = iNode;
-	mMtdEvtData.gpt[ngTracks] = gpt;
-	mMtdEvtData.geta[ngTracks] = geta;
-	mMtdEvtData.gphi[ngTracks] = gphi;
-	mMtdEvtData.ppt[ngTracks] = ppt;
-	mMtdEvtData.peta[ngTracks] = peta;
-	mMtdEvtData.pphi[ngTracks] = pphi;
-	mMtdEvtData.ghelixpx[ngTracks] = ghelixpx;
-	mMtdEvtData.ghelixpy[ngTracks] = ghelixpy;
-	mMtdEvtData.ghelixpz[ngTracks] = ghelixpz;
-	mMtdEvtData.ghelixox[ngTracks] = ghelixox;
-	mMtdEvtData.ghelixoy[ngTracks] = ghelixoy;
-	mMtdEvtData.ghelixoz[ngTracks] = ghelixoz;
-	mMtdEvtData.gIndex2Primary[ngTracks] = idx2primary;
-	mMtdEvtData.gnFtPts[ngTracks] 	= gnFtPts;
-	mMtdEvtData.gdedx[ngTracks] 	= gdEdx;
-	mMtdEvtData.gnDedxPts[ngTracks] = gndEdxpts;
-
-	mMtdEvtData.gchannel[ngTracks]= gchannel;
-	mMtdEvtData.gyLocal[ngTracks] = gyLocal;
-	mMtdEvtData.gzLocal[ngTracks] = gzLocal;
-	mMtdEvtData.gtdc[ngTracks]   = gtdc;
-	mMtdEvtData.gtot[ngTracks]   = gtot;
-	mMtdEvtData.gtof[ngTracks]   = gtof; 
-	mMtdEvtData.gpathLength[ngTracks] = gpathLength;
-	mMtdEvtData.gbeta[ngTracks] = gbeta;
-	mMtdEvtData.gnSigmaE[ngTracks] = nSigmaE;
-	mMtdEvtData.gnSigmaPi[ngTracks] = nSigmaPi;
-	mMtdEvtData.gnSigmaK[ngTracks] = nSigmaK;
-	mMtdEvtData.gnSigmaP[ngTracks] = nSigmaP;
-}
-
-void StMtdMatchMaker::fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode){
-
-	if(!t) return;
-	float gdEdx=-999.;
-	float gpt=-999.,geta=-999.,gphi=-999.;
-	float ppt=-999.,peta=-999.,pphi=-999.;
-	float nSigmaE = -999.,nSigmaPi = -999.,nSigmaK = -999.,nSigmaP = -999.;
-	float gyLocal=-999.,gzLocal=-999.;
-	float gtdc=-999.,gtof=-999.,gtot=-999.;
-	float gpathLength=-999.,gbeta=-999.;
-	int   gq = 0,gndEdxpts=0,gnFtPts=0;
-	int idx2primary = -1;
-	int gchannel=-1;
-	float ghelixpx  = -999.;
-	float ghelixpy  = -999.;
-	float ghelixpz  = -999.;
-	float ghelixox  = -999.;
-	float ghelixoy  = -999.;
-	float ghelixoz  = -999.;
-
-	bool isPrimary=kFALSE;
-	const StMuTrack *thePrimaryTrack=t->primaryTrack();
-	if(thePrimaryTrack) isPrimary=kTRUE;
-	if(!validTrack(t)) return;
-
-	nSigmaE  = t->nSigmaElectron(); 
-	nSigmaPi = t->nSigmaPion();
-	nSigmaK  = t->nSigmaKaon();
-	nSigmaP  = t->nSigmaProton();
-
-	gdEdx 		= t->dEdx();
-	gndEdxpts 	= t->nHitsDedx();
-	gnFtPts 	= t->nHitsFit();
-	gq 			= t->charge();
-	gpt 		= t->momentum().perp();
-	geta 		= t->momentum().pseudoRapidity();
-	gphi 		= t->momentum().phi();
-
-	if(isPrimary){
-		ppt 	= thePrimaryTrack->momentum().perp();
-		peta 	= thePrimaryTrack->momentum().pseudoRapidity();
-		pphi 	= thePrimaryTrack->momentum().phi();
-	}
-	while(gphi<0.)gphi+=2.*(TMath::Pi());
-	while(gphi>2*(TMath::Pi()))gphi-=2.*(TMath::Pi());
-	if(isPrimary) idx2primary = thePrimaryTrack->id();
-
-	StPhysicalHelixD helix = t->outerHelix();
-	StThreeVector<double> helixOrigin = helix.origin();
-	StThreeVector<double> helixMomentum = helix.momentum(mField*kilogauss);
-	ghelixpx  = helixMomentum.x();
-	ghelixpy  = helixMomentum.y();
-	ghelixpz  = helixMomentum.z();
-	ghelixox  = helixOrigin.x();
-	ghelixoy  = helixOrigin.y();
-	ghelixoz  = helixOrigin.z();
-
-	const StMuBTofPidTraits tofpid = t->btofPidTraits();
-	const StMuBTofHit* aHit = t->tofHit();
-	if(aHit){
-		int tray = aHit->tray();	
-		int module = aHit->module();	
-		int cell = aHit->cell();	
-		gchannel = (tray-1)*192+(module-1)*6+cell-1;
-		gyLocal = tofpid.yLocal();
-		gzLocal = tofpid.zLocal();
-		gtdc = aHit->leadingEdgeTime();
-		gtot = aHit->tot();
-		gtof = tofpid.timeOfFlight();
-		gpathLength = tofpid.pathLength();
-		gbeta = tofpid.beta();
-		LOG_DEBUG <<" project2MTD() Found matched TOF hit: tray:"<< tray << " module:"<<module<<" cell:"<<cell<<" gtdc:"<<aHit->leadingEdgeTime()<<" gtof:"<<aHit->tot()<<" gtof:"<<tofpid.timeOfFlight()<<" gpathLength:"<<tofpid.pathLength()<<" gbeta:"<<tofpid.beta()<<endm;
-	}
-
-	if(mHisto){
-		mTrackPtEta->Fill(gpt, geta);
-		mTrackPtPhi->Fill(gpt, gphi);
-		mTrackNFitPts->Fill(gnFtPts);
-		if(gdEdx>0.) mTrackdEdxvsp->Fill(gpt, gdEdx*1.e6);
-		if(fabs(nSigmaPi)<5.) mNSigmaPivsPt->Fill(gpt, nSigmaPi+5.*gq);
-	}
-
-	mMtdEvtData.gq[ngTracks] = gq;
-	mMtdEvtData.gtrackId[ngTracks] = iNode;
-	mMtdEvtData.gpt[ngTracks] = gpt;
-	mMtdEvtData.geta[ngTracks] = geta;
-	mMtdEvtData.gphi[ngTracks] = gphi;
-	mMtdEvtData.ppt[ngTracks] = ppt;
-	mMtdEvtData.peta[ngTracks] = peta;
-	mMtdEvtData.pphi[ngTracks] = pphi;
-	mMtdEvtData.ghelixpx[ngTracks] = ghelixpx;
-	mMtdEvtData.ghelixpy[ngTracks] = ghelixpy;
-	mMtdEvtData.ghelixpz[ngTracks] = ghelixpz;
-	mMtdEvtData.ghelixox[ngTracks] = ghelixox;
-	mMtdEvtData.ghelixoy[ngTracks] = ghelixoy;
-	mMtdEvtData.ghelixoz[ngTracks] = ghelixoz;
-	mMtdEvtData.gIndex2Primary[ngTracks] = idx2primary;
-	mMtdEvtData.gnFtPts[ngTracks] 	= gnFtPts;
-	mMtdEvtData.gdedx[ngTracks] 	= gdEdx;
-	mMtdEvtData.gnDedxPts[ngTracks] = gndEdxpts;
-
-	mMtdEvtData.gchannel[ngTracks]= gchannel;
-	mMtdEvtData.gyLocal[ngTracks] = gyLocal;
-	mMtdEvtData.gzLocal[ngTracks] = gzLocal;
-	mMtdEvtData.gtdc[ngTracks]   = gtdc;
-	mMtdEvtData.gtot[ngTracks]   = gtot;
-	mMtdEvtData.gtof[ngTracks]   = gtof; 
-	mMtdEvtData.gpathLength[ngTracks] = gpathLength;
-	mMtdEvtData.gbeta[ngTracks] = gbeta;
-	mMtdEvtData.gnSigmaE[ngTracks] = nSigmaE;
-	mMtdEvtData.gnSigmaPi[ngTracks] = nSigmaPi;
-	mMtdEvtData.gnSigmaK[ngTracks] = nSigmaK;
-	mMtdEvtData.gnSigmaP[ngTracks] = nSigmaP;
 }
 
 //___________________________________________________
