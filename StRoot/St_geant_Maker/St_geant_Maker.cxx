@@ -929,16 +929,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     Do(Form("ranlux %d",IAttr("RunG")));
     Do("rndm");
   }
-  LOG_INFO << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
-  m_geom_gdat = (St_geom_gdat *) Find(".runco/geom/geom_gdat");
-  if (! m_geom_gdat) {
-    St_geom_gdat *geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
-    if ( geom_gdat)  {
-      m_geom_gdat = new St_geom_gdat(*geom_gdat);
-      AddRunco(m_geom_gdat);
-    }
-  }
-  //  if (m_Mode%10 != 1 && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
+    //  if (m_Mode%10 != 1 && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
   if (! IAttr("Don'tTouchTimeStamp") && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*) GetTopChain()->GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
@@ -976,56 +967,67 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	  }
 	}
       } else {
-	Float_t mfscale = 1; 
-	if (m_geom_gdat)  {
-	  geom_gdat_st *gdat = m_geom_gdat->GetTable();
-	  mfscale = gdat->mfscale;
-	  LOG_INFO << "St_geant_Maker::Init geom_gdata is found in fz-file ! ";
-	} else {
-	  St_mfld_mflg *mfld_mflg = (St_mfld_mflg *) Find(".const/geom/mfld_mflg");
-	  if (mfld_mflg) {
-	    LOG_INFO << "St_geant_Maker::Init mfld_mflg is found in fz-file ! ";
-	    mfld_mflg_st *s = mfld_mflg->GetTable();
-	    mfscale = s->bfield/5.0;
-	  } else {
-	    LOG_INFO << "St_geant_Maker::Init geom_gdata is missing in fz-file ! Use default mag.field scale factor ";
-	  }
-	}
-	LOG_INFO  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
-	struct Field_t {
-	  const Char_t *name;
-	  Float_t scale;
-	};
-	const Field_t FieldOptions[5] = {
-	  {"FullMagFNegative", -1.0},
-	  {"FullMagFPositive",  1.0},
-	  {"HalfMagFNegative", -0.5},
-	  {"HalfMagFPositive",  0.5},
-	  {"ZeroMagF",          0.0}
-	};
-	TString FieldOption("");
-	for (Int_t i = 0; i < 5; i++) {
-	  if (TMath::Abs(mfscale - FieldOptions[i].scale) < 2.e-2) {
-	    FieldOption = FieldOptions[i].name;
-	    break;
-	  }
-	}
-	if (FieldOption != "") {
-	  SetFlavor(FieldOption.Data(),        "MagFactor");
-	  LOG_INFO << "St_geant_Maker::Init  SetFlavor(\"" << FieldOption.Data() 
-			     << "\",\"MagFactor\")" << endm;
-	}
-	delete StarMagField::Instance();
 	if (! StarMagField::Instance()) {
-	  new StarMagField ( StarMagField::kMapped, mfscale, kTRUE);
-	  LOG_INFO << "St_geant_Maker::Init  Create StarMagField and lock it"
+	  LOG_INFO << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
+	  m_geom_gdat = (St_geom_gdat *) Find(".runco/geom/geom_gdat");
+	  if (! m_geom_gdat) {
+	    St_geom_gdat *geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
+	    if ( geom_gdat)  {
+	      m_geom_gdat = new St_geom_gdat(*geom_gdat);
+	      AddRunco(m_geom_gdat);
+	    }
+	  }
+	  Float_t mfscale = 1; 
+	  if (m_geom_gdat)  {
+	    geom_gdat_st *gdat = m_geom_gdat->GetTable();
+	    mfscale = gdat->mfscale;
+	    LOG_INFO << "St_geant_Maker::InitRun geom_gdata is found in fz-file ! ";
+	  } else {
+	    St_mfld_mflg *mfld_mflg = (St_mfld_mflg *) Find(".const/geom/mfld_mflg");
+	    if (mfld_mflg) {
+	      LOG_INFO << "St_geant_Maker::InitRun mfld_mflg is found in fz-file ! ";
+	      mfld_mflg_st *s = mfld_mflg->GetTable();
+	      mfscale = s->bfield/5.0;
+	    } else {
+	      LOG_INFO << "St_geant_Maker::InitRun geom_gdata is missing in fz-file ! Use default mag.field scale factor ";
+	    }
+	  }
+	  LOG_INFO  << "St_geant_Maker::InitRun mfscale = " << mfscale		       << endm;
+	  struct Field_t {
+	    const Char_t *name;
+	    Float_t scale;
+	  };
+	  const Field_t FieldOptions[5] = {
+	    {"FullMagFNegative", -1.0},
+	    {"FullMagFPositive",  1.0},
+	    {"HalfMagFNegative", -0.5},
+	    {"HalfMagFPositive",  0.5},
+	    {"ZeroMagF",          0.0}
+	  };
+	  TString FieldOption("");
+	  for (Int_t i = 0; i < 5; i++) {
+	    if (TMath::Abs(mfscale - FieldOptions[i].scale) < 2.e-2) {
+	      FieldOption = FieldOptions[i].name;
+	      break;
+	    }
+	  }
+	  if (FieldOption != "") {
+	    SetFlavor(FieldOption.Data(),        "MagFactor");
+	    LOG_INFO << "St_geant_Maker::InitRun  SetFlavor(\"" << FieldOption.Data() 
+		     << "\",\"MagFactor\")" << endm;
+	  }
+	  delete StarMagField::Instance();
+	  if (! StarMagField::Instance()) {
+	    new StarMagField ( StarMagField::kMapped, mfscale, kTRUE);
+	    LOG_INFO << "St_geant_Maker::InitRun  Create StarMagField and lock it"
+		     << endm;
+	  }
+	  else {
+	    StarMagField::Instance()->SetFactor(mfscale);
+	    StarMagField::Instance()->SetLock();
+	    LOG_INFO << "St_geant_Maker::InitRun  Reset StarMagField and lock it"
 			     << endm;
-	}
-	else {
-	  StarMagField::Instance()->SetFactor(mfscale);
-	  StarMagField::Instance()->SetLock();
-	  LOG_INFO << "St_geant_Maker::Init  Reset StarMagField and lock it"
-			     << endm;
+	  }
 	}
       }
     }

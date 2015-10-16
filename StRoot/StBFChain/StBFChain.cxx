@@ -371,7 +371,7 @@ Int_t StBFChain::Instantiate()
 
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
-      if (!GetOption("fzin")  && 
+      if (!GetOption("fzin")  && !GetOption("fzinSDT") &&
 	  !GetOption("ntin")  &&
 	  !GetOption("gstar") && 
 	  !GetOption("pythia"))                      NwGeant =  5;
@@ -382,7 +382,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
       TString CintF(SAttr("GeneratorFile"));
-      if (GetOption("fzin")        || 
+      if (GetOption("fzin")        || GetOption("fzinSDT")        ||
 	  GetOption("ntin")        || 
 	  GetOption("gstar")       || 
 	  GetOption("PrepEmbed")   || 
@@ -390,7 +390,7 @@ Int_t StBFChain::Instantiate()
 	  CintF != "") {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
-	if (GetOption("PrepEmbed") || GetOption("pythiaEmbed")) mk->SetAttr("Don'tTouchTimeStamp",1);
+	if (GetOption("PrepEmbed") || GetOption("pythiaEmbed") || GetOption("fzinSDT")) mk->SetAttr("Don'tTouchTimeStamp",1);
 	if (GetOption("flux"))      mk->SetAttr("flux",1);
 	if (GetOption("fzout"))     mk->SetAttr("fzout",1);
 	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
@@ -399,7 +399,7 @@ Int_t StBFChain::Instantiate()
       } else mk->SetActive(kFALSE);
       if (! mk) goto Error;
       SetGeantOptions(mk);
-      if (GetOption("fzin")        || 
+      if (GetOption("fzin")        || GetOption("fzinSDT")        ||
 	  GetOption("PrepEmbed")   || 
 	  GetOption("mtin")) {
 	NoMakersWithInput++;
@@ -1370,7 +1370,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
 #if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || 
+      if (!( GetOption("fzin")   || GetOption("fzinSDT")        ||
 	     GetOption("ntin")   || 
 	     GetOption("gstar" ) || 
 	     GetOption("pythia") || 
@@ -1383,8 +1383,12 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");
       }
+      if (GetOption("fzin") &&  FDateS) {
+	SetOption("-fzin","Default,SDT");
+	SetOption("fzinSDT","Default,SDT");
+      }
     } else {                                  // root
-      if (GetOption("fzin")) {
+      if (GetOption("fzin") || GetOption("fzinSDT")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
@@ -1429,6 +1433,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     if (TString(SAttr("GeneratorFile")) != "") {
       SetOption("geant","GeneratorFile");
       SetOption("-fzin","GeneratorFile");
+      SetOption("-fzinSDT","GeneratorFile");
     }
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
@@ -1473,7 +1478,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
     }
   }
   if (fInFile == "") {SetOption("-in","No Input File"); SetOption("-InTree","NoInput File"); return;}
-  if (!GetOption("fzin") && !GetOption("ntin")) {
+  if (!GetOption("fzin") && !GetOption("fzinSDT") &&!GetOption("ntin")) {
     fSetFiles= new StFile();
     TObjArray Files;
     ParseString(fInFile,Files);
@@ -1499,7 +1504,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       fFileOut = outfile;
     }
     if ((fFileOut == "") & (fInFile != "")) {
-      if (GetOption("fzin") || GetOption("ntin")) {
+      if (GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin")) {
 	TObjArray words;
 	ParseString(fInFile,words);
 	TIter nextL(&words);
@@ -1568,7 +1573,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     geantMk->SetAttr("RunG",fRunG);
   }
 #if 0
-  if (! (GetOption("fzin") || ! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
+  if (! (GetOption("fzin") || GetOption("fzinSDT") |! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
     GeomVersion = "y2004x";
     const DbAlias_t *DbAlias = GetDbAliases();
     Int_t found = 0;
@@ -1589,12 +1594,12 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
   }
 #else
-  if (! GetOption("fzin")) {
+  if (! GetOption("fzin") && !  GetOption("fzinSDT")) {
     if (GetOption("phys_off")) {geantMk->SetAttr("phys_off",1);}
     if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",1);}
   }
 #endif      
-  if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
+  if ((GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
     ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }
@@ -1717,7 +1722,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
   //abort();
 #endif /*  USE_BFCTIMESTAMP */
 
-  if (!GetOption("fzin")) {
+  if (!GetOption("fzin") && !GetOption("fzinSDT")) {
     struct Field_t {
       const Char_t *name;
       Float_t scale;
@@ -1783,7 +1788,7 @@ void StBFChain::SetTreeOptions()
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
   if (GetOption("AllEvent")) {
-    if (GetOption("fzin")   || 
+    if (GetOption("fzin")   || GetOption("fzinSDT")   ||
 	GetOption("ntin")   || 
 	GetOption("gstar")  || 
 	GetOption("pythia") || 

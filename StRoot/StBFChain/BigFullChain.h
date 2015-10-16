@@ -1406,6 +1406,8 @@ Bfc_st BFC[] = { // standard chains
    ,"StarLight"
    ,                                         "Load StarLight in starsim, set AuAu 200 GeV with rho",kFALSE},
 #endif
+  {"fzinSDT"       ,"geant","","Simu,-gstar,-ntin,-fzin,geantL","St_geant_Maker",""
+   ,                                                                           "read gstar fz-file",kFALSE},
   {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
    ,                                                        "","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
