@@ -1,6 +1,6 @@
 /*****************************************************************************
  * 
- * $Id: StMuFmsPoint.h,v 1.2 2015/09/02 22:09:58 jdb Exp $
+ * $Id: StMuFmsPoint.h,v 1.3 2015/10/16 18:13:28 jdb Exp $
  *
  * Author: Thomas Burton, 2014
  *****************************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************************
  *  
  * $Log: StMuFmsPoint.h,v $
+ * Revision 1.3  2015/10/16 18:13:28  jdb
+ * incremented version # for StMuFmsCollection and StMuFmsPoint
+ *
  * Revision 1.2  2015/09/02 22:09:58  jdb
  * Added Akios changes to Fms
  *
@@ -84,7 +87,7 @@ class StMuFmsPoint : public TObject {
    Duplication should only be done via Clone().
    */
   StMuFmsPoint& operator=(const StMuFmsPoint&);
-  ClassDef(StMuFmsPoint, 1)
+  ClassDef(StMuFmsPoint, 2)
 };
 
   inline unsigned short StMuFmsPoint::detectorId() const { return mDetectorId; }
