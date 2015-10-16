@@ -657,14 +657,14 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	      // K. Yip : Aug. 14, 2015 : 
 	      // The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it, where _all_ SVX channels were connected to the silicon and the pitch is smaller.
 	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) { // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
-		pitch = 9.55E-5 ; // in m
+		pitch = pitch_4svx2 ; // in m
 	      }
 	      else {
-		pitch = 9.74E-5 ; // in m
+		pitch = pitch_4svx ; // in m
 	      }
 	    }
 	    else {               // B or D : pitch_6svx = 0.01050 cm
-	      pitch = 1.050E-4 ; // in m
+	      pitch = pitch_6svx ; // in m
 	    }
 
 	    position = position*pitch ;
