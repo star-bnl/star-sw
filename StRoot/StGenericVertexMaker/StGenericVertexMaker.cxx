@@ -116,15 +116,15 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")){ // 2 version of PPV w/ & w/o CTB
+  } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) { // 2 version of PPV w/ & w/o CTB
       LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
       theFinder= new StPPVertexFinder();
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
     }
-
-  } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")){ // 2 version of PPV w/ & w/o Btof
+  } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")
+           ||(IAttr("VFPPV")   &&  IAttr("Stv"))        )  { // 2 version of PPV w/ & w/o Btof
       LOG_INFO << "StGenericVertexMaker::Init: uses StvPPVertex finder(StEvent based)"<<  endm;
       theFinder= new StEvPPV::StPPVertexFinder();
       useBTOF = (IAttr("VFPPVEvNoBTof"))? 0:1;
