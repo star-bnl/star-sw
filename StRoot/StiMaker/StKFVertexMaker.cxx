@@ -277,18 +277,26 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   }
   StTrackNode *node = TrackNodeMap[kg];
   if (! node) {
+    UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
   StiKalmanTrack* kTrack = StiToolkit::instance()->getTrackFactory()->getInstance();
   const StiKalmanTrack* kTrackC = (*StiStEventFiller::Node2TrackMap())[node];
-  if (! kTrackC) return pTrack;
+  if (! kTrackC) {
+    UpdateParticleAtVertex(0, &track->Particle());
+    return pTrack;
+  }
   *kTrack = *kTrackC;
   StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
-  if (! gTrack) return pTrack;
+  if (! gTrack) {
+    UpdateParticleAtVertex(0, &track->Particle());
+    return pTrack;
+  }
   // Replace dca node by a primary vertex
   StiKalmanTrackNode *tNode = kTrack->getInnerMostNode();
   if (! tNode || tNode->getDetector()) {// Track has to be fitted to a vertex or to be Dca 
     BFactory::Free(kTrack);
+    UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
   if (Debug() > 1) {
@@ -335,6 +343,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (! kTrack->getFirstNode() || ! kTrack->getLastNode()) fail = 1;
   if (fail) {
     BFactory::Free(kTrack);
+    UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
   StiKalmanTrackNode *extended = (StiKalmanTrackNode*) kTrack->extendToVertex(Vertex);
@@ -349,6 +358,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   } 
   if (! extended) {
     BFactory::Free(kTrack);
+    UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
   kTrack->setPrimary(V->ID());
@@ -370,6 +380,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (status || kTrack->getChi2() >= 100) {
     //    kTrack->removeLastNode();
     BFactory::Free(kTrack);    
+    UpdateParticleAtVertex(0, &track->Particle());
     return pTrack; // failed to refit
   }
   if (Debug() > 2) {
@@ -1012,11 +1023,14 @@ void StKFVertexMaker::SecondaryVertices() {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *particle) {
-  StiKalmanTrackNode *extended = kTrack->getInnerMostHitNode(3);
+  StiKalmanTrackNode *extended = 0;
+  if (kTrack) extended = kTrack->getInnerMostHitNode(3);
   if (! extended) {
     if (StKFVertex::Debug() > 2) {
       cout << "StKFVertexMaker::UpdateParticleAtVertex extention to InnerMostNdode failed" << endl;
     }
+    particle->NDF() = -1;
+    particle->Chi2() = -1;;
     return;
   }
   TRVector Pxyz(6);
@@ -1028,7 +1042,7 @@ void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *
 #else
   particle->Create(Pxyz.GetArray(),covPxyz.GetArray(),particle->Q(),(Float_t) TDatabasePDG::Instance()->GetParticle(particle->GetPDG())->Mass());
 #endif
-  particle->SetPDG(kTrack->pdgId());
+  //  particle->SetPDG(kTrack->pdgId());
   particle->NDF() = 2;
   particle->Chi2() = extended->getChi2();
   PrPP(UpdateParticleAtVertex  after,*particle);
