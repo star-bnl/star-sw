@@ -362,18 +362,17 @@ Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t f2 = 0;
   St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
   if (e1==0) return -99;
-#if 0
-  Float_t v1=Voltage(e1-1);
+  Int_t ch1 = St_TpcAvgCurrentC::ChannelFromSocket((e1-1)%19+1);
+  Float_t v1=Voltage()[8*(sector-1)+ch1-1] ;
   if (f2==0) return v1;
-  Float_t v2=Voltage(e2-1);
+  Int_t ch2 = St_TpcAvgCurrentC::ChannelFromSocket((e2-1)%19 + 1);
+  Float_t v2=Voltage()[8*(sector-1)+ch2-1] ;
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
   Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
-#endif
-  return 0;
 }
 //________________________________________________________________________________
 Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
