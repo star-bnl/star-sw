@@ -19,6 +19,10 @@ int gMyNextSeed=0;
 #include "StvSeed/StvSeedConst.h"
 
 #define __NOSTV__
+#define StvSeedFinder ZtvSeedFinder
+#define StvKNSeedFinder ZtvKNSeedFinder
+#define StvHit ZtvHit
+
 
 #define StvHit_HH 1
 #define ST_TGEOHELPER_H
