@@ -163,6 +163,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   //  {"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
   // eStar simulations starting w/ timestamp 12/10/2020
   {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
+  {"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
+
   {0,                    0,     0,        0,    0}
 };
 #endif /*  __GeometryDbAliases__ */
