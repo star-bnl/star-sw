@@ -7,10 +7,13 @@ gfile p [input]
 *     gfile b background.list   ** list of background files
 gfile b  [pileup]
 *     gfile bw [pileup]
-gfile o pythiapp510wenu_[set]_pileup.fz
-gback 414 414  1.066 106.6 10 * 10 MHz
+*gfile o pythiapp510wenu_[set]_pileup.fz
+gfile o hijingauau200_[set]_pileup.fz
+*gback 414 414  1.066 106.6 10 * 10 MHz
+*gback 875 875  0.08 106.6 1 * 75 kHz
+gback 414 414  0.08 106.6 1 * 75 kHz
 mode  TPCE BACK 4141414  ** TPC sees 414 bxings before and 414 bxings after the trigger collision.
-* mode pixl back 8751875 ** Pixel sees 875 bxings before and 875 bxings after the trigger collision.
+mode pixl back 8751875 ** Pixel sees 875 bxings before and 875 bxings after the trigger collision.
 trig 10
 return
  
