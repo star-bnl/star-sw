@@ -75,7 +75,7 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
     Float_t V, dV = -1;
     switch (i) {
     case 0: if (particle.GetParameter(7) == 0.0) break; particle.GetDecayLength(V,dV); break;
-    case 1:                                             particle.GetMass(V,dV);        break;
+    case 1: if (particle.NDaughters())                  particle.GetMass(V,dV);        break;
     case 2: if (particle.GetParameter(7) == 0.0) break; particle.GetLifeTime(V,dV);    break;
     case 3:                                             particle.GetMomentum(V,dV);    break;
     default: break;
