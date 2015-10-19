@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsCollection.h,v 1.2 2015/08/28 18:36:04 jdb Exp $
+ * $Id: StMuFmsCollection.h,v 1.3 2015/10/16 18:13:28 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsCollection.h,v $
+ * Revision 1.3  2015/10/16 18:13:28  jdb
+ * incremented version # for StMuFmsCollection and StMuFmsPoint
+ *
  * Revision 1.2  2015/08/28 18:36:04  jdb
  * Added Akios FMS codes
  *
@@ -27,7 +30,7 @@ class StMuFmsHit;
 class StMuFmsCluster;
 class StMuFmsPoint;
 
-class StMuFmsCollection : public StObject {
+class StMuFmsCollection : public TObject {
 public:
     StMuFmsCollection();
     ~StMuFmsCollection();
@@ -55,6 +58,6 @@ private:
     TClonesArray* mClusters;
     TClonesArray* mPoints;
     
-    ClassDef(StMuFmsCollection,2)
+    ClassDef(StMuFmsCollection,3)
 };
 #endif
