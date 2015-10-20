@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.9 2015/09/23 17:34:01 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.10 2015/10/20 19:49:28 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,10 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.10  2015/10/20 19:49:28  akio
+ * Fixing distanceFromEdge()
+ * Adding readRecParamFromFile()
+ *
  * Revision 1.9  2015/09/23 17:34:01  akio
  * Adding distanceFromEdge() for fiducial volume cut
  *
@@ -56,6 +60,7 @@
 #include "getCellPosition2015pA.h"
 
 #include "StEvent/StFmsHit.h"
+#include "StEvent/StFmsPoint.h"
 #include "StEvent/StEnumerations.h"
 
 ClassImp(StFmsDbMaker)
@@ -64,7 +69,7 @@ StFmsDbMaker::StFmsDbMaker(const Char_t *name) : StMaker(name), mDebug(0),
   mChannelGeometry(0),mDetectorPosition(0),mMap(0),mmMap(0),mPatchPanelMap(0),
   mQTMap(0),mGain(0),mmGain(0),mGainCorrection(0),mmGainCorrection(0),mRecPar(0),
   mRecConfig(StFmsDbConfig::Instance()),
-  mForceUniformGain(0.0), mForceUniformGainCorrection(0.0),mReadGainFile(0),
+    mForceUniformGain(0.0), mForceUniformGainCorrection(0.0),mReadGainFile(0),mReadRecParam(0),
   mFpsConstant(0),mMaxSlatId(0),mFpsChannelGeometry(0),mFpsSlatId(0),mFpsReverseSlatId(0),
   mFpsPosition(0),mFpsMap(0),mFpsReverseMap(0),mFpsGain(0),mFpsStatus(0)  
 {}; //{gStFmsDbMaker = this;}
@@ -334,9 +339,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   
   //!fmsRec
   mMaxRecPar = 80; //dummy
-  mRecPar = (fmsRec_st*)dbRec->GetTable();
-  mRecConfig.readMap(*mRecPar); //read recPar into internal memory
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsRec "<< endm;
+  if(mReadRecParam==0){
+      mRecPar = (fmsRec_st*)dbRec->GetTable();
+      mRecConfig.readMap(*mRecPar); //read recPar into internal memory
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsRec "<< endm;
+  }else{
+      mRecConfig.fillMap("fmsrecpar.txt");
+      LOG_INFO << "StFmsDbMaker::InitRun - read fmsrecpar.txt for FmsRec table! "<< endm;
+  }
 
   //!fpsConstant
   fpsConstant_st *tFpsConstant = 0;
@@ -1126,6 +1136,10 @@ inline Int_t StFmsDbMaker::nCellCorner(Int_t det){
     }
 }	   
 
+Float_t StFmsDbMaker::distanceFromEdge(StFmsPoint* point, int& edge){
+    return distanceFromEdge(point->detectorId(),point->x(),point->y(), edge);
+}
+
 Float_t StFmsDbMaker::distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge){
     //Input x/y should be local coordinate in cm, NOT STAR coordinate
     //  x=0 is closest to beam edge, and x=nColumn(det) is far from beam edge
@@ -1142,6 +1156,20 @@ Float_t StFmsDbMaker::distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge
     float yy=abs(y/getYWidth(det) - nRow(det)/2.0);    
     int column=int(xx); 
     int row=int(yy);    
+    if(column<=0){
+	if(row>nCellHole(det) && row<nRow(det)/2-1){ //north-south gap
+	    edge=3;
+	    return -xx;
+	}
+	if((row==nCellHole(det)) && ((yy-nCellHole(det))>xx) ){ //has to do diagonal cut for edge
+	    edge=3;
+            return -xx;
+	}
+	if( (row==(nRow(det)/2-1)) && ((nRow(det)/2-yy)>xx) ){ //has to do diagonal cut for edge
+	    edge=3;
+	    return -xx;
+	}
+    }
     if(row>=nRow(det)/2-1.0){ //top or bottom edge
 	if(largeSmall(det)==0) {edge=2;}
 	else                   {edge=4;}
@@ -1151,10 +1179,6 @@ Float_t StFmsDbMaker::distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge
 	if(largeSmall(det)==0) {edge=2;}
 	else                   {edge=4;}
 	return xx - nColumn(det);
-    }
-    if(column<=0 && row>nCellHole(det)){ //north-south gap
-	edge=3;
-	return -xx;
     }
     if(xx>yy && column<=nCellHole(det)){ //edge inner hole at side
 	if(largeSmall(det)==0) {edge=4;}
