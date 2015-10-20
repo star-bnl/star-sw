@@ -8,10 +8,10 @@ void fpsGain_db(char* opt="", char* year="15sim") {
   std::cout << "year = " << year << "\n";
   if(yr.Contains("15ofl")){
     storeTime="2014-12-20 00:00:01";
-    date = 20141220; time = 1;
+    date = 20141225; time = 0;
   }else if(yr.Contains("15sim")){
-    storeTime="2014-12-10 00:00:01";
-    date = 20141210; time = 1;
+    storeTime="2014-12-10 00:00:02";
+    date = 20141215; time = 0;
   }else{
     std::cout << "Please specify valid year tag\n"; exit;
   }
@@ -45,6 +45,7 @@ void fpsGain_db(char* opt="", char* year="15sim") {
 	  if(l==3) mip=50.0;
 	  if(flag==0){table[id].slatid = id; table[id].MIP=mip;} 
 	  else       {table[id].slatid = id; table[id].MIP=0;} 
+	  printf("id=%3d Q%1dL%1dS%2d mip=%f\n",id,q,l,s,table[id].MIP);
 	  id++;
 	}
       }

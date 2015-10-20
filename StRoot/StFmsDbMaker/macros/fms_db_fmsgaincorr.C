@@ -10,24 +10,26 @@ int getDetectorId(int ew, int nstb) {return (ew-1)*8+nstb-1;}
 int getEW(int detid) {return detid/8 + 1;}
 int getNSTB(int detid) {return detid%8 + 1;}
 
-void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone") {
+void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone", 
+			char* storetime="2007-11-09 12:00:00",
+			int readDate=20071210, int readTime=0, int isSim=0) {
   // that's begin time for validity range for WRITING TO DB 
   // your data will be available from storeTime till 2037    
   TString opt(option);
   TString data(dataspec);
-  int readDatte=20071210, readTime=0, isSim=0;
+  TString storeTime(storetime);  
   if(opt.Contains("run8") && opt.Contains("dAu200")){
-      TString storeTime = "2007-11-09 12:00:00";
+      storeTime = "2007-11-09 12:00:00";
   }else if(opt.Contains("run8") && opt.Contains("pp200")){
-      TString storeTime = "2008-01-28 12:00:00";
+      storeTime = "2008-01-28 12:00:00";
   }else if(opt.Contains("run9") && opt.Contains("pp200")){
-      TString storeTime = "2009-01-16 00:00:00";
+      storeTime = "2009-01-16 00:00:00";
   }else if(opt.Contains("15sim")){
-      TString storeTime = "2014-12-10 00:00:01"; readDate = 20141215; readTime = 0; isSim=1;
+      storeTime = "2014-12-10 00:00:01"; readDate = 20141215; readTime = 0; isSim=1;
   }else if(opt.Contains("15ofl")){
-      TString storeTime = "2014-12-20 00:00:00"; readDate = 20141225; readTime = 0;
+      storeTime = "2014-12-20 00:00:00"; readDate = 20141225; readTime = 0;
   }      
-  else std::cout<<"Invalid year range"<<std::endl;
+  //else std::cout<<"Invalid year range"<<std::endl;
   
   std::cout << "Opt =" << option << "\n";
   std::cout << "testinput = " << opt.Contains("testinput")  << "\n";
@@ -35,7 +37,11 @@ void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone
   std::cout << "readdb    = " << opt.Contains("readdb")    << "\n";
   std::cout << "writedb   = " << opt.Contains("writedb")   << "\n";
   std::cout << "writetext = " << opt.Contains("writetext") << "\n";
-  
+  std::cout << "dataspec = "  << dataspec << endl; 
+  std::cout << "storeTime = " << storeTime << endl; 
+  std::cout << "readData = "  << readDate << " readTime="<<readTime<<endl; 
+  std::cout << "isSim = "     << isSim << endl; 
+
   gROOT->Macro("LoadLogger.C");
   gSystem->Load("St_base.so");
   gSystem->Load("libStDb_Tables.so");
@@ -64,6 +70,7 @@ void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone
       for(int ch=0; ch<maxch[det]; ch++){
 	  corr[index].detectorId=det;
 	  corr[index].ch        =ch+1;
+	  corr[index].corr      =0.0;
 	  idx[det][ch]          =index;	  
 	  if(data.Contains("allone")) corr[index].corr=1.0;	      
 	  index++;	  
@@ -80,7 +87,8 @@ void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone
 	  while(fscanf(fp,"%d %d %d %f",&rew,&rnstb,&rch,&rcorr) != EOF){
 	      int detid=getDetectorId(rew,rnstb);
 	      int index=idx[detid][rch-1];
-	      //printf("EW=%5d NSTB=%5d CH=%5d Gain=%6.4f | det=%2d idx=%4d\n",rew,rnstb,rch,rgain,detid,index);	  
+	      //printf("EW=%5d NSTB=%5d CH=%5d Gain=%6.4f | det=%2d idx=%4d\n",rew,rnstb,rch,rcorr,detid,index);	  
+	      if(rew==1) continue; //hack! ignore east
 	      if(detid != corr[index].detectorId) printf("ERR DetId %d != %d\n",detid,corr[index].detectorId); 
 	      if(rch   != corr[index].ch)         printf("ERR Ch    %d != %d\n",rch,corr[index].ch);
 	      corr[index].corr=rcorr;
@@ -183,7 +191,7 @@ void fms_db_fmsgaincorr(char* option = "writetext 15sim", char* dataspec="allone
      //node->removeTable(table);
     gSystem->Unsetenv("DB_ACCESS_MODE");
     //unsetenv("DB_ACCESS_MODE");
-    std::cout << "Done with database upload \n";
+    std::cout << "Done with database upload with nrow=" << index+1 << endl;
   }
 }
 
