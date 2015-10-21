@@ -1,6 +1,13 @@
-// $Id: StFmsTower.h,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsTower.h,v 1.2 2015/10/21 15:58:05 akio Exp $
 //
 // $Log: StFmsTower.h,v $
+// Revision 1.2  2015/10/21 15:58:05  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -89,13 +96,30 @@ class StFmsTower : public TObject {
   Int_t cluster() const { return mCluster; }
   /** Sets the cluster index and returns the new index. */
   void setCluster(Int_t cluster) { mCluster = cluster; }
+  /** Set & get local xy */
+  void setXY(double x, double y) {mX=x; mY=y;}
+  double x() const;
+  double y() const;
+  double e() const;
+  double w() const;
+
 
  protected:
   const StFmsHit* mHit;  //!< Hit information, not owned by StFmsTower
-  Int_t mColumn;  ///< Column number, starts at 1, horizontal (STAR x-coord)
-  Int_t mRow;  ///< Row number, starts at 1, vertical (STAR y-coord)
-  Int_t mCluster;  ///< Index of cluster the tower is associated with
+  Int_t mColumn;  /// < Column number, starts at 1, horizontal (STAR x-coord)
+  Int_t mRow;     /// < Row number, starts at 1, vertical (STAR y-coord)
+  Int_t mCluster; /// < Index of cluster the tower is associated with
+  Double_t mX;    /// local x [cm]
+  Double_t mY;    /// local y [cm]
+  Double_t mE;    /// Energy
+  Double_t mW;    /// Tower width [cm]
   ClassDef(StFmsTower, 0)
 };
+
+inline double StFmsTower::x() const {return mX;}
+inline double StFmsTower::y() const {return mY;}
+inline double StFmsTower::e() const {return mE;}
+inline double StFmsTower::w() const {return mW;}
+
 }  // namespace FMSCluster
 #endif  // STROOT_STFMSPOINTMAKER_STFMSTOWER_H_

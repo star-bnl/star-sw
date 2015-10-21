@@ -1,6 +1,13 @@
-// $Id: StFmsClusterFitter.cxx,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.3 2015/10/21 15:58:04 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.3  2015/10/21 15:58:04  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -38,6 +45,7 @@
 
 namespace {
 const Int_t kMaxNPhotons = 7;  // Maximum number of photons that can be fitted
+Double_t fitPar[7]={SS_C, SS_A1, SS_A2, SS_A3, SS_B1, SS_B2, SS_B3};
 std::array<double, 7> fitParameters{ {SS_C, SS_A1, SS_A2, SS_A3,
                                       SS_B1, SS_B2, SS_B3} };
 TF2 showerShapeFitFunction("showerShapeFitFunction",
@@ -63,16 +71,12 @@ double addTowerEnergy(double energy, const FMSCluster::StFmsTower* tower) {
   return energy + tower->hit()->energy();
 }
 
-// Returns a * f(x,y,b) as defined here:
-// https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
-double showerShapeComponent(double x, double y, double a, double b) {
-  return a * atan(x * y / (b * sqrt(b * b + x * x + y * y)));
-}
 }  // unnamed namespace
 
 namespace FMSCluster {
 // Instantiate static members
 StFmsTowerCluster::Towers* StFmsClusterFitter::mTowers(nullptr);
+Double_t StFmsClusterFitter::mEnergySum(0.0);
 
 StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
                                        Int_t detectorId, Float_t xw, Float_t yw)
@@ -222,7 +226,6 @@ Int_t StFmsClusterFitter::fit2Photon(const std::array<double, 7>& parameters,
   return chiSquare;
 }
 
-// xy array contains (x, y) position of the photon relative to the tower center
 Double_t StFmsClusterFitter::energyDepositionInTower(Double_t* xy,
                                                      Double_t* parameters) {
   // Calculate the energy deposited in a tower by evaluating
@@ -265,14 +268,14 @@ int StFmsClusterFitter::runMinuitMinimization() {
 Double_t StFmsClusterFitter::energyDepositionDistribution(
     Double_t* xy,
     Double_t* parameters) {
-  double f = 0;
-  // The parameter array has 10 elements, but we only use 6 here
-  // 1 to 6 are a1, a2, a3, b1, b2, b3 as defined in
-  // https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
-  for (int i = 1; i < 4; i++) {  // 1, 2, 3
-    f += showerShapeComponent(xy[0], xy[1], parameters[i], parameters[i + 3]);
-  }  // for
-  return f / TMath::TwoPi();
+    double f = 0;
+    // The parameter array has 10 elements, but we only use 6 here
+    // 1 to 6 are a1, a2, a3, b1, b2, b3 as defined in
+    // https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
+    for (int i = 1; i < 4; i++) {  // 1, 2, 3
+	f += showerShapeComponent(xy[0], xy[1], parameters[i], parameters[i + 3]);
+    }  // for
+    return f / TMath::TwoPi();;
 }
 
 // Uses the signature needed for TMinuit interface:
@@ -282,33 +285,59 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
                                                      Double_t& fval,
                                                      Double_t* para,
                                                      Int_t /* not used */) {
-  const double energySum = std::accumulate(mTowers->begin(), mTowers->end(),
-                                           0., addTowerEnergy);
+  //mEnergySum was already calcurated in setTowers()
+  //const double energySum = std::accumulate(mTowers->begin(), mTowers->end(),0., addTowerEnergy);
   fval = 0;  // Stores sum of chi2 over each tower
   const int nPhotons = static_cast<int>(para[0]);
-  for (auto i = mTowers->begin(); i != mTowers->end(); ++i) {
+  //  for (auto i = mTowers->begin(); i != mTowers->end(); ++i) {
+  for (auto i = mTowers->begin(), e = mTowers->end(); i!=e; ++i){
     const StFmsTower* tower = *i;
     // The shower shape function expects the centers of towers in units of cm
     // Tower centers are stored in row/column i.e. local coordinates
     // Therefore convert to cm, remembering to subtract 0.5 from row/column to
     // get centres not edges
-    const double x = towerWidths.at(0) * (tower->column() - 0.5);
-    const double y = towerWidths.at(1) * (tower->row() - 0.5);
+    Double_t x=tower->x();
+    Double_t y=tower->y();
+    fitPar[0]= tower->w(); //need to update width for each cell... when small cell is merged to large
+    /* Stop getting xy here. Already in tower StFmsTower class
+    Double_t x, y;
+    if(tower->hit()->detectorId()<10){
+        x = tower->column() - 0.5;
+        y = tower->row() - 0.5;
+    }else{
+        x = (tower->column()-0.5)*2.0/3.0;
+        y = (tower->row() - 0.5)*2.0/3.0 + 9.0;
+    }
+    //const double x = towerWidths.at(0) * (tower->column() - 0.5);
+    //const double y = towerWidths.at(1) * (tower->row() - 0.5);
+    x *= towerWidths.at(0);
+    y *= towerWidths.at(1);
+    */
     // Add expected energy in tower from each photon, according to shower-shape
     double expected = 0;
     for (int j = 0; j < nPhotons; ++j) {  // Recall there are 3 paras per photon
       int k = 3 * j;
       expected += para[k + 3] *  // total energy
-                  showerShapeFitFunction.Eval(x - para[k + 1], y - para[k + 2]);
+	  //                  showerShapeFitFunction.Eval(x - para[k + 1], y - para[k + 2]);
+	  energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitPar);
     }  // for
-    const double measured = tower->hit()->energy();
+    //const double measured = tower->hit()->energy();
+    const double measured = tower->e();
     const double deviation = measured - expected;
     // Larisa's chi2 function definition
+    /*
     const Double_t err = 0.03 *
                          pow(measured / energySum, 1. - 0.001 * energySum) *
                          pow(1 - measured / energySum, 1. - 0.007 * energySum) *
                          energySum + 0.01;
-    fval += pow(deviation, 2.) / err;
+    */
+    const Double_t ratio = measured / mEnergySum;
+    const Double_t err = 0.03 *
+                         pow(ratio, 1. - 0.001 * mEnergySum) *
+                         pow(1. - ratio, 1. - 0.007 * mEnergySum) *
+                         mEnergySum + 0.01;
+    //fval += pow(deviation, 2.) / err;
+    fval += deviation * deviation / err;
   }  // for
   fval = std::max(fval, 0.);  // require that the fraction be positive
 }
@@ -355,4 +384,10 @@ int StFmsClusterFitter::readMinuitParameters(std::vector<double>& parameters,
   }  // for
   return parameters.size();
 }
+
+void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) { 
+    mTowers = towers; 
+    mEnergySum = std::accumulate(mTowers->begin(), mTowers->end(), 0., addTowerEnergy);
+}
+    
 }  // namespace FMSCluster
