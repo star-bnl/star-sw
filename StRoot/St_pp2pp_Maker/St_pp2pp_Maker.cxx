@@ -195,6 +195,7 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
 Int_t St_pp2pp_Maker::readOffsetPerplane() {
 
   mOffsetTable = 0;
+  mRPpositionsTable = 0 ; // >= 2015
 
   TDataSet *DB = 0;
   DB = GetInputDB("Geometry/pp2pp");
@@ -236,6 +237,14 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
       if (descr) {
 	LOG_DEBUG << "St_pp2pp_Maker : Reading pp2ppRPpositions table with nrows = " << descr->GetNRows() << endm ;
 	mRPpositionsTable = descr->GetTable();
+	LVDT_pos[0] = mRPpositionsTable[0].y_right_E1U ;
+	LVDT_pos[1] = mRPpositionsTable[0].y_left_E1D ;
+	LVDT_pos[2] = mRPpositionsTable[0].y_top_E2U ;
+	LVDT_pos[3] = mRPpositionsTable[0].y_bot_E2D ;
+	LVDT_pos[4] = mRPpositionsTable[0].b_right_W1U ;
+	LVDT_pos[5] = mRPpositionsTable[0].b_left_W1D ;
+	LVDT_pos[6] = mRPpositionsTable[0].b_top_W2U ;
+	LVDT_pos[7] = mRPpositionsTable[0].b_bot_W2D ; 
 	/*
 	  for (Int_t i = 0; i < descr->GetNRows(); i++) {
 	  std::cout << i << "th row : " << mRPpositionsTable[i].b_left_W1D << " "  << mRPpositionsTable[i].b_right_W1U
@@ -244,7 +253,11 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
 	  << " " << mRPpositionsTable[i].y_bot_E2D << " "  << mRPpositionsTable[i].y_top_E2U << std::endl;
 	  }
 	*/
+      } else {
+	LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppRPpositions table (wrong timestamp?). Nothing to return, then" << endm ;
       }
+
+
     }
 
   }
@@ -535,6 +548,21 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   // >=2015 --- W2U (~WVU) is sequencer 7 and W2D (~WVD) is sequencer 8
   const short UD[kMAXSEQ]  =  { 1, 0, 0, 1, 1, 0, 0, 1 } ; 
 
+  // Bogdan's alignment-corrected offsets (in mm)
+  const double LVDT_OFFSET[32] = { 
+    5.4561,-36.8055,  5.4104,-36.7974, -4.4512, 41.6271, -4.4076, 41.6106,
+    5.4395,-14.6417,  5.5217,-14.7002, -4.6579, 63.7561, -4.8961, 63.5281,
+    6.2214, 44.4315,  6.2917, 44.0845, -5.0226,-36.1377, -4.9259,-36.4143,
+    5.6669, 65.6778,  5.6349, 65.6091, -3.1667,-14.8623, -3.1441,-15.0686,
+  };
+
+  const double LVDT_SCALE[32] = { 
+    0.9989,  0.0000,  0.9989,  0.0000,  0.9991,  0.0000,  0.9991,  0.0000,
+    0.9969,  0.0051,  0.9969,  0.0051,  0.9974,  0.0000,  0.9974,  0.0000,
+    0.9933, -0.0142,  0.9933, -0.0142,  0.9658,  0.0058,  0.9655,  0.0058,
+    1.0040,  0.0000,  1.0040,  0.0000,  1.0499,  0.0000,  1.0499,  0.0000,
+  };
+
   Bool_t is_candidate_to_store ;
 
   Int_t NCluster_Length, Diff_Bunch ;
@@ -597,11 +625,21 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       else
 	pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
 
-      if ( mOffsetTable )
-	offset = mOffsetTable[0].rp_offset_plane[4*i+j]/1000. ; /// offsets all in m
-      else
-	offset = double(ErrorCode) ;
-      //      cout << "Offsets : " <<  i << " " << j << " " << mOffsetTable[0].rp_offset_plane[4*i+j] << endl ; 
+      if ( mVersion < 2 ) {
+	if ( mOffsetTable )
+	  offset = mOffsetTable[0].rp_offset_plane[4*i+j]/1000. ; /// offsets all in m
+	else
+	  offset = double(ErrorCode) ;
+	//      cout << "Offsets : " <<  i << " " << j << " " << mOffsetTable[0].rp_offset_plane[4*i+j] << endl ; 
+      }
+      else {
+	if ( mRPpositionsTable )
+	  // K. Yip (Oct. 19, 2015) : set offsets back to m (as LVDT arrays are in mm)
+	  offset = ( LVDT_OFFSET[4*i+j] + LVDT_SCALE[4*i+j]*LVDT_pos[i] )/1000. ; 
+	else
+	  offset = double(ErrorCode) ;
+	//	cout << "Offsets : " <<  i << " " << j << " " << offset << endl ; 
+      }
 
       pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
 

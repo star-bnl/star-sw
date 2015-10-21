@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.5 2015/09/29 16:28:58 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.6 2015/10/20 19:52:36 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.6  2015/10/20 19:52:36  akio
+// Setting default for mFpsNPhotonPerMIP to 100.0
+//
 // Revision 1.5  2015/09/29 16:28:58  akio
 // setFmsZS(int v) and if ADC<v, drop the hit (default=2)
 // adding poisson distribution for FPS, with setFpsNPhotonPerMIP(float v)
@@ -39,7 +42,7 @@
 
 /* Constructor. */
 StFmsFastSimulatorMaker::StFmsFastSimulatorMaker(const Char_t* name) : 
-    StMaker(name),mFmsZSch(2),mFpsDEPerMIP(0.0016),mFpsNPhotonPerMIP(0.0) { }
+    StMaker(name),mFmsZSch(2),mFpsDEPerMIP(0.0016),mFpsNPhotonPerMIP(100.0) { }
 
 /* Process one event. */
 Int_t StFmsFastSimulatorMaker::Make() {

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.10 2015/09/23 17:34:01 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.11 2015/10/20 19:49:28 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,10 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.11  2015/10/20 19:49:28  akio
+ * Fixing distanceFromEdge()
+ * Adding readRecParamFromFile()
+ *
  * Revision 1.10  2015/09/23 17:34:01  akio
  * Adding distanceFromEdge() for fiducial volume cut
  *
@@ -61,6 +65,7 @@ struct fpsGain_st;
 struct fpsStatus_st;
 
 class StFmsHit;
+class StFmsPoint;
 
 class StFmsDbMaker : public StMaker {
  public: 
@@ -128,6 +133,7 @@ class StFmsDbMaker : public StMaker {
   //       4=between small and large
   //       4=large cell corner
   Float_t distanceFromEdge(Int_t det,Float_t x, Float_t y, int& edge);
+  Float_t distanceFromEdge(StFmsPoint* point, int& edge);
   Int_t nCellHole(Int_t det);
   Int_t nCellCorner(Int_t det);
 
@@ -148,12 +154,13 @@ class StFmsDbMaker : public StMaker {
   Float_t getGain(Int_t detectorId, Int_t ch); //! get the gain for the channel
   Float_t getGainCorrection(Int_t detectorId, Int_t ch); //! get the gain correction for the channel
     
-  //reference to StFmsDbConfig
-  StFmsDbConfig& getRecConfig();  
-
   void forceUniformGain(float v)           {mForceUniformGain=v;          } //! force gain to be specified value               
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
   void readGainFromText(int v=1)           {mReadGainFile=v;}               //! force gain to be read from FmsGain.txt
+
+  //reference to StFmsDbConfig
+  StFmsDbConfig& getRecConfig();  
+  void readRecParamFromFile(int v=1){mReadRecParam=v;} // Read fmsrecpar.txt for reconstuction parameters
 
   //! FPS related
   Int_t   fpsNQuad();
@@ -232,6 +239,8 @@ class StFmsDbMaker : public StMaker {
   Float_t                 mForceUniformGain; //!
   Float_t                 mForceUniformGainCorrection; //!
   Int_t                   mReadGainFile; //!             
+
+  Int_t                   mReadRecParam; //!
 
   fpsConstant_st*         mFpsConstant;
   Int_t                   mMaxSlatId;
