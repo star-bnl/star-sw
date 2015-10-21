@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.6 2015/09/14 16:59:53 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.7 2015/10/21 14:53:59 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.7  2015/10/21 14:53:59  ullrich
+ * Added new member and methods.
+ *
  * Revision 2.6  2015/09/14 16:59:53  ullrich
  * Added StFmsPointPair collection.
  *
@@ -70,6 +73,15 @@ public:
     StSPtrVecFmsPoint& points();    // Return the point list
     const StSPtrVecFmsPoint& points() const;
    
+    int fmsReconstructionFlag() const {return mFmsReconstructionFlag;}
+    int isMergeSmallToLarge()   const {return  (mFmsReconstructionFlag & 0x1);}
+    int isGlobalRefit()         const {return ((mFmsReconstructionFlag & 0x2)>>1);}
+    int isTry1PhotonFit()       const {return ((mFmsReconstructionFlag & 0x4)>>2);}
+    void setFmsReconstructionFlag(int v){mFmsReconstructionFlag=v;}
+    void setMergeSmallToLarge(int v)    {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffe) | (v & 0x1);   }
+    void setGlobalRefit(int v)          {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffd) | (v & 0x1)<<1;}
+    void setTry1PhotonFit(int v)        {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffb) | (v & 0x1)<<2;}
+
     void fillFpsSlat();            //update FPS slat info based on FMS hits
     void fillFpsAssociation();     //update FPS-FMS association info based on FMS points
     StSPtrVecFpsSlat& fpsSlats();  //Return the fps slats array
@@ -98,11 +110,15 @@ private:
     vector<StFmsPointPair*> mPointPairsETSorted;      //!  sorted by total decending ET
     vector<StFmsPointPair*> mPointPairsPi0MassSorted; //! sotted from close to pi0 mass to far
 
+    Int_t mFmsReconstructionFlag;   // LSB=(0=small/large separately, 1=merge small cell to large)
+                                    // 2nd LSB=(0=No global refit, 1=performe global refit)
+                                    // 3rd LSB=(0=No 1photon fit retry, 1=performe 1 photon fit if 2 photon fit is bad)
+
     bool mFpsSlatFilled;            //!
     bool mFpsAssociationFilled;     //!
     bool mFmsPointPairFilled;       //!
 
-    ClassDef(StFmsCollection, 2)
+    ClassDef(StFmsCollection, 3)
 };
 
 #endif
