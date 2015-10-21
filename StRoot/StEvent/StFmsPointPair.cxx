@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPointPair.cxx,v 2.1 2015/09/14 16:15:50 ullrich Exp $
+ * $Id: StFmsPointPair.cxx,v 2.2 2015/10/21 14:52:54 ullrich Exp $
  *
  * Author: Akio Ogawa, Sep 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPointPair.cxx,v $
+ * Revision 2.2  2015/10/21 14:52:54  ullrich
+ * Added methods x() and y()
+ *
  * Revision 2.1  2015/09/14 16:15:50  ullrich
  * Initial Revision.
  *
@@ -20,7 +23,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.1 2015/09/14 16:15:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPointPair.cxx,v 2.2 2015/10/21 14:52:54 ullrich Exp $";
 
 StFmsPointPair::StFmsPointPair() : mFpsPid(0), mConeRadius{0.100, 0.070, 0.030}
 {
@@ -49,29 +52,45 @@ StFmsPoint* StFmsPointPair::point(int v) {
     return 0;
 }
 
-Float_t StFmsPointPair::dgg() const {
+//hack need to expand for n>2
+float StFmsPointPair::x() const {
+    return
+	(mPoints[0]->XYZ().x() * mPoints[0]->energy() +
+	 mPoints[1]->XYZ().x() * mPoints[1]->energy() ) /
+	(mPoints[0]->energy() + mPoints[1]->energy());
+}
+
+//hack need to expand for n>2
+float StFmsPointPair::y() const {
+    return 
+	(mPoints[0]->XYZ().y() * mPoints[0]->energy() +
+	 mPoints[1]->XYZ().y() * mPoints[1]->energy() ) /
+	(mPoints[0]->energy() + mPoints[1]->energy());
+}
+
+float StFmsPointPair::dgg() const {
     if (nPoints()!=2) return -1.0;
     return (mPoints[0]->XYZ() - mPoints[1]->XYZ()).mag();
 }
 
-Float_t StFmsPointPair::zgg() const {
+float StFmsPointPair::zgg() const {
     if (nPoints()!=2) return -1.0;
     float e1=mPoints[0]->energy();
     float e2=mPoints[1]->energy();
     return fabs(e1-e2)/(e1+e2);
 }
 
-Float_t StFmsPointPair::coneRadius(int cone) const {
+float StFmsPointPair::coneRadius(int cone) const {
     if (cone>=0 && cone<kFmsPointMaxCone) return mConeRadius[cone];
     return 0.0;
 }
 
-Float_t StFmsPointPair::coneEnergy(int cone) const {
+float StFmsPointPair::coneEnergy(int cone) const {
     if (cone>=0 && cone<kFmsPointMaxCone) return mConeEnergy[cone];
     return 0.0;
 }
 
-Float_t StFmsPointPair::coneEnergyFraction(int cone) const {
+float StFmsPointPair::coneEnergyFraction(int cone) const {
     if (cone>=0 && cone<kFmsPointMaxCone && mConeEnergy[cone]>0.0) return energy()/mConeEnergy[cone];
     return -1.0;
 }

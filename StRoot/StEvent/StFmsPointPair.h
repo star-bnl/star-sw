@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPointPair.h,v 2.1 2015/09/14 16:15:50 ullrich Exp $
+ * $Id: StFmsPointPair.h,v 2.2 2015/10/21 14:52:54 ullrich Exp $
  *
  * Author: Akio Ogawa, Sep 2015
  **************************************************************************
@@ -10,6 +10,9 @@
  **************************************************************************
  *
  * $Log: StFmsPointPair.h,v $
+ * Revision 2.2  2015/10/21 14:52:54  ullrich
+ * Added methods x() and y()
+ *
  * Revision 2.1  2015/09/14 16:15:50  ullrich
  * Initial Revision.
  *
@@ -43,6 +46,8 @@ public:
     float mass() const;
     float dgg() const;            //only make sense if nPoint=2
     float zgg() const;            //only make sense if nPoint=2
+    float x() const;  
+    float y() const;;
     unsigned int fpsPid() const;  //each digit {0=bad,1=gamma,2=hadron,3=electton}
                                   //for pair(npoint=2), 11=gg, 22=hh, 33=ee, 13=ge,etc
                                   //for nPoint>2, LSD is first point and MSD is last 
