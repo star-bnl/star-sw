@@ -1,26 +1,37 @@
 #include <iostream.h> 
 #include <fstream.h>
 
-void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
+void fms_db_detectorposition(char* opt = "readtext", char* dataspec) {
   // that's begin time for validity range for WRITING TO DB 
   // your data will be available from storeTime till 2037
   TString data(dataspec);
-  if(data.Contains("run8") && data.Contains("dAu200"))
-    TString storeTime = "2007-11-09 12:00:00";
-  else
-    if(data.Contains("run8") && data.Contains("pp200"))
-      TString storeTime = "2008-01-28 12:00:00";
-    else
-      if(data.Contains("run9") && data.Contains("pp200"))  
-	TString storeTime = "2009-01-16 00:00:00";
-      else std::cout<<"Invalid year range"<<std::endl;
-
-  TString storeTime = "2014-12-20 00:00:00";
-  // this is data and time for READING FROM DB
-  //int readDate = 20140202;
-  int readDate = 20141220;
-  int readTime = 0;
-
+  TString storeTime;
+  int readDate,readTime;
+  if(data.Contains("run8") && data.Contains("dAu200")){
+      storeTime = "2007-11-09 12:00:00";
+      readDate = 20071110;
+      readTime = 0;
+  }else if(data.Contains("run8") && data.Contains("pp200")){
+      storeTime = "2008-01-28 12:00:00";
+      readDate = 20080129;
+      readTime = 0;
+  }else if(data.Contains("run9") && data.Contains("pp200")){
+      storeTime = "2009-01-16 00:00:00";
+      readDate = 20090117;
+      readTime = 0;
+  }else if(data.Contains("run15ppsim")){
+      storeTime = "2014-12-16 00:00:00";
+      readDate = 20141216;
+      readTime = 120000;
+  }else if(data.Contains("run15pAsim")){
+      storeTime = "2014-12-17 00:00:00";
+      readDate = 20141217;
+      readTime = 120000;
+  }else{
+      std::cout<<"Invalid year range"<<std::endl;
+      exit;
+  }
+  
   TString option(opt);
   std::cout << "Opt =" << opt << "\n";
   std::cout << "testinput = " << option.Contains("testinput")  << "\n";
@@ -28,6 +39,8 @@ void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
   std::cout << "readdb    = " << option.Contains("readdb")    << "\n";
   std::cout << "writedb   = " << option.Contains("writedb")   << "\n";
   std::cout << "writetext = " << option.Contains("writetext") << "\n";
+  std::cout << "StoreTime="<<storeTime<<endl;
+  std::cout << "ReadTime="<<readDate<<" "<<readTime<<endl;
   
   gROOT->Macro("LoadLogger.C");
   gSystem->Load("St_base.so");
@@ -50,7 +63,6 @@ void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
     detposition[1].ywidth = .15;
   }
 
-
   if(option.Contains("readtext")){
     FILE* fp;
     int rdetid;
@@ -64,8 +76,8 @@ void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
 	    detposition[i].ywidth=rywidth;
 	    detposition[i].xoffset=rxoffset;
 	    detposition[i].yoffset=ryoffset;
-	    detposition[i].zoffset=rzoffset;
-	    //cout << rdetid<<" "<<rzoffset<<" "<<rxoffset<<" "<<ryoffset<<" "<<rxwidth<<" "<<rywidth<<endl;
+	    detposition[i].zoffset=rzoffset;	    
+	    cout << Form("%2d zoff=%10.4f xoff=%10.4f yoff=%10.4f wx=%10.4f wy%10.4f\n",rdetid,rzoffset,rxoffset, ryoffset, rxwidth, rywidth);
       }
     }
     fclose(fp);
@@ -103,9 +115,11 @@ void fms_db_detectorposition(char* opt = "readdb", char* dataspec) {
     // fetch data and place it to appropriate structure
     if (dbppmap) {
       std::cout << "Reading fmsDetectorPosition table\n";
-      fmsDetectorPosition_st *pptable = dbppmap->GetTable();
-      for(int i=0; i<MAX; i++)
-	printf("%5d%8.1f%6.1f%5.1f%6.3f%6.3f\n",pptable[i].detectorId,pptable[i].zoffset,pptable[i].xoffset,
+      fmsDetectorPosition_st *pptable = dbppmap->GetTable();      
+      Int_t rows = dbppmap->GetNRows();
+      for(int i=0; i<rows; i++)
+	printf("%2d %8.1f %6.1f %5.1f %6.3f %6.3f\n",
+	       pptable[i].detectorId,pptable[i].zoffset,pptable[i].xoffset,
 	       pptable[i].yoffset,pptable[i].xwidth,pptable[i].ywidth);
       memcpy(detposition,pptable,sizeof(detposition));
     }
