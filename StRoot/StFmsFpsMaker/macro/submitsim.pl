@@ -1,23 +1,22 @@
 #!/usr/bin/perl -w
 
+@pid = ("electron","gamma","mu-","pi-","pi0");
+#@pid = ("mu-","pi-");
+#@pid = ("electron");
+$nev = 1000;
+$run1= 100;
+$run2= 199;
+$outdir="fzd";
+
 my $opt="none";
 if($#ARGV==0) {
     $opt=$ARGV[0];
     print "Option = $opt\n";
 }else{
-    print "Option = none, just searching files. To submit job, add option submit\n";
+    print "Option = none, just creating job file. To submit job, add option submit\n";
 }
 
-my $dir="/star/u/akio/pwg/fms2015/mudst";
-#my $dir="/gpfs01/star/subsysg/FPS/sheppel/mudst/";
-#my $nfile=100;
-#my $nev=1000;
-my $nfile=10;
-my $nev=10000;
-my $outdir="hist";
-my $readmudst=0;
-
-my $exe="runmudst";
+my $exe="runsim";
 my $logdir="log";
 my $condordir="condor";
 my $cwd=$ENV{'PWD'};
@@ -25,7 +24,7 @@ my $cwd=$ENV{'PWD'};
 if (! -e "$logdir")   {system("/bin/mkdir $logdir");}
 if (! -e "$condordir") {system("/bin/mkdir $condordir");}
 
-my $condor="$condordir/submit.txt";
+my $condor="$condordir/submit_sim.txt";
 print("Creating $condor\n");
 if (-e $condor) {system("/bin/rm $condor");}
 
@@ -39,21 +38,11 @@ print(OUT "+Experiment  = \"star\"\n");
 print(OUT "+Job_Type    = \"cas\"\n");
 print(OUT "\n");
 
-opendir(DIR,$dir);
-my @files = grep {/.MuDst.root/} readdir DIR;
-for $file (@files){	
-    $nfound++;
-    for (my $ifile=0; $ifile < $nfile; $ifile++) {
-	$log="$cwd/$logdir/$file.$ifile.nmg.log";
-	print(OUT "Arguments = \"$dir $file $ifile $nev ${outdir}_nomerge 0 $readmudst\"\n");
-	print(OUT "Log    = $log\n");
-	print(OUT "Output = $log\n");
-	print(OUT "Error  = $log\n");
-	print(OUT "Queue\n\n");    
-	$njob++;
-
-	$log="$cwd/$logdir/$file.$ifile.mg.log";
-	print(OUT "Arguments = \"$dir $file $ifile $nev ${outdir}_merge 1 $readmudst\"\n");
+$njob=0;
+foreach $p (@pid) {
+    for($r=$run1; $r<=$run2; $r++){
+	$log="$cwd/$logdir/$p.$r.log";
+	print(OUT "Arguments = \"$nev $r $p $outdir\"\n");
 	print(OUT "Log    = $log\n");
 	print(OUT "Output = $log\n");
 	print(OUT "Error  = $log\n");
@@ -61,11 +50,10 @@ for $file (@files){
 	$njob++;
     }
 }
-print "$nfound files found, creating $njob jobs\n";
+print "$njob jobs created\n";
 
 if($opt eq "submit" ){
     print("Submitting ${condor}\n");
     system("condor_submit ${condor}\n");
     system("running200.pl\n");
-    system("merge2.pl submit\n");
 }
