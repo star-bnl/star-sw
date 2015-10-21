@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: StFmsCluster.cxx,v 2.3 2015/09/01 18:29:01 ullrich Exp $
+ * $Id: StFmsCluster.cxx,v 2.4 2015/10/21 14:52:09 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  * ***************************************************************************
@@ -10,6 +10,9 @@
  * ***************************************************************************
  *
  * $Log: StFmsCluster.cxx,v $
+ * Revision 2.4  2015/10/21 14:52:09  ullrich
+ * Modified print out format and added info.
+ *
  * Revision 2.3  2015/09/01 18:29:01  ullrich
  * Changes due to adding StFpsSlat and interconnection between slats and points.
  *
@@ -25,7 +28,7 @@
 
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.3 2015/09/01 18:29:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.4 2015/10/21 14:52:09 ullrich Exp $";
 
 StFmsCluster::StFmsCluster()
 : StObject(), mCategory(0), mNTowers(0), mEnergy(0.), mX(0.),
@@ -37,8 +40,10 @@ StFmsCluster::~StFmsCluster() { /* no op */ }
 void StFmsCluster::print(Option_t *option) const {cout<< *this <<endl;}
 
 ostream& operator<<(ostream &os, const StFmsCluster& cluster) {
-    os << Form("StFmsCluster id=%4d categ=%1d nTow=%2d nPhoton=%1d loc=%7.2f %7.2f E=%7.2f sigMin/max=%7.2f %7.2f",
+    os << Form("StFmsCluster id=%4d categ=%1d nTow=%2d nPhoton=%1d loc=%7.2f %7.2f PXYZE=%7.2f %7.2f %7.2f %7.2f E=%7.2f sigMin/max=%7.2f %7.2f",
                cluster.id(), cluster.category(), cluster.nTowers(), cluster.nPhotons(),
-               cluster.x(), cluster.y(), cluster.energy(), cluster.sigmaMin(), cluster.sigmaMax());
+               cluster.x(), cluster.y(), 
+	       cluster.fourMomentum().px(),cluster.fourMomentum().py(),cluster.fourMomentum().pz(),cluster.fourMomentum().e(),
+	       cluster.energy(), cluster.sigmaMin(), cluster.sigmaMax());
     return os;
 }
