@@ -1,0 +1,23 @@
+/* pp2ppAcceleratorParameters.idl
+*
+* Table: pp2ppAcceleratorParameters
+*
+* description: Accelerator Parameters
+*
+*/
+
+struct pp2ppAcceleratorParameters {
+
+   double x_IP;  /* collision coordinates at the IP */
+   double y_IP;
+   double z_IP;
+   double theta_x_tilt; /* tilt angles of the beam at collision */
+   double theta_y_tilt ; 
+   double distancefromDX_east; /* distance from the IP to the DX magnet in the East and West */
+   double distancefromDX_west; 
+   double LDX_east; /* length of DX in the East and West */
+   double LDX_west;
+   double bendingAngle_east; /* DX bending angles in the East and West */
+   double bendingAngle_west;
+
+};
