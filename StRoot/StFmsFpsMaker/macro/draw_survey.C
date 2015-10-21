@@ -1,6 +1,6 @@
 // draws boxes representing FMS Pb-glass cells, in units of mm
 
-void draw_survey()
+void draw_survey(int opt=0)
 {
   TFile * infile = new TFile("geotr.root","READ");
   TTree * tr = (TTree*) infile->Get("geotr");
@@ -73,6 +73,11 @@ void draw_survey()
       y2 = y + small_width/2.0;
     };
 
+    x1/=10.0;
+    x2/=10.0;
+    y1/=10.0;
+    y2/=10.0;
+
     cell[0][it] = new TLine(x1,y1,x2,y1); //t
     cell[1][it] = new TLine(x1,y2,x2,y2); //b
     cell[2][it] = new TLine(x1,y1,x1,y2); //l
@@ -81,12 +86,14 @@ void draw_survey()
     it++;
   };
 
-  Double_t md = 1200;
-  Int_t factor = 1; // bins per millimeter... set this too high and you'll get a memory leak!
-  factor *= 2;
-  TH2D * bg = new TH2D("survey","FMS cells survey [mm]",factor*md,-1*md,md,factor*md,-1*md,md);
-  TCanvas * survey = new TCanvas("survey","survey",700,700);
-  gStyle->SetOptStat(0);
-  bg->Draw();
+  if(opt==0){
+      Double_t md = 120;
+      Int_t factor = 1; // bins per millimeter... set this too high and you'll get a memory leak!
+      factor *= 2;
+      TH2D * bg = new TH2D("survey","FMS cells survey [mm]",factor*md,-1*md,md,factor*md,-1*md,md);
+      TCanvas * survey = new TCanvas("survey","survey",700,700);
+      gStyle->SetOptStat(0);
+      bg->Draw();
+  }
   for(Int_t i=0; i<1264; i++) for(Int_t j=0; j<4; j++) cell[j][i]->Draw();
 };

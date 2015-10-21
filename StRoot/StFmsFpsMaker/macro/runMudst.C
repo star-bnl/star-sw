@@ -1,11 +1,19 @@
 /** Macro to test FMS code on MuDST input. */
 
-void runMudst(char* file, int readMuDst=1, Int_t nevt = 10000000){  
+void runMudst(char* file="/star/u/akio/pwg/fms2015/mudst/st_fms_16077027_raw_4000001.MuDst.root", 
+	      int ifile=0, Int_t nevt=1000, char* outdir="hist", int merge=1, int readMuDst=0, int print=0){  
   gROOT->Macro("load.C");  // Load all required libraries
   gSystem->Load("StEventMaker");
 
   StChain* chain = new StChain("StChain"); chain->SetDEBUG(0);
   StMuDstMaker* muDstMaker = new StMuDstMaker(0, 0, "", file,".", 1000, "MuDst");
+  int n=muDstMaker->tree()->GetEntries();
+  printf("Found %d entries in Mudst\n",n);
+  int start=ifile*nevt;
+  int stop=(ifile+1)*nevt-1;
+  if(n<start) {printf(" No event left. Exiting\n"); return;}
+  if(n<stop) {printf(" Overwring end event# stop=%d\n",n); stop=n;}
+  printf("Doing Event=%d to %d\n",start,stop);
 
   StTriggerFilterMaker* filterMaker = new StTriggerFilterMaker;
   filterMaker->printTriggerId();
@@ -23,27 +31,31 @@ void runMudst(char* file, int readMuDst=1, Int_t nevt = 10000000){
   filterMaker->addVetoTrigger(480833);
 
   St_db_Maker* dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb"); 
-  dbMk->SetDEBUG(0); dbMk->SetDateTime(20150301,0);
+  dbMk->SetDEBUG(0); //dbMk->SetDateTime(20150301,0);
+
   StFmsDbMaker* fmsdb = new StFmsDbMaker("fmsDb");  
   fmsdb->setDebug(1); 
-  fmsdb->readGainFromText();
+  //fmsdb->readGainFromText();
+  fmsdb->readRecParamFromFile();
+
   StEventMaker* eventMk = new StEventMaker();
   StFmsHitMaker* fmshitMk = new StFmsHitMaker();
-  StFmsPointMaker* fmsptMk = new StFmsPointMaker("StFmsPointMaker");;
+  StFmsPointMaker* fmsptMk = new StFmsPointMaker("StFmsPointMaker");;  
+  fmsptMk->setMergeSmallToLarge(merge);
   if(readMuDst){
     fmshitMk->SetReadMuDst();
     fmsptMk->SetReadMuDst();
   }
   StFmsFpsMaker* fmsfps = new StFmsFpsMaker(); 
   fmsfps->setReadMuDST();
-  //fmsfps->SetDebug(1);
+  fmsfps->setPrint(print);
   TString filename(file);
-  filename.ReplaceAll("mudst","hist");
-  filename.ReplaceAll(".MuDst.root",".fmsfps.root");
+  filename.ReplaceAll("mudst",outdir);
+  filename.ReplaceAll(".MuDst.root",Form(".%d.fmsfps.root",ifile));
   fmsfps->setQA(filename.Data());
 
   chain->Init();
-  chain->EventLoop(1,nevt);
+  chain->EventLoop(start,stop);
   chain->Finish();
   delete chain;
 }

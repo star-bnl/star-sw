@@ -3,23 +3,27 @@ static const int NL=3;
 static const int NS=21;
 static const int NID=NQ*NL*NS;
 
-//static const int NCUT=3;
-static const int NCUT=13;
+static const int NCUT1=6;
+static const int NCUT2=6;
 
-TH2F* mH2[NQ][NL][NCUT];   
-TH1F* mHd[NQ][NL][NCUT];   
-TH2F* mHd2[NQ][NL][NCUT];   
+TH2F* mH2[NQ][NL][NCUT1];   
+TH1F* mHd[NQ][NL][NCUT1];   
+TH2F* mHd2[NQ][NL][NCUT1];   
 
 static int LOG=0;
-static TCanvas *c;
+static TCanvas *c1;
 static TCanvas *c2;
+static TCanvas *c3;
 static TString* FILENAME;
 TFile* mTFile;
 
-const int color[NCUT]={1,2,4,6,8,9,1,2,4,6,8,9,1};
-const char* CCUT[NCUT]={"All","NP<3","E<5GeV","E>5GeV","E>5GeV,E2>3GeV","E>5GeV,E2>3GeV,pi0","gg","ee","hh","ge","gh","eh","??"};
-//const int color[NCUT]={1,2,4};
-//const char* CCUT[NCUT]={"All","E<3GeV","E>3GeV"};
+//for single point histogram
+const int col1[NCUT1]={1,2,4,6,8,9};
+const char* CCUT1[NCUT1]={"All","E>6GeV","gamma","hadron","electron","others"};
+
+//for point pair histogram
+const int col2[NCUT2]={1,2,4,6,8,9};
+const char* CCUT2[NCUT2]={"All/50","E1,E2>6GeV,E>20GeV","gg","hh","ee","others"};
 
 static const float zfms=730.0;
 static float dx[NID];
@@ -79,36 +83,36 @@ void readFpsPosition(char* input="fpsgeom.txt"){
 
 void plotd(int quad=0, int layer=0, int cut=0){
   gStyle->SetOptStat(0);
-  c->Clear();
+  c1->Clear();
   TVirtualPad *pad;
-  if(quad>0 || layer>0) {pad = c->cd(0);}
+  if(quad>0 || layer>0) {pad = c1->cd(0);}
   for(int l=1; l<=NL; l++){
     if(layer>0 && layer!=l) continue;
-    if(layer==0){c->Clear();}
-    if(quad==0) {c->Divide(2,2);}
+    if(layer==0){c1->Clear();}
+    if(quad==0) {c1->Divide(2,2);}
     for(int q=1; q<=NQ; q++){      
       if(quad>0 && quad!=q) continue;
-      if(quad==0) {pad=c->cd(q);}
+      if(quad==0) {pad=c1->cd(q);}
       pad->SetLogy(LOG);
       mHd[q-1][l-1][cut]->Draw();
     }
-    if(layer==0){c->SaveAs(Form("plot2/fmsfpsd_L%1d.png",layer));}
+    if(layer==0){c1->SaveAs(Form("plot2/fmsfpsd_L%1d.png",layer));}
   }
-  if(quad>0 || layer>0) {c->SaveAs(Form("plot2/fmsfpsd_Q%1dL%1d.png",quad,layer));}
+  if(quad>0 || layer>0) {c1->SaveAs(Form("plot2/fmsfpsd_Q%1dL%1d.png",quad,layer));}
 }
 
 void plot2d(int quad=0, int layer=0, int slat=0, int cut=0, int val=0, int scale=1, int slice=1){
   gStyle->SetOptStat(0);
-  c->Clear();
+  c1->Clear();
   TVirtualPad *pad;
-  if(quad>0 || layer>0) {pad = c->cd(0);}
+  if(quad>0 || layer>0) {pad = c1->cd(0);}
   for(int l=1; l<=NL; l++){
     if(layer>0 && layer!=l) continue;
-    if(layer==0){c->Clear();}
-    if(slice==0 && quad==0) {c->Divide(2,2);}
+    if(layer==0){c1->Clear();}
+    if(slice==0 && quad==0) {c1->Divide(2,2);}
     for(int q=1; q<=NQ; q++){      
       if(quad>0 && quad!=q) continue;
-      if(quad==0) {pad=c->cd(q);}
+      if(quad==0) {pad=c1->cd(q);}
       pad->SetLogz(LOG);
       TH2F* h;
       if(val==0) h=mH2[q-1][l-1][cut];
@@ -133,8 +137,8 @@ void plot2d(int quad=0, int layer=0, int slat=0, int cut=0, int val=0, int scale
 	if(scale)  {h2->Draw("colz");}
 	else       {h->Draw("colz");}  
       }else{
-	c->Clear();
-	if(slat==0) {c->Divide(3,7);}
+	c1->Clear();
+	if(slat==0) {c1->Divide(3,7);}
 	for(int s=1; s<=NS; s++){
 	  int slatid=getSlatid(q,l,s);
 	  if(slat>0 && s!=slat) continue;
@@ -192,7 +196,7 @@ void plot2d(int quad=0, int layer=0, int slat=0, int cut=0, int val=0, int scale
 	  //hp->SetMaximum(ymax);
 	  //hp->SetMinimum(ymin);
 	  if(slat==0){
-	    pad=c->cd(s);
+	    pad=c1->cd(s);
 	    float mergin=0.005;
 	    pad->SetRightMargin(mergin); pad->SetLeftMargin(mergin);
 	    pad->SetTopMargin(mergin);   pad->SetBottomMargin(0.01);
@@ -226,12 +230,12 @@ void plot2d(int quad=0, int layer=0, int slat=0, int cut=0, int val=0, int scale
 	  f->SetLineColor(kRed); 
 	  f->Draw("same");
 	} //loop over slat
-	c->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d_slice.png",q,layer,cut));
+	c1->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d_slice.png",q,layer,cut));
       } //if slice==1
     } //loop over quad
-    if(slice==0) c->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d.png",quad,layer,cut));
+    if(slice==0) c1->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d.png",quad,layer,cut));
   } //loop over layer
-  //if(quad>0 || layer>0) {c->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d.png",quad,layer,cut));}
+  //if(quad>0 || layer>0) {c1->SaveAs(Form("plot2/fmsfps2_Q%1dL%1d_cut%d.png",quad,layer,cut));}
   if(slice==1 && slat==0){
     for(int l=1; l<=NL; l++){
       if(layer>0 && l!=layer) continue;
@@ -275,90 +279,159 @@ void plot2d(int quad=0, int layer=0, int slat=0, int cut=0, int val=0, int scale
   }
 }
 
-void pltcut(char* name, int legend=0){
-  char c[100];
-  if(name!=""){
-    for(int cut=0; cut<NCUT; cut++){
-      sprintf(c,"%s_c%d",name,cut);
-      //printf("%s\n",c);
-      TH1* h=(TH1*)mTFile->Get(c); 
-      h->SetLineColor(color[cut]);
-      if(name=="phi") h->SetMinimum(0.0);    
-      if(name=="NP") h->SetMaximum(h->GetMaximum()*2.0);    
-      TString opt = "";
-      if(cut>0) opt+="same";
-      if(name=="ept") opt+="box";    
-      //printf("%s opt=%s\n",c,opt.Data()); 
-      h->Draw(opt.Data());
+void pltcut(char* name, TCanvas* c, int div, int log=0, int legend=0){
+    char cc[100];
+    TString hname(name);
+    if(log==0) c->cd(div);
+    if(log==1) c->cd(div)->SetLogy();
+    if(name!=""){
+	for(int cut=0; cut<NCUT1; cut++){
+	    sprintf(cc,"%s_c%d",name,cut);
+	    TH1* h=(TH1*)mTFile->Get(cc); 
+	    if(cut==0 && hname.Contains("p_")) h->Scale(0.05);
+	    h->SetLineColor(col1[cut]); h->SetMarkerColor(col1[cut]);
+	    if(log==1) h->SetMinimum(0.1);    
+	    if(name=="NP") h->SetMaximum(h->GetMaximum()*10.0);    
+	    TString opt = "";
+	    if(cut>0) opt+="same";
+	    h->Draw(opt.Data());
+	}
     }
-  }
-  if(legend){
-    for(int cut=0; cut<NCUT; cut++){
-      TText* t=new TText(0.5,0.6-0.07*cut,CCUT[cut]);
-      t->SetTextSize(0.07); t->SetNDC(); t->SetTextColor(color[cut]);
-      t->Draw();
+    if(legend){
+	for(int cut=0; cut<NCUT1; cut++){
+	    TText* t=new TText(0.7,0.6-0.07*cut,CCUT1[cut]);
+	    t->SetTextSize(0.07); t->SetNDC(); t->SetTextColor(col1[cut]);
+	    t->Draw();
+	}
     }
-  }
 }
 
-void plotfms1(){
-  c->Clear();
-  c->Divide(2,3);
-  c->cd(1)->SetLogy();  pltcut("NP",1);
-  c->cd(2)->SetLogy();  pltcut("e");
-  c->cd(3)->SetLogy();  pltcut("pt");
-  c->cd(4);             pltcut("ept");
-  c->cd(5);             pltcut("eta");
-  c->cd(6);             pltcut("phi");
-  c->SaveAs("plot2/fms1.png");
-}
-
-void plotfms2(){
-  c->Clear();
-  c->Divide(2,3);
-  c->cd(1);             pltcut("x");
-  c->cd(2);             pltcut("y");
-  c->cd(3);             pltcut("xy");
-  c->cd(4);             pltcut("m1");
-  c->cd(5)->SetLogy();  pltcut("m2");
-  c->cd(6);             pltcut("",1);
-  c->SaveAs("plot2/fms2.png");
-}
-
-void readfile(){
-  //mTFile = new TFile("hist/16077027.fmsps.root","old");
-  //mTFile = new TFile("hist/st_fms_16077027_raw_1000002.fmsfps.root","old");
-  mTFile = new TFile("hist/fmsps.root","old");
-  //mTFile = new TFile("/star/institutions/bnl/sheppel/fmsps/fmsfps_out/rootfiles/fmsfps_10_electron.root","old");
-  char c[100];
-  for(int cut=0; cut<NCUT; cut++){
-    for(int q=0; q<NQ; q++){
-      for(int l=0; l<NL; l++){
-	sprintf(c,"FMSFPS_Q%1dL%1d_c%d",q+1,l+1,cut);
-	mH2[q][l][cut]=(TH2F*)mTFile->Get(c);
-	sprintf(c,"FMS-FPS_Q%1dL%1d_c%d",q+1,l+1,cut);
-	mHd[q][l][cut]=(TH1F*)mTFile->Get(c);
-	sprintf(c,"FMSFPSd_Q%1dL%1d_c%d",q+1,l+1,cut);
-	mHd2[q][l][cut]=(TH2F*)mTFile->Get(c);
-      }
+void pltcut2(char* name, TCanvas* c, int div, int log=0, int legend=0){
+    char cc[100];
+    TString hname(name);
+    if(log==0) c->cd(div);
+    if(log==1) c->cd(div)->SetLogy();
+    if(log==2) c->cd(div)->SetLogz();
+    if(name!=""){
+	for(int cut=0; cut<NCUT2; cut++){
+	    if(name=="p_pid" && cut==0) continue;
+	    sprintf(cc,"%s_c%d",name,cut);
+	    TH1* h=(TH1*)mTFile->Get(cc); 
+	    if(cut==0) h->Scale(1/40.0);
+	    if(cut==3 && name=="p_m1") h->Scale(20.0);
+	    if(cut==4 && name=="p_m1") h->Scale(40.0);
+	    h->SetLineColor(col2[cut]); h->SetMarkerColor(col2[cut]);
+	    if(log==1) h->SetMinimum(0.1);    
+	    if(name=="p_NP") h->SetMaximum(h->GetMaximum()*1000.0);    
+	    TString opt = "";
+	    if(cut>0) opt+="same";
+	    //if(name=="p_ept") opt+="box";    
+	    if(name=="p_pid") opt+="colz";    
+	    h->Draw(opt.Data());
+	}
     }
-  }
+    if(legend){
+	for(int cut=0; cut<NCUT2; cut++){
+	    TText* t=new TText(0.7,0.6-0.07*cut,CCUT2[cut]);
+	    t->SetTextSize(0.07); t->SetNDC(); t->SetTextColor(col2[cut]);
+	    t->Draw();
+	}
+    }
+}
+
+void plotfms(){
+  c1->Clear();
+  c1->Divide(2,3);
+  pltcut("NP", c1,1,1,1);
+  pltcut("e",  c1,2,1);
+  pltcut("elo",c1,3,1);
+  pltcut("pt", c1,4,1);
+  pltcut("ept",c1,5,0);
+  pltcut("eta",c1,6,1);
+  c1->SaveAs("plot2/fms1.png");
+
+  c2->Clear();
+  c2->Divide(2,3);
+  pltcut("phi", c2,1,1,1);
+  pltcut("x",   c2,2,1);
+  pltcut("y",   c2,3,1);
+  pltcut("xy",  c2,4,0);
+  pltcut("pid", c2,5,0);
+  pltcut("pid2",c2,6,0);
+  c2->SaveAs("plot2/fms2.png");   
+  
+  c3->Clear();
+  c3->Divide(2,3);
+  c3->cd(1); xy_c0->Draw("");
+  c3->cd(2); xy_c1->Draw("");
+  c3->cd(3); xy_c2->Draw("");
+  c3->cd(4); xy_c3->Draw("");
+  c3->cd(5); xy_c4->Draw("");
+  c3->cd(6); xy_c5->Draw("");
+  c2->SaveAs("plot2/fms3.png");
+}
+
+void plotfmsPair(){
+  c1->Clear();
+  c1->Divide(2,3);
+  pltcut2("p_NP",  c1, 1, 1);
+  pltcut2("p_e",   c1, 2, 1);
+  pltcut2("p_pt",  c1, 3, 1);
+  pltcut2("p_ept", c1, 4, 0);
+  pltcut2("p_eta", c1, 5, 1);
+  pltcut2("p_phi", c1, 6, 1, 1);
+  c1->SaveAs("plot2/pair1.png");
+
+  c2->Clear();
+  c2->Divide(2,3);
+  pltcut2("p_m1",   c2, 1, 0);
+  pltcut2("p_m2",   c2, 2, 1);
+  pltcut2("p_zgg",  c2, 3, 1);
+  pltcut2("p_r30",  c2, 4, 1);
+  pltcut2("p_r100", c2, 5, 1, 1);
+  pltcut2("p_pid",  c2, 6, 2);
+  c2->SaveAs("plotpair2.png");   
+}
+
+void readfile(int file=0){
+    switch(file){
+    case 0: mTFile = new TFile("hist/fmsps.root","old"); break;
+    case 1: mTFile = new TFile("sim/test_electron.fmsfps.root"); break;
+    case 2: mTFile = new TFile("sim/test_pion.fmsfps.root"); break;
+    case 3: mTFile = new TFile("sim/test_gamma.fmsfps.root"); break;
+    case 4: mTFile = new TFile("sim/test_pi0.fmsfps.root"); break;
+    case 5: mTFile = new TFile("sim/test_mu-.fmsfps.root"); break;
+    }									    
+    char c[100];
+    for(int cut=0; cut<NCUT1; cut++){
+	for(int q=0; q<NQ; q++){
+	    for(int l=0; l<NL; l++){
+		sprintf(c,"FMSFPS_Q%1dL%1d_c%d",q+1,l+1,cut);
+		mH2[q][l][cut]=(TH2F*)mTFile->Get(c);
+		sprintf(c,"FMS-FPS_Q%1dL%1d_c%d",q+1,l+1,cut);
+		mHd[q][l][cut]=(TH1F*)mTFile->Get(c);
+		sprintf(c,"FMSFPSd_Q%1dL%1d_c%d",q+1,l+1,cut);
+		mHd2[q][l][cut]=(TH2F*)mTFile->Get(c);
+	    }
+	}
+    }
 }
 
 void openCanvas(){
-  c = new TCanvas("FPS","FPS",50,10,700,800);
+  c1 = new TCanvas("FPS","FPS",50,10,700,800);
   c2 = new TCanvas("FPS2","FPS2",750,10,700,800);
+  c3 = new TCanvas("FPS3","FPS3",1450,10,700,800);
   gStyle->SetPalette(1);
   gStyle->SetStatW(0.4);
 }
 
-void plot(int plt=0, int quad=0, int layer=0, int slat=0, int cut=0, int log=0){  
+void plot(int file=0, int plt=0, int quad=0, int layer=0, int slat=0, int cut=0, int log=0){  
   LOG=log;
   readFpsPosition();
-  readfile();
+  readfile(file);
   openCanvas();  
-  if(plt==1 || plt==0) plotfms1();
-  if(plt==2 || plt==0) plotfms2();
+  if(plt==1 || plt==0) plotfms();
+  if(plt==2 || plt==0) plotfmsPair();
   if(plt==3 || plt==0) plot2d(quad,layer,slat,cut,0,1,0);
   if(plt==4 || plt==0) plot2d(quad,layer,slat,cut,0,1,1);
   if(plt==5 || plt==0){
@@ -367,6 +440,4 @@ void plot(int plt=0, int quad=0, int layer=0, int slat=0, int cut=0, int log=0){
       plot2d(0,l,0,cut,0,1,1);
     }
   }
-  //if(plt==10 || plt==0) plotd(quad,layer,cut);
-  //if(plt==11 || plt==0) plot2d(quad,layer,slat,cut,0,0);
 }
