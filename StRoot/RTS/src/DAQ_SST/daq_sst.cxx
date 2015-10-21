@@ -175,12 +175,32 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 				LOG(NOTE,"S%d-%d: %u: fiber %d: overflow [0x%08X]",s,r,e,fib,fiber_id) ;
 				break ;
 			default:
-				LOG(NOTE,"S%d-%d: %u: fiber %d: odd fiber_id [0x%08X]",s,r,e,fib,fiber_id) ;
+				LOG(WARN,"S%d-%d: %u: fiber %d: odd fiber_id [0x%08X]",s,r,e,fib,fiber_id) ;
 				known_data_format = 0 ;
 				break ;
 			}
 		}
 
+		int pipe_mode = fiber_id & 0xF ;
+
+		switch(pipe_mode) {
+		case 0 :	//RAW
+			break ;
+		case 1 :	//COMPRESSED (aka ZS) ;
+			known_data_format = 2 ;
+			break ;
+		case 3 :	//Common Mode
+			known_data_format = 2 ;
+			break ;
+		case 2 :	//ZS but with RAW 
+		case 4 :	//Commong Mode with RAW
+		default :
+			LOG(ERR,"S%d-%d: %u: fiber %d: unknown pipe mode 0x%X (0x%08X)",s,r,e,fib,pipe_mode,fiber_id) ;
+			goto err_ret ;			
+		}
+
+/*
+			
 		if((fiber_id & 0xF) != 0) {
 			if((fiber_id & 0xF)==1) {	// ZS data
 				LOG(NOTE,"S%d-%d: %u: fiber %d: ZS data 0x%08X...",s,r,e,fib,fiber_id) ;
@@ -194,6 +214,9 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 
 
 		}
+*/
+
+
 
 		words -= 1 ;	// for some reason...
 
@@ -207,6 +230,7 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 
 		// If I don't know what the data format is, I'll skip decoding...
 		if(!known_data_format) {
+			LOG(WARN,"Unknown data format") ;
 			d32 += words ;
 			fib++ ;
 			if(fib==8) break ;
