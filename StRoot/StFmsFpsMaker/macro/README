@@ -44,6 +44,9 @@ runmudst /star/u/akio/pwg/fms2015/mudst st_fms_16077027_raw_4000001.MuDst.root 0
 submit.pl
 submit.pl submit
 merge2.pl submit
+
+*** Get average CPU time / event from logfile
+grep 'Done with' log.speed | awk '{m+=$22} END{print m/NR}'
 	 
 *** Valgrind profiles
 valgrind --tool=callgrind `which root4star` -b -q 'runMudst.C()'
