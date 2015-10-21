@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFmsPoint.h,v 2.6 2015/09/14 16:59:22 ullrich Exp $
+ * $Id: StFmsPoint.h,v 2.7 2015/10/21 14:46:48 ullrich Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  **************************************************************************
@@ -11,6 +11,9 @@
  **************************************************************************
  *
  * $Log: StFmsPoint.h,v $
+ * Revision 2.7  2015/10/21 14:46:48  ullrich
+ * Improved comments.
+ *
  * Revision 2.6  2015/09/14 16:59:22  ullrich
  * Added comments and modified print out.
  *
@@ -41,8 +44,8 @@ public:
     ~StFmsPoint();
 
     enum StFmsPointPidFlag {
-        kFpsPidNoFps=0,       // hit bad no slat
-        kFpsPidBad=1,         // hit bad slat or no slat
+        kFpsPidNoFps=0,       // hit no slat
+        kFpsPidBad=1,         // hit status bad slat
         kFpsPidGamma1=10,     // L1==0 L2==0 L3==0    gamma which did not convert
         kFpsPidGamma2=11,     // L1==0 L2==0 L3>=1    golden gamma
         kFpsPidGamma3=12,     // L1>=1 L2==0 L3==0    gamma with extra hit in layer1
@@ -108,7 +111,7 @@ private:
 #endif //__CINT__
     StLorentzVectorF mFourMomentum;  ///< Photon 4-momentum
     StThreeVectorF   mXYZ;           //Photon position in STAR coordinate
-    
+
     Int_t   mFpsPid;                                  // see enum above
     Int_t   mFpsNCandidate[kFpsNLayer];               // # of possible slat related to this point
     Float_t mFpsMip[kFpsNLayer][kFpsNCandidate];      // # of MIPs
