@@ -1,6 +1,13 @@
-// $Id: StFmsClusterFitter.h,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.3 2015/10/21 15:58:04 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.3  2015/10/21 15:58:04  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -78,7 +85,7 @@ class StFmsClusterFitter : public TObject {
    */
   TF2* showerShapeFunction();
   /** Set the tower list to fit when calling fitNPhoton() or fit2Photon() */
-  void setTowers(StFmsTowerCluster::Towers* towers) { mTowers = towers; }
+  void setTowers(StFmsTowerCluster::Towers* towers);
   /**
    Fit photons to the list of towers.
 
@@ -144,6 +151,7 @@ class StFmsClusterFitter : public TObject {
 
    \todo Provide LaTeX math function in documentation
    */
+  static inline Double_t energyDepositionInTower(Double_t x, Double_t y, Double_t* par);
   static Double_t energyDepositionInTower(Double_t* x, Double_t* par);
   /** Maximum number of photons that can be fit at once. */
   static int maxNFittedPhotons();
@@ -172,6 +180,7 @@ class StFmsClusterFitter : public TObject {
 
    \todo Provide LaTeX math function in documentation
    */
+  static inline Double_t energyDepositionDistribution(Double_t x, Double_t y, Double_t* par);
   static Double_t energyDepositionDistribution(Double_t* x, Double_t* par);
   /**
    Minuit minimization function for fitNPhoton() routine.
@@ -219,7 +228,37 @@ class StFmsClusterFitter : public TObject {
                            std::vector<double>& errors);
   TMinuit mMinuit;  ///< Minuit fitting interface
   static StFmsTowerCluster::Towers* mTowers;  ///< List of towers to fit
+  static Double_t mEnergySum;
+
   ClassDef(StFmsClusterFitter, 0)
 };  // class StFmsClusterFitter
+
+inline double asmsqrt(double x) { //slower than std::sqrt()                                                                                                                       
+    __asm__ ("fsqrt" : "+t" (x));
+    return x;
+}
+
+// Returns a * f(x,y,b) as defined here:
+// https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
+inline double showerShapeComponent(double x, double y, double a, double b) {
+    return a * atan(x * y / (b * sqrt(b * b + x * x + y * y)));
+}
+
+inline Double_t StFmsClusterFitter::energyDepositionDistribution(double x, double y, double* parameters){
+    constexpr double ootwopi = 1.0/atan2(0.0,-1.0);
+    return (   showerShapeComponent(x, y, parameters[1], parameters[4])
+	       + showerShapeComponent(x, y, parameters[2], parameters[5])
+	       + showerShapeComponent(x, y, parameters[3], parameters[6]) ) * ootwopi;
+}
+
+inline Double_t StFmsClusterFitter::energyDepositionInTower(Double_t x, Double_t y, Double_t* parameters){
+    const double w = parameters[0]/2.0;
+    return  energyDepositionDistribution(x-w,y-w,parameters)
+          - energyDepositionDistribution(x-w,y+w,parameters)
+          - energyDepositionDistribution(x+w,y-w,parameters)
+          + energyDepositionDistribution(x+w,y+w,parameters);
+}
+
+
 }  // namespace FMSCluster
 #endif  // STROOT_STFMSPOINTMAKER_STFMSCLUSTERFITTER_H_

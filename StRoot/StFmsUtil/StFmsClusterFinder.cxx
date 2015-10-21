@@ -1,6 +1,13 @@
-// $Id: StFmsClusterFinder.cxx,v 1.1 2015/03/10 14:38:54 jeromel Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.2 2015/10/21 15:58:04 akio Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.2  2015/10/21 15:58:04  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.1  2015/03/10 14:38:54  jeromel
 // First version of FmsUtil from Yuxi Pan - reviewd 2015/02
 //
@@ -146,7 +153,7 @@ class TowerClusterAssociation : public TObject {
    
    Initialise with the StFmsTower of interest.
    */
-  explicit TowerClusterAssociation(StFmsTower* tower) : mTower(tower) { }
+  explicit TowerClusterAssociation(StFmsTower* tower, int detectorId) : mTower(tower), mDetectorId(detectorId){ }
   /** Returns this tower. */
   StFmsTower* tower() { return mTower; }
   /** \overload */
@@ -161,8 +168,27 @@ class TowerClusterAssociation : public TObject {
    a distance of 1 from a tower at (1, 2), and sqrt(2) from a tower at (2, 2).
    */
   double separation(const StFmsTower* tower) {
-    return sqrt(pow(tower->column() - mTower->column(), 2.) +
-                pow(tower->row() - mTower->row(), 2.));
+      int det0=mTower->hit()->detectorId();
+      int det1=tower->hit()->detectorId();
+      //within the same detector
+      if(det0==det1){
+	  return sqrt(pow(tower->column() - mTower->column(), 2.) +
+		      pow(tower->row() - mTower->row(), 2.));
+      }
+      //different detector (large and small) - make small cell fit to large
+      int rowL,colL,rowS,colS;
+      if(det0<det1){
+	  rowL=mTower->row();    rowS=tower->row();
+	  colL=mTower->column(); colS=tower->column();
+      }else{
+	  rowS=mTower->row();    rowL=tower->row();
+	  colS=mTower->column(); colL=tower->column();
+      }      
+      float rL=rowL-0.5;
+      float cL=colL-0.5;
+      float rS=(rowS-0.5)/1.5 + 9.0;
+      float cS=(colS-0.5)/1.5;
+      return sqrt(pow(rL-rS,2.0)+pow(cL-cS,2.0));
   }
   /**
    Calculate the separation between this tower and a cluster.
@@ -179,11 +205,18 @@ class TowerClusterAssociation : public TObject {
     if (kPeakTower == distance) {
       return separation(cluster->towers().front());
     } else {
-      // Use calculated cluster center (x0, y0).
-      // Subtract 0.5 from tower (column, row) to give tower center.
-      return sqrt(pow(cluster->cluster()->x() - (mTower->column() - 0.5), 2.) +
-                  pow(cluster->cluster()->y() - (mTower->row() - 0.5), 2.));
-    }  // if
+	// Use calculated cluster center (x0, y0).
+	// Subtract 0.5 from tower (column, row) to give tower center.	
+	if(mTower->hit()->detectorId() == mDetectorId){ //within the same detector
+	    return sqrt(pow(cluster->cluster()->x() - (mTower->column() - 0.5), 2.) +
+			pow(cluster->cluster()->y() - (mTower->row() - 0.5), 2.));
+	}else{ //different detector (large cell cluster and small cell tower) - make small cell fit to large
+	    float col=(mTower->column()-0.5)/1.5; 
+	    float row=(mTower->row()-0.5)/1.5+9.0;    
+	    return sqrt(pow(cluster->cluster()->x() - col,2.0) +
+			pow(cluster->cluster()->y() - row,2.0));
+	}  // if	
+    }  
   }
   /**
    Returns true if this tower can be associated with a cluster.
@@ -284,8 +317,9 @@ class TowerClusterAssociation : public TObject {
   }
 
  private:
-  StFmsTower* mTower;  ///< Reference FMS tower
-  std::list<StFmsTowerCluster*> mClusters;   ///< Associable clusters
+  StFmsTower* mTower;  ///< Reference FMS tower  
+  int mDetectorId; //! working detectorId
+  std::list<StFmsTowerCluster*> mClusters;   ///< Associable clusters  
 };
 
 StFmsClusterFinder::StFmsClusterFinder(double energyCutoff)
@@ -324,7 +358,8 @@ int StFmsClusterFinder::categorise(StFmsTowerCluster* towerCluster) {
   return cluster->category();
 }
 
-int StFmsClusterFinder::findClusters(TowerList* towers, ClusterList* clusters) {
+int StFmsClusterFinder::findClusters(TowerList* towers, ClusterList* clusters, int detectorId) {
+  mDetectorId=detectorId; //current working detectorId
   // Remove towers below energy threshold, but save them for later use
   TowerList belowThreshold = filterTowersBelowEnergyThreshold(towers);
   TowerList neighbors;  // List of non-peak towers in clusters
@@ -384,7 +419,7 @@ unsigned StFmsClusterFinder::locateClusterSeeds(TowerList* towers,
       // Add "high" to cluster and move towers neighboring "high" to "neighbor"
       high->setCluster(clusters->size());
       typedef FMSCluster::ClusterList::value_type ClusterPtr;
-      clusters->push_back(ClusterPtr(new StFmsTowerCluster(new StFmsCluster)));
+      clusters->push_back(ClusterPtr(new StFmsTowerCluster(new StFmsCluster, mDetectorId)));
       clusters->back()->setIndex(high->cluster());
       clusters->back()->towers().push_back(high);
       // Add neighbors of the new peak tower to the neighbor list.
@@ -430,8 +465,7 @@ unsigned StFmsClusterFinder::associateTowersWithClusters(
   TowerConstRIter tower;
   for (tower = neighbors->rbegin(); tower != neighbors->rend(); ++tower) {
     // Populate association information of this tower with each cluster
-    std::unique_ptr<TowerClusterAssociation> association(
-      new TowerClusterAssociation(*tower));
+    std::unique_ptr<TowerClusterAssociation> association(new TowerClusterAssociation(*tower,mDetectorId));
     for (auto i = clusters->begin(); i != clusters->end(); ++i) {
       association->add(i->get(), kPeakTower);
     }  // for
@@ -460,8 +494,8 @@ unsigned StFmsClusterFinder::associateValleyTowersWithClusters(
     TObjArray* valleys) const {
   unsigned size = neighbors->size();
   for (Int_t i(0); i < valleys->GetEntriesFast(); ++i) {
-    TowerClusterAssociation* association =
-      static_cast<TowerClusterAssociation*>(valleys->At(i));
+    //TowerClusterAssociation* association = static_cast<TowerClusterAssociation*>(valleys->At(i));
+    TowerClusterAssociation* association = new TowerClusterAssociation((StFmsTower*)valleys->At(i),mDetectorId);
     StFmsTowerCluster* cluster = association->nearestCluster();
     if (cluster) {
       // Move the tower to the appropriate cluster
@@ -483,7 +517,7 @@ unsigned StFmsClusterFinder::associateResidualTowersWithClusters(
   TowerConstRIter tower;
   for (tower = neighbors->rbegin(); tower != neighbors->rend(); ++tower) {
     // Populate tower-cluster association information
-    TowerClusterAssociation association(*tower);
+    TowerClusterAssociation association(*tower,mDetectorId);
     for (auto i = clusters->begin(); i != clusters->end(); ++i) {
       // There are already some towers in the cluster so we can use a computed
       // cluster center to give a better estimate of tower-cluster separation
@@ -507,7 +541,7 @@ void StFmsClusterFinder::associateSubThresholdTowersWithClusters(
     TowerList* towers,
     ClusterList* clusters) const {
   for (auto tower = towers->begin(); tower != towers->end(); ++tower) {
-    TowerClusterAssociation association(*tower);
+      TowerClusterAssociation association(*tower,mDetectorId);
     // loop over all clusters
     for (auto i = clusters->begin(); i != clusters->end(); ++i) {
       association.add(i->get(), kPeakTower);

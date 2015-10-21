@@ -1,6 +1,13 @@
-// $Id: StFmsEventClusterer.h,v 1.2 2015/09/02 15:01:32 akio Exp $
+// $Id: StFmsEventClusterer.h,v 1.3 2015/10/21 15:58:05 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.3  2015/10/21 15:58:05  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.2  2015/09/02 15:01:32  akio
 // Removing StFmsGeometry class, and now it uses StFmsDbMaker to get appropriate parameters.
 //
@@ -52,7 +59,7 @@ class StFmsEventClusterer: public TObject {
    */
 
   //  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
-  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId);
+  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t try1Photon);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -198,6 +205,8 @@ class StFmsEventClusterer: public TObject {
   std::vector<Double_t> mTowerWidthXY;   ///< Geometry for this sub-detector (cm)
 
   StFmsDbMaker *mFmsDbMaker; //!
+  Int_t mGlobalRefit;        //!
+  Int_t mTry1PhotonFitWhen2PhotonFitFailed;//!
 
   ClassDef(StFmsEventClusterer, 0)
 };

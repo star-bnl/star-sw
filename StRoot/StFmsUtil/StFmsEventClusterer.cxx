@@ -1,6 +1,13 @@
-// $Id: StFmsEventClusterer.cxx,v 1.4 2015/10/01 18:19:59 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.5 2015/10/21 15:58:04 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.5  2015/10/21 15:58:04  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.4  2015/10/01 18:19:59  akio
 // fixed typo
 //
@@ -250,8 +257,9 @@ struct GlobalPhotonFitParameters {
 
 namespace FMSCluster {
   StFmsEventClusterer::StFmsEventClusterer( //const StFmsGeometry* geometry,
-					   StFmsDbMaker* db, Int_t detectorId)
-    : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db) { }
+					   StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t try1PhotonFit)
+      : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db), 
+	mGlobalRefit(globalrefit), mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit){ }
 
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
@@ -277,10 +285,18 @@ Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
 }
 
 Int_t StFmsEventClusterer::fitEvent() {
-  if (findClusters()) {
-    return fitClusters() && refitClusters();
-  }  // if
-  return false;
+    if(findClusters()) {
+	if(fitClusters()){
+	    if(mGlobalRefit==0) return true;
+	    if(refitClusters()) return true;
+	    LOG_INFO << "StFmsEventClusterer::fitEvent() refitClusters failed" <<endm;
+	    return false;
+	}
+	LOG_INFO << "StFmsEventClusterer::fitEvent() fitClusters failed" <<endm;
+	return false;
+    }
+    LOG_INFO << "StFmsEventClusterer::fitEvent() findClusters failed" <<endm;
+    return false;
 }
 
 Int_t StFmsEventClusterer::findClusters() {
@@ -288,16 +304,11 @@ Int_t StFmsEventClusterer::findClusters() {
   for (auto i = mTowers->begin(); i != mTowers->end(); ++i) {
     towerList.push_back(&(*i));
   }  // for
-  mClusterFinder.findClusters(&towerList, &mClusters);
-  //  switch (mDetectorId) {
+  mClusterFinder.findClusters(&towerList, &mClusters, mDetectorId);
   switch(mFmsDbMaker->largeSmall(mDetectorId)){
-    //case kFmsNorthLarge:  // Deliberate fall-through
-    //case kFmsSouthLarge:
   case 0:
     mClusters.remove_if(IsBadCluster(BAD_MIN_E_LRG, BAD_MAX_TOW_LRG));
     break;
-    //case kFmsNorthSmall:  // Deliberate fall-through
-    //case kFmsSouthSmall:
   case 1:
     mClusters.remove_if(IsBadCluster(BAD_MIN_E_SML, BAD_MAX_TOW_SML));
     break;
@@ -306,7 +317,7 @@ Int_t StFmsEventClusterer::findClusters() {
   }  // switch
   // Must do moment analysis before catagorization
   for (auto i = mClusters.begin(); i != mClusters.end(); ++i) {
-    (*i)->findClusterAxis(mClusterFinder.momentEnergyCutoff());
+      (*i)->findClusterAxis(mClusterFinder.momentEnergyCutoff(),mTowerWidthXY.at(0),mTowerWidthXY.at(1));
   }  // for
   return mClusters.size();
 }
@@ -318,8 +329,9 @@ Bool_t StFmsEventClusterer::fitClusters() {
   for (auto iter = mClusters.begin(); iter != mClusters.end(); ++iter) {
     int category = mClusterFinder.categorise(iter->get());
     mFitter->setTowers(&(*iter)->towers());
+    //LOG_INFO << "Cluster category = " << category << endm;
     switch (category) {
-      case k1PhotonCluster:
+      case k1PhotonCluster:	
         fit1PhotonCluster(iter->get());
         break;
       case k2PhotonCluster:
@@ -335,7 +347,18 @@ Bool_t StFmsEventClusterer::fitClusters() {
         break;
     }  // switch
     if (category == k2PhotonCluster && (*iter)->chiSquare() > BAD_2PH_CHI2) {
-      badFit = true;
+	float chi2=(*iter)->chiSquare();
+	LOG_INFO << Form("chi2=%f >  BAD_2PH_CHI2=%f", (*iter)->chiSquare(),BAD_2PH_CHI2) << endm;
+	if(mTry1PhotonFitWhen2PhotonFitFailed){
+	    fit1PhotonCluster(iter->get());
+	    LOG_INFO << Form("Tried 1-photon fit resulted with chi2=%f", (*iter)->chiSquare())<< endm;	
+	    if(chi2<(*iter)->chiSquare()){
+		LOG_INFO << "2-photon fit was better, returning bad" << endm;
+		badFit = true;
+	    }else{
+		LOG_INFO << "Taking 1-photon fit" << endm;
+	    }
+	}
     }  // if
   }  // Loop over all real clusters
   return !badFit;
@@ -420,11 +443,16 @@ Int_t StFmsEventClusterer::fitAmbiguousCluster(ClusterIter towerCluster) {
   const StFmsFittedPhoton photon = (*towerCluster)->photons().front();  // Cache
   // Decide if this 1-photon fit is good enough, if not try 2-photon fit
   int category = k1PhotonCluster;
+  LOG_INFO << "fitAmbiguousCluster chi2 for 1photon fit="<<chiSquare1Photon<<endm;
   if (chiSquare1Photon >= 5.) {
-    if (fit2PhotonCluster(towerCluster) <= chiSquare1Photon &&
-        validate2ndPhoton(towerCluster)) {
-      category = k2PhotonCluster;
-    }  // if
+      const double chiSquare2Photon=fit2PhotonCluster(towerCluster);
+      LOG_INFO << "fitAmbiguousCluster chi2 for 2photon fit="<<chiSquare2Photon<<endm;      
+      if(chiSquare2Photon <= chiSquare1Photon ){
+	  LOG_INFO << "fitAmbiguousCluster 2 photon fit is better, validate2ndPhoton"<<endm;
+	  if(validate2ndPhoton(towerCluster)) {
+	      category = k2PhotonCluster;
+	  }
+      }  // if
   }  // if
   // The 2-photon fit updated the cluster, so if the 1-photon fit turns out to
   // have been better, restore its properties
@@ -484,13 +512,15 @@ Double_t StFmsEventClusterer::fitGlobalClusters(unsigned int nPhotons,
 */
 bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   // Find the tower hit by the lowest energy photon in a cluster
+  printf("StFmsEventClusterer::validate2ndPhoton\n");
   const StFmsFittedPhoton* photon = findLowestEnergyPhoton(cluster->get());
   int column = 1 + int(photon->x / mTowerWidthXY.at(0));
   int row = 1 + int(photon->y / mTowerWidthXY.at(1));
   const StFmsTower* tower = searchClusterTowers(row, column, **cluster);
   // If tower is nullptr, the photon doesn't hit in a tower in this cluster.
   if (!tower) {
-    return false;
+    printf("StFmsEventClusterer::validate2ndPhoton No hit on photon\n");
+    //return false;
   }  // if
   // Check if the fitted energy is too large compared to the energy of the tower
   if (tower->hit()->energy() < VALID_FT * photon->energy) {
