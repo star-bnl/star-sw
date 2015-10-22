@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.24 2015/10/22 15:56:13 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.25 2015/10/22 18:51:08 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -77,6 +77,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   double mdistancefromDX_east, mdistancefromDX_west; /* distance from the IP to the DX magnet in the East and West */
   double mLDX_east, mLDX_west;     /* length of DX in the East and West */
   double mbendingAngle_east, mbendingAngle_west;     /* DX bending angles in the East and West */
+  double mconversion_TAC_time ;	/* converting the TAC tick to time (second) */
 
   // K. Yip (2015-10-22) : Adding methods to read Accelerator and Skew parameters from the respective database ;
   Int_t readAccelerateParameter() ;
@@ -142,7 +143,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.24 2015/10/22 15:56:13 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.25 2015/10/22 18:51:08 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
