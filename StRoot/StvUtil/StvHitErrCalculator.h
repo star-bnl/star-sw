@@ -1,6 +1,8 @@
 #ifndef __StvHitErrCalculatorulator_h_
 #define __StvHitErrCalculatorulator_h_
 #include "TNamed.h"
+class StvHit;
+typedef float Mtx33F_t[3][3];
 
 class StvHitErrCalculator : public TNamed {
 public:	
@@ -12,6 +14,7 @@ StvHitErrCalculator(const char *name,int nPars=2);
         void SetTrack(const float  tkDir[3]);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
+virtual  int CalcDcaErrs(const StvHit *hit,double hRR[3]);
 virtual void CalcDetDers(double dRR[kMaxPars][3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual double Trace(const float hiPos[3]);
