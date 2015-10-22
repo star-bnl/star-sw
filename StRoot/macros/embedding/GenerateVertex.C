@@ -1,11 +1,15 @@
 // Pibero Djawotho <pibero@tamu.edu>
 // Texas A&M University
 // 11 Dec 2010
-//
-// Generate vertex text file with format: vx vy vz.
-// Vertex uses beam line constraint with spreads in x, y and z,
-// and offset in z.
 
+
+/**
+ * Generates a text file (vertex.txt) with vertex coordinates (format: vx vy vz)
+ * based on the beam line position corresponding to real data file(s) specified
+ * by 'daqfile' argument. Vertex uses beam line constraint with spreads in x,
+ * y and z, and offset in z, and the distribution in z is base on the
+ * zVertexOneTofMatch histogram from the 'dataFileName' file in ROOT format.
+ */
 void GenerateVertex(char* dataFileName, int nevents = 1000, int seed = 0, const char* daqfile = "@run10179086.list", const char* vertexfile = "vertex.txt", const char* flag="Jet")
 {
   // vertex spreads and offsets
