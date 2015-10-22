@@ -24,11 +24,15 @@
 #include "tables/St_pp2ppOffset_Table.h"
 #include "tables/St_pp2ppZ_Table.h"
 #include "tables/St_pp2ppRPpositions_Table.h" // K. Yip : Aug. 10, 2015 : LVDT readings for RP positions
+#include "tables/St_pp2ppAcceleratorParameters_Table.h" // K. Yip : Aug. 10, 2015 : LVDT readings for RP positions
+#include "tables/St_pp2ppPMTSkewConstants_Table.h" // K. Yip : Aug. 10, 2015 : LVDT readings for RP positions
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StRpsCollection.h"
 #include "StEvent/StRpsCluster.h"
+#include "StEvent/StRpsTrackPoint.h" // added by Rafal
+#include "StEvent/StRpsTrack.h" // added by Rafal
 
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData2012.h"
@@ -39,9 +43,13 @@ using namespace std;
 ClassImp(St_pp2pp_Maker)
 
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
-						     mPedestalPerchannelFilename("pedestal.in.perchannel"), mLDoCluster(kTRUE) {
+						     mPedestalPerchannelFilename("pedestal.in.perchannel"), mLDoCluster(kTRUE),
+						     maxPitchesToMatch(3.0){ // added by Rafal
   // ctor
   //  nevt_count = 0 ;
+
+  Pitch[X] = kpitch_6svx; // added by Rafal
+  Pitch[Y] = kpitch_4svx; // added by Rafal
 }
 
 
@@ -71,6 +79,12 @@ Int_t St_pp2pp_Maker::InitRun(int runumber) {
     readPedestalPerchannel() ;
     readOffsetPerplane() ;
     readZPerplane() ;
+    
+    // K. Yip (2015-10-22): for Rafal's Tracking really
+    if ( mVersion >= 2 ) {
+      readSkewParameter() ;
+      readAccelerateParameter() ;
+    }
   }
 
   return kStOk ;
@@ -145,11 +159,11 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
       St_pp2ppPedestal160 *dataset = 0;
       dataset = (St_pp2ppPedestal160*) DB->Find("pp2ppPedestal160");
 
-      if ( dataset->GetNRows() > 1 ) {
-	LOG_ERROR << "St_pp2pp_Maker : Found INDEXED table with " <<  dataset->GetNRows() << " rows \?!" << endm ;
-      }
-
       if (dataset) {
+	if ( dataset->GetNRows() > 1 ) {
+	  LOG_ERROR << "St_pp2pp_Maker : Found INDEXED table with " <<  dataset->GetNRows() << " rows \?!" << endm ;
+	}
+
 	pp2ppPedestal160_st *table = dataset->GetTable();
 	for (Int_t j = 0; j < 160; j++) {
 
@@ -237,14 +251,14 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
       if (descr) {
 	LOG_DEBUG << "St_pp2pp_Maker : Reading pp2ppRPpositions table with nrows = " << descr->GetNRows() << endm ;
 	mRPpositionsTable = descr->GetTable();
-	LVDT_pos[0] = mRPpositionsTable[0].y_right_E1U ;
-	LVDT_pos[1] = mRPpositionsTable[0].y_left_E1D ;
-	LVDT_pos[2] = mRPpositionsTable[0].y_top_E2U ;
-	LVDT_pos[3] = mRPpositionsTable[0].y_bot_E2D ;
-	LVDT_pos[4] = mRPpositionsTable[0].b_right_W1U ;
-	LVDT_pos[5] = mRPpositionsTable[0].b_left_W1D ;
-	LVDT_pos[6] = mRPpositionsTable[0].b_top_W2U ;
-	LVDT_pos[7] = mRPpositionsTable[0].b_bot_W2D ; 
+	mLVDT_pos[0] = mRPpositionsTable[0].y_right_E1U ;
+	mLVDT_pos[1] = mRPpositionsTable[0].y_left_E1D ;
+	mLVDT_pos[2] = mRPpositionsTable[0].y_top_E2U ;
+	mLVDT_pos[3] = mRPpositionsTable[0].y_bot_E2D ;
+	mLVDT_pos[4] = mRPpositionsTable[0].b_right_W1U ;
+	mLVDT_pos[5] = mRPpositionsTable[0].b_left_W1D ;
+	mLVDT_pos[6] = mRPpositionsTable[0].b_top_W2U ;
+	mLVDT_pos[7] = mRPpositionsTable[0].b_bot_W2D ; 
 	/*
 	  for (Int_t i = 0; i < descr->GetNRows(); i++) {
 	  std::cout << i << "th row : " << mRPpositionsTable[i].b_left_W1D << " "  << mRPpositionsTable[i].b_right_W1U
@@ -294,6 +308,105 @@ Int_t St_pp2pp_Maker::readZPerplane() {
       */
     } else {
       LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppZ table (wrong timestamp?). Nothing to return, then" << endm ;
+    }
+
+  }
+
+  return kStOk ;
+
+}
+
+
+Int_t St_pp2pp_Maker::readSkewParameter() {
+
+  memset(mskew_param,0,sizeof(mskew_param));
+
+  int s, ipmt, ipar ;
+
+  // Database
+  TDataSet *DB = 0;
+  DB = GetDataBase("Calibrations/pp2pp");
+  if (!DB) {
+    LOG_ERROR << "ERROR: cannot find database Calibrations/pp2pp ?" << endm ;
+  }
+  else {
+
+    St_pp2ppPMTSkewConstants *dataset = 0;
+    dataset = (St_pp2ppPMTSkewConstants*) DB->Find("Calibrations/pp2pp/pp2ppPMTSkewConstants");
+
+      if (dataset) {
+
+	if ( dataset->GetNRows() > 1 ) {
+	  LOG_ERROR << "St_pp2pp_Maker : Found INDEXED table with " <<  dataset->GetNRows() << " rows \?!" << endm ;
+	}
+
+	pp2ppPMTSkewConstants_st *table = dataset->GetTable();
+	for (int j = 0; j < 64; j++) {
+
+	  s = j/kMAXSEQ ; // RP 0 .. 7
+	  ipmt = (j/4) % 2  ; // 0 or 1
+	  ipar = j - s*kMAXSEQ ; // 0 .. 3
+
+	  LOG_DEBUG << j << "th element: RP = " << s << " PMT = " << ipmt << " parameter = " << ipar 
+		    << " with parameter : " << table[0].skew_param[j] << endm ;
+
+	  mskew_param[s][ipmt][ipar] = table[0].skew_param[j] ;
+
+	} 
+      }
+      else {
+	LOG_ERROR << "St_pp2pp_Maker: dataset does not contain requested table pp2ppPMTSkewConstants ." << endm ;
+      }
+
+  }
+
+  return kStOk ;
+
+}
+
+
+Int_t St_pp2pp_Maker::readAccelerateParameter() {
+
+  TDataSet *DB = 0;
+  DB = GetInputDB("Geometry/pp2pp");
+  if (!DB) { 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << endm ; 
+  }
+  else {
+
+    // fetch ROOT descriptor of db table
+    St_pp2ppAcceleratorParameters *descr = 0;
+    descr = (St_pp2ppAcceleratorParameters*) DB->Find("pp2ppAcceleratorParameters");
+    // fetch data and place it to appropriate structure
+    if (descr) {
+      pp2ppAcceleratorParameters_st *table = descr->GetTable();
+      LOG_DEBUG << "St_pp2pp_Maker : Reading pp2ppAcceleratorParameters table with nrows = " << descr->GetNRows() << endm ;
+
+      mx_IP = table[0].x_IP ;
+      my_IP = table[0].y_IP ;
+      mz_IP = table[0].z_IP ;
+
+      mtheta_x_tilt = table[0].theta_x_tilt ;
+      mtheta_y_tilt = table[0].theta_y_tilt ;
+
+      mdistancefromDX_east = table[0].distancefromDX_east ;
+      mdistancefromDX_west = table[0].distancefromDX_west ;
+
+      mLDX_east = table[0].LDX_east ;
+      mLDX_west = table[0].LDX_west ;
+
+      mbendingAngle_east = table[0].bendingAngle_east ;
+      mbendingAngle_west = table[0].bendingAngle_west ;
+
+      /*
+      for (Int_t i = 0; i < descr->GetNRows(); i++) {
+	for ( Int_t j = 0; j< 32 ; j++ )
+	  std::cout << mOffsetTable[i].rp_offset_plane[j] << " "  ; 
+	cout << endl ;
+      }
+      */
+    } else {
+      LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppAcceleratorParameters table (wrong timestamp?). Nothing to return, then" << endm ;
     }
 
   }
@@ -635,7 +748,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       else {
 	if ( mRPpositionsTable )
 	  // K. Yip (Oct. 19, 2015) : set offsets back to m (as LVDT arrays are in mm)
-	  offset = ( LVDT_OFFSET[4*i+j] + LVDT_SCALE[4*i+j]*LVDT_pos[i] )/1000. ; 
+	  offset = ( LVDT_OFFSET[4*i+j] + LVDT_SCALE[4*i+j]*mLVDT_pos[i] )/1000. ; 
 	else
 	  offset = double(ErrorCode) ;
 	//	cout << "Offsets : " <<  i << " " << j << " " << offset << endl ; 
@@ -695,14 +808,14 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	      // K. Yip : Aug. 14, 2015 : 
 	      // The plane E2D.A installed on Jan. 30, 2015 had an old BNL made silicon in it, where _all_ SVX channels were connected to the silicon and the pitch is smaller.
 	      if ( ( mVersion == 2 ) && ( i == 3 ) && ( j == 0 ) ) { // Here the sequence nos. are from 0 to 7 (as they're from mValidHits arrays)
-		pitch = pitch_4svx2 ; // in m
+		pitch = kpitch_4svx2 ; // in m
 	      }
 	      else {
-		pitch = pitch_4svx ; // in m
+		pitch = kpitch_4svx ; // in m
 	      }
 	    }
 	    else {               // B or D : pitch_6svx = 0.01050 cm
-	      pitch = pitch_6svx ; // in m
+	      pitch = kpitch_6svx ; // in m
 	    }
 
 	    position = position*pitch ;
@@ -755,22 +868,313 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 }
 
+
+//BEGIN  ------------------------ Rafal's code ------------------------
+
+
 Int_t St_pp2pp_Maker::MakeTracks(StRpsCollection &RpsColl, float blue_beamenergy, float yellow_beamenergy) {
 
-  /*
-  UInt_t k, s, c ;
-
-  for ( s=0; s<St_pp2pp_Maker::kMAXSEQ; s++)
-    for ( c=0; c<St_pp2pp_Maker::kMAXCHAIN; c++)
-      for ( k=0; k<RpsColl.romanPot(s)->plane(c)->numberOfClusters() && k<1; k++) { // Just print 1
-	LOG_INFO << "Length : " << RpsColl.romanPot(s)->plane(c)->cluster(k)->length()
-		 << ", Energy : " << RpsColl.romanPot(s)->plane(c)->cluster(k)->energy() << endm ;
+  vector< StRpsTrackPoint* > trackPointsVec[kMAXSEQ];
+  vector< StRpsTrack* > trackVec;
+  
+  // reconstructing track-points
+  formTrackPoints( RpsColl, trackPointsVec );
+  
+  // reconstructing tracks
+  formTracks( &trackVec, trackPointsVec, blue_beamenergy, yellow_beamenergy );
+      
+  //filling StRpsCollection with track-points and tracks
+  for(int i=0; i<kMAXSEQ; ++i){
+    for(unsigned int j=0; j<trackPointsVec[i].size(); ++j){
+      RpsColl.addTrackPoint( trackPointsVec[i][j] );
+    }
   }
-  */
-
+  for(unsigned int j=0; j<trackVec.size(); ++j){
+    RpsColl.addTrack( trackVec[j] );
+  }
+  
   return kStOk ;
 
 }
+
+
+void St_pp2pp_Maker::formTracks( vector< StRpsTrack* > *trackVec, const vector< StRpsTrackPoint* > *trackPointVec, const float beamMomentumWest, const float beamMomentumEast ) const{
+
+  // constants necessary for momentum reconstruction
+
+  //------------ THOSE WILL BE READ FROM DATABASE ------------
+  static const double alpha0 = 0.01886; // bending angle of DX magnet [rad]
+  static const double d1 = 9.8; 	// distance from IP to DX magnet [m]
+  static const double lDX = 3.7; 	// length of DX magnet [m]
+  static const double vertexPosition[2] = { 0.0013, 0.0010 }; // average coordinates of vertex [m]
+  //------------ -------------------------------- ------------
+  
+  for(int branch=0; branch<nBranches; ++branch){ // loop over all branches in the Roman Pot system
+
+    int nPts[2]; // reading number of track-points found in the branch
+    nPts[0] = trackPointVec[ RpInBranch[branch][0] ].size();
+    nPts[1] = trackPointVec[ RpInBranch[branch][1] ].size();
+
+    if( nPts[0] && nPts[1] ){ // if track-points reconstructed in both stations in branch
+
+      for(int i=0; i<nPts[0]; ++i){ // loops over all combinations of track-points
+	for(int j=0; j<nPts[1]; ++j){
+	  StRpsTrack* track = new StRpsTrack();
+
+	  track->setBranch( branch ); // setting ID of branch
+	  track->setType( StRpsTrack::rpsGlobal ); // setting the type of the track
+	  track->setTrackPoint( trackPointVec[ RpInBranch[branch][0] ][i], 0 ); // setting constituent track-points
+	  track->setTrackPoint( trackPointVec[ RpInBranch[branch][1] ][j], 1 ); // setting constituent track-points
+
+	  // below calculating momentum vector
+	  double localThetaX = track->thetaRp( StRpsTrack::rpsAngleThetaX ); // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+	  double localThetaY = track->thetaRp( StRpsTrack::rpsAngleThetaY ); // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+
+	  double d2 = abs( trackPointVec[ RpInBranch[branch][0] ][i]->z() ) - lDX - d1; // distance from DX magnet exit to first RP station
+	  double thetaX_IP = ( trackPointVec[ RpInBranch[branch][0] ][i]->x() - vertexPosition[X] - (d2 + 0.5*lDX)*localThetaX ) / ( d1 /* +/- z_IP */ + 0.5*lDX );
+	  double xi = 1. / ( 1 + (alpha0*(d1 + 0.5*lDX /* +/- z_IP */)) / ( localThetaX*( abs( trackPointVec[ RpInBranch[branch][0] ][i]->z() ) /* +/- z_IP */ ) + vertexPosition[X] - trackPointVec[ RpInBranch[branch][0] ][i]->x() ) );
+	  double momentumValue = (branch < nBranches/2 ? beamMomentumEast : beamMomentumWest ) * (1.-xi);
+
+	  StThreeVectorF momentumVector( 0, 0, (branch < nBranches/2 ? -momentumValue : momentumValue ) );
+	  momentumVector.rotateX( (branch < nBranches/2 ? localThetaY : -localThetaY ) );
+	  momentumVector.rotateY( (branch < nBranches/2 ? -thetaX_IP : thetaX_IP ) );
+	  track->setP( momentumVector ); // setting the momentum vector
+
+	  trackVec->push_back( track ); // storing the track
+	}
+      }
+    }
+    else if( nPts[0] || nPts[1] ){ // if track-point reconstructed only in one station in branch
+
+      int station = nPts[0] ? 0 : 1; // checking ID of station where track-point was found
+      for(int i=0; i<nPts[station]; ++i){ // loop over all track-points
+	StRpsTrack* track = new StRpsTrack();
+
+	track->setBranch( branch ); // setting ID of branch
+	track->setType( StRpsTrack::rpsLocal ); // setting the type of the track
+	track->setTrackPoint( trackPointVec[ RpInBranch[branch][station] ][i], station ); // setting constituent track-point
+
+	// below calculating momentum vector (assuming no momentum loss == elastic track)
+	double localThetaX = ( trackPointVec[ RpInBranch[branch][station] ][i]->x() - vertexPosition[X] ) / abs( trackPointVec[ RpInBranch[branch][station] ][i]->z() /* +/- z_IP */ );
+	double localThetaY = ( trackPointVec[ RpInBranch[branch][station] ][i]->y() - vertexPosition[Y] ) / abs( trackPointVec[ RpInBranch[branch][station] ][i]->z() /* +/- z_IP */ );
+	double momentumValue = (branch < nBranches/2 ? beamMomentumEast : beamMomentumWest );
+
+	StThreeVectorF momentumVector( 0, 0, (branch < nBranches/2 ? -momentumValue : momentumValue ) );
+	momentumVector.rotateX( (branch < nBranches/2 ? localThetaY : -localThetaY ) );
+	momentumVector.rotateY( (branch < nBranches/2 ? -localThetaX : localThetaX ) );
+	track->setP( momentumVector ); // setting the momentum vector
+
+	trackVec->push_back( track ); // storing the track
+      }
+    }
+
+  }
+}
+
+
+void St_pp2pp_Maker::formTrackPoints(const StRpsCollection& RpsColl, vector< StRpsTrackPoint* > *trackPointVec ) const{
+
+  for(int i=0; i<kMAXSEQ; ++i){ // loop over all Roman Pots
+
+    // looking for hits in X and Y direction (necessary to determine (x,y) coordinates of track-point)
+    vector<St_pp2pp_Maker::StRpsHit> hits[2];
+    hits[Y] = formHits(RpsColl.romanPot(i), Y);
+    if( hits[Y].size()==0 ) continue; // if no hits in planes A&C => cannot reconstruct a track-point
+    hits[X] = formHits(RpsColl.romanPot(i), X);
+    if( hits[X].size()==0 ) continue; // if no hits in planes B&D => cannot reconstruct a track-point
+
+    // loops over all combinations of hits in X and Y directions
+    for(unsigned int j=0; j<hits[X].size(); ++j){
+      for(unsigned int k=0; k<hits[Y].size(); ++k){
+	StRpsTrackPoint* trackPoint = new StRpsTrackPoint();
+
+	// setting position of the track-point
+	double x = hits[X][j].positionXY;
+	double y = hits[Y][k].positionXY;
+	double z = (hits[X][j].positionZ + hits[Y][k].positionZ)/2.;
+	StThreeVectorF pos( x, y, z );
+	trackPoint->setPosition( pos );
+
+	// setting ID of Roman Pot
+	trackPoint->setRpId( i );
+
+	// setting IDs of clusters used to form a track-point
+	for(int l=0; l<kMAXCHAIN/2; ++l){
+	  trackPoint->setClusterId( hits[Y][k].clusterId[l], Planes[Y][l] );
+	  trackPoint->setClusterId( hits[X][j].clusterId[l], Planes[X][l] );
+	}
+
+	// setting time of the hit (in time units)
+	for(unsigned int pmt=0; pmt<trackPoint->mNumberOfPmtsInRp; ++pmt){
+	  trackPoint->setTime( RpsColl.romanPot(i)->tac(pmt), pmt ); // TEMPORARILY using the raw TAC value !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	}
+
+	// setting flag of track-point quality
+	if( hits[X][j].golden && hits[Y][k].golden ) trackPoint->setQuality( StRpsTrackPoint::rpsGolden );
+	else trackPoint->setQuality( StRpsTrackPoint::rpsNormal );
+
+	// storing a track-point in a vector
+	trackPointVec[i].push_back( trackPoint );
+      }
+    }
+
+  }
+}
+
+
+vector<St_pp2pp_Maker::StRpsHit> St_pp2pp_Maker::formHits(const StRpsRomanPot* Rp, const int coordinate) const{
+
+  vector<St_pp2pp_Maker::StRpsHit> hitVec;
+
+  vector<double> pos[2];
+  vector<int> en[2];
+  vector<int> len[2];
+  vector<int> id[2];
+
+  preselectClusters(Rp, coordinate, pos, en, len, id);
+  int clCase = classifyClustersCase(pos);
+
+  if(clCase>0){
+    int validClusters[2];
+    double deltaPitches;
+    bool matched = matchClusters(coordinate, clCase, pos, validClusters, &deltaPitches);
+
+    if( matched ){
+      St_pp2pp_Maker::StRpsHit hit;
+      hit.positionXY = ( (validClusters[0]<0 ? pos[1][validClusters[1]] : pos[0][validClusters[0]]) + (validClusters[1]<0 ? pos[0][validClusters[0]] : pos[1][validClusters[1]]) )/2;
+      hit.positionZ = ( (validClusters[0]<0 ? Rp->plane(Planes[coordinate][1])->z() : Rp->plane(Planes[coordinate][0])->z()) + (validClusters[1]<0 ? Rp->plane(Planes[coordinate][0])->z() : Rp->plane(Planes[coordinate][1])->z()) )/2;
+      for(int j=0; j<kMAXCHAIN/2; ++j){
+	hit.clusterId[j] = validClusters[j]<0 ? -1 : id[j][validClusters[j]];
+      }
+      if(clCase==5) hit.golden = true; // golden hit -> 1/1
+      else hit.golden = false;
+
+      hitVec.push_back( hit );
+      return hitVec;
+    }
+  }
+
+  return hitVec;
+}
+
+
+void St_pp2pp_Maker::preselectClusters(const StRpsRomanPot* Rp, const int coordinate, vector<double>* pos, vector<int>* en, vector<int>* len, vector<int>* id) const{
+  for(int j=0; j<kMAXCHAIN/2; ++j){ // loop over planes measuring given _coordinate_
+    const StRpsPlane* SiPlane = Rp->plane( Planes[coordinate][j] );
+    int nClusters = SiPlane->numberOfClusters();
+    if(nClusters < maxNumberOfClusterPerPlane) // continue only if nClusters is small, otherwise plane is not used in reconstruction
+      for(int k=0; k < nClusters; ++k){ // loop over clusters in this plane
+	const StRpsCluster* Cluster = SiPlane->cluster( k );
+	int lenCluster = Cluster->length();
+	if(lenCluster <= maxClusterLength && lenCluster>0){
+	  int enCluster = Cluster->energy();
+	  if(enCluster >= Emin[ Rp->romanPotId() ][lenCluster-1]){ // allow using this cluster only if it passes the energy cut
+	    pos[j].push_back( Cluster->xy() );
+	    en[j].push_back( enCluster );
+	    len[j].push_back( lenCluster );
+	    id[j].push_back( k );
+	  }
+	}
+      }
+  }
+}
+
+
+Int_t St_pp2pp_Maker::classifyClustersCase(vector<double>* pos) const{
+  int lA = pos[0].size();
+  int lB = pos[1].size();
+
+  if( lA==0 && lB==0 )	return -1; else
+  if( lA==1 && lB==1 )	return 5; else
+  if( lA==1 && lB >1 )	return 6; else
+  if( lA >1 && lB==1 )	return 7; else
+  if( lA==0 && lB==1 )	return 2; else
+  if( lA==1 && lB==0 )	return 1; else
+  if( lA==2 && lB==2 )	return 8; else
+  if( lA==0 && lB >1 )	return -4; else
+  if( lA >1 && lB==0 )	return -3; else
+  if( lA>=2 && lB>=2 )	return 9; else
+  return -100;
+}
+
+
+Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, const vector<double>* pos, int* validClusters, double* deltaPitches) const{
+  switch(clCase){
+    case 5: if( areMatched(coordinate, pos[0][0], pos[1][0], deltaPitches) ){
+	      validClusters[0] = 0;
+	      validClusters[1] = 0;
+	      return true;
+	    } break;
+    case 2:
+    case 1: validClusters[0] = clCase==2 ? -1 : 0;
+	    validClusters[1] = clCase==2 ? 0 : -1;
+	    *deltaPitches = -1e9;
+	    return true;
+    case 6:
+    case 7:
+    case 8:
+    case 9: {int nOfMatchingCl = 0;
+	    double DeltaPosition = 1e9;
+	    double minDeltaPosition = 1e9;
+	    int index1 = 0;
+	    int index2 = 0;
+	    for(unsigned int c1=0; c1<pos[0].size(); ++c1){
+	      for(unsigned int c2=0; c2<pos[1].size(); ++c2){
+		if(areMatched(coordinate, pos[0][c1], pos[1][c2], &DeltaPosition)){
+		  ++nOfMatchingCl;
+		  if(abs(DeltaPosition) < minDeltaPosition){
+		    minDeltaPosition = DeltaPosition;
+		    index1 = c1;
+		    index2 = c2;
+		  }
+		}
+	      }
+	    }
+	    if(nOfMatchingCl>0){
+	      validClusters[0] = index1;
+	      validClusters[1] = index2;
+	      *deltaPitches = minDeltaPosition;
+	      return true;
+	    } else return false;}
+    default: return false;
+  }
+  return false;
+}
+
+
+Bool_t St_pp2pp_Maker::areMatched(const int coordinate, const double p1, const double p2, double *deltaPitches) const{
+  if(deltaPitches) *deltaPitches = (p1 - p2) / Pitch[coordinate];
+  return  abs( p1 - p2 ) < maxPitchesToMatch*Pitch[coordinate] ? true : false;
+}
+
+
+
+const double St_pp2pp_Maker::Emin[8][5] ={{20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20},
+					  {20, 20, 20, 20, 20}};
+
+const int St_pp2pp_Maker::Planes[2][2] = {{1, 3},  // local x (vertical strips)
+					  {0, 2}}; // local y (horizontal strips)
+
+const int St_pp2pp_Maker::RpInBranch[4][2] = {{0, 2}, {1, 3},
+					      {4, 6}, {5, 7}};
+
+//END  ------------------------ Rafal's code ------------------------
+
+
+
+
+
+
+
+
+
+
 
 Int_t St_pp2pp_Maker::Finish() {
 
