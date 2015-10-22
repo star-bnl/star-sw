@@ -19,5 +19,5 @@ struct pp2ppAcceleratorParameters {
    double LDX_west;
    double bendingAngle_east; /* DX bending angles in the East and West */
    double bendingAngle_west;
-
+   double conversion_TAC_time; /* converting the TAC tick to time (second) */
 };
