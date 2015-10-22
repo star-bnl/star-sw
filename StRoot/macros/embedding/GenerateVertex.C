@@ -6,7 +6,7 @@
 // Vertex uses beam line constraint with spreads in x, y and z,
 // and offset in z.
 
-void GenerateVertex(int nevents = 1000, int seed = 0, const char* daqfile = "@run10179086.list", const char* vertexfile = "vertex.txt", const char* flag="Jet", char* dataFile)
+void GenerateVertex(char* dataFileName, int nevents = 1000, int seed = 0, const char* daqfile = "@run10179086.list", const char* vertexfile = "vertex.txt", const char* flag="Jet")
 {
   // vertex spreads and offsets
   const double xsigma = 0.055;	    // cm
@@ -113,7 +113,6 @@ void GenerateVertex(int nevents = 1000, int seed = 0, const char* daqfile = "@ru
       }
     }
 
-    TString dataFileName = dataFile;
     tf = new TFile(dataFileName);
 
     gDirectory->cd("Event");
