@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: StRpsTrack.h,v 2.3 2015/10/08 20:53:34 ullrich Exp $
+ * $Id: StRpsTrack.h,v 2.4 2015/10/22 20:31:31 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrack.h,v $
+ * Revision 2.4  2015/10/22 20:31:31  ullrich
+ * StRpsTrack.cxx
+ *
  * Revision 2.3  2015/10/08 20:53:34  ullrich
  * Changed comment of mBranch
  *
@@ -83,6 +86,10 @@ inline StThreeVectorF StRpsTrack::pVec() const { return mP; }
 inline int StRpsTrack::branch() const { return mBranch; }
 inline StRpsTrack::StRpsTrackType StRpsTrack::type() const { return mType; }
 inline double StRpsTrack::phi() const { return mP.phi(); }
+inline double StRpsTrack::t(double beamMomentum) const
+{
+  return -2*beamMomentum*beamMomentum*(1-xi(beamMomentum))*(1-cos(theta(rpsAngleTheta)));
+}
 inline double StRpsTrack::xi(double beamMomentum) const
 {
     return (beamMomentum - mP.mag())/beamMomentum;
