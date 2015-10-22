@@ -34,7 +34,7 @@ void load(Bool_t personal=true) {
     gSystem->Load("StFmsDbMaker");
     gSystem->Load("StFmsHitMaker");
     gSystem->Load("StFmsPointMaker");
-    gSystem->Load("StFmsQAHistoMaker");
+    //    gSystem->Load("StFmsQAHistoMaker");
     gSystem->Load("StFmsFpsMaker");
   }  // if
 }
