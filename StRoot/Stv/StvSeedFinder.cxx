@@ -116,11 +116,12 @@ static int nCall=0; nCall++;
     fHelix.Add(dx[0],dx[1],dx[2]);
 //		Set position errors for helix
     const StHitPlane *hp = hit->detector();
-    const Mtx33F_t &hd = hp->GetDir(fx);
     StvHitErrCalculator* myHitErrCalc = (StvHitErrCalculator*)hp->GetHitErrCalc();
     myHitErrCalc->SetTrack(circ.Dir());
     double hRR[3];
-    int ans = myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
+//     const Mtx33F_t &hd = hp->GetDir(fx);
+//     int ans = myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
+    int ans = myHitErrCalc->CalcDcaErrs(hit,hRR);
     if (ans) {// touching case
        fHelix.AddErr( 1.,1.);
     } else {
