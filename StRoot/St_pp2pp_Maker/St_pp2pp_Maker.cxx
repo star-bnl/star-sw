@@ -118,9 +118,9 @@ Int_t St_pp2pp_Maker::readPedestalPerchannel() {
   TDataSet *DB = 0;
   if ( mVersion == 1 ) { // before 2015
 
-    DB = GetInputDB("Calibrations/pp2pp");
+    DB = GetInputDB("Calibrations/pp2pp/pp2ppPedestal");
     if (!DB) {
-      LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+      LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp/pp2ppPedestal ?" << endm ;
     }
     else {
       // fetch ROOT descriptor of db table
@@ -212,9 +212,9 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
   mRPpositionsTable = 0 ; // >= 2015
 
   TDataSet *DB = 0;
-  DB = GetInputDB("Geometry/pp2pp");
+  DB = GetInputDB("Geometry/pp2pp/pp2ppOffset");
   if (!DB) { 
-    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << endm ; 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp/pp2ppOffset ?" << endm ; 
   }
   else {
 
@@ -240,9 +240,9 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
 
   if ( mVersion >= 2 ) { // only for >=2015
 
-    DB = GetInputDB("Calibrations/pp2pp");
+    DB = GetInputDB("Calibrations/pp2pp/pp2ppRPpositions");
     if (!DB) {
-      LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+      LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp/pp2ppRPpositions ?" << endm ;
     }
     else {
       // fetch ROOT descriptor of db table
@@ -286,9 +286,9 @@ Int_t St_pp2pp_Maker::readZPerplane() {
   mZTable = 0;
 
   TDataSet *DB = 0;
-  DB = GetInputDB("Geometry/pp2pp");
+  DB = GetInputDB("Geometry/pp2pp/pp2ppZ");
   if (!DB) { 
-    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << endm ; 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp/pp2ppZ ?" << endm ; 
   }
   else {
 
@@ -325,7 +325,7 @@ Int_t St_pp2pp_Maker::readSkewParameter() {
 
   // Database
   TDataSet *DB = 0;
-  DB = GetDataBase("Calibrations/pp2pp");
+  DB = GetDataBase("Calibrations/pp2pp/pp2ppPMTSkewConstants");
   if (!DB) {
     LOG_ERROR << "ERROR: cannot find database Calibrations/pp2pp ?" << endm ;
   }
@@ -368,9 +368,9 @@ Int_t St_pp2pp_Maker::readSkewParameter() {
 Int_t St_pp2pp_Maker::readAccelerateParameter() {
 
   TDataSet *DB = 0;
-  DB = GetInputDB("Geometry/pp2pp");
+  DB = GetInputDB("Geometry/pp2pp/pp2ppAcceleratorParameters");
   if (!DB) { 
-    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << endm ; 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp/pp2ppAcceleratorParameters ?" << endm ; 
   }
   else {
 
