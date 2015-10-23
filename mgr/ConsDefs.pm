@@ -175,14 +175,16 @@
     # $XMACHOPT would switch to -m32 or -m64
 #    $LDFLAGS = $SOFLAGS = "$XMACHOPT";
 
-    $CXXFLAGS      .= " -fPIC -w";
+#    $CXXFLAGS      .= " -fPIC -w";
+    $CXXFLAGS      .= " -w";
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
 #    $CC            = "gcc";
 
-    $CFLAGS       .= " -fPIC -w";
+#    $CFLAGS       .= " -fPIC -w";
+    $CFLAGS       .= " -w";
     $EXTRA_CFLAGS  = "";
 
     $FCPATH        = "";
