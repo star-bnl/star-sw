@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsCollection.cxx,v 1.3 2015/08/28 18:36:04 jdb Exp $
+ * $Id: StMuFmsCollection.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsCollection.cxx,v $
+ * Revision 1.4  2015/10/23 19:22:49  jdb
+ * akio added mFmsReconstructionFlag and related getters and setters. pushed version number of StMuFmsCollection. Corresponding changes for reconstruction flag in StMuFmsUtil.cxx
+ *
  * Revision 1.3  2015/08/28 18:36:04  jdb
  * Added Akios FMS codes
  *
@@ -25,11 +28,11 @@
 #include "StMuDSTMaker/COMMON/StMuFmsHit.h"
 #include "StMuDSTMaker/COMMON/StMuFmsPoint.h"
 
-static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.3 2015/08/28 18:36:04 jdb Exp $";
+static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $";
 
 ClassImp(StMuFmsCollection)
 
-StMuFmsCollection::StMuFmsCollection() { mHits = 0; mClusters = 0; mPoints = 0;}
+StMuFmsCollection::StMuFmsCollection() { mHits = 0; mClusters = 0; mPoints = 0; mFmsReconstructionFlag=0;}
 
 StMuFmsCollection::~StMuFmsCollection() {
   if (mHits) {
