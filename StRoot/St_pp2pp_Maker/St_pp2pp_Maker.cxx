@@ -399,7 +399,7 @@ Int_t St_pp2pp_Maker::readAccelerateParameter() {
       mbendingAngle_east = table[0].bendingAngle_east ;
       mbendingAngle_west = table[0].bendingAngle_west ;
 
-      //      mconversion_TAC_time = table[0].conversion_TAC_time ;
+      mconversion_TAC_time = table[0].conversion_TAC_time ;
 
       /*
       for (Int_t i = 0; i < descr->GetNRows(); i++) {
