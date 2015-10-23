@@ -40,9 +40,9 @@ struct daq_sst_pedrms_t {
 //#define SST_PED_ADC_LO		250
 
 struct daq_sst_ped_t {
-	float ped[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-	float rms[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-	u_short cou[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
+	double ped[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
+	double rms[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
+	u_int cou[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
 } ;
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.cxx,v 2.6 2015/09/14 16:59:53 ullrich Exp $
+ * $Id: StFmsCollection.cxx,v 2.7 2015/10/21 14:53:59 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.cxx,v $
+ * Revision 2.7  2015/10/21 14:53:59  ullrich
+ * Added new member and methods.
+ *
  * Revision 2.6  2015/09/14 16:59:53  ullrich
  * Added StFmsPointPair collection.
  *
@@ -38,10 +41,10 @@
 #include "StEvent/StFmsPointPair.h"
 #include "StarClassLibrary/StParticleTypes.hh"
 
-static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.6 2015/09/14 16:59:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.7 2015/10/21 14:53:59 ullrich Exp $";
 
 StFmsCollection::StFmsCollection() :
-mFpsSlatFilled(false), mFpsAssociationFilled(false), mFmsPointPairFilled(false) {
+    mFmsReconstructionFlag(0), mFpsSlatFilled(false), mFpsAssociationFilled(false), mFmsPointPairFilled(false) {
 }
 
 StFmsCollection::~StFmsCollection() {
@@ -113,9 +116,7 @@ void StFmsCollection::fillFpsSlat(){
         mFpsSlats.push_back(new StFpsSlat(i,0.0));
     }
     for(unsigned int i=0; i<numberOfHits(); i++) {
-        if(mHits[i]->detectorId()==kFpsDetId
-           || mHits[i]->detectorId()==15  //hack for dealing with bugged old detid=15
-           ) {
+        if(mHits[i]->detectorId()==kFpsDetId){
             int slatid=int(mHits[i]->channel());
             if (slatid>=0 && slatid<kFpsMaxSlat){
                 mFpsSlats[slatid]->setMip(mHits[i]->energy());
@@ -145,7 +146,9 @@ void StFmsCollection::fillFmsPointPair(){
     if(np<=1) return;
     sortPointsByEnergy(); //first sort points by energy
     for(int i=0; i<np-1; i++){
-        for(int j=i+1; j<np; j++){
+	if(mPoints[i]->energy()<1.0) break; //don't make pair with E<1GeV points
+        for(int j=i+1; j<np; j++){ 
+	    if(mPoints[j]->energy()<1.0) break; //don't make pair with E<1GeV points
             mPointPairs.push_back(new StFmsPointPair(mPoints[i],mPoints[j]));
         }
     }
@@ -206,10 +209,12 @@ void StFmsCollection::sortPointsByET() {
 }
 
 void StFmsCollection::print(int option) {
+    cout << Form("Flag=%x MergeSmallToLarge=%1d GlobalRefit=%1d Try1PhotonFit=%1d\n",
+		 mFmsReconstructionFlag,isMergeSmallToLarge(),isGlobalRefit(),isTry1PhotonFit());
     cout << Form("NHit=%3d NCluster=%3d NPoint=%3d\n",numberOfHits(),numberOfClusters(),numberOfPoints());
     if(option>=5) for(unsigned int i=0; i<numberOfHits(); i++)       {hits()[i]->print();}
     if(option>=4) for(unsigned int i=0; i<numberOfClusters(); i++)   {clusters()[i]->print();}
-    if(option>=3) for(unsigned int i=0; i<mFpsSlats.size(); i++)     {fpsSlats()[i]->print();}
+    if(option>=3) for(unsigned int i=0; i<mFpsSlats.size(); i++)     {fpsSlats()[i]->print(1);}
     if(option>=2) for(unsigned int i=0; i<numberOfPoints(); i++)     {points()[i]->print();}
     if(option>=1) for(unsigned int i=0; i<numberOfPointPairs(); i++) {pointPairs()[i]->print();}
 }

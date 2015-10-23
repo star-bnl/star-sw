@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsTrack.cxx,v 2.2 2015/10/07 17:30:11 ullrich Exp $
+ * $Id: StRpsTrack.cxx,v 2.3 2015/10/22 20:37:34 ullrich Exp $
  *
  * Author: Rafal Sikora, 1 Oct 2015
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRpsTrack.cxx,v $
+ * Revision 2.3  2015/10/22 20:37:34  ullrich
+ * Moved t(double) to header file made inline. Modified t code.
+ *
  * Revision 2.2  2015/10/07 17:30:11  ullrich
  * Changed const to enums and related changes.
  *
@@ -67,11 +70,6 @@ double StRpsTrack::phiRp() const{
     if(mType==rpsLocal) return phi();
     StThreeVectorF deltaVector = mTrackPoints[1]->positionVec() - mTrackPoints[0]->positionVec();
     return deltaVector.phi();
-}
-
-double StRpsTrack::t(double beamMomentum) const{
-    double xiValue = xi(beamMomentum);
-    return 2*beamMomentum*beamMomentum*(xiValue*xiValue-1+(1-xiValue)*cos(theta(rpsAngleTheta)));
 }
 
 double StRpsTrack::time() const{

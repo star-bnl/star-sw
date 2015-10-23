@@ -647,4 +647,15 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
     }
   }
 }
+
+#include "Stv/StvHit.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
+//______________________________________________________________________________
+int StvHitErrCalculator::CalcDcaErrs(const StvHit *hit,double hRr[3])
+{
+   const StHitPlane *hp = hit->detector(); 
+   const Mtx33F_t &hD = hp->GetDir(hit->x());
+   return CalcDcaErrs(hit->x(),hD,hRr);
+}
+
 #endif //0

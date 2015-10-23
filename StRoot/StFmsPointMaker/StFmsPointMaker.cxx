@@ -1,6 +1,12 @@
-// $Id: StFmsPointMaker.cxx,v 1.3 2015/09/18 18:46:47 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.4 2015/10/21 15:49:12 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.4  2015/10/21 15:49:12  akio
+// Adding 3 options to control how reconstruction works:
+//   setGlobalRefit(int v=1)
+//   setMergeSmallToLarge(int v=1)
+//   setTry1PhotonFit(int v=1)
+//
 // Revision 1.3  2015/09/18 18:46:47  akio
 // Move energy sum check for killing LED tail event to whole FMS, not each module
 // Also make it not dependent on beam energy, so that it runs on simulation as well.
@@ -22,6 +28,7 @@
 
 #include "StMessMgr.h"
 #include "StEvent.h"
+#include "StEnumerations.h"
 #include "StFmsCluster.h"
 #include "StFmsCollection.h"
 #include "StFmsHit.h"
@@ -45,7 +52,8 @@ namespace {
 }  // unnamed namespace
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
-    : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0) { }
+    : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0), 
+      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1) { }
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -121,31 +129,35 @@ int StFmsPointMaker::clusterEvent() {
     */
     clusterDetector(&i->second, i->first);
   }  // for
-  mFmsCollection->sortPointsByET();
+  mFmsCollection->setMergeSmallToLarge(mMergeSmallToLarge);
+  mFmsCollection->setGlobalRefit(mGlobalRefit);
+  mFmsCollection->setTry1PhotonFit(mTry1PhotonFitWhen2PhotonFitFailed);
+  mFmsCollection->sortPointsByEnergy();
   return kStOk;
 }
 
 /* Perform photon reconstruction on a single sub-detector */
 int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
-  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId);
+  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mTry1PhotonFitWhen2PhotonFitFailed);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
-    LOG_DEBUG << Form("clusterDetector failed for det=%d",detectorId)<<endm;
-    return kStOk; //mostly low energy which makes this fail. Returning ok.
+      LOG_INFO << Form("clusterDetector failed for det=%d",detectorId)<<endm;
+      // return kStOk ... mostly low energy which makes this fail???
   }  // if
   // Saved cluster info into StFmsCluster
   auto& clusters = clustering.clusters();
   for (auto cluster = clusters.begin(); cluster != clusters.end(); ++cluster) {
     processTowerCluster(cluster->get(), detectorId);
   }  // for
-  LOG_INFO << Form("Found %d clusters for detid=%d",clusters.size(),detectorId)<<endm;
+  LOG_INFO << Form("Found %d clusters for det=%d",clusters.size(),detectorId)<<endm;
   return kStOk;
 }
 
+/* Moving this to populateTowerLists()
 bool StFmsPointMaker::validateTowerEnergySum(const TowerList& towers) const {
-    /* remove acceing centerOfMassEnergy in StEvent, which can be
-       garbage for MC. BTW, shouldn't this be 1/2 of 510/200GeV?
+    // remove acceing centerOfMassEnergy in StEvent, which can be
+    // garbage for MC. BTW, shouldn't this be 1/2 of 510/200GeV?
     // Attempt to get center-of-mass energy from StRunInfo.
     // If it can't be accessed assume 500 GeV running.
     double centerOfMassEnergy(500.);
@@ -155,7 +167,6 @@ bool StFmsPointMaker::validateTowerEnergySum(const TowerList& towers) const {
     centerOfMassEnergy = event->runInfo()->centerOfMassEnergy();
     }  // if
     }  // if
-    */
 
     // Sum tower energies and test validity of the sum
     double Esum = 0.f;
@@ -166,6 +177,7 @@ bool StFmsPointMaker::validateTowerEnergySum(const TowerList& towers) const {
     LOG_DEBUG << Form("Esum=%f Max=%f",Esum,mMaxEnergySum) <<endm;
     return Esum >= 0.f && Esum <= mMaxEnergySum;
 }
+*/
 
 bool StFmsPointMaker::processTowerCluster(
     FMSCluster::StFmsTowerCluster* towerCluster,
@@ -175,26 +187,41 @@ bool StFmsPointMaker::processTowerCluster(
   StFmsCluster* cluster = towerCluster->cluster();
   // Skip clusters that don't have physically sensible coordinates
   if (!(cluster->x() > 0. && cluster->y() > 0.)) {
-    return false;
+      LOG_INFO << "Found cluster x or y is zero, not processing this cluster" << endm;
+      return false;
   }  // if
-  cluster->setDetectorId(detectorId);
+  int det=detectorId;
+  float x=cluster->x();
+  float y=cluster->y();
+  if(mMergeSmallToLarge>0){
+      if(x<8.0 && y>9.0 && y<25.0){ // Central hole, those are small cell merged to large
+	  det=detectorId+2;         //put back to small cell coordinate
+	  cluster->setX(x*1.5);
+	  cluster->setY((y-9.0)*1.5);
+      }
+  }
+  cluster->setDetectorId(det);
   // Cluster id is id of the 1st photon, not necessarily the highest-E photon
-  cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * detectorId + mFmsCollection->numberOfPoints());
+  cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
-  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(detectorId,cluster->x(),cluster->y());
+  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
   cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
-    StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
-    point->setDetectorId(detectorId);
-    point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * detectorId + mFmsCollection->numberOfPoints());
-    point->setParentClusterId(cluster->id());
-    point->setNParentClusterPhotons(towerCluster->photons().size());
-    point->setCluster(cluster);
-    // Add it to both the StFmsCollection and StFmsCluster
-    // StFmsCollection owns the pointer, the cluster merely references it
-    mFmsCollection->points().push_back(point);
-    cluster->points().push_back(point);
+      StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
+      point->setDetectorId(det);
+      point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
+      point->setParentClusterId(cluster->id());
+      point->setNParentClusterPhotons(towerCluster->photons().size());
+      point->setCluster(cluster);
+      //check fiducial volume 
+      //int edge;
+      //float distance=mFmsDbMaker->distanceFromEdge(detectorId,point->x(), point->y(), edge);  
+      //point->setEdge(edge,distance);
+      // Add it to both the StFmsCollection and StFmsCluster
+      // StFmsCollection owns the pointer, the cluster merely references it
+      mFmsCollection->points().push_back(point);
+      cluster->points().push_back(point);
   }  // for
   // Save the tower hit info.
   auto& towers = towerCluster->towers();
@@ -212,17 +239,25 @@ bool StFmsPointMaker::processTowerCluster(
 StFmsPoint* StFmsPointMaker::makeFmsPoint(
     const FMSCluster::StFmsFittedPhoton& photon, const int detectorId) {
   StFmsPoint* point = new StFmsPoint;
+  float x=photon.x; //photon xy is in detector local coordinate in [cm]
+  float y=photon.y;
+  int det=detectorId;
+  if(mMergeSmallToLarge>0){
+      float wx=mFmsDbMaker->getXWidth(kFmsNorthLargeDetId);//take large cell width since all merged to large cell
+      float wy=mFmsDbMaker->getYWidth(kFmsNorthLargeDetId);
+      if(x<8.0*wx && y>9.0*wy && y<25.0*wy){ // Central hole, those are small cell merged to large
+	  y = y - 9.0*wy;
+	  det+=2;
+      }
+  }
   point->setEnergy(photon.energy);
-  point->setX(photon.x);    //Akio propose to keep fitted local X here
-  point->setY(photon.y);    //Akio propose to keep fitted local Y here
+  point->setDetectorId(det);
+  point->setX(x);    //Akio propose to keep fitted local X here
+  point->setY(y);    //Akio propose to keep fitted local Y here
   // Calculate photon 4 momentum
-  // StFmsFittedPhoton position is in detector-local (x, y) cm coordinates
+  // StFmsFittedPhoton position is in detector-local (x, y) [cm] coordinates
   // Convert to global STAR coordinates for StFmsPoint  
-  //StThreeVectorF xyz = mGeometry.localToGlobalCoordinates(
-  //  photon.x, photon.y, detectorId);
-  StThreeVectorF xyz = mFmsDbMaker->getStarXYZ(detectorId,photon.x,photon.y);
-  //point->setX(xyz.x());
-  //point->setY(xyz.y());
+  StThreeVectorF xyz = mFmsDbMaker->getStarXYZ(det,x,y);
   point->setXYZ(xyz);  //This is in STAR global coordinate
   point->setFourMomentum(compute4Momentum(xyz, point->energy()));
   return point;
@@ -235,16 +270,21 @@ bool StFmsPointMaker::populateTowerLists() {
       return false;
   }  // if
   auto& hits = mFmsCollection->hits();
-  LOG_DEBUG << "Found nhits = " << hits.size() << endm;
+  LOG_INFO << "Found nhits = " << hits.size() << endm;
   float sumE=0.0;
+  int n=0;
   for (auto i = hits.begin(); i != hits.end(); ++i) {
     StFmsHit* hit = *i;
-    const int detector = hit->detectorId();
+    int detector = hit->detectorId();
     const int row = mFmsDbMaker->getRowNumber(detector, hit->channel());
     const int column = mFmsDbMaker->getColumnNumber(detector, hit->channel());
     if (!isValidChannel(detector, row, column)) {
       continue;
     }  // if
+    if(mMergeSmallToLarge>0){
+	if(detector==kFmsNorthSmallDetId) detector=kFmsNorthLargeDetId;
+	if(detector==kFmsSouthSmallDetId) detector=kFmsSouthLargeDetId;
+    }
     if (hit->adc() > 0) {
       sumE+=hit->energy();
       // Insert a tower list for this detector ID if there isn't one already
@@ -259,11 +299,12 @@ bool StFmsPointMaker::populateTowerLists() {
       if (tower.initialize(mFmsDbMaker)) {
         mTowers[detector].push_back(tower);
       }  // if
+      n++;
     }  // if
   }  // for
-  cout << Form("Esum=%f Max=%f\n",sumE,mMaxEnergySum);
-  if(sumE<0.0 || sumE>mMaxEnergySum) {
-      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?)",sumE,mMaxEnergySum)<< endm;
+  LOG_INFO << Form("NValidHit=%d Esum=%f Max=%f",n,sumE,mMaxEnergySum) << endm;
+  if(sumE<=0.0 || sumE>mMaxEnergySum) {
+      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?) or below zero",sumE,mMaxEnergySum)<< endm;
       LOG_INFO << "Skipping clustering and fitting photons"<< endm;
       return false;
   }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpsSlat.h,v 2.1 2015/09/01 18:26:45 ullrich Exp $
+ * $Id: StFpsSlat.h,v 2.2 2015/10/21 14:45:55 ullrich Exp $
  *
  * Author: Jingguo Ma, Akio Ogawa, Sep 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpsSlat.h,v $
+ * Revision 2.2  2015/10/21 14:45:55  ullrich
+ * Moved 7 members out of the schema.
+ *
  * Revision 2.1  2015/09/01 18:26:45  ullrich
  * Initial Revision.
  *
@@ -42,15 +45,15 @@ public:
     void print(int option=0) const;
     
 protected:
-    Int_t    mSlatId;
-    Float_t  mMip;
-    UInt_t   mNPoint[kFpsNCandidate+1];   //0 for closest, 1/2/3 for 2nd/3rd/4th closest, 5 for either
-    StPtrVecFmsPoint mPoint1;    //closest points
-    StPtrVecFmsPoint mPoint2;    //2nd closest points
-    StPtrVecFmsPoint mPoint3;    //3rd closest points
-    StPtrVecFmsPoint mPoint4;    //4th closest points
+    Int_t    mSlatId; //!
+    Float_t  mMip;    //!
+    UInt_t   mNPoint[kFpsNCandidate+1];   //! 0 for closest, 1/2/3 for 2nd/3rd/4th closest, 5 for either
+    StPtrVecFmsPoint mPoint1;    //! closest points
+    StPtrVecFmsPoint mPoint2;    //! 2nd closest points
+    StPtrVecFmsPoint mPoint3;    //! 3rd closest points
+    StPtrVecFmsPoint mPoint4;    //! 4th closest points
 
-    ClassDef(StFpsSlat,1)
+    ClassDef(StFpsSlat,2)
 };
 
 inline int StFpsSlat::slatId() const {return mSlatId;}

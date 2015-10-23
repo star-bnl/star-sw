@@ -1,6 +1,13 @@
-// $Id: StFmsTowerCluster.h,v 1.3 2015/10/01 19:55:48 akio Exp $
+// $Id: StFmsTowerCluster.h,v 1.4 2015/10/21 15:58:05 akio Exp $
 //
 // $Log: StFmsTowerCluster.h,v $
+// Revision 1.4  2015/10/21 15:58:05  akio
+// Code speed up (~x2) by optimizing minimization fuctions and showershape function
+// Add option to merge small cells to large, so that it finds cluster at border
+// Add option to perform 1photon fit when 2photon fit faield
+// Add option to turn on/off global refit
+// Moment analysis done without ECUTOFF when no tower in cluster exceed ECUTOFF=0.5GeV
+//
 // Revision 1.3  2015/10/01 19:55:48  akio
 // *** empty log message ***
 //
@@ -57,7 +64,7 @@ class StFmsTowerCluster {
    the StFmsTowerCluster no longer references a cluster and should not be used
    any longer.
    */
-  explicit StFmsTowerCluster(StFmsCluster* cluster);
+  explicit StFmsTowerCluster(StFmsCluster* cluster, Int_t detectorId);
   // Use default copy constructor and assignment operator
   /** Destructor */
   virtual ~StFmsTowerCluster();
@@ -74,14 +81,18 @@ class StFmsTowerCluster {
 
    Also sets energy cutoff for cluster moments.
    */
-  void findClusterAxis(Double_t Ecoff) {
+  void findClusterAxis(Double_t Ecoff, Double_t xwidth, Double_t ywidth) {
     mEnergyCutoff = Ecoff;
-    findClusterAxis();
+    findClusterAxis(xwidth, ywidth);
   }
   /** Return the index of this cluster in the event. */
   Int_t index() const { return mIndex; }
   /** Sets the index of this cluster in the event. */
   void setIndex(Int_t index) { mIndex = index; }
+  /** Return detectorId . */
+  Int_t detectorId() const { return mDetectorId; }
+  /** total energy */
+  double etot() const { return mEtot; }
   /** 2nd moment in x. */
   double sigmaX() const { return mSigmaX; }
   /** 2nd moment in y. */
@@ -113,11 +124,13 @@ class StFmsTowerCluster {
 
  protected:
   /** Determine cluster axis. */
-  void findClusterAxis();
+  void findClusterAxis(Double_t xwidth, Double_t ywidth);
   /** Calculate sigma w.r.t the axis going through the "center" and of an angle
       "theta" in x-y plane. */
-  Double_t getSigma(Double_t theta) const;
+  Double_t getSigma(Double_t theta, Double_t xwidth, Double_t ywidth);
   Int_t mIndex;  ///< cluster number in an event, counts from 0
+  Int_t mDetectorId;
+  Float_t mEtot;
   Double_t mSigmaX;  ///< 2nd moment in x
   Double_t mSigmaY;  ///< 2nd moment in y
   Double_t mSigmaXY;  ///< 2nd moment in x-y
@@ -149,6 +162,7 @@ class StFmsTowerCluster {
    See comments for StFmsTowerCluster(const StFmsTowerCluster&).
    */
   StFmsTowerCluster& operator=(const StFmsTowerCluster&);
+  
   ClassDef(StFmsTowerCluster, 0)
 };  // class StFmsTowerCluster
 }  // namespace FMSCluster

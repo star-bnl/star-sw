@@ -1,6 +1,12 @@
-// $Id: StFmsPointMaker.h,v 1.4 2015/09/18 18:46:47 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.5 2015/10/21 15:49:12 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.5  2015/10/21 15:49:12  akio
+// Adding 3 options to control how reconstruction works:
+//   setGlobalRefit(int v=1)
+//   setMergeSmallToLarge(int v=1)
+//   setTry1PhotonFit(int v=1)
+//
 // Revision 1.4  2015/09/18 18:46:47  akio
 // Move energy sum check for killing LED tail event to whole FMS, not each module
 // Also make it not dependent on beam energy, so that it runs on simulation as well.
@@ -60,12 +66,21 @@ class StFmsPointMaker : public StMaker {
   void Clear(Option_t* option = "");
 
   /** Set max energy on sum of all cell to kill tail of LED */
-    void setMaxEnergySum(Float_t v) {mMaxEnergySum=v;}
+  void setMaxEnergySum(Float_t v) {mMaxEnergySum=v;}
 
   /** Set to read MuDST, then only this maker does is recalc point position using DB values */
   /** and does NOT perform cluster finding nor fitting */
   void SetReadMuDst(int v=1) {mReadMuDst=v;} 
   
+  /* Set this to perform gloal refit of all photons in a detector */
+  void setGlobalRefit(int v=1) {mGlobalRefit=v;}
+
+  /* Set this to cluster small and large cell together... experimental for now */
+  void setMergeSmallToLarge(int v=1) {mMergeSmallToLarge=v;}
+
+  /* set this to perform 1 photon fit if 2 photon fit failed */
+  void setTry1PhotonFit(int v=1) {mTry1PhotonFitWhen2PhotonFitFailed=v;}
+
  private:
   /** Definition of a collection of towers. */
   typedef std::vector<FMSCluster::StFmsTower> TowerList;
@@ -99,13 +114,15 @@ class StFmsPointMaker : public StMaker {
    Returns standard STAR error codes (kStOk, kStWarn, kStErr).
    */
   int clusterDetector(TowerList* towers, int detectorId);
+
   /**
    Verify that the sum of tower energies is sensible.
-
    Returns true if the sum is non-negative and does not exceed the
    center-of-mass energy. Returns false otherwise.
+   This is removed and now part of populateTowerLists()
    */
-  bool validateTowerEnergySum(const TowerList& towers) const;
+  //bool validateTowerEnergySum(const TowerList& towers) const;
+
   /**
    Process an StFmsTowerCluster and store its StFmsCluster in a collection.
 
@@ -139,10 +156,14 @@ class StFmsPointMaker : public StMaker {
   int mObjectCount;  //!< Object count in event for use with TRef
 
   Float_t mMaxEnergySum; //! max energy cut on sum of all cells
-
+   
   Int_t readMuDst();
   Int_t mReadMuDst;   //! 0= Do clustering and make Fms points
                       //! 1= Just recalc positions based on DB values
+
+  Int_t mGlobalRefit;       //! if this is none-zero, perform gloab refit of all photon in a module
+  Int_t mMergeSmallToLarge; //! if this is none-zero, merge small cells to large cells
+  Int_t mTry1PhotonFitWhen2PhotonFitFailed; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)

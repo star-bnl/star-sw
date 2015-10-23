@@ -54,6 +54,7 @@ class StMtdQAMaker : public StMaker {
   void     setFillQATree(const Bool_t fill = kFALSE);
   void     setOutTreeFileName(const Char_t *out);
   void     setMaxVtxZ(const Double_t max);
+  void     setMaxVtxDz(const Double_t max);
   void     setTrackPtLimits(const Double_t min, const Double_t max);
   void     setTrackPhiLimits(const Double_t min, const Double_t max);
   void     setTrackEtaLimits(const Double_t min, const Double_t max);
@@ -231,6 +232,7 @@ class StMtdQAMaker : public StMaker {
   IntVec           mTriggerIDs;                                // Valid trigger id collection that will be tested
   
   Double_t         mMaxVtxZ;                                   // Maximum vertex z
+  Double_t         mMaxVtxDz;                                  // Maximum dz between VPD and TPC
   Double_t         mMinTrkPt;                                  // Minimum track pt
   Double_t         mMaxTrkPt;                                  // Maximum track pt
   Double_t         mMinTrkPhi;                                 // Minimum track phi
@@ -318,6 +320,9 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhTofMthTrkLocaly;                         // Projected y in TOF local coordinate for tracks matched to TOF hits
   TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
 
+  // global T0 alignment
+  TH2F             *mhMtdDtofVsChannel;                        // dTof of primary tracks vs channel for global alignment
+
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; 
     return cvs;
@@ -333,6 +338,7 @@ inline void StMtdQAMaker::setPrintMemory(const Bool_t pMem)        { mPrintMemor
 inline void StMtdQAMaker::setPrintCpu(const Bool_t pCpu)           { mPrintCpu = pCpu;         }
 inline void StMtdQAMaker::setPrintConfig(const Bool_t print)       { mPrintConfig = print;     }
 inline void StMtdQAMaker::setMaxVtxZ(const Double_t max)           { mMaxVtxZ = max;           }
+inline void StMtdQAMaker::setMaxVtxDz(const Double_t max)          { mMaxVtxDz = max;          }
 inline void StMtdQAMaker::setTrigTimeCut(const Bool_t cut)         { mTrigTimeCut = cut;       }
 inline void StMtdQAMaker::setMinNHitsFit(const Int_t min)          { mMinNHitsFit = min;       }
 inline void StMtdQAMaker::setMinNHitsDedx(const Int_t min)         { mMinNHitsDedx = min;      }
