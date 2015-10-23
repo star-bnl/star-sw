@@ -2382,8 +2382,8 @@ class Translation(Handler):
         checkAttributes( tag, attr, ['x','y','z'] )
         
         if ( x ) : document.impl('place.TranslateX(%s);' % replacements(x.lower()) , unit=current )
-        if ( y ) : document.impl('place.TranslateX(%s);' % replacements(y.lower()) , unit=current ) 
-        if ( z ) : document.impl('place.TranslateX(%s);' % replacements(z.lower()) , unit=current )        
+        if ( y ) : document.impl('place.TranslateY(%s);' % replacements(y.lower()) , unit=current ) 
+        if ( z ) : document.impl('place.TranslateZ(%s);' % replacements(z.lower()) , unit=current )        
 
 
 class Rotation(Handler):
