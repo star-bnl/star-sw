@@ -61,7 +61,8 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mIsCosmic(kFALSE), mStEvent(0), mMuDst(0), mRunId(-1), mRunCount(0), mTriggerData(0),
   mMuDstIn(kFALSE), mPrintMemory(kFALSE), mPrintCpu(kFALSE), mPrintConfig(kFALSE),
   mTriggerIDs(0),
-  mMaxVtxZ(150.), mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
+  mMaxVtxZ(100.), mMaxVtxDz(5.),
+  mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), mMinNsigmaPi(-1.), mMaxNsigmaPi(3.),
   mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(0)
 {
@@ -651,6 +652,12 @@ Int_t StMtdQAMaker::processMuDst()
 	mMtdData.bestVz = mMuDst->primaryVertex(index)->position().z();
     }
 
+  if(!mIsCosmic)
+    {
+      if(mMtdData.vpdVz==-999) return kStWarn;
+      if(fabs(mMtdData.vpdVz-mMtdData.vertexZ)>mMaxVtxDz) return kStWarn;
+    }
+
   // MTD trigger time
   StMuMtdHeader *muMtdHeader = mMuDst->mtdHeader();
   if(muMtdHeader)
@@ -783,7 +790,6 @@ Int_t StMtdQAMaker::processMuDst()
 	  LOG_DEBUG << "TOF tray = " << tofHit->tray() << ", module = " << tofHit->module() << ", cell = " << tofHit->cell() << ", local y = " << tofPid.yLocal() << ", local z = " << tofPid.zLocal() << endm;
 	}
 
-
       // MTD matching
       mMtdData.isTrkProjected[goodTrack]  = kFALSE;
       mMtdData.isTrkMtdMatched[goodTrack] = kFALSE;
@@ -820,6 +826,31 @@ Int_t StMtdQAMaker::processMuDst()
       goodTrack++;  
     }
   mMtdData.nGoodTrack = goodTrack;
+
+  //====================================
+  //====== global T0 alignment
+  int nPrimary = mMuDst->numberOfPrimaryTracks();
+  for(int i=0; i<nPrimary; i++)
+    {
+      StMuTrack* pTrack = mMuDst->primaryTracks(i);
+      if(!pTrack) continue;
+      if(!isValidTrack(pTrack)) continue;
+
+      /// muons
+      int index = pTrack->index2MtdHit();
+      if(index>-1)  
+	{								
+	  const StMuMtdHit *hit = pTrack->mtdHit();
+	  const StMuMtdPidTraits mtdPid = pTrack->mtdPidTraits();
+	  int gChannel = (hit->backleg()-1)*60 + (hit->module()-1)*12 + hit->cell();
+	  double dtof = mtdPid.timeOfFlight() - mtdPid.expTimeOfFlight();
+	  mhMtdDtofVsChannel->Fill(gChannel, dtof);
+	  cout << "+++++++++++++++++++"<< endl;
+	  cout << "dtof = " << dtof << endl;
+	  cout << "+++++++++++++++++++"<< endl;
+	}
+    }  
+  //====================================
 
   return kStOK;
 }
@@ -1183,7 +1214,7 @@ void StMtdQAMaker::bookHistos()
   mhVtxZvsVpdVz = new TH2F("hVtxZvsVpdVz","Primary vertex z: VPD vs TPC;TPC z_{vtx} (cm);VPD z_{vtx} (cm)",201,-201,201,201,-201,201);
   AddHist(mhVtxZvsVpdVz);
 
-  mhVtxZDiff = new TH1F("hVtxZDiff","TPC vz - VPD vz; #Deltavz (cm)",201,-201,201);
+  mhVtxZDiff = new TH1F("hVtxZDiff","TPC vz - VPD vz; #Deltavz (cm)",400,-20,20);
   AddHist(mhVtxZDiff);
 
   // TOF histograms
@@ -1318,7 +1349,7 @@ void StMtdQAMaker::bookHistos()
   mhMtdHitTotEast = new TH2F("hMtdHitTotEast","MTD: east TOT of hits;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
   AddHist(mhMtdHitTotEast);
 
-  mhMtdHitTrigTime = new TH2F("hMtdHitTrigTime","MTD: trigger time of hit (west+east)/2;channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,450,2400,3300);
+  mhMtdHitTrigTime = new TH2F("hMtdHitTrigTime","MTD: trigger time of hit (west+east)/2;channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,750,2000,3500);
   AddHist(mhMtdHitTrigTime);
 
   // ===== matched hits
@@ -1382,6 +1413,10 @@ void StMtdQAMaker::bookHistos()
 
   mhTofMthTrkLocalz = new TH2F("hTofMthTrkLocalz","TOF match: local z vs module;module;local z (cm)",64,0.5,64.5,100,-5,5);
   AddHist(mhTofMthTrkLocalz);
+
+  //====== global T0 alignment
+  mhMtdDtofVsChannel = new TH2F("hMtdDtofVsChannel","MTD: #Deltatof vs channel of primary tracks;channel;TOF_{measured}-TOF_{expected} (ns)",1800,-0.5,1799.5,500,-10,40);
+  AddHist(mhMtdDtofVsChannel);
 }
 
 //_____________________________________________________________________________
@@ -1763,8 +1798,12 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.8 2015/04/08 14:03:17 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.9 2015/10/23 02:18:51 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.9  2015/10/23 02:18:51  marr
+//// 1) Add histogram for global T0 alignment calibration using primary tracks
+//// 2) Add mMaxVtxDz to cut on vz difference between TPC and VPD
+////
 //// Revision 1.8  2015/04/08 14:03:17  marr
 //// change to use gMtdCellDriftV from StMtdConstants.h
 ////
