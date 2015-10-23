@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.3 2015/09/02 22:09:58 jdb Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.4  2015/10/23 19:22:49  jdb
+ * akio added mFmsReconstructionFlag and related getters and setters. pushed version number of StMuFmsCollection. Corresponding changes for reconstruction flag in StMuFmsUtil.cxx
+ *
  * Revision 1.3  2015/09/02 22:09:58  jdb
  * Added Akios changes to Fms
  *
@@ -100,6 +103,7 @@ void StMuFmsUtil::fillMuFms(StMuFmsCollection *muFms,StFmsCollection *fmscol)
   // Do hits and points before clusters, so that the hit and point lists are
   // populated before we try to set hit- and photon-in-cluster information
   // during the cluster loop
+  muFms->setFmsReconstructionFlag(fmscol->fmsReconstructionFlag());
   fillMuFmsHits(muFms, fmscol);
   fillMuFmsPoints(muFms, fmscol);
   fillMuFmsClusters(muFms, fmscol);
@@ -113,6 +117,7 @@ void StMuFmsUtil::fillFms(StFmsCollection* fmscol,StMuFmsCollection* muFms)
 {
   if(!muFms) return;
   if(!fmscol) return;
+  fmscol->setFmsReconstructionFlag(muFms->fmsReconstructionFlag());
   fillFmsHits(fmscol, muFms);
   fillFmsPoints(fmscol, muFms);
   fillFmsClusters(fmscol, muFms);
