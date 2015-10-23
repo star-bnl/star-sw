@@ -275,22 +275,10 @@
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
 
-    my $gccfilter = "";
-    if ($CC eq 'clang') {
-#      $CFLAGS .= " -fcolor-diagnostics"; $CXXFLAGS .= " -fcolor-diagnostics";
-      #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
-    } elsif ($cxx_version >= 4.8) {
-#      $CFLAGS .= " -fdiagnostics-color=always"; $CXXFLAGS .= " -fdiagnostics-color=always";
-    }  elsif (-e "$STAR/mgr/gccfilter") { 
-      $gccfilter = "$STAR/mgr/gccfilter -c -w -a ";
-      my $flag = system($gccfilter);
-      if ($flag) { $gccfilter = "";}
-    } 
-
-    $CXXCOM = $gccfilter .
+    $CXXCOM = 
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
 # print "CXXCOM : $CXXCOM\n";
-    $CCCOM =  $gccfilter .
+    $CCCOM =  
  "%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %Cinp%< %Cout%>";
     $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
     $LINKCOM =
