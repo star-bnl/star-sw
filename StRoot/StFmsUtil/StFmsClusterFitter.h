@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.3 2015/10/21 15:58:04 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.4 2015/10/23 15:05:07 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.4  2015/10/23 15:05:07  akio
+// fixed constexpr
+//
 // Revision 1.3  2015/10/21 15:58:04  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -245,8 +248,8 @@ inline double showerShapeComponent(double x, double y, double a, double b) {
 }
 
 inline Double_t StFmsClusterFitter::energyDepositionDistribution(double x, double y, double* parameters){
-    constexpr double ootwopi = 1.0/atan2(0.0,-1.0);
-    return (   showerShapeComponent(x, y, parameters[1], parameters[4])
+    constexpr double ootwopi = 1.0/2.0/3.14159265358979323846;
+    return (     showerShapeComponent(x, y, parameters[1], parameters[4])
 	       + showerShapeComponent(x, y, parameters[2], parameters[5])
 	       + showerShapeComponent(x, y, parameters[3], parameters[6]) ) * ootwopi;
 }
