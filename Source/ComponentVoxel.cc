@@ -565,7 +565,7 @@ bool ComponentVoxel::GetElement(const double xi, const double yi,
   // Check if the point is outside the mesh.
   if (y < m_yMin || y > m_yMax) return false;
 
-  const double cellsz = m_zMax - m_zMin;
+  const double cellsz = m_zMax - m_xMin;
   if (zPeriodic) {
     z = m_zMin + fmod(z - m_zMin, cellsz);
     if (z < m_zMin) z += cellsz;
