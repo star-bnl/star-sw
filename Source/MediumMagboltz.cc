@@ -790,15 +790,6 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     ionProducts.push_back(newIonProd);
     nIonisationProducts = nion = 2;
   } else if (type == ElectronCollisionTypeExcitation) {
-    // if (gas[igas] == "CH4" && loss * rgas[igas] < 13.35 && e > 12.65) {
-    //   if (RndmUniform() < 0.5) {
-    //     loss = 8.55 + RndmUniform() * (13.3 - 8.55);
-    //     loss /= rgas[igas];
-    //   } else {
-    //     loss = std::max(Small, RndmGaussian(loss * rgas[igas], 1.));
-    //     loss /= rgas[igas];
-    //   }
-    // }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
@@ -1595,13 +1586,13 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   // Inelastic cross-sections
   static double qIn[nEnergySteps][nMaxInelasticTerms];
   // Ionisation cross-sections
-  static double qIon[nEnergySteps][8];
+  static double qIon[nEnergySteps][12];
   // Parameters for angular distribution in inelastic collisions
   static double pEqIn[nEnergySteps][nMaxInelasticTerms];
   // Parameters for angular distribution in ionising collisions
-  static double pEqIon[nEnergySteps][8];
+  static double pEqIon[nEnergySteps][12];
   // Opal-Beaty parameter
-  static double eoby[nEnergySteps];
+  static double eoby[12];
   // Penning transfer parameters
   static double penFra[nMaxInelasticTerms][3];
   // Description of cross-section terms
@@ -1652,19 +1643,30 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     // Threshold energies
     double e[6] = {0., 0., 0., 0., 0., 0.};
     double eIn[nMaxInelasticTerms] = {0.};
-    double eIon[8] = {0.};
+    double eIon[12] = {0.};
     // Virial coefficient (not used)
     double virial = 0.;
     // Scattering algorithms
     long long kIn[nMaxInelasticTerms] = {0};
     long long kEl[6] = {0, 0, 0, 0, 0, 0};
     char name[] = "                         ";
+    long long nc0[12] = {0};
+    double ec0[12] = {0};
+    // Unused
+    double wk[12] = {0};
+    double efl[12] = {0};
+    long long ng1[12] = {0};
+    double eg1[12] = {0};
+    long long ng2[12] = {0};
+    double eg2[12] = {0};
 
     // Retrieve the cross-section data for this gas from Magboltz.
     long long ngs = gasNumber[iGas];
     Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, eoby,
                       pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, qIon[0],
-                      pEqIon[0], eIon, &nIon, scrpt);
+                      pEqIon[0], eIon, &nIon, 
+                      nc0, ec0, wk, efl, ng1, eg1, ng2, eg2,
+                      scrpt);
     if (m_debug || verbose) {
       const double massAmu =
           (2. / e[1]) * ElectronMass / AtomicMassUnitElectronVolt;
@@ -1712,22 +1714,16 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     bool withIon = false;
     // Ionisation
     if (nIon > 1) {
+      double eIonMin = eIon[0];
       for (int j = 0; j < nIon; ++j) {
+        if (eIon[j] < eIonMin) eIonMin = eIon[j];
         if (eFinal < eIon[j]) continue;
         withIon = true;
         ++nTerms;
         ++np;
         scatModel[np] = kEl[2];
         energyLoss[np] = eIon[j] / r;
-        // TODO
         wOpalBeaty[np] = eoby[j];
-        if (gas[iGas] == "CH4") {
-          if (fabs(eIon[j] - 21.) < 0.1) {
-            wOpalBeaty[np] = 14.;
-          } else if (fabs(eIon[j] - 291.) < 0.1) {
-            wOpalBeaty[np] = 200.;
-          }
-        }
         for (int k = 0; k < 50; ++k) {
           description[np][k] = scrpt[2 + j][k];
         }
@@ -1738,7 +1734,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
       }
       gsGreenSawada[iGas] = eoby[0];
       tbGreenSawada[iGas] = 2 * eIon[0];
-      ionPot[iGas] = eIon[0];
+      ionPot[iGas] = eIonMin;
     } else {
       if (eFinal >= e[2]) {
         withIon = true;
@@ -1857,15 +1853,6 @@ bool MediumMagboltz::Mixer(const bool verbose) {
         cf[iE][np] = qIn[iE][j] * van;
         // Scale the excitation cross-sections (for error estimates).
         cf[iE][np] *= scaleExc[iGas];
-        // Temporary hack for methane dissociative excitations:
-        if (description[np][5] == 'D' && description[np][6] == 'I' &&
-            description[np][7] == 'S') {
-          // if ((iE + 0.5) * eStep > 40.) {
-          //   cf[iE][np] *= 0.8;
-          // } else if ((iE + 0.5) * eStep > 30.) {
-          //   cf[iE][np] *= (1. - ((iE + 0.5) * eStep - 30.) * 0.02);
-          // }
-        }
         if (cf[iE][np] < 0.) {
           std::cerr << m_className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at "
@@ -1901,7 +1888,9 @@ bool MediumMagboltz::Mixer(const bool verbose) {
       Magboltz::inpt_.efinal = emax + 0.5 * Magboltz::inpt_.estep;
       Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, eoby,
                         pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, qIon[0],
-                        pEqIon[0], eIon, &nIon, scrpt);
+                        pEqIon[0], eIon, &nIon, 
+                        nc0, ec0, wk, efl, ng1, eg1, ng2, eg2, 
+                        scrpt);
       np = np0;
       if (useCsOutput) {
         outfile << emax << "  " << q[imax][1] << "  ";
@@ -5434,7 +5423,8 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   }
 
   // Call Magboltz internal setup routine.
-  Magboltz::setup1_();
+  // Magboltz::setup1_();
+  Magboltz::setupt1_();
 
   // Calculate the max. energy in the table.
   if (e * m_temperature / (293.15 * m_pressure) > 15) {
@@ -5447,7 +5437,7 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
 
   long long ielow = 1;
   while (ielow == 1) {
-    Magboltz::mixer_();
+    Magboltz::mixert_();
     if (bmag == 0. || btheta == 0. || fabs(btheta) == Pi) {
       Magboltz::elimit_(&ielow);
     } else if (btheta == HalfPi) {
