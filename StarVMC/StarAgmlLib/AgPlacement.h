@@ -27,6 +27,9 @@ class AgPlacement : public TNamed
   void TranslateY( Double_t y ){ mTranslation.y+=y; }
   void TranslateZ( Double_t z ){ mTranslation.z+=z; }
 
+  /// Rotation matrix
+  void Matrix( Double_t rotm[9] ){ for (int i=0;i<9;i++ ) mRotationMatrix[i]=rotm[i]; mHasRotm=true; }
+
   void Print( Option_t *opts="" )const;
 
   TGeoCombiTrans *matrix();
@@ -45,6 +48,8 @@ class AgPlacement : public TNamed
 
  private:
  protected:
+
+  bool mHasRotm;
 
   std::map< TString, Double_t > mParameters;
 
@@ -76,13 +81,14 @@ class AgPlacement : public TNamed
     Double_t z;
     Translation() : x(0), y(0), z(0){ };
   };
-  
+
   enum { kUnknown, kRot3, kRot6, kRotO };
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
   Translation             mTranslation;
   std::vector< Rotation > mRotation;
   std::vector< Int_t    > mType;
+  double                  mRotationMatrix[9];
 
  public:
   virtual const Char_t *GetCVS() const {
