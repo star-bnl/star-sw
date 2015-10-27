@@ -78,7 +78,7 @@
     <var name="rmax"      value="70*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="70*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="70*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
     <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   
@@ -94,8 +94,6 @@
     <var name="rmax"      value="93.33*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="93.33*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="93.33*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
 
   <!--                                                                                     Geometric paramters for disk 3 -->
@@ -125,8 +123,6 @@
     <var name="rmax"      value="140.0*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="140.0*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="140.0*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
 
   </If>
@@ -151,7 +147,7 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
     <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
@@ -168,8 +164,6 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -185,8 +179,6 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -201,8 +193,6 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -217,8 +207,6 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -233,8 +221,6 @@
     <var name="rmax"      value="zdisk*eta2tan(2.5)+1.0"   comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="zdisk*eta2tan(4.0)"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="zdisk*eta2tan(2.5)"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
 
   </If>
@@ -261,7 +247,7 @@
     <var name="rmax"      value="Rout+0.5"  comment="maximum radius of disk [cm]" />
     <var name="rminsens"  value="Rin"   comment="minimum radius of sensitive layer [cm]" />
     <var name="rmaxsens"  value="Rout"   comment="maximum radius of sensitive layer [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
+    <var name="thksens"   value="0.03744"    comment="thickness of sensitive layer [cm]" />
     <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
@@ -274,8 +260,6 @@
     <var name="x"         value="0.0"    comment="x center of disk [cm]" />
     <var name="y"         value="0.0"    comment="y center of disk [cm]" />
     <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -287,8 +271,6 @@
     <var name="x"         value="0.0"    comment="x center of disk [cm]" />
     <var name="y"         value="0.0"    comment="y center of disk [cm]" />
     <var name="z"         value="zdisk" comment="z center of disk [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -299,8 +281,6 @@
     <var name="x"         value="0.0"    comment="x center of disk [cm]" />
     <var name="y"         value="0.0"    comment="y center of disk [cm]" />
     <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -311,8 +291,6 @@
     <var name="x"         value="0.0"    comment="x center of disk [cm]" />
     <var name="y"         value="0.0"    comment="y center of disk [cm]" />
     <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
   zdisk = zdisk + dzdisk
 
@@ -323,8 +301,6 @@
     <var name="x"         value="0.0"    comment="x center of disk [cm]" />
     <var name="y"         value="0.0"    comment="y center of disk [cm]" />
     <var name="z"         value="zdisk"  comment="z center of disk [cm]" />
-    <var name="thksens"   value="0.2"    comment="thickness of sensitive layer [cm]" />
-    <var name="thksupp"   value="0.8"    comment="thickness of support material [cm]" />
   </Fill>
 
   </If>
