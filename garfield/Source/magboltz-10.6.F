@@ -1,14 +1,24 @@
-C  PROGRAM MAGBOLTZ 2   VERSION 10.2      AUGUST  2013    
+C  PROGRAM MAGBOLTZ 2   VERSION 10.6      OCTOBER 2014    
 C --------------------------------------------------------------------
-C  COPYRIGHT 2013   STEPHEN FRANCIS BIAGI
+C  COPYRIGHT 2014   STEPHEN FRANCIS BIAGI
 C----------------------------------------------------------------------
+C VERSION 10.6  UPGRADE TO SF6  ALSO INCLUDED IN DEGRADE
+C----------------------------------------------------------------------
+C VERSION 10.5 CONTAINS UPGRADE FOR ISOBUTANE (BETTER TOWNSEND)
+C               BOTH CH4 AND C4H10 NOW HAVE CORRECT OPTICAL OSCILLATOR
+C               STRENGTH
+C----------------------------------------------------------------------
+C VERSION 10.4 CORRECTED BEF SCALING IN ARGON DATA BASE   ARGON2014
+C---------------------------------------------------------------------
+C VERSION 10.3 UPDATED HELIUM IONISATION X-SECTION   HELIUM 2014
+C ---------------------------------------------------------------------
 C VERSION 10.2 SINCE VERSION 6 THE CALCULATION OF THE STATISTICAL
 C              ACCURACY OF THE DRIFT VELOCITY AND DIFFUSION COEFICIENTS
 C              HAS UNDERESTIMATED THE ACCURACY BY A FACTOR OF APPROX.
 C              SQRT(10) . THIS ERROR HAS BEEN FIXED IN THIS VERSION AND
 C              NOW GIVES A FACTOR OF 10 SHORTER CALCULATION TIME FOR
 C              THE SAME ACCURACY.
-C              INCREASED DECORREELATION MATRIX TO 2000000 COLLISIONS
+C              INCREASED DECORRELATION MATRIX TO 2000000 COLLISIONS
 C----------------------------------------------------------------------
 C VERSION 10.1 INCLUDES BETTER MODEL OF IONISATION 
 C              ALL NOBLE GASES INCLUDE INNER SHELLS IONISATIONS AND
@@ -271,10 +281,10 @@ C GAS4  :  HELIUM 3        (2010)                                  5*
 C GAS5  :  NEON            (2010)                                  5*
 C GAS6  :  KRYPTON         (2011)                                  4*
 C GAS7  :  XENON           (2011)                                  4*
-C GAS8  :  METHANE         (2008)                                  5*
+C GAS8  :  METHANE         (2013)                                  5*
 C GAS9  :  ETHANE          (1999)                                  5*
 C GAS10 :  PROPANE         (1999)                                  4*
-C GAS11 :  ISOBUTANE       (2009)                                  4*
+C GAS11 :  ISOBUTANE       (2014)                                  4*
 C GAS12 :  CO2             (2007)                                  5*
 C GAS13 :  NEO-PENTANE     (2003)  C(CH3)4                         4* 
 C GAS14 :  H20             (2004) 210  ROTATIONAL STATES INCLUDED  4*
@@ -293,7 +303,7 @@ C GAS26 :  REID STEP MODEL         (ANISOTROPIC VERSION)
 C GAS27 :  MAXWELL MODEL                                             
 C GAS28 :  REID RAMP MODEL                                           
 C GAS29 :  C2F6             (1999)   (ANISOTROPIC )                4*
-C GAS30 :  SF6   N.B.  DO NOT USE HIGH PERCENTAGE                  3*
+C GAS30 :  SF6              (2014)                                 4*
 C GAS31 :  NH3 AMMONIA        (2004) 120 ROTATIONAL LEVELS         4*
 C GAS32 :  C3H6   PROPENE     (1999)                               4*
 C GAS33 :  C3H6  CYCLOPROPANE (1999)                               4*
@@ -327,8 +337,8 @@ C GAS60 :  SIH4  (2005)    SILANE ANISOTROPIC                      4*
 C  GAS61-80 :DUMMY ROUTINES
 C------------------------------------------------------------------
 C
-C     PROGRAM MAGBOLTZ 2                                                
-      subroutine magboltz2
+C      PROGRAM MAGBOLTZ 2                                                
+      SUBROUTINE MAGBOLTZ2
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
       COMMON/BFLD/EOVB,WB,BTHETA,BMAG                                  
@@ -1779,7 +1789,7 @@ C
       CHARACTER*25 NAME       
       CHARACTER*50 SCRPT(264)                       
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EI(250),KIN(250) 
-      DIMENSION QION(8,4000),PEQION(8,4000),EION(8)          
+      DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EB(12)          
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KEL(6),PENFRA(3,250)
       DIMENSION NC0(12),EC0(12),WK(12),EFL(12),NG1(12),EG1(12),
      /NG2(12),EG2(12)
@@ -2096,6 +2106,7 @@ C     STOP
       COMMON/OUTPTT/TIME(300),ICOLL(6,5),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(6,264)
       COMMON/DECOR/NCOLM,NCORLN,NCORST
+      COMMON/DENS/DENSY(4000)
 C                                                                       
 C   NEW UPDATE OF CONSTANTS 2010
 C
@@ -2144,8 +2155,8 @@ C
 C SET LARGE DECORRELATION LENGTH AND STEP FOR PURE OR ALMOST PURE
 C ARGON KRYPTON AND XENON
       MXEKR=0
-      DO 55 HH=1,NGAS
-      IF(NGASN(HH).EQ.2.OR.NGASN(HH).EQ.6.OR.NGASN(HH).EQ.7) MXEKR=HH
+      DO 55 IH=1,NGAS
+      IF(NGASN(IH).EQ.2.OR.NGASN(IH).EQ.6.OR.NGASN(IH).EQ.7) MXEKR=IH
 C USE REDUCED DECORRELATION IF HIGH EFIELD
       IF(EFIELD.GT.(10./CORR)) MXEKR=0
    55 CONTINUE
@@ -2194,31 +2205,32 @@ C ZERO COMMON BLOCKS OF OUTPUT RESULTS
       ATT=0.0D0
       ALPER=0.0D0
       ATTER=0.0D0 
-      DIFLN=0.0D0
-      DIFTR=0.0D0
-      DFLER=0.0D0
-      DFTER=0.0D0
-      DIFXX=0.0D0
-      DIFYY=0.0D0
-      DIFZZ=0.0D0
-      DIFYZ=0.0D0
-      DIFXY=0.0D0
-      DIFXZ=0.0D0
-      DXXER=0.0D0
-      DYYER=0.0D0
-      DZZER=0.0D0
-      DYZER=0.0D0
-      DXYER=0.0D0
-      DXZER=0.0D0
+      DIFLN=0.0D0 
+      DIFTR=0.0D0 
+      DFLER=0.0D0 
+      DFTER=0.0D0 
+      DIFXX=0.0D0 
+      DIFYY=0.0D0 
+      DIFZZ=0.0D0 
+      DIFYZ=0.0D0 
+      DIFXY=0.0D0 
+      DIFXZ=0.0D0 
+      DXXER=0.0D0 
+      DYYER=0.0D0 
+      DZZER=0.0D0 
+      DYZER=0.0D0 
+      DXYER=0.0D0 
+      DXZER=0.0D0 
       DO 65 J=1,300                                                     
    65 TIME(J)=0.0D0                                                     
       DO 70 KGAS=1,6                              
       DO 70 K=1,5                        
-   70 ICOLL(KGAS,K)=0
+   70 ICOLL(KGAS,K)=0 
       DO 80 KGAS=1,6  
-      DO 80 K=1,264
+      DO 80 K=1,264 
    80 ICOLN(KGAS,K)=0                                                 
-      DO 100 K=1,4000                                                   
+      DO 100 K=1,4000      
+      DENSY(K)=0.0D0                                             
   100 SPEC(K)=0.0D0                                                     
       DO 101 K=1,6 
       VTMB(K)=0.0D0          
@@ -2226,7 +2238,7 @@ C ZERO COMMON BLOCKS OF OUTPUT RESULTS
 C ---------------------------------------------  
 C CAN SET RANDOM NUMBER SEED TO SEED VALUE HERE
 C                                                               
-      RSTART=0.666D0
+      RSTART=0.666D0 
 C    RANDOM NUMBER SEED FUNCTION (RSTART)      
 C-----------------------------------------------      
       ESTART=EFINAL/50.0D0
@@ -2258,6 +2270,163 @@ C   METRES PER PICOSECOND
      /NGAS=',I5,' FRAC=',F8.3))                                         
       RETURN                                                            
       END                                                               
+C Modified version of subroutine SETUPT for interface.
+      SUBROUTINE SETUPT1()                                            
+      IMPLICIT REAL*8 (A-H,O-Z)                                         
+      IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
+      COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
+      COMMON/CNSTS1/CONST1,CONST2,CONST3,CONST4,CONST5                  
+      COMMON/RATIO/AN1,AN2,AN3,AN4,AN5,AN6,AN,FRAC(6)               
+      COMMON/GASN/NGASN(6)                                 
+      COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX
+      COMMON/VEL/WX,WY,WZ
+      COMMON/VELERR/DWX,DWY,DWZ
+      COMMON/CTOWNS/ALPHA,ATT
+      COMMON/CTWNER/ALPER,ATTER
+      COMMON/DIFVEL/DIFLN,DIFTR
+      COMMON/DIFERL/DFLER,DFTER
+      COMMON/DIFLAB/DIFXX,DIFYY,DIFZZ,DIFYZ,DIFXY,DIFXZ
+      COMMON/DIFERB/DXXER,DYYER,DZZER,DYZER,DXYER,DXZER
+      COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
+      COMMON/BFLD/EOVB,WB,BTHETA,BMAG 
+      COMMON/GER/TWOPI
+      COMMON/MRATIO/VAN1,VAN2,VAN3,VAN4,VAN5,VAN6,VAN
+      COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS                             
+      COMMON/OUTPTT/TIME(300),ICOLL(6,5),SPEC(4000),TMAX1,
+     /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(6,264)
+      COMMON/DECOR/NCOLM,NCORLN,NCORST
+      COMMON/DENS/DENSY(4000)
+C                                                                       
+C   NEW UPDATE OF CONSTANTS 2010
+C
+      API=DACOS(-1.0D0)                                                 
+      TWOPI=2.0D0*API
+      ARY=13.60569253                                                  
+      PIR2=8.7973554297D-17                                             
+      ECHARG=1.602176565D-19                                            
+      EMASS=9.10938291D-31                                              
+      AMU=1.660538921D-27                                               
+      BOLTZ=8.6173324D-5       
+      BOLTZJ=1.3806488D-23                                              
+      AWB=1.758820088D10                                                
+      ALOSCH=2.6867805D19                                               
+      EOVM=DSQRT(2.0D0*ECHARG/EMASS)*100.0D0                            
+      ABZERO=273.15D0                                                   
+      ATMOS=760.0D0                                                     
+      CONST1=AWB/2.0D0*1.0D-19                                          
+      CONST2=CONST1*1.0D-02                                             
+      CONST3=DSQRT(0.2D0*AWB)*1.0D-09                                   
+      CONST4=CONST3*ALOSCH*1.0D-15                                      
+      CONST5=CONST3/2.0D0
+C
+      CORR=ABZERO*TORR/(ATMOS*(ABZERO+TEMPC)*100.0D0)                   
+C SET DECORRELATION STEP AND LENGTH
+      NCOLM=400000
+      NCORLN=50000
+      NCORST=4
+C
+C SET LARGE DECORRELATION LENGTH AND SETP FOR PURE OR ALMOST PURE
+C ARGON KRYPTON AND XENON
+      MXEKR=0
+      DO 55 IH=1,NGAS
+      IF(NGASN(IH).EQ.2.OR.NGASN(IH).EQ.6.OR.NGASN(IH).EQ.7) MXEKR=IH
+C IF HIGH EFIELD REDUCE DECORRELATION LENGTH
+      IF(EFIELD.GT.(10./CORR)) MXEKR=0
+   55 CONTINUE
+      IF(MXEKR.NE.0) THEN
+       IF(NGAS.EQ.1) THEN
+        NCOLM=2000000
+        NCORLN=500000
+        NCORST=2 
+       ELSE
+        IF(FRAC(MXEKR).GT.90.0) THEN
+         NCOLM=2000000
+         NCORLN=500000
+         NCORST=2
+        ENDIF
+       ENDIF     
+      ENDIF
+      TMAX=100.0D0                                                      
+      NSCALE=40000000
+      NMAX=NMAX*NSCALE 
+      NSTEP=4000                                                        
+      THETA=0.785D0                                                     
+      PHI=0.1D0  
+C ZERO COMMON BLOCKS OF OUTPUT RESULTS
+      WX=0.0D0
+      WY=0.0D0
+      WZ=0.0D0
+      DWX=0.0D0
+      DWY=0.0D0
+      DWZ=0.0D0
+      TTOTS=0.0D0
+      ALPHA=0.0D0
+      ATT=0.0D0
+      ALPER=0.0D0
+      ATTER=0.0D0 
+      DIFLN=0.0D0
+      DIFTR=0.0D0
+      DFLER=0.0D0
+      DFTER=0.0D0
+      DIFXX=0.0D0
+      DIFYY=0.0D0
+      DIFZZ=0.0D0
+      DIFYZ=0.0D0
+      DIFXY=0.0D0
+      DIFXZ=0.0D0
+      DXXER=0.0D0
+      DYYER=0.0D0
+      DZZER=0.0D0
+      DYZER=0.0D0
+      DXYER=0.0D0
+      DXZER=0.0D0
+      DO 65 J=1,300                                                     
+   65 TIME(J)=0.0D0                                                     
+      DO 70 KGAS=1,6                              
+      DO 70 K=1,5                        
+   70 ICOLL(KGAS,K)=0 
+      DO 80 KGAS=1,6  
+      DO 80 K=1,264 
+   80 ICOLN(KGAS,K)=0                                                 
+      DO 100 K=1,4000      
+      DENSY(K)=0.0D0                                             
+  100 SPEC(K)=0.0D0                                                     
+      DO 101 K=1,6 
+      VTMB(K)=0.0D0          
+  101 AMGAS(K)=0.0D0                                
+C ---------------------------------------------  
+C CAN SET RANDOM NUMBER SEED TO SEED VALUE HERE
+C                                                               
+      RSTART=0.666D0
+C    RANDOM NUMBER SEED FUNCTION (RSTART)      
+C-----------------------------------------------      
+      ESTART=EFINAL/50.0D0
+      ITHRM=0                                            
+      CORR=ABZERO*TORR/(ATMOS*(ABZERO+TEMPC)*100.0D0)                   
+      AKT=(ABZERO+TEMPC)*BOLTZ
+      AN1=FRAC(1)*CORR*ALOSCH                                           
+      AN2=FRAC(2)*CORR*ALOSCH                                           
+      AN3=FRAC(3)*CORR*ALOSCH                                           
+      AN4=FRAC(4)*CORR*ALOSCH
+      AN5=FRAC(5)*CORR*ALOSCH
+      AN6=FRAC(6)*CORR*ALOSCH                                           
+      AN=100.0D0*CORR*ALOSCH                                            
+      VAN1=FRAC(1)*CORR*CONST4*1.0D15                                   
+      VAN2=FRAC(2)*CORR*CONST4*1.0D15                                   
+      VAN3=FRAC(3)*CORR*CONST4*1.0D15                                   
+      VAN4=FRAC(4)*CORR*CONST4*1.0D15
+      VAN5=FRAC(5)*CORR*CONST4*1.0D15
+      VAN6=FRAC(6)*CORR*CONST4*1.0D15                                   
+      VAN=100.0D0*CORR*CONST4*1.0D15
+C                                                                       
+C  RADIANS PER PICOSECOND                                                        
+      WB=AWB*BMAG*1.0D-12 
+C   METRES PER PICOSECOND
+      IF(BMAG.EQ.0.0D0) RETURN
+      EOVB=EFIELD*1.D-9/BMAG
+      RETURN                                                            
+      END
       SUBROUTINE PRNTERT                                                
       IMPLICIT REAL*8 (A-H,O-Z)                                         
       IMPLICIT INTEGER*8 (I-N)
@@ -2273,7 +2442,7 @@ C   METRES PER PICOSECOND
       COMMON/DECOR/NCOLM,NCORLN,NCORST                          
       CHARACTER*25 NAMEG                                  
       WRITE(6,1)
-    1 FORMAT(2(/),10X,'PROGRAM MAGBOLTZ 2 VERSION 10.2',/)          
+    1 FORMAT(2(/),10X,'PROGRAM MAGBOLTZ 2 VERSION 10.6',/)          
       WRITE(6,10) NGAS                                                  
    10 FORMAT(10X,'MONTE CARLO SOLUTION FOR MIXTURE OF ',I2,' GASES.',/,
      /5X,'------------------------------------------------------')  
@@ -4726,6 +4895,7 @@ C LOOP
       SUBROUTINE ALPCALCT 
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/SSTOUT/VDOUT,VDERR,WSOUT,WSERR,DLOUT,DLERR,DTOUT,DTERR,
      /ALPHSST,ALPHERR,ATTSST,ATTERR         
@@ -4747,7 +4917,18 @@ C ------------------------------------------------------------------
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
-      VDST=WZ*1.D-5                                                 
+      VDST=WZ*1.D-5 
+      CORR=760.0*(273.15+TEMPC)/(293.15*TORR)  
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP BY 30
+        IF(ALPHA.GT.100.*CORR) THEN
+         ALPHAST=ALPHAST*30.0
+        ELSE IF(ALPHA.GT.50.0*CORR) THEN
+         ALPHAST=ALPHAST*15.0
+        ELSE
+         ALPHAST=ALPHAST*10.0
+        ENDIF
+      ENDIF                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       ZSTEP=DLOG(3.0D0)/ALPHAST
 C  CONVERT TO METRES AND PICOSECONDS     
@@ -4792,41 +4973,42 @@ C-----------------------------------------------
       WRITE(6,21) DLOUT,DLERR,DTOUT,DTERR   
    21 FORMAT(/,' DL=',F9.1,' +- ',F6.1,' %   DT=',F9.1,' +- ',F6.2,' %')
       WRITE(6,22) 
-   22 FORMAT(/,' SST TOWNSEND COEFICIENTS')
-      WRITE(6,23) ALPHSST,ALPHERR,ATTSST,ATTERR
-   23 FORMAT(/,' ALPHA=',F9.1,' +- ',F6.2,' %    ATT=',F9.1,' +- ',F6.2,
-     /' %')                                            
+   22 FORMAT(/,' SST TOWNSEND COEFICIENTS') 
+      WRITE(6,23) ALPHSST,ALPHERR,ATTSST,ATTERR 
+   23 FORMAT(/,' ALPHA =',F9.1,' +- ',F6.2,' %    ATT=',F9.1,' +- ',F6.2
+     /,' %')                                            
 C CALC TIME OF FLIGHT AND PT 
-      WRITE(6,25)
+      WRITE(6,25) 
    25 FORMAT(/,2X,'SOLUTION FOR PULSED TOWNSEND AND TIME OF FLIGHT PARAM
      /ETERS',/,'  ------------------------------------------------------
      /--------') 
-      WRITE(6,26) TSTEP
+      WRITE(6,26) TSTEP 
    26 FORMAT(1(/),'  TIME STEP BETWEEN SAMPLING PLANES =',D12.5,' PICOSE
      /CS.',/)                     
       CALL MONTEFTT                             
       CALL FRIEDLANDT 
-      CALL PT
-      CALL TOF
-      WRITE(6,27) RALPHA,RALPER,RATTOF,RATOFER
+      CALL PT 
+      CALL TOF 
+      WRITE(6,27) RALPHA,RALPER,RATTOF,RATOFER 
    27 FORMAT(/,' PT IONISATION AND ATTACHMENT RATES *10**12/SEC',/,' ALP
      /HA=',D10.3,' +- ',F6.2,' %      ATT=',D10.3,' +- ',F6.2,' %')    
       WRITE(6,28) 
-   28 FORMAT(/,' TOF DIFFUSION')
+   28 FORMAT(/,' TOF DIFFUSION') 
       WRITE(6,29) TOFDL,TOFDLER,TOFDT,TOFDTER 
    29 FORMAT(/,'  DL=',F8.1,' +- ',F6.1,' %       DT=',F8.1,' +- ',F6.1,
      /' %')     
-      WRITE(6,30)
-   30 FORMAT(/,' TOF DRIFT VELOCITY')
+      WRITE(6,30) 
+   30 FORMAT(/,' TOF DRIFT VELOCITY') 
       WRITE(6,31) TOFWR,TOFWRER   
    31 FORMAT(/,'    WR=',F8.2,' +-',F6.1,' %') 
-      WRZN=TOFWR*1.0D05
-      FC1=WRZN/(2.0D0*TOFDL)
-      FC2=((RALPHA-RATTOF)*1.0D12)/TOFDL
+      WRZN=TOFWR*1.0D05 
+      FC1=WRZN/(2.0D0*TOFDL) 
+      FC2=((RALPHA-RATTOF)*1.0D12)/TOFDL 
       ALPTEST=FC1-DSQRT(FC1**2-FC2) 
-      WRITE(6,888) ALPTEST
+      WRITE(6,888) ALPTEST 
   888 FORMAT(/,'TOWNSEND COEFICIENT (ALPHA-ATT) CALCULATED FROM TOF RESU
-     /LTS:',/,' ALPHA-ATT /CM.=',D11.4)                             
+     /LTS:',/,' ALPHA-ATT /CM.=',D11.4,' N.B. APPROXIMATE FORMULA NOT AC
+     /CURATE',/)                             
       RETURN                                                     
       END                                                               
       SUBROUTINE MONTEFTT                                               
@@ -4845,14 +5027,14 @@ C CALC TIME OF FLIGHT AND PT
       COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
       COMMON/RANM/RNMX(6)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),   
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUT/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),VZTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT 
       COMMON/ANIST/PSCT(6,4000,264),ANGCT(6,4000,264),INDEX(6,264),NISO 
       COMMON/IONFL/NC0(6,264),EC0(6,264),NG1(6,264),EG1(6,264),
      /NG2(6,264),EG2(6,264),WKLM(6,264),EFL(6,264)
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES.   
@@ -4955,7 +5137,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -5122,9 +5304,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -5195,7 +5377,7 @@ C  GIVE IONISATION OF THE OTHER GASES IN THE MIXTURE.
        IF(RAN.GT.PENFRA(KGAS,1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN 
+       IF(NPONT.GT.1000) THEN 
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -5644,8 +5826,8 @@ C NET IONISATION TAKE RESULTS FROM PLANE ITFINAL
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS 
       COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
       COMMON/RANM/RNMX(6)
-      COMMON/IPS/XSS(200),YSS(200),ZSS(200),TSS(200),ESS(200),
-     /DCXS(200),DCYS(200),DCZS(200),IPLS(200)  
+      COMMON/IPS/XSS(1000),YSS(1000),ZSS(1000),TSS(1000),ESS(1000),
+     /DCXS(1000),DCYS(1000),DCZS(1000),IPLS(1000)  
       COMMON/SPLOUT/ESPL(8),XSPL(8),YSPL(8),ZSPL(8),TSPL(8),XXSPL(8),
      /YYSPL(8),ZZSPL(8),VZSPL(8),TSSUM(8),TSSUM2(8),ATTOION,ATTIOER,
      /ATTATER,NESST(9)
@@ -5655,7 +5837,7 @@ C NET IONISATION TAKE RESULTS FROM PLANE ITFINAL
       COMMON/ANIST/PSCT(6,4000,264),ANGCT(6,4000,264),INDEX(6,264),NISO 
       COMMON/IONFL/NC0(6,264),EC0(6,264),NG1(6,264),EG1(6,264),
      /NG2(6,264),EG2(6,264),WKLM(6,264),EFL(6,264)
-      DIMENSION EPRM(4000000),IESPECP(100)
+      DIMENSION EPRM(10000000),IESPECP(100)
 C----------------------------------------------------------------------
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT DISTANCES.   
@@ -5765,7 +5947,7 @@ C CYCLE , IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        TSSTRT=0.0D0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
   944 FORMAT(2X,' PROGRAM STOPPED TOO MANY PRIMARIES IPRIM=',I7)
       STOP
@@ -5972,9 +6154,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD) 
-      IF(NPONT.GT.200) THEN
+      IF(NPONT.GT.1000) THEN
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED NPONT=',I3,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XSS(NPONT)=X        
@@ -6052,7 +6234,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE.
        IF(RAN.GT.PENFRA(KGAS,1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF 
@@ -6493,10 +6675,10 @@ C  SUBSTITUTE NEPL FOR NEEST
       IF(NESST(I).EQ.0.OR.NESST(I-1).EQ.0) GO TO 10
    10 ALFNE(I)=(DLOG(DFLOAT(NESST(I)))-DLOG(DFLOAT(NESST(I-1))))/ZSTEP
       DXFIN=((XXSPL(JPRINT)/TSSUM(JPRINT))-(XSPL(JPRINT)/TSSUM(JPRINT))
-     /**2)*WSSST(JPRINT)/(JPRINT*2.0D0*ZSTEP)
+     +**2)*WSSST(JPRINT)/(JPRINT*2.0D0*ZSTEP)
       DXFIN=DXFIN*1.0D+16 
       DYFIN=((YYSPL(JPRINT)/TSSUM(JPRINT))-(YSPL(JPRINT)/TSSUM(JPRINT))
-     /**2)*WSSST(JPRINT)/(JPRINT*2.0D0*ZSTEP)
+     +**2)*WSSST(JPRINT)/(JPRINT*2.0D0*ZSTEP)
       DYFIN=DYFIN*1.0D+16
       DLFIN=((TTMSPL(JPRINT)/TSSUM(JPRINT))-(TMSPL(JPRINT)/TSSUM(JPRINT)
      /)**2)*WSSST(JPRINT)**3/(JPRINT*2.0D0*ZSTEP)
@@ -6692,6 +6874,7 @@ C     WRITE(6,15)
       SUBROUTINE ALPCLCBT  
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFGOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWVZ,TOFWVZER,
      /TOFWVY,TOFWVYER,TOFDZZ,TOFDZZER,TOFDXX,TOFDXXER,TOFDYY,TOFDYYER,
@@ -6710,7 +6893,18 @@ C ----------------------------------------------------------------------
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
-      VDST=WZ*1.D-5                                                 
+      VDST=WZ*1.D-5
+      CORR=760.0*(273.15+TEMPC)/(TORR*293.15)
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C  LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP SIZE BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF                                              
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
       TFINAL=7.0D0*TSTEP
@@ -6719,7 +6913,7 @@ C CALC TIME OF FLIGHT AND PT
       WRITE(6,25)
    25 FORMAT(/,2X,'SOLUTION FOR PULSED TOWNSEND AND TIME OF FLIGHT PARAM
      /ETERS',/,'  ------------------------------------------------------
-     /--------') 
+     /--------')
       WRITE(6,26) TSTEP
    26 FORMAT(1(/),'  TIME STEP BETWEEN SAMPLING PLANES =',D12.5,' PICOSE
      /CS.',/)                     
@@ -6755,7 +6949,8 @@ C---- -------------------------------------------
       WRITE(6,32) ALPHA,ALPER,ATT,ATTER
    32 FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)           
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)           
 C --- -------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -6775,15 +6970,15 @@ C --- -------------------------------------------
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
       COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
       COMMON/RANM/RNMX(6)
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUTG/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),YZTPL(8),VZTPL(8),VYTPL(8),NETPL(8),ATTOINT,
      /ATTERT,AIOERT 
       COMMON/ANIST/PSCT(6,4000,264),ANGCT(6,4000,264),INDEX(6,264),NISO 
       COMMON/IONFL/NC0(6,264),EC0(6,264),NG1(6,264),EG1(6,264),
      /NG2(6,264),EG2(6,264),WKLM(6,264),EFL(6,264)
-      DIMENSION EPRM(4000000),IESPECP(100)           
+      DIMENSION EPRM(10000000),IESPECP(100)           
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES. 
@@ -6899,7 +7094,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        YSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -7074,9 +7269,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -7146,7 +7341,7 @@ C GIVE IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(KGAS,1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -7577,6 +7772,7 @@ C NET IONISATION TAKE RESULTS FROM PLANE ITFINAL
       SUBROUTINE ALPCLCCT   
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFHOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWVZ,TOFWVZER,
      /TOFWVY,TOFWVYER,TOFWVX,TOFWVXER,TOFDZZ,TOFDZZER,TOFDXX,TOFDXXER,
@@ -7596,7 +7792,18 @@ C ----------------------------------------------------------------------
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
-      VDST=WZ*1.D-5                                                 
+      VDST=WZ*1.D-5
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP SIZE BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
       TFINAL=7.0D0*TSTEP
@@ -7643,7 +7850,8 @@ C-----------------------------------------------
       WRITE(6,32) ALPHA,ALPER,ATT,ATTER
    32 FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)           
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)           
 C      ------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -7664,15 +7872,15 @@ C      ------------------------------------------
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
       COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
       COMMON/RANM/RNMX(6)
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUTH/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),YZTPL(8),XZTPL(8),XYTPL(8),VZTPL(8),VYTPL(8),
      /VXTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT
       COMMON/ANIST/PSCT(6,4000,264),ANGCT(6,4000,264),INDEX(6,264),NISO 
       COMMON/IONFL/NC0(6,264),EC0(6,264),NG1(6,264),EG1(6,264),
      /NG2(6,264),EG2(6,264),WKLM(6,264),EFL(6,264)
-      DIMENSION EPRM(4000000),IESPECP(100)           
+      DIMENSION EPRM(10000000),IESPECP(100)           
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES. 
@@ -7808,7 +8016,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        XSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -7988,9 +8196,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -8060,7 +8268,7 @@ C GIVE IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(KGAS,1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -8549,6 +8757,7 @@ C NET IONISATION TAKE RESULTS FROM PLANE ITFINAL
       SUBROUTINE ALPCLCAT 
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWV,TOFWVER,
      /TOFDL,TOFDLER,TOFDT,TOFDTER,TOFWR,TOFWRER,RATTOF,RATOFER 
@@ -8565,7 +8774,18 @@ C ------------------------------------------------------------------
       IMAX=NMAX/10000000 
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
-      ALPHAST=0.85D0*DABS(ALPHA-ATT) 
+      ALPHAST=0.85D0*DABS(ALPHA-ATT)
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF 
       VDST=WZ*1.D-5                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
@@ -8591,26 +8811,27 @@ C CALC TIME OF FLIGHT AND PT
       WRITE(6,29) TOFDL,TOFDLER,TOFDT,TOFDTER 
    29 FORMAT(/,'  DL=',F8.1,' +- ',F6.1,' %       DT=',F8.1,' +- ',F6.1,
      /' %')     
-      WRITE(6,30)
-   30 FORMAT(/,' TOF DRIFT VELOCITY')
+      WRITE(6,30) 
+   30 FORMAT(/,' TOF DRIFT VELOCITY') 
       WRITE(6,31) TOFWR,TOFWRER   
    31 FORMAT(/,'    WR=',F8.2,' +- ',F6.2,' %') 
-C CALCULATE TOWNSEND SST COEFICIENTS FROM TOF RESULTS
-      WRN=TOFWR*1.0D05
-      FC1=WRN/(2.0D0*TOFDL)
+C      CALCULATE TOWNSEND SST COEFICIENTS FROM TOF RESULTS  
+      WRN=TOFWR*1.0D05 
+      FC1=WRN/(2.0D0*TOFDL) 
       FC2=((RALPHA-RATTOF)*1.0D12)/TOFDL   
       ALPZZ=FC1-DSQRT(FC1**2-FC2)            
 C---------------------------------------------------           
 C LOAD NEW ALPHA AND ATTACHMENT INTO COMMON BLOCKS
 C-----------------------------------------------
-      ALPATT=ALPHA-ATT
-      RATIO=ALPZZ/ALPATT
-      ALPHA=ALPHA*RATIO
+      ALPATT=ALPHA-ATT 
+      RATIO=ALPZZ/ALPATT 
+      ALPHA=ALPHA*RATIO 
       ATT=ATT*RATIO  
-      WRITE(6,32) ALPHA,ALPER,ATT,ATTER
+      WRITE(6,32) ALPHA,ALPER,ATT,ATTER 
   32  FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)          
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)          
 C-----------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -8630,14 +8851,14 @@ C-----------------------------------------------
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
       COMMON/THRM/AMGAS(6),VTMB(6),TCFMX,TCFMXG(6),ITHRM
       COMMON/RANM/RNMX(6)
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUT/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),VZTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT 
       COMMON/ANIST/PSCT(6,4000,264),ANGCT(6,4000,264),INDEX(6,264),NISO
       COMMON/IONFL/NC0(6,264),EC0(6,264),NG1(6,264),EG1(6,264),
      /NG2(6,264),EG2(6,264),WKLM(6,264),EFL(6,264)
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES.
@@ -8750,7 +8971,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -8925,9 +9146,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -8997,7 +9218,7 @@ C GIVE IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(KGAS,1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -10637,6 +10858,7 @@ C
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/DECOR/NCOLM,NCORLN,NCORST
+      COMMON/DENS/DENSY(4000)
 C                                                                       
 C   NEW UPDATE OF CONSTANTS 2010
 C
@@ -10685,8 +10907,8 @@ C
 C SET LARGE DECORRELATION LENGTH AND SETP FOR PURE OR ALMOST PURE
 C ARGON KRYPTON AND XENON
       MXEKR=0
-      DO 55 HH=1,NGAS
-      IF(NGASN(HH).EQ.2.OR.NGASN(HH).EQ.6.OR.NGASN(HH).EQ.7) MXEKR=HH
+      DO 55 IH=1,NGAS
+      IF(NGASN(IH).EQ.2.OR.NGASN(IH).EQ.6.OR.NGASN(IH).EQ.7) MXEKR=IH
 C IF HIGH EFIELD REDUCE DECORRELATION LENGTH
       IF(EFIELD.GT.(10./CORR)) MXEKR=0
    55 CONTINUE
@@ -10757,7 +10979,8 @@ C ZERO COMMON BLOCKS OF OUTPUT RESULTS
    70 ICOLL(K)=0  
       DO 80 K=1,512
    80 ICOLN(K)=0                                                        
-      DO 100 K=1,4000                                                   
+      DO 100 K=1,4000      
+      DENSY(K)=0.0D0                                             
   100 SPEC(K)=0.0D0                                                     
 C ---------------------------------------------  
 C CAN SET RANDOM NUMBER SEED TO SEED VALUE HERE
@@ -10795,6 +11018,156 @@ C   METRES PER PICOSECOND
    99 LAST=1                                                            
       RETURN                                                            
       END                                                               
+C Previous SUBROUTINE: SETUP
+C Modified version of subroutine SETUP for interface.
+      SUBROUTINE SETUP1()                                            
+      IMPLICIT REAL*8 (A-H,O-Z)                                         
+      IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
+      COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
+      COMMON/CNSTS1/CONST1,CONST2,CONST3,CONST4,CONST5                  
+      COMMON/RATIO/AN1,AN2,AN3,AN4,AN5,AN6,AN,FRAC(6)               
+      COMMON/GASN/NGASN(6)                                 
+      COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX
+      COMMON/VEL/WX,WY,WZ
+      COMMON/VELERR/DWX,DWY,DWZ
+      COMMON/CTOWNS/ALPHA,ATT
+      COMMON/CTWNER/ALPER,ATTER
+      COMMON/DIFVEL/DIFLN,DIFTR
+      COMMON/DIFERL/DFLER,DFTER
+      COMMON/DIFLAB/DIFXX,DIFYY,DIFZZ,DIFYZ,DIFXY,DIFXZ
+      COMMON/DIFERB/DXXER,DYYER,DZZER,DYZER,DXYER,DXZER
+      COMMON/BFLD/EOVB,WB,BTHETA,BMAG 
+      COMMON/MRATIO/VAN1,VAN2,VAN3,VAN4,VAN5,VAN6,VAN
+      COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS                             
+      COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
+     /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
+      COMMON/DECOR/NCOLM,NCORLN,NCORST
+      COMMON/DENS/DENSY(4000)
+C                                                                       
+C   NEW UPDATE OF CONSTANTS 2010
+C
+      API=DACOS(-1.0D0)                                                 
+      ARY=13.60569253                                                  
+      PIR2=8.7973554297D-17                                             
+      ECHARG=1.602176565D-19                                            
+      EMASS=9.10938291D-31                                              
+      AMU=1.660538921D-27                                               
+      BOLTZ=8.6173324D-5       
+      BOLTZJ=1.3806488D-23                                              
+      AWB=1.758820088D10                                                
+      ALOSCH=2.6867805D19                                               
+      EOVM=DSQRT(2.0D0*ECHARG/EMASS)*100.0D0                            
+      ABZERO=273.15D0                                                   
+      ATMOS=760.0D0                                                     
+      CONST1=AWB/2.0D0*1.0D-19                                          
+      CONST2=CONST1*1.0D-02                                             
+      CONST3=DSQRT(0.2D0*AWB)*1.0D-09                                   
+      CONST4=CONST3*ALOSCH*1.0D-15                                      
+      CONST5=CONST3/2.0D0
+C
+      CORR=ABZERO*TORR/(ATMOS*(ABZERO+TEMPC)*100.0D0)                   
+C SET DECORRELATION STEP AND LENGTH
+      NCOLM=400000
+      NCORLN=50000
+      NCORST=4
+C
+C SET LARGE DECORRELATION LENGTH AND SETP FOR PURE OR ALMOST PURE
+C ARGON KRYPTON AND XENON
+      MXEKR=0
+      DO 55 IH=1,NGAS
+      IF(NGASN(IH).EQ.2.OR.NGASN(IH).EQ.6.OR.NGASN(IH).EQ.7) MXEKR=IH
+C IF HIGH EFIELD REDUCE DECORRELATION LENGTH
+      IF(EFIELD.GT.(10./CORR)) MXEKR=0
+   55 CONTINUE
+      IF(MXEKR.NE.0) THEN
+       IF(NGAS.EQ.1) THEN
+        NCOLM=2000000
+        NCORLN=500000
+        NCORST=2 
+       ELSE
+        IF(FRAC(MXEKR).GT.90.0) THEN
+         NCOLM=2000000
+         NCORLN=500000
+         NCORST=2
+        ENDIF
+       ENDIF     
+      ENDIF
+      TMAX=100.0D0                                                      
+      NSCALE=40000000
+      NMAX=NMAX*NSCALE 
+      NSTEP=4000                                                        
+      THETA=0.785D0                                                     
+      PHI=0.1D0  
+C ZERO COMMON BLOCKS OF OUTPUT RESULTS
+      WX=0.0D0
+      WY=0.0D0
+      WZ=0.0D0
+      DWX=0.0D0
+      DWY=0.0D0
+      DWZ=0.0D0
+      TTOTS=0.0D0
+      ALPHA=0.0D0
+      ATT=0.0D0
+      ALPER=0.0D0
+      ATTER=0.0D0 
+      DIFLN=0.0D0
+      DIFTR=0.0D0
+      DFLER=0.0D0
+      DFTER=0.0D0
+      DIFXX=0.0D0
+      DIFYY=0.0D0
+      DIFZZ=0.0D0
+      DIFYZ=0.0D0
+      DIFXY=0.0D0
+      DIFXZ=0.0D0
+      DXXER=0.0D0
+      DYYER=0.0D0
+      DZZER=0.0D0
+      DYZER=0.0D0
+      DXYER=0.0D0
+      DXZER=0.0D0
+      DO 65 J=1,300                                                     
+   65 TIME(J)=0.0D0                                                     
+      DO 70 K=1,30                                                      
+   70 ICOLL(K)=0  
+      DO 80 K=1,512
+   80 ICOLN(K)=0                                                        
+      DO 100 K=1,4000      
+      DENSY(K)=0.0D0                                             
+  100 SPEC(K)=0.0D0                                                     
+C ---------------------------------------------  
+C CAN SET RANDOM NUMBER SEED TO SEED VALUE HERE
+C                                                               
+      RSTART=0.666D0
+C    RANDOM NUMBER SEED FUNCTION (RSTART)      
+C-----------------------------------------------      
+      ESTART=EFINAL/50.0D0
+      CORR=ABZERO*TORR/(ATMOS*(ABZERO+TEMPC)*100.0D0)                   
+      AKT=(ABZERO+TEMPC)*BOLTZ
+      AN1=FRAC(1)*CORR*ALOSCH                                           
+      AN2=FRAC(2)*CORR*ALOSCH                                           
+      AN3=FRAC(3)*CORR*ALOSCH                                           
+      AN4=FRAC(4)*CORR*ALOSCH
+      AN5=FRAC(5)*CORR*ALOSCH
+      AN6=FRAC(6)*CORR*ALOSCH                                           
+      AN=100.0D0*CORR*ALOSCH                                            
+      VAN1=FRAC(1)*CORR*CONST4*1.0D15                                   
+      VAN2=FRAC(2)*CORR*CONST4*1.0D15                                   
+      VAN3=FRAC(3)*CORR*CONST4*1.0D15                                   
+      VAN4=FRAC(4)*CORR*CONST4*1.0D15
+      VAN5=FRAC(5)*CORR*CONST4*1.0D15
+      VAN6=FRAC(6)*CORR*CONST4*1.0D15                                   
+      VAN=100.0D0*CORR*CONST4*1.0D15
+C                                                                       
+C  RADIANS PER PICOSECOND                                                        
+      WB=AWB*BMAG*1.0D-12 
+C   METRES PER PICOSECOND
+      IF(BMAG.EQ.0.0D0) RETURN
+      EOVB=EFIELD*1.D-9/BMAG
+      RETURN                                                            
+      END
+C  NEXT SUBROUTINE: PRNTER
       SUBROUTINE PRNTER                                                 
       IMPLICIT REAL*8 (A-H,O-Z)                                         
       IMPLICIT INTEGER*8 (I-N)
@@ -10808,7 +11181,7 @@ C   METRES PER PICOSECOND
       COMMON/DECOR/NCOLM,NCORLN,NCORST                          
       CHARACTER*25 NAMEG                                  
       WRITE(6,1)
-    1 FORMAT(2(/),10X,'PROGRAM MAGBOLTZ 2 VERSION 10.2',/)          
+    1 FORMAT(2(/),10X,'PROGRAM MAGBOLTZ 2 VERSION 10.6',/)          
       WRITE(6,10) NGAS                                                  
    10 FORMAT(10X,'MONTE CARLO SOLUTION FOR MIXTURE OF ',I2,' GASES.',/,
      /5X,'------------------------------------------------------')  
@@ -13072,6 +13445,7 @@ C LOOP
       SUBROUTINE ALPCALC 
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/SSTOUT/VDOUT,VDERR,WSOUT,WSERR,DLOUT,DLERR,DTOUT,DTERR,
      /ALPHSST,ALPHERR,ATTSST,ATTERR         
@@ -13092,7 +13466,18 @@ C ------------------------------------------------------------------
       IMAX=NMAX/10000000 
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
-      ALPHAST=0.85D0*DABS(ALPHA-ATT) 
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
+      ALPHAST=0.85D0*DABS(ALPHA-ATT)
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP SIZE BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF 
       VDST=WZ*1.D-5                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       ZSTEP=DLOG(3.0D0)/ALPHAST
@@ -13172,7 +13557,8 @@ C CALC TIME OF FLIGHT AND PT
       ALPTEST=FC1-DSQRT(FC1**2-FC2) 
       WRITE(6,888) ALPTEST
   888 FORMAT(/,'TOWNSEND COEFICIENT (ALPHA-ATT) CALCULATED FROM TOF RESU
-     /LTS:',/,' ALPHA-ATT /CM.=',D11.4)                             
+     /LTS:',/,' ALPHA-ATT /CM.=',D11.4,' N.B. APPROXIMATE FORMULA NOT AC
+     /CURATE',/)                             
       RETURN                                                     
       END                                                               
       SUBROUTINE MONTEFT                                                
@@ -13189,12 +13575,12 @@ C CALC TIME OF FLIGHT AND PT
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUT/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),VZTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT 
       COMMON/ANIS/PSCT(4000,512),ANGCT(4000,512),INDEX(512),NISO        
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES.   
@@ -13295,7 +13681,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -13435,9 +13821,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -13507,7 +13893,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE.
        IF(RAN.GT.PENFRA(1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN 
+       IF(NPONT.GT.1000) THEN 
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -13796,8 +14182,8 @@ C-----------------------------------------------------
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS 
-      COMMON/IPS/XSS(200),YSS(200),ZSS(200),TSS(200),ESS(200),
-     /DCXS(200),DCYS(200),DCZS(200),IPLS(200)  
+      COMMON/IPS/XSS(1000),YSS(1000),ZSS(1000),TSS(1000),ESS(1000),
+     /DCXS(1000),DCYS(1000),DCZS(1000),IPLS(1000)  
       COMMON/SPLOUT/ESPL(8),XSPL(8),YSPL(8),ZSPL(8),TSPL(8),XXSPL(8),
      /YYSPL(8),ZZSPL(8),VZSPL(8),TSSUM(8),TSSUM2(8),ATTOION,ATTIOER,
      /ATTATER,NESST(9)
@@ -13807,7 +14193,7 @@ C-----------------------------------------------------
       COMMON/ANIS/PSCT(4000,512),ANGCT(4000,512),INDEX(512),NISO
       COMMON/IONFL1/NC0(512),EC0(512),NG1(512),EG1(512),NG2(512),
      /EG2(512),WKLM(512),EFL(512)        
-      DIMENSION EPRM(4000000),IESPECP(100)
+      DIMENSION EPRM(10000000),IESPECP(100)
 C----------------------------------------------------------------------
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT DISTANCES.   
@@ -13916,7 +14302,7 @@ C CYCLE , IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        TSSTRT=0.0D0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
   944 FORMAT(2X,' PROGRAM STOPPED TOO MANY PRIMARIES IPRIM=',I7)
       STOP
@@ -14091,9 +14477,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD) 
-      IF(NPONT.GT.200) THEN
+      IF(NPONT.GT.1000) THEN
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED NPONT=',I3,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XSS(NPONT)=X        
@@ -14171,7 +14557,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE.
        IF(RAN.GT.PENFRA(1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF 
@@ -14630,13 +15016,14 @@ C     WRITE(6,15)
       DO 420 I=1,40                                                     
       ENER=EPLT*(DFLOAT(I)-0.5D0)                                       
       WRITE(6,302) ENER,SPECS(I)                                        
-  302 FORMAT(6X,'E=',F11.3,6X,'SPEC=',D11.4)                             
+  302 FORMAT(6X,'E=',F11.3,6X,'SPEC=',D11.4)                            
   420 CONTINUE                                                          
       RETURN                                                            
       END 
       SUBROUTINE ALPCLCB   
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFGOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWVZ,TOFWVZER,
      /TOFWVY,TOFWVYER,TOFDZZ,TOFDZZER,TOFDXX,TOFDXXER,TOFDYY,TOFDYYER,
@@ -14654,7 +15041,18 @@ C ----------------------------------------------------------------------
       IMAX=NMAX/10000000 
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF
       VDST=WZ*1.D-5                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
@@ -14700,7 +15098,8 @@ C---- -------------------------------------------
       WRITE(6,32) ALPHA,ALPER,ATT,ATTER
    32 FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)           
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)           
 C --- -------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -14717,15 +15116,15 @@ C --- -------------------------------------------
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUTG/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),YZTPL(8),VZTPL(8),VYTPL(8),NETPL(8),ATTOINT,
      /ATTERT,AIOERT 
       COMMON/ANIS/PSCT(4000,512),ANGCT(4000,512),INDEX(512),NISO   
       COMMON/IONFL1/NC0(512),EC0(512),NG1(512),EG1(512),NG2(512),
      /EG2(512),WKLM(512),EFL(512)     
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES. 
@@ -14839,7 +15238,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        YSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -14994,9 +15393,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -15066,7 +15465,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -15323,6 +15722,7 @@ C CALC TIME LEFT TO ARRIVE AT PLANE
       SUBROUTINE ALPCLCC   
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFHOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWVZ,TOFWVZER,
      /TOFWVY,TOFWVYER,TOFWVX,TOFWVXER,TOFDZZ,TOFDZZER,TOFDXX,TOFDXXER,
@@ -15341,7 +15741,18 @@ C ----------------------------------------------------------------------
       IMAX=NMAX/10000000 
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE 
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF
       VDST=WZ*1.D-5                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
@@ -15389,7 +15800,8 @@ C-----------------------------------------------
       WRITE(6,32) ALPHA,ALPER,ATT,ATTER
    32 FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)           
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)           
 C-----------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -15407,15 +15819,15 @@ C-----------------------------------------------
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUTH/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),YZTPL(8),XZTPL(8),XYTPL(8),VZTPL(8),VYTPL(8),
      /VXTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT
       COMMON/ANIS/PSCT(4000,512),ANGCT(4000,512),INDEX(512),NISO  
       COMMON/IONFL1/NC0(512),EC0(512),NG1(512),EG1(512),NG2(512),
      /EG2(512),WKLM(512),EFL(512)      
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES. 
@@ -15550,7 +15962,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        XSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -15711,9 +16123,9 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
- 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
+ 546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I5,' ITER=',I10)
       STOP
       ENDIF     
       XS(NPONT)=X       
@@ -15783,7 +16195,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -16061,6 +16473,7 @@ C ROTATE VELOCITIES
       SUBROUTINE ALPCLCA 
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
+      COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/SETP/TMAX,SMALL,API,ESTART,THETA,PHI,RSTART,EFIELD,NMAX 
       COMMON/TOFOUT/RALPHA,RALPER,TOFENE,TOFENER,TOFWV,TOFWVER,
      /TOFDL,TOFDLER,TOFDT,TOFDTER,TOFWR,TOFWRER,RATTOF,RATOFER 
@@ -16077,7 +16490,18 @@ C ------------------------------------------------------------------
       IMAX=NMAX/10000000 
       IF(IMAX.LT.5) IMAX=5 
       NMAX=IMAX*10000000
+      CORR=760.0*(TEMPC+273.15)/(TORR*293.15)
       ALPHAST=0.85D0*DABS(ALPHA-ATT) 
+      IF(ALPHA.GT.(10.0*ALPHAST).OR.ATT.GT.(10.0*ALPHAST)) THEN
+C LARGE CANCELLATION BETWEEN ALPHA AND NETA REDUCE STEP BY 30.0
+       IF(ALPHA.GT.100.0*CORR) THEN
+        ALPHAST=ALPHAST*30.0
+       ELSE IF(ALPHA.GT.50.0*CORR) THEN
+        ALPHAST=ALPHAST*15.0
+       ELSE
+        ALPHAST=ALPHAST*8.0
+       ENDIF
+      ENDIF
       VDST=WZ*1.D-5                                                 
       TSTEP=DLOG(3.0D0)/(ALPHAST*VDST*1.0D5)
       TSTEP=TSTEP*1.0D12
@@ -16122,7 +16546,8 @@ C-----------------------------------------------
       WRITE(6,32) ALPHA,ALPER,ATT,ATTER
   32  FORMAT(/,'TOWNSEND COEFICIENTS CALCULATED FROM TOF RESULTS:',2(/),
      /'IONISATION RATE /CM.=',D11.4,' +-',F6.2,' %',/,'ATTACHMENT RATE /
-     /CM.=',D11.4,' +-',F6.2,' %',/)          
+     /CM.=',D11.4,' +-',F6.2,' %',/,' N.B. APPROXIMATE FORMULA NOT ACCUR
+     /ATE',/)          
 C-----------------------------------------------      
       RETURN                                                     
       END                                                               
@@ -16139,14 +16564,14 @@ C-----------------------------------------------
       COMMON/OUTPT/TIME(300),ICOLL(30),SPEC(4000),TMAX1,
      /AVE,DEN,XID,X,Y,Z,ST,NNULL,ICOLN(512)
       COMMON/TTRM/ZTOT,TTOT,ZTOTS,TTOTS
-      COMMON/IPT/XS(200),YS(200),ZS(200),TS(200),ES(200),
-     /DCX(200),DCY(200),DCZ(200),IPL(200)
+      COMMON/ISPT/XS(1000),YS(1000),ZS(1000),TS(1000),ES(1000),
+     /DCX(1000),DCY(1000),DCZ(1000),IPL(1000)
       COMMON/TPLOUT/ETPL(8),XTPL(8),YTPL(8),ZTPL(8),TTPL(8),XXTPL(8),
      /YYTPL(8),ZZTPL(8),VZTPL(8),NETPL(8),ATTOINT,ATTERT,AIOERT 
       COMMON/ANIS/PSCT(4000,512),ANGCT(4000,512),INDEX(512),NISO 
       COMMON/IONFL1/NC0(512),EC0(512),NG1(512),EG1(512),NG2(512),
      /EG2(512),WKLM(512),EFL(512)       
-      DIMENSION EPRM(4000000),IESPECP(100)            
+      DIMENSION EPRM(10000000),IESPECP(100)            
 C -------------------------------------------------------------------   
 C   CALCULATES COLLISION EVENTS AND UPDATES DIFFUSION AND VELOCITY.
 C   THIS ROUTINE HANDLES TERMINATIONS AT FIXED DRIFT TIMES.
@@ -16257,7 +16682,7 @@ C IN THIS CYCLE IF SO OUTPUT CURRENT RESULTS.
        ZSTRT=0.0D0
        IPLANE=0
       ENDIF
-      IF(IPRIM.GT.4000000) THEN
+      IF(IPRIM.GT.10000000) THEN
       WRITE(6,944) IPRIM
  944  FORMAT(/,2X,'PROGRAM STOPPED TOO MANY PRIMARIES IPRIM =',I7)
       GO TO 700
@@ -16409,7 +16834,7 @@ C OF IONISATION ELECTRON
       NCLUS=NCLUS+1
       NPONT=NPONT+1
       NMXADD=MAX(NPONT,NMXADD)
-      IF(NPONT.GT.200) THEN 
+      IF(NPONT.GT.1000) THEN 
       WRITE(6,546) NPONT,ITER
  546  FORMAT(2X,' PROGRAM STOPPED . NPONT=',I4,' ITER=',I10)
       STOP
@@ -16481,7 +16906,7 @@ C IONISATION OF THE OTHER GASES IN THE MIXTURE
        IF(RAN.GT.PENFRA(1,I)) GO TO 5
        NCLUS=NCLUS+1
        NPONT=NPONT+1
-       IF(NPONT.GT.200) THEN
+       IF(NPONT.GT.1000) THEN
         WRITE(6,546) NPONT,ITER
         STOP
        ENDIF
@@ -16772,15 +17197,9 @@ C CALC TIME LEFT TO ARRIVE AT PLANE
        END
 CCCCCCCC
 *
-* $Id: magboltz-10.0.2.f,v 1.2 2013/11/27 21:25:52 fisyak Exp $
+* $Id: rm48.F,v 1.2 1996/12/12 16:32:06 cernlib Exp $
 *
-* $Log: magboltz-10.0.2.f,v $
-* Revision 1.2  2013/11/27 21:25:52  fisyak
-* Take updates from CERN Garfield
-*
-* Revision 1.1  2013/09/20 19:08:30  fisyak
-* Freeze
-*
+* $Log: rm48.F,v $
 * Revision 1.2  1996/12/12 16:32:06  cernlib
 * Variables ONE and ZERO added to SAVE statement, courtesy R.Veenhof
 *
@@ -16933,22 +17352,25 @@ C           Entry to output current status
       SUBROUTINE GAS1(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY   
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)
-      DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
+      DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12) 
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(132),YELM(132),YELT(132),YEPS(132),
-     /XVBV4(17),YVBV4(17),XVBV1(17),YVBV1(17),XVBV3(17),YVBV3(17),
-     /XVIB5(18),YVIB5(18),XVIB6(18),YVIB6(18),
+      DIMENSION XEN(163),YELM(163),YELT(163),YEPS(163),
+     /XVBV4(11),YVBV4(11),XVBV1(11),YVBV1(11),XVBV3(11),YVBV3(11),
+     /XVIB5(12),YVIB5(12),XVIB6(12),YVIB6(12),
      /XEXC(31),YEXC(31),XION(52),YION(52),YINC(52),XATT(11),YATT(11),
-     /XKSHC(63),YKSHC(63),XKSHF(59),YKSHF(59),IOFFN(11),IOFFION(10)
+     /XKSHC(81),YKSHC(81),XKSHF(79),YKSHF(79),IOFFN(11),IOFFION(10)
+      DIMENSION Z6T(25),Z9T(25),EBRM(25)
       CHARACTER*50 SCRPT(264) 
       CHARACTER*25 NAME                                                 
       DATA XEN/0.0,.001,.002,.003,.004,.005,.006,.007,.008,.009,        
@@ -16964,7 +17386,10 @@ C           Entry to output current status
      /8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,
      /4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,
      /1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,
-     /8.0D6,1.0D7/
+     /8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,
+     /4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,
+     /1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,
+     /8.0D8,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER X-SECTION
       DATA YELM/12.5,8.70,7.00,5.95,5.20,4.70,4.30,3.95,3.65,3.40,
      /3.20,2.85,2.58,2.37,2.19,2.04,1.77,1.57,1.41,1.30,    
@@ -16983,7 +17408,13 @@ C ELASTIC MOMENTUM TRANSFER X-SECTION
      /1.81D-6,1.36D-6,
      /1.07D-6,8.68D-7,6.08D-7,4.53D-7,3.51D-7,2.82D-7,2.31D-7,1.93D-7,
      /1.42D-7,1.08D-7,
-     /8.59D-8,5.79D-8/
+     /8.59D-8,6.98D-8,5.79D-8,3.89D-8,2.80D-8,2.12D-8,1.66D-8,1.10D-8,
+     /7.86D-9,5.90D-9,
+     /4.59D-9,3.68D-9,3.01D-9,2.13D-9,1.58D-9,1.22D-9,9.75D-10,7.92D-10,
+     /5.10D-10,3.56D-10,
+     /2.62D-10,2.01D-10,1.29D-10,8.95D-11,6.58D-11,5.04D-11,3.98D-11,
+     /3.23D-11,2.24D-11,1.65D-11,
+     /1.26D-11,9.96D-12,8.07D-12/
 C ELASTIC X-SECTION ASSUMED ISOTROPIC BELOW 0.6 EV
       DATA YELT/12.5,8.70,7.00,5.95,5.20,4.70,4.30,3.95,3.65,3.40,
      /3.20,2.85,2.58,2.37,2.19,2.04,1.77,1.57,1.41,1.30,    
@@ -16998,53 +17429,61 @@ C ELASTIC X-SECTION ASSUMED ISOTROPIC BELOW 0.6 EV
      /.0522,.050,.0461,.0391,.0344,.0311,.0287,.0253,.0230,.0214,
      /.0202,.0193,.0186,.0176,.0169,.0164,.0160,.0157,.0152,.0148,
      /.0146,.0145,.0143,.0142,.0141,.0141,.0140,.0140,.0140,.0139,
-     /.0139,.0139/
+     /.0139,.0139,.0139,.0139,.01389,.01389,.01389,26*.01388/
 C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
-      DATA YEPS/40*0.0,
-     /.31944,.26899,.23839,.29336,.38730,.46203,.62112,.69396,.64495,
-     /.59170,
-     /.57021,.58174,.60860,.59206,.60014,.59037,.63994,.66049,.67963,
-     /.72329,
-     /.76015,.78141,.81052,.82334,.84708,.89820,.90642,.92120,.93462,
-     /.94699,
-     /.95392,.95883,.96167,.96468,.96812,.97439,.97626,.980014,.984995,
-     /.989075,
-     /.990155,.991558,.993652,.994554,.995333,.995972,.996446,.996814,
-     /.997470,.997904,
-     /.998217,.998451,.998772,.998984,.999141,.999251,.999339,.999410,
-     /.999514,.999589,
-     /.999647,.999688,.999722,.999783,.999824,.999853,.999874,.999904,
-     /.999923,.999936,
-     /.999946,.999954,.999960,.999969,.999975,.999979,.999982,.999985,
-     /.999989,.999992,
-     /.999993,.999995,.999996,.999997,.999998,.999998,.999999,.999999,
-     /.999999,.999999,
-     /.999999,.999999/
-C  VIBRATION V4 (RESONANCE ONLY)
+C EPSILON =1-YEPS
+      DATA YEPS/40*1.0,
+     /.68056,.73101,.76161,.70664,.61270,.53797,.37888,.30604,.35505,
+     /.40830,
+     /.42979,.41826,.39140,.40794,.39986,.40963,.36006,.33951,.32037,
+     /.27671,
+     /.23985,.21859,.18948,.17666,.15292,.10180,.09358,.07880,.06538,
+     /.05301,
+     /.04608,.04117,.03833,.03532,.03188,.02561,.02374,.019986,.015005,
+     /.010925,
+     /.009845,.008442,.006348,.005446,.004667,.004028,.003554,.003186,
+     /.002530,.002096,
+     /.001783,.001549,.001228,.001016,.000859,.000749,.000661,.000590,
+     /.000486,.000411,
+     /3.53D-4,3.12D-4,2.78D-4,2.17D-4,1.76D-4,1.47D-4,1.26D-4,9.61D-5,
+     /7.68D-5,6.32D-5,
+     /5.32D-5,4.56D-5,3.97D-5,3.10D-5,2.30D-5,2.07D-5,1.74D-5,1.49D-5,
+     /1.07D-5,8.04D-6,
+     /6.28D-6,5.05D-6,3.47D-6,2.54D-6,1.94D-6,1.53D-6,1.24D-6,1.02D-6,
+     /7.33D-7,5.51D-7,
+     /4.30D-7,3.44D-7,2.82D-7,1.84D-7,1.30D-7,9.62D-8,7.42D-8,4.80D-8,
+     /3.35D-8,2.47D-8,
+     /1.89D-8,1.50D-8,1.21D-8,8.388D-9,6.133D-9,4.669D-9,3.666D-9,
+     /2.950D-9,1.858D-9,1.271D-9,
+     /9.21D-10,6.97D-10,4.37D-10,2.98D-10,2.16D-10,1.63D-10,1.28D-10,
+     /1.02D-10,7.00D-11,5.10D-11,
+     /3.80D-11,3.00D-11,2.40D-11/
+C  VIBRATION V4 (RESONANCE ONLY) SCALED BY 1/E**3 ABOVE 50EV 
       DATA XVBV4/0.0783,4.00,5.00,6.00,7.00,8.00,9.00,10.0,15.0,20.0,
-     /50.0,100.,1000.,10000.,1.D5,1.D6,1.D7/                        
+     /50.0/           
       DATA YVBV4/0.0,0.0,0.05,0.35,1.06,1.40,1.26,0.97,0.07,.022,      
-     /1.D-4,1.D-5,1.D-6,1.D-7,1.D-8,1.D-9,1.D-9/           
-C  VIBRATION V1 (RESONANCE ONLY)
+     /1.D-3/        
+C  VIBRATION V1 (RESONANCE ONLY) SCALED BY 1/E**3 ABOVE 50EV
       DATA XVBV1/0.1126,4.00,5.00,6.00,7.00,8.00,9.00,10.0,15.0,20.0,   
-     /50.0,100.,1000.,10000.,1.D5,1.D6,1.D7/                       
+     /50.0/                 
       DATA YVBV1/0.0,0.0,.016,.118,0.36,0.47,0.42,0.33,.023,.007,     
-     /3.D-5,3.D-6,3.D-7,3.D-8,3.D-9,3.D-10,3.D-10/                  
-C  VIBRATION V3 (RESONANCE ONLY)
+     /3.D-4/    
+C  VIBRATION V3 (RESONANCE ONLY) SCALED BY 1/E**3 ABOVE 50EV
       DATA XVBV3/0.1588,4.00,5.00,6.00,7.00,8.00,9.00,10.0,15.0,20.0,   
-     /50.0,100.,1000.,1.D4,1.D5,1.D6,1.D7/                              
+     /50.0/         
       DATA YVBV3/0.0,0.0,0.15,1.05,3.19,4.20,3.78,2.90,0.20,.067,     
-     /1.D-4,1.D-5,1D-6,1.D-7,1.D-8,1.D-9,1.D-9/                      
-C  VIBRATION HARMONIC 2(V3)
+     /3.D-3/         
+C  VIBRATION HARMONIC 2(V3) SCALED BY 1/E ABOVE 50EV
       DATA XVIB5/0.3176,1.00,4.00,5.00,6.00,7.00,8.00,9.00,10.0,15.0,   
-     /20.0,50.0,100.0,1000.,1.D4,1.D5,1.D6,1.D7/                        
+     /20.0,50.0/             
       DATA YVIB5/0.0,.001,0.01,.031,0.23,0.67,0.87,0.79,0.60,.042,      
-     /.014,.0006,1.D-5,1.D-6,1.D-7,1.D-8,1.D-9,1.D-9/                   
+     /.014,.0006/ 
 C VIBRATION HARMONIC (3(V3) + ALL OTHER HARMONICS)
+C  SCALED BY 1/E ABOVE 50 EV
       DATA XVIB6/0.4764,1.00,4.00,5.00,6.00,7.00,8.00,9.00,10.0,15.0,   
-     /20.0,50.0,100.,1000.,1.D4,1.D5,1.D6,1.D7/                         
+     /20.0,50.0/          
       DATA YVIB6/0.0,.001,0.05,0.13,0.88,2.66,3.50,3.15,2.43,.168,      
-     /.043,.001,1.D-4,1.D-5,1.D-6,1.D-7,1.D-8,1.D-8/ 
+     /.043,.002/ 
 C                     
       DATA XION/15.9,16.0,17.0,18.0,19.0,20.0,22.0,24.0,26.0,28.0,
      /30.0,32.0,34.0,36.0,38.0,40.0,42.0,44.0,46.0,48.0,                
@@ -17075,7 +17514,11 @@ C CARBON K-SHELL IONISATION X-SECTION
      /6.13D5,
      /7.08D5,8.18D5,1.0D6,1.25D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
      /6.13D6,
-     /7.08D6,8.18D6,1.0D7/
+     /7.08D6,8.18D6,1.0D7,1.5D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,
+     /7.08D7,
+     /8.18D7,1.0D8,1.5D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,
+     /8.18D8,
+     /1.0D9/
       DATA YKSHC/0.00,1.66D-4,3.48D-4,5.25D-4,6.96D-4,8.63D-4,1.02D-3,
      /1.33D-3,1.75D-3,2.01D-3,
      /2.24D-3,2.46D-3,2.66D-3,2.84D-3,3.21D-3,3.38D-3,3.47D-3,3.55D-3,
@@ -17088,7 +17531,11 @@ C CARBON K-SHELL IONISATION X-SECTION
      /1.09D-4,1.05D-4,
      /1.03D-4,1.02D-4,1.01D-4,1.005D-4,1.01D-4,1.03D-4,1.07D-4,1.11D-4,
      /1.14D-4,1.17D-4,
-     /1.20D-4,1.22D-4,1.25D-4/
+     /1.20D-4,1.22D-4,1.25D-4,1.32D-4,1.38D-4,1.45D-4,1.50D-4,1.54D-4,
+     /1.58D-4,1.60D-4,
+     /1.63D-4,1.67D-4,1.74D-4,1.80D-4,1.87D-4,1.92D-4,1.96D-4,2.00D-4,
+     /2.02D-4,2.05D-4,
+     /2.09D-4/
 C FLUORINE K-SHELL IONISATION X-SECTION
       DATA XKSHF/685.4,705.,726.,747.,770.,792.,816.,840.,865.,890.,
      /916.,944.,1000.,1090.,1188.,1296.,1496.,1679.,1884.,2054.,
@@ -17096,8 +17543,12 @@ C FLUORINE K-SHELL IONISATION X-SECTION
      /1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,6.13D4,7.08D4,8.18D4,
      /1.0D5,
      /1.50D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,8.18D5,1.00D6,
-     /1.25D6,
-     /1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,1.00D7/
+     /1.26D6,
+     /1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,1.00D7,
+     /1.26D7,
+     /1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,1.00D8,
+     /1.26D8,
+     /1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,1.00D9/
       DATA YKSHF/0.00,3.39D-5,6.77D-5,1.00D-4,1.32D-4,1.63D-4,1.92D-4,
      /2.21D-4,2.48D-4,2.75D-4,
      /3.00D-4,3.25D-4,3.71D-4,4.33D-4,4.87D-4,5.34D-4,5.96D-4,6.32D-4,
@@ -17109,7 +17560,11 @@ C FLUORINE K-SHELL IONISATION X-SECTION
      /6.58D-5,5.60D-5,4.80D-5,4.35D-5,4.15D-5,4.00D-5,3.93D-5,3.89D-5,
      /3.85D-5,3.86D-5,
      /3.89D-5,3.98D-5,4.17D-5,4.33D-5,4.45D-5,4.58D-5,4.68D-5,4.78D-5,
-     /4.92D-5/
+     /4.92D-5,5.09D-5,
+     /5.21D-5,5.45D-5,5.75D-5,5.96D-5,6.12D-5,6.27D-5,6.38D-5,6.49D-5,
+     /6.64D-5,6.82D-5,
+     /6.95D-5,7.19D-5,7.50D-5,7.72D-5,7.88D-5,8.03D-5,8.14D-5,8.25D-5,
+     /8.40D-5/
 C ATTACHMENT              
       DATA XATT/4.00,4.10,5.00,6.00,7.00,8.00,9.00,10.0,11.0,           
      /12.0,100./                                                        
@@ -17123,7 +17578,17 @@ C  DISSOCIATION X-SECTION EXCLUDING DISSOCIATIVE IONISATION X-SECTION
       DATA YEXC/0.0,.030,.080,.180,0.31,0.54,0.74,1.03,1.18,1.28,       
      /1.35,1.38,1.41,1.43,1.44,1.44,1.43,1.41,1.40,1.36,            
      /1.34,1.30,1.24,1.14,0.99,0.83,0.72,0.47,0.28,0.16,                
-     /.076/              
+     /.076/     
+C BREMSTRAHLUNG X-SECTION WITH CUT OFF      
+      DATA Z6T/298.,178.,85.2,47.5,26.3,12.2,7.06,4.45,3.06,2.82,
+     /2.89,2.99,3.08,3.13,3.18,3.25,3.31,3.39,3.44,3.49,
+     /3.52,3.54,3.55,3.57,3.57/
+      DATA Z9T/573.,358.,179.,101.6,57.3,26.5,15.4,9.63,6.52,5.92,
+     /6.01,6.18,6.35,6.43,6.52,6.65,6.75,6.87,6.95,7.02,
+     /7.07,7.10,7.12,7.13,7.14/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C ---------------------------------------------------------------------- 
 C 2012: UPDATE INCLUDES CARBON AND FLUORINE K-SHELL IONISATION X-SECS.     
 C   NEW ANALYSIS UPDATED TO MARCH  2008
@@ -17170,16 +17635,23 @@ C AVERAGE AUGER EMISSIONS FROM EACH SHELL
 C
       NION=4
       NIN=11  
+C
+C ARRAY SIZE
+      NASIZE=4000
+C
+      NBREM=25
+      DO 3 J=1,NIN  
+      IZBR(J)=0
+    3 CONTINUE     
+      IZBR(12)=6
+      IZBR(13)=9
+c
       DO 1 J=1,6
     1 KEL(J)=NANISO
+C ASSUME CAPITELLI LONGO TYPE OF ANGULAR DISTRIBUTION FOR 
+C  ALL VIBRATIONAL LEVELS AND THE SUM OF HIGHER HARMONICS 
       DO 2 J=1,NIN
-    2 KIN(J)=0
-C ASSUME CAPITELLI LONGO TYPE OF ANGULAR DISTRIBUTION FOR VIBRATIONAL
-C  LEVELS V4 V3 2V3 AND THE SUM OF HIGHER HARMONICS 
-      KIN(4)=1
-      KIN(8)=1
-      KIN(9)=1
-      KIN(10)=1
+    2 KIN(J)=1
 C ANGULAR DISTRIBUTION FOR DISSOCIATIVE EXCITATION CAN BE EITHER
 C CAPITELLI LONGO OR OKHRIMOVSKKY TYPES
       KIN(11)=NANISO
@@ -17187,17 +17659,17 @@ C RATIO OF MOMENTUM TRANSFER TO TOTAL X-SEC FOR RESONANCE
 C PART OF VIBRATIONAL X-SECTIONS
       RAT=0.75
 C
-      NDATA=132                                                         
-      NVBV4=17                                                          
-      NVBV1=17                                                          
-      NVBV3=17                                                          
-      NVIB5=18                                                          
-      NVIB6=18
+      NDATA=163                                                       
+      NVBV4=11                                
+      NVBV1=11                                                          
+      NVBV3=11                                                          
+      NVIB5=12                                                          
+      NVIB6=12
       NIOND=52                                                         
       NATT=11                                                           
       NEXC=31
-      NKSHC=63
-      NKSHF=59
+      NKSHC=81
+      NKSHF=79
 C                                                          
       E(1)=0.0                                                          
       E(2)=2.0*EMASS/(88.0043*AMU)                                      
@@ -17209,16 +17681,25 @@ C IONISING X-SECTION AT 1.2 MEV
 C OPAL AND BEATY IONISATION ENERGY SPLITTING AT 1.2 MEV                 
       E(6)=19.5
 C  OPAL BEATY IONISATION ENERGY SPLITTING AT LOW ENERGY
-      EOBY(1)=15.90
-      EOBY(2)=36.0
+      EOBY(1)=13.8
+      EOBY(2)=32.0        
 C OPAL BEATY SPLITTING FACTOR FOR SHELLS
-      EOBY(3)=285.0
-      EOBY(4)=685.4
+      EOBY(3)=210.0    
+      EOBY(4)=510.0    
 C
       EION(1)=15.90
-      EION(2)=15.90
+C     EION(2)=15.90
+      EION(2)=36.0 
       EION(3)=285.0
       EION(4)=685.4
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=1
+      LEGAS(4)=2
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=1
+      ISHELL(4)=1
 C FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -17254,7 +17735,7 @@ C FLUORESCENCE DATA
       EG2(4)=5.0
 C
       DO 776 J=1,NION
-      DO 777 I=1,4000
+      DO 777 I=1,NASIZE
       IF(EG(I).GT.EION(J)) THEN
        IOFFION(J)=I-1
        GO TO 776
@@ -17273,10 +17754,12 @@ C
       EIN(9)=0.3176                                                     
       EIN(10)=0.4764
       EIN(11)=12.56
+      EIN(12)=0.0
+      EIN(13)=0.0
 C OFFSET ENERGY FOR DISSOCIATION ANGULAR DISTRIBUTION
       DO 5 NL=11,11
-      DO 651 I=1,4000
-      IF(EG(I).GT.EIN(NL)) THEN
+      DO 651 I=1,NASIZE
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
        IOFFN(NL)=I-1
        GO TO 5
       ENDIF
@@ -17314,17 +17797,19 @@ C***********************************************************************
       SCRPT(7)=' ATTACHMENT                                       '
       SCRPT(8)='                                                  '
       SCRPT(9)='                                                  '
-      SCRPT(10)=' VIB  V2                         ELOSS=   -0.0539 '
-      SCRPT(11)=' VIB  V2                         ELOSS=    0.0539 '
-      SCRPT(12)=' VIB  V4                         ELOSS=   -0.0783 '
-      SCRPT(13)=' VIB  V4 ANISOTROPIC             ELOSS=    0.0783 '
-      SCRPT(14)=' VIB  V1                         ELOSS=   -0.1126 '
-      SCRPT(15)=' VIB  V1                         ELOSS=    0.1126 '
-      SCRPT(16)=' VIB  V3                         ELOSS=   -0.1588 '
-      SCRPT(17)=' VIB  V3 ANISOTROPIC             ELOSS=    0.1588 '
-      SCRPT(18)=' VIB 2V3                         ELOSS=    0.3176 '
-      SCRPT(19)=' VIB HARMONIC                    ELOSS=    0.4764 '
-      SCRPT(20)=' EXC DISSOCIATION                ELOSS=   12.56   ' 
+      SCRPT(10)=' VIB  V2           ANISOTROPIC   ELOSS=   -0.0539 '
+      SCRPT(11)=' VIB  V2           ANISOTROPIC   ELOSS=    0.0539 '
+      SCRPT(12)=' VIB  V4           ANISOTROPIC   ELOSS=   -0.0783 '
+      SCRPT(13)=' VIB  V4           ANISOTROPIC   ELOSS=    0.0783 '
+      SCRPT(14)=' VIB  V1           ANISOTROPIC   ELOSS=   -0.1126 '
+      SCRPT(15)=' VIB  V1           ANISOTROPIC   ELOSS=    0.1126 '
+      SCRPT(16)=' VIB  V3           ANISOTROPIC   ELOSS=   -0.1588 '
+      SCRPT(17)=' VIB  V3           ANISOTROPIC   ELOSS=    0.1588 '
+      SCRPT(18)=' VIB 2V3           ANISOTROPIC   ELOSS=    0.3176 '
+      SCRPT(19)=' VIB HARMONIC      ANISOTROPIC   ELOSS=    0.4764 '
+      SCRPT(20)=' DISSOCIATION      ANISOTROPIC   ELOSS=   12.56   ' 
+      SCRPT(21)=' BREMSSTRAHLUNG FROM CARBON ATOM                  '
+      SCRPT(22)=' BREMSSTRAHLUNG FROM FLUORINE ATOMS               '
 C  VIBRATIONAL DEGENERACY
       DEGV4=3.0
       DEGV3=3.0
@@ -17348,10 +17833,10 @@ C EQUAL X-SEC TO THE GROUND STATE TRANSITIONS)
 C 
       APOPGS=1.0
 C
-      EN=-ESTEP/2.0                                      
+C     EN=-ESTEP/2.0                                      
       DO 9000 I=1,NSTEP   
-C     EN=EG(I)                              
-      EN=EN+ESTEP                                
+      EN=EG(I)                              
+C     EN=EN+ESTEP                                
       GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
       GAMMA2=GAMMA1*GAMMA1
       BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
@@ -17370,6 +17855,8 @@ C
       A=(YEPS(J)-YEPS(J-1))/(XEN(J)-XEN(J-1))
       B=(XEN(J-1)*YEPS(J)-XEN(J)*YEPS(J-1))/(XEN(J-1)-XEN(J))
       PQ2=(A*EN+B)
+C EPS CORRECTED FOR 1-EPS
+      PQ2=1.0-PQ2
       PQ1=0.5+(QELA-QMOM)/QELA
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
@@ -17393,7 +17880,7 @@ C  GROSS IONISATION
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
   123 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)/0.965
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)/0.965
   124 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -17468,7 +17955,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.D-16
       GO TO 290
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
-  280 Q(5,I)=CONST*(AM2*X1+C*X2)
+  280 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
   290 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -17488,7 +17975,7 @@ C RECALCULATE AND SPLIT GROSS AND COUNTING INTO 1 AND >1 CHARGE IONS
       QION(1,I)=QTEMP1
       QION(2,I)=QTEMP2
 C                                                                       
-  300 Q(6,I)=0.0
+      Q(6,I)=0.0
 C SCALE FACTOR FOR VIBRATIONAL DIPOLE V3 ABOVE 0.4EV
       VDSC=1.0
       IF(EN.GT.0.4) THEN
@@ -17497,7 +17984,7 @@ C SCALE FACTOR FOR VIBRATIONAL DIPOLE V3 ABOVE 0.4EV
        VDSC=(14.4-EPR)/14.0
       ENDIF 
 C           
-C SUPERELASTIC OF VIBRATION V2 ISOTROPIC                               
+C SUPERELASTIC OF VIBRATION V2 ISOTROPIC  BELOW 100EV                             
 C
       QIN(1,I)=0.0 
       PEQIN(1,I)=0.5
@@ -17505,141 +17992,188 @@ C
       EFAC=DSQRT(1.0-(EIN(1)/EN))
       QIN(1,I)=0.007*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
       QIN(1,I)=QIN(1,I)*APOPV2*1.D-16/DEGV2
+      IF(EN.GT.100.0) PEQIN(1,I)=PQ1
   350 CONTINUE
-C VIBRATION V2 ISOTROPIC
+C VIBRATION V2 ISOTROPIC BELOW 100EV
       QIN(2,I)=0.0
       PEQIN(2,I)=0.5                                                   
       IF(EN.LE.EIN(2)) GO TO 400                                        
       EFAC=DSQRT(1.0-(EIN(2)/EN))
       QIN(2,I)=0.007*DLOG((1.0+EFAC)/(1.0-EFAC))/EN    
       QIN(2,I)=QIN(2,I)*APOPGS*1.D-16
+      IF(EN.GT.100.0) PEQIN(2,I)=PQ1
   400 CONTINUE                                                          
 C           
-C SUPERELASTIC OF VIBRATION V4 ISOTROPIC                               
+C SUPERELASTIC OF VIBRATION V4 ISOTROPIC BELOW 100EV                              
 C
       QIN(3,I)=0.0
       PEQIN(3,I)=0.5
       IF(EN.LE.0.0) GO TO 450
+      IF((EN-EIN(3)).GT.XVBV4(NVBV4)) GO TO 424
       DO 410 J=2,NVBV4
       IF((EN-EIN(3)).LE.XVBV4(J)) GO TO 420
   410 CONTINUE
       J=NVBV4
   420 A=(YVBV4(J)-YVBV4(J-1))/(XVBV4(J)-XVBV4(J-1))
       B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J))
+      QIN(3,I)=(EN-EIN(3))*(A*(EN-EIN(3))+B)/EN
+      GO TO 425
+  424 QIN(3,I)=YVBV4(NVBV4)*(XVBV4(NVBV4)/(EN*(EN-EIN(3)))**2)
+  425 CONTINUE
       EFAC=DSQRT(1.0-(EIN(3)/EN))
-      QIN(3,I)=0.0500*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
-      QIN(3,I)=QIN(3,I)+(EN-EIN(3))*(A*(EN-EIN(3))+B)/EN
+      QIN(3,I)=QIN(3,I)+0.0500*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
       QIN(3,I)=QIN(3,I)*APOPV4*1.D-16/DEGV4
+      IF(EN.GT.100.0) PEQIN(3,I)=PQ1
   450 CONTINUE
 C VIBRATION V4 ANISOTROPIC
       QIN(4,I)=0.0
       PEQIN(4,I)=0.5                                                   
-      IF(EN.LE.EIN(4)) GO TO 500                                        
+      IF(EN.LE.EIN(4)) GO TO 500
+      IF(EN.GT.XVBV4(NVBV4)) GO TO 474                                
       DO 460 J=2,NVBV4                                                 
       IF(EN.LE.XVBV4(J)) GO TO 470                                      
   460 CONTINUE                                                          
       J=NVBV4                                                          
   470 A=(YVBV4(J)-YVBV4(J-1))/(XVBV4(J)-XVBV4(J-1))                     
-      B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J)) 
+      B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J))
+      QIN(4,I)=A*EN+B
+      GO TO 475
+  474 QIN(4,I)=YVBV4(NVBV4)*(XVBV4(NVBV4)/EN)**3
+  475 CONTINUE 
       EFAC=DSQRT(1.0-(EIN(4)/EN))
-      QIN(4,I)=0.0500*DLOG((1.0+EFAC)/(1.0-EFAC))/EN    
+      ADIP=0.0500*DLOG((1.0+EFAC)/(1.0-EFAC))/EN    
       ELF=EN-EIN(4)
       FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
       BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
 C RATIO OF MT TO TOTAL X-SECT FOR RESONANCE PART = RAT
-      XMT=((1.5-FWD/(FWD+BCK))*QIN(4,I)+RAT*(A*EN+B))*APOPGS*1.D-16
-      QIN(4,I)=((A*EN+B)+QIN(4,I))*APOPGS*1.D-16
-      PEQIN(4,I)=0.5+(QIN(4,I)-XMT)/QIN(4,I)
+      XMT=((1.5-FWD/(FWD+BCK))*ADIP+RAT*QIN(4,I))*APOPGS*1.D-16
+      QIN(4,I)=(QIN(4,I)+ADIP)*APOPGS*1.D-16
+      IF(EN.LE.100.0) PEQIN(4,I)=0.5+(QIN(4,I)-XMT)/QIN(4,I)
+      IF(EN.GT.100.0) PEQIN(4,I)=PQ1
   500 CONTINUE                                                          
-C SUPERELASTIC OF VIBRATION V1 ISOTROPIC
+C SUPERELASTIC OF VIBRATION V1 ISOTROPIC BELOW 100EV
       QIN(5,I)=0.0
       PEQIN(5,I)=0.5                                                  
-      IF(EN.LE.0.0) GO TO 550                                        
+      IF(EN.LE.0.0) GO TO 550
+      IF((EN-EIN(5)).GT.XVBV1(NVBV1)) GO TO 524                         
       DO 510 J=2,NVBV1                                                 
       IF((EN-EIN(5)).LE.XVBV1(J)) GO TO 520                             
   510 CONTINUE                                                          
       J=NVBV1                                                          
   520 A=(YVBV1(J)-YVBV1(J-1))/(XVBV1(J)-XVBV1(J-1))                     
-      B=(XVBV1(J-1)*YVBV1(J)-XVBV1(J)*YVBV1(J-1))/(XVBV1(J-1)-XVBV1(J)) 
+      B=(XVBV1(J-1)*YVBV1(J)-XVBV1(J)*YVBV1(J-1))/(XVBV1(J-1)-XVBV1(J))
+      QIN(5,I)=(EN-EIN(5))*(A*(EN-EIN(5))+B)/EN
+      GO TO 525
+  524 QIN(5,I)=YVBV1(NVBV1)*(XVBV1(NVBV1)/(EN*(EN-EIN(5)))**2)
+  525 CONTINUE 
       EFAC=DSQRT(1.0-(EIN(5)/EN))
-      QIN(5,I)=0.0224*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
-      QIN(5,I)=QIN(5,I)+(EN-EIN(5))*(A*(EN-EIN(5))+B)/EN
+      QIN(5,I)=QIN(5,I)+0.0224*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
       QIN(5,I)=QIN(5,I)*APOPV1*1.D-16/DEGV1  
+      IF(EN.GT.100.0) PEQIN(5,I)=PQ1
   550 CONTINUE                                                          
-C  VIBRATION V1  ISOTROPIC
+C  VIBRATION V1  ISOTROPIC BELOW 100EV
       QIN(6,I)=0.0        
       PEQIN(6,I)=0.5                          
-      IF(EN.LE.EIN(6)) GO TO 600                                        
+      IF(EN.LE.EIN(6)) GO TO 600   
+      IF(EN.GT.XVBV1(NVBV1)) GO TO 574                                
       DO 560 J=2,NVBV1                                                 
       IF(EN.LE.XVBV1(J)) GO TO 570                                      
   560 CONTINUE                                                          
       J=NVBV1                                                          
   570 A=(YVBV1(J)-YVBV1(J-1))/(XVBV1(J)-XVBV1(J-1))                     
       B=(XVBV1(J-1)*YVBV1(J)-XVBV1(J)*YVBV1(J-1))/(XVBV1(J-1)-XVBV1(J)) 
+      QIN(6,I)=A*EN+B
+      GO TO 575
+  574 QIN(6,I)=YVBV1(NVBV1)*(XVBV1(NVBV1)/EN)**3
+  575 CONTINUE
       EFAC=DSQRT(1.0-(EIN(6)/EN))
-      QIN(6,I)=0.0224*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
-      QIN(6,I)=((A*EN+B)+QIN(6,I))*APOPGS*1.D-16
+      QIN(6,I)=QIN(6,I)+0.0224*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
+      QIN(6,I)=QIN(6,I)*APOPGS*1.D-16
+      IF(EN.GT.100.0) PEQIN(6,I)=PQ1
   600 CONTINUE
-C SUPERELASTIC OF VIBRATION V3 ISOTROPIC
+C SUPERELASTIC OF VIBRATION V3 ISOTROPIC BELOW 100EV
       QIN(7,I)=0.0
       PEQIN(7,I)=0.5
-      IF(EN.LE.0.0) GO TO 650                                        
+      IF(EN.LE.0.0) GO TO 650        
+      IF((EN-EIN(7)).GT.XVBV3(NVBV3)) GO TO 624                        
       DO 610 J=2,NVBV3                                                 
       IF((EN-EIN(7)).LE.XVBV3(J)) GO TO 620                             
   610 CONTINUE                                                          
       J=NVBV3                                                          
   620 A=(YVBV3(J)-YVBV3(J-1))/(XVBV3(J)-XVBV3(J-1))                     
       B=(XVBV3(J-1)*YVBV3(J)-XVBV3(J)*YVBV3(J-1))/(XVBV3(J-1)-XVBV3(J)) 
+      QIN(7,I)=(EN-EIN(7))*(A*(EN-EIN(7))+B)/EN
+      GO TO 625
+  624 QIN(7,I)=YVBV3(NVBV3)*(XVBV3(NVBV3)/(EN*(EN-EIN(7)))**2)
+  625 CONTINUE
       EFAC=DSQRT(1.0-(EIN(7)/EN))
-      QIN(7,I)=VDSC*1.610*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
-      QIN(7,I)=QIN(7,I)+(EN-EIN(7))*(A*(EN-EIN(7))+B)/EN
+      QIN(7,I)=QIN(7,I)+VDSC*1.610*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
       QIN(7,I)=QIN(7,I)*APOPV3*1.D-16/DEGV3
+      IF(EN.GT.100.0) PEQIN(7,I)=PQ1
   650 CONTINUE                    
 C VIBRATION V3 ANISOTROPIC
       QIN(8,I)=0.0
       PEQIN(8,I)=0.5
-      IF(EN.LE.EIN(8)) GO TO 700                                        
+      IF(EN.LE.EIN(8)) GO TO 700   
+      IF(EN.GT.XVBV3(NVBV3)) GO TO 674                                 
       DO 660 J=2,NVBV3                                              
       IF(EN.LE.XVBV3(J)) GO TO 670                                      
   660 CONTINUE                                                          
       J=NVBV3                                                          
   670 A=(YVBV3(J)-YVBV3(J-1))/(XVBV3(J)-XVBV3(J-1))                     
       B=(XVBV3(J-1)*YVBV3(J)-XVBV3(J)*YVBV3(J-1))/(XVBV3(J-1)-XVBV3(J)) 
+      QIN(8,I)=A*EN+B
+      GO TO 675
+  674 QIN(8,I)=YVBV3(NVBV3)*(XVBV3(NVBV3)/EN)**3
+  675 CONTINUE
       EFAC=DSQRT(1.0-(EIN(8)/EN))
-      QIN(8,I)=VDSC*1.610*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
+      ADIP=VDSC*1.610*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
       ELF=EN-EIN(8)
       FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
       BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
 C   ASSUME RATIO MOM T./ TOT X-SECT FOR RESONANCE PART = RAT 
-      XMT=((1.5-FWD/(FWD+BCK))*QIN(8,I)+RAT*(A*EN+B))*APOPGS*1.D-16
-      QIN(8,I)=((A*EN+B)+QIN(8,I))*APOPGS*1.D-16
-      PEQIN(8,I)=0.5+(QIN(8,I)-XMT)/QIN(8,I)
+      XMT=((1.5-FWD/(FWD+BCK))*ADIP+RAT*QIN(8,I))*APOPGS*1.D-16
+      QIN(8,I)=(QIN(8,I)+ADIP)*APOPGS*1.D-16
+      IF(EN.LE.100.0) PEQIN(8,I)=0.5+(QIN(8,I)-XMT)/QIN(8,I)
+      IF(EN.GT.100.0) PEQIN(8,I)=PQ1
   700 CONTINUE                    
 C VIBRATION HARMONIC 2V3
       QIN(9,I)=0.0
       PEQIN(9,I)=0.5
-      IF(EN.LE.EIN(9)) GO TO 800                                        
+      IF(EN.LE.EIN(9)) GO TO 800 
+      IF(EN.GT.XVIB5(NVIB5)) GO TO 724                             
       DO 710 J=2,NVIB5                                                  
       IF(EN.LE.XVIB5(J)) GO TO 720                                      
   710 CONTINUE                                                          
       J=NVIB5                                                           
   720 A=(YVIB5(J)-YVIB5(J-1))/(XVIB5(J)-XVIB5(J-1))                     
       B=(XVIB5(J-1)*YVIB5(J)-XVIB5(J)*YVIB5(J-1))/(XVIB5(J-1)-XVIB5(J)) 
-      QIN(9,I)=(A*EN+B)*APOPGS*1.D-16
-      PEQIN(9,I)=0.5+(1.0-RAT)                 
+      QIN(9,I)=(A*EN+B)
+      GO TO 725
+  724 QIN(9,I)=YVIB5(NVIB5)*(XVIB5(NVIB5)/EN)
+  725 CONTINUE
+      QIN(9,I)=QIN(9,I)*APOPGS*1.D-16
+      IF(EN.LE.100.0) PEQIN(9,I)=0.5+(1.0-RAT)
+      IF(EN.GT.100.0) PEQIN(9,I)=PQ1                 
   800 CONTINUE                                                          
-C VIBRATION HARMONIC 3V3                                                
+C VIBRATION HARMONIC 3V3 
       QIN(10,I)=0.0
       PEQIN(10,I)=0.5                                                 
-      IF(EN.LE.EIN(10)) GO TO 900             
+      IF(EN.LE.EIN(10)) GO TO 900            
+      IF(EN.GT.XVIB6(NVIB6)) GO TO 824 
       DO 810 J=2,NVIB6                                                  
       IF(EN.LE.XVIB6(J)) GO TO 820                                      
   810 CONTINUE                                                          
       J=NVIB6                                                           
   820 A=(YVIB6(J)-YVIB6(J-1))/(XVIB6(J)-XVIB6(J-1))                     
       B=(XVIB6(J-1)*YVIB6(J)-XVIB6(J)*YVIB6(J-1))/(XVIB6(J-1)-XVIB6(J)) 
-      QIN(10,I)=(A*EN+B)*APOPGS*1.D-16
-      PEQIN(10,I)=0.5+(1.0-RAT)                      
+      QIN(10,I)=(A*EN+B)
+      GO TO 825
+  824 QIN(10,I)=YVIB6(NVIB6)*(XVIB6(NVIB6)/EN)
+  825 CONTINUE
+      QIN(10,I)=QIN(10,I)*APOPGS*1.D-16
+      IF(EN.LE.100.0) PEQIN(10,I)=0.5+(1.0-RAT)
+      IF(EN.GT.100.0) PEQIN(10,I)=PQ1                      
   900 CONTINUE                                                          
 C                                                                       
       QIN(11,I)=0.0  
@@ -17656,18 +18190,40 @@ C
       QIN(11,I)=(A*EN+B)*1.D-16
       GO TO 940
 C USE BORN BETHE X-SECTION ABOVE XEXC(NEXC) EV
-  930 QIN(11,I)=CONST*(AM2EXC*X1+CEXC*X2)
+  930 QIN(11,I)=CONST*(AM2EXC*(X1-DEN(I)/2.0)+CEXC*X2)
 C ANGULAR DISTRIBUTION COPIED FROM THE ELASTIC OFFSET BY TWICE THE 
 C LEVEL ENERGY
   940 IF(EN.LE.(2.0*EIN(11))) GO TO 950
       PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))                              
-  950 CONTINUE                                                          
+  950 CONTINUE 
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+C     QIN(12,I)=0.0
+C     QIN(13,I)=0.0
+C     IF(EN.LE.1000.) GO TO 1000 
+C     DO 952 J=2,NBREM 
+C     IF(EN.LE.EBRM(J)) GO TO 953
+C 952 CONTINUE
+C     J=NBREM
+C 953 A=(DLOG(Z6T(J))-DLOG(Z6T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B=(DLOG(Z6T(J))*EBRM(J-1)-DLOG(Z6T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))
+C     A1=(DLOG(Z9T(J))-DLOG(Z9T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B1=(DLOG(Z9T(J))*EBRM(J-1)-DLOG(Z9T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))
+C     QIN(12,I)=DEXP(A*EN+B)*1.D-24
+C     QIN(13,I)=DEXP(A1*EN+B1)*4.D-24 
+ 1000 CONTINUE                                              
 C                                                                       
       Q(1,I)=Q(2,I)+Q(5,I)+Q(4,I)+QIN(1,I)+QIN(2,I)+QIN(3,I)+QIN(4,I)+ 
      /QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+QIN(10,I)+QIN(11,I)+
      /QION(2,I)+QION(3,I)+QION(4,I)
+C    /QION(2,I)+QION(3,I)+QION(4,I)+QIN(12,I)+QIN(13,I)
+C     CALL YPRT(IWRITE,I)
+C     IF(IWRITE.EQ.1) WRITE(6,888) EN, Q(2,I)
+C 888 FORMAT(' EN=',D12.4,' Q =',D12.4) 
  9000 CONTINUE                                                          
 C  SAVE COMPUTE TIME 
+C     IF(EFINAL.GT.1000.) NIN=13
       IF(EFINAL.LE.EIN(11)) NIN=10
       IF(EFINAL.LE.EIN(10)) NIN=9
       IF(EFINAL.LE.EIN(9)) NIN=8                                        
@@ -17675,6 +18231,7 @@ C  SAVE COMPUTE TIME
       END 
       SUBROUTINE GAS2(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY 
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
+c    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
@@ -17682,23 +18239,24 @@ C  SAVE COMPUTE TIME
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6) 
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(60),YSEC(60),YEL(60),XEPS(160),YEPS(160),
+      DIMENSION XEN(117),YSEC(117),YEL(117),XEPS(217),YEPS(217),
      /XENI(75),YENI(75),YENC(75),YEN1(75),XEN2(47),YEN2(47),XEN3(36),
-     /YEN3(36),XKSH(68),YKSH(68),XL1S(80),YL1S(80),XL2S(83),YL2S(83),
-     /XL3S(83),YL3S(83),
-     /X1S5(71),Y1S5(71),YEPS1(71),X1S4(113),Y1S4(113),YEPS2(113),
-     /X1S3(70),Y1S3(70),YEPS3(70),X1S2(119),Y1S2(119),YEPS4(119),
+     /YEN3(36),XKSH(89),YKSH(89),XL1S(101),YL1S(101),
+     /XL2S(104),YL2S(104),XL3S(104),YL3S(104),
+     /X1S5(71),Y1S5(71),YEPS1(71),X1S4(79),Y1S4(79),YEPS2(79),
+     /X1S3(70),Y1S3(70),YEPS3(70),X1S2(70),Y1S2(70),YEPS4(70),
      /X2P10(54),Y2P10(54),YEP2P10(54),X2P9(17),Y2P9(17),YEP2P9(17),
      /X2P8(15),Y2P8(15),YEP2P8(15),X2P7(17),Y2P7(17),YEP2P7(17),
      /X2P6(16),Y2P6(16),YEP2P6(16),X2P5(17),Y2P5(17),YEP2P5(17),
      /X2P4(17),Y2P4(17),YEP2P4(17),X2P3(17),Y2P3(17),YEP2P3(17),
      /X2P2(16),Y2P2(16),YEP2P2(16),X2P1(17),Y2P1(17),YEP2P1(17),
-     /X3D6(19),Y3D6(19),YEP3D6(19),X3D5(72),Y3D5(72),YEP3D5(72),
+     /X3D6(19),Y3D6(19),YEP3D6(19),X3D5(26),Y3D5(26),YEP3D5(26),
      /X3D4P(20),Y3D4P(20),YEP3D4P(20),X3D4(23),Y3D4(23),YEP3D4(23),
      /X3D3(20),Y3D3(20),YEP3D3(20),X3D1PP(19),Y3D1PP(19),YEP3D1PP(19),
      /X3D1P(16),Y3D1P(16),YEP3D1P(16),
@@ -17707,6 +18265,7 @@ C  SAVE COMPUTE TIME
      /X3S1PP(21),Y3S1PP(21),YEP3S1PP(21),X2S5(19),Y2S5(19),YEP2S5(19),
      /X2S3(19),Y2S3(19),YEP2S3(19),
      /IOFFN(44),IOFFION(10)
+      DIMENSION Z18T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)                         
       CHARACTER*25 NAME                
 C  ENERGY                                       
@@ -17714,23 +18273,45 @@ C  ENERGY
      /7.00,8.00,9.00,10.0,11.0,12.0,13.0,14.0,15.0,16.0,
      /18.0,20.0,25.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,
      /100.,125.,150.,200.,250.,300.,350.,400.,500.,600.,
-     /700.,800.,1000.,1500.,2000.,3000.,4000.,5000.,6000.,10000.,
-     /20000.,40000.,1.D5,1.5D5,2.D5,4.D5,6.D5,1.D6,1.5D6,2.D6/
+     /700.,800.,1000.,1500.,2000.,3000.,4000.,5000.,6000.,8000.,
+     /10000.,15000.,20000.,40000.,60000.,80000.,1.D5,1.25D5,1.5D5,
+     /1.75D5,
+     /2.D5,2.5D5,3.D5,3.5D5,4.D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,
+     /9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,
+     /4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,
+     /2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,
+     /9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,
+     /4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER
       DATA YSEC/1.3913,1.66,2.05,2.33,2.70,3.43,4.20,5.70,7.60,9.60,
      /11.5,13.1,14.7,16.2,16.8,16.6,15.9,15.1,14.2,13.3,
      /11.5,10.0,7.75,6.25,4.45,3.50,2.80,2.25,2.00,1.70,
      /1.50,1.22,1.00,0.78,0.64,0.55,0.48,0.43,.355,0.30,
-     /0.26,0.22,0.16,.095,.063,.033,.021,.0146,.0108,.0047,
-     /.00145,4.3D-4,8.6D-5,4.3D-5,2.7D-5,8.9D-6,4.8D-6,2.2D-6,1.18D-6,
-     /7.6D-7/         
+     /0.26,0.22,0.16,.095,.063,.033,.021,.0146,.0108,.00708,
+     /.00484,.00240,.00145,4.3D-4,2.1D-4,1.26D-4,8.64D-5,5.91D-5,
+     /4.35D-5,3.36D-5,
+     /2.70D-5,1.88D-5,1.41D-5,1.10D-5,8.94D-6,7.45D-6,6.34D-6,4.80D-6,
+     /3.80D-6,3.10D-6,
+     /2.59D-6,2.21D-6,1.56D-6,1.18D-6,9.32D-7,7.56D-7,5.30D-7,3.95D-7,
+     /3.07D-7,2.46D-7,
+     /2.02D-7,1.69D-7,1.24D-7,9.49D-8,7.52D-8,6.12D-8,5.08D-8,3.41D-8,
+     /2.46D-8,1.86D-8,
+     /1.46D-8,9.65D-9,6.88D-9,5.16D-9,4.01D-9,3.21D-9,2.62D-9,1.85D-9,
+     /1.37D-9,1.06D-9,
+     /8.37D-10,6.80D-10,4.37D-10,3.04D-10,2.23D-10,1.71D-10,1.10D-10,
+     /7.61D-11,5.59D-11,4.28D-11,
+     /3.38D-11,2.74D-11,1.90D-11,1.40D-11,1.07D-11,8.45D-12,6.84D-12/
 C ELASTIC           
       DATA YEL/1.4945,1.80,2.25,2.63,3.20,4.15,5.10,7.05,8.90,11.1,
      /13.4,15.8,18.1,20.3,21.9,23.0,23.4,23.5,23.2,22.2,
      /19.4,17.0,13.3,11.0,8.44,7.16,6.28,5.78,5.25,4.89,
      /4.50,3.95,3.51,3.03,2.70,2.48,2.30,2.10,1.90,1.72,
-     /1.58,1.47,1.27,0.98,.818,.620,.510,.434,.380,.250,
-     /.138,.076,.036,.027,.023,.0156,.0127,.0101,.0087,.0078/  
+     /1.58,1.47,1.27,0.98,.818,.620,.510,.434,.380,.313,
+     /.250,.180,.138,.076,.056,.045,.0378,.0322,.0284,.0257,
+     /.0237,.0209,.0190,.0177,.0168,.0160,.0155,.0146,.0140,.0136,
+     /.0132,.0130,.0126,.0123,.0121,.0120,.0119,.0118,.0117,.0117,
+     /.0116,.0116,.0116,.0116,.0116,.0116,.0115,.0115,.0115,.0115,
+     /27*.0115/
 C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
       DATA XEPS/.0,.0001,.0002,.0003,.0004,.0006,.0008,.001,.0012,.0014,
      /.0017,.002,.0025,.003,.004,.005,.006,.008,.010,.012,
@@ -17746,25 +18327,44 @@ C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
      /7.00,8.00,9.00,10.0,11.0,12.0,13.0,14.0,15.0,16.0,
      /18.0,20.0,25.0,30.0,40.0,50.0,60.0,70.0,80.0,90.0,
      /100.,125.,150.,200.,250.,300.,350.,400.,500.,600.,
-     /700.,800.,1000.,1500.,2000.,3000.,4000.,5000.,6000.,10000.,
-     /20000.,40000.,1.D5,1.5D5,2.D5,4.D5,6.D5,1.D6,1.5D6,2.D6/
-      DATA YEPS/1.0,.013,.0186,.023,.0266,.0327,.0381,.0428,.0470,.0508,
-     /.0567,.0616,.0696,.0766,.0897,.1012,.1121,.1319,.1499,.1668,
-     /.1827,.2053,.2273,.2605,.2929,.3230,.3531,.3813,.4091,.4358,
-     /.4621,.4881,.5134,.5377,.5616,.5846,.6068,.6284,.6495,.6892,
-     /.7255,.7586,.7882,.8141,.8363,.8548,.8696,.8805,.8877,.8911,
-     /.8907,.8860,.8769,.8631,.8441,.8198,.7896,.7535,.7118,.6647,
-     /.6128,.5566,.4981,.4380,.3778,.3182,.2600,.2043,.1523,.1030,
-     /.0586,.018,-.019,-.0521,-.0812,-.107,-.1293,-.1487,-.1654,-.1796,
-     /-.191,-.2014,-.208,-.2137,-.2179,-.2205,-.222,-.222,-.2213,-.2194,
-     /-.2165,-.213,-.2035,-.192,-.171,-.1296,-.0836,-.0358,.0124,.0589,
-     /.1034,.1164,.1329,.1701,.2318,.2568,.2610,.2826,.2170,.2011,
-     /.2108,.2530,.2774,.2975,.3410,.4033,.4594,.5068,.5446,.5604,
-     /.5680,.5734,.5800,.5970,.6434,.6848,.7284,.7814,.7887,.8171,
-     /.8287,.8478,.8656,.8848,.8982,.9078,.9157,.9180,.9283,.9351,
-     /.9403,.9478,.9591,.9714,.9790,.9871,.9907,.9928,.9942,.9965,
-     /.99827,.99917,.99969,.999807,.999863,.999939,.999961,.999979,
-     /.999987,.999991/
+     /700.,800.,1000.,1500.,2000.,3000.,4000.,5000.,6000.,8000.,
+     /10000.,15000.,20000.,40000.,60000.,80000.,1.D5,1.25D5,1.5D5,
+     /1.75D5,
+     /2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,
+     /9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,
+     /4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,
+     /2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,
+     /9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,
+     /4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
+C EPSILON =1-YEPS
+      DATA YEPS/1.0,.987,.9814,.977,.9734,.9673,.9619,.9572,.9530,.9492,
+     /.9433,.9384,.9304,.9234,.9103,.8988,.8879,.8681,.8501,.8332,
+     /.8173,.7947,.7727,.7395,.7071,.6770,.6469,.6187,.5909,.5642,
+     /.5379,.5119,.4866,.4623,.4384,.4154,.3932,.3716,.3505,.3108,
+     /.2745,.2414,.2118,.1859,.1637,.1452,.1304,.1195,.1123,.1089,
+     /.1093,.1140,.1231,.1369,.1559,.1802,.2104,.2465,.2882,.3353,     
+     /.3872,.4434,.5019,.5620,.6222,.6818,.7400,.7957,.8477,.8970,
+     /.9414,.982,1.019,1.0521,1.0812,1.107,1.1293,1.1487,1.1654,1.1796,
+     /1.191,1.2014,1.208,1.2137,1.2179,1.2205,1.222,1.222,1.2213,1.2194,
+     /1.2165,1.213,1.2035,1.192,1.171,1.1296,1.0836,1.0358,.9876,.9411,
+     /.8966,.8836,.8671,.8299,.7682,.7432,.7390,.7174,.7830,.7989,
+     /.7892,.7470,.7226,.7025,.6590,.5967,.5406,.4932,.4554,.4396,
+     /.4320,.4266,.4200,.4030,.3564,.3152,.3716,.2186,.2113,.1829,
+     /.1713,.1522,.1344,.1152,.1018,.0922,.0843,.0820,.0717,.0649, 
+     /.0597,.0522,.0409,.0286,.0210,.0129,.0093,.0072,.0058,.0044,
+     /.0035,.0023,.00173,8.3D-4,5.1D-4,3.73D-4,2.919D-4,2.274D-4,
+     /1.847D-4,1.546D-4,
+     /1.322D-4,1.012D-4,8.095D-5,6.673D-5,5.621D-5,4.823D-5,4.197D-5,
+     /3.279D-5,2.647D-5,2.191D-5,
+     /1.848D-5,1.582D-5,1.123D-5,8.449D-6,7.602D-6,5.315D-6,3.660D-6,
+     /2.682D-6,2.050D-6,1.617D-6,
+     /1.310D-6,1.083D-6,7.762D-7,5.840D-7,4.551D-7,3.648D-7,2.990D-7,
+     /2.254D-7,1.376D-7,1.021D-7,
+     /7.88D-8,5.08D-8,3.55D-8,2.61D-8,2.00D-8,1.58D-8,1.28D-8,8.79D-9,
+     /6.41D-9,4.86D-9,
+     /3.81D-9,3.06D-9,1.92D-9,1.31D-9,9.50D-10,7.2D-10,4.5D-10,3.1D-10,
+     /2.2D-10,1.7D-10,
+     /1.31D-10,1.05D-10,7.2D-11,5.2D-11,3.9D-11,3.1D-11,2.5D-11/
 C IONISATION ( VALUES ABOVE 20KEV GENERATED BY BORN BETHE IN SUB)
       DATA XENI/15.75961,16.0,16.5,17.0,17.5,18.0,18.5,19.0,19.5,20.0,
      /20.5,21.0,21.5,22.0,22.5,23.0,23.5,24.0,24.5,25.0,                
@@ -17836,7 +18436,11 @@ C K-SHELL IONISATION
      /3.35D5,
      /4.10D5,5.01D5,6.13D5,7.50D5,8.91D5,1.00D6,1.22D6,1.50D6,1.83D6,
      /2.30D6,
-     /2.90D6,3.65D6,4.60D6,5.79D6,7.50D6,8.66D6,1.00D7,2.05D7/
+     /2.90D6,3.65D6,4.60D6,5.79D6,7.50D6,8.66D6,1.00D7,1.22D7,1.50D7,
+     /1.83D7,
+     /2.24D7,2.74D7,3.55D7,4.60D7,5.79D7,7.50D7,8.66D7,1.00D8,1.22D8,
+     /1.50D8,
+     /1.83D8,2.24D8,2.74D8,3.55D8,4.60D7,5.79D8,7.50D8,8.66D8,1.00D9/
       DATA YKSH/0.0,1.59D-6,3.44D-6,5.20D-6,6.89D-6,8.51D-6,1.01D-5,
      /1.15D-5,1.29D-5,1.43D-5,
      /1.68D-5,1.91D-5,2.11D-5,2.30D-5,2.46D-5,2.61D-5,2.74D-5,2.85D-5,
@@ -17849,7 +18453,12 @@ C K-SHELL IONISATION
      /7.72D-6,7.32D-6,
      /6.94D-6,6.67D-6,6.48D-6,6.37D-6,6.33D-6,6.33D-6,6.36D-6,6.45D-6,
      /6.57D-6,6.75D-6,
-     /6.97D-6,7.21D-6,7.47D-6,7.75D-6,8.08D-6,8.27D-6,8.46D-6,9.44D-6/
+     /6.97D-6,7.21D-6,7.47D-6,7.75D-6,8.08D-6,8.27D-6,8.46D-6,8.73D-6,
+     /9.01D-6,9.28D-6,
+     /9.56D-6,9.85D-6,1.02D-5,1.06D-5,1.09D-5,1.13D-5,1.15D-5,1.17D-5,
+     /1.20D-5,1.23D-5,
+     /1.25D-5,1.28D-5,1.31D-5,1.35D-5,1.39D-5,1.42D-5,1.46D-5,1.48D-5,
+     /1.50D-5/
 C L1 SHELL IONISATION
       DATA XL1S/326.3,329.0,338.3,347.8,357.5,367.6,378.0,388.6,399.6,
      /410.9,
@@ -17863,7 +18472,12 @@ C L1 SHELL IONISATION
      /2.30D5,2.90D5,3.65D5,4.60D5,5.79D5,7.50D5,8.66D5,1.00D6,1.22D6,
      /1.50D6,
      /1.83D6,2.30D6,2.90D6,3.65D6,4.60D6,5.79D6,7.50D6,8.66D6,1.00D7,
-     /2.05D7/
+     /1.22D7,
+     /1.50D7,1.83D7,2.30D7,2.90D7,3.65D7,4.60D7,5.79D7,7.50D7,8.66D7,
+     /1.00D8,
+     /1.22D8,1.50D8,1.83D8,2.30D8,2.90D8,3.65D8,4.60D8,5.79D8,7.50D8,
+     /8.66D8,
+     /1.00D9/
       DATA YL1S/0.0,5.83D-5,2.39D-4,4.07D-4,5.63D-4,7.08D-4,8.43D-4,
      /9.71D-4,1.09D-3,1.20D-3,
      /1.31D-3,1.50D-3,1.68D-3,1.84D-3,1.98D-3,2.11D-3,2.22D-3,2.32D-3,
@@ -17879,7 +18493,12 @@ C L1 SHELL IONISATION
      /9.19D-5,8.32D-5,7.66D-5,7.16D-5,6.81D-5,6.55D-5,6.45D-5,6.40D-5,
      /6.36D-5,6.38D-5,
      /6.44D-5,6.54D-5,6.67D-5,6.84D-5,7.02D-5,7.22D-5,7.45D-5,7.59D-5,
-     /7.72D-5,8.44D-5/
+     /7.72D-5,7.92D-5,
+     /8.12D-5,8.32D-5,8.55D-5,8.79D-5,9.03D-5,9.26D-5,9.50D-5,9.77D-5,
+     /9.92D-5,1.01D-4,
+     /1.03D-4,1.05D-4,1.07D-4,1.09D-4,1.12D-4,1.14D-4,1.17D-4,1.19D-4,
+     /1.22D-4,1.23D-4,
+     /1.25D-4/
 C L2 SHELL IONISATION
       DATA XL2S/250.6,252.3,260.3,267.3,275.3,283.3,291.3,300.3,308.3,
      /317.3,
@@ -17893,7 +18512,11 @@ C L2 SHELL IONISATION
      /7.50D5,
      /1.00D6,1.22D6,1.50D6,1.83D6,2.30D6,2.90D6,3.65D6,4.60D6,5.79D6,
      /7.50D6,
-     /8.66D6,1.00D7,2.05D7/
+     /8.66D6,1.00D7,1.22D7,1.50D7,1.83D7,2.30D7,2.90D7,3.65D7,4.60D7,
+     /5.79D7,
+     /7.50D7,8.66D7,1.00D8,1.22D8,1.50D8,1.83D8,2.30D8,2.90D8,3.65D8,
+     /4.60D8,
+     /5.79D8,7.50D8,8.66D8,1.00D9/
       DATA YL2S/0.00,9.77D-5,4.86D-4,8.50D-4,1.19D-3,1.51D-3,1.81D-3,
      /2.10D-3,2.36D-3,2.62D-3, 
      /2.85D-3,3.29D-3,3.67D-3,4.01D-3,4.32D-3,4.59D-3,4.83D-3,5.04D-3,
@@ -17910,7 +18533,11 @@ C L2 SHELL IONISATION
      /1.54D-4,1.50D-4,
      /1.48D-4,1.48D-4,1.49D-4,1.51D-4,1.54D-4,1.58D-4,1.63D-4,1.68D-4,
      /1.73D-4,1.80D-4,
-     /1.83D-4,1.87D-4,2.07D-4/
+     /1.83D-4,1.87D-4,1.93D-4,1.98D-4,2.04D-4,2.10D-4,2.16D-4,2.23D-4,
+     /2.29D-4,2.36D-4,
+     /2.43D-4,2.47D-4,2.52D-4,2.57D-4,2.63D-4,2.69D-4,2.75D-4,2.82D-4,
+     /2.89D-4,2.95D-4,
+     /3.02D-4,3.09D-4,3.13D-4,3.17D-4/
 C L3 SHELL IONISATION
       DATA XL3S/248.4,252.5,260.5,267.5,275.5,283.5,291.5,300.5,308.5,
      /317.5,
@@ -17924,7 +18551,11 @@ C L3 SHELL IONISATION
      /7.50D5,
      /1.00D6,1.22D6,1.50D6,1.83D6,2.30D6,2.90D6,3.65D6,4.60D6,5.79D6,
      /7.50D6,
-     /8.66D6,1.00D7,2.05D7/
+     /8.66D6,1.00D7,1.22D7,1.50D7,1.83D7,2.30D7,2.90D7,3.65D7,4.60D7,
+     /5.79D7,
+     /7.50D7,8.66D7,1.00D8,1.22D8,1.50D8,1.83D8,2.30D8,2.90D8,3.65D8,
+     /4.60D8,
+     /5.79D8,7.50D8,8.66D8,1.00D9/
       DATA YL3S/0.0,4.71D-4,1.25D-3,1.98D-3,2.67D-3,3.31D-3,3.92D-3,
      /4.48D-3,5.02D-3,5.52D-3,
      /6.00D-3,6.86D-3,7.63D-3,8.32D-3,8.93D-3,9.47D-3,9.95D-3,1.04D-2,
@@ -17941,7 +18572,11 @@ C L3 SHELL IONISATION
      /3.12D-4,3.05D-4,
      /3.00D-4,3.00D-4,3.02D-4,3.06D-4,3.12D-4,3.20D-4,3.30D-4,3.40D-4,
      /3.51D-4,3.64D-4,
-     /3.72D-4,3.79D-4,4.19D-4/
+     /3.72D-4,3.79D-4,3.90D-4,4.01D-4,4.13D-4,4.25D-4,4.39D-4,4.52D-4,
+     /4.65D-4,4.78D-4,
+     /4.93D-4,5.01D-4,5.10D-4,5.21D-4,5.33D-4,5.45D-4,5.58D-4,5.71D-4,
+     /5.85D-4,5.98D-4,
+     /6.11D-4,6.26D-4,6.35D-4,6.43D-4/
 C 1S5 METASTABLE SCALE BY 1/E**3 ABOVE 100 EV 
       DATA X1S5/11.548,11.60,11.63,11.64,11.66,11.70,11.75,11.80,11.82,
      /11.83,
@@ -17963,6 +18598,7 @@ C UNITS 10-18 CM**2
      /.042/                                                           
       DATA YEPS1/71*0.0/
 C 1S4 RESONANCE RADIATION 106.66 NM WAVELENGTH
+C USE BEF SCALING ABOVE 1000EV  F=0.058
       DATA X1S4/11.624,11.65,11.66,11.67,11.68,11.69,11.70,11.74,11.75,
      /11.77,
      /11.79,11.82,11.84,11.87,11.88,11.90,11.95,12.00,12.05,12.10,
@@ -17971,11 +18607,7 @@ C 1S4 RESONANCE RADIATION 106.66 NM WAVELENGTH
      /13.15,13.18,13.20,13.21,13.23,13.26,13.30,13.35,13.40,13.45,
      /13.47,13.49,13.60,13.70,13.80,14.0,15.0,16.0,17.0,18.0,
      /19.0,20.0,24.0,27.0,30.0,40.0,50.0,60.0,80.0,100.,
-     /140.,200.,250.,300.,400.,500.,600.,800.,1000.,1200.,
-     /1500.,2000.,2500.,3000.,4000.,5000.,6000.,8000.,1.0D4,1.2D4,
-     /1.4D4,1.7D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,7.0D4,1.0D5,1.5D5,
-     /2.0D5,3.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.3D6,1.7D6,2.0D6,3.0D6,
-     /4.0D6,7.0D6,1.0D7/
+     /140.,200.,250.,300.,400.,500.,600.,800.,1000./       
 C UNITS 10**-18 CM**2
       DATA Y1S4/0.00,0.90,1.48,1.57,1.57,1.55,1.48,1.10,1.05,1.14,
      /1.22,1.30,1.42,0.90,0.81,.742,.761,.788,0.86,0.92,
@@ -17984,12 +18616,8 @@ C UNITS 10**-18 CM**2
      /1.76,2.27,2.11,2.36,2.11,1.98,1.89,1.82,1.87,1.94,
      /2.16,2.07,2.23,2.40,2.55,2.90,5.02,6.23,6.86,7.43,
      /8.00,8.05,8.05,8.00,7.80,7.30,6.80,6.30,5.60,5.00,
-     /4.30,3.60,3.30,3.00,2.50,2.15,1.90,1.55,1.32,1.16,
-     /0.97,0.78,0.66,0.58,0.47,0.39,0.34,.270,.225,.193,
-     /.170,.145,.127,.106,.0917,.0731,.0616,.0480,.0375,.0291,
-     /.0249,.0207,.0187,.0170,.0163,.0160,.0159,.0160,.0162,.0167,
-     /.0172,.0184,.0192/
-      DATA YEPS2/113*0.0/
+     /4.30,3.60,3.30,3.00,2.50,2.15,1.92,1.60,1.41/       
+      DATA YEPS2/79*0.0/
 C 1S3 METASTABLE SCALE BY 1/E**3 ABOVE 100 EV
       DATA X1S3/11.723,11.75,11.76,11.78,11.79,11.80,11.84,11.86,11.90,
      /11.95,
@@ -18009,6 +18637,7 @@ C UNITS 10**-18 CM**2
      /0.40,0.23,0.16,.104,.074,.048,.027,.0176,.0120,.0084/
       DATA YEPS3/70*0.0/
 C 1S2 RESONANCE RADIATION 104.82 NM WAVELENGTH
+C USE BEF SCALING ABOVE 400 EV F=0.2214
       DATA X1S2/11.828,11.85,11.86,11.88,11.90,11.93,11.96,12.00,12.05,
      /12.10,
      /12.20,12.30,12.40,12.50,12.60,12.70,12.80,12.85,12.90,12.91,
@@ -18016,12 +18645,7 @@ C 1S2 RESONANCE RADIATION 104.82 NM WAVELENGTH
      /13.21,13.23,13.25,13.27,13.30,13.35,13.40,13.45,13.46,13.48,
      /13.50,13.60,13.70,13.80,14.0,15.0,16.0,17.0,18.0,19.0,
      /20.0,22.0,24.0,26.0,28.0,30.0,35.0,40.0,50.0,60.0,
-     /80.0,100.,120.,140.,170.,200.,250.,300.,350.,400.,
-     /450.,500.,600.,800.,1000.,1200.,1400.,1700.,2000.,2500.,
-     /3000.,3500.,4000.,5000.,6000.,8000.,1.0D4,1.2D4,1.4D4,1.7D4,
-     /2.0D4,2.5D4,3.0D4,3.5D4,4.0D4,5.0D4,6.0D4,8.0D4,1.0D5,1.2D5,
-     /1.4D5,1.7D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,5.0D5,6.0D5,8.0D5,
-     /1.0D6,1.2D6,1.4D6,1.7D6,2.0D6,4.0D6,6.0D6,8.0D6,1.0D7/
+     /80.0,100.,120.,140.,170.,200.,250.,300.,350.,400./
 C UNITS 10**-18 CM**2
       DATA Y1S2/0.00,1.55,1.94,1.76,1.58,1.37,1.24,1.19,1.19,1.21,
      /1.30,1.44,1.64,1.91,2.25,2.52,2.75,2.83,2.86,3.46,
@@ -18029,13 +18653,8 @@ C UNITS 10**-18 CM**2
      /4.21,3.78,3.53,3.17,3.02,2.74,2.92,3.29,3.40,3.24,
      /3.33,3.71,3.94,4.20,4.80,7.20,9.43,11.7,14.0,16.0,
      /17.2,18.8,19.8,20.6,21.3,22.0,23.6,24.7,25.5,25.3,
-     /24.0,22.3,20.7,19.3,17.5,16.0,14.0,12.5,11.3,10.3,
-     /9.54,8.87,7.79,6.31,5.34,4.65,4.13,3.55,3.12,2.61,
-     /2.25,1.99,1.79,1.49,1.28,1.01,.841,.724,.637,.544,
-     /.476,.397,.343,.304,.274,.230,.201,.163,.140,.125,
-     /.113,.101,.0931,.0837,.0775,.0732,.0701,.0661,.0636,.0611,
-     /.0600,.0597,.0597,.0600,.0606,.0645,.0676,.0700,.0719/
-      DATA YEPS4/119*0.0/
+     /24.0,22.3,20.7,19.3,17.5,16.0,14.0,12.5,11.3,10.3/
+      DATA YEPS4/70*0.0/
 C 2P10 J=1  SCALED BY 1/E**2 ABOVE 100 EV
       DATA X2P10/12.907,12.912,12.922,12.934,12.949,12.966,13.00,13.012,
      /13.035,13.042,
@@ -18113,26 +18732,17 @@ C 3D6 J=0 SCALED BY 1/E**3 ABOVE 100 EV
       DATA Y3D6/0.00,0.11,0.64,0.92,1.05,1.10,1.10,1.07,0.97,0.79,
      /0.56,0.39,0.28,0.21,0.16,.099,.065,.045,.024/
       DATA YEP3D6/19*0.0/
-C 3D5 J=1 DIPOLE ALLOWED BEF SCALING
+C 3D5 J=1 DIPOLE ALLOWED BEF SCALING USE BEF ABOVE 400EV F=0.0010
       DATA X3D5/13.864,14.0,15.0,16.0,17.0,18.0,19.0,20.0,22.0,25.0,
      /30.0,35.0,40.0,45.0,50.0,60.0,70.0,80.0,100.,120.,
-     /140.,170.,200.,250.,300.,400.,500.,600.,700.,800.,
-     /1000.,1200.,1400.,1700.,2000.,2500.,3000.,3500.,4000.,5000.,
-     /6000.,8000.,1.0D4,1.2D4,1.4D4,1.7D4,2.0D4,2.5D4,3.0D4,4.0D4,
-     /5.0D4,6.0D4,8.0D4,1.0D5,1.2D5,1.4D5,1.7D5,2.0D5,2.5D5,3.0D5,
-     /4.0D5,5.0D5,6.0D5,8.0D5,1.0D6,1.4D6,2.0D6,3.0D6,4.0D6,6.0D6,
-     /8.0D6,1.0D7/
-      DATA Y3D5/0.00,0.40,3.00,4.50,5.25,5.50,5.50,5.35,4.90,4.00,
-     /2.80,2.05,1.50,1.15,0.98,0.65,0.46,0.35,0.19,0.14,
-     /.115,.095,.077,.065,.055,.043,.036,.032,.028,.026,
-     /.022,.019,.017,.015,.0128,.0107,.0093,.0082,.0074,.0061,
-     /.0053,.0042,.0035,.0030,.0026,.0023,.0020,.00165,.00143,.00114,
-     /9.6D-4,8.4D-4,6.8D-4,5.8D-4,5.2D-4,4.7D-4,4.2D-4,3.9D-4,3.5D-4,
-     /3.2D-4,
-     /2.9D-4,2.8D-4,2.7D-4,2.6D-4,2.5D-4,2.5D-4,2.5D-4,2.6D-4,2.7D-4,
-     /2.8D-4,
-     /2.9D-4,3.0D-4/
-      DATA YEP3D5/72*0.0/
+     /140.,170.,200.,250.,300.,400./
+C     DATA Y3D5/0.00,0.40,3.00,4.50,5.25,5.50,5.50,5.35,4.90,4.00,
+C    /2.80,2.05,1.50,1.15,0.98,0.65,0.46,0.35,0.19,0.14,
+C    /.115,.095,.077,.065,.054,.037/
+      DATA Y3D5/0.00,0.32,2.40,3.60,4.20,4.40,4.40,4.28,3.92,3.20,
+     /2.24,1.64,1.20,0.92,0.78,0.52,0.37,0.28,0.15,.112,
+     /.092,.076,.062,.052,.045,.037/
+      DATA YEP3D5/26*0.0/
 C 3D4' J=4 SCALED BY 1/E**3 ABOVE 100 EV
       DATA X3D4P/13.979,15.0,16.0,17.0,18.0,19.0,20.0,22.0,25.0,30.0,
      /35.0,40.0,45.0,50.0,55.0,60.0,70.0,80.0,90.0,100./
@@ -18199,12 +18809,20 @@ C 2S3  J=0  SCALE BY 1/E**2  ABOVE 100 EV
       DATA Y2S3/0.00,0.12,0.22,0.30,0.34,0.36,0.37,0.37,0.33,0.27,
      /0.20,.146,.114,.090,.064,.046,.036,.029,.024/     
       DATA YEP2S3/19*0.0/
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF
+C UNITS 10**-24 CM**2
+      DATA Z18T/1518.,1035.,582.,355.,207.,99.5,58.9,37.1,24.7,21.9,
+     /21.9,22.3,22.6,22.9,23.1,23.4,23.7,24.0,24.2,24.4,
+     /24.6,24.7,24.7,24.8,24.9/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C----------------------------------------------------------------------
 C     NANISO=0
       IF(NANISO.EQ.0) THEN
-       NAME='ARGON ISOTROPIC      2013'       
+       NAME='ARGON ISOTROPIC      2014'       
       ELSE
-       NAME='ARGON ANISOTROPIC    2013'
+       NAME='ARGON ANISOTROPIC    2014'
       ENDIF                                         
 C ----------------------------------------------------------------      
 C  MULTI-TERM CROSS-SECTION.                                            
@@ -18224,7 +18842,10 @@ C       EXCITATION RATE STILL WITHIN 1 SIGMA OF TACHIBANAS MEASURED
 C       RATES FOR THE 1S LEVELS 
 C       AND SMALL INCREASE IN MOMENTUM TRANSFER X-SECTION AT THE
 C       PEAK( 11 EV) TO FIT DRIFT VELOCITY. 
-C  2013: INCLUDED K AND L SHELL IONISATIONS AND CHARGE STATES 1 2 AND 3              
+C  2013: INCLUDED K AND L SHELL IONISATIONS AND CHARGE STATES 1 2 AND 3    
+C  2014: UPDATE TO CORRECT THE BEF SCALING FORMULA 
+C-----------------------------------------------------------------------
+C        TOTAL OSCILLATOR SUM FOR EXCITED STATES F=0.860           
 C-----------------------------------------------------------------      
 C                                                                       
 C  PARAMETERS OF PHASE SHIFT ANALYSIS.                                  
@@ -18245,7 +18866,9 @@ C
 C
       AM2=3.593
       C=39.70  
-C      
+C
+      PSCALE=0.90 
+C     
 C  AVERAGE AUGER EMISSIONS FROM EACH SHELL
       AUGL3=2.0
       AUGL2=1.0
@@ -18254,24 +18877,31 @@ C  AVERAGE AUGER EMISSIONS FROM EACH SHELL
 C
       NION=7                
       NIN=44 
+C
+      NBREM=25
+      DO 6 J=1,NIN
+      IZBR(J)=0
+    6 CONTINUE
+      IZBR(45)=18
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
     2 KIN(J)=NANISO
 C      
-      NDATA=60  
-      NEPSI=160                                                        
+      NDATA=117
+      NEPSI=217               
       NIDATA=75
       NION2=47
       NION3=36
-      NKSH=68
-      NL1S=80
-      NL2S=83
-      NL3S=83
+      NKSH=89
+      NL1S=101
+      NL2S=104
+      NL3S=104
       N1S5=71
-      N1S4=113
+      N1S4=79
       N1S3=70 
-      N1S2=119
+      N1S2=70
       N2P10=54
       N2P9=17 
       N2P8=15            
@@ -18283,7 +18913,7 @@ C
       N2P2=16            
       N2P1=17
       N3D6=19
-      N3D5=72
+      N3D5=26
       N3D3=20
       N3D4P=20  
       N3D4=23   
@@ -18305,14 +18935,14 @@ C IONISING X-SECTION AT 1.5MEV
 C OPAL BEATY FOR MINIMUM IONISING PARTICLE                              
       E(6)=15.0
 C OPAL BEATY AT LOW ENERGY
-      EOBY(1)=10.0
-      EOBY(2)=10.0
-      EOBY(3)=10.0 
+      EOBY(1)=9.5  
+      EOBY(2)=18.0    
+      EOBY(3)=34.0    
 C OPAL BEATY SPLITTING FOR SHELLS
-      EOBY(4)=248.4
-      EOBY(5)=250.6
-      EOBY(6)=326.3
-      EOBY(7)=3205.9
+      EOBY(4)=110.      
+      EOBY(5)=110.0       
+      EOBY(6)=150.0     
+      EOBY(7)=1800.0        
 C
       EION(1)=15.75961
       EION(2)=43.38928
@@ -18321,6 +18951,20 @@ C
       EION(5)=250.6
       EION(6)=326.3
       EION(7)=3205.9
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=0
+      LEGAS(4)=1
+      LEGAS(5)=1
+      LEGAS(6)=1
+      LEGAS(7)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=0
+      ISHELL(4)=4
+      ISHELL(5)=3
+      ISHELL(6)=2
+      ISHELL(7)=1
 C FLUORESCENCE AND AUGER DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -18432,11 +19076,12 @@ C
       EIN(42)=15.366
       EIN(43)=15.374
       EIN(44)=15.660
+      EIN(45)=0.0
 C**********************************************************************
 C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL
 C USE TRANSFER FRACTION IN RANGE BETWEEN 0.0 AND 0.2 FOR MOST MIXTURES
       DO 50 NL=1,NIN
-      PENFRA(1,NL)=0.0
+      PENFRA(1,NL)=0.2
 C PENNING TRANSFER DISTANCE MICRONS
       PENFRA(2,NL)=1.0
 C PENNING TRANSFER TIME PICOSECONDS
@@ -18458,6 +19103,7 @@ C**********************************************************************
       ENDIF
   651 CONTINUE
     5 CONTINUE
+C
       SCRPT(1)='                                                  '
       SCRPT(2)=' ELASTIC ANISOTROPIC       ARGON                  '
       IF(NANISO.EQ.0) THEN
@@ -18517,11 +19163,12 @@ C**********************************************************************
       SCRPT(54)=' EXC 5S4    J=1 RESONANT           ELEVEL= 15.366 ' 
       SCRPT(55)=' EXC 6D2    J=1 RESONANT           ELEVEL= 15.374 '
       SCRPT(56)=' EXC HIGH   J=1 RESONANT           ELEVEL= 15.660 '
+      SCRPT(57)=' BREMSSTRAHLUNG FROM ARGON ATOM                   '
 C
-      EN=-ESTEP/2.0   
+C     EN=-ESTEP/2.0   
       DO 900 I=1,NSTEP
-C     EN=EG(I)
-      EN=EN+ESTEP
+      EN=EG(I)
+C     EN=EN+ESTEP
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -18577,6 +19224,8 @@ C     EN=EG(I)
   202 A=(YEPS(J)-YEPS(J-1))/(XEPS(J)-XEPS(J-1))
       B=(XEPS(J-1)*YEPS(J)-XEPS(J)*YEPS(J-1))/(XEPS(J-1)-XEPS(J))
       PQ2=A*EN+B
+C EPSILON =1-PQ2
+      PQ2=1.0D0-PQ2
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
@@ -18599,7 +19248,7 @@ C   IONISATION FOR CHARGE =1
 C USE BORN-BETHE X-SECTION ABOVE XENI(NIDATA) EV     
   221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)*0.9466
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.9466
   222 CONTINUE                        
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -18626,7 +19275,7 @@ C IONISATION FOR CHARGE =2
 C USE BORN-BETHE X-SECTION ABOVE XEN2(NION2) EV     
  3221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(2,I)=CONST*(AM2*X1+C*X2)*0.04448
+      QION(2,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.04448
  3222 CONTINUE                        
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -18653,7 +19302,7 @@ C IONISATION FOR CHARGE =3
 C USE BORN-BETHE X-SECTION ABOVE XEN3(NION3) EV     
  4221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(3,I)=CONST*(AM2*X1+C*X2)*0.00987 
+      QION(3,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.00987 
  4222 CONTINUE                        
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -18730,7 +19379,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16
       GO TO 250
 C USE BORN-BETHE X-SECTION ABOVE XENI(NIDATA) EV
-  241 Q(5,I)=CONST*(AM2*X1+C*X2)         
+  241 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)         
   250 CONTINUE
 C CORRECTION TO CHARGE STATE 1 2 AND 3 X-SECTION FOR K AND L SHELLS
 C GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
@@ -18768,8 +19417,9 @@ C IF ENERGY GT X1S5(N1S5) EV SCALE BY 1/E**3
  3111 QIN(1,I)=Y1S5(N1S5)*(X1S5(N1S5)/EN)**3*1.0D-18     
  3112 IF(EN.LE.(2.0*EIN(1))) GO TO 312
       PEQIN(1,I)=PEQEL(2,(I-IOFFN(1)))
-C 1S4
+C 1S4 F=0.0580
   312 IF(EN.LE.EIN(2)) GO TO 413
+      IF(EN.GT.X1S4(N1S4)) GO TO 3141
       DO 313 J=2,N1S4                                                   
       IF(EN.LE.X1S4(J)) GO TO 314                                      
   313 CONTINUE                                                          
@@ -18777,7 +19427,10 @@ C 1S4
   314 A=(Y1S4(J)-Y1S4(J-1))/(X1S4(J)-X1S4(J-1))                         
       B=(X1S4(J-1)*Y1S4(J)-X1S4(J)*Y1S4(J-1))/(X1S4(J-1)-X1S4(J))      
       QIN(2,I)=(A*EN+B)*1.0D-18
-      IF(EN.LE.(2.0*EIN(2))) GO TO 315
+      GO TO 3142
+ 3141 QIN(2,I)=0.0580/(EIN(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(2))
+ 3142 IF(EN.LE.(2.0*EIN(2))) GO TO 315
       PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))
 C 1S3
   315 IF(EN.LE.EIN(3)) GO TO 413
@@ -18794,8 +19447,9 @@ C IF ENERGY GT X1S3(N1S3) EV SCALE BY 1/E**3
  3171 QIN(3,I)=Y1S3(N1S3)*(X1S3(N1S3)/EN)**3*1.D-18
  3172 IF(EN.LE.(2.0*EIN(3))) GO TO 318
       PEQIN(3,I)=PEQEL(2,(I-IOFFN(3)))
-C 1S2
+C 1S2  F=0.2260
   318 IF(EN.LE.EIN(4)) GO TO 413
+      IF(EN.GT.X1S2(N1S2)) GO TO 3201
       DO 319 J=2,N1S2                                                   
       IF(EN.LE.X1S2(J)) GO TO 320                                      
   319 CONTINUE                                                          
@@ -18803,7 +19457,10 @@ C 1S2
   320 A=(Y1S2(J)-Y1S2(J-1))/(X1S2(J)-X1S2(J-1))                         
       B=(X1S2(J-1)*Y1S2(J)-X1S2(J)*Y1S2(J-1))/(X1S2(J-1)-X1S2(J))      
       QIN(4,I)=(A*EN+B)*1.0D-18
-      IF(EN.LE.(2.0*EIN(4))) GO TO 321
+      GO TO 3202
+ 3201 QIN(4,I)=0.2260/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(4))
+ 3202 IF(EN.LE.(2.0*EIN(4))) GO TO 321
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C         
 C P STATES
@@ -18817,10 +19474,10 @@ C 2P10
       J=N2P10
   323 A=(Y2P10(J)-Y2P10(J-1))/(X2P10(J)-X2P10(J-1))                    
       B=(X2P10(J-1)*Y2P10(J)-X2P10(J)*Y2P10(J-1))/(X2P10(J-1)-X2P10(J))
-      QIN(5,I)=(A*EN+B)*1.D-18
+      QIN(5,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3232
 C IF ENERGY GT X2P10(N2P10) EV SCALE BY 1/E**2
- 3231 QIN(5,I)=Y2P10(N2P10)*(X2P10(N2P10)/EN)**2*1.0D-18
+ 3231 QIN(5,I)=Y2P10(N2P10)*(X2P10(N2P10)/EN)**2*1.0D-18*PSCALE
  3232 IF(EN.LE.(2.0*EIN(5))) GO TO 324
       PEQIN(5,I)=PEQEL(2,(I-IOFFN(5)))
 C 2P9
@@ -18832,10 +19489,10 @@ C 2P9
       J=N2P9
   326 A=(Y2P9(J)-Y2P9(J-1))/(X2P9(J)-X2P9(J-1))                    
       B=(X2P9(J-1)*Y2P9(J)-X2P9(J)*Y2P9(J-1))/(X2P9(J-1)-X2P9(J))
-      QIN(6,I)=(A*EN+B)*1.D-18
+      QIN(6,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3262
 C IF ENERGY GT X2P9(N2P9) EV SCALE BY 1/E**2
- 3261 QIN(6,I)=Y2P9(N2P9)*(X2P9(N2P9)/EN)**2*1.0D-18
+ 3261 QIN(6,I)=Y2P9(N2P9)*(X2P9(N2P9)/EN)**2*1.0D-18*PSCALE
  3262 IF(EN.LE.(2.0*EIN(6))) GO TO 327
       PEQIN(6,I)=PEQEL(2,(I-IOFFN(6)))
 C 2P8
@@ -18847,10 +19504,10 @@ C 2P8
       J=N2P8
   329 A=(Y2P8(J)-Y2P8(J-1))/(X2P8(J)-X2P8(J-1))                    
       B=(X2P8(J-1)*Y2P8(J)-X2P8(J)*Y2P8(J-1))/(X2P8(J-1)-X2P8(J))
-      QIN(7,I)=(A*EN+B)*1.D-18
+      QIN(7,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3292
 C IF ENERGY GT X2P8(N2P8) EV SCALE BY 1/E
- 3291 QIN(7,I)=Y2P8(N2P8)*(X2P8(N2P8)/EN)*1.0D-18
+ 3291 QIN(7,I)=Y2P8(N2P8)*(X2P8(N2P8)/EN)*1.0D-18*PSCALE
  3292 IF(EN.LE.(2.0*EIN(7))) GO TO 330
       PEQIN(7,I)=PEQEL(2,(I-IOFFN(7)))
 C 2P7
@@ -18862,10 +19519,10 @@ C 2P7
       J=N2P7
   332 A=(Y2P7(J)-Y2P7(J-1))/(X2P7(J)-X2P7(J-1))                    
       B=(X2P7(J-1)*Y2P7(J)-X2P7(J)*Y2P7(J-1))/(X2P7(J-1)-X2P7(J))
-      QIN(8,I)=(A*EN+B)*1.D-18
+      QIN(8,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3322
 C IF ENERGY GT X2P7(N2P7) EV SCALE BY 1/E**2
- 3321 QIN(8,I)=Y2P7(N2P7)*(X2P7(N2P7)/EN)**2*1.0D-18
+ 3321 QIN(8,I)=Y2P7(N2P7)*(X2P7(N2P7)/EN)**2*1.0D-18*PSCALE
  3322 IF(EN.LE.(2.0*EIN(8))) GO TO 333
       PEQIN(8,I)=PEQEL(2,(I-IOFFN(8)))
 C 2P6
@@ -18877,10 +19534,10 @@ C 2P6
       J=N2P6
   335 A=(Y2P6(J)-Y2P6(J-1))/(X2P6(J)-X2P6(J-1))                    
       B=(X2P6(J-1)*Y2P6(J)-X2P6(J)*Y2P6(J-1))/(X2P6(J-1)-X2P6(J))
-      QIN(9,I)=(A*EN+B)*1.D-18
+      QIN(9,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3352
 C IF ENERGY GT X2P6(N2P6) EV SCALE BY 1/E
- 3351 QIN(9,I)=Y2P6(N2P6)*(X2P6(N2P6)/EN)*1.0D-18
+ 3351 QIN(9,I)=Y2P6(N2P6)*(X2P6(N2P6)/EN)*1.0D-18*PSCALE
  3352 IF(EN.LE.(2.0*EIN(9))) GO TO 336
       PEQIN(9,I)=PEQEL(2,(I-IOFFN(9)))
 C 2P5
@@ -18892,10 +19549,10 @@ C 2P5
       J=N2P5
   338 A=(Y2P5(J)-Y2P5(J-1))/(X2P5(J)-X2P5(J-1))                    
       B=(X2P5(J-1)*Y2P5(J)-X2P5(J)*Y2P5(J-1))/(X2P5(J-1)-X2P5(J))
-      QIN(10,I)=(A*EN+B)*1.D-18
+      QIN(10,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3382
 C IF ENERGY GT X2P5(N2P5) EV SCALE BY 1/E
- 3381 QIN(10,I)=Y2P5(N2P5)*(X2P5(N2P5)/EN)*1.0D-18
+ 3381 QIN(10,I)=Y2P5(N2P5)*(X2P5(N2P5)/EN)*1.0D-18*PSCALE
  3382 IF(EN.LE.(2.0*EIN(10))) GO TO 339
       PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
 C 2P4
@@ -18907,10 +19564,10 @@ C 2P4
       J=N2P4
   341 A=(Y2P4(J)-Y2P4(J-1))/(X2P4(J)-X2P4(J-1))                    
       B=(X2P4(J-1)*Y2P4(J)-X2P4(J)*Y2P4(J-1))/(X2P4(J-1)-X2P4(J))
-      QIN(11,I)=(A*EN+B)*1.D-18
+      QIN(11,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3412
 C IF ENERGY GT X2P4(N2P4) EV SCALE BY 1/E**2
- 3411 QIN(11,I)=Y2P4(N2P4)*(X2P4(N2P4)/EN)**2*1.0D-18
+ 3411 QIN(11,I)=Y2P4(N2P4)*(X2P4(N2P4)/EN)**2*1.0D-18*PSCALE
  3412 IF(EN.LE.(2.0*EIN(11))) GO TO 342
       PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))
 C 2P3
@@ -18922,10 +19579,10 @@ C 2P3
       J=N2P3
   344 A=(Y2P3(J)-Y2P3(J-1))/(X2P3(J)-X2P3(J-1))                    
       B=(X2P3(J-1)*Y2P3(J)-X2P3(J)*Y2P3(J-1))/(X2P3(J-1)-X2P3(J))
-      QIN(12,I)=(A*EN+B)*1.D-18
+      QIN(12,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3442
 C IF ENERGY GT X2P3(N2P3) EV SCALE BY 1/E
- 3441 QIN(12,I)=Y2P3(N2P3)*(X2P3(N2P3)/EN)*1.0D-18
+ 3441 QIN(12,I)=Y2P3(N2P3)*(X2P3(N2P3)/EN)*1.0D-18*PSCALE
  3442 IF(EN.LE.(2.0*EIN(12))) GO TO 345
       PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))
 C 2P2
@@ -18937,10 +19594,10 @@ C 2P2
       J=N2P2
   347 A=(Y2P2(J)-Y2P2(J-1))/(X2P2(J)-X2P2(J-1))                    
       B=(X2P2(J-1)*Y2P2(J)-X2P2(J)*Y2P2(J-1))/(X2P2(J-1)-X2P2(J))
-      QIN(13,I)=(A*EN+B)*1.D-18
+      QIN(13,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3472
 C IF ENERGY GT X2P2(N2P2) EV SCALE BY 1/E**2
- 3471 QIN(13,I)=Y2P2(N2P2)*(X2P2(N2P2)/EN)**2*1.0D-18
+ 3471 QIN(13,I)=Y2P2(N2P2)*(X2P2(N2P2)/EN)**2*1.0D-18*PSCALE
  3472 IF(EN.LE.(2.0*EIN(13))) GO TO 348
       PEQIN(13,I)=PEQEL(2,(I-IOFFN(13)))
 C 2P1
@@ -18952,10 +19609,10 @@ C 2P1
       J=N2P1
   350 A=(Y2P1(J)-Y2P1(J-1))/(X2P1(J)-X2P1(J-1))                    
       B=(X2P1(J-1)*Y2P1(J)-X2P1(J)*Y2P1(J-1))/(X2P1(J-1)-X2P1(J))
-      QIN(14,I)=(A*EN+B)*1.D-18
+      QIN(14,I)=(A*EN+B)*1.D-18*PSCALE
       GO TO 3502
 C IF ENERGY GT X2P1(N2P1) EV SCALE BY 1/E
- 3501 QIN(14,I)=Y2P1(N2P1)*(X2P1(N2P1)/EN)*1.0D-18
+ 3501 QIN(14,I)=Y2P1(N2P1)*(X2P1(N2P1)/EN)*1.0D-18*PSCALE
  3502 IF(EN.LE.(2.0*EIN(14))) GO TO 351
       PEQIN(14,I)=PEQEL(2,(I-IOFFN(14)))
 C 3D6
@@ -18973,8 +19630,9 @@ C IF ENERGY GT X3D6(N3D6) EV SCALE BY 1/E**3
  3531 QIN(15,I)=Y3D6(N3D6)*(X3D6(N3D6)/EN)**3*1.0D-18
  3532 IF(EN.LE.(2.0*EIN(15))) GO TO 354
       PEQIN(15,I)=PEQEL(2,(I-IOFFN(15)))
-C 3D5
+C 3D5 F=0.0010 
   354 IF(EN.LE.EIN(16)) GO TO 413
+      IF(EN.GT.X3D5(N3D5)) GO TO 3561
       DO 355 J=2,N3D5
       IF(EN.LE.X3D5(J)) GO TO 356
   355 CONTINUE
@@ -18982,7 +19640,11 @@ C 3D5
   356 A=(Y3D5(J)-Y3D5(J-1))/(X3D5(J)-X3D5(J-1))                    
       B=(X3D5(J-1)*Y3D5(J)-X3D5(J)*Y3D5(J-1))/(X3D5(J-1)-X3D5(J))
       QIN(16,I)=(A*EN+B)*1.D-18
-      IF(EN.LE.(2.0*EIN(16))) GO TO 357
+      GO TO 3562
+ 3561 QIN(16,I)=0.0010/(EIN(16)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(16)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(16))
+      IF(QIN(16,I).LT.0.0) QIN(16,I)=0.0
+ 3562 IF(EN.LE.(2.0*EIN(16))) GO TO 357
       PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))
 C 3D3
   357 IF(EN.LE.EIN(17)) GO TO 413
@@ -19063,7 +19725,8 @@ C IF EN GT X2S5(N2S5) EV   SCALE BY 1/E**2
 C 2S4 F=0.0257
   372 IF(EN.LE.EIN(22)) GO TO 413
       QIN(22,I)=0.0257/(EIN(22)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(22)))-BETA2)*BBCONST*(1.0-(4.0*EIN(22)/(EMASS2*BETA2)))
+     /EIN(22)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(22))
+      IF(QIN(22,I).LT.0.0) QIN(22,I)=0.0
       IF(EN.LE.(2.0*EIN(22))) GO TO 375
       PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))
 C 3D1' 
@@ -19084,7 +19747,8 @@ C IF EN GT X3D1P(N3D1P) EV  SCALE BY 1/E
 C 3D2  F=0.074
   378 IF(EN.LE.EIN(24)) GO TO 413
       QIN(24,I)=0.0740/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(24)))-BETA2)*BBCONST*(1.0-(4.0*EIN(24)/(EMASS2*BETA2)))
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(24))
+      IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0
       IF(EN.LE.(2.0*EIN(24))) GO TO 381
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
 C 3S1''''
@@ -19147,107 +19811,134 @@ C 2S3
       QIN(28,I)=(A*EN+B)*1.D-18
       GO TO 3922
 C IF EN GT X2S3(N2S3) EV  SCALE BY 1/E**2
- 3921 QIN(29,I)=Y2S3(N2S3)*(X2S3(N2S3)/EN)**2*1.0D-18
+ 3921 QIN(28,I)=Y2S3(N2S3)*(X2S3(N2S3)/EN)**2*1.0D-18
  3922 IF(EN.LE.(2.0*EIN(28))) GO TO 393
       PEQIN(28,I)=PEQEL(2,(I-IOFFN(28)))
 C 2S2  F=0.011
   393 IF(EN.LE.EIN(29)) GO TO 413
       QIN(29,I)=0.0110/(EIN(29)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(29)))-BETA2)*BBCONST*(1.0-(4.0*EIN(29)/(EMASS2*BETA2)))
+     /EIN(29)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(29))
+      IF(QIN(29,I).LT.0.0) QIN(29,I)=0.0
       IF(EN.LE.(2.0*EIN(29))) GO TO 396
       PEQIN(29,I)=PEQEL(2,(I-IOFFN(29)))
 C 3S1' F=0.092
   396 IF(EN.LE.EIN(30)) GO TO 413
       QIN(30,I)=0.0920/(EIN(30)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(30)))-BETA2)*BBCONST*(1.0-(4.0*EIN(30)/(EMASS2*BETA2)))
+     /EIN(30)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(30))
+      IF(QIN(30,I).LT.0.0) QIN(30,I)=0.0
       IF(EN.LE.(2.0*EIN(30))) GO TO 399
       PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))
 C 4D5 F=0.0019
   399 IF(EN.LE.EIN(31)) GO TO 413
       QIN(31,I)=0.0019/(EIN(31)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(31)))-BETA2)*BBCONST*(1.0-(4.0*EIN(31)/(EMASS2*BETA2)))
+     /EIN(31)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(31))
+      IF(QIN(31,I).LT.0.0) QIN(31,I)=0.0
       IF(EN.LE.(2.0*EIN(31))) GO TO 400
       PEQIN(31,I)=PEQEL(2,(I-IOFFN(31)))
 C 3S4 F=0.0144
   400 IF(EN.LE.EIN(32)) GO TO 413
       QIN(32,I)=0.0144/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(32)))-BETA2)*BBCONST*(1.0-(4.0*EIN(32)/(EMASS2*BETA2)))
+     /EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(32))
+      IF(QIN(32,I).LT.0.0) QIN(32,I)=0.0
       IF(EN.LE.(2.0*EIN(32))) GO TO 401
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C 4D2 F=0.0484
   401 IF(EN.LE.EIN(33)) GO TO 413
       QIN(33,I)=0.0484/(EIN(33)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(33)))-BETA2)*BBCONST*(1.0-(4.0*EIN(33)/(EMASS2*BETA2)))
+     /EIN(33)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(33))
+      IF(QIN(33,I).LT.0.0) QIN(33,I)=0.0
       IF(EN.LE.(2.0*EIN(33))) GO TO 402
       PEQIN(33,I)=PEQEL(2,(I-IOFFN(33)))
 C 4S1' F=0.0209
   402 IF(EN.LE.EIN(34)) GO TO 413
       QIN(34,I)=0.0209/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(34)))-BETA2)*BBCONST*(1.0-(4.0*EIN(34)/(EMASS2*BETA2)))
+     /EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(34))
+      IF(QIN(34,I).LT.0.0) QIN(34,I)=0.0
       IF(EN.LE.(2.0*EIN(34))) GO TO 403
       PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
 C 3S2  F=0.0220
   403 IF(EN.LE.EIN(35)) GO TO 413
       QIN(35,I)=0.0220/(EIN(35)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(35)))-BETA2)*BBCONST*(1.0-(4.0*EIN(35)/(EMASS2*BETA2)))
+     /EIN(35)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(35))
+      IF(QIN(35,I).LT.0.0) QIN(35,I)=0.0
       IF(EN.LE.(2.0*EIN(35))) GO TO 404
       PEQIN(35,I)=PEQEL(2,(I-IOFFN(35)))
 C 5D5  F=0.0041
   404 IF(EN.LE.EIN(36)) GO TO 413
       QIN(36,I)=0.0041/(EIN(36)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(36)))-BETA2)*BBCONST*(1.0-(4.0*EIN(36)/(EMASS2*BETA2)))
+     /EIN(36)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(36))
+      IF(QIN(36,I).LT.0.0) QIN(36,I)=0.0
       IF(EN.LE.(2.0*EIN(36))) GO TO 405
       PEQIN(36,I)=PEQEL(2,(I-IOFFN(36)))
 C 4S4  F=0.0426
   405 IF(EN.LE.EIN(37)) GO TO 413
       QIN(37,I)=0.0426/(EIN(37)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(37)))-BETA2)*BBCONST*(1.0-(4.0*EIN(37)/(EMASS2*BETA2)))
+     /EIN(37)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(37))
+      IF(QIN(37,I).LT.0.0) QIN(37,I)=0.0
       IF(EN.LE.(2.0*EIN(37))) GO TO 406
       PEQIN(37,I)=PEQEL(2,(I-IOFFN(37)))
 C 5D2  F=0.0426
   406 IF(EN.LE.EIN(38)) GO TO 413
       QIN(38,I)=0.0426/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*(1.0-(4.0*EIN(38)/(EMASS2*BETA2)))
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(38))
+      IF(QIN(38,I).LT.0.0) QIN(38,I)=0.0
       IF(EN.LE.(2.0*EIN(38))) GO TO 407
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C 6D5  F=0.00075
   407 IF(EN.LE.EIN(39)) GO TO 413
       QIN(39,I)=.00075/(EIN(39)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(39)))-BETA2)*BBCONST*(1.0-(4.0*EIN(39)/(EMASS2*BETA2)))
+     /EIN(39)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(39))
+      IF(QIN(39,I).LT.0.0) QIN(39,I)=0.0
       IF(EN.LE.(2.0*EIN(39))) GO TO 408
       PEQIN(39,I)=PEQEL(2,(I-IOFFN(39)))
 C 5S1' F=0.00051
   408 IF(EN.LE.EIN(40)) GO TO 413
       QIN(40,I)=.00051/(EIN(40)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(40)))-BETA2)*BBCONST*(1.0-(4.0*EIN(40)/(EMASS2*BETA2)))
+     /EIN(40)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(40))
+      IF(QIN(40,I).LT.0.0) QIN(40,I)=0.0
       IF(EN.LE.(2.0*EIN(40))) GO TO 409
       PEQIN(40,I)=PEQEL(2,(I-IOFFN(40)))
 C 4S2  F=0.00074
   409 IF(EN.LE.EIN(41)) GO TO 413
       QIN(41,I)=.00074/(EIN(41)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(41)))-BETA2)*BBCONST*(1.0-(4.0*EIN(41)/(EMASS2*BETA2)))
+     /EIN(41)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(41))
+      IF(QIN(41,I).LT.0.0) QIN(41,I)=0.0
       IF(EN.LE.(2.0*EIN(41))) GO TO 410
       PEQIN(41,I)=PEQEL(2,(I-IOFFN(41)))
 C 5S4  F=0.0130 
   410 IF(EN.LE.EIN(42)) GO TO 413
       QIN(42,I)=0.0130/(EIN(42)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(42)))-BETA2)*BBCONST*(1.0-(4.0*EIN(42)/(EMASS2*BETA2)))
+     /EIN(42)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(42))
+      IF(QIN(42,I).LT.0.0) QIN(42,I)=0.0
       IF(EN.LE.(2.0*EIN(42))) GO TO 411
       PEQIN(42,I)=PEQEL(2,(I-IOFFN(42)))
 C 6D2  F=0.0290 
   411 IF(EN.LE.EIN(43)) GO TO 413 
       QIN(43,I)=0.0290/(EIN(43)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(43)))-BETA2)*BBCONST*(1.0-(4.0*EIN(43)/(EMASS2*BETA2)))
+     /EIN(43)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(43))
+      IF(QIN(43,I).LT.0.0) QIN(43,I)=0.0
       IF(EN.LE.(2.0*EIN(43))) GO TO 412
       PEQIN(43,I)=PEQEL(2,(I-IOFFN(43)))
-C SUM HIGHER J=1 STATES F=0.1359
+C SUM HIGHER J=1 STATES F=0.1315
   412 IF(EN.LE.EIN(44)) GO TO 413
-      QIN(44,I)=0.1359/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*(1.0-(4.0*EIN(44)/(EMASS2*BETA2)))
+      QIN(44,I)=0.1315/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(44))
+      IF(QIN(44,I).LT.0.0) QIN(44,I)=0.0
       IF(EN.LE.(2.0*EIN(44))) GO TO 413
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
   413 CONTINUE
-C
+C BREMSSTRAHLUNG X-SECTION
+c      QIN(45,I)=0.0
+c      IF(EN.LE.1000.) GO TO 450
+c      DO 414 J=2,NBREM
+c      IF(EN.LE.EBRM(J)) GO TO 415
+c  414 CONTINUE
+c      J=NBREM
+c  415 A=(DLOG(Z18T(J))-DLOG(Z18T(J-1)))/(EBRM(J)-EBRM(J-1))
+c      B=(DLOG(Z18T(J))*EBRM(J-1)-DLOG(Z18T(J-1))*EBRM(J))/
+c     /(EBRM(J-1)-EBRM(J))
+c      QIN(45,I)=DEXP(A*EN+B)*1.D-24
+c  450 CONTINUE     
       Q1SSUM=QIN(1,I)+QIN(2,I)+QIN(3,I)+QIN(4,I) 
       QPSSUM=QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+QIN(10,I)+
      /QIN(11,I)+QIN(12,I)+QIN(13,I)+QIN(14,I)   
@@ -19264,7 +19955,8 @@ C    /D12.3,' Q1S2 =',D12.3,/,'S1 =',D12.3,' P2=',D12.3,' D3 =',D12.3,
 C    /' QTOT=',D12.3)  
 C  TOTAL X-SECTION
       Q(1,I)=QELA+Q1SSUM+QPSSUM+QDSSUM+QION(1,I)+QION(2,I)+QION(3,I)+
-     /QION(4,I)+QION(5,I)+QION(6,I)+QION(7,I)
+     /QION(4,I)+QION(5,I)+QION(6,I)+QION(7,I)          
+C    /QION(4,I)+QION(5,I)+QION(6,I)+QION(7,I)+QIN(45,I)
   900 CONTINUE                                                          
 C SAVE COMPUTE TIME
       DO 910 K=1,NIN
@@ -19274,24 +19966,27 @@ C SAVE COMPUTE TIME
       ENDIF
   910 CONTINUE
   911 CONTINUE
+c     IF(EFINAL.GT.1000.) NIN=45
 C                                                                       
       RETURN                                                            
       END 
       SUBROUTINE GAS3(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY  
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)                                         
       IMPLICIT INTEGER*8 (I-N)
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)    
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(100),YEM(100),YEL(100),YEPS(100),
+      DIMENSION XEN(144),YEM(144),YEL(144),YEPS(144),
      /XION(90),YION(90),YINC(90),
      /X23S(139),Y23S(139),X21S(128),Y21S(128),X23P(128),Y23P(128),
      /X21P(125),Y21P(125),X33S(106),Y33S(106),X31S(87),Y31S(87),
@@ -19299,7 +19994,8 @@ C
      /X31P(114),Y31P(114),X43S(59),Y43S(59),X41S(55),Y41S(55),
      /X43P(76),Y43P(76),X43D(65),Y43D(65),X41D(53),Y41D(53),
      /X43F(40),Y43F(40),X41F(57),Y41F(57),X41P(96),Y41P(96),
-     /IOFFN(49),IOFFION(2)   
+     /IOFFN(49),IOFFION(2)  
+      DIMENSION Z2T(25),EBRM(25) 
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME  
 C ELASTIC                            
@@ -19311,8 +20007,13 @@ C ELASTIC
      /35.0,40.0,50.0,60.0,70.0,80.0,90.0,100.,125.,150.,
      /200.,250.,300.,400.,500.,600.,800.,1000.,1500.,2000.,
      /3000.,4000.,6000.,8000.,10000.,1.25D4,1.5D4,2.0D4,2.5D4,3.0D4,
-     /4.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.50D5,2.0D5,2.5D5,3.0D5,4.0D5,
-     /6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,4.0D6,6.0D6,8.0D6,1.0D7/ 
+     /4.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,
+     /3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,
+     /1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,
+     /7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,
+     /3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,
+     /1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,
+     /7.0D8,8.0D8,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER           
       DATA YEM/4.89,5.18,5.19,5.21,5.26,5.31,5.35,5.41,5.46,5.54,     
      /5.62,5.68,5.74,5.79,5.83,5.86,5.94,6.04,6.12,6.16,                
@@ -19323,10 +20024,19 @@ C ELASTIC MOMENTUM TRANSFER
      /.0807,.0549,.0400,.0242,.0164,.0119,.00716,.00482,.00234,.0014,
      /.000676,4.03D-4,1.93D-4,1.15D-4,7.65D-5,5.10D-5,3.66D-5,2.17D-5,
      /1.45D-5,1.04D-5,
-     /6.18D-6,2.99D-6,1.71D-6,1.21D-6,8.26D-7,6.05D-7,3.73D-7,2.58D-7,
-     /1.92D-7,1.22D-7,
-     /6.48D-8,4.17D-8,2.96D-8,1.58D-8,1.01D-8,5.24D-9,3.25D-9,1.63D-9,
-     /9.89D-10,6.67D-10/    
+     /6.18D-6,2.99D-6,1.71D-6,1.21D-6,8.26D-7,6.05D-7,4.66D-7,3.73D-7,
+     /2.58D-7,1.92D-7,
+     /1.50D-7,1.22D-7,1.01D-7,8.59D-8,6.48D-8,5.11D-8,4.17D-8,3.48D-8,
+     /2.96D-8,2.10D-8,
+     /1.58D-8,1.24D-8,1.01D-8,7.05D-9,5.24D-9,4.07D-9,3.25D-9,2.67D-9,
+     /2.23D-9,1.63D-9,
+     /1.25D-9,9.89D-10,8.04D-10,6.67D-10,4.47D-10,3.22D-10,2.43D-10,
+     /1.91D-10,1.27D-10,9.04D-11,
+     /6.79D-11,5.29D-11,4.24D-11,3.48D-11,2.46D-11,1.84D-11,1.42D-11,
+     /1.13D-11,9.26D-12,6.00D-12,
+     /4.20D-12,3.10D-12,2.38D-12,1.53D-12,1.06D-12,7.82D-13,5.99D-13,
+     /4.74D-13,3.84D-13,2.67D-13,
+     /1.96D-13,1.50D-13,1.19D-13,9.62D-14/  
 C ELASTIC TOTAL                                 
       DATA YEL/4.89,5.19,5.20,5.21,5.26,5.29,5.33,5.37,5.41,5.47,
      /5.53,5.58,5.62,5.66,5.69,5.70,5.76,5.83,5.88,5.90,
@@ -19337,31 +20047,44 @@ C ELASTIC TOTAL
      /.244,.194,.150,.117,.087,.071,.052,.041,.028,.022,
      /.014,.0108,.00722,.00544,.00437,.00352,.00295,.00224,.00182,
      /.00154,
-     /.00118,.000830,.000654,.000550,.000466,.000411,.000342,.000301,
-     /.000274,.000241,
-     /.000209,.000195,.000186,.000177,.000172,.000169,.000167,.000166,
-     /.000166,.000166/  
+     /.00118,.000830,.000654,.000550,.000466,.000411,.000371,.000342,
+     /.000301,.000274,
+     /.000255,.000241,.000230,.000222,.000209,.000201,.000195,.000190,
+     /.000186,.000180,
+     /.000177,.000174,.000172,.000170,.000169,.000168,.000167,.000167,
+     /.000167,.000166,
+     /.000166,.000166,.000166,.000166,30*.000165/
 C ANGULAR DISTRIBUTION PARAMETER EPSILON
-      DATA YEPS/0.0,.00289,.00288,0.0,0.0,-.00562,-.00565,-.01118,
-     /-.01386,-.01920,
-     /-.02440,-.02688,-.03202,-.03445,-.03689,-.04209,-.04686,-.05400,
-     /-.06119,-.06604,
-     /-.07792,-.08474,-.10094,-.11490,-.12663,-.13826,-.14789,-.15724,
-     /-.16707,-.18142,
-     /-.19873,-.21165,-.21951,-.23447,-.24855,-.26918,-.26215,-.26104,
-     /-.23265,-.20568,
-     /-.17192,-.13835,-.08539,-.03657,0.02800,0.09011,0.14616,0.19164,
-     /0.28459,0.34854,
-     /0.39645,0.46261,0.53723,0.61037,0.64478,0.67011,0.70021,0.72258,
-     /0.78150,0.79668,
-     /0.83079,0.86696,0.87845,0.91682,0.92737,0.93870,0.95363,0.96280,
-     /0.97662,.983705,
-     /.988614,.991805,.994606,.995963,.996795,.997452,.997887,.998428,
-     /.998754,.998956,
-     /.999239,.9995075,.9996596,.9997208,.9997819,.9998234,.9998743,
-     /.9999042,.9999236,.9999469,
-     /.9999692,.9999796,.9999853,.9999922,.9999951,.9999975,.9999985,
-     /.9999993,.9999996,.9999997/     
+C EPSILON = 1.0-YEPS
+      DATA YEPS/1.0,.99711,.99712,1.0,1.0,1.00562,1.00565,1.01118,
+     /1.01386,1.01920,
+     /1.02440,1.02688,1.03202,1.03445,1.03689,1.04209,1.04686,1.05400,
+     /1.06119,1.06604,
+     /1.07792,1.08474,1.10094,1.11490,1.12663,1.13826,1.14789,1.15724,
+     /1.16707,1.18142,
+     /1.19873,1.21165,1.21951,1.23447,1.24855,1.26918,1.26215,1.26104,
+     /1.23265,1.20568,
+     /1.17192,1.13835,1.08539,1.03657,.97200,.90989,.85384,.80836,
+     /.71541,.65146,
+     /.60355,.53739,.46277,.38963,.35522,.32989,.29979,.27742,
+     /.21850,.20332,
+     /.16921,.13304,.12155,.08318,.07263,.06130,.04637,.03720,
+     /.02338,.016295,
+     /.011386,.008195,.005394,.004037,.003205,.002548,.002113,.001572,
+     /.001246,.001044,
+     /7.61D-4,4.925D-4,3.404D-4,2.803D-4,2.179D-4,1.766D-4,1.475D-4,
+     /1.258D-4,9.60D-5,7.65D-5,
+     /6.29D-5,5.29D-5,4.53D-5,3.93D-5,3.07D-5,2.47D-5,2.04D-5,1.72D-5,
+     /1.47D-5,1.05D-5,
+     /7.84D-6,6.12D-6,4.91D-6,3.373D-6,2.463D-6,1.881D-6,1.483D-6,
+     /1.200D-6,9.91D-7,7.09D-7,
+     /5.322D-7,4.146D-7,3.319D-7,2.718D-7,1.775D-7,1.249D-7,9.27D-8,
+     /7.15D-8,4.62D-8,3.23D-8,
+     /2.382D-8,1.828D-8,1.447D-8,1.173D-8,8.14D-9,5.97D-9,4.56D-9,
+     /3.59D-9,2.90D-9,1.83D-9,
+     /1.26D-9,9.10D-10,6.90D-10,4.40D-10,3.00D-10,2.16D-10,1.63D-10,
+     /1.27D-10,1.02D-10,7.0D-11,
+     /5.1D-11,3.8D-11,3.0D-11,2.4D-11/
 C  IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN-BETHE IN SUB)
       DATA XION/24.58739,25.0,25.5,26.0,26.5,27.0,27.5,28.0,28.5,29.0,
      /29.5,30.0,30.5,31.0,31.5,32.0,32.5,33.0,33.5,34.0,    
@@ -19373,25 +20096,27 @@ C  IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN-BETHE IN SUB)
      /1600.,1800.,2000.,2500.,3000.,3500.,4000.,4500.,5000.,5500.,
      /6000.,7000.,8000.,9000.,1.0D4,1.2D4,1.4D4,1.6D4,1.8D4,2.0D4/
 C GROSS IONISATION 
-      DATA YION/.0,.0041,.0101,.0166,.0233,.0299,.036,.0419,.0477,.0539,
-     /.0600,.0655,.0714,.0773,.0827,.0884,.0940,.0994,.105,.110,
-     /.130,.148,.165,.201,.234,.259,.280,.295,.310,.322,
-     /.333,.341,.349,.356,.360,.362,.364,.365,.366,.366,
-     /.367,.366,.365,.364,.362,.359,.355,.351,.346,.341, 
-     /.327,.314,.303,.291,.269,.248,.229,.212,.201,.190,              
-     ..179,.171,.162,.154,.148,.142,.137,.128,.115,.102,
-     /.0922,.0845,.0781,.0645,.0551,.0501,.0440,.0409,.0363,.0333,
-     /.0312,.0275,.0249,.0223,.0194,.0164,.0147,.0130,.0119,.0108/
+      DATA YION/.0,.0038,.0094,.0155,.0218,.0279,.0336,.0392,.0446,
+     /.0504,
+     /.0561,.0612,.0667,.0722,.0773,.0826,.0878,.0929,.0981,.103,
+     /.121,.138,.154,.188,.219,.242,.262,.276,.290,.301,
+     /.311,.319,.326,.333,.336,.338,.340,.341,.342,.342,
+     /.343,.342,.341,.340,.338,.335,.332,.326,.322,.316, 
+     /.302,.290,.279,.268,.246,.231,.216,.203,.191,.180,              
+     ..171,.163,.155,.148,.142,.136,.130,.125,.109,.097,
+     /.0872,.0795,.0729,.0608,.0524,.0458,.0410,.0368,.0336,.0311,
+     /.0293,.0255,.0229,.0206,.0192,.0164,.0147,.0130,.0119,.0108/
 C COUNTING IONISATION      
-      DATA YINC/.0,.0041,.0101,.0166,.0233,.0299,.036,.0419,.0477,.0539,
-     /.0600,.0655,.0714,.0773,.0827,.0884,.0940,.0994,.105,.110,
-     /.130,.148,.165,.201,.234,.259,.280,.295,.310,.322,
-     /.333,.341,.349,.356,.360,.362,.364,.365,.366,.366,
-     /.366,.365,.364,.363,.361,.358,.354,.350,.345,.340,
-     /.326,.313,.302,.290,.268,.247,.228,.211,.200,.189,           
-     /.178,.170,.161,.153,.147,.141,.136,.127,.114,.101,
-     /.0917,.0841,.0777,.0642,.0548,.0498,.0438,.0407,.0361,.0331,
-     /.0310,.0274,.0248,.0222,.0193,.0163,.0146,.0129,.0118,.0107/
+      DATA YINC/.0,.0038,.0094,.0155,.0218,.0279,.0336,.0392,.0446,
+     /.0504,
+     /.0561,.0612,.0667,.0722,.0773,.0826,.0878,.0929,.0981,.103,
+     /.121,.138,.154,.188,.219,.242,.262,.276,.290,.301,
+     /.311,.319,.326,.333,.336,.338,.340,.341,.341,.341,
+     /.342,.341,.340,.339,.337,.334,.331,.325,.321,.315,
+     /.301,.289,.278,.267,.245,.230,.215,.202,.190,.179,           
+     /.170,.162,.154,.147,.141,.135,.129,.124,.108,.096,
+     /.0867,.0791,.0725,.0605,.0522,.0456,.0408,.0367,.0335,.0310,
+     /.0292,.0254,.0228,.0205,.0191,.0163,.0146,.0129,.0118,.0107/
 C  ALL EXCITATIONS IN UNITS OF 10**-18
 C  2 3S J=1 METASTABLE
       DATA X23S/19.81961,19.83,19.85,19.88,19.9,19.95,20.0,20.05,20.1,
@@ -19797,11 +20522,21 @@ C 11 1P RESONANCE RADIATION J=1  50.657 NM      F=0.00138
 C 12 1P RESONANCE RADIATION J=1  50.620 NM      F=0.00106
 C SUM HIGHER 1P LEVELS RESONANCE RADIATION J=1  F=0.00440
 C TOTAL SUM OSCILLATOR STRENGTH = 0.42326
+C
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF 
+      DATA Z2T/42.1,23.5,10.7,5.88,3.25,1.50,.886,.582,.437,.429,
+     /.460,.484,.502,.515,.525,.540,.550,.566,.575,.585,
+     /.592,.596,.597,.598,.598/
+C UNITS 10**-24
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
+
 C --------------------------------------------------------------------
       IF(NANISO.EQ.0) THEN
-       NAME='HE4  ISOTROPIC   2013    '   
+       NAME='HE4  ISOTROPIC   2014    '   
       ELSE 
-       NAME='HE4 ANISOTROPIC  2013    '
+       NAME='HE4 ANISOTROPIC  2014    '
       ENDIF                                         
 C --------------------------------------------------------------------  
 C  HELIUM 4 BEST KNOWN GAS USED AS STANDARD ACCURACY BETTER THAN 0.2%   
@@ -19811,6 +20546,7 @@ C  2007: INCREASED DATA FILE UP TO 10 MEV
 C  2007: NEW ANISTROPIC SCATTERING FUNCTION INTRODUCED
 C  2007: PENNING FRACTION INTRODUCED
 C  2010: SPLIT EXCITATION INTO 49 LEVELS.
+C  2014: UPDATED IONISATION TO BE CONSISTENT WITH FURSA AND BRAY CCC
 C USED MAINLY THE FOLLOWING THEORETICAL EXCITATION X-SECTIONS:
 C AT RESONANCE ENERGIES USED RMPS CALCULATIONS OF 
 C  BARTSCHAT   J.PHYS B31(1998)L469
@@ -19832,11 +20568,18 @@ C
 C
       NION=2
       NIN=49
+C    
+      NBREM=25
+      DO 6 J=1,NIN
+      IZBR(J)=0
+    6 CONTINUE
+      IZBR(50)=2
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
     2 KIN(J)=NANISO
-      NDATA=100
+      NDATA=144
       NIOND=90                                                         
       N23S=139          
       N21S=128
@@ -19868,9 +20611,13 @@ C ENTER EOBY FOR MINIMUM IONISING PARTICLE
 C IONISATION ENERGIES
       EION(1)=24.58739
       EION(2)=79.00515
+      LEGAS(1)=0
+      LEGAS(2)=0
+      ISHELL(1)=0
+      ISHELL(2)=0
 C EOBY AT LOW ENERGY
-      EOBY(1)=15.8
-      EOBY(2)=15.8
+      EOBY(1)=12.0        
+      EOBY(2)=65.0       
 C FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -19947,6 +20694,7 @@ C
       EIN(47)=24.47518
       EIN(48)=24.49308
       EIN(49)=24.50708
+      EIN(50)=0.0
 C***********************************************************************
 C ENTER PENNING FRACTION FOR EACH LEVEL
 C PENNING FRACTION BETWEEN 0.9 AND 1.0 FOR ALL MIXTURES
@@ -20040,10 +20788,11 @@ C***********************************************************************
       SCRPT(54)=' EXC 111P J=1    RESONANT          ELOSS= 24.47518'
       SCRPT(55)=' EXC 121P J=1    RESONANT          ELOSS= 24.49308'
       SCRPT(56)=' EXC  N1P SUM HI RESONANT          ELOSS= 24.50708'
-      EN=-ESTEP/2.0D0   
+      SCRPT(57)=' BREMSSTRAHLUNG FROM HELIUM ATOM                  '
+C     EN=-ESTEP/2.0D0   
       DO 9000 I=1,NSTEP    
-C     EN=EG(I)                                            
-      EN=EN+ESTEP 
+      EN=EG(I)                                            
+C     EN=EN+ESTEP 
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -20066,6 +20815,8 @@ C
       A=(YEPS(J)-YEPS(J-1))/(XEN(J)-XEN(J-1))
       B=(XEN(J-1)*YEPS(J)-XEN(J)*YEPS(J-1))/(XEN(J-1)-XEN(J))
       PQ2=A*EN+B
+C EPSILON=1-PQ2
+      PQ2=1.0D0-PQ2
 C
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
@@ -20091,7 +20842,7 @@ C GROSS IONISATION
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
   121 AX2=1.0D0/BETA2
       AX1=AX2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*AX1+C*AX2)/0.995
+      QION(1,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)/0.995
   122 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY 
@@ -20116,7 +20867,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16
       GO TO 242
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
-  241 Q(5,I)=CONST*(AM2*AX1+C*AX2)
+  241 Q(5,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)
   242 CONTINUE  
       IF(EN.LE.(2.0D0*EION(2))) GO TO 250
       PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
@@ -20128,7 +20879,7 @@ C CALCULATE CHARGE STATE 1 AND 2 FROM COUNT AND GROSS
       QION(2,I)=QTEMP2
       IF(QION(2,I).LT.0.0) QION(2,I)=0.0
 C
-      DO 251 NL=1,NIN
+      DO 251 NL=1,NIN+1
       QIN(NL,I)=0.0D0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -20197,7 +20948,7 @@ C 2 1P        OSC STRENGTH  F=0.27608
       GO TO 402
 C IF ENERGY GT X21P(N21P) EV THEN USE BEF SCALING
   401 QIN(4,I)=0.27608/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(4)))-BETA2)*BBCONST*EN/(EN+EIN(4)+E(3))
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(4)+E(3))
   402 IF(EN.LE.(2.0*EIN(4))) GO TO 410
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C
@@ -20294,7 +21045,7 @@ C 3 1P        OSC STRENGTH F=0.07342
       GO TO 582
 C IF ENERGY GT X31P(N31P) EV THEN USE BEF SCALING
   581 QIN(10,I)=0.07342/(EIN(10)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(10)))-BETA2)*BBCONST*EN/(EN+EIN(10)+E(3))
+     /EIN(10)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(10)+E(3))
   582 IF(EN.LE.(2.0*EIN(10))) GO TO 590
       PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
 C
@@ -20423,7 +21174,7 @@ C 4 1P       OSC STRENGTH  F=0.02986
       GO TO 822
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
   821 QIN(18,I)=0.02986/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+E(3))
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3))
   822 IF(EN.LE.(2.0*EIN(18))) GO TO 830
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
 C
@@ -20568,7 +21319,7 @@ C 5 1P   SCALED FROM 4 1P   OSC STRENGTH  F=0.01504
       GO TO 1062
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1061 QIN(26,I)=0.01504/(EIN(26)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(26)))-BETA2)*BBCONST*EN/(EN+EIN(26)+E(3))
+     /EIN(26)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(26)+E(3))
  1062 IF(EN.LE.(2.0*EIN(26))) GO TO 1070
       PEQIN(26,I)=PEQEL(2,(I-IOFFN(26)))
 C
@@ -20677,7 +21428,7 @@ C 6 1P  SCALED FROM 4 1P    OSC STRENGTH  F=0.00863
       GO TO 1242
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1241 QIN(32,I)=0.00863/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(32)))-BETA2)*BBCONST*EN/(EN+EIN(32)+E(3))
+     /EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+E(3))
  1242 IF(EN.LE.(2.0*EIN(32))) GO TO 1250 
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C
@@ -20786,7 +21537,7 @@ C 7 1P  SCALED FROM 4 1P   OSC STRENGTH  F=0.00540
       GO TO 1422
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1421 QIN(38,I)=0.00540/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*EN/(EN+EIN(38)+E(3))
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(38)+E(3))
  1422 IF(EN.LE.(2.0*EIN(38))) GO TO 1430 
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C
@@ -20895,7 +21646,7 @@ C 8 1P SCALED FROM 4 1P   OSC STRENGTH  F=0.00362
       GO TO 1602
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1601 QIN(44,I)=0.00362/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*EN/(EN+EIN(44)+E(3))
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(44)+E(3))
  1602 IF(EN.LE.(2.0*EIN(44))) GO TO 1610 
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
 C
@@ -20914,7 +21665,7 @@ C 9 1P SCALED FROM 4 1P   OSC STRENGTH  F=0.00253
       GO TO 1632
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1631 QIN(45,I)=0.00253/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+E(3))
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+E(3))
  1632 IF(EN.LE.(2.0*EIN(45))) GO TO 1640 
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
 C
@@ -20933,7 +21684,7 @@ C 10 1P SCALED FROM 4 1P    OSC STRENGTH F=0.00184
       GO TO 1662
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1661 QIN(46,I)=0.00184/(EIN(46)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(46)))-BETA2)*BBCONST*EN/(EN+EIN(46)+E(3))
+     /EIN(46)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(46)+E(3))
  1662 IF(EN.LE.(2.0*EIN(46))) GO TO 1670 
       PEQIN(46,I)=PEQEL(2,(I-IOFFN(46)))
 C
@@ -20952,7 +21703,7 @@ C 11 1P SCALED FROM 4 1P   OSC STRENGTH F=0.00138
       GO TO 1692
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1691 QIN(47,I)=0.00138/(EIN(47)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(47)))-BETA2)*BBCONST*EN/(EN+EIN(47)+E(3))
+     /EIN(47)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(47)+E(3))
  1692 IF(EN.LE.(2.0*EIN(47))) GO TO 1700 
       PEQIN(47,I)=PEQEL(2,(I-IOFFN(47)))
 C
@@ -20971,7 +21722,7 @@ C 12 1P SCALED FROM 4 1P   OSC STRENGTH F=0.00106
       GO TO 1722
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1721 QIN(48,I)=0.00106/(EIN(48)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(48)))-BETA2)*BBCONST*EN/(EN+EIN(48)+E(3))
+     /EIN(48)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(48)+E(3))
  1722 IF(EN.LE.(2.0*EIN(48))) GO TO 1730 
       PEQIN(48,I)=PEQEL(2,(I-IOFFN(48)))
 C
@@ -20990,10 +21741,20 @@ C SUM HIGHER 1P LEVELS     OSC STRENGTH F=0.00440
       GO TO 1752
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1751 QIN(49,I)=0.00440/(EIN(49)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(49)))-BETA2)*BBCONST*EN/(EN+EIN(49)+E(3))
+     /EIN(49)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(49)+E(3))
  1752 IF(EN.LE.(2.0*EIN(49))) GO TO 1760 
       PEQIN(49,I)=PEQEL(2,(I-IOFFN(49)))
  1760 CONTINUE
+C  LOAD BREMSSTRAHLUNG X-SECTIONS
+c      IF(EN.LE.1000.) GO TO 2000
+c      DO 1780 J=2,NBREM
+c      IF(EN.LE.EBRM(J)) GO TO 1790
+c 1780 CONTINUE
+c      J=NBREM
+c 1790 A=(DLOG(Z2T(J))-DLOG(Z2T(J-1)))/(EBRM(J)-EBRM(J-1))
+c      B=(DLOG(Z2T(J))*EBRM(J-1)-DLOG(Z2T(J-1))*EBRM(J))/
+c     /(EBRM(J-1)-EBRM(J))
+c      QIN(50,I)=DEXP(A*EN+B)*1.D-24
 C
  2000 CONTINUE                                                          
 C     
@@ -21010,7 +21771,8 @@ C
      /QIN(38,I)+QIN(40,I)+QIN(43,I)+QIN(44,I)+QIN(45,I)+QIN(46,I)+
      /QIN(47,I)+QIN(48,I)+QIN(49,I)
       QINEL=QSNG+QTRP+QION(1,I)+QION(2,I)
-      Q(1,I)=QELA+QINEL                            
+C      Q(1,I)=QELA+QINEL+QIN(50,I)                            
+      Q(1,I)=QELA+QINEL                          
 C EXAMINE X-SECTION DATA 
 C     WRITE(6,986) EN,QIN(4,I),QIN(10,I),QIN(18,I),QIN(26,I),QIN(32,I),
 C    /QIN(38,I),QIN(44,I),QIN(45,I),QIN(46,I),QIN(47,I),QIN(48,I),
@@ -21029,24 +21791,27 @@ C  SAVE COMPUTE TIME
        GO TO 9011
       ENDIF
  9001 CONTINUE
- 9011 CONTINUE                                          
+ 9011 CONTINUE 
+c      IF(EN.GT.1000.) NIN=50                                         
       RETURN                                                            
       END
       SUBROUTINE GAS4(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY  
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)                                         
       IMPLICIT INTEGER*8 (I-N)
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)    
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(100),YEM(100),YEL(100),YEPS(100),
+      DIMENSION XEN(144),YEM(144),YEL(144),YEPS(144),
      /XION(90),YION(90),YINC(90),
      /X23S(139),Y23S(139),X21S(128),Y21S(128),X23P(128),Y23P(128),
      /X21P(125),Y21P(125),X33S(106),Y33S(106),X31S(87),Y31S(87),
@@ -21055,6 +21820,7 @@ C  SAVE COMPUTE TIME
      /X43P(76),Y43P(76),X43D(65),Y43D(65),X41D(53),Y41D(53),
      /X43F(40),Y43F(40),X41F(57),Y41F(57),X41P(96),Y41P(96),
      /IOFFN(49),IOFFION(2)   
+      DIMENSION Z2T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME  
 C ELASTIC                            
@@ -21066,8 +21832,13 @@ C ELASTIC
      /35.0,40.0,50.0,60.0,70.0,80.0,90.0,100.,125.,150.,
      /200.,250.,300.,400.,500.,600.,800.,1000.,1500.,2000.,
      /3000.,4000.,6000.,8000.,10000.,1.25D4,1.5D4,2.0D4,2.5D4,3.0D4,
-     /4.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.50D5,2.0D5,2.5D5,3.0D5,4.0D5,
-     /6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,4.0D6,6.0D6,8.0D6,1.0D7/ 
+     /4.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,
+     /3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,
+     /1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,
+     /7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,
+     /3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,
+     /1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,
+     /7.0D8,8.0D8,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER           
       DATA YEM/4.89,5.18,5.19,5.21,5.26,5.31,5.35,5.41,5.46,5.54,     
      /5.62,5.68,5.74,5.79,5.83,5.86,5.94,6.04,6.12,6.16,                
@@ -21078,10 +21849,19 @@ C ELASTIC MOMENTUM TRANSFER
      /.0807,.0549,.0400,.0242,.0164,.0119,.00716,.00482,.00234,.0014,
      /.000676,4.03D-4,1.93D-4,1.15D-4,7.65D-5,5.10D-5,3.66D-5,2.17D-5,
      /1.45D-5,1.04D-5,
-     /6.18D-6,2.99D-6,1.71D-6,1.21D-6,8.26D-7,6.05D-7,3.73D-7,2.58D-7,
-     /1.92D-7,1.22D-7,
-     /6.48D-8,4.17D-8,2.96D-8,1.58D-8,1.01D-8,5.24D-9,3.25D-9,1.63D-9,
-     /9.89D-10,6.67D-10/    
+     /6.18D-6,2.99D-6,1.71D-6,1.21D-6,8.26D-7,6.05D-7,4.66D-7,3.73D-7,
+     /2.58D-7,1.92D-7,
+     /1.50D-7,1.22D-7,1.01D-7,8.59D-8,6.48D-8,5.11D-8,4.17D-8,3.48D-8,
+     /2.96D-8,2.10D-8,
+     /1.58D-8,1.24D-8,1.01D-8,7.05D-9,5.24D-9,4.07D-9,3.25D-9,2.67D-9,
+     /2.23D-9,1.63D-9,
+     /1.25D-9,9.89D-10,8.04D-10,6.67D-10,4.47D-10,3.22D-10,2.43D-10,
+     /1.91D-10,1.27D-10,9.04D-11,
+     /6.79D-11,5.29D-11,4.24D-11,3.48D-11,2.46D-11,1.84D-11,1.42D-11,
+     /1.13D-11,9.26D-12,6.00D-12,
+     /4.20D-12,3.10D-12,2.38D-12,1.53D-12,1.06D-12,7.82D-13,5.99D-13,
+     /4.74D-13,3.84D-13,2.67D-13,
+     /1.96D-13,1.50D-13,1.19D-13,9.62D-14/  
 C ELASTIC TOTAL                                 
       DATA YEL/4.89,5.19,5.20,5.21,5.26,5.29,5.33,5.37,5.41,5.47,
      /5.53,5.58,5.62,5.66,5.69,5.70,5.76,5.83,5.88,5.90,
@@ -21092,31 +21872,44 @@ C ELASTIC TOTAL
      /.244,.194,.150,.117,.087,.071,.052,.041,.028,.022,
      /.014,.0108,.00722,.00544,.00437,.00352,.00295,.00224,.00182,
      /.00154,
-     /.00118,.000830,.000654,.000550,.000466,.000411,.000342,.000301,
-     /.000274,.000241,
-     /.000209,.000195,.000186,.000177,.000172,.000169,.000167,.000166,
-     /.000166,.000166/  
+     /.00118,.000830,.000654,.000550,.000466,.000411,.000371,.000342,
+     /.000301,.000274,
+     /.000255,.000241,.000230,.000222,.000209,.000201,.000195,.000190,
+     /.000186,.000180,
+     /.000177,.000174,.000172,.000170,.000169,.000168,.000167,.000167,
+     /.000167,.000166,
+     /.000166,.000166,.000166,.000166,30*.000165/
 C ANGULAR DISTRIBUTION PARAMETER EPSILON
-      DATA YEPS/0.0,.00289,.00288,0.0,0.0,-.00562,-.00565,-.01118,
-     /-.01386,-.01920,
-     /-.02440,-.02688,-.03202,-.03445,-.03689,-.04209,-.04686,-.05400,
-     /-.06119,-.06604,
-     /-.07792,-.08474,-.10094,-.11490,-.12663,-.13826,-.14789,-.15724,
-     /-.16707,-.18142,
-     /-.19873,-.21165,-.21951,-.23447,-.24855,-.26918,-.26215,-.26104,
-     /-.23265,-.20568,
-     /-.17192,-.13835,-.08539,-.03657,0.02800,0.09011,0.14616,0.19164,
-     /0.28459,0.34854,
-     /0.39645,0.46261,0.53723,0.61037,0.64478,0.67011,0.70021,0.72258,
-     /0.78150,0.79668,
-     /0.83079,0.86696,0.87845,0.91682,0.92737,0.93870,0.95363,0.96280,
-     /0.97662,.983705,
-     /.988614,.991805,.994606,.995963,.996795,.997452,.997887,.998428,
-     /.998754,.998956,
-     /.999239,.9995075,.9996596,.9997208,.9997819,.9998234,.9998743,
-     /.9999042,.9999236,.9999469,
-     /.9999692,.9999796,.9999853,.9999922,.9999951,.9999975,.9999985,
-     /.9999993,.9999996,.9999997/     
+C EPSILON = 1.0-YEPS
+      DATA YEPS/1.0,.99711,.99712,1.0,1.0,1.00562,1.00565,1.01118,
+     /1.01386,1.01920,
+     /1.02440,1.02688,1.03202,1.03445,1.03689,1.04209,1.04686,1.05400,
+     /1.06119,1.06604,
+     /1.07792,1.08474,1.10094,1.11490,1.12663,1.13826,1.14789,1.15724,
+     /1.16707,1.18142,
+     /1.19873,1.21165,1.21951,1.23447,1.24855,1.26918,1.26215,1.26104,
+     /1.23265,1.20568,
+     /1.17192,1.13835,1.08539,1.03657,.97200,.90989,.85384,.80836,
+     /.71541,.65146,
+     /.60355,.53739,.46277,.38963,.35522,.32989,.29979,.27742,
+     /.21850,.20332,
+     /.16921,.13304,.12155,.08318,.07263,.06130,.04637,.03720,
+     /.02338,.016295,
+     /.011386,.008195,.005394,.004037,.003205,.002548,.002113,.001572,
+     /.001246,.001044,
+     /7.61D-4,4.925D-4,3.404D-4,2.803D-4,2.179D-4,1.766D-4,1.475D-4,
+     /1.258D-4,9.60D-5,7.65D-5,
+     /6.29D-5,5.29D-5,4.53D-5,3.93D-5,3.07D-5,2.47D-5,2.04D-5,1.72D-5,
+     /1.47D-5,1.05D-5,
+     /7.84D-6,6.12D-6,4.91D-6,3.373D-6,2.463D-6,1.881D-6,1.483D-6,
+     /1.200D-6,9.91D-7,7.09D-7,
+     /5.322D-7,4.146D-7,3.319D-7,2.718D-7,1.775D-7,1.249D-7,9.27D-8,
+     /7.15D-8,4.62D-8,3.23D-8,
+     /2.382D-8,1.828D-8,1.447D-8,1.173D-8,8.14D-9,5.97D-9,4.56D-9,
+     /3.59D-9,2.90D-9,1.83D-9,
+     /1.26D-9,9.10D-10,6.90D-10,4.40D-10,3.00D-10,2.16D-10,1.63D-10,
+     /1.27D-10,1.02D-10,7.0D-11,
+     /5.1D-11,3.8D-11,3.0D-11,2.4D-11/
 C  IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN-BETHE IN SUB)
       DATA XION/24.58739,25.0,25.5,26.0,26.5,27.0,27.5,28.0,28.5,29.0,
      /29.5,30.0,30.5,31.0,31.5,32.0,32.5,33.0,33.5,34.0,    
@@ -21128,25 +21921,27 @@ C  IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN-BETHE IN SUB)
      /1600.,1800.,2000.,2500.,3000.,3500.,4000.,4500.,5000.,5500.,
      /6000.,7000.,8000.,9000.,1.0D4,1.2D4,1.4D4,1.6D4,1.8D4,2.0D4/
 C GROSS IONISATION 
-      DATA YION/.0,.0041,.0101,.0166,.0233,.0299,.036,.0419,.0477,.0539,
-     /.0600,.0655,.0714,.0773,.0827,.0884,.0940,.0994,.105,.110,
-     /.130,.148,.165,.201,.234,.259,.280,.295,.310,.322,
-     /.333,.341,.349,.356,.360,.362,.364,.365,.366,.366,
-     /.367,.366,.365,.364,.362,.359,.355,.351,.346,.341, 
-     /.327,.314,.303,.291,.269,.248,.229,.212,.201,.190,              
-     ..179,.171,.162,.154,.148,.142,.137,.128,.115,.102,
-     /.0922,.0845,.0781,.0645,.0551,.0501,.0440,.0409,.0363,.0333,
-     /.0312,.0275,.0249,.0223,.0194,.0164,.0147,.0130,.0119,.0108/
+      DATA YION/.0,.0038,.0094,.0155,.0218,.0279,.0336,.0392,.0446,
+     /.0504,
+     /.0561,.0612,.0667,.0722,.0773,.0826,.0878,.0929,.0981,.103,
+     /.121,.138,.154,.188,.219,.242,.262,.276,.290,.301,
+     /.311,.319,.326,.333,.336,.338,.340,.341,.342,.342,
+     /.343,.342,.341,.340,.338,.335,.332,.326,.322,.316, 
+     /.302,.290,.279,.268,.246,.231,.216,.203,.191,.180,              
+     ..171,.163,.155,.148,.142,.136,.130,.125,.109,.097,
+     /.0872,.0795,.0729,.0608,.0524,.0458,.0410,.0368,.0336,.0311,
+     /.0293,.0255,.0229,.0206,.0192,.0164,.0147,.0130,.0119,.0108/
 C COUNTING IONISATION      
-      DATA YINC/.0,.0041,.0101,.0166,.0233,.0299,.036,.0419,.0477,.0539,
-     /.0600,.0655,.0714,.0773,.0827,.0884,.0940,.0994,.105,.110,
-     /.130,.148,.165,.201,.234,.259,.280,.295,.310,.322,
-     /.333,.341,.349,.356,.360,.362,.364,.365,.366,.366,
-     /.366,.365,.364,.363,.361,.358,.354,.350,.345,.340,
-     /.326,.313,.302,.290,.268,.247,.228,.211,.200,.189,           
-     /.178,.170,.161,.153,.147,.141,.136,.127,.114,.101,
-     /.0917,.0841,.0777,.0642,.0548,.0498,.0438,.0407,.0361,.0331,
-     /.0310,.0274,.0248,.0222,.0193,.0163,.0146,.0129,.0118,.0107/
+      DATA YINC/.0,.0038,.0094,.0155,.0218,.0279,.0336,.0392,.0446,
+     /.0504,
+     /.0561,.0612,.0667,.0722,.0773,.0826,.0878,.0929,.0981,.103,
+     /.121,.138,.154,.188,.219,.242,.262,.276,.290,.301,
+     /.311,.319,.326,.333,.336,.338,.340,.341,.341,.341,
+     /.342,.341,.340,.339,.337,.334,.331,.325,.321,.315,
+     /.301,.289,.278,.267,.245,.230,.215,.202,.190,.179,           
+     /.170,.162,.154,.147,.141,.135,.129,.124,.108,.096,
+     /.0867,.0791,.0725,.0605,.0522,.0456,.0408,.0367,.0335,.0310,
+     /.0292,.0254,.0228,.0205,.0191,.0163,.0146,.0129,.0118,.0107/
 C  ALL EXCITATIONS IN UNITS OF 10**-18
 C  2 3S J=1 METASTABLE
       DATA X23S/19.81961,19.83,19.85,19.88,19.9,19.95,20.0,20.05,20.1,
@@ -21552,11 +22347,20 @@ C 11 1P RESONANCE RADIATION J=1  50.657 NM      F=0.00138
 C 12 1P RESONANCE RADIATION J=1  50.620 NM      F=0.00106
 C SUM HIGHER 1P LEVELS RESONANCE RADIATION J=1  F=0.00440
 C TOTAL SUM OSCILLATOR STRENGTH = 0.42326
+C
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF
+      DATA Z2T/42.1,23.5,10.7,5.88,3.25,1.50,.886,.582,.437,.429,
+     /.460,.484,.502,.515,.525,.540,.550,.566,.575,.585,
+     /.592,.596,.597,.598,.598/
+C UNITS 10**-24
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C --------------------------------------------------------------------
       IF(NANISO.EQ.0) THEN
-       NAME='HE3    ISOTROPIC   2013  '   
+       NAME='HE3    ISOTROPIC   2014  '   
       ELSE 
-       NAME='HE3  ANISOTROPIC   2013  '
+       NAME='HE3  ANISOTROPIC   2014  '
       ENDIF                                         
 C --------------------------------------------------------------------  
 C  HELIUM 3 USES SAME X-SECTIONS AS HE 4 WITH CORRECT ATOMIC MASS
@@ -21567,6 +22371,7 @@ C  2007: INCREASED DATA FILE UP TO 10 MEV
 C  2007: NEW ANISTROPIC SCATTERING FUNCTION INTRODUCED
 C  2007: PENNING FRACTION INTRODUCED
 C  2010: SPLIT EXCITATION INTO 49 LEVELS.
+C  2014: UPDATED IONISATION TO BE CONSISTENT WITH FURSA AND BRAY CCC
 C USED MAINLY THE FOLLOWING THEORETICAL EXCITATION X-SECTIONS:
 C AT RESONANCE ENERGIES USED RMPS CALCULATIONS OF 
 C  BARTSCHAT   J.PHYS B31(1998)L469
@@ -21588,11 +22393,18 @@ C
 C
       NION=2
       NIN=49
+C
+      NBREM=25
+      DO 6 J=1,NIN
+      IZBR(J)=0
+    6 CONTINUE
+      IZBR(50)=2
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
     2 KIN(J)=NANISO
-      NDATA=100
+      NDATA=144
       NIOND=90                                                          
       N23S=139          
       N21S=128
@@ -21621,12 +22433,16 @@ C ENTER IONISING X-SECTION AT 1.4MEV
       E(5)=0.1271D-18
 C ENTER EOBY FOR MINIMUM IONISING PARTICLE         
       E(6)=10.5
-C EOBY AT LOW ENERGY
-      EOBY(1)=15.8
-      EOBY(2)=15.8
 C IONISATION ENERGIES 
       EION(1)=24.58739
       EION(2)=79.00515
+      LEGAS(1)=0
+      LEGAS(2)=0
+      ISHELL(1)=0
+      ISHELL(2)=0
+C EOBY AT LOW ENERGY
+      EOBY(1)=12.0
+      EOBY(2)=65.0
 C AUGER AND FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -21703,6 +22519,7 @@ C
       EIN(47)=24.47518
       EIN(48)=24.49308
       EIN(49)=24.50708
+      EIN(50)=0.0
 C***********************************************************************
 C ENTER PENNING FRACTION FOR EACH LEVEL
 C PENNING FRACTION BETWEEN 0.9 AND 1.0 FOR ALL MIXTURES
@@ -21730,7 +22547,13 @@ C***********************************************************************
      /OBABILITY =',F5.3,' ABS.LENGTH =',F7.2,' DECAY TIME =',F7.1,/)    
     3 CONTINUE
     4 DO 5 NL=1,NIN
-    5 IOFFN(NL)=IFIX(SNGL(0.5+EIN(NL)/ESTEP))
+      DO 651 I=1,4000
+      IF(EG(I).GT.EIN(NL)) THEN
+       IOFFN(NL)=I-1
+       GOTO 5
+      ENDIF
+  651 CONTINUE
+    5 CONTINUE
       SCRPT(1)='                                                  '
       SCRPT(2)=' ELASTIC  ANISOTROPIC        HELIUM 3             '
       IF(NANISO.EQ.0) THEN
@@ -21790,10 +22613,11 @@ C***********************************************************************
       SCRPT(54)=' EXC 111P J=1    RESONANT          ELOSS= 24.47518'
       SCRPT(55)=' EXC 121P J=1    RESONANT          ELOSS= 24.49308'
       SCRPT(56)=' EXC  N1P SUM HI RESONANT          ELOSS= 24.50708'
-      EN=-ESTEP/2.0D0    
+      SCRPT(57)=' BREMSSTRAHLUNG FROM HELIUM ATOM                  '
+C      EN=-ESTEP/2.0D0    
       DO 9000 I=1,NSTEP   
-C      EN=EG(I)                                             
-      EN=EN+ESTEP 
+      EN=EG(I)                                             
+C      EN=EN+ESTEP 
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -21816,6 +22640,8 @@ C
       A=(YEPS(J)-YEPS(J-1))/(XEN(J)-XEN(J-1))
       B=(XEN(J-1)*YEPS(J)-XEN(J)*YEPS(J-1))/(XEN(J-1)-XEN(J))
       PQ2=A*EN+B
+C EPSILON = 1-YEPS
+      PQ2=1.0D0-PQ2
 C
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
@@ -21841,7 +22667,7 @@ C GROSS IONISATION
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
   121 AX2=1.0D0/BETA2
       AX1=AX2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*AX1+C*AX2)/0.995
+      QION(1,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)/0.995
   122 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY 
@@ -21866,7 +22692,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16
       GO TO 242
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
-  241 Q(5,I)=CONST*(AM2*AX1+C*AX2)
+  241 Q(5,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)
   242 CONTINUE  
       IF(EN.LE.(2.0D0*EION(2))) GO TO 250
       PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
@@ -21878,7 +22704,7 @@ C
       QION(2,I)=QTEMP2
       IF(QION(2,I).LT.0.0) QION(2,I)=0.0
 C
-      DO 251 NL=1,NIN
+      DO 251 NL=1,NIN+1
       QIN(NL,I)=0.0D0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -21947,7 +22773,7 @@ C 2 1P        OSC STRENGTH  F=0.27608
       GO TO 402
 C IF ENERGY GT X21P(N21P) EV THEN USE BEF SCALING
   401 QIN(4,I)=0.27608/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(4)))-BETA2)*BBCONST*EN/(EN+EIN(4)+E(3))
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(4)+E(3))
   402 IF(EN.LE.(2.0*EIN(4))) GO TO 410
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C
@@ -22044,7 +22870,7 @@ C 3 1P        OSC STRENGTH F=0.07342
       GO TO 582
 C IF ENERGY GT X31P(N31P) EV THEN USE BEF SCALING
   581 QIN(10,I)=0.07342/(EIN(10)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(10)))-BETA2)*BBCONST*EN/(EN+EIN(10)+E(3))
+     /EIN(10)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(10)+E(3))
   582 IF(EN.LE.(2.0*EIN(10))) GO TO 590
       PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
 C
@@ -22173,7 +22999,7 @@ C 4 1P       OSC STRENGTH  F=0.02986
       GO TO 822
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
   821 QIN(18,I)=0.02986/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+E(3))
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3))
   822 IF(EN.LE.(2.0*EIN(18))) GO TO 830
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
 C
@@ -22318,7 +23144,7 @@ C 5 1P   SCALED FROM 4 1P   OSC STRENGTH  F=0.01504
       GO TO 1062
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1061 QIN(26,I)=0.01504/(EIN(26)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(26)))-BETA2)*BBCONST*EN/(EN+EIN(26)+E(3))
+     /EIN(26)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(26)+E(3))
  1062 IF(EN.LE.(2.0*EIN(26))) GO TO 1070
       PEQIN(26,I)=PEQEL(2,(I-IOFFN(26)))
 C
@@ -22427,7 +23253,7 @@ C 6 1P  SCALED FROM 4 1P    OSC STRENGTH  F=0.00863
       GO TO 1242
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1241 QIN(32,I)=0.00863/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(32)))-BETA2)*BBCONST*EN/(EN+EIN(32)+E(3))
+     /EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+E(3))
  1242 IF(EN.LE.(2.0*EIN(32))) GO TO 1250 
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C
@@ -22536,7 +23362,7 @@ C 7 1P  SCALED FROM 4 1P   OSC STRENGTH  F=0.00540
       GO TO 1422
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1421 QIN(38,I)=0.00540/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*EN/(EN+EIN(38)+E(3))
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(38)+E(3))
  1422 IF(EN.LE.(2.0*EIN(38))) GO TO 1430 
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C
@@ -22645,7 +23471,7 @@ C 8 1P SCALED FROM 4 1P   OSC STRENGTH  F=0.00362
       GO TO 1602
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1601 QIN(44,I)=0.00362/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*EN/(EN+EIN(44)+E(3))
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(44)+E(3))
  1602 IF(EN.LE.(2.0*EIN(44))) GO TO 1610 
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
 C
@@ -22664,7 +23490,7 @@ C 9 1P SCALED FROM 4 1P   OSC STRENGTH  F=0.00253
       GO TO 1632
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1631 QIN(45,I)=0.00253/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+E(3))
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+E(3))
  1632 IF(EN.LE.(2.0*EIN(45))) GO TO 1640 
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
 C
@@ -22683,7 +23509,7 @@ C 10 1P SCALED FROM 4 1P    OSC STRENGTH F=0.00184
       GO TO 1662
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1661 QIN(46,I)=0.00184/(EIN(46)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(46)))-BETA2)*BBCONST*EN/(EN+EIN(46)+E(3))
+     /EIN(46)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(46)+E(3))
  1662 IF(EN.LE.(2.0*EIN(46))) GO TO 1670 
       PEQIN(46,I)=PEQEL(2,(I-IOFFN(46)))
 C
@@ -22702,7 +23528,7 @@ C 11 1P SCALED FROM 4 1P   OSC STRENGTH F=0.00138
       GO TO 1692
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1691 QIN(47,I)=0.00138/(EIN(47)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(47)))-BETA2)*BBCONST*EN/(EN+EIN(47)+E(3))
+     /EIN(47)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(47)+E(3))
  1692 IF(EN.LE.(2.0*EIN(47))) GO TO 1700 
       PEQIN(47,I)=PEQEL(2,(I-IOFFN(47)))
 C
@@ -22721,7 +23547,7 @@ C 12 1P SCALED FROM 4 1P   OSC STRENGTH F=0.00106
       GO TO 1722
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1721 QIN(48,I)=0.00106/(EIN(48)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(48)))-BETA2)*BBCONST*EN/(EN+EIN(48)+E(3))
+     /EIN(48)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(48)+E(3))
  1722 IF(EN.LE.(2.0*EIN(48))) GO TO 1730 
       PEQIN(48,I)=PEQEL(2,(I-IOFFN(48)))
 C
@@ -22740,10 +23566,20 @@ C SUM HIGHER 1P LEVELS     OSC STRENGTH F=0.00440
       GO TO 1752
 C IF ENERGY GT X41P(N41P) EV USE BEF SCALING  
  1751 QIN(49,I)=0.00440/(EIN(49)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(49)))-BETA2)*BBCONST*EN/(EN+EIN(49)+E(3))
+     /EIN(49)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(49)+E(3))
  1752 IF(EN.LE.(2.0*EIN(49))) GO TO 1760 
       PEQIN(49,I)=PEQEL(2,(I-IOFFN(49)))
  1760 CONTINUE
+C LOAD BREMSSTRAHLUNG X-SECTION
+C      IF(EN.LE.1000.) GO TO 2000
+C      DO 1780 J=2,NBREM
+C      IF(EN.LE.EBRM(J)) GO TO 1790
+C 1780 CONTINUE
+C      J=NBREM
+C 1790 A=(DLOG(Z2T(J))-DLOG(Z2T(J-1)))/(EBRM(J)-EBRM(J-1))
+C      B=(DLOG(Z2T(J))*EBRM(J-1)-DLOG(Z2T(J-1))*EBRM(J))/
+C     /(EBRM(J-1)-EBRM(J))  
+C      QIN(50,I)=DEXP(A*EN+B)*1.D-24
 C
  2000 CONTINUE                                                          
 C     
@@ -22760,7 +23596,8 @@ C
      /QIN(38,I)+QIN(40,I)+QIN(43,I)+QIN(44,I)+QIN(45,I)+QIN(46,I)+
      /QIN(47,I)+QIN(48,I)+QIN(49,I)
       QINEL=QSNG+QTRP+QION(1,I)+QION(2,I)
-      Q(1,I)=QELA+QINEL                            
+      Q(1,I)=QELA+QINEL                           
+C     Q(1,I)=QELA+QINEL+QIN(50,I)                            
 C EXAMINE X-SECTION DATA 
 C     WRITE(6,986) EN,QIN(4,I),QIN(10,I),QIN(18,I),QIN(26,I),QIN(32,I),
 C    /QIN(38,I),QIN(44,I),QIN(45,I),QIN(46,I),QIN(47,I),QIN(48,I),
@@ -22779,26 +23616,29 @@ C  SAVE COMPUTE TIME
        GO TO 9011
       ENDIF
  9001 CONTINUE
- 9011 CONTINUE                                          
+ 9011 CONTINUE  
+C      IF(EFINAL.GT.1000.) NIN=50                                        
       RETURN                                                            
       END
       SUBROUTINE GAS5(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY 
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+c    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)                                         
       IMPLICIT INTEGER*8 (I-N)
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6) 
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)     
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(87),YXSEC(87),XEL(84),YEL(84),XEPS(158),YEPS(158),
-     /XION(74),YION(74),YINC(74),YIN1(74),XIN2(49),YIN2(49),XIN3(41),
-     /YIN3(41),XKSH(84),YKSH(84),
+      DIMENSION XEN(125),YXSEC(125),XEL(120),YEL(120),
+     /XEPS(196),YEPS(196),XION(74),YION(74),YINC(74),YIN1(74),
+     /XIN2(49),YIN2(49),XIN3(41),YIN3(41),XKSH(99),YKSH(99),
      /X1S5(111),Y1S5(111),X1S4(137),Y1S4(137),X1S3(117),Y1S3(117),
      /X1S2(119),Y1S2(119),X2P10(73),Y2P10(73),X2P9(70),Y2P9(70),
      /X2P8(72),Y2P8(72),X2P7(65),Y2P7(65),X2P6(59),Y2P6(59),
@@ -22810,6 +23650,7 @@ C  SAVE COMPUTE TIME
      /X3S1PPP(12),Y3S1PPP(12),X3S1PP(12),Y3S1PP(12),
      /X3P106(16),Y3P106(16),X3P52(16),Y3P52(16),X3P1(16),Y3P1(16),
      /IOFFN(45),IOFFION(10)
+      DIMENSION Z10T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME  
 C ELASTIC MOMENTUM TRANSFER                          
@@ -22819,9 +23660,13 @@ C ELASTIC MOMENTUM TRANSFER
      /170.,200.,250.,300.,350.,400.,500.,600.,700.,800.,
      /900.,1000.,1500.,2000.,2500.,3000.,3500.,4000.,5000.,6000.,
      /7000.,8000.,9000.,1.0D4,1.5D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,  
-     /6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,1.50D5,1.75D5,2.0D5,2.5D5,
-     /3.0D5,4.0D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.50D6,
-     /1.75D6,2.0D6,3.0D6,4.0D6,6.0D6,8.0D6,1.0D7/
+     /6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,
+     /3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,
+     /1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,
+     /6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,
+     /3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,
+     /1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,
+     /6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
       DATA YXSEC/1.6178,1.69,1.75,1.79,1.82,1.86,1.91,1.98,2.07,2.14,   
      /2.21,2.29,2.35,2.37,2.44,2.51,2.66,2.71,2.76,2.83,                
      /2.84,2.84,2.78,2.58,2.30,2.12,2.03,1.53,1.21,1.03,                
@@ -22831,9 +23676,17 @@ C ELASTIC MOMENTUM TRANSFER
      /9.28D-5,  
      /6.72D-5,5.12D-5,4.05D-5,3.30D-5,2.75D-5,1.88D-5,1.38D-5,1.06D-5,
      /8.54D-6,5.9D-6,
-     /4.43D-6,2.81D-6,1.99D-6,1.50D-6,1.19D-6,9.71D-7,8.12D-7,6.91D-7,
-     /4.95D-7,3.74D-7,
-     /2.94D-7,2.38D-7,1.24D-7,7.74D-8,3.89D-8,2.36D-8,1.59D-8/
+     /4.43D-6,3.46D-6,2.81D-6,2.34D-6,1.99D-6,1.50D-6,1.19D-6,9.71D-7,
+     /8.12D-7,6.91D-7,
+     /4.95D-7,3.74D-7,2.94D-7,2.38D-7,1.67D-7,1.24D-7,9.66D-8,7.74D-8,
+     /6.35D-8,5.31D-8,
+     /3.89D-8,2.98D-8,2.36D-8,1.92D-8,1.59D-8,1.07D-8,7.71D-9,5.83D-9,
+     /4.57D-9,3.03D-9,
+     /2.16D-9,1.62D-9,1.26D-9,1.01D-9,8.29D-10,5.86D-10,4.36D-10,
+     /3.36D-10,2.67D-10,2.18D-10,
+     /1.40D-10,9.78D-11,7.20D-11,5.52D-11,3.54D-11,2.46D-11,1.81D-11,
+     /1.38D-11,1.09D-11,8.86D-12,
+     /6.15D-12,4.52D-12,3.46D-12,2.73D-12,2.21D-12/
 C ELASTIC TOTAL
       DATA XEL/1.00,1.20,1.50,1.80,2.00,2.50,3.00,4.00,5.00,6.00,       
      /8.00,10.0,12.0,14.0,16.0,18.0,20.0,25.0,30.0,40.0,
@@ -22841,19 +23694,25 @@ C ELASTIC TOTAL
      /300.,350.,400.,500.,600.,700.,800.,900.,1000.,1200.,              
      /1500.,2000.,2500.,3000.,4000.,5000.,6000.,7000.,8000.,9000.,
      /1.0D4,1.5D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,4.0D5,5.0D5,
-     /6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,3.0D6,
-     /4.0D6,6.0D6,8.0D6,1.0D7/
+     /9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,
+     /4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,
+     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,
+     /9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,
+     /5.0D7,6.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,
+     /3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
       DATA YEL/1.5667,1.68,1.82,1.94,2.01,2.16,2.30,2.55,2.80,2.98,
      /3.23,3.39,3.54,3.63,3.67,3.68,3.69,3.61,3.50,3.27,
      /3.09,2.90,2.72,2.54,2.40,2.25,1.96,1.74,1.39,1.21,
      /1.06,.997,.893,.799,.693,.640,.565,.545,.483,.433,
      /.359,.284,.223,.191,.156,.125,.109,.096,.0850,.0770,
      /.0710,.0500,.0389,.0317,.0269,.0208,.0172,.0147,.0129,.0116,
-     /.0106,.00977,.00829,.00731,.00661,.00608,.00636,.00488,.00430,
-     /.00396,
-     /.00374,.00358,.00347,.00339,.00333,.00322,.00315,.00310,.00307,
-     /.00301,.00298,.00296,.00296,.00295/
+     /.0106,.00977,.00829,.00731,.00661,.00608,.00536,.00488,.00455,
+     /.00430,
+     /.00411,.00396,.00374,.00358,.00347,.00339,.00333,.00322,.00315,
+     /.00310,
+     /.00307,.00303,.00301,.00299,.00298,.00298,.00297,.00296,.00296,
+     /.00296,
+     /.00295,.00295,28*.002945/
 C ANGULAR DISTRIBUTION PARAMETER EPSILON
       DATA XEPS/0.0,.0001,.0002,.0003,.0004,.0005,.0006,.0008,.001,
      /.0012,
@@ -22870,40 +23729,53 @@ C ANGULAR DISTRIBUTION PARAMETER EPSILON
      /900.,1000.,1200.,1500.,2000.,2500.,3000.,3500.,4000.,5000.,
      /6000.,7000.,8000.,9000.,1.0D4,1.5D4,2.0D4,2.5D4,3.0D4,4.0D4,
      /5.0D4,6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,
-     /2.5D5,3.0D5,4.0D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,
-     /1.5D6,1.75D6,2.0D6,3.0D6,4.0D6,6.0D6,8.0D6,1.0D7/
-      DATA YEPS/0.0,-.02100,-.02805,-.03494,-.03914,-.04259,-.04678,
-     /-.05337,-.05831,-.06325,
-     /-.06804,-.07208,-.07522,-.07761,-.08388,-.09015,-.09478,-.09866,
-     /-.10254,-.10730,
-     /-.11177,-.11579,-.11891,-.12531,-.13154,-.13659,-.14163,-.14918,
-     /-.15613,-.16248,
-     /-.16779,-.17310,-.18075,-.18722,-.19324,-.19778,-.20202,-.20656,
-     /-.21006,-.21313,
-     /-.21604,-.22041,-.22362,-.22580,-.22725,-.22929,-.22929,-.22856,
-     /-.22711,-.22478,
-     /-.21852,-.21196,-.20422,-.19734,-.18766,-.17649,-.16544,-.15332,
-     /-.14133,-.11787,
-     /-.09463,-.07058,-.04888,-.00900,0.05765,0.11566,0.14122,0.20654,
-     /0.25109,0.32789,
-     /.37941,.40815,.41670,.42042,.41243,.41099,.40593,.39969,.39828,
-     /.38331,
-     /.38303,.37506,.36827,.36259,.35193,.34064,.33744,.31351,.27839,
-     /.22252,
-     /.24457,.30446,.32377,.31932,.33189,.39491,.45872,.50382,.52062,
-     /.56896,
-     /.60358,.62484,.69036,.72708,.78414,.80724,.85978,.88320,.90677,
-     /.91667,
-     /.93247,.93647,.94508,.96121,.97204,.97651,.98092,.98344,.98703,
-     /.98954,
-     /.99172,.99311,.99405,.99480,.99543,.99713,.99791,.998626,.998640,
-     /.999047,
-     /.999212,.999350,.999449,.999525,.999584,.999629,.999711,.999765,
-     /.999805,.999832,
-     /.999895,.999898,.999929,.999947,.999959,.999967,.999972,.9999769, 
-     /.9999803,.9999858,
-     /.9999893,.9999917,.9999933,.9999966,.9999980,.9999990,.9999994,
-     /.9999996/
+     /2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,
+     /1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,
+     /5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,
+     /2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,
+     /1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,
+     /5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
+C ELASTIC ANGULAR DISTRIBUTION PARAMETER EPSILON
+C EPSILON =1.0-YEPS
+      DATA YEPS/1.0,1.02100,1.02805,1.03494,1.03914,1.04259,1.04678,
+     /1.05337,1.05831,1.06325,
+     /1.06804,1.07208,1.07522,1.07761,1.08388,1.09015,1.09478,1.09866,
+     /1.10254,1.10730,
+     /1.11177,1.11579,1.11891,1.12531,1.13154,1.13659,1.14163,1.14918,
+     /1.15613,1.16248,
+     /1.16779,1.17310,1.18075,1.18722,1.19324,1.19778,1.20202,1.20656,
+     /1.21006,1.21313,
+     /1.21604,1.22041,1.22362,1.22580,1.22725,1.22929,1.22929,1.22856,
+     /1.22711,1.22478,
+     /1.21852,1.21196,1.20422,1.19734,1.18766,1.17649,1.16544,1.15332,
+     /1.14133,1.11787,
+     /1.09463,1.07058,1.04888,1.00900,0.94235,0.88434,0.85878,0.79346,
+     /0.74891,0.67211,
+     /.62059,.59185,.58330,.57958,.58757,.58901,.59407,.60031,.60172,
+     /.61669,
+     /.61697,.62494,.63173,.63741,.64807,.65936,.66256,.68649,.72161,
+     /.77748,
+     /.75543,.69554,.67623,.68068,.66811,.60509,.54128,.49618,.47938,
+     /.43104,
+     /.39642,.37516,.30964,.27292,.21586,.19276,.14022,.11680,.09323,
+     /.08333,
+     /.06753,.06353,.05492,.03879,.02796,.02349,.01908,.01656,.01297,
+     /.01046,
+     /.00828,.00689,.00595,.00520,.00457,.00287,.00209,.001374,.001360,
+     /.000953,
+     /7.88D-4,6.50D-4,5.51D-4,4.75D-4,4.16D-4,3.71D-4,2.89D-4,2.34D-4,
+     /1.96D-4,1.67D-4,
+     /1.278D-4,1.020D-4,8.40D-5,7.07D-5,6.06D-5,5.27D-5,4.11D-5,3.33D-5,
+     /2.74D-5,2.31D-5,
+     /1.975D-5,1.418D-5,1.065D-5,8.32D-6,6.69D-6,4.60D-6,3.36D-6,
+     /2.57D-6,2.03D-6,1.64D-6,
+     /1.355D-6,9.70D-7,7.29D-7,5.68D-7,4.55D-7,3.73D-7,2.43D-7,1.71D-7,
+     /1.27D-7,9.80D-8,
+     /6.33D-8,4.42D-8,3.26D-8,2.49D-8,1.97D-8,1.60D-8,1.10D-8,8.10D-9,
+     /6.14D-9,4.82D-9,
+     /3.88D-9,2.44D-9,1.67D-9,1.21D-9,9.1D-10,5.7D-10,3.9D-10,2.8D-10,
+     /2.1D-10,1.7D-10,
+     /1.3D-10,9.1D-11,6.6D-11,5.0D-11,3.9D-11,3.1D-11/
 C IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN-BETHE IN SUB)  
       DATA XION/21.56454,22.0,22.5,23.0,23.5,24.0,24.5,25.0,25.5,26.0, 
      /26.5,27.0,27.5,28.0,29.0,30.0,32.0,34.0,36.0,40.0,
@@ -22983,7 +23855,9 @@ C K-SHELL IONISATION X-SECTION
      /6.13D5,
      /7.50D5,1.00D6,1.22D6,1.45D6,1.73D6,2.00D6,2.51D6,3.07D6,4.00D6,
      /5.01D6,
-     /6.13D6,8.18D6,1.00D7,2.05D7/
+     /6.13D6,8.18D6,1.00D7,1.50D7,2.05D7,3.07D7,3.98D7,5.01D7,6.13D7,
+     /8.18D7,
+     /1.00D8,1.50D8,2.05D8,3.07D8,3.98D8,5.01D8,6.13D8,8.18D8,1.00D9/
       DATA YKSH/0.0,7.15D-6,2.96D-5,5.13D-5,7.23D-5,9.26D-5,1.12D-4,
      /1.31D-4,1.49D-4,1.67D-4,
      /1.84D-4,2.00D-4,2.31D-4,2.59D-4,2.84D-4,3.08D-4,3.39D-4,3.65D-4,
@@ -23000,9 +23874,12 @@ C K-SHELL IONISATION X-SECTION
      /3.23D-5,3.12D-5,
      /3.05D-5,3.01D-5,3.01D-5,3.04D-5,3.07D-5,3.11D-5,3.19D-5,3.27D-5,
      /3.39D-5,3.50D-5,
-     /3.60D-5,3.76D-5,3.87D-5,4.30D-5/  
+     /3.60D-5,3.76D-5,3.87D-5,4.11D-5,4.30D-5,4.54D-5,4.69D-5,4.83D-5,
+     /4.96D-5,5.13D-5,
+     /5.25D-5,5.50D-5,5.69D-5,5.94D-5,6.10D-5,6.24D-5,6.36D-5,6.54D-5,
+     /6.66D-5/
 C            
-C 1S5 METASTABLE J=2  UNITS 10**-18
+C 1S5 METASTABLE J=2  UNITS 10**-18 SCALED BY 1/E**3 ABOVE 50 EV
       DATA X1S5/16.61907,16.625,16.63,16.64,16.65,16.66,16.67,16.68,
      /16.69,16.70,
      /16.71,16.73,16.75,16.79,16.80,16.81,16.82,16.84,16.85,16.86,
@@ -23058,7 +23935,7 @@ C 1S4 RESONANCE LEVEL J=1 F=0.0118  UNITS 10**-18  74.3724 NM.
      /1.00,1.02,1.04,1.05,1.06,1.06,1.05,1.04,1.02,.990,
      /.950,.880,.800,.730,.670,.600,.530,.460,.410,.370,
      /.338,.310,.270,.239,.217,.198,.184/
-C 1S3 METASTABLE LEVEL  J=0   UNITS 10**-18
+C 1S3 METASTABLE LEVEL  J=0   UNITS 10**-18 SCALED BY 1/E**3 ABOVE 50 EV
       DATA X1S3/16.71538,16.72,16.73,16.74,16.75,16.76,16.77,16.78,
      /16.79,16.80,
      /16.81,16.82,16.83,16.84,16.85,16.86,16.87,16.88,16.89,16.90,
@@ -23366,6 +24243,15 @@ C 5S1! J=1  RESONANCE LEVEL  USE BEF SCALING     F=0.0025    58.7217 NM
 C SUM S STATES 5-INFINITY USE BEF SCALING        F=0.00962
 C SUM D STATES 6-INFINITY USE BEF SCALING        F=0.01695  
 C  TOTAL OSCILLATOR SUM  F = 0.2926
+C
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF
+      DATA Z10T/671.,424.,215.,123.,69.3,32.5,18.8,11.8,7.95,7.19,
+     /7.27,7.42,7.59,7.71,7.80,7.94,8.05,8.19,8.29,8.40,
+     /8.47,8.51,8.52,8.56,8.57/
+C UNITS 10**-24
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C ---------------------------------------------------------------------
       IF(NANISO.EQ.0) THEN
        NAME='NEON ISOTROPIC     2013  '       
@@ -23416,18 +24302,25 @@ C AVERAGE AUGER EMISSION FOR EACH SHELL
 C
       NION=4                                           
       NIN=45
+C
+      NBREM=25
+      DO 55 J=1,NIN
+      IZBR(J)=0
+   55 CONTINUE
+      IZBR(46)=10
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO 
       DO 2 J=1,NIN
     2 KIN(J)=NANISO
 C       
-      NEL=84                                                            
-      NDATA=87 
-      NEPSI=158                                                        
+      NEL=120                                                       
+      NDATA=125 
+      NEPSI=196                                                        
       NIOND=74 
       NION2=49
       NION3=41
-      NKSH=84                                                         
+      NKSH=99             
       N1S5=111
       N1S4=137
       N1S3=117
@@ -23467,16 +24360,24 @@ C ENTER IONISING X-SECTION AT 1.3MEV
 C ENTER EOBY FOR MINIMUM IONISING PARTICLE          
       E(6)=19.5
 C OPAL BEATY AT LOW ENERGY
-      EOBY(1)=24.2
-      EOBY(2)=24.2
-      EOBY(3)=24.2 
+      EOBY(1)=17.4      
+      EOBY(2)=36.0     
+      EOBY(3)=73.0     
 C OPAL BEATY SPLITTING FOR K SHELL
-      EOBY(4)=870.2
+      EOBY(4)=500.0       
 C
       EION(1)=21.56454
       EION(2)=62.5275
       EION(3)=125.9508
       EION(4)=870.2
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=0
+      LEGAS(4)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=0
+      ISHELL(4)=1
 C AUGER AND FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -23565,6 +24466,7 @@ C
       EIN(43)=21.11401
       EIN(44)=21.14638
       EIN(45)=21.18286
+      EIN(46)=0.0
 C*****************************************************************
 C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL
 C PENNING TRANSFER EFFICIENCY IN NEON MIXTURES BETWEEN 0.3 AND 0.6
@@ -23654,6 +24556,7 @@ C*****************************************************************
       SCRPT(52)='EX   5S1!     J=1   RESONANT        ELVL= 21.11401'
       SCRPT(53)='EX SUM HIGHER S     RESONANT        ELVL= 21.14638'
       SCRPT(54)='EX SUM HIGHER D     RESONANT        ELVL= 21.18286'
+      SCRPT(55)=' BREMSSTRAHLUNG FROM NEON ATOM                    '
 C PARAMETERS OF PHASE SHIFT ANALYSIS                         
       APOL=2.672                                                        
       LMAX=100                                                          
@@ -23664,10 +24567,10 @@ C PARAMETERS OF PHASE SHIFT ANALYSIS
       B1=3.29                                                           
       A2=-0.037
 C       
-      EN=-ESTEP/2.0D0                                    
+C     EN=-ESTEP/2.0D0                                    
       DO 9000 I=1,NSTEP 
-C      EN=EG(I)                                                
-      EN=EN+ESTEP
+      EN=EG(I)                                                
+C     EN=EN+ESTEP
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -23725,6 +24628,8 @@ C      EN=EG(I)
    14 A=(YEPS(J)-YEPS(J-1))/(XEPS(J)-XEPS(J-1))
       B=(XEPS(J-1)*YEPS(J)-XEPS(J)*YEPS(J-1))/(XEPS(J-1)-XEPS(J))
       PQ2=A*EN+B
+C EPSILON =1.0-YEPS
+      PQ2=1.0D0-PQ2
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
       Q(2,I)=QELA                   
@@ -23750,7 +24655,7 @@ C IONISATION FOR CHARGE STATE =1
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
   121 AX2=1.0D0/BETA2
       AX1=AX2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*AX1+C*AX2)*0.9594
+      QION(1,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)*0.9594
   122 CONTINUE                     
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -23776,7 +24681,7 @@ C IONISATION FOR CHARGE STATE =2
 C USE BORN BETHE X-SECTION ABOVE XIN2(NION2) EV
   141 AX2=1.0D0/BETA2
       AX1=AX2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(2,I)=CONST*(AM2*AX1+C*AX2)*0.0388
+      QION(2,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)*0.0388
   142 CONTINUE                     
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -23802,7 +24707,7 @@ C IONISATION FOR CHARGE STATE =3
 C USE BORN BETHE X-SECTION ABOVE XIN3(NION3) EV
   161 AX2=1.0D0/BETA2
       AX1=AX2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(3,I)=CONST*(AM2*AX1+C*AX2)*0.00215
+      QION(3,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)*0.00215
   162 CONTINUE                     
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -23842,7 +24747,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16
       GO TO 242
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
-  241 Q(5,I)=CONST*(AM2*AX1+C*AX2)
+  241 Q(5,I)=CONST*(AM2*(AX1-DEN(I)/2.0)+C*AX2)
   242 CONTINUE  
 C CORRECTION TO CHARGE STATE 1 2 AND 3 X-SECTION FOR K SHELL 
 C GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
@@ -23857,7 +24762,7 @@ C GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
 C                     
       Q(6,I)=0.0D0     
 C
-      DO 251 NL=1,NIN
+      DO 251 NL=1,NIN+1
       QIN(NL,I)=0.0D0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -23894,7 +24799,7 @@ C 1S4 RESONANCE LEVEL  F=0.0118
       GO TO 342
 C IF ENERGY GT X1S4(N1S4) EV USE BEF SCALING
   341 QIN(2,I)=0.0118/(EIN(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(2)))-BETA2)*BBCONST*EN/(EN+EIN(2)+E(3))   
+     /EIN(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(2)+E(3))   
       QIN(2,I)=DABS(QIN(2,I))
   342 IF(EN.LE.(2.0*EIN(2))) GO TO 350 
       PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))                         
@@ -23926,7 +24831,7 @@ C 1S2 RESONANCE LEVEL F=0.159
       GO TO 402
 C IF ENERGY GT X1S2(N1S2) EV USE BEF SCALING
   401 QIN(4,I)=0.1590/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(4)))-BETA2)*BBCONST*EN/(EN+EIN(4)+E(3))  
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(4)+E(3))  
       QIN(4,I)=DABS(QIN(4,I))
   402 IF(EN.LE.(2.0*EIN(4))) GO TO 410
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))                                
@@ -24098,7 +25003,7 @@ C IF ENERGY GT X2S5(N2S5) EV   SCALE BY 1/E**2
 C 2S4   BEF SCALING
   740 IF(EN.LE.EIN(16)) GO TO 2000
       QIN(16,I)=0.0128/(EIN(16)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(16)))-BETA2)*BBCONST*EN/(EN+EIN(16)+E(3))   
+     /EIN(16)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(16)+E(3))   
       QIN(16,I)=DABS(QIN(16,I))
       IF(EN.LE.(2.0*EIN(16))) GO TO 750 
       PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))
@@ -24120,7 +25025,7 @@ C IF ENERGY GT X2S3(N2S3) EV   SCALE BY 1/E**2
 C 2S2   BEF SCALING
   780 IF(EN.LE.EIN(18)) GO TO 2000
       QIN(18,I)=0.0166/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+E(3)) 
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3)) 
       QIN(18,I)=DABS(QIN(18,I))  
       IF(EN.LE.(2.0*EIN(18))) GO TO 790 
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
@@ -24142,7 +25047,7 @@ C IF ENERGY GT X3D6(N3D6) EV   SCALE BY 1/E**2
 C 3D5   BEF SCALING
   820 IF(EN.LE.EIN(20)) GO TO 2000
       QIN(20,I)=0.0048/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(20)))-BETA2)*BBCONST*EN/(EN+EIN(20)+E(3)) 
+     /EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(20)+E(3)) 
       QIN(20,I)=DABS(QIN(20,I))  
       IF(EN.LE.(2.0*EIN(20))) GO TO 830 
       PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))
@@ -24194,7 +25099,7 @@ C IF ENERGY GT X3D3(N3D3) EV   SCALE BY 1/E**2
 C 3D2     BEF SCALING
   920 IF(EN.LE.EIN(24)) GO TO 2000
       QIN(24,I)=0.0146/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(24)))-BETA2)*BBCONST*EN/(EN+EIN(24)+E(3)) 
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(24)+E(3)) 
       QIN(24,I)=DABS(QIN(24,I))  
       IF(EN.LE.(2.0*EIN(24))) GO TO 930 
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
@@ -24280,7 +25185,7 @@ C IF ENERGY GT X3S1PP(N3S1PP) EV   SCALE BY 1/E**2
 C 3S1!   BEF SCALING
  1080 IF(EN.LE.EIN(30)) GO TO 2000
       QIN(30,I)=0.00676/(EIN(30)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(30)))-BETA2)*BBCONST*EN/(EN+EIN(30)+E(3))  
+     /EIN(30)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(30)+E(3))  
       QIN(30,I)=DABS(QIN(30,I)) 
       IF(EN.LE.(2.0*EIN(30))) GO TO 1090 
       PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))
@@ -24333,91 +25238,103 @@ C IF ENERGY GT X3P1(N3P1) EV   SCALE BY 1/E
 C 3S4     BEF SCALING
  1180 IF(EN.LE.EIN(34)) GO TO 2000
       QIN(34,I)=0.00635/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(34)))-BETA2)*BBCONST*EN/(EN+EIN(34)+E(3))   
+     /EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(34)+E(3))   
       QIN(34,I)=DABS(QIN(34,I))
       IF(EN.LE.(2.0*EIN(34))) GO TO 1190
       PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
 C 3S2     BEF SCALING
  1190 IF(EN.LE.EIN(35)) GO TO 2000
       QIN(35,I)=0.00440/(EIN(35)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(35)))-BETA2)*BBCONST*EN/(EN+EIN(35)+E(3))
+     /EIN(35)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(35)+E(3))
       QIN(35,I)=DABS(QIN(35,I))   
       IF(EN.LE.(2.0*EIN(35))) GO TO 1200
       PEQIN(35,I)=PEQEL(2,(I-IOFFN(35)))
 C 4D5     BEF SCALING
  1200 IF(EN.LE.EIN(36)) GO TO 2000
       QIN(36,I)=0.00705/(EIN(36)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(36)))-BETA2)*BBCONST*EN/(EN+EIN(36)+E(3))
+     /EIN(36)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(36)+E(3))
       QIN(36,I)=DABS(QIN(36,I))   
       IF(EN.LE.(2.0*EIN(36))) GO TO 1210
       PEQIN(36,I)=PEQEL(2,(I-IOFFN(36)))
 C 4D2     BEF SCALING
  1210 IF(EN.LE.EIN(37)) GO TO 2000
       QIN(37,I)=0.00235/(EIN(37)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(37)))-BETA2)*BBCONST*EN/(EN+EIN(37)+E(3)) 
+     /EIN(37)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(37)+E(3)) 
       QIN(37,I)=DABS(QIN(37,I))  
       IF(EN.LE.(2.0*EIN(37))) GO TO 1220
       PEQIN(37,I)=PEQEL(2,(I-IOFFN(37)))
 C 4S1!    BEF SCALING
  1220 IF(EN.LE.EIN(38)) GO TO 2000
       QIN(38,I)=0.00435/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*EN/(EN+EIN(38)+E(3)) 
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(38)+E(3)) 
       QIN(38,I)=DABS(QIN(38,I))  
       IF(EN.LE.(2.0*EIN(38))) GO TO 1230
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C 4S4     BEF SCALING
  1230 IF(EN.LE.EIN(39)) GO TO 2000
       QIN(39,I)=0.00325/(EIN(39)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(39)))-BETA2)*BBCONST*EN/(EN+EIN(39)+E(3))
+     /EIN(39)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(39)+E(3))
       QIN(39,I)=DABS(QIN(39,I))   
       IF(EN.LE.(2.0*EIN(39))) GO TO 1240
       PEQIN(39,I)=PEQEL(2,(I-IOFFN(39)))
 C 5D5     BEF SCALING
  1240 IF(EN.LE.EIN(40)) GO TO 2000
       QIN(40,I)=0.00383/(EIN(40)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(40)))-BETA2)*BBCONST*EN/(EN+EIN(40)+E(3)) 
+     /EIN(40)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(40)+E(3)) 
       QIN(40,I)=DABS(QIN(40,I))  
       IF(EN.LE.(2.0*EIN(40))) GO TO 1250
       PEQIN(40,I)=PEQEL(2,(I-IOFFN(40)))
 C 5D2     BEF SCALING
  1250 IF(EN.LE.EIN(41)) GO TO 2000
       QIN(41,I)=0.00127/(EIN(41)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(41)))-BETA2)*BBCONST*EN/(EN+EIN(41)+E(3)) 
+     /EIN(41)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(41)+E(3)) 
       QIN(41,I)=DABS(QIN(41,I))  
       IF(EN.LE.(2.0*EIN(41))) GO TO 1260
       PEQIN(41,I)=PEQEL(2,(I-IOFFN(41)))
 C 4S2     BEF SCALING
  1260 IF(EN.LE.EIN(42)) GO TO 2000
       QIN(42,I)=0.00165/(EIN(42)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(42)))-BETA2)*BBCONST*EN/(EN+EIN(42)+E(3)) 
+     /EIN(42)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(42)+E(3)) 
       QIN(42,I)=DABS(QIN(42,I))  
       IF(EN.LE.(2.0*EIN(42))) GO TO 1270
       PEQIN(42,I)=PEQEL(2,(I-IOFFN(42)))
 C 5S1!    BEF SCALING
  1270 IF(EN.LE.EIN(43)) GO TO 2000
       QIN(43,I)=0.00250/(EIN(43)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(43)))-BETA2)*BBCONST*EN/(EN+EIN(43)+E(3))   
+     /EIN(43)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(43)+E(3))   
       QIN(43,I)=DABS(QIN(43,I))
       IF(EN.LE.(2.0*EIN(43))) GO TO 1280
       PEQIN(43,I)=PEQEL(2,(I-IOFFN(43)))
 C SUM HIGHER RESONANCE S STATES
  1280 IF(EN.LE.EIN(44)) GO TO 2000
       QIN(44,I)=0.00962/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*EN/(EN+EIN(44)+E(3))  
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(44)+E(3))  
       QIN(44,I)=DABS(QIN(44,I)) 
       IF(EN.LE.(2.0*EIN(44))) GO TO 1290
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
 C SUM HIGHER RESONANCE S STATES
  1290 IF(EN.LE.EIN(45)) GO TO 2000
       QIN(45,I)=0.01695/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+E(3))   
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+E(3))   
       QIN(45,I)=DABS(QIN(45,I))
       IF(EN.LE.(2.0*EIN(45))) GO TO 2000
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+C      IF(EN.LT.1000.) GO TO 2000
+C      DO 1300 J=2,NBREM
+C      IF(EN.LE.EBRM(J)) GO TO 1310
+CC 1300 CONTINUE
+C      J=NBREM
+C 1310 A=(DLOG(Z10T(J))-DLOG(Z10T(J-1)))/(EBRM(J)-EBRM(J-1))
+C      B=(DLOG(Z10T(J))*EBRM(J-1)-DLOG(Z10T(J-1))*EBRM(J))/
+C     /(EBRM(J-1)-EBRM(J))
+C      QIN(46,I)=DEXP(A*EN+B)*1.D-24
  2000 CONTINUE 
       QINEL=0.0
       DO 8000 ILVL=1,NIN
  8000 QINEL=QINEL+QIN(ILVL,I)
+C     Q(1,I)=QELA+QION(1,I)+QION(2,I)+QION(3,I)+QION(4,I)+QINEL+
+C    /QIN(46,I)
       Q(1,I)=QELA+QION(1,I)+QION(2,I)+QION(3,I)+QION(4,I)+QINEL
 C WRITE TOTAL, COUNTING IONISATION, INELASTIC AND ELASTIC X-SECTIONS
 C     WRITE(6,8001) EN,Q(1,I),Q(5,I),QINEL,QELA
@@ -24432,28 +25349,31 @@ C  SAVE COMPUTING TIME
       ENDIF
  9001 CONTINUE
  9011 CONTINUE
+C      IF(EFINAL.GT.1000.) NIN=46
       RETURN                                                            
-      END                                                               
+      END
       SUBROUTINE GAS6(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY 
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6) 
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(116),YXSEC(116),XEL(130),YEL(130),
-     /XEPS(140),YEPS(140),XION(65),YION(65),YINC(65),YIN1(65),XIN2(41),
-     /YIN2(41),XIN3(35),YIN3(35),XIN4(32),YIN4(32),XKSH(59),YKSH(59),
-     /XL1S(66),YL1S(66),XL2S(65),YL2S(65),XL3S(67),YL3S(67),
-     /XM1S(74),YM1S(74),XM2S(79),YM2S(79),XM3S(80),YM3S(80),
-     /XM4S(86),YM4S(86),XM5S(87),YM5S(87),
+      DIMENSION XEN(162),YXSEC(162),XEL(151),YEL(151),
+     /XEPS(186),YEPS(186),XION(65),YION(65),YINC(65),YIN1(65),XIN2(41),
+     /YIN2(41),XIN3(35),YIN3(35),XIN4(32),YIN4(32),XKSH(74),YKSH(74),
+     /XL1S(83),YL1S(83),XL2S(82),YL2S(82),XL3S(84),YL3S(84),
+     /XM1S(91),YM1S(91),XM2S(98),YM2S(98),XM3S(99),YM3S(99),
+     /XM4S(105),YM4S(105),XM5S(106),YM5S(106),
      /XEXC1(105),YEXC1(105),XEXC2(86),YEXC2(86),
      /X1S5(169),Y1S5(169),YP1S5(169),X1S4(130),Y1S4(130),YP1S4(130),
      /X1S3(168),Y1S3(168),YP1S3(168),X1S2(150),Y1S2(150),YP1S2(150),
@@ -24476,6 +25396,7 @@ C  SAVE COMPUTING TIME
      /X2S3(19),Y2S3(19),YP2S3(19),X4D1PP(19),Y4D1PP(19),YP4D1PP(19),
      /X4D1P(19),Y4D1P(19),YP4D1P(19),X3S5(19),Y3S5(19),YP3S5(19),
      /X4FS(19),Y4FS(19),YP4FS(19),IOFFN(51),IOFFION(11)   
+      DIMENSION Z36T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME 
 C ELASTIC MOMENTUM TRANSFER                                       
@@ -24488,9 +25409,14 @@ C ELASTIC MOMENTUM TRANSFER
      /16.0,20.0,30.0,40.0,50.0,60.0,75.0,100.,150.,200.,
      /300.,400.,500.,700.,1000.,1250.,1500.,1750.,2000.,2500.,
      /3000.,3500.,4000.,4500.,5000.,6000.,7000.,8000.,9000.,1.0D4,
-     /1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,3.5D4,4.0D4,5.0D4,
-     /6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,
-     /4.0D5,5.0D5,6.0D5,8.0D5,1.0D6,1.25D6,1.50D6,2.0D6/
+     /1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,3.5D4,4.0D4,5.0D4,6.0D4,
+     /8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,
+     /4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,
+     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,
+     /9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,
+     /4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,
+     /2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,
+     /9.0D8,1.0D9/
 C ELFORD UP TO 2.0 EV THEN FIT TO NAKAMURA DRIFT VELOCITY
       DATA YXSEC/37.4,33.1,30.0,27.9,26.2,24.2,21.6,19.5,16.3,13.9,     
      /12.1,10.6,9.30,8.27,7.29,6.55,5.27,4.30,3.18,2.37,                
@@ -24502,9 +25428,20 @@ C ELFORD UP TO 2.0 EV THEN FIT TO NAKAMURA DRIFT VELOCITY
      /0.64,0.54,0.48,0.41,.340,.270,.222,.183,.154,.113,
      /.0881,.0711,.0591,.0501,.0432,.033,.026,.0212,.0176,.0149,
      /.0104,.00778,.00605,.00486,.00336,.00248,.00192,.00153,.00105,
-     /.000773,4.76D-4,3.28D-4,2.26D-4,1.68D-4,1.3D-4,1.05D-4,7.35D-5,
-     /5.51D-5,3.53D-5,2.51D-5,1.90D-5,1.25D-5,8.81D-6,6.19D-6,4.68D-6,
-     /3.69D-6/
+     /.000773,
+     /4.76D-4,3.28D-4,2.26D-4,1.68D-4,1.30D-4,1.05D-4,7.35D-5,5.51D-5,
+     /4.33D-5,3.53D-5,
+     /2.94D-5,2.51D-5,1.90D-5,1.51D-5,1.23D-5,1.03D-5,8.81D-6,6.19D-6,
+     /4.68D-6,3.69D-6,
+     /2.99D-6,2.10D-6,1.57D-6,1.22D-6,9.76D-7,8.02D-7,6.71D-7,4.92D-7,
+     /3.77D-7,2.99D-7,
+     /2.43D-7,2.02D-7,1.35D-7,9.74D-8,7.36D-8,5.76D-8,3.81D-8,2.71D-8,
+     /2.02D-8,1.57D-8,
+     /1.25D-8,1.02D-8,7.13D-9,5.26D-9,4.03D-9,3.19D-9,2.58D-9,1.65D-9,
+     /1.14D-9,8.40D-10,
+     /6.43D-10,4.11D-10,2.85D-10,2.09D-10,1.60D-10,1.26D-10,1.02D-10,
+     /7.10D-11,5.21D-11,3.99D-11,
+     /3.15D-11,2.55D-11/
 C ELASTIC   CONSISTENT WITHIN 1% OF TOTAL X-SECTION SUM
       DATA XEL/1.D-6,.001,.003,.005,.007,0.01,.015,0.02,0.03,0.04,
      /0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.14,0.17,0.20,
@@ -24518,7 +25455,10 @@ C ELASTIC   CONSISTENT WITHIN 1% OF TOTAL X-SECTION SUM
      /1500.,1800.,2000.,2500.,3000.,3500.,4000.,4500.,5000.,5500.,
      /6.0D3,7.0D3,8.0D3,1.0D4,1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,
      /3.5D4,4.0D4,5.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,
-     /2.5D5,3.0D5,4.0D5,5.0D5,6.0D5,8.0D5,1.0D6,1.25D6,1.5D6,2.0D6/
+     /2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,
+     /1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,
+     /5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,
+     /1.D9/
       DATA YEL/37.4,34.6,31.8,29.9,28.4,26.6,24.1,22.2,19.1,16.8,
      /14.9,13.4,12.1,11.0,10.0,9.15,7.71,6.56,5.21,4.38,
      /3.22,2.31,1.75,1.30,1.04,0.83,0.65,0.60,0.58,0.58,
@@ -24530,8 +25470,12 @@ C ELASTIC   CONSISTENT WITHIN 1% OF TOTAL X-SECTION SUM
      /3.70,3.56,3.15,2.90,2.62,2.44,2.25,2.20,1.92,1.72,
      /1.61,1.41,1.40,1.28,1.13,1.06,.951,.895,.826,.798,
      /.744,.668,.617,.526,.450,.396,.354,.321,.272,.237,
-     /.211,.191,.161,.141,.114,.0973,.0836,.0743,.0676,.0625,
-     /.0554,.0507,.0448,.0414,.0392,.0365,.0350,.0338,.0331,.0323/
+C SMOOTH JOIN TO SALVAT BETWEEN E=10**5 AND 2*10**5 EV
+     /.211,.191,.161,.141,.114,.0973,.0817,.0709,.0630,.0568,
+     /.0504,.0461,.0430,.0408,.0390,.0376,.0356,.0342,.0332,.0324,
+     /.0318,.0308,.0301,.0297,.0294,.0290,.0288,.0286,.0285,.0284,
+     /.0284,.0283,.0283,.0283,.0282,.0282,.0282,.0282,.0282,.0282,
+     /.0282/
 C ELASTIC ANGULAR DISTRIBUTION (EPSILON)
       DATA XEPS/0.00,.001,.003,.005,.007,.010,.015,.020,.030,.040,
      /0.05,0.06,0.07,0.08,0.09,0.10,0.12,0.14,0.17,0.20,
@@ -24546,23 +25490,39 @@ C ELASTIC ANGULAR DISTRIBUTION (EPSILON)
      /1800.,2000.,2500.,3000.,3500.,4000.,4500.,5000.,5500.,6000.,
      /7000.,8000.,9000.,1.0D4,1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,
      /3.5D4,4.0D4,5.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,
-     /2.5D5,3.0D5,4.0D5,5.0D5,6.0D5,8.0D5,1.0D6,1.25D6,1.5D6,2.0D6/
-      DATA YEPS/.0,.065,.0848,.1001,.1159,.1348,.1548,.1813,.2178,.2555,
-     /.2775,.3074,.3389,.3622,.3934,.4113,.4541,.4904,.5467,.6280,
-     /.7178,.7779,.8446,.8918,.9338,.9555,.9584,.9583,.9568,.9558,
-     /.9439,.9052,.8374,.8059,.7687,.7338,.6584,.5757,.4998,.4338,  
-     /.3731,.3032,.2724,.2498,.2494,.2373,.2546,.2270,.2286,.2297,
-     /.2532,.2517,.3053,.3162,.3328,.3492,.3390,.3375,.3520,.3872,  
-     /.4489,.5048,.5515,.6103,.6553,.6966,.7419,.7747,.8075,.8415,
-     /.8802,.8991,.9110,.9220,.9288,.9392,.9463,.9517,.9520,.9464,
-     /.9433,.9382,.9294,.9196,.9204,.9122,.9152,.9112,.9216,.9190,
-     /.9287,.9303,.9305,.9309,.9306,.9337,.9422,.9440,.9519,.9593,
-     /.9606,.9654,.9756,.9787,.9823,.9843,.9861,.9874,.9890,.9910,
-     /.9914,.9926,.9935,.9942,.9955,.9963,.9969,.9973,.9977,.9983,
-     /.9985,.99874,.999016,.999197,.999415,.999544,.999646,.999712,
-     /.999760,.999795,
-     /.999843,.999875,.999913,.999935,.999949,.999965,.999975,.999983,
-     /.999987,.999990/
+     /2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,
+     /1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,
+     /5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,
+     /2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,
+     /1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,
+     /5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
+C ELASTIC ANGULAR DISTRIBUTION PARAMETER EPSILON
+C EPSILON= 1.0-YEPS
+      DATA YEPS/1.,.935,.9152,.8999,.8841,.8652,.8452,.8187,.7822,.7445,
+     /.7225,.6926,.6611,.6378,.6066,.5887,.5459,.5096,.4533,.3720,
+     /.2822,.2221,.1554,.1082,.0662,.0445,.0416,.0417,.0432,.0442,
+     /.0561,.0948,.1626,.1941,.2313,.2662,.3416,.4243,.5002,.5662,
+     /.6269,.6968,.7276,.7502,.7506,.7627,.7454,.7730,.7714,.7703, 
+     /.7468,.7483,.6947,.6838,.6672,.6508,.6610,.6625,.6480,.6128,
+     /.5511,.4952,.4485,.3897,.3447,.3034,.2581,.2253,.1925,.1585,
+     /.1198,.1009,.0890,.0780,.0712,.0608,.0537,.0483,.0480,.0536,   
+     /.0567,.0618,.0706,.0804,.0796,.0878,.0848,.0888,.0784,.0810,
+     /.0713,.0697,.0695,.0691,.0694,.0663,.0578,.0560,.0481,.0407, 
+     /.0394,.0346,.0244,.0213,.0177,.0157,.0139,.0126,.0110,.0090,  
+     /.0086,.0074,.0065,.0058,.0045,.0037,.0031,.0027,.0023,.0017,
+     /.0015,.00126,9.84D-4,8.03D-4,5.85D-4,4.56D-4,3.64D-4,3.04D-4,
+     /2.60D-4,2.28D-4,
+     /1.746D-4,1.395D-4,1.149D-4,9.68D-5,8.30D-5,7.22D-5,5.64D-5,
+     /4.55D-5,3.76D-5,3.17D-5,
+     /2.72D-5,1.91D-5,1.43D-5,1.12D-5,9.02D-6,6.21D-6,4.54D-6,3.47D-6,
+     /2.74D-6,2.22D-6,
+     /1.83D-6,1.31D-6,9.90D-7,7.67D-7,6.15D-7,5.03D-7,3.28D-7,2.31D-7,
+     /1.71D-7,1.32D-7,
+     /8.46D-8,5.88D-8,4.31D-8,3.29D-8,2.58D-8,2.08D-8,1.43D-8,1.03D-8,
+     /7.80D-9,6.10D-9,
+     /4.87D-9,3.04D-9,2.07D-9,1.49D-9,1.12D-9,7.0D-10,4.8D-10,3.5D-10,
+     /2.6D-10,2.0D-10,
+     /1.6D-10,1.1D-10,8.1D-11,6.1D-11,4.7D-11,3.8D-11/
 C IONISATION ( VALUES ABOVE 1OKEV GENERATED BY BORN BETHE IN SUB)        
       DATA XION/13.9996,14.5,15.0,15.5,16.0,16.5,17.0,17.5,18.0,18.5,   
      /19.0,19.5,20.0,21.0,22.0,23.0,24.0,26.0,28.0,30.0,                
@@ -24638,7 +25598,11 @@ C K-SHELL IONISATION
      /2.74D5,
      /3.16D5,3.76D5,4.47D5,5.31D5,7.08D5,8.17D5,1.00D6,1.22D6,1.45D6,
      /1.73D6,
-     /2.00D6,2.51D6,3.07D6,4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,2.05D7/
+     /2.00D6,2.51D6,3.07D6,4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,1.45D7,
+     /2.05D7,
+     /2.99D7,4.10D7,5.01D7,6.13D7,8.18D7,1.00D8,1.45D8,2.05D8,2.99D8,
+     /4.10D8,
+     /5.01D8,6.13D8,8.18D8,1.00D9/
       DATA YKSH/0.0,6.61D-8,1.68D-7,2.66D-7,3.58D-7,4.46D-7,5.30D-7,
      /6.10D-7,6.86D-7,7.57D-7,
      /8.26D-7,8.91D-7,9.52D-7,1.01D-6,1.12D-6,1.21D-6,1.30D-6,1.37D-6,
@@ -24650,7 +25614,10 @@ C K-SHELL IONISATION
      /1.11D-6,1.08D-6,1.05D-6,1.03D-6,1.02D-6,1.02D-6,1.03D-6,1.04D-6,
      /1.06D-6,1.09D-6,
      /1.11D-6,1.16D-6,1.20D-6,1.25D-6,1.31D-6,1.36D-6,1.43D-6,1.48D-6,
-     /1.68D-6/
+     /1.58D-6,1.68D-6,
+     /1.78D-6,1.87D-6,1.92D-6,1.98D-6,2.06D-6,2.11D-6,2.22D-6,2.31D-6,
+     /2.41D-6,2.50D-6,
+     /2.56D-6,2.61D-6,2.69D-6,2.75D-6/
 C L1-SHELL IONISATION
       DATA XL1S/1921.0,1956.6,2013.2,2071.4,2131.4,2193.,2256.,2322.,
      /2389.,2458.,
@@ -24662,7 +25629,11 @@ C L1-SHELL IONISATION
      /3.55D5,
      /4.47D5,5.79D5,7.50D5,1.00D6,1.22D6,1.45D6,1.73D6,2.00D6,2.51D6,
      /3.07D6,
-     /4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,2.05D7/
+     /4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,1.50D7,2.05D7,2.51D7,3.07D7,
+     /4.10D7,
+     /5.16D7,6.13D7,8.18D7,1.00D8,1.50D8,2.05D8,2.51D8,3.07D8,4.10D8,
+     /5.16D8,
+     /6.13D8,8.18D8,1.00D9/
       DATA YL1S/0.0,3.47D-6,8.56D-6,1.34D-5,1.80D-5,2.23D-5,2.65D-5,
      /3.04D-5,3.41D-5,3.76D-5,
      /4.10D-5,4.71D-5,5.27D-5,5.76D-5,6.19D-5,6.58D-5,6.91D-5,7.20D-5,
@@ -24675,7 +25646,11 @@ C L1-SHELL IONISATION
      /1.14D-5,1.06D-5,
      /9.97D-6,9.49D-6,9.21D-6,9.08D-6,9.10D-6,9.16D-6,9.27D-6,9.39D-6,
      /9.62D-6,9.86D-6,
-     /1.02D-5,1.05D-5,1.09D-5,1.13D-5,1.17D-5,1.29D-5/
+     /1.02D-5,1.05D-5,1.09D-5,1.13D-5,1.17D-5,1.24D-5,1.29D-5,1.33D-5,
+     /1.36D-5,1.42D-5,
+     /1.46D-5,1.49D-5,1.54D-5,1.58D-5,1.65D-5,1.71D-5,1.74D-5,1.78D-5,
+     /1.83D-5,1.88D-5,
+     /1.91D-5,1.96D-5,2.00D-5/
 C L2-SHELL IONISATION
       DATA XL2S/1730.9,1780.7,1832.6,1886.,1941.,1998.,2056.,2116.,
      /2178.,2241.,
@@ -24687,7 +25662,11 @@ C L2-SHELL IONISATION
      /4.47D5,
      /5.79D5,7.50D5,1.00D6,1.22D6,1.45D6,1.73D6,2.00D6,2.51D6,3.07D6,
      /4.00D6,
-     /5.01D6,6.13D6,8.18D6,1.00D7,2.05D7/
+     /5.01D6,6.13D6,8.18D6,1.00D7,1.45D7,2.05D7,2.51D7,3.07D7,4.10D7,
+     /5.01D7,
+     /6.13D7,8.18D7,1.00D8,1.45D8,2.05D8,2.51D8,3.07D8,4.10D8,5.01D8,
+     /6.13D8,
+     /8.18D8,1.00D9/
       DATA YL2S/0.0,9.21D-6,1.81D-5,2.65D-5,3.45D-5,4.20D-5,4.92D-5,
      /5.59D-5,6.22D-5,6.81D-5,
      /7.36D-5,7.88D-5,8.37D-5,8.82D-5,9.63D-5,1.03D-4,1.09D-4,1.14D-4,
@@ -24700,7 +25679,11 @@ C L2-SHELL IONISATION
      /1.64D-5,1.55D-5,
      /1.48D-5,1.44D-5,1.42D-5,1.43D-5,1.44D-5,1.46D-5,1.48D-5,1.52D-5,
      /1.57D-5,1.63D-5,
-     /1.69D-5,1.74D-5,1.82D-5,1.88D-5,2.09D-5/
+     /1.69D-5,1.74D-5,1.82D-5,1.88D-5,1.99D-5,2.09D-5,2.15D-5,2.21D-5,
+     /2.30D-5,2.36D-5,
+     /2.43D-5,2.51D-5,2.58D-5,2.69D-5,2.80D-5,2.86D-5,2.92D-5,3.01D-5,
+     /3.08D-5,3.14D-5,
+     /3.23D-5,3.29D-5/
 C L3-SHELL IONISATION
       DATA XL3S/1678.4,1684.5,1733.6,1784.,1836.,1889.,1944.,2001.,
      /2059.,2119.,
@@ -24712,7 +25695,11 @@ C L3-SHELL IONISATION
      /2.82D5,
      /3.55D5,4.47D5,5.79D5,7.50D5,1.00D6,1.22D6,1.45D6,1.73D6,2.00D6,
      /2.51D6,
-     /3.07D6,4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,2.05D7/
+     /3.07D6,4.00D6,5.01D6,6.13D6,8.18D6,1.00D7,1.50D7,2.05D7,2.51D7,
+     /3.07D7,
+     /4.10D7,5.16D7,6.31D7,8.18D7,1.00D8,1.50D8,2.05D8,2.51D8,3.07D8,
+     /4.10D8,
+     /5.16D8,6.31D8,8.18D8,1.00D9/
       DATA YL3S/0.0,2.31D-6,2.23D-5,4.13D-5,5.91D-5,7.64D-5,9.25D-5,
      /1.08D-4,1.22D-4,1.36D-4,
      /1.48D-4,1.60D-4,1.71D-4,1.82D-4,1.91D-4,2.00D-4,2.16D-4,2.30D-4,
@@ -24725,7 +25712,11 @@ C L3-SHELL IONISATION
      /4.03D-5,3.69D-5,
      /3.42D-5,3.22D-5,3.08D-5,2.99D-5,2.96D-5,2.97D-5,3.00D-5,3.04D-5,
      /3.08D-5,3.17D-5,
-     /3.25D-5,3.38D-5,3.50D-5,3.61D-5,3.77D-5,3.89D-5,4.33D-5/
+     /3.25D-5,3.38D-5,3.50D-5,3.61D-5,3.77D-5,3.89D-5,4.13D-5,4.33D-5,
+     /4.46D-5,4.58D-5,
+     /4.77D-5,4.91D-5,5.04D-5,5.21D-5,5.34D-5,5.59D-5,5.80D-5,5.93D-5,
+     /6.06D-5,6.24D-5,
+     /6.39D-5,6.52D-5,6.68D-5,6.81D-5/
 C M1-SHELL IONISATION
       DATA XM1S/292.8,295.7,303.9,312.4,321.1,330.1,339.3,348.8,358.6,
      /368.7,
@@ -24738,7 +25729,11 @@ C M1-SHELL IONISATION
      /8.66D5,
      /1.00D6,1.22D6,1.50D6,1.88D6,2.37D6,2.99D6,3.87D6,4.87D6,5.96D6,
      /7.08D6,
-     /8.66D6,1.00D7,1.22D7,2.05D7/
+     /8.66D6,1.00D7,1.22D7,1.63D7,2.05D7,2.51D7,3.07D7,4.10D7,5.16D7,
+     /6.31D7,
+     /8.66D7,1.00D8,1.50D8,2.05D8,2.51D8,3.07D8,4.10D8,5.16D8,6.31D8,
+     /8.66D8,
+     /1.00D9/
       DATA YM1S/0.0,3.29D-5,1.10D-4,1.89D-4,2.72D-4,3.57D-4,4.44D-4,
      /5.32D-4,6.20D-4,7.09D-4,
      /8.86D-4,1.06D-3,1.23D-3,1.39D-3,1.54D-3,1.67D-3,1.80D-3,1.91D-3,
@@ -24753,7 +25748,11 @@ C M1-SHELL IONISATION
      /5.26D-5,5.15D-5,
      /5.09D-5,5.06D-5,5.07D-5,5.11D-5,5.19D-5,5.29D-5,5.43D-5,5.57D-5,
      /5.70D-5,5.82D-5,
-     /5.96D-5,6.07D-5,6.22D-5,6.61D-5/
+     /5.96D-5,6.07D-5,6.22D-5,6.43D-5,6.61D-5,6.76D-5,6.92D-5,7.14D-5,
+     /7.32D-5,7.48D-5,
+     /7.72D-5,7.84D-5,8.15D-5,8.40D-5,8.56D-5,8.72D-5,8.95D-5,9.13D-5,
+     /9.29D-5,9.54D-5,
+     /9.65D-5/
 C M2-SHELL IONISATION
       DATA XM2S/222.2,224.1,230.5,237.0,243.7,250.7,257.8,265.1,272.7,
      /280.5,
@@ -24766,7 +25765,11 @@ C M2-SHELL IONISATION
      /2.37D5,
      /2.74D5,3.25D5,3.98D5,4.87D5,5.96D5,7.29D5,8.66D5,1.00D6,1.22D6,
      /1.50D6,
-     /2.05D6,2.99D6,3.87D6,4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,2.05D7/
+     /2.05D6,2.99D6,3.87D6,4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,1.22D7,
+     /1.50D7,
+     /2.05D7,2.99D7,3.87D7,4.87D7,5.96D7,7.08D7,8.66D7,1.00D8,1.22D8,
+     /1.50D8,
+     /2.05D8,2.99D8,3.87D8,4.87D8,5.96D8,7.08D8,8.66D8,1.00D9/
       DATA YM2S/0.0,4.89D-5,1.82D-4,3.18D-4,4.56D-4,5.95D-4,7.35D-4,
      /8.75D-4,1.01D-3,1.15D-3,
      /1.29D-3,1.56D-3,1.82D-3,2.07D-3,2.31D-3,2.53D-3,2.74D-3,2.93D-3,
@@ -24782,7 +25785,10 @@ C M2-SHELL IONISATION
      /1.02D-4,9.52D-5,8.89D-5,8.42D-5,8.06D-5,7.82D-5,7.68D-5,7.60D-5,
      /7.56D-5,7.57D-5,
      /7.68D-5,7.91D-5,8.13D-5,8.34D-5,8.54D-5,8.72D-5,8.94D-5,9.10D-5,
-     /9.91D-5/
+     /9.32D-5,9.55D-5,
+     /9.91D-5,1.04D-4,1.07D-4,1.09D-4,1.12D-4,1.14D-4,1.16D-4,1.18D-4,
+     /1.20D-4,1.23D-4,
+     /1.26D-4,1.31D-4,1.34D-4,1.37D-4,1.39D-4,1.41D-4,1.44D-4,1.45D-4/
 C M3-SHELL IONISATION
       DATA XM3S/214.4,218.8,225.0,231.3,237.9,244.6,251.5,258.6,266.0,
      /273.5,
@@ -24795,7 +25801,10 @@ C M3-SHELL IONISATION
      /2.37D5,2.74D5,3.25D5,3.98D5,4.87D5,5.96D5,7.29D5,8.66D5,1.00D6,
      /1.22D6,
      /1.50D6,2.05D6,2.99D6,3.87D6,4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,
-     /2.05D7/
+     /1.22D7,
+     /1.50D7,2.05D7,2.99D7,3.87D7,4.87D7,5.96D7,7.08D7,8.66D7,1.00D8,
+     /1.22D8,
+     /1.50D8,2.05D8,2.99D8,3.87D8,4.87D8,5.96D8,7.08D8,8.66D8,1.00D9/
       DATA YM3S/0.0,2.05D-4,4.91D-4,7.83D-4,1.08D-3,1.38D-3,1.68D-3,
      /1.98D-3,2.28D-3,2.58D-3,
      /2.87D-3,3.17D-3,3.74D-3,4.29D-3,4.81D-3,5.31D-3,5.78D-3,6.21D-3,
@@ -24811,7 +25820,11 @@ C M3-SHELL IONISATION
      /2.35D-4,2.20D-4,2.06D-4,1.93D-4,1.82D-4,1.75D-4,1.69D-4,1.66D-4,
      /1.65D-4,1.64D-4,
      /1.64D-4,1.67D-4,1.72D-4,1.77D-4,1.81D-4,1.86D-4,1.90D-4,1.95D-4,
-     /1.98D-4,2.16D-4/
+     /1.98D-4,2.03D-4,
+     /2.08D-4,2.16D-4,2.26D-4,2.32D-4,2.38D-4,2.44D-4,2.48D-4,2.54D-4,
+     /2.57D-4,2.63D-4,
+     /2.68D-4,2.76D-4,2.86D-4,2.93D-4,2.99D-4,3.04D-4,3.09D-4,3.14D-4,
+     /3.18D-4/
 C M4-SHELL IONISATION
       DATA XM4S/95.0,96.83,99.67,102.6,105.6,108.7,111.9,115.2,118.5,
      /122.0,
@@ -24825,7 +25838,11 @@ C M4-SHELL IONISATION
      /3.98D5,
      /4.87D5,5.96D5,7.29D5,8.66D5,1.00D6,1.22D6,1.50D6,2.05D6,2.99D6,
      /3.87D6,
-     /4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,2.05D7/
+     /4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,1.22D7,1.50D7,2.05D7,2.99D7,
+     /3.87D7,
+     /4.87D7,5.96D7,7.08D7,8.66D7,1.00D8,1.22D8,1.50D8,2.05D8,2.99D8,
+     /3.87D8,
+     /4.87D8,5.96D8,7.08D8,8.66D8,1.00D9/
       DATA YM4S/0.0,1.08D-3,2.62D-3,4.04D-3,5.37D-3,6.62D-3,7.79D-3,
      /8.90D-3,9.96D-3,1.10D-2,
      /1.20D-2,1.38D-2,1.56D-2,1.73D-2,1.90D-2,2.06D-2,2.22D-2,2.37D-2,
@@ -24842,7 +25859,11 @@ C M4-SHELL IONISATION
      /7.33D-4,6.88D-4,
      /6.54D-4,6.29D-4,6.12D-4,6.03D-4,5.99D-4,5.99D-4,6.02D-4,6.15D-4,
      /6.39D-4,6.60D-4,
-     /6.81D-4,6.99D-4,7.16D-4,7.37D-4,7.52D-4,8.28D-4/
+     /6.81D-4,6.99D-4,7.16D-4,7.37D-4,7.52D-4,7.73D-4,7.94D-4,8.28D-4,
+     /8.69D-4,8.98D-4,
+     /9.24D-4,9.46D-4,9.65D-4,9.88D-4,1.00D-3,1.03D-3,1.05D-3,1.08D-3,
+     /1.13D-3,1.16D-3,
+     /1.18D-3,1.20D-3,1.22D-3,1.25D-3,1.26D-3/
 C M5-SHELL IONISATION
       DATA XM5S/93.8,94.3,97.0,99.9,102.8,105.8,108.9,112.1,115.3,118.7,
      /122.2,125.8,133.2,141.1,149.5,158.4,167.8,177.7,188.2,199.4,
@@ -24855,7 +25876,11 @@ C M5-SHELL IONISATION
      /3.25D5,
      /3.98D5,4.87D5,5.96D5,7.29D5,8.66D5,1.00D6,1.22D6,1.50D6,2.05D6,
      /2.99D6,
-     /3.87D6,4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,2.05D7/
+     /3.87D6,4.87D6,5.96D6,7.08D6,8.66D6,1.00D7,1.22D7,1.50D7,2.05D7,
+     /2.99D7,
+     /3.87D7,4.87D7,5.96D7,7.08D7,8.66D7,1.00D8,1.22D8,1.50D8,2.05D8,
+     /2.99D8,
+     /3.87D8,4.87D8,5.96D8,7.08D8,8.66D8,1.00D9/
       DATA YM5S/0.0,4.52D-4,2.91D-3,5.18D-3,7.29D-3,9.26D-3,1.11D-2,
      /1.29D-2,1.45D-2,1.61D-2,
      /1.76D-2,1.91D-2,2.19D-2,2.46D-2,2.72D-2,2.97D-2,3.22D-2,3.46D-2,
@@ -24872,7 +25897,11 @@ C M5-SHELL IONISATION
      /1.19D-3,1.11D-3,
      /1.05D-3,9.94D-4,9.56D-4,9.31D-4,9.18D-4,9.12D-4,9.10D-4,9.16D-4,
      /9.36D-4,9.72D-4,
-     /1.00D-3,1.03D-3,1.06D-3,1.09D-3,1.12D-3,1.14D-3,1.26D-3/
+     /1.00D-3,1.03D-3,1.06D-3,1.09D-3,1.12D-3,1.14D-3,1.17D-3,1.21D-3,
+     /1.26D-3,1.32D-3,
+     /1.37D-3,1.40D-3,1.44D-3,1.47D-3,1.50D-3,1.53D-3,1.56D-3,1.59D-3,
+     /1.65D-3,1.71D-3,
+     /1.76D-3,1.80D-3,1.83D-3,1.86D-3,1.89D-3,1.92D-3/
 C 1S5  METASTABLE   E=9.91523166 EV  J=2
 C      SHAPE FUNCTION BELOW 50 EV FROM BARTSCHAT AND ZATSARINNY
 C      ABOVE 50 EV SCALED BY 1/E**3
@@ -25755,6 +26784,13 @@ C         USE BEF SCALING
 C 
 C    TOTAL OSCILLATOR STRENGTH =1.1258 1.1058
 C
+C  BREMSSTRAHLUNG X-SECTION WITH CUT OFF UNITS 10**-24
+      DATA Z36T/3500.,2633.,1689.,1126.,708.,367.,226.,146.,97.2,84.6,
+     /82.1,82.5,83.1,83.6,84.0,84.5,85.1,86.0,86.5,87.3,
+     /87.4,87.8,88.0,88.3,88.4/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C----------------------------------------------------------------------
 C     NANISO=0
       IF(NANISO.EQ.0) THEN                                         
@@ -25819,27 +26855,34 @@ C AVERAGE AUGER EMISSIONS FROM EACH SHELL
 C
       NION=11
       NIN=51
+C
+      NBREM=25
+      DO 6 J=1,NIN
+      IZBR(J)=0
+    6 CONTINUE
+      IZBR(52)=36
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
     2 KIN(J)=NANISO
 C                              
-      NEL=130                                            
-      NDATA=116 
-      NEPSI=140                                                        
+      NEL=151                      
+      NDATA=162 
+      NEPSI=186                                                        
       NIONG=65
       NION2=41
       NION3=35
       NION4=32 
-      NKSH=59
-      NL1S=66
-      NL2S=65
-      NL3S=67
-      NM1S=74
-      NM2S=79
-      NM3S=80
-      NM4S=86
-      NM5S=87
+      NKSH=74
+      NL1S=83
+      NL2S=82
+      NL3S=84
+      NM1S=91
+      NM2S=98
+      NM3S=99
+      NM4S=105
+      NM5S=106
       N1S5=169
       N1S4=130
       N1S3=168
@@ -25891,14 +26934,14 @@ C  IONISING X-SECTION AT 1.4MEV
 C EOBY AT MINIMUM IONISING                          
       E(6)=23.0
 C EOBY AT LOW ENERGY
-      EOBY(1)=9.6
-      EOBY(2)=9.6
-      EOBY(3)=9.6
-      EOBY(4)=9.6
+      EOBY(1)=10.0
+      EOBY(2)=30.0
+      EOBY(3)=60.0
+      EOBY(4)=100.
 C EOBY FOR SHELLS
-      EOBY(5)=214.4
-      EOBY(6)=222.2
-      EOBY(7)=292.8
+      EOBY(5)=175.0
+      EOBY(6)=180.0
+      EOBY(7)=250.0
       EOBY(8)=1678.4
       EOBY(9)=1730.9
       EOBY(10)=1921.0
@@ -26004,6 +27047,28 @@ C
       EION(9)=1730.9
       EION(10)=1921.0
       EION(11)=14327.26
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=0
+      LEGAS(4)=0
+      LEGAS(5)=1
+      LEGAS(6)=1
+      LEGAS(7)=1
+      LEGAS(8)=1
+      LEGAS(9)=1
+      LEGAS(10)=1
+      LEGAS(11)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=0
+      ISHELL(4)=0
+      ISHELL(5)=7
+      ISHELL(6)=6
+      ISHELL(7)=5
+      ISHELL(8)=4
+      ISHELL(9)=3
+      ISHELL(10)=2
+      ISHELL(11)=1
 C
       DO 776 J=1,NION
       DO 777 I=1,4000
@@ -26065,6 +27130,7 @@ C
       EIN(49)=13.4224
       EIN(50)=13.4365
       EIN(51)=13.6
+      EIN(52)=0.0
 C**********************************************************************
 C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL
 C USE PENNING TRANSFER FRACTION BETWEEN 0.0 AND 0.2 
@@ -26161,10 +27227,11 @@ C**********************************************************************
       SCRPT(65)=' EXC 5D2     J=1 RESONANT         ELEVEL=  13.4224'
       SCRPT(66)=' EXC 4S4     J=1 RESONANT         ELEVEL=  13.4365'
       SCRPT(67)=' EXC HIGH    J=1 RESONANT         ELEVEL=  13.6   '
-      EN=-ESTEP/2.0
+      SCRPT(68)=' BREMSSTRAHLUNG FROM KRYPTON ATOM                 '
+C      EN=-ESTEP/2.0
       DO 900 I=1,NSTEP      
-C      EN=EG(I)                           
-      EN=EN+ESTEP
+      EN=EG(I)                           
+C      EN=EN+ESTEP
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -26209,6 +27276,8 @@ C USE LOG INTERPOLATION
   202 A=(YEPS(J)-YEPS(J-1))/(XEPS(J)-XEPS(J-1))
       B=(XEPS(J-1)*YEPS(J)-XEPS(J)*YEPS(J-1))/(XEPS(J-1)-XEPS(J))
       PQ2=A*EN+B
+C EPSILON =1.0-YEPS
+      PQ2=1.0D0-PQ2
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
       Q(2,I)=QELA
@@ -26233,7 +27302,7 @@ C IONISATION FOR CHARGE =1
 C USE BORN BETHE ABOVE XION(NIONG) EV.
   221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)*0.9009 
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.9009 
   222 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -26258,7 +27327,7 @@ C IONISATION FOR CHARGE =2
 C USE BORN BETHE ABOVE XIN2(NION2)
  1251 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(2,I)=CONST*(AM2*X1+C*X2)*0.0613
+      QION(2,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0613
  1252 CONTINUE
       IF(EN.LE.(2.0*EION(2))) GO TO 2253
       PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
@@ -26279,7 +27348,7 @@ C IONISATION FOR CHARGE =3
 C USE BORN BETHE ABOVE XIN3(NION3) EV
  1253 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(3,I)=CONST*(AM2*X1+C*X2)*0.0291 
+      QION(3,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0291 
  1254 CONTINUE
       IF(EN.LE.(2.0*EION(3))) GO TO 3256
       PEQION(3,I)=PEQEL(2,(I-IOFFION(3)))
@@ -26300,7 +27369,7 @@ C IONISATION FOR CHARGE STATE =4
 C USE BORN BETHE ABOBVE XIN4(NION4) EV
  3253 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(4,I)=CONST*(AM2*X1+C*X2)*0.0082 
+      QION(4,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0082 
  1255 CONTINUE
       IF(EN.LE.(2.0*EION(4))) GO TO 2256
       PEQION(4,I)=PEQEL(2,(I-IOFFION(4)))
@@ -26413,7 +27482,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.D-16
       GO TO 242
 C USE BORN BETHE X-SECTION ABOVE XION(NIONG) EV.
-  241 Q(5,I)=CONST*(AM2*X1+C*X2) 
+  241 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2) 
   242 CONTINUE                                                       
 C CORRECTION TO SHARGE STATE 1 2 3 AND 4 X-SECTION FOR K L AND M SHELLS
 C GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
@@ -26431,7 +27500,7 @@ C GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
 C
       Q(6,I)=0.0 
 C
-      DO 251 NL=1,NIN
+      DO 251 NL=1,NIN+1
       QIN(NL,I)=0.0D0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -26465,7 +27534,7 @@ C 1S4                                                 F=0.203
       QIN(2,I)=(A*EN+B)*1.0D-18*AN1S
       GO TO 358
   357 QIN(2,I)=0.203/(EIN(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(2)))-BETA2)*BBCONST*EN/(EN+EIN(2)+E(3))
+     /EIN(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(2)+E(3))
   358 IF(EN.LE.(2.0*EIN(2))) GO TO 359
       PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))
 C 1S3
@@ -26495,7 +27564,7 @@ C 1S2                                                 F=0.182
       QIN(4,I)=(A*EN+B)*1.0D-18*AN1S
       GO TO 368
   367 QIN(4,I)=0.182/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(4)))-BETA2)*BBCONST*EN/(EN+EIN(4)+E(3))
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(4)+E(3))
   368 IF(EN.LE.(2.0*EIN(4))) GO TO 369
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C 2P10
@@ -26616,7 +27685,7 @@ C 3D5
       GO TO 408
 C USE BEF SCALING ABOVE X3D5(N3D5) EV                      F=0.0053
   407 QIN(12,I)=0.0053/(EIN(12)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(12)))-BETA2)*BBCONST*EN/(EN+EIN(12)+E(3))     
+     /EIN(12)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(12)+E(3))     
       IF(QIN(12,I).LT.0.0) QIN(12,I)=0.0D0
   408 IF(EN.LE.(2.0*EIN(12))) GO TO 409
       PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))
@@ -26774,14 +27843,14 @@ C SCALED X-SECTION ABOVE X2S5(N2S5) EV BY 1/E**3
 C 3D2  BEF SCALED                                         F=0.082
   459 IF(EN.LE.EIN(23)) GO TO 899
       QIN(23,I)=0.082/(EIN(23)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(23)))-BETA2)*BBCONST*EN/(EN+EIN(23)+E(3))
+     /EIN(23)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(23)+E(3))
       IF(QIN(23,I).LT.0.0) QIN(23,I)=0.0D0
       IF(EN.LE.(2.0*EIN(23))) GO TO 460
       PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))
 C 2S4  BEF SCALED                                         F=0.154
   460 IF(EN.LE.EIN(24)) GO TO 899
       QIN(24,I)=0.154/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(24)))-BETA2)*BBCONST*EN/(EN+EIN(24)+E(3))
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(24)+E(3))
       IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0
       IF(EN.LE.(2.0*EIN(24))) GO TO 461
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
@@ -26927,7 +27996,7 @@ C SCALED X-SECTION ABOVE X3P5(N3P5) EV BY 1/E
 C 4D5  BEF SCALED                                          F=0.0140
   506 IF(EN.LE.EIN(34)) GO TO 899
       QIN(34,I)=0.014/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(34)))-BETA2)*BBCONST*EN/(EN+EIN(34)+E(3))
+     /EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(34)+E(3))
       IF(QIN(34,I).LT.0.0) QIN(34,I)=0.0D0
       IF(EN.LE.(2.0*EIN(34))) GO TO 507
       PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
@@ -26964,7 +28033,7 @@ C SCALED X-SECTION ABOVE X4D4P(N4D4P) EV BY 1/E**3
 C 3S1P        BEF SCALED                                     F=0.0435
   517 IF(EN.LE.EIN(37)) GO TO 899
       QIN(37,I)=0.0435/(EIN(37)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(37)))-BETA2)*BBCONST*EN/(EN+EIN(37)+E(3))
+     /EIN(37)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(37)+E(3))
       IF(QIN(37,I).LT.0.0) QIN(37,I)=0.0D0
       IF(EN.LE.(2.0*EIN(37))) GO TO 518
       PEQIN(37,I)=PEQEL(2,(I-IOFFN(37)))
@@ -27016,7 +28085,7 @@ C SCALED X-SECTION ABOVE X2S3(N2S3) EV BY 1/E**3
 C 2S2         BEF SCALED                                 F=0.0105
   533 IF(EN.LE.EIN(41)) GO TO 899
       QIN(41,I)=0.0105/(EIN(41)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(41)))-BETA2)*BBCONST*EN/(EN+EIN(41)+E(3))
+     /EIN(41)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(41)+E(3))
       IF(QIN(41,I).LT.0.0) QIN(41,I)=0.0D0
       IF(EN.LE.(2.0*EIN(41))) GO TO 534
       PEQIN(41,I)=PEQEL(2,(I-IOFFN(41)))
@@ -27069,14 +28138,14 @@ C SCALED X-SECTION ABOVE X3S5(N3S5) EV BY 1/E**3
 C 4D2         BEF SCALED                                   F=0.0970
   549 IF(EN.LE.EIN(45)) GO TO 899
       QIN(45,I)=0.0970/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+E(3))
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+E(3))
       IF(QIN(45,I).LT.0.0) QIN(45,I)=0.0D0
       IF(EN.LE.(2.0*EIN(45))) GO TO 550
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
 C 3S4         BEF SCALED                                   F=0.0808
   550 IF(EN.LE.EIN(46)) GO TO 899
       QIN(46,I)=0.0808/(EIN(46)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(46)))-BETA2)*BBCONST*EN/(EN+EIN(46)+E(3))
+     /EIN(46)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(46)+E(3))
       IF(QIN(46,I).LT.0.0) QIN(46,I)=0.0D0
       IF(EN.LE.(2.0*EIN(46))) GO TO 551 
       PEQIN(46,I)=PEQEL(2,(I-IOFFN(46)))
@@ -27098,31 +28167,41 @@ C SCALED X-SECTION ABOVE X4FS(N4FS) EV BY 1/E
 C 5D5         BEF SCALED                                  F=0.0015
   556 IF(EN.LE.EIN(48)) GO TO 899
       QIN(48,I)=0.0015/(EIN(48)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(48)))-BETA2)*BBCONST*EN/(EN+EIN(48)+E(3))
+     /EIN(48)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(48)+E(3))
       IF(QIN(48,I).LT.0.0) QIN(48,I)=0.0D0
       IF(EN.LE.(2.0*EIN(48))) GO TO 557
       PEQIN(48,I)=PEQEL(2,(I-IOFFN(48)))
 C 5D2         BEF SCALED                                   F=0.0439
   557 IF(EN.LE.EIN(49)) GO TO 899
       QIN(49,I)=0.0439/(EIN(49)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(49)))-BETA2)*BBCONST*EN/(EN+EIN(49)+E(3))
+     /EIN(49)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(49)+E(3))
       IF(QIN(49,I).LT.0.0) QIN(49,I)=0.0D0
       IF(EN.LE.(2.0*EIN(49))) GO TO 558
       PEQIN(49,I)=PEQEL(2,(I-IOFFN(49)))
 C 4S4         BEF SCALED                                   F=0.0203
   558 IF(EN.LE.EIN(50)) GO TO 899
       QIN(50,I)=0.0203/(EIN(50)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(50)))-BETA2)*BBCONST*EN/(EN+EIN(50)+E(3))
+     /EIN(50)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(50)+E(3))
       IF(QIN(50,I).LT.0.0) QIN(50,I)=0.0D0
       IF(EN.LE.(2.0*EIN(50))) GO TO 559
       PEQIN(50,I)=PEQEL(2,(I-IOFFN(50)))
 C SUM OF HIGHER DIPOLE STATES       BEF SCALED              F=0.1680
   559 IF(EN.LE.EIN(51)) GO TO 899
       QIN(51,I)=0.1680/(EIN(51)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(51)))-BETA2)*BBCONST*EN/(EN+EIN(51)+E(3))
+     /EIN(51)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(51)+E(3))
       IF(QIN(51,I).LT.0.0) QIN(51,I)=0.0D0
       IF(EN.LE.(2.0*EIN(51))) GO TO 899
       PEQIN(51,I)=PEQEL(2,(I-IOFFN(51)))
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+c     IF(EN.LE.1000.) GO TO 899
+c     DO 600 J=2,NBREM
+c      IF(EN.LE.EBRM(J)) GO TO 610
+c  600 CONTINUE
+c      J=NBREM
+c  610 A=(DLOG(Z36T(J))-DLOG(Z36T(J-1)))/(EBRM(J)-EBRM(J-1))
+c      B=(DLOG(Z36T(J))*EBRM(J-1)-DLOG(Z36T(J-1))*EBRM(J))/
+c     /(EBRM(J-1)-EBRM(J))
+c      QIN(52,I)=DEXP(A*EN+B)*1.D-24
   899 CONTINUE  
 C 
 C CALCULATE TOTAL X-SECTION                           
@@ -27138,6 +28217,7 @@ C CALCULATE TOTAL X-SECTION
       Q(1,I)=QELA+QINEL+QION(1,I)+QION(2,I)+QION(3,I)+QION(4,I)+
      /QION(5,I)+QION(6,I)+QION(7,I)+QION(8,I)+QION(9,I)+QION(10,I)+
      /QION(11,I)
+c     /QION(11,I)+QIN(52,I)
 C     WRITE(6,8976) EN,Q1SUM,Q2SUM,Q3SUM,Q4SUM,QINEL
 C8976 FORMAT(' EN=',F9.1,' Q1=',D12.3,' Q2=',D12.3,' Q3=',D12.3,' Q4=',
 C    /D12.3,' QSUM=',D12.3)       
@@ -27150,42 +28230,46 @@ C  SAVE COMPUTE TIME
       ENDIF 
   910 CONTINUE
   911 CONTINUE
+c      IF(EFINAL.GT.1000.) NIN=52
       RETURN                                                            
       END
       SUBROUTINE GAS7(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY 
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)         
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)   
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
-      DIMENSION XEN(149),YMOM(149),XEL(141),YEL(141),XEPS(149),YEPS(149)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
+      DIMENSION XEN(182),YMOM(182),XEL(153),YEL(153),XEPS(182),YEPS(182)
       DIMENSION XION(76),YION(76),YINC(76),YIN1(76),XIN2(54),YIN2(54),
      /XIN3(47),YIN3(47),XIN4(42),YIN4(42),XIN5(37),YIN5(37),XIN6(35),
-     /YIN6(35),XKSH(39),YKSH(39),
-     /XL1S(56),YL1S(56),XL2S(56),YL2S(56),XL3S(56),YL3S(56),
-     /XM1S(60),YM1S(60),XM2S(62),YM2S(62),XM3S(62),YM3S(62),
-     /XM4S(64),YM4S(64),XM5S(65),YM5S(65),XOPB(8),YOPB(8)
-      DIMENSION X1S5(79),Y1S5(79),YP1S5(79),X1S4(38),Y1S4(38),YP1S4(38),
-     /X1S3(57),Y1S3(57),YP1S3(57),X1S2(20),Y1S2(20),YP1S2(20),
-     /X2P10(37),Y2P10(37),YP2P10(37),X2P9(38),Y2P9(38),YP2P9(38),
-     /X2P8(33),Y2P8(33),YP2P8(33),X2P7(34),Y2P7(34),YP2P7(34),
-     /X2P6(38),Y2P6(38),YP2P6(38),X3D6(40),Y3D6(40),YP3D6(40),
-     /X2P5(30),Y2P5(30),YP2P5(30),X3D4P(40),Y3D4P(40),YP3D4P(40),
-     /X3D3(40),Y3D3(40),YP3D3(40),X3D4(36),Y3D4(36),YP3D4(36),
-     /X3D1PP(34),Y3D1PP(34),YP3D1PP(34),X3D1P(33),Y3D1P(33),YP3D1P(33),
-     /X2S5(27),Y2S5(27),YP2S5(27),X3P105(33),Y3P105(33),YP3P105(33),
-     /X2P4(23),Y2P4(23),YP2P4(23),X4DSUM(25),Y4DSUM(25),YP4DSUM(25),
-     /X2P3(23),Y2P3(23),YP2P3(23),X2P2(23),Y2P2(23),YP2P2(23),
-     /X2P1(24),Y2P1(24),YP2P1(24),
+     /YIN6(35),XKSH(60),YKSH(60),
+     /XL1S(76),YL1S(76),XL2S(76),YL2S(76),XL3S(76),YL3S(76),
+     /XM1S(79),YM1S(79),XM2S(80),YM2S(80),XM3S(80),YM3S(80),
+     /XM4S(82),YM4S(82),XM5S(83),YM5S(83)
+      DIMENSION X1S5(70),Y1S5(70),YP1S5(70),X1S4(38),Y1S4(38),YP1S4(38),
+     /X1S3(46),Y1S3(46),YP1S3(46),X1S2(20),Y1S2(20),YP1S2(20),
+     /X2P10(22),Y2P10(22),YP2P10(22),X2P9(21),Y2P9(21),YP2P9(21),
+     /X2P8(22),Y2P8(22),YP2P8(22),X2P7(22),Y2P7(22),YP2P7(22),
+     /X2P6(22),Y2P6(22),YP2P6(22),X3D6(24),Y3D6(24),YP3D6(24),
+     /X2P5(15),Y2P5(15),YP2P5(15),X3D4P(24),Y3D4P(24),YP3D4P(24),
+     /X3D3(24),Y3D3(24),YP3D3(24),X3D4(26),Y3D4(26),YP3D4(26),
+     /X3D1PP(23),Y3D1PP(23),YP3D1PP(23),X3D1P(22),Y3D1P(22),YP3D1P(22),
+     /X2S5(18),Y2S5(18),YP2S5(18),X3P105(18),Y3P105(18),YP3P105(18),
+     /X2P4(14),Y2P4(14),YP2P4(14),X4DSUM(16),Y4DSUM(16),YP4DSUM(16),
+     /X2P3(14),Y2P3(14),YP2P3(14),X2P2(14),Y2P2(14),YP2P2(14),
+     /X2P1(15),Y2P1(15),YP2P1(15),
      /IOFFN(50),IOFFION(12) 
+      DIMENSION Z54T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME                                                 
 C   ELASTIC MOMENTUM TRANSFER                                           
@@ -27203,7 +28287,11 @@ C   ELASTIC MOMENTUM TRANSFER
      /5000.,6000.,8000.,1.0D4,1.5D4,2.0D4,3.0D4,4.0D4,5.0D4,6.0D4,     
      /8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,
      /4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,
-     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,5.0D6,6.0D6,8.0D6,1.0D7/
+     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,
+     /9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,
+     /4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,
+     /2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,
+     /9.0D8,1.0D9/
       DATA YMOM/131.,115.,97.0,91.1,83.9,74.6,67.3,61.2,56.1,47.9,
      /41.4,36.2,31.8,28.2,22.5,18.1,14.8,11.1,8.36,5.33,
      /4.47,3.43,2.88,2.22,1.86,1.43,1.20,1.01,.844,.708,
@@ -27217,11 +28305,18 @@ C   ELASTIC MOMENTUM TRANSFER
      /1.09,0.94,0.84,0.75,0.68,0.56,0.38,0.26,.155,.105,                
      /.076,.059,.038,.027,.0148,.0094,.0050,.0031,.0022,.00163,
      /.001024,.000714,.000498,.000372,.000291,.000236,.000166,.000125,
-     /.000099,.0000808,
-     /.0000676,.0000577,.0000438,.0000348,.0000285,
-     /.0000239,.0000204,.0000143,.0000108,.00000852,
-     /.00000691,.00000485,.00000362,.00000281,.00000225,
-     /.00000155,.00000113,.000000686,.000000463/
+     /9.90D-5,8.08D-5,
+     /6.76D-5,5.77D-5,4.38D-5,3.48D-5,2.85D-5,2.39D-5,2.04D-5,
+     /1.43D-5,1.08D-5,8.52D-6,
+     /6.91D-6,4.85D-6,3.62D-6,2.81D-6,2.25D-6,1.85D-6,1.55D-6,1.13D-6,
+     /8.67D-7,6.86D-7,
+     /5.58D-7,4.63D-7,3.10D-7,2.23D-7,1.68D-7,1.31D-7,8.64D-8,6.11D-8,
+     /4.54D-8,3.51D-8,
+     /2.78D-8,2.26D-8,1.57D-8,1.15D-8,8.79D-9,6.93D-9,5.60D-9,3.57D-9,
+     /2.47D-9,1.81D-9,
+     /1.38D-9,8.82D-10,6.11D-10,4.48D-10,3.43D-10,2.71D-10,2.19D-10,
+     /1.52D-10,1.12D-10,8.55D-11,
+     /6.75D-11,5.47D-11/
 C ELASTIC TOTAL
       DATA XEL/0.00,.001,.005,.007,0.01,.015,0.02,.025,0.03,0.04,
      /0.05,0.06,0.07,0.08,0.10,0.12,0.14,0.17,0.20,0.25, 
@@ -27236,8 +28331,9 @@ C ELASTIC TOTAL
      /3000.,4000.,5000.,6000.,8000.,1.0D4,1.5D4,2.0D4,3.0D4,4.0D4,
      /5.0D4,6.0D4,8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,
      /3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,
-     /1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,5.0D6,6.0D6,8.0D6,
-     /1.0D7/  
+     /1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,
+     /7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,
+     /3.5D7,7.0D7,1.D9/  
       DATA YEL/131.,117.,101.,95.4,88.8,80.1,73.3,67.5,62.6,54.7,
      /48.4,43.2,38.8,35.2,29.4,24.7,21.2,17.1,14.0,10.3,
      /9.10,7.75,6.94,5.95,5.40,4.50,4.25,3.95,3.65,3.45,
@@ -27251,8 +28347,9 @@ C ELASTIC TOTAL
      /1.72,1.52,1.34,1.13,.937,.817,.632,.523,.397,.326,
      /.279,.246,.203,.175,.152,.136,.124,.116,.103,.0946,
      /.0886,.0841,.0807,.0779,.0739,.0711,.0690,.0674,.0662,.0640,
-     /.0627,.0618,.0612,.0604,.0599,.0596,.0594,.0592,.0590,.0589,
-     /.0588/
+     /.0627,.0618,.0612,.0604,.0599,.0596,.0594,.0593,.0592,.0590,
+     /.0589,.0589,.0588,.0588,.0587,.0587,.0587,.0587,.0587,.05867,
+     /.05866,.05865,.05865/
 C ELASTIC ANGULAR DISTRIBUTION ( EPSILON) 
       DATA XEPS/0.00,.001,.005,.007,.010,.015,.020,.025,.030,.040,
      /0.05,0.06,0.07,0.08,0.10,0.12,0.14,0.17,0.20,0.25,
@@ -27268,25 +28365,38 @@ C ELASTIC ANGULAR DISTRIBUTION ( EPSILON)
      /5000.,6000.,8000.,10000.,15000.,2.0D4,3.0D4,4.0D4,5.0D4,6.0D4,
      /8.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,
      /4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,
-     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,5.0D6,6.0D6,8.0D6,1.0D7/
-      DATA YEPS/.0,.0256,.0594,.0675,.0827,.1028,.1224,.1394,.155,.1852,
-     /.2149,.2402,.2667,.2931,.3435,.3883,.4349,.4985,.5627,.6541,
-     /.6823,.7316,.7579,.7956,.8197,.8410,.8674,.8859,.9019,.9178,
-     /.9286,.9341,.9385,.9425,.9456,.9485,.9508,.9524,.9533,.9536,
-     /.9533,.9520,.9507,.9477,.9440,.9386,.9322,.9249,.9155,.9063,
-     /.8944,.8817,.8679,.8529,.8198,.7905,.7415,.7056,.6817,.6412,
-     /.5753,.4668,.3741,.2896,.2352,.1953,.1692,.1283,.1485,.2062,
-     /.2301,.1418,.2353,.2136,.2456,.2925,.3305,.3539,.3762,.4781,
-     /.5912,.6783,.7707,.8403,.8835,.8989,.8844,.8113,.6465,.7171,
-     /.7668,.7760,.7913,.8044,.8127,.7972,.8066,.8383,.8494,.8621,
-     /.8799,.8902,.8997,.9044,.9101,.9208,.9421,.9592,.9741,.9818,
-     /.9860,.9874,.9909,.9930,.9954,.99669,.99785,.99846,.99877,.99900,
-     /.99927,.99943,.999558,.999641,.999696,.999744,.999804,.999844,
-     /.999871,.999891,
-     /.999907,.999918,.999936,.999949,.999957,.999964,.9999695,.9999786,
-     /.9999839,.9999874,
-     /.9999899,.9999930,.9999949,.9999961,.9999969,.9999979,.9999985,
-     /.9999991,.9999994/
+     /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,
+     /9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,
+     /4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,
+     /2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,
+     /9.0D8,1.0D9/
+C ELASTIC ANGULAR DISTRIBUTION PARAMETER EPSILON
+C  YEPS=1.0-EPSILON
+      DATA YEPS/1.,.9744,.9406,.9325,.9173,.8972,.8776,.8606,.845,.8148,
+     /.7851,.7598,.7333,.7069,.6565,.6117,.5651,.5015,.4373,.3459,
+     /.3177,.2684,.2421,.2044,.1803,.1590,.1326,.1141,.0981,.0822,
+     /.0714,.0659,.0615,.0575,.0544,.0515,.0492,.0476,.0467,.0464,
+     /.0467,.0480,.0493,.0523,.0560,.0614,.0678,.0751,.0845,.0937,
+     /.1056,.1183,.1321,.1471,.1802,.2095,.2585,.2944,.3183,.3588,
+     /.4247,.5332,.6259,.7104,.7648,.8047,.8308,.8717,.8515,.7938,
+     /.7699,.7682,.7647,.7864,.7544,.7075,.6695,.6461,.6238,.5219,
+     /.4088,.3217,.2293,.1597,.1165,.1011,.1156,.1887,.3535,.2829,
+     /.2332,.2240,.2087,.1956,.1873,.2028,.1934,.1617,.1506,.1379,
+     /.1201,.1098,.1003,.0956,.0899,.0792,.0579,.0408,.0259,.0182,
+     /.0140,.0126,.0091,.0070,.0046,.00331,.00215,.00154,.00123,.00100,
+     /7.30D-4,5.69D-4,4.42D-4,3.59D-4,3.00D-4,2.56D-4,1.96D-4,1.57D-4,
+     /1.29D-4,1.09D-4,
+     /9.34D-5,8.12D-5,6.34D-5,5.12D-5,4.23D-5,3.563D-5,3.048D-5,
+     /2.134D-5,1.607D-5,1.255D-5,
+     /1.009D-5,6.944D-6,5.077D-6,3.875D-6,3.056D-6,2.473D-6,2.043D-6,
+     /1.461D-6,1.097D-6,8.531D-7,
+     /6.826D-7,5.583D-7,3.635D-7,2.550D-7,1.885D-7,1.447D-7,9.266D-8,
+     /6.407D-8,4.674D-8,3.548D-8,
+     /2.775D-8,2.224D-8,1.512D-8,1.089D-8,8.19D-9,6.36D-9,5.08D-9,
+     /3.16D-8,2.14D-9,1.54D-9,
+     /1.163D-9,7.25D-10,4.93D-10,3.56D-10,2.69D-10,2.10D-10,1.68D-10,
+     /1.15D-10,8.3D-11,6.3D-11,
+     /4.9D-11,3.9D-11/
 C IONISATION (VALUES ABOVE 20KEV GENERATED BY BORN BETHE IN SUB)  
       DATA XION/12.129843,12.5,13.0,13.5,14.0,14.5,15.0,15.5,16.0,16.5,
      /17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,26.0,28.0,                
@@ -27387,7 +28497,12 @@ C K-SHELL IONISATION
      /1.50D5,
      /1.83D5,2.24D5,2.82D5,3.65D5,4.87D5,6.49D5,8.66D5,1.00D6,1.22D6,
      /1.50D6,
-     /1.83D6,2.24D6,2.82D6,3.65D6,4.87D6,6.49D6,8.66D6,1.00D7,2.05D7/  
+     /1.83D6,2.24D6,2.82D6,3.65D6,4.87D6,6.49D6,8.66D6,1.00D7,1.22D7,
+     /1.50D7,
+     /2.05D7,2.51D7,3.07D7,4.10D7,5.16D7,6.31D7,7.50D7,8.66D7,1.00D8,
+     /1.22D8,
+     /1.50D8,2.05D8,2.51D8,3.07D8,4.10D8,5.16D8,6.31D8,7.50D8,8.66D8,
+     /1.00D9/ 
       DATA YKSH/0.0,1.74D-8,3.56D-8,5.30D-8,6.98D-8,8.58D-8,1.01D-7,
      /1.16D-7,1.29D-7,1.55D-7,
      /1.78D-7,1.99D-7,2.17D-7,2.34D-7,2.62D-7,2.84D-7,3.00D-7,3.20D-7,
@@ -27395,7 +28510,11 @@ C K-SHELL IONISATION
      /3.34D-7,3.31D-7,3.26D-7,3.21D-7,3.20D-7,3.23D-7,3.29D-7,3.34D-7,
      /3.43D-7,3.55D-7,
      /3.68D-7,3.83D-7,4.01D-7,4.23D-7,4.50D-7,4.77D-7,5.05D-7,5.20D-7,
-     /5.93D-7/
+     /5.40D-7,5.61D-7,
+     /5.93D-7,6.14D-7,6.35D-7,6.65D-7,6.89D-7,7.10D-7,7.28D-7,7.43D-7,
+     /7.58D-7,7.79D-7,
+     /7.99D-7,8.32D-7,8.53D-7,8.74D-7,9.03D-7,9.27D-7,9.47D-7,9.65D-7,
+     /9.79D-7,9.94D-7/
 C L1-SHELL IONISATION
       DATA XL1S/5453.,5499.2,5658.7,5823.,5992.,6166.,6345.,6529.,
      /6719.,6914.,
@@ -27406,7 +28525,11 @@ C L1-SHELL IONISATION
      /4.47D5,
      /5.96D5,8.66D5,1.00D6,1.22D6,1.50D6,1.83D6,2.30D6,2.90D6,3.65D6,
      /4.60D6,
-     /5.79D6,7.50D6,8.66D6,1.00D7,1.50D7,2.05D7/
+     /5.79D6,7.50D6,8.66D6,1.00D7,1.22D7,1.50D7,1.83D7,2.30D7,2.90D7,
+     /3.65D7,
+     /4.60D7,5.79D7,7.29D7,8.66D7,1.00D8,1.22D8,1.50D8,1.83D8,2.30D8,
+     /2.90D8,
+     /3.65D8,4.60D8,5.79D8,7.29D8,8.66D8,1.00D9/
       DATA YL1S/0.0,2.21D-7,9.39D-7,1.62D-6,2.26D-6,2.86D-6,3.43D-6,
      /3.96D-6,4.47D-6,4.95D-6,
      /5.82D-6,6.59D-6,7.26D-6,7.86D-6,8.37D-6,9.02D-6,9.52D-6,9.89D-6,
@@ -27417,7 +28540,11 @@ C L1-SHELL IONISATION
      /3.04D-6,2.84D-6,
      /2.71D-6,2.64D-6,2.64D-6,2.66D-6,2.69D-6,2.74D-6,2.82D-6,2.90D-6,
      /3.00D-6,3.11D-6,
-     /3.23D-6,3.36D-6,3.44D-6,3.52D-6,3.74D-6,3.92D-6/
+     /3.23D-6,3.36D-6,3.44D-6,3.52D-6,3.63D-6,3.74D-6,3.85D-6,3.98D-6,
+     /4.12D-6,4.25D-6,
+     /4.38D-6,4.51D-6,4.65D-6,4.75D-6,4.83D-6,4.95D-6,5.06D-6,5.18D-6,
+     /5.32D-6,5.45D-6,
+     /5.58D-6,5.72D-6,5.85D-6,5.99D-6,6.09D-6,6.17D-6/
 C L2-SHELL IONISATION
       DATA XL2S/5107.,5160.6,5311.3,5466.,5626.,5790.,5959.,6133.,
      /6312.,6686.,
@@ -27428,7 +28555,11 @@ C L2-SHELL IONISATION
      /4.47D5,
      /5.96D5,8.66D5,1.00D6,1.22D6,1.50D6,1.83D6,2.30D6,2.90D6,3.65D6,
      /4.60D6,
-     /5.79D6,7.50D6,8.66D6,1.00D7,1.50D7,2.05D7/
+     /5.79D6,7.50D6,8.66D6,1.00D7,1.22D7,1.50D7,2.05D7,2.59D7,3.16D7,
+     /4.10D7,
+     /5.16D7,6.31D7,7.50D7,8.66D7,1.00D8,1.22D8,1.50D8,2.05D8,2.59D8,
+     /3.16D8,
+     /4.10D8,5.16D8,6.31D8,7.50D8,8.66D8,1.00D9/
       DATA YL2S/0.0,4.47D-7,1.62D-6,2.72D-6,3.76D-6,4.73D-6,5.64D-6,
      /6.49D-6,7.28D-6,8.71D-6,
      /9.94D-6,1.10D-5,1.19D-5,1.27D-5,1.36D-5,1.43D-5,1.47D-5,1.50D-5,
@@ -27439,7 +28570,11 @@ C L2-SHELL IONISATION
      /4.19D-6,3.92D-6,
      /3.75D-6,3.66D-6,3.66D-6,3.69D-6,3.74D-6,3.82D-6,3.93D-6,4.06D-6,
      /4.20D-6,4.36D-6,
-     /4.52D-6,4.72D-6,4.83D-6,4.94D-6,5.26D-6,5.52D-6/
+     /4.52D-6,4.72D-6,4.83D-6,4.94D-6,5.10D-6,5.26D-6,5.52D-6,5.71D-6,
+     /5.88D-6,6.09D-6,
+     /6.28D-6,6.45D-6,6.59D-6,6.71D-6,6.83D-6,7.00D-6,7.17D-6,7.43D-6,
+     /7.63D-6,7.79D-6,
+     /8.01D-6,8.20D-6,8.37D-6,8.51D-6,8.63D-6,8.75D-6/
 C L3-SHELL IONISATION
       DATA XL3S/4786.,4881.6,5023.7,5170.,5321.,5476.,5635.,5800.,
      /5968.,6321.,
@@ -27450,7 +28585,11 @@ C L3-SHELL IONISATION
      /4.47D5,
      /5.96D5,8.66D5,1.00D6,1.22D6,1.50D6,1.83D6,2.30D6,2.90D6,3.65D6,
      /4.60D6,
-     /5.79D6,7.50D6,8.66D6,1.00D7,1.50D7,2.05D7/
+     /5.79D6,7.50D6,8.66D6,1.00D7,1.22D7,1.50D7,1.83D7,2.30D7,2.90D7,
+     /3.65D7,
+     /4.60D7,5.79D7,7.50D7,8.66D7,1.00D8,1.22D8,1.50D8,1.83D8,2.30D8,
+     /2.90D8,
+     /3.65D8,4.60D8,5.79D8,7.50D8,8.66D8,1.00D9/
       DATA YL3S/0.0,1.94D-6,4.64D-6,7.17D-6,9.54D-6,1.18D-5,1.38D-5,
      /1.58D-5,1.76D-5,2.08D-5,
      /2.36D-5,2.60D-5,2.80D-5,3.05D-5,3.23D-5,3.40D-5,3.48D-5,3.52D-5,
@@ -27461,7 +28600,11 @@ C L3-SHELL IONISATION
      /9.10D-6,8.49D-6,
      /8.10D-6,7.90D-6,7.89D-6,7.93D-6,8.04D-6,8.19D-6,8.41D-6,8.67D-6,
      /8.97D-6,9.29D-6,
-     /9.63D-6,1.00D-5,1.03D-5,1.05D-5,1.12D-5,1.17D-5/
+     /9.63D-6,1.00D-5,1.03D-5,1.05D-5,1.08D-5,1.12D-5,1.15D-5,1.19D-5,
+     /1.23D-5,1.27D-5,
+     /1.31D-5,1.35D-5,1.39D-5,1.42D-5,1.45D-5,1.48D-5,1.52D-5,1.55D-5,
+     /1.59D-5,1.63D-5,
+     /1.67D-5,1.71D-5,1.75D-5,1.80D-5,1.82D-5,1.85D-5/
 C M1-SHELL IONISATION
       DATA XM1S/1148.7,1180.9,1214.7,1249.4,1285.1,1321.8,1359.7,1398.6,
      /1438.7,1479.9,
@@ -27472,7 +28615,10 @@ C M1-SHELL IONISATION
      /1.50D5,1.88D5,2.37D5,3.00D5,3.76D5,4.87D5,6.31D5,8.41D5,1.00D6,
      /1.22D6,
      /1.50D6,1.88D6,2.37D6,3.00D6,3.76D6,4.87D6,6.31D6,8.41D6,1.00D7,
-     /2.05D7/ 
+     /1.22D7,
+     /1.50D7,1.88D7,2.37D7,2.99D7,3.76D7,4.87D7,6.31D7,8.41D7,1.00D8,
+     /1.22D8,
+     /1.50D8,1.88D8,2.37D8,2.99D8,3.76D8,4.87D8,6.31D8,8.41D8,1.00D9/ 
       DATA YM1S/0.0,2.13D-5,4.08D-5,5.85D-5,7.47D-5,8.95D-5,1.03D-4,
      /1.16D-4,1.27D-4,1.37D-4,
      /1.56D-4,1.71D-4,1.84D-4,1.95D-4,2.04D-4,2.15D-4,2.23D-4,2.28D-4,
@@ -27484,7 +28630,11 @@ C M1-SHELL IONISATION
      /2.38D-5,2.10D-5,1.88D-5,1.71D-5,1.58D-5,1.47D-5,1.40D-5,1.35D-5,
      /1.34D-5,1.33D-5,
      /1.34D-5,1.35D-5,1.37D-5,1.40D-5,1.44D-5,1.48D-5,1.53D-5,1.59D-5,
-     /1.62D-5,1.77D-5/
+     /1.62D-5,1.66D-5,
+     /1.70D-5,1.75D-5,1.80D-5,1.85D-5,1.90D-5,1.96D-5,2.01D-5,2.08D-5,
+     /2.11D-5,2.16D-5,
+     /2.20D-5,2.25D-5,2.30D-5,2.35D-5,2.40D-5,2.46D-5,2.52D-5,2.58D-5,
+     /2.62D-5/
 C M2-SHELL IONISATION
       DATA XM2S/1002.1,1012.5,1041.7,1071.7,1102.6,1134.5,1167.2,1201.,
      /1236.,1271.,
@@ -27495,7 +28645,11 @@ C M2-SHELL IONISATION
      /1.22D5,1.50D5,1.88D5,2.37D5,3.00D5,3.76D5,4.87D5,6.31D5,8.41D5,
      /1.00D6,
      /1.22D6,1.50D6,1.88D6,2.37D6,3.00D6,3.76D6,4.87D6,6.31D6,8.41D6,
-     /1.00D7,1.50D7,2.05D7/
+     /1.00D7,
+     /1.22D7,1.50D7,1.88D7,2.37D7,2.99D7,3.76D7,4.87D7,6.31D7,8.41D7,
+     /1.00D8,
+     /1.22D8,1.50D8,1.88D8,2.37D8,2.99D8,3.76D8,4.87D8,6.31D8,8.41D8,
+     /1.00D9/
       DATA YM2S/0.0,1.17D-5,4.18D-5,6.88D-5,9.29D-5,1.15D-4,1.34D-4,
      /1.52D-4,1.68D-4,1.83D-4,
      /2.08D-4,2.30D-4,2.49D-4,2.64D-4,2.78D-4,2.95D-4,3.09D-4,3.19D-4,
@@ -27507,7 +28661,11 @@ C M2-SHELL IONISATION
      /3.87D-5,3.45D-5,3.05D-5,2.74D-5,2.50D-5,2.31D-5,2.16D-5,2.06D-5,
      /1.99D-5,1.98D-5,
      /1.97D-5,1.98D-5,2.01D-5,2.05D-5,2.10D-5,2.16D-5,2.23D-5,2.31D-5,
-     /2.40D-5,2.46D-5,2.59D-5,2.70D-5/
+     /2.40D-5,2.46D-5,
+     /2.52D-5,2.59D-5,2.67D-5,2.75D-5,2.83D-5,2.91D-5,3.00D-5,3.09D-5,
+     /3.20D-5,3.26D-5,
+     /3.33D-5,3.40D-5,3.48D-5,3.56D-5,3.65D-5,3.73D-5,3.82D-5,3.91D-5,
+     /4.01D-5,4.08D-5/
 C M3-SHELL IONISATION
       DATA XM3S/940.6,958.1,985.7,1014.1,1043.3,1073.3,1104.3,1136.1,
      /1168.9,1202.6,
@@ -27518,7 +28676,11 @@ C M3-SHELL IONISATION
      /1.00D5,1.22D5,1.50D5,1.88D5,2.37D5,3.00D5,3.76D5,4.87D5,6.31D5,
      /8.41D5,
      /1.00D6,1.22D6,1.88D6,2.37D6,3.00D6,3.76D6,4.87D6,6.31D6,8.41D6,
-     /1.00D7,1.50D7,2.05D7/
+     /1.00D7,
+     /1.22D7,1.50D7,1.88D7,2.37D7,2.99D7,3.76D7,4.87D7,6.31D7,8.41D7,
+     /1.00D8,
+     /1.22D8,1.50D8,1.88D8,2.37D8,2.99D8,3.76D8,4.87D8,6.31D8,8.41D8,
+     /1.00D9/
       DATA YM3S/0.0,5.19D-5,1.24D-4,1.88D-4,2.44D-4,2.95D-4,3.40D-4,
      /3.81D-4,4.18D-4,4.51D-4,
      /5.10D-4,5.59D-4,6.01D-4,6.37D-4,6.68D-4,6.96D-4,7.29D-4,7.56D-4,
@@ -27530,7 +28692,11 @@ C M3-SHELL IONISATION
      /1.00D-4,8.86D-5,7.89D-5,6.99D-5,6.27D-5,5.71D-5,5.29D-5,4.94D-5,
      /4.71D-5,4.57D-5,
      /4.53D-5,4.52D-5,4.61D-5,4.71D-5,4.82D-5,4.96D-5,5.13D-5,5.31D-5,
-     /5.52D-5,5.65D-5,5.97D-5,6.22D-5/
+     /5.52D-5,5.65D-5,
+     /5.81D-5,5.97D-5,6.15D-5,6.34D-5,6.53D-5,6.71D-5,6.93D-5,7.14D-5,
+     /7.38D-5,7.52D-5,
+     /7.69D-5,7.86D-5,8.05D-5,8.24D-5,8.43D-5,8.62D-5,8.84D-5,9.05D-5,
+     /9.29D-5,9.43D-5/
 C M4-SHELL IONISATION
       DATA XM4S/689.0,706.2,726.8,748.1,770.0,792.6,815.7,839.6,864.2,
      /889.5,
@@ -27542,7 +28708,11 @@ C M4-SHELL IONISATION
      /4.87D5,
      /6.31D5,8.41D5,1.00D6,1.22D6,1.88D6,2.37D6,3.00D6,3.76D6,4.87D6,
      /6.31D6,
-     /8.41D6,1.00D7,1.50D7,2.05D7/
+     /8.41D6,1.00D7,1.22D7,1.50D7,1.88D7,2.37D7,2.99D7,3.76D7,4.87D7,
+     /6.31D7,
+     /8.41D7,1.00D8,1.22D8,1.50D8,1.88D8,2.37D8,2.99D8,3.76D8,4.87D8,
+     /6.31D8,
+     /8.41D8,1.00D9/
       DATA YM4S/0.0,1.79D-4,3.69D-4,5.38D-4,6.89D-4,8.24D-4,9.45D-4,
      /1.05D-3,1.15D-3,1.24D-3,
      /1.39D-3,1.52D-3,1.62D-3,1.71D-3,1.79D-3,1.88D-3,1.95D-3,2.00D-3,
@@ -27555,7 +28725,11 @@ C M4-SHELL IONISATION
      /1.37D-4,1.29D-4,
      /1.24D-4,1.21D-4,1.21D-4,1.21D-4,1.25D-4,1.29D-4,1.33D-4,1.38D-4,
      /1.43D-4,1.49D-4,
-     /1.56D-4,1.61D-4,1.71D-4,1.79D-4/
+     /1.56D-4,1.61D-4,1.66D-4,1.71D-4,1.77D-4,1.83D-4,1.89D-4,1.96D-4,
+     /2.03D-4,2.10D-4,
+     /2.18D-4,2.22D-4,2.28D-4,2.33D-4,2.40D-4,2.46D-4,2.52D-4,2.58D-4,
+     /2.65D-4,2.73D-4,
+     /2.80D-4,2.85D-4/
 C M5-SHELL IONISATION
       DATA XM5S/676.4,686.9,707.0,727.7,748.9,770.8,793.4,816.6,840.4,
      /865.0,
@@ -27567,7 +28741,11 @@ C M5-SHELL IONISATION
      /4.87D5,
      /6.31D5,8.41D5,1.00D6,1.22D6,1.50D6,1.88D6,2.37D6,3.00D6,3.76D6,
      /4.87D6,
-     /6.31D6,8.41D6,1.00D7,1.50D7,2.05D7/
+     /6.31D6,8.41D6,1.00D7,1.22D7,1.50D7,1.88D7,2.37D7,2.99D7,3.76D7,
+     /4.87D7,
+     /6.31D7,8.41D7,1.00D8,1.22D8,1.50D8,1.88D8,2.37D8,2.99D8,3.76D8,
+     /4.87D8,
+     /6.31D8,8.41D8,1.00D9/
       DATA YM5S/0.0,1.84D-4,4.98D-4,7.77D-4,1.02D-3,1.25D-3,1.44D-3,
      /1.62D-3,1.78D-3,1.92D-3,
      /2.16D-3,2.37D-3,2.53D-3,2.67D-3,2.79D-3,2.93D-3,3.04D-3,3.12D-3,
@@ -27580,29 +28758,32 @@ C M5-SHELL IONISATION
      /2.11D-4,1.98D-4,
      /1.91D-4,1.86D-4,1.86D-4,1.87D-4,1.89D-4,1.93D-4,1.98D-4,2.04D-4,
      /2.11D-4,2.20D-4,
-     /2.29D-4,2.40D-4,2.47D-4,2.63D-4,2.76D-4/
+     /2.29D-4,2.40D-4,2.47D-4,2.55D-4,2.63D-4,2.72D-4,2.81D-4,2.91D-4,
+     /3.00D-4,3.11D-4,
+     /3.22D-4,3.34D-4,3.41D-4,3.50D-4,3.58D-4,3.68D-4,3.77D-4,3.87D-4,
+     /3.97D-4,4.08D-4,
+     /4.18D-4,4.31D-4,4.38D-4/
 C
 C EXCITATION  UNITS OF 10**-18CM**2
 C 
 C 1S5 METASTABLE E=8.3153155 EV  J=2        
 C SHAPE FUNCTION BELOW 11EV FROM BARTSCHAT AND ZATSARINNY
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X1S5/8.3153,8.35,8.40,8.44,8.48,8.52,8.56,8.60,8.65,8.70,
      /8.75,8.80,8.85,9.90,8.95,9.00,9.05,9.10,9.15,9.20,
      /9.25,9.30,9.35,9.40,9.45,9.50,9.516,9.52,9.525,9.53,
      /9.54,9.545,9.55,9.555,9.56,9.57,9.58,9.59,9.60,9.61,
      /9.615,9.62,9.625,9.63,9.64,9.65,9.66,9.67,9.68,9.70,
      /9.75,10.0,10.5,11.0,11.5,12.0,12.5,13.0,14.0,15.0,
-     /16.0,18.0,20.0,25.0,30.0,40.0,50.0,60.0,80.0,100.,
-     /150.,200.,300.,600.,1000.,1.D4,1.D5,1.D6,1.D7/
+     /16.0,18.0,20.0,25.0,30.0,40.0,50.0,60.0,80.0,100./
       DATA Y1S5/0.00,2.38,4.93,6.41,3.42,2.84,3.00,3.33,3.89,4.59,
      /5.45,6.48,7.72,9.05,10.4,11.5,12.3,12.2,10.8,9.45,
      /8.84,9.04,9.18,9.18,9.11,9.32,23.6,15.7,12.1,10.7,
      /9.79,11.4,15.8,18.0,15.9,13.1,13.6,12.6,10.4,12.1,
      /14.9,20.5,21.5,18.5,17.2,16.9,15.9,13.8,12.4,11.1,
      /10.1,10.0,9.90,9.80,9.70,9.60,9.30,8.80,8.10,7.45,
-     /6.80,5.50,4.40,2.20,1.10,.500,.230,.150,.065,.034,
-     /.010,.0042,.0013,1.7D-4,3.8D-5,4.D-8,4.D-11,4.D-14,4.D-17/
-      DATA YP1S5/79*0.0/
+     /6.80,5.50,4.40,2.20,1.10,.500,.230,.150,.065,.034/
+      DATA YP1S5/70*0.0/
 C 1S4 E=8.4365236 EV J=1  RESONANCE RADIATION 146.96 NM       F=0.260 
 C    USED BEF SCALING ABOVE 11.0EV
 C SHAPE FUNCTION BELOW 11EV FROM BARTSCHAT AND ZATSARINNY        
@@ -27617,19 +28798,18 @@ C SHAPE FUNCTION BELOW 11EV FROM BARTSCHAT AND ZATSARINNY
       DATA YP1S4/38*0.0/
 C 1S3  METASTABLE   E=9.4471945 EV J=0 
 C SHAPE FUNCTION BELOW 11EV FROM BARTSCAT AND ZATSARINNY
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X1S3/9.4472,9.45,9.47,9.48,9.49,9.50,9.506,9.51,9.52,9.525,
      /9.53,9.54,9.55,9.555,9.56,9.57,9.58,9.60,9.62,9.64,
      /9.67,9.68,9.69,9.70,9.71,9.72,9.73,9.74,9.75,9.80,
      /10.0,11.0,12.0,13.0,14.0,15.0,16.0,18.0,20.0,24.0,
-     /30.0,40.0,50.0,60.0,80.0,100.,150.,200.,300.,400.,
-     ,600.,800.,1000.,1.D4,1.D5,1.D6,1.D7/
+     /30.0,40.0,50.0,60.0,80.0,100./
       DATA Y1S3/0.00,.313,.324,.230,.360,1.67,3.78,2.57,1.26,1.71,
      /1.80,1.78,2.23,2.70,2.43,.635,1.14,1.04,1.49,1.59,
      /1.62,2.77,3.89,6.21,9.38,8.28,6.75,4.29,3.97,.556,
      /0.77,3.30,4.30,4.50,4.30,3.70,3.30,2.65,2.25,1.50,
-     /0.80,0.32,0.17,0.10,.040,.021,.0064,.0026,7.5D-4,3.3D-4,
-     /1.0D-4,4.D-5,2.D-5,2.D-8,2.D-11,2.D-14,2.D-17/
-      DATA YP1S3/57*0.0/
+     /0.80,0.32,0.17,0.10,.040,.021/
+      DATA YP1S3/46*0.0/
 C 1S2 E=9.5697248 EV J=1 RESONANCE RADIATION 129.56 NM        F=0.183
 C   USED BEF SCALING ABOVE 11.0EV
 C SHAPE FUNCTION BELOW 11EV FROM BARTSCHAT AND ZATSARINNY
@@ -27639,197 +28819,173 @@ C SHAPE FUNCTION BELOW 11EV FROM BARTSCHAT AND ZATSARINNY
      /2.83,2.11,2.07,1.78,2.10,1.96,1.75,1.87,2.17,5.305/
       DATA YP1S2/20*0.0/
 C 2P10 E=9.5801524 EV  J=1 
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X2P10/9.5802,9.80,10.0,10.5,11.0,11.5,12.0,12.5,13.0,14.0,
      /15.0,16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,
-     /80.0,100.,120.,160.,200.,250.,300.,500.,700.,1000.,
-     /2000.,4000.,7000.,1.D4,1.D5,1.D6,1.D7/
+     /80.0,100./
       DATA Y2P10/0.00,0.69,1.23,2.34,3.15,3.73,4.14,4.41,4.59,4.76,
      /4.74,4.63,4.26,3.84,2.91,2.23,1.75,1.40,0.95,0.69,
-     /.406,.267,.188,.108,.071,.046,.032,.011,.0059,.0029,
-     /7.8D-4,1.9D-4,6.0D-5,2.9D-5,2.9D-7,2.9D-9,2.9D-11/
-      DATA YP2P10/37*0.0/
+     /.406,.267/
+      DATA YP2P10/22*0.0/
 C 2P9 E=9.6856199 EV  J=2
+C ABOVE 100EV SCALED BY 1/E
       DATA X2P9/9.6856,10.0,10.5,11.0,11.5,12.0,12.5,13.0,14.0,15.0,
      /16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,80.0,
-     /100.,120.,140.,170.,200.,250.,300.,400.,600.,800.,
-     /1000.,2000.,4000.,7000.,1.D4,1.D5,1.D6,1.D7/
+     /100./
       DATA Y2P9/0.00,1.50,3.37,4.49,5.47,6.04,6.48,6.91,7.41,7.49,
      /7.41,6.98,6.26,5.04,4.17,3.52,3.09,2.52,2.08,1.58,
-     /1.22,1.00,0.87,0.72,0.61,0.51,0.41,0.30,0.21,0.16,
-     /0.12,.061,.030,.017,.012,.0012,1.2D-4,1.2D-5/
-      DATA YP2P9/38*0.0/
+     /1.22/
+      DATA YP2P9/21*0.0/
 C 2P8 E=9.7207401 EV  J=3
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X2P8/9.7207,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /15.0,16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,
-     /80.0,100.,200.,400.,700.,1000.,2000.,4000.,7000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /80.0,100./
       DATA Y2P8/0.00,1.16,2.78,3.88,4.86,5.44,5.83,6.02,6.35,6.41,
      /6.48,6.33,4.89,3.24,1.51,0.72,0.43,0.26,0.11,.061,
-     /.021,.0093,.0011,1.4D-4,2.7D-5,9.4D-6,1.1D-6,1.4D-7,2.7D-8,9.4D-9,
-     /9.4D-12,9.4D-15,9.4D-18/
-      DATA YP2P8/33*0.0/
+     /.021,.0093/
+      DATA YP2P8/22*0.0/
 C 2P7 E=9.7892996 EV  J=1
+C ABOVE 100EV SCALED BY 1/E**2
       DATA X2P7/9.7893,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /15.0,16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,
-     /80.0,100.,120.,150.,200.,300.,400.,600.,1000.,2000.,
-     /1.D4,1.D5,1.D6,1.D7/
+     /80.0,100./
       DATA Y2P7/0.00,0.66,1.68,2.52,3.12,3.48,3.72,3.90,4.02,4.14,
      /4.20,4.20,3.90,3.48,2.64,1.80,1.26,0.96,0.63,0.42,
-     /0.24,0.15,0.11,.066,.036,.017,.0096,4.3D-3,1.6D-3,3.6D-4,
-     /1.6D-5,1.6D-7,1.6D-9,1.6D-11/
-      DATA YP2P7/34*0.0/
+     /0.24,0.15/
+      DATA YP2P7/22*0.0/
 C 2P6 E=9.8210934 EV  J=2
+C ABOVE 100EV SCALED BY 1/E
       DATA X2P6/9.8211,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /15.0,16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,
-     /80.0,100.,120.,140.,170.,200.,300.,400.,600.,800.,
-     /1000.,1400.,2000.,4000.,1.D4,1.D5,1.D6,1.D7/
+     /80.0,100./
       DATA Y2P6/0.00,0.26,1.05,1.47,1.92,2.19,2.32,2.43,2.53,2.62,
      /2.64,2.88,3.06,2.94,2.70,2.10,1.68,1.53,1.26,1.02,
-     /0.78,0.60,0.51,0.44,0.36,0.31,0.20,0.16,0.10,.075,
-     /0.06,.044,.031,.016,.006,.0006,.00006,.000006/
-      DATA YP2P6/38*0.0/
+     /0.78,0.60/
+      DATA YP2P6/22*0.0/
 C 3D6 E=9.8903760 EV  J=0
+C ABOVE 100EV SCALED BY 1/E**1.5
       DATA X3D6/9.8904,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /14.5,15.0,16.0,17.0,18.0,20.0,22.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,250.,300.,400.,
-     /600.,800.,1000.,1400.,2000.,4000.,1.D4,1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y3D6/0.00,0.23,0.83,1.50,2.17,2.77,3.22,3.60,3.90,4.20,
      /4.42,4.65,4.80,5.02,5.02,4.80,4.50,3.90,2.78,1.87,
-     /1.35,1.01,0.66,0.48,0.36,0.25,0.17,0.12,0.09,5.8D-2,
-     /3.2D-2,2.1D-2,1.5D-2,9.0D-3,5.4D-3,1.9D-3,4.5D-4,1.5D-5,4.5D-7,
-     /1.5D-8/ 
-      DATA YP3D6/40*0.0/
+     /1.35,1.01,0.66,0.48/
+      DATA YP3D6/24*0.0/
 C
 C 3D5 E=9.9170761 EV J=1 RESONACE RADIATION 125.02 NM         F=0.010
 C
 C 2P5 E=9.9334847 EV  J=0 
+C ABOVE 100EV SCALED BY 1/E
       DATA X2P5/9.9335,13.0,16.0,17.5,20.0,24.0,26.0,28.0,30.0,35.0,
-     /40.0,50.0,60.0,80.0,100.,120.,150.,200.,300.,400.,
-     /600.,800.,1000.,1400.,2000.,4000.,1.D4,1.D5,1.D6,1.D7/
+     /40.0,50.0,60.0,80.0,100./
       DATA Y2P5/0.00,1.60,2.16,2.70,4.26,7.32,8.46,8.88,8.70,8.40, 
-     /7.50,5.70,4.80,3.60,3.00,2.46,1.98,1.50,1.02,0.76,
-     /0.52,0.39,0.31,0.23,0.16,.078,.031,.0031,3.1D-4,3.1D-5/
-      DATA YP2P5/30*0.0/
+     /7.50,5.70,4.80,3.60,3.00/
+      DATA YP2P5/15*0.0/
 C 3D4! E=9.9431141 EV  J=4
+C ABOVE 100EV SCALED BY 1/E**1.5
       DATA X3D4P/9.9431,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /14.5,15.0,16.0,17.0,18.0,20.0,22.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,250.,300.,400.,
-     /600.,800.,1000.,1400.,2000.,4000.,1.D4,1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y3D4P/0.00,0.45,1.65,3.00,4.35,5.55,6.45,7.20,7.80,8.40,
      /8.85,9.30,9.60,10.1,10.1,9.60,9.00,7.80,5.77,3.75,
-     /2.70,2.03,1.32,0.96,0.72,0.51,0.33,0.24,0.18,.117,          
-     /6.3D-2,4.2D-2,3.0D-2,1.8D-2,1.1D-2,3.8D-3,9.0D-4,3.D-5,9.0D-7,
-     /3.D-8/ 
-      DATA YP3D4P/40*0.0/
+     /2.70,2.03,1.32,0.96/
+      DATA YP3D4P/24*0.0/
 C 3D3 E=9.9587506 EV  J=2
+C ABOVE 100EV SCALED BY 1/E**1.5
       DATA X3D3/9.9588,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /14.5,15.0,16.0,17.0,18.0,20.0,22.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,250.,300.,400.,
-     /600.,800.,1000.,1400.,2000.,4000.,1.D4,1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y3D3/0.00,0.48,1.76,3.20,4.64,5.92,6.88,7.68,8.32,8.96,
      /9.44,9.92,10.2,10.7,10.7,10.2,9.60,8.32,5.92,4.00,
-     /2.88,2.16,1.41,1.03,0.77,0.54,0.35,0.26,0.19,.125,          
-     /6.7D-2,4.5D-2,3.2D-2,1.9D-2,1.1D-2,4.0D-3,9.6D-4,3.2D-5,9.6D-7,
-     /3.2D-8/ 
-      DATA YP3D3/40*0.0/
+     /2.88,2.16,1.41,1.03/
+      DATA YP3D3/24*0.0/
 C 3D4 E=10.039054 EV  J=3
+C ABOVE 100EV SCALED BY 1/E**2
       DATA X3D4/10.0391,10.2,10.5,10.7,11.0,11.2,11.5,12.0,12.5,13.0,
      /13.5,14.0,14.5,15.0,16.0,18.0,20.0,22.0,25.0,30.0,
-     /35.0,40.0,50.0,60.0,80.0,100.,120.,150.,200.,300.,
-     /600.,1000.,2000.,1.D5,1.D6,1.D7/
+     /35.0,40.0,50.0,60.0,80.0,100./
       DATA Y3D4/0.00,0.50,1.50,2.20,3.30,4.00,5.00,6.90,8.70,10.7,
      /12.2,13.3,13.6,13.6,12.8,10.2,9.00,7.30,5.70,3.40,
-     /2.90,2.20,1.45,1.00,0.56,0.36,0.25,0.16,.090,.040,
-     /.010,.0036,9.D-4,3.6D-5,3.6D-7,3.6D-9/
-      DATA YP3D4/36*0.0/
+     /2.90,2.20,1.45,1.00,0.56,0.36/
+      DATA YP3D4/26*0.0/
 C 3D1!! E=10.157469 EV  J=2
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X3D1PP/10.1575,10.5,10.7,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
      /14.5,15.0,16.0,18.0,20.0,22.0,25.0,30.0,40.0,50.0,
-     /60.0,80.0,100.,120.,150.,200.,300.,600.,1000.,2000.,
-     /1.D4,1.D5,1.D6,1.D7/
+     /60.0,80.0,100./
       DATA Y3D1PP/0.00,0.70,1.30,2.00,3.20,4.50,5.70,6.80,7.80,8.30,
      /8.50,8.50,8.20,6.70,5.30,3.80,2.90,1.55,0.67,0.35,
-     /0.20,.085,.044,.025,.013,.0055,.0016,2.0D-4,4.4D-5,5.5D-6,
-     /4.4D-8,4.4D-11,4.4D-14,4.4D-17/
-      DATA YP3D1PP/34*0.0/
+     /0.20,.085,.044/
+      DATA YP3D1PP/23*0.0/
 C 3D1! E=10.220042  J=3
+C ABOVE 100EV SCALED BY 1/E
       DATA X3D1P/10.2200,10.7,11.0,11.5,12.0,12.5,13.0,13.5,14.0,14.5,
      /15.0,16.0,18.0,20.0,22.0,25.0,30.0,40.0,50.0,60.0,
-     /80.0,100.,120.,150.,200.,300.,600.,1000.,2000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /80.0,100./
       DATA Y3D1P/0.00,0.60,1.04,1.83,2.39,3.00,3.39,3.65,3.83,3.94,
      /4.00,4.00,3.95,3.85,3.70,3.45,2.90,2.15,1.70,1.45,
-     /1.08,.875,0.73,0.58,0.44,0.30,0.15,0.09,.045,.009,
-     /9.D-4,9.D-5,9.D-6/
-      DATA YP3D1P/33*0.0/
+     /1.08,.875/
+      DATA YP3D1P/22*0.0/
 C
 C 3D2 E=10.401030  J=1 RESONANCE RADIATION  119.20 NM         F=0.379
 C
 C 2S5  E=10.562062 EV  J=2 NOT OBSERVED  USE 1S5 SCALED BY 0.25
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X2S5/10.5621,11.0,11.5,12.0,12.5,13.0,14.0,15.0,16.0,18.0,
-     /20.0,25.0,30.0,40.0,50.0,60.0,80.0,100.,150.,200.,
-     /300.,600.,1000.,1.D4,1.D5,1.D6,1.D7/
+     /20.0,25.0,30.0,40.0,50.0,60.0,80.0,100./
       DATA Y2S5/0.00,0.10,0.25,0.50,1.00,1.50,2.02,1.75,1.70,1.37,
-     /1.10,.550,.275,.125,.057,.037,.016,.0085,.0025,.0010,
-     /3.2D-4,4.2D-5,1.0D-5,1.D-8,1.D-11,1.D-14,1.D-17/
-      DATA YP2S5/27*0.0/
+     /1.10,.550,.275,.125,.057,.037,.016,.0085/
+      DATA YP2S5/18*0.0/
 C
 C 2S4  E=10.593211 EV  J=1  RESONANCE RADIATION 117.04 NM     F=0.086  
 C
 C 3P10+3P9+3P8+3P7+3P6+3P5  E=10.9016 EV SCALED SUM OF 2P10--2P5 BY 0.25
+C ABOVE 100EV SCALED BY 1/E
       DATA X3P105/10.9016,11.50,12.0,12.5,13.0,14.0,15.0,16.0,18.0,20.0,
-     /25.0,30.0,35.0,40.0,50.0,60.0,80.0,100.,120.,150.,
-     /200.,300.,400.,600.,800.,1000.,1400.,2000.,4000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /25.0,30.0,35.0,40.0,50.0,60.0,80.0,100./
       DATA Y3P105/0.00,1.00,2.70,3.42,4.20,5.10,5.70,5.94,5.93,5.52,
-     /5.31,4.71,4.09,3.54,2.68,2.18,1.59,1.26,1.02,0.81,
-     /0.60,.405,0.30,0.20,0.15,0.12,.084,.060,.030,.012,
-     /.0012,1.2D-4,1.2D-5/
-      DATA YP3P105/33*0.0/
+     /5.31,4.71,4.09,3.54,2.68,2.18,1.59,1.26/
+      DATA YP3P105/18*0.0/
 C 2P4 E=10.957614 J=1 
+C ABOVE 100EV SCALED BY 1/E**2
       DATA X2P4/10.9576,13.0,14.0,15.0,16.0,18.0,20.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,400.,1000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y2P4/0.00,0.75,1.10,1.20,1.10,0.75,0.60,0.38,0.25,.145,
-     /.095,.065,.037,.025,.017,.011,.0065,.0016,2.5D-4,2.5D-6,
-     /2.5D-8,1.5D-10,1.5D-12/
-      DATA YP2P4/23*0.0/
+     /.095,.065,.037,.025/
+      DATA YP2P4/14*0.0/
 C 4D6+4D3+4D4!+4D4+4D1!!+4D1!  SUM 4D  E=10.9715
 C       SHAPE FROM PETROV NORMALISED TO HAYASHI TOTAL
+C ABOVE 100EV SCALED BY 1/E**3
       DATA X4DSUM/10.9715,12.0,13.0,14.0,15.0,16.0,18.0,20.0,25.0,30.0,
-     /35.0,40.0,50.0,60.0,80.0,100.,120.,150.,200.,400.,
-     /1000.,1.D4,1.D5,1.D6,1.D7/
+     /35.0,40.0,50.0,60.0,80.0,100./
       DATA Y4DSUM/0.00,1.50,4.35,4.65,4.50,4.05,3.00,2.25,0.96,0.57,
-     /0.36,0.21,.099,.060,.024,.011,.0063,.0031,.0014,.00018,
-     /1.1D-5,1.1D-8,1.1D-11,1.1D-14,1.1D-17/
-      DATA YP4DSUM/25*0.0/
+     /0.36,0.21,.099,.060,.024,.011/
+      DATA YP4DSUM/16*0.0/
 C
 C 4D5 E=10.978772 J=1 RESONANCE RADIATION AT 112.93 NM        F=0.001
 C 
 C 2P3 E=11.054723  J=2
+C ABOVE 100 EV SCALED BY 1/E
       DATA X2P3/11.0547,13.0,14.0,15.0,16.0,18.0,20.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,400.,1000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y2P3/0.00,2.20,3.00,3.50,3.60,3.50,3.20,2.60,2.20,1.65,
-     /1.35,1.10,0.83,0.65,0.54,0.44,0.33,.165,.065,.0065,
-     /6.5D-4,6.5D-5,6.5D-6/
-      DATA YP2P3/23*0.0/
+     /1.35,1.10,0.83,0.65/
+      DATA YP2P3/14*0.0/
 C 2P2 E=11.069148  J=1
+C ABOVE 100EV SCALED BY 1/E**2
       DATA X2P2/11.0691,13.0,14.0,15.0,16.0,18.0,20.0,25.0,30.0,40.0,
-     /50.0,60.0,80.0,100.,120.,150.,200.,400.,1000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /50.0,60.0,80.0,100./
       DATA Y2P2/0.00,0.75,1.00,1.08,1.08,0.97,0.85,0.56,0.40,0.22,
-     /.145,.100,.054,.035,.024,.0155,.0086,.0022,3.5D-4,3.5D-6,
-     /3.5D-8,3.5D-10,3.5D-12/
-      DATA YP2P2/23*0.0/
+     /.145,.100,.054,.035/
+      DATA YP2P2/14*0.0/
 C 2P1 E=11.141221  J=0
+C ABOVE 100EV SCALED BY 1/E
       DATA X2P1/11.1412,13.0,14.0,15.0,16.0,18.0,20.0,25.0,30.0,35.0,
-     /40.0,50.0,60.0,80.0,100.,120.,150.,200.,400.,1000.,
-     /1.D4,1.D5,1.D6,1.D7/
+     /40.0,50.0,60.0,80.0,100./
       DATA Y2P1/0.00,0.80,1.50,1.90,1.90,1.80,1.60,1.30,1.05,0.91,
-     /0.77,0.64,0.52,0.39,0.31,0.26,.205,.155,.077,.031,
-     /.0031,3.1D-4,3.1D-5,3.1D-6/
-      DATA YP2P1/24*0.0/
+     /0.77,0.64,0.52,0.39,0.31/
+      DATA YP2P1/15*0.0/
 C                          
 C 4D2 E=11.162564 EV  J=1 RESONANCE RADIATION AT 111.07 NM    F=0.0835
 C 3S4 E=11.274184 EV  J=1 RESONANCE RADIATION AT 109.97 NM    F=0.0225
@@ -27857,6 +29013,13 @@ C SUM HIGHER STATES E=12.0 EV                                 F=0.0831
 C
 C TOTAL OSCILLATOR SUM =1.650
 C
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF UNITS 10**-24
+      DATA Z54T/4948.,4086.,2921.,2088.,1396.,776.,492.,328.,220.,189.,
+     /179.7,178.6,179.0,179.3,179.6,180.2,180.3,181.5,182.1,182.7,
+     /183.6,184.4,184.7,185.5,185.7/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C-----------------------------------------------------------------------
       IF(NANISO.EQ.0) THEN                                
        NAME='XENON 2013     ISOTROPIC '
@@ -27902,52 +29065,59 @@ C AVERAGE AUGER EMISSIONS FROM EACH SHELL
 C
       NION=12
       NIN=50
+C
+      NBREM=25
+      DO 6 J=1,NIN
+      IZBR(J)=0
+    6 CONTINUE
+      IZBR(51)=54
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
-    2 KIN(J)=NANISO
+    2 KIN(J)=NANISO   
 C                                                                      
-      NDATA=149
-      NEL=141   
-      NEPSI=149                                                        
+      NDATA=182 
+      NEL=153  
+      NEPSI=182                                                       
       NIONG=76
       NION2=54
       NION3=47
       NION4=42
       NION5=37
       NION6=35
-      NIONK=39
-      NIONL1=56
-      NIONL2=56
-      NIONL3=56
-      NIONM1=60
-      NIONM2=62
-      NIONM3=62
-      NIONM4=64
-      NIONM5=65
-      N1S5=79
+      NIONK=60
+      NIONL1=76
+      NIONL2=76
+      NIONL3=76
+      NIONM1=79
+      NIONM2=80
+      NIONM3=80
+      NIONM4=82
+      NIONM5=83
+      N1S5=70
       N1S4=38
-      N1S3=57
+      N1S3=46
       N1S2=20
-      N2P10=37
-      N2P9=38
-      N2P8=33
-      N2P7=34
-      N2P6=38
-      N3D6=40
-      N2P5=30
-      N3D4P=40
-      N3D3=40
-      N3D4=36
-      N3D1PP=34
-      N3D1P=33
-      N2S5=27
-      N3PSUM=33
-      N2P4=23
-      N4DSUM=25
-      N2P3=23
-      N2P2=23
-      N2P1=24  
+      N2P10=22
+      N2P9=21
+      N2P8=22
+      N2P7=22
+      N2P6=22
+      N3D6=24
+      N2P5=15
+      N3D4P=24
+      N3D3=24
+      N3D4=26
+      N3D1PP=23
+      N3D1P=22
+      N2S5=18
+      N3PSUM=18
+      N2P4=14
+      N4DSUM=16
+      N2P3=14
+      N2P2=14
+      N2P1=15  
 C                                                         
       E(1)=0.0                                                          
       E(2)=2.0*EMASS/(131.30*AMU)                                       
@@ -27960,17 +29130,17 @@ C EOBY FOR MINIMUM IONISING PARTICLE
       E(6)=23.7
 C EOBY AT LOW ENERGY
       EOBY(1)=8.7
-      EOBY(2)=8.7  
-      EOBY(3)=8.7 
+      EOBY(2)=20.0 
+      EOBY(3)=38.0
 C EOBY FOR SHELLS
-      EOBY(4)=676.4
-      EOBY(5)=689.0
-      EOBY(6)=940.6
-      EOBY(7)=1002.1
-      EOBY(8)=1148.7
-      EOBY(9)=4786.
-      EOBY(10)=5107.
-      EOBY(11)=5453.
+      EOBY(4)=400.             
+      EOBY(5)=410.             
+      EOBY(6)=750.0  
+      EOBY(7)=800.0 
+      EOBY(8)=920.0 
+      EOBY(9)=3850.
+      EOBY(10)=4100.
+      EOBY(11)=4400.
       EOBY(12)=34561.
 C 
       EION(1)=12.129843
@@ -27985,6 +29155,30 @@ C
       EION(10)=5107.
       EION(11)=5453. 
       EION(12)=34561.
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=0
+      LEGAS(4)=1
+      LEGAS(5)=1
+      LEGAS(6)=1
+      LEGAS(7)=1
+      LEGAS(8)=1
+      LEGAS(9)=1
+      LEGAS(10)=1
+      LEGAS(11)=1
+      LEGAS(12)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=0
+      ISHELL(4)=9
+      ISHELL(5)=8
+      ISHELL(6)=7
+      ISHELL(7)=6
+      ISHELL(8)=5
+      ISHELL(9)=4
+      ISHELL(10)=3
+      ISHELL(11)=2
+      ISHELL(12)=1
 C FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -28142,6 +29336,7 @@ C
       EIN(48)=11.9886
       EIN(49)=11.9939
       EIN(50)=12.0
+      EIN(51)=0.0
 C***********************************************************************
 C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL
 C USE TRANSFER FRACTION BETWEEN 0.0 AND 0.1 FOR XENON
@@ -28239,10 +29434,11 @@ C
       SCRPT(65)=' EXC  10D2     J=1 RESONANT     ELOSS=    11.9886 '
       SCRPT(66)=' EXC  9S4      J=1 RESONANT     ELOSS=    11.9939 '
       SCRPT(67)=' EXC  HIGH     J=1 RESONANT     ELOSS=    12.0    '
-      EN=-ESTEP/2.0  
+      SCRPT(68)=' BREMSSTRAHLUNG FROM XENON ATOM                   '
+C     EN=-ESTEP/2.0  
       DO 900 I=1,NSTEP    
-C      EN=EG(I)                                           
-      EN=EN+ESTEP  
+      EN=EG(I)                                           
+C     EN=EN+ESTEP  
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -28285,6 +29481,8 @@ C      EN=EG(I)
   202 A=(YEPS(J)-YEPS(J-1))/(XEPS(J)-XEPS(J-1))                         
       B=(XEPS(J-1)*YEPS(J)-XEPS(J)*YEPS(J-1))/(XEPS(J-1)-XEPS(J))       
       PQ2=A*EN+B
+C EPSILON =1.0-YEPS
+      PQ2=1.0D0-PQ2
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
       IF(NANISO.EQ.2) PEQEL(2,I)=PQ2 
@@ -28307,7 +29505,7 @@ C IONISATION CHARGE STATE =1
 C USE BORN-BETHE X-SECTION ABOVE XION(NIONG) EV
   221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)*0.8061
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.8061
   222 CONTINUE  
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY  
@@ -28332,7 +29530,7 @@ C IONISATION CHARGE STATE =2
 C USE BORN-BETHE X-SECTION ABOVE XIN2(NION2) EV
  3221 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(2,I)=CONST*(AM2*X1+C*X2)*0.1133
+      QION(2,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.1133
  3222 CONTINUE  
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY  
@@ -28346,9 +29544,9 @@ C IONISATION CHARGE STATE =3
       IF(NANISO.EQ.2) PEQION(3,I)=0.0D0                            
       IF(EN.LE.EION(3)) GO TO 3300    
       IF(EN.GT.XIN3(NION3)) GO TO 3271                                 
-      DO 3260 J=2,NION3                                                 
+      DO 3265 J=2,NION3                                                 
       IF(EN.LE.XIN3(J)) GO TO 3270                                      
- 3260 CONTINUE                                                          
+ 3265 CONTINUE                                                          
       J=NION3                                                           
  3270 A=(YIN3(J)-YIN3(J-1))/(XIN3(J)-XIN3(J-1))                         
       B=(XIN3(J-1)*YIN3(J)-XIN3(J)*YIN3(J-1))/(XIN3(J-1)-XIN3(J))       
@@ -28357,7 +29555,7 @@ C IONISATION CHARGE STATE =3
 C USE BORN-BETHE X-SECTION ABOVE XIN3(NION3) EV
  3271 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(3,I)=CONST*(AM2*X1+C*X2)*0.05496
+      QION(3,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.05496
  3272 CONTINUE  
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY  
@@ -28370,18 +29568,18 @@ C GROSS SUM OF IONISATION STATE =4+5+6
       IF(EN.LE.106.35) GO TO 3350
       IF(EN.GT.XIN4(NION4)) GO TO 3349
       DO 3310 J=2,NION4
-      IF(EN.LE.XIN4(J)) GO TO 3320
+      IF(EN.LE.XIN4(J)) GO TO 3325
  3310 CONTINUE
       J=NION4
- 3320 A=(YIN4(J)-YIN4(J-1))/(XIN4(J)-XIN4(J-1))                         
+ 3325 A=(YIN4(J)-YIN4(J-1))/(XIN4(J)-XIN4(J-1))                         
       B=(XIN4(J-1)*YIN4(J)-XIN4(J)*YIN4(J-1))/(XIN4(J-1)-XIN4(J))       
       Q456=(A*EN+B)*1.0D-16 
       Q456=Q456*4.0/3.0
       IF(EN.LE.160.45) GO TO 3350
       IF(EN.GT.XIN5(NION5)) GO TO 3349
-      DO 3321 J=2,NION5
+      DO 3377 J=2,NION5
       IF(EN.LE.XIN5(J)) GO TO 3322
- 3321 CONTINUE
+ 3377 CONTINUE
       J=NION5
  3322 A=(YIN5(J)-YIN5(J-1))/(XIN5(J)-XIN5(J-1))                         
       B=(XIN5(J-1)*YIN5(J)-XIN5(J)*YIN5(J-1))/(XIN5(J-1)-XIN5(J))       
@@ -28400,7 +29598,7 @@ C USE BORN BETHE X-SECTION ABOVE XIN4(NION4) EV
  3349 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
 C 0.3629 = .01959*4/3 + .004597*5/3  + .002504*6/3
-      Q456=CONST*(AM2*X1+C*X2)*0.03629
+      Q456=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.03629
 C SUM 3 + 456
  3350 QION(3,I)=QION(3,I)+Q456     
 C M5-SHELL IONISATION      
@@ -28538,7 +29736,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16 
       GO TO 242
 C USE BORN-BETHE X-SECTION ABOVE XION(NION) EV
-  241 Q(5,I)=CONST*(AM2*X1+C*X2)
+  241 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
   242 CONTINUE   
 C CORRECTION TO CHARGE STATE 1 2 3+4+5+6 X-SECTION FOR K L AND M SHELLS
 C CORRECTION GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
@@ -28555,7 +29753,7 @@ C CORRECTION GIVES TOTAL IONISATION EQUAL TO OSCILLATOR SUM
 C
       Q(6,I)=0.0                                                        
 C     
-      DO 251 NL=1,NIN
+      DO 251 NL=1,NIN+1
       QIN(NL,I)=0.0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -28563,7 +29761,8 @@ C
       ENDIF
   251 CONTINUE 
 C 1S5                                                    
-      IF(EN.LE.EIN(1)) GO TO 413                                        
+      IF(EN.LE.EIN(1)) GO TO 413     
+      IF(EN.GT.X1S5(N1S5)) GO TO 3110                                   
       DO 310 J=2,N1S5                                                   
       IF(EN.LE.X1S5(J)) GO TO 311                                      
   310 CONTINUE                                                          
@@ -28571,13 +29770,15 @@ C 1S5
   311 A=(Y1S5(J)-Y1S5(J-1))/(X1S5(J)-X1S5(J-1))                     
       B=(X1S5(J-1)*Y1S5(J)-X1S5(J)*Y1S5(J-1))/(X1S5(J-1)-X1S5(J)) 
       QIN(1,I)=(A*EN+B)*1.0D-18 
-      IF(EN.LE.(2.0*EIN(1))) GO TO 312
+      GO TO 3111
+ 3110 QIN(1,I)=Y1S5(N1S5)*(X1S5(N1S5)/EN)**3*1.0D-18
+ 3111 IF(EN.LE.(2.0*EIN(1))) GO TO 312
       PEQIN(1,I)=PEQEL(2,(I-IOFFN(1)))       
 C 1S4 F=0.260                   
-  312 IF(EN.LE.EIN(2)) GO TO 413                                        
+  312 IF(EN.LE.EIN(2)) GO TO 413                    
+      IF(EN.GT.X1S4(N1S4)) GO TO 3141                    
       DO 313 J=2,N1S4                                                  
       IF(EN.LE.X1S4(J)) GO TO 314
-      IF(EN.GT.X1S4(N1S4)) GO TO 3141                                  
   313 CONTINUE                                                          
       J=N1S4                                                           
   314 A=(Y1S4(J)-Y1S4(J-1))/(X1S4(J)-X1S4(J-1))                     
@@ -28585,11 +29786,12 @@ C 1S4 F=0.260
       QIN(2,I)=(A*EN+B)*1.0D-18
       GO TO 3142
  3141 QIN(2,I)=0.260/(EIN(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(2)))-BETA2)*BBCONST*EN/(EN+EIN(2)+E(3))
+     /EIN(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(2)+E(3))
  3142 IF(EN.LE.(2.0*EIN(2))) GO TO 315
       PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))   
 C 1S3                                  
-  315 IF(EN.LE.EIN(3)) GO TO 413                                        
+  315 IF(EN.LE.EIN(3)) GO TO 413  
+      IF(EN.GT.X1S3(N1S3)) GO TO 3170                              
       DO 316 J=2,N1S3                                                  
       IF(EN.LE.X1S3(J)) GO TO 317                                      
   316 CONTINUE                                                          
@@ -28597,13 +29799,15 @@ C 1S3
   317 A=(Y1S3(J)-Y1S3(J-1))/(X1S3(J)-X1S3(J-1))                     
       B=(X1S3(J-1)*Y1S3(J)-X1S3(J)*Y1S3(J-1))/(X1S3(J-1)-X1S3(J)) 
       QIN(3,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(3))) GO TO 318
+      GO TO 3171
+ 3170 QIN(3,I)=Y1S3(N1S3)*(X1S3(N1S3)/EN)**3*1.0D-18
+ 3171 IF(EN.LE.(2.0*EIN(3))) GO TO 318
       PEQIN(3,I)=PEQEL(2,(I-IOFFN(3)))   
 C 1S2 F=0.183                   
-  318 IF(EN.LE.EIN(4)) GO TO 413                       
+  318 IF(EN.LE.EIN(4)) GO TO 413                
+      IF(EN.GT.X1S2(N1S2)) GO TO 3201       
       DO 319 J=2,N1S2                                                  
-      IF(EN.LE.X1S2(J)) GO TO 320
-      IF(EN.GT.X1S2(N1S2)) GO TO 3201                               
+      IF(EN.LE.X1S2(J)) GO TO 320                               
   319 CONTINUE                                                          
       J=N1S2                                                           
   320 A=(Y1S2(J)-Y1S2(J-1))/(X1S2(J)-X1S2(J-1))                     
@@ -28611,120 +29815,148 @@ C 1S2 F=0.183
       QIN(4,I)=(A*EN+B)*1.0D-18
       GO TO 3202
  3201 QIN(4,I)=0.183/(EIN(4)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(4)))-BETA2)*BBCONST*EN/(EN+EIN(4)+E(3))
+     /EIN(4)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(4)+E(3))
  3202 IF(EN.LE.(2.0*EIN(4))) GO TO 321
       PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C
 C P STATES
 C
 C 2P10    
-  321 IF(EN.LE.EIN(5)) GO TO 413                                        
+  321 IF(EN.LE.EIN(5)) GO TO 413 
+      IF(EN.GT.X2P10(N2P10)) GO TO 3230                                
       DO 322 J=2,N2P10                                                 
       IF(EN.LE.X2P10(J)) GO TO 323                                      
   322 CONTINUE                                                          
       J=N2P10                                                           
   323 A=(Y2P10(J)-Y2P10(J-1))/(X2P10(J)-X2P10(J-1))                     
       B=(X2P10(J-1)*Y2P10(J)-X2P10(J)*Y2P10(J-1))/(X2P10(J-1)-X2P10(J)) 
-      QIN(5,I)=(A*EN+B)*1.0D-18          
-      IF(EN.LE.(2.0*EIN(5))) GO TO 324
+      QIN(5,I)=(A*EN+B)*1.0D-18         
+      GO TO 3231
+ 3230 QIN(5,I)=Y2P10(N2P10)*(X2P10(N2P10)/EN)**3*1.0D-18 
+ 3231 IF(EN.LE.(2.0*EIN(5))) GO TO 324
       PEQIN(5,I)=PEQEL(2,(I-IOFFN(5)))
 C 2P9    
-  324 IF(EN.LE.EIN(6)) GO TO 413                                        
+  324 IF(EN.LE.EIN(6)) GO TO 413                        
+      IF(EN.GT.X2P9(N2P9)) GO TO 3260                
       DO 325 J=2,N2P9                                                 
       IF(EN.LE.X2P9(J)) GO TO 326                                      
   325 CONTINUE                                                          
       J=N2P9                                                           
   326 A=(Y2P9(J)-Y2P9(J-1))/(X2P9(J)-X2P9(J-1))                     
       B=(X2P9(J-1)*Y2P9(J)-X2P9(J)*Y2P9(J-1))/(X2P9(J-1)-X2P9(J)) 
-      QIN(6,I)=(A*EN+B)*1.0D-18         
-      IF(EN.LE.(2.0*EIN(6))) GO TO 327
+      QIN(6,I)=(A*EN+B)*1.0D-18      
+      GO TO 3261
+ 3260 QIN(6,I)=Y2P9(N2P9)*(X2P9(N2P9)/EN)*1.0D-18
+ 3261 IF(EN.LE.(2.0*EIN(6))) GO TO 327
       PEQIN(6,I)=PEQEL(2,(I-IOFFN(6)))
 C 2P8    
-  327 IF(EN.LE.EIN(7)) GO TO 413                                        
+  327 IF(EN.LE.EIN(7)) GO TO 413                 
+      IF(EN.GT.X2P8(N2P8)) GO TO 3290                       
       DO 328 J=2,N2P8                                                 
       IF(EN.LE.X2P8(J)) GO TO 329                                      
   328 CONTINUE                                                          
       J=N2P8                                                           
   329 A=(Y2P8(J)-Y2P8(J-1))/(X2P8(J)-X2P8(J-1))                     
       B=(X2P8(J-1)*Y2P8(J)-X2P8(J)*Y2P8(J-1))/(X2P8(J-1)-X2P8(J)) 
-      QIN(7,I)=(A*EN+B)*1.0D-18           
-      IF(EN.LE.(2.0*EIN(7))) GO TO 330
+      QIN(7,I)=(A*EN+B)*1.0D-18      
+      GO TO 3291  
+ 3290 QIN(7,I)=Y2P8(N2P8)*(X2P8(N2P8)/EN)**3*1.0D-18  
+ 3291 IF(EN.LE.(2.0*EIN(7))) GO TO 330
       PEQIN(7,I)=PEQEL(2,(I-IOFFN(7)))
 C 2P7    
-  330 IF(EN.LE.EIN(8)) GO TO 413                                        
+  330 IF(EN.LE.EIN(8)) GO TO 413                    
+      IF(EN.GT.X2P7(N2P7)) GO TO 3320                    
       DO 331 J=2,N2P7                                                 
       IF(EN.LE.X2P7(J)) GO TO 332                                      
   331 CONTINUE                                                          
       J=N2P7                                                           
   332 A=(Y2P7(J)-Y2P7(J-1))/(X2P7(J)-X2P7(J-1))                     
       B=(X2P7(J-1)*Y2P7(J)-X2P7(J)*Y2P7(J-1))/(X2P7(J-1)-X2P7(J)) 
-      QIN(8,I)=(A*EN+B)*1.0D-18          
-      IF(EN.LE.(2.0*EIN(8))) GO TO 333
+      QIN(8,I)=(A*EN+B)*1.0D-18      
+      GO TO 3321 
+ 3320 QIN(8,I)=Y2P7(N2P7)*(X2P7(N2P7)/EN)**2*1.0D-18   
+ 3321 IF(EN.LE.(2.0*EIN(8))) GO TO 333
       PEQIN(8,I)=PEQEL(2,(I-IOFFN(8)))
 C 2P6    
-  333 IF(EN.LE.EIN(9)) GO TO 413                                        
+  333 IF(EN.LE.EIN(9)) GO TO 413                    
+      IF(EN.GT.X2P6(N2P6)) GO TO 3355                    
       DO 334 J=2,N2P6                                                 
       IF(EN.LE.X2P6(J)) GO TO 335                                      
   334 CONTINUE                                                          
       J=N2P6                                                           
   335 A=(Y2P6(J)-Y2P6(J-1))/(X2P6(J)-X2P6(J-1))                     
       B=(X2P6(J-1)*Y2P6(J)-X2P6(J)*Y2P6(J-1))/(X2P6(J-1)-X2P6(J)) 
-      QIN(9,I)=(A*EN+B)*1.0D-18         
-      IF(EN.LE.(2.0*EIN(9))) GO TO 336
+      QIN(9,I)=(A*EN+B)*1.0D-18      
+      GO TO 3356   
+ 3355 QIN(9,I)=Y2P6(N2P6)*(X2P6(N2P6)/EN)*1.0D-18
+ 3356 IF(EN.LE.(2.0*EIN(9))) GO TO 336
       PEQIN(9,I)=PEQEL(2,(I-IOFFN(9)))
 C 3D6    
-  336 IF(EN.LE.EIN(10)) GO TO 413                                    
+  336 IF(EN.LE.EIN(10)) GO TO 413                
+      IF(EN.GT.X3D6(N3D6)) GO TO 3380                    
       DO 337 J=2,N3D6                                                 
       IF(EN.LE.X3D6(J)) GO TO 338                                      
   337 CONTINUE                                                          
       J=N3D6                                                           
   338 A=(Y3D6(J)-Y3D6(J-1))/(X3D6(J)-X3D6(J-1))                     
       B=(X3D6(J-1)*Y3D6(J)-X3D6(J)*Y3D6(J-1))/(X3D6(J-1)-X3D6(J)) 
-      QIN(10,I)=(A*EN+B)*1.0D-18        
-      IF(EN.LE.(2.0*EIN(10))) GO TO 339
+      QIN(10,I)=(A*EN+B)*1.0D-18     
+      GO TO 3381  
+ 3380 QIN(10,I)=Y3D6(N3D6)*(X3D6(N3D6)/EN)**1.5*1.0D-18 
+ 3381 IF(EN.LE.(2.0*EIN(10))) GO TO 339
       PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
 C 3D5 J=1 F=0.0100   
   339 IF(EN.LE.EIN(11)) GO TO 413 
       QIN(11,I)=0.0100/(EIN(11)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(11)))-BETA2)*BBCONST*EN/(EN+EIN(11)+E(3))
+     /EIN(11)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(11)+E(3))
       IF(QIN(11,I).LT.0.0) QIN(11,I)=0.0
       IF(EN.LE.(2.0*EIN(11))) GO TO 340
       PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))
 C 2P5 
   340 IF(EN.LE.EIN(12)) GO TO 413
+      IF(EN.GT.X2P5(N2P5)) GO TO 3420
       DO 341 J=2,N2P5                                                 
       IF(EN.LE.X2P5(J)) GO TO 342                                      
   341 CONTINUE                                                          
       J=N2P5                                                           
   342 A=(Y2P5(J)-Y2P5(J-1))/(X2P5(J)-X2P5(J-1))                     
       B=(X2P5(J-1)*Y2P5(J)-X2P5(J)*Y2P5(J-1))/(X2P5(J-1)-X2P5(J)) 
-      QIN(12,I)=(A*EN+B)*1.0D-18         
-      IF(EN.LE.(2.0*EIN(12))) GO TO 343
+      QIN(12,I)=(A*EN+B)*1.0D-18     
+      GO TO 3421
+ 3420 QIN(12,I)=Y2P5(N2P5)*(X2P5(N2P5)/EN)*1.0D-18   
+ 3421 IF(EN.LE.(2.0*EIN(12))) GO TO 343
       PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))
 C 3D4!
   343 IF(EN.LE.EIN(13)) GO TO 413
+      IF(EN.GT.X3D4P(N3D4P)) GO TO 3450
       DO 344 J=2,N3D4P                                                
       IF(EN.LE.X3D4P(J)) GO TO 345                                      
   344 CONTINUE                                                          
       J=N3D4P                                                           
   345 A=(Y3D4P(J)-Y3D4P(J-1))/(X3D4P(J)-X3D4P(J-1))                     
       B=(X3D4P(J-1)*Y3D4P(J)-X3D4P(J)*Y3D4P(J-1))/(X3D4P(J-1)-X3D4P(J)) 
-      QIN(13,I)=(A*EN+B)*1.0D-18         
-      IF(EN.LE.(2.0*EIN(13))) GO TO 346
+      QIN(13,I)=(A*EN+B)*1.0D-18       
+      GO TO 3451 
+ 3450 QIN(13,I)=Y3D4P(N3D4P)*(X3D4P(N3D4P)/EN)**1.5*1.0D-18 
+ 3451 IF(EN.LE.(2.0*EIN(13))) GO TO 346
       PEQIN(13,I)=PEQEL(2,(I-IOFFN(13)))
 C 3D3 
   346 IF(EN.LE.EIN(14)) GO TO 413
+      IF(EN.GT.X3D3(N3D3)) GO TO 3480
       DO 347 J=2,N3D3                                                
       IF(EN.LE.X3D3(J)) GO TO 348                                      
   347 CONTINUE                                                          
       J=N3D3                                                           
   348 A=(Y3D3(J)-Y3D3(J-1))/(X3D3(J)-X3D3(J-1))                     
       B=(X3D3(J-1)*Y3D3(J)-X3D3(J)*Y3D3(J-1))/(X3D3(J-1)-X3D3(J)) 
-      QIN(14,I)=(A*EN+B)*1.0D-18          
-      IF(EN.LE.(2.0*EIN(14))) GO TO 349
+      QIN(14,I)=(A*EN+B)*1.0D-18     
+      GO TO 3481
+ 3480 QIN(14,I)=Y3D3(N3D3)*(X3D3(N3D3)/EN)**1.5*1.0D-18    
+ 3481 IF(EN.LE.(2.0*EIN(14))) GO TO 349
       PEQIN(14,I)=PEQEL(2,(I-IOFFN(14)))
 C 3D4 
   349 IF(EN.LE.EIN(15)) GO TO 413
+      IF(EN.GT.X3D4(N3D4)) GO TO 3510
       DO 350 J=2,N3D4                                                
       IF(EN.LE.X3D4(J)) GO TO 351                                      
   350 CONTINUE                                                          
@@ -28732,10 +29964,13 @@ C 3D4
   351 A=(Y3D4(J)-Y3D4(J-1))/(X3D4(J)-X3D4(J-1))                     
       B=(X3D4(J-1)*Y3D4(J)-X3D4(J)*Y3D4(J-1))/(X3D4(J-1)-X3D4(J)) 
       QIN(15,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(15))) GO TO 352
+      GO TO 3511
+ 3510 QIN(15,I)=Y3D4(N3D4)*(X3D4(N3D4)/EN)**2*1.0D-18
+ 3511 IF(EN.LE.(2.0*EIN(15))) GO TO 352
       PEQIN(15,I)=PEQEL(2,(I-IOFFN(15)))
 C 3D1!!
   352 IF(EN.LE.EIN(16)) GO TO 413
+      IF(EN.GT.X3D1PP(N3D1PP)) GO TO 3540
       DO 353 J=2,N3D1PP                                              
       IF(EN.LE.X3D1PP(J)) GO TO 354                                
   353 CONTINUE                                                          
@@ -28744,10 +29979,13 @@ C 3D1!!
       B=(X3D1PP(J-1)*Y3D1PP(J)-X3D1PP(J)*Y3D1PP(J-1))/(X3D1PP(J-1)-
      /X3D1PP(J)) 
       QIN(16,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(16))) GO TO 355
+      GO TO 3541
+ 3540 QIN(16,I)=Y3D1PP(N3D1PP)*(X3D1PP(N3D1PP)/EN)**3*1.0D-18
+ 3541 IF(EN.LE.(2.0*EIN(16))) GO TO 355
       PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))
 C 3D1!
   355 IF(EN.LE.EIN(17)) GO TO 413
+      IF(EN.GT.X3D1P(N3D1P)) GO TO 3570
       DO 356 J=2,N3D1P                                              
       IF(EN.LE.X3D1P(J)) GO TO 357                                
   356 CONTINUE                                                          
@@ -28755,17 +29993,20 @@ C 3D1!
   357 A=(Y3D1P(J)-Y3D1P(J-1))/(X3D1P(J)-X3D1P(J-1))               
       B=(X3D1P(J-1)*Y3D1P(J)-X3D1P(J)*Y3D1P(J-1))/(X3D1P(J-1)-X3D1P(J)) 
       QIN(17,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(17))) GO TO 358
+      GO TO 3571
+ 3570 QIN(17,I)=Y3D1P(N3D1P)*(X3D1P(N3D1P)/EN)*1.0D-18
+ 3571 IF(EN.LE.(2.0*EIN(17))) GO TO 358
       PEQIN(17,I)=PEQEL(2,(I-IOFFN(17)))
 C 3D2 J=1 F=0.379
   358 IF(EN.LE.EIN(18)) GO TO 413 
       QIN(18,I)=0.3790/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+E(3))
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3))
       IF(QIN(18,I).LT.0.0) QIN(18,I)=0.0
       IF(EN.LE.(2.0*EIN(18))) GO TO 359
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
 C 2S5
   359 IF(EN.LE.EIN(19)) GO TO 413
+      IF(EN.GT.X2S5(N2S5)) GO TO 3610
       DO 360 J=2,N2S5                                               
       IF(EN.LE.X2S5(J)) GO TO 361                                
   360 CONTINUE                                                          
@@ -28773,17 +30014,20 @@ C 2S5
   361 A=(Y2S5(J)-Y2S5(J-1))/(X2S5(J)-X2S5(J-1))               
       B=(X2S5(J-1)*Y2S5(J)-X2S5(J)*Y2S5(J-1))/(X2S5(J-1)-X2S5(J)) 
       QIN(19,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(19))) GO TO 362
+      GO TO 3611
+ 3610 QIN(19,I)=Y2S5(N2S5)*(X2S5(N2S5)/EN)**3*1.0D-18
+ 3611 IF(EN.LE.(2.0*EIN(19))) GO TO 362
       PEQIN(19,I)=PEQEL(2,(I-IOFFN(19)))
 C 2S4 J=1 F=0.086
   362 IF(EN.LE.EIN(20)) GO TO 413 
       QIN(20,I)=0.086/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(20)))-BETA2)*BBCONST*EN/(EN+EIN(20)+E(3))
+     /EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(20)+E(3))
       IF(QIN(20,I).LT.0.0) QIN(20,I)=0.0
       IF(EN.LE.(2.0*EIN(20))) GO TO 363
       PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))
 C SUM 3P10+3P9+3P8+3P7+3P6+3P5
   363 IF(EN.LE.EIN(21)) GO TO 413
+      IF(EN.GT.X3P105(N3PSUM)) GO TO 3650
       DO 364 J=2,N3PSUM                                             
       IF(EN.LE.X3P105(J)) GO TO 365                                
   364 CONTINUE                                                          
@@ -28792,10 +30036,13 @@ C SUM 3P10+3P9+3P8+3P7+3P6+3P5
       B=(X3P105(J-1)*Y3P105(J)-X3P105(J)*Y3P105(J-1))/(X3P105(J-1)-
      /X3P105(J)) 
       QIN(21,I)=(A*EN+B)*1.0D-18
-      IF(EN.LE.(2.0*EIN(21))) GO TO 366
+      GO TO 3651
+ 3650 QIN(21,I)=Y3P105(N3PSUM)*(X3P105(N3PSUM)/EN)*1.0D-18
+ 3651 IF(EN.LE.(2.0*EIN(21))) GO TO 366
       PEQIN(21,I)=PEQEL(2,(I-IOFFN(21)))
 C 2P4                           
   366 IF(EN.LE.EIN(22)) GO TO 413
+      IF(EN.GT.X2P4(N2P4)) GO TO 3680
       DO 367 J=2,N2P4                                               
       IF(EN.LE.X2P4(J)) GO TO 368                                
   367 CONTINUE                                                          
@@ -28803,10 +30050,13 @@ C 2P4
   368 A=(Y2P4(J)-Y2P4(J-1))/(X2P4(J)-X2P4(J-1))               
       B=(X2P4(J-1)*Y2P4(J)-X2P4(J)*Y2P4(J-1))/(X2P4(J-1)-X2P4(J)) 
       QIN(22,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(22))) GO TO 369
+      GO TO 3681
+ 3680 QIN(22,I)=Y2P4(N2P4)*(X2P4(N2P4)/EN)**2*1.0D-18
+ 3681 IF(EN.LE.(2.0*EIN(22))) GO TO 369
       PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))
 C SUM 4D6+4D3+4D4P+4D4+4D1PP+4D1P
   369 IF(EN.LE.EIN(23)) GO TO 413
+      IF(EN.GT.X4DSUM(N4DSUM)) GO TO 3710
       DO 370 J=2,N4DSUM                                              
       IF(EN.LE.X4DSUM(J)) GO TO 371                                
   370 CONTINUE                                                          
@@ -28815,17 +30065,20 @@ C SUM 4D6+4D3+4D4P+4D4+4D1PP+4D1P
       B=(X4DSUM(J-1)*Y4DSUM(J)-X4DSUM(J)*Y4DSUM(J-1))/(X4DSUM(J-1)-
      /X4DSUM(J)) 
       QIN(23,I)=(A*EN+B)*1.0D-18
-      IF(EN.LE.(2.0*EIN(23))) GO TO 372
+      GO TO 3711
+ 3710 QIN(2,I)=Y4DSUM(N4DSUM)*(X4DSUM(N4DSUM)/EN)**3*1.0D-18
+ 3711 IF(EN.LE.(2.0*EIN(23))) GO TO 372
       PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))
 C 4D5 J=1 F=0.0010
   372 IF(EN.LE.EIN(24)) GO TO 413 
       QIN(24,I)=0.0010/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(24)))-BETA2)*BBCONST*EN/(EN+EIN(24)+E(3))
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(24)+E(3))
       IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0
       IF(EN.LE.(2.0*EIN(24))) GO TO 373
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
 C 2P3                           
   373 IF(EN.LE.EIN(25)) GO TO 413
+      IF(EN.GT.X2P3(N2P3)) GO TO 3750
       DO 374 J=2,N2P3                                               
       IF(EN.LE.X2P3(J)) GO TO 375                                
   374 CONTINUE                                                          
@@ -28833,9 +30086,12 @@ C 2P3
   375 A=(Y2P3(J)-Y2P3(J-1))/(X2P3(J)-X2P3(J-1))               
       B=(X2P3(J-1)*Y2P3(J)-X2P3(J)*Y2P3(J-1))/(X2P3(J-1)-X2P3(J)) 
       QIN(25,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(25))) GO TO 376
+      GO TO 3751
+ 3750 QIN(25,I)=Y2P3(N2P3)*(X2P3(N2P3)/EN)*1.D-18
+ 3751 IF(EN.LE.(2.0*EIN(25))) GO TO 376
 C 2P2                           
   376 IF(EN.LE.EIN(26)) GO TO 413
+      IF(EN.GT.X2P2(N2P2)) GO TO 3780
       DO 377 J=2,N2P2                                               
       IF(EN.LE.X2P2(J)) GO TO 378                                
   377 CONTINUE                                                          
@@ -28843,9 +30099,12 @@ C 2P2
   378 A=(Y2P2(J)-Y2P2(J-1))/(X2P2(J)-X2P2(J-1))               
       B=(X2P2(J-1)*Y2P2(J)-X2P2(J)*Y2P2(J-1))/(X2P2(J-1)-X2P2(J)) 
       QIN(26,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(26))) GO TO 379
+      GO TO 3781
+ 3780 QIN(26,I)=Y2P2(N2P2)*(X2P2(N2P2)/EN)**2*1.0D-18
+ 3781 IF(EN.LE.(2.0*EIN(26))) GO TO 379
 C 2P1                           
   379 IF(EN.LE.EIN(27)) GO TO 413
+      IF(EN.GT.X2P1(N2P1)) GO TO 3810
       DO 380 J=2,N2P1                                               
       IF(EN.LE.X2P1(J)) GO TO 381                                
   380 CONTINUE                                                          
@@ -28853,169 +30112,180 @@ C 2P1
   381 A=(Y2P1(J)-Y2P1(J-1))/(X2P1(J)-X2P1(J-1))               
       B=(X2P1(J-1)*Y2P1(J)-X2P1(J)*Y2P1(J-1))/(X2P1(J-1)-X2P1(J)) 
       QIN(27,I)=(A*EN+B)*1.0D-18  
-      IF(EN.LE.(2.0*EIN(27))) GO TO 382
+      GO TO 3811
+ 3810 QIN(27,I)=Y2P1(N2P1)*(X2P1(N2P1)/EN)*1.D-18
+ 3811 IF(EN.LE.(2.0*EIN(27))) GO TO 382
 C 4D2 J=1 F=0.0835
   382 IF(EN.LE.EIN(28)) GO TO 413 
       QIN(28,I)=0.0835/(EIN(28)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(28)))-BETA2)*BBCONST*EN/(EN+EIN(28)+E(3))
+     /EIN(28)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(28)+E(3))
       IF(QIN(28,I).LT.0.0) QIN(28,I)=0.0
       IF(EN.LE.(2.0*EIN(28))) GO TO 383
       PEQIN(28,I)=PEQEL(2,(I-IOFFN(28)))
 C 3S4 J=1 F=0.0225
   383 IF(EN.LE.EIN(29)) GO TO 413 
       QIN(29,I)=0.0225/(EIN(29)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(29)))-BETA2)*BBCONST*EN/(EN+EIN(29)+E(3))
+     /EIN(29)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(29)+E(3))
       IF(QIN(29,I).LT.0.0) QIN(29,I)=0.0
       IF(EN.LE.(2.0*EIN(29))) GO TO 384
       PEQIN(29,I)=PEQEL(2,(I-IOFFN(29)))
 C 5D5 J=1 F=0.0227
   384 IF(EN.LE.EIN(30)) GO TO 413 
       QIN(30,I)=0.0227/(EIN(30)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(30)))-BETA2)*BBCONST*EN/(EN+EIN(30)+E(3))
+     /EIN(30)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(30)+E(3))
       IF(QIN(30,I).LT.0.0) QIN(30,I)=0.0
       IF(EN.LE.(2.0*EIN(30))) GO TO 385
       PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))
 C 5D2 J=1 F=0.0020
   385 IF(EN.LE.EIN(31)) GO TO 413 
       QIN(31,I)=0.0020/(EIN(31)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(31)))-BETA2)*BBCONST*EN/(EN+EIN(31)+E(3))
+     /EIN(31)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(31)+E(3))
       IF(QIN(31,I).LT.0.0) QIN(31,I)=0.0
       IF(EN.LE.(2.0*EIN(31))) GO TO 386
       PEQIN(31,I)=PEQEL(2,(I-IOFFN(31)))
 C 4S4 J=1 F=0.0005
   386 IF(EN.LE.EIN(32)) GO TO 413 
       QIN(32,I)=0.0005/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(32)))-BETA2)*BBCONST*EN/(EN+EIN(32)+E(3))
+     /EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+E(3))
       IF(QIN(32,I).LT.0.0) QIN(32,I)=0.0
       IF(EN.LE.(2.0*EIN(32))) GO TO 387
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C 3S1! J=1 F=0.1910
   387 IF(EN.LE.EIN(33)) GO TO 413 
       QIN(33,I)=0.1910/(EIN(33)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(33)))-BETA2)*BBCONST*EN/(EN+EIN(33)+E(3))
+     /EIN(33)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(33)+E(3))
       IF(QIN(33,I).LT.0.0) QIN(33,I)=0.0
       IF(EN.LE.(2.0*EIN(33))) GO TO 388
       PEQIN(33,I)=PEQEL(2,(I-IOFFN(33)))
 C 6D5 J=1 F=0.0088 
   388 IF(EN.LE.EIN(34)) GO TO 413 
       QIN(34,I)=0.0088/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(34)))-BETA2)*BBCONST*EN/(EN+EIN(34)+E(3))
+     /EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(34)+E(3))
       IF(QIN(34,I).LT.0.0) QIN(34,I)=0.0
       IF(EN.LE.(2.0*EIN(34))) GO TO 389
       PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
 C 6D2 J=1 F=0.0967 
   389 IF(EN.LE.EIN(35)) GO TO 413 
       QIN(35,I)=0.0967/(EIN(35)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(35)))-BETA2)*BBCONST*EN/(EN+EIN(35)+E(3))
+     /EIN(35)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(35)+E(3))
       IF(QIN(35,I).LT.0.0) QIN(35,I)=0.0
       IF(EN.LE.(2.0*EIN(35))) GO TO 390
       PEQIN(35,I)=PEQEL(2,(I-IOFFN(35)))
 C 5S4 J=1 F=0.0288 
   390 IF(EN.LE.EIN(36)) GO TO 413 
       QIN(36,I)=0.0288/(EIN(36)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(36)))-BETA2)*BBCONST*EN/(EN+EIN(36)+E(3))
+     /EIN(36)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(36)+E(3))
       IF(QIN(36,I).LT.0.0) QIN(36,I)=0.0
       IF(EN.LE.(2.0*EIN(36))) GO TO 391
       PEQIN(36,I)=PEQEL(2,(I-IOFFN(36)))
 C 7D5 J=1 F=0.0042 
   391 IF(EN.LE.EIN(37)) GO TO 413 
       QIN(37,I)=0.0042/(EIN(37)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(37)))-BETA2)*BBCONST*EN/(EN+EIN(37)+E(3))
+     /EIN(37)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(37)+E(3))
       IF(QIN(37,I).LT.0.0) QIN(37,I)=0.0
       IF(EN.LE.(2.0*EIN(37))) GO TO 392
       PEQIN(37,I)=PEQEL(2,(I-IOFFN(37)))
 C 7D2 J=1 F=0.0625 
   392 IF(EN.LE.EIN(38)) GO TO 413 
       QIN(38,I)=0.0625/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*EN/(EN+EIN(38)+E(3))
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(38)+E(3))
       IF(QIN(38,I).LT.0.0) QIN(38,I)=0.0
       IF(EN.LE.(2.0*EIN(38))) GO TO 393
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C 6S4 J=1 F=0.0025 
   393 IF(EN.LE.EIN(39)) GO TO 413 
       QIN(39,I)=0.0025/(EIN(39)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(39)))-BETA2)*BBCONST*EN/(EN+EIN(39)+E(3))
+     /EIN(39)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(39)+E(3))
       IF(QIN(39,I).LT.0.0) QIN(39,I)=0.0
       IF(EN.LE.(2.0*EIN(39))) GO TO 394
       PEQIN(39,I)=PEQEL(2,(I-IOFFN(39)))
 C 2S2 J=1 F=0.0290 
   394 IF(EN.LE.EIN(40)) GO TO 413 
       QIN(40,I)=0.0290/(EIN(40)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(40)))-BETA2)*BBCONST*EN/(EN+EIN(40)+E(3))
+     /EIN(40)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(40)+E(3))
       IF(QIN(40,I).LT.0.0) QIN(40,I)=0.0
       IF(EN.LE.(2.0*EIN(40))) GO TO 395
       PEQIN(40,I)=PEQEL(2,(I-IOFFN(40)))
 C 8D5 J=1 F=0.0035 
   395 IF(EN.LE.EIN(41)) GO TO 413 
       QIN(41,I)=0.0035/(EIN(41)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(41)))-BETA2)*BBCONST*EN/(EN+EIN(41)+E(3))
+     /EIN(41)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(41)+E(3))
       IF(QIN(41,I).LT.0.0) QIN(41,I)=0.0
       IF(EN.LE.(2.0*EIN(41))) GO TO 396
       PEQIN(41,I)=PEQEL(2,(I-IOFFN(41)))
 C 8D2 J=1 F=0.0386 
   396 IF(EN.LE.EIN(42)) GO TO 413 
       QIN(42,I)=0.0386/(EIN(42)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(42)))-BETA2)*BBCONST*EN/(EN+EIN(42)+E(3))
+     /EIN(42)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(42)+E(3))
       IF(QIN(42,I).LT.0.0) QIN(42,I)=0.0
       IF(EN.LE.(2.0*EIN(42))) GO TO 397
       PEQIN(42,I)=PEQEL(2,(I-IOFFN(42)))
 C 7S4 J=1 F=0.0050 
   397 IF(EN.LE.EIN(43)) GO TO 413 
       QIN(43,I)=0.0050/(EIN(43)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(43)))-BETA2)*BBCONST*EN/(EN+EIN(43)+E(3))
+     /EIN(43)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(43)+E(3))
       IF(QIN(43,I).LT.0.0) QIN(43,I)=0.0
       IF(EN.LE.(2.0*EIN(43))) GO TO 398
       PEQIN(43,I)=PEQEL(2,(I-IOFFN(43)))
 C 9D5 J=1 F=0.0005 
   398 IF(EN.LE.EIN(44)) GO TO 413 
       QIN(44,I)=0.0005/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*EN/(EN+EIN(44)+E(3))
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(44)+E(3))
       IF(QIN(44,I).LT.0.0) QIN(44,I)=0.0
       IF(EN.LE.(2.0*EIN(44))) GO TO 399
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
 C 9D2 J=1 F=0.0250 
   399 IF(EN.LE.EIN(45)) GO TO 413 
       QIN(45,I)=0.0250/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+E(3))
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+E(3))
       IF(QIN(45,I).LT.0.0) QIN(45,I)=0.0
       IF(EN.LE.(2.0*EIN(45))) GO TO 400
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
 C 8S4 J=1 F=0.0023 
   400 IF(EN.LE.EIN(46)) GO TO 413 
       QIN(46,I)=0.0023/(EIN(46)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(46)))-BETA2)*BBCONST*EN/(EN+EIN(46)+E(3))
+     /EIN(46)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(46)+E(3))
       IF(QIN(46,I).LT.0.0) QIN(46,I)=0.0
       IF(EN.LE.(2.0*EIN(46))) GO TO 401
       PEQIN(46,I)=PEQEL(2,(I-IOFFN(46)))
 C 10D5 J=1 F=0.0005 
   401 IF(EN.LE.EIN(47)) GO TO 413 
       QIN(47,I)=0.0005/(EIN(47)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(47)))-BETA2)*BBCONST*EN/(EN+EIN(47)+E(3))
+     /EIN(47)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(47)+E(3))
       IF(QIN(47,I).LT.0.0) QIN(47,I)=0.0
       IF(EN.LE.(2.0*EIN(47))) GO TO 402
       PEQIN(47,I)=PEQEL(2,(I-IOFFN(47)))
 C 10D2 J=1 F=0.0164 
   402 IF(EN.LE.EIN(48)) GO TO 413 
       QIN(48,I)=0.0164/(EIN(48)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(48)))-BETA2)*BBCONST*EN/(EN+EIN(48)+E(3))
+     /EIN(48)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(48)+E(3))
       IF(QIN(48,I).LT.0.0) QIN(48,I)=0.0
       IF(EN.LE.(2.0*EIN(48))) GO TO 403
       PEQIN(48,I)=PEQEL(2,(I-IOFFN(48)))
 C 9S4  J=1 F=0.0014 
   403 IF(EN.LE.EIN(49)) GO TO 413 
       QIN(49,I)=0.0014/(EIN(49)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(49)))-BETA2)*BBCONST*EN/(EN+EIN(49)+E(3))
+     /EIN(49)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(49)+E(3))
       IF(QIN(49,I).LT.0.0) QIN(49,I)=0.0
       IF(EN.LE.(2.0*EIN(49))) GO TO 404
       PEQIN(49,I)=PEQEL(2,(I-IOFFN(49)))
 C HIGH J=1 F=0.0831
   404 IF(EN.LE.EIN(50)) GO TO 413 
       QIN(50,I)=0.0831/(EIN(50)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(50)))-BETA2)*BBCONST*EN/(EN+EIN(50)+E(3))
+     /EIN(50)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(50)+E(3))
       IF(QIN(50,I).LT.0.0) QIN(50,I)=0.0
       IF(EN.LE.(2.0*EIN(50))) GO TO 405
       PEQIN(50,I)=PEQEL(2,(I-IOFFN(50)))
   405 CONTINUE
+C     IF(EN.LE.1000.) GO TO 413
+C     DO 500 J=2,NBREM
+C     IF(EN.LE.EBRM(2)) GO TO 510
+C 500 CONTINUE
+C     J=NBREM
+C 510 A=(DLOG(Z54T(J))-DLOG(Z54T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B=(DLOG(Z54T(J))*EBRM(J-1)-DLOG(Z54T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))
+C     QIN(51,I)=DEXP(A*EN+B)*1.D-24
 C
 C CALCULATE TOTAL X-SECTION
   413 QEXC=0.0
@@ -29024,6 +30294,7 @@ C CALCULATE TOTAL X-SECTION
       Q(1,I)=QELA+QION(1,I)+QION(2,I)+QION(3,I)+QION(4,I)+QION(5,I)+
      /QION(6,I)+QION(7,I)+QION(8,I)+QION(9,I)+QION(10,I)+QION(11,I)+
      /QION(12,I)+QEXC
+C    /QION(12,I)+QEXC+QIN(51,I)
 C
 C     WRITE(6,997) EN,Q(1,I),QEXC,Q(5,I),QELA
 C 997 FORMAT(' EN =',D12.4,' QTOT =',D12.3,' QEXC =',D12.3,' QION =',D12
@@ -29038,29 +30309,33 @@ C SAVE COMPUTE TIME
       ENDIF
   910 CONTINUE
   911 CONTINUE
+C      IF(EFINAL.GT.1000.) NIN=51
       RETURN                                                            
-      END                                                              
+      END     
       SUBROUTINE GAS8(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY  
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
-      DIMENSION XEN(117),YELM(117),YELT(117),YEPS(117),XATT(6),YATT(6), 
-     /XVBV4(36),YVBV4(36),XVBV2(29),YVBV2(29),XVBV1(30),YVBV1(30),
-     /XVBV3(35),YVBV3(35),XVBH1(14),YVBH1(14),XVBH2(14),YVBH2(14),
+      DIMENSION XEN(153),YELM(153),YELT(153),YEPS(153),XATT(6),YATT(6), 
+     /XVBV4(26),YVBV4(26),XVBV2(29),YVBV2(29),XVBV1(30),YVBV1(30),
+     /XVBV3(25),YVBV3(25),XVBH1(14),YVBH1(14),XVBH2(14),YVBH2(14),
      /XION(70),YION(70),YINC(70),XDET(9),YDET(9),XTR1(12),YTR1(12),  
      /XTR2(11),YTR2(11),XTR3(11),YTR3(11),
-     /XCHD(42),YCHD(42),XCHB(43),YCHB(43),XHAL(42),YHAL(42),
-     /XHBE(42),YHBE(42),XKSH(63),YKSH(63),IOFFN(33),IOFFION(10)
+     /XCHD(32),YCHD(32),XCHB(35),YCHB(35),XHAL(34),YHAL(34),
+     /XHBE(34),YHBE(34),XKSH(83),YKSH(83),IOFFN(33),IOFFION(10)
+      DIMENSION Z1T(25),Z6T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME                                                 
       DATA XEN/0.00,.0001,.001,.002,.004,.007,0.01,.012,.014,.017,
@@ -29074,7 +30349,11 @@ C SAVE COMPUTE TIME
      /1.75D4,2.0D4,2.5D4,3.0D4,3.5D4,4.0D4,4.5D4,5.0D4,6.0D4,7.0D4,
      /8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,
      /4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,
-     /1.75D6,2.0D6,2.5D6,3.0D6,4.0D6,7.0D6,1.0D7/     
+     /1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,
+     /8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,
+     /4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,
+     /1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,
+     /8.0D9,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER X-SECTION     
       DATA YELM/26.7,25.4,22.6,21.0,18.8,16.5,14.8,13.9,13.0,12.0,
      /11.2,10.05,9.05,8.20,7.50,6.25,5.30,4.60,3.88,3.22,
@@ -29091,7 +30370,15 @@ C ELASTIC MOMENTUM TRANSFER X-SECTION
      /1.89D-6,1.48D-6,
      /1.20D-6,9.96D-7,8.45D-7,6.38D-7,5.04D-7,4.11D-7,3.43D-7,2.92D-7,
      /2.09D-7,1.58D-7,
-     /1.24D-7,1.00D-7,7.01D-8,5.21D-8,3.24D-8,1.24D-8,6.64D-9/
+     /1.24D-7,1.00D-7,7.01D-8,5.21D-8,4.04D-8,3.24D-8,2.66D-8,2.22D-8,
+     /1.62D-8,1.24D-8,
+     /9.84D-9,8.00D-9,6.64D-9,4.45D-9,3.20D-9,2.42D-9,1.90D-9,1.26D-9,
+     /8.98D-10,6.74D-10,
+     /5.25D-10,4.21D-10,3.45D-10,2.44D-10,1.82D-10,1.40D-10,1.12D-10,
+     /9.11D-11,5.89D-11,4.11D-11,
+     /3.03D-11,2.32D-11,1.49D-11,1.04D-11,7.63D-12,5.84D-12,4.62D-12,
+     /3.74D-12,2.60D-12,1.91D-12,
+     /1.46D-12,1.16D-12,9.36D-13/
 C ELASTIC TOTAL X-SECTION               
       DATA YELT/26.7,25.6,23.3,22.0,19.9,17.9,16.4,15.5,14.8,13.8,
      /12.9,11.6,10.6,9.67,8.89,7.60,6.57,5.70,4.90,4.20,
@@ -29106,34 +30393,44 @@ C ELASTIC TOTAL X-SECTION
      /.00444,
      /.00420,.00401,.00387,.00365,.00350,.00340,.00331,.00325,.00314,
      /.00308,
-     /.00303,.00300,.00296,.00294,.00292,.00289,.00289/
-C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
-      DATA YEPS/0.00,.0117,.0450,.0681,.0828,.1170,.1457,.1541,.1812,
-     /.1942,
-     /.1961,.1988,.2173,.2257,.2320,.2627,.2851,.2847,.3063,.3416,
-     /.4288,.5331,.6282,.7417,.8087,.8505,.8320,.8068,.7229,.5861,
-     /.3788,.2406,.1571,.0273,-.0234,-.0262,0.000,.1493,.1732,.2061,
-     /.1997,.2049,.1993,.1889,.2482,.3079,.3093,.3300,.3345,.3819,
-     /.4876,.6374,.7425,.8083,.8264,.8488,.8662,.8755,.8946,.9049,
-     /.9141,.9315,.9474,.9472,.9507,.9512,.9617,.9650,.9808,.9871,
-     /.9931,.9954,.99674,.99728,.99768,.99796,.99820,.99838,.99870,
-     /.99893,
-     /.99909,.999209,.999366,.999477,.999552,.999610,.999656,.999693,
-     /.999746,.999785,
-     /.999819,.999837,.9998542,.9998865,.9999077,.9999229,.9999340,
-     /.9999494,.9999596,.9999667,
-     /.9999719,.9999759,.9999791,.9999837,.9999868,.9999891,.9999908,
-     /.9999921,.9999943,.9999957,
-     /.9999967,.9999973,.9999982,.9999986,.9999992,.9999997,.9999998/
-C V4 DIPOLE PART AS ANALYTIC FUNCTION 
+     /.00303,.00300,.00296,.00294,.00293,.00292,.00291,.00290,.00290,
+     /.00289,
+     /.00289,.00289,.00289,.00288,.00288,.00288,.00288,26*.002879/
+C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION  
+C  EPSILON=1.0-YEPS
+      DATA YEPS/1.00,.9883,.9550,.9319,.9172,.8830,.8543,.8459,.8188,
+     /.8058,
+     /.8039,.8012,.7827,.7743,.7680,.7373,.7149,.7153,.6937,.6584,
+     /.5712,.4669,.3718,.2583,.1913,.1495,.1680,.1932,.2771,.4139,
+     /.6212,.7594,.8429,.9727,1.0234,1.0262,1.000,.8507,.8268,.7939,
+     /.8003,.7951,.8007,.8111,.7518,.6921,.6907,.6700,.6655,.6181,
+     /.5124,.3626,.2575,.1917,.1736,.1512,.1338,.1245,.1054,.0951,
+     /.0859,.0685,.0526,.0528,.0493,.0488,.0383,.0350,.0192,.0129,
+     /.0069,.0046,.00326,.00272,.00232,.00204,.00180,.00162,.00130,
+     /.00107,
+     /.00091,.000791,.000634,.000523,.000448,.000390,.000344,.000307,
+     /.000254,.000215,
+     /1.81D-4,1.63D-4,1.46D-4,1.14D-4,9.23D-5,7.71D-5,6.60D-5,5.06D-5,
+     /4.04D-5,3.33D-5,
+     /2.81D-5,2.41D-5,2.09D-5,1.63D-5,1.32D-5,1.09D-5,9.17D-6,7.85D-6,
+     /5.64D-6,4.24D-6,
+     /3.31D-6,2.66D-6,1.83D-6,1.37D-6,1.03D-6,8.09D-7,6.55D-7,5.41D-7,
+     /3.88D-7,2.92D-7,
+     /2.27D-7,1.82D-7,1.49D-7,9.75D-8,6.87D-8,5.10D-8,3.93D-8,2.54D-8,
+     /1.78D-8,1.31D-8,
+     /1.01D-8,7.97D-9,6.46D-9,4.48D-9,3.28D-9,2.50D-9,1.97D-9,1.59D-9,
+     /1.00D-9,6.86D-10,
+     /4.98D-10,3.77D-10,2.37D-10,1.62D-10,1.17D-10,8.90D-11,6.90D-11,
+     /5.60D-11,3.80D-11,2.70D-11,
+     /2.10D-11,1.60D-11,1.30D-11/
+C V4 DIPOLE PART AS ANALYTIC FUNCTION IN SUBROUTINE
+C ABOVE 100 EV SCALED BY 1/E**2 
       DATA XVBV4/.1625135,0.20,0.30,0.40,0.50,0.60,0.80,1.00,1.50,2.00,
      /3.00,5.00,6.00,7.00,8.00,9.00,10.0,12.5,15.0,20.0,
-     /30.0,40.0,50.0,60.0,80.0,100.,150.,200.,300.,500.,
-     /700.,1000.,10000.,1.0D5,1.0D6,1.0D7/
+     /30.0,40.0,50.0,60.0,80.0,100./
       DATA YVBV4/0.00,.0001,.060,.057,.055,.050,.040,.035,.041,.056,
      /.082,.278,.406,0.47,0.44,.383,.323,.266,.201,.126,
-     /.056,.031,.020,.014,.0079,.005,.0022,.00126,.00056,.00020,
-     /.00010,.00005,5.D-7,5.D-9,5.D-11,5.D-13/ 
+     /.056,.031,.020,.014,.0079,.005/ 
 C V2       
       DATA XVBV2/.1901087,.195,0.20,0.21,0.22,0.23,0.24,0.26,0.28,0.30,
      /0.40,0.50,0.60,0.80,1.00,1.50,2.00,3.00,5.00,6.00,
@@ -29151,12 +30448,10 @@ C V1
 C V3 DIPOLE PART AS ANALYTIC FUNCTION
       DATA XVBV3/.3743690,0.40,0.50,0.60,0.70,0.80,1.00,1.50,2.00,3.00,
      /5.00,6.00,7.00,8.00,9.00,10.0,12.5,15.0,20.0,30.0,
-     /40.0,50.0,60.0,80.0,100.,150.,200.,300.,500.,700.,
-     /1000.,10000.,1.0D5,1.0D6,1.0D7/
+     /40.0,50.0,60.0,80.0,100./
       DATA YVBV3/.0,.004,0.01,.011,.011,.011,.011,.015,.019,.105,
      /.458,.596,.680,.680,.593,.433,.300,.241,.142,.063,
-     /.0355,.0227,.0158,.0089,.0057,.0025,.00142,.00063,.000227,.000116,
-     /.000057,5.7D-7,5.7D-9,5.7D-11,5.7D-13/
+     /.0355,.0227,.0158,.0089,.0057/
 C VIBRATION HARMONIC 
       DATA XVBH1/.544,1.00,2.00,3.00,5.00,6.00,7.00,8.00,9.00,10.0,
      /12.5,15.0,17.5,20.0/
@@ -29191,16 +30486,20 @@ C COUNTING IONISATION
      /3.67,3.64,3.62,3.59,3.56,3.53,3.49,3.46,3.43,3.39,
      /3.33,3.24,3.09,2.97,2.66,2.38,2.20,2.02,1.86,1.72,
      /1.62,1.52,1.43,1.35,1.29,1.24,1.18,1.14,1.09,1.042/
-C K-SHELL IONISATION X-SECTION
+C K-SHELL IONISATION X-SECTION CARBON  
       DATA XKSH/285.,298.,307.,316.,325.,335.,345.,365.,398.,422.,
      /447.,473.,501.,531.,613.,668.,708.,750.,817.,917.,
      /1000.,1122.,1296.,1496.,1679.,1884.,2054.,2238.,2512.,2985.,
      /3981.,5012.,7079.,1.0D4,1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,
      /6.13D4,7.08D4,8.18D4,1.0D5,1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,
      /6.13D5,
-     /7.08D5,8.18D5,1.0D6,1.25D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
+     /7.08D5,8.18D5,1.0D6,1.26D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
      /6.13D6,
-     /7.08D6,8.18D6,1.0D7/
+     /7.08D6,8.18D6,1.0D7,1.26D7,1.5D7,2.05D7,3.07D7,4.10D7,5.01D7,
+     /6.13D7,
+     /7.08D7,8.18D7,1.0D8,1.26D8,1.5D8,2.05D8,3.07D8,4.10D8,5.01D8,
+     /6.13D8,
+     /7.08D8,8.18D8,1.0D9/
       DATA YKSH/0.00,1.66D-4,3.48D-4,5.25D-4,6.96D-4,8.63D-4,1.02D-3,
      /1.33D-3,1.75D-3,2.01D-3,
      /2.24D-3,2.46D-3,2.66D-3,2.84D-3,3.21D-3,3.38D-3,3.47D-3,3.55D-3,
@@ -29213,7 +30512,11 @@ C K-SHELL IONISATION X-SECTION
      /1.09D-4,1.05D-4,
      /1.03D-4,1.02D-4,1.01D-4,1.005D-4,1.01D-4,1.03D-4,1.07D-4,1.11D-4,
      /1.14D-4,1.17D-4,
-     /1.20D-4,1.22D-4,1.25D-4/
+     /1.20D-4,1.22D-4,1.25D-4,1.29D-4,1.32D-4,1.38D-4,1.45D-4,1.50D-4,
+     /1.54D-4,1.58D-4,
+     /1.60D-4,1.63D-4,1.67D-4,1.71D-4,1.74D-4,1.80D-4,1.87D-4,1.92D-4,
+     /1.96D-4,2.00D-4,
+     /2.02D-4,2.05D-4,2.09D-4/
 C ATTACHMENT  - DEATTACHMENT VIA H- 9.8 EV RESONANCE (RAWAT ET AL)
       DATA XDET/7.80,8.00,9.00,9.80,10.0,11.0,12.0,13.0,14.0/
       DATA YDET/0.00,.0049,.0134,.0153,.0150,.0113,.0038,.0095,0.00/
@@ -29238,55 +30541,56 @@ C LIGHT EMISSION FROM CH(A2DELTA TO X2PI)
       DATA XCHD/13.4,13.5,14.5,18.5,20.6,21.6,22.5,23.6,27.7,31.8,
      /33.5,33.9,35.4,37.5,39.2,40.0,44.0,49.1,55.6,58.3,
      /60.1,63.2,67.0,71.3,76.3,80.3,100.,150.,200.,400.,
-     /700.,1000.,1500.,2000.,2500.,3000.,3500.,4000.,1.D4,1.D5,
-     /1.D6,1.D7/
+     /700.,1000./
       DATA YCHD/0.00,.0041,.0065,.0116,.0169,.0205,.0232,.0261,.0299,
      /.0327,
      /.0339,.0355,.0363,.0392,.0411,.0441,.0462,.0469,.0476,.0479,
      /.0481,.0485,.0489,.0491,.0487,.0477,.0403,.0292,.0232,.0131,
-     /.0082,.0060,.0043,.0033,.0027,.0023,.00205,.00181,.0008,.00015,
-     /.000017,.000002/
+     /.0082,.0060/
 C LIGHT EMISSION FROM CH(B2SIGMA- TO X2PI)
       DATA XCHB/13.7,13.8,14.8,18.8,20.9,21.9,22.8,23.9,28.0,32.1,
      /33.8,34.2,35.7,37.8,39.5,42.1,43.4,44.3,49.4,56.0,
      /58.6,60.4,63.5,67.3,71.6,76.6,80.6,100.,150.,200.,
-     /400.,700.,1000.,1500.,2000.,2500.,3000.,3500.,4000.,1.D4,
-     /1.D5,1.D6,1.D7/
+     /400.,700.,1000.,1500.,2000./
       DATA YCHB/0.00,2.44D-4,3.91D-4,6.96D-4,.00102,.00123,.0014,.00157,
      /.0018,.00197,
      /.00204,.00214,.00219,.00236,.00248,.00259,.00265,.00278,.00283,
      /.00286,
      /.00289,.00290,.00292,.00295,.00296,.00293,.00287,.00242,.00176,
      /.00139,
-     /7.88D-4,4.93D-4,3.63D-4,2.57D-4,2.00D-4,1.65D-4,1.40D-4,1.23D-4,
-     /1.09D-4,5.D-5,
-     /8.D-6,1.D-6,1.5D-7/
+     /7.88D-4,4.93D-4,3.63D-4,2.57D-4,2.00D-4/
 C LIGHT EMISSION FROM H(ALPHA)
       DATA XHAL/16.14,16.3,16.6,16.9,17.2,18.1,19.2,20.0,20.8,22.6,
      /25.2,30.0,40.0,50.0,60.0,70.0,80.0,90.0,100.,144.,
      /185.,200.,224.,245.,284.,364.,453.,500.,600.,700.,
-     /800.,1000.,1500.,2000.,2500.,3000.,3500.,4000.,1.D4,1.D5,
-     /1.D6,1.D7/
+     /800.,1000.,1500.,2000./
       DATA YHAL/0.00,2.54D-4,3.80D-4,5.05D-4,6.60D-4,.00101,.00142,
      /.00175,.00209,.00288,
      /.00431,.00686,.01225,.0156,.0181,.0195,.0204,.0203,.0200,.0181,
      /.0148,.0134,.0127,.0119,.0103,.00789,.00598,.00529,.00425,.00357,
-     /.00309,.00227,.0016,.00125,.00103,8.75D-4,7.7D-4,6.82D-4,3.D-4,
-     /3.8D-5,4.8D-6,6.D-7/
+     /.00309,.00227,.0016,.00125/
 C LIGHT EMISSION FROM H(BETA)
       DATA XHBE/16.8,18.0,21.9,23.4,24.5,25.5,26.4,28.2,30.0,33.7,
      /37.2,40.0,50.0,57.7,80.0,100.,141.,169.,200.,226.,
      /247.,284.,340.,363.,398.,455.,500.,550.,654.,700.,
-     /800.,999.,1500.,2000.,2500.,3000.,3500.,4000.,1.D4,1.D5,
-     /1.D6,1.D7/
+     /800.,999.,1500.,2000./
       DATA YHBE/0.00,1.53D-4,5.44D-4,7.19D-4,8.85D-4,.00114,.00128,
      /.00159,.00194,.00228,
      /.00269,.00316,.00374,.00419,.00481,.00463,.00419,.00374,.00314,
      /.00288,
      /.00269,.00227,.00194,.00179,.00160,.00140,.00128,.00114,9.5D-4,
      /8.85D-4,
-     /7.19D-4,5.45D-4,3.84D-4,3.00D-4,2.47D-4,2.10D-4,1.84D-4,1.63D-4,
-     /7.5D-5,1.05D-5,1.5D-6,2.2D-7/
+     /7.19D-4,5.45D-4,3.84D-4,3.00D-4/
+C BREMSSTRAHLUNG X-SECTION WITH CUT UNITS 10**-24
+      DATA Z1T/11.3,6.18,2.80,1.54,.858,.407,.251,.176,.145,.150,
+     /.167,.178,.187,.193,.198,.205,.210,.218,.222,.228,
+     /.231,.233,.234,.235,.235/
+      DATA Z6T/298.,178.,85.2,47.5,26.3,12.2,7.06,4.45,3.06,2.82,
+     /2.89,2.99,3.08,3.13,3.18,3.25,3.31,3.39,3.44,3.49,
+     /3.52,3.54,3.55,3.57,3.57/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C-----------------------------------------------------------------------
 C 2013: UPDATE INCLUDES USE OF OSCILLATOR STRENGTHS FOR DIPOLE SINGLET
 C       DISSOCIATION X-SECTION. USED OSCILLATOR STRENGTH FROM 
@@ -29351,54 +30655,60 @@ C BORN BETHE VALUES FOR IONISATION
 C BORN BETHE FOR EXCITATION
       AM2EXC=1.40
       CEXC=19.0 
-C
+C  ARRAY SIZE
+      NASIZE=4000
 C AVERAGE AUGER EMISSION FROM K-SHELL
       AUGK=2.0
 C 
       NION=3
       NIN=33
+C
+      NBREM=25
+      DO 8 J=1,NIN
+      IZBR(J)=0
+    8 CONTINUE
+      IZBR(34)=6
+      IZBR(35)=1
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
-C SUPERELASTIC AND HARMONIC VIBRATIONS ASSUMED ISOTROPIC
+C SUPERELASTIC, V2 V1 AND HARMONIC VIBRATIONS ASSUMED ISOTROPIC
       KIN(1)=0
       KIN(3)=0
+      KIN(4)=0
+      KIN(5)=0
       KIN(7)=0
       KIN(8)=0
-C   ATTACHMENT DE-ATTACHMENT ASSUMED ISOTROPIC
-      KIN(9)=0
-C V4,V2,V1 AND V3 VIBRATIONS ANISOTROPIC ( CAPITELLI-LONGO)
+C V4 AND V3 VIBRATIONS ANISOTROPIC ( CAPITELLI-LONGO)
       KIN(2)=1
-      KIN(4)=1      
-      KIN(5)=1
       KIN(6)=1
-C ANGULAR DISTRIBUTION FOR DISSOCIATIVE EXCITATION CAN BE EITHER
-C CAPITELLI LONGO OR OKHRIMOVSKYY TYPE 
-      DO 2 J=10,NIN
-    2 KIN(J)=NANISO
+C ANGULAR DISTRIBUTION FOR DISSOCIATIVE EXCITATION IS OKHRIMOVSKYY TYPE 
+      DO 2 J=9,NIN
+    2 KIN(J)=2
 C
 C  RAT IS MOMENTUM TRANSFER TO TOTAL RATIO FOR VIBRATIONS IN THE
 C  RESONANCE REGION AND ALSO FOR THE VIBRATIONS V1 AND V2 .     
 C  USED DIPOLE ANGULAR DISTRIBUTION FOR V3 AND V4 NEAR THRESHOLD.
       RAT=1.0  
 C                                                         
-      NDATA=117
-      NVIBV4=36
+      NDATA=153 
+      NVIBV4=26
       NVIBV2=29
       NVIBV1=30
-      NVIBV3=35
+      NVIBV3=25
       NVIBH1=14
       NVIBH2=14                                                        
       NIOND=70
-      NKSH=63                                                          
+      NKSH=83                                                        
       NATT=6    
       NDET=9   
       NTRP1=12
       NTRP2=11
       NTRP3=11                                                    
-      NCHD=42
-      NCHB=43
-      NHAL=42
-      NHBE=42
+      NCHD=32
+      NCHB=35
+      NHAL=34
+      NHBE=34
 C VIBRATIONAL DEGENERACY
       DEGV4=3.0
       DEGV2=2.0
@@ -29415,14 +30725,20 @@ C IONISING X-SECTION AT 1.2 MEV
 C EOBY AT 1.5 MEV                                         
       E(6)=8.0 
 C OPAL BEATY AT LOW ENERGY
-      EOBY(1)=7.3
+      EOBY(1)=6.8
 C OPAL BEATY FOR DISSOCIATION AND K SHELL
-      EOBY(2)=7.3
-      EOBY(3)=285.0
+      EOBY(2)=6.8 
+      EOBY(3)=180.0
 C 
       EION(1)=12.65
       EION(2)=21.0
       EION(3)=285.0
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=1
 C FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -29450,7 +30766,7 @@ C FLUORESCENCE DATA
       EG2(3)=5.
 C OFFSET ENERGY FOR IONISATION ELECTRON ANGULAR DISTRIBUTION
       DO 776 J=1,NION
-      DO 777 I=1,4000
+      DO 777 I=1,NASIZE
       IF(EG(I).GT.EION(J)) THEN
        IOFFION(J)=I-1
        GO TO 776
@@ -29491,10 +30807,12 @@ C
       EIN(31)=16.8
       EIN(32)=20.5
       EIN(33)=22.0
+      EIN(34)=0.0
+      EIN(35)=0.0
 C OFFSET ENERGY FOR EXCITATION LEVELS ANGULAR DISTRIBUTION
-      DO 3 NL=9,33
-      DO 651 I=1,4000
-      IF(EG(I).GT.EIN(NL)) THEN
+      DO 3 NL=1,33
+      DO 651 I=1,NASIZE
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
        IOFFN(NL)=I-1
        GO TO 3
       ENDIF
@@ -29560,6 +30878,8 @@ C
       SCRPT(39)=' EXCITATION  H(BETA)               ELOSS= 16.8    '
       SCRPT(40)=' EXCITATION SINGLET  DISSOCIATION  ELOSS= 20.25   '
       SCRPT(41)=' EXCITATION SINGLET  DISSOCIATION  ELOSS= 22.0    '
+      SCRPT(42)=' BREMSSTRAHLUNG FROM CARBON ATOM                  '
+      SCRPT(43)=' BREMSSTRAHLUNG FROM HYDROGEN ATOM                '
 C CALC LEVEL POPULATIONS
       APOPV4=DEGV4*DEXP(EIN(1)/AKT)
       APOPV2=DEGV2*DEXP(EIN(3)/AKT)
@@ -29572,10 +30892,10 @@ C  RENORMALISE GROUND STATE TO ALLOW FOR INCREASED EXCITATION X-SEC
 C  FROM EXCITED VIBRATIONAL STATE ( EXACT FOR TWICE GROUND STATE XSEC) 
       APOPGS=1.0
 C
-      EN=-ESTEP/2.0  
+C     EN=-ESTEP/2.0  
       DO 1000 I=1,NSTEP 
-C     EN=EG(I)                                             
-      EN=EN+ESTEP   
+      EN=EG(I)                                             
+C     EN=EN+ESTEP   
       GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
       GAMMA2=GAMMA1*GAMMA1
       BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
@@ -29603,12 +30923,14 @@ C USE LOG INTERPOLATION FOR ELASTIC
       A=(YXJ-YXJ1)/(XNJ-XNJ1)
       B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)
       QMOM=DEXP(A*DLOG(EN)+B)*1.D-16
-C USE 1.0 OFFSET IN LOG INTERPOLATION (TO AVOID NEGATIVES)
-      YXJ=DLOG(YEPS(J)+1.0)
-      YXJ1=DLOG(YEPS(J-1)+1.0)
+C 
+      YXJ=DLOG(YEPS(J))
+      YXJ1=DLOG(YEPS(J-1))
       A=(YXJ-YXJ1)/(XNJ-XNJ1)
       B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)
-      PQ2=DEXP(A*DLOG(EN)+B)-1.0
+      PQ2=DEXP(A*DLOG(EN)+B)
+C  EPSILON =1-YEPS
+      PQ2=1.0D0-PQ2
    30 CONTINUE
       PQ1=0.5+(QELA-QMOM)/QELA
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
@@ -29633,7 +30955,7 @@ C GROSS IONISATION
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
   123 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)/0.99
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)/0.99
   124 CONTINUE  
 C   USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR 
 C ENERGIES ABOVE 2 * IONISATION ENERGY 
@@ -29648,9 +30970,9 @@ C  IONISATION ONLY AND IONISATION+EXCITATION
       IF(NANISO.EQ.2) PEQION(2,I)=0.0                                   
       IF(EN.LE.EION(2)) GO TO 191
       QION(2,I)=4.400/(EION(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EION(2)))-BETA2)*BBCONST*EN/(EN+EION(2)+E(3))
+     +*EION(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EION(2)+E(3))
       IF(QION(2,I).LT.0.0) QION(2,I)=0.0  
-  190 CONTINUE
+      CONTINUE
 C FIND IONISATION ONLY
       QION(1,I)=QION(1,I)-QION(2,I)
 C   USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR 
@@ -29706,7 +31028,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.D-16
       GO TO 290
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
-  280 Q(5,I)=CONST*(AM2*X1+C*X2)
+  280 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
   290 CONTINUE
 C   USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR 
 C ENERGIES ABOVE 2 * IONISATION ENERGY 
@@ -29720,41 +31042,49 @@ C
   300 Q(6,I)=0.0                                                        
 C V4  SUPERELASTIC ISOTROPIC
       QIN(1,I)=0.0
-      PEQIN(1,I)=0.5                                                  
-      IF(EN.LE.0.0) GO TO 350                                           
+      PEQIN(1,I)=0.5D0
+      IF(EN.LE.0.0) GO TO 350    
+      IF((EN+EIN(2)).GT.XVBV4(NVIBV4)) GO TO 325                        
       DO 310 J=2,NVIBV4                                                 
       IF((EN+EIN(2)).LE.XVBV4(J)) GO TO 320                             
   310 CONTINUE                                                          
       J=NVIBV4                                                          
   320 A=(YVBV4(J)-YVBV4(J-1))/(XVBV4(J)-XVBV4(J-1))                     
       B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J))
-      EFAC=DSQRT(1.0-(EIN(1)/EN))
-      QIN(1,I)=0.076*DLOG((EFAC+1.0)/(EFAC-1.0))/EN     
-      QIN(1,I)=QIN(1,I)+(EN+EIN(2))*(A*(EN+EIN(2))+B)/EN
+      QIN(1,I)=(EN+EIN(2))*(A*(EN+EIN(2))+B)/EN
+      GO TO 326
+  325 QIN(1,I)=YVBV4(NVIBV4)*(XVBV4(NVIBV4)/(EN+EIN(2)))**2
+  326 EFAC=DSQRT(1.0-(EIN(1)/EN))
+      QIN(1,I)=QIN(1,I)+0.076*DLOG((EFAC+1.0)/(EFAC-1.0))/EN  
       QIN(1,I)=QIN(1,I)*APOPV4*1.D-16 
-      QIN(1,I)=QIN(1,I)/DEGV4                         
+      QIN(1,I)=QIN(1,I)/DEGV4         
   350 CONTINUE                                                          
 C V4   ANISOTROPIC                                                    
-      QIN(2,I)=0.0                                                      
-      IF(EN.LE.EIN(2)) GO TO 400                                        
+      QIN(2,I)=0.0   
+       PEQIN(2,I)=0.5D0                                              
+      IF(EN.LE.EIN(2)) GO TO 400 
+      IF(EN.GT.XVBV4(NVIBV4)) GO TO 375                         
       DO 360 J=2,NVIBV4                                                
       IF(EN.LE.XVBV4(J)) GO TO 370                                      
   360 CONTINUE                                                          
       J=NVIBV4                                                         
   370 A=(YVBV4(J)-YVBV4(J-1))/(XVBV4(J)-XVBV4(J-1))                     
-      B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J)) 
-      EFAC=DSQRT(1.0-(EIN(2)/EN))
-      QIN(2,I)=0.076*DLOG((1.0+EFAC)/(1.0-EFAC))/EN     
+      B=(XVBV4(J-1)*YVBV4(J)-XVBV4(J)*YVBV4(J-1))/(XVBV4(J-1)-XVBV4(J))
+      QIN(2,I)=A*EN+B
+      GO TO 376
+  375 QIN(2,I)=YVBV4(NVIBV4)*(XVBV4(NVIBV4)/EN)**2 
+  376 EFAC=DSQRT(1.0-(EIN(2)/EN))
+      ADIP=0.076*DLOG((1.0+EFAC)/(1.0-EFAC))/EN     
       ELF=EN-EIN(2)
       FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
       BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
 C RATIO OF MT TO TOTAL X-SECT FOR RESONANCE PART =RAT
-      XMT=((1.5-FWD/(FWD+BCK))*QIN(2,I)+RAT*(A*EN+B))*APOPGS*1.D-16
-      QIN(2,I)=((A*EN+B)+QIN(2,I))*APOPGS*1.D-16      
-      PEQIN(2,I)=0.5+(QIN(2,I)-XMT)/QIN(2,I)
+      XMT=((1.5-FWD/(FWD+BCK))*ADIP+RAT*QIN(2,I))*APOPGS*1.D-16
+      QIN(2,I)=(QIN(2,I)+ADIP)*APOPGS*1.D-16      
+       PEQIN(2,I)=0.5+(QIN(2,I)-XMT)/QIN(2,I)
 C V2 SUPERELASTIC ISOTROPIC
   400 QIN(3,I)=0.0
-      PEQIN(3,I)=0.5
+      PEQIN(3,I)=0.5D0
       IF(EN.LE.0.0) GO TO 450
       IF((EN+EIN(4)).GT.XVBV2(NVIBV2)) GO TO 421
       DO 410 J=2,NVIBV2
@@ -29770,9 +31100,9 @@ C V2 SUPERELASTIC ISOTROPIC
 C SCALE BY 1/E**2 ABOVE XVBV2(NVIBV2) EV
   421 QIN(3,I)=YVBV2(NVIBV2)*(XVBV2(NVIBV2)/(EN+EIN(4)))**2*APOPV2*
      /1.D-16/DEGV2
-C V2 ANISOTROPIC
+C V2 ISOTROPIC
   450 QIN(4,I)=0.0
-      PEQIN(4,I)=0.5
+      PEQIN(4,I)=0.5D0
       IF(EN.LE.EIN(4)) GO TO 500
       IF(EN.GT.XVBV2(NVIBV2)) GO TO 471
       DO 460 J=2,NVIBV2
@@ -29782,13 +31112,12 @@ C V2 ANISOTROPIC
   470 A=(YVBV2(J)-YVBV2(J-1))/(XVBV2(J)-XVBV2(J-1))                     
       B=(XVBV2(J-1)*YVBV2(J)-XVBV2(J)*YVBV2(J-1))/(XVBV2(J-1)-XVBV2(J)) 
       QIN(4,I)=(A*EN+B)*APOPGS*1.D-16
-      GO TO 472
+      GO TO 500
 C SCALE BY 1/E**2 ABOVE XVBV2(NVIBV2) EV
   471 QIN(4,I)=YVBV2(NVIBV2)*(XVBV2(NVIBV2)/EN)**2*APOPGS*1.D-16
-  472 PEQIN(4,I)=1.5-RAT
-C V1  ANISOTROPIC                                                        
+C V1  ISOTROPIC                                                        
   500 QIN(5,I)=0.0
-      PEQIN(5,I)=0.5                                                  
+      PEQIN(5,I)=0.5D0                                                 
       IF(EN.LE.EIN(5)) GO TO 550
       IF(EN.GT.XVBV1(NVIBV1)) GO TO 521                               
       DO 510 J=2,NVIBV1                                                 
@@ -29798,32 +31127,36 @@ C V1  ANISOTROPIC
   520 A=(YVBV1(J)-YVBV1(J-1))/(XVBV1(J)-XVBV1(J-1))                     
       B=(XVBV1(J-1)*YVBV1(J)-XVBV1(J)*YVBV1(J-1))/(XVBV1(J-1)-XVBV1(J))
       QIN(5,I)=(A*EN+B)*1.D-16
-      GO TO 522 
+      GO TO 550 
 C SCALE BY 1/E**2 ABOVE XVBV1(NVIBV1) EV
   521 QIN(5,I)=YVBV1(NVIBV1)*(XVBV1(NVIBV1)/EN)**2*1.D-16 
-  522 PEQIN(5,I)=1.5-RAT     
 C V3  ANISOTROPIC                                                       
-  550 QIN(6,I)=0.0                                                      
-      IF(EN.LE.EIN(6)) GO TO 600                                        
+  550 QIN(6,I)=0.0    
+      PEQIN(6,I)=0.5D0                
+C     PEQIN(6,I)=0.0D0                                  
+      IF(EN.LE.EIN(6)) GO TO 600     
+      IF(EN.GT.XVBV3(NVIBV3)) GO TO 575                               
       DO 560 J=2,NVIBV3                                                 
       IF(EN.LE.XVBV3(J)) GO TO 570                                      
   560 CONTINUE                                                          
       J=NVIBV3                                                          
   570 A=(YVBV3(J)-YVBV3(J-1))/(XVBV3(J)-XVBV3(J-1))                     
       B=(XVBV3(J-1)*YVBV3(J)-XVBV3(J)*YVBV3(J-1))/(XVBV3(J-1)-XVBV3(J))
-      EFAC=DSQRT(1.0-(EIN(6)/EN))
-      QIN(6,I)=0.076*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
+      QIN(6,I)=A*EN+B
+      GO TO 576
+  575 QIN(6,I)=YVBV3(NVIBV3)*(XVBV3(NVIBV3)/EN)**2
+  576 EFAC=DSQRT(1.0-(EIN(6)/EN))
+      ADIP=0.076*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
       ELF=EN-EIN(6)
       FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
       BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
 C RATIO OF MT TO TOTAL X-SECT FOR RESONANCE PART =RAT
-      XMT=((1.5-FWD/(FWD+BCK))*QIN(6,I)+RAT*(A*EN+B))*1.D-16
-      QIN(6,I)=((A*EN+B)+QIN(6,I))*1.D-16      
+      XMT=((1.5-FWD/(FWD+BCK))*ADIP+RAT*QIN(6,I))*1.D-16
+      QIN(6,I)=(ADIP+QIN(6,I))*1.D-16      
       PEQIN(6,I)=0.5+(QIN(6,I)-XMT)/QIN(6,I)
-C  VIBRATION HARMONICS 1 (ISOTROPIC)                                  
+C  VIBRATION HARMONICS 1 ISOTROPIC                                    
   600 QIN(7,I)=0.0
-      PEQIN(7,I)=0.5               
-      IF(NANISO.EQ.2) PEQIN(7,I)=0.0
+      PEQIN(7,I)=0.5D0               
       IF(EN.LE.EIN(7)) GO TO 650    
       IF(EN.GT.XVBH1(NVIBH1)) GO TO 621
       DO 610 J=2,NVIBH1                                                 
@@ -29832,14 +31165,13 @@ C  VIBRATION HARMONICS 1 (ISOTROPIC)
       J=NVIBH1                                                          
   620 A=(YVBH1(J)-YVBH1(J-1))/(XVBH1(J)-XVBH1(J-1))                     
       B=(XVBH1(J-1)*YVBH1(J)-XVBH1(J)*YVBH1(J-1))/(XVBH1(J-1)-XVBH1(J)) 
-      QIN(7,I)=(A*EN+B)*1.D-16         
+      QIN(7,I)=(A*EN+B)*1.D-16   
       GO TO 650
 C SCALE BY 1/E**2 ABOVE XVBH1(NVBH1) EV
   621 QIN(7,I)=YVBH1(NVIBH1)*(XVBH1(NVIBH1)/EN)**2*1.D-16
-C  VIBRATION HARMONICS 2  (ISOTROPIC)                                    
+C  VIBRATION HARMONICS 2  ISOTROPIC                                     
   650 QIN(8,I)=0.0                   
-      PEQIN(8,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(8,I)=0.0                                   
+      PEQIN(8,I)=0.5D0                                  
       IF(EN.LE.EIN(8)) GO TO 700    
       IF(EN.GT.XVBH2(NVIBH2)) GO TO 671                                
       DO 660 J=2,NVIBH2                                                 
@@ -29854,8 +31186,7 @@ C SCALE BY 1/E**2 ABOVE XVBH2(NVIBH2) EV
   671 QIN(8,I)=YVBH2(NVIBH2)*(XVBH2(NVIBH2)/EN)**2*1.D-16
 C TRIPLET DISSOCIATION 7.5EV
   700 QIN(9,I)=0.0
-      PEQIN(9,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(9,I)=0.0
+      PEQIN(9,I)=0.0
       IF(EN.LE.EIN(9)) GO TO 705
       IF(EN.GT.XTR1(NTRP1)) GO TO 703
       DO 701 J=2,NTRP1
@@ -29872,8 +31203,7 @@ C SCALE BY 1/E**2 ABOVE XTR1(NTRP1) EV
       PEQIN(9,I)=PEQEL(2,(I-IOFFN(9)))                                 
 C ATTACHMENT - DEATTACHMENT RESONANCE VIA H- AT 9.8EV RESONANCE
   705 QIN(10,I)=0.0
-      PEQIN(10,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(10,I)=0.0
+      PEQIN(10,I)=0.0
       IF(EN.LE.EIN(10)) GO TO 708
       IF(EN.GT.XDET(NDET)) GO TO 708
       DO 706 J=2,NDET
@@ -29883,10 +31213,11 @@ C ATTACHMENT - DEATTACHMENT RESONANCE VIA H- AT 9.8EV RESONANCE
   707 A=(YDET(J)-YDET(J-1))/(XDET(J)-XDET(J-1))
       B=(XDET(J-1)*YDET(J)-XDET(J)*YDET(J-1))/(XDET(J-1)-XDET(J))
       QIN(10,I)=(A*EN+B)*1.D-16
+      IF(EN.LE.(3.0*EIN(10))) GO TO 708
+      PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
 C TRIPLET DISSOCIATION  AT 8.5 EV
   708 QIN(11,I)=0.0
-      PEQIN(11,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(11,I)=0.0
+      PEQIN(11,I)=0.0
       IF(EN.LE.EIN(11)) GO TO 713
       IF(EN.GT.XTR2(NTRP2)) GO TO 711
       DO 709 J=2,NTRP2
@@ -29903,38 +31234,34 @@ C SCALE BY 1/E**2 ABOVE XTR2(NTRP2) EV
       PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))                               
 C SINGLET DISSOCIATION AT 8.75 EV USE BEF SCALING WITH F=0.0271
   713 QIN(12,I)=0.0
-      PEQIN(12,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(12,I)=0.0
+      PEQIN(12,I)=0.0
       IF(EN.LE.EIN(12)) GO TO 714
       QIN(12,I)=0.0271/(EIN(12)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(12)))-BETA2)*BBCONST*EN/(EN+EIN(12)+E(3))*1.029
+     +*EIN(12)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(12)+E(3))*1.029
       IF(QIN(12,I).LT.0.0) QIN(12,I)=0.0       
       IF(EN.LE.(3.0*EIN(12))) GO TO 714
       PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))
 C SINGLET DISSOCIATION AT 9.25 EV USE BEF SCALING WITH F=0.0442
   714 QIN(13,I)=0.0
-      PEQIN(13,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(13,I)=0.0
+      PEQIN(13,I)=0.0
       IF(EN.LE.EIN(13)) GO TO 715
       QIN(13,I)=0.0442/(EIN(13)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(13)))-BETA2)*BBCONST*EN/(EN+EIN(13)+E(3))*1.027
+     +*EIN(13)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(13)+E(3))*1.027
       IF(QIN(13,I).LT.0.0) QIN(13,I)=0.0       
       IF(EN.LE.(3.0*EIN(13))) GO TO 715
       PEQIN(13,I)=PEQEL(2,(I-IOFFN(13)))
 C SINGLET DISSOCIATION AT 9.75 EV USE BEF SCALING WITH F=0.0859
   715 QIN(14,I)=0.0
-      PEQIN(14,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(14,I)=0.0
+      PEQIN(14,I)=0.0
       IF(EN.LE.EIN(14)) GO TO 716
       QIN(14,I)=0.0859/(EIN(14)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(14)))-BETA2)*BBCONST*EN/(EN+EIN(14)+E(3))*1.026
+     +*EIN(14)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(14)+E(3))*1.026
       IF(QIN(14,I).LT.0.0) QIN(14,I)=0.0       
       IF(EN.LE.(3.0*EIN(14))) GO TO 716
       PEQIN(14,I)=PEQEL(2,(I-IOFFN(14)))
 C TRIPLET DISSOCIATION  AT 10.0EV
   716 QIN(15,I)=0.0
-      PEQIN(15,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(15,I)=0.0
+      PEQIN(15,I)=0.0
       IF(EN.LE.EIN(15)) GO TO 721
       IF(EN.GT.XTR3(NTRP3)) GO TO 719
       DO 717 J=2,NTRP3
@@ -29950,81 +31277,73 @@ C SCALE BY 1/E**2 ABOVE XTR3(NTRP3) EV
   720 IF(EN.LE.(3.0*EIN(15))) GO TO 721
       PEQIN(15,I)=PEQEL(2,(I-IOFFN(15)))                               
 C SINGLET DISSOCIATION AT 10.25 EV USE BEF SCALING WITH F=0.0906
-  721 QIN(16,I)=0.0
-      PEQIN(16,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(16,I)=0.0
+  721 QIN(16,I)=0.0D0
+      PEQIN(16,I)=0.0
       IF(EN.LE.EIN(16)) GO TO 722
       QIN(16,I)=0.0906/(EIN(16)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(16)))-BETA2)*BBCONST*EN/(EN+EIN(16)+E(3))*1.024
+     +*EIN(16)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(16)+E(3))*1.024
       IF(QIN(16,I).LT.0.0) QIN(16,I)=0.0       
       IF(EN.LE.(3.0*EIN(16))) GO TO 722
       PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))
 C SINGLET DISSOCIATION AT 10.75 EV USE BEF SCALING WITH F=0.0841
   722 QIN(17,I)=0.0
-      PEQIN(17,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(17,I)=0.0
+      PEQIN(17,I)=0.0
       IF(EN.LE.EIN(17)) GO TO 723
       QIN(17,I)=0.0841/(EIN(17)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(17)))-BETA2)*BBCONST*EN/(EN+EIN(17)+E(3))*1.023
+     +*EIN(17)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(17)+E(3))*1.023
       IF(QIN(17,I).LT.0.0) QIN(17,I)=0.0       
       IF(EN.LE.(3.0*EIN(17))) GO TO 723
       PEQIN(17,I)=PEQEL(2,(I-IOFFN(17)))
 C SINGLET DISSOCIATION AT 11.25 EV USE BEF SCALING WITH F=0.1036
   723 QIN(18,I)=0.0
-      PEQIN(18,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(18,I)=0.0
+      PEQIN(18,I)=0.0
       IF(EN.LE.EIN(18)) GO TO 724
       QIN(18,I)=0.1036/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+E(3))*1.022
+     +*EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3))*1.022
       IF(QIN(18,I).LT.0.0) QIN(18,I)=0.0       
       IF(EN.LE.(3.0*EIN(18))) GO TO 724
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
 C SINGLET DISSOCIATION AT 11.75 EV USE BEF SCALING WITH F=0.1460
   724 QIN(19,I)=0.0
-      PEQIN(19,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(19,I)=0.0
+      PEQIN(19,I)=0.0
       IF(EN.LE.EIN(19)) GO TO 725
       QIN(19,I)=0.1460/(EIN(19)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(19)))-BETA2)*BBCONST*EN/(EN+EIN(19)+E(3))*1.021
+     +*EIN(19)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(19)+E(3))*1.021
       IF(QIN(19,I).LT.0.0) QIN(19,I)=0.0       
       IF(EN.LE.(3.0*EIN(19))) GO TO 725
       PEQIN(19,I)=PEQEL(2,(I-IOFFN(19)))
 C SINGLET DISSOCIATION AT 12.25 EV USE BEF SCALING WITH F=0.1548
   725 QIN(20,I)=0.0
-      PEQIN(20,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(20,I)=0.0
+      PEQIN(20,I)=0.0
       IF(EN.LE.EIN(20)) GO TO 726
       QIN(20,I)=0.1548/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(20)))-BETA2)*BBCONST*EN/(EN+EIN(20)+E(3))*1.020
+     +*EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(20)+E(3))*1.020
       IF(QIN(20,I).LT.0.0) QIN(20,I)=0.0       
       IF(EN.LE.(3.0*EIN(20))) GO TO 726
       PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))
 C SINGLET DISSOCIATION AT 12.75 EV USE BEF SCALING WITH F=0.1927
   726 QIN(21,I)=0.0
-      PEQIN(21,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(21,I)=0.0
+      PEQIN(21,I)=0.0
       IF(EN.LE.EIN(21)) GO TO 727
       QIN(21,I)=0.1927/(EIN(21)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(21)))-BETA2)*BBCONST*EN/(EN+EIN(21)+E(3))*1.020
+     +*EIN(21)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(21)+E(3))*1.020
       IF(QIN(21,I).LT.0.0) QIN(21,I)=0.0       
       IF(EN.LE.(3.0*EIN(21))) GO TO 727
       PEQIN(21,I)=PEQEL(2,(I-IOFFN(21)))
 C SINGLET DISSOCIATION AT 13.25 EV USE BEF SCALING WITH F=0.1981
   727 QIN(22,I)=0.0
-      PEQIN(22,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(22,I)=0.0
+      PEQIN(22,I)=0.0
       IF(EN.LE.EIN(22)) GO TO 728
       QIN(22,I)=0.1981/(EIN(22)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(22)))-BETA2)*BBCONST*EN/(EN+EIN(22)+E(3))*1.019
+     +*EIN(22)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(22)+E(3))*1.019
       IF(QIN(22,I).LT.0.0) QIN(22,I)=0.0       
       IF(EN.LE.(3.0*EIN(22))) GO TO 728
       PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))
 C  DISSOCIATIVE EXC TO STATES DECAYING VIA CH(A2DELTA TO G.S.)           
   728 QIN(23,I)=0.0
-      PEQIN(23,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(23,I)=0.0                             
+      PEQIN(23,I)=0.0                             
       IF(EN.LE.EIN(23)) GO TO 731 
-      IF(EN.GT.XCHD(NCHD)) GO TO 731                                   
+      IF(EN.GT.XCHD(NCHD)) GO TO 7311                                   
       DO 729 J=2,NCHD                                                  
       IF(EN.LE.XCHD(J)) GO TO 730                                      
   729 CONTINUE                                                          
@@ -30032,14 +31351,16 @@ C  DISSOCIATIVE EXC TO STATES DECAYING VIA CH(A2DELTA TO G.S.)
   730 A=(YCHD(J)-YCHD(J-1))/(XCHD(J)-XCHD(J-1))                     
       B=(XCHD(J-1)*YCHD(J)-XCHD(J)*YCHD(J-1))/(XCHD(J-1)-XCHD(J)) 
       QIN(23,I)=(A*EN+B)*1.D-16 
-      IF(EN.LE.(3.0*EIN(23))) GO TO 731
+      GO TO 7312
+C ABOVE XCHD(NCHD) EV SCALE BY 1/E
+ 7311 QIN(23,I)=YCHD(NCHD)*(XCHD(NCHD)/EN)*1.D-16
+ 7312 IF(EN.LE.(3.0*EIN(23))) GO TO 731
       PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))                               
 C  DISSOCIATIVE EXC TO STATES DECAYING VIA CH(B2SIGMA- TO G.S.)          
   731 QIN(24,I)=0.0
-      PEQIN(24,I)=0.5 
-      IF(NANISO.EQ.2) PEQIN(24,I)=0.0                               
+      PEQIN(24,I)=0.0                               
       IF(EN.LE.EIN(24)) GO TO 734  
-      IF(EN.GT.XCHB(NCHB)) GO TO 734                                   
+      IF(EN.GT.XCHB(NCHB)) GO TO 7341                                   
       DO 732  J=2,NCHB                                                  
       IF(EN.LE.XCHB(J)) GO TO 733                                      
   732 CONTINUE                                                          
@@ -30047,64 +31368,61 @@ C  DISSOCIATIVE EXC TO STATES DECAYING VIA CH(B2SIGMA- TO G.S.)
   733 A=(YCHB(J)-YCHB(J-1))/(XCHB(J)-XCHB(J-1))                     
       B=(XCHB(J-1)*YCHB(J)-XCHB(J)*YCHB(J-1))/(XCHB(J-1)-XCHB(J)) 
       QIN(24,I)=(A*EN+B)*1.D-16
-      IF(EN.LE.(3.0*EIN(24))) GO TO 734 
+      GO TO 7342
+C ABOVE XCHB(NCHB) EV SCALE BY 1/E
+ 7341 QIN(24,I)=YCHB(NCHB)*(XCHB(NCHB)/EN)*1.0D-16
+ 7342 IF(EN.LE.(3.0*EIN(24))) GO TO 734 
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))                                
 C SINGLET DISSOCIATION AT 13.75 EV USE BEF SCALING WITH F=0.1628
   734 QIN(25,I)=0.0
-      PEQIN(25,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(25,I)=0.0
+       PEQIN(25,I)=0.0
       IF(EN.LE.EIN(25)) GO TO 735
       QIN(25,I)=0.1628/(EIN(25)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(25)))-BETA2)*BBCONST*EN/(EN+EIN(25)+E(3))*1.018
+     +*EIN(25)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(25)+E(3))*1.018
       IF(QIN(25,I).LT.0.0) QIN(25,I)=0.0       
       IF(EN.LE.(3.0*EIN(25))) GO TO 735
       PEQIN(25,I)=PEQEL(2,(I-IOFFN(25)))
 C SINGLET DISSOCIATION AT 14.25 EV USE BEF SCALING WITH F=0.1093
   735 QIN(26,I)=0.0
-      PEQIN(26,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(26,I)=0.0
+      PEQIN(26,I)=0.0
       IF(EN.LE.EIN(26)) GO TO 736
       QIN(26,I)=0.1093/(EIN(26)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(26)))-BETA2)*BBCONST*EN/(EN+EIN(26)+E(3))*1.018
+     +*EIN(26)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(26)+E(3))*1.018
       IF(QIN(26,I).LT.0.0) QIN(26,I)=0.0       
       IF(EN.LE.(3.0*EIN(26))) GO TO 736
       PEQIN(26,I)=PEQEL(2,(I-IOFFN(26)))
 C SINGLET DISSOCIATION AT 14.75 EV USE BEF SCALING WITH F=0.0628
   736 QIN(27,I)=0.0
-      PEQIN(27,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(27,I)=0.0
+      PEQIN(27,I)=0.0
       IF(EN.LE.EIN(27)) GO TO 737
       QIN(27,I)=0.0628/(EIN(27)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(27)))-BETA2)*BBCONST*EN/(EN+EIN(27)+E(3))*1.017
+     +*EIN(27)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(27)+E(3))*1.017
       IF(QIN(27,I).LT.0.0) QIN(27,I)=0.0       
       IF(EN.LE.(3.0*EIN(27))) GO TO 737
       PEQIN(27,I)=PEQEL(2,(I-IOFFN(27)))
 C SINGLET DISSOCIATION AT 15.25 EV USE BEF SCALING WITH F=0.0297
   737 QIN(28,I)=0.0
-      PEQIN(28,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(28,I)=0.0
+      PEQIN(28,I)=0.0
       IF(EN.LE.EIN(28)) GO TO 738
       QIN(28,I)=0.0297/(EIN(28)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(28)))-BETA2)*BBCONST*EN/(EN+EIN(28)+E(3))*1.016
+     +*EIN(28)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(28)+E(3))*1.016
       IF(QIN(28,I).LT.0.0) QIN(28,I)=0.0       
       IF(EN.LE.(3.0*EIN(28))) GO TO 738
       PEQIN(28,I)=PEQEL(2,(I-IOFFN(28)))
 C SINGLET DISSOCIATION AT 15.75 EV USE BEF SCALING WITH F=0.0074
   738 QIN(29,I)=0.0
-      PEQIN(29,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(29,I)=0.0
+      PEQIN(29,I)=0.0
       IF(EN.LE.EIN(29)) GO TO 739
       QIN(29,I)=0.0074/(EIN(29)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(29)))-BETA2)*BBCONST*EN/(EN+EIN(29)+E(3))*1.016
+     +*EIN(29)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(29)+E(3))*1.016
       IF(QIN(29,I).LT.0.0) QIN(29,I)=0.0       
       IF(EN.LE.(3.0*EIN(29))) GO TO 739
       PEQIN(29,I)=PEQEL(2,(I-IOFFN(29)))
 C  DISSOCIATIVE EXC TO STATES DECAYING VIA H(ALPHA) 
-  739 QIN(30,I)=0.0                   
-      PEQIN(30,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(30,I)=0.0                       
+  739 QIN(30,I)=0.0  
+      PEQIN(30,I)=0.0                       
       IF(EN.LE.EIN(30)) GO TO 742    
-      IF(EN.GT.XHAL(NHAL)) GO TO 742                                   
+      IF(EN.GT.XHAL(NHAL)) GO TO 7421                                   
       DO 740  J=2,NHAL                                                  
       IF(EN.LE.XHAL(J)) GO TO 741                                      
   740 CONTINUE                                                          
@@ -30112,14 +31430,16 @@ C  DISSOCIATIVE EXC TO STATES DECAYING VIA H(ALPHA)
   741 A=(YHAL(J)-YHAL(J-1))/(XHAL(J)-XHAL(J-1))                     
       B=(XHAL(J-1)*YHAL(J)-XHAL(J)*YHAL(J-1))/(XHAL(J-1)-XHAL(J)) 
       QIN(30,I)=(A*EN+B)*1.D-16
-      IF(EN.LE.(3.0*EIN(30))) GO TO 742 
+      GO TO 7422
+C ABOVE XHAL(NHAL) EV SCALE BY 1/E
+ 7421 QIN(30,I)=YHAL(NHAL)*(XHAL(NHAL)/EN)*1.D-16
+ 7422 IF(EN.LE.(3.0*EIN(30))) GO TO 742 
       PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))                               
 C  DISSOCIATIVE EXC TO STATES DECAYING VIA H(BETA)                     
-  742 QIN(31,I)=0.0
-      PEQIN(31,I)=0.5                                      
-      IF(NANISO.EQ.2) PEQIN(31,I)=0.0            
+  742 QIN(31,I)=0.0                               
+      PEQIN(31,I)=0.0            
       IF(EN.LE.EIN(31)) GO TO 745 
-      IF(EN.GT.XHBE(NHBE)) GO TO 745                                  
+      IF(EN.GT.XHBE(NHBE)) GO TO 7451                                  
       DO 743  J=2,NHBE                                                  
       IF(EN.LE.XHBE(J)) GO TO 744                                      
   743 CONTINUE                                                          
@@ -30127,29 +31447,61 @@ C  DISSOCIATIVE EXC TO STATES DECAYING VIA H(BETA)
   744 A=(YHBE(J)-YHBE(J-1))/(XHBE(J)-XHBE(J-1))                     
       B=(XHBE(J-1)*YHBE(J)-XHBE(J)*YHBE(J-1))/(XHBE(J-1)-XHBE(J)) 
       QIN(31,I)=(A*EN+B)*1.D-16  
-      IF(EN.LE.(3.0*EIN(31))) GO TO 745 
+      GO TO 7452
+C ABOVE XHBE(NHBE) EV SCALE BY 1/E
+ 7451 QIN(31,I)=YHBE(NHBE)*(XHBE(NHBE)/EN)*1.0D-16
+ 7452 IF(EN.LE.(3.0*EIN(31))) GO TO 745 
       PEQIN(31,I)=PEQEL(2,(I-IOFFN(31)))           
 C SINGLET DISSOCIATION AT 20.50 EV USE BEF SCALING WITH F=0.0045
   745 QIN(32,I)=0.0
-      PEQIN(32,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(32,I)=0.0
+      PEQIN(32,I)=0.0
       IF(EN.LE.EIN(32)) GO TO 746
       QIN(32,I)=0.0045/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(32)))-BETA2)*BBCONST*EN/(EN+EIN(32)+E(3))*1.037
+     +*EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+E(3))*1.037
       IF(QIN(32,I).LT.0.0) QIN(32,I)=0.0       
       IF(EN.LE.(3.0*EIN(32))) GO TO 746
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C SINGLET DISSOCIATION AT 22.00 EV USE BEF SCALING WITH F=0.0045
   746 QIN(33,I)=0.0
-      PEQIN(33,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(33,I)=0.0
+      PEQIN(33,I)=0.0
       IF(EN.LE.EIN(33)) GO TO 747
       QIN(33,I)=0.0045/(EIN(33)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
-     /*EIN(33)))-BETA2)*BBCONST*EN/(EN+EIN(33)+E(3))*1.034
+     +*EIN(33)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(33)+E(3))*1.034
       IF(QIN(33,I).LT.0.0) QIN(33,I)=0.0       
       IF(EN.LE.(3.0*EIN(33))) GO TO 747
       PEQIN(33,I)=PEQEL(2,(I-IOFFN(33)))
   747 CONTINUE
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+      QIN(34,I)=0.0
+      QIN(35,I)=0.0
+      IF(EN.LE.1000.) GO TO 800
+      DO 780 J=2,NBREM
+      IF(EN.LE.EBRM(J)) GO TO 790
+  780 CONTINUE
+      J=NBREM
+  790 A=(DLOG(Z6T(J))-DLOG(Z6T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B=(DLOG(Z6T(J))*EBRM(J-1)-DLOG(Z6T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      A1=(DLOG(Z1T(J))-DLOG(Z1T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B1=(DLOG(Z1T(J))*EBRM(J-1)-DLOG(Z1T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      QIN(34,I)=DEXP(A*EN+B)*1.D-24
+      QIN(35,I)=DEXP(A1*EN+B1)*4.D-24
+  800 CONTINUE
+C     WRITE(6,881) EN
+C 881 FORMAT('EN=',D14.6)
+C     WRITE(6,882) QIN(1,I),QIN(2,I),QIN(3,I),QIN(4,I),QIN(5,I)
+C     WRITE(6,882) QIN(6,I),QIN(7,I),QIN(8,I),QIN(9,I),QIN(10,I)
+C     WRITE(6,882) QIN(11,I),QIN(12,I),QIN(13,I),QIN(14,I),QIN(15,I)
+C     WRITE(6,882) QIN(16,I),QIN(17,I),QIN(18,I),QIN(19,I),QIN(20,I)
+C     WRITE(6,882) QIN(21,I),QIN(22,I),QIN(23,I),QIN(24,I),QIN(25,I)
+C     WRITE(6,882) QIN(26,I),QIN(27,I),QIN(28,I),QIN(29,I),QIN(30,I)
+C     WRITE(6,882) QIN(31,I),QIN(32,I),QIN(33,I),QIN(34,I),QIN(35,I)
+C 882 FORMAT(' QIN ',5D12.4)
+C     WRITE(6,883) Q(2,I),Q(3,I),Q(4,I),Q(5,I)
+C 883 FORMAT(' Q 2 3 4 5',4D12.4)
+C     WRITE(6,884) QION(1,I),QION(2,I),QION(3,I)
+C 884 FORMAT('QION 1 2 3 ',3D12.4)
 C
       QSUP=QIN(1,I)+QIN(3,I)
       QVIB=QIN(2,I)+QIN(4,I)+QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)
@@ -30162,10 +31514,11 @@ C
       QTTT=QEXC+QTRIP+QSING+QDATT  
       QWINT=QION(2,I)+QTTT
       QINEL=QSUP+QVIB+QDATT+QSING+QTRIP+QEXC+Q(5,I)+Q(4,I)      
-      Q(1,I)=Q(2,I)+Q(5,I)+Q(4,I)+QTTT+QSUP+QVIB
+      Q(1,I)=Q(2,I)+Q(5,I)+Q(4,I)+QTTT+QSUP+QVIB                    
+C     Q(1,I)=Q(2,I)+Q(5,I)+Q(4,I)+QTTT+QSUP+QVIB+QIN(34,I)+QIN(35,I)
 C     WRITE(6,767) EN,Q(1,I),QSUP,QVIB,QDATT,QSING,QTRIP,QEXC,QTTT,QINEL
 C767  FORMAT(' EN=',F9.2,' QTOT=',D12.3,' QSUP=',D12.3,' QVIB=',D12.3,/,
-CC   /' QDATT=',D12.3,' QSING=',D12.3,' QTRIP=',D12.3,' QEXC=',D12.3,/,
+C    /' QDATT=',D12.3,' QSING=',D12.3,' QTRIP=',D12.3,' QEXC=',D12.3,/,
 C    /' QTTT=',D12.3,' QINELSUM=',D12.3,/)
 C     WRITE(6,768) EN,QION(1,I),QION(2,I),QWINT
 C 768 FORMAT(' EN=',F9.2,' QION1=',D12.3,' QION2=',D12.3,' QWINTERS=',
@@ -30180,6 +31533,7 @@ C  SAVE COMPUTE TIME
       ENDIF
  1010 CONTINUE
  1011 CONTINUE
+C     IF(EFINAL.GT.1000.) NIN=35
 C
       RETURN
       END     
@@ -30756,25 +32110,28 @@ C  SAVE COMPUTE TIME
       END
       SUBROUTINE GAS11(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY 
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
-     /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)  
+     /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NCO,ECO,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)  
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)    
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)     
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)   
-      DIMENSION XEN(122),YELM(122),YELT(122),YEPS(122),
-     /XION(38),YION(38),YINC(38),XATT(10),YATT(10),XKSH(63),YKSH(63),  
-     /XVIB1(36),YVIB1(36),XVIB2(30),YVIB2(30),XVIB3(30),YVIB3(30),      
-     /XVIB4(35),YVIB4(35),XVIB5(21),YVIB5(21),XEXC1(24),YEXC1(24),
-     /XEXC2(21),YEXC2(21),XEXC3(20),YEXC3(20),IOFFN(12),IOFFION(10)
+      DIMENSION XEN(157),YELM(157),YELT(157),YEPS(157),
+     /XION(42),YION(42),YINC(42),XATT(10),YATT(10),XKSH(83),YKSH(83),  
+     /XVIB1(30),YVIB1(30),XVIB2(24),YVIB2(24),XVIB3(24),YVIB3(24),      
+     /XVIB4(29),YVIB4(29),XVIB5(15),YVIB5(15),XEXC1(16),YEXC1(16),
+     /XEXC2(16),YEXC2(16),IOFFN(24),IOFFION(10)
+      DIMENSION Z6T(25),Z1T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
-      CHARACTER*25 NAME       
+      CHARACTER*25 NAME     
 C ELASTIC                                          
       DATA XEN/0.00,0.001,0.002,0.003,0.004,0.005,0.007,0.01,0.014,0.02,
      /.025,0.03,.035,0.04,0.05,0.06,0.07,0.08,0.09,0.10,
@@ -30787,8 +32144,11 @@ C ELASTIC
      /9000.,1.D4,1.25D4,1.5D4,1.75D4,2.D4,2.5D4,3.D4,3.5D4,4.D4,
      /4.5D4,5.D4,6.D4,7.D4,8.D4,9.D4,1.D5,1.25D5,1.5D5,1.75D5,
      /2.0D5,2.5D5,3.D5,3.5D5,4.D5,4.5D5,5.D5,6.D5,7.D5,8.D5,
-     /9.D5,1.D6,1.25D6,1.5D6,1.75D6,2.D6,2.5D6,3.D6,3.5D6,4.D6,
-     /5.D6,1.D7/
+     /9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,
+     /4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,
+     /2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,
+     /9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,
+     /4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
 C ELASTIC MOMENTUM TRANSFER X-SECTION
       DATA YELM/255.,255.,255.,255.,255.,210.,150.,105.,74.5,52.0,     
      /41.4,34.5,29.6,25.9,20.7,17.2,14.8,13.0,11.7,10.8,
@@ -30806,7 +32166,13 @@ C ELASTIC MOMENTUM TRANSFER X-SECTION
      /1.93D-6,1.57D-6,
      /1.31D-6,1.12D-6,8.01D-7,6.04D-7,4.75D-7,3.84D-7,2.69D-7,2.00D-7,
      /1.55D-7,1.24D-7,
-     /8.52D-8,2.55D-8/
+     /1.02D-7,8.52D-8,6.23D-8,4.77D-8,3.78D-8,3.07D-8,2.55D-8,1.71D-8,
+     /1.23D-8,9.30D-9,
+     /7.28D-9,4.83D-9,3.45D-9,2.59D-9,2.02D-9,1.61D-9,1.32D-9,9.36D-10,
+     /6.97D-10,5.39D-10,
+     /4.29D-10,3.50D-10,2.26D-10,1.58D-10,1.16D-10,8.92D-11,5.72D-11,
+     /3.98D-11,2.92D-11,2.24D-11,
+     /1.77D-11,1.44D-11,9.97D-12,7.33D-12,5.61D-12,4.43D-12,3.59D-12/
 C ELASTIC X-SECTION ASSUMED ISOTROPIC BELOW     2.0 EV
       DATA YELT/255.,255.,255.,255.,255.,210.,150.,105.,74.5,52.0,     
      /41.4,34.5,29.6,25.9,20.7,17.2,14.8,13.0,11.7,10.8,
@@ -30820,46 +32186,56 @@ C ELASTIC X-SECTION ASSUMED ISOTROPIC BELOW     2.0 EV
      /.0698,.0636,.0545,.0479,.0443,.0392,.0361,.0306,.0270,.0244,
      /.0225,.0198,.0180,.0168,.0158,.0151,.0146,.0138,.0132,.0128,
      /.0125,.0123,.0119,.0116,.0114,.0113,.0112,.0111,.0110,.0110,
-     /.0110,.0109/
-C ELPSILON FOR ELASTIC ANGULAR DISTRIBUTION
-      DATA YEPS/0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-     /0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-     /0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-     /0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,.3060,.3989,
-     /.4153,.3631,.3497,.3932,.4489,.4946,.5894,.6535,.7149,.7455,
-     /.7549,.7717,.7859,.7985,.8120,.8247,.8407,.8607,.8809,.8970,
-     /.9097,.9164,.9270,.9390,.9456,.9585,.9704,.9773,.9815,.9849,
-     /.98728,.99015,.99214,.99338,.99445,.99516,.99573,.99654,.99709,
-     /.99756,
-     /.99787,.99810,.998551,.998829,.999016,.999162,.999357,.999465,
-     /.999546,.999603,
-     /.999650,.999686,.999742,.999781,.999817,.9998342,.9998519,
-     /.9998843,.9999063,.9999216,
-     /.9999331,.9999488,.9999589,.9999663,.9999714,.9999755,.9999788,
-     /.9999835,.9999866,.9999889,
-     /.9999907,.9999920,.9999943,.9999957,.9999966,.9999973,.9999981,
-     /.9999986,.9999989,.9999992,
-     /.9999994,.9999998/
+     /.0110,.0110,.0109,.0109,.0109,.0109,.0109,30*.01086/
+C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
+C EPSILON=1.0-YEPS
+      DATA YEPS/38*1.0,.6940,.6011,
+     /.5847,.6369,.6507,.6068,.5511,.5054,.4106,.3465,.2851,.2545,
+     /.2451,.2283,.2141,.2015,.1880,.1753,.1593,.1393,.1191,.1030,
+     /.0903,.0836,.0730,.0610,.0544,.0415,.0296,.0227,.0185,.0151,
+     /.01272,.00985,.00786,.00662,.00555,.00484,.00427,.00346,.00291,
+     /.00244,
+     /.00213,.00190,.001449,.001171,9.84D-4,8.38D-4,6.43D-4,5.35D-4,
+     /4.54D-4,3.97D-4,
+     /3.50D-4,3.14D-4,2.58D-4,2.19D-4,1.83D-4,1.658D-4,1.481D-4,
+     /1.157D-4,9.37D-5,7.84D-5,
+     /6.69D-5,5.12D-5,4.11D-5,3.37D-5,2.86D-5,2.45D-5,2.12D-5,1.65D-5,
+     /1.34D-5,1.11D-5,
+     /9.33D-6,7.99D-6,5.75D-6,4.32D-6,3.37D-6,2.71D-6,1.87D-6,1.37D-6,
+     /1.04D-6,8.24D-7,
+     /6.67D-7,5.52D-7,3.95D-7,2.97D-7,2.32D-7,1.86D-7,1.52D-7,9.94D-8,
+     /7.00D-8,5.20D-8,
+     /4.01D-8,2.59D-8,1.81D-8,1.34D-8,1.03D-8,8.12D-9,6.58D-9,4.56D-9,
+     /3.34D-9,2.55D-9,
+     /2.00D-9,1.62D-9,1.02D-9,7.00D-10,5.07D-10,3.84D-10,2.41D-10,
+     /1.65D-10,1.19D-10,9.00D-11,
+     /7.1D-11,5.7D-11,3.9D-11,2.8D-11,2.1D-11,1.6D-11,1.3D-11/
 C IONISATION
       DATA XION/10.67,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,
-     /20.0,22.0,24.0,26.0,28.0,30.0,33.0,36.0,40.0,45.0,
-     /50.0,60.0,70.0,80.0,90.0,100.,125.,150.,200.,250.,
-     /300.,400.,500.,600.,700.,800.,900.,1000./
+     /20.0,25.0,30.0,35.0,40.0,45.0,50.0,60.0,70.0,75.0,
+     /85.0,100.,125.,150.,175.,200.,250.,300.,350.,400.,
+     /450.,500.,550.,600.,650.,700.,750.,800.,850.,900.,
+     /950.,1000./
 C GROSS IONISATION
-      DATA YION/0.00,.004,.074,0.19,0.39,0.63,0.89,1.17,1.70,2.33,
-     /3.07,4.35,5.62,6.89,7.63,8.35,9.06,9.90,10.5,11.4,
-     /12.0,12.6,13.2,13.2,13.1,13.0,12.7,12.0,10.8,9.40,
-     /8.40,7.10,6.07,5.29,4.70,4.23,3.86,3.555/ 
-C K-SHELL IONISATION X-SECTION
+      DATA YION/0.00,.004,.070,0.18,0.37,0.59,0.84,1.10,1.60,2.20,
+     /3.00,5.11,6.71,8.00,8.82,9.51,10.0,10.5,10.7,10.8,
+     /10.7,10.5,10.0,9.41,8.87,8.33,7.29,6.51,5.90,5.40,
+     /4.99,4.65,4.36,4.11,3.88,3.69,3.52,3.36,3.22,3.09,
+     /2.98,2.872/
+C K-SHELL IONISATION X-SECTION CARBON (MUTILPY BY 4 FOR MOLECULE)  
       DATA XKSH/285.,298.,307.,316.,325.,335.,345.,365.,398.,422.,
      /447.,473.,501.,531.,613.,668.,708.,750.,817.,917.,
      /1000.,1122.,1296.,1496.,1679.,1884.,2054.,2238.,2512.,2985.,
      /3981.,5012.,7079.,1.0D4,1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,
      /6.13D4,7.08D4,8.18D4,1.0D5,1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,
      /6.13D5,
-     /7.08D5,8.18D5,1.0D6,1.25D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
+     /7.08D5,8.18D5,1.0D6,1.26D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
      /6.13D6,
-     /7.08D6,8.18D6,1.0D7/
+     /7.08D6,8.18D6,1.0D7,1.26D7,1.5D7,2.05D7,3.07D7,4.10D7,5.01D7,
+     /6.13D7,
+     /7.08D7,8.18D7,1.0D8,1.26D8,1.5D8,2.05D8,3.07D8,4.10D8,5.01D8,
+     /6.13D8,
+     /7.08D8,8.18D8,1.0D9/
       DATA YKSH/0.00,1.66D-4,3.48D-4,5.25D-4,6.96D-4,8.63D-4,1.02D-3,
      /1.33D-3,1.75D-3,2.01D-3,
      /2.24D-3,2.46D-3,2.66D-3,2.84D-3,3.21D-3,3.38D-3,3.47D-3,3.55D-3,
@@ -30872,71 +32248,77 @@ C K-SHELL IONISATION X-SECTION
      /1.09D-4,1.05D-4,
      /1.03D-4,1.02D-4,1.01D-4,1.005D-4,1.01D-4,1.03D-4,1.07D-4,1.11D-4,
      /1.14D-4,1.17D-4,
-     /1.20D-4,1.22D-4,1.25D-4/
+     /1.20D-4,1.22D-4,1.25D-4,1.29D-4,1.32D-4,1.38D-4,1.45D-4,1.50D-4,
+     /1.54D-4,1.58D-4,
+     /1.60D-4,1.63D-4,1.67D-4,1.71D-4,1.74D-4,1.80D-4,1.87D-4,1.92D-4,
+     /1.96D-4,2.00D-4,
+     /2.02D-4,2.05D-4,2.09D-4/
 C COUNTING IONISATION
-      DATA YINC/38*0.0/
+      DATA YINC/42*0.0/
 C ATTACHMENT
       DATA XATT/10*0.0/         
-      DATA YATT/10*0.0/                                                 
-C VIBRATION/TORSION                                   
+      DATA YATT/10*0.0/ 
+C VIBRATION/TORSION
+C ABOVE 40EV SCALE BY 1/E                                   
       DATA XVIB1/.052,.055,.060,.065,.070,.075,0.08,0.10,0.12,0.14,     
      /0.20,0.25,0.30,0.40,0.50,0.70,1.00,1.50,2.00,3.00,
-     /4.00,5.00,6.00,7.00,8.00,10.0,15.0,20.0,30.0,40.0,                
-     /100.,1000.,1.D4,1.D5,1.D6,1.D7/                                   
+     /4.00,5.00,6.00,7.00,8.00,10.0,15.0,20.0,30.0,40.0/                
       DATA YVIB1/0.00,.014,.021,.024,.026,.027,.028,.028,.027,.025,     
      /.021,.018,.016,.014,.012,.009,.008,.012,.015,.024,
-     /.036,.047,.060,.079,.079,.065,.038,.025,.012,.008,                
-     /.003,3.D-4,3.D-5,3.D-6,3.D-7,3.D-8/
-C VIBRATION                                       
+     /.036,.047,.060,.079,.079,.065,.038,.025,.012,.008/
+C VIBRATION                          
+C ABOVE 40EV SCALE BY 1/E             
       DATA XVIB2/.108,.125,0.15,0.20,0.23,0.25,0.30,0.40,0.50,0.70,     
      /1.00,1.50,2.00,3.00,4.00,5.00,6.00,7.00,8.00,10.0,                
-     /15.0,20.0,30.0,40.0,100.,1000.,1.D4,1.D5,1.D6,1.D7/               
+     /15.0,20.0,30.0,40.0/               
       DATA YVIB2/0.00,0.27,0.52,0.71,0.73,0.73,0.66,0.56,0.49,0.41,     
      /0.32,0.32,0.39,0.63,0.93,1.22,1.57,2.06,2.06,1.69,                
-     /1.00,0.66,0.35,0.22,.088,.0088,8.8D-4,8.8D-5,8.8D-6,8.8D-7/
-C VIBRATION                       
+     /1.00,0.66,0.35,0.22/
+C VIBRATION              
+C ABOVE 40EV SCALE BY 1/E         
       DATA XVIB3/.173,0.18,0.19,0.20,0.23,0.25,0.30,0.40,0.50,0.70,     
      /1.00,1.50,2.00,3.00,4.00,5.00,6.00,7.00,8.00,10.0,                
-     /15.0,20.0,30.0,40.0,100.,1000.,1.D4,1.D5,1.D6,1.D7/               
+     /15.0,20.0,30.0,40.0/               
       DATA YVIB3/0.00,0.13,0.27,0.38,0.49,0.53,0.56,0.53,0.49,0.42,     
      /0.34,0.31,0.33,0.48,0.72,0.94,1.21,1.59,1.59,1.35,                
-     /0.80,0.52,0.28,.175,.070,.007,7.D-4,7.D-5,7.D-6,7.D-7/
-C VIBRATION                       
+     /0.80,0.52,0.28,.175/
+C VIBRATION     
+C ABOVE 40EV SCALE BY 1/E                  
       DATA XVIB4/.363,.365,0.37,0.38,0.39,0.40,0.42,0.45,0.50,0.55,
      /0.60,0.70,0.80,0.90,1.00,1.20,1.50,2.00,3.00,4.00,
-     /5.00,6.00,7.00,8.00,10.0,15.0,20.0,30.0,40.0,100.,
-     /1000.,1.D4,1.D5,1.D6,1.D7/                              
+     /5.00,6.00,7.00,8.00,10.0,15.0,20.0,30.0,40.0/            
       DATA YVIB4/0.00,.108,.198,.299,.366,.416,.487,.555,.615,.645,     
      /.655,.650,.630,.605,.580,0.55,0.57,0.67,1.05,1.50,
-     /2.00,2.45,2.70,2.70,2.10,1.15,0.76,0.42,0.27,0.11,       
-     /.011,.0011,1.1D-4,1.1D-5,1.1D-6/ 
-C VIBRATION HARMONICS                                      
+     /2.00,2.45,2.70,2.70,2.10,1.15,0.76,0.42,0.27/ 
+C VIBRATION HARMONICS         
+C ABOVE 40EV SCALE BY 1/E                             
       DATA XVIB5/.519,1.00,1.50,2.00,3.00,4.00,5.00,6.00,7.00,8.00,     
-     /10.0,15.0,20.0,30.0,40.0,100.,1000.,1.D4,1.D5,1.D6,
-     /1.D7/    
+     /10.0,15.0,20.0,30.0,40.0/    
       DATA YVIB5/0.00,.001,0.01,.033,.085,0.16,0.20,0.27,0.30,0.30,     
-     /0.23,.125,.085,.047,.032,.013,.0013,1.3D-4,1.3D-5,1.3D-6,
-     /1.3D-7/
-C EXCITATION               
-      DATA XEXC1/7.40,8.00,9.00,10.0,11.0,12.0,14.0,16.0,20.0,25.0,
-     /30.0,40.0,50.0,60.0,70.0,80.0,100.,125.,150.,200.,
-     /300.,400.,600.,1000./                                            
-      DATA YEXC1/0.00,.019,.250,.500,0.68,0.87,1.15,1.36,1.56,1.80,
-     /2.04,2.50,2.95,3.45,3.75,4.00,4.00,3.70,3.25,2.50,1.72,
-     /1.32,0.91,0.56/                             
-C EXCITATION                                       
-      DATA XEXC2/9.70,11.0,12.0,14.0,16.0,20.0,25.0,30.0,40.0,50.0,
-     /60.0,70.0,80.0,100.,125.,150.,200.,300.,400.,600.,
-     /1000./ 
-      DATA YEXC2/0.00,.133,.350,.630,0.87,1.15,1.40,1.57,1.90,2.25,
-     /2.60,2.90,3.15,3.15,2.90,2.55,1.92,1.30,0.99,0.68,
-     /.424/
-C EXCITATION                                         
-      DATA XEXC3/14.0,16.0,18.0,20.0,25.0,30.0,35.0,40.0,50.0,60.0,
-     /70.0,80.0,100.,125.,150.,200.,300.,400.,600.,1000./             
-      DATA YEXC3/0.00,.550,0.95,1.20,1.45,1.69,1.88,2.10,2.50,2.90,
-     /3.25,3.50,3.50,3.25,2.85,2.25,1.55,1.18,0.82,0.51/  
+     /0.23,.125,.085,.047,.032/
+C EXCITATION TRIPLET               
+      DATA XEXC1/7.20,8.00,9.00,10.0,12.0,14.0,16.0,20.0,25.0,30.0,
+     /40.0,50.0,60.0,70.0,80.0,100./                  
+      DATA YEXC1/0.00,0.10,0.30,0.45,0.52,0.55,0.51,0.45,0.30,0.20,
+     /0.10,0.06,.037,.026,.019,.011/                             
+C EXCITATION  TRIPLET                                     
+      DATA XEXC2/8.60,9.40,10.4,11.4,13.4,15.4,17.4,21.4,26.0,30.0,
+     /40.0,50.0,60.0,70.0,80.0,100./ 
+      DATA YEXC2/0.00,0.10,0.30,0.45,0.52,0.55,0.51,0.45,0.30,0.20,
+     /0.10,0.06,.037,.026,.019,.011/ 
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF  UNITS 10**-24 CM**2
+      DATA Z6T/298.,178.,85.2,47.5,26.3,12.2,7.06,4.45,3.06,2.82,
+     /2.89,2.99,3.08,3.13,3.18,3.25,3.31,3.39,3.44,3.49,
+     /3.52,3.54,3.55,3.57,3.57/
+      DATA Z1T/11.3,6.18,2.80,1.54,.858,.407,.251,.176,.145,.150,
+     /.167,.178,.187,.193,.198,.205,.210,.218,.222,.228,
+     /.231,.233,.234,.235,.235/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C**********************************************************************
+C 2014 UPDATE INCLUDES CORRECT OSCILLATOR STRENGTH AND FIT TO NEW 
+C       TOWNSEND DATA
 C 2012 UPDATE INCLUDES K-SHELL IONISATION
 C 2009 UPDATE OF 1999 SUBROUTINE
 C      VERSION INCLUDES ANISOTROPIC SCATTERING. USED ISOTROPIC ELASTIC
@@ -30957,47 +32339,59 @@ C      FUTURE IMPROVEMENT: INCLUDE EFFECTIVE ROTATIONAL STATE AT 0.005EV
 C***********************************************************************
 C--------------------------------------------------------
       IF(NANISO.EQ.0) THEN
-       NAME='ISO-C4H10 2012 ISOTROPIC '
+       NAME='ISO-C4H10 2014 ISOTROPIC '
       ELSE
-       NAME='ISO-C4H10 2012 ANISOTRPIC'
+       NAME='ISO-C4H10 2014 ANISOTRPIC'
       ENDIF                                            
 C ---------------------------------------------------------------------
-C BORN BETHE VALUES FOR IONISATION
+C 
+      API=DACOS(-1.0D0)
+      A0=0.52917720859D-8
+      RY=13.60569193
       CONST=1.873884D-20
       EMASS2=1021997.804
-      AM2=15.5
-      C=160.0
-C BORN BETHE VALUES FOR EXCITATIONS
-      AM2EXC=5.69 
-      CEXC=62.6 
+      BBCONST=16.0*API*A0*A0*RY*RY/EMASS2
+C
+C BORN BETHE VALUES FOR IONISATION
+      AM2=14.8
+      C=141.9
 C
 C AVERAGE AUGER EMISSIONS FROM K-SHELL
       AUGK=2.0
 C
-      NION=2
-      NIN=12
+C ARRAY SIZE
+      NASIZE=4000
+C SCALE SINGLET X-SECTIONS TO ALLOW FOR INCREASED ENERGY LOSS DUE TO 5%
+C   STEP IN ENERGY BETWEEN SINGLET LEVELS.
+      ASING=1.02
+C
+      NION=3
+      NIN=24
+C     
+      NBREM=25
+      DO 18 J=1,NIN
+      IZBR(J)=0
+   18 CONTINUE
+      IZBR(25)=6
+      IZBR(26)=1
+C
+C USE NANISO=2 ONLY (OKHRIMOVSKY)
       DO 1 J=1,6 
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
-    2 KIN(J)=0
-C ANGULAR DISTRIBUTION FOR EXCITATION CAN BE EITHER
-C CAPITELLI-LONGO OR OKHRIMOVSKKY TYPES
-      KIN(10)=NANISO
-      KIN(11)=NANISO
-      KIN(12)=NANISO
+    2 KIN(J)=2
 C                                                                  
-      NDATA=122                                                         
-      NIOND=38                                                          
+      NDATA=157                                                         
+      NIOND=42                                                       
       NATT=10                                                           
-      NVIB1=36
-      NVIB2=30                                                          
-      NVIB3=30                                                          
-      NVIB4=35
-      NVIB5=21
-      NEXC1=24                                                          
-      NEXC2=21                                                          
-      NEXC3=20
-      NKSH=63
+      NVIB1=30
+      NVIB2=24                                                          
+      NVIB3=24                                                          
+      NVIB4=29
+      NVIB5=15
+      NEXC1=16                                                         
+      NEXC2=16                                                 
+      NKSH=83
 C
       E(1)=0.0                                                          
       E(2)=2.0*EMASS/(58.1234*AMU)                                      
@@ -31006,15 +32400,24 @@ C EXCITATION X-SECTION AT 1.2 MEV
       E(4)=0.0145D-16
 C IONISATION X-SECTION AT 1.2 MEV                               
       E(5)=0.0374D-16
-C OPAL BEATY IONISATION ENERGY SPLITTING AT 1.2 MEV                            
+C OPAL BEATY IONISATION ENERGY SPLITTING AT 1.2 MEV                 
       E(6)=7.00 
 C OPAL BEATY IONISATION  AT LOW ENERGY
-      EOBY(1)=8.80 
-C OPAL BEATY FOR K-SHELL
-      EOBY(2)=285.0
+      EOBY(1)=6.8  
+C OPAL BEATY FOR DISSOCIATION AND K-SHELL
+      EOBY(2)=6.8
+      EOBY(3)=180.0
+
 C  
       EION(1)=10.67
-      EION(2)=285.0
+      EION(2)=17.0
+      EION(3)=285.0
+      LEGAS(1)=0
+      LEGAS(2)=0
+      LEGAS(3)=1
+      ISHELL(1)=0
+      ISHELL(2)=0
+      ISHELL(3)=1
 C FLUORESCENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -31024,14 +32427,22 @@ C FLUORESCENCE DATA
       EG1(1)=0.0
       NG2(1)=0
       EG2(1)=0.0
-      NC0(2)=2
-      EC0(2)=253.
-      WKLM(2)=0.0026
-      EFL(2)=273.
-      NG1(2)=1
-      EG1(2)=253.
-      NG2(2)=2
-      EG2(2)=5.0
+      NC0(2)=0
+      EC0(2)=0.0
+      WKLM(2)=0.0
+      EFL(2)=0.0
+      NG1(2)=0
+      EG1(2)=0.0
+      NG2(2)=0
+      EG2(2)=0.0
+      NC0(3)=2
+      EC0(3)=253.
+      WKLM(3)=0.0026
+      EFL(3)=273.
+      NG1(3)=1
+      EG1(3)=253.
+      NG2(3)=2
+      EG2(3)=5.0
 C
       EIN(1)=-0.032                                            
       EIN(2)=0.032 
@@ -31042,12 +32453,26 @@ C
       EIN(7)=-0.363                                                    
       EIN(8)=0.363
       EIN(9)=0.519
-      EIN(10)=7.4                                                       
-      EIN(11)=9.70                      
-      EIN(12)=14.0
+      EIN(10)=7.2
+      EIN(11)=8.6                                               
+      EIN(12)=7.50                     
+      EIN(13)=8.0
+      EIN(14)=8.5
+      EIN(15)=9.0
+      EIN(16)=9.5
+      EIN(17)=10.0
+      EIN(18)=10.5
+      EIN(19)=11.0
+      EIN(20)=11.5
+      EIN(21)=12.0
+      EIN(22)=12.5
+      EIN(23)=13.0
+      EIN(24)=13.5
+      EIN(25)=0.0
+      EIN(26)=0.0
 C  
       DO 776 J=1,NION
-      DO 777 I=1,4000
+      DO 777 I=1,NASIZE
       IF(EG(I).GT.EION(J)) THEN
        IOFFION(J)=I-1
        GO TO 776
@@ -31055,9 +32480,9 @@ C
   777 CONTINUE
   776 CONTINUE
 C
-      DO 652 NL=10,NIN
-      DO 651 I=1,4000
-      IF(EG(I).GT.EIN(NL)) THEN
+      DO 652 NL=1,NIN
+      DO 651 I=1,NASIZE
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
        IOFFN(NL)=I-1
        GO TO 652
       ENDIF
@@ -31065,24 +32490,22 @@ C
   652 CONTINUE
 C***********************************************************************
 C PENNING TRANSFER FRACTION FOR EACH LEVEL
-      DO 5 K=1,12
+      DO 5 K=1,24 
       DO 5 L=1,3
     5 PENFRA(L,K)=0.0
+      PENSUM=0.0
 C PENNING TRANSFER FRACTION FOR EXCITATION LEVELS ONLY
-      PENFRA(1,10)=0.0
-      PENFRA(1,11)=0.0
-      PENFRA(1,12)=0.0
+      DO 555 K=10,24
+      PENFRA(1,K)=0.0
+      PENSUM=PENSUM+PENFRA(1,K)
 C PENNING TRANSFER DISTANCE IN MICRONS
-      PENFRA(2,10)=1.0
-      PENFRA(2,11)=1.0
-      PENFRA(2,12)=1.0
+      PENFRA(2,K)=1.0
 C PENNING TRANSFER TIME IN PICOSECONDS
-      PENFRA(3,10)=1.0
-      PENFRA(3,11)=1.0
-      PENFRA(3,12)=1.0
+      PENFRA(3,K)=1.0
+  555 CONTINUE
       IF(IPEN.EQ.0) GO TO 8
-      IF((PENFRA(1,10)+PENFRA(1,11)+PENFRA(1,12)).EQ.0.0) GO TO 8
-      DO 6 K=10,12
+      IF((PENSUM).EQ.0.0) GO TO 8
+      DO 6 K=10,24
     6 WRITE(6,999) NAME,EIN(K),PENFRA(1,K),PENFRA(2,K),PENFRA(3,K)
   999 FORMAT(' GAS = ',A15,' ENERGY LEVEL = ',F7.4,' EV.',/,' PENNING PR
      /OBABILITY = ',F5.3,' ABS.LENGTH = ',F7.2,' DECAY TIME = ',F7.1,/)
@@ -31094,22 +32517,37 @@ C***********************************************************************
       SCRPT(2)=' ELASTIC  ISOTROPIC        ISOBUTANE              '
       ENDIF
       SCRPT(3)=' IONISATION                       ELOSS=  10.67   '
-      SCRPT(4)=' IONISATION  K-SHELL              ELOSS= 285.0    '
-      SCRPT(5)=' ATTACHMENT                                       '
-      SCRPT(6)='                                                  '
+      SCRPT(4)=' IONISATION-EXCITATION (BREAKUP)  ELOSS=  17.0    '
+      SCRPT(5)=' IONISATION  K-SHELL              ELOSS= 285.0    '
+      SCRPT(6)=' ATTACHMENT                                       '
       SCRPT(7)='                                                  '
-      SCRPT(8)=' TORSION                          ELOSS=  -0.032  '
-      SCRPT(9)=' TORSION                          ELOSS=   0.032  '
-      SCRPT(10)=' VIBRATION  BEND                  ELOSS=  -0.108  '
-      SCRPT(11)=' VIBRATION  BEND                  ELOSS=   0.108  '
-      SCRPT(12)=' VIBRATION  STRETCH               ELOSS=  -0.173  '
-      SCRPT(13)=' VIBRATION  STRETCH               ELOSS=   0.173  '
-      SCRPT(14)=' VIBRATION  STRETCH               ELOSS=  -0.363  '
-      SCRPT(15)=' VIBRATION  STRETCH               ELOSS=   0.363  ' 
-      SCRPT(16)=' VIBRATION  STRETCH               ELOSS=   0.519  '
-      SCRPT(17)=' EXCITATION                       ELOSS=   7.4    '
-      SCRPT(18)=' EXCITATION/DISSOCIATIVE          ELOSS=   9.70   '
-      SCRPT(19)=' EXCITATION/DISSOCIATIVE          ELOSS=  14.0    '
+      SCRPT(8)='                                                  '
+      SCRPT(9)=' TORSION                          ELOSS=  -0.032  '
+      SCRPT(10)=' TORSION                          ELOSS=   0.032  '
+      SCRPT(11)=' VIBRATION  BEND                  ELOSS=  -0.108  '
+      SCRPT(12)=' VIBRATION  BEND                  ELOSS=   0.108  '
+      SCRPT(13)=' VIBRATION  STRETCH               ELOSS=  -0.173  '
+      SCRPT(14)=' VIBRATION  STRETCH               ELOSS=   0.173  '
+      SCRPT(15)=' VIBRATION  STRETCH               ELOSS=  -0.363  '
+      SCRPT(16)=' VIBRATION  STRETCH               ELOSS=   0.363  ' 
+      SCRPT(17)=' VIBRATION  STRETCH               ELOSS=   0.519  '
+      SCRPT(18)=' EXC.  TRIPLET                    ELOSS=   7.2    '
+      SCRPT(19)=' EXC.  TRIPLET                    ELOSS=   8.6    '
+      SCRPT(20)=' EXC. SINGLET         F=.0013     ELOSS=   7.5    '
+      SCRPT(21)=' EXC. SINGLET         F=.0150     ELOSS=   8.0    '
+      SCRPT(22)=' EXC. SINGLET         F=.1140     ELOSS=   8.5    '
+      SCRPT(23)=' EXC. SINGLET         F=.1570     ELOSS=   9.0    '
+      SCRPT(24)=' EXC. SINGLET         F=.1710     ELOSS=   9.5    '
+      SCRPT(25)=' EXC. SINGLET         F=.1880     ELOSS=  10.0    '
+      SCRPT(26)=' EXC. SINGLET         F=.2050     ELOSS=  10.5    '
+      SCRPT(27)=' EXC. SINGLET         F=.1930     ELOSS=  11.0    '
+      SCRPT(28)=' EXC. SINGLET         F=.1620     ELOSS=  11.5    '
+      SCRPT(29)=' EXC. SINGLET         F=.1030     ELOSS=  12.0    '
+      SCRPT(30)=' EXC. SINGLET         F=.0670     ELOSS=  12.5    '
+      SCRPT(31)=' EXC. SINGLET         F=.0640     ELOSS=  13.0    '
+      SCRPT(32)=' EXC. SINGLET         F=.0280     ELOSS=  13.5    '
+      SCRPT(33)=' BREMSSTRAHLUNG FROM CARBON ATOM                  '
+      SCRPT(34)=' BREMSSTRAHLUNG FROM HYDROGEN ATOM                '
 C CALCULATE POPULATION OF TORSIONAL STATES
       APOP1=DEXP(EIN(1)/AKT)
       APOP2=DEXP(2.0*EIN(1)/AKT)
@@ -31152,10 +32590,15 @@ C RENORMALISE GROUND STATE POPULATION ( GIVES CORRECTION THAT
 C ALLOWS FOR VIBRATIONAL EXCITATION FROM EXCITED VIBRATIONAL STATES)
       APOPGS=1.0
 C
-      EN=-ESTEP/2.0   
+C     EN=-ESTEP/2.0   
       DO 1000 I=1,NSTEP  
-C      EN=EG(I)                                            
-      EN=EN+ESTEP                                                       
+      EN=EG(I)                                            
+C     EN=EN+ESTEP    
+      GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
+      GAMMA2=GAMMA1*GAMMA1
+      BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
+      BETA2=BETA*BETA
+C                                             
       DO 10 J=2,NDATA                                                   
       IF(EN.LE.XEN(J)) GO TO 20                                         
    10 CONTINUE                                                          
@@ -31169,6 +32612,8 @@ C      EN=EG(I)
       A=(YEPS(J)-YEPS(J-1))/(XEN(J)-XEN(J-1))                         
       B=(XEN(J-1)*YEPS(J)-XEN(J)*YEPS(J-1))/(XEN(J-1)-XEN(J))
       PQ2=(A*EN+B)
+C EPSILON = 1.0-YEPS
+      PQ2=1.0D0-PQ2
       PQ1=0.5+(QELA-QMOM)/QELA
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
@@ -31190,12 +32635,9 @@ C GROSS IONISATION
       QION(1,I)=(A*EN+B)*1.D-16 
       GO TO 124
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
-  123 GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
-      BETA=DSQRT(1.0D0-1.0D0/(GAMMA1*GAMMA1))
-      BETA2=BETA*BETA
-      X2=1.0D0/BETA2
+  123 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
   124 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE  2 * IONISATION ENERGY
@@ -31203,28 +32645,40 @@ C ANISOTROPIC ANGULAR DISTRIBUTION EQUAL TO ELASTIC ANGULAR DISTRIBUTION
 C AT AN ENERGY OFFSET BY THE IONISATION ENERGY
       IF(EN.LE.(2.0*EION(1))) GO TO 150
       PEQION(1,I)=PEQEL(2,(I-IOFFION(1)))
-C K-SHELL IONISATION
+C CALCULATE IONISATION-EXCITATION AND SPLIT IONISATION INTO
+C IONISATION ONLY AND IONISATION +EXCITATION
   150 QION(2,I)=0.0
-      PEQION(2,I)=0.5
-      IF(NANISO.EQ.2) PEQION(2,I)=0.0 
-      IF(EN.LT.EION(2)) GO TO 160
-      DO 151 J=2,NKSH                                                  
-      IF(EN.LE.XKSH(J)) GO TO 152                                       
-  151 CONTINUE                                                          
+      PEQION(2,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(2,I)=0.0
+      IF(EN.LE.EION(2)) GO TO 160
+      QION(2,I)=12.00/(EION(2)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EION(2)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EION(2)+E(3))
+      IF(QION(2,I).LT.0.0) QION(2,I)=0.0
+C FIND IONISATION ONLY
+      QION(1,I)=QION(1,I)-QION(2,I)
+      IF(EN.LE.(2.0*EION(2))) GO TO 160
+      PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
+C K-SHELL IONISATION
+  160 QION(3,I)=0.0
+      PEQION(3,I)=0.5
+      IF(NANISO.EQ.2) PEQION(3,I)=0.0 
+      IF(EN.LT.EION(3)) GO TO 170
+      DO 161 J=2,NKSH                                                  
+      IF(EN.LE.XKSH(J)) GO TO 162                                       
+  161 CONTINUE                                                          
       J=NKSH                                                           
-  152 A=(YKSH(J)-YKSH(J-1))/(XKSH(J)-XKSH(J-1))                         
+  162 A=(YKSH(J)-YKSH(J-1))/(XKSH(J)-XKSH(J-1))                         
       B=(XKSH(J-1)*YKSH(J)-XKSH(J)*YKSH(J-1))/(XKSH(J-1)-XKSH(J)) 
 C FACTOR OF 4 FROM NUMBER OF ATOMS ON MOLECULE
-      QION(2,I)=4.0*(A*EN+B)*1.D-16 
+      QION(3,I)=4.0*(A*EN+B)*1.D-16 
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE  2 * IONISATION ENERGY
 C ANISOTROPIC ANGULAR DISTRIBUTION EQUAL TO ELASTIC ANGULAR DISTRIBUTION
 C AT AN ENERGY OFFSET BY THE IONISATION ENERGY
-      IF(EN.LE.(2.0*EION(2))) GO TO 160
-      PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
-C CORRECT GROSS IONISATION FOR SPLIT INTO K-SHELL
-C SCALING FACTOR FOR AVERAGE AUGER EMISSION IN K-SHELL
-  160 QION(1,I)=QION(1,I)-AUGK*QION(2,I)
+      IF(EN.LE.(2.0*EION(3))) GO TO 170
+      PEQION(3,I)=PEQEL(2,(I-IOFFION(3)))
+C CORRECT DISSOCIATIVE IONISATION FOR SPLIT INTO K-SHELL
+  170 QION(2,I)=QION(2,I)-QION(3,I)
 C ATTACHMENT (NO ATTACHMENT)                                          
       Q(4,I)=0.0                                                        
 C COUNTING IONISATION                                          
@@ -31233,15 +32687,15 @@ C COUNTING IONISATION
       IF(NANISO.EQ.2) PEQEL(5,I)=0.0
       IF(EN.LE.E(3)) GO TO 210
 C SET COUNTING IONISATION = GROSS IONISATION (LACK OF EXPERIMENTAL DATA)
-      Q(5,I)=QION(1,I)+AUGK*QION(2,I)
-      Q(5,I)=Q(5,I)-QION(2,I)
+      Q(5,I)=QION(1,I)+AUGK*QION(3,I)
+      Q(5,I)=Q(5,I)-QION(3,I)
       IF(EN.LE.(2.0*E(3))) GO TO 210
-      PEQEL(5,I)=PEQEL(3,(I-IOFFION(1)))
+      PEQEL(5,I)=PEQEL(2,(I-IOFFION(1)))
   210 CONTINUE
 C**********************************************************************
 C TEMPORARY MOD FOR RANGE PARAMETERS 
-      IF(EN.GT.1000.) QION(1,I)=Q(5,I)
-C*********************************************************************         
+C      IF(EN.GT.1000.) QION(1,I)=Q(5,I)
+C********************************************************************* 
       Q(6,I)=0.0                                                        
 C SUPERELASTIC TORSION
       QIN(1,I)=0.0
@@ -31251,6 +32705,8 @@ C SUPERELASTIC TORSION
       EFAC=DSQRT(1.0-(EIN(1)/EN))
       QIN(1,I)=0.009*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
       QIN(1,I)=APOP1*QIN(1,I)*1.D-16
+      IF(EN.LT.(5.0*DABS(EIN(1)))) GO TO 305
+      IF(NANISO.EQ.2) PEQIN(1,I)=PEQEL(2,(I-IOFFN(1)))
 C TORSION           
   305 QIN(2,I)=0.0
       PEQIN(2,I)=0.5  
@@ -31259,11 +32715,14 @@ C TORSION
       EFAC=DSQRT(1.0-(EIN(2)/EN))
       QIN(2,I)=0.009*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
       QIN(2,I)=APOPGST*QIN(2,I)*1.D-16
+      IF(EN.LT.(5.0*DABS(EIN(2)))) GO TO 400
+      IF(NANISO.EQ.2) PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))
 C SUPERELASTIC VIB BEND MODES
   400 QIN(3,I)=0.0
       PEQIN(3,I)=0.5
       IF(NANISO.EQ.2) PEQIN(3,I)=0.0
       IF(EN.EQ.0.0) GO TO 450 
+      IF((EN+EIN(4)).GT.XVIB2(NVIB2)) GO TO 425
       DO 410 J=2,NVIB2
       IF((EN+EIN(4)).LE.XVIB2(J)) GO TO 420
   410 CONTINUE
@@ -31271,11 +32730,16 @@ C SUPERELASTIC VIB BEND MODES
   420 A=(YVIB2(J)-YVIB2(J-1))/(XVIB2(J)-XVIB2(J-1))                     
       B=(XVIB2(J-1)*YVIB2(J)-XVIB2(J)*YVIB2(J-1))/(XVIB2(J-1)-XVIB2(J)) 
       QIN(3,I)=APOPV2*(EN+EIN(4))*(A*(EN+EIN(4))+B)*1.D-16/EN  
+      GO TO 426
+  425 QIN(3,I)=APOPV2*YVIB2(NVIB2)*(XVIB2(NVIB2)/EN)*1.D-16
+  426 IF(EN.LT.(3.0*DABS(EIN(3)))) GO TO 450
+      IF(NANISO.EQ.2) PEQIN(3,I)=PEQEL(2,(I-IOFFN(3)))
 C VIB BEND MODES 
   450 QIN(4,I)=0.0  
       PEQIN(4,I)=0.5                
       IF(NANISO.EQ.2) PEQIN(4,I)=0.0                                    
-      IF(EN.LE.EIN(4)) GO TO 500                                        
+      IF(EN.LE.EIN(4)) GO TO 500                           
+      IF(EN.GT.XVIB2(NVIB2)) GO TO 475              
       DO 460 J=2,NVIB2                                                  
       IF(EN.LE.XVIB2(J)) GO TO 470                                      
   460 CONTINUE                                                          
@@ -31283,12 +32747,17 @@ C VIB BEND MODES
   470 A=(YVIB2(J)-YVIB2(J-1))/(XVIB2(J)-XVIB2(J-1))                     
       B=(XVIB2(J-1)*YVIB2(J)-XVIB2(J)*YVIB2(J-1))/(XVIB2(J-1)-XVIB2(J)) 
       QIN(4,I)=APOPGS*(A*EN+B)*1.D-16   
+      GO TO 476 
+  475 QIN(4,I)=APOPGS*YVIB2(NVIB2)*(XVIB2(NVIB2)/EN)*1.D-16
+  476 IF(EN.LT.(3.0*DABS(EIN(4)))) GO TO 500
+      IF(NANISO.EQ.2) PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
 C SUPERELASTIC VIB STRETCH MODES
   500 CONTINUE 
       QIN(5,I)=0.0
       PEQIN(5,I)=0.5
       IF(NANISO.EQ.2) PEQIN(5,I)=0.0
       IF(EN.EQ.0.0) GO TO 550
+      IF((EN+EIN(6)).GT.XVIB3(NVIB3)) GO TO 525
       DO 510  J=2,NVIB3
       IF((EN+EIN(6)).LE.XVIB3(J)) GO TO 520 
   510 CONTINUE
@@ -31296,25 +32765,35 @@ C SUPERELASTIC VIB STRETCH MODES
   520 A=(YVIB3(J)-YVIB3(J-1))/(XVIB3(J)-XVIB3(J-1))                     
       B=(XVIB3(J-1)*YVIB3(J)-XVIB3(J)*YVIB3(J-1))/(XVIB3(J-1)-XVIB3(J)) 
       QIN(5,I)=APOPV3*(EN+EIN(6))*(A*(EN+EIN(6))+B)*1.D-16/EN  
+      GO TO 526
+  525 QIN(5,I)=APOPV3*YVIB3(NVIB3)*(XVIB3(NVIB3)/EN)*1.D-16
+  526 IF(EN.LT.(3.0*DABS(EIN(5)))) GO TO 550
+      IF(NANISO.EQ.2) PEQIN(5,I)=PEQEL(2,(I-IOFFN(5)))
 C VIB STRETCH MODES
   550 CONTINUE                                                          
       QIN(6,I)=0.0  
       PEQIN(6,I)=0.5
       IF(NANISO.EQ.2) PEQIN(6,I)=0.0                             
-      IF(EN.LE.EIN(6)) GO TO 600                                        
+      IF(EN.LE.EIN(6)) GO TO 600                           
+      IF(EN.GT.XVIB3(NVIB3)) GO TO 575             
       DO 560 J=2,NVIB3                                                  
       IF(EN.LE.XVIB3(J)) GO TO 570                                      
   560 CONTINUE                                                          
       J=NVIB3                                                           
   570 A=(YVIB3(J)-YVIB3(J-1))/(XVIB3(J)-XVIB3(J-1))                     
       B=(XVIB3(J-1)*YVIB3(J)-XVIB3(J)*YVIB3(J-1))/(XVIB3(J-1)-XVIB3(J)) 
-      QIN(6,I)=APOPGS*(A*EN+B)*1.D-16    
+      QIN(6,I)=APOPGS*(A*EN+B)*1.D-16 
+      GO TO 576 
+  575 QIN(6,I)=APOPGS*YVIB3(NVIB3)*(XVIB3(NVIB3)/EN)*1.D-16  
+  576 IF(EN.LT.(3.0*DABS(EIN(6)))) GO TO 600
+      IF(NANISO.EQ.2) PEQIN(6,I)=PEQEL(2,(I-IOFFN(6)))
 C SUPERELASTIC VIB STRETCH MODES
   600 CONTINUE 
       QIN(7,I)=0.0
       PEQIN(7,I)=0.5
       IF(NANISO.EQ.2) PEQIN(7,I)=0.0
       IF(EN.EQ.0.0) GO TO 650
+      IF((EN+EIN(8)).GT.XVIB4(NVIB4)) GO TO 625
       DO 610  J=2,NVIB4
       IF((EN+EIN(8)).LE.XVIB4(J)) GO TO 620 
   610 CONTINUE
@@ -31322,24 +32801,34 @@ C SUPERELASTIC VIB STRETCH MODES
   620 A=(YVIB4(J)-YVIB4(J-1))/(XVIB4(J)-XVIB4(J-1))                     
       B=(XVIB4(J-1)*YVIB4(J)-XVIB4(J)*YVIB4(J-1))/(XVIB4(J-1)-XVIB4(J)) 
       QIN(7,I)=APOPV4*(EN+EIN(8))*(A*(EN+EIN(8))+B)*1.D-16/EN 
+      GO TO 626
+  625 QIN(7,I)=APOPV4*YVIB4(NVIB4)*(XVIB4(NVIB4)/EN)*1.D-16
+  626 IF(EN.LT.(3.0*DABS(EIN(7)))) GO TO 650
+      IF(NANISO.EQ.2) PEQIN(7,I)=PEQEL(2,(I-IOFFN(7)))
 C  VIB STRETCH MODES         
   650 CONTINUE                                                          
       QIN(8,I)=0.0  
       PEQIN(8,I)=0.5 
       IF(NANISO.EQ.2) PEQIN(8,I)=0.0                         
-      IF(EN.LE.EIN(8)) GO TO 700                                        
+      IF(EN.LE.EIN(8)) GO TO 700                           
+      IF(EN.GT.XVIB4(NVIB4)) GO TO 675           
       DO 660 J=2,NVIB4                                                  
       IF(EN.LE.XVIB4(J)) GO TO 670                                      
   660 CONTINUE                                                          
       J=NVIB4                                                           
   670 A=(YVIB4(J)-YVIB4(J-1))/(XVIB4(J)-XVIB4(J-1))                     
       B=(XVIB4(J-1)*YVIB4(J)-XVIB4(J)*YVIB4(J-1))/(XVIB4(J-1)-XVIB4(J)) 
-      QIN(8,I)=APOPGS*(A*EN+B)*1.D-16                        
+      QIN(8,I)=APOPGS*(A*EN+B)*1.D-16 
+      GO TO 676   
+  675 QIN(8,I)=APOPGS*YVIB4(NVIB4)*(XVIB4(NVIB4)/EN)*1.D-16             
+  676 IF(EN.LT.(3.0*DABS(EIN(8)))) GO TO 700
+      IF(NANISO.EQ.2) PEQIN(8,I)=PEQEL(2,(I-IOFFN(8)))       
 C HIGHER VIBRATIONAL MODES                                              
   700 QIN(9,I)=0.0  
       PEQIN(9,I)=0.5       
       IF(NANISO.EQ.2) PEQIN(9,I)=0.0                            
-      IF(EN.LE.EIN(9)) GO TO 800                                        
+      IF(EN.LE.EIN(9)) GO TO 800                           
+      IF(EN.GT.XVIB5(NVIB5)) GO TO 725             
       DO 710 J=2,NVIB5                                                  
       IF(EN.LE.XVIB5(J)) GO TO 720                                      
   710 CONTINUE                                                          
@@ -31347,7 +32836,11 @@ C HIGHER VIBRATIONAL MODES
   720 A=(YVIB5(J)-YVIB5(J-1))/(XVIB5(J)-XVIB5(J-1))                     
       B=(XVIB5(J-1)*YVIB5(J)-XVIB5(J)*YVIB5(J-1))/(XVIB5(J-1)-XVIB5(J)) 
       QIN(9,I)=(A*EN+B)*1.D-16
-C EXCITATION                              
+      GO TO 726
+  725 QIN(9,I)=YVIB5(NVIB5)*(XVIB5(NVIB5)/EN)*1.D-16
+  726 IF(EN.LT.(3.0*DABS(EIN(9)))) GO TO 800
+      IF(NANISO.EQ.2) PEQIN(9,I)=PEQEL(2,(I-IOFFN(9)))
+C EXCITATION    TRIPLET  ABOVE XEXC1(NEXC1) SCALE BY 1/EN**3           
   800 QIN(10,I)=0.0 
       PEQIN(10,I)=0.5  
       IF(NANISO.EQ.2) PEQIN(10,I)=0.0                             
@@ -31359,15 +32852,13 @@ C EXCITATION
       J=NEXC1                                                           
   820 A=(YEXC1(J)-YEXC1(J-1))/(XEXC1(J)-XEXC1(J-1))                     
       B=(XEXC1(J-1)*YEXC1(J)-XEXC1(J)*YEXC1(J-1))/(XEXC1(J-1)-XEXC1(J)) 
-      QIN(10,I)=(A*EN+B)*1.D-16   
+      QIN(10,I)=(A*EN+B)*1.D-16  
       GO TO 840
-C USE BORN BETHE X-SECTION ABOVE XEXC1(NEXC1) EV
-  830 QIN(10,I)=CONST*(AM2EXC*X1+CEXC*X2)*0.375
-C ANGULAR DISTRIBUTION COPIED FROM ELASTIC OFFSET BY TWICE THE 
-C LEVEL ENERGY
+C SCALE BY 1/E**3
+  830 QIN(10,I)=YEXC1(NEXC1)*(XEXC1(NEXC1)/EN)**3*1.D-16
   840 IF(EN.LE.(2.0*EIN(10))) GO TO 850
-      PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))   
-C EXCITATION                           
+      PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
+C EXCITATION  TRIPLET ABOVE XEXC2(NEXC2) SCALE BY 1/E**3
   850 QIN(11,I)=0.0 
       PEQIN(11,I)=0.5              
       IF(NANISO.EQ.2) PEQIN(11,I)=0.0                                   
@@ -31381,71 +32872,201 @@ C EXCITATION
       B=(XEXC2(J-1)*YEXC2(J)-XEXC2(J)*YEXC2(J-1))/(XEXC2(J-1)-XEXC2(J)) 
       QIN(11,I)=(A*EN+B)*1.D-16
       GO TO 890                                         
-C USE BORN BETHE X-SECTION ABOVE XEXC2(NEXC2) EV
-  880 QIN(11,I)=CONST*(AM2EXC*X1+CEXC*X2)*0.284
-C ANGULAR DISTRIBUTION COPIED FROM ELASTIC OFFSET BY TWICE THE 
-C LEVEL ENERGY
+C  SCALE BY 1/E**3
+  880 QIN(11,I)=YEXC2(NEXC2)*(XEXC2(NEXC2)/EN)**3*1.D-16
   890 IF(EN.LE.(2.0*EIN(11))) GO TO 900
       PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))   
-C EXCITATION                                                            
-  900 QIN(12,I)=0.0  
-      PEQIN(12,I)=0.5                
-      IF(NANISO.EQ.2) PEQIN(12,I)=0.0                                   
-      IF(EN.LE.EIN(12)) GO TO 950    
-      IF(EN.GT.XEXC3(NEXC3)) GO TO 930                                 
-      DO 910 J=2,NEXC3                                                  
-      IF(EN.LE.XEXC3(J)) GO TO 920                                      
-  910 CONTINUE                                                          
-      J=NEXC3                                                           
-  920 A=(YEXC3(J)-YEXC3(J-1))/(XEXC3(J)-XEXC3(J-1))                     
-      B=(XEXC3(J-1)*YEXC3(J)-XEXC3(J)*YEXC3(J-1))/(XEXC3(J-1)-XEXC3(J)) 
-      QIN(12,I)=(A*EN+B)*1.D-16       
-      GO TO 940
-C USE BORN BETHE X-SECTION ABOVE XEXC3(NEXC3) EV
-  930 QIN(12,I)=CONST*(AM2EXC*X1+CEXC*X2)*0.341
-C ANGULAR DISTRIBUTION COPIED FROM ELASTIC OFFSET BY TWICE THE 
-C LEVEL ENERGY
-  940 IF(EN.LE.(2.0*EIN(12))) GO TO 950
-      PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))   
-  950 CONTINUE                                                          
-C                                                                       
+C EXCITATION   F=0.00131                                      
+  900 QIN(12,I)=0.0              
+      PEQIN(12,I)=0.0                                   
+      IF(EN.LE.EIN(12)) GO TO 905
+      QIN(12,I)=.00131/(EIN(12)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(12)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(12))*ASING
+      IF(QIN(12,I).LT.0.0) QIN(12,I)=0.0
+      IF(EN.LE.(2.0*EIN(12))) GO TO 905
+      PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))     
+C EXCITATION   F=0.0150                                       
+  905 QIN(13,I)=0.0              
+      PEQIN(13,I)=0.0                                   
+      IF(EN.LE.EIN(13)) GO TO 910
+      QIN(13,I)=.01500/(EIN(13)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(13)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(13))*ASING
+      IF(QIN(13,I).LT.0.0) QIN(13,I)=0.0
+      IF(EN.LE.(2.0*EIN(13))) GO TO 910
+      PEQIN(13,I)=PEQEL(2,(I-IOFFN(13)))     
+C EXCITATION   F=0.11400                                      
+  910 QIN(14,I)=0.0              
+      PEQIN(14,I)=0.0                                   
+      IF(EN.LE.EIN(14)) GO TO 915
+      QIN(14,I)=.11400/(EIN(14)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(14)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(14))*ASING
+      IF(QIN(14,I).LT.0.0) QIN(14,I)=0.0
+      IF(EN.LE.(2.0*EIN(14))) GO TO 915
+      PEQIN(14,I)=PEQEL(2,(I-IOFFN(14)))     
+C EXCITATION   F=0.15700                                      
+  915 QIN(15,I)=0.0              
+      PEQIN(15,I)=0.0                                   
+      IF(EN.LE.EIN(15)) GO TO 920
+      QIN(15,I)=.15700/(EIN(15)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(15)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(15))*ASING
+      IF(QIN(15,I).LT.0.0) QIN(15,I)=0.0
+      IF(EN.LE.(2.0*EIN(15))) GO TO 920
+      PEQIN(15,I)=PEQEL(2,(I-IOFFN(15)))
+C EXCITATION   F=0.17100                                      
+  920 QIN(16,I)=0.0              
+      PEQIN(16,I)=0.0                                   
+      IF(EN.LE.EIN(16)) GO TO 925
+      QIN(16,I)=.17100/(EIN(16)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(16)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(16))*ASING
+      IF(QIN(16,I).LT.0.0) QIN(16,I)=0.0
+      IF(EN.LE.(2.0*EIN(16))) GO TO 925
+      PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))     
+C EXCITATION   F=0.18800                                      
+  925 QIN(17,I)=0.0              
+      PEQIN(17,I)=0.0                                   
+      IF(EN.LE.EIN(17)) GO TO 930
+      QIN(17,I)=.18800/(EIN(17)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(17)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(17))*ASING
+      IF(QIN(17,I).LT.0.0) QIN(17,I)=0.0
+      IF(EN.LE.(2.0*EIN(17))) GO TO 930
+      PEQIN(17,I)=PEQEL(2,(I-IOFFN(17)))    
+C EXCITATION   F=0.20500                                      
+  930 QIN(18,I)=0.0              
+      PEQIN(18,I)=0.0                                   
+      IF(EN.LE.EIN(18)) GO TO 935
+      QIN(18,I)=.20500/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(18))*ASING
+      IF(QIN(18,I).LT.0.0) QIN(18,I)=0.0
+      IF(EN.LE.(2.0*EIN(18))) GO TO 935
+      PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))    
+C EXCITATION   F=0.19300                                      
+  935 QIN(19,I)=0.0              
+      PEQIN(19,I)=0.0                                   
+      IF(EN.LE.EIN(19)) GO TO 940
+      QIN(19,I)=.19300/(EIN(19)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(19)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(19))*ASING
+      IF(QIN(19,I).LT.0.0) QIN(19,I)=0.0
+      IF(EN.LE.(2.0*EIN(19))) GO TO 940
+      PEQIN(19,I)=PEQEL(2,(I-IOFFN(19)))    
+C EXCITATION   F=0.16200                                      
+  940 QIN(20,I)=0.0              
+      PEQIN(20,I)=0.0                                   
+      IF(EN.LE.EIN(20)) GO TO 945
+      QIN(20,I)=.16200/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(20))*ASING
+      IF(QIN(20,I).LT.0.0) QIN(20,I)=0.0
+      IF(EN.LE.(2.0*EIN(20))) GO TO 945
+      PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))    
+C EXCITATION   F=0.10300                                      
+  945 QIN(21,I)=0.0              
+      PEQIN(21,I)=0.0                                   
+      IF(EN.LE.EIN(21)) GO TO 950
+      QIN(21,I)=.10300/(EIN(21)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(21)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(21))*ASING
+      IF(QIN(21,I).LT.0.0) QIN(21,I)=0.0
+      IF(EN.LE.(2.0*EIN(21))) GO TO 950
+      PEQIN(21,I)=PEQEL(2,(I-IOFFN(21)))    
+C EXCITATION   F=0.06700                                      
+  950 QIN(22,I)=0.0              
+      PEQIN(22,I)=0.0                                   
+      IF(EN.LE.EIN(22)) GO TO 955
+      QIN(22,I)=.06700/(EIN(22)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(22)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(22))*ASING
+      IF(QIN(22,I).LT.0.0) QIN(22,I)=0.0
+      IF(EN.LE.(2.0*EIN(22))) GO TO 955
+      PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))    
+C EXCITATION   F=0.06400                                      
+  955 QIN(23,I)=0.0              
+      PEQIN(23,I)=0.0                                   
+      IF(EN.LE.EIN(23)) GO TO 960
+      QIN(23,I)=.06400/(EIN(23)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(23)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(23))*ASING
+      IF(QIN(23,I).LT.0.0) QIN(23,I)=0.0
+      IF(EN.LE.(2.0*EIN(23))) GO TO 960
+      PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))    
+C EXCITATION   F=0.02800                                      
+  960 QIN(24,I)=0.0              
+      PEQIN(24,I)=0.0                                   
+      IF(EN.LE.EIN(24)) GO TO 965
+      QIN(24,I)=.02800/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+EIN(24))*ASING
+      IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0
+      IF(EN.LE.(2.0*EIN(24))) GO TO 965
+      PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
+  965 CONTINUE    
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+C     QIN(25,I)=0.0
+C     QIN(26,I)=0.0
+C     IF(EN.LE.1000.) GO TO 990
+C     DO 972 J=2,NBREM
+C     IF(EN.LE.EBRM(J)) GO TO 973
+C 972 CONTINUE
+C     J=NBREM
+C 973 A=(DLOG(Z6T(J))-DLOG(Z6T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B=(DLOG(Z6T(J))*EBRM(J-1)-DLOG(Z6T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))            
+C     A1=(DLOG(Z1T(J))-DLOG(Z1T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B1=(DLOG(Z1T(J))*EBRM(J-1)-DLOG(Z1T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))                                
+C     QIN(25,I)=DEXP(A*EN+B)*4.0*1.D-24
+C     QIN(26,I)=DEXP(A1*EN+B1)*10.0*1.D-24
+C 990 CONTINUE
+C
+      QSNG=QIN(12,I)+QIN(13,I)+QIN(14,I)+QIN(15,I)+QIN(16,I)+
+     /QIN(17,I)+QIN(18,I)+QIN(19,I)+QIN(20,I)+QIN(21,I)+QIN(22,I)+
+     /QIN(23,I)+QIN(24,I)
+      QTRP=QIN(10,I)+QIN(11,I) 
+      QTOTEXC=QTRP+QSNG
       Q(1,I)=Q(2,I)+Q(5,I)+Q(4,I)+QIN(1,I)+QIN(2,I)+QIN(3,I)+QIN(4,I)+  
-     /QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+QIN(10,I)+QIN(11,I)
-     /+QIN(12,I)+QION(2,I)
+     /QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+QEXCTOT
+C    /QIN(5,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+QEXCTOT+
+C    /QIN(25,I)+QIN(26,I)
+C     WRITE(6,991) EN,QTRP,QSNG,QTOTEXC
+C 991 FORMAT(' EN=',D12.4,' QTRP=',D12.4,' QSNG=',D12.4,' QEXCTOT=',
+C    /D12.4)
+c     WRITE(6,992) EN,QION(1,I),QION(2,I),QION(3,I)
+C 992 FORMAT(' EN=',D12.4,' ION1=',D12.4,' ION2=',D12.4,' ION3=',D12.4)
  1000 CONTINUE                                                          
 C  SAVE COMPUTE TIME
-      IF(EFINAL.LE.EIN(12)) NIN=11
-      IF(EFINAL.LE.EIN(11)) NIN=10
-      IF(EFINAL.LE.EIN(10)) NIN=9                    
-      IF(EFINAL.LE.EIN(9)) NIN=8                                        
+      DO 997 K=14,NIN
+      IF(EFINAL.LE.EIN(K)) THEN
+       NIN=K-1
+       GO TO 998
+      ENDIF
+  997 CONTINUE
+  998 CONTINUE
+C     IF(EFINAL.GT.1000.) NIN=NIN+2 
       RETURN                                                            
       END                                                               
       SUBROUTINE GAS12(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)    
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)    
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)       
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250),
      /PJ(220) 
-      DIMENSION XEN(124),YMOM(124),YEL(124),YVBMOM(124),YVBEL(124),
-     /YEPS(124),XION(62),YION(62),YINC(62),XATT(74),YATT(74),
-     /XV2(23),YV2(23),X2V2(25),Y2V2(25),XV1(32),YV1(32),
-     /X3V2(17),Y3V2(17),XV3(17),YV3(17),XVPD3(22),YVPD3(22),
-     /XV130(19),YV130(19),XVPD4(20),YVPD4(20),XVPD5(17),YVPD5(17),
-     /XVPD6(17),YVPD6(17),XVPD7(17),YVPD7(17),XVPD8(17),YVPD8(17),
-     /XVPD9(17),YVPD9(17),XVPDH(15),YVPDH(15),      
-     /XEXC1(53),YEXC1(53),XEXC2(53),YEXC2(53),XEXC3(51),YEXC3(51),      
-     /XEXC4(51),YEXC4(51),XEXC5(51),YEXC5(51),XEXC6(51),YEXC6(51),
-     /XKSHC(63),YKSHC(63),XKSHO(61),YKSHO(61),
+      DIMENSION XEN(158),YMOM(158),YEL(158),YVBMOM(158),YVBEL(158),
+     /YEPS(158),XION(62),YION(62),YINC(62),XATT(68),YATT(68),
+     /XV2(17),YV2(17),X2V2(19),Y2V2(19),XV1(26),YV1(26),
+     /X3V2(11),Y3V2(11),XV3(11),YV3(11),XVPD3(14),YVPD3(14),
+     /XV130(12),YV130(12),XVPD4(14),YVPD4(14),XVPD5(11),YVPD5(11),
+     /XVPD6(11),YVPD6(11),XVPD7(11),YVPD7(11),XVPD8(11),YVPD8(11),
+     /XVPD9(11),YVPD9(11),XVPDH(9),YVPDH(9),      
+     /XEXC1(28),YEXC1(28),XEXC2(28),YEXC2(28),XEXC3(26),YEXC3(26),      
+     /XEXC4(26),YEXC4(26),XEXC5(26),YEXC5(26),XEXC6(26),YEXC6(26),
+     /XKSHC(83),YKSHC(83),XKSHO(81),YKSHO(81),
      /IOFFN(85),IOFFION(10)
+      DIMENSION Z6T(25),Z8T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)                                           
       CHARACTER*25 NAME 
 C ELASTIC +ROTATIONAL                                                
@@ -31461,7 +33082,10 @@ C ELASTIC +ROTATIONAL
      /4.0D4,4.5D4,5.0D4,6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,
      /1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,
      /8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,
-     /4.0D6,6.0D6,8.0D6,1.0D7/
+     /4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,
+     /1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,
+     /8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,
+     /4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
 C GROUND STATE AND BEND MODE ELASTIC + ROTATION.  MOMENTUM TRANSFER
 C  AT 293.15 KELVIN     
       DATA YMOM/148.,148.,146.,141.,134.,128.,119.,109.,95.0,85.0,      
@@ -31480,7 +33104,14 @@ C  AT 293.15 KELVIN
      /2.54D-6,2.00D-6,
      /1.63D-6,1.37D-6,1.16D-6,8.32D-7,6.28D-7,4.94D-7,4.00D-7,2.80D-7,
      /2.08D-7,1.62D-7,
-     /1.30D-7,6.51D-8,3.95D-8,2.66D-8/
+     /1.30D-7,1.06D-7,8.89D-8,6.51D-8,4.98D-8,3.95D-8,3.21D-8,2.66D-8,
+     /1.79D-8,1.29D-8,
+     /9.73D-9,7.63D-9,5.06D-9,3.61D-9,2.71D-9,2.11D-9,1.69D-9,1.38D-9,
+     /9.79D-10,7.28D-10,
+     /5.63D-10,4.48D-10,3.65D-10,2.35D-10,1.64D-10,1.21D-10,9.27D-11,
+     /5.95D-11,4.13D-11,3.04D-11,
+     /2.33D-11,1.84D-11,1.49D-11,1.03D-11,7.61D-12,5.83D-12,4.60D-12,
+     /3.73D-12/
 C GROUND STATE AND BEND MODE ELASTIC + ROTATION.  AT 293.15 KELVIN     
       DATA YEL/148.,148.,146.,141.,135.,129.,120.,110.,96.0,86.0,      
      /77.5,70.5,60.0,53.5,48.5,42.0,37.0,31.5,24.8,20.4, 
@@ -31495,7 +33126,10 @@ C GROUND STATE AND BEND MODE ELASTIC + ROTATION.  AT 293.15 KELVIN
      /.0178,.0164,.0145,.0132,.0123,.0116,.0111,.0107,.0101,.00967,
      /.00937,.00915,.00897,.00868,.00849,.00837,.00829,.00818,.00812,
      /.00808,
-     /.00805,.00799,.00797,.00797/
+     /.00805,.00803,.00801,.00799,.00798,.00797,.00797,.007965,.007957,
+     /.007954,
+     /.007951,.007951,.007948,.007948,.007948,.007948,.007946,.007945,
+     /20*.007945/
 C ELASTIC FOR BEND MODE VIBRATIONS.   MOMENTUM TRANSFER     
       DATA YVBMOM/148.,148.,146.,141.,134.,128.,119.,109.,95.0,85.0,    
      /76.5,69.5,59.0,53.5,50.0,46.5,45.5,45.0,43.0,37.0, 
@@ -31513,7 +33147,14 @@ C ELASTIC FOR BEND MODE VIBRATIONS.   MOMENTUM TRANSFER
      /2.54D-6,2.00D-6,
      /1.63D-6,1.37D-6,1.16D-6,8.32D-7,6.28D-7,4.94D-7,4.00D-7,2.80D-7,
      /2.08D-7,1.62D-7,
-     /1.30D-7,6.51D-8,3.95D-8,2.66D-8/
+     /1.30D-7,1.06D-7,8.89D-8,6.51D-8,4.98D-8,3.95D-8,3.21D-8,2.66D-8,
+     /1.79D-8,1.29D-8,
+     /9.73D-9,7.63D-9,5.06D-9,3.61D-9,2.71D-9,2.11D-9,1.69D-9,1.38D-9,
+     /9.79D-10,7.28D-10,
+     /5.63D-10,4.48D-10,3.65D-10,2.35D-10,1.64D-10,1.21D-10,9.27D-11,
+     /5.95D-11,4.13D-11,3.04D-11,
+     /2.33D-11,1.84D-11,1.49D-11,1.03D-11,7.61D-12,5.83D-12,4.60D-12,
+     /3.73D-12/
 C ELASTIC FOR BEND MODE VIBRATIONS.      
       DATA YVBEL/148.,148.,146.,141.,135.,129.,120.,110.,96.0,86.0,     
      /77.5,70.5,60.0,54.5,51.1,47.6,46.8,47.2,48.5,46.6, 
@@ -31528,124 +33169,126 @@ C ELASTIC FOR BEND MODE VIBRATIONS.
      /.0178,.0164,.0145,.0132,.0123,.0116,.0111,.0107,.0101,.00967,
      /.00937,.00915,.00897,.00868,.00849,.00837,.00829,.00818,.00812,
      /.00808,
-     /.00805,.00799,.00797,.00797/
+     /.00805,.00803,.00801,.00799,.00798,.00797,.00797,.007965,.007957,
+     /.007954,
+     /.007951,.007951,.007948,.007948,.007948,.007948,.007946,.007945,
+     /20*.007945/
 C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION
-      DATA YEPS/0.0,.00001,.0001,.001,.01111,.01162,.01249,.01363,
-     /.01563,.01744,
-     /.01935,.02127,.02500,.02803,.03092,.03571,.04053,.07136,
-     /.16838,.30302,
-     /.38441,.45366,.52155,.55591,.58136,.59099,.53607,.44734,
-     /.33109,.26842,
-     /.23335,.20060,.19416,.17264,.14643,.17460,.32377,.38639,
-     /.42456,.33803,
-     /.17884,.25277,.35423,.38173,.36044,.33916,.34362,.34620,
-     /.25594,.29053,
-     /.31927,.39402,.44108,.54525,.58678,.66131,.70472,.74599,
-     /.77171,.78971,
-     /.82594,.85753,.87452,.89179,.91987,.93361,.94210,.94813,
-     /.95253,.95654,
-     /.96172,.96505,.96735,.96904,.97115,.98131,.98646,.99126,
-     /.99359,.99493,
-     /.99581,.99689,.99753,.99804,.998381,.998607,.998791,.999045,
-     /.9992083,.9993264,
-     /.9994153,.9994836,.9995363,.9996182,.9996776,.9997242,.9997546,
-     /.9997818,.9998299,.9998615,
-     /.9998838,.9999008,.9999250,.9999398,.9999504,.9999581,.9999642,
-     /.9999688,.9999756,.9999803,
-     /.9999838,.9999862,.9999883,.9999916,.9999936,.9999950,.9999960,
-     /.9999972,.9999980,.9999985,
-     /.9999988,.9999994,.9999996,.9999998/
+C EPSILON= 1.0-YEPS
+      DATA YEPS/1.0,.99999,.9999,.999,.98889,.98838,.98751,.98637,
+     /.98437,.98256,
+     /.98065,.97873,.97500,.97197,.96908,.96429,.95947,.92864,
+     /.83162,.69698,
+     /.61559,.54634,.47845,.44409,.41864,.40901,.46393,.55266,
+     /.66891,.73158,
+     /.76665,.79940,.80584,.82736,.85357,.82540,.67623,.61361,
+     /.57544,.66197,
+     /.82116,.74723,.64577,.61827,.63956,.66084,.65638,.65380,
+     /.74406,.70947,
+     /.68073,.60598,.55892,.45475,.41322,.33869,.29528,.25401,
+     /.22829,.21029,
+     /.17406,.14247,.12548,.10821,.08013,.06639,.05790,.05187,
+     /.04747,.04346,
+     /.03828,.03495,.03265,.03096,.02885,.01869,.01354,.00874,
+     /.00641,.00507,
+     /.00419,.00311,.00247,.00196,.001619,.001393,.001209,.000954,
+     /7.917D-4,6.736D-4,
+     /5.847D-4,5.164D-4,4.637D-4,3.818D-4,3.224D-4,2.758D-4,2.454D-4,
+     /2.182D-4,1.701D-4,1.385D-4,
+     /1.162D-4,9.92D-5,7.50D-5,6.02D-5,4.96D-5,4.19D-5,3.58D-5,3.12D-5,
+     /2.44D-5,1.97D-5,
+     /1.63D-5,1.37D-5,1.17D-5,8.44D-6,6.34D-6,4.95D-6,3.98D-6,2.74D-6,
+     /2.00D-6,1.53D-6,
+     /1.21D-6,9.78D-7,8.09D-7,5.79D-7,4.36D-7,3.39D-7,2.72D-7,2.23D-7,
+     /1.46D-7,1.026D-7,
+     /7.610D-8,5.868D-8,3.796D-8,2.652D-8,1.955D-8,1.499D-8,1.186D-8,
+     /9.60D-9,6.65D-9,4.87D-9,
+     /3.71D-9,2.91D-9,2.35D-9,1.48D-9,1.01D-9,7.34D-10,5.55D-10,
+     /3.48D-10,2.38D-10,1.72D-10,
+     /1.30D-10,1.02D-10,8.2D-11,5.6D-11,4.0D-11,3.0D-11,2.4D-11,1.9D-11/
 C      
 C V(010)  BEND MODE  ( ANALYTICAL DIPOLE FUNCTION AT THRESHOLD)
+C ABOVE 70EV SCALED BY 1/E
       DATA XV2/.08275,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,     
-     /8.00,10.0,15.0,20.0,30.0,50.0,70.0,100.,1000.,10000.,
-     /1.0D5,1.0D6,1.0D7/
+     /8.00,10.0,15.0,20.0,30.0,50.0,70.0/
       DATA YV2/0.00,0.00,0.24,0.48,1.29,1.70,1.70,1.17,0.74,0.42,
-     /0.01,0.08,0.05,0.08,0.12,0.07,.001,.0001,.00001,.000001,
-     /1.0D-7,1.0D-8,1.0D-9/
-C V(020)  BEND MODE HARMONIC  RESONANCE
+     /0.01,0.08,0.05,0.08,0.12,0.07,.001/
+C V(020)  BEND MODE HARMONIC  RESONANCE    ABOVE 70EV SCALED BY 1/E
       DATA X2V2/.15937,0.18,0.50,1.00,2.00,3.00,3.50,3.80,4.00,4.50,
-     /5.00,6.00,8.00,10.0,15.0,20.0,30.0,50.0,70.0,100.,
-     /1000.,10000.,1.0D5,1.0D6,1.0D7/
+     /5.00,6.00,8.00,10.0,15.0,20.0,30.0,50.0,70.0/
       DATA Y2V2/0.00,0.02,0.01,.003,.025,0.09,0.31,0.44,0.56,0.49,     
-     /0.35,0.17,0.08,0.10,0.02,.008,.015,.008,.001,.0001,
-     /.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C V(100) SYMMETRIC STRETCH                           
+     /0.35,0.17,0.08,0.10,0.02,.008,.015,.008,.001/
+C V(100) SYMMETRIC STRETCH                ABOVE 70EV SCALED BY 1/E   
       DATA XV1/.17211,0.18,0.20,0.23,0.25,0.30,0.40,0.50,0.60,1.00,
      /2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,8.00,
-     /10.0,15.0,20.0,30.0,50.0,70.0,100.,1000.,10000.,1.0D5,
-     /1.0D6,1.0D7/
+     /10.0,15.0,20.0,30.0,50.0,70.0/
       DATA YV1/0.00,.475,.790,0.91,0.91,0.82,0.58,0.43,0.34,0.32,    
      /0.38,0.66,0.89,1.27,1.32,1.04,0.53,0.18,.084,.075,                
-     /.077,.030,.009,.030,.008,.001,.0001,.00001,.000001,1.0D-7,  
-     /1.0D-8,1.0D-9/
-C V(030) + V(110)                          
+     /.077,.030,.009,.030,.008,.001/
+C V(030) + V(110)                          ABOVE 10EV SCALED BY 1/E  
       DATA X3V2/.251,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00, 
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA Y3V2/0.00,0.00,0.01,0.17,0.36,0.58,0.58,0.36,0.17,0.01,      
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C V(001) ASYMMETRIC STRETCH  (ANALYTICAL DIPOLE FUNCTION AT THRESHOLD) 
+     /.001/
+C V(001) ASYMMETRIC STRETCH  (ANALYTICAL DIPOLE FUNCTION AT THRESHOLD)
+C ABOVE 10EV SCALED BY 1/E 
       DATA XV3/.29126,2.00,3.00,3.50,3.80,4.00,4.50,5.00,6.00,8.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/
+     /10.0/
       DATA YV3/0.00,0.00,.002,.005,.010,.005,.002,.001,.001,.001,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C V(040) + V(120) + V(200)  POLYAD 3
+     /.001/
+C V(040) + V(120) + V(200)  POLYAD 3        ABOVE 10EV SCALED BY 1/E
       DATA XVPD3/.335,0.35,0.50,0.80,2.00,2.50,3.00,3.50,3.80,4.00,     
-     /4.50,5.00,6.00,10.0,20.0,40.0,100.,1000.,10000.,1.0D5,
-     /1.0D6,1.0D7/
+     /4.50,5.00,6.00,10.0/
       DATA YVPD3/0.00,0.09,.035,0.02,0.02,0.02,0.21,0.43,0.70,0.70,     
-     /0.43,0.21,0.05,.020,0.01,.005,.0001,.00001,.000001,1.0D-7,
-     /1.0D-8,1.0D-9/
-C  V(130) + V(210)                      
+     /0.43,0.21,0.05,.020/
+C  V(130) + V(210)                          ABOVE 20EV SCALED BY 1/E  
       DATA XV130/0.422,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,20.0,40.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/               
+     /10.0,20.0/               
       DATA YV130/0.00,0.00,.005,0.10,0.22,0.35,0.35,0.22,0.10,.025,
-     /.005,.002,.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 4                                        
+     /.005,.002/
+C  POLYAD 4                                ABOVE 10EV SCALED BY 1/E
       DATA XVPD4/0.505,0.55,0.65,1.00,2.00,2.50,3.00,3.50,3.80,4.00,
-     /4.50,5.00,6.00,10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/          
+     /4.50,5.00,6.00,10.0/          
       DATA YVPD4/0.00,.0017,.0005,.0001,.0001,.005,0.12,0.24,0.40,0.40,
-     /0.24,0.13,0.01,.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 5                                        
+     /0.24,0.13,0.01,.001/
+C  POLYAD 5                                ABOVE 10EV SCALED BY 1/E 
       DATA XVPD5/0.685,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA YVPD5/0.00,0.00,.003,0.07,0.14,0.24,0.24,0.14,0.08,.006,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 6                                        
+     /.001/
+C  POLYAD 6                                ABOVE 10EV SCALED BY 1/E 
       DATA XVPD6/0.825,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA YVPD6/0.00,0.00,.001,0.05,0.10,0.16,0.16,0.10,0.05,.004,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 7                                        
+     /.001/
+C  POLYAD 7                                ABOVE 10EV SCALED BY 1/E
       DATA XVPD7/0.995,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA YVPD7/0.00,0.00,.001,0.03,0.06,0.10,0.10,0.06,0.03,.003,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 8                                        
+     /.001/
+C  POLYAD 8                                ABOVE 10EV SCALED BY 1/E
       DATA XVPD8/1.160,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA YVPD8/0.00,0.00,.001,0.03,0.06,0.10,0.10,0.06,0.03,.003,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  POLYAD 9                                        
+     /.001/
+C  POLYAD 9                                ABOVE 10EV SCALED BY 1/E
       DATA XVPD9/1.320,2.00,2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,
-     /10.0,100.,1000.,10000.,1.0D5,1.0D6,1.0D7/                         
+     /10.0/                         
       DATA YVPD9/0.00,0.00,.001,0.03,0.06,0.10,0.10,0.06,0.03,.003,
-     /.001,.0001,.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
-C  SUM HIGHER POLYADS                                                
-      DATA XVPDH/2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,10.0,100.,
-     /1000.,10000.,1.0D5,1.0D6,1.0D7/ 
-      DATA YVPDH/0.00,0.01,0.36,0.58,0.58,0.36,0.16,.045,.001,.0001,
-     /.00001,.000001,1.0D-7,1.0D-8,1.0D-9/
+     /.001/
+C  SUM HIGHER POLYADS                      ABOVE 10EV SCALED BY 1/E
+      DATA XVPDH/2.50,3.00,3.50,3.80,4.00,4.50,5.00,6.00,10.0/ 
+      DATA YVPDH/0.00,0.01,0.36,0.58,0.58,0.36,0.16,.045,.001/
 C DATA FROM RAP AND BRIGLIA ( SCALED BY 1.031 FROM INCREASE IN CO2
 C                              IONISATION X-SEC)
+C ABOVE 10EV SCALED BY 1/E**3
       DATA XATT/3.30,3.40,3.50,3.60,3.70,3.80,3.90,4.00,4.10,4.20,
      /4.30,4.40,4.50,4.60,4.70,4.80,4.90,5.00,5.10,5.20,
      /5.30,5.40,5.50,5.60,5.70,5.80,5.90,6.00,6.10,6.20,
      /6.30,6.40,6.50,6.60,6.70,6.80,6.90,7.00,7.10,7.20,  
      /7.30,7.40,7.50,7.60,7.70,7.80,7.90,8.00,8.10,8.20, 
      /8.30,8.40,8.50,8.60,8.70,8.80,8.90,9.00,9.10,9.20, 
-     /9.30,9.40,9.50,9.60,9.70,9.80,9.90,10.0,15.0,100.,            
-     /1000.,1.0D5,1.0D6,1.0D7/
+     /9.30,9.40,9.50,9.60,9.70,9.80,9.90,10.0/
       DATA YATT/.0,1.81D-5,6.35D-5,1.45D-4,2.81D-4,5.44D-4,8.43D-4,
      /1.09D-3,1.32D-3,1.45D-3,
      /1.53D-3,1.40D-3,1.25D-3,1.01D-3,7.98D-4,6.17D-4,4.54D-4,2.91D-4,
@@ -31658,90 +33301,49 @@ C                              IONISATION X-SEC)
      /4.41D-3,4.26D-3,
      /3.92D-3,3.46D-3,2.92D-3,2.22D-3,1.77D-3,1.40D-3,1.05D-3,8.07D-4,
      /6.35D-4,4.99D-4,
-     /3.80D-4,2.99D-4,2.36D-4,1.81D-4,1.36D-4,1.09D-4,8.17D-5,1.00D-6,
-     /1.0D-8,1.0D-9,
-     /1.0D-10,1.0D-11,1.0D-12,1.0D-13/
-C
+     /3.80D-4,2.99D-4,2.36D-4,1.81D-4,1.36D-4,1.09D-4,8.17D-5,1.00D-6/
+C USE BORN-BETHE EXTRAPOLATION ABOVE 1000EV
       DATA XEXC1/7.90,9.00,10.0,11.0,12.0,13.0,14.0,16.0,18.0,20.0,
      /25.0,30.0,35.0,40.0,50.0,60.0,80.0,100.,120.,150.,
-     /200.,250.,300.,400.,500.,600.,750.,1000.,1500.,2000.,
-     /2500.,3000.,4000.,6000.,8000.,10000.,20000.,40000.,60000.,80000.,
-     /1.0D5,1.5D5,2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,
-     /5.0D6,7.0D6,1.0D7/
+     /200.,250.,300.,400.,500.,600.,750.,1000./
       DATA YEXC1/0.00,.007,.030,.069,.078,.069,.063,.060,.058,.057,
      /.053,.051,.049,.047,.046,.043,.038,.034,.031,.027,
-     /.022,.019,.016,.013,.0110,.0095,.0079,.0062,.0044,.0034,
-     /.0028,.0024,.0018,.0013,.00098,.00080,.00042,.00024,.00017,.00014,
-     /1.16D-4,8.8D-5,7.4D-5,5.4D-5,4.8D-5,4.6D-5,4.5D-5,4.4D-5,
-     /4.3D-5,4.4D-5,
-     /4.5D-5,4.6D-5,4.8D-5/
-C     
+     /.022,.019,.016,.013,.0110,.0095,.0079,.0062/
+C  USE BORN BETHE EXTRAPOLATION ABOVE 1000EV
       DATA XEXC2/8.90,9.50,10.0,11.0,12.0,13.0,14.0,16.0,18.0,20.0,
      /25.0,30.0,35.0,40.0,50.0,60.0,80.0,100.,120.,150.,
-     /200.,250.,300.,400.,500.,600.,750.,1000.,1500.,2000.,
-     /2500.,3000.,4000.,6000.,8000.,10000.,20000.,40000.,60000.,80000.,
-     /1.0D5,1.5D5,2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,
-     /5.0D6,7.0D6,1.0D7/
+     /200.,250.,300.,400.,500.,600.,750.,1000./
       DATA YEXC2/0.00,.004,.009,.040,.065,.062,.060,.058,.057,.056,
      /.055,.054,.052,.050,.048,.046,.041,.037,.034,.029,
-     /.024,.021,.018,.015,.0123,.0106,.0089,.0070,.0050,.0040,
-     /3.37D-3,2.85D-3,2.2D-3,.0015,.00116,.00095,5.1D-4,2.81D-4,
-     /2.02D-4,1.62D-4,
-     /1.38D-4,1.05D-4,8.9D-5,6.5D-5,5.8D-5,5.5D-5,5.32D-5,5.19D-5,
-     /5.18D-5,5.24D-5,
-     /5.4D-5,5.53D-5,5.68D-5/
-C                  
+     /.024,.021,.018,.015,.0123,.0106,.0089,.0070/
+C  USE BORN BETHE EXTRAPOLATION ABOVE 1000EV                 
       DATA XEXC3/10.5,12.0,13.0,14.0,15.0,17.0,20.0,25.0,30.0,35.0,     
      /40.0,50.0,60.0,70.0,80.0,100.,120.,150.,200.,250.,   
-     /300.,400.,500.,600.,750.,1000.,1500.,2000.,2500.,3000.,
-     /4000.,6000.,8000.,10000.,20000.,40000.,60000.,8.0D4,1.0D5,1.5D5,
-     /2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,5.0D6,7.0D6,
-     /1.0D7/
+     /300.,400.,500.,600.,750.,1000./
       DATA YEXC3/0.00,0.56,0.43,0.34,0.31,0.30,0.30,0.31,0.32,0.33,     
      /0.35,0.38,0.41,0.43,0.44,.425,0.40,0.36,.325,0.29,
-     /.258,.214,.184,.161,.136,.111,.081,.064,.053,.0444,
-     /.0342,.024,.0180,.0148,.00795,.00439,.00315,.00253,.00214,.00164,
-     /.0014,.00102,.00090,.00085,.00083,.00082,.00080,.00082,.00084,
-     /.00086,.00089/    
-C     
+     /.258,.214,.184,.161,.136,.111/    
+C  USE BORN BETHE EXTRAPOLATION ABOVE 1000EV   
       DATA XEXC4/12.2,13.0,14.0,15.0,16.0,17.0,20.0,25.0,30.0,35.0,     
      /40.0,50.0,60.0,70.0,80.0,100.,120.,150.,200.,250.,   
-     /300.,400.,500.,600.,750.,1000.,1500.,2000.,2500.,3000.,
-     /4000.,6000.,8000.,10000.,20000.,40000.,60000.,8.0D4,1.0D5,1.5D5,
-     /2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,5.0D6,7.0D6,
-     /1.0D7/
+     /300.,400.,500.,600.,750.,1000./
       DATA YEXC4/0.00,0.23,0.31,0.34,0.38,0.40,0.46,0.54,0.60,0.64,     
      /0.67,0.74,0.80,0.82,0.82,0.79,0.75,0.68,0.59,0.51,
-     /0.46,0.38,0.33,0.29,.233,.188,.133,.1016,.0829,.070,
-     /.054,.038,.029,.0234,.0125,.0069,.0050,.0040,.00339,.00258,
-     /.00218,.00160,.00143,.00135,.00131,.00128,.00128,.00129,
-     /.00133,.00136,.00140/
-C     
+     /0.46,0.38,0.33,0.29,.233,.188/
+C  USE BORN BETHE EXTRAPOLATION ABOVE 1000EV   
       DATA XEXC5/13.2,14.0,15.0,16.0,17.0,18.0,20.0,25.0,30.0,35.0,     
      /40.0,50.0,60.0,70.0,80.0,100.,120.,150.,200.,250.,   
-     /300.,400.,500.,600.,750.,1000.,1500.,2000.,2500.,3000.,
-     /4000.,6000.,8000.,10000.,20000.,40000.,60000.,8.0D4,1.0D5,1.5D5,
-     /2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,5.0D6,7.0D6,
-     /1.0D7/
+     /300.,400.,500.,600.,750.,1000./
       DATA YEXC5/0.00,0.37,0.48,0.61,0.69,0.76,0.89,1.11,1.24,1.33,     
      /1.39,1.55,1.68,1.78,1.85,1.81,1.71,1.59,1.39,1.25,
-     /1.14,0.95,0.83,0.73,0.61,0.50,0.38,0.30,0.26,.225,
-     /.175,.128,.099,.083,.045,.025,.0176,.0141,.01204,.00918,
-     /.00775,.00566,.00505,.00478,.00465,.00454,.00453,.00458,
-     /.00472,.00484,.00496/
-C     
+     /1.14,0.95,0.83,0.73,0.61,0.50/
+C  USE BORN BETHE EXTRAPOLATION ABOVE 1000EV   
       DATA XEXC6/15.0,16.0,17.0,18.0,19.0,20.0,21.0,25.0,30.0,35.0,     
      /40.0,50.0,60.0,70.0,80.0,100.,120.,150.,200.,250.,   
-     /300.,400.,500.,600.,750.,1000.,1500.,2000.,2500.,3000.,
-     /4000.,6000.,8000.,10000.,20000.,40000.,60000.,8.0D4,1.0D5,1.5D5,
-     /2.0D5,4.0D5,6.0D5,8.0D5,1.0D6,1.5D6,2.0D6,3.0D6,5.0D6,7.0D6,
-     /1.0D7/
+     /300.,400.,500.,600.,750.,1000./
       DATA YEXC6/0.0,.0005,.003,.006,.009,.013,.016,.025,.031,.034,     
      /.037,.041,.046,.048,.048,.046,.044,.040,.035,.031,
-     /.028,.024,.020,.018,.015,.013,.0090,.0078,.0064,.0056,
-     /.0048,.0035,.0028,.00234,.00126,.0008,.0005,.00040,.00034,.000258,
-     /.000218,.000160,.000143,.000135,.000131,.000128,.000128,.000129,
-     /.000133,.000136,.000140/
+     /.028,.024,.020,.018,.015,.013/
 C IONISATION VALUES ABOVE 1KEV GENERATED BY BORN BETHE IN SUB)   
 C DATA FROM RAPP, LINDSAY AND RIEKE ALSO BB THEORY
       DATA XION/13.777,14.5,15.0,15.5,16.0,16.5,17.0,17.5,18.0,18.5,
@@ -31767,16 +33369,20 @@ C COUNTING IONISATION
      /3.60,3.48,3.40,3.29,3.17,3.02,2.94,2.79,2.55,2.41,
      /2.21,2.08,1.94,1.84,1.75,1.66,1.60,1.51,1.44,1.40,                
      /1.35,1.29/          
-C CARBON K-SHELL IONISATION X-SECTION
+C CARBON K-SHELL IONISATION X-SECTION  
       DATA XKSHC/285.,298.,307.,316.,325.,335.,345.,365.,398.,422.,
      /447.,473.,501.,531.,613.,668.,708.,750.,817.,917.,
      /1000.,1122.,1296.,1496.,1679.,1884.,2054.,2238.,2512.,2985.,
      /3981.,5012.,7079.,1.0D4,1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,
      /6.13D4,7.08D4,8.18D4,1.0D5,1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,
      /6.13D5,
-     /7.08D5,8.18D5,1.0D6,1.25D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
+     /7.08D5,8.18D5,1.0D6,1.26D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,
      /6.13D6,
-     /7.08D6,8.18D6,1.0D7/
+     /7.08D6,8.18D6,1.0D7,1.26D7,1.5D7,2.05D7,3.07D7,4.10D7,5.01D7,
+     /6.13D7,
+     /7.08D7,8.18D7,1.0D8,1.26D8,1.5D8,2.05D8,3.07D8,4.10D8,5.01D8,
+     /6.13D8,
+     /7.08D8,8.18D8,1.0D9/
       DATA YKSHC/0.00,1.66D-4,3.48D-4,5.25D-4,6.96D-4,8.63D-4,1.02D-3,
      /1.33D-3,1.75D-3,2.01D-3,
      /2.24D-3,2.46D-3,2.66D-3,2.84D-3,3.21D-3,3.38D-3,3.47D-3,3.55D-3,
@@ -31789,17 +33395,26 @@ C CARBON K-SHELL IONISATION X-SECTION
      /1.09D-4,1.05D-4,
      /1.03D-4,1.02D-4,1.01D-4,1.005D-4,1.01D-4,1.03D-4,1.07D-4,1.11D-4,
      /1.14D-4,1.17D-4,
-     /1.20D-4,1.22D-4,1.25D-4/
-C OXYGEN K-SHELL IONISATION X-SECTION
+     /1.20D-4,1.22D-4,1.25D-4,1.29D-4,1.32D-4,1.38D-4,1.45D-4,1.50D-4,
+     /1.54D-4,1.58D-4,
+     /1.60D-4,1.63D-4,1.67D-4,1.71D-4,1.74D-4,1.80D-4,1.87D-4,1.92D-4,
+     /1.96D-4,2.00D-4,
+     /2.02D-4,2.05D-4,2.09D-4/
+C OXYGEN K-SHELL IONISATION X-SECTION (MULTIPLY BY 2 FOR MOLECULE)
       DATA XKSHO/532.,541.,557.,574.,591.,609.,627.,646.,665.,685.,
      /706.,727.,749.,793.,841.,891.,944.,1000.,1090.,1188.,
      /1296.,1496.,1679.,1884.,2054.,2238.,2512.,2985.,3981.,5012.,
-     /7079.,1.0D4,1.5D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,6.13D4,
+     /7079.,1.00D4,1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,6.13D4,
      /7.08D4,
-     /8.18D4,1.0D5,1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,
+     /8.18D4,1.00D5,1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,
      /8.18D5,
-     /1.0D6,1.25D6,1.5D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,
-     /8.18D6,1.0D7/
+     /1.00D6,1.25D6,1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,
+     /8.18D6,
+     /1.00D7,1.26D7,1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,
+     /8.18D7,
+     /1.00D8,1.26D8,1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,
+     /8.18D8,
+     /1.00D9/
       DATA YKSHO/0.00,3.31D-5,8.86D-5,1.42D-4,1.95D-4,2.45D-4,2.94D-4,
      /3.41D-4,3.87D-4,4.31D-4,
      /4.73D-4,5.14D-4,5.53D-4,6.27D-4,6.95D-4,7.56D-4,8.13D-4,8.63D-4,
@@ -31811,7 +33426,22 @@ C OXYGEN K-SHELL IONISATION X-SECTION
      /1.26D-4,1.11D-4,
      /8.62D-5,7.45D-5,6.36D-5,5.75D-5,5.48D-5,5.29D-5,5.20D-5,5.13D-5,
      /5.08D-5,5.08D-5,5.12D-5,5.24D-5,5.47D-5,5.68D-5,5.84D-5,6.00D-5,
-     /6.13D-5,6.26D-5,6.44D-5/
+     /6.13D-5,6.26D-5,
+     /6.44D-5,6.65D-5,6.81D-5,7.11D-5,7.50D-5,7.78D-5,7.97D-5,8.17D-5,
+     /8.31D-5,8.45D-5,
+     /8.65D-5,8.87D-5,9.04D-5,9.36D-5,9.75D-5,1.00D-4,1.02D-4,1.04D-4,
+     /1.06D-4,1.07D-4,
+     /1.09D-4/
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF UNITS 10**-24 CM**2
+      DATA Z6T/298.,178.,85.2,47.5,26.3,12.2,7.06,4.45,3.06,2.82,
+     /2.89,2.99,3.08,3.13,3.18,3.25,3.31,3.39,3.44,3.49,
+     /3.52,3.54,3.55,3.57,3.57/
+      DATA Z8T/477.,294.,145.,81.6,45.8,21.2,12.2,7.69,5.22,4.76,
+     /4.84,4.99,5.10,5.20,5.27,5.38,5.46,5.58,5.65,5.72,
+     /5.77,5.80,5.81,5.83,5.84/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C ---------------------------------------------------------------------
 C
 C ANGULAR DISTRIBUTION ONLY ALLOWED FOR ELASTIC , IONISATION AND 
@@ -31830,46 +33460,61 @@ C ---------------------------------------------------------------------
 C    BORN-BETHE VALUES FOR IONISATION
       CONST=1.873884D-20
       EMASS2=1021997.804
+      API=DACOS(-1.0D0)
+      A0=0.52917720859D-8
+      RY=13.60569193
+      BBCONST=16.0*API*A0*A0*RY*RY/EMASS2
+C
       AM2=5.60
       C=57.91
 C     
 C AVERAGE AUGER EMISSIONS FROM EACH SHELL
       AUGKC=2.0
       AUGKO=1.99
+C ARRAY SIZE
+      NASIZE=4000
 C
       NION=3
       NIN=85  
+C
+      NBREM=25
+      DO 11 J=1,NIN
+      IZBR(J)=0
+   11 CONTINUE
+      IZBR(86)=6
+      IZBR(87)=8
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
       DO 2 J=1,NIN
       KIN(J)=NANISO
-    2 IF(J.LT.80) KIN(J)=0
+    2 CONTINUE
 C                 
-      NEL=124                                                           
-      NV2=23                                                          
-      N2V2=25                                                           
-      NV1=32                                                            
-      N3V2=17
-      NV3=17
-      NPD3=22                                                           
-      NV130=19                                                          
-      NPD4=20  
-      NPD5=17
-      NPD6=17
-      NPD7=17
-      NPD8=17
-      NPD9=17
-      NPDH=15                                                         
-      NATT=74
-      NEXC1=53                                                        
-      NEXC2=53                                                          
-      NEXC3=51  
-      NEXC4=51
-      NEXC5=51
-      NEXC6=51
+      NEL=158                                                           
+      NV2=17                                                          
+      N2V2=19                                                           
+      NV1=26                                                            
+      N3V2=11
+      NV3=11
+      NPD3=14                                                           
+      NV130=12                                                          
+      NPD4=14  
+      NPD5=11
+      NPD6=11
+      NPD7=11
+      NPD8=11
+      NPD9=11
+      NPDH=9                                                          
+      NATT=68
+      NEXC1=28                                                        
+      NEXC2=28                                                          
+      NEXC3=26  
+      NEXC4=26
+      NEXC5=26
+      NEXC6=26
       NIOND=62    
-      NKSHC=63
-      NKSHO=61 
+      NKSHC=83
+      NKSHO=81 
 C                                                     
       E(1)=0.0                                                          
       E(2)=2.0*EMASS/(44.0095*AMU)                                      
@@ -31881,14 +33526,20 @@ C  IONISING X-SECTION AT 1.5 MEV
 C EOBY FOR MINIMUM IONISING PARTICLE
       E(6)=13.0 
 C OPAL AND BEATY AT LOW ENERGY      
-      EOBY(1)=13.8 
+      EOBY(1)=10.2 
 C OPAL BEATY FOR CARBON AND OXYGEN K-SHELLS
-      EOBY(2)=285.0
-      EOBY(3)=532.0
+      EOBY(2)=200.0
+      EOBY(3)=375.0
 C     
       EION(1)=13.777
       EION(2)=285.0
       EION(3)=532.0
+      LEGAS(1)=0
+      LEGAS(2)=1
+      LEGAS(3)=2
+      ISHELL(1)=0
+      ISHELL(2)=1
+      ISHELL(3)=1
 C FLUORESENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -31916,7 +33567,7 @@ C FLUORESENCE DATA
       EG2(3)=5.0
 C
       DO 776 J=1,NION
-      DO 777 I=1,4000
+      DO 777 I=1,NASIZE
       IF(EG(I).GT.EION(J)) THEN
        IOFFION(J)=I-1
        GO TO 776
@@ -31974,10 +33625,12 @@ C CALC ROTATIONAL TRANSITION ENERGIES
       EIN(83)  = 12.2
       EIN(84)  = 13.2
       EIN(85)  = 15.0
+      EIN(86)  =  0.0
+      EIN(87)  =  0.0
 C  OFFSET ENERGY FOR EXCITATION LEVELS ANGULAR DISTRIBUTION
-      DO 551 NL=80,85
-      DO 651 I=1,4000
-      IF(EG(I).GT.EIN(NL)) THEN
+      DO 551 NL=1,85
+      DO 651 I=1,NASIZE
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
        IOFFN(NL)=I-1
        GO TO 551
       ENDIF
@@ -32056,8 +33709,8 @@ C------------------------------------------------------
       IF(NANISO.EQ.0) THEN
       SCRPT(2)=' ELASTIC    ISOTROPIC          CO2                '  
       ENDIF
-      SCRPT(3)=' IONISATION                       ELOSS=  13.773  '
-      SCRPT(4)=' IONISATION CARBON K-SHELL        ELOSS= 291.0    '
+      SCRPT(3)=' IONISATION                       ELOSS=  13.777  '
+      SCRPT(4)=' IONISATION CARBON K-SHELL        ELOSS= 285.0    '
       SCRPT(5)=' IONISATION OXYGEN K-SHELL        ELOSS= 532.0    '
       SCRPT(6)=' ATTACHMENT                                       '
       SCRPT(7)='                                                  '
@@ -32147,10 +33800,16 @@ C------------------------------------------------------
       SCRPT(91)=' EXCITATION                       ELOSS= 12.200   '
       SCRPT(92)=' EXCITATION                       ELOSS= 13.200   '
       SCRPT(93)=' EXCITATION                       ELOSS= 15.000   '
-      EN=-ESTEP/2.0
+      SCRPT(94)=' BREMSSTRAHLUNG FROM CARBON ATOM                  '
+      SCRPT(95)=' BREMSSTRAHLUNG FROM OXYGEN ATOMS                 '
+C     EN=-ESTEP/2.0
       DO 9000 I=1,NSTEP   
-C      EN=EG(I)                                           
-      EN=EN+ESTEP 
+      EN=EG(I)                                           
+C     EN=EN+ESTEP 
+      GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
+      GAMMA2=GAMMA1*GAMMA1
+      BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
+      BETA2=BETA*BETA
 C ELASTIC USE LOG INTERPOLATION
       IF(EN.LE.XEN(1)) THEN 
        QMOM=YMOM(1)*1.D-16
@@ -32191,6 +33850,8 @@ C ELASTIC USE LOG INTERPOLATION
       A=(YXJ-YXJ1)/(XNJ-XNJ1)                                           
       B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)                                  
       PQ2=DEXP(A*DLOG(EN)+B)
+C EPSILON=1.0-YEPS
+      PQ2=1.0D0-PQ2
    20 CONTINUE
 C CALC CHANGE IN ELASTIC CROSS SECTION DUE TO CHANGE IN ELASTIC
 C SCATTERING FROM BEND MODES ( CHANGE RELATIVE TO X-SECTION AT 293.15K)
@@ -32237,7 +33898,7 @@ C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
       BETA2=BETA*BETA
       X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)/0.9921
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)/0.9921
    24 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -32285,7 +33946,8 @@ C IONISATION ENERGY
 C
 C ATTACHMENT                                                            
   301 Q(4,I)=0.0                                                        
-      IF(EN.LE.XATT(1)) GO TO 40                                  
+      IF(EN.LE.XATT(1)) GO TO 40
+      IF(EN.GT.XATT(NATT)) GO TO 33                                 
       DO 31  J=2,NATT                                                  
       IF(EN.LE.XATT(J)) GO TO 32                                        
    31 CONTINUE                                                          
@@ -32293,6 +33955,8 @@ C ATTACHMENT
    32 A=(YATT(J)-YATT(J-1))/(XATT(J)-XATT(J-1))                         
       B=(XATT(J-1)*YATT(J)-XATT(J)*YATT(J-1))/(XATT(J-1)-XATT(J))       
       Q(4,I)=1.0D-16*(A*EN+B)
+      GO TO 40
+   33 Q(4,I)=YATT(NATT)*(XATT(NATT)/EN)**3*1.D-16
 C COUNTING IONISATION
    40 Q(5,I)=0.0     
       PEQEL(5,I)=0.5
@@ -32308,7 +33972,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.0D-16
       GO TO 44
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
-   43 Q(5,I)=CONST*(AM2*X1+C*X2)
+   43 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
    44 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -32328,6 +33992,9 @@ C SUPERELASTIC ROTATION
       L=(K/2)+1
       PEQIN(K,I)=0.5
       IF(NANISO.EQ.2) PEQIN(K,I)=0.0
+      IF(EN.LT.(4.0*DABS(EIN(K)))) GO TO 50
+      IF(NANISO.GT.0) PEQIN(K,I)=PEQEL(2,(I-IOFFN(K)))
+   50 CONTINUE
    51 QIN(K,I)=PJ(L)*QBK*DSQRT(1.0-EIN(K)/EN)*AJ*(AJ-1.0)/((2.0*AJ+1.0)*
      /(2.0*AJ-1.0))
 C ROTATION                 
@@ -32340,20 +34007,24 @@ C ROTATION
       L=(K+1)/2
       QIN(K,I)=PJ(L)*QBK*DSQRT(1.0-EIN(K)/EN)*(AJ+2.0)*(AJ+1.0)/((2.0*AJ
      /+3.0)*(2.0*AJ+1.0))
+      IF(EN.LT.(4.0*EIN(K))) GO TO 52
+      IF(NANISO.GT.0) PEQIN(K,I)=PEQEL(2,(I-IOFFN(K)))
    52 CONTINUE
-C BORN (1/E) FALL OFF IN ROTATONAL X-SEC ABOVE 6.0 EV 
-C AND SET TO EFFECTIVE ZERO ABOVE 1KEV.
+C BORN (1/E) FALL OFF IN ROTATONAL X-SEC ABOVE 6.0 EV .
       IF(EN.LT.6.0) GO TO 80
       DO 70 K=1,60
       QIN(K,I)=QIN(K,I)*6.0/EN
-   70 IF(EN.GT.1000.0) QIN(K,I)=1.0D-30
+   70 CONTINUE
    80 CONTINUE   
 C                                                                        
 C  SUPERELASTIC V2  BEND MODE                                            
       QIN(61,I)=0.0 
+      PEQIN(61,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(61,I)=0.0D0
       IF(EN.LE.0.0) GO TO 150
       EFAC=DSQRT(1.0-(EIN(61)/EN))
-      QIN(61,I)=AMPV2*DLOG((EFAC+1.0)/(EFAC-1.0))/EN                    
+      QIN(61,I)=AMPV2*DLOG((EFAC+1.0)/(EFAC-1.0))/EN 
+      IF((EN+EIN(62)).GT.XV2(NV2)) GO TO 125                   
       DO 110 J=2,NV2                                                    
       IF((EN+EIN(62)).LE.XV2(J)) GOTO 120                               
   110 CONTINUE                                                          
@@ -32361,12 +34032,19 @@ C  SUPERELASTIC V2  BEND MODE
   120 A=(YV2(J)-YV2(J-1))/(XV2(J)-XV2(J-1))                     
       B=(XV2(J-1)*YV2(J)-XV2(J)*YV2(J-1))/(XV2(J-1)-XV2(J)) 
       QIN(61,I)=QIN(61,I)+(EN+EIN(62))*(A*(EN+EIN(62))+B)/EN
-      QIN(61,I)=QIN(61,I)*APOPV2/DEGV2*1.D-16
+      GO TO 126
+  125 QIN(61,I)=QIN(61,I)+YV2(NV2)*XV2(NV2)*(EN+EIN(62))/(EN*EN)
+  126 QIN(61,I)=QIN(61,I)*APOPV2/DEGV2*1.D-16
+      IF(EN.LT.(3.0*DABS(EIN(61)))) GO TO 150
+      IF(NANISO.GT.0) PEQIN(61,I)=PEQEL(2,(I-IOFFN(61)))
 C V2  BEND MODE                                                             
   150 QIN(62,I)=0.0                        
+      PEQIN(62,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(62,I)=0.0D0
       IF(EN.LE.EIN(62)) GO TO 200 
       EFAC=DSQRT(1.0-(EIN(62)/EN))
-      QIN(62,I)=AMPV2*DLOG((1.0+EFAC)/(1.0-EFAC))/EN                    
+      QIN(62,I)=AMPV2*DLOG((1.0+EFAC)/(1.0-EFAC))/EN
+      IF(EN.GT.XV2(NV2)) GO TO 175                    
       DO 160 J=2,NV2                                                    
       IF(EN.LE.XV2(J)) GO TO 170                                      
   160 CONTINUE                                                          
@@ -32374,12 +34052,19 @@ C V2  BEND MODE
   170 A=(YV2(J)-YV2(J-1))/(XV2(J)-XV2(J-1))                     
       B=(XV2(J-1)*YV2(J)-XV2(J)*YV2(J-1))/(XV2(J-1)-XV2(J)) 
       QIN(62,I)=QIN(62,I)+(A*EN+B)
-      QIN(62,I)=QIN(62,I)*APOPGS*1.D-16
+      GO TO 176
+  175 QIN(62,I)=QIN(62,I)+YV2(NV2)*XV2(NV2)/EN
+  176 QIN(62,I)=QIN(62,I)*APOPGS*1.D-16
+      IF(EN.LT.(3.0*EIN(62))) GO TO 200
+      IF(NANISO.GT.0) PEQIN(62,I)=PEQEL(2,(I-IOFFN(62)))
 C     
 C  SUPERELASTIC 2V2 BEND MODE HARMONIC                                               
   200 CONTINUE                                                          
       QIN(63,I)=0.0  
-      IF(EN.LE.0.0) GO TO 250                                        
+      PEQIN(63,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(63,I)=0.0D0
+      IF(EN.LE.0.0) GO TO 250                 
+      IF((EN+EIN(64)).GT.X2V2(N2V2)) GO TO 225                       
       DO 210 J=2,N2V2                                                   
       IF((EN+EIN(64)).LE.X2V2(J)) GOTO 220                              
   210 CONTINUE                                                          
@@ -32387,23 +34072,38 @@ C  SUPERELASTIC 2V2 BEND MODE HARMONIC
   220 A=(Y2V2(J)-Y2V2(J-1))/(X2V2(J)-X2V2(J-1))                     
       B=(X2V2(J-1)*Y2V2(J)-X2V2(J)*Y2V2(J-1))/(X2V2(J-1)-X2V2(J)) 
       QIN(63,I)=(EN+EIN(64))*(A*(EN+EIN(64))+B)/EN
-      QIN(63,I)=QIN(63,I)*APOP2V2/DEG2V2*1.D-16                
+      GO TO 226
+  225 QIN(63,I)=Y2V2(N2V2)*X2V2(N2V2)*(EN+EIN(64))/(EN*EN)
+  226 QIN(63,I)=QIN(63,I)*APOP2V2/DEG2V2*1.D-16      
+      IF(EN.LT.(3.0*DABS(EIN(63)))) GO TO 250
+      IF(NANISO.GT.0) PEQIN(63,I)=PEQEL(2,(I-IOFFN(63)))          
 C  2V2 BEND MODE HARMONIC                                               
   250 CONTINUE                                                          
       QIN(64,I)=0.0  
-      IF(EN.LE.EIN(64)) GO TO 300                                       
+      PEQIN(64,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(64,I)=0.0D0
+      IF(EN.LE.EIN(64)) GO TO 300       
+      IF(EN.GT.X2V2(N2V2)) GO TO 275                                
       DO 260 J=2,N2V2                                                   
       IF(EN.LE.X2V2(J)) GOTO 270                                       
   260 CONTINUE                                                          
       J=N2V2                                                            
   270 A=(Y2V2(J)-Y2V2(J-1))/(X2V2(J)-X2V2(J-1))                     
       B=(X2V2(J-1)*Y2V2(J)-X2V2(J)*Y2V2(J-1))/(X2V2(J-1)-X2V2(J)) 
-      QIN(64,I)=(A*EN+B)*APOPGS*1.D-16                                  
+      QIN(64,I)=(A*EN+B)
+      GO TO 276
+  275 QIN(64,I)=Y2V2(N2V2)*X2V2(N2V2)/EN  
+  276 QIN(64,I)=QIN(64,I)*APOPGS*1.D-16  
+      IF(EN.LT.(3.0*EIN(64))) GO TO 300
+      IF(NANISO.GT.0) PEQIN(64,I)=PEQEL(2,(I-IOFFN(64)))                
 C  
 C SUPERELASTIC V1 SYMMETRIC STRETCH                                
   300 CONTINUE                                                          
       QIN(65,I)=0.0  
-      IF(EN.LE.0.0) GO TO 350                                        
+      PEQIN(65,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(65,I)=0.0D0
+      IF(EN.LE.0.0) GO TO 350   
+      IF((EN+EIN(66)).GT.XV1(NV1)) GO TO 325                           
       DO 310 J=2,NV1                                                    
       IF((EN+EIN(66)).LE.XV1(J)) GOTO 320                               
   310 CONTINUE                                                          
@@ -32411,48 +34111,78 @@ C SUPERELASTIC V1 SYMMETRIC STRETCH
   320 A=(YV1(J)-YV1(J-1))/(XV1(J)-XV1(J-1))                     
       B=(XV1(J-1)*YV1(J)-XV1(J)*YV1(J-1))/(XV1(J-1)-XV1(J)) 
       QIN(65,I)=(EN+EIN(66))*(A*(EN+EIN(66))+B)/EN
-      QIN(65,I)=QIN(65,I)*APOPV1/DEGV1*1.D-16                           
+      GO TO 326
+  325 QIN(65,I)=YV1(NV1)*XV1(NV1)*(EN+EIN(66))/(EN*EN)
+  326 QIN(65,I)=QIN(65,I)*APOPV1/DEGV1*1.D-16   
+      IF(EN.LT.(3.0*DABS(EIN(65)))) GO TO 350
+      IF(NANISO.GT.0) PEQIN(65,I)=PEQEL(2,(I-IOFFN(65)))               
 C V1 SYMMETRIC STRETCH                                                 
   350 CONTINUE                                                          
       QIN(66,I)=0.0  
-      IF(EN.LE.EIN(66)) GO TO 400                                       
+      PEQIN(66,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(66,I)=0.0D0
+      IF(EN.LE.EIN(66)) GO TO 400              
+      IF(EN.GT.XV1(NV1)) GO TO 375                         
       DO 360 J=2,NV1                                                    
       IF(EN.LE.XV1(J)) GOTO 370                                       
   360 CONTINUE                                                          
       J=NV1                                                             
   370 A=(YV1(J)-YV1(J-1))/(XV1(J)-XV1(J-1))                     
       B=(XV1(J-1)*YV1(J)-XV1(J)*YV1(J-1))/(XV1(J-1)-XV1(J)) 
-      QIN(66,I)=(A*EN+B)*APOPGS*1.D-16                                  
+      QIN(66,I)=(A*EN+B)
+      GO TO 376 
+  375 QIN(66,I)=YV1(NV1)*XV1(NV1)/EN
+  376 QIN(66,I)=QIN(66,I)*APOPGS*1.D-16
+      IF(EN.LT.(3.0*EIN(66))) GO TO 400
+      IF(NANISO.GT.0) PEQIN(66,I)=PEQEL(2,(I-IOFFN(66)))             
 C  
 C SUPERELASTIC 3V2 + V12                                                
   400 CONTINUE                                                          
       QIN(67,I)=0.0  
-      IF(EN.LE.0.0) GO TO 450                                        
+      PEQIN(67,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(67,I)=0.0D0
+      IF(EN.LE.0.0) GO TO 450 
+      IF((EN+EIN(68)).GT.X3V2(N3V2)) GO TO 425                         
       DO 410 J=2,N3V2                                                   
       IF((EN+EIN(68)).LE.X3V2(J)) GOTO 420                              
   410 CONTINUE                                                          
       J=N3V2                                                            
   420 A=(Y3V2(J)-Y3V2(J-1))/(X3V2(J)-X3V2(J-1))                     
       B=(X3V2(J-1)*Y3V2(J)-X3V2(J)*Y3V2(J-1))/(X3V2(J-1)-X3V2(J))
-      QIN(67,I)=(EN+EIN(68))*(A*(EN+EIN(68))+B)/EN 
-      QIN(67,I)=QIN(67,I)*APOP3V2/DEG3V2*1.D-16                         
+      QIN(67,I)=(EN+EIN(68))*(A*(EN+EIN(68))+B)/EN
+      GO TO 426
+  425 QIN(67,I)=Y3V2(N3V2)*X3V2(N3V2)*(EN+EIN(68))/(EN*EN) 
+  426 QIN(67,I)=QIN(67,I)*APOP3V2/DEG3V2*1.D-16  
+      IF(EN.LT.(3.0*DABS(EIN(68)))) GO TO 450
+      IF(NANISO.GT.0) PEQIN(67,I)=PEQEL(2,(I-IOFFN(67)))                
 C 3V2 + V12                                                             
   450 CONTINUE                                                          
       QIN(68,I)=0.0  
-      IF(EN.LE.EIN(68)) GO TO 500                                       
+      PEQIN(68,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(68,I)=0.0D0
+      IF(EN.LE.EIN(68)) GO TO 500
+      IF(EN.GT.X3V2(N3V2)) GO TO 475                              
       DO 460 J=2,N3V2                                                   
       IF(EN.LE.X3V2(J)) GOTO 470                                       
   460 CONTINUE                                                          
       J=N3V2                                                            
   470 A=(Y3V2(J)-Y3V2(J-1))/(X3V2(J)-X3V2(J-1))                     
       B=(X3V2(J-1)*Y3V2(J)-X3V2(J)*Y3V2(J-1))/(X3V2(J-1)-X3V2(J)) 
-      QIN(68,I)=(A*EN+B)*APOPGS*1.D-16                                  
+      QIN(68,I)=(A*EN+B)  
+      GO TO 476
+  475 QIN(68,I)=Y3V2(N3V2)*X3V2(N3V2)/EN
+  476 QIN(68,I)=QIN(68,I)*APOPGS*1.D-16
+      IF(EN.LT.(3.0*EIN(68))) GO TO 500
+      IF(NANISO.GT.0) PEQIN(68,I)=PEQEL(2,(I-IOFFN(68)))               
 C
 C  SUPERELASTIC V3 ASYMMETRIC STRETCH                                                     
   500 QIN(69,I)=0.0  
+      PEQIN(69,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(69,I)=0.0D0
       IF(EN.LE.0.0) GO TO 550
       EFAC=DSQRT(1.0-(EIN(69)/EN))
-      QIN(69,I)=AMPV3*DLOG((EFAC+1.0)/(EFAC-1.0))/EN                    
+      QIN(69,I)=AMPV3*DLOG((EFAC+1.0)/(EFAC-1.0))/EN    
+      IF((EN+EIN(70)).GT.XV3(NV3)) GO TO 525                
       DO 510 J=2,NV3                                                    
       IF((EN+EIN(70)).LE.XV3(J)) GOTO 520                               
   510 CONTINUE                                                          
@@ -32460,12 +34190,19 @@ C  SUPERELASTIC V3 ASYMMETRIC STRETCH
   520 A=(YV3(J)-YV3(J-1))/(XV3(J)-XV3(J-1))                     
       B=(XV3(J-1)*YV3(J)-XV3(J)*YV3(J-1))/(XV3(J-1)-XV3(J)) 
       QIN(69,I)=QIN(69,I)+(EN+EIN(70))*(A*(EN+EIN(70))+B)/EN
-      QIN(69,I)=QIN(69,I)*APOPV3/DEGV3*1.D-16
+      GO TO 526
+  525 QIN(69,I)=QIN(69,I)+YV3(NV3)*XV3(NV3)*(EN+EIN(70))/(EN*EN)
+  526 QIN(69,I)=QIN(69,I)*APOPV3/DEGV3*1.D-16
+      IF(EN.LT.(3.0*DABS(EIN(69))))  GO TO 550
+      IF(NANISO.GT.0) PEQIN(69,I)=PEQEL(2,(I-IOFFN(69)))
 C V3  ASYMMETRIC STRETCH                                                    
   550 QIN(70,I)=0.0  
+      PEQIN(70,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(70,I)=0.0D0
       IF(EN.LE.EIN(70)) GO TO 600 
       EFAC=DSQRT(1.0-(EIN(70)/EN))
-      QIN(70,I)=AMPV3*DLOG((1.0+EFAC)/(1.0-EFAC))/EN                    
+      QIN(70,I)=AMPV3*DLOG((1.0+EFAC)/(1.0-EFAC))/EN  
+      IF(EN.GT.XV3(NV3)) GO TO 575                  
       DO 560 J=2,NV3                                                    
       IF(EN.LE.XV3(J)) GO TO 570                                      
   560 CONTINUE                                                          
@@ -32473,48 +34210,76 @@ C V3  ASYMMETRIC STRETCH
   570 A=(YV3(J)-YV3(J-1))/(XV3(J)-XV3(J-1))                     
       B=(XV3(J-1)*YV3(J)-XV3(J)*YV3(J-1))/(XV3(J-1)-XV3(J)) 
       QIN(70,I)=QIN(70,I)+(A*EN+B)
-      QIN(70,I)=QIN(70,I)*APOPGS*1.D-16
+      GO TO 576
+  575 QIN(70,I)=QIN(70,I)+YV3(NV3)*XV3(NV3)/EN
+  576 QIN(70,I)=QIN(70,I)*APOPGS*1.D-16
+      IF(EN.LT.(3.0*EIN(70))) GO TO 600
+      IF(NANISO.GT.0) PEQIN(70,I)=PEQEL(2,(I-IOFFN(70)))
 C     
 C  4V2 + 2V1 + V12V2  POLYAD 3                                                 
   600 CONTINUE                                                          
       QIN(71,I)=0.0  
-      IF(EN.LE.EIN(71)) GO TO 650                                       
+      PEQIN(71,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(71,I)=0.0D0
+      IF(EN.LE.EIN(71)) GO TO 650 
+      IF(EN.GT.XVPD3(NPD3)) GO TO 625                                  
       DO 610 J=2,NPD3                                                   
       IF(EN.LE.XVPD3(J)) GOTO 620                                       
   610 CONTINUE                                                          
       J=NPD3                                                           
   620 A=(YVPD3(J)-YVPD3(J-1))/(XVPD3(J)-XVPD3(J-1))                     
       B=(XVPD3(J-1)*YVPD3(J)-XVPD3(J)*YVPD3(J-1))/(XVPD3(J-1)-XVPD3(J)) 
-      QIN(71,I)=(A*EN+B)*1.D-16                                         
+      QIN(71,I)=(A*EN+B)*1.D-16             
+      GO TO 626
+  625 QIN(71,I)=YVPD3(NPD3)*XVPD3(NPD3)/EN*1.D-16       
+  626 IF(EN.LT.(3.0*EIN(71))) GO TO 650
+      IF(NANISO.GT.0) PEQIN(71,I)=PEQEL(2,(I-IOFFN(71)))
 C                                      
 C       3V2V1  + 2V1V2                                                   
   650 CONTINUE                                                          
       QIN(72,I)=0.0  
-      IF(EN.LE.EIN(72)) GO TO 700                                       
+      PEQIN(72,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(72,I)=0.0D0
+      IF(EN.LE.EIN(72)) GO TO 700                         
+      IF(EN.GT.XV130(NV130)) GO TO 675              
       DO 660 J=2,NV130                                                  
       IF(EN.LE.XV130(J)) GOTO 670                                       
   660 CONTINUE                                                          
       J=NV130                                                           
   670 A=(YV130(J)-YV130(J-1))/(XV130(J)-XV130(J-1))                     
       B=(XV130(J-1)*YV130(J)-XV130(J)*YV130(J-1))/(XV130(J-1)-XV130(J)) 
-      QIN(72,I)=(A*EN+B)*1.D-16                                         
+      QIN(72,I)=(A*EN+B)*1.D-16       
+      GO TO 676
+  675 QIN(72,I)=YV130(NV130)*XV130(NV130)/EN*1.D-16   
+  676 IF(EN.LT.(3.0*EIN(72))) GO TO 700
+      IF(NANISO.GT.0) PEQIN(72,I)=PEQEL(2,(I-IOFFN(72)))
 C                                      
 C   POLYAD 4                                                                    
   700 CONTINUE                                                          
       QIN(73,I)=0.0  
-      IF(EN.LE.EIN(73)) GO TO 750                                       
+      PEQIN(73,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(73,I)=0.0D0
+      IF(EN.LE.EIN(73)) GO TO 750                   
+      IF(EN.GT.XVPD4(NPD4)) GO TO 725                    
       DO 710 J=2,NPD4                                                   
       IF(EN.LE.XVPD4(J)) GOTO 720                                       
   710 CONTINUE                                                          
       J=NPD4                                                            
   720 A=(YVPD4(J)-YVPD4(J-1))/(XVPD4(J)-XVPD4(J-1))                     
       B=(XVPD4(J-1)*YVPD4(J)-XVPD4(J)*YVPD4(J-1))/(XVPD4(J-1)-XVPD4(J)) 
-      QIN(73,I)=(A*EN+B)*1.D-16                                         
+      QIN(73,I)=(A*EN+B)*1.D-16      
+      GO TO 726
+  725 QIN(73,I)=YVPD4(NPD4)*XVPD4(NPD4)/EN*1.D-16     
+  726 IF(EN.LT.(3.0*EIN(73))) GO TO 750
+      IF(NANISO.GT.0) PEQIN(73,I)=PEQEL(2,(I-IOFFN(73)))
 C
 C  PLOYAD 5     
   750 CONTINUE                                                          
       QIN(74,I)=0.0  
-      IF(EN.LE.EIN(74)) GO TO 800                                       
+      PEQIN(74,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(74,I)=0.0D0
+      IF(EN.LE.EIN(74)) GO TO 800
+      IF(EN.GT.XVPD5(NPD5)) GO TO 775                          
       DO 760 J=2,NPD5                                                   
       IF(EN.LE.XVPD5(J)) GOTO 770                                       
   760 CONTINUE                                                          
@@ -32522,11 +34287,18 @@ C  PLOYAD 5
   770 A=(YVPD5(J)-YVPD5(J-1))/(XVPD5(J)-XVPD5(J-1))                     
       B=(XVPD5(J-1)*YVPD5(J)-XVPD5(J)*YVPD5(J-1))/(XVPD5(J-1)-XVPD5(J)) 
       QIN(74,I)=(A*EN+B)*1.D-16  
+      GO TO 799
+  775 QIN(74,I)=YVPD5(NPD5)*XVPD5(NPD5)/EN*1.D-16
+  799 IF(EN.LT.(3.0*EIN(74))) GO TO 800
+      IF(NANISO.GT.0) PEQIN(74,I)=PEQEL(2,(I-IOFFN(74)))
 C                                              
 C   POLYAD 6                                                                    
   800 CONTINUE                                                          
       QIN(75,I)=0.0  
-      IF(EN.LE.EIN(75)) GO TO 850                                       
+      PEQIN(75,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(75,I)=0.0D0
+      IF(EN.LE.EIN(75)) GO TO 850                
+      IF(EN.GT.XVPD6(NPD6)) GO TO 825                       
       DO 810 J=2,NPD6                                                   
       IF(EN.LE.XVPD6(J)) GOTO 820                                       
   810 CONTINUE                                                          
@@ -32534,11 +34306,18 @@ C   POLYAD 6
   820 A=(YVPD6(J)-YVPD6(J-1))/(XVPD6(J)-XVPD6(J-1))                     
       B=(XVPD6(J-1)*YVPD6(J)-XVPD6(J)*YVPD6(J-1))/(XVPD6(J-1)-XVPD6(J)) 
       QIN(75,I)=(A*EN+B)*1.D-16 
+      GO TO 826
+  825 QIN(75,I)=YVPD6(NPD6)*XVPD6(NPD6)/EN*1.D-16
+  826 IF(EN.LT.(3.0*EIN(75)))  GO TO 850
+      IF(NANISO.GT.0) PEQIN(75,I)=PEQEL(2,(I-IOFFN(75)))
 C                                             
 C   POLYAD 7                                                                    
   850 CONTINUE                                                          
       QIN(76,I)=0.0  
-      IF(EN.LE.EIN(76)) GO TO 900                                       
+      PEQIN(76,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(76,I)=0.0D0
+      IF(EN.LE.EIN(76)) GO TO 900                
+      IF(EN.GT.XVPD7(NPD7)) GO TO 875                       
       DO 860 J=2,NPD7                                                   
       IF(EN.LE.XVPD7(J)) GOTO 870                                       
   860 CONTINUE                                                          
@@ -32546,11 +34325,18 @@ C   POLYAD 7
   870 A=(YVPD7(J)-YVPD7(J-1))/(XVPD7(J)-XVPD7(J-1))                     
       B=(XVPD7(J-1)*YVPD7(J)-XVPD7(J)*YVPD7(J-1))/(XVPD7(J-1)-XVPD7(J)) 
       QIN(76,I)=(A*EN+B)*1.D-16 
+      GO TO 876
+  875 QIN(76,I)=YVPD7(NPD7)*XVPD7(NPD7)/EN*1.D-16
+  876 IF(EN.LT.(3.0*EIN(76))) GO TO 900
+      IF(NANISO.GT.0) PEQIN(76,I)=PEQEL(2,(I-IOFFN(76)))
 C                                              
 C   POLYAD 8                                                                    
   900 CONTINUE                                                          
       QIN(77,I)=0.0  
-      IF(EN.LE.EIN(77)) GO TO 950                                       
+      PEQIN(77,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(77,I)=0.0D0
+      IF(EN.LE.EIN(77)) GO TO 950                
+      IF(EN.GT.XVPD8(NPD8)) GO TO 925                       
       DO 910 J=2,NPD8                                                   
       IF(EN.LE.XVPD8(J)) GOTO 920                                       
   910 CONTINUE                                                          
@@ -32558,11 +34344,18 @@ C   POLYAD 8
   920 A=(YVPD8(J)-YVPD8(J-1))/(XVPD8(J)-XVPD8(J-1))                     
       B=(XVPD8(J-1)*YVPD8(J)-XVPD8(J)*YVPD8(J-1))/(XVPD8(J-1)-XVPD8(J)) 
       QIN(77,I)=(A*EN+B)*1.D-16
+      GO TO 926
+  925 QIN(77,I)=YVPD8(NPD8)*XVPD8(NPD8)/EN*1.D-16
+  926 IF(EN.LT.(3.0*EIN(77)))  GO TO 950
+      IF(NANISO.GT.0) PEQIN(77,I)=PEQEL(2,(I-IOFFN(77)))
 C                                               
 C   POLYAD 9                                                                    
   950 CONTINUE                                                          
       QIN(78,I)=0.0  
-      IF(EN.LE.EIN(78)) GO TO 1000                                      
+      PEQIN(78,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(78,I)=0.0D0
+      IF(EN.LE.EIN(78)) GO TO 1000               
+      IF(EN.GT.XVPD9(NPD9)) GO TO 975                       
       DO 960 J=2,NPD9                                                   
       IF(EN.LE.XVPD9(J)) GOTO 970                                       
   960 CONTINUE                                                          
@@ -32570,29 +34363,36 @@ C   POLYAD 9
   970 A=(YVPD9(J)-YVPD9(J-1))/(XVPD9(J)-XVPD9(J-1))                     
       B=(XVPD9(J-1)*YVPD9(J)-XVPD9(J)*YVPD9(J-1))/(XVPD9(J-1)-XVPD9(J)) 
       QIN(78,I)=(A*EN+B)*1.D-16     
+      GO TO 976 
+  975 QIN(78,I)=YVPD9(NPD9)*XVPD9(NPD9)/EN*1.D-16
+  976 IF(EN.LT.(3.0*EIN(78))) GO TO 1000
+      IF(NANISO.GT.0) PEQIN(78,I)=PEQEL(2,(I-IOFFN(78)))
 C                                          
 C   SUM OF HIGHER POLYADS                                                       
  1000 CONTINUE                                                          
       QIN(79,I)=0.0   
-      IF(EN.LE.EIN(79)) GO TO 1050                                      
+      PEQIN(79,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(79,I)=0.0D0
+      IF(EN.LE.EIN(79)) GO TO 1050               
+      IF(EN.GT.XVPDH(NPDH)) GO TO 1025                       
       DO 1010 J=2,NPDH                                                  
       IF(EN.LE.XVPDH(J)) GOTO 1020                                      
  1010 CONTINUE                                                          
       J=NPDH                                                            
  1020 A=(YVPDH(J)-YVPDH(J-1))/(XVPDH(J)-XVPDH(J-1))                     
       B=(XVPDH(J-1)*YVPDH(J)-XVPDH(J)*YVPDH(J-1))/(XVPDH(J-1)-XVPDH(J)) 
-      QIN(79,I)=(A*EN+B)*1.D-16                                         
-C SET  FLAT ANGULAR DISTRIBUTIONS FOR VIBRATIONS
-      DO 1030 KDUM=61,79
-      PEQIN(KDUM,I)=0.5
-      IF(NANISO.EQ.2) PEQIN(KDUM,I)=0.0
- 1030 CONTINUE
+      QIN(79,I)=(A*EN+B)*1.D-16       
+      GO TO 1026
+ 1025 QIN(79,I)=YVPDH(NPDH)*XVPDH(NPDH)/EN*1.D-16   
+ 1026 IF(EN.LT.(3.0*EIN(79))) GO TO 1050
+      IF(NANISO.GT.0) PEQIN(79,I)=PEQEL(2,(I-IOFFN(79)))
 C                        
  1050 CONTINUE                                                          
       QIN(80,I)=0.0  
       PEQIN(80,I)=0.5
       IF(NANISO.EQ.2) PEQIN(80,I)=0.0  
-      IF(EN.LE.EIN(80)) GO TO 1100                                      
+      IF(EN.LE.EIN(80)) GO TO 1100  
+      IF(EN.GT.XEXC1(NEXC1)) GO TO 1075                         
       DO 1060 J=2,NEXC1                                                 
       IF(EN.LE.XEXC1(J)) GOTO 1070                                      
  1060 CONTINUE                                                          
@@ -32600,14 +34400,18 @@ C
  1070 A=(YEXC1(J)-YEXC1(J-1))/(XEXC1(J)-XEXC1(J-1))                     
       B=(XEXC1(J-1)*YEXC1(J)-XEXC1(J)*YEXC1(J-1))/(XEXC1(J-1)-XEXC1(J)) 
       QIN(80,I)=(A*EN+B)*1.D-16 
-      IF(EN.LE.(2.0*EIN(80))) GO TO 1100   
-      PEQIN(80,I)=PEQEL(2,(I-IOFFN(80)))                              
+      GO TO 1076
+ 1075 QIN(80,I)=.01583/(EIN(80)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(80)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(80)+E(3))
+ 1076 IF(EN.LE.(2.0*EIN(80))) GO TO 1100   
+      IF(NANISO.GT.0) PEQIN(80,I)=PEQEL(2,(I-IOFFN(80)))               
 C                                                                       
  1100 CONTINUE                                                          
       QIN(81,I)=0.0   
       PEQIN(81,I)=0.5  
       IF(NANISO.EQ.2) PEQIN(81,I)=0.0                                  
-      IF(EN.LE.EIN(81)) GO TO 1150                                      
+      IF(EN.LE.EIN(81)) GO TO 1150                            
+      IF(EN.GT.XEXC2(NEXC2)) GO TO 1125          
       DO 1110 J=2,NEXC2                                                 
       IF(EN.LE.XEXC2(J)) GOTO 1120                                      
  1110 CONTINUE                                                          
@@ -32615,14 +34419,18 @@ C
  1120 A=(YEXC2(J)-YEXC2(J-1))/(XEXC2(J)-XEXC2(J-1))                     
       B=(XEXC2(J-1)*YEXC2(J)-XEXC2(J)*YEXC2(J-1))/(XEXC2(J-1)-XEXC2(J)) 
       QIN(81,I)=(A*EN+B)*1.D-16   
-      IF(EN.LE.(2.0*EIN(81))) GO TO 1150
-      PEQIN(81,I)=PEQEL(2,(I-IOFFN(81)))                          
+      GO TO 1126
+ 1125 QIN(81,I)=.02067/(EIN(81)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(81)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(81)+E(3))
+ 1126 IF(EN.LE.(2.0*EIN(81))) GO TO 1150
+      IF(NANISO.GT.0) PEQIN(81,I)=PEQEL(2,(I-IOFFN(81)))           
 C                                                                       
  1150 CONTINUE                                                          
       QIN(82,I)=0.0
       PEQIN(82,I)=0.5 
       IF(NANISO.EQ.2) PEQIN(82,I)=0.0                                 
-      IF(EN.LE.EIN(82)) GO TO 1200                                      
+      IF(EN.LE.EIN(82)) GO TO 1200
+      IF(EN.GT.XEXC3(NEXC3)) GO TO 1175
       DO 1160  J=2,NEXC3                                                
       IF(EN.LE.XEXC3(J)) GOTO 1170                                      
  1160 CONTINUE                                                          
@@ -32630,14 +34438,18 @@ C
  1170 A=(YEXC3(J)-YEXC3(J-1))/(XEXC3(J)-XEXC3(J-1))                     
       B=(XEXC3(J-1)*YEXC3(J)-XEXC3(J)*YEXC3(J-1))/(XEXC3(J-1)-XEXC3(J)) 
       QIN(82,I)=(A*EN+B)*1.D-16
-      IF(EN.LE.(2.0*EIN(82))) GO TO 1200
-      PEQIN(82,I)=PEQEL(2,(I-IOFFN(82))) 
+      GO TO 1176
+ 1175 QIN(82,I)=.4013/(EIN(82)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(82)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(82)+E(3))
+ 1176 IF(EN.LE.(2.0*EIN(82))) GO TO 1200
+      IF(NANISO.GT.0) PEQIN(82,I)=PEQEL(2,(I-IOFFN(82))) 
 C                                              
  1200 CONTINUE                                                          
       QIN(83,I)=0.0
       PEQIN(83,I)=0.5
       IF(NANISO.EQ.2) PEQIN(83,I)=0.0                                  
-      IF(EN.LE.EIN(83)) GO TO 1250                                      
+      IF(EN.LE.EIN(83)) GO TO 1250   
+      IF(EN.GT.XEXC4(NEXC4)) GO TO 1225                                
       DO 1210 J=2,NEXC4                                                 
       IF(EN.LE.XEXC4(J)) GOTO 1220                                      
  1210 CONTINUE                                                          
@@ -32645,14 +34457,18 @@ C
  1220 A=(YEXC4(J)-YEXC4(J-1))/(XEXC4(J)-XEXC4(J-1))                     
       B=(XEXC4(J-1)*YEXC4(J)-XEXC4(J)*YEXC4(J-1))/(XEXC4(J-1)-XEXC4(J)) 
       QIN(83,I)=(A*EN+B)*1.D-16 
-      IF(EN.LE.(2.0*EIN(83))) GO TO 1250
-      PEQIN(83,I)=PEQEL(2,(I-IOFFN(83)))                              
+      GO TO 1226
+ 1225 QIN(83,I)=.8180/(EIN(83)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(83)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(83)+E(3))
+ 1226 IF(EN.LE.(2.0*EIN(83))) GO TO 1250
+      IF(NANISO.GT.0) PEQIN(83,I)=PEQEL(2,(I-IOFFN(83)))       
 C                                                                       
  1250 CONTINUE                                                          
       QIN(84,I)=0.0 
       PEQIN(84,I)=0.5
       IF(NANISO.EQ.2) PEQIN(84,I)=0.0                                  
-      IF(EN.LE.EIN(84)) GO TO 1300                                      
+      IF(EN.LE.EIN(84)) GO TO 1300  
+      IF(EN.GT.XEXC5(NEXC5)) GO TO 1275                               
       DO 1260  J=2,NEXC5                                                
       IF(EN.LE.XEXC5(J)) GOTO 1270                                      
  1260 CONTINUE                                                          
@@ -32660,14 +34476,18 @@ C
  1270 A=(YEXC5(J)-YEXC5(J-1))/(XEXC5(J)-XEXC5(J-1))                     
       B=(XEXC5(J-1)*YEXC5(J)-XEXC5(J)*YEXC5(J-1))/(XEXC5(J-1)-XEXC5(J)) 
       QIN(84,I)=(A*EN+B)*1.D-16 
-      IF(EN.LE.(2.0*EIN(84))) GO TO 1300   
-      PEQIN(84,I)=PEQEL(2,(I-IOFFN(84)))                          
+      GO TO 1276
+ 1275 QIN(84,I)=2.400/(EIN(84)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(84)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(84)+E(3))
+ 1276 IF(EN.LE.(2.0*EIN(84))) GO TO 1300   
+      IF(NANISO.GT.0) PEQIN(84,I)=PEQEL(2,(I-IOFFN(84)))           
 C                                                                       
  1300 CONTINUE                                                          
       QIN(85,I)=0.0
       PEQIN(85,I)=0.5
       IF(NANISO.EQ.2) PEQIN(85,I)=0.0                              
-      IF(EN.LE.EIN(85)) GO TO 1400                                      
+      IF(EN.LE.EIN(85)) GO TO 1400   
+      IF(EN.GT.XEXC6(NEXC6)) GO TO 1325                              
       DO 1310  J=2,NEXC6                                                
       IF(EN.LE.XEXC6(J)) GOTO 1320                                      
  1310 CONTINUE                                                          
@@ -32675,9 +34495,29 @@ C
  1320 A=(YEXC6(J)-YEXC6(J-1))/(XEXC6(J)-XEXC6(J-1))                     
       B=(XEXC6(J-1)*YEXC6(J)-XEXC6(J)*YEXC6(J-1))/(XEXC6(J-1)-XEXC6(J)) 
       QIN(85,I)=(A*EN+B)*1.D-16 
-      IF(EN.LE.(2.0*EIN(85))) GO TO 1400
-      PEQIN(85,I)=PEQEL(2,(I-IOFFN(85)))                              
+      GO TO 1326
+ 1325 QIN(85,I)=.0732/(EIN(85)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(85)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(85)+E(3))
+ 1326 IF(EN.LE.(2.0*EIN(85))) GO TO 1400
+      IF(NANISO.GT.0) PEQIN(85,I)=PEQEL(2,(I-IOFFN(85)))                
  1400 CONTINUE
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+      QIN(86,I)=0.0
+      QIN(87,I)=0.0
+      IF(EN.LE.1000.) GO TO 1440
+      DO 1410 J=2,NBREM
+      IF(EN.LE.EBRM(J)) GO TO 1420
+ 1410 CONTINUE
+      J=NBREM
+ 1420 A=(DLOG(Z6T(J))-DLOG(Z6T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B=(DLOG(Z6T(J))*EBRM(J-1)-DLOG(Z6T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      A1=(DLOG(Z8T(J))-DLOG(Z8T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B1=(DLOG(Z8T(J))*EBRM(J-1)-DLOG(Z8T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      QIN(86,I)=DEXP(A*EN+B)*1.D-24
+      QIN(87,I)=DEXP(A1*EN+B1)*2.D-24
+ 1440 CONTINUE
 C SUM ROTATION 
       SUMR=0.0
       DO 1450 K=1,60
@@ -32696,7 +34536,9 @@ C SUM EXCITATION
 C GET CORRECT ELASTIC X-SECTION
       Q(2,I)=Q(2,I)-SUMR
 C Q(1,I) TOTAL USED FOR INFORMATION ONLY          
-      Q(1,I)=QELA+Q(5,I)+Q(4,I)+SUMV+SUME+QION(2,I)+QION(3,I)          
+C     Q(1,I)=QELA+Q(5,I)+Q(4,I)+SUMV+SUME+QION(2,I)+QION(3,I)+
+C    /QIN(86,I)+QIN(87,I)          
+      Q(1,I)=QELA+Q(5,I)+Q(4,I)+SUMV+SUME+QION(2,I)+QION(3,I)         
  9000 CONTINUE                                                          
 C                                                                       
 C     SAVE ON COMPUTING TIME                                            
@@ -32705,6 +34547,7 @@ C
       J=86-K   
       IF(EFINAL.LE.EIN(J)) NIN=J-1
  2000 CONTINUE
+C     IF(EFINAL.GT.1000.) NIN=87
 C                                                                
       RETURN                                                            
       END     
@@ -33619,6 +35462,8 @@ C
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)       
+      DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)   
       DIMENSION XEN(48),YXSEC(48),XVIB1(64),YVIB1(64),YVIB2(64),YVIB3(64
      /),YVIB4(64),XION(60),YION(60),X3ATT(30),Y3ATT(30),XATT(33),YATT(33
@@ -34022,45 +35867,49 @@ C  SAVE COMPUTE TIME
       IF(EFINAL.LE.EIN(1)) NIN=0                                        
 C                                                                       
       RETURN                                                            
-      END  
+      END
       SUBROUTINE GAS16(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY  
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,   
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)   
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)   
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)         
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250),
      /PJ(220) 
-      DIMENSION XELA(184),YELA(184),YMOM(184),YEPS(184),
+      DIMENSION XELA(216),YELA(216),YMOM(216),YEPS(216),
      /XROT(70),YROT(70),
-     /XVB1(91),YVB1(91),XVB2(73),YVB2(73),XVB3(74),YVB3(74),
-     /XVB4(54),YVB4(54),XVB5(44),YVB5(44),XVB6(45),YVB6(45),
-     /XVB7(46),YVB7(46),XVB8(44),YVB8(44),XVB9(39),YVB9(39),
-     /XVB10(39),YVB10(39),XVB11(39),YVB11(39),XVB12(37),YVB12(37),
-     /XVB13(35),YVB13(35),XVB14(32),YVB14(32),XVB15(36),YVB15(36),
-     /XTRP1(30),YTRP1(30),YTP1M(30),XTRP2(30),YTRP2(30),YTP2M(30),
-     /XTRP3(28),YTRP3(28),YTP3M(28),XTRP4(29),YTRP4(29),YTP4M(29),
-     /XTRP5(30),YTRP5(30),YTP5M(30),XTRP6(28),YTRP6(28),YTP6M(28),
-     /XTRP7(28),YTRP7(28),YTP7M(28),XTRP8(28),YTRP8(28),YTP8M(28),
-     /XTRP9(27),YTRP9(27),YTP9M(27),XTRP10(27),YTRP10(27),YTP10M(27),
-     /XTRP11(26),YTRP11(26),YTP11M(26),XTRP12(29),YTRP12(29),YTP12M(29),
-     /XTRP13(17),YTRP13(17),YTP13M(17),XTRP14(17),YTRP14(17),YTP14M(17),
-     /XSNG1(33),YSNG1(33),YSG1M(33),XSNG2(24),YSNG2(24),YSG2M(24),
-     /XSNG3(24),YSNG3(24),YSG3M(24),XSNG4(33),YSNG4(33),YSG4M(33),
-     /XSNG5(24),YSNG5(24),YSG5M(24),XSNG6(23),YSNG6(23),YSG6M(23),
-     /XSNG7(19),YSNG7(19),YSG7M(19),XSNG8(54),YSNG8(54),YSG8M(54),
-     /XSNG9(54),YSNG9(54),YSG9M(54),XSNG10(54),YSNG10(54),YSG10M(54),
-     /XSNG11(54),YSNG11(54),YSG11M(54),XSNG12(54),YSNG12(54),YSG12M(54),
-     /XSNG13(54),YSNG13(54),YSG13M(54),XSNG14(54),YSNG14(54),YSG14M(54),
-     /XSNG15(28),YSNG15(28),YSG15M(28),XKSH(69),YKSH(69),
+     /XVB1(87),YVB1(87),XVB2(69),YVB2(69),XVB3(70),YVB3(70),
+     /XVB4(50),YVB4(50),XVB5(40),YVB5(40),XVB6(41),YVB6(41),
+     /XVB7(42),YVB7(42),XVB8(40),YVB8(40),XVB9(35),YVB9(35),
+     /XVB10(35),YVB10(35),XVB11(35),YVB11(35),XVB12(33),YVB12(33),
+     /XVB13(31),YVB13(31),XVB14(28),YVB14(28),XVB15(32),YVB15(32),
+     /XTRP1(23),YTRP1(23),YTP1M(23),XTRP2(23),YTRP2(23),YTP2M(23),
+     /XTRP3(21),YTRP3(21),YTP3M(21),XTRP4(22),YTRP4(22),YTP4M(22),
+     /XTRP5(23),YTRP5(23),YTP5M(23),XTRP6(21),YTRP6(21),YTP6M(21),
+     /XTRP7(21),YTRP7(21),YTP7M(21),XTRP8(21),YTRP8(21),YTP8M(21),
+     /XTRP9(20),YTRP9(20),YTP9M(20),XTRP10(20),YTRP10(20),YTP10M(20),
+     /XTRP11(19),YTRP11(19),YTP11M(19),XTRP12(22),YTRP12(22),YTP12M(22),
+     /XTRP13(10),YTRP13(10),YTP13M(10),XTRP14(10),YTRP14(10),YTP14M(10),
+     /XSNG1(19),YSNG1(19),YSG1M(19),XSNG2(17),YSNG2(17),YSG2M(17),
+     /XSNG3(17),YSNG3(17),YSG3M(17),XSNG4(19),YSNG4(19),YSG4M(19),
+     /XSNG5(17),YSNG5(17),YSG5M(17),XSNG6(16),YSNG6(16),YSG6M(16),
+     /XSNG7(12),YSNG7(12),YSG7M(12),XSNG8(8),YSNG8(8),YSG8M(8),
+     /XSNG9(16),YSNG9(16),YSG9M(16),XSNG10(8),YSNG10(8),YSG10M(8),
+     /XSNG11(8),YSNG11(8),YSG11M(8),XSNG12(8),YSNG12(8),YSG12M(8),
+     /XSNG13(8),YSNG13(8),YSG13M(8),XSNG14(8),YSNG14(8),YSG14M(8),
+     /XSNG15(8),YSNG15(8),YSG15M(8),
+     /XKSH(89),YKSH(89),
      /XION(87),YION(87),YINC(87),IOFFN(121),IOFFION(10)
+      DIMENSION Z7T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)      
       CHARACTER*25 NAME                                                 
       DATA XELA/0.00,.001,.0015,.0018,.002,.0025,.003,.004,.005,.006,
@@ -34080,8 +35929,11 @@ C
      /10000.,1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,3.5D4,4.0D4,4.5D4,
      /5.0D4,6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,
      /2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,
-     /1.0D6,1.25D6,1.50D6,1.75D6,2.0D6,2.5D6,3.0D6,4.0D6,5.0D6,6.0D6,
-     /8.0D6,1.0D7,1.5D7,2.0D7/
+     /1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,
+     /5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,
+     /2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,
+     /1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,
+     /5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
 C ELASTIC +ROTATION X-SECTION
       DATA YELA/1.12,1.377,1.446,1.484,1.510,1.570,1.640,1.738,1.830,
      /1.928,
@@ -34102,9 +35954,11 @@ C ELASTIC +ROTATION X-SECTION
      /.0306,.0262,.0231,.0207,.0189,.0174,.0148,.0130,.0118,.0108,
      /.00953,.00868,.00808,.00764,.00730,.00703,.00664,.00637,.00617,
      /.00602, 
-     /.00591,.00572,.00560,.00552,.00546,.00539,.00535,.00530,.00528,
-     /.00527,
-     /.00525,.00525,.00524,.00524/
+     /.00591,.00572,.00560,.00552,.00546,.00539,.00535,.00532,.00530,
+     /.00529,
+     /.00528,.00527,.00525,.00525,.00525,.00524,.00524,.00524,.00524,
+     /.005236,
+     /26*.005234/
 C ELASTIC+ROTATION MOMENTUM TRANSFER X-SECTION           
       DATA YMOM/1.12,1.377,1.446,1.484,1.510,1.570,1.640,1.738,1.830,
      /1.928,
@@ -34128,44 +35982,57 @@ C ELASTIC+ROTATION MOMENTUM TRANSFER X-SECTION
      /1.09D-5,8.71D-6,
      /6.04D-6,4.50D-6,3.52D-6,2.86D-6,2.38D-6,2.02D-6,1.52D-6,1.20D-6,
      /9.83D-7,8.21D-7,
-     /6.99D-7,5.00D-7,3.77D-7,2.97D-7,2.40D-7,1.68D-7,1.25D-7,7.78D-8,
-     /5.34D-8,3.91D-8,
-     /2.37D-8,1.60D-8,7.73D-9,4.58D-9/
-C ELASTIC ANISOTROPY FUNCTION
-      DATA YEPS/20*0.00,
-     /-.01974,-.06500,-.09085,-.11025,-.12263,-.12532,-.13709,-.15311,
-     /-.18909,-.17321,
-     /-.19143,-.17651,-.18619,-.19046,-.21464,-.27297,-.30840,-.30369,
-     /-.25314,-.19066,
-     /-.13451,-.06001,0.00429,0.00281,0.03393,-.01794,-.08128,-.11047,
-     /-.12077,-.11898,
-     /-.12034,-.13112,-.13750,-.12243,-.10323,-.08700,-.09660,-.11142,
-     /-.11699,-.08770,
-     /-.07822,-.08972,-.10807,-.11576,-.09314,-.08340,-.08852,-.09688,
-     /-.08914,-.07212,
-     /-.05611,-.05451,-.03920,-.01911,0.00937,0.02922,0.06160,0.10323,
-     /0.14228,0.18747,
-     /0.23082,0.25736,0.28211,0.29895,0.32902,0.33802,0.34052,0.34433,
-     /0.34080,0.34648,
-     /0.35236,0.35537,0.36780,0.36154,0.35190,0.37697,0.38275,0.40516,
-     /0.40516,0.38593,
-     /0.39347,0.37111,0.34171,0.32298,0.30861,0.31533,0.38298,0.45227,
-     /0.48887,0.55047,
-     /0.59500,0.65988,0.71600,0.75776,0.77685,0.83247,0.86526,0.88911,
-     /0.90685,0.91951,
-     /0.92969,0.94445,0.95363,0.96172,0.96723,0.97137,0.97832,0.98295,
-     /0.98564,0.98773,
-     /0.99049,0.99218,0.99335,0.99424,0.99492,0.99546,0.99623,0.99678,
-     /0.99721,0.99752,
-     /.997788,.998241,.998539,.998754,.998916,.999138,.999288,.999393,
-     /.999469,.999536,
-     /.999582,.999656,.999709,.999748,.999779,.999803,.999847,.9998751,
-     /.9998958,.9999105,
-     /.9999317,.9999455,.9999551,.9999621,.9999675,.9999717,.9999780,
-     /.9999823,.9999853,.9999876,
-     /.9999894,.9999924,.9999943,.9999955,.9999964,.9999975,.9999982,
-     /.9999989,.9999992,.9999995,
-     /.9999997,.9999998,.9999999,.9999999/
+     /6.99D-7,5.00D-7,3.77D-7,2.97D-7,2.40D-7,1.68D-7,1.25D-7,9.72D-8,
+     /7.78D-8,6.38D-8,
+     /5.34D-8,3.91D-8,2.99D-8,2.37D-8,1.93D-8,1.60D-8,1.07D-8,7.73D-9,
+     /5.84D-9,4.58D-9,
+     /3.04D-9,2.17D-9,1.63D-9,1.27D-9,1.01D-9,8.31D-10,5.88D-10,
+     /4.37D-10,3.38D-10,2.69D-10,
+     /2.19D-10,1.41D-10,9.86D-11,7.27D-11,5.57D-11,3.57D-11,2.48D-11,
+     /1.83D-11,1.40D-11,1.11D-11,
+     /8.96D-12,6.22D-12,4.57D-12,3.50D-12,2.77D-12,2.24D-12/
+C ELASTIC ANISOTROPY FUNCTION EPSILON
+C EPSILON=1.0-YEPS
+      DATA YEPS/20*1.00,
+     /1.01974,1.06500,1.09085,1.11025,1.12263,1.12532,1.13709,1.15311,
+     /1.18909,1.17321,
+     /1.19143,1.17651,1.18619,1.19046,1.21464,1.27297,1.30840,1.30369,
+     /1.25314,1.19066,
+     /1.13451,1.06001,0.99571,0.99719,0.96607,1.01794,1.08128,1.11047,
+     /1.12077,1.11898,
+     /1.12034,1.13112,1.13750,1.12243,1.10323,1.08700,1.09660,1.11142,
+     /1.11699,1.08770,
+     /1.07822,1.08972,1.10807,1.11576,1.09314,1.08340,1.08852,1.09688,
+     /1.08914,1.07212,
+     /1.05611,1.05451,1.03920,1.01911,0.99063,0.97078,0.93840,0.89677,
+     /0.85772,0.81253,
+     /0.76918,0.74264,0.71789,0.70105,0.67098,0.66198,0.65948,0.65567,
+     /0.65920,0.65352,
+     /0.64764,0.64463,0.63220,0.63846,0.64810,0.62303,0.61725,0.59484,
+     /0.59484,0.61407,
+     /0.60653,0.62889,0.65829,0.67702,0.69139,0.68467,0.61702,0.54773,
+     /0.51113,0.44953,
+     /0.40500,0.34012,0.28400,0.24224,0.22315,0.16753,0.13474,0.11089,
+     /0.09315,0.08049,
+     /0.07031,0.05555,0.04637,0.03828,0.03277,0.02863,0.02168,0.01705,
+     /0.01436,0.01227,
+     /0.00951,0.00782,0.00665,0.00576,0.00508,0.00454,0.00377,0.00322,
+     /0.00279,0.00248,
+     /.002212,.001759,.001461,.001246,.001084,8.62D-4,7.12D-4,6.07D-4,
+     /5.31D-4,4.64D-4,
+     /4.18D-4,3.44D-4,2.91D-4,2.52D-4,2.21D-4,1.97D-4,1.53D-4,1.249D-4,
+     /1.042D-4,8.95D-5,
+     /6.83D-5,5.45D-5,4.49D-5,3.79D-5,3.25D-5,2.83D-5,2.20D-5,1.77D-5,
+     /1.47D-5,1.24D-5,
+     /1.062D-5,7.65D-6,5.73D-6,4.48D-6,3.60D-6,2.48D-6,1.81D-6,1.38D-6,
+     /1.09D-6,8.85D-7,
+     /7.32D-7,5.24D-7,3.94D-7,3.07D-7,2.46D-7,2.02D-7,1.32D-7,9.28D-8,
+     /6.89D-8,5.31D-8,
+     /3.44D-8,2.40D-8,1.77D-8,1.36D-8,1.07D-8,8.70D-9,6.03D-9,4.41D-9,
+     /3.36D-9,2.64D-9,
+     /2.13D-9,1.34D-9,9.19D-10,6.67D-10,5.04D-10,3.16D-10,2.16D-10,
+     /1.57D-10,1.18D-10,9.3D-11,
+     /7.4D-11,5.1D-11,3.7D-11,2.8D-11,2.2D-11,1.7D-11/
 C ROTATIONAL RESONANCE FUNCTION 
       DATA XROT/0.00,1.00,1.10,1.20,1.30,1.40,1.50,1.60,1.70,1.80,
      /1.85,1.90,1.95,1.98,2.00,2.05,2.10,2.15,2.20,2.25,
@@ -34190,8 +36057,7 @@ C ALLAN AND VICIC  FROM 1.6 EV TO 4.5 EV FOR VIBRATIONS
      /2.70,2.75,2.80,2.85,2.90,2.95,3.00,3.05,3.10,3.15,
      /3.20,3.25,3.30,3.35,3.40,3.45,3.50,3.55,3.60,3.65,
      /3.70,3.75,3.80,3.90,4.00,4.50,5.00,7.50,10.0,15.0,
-     /18.0,20.0,22.5,25.0,30.0,50.0,80.0,160.,1000.,1.D6,
-     /1.D7/            
+     /18.0,20.0,22.5,25.0,30.0,50.0,80.0/            
 C V1                                            
       DATA YVB1/.00,.00018,.00045,.00072,.00082,.00099,.00131,
      /.00174,.00203,.00225,
@@ -34202,8 +36068,7 @@ C V1
      /1.61,1.97,2.95,3.43,2.30,1.41,1.63,2.30,2.01,1.54,
      /1.12,1.27,1.37,1.27,0.96,0.84,.820,.768,.648,.600,
      /.624,.528,.432,.390,.330,.230,.075,.025,.012,.031,
-     /.061,.156,.101,.066,.022,.012,.006,.003,0.00,0.00,
-     /0.00/  
+     /.061,.156,.101,.066,.022,.012,.006/  
 C V2              
       DATA XVB2/.5742,.600,.700,.800,.900,1.00,1.10,1.20,1.30,1.40,
      /1.50,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,
@@ -34211,8 +36076,7 @@ C V2
      /2.50,2.55,2.60,2.65,2.70,2.75,2.80,2.85,2.90,2.95,
      /3.00,3.05,3.10,3.15,3.20,3.25,3.30,3.35,3.40,3.45,
      /3.50,3.55,3.60,3.70,3.80,3.90,4.00,4.50,5.00,7.50,
-     /10.0,15.0,18.0,20.0,22.5,25.0,30.0,50.0,80.0,160.,
-     /1000.,1.D6,1.D7/                            
+     /10.0,15.0,18.0,20.0,22.5,25.0,30.0,50.0,80.0/
       DATA YVB2/.0,1.D-5,4.D-5,9.D-5,1.5D-4,2.0D-4,2.8D-4,3.2D-4,5.D-4,
      /8.1D-4,
      /.0026,.0059,.0115,.026,.051,.123,.236,.491,0.94,2.26,
@@ -34220,8 +36084,7 @@ C V2
      /1.70,.672,.800,1.48,1.61,1.25,.805,.501,.670,.890,
      /.890,.650,.444,.428,.539,.491,.364,.225,.285,.238,
      /.200,.168,.156,.127,.101,.085,.072,.042,.014,.004,
-     /.002,.006,.012,.030,.020,.012,.004,.002,.001,.0005,
-     /0.00,0.00,0.00/  
+     /.002,.006,.012,.030,.020,.012,.004,.002,.001/
 C V3                        
       DATA XVB3/.8559,.900,1.00,1.10,1.20,1.30,1.40,1.50,1.60,1.65,
      /1.70,1.75,1.80,1.85,1.90,1.95,2.00,2.05,2.10,2.15,
@@ -34229,8 +36092,7 @@ C V3
      /2.65,2.70,2.75,2.80,2.85,2.90,2.95,3.00,3.05,3.10,
      /3.15,3.20,3.25,3.30,3.35,3.40,3.45,3.50,3.55,3.60,
      /3.65,3.70,3.75,3.80,3.85,3.90,3.95,4.00,4.50,5.00,
-     /7.50,10.0,15.0,18.0,20.0,22.5,25.0,30.0,50.0,80.0,
-     /160.,1000.,1.D6,1.D7/
+     /7.50,10.0,15.0,18.0,20.0,22.5,25.0,30.0,50.0,80.0/
       DATA YVB3/.0,1.D-5,3.7D-5,7.D-5,9.8D-5,1.3D-4,1.8D-4,4.1D-4,
      /.0021,.0050,
      /.012,.028,.071,.160,.300,.807,1.30,1.87,2.11,2.55,
@@ -34238,533 +36100,376 @@ C V3
      /.630,.250,.409,.747,1.00,.682,.309,.144,.263,.412,
      /.360,.212,.131,.148,.183,.200,.157,.114,.079,.101,
      /.101,.079,.057,.053,.058,.053,.044,.035,.023,.008,
-     /.0023,.001,.003,.007,.017,.011,.006,.002,.001,.0005,
-     /.00025,0.00,0.00,0.00/
+     /.0023,.001,.003,.007,.017,.011,.006,.002,.001,.0005/
 C V4
       DATA XVB4/1.1342,1.80,1.85,1.90,1.95,2.00,2.05,2.10,2.15,2.20,
      /2.22,2.25,2.30,2.35,2.40,2.45,2.50,2.55,2.60,2.65,
      /2.70,2.75,2.80,2.85,2.90,2.95,3.00,3.05,3.10,3.15,
      /3.20,3.25,3.30,3.35,3.40,3.50,3.60,3.80,4.00,4.50,
-     /5.00,7.50,10.0,15.0,18.0,20.0,22.5,30.0,50.0,80.0,
-     /160.,1000.,1.D6,1.D7/                      
+     /5.00,7.50,10.0,15.0,18.0,20.0,22.5,30.0,50.0,80.0/
       DATA YVB4/0.0,0.00,9.D-5,.064,.170,.269,.465,.743,1.29,1.76,
      /1.79,1.72,1.41,1.04,.600,.234,.168,.439,.797,.994,
      /.806,.474,.215,.104,.197,.385,.394,.260,.198,.063,
      /.098,.151,.205,.089,.070,.078,.061,.044,.035,.026,
-     /.009,.0026,.00105,.0016,.003,.008,.005,.003,.001,.0005,
-     /.00025,0.00,0.00,0.00/ 
+     /.009,.0026,.00105,.0016,.003,.008,.005,.003,.001,.0005/
 C V5               
       DATA XVB5/1.4088,1.90,1.95,2.00,2.05,2.10,2.15,2.20,2.25,2.30,
      /2.35,2.40,2.45,2.50,2.55,2.60,2.65,2.70,2.75,2.80,     
      /2.85,2.90,2.95,3.00,3.05,3.10,3.15,3.20,3.25,3.30,
-     /3.35,3.40,3.45,3.50,4.00,4.50,5.00,7.50,10.0,20.0,
-     /100.,1000.,1.D6,1.D7/     
+     /3.35,3.40,3.45,3.50,4.00,4.50,5.00,7.50,10.0,20.0/     
       DATA YVB5/0.00,0.00,.0009,.0118,.0531,.136,.313,.490,.655,.791,
      /1.04,1.18,1.01,.631,.295,.101,.068,.195,.395,.502,
      /.519,.313,.106,.024,.101,.195,.183,.112,.068,.018,
-     /.035,.065,.065,.024,.014,.0096,.0032,.00096,.00024,.00012,
-     /.00001,0.00,0.00,0.00/ 
+     /.035,.065,.065,.024,.014,.0096,.0032,.00096,.00024,.00012/ 
 C V6        
       DATA XVB6/1.6801,2.05,2.10,2.15,2.20,2.25,2.30,2.35,2.40,2.45,
      /2.50,2.55,2.60,2.65,2.70,2.75,2.80,2.85,2.90,2.95,     
      /3.00,3.05,3.10,3.15,3.20,3.25,3.30,3.35,3.40,3.45,
      /3.50,3.55,3.60,3.65,3.70,4.00,4.50,5.00,7.50,10.0,
-     /20.0,100.,1000.,1.D6,1.D7/                                     
+     /20.0/                                     
       DATA YVB6/0.00,0.00,9.D-5,.0117,.0463,.124,.192,.344,.487,.602,
      /.615,.602,.577,.527,.307,.124,.050,.103,.193,.270,
      /.270,.180,.084,.0372,.0527,.103,.128,.096,.062,.0248,
      /.0186,.0312,.0372,.0372,.0155,.010,.052,.017,.0052,.0021,   
-     /.00105,.00001,0.00,0.00,0.00/
+     /.00105/
 C V7
       DATA XVB7/1.9475,2.25,2.30,2.35,2.40,2.45,2.50,2.55,2.60,2.65,
      /2.68,2.70,2.75,2.80,2.85,2.90,2.95,3.00,3.05,3.10,
      /3.15,3.20,3.25,3.30,3.35,3.40,3.45,3.50,3.55,3.60,
      /3.65,3.70,3.75,3.80,3.85,3.90,4.00,4.50,5.00,7.50,
-     /10.0,20.0,100.,1000.,1.D6,1.D7/
+     /10.0,20.0/
       DATA YVB7/0.00,0.00,.0009,.0255,.0526,.089,.133,.178,.232,.303,
      /.318,.304,.231,.159,.119,.0542,.0239,.0255,.0796,.113,
      /.108,.0812,.0413,.0112,.0064,.0207,.0334,.0366,.0224,.0128, 
      /.0128,.0157,.0183,.0166,.0096,.0074,.0057,.0039,.0013,.00039,
-     /.00015,.00008,.000008,0.00,0.00,0.00/
+     /.00015,.000075/
 C V8
       DATA XVB8/2.2115,2.40,2.45,2.50,2.55,2.60,2.65,2.70,2.75,2.80,
      /2.85,2.88,2.90,2.95,3.00,3.05,3.10,3.15,3.20,3.25,
      /3.30,3.35,3.40,3.45,3.50,3.55,3.60,3.65,3.70,3.75,
-     /3.80,3.85,3.90,3.95,4.00,4.50,5.00,7.50,10.0,20.0,
-     /100.,1000.,1.D6,1.D7/
+     /3.80,3.85,3.90,3.95,4.00,4.50,5.00,7.50,10.0,20.0/
       DATA YVB8/0.00,0.00,9.D-6,.003,.011,.017,.042,.0656,.0739,.098,
      /.135,.140,.128,.084,.035,.014,.003,.007,.028,.0460,
      /.0460,.028,.011,.003,.0018,.011,.0123,.0140,.0084,.0035,
-     /.0018,.0018,.0026,.0029,.0014,.0010,.0003,.00010,.000040,.000020,
-     /.0000020,0.00,0.00,0.00/
+     /.0018,.0018,.0026,.0029,.0014,.0010,.0003,.00010,.00004,.00002/
 C V9
       DATA XVB9/2.4718,2.65,2.70,2.75,2.80,2.85,2.90,2.95,3.00,3.05,
      /3.07,3.10,3.15,3.20,3.25,3.30,3.35,3.40,3.45,3.50,
      /3.55,3.60,3.65,3.70,3.75,3.80,3.85,3.90,3.95,4.00,
-     /4.50,5.00,7.50,10.0,20.0,100.,1000.,1.D6,1.D7/
+     /4.50,5.00,7.50,10.0,20.0/
       DATA YVB9/0.00,.0011,.0028,.0069,.0132,.0264,.0412,.0474,.0438,
      /.0496,
      /.0528,.0438,.0247,.0739,.00295,.00581,.0159,.0232,.0264,.0206,
      /.0116,.00296,.00296,.00581,.00739,.00739,.00528,.00295,.00147,
      /.00070,
-     /.00039,.00013,.000039,.0000157,.0000079,7.9D-7,0.00,0.00,0.00/
+     /.00039,.00013,.000039,.0000157,.0000079/
 C V10
       DATA XVB10/2.7284,2.90,2.95,3.00,3.05,3.10,3.15,3.20,3.25,3.30,
      /3.35,3.40,3.45,3.50,3.55,3.60,3.65,3.70,3.75,3.80,
      /3.85,3.90,3.95,4.00,4.05,4.10,4.15,4.20,4.25,4.30,
-     /4.50,5.00,7.50,10.0,20.0,100.,1000.,1.D6,1.D7/
+     /4.50,5.00,7.50,10.0,20.0/
       DATA YVB10/0.00,.000040,.00170,.00554,.0103,.0154,.0205,.0201,
      /.0147,.0103,
      /.00677,.00225,.00137,.00452,.00800,.0116,.0119,.00800,.00390,
      /.00137,
      /.00205,.00390,.00573,.00573,.00452,.00349,.00225,.00116,.00042,
      /.00026,
-     /.00017,5.8D-5,1.7D-5,7.0D-6,3.5D-6,3.5D-7,0.00,0.00,0.00/
+     /.00017,5.8D-5,1.7D-5,8.5D-6,4.2D-6/
 C V11
       DATA XVB11/2.9815,3.10,3.15,3.20,3.25,3.30,3.35,3.40,3.45,3.50,
      /3.55,3.60,3.65,3.70,3.75,3.80,3.85,3.90,3.95,4.00,
      /4.05,4.10,4.15,4.20,4.25,4.30,4.35,4.40,4.45,4.50,
-     /4.60,5.00,7.50,10.0,20.0,100.,1000.,1.D6,1.D7/
+     /4.60,5.00,7.50,10.0,20.0/
       DATA YVB11/0.00,3.29D-4,.00170,.00291,.00445,.00550,.00462,
      /.00291,.00170,6.04D-4,
      /2.20D-4,.00105,.00275,.00344,.00303,.00198,7.70D-4,1.65D-4,
      /2.75D-4,4.40D-4,
      /.00116,.00110,3.85D-4,5.50D-5,5.50D-5,3.30D-4,3.85D-4,3.30D-4,
      /1.65D-4,8.70D-5,
-     /2.88D-5,9.60D-6,2.88D-6,1.16D-6,5.8D-7,5.8D-8,0.00,0.00,0.00/
+     /2.88D-5,9.60D-6,2.88D-6,1.16D-6,5.8D-7/
 C V12
       DATA XVB12/3.2310,3.30,3.35,3.40,3.45,3.50,3.55,3.60,3.65,3.70,
      /3.75,3.80,3.85,3.90,3.95,4.00,4.05,4.10,4.15,4.20,
      /4.25,4.30,4.35,4.40,4.45,4.50,4.55,4.60,4.65,5.00,
-     /7.50,10.0,20.0,100.,1000.,1.D6,1.D7/
+     /7.50,10.0,20.0/
       DATA YVB12/0.00,3.66D-5,3.78D-4,6.22D-4,.00107,.00119,.00092,
      /4.40D-4,1.59D-4,1.10D-4,
      /4.52D-4,8.06D-4,.00122,.00107,6.96D-4,3.17D-4,7.32D-5,8.55D-5,
      /3.05D-4,3.78D-4,
      /3.05D-4,1.53D-4,7.33D-5,1.22D-5,7.33D-5,1.46D-4,8.55D-5,1.22D-5,
      /6.10D-6,2.04D-6,
-     /6.10D-7,2.44D-7,1.22D-7,1.22D-8,0.00,0.00,0.00/
+     /6.10D-7,2.44D-7,1.22D-7/
 C V13
       DATA XVB13/3.4769,3.55,3.60,3.65,3.70,3.75,3.80,3.85,3.90,3.95,
      /4.00,4.05,4.10,4.15,4.20,4.25,4.30,4.35,4.40,4.45,
      /4.50,4.55,4.60,4.65,4.70,4.75,4.80,5.00,7.50,10.0,
-     /20.0,100.,1000.,1.D6,1.D7/
+     /20.0/
       DATA YVB13/0.00,4.90D-5,1.02D-4,1.96D-4,2.16D-4,1.18D-4,3.92D-5,
      /3.92D-5,1.46D-4,2.94D-4,
      /3.68D-4,3.92D-4,2.72D-4,1.22D-4,2.75D-5,6.28D-5,9.77D-5,1.49D-4,
      /1.18D-4,6.28D-5,
      /1.57D-5,1.57D-5,2.35D-5,4.71D-5,3.14D-5,1.96D-5,3.93D-6,1.31D-6,
      /3.93D-7,1.57D-7,
-     /7.8D-8,7.8D-9,0.00,0.00,0.00/
+     /7.8D-8/
 C V14
       DATA XVB14/3.7191,3.80,3.85,3.90,3.95,4.00,4.05,4.10,4.15,4.20,
      /4.25,4.30,4.35,4.40,4.45,4.50,4.55,4.60,4.65,4.70,
-     /4.75,4.80,4.85,4.90,4.95,7.50,10.0,20.0,100.,1000.,
-     /1.D6,1.D7/
+     /4.75,4.80,4.85,4.90,4.95,7.50,10.0,20.0/
       DATA YVB14/0.00,9.07D-6,1.70D-5,1.70D-5,6.80D-6,7.94D-6,3.51D-5,
      /7.83D-5,1.14D-4,1.09D-4,
      /7.14D-5,3.51D-5,6.80D-6,9.07D-6,4.31D-5,5.44D-5,3.51D-5,1.70D-5,
      /4.54D-6,6.80D-6,
-     /1.02D-5,1.70D-5,9.07D-6,5.67D-6,1.75D-6,1.75D-7,6.98D-8,3.5D-8,
-     /3.5D-9,0.00,
-     /0.00,0.00/
+     /1.02D-5,1.70D-5,9.07D-6,5.67D-6,1.75D-6,1.75D-7,6.98D-8,3.5D-8/
 C V15
       DATA XVB15/3.9576,4.05,4.10,4.15,4.20,4.25,4.30,4.35,4.40,4.45,
      /4.50,4.55,4.60,4.65,4.70,4.75,4.80,4.85,4.90,4.95,
      /5.00,5.05,5.10,5.15,5.20,5.25,5.30,5.40,5.50,7.50,
-     /10.0,20.0,100.,1000.,1.D6,1.D7/
+     /10.0,20.0/
       DATA YVB15/0.00,9.42D-7,1.25D-6,2.51D-6,5.34D-6,1.94D-5,2.89D-5,
      /3.14D-5,2.16D-5,1.10D-5,
      /4.40D-6,5.96D-6,1.20D-5,1.98D-5,1.64D-5,9.07D-6,3.77D-6,3.77D-6,
      /7.22D-6,7.22D-6,
      /6.28D-6,3.77D-6,3.46D-6,4.39D-6,4.71D-6,4.71D-6,3.77D-6,2.18D-6,
      /1.09D-6,1.09D-7,
-     /4.36D-8,2.2D-8,2.2D-9,0.00,0.00,0.00/
+     /4.36D-8,2.2D-8/
 C A3SIG(V=0-4) (V=0 ENERGY=6.169 EV)  AVERAGE ENERGY LOSS =6.725 EV
       DATA XTRP1/6.725,7.00,7.80,8.50,9.00,10.0,11.0,12.0,13.0,14.0,   
      /16.0,17.0,18.0,20.0,22.0,24.0,26.0,30.0,34.0,40.0,                
-     /50.0,70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/             
+     /50.0,70.0,100./             
       DATA YTRP1/0.00,.0035,.0100,.0440,.0280,.0240,.022,.021,.020,.019,
      /.016,.015,.014,.013,.0108,.0099,.0087,.0069,.0057,.0046,          
-     /.0033,.0019,.00094,.0003,.0001,2.5D-5,2.5D-6,0.00,0.00,0.00/
+     /.0033,.0019,.00094/
       DATA YTP1M/0.92,0.92,0.92,0.92,0.92,0.92,0.93,0.94,0.94,0.95,
      /0.97,1.01,1.07,1.12,1.14,1.16,1.18,1.22,1.21,1.20,
-     /1.18,1.00,0.92,0.72,0.42,0.22,0.03,.003,0.00,0.00/ 
+     /1.18,1.00,0.92/ 
 C A3SIG(V=5-9) (V=5 ENERGY=7.023 EV) AVERAGE ENERGY LOSS =7.360 EV
       DATA XTRP2/7.360,7.50,7.80,8.50,9.00,10.0,11.0,12.0,13.0,14.0,
      /16.0,17.0,18.0,20.0,22.0,24.0,26.0,30.0,34.0,40.0,
-     /50.0,70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /50.0,70.0,100./
       DATA YTRP2/0.00,.0071,.0180,.072,.108,.096,.094,.092,.085,.081,
      /.069,.064,.059,.054,.049,.043,.038,.029,.024,.020,
-     /.0136,.0076,.0040,.0013,.0004,.0001,1.D-5,0.00,0.00,0.00/   
+     /.0136,.0076,.0040/   
       DATA YTP2M/0.92,0.92,0.92,0.92,0.92,0.92,0.93,0.94,0.94,0.95,
      /0.97,1.01,1.07,1.12,1.14,1.16,1.18,1.22,1.21,1.20,
-     /1.18,1.00,0.92,0.72,0.42,0.22,0.03,.003,0.00,0.00/ 
+     /1.18,1.00,0.92/ 
 C B3PI(V=0-3) (V=0 ENERGY=7.353 EV) AVERAGE ENERGY LOSS =7.744 EV       
       DATA XTRP3/7.744,8.00,9.00,10.0,11.0,12.0,13.0,14.0,15.0,16.0,  
      /17.0,18.0,20.0,22.0,26.0,30.0,34.0,40.0,50.0,70.0,                
-     /100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/                  
+     /100./                  
       DATA YTRP3/.0,.018,.132,.194,.188,.173,.161,.150,.138,.128,
      /.116,.108,.089,.077,.063,.053,.047,.035,.026,.0113,      
-     /.0039,.0013,.0004,.0001,1.D-5,0.00,0.00,0.00/
+     /.0039/
       DATA YTP3M/1.06,1.06,1.06,1.06,1.12,1.18,1.18,1.16,1.14,1.12,
      /1.10,1.08,1.06,1.08,1.12,1.16,1.16,1.17,1.18,1.06,
-     /0.94,0.72,0.42,0.22,0.03,.003,0.00,0.00/
+     /0.94/
 C W3DEL(V=0-5) (V=0 ENERGY=7.362 EV) AVERAGE ENERGY LOSS = 8.050 EV    
       DATA XTRP4/8.050,8.50,9.00,10.0,11.0,12.0,14.0,15.0,16.0,17.0,
      /18.0,20.0,22.0,24.0,26.0,28.0,30.0,34.0,40.0,50.0,
-     /70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /70.0,100./
       DATA YTRP4/.0,.0010,.007,.016,.023,.030,.044,.050,.053,.053,
      /.052,.047,.039,.032,.027,.023,.020,.015,.0112,.0073,
-     /.00366,.00183,6.D-4,2.D-4,5.D-5,5.D-6,0.00,0.00,0.00/
+     /.00366,.00183/
       DATA YTP4M/1.20,1.20,1.20,1.20,1.14,1.08,1.08,1.13,1.16,1.19,
      /1.21,1.22,1.23,1.24,1.25,1.26,1.27,1.26,1.23,1.19,
-     /1.11,0.98,0.72,0.42,0.22,0.03,.003,0.00,0.00/
-C A3SIG(V=10-21) (V=10 ENERGY=7.790 EV) AVERAGE ENERGY LOSS=8.217 EV        
+     /1.11,0.98/
+C A3SIG(V=10-21) (V=10 ENERGY=7.790 EV) AVERAGE ENERGY LOSS=8.217 EV    
       DATA XTRP5/8.217,8.30,8.50,8.70,9.00,10.0,11.0,12.0,13.0,14.0,    
      /16.0,17.0,18.0,20.0,22.0,24.0,26.0,30.0,34.0,40.0,                
-     /50.0,70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/           
+     /50.0,70.0,100./           
       DATA YTRP5/0.0,.0069,.0365,.0450,.055,.096,.100,.097,.091,.086,
      /.073,.066,.060,.055,.050,.044,.038,.031,.024,.020,                
-     /.0145,.0080,.0043,.0014,.00046,.0001,1.D-5,0.00,0.00,0.00/
+     /.0145,.0080,.0043/
       DATA YTP5M/0.92,0.92,0.92,0.92,0.92,0.92,0.93,0.94,0.94,0.95,
      /0.97,1.01,1.07,1.12,1.14,1.16,1.18,1.22,1.21,1.20,
-     /1.18,1.00,0.92,0.72,0.42,0.22,0.03,.003,0.00,0.00/ 
+     /1.18,1.00,0.92/ 
 C B3PI(V=4-16) (V=4 ENERGY=8.177 EV) AVERAGE ENERGY LOSS= 8.451 EV
       DATA XTRP6/8.451,8.50,9.00,10.0,11.0,12.0,13.0,14.0,15.0,16.0,
      /17.0,18.0,20.0,22.0,26.0,30.0,34.0,40.0,50.0,70.0,
-     /100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /100./
       DATA YTRP6/.0,.011,.090,.133,.129,.119,.110,.102,.094,.088,
      /.079,.074,.061,.053,.044,.037,.032,.023,.017,.0077, 
-     /.0028,.0010,.0003,1.D-4,1.D-5,0.00,0.00,0.00/
+     /.0028/
       DATA YTP6M/1.06,1.06,1.06,1.06,1.12,1.18,1.18,1.16,1.14,1.12,
      /1.10,1.08,1.06,1.08,1.12,1.16,1.16,1.17,1.18,1.06,
-     /0.94,0.72,0.42,0.22,0.03,.003,0.00,0.00/
+     /0.94/
 C W3DEL(V=6-10) (V=6 ENERGY=8.419 EV) AVERAGE ENERGY LOSS= 8.729 EV
       DATA XTRP7/8.729,9.00,10.0,11.0,12.0,14.0,15.0,16.0,17.0,18.0,
      /20.0,22.0,24.0,26.0,28.0,30.0,34.0,40.0,50.0,70.0,
-     /100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /100./
       DATA YTRP7/.0,0.004,.032,.048,.064,.092,.105,.110,.110,
      /.108,
      /.097,.082,.066,.056,.048,.041,.032,.023,.0153,.0076,
-     /.0038,.0013,.0004,1.D-4,1.D-5,0.00,0.00,0.00/
+     /.0038/
       DATA YTP7M/1.20,1.20,1.20,1.14,1.08,1.08,1.13,1.16,1.19,1.21,
      /1.22,1.23,1.24,1.25,1.26,1.27,1.26,1.23,1.19,1.11,
-     /0.98,0.72,0.42,0.22,0.03,.003,0.00,0.00/
+     /0.98/
 C A1PI(V=0-3) (V=0 ENERGY=8.549 EV) AVERAGE ENERGY LOSS= 8.950 EV
       DATA XSNG1/8.950,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,
-     /19.0,20.0,24.0,27.0,30.0,40.0,50.0,70.0,100.,150.,
-     /200.,250.,300.,500.,700.,1000.,2000.,4000.,10000.,20000.,
-     /1.D5,1.D6,1.D7/        
+     /19.0,20.0,24.0,27.0,30.0,40.0,50.0,70.0,100./        
       DATA YSNG1/.0,.013,.025,.040,.059,.082,.101,.116,.123,.128,
-     /.130,.130,.125,.119,.112,.087,.071,.051,.036,.0242,
-     /.0182,.0147,.0122,.0074,.0054,.0038,.0019,.0010,.00038,.00019,
-     /3.8D-5,3.8D-6,3.8D-7/  
+     /.130,.130,.125,.119,.112,.087,.071,.051,.036/  
       DATA YSG1M/0.80,0.80,0.75,0.70,0.66,0.60,0.55,0.53,0.51,0.50,
-     /0.49,0.48,0.50,0.52,0.54,0.48,0.41,0.34,0.24,0.20,
-     /0.19,0.18,0.17,0.16,0.12,.091,.051,.028,.013,.007,
-     /.0016,.00012,.000010/
+     /0.49,0.48,0.50,0.52,0.54,0.48,0.41,0.34,0.24/
 C B'3SIG(V=0-6) (V=0 ENERGY=8.165 EV) AVERAGE ENERGY LOSS= 8.974 EV
       DATA XTRP8/8.974,9.50,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,
      /18.0,19.0,20.0,22.0,26.0,30.0,34.0,40.0,50.0,70.0,
-     /100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /100./
       DATA YTRP8/.0,.0002,.0010,.0032,.0081,.0136,.0203,.0252,.0274,
      /.0274,
      /.0264,.0250,.0236,.0209,.0151,.0114,.0089,.0064,.0041,.0020,
-     /.0010,.0003,.0001,3.D-5,3.D-6,0.00,0.00,0.00/
+     /.0010/
       DATA YTP8M/0.90,0.90,0.90,0.90,0.90,0.91,0.93,0.97,1.07,1.17,
      /1.22,1.22,1.23,1.26,1.32,1.37,1.35,1.32,1.29,1.20,
-     /1.04,0.74,0.42,0.22,0.03,.003,0.00,0.00/
+     /1.04/
 C A'1SIG (V=0-6) (V=0 ENERGY=8.398 EV) AVERAGE ENERGY LOSS= 9.191 EV
       DATA XSNG2/9.191,10.2,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,
-     /20.0,24.0,30.0,40.0,50.0,70.0,100.,200.,400.,1000.,
-     /10000.,1.D5,1.D6,1.D7/
+     /20.0,24.0,30.0,40.0,50.0,70.0,100./
       DATA YSNG2/.0,.0013,.0071,.0106,.0139,.0146,.0145,.0143,.0139,
      /.0135,
-     /.0132,.0105,.0072,.0045,.0031,.0017,.0010,.0003,.0001,3.D-5,
-     /3.D-6,0.00,0.00,0.00/
+     /.0132,.0105,.0072,.0045,.0031,.0017,.0010/
       DATA YSG2M/1.00,1.00,1.00,1.00,1.00,1.00,1.07,1.13,1.14,1.15,
-     /1.16,1.21,1.27,1.17,1.07,0.93,0.72,0.66,0.42,0.22,
-     /0.03,.003,0.00,0.00/
+     /1.16,1.21,1.27,1.17,1.07,0.93,0.72/
 C W3DEL(V=11-19) (V=11 ENERGY=9.220 EV) AVERAGE ENERGY LOSS= 9.562 EV
       DATA XTRP9/9.562,10.0,11.0,12.0,14.0,15.0,16.0,17.0,18.0,20.0,
-     /22.0,24.0,26.0,28.0,30.0,34.0,40.0,50.0,70.0,100.,
-     /200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /22.0,24.0,26.0,28.0,30.0,34.0,40.0,50.0,70.0,100./
       DATA YTRP9/.0,.012,.029,.038,.056,.063,.067,.067,.065,
      /.058,
-     /.049,.040,.034,.029,.024,.019,.0141,.0092,.00461,.00230,
-     /.00076,.00026,6.D-5,6.D-6,0.00,0.00,0.00/
+     /.049,.040,.034,.029,.024,.019,.0141,.0092,.00461,.00230/
       DATA YTP9M/1.20,1.20,1.14,1.08,1.08,1.13,1.16,1.19,1.21,1.22,
-     /1.23,1.24,1.25,1.26,1.27,1.26,1.23,1.19,1.11,0.98,
-     /0.72,0.42,0.22,0.03,.003,0.00,0.00/
+     /1.23,1.24,1.25,1.26,1.27,1.26,1.23,1.19,1.11,0.98/
 C W1DEL(V=0-5) (V=0 ENERGY=8.895 EV) AVERAGE ENERGY LOSS= 9.590 EV 
       DATA XSNG3/9.590,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,
-     /20.0,24.0,30.0,40.0,50.0,70.0,100.,200.,400.,1000.,
-     /10000.,1.D5,1.D6,1.D7/
+     /20.0,24.0,30.0,40.0,50.0,70.0,100./
       DATA YSNG3/.0,.0002,.003,.009,.0109,.0144,.0141,.0138,.0134,.013, 
-     /.012,.0094,.0074,.0054,.0043,.0030,.0020,.0010,.00046,.00018,
-     /1.8D-5,0.00,0.00,0.00/
+     /.012,.0094,.0074,.0054,.0043,.0030,.0020/
       DATA YSG3M/1.08,1.08,1.08,1.08,1.05,1.00,0.08,0.97,0.96,0.95,
-     /0.92,0.90,0.86,0.76,0.66,0.55,0.36,0.28,0.19,.091,
-     /.013,.0013,0.00,0.00/
+     /0.92,0.90,0.86,0.76,0.66,0.55,0.36/
 C A1PI(V=4-15) (V=4 ENERGY=9.355 EV) AVERAGE ENERGY LOSS= 9.665 EV
       DATA XSNG4/9.665,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,
-     /19.0,20.0,24.0,27.0,30.0,40.0,50.0,70.0,100.,150.,
-     /200.,250.,300.,500.,700.,1000.,2000.,4000.,10000.,20000.,
-     /1.D5,1.D6,1.D7/        
+     /19.0,20.0,24.0,27.0,30.0,40.0,50.0,70.0,100./        
       DATA YSNG4/.0,.009,.023,.039,.057,.077,.097,.109,.117,.121,
-     /.123,.124,.119,.112,.106,.083,.067,.048,.034,.0230,
-     /.0173,.0139,.0117,.0071,.0052,.0036,.0018,.0010,.00038,.00019,
-     /3.7D-5,3.7D-6,3.7D-7/  
+     /.123,.124,.119,.112,.106,.083,.067,.048,.034/  
       DATA YSG4M/0.80,0.80,0.75,0.70,0.66,0.60,0.55,0.53,0.51,0.50,
-     /0.49,0.48,0.50,0.52,0.54,0.48,0.41,0.34,0.24,0.20,
-     /0.19,0.18,0.17,0.16,0.12,.091,.051,.028,.013,.007,
-     /.0016,.00012,.000010/
+     /0.49,0.48,0.50,0.52,0.54,0.48,0.41,0.34,0.24/
 C B'3SIG(V=7-18) (V=7 ENERGY=9.399 EV) AVERAGE ENERGY LOSS= 9.933 EV
       DATA XTRP10/9.933,10.2,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,
-     /19.0,20.0,22.0,26.0,30.0,34.0,40.0,50.0,70.0,100.,
-     /200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /19.0,20.0,22.0,26.0,30.0,34.0,40.0,50.0,70.0,100./
       DATA YTRP10/.0,.0010,.0068,.0169,.0284,.0427,.0528,.0575,.0575,
      /.0552,
-     /.0524,.0495,.0438,.0316,.0236,.0187,.0133,.0086,.0041,.0020,
-     /.0007,.0002,6.D-5,6.D-6,0.00,0.00,0.00/
+     /.0524,.0495,.0438,.0316,.0236,.0187,.0133,.0086,.0041,.0020/
       DATA YTP10M/0.90,0.90,0.90,0.90,0.90,0.91,0.93,0.97,1.07,1.17,
-     /1.22,1.22,1.23,1.26,1.32,1.37,1.35,1.32,1.29,1.20,
-     /1.04,0.54,0.22,0.03,.003,0.00,0.00/       
+     /1.22,1.22,1.23,1.26,1.32,1.37,1.35,1.32,1.29,1.20/       
 C A'1SIG (V=7-19) (V=7 ENERGY=9.645 EV) AVERAGE ENERGY LOSS= 10.174 EV
       DATA XSNG5/10.174,10.5,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,
-     /20.0,24.0,30.0,40.0,50.0,70.0,100.,200.,400.,1000.,
-     /10000.,1.D5,1.D6,1.D7/
+     /20.0,24.0,30.0,40.0,50.0,70.0,100./
       DATA YSNG5/.0,.0013,.0129,.0194,.0252,.0267,.0265,.0260,.0253,
      /.0247,
-     /.0240,.0192,.0133,.0081,.0055,.0032,.0017,.00057,2.D-4,5.D-5,
-     /5.D-6,0.00,0.00,0.00/
+     /.0240,.0192,.0133,.0081,.0055,.0032,.0017/
       DATA YSG5M/1.00,1.00,1.00,1.00,1.00,1.00,1.07,1.13,1.14,1.15,
-     /1.16,1.21,1.27,1.17,1.07,0.93,0.72,0.66,0.42,0.22,
-     /0.03,.003,0.00,0.00/
+     /1.16,1.21,1.27,1.17,1.07,0.93,0.72/
 C W1DEL(V=6-18) (V=6 ENERGY=9.994 EV) AVERAGE ENERGY LOSS= 10.536 EV
       DATA XSNG6/10.536,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,20.0,
-     /24.0,30.0,40.0,50.0,70.0,100.,200.,400.,1000.,10000.,
-     /1.D5,1.D6,1.D7/
+     /24.0,30.0,40.0,50.0,70.0,100./
       DATA YSNG6/.0,.003,.009,.0242,.032,.032,.031,.030,.029,.026,
-     /.021,.0164,.0121,.0096,.0066,.0046,.0021,.00102,4.D-4,4.D-5,
-     /0.00,0.00,0.00/
+     /.021,.0164,.0121,.0096,.0066,.0046/
       DATA YSG6M/1.08,1.08,1.08,1.05,1.00,0.08,0.97,0.96,0.95,0.92,
-     /0.90,0.86,0.76,0.66,0.55,0.36,0.28,0.19,.091,.013,
-     /.002,0.00,0.00/
+     /0.90,0.86,0.76,0.66,0.55,0.36/
 C C3PI(V=0-4) (V=0 ENERGY=11.032 EV) AVERAGE ENERGY LOSS= 11.188 EV   
       DATA XTRP11/11.188,12.0,12.5,13.0,13.5,14.0,14.5,15.0,16.0,17.0,
-     /18.0,19.0,20.0,24.0,30.0,40.0,50.0,70.0,100.,200.,
-     /400.,1000.,10000.,1.D5,1.D6,1.D7/           
+     /18.0,19.0,20.0,24.0,30.0,40.0,50.0,70.0,100./           
       DATA YTRP11/.0,.057,.089,.130,.180,.225,.235,.225,.205,.190,
-     /.170,.155,.140,.105,.074,.044,.031,.015,.0057,.0019,
-     /.0006,2.5D-4,2.5D-5,0.00,0.00,0.00/ 
+     /.170,.155,.140,.105,.074,.044,.031,.015,.0057/ 
       DATA YTP11M/1.03,1.03,1.03,1.03,1.03,1.03,1.03,1.03,1.02,1.01,
-     /1.00,0.99,0.99,1.06,1.14,1.11,1.09,0.93,0.70,0.42,
-     /0.22,.091,.013,.002,0.00,0.00/    
+     /1.00,0.99,0.99,1.06,1.14,1.11,1.09,0.93,0.70/    
 C E3SIG  V=0         
       DATA XTRP12/11.875,11.9,11.95,12.0,12.5,13.0,14.0,15.0,16.0,17.0,
      /18.0,19.0,20.0,21.0,25.0,30.0,35.0,40.0,45.0,50.0,
-     /70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/   
+     /70.0,100./   
       DATA YTRP12/.0,.157,.127,.101,.031,.021,.009,.003,.002,.004,
      /.008,.011,.013,.013,.010,.008,.005,.0037,.0027,.002,
-     /.0010,.0004,.0001,.00004,.00001,1.D-6,0.00,0.00,0.00/ 
-      DATA YTP12M/29*1.0/  
+     /.0010,.0004/ 
+      DATA YTP12M/22*1.0/  
 C A''1SIG(V=0-1) (V=0 ENERGY=12.255 EV)  AVERAGE ENERGY LOSS= 12.289 EV
       DATA XSNG7/12.289,13.0,14.0,15.0,17.5,20.0,24.0,30.0,40.0,50.0,
-     /70.0,100.,200.,400.,1000.,10000.,1.D5,1.D6,1.D7/
+     /70.0,100./
       DATA YSNG7/.0,.002,.005,.011,.022,.034,.037,.036,.031,.028,
-     /.020,.0125,.0049,.0019,4.D-4,4.D-5,0.00,0.00,0.00/
+     /.020,.0125/
       DATA YSG7M/0.86,0.86,0.86,0.86,0.86,0.91,0.94,0.99,0.94,0.89,
-     /0.73,0.50,0.33,0.19,.091,.013,.002,0.00,0.00/
-C B1PI (V=0-6) (V=0 ENERGY=12.500 EV) AVERAGE ENERGY LOSS= 12.771 EV
-C  USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-      DATA XSNG8/12.771,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG8/0.0,.0357,.0855,.170,.173,.163,.142,.116,.0905,.0763,
-     /.0668,.0599,.0551,.0501,.0463,.0440,.0374,.0334,.0299,.0273,
-     /.0249,.0214,.0189,.0170,.0154,.0140,.0120,.01056,.00937,.00849,
-     /.00775,.00701,.00640,.00587,.00545,.00479,.00425,.00384,.00350,
-     /.00299,
-     /.00261,.00232,.00191,.00156,.00133,.001024,8.42D-4,7.15D-4,
-     /6.22D-4,5.49D-4,
-     /4.96D-4,4.48D-4,1.5D-4,1.5D-4/
-      DATA YSG8M/0.76,0.76,0.67,0.46,0.34,0.22,0.13,0.05,0.04,0.03,
-     /.028,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.00002,.000002/
-C C'1SIG (V=0-3) (V=0 ENERGY=12.934 EV) AVERAGE ENERGY LOSS= 12.950 EV
-C  USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-C  SCALED X-SECTION BY 1.212 TO ALLOW FOR HIGHER VIBRATIONS THAN V=3
-      DATA XSNG9/12.950,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG9/0.0,.0103,.0228,.067,.086,.093,.102,.100,.091,.083,
-     /.075,.069,.063,.059,.054,.052,.0440,.0392,.0352,.0320,
-     /.0293,.0252,.0222,.0198,.0180,.0164,.0141,.0124,.0110,.00999,
-     /.00911,.00824,.00752,.00690,.00640,.00563,.00500,.00451,.00411,
-     /.00351,
-     /.00308,.00273,.00224,.00182,.00156,.00121,9.89D-4,8.40D-4,
-     /7.32D-4,6.45D-4,
-     /5.83D-4,5.27D-4,1.8D-4,1.8D-4/
+     /0.73,0.50/
+C B1PI (V=0-6) (V=0 ENERGY=12.500 EV) AVERAGE ENERGY LOSS= 12.781 EV
+C  USE BEF SCALING ABOVE 100EV                   F=0.1855
+      DATA XSNG8/12.781,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG8/0.0,.0640,.0855,.145,.160,.163,.160,.152/
+      DATA YSG8M/0.76,0.76,0.67,0.46,0.34,0.22,0.13,0.05/
+C C'1SIG (V=0-3) (V=0 ENERGY=12.934 EV) AVERAGE ENERGY LOSS= 13.000 EV
+C  USE BEF SCALING ABOVE 500EV                  F=0.15
+      DATA XSNG9/13.000,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
+     /250.,300.,350.,400.,450.,500./ 
+      DATA YSNG9/0.0,.0300,.0440,.067,.086,.093,.102,.100,.091,.083,
+     /.075,.069,.063,.059,.054,.052/
       DATA YSG9M/0.72,0.72,0.47,0.41,0.32,0.23,0.13,0.05,0.04,0.03,
-     /.028,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.00002,.000002/
+     /.028,.025,.022,.020,.018,.016/ 
 C G3 PI (V=0-3) (V=0 ENERGY=12.810 EV) AVERAGE ENERGY LOSS=13.001 EV         
-      DATA XTRP13/13.001,17.5,20.0,23.0,26.0,30.0,40.0,50.0,70.0,100.,
-     /200.,400.,1000.,10000.,1.D5,1.D6,1.D7/   
+      DATA XTRP13/13.001,17.5,20.0,23.0,26.0,30.0,40.0,50.0,70.0,100./
       DATA YTRP13/.0,.0133,.0178,.0204,.0207,.0199,.0174,.0152,.0115,
-     /.0065,
-     /.0021,.0006,.00016,.00002,0.00,0.00,0.00/ 
-      DATA YTP13M/0.74,0.74,0.73,0.72,0.71,0.69,0.61,0.53,0.47,0.40,
-     /0.33,0.19,.091,.013,.002,0.00,0.00/   
-C C3 1PI ( V=0-3) V=0 ENERGY=12.912 AVERAGE ENERGY LOSS= 13.093 EV
-C  USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-      DATA XSNG10/13.093,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG10/0.0,.0175,.040,.100,.102,.097,.084,.068,.053,.045,
-     /.039,.035,.032,.030,.027,.026,.022,.0196,.0175,.0160,
-     /.0146,.0126,.0111,.0100,.0090,.0082,.0070,.0062,.0055,.0050,
-     /.0046,.0041,.0038,.0035,.0032,.0029,.0026,.0022,.00206,
-     /.00175,
-     /.00154,.00136,.00112,9.14D-4,7.79D-4,6.02D-4,4.94D-4,4.20D-4,
-     /3.66D-4,3.22D-4,
-     /2.92D-4,2.64D-4,9.0D-5,9.0D-5/
-      DATA YSG10M/0.69,0.69,0.55,0.40,0.28,0.16,0.11,0.05,0.04,0.03,
-     /.028,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.000015,.0000015/
-C F3 PI (V=0-3) (V=0 ENERGY=12.985 EV) AVERAGE ENERGY LOSS=13.174 EV         
-      DATA XTRP14/13.174,17.5,20.0,23.0,26.0,30.0,40.0,50.0,70.0,100.,
-     /200.,400.,1000.,10000.,1.D5,1.D6,1.D7/   
+     /.0065/ 
+      DATA YTP13M/0.74,0.74,0.73,0.72,0.71,0.69,0.61,0.53,0.47,0.40/   
+C C3 1PI ( V=0-3) V=0 ENERGY=12.912 AVERAGE ENERGY LOSS= 13.076 EV
+C  USE BEF SCALING ABOVE 100EV        F=0.15
+      DATA XSNG10/13.076,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG10/0.0,.0470,.060,.100,.118,.124,.124,.118/
+      DATA YSG10M/0.69,0.69,0.55,0.40,0.28,0.16,0.11,0.05/
+C F3 PI (V=0-3) (V=0 ENERGY=12.985 EV) AVERAGE ENERGY LOSS=13.174 EV  
+      DATA XTRP14/13.174,17.5,20.0,23.0,26.0,30.0,40.0,50.0,70.0,100./
       DATA YTRP14/.0,.0062,.0091,.0129,.0140,.0136,.0119,.0102,.0074,
-     /.0040,
-     /.0014,.0004,.0001,.00001,0.00,0.00,0.00/   
-      DATA YTP14M/0.74,0.74,0.76,0.71,0.65,0.63,0.53,0.43,0.40,0.34,
-     /0.29,0.19,.091,.013,.002,0.00,0.00/   
-C B! 1SIG (V=0-10) V=0 ENERGY=12.854 AVERAGE ENERGY LOSS= 13.371 EV
-C  USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-      DATA XSNG11/13.371,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG11/0.0,.0156,.027,.037,.046,.048,.048,.046,.039,.035,
-     /.031,.029,.027,.024,.0228,.0216,.0185,.0164,.0147,.0135,
-     /.0123,.0106,.0093,.0084,.0075,.0069,.0059,.0052,.0047,.0043,
-     /.0038,.0035,.0032,.0029,.0027,.0023,.0021,.0019,.00173,
-     /.00147,
-     /.00128,.00115,9.4D-4,7.6D-4,6.6D-4,5.1D-4,4.1D-4,3.5D-4,
-     /3.1D-4,2.70D-4,
-     /2.45D-4,2.21D-4,7.0D-5,7.0D-5/
-      DATA YSG11M/0.81,0.81,0.71,0.47,0.33,0.20,0.15,0.09,0.05,0.04,
-     /.030,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.000015,.0000015/
-C B1PI (V=7-14) (V=7 ENERGY=13.156 EV) AVERAGE ENERGY LOSS= 13.382 EV
-C USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-      DATA XSNG12/13.382,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG12/0.0,.0120,.0288,.0571,.0582,.0550,.0478,.0387,.0304,
-     /.0257,
-     /.0225,.0201,.0186,.0169,.0156,.0148,.0126,.0112,.01007,.00916,
-     /.00839,.00721,.00636,.00569,.00515,.00471,.00404,.00355,.00315,
-     /.00286,
-     /.00261,.00236,.00215,.00197,.00183,.00161,.00143,.00129,.00118,
-     /.001005,
-     /.000879,.000780,.000641,.000524,.000446,.000345,.000283,.000241,
-     /.000210,.000185,
-     /.000168,.000151,5.0D-5,5.0D-5/
-      DATA YSG12M/0.76,0.76,0.67,0.46,0.34,0.22,0.13,0.05,0.04,0.03,
-     /.028,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.000015,.0000015/
-C O3 1PI (V=0-3) (V=0 ENERGY=13.103 EV) AVERAGE ENERGY LOSS= 13.564 EV
-C USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-C SCALED X-SECTION BY 1.096 TO ALLOW FOR VIBRATIONS HIGHER THAN V=3
-      DATA XSNG13/13.564,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG13/0.0,.0140,.028,.055,.056,.053,.046,.037,.030,.024,
-     /.021,.019,.018,.017,.015,.0140,.0123,.0108,.0097,.0089,
-     /.0081,.0070,.0062,.0055,.0050,.0045,.0038,.0034,.0031,.0027,
-     /.00251,.00228,.00210,.00193,.00175,.00157,.00141,.00123,.00114,
-     /9.7D-4,
-     /8.4D-4,7.5D-4,6.2D-4,5.1D-4,4.3D-4,3.3D-4,2.7D-4,2.3D-4,
-     /2.0D-4,1.8D-4,
-     /1.6D-4,1.5D-4,5.0D-5,5.0D-5/
-      DATA YSG13M/0.86,0.86,0.77,0.60,0.45,0.30,0.19,0.08,0.05,0.04,
-     /.030,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.000015,.0000015/
-C B! 1SIG (V=11-INF) (V=11 ENERGY=13.86 EV) AVERAGE ENERGY LOSS=14.0 EV
-C  USE DIPOLE FALL OFF WITH ENERGY ABOVE 500EV
-C  USE SCALING ( FRANK CONDON FACTORS) OF 91.75/8.25 FOR TRANSITION 
-C STRENGTH COMPARED TO THE B! 1SIG (V=0-10) X-SECTION 
-      DATA XSNG14/14.0,17.5,20.0,30.0,40.0,50.0,70.0,100.,150.,200.,
-     /250.,300.,350.,400.,450.,500.,600.,700.,800.,900.,
-     /1000.,1200.,1400.,1600.,1800.,2000.,2400.,2800.,3200.,3600.,
-     /4000.,4500.,5000.,5500.,6000.,7000.,8000.,9000.,1.0D4,1.2D4,
-     /1.4D4,1.6D4,2.0D4,2.5D4,3.0D4,4.0D4,5.0D4,6.0D4,7.0D4,8.0D4,
-     /9.0D4,1.0D5,1.0D6,1.0D7/ 
-      DATA YSNG14/0.0,.080,.229,.417,.507,.530,.534,.504,.439,.387,
-     /.347,.317,.295,.275,.253,.241,.205,.182,.164,.150,      
-     /.137,.118,.1035,.0927,.0840,.0765,.0656,.0579,.0513,.0465,
-     /.0424,.0385,.0350,.0322,.0298,.0263,.0233,.0210,.0192,
-     /.0164,
-     /.0143,.0127,.01044,.00852,.00726,.00561,.00461,.00391,.00340,
-     /.00301,
-     /.00273,.00245,8.0D-4,8.0D-4/
-      DATA YSG14M/0.81,0.81,0.71,0.47,0.33,0.20,0.15,0.09,0.05,0.04,
-     /.030,.025,.022,.020,.018,.016,.014,.012,.011,.010,
-     /.009,.008,.007,.006,.0055,.005,.0046,.0042,.0038,.0034,
-     /.0030,.0028,.0026,.0024,.0022,.0020,.0018,.0016,.0014,.0013,
-     /.0012,.0011,.0010,.0009,.0008,.0007,.0006,.0005,.0004,.0003,
-     /.0002,.00015,.000015,.0000015/
-C SUM SINGLET (SUMMED SINGLETS ABOVE 14.2 EV)            
-      DATA XSNG15/14.2,14.5,15.0,16.0,17.0,18.0,20.0,22.0,25.0,30.0,   
-     /40.0,60.0,80.0,100.,150.,200.,250.,300.,500.,700.,
-     /1000.,2000.,4000.,10000.,20000.,1.D5,1.D6,1.D7/          
-      DATA YSNG15/0.0,.037,.088,.133,.194,.240,.346,.442,.548,.682,    
-     /.811,.811,.774,.728,.613,.534,.485,.442,.341,.295,
-     /.244,.129,.065,.028,.014,.0055,.0018,.0018/ 
-      DATA YSG15M/0.81,0.81,0.81,0.81,0.81,0.79,0.71,0.65,0.59,0.47,
-     /0.33,0.19,0.13,0.09,0.05,0.04,0.03,.025,.016,.012,
-     /.009,.005,.003,.0014,.0010,.00015,.000015,.000001/   
+     /.0040/   
+      DATA YTP14M/0.74,0.74,0.76,0.71,0.65,0.63,0.53,0.43,0.40,0.34/  
+C B1PI (V=7-14) (V=7 ENERGY=13.156 EV) AVERAGE ENERGY LOSS= 13.338 EV
+C USE BEF SCALING ABOVE 100EV      F=0.0663
+      DATA XSNG11/13.338,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG11/0.0,.0120,.0288,.047,.052,.055,.054,.0503/
+      DATA YSG11M/0.76,0.76,0.67,0.46,0.34,0.22,0.13,0.05/
+C B! 1SIG (V=0-10) V=0 ENERGY=12.854 AVERAGE ENERGY LOSS= 13.385 EV
+C  USE BEF SCALING ABOVE 100EV             F=0.0601
+      DATA XSNG12/13.385,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG12/0.0,.0156,.027,.037,.046,.048,.048,.046/
+      DATA YSG12M/0.81,0.81,0.71,0.47,0.33,0.20,0.15,0.09/
+C O3 1PI (V=0-5) (V=0 ENERGY=13.103 EV) AVERAGE ENERGY LOSS= 13.628 EV
+C USE BEF SCALING ABOVE 100EV      F=0.0828
+      DATA XSNG13/13.628,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG13/0.0,.0140,.028,.051,.060,.063,.065,.061/
+      DATA YSG13M/0.86,0.86,0.77,0.60,0.45,0.30,0.19,0.08/
+C C! 1SIG (V=4-6)  (V=4 ENERGY=13.982 EV)  AVERAGE ENERGY LOSS=14.090
+C USE BEF SCALING ABOVE 100EV     F=0.139
+      DATA XSNG14/14.090,17.5,20.0,30.0,40.0,50.0,70.0,100./
+      DATA YSNG14/0.0,.030,.045,.081,.096,.102,.103,.097/
+      DATA YSG14M/0.85,0.85,0.75,0.55,0.40,0.25,0.17,0.08/
+C B! 1SIG (V=11-INF) (V=11 ENERGY=13.84 EV) 
+C  AVERAGE ENERGY LOSS=14.232 EV      (CONSISTENT WITH BERKOWITZ)
+C  USE BEF SCALING ABOVE 100EV            F=0.265  
+C  TOTAL TRANSITION STRENGTH FOR B! 1SIG= 0.265 + 0.0601=0.3301 
+      DATA XSNG15/14.232,17.5,20.0,30.0,40.0,50.0,70.0,100./ 
+      DATA YSNG15/0.0,.055,.083,.151,.180,.191,.194,.182/
+      DATA YSG15M/0.81,0.81,0.71,0.47,0.33,0.20,0.15,0.09/
+C
+C E! 1SIG  ENERGY LOSS=14.36EV        F=0.0108  (BERKOWITZ) 
+C  USE BEF SCALING IN SUBROUTINE
+C
+C E 1PI   ENERGY LOSS=14.45EV         F=0.0237   (BERKOWITZ)
+C USE BEF SCALING IN SUBROUTINE
+C
+C SINGLET  ENERGY LOSS=14.839EV       F=0.0117  (BERKOWITZ)
+C USE BEF SCALING IN SUBROUTINE
+C 
+C  SUM OF HIGH ENERGY SINGLETS   ENERGY LOSS=15.2  F=0.1152
+C USE BEF SCALING IN SUBROUTINE
+C
+C SUM OF EXCITATIONS TO EXCITED IONS AND MOLECULAR BREAKUP.
+C    ENERGY LOSS=15.5EV    
+C USE BEF SCALING                F=1.30
+C           
 C RAP UP TO 100 EV THEN LINDSAY TO 1KEV THEN SCHRAM TO 20KEV    
-C ABOVE 20KEV USE MATRIX ELEMENTS COMPATIBLE WITH RIEKE AND BERKOWITZ    
+C ABOVE 20KEV USE MATRIX ELEMENTS COMPATIBLE WITH RIEKE AND BERKOWITZ   
       DATA XION/15.581,16.0,16.5,17.0,17.5,18.0,18.5,19.0,19.5,20.0,
      /20.5,21.0,21.5,22.0,22.5,23.0,23.5,24.0,24.5,25.0,
      /25.5,26.0,28.0,30.0,32.0,34.0,36.0,38.0,40.0,45.0,
@@ -34794,7 +36499,7 @@ C COUNTING IONISATION
      /.965,.931,.902,.874,.842,.724,.645,.581,.531,.488,
      /.405,.349,.308,.278,.253,.231,.215,.198,.176,.157,
      /.143,.131,.112,.0988,.0889,.0816,.0745/
-C K-SHELL IONISATION
+C NITROGEN K-SHELL IONISATION (MULTIPLY BY 2 FOR MOLECULE)
       DATA XKSH/401.6,407.,419.,431.,444.,457.,471.,485.,499.,515.,
      /530.,546.,562.,596.,631.,668.,708.,750.,794.,841.,
      /891.,944.,1000.,1090.,1188.,1296.,1496.,1679.,1884.,2054.,
@@ -34803,7 +36508,11 @@ C K-SHELL IONISATION
      /1.0D5,
      /1.54D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,8.18D5,1.00D6,
      /1.25D6,
-     /1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,1.0D7/
+     /1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,1.00D7,
+     /1.22D7,
+     /1.50D7,1.88D7,2.24D7,2.82D7,3.76D7,4.87D7,6.31D7,8.66D7,1.00D8,
+     /1.22D8,
+     /1.50D8,1.88D8,2.24D8,2.82D8,3.76D8,4.87D8,6.31D8,8.66D8,1.00D9/
       DATA YKSH/0.00,4.11D-5,1.38D-4,2.32D-4,3.23D-4,4.12D-4,4.98D-4,
      /5.81D-4,6.61D-4,7.38D-4,
      /8.13D-4,8.85D-4,9.54D-4,1.08D-3,1.20D-3,1.31D-3,1.41D-3,1.50D-3,
@@ -34817,7 +36526,21 @@ C K-SHELL IONISATION
      /1.19D-4,1.03D-4,8.77D-5,7.92D-5,7.54D-5,7.27D-5,7.14D-5,7.04D-5,
      /6.97D-5,6.96D-5,
      /7.00D-5,7.16D-5,7.47D-5,7.74D-5,7.95D-5,8.17D-5,8.34D-5,8.51D-5,
-     /8.75D-5/
+     /8.75D-5,9.00D-5,
+     /9.25D-5,9.54D-5,9.76D-5,1.01D-4,1.04D-4,1.08D-4,1.11D-4,1.15D-4,
+     /1.17D-4,1.20D-4,
+     /1.22D-4,1.25D-4,1.27D-4,1.31D-4,1.34D-4,1.38D-4,1.41D-4,1.45D-4,
+     /1.47D-4/
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF UNITS 10**-24 CM**2
+      DATA Z7T/385.,234.,113.,63.5,35.5,16.4,9.48,5.96,4.07,3.73,
+     /3.81,3.93,4.04,4.11,4.18,4.26,4.33,4.42,4.48,4.55,
+     /4.59,4.61,4.63,4.64,4.65/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
+C  *********************************************************************
+C REANALYSED SINGLET STATES TO MAKE CONSISTENT WITH OSCILLATOR SUM
+C FROM BERKOWITZ  USED BEF SCALING TO GIVE X-SCTION AT HIGH ENERGY.
 C  *********************************************************************
 C  2013: INCLUDE K-SHELL IONISATION
 C -----------------------------------
@@ -34867,14 +36590,19 @@ C
 C***********************************************************************      
 C--------------------------------------------------------------------- 
       IF(NANISO.EQ.0) THEN
-       NAME='NITROGEN 2013  ISOTROPIC '
+       NAME='NITROGEN 2014  ISOTROPIC '
       ELSE 
-       NAME='NITROGEN 2013 ANISOTROPIC'
+       NAME='NITROGEN 2014 ANISOTROPIC'
       ENDIF
 C    -------------------------------------------------------------- 
 C BORN BETHE VALUES FOR COUNTING IONISATION
       CONST=1.873884D-20
       EMASS2=1021997.804
+      API=DACOS(-1.0D0)
+      A0=0.52917720859D-8
+      RY=13.60569193
+      BBCONST=16.0*API*A0*A0*RY*RY/EMASS2
+C
       AM2=3.35
       C=38.1
 C
@@ -34882,86 +36610,101 @@ C AVERAGE AUGER EMISSION FROM K-SHELL
       AUGK=1.99
 C
       NION=2
-      NIN=121
+      NIN=126
+C      
+      NBREM=25
+      DO 11 J=1,NIN
+      IZBR(J)=0
+   11 CONTINUE
+      IZBR(NIN+1)=7
+C
 C ANGULAR DISTRIBUTIONS OF ELASTIC AND IONISATION CAN BE EITHER
 C ISOTROPIC (KEL=0) OR
 C CAPITELLI-LONGO (KEL =1)  OR OKHRIMOVSKKY TYPES (KEL=2)
 C 
       DO 1 J=1,6
     1 KEL(J)=NANISO
-C USE ISOTROPIC SCATTERING FOR ROTATIONAL AND VIBRATIONAL STATES
-      DO 2 J=1,92 
-    2 KIN(J)=0    
-C USE ANISOTROPIC SCATTERING FOR EXCITED STATES .
+C USE ISOTROPIC SCATTERING FOR ROTATIONAL STATES
+      DO 2 J=1,76 
+    2 KIN(J)=2    
+C USE ISOTROPIC FOR SUPERELASTIC VIBRATION
+      KIN(77)=2
+C USE ANISOTROPIC SCATTERING FOR VIBRATIONAL AND EXCITED STATES .
 C ANGULAR DISTRIBUTIONS ARE CAPITELLI-LONGO (FORWARD BACKWARD ASYMMETRY)
-      DO 20 J=93,121
-   20 KIN(J)=1 
+C OR OKRIMOVSKKY
+      DO 20 J=78,126
+   20 KIN(J)=NANISO
 C 
-      NELA=184                                                          
+      NELA=216                                                          
       NROT=70                                                          
-      NVIB1=91                                                          
-      NVIB2=73                                                          
-      NVIB3=74                                                          
-      NVIB4=54                                                          
-      NVIB5=44                                                          
-      NVIB6=45 
-      NVIB7=46
-      NVIB8=44 
-      NVIB9=39
-      NVIB10=39
-      NVIB11=39
-      NVIB12=37
-      NVIB13=35
-      NVIB14=32
-      NVIB15=36
-      NTRP1=30  
-      NTRP2=30                                                        
-      NTRP3=28
-      NTRP4=29                                                          
-      NTRP5=30
-      NTRP6=28                                                          
-      NTRP7=28                                                          
-      NTRP8=28
-      NTRP9=27
-      NTRP10=27
-      NTRP11=26
-      NTRP12=29
-      NTRP13=17
-      NTRP14=17
-      NSNG1=33                                                         
-      NSNG2=24
-      NSNG3=24
-      NSNG4=33                                                          
-      NSNG5=24
-      NSNG6=23
-      NSNG7=19
-      NSNG8=54
-      NSNG9=54 
-      NSNG10=54
-      NSNG11=54
-      NSNG12=54
-      NSNG13=54
-      NSNG14=54
-      NSNG15=28                             
+      NVIB1=87                                                          
+      NVIB2=69                                                          
+      NVIB3=70                                                          
+      NVIB4=50                                                          
+      NVIB5=40                                                          
+      NVIB6=41 
+      NVIB7=42
+      NVIB8=40 
+      NVIB9=35
+      NVIB10=35
+      NVIB11=35
+      NVIB12=33
+      NVIB13=31
+      NVIB14=28
+      NVIB15=32
+      NTRP1=23  
+      NTRP2=23                                                        
+      NTRP3=21
+      NTRP4=22                                                          
+      NTRP5=23
+      NTRP6=21                                                          
+      NTRP7=21                                                          
+      NTRP8=21
+      NTRP9=20
+      NTRP10=20
+      NTRP11=19
+      NTRP12=22
+      NTRP13=10
+      NTRP14=10
+      NSNG1=19                                                         
+      NSNG2=17
+      NSNG3=17
+      NSNG4=19                                                          
+      NSNG5=17
+      NSNG6=16
+      NSNG7=12
+      NSNG8=8
+      NSNG9=16 
+      NSNG10=8
+      NSNG11=8
+      NSNG12=8
+      NSNG13=8
+      NSNG14=8
+      NSNG15=8
       NIOND=87 
-      NKSH=69
+      NKSH=89
 C                                                         
       E(1)=0.0                                                          
       E(2)=2.0*EMASS/(27.7940*AMU)                                      
       E(3)=15.581  
-C EXCITATION X-SECTION AT 1.4 MEV                                              
+C EXCITATION X-SECTION AT 1.4 MEV                                     
       E(4)=0.0032D-16
 C IONISATION X-SECTION AT 1.4MEV                                     
       E(5)=0.008795D-16
 C OPAL BEATY IONISATION ENERGY SPLITTING AT 1.4MEV                    
       E(6)=13.8
 C OPAL BEATY IONISATION ENERGY SPLITTING AT LOW ENERGY
-      EOBY(1)=13.0
+      EOBY(1)=10.6
+C     EOBY(1)=13.8
 C OPAL BEATY FOR K-SHELL
-      EOBY(2)=401.6
+      EOBY(2)=260.0
 C
       EION(1)=15.581
       EION(2)=401.6
+      LEGAS(1)=0
+      LEGAS(2)=1
+      ISHELL(1)=0
+      ISHELL(2)=1
 C FLUORESENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -35047,16 +36790,22 @@ C CALC ROTATIONAL TRANSITION ENERGIES
       EIN(109)=11.188                                                   
       EIN(110)=11.875
       EIN(111)=12.289 
-      EIN(112)=12.771
-      EIN(113)=12.950
+      EIN(112)=12.781
+      EIN(113)=13.000
       EIN(114)=13.001
-      EIN(115)=13.093
+      EIN(115)=13.076
       EIN(116)=13.174
-      EIN(117)=13.371
-      EIN(118)=13.382  
-      EIN(119)=13.564
-      EIN(120)=14.0                              
-      EIN(121)=14.2 
+      EIN(117)=13.338
+      EIN(118)=13.385
+      EIN(119)=13.628
+      EIN(120)=14.090
+      EIN(121)=14.232                              
+      EIN(122)=14.36
+      EIN(123)=14.45
+      EIN(124)=14.839
+      EIN(125)=15.2
+      EIN(126)=15.5 
+      EIN(127)=0.0
 C
 C**********************************************************************
 C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL
@@ -35078,9 +36827,9 @@ C PENNING TRANSFER TIME IN PICOSECONDS
      /OBABILITY = ',F5.3,' ABS.LENGTH = ',F7.2,' DECAY TIME = ',F7.1,/)
     9 CONTINUE
 C********************************************************************** 
-      DO 551 NL=93,NIN
+      DO 551 NL=1,NIN
       DO 651 I=1,4000
-      IF(EG(I).GT.EIN(NL)) THEN
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
        IOFFN(NL)=I-1
        GO TO 551
       ENDIF 
@@ -35209,16 +36958,22 @@ C
       SCRPT(116)=' C 3PI     V=0-4                  ELOSS= 11.188  '
       SCRPT(117)=' E 3SIG                           ELOSS= 11.875  '
       SCRPT(118)=' A!!1SIG   V=0-1                  ELOSS= 12.289  '
-      SCRPT(119)=' B 1PI     V=0-6                  ELOSS= 12.771  '
-      SCRPT(120)=' C!1SIG    V=0-3                  ELOSS= 12.950  '
+      SCRPT(119)=' B 1PI     V=0-6     F=0.1855     ELOSS= 12.781  '
+      SCRPT(120)=' C!1SIG    V=0-3     F=0.1500     ELOSS= 13.000  '
       SCRPT(121)=' G 3PI     V=0-3                  ELOSS= 13.001  '
-      SCRPT(122)=' C3 1PI    V=0-3                  ELOSS= 13.093  '
+      SCRPT(122)=' C3 1PI    V=0-3     F=0.1500     ELOSS= 13.076  '
       SCRPT(123)=' F 3PI     V=0-3                  ELOSS= 13.174  '
-      SCRPT(124)=' B!1SIG    V=0-10                 ELOSS= 13.371  '
-      SCRPT(125)=' B 1PI     V=7-14                 ELOSS= 13.382  '
-      SCRPT(126)=' O3 1PI    V=0-3                  ELOSS= 13.564  '
-      SCRPT(127)=' B!1SIG    V=10-H                 ELOSS= 14.0    '
-      SCRPT(128)=' SUM SINGLETS                     ELOSS= 14.2    '
+      SCRPT(124)=' B 1PI     V=7-14    F=0.0663     ELOSS= 13.338  '
+      SCRPT(125)=' B!1SIG    V=0-10    F=0.0601     ELOSS= 13.385  '
+      SCRPT(126)=' O3 1PI    V=0-3     F=0.0828     ELOSS= 13.628  '
+      SCRPT(127)=' C!1SIG    V=4-6     F=0.1390     ELOSS= 14.090  '
+      SCRPT(128)=' B!1SIG    V=11-24   F=0.2650     ELOSS= 14.232  '
+      SCRPT(129)=' E!1SIG              F=0.0108     ELOSS= 14.36   '
+      SCRPT(130)=' E 1PI               F=0.0237     ELOSS= 14.45   '
+      SCRPT(131)=' SINGLET LEVEL       F=0.0117     ELOSS= 14.839  '
+      SCRPT(132)=' SUM HIGH SINGLETS   F=0.1152     ELOSS= 15.2    '
+      SCRPT(133)=' ION EXC. + NEUTRAL BREAKUP       ELOSS= 15.5    '
+      SCRPT(134)=' BREMSSTRAHLUNG  FROM NITROGEN ATOMS             '
 C CALC VIBRATIONAL LEVEL V1 POPULATION
       APOPV1=DEXP(EIN(77)/AKT)
       APOPGS=1.0
@@ -35229,10 +36984,14 @@ C  RENORMALISE GROUND STATE TO ALLOW FOR EXCITATION FROM
 C  THE EXCITED VIBRATIONAL STATE 
       APOPGS=1.0
 C       
-      EN=-ESTEP/2.0   
+C     EN=-ESTEP/2.0   
       DO 900 I=1,NSTEP
-C     EN=EG(I)
-      EN=EN+ESTEP 
+      EN=EG(I)
+C     EN=EN+ESTEP 
+      GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
+      GAMMA2=GAMMA1*GAMMA1
+      BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
+      BETA2=BETA*BETA
 C        
 C ELASTIC (+ROTATIONAL)                                                
       DO 10 J=2,NELA                                                    
@@ -35251,6 +37010,8 @@ C  MOMENTUM TRANSFER
       B=(XELA(J-1)*YEPS(J)-XELA(J)*YEPS(J-1))/(XELA(J-1)-XELA(J))
 C ANISOTROPY FUNCTIONS
       PQ2=(A*EN+B)
+C EPSILON =1.0-YEPS
+      PQ2=1.0D0-PQ2
       PQ1=0.5+(QELA-QMOM)/QELA
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
@@ -35272,12 +37033,9 @@ C GROSS IONISATION
       QION(1,I)=(A*EN+B)*1.D-16                   
       GO TO 42
 C USE BORN BETHE X-SECTION ABOVE  XION(NIOND) EV 
-   41 GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
-      BETA=DSQRT(1.0D0-1.0D0/(GAMMA1*GAMMA1))
-      BETA2=BETA*BETA
-      X2=1.0D0/BETA2
+   41 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      QION(1,I)=CONST*(AM2*X1+C*X2)/0.991                         
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)/0.991                 
    42 CONTINUE  
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -35324,7 +37082,7 @@ C COUNTING IONISATION
       Q(5,I)=(A*EN+B)*1.D-16    
       GO TO 47
 C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
-   46 Q(5,I)=CONST*(AM2*X1+C*X2)                    
+   46 Q(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)                    
    47 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON AT
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -35336,7 +37094,7 @@ C AT AN ENERGY OFFSET BY THE IONISATION ENERGY
    48 CONTINUE
 C**********************************************************************
 C TEMPORARY MOD FOR RANGE PARAMETERS
-      IF(EN.GT.1000.) QION(1,I)=Q(5,I)
+C      IF(EN.GT.1000.) QION(1,I)=Q(5,I)
 C*******************************************************************
       Q(6,I)=0.0                                                        
 C---------------------------------------------------------------------  
@@ -35362,13 +37120,16 @@ C CALCULATE ENHANCEMENT OF ROTATIONAL XSEC IN THE RESONANCE REGION
 C USE 30% FOR RESFAC
       RESFAC=RESFAC*0.3  
 C BORN ROTATIONAL X-SEC SUM IN RESONANCE REGION = 0.249
-      RESFAC=1.0+RESFAC/0.249  
+      RESFAC=1.0+RESFAC/0.249 
+C SET ROTATIONAL ANGULAR DISTRIBUTIONS 
+      PEQIN(K,I)=0.5D0 
+      IF(NANISO.EQ.2) PEQIN(K,I)=0.0D0 
    53 QIN(K,I)=QIN(K,I)*RESFAC    
 C
 C  INELASTIC ROTATION
 C
 C CALCULATE ENHANCEMENT OF ROTATIONAL XSEC IN THE RESONANCE REGION
-   54 DO 55 K=39,76
+      DO 55 K=39,76
    55 QIN(K,I)=0.0
       IF(EN.LE.0.0) GO TO 80
       DO 56 L=1,NROT
@@ -35386,16 +37147,21 @@ C  ROT 0-2
       IF(EN.LE.EIN(39)) GO TO 80
       QIN(39,I)=FROT0*QBK*DSQRT(1.0-EIN(39)/EN)*2.0/3.0
       QIN(39,I)=QIN(39,I)*RESFAC
+      PEQIN(39,I)=0.0
+      IF(NANISO.EQ.2) PEQIN(39,I)=0.0
 C ROT 1-3 AND HIGHER
       DO 58 K=40,76
       AJ=DFLOAT(K-39) 
       IF(EN.LE.EIN(K)) GO TO 80
       QIN(K,I)=PJ(K-39)*QBK*DSQRT(1.0-EIN(K)/EN)*(AJ+2.0)*(AJ+1.0)/((2.0
-     /*AJ+3.0)*(2.0*AJ+1.0))
+     +*AJ+3.0)*(2.0*AJ+1.0))
+C SET ANGULAR  DISTRIBUTION ISOTROPIC
+      PEQIN(K,I)=0.5D0
+      IF(NANISO.EQ.2) PEQIN(K,I)=0.0D0
    58 QIN(K,I)=QIN(K,I)*RESFAC    
 C  FORCE ROTATIONAL X-SEC TO FALL AT SAME RATE AS THE
 C  ELASTIC X-SECTION ABOVE 5.0 EV
-   60 IF(EN.LT.5.0) GO TO 80
+      IF(EN.LT.5.0) GO TO 80
       ASCALE=QMOM/8.90D-16
       DO 70 K=1,76
    70 QIN(K,I)=QIN(K,I)*ASCALE
@@ -35405,7 +37171,10 @@ C  VIBRATIONAL AND EXCITATION X-SECTIONS
 C--------------------------------------------------------------------- 
 C  V1 SUPERELASTIC 
       QIN(77,I)=0.0
-      IF(EN.LE.0.0) GO TO 87                                   
+      PEQIN(77,I)=0.5
+      IF(NANISO.EQ.2) PEQIN(77,I)=0.0
+      IF(EN.LE.0.0) GO TO 87
+      IF((EN-EIN(77)).GT.XVB1(NVIB1)) GO TO 861                    
       DO 85 J=2,NVIB1                                                   
       IF((EN-EIN(77)).LE.XVB1(J)) GO TO 86                           
    85 CONTINUE                                                          
@@ -35413,178 +37182,234 @@ C  V1 SUPERELASTIC
    86 A=(YVB1(J)-YVB1(J-1))/(XVB1(J)-XVB1(J-1))                     
       B=(XVB1(J-1)*YVB1(J)-XVB1(J)*YVB1(J-1))/(XVB1(J-1)-XVB1(J)) 
       QIN(77,I)=(EN-EIN(77))*(A*(EN-EIN(77))+B)/EN
-      QIN(77,I)=APOPV1*QIN(77,I)*1.D-16        
+      GO TO 862
+  861 QIN(77,I)=(EN-EIN(77))*YVB1(NVIB1)*(XVB1(NVIB1)/(EN*EN)) 
+  862 QIN(77,I)=APOPV1*QIN(77,I)*1.D-16        
    87 CONTINUE
 C  V1  
       QIN(78,I)=0.0                                                     
-      IF(EN.LE.EIN(78)) GO TO 110                                       
+      IF(EN.LE.EIN(78)) GO TO 110
+      IF(EN.GT.XVB1(NVIB1)) GO TO 101                                
       DO 90 J=2,NVIB1                                                   
       IF(EN.LE.XVB1(J)) GO TO 100                                      
    90 CONTINUE                                                          
       J=NVIB1                                                           
   100 A=(YVB1(J)-YVB1(J-1))/(XVB1(J)-XVB1(J-1))                     
       B=(XVB1(J-1)*YVB1(J)-XVB1(J)*YVB1(J-1))/(XVB1(J-1)-XVB1(J)) 
-      QIN(78,I)=APOPGS*(A*EN+B)*1.D-16                           
+      QIN(78,I)=APOPGS*(A*EN+B)*1.D-16   
+      GO TO 110
+  101 QIN(78,I)=APOPGS*YVB1(NVIB1)*(XVB1(NVIB1)/EN)*1.D-16            
   110 CONTINUE
 C  2V1                                                                  
-      QIN(79,I)=0.0                                                     
-      IF(EN.LE.EIN(79)) GO TO 140                                       
+      QIN(79,I)=0.0                                
+      IF(EN.LE.EIN(79)) GO TO 140                           
+      IF(EN.GT.XVB2(NVIB2)) GO TO 131            
       DO 120 J=2,NVIB2                                                  
       IF(EN.LE.XVB2(J)) GO TO 130                                      
   120 CONTINUE                                                          
       J=NVIB2                                                           
   130 A=(YVB2(J)-YVB2(J-1))/(XVB2(J)-XVB2(J-1))                     
       B=(XVB2(J-1)*YVB2(J)-XVB2(J)*YVB2(J-1))/(XVB2(J-1)-XVB2(J)) 
-      QIN(79,I)=APOPGS*(A*EN+B)*1.D-16                         
-  140 CONTINUE                                                          
-C  3V1                                                        
-      QIN(80,I)=0.0                                                     
-      IF(EN.LE.EIN(80)) GO TO 170                                       
+      QIN(79,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 140  
+  131 QIN(79,I)=APOPGS*YVB2(NVIB2)*(XVB2(NVIB2)/EN)*1.D-16             
+  140 CONTINUE                           
+C  3V1                                                       
+      QIN(80,I)=0.0                                                    
+      IF(EN.LE.EIN(80)) GO TO 170                           
+      IF(EN.GT.XVB3(NVIB3)) GO TO 161            
       DO 150 J=2,NVIB3                                                  
       IF(EN.LE.XVB3(J)) GO TO 160                                      
   150 CONTINUE                                                          
       J=NVIB3                                                           
   160 A=(YVB3(J)-YVB3(J-1))/(XVB3(J)-XVB3(J-1))                     
       B=(XVB3(J-1)*YVB3(J)-XVB3(J)*YVB3(J-1))/(XVB3(J-1)-XVB3(J)) 
-      QIN(80,I)=APOPGS*(A*EN+B)*1.D-16                           
-  170 CONTINUE                                                          
+      QIN(80,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 170
+  161 QIN(80,I)=APOPGS*YVB3(NVIB3)*(XVB3(NVIB3)/EN)*1.D-16           
+  170 CONTINUE                       
 C 4V1                                                               
-      QIN(81,I)=0.0                                                     
-      IF(EN.LE.EIN(81)) GO TO 200                                       
+      QIN(81,I)=0.0                                           
+      IF(EN.LE.EIN(81)) GO TO 200                               
+      IF(EN.GT.XVB4(NVIB4)) GO TO 191        
       DO 180 J=2,NVIB4                                                  
       IF(EN.LE.XVB4(J)) GO TO 190                                      
   180 CONTINUE                                                          
       J=NVIB4                                                           
   190 A=(YVB4(J)-YVB4(J-1))/(XVB4(J)-XVB4(J-1))                     
       B=(XVB4(J-1)*YVB4(J)-XVB4(J)*YVB4(J-1))/(XVB4(J-1)-XVB4(J)) 
-      QIN(81,I)=APOPGS*(A*EN+B)*1.D-16                           
-  200 CONTINUE                                                          
-C 5V1                                                                   
-      QIN(82,I)=0.0                                           
-      IF(EN.LE.EIN(82)) GO TO 230                                       
+      QIN(81,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 200
+  191 QIN(81,I)=APOPGS*YVB4(NVIB4)*(XVB4(NVIB4)/EN)*1.D-16            
+  200 CONTINUE                               
+C 5V1                                                                  
+      QIN(82,I)=0.0                                          
+      IF(EN.LE.EIN(82)) GO TO 230                              
+      IF(EN.GT.XVB5(NVIB5)) GO TO 221         
       DO 210 J=2,NVIB5                                                  
       IF(EN.LE.XVB5(J)) GO TO 220                                      
   210 CONTINUE                                                          
       J=NVIB5                                                           
   220 A=(YVB5(J)-YVB5(J-1))/(XVB5(J)-XVB5(J-1))                     
       B=(XVB5(J-1)*YVB5(J)-XVB5(J)*YVB5(J-1))/(XVB5(J-1)-XVB5(J)) 
-      QIN(82,I)=APOPGS*(A*EN+B)*1.D-16                                 
-  230 CONTINUE                                                          
+      QIN(82,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 230
+  221 QIN(82,I)=APOPGS*YVB5(NVIB5)*(XVB5(NVIB5)/EN)*1.D-16           
+  230 CONTINUE                       
 C 6V1                                                                   
       QIN(83,I)=0.0                                                     
-      IF(EN.LE.EIN(83)) GO TO 260                                       
+      IF(EN.LE.EIN(83)) GO TO 260                               
+      IF(EN.GT.XVB6(NVIB6)) GO TO 251        
       DO 240 J=2,NVIB6                                                  
       IF(EN.LE.XVB6(J)) GO TO 250                                      
   240 CONTINUE                                                          
       J=NVIB6                                                           
   250 A=(YVB6(J)-YVB6(J-1))/(XVB6(J)-XVB6(J-1))                     
       B=(XVB6(J-1)*YVB6(J)-XVB6(J)*YVB6(J-1))/(XVB6(J-1)-XVB6(J)) 
-      QIN(83,I)=APOPGS*(A*EN+B)*1.D-16                              
+      QIN(83,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 260
+  251 QIN(83,I)=APOPGS*YVB6(NVIB6)*(XVB6(NVIB6)/EN)*1.D-16         
   260 CONTINUE 
 C 7V1                                                                   
       QIN(84,I)=0.0                                                     
-      IF(EN.LE.EIN(84)) GO TO 330                                       
+      IF(EN.LE.EIN(84)) GO TO 330                              
+      IF(EN.GT.XVB7(NVIB7)) GO TO 321         
       DO 310 J=2,NVIB7                                                  
       IF(EN.LE.XVB7(J)) GO TO 320                                      
   310 CONTINUE                                                          
       J=NVIB7                                                           
   320 A=(YVB7(J)-YVB7(J-1))/(XVB7(J)-XVB7(J-1))                     
       B=(XVB7(J-1)*YVB7(J)-XVB7(J)*YVB7(J-1))/(XVB7(J-1)-XVB7(J)) 
-      QIN(84,I)=APOPGS*(A*EN+B)*1.D-16                               
+      QIN(84,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 330
+  321 QIN(84,I)=APOPGS*YVB7(NVIB7)*(XVB7(NVIB7)/EN)*1.D-16        
   330 CONTINUE                                                          
 C 8V1                                                                   
       QIN(85,I)=0.0                                                     
-      IF(EN.LE.EIN(85)) GO TO 360                                       
+      IF(EN.LE.EIN(85)) GO TO 360                                 
+      IF(EN.GT.XVB8(NVIB8)) GO TO 351      
       DO 340 J=2,NVIB8                                                  
       IF(EN.LE.XVB8(J)) GO TO 350                                      
   340 CONTINUE                                                          
       J=NVIB8                                                           
   350 A=(YVB8(J)-YVB8(J-1))/(XVB8(J)-XVB8(J-1))                     
       B=(XVB8(J-1)*YVB8(J)-XVB8(J)*YVB8(J-1))/(XVB8(J-1)-XVB8(J)) 
-      QIN(85,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(85,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 360
+  351 QIN(85,I)=APOPGS*YVB8(NVIB8)*(XVB8(NVIB8)/EN)*1.D-16         
   360 CONTINUE 
 C 9V1                                                                   
       QIN(86,I)=0.0                                                     
-      IF(EN.LE.EIN(86)) GO TO 2030                                      
+      IF(EN.LE.EIN(86)) GO TO 2030                              
+      IF(EN.GT.XVB9(NVIB9)) GO TO 2021        
       DO 2010 J=2,NVIB9                                           
       IF(EN.LE.XVB9(J)) GO TO 2020                                     
  2010 CONTINUE                                                          
       J=NVIB9                                                           
  2020 A=(YVB9(J)-YVB9(J-1))/(XVB9(J)-XVB9(J-1))                     
       B=(XVB9(J-1)*YVB9(J)-XVB9(J)*YVB9(J-1))/(XVB9(J-1)-XVB9(J)) 
-      QIN(86,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(86,I)=APOPGS*(A*EN+B)*1.D-16
+      GO TO 2030
+ 2021 QIN(86,I)=APOPGS*YVB9(NVIB9)*(XVB9(NVIB9)/EN)*1.D-16        
  2030 CONTINUE 
 C 10V1                                                                  
       QIN(87,I)=0.0                                                     
-      IF(EN.LE.EIN(87)) GO TO 2060                                      
+      IF(EN.LE.EIN(87)) GO TO 2060                               
+      IF(EN.GT.XVB10(NVIB10)) GO TO 2051       
       DO 2040 J=2,NVIB10                                              
       IF(EN.LE.XVB10(J)) GO TO 2050                                     
  2040 CONTINUE                                                          
       J=NVIB10                                                          
  2050 A=(YVB10(J)-YVB10(J-1))/(XVB10(J)-XVB10(J-1))                     
       B=(XVB10(J-1)*YVB10(J)-XVB10(J)*YVB10(J-1))/(XVB10(J-1)-XVB10(J)) 
-      QIN(87,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(87,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2060
+ 2051 QIN(87,I)=APOPGS*YVB10(NVIB10)*(XVB10(NVIB10)/EN)*1.D-16   
  2060 CONTINUE 
 C 11V1                                                                  
       QIN(88,I)=0.0                                                     
-      IF(EN.LE.EIN(88)) GO TO 2130                                      
+      IF(EN.LE.EIN(88)) GO TO 2130                        
+      IF(EN.GT.XVB11(NVIB11)) GO TO 2121              
       DO 2110 J=2,NVIB11                                              
       IF(EN.LE.XVB11(J)) GO TO 2120                                     
  2110 CONTINUE                                                          
       J=NVIB11                                                          
  2120 A=(YVB11(J)-YVB11(J-1))/(XVB11(J)-XVB11(J-1))                     
       B=(XVB11(J-1)*YVB11(J)-XVB11(J)*YVB11(J-1))/(XVB11(J-1)-XVB11(J)) 
-      QIN(88,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(88,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2130
+ 2121 QIN(88,I)=APOPGS*YVB11(NVIB11)*(XVB11(NVIB11)/EN)*1.D-16    
  2130 CONTINUE 
 C 12V1                                                           
       QIN(89,I)=0.0                                                     
-      IF(EN.LE.EIN(89)) GO TO 2160                                      
+      IF(EN.LE.EIN(89)) GO TO 2160                                
+      IF(EN.GT.XVB12(NVIB12)) GO TO 2151      
       DO 2140 J=2,NVIB12                                              
       IF(EN.LE.XVB12(J)) GO TO 2150                                     
  2140 CONTINUE                                                          
       J=NVIB12                                                          
  2150 A=(YVB12(J)-YVB12(J-1))/(XVB12(J)-XVB12(J-1))                     
       B=(XVB12(J-1)*YVB12(J)-XVB12(J)*YVB12(J-1))/(XVB12(J-1)-XVB12(J)) 
-      QIN(89,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(89,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2160
+ 2151 QIN(89,I)=APOPGS*YVB12(NVIB12)*(XVB12(NVIB12)/EN)*1.D-16   
  2160 CONTINUE 
 C 13V1                                                                  
       QIN(90,I)=0.0                                                     
-      IF(EN.LE.EIN(90)) GO TO 2230                                      
+      IF(EN.LE.EIN(90)) GO TO 2230                               
+      IF(EN.GT.XVB13(NVIB13)) GO TO 2221       
       DO 2210 J=2,NVIB13                                              
       IF(EN.LE.XVB13(J)) GO TO 2220                                     
  2210 CONTINUE                                                          
       J=NVIB13                                                          
  2220 A=(YVB13(J)-YVB13(J-1))/(XVB13(J)-XVB13(J-1))                     
       B=(XVB13(J-1)*YVB13(J)-XVB13(J)*YVB13(J-1))/(XVB13(J-1)-XVB13(J)) 
-      QIN(90,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(90,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2230
+ 2221 QIN(90,I)=APOPGS*YVB13(NVIB13)*(XVB13(NVIB13)/EN)*1.D-16      
  2230 CONTINUE 
 C 14V1                                                                  
       QIN(91,I)=0.0                                                     
-      IF(EN.LE.EIN(91)) GO TO 2260                                      
+      IF(EN.LE.EIN(91)) GO TO 2260                                  
+      IF(EN.GT.XVB14(NVIB14)) GO TO 2251    
       DO 2240 J=2,NVIB14                                              
       IF(EN.LE.XVB14(J)) GO TO 2250                                     
  2240 CONTINUE                                                          
       J=NVIB14                                                          
  2250 A=(YVB14(J)-YVB14(J-1))/(XVB14(J)-XVB14(J-1))                     
       B=(XVB14(J-1)*YVB14(J)-XVB14(J)*YVB14(J-1))/(XVB14(J-1)-XVB14(J)) 
-      QIN(91,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(91,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2260
+ 2251 QIN(91,I)=APOPGS*YVB14(NVIB14)*(XVB14(NVIB14)/EN)*1.D-16     
  2260 CONTINUE 
 C 15V1                                                                  
       QIN(92,I)=0.0                                                     
-      IF(EN.LE.EIN(92)) GO TO 2330                                      
+      IF(EN.LE.EIN(92)) GO TO 2330                                 
+      IF(EN.GT.XVB15(NVIB15)) GO TO 2321     
       DO 2310 J=2,NVIB15                                              
       IF(EN.LE.XVB15(J)) GO TO 2320                                     
  2310 CONTINUE                                                          
       J=NVIB15                                                          
  2320 A=(YVB15(J)-YVB15(J-1))/(XVB15(J)-XVB15(J-1))                     
       B=(XVB15(J-1)*YVB15(J)-XVB15(J)*YVB15(J-1))/(XVB15(J-1)-XVB15(J)) 
-      QIN(92,I)=APOPGS*(A*EN+B)*1.D-16                      
+      QIN(92,I)=APOPGS*(A*EN+B)*1.D-16  
+      GO TO 2330
+ 2321 QIN(92,I)=APOPGS*YVB15(NVIB15)*(XVB15(NVIB15)/EN)*1.D-16   
  2330 CONTINUE
+C SET ROTATIONAL AND VIBRATIONAL ANGULAR DISTRIBUTIONS ( IF KIN NE 0 )
+      DO 2440 K=1,92
+      PEQIN(K,I)=0.5
+      IF(NANISO.EQ.2) PEQIN(K,I)=0.0
+      IF(EN.LE.3.0*DABS(EIN(K))) GO TO 2440
+      IF(NANISO.GT.0) PEQIN(K,I)=PEQEL(2,(I-IOFFN(K)))
+ 2440 CONTINUE
 C  
 C A3SIGMA (V=0-4)  
       QIN(93,I)=0.0 
       PEQIN(93,I)=0.5
-      IF(EN.LE.EIN(93)) GO TO 450                                       
+      IF(NANISO.EQ.2) PEQIN(93,I)=0.0
+      IF(EN.LE.EIN(93)) GO TO 450                      
+      IF(EN.GT.XTRP1(NTRP1)) GO TO 445                 
       DO 430 J=2,NTRP1                                                  
       IF(EN.LE.XTRP1(J)) GO TO 440                                      
   430 CONTINUE                                                          
@@ -35595,12 +37420,19 @@ C A3SIGMA (V=0-4)
       A=(YTP1M(J)-YTP1M(J-1))/(XTRP1(J)-XTRP1(J-1))                     
       B=(XTRP1(J-1)*YTP1M(J)-XTRP1(J)*YTP1M(J-1))/(XTRP1(J-1)-XTRP1(J)) 
       RAT=A*EN+B
-      PEQIN(93,I)=1.5-RAT
+      GO TO 446
+  445 QIN(93,I)=YTRP1(NTRP1)*(XTRP1(NTRP1)/EN)**2*1.D-16
+      RAT=YTP1M(NTRP1)*(XTRP1(NTRP1)/EN)
+  446 IF(EN.LE.(3.0*EIN(93))) GO TO 450
+      IF(NANISO.EQ.1) PEQIN(93,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(93,I)=PEQEL(2,(I-IOFFN(93)))
   450 CONTINUE                                                          
 C A3SIGMA (V=5-9)                                     
       QIN(94,I)=0.0 
-      PEQIN(94,I)=0.5                                                 
-      IF(EN.LE.EIN(94)) GO TO 480                                       
+      PEQIN(94,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(94,I)=0.0                         
+      IF(EN.LE.EIN(94)) GO TO 480  
+      IF(EN.GT.XTRP2(NTRP2)) GO TO 475                               
       DO 460 J=2,NTRP2                                                  
       IF(EN.LE.XTRP2(J)) GO TO 470                                      
   460 CONTINUE                                                          
@@ -35611,12 +37443,19 @@ C A3SIGMA (V=5-9)
       A=(YTP2M(J)-YTP2M(J-1))/(XTRP2(J)-XTRP2(J-1))                     
       B=(XTRP2(J-1)*YTP2M(J)-XTRP2(J)*YTP2M(J-1))/(XTRP2(J-1)-XTRP2(J)) 
       RAT=A*EN+B
-      PEQIN(94,I)=1.5-RAT
+      GO TO 476
+  475 QIN(94,I)=YTRP2(NTRP2)*(XTRP2(NTRP2)/EN)**2*1.D-16
+      RAT=YTP2M(NTRP2)*(XTRP2(NTRP2)/EN)
+  476 IF(EN.LE.(3.0*EIN(94))) GO TO 480
+      IF(NANISO.EQ.1) PEQIN(94,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(94,I)=PEQEL(2,(I-IOFFN(94)))
   480 CONTINUE                                                          
 C B3PI (V=0-3)                                  
       QIN(95,I)=0.0 
-      PEQIN(95,I)=0.5                                                  
-      IF(EN.LE.EIN(95)) GO TO 510                                       
+      PEQIN(95,I)=0.5                      
+      IF(NANISO.EQ.2) PEQIN(95,I)=0.0                            
+      IF(EN.LE.EIN(95)) GO TO 510
+      IF(EN.GT.XTRP3(NTRP3)) GO TO 505                             
       DO 490 J=2,NTRP3                                                  
       IF(EN.LE.XTRP3(J)) GO TO 500                                      
   490 CONTINUE                                                          
@@ -35627,12 +37466,19 @@ C B3PI (V=0-3)
       A=(YTP3M(J)-YTP3M(J-1))/(XTRP3(J)-XTRP3(J-1))                     
       B=(XTRP3(J-1)*YTP3M(J)-XTRP3(J)*YTP3M(J-1))/(XTRP3(J-1)-XTRP3(J)) 
       RAT=A*EN+B
-      PEQIN(95,I)=1.5-RAT
+      GO TO 506
+  505 QIN(95,I)=YTRP3(NTRP3)*(XTRP3(NTRP3)/EN)**2*1.D-16
+      RAT=YTP3M(NTRP3)*(XTRP3(NTRP3)/EN)
+  506 IF(EN.LE.(3.0*EIN(95))) GO TO 510
+      IF(NANISO.EQ.1) PEQIN(95,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(95,I)=PEQEL(2,(I-IOFFN(95)))
   510 CONTINUE                                                          
 C W3DELTA  (V=0-5)                    
       QIN(96,I)=0.0  
-      PEQIN(96,I)=0.5                                                   
-      IF(EN.LE.EIN(96)) GO TO 540                                       
+      PEQIN(96,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(96,I)=0.0                            
+      IF(EN.LE.EIN(96)) GO TO 540                       
+      IF(EN.GT.XTRP4(NTRP4)) GO TO 535                
       DO 520 J=2,NTRP4                                                  
       IF(EN.LE.XTRP4(J)) GO TO 530                                      
   520 CONTINUE                                                          
@@ -35643,12 +37489,19 @@ C W3DELTA  (V=0-5)
       A=(YTP4M(J)-YTP4M(J-1))/(XTRP4(J)-XTRP4(J-1))                     
       B=(XTRP4(J-1)*YTP4M(J)-XTRP4(J)*YTP4M(J-1))/(XTRP4(J-1)-XTRP4(J)) 
       RAT=A*EN+B
-      PEQIN(96,I)=1.5-RAT
+      GO TO 536
+  535 QIN(96,I)=YTRP4(NTRP4)*(XTRP4(NTRP4)/EN)**2*1.D-16
+      RAT=YTP4M(NTRP4)*(XTRP4(NTRP4)/EN)
+  536 IF(EN.LE.(3.0*EIN(96))) GO TO 540
+      IF(NANISO.EQ.1) PEQIN(96,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(96,I)=PEQEL(2,(I-IOFFN(96)))
   540 CONTINUE                                                          
 C A3SIGMA  (V=10-21)                      
       QIN(97,I)=0.0      
-      PEQIN(97,I)=0.5                          
-      IF(EN.LE.EIN(97)) GO TO 570                                       
+      PEQIN(97,I)=0.5    
+      IF(NANISO.EQ.2) PEQIN(97,I)=0.0                      
+      IF(EN.LE.EIN(97)) GO TO 570       
+      IF(EN.GT.XTRP5(NTRP5)) GO TO 565                                
       DO 550 J=2,NTRP5                                                  
       IF(EN.LE.XTRP5(J)) GO TO 560                                      
   550 CONTINUE                                                          
@@ -35659,12 +37512,19 @@ C A3SIGMA  (V=10-21)
       A=(YTP5M(J)-YTP5M(J-1))/(XTRP5(J)-XTRP5(J-1))                     
       B=(XTRP5(J-1)*YTP5M(J)-XTRP5(J)*YTP5M(J-1))/(XTRP5(J-1)-XTRP5(J)) 
       RAT=A*EN+B
-      PEQIN(97,I)=1.5-RAT
+      GO TO 566
+  565 QIN(97,I)=YTRP5(NTRP5)*(XTRP5(NTRP5)/EN)**2*1.D-16
+      RAT=YTP5M(NTRP5)*(XTRP5(NTRP5)/EN)
+  566 IF(EN.LE.(3.0*EIN(97))) GO TO 570
+      IF(NANISO.EQ.1) PEQIN(97,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(97,I)=PEQEL(2,(I-IOFFN(97)))
   570 CONTINUE                                                          
 C B3PI (V=4-16)                              
       QIN(98,I)=0.0  
-      PEQIN(98,I)=0.5                                                   
-      IF(EN.LE.EIN(98)) GO TO 600                                       
+      PEQIN(98,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(98,I)=0.0                              
+      IF(EN.LE.EIN(98)) GO TO 600       
+      IF(EN.GT.XTRP6(NTRP6)) GO TO 595                                
       DO 580 J=2,NTRP6                                                  
       IF(EN.LE.XTRP6(J)) GO TO 590                                      
   580 CONTINUE                                                          
@@ -35675,12 +37535,19 @@ C B3PI (V=4-16)
       A=(YTP6M(J)-YTP6M(J-1))/(XTRP6(J)-XTRP6(J-1))                     
       B=(XTRP6(J-1)*YTP6M(J)-XTRP6(J)*YTP6M(J-1))/(XTRP6(J-1)-XTRP6(J)) 
       RAT=A*EN+B
-      PEQIN(98,I)=1.5-RAT
+      GO TO 596
+  595 QIN(98,I)=YTRP6(NTRP6)*(XTRP6(NTRP6)/EN)**2*1.D-16
+      RAT=YTP6M(NTRP6)*(XTRP6(NTRP6)/EN)
+  596 IF(EN.LE.(3.0*EIN(98))) GO TO 600
+      IF(NANISO.EQ.1) PEQIN(98,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(98,I)=PEQEL(2,(I-IOFFN(98)))
   600 CONTINUE                                                          
 C W3DEL (V=6-10)                             
       QIN(99,I)=0.0
-      PEQIN(99,I)=0.5                                                 
-      IF(EN.LE.EIN(99)) GO TO 603                                       
+      PEQIN(99,I)=0.5
+      IF(NANISO.EQ.2) PEQIN(99,I)=0.0                              
+      IF(EN.LE.EIN(99)) GO TO 603       
+      IF(EN.GT.XTRP7(NTRP7)) GO TO 6025                                
       DO 601 J=2,NTRP7                                                  
       IF(EN.LE.XTRP7(J)) GO TO 602                                      
   601 CONTINUE                                                          
@@ -35691,12 +37558,19 @@ C W3DEL (V=6-10)
       A=(YTP7M(J)-YTP7M(J-1))/(XTRP7(J)-XTRP7(J-1))                     
       B=(XTRP7(J-1)*YTP7M(J)-XTRP7(J)*YTP7M(J-1))/(XTRP7(J-1)-XTRP7(J))
       RAT=A*EN+B
-      PEQIN(99,I)=1.5-RAT
+      GO TO 6026
+ 6025 QIN(99,I)=YTRP7(NTRP7)*(XTRP7(NTRP7)/EN)**2*1.D-16
+      RAT=YTP7M(NTRP7)*(XTRP7(NTRP7)/EN)
+ 6026 IF(EN.LE.(3.0*EIN(99))) GO TO 603
+      IF(NANISO.EQ.1) PEQIN(99,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(99,I)=PEQEL(2,(I-IOFFN(99)))
   603 CONTINUE                                                          
 C A1PI (V=0-3)                                  
       QIN(100,I)=0.0  
-      PEQIN(100,I)=0.5                                                  
-      IF(EN.LE.EIN(100)) GO TO 630                                      
+      PEQIN(100,I)=0.5    
+      IF(NANISO.EQ.2) PEQIN(100,I)=0.0                                
+      IF(EN.LE.EIN(100)) GO TO 630      
+      IF(EN.GT.XSNG1(NSNG1)) GO TO 625                                
       DO 610 J=2,NSNG1                                                  
       IF(EN.LE.XSNG1(J)) GO TO 620                                      
   610 CONTINUE                                                          
@@ -35707,12 +37581,19 @@ C A1PI (V=0-3)
       A=(YSG1M(J)-YSG1M(J-1))/(XSNG1(J)-XSNG1(J-1))                     
       B=(XSNG1(J-1)*YSG1M(J)-XSNG1(J)*YSG1M(J-1))/(XSNG1(J-1)-XSNG1(J)) 
       RAT=A*EN+B
-      PEQIN(100,I)=1.5-RAT
+      GO TO 626
+  625 QIN(100,I)=YSNG1(NSNG1)*(XSNG1(NSNG1)/EN)**1.5*1.D-16
+      RAT=YSG1M(NSNG1)*(XSNG1(NSNG1)/EN)
+  626 IF(EN.LE.(3.0*EIN(100))) GO TO 630
+      IF(NANISO.EQ.1) PEQIN(100,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(100,I)=PEQEL(2,(I-IOFFN(100)))
   630 CONTINUE                                                          
 C B!3SIG (V=0-6)                             
       QIN(101,I)=0.0  
-      PEQIN(101,I)=0.5                                                  
-      IF(EN.LE.EIN(101)) GO TO 633                                      
+      PEQIN(101,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(101,I)=0.0                       
+      IF(EN.LE.EIN(101)) GO TO 633  
+      IF(EN.GT.XTRP8(NTRP8)) GO TO 6325                        
       DO 631 J=2,NTRP8                                                  
       IF(EN.LE.XTRP8(J)) GO TO 632                                      
   631 CONTINUE                                                          
@@ -35723,12 +37604,19 @@ C B!3SIG (V=0-6)
       A=(YTP8M(J)-YTP8M(J-1))/(XTRP8(J)-XTRP8(J-1))                     
       B=(XTRP8(J-1)*YTP8M(J)-XTRP8(J)*YTP8M(J-1))/(XTRP8(J-1)-XTRP8(J)) 
       RAT=A*EN+B
-      PEQIN(101,I)=1.5-RAT
+      GO TO 6326
+ 6325 QIN(101,I)=YTRP8(NTRP8)*(XTRP8(NTRP8)/EN)**2*1.D-16
+      RAT=YTP8M(NTRP8)*(XTRP8(NTRP8)/EN)
+ 6326 IF(EN.LE.(3.0*EIN(101))) GO TO 633
+      IF(NANISO.EQ.1) PEQIN(101,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(101,I)=PEQEL(2,(I-IOFFN(101)))
   633 CONTINUE                                                          
 C A!1SIG (V=0-6)                      
       QIN(102,I)=0.0
-      PEQIN(102,I)=0.5                                                
-      IF(EN.LE.EIN(102)) GO TO 660                                      
+      PEQIN(102,I)=0.5    
+      IF(NANISO.EQ.2) PEQIN(102,I)=0.0                          
+      IF(EN.LE.EIN(102)) GO TO 660      
+      IF(EN.GT.XSNG2(NSNG2)) GO TO 655                                
       DO 640 J=2,NSNG2                                                  
       IF(EN.LE.XSNG2(J)) GO TO 650                                      
   640 CONTINUE                                                          
@@ -35739,12 +37627,19 @@ C A!1SIG (V=0-6)
       A=(YSG2M(J)-YSG2M(J-1))/(XSNG2(J)-XSNG2(J-1))                     
       B=(XSNG2(J-1)*YSG2M(J)-XSNG2(J)*YSG2M(J-1))/(XSNG2(J-1)-XSNG2(J))
       RAT=A*EN+B
-      PEQIN(102,I)=1.5-RAT
+      GO TO 656
+  655 QIN(102,I)=YSNG2(NSNG2)*(XSNG2(NSNG2)/EN)**1.5*1.D-16
+      RAT=YSG2M(NSNG2)*(XSNG2(NSNG2)/EN)
+  656 IF(EN.LE.(3.0*EIN(102))) GO TO 660
+      IF(NANISO.EQ.1) PEQIN(102,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(102,I)=PEQEL(2,(I-IOFFN(102)))
   660 CONTINUE                                                          
 C W3DEL (V=11-19)                              
       QIN(103,I)=0.0      
-      PEQIN(103,I)=0.5                          
-      IF(EN.LE.EIN(103)) GO TO 690                                      
+      PEQIN(103,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(103,I)=0.0                         
+      IF(EN.LE.EIN(103)) GO TO 690      
+      IF(EN.GT.XTRP9(NTRP9)) GO TO 685                                
       DO 670 J=2,NTRP9                                                  
       IF(EN.LE.XTRP9(J)) GO TO 680                                      
   670 CONTINUE                                                          
@@ -35755,12 +37650,19 @@ C W3DEL (V=11-19)
       A=(YTP9M(J)-YTP9M(J-1))/(XTRP9(J)-XTRP9(J-1))                     
       B=(XTRP9(J-1)*YTP9M(J)-XTRP9(J)*YTP9M(J-1))/(XTRP9(J-1)-XTRP9(J)) 
       RAT=A*EN+B
-      PEQIN(103,I)=1.5-RAT
+      GO TO 686
+  685 QIN(103,I)=YTRP9(NTRP9)*(XTRP9(NTRP9)/EN)**2*1.D-16
+      RAT=YTP9M(NTRP9)*(XTRP9(NTRP9)/EN)
+  686 IF(EN.LE.(3.0*EIN(103))) GO TO 690
+      IF(NANISO.EQ.1) PEQIN(103,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(103,I)=PEQEL(2,(I-IOFFN(103)))
   690 CONTINUE                                                          
 C W1DEL (V=0-5)                               
       QIN(104,I)=0.0
-      PEQIN(104,I)=0.5                                                 
-      IF(EN.LE.EIN(104)) GO TO 720                                     
+      PEQIN(104,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(104,I)=0.0                             
+      IF(EN.LE.EIN(104)) GO TO 720
+      IF(EN.GT.XSNG3(NSNG3)) GO TO 715                               
       DO 700 J=2,NSNG3                                                  
       IF(EN.LE.XSNG3(J)) GO TO 710                                      
   700 CONTINUE                                                          
@@ -35771,12 +37673,19 @@ C W1DEL (V=0-5)
       A=(YSG3M(J)-YSG3M(J-1))/(XSNG3(J)-XSNG3(J-1))                     
       B=(XSNG3(J-1)*YSG3M(J)-XSNG3(J)*YSG3M(J-1))/(XSNG3(J-1)-XSNG3(J))
       RAT=A*EN+B
-      PEQIN(104,I)=1.5-RAT
+      GO TO 716
+  715 QIN(104,I)=YSNG3(NSNG3)*(XSNG3(NSNG3)/EN)**1.5*1.D-16
+      RAT=YSG3M(NSNG3)*(XSNG3(NSNG3)/EN)
+  716 IF(EN.LE.(3.0*EIN(104))) GO TO 720
+      IF(NANISO.EQ.1) PEQIN(104,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(104,I)=PEQEL(2,(I-IOFFN(104)))
   720 CONTINUE                                                          
 C A1PI (V=4-15)                                 
       QIN(105,I)=0.0      
-      PEQIN(105,I)=0.5                          
-      IF(EN.LE.EIN(105)) GO TO 723                                     
+      PEQIN(105,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(105,I)=0.0                         
+      IF(EN.LE.EIN(105)) GO TO 723      
+      IF(EN.GT.XSNG4(NSNG4)) GO TO 7225                               
       DO 721 J=2,NSNG4                                                  
       IF(EN.LE.XSNG4(J)) GO TO 722                                      
   721 CONTINUE                                                          
@@ -35787,12 +37696,19 @@ C A1PI (V=4-15)
       A=(YSG4M(J)-YSG4M(J-1))/(XSNG4(J)-XSNG4(J-1))                     
       B=(XSNG4(J-1)*YSG4M(J)-XSNG4(J)*YSG4M(J-1))/(XSNG4(J-1)-XSNG4(J)) 
       RAT=A*EN+B
-      PEQIN(105,I)=1.5-RAT
+      GO TO 7226
+ 7225 QIN(105,I)=YSNG4(NSNG4)*(XSNG4(NSNG4)/EN)**1.5*1.D-16
+      RAT=YSG4M(NSNG4)*(XSNG4(NSNG4)/EN)
+ 7226 IF(EN.LE.(3.0*EIN(105))) GO TO 723
+      IF(NANISO.EQ.1) PEQIN(105,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(105,I)=PEQEL(2,(I-IOFFN(105)))
   723 CONTINUE                                                          
 C B!3SIG   (V=7-18)                             
       QIN(106,I)=0.0
-      PEQIN(106,I)=0.5                                                 
-      IF(EN.LE.EIN(106)) GO TO 750                                     
+      PEQIN(106,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(106,I)=0.0                              
+      IF(EN.LE.EIN(106)) GO TO 750      
+      IF(EN.GT.XTRP10(NTRP10)) GO TO 745                               
       DO 730 J=2,NTRP10                                               
       IF(EN.LE.XTRP10(J)) GO TO 740                                  
   730 CONTINUE                                                          
@@ -35805,12 +37721,19 @@ C B!3SIG   (V=7-18)
       B=(XTRP10(J-1)*YTP10M(J)-XTRP10(J)*YTP10M(J-1))/(XTRP10(J-1)-
      /XTRP10(J)) 
       RAT=A*EN+B
-      PEQIN(106,I)=1.5-RAT
+      GO TO 746
+  745 QIN(106,I)=YTRP10(NTRP10)*(XTRP10(NTRP10)/EN)**2*1.D-16
+      RAT=YTP10M(NTRP10)*(XTRP10(NTRP10)/EN)
+  746 IF(EN.LE.(3.0*EIN(106))) GO TO 750
+      IF(NANISO.EQ.1) PEQIN(106,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(106,I)=PEQEL(2,(I-IOFFN(106)))
   750 CONTINUE                                                          
 C A!1SIG (V=7-19)                                   
       QIN(107,I)=0.0
-      PEQIN(107,I)=0.5                                                 
-      IF(EN.LE.EIN(107)) GO TO 780                                     
+      PEQIN(107,I)=0.5   
+      IF(NANISO.EQ.2) PEQIN(107,I)=0.0                                 
+      IF(EN.LE.EIN(107)) GO TO 780          
+      IF(EN.GT.XSNG5(NSNG5)) GO TO 771                           
       DO 760 J=2,NSNG5                                                  
       IF(EN.LE.XSNG5(J)) GO TO 770                                      
   760 CONTINUE                                                          
@@ -35821,12 +37744,19 @@ C A!1SIG (V=7-19)
       A=(YSG5M(J)-YSG5M(J-1))/(XSNG5(J)-XSNG5(J-1))                     
       B=(XSNG5(J-1)*YSG5M(J)-XSNG5(J)*YSG5M(J-1))/(XSNG5(J-1)-XSNG5(J)) 
       RAT=A*EN+B
-      PEQIN(107,I)=1.5-RAT                                 
+      GO TO 772
+  771 QIN(107,I)=YSNG5(NSNG5)*(XSNG5(NSNG5)/EN)**1.5*1.D-16
+      RAT=YSG5M(NSNG5)*(XSNG5(NSNG5)/EN)
+  772 IF(EN.LE.(3.0*EIN(107))) GO TO 780
+      IF(NANISO.EQ.1) PEQIN(107,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(107,I)=PEQEL(2,(I-IOFFN(107)))
   780 CONTINUE                                                          
 C W1DEL (V=6-18)                          
       QIN(108,I)=0.0
-      PEQIN(108,I)=0.5                                                  
-      IF(EN.LE.EIN(108)) GO TO 783                                     
+      PEQIN(108,I)=0.5     
+      IF(NANISO.EQ.2) PEQIN(108,I)=0.0                              
+      IF(EN.LE.EIN(108)) GO TO 783      
+      IF(EN.GT.XSNG6(NSNG6)) GO TO 7825                               
       DO 781 J=2,NSNG6                                               
       IF(EN.LE.XSNG6(J)) GO TO 782                                  
   781 CONTINUE                                                          
@@ -35837,12 +37767,19 @@ C W1DEL (V=6-18)
       A=(YSG6M(J)-YSG6M(J-1))/(XSNG6(J)-XSNG6(J-1))               
       B=(XSNG6(J-1)*YSG6M(J)-XSNG6(J)*YSG6M(J-1))/(XSNG6(J-1)-XSNG6(J)) 
       RAT=A*EN+B
-      PEQIN(108,I)=1.5-RAT
+      GO TO 7826
+ 7825 QIN(108,I)=YSNG6(NSNG6)*(XSNG6(NSNG6)/EN)**1.5*1.D-16
+      RAT=YSG6M(NSNG6)*(XSNG6(NSNG6)/EN)
+ 7826 IF(EN.LE.(3.0*EIN(108))) GO TO 783
+      IF(NANISO.EQ.1) PEQIN(108,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(108,I)=PEQEL(2,(I-IOFFN(108)))
   783 CONTINUE                                                          
 C C3PI (V=0-4)                     
       QIN(109,I)=0.0      
-      PEQIN(109,I)=0.5                          
-      IF(EN.LE.EIN(109)) GO TO 786                                     
+      PEQIN(109,I)=0.5     
+      IF(NANISO.EQ.2) PEQIN(109,I)=0.0                     
+      IF(EN.LE.EIN(109)) GO TO 786      
+      IF(EN.GT.XTRP11(NTRP11)) GO TO 7855                               
       DO 784 J=2,NTRP11                                               
       IF(EN.LE.XTRP11(J)) GO TO 785                                  
   784 CONTINUE                                                          
@@ -35855,12 +37792,19 @@ C C3PI (V=0-4)
       B=(XTRP11(J-1)*YTP11M(J)-XTRP11(J)*YTP11M(J-1))/(XTRP11(J-1)-
      /XTRP11(J)) 
       RAT=A*EN+B
-      PEQIN(109,I)=1.5-RAT
+      GO TO 7856
+ 7855 QIN(109,I)=YTRP11(NTRP11)*(XTRP11(NTRP11)/EN)**2*1.D-16
+      RAT=YTP11M(NTRP11)*(XTRP11(NTRP11)/EN)
+ 7856 IF(EN.LE.(3.0*EIN(109))) GO TO 786
+      IF(NANISO.EQ.1) PEQIN(109,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(109,I)=PEQEL(2,(I-IOFFN(109)))
   786 CONTINUE                                                          
 C E3SIG                                  
       QIN(110,I)=0.0
-      PEQIN(110,I)=0.5                                                 
-      IF(EN.LE.EIN(110)) GO TO 789                                      
+      PEQIN(110,I)=0.5   
+      IF(NANISO.EQ.2) PEQIN(110,I)=0.0                               
+      IF(EN.LE.EIN(110)) GO TO 789          
+      IF(EN.GT.XTRP12(NTRP12)) GO TO 7885                            
       DO 787 J=2,NTRP12                                                
       IF(EN.LE.XTRP12(J)) GO TO 788                                    
   787 CONTINUE                                                         
@@ -35873,12 +37817,19 @@ C E3SIG
       B=(XTRP12(J-1)*YTP12M(J)-XTRP12(J)*YTP12M(J-1))/(XTRP12(J-1)-
      /XTRP12(J)) 
       RAT=A*EN+B
-      PEQIN(110,I)=1.5-RAT
+      GO TO 7886
+ 7885 QIN(110,I)=YTRP12(NTRP12)*(XTRP12(NTRP12)/EN)**2*1.D-16
+      RAT=YTP12M(NTRP12)*(XTRP12(NTRP12)/EN)
+ 7886 IF(EN.LE.(3.0*EIN(110))) GO TO 789
+      IF(NANISO.EQ.1) PEQIN(110,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(110,I)=PEQEL(2,(I-IOFFN(110)))
   789 CONTINUE                                                          
 C A!!1SIG (V=0-1)                      
       QIN(111,I)=0.0
-      PEQIN(111,I)=0.5                                                 
-      IF(EN.LE.EIN(111)) GO TO 792                                     
+      PEQIN(111,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(111,I)=0.0                                
+      IF(EN.LE.EIN(111)) GO TO 792 
+      IF(EN.GT.XSNG7(NSNG7)) GO TO 7915                              
       DO 790 J=2,NSNG7                                               
       IF(EN.LE.XSNG7(J)) GO TO 791                                  
   790 CONTINUE                                                          
@@ -35889,12 +37840,19 @@ C A!!1SIG (V=0-1)
       A=(YSG7M(J)-YSG7M(J-1))/(XSNG7(J)-XSNG7(J-1))               
       B=(XSNG7(J-1)*YSG7M(J)-XSNG7(J)*YSG7M(J-1))/(XSNG7(J-1)-XSNG7(J))
       RAT=A*EN+B
-      PEQIN(111,I)=1.5-RAT
+      GO TO 7916
+ 7915 QIN(111,I)=YSNG7(NSNG7)*(XSNG7(NSNG7)/EN)**1.5*1.D-16
+      RAT=YSG7M(NSNG7)*(XSNG7(NSNG7)/EN)
+ 7916 IF(EN.LE.(3.0*EIN(111))) GO TO 792
+      IF(NANISO.EQ.1) PEQIN(111,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(111,I)=PEQEL(2,(I-IOFFN(111)))
   792 CONTINUE                                                          
-C B1PI  (V=0-6)                        
+C B1PI  (V=0-6)                 F=0.1855           
       QIN(112,I)=0.0
-      PEQIN(112,I)=0.5                                                  
-      IF(EN.LE.EIN(112)) GO TO 795                                      
+      PEQIN(112,I)=0.5        
+      IF(NANISO.EQ.2) PEQIN(112,I)=0.0    
+      IF(EN.LE.EIN(112)) GO TO 795  
+      IF(EN.GT.XSNG8(NSNG8)) GO TO 7945                      
       DO 793 J=2,NSNG8                                               
       IF(EN.LE.XSNG8(J)) GO TO 794                                  
   793 CONTINUE                                                          
@@ -35905,12 +37863,21 @@ C B1PI  (V=0-6)
       A=(YSG8M(J)-YSG8M(J-1))/(XSNG8(J)-XSNG8(J-1))               
       B=(XSNG8(J-1)*YSG8M(J)-XSNG8(J)*YSG8M(J-1))/(XSNG8(J-1)-XSNG8(J))
       RAT=A*EN+B
-      PEQIN(112,I)=1.5-RAT
+      GO TO 7946
+C USE BEF SCALING F=0.1855
+ 7945 QIN(112,I)=.1855/(EIN(112)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(112)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(112)+E(3))
+      RAT=YSG8M(NSNG8)*(XSNG8(NSNG8)/EN)
+ 7946 IF(EN.LE.(3.0*EIN(112))) GO TO 795
+      IF(NANISO.EQ.1) PEQIN(112,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(112,I)=PEQEL(2,(I-IOFFN(112)))
   795 CONTINUE                                                          
-C C!1SIG (V=0-3)                    
+C C!1SIG (V=0-3)                    F=0.150
       QIN(113,I)=0.0      
-      PEQIN(113,I)=0.5                          
-      IF(EN.LE.EIN(113)) GO TO 798                                      
+      PEQIN(113,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(113,I)=0.0                        
+      IF(EN.LE.EIN(113)) GO TO 798   
+      IF(EN.GT.XSNG9(NSNG9)) GO TO 7975                          
       DO 796 J=2,NSNG9                                               
       IF(EN.LE.XSNG9(J)) GO TO 797                                  
   796 CONTINUE                                                          
@@ -35921,12 +37888,21 @@ C C!1SIG (V=0-3)
       A=(YSG9M(J)-YSG9M(J-1))/(XSNG9(J)-XSNG9(J-1))               
       B=(XSNG9(J-1)*YSG9M(J)-XSNG9(J)*YSG9M(J-1))/(XSNG9(J-1)-XSNG9(J))
       RAT=A*EN+B
-      PEQIN(113,I)=1.5-RAT
+      GO TO 7976
+C USE BEF SCALING   F=0.15
+ 7975 QIN(113,I)=.15000/(EIN(113)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(113)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(113)+E(3))
+      RAT=YSG9M(NSNG9)*(XSNG9(NSNG9)/EN)
+ 7976 IF(EN.LE.(3.0*EIN(113))) GO TO 798
+      IF(NANISO.EQ.1) PEQIN(113,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(113,I)=PEQEL(2,(I-IOFFN(113)))
   798 CONTINUE                                                          
 C G 3PI (V=0-3)                          
       QIN(114,I)=0.0
-      PEQIN(114,I)=0.5                                                 
-      IF(EN.LE.EIN(114)) GO TO 801                                      
+      PEQIN(114,I)=0.5
+      IF(NANISO.EQ.2) PEQIN(114,I)=0.0                                 
+      IF(EN.LE.EIN(114)) GO TO 801      
+      IF(EN.GT.XTRP13(NTRP13)) GO TO 8005                              
       DO 799 J=2,NTRP13                                                
       IF(EN.LE.XTRP13(J)) GO TO 800                                    
   799 CONTINUE                                                         
@@ -35939,12 +37915,19 @@ C G 3PI (V=0-3)
       B=(XTRP13(J-1)*YTP13M(J)-XTRP13(J)*YTP13M(J-1))/(XTRP13(J-1)-
      /XTRP13(J)) 
       RAT=A*EN+B
-      PEQIN(114,I)=1.5-RAT
+      GO TO 8006
+ 8005 QIN(114,I)=YTRP13(NTRP13)*(XTRP13(NTRP13)/EN)**1.5*1.D-16
+      RAT=YTP13M(NTRP13)*(XTRP13(NTRP13)/EN)
+ 8006 IF(EN.LE.(3.0*EIN(114))) GO TO 801
+      IF(NANISO.EQ.1) PEQIN(114,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(114,I)=PEQEL(2,(I-IOFFN(114)))
   801 CONTINUE                                                          
-C C3 1PI (V=0-3)                      
+C C3 1PI (V=0-3)                 F=0.15            
       QIN(115,I)=0.0
-      PEQIN(115,I)=0.5                                
-      IF(EN.LE.EIN(115)) GO TO 804                                     
+      PEQIN(115,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(115,I)=0.0                              
+      IF(EN.LE.EIN(115)) GO TO 804          
+      IF(EN.GT.XSNG10(NSNG10)) GO TO 8035                           
       DO 802 J=2,NSNG10                                              
       IF(EN.LE.XSNG10(J)) GO TO 803                                  
   802 CONTINUE                                                          
@@ -35957,12 +37940,21 @@ C C3 1PI (V=0-3)
       B=(XSNG10(J-1)*YSG10M(J)-XSNG10(J)*YSG10M(J-1))/(XSNG10(J-1)-
      /XSNG10(J)) 
       RAT=A*EN+B
-      PEQIN(115,I)=1.5-RAT
+      GO TO 8036
+C USE BEF SCALING
+ 8035 QIN(115,I)=.1500/(EIN(115)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(115)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(115)+E(3))
+      RAT=YSG10M(NSNG10)*(XSNG10(NSNG10)/EN) 
+ 8036 IF(EN.LE.(3.0*EIN(115))) GO TO 804
+      IF(NANISO.EQ.1) PEQIN(115,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(115,I)=PEQEL(2,(I-IOFFN(115)))
   804 CONTINUE                                                          
 C F 3PI (V=0-3)                          
       QIN(116,I)=0.0      
-      PEQIN(116,I)=0.5                          
-      IF(EN.LE.EIN(116)) GO TO 807                                      
+      PEQIN(116,I)=0.5   
+      IF(NANISO.EQ.2) PEQIN(116,I)=0.0                       
+      IF(EN.LE.EIN(116)) GO TO 807                              
+      IF(EN.GT.XTRP14(NTRP14)) GO TO 8065        
       DO 805 J=2,NTRP14                                                
       IF(EN.LE.XTRP14(J)) GO TO 806                                    
   805 CONTINUE                                                         
@@ -35975,12 +37967,19 @@ C F 3PI (V=0-3)
       B=(XTRP14(J-1)*YTP14M(J)-XTRP14(J)*YTP14M(J-1))/(XTRP14(J-1)-
      /XTRP14(J)) 
       RAT=A*EN+B
-      PEQIN(116,I)=1.5-RAT
+      GO TO 8066
+ 8065 QIN(116,I)=YTRP14(NTRP14)*(XTRP14(NTRP14)/EN)**1.5*1.D-16
+      RAT=YTP14M(NTRP14)*(XTRP14(NTRP14)/EN)
+ 8066 IF(EN.LE.(3.0*EIN(116))) GO TO 807
+      IF(NANISO.EQ.1) PEQIN(116,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(116,I)=PEQEL(2,(I-IOFFN(116)))
   807 CONTINUE                                                          
-C B! 1SIG (V=0-10)                     
+C B1PI  (V=7-14)                      F=0.0663
       QIN(117,I)=0.0      
-      PEQIN(117,I)=0.5                          
-      IF(EN.LE.EIN(117)) GO TO 810                                      
+      PEQIN(117,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(117,I)=0.0                         
+      IF(EN.LE.EIN(117)) GO TO 810 
+      IF(EN.GT.XSNG11(NSNG11)) GO TO 8095                          
       DO 808 J=2,NSNG11                                              
       IF(EN.LE.XSNG11(J)) GO TO 809                                  
   808 CONTINUE                                                          
@@ -35993,12 +37992,21 @@ C B! 1SIG (V=0-10)
       B=(XSNG11(J-1)*YSG11M(J)-XSNG11(J)*YSG11M(J-1))/(XSNG11(J-1)-
      /XSNG11(J)) 
       RAT=A*EN+B
-      PEQIN(117,I)=1.5-RAT
+      GO TO 8096
+C USE BEF SCALING
+ 8095 QIN(117,I)=.0663/(EIN(117)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(117)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(117)+E(3))
+      RAT=YSG11M(NSNG11)*(XSNG11(NSNG11)/EN) 
+ 8096 IF(EN.LE.(3.0*EIN(117))) GO TO 810
+      IF(NANISO.EQ.1) PEQIN(117,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(117,I)=PEQEL(2,(I-IOFFN(117)))
   810 CONTINUE                                                          
-C B1PI  (V=7-14)                       
+C B! 1SIG (V=0-10)                       F=.0601
       QIN(118,I)=0.0      
-      PEQIN(118,I)=0.5                          
-      IF(EN.LE.EIN(118)) GO TO 813                                     
+      PEQIN(118,I)=0.5 
+      IF(NANISO.EQ.2) PEQIN(118,I)=0.0                         
+      IF(EN.LE.EIN(118)) GO TO 813 
+      IF(EN.GT.XSNG12(NSNG12)) GO TO 8125                            
       DO 811 J=2,NSNG12                                              
       IF(EN.LE.XSNG12(J)) GO TO 812                                  
   811 CONTINUE                                                          
@@ -36011,30 +38019,47 @@ C B1PI  (V=7-14)
       B=(XSNG12(J-1)*YSG12M(J)-XSNG12(J)*YSG12M(J-1))/(XSNG12(J-1)-
      /XSNG12(J)) 
       RAT=A*EN+B
-      PEQIN(118,I)=1.5-RAT
+      GO TO 8126
+ 8125 QIN(118,I)=.0601/(EIN(118)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(118)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(118)+E(3))
+      RAT=YSG12M(NSNG12)*(XSNG12(NSNG12)/EN) 
+ 8126 IF(EN.LE.(3.0*EIN(118))) GO TO 813
+      IF(NANISO.EQ.1) PEQIN(118,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(118,I)=PEQEL(2,(I-IOFFN(118)))
   813 CONTINUE                                                          
-C O3 1PI (V=0-3)                       
+C O3 1PI (V=0-3)                       F=0.0828
       QIN(119,I)=0.0
-      PEQIN(119,I)=0.5                                                 
-      IF(EN.LE.EIN(119)) GO TO 816                                     
+      PEQIN(119,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(119,I)=0.0                               
+      IF(EN.LE.EIN(119)) GO TO 816    
+      IF(EN.GT.XSNG13(NSNG13)) GO TO 8155                             
       DO 814 J=2,NSNG13                                              
       IF(EN.LE.XSNG13(J)) GO TO 815                                  
   814 CONTINUE                                                          
       J=NSNG13                                               
   815 A=(YSNG13(J)-YSNG13(J-1))/(XSNG13(J)-XSNG13(J-1))               
       B=(XSNG13(J-1)*YSNG13(J)-XSNG13(J)*YSNG13(J-1))/(XSNG13(J-1)-
-     /XSNG12(J))  
+     /XSNG13(J))  
       QIN(119,I)=(A*EN+B)*1.D-16                                 
       A=(YSG13M(J)-YSG13M(J-1))/(XSNG13(J)-XSNG13(J-1))               
       B=(XSNG13(J-1)*YSG13M(J)-XSNG13(J)*YSG13M(J-1))/(XSNG13(J-1)-
-     /XSNG12(J))  
+     /XSNG13(J))  
       RAT=A*EN+B
-      PEQIN(119,I)=1.5-RAT
-  816 CONTINUE                                                          
-C B! 1SIG  (V=11-HIGH)                 
+      GO TO 8156
+C USE BEF SCALING
+ 8155 QIN(119,I)=.0828/(EIN(119)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(119)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(119)+E(3))
+      RAT=YSG13M(NSNG13)*(XSNG12(NSNG13)/EN) 
+ 8156 IF(EN.LE.(3.0*EIN(119))) GO TO 816
+      IF(NANISO.EQ.1) PEQIN(119,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(119,I)=PEQEL(2,(I-IOFFN(119)))
+  816 CONTINUE   
+C C! 1SIG  (SUM V=4-6) (AVERAGE E=14.090)  F=0.139
       QIN(120,I)=0.0
-      PEQIN(120,I)=0.5                                                 
-      IF(EN.LE.EIN(120)) GO TO 819                                     
+      PEQIN(120,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(120,I)=0.0                            
+      IF(EN.LE.EIN(120)) GO TO 819    
+      IF(EN.GT.XSNG14(NSNG14)) GO TO 8185                             
       DO 817 J=2,NSNG14                                              
       IF(EN.LE.XSNG14(J)) GO TO 818                                  
   817 CONTINUE                                                          
@@ -36047,46 +38072,135 @@ C B! 1SIG  (V=11-HIGH)
       B=(XSNG14(J-1)*YSG14M(J)-XSNG14(J)*YSG14M(J-1))/(XSNG14(J-1)-
      /XSNG14(J)) 
       RAT=A*EN+B
-      PEQIN(120,I)=1.5-RAT
+      GO TO 8186
+C USE BEF SCALING
+ 8185 QIN(120,I)=0.1390/(EIN(120)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(120)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(120)+E(3))
+      RAT=YSG14M(NSNG14)*(XSNG14(NSNG14)/EN) 
+ 8186 IF(EN.LE.(3.0*EIN(120))) GO TO 819
+      IF(NANISO.EQ.1) PEQIN(120,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(120,I)=PEQEL(2,(I-IOFFN(120)))
   819 CONTINUE                                                          
-C SUM OF HIGHER SINGLET STATES    
-      QIN(121,I)=0.0      
-      PEQIN(121,I)=0.5                 
-      IF(EN.LE.EIN(121)) GO TO 895                                     
-      DO 893 J=2,NSNG15                                                
-      IF(EN.LE.XSNG15(J)) GO TO 894                                    
-  893 CONTINUE                                                          
-      J=NSNG15                                                         
-  894 A=(YSNG15(J)-YSNG15(J-1))/(XSNG15(J)-XSNG15(J-1))               
+C    
+C B! 1SIG  (V=11-24)                 
+      QIN(121,I)=0.0
+      PEQIN(121,I)=0.5
+      IF(NANISO.EQ.2) PEQIN(121,I)=0.0                                
+      IF(EN.LE.EIN(121)) GO TO 829    
+      IF(EN.GT.XSNG15(NSNG15)) GO TO 8285                             
+      DO 827 J=2,NSNG15                                             
+      IF(EN.LE.XSNG15(J)) GO TO 828                                  
+  827 CONTINUE                                                          
+      J=NSNG15                                               
+  828 A=(YSNG15(J)-YSNG15(J-1))/(XSNG15(J)-XSNG15(J-1))               
       B=(XSNG15(J-1)*YSNG15(J)-XSNG15(J)*YSNG15(J-1))/(XSNG15(J-1)-
      /XSNG15(J)) 
-      QIN(121,I)=(A*EN+B)*1.D-16                              
+      QIN(121,I)=(A*EN+B)*1.D-16                                 
       A=(YSG15M(J)-YSG15M(J-1))/(XSNG15(J)-XSNG15(J-1))               
       B=(XSNG15(J-1)*YSG15M(J)-XSNG15(J)*YSG15M(J-1))/(XSNG15(J-1)-
      /XSNG15(J)) 
       RAT=A*EN+B
-      PEQIN(121,I)=1.5-RAT
-  895 CONTINUE                                                          
+      GO TO 8286
+C USE BEF SCALING                           F=0.265
+ 8285 QIN(121,I)=0.2650/(EIN(121)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(121)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(121)+E(3))
+      RAT=YSG15M(NSNG15)*(XSNG15(NSNG15)/EN) 
+ 8286 IF(EN.LE.(3.0*EIN(121))) GO TO 829
+      IF(NANISO.EQ.1) PEQIN(121,I)=1.5-RAT
+      IF(NANISO.EQ.2) PEQIN(121,I)=PEQEL(2,(I-IOFFN(121)))
+  829 CONTINUE                                                          
+C E! 1SIG     ELOSS=14.36EV    F=0.0108   
+      QIN(122,I)=0.0      
+      PEQIN(122,I)=0.5  
+      IF(NANISO.EQ.2) PEQIN(122,I)=0.0               
+      IF(EN.LE.EIN(122)) GO TO 895    
+C USE BEF SCALING
+      QIN(122,I)=0.0108/(EIN(122)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(122)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(122)+E(3))
+      IF(QIN(122,I).LT.0.0) QIN(122,I)=0.0
+C 
+      PEQIN(122,I)=PEQIN(121,I)
+  895 CONTINUE
+C E 1PI     ELOSS=14.45EV    F=0.0237   
+      QIN(123,I)=0.0      
+      PEQIN(123,I)=0.5                
+      IF(NANISO.EQ.2) PEQIN(123,I)=0.0 
+      IF(EN.LE.EIN(123)) GO TO 896    
+C USE BEF SCALING
+      QIN(123,I)=0.0237/(EIN(123)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(123)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(123)+E(3))
+      IF(QIN(123,I).LT.0.0) QIN(123,I)=0.0
+C 
+      PEQIN(123,I)=PEQIN(121,I)
+  896 CONTINUE
+C SINGLET     ELOSS=14.839EV   F=0.0117   
+      QIN(124,I)=0.0      
+      PEQIN(124,I)=0.5                
+      IF(NANISO.EQ.2) PEQIN(124,I)=0.0 
+      IF(EN.LE.EIN(124)) GO TO 897    
+C USE BEF SCALING
+      QIN(124,I)=0.0117/(EIN(124)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(124)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(124)+E(3))
+      IF(QIN(124,I).LT.0.0) QIN(124,I)=0.0
+C 
+      PEQIN(124,I)=PEQIN(121,I)
+  897 CONTINUE
+C SUM OF HIGH  ENERGY SINGLETS        ELOSS=15.20EV    F=0.1152   
+      QIN(125,I)=0.0      
+      PEQIN(125,I)=0.5                
+      IF(NANISO.EQ.2) PEQIN(125,I)=0.0 
+      IF(EN.LE.EIN(125)) GO TO 898    
+C USE BEF SCALING
+      QIN(125,I)=0.1152/(EIN(125)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /EIN(125)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(125)+E(3))
+      IF(QIN(125,I).LT.0.0) QIN(125,I)=0.0
+C 
+      PEQIN(125,I)=PEQIN(121,I)
+  898 CONTINUE
+C SUM OF ION EXCITATION AND BREAKUP     ELOSS=15.50EV    F=1.3
+      QIN(126,I)=0.0      
+      PEQIN(126,I)=0.5                
+      IF(NANISO.EQ.2) PEQIN(126,I)=0.0 
+      IF(EN.LE.(E(3))) GO TO 899    
+C USE BEF SCALING
+      QIN(126,I)=1.3000/(E(3)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
+     /E(3)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+E(3)+E(3))
+      IF(QIN(126,I).LT.0.0) QIN(126,I)=0.0
+C 
+      PEQIN(126,I)=PEQIN(121,I)
+  899 CONTINUE
+C LOAD BREMSSTRAHLUNG X-SECTION
+      QIN(127,I)=0.0
+      IF(EN.LE.1000.) GO TO 8969
+      DO 8961 J=2,NBREM
+      IF(EN.LE.EBRM(J)) GO TO 8962
+ 8961 CONTINUE
+      J=NBREM
+ 8962 A=(DLOG(Z7T(J))-DLOG(Z7T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B=(DLOG(Z7T(J))*EBRM(J-1)-DLOG(Z7T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      QIN(127,I)=DEXP(A*EN+B)*2.D-24
+ 8969 CONTINUE                                                          
 C ROTATIONAL SUM                                                        
       SUMR=0.0                                                       
-      DO 897 K=1,76                                     
+      DO 8990 K=1,76                                     
       SUMR=SUMR+QIN(K,I)                                              
-  897 CONTINUE 
+ 8990 CONTINUE 
 C  VIBRATIONAL SUM
       SUMV=0
-      DO 898 K=77,92
+      DO 8991 K=77,92
       SUMV=SUMV+QIN(K,I)
-  898 CONTINUE
+ 8991 CONTINUE
 C EXCITATION SUM
       SUMEX=0.0
-      DO 899 K=93,111  
+      DO 8992 K=93,111  
       SUMEX=SUMEX+QIN(K,I)   
-  899 CONTINUE                                                          
+ 8992 CONTINUE                                                          
 C EXCITATION SUM
       SUMEX1=0.0
-      DO 8999 K=112,121 
+      DO 8993  K=112,126
       SUMEX1=SUMEX1+QIN(K,I)   
- 8999 CONTINUE                                                          
+ 8993 CONTINUE                                                          
 C GET CORRECT ELASTIC XSECTION BY SUBTRACTION OF ROTATION
       Q(2,I)=Q(2,I)-SUMR
 C FOR VERY HIGH TEMPERATURES SOMETIMES SUMR BECOMES LARGER THAN
@@ -36094,7 +38208,8 @@ C THE ELASTIC+ROT (ONLY IN FIRST TWO ENERGY BINS) FIX GT 0
       IF(Q(2,I).LE.0.0) THEN
        Q(2,I)=0.95D-16
       ENDIF
-      Q(1,I)=Q(2,I)+Q(5,I)+QION(2,I)+SUMR+SUMV+SUMEX+SUMEX1
+      Q(1,I)=Q(2,I)+Q(5,I)+QION(2,I)+SUMR+SUMV+SUMEX+SUMEX1           
+C     Q(1,I)=Q(2,I)+Q(5,I)+QION(2,I)+SUMR+SUMV+SUMEX+SUMEX1+QIN(127,I)
 C CAN PRINT OUT X-SECTION DATA
 C     SUMR=SUMR*1.D16
 C     SUMV=SUMV*1.D16
@@ -36105,13 +38220,17 @@ C     SUMVEXI=SUMVEX+Q(5,I)*1.D16
 C     WRITE(6,8769) EN,SUMR,SUMV,SUMEX,SUMEX1,SUMVEX,SUMVEXI
 C8769 FORMAT(' EN=',F8.3,' SUMR=',F8.3,' SUMV=',F8.3,' SUMEX=',F8.3,' SU
 C    /MEX1=',F8.3,' SUMVEX=',F8.3,' TOT=',F8.3)
-  900 CONTINUE                                                          
+C     WRITE(6,8770) EN,QION(1,I),QION(2,I),Q(5,I)
+C8770 FORMAT(' EN=',D12.4,' QION1=',D12.4,' QION2=',D12.4,' Q5=',D12.4)
+  900 CONTINUE         
+C     STOP                                                 
 C SAVE COMPUTE TIME                                                     
-      DO 1000 K=1,121                                                   
-      J=122-K                                                           
+      DO 1000 K=1,126                                                   
+      J=127-K                                                           
       IF(EFINAL.LE.EIN(J)) NIN=J-1                                      
  1000 CONTINUE
       IF(NIN.LT.77) NIN=77 
+C     IF(EFINAL.GT.1000.) NIN=127
 C                                                                       
       RETURN                                                            
       END                                                               
@@ -37470,27 +39589,29 @@ C
       SUBROUTINE GAS21(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,    
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)   
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)   
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
       COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
      /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
       DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
       DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)       
       DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
-     /,EG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
       DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)   
-      DIMENSION XELM(142),YELM(142),YELT(142),YEPS(142),
+      DIMENSION XELM(172),YELM(172),YELT(172),YEPS(172),
      /XROT0(53),YROT0(53),XROT1(43),YROT1(43),XROT2(28),YROT2(28),
      /XROT3(28),YROT3(28),XVIB1(43),YVIB1(43),XVIB2(42),YVIB2(42),
      /XVIB3(13),YVIB3(13),XVIB4(12),YVIB4(12),
      /XB3S1(3),YB3S1(3),XB3S2(6),YB3S2(6),XB3S3(5),YB3S3(5),
      /XB3S4(8),YB3S4(8),XC3PI(5),YC3PI(5),XA3SG(5),YA3SG(5),
      /XE3SG(5),YE3SG(5),XEFSG(34),YEFSG(34),
-     /XEXC1(20),YEXC1(20),XEXC2(23),YEXC2(23),
      /XATT(18),YATT(18),XION(92),YION(92),IOFFN(106),PJ(7),ERLVL(7),
      /BEF(10)
+      DIMENSION Z1T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)                                       
       CHARACTER*25 NAME 
 C --------------------------------------------------------------      
@@ -37509,7 +39630,10 @@ C ELASTIC MT
      /9.0D4,1.0D5,1.25D5,1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,
      /4.5D5,5.0D5,6.0D5,7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,
      /2.0D6,2.5D6,3.0D6,3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,
-     /9.0D6,1.0D7/  
+     /9.0D6,1.0D7,1.25D7,1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,
+     /4.5D7,5.0D7,6.0D7,7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,
+     /2.0D8,2.5D8,3.0D8,3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,
+     /9.0D8,1.0D9/  
       DATA YELM/7.24,7.25,7.26,7.26,7.27,7.28,7.30,7.35,7.38,7.45,
      /7.48,7.54,7.59,7.64,7.70,7.78,7.90,8.04,8.14,8.33,
      /8.56,8.93,9.27,9.54,9.79,10.04,10.25,10.47,10.86,11.35,
@@ -37530,36 +39654,50 @@ C ELASTIC MT
      /8.67D-9,6.80D-9,
      /5.49D-9,3.83D-9,2.84D-9,2.20D-9,1.76D-9,1.44D-9,1.20D-9,8.79D-10,
      /6.72D-10,5.31D-10,
-     /4.31D-10,3.57D-10/
-      DATA YEPS/0.0,0.0,0.0,0.0,0.0,0.0,0.0,-.00204,-.00406,-.00403,
-     /-.00402,-.00799,-.01195,-.01587,-.01974,-.02548,-.03497,-.04613,
-     /-.05537,-.07162,
-     /-.09485,-.11355,-.13538,-.15360,-.16779,-.18516,-.19550,-.20711,
-     /-.22691,-.25186,
-     /-.27686,-.29241,-.29958,-.33194,-.36128,-.39254,-.42965,-.43614,
-     /-.42939,-.42749,
-     /-.44093,-.43942,-.39970,-.34691,-.29121,-.15375,-.03498,0.18393,
-     /0.31707,0.40003,
-     /0.46174,0.51567,0.56204,0.58937,0.63888,0.68310,0.71518,0.73895,
-     /0.79352,0.81348,
-     /0.85049,0.86411,0.88575,0.89777,0.90257,0.91825,0.91958,0.93123,
-     /0.93873,0.94796,
-     /0.95404,0.96326,0.97004,0.97305,0.97513,0.97827,0.98027,0.98267,
-     /0.98464,0.98629,
-     /.987605,.988622,.990817,.992168,.993473,.994052,.995228,.995858,
-     /.996455,.996914,
-     /.987258,.997548,.997951,.998252,.998475,.998649,.998785,.9990334,
-     /.9992007,.9993190,
-     /.9994023,.9995276,.9996104,.9996674,.9997107,.9997456,.9997718,
-     /.9998134,.9998419,.9998630,
-     /.9998801,.9998934,.9999171,.9999328,.9999437,.9999520,.9999635,
-     /.9999709,.9999760,.9999798,
-     /.9999827,.9999850,.9999883,.9999906,.9999922,.9999934,.9999944,
-     /.9999960,.9999970,.9999977,
-     /.9999981,.9999987,.9999990,.9999993,.9999994,.9999995,.9999996,
-     /.9999997,.9999998,.9999998,
-     /.9999999,.9999999/
-C ELASTIC FROM 100 EV
+     /4.31D-10,3.57D-10,2.39D-10,1.72D-10,1.30D-10,1.02D-10,6.74D-11,
+     /4.81D-11,3.61D-11,2.81D-11,
+     /2.25D-11,1.85D-11,1.31D-11,9.76D-12,7.57D-12,6.04D-12,4.93D-12,
+     /3.20D-12,2.24D-12,1.66D-12,
+     /1.27D-12,8.18D-13,5.70D-13,4.19D-13,3.21D-13,2.54D-13,2.06D-13,
+     /1.43D-13,1.05D-13,8.06D-14,
+     /6.37D-14,5.16D-14/
+C ELASTIC ANGULAR DISTRIBUTION FUNCTION EPSILON
+C EPSILON =1-YEPS
+      DATA YEPS/1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.00204,1.00406,1.00403,
+     /1.00402,1.00799,1.01195,1.01587,1.01974,1.02548,1.03497,1.04613,
+     /1.05537,1.07162,
+     /1.09485,1.11355,1.13538,1.15360,1.16779,1.18516,1.19550,1.20711,
+     /1.22691,1.25186,
+     /1.27686,1.29241,1.29958,1.33194,1.36128,1.39254,1.42965,1.43614,
+     /1.42939,1.42749,
+     /1.44093,1.43942,1.39970,1.34691,1.29121,1.15375,1.03498,0.81607,
+     /0.68293,0.59997,
+     /0.53826,0.48433,0.43796,0.41063,0.36112,0.31690,0.28482,0.26105,
+     /0.20648,0.18652,
+     /0.14951,0.13589,0.11425,0.10223,0.09743,0.08175,0.08042,0.06877,
+     /0.06127,0.05204,
+     /0.04596,0.03674,0.02996,0.02695,0.02487,0.02173,0.01973,0.01733,
+     /0.01536,0.01371,
+     /.012395,.011378,.009183,.007832,.006527,.005948,.004772,.004142,
+     /.003545,.003086,
+     /.002742,.002452,.002049,.001748,.001525,.001351,.001215,.0009666,
+     /.0007993,.0006810,
+     /5.977D-4,4.724D-4,3.896D-4,3.326D-4,2.893D-4,2.544D-4,2.282D-4,
+     /1.866D-4,1.581D-4,1.370D-4,
+     /1.199D-4,1.066D-4,8.29D-5,6.72D-5,5.63D-5,4.80D-5,3.65D-5,2.91D-5,
+     /2.40D-5,2.02D-5,
+     /1.73D-5,1.50D-5,1.17D-5,9.40D-6,7.77D-6,6.54D-6,5.59D-6,3.98D-6,
+     /2.99D-6,2.33D-6,
+     /1.87D-6,1.28D-6,9.38D-7,7.15D-7,5.64D-7,4.56D-7,3.77D-7,2.70D-7,
+     /2.02D-7,1.57D-7,
+     /1.26D-7,1.03D-7,6.74D-8,4.74D-8,3.52D-8,2.72D-8,1.76D-8,1.23D-8,
+     /9.05D-9,6.95D-9,
+     /5.50D-9,4.46D-9,3.10D-9,2.28D-9,1.74D-9,1.37D-9,1.11D-9,7.04D-10,
+     /4.85D-10,3.53D-10,
+     /2.67D-10,1.68D-10,1.15D-10,8.3D-11,6.3D-11,4.9D-11,4.0D-11,
+     /2.7D-11,2.0D-11,1.5D-11,
+     /1.2D-11,9.0D-12/
+C ELASTIC FROM 100EV
       DATA YELT/7.24,7.25,7.26,7.26,7.27,7.28,7.30,7.36,7.40,7.43,
      /7.46,7.50,7.53,7.56,7.60,7.65,7.72,7.80,7.85,7.95,
      /8.05,8.30,8.50,8.65,8.80,8.93,9.06,9.19,9.42,9.70,
@@ -37579,7 +39717,7 @@ C ELASTIC FROM 100 EV
      /2.34D-4,2.31D-4,
      /2.28D-4,2.25D-4,2.23D-4,2.22D-4,2.22D-4,2.21D-4,2.21D-4,2.20D-4,
      /2.20D-4,2.20D-4,
-     /2.19D-4,2.19D-4/      
+     /2.19D-4,2.19D-4,2.19D-4,2.19D-4,2.19D-4,27*2.188D-4/      
 C-----------------------------------------------------------------------
 C ROTATION J=0-2
 C SCALED BY 1/E ABOVE 20 EV IN SUBROUTINE                    
@@ -37750,6 +39888,13 @@ C SEE NOTES ON DERIVATION OF IONISATION X-SECTION
      /.226,.214,.199,.165,.146,.133,.121,.101,.0865,.0754,
      /.0675,.0610,.0558,.0515,.0480,.0422,.0375,.0340,.0310,.0265,
      /.0234,.0208/   
+C BREMSSTRAHLUNG X-SECTION WITH CUT OFF  UNITS 10**-24
+      DATA Z1T/11.3,6.18,2.80,1.54,.858,.407,.251,.176,.145,.150,
+     /.167,.178,.187,.193,.198,.205,.210,.218,.222,.228,
+     /.231,.233,.234,.235,.235/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
 C***********************************************************************
 C IONISATION FROM WEIGHTED AVERAGE OF RAPP AND STRAUB UP TO 180EV
 C  NORMALISED STRAUB BETWEEN 180 AND 1000EV THEN NORMALISED SCHRAM
@@ -37794,14 +39939,21 @@ C BORN-BETHE CONSTANTS FOR IONISATION
 C-----------------------------------------------------------------------
       NION=1
       NIN=106 
+C
+      NBREM=25
+      DO 11 J=1,NIN
+      IZBR(J)=0
+   11 CONTINUE
+      IZBR(107)=1
+C
       DO 1 J=1,6
     1 KEL(J)=NANISO
-      DO 2 J=13,NIN
+      DO 2 J=5,NIN
     2 KIN(J)=NANISO
-C SET VIBRATION AND ROTATION TO ISOTROPIC
-      DO 22 J=1,12
+C SET  SUPERELASTIC TO ISOTROPIC ( X-SEC ZERO ABOVE 20EV)
+      DO 22 J=1,4
    22 KIN(J)=0
-      NELM=142                                                         
+      NELM=172                                                         
       NROT0=53                                                          
       NROT1=43                                                          
       NROT2=28                                                          
@@ -37826,6 +39978,8 @@ C IONISATION ENERGY FOR PARA =15.42580155 EV
 C IONISATION ENERGY FOR ORTHO=15.41833111 EV
 C USE ORTHO ENERGY FOR ROOM TEMPERATURE GAS
       E(3)=15.418 
+      LEGAS(1)=0
+      ISHELL(1)=0
 C EXCITATION X-SECTION AT 1.3 MEV                                                      
       E(4)=0.2228D-18             
 C IONISING X-SECTION AT 1.3 MEV                           
@@ -37833,7 +39987,8 @@ C IONISING X-SECTION AT 1.3 MEV
 C EOBY FOR MINIMUM IONISING PARTICLES                                 
       E(6)=6.5 
 C OPAL BEATY FOR LOW ENERGY
-      EOBY(1)=12.0
+      EOBY(1)=8.0
+C     EOBY(1)=6.5 
 C FLUORESENCE DATA
       NC0(1)=0
       EC0(1)=0.0
@@ -37967,6 +40122,7 @@ C CONTINUUM DISSOCIATIVE EXC
       EIN(105)=15.300
 C PREDISSOCIATION ABOVE IONISATION POTENTIAL
       EIN(106)=15.800
+      EIN(107)=0.0
 C BEF SCALING :  BINDING ENERGIES
       BEF(1)=E(3)
       BEF(2)=E(3)
@@ -38017,7 +40173,7 @@ C**********************************************************************
     3 CONTINUE
 C
     4 DO 5 NL=1,NIN
-    5 IOFFN(NL)=IFIX(SNGL(0.5+EIN(NL)/ESTEP))
+    5 IOFFN(NL)=IFIX(SNGL(0.5+DABS(EIN(NL))/ESTEP))
 C
 C ROTATIONAL POPULATIONS
       DO 6 K=1,7,2
@@ -38155,13 +40311,14 @@ C
       SCRPT(110)=' 7P SIG 7P PI DISSOCIATIVE        ELOSS= 15.150   '
       SCRPT(111)=' CONTINUUM EX DISSOCIATIVE        EL0SS= 15.300   '
       SCRPT(112)=' PREDISS >IP  DISSOCIATIVE        ELOSS= 15.800   '
+      SCRPT(113)=' BREMSSTRAHLUNG FROM HYDROGEN ATOMS               '
 C 
 c*****************************                    
-      EN=-ESTEP/2.0           
+C      EN=-ESTEP/2.0           
 C**************************                           
       DO 900 I=1,NSTEP 
-C     EN=EG(I)                                              
-      EN=EN+ESTEP   
+      EN=EG(I)                                              
+C     EN=EN+ESTEP   
       IF(EN.GT.EIN(1)) THEN
        GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
        GAMMA2=GAMMA1*GAMMA1
@@ -38184,7 +40341,9 @@ C ELASTIC X-SECTION
 C ANGULAR DISTRIBUTION FACTOR ( OKRIMOVSKKY)
       A=(YEPS(J)-YEPS(J-1))/(XELM(J)-XELM(J-1))                         
       B=(XELM(J-1)*YEPS(J)-XELM(J)*YEPS(J-1))/(XELM(J-1)-XELM(J))      
-      PQ2=A*EN+B             
+      PQ2=A*EN+B      
+C EPSILON =1.0-YEPS
+      PQ2=1.0D0-PQ2       
       PQ1=0.5+(QELA-QMOM)/QELA
       IF(NANISO.EQ.0) PEQEL(2,I)=0.5
       IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
@@ -38208,7 +40367,7 @@ C GROSS IONISATION
 C USE BORN-BETHE X-SECTION ABOVE XION(NIOND) EV
   121 X2=1.0D0/BETA2
       X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
-      Q(3,I)=CONST*(AM2*X1+C*X2)
+      Q(3,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)
   122 CONTINUE
 C USE ANISOTROPIC SCATTERING FOR PRIMARY IONISATION ELECTRON FOR
 C ENERGIES ABOVE 2 * IONISATION ENERGY
@@ -38256,7 +40415,7 @@ C COUNTING IONISATION ( SET EQUAL TO GROSS IONISATION)
       PEQEL(5,I)=PEQEL(3,I)                                  
       Q(6,I)=0.0 
 C
-      DO 1005 NL=1,NIN
+      DO 1005 NL=1,NIN+1
       QIN(NL,I)=0.0D0
       PEQIN(NL,I)=0.5D0
       IF(NANISO.EQ.2) THEN
@@ -38486,357 +40645,357 @@ C   DIPOLE ALLOWED
 C V=0                                                           
   332 IF(EN.LE.EIN(17)) GO TO 333
       QIN(17,I)=.0016884/(EIN(17)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(17)))-BETA2)*BBCONST*EN/(EN+EIN(17)+BEF(1))
+     /EIN(17)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(17)+BEF(1))
       IF(QIN(17,I).LT.0.0) QIN(17,I)=0.0
       IF(EN.LE.(2.0*EIN(17))) GO TO 333
       PEQIN(17,I)=PEQEL(2,(I-IOFFN(17)))
 C V=1 B1 SIGMA
   333 IF(EN.LE.EIN(18)) GO TO 334
       QIN(18,I)=.005782/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(18)))-BETA2)*BBCONST*EN/(EN+EIN(18)+BEF(1))
+     /EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+BEF(1))
       IF(QIN(18,I).LT.0.0) QIN(18,I)=0.0
       IF(EN.LE.(2.0*EIN(18))) GO TO 334
       PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
 C V=2 B1 SIGMA
   334 IF(EN.LE.EIN(19)) GO TO 335
       QIN(19,I)=.011536/(EIN(19)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(19)))-BETA2)*BBCONST*EN/(EN+EIN(19)+BEF(1))
+     /EIN(19)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(19)+BEF(1))
       IF(QIN(19,I).LT.0.0) QIN(19,I)=0.0
       IF(EN.LE.(2.0*EIN(18))) GO TO 335
       PEQIN(19,I)=PEQEL(2,(I-IOFFN(19)))
 C V=3 B1 SIGMA
   335 IF(EN.LE.EIN(20)) GO TO 336
       QIN(20,I)=.017531/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(20)))-BETA2)*BBCONST*EN/(EN+EIN(20)+BEF(1))
+     /EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(20)+BEF(1))
       IF(QIN(20,I).LT.0.0) QIN(20,I)=0.0
       IF(EN.LE.(2.0*EIN(20))) GO TO 336
       PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))
 C V=4 B1 SIGMA
   336 IF(EN.LE.EIN(21)) GO TO 337
       QIN(21,I)=.022477/(EIN(21)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(21)))-BETA2)*BBCONST*EN/(EN+EIN(21)+BEF(1))
+     /EIN(21)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(21)+BEF(1))
       IF(QIN(21,I).LT.0.0) QIN(21,I)=0.0
       IF(EN.LE.(2.0*EIN(21))) GO TO 337
       PEQIN(21,I)=PEQEL(2,(I-IOFFN(21)))
 C V=5 B1 SIGMA
   337 IF(EN.LE.EIN(22)) GO TO 338
       QIN(22,I)=.025688/(EIN(22)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(22)))-BETA2)*BBCONST*EN/(EN+EIN(22)+BEF(1))
+     /EIN(22)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(22)+BEF(1))
       IF(QIN(22,I).LT.0.0) QIN(22,I)=0.0
       IF(EN.LE.(2.0*EIN(22))) GO TO 338
       PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))
 C V=6 B1 SIGMA
   338 IF(EN.LE.EIN(23)) GO TO 339
       QIN(23,I)=.027021/(EIN(23)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(23)))-BETA2)*BBCONST*EN/(EN+EIN(23)+BEF(1))
+     /EIN(23)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(23)+BEF(1))
       IF(QIN(23,I).LT.0.0) QIN(23,I)=0.0
       IF(EN.LE.(2.0*EIN(23))) GO TO 339
       PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))
 C V=7 B1 SIGMA
   339 IF(EN.LE.EIN(24)) GO TO 340
       QIN(24,I)=.026731/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(24)))-BETA2)*BBCONST*EN/(EN+EIN(24)+BEF(1))
+     /EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(24)+BEF(1))
       IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0
       IF(EN.LE.(2.0*EIN(24))) GO TO 340
       PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
 C V=8 B1 SIGMA
   340 IF(EN.LE.EIN(25)) GO TO 341
       QIN(25,I)=.025233/(EIN(25)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(25)))-BETA2)*BBCONST*EN/(EN+EIN(25)+BEF(1))
+     /EIN(25)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(25)+BEF(1))
       IF(QIN(25,I).LT.0.0) QIN(25,I)=0.0
       IF(EN.LE.(2.0*EIN(25))) GO TO 341
       PEQIN(25,I)=PEQEL(2,(I-IOFFN(25)))
 C V=9 B1 SIGMA
   341 IF(EN.LE.EIN(26)) GO TO 342
       QIN(26,I)=.022980/(EIN(26)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(26)))-BETA2)*BBCONST*EN/(EN+EIN(26)+BEF(1))
+     /EIN(26)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(26)+BEF(1))
       IF(QIN(26,I).LT.0.0) QIN(26,I)=0.0
       IF(EN.LE.(2.0*EIN(26))) GO TO 342
       PEQIN(26,I)=PEQEL(2,(I-IOFFN(26)))
 C V=10 B1 SIGMA
   342 IF(EN.LE.EIN(27)) GO TO 343
       QIN(27,I)=.020362/(EIN(27)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(27)))-BETA2)*BBCONST*EN/(EN+EIN(27)+BEF(1))
+     /EIN(27)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(27)+BEF(1))
       IF(QIN(27,I).LT.0.0) QIN(27,I)=0.0
       IF(EN.LE.(2.0*EIN(27))) GO TO 343
       PEQIN(27,I)=PEQEL(2,(I-IOFFN(27)))
 C V=11 B1 SIGMA
   343 IF(EN.LE.EIN(28)) GO TO 344
       QIN(28,I)=.017653/(EIN(28)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(28)))-BETA2)*BBCONST*EN/(EN+EIN(28)+BEF(1))
+     /EIN(28)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(28)+BEF(1))
       IF(QIN(28,I).LT.0.0) QIN(28,I)=0.0
       IF(EN.LE.(2.0*EIN(28))) GO TO 344
       PEQIN(28,I)=PEQEL(2,(I-IOFFN(28)))
 C V=12 B1 SIGMA
   344 IF(EN.LE.EIN(29)) GO TO 345
       QIN(29,I)=.015054/(EIN(29)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(29)))-BETA2)*BBCONST*EN/(EN+EIN(29)+BEF(1))
+     /EIN(29)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(29)+BEF(1))
       IF(QIN(29,I).LT.0.0) QIN(29,I)=0.0
       IF(EN.LE.(2.0*EIN(29))) GO TO 345
       PEQIN(29,I)=PEQEL(2,(I-IOFFN(29)))
 C V=13 B1 SIGMA
   345 IF(EN.LE.EIN(30)) GO TO 346
       QIN(30,I)=.012678/(EIN(30)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(30)))-BETA2)*BBCONST*EN/(EN+EIN(30)+BEF(1))
+     /EIN(30)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(30)+BEF(1))
       IF(QIN(30,I).LT.0.0) QIN(30,I)=0.0
       IF(EN.LE.(2.0*EIN(30))) GO TO 346
       PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))
 C V=14 B1 SIGMA
   346 IF(EN.LE.EIN(31)) GO TO 347
       QIN(31,I)=.010567/(EIN(31)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(31)))-BETA2)*BBCONST*EN/(EN+EIN(31)+BEF(1))
+     /EIN(31)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(31)+BEF(1))
       IF(QIN(31,I).LT.0.0) QIN(31,I)=0.0
       IF(EN.LE.(2.0*EIN(31))) GO TO 347
       PEQIN(31,I)=PEQEL(2,(I-IOFFN(31)))
 C V=15 B1 SIGMA
   347 IF(EN.LE.EIN(32)) GO TO 348
       QIN(32,I)=.008746/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(32)))-BETA2)*BBCONST*EN/(EN+EIN(32)+BEF(1))
+     /EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+BEF(1))
       IF(QIN(32,I).LT.0.0) QIN(32,I)=0.0
       IF(EN.LE.(2.0*EIN(32))) GO TO 348
       PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
 C V=16 B1 SIGMA
   348 IF(EN.LE.EIN(33)) GO TO 349
       QIN(33,I)=.007201/(EIN(33)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(33)))-BETA2)*BBCONST*EN/(EN+EIN(33)+BEF(1))
+     /EIN(33)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(33)+BEF(1))
       IF(QIN(33,I).LT.0.0) QIN(33,I)=0.0
       IF(EN.LE.(2.0*EIN(33))) GO TO 349
       PEQIN(33,I)=PEQEL(2,(I-IOFFN(33)))
 C V=17 B1 SIGMA
   349 IF(EN.LE.EIN(34)) GO TO 350
       QIN(34,I)=.005909/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(34)))-BETA2)*BBCONST*EN/(EN+EIN(34)+BEF(1))
+     /EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(34)+BEF(1))
       IF(QIN(34,I).LT.0.0) QIN(34,I)=0.0
       IF(EN.LE.(2.0*EIN(34))) GO TO 350
       PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
 C V=18 B1 SIGMA
   350 IF(EN.LE.EIN(35)) GO TO 351
       QIN(35,I)=.004838/(EIN(35)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(35)))-BETA2)*BBCONST*EN/(EN+EIN(35)+BEF(1))
+     /EIN(35)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(35)+BEF(1))
       IF(QIN(35,I).LT.0.0) QIN(35,I)=0.0
       IF(EN.LE.(2.0*EIN(35))) GO TO 351
       PEQIN(35,I)=PEQEL(2,(I-IOFFN(35)))
 C V=19 B1 SIGMA
   351 IF(EN.LE.EIN(36)) GO TO 352
       QIN(36,I)=.003956/(EIN(36)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(36)))-BETA2)*BBCONST*EN/(EN+EIN(36)+BEF(1))
+     /EIN(36)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(36)+BEF(1))
       IF(QIN(36,I).LT.0.0) QIN(36,I)=0.0
       IF(EN.LE.(2.0*EIN(36))) GO TO 352
       PEQIN(36,I)=PEQEL(2,(I-IOFFN(36)))
 C V=20 B1 SIGMA
   352 IF(EN.LE.EIN(37)) GO TO 353
       QIN(37,I)=.003233/(EIN(37)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(37)))-BETA2)*BBCONST*EN/(EN+EIN(37)+BEF(1))
+     /EIN(37)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(37)+BEF(1))
       IF(QIN(37,I).LT.0.0) QIN(37,I)=0.0
       IF(EN.LE.(2.0*EIN(37))) GO TO 353
       PEQIN(37,I)=PEQEL(2,(I-IOFFN(37)))
 C V=21 B1 SIGMA
   353 IF(EN.LE.EIN(38)) GO TO 354
       QIN(38,I)=.002644/(EIN(38)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(38)))-BETA2)*BBCONST*EN/(EN+EIN(38)+BEF(1))
+     /EIN(38)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(38)+BEF(1))
       IF(QIN(38,I).LT.0.0) QIN(38,I)=0.0
       IF(EN.LE.(2.0*EIN(38))) GO TO 354
       PEQIN(38,I)=PEQEL(2,(I-IOFFN(38)))
 C V=22 B1 SIGMA
   354 IF(EN.LE.EIN(39)) GO TO 355
       QIN(39,I)=.002165/(EIN(39)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(39)))-BETA2)*BBCONST*EN/(EN+EIN(39)+BEF(1))
+     /EIN(39)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(39)+BEF(1))
       IF(QIN(39,I).LT.0.0) QIN(39,I)=0.0
       IF(EN.LE.(2.0*EIN(39))) GO TO 355
       PEQIN(39,I)=PEQEL(2,(I-IOFFN(39)))
 C V=23 B1 SIGMA
   355 IF(EN.LE.EIN(40)) GO TO 356
       QIN(40,I)=.001775/(EIN(40)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(40)))-BETA2)*BBCONST*EN/(EN+EIN(40)+BEF(1))
+     /EIN(40)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(40)+BEF(1))
       IF(QIN(40,I).LT.0.0) QIN(40,I)=0.0
       IF(EN.LE.(2.0*EIN(40))) GO TO 356
       PEQIN(40,I)=PEQEL(2,(I-IOFFN(40)))
 C V=24 B1 SIGMA
   356 IF(EN.LE.EIN(41)) GO TO 357
       QIN(41,I)=.001457/(EIN(41)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(41)))-BETA2)*BBCONST*EN/(EN+EIN(41)+BEF(1))
+     /EIN(41)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(41)+BEF(1))
       IF(QIN(41,I).LT.0.0) QIN(41,I)=0.0
       IF(EN.LE.(2.0*EIN(41))) GO TO 357
       PEQIN(41,I)=PEQEL(2,(I-IOFFN(41)))
 C V=25 B1 SIGMA
   357 IF(EN.LE.EIN(42)) GO TO 358
       QIN(42,I)=.001199/(EIN(42)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(42)))-BETA2)*BBCONST*EN/(EN+EIN(42)+BEF(1))
+     /EIN(42)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(42)+BEF(1))
       IF(QIN(42,I).LT.0.0) QIN(42,I)=0.0
       IF(EN.LE.(2.0*EIN(42))) GO TO 358
       PEQIN(42,I)=PEQEL(2,(I-IOFFN(42)))
 C V=26 B1 SIGMA
   358 IF(EN.LE.EIN(43)) GO TO 359
       QIN(43,I)=.0009882/(EIN(43)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(43)))-BETA2)*BBCONST*EN/(EN+EIN(43)+BEF(1))
+     /EIN(43)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(43)+BEF(1))
       IF(QIN(43,I).LT.0.0) QIN(43,I)=0.0
       IF(EN.LE.(2.0*EIN(43))) GO TO 359
       PEQIN(43,I)=PEQEL(2,(I-IOFFN(43)))
 C V=27 B1 SIGMA
   359 IF(EN.LE.EIN(44)) GO TO 360
       QIN(44,I)=.0008153/(EIN(44)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(44)))-BETA2)*BBCONST*EN/(EN+EIN(44)+BEF(1))
+     /EIN(44)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(44)+BEF(1))
       IF(QIN(44,I).LT.0.0) QIN(44,I)=0.0
       IF(EN.LE.(2.0*EIN(44))) GO TO 360
       PEQIN(44,I)=PEQEL(2,(I-IOFFN(44)))
 C V=28 B1 SIGMA
   360 IF(EN.LE.EIN(45)) GO TO 361
       QIN(45,I)=.0006738/(EIN(45)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(45)))-BETA2)*BBCONST*EN/(EN+EIN(45)+BEF(1))
+     /EIN(45)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(45)+BEF(1))
       IF(QIN(45,I).LT.0.0) QIN(45,I)=0.0
       IF(EN.LE.(2.0*EIN(45))) GO TO 361
       PEQIN(45,I)=PEQEL(2,(I-IOFFN(45)))
 C V=29 B1 SIGMA
   361 IF(EN.LE.EIN(46)) GO TO 362
       QIN(46,I)=.0005561/(EIN(46)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(46)))-BETA2)*BBCONST*EN/(EN+EIN(46)+BEF(1))
+     /EIN(46)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(46)+BEF(1))
       IF(QIN(46,I).LT.0.0) QIN(46,I)=0.0
       IF(EN.LE.(2.0*EIN(46))) GO TO 362
       PEQIN(46,I)=PEQEL(2,(I-IOFFN(46)))
 C V=30 B1 SIGMA
   362 IF(EN.LE.EIN(47)) GO TO 363
       QIN(47,I)=.0004573/(EIN(47)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(47)))-BETA2)*BBCONST*EN/(EN+EIN(47)+BEF(1))
+     /EIN(47)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(47)+BEF(1))
       IF(QIN(47,I).LT.0.0) QIN(47,I)=0.0
       IF(EN.LE.(2.0*EIN(47))) GO TO 363
       PEQIN(47,I)=PEQEL(2,(I-IOFFN(47)))
 C V=31 B1 SIGMA 
   363 IF(EN.LE.EIN(48)) GO TO 364
       QIN(48,I)=.0003731/(EIN(48)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(48)))-BETA2)*BBCONST*EN/(EN+EIN(48)+BEF(1))
+     /EIN(48)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(48)+BEF(1))
       IF(QIN(48,I).LT.0.0) QIN(48,I)=0.0
       IF(EN.LE.(2.0*EIN(48))) GO TO 364
       PEQIN(48,I)=PEQEL(2,(I-IOFFN(48)))
 C V=32 B1 SIGMA 
   364 IF(EN.LE.EIN(49)) GO TO 365
       QIN(49,I)=.0002992/(EIN(49)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(49)))-BETA2)*BBCONST*EN/(EN+EIN(49)+BEF(1))
+     /EIN(49)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(49)+BEF(1))
       IF(QIN(49,I).LT.0.0) QIN(49,I)=0.0
       IF(EN.LE.(2.0*EIN(49))) GO TO 365
       PEQIN(49,I)=PEQEL(2,(I-IOFFN(49)))
 C V=33 B1 SIGMA 
   365 IF(EN.LE.EIN(50)) GO TO 366
       QIN(50,I)=.0002309/(EIN(50)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(50)))-BETA2)*BBCONST*EN/(EN+EIN(50)+BEF(1))
+     /EIN(50)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(50)+BEF(1))
       IF(QIN(50,I).LT.0.0) QIN(50,I)=0.0
       IF(EN.LE.(2.0*EIN(50))) GO TO 366
       PEQIN(50,I)=PEQEL(2,(I-IOFFN(50)))
 C V=34 B1 SIGMA 
   366 IF(EN.LE.EIN(51)) GO TO 367
       QIN(51,I)=.0001627/(EIN(51)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(51)))-BETA2)*BBCONST*EN/(EN+EIN(51)+BEF(1))
+     /EIN(51)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(51)+BEF(1))
       IF(QIN(51,I).LT.0.0) QIN(51,I)=0.0
       IF(EN.LE.(2.0*EIN(51))) GO TO 367
       PEQIN(51,I)=PEQEL(2,(I-IOFFN(51)))
 C V=35 B1 SIGMA 
   367 IF(EN.LE.EIN(52)) GO TO 368
       QIN(52,I)=8.652D-5/(EIN(52)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(52)))-BETA2)*BBCONST*EN/(EN+EIN(52)+BEF(1))
+     /EIN(52)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(52)+BEF(1))
       IF(QIN(52,I).LT.0.0) QIN(52,I)=0.0
       IF(EN.LE.(2.0*EIN(52))) GO TO 368
       PEQIN(52,I)=PEQEL(2,(I-IOFFN(52)))
 C V=36 B1 SIGMA 
   368 IF(EN.LE.EIN(53)) GO TO 369
       QIN(53,I)=2.256D-5/(EIN(53)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(53)))-BETA2)*BBCONST*EN/(EN+EIN(53)+BEF(1))
+     /EIN(53)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(53)+BEF(1))
       IF(QIN(53,I).LT.0.0) QIN(53,I)=0.0
       IF(EN.LE.(2.0*EIN(53))) GO TO 369
       PEQIN(53,I)=PEQEL(2,(I-IOFFN(53)))
 C V=0  C1 PI    
   369 IF(EN.LE.EIN(54)) GO TO 370
       QIN(54,I)=.0476000/(EIN(54)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(54)))-BETA2)*BBCONST*EN/(EN+EIN(54)+BEF(2))
+     /EIN(54)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(54)+BEF(2))
       IF(QIN(54,I).LT.0.0) QIN(54,I)=0.0
       IF(EN.LE.(2.0*EIN(54))) GO TO 370
       PEQIN(54,I)=PEQEL(2,(I-IOFFN(54)))
 C V=1  C1 PI    
   370 IF(EN.LE.EIN(55)) GO TO 371
       QIN(55,I)=.0728400/(EIN(55)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(55)))-BETA2)*BBCONST*EN/(EN+EIN(55)+BEF(2))
+     /EIN(55)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(55)+BEF(2))
       IF(QIN(55,I).LT.0.0) QIN(55,I)=0.0
       IF(EN.LE.(2.0*EIN(55))) GO TO 371
       PEQIN(55,I)=PEQEL(2,(I-IOFFN(55)))
 C V=2  C1 PI    
   371 IF(EN.LE.EIN(56)) GO TO 372
       QIN(56,I)=.0698200/(EIN(56)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(56)))-BETA2)*BBCONST*EN/(EN+EIN(56)+BEF(2))
+     /EIN(56)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(56)+BEF(2))
       IF(QIN(56,I).LT.0.0) QIN(56,I)=0.0
       IF(EN.LE.(2.0*EIN(56))) GO TO 372
       PEQIN(56,I)=PEQEL(2,(I-IOFFN(56)))
 C V=3  C1 PI    
   372 IF(EN.LE.EIN(57)) GO TO 373
       QIN(57,I)=.0547200/(EIN(57)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(57)))-BETA2)*BBCONST*EN/(EN+EIN(57)+BEF(2))
+     /EIN(57)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(57)+BEF(2))
       IF(QIN(57,I).LT.0.0) QIN(57,I)=0.0
       IF(EN.LE.(2.0*EIN(57))) GO TO 373
       PEQIN(57,I)=PEQEL(2,(I-IOFFN(57)))
 C V=4  C1 PI    
   373 IF(EN.LE.EIN(58)) GO TO 374
       QIN(58,I)=.0387400/(EIN(58)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(58)))-BETA2)*BBCONST*EN/(EN+EIN(58)+BEF(2))
+     /EIN(58)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(58)+BEF(2))
       IF(QIN(58,I).LT.0.0) QIN(58,I)=0.0
       IF(EN.LE.(2.0*EIN(58))) GO TO 374
       PEQIN(58,I)=PEQEL(2,(I-IOFFN(58)))
 C V=5  C1 PI    
   374 IF(EN.LE.EIN(59)) GO TO 375
       QIN(59,I)=.0259800/(EIN(59)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(59)))-BETA2)*BBCONST*EN/(EN+EIN(59)+BEF(2))
+     /EIN(59)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(59)+BEF(2))
       IF(QIN(59,I).LT.0.0) QIN(59,I)=0.0
       IF(EN.LE.(2.0*EIN(59))) GO TO 375
       PEQIN(59,I)=PEQEL(2,(I-IOFFN(59)))
 C V=6  C1 PI    
   375 IF(EN.LE.EIN(60)) GO TO 376
       QIN(60,I)=.0170000/(EIN(60)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(60)))-BETA2)*BBCONST*EN/(EN+EIN(60)+BEF(2))
+     /EIN(60)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(60)+BEF(2))
       IF(QIN(60,I).LT.0.0) QIN(60,I)=0.0
       IF(EN.LE.(2.0*EIN(60))) GO TO 376
       PEQIN(60,I)=PEQEL(2,(I-IOFFN(60)))
 C V=7  C1 PI    
   376 IF(EN.LE.EIN(61)) GO TO 377
       QIN(61,I)=.0109900/(EIN(61)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(61)))-BETA2)*BBCONST*EN/(EN+EIN(61)+BEF(2))
+     /EIN(61)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(61)+BEF(2))
       IF(QIN(61,I).LT.0.0) QIN(61,I)=0.0
       IF(EN.LE.(2.0*EIN(61))) GO TO 377
       PEQIN(61,I)=PEQEL(2,(I-IOFFN(61)))
 C V=8  C1 PI    
   377 IF(EN.LE.EIN(62)) GO TO 378
       QIN(62,I)=.0070980/(EIN(62)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(62)))-BETA2)*BBCONST*EN/(EN+EIN(62)+BEF(2))
+     /EIN(62)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(62)+BEF(2))
       IF(QIN(62,I).LT.0.0) QIN(62,I)=0.0
       IF(EN.LE.(2.0*EIN(62))) GO TO 378
       PEQIN(62,I)=PEQEL(2,(I-IOFFN(62)))
 C V=9  C1 PI    
   378 IF(EN.LE.EIN(63)) GO TO 379
       QIN(63,I)=.0045920/(EIN(63)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(63)))-BETA2)*BBCONST*EN/(EN+EIN(63)+BEF(2))
+     /EIN(63)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(63)+BEF(2))
       IF(QIN(63,I).LT.0.0) QIN(63,I)=0.0
       IF(EN.LE.(2.0*EIN(63))) GO TO 379
       PEQIN(63,I)=PEQEL(2,(I-IOFFN(63)))
 C V=10 C1 PI    
   379 IF(EN.LE.EIN(64)) GO TO 380
       QIN(64,I)=.0029760/(EIN(64)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(64)))-BETA2)*BBCONST*EN/(EN+EIN(64)+BEF(2))
+     /EIN(64)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(64)+BEF(2))
       IF(QIN(64,I).LT.0.0) QIN(64,I)=0.0
       IF(EN.LE.(2.0*EIN(64))) GO TO 380
       PEQIN(64,I)=PEQEL(2,(I-IOFFN(64)))
 C V=11 C1 PI    
   380 IF(EN.LE.EIN(65)) GO TO 381
       QIN(65,I)=.0019090/(EIN(65)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(65)))-BETA2)*BBCONST*EN/(EN+EIN(65)+BEF(2))
+     /EIN(65)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(65)+BEF(2))
       IF(QIN(65,I).LT.0.0) QIN(65,I)=0.0
       IF(EN.LE.(2.0*EIN(65))) GO TO 381
       PEQIN(65,I)=PEQEL(2,(I-IOFFN(65)))
 C V=12 C1 PI    
   381 IF(EN.LE.EIN(66)) GO TO 382
       QIN(66,I)=.0011710/(EIN(66)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(66)))-BETA2)*BBCONST*EN/(EN+EIN(66)+BEF(2))
+     /EIN(66)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(66)+BEF(2))
       IF(QIN(66,I).LT.0.0) QIN(66,I)=0.0
       IF(EN.LE.(2.0*EIN(66))) GO TO 382
       PEQIN(66,I)=PEQEL(2,(I-IOFFN(66)))
 C V=13 C1 PI    
   382 IF(EN.LE.EIN(67)) GO TO 383
       QIN(67,I)=.0005590/(EIN(67)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(67)))-BETA2)*BBCONST*EN/(EN+EIN(67)+BEF(2))
+     /EIN(67)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(67)+BEF(2))
       IF(QIN(67,I).LT.0.0) QIN(67,I)=0.0
       IF(EN.LE.(2.0*EIN(67))) GO TO 383
       PEQIN(67,I)=PEQEL(2,(I-IOFFN(67)))
@@ -38928,7 +41087,7 @@ C USE BORN SCALING ABOVE XEFSG(NEFSG)  EV
       QIN(73,I)=(A*EN+B)*1.D-16*0.4          
       GO TO 1406
   406 QIN(73,I)=.0089000/(EIN(73)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(73)))-BETA2)*BBCONST*EN/(EN+EIN(73)+BEF(3))
+     /EIN(73)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(73)+BEF(3))
       IF(QIN(73,I).LT.0.0) QIN(73,I)=0.0
  1406 IF(EN.LE.(2.0*EIN(73))) GO TO 407
       PEQIN(73,I)=PEQEL(2,(I-IOFFN(73)))
@@ -38945,182 +41104,182 @@ C USE BORN SCALING ABOVE XEFSG(NEFSG) EV
       QIN(74,I)=(A*EN+B)*1.D-16*0.6          
       GO TO 1410
   410 QIN(74,I)=.0133000/(EIN(74)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(74)))-BETA2)*BBCONST*EN/(EN+EIN(74)+BEF(3))
+     /EIN(74)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(74)+BEF(3))
       IF(QIN(74,I).LT.0.0) QIN(74,I)=0.0
  1410 IF(EN.LE.(2.0*EIN(74))) GO TO 411
       PEQIN(74,I)=PEQEL(2,(I-IOFFN(74)))
 C B!1 SIGMA V=0       
   411 IF(EN.LE.EIN(75)) GO TO 412
       QIN(75,I)=.003970/(EIN(75)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(75)))-BETA2)*BBCONST*EN/(EN+EIN(75)+BEF(4))
+     /EIN(75)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(75)+BEF(4))
       IF(QIN(75,I).LT.0.0) QIN(75,I)=0.0
       IF(EN.LE.(2.0*EIN(75))) GO TO 412
       PEQIN(75,I)=PEQEL(2,(I-IOFFN(75)))
 C B!1 SIGMA V=1         
   412 IF(EN.LE.EIN(76)) GO TO 413
       QIN(76,I)=.008150/(EIN(76)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(76)))-BETA2)*BBCONST*EN/(EN+EIN(76)+BEF(4))
+     /EIN(76)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(76)+BEF(4))
       IF(QIN(76,I).LT.0.0) QIN(76,I)=0.0
       IF(EN.LE.(2.0*EIN(76))) GO TO 413
       PEQIN(76,I)=PEQEL(2,(I-IOFFN(76)))
 C B!1 SIGMA V=2         
   413 IF(EN.LE.EIN(77)) GO TO 414
       QIN(77,I)=.009980/(EIN(77)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(77)))-BETA2)*BBCONST*EN/(EN+EIN(77)+BEF(4))
+     /EIN(77)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(77)+BEF(4))
       IF(QIN(77,I).LT.0.0) QIN(77,I)=0.0
       IF(EN.LE.(2.0*EIN(77))) GO TO 414
       PEQIN(77,I)=PEQEL(2,(I-IOFFN(77)))
 C B!1 SIGMA V=3         
   414 IF(EN.LE.EIN(78)) GO TO 415
       QIN(78,I)=.009520/(EIN(78)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(78)))-BETA2)*BBCONST*EN/(EN+EIN(78)+BEF(4))
+     /EIN(78)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(78)+BEF(4))
       IF(QIN(78,I).LT.0.0) QIN(78,I)=0.0
       IF(EN.LE.(2.0*EIN(78))) GO TO 415
       PEQIN(78,I)=PEQEL(2,(I-IOFFN(78)))
 C B!1 SIGMA V=4         
   415 IF(EN.LE.EIN(79)) GO TO 416
       QIN(79,I)=.007550/(EIN(79)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(79)))-BETA2)*BBCONST*EN/(EN+EIN(79)+BEF(4))
+     /EIN(79)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(79)+BEF(4))
       IF(QIN(79,I).LT.0.0) QIN(79,I)=0.0
       IF(EN.LE.(2.0*EIN(79))) GO TO 416
       PEQIN(79,I)=PEQEL(2,(I-IOFFN(79)))
 C B!1 SIGMA V=5         
   416 IF(EN.LE.EIN(80)) GO TO 417
       QIN(80,I)=.004230/(EIN(80)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(80)))-BETA2)*BBCONST*EN/(EN+EIN(80)+BEF(4))
+     /EIN(80)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(80)+BEF(4))
       IF(QIN(80,I).LT.0.0) QIN(80,I)=0.0
       IF(EN.LE.(2.0*EIN(80))) GO TO 417
       PEQIN(80,I)=PEQEL(2,(I-IOFFN(80)))
 C B!1 SIGMA V=6         
   417 IF(EN.LE.EIN(81)) GO TO 418
       QIN(81,I)=.000460/(EIN(81)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(81)))-BETA2)*BBCONST*EN/(EN+EIN(81)+BEF(4))
+     /EIN(81)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(81)+BEF(4))
       IF(QIN(81,I).LT.0.0) QIN(81,I)=0.0
       IF(EN.LE.(2.0*EIN(81))) GO TO 418
       PEQIN(81,I)=PEQEL(2,(I-IOFFN(81)))
 C B!1 SIGMA V=7         
   418 IF(EN.LE.EIN(82)) GO TO 419
       QIN(82,I)=.000450/(EIN(82)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(82)))-BETA2)*BBCONST*EN/(EN+EIN(82)+BEF(4))
+     /EIN(82)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(82)+BEF(4))
       IF(QIN(82,I).LT.0.0) QIN(82,I)=0.0
       IF(EN.LE.(2.0*EIN(82))) GO TO 419
       PEQIN(82,I)=PEQEL(2,(I-IOFFN(82)))
 C B!1 SIGMA V=8         
   419 IF(EN.LE.EIN(83)) GO TO 420
       QIN(83,I)=.000300/(EIN(83)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(83)))-BETA2)*BBCONST*EN/(EN+EIN(83)+BEF(4))
+     /EIN(83)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(83)+BEF(4))
       IF(QIN(83,I).LT.0.0) QIN(83,I)=0.0
       IF(EN.LE.(2.0*EIN(83))) GO TO 420
       PEQIN(83,I)=PEQEL(2,(I-IOFFN(83)))
 C D1 PI     V=0         
   420 IF(EN.LE.EIN(84)) GO TO 421
       QIN(84,I)=.007750/(EIN(84)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(84)))-BETA2)*BBCONST*EN/(EN+EIN(84)+BEF(5))
+     /EIN(84)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(84)+BEF(5))
       IF(QIN(84,I).LT.0.0) QIN(84,I)=0.0
       IF(EN.LE.(2.0*EIN(85))) GO TO 421
       PEQIN(84,I)=PEQEL(2,(I-IOFFN(84)))
 C D1 PI     V=1         
   421 IF(EN.LE.EIN(85)) GO TO 422
       QIN(85,I)=.013100/(EIN(85)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(85)))-BETA2)*BBCONST*EN/(EN+EIN(85)+BEF(5))
+     /EIN(85)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(85)+BEF(5))
       IF(QIN(85,I).LT.0.0) QIN(85,I)=0.0
       IF(EN.LE.(2.0*EIN(85))) GO TO 422
       PEQIN(85,I)=PEQEL(2,(I-IOFFN(85)))
 C D1 PI     V=2         
   422 IF(EN.LE.EIN(86)) GO TO 423
       QIN(86,I)=.013670/(EIN(86)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(86)))-BETA2)*BBCONST*EN/(EN+EIN(86)+BEF(5))
+     /EIN(86)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(86)+BEF(5))
       IF(QIN(86,I).LT.0.0) QIN(86,I)=0.0
       IF(EN.LE.(2.0*EIN(86))) GO TO 423
       PEQIN(86,I)=PEQEL(2,(I-IOFFN(86)))
 C D1 PI     V=3         
   423 IF(EN.LE.EIN(87)) GO TO 424
       QIN(87,I)=.011560/(EIN(87)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(87)))-BETA2)*BBCONST*EN/(EN+EIN(87)+BEF(5))
+     /EIN(87)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(87)+BEF(5))
       IF(QIN(87,I).LT.0.0) QIN(87,I)=0.0
       IF(EN.LE.(2.0*EIN(87))) GO TO 424
       PEQIN(87,I)=PEQEL(2,(I-IOFFN(87)))
 C D1 PI     V=4         
   424 IF(EN.LE.EIN(88)) GO TO 425
       QIN(88,I)=.008730/(EIN(88)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(88)))-BETA2)*BBCONST*EN/(EN+EIN(88)+BEF(5))
+     /EIN(88)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(88)+BEF(5))
       IF(QIN(88,I).LT.0.0) QIN(88,I)=0.0
       IF(EN.LE.(2.0*EIN(88))) GO TO 425
       PEQIN(88,I)=PEQEL(2,(I-IOFFN(88)))
 C D1 PI     V=5         
   425 IF(EN.LE.EIN(89)) GO TO 426
       QIN(89,I)=.006190/(EIN(89)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(89)))-BETA2)*BBCONST*EN/(EN+EIN(89)+BEF(5))
+     /EIN(89)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(89)+BEF(5))
       IF(QIN(89,I).LT.0.0) QIN(89,I)=0.0
       IF(EN.LE.(2.0*EIN(89))) GO TO 426
       PEQIN(89,I)=PEQEL(2,(I-IOFFN(89)))
 C D1 PI     V=6         
   426 IF(EN.LE.EIN(90)) GO TO 427
       QIN(90,I)=.004280/(EIN(90)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(90)))-BETA2)*BBCONST*EN/(EN+EIN(90)+BEF(5))
+     /EIN(90)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(90)+BEF(5))
       IF(QIN(90,I).LT.0.0) QIN(90,I)=0.0
       IF(EN.LE.(2.0*EIN(90))) GO TO 427
       PEQIN(90,I)=PEQEL(2,(I-IOFFN(90)))
 C D1 PI     V=7         
   427 IF(EN.LE.EIN(91)) GO TO 428
       QIN(91,I)=.002920/(EIN(91)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(91)))-BETA2)*BBCONST*EN/(EN+EIN(91)+BEF(5))
+     /EIN(91)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(91)+BEF(5))
       IF(QIN(91,I).LT.0.0) QIN(91,I)=0.0
       IF(EN.LE.(2.0*EIN(91))) GO TO 428
       PEQIN(91,I)=PEQEL(2,(I-IOFFN(91)))
 C D1 PI     V=8         
   428 IF(EN.LE.EIN(92)) GO TO 429
       QIN(92,I)=.001960/(EIN(92)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(92)))-BETA2)*BBCONST*EN/(EN+EIN(92)+BEF(5))
+     /EIN(92)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(92)+BEF(5))
       IF(QIN(92,I).LT.0.0) QIN(92,I)=0.0
       IF(EN.LE.(2.0*EIN(92))) GO TO 429
       PEQIN(92,I)=PEQEL(2,(I-IOFFN(92)))
 C D1 PI     V=9         
   429 IF(EN.LE.EIN(93)) GO TO 430
       QIN(93,I)=.001330/(EIN(93)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(93)))-BETA2)*BBCONST*EN/(EN+EIN(93)+BEF(5))
+     /EIN(93)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(93)+BEF(5))
       IF(QIN(93,I).LT.0.0) QIN(93,I)=0.0
       IF(EN.LE.(2.0*EIN(93))) GO TO 430
       PEQIN(93,I)=PEQEL(2,(I-IOFFN(93)))
 C D1 PI     V=10        
   430 IF(EN.LE.EIN(94)) GO TO 431
       QIN(94,I)=.000910/(EIN(94)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(94)))-BETA2)*BBCONST*EN/(EN+EIN(94)+BEF(5))
+     /EIN(94)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(94)+BEF(5))
       IF(QIN(94,I).LT.0.0) QIN(94,I)=0.0
       IF(EN.LE.(2.0*EIN(94))) GO TO 431
       PEQIN(94,I)=PEQEL(2,(I-IOFFN(94)))
 C D1 PI     V=11        
   431 IF(EN.LE.EIN(95)) GO TO 432
       QIN(95,I)=.000630/(EIN(95)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(95)))-BETA2)*BBCONST*EN/(EN+EIN(95)+BEF(5))
+     /EIN(95)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(95)+BEF(5))
       IF(QIN(95,I).LT.0.0) QIN(95,I)=0.0
       IF(EN.LE.(2.0*EIN(95))) GO TO 432
       PEQIN(95,I)=PEQEL(2,(I-IOFFN(95)))
 C D1 PI     V=12        
   432 IF(EN.LE.EIN(96)) GO TO 433
       QIN(96,I)=.000430/(EIN(96)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(96)))-BETA2)*BBCONST*EN/(EN+EIN(96)+BEF(5))
+     /EIN(96)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(96)+BEF(5))
       IF(QIN(96,I).LT.0.0) QIN(96,I)=0.0
       IF(EN.LE.(2.0*EIN(96))) GO TO 433
       PEQIN(96,I)=PEQEL(2,(I-IOFFN(96)))
 C D1 PI     V=13        
   433 IF(EN.LE.EIN(97)) GO TO 434
       QIN(97,I)=.000290/(EIN(97)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(97)))-BETA2)*BBCONST*EN/(EN+EIN(97)+BEF(5))
+     /EIN(97)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(97)+BEF(5))
       IF(QIN(97,I).LT.0.0) QIN(97,I)=0.0
       IF(EN.LE.(2.0*EIN(97))) GO TO 434
       PEQIN(97,I)=PEQEL(2,(I-IOFFN(97)))
 C D1 PI     V=14        
   434 IF(EN.LE.EIN(98)) GO TO 435
       QIN(98,I)=.000200/(EIN(98)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(98)))-BETA2)*BBCONST*EN/(EN+EIN(98)+BEF(5))
+     /EIN(98)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(98)+BEF(5))
       IF(QIN(98,I).LT.0.0) QIN(98,I)=0.0
       IF(EN.LE.(2.0*EIN(98))) GO TO 435
       PEQIN(98,I)=PEQEL(2,(I-IOFFN(98)))
 C D1 PI     V=15        
   435 IF(EN.LE.EIN(99)) GO TO 436
       QIN(99,I)=.000120/(EIN(99)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(99)))-BETA2)*BBCONST*EN/(EN+EIN(99)+BEF(5))
+     /EIN(99)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(99)+BEF(5))
       IF(QIN(99,I).LT.0.0) QIN(99,I)=0.0
       IF(EN.LE.(2.0*EIN(99))) GO TO 436
       PEQIN(99,I)=PEQEL(2,(I-IOFFN(99)))
@@ -39128,7 +41287,7 @@ C B!!1 SIGMA SUM V=0-6  DISSOCIATIVE
 C SCALED BY 1.08 FOR INCREASED ENERGY LOSSES FROM VIB SERIES
   436 IF(EN.LE.EIN(100)) GO TO 437
       QIN(100,I)=.02230/(EIN(100)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(100)))-BETA2)*BBCONST*EN/(EN+EIN(100)+BEF(5))*1.08 
+     /EIN(100)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(100)+BEF(5))*1.08 
       IF(QIN(100,I).LT.0.0) QIN(100,I)=0.0
       IF(EN.LE.(2.0*EIN(100))) GO TO 437
       PEQIN(100,I)=PEQEL(2,(I-IOFFN(100)))
@@ -39136,7 +41295,7 @@ C D!1 PI     SUM V=0-3  DISSOCIATIVE
 C SCALED BY 1.08 FOR INCREASED ENERGY LOSSES FROM VIB SERIES
   437 IF(EN.LE.EIN(101)) GO TO 438
       QIN(101,I)=.01450/(EIN(101)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(101)))-BETA2)*BBCONST*EN/(EN+EIN(101)+BEF(5))*1.08 
+     /EIN(101)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(101)+BEF(5))*1.08 
       IF(QIN(101,I).LT.0.0) QIN(101,I)=0.0
       IF(EN.LE.(2.0*EIN(101))) GO TO 438
       PEQIN(101,I)=PEQEL(2,(I-IOFFN(101)))
@@ -39144,7 +41303,7 @@ C B!!!1 SIGMA + D!!1 PI VIBRATION SUMMED   DISSOCIATIVE
 C  SCALED BY 1.08 FOR INCREASED ENERGY LOSSES FROM VIB SERIES
   438 IF(EN.LE.EIN(102)) GO TO 439
       QIN(102,I)=.01450/(EIN(102)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(102)))-BETA2)*BBCONST*EN/(EN+EIN(102)+BEF(5))*1.08 
+     /EIN(102)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(102)+BEF(5))*1.08 
       IF(QIN(102,I).LT.0.0) QIN(102,I)=0.0
       IF(EN.LE.(2.0*EIN(102))) GO TO 439
       PEQIN(102,I)=PEQEL(2,(I-IOFFN(102)))
@@ -39152,7 +41311,7 @@ C B!!!!1 SIGMA + D!!!1 PI VIBRATION SUMMED   DISSOCIATIVE
 C  SCALED BY 1.08 FOR INCREASED ENERGY LOSSES FROM VIB SERIES
   439 IF(EN.LE.EIN(103)) GO TO 440
       QIN(103,I)=.01010/(EIN(103)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(103)))-BETA2)*BBCONST*EN/(EN+EIN(103)+BEF(5))*1.08 
+     /EIN(103)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(103)+BEF(5))*1.08 
       IF(QIN(103,I).LT.0.0) QIN(103,I)=0.0
       IF(EN.LE.(2.0*EIN(103))) GO TO 440
       PEQIN(103,I)=PEQEL(2,(I-IOFFN(103)))
@@ -39160,7 +41319,7 @@ C B!!!!!1 SIGMA + D!!!!1 PI VIBRATION SUMMED   DISSOCIATIVE
 C  SCALED BY 1.08 FOR INCREASED ENERGY LOSSES FROM VIB SERIES
   440 IF(EN.LE.EIN(104)) GO TO 441
       QIN(104,I)=.00500/(EIN(104)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(104)))-BETA2)*BBCONST*EN/(EN+EIN(104)+BEF(5))*1.08
+     /EIN(104)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(104)+BEF(5))*1.08
       IF(QIN(104,I).LT.0.0) QIN(104,I)=0.0
       IF(EN.LE.(2.0*EIN(104))) GO TO 441
       PEQIN(104,I)=PEQEL(2,(I-IOFFN(104)))
@@ -39168,7 +41327,7 @@ C CONTINUUM EXCITATION AROUND IONISATION ENERGY   DISSOCIATIVE
 C SCALED BY 1.20 FOR INCREASED ENERGY LOSSES ABOVE THRESHOLD
   441 IF(EN.LE.EIN(105)) GO TO 442
       QIN(105,I)=.02680/(EIN(105)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(105)))-BETA2)*BBCONST*EN/(EN+EIN(105)+BEF(5))*1.20
+     /EIN(105)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(105)+BEF(5))*1.20
       IF(QIN(105,I).LT.0.0) QIN(105,I)=0.0
       IF(EN.LE.(2.0*EIN(105))) GO TO 442
       PEQIN(105,I)=PEQEL(2,(I-IOFFN(105)))
@@ -39176,29 +41335,51 @@ C PREDISSOCIATION ABOVE IONISATION ENERGY         DISSOCIATIVE
 C SCALED BY 1.2 FOR INCREASED ENERGY LOSSES ABOVE THRESHOLD 
   442 IF(EN.LE.EIN(106)) GO TO 443
       QIN(106,I)=.01700/(EIN(106)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0*
-     /EIN(106)))-BETA2)*BBCONST*EN/(EN+EIN(106)+BEF(5))*1.20 
+     /EIN(106)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(106)+BEF(5))*1.20 
       IF(QIN(106,I).LT.0.0) QIN(106,I)=0.0
       IF(EN.LE.(2.0*EIN(106))) GO TO 443
       PEQIN(106,I)=PEQEL(2,(I-IOFFN(106)))
   443 CONTINUE
+C LOAD BREMSSTRAHLUNG X-SECTION
+C     IF(EN.LE.1000.) GO TO 450
+C     DO 444 J=2,NBREM
+C     IF(EN.LE.EBRM(J)) GO TO 445
+C 444 CONTINUE
+C     J=NBREM
+C 445 A=(DLOG(Z1T(J))-DLOG(Z1T(J-1)))/(EBRM(J)-EBRM(J-1))
+C     B=(DLOG(Z1T(J))*EBRM(J-1)-DLOG(Z1T(J-1))*EBRM(J))/
+C    /(EBRM(J-1)-EBRM(J))
+C     QIN(107,I)=DEXP(A*EN+B)*2.D-24
+  450 CONTINUE
 C---------------------------------------------------------------------
       Q(1,I)=0.0
       DO 555 NL=1,106
       Q(1,I)=Q(1,I)+QIN(NL,I)
   555 CONTINUE
-      Q(1,I)=Q(1,I)+Q(2,I)+Q(4,I)+Q(5,I) 
+      Q(1,I)=Q(1,I)+Q(2,I)+Q(4,I)+Q(5,I)
+C     Q(1,I)=Q(1,I)+Q(2,I)+Q(4,I)+Q(5,I)+QIN(107,I) 
+C     IPRT=0
+C     IPRT=0
+C     IF(EN.GT.9992.AND.EN.LT.10002) IPRT=1
+C     IF(EN.GT.19992.AND.EN.LT.20002) IPRT=1
+C     IF(EN.GT.99992.AND.EN.LT.100002) IPRT=1
+C     IF(EN.GT.199950.AND.EN.LT.200050) IPRT=1
+C     IF(EN.GT.1999900.AND.EN.LT.2000250) IPRT=1
+C     IF(IPRT.EQ.1) THEN
 C     WRITE(6,991) EN,Q(2,I),Q(4,I),Q(5,I),Q(1,I)          
 C 991 FORMAT(' EN=',D12.4,' ELAS=',D12.4,' ATT =',D12.4,'IONS=',D12.4,'
-C    / TOT=',D12.4)                                
+C    / TOT=',D12.4)        
+C     WRITE(6,992) (QIN(JP,I), JP=1,107)
+C 992 FORMAT(11(10D12.4,/))                                
+C     ENDIF
   900 CONTINUE                                                          
 C  SAVE COMPUTE TIME
-      DO 910 K=1,20 
-      IF(EFINAL.LE.EIN(K)) THEN
-       NIN=K-1
-       GO TO 911
-      ENDIF
+      DO 910 K=1,106
+      J=107-K 
+      IF(EFINAL.LE.EIN(J)) THEN NIN=J-1
   910 CONTINUE
-  911 CONTINUE
+      IF(NIN.LT.8) NIN=8
+C      IF(EFINAL.GT.1000.) NIN=107
 C                                                                       
       RETURN                                                            
       END 
@@ -41154,268 +43335,1625 @@ C  SAVE COMPUTE TIME
       IF(EFINAL.LE.EIN(1)) NIN=0                                        
       RETURN                                                            
       END 
-      SUBROUTINE GAS30(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY
+      SUBROUTINE GAS30(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY  
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
-     /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)    
+     /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)
+C    /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,IZBR,LEGAS,ISHELL,SCRPT)
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)                                         
       COMMON/CNSTS/ECHARG,EMASS,AMU,PIR2                                
       COMMON/INPT/NGAS,NSTEP,NANISO,EFINAL,ESTEP,AKT,ARY,TEMPC,TORR,IPEN
-      DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)  
-      DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)   
-      DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),
-     /NG2(12),EG2(12)    
-      DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)   
+      COMMON/MIX2/EG(4000),EROOT(4000),QT1(4000),QT2(4000),
+     /QT3(4000),QT4(4000)
+      COMMON/DENS/DEN(4000)
+      DIMENSION PEQEL(6,4000),PEQIN(250,4000),KIN(250),KEL(6)
+      DIMENSION QION(12,4000),PEQION(12,4000),EION(12),EOBY(12)
+      DIMENSION NC0(12),EC0(12),WKLM(12),EFL(12),NG1(12),EG1(12),NG2(12)
+     /,EG2(12),IZBR(250),LEGAS(12),ISHELL(12)
+      DIMENSION Q(6,4000),QIN(250,4000),E(6),EIN(250),PENFRA(3,250)  
+      DIMENSION XEN(159),YELM(159),YELT(159),YEPS(159),
+     /XATT(113),YAT1(113),YAT2(113),YAT3(113),YAT4(113),YAT5(113),
+     /YAT6(113),YAT7(113), 
+     /XION(55),YION(55),YIN1(55),YIN2(55),YIN3(55),YIN4(55),YIN5(55),
+     /YIN6(55),YIN7(55),XL3SH(100),YL3SH(100),XL2SH(100),YL2SH(100),
+     /XL1SH(100),YL1SH(100),XKSHS(80),YKSHS(80),XKSHF(79),YKSHF(79),
+     /XV1V1(13),YV1V1(13),XV2V1(12),YV2V1(12),XV3V1(7),YV3V1(7),
+     ,XV4V1(7),YV4V1(7),XV5V1(5),YV5V1(5),XVBV3(17),YVBV3(17),
+     /XTR1(12),YTR1(12),  
+     /XTR2(11),YTR2(11),XTR3(11),YTR3(11),
+     /IOFFN(35),IOFFION(12)
+      DIMENSION Z9T(25),Z16T(25),EBRM(25)
       CHARACTER*50 SCRPT(264)
       CHARACTER*25 NAME                                                 
-C ----------------------------------------------------------------      
-C   SF6 FILE FROM ITOH ET AL J.PHYS.D.  26 (1993) 1975-1979              
-C ---------------------------------------------------------------       
-      NAME='SF6 ITOH ET AL '                      
-C                
-      NION=1           
-      NIN=2 
+      DATA XEN/0.00,.001,.005,.010,.025,.050,.075,0.10,0.20,0.30,
+     /0.35,0.40,0.45,0.50,0.60,0.70,0.80,0.90,1.00,1.20,
+     /1.50,2.00,2.50,3.00,3.50,4.00,4.50,5.00,6.00,7.00,
+     /8.00,9.00,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,
+     /18.0,19.0,20.0,22.0,25.0,30.0,35.0,40.0,45.0,50.0,
+     /60.0,70.0,75.0,80.0,90.0,100.,125.,150.,200.,250.,
+     /300.,350.,400.,450.,500.,600.,700.,800.,1000.,1250.,
+     /1500.,1750.,2000.,2500.,3000.,3500.,4000.,4500.,5000.,6000.,
+     /7000.,8000.,9000.,1.0D4,1.25D4,1.5D4,1.75D4,2.0D4,2.5D4,3.0D4,
+     /3.5D4,4.0D4,4.5D4,5.0D4,6.0D4,7.0D4,8.0D4,9.0D4,1.0D5,1.25D5,
+     /1.5D5,1.75D5,2.0D5,2.5D5,3.0D5,3.5D5,4.0D5,4.5D5,5.0D5,6.0D5,
+     /7.0D5,8.0D5,9.0D5,1.0D6,1.25D6,1.5D6,1.75D6,2.0D6,2.5D6,3.0D6,
+     /3.5D6,4.0D6,4.5D6,5.0D6,6.0D6,7.0D6,8.0D6,9.0D6,1.0D7,1.25D7,
+     /1.5D7,1.75D7,2.0D7,2.5D7,3.0D7,3.5D7,4.0D7,4.5D7,5.0D7,6.0D7,
+     /7.0D7,8.0D7,9.0D7,1.0D8,1.25D8,1.5D8,1.75D8,2.0D8,2.5D8,3.0D8,
+     /3.5D8,4.0D8,4.5D8,5.0D8,6.0D8,7.0D8,8.0D8,9.0D8,1.0D9/
+C ELASTIC MOMENTUM TRANSFER X-SECTION     
+      DATA YELM/1434.,1300.,890.,620.,386.,199.,122.,61.5,36.0,28.0,
+     /24.0,20.8,17.4,15.0,12.0,10.3,9.21,8.57,8.25,8.75,
+     /10.5,14.5,16.3,15.1,14.3,13.6,13.5,13.9,15.1,15.5,
+     /14.8,14.7,15.3,16.5,17.6,16.5,15.1,14.4,14.2,14.5,
+     /14.8,15.3,15.7,16.1,15.4,13.4,11.5,10.3,9.45,8.73,
+     /7.84,7.24,6.88,6.52,5.93,5.49,4.67,3.95,2.84,2.12,
+     /1.66,1.39,1.22,1.08,0.96,.784,.642,.554,.447,0.35,
+     /.265,.225,.195,.135,.099,.0762,.0606,.0494,.0412,.0300,
+     /.0229,.0181,.0147,.0122,.00818,.00591,.00449,.00353,.00237,.00171,
+     /.00130,.00102,8.30D-4,6.88D-4,4.99D-4,3.80D-4,3.01D-4,2.45D-4,
+     /2.04D-4,1.40D-4,
+     /1.02D-4,7.92D-5,6.35D-5,4.41D-5,3.29D-5,2.58D-5,2.09D-5,1.74D-5,
+     /1.48D-5,1.12D-5,
+     /8.85D-6,7.22D-6,6.04D-6,5.15D-6,3.67D-6,2.77D-6,2.18D-6,1.77D-6,
+     /1.24D-6,9.22D-7,
+     /7.16D-7,5.74D-7,4.71D-7,3.94D-7,2.89D-7,2.21D-7,1.75D-7,1.42D-7,
+     /1.18D-7,7.94D-8,
+     /5.72D-8,4.32D-8,3.39D-8,2.25D-8,1.60D-8,1.20D-8,9.36D-9,7.50D-9,
+     /6.14D-9,4.33D-9,
+     /3.22D-9,2.49D-9,1.98D-9,1.61D-9,1.04D-9,7.21D-10,5.31D-10,
+     /4.07D-10,2.61D-10,1.81D-10,
+     /1.33D-10,1.02D-10,8.06D-11,6.53D-11,4.54D-11,3.33D-11,2.55D-11,
+     /2.02D-11,1.63D-11/
+C ELASTIC TOTAL X-SECTION               
+      DATA YELT/1434.,1300.,890.,620.,386.,209.,136.,77.0,45.0,35.0,
+     /30.0,26.2,21.8,18.7,14.8,12.5,11.1,10.2,9.72,9.73,
+     /10.9,14.8,17.6,18.4,19.6,19.5,20.0,21.0,23.6,24.2,
+     /24.6,25.0,25.2,25.8,26.6,25.5,24.9,24.7,24.6,24.5,
+     /24.5,24.6,24.7,25.3,25.3,24.7,24.0,23.5,23.0,22.4,
+     /21.2,20.1,19.7,19.3,18.6,18.0,16.2,14.8,12.5,11.1,
+     /10.0,9.15,8.45,7.84,7.14,6.45,5.74,5.30,4.52,3.94,
+     /3.43,3.04,2.73,2.28,1.96,1.72,1.53,1.39,1.26,1.08,
+     /.938,.832,.748,.680,.555,.470,.408,.362,.295,.251,
+     /.219,.194,.175,.160,.137,.121,.109,.0992,.0915,.0777,
+     /.0685,.0620,.0571,.0503,.0458,.0427,.0403,.0385,.0371,.0351,
+     /.0336,.0326,.0318,.0312,.0302,.0296,.0291,.0288,.0285,.0282,
+     /.0281,.0280,.0279,.0279,.0278,.0278,.0277,.0277,.0277,.0277,
+     /.0277,.0277,.0277,.0277,.0277,.0277,.0277,.0277,.0277,.0277,
+     /.0276,.0276,.0276,.0276,.0276,.0276,.0276,.0276,.0276,.0276,
+     /.0276,.0276,.0276,.0276,.0276,.0276,.0276,.0276,.0276/
+C EPSILON FOR ELASTIC ANGULAR DISTRIBUTION  
+C  EPSILON=1.0-YEPS
+      DATA YEPS/.9999,.9999,.9999,.9999,.9999,.9283,.8463,.7035,.7053,
+     /.7053,
+     /.7053,.6967,.7027,.7084,.7208,.7396,.7479,.7630,.7755,.8496,
+     /.9450,.9696,.8907,.7327,.6061,.5630,.5345,.5179,.4898,.4906,
+     /.4427,.4260,.4515,.4898,.5175,.4967,.4472,.4192,.4114,.4291,
+     /.4466,.4663,.4845,.4845,.4495,.3719,.3052,.2643,.2383,.2190,
+     /.2015,.1934,.1842,.1752,.1600,.1492,.1365,.1215,.09574,.07381,
+     /.06047,.05348,.04969,.04650,.04482,.03893,.03466,.03168,.02936,
+     /.02538,
+     /.02106,.01989,.01897,.01481,.01209,.01019,.00880,.00774,.00691,
+     /.00567,
+     /.00481,.00417,.00368,.00329,.00260,.00215,.00183,.001588,.001257,
+     /.001037,
+     /8.82D-4,7.66D-4,6.76D-4,6.04D-4,4.97D-4,4.21D-4,3.64D-4,3.19D-4,
+     /2.84D-4,2.21D-4,
+     /1.798D-4,1.504D-4,1.285D-4,9.83D-5,7.86D-5,6.47D-5,5.45D-5,
+     /4.68D-5,4.07D-5,3.18D-5,
+     /2.56D-5,2.12D-5,1.786D-5,1.529D-5,1.093D-5,8.22D-6,6.42D-6,
+     /5.16D-6,3.55D-6,2.60D-6,
+     /1.99D-6,1.568D-6,1.270D-6,1.049D-6,7.52D-7,5.65D-7,4.41D-7,
+     /3.53D-7,2.89D-7,1.89D-7,
+     /1.331D-7,9.87D-8,7.62D-8,4.92D-8,3.44D-8,2.53D-8,1.94D-8,1.533D-8,
+     /1.241D-8,8.58D-9,
+     /6.27D-9,4.77D-9,3.74D-9,3.01D-9,1.89D-9,1.29D-9,9.38D-10,7.09D-10,
+     /4.44D-10,3.03D-10,
+     /2.20D-10,1.66D-10,1.30D-10,1.04D-10,7.1D-11,5.1D-11,3.9D-11,
+     /3.0D-11,2.4D-11/
+C V1 RAMAN ISOTROPIC                   SCALED BY 1/E**2 ABOVE 1.0 EV
+      DATA XV1V1/.096032,.100,.114,0.25,0.20,0.25,0.30,0.35,0.40,0.50,
+     /0.55,0.70,1.00/
+      DATA YV1V1/0.00,19.0,21.0,15.7,9.68,8.80,8.80,7.54,6.28,6.00,
+     /5.60,4.20,2.45/
+C 2V1 RAMAN ISOTROPIC                  SCALED BY 1/E**2 ABOVE 1.0EV
+      DATA XV2V1/.192064,0.20,0.23,0.25,0.30,0.35,0.40,0.50,0.55,0.60,
+     /0.70,1.00/
+      DATA YV2V1/0.00,3.14,4.14,3.52,3.02,2.76,2.64,2.14,1.98,1.85,
+     /1.70,0.99/
+C 3V1 RAMAN ISOTROPIC                  SCALED BY 1/E**2 ABOVE 1.0EV
+      DATA XV3V1/0.288096,0.325,0.40,0.50,0.60,0.70,1.00/
+      DATA YV3V1/0.00,2.3,1.6,1.30,1.10,0.85,0.50/
+C 4V1 RAMAN ISOTROPIC                  SCALED BY 1/E**2 ABOVE 1.0EV
+      DATA XV4V1/.384128,0.45,0.50,0.55,0.60,0.70,1.00/
+      DATA YV4V1/0.00,1.15,0.85,0.65,0.55,0.50,0.29/
+C 5V1+HIGHER V1 RAMAN   ISOTROPIC      SCALED BY 1/E**2 ABOVE 1.0EV
+      DATA XV5V1/.48016,0.55,0.60,0.70,1.00/
+      DATA YV5V1/0.00,1.00,0.70,0.45,0.26/
+C V3 DIPOLE ANISOTROPIC
+C V3 DIPOLE PART AS ANALYTIC FUNCTION IN SUBROUTINE
+C V3 DIRECT PART AT THRESHOLD AND ALSO RESONANT STRUCTURE ABOVE 6EV
+C GIVEN AS TABLES.
+C              
+      DATA XVBV3/.11754,.125,0.13,0.14,0.15,0.16,0.17,0.18,0.19,5.00,
+     /6.00,7.00,8.00,9.00,10.0,12.0,15.0/
+      DATA YVBV3/0.00,20.0,17.0,13.0,9.00,6.00,3.50,2.00,0.00,0.00,
+     /1.50,4.00,2.00,0.00,0.00,4.50,0.00/
+C V4 DIPOLE ANISOTROPIC
+C V4 DIPOLE GIVEN AS ANALYTIC FUNCTION IN SUBROUTINE
+C
+C NOTE : IONISATION  X-SECTIONS ABOVE 1KEV GIVEN BY BORN-BETHE.
+C       IONISATION FROM RAP ET AL AND LINDSAY ET AL.
+C         
+      DATA XION/15.67,16.5,17.0,17.5,18.0,18.5,19.0,19.5,21.0,21.5,     
+     /22.0,22.5,23.0,23.5,24.0,26.0,28.0,30.0,32.0,34.0,
+     /36.0,38.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,
+     /80.0,85.0,90.0,95.0,100.,105.,110.,115.,120.,125.,
+     /130.,135.,140.,145.,150.,160.,180.,200.,250.,300.,
+     /400.,500.,600.,800.,1000./
+C IONISATION TO SF5 +
+      DATA YION/0.00,.020,.035,.055,.084,.118,.154,.197,.314,.370,    
+     /.434,.509,.584,.670,.760,1.13,1.36,1.61,1.83,2.08,
+     /2.26,2.37,2.46,2.63,2.81,2.99,3.02,3.08,3.16,3.19,
+     /3.25,3.28,3.27,3.29,3.30,3.31,3.32,3.33,3.33,3.32,
+     /3.30,3.30,3.29,3.29,3.30,3.30,3.24,3.20,3.03,2.92,
+     /2.62,2.42,2.21,1.86,1.65/
+C IONISATION TO SF4 +
+      DATA YIN1/0.00,0.00,0.00,0.00,0.00,0.00,.001,.003,.009,.011,      
+     /.012,.014,.017,.020,.022,.038,.052,.076,.110,.130,
+     /.148,.161,.173,.180,.202,.220,.228,.240,.256,.261,
+     /.269,.271,.271,.277,.282,.283,.284,.285,.285,.284,
+     /.284,.284,.285,.280,.277,.268,.266,.265,.243,.237,
+     /.208,.199,.172,.146,.127/
+C IONISATION TO SF3 +
+      DATA YIN2/0.00,0.00,0.00,0.00,0.00,0.00,0.00,.002,.008,.010,
+     /.011,.013,.020,.028,.038,.092,.148,.242,.340,.449,
+     /.546,.598,.648,.603,.694,.768,.812,.843,.881,.886,
+     /.898,.922,.938,.950,.958,.961,.964,.966,.964,.964,
+     /.963,.965,.965,.961,.960,.949,.936,.927,.869,.814,
+     /.717,.660,.598,.493,.449/
+C IONISATION TO SF2 +
+      DATA YIN3/16*0.0,.001,.002,.021,.043,
+     /.072,.097,.125,.186,.233,.261,.281,.292,.306,.300,
+     /.296,.305,.312,.311,.310,.307,.304,.301,.296,.295,
+     /.293,.292,.291,.286,.282,.272,.267,.264,.234,.217,
+     /.172,.154,.140,.113,.098/
+C IONISATION TO SF +
+      DATA YIN4/19*0.0,.001,
+     /.014,.031,.054,.163,.282,.348,.405,.447,.496,.512,
+     /.534,.570,.601,.615,.625,.634,.642,.648,.654,.650,
+     /.646,.643,.640,.644,.650,.657,.638,.622,.569,.515,
+     /.425,.383,.342,.267,.221/
+C IONISATION TO S +
+      DATA YIN5/21*0.0,.003,.011,.030,.072,.112,.152,.181,.214,.233,
+     /.256,.275,.291,.310,.328,.345,.362,.378,.394,.398,
+     /.401,.406,.411,.413,.417,.421,.424,.428,.390,.370,
+     /.300,.263,.233,.173,.151/
+C IONISATION TO F +
+      DATA YIN6/21*0.0,.002,.007,.025,.052,.092,.134,.186,.242,.267,
+     /.296,.349,.401,.448,.495,.530,.566,.602,.637,.658,
+     /.677,.699,.721,.735,.753,.780,.807,.838,.817,.759,
+     /.627,.538,.481,.372,.297/
+C IONISATION TO SUM OF DOUBLE CHARGED STATES SF3,SF2,SF ALL ++
+C MAJORITY IN STATE SF2 ++
+      DATA YIN7/25*0.0,.011,.0217,.0330,.0445,.0585,
+     /.0730,.0850,.0980,.1084,.1188,.1257,.1326,.1395,.1463,.1505,
+     /.1548,.1590,.1633,.1631,.1629,.1624,.1652,.1681,.1546,.1419,
+     /.1189,.1023,.0894,.0684,.0611/
+C SULFUR L3 SHELL
+      DATA XL3SH/164.16,170.6,175.8,181.2,186.7,192.3,198.1,204.1,210.3,
+     /216.7,
+     /229.9,244.0,258.9,274.6,318.3,358.0,390.9,439.5,494.0,555.1,
+     /605.9,700.7,810.3,910.1,1022.,1216.,1447.,1671.,1932.,2232.,
+     /2578.,2978.,3440.,3974.,4460.,5005.,5950.,7072.,8168.,9165.,
+     /1.00D4,1.15D4,1.30D4,1.45D4,1.63D4,1.83D4,2.05D4,2.37D4,2.74D4,
+     /3.16D4,
+     /3.65D4,4.22D4,4.87D4,5.62D4,6.49D4,7.50D4,8.66D4,1.00D5,1.26D5,
+     /1.54D5,
+     /2.05D5,2.51D5,3.07D5,3.55D5,4.10D5,5.01D5,6.13D5,7.29D5,8.66D5,
+     /1.00D6,
+     /1.26D6,1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,
+     /1.00D7,
+     /1.26D7,1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,
+     /1.00D8,
+     /1.26D8,1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,
+     /1.00D9/
+      DATA YL3SH/0.00,1.49D-3,2.62D-3,3.72D-3,4.79D-3,5.83D-3,6.84D-3,
+     /7.81D-3,8.75D-3,9.65D-3,
+     /1.13D-2,1.29D-2,1.43D-2,1.56D-2,1.83D-2,1.99D-2,2.09D-2,2.19D-2,
+     /2.25D-2,2.28D-2,
+     /2.29D-2,2.26D-2,2.21D-2,2.15D-2,2.07D-2,1.94D-2,1.80D-2,1.67D-2,
+     /1.55D-2,1.43D-2,
+     /1.31D-2,1.20D-2,1.10D-2,9.99D-3,9.24D-3,8.54D-3,7.56D-3,6.68D-3,
+     /6.01D-3,5.52D-3,
+     /5.17D-3,4.64D-3,4.26D-3,3.90D-3,3.57D-3,3.27D-3,3.00D-3,2.68D-3,
+     /2.41D-3,2.16D-3,
+     /1.94D-3,1.74D-3,1.56D-3,1.41D-3,1.27D-3,1.15D-3,1.05D-3,9.52D-4,
+     /8.26D-4,7.35D-4,
+     /6.33D-4,5.78D-4,5.34D-4,5.08D-4,4.87D-4,4.63D-4,4.47D-4,4.37D-4,
+     /4.30D-4,4.28D-4,
+     /4.27D-4,4.29D-4,4.39D-4,4.57D-4,4.74D-4,4.87D-4,5.00D-4,5.10D-4,
+     /5.21D-4,5.35D-4,
+     /5.53D-4,5.66D-4,5.90D-4,6.21D-4,6.44D-4,6.60D-4,6.76D-4,6.87D-4,
+     /6.99D-4,7.15D-4,
+     /7.33D-4,7.47D-4,7.72D-4,8.04D-4,8.27D-4,8.43D-4,8.59D-4,8.71D-4,
+     /8.82D-4,8.98D-4/
+C SULFUR L2 SHELL
+      DATA XL2SH/165.36,170.5,175.7,181.0,186.5,192.2,198.0,204.0,210.2,
+     /216.5,
+     /229.8,243.8,258.7,274.5,318.1,357.8,390.7,439.3,493.8,555.0,
+     /605.7,700.6,810.2,909.9,1022.,1216.,1447.,1671.,1932.,2232.,
+     /2578.,2978.,3440.,3974.,4460.,5005.,5950.,7072.,8168.,9165.,
+     /1.00D4,1.15D4,1.30D4,1.45D4,1.63D4,1.83D4,2.05D4,2.37D4,2.74D4,
+     /3.16D4,
+     /3.65D4,4.22D4,4.87D4,5.62D4,6.49D4,7.50D4,8.66D4,1.00D5,1.26D5,
+     /1.54D5,
+     /2.05D5,2.51D5,3.07D5,3.55D5,4.10D5,5.01D5,6.13D5,7.29D5,8.66D5,
+     /1.00D6,
+     /1.26D6,1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,
+     /1.00D7,
+     /1.26D7,1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,
+     /1.00D8,
+     /1.26D8,1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,
+     /1.00D9/
+      DATA YL2SH/0.00,5.76D-4,1.13D-3,1.68D-3,2.21D-3,2.72D-3,3.22D-3,
+     /3.70D-3,4.16D-3,4.61D-3,
+     /5.45D-3,6.23D-3,6.93D-3,7.57D-3,8.91D-3,9.73D-3,1.02D-2,1.07D-2,
+     /1.10D-2,1.12D-2,
+     /1.12D-2,1.11D-2,1.09D-2,1.06D-2,1.02D-2,9.56D-3,8.85D-3,8.24D-3,
+     /7.64D-3,7.04D-3,
+     /6.47D-3,5.94D-3,5.42D-3,4.93D-3,4.57D-3,4.22D-3,3.74D-3,3.30D-3,
+     /2.97D-3,2.73D-3,
+     /2.56D-3,2.29D-3,2.10D-3,1.93D-3,1.77D-3,1.62D-3,1.48D-3,1.33D-3,
+     /1.19D-3,1.07D-3,
+     /9.57D-4,8.60D-4,7.74D-4,6.97D-4,6.30D-4,5.70D-4,5.17D-4,4.71D-4,
+     /4.08D-4,3.64D-4,
+     /3.13D-4,2.86D-4,2.64D-4,2.51D-4,2.41D-4,2.29D-4,2.21D-4,2.16D-4,
+     /2.13D-4,2.12D-4,
+     /2.11D-4,2.13D-4,2.17D-4,2.26D-4,2.35D-4,2.41D-4,2.48D-4,2.53D-4,
+     /2.58D-4,2.65D-4,
+     /2.73D-4,2.80D-4,2.92D-4,3.08D-4,3.19D-4,3.27D-4,3.35D-4,3.40D-4,
+     /3.46D-4,3.54D-4,
+     /3.63D-4,3.70D-4,3.82D-4,3.98D-4,4.09D-4,4.17D-4,4.25D-4,4.31D-4,
+     /4.37D-4,4.45D-4/
+C SULFUR L1 SHELL
+      DATA XL1SH/230.9,235.3,242.1,249.0,256.1,263.5,271.0,278.8,286.8,
+     /295.0,
+     /303.5,321.2,339.9,370.1,403.1,439.0,478.1,520.8,567.3,618.0,
+     /692.8,754.8,822.5,896.2,976.6,1095.,1193.,1301.,1418.,1545.,
+     /1733.,2000.,2517.,3078.,3553.,4102.,4602.,5163.,6136.,7291.,
+     /8419.,1.00D4,1.19D4,1.41D4,1.63D4,1.83D4,2.05D4,2.51D4,3.07D4,
+     /3.55D4,
+     /4.10D4,4.60D4,5.16D4,5.62D4,6.49D4,7.72D4,8.91D4,1.00D5,1.26D5,
+     /1.54D5,
+     /2.05D5,2.51D5,3.07D5,3.55D5,4.10D5,5.01D5,6.13D5,7.29D5,8.66D5,
+     /1.00D6,
+     /1.26D6,1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,
+     /1.00D7,
+     /1.26D7,1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,
+     /1.00D8,
+     /1.26D8,1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,
+     /1.00D9/
+      DATA YL1SH/0.00,1.83D-4,4.44D-4,6.95D-4,9.35D-4,1.17D-3,1.39D-3,
+     /1.60D-3,1.81D-3,2.00D-3,
+     /2.19D-3,2.54D-3,2.87D-3,3.30D-3,3.68D-3,4.00D-3,4.26D-3,4.48D-3,
+     /4.65D-3,4.77D-3,
+     /4.87D-3,4.89D-3,4.89D-3,4.85D-3,4.78D-3,4.66D-3,4.54D-3,4.41D-3,
+     /4.26D-3,4.11D-3,
+     /3.89D-3,3.60D-3,3.15D-3,2.77D-3,2.52D-3,2.28D-3,2.11D-3,1.94D-3,
+     /1.71D-3,1.50D-3,
+     /1.34D-3,1.18D-3,1.03D-3,8.97D-4,8.00D-4,7.31D-4,6.67D-4,5.69D-4,
+     /4.86D-4,4.34D-4,
+     /3.89D-4,3.56D-4,3.26D-4,3.06D-4,2.75D-4,2.44D-4,2.20D-4,2.04D-4,
+     /1.76D-4,1.56D-4,
+     /1.34D-4,1.22D-4,1.12D-4,1.06D-4,1.02D-4,9.63D-5,9.24D-5,9.00D-5,
+     /8.84D-5,8.76D-5,
+     /8.71D-5,8.72D-5,8.85D-5,9.16D-5,9.44D-5,9.66D-5,9.89D-5,1.01D-4,
+     /1.03D-4,1.05D-4,
+     /1.08D-4,1.10D-4,1.14D-4,1.20D-4,1.24D-4,1.27D-4,1.29D-4,1.31D-4,
+     /1.33D-4,1.36D-4,
+     /1.39D-4,1.42D-4,1.46D-4,1.52D-4,1.56D-4,1.59D-4,1.61D-4,1.63D-4,
+     /1.65D-4,1.68D-4/
+C SULFUR K SHELL
+      DATA XKSHS/2472.,2528.,2601.,2677.,2755.,2834.,2917.,3001.,3089.,
+     /3178.,
+     /3271.,3366.,3464.,3564.,3668.,3774.,3884.,3997.,4113.,4233.,
+     /4356.,4483.,4748.,5028.,5325.,5804.,6510.,7515.,8430.,9457.,
+     /11240.,1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,6.13D4,7.08D4,
+     /8.18D4,
+     /1.00D5,1.50D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,8.18D5,
+     /1.00D6,
+     /1.26D6,1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,
+     /1.00D7,
+     /1.26D7,1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,
+     /1.00D8,
+     /1.26D8,1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,
+     /1.00D9/
+      DATA YKSHS/0.0,2.47D-6,5.51D-6,8.42D-6,1.12D-5,1.39D-5,1.65D-5,
+     /1.89D-5,2.13D-5,2.35D-5,
+     /2.56D-5,2.77D-5,2.96D-5,3.15D-5,3.32D-5,3.49D-5,3.65D-5,3.80D-5,
+     /3.94D-5,4.08D-5,
+     /4.21D-5,4.33D-5,4.55D-5,4.74D-5,4.91D-5,5.11D-5,5.31D-5,5.44D-5,
+     /5.46D-5,5.42D-5,
+     /5.27D-5,4.84D-5,4.23D-5,3.82D-5,3.43D-5,2.91D-5,2.59D-5,2.30D-5,
+     /2.11D-5,1.94D-5,
+     /1.73D-5,1.39D-5,1.20D-5,1.04D-5,9.49D-6,9.11D-6,8.84D-6,8.71D-6,
+     /8.63D-6,8.60D-6,
+     /8.65D-6,8.74D-6,9.01D-6,9.50D-6,9.91D-6,1.02D-5,1.06D-5,1.08D-5,
+     /1.10D-5,1.14D-5,
+     /1.18D-5,1.21D-5,1.27D-5,1.34D-5,1.40D-5,1.44D-5,1.47D-5,1.50D-5,
+     /1.53D-5,1.57D-5,
+     /1.61D-5,1.64D-5,1.70D-5,1.78D-5,1.83D-5,1.88D-5,1.91D-5,1.94D-5,
+     /1.97D-5,2.00D-5/
+C FLUORINE K-SHELL IONISATION X-SECTION
+      DATA XKSHF/685.4,705.,726.,747.,770.,792.,816.,840.,865.,890.,
+     /916.,944.,1000.,1090.,1188.,1296.,1496.,1679.,1884.,2054.,
+     /2238.,2512.,2985.,3758.,4467.,5158.,5957.,7079.,1.0D4,1.26D4,
+     /1.50D4,2.05D4,2.51D4,3.07D4,4.10D4,5.01D4,6.13D4,7.08D4,8.18D4,
+     /1.0D5,
+     /1.50D5,2.05D5,2.99D5,4.10D5,5.01D5,6.13D5,7.08D5,8.18D5,1.00D6,
+     /1.26D6,
+     /1.50D6,2.05D6,3.07D6,4.10D6,5.01D6,6.13D6,7.08D6,8.18D6,1.00D7,
+     /1.26D7,
+     /1.50D7,2.05D7,3.07D7,4.10D7,5.01D7,6.13D7,7.08D7,8.18D7,1.00D8,
+     /1.26D8,
+     /1.50D8,2.05D8,3.07D8,4.10D8,5.01D8,6.13D8,7.08D8,8.18D8,1.00D9/
+      DATA YKSHF/0.00,3.39D-5,6.77D-5,1.00D-4,1.32D-4,1.63D-4,1.92D-4,
+     /2.21D-4,2.48D-4,2.75D-4,
+     /3.00D-4,3.25D-4,3.71D-4,4.33D-4,4.87D-4,5.34D-4,5.96D-4,6.32D-4,
+     /6.57D-4,6.69D-4,
+     /6.77D-4,6.79D-4,6.68D-4,6.33D-4,5.97D-4,5.62D-4,5.25D-4,4.80D-4,
+     /3.93D-4,3.41D-4,
+     /3.04D-4,2.45D-4,2.13D-4,1.85D-4,1.51D-4,1.31D-4,1.14D-4,1.04D-4,
+     /9.46D-5,8.32D-5,
+     /6.58D-5,5.60D-5,4.80D-5,4.35D-5,4.15D-5,4.00D-5,3.93D-5,3.89D-5,
+     /3.85D-5,3.86D-5,
+     /3.89D-5,3.98D-5,4.17D-5,4.33D-5,4.45D-5,4.58D-5,4.68D-5,4.78D-5,
+     /4.92D-5,5.09D-5,
+     /5.21D-5,5.45D-5,5.75D-5,5.96D-5,6.12D-5,6.27D-5,6.38D-5,6.49D-5,
+     /6.64D-5,6.82D-5,
+     /6.95D-5,7.19D-5,7.50D-5,7.72D-5,7.88D-5,8.03D-5,8.14D-5,8.25D-5,
+     /8.40D-5/
+C ATTACHMENT   (ALL DATA AT 300 KELVIN)
+      DATA XATT/1.D-6,.00002,.00005,.00007,.0001,.0002,.0003,.0004,
+     /.0005,.0006,
+     /.0007,.0008,.0009,.001,.002,.003,.004,.005,.006,.007,
+     /.008,.009,.010,.015,.020,.025,.030,.035,.040,.045,
+     /.050,.055,.060,.065,.070,.075,.080,.085,.090,.095,
+     /.100,.105,.110,.115,.120,.125,.130,.140,.150,.160,
+     /.170,.180,.190,.200,.220,.240,.260,.280,.300,.350,
+     /.400,.450,.500,.550,.600,.650,.700,.750,.800,.850,
+     /.900,.950,1.00,1.10,1.20,1.30,1.40,1.50,1.60,1.70,
+     /1.80,1.90,2.00,2.25,2.50,2.75,3.00,3.50,4.00,4.50,
+     /5.00,5.50,6.00,6.50,7.00,7.50,8.00,8.50,9.00,9.50,
+     /10.0,10.25,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,
+     /14.5,15.0,15.5/
+C ATTACHMENT   SF6-                                BRAUN ET AL 2009
+      DATA YAT1/19845.,19845.,12346.,10350.,8571.,5906.,4728.,4028.,
+     /3551.,3200.,
+     /2927.,2708.,2527.,2374.,1540.,1196.,989.6,865.4,762.2,683.8,
+     /612.8,564.5,534.6,380.8,308.3,258.8,219.7,191.3,173.2,153.9,
+     /130.6,121.5,108.1,103.8,89.56,91.17,83.17,80.07,72.08,73.68,
+     /50.47,39.94,34.78,31.24,31.00,25.33,21.04,17.71,14.66,11.74,
+     /9.21,7.31,5.59,3.99,1.96,1.00,.526,.266,.126,.036,
+     /.029,.017,.013,50*0.0/
+C ATTACHMENT DISSOCIATIVE     SF5-                 BRAUN ET AL 2009 
+      DATA YAT2/14*0.0,.477,.453,.443,.413,.395,.377,
+     /.366,.349,.342,.292,.259,.232,.220,.203,.192,.179,
+     /.171,.161,.155,.148,.144,.142,.134,.132,.130,.123,
+     /.113,.109,.103,.101,.096,.093,.093,.096,.099,.100,
+     /.110,.115,.123,.123,.134,.164,.198,.232,.265,.389,
+     /.513,.676,.743,.810,.710,.632,.479,.394,.299,.247,
+     /.190,.157,.130,.0801,.0573,.0397,.0283,.0189,.0150,.0103,
+     /.0069,.0049,31*0.0/
+C ATTACHMENT  DISSOCIATIVE   SF4-     J.PHYS.CHEM.REF.DATA 29(2000)267
+C UNITS 10**-18
+      DATA YAT3/87*0.0,.0084,.0350,.144,
+     /.457,.528,.394,.251,.130,.046,.0084,.0032,15*0.0/
+C ATTACHMENT DISSOCIATIVE    SF3-     J.PHYS.CHEM.REF.DATA 29(2000)267
+C UNITS 10**-18
+      DATA YAT4/96*0.0,.0014,.0046,.015,.033,
+     /.051,.0577,.064,.075,.071,.049,.026,.011,.0031,.0008,
+     /3*0.0/
+C ATTACHMENT DISSOCIATIVE   SF2-      J.PHYS.CHEM.REF.DATA 29(2000)267
+C UNITS 10**-18
+      DATA YAT5/100*0.0,
+     /0.00,.00019,.00037,.0014,.0042,.0076,.0106,.0087,.0044,.0017,
+     /.00068,.00028,0.00/
+C ATTACHMENT DISSOCIATIVE    F2-      J.PHYS.CHEM.REF.DATA 29(2000)267
+C UNITS 10**-18
+      DATA YAT6/77*0.0,.003,.004,.005,
+     /.006,.007,.008,.0075,.006,.0042,.0026,.0026,.00265,.0707,
+     /.0489,.0155,.0038,.0019,.0015,.0015,.0018,.0031,.0065,.0104,
+     /.0200,.0308,.0503,.0910,.0954,.0615,.0274,.0111,.0050,.0032,
+     /.0018,.0012,0.00/
+C ATTACHMENT DISSOCIATIVE    F-       J.PHYS.CHEM.REF.DATA 29(2000)267
+C UNITS 10**-18
+      DATA YAT7/80*0.0,
+     /0.00,.010,.022,.075,.149,.162,.098,.171,.856,2.69,
+     /4.63,4.39,2.78,1.37,.749,.615,.977,1.42,1.57,1.39,
+     /1.13,1.14,1.31,2.10,2.35,1.95,1.22,.629,.400,.340,
+     /.310,.300,0.0/
+C DISSOCIATION TRIPLET + SINGLETS ( SINGLETS GIVEN ANALYTICALLY)
+C
+C TRIPLETS  SCALED AT HIGH ENERGY BY 1/E**2
+      DATA XTR1/9.60,10.6,12.0,13.0,14.0,15.0,17.0,19.0,22.0,25.0,
+     /29.0,32.0/
+      DATA YTR1/0.00,.009,.030,.045,.050,.054,.059,.060,.054,.045,
+     /.033,.026/
+      DATA XTR2/10.9,12.4,14.0,15.0,16.0,18.0,20.0,23.0,26.0,30.0,
+     /33.0/
+      DATA YTR2/0.00,.053,.097,.111,.119,.130,.132,.119,.099,.073,
+     /.057/
+      DATA XTR3/14.4,15.4,17.0,18.0,20.0,22.0,25.0,28.0,32.0,35.0,
+     /38.0/
+      DATA YTR3/0.00,.110,.227,.265,.299,.315,.315,.299,.236,.183,
+     /.135/
+C BREMSSTRAHLUNG X-SECTION WITH CUT UNITS 10**-24
+      DATA Z16T/1299.,871.,480.,289.,167.,79.5,46.9,29.4,19.6,17.5,
+     /17.5,17.8,18.2,18.5,18.6,18.9,19.1,19.3,19.5,19.7,
+     /19.8,19.9,20.0,20.0,20.1/
+      DATA Z9T/573.,358.,179.,101.6,57.3,26.5,15.4,9.63,6.52,5.92,
+     /6.01,6.18,6.35,6.43,6.52,6.65,6.75,6.87,6.95,7.02,
+     /7.07,7.10,7.12,7.13,7.14/
+      DATA EBRM/1000.,2000.,5000.,1.E4,2.E4,5.E4,1.E5,2.E5,5.E5,1.E6,
+     /2.E6,3.E6,4.E6,5.E6,6.E6,8.E6,1.E7,1.5E7,2.E7,3.E7,
+     /4.E7,5.E7,6.E7,8.E7,1.E8/
+C-----------------------------------------------------------------------
+C
+C-----------------------------------------------------------------------
+C     NANISO=0
+      IF(NANISO.EQ.0) THEN
+       NAME=' SF6 2014    ISOTROPIC  '
+      ELSE
+       NAME=' SF6 2014  ANISOTROPIC  '
+      ENDIF
+C-----------------------------------------------------------------------
+C BORN BETHE CONSTANTS
+      A0=0.52917720859D-08
+      RY=13.60569193
+      CONST=1.873884D-20
+      EMASS2=1021997.804
+      API=DACOS(-1.0D0)
+      BBCONST=16.0D0*API*A0*A0*RY*RY/EMASS2
+C
+C BORN BETHE VALUES FOR IONISATION
+      AM2=13.894
+      C=140.7
+C AMPLITUDE NORMALISATION FOR TRIPLETS
+      AMPTR1=1.0
+      AMPTR2=1.0
+      AMPTR3=1.0 
+C  DIPOLE CONSTANT FOR VIBRATIONS V4 AND V3 
+      V4DCONST=0.236
+      V3DCONST=2.83
+C  ARRAY SIZE
+      NASIZE=4000
+C 
+      NION=12
+      NIN=35
+C
+      NBREM=25
+      DO 8 J=1,NIN
+      IZBR(J)=0
+    8 CONTINUE
+      IZBR(36)=16
+      IZBR(37)=9
+C
       DO 1 J=1,6
-    1 KEL(J)=0
-      DO 2 J=1,NIN
-    2 KIN(J)=0     
+    1 KEL(J)=NANISO
+C SUPERELASTIC, V4,V1 AND V3 SET TO ISOTROPIC
+C NB SET TO 2 IN DEGRAD
+      KIN(1)=0
+      KIN(3)=0
+      KIN(5)=0
+C INELASTIC V1,2V1,3V1,4V1 AND 5V1 SET TO STANDARD ANG DISTRIBUTION
+      KIN(4)=2
+      KIN(7)=2
+      KIN(8)=2
+      KIN(9)=2
+      KIN(10)=2
+C V4 AND V3 VIBRATIONS ANISOTROPIC ( CAPITELLI-LONGO)
+C NB SET TO 2 IN DEGRAD
+      KIN(2)=1
+      KIN(6)=1
+C 
+C ANGULAR DISTRIBUTION FOR DISSOCIATIVE EXCITATION IS OKHRIMOVSKYY TYPE 
+      DO 2 J=11,NIN
+    2 KIN(J)=2
+C
+C  RAT IS MOMENTUM TRANSFER TO TOTAL RATIO FOR VIBRATIONS IN THE
+C  RESONANCE AND THRESHOLD REGION  FOR THE VIBRATION V3.     
+C  USED DIPOLE ANGULAR DISTRIBUTION FOR V3 AND V4 NEAR THRESHOLD.
+      RAT=1.0  
+C                                                         
+      NDATA=159 
+      N1V1=13
+      N2V1=12
+      N3V1=7
+      N4V1=7
+      N5V1=5
+      N1V3=17                                                      
+      NIOND=55
+      NIONL3=100
+      NIONL2=100
+      NIONL1=100
+      NKSHS=80
+      NKSHF=79                                                        
+      NATT=113    
+      NTRP1=12
+      NTRP2=11
+      NTRP3=11                                                    
+C VIBRATIONAL DEGENERACY
+      DEGV4=3.0
+      DEGV1=1.0
+      DEGV3=3.0
+C
       E(1)=0.0                                                          
-      E(2)=2.0D0*EMASS/(146.05642*AMU)                                  
-      E(3)=15.8                                                         
-      E(4)=0.0                                                          
-      E(5)=0.0                                                          
+      E(2)=2.0*EMASS/(146.0554192*AMU)                                
+      E(3)=15.67                             
+      E(4)=0.0                                              
+      E(5)=0.0                           
       E(6)=0.0 
-      EOBY(1)=15.8                                                      
-      EIN(1)=0.095
-      EIN(2)=9.80 
-      SCRPT(1)='                              '
-      SCRPT(2)=' ELASTIC       SF6            '
-      SCRPT(3)=' IONISATION    ELOSS= 15.8    '
-      SCRPT(4)=' ATTACHMENT                   '
-      SCRPT(5)='                              '
-      SCRPT(6)='                              '
-      SCRPT(7)=' VIB           ELOSS=  0.095  '
-      SCRPT(8)=' EXC           ELOSS=  9.80   '
-      EN=-ESTEP/2.0                                      
-      DO 9000 I=1,NSTEP            
-      EN=EN+ESTEP
-      IF(EN.EQ.0.0D0) THEN
-       BTA=-5.0
+C 
+      EION(1)=E(3)  
+      EION(2)=18.5
+      EION(3)=18.8
+      EION(4)=27.0
+      EION(5)=31.0
+      EION(6)=37.0
+      EION(7)=46.5
+      EION(8)=164.16
+      EION(9)=165.36
+      EION(10)=230.9
+      EION(11)=2472.0
+      EION(12)=685.4         
+C OPAL BEATY
+      EOBY(1)=EION(1)*0.85
+      EOBY(2)=EION(2)*0.85
+      EOBY(3)=EION(3)*0.85
+      EOBY(4)=EION(4)*0.85
+      EOBY(5)=EION(5)*0.85
+      EOBY(6)=EION(6)*0.85
+      EOBY(7)=EION(7)*0.85
+      EOBY(8)=EION(8)*1.0
+      EOBY(9)=EION(9)*1.0
+      EOBY(10)=EION(10)*1.0
+      EOBY(11)=EION(11)*1.0
+      EOBY(12)=EION(12)*1.0
+C
+C FLUORESCENCE DATA
+      DO 22 NK=1,6 
+      NC0(NK)=0
+      EC0(NK)=0.0
+      WKLM(NK)=0.0
+      EFL(NK)=0.0
+      NG1(NK)=0
+      EG1(NK)=0.0
+      NG2(NK)=0
+      EG2(NK)=0.0
+      LEGAS(NK)=0
+      ISHELL(NK)=0
+   22 CONTINUE
+C IONISATION TO 2+ CHARGE STATES
+      NC0(7)=1
+      EC0(7)=1.0
+      WKLM(7)=0.0
+      EFL(7)=0.0
+      NG1(7)=0
+      EG1(7)=0.0
+      NG2(7)=0
+      EG2(7)=0.0
+      LEGAS(7)=0
+      ISHELL(7)=0
+C SULFUR L3 SHELL
+      NC0(8)=2
+      EC0(8)=138.
+      WKLM(8)=0.00093
+      EFL(8)=150.
+      NG1(8)=1
+      EG1(8)=138.
+      NG2(8)=1
+      EG2(8)=5.
+      LEGAS(8)=1
+      ISHELL(8)=4
+C SULFUR L2 SHELL
+      NC0(9)=2
+      EC0(9)=133.
+      WKLM(9)=0.00093
+      EFL(9)=150.
+      NG1(9)=1
+      EG1(9)=133.
+      NG2(9)=1
+      EG2(9)=5.0
+      LEGAS(9)=1
+      ISHELL(9)=3
+C SULFUR L1 SHELL
+      NC0(10)=2
+      EC0(10)=170.
+      WKLM(10)=0.00093
+      EFL(10)=215.
+      NG1(10)=2
+      EG1(10)=170.
+      NG2(10)=1
+      EG2(10)=5.0
+      LEGAS(10)=1
+      ISHELL(10)=2
+C SULFUR K  SHELL
+      NC0(11)=4
+      EC0(11)=2353.
+      WKLM(11)=0.0804
+      EFL(11)=2308.
+      NG1(11)=3
+      EG1(11)=2220.
+      NG2(11)=2
+      EG2(11)=90.0
+      LEGAS(11)=1
+      ISHELL(11)=1
+C FLUORINE K SHELL
+      NC0(12)=3
+      EC0(12)=625.2
+      WKLM(12)=0.010
+      EFL(12)=668.
+      NG1(12)=2
+      EG1(12)=625.2
+      NG2(12)=1
+      EG2(12)=5.0
+      LEGAS(12)=2  
+      ISHELL(12)=1
+C OFFSET ENERGY FOR IONISATION ELECTRON ANGULAR DISTRIBUTION
+      DO 776 J=1,NION
+      DO 777 I=1,NASIZE
+      IF(EG(I).GT.EION(J)) THEN
+       IOFFION(J)=I-1
+       GO TO 776
+      ENDIF
+  777 CONTINUE
+  776 CONTINUE
+C
+      EIN(1)=-0.076253
+      EIN(2)=0.076253
+      EIN(3)=-0.096032  
+      EIN(4)=0.096032 
+      EIN(5)=-0.11754  
+      EIN(6)=0.11754  
+      EIN(7)=0.192064  
+      EIN(8)=0.288096 
+      EIN(9)=0.384128
+      EIN(10)=0.48016
+      EIN(11)=9.60 
+      EIN(12)=10.0                                               
+      EIN(13)=10.5
+      EIN(14)=10.9                                                      
+      EIN(15)=11.0
+      EIN(16)=11.5
+      EIN(17)=12.0
+      EIN(18)=12.5
+      EIN(19)=13.0
+      EIN(20)=13.5
+      EIN(21)=14.0
+      EIN(22)=14.4
+      EIN(23)=14.5
+      EIN(24)=15.0
+      EIN(25)=15.5
+      EIN(26)=16.0 
+      EIN(27)=16.5  
+      EIN(28)=17.0
+      EIN(29)=17.5
+      EIN(30)=18.0
+      EIN(31)=18.5
+      EIN(32)=19.0
+      EIN(33)=19.5
+      EIN(34)=20.0
+      EIN(35)=23.0
+      EIN(36)=0.0
+      EIN(37)=0.0
+C OFFSET ENERGY FOR EXCITATION LEVELS ANGULAR DISTRIBUTION
+      DO 3 NL=1,35
+      DO 651 I=1,NASIZE
+      IF(EG(I).GT.DABS(EIN(NL))) THEN
+       IOFFN(NL)=I-1
        GO TO 3
-      ENDIF 
-      BTA=DLOG10(EN)
-   3  BTA2=BTA*BTA
-      BTA3=BTA2*BTA
-      EN2=EN*EN
-      EN3=EN2*EN
-      Q(2,I)=0.0D0
-      IF(EN.EQ.0.0) THEN
-       Q(2,I)=20.0
-       GO TO 10
       ENDIF
-      IF(EN.LE.0.255) THEN
-       Q(2,I)=10.0**(1.055-1.033*BTA-0.1632*BTA2+0.0126*BTA3)          
-       GO TO 10 
-      ENDIF 
-      IF(EN.LE.0.92) THEN
-       Q(2,I)=10.0**(1.041-0.189*BTA+2.091*BTA2+1.348*BTA3)       
-       GO TO 10
+  651 CONTINUE
+    3 CONTINUE
+C***********************************************************************
+C ENTER PENNING TRANSFER FRACTION FOR EACH LEVEL 
+C LEVELS ARE DISSOCIATIVE SO DO NOT  GIVE PENNING TRANSFERS
+      DO 4 K=1,35
+      DO 4 L=1,3
+    4 PENFRA(L,K)=0.0
+      IF(IPEN.EQ.0) GO TO 6
+      DO 5 KDUM=10,14
+      IF(PENFRA(1,KDUM).EQ.0.0) GO TO 5
+      WRITE(6,999) NAME,EIN(KDUM),PENFRA(1,KDUM),PENFRA(2,KDUM),
+     /PENFRA(3,KDUM)
+  999 FORMAT(' GAS = ',A15,' ENERGY LEVEL = ',F7.4,' EV.',/,' PENNING PR
+     /OBABILITY =',F5.3,' ABS.LENGTH =',F7.2,' DECAY TIME =',F7.1,/) 
+    5 CONTINUE
+C***********************************************************************
+C
+    6 SCRPT(1)='                                                  '
+      SCRPT(2)=' ELASTIC   ANISOTROPIC      SF6                   '
+      IF(NANISO.EQ.0) THEN
+      SCRPT(2)=' ELASTIC     ISOTROPIC      SF6                   '
       ENDIF
-      IF(EN.LE.1.90) THEN
-       Q(2,I)=10.0**(1.037-0.3741*BTA+1.193*BTA2+0.5179*BTA3)       
-       GO TO 10
+      SCRPT(3)=' IONISATION  SF5 +                 ELOSS=   15.67 '
+      SCRPT(4)=' IONISATION  SF4 +                 ELOSS=   18.5  '
+      SCRPT(5)=' IONISATION  SF3 +                 ELOSS=   18.8  '
+      SCRPT(6)=' IONISATION  SF2 +                 ELOSS=   27.0  '
+      SCRPT(7)=' IONISATION  SF  +                 ELOSS=   31.0  '
+      SCRPT(8)=' IONISATION  SUM OF: S + AND F +   ELOSS=   37.0  '
+      SCRPT(9)=' IONISATION  SUM OF (SF3 SF2 SF)2+ ELOSS=   46.5  '
+      SCRPT(10)=' IONISATION SULFUR L3 SHELL        ELOSS=  164.16 '
+      SCRPT(11)=' IONISATION SULFUR L2 SHELL        ELOSS=  165.36 '
+      SCRPT(12)=' IONISATION SULFUR L1 SHELL        ELOSS=  230.9  '
+      SCRPT(13)=' IONISATION SULFUR  K SHELL        ELOSS= 2472.0  '
+      SCRPT(14)=' IONISATION FLUORINE K SHELL       ELOSS=  685.4  '
+      SCRPT(15)=' ATTACHMENT    (VALID FOR T=300KELVIN)            '
+      SCRPT(16)='                                                  '
+      SCRPT(17)='                                                  '
+      SCRPT(18)=' VIBRATION V4 SUPERELASTIC         ELOSS=-0.076253' 
+      SCRPT(19)=' VIBRATION V4 ANISOTROPIC          ELOSS= 0.076253'
+      SCRPT(20)=' VIBRATION V1 SUPERELASTIC         ELOSS=-0.096032'
+      SCRPT(21)=' VIBRATION V1 ISOTROPIC            ELOSS= 0.096032'
+      SCRPT(22)=' VIBRATION V3 SUPERELASTIC         ELOSS=-0.11754 '
+      SCRPT(23)=' VIBRATION V3 ANISOTROPIC          ELOSS= 0.11754 '
+      SCRPT(24)=' VIBRATION 2V1                     ELOSS= 0.192064'
+      SCRPT(25)=' VIBRATION 3V1                     ELOSS= 0.288096'
+      SCRPT(26)=' VIBRATION 4V1                     ELOSS= 0.384128'
+      SCRPT(27)=' VIBRATION 5V1 + HIGHER HARMONICS  ELOSS= 0.48016 '
+      SCRPT(28)=' EXC. TRIPLET  DISSOCIATION        ELOSS=  9.6    '
+      SCRPT(29)=' EXC. SINGLET  DISSOC.   F=0.0443  ELOSS= 10.0    '
+      SCRPT(30)=' EXC. SINGLET  DISSOC.   F=0.0642  ELOSS= 10.5    '  
+      SCRPT(31)=' EXC. TRIPLET  DISSOCIATION        ELOSS= 10.9    '
+      SCRPT(32)=' EXC. SINGLET  DISSOC.   F=0.1839  ELOSS= 11.0    '
+      SCRPT(33)=' EXC. SINGLET  DISSOC.   F=0.1073  ELOSS= 11.5    '
+      SCRPT(34)=' EXC. SINGLET  DISSOC.   F=0.0880  ELOSS= 12.0    '
+      SCRPT(35)=' EXC. SINGLET  DISSOC.   F=0.0304  ELOSS= 12.5    '
+      SCRPT(36)=' EXC. ION PAIR F- + SF5+ F=0.0648  ELOSS= 13.0    '
+      SCRPT(37)=' EXC. SINGLET  DISSOC.   F=0.1067  ELOSS= 13.5    '
+      SCRPT(38)=' EXC. SINGLET  DISSOC.   F=0.1047  ELOSS= 14.0    '
+      SCRPT(39)=' EXC. TRIPLET  DISSOCIATION        ELOSS= 14.4    '
+      SCRPT(40)=' EXC. SINGLET  DISSOC.   F=0.1211  ELOSS= 14.5    '
+      SCRPT(41)=' EXC. SINGLET  DISSOC.   F=0.2225  ELOSS= 15.0    '
+      SCRPT(42)=' EXC. SINGLET  DISSOC.   F=0.2731  ELOSS= 15.5    '
+      SCRPT(43)=' EXC. SINGLET  DISSOC.   F=0.1514  ELOSS= 16.0    '
+      SCRPT(44)=' EXC. SINGLET  DISSOC.   F=0.1831  ELOSS= 16.5    '
+      SCRPT(45)=' EXC. SINGLET  DISSOC.   F=0.1678  ELOSS= 17.0    '
+      SCRPT(46)=' EXC. SINGLET  DISSOC.   F=0.1098  ELOSS= 17.5    '
+      SCRPT(47)=' EXC. SINGLET  DISSOC.   F=0.0623  ELOSS= 18.0    '
+      SCRPT(48)=' EXC. SINGLET  DISSOC.   F=0.0361  ELOSS= 18.5    '
+      SCRPT(49)=' EXC. SINGLET  DISSOC.   F=0.0107  ELOSS= 19.0    '
+      SCRPT(50)=' EXC. SINGLET  DISSOC.   F=0.0129  ELOSS= 19.5    '
+      SCRPT(51)=' EXC. SINGLET  DISSOC.   F=0.0053  ELOSS= 20.0    '
+      SCRPT(52)=' EXC. SINGLET  DISSOC.   F=0.0290  ELOSS= 23.0    '
+      SCRPT(53)=' BREMSSTRAHLUNG FROM SULFUR ATOM                  '
+      SCRPT(54)=' BREMSSTRAHLUNG FROM FLUORINE ATOM                '
+C CALC LEVEL POPULATIONS
+      APOPV4=DEGV4*DEXP(EIN(1)/AKT)
+      APOPV1=DEGV1*DEXP(EIN(3)/AKT)
+      APOPV3=DEGV3*DEXP(EIN(5)/AKT)
+      APOPGS=1.0
+      APOPSUM=APOPGS+APOPV4+APOPV1+APOPV3
+      APOPGS=1.0/APOPSUM
+      APOPV4=APOPV4/APOPSUM
+      APOPV1=APOPV1/APOPSUM
+      APOPV3=APOPV3/APOPSUM
+C  RENORMALISE GROUND STATE TO ALLOW FOR EXCITATION X-SEC 
+C  FROM EXCITED VIBRATIONAL STATE 
+      APOPGS=1.0
+C
+C     EN=-ESTEP/2.0  
+      DO 1000 I=1,NSTEP 
+      EN=EG(I)                                             
+C     EN=EN+ESTEP   
+      GAMMA1=(EMASS2+2.0D0*EN)/EMASS2
+      GAMMA2=GAMMA1*GAMMA1
+      BETA=DSQRT(1.0D0-1.0D0/GAMMA2)
+      BETA2=BETA*BETA
+C USE LOG INTERPOLATION FOR ELASTIC      
+      IF(EN.LE.XEN(2)) THEN 
+       QELA=1434.D-16
+       QMOM=1434.D-16
+       PQ2=0.0
+       GO TO 30 
+      ENDIF                                                    
+      DO 10 J=2,NDATA 
+      IF(EN.LE.XEN(J)) GO TO 11                                        
+   10 CONTINUE                                                          
+      J=NDATA                                                           
+   11 YXJ=DLOG(YELT(J))
+      YXJ1=DLOG(YELT(J-1))
+      XNJ=DLOG(XEN(J))
+      XNJ1=DLOG(XEN(J-1))
+      A=(YXJ-YXJ1)/(XNJ-XNJ1)
+      B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)
+      QELA=DEXP(A*DLOG(EN)+B)*1.D-16
+      YXJ=DLOG(YELM(J))
+      YXJ1=DLOG(YELM(J-1))
+      A=(YXJ-YXJ1)/(XNJ-XNJ1)
+      B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)
+      QMOM=DEXP(A*DLOG(EN)+B)*1.D-16
+C 
+      YXJ=DLOG(YEPS(J))
+      YXJ1=DLOG(YEPS(J-1))
+      A=(YXJ-YXJ1)/(XNJ-XNJ1)
+      B=(XNJ1*YXJ-XNJ*YXJ1)/(XNJ1-XNJ)
+      PQ2=DEXP(A*DLOG(EN)+B)
+C  EPSILON =1-YEPS
+      PQ2=1.0D0-PQ2
+   30 CONTINUE
+      PQ1=0.5+(QELA-QMOM)/QELA
+      IF(NANISO.EQ.0) PEQEL(2,I)=0.5
+      IF(NANISO.EQ.1) PEQEL(2,I)=PQ1
+      IF(NANISO.EQ.2) PEQEL(2,I)=PQ2
+      Q(2,I)=QELA 
+      IF(NANISO.EQ.0) Q(2,I)=QMOM
+C IONISATION   SF5 +                    
+      QION(1,I)=0.0             
+      PEQION(1,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(1,I)=0.0                                   
+      IF(EN.LT.EION(1)) GO TO 44   
+      IF(EN.GT.XION(NIOND)) GO TO 42                                   
+      DO 40 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 41                                       
+   40 CONTINUE                                                          
+      J=NIOND                                                   
+   41 A=(YION(J)-YION(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YION(J)-XION(J)*YION(J-1))/(XION(J-1)-XION(J))       
+      QION(1,I)=(A*EN+B)*1.D-16
+      GO TO 43
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   42 X2=1.0D0/BETA2
+      X1=X2*DLOG(BETA2/(1.0D0-BETA2))-1.0D0
+      QION(1,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.5403
+   43 CONTINUE  
+C        
+      IF(EN.LE.(2.0*EION(1))) GO TO 44
+      PEQION(1,I)=PEQEL(2,(I-IOFFION(1)))
+C IONISATION SF4 +
+   44 QION(2,I)=0.0             
+      PEQION(2,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(2,I)=0.0                                   
+      IF(EN.LT.EION(2)) GO TO 54   
+      IF(EN.GT.XION(NIOND)) GO TO 52                                   
+      DO 50 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 51                                       
+   50 CONTINUE                                                          
+      J=NIOND                                                   
+   51 A=(YIN1(J)-YIN1(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN1(J)-XION(J)*YIN1(J-1))/(XION(J-1)-XION(J))       
+      QION(2,I)=(A*EN+B)*1.D-16
+      GO TO 53
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   52 QION(2,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0416
+   53 CONTINUE  
+C        
+      IF(EN.LE.(2.0*EION(2))) GO TO 54
+      PEQION(2,I)=PEQEL(2,(I-IOFFION(2)))
+C IONISATION SF3 +
+   54 QION(3,I)=0.0             
+      PEQION(3,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(3,I)=0.0                                   
+      IF(EN.LT.EION(3)) GO TO 64   
+      IF(EN.GT.XION(NIOND)) GO TO 62                                   
+      DO 60 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 61                                       
+   60 CONTINUE                                                          
+      J=NIOND                                                   
+   61 A=(YIN2(J)-YIN2(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN2(J)-XION(J)*YIN2(J-1))/(XION(J-1)-XION(J))       
+      QION(3,I)=(A*EN+B)*1.D-16
+      GO TO 63
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   62 QION(3,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.1470
+   63 CONTINUE  
+C        
+      IF(EN.LE.(2.0*EION(3))) GO TO 64
+      PEQION(3,I)=PEQEL(2,(I-IOFFION(3)))
+C IONISATION SF2 +
+   64 QION(4,I)=0.0             
+      PEQION(4,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(4,I)=0.0                                   
+      IF(EN.LT.EION(4)) GO TO 74   
+      IF(EN.GT.XION(NIOND)) GO TO 72                                   
+      DO 70 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 71                                       
+   70 CONTINUE                                                          
+      J=NIOND                                                   
+   71 A=(YIN3(J)-YIN3(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN3(J)-XION(J)*YIN3(J-1))/(XION(J-1)-XION(J))       
+      QION(4,I)=(A*EN+B)*1.D-16
+      GO TO 73
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   72 QION(4,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0321
+   73 CONTINUE  
+C        
+      IF(EN.LE.(2.0*EION(4))) GO TO 74
+      PEQION(4,I)=PEQEL(2,(I-IOFFION(4)))
+C IONISATION SF  +
+   74 QION(5,I)=0.0             
+      PEQION(5,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(5,I)=0.0                                   
+      IF(EN.LT.EION(5)) GO TO 84   
+      IF(EN.GT.XION(NIOND)) GO TO 82                                   
+      DO 80 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 81                                       
+   80 CONTINUE                                                          
+      J=NIOND                                                   
+   81 A=(YIN4(J)-YIN4(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN4(J)-XION(J)*YIN4(J-1))/(XION(J-1)-XION(J))       
+      QION(5,I)=(A*EN+B)*1.D-16
+      GO TO 83
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   82 QION(5,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0724
+   83 CONTINUE  
+C        
+      IF(EN.LE.(2.0*EION(5))) GO TO 84 
+      PEQION(5,I)=PEQEL(2,(I-IOFFION(5)))
+C IONISATION SUM OF S + AND F +
+   84 QION(6,I)=0.0             
+      PEQION(6,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(6,I)=0.0                                   
+      IF(EN.LT.EION(6)) GO TO 94   
+      IF(EN.GT.XION(NIOND)) GO TO 92                                   
+      DO 90 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 91                                       
+   90 CONTINUE                                                          
+      J=NIOND                                                   
+   91 A=(YIN5(J)-YIN5(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN5(J)-XION(J)*YIN5(J-1))/(XION(J-1)-XION(J))       
+      QION(6,I)=(A*EN+B)*1.D-16
+      A=(YIN6(J)-YIN6(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN6(J)-XION(J)*YIN6(J-1))/(XION(J-1)-XION(J))
+      QION(6,I)=QION(6,I)+(A*EN+B)*1.D-16
+      GO TO 93
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+   92 QION(6,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.1466
+   93 CONTINUE
+      IF(EN.LT.(2.0*EION(6))) GO TO 94
+      PEQION(6,I)=PEQEL(2,(I-IOFFION(6)))  
+C IONISATION SUM OF SF3,SF2 AND SF  ALL DOUBLE CHARGED
+   94 QION(7,I)=0.0             
+      PEQION(7,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(7,I)=0.0                                   
+      IF(EN.LT.EION(7)) GO TO 104   
+      IF(EN.GT.XION(NIOND)) GO TO 102                                   
+      DO 100 J=2,NIOND                                                  
+      IF(EN.LE.XION(J)) GO TO 101                                       
+  100 CONTINUE                                                          
+      J=NIOND                                                   
+  101 A=(YIN7(J)-YIN7(J-1))/(XION(J)-XION(J-1))                         
+      B=(XION(J-1)*YIN7(J)-XION(J)*YIN7(J-1))/(XION(J-1)-XION(J))       
+      QION(7,I)=(A*EN+B)*1.D-16
+      GO TO 103
+C USE BORN BETHE X-SECTION ABOVE XION(NIOND) EV
+  102 QION(7,I)=CONST*(AM2*(X1-DEN(I)/2.0)+C*X2)*0.0200
+  103 CONTINUE  
+      IF(EN.LT.(2.0*EION(7))) GO TO 104
+      PEQION(7,I)=PEQEL(2,(I-IOFFION(7)))
+C CALCULATE SULFUR L3 SHELL IONISATION
+  104 QION(8,I)=0.0
+      PEQION(8,I)=0.5
+      IF(NANISO.EQ.2) PEQION(8,I)=0.0
+      IF(EN.LT.EION(8)) GO TO 114
+      DO 110 J=2,NIONL3
+      IF(EN.LE.XL3SH(J)) GO TO 111
+  110 CONTINUE
+      J=NIONL3
+  111 A=(YL3SH(J)-YL3SH(J-1))/(XL3SH(J)-XL3SH(J-1))
+      B=(XL3SH(J-1)*YL3SH(J)-XL3SH(J)*YL3SH(J-1))/(XL3SH(J-1)-XL3SH(J))
+      QION(8,I)=(A*EN+B)*1.D-16
+      IF(EN.LE.(2.0*EION(8))) GO TO 114
+      PEQION(8,I)=PEQEL(2,(I-IOFFION(8)))
+C CALCULATE SULFUR L2 SHELL IONISATION  
+  114 QION(9,I)=0.0
+      PEQION(9,I)=0.5
+      IF(NANISO.EQ.2) PEQION(9,I)=0.0
+      IF(EN.LT.EION(9)) GO TO 124
+      DO 120 J=2,NIONL2
+      IF(EN.LE.XL2SH(J)) GO TO 121
+  120 CONTINUE
+      J=NIONL2
+  121 A=(YL2SH(J)-YL2SH(J-1))/(XL2SH(J)-XL2SH(J-1))
+      B=(XL2SH(J-1)*YL2SH(J)-XL2SH(J)*YL2SH(J-1))/(XL2SH(J-1)-XL2SH(J))
+      QION(9,I)=(A*EN+B)*1.D-16
+      IF(EN.LE.(2.0*EION(9))) GO TO 124
+      PEQION(9,I)=PEQEL(2,(I-IOFFION(9)))
+C CALCULATE SULFUR L1 SHELL IONISATION  
+  124 QION(10,I)=0.0
+      PEQION(10,I)=0.5
+      IF(NANISO.EQ.2) PEQION(10,I)=0.0
+      IF(EN.LT.EION(10)) GO TO 134
+      DO 130 J=2,NIONL1
+      IF(EN.LE.XL1SH(J)) GO TO 131
+  130 CONTINUE
+      J=NIONL1
+  131 A=(YL1SH(J)-YL1SH(J-1))/(XL1SH(J)-XL1SH(J-1))
+      B=(XL1SH(J-1)*YL1SH(J)-XL1SH(J)*YL1SH(J-1))/(XL1SH(J-1)-XL1SH(J))
+      QION(10,I)=(A*EN+B)*1.D-16
+      IF(EN.LE.(2.0*EION(10))) GO TO 134
+      PEQION(10,I)=PEQEL(2,(I-IOFFION(10)))
+C CALCULATE SULFUR K SHELL IONISATION  
+  134 QION(11,I)=0.0
+      PEQION(11,I)=0.5
+      IF(NANISO.EQ.2) PEQION(11,I)=0.0
+      IF(EN.LT.EION(11)) GO TO 144
+      DO 140 J=2,NKSHS
+      IF(EN.LE.XKSHS(J)) GO TO 141
+  140 CONTINUE
+      J=NKSHS
+  141 A=(YKSHS(J)-YKSHS(J-1))/(XKSHS(J)-XKSHS(J-1))
+      B=(XKSHS(J-1)*YKSHS(J)-XKSHS(J)*YKSHS(J-1))/(XKSHS(J-1)-XKSHS(J))
+      QION(11,I)=(A*EN+B)*1.D-16
+      IF(EN.LE.(2.0*EION(11))) GO TO 144
+      PEQION(11,I)=PEQEL(2,(I-IOFFION(11)))
+C CALCULATE FLUORINE K-SHELL IONISATION
+  144 QION(12,I)=0.0D0
+      PEQION(12,I)=0.5   
+      IF(NANISO.EQ.2) PEQION(12,I)=0.0                                  
+      IF(EN.LE.EION(12)) GO TO 154     
+      DO 150 J=2,NKSHF                                                  
+      IF(EN.LE.XKSHF(J)) GO TO 151                                      
+  150 CONTINUE                                                          
+      J=NKSHF                                                   
+  151 A=(YKSHF(J)-YKSHF(J-1))/(XKSHF(J)-XKSHF(J-1))                     
+      B=(XKSHF(J-1)*YKSHF(J)-XKSHF(J)*YKSHF(J-1))/(XKSHF(J-1)-XKSHF(J))
+      QION(12,I)=(A*EN+B)*1.D-16  
+      IF(EN.LE.(2.0*EION(12))) GO TO 154
+      PEQION(12,I)=PEQEL(2,(I-IOFFION(12)))
+C CORECTION TO IONISATION DUE TO SPLIT INTO K AND L SHELLS
+  154 SSUM=QION(8,I)+QION(9,I)+QION(10,I)+QION(11,I)+QION(12,I)
+      IF(SSUM.LE.0.0) GO TO 200
+      TOT=QION(1,I)+QION(2,I)+QION(3,I)+QION(4,I)+QION(5,I)+QION(6,I)+
+     /QION(7,I)
+      CRFAC=(TOT-SSUM)/TOT
+      DO 155 J=1,7
+      QION(J,I)=QION(J,I)*CRFAC
+  155 CONTINUE
+C                                      
+C ATTACHMENT (USE LOG INTERPOLATION FOR SF6- AND LINEAR FOR OTHER IONS)      
+  200 Q(4,I)=0.0                                                        
+      IF(EN.LE.0.0) GO TO 250                                       
+      IF(EN.GE.XATT(NATT)) GO TO 250                                   
+      DO 210 J=2,NATT                                                   
+      IF(EN.LE.XATT(J)) GO TO 220                                       
+  210 CONTINUE                                                          
+      J=NATT  
+  220 XNJ=DLOG(XATT(J))
+      XNJ1=DLOG(XATT(J-1))
+      XNL=XATT(J)
+      XNL1=XATT(J-1)
+C LOG
+      IF(YAT1(J).EQ.0.0.OR.YAT1(J-1).EQ.0.0) THEN
+       QAT1=0.0
+       GO TO 221
       ENDIF
-      IF(EN.LE.6.20) THEN
-       Q(2,I)=1.917+6.463*EN-1.027*EN2+0.05562*EN3         
-       GO TO 10
-      ENDIF
-      IF(EN.LE.28.2) THEN
-       Q(2,I)=12.53+0.7762*EN-0.0457*EN2+0.0006344*EN3        
-       GO TO 10
-      ENDIF
-      IF(EN.LE.51.0) THEN 
-       Q(2,I)=20.44-0.3373*EN+0.002436*EN2-0.000006189*EN3        
-       GO TO 10
-      ENDIF
-      IF(EN.LE.80.0) THEN
-       Q(2,I)=29.09-0.7115*EN+0.007397*EN2-0.00002485*EN3        
-       GO TO 10
-      ENDIF 
-      IF(EN.LE.188.0) THEN
-       Q(2,I)=10.51*DEXP(-0.00558*EN)
-       GO TO 10
-      ENDIF
-      IF(EN.LE.364.0) THEN
-       Q(2,I)=1289.0*EN**(-1.118)
-       GO TO 10 
-      ENDIF
-      Q(2,I)=4.881*DEXP(-0.002807*EN)    
-  10  Q(2,I)=Q(2,I)*1.D-16
-      Q(3,I)=0.0D0
-      IF(EN.LE.15.8) GO TO 20
-      IF(EN.LE.38.9) THEN
-       Q(3,I)=4.715-0.693*EN+0.0306*EN2-0.0003508*EN3
-       GO TO 20
-      ENDIF
-      IF(EN.LE.122.0) THEN
-       Q(3,I)=6.986-DEXP(2.07-0.0145*EN-0.00014*EN2)
-       GO TO 20
-      ENDIF
-      IF(EN.LE.201.0) THEN 
-       Q(3,I)=4.364+0.0323*EN-0.00009987*EN2
-       GO TO 20
-      ENDIF
-      Q(3,I)=DEXP(2.151-0.00115*EN) 
-  20  Q(3,I)=Q(3,I)*1.D-16
-      Q(4,I)=0.0D0
-      QA1=0.0D0
-      IF(EN.EQ.0.0) THEN
-       QA1=4000.0
-       GO TO 30
-      ENDIF
-      IF(EN.GT.25.0) THEN
-       QA5=0.0D0
-       GO TO 70     
-      ENDIF
-      IF(EN.LE.0.14) THEN
-       QA1=436.0*(0.0617*DSQRT(1.0/EN)*DEXP(-1.0*(EN/0.0045)**2)+
-     /DEXP(-EN/0.0559))   
-       GO TO 30
-      ENDIF
-      IF(EN.LE.0.9746) THEN
-       QA1=DEXP(6.477-20.91*EN+1.183*EN2) 
-      ENDIF
-  30  Q(4,I)=QA1*1.D-16
-      QA2=0.0D0
-      IF(EN.LE.0.312) THEN
-       QA2=2.85*EN+5.419*EN2+30.49*EN3
-       GO TO 40
-      ENDIF
-      IF(EN.LE.0.425) THEN
-       QA2=468.0*EN3-624.3*EN2+268.1*EN-34.75
-       GO TO 40
-      ENDIF
-      IF(EN.LE.1.05) THEN
-       QA2=8.751-22.15*EN+19.08*EN2-5.592*EN3
-       GO TO 40
-      ENDIF
-      QA2=DEXP(8.054-10.42*EN)
-  40  Q(4,I)=Q(4,I)+QA2*1.D-16
-      QA3=0.0D0
-      IF(EN.LT.2.19) GO TO 50
-      IF(EN.LE.2.90) THEN
-       QA3=-0.1069+0.08552*EN-0.01676*EN2
-       GO TO 50
-      ENDIF
-      IF(EN.LT.3.32) GO TO 50
-      IF(EN.LE.4.27) THEN
-       QA3=-0.2016+0.2133*EN-0.07421*EN2+0.00851*EN3
-       GO TO 50
-      ENDIF
-      IF(EN.LE.5.59) THEN
-       QA3=0.7777-0.6913*EN+0.1856*EN2-0.0153*EN3
-       GO TO 50
-      ENDIF
-      IF(EN.LE.7.95) THEN
-       QA3=0.9885-0.3216*EN+0.03252*EN2-0.0009533*EN3
-       GO TO 50
-      ENDIF
-      IF(EN.LE.9.73) THEN
-       QA3=-0.3504+0.08087*EN-0.0045*EN2
-       GO TO 50
-      ENDIF
-      IF(EN.LE.11.1) THEN
-       QA3=1.397-0.2724*EN+0.01335*EN2
-       GO TO 50
-      ENDIF
-      IF(EN.LE.11.8) THEN
-       QA3=-3.30+0.5801*EN-0.02533*EN2
-       GO TO 50
-      ENDIF
-      QA3=DEXP(10.91-1.264*EN)
-  50  Q(4,I)=Q(4,I)+QA3*1.D-16
-      QA4=0.0D0
-      IF(EN.LT.3.92) GO TO 60
-      IF(EN.LE.8.25) THEN
-       QA4=DEXP(-466.8+296.4*EN-71.09*EN2+7.573*EN3-0.3033*EN*EN3)
-      ENDIF
-  60  Q(4,I)=Q(4,I)+QA4*1.D-16
-      QA5=0.0D0
-      IF(EN.LE.1.50) GO TO 70
-      IF(EN.LE.3.27) THEN
-       QA5=DEXP(2.932*EN3-22.91*EN2+56.52*EN-53.37)
-       GO TO 70
-      ENDIF     
-      IF(EN.LE.7.45) THEN
-       QA5=DEXP(0.5554*EN3-9.613*EN2+52.832*EN-100.3)
-       GO TO 70
-      ENDIF
-      IF(EN.LE.10.6) THEN
-       QA5=DEXP(0.1216*EN2-1.035*EN-9.723)
-       GO TO 70
-      ENDIF
-      IF(EN.LE.11.7) THEN
-       QA5=DEXP(-1.114*EN2+25.12*EN-148.0)-0.00012
-       GO TO 70
-      ENDIF
-      QA5=DEXP(-0.9386*EN2+21.0*EN-123.9)             
-  70  Q(4,I)=Q(4,I)+QA5*1.D-16
-      Q(5,I)=0.0D0                           
-      Q(6,I)=0.0D0   
-C VIBRATIONAL SUM                                                         
-      QIN(1,I)=0.0D0                                                    
-      IF(EN.LE.EIN(1).OR.EN.GT.50.0) GO TO 400 
-      IF(EN.LE.0.247) THEN
-       QIN(1,I)=(14.06+4.425/EN-0.5472/EN2)*1.D-16 
-       GO TO 400
-      ENDIF 
-      IF(EN.LE.0.505) THEN
-       QIN(1,I)=(DEXP(11.19*EN3-13.91*EN2+4.663*EN+2.664))*1.D-16
-       GO TO 400
-      ENDIF
-      IF(EN.LE.1.03) THEN
-       QIN(1,I)=(DEXP(0.3166*EN2-1.341*EN+3.509))*1.D-16
-       GO TO 400
-      ENDIF
-      QIN(1,I)=(22.0*10.0**(-0.2645*EN))*1.D-16
-C EXCITATION                                            
-  400 QIN(2,I)=0.0D0
-      IF(EN.LE.EIN(2)) GO TO 500
-      IF(EN.LE.26.66) THEN
-       QIN(2,I)=(4.811*BTA-4.769)*1.D-16
-       GO TO 500
-      ENDIF
-      IF(EN.LE.29.3) THEN
-       QIN(2,I)=(3.643-0.204*EN+0.005477*EN2)*1.D-16
-       GO TO 500
-      ENDIF
-      IF(EN.LE.56.6) THEN
-       QIN(2,I)=(0.01382*EN**(1.522))*1.D-16
-       GO TO 500
-      ENDIF
-      IF(EN.LE.65.2) THEN
-       QIN(2,I)=(-25.26+0.9902*EN-0.007593*EN2)*1.D-16
-       GO TO 500
-      ENDIF
-      IF(EN.LE.100.0) THEN
-       QIN(2,I)=(2.197+0.1479*EN-0.001123*EN2)*1.D-16
-       GO TO 500
-      ENDIF
-      IF(EN.LE.250.0) THEN
-       QIN(2,I)=(17.11*DEXP(-0.0109*EN))*1.D-16
-       GO TO 500
-      ENDIF               
-      QIN(2,I)=(6566000.0*EN**(-2.821))*1.D-16     
-  500 CONTINUE                        
-      IF(QIN(2,I).LE.0.0) QIN(2,I)=0.0                                  
-C                                                                       
-      Q(1,I)=Q(2,I)+Q(3,I)+Q(4,I)+QIN(1,I)+QIN(2,I)                     
- 9000 CONTINUE                                                          
+      Y1J=DLOG(YAT1(J))
+      Y1J1=DLOG(YAT1(J-1))
+      A1=(Y1J-Y1J1)/(XNJ-XNJ1)
+      B1=(XNJ1*Y1J-XNJ*Y1J1)/(XNJ1-XNJ)
+      QAT1=DEXP(A1*DLOG(EN)+B1)*1.D-16
+C LINEAR
+  221 Y2J=YAT2(J)
+      Y2J1=YAT2(J-1)
+      Y3J=YAT3(J)
+      Y3J1=YAT3(J-1)
+      Y4J=YAT4(J)
+      Y4J1=YAT4(J-1)
+      Y5J=YAT5(J)
+      Y5J1=YAT5(J-1)
+      Y6J=YAT6(J)
+      Y6J1=YAT6(J-1)
+      Y7J=YAT7(J)
+      Y7J1=YAT7(J-1)
+      A2=(Y2J-Y2J1)/(XNL-XNL1)
+      B2=(XNL1*Y2J-XNL*Y2J1)/(XNL1-XNL)
+      A3=(Y3J-Y3J1)/(XNL-XNL1)
+      B3=(XNL1*Y3J-XNL*Y3J1)/(XNL1-XNL)
+      A4=(Y4J-Y4J1)/(XNL-XNL1)
+      B4=(XNL1*Y4J-XNL*Y4J1)/(XNL1-XNL)
+      A5=(Y5J-Y5J1)/(XNL-XNL1)
+      B5=(XNL1*Y5J-XNL*Y5J1)/(XNL1-XNL)
+      A6=(Y6J-Y6J1)/(XNL-XNL1)
+      B6=(XNL1*Y6J-XNL*Y6J1)/(XNL1-XNL)
+      A7=(Y7J-Y7J1)/(XNL-XNL1)
+      B7=(XNL1*Y7J-XNL*Y7J1)/(XNL1-XNL)
+      QAT2=(A2*EN+B2)*1.D-16
+      QAT3=(A3*EN+B3)*1.D-18
+      QAT4=(A4*EN+B4)*1.D-18
+      QAT5=(A5*EN+B5)*1.D-18
+      QAT6=(A6*EN+B6)*1.D-18
+      QAT7=(A7*EN+B7)*1.D-18
+      Q(4,I)=QAT1+QAT2+QAT3+QAT4+QAT5+QAT6+QAT7
+C                                                               
+  250 Q(5,I)=0.0     
+      Q(6,I)=0.0                                                        
+C V4 SUPERELASTIC  
+      QIN(1,I)=0.0
+      PEQIN(1,I)=0.5D0
+      IF(KIN(1).EQ.2) PEQIN(1,I)=0.0
+      IF(EN.LE.0.0) GO TO 350
+      EFAC=DSQRT(1.0-(EIN(1)/EN))
+C  DIPOLE 
+      QIN(1,I)=V4DCONST*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
+      QIN(1,I)=QIN(1,I)*APOPV4/DEGV4*1.D-16
+      IF(KIN(1).EQ.2) PEQIN(1,I)=PEQEL(2,(I-IOFFN(1)))
+C V4 ANISOTROPIC
+  350 QIN(2,I)=0.0
+      PEQIN(2,I)=0.5D0
+      IF(KIN(2).EQ.2) PEQIN(2,I)=0.0
+      IF(EN.LE.EIN(2)) GO TO 400
+C  DIPOLE 
+      EFAC=DSQRT(1.0-(EIN(2)/EN))  
+      ELF=EN-EIN(2)
+      FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
+      BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
+      QIN(2,I)=V4DCONST*DLOG((1.0+EFAC)/(1.0-EFAC))/EN 
+      QIN(2,I)=QIN(2,I)*APOPGS*1.D-16
+      XMT=(1.5-FWD/(FWD+BCK))*Q(2,I)
+      IF(KIN(2).EQ.1) PEQIN(2,I)=0.5+(QIN(2,I)-XMT)/QIN(2,I)
+      IF(KIN(2).EQ.2) PEQIN(2,I)=PEQEL(2,(I-IOFFN(2)))    
+C 1V1 SUPERELASTIC 
+ 400  QIN(3,I)=0.0
+      PEQIN(3,I)=0.5D0
+      IF(KIN(3).EQ.2) PEQIN(3,I)=0.0
+      IF(EN.LE.0.0) GO TO 450    
+      IF((EN+EIN(4)).GT.XV1V1(N1V1)) GO TO 425                        
+      DO 410 J=2,N1V1                                                 
+      IF((EN+EIN(4)).LE.XV1V1(J)) GO TO 420                             
+  410 CONTINUE                                                          
+      J=N1V1                                                          
+  420 A=(YV1V1(J)-YV1V1(J-1))/(XV1V1(J)-XV1V1(J-1))                     
+      B=(XV1V1(J-1)*YV1V1(J)-XV1V1(J)*YV1V1(J-1))/(XV1V1(J-1)-XV1V1(J))
+      QIN(3,I)=(EN+EIN(4))*(A*(EN+EIN(4))+B)/EN
+      GO TO 426
+  425 QIN(3,I)=YV1V1(N1V1)*(XV1V1(N1V1)/(EN+EIN(4)))**2
+  426 QIN(3,I)=QIN(3,I)*APOPV1/DEGV1*1.D-16 
+      IF(KIN(3).EQ.2) PEQIN(3,I)=PEQEL(2,(I-IOFFN(3)))                 
+C 1V1   ISOTROPIC                                                    
+  450 QIN(4,I)=0.0   
+      PEQIN(4,I)=0.5D0              
+      IF(KIN(4).EQ.2) PEQIN(4,I)=0.0                                
+      IF(EN.LE.EIN(4)) GO TO 500 
+      IF(EN.GT.XV1V1(N1V1)) GO TO 475                         
+      DO 460 J=2,N1V1                                                
+      IF(EN.LE.XV1V1(J)) GO TO 470                                      
+  460 CONTINUE                                                          
+      J=N1V1                                                         
+  470 A=(YV1V1(J)-YV1V1(J-1))/(XV1V1(J)-XV1V1(J-1))                     
+      B=(XV1V1(J-1)*YV1V1(J)-XV1V1(J)*YV1V1(J-1))/(XV1V1(J-1)-XV1V1(J))
+      QIN(4,I)=A*EN+B
+      GO TO 476
+  475 QIN(4,I)=YV1V1(N1V1)*(XV1V1(N1V1)/EN)**2 
+  476 QIN(4,I)=QIN(4,I)*APOPGS*1.D-16 
+      IF(KIN(4).EQ.2) PEQIN(4,I)=PEQEL(2,(I-IOFFN(4)))
+C
+C V3 SUPERELASTIC  
+  500 QIN(5,I)=0.0
+      PEQIN(5,I)=0.5D0
+      IF(KIN(5).EQ.2) PEQIN(5,I)=0.0
+      IF(EN.LE.0.0) GO TO 550
+      IF((EN+EIN(6)).GT.XVBV3(N1V3)) GO TO 530
+      DO 510 J=2,N1V3
+      IF((EN+EIN(6)).LE.XVBV3(J)) GO TO 520
+  510 CONTINUE
+      J=N1V3
+  520 A=(YVBV3(J)-YVBV3(J-1))/(XVBV3(J)-XVBV3(J-1))                     
+      B=(XVBV3(J-1)*YVBV3(J)-XVBV3(J)*YVBV3(J-1))/(XVBV3(J-1)-XVBV3(J))
+      QIN(5,I)=(EN+EIN(6))*(A*(EN+EIN(6))+B)/EN
+  530 EFAC=DSQRT(1.0-(EIN(5)/EN))
+C ADD DIPOLE 
+      QIN(5,I)=QIN(5,I)+V3DCONST*DLOG((EFAC+1.0)/(EFAC-1.0))/EN
+      QIN(5,I)=QIN(5,I)*APOPV3/DEGV3*1.D-16
+      IF(KIN(5).EQ.2) PEQIN(5,I)=PEQEL(2,(I-IOFFN(5)))
+C V3 ANISOTROPIC
+  550 QIN(6,I)=0.0
+      PEQIN(6,I)=0.5D0
+      IF(KIN(6).EQ.2) PEQIN(6,I)=0.0
+      IF(EN.LE.EIN(6)) GO TO 600
+      IF(EN.GT.XVBV3(N1V3)) GO TO 580
+      DO 560 J=2,N1V3
+      IF(EN.LE.XVBV3(J)) GO TO 570
+  560 CONTINUE
+      J=N1V3
+  570 A=(YVBV3(J)-YVBV3(J-1))/(XVBV3(J)-XVBV3(J-1))                     
+      B=(XVBV3(J-1)*YVBV3(J)-XVBV3(J)*YVBV3(J-1))/(XVBV3(J-1)-XVBV3(J)) 
+      QIN(6,I)=(A*EN+B)
+C ADD DIPOLE PART
+  580 EFAC=DSQRT(1.0-(EIN(6)/EN))   
+      ADIP=V3DCONST*DLOG((1.0+EFAC)/(1.0-EFAC))/EN     
+      ELF=EN-EIN(6)
+      FWD=DLOG((EN+ELF)/(EN+ELF-2.0*DSQRT(EN*ELF)))
+      BCK=DLOG((EN+ELF+2.0*DSQRT(EN*ELF))/(EN+ELF))
+C RATIO OF MT TO TOTAL X-SECT FOR RESONANCE PART =RAT
+      XMT=((1.5-FWD/(FWD+BCK))*ADIP+RAT*QIN(6,I))*APOPGS*1.D-16         
+      QIN(6,I)=(QIN(6,I)+ADIP)*APOPGS*1.D-16 
+      IF(KIN(6).EQ.1) PEQIN(6,I)=0.5+(QIN(6,I)-XMT)/QIN(6,I)    
+      IF(KIN(6).EQ.2) PEQIN(6,I)=PEQEL(2,(I-IOFFN(6)))
+c
+C 2V1                                                         
+  600 QIN(7,I)=0.0
+      PEQIN(7,I)=0.5D0       
+      IF(KIN(7).EQ.2) PEQIN(7,I)=0.0                                 
+      IF(EN.LE.EIN(7)) GO TO 650
+      IF(EN.GT.XV2V1(N2V1)) GO TO 621                               
+      DO 610 J=2,N2V1                                                 
+      IF(EN.LE.XV2V1(J)) GO TO 620                                      
+  610 CONTINUE                                                          
+      J=N2V1                                                          
+  620 A=(YV2V1(J)-YV2V1(J-1))/(XV2V1(J)-XV2V1(J-1))                     
+      B=(XV2V1(J-1)*YV2V1(J)-XV2V1(J)*YV2V1(J-1))/(XV2V1(J-1)-XV2V1(J))
+      QIN(7,I)=(A*EN+B)*1.D-16
+      GO TO 630 
+C SCALE BY 1/E**2 ABOVE XV2V1(N2V1) EV
+  621 QIN(7,I)=YV2V1(N2V1)*(XV2V1(N2V1)/EN)**2*1.D-16 
+  630 IF(KIN(7).EQ.2) PEQIN(7,I)=PEQEL(2,(I-IOFFN(7))) 
+C 3V1                                       
+  650 QIN(8,I)=0.0    
+      PEQIN(8,I)=0.5D0                
+      IF(KIN(8).EQ.2) PEQIN(8,I)=0.0D0                                  
+      IF(EN.LE.EIN(8)) GO TO 680     
+      IF(EN.GT.XV3V1(N3V1)) GO TO 675                               
+      DO 660 J=2,N3V1                                                
+      IF(EN.LE.XV3V1(J)) GO TO 670                                      
+  660 CONTINUE                                                          
+      J=N3V1                                                          
+  670 A=(YV3V1(J)-YV3V1(J-1))/(XV3V1(J)-XV3V1(J-1))                     
+      B=(XV3V1(J-1)*YV3V1(J)-XV3V1(J)*YV3V1(J-1))/(XV3V1(J-1)-XV3V1(J))
+      QIN(8,I)=(A*EN+B)*1.D-16
+      GO TO 676
+C SCALE BY 1/E**2 ABOBE XV3V1(N3V1) EV
+  675 QIN(8,I)=YV3V1(N3V1)*(XV3V1(N3V1)/EN)**2*1.D-16
+  676 IF(KIN(8).EQ.2) PEQIN(8,I)=PEQEL(2,(I-IOFFN(8)))
+C 4V1                                   
+  680 QIN(9,I)=0.0
+      PEQIN(9,I)=0.5D0  
+      IF(KIN(9).EQ.2) PEQIN(9,I)=0.0             
+      IF(EN.LE.EIN(9)) GO TO 685    
+      IF(EN.GT.XV4V1(N4V1)) GO TO 683
+      DO 681 J=2,N4V1                                                 
+      IF(EN.LE.XV4V1(J)) GO TO 682                                      
+  681 CONTINUE
+      J=N4V1                                                          
+  682 A=(YV4V1(J)-YV4V1(J-1))/(XV4V1(J)-XV4V1(J-1))                     
+      B=(XV4V1(J-1)*YV4V1(J)-XV4V1(J)*YV4V1(J-1))/(XV4V1(J-1)-XV4V1(J)) 
+      QIN(9,I)=(A*EN+B)*1.D-16   
+      GO TO 684
+C SCALE BY 1/E**2 ABOVE XV4V1(N4V1) EV
+  683 QIN(9,I)=YV4V1(N4V1)*(XV4V1(N4V1)/EN)**2*1.D-16
+  684 IF(KIN(9).EQ.2) PEQIN(9,I)=PEQEL(2,(I-IOFFN(9)))
+C 5V1                                   
+  685 QIN(10,I)=0.0                   
+      PEQIN(10,I)=0.5D0 
+      IF(KIN(10).EQ.2) PEQIN(10,I)=0.0                                 
+      IF(EN.LE.EIN(10)) GO TO 700    
+      IF(EN.GT.XV5V1(N5V1)) GO TO 688                                
+      DO 686 J=2,N5V1                                                 
+      IF(EN.LE.XV5V1(J)) GO TO 687                                      
+  686 CONTINUE                                                          
+      J=N5V1                                                          
+  687 A=(YV5V1(J)-YV5V1(J-1))/(XV5V1(J)-XV5V1(J-1))                     
+      B=(XV5V1(J-1)*YV5V1(J)-XV5V1(J)*YV5V1(J-1))/(XV5V1(J-1)-XV5V1(J)) 
+      QIN(10,I)=(A*EN+B)*1.D-16 
+      GO TO 689
+C SCALE BY 1/E**2 ABOVE XV5V1(N5V1) EV
+  688 QIN(10,I)=YV5V1(N5V1)*(XV5V1(N5V1)/EN)**2*1.D-16
+  689 IF(KIN(10).EQ.2) PEQIN(10,I)=PEQEL(2,(I-IOFFN(10)))
+C TRIPLET AT 9.6EV
+  700 QIN(11,I)=0.0
+      PEQIN(11,I)=0.0
+      IF(EN.LE.EIN(11)) GO TO 705
+      IF(EN.GT.XTR1(NTRP1)) GO TO 703
+      DO 701 J=2,NTRP1
+      IF(EN.LE.XTR1(J)) GO TO 702
+  701 CONTINUE
+      J=NTRP1
+  702 A=(YTR1(J)-YTR1(J-1))/(XTR1(J)-XTR1(J-1))
+      B=(XTR1(J-1)*YTR1(J)-XTR1(J)*YTR1(J-1))/(XTR1(J-1)-XTR1(J))
+      QIN(11,I)=(A*EN+B)*1.D-16*AMPTR1
+      GO TO 704
+C SCALE BY 1/E**2 ABOVE XTR1(NTRP1) EV
+  703 QIN(11,I)=YTR1(NTRP1)*(XTR1(NTRP1)/EN)**2*1.D-16*AMPTR1
+  704 IF(EN.LE.(3.0*EIN(11))) GO TO 705
+      PEQIN(11,I)=PEQEL(2,(I-IOFFN(11)))                                
+C SINGLET DISSOCIATION AT 10.0 EV USE BEF SCALING WITH F=0.0443
+  705 QIN(12,I)=0.0
+      PEQIN(12,I)=0.0
+      IF(EN.LE.EIN(12)) GO TO 706
+      QIN(12,I)=0.0443/(EIN(12)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(12)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(12)+E(3))*1.025
+      IF(QIN(12,I).LT.0.0) QIN(12,I)=0.0       
+      IF(EN.LE.(3.0*EIN(12))) GO TO 706
+      PEQIN(12,I)=PEQEL(2,(I-IOFFN(12)))
+C SINGLET DISSOCIATION AT 10.5 EV USE BEF SCALING WITH F=0.0642
+  706 QIN(13,I)=0.0
+      PEQIN(13,I)=0.0
+      IF(EN.LE.EIN(13)) GO TO 707
+      QIN(13,I)=0.0642/(EIN(13)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(13)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(13)+E(3))*1.024
+      IF(QIN(13,I).LT.0.0) QIN(13,I)=0.0       
+      IF(EN.LE.(3.0*EIN(13))) GO TO 707
+      PEQIN(13,I)=PEQEL(2,(I-IOFFN(13)))
+C TRIPLET DISSOCIATION AT 10.9 EV  
+  707 QIN(14,I)=0.0
+      PEQIN(14,I)=0.0
+      IF(EN.LE.EIN(14)) GO TO 712
+      IF(EN.GT.XTR2(NTRP2)) GO TO 710
+      DO 708 J=2,NTRP2
+      IF(EN.LE.XTR2(J)) GO TO 709
+  708 CONTINUE
+      J=NTRP2
+  709 A=(YTR2(J)-YTR2(J-1))/(XTR2(J)-XTR2(J-1))
+      B=(XTR2(J-1)*YTR2(J)-XTR2(J)*YTR2(J-1))/(XTR2(J-1)-XTR2(J))
+      QIN(14,I)=(A*EN+B)*1.D-16*AMPTR2
+      GO TO 711
+C SCALE BY 1/E**2 ABOVE XTR2(NTRP2) EV
+  710 QIN(14,I)=YTR2(NTRP2)*(XTR2(NTRP2)/EN)**2*1.D-16*AMPTR2
+  711 IF(EN.LE.(3.0*EIN(14))) GO TO 712
+      PEQIN(14,I)=PEQEL(2,(I-IOFFN(14)))                               
+C SINGLET DISSOCIATION AT 11.0 EV USE BEF SCALING WITH F=0.1839
+  712 QIN(15,I)=0.0
+      PEQIN(15,I)=0.0
+      IF(EN.LE.EIN(15)) GO TO 713
+      QIN(15,I)=0.1839/(EIN(15)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(15)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(15)+E(3))*1.023
+      IF(QIN(15,I).LT.0.0) QIN(15,I)=0.0       
+      IF(EN.LE.(3.0*EIN(15))) GO TO 713
+      PEQIN(15,I)=PEQEL(2,(I-IOFFN(15)))
+C SINGLET DISSOCIATION AT 11.5 EV USE BEF SCALING WITH F=0.1073
+  713 QIN(16,I)=0.0
+      PEQIN(16,I)=0.0
+      IF(EN.LE.EIN(16)) GO TO 714
+      QIN(16,I)=0.1073/(EIN(16)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(16)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(16)+E(3))*1.022
+      IF(QIN(16,I).LT.0.0) QIN(16,I)=0.0       
+      IF(EN.LE.(3.0*EIN(16))) GO TO 714
+      PEQIN(16,I)=PEQEL(2,(I-IOFFN(16)))
+C SINGLET DISSOCIATION AT 12.0 EV USE BEF SCALING WITH F=0.0880
+  714 QIN(17,I)=0.0
+      PEQIN(17,I)=0.0
+      IF(EN.LE.EIN(17)) GO TO 715
+      QIN(17,I)=0.0880/(EIN(17)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(17)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(17)+E(3))*1.021
+      IF(QIN(17,I).LT.0.0) QIN(17,I)=0.0       
+      IF(EN.LE.(3.0*EIN(17))) GO TO 715
+      PEQIN(17,I)=PEQEL(2,(I-IOFFN(17)))
+C SINGLET DISSOCIATION AT 12.5 EV USE BEF SCALING WITH F=0.0304
+  715 QIN(18,I)=0.0
+      PEQIN(18,I)=0.0
+      IF(EN.LE.EIN(18)) GO TO 716
+      QIN(18,I)=0.0304/(EIN(18)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(18)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(18)+E(3))*1.020
+      IF(QIN(18,I).LT.0.0) QIN(18,I)=0.0       
+      IF(EN.LE.(3.0*EIN(18))) GO TO 716
+      PEQIN(18,I)=PEQEL(2,(I-IOFFN(18)))
+C SINGLET DISSOCIATION AT 13.0 EV USE BEF SCALING WITH F=0.0648
+C ION PAIR FORMATION  F- + SF5+
+  716 QIN(19,I)=0.0
+      PEQIN(19,I)=0.0
+      IF(EN.LE.EIN(19)) GO TO 717
+      QIN(19,I)=0.0648/(EIN(19)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(19)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(19)+E(3))*1.019
+      IF(QIN(19,I).LT.0.0) QIN(19,I)=0.0       
+      IF(EN.LE.(3.0*EIN(19))) GO TO 717
+      PEQIN(19,I)=PEQEL(2,(I-IOFFN(19)))
+C SINGLET DISSOCIATION AT 13.5 EV USE BEF SCALING WITH F=0.1067
+  717 QIN(20,I)=0.0
+      PEQIN(20,I)=0.0
+      IF(EN.LE.EIN(20)) GO TO 718
+      QIN(20,I)=0.1067/(EIN(20)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(20)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(20)+E(3))*1.019
+      IF(QIN(20,I).LT.0.0) QIN(20,I)=0.0       
+      IF(EN.LE.(3.0*EIN(20))) GO TO 718
+      PEQIN(20,I)=PEQEL(2,(I-IOFFN(20)))
+C SINGLET DISSOCIATION AT 14.0 EV USE BEF SCALING WITH F=0.1047
+  718 QIN(21,I)=0.0
+      PEQIN(21,I)=0.0
+      IF(EN.LE.EIN(21)) GO TO 719
+      QIN(21,I)=0.1047/(EIN(21)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(21)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(21)+E(3))*1.018
+      IF(QIN(21,I).LT.0.0) QIN(21,I)=0.0       
+      IF(EN.LE.(3.0*EIN(21))) GO TO 719
+      PEQIN(21,I)=PEQEL(2,(I-IOFFN(21)))
+C TRIPLET DISSOCIATION  AT 14.4 EV
+  719 QIN(22,I)=0.0
+      PEQIN(2,I)=0.0
+      IF(EN.LE.EIN(22)) GO TO 724
+      IF(EN.GT.XTR3(NTRP3)) GO TO 722
+      DO 720 J=2,NTRP3
+      IF(EN.LE.XTR3(J)) GO TO 721
+  720 CONTINUE
+      J=NTRP3
+  721 A=(YTR3(J)-YTR3(J-1))/(XTR3(J)-XTR3(J-1))
+      B=(XTR3(J-1)*YTR3(J)-XTR3(J)*YTR3(J-1))/(XTR3(J-1)-XTR3(J))
+      QIN(22,I)=(A*EN+B)*1.D-16*AMPTR3
+      GO TO 723
+C SCALE BY 1/E**2 ABOVE XTR3(NTRP3) EV
+  722 QIN(22,I)=YTR3(NTRP3)*(XTR3(NTRP3)/EN)**2*1.D-16*AMPTR3
+  723 IF(EN.LE.(3.0*EIN(22))) GO TO 724
+      PEQIN(22,I)=PEQEL(2,(I-IOFFN(22)))                               
+C SINGLET DISSOCIATION AT 14.5 EV USE BEF SCALING WITH F=0.1211
+  724 QIN(23,I)=0.0D0
+      PEQIN(23,I)=0.0
+      IF(EN.LE.EIN(23)) GO TO 725
+      QIN(23,I)=0.01211/(EIN(23)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(23)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(23)+E(3))*1.017
+      IF(QIN(23,I).LT.0.0) QIN(23,I)=0.0       
+      IF(EN.LE.(3.0*EIN(23))) GO TO 725
+      PEQIN(23,I)=PEQEL(2,(I-IOFFN(23)))
+C SINGLET DISSOCIATION AT 15.0 EV USE BEF SCALING WITH F=0.2225
+  725 QIN(24,I)=0.0
+      PEQIN(24,I)=0.0
+      IF(EN.LE.EIN(24)) GO TO 726
+      QIN(24,I)=0.2225/(EIN(24)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(24)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(24)+E(3))*1.017
+      IF(QIN(24,I).LT.0.0) QIN(24,I)=0.0       
+      IF(EN.LE.(3.0*EIN(24))) GO TO 726
+      PEQIN(24,I)=PEQEL(2,(I-IOFFN(24)))
+C SINGLET DISSOCIATION AT 15.5 EV USE BEF SCALING WITH F=0.2731
+  726 QIN(25,I)=0.0
+      PEQIN(25,I)=0.0
+      IF(EN.LE.EIN(25)) GO TO 727
+      QIN(25,I)=0.2731/(EIN(25)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(25)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(25)+E(3))*1.016
+      IF(QIN(25,I).LT.0.0) QIN(25,I)=0.0       
+      IF(EN.LE.(3.0*EIN(25))) GO TO 727
+      PEQIN(25,I)=PEQEL(2,(I-IOFFN(25)))
+C SINGLET DISSOCIATION AT 16.0 EV USE BEF SCALING WITH F=0.1514
+  727 QIN(26,I)=0.0
+      PEQIN(26,I)=0.0
+      IF(EN.LE.EIN(26)) GO TO 728
+      QIN(26,I)=0.1514/(EIN(26)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(26)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(26)+E(3))*1.016
+      IF(QIN(26,I).LT.0.0) QIN(26,I)=0.0       
+      IF(EN.LE.(3.0*EIN(26))) GO TO 728
+      PEQIN(26,I)=PEQEL(2,(I-IOFFN(26)))
+C SINGLET DISSOCIATION AT 16.5 EV USE BEF SCALING WITH F=0.1831
+  728 QIN(27,I)=0.0
+       PEQIN(27,I)=0.0
+      IF(EN.LE.EIN(27)) GO TO 729
+      QIN(27,I)=0.1831/(EIN(27)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(27)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(27)+E(3))*1.015
+      IF(QIN(27,I).LT.0.0) QIN(27,I)=0.0       
+      IF(EN.LE.(3.0*EIN(27))) GO TO 729
+      PEQIN(27,I)=PEQEL(2,(I-IOFFN(27)))
+C SINGLET DISSOCIATION AT 17.00 EV USE BEF SCALING WITH F=0.1678
+  729 QIN(28,I)=0.0
+      PEQIN(28,I)=0.0
+      IF(EN.LE.EIN(28)) GO TO 730
+      QIN(28,I)=0.1678/(EIN(28)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(28)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(28)+E(3))*1.015
+      IF(QIN(28,I).LT.0.0) QIN(28,I)=0.0       
+      IF(EN.LE.(3.0*EIN(28))) GO TO 730
+      PEQIN(28,I)=PEQEL(2,(I-IOFFN(28)))
+C SINGLET DISSOCIATION AT 17.5 EV USE BEF SCALING WITH F=0.1098
+  730 QIN(29,I)=0.0
+      PEQIN(29,I)=0.0
+      IF(EN.LE.EIN(29)) GO TO 731
+      QIN(29,I)=0.1098/(EIN(29)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(29)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(29)+E(3))*1.014
+      IF(QIN(29,I).LT.0.0) QIN(29,I)=0.0       
+      IF(EN.LE.(3.0*EIN(29))) GO TO 731
+      PEQIN(29,I)=PEQEL(2,(I-IOFFN(29)))
+C SINGLET DISSOCIATION AT 18.0 EV USE BEF SCALING WITH F=0.0623
+  731 QIN(30,I)=0.0
+      PEQIN(30,I)=0.0
+      IF(EN.LE.EIN(30)) GO TO 732
+      QIN(30,I)=0.0623/(EIN(30)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(30)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(30)+E(3))*1.014
+      IF(QIN(30,I).LT.0.0) QIN(30,I)=0.0       
+      IF(EN.LE.(3.0*EIN(30))) GO TO 732
+      PEQIN(30,I)=PEQEL(2,(I-IOFFN(30)))
+C SINGLET DISSOCIATION AT 18.5 EV USE BEF SCALING WITH F=0.0361
+  732 QIN(31,I)=0.0
+      PEQIN(31,I)=0.0
+      IF(EN.LE.EIN(31)) GO TO 733
+      QIN(31,I)=0.0361/(EIN(31)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(31)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(31)+E(3))*1.014
+      IF(QIN(31,I).LT.0.0) QIN(31,I)=0.0       
+      IF(EN.LE.(3.0*EIN(31))) GO TO 733
+      PEQIN(31,I)=PEQEL(2,(I-IOFFN(31)))
+C SINGLET DISSOCIATION AT 19.0 EV USE BEF SCALING WITH F=0.0107
+  733 QIN(32,I)=0.0
+      PEQIN(32,I)=0.0
+      IF(EN.LE.EIN(32)) GO TO 734
+      QIN(32,I)=0.0107/(EIN(32)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(32)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(32)+E(3))*1.013
+      IF(QIN(32,I).LT.0.0) QIN(32,I)=0.0       
+      IF(EN.LE.(3.0*EIN(32))) GO TO 734
+      PEQIN(32,I)=PEQEL(2,(I-IOFFN(32)))
+C SINGLET DISSOCIATION AT 19.5 EV USE BEF SCALING WITH F=0.0129
+  734 QIN(33,I)=0.0
+      PEQIN(33,I)=0.0
+      IF(EN.LE.EIN(33)) GO TO 735
+      QIN(33,I)=0.0129/(EIN(33)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(33)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(33)+E(3))*1.013
+      IF(QIN(33,I).LT.0.0) QIN(33,I)=0.0       
+      IF(EN.LE.(3.0*EIN(33))) GO TO 735
+      PEQIN(33,I)=PEQEL(2,(I-IOFFN(33)))
+C SINGLET DISSOCIATION AT 20.0 EV USE BEF SCALING WITH F=0.0053
+  735 QIN(34,I)=0.0
+      PEQIN(34,I)=0.0
+      IF(EN.LE.EIN(34)) GO TO 736
+      QIN(34,I)=0.0053/(EIN(34)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(34)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(34)+E(3))*1.013
+      IF(QIN(34,I).LT.0.0) QIN(34,I)=0.0       
+      IF(EN.LE.(3.0*EIN(34))) GO TO 736
+      PEQIN(34,I)=PEQEL(2,(I-IOFFN(34)))
+C SINGLET DISSOCIATION AT 23.0 EV USE BEF SCALING WITH F=0.029
+  736 QIN(35,I)=0.0
+      PEQIN(35,I)=0.0
+      IF(EN.LE.EIN(35)) GO TO 737
+      QIN(35,I)=0.0290/(EIN(35)*BETA2)*(DLOG(BETA2*GAMMA2*EMASS2/(4.0
+     +*EIN(35)))-BETA2-DEN(I)/2.0)*BBCONST*EN/(EN+EIN(35)+E(3))*1.02
+      IF(QIN(35,I).LT.0.0) QIN(35,I)=0.0       
+      IF(EN.LE.(3.0*EIN(35))) GO TO 737
+      PEQIN(35,I)=PEQEL(2,(I-IOFFN(35)))
+C LOAD BREMSSTRAHLUNG X-SECTIONS
+  737 QIN(36,I)=0.0
+      QIN(37,I)=0.0
+      IF(EN.LE.1000.) GO TO 800
+      DO 780 J=2,NBREM
+      IF(EN.LE.EBRM(J)) GO TO 790
+  780 CONTINUE
+      J=NBREM
+  790 A=(DLOG(Z16T(J))-DLOG(Z16T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B=(DLOG(Z16T(J))*EBRM(J-1)-DLOG(Z16T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      A1=(DLOG(Z9T(J))-DLOG(Z9T(J-1)))/(EBRM(J)-EBRM(J-1))
+      B1=(DLOG(Z9T(J))*EBRM(J-1)-DLOG(Z9T(J-1))*EBRM(J))/
+     /(EBRM(J-1)-EBRM(J))
+      QIN(36,I)=DEXP(A*EN+B)*1.D-24
+      QIN(37,I)=DEXP(A1*EN+B1)*6.D-24
+  800 CONTINUE
+C     WRITE(6,881) EN
+C 881 FORMAT('EN=',D14.6)
+C     WRITE(6,882) QIN(1,I),QIN(2,I),QIN(3,I),QIN(4,I),QIN(5,I)
+C     WRITE(6,882) QIN(6,I),QIN(7,I),QIN(8,I),QIN(9,I),QIN(10,I)
+C     WRITE(6,882) QIN(11,I),QIN(12,I),QIN(13,I),QIN(14,I),QIN(15,I)
+C     WRITE(6,882) QIN(16,I),QIN(17,I),QIN(18,I),QIN(19,I),QIN(20,I)
+C     WRITE(6,882) QIN(21,I),QIN(22,I),QIN(23,I),QIN(24,I),QIN(25,I)
+C     WRITE(6,882) QIN(26,I),QIN(27,I),QIN(28,I),QIN(29,I),QIN(30,I)
+C     WRITE(6,882) QIN(31,I),QIN(32,I),QIN(33,I),QIN(34,I),QIN(35,I)
+C 882 FORMAT(' QIN ',5D12.4)
+C     WRITE(6,883) Q(2,I),Q(3,I),Q(4,I),Q(5,I)
+C 883 FORMAT(' Q 2 3 4 5',4D12.4)
+C     WRITE(6,884) QION(1,I),QION(2,I),QION(3,I)
+C 884 FORMAT('QION 1 2 3 ',3D12.4)
+C
+      QSUP=QIN(1,I)+QIN(3,I)+QIN(5,I)
+      QVIB=QIN(2,I)+QIN(4,I)+QIN(6,I)+QIN(7,I)+QIN(8,I)+QIN(9,I)+
+     /QIN(10,I)
+      QSING=0.0
+      DO 888 NPT=11,35
+  888 QSING=QSING+QIN(NPT,I)
+      QTRIP=QIN(11,I)+QIN(14,I)+QIN(22,I)
+      QSING=QSING-QTRIP
+      QATT=Q(4,I)
+      QIONS=0.0
+      DO 889 NPT=1,NION
+  889 QIONS=QIONS+QION(NPT,I)      
+      QTOT=Q(2,I)+Q(4,I)+QSUP+QVIB+QSING+QTRIP                   
+C     WRITE(6,767) EN,QTOT,QATT,QSUP,QVIB,QSING,QTRIP,QIONS,Q(2,I),QMOM
+C767  FORMAT(' EN=',F12.4,' QTOT=',D12.3,' QATT=',D12.3,' QSUP=',D12.3,/
+C    /,' QVIB=',D12.3,' QSING=',D12.3,' QTRIP=',D12.3,' QION=',D12.3,/,'
+C    / QELAS=',D12.3,' QELMOM=',D12.3,/)
+C 
+ 1000 CONTINUE
 C  SAVE COMPUTE TIME
-      IF(EFINAL.LE.EIN(2)) NIN=1                    
-      IF(EFINAL.LE.EIN(1)) NIN=0                                        
-      RETURN                                                            
-      END
+      DO 1010 K=1,NIN
+      IF(EFINAL.LE.EIN(K)) THEN
+       NIN=K-1
+       GO TO 1011
+      ENDIF
+ 1010 CONTINUE
+ 1011 CONTINUE
+C     IF(EFINAL.GT.1000.) NIN=37
+C
+      RETURN
+      END     
       SUBROUTINE GAS31(Q,QIN,NIN,E,EIN,NAME,VIRIAL,EOBY
      /,PEQEL,PEQIN,PENFRA,KEL,KIN,QION,PEQION,EION,NION,
      /NC0,EC0,WKLM,EFL,NG1,EG1,NG2,EG2,SCRPT)    
@@ -41698,7 +45236,7 @@ C 10-->00
       AJG=1.0
       AJG2=AJG*AJG
       QIN(1,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(1)))/(DSQRT(EN-EIN(1))-ENRT))
-     /*PJ(2)*AJG2/(AJG*(2.0*AJ+1.0)*EN)
+     +*PJ(2)*AJG2/(AJG*(2.0*AJ+1.0)*EN)
       PEQIN(1,I)=0.5+(QIN(1,I)-DRAT*QIN(1,I))/QIN(1,I) 
 C 00-->10
       AJ=0.0
@@ -41707,14 +45245,14 @@ C 00-->10
       QIN(2,I)=0.0D0
       IF(EN.LE.EIN(2)) GO TO 60
       QIN(2,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(2)))/(ENRT-DSQRT(EN-EIN(2))))
-     /*PJ(1)*AJG2/(AJG*(2.0*AJ+1.0)*EN)
+     +*PJ(1)*AJG2/(AJG*(2.0*AJ+1.0)*EN)
       PEQIN(2,I)=0.5+(QIN(2,I)-DRAT*QIN(2,I))/QIN(2,I)
 C 20-->10  + 21-->11
    60 AJ=2.0
       AJG=2.0
       AJG2=AJG*AJG
       QIN(3,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(3)))/(DSQRT(EN-EIN(3))-ENRT))
-     /*(PJ(4)*AJG2+PJ(5)*(AJG2-1.0))/(AJG*(2.0*AJ+1.0)*EN)  
+     +*(PJ(4)*AJG2+PJ(5)*(AJG2-1.0))/(AJG*(2.0*AJ+1.0)*EN)  
       PEQIN(3,I)=0.5+(QIN(3,I)-DRAT*QIN(3,I))/QIN(3,I)
 C 10-->20 + 11-->21
       AJ=1.0
@@ -41723,14 +45261,14 @@ C 10-->20 + 11-->21
       QIN(4,I)=0.0D0
       IF(EN.LE.EIN(4)) GO TO 61
       QIN(4,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(4)))/(ENRT-DSQRT(EN-EIN(4))))
-     /*(PJ(2)*AJG2+PJ(3)*(AJG2-1.0))/(AJG*(2.0*AJ+1.0)*EN)  
+     +*(PJ(2)*AJG2+PJ(3)*(AJG2-1.0))/(AJG*(2.0*AJ+1.0)*EN)  
       PEQIN(4,I)=0.5+(QIN(4,I)-DRAT*QIN(4,I))/QIN(4,I)
 C 30-->20 + 31-->21 + 32-->22
    61 AJ=3.0
       AJG=3.0
       AJG2=AJG*AJG
       QIN(5,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(5)))/(DSQRT(EN-EIN(5))-ENRT))
-     /*(PJ(7)*AJG2+PJ(8)*(AJG2-1.0)+PJ(9)*(AJG2-4.0))/(AJG*(2.0*AJ+1.0)*
+     +*(PJ(7)*AJG2+PJ(8)*(AJG2-1.0)+PJ(9)*(AJG2-4.0))/(AJG*(2.0*AJ+1.0)*
      /EN)  
       PEQIN(5,I)=0.5+(QIN(5,I)-DRAT*QIN(5,I))/QIN(5,I)
 C 20-->30 + 21-->31 + 22-->32
@@ -41740,7 +45278,7 @@ C 20-->30 + 21-->31 + 22-->32
       QIN(6,I)=0.0D0
       IF(EN.LE.EIN(6)) GO TO 62
       QIN(6,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(6)))/(ENRT-DSQRT(EN-EIN(6))))
-     /*(PJ(4)*AJG2+PJ(5)*(AJG2-1.0)+PJ(6)*(AJG2-4.0))/(AJG*(2.0*AJ+1.0)*
+     +*(PJ(4)*AJG2+PJ(5)*(AJG2-1.0)+PJ(6)*(AJG2-4.0))/(AJG*(2.0*AJ+1.0)*
      /EN)  
       PEQIN(6,I)=0.5+(QIN(6,I)-DRAT*QIN(6,I))/QIN(6,I)
 C 40-->30 + 41-->31 + 42-->32 + 43-->33
@@ -41748,7 +45286,7 @@ C 40-->30 + 41-->31 + 42-->32 + 43-->33
       AJG=4.0
       AJG2=AJG*AJG
       QIN(7,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(7)))/(DSQRT(EN-EIN(7))-ENRT))
-     /*(PJ(11)*AJG2+PJ(12)*(AJG2-1.0)+PJ(13)*(AJG2-4.0)+PJ(14)*(AJG2-9.0
+     +*(PJ(11)*AJG2+PJ(12)*(AJG2-1.0)+PJ(13)*(AJG2-4.0)+PJ(14)*(AJG2-9.0
      /))/(AJG*(2.0*AJ+1.0)*EN)
       PEQIN(7,I)=0.5+(QIN(7,I)-DRAT*QIN(7,I))/QIN(7,I)
 C 30-->40 + 31-->41 + 32-->42 + 33-->43
@@ -41758,7 +45296,7 @@ C 30-->40 + 31-->41 + 32-->42 + 33-->43
       QIN(8,I)=0.0D0
       IF(EN.LE.EIN(8)) GO TO 63
       QIN(8,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(8)))/(ENRT-DSQRT(EN-EIN(8))))
-     /*(PJ(7)*AJG2+PJ(8)*(AJG2-1.0)+PJ(9)*(AJG2-4.0)+PJ(10)*(AJG2-9.0))/
+     +*(PJ(7)*AJG2+PJ(8)*(AJG2-1.0)+PJ(9)*(AJG2-4.0)+PJ(10)*(AJG2-9.0))/
      /(AJG*(2.0*AJ+1.0)*EN)
       PEQIN(8,I)=0.5+(QIN(8,I)-DRAT*QIN(8,I))/QIN(8,I)
 C 50-->40 + 51-->41 + 52-->42 + 53-->43 + 54-->44
@@ -41766,7 +45304,7 @@ C 50-->40 + 51-->41 + 52-->42 + 53-->43 + 54-->44
       AJG=5.0
       AJG2=AJG*AJG
       QIN(9,I)=DBK*DLOG((ENRT+DSQRT(EN-EIN(9)))/(DSQRT(EN-EIN(9))-ENRT))
-     /*(PJ(16)*AJG2+PJ(17)*(AJG2-1.0)+PJ(18)*(AJG2-4.0)+PJ(19)*(AJG2-9.0
+     +*(PJ(16)*AJG2+PJ(17)*(AJG2-1.0)+PJ(18)*(AJG2-4.0)+PJ(19)*(AJG2-9.0
      /)+PJ(20)*(AJG2-16.0))/(AJG*(2.0*AJ+1.0)*EN)
       PEQIN(9,I)=0.5+(QIN(9,I)-DRAT*QIN(9,I))/QIN(9,I)
 C 40-->50 + 41-->51 + 42-->52 + 43-->53 + 44-->54
@@ -50975,7 +54513,7 @@ C   ROT 1-3 AND HIGHER
       AJ=DFLOAT(K-29)
       IF(EN.LE.EIN(K)) GO TO 60
    53 QIN(K,I)=PJ(K-29)*QBK*DSQRT(1.0-EIN(K)/EN)*(AJ+2.0)*(AJ+1.0)/((2.0
-     /*AJ+3.0)*(2.0*AJ+1.0))     
+     +*AJ+3.0)*(2.0*AJ+1.0))     
 C BORN (1/E) FALL OFF IN ROTATIONAL X-SECS ABOVE 6.0 EV
    60 IF(EN.LT.6.0) GO TO 80
       DO 70 K=1,56
