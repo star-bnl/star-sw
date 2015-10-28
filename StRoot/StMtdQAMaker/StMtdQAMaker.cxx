@@ -845,9 +845,6 @@ Int_t StMtdQAMaker::processMuDst()
 	  int gChannel = (hit->backleg()-1)*60 + (hit->module()-1)*12 + hit->cell();
 	  double dtof = mtdPid.timeOfFlight() - mtdPid.expTimeOfFlight();
 	  mhMtdDtofVsChannel->Fill(gChannel, dtof);
-	  cout << "+++++++++++++++++++"<< endl;
-	  cout << "dtof = " << dtof << endl;
-	  cout << "+++++++++++++++++++"<< endl;
 	}
     }  
   //====================================
@@ -1801,8 +1798,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.10 2015/10/28 19:50:23 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.11 2015/10/28 19:51:10 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.11  2015/10/28 19:51:10  marr
+//// Remove printout
+////
 //// Revision 1.10  2015/10/28 19:50:23  marr
 //// Add a new data member: mMaxVtxDz
 ////
