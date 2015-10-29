@@ -1,8 +1,11 @@
 // \class StFmsFpsMaker
 // \author Akio Ogawa
 //
-//  $Id: StFmsFpsMaker.cxx,v 1.4 2015/10/21 15:51:01 akio Exp $
+//  $Id: StFmsFpsMaker.cxx,v 1.5 2015/10/29 21:22:01 akio Exp $
 //  $Log: StFmsFpsMaker.cxx,v $
+//  Revision 1.5  2015/10/29 21:22:01  akio
+//  more cuts for QA
+//
 //  Revision 1.4  2015/10/21 15:51:01  akio
 //  Add more QA for debugging FMS reconstruciton code
 //
@@ -35,8 +38,9 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
-static const float EThr=6.0;
-static const float ETotThr=20.0;
+static const float EThr=5.0;
+static const float ETotThr1=20.0;
+static const float ETotThr2=30.0;
 
 inline float project(float x, float z, float zp, float vz){
     return x/(z-vz)*(zp-vz);
@@ -103,10 +107,10 @@ Int_t StFmsFpsMaker::Init(){
     mSigmin[1]= new TH1F("SigMinS","SigMinS",100.0,0.0,4.0);
     mSigmaxE[0]= new TH2F("SigMaxEL","SigMaxEL",100.0,0.0,100.0,100,0.0,2.0);
     mSigmaxE[1]= new TH2F("SigMaxES","SigMaxES",100.0,0.0,100.0,100,0.0,2.0);
-    mChi2[0]  = new TH1F("Chi2L","Chi2L",500.0,0.0,2000.0);
-    mChi2[1]  = new TH1F("Chi2S","Chi2S",500.0,0.0,2000.0);
-    mCluXY[0]= new TH2F("CluXYL","CluXYL",500.0,0.0,17*5.812,500,0.0,34.0*5.812);
-    mCluXY[1]= new TH2F("CluXYS","CluXYS",500.0,0.0,24*3.822,500,0.0,12.0*3.875);
+    mChi2[0]  = new TH1F("Chi2L","Chi2L",100.0,0.0,2000.0);
+    mChi2[1]  = new TH1F("Chi2S","Chi2S",100.0,0.0,2000.0);
+    mCluXY[0]= new TH2F("CluXYL","CluXYL",100.0,0.0,17*5.812,100,0.0,34.0*5.812);
+    mCluXY[1]= new TH2F("CluXYS","CluXYS",100.0,0.0,24*3.822,100,0.0,12.0*3.875);
 
     for(int cut=0; cut<NCUT1; cut++){
 	for(int q=0; q<kFpsNQuad; q++){
@@ -122,16 +126,16 @@ Int_t StFmsFpsMaker::Init(){
 		mHd[q][l][cut]=new TH1F(c,c,100,-50.0,50.0);
 	    }//loop over layer
 	}//loop over quad
-	sprintf(c,"NP_c%d",cut);   mHn  [cut]=new TH1F(c,c, 20,0.0,20.0);
+	sprintf(c,"NP_c%d",cut);   mHn  [cut]=new TH1F(c,c, 50,0.0,50.0);
 	sprintf(c,"e_c%d",cut);    mHene[cut]=new TH1F(c,c,100,0.0,100.0);
 	sprintf(c,"elo_c%d",cut);  mHelo[cut]=new TH1F(c,c,100,0.0,4.0);
 	sprintf(c,"pt_c%d",cut);   mHpt [cut]=new TH1F(c,c,100,0.0,10.0);
 	sprintf(c,"ept_c%d",cut);  mHept[cut]=new TH2F(c,c,100,0.0,100.0,100,0.0,10.0);
 	sprintf(c,"eta_c%d",cut);  mHeta[cut]=new TH1F(c,c,100,2.5,4.5);
-	sprintf(c,"phi_c%d",cut);  mHphi[cut]=new TH1F(c,c,100,-3.141592654,3.141592654);
+	sprintf(c,"phi_c%d",cut);  mHphi[cut]=new TH1F(c,c,100,-3.2,3.2);
 	sprintf(c,"x_c%d",cut);    mHx  [cut]=new TH1F(c,c,100,-100.0,100.0);
 	sprintf(c,"y_c%d",cut);    mHy  [cut]=new TH1F(c,c,100,-100.0,100.0);
-	sprintf(c,"xy_c%d",cut);   mHxy [cut]=new TH2F(c,c,500,-100.0,100.0,500,-100.0,100.0);
+	sprintf(c,"xy_c%d",cut);   mHxy [cut]=new TH2F(c,c,200,-100.0,100.0,200,-100.0,100.0);
 	sprintf(c,"pid_c%d",cut);  mHpid[cut]=new TH1F(c,c,41,-0.5,40.5);
 	sprintf(c,"pid2_c%d",cut); mHpid2[cut]=new TH1F(c,c,5,-0.5,4.5);
     }//loop over cuts
@@ -142,7 +146,8 @@ Int_t StFmsFpsMaker::Init(){
 	sprintf(c,"p_pt_c%d",cut);   mPpt [cut]=new TH1F(c,c,100,0.0,10.0);
 	sprintf(c,"p_ept_c%d",cut);  mPept[cut]=new TH2F(c,c,100,0.0,100.0,100,0.0,10.0);
 	sprintf(c,"p_eta_c%d",cut);  mPeta[cut]=new TH1F(c,c,100,2.5,5.0);
-	sprintf(c,"p_phi_c%d",cut);  mPphi[cut]=new TH1F(c,c,100,-3.141592654,3.141592654);
+	sprintf(c,"p_phi_c%d",cut);  mPphi[cut]=new TH1F(c,c,100,-3.2,3.2
+);
 	sprintf(c,"p_pid_c%d",cut);  mPpid[cut]=new TH2F(c,c,5,-0.5,4.5,5,-0.5,4.5);
 	sprintf(c,"p_m1_c%d",cut);   mPm1 [cut]=new TH1F(c,c,100,0.0,1.0);
 	sprintf(c,"p_m2_c%d",cut);   mPm2 [cut]=new TH1F(c,c,100,0.0,5.0);    
@@ -150,7 +155,7 @@ Int_t StFmsFpsMaker::Init(){
 	sprintf(c,"p_dgg_c%d",cut);  mPdgg[cut]=new TH1F(c,c,200,0.0,20.0);    
 	sprintf(c,"p_r30_c%d",cut);  mPr30[cut]=new TH1F(c,c,100,0.0,3.0);    
 	sprintf(c,"p_r100_c%d",cut); mPr100[cut]=new TH1F(c,c,100,0.0,2.0);    
-	sprintf(c,"p_xy_c%d",cut);   mPxy[cut]=new TH2F(c,c,500,-100.0,100.0,500,-100.0,100.0);    
+	sprintf(c,"p_xy_c%d",cut);   mPxy[cut]=new TH2F(c,c,200,-100.0,100.0,200,-100.0,100.0);    
     }
     return kStOK;
 }
@@ -476,19 +481,22 @@ void StFmsFpsMaker::fmsFpsAlignment(){
 	else if(x< 0.0 && y< 0.0) {q=4;}
 	
 	cut1[0]=1; //all	
-	if(e>=EThr){
+	int edgeType;
+	float distance=mFmsDbMaker->distanceFromEdge(points[i],edgeType); 
+	//	if(distance<-0.51 || (mFmsColl->isMergeSmallToLarge() && edgeType==4)){
+	if(distance<-0.51 || edgeType==4){
 	    cut1[1]=1;
-	    int edgeType;
-	    float distance=mFmsDbMaker->distanceFromEdge(points[i],edgeType); 
-	    if(distance<-0.5 || (mFmsColl->isMergeSmallToLarge() && edgeType==4)){
+	    if(e>=EThr){
 		cut1[2]=1;
 		if(pid2==1)      {cut1[5]=1;}
 		else if(pid2==2) {cut1[6]=1;}
 		else if(pid2==3) {cut1[7]=1;}
 		else             {cut1[8]=1;}
 	    }
-	    if(edgeType==4) cut1[3]=1;
-	    if(edgeType==3) cut1[4]=1;
+	}
+	if(edgeType==4 && distance>=-0.51){
+	    cut1[3]=1;
+	    if(e>=EThr) cut1[4]=1;
 	}
 	for(int c=0; c<NCUT1; c++){      
 	    if(cut1[c]==0) continue;
@@ -548,21 +556,32 @@ void StFmsFpsMaker::fmsFpsAlignment(){
 	float e1=p1->energy();
 	int pid=pair->fpsPid();
 	cut2[0]=1; //all
-	if(e0>=EThr && e1>=EThr && pair->energy()>ETotThr){
+	int edgeType0, edgeType1;
+	float d0=mFmsDbMaker->distanceFromEdge(p0,edgeType0); 
+	float d1=mFmsDbMaker->distanceFromEdge(p1,edgeType1); 
+	//	if( (d0<-0.51 || (mFmsColl->isMergeSmallToLarge() && edgeType0==4)) &&
+	//          (d1<-0.51 || (mFmsColl->isMergeSmallToLarge() && edgeType1==4)) ){
+	if( (d0<-0.51 || edgeType0==4) &&
+	    (d1<-0.51 || edgeType1==4) ){
 	    cut2[1]=1;    
-	    int edgeType0, edgeType1;
-	    float d0=mFmsDbMaker->distanceFromEdge(p0,edgeType0); 
-	    float d1=mFmsDbMaker->distanceFromEdge(p1,edgeType1); 
-	    if( (d0<-0.5 || (mFmsColl->isMergeSmallToLarge() && edgeType0==4)) &&
-		(d1<-0.5 || (mFmsColl->isMergeSmallToLarge() && edgeType1==4)) ){
+	    if(e0>=EThr && e1>=EThr && pair->energy()>ETotThr1){
+		LOG_DEBUG << Form("EdgeType=%1d %1d, d=%20.15f %20.15f x=%20.15f %20.15f xx=%20.15f %20.15f\n",
+				  edgeType0, edgeType1,d0,d1,
+				  p0->x(),p1->x(),p0->XYZ().x(),p1->XYZ().x());
 		cut2[2]=1;
+		if(pair->energy()>ETotThr2) {cut2[9]=1;}
 		if     (pid==11)   {cut2[5]=1;}
 		else if(pid==22)   {cut2[6]=1;}
 		else if(pid==33)   {cut2[7]=1;}
 		else               {cut2[8]=1;}
 	    }
-	    if(edgeType0==4 || edgeType1==4) cut2[3]=1;
-	    if(edgeType0==3 || edgeType1==3) cut2[4]=1;
+	}
+	if( (edgeType0==4 && d0>=-0.51) || (edgeType1==4 && d1>=-0.51) ){
+	    cut2[3]=1;
+	    if(e0>=EThr && e1>=EThr && pair->energy()>ETotThr1){
+		cut2[4]=1;
+		if(pair->energy()>ETotThr2) cut2[10]=1;
+	    }
 	}
 	for(int c=0; c<NCUT2; c++){      
 	    if(cut2[c]==0) continue;
