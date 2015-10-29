@@ -845,9 +845,6 @@ Int_t StMtdQAMaker::processMuDst()
 	  int gChannel = (hit->backleg()-1)*60 + (hit->module()-1)*12 + hit->cell();
 	  double dtof = mtdPid.timeOfFlight() - mtdPid.expTimeOfFlight();
 	  mhMtdDtofVsChannel->Fill(gChannel, dtof);
-	  cout << "+++++++++++++++++++"<< endl;
-	  cout << "dtof = " << dtof << endl;
-	  cout << "+++++++++++++++++++"<< endl;
 	}
     }  
   //====================================
@@ -1189,6 +1186,8 @@ void StMtdQAMaker::bookHistos()
   mhEventCuts->SetBinContent(14, mMaxNsigmaPi);
   mhEventCuts->GetXaxis()->SetBinLabel(15,"mMinFitHitsFraction");
   mhEventCuts->SetBinContent(15, mMinFitHitsFraction);
+  mhEventCuts->GetXaxis()->SetBinLabel(16,"mMaxVtxDz");
+  mhEventCuts->SetBinContent(16, mMaxVtxDz);
 
 
   const Int_t nbins = 3 + mTriggerIDs.size();
@@ -1539,6 +1538,7 @@ void StMtdQAMaker::printConfig()
   printf("Force to run muDst: %s\n",decision[mMuDstIn]);
   printf("Fill the QA tree: %s\n",decision[mFillTree]);
   printf("Maximum vertex z: %1.0f\n",mMaxVtxZ);
+  printf("Maximum vz diff: %1.0f\n",mMaxVtxDz);
   printf("Track pt  range: [%1.2f, %1.2f]\n",mMinTrkPt,mMaxTrkPt);
   printf("Track phi range: [%1.2f, %1.2f]\n",mMinTrkPhi,mMaxTrkPhi);
   printf("Track eta range: [%1.2f, %1.2f]\n",mMinTrkEta,mMaxTrkEta);
@@ -1798,8 +1798,14 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.9 2015/10/23 02:18:51 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.11 2015/10/28 19:51:10 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.11  2015/10/28 19:51:10  marr
+//// Remove printout
+////
+//// Revision 1.10  2015/10/28 19:50:23  marr
+//// Add a new data member: mMaxVtxDz
+////
 //// Revision 1.9  2015/10/23 02:18:51  marr
 //// 1) Add histogram for global T0 alignment calibration using primary tracks
 //// 2) Add mMaxVtxDz to cut on vz difference between TPC and VPD
