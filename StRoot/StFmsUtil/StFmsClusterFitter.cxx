@@ -1,6 +1,11 @@
-// $Id: StFmsClusterFitter.cxx,v 1.3 2015/10/21 15:58:04 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.4 2015/10/29 21:14:55 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.4  2015/10/29 21:14:55  akio
+// increase max number of clusters
+// a bug fixes in valley tower association
+// removing some debug comments
+//
 // Revision 1.3  2015/10/21 15:58:04  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -64,6 +69,16 @@ std::vector<double> defaultMinuitStepSizes() {
   }  // for
   return steps;
 }
+
+std::vector<double> smalllMinuitStepSizes() {
+  std::vector<double> steps(1, 0.);  // Initialise with nPhoton step
+  // Append default (x, y, E) steps for each photon
+  for (int i(0); i < kMaxNPhotons; ++i) {
+    steps.insert(steps.end(), {0.1/1.5, 0.1/1.5, 0.2});
+  }  // for
+  return steps;
+}
+
 std::vector<double> towerWidths;  // Tower (x, y) width in cm
 
 // Helper function for accumulating tower energies
