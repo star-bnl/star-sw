@@ -29,13 +29,11 @@ StFmsHitMaker::StFmsHitMaker(const char* name) : StMaker(name), mReadMuDst(0) {
 	mFmsDbMaker = NULL;
 	mFmsCollection = NULL;
 	mMuFmsColl = NULL;
-	LOG_INFO << "StFmsHitMaker initializing...."<<endm;
 	LOG_DEBUG << "StFmsHitMaker::constructor." << endm;
 }
 
-StFmsHitMaker::~StFmsHitMaker(){
-  
-  LOG_INFO << "StFmsHitMaker::destructor." << endm;
+StFmsHitMaker::~StFmsHitMaker(){  
+  LOG_DEBUG << "StFmsHitMaker::destructor." << endm;
 }
 
 void StFmsHitMaker::Clear(Option_t* option){
@@ -43,12 +41,9 @@ void StFmsHitMaker::Clear(Option_t* option){
   StMaker::Clear(option);
 }
 
-int StFmsHitMaker::Init() {
-  
-	LOG_INFO<<"StFmsHitMaker::Init() "<<endm;
-
+int StFmsHitMaker::Init() {  
+	LOG_DEBUG<<"StFmsHitMaker::Init() "<<endm;
 	return StMaker::Init();
-
 }
 
 int StFmsHitMaker::InitRun(Int_t runNumber) {  
@@ -64,7 +59,6 @@ int StFmsHitMaker::InitRun(Int_t runNumber) {
 
 //// This is StFmsHitMaker Make, it reads in data and make hit and fill StFmsCollection
 int StFmsHitMaker::Make(){
-
 	LOG_DEBUG<<"StFmsHitMaker::Make start"<<endm;
 	int flag = 0;
 	StTriggerData* triggerData = 0;
@@ -112,7 +106,7 @@ int StFmsHitMaker::Make(){
 			triggerData = (StTriggerData*)StMuDst::event()->triggerData();
 			if(triggerData){
 				flag = 4; //Yuxi
-				LOG_INFO<<"StFmsHitMaker::Make Found StFmsTriggerData in MuDst"<<endm;
+				LOG_DEBUG<<"StFmsHitMaker::Make Found StFmsTriggerData in MuDst"<<endm;
 			}
 			else LOG_ERROR << "Finally, no StFmsTriggerData in MuDst " <<endm;
 		}
@@ -210,7 +204,7 @@ int StFmsHitMaker::Make(){
 */
 	if(stEvent) {
 		//Adding StFmsCollection to StEvent
-		LOG_INFO<<"StFmsHitMaker::Make Adding StFmsCollection to StEvent"<<endm;
+		LOG_DEBUG<<"StFmsHitMaker::Make Adding StFmsCollection to StEvent"<<endm;
 		stEvent->setFmsCollection(mFmsCollection);
 	}
 	else LOG_INFO << "StEvent is empty" << endm;
@@ -219,22 +213,22 @@ int StFmsHitMaker::Make(){
 }
 
 int StFmsHitMaker::Finish(){  
-  LOG_INFO << "StFmsHitMaker::Finish() " << endm;
+  LOG_DEBUG << "StFmsHitMaker::Finish() " << endm;
   return kStOk;
 }
 
 Int_t StFmsHitMaker::readMuDst(){
   StEvent* event = (StEvent*)GetInputDS("StEvent");
-  if(!event){LOG_INFO<<"StFmsHitMaker::readMuDst found no StEvent"<<endm; return kStErr;}
+  if(!event){LOG_ERROR<<"StFmsHitMaker::readMuDst found no StEvent"<<endm; return kStErr;}
   StFmsCollection* fmsColl = event->fmsCollection();
   if(!fmsColl){
     fmsColl=new StFmsCollection;
     event->setFmsCollection(fmsColl);
   }
   StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
-  if(!mudst){LOG_INFO<<"StFmsHitMaker::readMuDst found no MuDst"<<endm; return kStErr;}
+  if(!mudst){LOG_ERROR<<"StFmsHitMaker::readMuDst found no MuDst"<<endm; return kStErr;}
   StMuFmsCollection* mufmsColl= mudst->muFmsCollection();
-  if(!mufmsColl){LOG_INFO<<"StFmsHitMaker::readMuDst found no MuFmsCollection"<<endm; return kStErr;}
+  if(!mufmsColl){LOG_ERROR<<"StFmsHitMaker::readMuDst found no MuFmsCollection"<<endm; return kStErr;}
   StMuFmsUtil util;
   util.fillFms(fmsColl,mufmsColl); 
   return kStOk;
