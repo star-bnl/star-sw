@@ -105,8 +105,10 @@ public:
    static StPxlDb* 	instance() {return fgInstance;}
 
    //! geoHMatrices describing rotation + shift tranlations between different coordinate systems
+#ifndef  __NEW_PXLDB__
    const TGeoHMatrix *geoHMatrixTpcOnGlobal() const
      {return mGeoHMatrixTpcOnGlobal;}
+#endif /* ! __NEW_PXLDB__ */
    const TGeoHMatrix *geoHMatrixIdsOnTpc() const
      {return &mGeoHMatrixIdsOnTpc;}
    const TGeoHMatrix *geoHMatrixPstOnIds() const

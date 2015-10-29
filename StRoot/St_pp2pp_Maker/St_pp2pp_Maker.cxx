@@ -10,7 +10,9 @@
  *
  * Revision 2015/10/3 (Kin Yip) : Add positionRMS to each cluster
  *
- * Revision 2015/10/22 (Kin Yip) : Add MakeTrack from Rafal and a couple functions to read from new databases PMTSkewConstants/AcceleratorParameters
+ * Revision 2015/10/22 (Kin Yip) : Add MakeTracks from Rafal and a couple functions to read from new databases PMTSkewConstants/AcceleratorParameters
+ *
+ * Revision 2015/10/28 (Kin Yip) : Add Rafal's latest revision (multi-track algorithm etc.) for his MakeTracks to be used for the imminent production
  */                                                                      
 
 #include "St_pp2pp_Maker.h"
@@ -45,12 +47,25 @@ ClassImp(St_pp2pp_Maker)
 
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
 						     mPedestalPerchannelFilename("pedestal.in.perchannel"), mLDoCluster(kTRUE),
-						     maxPitchesToMatch(3.0){ // added by Rafal
+						     kMaxPitchesToMatch(3.0), // added by Rafal
+						     kPitch{ kpitch_6svx, kpitch_4svx }{ // added by Rafal
   // ctor
   //  nevt_count = 0 ;
 
-  Pitch[X] = kpitch_6svx; // added by Rafal
-  Pitch[Y] = kpitch_4svx; // added by Rafal
+  // --- default values for pp run15 (in case it's not read from database) --- 
+  mXYZ_IP[kX] = 0.00025;
+  mXYZ_IP[kY] = 0.00040;
+  mXYZ_IP[kZ] = 0.00000;
+  mThetaXY_tilt[kX] = 0.00000;
+  mThetaXY_tilt[kY] = 0.00000;
+  mDistanceFromIPtoDX[StBeamDirection::east] = 9.7496;
+  mDistanceFromIPtoDX[StBeamDirection::west] = 9.7496;
+  mLDX[StBeamDirection::east] = 3.7;
+  mLDX[StBeamDirection::west] = 3.7;
+  mBendingAngle[StBeamDirection::east] = 0.018832292;
+  mBendingAngle[StBeamDirection::west] = 0.018826657;
+  mConversion_TAC_time = 18e-12;
+  // --- --- --- --- --- --- --- --- --- 
 }
 
 
@@ -320,7 +335,7 @@ Int_t St_pp2pp_Maker::readZPerplane() {
 
 Int_t St_pp2pp_Maker::readSkewParameter() {
 
-  memset(mskew_param,0,sizeof(mskew_param));
+  memset(mSkew_param,0,sizeof(mSkew_param));
 
   int s, ipmt, ipar ;
 
@@ -333,7 +348,7 @@ Int_t St_pp2pp_Maker::readSkewParameter() {
   else {
 
     St_pp2ppPMTSkewConstants *dataset = 0;
-    dataset = (St_pp2ppPMTSkewConstants*) DB->Find("Calibrations/pp2pp/pp2ppPMTSkewConstants");
+    dataset = (St_pp2ppPMTSkewConstants*) DB->Find("pp2ppPMTSkewConstants");
 
       if (dataset) {
 
@@ -346,12 +361,12 @@ Int_t St_pp2pp_Maker::readSkewParameter() {
 
 	  s = j/kMAXSEQ ; // RP 0 .. 7
 	  ipmt = (j/4) % 2  ; // 0 or 1
-	  ipar = j - s*kMAXSEQ ; // 0 .. 3
+	  ipar = j - 4*ipmt - s*kMAXSEQ ; // 0 .. 3
 
 	  LOG_DEBUG << j << "th element: RP = " << s << " PMT = " << ipmt << " parameter = " << ipar 
 		    << " with parameter : " << table[0].skew_param[j] << endm ;
 
-	  mskew_param[s][ipmt][ipar] = table[0].skew_param[j] ;
+	  mSkew_param[s][ipmt][ipar] = table[0].skew_param[j] ;
 
 	} 
       }
@@ -383,23 +398,23 @@ Int_t St_pp2pp_Maker::readAccelerateParameter() {
       pp2ppAcceleratorParameters_st *table = descr->GetTable();
       LOG_DEBUG << "St_pp2pp_Maker : Reading pp2ppAcceleratorParameters table with nrows = " << descr->GetNRows() << endm ;
 
-      mx_IP = table[0].x_IP ;
-      my_IP = table[0].y_IP ;
-      mz_IP = table[0].z_IP ;
+      mXYZ_IP[0] = table[0].x_IP ;
+      mXYZ_IP[1] = table[0].y_IP ;
+      mXYZ_IP[2] = table[0].z_IP ;
 
-      mtheta_x_tilt = table[0].theta_x_tilt ;
-      mtheta_y_tilt = table[0].theta_y_tilt ;
+      mThetaXY_tilt[0] = table[0].theta_x_tilt ;
+      mThetaXY_tilt[1] = table[0].theta_y_tilt ;
 
-      mdistancefromDX_east = table[0].distancefromDX_east ;
-      mdistancefromDX_west = table[0].distancefromDX_west ;
+      mDistanceFromIPtoDX[0] = table[0].distancefromDX_east ;
+      mDistanceFromIPtoDX[1] = table[0].distancefromDX_west ;
 
-      mLDX_east = table[0].LDX_east ;
-      mLDX_west = table[0].LDX_west ;
+      mLDX[0] = table[0].LDX_east ;
+      mLDX[1] = table[0].LDX_west ;
 
-      mbendingAngle_east = table[0].bendingAngle_east ;
-      mbendingAngle_west = table[0].bendingAngle_west ;
+      mBendingAngle[0] = table[0].bendingAngle_east ;
+      mBendingAngle[1] = table[0].bendingAngle_west ;
 
-      mconversion_TAC_time = table[0].conversion_TAC_time ;
+      mConversion_TAC_time = table[0].conversion_TAC_time ;
 
       /*
       for (Int_t i = 0; i < descr->GetNRows(); i++) {
@@ -664,19 +679,19 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   // >=2015 --- W2U (~WVU) is sequencer 7 and W2D (~WVD) is sequencer 8
   const short UD[kMAXSEQ]  =  { 1, 0, 0, 1, 1, 0, 0, 1 } ; 
 
-  // Bogdan's alignment-corrected offsets (in mm)
-  const double LVDT_OFFSET[32] = { 
-    5.4561,-36.8055,  5.4104,-36.7974, -4.4512, 41.6271, -4.4076, 41.6106,
-    5.4395,-14.6417,  5.5217,-14.7002, -4.6579, 63.7561, -4.8961, 63.5281,
-    6.2214, 44.4315,  6.2917, 44.0845, -5.0226,-36.1377, -4.9259,-36.4143,
-    5.6669, 65.6778,  5.6349, 65.6091, -3.1667,-14.8623, -3.1441,-15.0686,
+  // Bogdan's alignment-corrected offsets (in mm) // version 1.1. -> included by Rafal
+  const double LVDT_OFFSET[32] = {
+    4.991, -36.620,   4.945, -36.610,  -4.147,  41.738,  -4.103,  41.722,
+    5.114, -14.433,   5.197, -14.490,  -4.439,  64.106,  -4.679,  63.878,
+    4.708,  42.106,   4.764,  41.758,  -5.443, -37.980,  -5.365, -38.274,
+    4.065,  63.583,   4.072,  63.513,  -3.665, -16.674,  -3.714, -16.881,
   };
-
-  const double LVDT_SCALE[32] = { 
-    0.9989,  0.0000,  0.9989,  0.0000,  0.9991,  0.0000,  0.9991,  0.0000,
-    0.9969,  0.0051,  0.9969,  0.0051,  0.9974,  0.0000,  0.9974,  0.0000,
-    0.9933, -0.0142,  0.9933, -0.0142,  0.9658,  0.0058,  0.9655,  0.0058,
-    1.0040,  0.0000,  1.0040,  0.0000,  1.0499,  0.0000,  1.0499,  0.0000,
+  
+  const double LVDT_SCALE[32] = {
+    0.999,  -0.010,   0.999,  -0.011,   0.999,   0.000,   0.999,   0.000,
+    0.997,   0.000,   0.997,   0.000,   0.997,   0.000,   0.997,   0.000,
+    0.993,   0.000,   0.993,   0.000,   0.966,   0.000,   0.965,   0.000,
+    1.004,   0.000,   1.004,   0.000,   1.050,   0.000,   1.049,   0.000,
   };
 
   Bool_t is_candidate_to_store ;
@@ -803,7 +818,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	    // K. Yip : Oct. 3, 2015 : Added positionRMS
 	    positionRMS = POStimesESq/ECluster - position*position ; 
 	    if ( positionRMS > 0 ) // protecting against possibly numbers very close to 0 which may be -ve
-	      positionRMS = TMath::Sqrt( positionRMS ) ;
+	      positionRMS = sqrt( positionRMS ) ;
 	    else
 	      positionRMS = 0.0 ;
 
@@ -903,68 +918,65 @@ Int_t St_pp2pp_Maker::MakeTracks(StRpsCollection &RpsColl, float blue_beamenergy
 
 void St_pp2pp_Maker::formTracks( vector< StRpsTrack* > *trackVec, const vector< StRpsTrackPoint* > *trackPointVec, const float beamMomentumWest, const float beamMomentumEast ) const{
 
-  // constants necessary for momentum reconstruction
-
-  //------------ THOSE WILL BE READ FROM DATABASE ------------
-  static const double alpha0 = 0.01886; // bending angle of DX magnet [rad]
-  static const double d1 = 9.8; 	// distance from IP to DX magnet [m]
-  static const double lDX = 3.7; 	// length of DX magnet [m]
-  static const double vertexPosition[2] = { 0.0013, 0.0010 }; // average coordinates of vertex [m]
-  //------------ -------------------------------- ------------
+  double beamMomentum[2];
+  beamMomentum[StBeamDirection::east] = beamMomentumEast;
+  beamMomentum[StBeamDirection::west] = beamMomentumWest;
   
-  for(int branch=0; branch<nBranches; ++branch){ // loop over all branches in the Roman Pot system
+  for(int branch=0; branch<kBranches; ++branch){ // loop over all branches in the Roman Pot system
 
-    int nPts[2]; // reading number of track-points found in the branch
-    nPts[0] = trackPointVec[ RpInBranch[branch][0] ].size();
-    nPts[1] = trackPointVec[ RpInBranch[branch][1] ].size();
+    unsigned int side = ( branch < kBranches/2 ? StBeamDirection::east : StBeamDirection::west );
+    int sign = (side == StBeamDirection::east ? -1 : 1 );
+    int nPts[kStationsPerBranch]; // reading number of track-points found in the branch
+    nPts[kRP1] = trackPointVec[ kRpInBranch[branch][kRP1] ].size();
+    nPts[kRP2] = trackPointVec[ kRpInBranch[branch][kRP2] ].size();
 
-    if( nPts[0] && nPts[1] ){ // if track-points reconstructed in both stations in branch
+    if( nPts[kRP1] && nPts[kRP2] ){ // if track-points reconstructed in both stations in branch
 
-      for(int i=0; i<nPts[0]; ++i){ // loops over all combinations of track-points
-	for(int j=0; j<nPts[1]; ++j){
+      for(int i=0; i<nPts[kRP1]; ++i){ // loops over all combinations of track-points
+	for(int j=0; j<nPts[kRP2]; ++j){
 	  StRpsTrack* track = new StRpsTrack();
 
 	  track->setBranch( branch ); // setting ID of branch
 	  track->setType( StRpsTrack::rpsGlobal ); // setting the type of the track
-	  track->setTrackPoint( trackPointVec[ RpInBranch[branch][0] ][i], 0 ); // setting constituent track-points
-	  track->setTrackPoint( trackPointVec[ RpInBranch[branch][1] ][j], 1 ); // setting constituent track-points
+	  track->setTrackPoint( trackPointVec[ kRpInBranch[branch][kRP1] ][i], kRP1 ); // setting constituent track-points
+	  track->setTrackPoint( trackPointVec[ kRpInBranch[branch][kRP2] ][j], kRP2 ); // setting constituent track-points
 
 	  // below calculating momentum vector
-	  double localThetaX = track->thetaRp( StRpsTrack::rpsAngleThetaX ); // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
-	  double localThetaY = track->thetaRp( StRpsTrack::rpsAngleThetaY ); // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+	  double localThetaX = track->thetaRp( StRpsTrack::rpsAngleThetaX ) + sign*mThetaXY_tilt[kX]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+	  double localThetaY = track->thetaRp( StRpsTrack::rpsAngleThetaY ) + sign*mThetaXY_tilt[kY]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
 
-	  double d2 = abs( trackPointVec[ RpInBranch[branch][0] ][i]->z() ) - lDX - d1; // distance from DX magnet exit to first RP station
-	  double thetaX_IP = ( trackPointVec[ RpInBranch[branch][0] ][i]->x() - vertexPosition[X] - (d2 + 0.5*lDX)*localThetaX ) / ( d1 /* +/- z_IP */ + 0.5*lDX );
-	  double xi = 1. / ( 1 + (alpha0*(d1 + 0.5*lDX /* +/- z_IP */)) / ( localThetaX*( abs( trackPointVec[ RpInBranch[branch][0] ][i]->z() ) /* +/- z_IP */ ) + vertexPosition[X] - trackPointVec[ RpInBranch[branch][0] ][i]->x() ) );
-	  double momentumValue = (branch < nBranches/2 ? beamMomentumEast : beamMomentumWest ) * (1.-xi);
+	  double d2 = abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - mLDX[side] - mDistanceFromIPtoDX[side]; // distance from DX magnet exit to first RP station
+	  double thetaX_IP = ( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->x() - mXYZ_IP[kX] + sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) - (d2 + 0.5*mLDX[side])*localThetaX ) / ( mDistanceFromIPtoDX[side] - sign*mXYZ_IP[kZ]  + 0.5*mLDX[side] );
+	  double xi = 1. / ( 1 + (mBendingAngle[side]*(mDistanceFromIPtoDX[side] + 0.5*mLDX[side] - sign*mXYZ_IP[kZ])) / ( localThetaX*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + mXYZ_IP[kX] - trackPointVec[ kRpInBranch[branch][kRP1] ][i]->x() - sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) );
+	  double momentumValue = beamMomentum[side] * (1.-xi);
 
-	  StThreeVectorF momentumVector( 0, 0, (branch < nBranches/2 ? -momentumValue : momentumValue ) );
-	  momentumVector.rotateX( (branch < nBranches/2 ? localThetaY : -localThetaY ) );
-	  momentumVector.rotateY( (branch < nBranches/2 ? -thetaX_IP : thetaX_IP ) );
+	  StThreeVectorF momentumVector( 0, 0, sign*momentumValue );
+	  momentumVector.rotateX( -sign*localThetaY );
+	  momentumVector.rotateY( sign*thetaX_IP );
 	  track->setP( momentumVector ); // setting the momentum vector
 
 	  trackVec->push_back( track ); // storing the track
 	}
       }
     }
-    else if( nPts[0] || nPts[1] ){ // if track-point reconstructed only in one station in branch
+    else if( nPts[kRP1] || nPts[kRP2] ){ // if track-point reconstructed only in one station in branch
 
-      int station = nPts[0] ? 0 : 1; // checking ID of station where track-point was found
+      int station = nPts[kRP1] ? kRP1 : kRP2; // checking ID of station where track-point was found
       for(int i=0; i<nPts[station]; ++i){ // loop over all track-points
 	StRpsTrack* track = new StRpsTrack();
 
 	track->setBranch( branch ); // setting ID of branch
 	track->setType( StRpsTrack::rpsLocal ); // setting the type of the track
-	track->setTrackPoint( trackPointVec[ RpInBranch[branch][station] ][i], station ); // setting constituent track-point
+	track->setTrackPoint( trackPointVec[ kRpInBranch[branch][station] ][i], station ); // setting constituent track-point
 
 	// below calculating momentum vector (assuming no momentum loss == elastic track)
-	double localThetaX = ( trackPointVec[ RpInBranch[branch][station] ][i]->x() - vertexPosition[X] ) / abs( trackPointVec[ RpInBranch[branch][station] ][i]->z() /* +/- z_IP */ );
-	double localThetaY = ( trackPointVec[ RpInBranch[branch][station] ][i]->y() - vertexPosition[Y] ) / abs( trackPointVec[ RpInBranch[branch][station] ][i]->z() /* +/- z_IP */ );
-	double momentumValue = (branch < nBranches/2 ? beamMomentumEast : beamMomentumWest );
+	double localThetaX = ( trackPointVec[ kRpInBranch[branch][station] ][i]->x() - mXYZ_IP[kX] + sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) / ( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + sign*mThetaXY_tilt[kX];
+	double localThetaY = ( trackPointVec[ kRpInBranch[branch][station] ][i]->y() - mXYZ_IP[kY] + sign*mThetaXY_tilt[kY]*( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) / ( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + sign*mThetaXY_tilt[kY];
+	double momentumValue = beamMomentum[side];
 
-	StThreeVectorF momentumVector( 0, 0, (branch < nBranches/2 ? -momentumValue : momentumValue ) );
-	momentumVector.rotateX( (branch < nBranches/2 ? localThetaY : -localThetaY ) );
-	momentumVector.rotateY( (branch < nBranches/2 ? -localThetaX : localThetaX ) );
+	StThreeVectorF momentumVector( 0, 0, sign*momentumValue );
+	momentumVector.rotateX( -sign*localThetaY );
+	momentumVector.rotateY( sign*localThetaX );
 	track->setP( momentumVector ); // setting the momentum vector
 
 	trackVec->push_back( track ); // storing the track
@@ -980,21 +992,28 @@ void St_pp2pp_Maker::formTrackPoints(const StRpsCollection& RpsColl, vector< StR
   for(int i=0; i<kMAXSEQ; ++i){ // loop over all Roman Pots
 
     // looking for hits in X and Y direction (necessary to determine (x,y) coordinates of track-point)
-    vector<St_pp2pp_Maker::StRpsHit> hits[2];
-    hits[Y] = formHits(RpsColl.romanPot(i), Y);
-    if( hits[Y].size()==0 ) continue; // if no hits in planes A&C => cannot reconstruct a track-point
-    hits[X] = formHits(RpsColl.romanPot(i), X);
-    if( hits[X].size()==0 ) continue; // if no hits in planes B&D => cannot reconstruct a track-point
+    vector<St_pp2pp_Maker::StRpsHit> hits[kCoordinates];
+    hits[kY] = formHits(RpsColl.romanPot(i), kY);
+    if( hits[kY].size()==0 ) continue; // if no hits in planes A&C => cannot reconstruct a track-point
+    hits[kX] = formHits(RpsColl.romanPot(i), kX);
+    if( hits[kX].size()==0 ) continue; // if no hits in planes B&D => cannot reconstruct a track-point
+
+    // calculating time of detection in PMTs (invoked here to avoid multiple calclation in case of many hits)
+    double time[2] = {-1, -1};
+    for(unsigned int pmt=0; pmt<2; ++pmt){
+      if( RpsColl.romanPot(i)->tac(pmt) < kMaxPedestalTAC ) continue; // don't calculate time if TAC is at pedestal
+      time[pmt] = timeFromTAC( i, pmt, RpsColl.romanPot(i)->tac(pmt), RpsColl.romanPot(i)->adc(pmt) );
+    }
 
     // loops over all combinations of hits in X and Y directions
-    for(unsigned int j=0; j<hits[X].size(); ++j){
-      for(unsigned int k=0; k<hits[Y].size(); ++k){
+    for(unsigned int j=0; j<hits[kX].size(); ++j){
+      for(unsigned int k=0; k<hits[kY].size(); ++k){
 	StRpsTrackPoint* trackPoint = new StRpsTrackPoint();
 
 	// setting position of the track-point
-	double x = hits[X][j].positionXY;
-	double y = hits[Y][k].positionXY;
-	double z = (hits[X][j].positionZ + hits[Y][k].positionZ)/2.;
+	double x = hits[kX][j].mPositionXY;
+	double y = hits[kY][k].mPositionXY;
+	double z = (hits[kX][j].mPositionZ + hits[kY][k].mPositionZ)/2.;
 	StThreeVectorF pos( x, y, z );
 	trackPoint->setPosition( pos );
 
@@ -1002,18 +1021,18 @@ void St_pp2pp_Maker::formTrackPoints(const StRpsCollection& RpsColl, vector< StR
 	trackPoint->setRpId( i );
 
 	// setting IDs of clusters used to form a track-point
-	for(int l=0; l<kMAXCHAIN/2; ++l){
-	  trackPoint->setClusterId( hits[Y][k].clusterId[l], Planes[Y][l] );
-	  trackPoint->setClusterId( hits[X][j].clusterId[l], Planes[X][l] );
+	for(int l=0; l<kPlanesPerCoordinate; ++l){
+	  trackPoint->setClusterId( hits[kY][k].mClusterId[l], kPlanes[kY][l] );
+	  trackPoint->setClusterId( hits[kX][j].mClusterId[l], kPlanes[kX][l] );
 	}
 
 	// setting time of the hit (in time units)
 	for(unsigned int pmt=0; pmt<trackPoint->mNumberOfPmtsInRp; ++pmt){
-	  trackPoint->setTime( RpsColl.romanPot(i)->tac(pmt), pmt ); // TEMPORARILY using the raw TAC value !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	  trackPoint->setTime( time[pmt], pmt );
 	}
 
 	// setting flag of track-point quality
-	if( hits[X][j].golden && hits[Y][k].golden ) trackPoint->setQuality( StRpsTrackPoint::rpsGolden );
+	if( hits[kX][j].mGolden && hits[kY][k].mGolden ) trackPoint->setQuality( StRpsTrackPoint::rpsGolden );
 	else trackPoint->setQuality( StRpsTrackPoint::rpsNormal );
 
 	// storing a track-point in a vector
@@ -1029,32 +1048,49 @@ vector<St_pp2pp_Maker::StRpsHit> St_pp2pp_Maker::formHits(const StRpsRomanPot* R
 
   vector<St_pp2pp_Maker::StRpsHit> hitVec;
 
-  vector<double> pos[2];
-  vector<int> en[2];
-  vector<int> len[2];
-  vector<int> id[2];
+  vector<double> pos[kPlanesPerCoordinate];
+  vector<int> en[kPlanesPerCoordinate];
+  vector<int> len[kPlanesPerCoordinate];
+  vector<int> id[kPlanesPerCoordinate];
 
   preselectClusters(Rp, coordinate, pos, en, len, id);
   int clCase = classifyClustersCase(pos);
 
   if(clCase>0){
-    int validClusters[2];
-    double deltaPitches;
-    bool matched = matchClusters(coordinate, clCase, pos, validClusters, &deltaPitches);
+    
+    std::vector<int> validClusters[kPlanesPerCoordinate];
+    bool matched = matchClusters(coordinate, clCase, pos, validClusters);
 
-    if( matched ){
-      St_pp2pp_Maker::StRpsHit hit;
-      hit.positionXY = ( (validClusters[0]<0 ? pos[1][validClusters[1]] : pos[0][validClusters[0]]) + (validClusters[1]<0 ? pos[0][validClusters[0]] : pos[1][validClusters[1]]) )/2;
-      hit.positionZ = ( (validClusters[0]<0 ? Rp->plane(Planes[coordinate][1])->z() : Rp->plane(Planes[coordinate][0])->z()) + (validClusters[1]<0 ? Rp->plane(Planes[coordinate][0])->z() : Rp->plane(Planes[coordinate][1])->z()) )/2;
-      for(int j=0; j<kMAXCHAIN/2; ++j){
-	hit.clusterId[j] = validClusters[j]<0 ? -1 : id[j][validClusters[j]];
+    if( matched ){  // if there are pair of clusters which match - use only those
+      for(unsigned int k=0; k<validClusters[kFirst].size(); ++k){
+	St_pp2pp_Maker::StRpsHit hit;
+	hit.mPositionXY = ( (validClusters[kFirst][k]<0 ? pos[kSecond][validClusters[kSecond][k]] : pos[kFirst][validClusters[kFirst][k]]) + (validClusters[kSecond][k]<0 ? pos[kFirst][validClusters[kFirst][k]] : pos[kSecond][validClusters[kSecond][k]]) )/2;
+	hit.mPositionZ = ( (validClusters[kFirst][k]<0 ? Rp->plane(kPlanes[coordinate][kSecond])->z() : Rp->plane(kPlanes[coordinate][kFirst])->z()) + (validClusters[kSecond][k]<0 ? Rp->plane(kPlanes[coordinate][kFirst])->z() : Rp->plane(kPlanes[coordinate][kSecond])->z()) )/2;
+	for(int j=0; j<kPlanesPerCoordinate; ++j){
+	  hit.mClusterId[j] = validClusters[j][k]<0 ? -1 : id[j][validClusters[j][k]];
+	}
+	if(clCase==5) hit.mGolden = true; // golden hit <-- 1/1
+	else hit.mGolden = false;
+
+	hitVec.push_back( hit );
       }
-      if(clCase==5) hit.golden = true; // golden hit -> 1/1
-      else hit.golden = false;
-
-      hitVec.push_back( hit );
-      return hitVec;
     }
+    else{ // if clusters don't match, use each one separately
+      for(int j=0; j<kPlanesPerCoordinate; ++j){ // loop over 2 planes in given _coordinate_
+	for(unsigned int k=0; k<pos[j].size(); ++k){
+	  St_pp2pp_Maker::StRpsHit hit;
+	  hit.mPositionXY = pos[j][k];
+	  hit.mPositionZ = Rp->plane(kPlanes[coordinate][j])->z();
+	  for(int l=0; l<kPlanesPerCoordinate; ++l){
+	    if(l==j) hit.mClusterId[l] = id[l][k];
+	    else hit.mClusterId[l] = -1;
+	  }
+	  hit.mGolden = false;
+	  hitVec.push_back( hit );
+	}
+      }
+    }
+    
   }
 
   return hitVec;
@@ -1062,16 +1098,16 @@ vector<St_pp2pp_Maker::StRpsHit> St_pp2pp_Maker::formHits(const StRpsRomanPot* R
 
 
 void St_pp2pp_Maker::preselectClusters(const StRpsRomanPot* Rp, const int coordinate, vector<double>* pos, vector<int>* en, vector<int>* len, vector<int>* id) const{
-  for(int j=0; j<kMAXCHAIN/2; ++j){ // loop over planes measuring given _coordinate_
-    const StRpsPlane* SiPlane = Rp->plane( Planes[coordinate][j] );
+  for(int j=0; j<kPlanesPerCoordinate; ++j){ // loop over planes measuring given _coordinate_
+    const StRpsPlane* SiPlane = Rp->plane( kPlanes[coordinate][j] );
     int nClusters = SiPlane->numberOfClusters();
-    if(nClusters < maxNumberOfClusterPerPlane) // continue only if nClusters is small, otherwise plane is not used in reconstruction
+    if(nClusters < kMaxNumberOfClusterPerPlane) // continue only if nClusters is small, otherwise plane is not used in reconstruction
       for(int k=0; k < nClusters; ++k){ // loop over clusters in this plane
 	const StRpsCluster* Cluster = SiPlane->cluster( k );
 	int lenCluster = Cluster->length();
-	if(lenCluster <= maxClusterLength && lenCluster>0){
+	if(lenCluster <= kMaxClusterLength && lenCluster>0){
 	  int enCluster = Cluster->energy();
-	  if(enCluster >= Emin[ Rp->romanPotId() ][lenCluster-1]){ // allow using this cluster only if it passes the energy cut
+	  if(enCluster >= kEmin[ Rp->romanPotId() ][lenCluster-1]){ // allow using this cluster only if it passes the energy cut
 	    pos[j].push_back( Cluster->xy() );
 	    en[j].push_back( enCluster );
 	    len[j].push_back( lenCluster );
@@ -1084,8 +1120,8 @@ void St_pp2pp_Maker::preselectClusters(const StRpsRomanPot* Rp, const int coordi
 
 
 Int_t St_pp2pp_Maker::classifyClustersCase(vector<double>* pos) const{
-  int lA = pos[0].size();
-  int lB = pos[1].size();
+  int lA = pos[kFirst].size();
+  int lB = pos[kSecond].size();
 
   if( lA==0 && lB==0 )	return -1; else
   if( lA==1 && lB==1 )	return 5; else
@@ -1094,51 +1130,55 @@ Int_t St_pp2pp_Maker::classifyClustersCase(vector<double>* pos) const{
   if( lA==0 && lB==1 )	return 2; else
   if( lA==1 && lB==0 )	return 1; else
   if( lA==2 && lB==2 )	return 8; else
-  if( lA==0 && lB >1 )	return -4; else
-  if( lA >1 && lB==0 )	return -3; else
+  if( lA==0 && lB >1 )	return 4; else
+  if( lA >1 && lB==0 )	return 3; else
   if( lA>=2 && lB>=2 )	return 9; else
   return -100;
 }
 
 
-Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, const vector<double>* pos, int* validClusters, double* deltaPitches) const{
+Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, const vector<double>* pos, std::vector<int>* validClusters) const{
   switch(clCase){
-    case 5: if( areMatched(coordinate, pos[0][0], pos[1][0], deltaPitches) ){
-	      validClusters[0] = 0;
-	      validClusters[1] = 0;
+    case 5: if( areMatched(coordinate, pos[kFirst][0], pos[kSecond][0]) ){
+	      validClusters[kFirst].push_back( 0 );
+	      validClusters[kSecond].push_back( 0 );
 	      return true;
-	    } break;
-    case 2:
-    case 1: validClusters[0] = clCase==2 ? -1 : 0;
-	    validClusters[1] = clCase==2 ? 0 : -1;
-	    *deltaPitches = -1e9;
+	    } return false;
+    case 1:
+    case 2: validClusters[kFirst].push_back( clCase==2 ? -1 : 0 );
+	    validClusters[kSecond].push_back( clCase==2 ? 0 : -1 );
 	    return true;
     case 6:
-    case 7:
-    case 8:
-    case 9: {int nOfMatchingCl = 0;
-	    double DeltaPosition = 1e9;
+    case 7: {double DeltaPosition = 1e9;
 	    double minDeltaPosition = 1e9;
-	    int index1 = 0;
-	    int index2 = 0;
-	    for(unsigned int c1=0; c1<pos[0].size(); ++c1){
-	      for(unsigned int c2=0; c2<pos[1].size(); ++c2){
-		if(areMatched(coordinate, pos[0][c1], pos[1][c2], &DeltaPosition)){
-		  ++nOfMatchingCl;
+	    int index[kPlanesPerCoordinate] = { -1, -1 };
+	    for(unsigned int c1=0; c1<pos[kFirst].size(); ++c1){
+	      for(unsigned int c2=0; c2<pos[kSecond].size(); ++c2){
+		if(areMatched(coordinate, pos[kFirst][c1], pos[kSecond][c2], &DeltaPosition)){
 		  if(abs(DeltaPosition) < minDeltaPosition){
 		    minDeltaPosition = DeltaPosition;
-		    index1 = c1;
-		    index2 = c2;
+		    index[kFirst] = c1;
+		    index[kSecond] = c2;
 		  }
 		}
 	      }
 	    }
-	    if(nOfMatchingCl>0){
-	      validClusters[0] = index1;
-	      validClusters[1] = index2;
-	      *deltaPitches = minDeltaPosition;
+	    if(index[kFirst]>0){
+	      validClusters[kFirst].push_back( index[kFirst] );
+	      validClusters[kSecond].push_back( index[kSecond] );
 	      return true;
 	    } else return false;}
+    case 8:
+    case 9: {for(unsigned int c1=0; c1<pos[kFirst].size(); ++c1){
+	      for(unsigned int c2=0; c2<pos[kSecond].size(); ++c2){
+		if(areMatched(coordinate, pos[kFirst][c1], pos[kSecond][c2])){
+		  validClusters[kFirst].push_back( c1 );
+		  validClusters[kSecond].push_back( c2 );
+		}
+	      }
+	    }
+	    if(validClusters[kFirst].size()>0) return true;
+	    else return false;}
     default: return false;
   }
   return false;
@@ -1146,13 +1186,14 @@ Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, con
 
 
 Bool_t St_pp2pp_Maker::areMatched(const int coordinate, const double p1, const double p2, double *deltaPitches) const{
-  if(deltaPitches) *deltaPitches = (p1 - p2) / Pitch[coordinate];
-  return  abs( p1 - p2 ) < maxPitchesToMatch*Pitch[coordinate] ? true : false;
+  if(deltaPitches) *deltaPitches = (p1 - p2) / kPitch[coordinate];
+  return  abs( p1 - p2 ) < kMaxPitchesToMatch*kPitch[coordinate] ? true : false;
 }
 
 
 
-const double St_pp2pp_Maker::Emin[8][5] ={{20, 20, 20, 20, 20},
+const double St_pp2pp_Maker::kEmin[kMAXSEQ][kMaxClusterLength] =
+					 {{20, 20, 20, 20, 20},
 					  {20, 20, 20, 20, 20},
 					  {20, 20, 20, 20, 20},
 					  {20, 20, 20, 20, 20},
@@ -1161,11 +1202,13 @@ const double St_pp2pp_Maker::Emin[8][5] ={{20, 20, 20, 20, 20},
 					  {20, 20, 20, 20, 20},
 					  {20, 20, 20, 20, 20}};
 
-const int St_pp2pp_Maker::Planes[2][2] = {{1, 3},  // local x (vertical strips)
-					  {0, 2}}; // local y (horizontal strips)
+const int St_pp2pp_Maker::kPlanes[kCoordinates][kPlanesPerCoordinate] =
+					 {{1, 3},  // kX (vertical strips)
+					  {0, 2}}; // kY (horizontal strips)
 
-const int St_pp2pp_Maker::RpInBranch[4][2] = {{0, 2}, {1, 3},
-					      {4, 6}, {5, 7}};
+const int St_pp2pp_Maker::kRpInBranch[kBranches][kStationsPerBranch] =
+							     {{0, 2}, {1, 3},
+							      {4, 6}, {5, 7}};
 
 //END  ------------------------ Rafal's code ------------------------
 
@@ -1173,17 +1216,8 @@ const int St_pp2pp_Maker::RpInBranch[4][2] = {{0, 2}, {1, 3},
 
 
 
-
-
-
-
-
-
 Int_t St_pp2pp_Maker::Finish() {
-
-
   return StMaker::Finish();
-
 }
 
 

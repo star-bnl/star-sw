@@ -2274,6 +2274,7 @@ class Placement(Handler):
         only  = attr.get('konly',None)
         copy  = attr.get('ncopy',None)
         cond  = attr.get('if',None)   # conditional placement
+        matrix= attr.get('matrix',None)
 
         if cond:
             cond = replacements(cond)
@@ -2346,6 +2347,10 @@ class Placement(Handler):
         if ( z != None ):
             document.impl( 'place.TranslateZ(%s);'% z, unit=current )
             document.impl( '/// Translate z = %s'%z, unit=current )
+
+        if ( matrix != None ):
+            document.impl( '{ double matrix[] = %s; place.Matrix( matrix ); }'%matrix, unit=current )
+            document.impl( '/// Rotation Matrix = %s'%matrix, unit=current )
         
         if ( only != None ):
             document.impl( 'place.par("only")=%s;'% only, unit=current )
@@ -2399,7 +2404,8 @@ class Rotation(Handler):
     def startElement(self,tag,attr):
 
         # Validate attributes
-        checkAttributes( tag, attr, ['alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
+        checkAttributes( tag, attr,
+                         ['alphax','alphay','alphaz',  'thetax','thetay','thetaz','phix','phiy','phiz', 'ort'] )
 
         list = ['alphax','alphay','alphaz' ]
         func = {'alphax' : 'AlphaX',
@@ -2453,8 +2459,6 @@ class Rotation(Handler):
         if ( ortho ):
             document.impl( 'place.Ortho( "%s" ); // ORT=%s'%( ortho, ortho ), unit=current )
             document.impl( '/// Axis substitution: XYZ --> %s'%ortho, unit=current )
-     
-
                
         
 # ----------------------------------------------------------------------------------------------------

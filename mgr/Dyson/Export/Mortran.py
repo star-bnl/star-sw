@@ -385,6 +385,10 @@ class Module ( Handler ):
         self.name = name
         _in_module = True
         form ( "MODULE %s   %s" % ( name, comm ) )
+        form ( '""" AGML variables """' )
+        form ( 'REAL :: agml_rotm(9), agml_thetax, agml_phix, agml_thetay, agml_phiy, agml_thetaz, agml_phiz' )
+        form ( 'COMMON /agml_vars/ agml_rotm, agml_thetax, agml_phix, agml_thetay, agml_phiy, agml_thetaz, agml_phiz' )
+               
     def characters( self, content ):
         form( content, cchar=' _' )        
     def endElement(self, tag ):
@@ -1386,10 +1390,21 @@ class Placement(Handler):
         copy   = self.attr.pop('ncopy',None)
         only   = self.attr.pop('konly',None)
         cond   = self.attr.pop('if', None)
-
+        matrix = self.attr.pop('matrix', None)
 
         if cond: formatter( 'IF %s {'%cond )
 
+
+
+        # Handle rotation matrix
+        if matrix:
+            formatter( '""" Handle the matrix """' )
+            form     ( 'agml_rotm = %s'%matrix )
+            form     ( 'Call GVmxga(agml_rotm,agml_thetax,agml_phix,agml_thetay,agml_phiy,agml_thetaz,agml_phiz)' )
+            # push theta, phi onto attribute stack
+            for key in ['thetax', 'phix', 'thetay', 'phiy', 'thetaz', 'phiz']:
+                self.attr[key] = 'agml_%s'%key
+        
         output = 'POSITION %s '% block.upper()        
 
         if ( mother != None ):
@@ -1419,6 +1434,10 @@ class Placement(Handler):
 ##        form(output,cchar='_')
         
         formatter( output, cchar='_' )
+
+
+        if matrix: form( 'call gprotm(%irot)' )
+        
         if cond: formatter( '}' )
         
     def add(self,thingy):
@@ -1452,6 +1471,11 @@ class Rotation(Handler):
 
     def output(self):
         out=''
+
+#       if self.key=='matrix':
+#           out='""" Got a matrix %s """' % self.value
+#           return out
+        
         if ( self.key != None ):
             out='%s=%s '%(self.key, self.value)
             return out
@@ -1467,6 +1491,14 @@ class Rotation(Handler):
             
     def setParent(self,p): self.parent = p
     def startElement(self,tag,attr):
+
+
+        matrix = attr.get('matrix',None)
+        if matrix:
+            self.key = 'matrix'
+            self.value = matrix
+            self.parent.add(self)
+
 
         list = ['alphax','alphay','alphaz','ort']
         for key in list:
