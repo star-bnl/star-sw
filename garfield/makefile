@@ -279,7 +279,7 @@ $(OBJDIR)/MediumMagboltz.o: \
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/magboltz.o: \
-	$(SRCDIR)/magboltz-10.6.F
+	$(SRCDIR)/magboltz-9.01.f
 	@echo $@
 	$(FC) $(FFLAGS) $< -o $@
 $(OBJDIR)/MediumSilicon.o: \

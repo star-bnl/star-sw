@@ -105,12 +105,11 @@ void gasmix_(long long* ngs, double* q, double* qin, long long* nin, double* e,
              double* ei, char* name, double* virl, double* eb, double* peqel,
              double* peqin, double* penfra, long long* kel, long long* kin,
              double* qion, double* peqion, double* eion, long long* nion,
-	     long long* nc0, double* ec0, double* wk, double* efl, long long* ng1, double* eg1, long long* ng2, double* eg2,
              char scrpt[260][50]);
 
-void setupt1_();
+void setup1_();
 
-void mixert_();
+void mixer_();
 
 void elimit_(long long* ielow);
 void elimitb_(long long* ielow);

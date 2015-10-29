@@ -206,6 +206,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       if (!EndDriftLine()) return false;
       break;
     }
+    if (m_particleType != ParticleTypeIon) {
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
                                 m_path.back().zi, x1, y1, z1, rc[0], rc[1],
                                 rc[2])) {
@@ -217,6 +218,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
+    }
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
       std::cerr << m_className << "::DriftLine:\n";
@@ -233,6 +235,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       if (!EndDriftLine()) return false;
       break;
     }
+    if (m_particleType != ParticleTypeIon) {
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
                                 m_path.back().zi, x1, y1, z1, rc[0], rc[1],
                                 rc[2])) {
@@ -244,6 +247,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
+    }
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
       std::cerr << m_className << "::DriftLine:\n";
@@ -260,6 +264,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       if (!EndDriftLine()) return false;
       break;
     }
+    if (m_particleType != ParticleTypeIon) {
     if (m_sensor->IsWireCrossed(m_path.back().xi, m_path.back().yi,
                                 m_path.back().zi, x1, y1, z1, rc[0], rc[1],
                                 rc[2])) {
@@ -271,6 +276,7 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
     if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
+    }
     }
     if (!GetVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
       std::cerr << m_className << "::DriftLine:\n";
@@ -1104,6 +1110,8 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
       y1 = ym;
       z1 = zm;
       alpha1 = alpham;
+      if(stepCounter>10000)
+	return integral;
     }
   }
   return integral;
