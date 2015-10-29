@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.25 2015/10/22 18:51:08 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.26 2015/10/29 00:17:27 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -71,13 +71,13 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   UChar_t mSiliconBunch ;
 
   // K. Yip (2015-10-22) : Adding variables for Accelerator and Skew parameters in the respective database ;
-  double mskew_param[kMAXSEQ][2][4] ; // 4 parameters for each PMT and there are 2 PMT's for each of the 8 RP
-  double mx_IP, my_IP, mz_IP; /* collision coordinates at the IP */
-  double mtheta_x_tilt, mtheta_y_tilt ; /* tilt angles of the beam at collision */
-  double mdistancefromDX_east, mdistancefromDX_west; /* distance from the IP to the DX magnet in the East and West */
-  double mLDX_east, mLDX_west;     /* length of DX in the East and West */
-  double mbendingAngle_east, mbendingAngle_west;     /* DX bending angles in the East and West */
-  double mconversion_TAC_time ;	/* converting the TAC tick to time (second) */
+  double mSkew_param[kMAXSEQ][2][4] ; // 4 parameters for each PMT and there are 2 PMT's for each of the 8 RP
+  double mXYZ_IP[3]; /* collision coordinates at the IP; 0=X, 1=Y, 2=Z */
+  double mThetaXY_tilt[2]; /* tilt angles of the beam at collision; 0=X, 1=Y */
+  double mDistanceFromIPtoDX[2]; /* distance from the IP to the DX magnet in the East and West; 0=E, 1=W */
+  double mLDX[2];     /* length of DX in the East and West; 0=E, 1=W */
+  double mBendingAngle[2];     /* DX bending angles in the East and West; 0=E, 1=W */
+  double mConversion_TAC_time ;	/* converting the TAC tick to time (second) */
 
   // K. Yip (2015-10-22) : Adding methods to read Accelerator and Skew parameters from the respective database ;
   Int_t readAccelerateParameter() ;
@@ -143,7 +143,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.25 2015/10/22 18:51:08 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.26 2015/10/29 00:17:27 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -154,42 +154,57 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   //BEGIN  ------------------------ Rafal's code ------------------------  
   private:
 
-  struct StRpsHit { // structure representing reconstructed coordinate (one) of track-point
-    double positionXY;
-    double positionZ;
-    int clusterId[2];
-    bool golden;
-  };
-    
-  enum COORDINATES { X=0, Y=1 };
+  enum RP_STATIONS_PER_BRANCH { kRP1, kRP2, kStationsPerBranch };
+  enum SILICON_PLANES_PER_COORDINATE { kFirst, kSecond };
+  enum COORDINATES { kX, kY, kCoordinates, kZ = kCoordinates };
 
-  const int nBranches = 4; 	// number of branches in RP system (EU, ED, WU and WD)
+  // additional constants describing the Roman Pot Phase II* system
+  static const int kBranches = 4; // number of branches in RP system (EU, ED, WU and WD)
+  static const int kPlanesPerCoordinate = kMAXCHAIN/2; // number of Si planes for one spatial coordinate (assumes kMAXCHAIN is even!)
 
   // reconstruction parameters
-  static const int maxClusterLength = 5;
-  static const int maxNumberOfClusterPerPlane = 5;
-  const double maxPitchesToMatch;
-  
-  static const double Emin[8][5];
-  static const int Planes[2][2];
-  static const int RpInBranch[4][2];
-  double Pitch[2];
+  static const int kMaxClusterLength = 5;
+  const int kMaxNumberOfClusterPerPlane = 5;
+  const double kMaxPitchesToMatch;
+  static const double kEmin[kMAXSEQ][kMaxClusterLength];
+  const double kMaxPedestalTAC = 100;
 
+  // handy arrays
+  static const int kPlanes[kCoordinates][kPlanesPerCoordinate];
+  static const int kRpInBranch[kBranches][kStationsPerBranch];
+  const double kPitch[kCoordinates];
+
+  // structures
+  struct StRpsHit { // structure representing reconstructed coordinate (one) of track-point
+    double mPositionXY;
+    double mPositionZ;
+    int mClusterId[kPlanesPerCoordinate];
+    bool mGolden;
+  };
+  
   // methods
   void formTracks( vector< StRpsTrack* > *,  const vector< StRpsTrackPoint* > * , const float, const float ) const;
   void formTrackPoints(const StRpsCollection &, vector< StRpsTrackPoint* > * ) const;
   vector<St_pp2pp_Maker::StRpsHit> formHits(const StRpsRomanPot *, const int) const;
   void preselectClusters(const StRpsRomanPot *, const int coordinate, vector<double>*, vector<int>*, vector<int>*, vector<int>*) const;
   Int_t classifyClustersCase(vector<double>*) const;
-  Bool_t matchClusters(const int, const int, const vector<double>*, int*, double* = nullptr) const;
+  Bool_t matchClusters(const int, const int, const vector<double>*, std::vector<int>*) const;
   Bool_t areMatched(const int, const double, const double, double* = nullptr) const;
-  
+  Double_t timeFromTAC(const int, const int, const int, const int) const;
   
   //END    ------------------------ Rafal's code ------------------------
 
   ClassDef(St_pp2pp_Maker,1)   //StAF chain virtual base class for Makers
 
 };
+
+//BEGIN  ------------------------ Rafal's code ------------------------  
+inline Double_t St_pp2pp_Maker::timeFromTAC(const int Rp, const int pmt, const int Tac, const int Adc) const{
+  return mConversion_TAC_time * (Tac + mSkew_param[Rp][pmt][0]
+  + mSkew_param[Rp][pmt][1]*exp(-mSkew_param[Rp][pmt][2]*(Adc-mSkew_param[Rp][pmt][3])) / (Adc-mSkew_param[Rp][pmt][3]) );
+}
+//END    ------------------------ Rafal's code ------------------------
+
 #endif
 
 
