@@ -1,6 +1,11 @@
-// $Id: StFmsClusterFinder.h,v 1.3 2015/10/21 15:58:04 akio Exp $
+// $Id: StFmsClusterFinder.h,v 1.4 2015/10/29 21:14:55 akio Exp $
 //
 // $Log: StFmsClusterFinder.h,v $
+// Revision 1.4  2015/10/29 21:14:55  akio
+// increase max number of clusters
+// a bug fixes in valley tower association
+// removing some debug comments
+//
 // Revision 1.3  2015/10/21 15:58:04  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -92,7 +97,7 @@ class StFmsClusterFinder {
 #endif  // __CINT__
 
  private:
-  static const unsigned kMaxNClusters = 6;  ///< We stop looking after this many
+  static const unsigned kMaxNClusters = 25;  ///< We stop looking after this many
 #ifndef __CINT__  // Hide ClusterList from CINT
   /**
    Look for cluster seed towers.

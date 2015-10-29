@@ -1,6 +1,11 @@
-// $Id: StFmsClusterFinder.cxx,v 1.2 2015/10/21 15:58:04 akio Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.3 2015/10/29 21:14:55 akio Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.3  2015/10/29 21:14:55  akio
+// increase max number of clusters
+// a bug fixes in valley tower association
+// removing some debug comments
+//
 // Revision 1.2  2015/10/21 15:58:04  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -494,8 +499,7 @@ unsigned StFmsClusterFinder::associateValleyTowersWithClusters(
     TObjArray* valleys) const {
   unsigned size = neighbors->size();
   for (Int_t i(0); i < valleys->GetEntriesFast(); ++i) {
-    //TowerClusterAssociation* association = static_cast<TowerClusterAssociation*>(valleys->At(i));
-    TowerClusterAssociation* association = new TowerClusterAssociation((StFmsTower*)valleys->At(i),mDetectorId);
+    TowerClusterAssociation* association = static_cast<TowerClusterAssociation*>(valleys->At(i));    
     StFmsTowerCluster* cluster = association->nearestCluster();
     if (cluster) {
       // Move the tower to the appropriate cluster
