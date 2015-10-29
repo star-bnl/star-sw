@@ -36,7 +36,7 @@ TDataSet *CreateTable() {
 
   primary -> AddGenerator(hijing);
   primary -> SetCuts( 1.0E-6 , -1., 0, -1, 0, -1, -6, 6 ); // cut |z| < 6 cm
-  primary -> SetAttr("beamline",kTRUE);
+  primary -> SetAttr("beamline",1);
   //
   // Initialize primary event generator and all sub makers
   //
