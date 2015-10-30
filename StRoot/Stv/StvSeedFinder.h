@@ -35,6 +35,7 @@ enum {kMinHits=5,kMaxHits = 10};
 public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
+          void SetMinHits(int mh) {fMinHits = mh;}
   virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
