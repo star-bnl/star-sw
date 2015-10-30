@@ -87,7 +87,28 @@ class RtsTimer
 #endif
     ts_last = ts_new;
     return t;
-  } 
+  }
+
+  double stopwatch;
+  int stopwatchcounting;
+
+  void StopWatchReset() {
+      stopwatchcounting = 0;
+      stopwatch = 0;
+  }
+
+  double StopWatchStop() {
+      if(stopwatchcounting) stopwatch += record_time();
+      stopwatchcounting = 0;
+      return stopwatch;
+  }
+
+  double StopWatchStart() {
+      if(stopwatchcounting) stopwatch += record_time();
+      else record_time();
+      stopwatchcounting = 1;
+      return stopwatch;
+  }
 };
 
 // Returns medium resolution time  (~1ms)
