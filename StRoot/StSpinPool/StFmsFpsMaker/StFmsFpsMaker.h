@@ -3,8 +3,11 @@
 //
 //   This is analysis for FMS-FPS correlations.
 // 
-//  $Id: StFmsFpsMaker.h,v 1.3 2015/10/21 15:51:01 akio Exp $
+//  $Id: StFmsFpsMaker.h,v 1.4 2015/10/29 21:22:01 akio Exp $
 //  $Log: StFmsFpsMaker.h,v $
+//  Revision 1.4  2015/10/29 21:22:01  akio
+//  more cuts for QA
+//
 //  Revision 1.3  2015/10/21 15:51:01  akio
 //  Add more QA for debugging FMS reconstruciton code
 //
@@ -67,8 +70,8 @@ private:
     void isolationCone();
     
     //QA & alignment related
-    enum {NCUT1=9};  //0:all, 1:E>3GeV,     2:FV, 3:LSgap, 4:NSgap 5:PID=gamma, 6:PID=hadron, 7:PID=electron, 8:others
-    enum {NCUT2=9};  //0:all, 1:E1,E2>5GeV, 2:FV, 3:LSgap, 4:NSGap 5:PID=gg, 6:PID=hh, 7:ee, 8:other PID combos
+    enum {NCUT1=9};   
+    enum {NCUT2=11};  
     
     void fmsFpsAlignment(); 
     
@@ -124,7 +127,7 @@ private:
     TH2F* mPxy[NCUT2];
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsFpsMaker.h,v 1.3 2015/10/21 15:51:01 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsFpsMaker.h,v 1.4 2015/10/29 21:22:01 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsFpsMaker,0);
 };

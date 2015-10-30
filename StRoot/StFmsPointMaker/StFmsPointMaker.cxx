@@ -1,6 +1,10 @@
-// $Id: StFmsPointMaker.cxx,v 1.4 2015/10/21 15:49:12 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.5 2015/10/29 21:17:41 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.5  2015/10/29 21:17:41  akio
+// Fix small scale differebce for small cells when converting coordinates while mMergeSmallToLarge is on
+// Cleaning up debug prints
+//
 // Revision 1.4  2015/10/21 15:49:12  akio
 // Adding 3 options to control how reconstruction works:
 //   setGlobalRefit(int v=1)
@@ -132,7 +136,8 @@ int StFmsPointMaker::clusterEvent() {
   mFmsCollection->setMergeSmallToLarge(mMergeSmallToLarge);
   mFmsCollection->setGlobalRefit(mGlobalRefit);
   mFmsCollection->setTry1PhotonFit(mTry1PhotonFitWhen2PhotonFitFailed);
-  mFmsCollection->sortPointsByEnergy();
+  mFmsCollection->sortPointsByEnergy();  
+  LOG_INFO << Form("Found %d Clusters and %d Points",mFmsCollection->numberOfClusters(),mFmsCollection->numberOfPoints()) << endm;
   return kStOk;
 }
 
@@ -150,7 +155,7 @@ int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   for (auto cluster = clusters.begin(); cluster != clusters.end(); ++cluster) {
     processTowerCluster(cluster->get(), detectorId);
   }  // for
-  LOG_INFO << Form("Found %d clusters for det=%d",clusters.size(),detectorId)<<endm;
+  LOG_DEBUG << Form("Found %d clusters for det=%d",clusters.size(),detectorId)<<endm;
   return kStOk;
 }
 
@@ -243,10 +248,13 @@ StFmsPoint* StFmsPointMaker::makeFmsPoint(
   float y=photon.y;
   int det=detectorId;
   if(mMergeSmallToLarge>0){
-      float wx=mFmsDbMaker->getXWidth(kFmsNorthLargeDetId);//take large cell width since all merged to large cell
-      float wy=mFmsDbMaker->getYWidth(kFmsNorthLargeDetId);
-      if(x<8.0*wx && y>9.0*wy && y<25.0*wy){ // Central hole, those are small cell merged to large
-	  y = y - 9.0*wy;
+      float lwx=mFmsDbMaker->getXWidth(kFmsNorthLargeDetId);//take large cell width since all merged to large cell
+      float lwy=mFmsDbMaker->getYWidth(kFmsNorthLargeDetId);
+      float wx=mFmsDbMaker->getXWidth(kFmsNorthSmallDetId);
+      float wy=mFmsDbMaker->getYWidth(kFmsNorthSmallDetId);
+      if(x<8.0*lwx && y>9.0*lwy && y<25.0*lwy){ // Central hole, those are small cell merged to large
+	  x = x/lwx*1.5*wx;
+	  y = (y/lwy - 9.0)*1.5*wy;
 	  det+=2;
       }
   }
@@ -270,7 +278,7 @@ bool StFmsPointMaker::populateTowerLists() {
       return false;
   }  // if
   auto& hits = mFmsCollection->hits();
-  LOG_INFO << "Found nhits = " << hits.size() << endm;
+  LOG_DEBUG << "Found nhits = " << hits.size() << endm;
   float sumE=0.0;
   int n=0;
   for (auto i = hits.begin(); i != hits.end(); ++i) {
@@ -302,10 +310,9 @@ bool StFmsPointMaker::populateTowerLists() {
       n++;
     }  // if
   }  // for
-  LOG_INFO << Form("NValidHit=%d Esum=%f Max=%f",n,sumE,mMaxEnergySum) << endm;
+  LOG_INFO << Form("NHit=%d NValidHit=%d Esum=%f Max=%f",hits.size(),n,sumE,mMaxEnergySum) << endm;
   if(sumE<=0.0 || sumE>mMaxEnergySum) {
-      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?) or below zero",sumE,mMaxEnergySum)<< endm;
-      LOG_INFO << "Skipping clustering and fitting photons"<< endm;
+      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?) or below zero. Skipping!",sumE,mMaxEnergySum)<< endm;
       return false;
   }
   return true;

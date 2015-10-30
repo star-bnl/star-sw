@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.155 2015/10/12 20:46:57 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.156 2015/10/30 13:37:10 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.156  2015/10/30 13:37:10  jwebb
+// Removed unnecessary printout of number of FTS hits.
+//
 // Revision 1.155  2015/10/12 20:46:57  jwebb
 // Hit definition and starsim to root interface for FTS.
 //
@@ -1490,7 +1493,6 @@ Int_t St_geant_Maker::Make() {
   nhits=0;
 
   geant3 -> Gfnhit("FTSH","FTSA", nhits); 
-   LOG_INFO << "FTSH/FTSA nhits=" << nhits << endm;
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
     m_DataSet->Add(  g2t_fts_hit );

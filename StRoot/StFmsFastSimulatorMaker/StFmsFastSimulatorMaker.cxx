@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.6 2015/10/20 19:52:36 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.7 2015/10/29 21:19:16 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.7  2015/10/29 21:19:16  akio
+// adjust debug prints
+//
 // Revision 1.6  2015/10/20 19:52:36  akio
 // Setting default for mFpsNPhotonPerMIP to 100.0
 //
@@ -86,13 +89,13 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
   // Read the g2t table
   St_g2t_emc_hit* hitTable = static_cast<St_g2t_emc_hit*>(GetDataSet("g2t_fpd_hit"));
   if (!hitTable) {
-    LOG_INFO << "g2t_fpd_hit table is empty" << endm;
+    LOG_DEBUG << "g2t_fpd_hit table is empty" << endm;
     return;  // Nothing to do
   }  // if
 
   // Loop over FPD hits and accumurate hits
   const Int_t nHits = hitTable->GetNRows();
-  LOG_DEBUG << "g2t_fpd_hit table has " << nHits << " hits" << endm;
+  //LOG_DEBUG << "g2t_fpd_hit table has " << nHits << " hits" << endm;
   const g2t_emc_hit_st* hit = hitTable->GetTable();
   StPtrVecFmsHit hits; //temp storage for hits
   for (Int_t i=0; i < nHits; ++i, ++hit) {
@@ -101,6 +104,7 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
       Int_t channel;
       if(detectorId!=kFpsDetId) channel=hit->volume_id % 1000;
       else                      channel=dbMaker->fpsSlatIdFromG2t(hit->volume_id);
+      //LOG_INFO << Form("volid=%8d det=%2d ch=%4d e=%f\n",hit->volume_id,detectorId,channel,hit->de);
       if(detectorId<0 || detectorId>=NDET || channel<0 || channel>=NCH){
 	  LOG_DEBUG << Form("det or ch out of range det=%d ch=%d",detectorId,channel) << endm;
 	continue;
