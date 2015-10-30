@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.50 2014/01/15 22:00:04 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.50.6.1 2015/10/30 19:08:41 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -44,7 +44,10 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mId(0), mType(0), mFlag(0), mFlagExtension(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
   mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), 
   /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ 
-  mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1), mIdTruth(0), mQuality(0), mIdParentVx(0)  {
+  mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1), mIdTruth(0), mQuality(0), mIdParentVx(0),  
+  mNumberOfMcHits({0,0,0,0,0}),
+  mNumberOfGoodMcHits({0,0,0,0,0})
+{
 
   const StGlobalTrack* globalTrack = dynamic_cast<const StGlobalTrack*>(track->node()->track(global));
 
@@ -56,6 +59,17 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mIdTruth = track->idTruth();
   mQuality = track->qaTruth();
   mIdParentVx = track->idParentVx();
+  mNumberOfMcHits[0] = track->numberOfMcHits( kTpcId );
+  mNumberOfMcHits[1] = track->numberOfMcHits( kPxlId );
+  mNumberOfMcHits[2] = track->numberOfMcHits( kIstId );
+  mNumberOfMcHits[3] = track->numberOfMcHits( kSsdId );
+  mNumberOfMcHits[4] = track->numberOfMcHits( kUnknownId );
+  mNumberOfGoodMcHits[0] = track->numberOfGoodMcHits( kTpcId );
+  mNumberOfGoodMcHits[1] = track->numberOfGoodMcHits( kPxlId );
+  mNumberOfGoodMcHits[2] = track->numberOfGoodMcHits( kIstId );
+  mNumberOfGoodMcHits[3] = track->numberOfGoodMcHits( kSsdId );
+  mNumberOfGoodMcHits[4] = track->numberOfGoodMcHits( kUnknownId );
+
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINES
@@ -694,18 +708,44 @@ Double_t StMuTrack::dEdxPull(Double_t mass, Bool_t fit, Int_t charge) const {
       dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(momentum*TMath::Abs(charge)/mass)));
       dedx_resolution = probPidTraits().dEdxErrorFit();
     }
-    if (dedx_resolution > 0)
+    if (dedx_resolution > 0) 
       z = TMath::Log(dedx_measured/dedx_expected)/dedx_resolution;
   }
   return z;
 }
 //________________________________________________________________________________
-
+//________________________________________________________________________________
+int StMuTrack::numberOfMcHits( const StDetectorId det ) const 
+{
+  int mydet; switch(det){
+	case kTpcId: mydet = 0; break;
+	case kPxlId: mydet = 1; break;
+	case kIstId: mydet = 2; break;
+	case kSsdId: mydet = 3; break;
+	default:     mydet = 4;	  
+	}
+	return mNumberOfMcHits[mydet];
+};
+//________________________________________________________________________________
+int StMuTrack::numberOfGoodMcHits( const StDetectorId det ) const 
+{
+  int mydet; switch(det){
+	case kTpcId: mydet = 0; break;
+	case kPxlId: mydet = 1; break;
+	case kIstId: mydet = 2; break;
+	case kSsdId: mydet = 3; break;
+	default:     mydet = 4;	  
+	}
+	return mNumberOfGoodMcHits[mydet];
+};
 ClassImp(StMuTrack)
 
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.50.6.1  2015/10/30 19:08:41  perev
+ * MCHits info added
+ *
  * Revision 1.50  2014/01/15 22:00:04  fisyak
  * Add method to calculate dE/dx pulls for I70 and Ifit
  *

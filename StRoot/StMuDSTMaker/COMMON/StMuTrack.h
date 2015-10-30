@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.49 2014/02/28 05:40:09 jdb Exp $
+ * $Id: StMuTrack.h,v 1.49.6.1 2015/10/30 19:09:02 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -149,11 +149,13 @@ class StMuTrack : public TObject {
     Int_t           idParentVx() const {return mIdParentVx;}
     void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
+    Int_t numberOfMcHits( const StDetectorId id ) const;
+    Int_t numberOfGoodMcHits( const StDetectorId id ) const;
 
 protected:
   Int_t mId;
   Short_t mType;
-  Short_t mFlag;
+  Short_t mFlag; 
   UInt_t  mFlagExtension; // bit wise fast detector matching status
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
@@ -198,6 +200,8 @@ protected:
   UShort_t         mIdTruth; // MC track id if any 
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
   Int_t         mIdParentVx;
+  UShort_t                mNumberOfMcHits[5]; // Number of MC hits on track
+  UShort_t                mNumberOfGoodMcHits[5]; // Number of MC hits on track with correct idtruth
   void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -266,6 +270,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.49.6.1  2015/10/30 19:09:02  perev
+ * MCHits info added
+ *
  * Revision 1.49  2014/02/28 05:40:09  jdb
  * jdb StMuTrack: Added setMtdPidTraits, StMuMtdPidTraits: removed mtdHit(), MtdHit(), setMtdHit()
  *
