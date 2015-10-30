@@ -131,10 +131,10 @@ static int nCall=0; nCall++;
       mSel.Add(nexHit->x(),nexHit);
 
     } //endMultiIter loop
-    if (nAccHits<kMinHits) 	continue;
+    if (nAccHits<fMinHits) 	continue;
 
     int nHits = mSel.Select();
-    if (nHits < kMinHits) 	continue;
+    if (nHits < fMinHits) 	continue;
     fSeedHits.clear();
     fSeedHits+=mSel.Get();
     const THelixTrack *hel =  Approx();
