@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.48 2015/06/10 17:29:24 perev Exp $
+// $Id: StvMaker.cxx,v 1.49 2015/10/30 19:28:34 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -72,6 +72,8 @@ More detailed: 				<br>
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
+#include "StvUtil/StvHitErrCalculator.h"
+#include "StvFtsHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
@@ -147,6 +149,8 @@ Int_t StvMaker::InitDetectors()
 
 
 //		Activate detectors
+  if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
+                            SetAttr("activeTpc",0);}
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
@@ -209,7 +213,11 @@ Int_t StvMaker::InitDetectors()
       int nHP = tgh->SetHitErrCalc(kTpcId,hec,sel);
       Info("Init","%s: %d HitPlanes",innOut,nHP);
       assert(nHP);
-  } }
+  }
+  
+//	After 2009 tpcegeo3 is used
+    if (yGeo>=2009) kit->HitLoader()->SetHitActor(new StvTpcHitActor);
+  }
 
   if (IAttr("activeEtr")) {	//Etr error calculators
     TString myName("EtrHitErrs"); if (mFETracks) myName+="FE";
@@ -255,11 +263,16 @@ Int_t StvMaker::InitDetectors()
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
 
+  if (IAttr("activeFTS")) {    // FTS error calculator
+    mSeedFinder->SetMinHits(3);
+    TString myName("FtsHitErrs"); 
+    StvHitErrCalculator *hec = new StvFtsHitErrCalculator(myName);
+    Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
+    Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
+  }
+
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
-
-//	After 2009 tpcegeo3 is used
-  if (yGeo>=2009) kit->HitLoader()->SetHitActor(new StvTpcHitActor);
 
 //		In case of fithiterr utility working, selects special hits to speedup
   if (mFETracks) kit->HitLoader()->SetHitSelector();
@@ -290,8 +303,6 @@ static int initialized = 0;
   app->SetInit(ini);
   app->Init();
 
-  InitDetectors();
-
 
   StvToolkit *kit =StvToolkit::Inst();
 
@@ -300,7 +311,7 @@ static int initialized = 0;
   TString seeds = SAttr("seedFinders");
   if (!seeds.Length()) seeds = "Default";
   TObjArray *tokens = seeds.Tokenize(" .,");
-  StvSeedFinder *seedFinder=0; int seedErr=0; 
+  mSeedFinder=0; int seedErr=0; 
   const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
   const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
 
@@ -311,13 +322,14 @@ static int initialized = 0;
       if (nick==0) {
         assert(gSystem->Load("Vc.so")		>=0);
         assert(gSystem->Load("TPCCATracker.so")	>=0);}
-      seedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
-      assert(seedFinder && !seedErr);
-      kit->SetSeedFinder (seedFinder); break;
-      Info("InitRun","Added %s seed finder",seedFinder->GetName());
+      mSeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+      assert(mSeedFinder && !seedErr);
+      kit->SetSeedFinder (mSeedFinder); break;
+      Info("InitRun","Added %s seed finder",mSeedFinder->GetName());
     }
   };
   delete tokens;
+  InitDetectors();
 
   StvKalmanTrackFinder *tf = new StvKalmanTrackFinder;
   kit->SetTrackFinder(tf);
