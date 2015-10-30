@@ -102,13 +102,13 @@ enum {kRepeatSeedFinder = 2};
 	  if (ans) 				break;
           StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
-          if (nHits<=3) 			break;
+          if (nHits<3) 			break;
 //=============================
 	  nAdded = FindTrack(1);
 //=============================
           if (nAdded<=0)			continue;;
           nHits = mCurrTrak->GetNHits();
-          if (nHits<=3) 			break;
+          if (nHits<3) 				break;
 // 			few hits added. Refit track to beam again 
 //=============================
 	  ans = Refit(0);
@@ -178,12 +178,6 @@ hitCount->Clear();
     err[0].Set(mSeedHelx,Hz); err[0]*= kKalmanErrFact; 
     par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
     err[0].Backward();
-// {
-// static int when=0; when++;
-// if ((when%100)==1) {
-//   double d[3];par[0].getDir(d);
-//   assert(TCL::vdot(d,par[0].P,3)>0);
-// }}
 
   } else 	{//Forward or backward tracking
  
@@ -228,7 +222,8 @@ StvFitDers derivFit;
     if (idive & StvDiver::kDiveBreak) 		break;
     if (idive & StvDiver::kDiveDca  ) 		break;
 
-    totLen+=mDive->GetLength();
+    double deltaL = mDive->GetLength();
+    totLen+=deltaL;
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
 		// Stop tracking when too big Z or Rxy
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
@@ -254,6 +249,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
 
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
     else        {mCurrTrak->push_back(curNode);innNode=preNode;outNode=curNode;}
+    if (outNode){}
     nNode++;		// assert(nNode<200);
     if (nNode>200) { //Something very wrong
       Error("FindTrack","Too many nodes =200 Skip track");
@@ -298,10 +294,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       minXi2[1]=minXi2[0]; minXi2[0] = myXi2;
       minHit[1]=minHit[0]; minHit[0] = hit; minIdx = ihit;
     }
-if (minHit[0] && minHit[0]->getRxy()<10) {
-  StvDebug::Count("PxlXi2__1",minXi2[0]);
-  assert(minHit[0]->detector()->GetDetId() == kPxlId);
-}
+    if (minIdx){};
 
     if (mySkip) break; 		//Track Errors too big
 
@@ -313,7 +306,7 @@ if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__2",minXi2[0])
       
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
-      if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
+      if (iuerr<=0 || (nHits<3)) {		//Hit accepted
 if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0]);}
         hitCount->AddHit();
 	nHits++;nTotHits++;assert(nHits<=100);
