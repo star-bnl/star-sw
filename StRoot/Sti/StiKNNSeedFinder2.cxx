@@ -45,13 +45,14 @@ public:
 class StvSeedFinder
 {
 public:
-   StvSeedFinder(const char *name=0)	{if (name){};}
+   StvSeedFinder(const char *name=0)	{if (name){};fMinHits = 5;}
    void Clear() 			{fSeedHits.clear();}
 const THelixTrack* Approx() 		{return (THelixTrack*)(-1);}
 const StvHits *GetHits() const 		{return &fSeedHits;}
 void  FeedBack(int)     {};
    float fXi2[2];
 protected:
+   int fMinHits;
    StvHits  fSeedHits;
    
 };
