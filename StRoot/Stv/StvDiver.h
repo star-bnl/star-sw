@@ -122,6 +122,7 @@ StvELossTrak *fELossTrak;	//Energy loss calculator
 StvMCField   *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
 TGeoVolume *fHALLVolu;
+TGeoNode   *fPrevNode;
 char fLast[1];
 TString fCurrPath;		//Path in current  Dive()
 TString fPrevPath;		//Path in previous Dive()
