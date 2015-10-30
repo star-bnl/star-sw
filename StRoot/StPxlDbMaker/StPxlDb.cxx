@@ -55,6 +55,8 @@
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
+#else /* __NEW_PXLDB__ */
+#include "TEnv.h"
 #endif /* ! __NEW_PXLDB__ */
 
 
@@ -164,9 +166,17 @@ void StPxlDb::setGeoHMatrices()
                                                  * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
                                                  * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
 #else /* __NEW_PXLDB__ */
-            mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix()) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
-                                                 * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
-                                                 * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+	    if (gEnv->GetValue("IdealHFT",0) == 0) {
+	      mGeoHMatrixSensorOnGlobal[i][j][k] = (StTpcDb::instance()->Tpc2GlobalMatrix()) * 
+		mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
+		* mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
+		* mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+	    } else {
+	      mGeoHMatrixSensorOnGlobal[i][j][k] = 
+		mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
+		* mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
+		* mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
+	    }
 #endif /* ! __NEW_PXLDB__ */
          }
 

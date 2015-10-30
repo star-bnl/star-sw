@@ -10,7 +10,7 @@
 #include "StDetectorDbMaker/St_istMappingC.h"
 #include "StDetectorDbMaker/St_istControlC.h"
 #include "StDetectorDbMaker/St_istChipConfigC.h"
-
+#include "TEnv.h"
 ClassImp(StIstDbMaker)
 
 
@@ -26,6 +26,18 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(new StIstDb
 Int_t StIstDbMaker::Init()
 {
    ToWhiteConst("ist_db", mIstDb);
+   const Char_t *TabNames[3] = {
+     //     "idsOnTpc", //set in PxlDb
+     //     "pstOnIds",
+     "istOnPst",
+     "istLadderOnIst",
+     "istSensorOnLadder"};
+   if (gEnv->GetValue("IdealHFT",0) != 0) {
+     for (Int_t i = 0; i < 3; i++) {
+       SetFlavor("sim",TabNames[i]);
+       LOG_INFO << "StIstDbMaker::Init Using \"sim\" flavor for " << TabNames[i] << endm;
+     }
+   }
 
    return kStOk;
 }
@@ -34,7 +46,6 @@ Int_t StIstDbMaker::Init()
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
-
    LOG_DEBUG << "StIstDbMaker::InitRun() - Access data from database" << endm;
 
    // Get IDS positionment relative to TPC

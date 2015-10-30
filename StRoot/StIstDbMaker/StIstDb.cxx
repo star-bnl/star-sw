@@ -12,7 +12,7 @@
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
-
+#include "TEnv.h"
 THashList *StIstDb::mgRotList = 0;
 StIstDb* StIstDb::fgInstance = 0;
 ClassImp(StIstDb)
@@ -42,7 +42,7 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
    mgRotList->SetOwner(kFALSE);
 
    //get TPC positionement relative to STAR
-   if (gStTpcDb) {
+   if (gStTpcDb && gEnv->GetValue("IdealHFT",0) == 0) {
       mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
    }
    else {

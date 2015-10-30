@@ -61,6 +61,8 @@
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #endif /* __NEW_PXLDB__ */
+#include "TEnv.h"
+#include "TSystem.h"
 
 ClassImp(StPxlDbMaker)
 //_____________________________________________________________________________
@@ -74,6 +76,19 @@ StPxlDbMaker::StPxlDbMaker(const char *name) :
 Int_t StPxlDbMaker::Init()
 {
    ToWhiteConst("pxl_db", mPxlDb);
+   const Char_t *TableNames[] = {"Geometry/pxl/idsOnTpc",
+				 "Geometry/pxl/pstOnIds",
+				 "Geometry/pxl/pxlOnPst",
+				 "Geometry/pxl/pxlHalfOnPxl",
+				 "Geometry/pxl/pxlSectorOnHalf",
+				 "Geometry/pxl/pxlLadderOnSector",
+				 "Geometry/pxl/pxlSensorOnLadder"};
+   if (gEnv->GetValue("IdealHFT",0) != 0) {
+     for (Int_t i = 0; i < 7; i++) {
+       SetFlavor("sim",gSystem->BaseName(TableNames[i]));
+       LOG_INFO << "StPxlDbMaker::Init Using \"sim\" flavor for " << gSystem->BaseName(TableNames[i]) << endm;
+     }
+   }
 
    return kStOk;
 }
@@ -83,34 +98,14 @@ Int_t StPxlDbMaker::Init()
 Int_t StPxlDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
-
    // set geoHMatrices
 #ifndef __NEW_PXLDB__
-   St_Survey *idsOnTpc          = (St_Survey *) GetDataBase("Geometry/pxl/idsOnTpc");
-   if (! idsOnTpc)          {LOG_WARN << "idsOnTpc has not been found"  << endm; return kStErr;}
-
-   St_Survey *pstOnIds          = (St_Survey *) GetDataBase("Geometry/pxl/pstOnIds");
-   if (! pstOnIds)          {LOG_WARN << "pstOnIds has not been found"  << endm; return kStErr;}
-
-   St_Survey *pxlOnPst          = (St_Survey *) GetDataBase("Geometry/pxl/pxlOnPst");
-   if (! pxlOnPst)          {LOG_WARN << "pxlOnPst has not been found"  << endm; return kStErr;}
-
-   St_Survey *pxlHalfOnPxl         = (St_Survey *) GetDataBase("Geometry/pxl/pxlHalfOnPxl");
-   if (! pxlHalfOnPxl)         {LOG_WARN << "pxlHalfOnPxl has not been found"  << endm; return kStErr;}
-
-   St_Survey *pxlSectorOnHalf     = (St_Survey *) GetDataBase("Geometry/pxl/pxlSectorOnHalf");
-   if (! pxlSectorOnHalf)     {LOG_WARN << "pxlSectorOnHalf has not been found"  << endm; return kStErr;}
-
-   St_Survey *pxlLadderOnSector  = (St_Survey *) GetDataBase("Geometry/pxl/pxlLadderOnSector");
-   if (! pxlLadderOnSector)  {LOG_WARN << "pxladderOnSector has not been found"  << endm; return kStErr;}
-
-   St_Survey *pxlSensorOnLadder  = (St_Survey *) GetDataBase("Geometry/pxl/pxlSensorOnLadder");
-   if (! pxlSensorOnLadder)  {LOG_WARN << "pxlSensorOnLadder has not been found"  << endm; return kStErr;}
-
-   Survey_st *tables[7] = {idsOnTpc->GetTable(), pstOnIds->GetTable(), pxlOnPst->GetTable(), pxlHalfOnPxl->GetTable(),
-                           pxlSectorOnHalf->GetTable(), pxlLadderOnSector->GetTable(), pxlSensorOnLadder->GetTable()
-                          };
-
+   Survey_st *tables[7];
+   for (Int_t i = 0; i < 7; i++) {
+     St_Survey *survey = (St_Survey *) GetDataBase(TableNames[i]);
+     if (! survey)  {LOG_WARN << TableNames[i] << " has not been found"  << endm; return kStErr;}
+     Survey_st *tables[i] = survey->GetTable();
+   }
    mPxlDb->setGeoHMatrices(tables);
 #else /* __NEW_PXLDB__ */
    mPxlDb->setGeoHMatrices();
