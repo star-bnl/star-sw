@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.26 2015/07/27 21:38:30 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.27 2015/10/30 19:26:57 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -91,6 +91,7 @@ StvHits *myHits=0;
 if (myGraph) { //create canvas
   myDraw = new StvDraw();
   myHits = new StvHits;
+  if (myHits) {/*noopt*/}
 }
   mHitIter->Reset(stev);
   int nSel = (mHitSelector)? mHitSelector->Edit(stev):-1;
@@ -148,7 +149,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
    stvHit->set(stHit,xyz);
-   int seed = 0;
+   int seed = 1;
    if (did == kTpcId) {	// Special case for TPCHit. Prompt info added
 //   enum {zPrompt = 205,rMiddle=124};
      enum {zPrompt = 205,rMiddle=0};
@@ -160,59 +161,6 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
-
-
-#if 0  
-if (did == kIstId) {
-  StIstHit *IstHit = (StIstHit*)stHit;
-  int sec = 1;
-  int lad = IstHit->getLadder();
-  int sen = IstHit->getSensor();
-  int myPath = 0;
-  const char* path = strstr(hp->GetName(),"IBMO");
-  static int nk=0;
-  for (int jk=0;jk<3;jk++) {
-    path= strstr(path,"_");
-    assert(path);
-    path++;
-    myPath = myPath*100+atoi(path);
-  }
-  int ihPath = sen+100*(lad+100*sec);
-static int ihPathWas=0,myPathWas=0;
-
-  if (myPath!=ihPath){
-     nk++;
-     if (myPath!=myPathWas || ihPath!=ihPathWas)
-       printf("%5d - IST: %s = %d %d\n",nk,hp->GetName(),myPath,ihPath);
-     myPathWas =myPath; ihPathWas=ihPath;
-} }
-
-if (did == kPxlId) {
-  StPxlHit *pxlHit = (StPxlHit*)stHit;
-  int sec = pxlHit->sector();
-  int lad = pxlHit->ladder();
-  int sen = pxlHit->sensor();
-  int myPath = 0;
-  const char* path = strstr(hp->GetName(),"PXLA");
-  static int nk=0;
-  for (int jk=0;jk<3;jk++) {
-    path= strstr(path,"_");
-    assert(path);
-    path++;
-    myPath = myPath*100+atoi(path);
-  }
-  int ihPath = sen+100*(lad+100*sec);
-static int ihPathWas=0,myPathWas=0;
-
-  if (myPath!=ihPath){
-     nk++;
-     if (myPath!=myPathWas || ihPath!=ihPathWas)
-       printf("%5d - PXL: %s = %d %d\n",nk,hp->GetName(),myPath,ihPath);
-     myPathWas =myPath; ihPathWas=ihPath;
-} }
-#endif
-
-
 
    if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
