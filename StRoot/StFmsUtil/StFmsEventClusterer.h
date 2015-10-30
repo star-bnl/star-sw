@@ -1,6 +1,10 @@
-// $Id: StFmsEventClusterer.h,v 1.3 2015/10/21 15:58:05 akio Exp $
+// $Id: StFmsEventClusterer.h,v 1.4 2015/10/30 21:33:56 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.4  2015/10/30 21:33:56  akio
+// fix parameter initialization
+// adding new cluster categorization method
+//
 // Revision 1.3  2015/10/21 15:58:05  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -59,7 +63,7 @@ class StFmsEventClusterer: public TObject {
    */
 
   //  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
-  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t try1Photon);
+  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t mergeSmallToLarge, Int_t try1Photon);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -206,6 +210,7 @@ class StFmsEventClusterer: public TObject {
 
   StFmsDbMaker *mFmsDbMaker; //!
   Int_t mGlobalRefit;        //!
+  Int_t mMergeSmallToLarge;  //!
   Int_t mTry1PhotonFitWhen2PhotonFitFailed;//!
 
   ClassDef(StFmsEventClusterer, 0)

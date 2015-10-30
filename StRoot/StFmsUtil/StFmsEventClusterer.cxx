@@ -1,6 +1,10 @@
-// $Id: StFmsEventClusterer.cxx,v 1.6 2015/10/29 21:14:55 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.7 2015/10/30 21:33:56 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.7  2015/10/30 21:33:56  akio
+// fix parameter initialization
+// adding new cluster categorization method
+//
 // Revision 1.6  2015/10/29 21:14:55  akio
 // increase max number of clusters
 // a bug fixes in valley tower association
@@ -131,11 +135,11 @@ const fms::StFmsFittedPhoton* findLowestEnergyPhoton(
 
 /* Functor returning true if a tower matches (row, column) */
 struct HasRowColumn {
-  int row, column;
-  HasRowColumn(int r, int c) : row(r), column(c) { }
-  bool operator()(const fms::StFmsTower* tower) const {
-    return tower->row() == row && tower->column() == column;
-  }
+    int det, row, column;
+    HasRowColumn(int d, int r, int c) : det(d), row(r), column(c) { }
+    bool operator()(const fms::StFmsTower* tower) const {
+	return tower->hit()->detectorId() == det && tower->row() == row && tower->column() == column ;
+    }
 };
 
 /*
@@ -143,10 +147,9 @@ struct HasRowColumn {
 
  Return a pointer to the matching tower if one is found, nullptr otherwise.
  */
-const fms::StFmsTower* searchClusterTowers(
-    int row, int column, const fms::StFmsTowerCluster& cluster) {
+const fms::StFmsTower* searchClusterTowers(int det,int row, int column, const fms::StFmsTowerCluster& cluster) {
   auto found = std::find_if(cluster.towers().begin(), cluster.towers().end(),
-                            HasRowColumn(row, column));
+                            HasRowColumn(det, row, column));
   if (found != cluster.towers().end()) {
     return *found;
   }  // if
@@ -263,9 +266,10 @@ struct GlobalPhotonFitParameters {
 
 namespace FMSCluster {
   StFmsEventClusterer::StFmsEventClusterer( //const StFmsGeometry* geometry,
-					   StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t try1PhotonFit)
+					   StFmsDbMaker* db, Int_t detectorId, 
+					   Int_t globalrefit, Int_t mergeSmallToLarge, Int_t try1PhotonFit)
       : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db), 
-	mGlobalRefit(globalrefit), mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit){ }
+	mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit){ }
 
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
@@ -334,8 +338,8 @@ Bool_t StFmsEventClusterer::fitClusters() {
   bool badFit = false;
   for (auto iter = mClusters.begin(); iter != mClusters.end(); ++iter) {
     int category = mClusterFinder.categorise(iter->get());
+    //int category = mClusterFinder.categorise2(iter->get());
     mFitter->setTowers(&(*iter)->towers());
-    //LOG_INFO << "Cluster category = " << category << endm;
     switch (category) {
       case k1PhotonCluster:	
         fit1PhotonCluster(iter->get());
@@ -354,13 +358,17 @@ Bool_t StFmsEventClusterer::fitClusters() {
     }  // switch
     if (category == k2PhotonCluster && (*iter)->chiSquare() > BAD_2PH_CHI2) {
 	float chi2=(*iter)->chiSquare();
-	LOG_INFO << Form("chi2=%f >  BAD_2PH_CHI2=%f", (*iter)->chiSquare(),BAD_2PH_CHI2) << endm;
+	LOG_DEBUG << Form("chi2=%f >  BAD_2PH_CHI2=%f",chi2,BAD_2PH_CHI2) << endm;
 	if(mTry1PhotonFitWhen2PhotonFitFailed){
-	    fit1PhotonCluster(iter->get());
-	    LOG_INFO << Form("Tried 1-photon fit resulted with chi2=%f", (*iter)->chiSquare())<< endm;	
-	    if(chi2<(*iter)->chiSquare()){
-		LOG_INFO << "2-photon fit was better, returning bad" << endm;
-		badFit = true;
+	    const std::vector<StFmsFittedPhoton> keep = (*iter)->photons(); //copy in case 2-photon fit is better
+	    fit1PhotonCluster(iter->get()); //try 1-photon fit
+	    float chi1=(*iter)->chiSquare();
+	    LOG_DEBUG << Form("Tried 1-photon fit resulted with chi2=%f", chi1)<< endm;	
+	    if(chi2<chi1){
+		LOG_DEBUG << "2-photon fit was better" << endm;
+		(*iter)->photons().assign(keep.begin(), keep.end());
+		(*iter)->setChiSquare(chi2);
+		//badFit = true;
 	    }else{
 		LOG_INFO << "Taking 1-photon fit" << endm;
 	    }
@@ -455,7 +463,7 @@ Int_t StFmsEventClusterer::fitAmbiguousCluster(ClusterIter towerCluster) {
       const double chiSquare2Photon=fit2PhotonCluster(towerCluster);
       LOG_DEBUG << "fitAmbiguousCluster chi2 for 2photon fit="<<chiSquare2Photon<<endm;      
       if(chiSquare2Photon <= chiSquare1Photon ){
-	  LOG_INFO << "fitAmbiguousCluster 2 photon fit is better, validate2ndPhoton"<<endm;
+	  LOG_DEBUG << "fitAmbiguousCluster 2 photon fit is better, validate2ndPhoton"<<endm;
 	  if(validate2ndPhoton(towerCluster)) {
 	      category = k2PhotonCluster;
 	  }
@@ -519,24 +527,33 @@ Double_t StFmsEventClusterer::fitGlobalClusters(unsigned int nPhotons,
 */
 bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   // Find the tower hit by the lowest energy photon in a cluster
-  LOG_INFO <<"StFmsEventClusterer::validate2ndPhoton" <<endm;
   const StFmsFittedPhoton* photon = findLowestEnergyPhoton(cluster->get());
-  int column = 1 + int(photon->x / mTowerWidthXY.at(0));
-  int row = 1 + int(photon->y / mTowerWidthXY.at(1));
-  const StFmsTower* tower = searchClusterTowers(row, column, **cluster);
+  double x=photon->x / mTowerWidthXY.at(0);
+  double y=photon->y / mTowerWidthXY.at(1);
+  int det=mDetectorId;
+  int column = 1 + int(x);
+  int row    = 1 + int(y);
+  if(mMergeSmallToLarge>0 && x<8.0 && y>9.0 && y<25.0){
+      column = 1 + int(x*1.5);
+      row    = 1 + int((y-9.0)*1.5);
+      det+=2;
+  }
+  const StFmsTower* tower = searchClusterTowers(det, row, column, **cluster);
   // If tower is nullptr, the photon doesn't hit in a tower in this cluster.
   if (!tower) {
       LOG_INFO << "StFmsEventClusterer::validate2ndPhoton No hit on photon" << endm;
-    //return false;
+      return false;
   }  // if
   // Check if the fitted energy is too large compared to the energy of the tower
   if (tower->hit()->energy() < VALID_FT * photon->energy) {
-    return false;
+      LOG_INFO << "StFmsEventClusterer::validate2ndPhoton hit on photon too low" << endm;
+      return false;
   }  // if
   // Check if the 2nd photon's "high-hower" energy is too large compared to its
   // fitted energy. If so, it is probably splitting one photon into two
   if (tower->hit()->energy() > VALID_2ND_FT * photonEnergyInTower(tower, photon)) {
-    return false;
+      LOG_INFO << "StFmsEventClusterer::validate2ndPhoton photon energy too low compared to other photon" << endm;
+      return false;
   }  // if
   // Check that the 2nd photon is not near the edge of another cluster
   const double energyInOwnCluster =
@@ -544,6 +561,7 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   for (ClusterConstIter i = mClusters.begin(); i != mClusters.end(); ++i) {
     if (i != cluster) {  // Skip the photon's own cluster
       if (photonEnergyInCluster(i->get(), photon) > VALID_E_OWN * energyInOwnCluster) {
+	  LOG_INFO << "StFmsEventClusterer::validate2ndPhoton photon is at edge of another cluster" << endm;
         return false;  // Stop as soon as we fail for one cluster
       }  // if
     }  // if

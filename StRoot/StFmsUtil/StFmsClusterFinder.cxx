@@ -1,6 +1,10 @@
-// $Id: StFmsClusterFinder.cxx,v 1.3 2015/10/29 21:14:55 akio Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.4 2015/10/30 21:33:55 akio Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.4  2015/10/30 21:33:55  akio
+// fix parameter initialization
+// adding new cluster categorization method
+//
 // Revision 1.3  2015/10/29 21:14:55  akio
 // increase max number of clusters
 // a bug fixes in valley tower association
@@ -361,6 +365,36 @@ int StFmsClusterFinder::categorise(StFmsTowerCluster* towerCluster) {
     }  // if
   }  // if
   return cluster->category();
+}
+
+int StFmsClusterFinder::categorise2(StFmsTowerCluster* towerCluster) {
+    StFmsCluster* cluster = towerCluster->cluster();
+    if (cluster->nTowers() < CAT_NTOWERS_PH1) {
+	cluster->setCategory(k1PhotonCluster);
+    }else{  // Categorise cluster based on empirical criteria
+	int det=towerCluster->towers().front()->hit()->detectorId();//detectorId for top cell
+	const double sigma=cluster->sigmaMax();
+	const double e    =cluster->energy();
+	if(det==8 || det==9){
+	    if(sigma > 1/2.5 + 0.002*e + 4.0/e){
+		cluster->setCategory(k2PhotonCluster);
+	    }else if(sigma < 1/2.1 + 2.0/e){
+		cluster->setCategory(k1PhotonCluster);
+	    }else{
+		cluster->setCategory(kAmbiguousCluster);
+	    }
+	}else{
+	    if(sigma > 1/2.5 + 0.002*e + 7.0/e){
+		cluster->setCategory(k2PhotonCluster);
+	    }else if(sigma < 1/2.1 + 4.0/e){
+		cluster->setCategory(k1PhotonCluster);
+	    }else{
+		cluster->setCategory(kAmbiguousCluster);
+	    }
+	}
+	//LOG_INFO << Form("Det=%2d e=%6.2f sigma=%6.3f cat=%1d",det,e,sigma,cluster->category()) <<endm;
+    } 
+    return cluster->category();
 }
 
 int StFmsClusterFinder::findClusters(TowerList* towers, ClusterList* clusters, int detectorId) {
