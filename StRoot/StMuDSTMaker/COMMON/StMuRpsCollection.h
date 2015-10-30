@@ -92,7 +92,7 @@ private:
 
 
 
-ClassDef(StMuRpsCollection,2)
+ClassDef(StMuRpsCollection,3)
 
 };
 inline unsigned char StMuRpsCollection::siliconBunch() const { return mSiliconBunch ; }
