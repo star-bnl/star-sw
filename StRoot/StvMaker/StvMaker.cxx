@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.49 2015/10/30 19:28:34 perev Exp $
+// $Id: StvMaker.cxx,v 1.50 2015/10/30 20:36:02 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -73,7 +73,7 @@ More detailed: 				<br>
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StvUtil/StvHitErrCalculator.h"
-#include "StvFtsHitErrCalculator.h"
+#include "StvUtil/StvFtsHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
