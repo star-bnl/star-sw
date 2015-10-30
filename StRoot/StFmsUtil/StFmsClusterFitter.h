@@ -1,6 +1,10 @@
-// $Id: StFmsClusterFitter.h,v 1.5 2015/10/29 21:14:55 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.6 2015/10/30 21:33:56 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.6  2015/10/30 21:33:56  akio
+// fix parameter initialization
+// adding new cluster categorization method
+//
 // Revision 1.5  2015/10/29 21:14:55  akio
 // increase max number of clusters
 // a bug fixes in valley tower association
@@ -253,9 +257,7 @@ inline double showerShapeComponent(double x, double y, double a, double b) {
 }
 
 inline Double_t StFmsClusterFitter::energyDepositionDistribution(double x, double y, double* parameters){
-
     constexpr double ootwopi = 1.0/2.0/3.14159265358979323846;
-
     return (     showerShapeComponent(x, y, parameters[1], parameters[4])
 	       + showerShapeComponent(x, y, parameters[2], parameters[5])
 	       + showerShapeComponent(x, y, parameters[3], parameters[6]) ) * ootwopi;
