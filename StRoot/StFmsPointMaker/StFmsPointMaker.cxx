@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.5 2015/10/29 21:17:41 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.6 2015/10/30 21:23:04 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.6  2015/10/30 21:23:04  akio
+// *** empty log message ***
+//
 // Revision 1.5  2015/10/29 21:17:41  akio
 // Fix small scale differebce for small cells when converting coordinates while mMergeSmallToLarge is on
 // Cleaning up debug prints
@@ -144,7 +147,7 @@ int StFmsPointMaker::clusterEvent() {
 /* Perform photon reconstruction on a single sub-detector */
 int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
-  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mTry1PhotonFitWhen2PhotonFitFailed);
+  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,mTry1PhotonFitWhen2PhotonFitFailed);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
       LOG_INFO << Form("clusterDetector failed for det=%d",detectorId)<<endm;
