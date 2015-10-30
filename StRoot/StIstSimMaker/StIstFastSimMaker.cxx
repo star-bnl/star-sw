@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.37 2015/08/03 14:26:03 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.38 2015/10/30 19:01:22 perev Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -29,6 +29,15 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : 
 Int_t StIstFastSimMaker::Init()
 {
    LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+   return kStOk;
+}
+
+
+
+//____________________________________________________________
+Int_t StIstFastSimMaker::InitRun(int runNo)
+{
+   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
    if (mBuildIdealGeom && !gGeoManager) {
 
@@ -42,13 +51,6 @@ Int_t StIstFastSimMaker::Init()
       }
    }
 
-   return kStOk;
-}
-
-//____________________________________________________________
-Int_t StIstFastSimMaker::InitRun(int runNo)
-{
-   LOG_INFO << "StIstFastSimMaker::InitRun" << endm;
 
    TDataSet *calibDataSet = GetDataBase("Calibrations/tracker");
    St_HitError *istTableSet = (St_HitError *) calibDataSet->Find("ist1HitError");
