@@ -1860,6 +1860,7 @@ Bfc_st BFC[] = { // standard chains
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"NewTpcAlignment","","",""                           ,"","","Switch on new Tpc Alignment schema",kFALSE},
+  {"IdealHFT"    ,"","",""                                                   ,"","","Use Ideal HFT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}
