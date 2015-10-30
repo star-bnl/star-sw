@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.38 2015/06/18 02:17:14 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.39 2015/10/30 19:39:33 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.39  2015/10/30 19:39:33  perev
+ * do not fill detector id == 0
+ *
  * Revision 1.38  2015/06/18 02:17:14  perev
  * Fix  printout of counting used hits
  *
@@ -1036,7 +1039,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   int nTotHits = dets[0][2];
   int nTpcHits = dets[kTpcId][2];
   const StvNode *node = 0;
-  for (int i=0;i<kMaxDetectorId;i++) {
+  for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][1];
     if (!np) continue;
     assert(np<100);
