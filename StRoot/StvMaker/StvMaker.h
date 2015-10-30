@@ -22,6 +22,7 @@ class StvTrack;
 class StvToolkit;
 class StvVertexFinder;
 class StvEventFiller;
+class StvSeedFinder;
 
 class StvMaker : public StMaker 
 {
@@ -39,14 +40,15 @@ class StvMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.4 2015/08/29 03:38:40 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.5 2015/10/30 19:38:15 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
 
  protected:
     int GeoTest();
 private:
-  char mBeg[1];
+  char mBeg[1]; 
+    StvSeedFinder       *mSeedFinder;
     StvEventFiller      *mEventFiller;
     StvVertexFinder     *mVertexFinder;
     TFile               *mPullFile;
