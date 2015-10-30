@@ -4,6 +4,10 @@
 #include "TObject.h"
 #include <vector>
 
+#include "StMuRpsTrackPoint.h"
+#include "StMuRpsTrack.h"
+#include "TClonesArray.h"
+
 using namespace std;
 
 class StRpsCollection;
@@ -45,6 +49,9 @@ public:
 	double energyCluster(int romanPotId, int planeId, int cluster) const;
 	double xyCluster(int romanPotId, int planeId, int cluster) const;
 	unsigned char qualityCluster(int romanPotId, int planeId, int cluster) const;
+
+	StMuRpsTrackPoint* trackPoint( unsigned int i ) { if ( i < mTrackPoints.size() ) return mTrackPoints[i]; return nullptr; }
+	StMuRpsTrack* track( unsigned int i ) { if ( i < mTracks.size() ) return mTracks[i]; return nullptr; }
 	
 private:
 
@@ -66,10 +73,16 @@ private:
 	int mNumberOfClusters[mNumberOfRomanPot][mNumberOfPlanes];
 
 	vector<double> mPositionCluster[mNumberOfRomanPot][mNumberOfPlanes];
+	vector<double> mPositionRMSCluster[mNumberOfRomanPot][mNumberOfPlanes];
 	vector<short> mLengthCluster[mNumberOfRomanPot][mNumberOfPlanes];
 	vector<double> mEnergyCluster[mNumberOfRomanPot][mNumberOfPlanes];
 	vector<double> mXYCluster[mNumberOfRomanPot][mNumberOfPlanes];		
 	vector<unsigned char> mQualityCluster[mNumberOfRomanPot][mNumberOfPlanes];
+
+	vector<StMuRpsTrackPoint*> 	mTrackPoints;
+	vector<StMuRpsTrack*> 		mTracks;
+
+	StMuRpsTrackPoint* addTrackPoint( StRpsTrackPoint* tp );
 
 /*	double mPositionCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
 	short mLengthCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
