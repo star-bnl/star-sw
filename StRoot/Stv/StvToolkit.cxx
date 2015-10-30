@@ -142,6 +142,15 @@ void StvToolkit::Clear(const char*)
   Field is calcualated via StarMagField class and cashed. 
 */
 //_____________________________________________________________________________
+void StvToolkit::Print(const char*)
+{
+  if (mTrackFactory)	mTrackFactory->print();
+  if (mELossTrakFactory)mELossTrakFactory->print();
+  if (mNodeFactory) 	mNodeFactory->print();
+  if (mHitFactory)  	mHitFactory->print();
+  if (mVertexFactory)   mVertexFactory->print();
+}
+//_____________________________________________________________________________
 void StvToolkit::Reset()
 {
   if (mSeedFinders)  	mSeedFinders->Reset();

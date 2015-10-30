@@ -34,6 +34,7 @@ protected:
   StvToolkit(); 
 public:
 void Clear(const char* opt="");
+void Print(const char* opt="");
 void Reset();
 
 void Init ();
