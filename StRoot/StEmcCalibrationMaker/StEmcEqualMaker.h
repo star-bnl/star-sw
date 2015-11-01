@@ -55,7 +55,7 @@ class StEmcEqualMaker : public StEmcCalibMaker
  							TH2F*             getSlopesTheta() { return mSlopesTheta;}
 							
 							TH1F*             getEtaBinSpec(int,int,TH2F* SPEC=0);
-			        TH1F*             rebin(int,const char *name = "tmp",TH2F* SPEC = NULL);
+			        TH1F*             rebin(int,char*name = "tmp",TH2F* SPEC = NULL);
 							
 							void              drawEtaBin(int, int,TH2F* SPEC=0);
                            
