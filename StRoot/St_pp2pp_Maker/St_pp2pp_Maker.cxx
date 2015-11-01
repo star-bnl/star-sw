@@ -422,13 +422,7 @@ Int_t St_pp2pp_Maker::readAccelerateParameter() {
 		<< mLDX[0] << " " << mLDX[1] << " " 
 		<< mBendingAngle[0] << " " << mBendingAngle[1] << " "
 		<< mConversion_TAC_time << endm ;
-      /*
-      for (Int_t i = 0; i < descr->GetNRows(); i++) {
-	for ( Int_t j = 0; j< 32 ; j++ )
-	  std::cout << mOffsetTable[i].rp_offset_plane[j] << " "  ; 
-	cout << endl ;
-      }
-      */
+
     } else {
       LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppAcceleratorParameters table (wrong timestamp?). Nothing to return, then" << endm ;
     }
