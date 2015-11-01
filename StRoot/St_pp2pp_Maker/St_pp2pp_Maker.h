@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.26 2015/10/29 00:17:27 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.27 2015/11/01 22:58:51 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -143,7 +143,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.26 2015/10/29 00:17:27 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.27 2015/11/01 22:58:51 yipkin Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -179,6 +179,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
     double mPositionXY;
     double mPositionZ;
     int mClusterId[kPlanesPerCoordinate];
+    int mPlanesUsed;
     bool mGolden;
   };
   
