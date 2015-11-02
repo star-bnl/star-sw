@@ -1803,8 +1803,7 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-
-  {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
+  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,StrngMuDST,Tree",  "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom"
