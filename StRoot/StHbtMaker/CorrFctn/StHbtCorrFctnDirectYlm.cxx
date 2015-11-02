@@ -1,5 +1,5 @@
 /****************************************************************************
- * $Id: StHbtCorrFctnDirectYlm.cxx,v 1.1 2013/01/18 14:46:02 yyang Exp $
+ * $Id: StHbtCorrFctnDirectYlm.cxx,v 1.2 2015/11/02 20:11:06 perev Exp $
  *
  * Author: Yan Yang, hce137@gmail.com
  * **************************************************************************
@@ -363,8 +363,8 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 	for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
 		if ( TMath::IsNaN(real(ylmbuffer[ilm]) * weight) ) return;
 		if ( TMath::IsNaN(imag(ylmbuffer[ilm]) * weight) ) return;
-		if ( isinf(real(ylmbuffer[ilm]) * weight) ) return;
-		if ( isinf(imag(ylmbuffer[ilm]) * weight) ) return;
+		if ( ::isinf(real(ylmbuffer[ilm]) * weight) ) return;
+		if ( ::isinf(imag(ylmbuffer[ilm]) * weight) ) return;
 	}
 	if ( nqbin < binctn->GetNbinsX() )
 		for (int ilmzero = 0; ilmzero < GetMaxJM(); ilmzero++)
@@ -373,10 +373,10 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 				if ( TMath::IsNaN(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
 				if ( TMath::IsNaN(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
 				if ( TMath::IsNaN(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( isinf(real(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( isinf(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( isinf(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( isinf(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(real(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
 			}
 
 	for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
@@ -390,8 +390,8 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 		double p1p2z = aPair->track1()->FourMomentum().pz() * aPair->track2()->FourMomentum().pz();
 		double e1e2	 = aPair->track1()->FourMomentum().e() * aPair->track2()->FourMomentum().e();
 		double e1pluse2 = aPair->track1()->FourMomentum().e() + aPair->track2()->FourMomentum().e();
-		if ( !( isnan(p1p2t) || isnan(p1p2z) || isnan(e1e2) || isnan(e1pluse2) ||
-				isinf(p1p2t) || isinf(p1p2z) || isinf(e1e2) || isinf(e1pluse2) ) )
+		if ( !( ::isnan(p1p2t) || ::isnan(p1p2z) || ::isnan(e1e2) || ::isnan(e1pluse2) ||
+				::isinf(p1p2t) || ::isinf(p1p2z) || ::isinf(e1e2) || ::isinf(e1pluse2) ) )
 		{
 			for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
 				emcicP1P2T[ilm]->Fill(kv, p1p2t);
@@ -837,16 +837,16 @@ void StHbtCorrFctnDirectYlm::CalcCorrFctn()
 		if (recalccov) {
 			for (int ilmzero = 0; ilmzero < GetMaxJM(); ilmzero++) {
 				for (int ilmprim = 0; ilmprim < GetMaxJM(); ilmprim++) {
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
 						cout << "NaN !!!! RR " << ilmzero << " " << ilmprim << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
 						cout << "NaN !!!! RI " << ilmzero << " " << ilmprim << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
 						cout << "NaN !!!! IR " << ilmzero << " " << ilmprim << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
 						cout << "NaN !!!! II " << ilmzero << " " << ilmprim << endl;
 					}
 
@@ -855,16 +855,16 @@ void StHbtCorrFctnDirectYlm::CalcCorrFctn()
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)] /= numsreal[0]->GetEntries();
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)] /= numsreal[0]->GetEntries();
 
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
 						cout << "NaN !!!! RR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
 						cout << "NaN !!!! RI" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
 						cout << "NaN !!!! IR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
 						cout << "NaN !!!! II" << endl;
 					}
 
@@ -873,16 +873,16 @@ void StHbtCorrFctnDirectYlm::CalcCorrFctn()
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)] -= imag(tTq0[ilmzero]) * real(tTq0[ilmprim]);
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)] -= imag(tTq0[ilmzero]) * imag(tTq0[ilmprim]);
 
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
 						cout << "NaN !!!! RR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
 						cout << "NaN !!!! RI" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
 						cout << "NaN !!!! IR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
 						cout << "NaN !!!! II" << endl;
 					}
 
@@ -891,16 +891,16 @@ void StHbtCorrFctnDirectYlm::CalcCorrFctn()
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)] /= (numsreal[0]->GetEntries() - 1);
 					covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)] /= (numsreal[0]->GetEntries() - 1);
 
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 0)]) ) {
 						cout << "NaN !!!! RR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 0, ilmprim, 1)]) ) {
 						cout << "NaN !!!! RI" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 0)]) ) {
 						cout << "NaN !!!! IR" << endl;
 					}
-					if ( isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
+					if ( ::isnan(covmnum[GetBin(ibin - 1, ilmzero, 1, ilmprim, 1)]) ) {
 						cout << "NaN !!!! II" << endl;
 					}
 				}
@@ -1372,6 +1372,9 @@ int StHbtCorrFctnDirectYlm::PackYlmVectorIndependentOnly(double* invec, double* 
 
 /***************************************************************************
  * $Log: StHbtCorrFctnDirectYlm.cxx,v $
+ * Revision 1.2  2015/11/02 20:11:06  perev
+ * isnan for new compiler
+ *
  * Revision 1.1  2013/01/18 14:46:02  yyang
  * Add ultilities for SHD of CF
  *

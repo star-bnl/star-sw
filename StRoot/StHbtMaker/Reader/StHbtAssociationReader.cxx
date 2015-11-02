@@ -198,7 +198,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   if ( !(rEvent->primaryVertex()) || // no pointer to prim vertex
        (mEvent->primaryVertex()->position().x() == mEvent->primaryVertex()->position().y() && 
 	mEvent->primaryVertex()->position().y() == mEvent->primaryVertex()->position().z()     ) ||// x==y==z --> mark for bad events from embedding
-       isnan(rEvent->primaryVertex()->position().x())  // vertex position not a number 
+       ::isnan(rEvent->primaryVertex()->position().x())  // vertex position not a number 
        ) { 
     cout << "StHbtAssociationReader - bad vertex !!! " << endl;
     return 0;
