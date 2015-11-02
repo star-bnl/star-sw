@@ -1,4 +1,4 @@
-/* $Id: StIstFastSimMaker.cxx,v 1.37 2015/08/03 14:26:03 smirnovd Exp $ */
+/* $Id: StIstFastSimMaker.cxx,v 1.38 2015/10/30 19:01:22 perev Exp $ */
 
 #include "TGeoManager.h"
 #include "TDataSet.h"
@@ -17,7 +17,7 @@
 #include "StMcEvent/StMcIstHitCollection.hh"
 #include "StThreeVectorF.hh"
 #include "tables/St_HitError_Table.h"
-
+#include "TEnv.h"
 ClassImp(StIstFastSimMaker)
 
 StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : StMaker(name), mIstRot(NULL), mIstDb(NULL), mBuildIdealGeom(kFALSE),
@@ -28,7 +28,13 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : 
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
   //   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
-   return kStOk;
+  mBuildIdealGeom = gEnv->GetValue("IdealHFT",0) != 0;
+   if(mBuildIdealGeom)
+   {
+     LOG_INFO << " Ideal geometry requested" << endm;
+   }
+
+  return kStOk;
 }
 
 //____________________________________________________________

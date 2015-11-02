@@ -45,6 +45,7 @@
 #include "TGeoMatrix.h"
 
 #include "TObjectSet.h"
+#include "TEnv.h"
 
 ClassImp(StPxlSimMaker)
 
@@ -74,7 +75,8 @@ Int_t StPxlSimMaker::Init()
    // temporary till DIGMAPS algorithm is added and option added in StMaker
    mUseFastSim = kTRUE;
    mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
-
+   mUseIdealGeom = gEnv->GetValue("IdealHFT",0) == 0;
+   mUseDbGeom = ! mUseIdealGeom;
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
    //}
 
