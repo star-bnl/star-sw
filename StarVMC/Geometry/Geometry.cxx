@@ -1498,6 +1498,7 @@ Bool_t Geometry::MutdInit()
   mutdGeom.select="MUTD12";    mutdGeom.module="MutdGeo4";  mutdGeom.config=12;     mutdGeom.fill();
   mutdGeom.select="MUTD13";    mutdGeom.module="MutdGeo4";  mutdGeom.config=13;     mutdGeom.fill();
   mutdGeom.select="MUTD14";    mutdGeom.module="MutdGeo5";  mutdGeom.config=14;     mutdGeom.fill();
+  mutdGeom.select="MUTD15";    mutdGeom.module="MutdGeo7";  mutdGeom.config=15;     mutdGeom.fill();
 
   return true;
 }

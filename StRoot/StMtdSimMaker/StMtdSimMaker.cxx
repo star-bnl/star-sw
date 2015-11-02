@@ -1,6 +1,10 @@
 /***************************************************************************
  *
+<<<<<<< StMtdSimMaker.cxx
  * $Id: StMtdSimMaker.cxx,v 1.11 2015/07/01 17:51:54 marr Exp $
+=======
+ * $Id: StMtdSimMaker.cxx,v 1.13 2015/11/02 18:19:46 marr Exp $
+>>>>>>> 1.13
  *
  * Author: Frank Geurts
  *
@@ -316,13 +320,26 @@ Int_t StMtdSimMaker::FastCellResponse()
     LOG_INFO << "sthit " << sthit->tof() << " tof:" << tof << endm;
   }
 
-  mMtdCollection= new StMtdCollection();
+  int nRealHits = 0;
+  if (mEvent) 
+    {
+      mMtdCollection = mEvent->mtdCollection();
+      if(!mMtdCollection)
+	{
+	  mMtdCollection= new StMtdCollection();
+	  mEvent->setMtdCollection(mMtdCollection);
+	}
+      nRealHits = mMtdCollection->mtdHits().size();
+    }
+  else mMtdCollection= new StMtdCollection();
+
+  int nMcHits = 0;
   for (myIter=myMap.begin(); myIter!=myMap.end(); ++myIter) {
     mMtdCollection->addHit((*myIter).second);
+    nMcHits++;
   }
   if (mEvent) {
-    mEvent->setMtdCollection(mMtdCollection);
-    LOG_INFO << "... StMtdCollection Stored in StEvent! " << endm;
+    LOG_INFO << "... " << nMcHits << " MC hits stored in StEvent with " << nRealHits << " real hits! " << endm;
   }
 
   return kStOK;
