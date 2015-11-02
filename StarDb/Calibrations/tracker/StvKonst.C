@@ -26,8 +26,11 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMaxRes	= 0.5;		/*Maximal allowed residual */
   row.mCoeWindow= 5.;		/*Maximal window to search hits*/
   row.mMaxWindow= 10.;		/*Maximal window to search hits*/
-  row.mMinHits 	= 5;		/*Min number of hits allowed*/
+  row.mMinHits 	= 3;		/*Min number of hits allowed*/
   row.mGoodHits =15;		/*Good number of hits allowed*/
+//		Forward version
+  row.mMinHitsFw  = 3;		/*Min number of hits allowed*/
+  row.mGoodHitsFw = 3;		/*Good number of hits allowed*/
 
 //	hitCount hitCount hitCount hitCount hitCount 
   row.mMinTotHits =3;       	/*Min number hits for track*/
