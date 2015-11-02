@@ -4,17 +4,20 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
-      call geometry  
+       call geometry  
 </Export>
 </Module> 
-
-
+  
+  
 
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.52 2015/10/12 20:46:57 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.53 2015/11/02 15:26:53 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.53  2015/11/02 15:26:53  jwebb
+  Add MutdGeo7 module with corrected radii.  Define y2015b production geometry tag to use latest MTD geometry.
+
   Revision 1.52  2015/10/12 20:46:57  jwebb
   Hit definition and starsim to root interface for FTS.
 

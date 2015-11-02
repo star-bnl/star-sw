@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.290 2015/10/12 18:36:35 jwebb Exp $
+* $Id: geometry.g,v 1.291 2015/11/02 15:26:53 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.291  2015/11/02 15:26:53  jwebb
+* Add MutdGeo7 module with corrected radii.  Define y2015b production geometry tag to use latest MTD geometry.
+*
 * Revision 1.290  2015/10/12 18:36:35  jwebb
 * Initial version of dev2020 geometry tag including forward tracking system.
 *
@@ -1325,7 +1328,8 @@ Replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays";  MUTD=on;  
 Replace [exe MUTD05;] with [ "MTD Run 28 backlegs, 118 trays";        MUTD=on;   MutdConfig= 5;]
 Replace [exe MUTD12;] with [ "MTD Run 12 - 3  backlegs, 13 trays";    MUTD=on;   MutdConfig=12;]
 Replace [exe MUTD13;] with [ "MTD Run 13 - 15 backlegs, 75 trays";    MUTD=on;   MutdConfig=13;]
-Replace [exe MUTD14;] with [ "MTD Run 13 - 15 backlegs, 75 trays";    MUTD=on;   MutdConfig=14;]
+Replace [exe MUTD14;] with [ "MTD Run 14+";    MUTD=on;   MutdConfig=14;]
+Replace [exe MUTD15;] with [ "MTD Run 14+ with corrected radii"; Mutd=on; MutdConfig=15;]
 
 
 
@@ -2394,7 +2398,10 @@ REPLACE [exe y2015a;] with ["Y2015 production geometry";
     exe PSUP01;      "1st version of pixl supports";
     exe FPDM04;      "FMS plus preshower";
 ]
-
+REPLACE [exe y2015b;] with ["Y2015 production geometry";
+    exe y2015a; "Base off of y2015a";
+    exe Mutd15; "Use corrected MTD geometry";
+]
 
 REPLACE [exe dev2016;] with ["Y2016 development tag";
 
@@ -3384,6 +3391,9 @@ If LL>0
 
   Case y2015a   { y2015a : y2015a production baseline, is y2015 with pixel Al cables;
                   Geom = 'y2015a    '; exe y2015a;  }
+
+  Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
+                  Geom = 'y2015b    '; exe y2015b;  }
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
@@ -5158,6 +5168,10 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF MutdConfig=14 {
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
          CONSTRUCT mutdgeo5;
+     }
+     IF MutdConfig>=15 {
+         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
+         CONSTRUCT mutdgeo7;
      }
 
    }
