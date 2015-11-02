@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.cxx,v 1.4 2003/01/31 19:21:09 magestro Exp $
+ * $Id: MinvLikeSignCorrFctn_Minv_vs_Phi.cxx,v 1.5 2015/11/02 20:10:24 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -121,7 +121,7 @@ StHbtString MinvLikeSignCorrFctn_Minv_vs_Phi::Report(){
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddRealPair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+  if ( !::isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
     double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
     angle = fabs(angle);
     if (angle > M_PIl) angle = 2.*M_PIl-angle; 
@@ -131,7 +131,7 @@ inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddRealPair(const StHbtPair* pair)
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddMixedPair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+  if ( !::isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
     double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
     angle = fabs(angle);
     if (angle > M_PIl) angle = 2.*M_PIl-angle; 
@@ -141,7 +141,7 @@ inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddMixedPair(const StHbtPair* pair
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddLikeSignPositivePair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+  if ( !::isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
     double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
     angle = fabs(angle);
     if (angle > M_PIl) angle = 2.*M_PIl-angle; 
@@ -151,7 +151,7 @@ inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddLikeSignPositivePair(const StHb
 //____________________________
 inline void MinvLikeSignCorrFctn_Minv_vs_Phi::AddLikeSignNegativePair(const StHbtPair* pair){
   //  if ( fabs(pair->mInv()-1.02)<0.01) 
-  if ( !isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
+  if ( !::isnan(mReactionPlaneError) && mReactionPlaneError!=0. ) {
     double angle = pair->fourMomentumSum().vect().phi()-mReactionPlane;
     angle = fabs(angle);
     if (angle > M_PIl) angle = 2.*M_PIl-angle; 
