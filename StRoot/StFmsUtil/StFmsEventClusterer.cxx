@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.7 2015/10/30 21:33:56 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.8 2015/11/02 22:44:49 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.8  2015/11/02 22:44:49  akio
+// Fix photonEnergyInTower()
+//
 // Revision 1.7  2015/10/30 21:33:56  akio
 // fix parameter initialization
 // adding new cluster categorization method
@@ -267,9 +270,11 @@ struct GlobalPhotonFitParameters {
 namespace FMSCluster {
   StFmsEventClusterer::StFmsEventClusterer( //const StFmsGeometry* geometry,
 					   StFmsDbMaker* db, Int_t detectorId, 
-					   Int_t globalrefit, Int_t mergeSmallToLarge, Int_t try1PhotonFit)
+					   Int_t globalrefit, Int_t mergeSmallToLarge, 
+					   Int_t try1PhotonFit, Int_t categorizationAlgo)
       : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db), 
-	mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit){ }
+	mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
+	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo) { }
 
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
@@ -305,7 +310,7 @@ Int_t StFmsEventClusterer::fitEvent() {
 	LOG_INFO << "StFmsEventClusterer::fitEvent() fitClusters failed" <<endm;
 	return false;
     }
-    LOG_INFO << "StFmsEventClusterer::fitEvent() findClusters failed" <<endm;
+    //LOG_INFO << "StFmsEventClusterer::fitEvent() findClusters failed" <<endm;
     return false;
 }
 
@@ -337,8 +342,9 @@ Bool_t StFmsEventClusterer::fitClusters() {
   // clusters then fit, compare, and choose the best fit
   bool badFit = false;
   for (auto iter = mClusters.begin(); iter != mClusters.end(); ++iter) {
-    int category = mClusterFinder.categorise(iter->get());
-    //int category = mClusterFinder.categorise2(iter->get());
+    int category = -1;
+    if(mCategorizationAlgo==0) {category = mClusterFinder.categorise(iter->get());}
+    else                       {category = mClusterFinder.categorise2(iter->get());}
     mFitter->setTowers(&(*iter)->towers());
     switch (category) {
       case k1PhotonCluster:	
@@ -408,9 +414,10 @@ Double_t StFmsEventClusterer::photonEnergyInCluster(
 Double_t StFmsEventClusterer::photonEnergyInTower(
     const StFmsTower* tower,
     const StFmsFittedPhoton* photon) const {
-  double x = (tower->column() - 0.5) * mTowerWidthXY.at(0) - photon->x;
-  double y = (tower->row() - 0.5) * mTowerWidthXY.at(1) - photon->y;
-  return photon->energy * mFitter->showerShapeFunction()->Eval(x, y);
+    //double x = (tower->column() - 0.5) * mTowerWidthXY.at(0) - photon->x;
+    //double y = (tower->row() - 0.5) * mTowerWidthXY.at(1) - photon->y;
+    //return photon->energy * mFitter->showerShapeFunction()->Eval(x, y);
+  return photon->energy * mFitter->showerShapeFunction()->Eval(tower->x()-photon->x,tower->y()-photon->y);
 }
 
 /* 1-photon fitting function */
@@ -537,8 +544,8 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
       column = 1 + int(x*1.5);
       row    = 1 + int((y-9.0)*1.5);
       det+=2;
-  }
-  const StFmsTower* tower = searchClusterTowers(det, row, column, **cluster);
+  } 
+    const StFmsTower* tower = searchClusterTowers(det, row, column, **cluster);
   // If tower is nullptr, the photon doesn't hit in a tower in this cluster.
   if (!tower) {
       LOG_INFO << "StFmsEventClusterer::validate2ndPhoton No hit on photon" << endm;
@@ -548,7 +555,7 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   if (tower->hit()->energy() < VALID_FT * photon->energy) {
       LOG_INFO << "StFmsEventClusterer::validate2ndPhoton hit on photon too low" << endm;
       return false;
-  }  // if
+  }  // ifvalidate2ndPhoton
   // Check if the 2nd photon's "high-hower" energy is too large compared to its
   // fitted energy. If so, it is probably splitting one photon into two
   if (tower->hit()->energy() > VALID_2ND_FT * photonEnergyInTower(tower, photon)) {
@@ -566,6 +573,7 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
       }  // if
     }  // if
   }  // for
+  LOG_INFO << "StFmsEventClusterer::validate2ndPhoton OK" << endm;
   return true;  // The photon passed all tests; it's real
 }
 }  // namespace FMSCluster
