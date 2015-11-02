@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.36 2015/10/07 02:51:33 perev Exp $
+ * $Id: StvNode.cxx,v 1.37 2015/10/30 18:24:38 perev Exp $
  *
  * /author Victor Perev
  */
@@ -33,6 +33,7 @@ void StvNode::unset()
 { 
 static StvToolkit *kit = StvToolkit::Inst();
   if (mELoss) kit->FreeELossTrak(mELoss); 
+  mELoss = 0;
   assert(mBeg[0]!='@');
   memset(mBeg,'@',mEnd-mBeg+1);
 }

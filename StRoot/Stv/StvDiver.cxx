@@ -284,15 +284,14 @@ StMCStepping::Print(opt);
 //_____________________________________________________________________________
 int StvMCStepping::Fun()
 {
-static int nCall = 0,iCall = 0; nCall++;
+static int nCall = 0;nCall++;
 static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
-static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
+//static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
 static       TVirtualMC     *virtualMC	= TVirtualMC::GetMC();
 static const TVirtualMCApplication *virtApp = TVirtualMCApplication::Instance();
 static const double Rmax = virtApp->TrackingRmax();
 static const double Zmax = virtApp->TrackingZmax();
 
-int meAgain = 0;
 
 mybreak(nCall);
   TString ts,modName;
@@ -300,6 +299,14 @@ mybreak(nCall);
 
 double prevLen = fPrevLength;
   Case();
+
+int meAgain = (fNode==fPrevNode);
+if (meAgain) meAgain = (fPrevPath == tgh->GetPath());
+if (!meAgain) {fPrevNode = fNode; fPrevPath == tgh->GetPath();}
+
+
+
+
 {
   double deltaLen = fCurrentLength-prevLen;
   if (deltaLen>0) {    StMCSAux aux; aux.Len=deltaLen; aux.Dep=fEdep; aux.P=fCurrentMomentum.P();myInfo.push_back(aux);}
@@ -313,27 +320,26 @@ double prevLen = fPrevLength;
 //   StTGeoProxy::Instance()->Print(KazeAsString(fKaze));
 //   printf("fEnterLength=%g fCurrentLength=%g Rxy=%g Z=%g\n\n"
 //         , fEnterLength, fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
+
 SWITCH: int myKaze = fKaze;
+//=========================
+
 // printf("KASE=%d Pos(%g %g %g) In %s\n",fKaze
 //       ,fCurrentPosition.X(),fCurrentPosition.Y(),fCurrentPosition.Z()
 //       ,gGeoManager->GetPath());
 
 
 
-if (GetDebug()) {printf("%d - ",nCall); Print();}
   switch (fKaze) {
     case kNEWtrack:;
          myInfo.clear();
-         iCall = nCall;
-         meAgain = (fPrevPath == tgh->GetPath());
-
 
     case kENTERtrack:;{
          double *X = &fCurrentPosition[0];
          fHitted = ((!meAgain) && tgh->IsHitted(X));
          if (fVolume==fHALLVolu) {fKaze=kENDEDtrack; break;}
-         int outSide = hitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp());
-         if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
+//          int outSide = hitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp());
+//          if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
     

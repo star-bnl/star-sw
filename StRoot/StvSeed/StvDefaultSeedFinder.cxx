@@ -56,20 +56,10 @@ void StvDefaultSeedFinder::Reset()
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
     if (stiHit->isUsed()) continue;
     const float *x = stiHit->x();
-//    float r2 = x[0]*x[0] + x[1]*x[1]+ x[2]*x[2];
-    float r2 = x[0]*x[0] + x[1]*x[1] + 1e-2*x[2]*x[2];
+    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
 
-#ifdef MultiPhiZMap
-    float keys[kNKeys];
-    keys[kPhi ] = atan2(x[1],x[0]);
-    keys[kRxy ] = sqrt(x[0]*x[0] + x[1]*x[1]);
-    keys[kTanL] = x[2]/keys[kRxy];
-    keys[kZ   ] = x[2];
-    fMultiHits->Add(stiHit,keys);
-#else
     fMultiHits->Add(stiHit,x);
-#endif
   } 
    fMultiHits->MakeTree();
   *f1stHitMapIter = f1stHitMap->begin();
@@ -173,63 +163,50 @@ std::vector<TObject*> mySeedObjs;
       nTally++;
       fSeedHits.push_back(selHit); fNUsed[0]++;
       if (fSeedHits.size()>=kMaxHits) break;
+//		Store second hit to skip it next time
+      if (fSeedHits.size()==2) mDejavu[mNDejavu++]=selHit;
       const StHitPlane *hp = selHit->detector();
       const float *hd = hp->GetDir(selHit->x())[0];
       mSel.AddHit(selHit->x(),hd,hp->GetLayer());
       mSel.Prepare();
-      int myState = mSel.mJst; if (myState>2)  myState=2;
 
-      if (myState==1) {		//save 1st direction 
-        memcpy(m1stDir,mSel.mDir,sizeof(m1stDir));}
+      fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
 
-      int nLim = (myState<2 ||mSel.mLim[2][0]>1000)?1:2;
-      for (int iLim=0;iLim<nLim; iLim++) {
-
-        fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
-	
- 	selHit=0; 
+      selHit=0; 
 //	for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
-        StMultiKeyNode *node=0;
-	StvHit *nexHit = 0;
-        while(1) {
-	  node = *(*fMultiIter)		        ; if (!node) break; 
-	  nexHit = (StvHit*)node->GetObj()	;++(*fMultiIter); 
+      StMultiKeyNode *node=0;
+      StvHit *nexHit = 0;
+      while(1) {
+	node = *(*fMultiIter)		        ; if (!node) break; 
+	nexHit = (StvHit*)node->GetObj()	;++(*fMultiIter); 
 
-	  if (nexHit->isUsed()) 	continue;
-	  const StHitPlane *hpNex = nexHit->detector();
-	  if (hpNex==hp) 		continue;
-	  int dejavu = 0;
-	  for (int j=0;j<mNDejavu;j++) {
-            if (mDejavu[j]!=nexHit) 	continue;
-            dejavu = 2013; 		break;
-	  }
-	  if (dejavu) 			continue;
-	  int ans = mSel.Reject(nexHit->x(),hpNex);
-	  if (ans>0) 			continue;	//hit outside the cone
+	if (nexHit->isUsed()) 	continue;
+	const StHitPlane *hpNex = nexHit->detector();
+	if (hpNex==hp) 		continue;
+	int dejavu = 0;
+	for (int j=0;j<mNDejavu;j++) {
+          if (mDejavu[j]!=nexHit) 	continue;
+          dejavu = 2013; 		break;
+	}
+	if (dejavu) 			continue;
+	int ans = mSel.Reject(nexHit->x(),hpNex);
+	if (ans>0) 			continue;	//hit outside the cone
 
-   //			Selecting the best
-	  selHit=nexHit;
-	  if (!ans)  			continue;
-   //		Decrease size of searching box
-	  mSel.Update();
-	  fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
-	} //endMultiIter loop
+ //			Selecting the best
+	selHit=nexHit;
+	if (!ans)  			continue;
+ //		Decrease size of searching box
+	mSel.Update();
+	fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
+      } //endMultiIter loop
 
-        if (nLim>1) memcpy(mSel.mLim[0],mSel.mLim[2],2*sizeof(mSel.mLim[0]));
-	if (!selHit) 			continue; //No more hits 
-      }//end iLim loop
       if (!selHit) 			break; //No more hits 
     }// end NextHit loop
-//		Mark hits as unused when seed is created. Only tracker
-//		has right to deside to use or not to use
-//    fSeedHits.unused();
 //		If no hits found, go to next 1st hit
     if ((int)fSeedHits.size()<=1) {mNDejavu = 99; continue;}
 
-//		Store second hit to skip it next time
-    mDejavu[mNDejavu++]=fSeedHits[1];
 //	If too short seed go to next 1st hit
-    if (fSeedHits.size() < kMinHits) 		  continue;
+    if ((int)fSeedHits.size() < fMinHits) continue;
 
 
     const THelixTrack *hel = Approx();
@@ -262,9 +239,11 @@ void StvConeSelector::Prepare()
 static int nCall=0; nCall++;
 StvDebug::Break(nCall);
 
+  float Rxy = sqrt(mX[0][0]*mX[0][0]+mX[0][1]*mX[0][1]);
+  SetErr(SEED_ERR(Rxy)*kErrFakt);
   float stp=0;
   int kase = mJst; if (kase>2) kase = 2;
-
+     
   switch(kase) {
   
     case 0: {

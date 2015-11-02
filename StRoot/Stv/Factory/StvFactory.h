@@ -33,7 +33,7 @@ public:
 enum {kSize=100};
      StvBlock(StvBlock **bTop,StvHolder<Object> **hTop,char *buf);
 void reset(StvBlock **bTop,StvHolder<Object> **hTop);
-int getSize() const {return kSize;}
+uint getSize() const {return kSize;}
 
 StvBlock *fNext;
 char     *fBuff;
@@ -50,6 +50,7 @@ void   free(Abstract *obj);
 void   free(void *obj) { free((Abstract*)obj);}
   ///Clear/delete all objects owned by this factory
 void clear();  
+void print();  
 
   ///Reset this factory
 void reset();
@@ -118,7 +119,7 @@ Abstract *StvFactory<Concrete,Abstract>::getInstance()
             this->fCurCount < this->fMaxCount);
 
     if (this->fFastDel)    {
-       int   nBuf = sizeof(StvBlock<Concrete>) + FENCE;
+       uint   nBuf = sizeof(StvBlock<Concrete>) + FENCE;
        char *cBuf = new char[nBuf];
        cBuf[nBuf-1]=46;
        new((StvBlock<Concrete>*)cBuf) StvBlock<Concrete>(&fBTop,&fHTop,cBuf);
@@ -143,7 +144,7 @@ Abstract *StvFactory<Concrete,Abstract>::getInstance()
 template <class Concrete, class Abstract>
 void StvFactory<Concrete,Abstract>::free(Abstract *obj)
 {
-  static const int shift = (char*)(&(((StvHolder<Concrete>*)1)->fObj))-(char*)1;
+  static const uint shift = (char*)(&(((StvHolder<Concrete>*)1)->fObj))-(char*)1;
   obj->unset();
   StvHolder<Concrete>* h = (StvHolder<Concrete>*)((char*)obj-shift);
   assert(h->fFact == this); 
@@ -168,8 +169,24 @@ void StvFactory<Concrete,Abstract>::clear()
   fBTop=0; fHTop=0; this->fCurCount=0; this->fUseCount=0;
   printf("*** %s::clear() %g MegaBytes Total %g Inst/Free=%d %d\n"
         ,this->GetName(),sz*1e-6
-	,this->fgTotal,this->fInstCount,this->fFreeCount);
+	,this->fgTotal*1e-6,this->fInstCount,this->fFreeCount);
   this->fInstCount=0; this->fFreeCount=0;
+}
+//______________________________________________________________________________
+template <class Concrete, class Abstract>
+void StvFactory<Concrete,Abstract>::print()
+{
+  double sz=0;
+  StvBlock<Concrete>* b = fBTop;
+  while (b) {
+    b=b->fNext;
+    sz += sizeof(StvBlock<Concrete>);
+    this->fgTotal -= sizeof(StvBlock<Concrete>)*1e-6;
+  }
+  this->fCurCount=0; this->fUseCount=0;
+  printf("*** %s::print() %g MegaBytes Total %g Inst/Free=%d %d \n"
+        ,this->GetName(),sz*1e-6
+	,this->fgTotal  ,this->fInstCount,this->fFreeCount);
 }
 //______________________________________________________________________________
 template <class Concrete, class Abstract>

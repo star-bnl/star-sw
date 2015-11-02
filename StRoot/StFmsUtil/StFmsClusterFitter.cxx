@@ -1,6 +1,10 @@
-// $Id: StFmsClusterFitter.cxx,v 1.4 2015/10/29 21:14:55 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.5 2015/10/30 21:33:56 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.5  2015/10/30 21:33:56  akio
+// fix parameter initialization
+// adding new cluster categorization method
+//
 // Revision 1.4  2015/10/29 21:14:55  akio
 // increase max number of clusters
 // a bug fixes in valley tower association
@@ -50,7 +54,6 @@
 
 namespace {
 const Int_t kMaxNPhotons = 7;  // Maximum number of photons that can be fitted
-Double_t fitPar[7]={SS_C, SS_A1, SS_A2, SS_A3, SS_B1, SS_B2, SS_B3};
 std::array<double, 7> fitParameters{ {SS_C, SS_A1, SS_A2, SS_A3,
                                       SS_B1, SS_B2, SS_B3} };
 TF2 showerShapeFitFunction("showerShapeFitFunction",
@@ -66,15 +69,6 @@ std::vector<double> defaultMinuitStepSizes() {
   // Append default (x, y, E) steps for each photon
   for (int i(0); i < kMaxNPhotons; ++i) {
     steps.insert(steps.end(), {0.1, 0.1, 0.2});
-  }  // for
-  return steps;
-}
-
-std::vector<double> smalllMinuitStepSizes() {
-  std::vector<double> steps(1, 0.);  // Initialise with nPhoton step
-  // Append default (x, y, E) steps for each photon
-  for (int i(0); i < kMaxNPhotons; ++i) {
-    steps.insert(steps.end(), {0.1/1.5, 0.1/1.5, 0.2});
   }  // for
   return steps;
 }
@@ -100,7 +94,7 @@ StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
   towerWidths.clear();
   towerWidths.push_back(xw);
   towerWidths.push_back(yw);
-  fitParameters.front() = towerWidths.at(0);
+  fitParameters = {towerWidths.at(0), SS_A1, SS_A2, SS_A3, SS_B1, SS_B2, SS_B3};
   showerShapeFitFunction.SetParameters(fitParameters.data());
   mMinuit.SetPrintLevel(-1);  // Quiet, including suppression of warnings
 }
@@ -311,9 +305,6 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
     // Tower centers are stored in row/column i.e. local coordinates
     // Therefore convert to cm, remembering to subtract 0.5 from row/column to
     // get centres not edges
-    Double_t x=tower->x();
-    Double_t y=tower->y();
-    fitPar[0]= tower->w(); //need to update width for each cell... when small cell is merged to large
     /* Stop getting xy here. Already in tower StFmsTower class
     Double_t x, y;
     if(tower->hit()->detectorId()<10){
@@ -328,13 +319,15 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
     x *= towerWidths.at(0);
     y *= towerWidths.at(1);
     */
+    Double_t x=tower->x();
+    Double_t y=tower->y();
+    fitParameters.front() = tower->w(); 
     // Add expected energy in tower from each photon, according to shower-shape
     double expected = 0;
     for (int j = 0; j < nPhotons; ++j) {  // Recall there are 3 paras per photon
       int k = 3 * j;
       expected += para[k + 3] *  // total energy
-	  //                  showerShapeFitFunction.Eval(x - para[k + 1], y - para[k + 2]);
-	  energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitPar);
+	  energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitParameters.data());
     }  // for
     //const double measured = tower->hit()->energy();
     const double measured = tower->e();
@@ -353,8 +346,11 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
                          mEnergySum + 0.01;
     //fval += pow(deviation, 2.) / err;
     fval += deviation * deviation / err;
+    //cout << Form("n=%1d x=%6.2f y=%6.2f e=%6.2f exp=%6.2f diff=%6.2f sum=%6.2f err=%6.2f fval=%6.2f",
+    //             nPhotons,x,y,measured,expected,deviation,mEnergySum,err,deviation*deviation/err)<<endl;
   }  // for
   fval = std::max(fval, 0.);  // require that the fraction be positive
+  //cout << Form("nPhotons=%d fval=%6.2f",nPhotons,fval)<<endl;
 }
 
 // Uses the signature needed for TMinuit interface:
@@ -365,15 +361,17 @@ void StFmsClusterFitter::minimizationFunction2Photon(Int_t& nparam,
                                                      Double_t* param,
                                                      Int_t /* not used */) {
   // Only need to translate into the old parameterization
-  const double separation = param[3];
+  const double dgg   = param[3];
+  const double zgg   = param[5];
+  const double angle = param[4];
   std::array<double, 7> oldParam{ {
     param[0],  // Number of photons, unchanged
-    param[1] + cos(param[4]) * separation * (1 - param[5]) / 2.0,  // x 1
-    param[2] + sin(param[4]) * separation * (1 - param[5]) / 2.0,  // y 1
-    param[6] * (1 + param[5]) / 2.0,  // Energy 1
-    param[1] - cos(param[4]) * separation * (1 + param[5]) / 2.0,  // x 2
-    param[2] - sin(param[4]) * separation * (1 + param[5]) / 2.0,  // y 2
-    param[6] * (1 - param[5]) / 2.0  // Energy 2
+    param[1] + cos(angle) * dgg * (1 - zgg) / 2.0,  // x 1
+    param[2] + sin(angle) * dgg * (1 - zgg) / 2.0,  // y 1
+    param[6] * (1 + zgg) / 2.0,                     // Energy 1
+    param[1] - cos(angle) * dgg * (1 + zgg) / 2.0,  // x 2
+    param[2] - sin(angle) * dgg * (1 + zgg) / 2.0,  // y 2
+    param[6] * (1 - zgg) / 2.0                      // Energy 2
   } };
   // Now call the regular minimization function with the translated parameters
   minimizationFunctionNPhoton(nparam, grad, fval, oldParam.data(), 0);

@@ -53,13 +53,13 @@ ClassImp(St_pp2pp_Maker)
   //  nevt_count = 0 ;
 
   // --- default values for pp run15 (in case it's not read from database) --- 
-  mXYZ_IP[kX] = 0.00025;
-  mXYZ_IP[kY] = 0.00040;
-  mXYZ_IP[kZ] = 0.00000;
-  mThetaXY_tilt[kX] = 0.00000;
-  mThetaXY_tilt[kY] = 0.00000;
-  mDistanceFromIPtoDX[StBeamDirection::east] = 9.7496;
-  mDistanceFromIPtoDX[StBeamDirection::west] = 9.7496;
+  mXYZ_IP[kX] = 0.0;
+  mXYZ_IP[kY] = 0.0;
+  mXYZ_IP[kZ] = 0.0;
+  mThetaXY_tilt[kX] = 0.0;
+  mThetaXY_tilt[kY] = 0.0;
+  mDistanceFromIPtoDX[StBeamDirection::east] = 9.8;
+  mDistanceFromIPtoDX[StBeamDirection::west] = 9.8;
   mLDX[StBeamDirection::east] = 3.7;
   mLDX[StBeamDirection::west] = 3.7;
   mBendingAngle[StBeamDirection::east] = 0.018832292;
@@ -416,13 +416,13 @@ Int_t St_pp2pp_Maker::readAccelerateParameter() {
 
       mConversion_TAC_time = table[0].conversion_TAC_time ;
 
-      /*
-      for (Int_t i = 0; i < descr->GetNRows(); i++) {
-	for ( Int_t j = 0; j< 32 ; j++ )
-	  std::cout << mOffsetTable[i].rp_offset_plane[j] << " "  ; 
-	cout << endl ;
-      }
-      */
+      LOG_DEBUG << mXYZ_IP[0] << " " << mXYZ_IP[1] << " " << mXYZ_IP[2] << " "
+		<< mThetaXY_tilt[0] << " " << mThetaXY_tilt[1] << " "
+		<< mDistanceFromIPtoDX[0] << " " << mDistanceFromIPtoDX[1] << " "
+		<< mLDX[0] << " " << mLDX[1] << " " 
+		<< mBendingAngle[0] << " " << mBendingAngle[1] << " "
+		<< mConversion_TAC_time << endm ;
+
     } else {
       LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppAcceleratorParameters table (wrong timestamp?). Nothing to return, then" << endm ;
     }
@@ -942,12 +942,12 @@ void St_pp2pp_Maker::formTracks( vector< StRpsTrack* > *trackVec, const vector< 
 	  track->setTrackPoint( trackPointVec[ kRpInBranch[branch][kRP2] ][j], kRP2 ); // setting constituent track-points
 
 	  // below calculating momentum vector
-	  double localThetaX = track->thetaRp( StRpsTrack::rpsAngleThetaX ) + sign*mThetaXY_tilt[kX]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
-	  double localThetaY = track->thetaRp( StRpsTrack::rpsAngleThetaY ) + sign*mThetaXY_tilt[kY]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
-
+	  double localThetaX = track->thetaRp( StRpsTrack::rpsAngleThetaX ) - sign*mThetaXY_tilt[kX]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+	  double localThetaY = track->thetaRp( StRpsTrack::rpsAngleThetaY ) - sign*mThetaXY_tilt[kY]; // REMINDER: sensitive to changes in StRpsTrack::thetaRp() !
+	  double x_BCS =  trackPointVec[ kRpInBranch[branch][kRP1] ][i]->x() - mXYZ_IP[kX] - sin(mThetaXY_tilt[kX])*( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() - mXYZ_IP[kZ] ); // x_RP1 in beam coordinate system
 	  double d2 = abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - mLDX[side] - mDistanceFromIPtoDX[side]; // distance from DX magnet exit to first RP station
-	  double thetaX_IP = ( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->x() - mXYZ_IP[kX] + sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) - (d2 + 0.5*mLDX[side])*localThetaX ) / ( mDistanceFromIPtoDX[side] - sign*mXYZ_IP[kZ]  + 0.5*mLDX[side] );
-	  double xi = 1. / ( 1 + (mBendingAngle[side]*(mDistanceFromIPtoDX[side] + 0.5*mLDX[side] - sign*mXYZ_IP[kZ])) / ( localThetaX*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + mXYZ_IP[kX] - trackPointVec[ kRpInBranch[branch][kRP1] ][i]->x() - sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) );
+	  double thetaX_IP = ( x_BCS - (d2 + 0.5*mLDX[side])*localThetaX ) / ( mDistanceFromIPtoDX[side]  + 0.5*mLDX[side] );
+	  double xi = 1. / ( 1 + (mBendingAngle[side]*(mDistanceFromIPtoDX[side] + 0.5*mLDX[side])) / ( localThetaX*abs( trackPointVec[ kRpInBranch[branch][kRP1] ][i]->z() ) - x_BCS ) );
 	  double momentumValue = beamMomentum[side] * (1.-xi);
 
 	  StThreeVectorF momentumVector( 0, 0, sign*momentumValue );
@@ -970,8 +970,10 @@ void St_pp2pp_Maker::formTracks( vector< StRpsTrack* > *trackVec, const vector< 
 	track->setTrackPoint( trackPointVec[ kRpInBranch[branch][station] ][i], station ); // setting constituent track-point
 
 	// below calculating momentum vector (assuming no momentum loss == elastic track)
-	double localThetaX = ( trackPointVec[ kRpInBranch[branch][station] ][i]->x() - mXYZ_IP[kX] + sign*mThetaXY_tilt[kX]*( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) / ( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + sign*mThetaXY_tilt[kX];
-	double localThetaY = ( trackPointVec[ kRpInBranch[branch][station] ][i]->y() - mXYZ_IP[kY] + sign*mThetaXY_tilt[kY]*( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) ) / ( abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() ) - sign*mXYZ_IP[kZ] ) + sign*mThetaXY_tilt[kY];
+	double x_BCS = trackPointVec[ kRpInBranch[branch][station] ][i]->x() - mXYZ_IP[kX] - sin(mThetaXY_tilt[kX])*( trackPointVec[ kRpInBranch[branch][station] ][i]->z() - mXYZ_IP[kZ] ); // x_RP in beam coordinate system
+	double y_BCS = trackPointVec[ kRpInBranch[branch][station] ][i]->y() - mXYZ_IP[kY] - sin(mThetaXY_tilt[kY])*( trackPointVec[ kRpInBranch[branch][station] ][i]->z() - mXYZ_IP[kZ] ); // y_RP in beam coordinate system
+	double localThetaX = x_BCS / abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() );
+	double localThetaY = y_BCS / abs( trackPointVec[ kRpInBranch[branch][station] ][i]->z() );
 	double momentumValue = beamMomentum[side];
 
 	StThreeVectorF momentumVector( 0, 0, sign*momentumValue );
@@ -1013,7 +1015,7 @@ void St_pp2pp_Maker::formTrackPoints(const StRpsCollection& RpsColl, vector< StR
 	// setting position of the track-point
 	double x = hits[kX][j].mPositionXY;
 	double y = hits[kY][k].mPositionXY;
-	double z = (hits[kX][j].mPositionZ + hits[kY][k].mPositionZ)/2.;
+	double z = (hits[kX][j].mPositionZ*hits[kX][j].mPlanesUsed + hits[kY][k].mPositionZ*hits[kY][k].mPlanesUsed) / (hits[kX][j].mPlanesUsed + hits[kY][k].mPlanesUsed);
 	StThreeVectorF pos( x, y, z );
 	trackPoint->setPosition( pos );
 
@@ -1064,11 +1066,10 @@ vector<St_pp2pp_Maker::StRpsHit> St_pp2pp_Maker::formHits(const StRpsRomanPot* R
     if( matched ){  // if there are pair of clusters which match - use only those
       for(unsigned int k=0; k<validClusters[kFirst].size(); ++k){
 	St_pp2pp_Maker::StRpsHit hit;
-	hit.mPositionXY = ( (validClusters[kFirst][k]<0 ? pos[kSecond][validClusters[kSecond][k]] : pos[kFirst][validClusters[kFirst][k]]) + (validClusters[kSecond][k]<0 ? pos[kFirst][validClusters[kFirst][k]] : pos[kSecond][validClusters[kSecond][k]]) )/2;
-	hit.mPositionZ = ( (validClusters[kFirst][k]<0 ? Rp->plane(kPlanes[coordinate][kSecond])->z() : Rp->plane(kPlanes[coordinate][kFirst])->z()) + (validClusters[kSecond][k]<0 ? Rp->plane(kPlanes[coordinate][kFirst])->z() : Rp->plane(kPlanes[coordinate][kSecond])->z()) )/2;
-	for(int j=0; j<kPlanesPerCoordinate; ++j){
-	  hit.mClusterId[j] = validClusters[j][k]<0 ? -1 : id[j][validClusters[j][k]];
-	}
+	hit.mPositionXY = ( pos[kFirst][validClusters[kFirst][k]] + pos[kSecond][validClusters[kSecond][k]] )/2;
+	hit.mPositionZ = ( Rp->plane(kPlanes[coordinate][kFirst])->z() +  Rp->plane(kPlanes[coordinate][kSecond])->z() )/2;
+	for(int j=0; j<kPlanesPerCoordinate; ++j)  hit.mClusterId[j] = id[j][validClusters[j][k]];
+	hit.mPlanesUsed = kPlanesPerCoordinate;
 	if(clCase==5) hit.mGolden = true; // golden hit <-- 1/1
 	else hit.mGolden = false;
 
@@ -1085,6 +1086,7 @@ vector<St_pp2pp_Maker::StRpsHit> St_pp2pp_Maker::formHits(const StRpsRomanPot* R
 	    if(l==j) hit.mClusterId[l] = id[l][k];
 	    else hit.mClusterId[l] = -1;
 	  }
+	  hit.mPlanesUsed = 1;
 	  hit.mGolden = false;
 	  hitVec.push_back( hit );
 	}
@@ -1129,10 +1131,9 @@ Int_t St_pp2pp_Maker::classifyClustersCase(vector<double>* pos) const{
   if( lA >1 && lB==1 )	return 7; else
   if( lA==0 && lB==1 )	return 2; else
   if( lA==1 && lB==0 )	return 1; else
-  if( lA==2 && lB==2 )	return 8; else
+  if( lA>=2 && lB>=2 )	return 8; else
   if( lA==0 && lB >1 )	return 4; else
   if( lA >1 && lB==0 )	return 3; else
-  if( lA>=2 && lB>=2 )	return 9; else
   return -100;
 }
 
@@ -1144,10 +1145,6 @@ Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, con
 	      validClusters[kSecond].push_back( 0 );
 	      return true;
 	    } return false;
-    case 1:
-    case 2: validClusters[kFirst].push_back( clCase==2 ? -1 : 0 );
-	    validClusters[kSecond].push_back( clCase==2 ? 0 : -1 );
-	    return true;
     case 6:
     case 7: {double DeltaPosition = 1e9;
 	    double minDeltaPosition = 1e9;
@@ -1156,20 +1153,19 @@ Bool_t St_pp2pp_Maker::matchClusters(const int coordinate, const int clCase, con
 	      for(unsigned int c2=0; c2<pos[kSecond].size(); ++c2){
 		if(areMatched(coordinate, pos[kFirst][c1], pos[kSecond][c2], &DeltaPosition)){
 		  if(abs(DeltaPosition) < minDeltaPosition){
-		    minDeltaPosition = DeltaPosition;
+		    minDeltaPosition = abs(DeltaPosition);
 		    index[kFirst] = c1;
 		    index[kSecond] = c2;
 		  }
 		}
 	      }
 	    }
-	    if(index[kFirst]>0){
+	    if(index[kFirst]>-1){
 	      validClusters[kFirst].push_back( index[kFirst] );
 	      validClusters[kSecond].push_back( index[kSecond] );
 	      return true;
 	    } else return false;}
-    case 8:
-    case 9: {for(unsigned int c1=0; c1<pos[kFirst].size(); ++c1){
+    case 8: {for(unsigned int c1=0; c1<pos[kFirst].size(); ++c1){
 	      for(unsigned int c2=0; c2<pos[kSecond].size(); ++c2){
 		if(areMatched(coordinate, pos[kFirst][c1], pos[kSecond][c2])){
 		  validClusters[kFirst].push_back( c1 );
