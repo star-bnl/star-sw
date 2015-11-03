@@ -25,20 +25,22 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMaxPti   = 200;		/*Maximal allowed 1/pt */
   row.mMaxRes	= 0.5;		/*Maximal allowed residual */
   row.mCoeWindow= 5.;		/*Maximal window to search hits*/
+
   row.mMaxWindow= 10.;		/*Maximal window to search hits*/
   row.mMinHits 	= 3;		/*Min number of hits allowed*/
   row.mGoodHits =15;		/*Good number of hits allowed*/
-//		Forward version
-  row.mMinHitsFw  = 3;		/*Min number of hits allowed*/
-  row.mGoodHitsFw = 3;		/*Good number of hits allowed*/
-
 //	hitCount hitCount hitCount hitCount hitCount 
   row.mMinTotHits =3;       	/*Min number hits for track*/
   row.mMinGoodHits=3;       	/*Min number good hits for track*/
   row.mMinContHits=3;       	/*Min length of good hit sequence*/
-//row.mMaxContNits=5;      	/*Max length of acceptable non hit sequence*/
   row.mMaxContNits=11;      	/*Max length of acceptable non hit sequence*/
   row.mMaxTotNits =20;      	/*Max number of acceptable non hits*/
+//		Forward version
+  row.mMinHitsFw  = 3;		/*Min number of hits allowed*/
+  row.mGoodHitsFw = 3;		/*Good number of hits allowed*/
+
+  row.mMinTotHitsFw=3;		/*Forward Min number hits per track*/
+  row.mMinGoodHitsFw=3;		/*Forward Min number good hits for track*/
 
 
 tableSet->AddAt(&row);
