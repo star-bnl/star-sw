@@ -1,5 +1,5 @@
 /****************************************************************************
- * $Id: StHbtCorrFctnDirectYlm.cxx,v 1.1 2013/01/18 14:46:02 yyang Exp $
+ * $Id: StHbtCorrFctnDirectYlm.cxx,v 1.2 2015/11/02 20:11:06 perev Exp $
  *
  * Author: Yan Yang, hce137@gmail.com
  * **************************************************************************
@@ -376,8 +376,8 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 	for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
 		if ( TMath::IsNaN(real(ylmbuffer[ilm]) * weight) ) return;
 		if ( TMath::IsNaN(imag(ylmbuffer[ilm]) * weight) ) return;
-		if ( Isinf(real(ylmbuffer[ilm]) * weight) ) return;
-		if ( Isinf(imag(ylmbuffer[ilm]) * weight) ) return;
+		if ( ::isinf(real(ylmbuffer[ilm]) * weight) ) return;
+		if ( ::isinf(imag(ylmbuffer[ilm]) * weight) ) return;
 	}
 	if ( nqbin < binctn->GetNbinsX() )
 		for (int ilmzero = 0; ilmzero < GetMaxJM(); ilmzero++)
@@ -386,10 +386,10 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 				if ( TMath::IsNaN(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
 				if ( TMath::IsNaN(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
 				if ( TMath::IsNaN(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( Isinf(real(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( Isinf(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( Isinf(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
-				if ( Isinf(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(real(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(real(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(imag(ylmbuffer[ilmzero]) * real(ylmbuffer[ilmprim]) * weight * weight) ) return;
+				if ( ::isinf(imag(ylmbuffer[ilmzero]) * -imag(ylmbuffer[ilmprim]) * weight * weight) ) return;
 			}
 
 	for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
@@ -404,7 +404,7 @@ void StHbtCorrFctnDirectYlm::AddRealPair(const StHbtPair* aPair, double weight)
 		double e1e2	 = aPair->track1()->FourMomentum().e() * aPair->track2()->FourMomentum().e();
 		double e1pluse2 = aPair->track1()->FourMomentum().e() + aPair->track2()->FourMomentum().e();
 		if ( !( TMath::IsNaN(p1p2t) || TMath::IsNaN(p1p2z) || TMath::IsNaN(e1e2) || TMath::IsNaN(e1pluse2) ||
-				Isinf(p1p2t) || Isinf(p1p2z) || Isinf(e1e2) || Isinf(e1pluse2) ) )
+			::isinf(p1p2t) || ::isinf(p1p2z) || ::isinf(e1e2) || ::isinf(e1pluse2) ) )
 		{
 			for (int ilm = 0; ilm < GetMaxJM(); ilm++) {
 				emcicP1P2T[ilm]->Fill(kv, p1p2t);
@@ -1388,6 +1388,9 @@ int StHbtCorrFctnDirectYlm::PackYlmVectorIndependentOnly(double* invec, double* 
 
 /***************************************************************************
  * $Log: StHbtCorrFctnDirectYlm.cxx,v $
+ * Revision 1.2  2015/11/02 20:11:06  perev
+ * isnan for new compiler
+ *
  * Revision 1.1  2013/01/18 14:46:02  yyang
  * Add ultilities for SHD of CF
  *

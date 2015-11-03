@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.22 2003/09/02 17:58:32 perev Exp $
+ * $Id: StHbtParticle.cc,v 1.23 2015/11/02 20:12:58 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.23  2015/11/02 20:12:58  perev
+ * isnan for new compiler
+ *
  * Revision 1.22  2003/09/02 17:58:32  perev
  * gcc 3.2 updates + WarnOff
  *

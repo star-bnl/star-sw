@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.cxx,v 1.4 2015/10/21 15:58:05 akio Exp $
+// $Id: StFmsTowerCluster.cxx,v 1.5 2015/11/02 22:44:49 akio Exp $
 //
 // $Log: StFmsTowerCluster.cxx,v $
+// Revision 1.5  2015/11/02 22:44:49  akio
+// Fix photonEnergyInTower()
+//
 // Revision 1.4  2015/10/21 15:58:05  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -153,7 +156,7 @@ Double_t StFmsTowerCluster::getSigma(Double_t theta,Double_t xwidth, Double_t yw
     Double_t dis = (v1.Norm(vaxis)).Mod();
     // contribution to sigma
     double wtmp = log(tower->hit()->energy() + 1. - mEnergyCutoff) > 0 ?
-                  log(tower->hit()->energy() + 1. - mEnergyCutoff) : 0;
+	          log(tower->hit()->energy() + 1. - mEnergyCutoff) : 0;
     wnew += wtmp;
     sigma += wtmp * dis * dis;
   }  // for

@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.6 2015/10/30 21:23:04 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.7 2015/11/02 22:40:04 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.7  2015/11/02 22:40:04  akio
+// adding option for new cluster categorization
+//
 // Revision 1.6  2015/10/30 21:23:04  akio
 // *** empty log message ***
 //
@@ -60,7 +63,7 @@ namespace {
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
     : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0), 
-      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1) { }
+      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), mCategorizationAlgo(1) { }
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -147,11 +150,11 @@ int StFmsPointMaker::clusterEvent() {
 /* Perform photon reconstruction on a single sub-detector */
 int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
-  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,mTry1PhotonFitWhen2PhotonFitFailed);
+  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
-      LOG_INFO << Form("clusterDetector failed for det=%d",detectorId)<<endm;
-      // return kStOk ... mostly low energy which makes this fail???
+      //LOG_INFO << Form("clusterDetector found no cluster for det=%d ",detectorId)<<endm;
+      return kStOk; // this happens if detector just had too low energy
   }  // if
   // Saved cluster info into StFmsCluster
   auto& clusters = clustering.clusters();
@@ -210,7 +213,8 @@ bool StFmsPointMaker::processTowerCluster(
   }
   cluster->setDetectorId(det);
   // Cluster id is id of the 1st photon, not necessarily the highest-E photon
-  cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
+  //cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
+  cluster->setId(100*det + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
   cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
@@ -218,7 +222,8 @@ bool StFmsPointMaker::processTowerCluster(
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
       StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
       point->setDetectorId(det);
-      point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
+      //      point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
+      point->setId(100*det + mFmsCollection->numberOfPoints());
       point->setParentClusterId(cluster->id());
       point->setNParentClusterPhotons(towerCluster->photons().size());
       point->setCluster(cluster);
@@ -282,7 +287,7 @@ bool StFmsPointMaker::populateTowerLists() {
   }  // if
   auto& hits = mFmsCollection->hits();
   LOG_DEBUG << "Found nhits = " << hits.size() << endm;
-  float sumE=0.0;
+  float sumE[5]={0.0,0.0,0.0,0.0,0.0};
   int n=0;
   for (auto i = hits.begin(); i != hits.end(); ++i) {
     StFmsHit* hit = *i;
@@ -297,7 +302,8 @@ bool StFmsPointMaker::populateTowerLists() {
 	if(detector==kFmsSouthSmallDetId) detector=kFmsSouthLargeDetId;
     }
     if (hit->adc() > 0) {
-      sumE+=hit->energy();
+      sumE[0]+=hit->energy();
+      sumE[detector-kFmsNorthLargeDetId+1]+=hit->energy();
       // Insert a tower list for this detector ID if there isn't one already
       // This method is faster than using find() followed by insert()
       // http://stackoverflow.com/questions/97050/stdmap-insert-or-stdmap-find
@@ -313,9 +319,9 @@ bool StFmsPointMaker::populateTowerLists() {
       n++;
     }  // if
   }  // for
-  LOG_INFO << Form("NHit=%d NValidHit=%d Esum=%f Max=%f",hits.size(),n,sumE,mMaxEnergySum) << endm;
-  if(sumE<=0.0 || sumE>mMaxEnergySum) {
-      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?) or below zero. Skipping!",sumE,mMaxEnergySum)<< endm;
+  LOG_INFO << Form("NHit=%d NValidHit=%d Esum=%f (%f %f %f %f) Max=%f",hits.size(),n,sumE[0],sumE[1],sumE[2],sumE[3],sumE[4],mMaxEnergySum) << endm;
+  if(sumE[0]<=0.0 || sumE[0]>mMaxEnergySum) {
+      LOG_INFO << Form("Energy sum=%f exceed MaxEnergySum=%f (LED tail?) or below zero. Skipping!",sumE[0],mMaxEnergySum)<< endm;
       return false;
   }
   return true;

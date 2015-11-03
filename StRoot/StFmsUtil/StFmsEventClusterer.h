@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.h,v 1.4 2015/10/30 21:33:56 akio Exp $
+// $Id: StFmsEventClusterer.h,v 1.5 2015/11/02 22:44:49 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.5  2015/11/02 22:44:49  akio
+// Fix photonEnergyInTower()
+//
 // Revision 1.4  2015/10/30 21:33:56  akio
 // fix parameter initialization
 // adding new cluster categorization method
@@ -63,7 +66,9 @@ class StFmsEventClusterer: public TObject {
    */
 
   //  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
-  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, Int_t globalrefit, Int_t mergeSmallToLarge, Int_t try1Photon);
+  StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, 
+		      Int_t globalrefit, Int_t mergeSmallToLarge, 
+		      Int_t try1Photon, Int_t categorizationAlgo);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -212,6 +217,7 @@ class StFmsEventClusterer: public TObject {
   Int_t mGlobalRefit;        //!
   Int_t mMergeSmallToLarge;  //!
   Int_t mTry1PhotonFitWhen2PhotonFitFailed;//!
+  Int_t mCategorizationAlgo; //!
 
   ClassDef(StFmsEventClusterer, 0)
 };

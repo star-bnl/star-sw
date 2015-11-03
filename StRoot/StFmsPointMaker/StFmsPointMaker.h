@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.5 2015/10/21 15:49:12 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.6 2015/11/02 22:40:04 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.6  2015/11/02 22:40:04  akio
+// adding option for new cluster categorization
+//
 // Revision 1.5  2015/10/21 15:49:12  akio
 // Adding 3 options to control how reconstruction works:
 //   setGlobalRefit(int v=1)
@@ -80,6 +83,9 @@ class StFmsPointMaker : public StMaker {
 
   /* set this to perform 1 photon fit if 2 photon fit failed */
   void setTry1PhotonFit(int v=1) {mTry1PhotonFitWhen2PhotonFitFailed=v;}
+
+  /* set cluster categorization algo */
+  void setCategorizationAlgo(int v=1) {mCategorizationAlgo=v;}
 
  private:
   /** Definition of a collection of towers. */
@@ -164,6 +170,7 @@ class StFmsPointMaker : public StMaker {
   Int_t mGlobalRefit;       //! if this is none-zero, perform gloab refit of all photon in a module
   Int_t mMergeSmallToLarge; //! if this is none-zero, merge small cells to large cells
   Int_t mTry1PhotonFitWhen2PhotonFitFailed; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
+  Int_t mCategorizationAlgo; //! choose cluster categorization algo
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
