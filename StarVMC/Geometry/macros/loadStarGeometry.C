@@ -20,6 +20,8 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   Load("libStarGeometry.so");
   Load("libGeometry.so");
 
+  if (!mytag) return;
+
   if (!gMessMgr) gMessMgr = new StMessMgr();
 
   gErrorIgnoreLevel=9999;

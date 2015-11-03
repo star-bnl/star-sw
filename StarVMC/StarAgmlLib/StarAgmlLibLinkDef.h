@@ -13,6 +13,8 @@
 #pragma link C++ class AgPlacement+;
 #pragma link C++ class AgShape+;
 #pragma link C++ class AgStructure+;
+#pragma link C++ class AgParameterList<double>+;
+#pragma link C++ class AgTransform+;
 #pragma link C++ class AgVolume+;
 #pragma link C++ class StarAgmlStacker+;
 #pragma link C++ class StarTGeoStacker+;
