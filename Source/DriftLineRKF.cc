@@ -15,6 +15,9 @@ DriftLineRKF::DriftLineRKF()
       m_maxSteps(1000),
       m_usePlotting(false),
       m_view(0),
+      m_scaleElectronSignal(1.),
+      m_scaleHoleSignal(1.),
+      m_scaleIonSignal(1.),
       m_debug(false),
       m_verbose(false) {
 
@@ -214,7 +217,8 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
+    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+        m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
@@ -241,7 +245,8 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
+    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+        m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
@@ -268,7 +273,8 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire)) {
+    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+        m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
     }
@@ -655,6 +661,9 @@ bool DriftLineRKF::DriftToWire(double x0, double y0, double z0,
                sqrt(vx0 * vx0 + vy0 * vy0);
   const unsigned int nMaxSteps = 10;
   for (unsigned int i = 0; i < nMaxSteps; ++i) {
+    // JAMES MOTT HACK (5th Oct 2015) - m_path.back().xf,yf,zf not being set
+    // Put in flag here, remove return statement and check when looking for onwire flag
+    bool smallTimeStep = false;
     if (dt0 < 1.e-6) {
       if (m_debug) {
         std::cout << m_className << "::DriftToWire:\n";
@@ -663,7 +672,9 @@ bool DriftLineRKF::DriftToWire(double x0, double y0, double z0,
       // Estimated time step is very small. Stop.
       m_path.back().tf = m_path.back().ti + dt0;
       m_path.back().status = StatusLeftDriftMedium;
-      return true;
+      // JAMES MOTT HACK (5th Oct 2015)
+      //      return true;
+      smallTimeStep = true;
     }
     // Calculate the estimated end-point.
     double x1 = x0 + dt0 * vx0;
@@ -769,6 +780,8 @@ bool DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     m_path.back().yf = y1;
     m_path.back().zf = z1;
     if (onwire) break;
+    // JAMES MOTT HACK (5th Oct 2015)
+    if(smallTimeStep) break;
     step newStep;
     newStep.xi = x1;
     newStep.yi = y1;
@@ -798,6 +811,22 @@ void DriftLineRKF::GetEndPoint(double& x, double& y, double& z, double& t,
   z = m_path.back().zi;
   t = m_path.back().ti;
   stat = m_path.back().status;
+}
+
+void DriftLineRKF::GetDriftLinePoint(const unsigned int i, double& x, double& y,
+                                    double& z, double& t) const {
+
+  if (i >= m_path.size()) {
+    std::cerr << m_className << "::GetDriftLinePoint:\n";
+    std::cerr << "    Index is outside the range.\n";
+    return;
+  }
+
+  // Return midpoint of drift line stage
+  x = 0.5*(m_path.at(i).xi+m_path.at(i).xf);
+  y = 0.5*(m_path.at(i).yi+m_path.at(i).yf);
+  z = 0.5*(m_path.at(i).zi+m_path.at(i).zf);
+  t = 0.5*(m_path.at(i).ti+m_path.at(i).tf);
 }
 
 double DriftLineRKF::IntegrateDiffusion(const double& x, const double& y,
@@ -1130,9 +1159,11 @@ void DriftLineRKF::ComputeSignal() const {
     if (m_particleType == ParticleTypeElectron) {
       // Signal is weighted by avalanche size at this step.
       const double g = exp(m_path[i].alphaint);
-      m_sensor->AddSignal(-1. * g, m_path[i].ti, dt, xm, ym, zm, vx, vy, vz);
-    } else {
-      m_sensor->AddSignal(1., m_path[i].ti, dt, xm, ym, zm, vx, vy, vz);
+      m_sensor->AddSignal(-1. * g * m_scaleElectronSignal, m_path[i].ti, dt, xm, ym, zm, vx, vy, vz);
+    } else if (m_particleType == ParticleTypeIon) {
+      m_sensor->AddSignal(1. * m_scaleIonSignal, m_path[i].ti, dt, xm, ym, zm, vx, vy, vz);
+    } else if (m_particleType == ParticleTypeHole) {
+      m_sensor->AddSignal(1. * m_scaleHoleSignal, m_path[i].ti, dt, xm, ym, zm, vx, vy, vz);
     }
   }
 }

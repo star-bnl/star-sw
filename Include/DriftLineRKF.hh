@@ -26,6 +26,10 @@ class DriftLineRKF {
 
   void SetMaxSteps(const unsigned int& m) { m_maxSteps = m; }
 
+  void SetElectronSignalScalingFactor(const double scale) { m_scaleElectronSignal = scale; }
+  void SetHoleSignalScalingFactor(const double scale) { m_scaleHoleSignal = scale; }
+  void SetIonSignalScalingFactor(const double scale) { m_scaleIonSignal = scale; }
+
   bool DriftElectron(const double& x0, const double& y0, const double& z0,
                      const double& t0);
   bool DriftHole(const double& x0, const double& y0, const double& z0,
@@ -34,6 +38,8 @@ class DriftLineRKF {
                 const double& t0);
 
   void GetEndPoint(double& x, double& y, double& z, double& t, int& st) const;
+  unsigned int GetNumberOfDriftLinePoints() const { return m_path.size(); }
+  void GetDriftLinePoint(const unsigned int i, double& x, double& y, double& z, double& t) const;
 
   double GetArrivalTimeSpread();
   double GetGain();
@@ -76,6 +82,10 @@ class DriftLineRKF {
     int status;
   };
   std::vector<step> m_path;
+
+  double m_scaleElectronSignal;
+  double m_scaleHoleSignal;
+  double m_scaleIonSignal;
 
   bool m_debug;
   bool m_verbose;
