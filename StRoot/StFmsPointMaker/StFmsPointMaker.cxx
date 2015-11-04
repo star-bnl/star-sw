@@ -1,6 +1,10 @@
-// $Id: StFmsPointMaker.cxx,v 1.7 2015/11/02 22:40:04 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.8 2015/11/04 21:57:43 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.8  2015/11/04 21:57:43  akio
+// fixing overwrting detectorId for some StFmsPoint near large/small gap when
+// top cell in the cluster and the photon are in different detector
+//
 // Revision 1.7  2015/11/02 22:40:04  akio
 // adding option for new cluster categorization
 //
@@ -214,23 +218,18 @@ bool StFmsPointMaker::processTowerCluster(
   cluster->setDetectorId(det);
   // Cluster id is id of the 1st photon, not necessarily the highest-E photon
   //cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
-  cluster->setId(100*det + mFmsCollection->numberOfPoints());
+  cluster->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
   cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
       StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
-      point->setDetectorId(det);
       //      point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
-      point->setId(100*det + mFmsCollection->numberOfPoints());
+      point->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
       point->setParentClusterId(cluster->id());
       point->setNParentClusterPhotons(towerCluster->photons().size());
       point->setCluster(cluster);
-      //check fiducial volume 
-      //int edge;
-      //float distance=mFmsDbMaker->distanceFromEdge(detectorId,point->x(), point->y(), edge);  
-      //point->setEdge(edge,distance);
       // Add it to both the StFmsCollection and StFmsCluster
       // StFmsCollection owns the pointer, the cluster merely references it
       mFmsCollection->points().push_back(point);
@@ -379,6 +378,13 @@ Int_t StFmsPointMaker::readMuDst(){
   if(!event){LOG_INFO<<"StFmsPointMaker::readMuDst found no StEvent"<<endm; return kStErr;}
   StFmsCollection* fmscol = event->fmsCollection();
   if(!fmscol){LOG_INFO<<"StFmsPointMaker::readMuDst found no FmsCollection"<<endm; return kStErr;}
+  for (unsigned i(0); i < fmscol->numberOfClusters(); ++i) {
+      StFmsCluster* c = fmscol->clusters()[i];
+      if(c){
+	  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(c->detectorId(),c->x(),c->y());
+	  c->setFourMomentum(compute4Momentum(xyz, c->energy()));
+      }
+  }
   for (unsigned i(0); i < fmscol->numberOfPoints(); ++i) {
     StFmsPoint* p = fmscol->points()[i];
     if(p){
