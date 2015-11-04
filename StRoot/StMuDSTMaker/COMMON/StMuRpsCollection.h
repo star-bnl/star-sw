@@ -50,8 +50,12 @@ public:
 	double xyCluster(int romanPotId, int planeId, int cluster) const;
 	unsigned char qualityCluster(int romanPotId, int planeId, int cluster) const;
 
+// Tracks and Track Points
 	StMuRpsTrackPoint* trackPoint( unsigned int i ) { if ( i < mTrackPoints.size() ) return mTrackPoints[i]; return nullptr; }
 	StMuRpsTrack* track( unsigned int i ) { if ( i < mTracks.size() ) return mTracks[i]; return nullptr; }
+
+	inline int numberOfTrackPoints() const { return mTrackPoints.size(); }
+	inline int numberOfTracks() const { return mTracks.size(); }
 	
 private:
 

@@ -48,48 +48,28 @@ StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 	}
 
 	// Need to mirror over the StRpsTrackPoint
-	// vector<StRpsTrackPoint*> visited;
 	int nTracks = rps.tracks().size();
 	for ( int iTrack = 0; iTrack < nTracks; iTrack++ ){
-		// new ((*mTracks)[iTrack]) StMuRpsTrack();
-  		// StMuRpsTrack * muRpsTrack = (StMuRpsTrack*) mTracks->At(iTrack);
 		StMuRpsTrack * muRpsTrack = new StMuRpsTrack();
 
-		// first get the track points from the StRpsTrack
+		// The track points are taken from the StRpsTrack
 		for ( int iStation = 0; iStation < StMuRpsTrack::mNumberOfStationsInBranch; iStation++ ){
-			// visited.push_back(rps.tracks()[iTrack]->trackPoint( iStation ));
 			if ( rps.tracks()[iTrack] && rps.tracks()[iTrack]->trackPoint( iStation ) ){
-				
-				// cout << "------------!*!*!*!*!**!*!*!*!*!---------------------" << endl;
-				// cout << "rps.track()[]->trackPoint(station) = " << rps.tracks()[iTrack]->trackPoint( iStation ) << endl;
-				// cout << "------------!*!*!*!*!**!*!*!*!*!---------------------" << endl;
 				StMuRpsTrackPoint * ptp = addTrackPoint( rps.tracks()[iTrack]->trackPoint( iStation ) );
 				muRpsTrack->setTrackPoint( ptp, iStation );
 			}
-			
 		}
 		muRpsTrack->setP( TVector3( rps.tracks()[iTrack]->pVec().x(), rps.tracks()[iTrack]->pVec().y(), rps.tracks()[iTrack]->pVec().z() ) );
 		muRpsTrack->setBranch( rps.tracks()[iTrack]->branch() );
+		muRpsTrack->setType( (StMuRpsTrack::StMuRpsTrackType)rps.tracks()[iTrack]->type() );
 
 		mTracks.push_back( muRpsTrack );
-	}
-
-	// Check if any of the StRpsTrackPoints were not in a StRpsTrack, if so add them to the end
-	int nTrackPoints = rps.trackPoints().size();
-	for ( int i = 0; i < nTrackPoints; i++ ){
-		addTrackPoint( rps.trackPoints()[i] );
 	}
 }
 
 
 
 StMuRpsTrackPoint* StMuRpsCollection::addTrackPoint( StRpsTrackPoint * rpsTP ){
-
-	
-	// int counter = mTrackPoints->GetEntriesFast();
-  	// new ((*mTrackPoints)[counter]) StMuRpsTrackPoint();
-  	
-  	// StMuRpsTrackPoint * muRpsTrackPoint = (StMuRpsTrackPoint*) mTrackPoints->At(counter);
 
 	StMuRpsTrackPoint * muRpsTrackPoint = new StMuRpsTrackPoint();
 
