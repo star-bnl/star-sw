@@ -3,12 +3,15 @@
 
 #include "TObject.h"
 #include <vector>
+#include <map>
 
 #include "StMuRpsTrackPoint.h"
 #include "StMuRpsTrack.h"
 #include "TClonesArray.h"
 
 using namespace std;
+
+
 
 class StRpsCollection;
 
@@ -88,12 +91,9 @@ private:
 
 	StMuRpsTrackPoint* addTrackPoint( StRpsTrackPoint* tp );
 
-/*	double mPositionCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	short mLengthCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	double mEnergyCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	double mXYCluster[mNumberOfRomanPot][mNumberOfPlanes][100];		
-	unsigned char mQualityCluster[mNumberOfRomanPot][mNumberOfPlanes][100];*/
-
+	// keeps an in-memory map of the StEvent TrackPoints to the 
+	// StMuDst TrackPoints - for recovering the relationship in StMuRpsTracks
+	map<StRpsTrackPoint *, StMuRpsTrackPoint * > mTrackPointsMap;		//! 
 
 
 ClassDef(StMuRpsCollection,2)
