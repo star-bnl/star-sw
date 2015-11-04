@@ -1,5 +1,5 @@
 /* 
-   root.exe SL15AuAu200Z6cmBLStiCAKFV.root dEdxParameterization.C+
+   root.exe SL15AuAu200Z6cmBLStiCAKFV.root dEdxModel.C+
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -239,12 +239,12 @@ TF1 *zdEdx() {
   return f;
 }
 //________________________________________________________________________________
-void dEdxParameterization() {
+void dEdxModel() {
   if (_debug) {
     c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
     if (! c1 ) c1 = new TCanvas("c1","c1");
   }
-  cout << "dEdxParameterization" << endl;
+  cout << "dEdxModel" << endl;
   /* nPdTO/nPdTI - log(Total no. of conducting electrons) - log(no. of primary one) versus no. primary electrons:Outer/Inner
      n_e - Total no. of conducting electrons
      n_P - no. primary electrons; n_p = dX * BB(beta*gamma), dX track segment length, BB is Bether Bloch function = no. of primary clusters per cm
@@ -289,7 +289,7 @@ void dEdxParameterization() {
   for (Int_t ix = 0; ix <= Nxbins; ix++) XBins[ix] = TMath::Log10(xBins[ix+1]);
   TAxis *y = nPdT->GetYaxis();
   Int_t Nybins = y->GetNbins();
-  TFile *fOut = new TFile("dEdxParameterization.root","recreate");
+  TFile *fOut = new TFile("dEdxModel.root","recreate");
   Int_t    Nsigma = 100;
   Double_t sigmaMin = 0.00;
   Double_t sigmaMax = 1.00;
