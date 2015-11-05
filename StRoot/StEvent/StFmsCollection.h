@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.h,v 2.7 2015/10/21 14:53:59 ullrich Exp $
+ * $Id: StFmsCollection.h,v 2.8 2015/11/05 19:00:39 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.h,v $
+ * Revision 2.8  2015/11/05 19:00:39  ullrich
+ * Added 4 new inline functions.
+ *
  * Revision 2.7  2015/10/21 14:53:59  ullrich
  * Added new member and methods.
  *
@@ -73,14 +76,18 @@ public:
     StSPtrVecFmsPoint& points();    // Return the point list
     const StSPtrVecFmsPoint& points() const;
    
-    int fmsReconstructionFlag() const {return mFmsReconstructionFlag;}
-    int isMergeSmallToLarge()   const {return  (mFmsReconstructionFlag & 0x1);}
-    int isGlobalRefit()         const {return ((mFmsReconstructionFlag & 0x2)>>1);}
-    int isTry1PhotonFit()       const {return ((mFmsReconstructionFlag & 0x4)>>2);}
-    void setFmsReconstructionFlag(int v){mFmsReconstructionFlag=v;}
-    void setMergeSmallToLarge(int v)    {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffe) | (v & 0x1);   }
-    void setGlobalRefit(int v)          {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffd) | (v & 0x1)<<1;}
-    void setTry1PhotonFit(int v)        {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffb) | (v & 0x1)<<2;}
+    int fmsReconstructionFlag()      const;
+    int isMergeSmallToLarge()        const;
+    int isGlobalRefit()              const;
+    int isTry1PhotonFit()            const;
+    int isNewClusterCategorization() const;
+    int isScaleShowerShape()         const;
+    void setFmsReconstructionFlag(int v);
+    void setMergeSmallToLarge(int v);
+    void setGlobalRefit(int v);
+    void setTry1PhotonFit(int v);
+    void setNewClusterCategorization(int v);
+    void setScaleShowerShape(int v);
 
     void fillFpsSlat();            //update FPS slat info based on FMS hits
     void fillFpsAssociation();     //update FPS-FMS association info based on FMS points
@@ -120,5 +127,18 @@ private:
 
     ClassDef(StFmsCollection, 3)
 };
+
+inline int StFmsCollection::fmsReconstructionFlag()      const {return mFmsReconstructionFlag;}
+inline int StFmsCollection::isMergeSmallToLarge()        const {return  (mFmsReconstructionFlag &  0x1);}
+inline int StFmsCollection::isGlobalRefit()              const {return ((mFmsReconstructionFlag &  0x2)>>1);}
+inline int StFmsCollection::isTry1PhotonFit()            const {return ((mFmsReconstructionFlag &  0x4)>>2);}
+inline int StFmsCollection::isNewClusterCategorization() const {return ((mFmsReconstructionFlag &  0x8)>>3);}
+inline int StFmsCollection::isScaleShowerShape()         const {return ((mFmsReconstructionFlag & 0x10)>>4);}
+inline void StFmsCollection::setFmsReconstructionFlag(int v)    {mFmsReconstructionFlag=v;}
+inline void StFmsCollection::setMergeSmallToLarge(int v)        {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffe) | (v & 0x1);   }
+inline void StFmsCollection::setGlobalRefit(int v)              {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffd) | (v & 0x1)<<1;}
+inline void StFmsCollection::setTry1PhotonFit(int v)            {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffffb) | (v & 0x1)<<2;}
+inline void StFmsCollection::setNewClusterCategorization(int v) {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xfffff7) | (v & 0x1)<<3;}
+inline void StFmsCollection::setScaleShowerShape(int v)         {mFmsReconstructionFlag=(mFmsReconstructionFlag & 0xffffef) | (v & 0x1)<<4;}
 
 #endif
