@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.6 2015/10/30 21:33:56 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.7 2015/11/05 17:54:57 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.7  2015/11/05 17:54:57  akio
+// Adding option to scale up shower shape function for large cells
+//
 // Revision 1.6  2015/10/30 21:33:56  akio
 // fix parameter initialization
 // adding new cluster categorization method
@@ -80,7 +83,7 @@ class StFmsTower;
 class StFmsClusterFitter : public TObject {
  public:
   /** Constructor using detector geometry for a single sub-detector */
-  StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw);
+  StFmsClusterFitter(/*const StFmsGeometry* geometry,*/ Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape);
   /**
    Default constructor.
 
@@ -241,6 +244,7 @@ class StFmsClusterFitter : public TObject {
   TMinuit mMinuit;  ///< Minuit fitting interface
   static StFmsTowerCluster::Towers* mTowers;  ///< List of towers to fit
   static Double_t mEnergySum;
+  Int_t mScaleShowerShape;
 
   ClassDef(StFmsClusterFitter, 0)
 };  // class StFmsClusterFitter
