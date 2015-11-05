@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.8 2015/11/04 21:57:43 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.9 2015/11/05 17:53:09 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.9  2015/11/05 17:53:09  akio
+// Adding setScaleShowerShape() option for scaling up shower shape function for large cell
+//
 // Revision 1.8  2015/11/04 21:57:43  akio
 // fixing overwrting detectorId for some StFmsPoint near large/small gap when
 // top cell in the cluster and the photon are in different detector
@@ -67,7 +70,8 @@ namespace {
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
     : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0), 
-      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), mCategorizationAlgo(1) { }
+      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), 
+      mCategorizationAlgo(1), mScaleShowerShape(1) { }
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -146,7 +150,9 @@ int StFmsPointMaker::clusterEvent() {
   mFmsCollection->setMergeSmallToLarge(mMergeSmallToLarge);
   mFmsCollection->setGlobalRefit(mGlobalRefit);
   mFmsCollection->setTry1PhotonFit(mTry1PhotonFitWhen2PhotonFitFailed);
-  mFmsCollection->sortPointsByEnergy();  
+  mFmsCollection->setNewClusterCategorization(mCategorizationAlgo);
+  mFmsCollection->setScaleShowerShape(mScaleShowerShape);
+  mFmsCollection->sortPointsByEnergy();    
   LOG_INFO << Form("Found %d Clusters and %d Points",mFmsCollection->numberOfClusters(),mFmsCollection->numberOfPoints()) << endm;
   return kStOk;
 }
@@ -154,7 +160,9 @@ int StFmsPointMaker::clusterEvent() {
 /* Perform photon reconstruction on a single sub-detector */
 int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
-  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo);
+  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,
+					     mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo,
+					     mScaleShowerShape);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
       //LOG_INFO << Form("clusterDetector found no cluster for det=%d ",detectorId)<<endm;
