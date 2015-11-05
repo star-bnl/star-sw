@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.h,v 1.6 2015/11/02 22:40:04 akio Exp $
+// $Id: StFmsPointMaker.h,v 1.7 2015/11/05 17:53:09 akio Exp $
 //
 // $Log: StFmsPointMaker.h,v $
+// Revision 1.7  2015/11/05 17:53:09  akio
+// Adding setScaleShowerShape() option for scaling up shower shape function for large cell
+//
 // Revision 1.6  2015/11/02 22:40:04  akio
 // adding option for new cluster categorization
 //
@@ -87,6 +90,9 @@ class StFmsPointMaker : public StMaker {
   /* set cluster categorization algo */
   void setCategorizationAlgo(int v=1) {mCategorizationAlgo=v;}
 
+  /* set to scale shower shape for large cell */
+  void setScaleShowerShape(int v=1) {mScaleShowerShape=v;}
+
  private:
   /** Definition of a collection of towers. */
   typedef std::vector<FMSCluster::StFmsTower> TowerList;
@@ -171,6 +177,7 @@ class StFmsPointMaker : public StMaker {
   Int_t mMergeSmallToLarge; //! if this is none-zero, merge small cells to large cells
   Int_t mTry1PhotonFitWhen2PhotonFitFailed; //! if this is none-zero, try 1 photon fit if 2 photon fit failed
   Int_t mCategorizationAlgo; //! choose cluster categorization algo
+  Int_t mScaleShowerShape;   //! scale shower shape for large cell 
 
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsPointMaker, 0)
