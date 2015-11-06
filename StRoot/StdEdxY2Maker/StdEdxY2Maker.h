@@ -17,7 +17,6 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
-class Bichsel;
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
@@ -64,7 +63,6 @@ class StdEdxY2Maker : public StMaker {
   void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
-  static  Bichsel             *m_Bichsel;       //
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   static  Double_t gaus2(Double_t *x, Double_t *p);

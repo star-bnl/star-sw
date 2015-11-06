@@ -28,6 +28,7 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h" 
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
 // StarClassLibrary
@@ -73,7 +74,6 @@ static Double_t outerSectorPadPitch = 0;
 
 const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
-Bichsel *StdEdxY2Maker::m_Bichsel = 0;
 #include "dEdxTrackY2.h"
 //______________________________________________________________________________
 // QA histograms
@@ -115,7 +115,6 @@ Int_t StdEdxY2Maker::Init(){
     if (TESTBIT(m_Mode, kEmbedding))     
       LOG_WARN << "StdEdxY2Maker::Init This is embedding run" << endm;
   }
-  if (! m_Bichsel) m_Bichsel = Bichsel::Instance();
   
   gMessMgr->SetLimit("StdEdxY2Maker:: mismatched Sector",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: pad/TimeBucket out of range:",20);
@@ -325,7 +324,6 @@ Int_t StdEdxY2Maker::Finish() {
 #endif
   SafeDelete(m_TpcdEdxCorrection);
   SafeDelete(m_Minuit);
-  SafeDelete(m_Bichsel);
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
@@ -850,7 +848,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH3F *Phi3 = 0;
   static TH3F *Phi3D = 0, *Theta3D = 0;
   //  static TH2F *GainMonitor = 0;
-  static TH3F *SecRow3 = 0, *SecRow3C = 0;//, *SecRow3A = 0;
+  static TH3F *SecRow3 = 0, *SecRow3C = 0, *SecRow3CN, *SecRow3Ne = 0, *SecRow3Npi = 0, *SecRow3NK = 0, *SecRow3NP = 0, *SecRow3Nd = 0;
+  static const Char_t *SecRowNames[8] = {"","C","N","Ne","Npi","NK","NP","Nd"};
+  static const Int_t        inxPid[8] = {0, 0, 0, kPidElectron, kPidPion, kPidKaon, kPidProton, kPidDeuteron};
+  TH3F **SecRow3s[8] = {&SecRow3, &SecRow3C, &SecRow3CN, &SecRow3Ne, &SecRow3Npi, &SecRow3NK, &SecRow3NP, &SecRow3Nd};
   static TH3F *Zdc3C = 0;
   static TH3F *Z3C = 0, *Z3OC = 0;
   // AdcHistos
@@ -911,14 +912,21 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     Edge3 = new TH3D("Edge3",
 		     "log(dEdx/Pion) versus row and Edge",
 		     NumberOfRows,0.5, NumberOfRows+0.5, 400,-100,100,nZBins,ZdEdxMin,ZdEdxMax);
-    SecRow3= new TH3F("SecRow3","<log(dEdx/Pion)> (uncorrected) versus sector and row",
-		      numberOfSectors,0.5, numberOfSectors+0.5, NumberOfRows,0.5, NumberOfRows+0.5,nZBins,ZdEdxMin,ZdEdxMax);
-    SecRow3->SetXTitle("Sector number");
-    SecRow3->SetYTitle("Row number");
-    SecRow3C= new TH3F("SecRow3C","<log(dEdx/Pion)> (corrected) versus sector and row",
-		       numberOfSectors,0.5, numberOfSectors+0.5, NumberOfRows,0.5, NumberOfRows+0.5,nZBins,ZdEdxMin,ZdEdxMax);
-    SecRow3C->SetXTitle("Sector number");
-    SecRow3C->SetYTitle("Row number");
+    for (Int_t i = 0; i < 8; i++) {
+      if (i < 3) {
+	TString          Title("<log(dEdx/Pion)> (uncorrected) versus sector and row");
+	if      (i == 1) Title = "<log(dEdx/Pion)> (corrected) versus sector and row";
+	else if (i == 2) Title = "<log(dE/dE_PionTRS)> (corrected) versus sector and row";
+	*SecRow3s[i] = new TH3F(Form("SecRow3%s",SecRowNames[i]),Title,
+			       numberOfSectors,0.5, numberOfSectors+0.5, NumberOfRows,0.5, NumberOfRows+0.5,nZBins,ZdEdxMin,ZdEdxMax);
+      } else {
+	TString Title(Form("Log_{10}(No. primary clusters) for %s versus sector and row",SecRowNames[i]));
+	*SecRow3s[i] = new TH3F(Form("SecRow3%s",SecRowNames[i]),Title,
+			       numberOfSectors,0.5, numberOfSectors+0.5, NumberOfRows,0.5, NumberOfRows+0.5, 500,0.,5.);
+      }
+      (*SecRow3s[i])->SetXTitle("Sector number");
+      (*SecRow3s[i])->SetYTitle("Row number");
+    }
     Zdc3C   = new TH3F("Zdc3C","<log(dEdx/Pion)> versus row and  ZdcCoincidenceRate (log10)",
 		       NumberOfRows,0.5, NumberOfRows+0.5,100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     if ((TESTBIT(m_Mode, kAdcHistos))) {
@@ -1200,7 +1208,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (PiD.PiDStatus < 0) return;
   Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t l;
-  for (l = kPidElectron; l < KPidParticles; l += 1) {
+  for (l = kPidElectron; l < KPidParticles; l++) {
     if (PiD.fI70.fPiD) {
       hist70B[l][sCharge]->Fill(PiD.bghyp[l],PiD.devZ[l]);
       hist70P[l][sCharge]->Fill(PiD.bghyp[l],TMath::Log(PiD.Pred70BT[l]));
@@ -1295,10 +1303,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     Int_t k;
     Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
     for (k = 0; k < NdEdx; k++) {
-      FdEdx[k].zP = // m_Bichsel->GetMostProbableZ(bgL10,1.);
-	m_Bichsel->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].dx)); //remove dX
-      FdEdx[k].sigmaP = //m_Bichsel->GetRmsZ(bgL10,1.);
-	m_Bichsel->GetRmsZ(bgL10,TMath::Log2(FdEdx[k].dx)); //remove dX	
+      FdEdx[k].zP = // Bichsel::Instance()->GetMostProbableZ(bgL10,1.);
+	Bichsel::Instance()->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].dx)); //remove dX
+      FdEdx[k].sigmaP = //Bichsel::Instance()->GetRmsZ(bgL10,1.);
+	Bichsel::Instance()->GetRmsZ(bgL10,TMath::Log2(FdEdx[k].dx)); //remove dX	
       Double_t predB  = 1.e-6*TMath::Exp(FdEdx[k].zP);
       FdEdx[k].dEdxN  = TMath::Log(FdEdx[k].dEdx /predB);
       for (Int_t l = 0; l <= StTpcdEdxCorrection::kTpcLast; l++) {
@@ -1328,7 +1336,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       if ((TESTBIT(m_Mode, kAdcHistos))) {
 	if (PiD.PiDkeyU3 >= 0) {
 	  Double_t betaXgamma = pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[PiD.PiDkeyU3]->charge())/StProbPidTraits::mPidParticleDefinitions[PiD.PiDkeyU3]->mass();
-	  Double_t zA = m_Bichsel->GetMostProbableZ(TMath::Log10(betaXgamma),1.) + 2*TMath::Log(TMath::Abs(StProbPidTraits::mPidParticleDefinitions[PiD.PiDkeyU3]->charge()));
+	  Double_t zA = Bichsel::Instance()->GetMostProbableZ(TMath::Log10(betaXgamma),1.) + 2*TMath::Log(TMath::Abs(StProbPidTraits::mPidParticleDefinitions[PiD.PiDkeyU3]->charge()));
 	  Double_t PredA = 1.e-6*TMath::Exp(zA);
 	  Double_t PredE =  PredA*FdEdx[k].dx;
 	  Double_t PredEL = TMath::Log10(PredE);
@@ -1409,6 +1417,18 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (TMath::Abs(Pad2Edge) > 5) {
 	  if (SecRow3 )  SecRow3->Fill(FdEdx[k].sector,FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN);
 	  if (SecRow3C) SecRow3C->Fill(FdEdx[k].sector,FdEdx[k].row,FdEdx[k].dEdxN);
+	  if (SecRow3CN) {
+	    Double_t sigma = 0.25;
+	    Double_t n_P = FdEdx[k].dx*PiD.dNdx[kPidPion];
+	    Double_t zdE = StdEdxModel::instance()->zdE(n_P,sigma);
+	    Double_t dEN = TMath::Log(FdEdx[k].dE) - 5.50667e-01; // scale to <dE/dx>_MIP = 2.4 keV/cm
+	    Double_t zdEMVP = StdEdxModel::instance()->zdE(n_P,sigma);
+	    SecRow3CN->Fill(FdEdx[k].sector,FdEdx[k].row,dEN - zdEMVP);
+	    for (Int_t i = 3; i < 8; i++) {
+	      Int_t m = inxPid[i];
+	      (*SecRow3s[i])->Fill(FdEdx[k].sector,FdEdx[k].row,TMath::Log10(FdEdx[k].dx*PiD.dNdx[m]));
+	    }
+	  }
 	}
 	if (Zdc3C && FdEdx[k].Zdc > 0) Zdc3C->Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),FdEdx[k].dEdxN);
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
@@ -1534,10 +1554,10 @@ Double_t StdEdxY2Maker::LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdxY2_t *dEd
     Double_t Ylog2dx = TMath::Log2(dEdx[i].dx);
     //    Double_t Ylog2dx = 1;
     Double_t sigmaC = 0;
-    Double_t zMostProb = m_Bichsel->GetMostProbableZ(Xlog10bg,Ylog2dx) + TMath::Log(chargeSq);
-    Double_t sigma     = m_Bichsel->GetRmsZ(Xlog10bg,Ylog2dx) + sigmaC;
+    Double_t zMostProb = Bichsel::Instance()->GetMostProbableZ(Xlog10bg,Ylog2dx) + TMath::Log(chargeSq);
+    Double_t sigma     = Bichsel::Instance()->GetRmsZ(Xlog10bg,Ylog2dx) + sigmaC;
     Double_t xi = (dEdx[i].dEdxL - GeV2keV - zMostProb)/sigma;
-    Double_t  Phi = m_Bichsel->GetProbability(Xlog10bg,Ylog2dx,xi);
+    Double_t  Phi = Bichsel::Instance()->GetProbability(Xlog10bg,Ylog2dx,xi);
     dEdx[i].Prob = Phi/sigma;
     if (dEdx[i].Prob < ProbCut) {
       dEdx[i].Prob = ProbCut; 
@@ -1869,7 +1889,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
     if (Z3A && pMomentum > pMomin && pMomentum < pMomax && TrackLength > 40) {
       Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
       for (Int_t k = 0; k < NdEdx; k++) {
-	Double_t zP = m_Bichsel->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].dx));
+	Double_t zP = Bichsel::Instance()->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].dx));
 	Double_t predB  = 1.e-6*TMath::Exp(zP);
 	Double_t dEdxN  = TMath::Log(FdEdx[k].dEdx /predB);
 	Int_t io = 0;

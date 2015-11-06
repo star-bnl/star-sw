@@ -1,5 +1,6 @@
 #include "StPidStatus.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "StTrackGeometry.h"
 #include "TMath.h"
 //________________________________________________________________________________
@@ -40,19 +41,20 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
   Int_t l;
   PredBMN[0] = Pred70BMN[0] =  1;
   PredBMN[1] = Pred70BMN[1] = -1;
-  Bichsel *b = Bichsel::Instance();
-  for (l = kPidElectron; l < KPidParticles; l += 1) {
-    bghyp[l] = TMath::Log10(pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[l]->charge())/StProbPidTraits::mPidParticleDefinitions[l]->mass());
+  for (l = kPidElectron; l < KPidParticles; l++) {
+    bgs[l]   = pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[l]->charge())/StProbPidTraits::mPidParticleDefinitions[l]->mass();
+    dNdx[l] = StdEdxModel::instance()->dNdx(bgs[l]);
+    bghyp[l] = TMath::Log10(bgs[l]);
     PredB[l]   = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      TMath::Exp(b->GetMostProbableZ(bghyp[l],fFit.fPiD->log2dX())); 
+      TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l],fFit.fPiD->log2dX())); 
     PredBT[l]   = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      TMath::Exp(b->GetMostProbableZ(bghyp[l]));
+      TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp[l]));
     if (PredBT[l] < PredBMN[0]) PredBMN[0] = PredBT[l];
     if (PredBT[l] > PredBMN[1]) PredBMN[1] = PredBT[l];
     Pred70B[l] = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      b->GetI70M(bghyp[l],fI70.fPiD->log2dX()); 
+      Bichsel::Instance()->GetI70M(bghyp[l],fI70.fPiD->log2dX()); 
     Pred70BT[l] = 1.e-6*StProbPidTraits::mPidParticleDefinitions[l]->charge()*StProbPidTraits::mPidParticleDefinitions[l]->charge()*
-      b->GetI70M(bghyp[l]); 
+      Bichsel::Instance()->GetI70M(bghyp[l]); 
     if (Pred70B[l] < Pred70BMN[0]) Pred70BMN[0] = Pred70BT[l];
     if (Pred70B[l] > Pred70BMN[1]) Pred70BMN[1] = Pred70BT[l];
     if (fI70.fPiD) {
