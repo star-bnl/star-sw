@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.5  2015/11/06 17:47:16  jdb
+ * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
+ *
  * Revision 1.4  2015/10/23 19:22:49  jdb
  * akio added mFmsReconstructionFlag and related getters and setters. pushed version number of StMuFmsCollection. Corresponding changes for reconstruction flag in StMuFmsUtil.cxx
  *
@@ -103,7 +106,10 @@ void StMuFmsUtil::fillMuFms(StMuFmsCollection *muFms,StFmsCollection *fmscol)
   // Do hits and points before clusters, so that the hit and point lists are
   // populated before we try to set hit- and photon-in-cluster information
   // during the cluster loop
+
+  muFms->addInfo();
   muFms->setFmsReconstructionFlag(fmscol->fmsReconstructionFlag());
+  
   fillMuFmsHits(muFms, fmscol);
   fillMuFmsPoints(muFms, fmscol);
   fillMuFmsClusters(muFms, fmscol);

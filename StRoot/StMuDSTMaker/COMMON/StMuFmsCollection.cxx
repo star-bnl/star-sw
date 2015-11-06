@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsCollection.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $
+ * $Id: StMuFmsCollection.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsCollection.cxx,v $
+ * Revision 1.5  2015/11/06 17:47:16  jdb
+ * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
+ *
  * Revision 1.4  2015/10/23 19:22:49  jdb
  * akio added mFmsReconstructionFlag and related getters and setters. pushed version number of StMuFmsCollection. Corresponding changes for reconstruction flag in StMuFmsUtil.cxx
  *
@@ -27,12 +30,13 @@
 #include "StMuDSTMaker/COMMON/StMuFmsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFmsHit.h"
 #include "StMuDSTMaker/COMMON/StMuFmsPoint.h"
+ #include "StMuDSTMaker/COMMON/StMuFmsInfo.h"
 
-static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.4 2015/10/23 19:22:49 jdb Exp $";
+static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $";
 
 ClassImp(StMuFmsCollection)
 
-StMuFmsCollection::StMuFmsCollection() { mHits = 0; mClusters = 0; mPoints = 0; mFmsReconstructionFlag=0;}
+StMuFmsCollection::StMuFmsCollection() { mHits = 0; mClusters = 0; mPoints = 0; mInfo=0;}
 
 StMuFmsCollection::~StMuFmsCollection() {
   if (mHits) {
@@ -44,13 +48,17 @@ StMuFmsCollection::~StMuFmsCollection() {
   if (mPoints) {
     delete mPoints;
   }  // if
-  mHits = mClusters = mPoints = NULL;
+  if (mInfo) {
+    delete mInfo;
+  }  // if
+  mHits = mClusters = mPoints = mInfo = NULL;
 }
 
 void StMuFmsCollection::init() {
   mHits = new TClonesArray("StMuFmsHit", 0);
   mClusters = new TClonesArray("StMuFmsCluster", 0);
   mPoints = new TClonesArray("StMuFmsPoint", 0);
+  mInfo = new TClonesArray("StMuFmsInfo", 0);
 }
 
 void StMuFmsCollection::addHit(){
@@ -70,6 +78,13 @@ StMuFmsPoint* StMuFmsCollection::addPoint() {
   if (!mPoints) init();
   int counter = mPoints->GetEntriesFast();
   return new ((*mPoints)[counter]) StMuFmsPoint;
+}
+
+void StMuFmsCollection::addInfo() {
+  if (!mInfo) init();
+  int counter = mInfo->GetEntriesFast();
+  new ((*mInfo)[counter]) StMuFmsInfo;
+  return;
 }
 
 unsigned int StMuFmsCollection::numberOfHits() const{
@@ -100,4 +115,17 @@ StMuFmsCluster* StMuFmsCollection::getCluster(int index) {
 StMuFmsPoint* StMuFmsCollection::getPoint(int index) {
   if (!mPoints) return NULL;
   return static_cast<StMuFmsPoint*>(mPoints->At(index));
+}
+
+StMuFmsInfo* StMuFmsCollection::getInfo() {
+  if (!mInfo) return NULL;
+  return static_cast<StMuFmsInfo*>(mInfo->At(0));
+}
+
+
+Int_t StMuFmsCollection::fmsReconstructionFlag() {
+  return getInfo()->fmsReconstructionFlag();
+}
+void StMuFmsCollection::setFmsReconstructionFlag(Int_t v){ 
+  getInfo()->setFmsReconstructionFlag(v);
 }

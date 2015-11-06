@@ -31,3 +31,4 @@
 #include "StMuFmsCollection.h"
 #include "StMuFmsHit.h"
 #include "StMuFmsUtil.h"
+#include "StMuFmsInfo.h"
