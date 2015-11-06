@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.11 2015/06/10 22:03:20 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.12 2015/11/06 16:45:09 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -129,6 +129,7 @@ static myMap gMyMod[] = {
 {kFmsId       		,""	},
 {kRpsId       		,""	},
 {kMtdId       		,"MMBL"	},
+{kFtsId       		,"FTSM"	},
 {0,0				}};
   		  
 void myBreak(int i) 
@@ -408,9 +409,13 @@ void StTGeoProxy::InitHitShape()
       }
            
       rMax = sqrt(rMax);
-      if (!pass) rMax = 0; //calculation only zMin & zMax
-      fHitShape->Update(z1,z2,rMax);
-
+      if (!pass) {
+      		//calculation only zMin & zMax
+        fHitShape->Update(z1,z2,0);}
+      else {
+        fHitShape->Update(z1,z2,rMax);
+        fHitShape->Update(z1,z2,0.1);// It is a HACK (VP)
+      }
     }
   }
   fHitShape->Smooth(-100,100);
@@ -1523,7 +1528,7 @@ void StTGeoHitShape::Update(double z1, double z2, double rxy)
      if (fZMax<z2) fZMax=z2;
      return;
    }
-   fZStp = (fZMax-fZMin)/kNZ * 1.001;
+   fZStp = (fZMax-fZMin)/kNZ;
    assert(z1>=fZMin && z1<=fZMax);
    assert(z2>=fZMin && z2<=fZMax);
    if (fRMin>rxy) fRMin=rxy;
@@ -1564,8 +1569,8 @@ void StTGeoHitShape::Smooth(double zl, double zr)
      }
    }
 //	Increase volume, do not lose the boundary hits
-   fZMin*=kSafe/100.;
-   fZMax*=kSafe/100.;
+   fZMin-=fabs(fZMin)*kSafe/100.;
+   fZMax+=fabs(fZMax)*kSafe/100.;
    fRMin*=100./kSafe;
    fRMax*=kSafe/100.;
 
@@ -1588,7 +1593,7 @@ int  StTGeoHitShape::Outside(double z,double rxy) const
 {
    if (z<fZMin) 		return  1;
    if (z>fZMax) 		return  2;
-   if (rxy<fRMinMax && rxy>fRMaxMin ) 	return 0;
+   if (rxy>fRMinMax && rxy<fRMaxMin ) 	return 0;
    int jj = (int)(z-fZMin)/fZStp;
    if (jj<   0) jj=0;
    if (jj>=kNZ) jj=kNZ-1;
