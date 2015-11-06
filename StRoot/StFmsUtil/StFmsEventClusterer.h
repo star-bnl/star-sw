@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.h,v 1.5 2015/11/02 22:44:49 akio Exp $
+// $Id: StFmsEventClusterer.h,v 1.6 2015/11/05 17:54:57 akio Exp $
 //
 // $Log: StFmsEventClusterer.h,v $
+// Revision 1.6  2015/11/05 17:54:57  akio
+// Adding option to scale up shower shape function for large cells
+//
 // Revision 1.5  2015/11/02 22:44:49  akio
 // Fix photonEnergyInTower()
 //
@@ -68,7 +71,8 @@ class StFmsEventClusterer: public TObject {
   //  StFmsEventClusterer(const StFmsGeometry* geometry, Int_t detectorId);
   StFmsEventClusterer(StFmsDbMaker* db, Int_t detectorId, 
 		      Int_t globalrefit, Int_t mergeSmallToLarge, 
-		      Int_t try1Photon, Int_t categorizationAlgo);
+		      Int_t try1Photon, Int_t categorizationAlgo,
+		      Int_t scaleShowerShape);
   /** Destructor. */
   ~StFmsEventClusterer();
   /**
@@ -218,7 +222,7 @@ class StFmsEventClusterer: public TObject {
   Int_t mMergeSmallToLarge;  //!
   Int_t mTry1PhotonFitWhen2PhotonFitFailed;//!
   Int_t mCategorizationAlgo; //!
-
+  Int_t mScaleShowerShape; //!
   ClassDef(StFmsEventClusterer, 0)
 };
 }  // namespace FMSCluster

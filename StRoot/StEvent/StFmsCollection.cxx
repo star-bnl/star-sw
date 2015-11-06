@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsCollection.cxx,v 2.7 2015/10/21 14:53:59 ullrich Exp $
+ * $Id: StFmsCollection.cxx,v 2.8 2015/11/05 19:01:15 ullrich Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsCollection.cxx,v $
+ * Revision 2.8  2015/11/05 19:01:15  ullrich
+ * Improve print-out.
+ *
  * Revision 2.7  2015/10/21 14:53:59  ullrich
  * Added new member and methods.
  *
@@ -41,7 +44,7 @@
 #include "StEvent/StFmsPointPair.h"
 #include "StarClassLibrary/StParticleTypes.hh"
 
-static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.7 2015/10/21 14:53:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCollection.cxx,v 2.8 2015/11/05 19:01:15 ullrich Exp $";
 
 StFmsCollection::StFmsCollection() :
     mFmsReconstructionFlag(0), mFpsSlatFilled(false), mFpsAssociationFilled(false), mFmsPointPairFilled(false) {
@@ -209,8 +212,9 @@ void StFmsCollection::sortPointsByET() {
 }
 
 void StFmsCollection::print(int option) {
-    cout << Form("Flag=%x MergeSmallToLarge=%1d GlobalRefit=%1d Try1PhotonFit=%1d\n",
-		 mFmsReconstructionFlag,isMergeSmallToLarge(),isGlobalRefit(),isTry1PhotonFit());
+    cout << Form("Flag=%x MergeSmallToLarge=%1d GlobalRefit=%1d Try1PhotonFit=%1d NewClusterCateg=%1d ScaleShowerShape=%1d\n",
+		 mFmsReconstructionFlag,isMergeSmallToLarge(),isGlobalRefit(),isTry1PhotonFit(),
+		 isNewClusterCategorization(),isScaleShowerShape());
     cout << Form("NHit=%3d NCluster=%3d NPoint=%3d\n",numberOfHits(),numberOfClusters(),numberOfPoints());
     if(option>=5) for(unsigned int i=0; i<numberOfHits(); i++)       {hits()[i]->print();}
     if(option>=4) for(unsigned int i=0; i<numberOfClusters(); i++)   {clusters()[i]->print();}

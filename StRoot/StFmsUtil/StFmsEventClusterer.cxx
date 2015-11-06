@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.8 2015/11/02 22:44:49 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.9 2015/11/05 17:54:57 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.9  2015/11/05 17:54:57  akio
+// Adding option to scale up shower shape function for large cells
+//
 // Revision 1.8  2015/11/02 22:44:49  akio
 // Fix photonEnergyInTower()
 //
@@ -271,11 +274,13 @@ namespace FMSCluster {
   StFmsEventClusterer::StFmsEventClusterer( //const StFmsGeometry* geometry,
 					   StFmsDbMaker* db, Int_t detectorId, 
 					   Int_t globalrefit, Int_t mergeSmallToLarge, 
-					   Int_t try1PhotonFit, Int_t categorizationAlgo)
+					   Int_t try1PhotonFit, Int_t categorizationAlgo,
+					   Int_t scaleShowerShape)
       : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db), 
 	mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
-	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo) { }
-
+	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo),
+        mScaleShowerShape(scaleShowerShape) { }
+    
 StFmsEventClusterer::~StFmsEventClusterer() {}
 
 Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
@@ -295,7 +300,7 @@ Bool_t StFmsEventClusterer::cluster(std::vector<StFmsTower>* towerList) {
     LOG_ERROR << "Too many towers for Fit" << endm;
     return false;
   }  // if
-  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw));
+  mFitter.reset(new StFmsClusterFitter(/*mGeometry,*/ mDetectorId,xw,yw,mScaleShowerShape));
   return fitEvent();  // Return true for success
 }
 

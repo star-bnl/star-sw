@@ -10,10 +10,6 @@ ClassImp(StMuRpsCollection)
 
 StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 
-	// mTrackPoints 	= new TClonesArray( "StMuRpsTrackPoint", 0 );
-	// mTracks 		= new TClonesArray( "StMuRpsTrack", 0 );
-
-
     mSiliconBunch = rps.siliconBunch();
 
 	for(int i=0;i<mNumberOfRomanPot;i++){
@@ -47,37 +43,32 @@ StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 		}
 	}
 
-	// Need to mirror over the StRpsTrackPoint
-	// vector<StRpsTrackPoint*> visited;
-	int nTracks = rps.tracks().size();
-	for ( int iTrack = 0; iTrack < nTracks; iTrack++ ){
-		// new ((*mTracks)[iTrack]) StMuRpsTrack();
-  		// StMuRpsTrack * muRpsTrack = (StMuRpsTrack*) mTracks->At(iTrack);
-		StMuRpsTrack * muRpsTrack = new StMuRpsTrack();
-
-		// first get the track points from the StRpsTrack
-		for ( int iStation = 0; iStation < StMuRpsTrack::mNumberOfStationsInBranch; iStation++ ){
-			// visited.push_back(rps.tracks()[iTrack]->trackPoint( iStation ));
-			if ( rps.tracks()[iTrack] && rps.tracks()[iTrack]->trackPoint( iStation ) ){
-				
-				// cout << "------------!*!*!*!*!**!*!*!*!*!---------------------" << endl;
-				// cout << "rps.track()[]->trackPoint(station) = " << rps.tracks()[iTrack]->trackPoint( iStation ) << endl;
-				// cout << "------------!*!*!*!*!**!*!*!*!*!---------------------" << endl;
-				StMuRpsTrackPoint * ptp = addTrackPoint( rps.tracks()[iTrack]->trackPoint( iStation ) );
-				muRpsTrack->setTrackPoint( ptp, iStation );
-			}
-			
-		}
-		muRpsTrack->setP( TVector3( rps.tracks()[iTrack]->pVec().x(), rps.tracks()[iTrack]->pVec().y(), rps.tracks()[iTrack]->pVec().z() ) );
-		muRpsTrack->setBranch( rps.tracks()[iTrack]->branch() );
-
-		mTracks.push_back( muRpsTrack );
-	}
-
-	// Check if any of the StRpsTrackPoints were not in a StRpsTrack, if so add them to the end
+	// Add all of the track points
 	int nTrackPoints = rps.trackPoints().size();
 	for ( int i = 0; i < nTrackPoints; i++ ){
 		addTrackPoint( rps.trackPoints()[i] );
+	}
+
+	// Need to mirror over the StRpsTracks
+	int nTracks = rps.tracks().size();
+	for ( int iTrack = 0; iTrack < nTracks; iTrack++ ){
+		StMuRpsTrack * muRpsTrack = new StMuRpsTrack();
+
+		// Add the track points to the Tracks, if they are already in the collection (and they should be)
+		// then they wont be added again
+		for ( int iStation = 0; iStation < StMuRpsTrack::mNumberOfStationsInBranch; iStation++ ){
+			if ( rps.tracks()[iTrack] && rps.tracks()[iTrack]->trackPoint( iStation ) ){
+				StMuRpsTrackPoint * ptp = addTrackPoint( rps.tracks()[iTrack]->trackPoint( iStation ) );
+				muRpsTrack->setTrackPoint( ptp, iStation );
+			}
+		}
+		// Set the Track's attributes
+		muRpsTrack->setP( TVector3( rps.tracks()[iTrack]->pVec().x(), rps.tracks()[iTrack]->pVec().y(), rps.tracks()[iTrack]->pVec().z() ) );
+		muRpsTrack->setBranch( rps.tracks()[iTrack]->branch() );
+		muRpsTrack->setType( (StMuRpsTrack::StMuRpsTrackType)rps.tracks()[iTrack]->type() );
+
+		// add it to collection
+		mTracks.push_back( muRpsTrack );
 	}
 }
 
@@ -85,14 +76,11 @@ StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 
 StMuRpsTrackPoint* StMuRpsCollection::addTrackPoint( StRpsTrackPoint * rpsTP ){
 
-	
-	// int counter = mTrackPoints->GetEntriesFast();
-  	// new ((*mTrackPoints)[counter]) StMuRpsTrackPoint();
-  	
-  	// StMuRpsTrackPoint * muRpsTrackPoint = (StMuRpsTrackPoint*) mTrackPoints->At(counter);
+	if ( mTrackPointsMap.count( rpsTP ) ){
+		return mTrackPointsMap[ rpsTP ]; 
+	}
 
 	StMuRpsTrackPoint * muRpsTrackPoint = new StMuRpsTrackPoint();
-
 
 	muRpsTrackPoint->setPosition( TVector3( rpsTP->x(), rpsTP->y(), rpsTP->z() ) );
 	muRpsTrackPoint->setQuality( (StMuRpsTrackPoint::StMuRpsTrackPointQuality)rpsTP->quality() );
@@ -107,5 +95,6 @@ StMuRpsTrackPoint* StMuRpsCollection::addTrackPoint( StRpsTrackPoint * rpsTP ){
 	}
 
 	mTrackPoints.push_back( muRpsTrackPoint );
+	mTrackPointsMap[ rpsTP ] = muRpsTrackPoint;
 	return muRpsTrackPoint;
 }

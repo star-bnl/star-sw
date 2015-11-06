@@ -3,12 +3,15 @@
 
 #include "TObject.h"
 #include <vector>
+#include <map>
 
 #include "StMuRpsTrackPoint.h"
 #include "StMuRpsTrack.h"
 #include "TClonesArray.h"
 
 using namespace std;
+
+
 
 class StRpsCollection;
 
@@ -50,8 +53,12 @@ public:
 	double xyCluster(int romanPotId, int planeId, int cluster) const;
 	unsigned char qualityCluster(int romanPotId, int planeId, int cluster) const;
 
+// Tracks and Track Points
 	StMuRpsTrackPoint* trackPoint( unsigned int i ) { if ( i < mTrackPoints.size() ) return mTrackPoints[i]; return nullptr; }
 	StMuRpsTrack* track( unsigned int i ) { if ( i < mTracks.size() ) return mTracks[i]; return nullptr; }
+
+	inline int numberOfTrackPoints() const { return mTrackPoints.size(); }
+	inline int numberOfTracks() const { return mTracks.size(); }
 	
 private:
 
@@ -84,12 +91,9 @@ private:
 
 	StMuRpsTrackPoint* addTrackPoint( StRpsTrackPoint* tp );
 
-/*	double mPositionCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	short mLengthCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	double mEnergyCluster[mNumberOfRomanPot][mNumberOfPlanes][100];
-	double mXYCluster[mNumberOfRomanPot][mNumberOfPlanes][100];		
-	unsigned char mQualityCluster[mNumberOfRomanPot][mNumberOfPlanes][100];*/
-
+	// keeps an in-memory map of the StEvent TrackPoints to the 
+	// StMuDst TrackPoints - for recovering the relationship in StMuRpsTracks
+	map<StRpsTrackPoint *, StMuRpsTrackPoint * > mTrackPointsMap;		//! 
 
 
 ClassDef(StMuRpsCollection,3)

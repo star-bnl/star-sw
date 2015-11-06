@@ -1,6 +1,13 @@
-// $Id: StFmsPointMaker.cxx,v 1.7 2015/11/02 22:40:04 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.9 2015/11/05 17:53:09 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.9  2015/11/05 17:53:09  akio
+// Adding setScaleShowerShape() option for scaling up shower shape function for large cell
+//
+// Revision 1.8  2015/11/04 21:57:43  akio
+// fixing overwrting detectorId for some StFmsPoint near large/small gap when
+// top cell in the cluster and the photon are in different detector
+//
 // Revision 1.7  2015/11/02 22:40:04  akio
 // adding option for new cluster categorization
 //
@@ -63,7 +70,8 @@ namespace {
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
     : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0), 
-      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), mCategorizationAlgo(1) { }
+      mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), 
+      mCategorizationAlgo(1), mScaleShowerShape(1) { }
 
 StFmsPointMaker::~StFmsPointMaker() { }
 
@@ -142,7 +150,9 @@ int StFmsPointMaker::clusterEvent() {
   mFmsCollection->setMergeSmallToLarge(mMergeSmallToLarge);
   mFmsCollection->setGlobalRefit(mGlobalRefit);
   mFmsCollection->setTry1PhotonFit(mTry1PhotonFitWhen2PhotonFitFailed);
-  mFmsCollection->sortPointsByEnergy();  
+  mFmsCollection->setNewClusterCategorization(mCategorizationAlgo);
+  mFmsCollection->setScaleShowerShape(mScaleShowerShape);
+  mFmsCollection->sortPointsByEnergy();    
   LOG_INFO << Form("Found %d Clusters and %d Points",mFmsCollection->numberOfClusters(),mFmsCollection->numberOfPoints()) << endm;
   return kStOk;
 }
@@ -150,7 +160,9 @@ int StFmsPointMaker::clusterEvent() {
 /* Perform photon reconstruction on a single sub-detector */
 int StFmsPointMaker::clusterDetector(TowerList* towers, const int detectorId) {
   //  FMSCluster::StFmsEventClusterer clustering(&mGeometry,detectorId);
-  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo);
+  FMSCluster::StFmsEventClusterer clustering(mFmsDbMaker,detectorId,mGlobalRefit,mMergeSmallToLarge,
+					     mTry1PhotonFitWhen2PhotonFitFailed,mCategorizationAlgo,
+					     mScaleShowerShape);
   // Perform tower clustering, skip this subdetector if an error occurs
   if (!clustering.cluster(towers)) {  // Cluster tower list      
       //LOG_INFO << Form("clusterDetector found no cluster for det=%d ",detectorId)<<endm;
@@ -214,23 +226,18 @@ bool StFmsPointMaker::processTowerCluster(
   cluster->setDetectorId(det);
   // Cluster id is id of the 1st photon, not necessarily the highest-E photon
   //cluster->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
-  cluster->setId(100*det + mFmsCollection->numberOfPoints());
+  cluster->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
   // Cluster locations are in column-row grid coordinates so convert to cm and get STAR xyz
   StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(det,cluster->x(),cluster->y());
   cluster->setFourMomentum(compute4Momentum(xyz, cluster->energy()));
   // Save photons reconstructed from this cluster
   for (UInt_t np = 0; np < towerCluster->photons().size(); np++) {
       StFmsPoint* point = makeFmsPoint(towerCluster->photons()[np], detectorId);
-      point->setDetectorId(det);
       //      point->setId(CLUSTER_BASE + CLUSTER_ID_FACTOR_DET * det + mFmsCollection->numberOfPoints());
-      point->setId(100*det + mFmsCollection->numberOfPoints());
+      point->setId(200*(det-kFmsNorthLargeDetId) + mFmsCollection->numberOfPoints());
       point->setParentClusterId(cluster->id());
       point->setNParentClusterPhotons(towerCluster->photons().size());
       point->setCluster(cluster);
-      //check fiducial volume 
-      //int edge;
-      //float distance=mFmsDbMaker->distanceFromEdge(detectorId,point->x(), point->y(), edge);  
-      //point->setEdge(edge,distance);
       // Add it to both the StFmsCollection and StFmsCluster
       // StFmsCollection owns the pointer, the cluster merely references it
       mFmsCollection->points().push_back(point);
@@ -379,6 +386,13 @@ Int_t StFmsPointMaker::readMuDst(){
   if(!event){LOG_INFO<<"StFmsPointMaker::readMuDst found no StEvent"<<endm; return kStErr;}
   StFmsCollection* fmscol = event->fmsCollection();
   if(!fmscol){LOG_INFO<<"StFmsPointMaker::readMuDst found no FmsCollection"<<endm; return kStErr;}
+  for (unsigned i(0); i < fmscol->numberOfClusters(); ++i) {
+      StFmsCluster* c = fmscol->clusters()[i];
+      if(c){
+	  StThreeVectorF xyz = mFmsDbMaker->getStarXYZfromColumnRow(c->detectorId(),c->x(),c->y());
+	  c->setFourMomentum(compute4Momentum(xyz, c->energy()));
+      }
+  }
   for (unsigned i(0); i < fmscol->numberOfPoints(); ++i) {
     StFmsPoint* p = fmscol->points()[i];
     if(p){

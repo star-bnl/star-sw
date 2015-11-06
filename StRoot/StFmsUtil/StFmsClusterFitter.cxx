@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.cxx,v 1.5 2015/10/30 21:33:56 akio Exp $
+// $Id: StFmsClusterFitter.cxx,v 1.6 2015/11/05 17:54:57 akio Exp $
 //
 // $Log: StFmsClusterFitter.cxx,v $
+// Revision 1.6  2015/11/05 17:54:57  akio
+// Adding option to scale up shower shape function for large cells
+//
 // Revision 1.5  2015/10/30 21:33:56  akio
 // fix parameter initialization
 // adding new cluster categorization method
@@ -88,8 +91,8 @@ StFmsTowerCluster::Towers* StFmsClusterFitter::mTowers(nullptr);
 Double_t StFmsClusterFitter::mEnergySum(0.0);
 
 StFmsClusterFitter::StFmsClusterFitter( //const StFmsGeometry* geometry,
-                                       Int_t detectorId, Float_t xw, Float_t yw)
-    : mMinuit(3 * kMaxNPhotons + 1) {
+                                       Int_t detectorId, Float_t xw, Float_t yw, Int_t scaleShowerShape)
+    : mMinuit(3 * kMaxNPhotons + 1), mScaleShowerShape(scaleShowerShape) {
   // Set tower (x, y) widths for this detector
   towerWidths.clear();
   towerWidths.push_back(xw);
@@ -325,10 +328,10 @@ void StFmsClusterFitter::minimizationFunctionNPhoton(Int_t& npara,
     // Add expected energy in tower from each photon, according to shower-shape
     double expected = 0;
     for (int j = 0; j < nPhotons; ++j) {  // Recall there are 3 paras per photon
-      int k = 3 * j;
-      expected += para[k + 3] *  // total energy
-	  energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitParameters.data());
-    }  // for
+	int k = 3 * j;
+	expected += para[k + 3] * 
+	    energyDepositionInTower(x - para[k + 1], y - para[k + 2], fitParameters.data());
+    }
     //const double measured = tower->hit()->energy();
     const double measured = tower->e();
     const double deviation = measured - expected;
@@ -401,6 +404,19 @@ int StFmsClusterFitter::readMinuitParameters(std::vector<double>& parameters,
 void StFmsClusterFitter::setTowers(StFmsTowerCluster::Towers* towers) { 
     mTowers = towers; 
     mEnergySum = std::accumulate(mTowers->begin(), mTowers->end(), 0., addTowerEnergy);
+    //if mScaleShowerShape is on, and if top cell is in large cell, scale shower shape up
+    if(mScaleShowerShape){
+	if(mTowers->front()->hit()->detectorId() <= 9){ 
+	    fitParameters.at(4) = SS_B1*1.5;
+	    fitParameters.at(5) = SS_B2*1.5;
+	    fitParameters.at(6) = SS_B3*1.5;
+	}else{
+	    fitParameters.at(4) = SS_B1;
+	    fitParameters.at(5) = SS_B2;
+	    fitParameters.at(6) = SS_B3;
+	}
+	showerShapeFitFunction.SetParameters(fitParameters.data());
+    }
 }
     
 }  // namespace FMSCluster
