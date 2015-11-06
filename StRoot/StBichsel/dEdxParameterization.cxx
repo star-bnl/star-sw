@@ -159,3 +159,5 @@ Double_t dEdxParameterization::Get(const TH1D *hist, Double_t log10bg) const {
   if (log10bg > xmax) log10bg = xmax;
   return hsave->Interpolate(log10bg);
 }
+// $Id: $
+// $Log: $

@@ -129,4 +129,6 @@ class dEdxParameterization {
     
   ClassDef(dEdxParameterization,0)
 };
+// $Id: $
+// $Log: $
 #endif
