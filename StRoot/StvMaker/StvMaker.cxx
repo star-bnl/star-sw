@@ -149,8 +149,10 @@ Int_t StvMaker::InitDetectors()
 
 
 //		Activate detectors
+#if 0
   if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
                             SetAttr("activeTpc",0);}
+#endif
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
@@ -262,7 +264,7 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kPxlId,hec,0);
     Info("Init","%s: %d Hitplanes", "PxlHitErrs", nHP);
   }
-
+#if 0
   if (IAttr("activeFTS")) {    // FTS error calculator
     mSeedFinder->SetMinHits(3);
     TString myName("FtsHitErrs"); 
@@ -270,7 +272,7 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
     Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
   }
-
+#endif
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
 
