@@ -34,3 +34,5 @@ void Bichsel::Print() {
   cout << "Bichsel:: " << m_Tag << endl;
   if (m_dEdxParameterization) m_dEdxParameterization->Print();
 }
+// $Id: $
+// $Log: $

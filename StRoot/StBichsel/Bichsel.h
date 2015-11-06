@@ -89,5 +89,7 @@ class Bichsel {
 
   ClassDef(Bichsel,0)
 };
+// $Id: $
+// $Log: $
 #endif
 
