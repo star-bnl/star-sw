@@ -103,10 +103,11 @@ void AgStarReader::ReadEvent()
 #else
       nin++;
       if (_debug) {cout << nin << "\t"; part->Print();}
-	  Float_t v[] = {
+	  Float_t v[4] = {
 	    Float_t(part->Vx())  ,
 	    Float_t(part->Vy())  ,
-	    Float_t(part->Vz())
+	    Float_t(part->Vz())  ,
+	    0
 	  };
 	  SetVert(v, 0, 0, ubuf, nu, nv);
 #endif
