@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.124 2015/08/31 20:01:10 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.125 2015/11/06 17:47:16 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1822,6 +1822,7 @@ void StMuDstMaker::connectFmsCollection() {
   mFmsCollection->setFmsHitArray(mFmsArrays[muFmsHit]);
   mFmsCollection->setFmsClusterArray(mFmsArrays[muFmsCluster]);
   mFmsCollection->setFmsPointArray(mFmsArrays[muFmsPoint]);
+  mFmsCollection->setFmsInfoArray(mFmsArrays[muFmsInfo]);
 }
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectPmdCollection() {
@@ -1834,6 +1835,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.125  2015/11/06 17:47:16  jdb
+ * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
+ *
  * Revision 1.124  2015/08/31 20:01:10  jdb
  * Added pT check back to StMuDstMaker::fillMC() - its removal was causing the test failure reported in [www.star.bnl.gov #3136] Assertion failed in StMuMcTrack.cxx for year 2009 MC test in DEV
  *
