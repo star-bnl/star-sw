@@ -1,0 +1,13 @@
+/*    fmsTimeDepCorr.idl
+*
+*  Table: fmsTimeDepCorr
+*
+*       description: // FMS detector LED based time dependent correction
+*/ 
+
+struct fmsTimeDepCorr {   
+    unsigned short detectorId[20000];   /* DetectorId */
+    unsigned short ch[20000];           /* ch */
+    unsigned long  endEvent[20000];     /* last event# for which this correction applys*/
+    float corr[20000];                  /* LED based time dependent gain correction */
+};  
