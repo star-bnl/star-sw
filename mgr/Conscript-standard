@@ -995,11 +995,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    if (! $xgeomList{$geom}) {
 	      Depends $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 	      Command $env1 [$rz,$geometry], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null; mv geom.rz $rz;);
+		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
 	    } else{
 	      Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
 	      Command $env1 [$rz,$geometry], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv geom.rz $rz;);
+		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
 	    }
 #	    my $starsim = $BIN . "/" . "root4star";
 #	    my $xgeomlist = "y2013.*|devT";# "\^devT\$";#"dev13|devE|devT|y2013.*|y2012.*|y2011b|y2012a|y2013_1|y2013_2|y2003x";
