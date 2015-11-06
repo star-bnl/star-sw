@@ -352,7 +352,7 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   //41  if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
   //21  if (  Vtx->position().perp() > 3.0) return kFALSE;
   return kTRUE;
-}
+} 
 //________________________________________________________________________________
 void ForceAnimate(UInt_t times=0, Int_t msecDelay=0) {
   UInt_t  counter = times;
@@ -412,10 +412,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
      4. With pileup. repeat above (a-c) with new ranking scheme for cases I-III
   */
   TString OutFile(outFile);
-  if (iYear < 0) {
-    TString xmlFile;
-    if (iTMVA) xmlFile = "./weights/TMVAClassification_BDT.weights.xml";
-    Setup(xmlFile);
+  if (iTMVA) {
+    Setup("./weights/TMVAClassification_BDT.weights.xml");
   }
   if (iTMVA)   OutFile += "TMVARank";
   if (RankMin) OutFile += "R"; 
@@ -595,7 +593,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
       Id2McVx[Id] = McVx;
     }
-    PrPP(Id2McVx.size());
+    PrPPD(Id2McVx.size());
     PrPPDH(IdMc2RcTk);
     // Id (Truth, IdMcTk) => gTrack
     for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
@@ -605,7 +603,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       if (! IdTruth) continue;
       IdMc2RcTk.insert(pair<Int_t,StMuTrack *>(IdTruth,gTrack));
     }
-    PrPP(IdMc2RcTk.size());
+    PrPPD(IdMc2RcTk.size());
     PrPPDH(McTk);
     //  Id => McTk
     for (Int_t m = 0; m < NoMuMcTracks; m++) {
@@ -633,7 +631,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       McVx2McParentTk[McVx] = McTrack;
     }
     
-    PrPP(Id2McTk.size());
+    PrPPD(Id2McTk.size());
     // McVx => McTkR
     for (auto x : Id2McTk) {
       Int_t Id = x.first;
@@ -657,8 +655,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
       McVx2McTkR.insert(pair<StMuMcVertex *,StMuMcTrack *>(mcVx,McTrack));
     }
-    PrPP(McVx2McParentTk.size());
-    PrPP(McVx2McTkR.size());
+    PrPPD(McVx2McParentTk.size());
+    PrPPD(McVx2McTkR.size());
     for (auto x : McVx2McTkR) {
       if (! x.first) continue;
       Int_t n = McVx2McTkR.count(x.first);
@@ -666,12 +664,12 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Int_t Id = x.first->Id();
       Id2McVxR[Id] = x.first; 
     }
-    PrPP(Id2McVxR.size());
+    PrPPD(Id2McVxR.size());
     PrPPDH(RcVx);
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *RcVx = (StMuPrimaryVertex *) PrimaryVertices->UncheckedAt(l);
       //      if (! AcceptVX(RcVx)) continue;
-      PrPP(*RcVx);
+      PrPPD(*RcVx);
       Int_t Id = RcVx->id();
       RcVxs.push_back(RcVx); 
       Id2RcVx[Id] = RcVx;
@@ -681,14 +679,14 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
       StMuMcVertex *McVx = Id2McVx[IdMc]; 
       if (McVx) {
-	PrPP(*McVx);
+	PrPPD(*McVx);
 	RcVx2McVx[RcVx] = McVx;
 	McVx2RcVx.insert(make_pair(McVx,RcVx));
       }
     }
-    PrPP(RcVxs.size());
-    PrPP(McVx2RcVx.size()); PrPP(Id2RcVx.size());
-    PrPP(GhostVx.size());
+    PrPPD(RcVxs.size());
+    PrPPD(McVx2RcVx.size()); PrPPD(Id2RcVx.size());
+    PrPPD(GhostVx.size());
 
     PrPPDH(pTrack);
     for (Int_t k = 0; k < NoPrimaryTracks; k++) {
@@ -724,9 +722,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	}
       }
     }
-    PrPP(LostVx.size());
-    PrPP(RecoVx.size());
-    PrPP(CloneVx.size());
+    PrPPD(LostVx.size());
+    PrPPD(RecoVx.size());
+    PrPPD(CloneVx.size());
 #if 0
     PrPPDH(KFTrack);
     for (Int_t m = 0; m < NoKFTracks; m++) {
@@ -739,9 +737,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     for (Int_t m = 0; m < NoKFVertices; m++) {
       KFParticle *KFVx = (KFParticle *) KFVertices->UncheckedAt(m);
       if (! KFVx) continue;
-      PrPP(*KFVx);
+      PrPPD(*KFVx);
 #if 1
-      if (doPrint) {
+      if (doPrint && Debug() > 1) {
 	cout << "NDaughters = " << KFVx->NDaughters() << endl;
 	for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
 	  cout << "\t" << KFVx->DaughterIds()[i];
@@ -756,13 +754,13 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       IdVx2KFVx[IdVx] = KFVx;
       StMuPrimaryVertex* RcVx = Id2RcVx[IdVx];
       if (RcVx) {
-	PrPP(*RcVx);
+	PrPPD(*RcVx);
 	KFVx2RcVx[KFVx] = RcVx;
 	RcVx2KFVx.insert(pair<StMuPrimaryVertex*,KFParticle*>(RcVx,KFVx));
       }
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       if (McVx) {
-	PrPP(*McVx);
+	PrPPD(*McVx);
 	McVx2KFVx.insert(pair<StMuMcVertex *,KFParticle *>(McVx,KFVx));
       }
     }
@@ -770,9 +768,9 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       KFParticle *KFVx = (KFParticle *) KFTracks->UncheckedAt(m);
       if (! KFVx) continue;
       if (! KFVx->NDaughters()) continue;
-      PrPP(*KFVx);
+      PrPPD(*KFVx);
 #if 1
-      if (doPrint) {
+      if (doPrint && Debug() > 1) {
 	cout << "NDaughters = " << KFVx->NDaughters() << endl;
 	for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
 	  cout << "\t" << KFVx->DaughterIds()[i];
@@ -787,18 +785,18 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       IdVx2KFVx[IdVx] = KFVx;
       StMuPrimaryVertex* RcVx = Id2RcVx[IdVx];
       if (RcVx) {
-	PrPP(*RcVx);
+	PrPPD(*RcVx);
 	KFVx2RcVx[KFVx] = RcVx;
 	RcVx2KFVx.insert(pair<StMuPrimaryVertex*,KFParticle*>(RcVx,KFVx));
       }
       StMuMcVertex *McVx = RcVx2McVx[RcVx];
       if (McVx) {
-	PrPP(*McVx);
+	PrPPD(*McVx);
 	McVx2KFVx.insert(pair<StMuMcVertex *,KFParticle *>(McVx,KFVx));
       }
     }
-    PrPP(IdVx2KFVx.size());
-    PrPP(McVx2KFVx.size());
+    PrPPD(IdVx2KFVx.size());
+    PrPPD(McVx2KFVx.size());
     // Done with maps --------------------------------------------------------------------------------
     // Primary vertices:
     StMuMcVertex *McVx1 = Id2McVx[1];
