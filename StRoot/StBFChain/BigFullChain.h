@@ -985,14 +985,11 @@ Bfc_st BFC[] = { // standard chains
   {"pp2009d"      ,"" ,"",
    "B2009.3,BAna,hitfilt,ppOpt,emcDY2,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis","",""
    ,                   "Production chain for 2009 data - no Corr, no VF (+l3, ftpc, e/b-emc, trig)",kFALSE},
-
-
   // chains for year 10
   {"B2010","","","ry2010,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2010 ITTF (tpc)",kFALSE},
   {"B2010c","","","ry2010c,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2010 ITTF (tpc)",kFALSE},
-
   {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
    "B2010,BAna,hitfilt,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                         "","","Production chain for 2010 data - no Corr (+ l3, ftpc, e/b-emc)",kFALSE},
@@ -1005,26 +1002,20 @@ Bfc_st BFC[] = { // standard chains
   {"pp2010c","" ,"", // use of y2010c geometry
    "B2010c,BAna,hitfilt,ppOpt,emcDY2,trgd,ftpc,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                  "","","Production chain for 2010 data - no Corr (+ l3, ftpc, e/b-emc, no VF)",kFALSE},
-
-
   // chains for year 11
   {"B2011","","","ry2011,in,tpcX,UseXgeom,ftpc,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2011 ITTF (tpc)",kFALSE},
-
   {"P2011a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
    "B2011,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                               "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc)",kFALSE},
   {"pp2011a","" ,"", // initial chain - Add some to all of BEmcChkStat,QAalltrigs,btof,Corr3,-hitfilt,VFPPVnoCTB
    "B2011,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
-   ,                  "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
-
-
+   ,                        "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
   // chains for year 12
   {"B2012","","","ry2012,in,tpcX,UseXgeom,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2012 ITTF (tpc)",kFALSE},
   {"pp2012a","" ,"","B2012,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,        "","",                "Production chain for 2012 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
-
   {"P2012a","" ,"",
    "B2012,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                               "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc)",kFALSE},
@@ -1033,7 +1024,6 @@ Bfc_st BFC[] = { // standard chains
   {"pp2012b","" ,"",
    "B2012b,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,        "","",                "Production chain for 2012 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
-
   {"P2012b","" ,"",
    "B2012b,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,                               "","","Production chain for 2011 data - no Corr (+ l3, e/b-emc)",kFALSE},
@@ -1048,14 +1038,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
   {"B2013_c1","","","ry2013_1c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
-
   {"pp2013a","" ,"",
    "B2013_c2,ITTF,UseXgeom,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis",
-   "","",                "Production chain for 2013 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
+   "","",                         "Production chain for 2013 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
   {"pp2013b","" ,"",
    "B2013_c1,ITTF,UseXgeom,BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
    ,        "","",                "Production chain for 2013 data - no Corr (+ l3, e/b-emc, no VF)",kFALSE},
-
   // option is bare, no tracker and no Geom
   {"pp2013","" ,"",
    "BAna,hitfilt,ppOpt,emcDY2,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,analysis"
@@ -1069,56 +1057,37 @@ Bfc_st BFC[] = { // standard chains
   {"P2014","" ,"",
    "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,analysis" //,l3onl,fpd
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
    "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,StiHftC,analysis,"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
+   ,                               "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   // Year 15 chains
   {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
 
   {"B2015a"  ,"","","ry2015a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                               "Base chain for run 2015a data",kFALSE},
+   ,                                                                "Base chain for run 2015a data",kFALSE},
 
   {"B2015b"  ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                  "Base chain for run 2015 with y2015b geometry",kFALSE},
+   ,                                                 "Base chain for run 2015 with y2015b geometry",kFALSE},
 
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
+   ,                               "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   {"pp2015a","" ,"",
    "B2015a,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for year 2015a data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
+   ,                "","","Production chain for year 2015a data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"pp2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
-
-  {"P2015","" ,"",
-   "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
-
+   ,                "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2015","" ,"","B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,StiHftC,analysis"
+   ,                               "","","Production chain for 2014 data - no Corr (+ l3, e/b-emc)",kFALSE},
   {"P2015a","" ,"",
    "B2015a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for year 2015a data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
+   ,                 "","","Production chain for year 2015a data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
-   ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-
-
-
-  // TEST
-  //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-  // ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
-  //{"pp2013X","" ,"",
-  // "B2013_X,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-  // "","",                "Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
-
-
-
+   ,                 "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
