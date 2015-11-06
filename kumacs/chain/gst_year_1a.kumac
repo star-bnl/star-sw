@@ -1,0 +1,153 @@
+* $Id: gst_year_1a.kumac,v 1.2 1999/01/13 13:47:53 fisyak Exp $
+* $Log: gst_year_1a.kumac,v $
+* Revision 1.2  1999/01/13 13:47:53  fisyak
+* Add global for log_file. Thanks Janet
+*
+* Revision 1.1  1998/09/08 23:09:32  fisyak
+* gstar+g2t  for 1a
+*
+MACRO gst_year_1a _
+   TOP=$STAR _
+   gstar_settings=' year_1a hadr_off' _
+   domain='geometry sim/gstar sim/g2t' _
+   chain='evgin rgst g2t'_ 
+   first=401 _
+   no_events=50 _
+   no_in_bunch=200 _
+   nsplit=50 _
+   prefix_in=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2 _
+   prefix_out=auau_ce_b0-2 _
+   skip=0 _
+   log=''
+*   trace on full
+***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+* **********************************************************
+  ff    = $format([no_in_bunch]*int([first]/[no_in_bunch])+1,i5)
+  f     = [ff]
+  l     = [f]+[no_in_bunch]-1
+  last  = [first]+[no_events]-1
+
+  input_file = [prefix_in]_[f]_[l].xdf
+  if [no_in_bunch]>[nsplit] then | split mode
+    output_file = ""
+  endif
+ 
+***********************************************************
+* GLOBAL VARIABLES 
+* ********************************************************** 
+ macro/global/create input_file       [input_file]        'Input file name'
+ macro/global/create output_file      [output_file]       'Output file name'
+ macro/global/create tpc_sector_first [tpc_sector_first]  'first sector in TPC'
+ macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
+ macro/global/create ievent           1                   'Event counter'
+ macro/global/create TOP              [TOP]
+ macro/global/create gstar_settings [gstar_settings]
+ macro/global/create output_fzd_file   ""      'Output fz file'
+ macro/global/create output_xdf_file   ""      'Output xdf file' 
+ macro/global/create log_file         [log]
+* trace off
+   
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** Input file              --> ' [input_file]        
+ message ' *** First event             --> ' [first]
+ message ' *** no_in_bunch             --> ' [no_in_bunch]
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ message ' *** modules to process      --> ' [chain]   
+ message ' *** prefix_in               --> ' [prefix_in]
+ message ' *** prefix_out              --> ' [prefix_out]
+ message ' *** Output file name        --> ' [output_file]
+ message ' *** tpc_sector_first        --> ' [tpc_sector_first]
+ message ' *** tpc_sector_last         --> ' [tpc_sector_last]
+ message ' *** gstar settings          --> ' [gstar_settings]
+  
+   
+***********************************************************
+* BEGINNING STUFF 
+* **********************************************************
+ 
+ exec $STAR/kumacs/util/setup_defaults domain=[domain]
+   
+ exec setup#setup
+ 
+  exec bfc_util#bfc_start _
+    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
+  
+ macro/global/import *
+   message ' *** log_file                --> ' [log_file]
+ string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_xdf_file]
+   fmessage $quote([string])  [log_file]
+ string =   '---<bfc>-- f:'//[first]//' s:'//[skip]//' l:'//[last]
+   fmessage $quote([string])  [log_file]
+ string =  '---<bfc>-- c:'//[chain]
+   fmessage $quote([string])  [log_file]
+ if $iquest(1)<>0 goto ABEND
+  
+ exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=[chain]
+ 
+* now skip events
+ if $index([chain],evgin)>0 then
+* skip input event if any
+   do ievent = [f],[first]-1
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=evgin
+   enddo
+ endif 
+ 
+ *****************************************
+ *  MAIN EVENT LOOP 
+ *****************************************
+ message cpu time = $cptime
+ 
+* now split up output files into reasonable sizes
+* must create output file names for each type
+  do iev=[first],[last],[nsplit]
+   iev1=[iev]
+   iev2=[iev]+[nsplit]-1
+   if [iev2]>[last] then
+     iev2 = [last]
+   endif
+   i1 = $format([iev1],i4.4)
+   i2 = $format([iev2],i4.4)
+   output_xdf_file = [prefix_out]_[i1]_[i2].xdf
+   exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=evout  
+   output_fzd_file = [prefix_out]_[i1]_[i2].fzd
+   exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=fzout  
+   
+* here is the loop over events for this particular output file
+   do ievent=[iev1],[iev2]
+* clean tables
+     tabclear [event]
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process [chain]
+     if $iquest(1)<>0 goto EOF
+     if (STAF_STATUS(1).ne. STAFCV_OK) goto EOF
+* didn't put "evout" into chain - do it explicitly here
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=evout
+   enddo
+   
+* close this output file
+   exec [TOP]/kumacs/chain/bfc_util#bfc_finish chain=evout
+   exec [TOP]/kumacs/chain/bfc_util#bfc_finish chain=fzout
+ enddo
+ 
+*****************************************
+*  FINISH
+* ****************************************   
+EOF:
+  exec [TOP]/kumacs/chain/bfc_util#bfc_finish [chain]
+  goto END
+ABEND:
+* fatal error
+  message "<bfc> Fatal error"
+END:
+RETURN
+* ******************************************************************
+* ******************************************************************
+* ******************************************************************
+* ******************************************************************
+* ******************************************************************
+ 

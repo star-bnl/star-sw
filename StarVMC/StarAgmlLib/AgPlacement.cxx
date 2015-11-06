@@ -7,7 +7,7 @@ ClassImp(AgPlacement);
 #include "TGeoMatrix.h"
 
 AgPlacement::AgPlacement(const Char_t *block, const Char_t *mother, const Char_t *group):
-  TNamed(block,Form("Place %s into %s",block,mother)), mHasRotm(false),mType(kUnknown)
+		  TNamed(block,Form("Place %s into %s",block,mother)), mType(kUnknown)
 {
 	mBlock=block;
 	mMother=mother;
@@ -182,12 +182,6 @@ TGeoCombiTrans *AgPlacement::matrix()
 		  //			std::cout << "I dunno" << std::endl;
 		}
 	}
-
-	// Completely specified by rotation matrix provided
-	if ( mHasRotm ) 
-	  {
-	    rotation.SetMatrix( mRotationMatrix );
-	  }
 
 
 	TGeoRotation *RotInHell = new TGeoRotation(rotation);

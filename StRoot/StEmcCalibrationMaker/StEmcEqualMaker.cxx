@@ -500,7 +500,7 @@ TH1F* StEmcEqualMaker::getEtaBinSpec(int eta0, int eta1,TH2F* SPEC)
 	return hist;
 }
 //_____________________________________________________________________________
-TH1F* StEmcEqualMaker::rebin(int id,const char *name, TH2F* SPEC)
+TH1F* StEmcEqualMaker::rebin(int id,char *name, TH2F* SPEC)
 {   
 	TH2F *spec = NULL;
 	if(!SPEC) spec = getSpec(); else spec = SPEC;
