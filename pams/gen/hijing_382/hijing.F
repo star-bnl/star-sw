@@ -842,7 +842,7 @@ C
 
 C...Switch off decay of pi0, K0S, Lambda, Sigma+-, Xi0-, Omega-.
 	IF(IHPR2(12).GT.0) THEN
-	CALL LUGIVE('MDCY(C111,1)=0')
+!	CALL LUGIVE('MDCY(C111,1)=0')
 	CALL LUGIVE('MDCY(C310,1)=0')
 	   CALL LUGIVE('MDCY(C411,1)=0;MDCY(C-411,1)=0')
 	   CALL LUGIVE('MDCY(C421,1)=0;MDCY(C-421,1)=0')

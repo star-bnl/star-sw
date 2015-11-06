@@ -139,7 +139,9 @@ Introduction of the Copyright and cvs Log
 #define    gsckov	 F77_NAME(gsckov,GSCKOV)
 #define    gstpar	 F77_NAME(gstpar,GSTPAR)
 #define    gfkine	 F77_NAME(gfkine,GFKINE)
+#define    gpkine	 F77_NAME(gpkine,GPKINE)
 #define    gfvert	 F77_NAME(gfvert,GFVERT)
+#define    gpvert	 F77_NAME(gpvert,GPVERT)
 #define    gskine	 F77_NAME(gskine,GSKINE)
 #define    gsvert	 F77_NAME(gsvert,GSVERT)
 #define    gphysi	 F77_NAME(gphysi,GPHYSI)
@@ -279,16 +281,17 @@ extern "C"
 
   void type_of_call gfkine(Int_t &, Float_t *, Float_t *, Int_t &,
 			   Int_t &, Float_t *, Int_t &); 
-
+  void type_of_call gpkine(Int_t &);
   void type_of_call gfvert(Int_t &, Float_t *, Int_t &, Int_t &, 
 			   Float_t &, Float_t *, Int_t &); 
+  void type_of_call gpvert(Int_t &);
 
   void type_of_call gskine(Float_t *,Int_t &, Int_t &, Float_t *,
 			   Int_t &, Int_t &); 
 
   void type_of_call gsvert(Float_t *,Int_t &, Int_t &, Float_t *,
 			   Int_t &, Int_t &); 
-
+  
   void type_of_call gphysi(); 
 
   void type_of_call gdebug(); 
@@ -2055,7 +2058,10 @@ void  TGiant3::Gfkine(Int_t itra, Float_t *vert, Float_t *pvert, Int_t &ipart,
   Int_t   nbuf; 
   gfkine(itra,vert,pvert,ipart,nvert,ubuf,nbuf); 
 } 
-
+//_____________________________________________________________________________
+void  TGiant3::Gpkine(Int_t itra) {
+  gpkine(itra);
+}
 //_____________________________________________________________________________
 void  TGiant3::Gfvert(Int_t nvtx, Float_t *v, Int_t &ntbeam, Int_t &nttarg,
 		      Float_t &tofg) 
@@ -2069,6 +2075,10 @@ void  TGiant3::Gfvert(Int_t nvtx, Float_t *v, Int_t &ntbeam, Int_t &nttarg,
   Int_t   nbuf; 
   gfvert(nvtx,v,ntbeam,nttarg,tofg,ubuf,nbuf); 
 } 
+//_____________________________________________________________________________
+void  TGiant3::Gpvert(Int_t nvtx) {
+  gpvert(nvtx);
+}
  
 //_____________________________________________________________________________
 Int_t TGiant3::Gskine(Float_t *plab, Int_t ipart, Int_t nv, Float_t *buf,

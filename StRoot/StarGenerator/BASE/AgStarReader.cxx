@@ -57,7 +57,7 @@ void AgStarReader::ReadEvent()
 
   TParticle *part = 0;    // particle 
   Int_t      itrk = -1;   // track number
-
+  static Int_t _debug = 0;
 
   struct Vertex_t {
     Double_t x, y, z, t;
@@ -66,7 +66,14 @@ void AgStarReader::ReadEvent()
 
   Int_t idvtx = 0;
   map<Int_t, Int_t> start_vtx;
-
+  Float_t ubuf[1] = {0};
+  Int_t nb = 0;
+  Int_t nu = 0;
+  Int_t nv = 0;
+  Int_t nt = 0;
+  Int_t nin = 0;
+  Int_t nvold = -1;
+  
   while(  (part=mStack->PopNextTrack(itrk)) )
     {
 
@@ -74,8 +81,7 @@ void AgStarReader::ReadEvent()
       // continue on to the next particle.
       if ( part->GetStatusCode() != 1 ) continue;
 
-      //      part->Print();
-
+#if 0
       // Get the parent particle and lookup the vertex id
       Int_t parent = part->GetFirstMother();
       Int_t myvtx  = start_vtx[parent];
@@ -94,14 +100,22 @@ void AgStarReader::ReadEvent()
 	  assert(myvtx==idvtx);
 
 	}
-
+#else
+      nin++;
+      if (_debug) {cout << nin << "\t"; part->Print();}
+	  Float_t v[] = {
+	    Float_t(part->Vx())  ,
+	    Float_t(part->Vy())  ,
+	    Float_t(part->Vz())
+	  };
+	  SetVert(v, 0, 0, ubuf, nu, nv);
+#endif
       // Now connect the particle to the vertex
       Float_t plab[] = { 
 	Float_t(part->Px())  ,
 	Float_t(part->Py())  ,
 	Float_t(part->Pz())
       };
-
       Int_t   ipdg    = part->GetPdgCode();
       Int_t   g3id    = 0;
       {
@@ -112,12 +126,17 @@ void AgStarReader::ReadEvent()
 	    Warning(GetName(),Form("Particle %s with PDG id=%i has no G3 code.  Skipped.",pdg->GetName(),ipdg));
 	  }
       }
-
-
+#if 0
       geant3->Gskine( plab, g3id, myvtx );
-
+#else
+      SetKine(plab, g3id, nv, ubuf, nb, nt);
+#endif
     }
-
+  if (_debug) {
+    nv = 0; 
+    geant3->Gpvert(nv);
+    geant3->Gpkine(nv);
+  }
 }
 // ----------------------------------------------------------------------------------------------------
 //

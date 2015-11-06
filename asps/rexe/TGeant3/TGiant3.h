@@ -726,7 +726,8 @@ public:
    virtual  void  Gfvert(Int_t nvtx, Float_t *v, Int_t &ntbeam, Int_t &nttarg, Float_t &tofg); 
    virtual  Int_t Gskine(Float_t *plab, Int_t ipart, Int_t nv, Float_t *ubuf=0, Int_t nwbuf=0); 
    virtual  Int_t Gsvert(Float_t *v, Int_t ntbeam, Int_t nttarg, Float_t *ubuf=0, Int_t nwbuf=0); 
- 
+   virtual  void  Gpvert(Int_t nvtx);
+   virtual  void  Gpkine(Int_t itra);
       // functions from GPHYS 
    virtual  void  Gphysi(); 
  

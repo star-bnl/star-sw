@@ -180,7 +180,7 @@ Int_t StarHijing::Init()
   A["neutron"]  =1;    Z["neutron"]  =0;   type["neutron"]  ="N       ";
   A["deuteron"] =2;    Z["deuteron"] =1;   type["deuteron"] ="A       ";
 
-  hiparnt().ihpr2(12) = 0; // 0=particle decays on 1=off
+  hiparnt().ihpr2(12) = 1; // 0=particle decays on 1=off
 
   string frame = mFrame.Data();
   if(frame =="FIXT") frame="LAB";
