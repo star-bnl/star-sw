@@ -933,18 +933,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	foreach my $tag ( sort keys %tagList ) {
 	  my $geom = $AgMLList{$tag};
 	  next if ! $geom;
-#	  my @rejected_geoms = qw(y2000 y2001 y2003 y2003x 
-#				  y2004 y2004a y2004y 
-#				  y2005 y2005x
-#				  y2011b
-#				  devTA devTB devTC devTD devTE devTF
-#				  upgr01 upgr02 upgr03 upgr04 upgr05 upgr06 upgr07 upgr08 upgr09 upgr10 upgr11 upgr12 upgr13 upgr14 upgr15 upgr16 upgr17 upgr16a);
-#	  foreach my $rgeom ( @rejected_geoms ) {
-#	    if ($geom eq $rgeom) {
-#	      print "geom $geom has been rejected\n" if $param::debug;
-#	      goto ENDL;
-#	    }
-#	  }
 	  print "Build $geometry for $tag\n" if $param::debug;
 	  my $geometry = "Geometry." . $tag . ".root";
 	  Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
@@ -954,22 +942,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }	else { # AgiGeometry
 	foreach my $geom (@versionList) { # create geometries itself
-#	  if ( -d "./StarDb/starsim") {
-#	    my $starsim_geom = "./StarDb/starsim/geometry." . $geom . ".C";
-#	    if (! -r $starsim_geom) {
-#	      open (Out, ">$starsim_geom") or die "Can't open $starsim_geom";
-#	      print Out "
-#TDataSet *CreateTable() {
-#  if (!gROOT->GetClass(\"St_geant_Maker\")) return 0;
-#  St_geant_Maker *geant = (St_geant_Maker *) StMaker::GetChain()->Maker(\"geant\");
-#  if (! geant) return 0;
-#  TDataSet *geom = new TDataSet(\"geometry\");
-#  geant->Do(\"detp geom $geom\");
-#  return geom;
-#};";
-#	      close(Out);
-#	    }
-#	  }
+	  if ( -d "./StarDb/starsim") {
+	    my $starsim_geom = "./StarDb/starsim/geometry." . $geom . ".C";
+	    if (! -r $starsim_geom) {
+	      open (Out, ">$starsim_geom") or die "Can't open $starsim_geom";
+	      print Out "
+TDataSet *CreateTable() {
+  if (!gROOT->GetClass(\"St_geant_Maker\")) return 0;
+  St_geant_Maker *geant = (St_geant_Maker *) StMaker::GetChain()->Maker(\"geant\");
+  if (! geant) return 0;
+  TDataSet *geom = new TDataSet(\"geometry\");
+  geant->Do(\"detp geom $geom\");
+  return geom;
+};";
+	      close(Out);
+	    }
+	  }
 	  my $geom_h = $geom . ".h";
 	  my $rz = lc($geom . ".rz");
 	  if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
@@ -1001,15 +989,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      Command $env1 [$rz,$geometry], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
 		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
 	    }
-#	    my $starsim = $BIN . "/" . "root4star";
-#	    my $xgeomlist = "y2013.*|devT";# "\^devT\$";#"dev13|devE|devT|y2013.*|y2012.*|y2011b|y2012a|y2013_1|y2013_2|y2003x";
-#	    if ($geom !~ /$xgeomlist/) {
-#	      Command $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-#		qq (cd %>:d; starsim -w 0 -c "DETP geom $geom; gexec $STAR_LIB/StarMagFieldNoDict.so; gexec $STAR_LIB/geometry.so; gclos all; grfile geom.rz; quit"; mv geom.rz $rz;);
-#	    } else{
-#	      Command $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-#		qq (cd %>:d; starsim -w 0 -c "DETP geom $geom; gexec $STAR_LIB/StarMagFieldNoDict.so; gexec $STAR_LIB/xgeometry.so; gclos all; grfile geom.rz; quit"; mv geom.rz $rz;);
-#	    }
 	  }
 	  my $g2root = "g2Root";
 	  Depends $env1 [$geom_h], ($rz);
@@ -1017,12 +996,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  if ($geomlist) { $geomlist .= "|";}
 	  $geomlist .= $geom;
 	}
-#	foreach my $tag ( sort keys %tagList ) { # create geometry tags
-#	  my $geom = $tagList{$tag};
-#	  my $geom_h = $geom . ".h";
-#	  my $geometry = "Geometry." . $tag . ".C";
-#	  Command $env1 [$geometry], ($geom_h, "CreateGeometry.h", "Rotations.h", "Material.h", "Media.h"), qq(cd %>:d; CreateGeometry.pl $geom > %>:f);
-#	}
       }
     }
   }
