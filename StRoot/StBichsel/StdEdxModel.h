@@ -28,7 +28,8 @@ class StdEdxModel {
   static  StdEdxModel* instance();
   TF2    *zMPV();
   TF1    *zFunc();
-  TF1    *zdEdx();
+  TF1    *zdEdx();   // log(dE) with respect to Most Probable Value (MPV)
+  TF1    *zdEdxA();  // log(dE[GeV]) 
   Double_t zdE(Double_t n_P = 30, Double_t sigma = 0.25);
   Double_t dNdx(Double_t betagamma = 4.0, Double_t charge = 1.0) {return charge*charge*mdNdx->Interpolate(betagamma);}
  private:
@@ -40,7 +41,7 @@ class StdEdxModel {
   static TMultiDimFit *mDFit;    // Most probable log(n_t/n_p) value versus log10(n_p0 and sigma
   static TH1D         *mdNdx;    // dN/dx versus beta*gamma
   static TH2D         *mdEdxMPV; // Histogram for most probable log(n_t/n_p) value versus log10(n_p) and sigma
-  static TH3F         *mdEdxFun; // Distribution {log10(n_p), sigma, log(n_t/n_p)}
+  static TH3F         *mdEdxFun; // Distribution {log10(n_p), sigma, log(n_t/n_p) - log(n_t/n_p)_MPV}
   ClassDef(StdEdxModel,0)
 };
 // $Id: $

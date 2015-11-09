@@ -48,11 +48,14 @@ StdEdxModel::~StdEdxModel() {
 }
 //____________________________________________________________________________
 Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
+  static Double_t ln10 = TMath::Log(10.);
   Double_t n_PL10   = x[0];
+  Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = x[1];
-  if (sigma < 0.01) sigma = 0.01;
-  if (sigma > 0.99) sigma = 0.99;
-  return mdEdxMPV->Interpolate(n_PL10, sigma);
+  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
+  if (Sigma < 0.01) Sigma = 0.01;
+  if (Sigma > 0.99) Sigma = 0.99;
+  return mdEdxMPV->Interpolate(n_PL10, Sigma);
 }
 //________________________________________________________________________________
 TF2 *StdEdxModel::zMPV() {
@@ -62,18 +65,20 @@ TF2 *StdEdxModel::zMPV() {
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
+  static Double_t ln10 = TMath::Log(10.);
   static Double_t W = 26.2e-3;// keV
   Double_t z        = x[0]; // log (dE (keV))
   Double_t n_PL10   = p[0];
-  Double_t n_P      = TMath::Power(10., n_PL10);
+  Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = p[1];
-  if (sigma < 0.01) sigma = 0.01;
-  if (sigma > 0.99) sigma = 0.99;
+  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
+  if (Sigma < 0.01) Sigma = 0.01;
+  if (Sigma > 0.99) Sigma = 0.99;
   Double_t n_T   = TMath::Exp(z)/W;
   Double_t w     = TMath::Log(n_T/n_P);
   if (w <-1.95) w = -1.95;
   if (w > 7.95) w =  7.95;
-  return mdEdxFun->Interpolate(n_PL10, sigma, w);
+  return mdEdxFun->Interpolate(n_PL10, Sigma, w);
 }
 //________________________________________________________________________________
 TF1 *StdEdxModel::zFunc() {
@@ -97,7 +102,7 @@ Double_t StdEdxModel::dEdxFunc(Double_t *x, Double_t *p) {
   static TF1 *fMPV = 0;
   if (! fMPV) fMPV = instance()->zMPV();
   Double_t zMPV = fMPV->Eval(n_PL10,p[2]);
-  return TMath::Exp(p[0])*f->Eval(x[0]+zMPV-p[2]);
+  return TMath::Exp(p[0])*f->Eval(x[0]+zMPV-p[2])/2000.;
 }
 //________________________________________________________________________________
 TF1 *StdEdxModel::zdEdx() {
