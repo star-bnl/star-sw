@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.12 2015/11/10 21:59:03 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.13 2015/11/10 22:13:54 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.13  2015/11/10 22:13:54  akio
+ * fix of a fix
+ *
  * Revision 1.12  2015/11/10 21:59:03  akio
  * fixing backward compatbility
  *
@@ -110,9 +113,9 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!DBgeom)          {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms"<<endm;            return kStFatal;}
   if(!DBmapping)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping"<<endm; return kStFatal;} 
   if(!DBcalibration)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms"<<endm;         return kStFatal;}
-  if(!DBFpsGeom)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps"<<endm;}
-  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps"<<endm;}
-
+  if(!DBFpsGeom)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps"<<endm;            return kStFatal;}
+  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps"<<endm;         return kStFatal;}  
+ 
   //!Getting DB tables
   St_fmsChannelGeometry *dbChannelGeometry   =0;
   St_fmsDetectorPosition *dbDetectorPosition =0;
@@ -142,17 +145,13 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbGainCorrection    = (St_fmsGainCorrection*)  DBcalibration->Find("fmsGainCorrection");
   dbTimeDepCorr       = (St_fmsTimeDepCorr*)     DBcalibration->Find("fmsTimeDepCorr");
   dbRec               = (St_fmsRec*)             DBcalibration->Find("fmsRec");
-  if(DBFpsGeom){
-      dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
-      dbFpsChannelGeometry= (St_fpsChannelGeometry*) DBFpsGeom->Find("fpsChannelGeometry");
-      dbFpsSlatId         = (St_fpsSlatId*)          DBFpsGeom->Find("fpsSlatId"); 
-      dbFpsPosition       = (St_fpsPosition*)        DBFpsGeom->Find("fpsPosition");
-      dbFpsMap            = (St_fpsMap*)             DBFpsGeom->Find("fpsMap");
-  }
-  if(DBFpsCalibration){
-      dbFpsGain           = (St_fpsGain*)            DBFpsCalibration->Find("fpsGain");
-      dbFpsStatus         = (St_fpsStatus*)          DBFpsCalibration->Find("fpsStatus");
-  }
+  dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
+  dbFpsChannelGeometry= (St_fpsChannelGeometry*) DBFpsGeom->Find("fpsChannelGeometry");
+  dbFpsSlatId         = (St_fpsSlatId*)          DBFpsGeom->Find("fpsSlatId"); 
+  dbFpsPosition       = (St_fpsPosition*)        DBFpsGeom->Find("fpsPosition");
+  dbFpsMap            = (St_fpsMap*)             DBFpsGeom->Find("fpsMap");
+  dbFpsGain           = (St_fpsGain*)            DBFpsCalibration->Find("fpsGain");
+  dbFpsStatus         = (St_fpsStatus*)          DBFpsCalibration->Find("fpsStatus");
 
   if(!dbChannelGeometry)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms/fmsChannelGeometry"         <<endm; return kStFatal;}
   if(!dbDetectorPosition)  {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fms/fmsDetectorPosition"        <<endm; return kStFatal;}
@@ -164,17 +163,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
   if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm; return kStFatal;}
   if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
-  if(DBFpsGeom){
-      if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm; return kStFatal;}  
-      if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm; return kStFatal;}
-      if(!dbFpsSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsSlatId"                  <<endm; return kStFatal;}
-      if(!dbFpsPosition)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsPosition"                <<endm; return kStFatal;}
-      if(!dbFpsMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsMap"                     <<endm; return kStFatal;}
-  }
-  if(DBFpsCalibration){
-      if(!dbFpsGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsGain"                 <<endm; return kStFatal;}
-      if(!dbFpsStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsStatus"               <<endm; return kStFatal;}
-  }
+  
+  if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm;}  
+  if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm;}
+  if(!dbFpsSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsSlatId"                  <<endm;}
+  if(!dbFpsPosition)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsPosition"                <<endm;}
+  if(!dbFpsMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsMap"                     <<endm;}
+  if(!dbFpsGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsGain"                 <<endm;}
+  if(!dbFpsStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsStatus"               <<endm;}
 
   //!fmsChannelGeometry
   fmsChannelGeometry_st *tChannelGeometry = 0;
@@ -403,20 +399,22 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       LOG_INFO << "StFmsDbMaker::InitRun - read fmsrecpar.txt for FmsRec table! "<< endm;
   }
 
-  if(DBFpsGeom){
-      //!fpsConstant
+  //!fpsConstant
+  if(dbFpsConstant){
       fpsConstant_st *tFpsConstant = 0;
       tFpsConstant = (fpsConstant_st*) dbFpsConstant->GetTable();
       mFpsConstant = new fpsConstant_st;
       memcpy(mFpsConstant,tFpsConstant,sizeof(fpsConstant_st));
       mMaxSlatId=fpsNQuad()*fpsNLayer()*fpsMaxSlat();
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsConstant maxSlatId="<<mMaxSlatId<<endm;
+  }
       
-      //!fpsChannelGeometry
+  int mI=0, mQ = 0, mL=0, mS=0;
+  //!fpsChannelGeometry
+  if(dbFpsChannelGeometry){
       fpsChannelGeometry_st *tFpsChannelGeometry = 0;
       tFpsChannelGeometry = (fpsChannelGeometry_st*) dbFpsChannelGeometry->GetTable();
       max = dbFpsChannelGeometry->GetNRows();
-      int mI=0, mQ = 0, mL=0, mS=0;
       for(Int_t i=0; i<max; i++){
 	  if(mQ < tFpsChannelGeometry[i].quad)  mQ=tFpsChannelGeometry[i].quad;
 	  if(mL < tFpsChannelGeometry[i].layer) mL=tFpsChannelGeometry[i].layer;
@@ -430,8 +428,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 		 &tFpsChannelGeometry[i], sizeof(fpsChannelGeometry_st));
       }
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsChannelGeometry with maxQuad="<<mQ<<" and maxLayer="<<mL<<endm;
-      
-      //!fpsSlatId
+  }
+
+  //!fpsSlatId
+  if(dbFpsSlatId){
       fpsSlatId_st *tFpsSlatId = 0;
       tFpsSlatId = (fpsSlatId_st*) dbFpsSlatId->GetTable();
       max = dbFpsSlatId->GetNRows();
@@ -463,8 +463,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  }
       }
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsSlatId with max slat Id="<<max<<endm;
-      
-      //!fpsPosition
+  }
+
+  //!fpsPosition
+  if(dbFpsPosition){
       fpsPosition_st *tFpsPosition = 0;
       tFpsPosition = (fpsPosition_st*) dbFpsPosition->GetTable();
       max = dbFpsPosition->GetNRows();
@@ -481,8 +483,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  memcpy(&mFpsPosition[tFpsPosition[i].slatid],&tFpsPosition[i],sizeof(fpsPosition_st));
       }
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsPosition with max slat Id="<<max<<endm;
-      
-      //!fpsMap
+  }
+
+  //!fpsMap
+  if(dbFpsMap){
       fpsMap_st *tFpsMap = 0;
       tFpsMap = (fpsMap_st*) dbFpsMap->GetTable();
       max = dbFpsMap->GetNRows();
@@ -508,8 +512,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsMap with max slat Id="<<max<<endm;
   }
 
-  if(DBFpsCalibration){
-      //!fpsGain
+  //!fpsGain
+  if(dbFpsGain){
       fpsGain_st *tFpsGain = 0;
       tFpsGain = (fpsGain_st*) dbFpsGain->GetTable();
       max = dbFpsGain->GetNRows();
@@ -525,8 +529,10 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  memcpy(&mFpsGain[tFpsGain[i].slatid],&tFpsGain[i],sizeof(fpsGain_st));
       }
       LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsGain with max slat Id="<<max<<endm;
-      
-      //!fpsStatus
+  }
+
+  //!fpsStatus
+  if(dbFpsStatus){
       fpsStatus_st *tFpsStatus = 0;
       tFpsStatus = (fpsStatus_st*) dbFpsStatus->GetTable();
       max = dbFpsStatus->GetNRows();
@@ -555,17 +561,12 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsGainCorrection();
     dumpFmsTimeDepCorr();
     dumpFmsRec();
-    if(DBFpsGeom){
-	dumpFpsConstant();
-	dumpFpsChannelGeometry(); 
-	dumpFpsSlatId();          
-	dumpFpsPosition();        
-	dumpFpsMap();        
-    }     
-    if(DBFpsCalibration){	
-	dumpFpsGain();            
-	dumpFpsStatus();            
-    }
+    if(dbFpsChannelGeometry) dumpFpsChannelGeometry(); 
+    if(dbFpsSlatId) dumpFpsSlatId();          
+    if(dbFpsPosition) dumpFpsPosition();        
+    if(dbFpsMap) dumpFpsMap();        
+    if(dbFpsGain) dumpFpsGain();            
+    if(dbFpsStatus) dumpFpsStatus();            
   }
   return kStOK;
 }
