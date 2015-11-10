@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.13 2015/11/10 22:13:54 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.14 2015/11/10 22:35:44 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.14  2015/11/10 22:35:44  akio
+ * fix logic for fmsTimeDepCorr table making
+ *
  * Revision 1.13  2015/11/10 22:13:54  akio
  * fix of a fix
  *
@@ -353,7 +356,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 
   //!fmsTimeDepCorr
   mMaxTimeSlice=0;
-  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh, 1.0);
+  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh,-1.0);  
   memset(mTimeDepEvt,0,sizeof(mTimeDepEvt));
   mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
   if(mTimeDepCorr){
@@ -375,9 +378,9 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 		  mMaxTimeSlice=t;
 	      }else if(d==0 && c==0 && e==0){
 		  break;
-	      }else{
+	      }else{		  
 		  for(int tt=0; tt<mMaxTimeSlice; tt++){
-		      if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
+		      if(e>=mTimeDepEvt[tt] && mTimeDep[tt][d][c-1]<0.0) {mTimeDep[tt][d][c-1]=v;}
 		      else {continue;}
 		  }
 	      }
