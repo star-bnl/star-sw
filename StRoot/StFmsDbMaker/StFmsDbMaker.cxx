@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.14 2015/11/10 22:35:44 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.15 2015/11/10 22:48:43 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.15  2015/11/10 22:48:43  akio
+ * change default to 1, not -1, for case we do not have LED time dep corr
+ *
  * Revision 1.14  2015/11/10 22:35:44  akio
  * fix logic for fmsTimeDepCorr table making
  *
@@ -356,7 +359,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 
   //!fmsTimeDepCorr
   mMaxTimeSlice=0;
-  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh,-1.0);  
+  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh,1.0);  
   memset(mTimeDepEvt,0,sizeof(mTimeDepEvt));
   mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
   if(mTimeDepCorr){
@@ -365,7 +368,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsTimeDepCorr should have 1 row only, but found " 
 		    << nrow << " rows. No TimeDepCorr"<<endm;
       }else{
-	  int t=0, ndata=0;
+	  int t=0, ndata=0, keepch=0, keept=0;
 	  for(Int_t i=0; i<mFmsTimeDepMaxData; i++){      
 	      Int_t d=mTimeDepCorr[0].detectorId[i];
 	      Int_t c=mTimeDepCorr[0].ch[i];
@@ -379,10 +382,12 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 	      }else if(d==0 && c==0 && e==0){
 		  break;
 	      }else{		  
-		  for(int tt=0; tt<mMaxTimeSlice; tt++){
-		      if(e>=mTimeDepEvt[tt] && mTimeDep[tt][d][c-1]<0.0) {mTimeDep[tt][d][c-1]=v;}
-		      else {continue;}
+		  if(c!=keepch) keept=0;
+		  for(int tt=keept; tt<mMaxTimeSlice; tt++){
+		      if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
+		      else {keept=tt; break;}
 		  }
+		  keepch=c;
 	      }
 	      ndata++;
 	  }
