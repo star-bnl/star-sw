@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.15 2015/11/10 22:48:43 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.16 2015/11/10 23:09:45 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.16  2015/11/10 23:09:45  akio
+ * fixed logic flaw
+ *
  * Revision 1.15  2015/11/10 22:48:43  akio
  * change default to 1, not -1, for case we do not have LED time dep corr
  *
@@ -864,7 +867,7 @@ float StFmsDbMaker::getTimeDepCorr(int event, int det, int ch){  //det=0-3, ch=1
     }
     if(event!=oldEvent){
 	for(int i=0; i<mMaxTimeSlice; i++){
-	    if(event < mTimeDepEvt[i]) timeslice=i;
+	    if(event < mTimeDepEvt[i]) {timeslice=i; break;}
 	}
 	oldEvent=event;
     }
@@ -1002,17 +1005,18 @@ void StFmsDbMaker::dumpFmsTimeDepCorr(const Char_t* filename) {
     if((fp=fopen(filename,"w"))){
 	fprintf(fp,"maxTimeSlice = %d\n",mMaxTimeSlice);
 	for(Int_t t=0; t<mMaxTimeSlice; t++){
-	    fprintf(fp,"%3d %10d %5.2f\n",t,mTimeDepEvt[t],getTimeDepCorr(mTimeDepEvt[t]-1,0,1));
+	    fprintf(fp,"%3d %10d %6.3f\n",t,mTimeDepEvt[t],getTimeDepCorr(mTimeDepEvt[t]-1,0,1));
 	}
 	for(Int_t d=0; d<mFmsTimeDepMaxDet; d++){
 	    for(Int_t c=1; c<=mFmsTimeDepMaxCh; c++){		
 		fprintf(fp,"%1d %3d :",d,c);
 		for(Int_t t=0; t<mMaxTimeSlice; t++){
-		    fprintf(fp,"%5.2f ",mTimeDep[t][d][c-1]);
+		    fprintf(fp,"%6.3f ",mTimeDep[t][d][c-1]);
+		    if(t%10==9) fprintf(fp,"\n      :");
 		}
+		fprintf(fp,"\n");
 	    }
 	}
-	fprintf(fp,"\n");
 	fclose(fp);
     }    
 }
