@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.11 2015/10/20 19:49:28 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.12 2015/11/10 19:06:02 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.12  2015/11/10 19:06:02  akio
+ * Adding TimeDepCorr for LED gain correction based on event#
+ *
  * Revision 1.11  2015/10/20 19:49:28  akio
  * Fixing distanceFromEdge()
  * Adding readRecParamFromFile()
@@ -55,6 +58,7 @@ struct fmsPatchPanelMap_st;
 struct fmsQTMap_st;
 struct fmsGain_st;
 struct fmsGainCorrection_st;
+struct fmsTimeDepCorr_st;
 struct fmsRec_st;
 struct fpsConstant_st;
 struct fpsChannelGeometry_st;
@@ -87,6 +91,7 @@ class StFmsDbMaker : public StMaker {
   fmsQTMap_st*            QTMap();
   fmsGain_st*             Gain();
   fmsGainCorrection_st*   GainCorrection();
+  fmsTimeDepCorr_st*      TimeDepCorr();
   fmsRec_st*              RecPar(); //reconstruction related parameters
   fpsConstant_st*         FpsConstant();
   fpsChannelGeometry_st** FpsChannelGeometry();
@@ -158,6 +163,10 @@ class StFmsDbMaker : public StMaker {
   void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
   void readGainFromText(int v=1)           {mReadGainFile=v;}               //! force gain to be read from FmsGain.txt
 
+  //! fmsTimeDepCorr relayed
+  float getTimeDepCorr(int event, int det, int ch); //det = detectorId - 8 (0=largeNoth, 1=largeSouth, 2=smallNorth, 3=smallSouth)
+                                                    //ch=1 to 578
+
   //reference to StFmsDbConfig
   StFmsDbConfig& getRecConfig();  
   void readRecParamFromFile(int v=1){mReadRecParam=v;} // Read fmsrecpar.txt for reconstuction parameters
@@ -191,6 +200,7 @@ class StFmsDbMaker : public StMaker {
   void dumpFmsQTMap           (const Char_t* filename="dumpFmsQTMap.txt");
   void dumpFmsGain            (const Char_t* filename="dumpFmsGain.txt");
   void dumpFmsGainCorrection  (const Char_t* filename="dumpFmsGainCorrection.txt");
+  void dumpFmsTimeDepCorr     (const Char_t* filename="dumpFmsTimeDepCorr.txt");
   void dumpFpsConstant        (const Char_t* filename="dumpFpsConstant.txt");
   void dumpFpsChannelGeometry (const Char_t* filename="dumpFpsChannelGeometry.txt");
   void dumpFpsSlatId          (const Char_t* filename="dumpSlatId.txt"); 
@@ -231,6 +241,12 @@ class StFmsDbMaker : public StMaker {
   fmsGainCorrection_st  *mGainCorrection; //! gain correction table
   fmsGainCorrection_st  **mmGainCorrection;
   Int_t                   mMaxGainCorrection;
+
+    enum {mFmsTimeDepMaxData=20000,mFmsTimeDepMaxTimeSlice=200,mFmsTimeDepMaxDet=4,mFmsTimeDepMaxCh=578};
+  fmsTimeDepCorr_st     *mTimeDepCorr;
+  int mMaxTimeSlice;
+  int mTimeDepEvt[mFmsTimeDepMaxTimeSlice];    
+  float mTimeDep[mFmsTimeDepMaxTimeSlice][mFmsTimeDepMaxDet][mFmsTimeDepMaxCh];
 
   fmsRec_st             *mRecPar; //! rec. parameters table
   Int_t                 mMaxRecPar;
