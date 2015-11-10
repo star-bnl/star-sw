@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.10 2015/10/20 19:49:28 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.11 2015/11/10 19:06:02 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.11  2015/11/10 19:06:02  akio
+ * Adding TimeDepCorr for LED gain correction based on event#
+ *
  * Revision 1.10  2015/10/20 19:49:28  akio
  * Fixing distanceFromEdge()
  * Adding readRecParamFromFile()
@@ -46,6 +49,7 @@
 #include "tables/St_fmsQTMap_Table.h"
 #include "tables/St_fmsGain_Table.h"
 #include "tables/St_fmsGainCorrection_Table.h"
+#include "tables/St_fmsTimeDepCorr_Table.h"
 #include "tables/St_fmsRec_Table.h"
 #include "tables/St_fmsPositionModel_Table.h"
 #include "tables/St_fpsConstant_Table.h"
@@ -115,6 +119,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   St_fmsQTMap           *dbQTMap             =0;
   St_fmsGain            *dbGain              =0;
   St_fmsGainCorrection  *dbGainCorrection    =0;
+  St_fmsTimeDepCorr     *dbTimeDepCorr       =0;
   St_fmsRec             *dbRec               =0;
   St_fpsConstant        *dbFpsConstant       =0;
   St_fpsChannelGeometry *dbFpsChannelGeometry=0;
@@ -132,6 +137,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbQTMap             = (St_fmsQTMap*)           DBmapping->Find("fmsQTMap");
   dbGain              = (St_fmsGain*)            DBcalibration->Find("fmsGain");
   dbGainCorrection    = (St_fmsGainCorrection*)  DBcalibration->Find("fmsGainCorrection");
+  dbTimeDepCorr       = (St_fmsTimeDepCorr*)     DBcalibration->Find("fmsTimeDepCorr");
   dbRec               = (St_fmsRec*)             DBcalibration->Find("fmsRec");
   dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
   dbFpsChannelGeometry= (St_fpsChannelGeometry*) DBFpsGeom->Find("fpsChannelGeometry");
@@ -149,6 +155,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbQTMap)             {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsQTMap"        <<endm; return kStFatal;}
   if(!dbGain)              {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain"                 <<endm; return kStFatal;}
   if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
+  if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm; return kStFatal;}
   if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
   if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm; return kStFatal;}  
   if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm; return kStFatal;}
@@ -336,6 +343,43 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     }
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
+
+  //!fmsTimeDepCorr
+  mMaxTimeSlice=0;
+  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh, 1.0);
+  memset(mTimeDepEvt,0,sizeof(mTimeDepEvt));
+  mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
+  if(mTimeDepCorr){
+      int nrow = dbTimeDepCorr->GetNRows();
+      if(nrow!=1) {
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsTimeDepCorr should have 1 row only, but found " 
+		    << nrow << " rows. No TimeDepCorr"<<endm;
+      }else{
+	  int t=0, ndata=0;
+	  for(Int_t i=0; i<mFmsTimeDepMaxData; i++){      
+	      Int_t d=mTimeDepCorr[0].detectorId[i];
+	      Int_t c=mTimeDepCorr[0].ch[i];
+	      Int_t e=mTimeDepCorr[0].endEvent[i];
+	      Float_t v=mTimeDepCorr[0].corr[i];
+	      if(d==0 && c==1){
+		  mTimeDepEvt[t]=e;
+		  mTimeDep[t][d][c-1]=v;
+		  t++;
+		  mMaxTimeSlice=t;
+	      }else if(d==0 && c==0 && e==0){
+		  break;
+	      }else{
+		  for(int tt=0; tt<mMaxTimeSlice; tt++){
+		      if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
+		      else {continue;}
+		  }
+	      }
+	      ndata++;
+	  }
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsTimeDepCorr with "<<ndata<<" lines abd "<<mMaxTimeSlice<<" timeslices"<<endm;
+      }
+  }
+
   
   //!fmsRec
   mMaxRecPar = 80; //dummy
@@ -494,6 +538,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsQTMap();
     dumpFmsGain();
     dumpFmsGainCorrection();
+    dumpFmsTimeDepCorr();
     dumpFmsRec();
     dumpFpsConstant();
     dumpFpsChannelGeometry(); 
@@ -781,6 +826,28 @@ Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch){
   return mmGainCorrection[detectorId][ch-1].corr;
 }
 
+//! fmsTimeDepCorr
+float StFmsDbMaker::getTimeDepCorr(int event, int det, int ch){  //det=0-3, ch=1-574
+    static int oldEvent=-1;
+    static int timeslice=-1;   
+    if(mMaxTimeSlice<=0) {
+	LOG_INFO << "getTimeDepCorr did not find time dependent correction, returning 1.0"<<endm;
+	return 1.0;
+    }
+    if(event!=oldEvent){
+	for(int i=0; i<mMaxTimeSlice; i++){
+	    if(event < mTimeDepEvt[i]) timeslice=i;
+	}
+	oldEvent=event;
+    }
+    if(timeslice<0){
+	LOG_INFO << Form("getTimeDepCorr did not find time dependent correction for event=%d in %d time slices",event,mMaxTimeSlice)<<endm;
+	return 1.0;
+    }    
+    return mTimeDep[timeslice][det][ch-1];
+}
+
+
 //!text dump for debugging
 void StFmsDbMaker::dumpFmsChannelGeometry(const Char_t* filename) {
   FILE* fp;
@@ -901,8 +968,28 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
   }      
 }
 
-void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
+void StFmsDbMaker::dumpFmsTimeDepCorr(const Char_t* filename) {
+    FILE* fp;
+    LOG_INFO << "Writing "<<filename<<endm;
+    if((fp=fopen(filename,"w"))){
+	fprintf(fp,"maxTimeSlice = %d\n",mMaxTimeSlice);
+	for(Int_t t=0; t<mMaxTimeSlice; t++){
+	    fprintf(fp,"%3d %10d %5.2f\n",t,mTimeDepEvt[t],getTimeDepCorr(mTimeDepEvt[t]-1,0,1));
+	}
+	for(Int_t d=0; d<mFmsTimeDepMaxDet; d++){
+	    for(Int_t c=1; c<=mFmsTimeDepMaxCh; c++){		
+		fprintf(fp,"%1d %3d :",d,c);
+		for(Int_t t=0; t<mMaxTimeSlice; t++){
+		    fprintf(fp,"%5.2f ",mTimeDep[t][d][c-1]);
+		}
+	    }
+	}
+	fprintf(fp,"\n");
+	fclose(fp);
+    }    
+}
 
+void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
   LOG_INFO << "writing "<<filename<<endm;
   mRecConfig.writeMap(filename);
 
