@@ -959,7 +959,8 @@ TDataSet *CreateTable() {
 	    }
 	  }
 	  my $geom_h = $geom . ".h";
-	  my $rz = lc($geom . ".rz");
+#	  my $rz = lc($geom . ".rz");
+	  my $rz = $geom . ".rz";
 	  if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
 	    my $glob = ".sl*/obj/StarDb/AgiGeometry/" . $rz;
 	    my @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
