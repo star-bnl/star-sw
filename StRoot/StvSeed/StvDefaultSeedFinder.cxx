@@ -24,7 +24,7 @@ void myBreak(int);
 enum {kFstAng=65,kErrFakt=4,kLenFakt=4};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
-static const double kMinTan = 0.1;
+static const double kMinTan = 0.01;
 
 ClassImp(StvDefaultSeedFinder)
 
@@ -316,11 +316,11 @@ void  StvConeSelector::UpdateLims()
     mLim[1][i]+= mHit[i];
   }
 
-//		Account that all the hits inside of cylinder with Rxy
-  for (int i=0;i<2;i++) {
-    if (mLim[0][i]<-mRxy) mLim[0][i]=-mRxy;
-    if (mLim[1][i]> mRxy) mLim[1][i]= mRxy;
-  }
+// //		Account that all the hits inside of cylinder with Rxy
+//   for (int i=0;i<2;i++) {
+//     if (mLim[0][i]<-mRxy) mLim[0][i]=-mRxy;
+//     if (mLim[1][i]> mRxy) mLim[1][i]= mRxy;
+//   }
 
 }
 #endif
