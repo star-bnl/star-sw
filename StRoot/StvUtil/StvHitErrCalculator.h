@@ -28,7 +28,7 @@ protected:
 int CalcLocals(const float hiDir[3][3]);
 protected:
 enum {kYErr=0,kZErr=1};
-enum {kXX=0,kYX=1,kYY=2,kZX=3,kZY=4,kZZ=5};
+enum {kXX=0,kYX=1,kXY=1,kYY=2,kZX=3,kXZ=3,kZY=4,kYZ=4,kZZ=5};
 
 char mBeg[1];
 int mFailed;
