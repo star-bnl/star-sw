@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.7 2015/06/10 17:28:08 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.8 2015/11/11 01:52:57 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.8  2015/11/11 01:52:57  perev
+ * Remove non used method setUseAux
+ *
  * Revision 1.7  2015/06/10 17:28:08  perev
  * Print of used hits (from Sti) added
  *
@@ -74,7 +77,6 @@ class StvStEventFiller : public StvEventFiller
 {
 public:
     StvStEventFiller();
-    void setUseAux(int aux=1)		{mUseAux=aux;}
     virtual ~StvStEventFiller();
     void fillEvent();
     void fillEventPrimaries();
@@ -100,7 +102,6 @@ private:
  void FillStHitErr(StHit *hh,const StvNode *node);
 
 private:
-    int mUseAux;
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
     int mUsedHits[100];

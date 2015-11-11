@@ -85,6 +85,8 @@ int StvStarVertexFinder::GetVertex(int idx,double x[3],double e[6])
   e[0]=cov[0][0];
   e[1]=cov[1][0];e[2]=cov[1][1];
   e[3]=cov[2][0];e[4]=cov[2][1];e[5]=cov[2][2];
-  assert(StvFitErrs::EmxSign(3,e)>0);
+#if 0
+  assert(mGVF->IsFixed() || StvFitErrs::EmxSign(3,e)>0);
+#endif
   return 0;
 }

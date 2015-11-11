@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.27 2015/10/30 19:26:57 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.28 2015/11/11 02:00:56 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -41,7 +41,7 @@ StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 
 {
   mHitIter = new StEventHitIter();
-  mHitSelector = 0; mHitLoadActor = 0;
+  mHitSelector = 0; mHitLoadActor = 0; mNDets = 0;
 }
 
 //_____________________________________________________________________________
@@ -65,15 +65,25 @@ Int_t StvHitLoader::Finish()
 //_____________________________________________________________________________
 Int_t StvHitLoader::Init()
 {
-   int nDet=0;
+   mNDets=0;
    for (int id=1; id<kMaxDetectorId; id++){
      if (!StTGeoProxy::Inst()->IsActive((StDetectorId)id)) continue;
      mHitIter->AddDetector((StDetectorId)id);
-     nDet++;
+     mNDets++;
    }
-   return nDet;
+   return mNDets;
 }
 //_____________________________________________________________________________
+int StvHitLoader::AddDetector(StDetectorId did)
+{
+   if (!StTGeoProxy::Inst()->IsActive((StDetectorId)did)) {
+     Warning("AddDetector","DetectorId=%d not active, ignored",(int)did);
+     return 13;
+   }
+   mHitIter->AddDetector((StDetectorId)did);
+   mNDets++;
+   return 0;
+}
 void StvHitLoader::SetHitSelector()
 {
    mHitSelector = new StvStEventHitSelector;

@@ -16,19 +16,27 @@ struct StvKonst {
       float     mMaxRes;		/*Maximal allowed residual */
       float     mCoeWindow;		/*Error coeficient for searching window*/
       float     mMaxWindow;		/*Maximal window to search hits*/
-      long      mMinHits;		/*Min number of hits allowed*/
-      long      mGoodHits;		/*Min umber of Good hits in track*/
+
+      long      mMinHits;		/*Min number of hits allowed MidEta*/
+      long      mNorHits;		/*Normal number of hits allowed MidEta*/
+      long      mGoodHits;		/*Min umber of Good hits in track MidEta*/
+
       long	mMinTotHits;		/*Min number hits per track*/
       long 	mMinGoodHits;		/*Min number good hits for track*/
-
       long 	mMinContHits;		/*Min length of good hit sequence*/
       long 	mMaxContNits;		/*Max length of acceptable non hit sequence*/
       long 	mMaxTotNits;		/*Max number of acceptable non hits*/
 
-      long      mMinHitsFw;		/*Forward Min number of hits allowed*/
-      long      mGoodHitsFw;		/*Forward Min umber of Good hits in track*/
-      long	mMinTotHitsFw;		/*Forward Min number hits per track*/
-      long 	mMinGoodHitsFw;		/*Forward Min number good hits for track*/
+      long      mMinHitsFw;		/*Min number of hits allowed forwEta*/
+      long      mNorHitsFw;		/*Normal number of hits allowed forwEta*/
+      long      mGoodHitsFw;		/*Min umber of Good hits in track forwEta*/
+
+      long	mMinTotHitsFw;		/*Min number hits per track forwEta*/
+      long 	mMinGoodHitsFw;		/*Min number good hits for track forwEta*/
+      long 	mMinContHitsFw;		/*Min length of good hit sequence forwEta*/
+      long 	mMaxContNitsFw;		/*Max length of acceptable non hit sequence forwEta*/
+      long 	mMaxTotNitsFw;		/*Max number of acceptable non hits*/
+
 
 };
 

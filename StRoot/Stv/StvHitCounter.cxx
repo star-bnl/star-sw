@@ -23,10 +23,13 @@ const StvConst *kons = StvConst::Inst();
  mMaxTotNits  = kons->mMaxTotNits;	
 }
 //_____________________________________________________________________________
-StvHitCounter *StvHitCounter::Inst()		
+void StvHitCounter::SetCons(const StvKonst_st* kons)
 {
-  if (!mgStvHitCounter) mgStvHitCounter = new StvHitCounter;
-  return mgStvHitCounter;
+ mMinTotHits  = kons->mMinTotHits;	
+ mMinGoodHits = kons->mMinGoodHits;	
+ mMinContHits = kons->mMinContHits;	
+ mMaxContNits = kons->mMaxContNits;	
+ mMaxTotNits  = kons->mMaxTotNits;	
 }
 //_____________________________________________________________________________
 int StvHitCounter::MaxNitSeq() const

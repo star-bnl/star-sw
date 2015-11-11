@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.10 2015/10/20 19:49:28 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.16 2015/11/10 23:09:45 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,24 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.16  2015/11/10 23:09:45  akio
+ * fixed logic flaw
+ *
+ * Revision 1.15  2015/11/10 22:48:43  akio
+ * change default to 1, not -1, for case we do not have LED time dep corr
+ *
+ * Revision 1.14  2015/11/10 22:35:44  akio
+ * fix logic for fmsTimeDepCorr table making
+ *
+ * Revision 1.13  2015/11/10 22:13:54  akio
+ * fix of a fix
+ *
+ * Revision 1.12  2015/11/10 21:59:03  akio
+ * fixing backward compatbility
+ *
+ * Revision 1.11  2015/11/10 19:06:02  akio
+ * Adding TimeDepCorr for LED gain correction based on event#
+ *
  * Revision 1.10  2015/10/20 19:49:28  akio
  * Fixing distanceFromEdge()
  * Adding readRecParamFromFile()
@@ -46,6 +64,7 @@
 #include "tables/St_fmsQTMap_Table.h"
 #include "tables/St_fmsGain_Table.h"
 #include "tables/St_fmsGainCorrection_Table.h"
+#include "tables/St_fmsTimeDepCorr_Table.h"
 #include "tables/St_fmsRec_Table.h"
 #include "tables/St_fmsPositionModel_Table.h"
 #include "tables/St_fpsConstant_Table.h"
@@ -104,8 +123,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!DBmapping)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping"<<endm; return kStFatal;} 
   if(!DBcalibration)   {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms"<<endm;         return kStFatal;}
   if(!DBFpsGeom)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps"<<endm;            return kStFatal;}
-  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps"<<endm;         return kStFatal;}
-
+  if(!DBFpsCalibration){LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps"<<endm;         return kStFatal;}  
+ 
   //!Getting DB tables
   St_fmsChannelGeometry *dbChannelGeometry   =0;
   St_fmsDetectorPosition *dbDetectorPosition =0;
@@ -115,6 +134,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   St_fmsQTMap           *dbQTMap             =0;
   St_fmsGain            *dbGain              =0;
   St_fmsGainCorrection  *dbGainCorrection    =0;
+  St_fmsTimeDepCorr     *dbTimeDepCorr       =0;
   St_fmsRec             *dbRec               =0;
   St_fpsConstant        *dbFpsConstant       =0;
   St_fpsChannelGeometry *dbFpsChannelGeometry=0;
@@ -132,6 +152,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   dbQTMap             = (St_fmsQTMap*)           DBmapping->Find("fmsQTMap");
   dbGain              = (St_fmsGain*)            DBcalibration->Find("fmsGain");
   dbGainCorrection    = (St_fmsGainCorrection*)  DBcalibration->Find("fmsGainCorrection");
+  dbTimeDepCorr       = (St_fmsTimeDepCorr*)     DBcalibration->Find("fmsTimeDepCorr");
   dbRec               = (St_fmsRec*)             DBcalibration->Find("fmsRec");
   dbFpsConstant       = (St_fpsConstant*)        DBFpsGeom->Find("fpsConstant");
   dbFpsChannelGeometry= (St_fpsChannelGeometry*) DBFpsGeom->Find("fpsChannelGeometry");
@@ -149,14 +170,16 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbQTMap)             {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsQTMap"        <<endm; return kStFatal;}
   if(!dbGain)              {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain"                 <<endm; return kStFatal;}
   if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
+  if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm; return kStFatal;}
   if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
-  if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm; return kStFatal;}  
-  if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm; return kStFatal;}
-  if(!dbFpsSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsSlatId"                  <<endm; return kStFatal;}
-  if(!dbFpsPosition)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsPosition"                <<endm; return kStFatal;}
-  if(!dbFpsMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsMap"                     <<endm; return kStFatal;}
-  if(!dbFpsGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsGain"                 <<endm; return kStFatal;}
-  if(!dbFpsStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsStatus"               <<endm; return kStFatal;}
+  
+  if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm;}  
+  if(!dbFpsChannelGeometry){LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsChannelGeometry"         <<endm;}
+  if(!dbFpsSlatId)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsSlatId"                  <<endm;}
+  if(!dbFpsPosition)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsPosition"                <<endm;}
+  if(!dbFpsMap)            {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsMap"                     <<endm;}
+  if(!dbFpsGain)           {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsGain"                 <<endm;}
+  if(!dbFpsStatus)         {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fps/fpsStatus"               <<endm;}
 
   //!fmsChannelGeometry
   fmsChannelGeometry_st *tChannelGeometry = 0;
@@ -336,6 +359,45 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     }
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
+
+  //!fmsTimeDepCorr
+  mMaxTimeSlice=0;
+  fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh,1.0);  
+  memset(mTimeDepEvt,0,sizeof(mTimeDepEvt));
+  mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
+  if(mTimeDepCorr){
+      int nrow = dbTimeDepCorr->GetNRows();
+      if(nrow!=1) {
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsTimeDepCorr should have 1 row only, but found " 
+		    << nrow << " rows. No TimeDepCorr"<<endm;
+      }else{
+	  int t=0, ndata=0, keepch=0, keept=0;
+	  for(Int_t i=0; i<mFmsTimeDepMaxData; i++){      
+	      Int_t d=mTimeDepCorr[0].detectorId[i];
+	      Int_t c=mTimeDepCorr[0].ch[i];
+	      Int_t e=mTimeDepCorr[0].endEvent[i];
+	      Float_t v=mTimeDepCorr[0].corr[i];
+	      if(d==0 && c==1){
+		  mTimeDepEvt[t]=e;
+		  mTimeDep[t][d][c-1]=v;
+		  t++;
+		  mMaxTimeSlice=t;
+	      }else if(d==0 && c==0 && e==0){
+		  break;
+	      }else{		  
+		  if(c!=keepch) keept=0;
+		  for(int tt=keept; tt<mMaxTimeSlice; tt++){
+		      if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
+		      else {keept=tt; break;}
+		  }
+		  keepch=c;
+	      }
+	      ndata++;
+	  }
+	  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsTimeDepCorr with "<<ndata<<" lines abd "<<mMaxTimeSlice<<" timeslices"<<endm;
+      }
+  }
+
   
   //!fmsRec
   mMaxRecPar = 80; //dummy
@@ -349,141 +411,155 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   }
 
   //!fpsConstant
-  fpsConstant_st *tFpsConstant = 0;
-  tFpsConstant = (fpsConstant_st*) dbFpsConstant->GetTable();
-  mFpsConstant = new fpsConstant_st;
-  memcpy(mFpsConstant,tFpsConstant,sizeof(fpsConstant_st));
-  mMaxSlatId=fpsNQuad()*fpsNLayer()*fpsMaxSlat();
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsConstant maxSlatId="<<mMaxSlatId<<endm;
-  
-  //!fpsChannelGeometry
-  fpsChannelGeometry_st *tFpsChannelGeometry = 0;
-  tFpsChannelGeometry = (fpsChannelGeometry_st*) dbFpsChannelGeometry->GetTable();
-  max = dbFpsChannelGeometry->GetNRows();
+  if(dbFpsConstant){
+      fpsConstant_st *tFpsConstant = 0;
+      tFpsConstant = (fpsConstant_st*) dbFpsConstant->GetTable();
+      mFpsConstant = new fpsConstant_st;
+      memcpy(mFpsConstant,tFpsConstant,sizeof(fpsConstant_st));
+      mMaxSlatId=fpsNQuad()*fpsNLayer()*fpsMaxSlat();
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsConstant maxSlatId="<<mMaxSlatId<<endm;
+  }
+      
   int mI=0, mQ = 0, mL=0, mS=0;
-  for(Int_t i=0; i<max; i++){
-    if(mQ < tFpsChannelGeometry[i].quad)  mQ=tFpsChannelGeometry[i].quad;
-    if(mL < tFpsChannelGeometry[i].layer) mL=tFpsChannelGeometry[i].layer;
+  //!fpsChannelGeometry
+  if(dbFpsChannelGeometry){
+      fpsChannelGeometry_st *tFpsChannelGeometry = 0;
+      tFpsChannelGeometry = (fpsChannelGeometry_st*) dbFpsChannelGeometry->GetTable();
+      max = dbFpsChannelGeometry->GetNRows();
+      for(Int_t i=0; i<max; i++){
+	  if(mQ < tFpsChannelGeometry[i].quad)  mQ=tFpsChannelGeometry[i].quad;
+	  if(mL < tFpsChannelGeometry[i].layer) mL=tFpsChannelGeometry[i].layer;
+      }
+      if(mQ>fpsNQuad())  LOG_WARN << "StFmsDbMaker::InitRun - fpsChannelGeometry has more quad than fpsConstant"<<endm;
+      if(mL>fpsNLayer()) LOG_WARN << "StFmsDbMaker::InitRun - fpsChannelGeometry has more layer than fpsConstant"<<endm;
+      mFpsChannelGeometry = new fpsChannelGeometry_st*[fpsNQuad()]();
+      for(int i=0; i<fpsNQuad(); i++) mFpsChannelGeometry[i]= new fpsChannelGeometry_st[fpsNLayer()]();
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpsChannelGeometry[tFpsChannelGeometry[i].quad-1][tFpsChannelGeometry[i].layer-1], 
+		 &tFpsChannelGeometry[i], sizeof(fpsChannelGeometry_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsChannelGeometry with maxQuad="<<mQ<<" and maxLayer="<<mL<<endm;
   }
-  if(mQ>fpsNQuad())  LOG_WARN << "StFmsDbMaker::InitRun - fpsChannelGeometry has more quad than fpsConstant"<<endm;
-  if(mL>fpsNLayer()) LOG_WARN << "StFmsDbMaker::InitRun - fpsChannelGeometry has more layer than fpsConstant"<<endm;
-  mFpsChannelGeometry = new fpsChannelGeometry_st*[fpsNQuad()]();
-  for(int i=0; i<fpsNQuad(); i++) mFpsChannelGeometry[i]= new fpsChannelGeometry_st[fpsNLayer()]();
-  for(Int_t i=0; i<max; i++){ 
-    memcpy(&mFpsChannelGeometry[tFpsChannelGeometry[i].quad-1][tFpsChannelGeometry[i].layer-1], 
-	   &tFpsChannelGeometry[i], sizeof(fpsChannelGeometry_st));
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsChannelGeometry with maxQuad="<<mQ<<" and maxLayer="<<mL<<endm;
-  
+
   //!fpsSlatId
-  fpsSlatId_st *tFpsSlatId = 0;
-  tFpsSlatId = (fpsSlatId_st*) dbFpsSlatId->GetTable();
-  max = dbFpsSlatId->GetNRows();
-  mI=0; mQ=0; mL=0; mS=0;
-  for(Int_t i=0; i<max; i++){
-    if(mI < tFpsSlatId[i].slatid) mI=tFpsSlatId[i].slatid;
-    if(mQ < tFpsSlatId[i].quad)   mQ=tFpsSlatId[i].quad;
-    if(mL < tFpsSlatId[i].layer)  mL=tFpsSlatId[i].layer;
-    if(mS < tFpsSlatId[i].slat)   mS=tFpsSlatId[i].slat;
+  if(dbFpsSlatId){
+      fpsSlatId_st *tFpsSlatId = 0;
+      tFpsSlatId = (fpsSlatId_st*) dbFpsSlatId->GetTable();
+      max = dbFpsSlatId->GetNRows();
+      mI=0; mQ=0; mL=0; mS=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpsSlatId[i].slatid) mI=tFpsSlatId[i].slatid;
+	  if(mQ < tFpsSlatId[i].quad)   mQ=tFpsSlatId[i].quad;
+	  if(mL < tFpsSlatId[i].layer)  mL=tFpsSlatId[i].layer;
+	  if(mS < tFpsSlatId[i].slat)   mS=tFpsSlatId[i].slat;
+      }
+      if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more row than fpsConstant"<<endm;
+      if(mI>fpsMaxSlatId())  LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slatId than fpsConstant"<<endm;
+      if(mQ>fpsNQuad())      LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more quad than fpsConstant"<<endm;
+      if(mL>fpsNLayer())     LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more layer than fpsConstant"<<endm;
+      if(mS>fpsMaxSlat())    LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slat than fpsConstant"<<endm;
+      mFpsSlatId = new fpsSlatId_st[max];
+      mFpsReverseSlatId = new int**[fpsNQuad()]();
+      for(int i=0; i<fpsNQuad(); i++) {
+	  mFpsReverseSlatId[i] = new int*[fpsNLayer()]();
+	  for(int j=0; j<fpsNLayer(); j++) {
+	      mFpsReverseSlatId[i][j] = new int[fpsMaxSlat()]();
+	      for(int k=0; k<fpsMaxSlat(); k++) mFpsReverseSlatId[i][j][k]=-1;
+	  }    
+      }
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpsSlatId[tFpsSlatId[i].slatid],&tFpsSlatId[i],sizeof(fpsSlatId_st));
+	  if(tFpsSlatId[i].quad>0 && tFpsSlatId[i].layer>0 && tFpsSlatId[i].slat>0){
+	      mFpsReverseSlatId[tFpsSlatId[i].quad-1][tFpsSlatId[i].layer-1][tFpsSlatId[i].slat-1]=tFpsSlatId[i].slatid;
+	  }
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsSlatId with max slat Id="<<max<<endm;
   }
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more row than fpsConstant"<<endm;
-  if(mI>fpsMaxSlatId())  LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slatId than fpsConstant"<<endm;
-  if(mQ>fpsNQuad())      LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more quad than fpsConstant"<<endm;
-  if(mL>fpsNLayer())     LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more layer than fpsConstant"<<endm;
-  if(mS>fpsMaxSlat())    LOG_WARN << "StFmsDbMaker::InitRun - fpsSlatId has more slat than fpsConstant"<<endm;
-  mFpsSlatId = new fpsSlatId_st[max];
-  mFpsReverseSlatId = new int**[fpsNQuad()]();
-  for(int i=0; i<fpsNQuad(); i++) {
-    mFpsReverseSlatId[i] = new int*[fpsNLayer()]();
-    for(int j=0; j<fpsNLayer(); j++) {
-	mFpsReverseSlatId[i][j] = new int[fpsMaxSlat()]();
-	for(int k=0; k<fpsMaxSlat(); k++) mFpsReverseSlatId[i][j][k]=-1;
-    }    
-  }
-  for(Int_t i=0; i<max; i++){ 
-    memcpy(&mFpsSlatId[tFpsSlatId[i].slatid],&tFpsSlatId[i],sizeof(fpsSlatId_st));
-    if(tFpsSlatId[i].quad>0 && tFpsSlatId[i].layer>0 && tFpsSlatId[i].slat>0){
-      mFpsReverseSlatId[tFpsSlatId[i].quad-1][tFpsSlatId[i].layer-1][tFpsSlatId[i].slat-1]=tFpsSlatId[i].slatid;
-    }
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsSlatId with max slat Id="<<max<<endm;
 
   //!fpsPosition
-  fpsPosition_st *tFpsPosition = 0;
-  tFpsPosition = (fpsPosition_st*) dbFpsPosition->GetTable();
-  max = dbFpsPosition->GetNRows();
-  mI=0;
-  for(Int_t i=0; i<max; i++){
-    if(mI < tFpsPosition[i].slatid) mI=tFpsPosition[i].slatid;
+  if(dbFpsPosition){
+      fpsPosition_st *tFpsPosition = 0;
+      tFpsPosition = (fpsPosition_st*) dbFpsPosition->GetTable();
+      max = dbFpsPosition->GetNRows();
+      mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpsPosition[i].slatid) mI=tFpsPosition[i].slatid;
+      }
+      if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsPosition has more row than fpsConstant"<<endm;
+      if( mI>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsPosition has more slatId than fpsConstant"<<endm;
+      mFpsPosition = new fpsPosition_st[max];
+      memset(mFpsPosition,0,sizeof(*mFpsPosition));
+      for(Int_t i=0; i<max; i++){ 
+	  if(tFpsPosition[i].slatid==0 && tFpsPosition[i].xoffset==0.0 && tFpsPosition[i].yoffset==0.0) continue;
+	  memcpy(&mFpsPosition[tFpsPosition[i].slatid],&tFpsPosition[i],sizeof(fpsPosition_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsPosition with max slat Id="<<max<<endm;
   }
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsPosition has more row than fpsConstant"<<endm;
-  if( mI>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsPosition has more slatId than fpsConstant"<<endm;
-  mFpsPosition = new fpsPosition_st[max];
-  memset(mFpsPosition,0,sizeof(*mFpsPosition));
-  for(Int_t i=0; i<max; i++){ 
-    if(tFpsPosition[i].slatid==0 && tFpsPosition[i].xoffset==0.0 && tFpsPosition[i].yoffset==0.0) continue;
-    memcpy(&mFpsPosition[tFpsPosition[i].slatid],&tFpsPosition[i],sizeof(fpsPosition_st));
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsPosition with max slat Id="<<max<<endm;
 
   //!fpsMap
-  fpsMap_st *tFpsMap = 0;
-  tFpsMap = (fpsMap_st*) dbFpsMap->GetTable();
-  max = dbFpsMap->GetNRows();
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatId than fpsConstant"<<endm;
-  int mA = 0, mC=0; mI=0;
-  for(Int_t i=0; i<max; i++){
-    if(mI < tFpsMap[i].slatid) mI=tFpsMap[i].slatid;
-    if(mA < tFpsMap[i].QTaddr) mA=tFpsMap[i].QTaddr;
-    if(mC < tFpsMap[i].QTch)   mC=tFpsMap[i].QTch;
+  if(dbFpsMap){
+      fpsMap_st *tFpsMap = 0;
+      tFpsMap = (fpsMap_st*) dbFpsMap->GetTable();
+      max = dbFpsMap->GetNRows();
+      if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatId than fpsConstant"<<endm;
+      int mA = 0, mC=0; mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpsMap[i].slatid) mI=tFpsMap[i].slatid;
+	  if(mA < tFpsMap[i].QTaddr) mA=tFpsMap[i].QTaddr;
+	  if(mC < tFpsMap[i].QTch)   mC=tFpsMap[i].QTch;
+      }
+      if(max>fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more row than fpsConstant"<<endm;
+      if(mI >fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatid than fpsConstant"<<endm;
+      if(mA>=fpsMaxQTaddr()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTaddr"<<endm;
+      if(mC>=fpsMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTch"<<endm;
+      mFpsMap = new fpsMap_st[max];
+      mFpsReverseMap = new int*[fpsMaxQTaddr()]();
+      for(int i=0; i<fpsMaxQTaddr(); i++) mFpsReverseMap[i] = new int[fpsMaxQTch()]();
+      for(Int_t i=0; i<max; i++){ 
+	  memcpy(&mFpsMap[tFpsMap[i].slatid],&tFpsMap[i],sizeof(fpsMap_st));
+	  if(tFpsMap[i].QTaddr>=0 && tFpsMap[i].QTch>=0)
+	      mFpsReverseMap[tFpsMap[i].QTaddr][tFpsMap[i].QTch]=tFpsMap[i].slatid;
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsMap with max slat Id="<<max<<endm;
   }
-  if(max>fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more row than fpsConstant"<<endm;
-  if(mI >fpsMaxSlat())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more slatid than fpsConstant"<<endm;
-  if(mA>=fpsMaxQTaddr()) LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTaddr"<<endm;
-  if(mC>=fpsMaxQTch())   LOG_WARN << "StFmsDbMaker::InitRun - fpsMap has more QTch"<<endm;
-  mFpsMap = new fpsMap_st[max];
-  mFpsReverseMap = new int*[fpsMaxQTaddr()]();
-  for(int i=0; i<fpsMaxQTaddr(); i++) mFpsReverseMap[i] = new int[fpsMaxQTch()]();
-  for(Int_t i=0; i<max; i++){ 
-    memcpy(&mFpsMap[tFpsMap[i].slatid],&tFpsMap[i],sizeof(fpsMap_st));
-    if(tFpsMap[i].QTaddr>=0 && tFpsMap[i].QTch>=0)
-      mFpsReverseMap[tFpsMap[i].QTaddr][tFpsMap[i].QTch]=tFpsMap[i].slatid;
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fpsMap with max slat Id="<<max<<endm;
-  
+
   //!fpsGain
-  fpsGain_st *tFpsGain = 0;
-  tFpsGain = (fpsGain_st*) dbFpsGain->GetTable();
-  max = dbFpsGain->GetNRows();
-  mI=0;;
-  for(Int_t i=0; i<max; i++){
-    if(mI < tFpsGain[i].slatid) mI=tFpsGain[i].slatid;
+  if(dbFpsGain){
+      fpsGain_st *tFpsGain = 0;
+      tFpsGain = (fpsGain_st*) dbFpsGain->GetTable();
+      max = dbFpsGain->GetNRows();
+      int mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpsGain[i].slatid) mI=tFpsGain[i].slatid;
+      }
+      if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsGain has more row than fpsConstant"<<endm;
+      if(mI >fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsGain has more slatId than fpsConstant"<<endm;
+      mFpsGain = new fpsGain_st[max];
+      memset(mFpsGain,0,sizeof(*mFpsGain));
+      for(Int_t i=0; i<max; i++){
+	  memcpy(&mFpsGain[tFpsGain[i].slatid],&tFpsGain[i],sizeof(fpsGain_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsGain with max slat Id="<<max<<endm;
   }
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsGain has more row than fpsConstant"<<endm;
-  if(mI >fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsGain has more slatId than fpsConstant"<<endm;
-  mFpsGain = new fpsGain_st[max];
-  memset(mFpsGain,0,sizeof(*mFpsGain));
-  for(Int_t i=0; i<max; i++){
-    memcpy(&mFpsGain[tFpsGain[i].slatid],&tFpsGain[i],sizeof(fpsGain_st));
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsGain with max slat Id="<<max<<endm;
 
   //!fpsStatus
-  fpsStatus_st *tFpsStatus = 0;
-  tFpsStatus = (fpsStatus_st*) dbFpsStatus->GetTable();
-  max = dbFpsStatus->GetNRows();
-  mI=0;;
-  for(Int_t i=0; i<max; i++){
-    if(mI < tFpsStatus[i].slatid) mI=tFpsStatus[i].slatid;
+  if(dbFpsStatus){
+      fpsStatus_st *tFpsStatus = 0;
+      tFpsStatus = (fpsStatus_st*) dbFpsStatus->GetTable();
+      max = dbFpsStatus->GetNRows();
+      mI=0;
+      for(Int_t i=0; i<max; i++){
+	  if(mI < tFpsStatus[i].slatid) mI=tFpsStatus[i].slatid;
+      }
+      if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsStatus has more row than fpsConstant"<<endm;
+      if(mI >fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsStatus has more slatId than fpsConstant"<<endm;
+      mFpsStatus = new fpsStatus_st[max];
+      memset(mFpsStatus,0,sizeof(*mFpsStatus));
+      for(Int_t i=0; i<max; i++){
+	  memcpy(&mFpsStatus[tFpsStatus[i].slatid],&tFpsStatus[i],sizeof(fpsStatus_st));
+      }
+      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsStatus with max slat Id="<<max<<endm;
   }
-  if(max>fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsStatus has more row than fpsConstant"<<endm;
-  if(mI >fpsMaxSlatId()) LOG_WARN << "StFmsDbMaker::InitRun - fpsStatus has more slatId than fpsConstant"<<endm;
-  mFpsStatus = new fpsStatus_st[max];
-  memset(mFpsStatus,0,sizeof(*mFpsStatus));
-  for(Int_t i=0; i<max; i++){
-    memcpy(&mFpsStatus[tFpsStatus[i].slatid],&tFpsStatus[i],sizeof(fpsStatus_st));
-  }
-  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fpsStatus with max slat Id="<<max<<endm;
   
   //!Debug
   if(mDebug>0){
@@ -494,14 +570,14 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsQTMap();
     dumpFmsGain();
     dumpFmsGainCorrection();
+    dumpFmsTimeDepCorr();
     dumpFmsRec();
-    dumpFpsConstant();
-    dumpFpsChannelGeometry(); 
-    dumpFpsSlatId();          
-    dumpFpsPosition();        
-    dumpFpsMap();             
-    dumpFpsGain();            
-    dumpFpsStatus();            
+    if(dbFpsChannelGeometry) dumpFpsChannelGeometry(); 
+    if(dbFpsSlatId) dumpFpsSlatId();          
+    if(dbFpsPosition) dumpFpsPosition();        
+    if(dbFpsMap) dumpFpsMap();        
+    if(dbFpsGain) dumpFpsGain();            
+    if(dbFpsStatus) dumpFpsStatus();            
   }
   return kStOK;
 }
@@ -781,6 +857,28 @@ Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch){
   return mmGainCorrection[detectorId][ch-1].corr;
 }
 
+//! fmsTimeDepCorr
+float StFmsDbMaker::getTimeDepCorr(int event, int det, int ch){  //det=0-3, ch=1-574
+    static int oldEvent=-1;
+    static int timeslice=-1;   
+    if(mMaxTimeSlice<=0) {
+	LOG_INFO << "getTimeDepCorr did not find time dependent correction, returning 1.0"<<endm;
+	return 1.0;
+    }
+    if(event!=oldEvent){
+	for(int i=0; i<mMaxTimeSlice; i++){
+	    if(event < mTimeDepEvt[i]) {timeslice=i; break;}
+	}
+	oldEvent=event;
+    }
+    if(timeslice<0){
+	LOG_INFO << Form("getTimeDepCorr did not find time dependent correction for event=%d in %d time slices",event,mMaxTimeSlice)<<endm;
+	return 1.0;
+    }    
+    return mTimeDep[timeslice][det][ch-1];
+}
+
+
 //!text dump for debugging
 void StFmsDbMaker::dumpFmsChannelGeometry(const Char_t* filename) {
   FILE* fp;
@@ -901,8 +999,29 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
   }      
 }
 
-void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
+void StFmsDbMaker::dumpFmsTimeDepCorr(const Char_t* filename) {
+    FILE* fp;
+    LOG_INFO << "Writing "<<filename<<endm;
+    if((fp=fopen(filename,"w"))){
+	fprintf(fp,"maxTimeSlice = %d\n",mMaxTimeSlice);
+	for(Int_t t=0; t<mMaxTimeSlice; t++){
+	    fprintf(fp,"%3d %10d %6.3f\n",t,mTimeDepEvt[t],getTimeDepCorr(mTimeDepEvt[t]-1,0,1));
+	}
+	for(Int_t d=0; d<mFmsTimeDepMaxDet; d++){
+	    for(Int_t c=1; c<=mFmsTimeDepMaxCh; c++){		
+		fprintf(fp,"%1d %3d :",d,c);
+		for(Int_t t=0; t<mMaxTimeSlice; t++){
+		    fprintf(fp,"%6.3f ",mTimeDep[t][d][c-1]);
+		    if(t%10==9) fprintf(fp,"\n      :");
+		}
+		fprintf(fp,"\n");
+	    }
+	}
+	fclose(fp);
+    }    
+}
 
+void StFmsDbMaker::dumpFmsRec(const Char_t* filename) {
   LOG_INFO << "writing "<<filename<<endm;
   mRecConfig.writeMap(filename);
 

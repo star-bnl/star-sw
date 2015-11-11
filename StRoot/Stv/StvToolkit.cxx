@@ -172,13 +172,6 @@ double StvToolkit::GetHz(const float *x) const
   return GetHz(xx);
 }
 //______________________________________________________________________________
-void StvToolkit::SetSeedFinder(StvSeedFinder *seedFinder )
-{
-  assert(seedFinder);
-  if (!mSeedFinders) mSeedFinders = new StvSeedFinders;
-  mSeedFinders->push_back(seedFinder);
-}
-//______________________________________________________________________________
 int StvToolkit::Alive(void *obj)
 {
   return FactoryB::Alive(obj);

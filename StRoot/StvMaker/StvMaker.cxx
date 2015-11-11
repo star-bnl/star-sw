@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.50 2015/10/30 20:36:02 perev Exp $
+// $Id: StvMaker.cxx,v 1.51 2015/11/11 02:04:25 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -85,6 +85,8 @@ More detailed: 				<br>
 /// But zero errors could to unpredicted problems
 /// Now minimal possible error is 1 micron
 static const float MIN_VTX_ERR2 = 1e-4*1e-4;
+enum {kMidEta=1,kForwEta=2};
+
 ClassImp(StvMaker)
   
 //_____________________________________________________________________________
@@ -138,47 +140,7 @@ Int_t StvMaker::Init()
 Int_t StvMaker::InitDetectors()
 {
   
-  StvToolkit   *kit = StvToolkit::Inst();
   StTGeoProxy *tgh = StTGeoProxy::Inst();
-  if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
-
-//	What is the geo version
-  TString geoName(gGeoManager->GetName()); geoName.ToLower();
-  int yGeo = 2014;
-  if (geoName(0,2)=="y2") yGeo = TString(geoName(1,99)).Atoi();
-
-
-//		Activate detectors
-#if 0
-  if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
-                            SetAttr("activeTpc",0);}
-#endif
-  if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
-  if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
-  if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
-  if (IAttr("activeIst")) { assert(tgh->SetActive(kIstId                   ));}
-  if (IAttr("activePxl")) { assert(tgh->SetActive(kPxlId                   ));}
-  if (IAttr("activePixel")){assert(tgh->SetActive(kPxlId                   ));}
-
-//		Now Initialize TGeo proxy
-  tgh->Init(1+2+4);
-  if (yGeo>=2009) { 	//no prompt hits for geo <y2009
-    StvTpcPrompt promp;
-    tgh->InitHitPlane(&promp);
-  }
-
-//	TPC has non standard TGeo. Edit it
-  if (yGeo>=2009) { 
-    StvTpcEdit tpce;
-    int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
-    Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
-  }
-  tgh->InitLayers();
-  tgh->InitHitShape();
-
-  tgh->Summary();
-
-
 
 //	Check is Stv is running in fit hit error utility
 
@@ -187,13 +149,16 @@ Int_t StvMaker::InitDetectors()
   
 //		TGeo herlper is ready, add error calculators
   int actTpc = IAttr("activeTpc");
+  mEtaRegion = 0;
   if (actTpc) {	//TPC error calculators
-  
+    mHitLoader[0]->AddDetector(kTpcId);
+
+    mEtaRegion|= kMidEta;
+    
     const char*  innOutNames[]  = {"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs" 
                                   ,"StvTpcInnerPromptErrs" ,"StvTpcOuterPromptErrs",0};
     const char* innOut = 0;
     for (int io=0;(innOut=innOutNames[io]);io++) {
-      if (yGeo<2009 && strstr(innOut,"Prompt")) 	break;
       TTable *tt = 0;
       StvHitErrCalculator *hec = 0;
       int nDo = !!mFETracks;
@@ -215,13 +180,14 @@ Int_t StvMaker::InitDetectors()
       int nHP = tgh->SetHitErrCalc(kTpcId,hec,sel);
       Info("Init","%s: %d HitPlanes",innOut,nHP);
       assert(nHP);
-  }
+    }
   
 //	After 2009 tpcegeo3 is used
-    if (yGeo>=2009) kit->HitLoader()->SetHitActor(new StvTpcHitActor);
+    mHitLoader[0]->SetHitActor(new StvTpcHitActor);
   }
 
   if (IAttr("activeEtr")) {	//Etr error calculators
+    mHitLoader[0]->AddDetector(kEtrId);
     TString myName("EtrHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName,2);
     double etrPars[StvHitErrCalculator::kMaxPars]={9e-4,9e-4};
@@ -232,6 +198,8 @@ Int_t StvMaker::InitDetectors()
   }
 
   if (IAttr("activeFgt")) {    // FGT error calculator
+    mHitLoader[1]->AddDetector(kFgtId);
+    mEtaRegion |= kForwEta;
     TString myName("FgtHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
     Double_t fgtPars[ StvHitErrCalculator::kMaxPars]={
@@ -241,7 +209,14 @@ Int_t StvMaker::InitDetectors()
     Int_t nHP = tgh->SetHitErrCalc(kFgtId,hec,0);
     Info("Init","%s: %d Hitplanes", "FgtHitErrs", nHP);
   }
+  if (IAttr("activeSst")) {    // Sst error calculator
+     mHitLoader[0]->AddDetector(kSstId);
+
+//???????????????????????????????????????????????????????????????????????????
+  }
   if (IAttr("activeIst")) {    // IST error calculator
+    mHitLoader[0]->AddDetector(kIstId);
+    mEtaRegion |= kMidEta;
     TString myName("IstHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
     TString ts("Calibrations/tracker/Stv");ts+=myName;
@@ -254,6 +229,7 @@ Int_t StvMaker::InitDetectors()
   }
      
   if (IAttr("activePxl")) {    // PXL error calculator
+    mHitLoader[0]->AddDetector(kPxlId);
     TString myName("PxlHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
     TString ts("Calibrations/tracker/Stv");ts+=myName;
@@ -266,18 +242,16 @@ Int_t StvMaker::InitDetectors()
   }
 #if 0
   if (IAttr("activeFTS")) {    // FTS error calculator
-    mSeedFinder->SetMinHits(3);
+    mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
     StvHitErrCalculator *hec = new StvFtsHitErrCalculator(myName);
     Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
     Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
   }
 #endif
-  kit->SetHitLoader(new StvHitLoader);
-  assert(kit->HitLoader()->Init());
 
 //		In case of fithiterr utility working, selects special hits to speedup
-  if (mFETracks) kit->HitLoader()->SetHitSelector();
+  if (mFETracks) mHitLoader[0]->SetHitSelector();
 
   return kStOk;
 } 
@@ -287,64 +261,120 @@ Int_t StvMaker::InitRun(int run)
 {
 static int initialized = 0;
   if (initialized) return 0;
-  new StvConst();
-  TString geom;
+  static const StvConst  *kons = new StvConst();
+
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
-  if (gGeoManager) {
-    geom = gGeoManager->GetName();
-  } else {
-    geom = GetChainOpt()->GetGeometry();
-    assert(geom.Length());
-    StTGeoProxy::Inst()->Load(geom);
-  }
-  assert(!GeoTest());
+  assert (gGeoManager);
 
-  StVMCApplication *app = new StVMCApplication(geom, "StVMC application");
+
+  StTGeoProxy *tgh = StTGeoProxy::Inst();
+  if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
+
+//	What is the geo version
+  TString geoName(gGeoManager->GetName()); geoName.ToLower();
+
+//		Activate detectors
+#if 0
+  if (IAttr("activeFts")) { assert(tgh->SetActive(kFtsId                   ));
+                            SetAttr("activeTpc",0);}
+#endif
+  if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
+  if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
+  if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
+  if (IAttr("activeIst")) { assert(tgh->SetActive(kIstId                   ));}
+  if (IAttr("activePxl")) { assert(tgh->SetActive(kPxlId                   ));}
+  if (IAttr("activePixel")){assert(tgh->SetActive(kPxlId                   ));}
+
+//		Now Initialize TGeo proxy
+  tgh->Init(1+2+4);
+
+  if (IAttr("activeTpc")) { 	//prompt hits for geo >=y2009
+    StvTpcPrompt promp;
+    tgh->InitHitPlane(&promp);
+
+//	TPC has non standard TGeo. Edit it
+    StvTpcEdit tpce;
+    int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
+    Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
+  }//End Tpc special
+
+
+  tgh->InitLayers();
+  tgh->InitHitShape();
+
+  tgh->Summary();
+
+
+  StVMCApplication *app = new StVMCApplication("StVMC", "StVMC application");
   StvMCInitApp *ini = new StvMCInitApp();
   app->SetInit(ini);
   app->Init();
 
 
-  StvToolkit *kit =StvToolkit::Inst();
-
 //		Choose seed finders
   assert(gSystem->Load("StvSeed.so")>=0);
-  TString seeds = SAttr("seedFinders");
-  if (!seeds.Length()) seeds = "Default";
-  TObjArray *tokens = seeds.Tokenize(" .,");
-  mSeedFinder=0; int seedErr=0; 
-  const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
-  const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
+  const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
+  for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
+    mHitLoader[jreg] = new StvHitLoader;
+    mSeedFinders[jreg] = new StvSeedFinders;
+    if (IAttr("useEventFiller")) 
+      mEventFiller[jreg]= new StvStEventFiller;
+    if (IAttr("useVertexFinder")) 
+      mVertexFinder[jreg] = new StvStarVertexFinder("GenericVertex");
 
-  for (int idx=0;idx<=tokens->GetLast();idx++) {
-  TString &chunk = ((TObjString*)tokens->At(idx))->String();
-    for (int nick=0;seedNick[nick];nick++) {
-      if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
-      if (nick==0) {
-        assert(gSystem->Load("Vc.so")		>=0);
-        assert(gSystem->Load("TPCCATracker.so")	>=0);}
-      mSeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
-      assert(mSeedFinder && !seedErr);
-      kit->SetSeedFinder (mSeedFinder); break;
-      Info("InitRun","Added %s seed finder",mSeedFinder->GetName());
-    }
-  };
-  delete tokens;
+    mTrackFinder[jreg] = new StvKalmanTrackFinder;
+    int iRefit = IAttr("Refit");
+    mTrackFinder[jreg]->SetRefit(iRefit);
+
+
+    TString seeds = SAttr(seedAtt[jreg]);
+    if (!seeds.Length()) seeds = "Default";
+    TObjArray *tokens = seeds.Tokenize(" .,");
+    int seedErr=0; 
+    const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
+    const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
+
+    for (int idx=0;idx<=tokens->GetLast();idx++) {
+    TString &chunk = ((TObjString*)tokens->At(idx))->String();
+      for (int nick=0;seedNick[nick];nick++) {
+	if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
+	if (nick==0) {
+          assert(gSystem->Load("Vc.so")>=0);
+          assert(gSystem->Load("TPCCATracker.so")	>=0);}
+	StvSeedFinder *mySeedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+	assert(mySeedFinder && !seedErr);
+        mSeedFinders[jreg]->Add(mySeedFinder);
+	Info("InitRun","Added %s seed finder",mySeedFinder->GetName());
+      }
+    };
+    delete tokens;
+  }//end of Eta regions
+
   InitDetectors();
 
-  StvKalmanTrackFinder *tf = new StvKalmanTrackFinder;
-  kit->SetTrackFinder(tf);
-  int iRefit = IAttr("Refit");
-  tf->SetRefit(iRefit);
+
+  for (int reg = 0;reg<2;reg++) {
+    if (mHitLoader[reg]->NumDetectors()) continue; 	// used
+    delete mHitLoader[reg];    mHitLoader[reg]   =0;
+    delete mSeedFinders[reg];  mSeedFinders[reg] =0;
+    delete mEventFiller[reg];  mEventFiller[reg] =0;
+    delete mTrackFinder[reg];  mTrackFinder[reg] =0;
+    delete mVertexFinder[reg]; mVertexFinder[reg]=0;
+  }   
+  for (int reg = 0;reg<2;reg++) {
+    if (!mHitLoader[reg]) continue;		// not used
+    const auto *par = kons->At(reg);
+    mSeedFinders [reg]->SetCons(par);
+    mEventFiller [reg]->SetCons(par);
+    mTrackFinder [reg]->SetCons(par);
+    mVertexFinder[reg]->SetCons(par);
+  }
   
+  InitPulls();
+
   new StvFitter();
   new StvKalmanTrackFitter();
-  if (IAttr("useEventFiller"))
-    mEventFiller= new StvStEventFiller;
-  InitPulls();
-  if (IAttr("useVertexFinder")) 
-    mVertexFinder = new StvStarVertexFinder("GenericVertex");
        
   return StMaker::InitRun(run);
 }
@@ -352,52 +382,54 @@ static int initialized = 0;
 //_____________________________________________________________________________
 Int_t StvMaker::Make()
 {
+static StvToolkit* kit = StvToolkit::Inst();
   cout <<"StvMaker::Make() -I- Starting on new event"<<endl;
 
   StEvent   *event = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
 
   if (!event) return kStWarn;
-  StvToolkit* kit = StvToolkit::Inst();
-  kit->HitLoader()->LoadHits(event);
-  kit->Reset();
-  int nTks = kit->TrackFinder()->FindTracks();
-  mToTracks += nTks;
 
-  if (mEventFiller) {
-    mEventFiller->Set(event,&kit->GetTracks());
-    mEventFiller->fillEvent();
-  }
-
-  do {//pseudo loop
-    if (!mVertexFinder) break;
-    int nVtx = mVertexFinder->Fit(event);
-    if (!nVtx) 		break;
-    Info("Make","VertexFinder found %d vertices",nVtx);
-    const StvHits &vertexes = mVertexFinder->Result();
-    if (!vertexes.size()) break;       
-//Set minimal errors
-    for (size_t i=0;i<vertexes.size();i++) {
-      StvHit *vtx=vertexes[i];
-      float *vtxErr = vtx->errMtx();
-      if (vtxErr[5]>MIN_VTX_ERR2) continue;
-      memset(vtxErr,0,sizeof(vtxErr[0])*6);
-      vtxErr[0]=MIN_VTX_ERR2;
-      vtxErr[2]=MIN_VTX_ERR2;
-      vtxErr[5]=MIN_VTX_ERR2;
+  for (int reg=0;reg<2;reg++) { //Loop over eta regions
+    if (!mHitLoader[reg]) continue;
+    mHitLoader[reg]->LoadHits(event);
+    kit->SetSeedFinders(mSeedFinders[reg] );
+    kit->Reset();
+    int nTks = mTrackFinder[reg]->FindTracks();
+    mToTracks += nTks;
+    if (mEventFiller[reg]) {
+      mEventFiller[reg]->Set(event,&kit->GetTracks());
+      mEventFiller[reg]->fillEvent();
     }
-    //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-    kit->TrackFinder()->FindPrimaries(vertexes);
-    if (mEventFiller) mEventFiller->fillEventPrimaries();
-  } while(0);
 
-  int iAns=kStOK,iAnz;
-  if (mPullTTree) {iAns = FillPulls();}
+    do {//pseudo loop
+      if (!mVertexFinder[reg]) 	break;
+      int nVtx = mVertexFinder[reg]->Fit(event);
+      if (!nVtx) 			break;
+      Info("Make","VertexFinder found %d vertices",nVtx);
+      const StvHits &vertexes = mVertexFinder[reg]->Result();
+      if (!vertexes.size()) 	break;       
+  //Set minimal errors
+      for (size_t i=0;i<vertexes.size();i++) {
+	StvHit *vtx=vertexes[i];
+	float *vtxErr = vtx->errMtx();
+	if (vtxErr[5]>MIN_VTX_ERR2) continue;
+	memset(vtxErr,0,sizeof(vtxErr[0])*6);
+	vtxErr[0]=MIN_VTX_ERR2;
+	vtxErr[2]=MIN_VTX_ERR2;
+	vtxErr[5]=MIN_VTX_ERR2;
+      }
+      //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+      mTrackFinder[reg]->FindPrimaries(vertexes);
+      if (mEventFiller[reg]) mEventFiller[reg]->fillEventPrimaries();
+    } while(0);
+
+  }//end regions
+  if (mPullTTree) {FillPulls();}
+
   cout<< "StvMaker::Make() -I- Done"<<endl;
-  iAnz = StMaker::Make();
+  StMaker::Make();
   kit->Clear();
   StTGeoProxy::Inst()->Clear();
-  if (iAns) return iAns;
-  if (iAnz) return iAnz;
   if (mFETracks && mToTracks>mFETracks) return kStEOF;
   return kStOK;
 }
@@ -423,7 +455,8 @@ Int_t StvMaker::InitPulls()
   mPullEvent = new StvPullEvent;
   TBranch *branch = mPullTTree->Branch("event", mPullEvent->ClassName(),&mPullEvent, 16000,99);
   branch->SetAutoDelete(kFALSE);
-  mEventFiller->Set(mPullEvent);
+  if (mEventFiller[0])mEventFiller[0]->Set(mPullEvent);
+  if (mEventFiller[1])mEventFiller[1]->Set(mPullEvent);
   return 0;
 }
 //_____________________________________________________________________________
@@ -434,10 +467,10 @@ Int_t StvMaker::FillPulls()
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
   const StvHit *vertex = 0; int nMaxTks=0,ivertex=0;
-  if (mVertexFinder && mVertexFinder->Result().size()) {
-    int nVtx = mVertexFinder->Result().size();
+  if (mVertexFinder[0] && mVertexFinder[0]->Result().size()) {
+    int nVtx = mVertexFinder[0]->Result().size();
     for (int iv=0;iv<nVtx;iv++) {
-      const StvHit *hit = mVertexFinder->Result()[iv];
+      const StvHit *hit = mVertexFinder[0]->Result()[iv];
       if (nMaxTks > hit->getCount()) continue;
       nMaxTks = hit->getCount();
       vertex = hit; ivertex = iv+1;

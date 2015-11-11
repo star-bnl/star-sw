@@ -6,14 +6,16 @@
 #include <string.h>
 #ifndef StvHitCounter_H
 #define StvHitCounter_H 1
+class StvKonst_st;
 
 /// Hit counting
 class StvHitCounter
 { 
-StvHitCounter();
 public:
-static StvHitCounter *Inst();
+StvHitCounter();
 void Clear()		{memset(mBeg,0,mMed-mBeg+1);}
+void SetCons(const StvKonst_st*);
+
 void AddHit();
 void AddNit();
 int  Reject() const;

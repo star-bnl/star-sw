@@ -27,10 +27,13 @@ class StvHitLoader : public TNamed
     void  SetHitActor(StActorFunctor *act)	{mHitLoadActor=act;}
     int   LoadHits(const StEvent *stev); 
     int   Finish();
+    int   AddDetector(StDetectorId did);
+    int   NumDetectors() const {return mNDets;};
  protected:
     StvHit *MakeStvHit(const StHit *stHit,UInt_t upath,int &sure); 
     int     TpcHitTest(const StHit *stHit);    
  private:
+ int             mNDets;
  StDetectorId    mDetId;
  StEventHitIter *mHitIter;
  StvStEventHitSelector *mHitSelector;
