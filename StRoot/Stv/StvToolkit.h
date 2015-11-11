@@ -65,7 +65,7 @@ void            FreeELossTrak(StvELossTrak* &stiELossTrak);
 
 
 void SetHitLoader  (StvHitLoader   *loadHits   ){ mHitLoader   = loadHits   ;}
-void SetSeedFinder (StvSeedFinder  *seedFinder );
+void SetSeedFinders(StvSeedFinders *seedFinders){ mSeedFinders = seedFinders;}
 void SetTrackFinder(StvTrackFinder *trackFinder){ mTrakFinder  = trackFinder;}
 void SetEventFiller(StvEventFiller *eventFiller){ mEventFiller = eventFiller;}
 
@@ -85,7 +85,7 @@ StvHitFactory  	*mHitFactory;
 StvNodeFactory  *mNodeFactory;
 StvTrackFactory *mTrackFactory;
 StvELossTrakFactory *mELossTrakFactory;
-StvVertexFactory 	*mVertexFactory;
+StvVertexFactory    *mVertexFactory;
 char            mEnd[1];
 
 protected:
