@@ -1,11 +1,18 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.39 2015/10/30 19:39:33 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.40 2015/11/11 01:57:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.40  2015/11/11 01:57:06  perev
+ * Added SetCons(const StvKonst_st *kons)
+ * Now old constants like kMinHits, kGood hits etc become variable defined by SetCons
+ * It allows have to StEventFiller's with different constants
+ * Typical use case: mid rapidity (Tpc,Hft ..) and separately forward, big rapidity
+ * with different constants
+ *
  * Revision 1.39  2015/10/30 19:39:33  perev
  * do not fill detector id == 0
  *
@@ -584,8 +591,7 @@
 
 
 #include "StEventUtilities/StEventHelper.h"
-///VP #include "StEventUtilities/StuFixTopoMap.cxx"
-//Stv
+#include "Stv/StvConst.h"
 #include "Stv/StvStl.h"
 #include "Stv/StvHit.h"
 #include "Stv/StvNode.h"
@@ -760,22 +766,10 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 StvStEventFiller::StvStEventFiller()
 {
+   mMinHits = 5; mNorHits = 10; mGoodHits = 15;
    mGloPri = 0;
    mPullEvent=0;
   
-  //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
-  //mResMaker.setDetector(kSvtId);
-
-  // encoded method = 16 bits = 12 finding and 4 fitting, Refer
-  // to StTrackMethod.h and StTrackDefinitions.h in pams/global/inc/
-  // and StEvent/StEnumerations.h
-  // For the IT tracks use:
-  // Fitting: kITKalmanFitId     (should be something like 7, but don't hardwire it)
-  // Finding: tpcOther           (should be 9th LSB, or shift the "1" 8 places to the left, but also don't hardwire it) 
-  // so need this bit pattern:
-  // finding 000000010000     
-  // fitting             0111 
-  //               256  +   7 = 263;
   unsigned short bit = 1 << tpcOther;  // shifting the "1" exactly tpcOther places to the left
   mStvEncoded = kITKalmanFitId + bit; // adding that to the proper fitting Id
 
@@ -900,8 +894,6 @@ void StvStEventFiller::fillEvent()
 assert(gTrack->fitTraits().numberOfFitPoints(kTpcId)<=gTrack->numberOfPossiblePoints(kTpcId));
 assert(gTrack->fitTraits().numberOfFitPoints(      )<=gTrack->numberOfPossiblePoints(      ));
           if (gTrack->fitTraits().numberOfFitPoints(kTpcId)<15) 	continue;
-//          if (gTrack->numberOfPossiblePoints()<15) 	continue;
-//          if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
           
 	}
@@ -1004,8 +996,7 @@ void StvStEventFiller::fillEventPrimaries()
 //VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
 //VP	        throw runtime_error("StvStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
       }
-      if (pTrack->numberOfPossiblePoints(kTpcId)<15) 		break;
-      if (pTrack->fitTraits().numberOfFitPoints(kTpcId)<15) 	break;
+      if (pTrack->fitTraits().numberOfFitPoints()<mGoodHits) 	break;
 //      if (pTrack->geometry()->momentum().mag()<0.1) 	break;
       StDcaGeometry *myDca = gTrack->dcaGeometry();
       if (!myDca)					break;
@@ -1057,11 +1048,11 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
 
 
 //		Count used hits for tracks tpc hits >10
-      if (nTpcHits > 10) {
+      if (nTpcHits >= mNorHits) {
 	int gid = node->GetDetId();
 	if (mUsedHits[0]<gid) mUsedHits[0]=gid;
 	mUsedHits[gid]++;
-	if (nTotHits>=15) {
+	if (nTotHits>=mGoodHits) {
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
       } }
@@ -1076,11 +1067,10 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
       if (!refCountIncr) 	continue;
       hh->setFitFlag(1);
   }
-  const double *d=0;
-  node = track->GetNode(StvTrack::kLastPoint); d = node->GetFP().P;
+  node = track->GetNode(StvTrack::kLastPoint);
   detInfo->setLastPoint (position(node));
 
-  node = track->GetNode(StvTrack::kFirstPoint); d = node->GetFP().P;
+  node = track->GetNode(StvTrack::kFirstPoint); 
   detInfo->setFirstPoint (position(node));
 
 }
@@ -1226,7 +1216,6 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
   }
   const StTrackFitTraits &fitTrait = gTrack->fitTraits();
   int totFitPoints = fitTrait.numberOfFitPoints();
-//int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
   if (dinfo) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
@@ -1246,7 +1235,7 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
       if (NoWrongSignZ >= 2) 
 	gTrack->setFlag((flag%1000) + 1000); // +1000
     }
-    if (totFitPoints < kMinFitPoints ) { 
+    if (totFitPoints < mMinHits ) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
       //keep most sig. digit, set last digit to 2, and set negative sign
       gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
@@ -1257,7 +1246,9 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
 	  Int_t Nhits = hits.size();
 	  for (Int_t i = 0; i < Nhits; i++) {
 	    const StHit *hit = hits[i];
-	    if (hit->position().z() > 150.0) {
+	    if (hit->position().z() > 150.0 
+	      ||hit->detector()==kFtsId)
+	    {
 	      gTrack->setFlag((((flag/100)*100)+11)); // +x11 
 	      return;
 	    }
@@ -1598,4 +1589,10 @@ enum {kPP=0,kMP=1,kFP=2};
   }
 }
 
-
+//_____________________________________________________________________________
+void StvEventFiller::SetCons(const StvKonst_st *kons)
+{
+  mMinHits=kons->mMinHits; 
+  mNorHits=kons->mNorHits;
+  mGoodHits=kons->mGoodHits; 
+}  
