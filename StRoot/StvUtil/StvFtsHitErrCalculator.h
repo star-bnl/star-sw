@@ -14,8 +14,8 @@ int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
 
 protected:
 enum {
-kYErr  	=0, 	/* Intrinsic resolution, padrow or Y direction		*/
-kZErr  	=1}; 	/* Intrinsic resolution, z direction			*/
+kRxyErr  	=0, 	/* Intrinsic resolution, padrow or rxy direction		*/
+kPhiErr  	=1}; 	/* Intrinsic resolution, Phi direction			*/
 
 static double mgRPhiErrs[2]; 	//these errors are used only for CalcDetErrs
 				//when the concrete hit is not defined
