@@ -2,13 +2,11 @@
 #include "TSystem.h"
 #include "StvDraw.h"
 #include "vector"
-StvTrackFinder *StvTrackFinder::fgInst=0;
 ClassImp(StvTrackFinder)
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StvTrackFinder::~StvTrackFinder()
 { DoShow(0);
-  if (this == fgInst) fgInst=0;
 }
 //_____________________________________________________________________________
 void StvTrackFinder::Show()
