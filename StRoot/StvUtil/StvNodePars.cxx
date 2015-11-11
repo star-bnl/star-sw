@@ -158,7 +158,6 @@ int StvNodePars::check(const char *pri) const
   ierr = 1002; if (tmp>1e-4) 							goto FAILED;
   tmp = fabs(sin(_psi)-_sinCA);
   ierr = 1003; if (tmp>1e-4) 							goto FAILED;
-  ierr = 1004; if (fabs(_z) <= 1e-10) 						goto FAILED;
   return 0;
 FAILED: 
   assert(ierr<1000);
