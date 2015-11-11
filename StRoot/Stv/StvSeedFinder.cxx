@@ -11,6 +11,7 @@
 #include "vector"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvUtil/StvKNNUtil.h"
+#include "Stv/StvConst.h"
 
 //Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
@@ -24,6 +25,13 @@ ClassImp(StvSeedFinder)
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
 { fDraw=0;
   fMinHits = 5;
+  fMaxHits = 10;
+}
+//_____________________________________________________________________________
+void StvSeedFinder::SetCons(const StvKonst_st *kons)
+{
+  fMinHits= kons->mMinHits;
+  fMaxHits= kons->mNorHits;
 }
 //_____________________________________________________________________________
 void StvSeedFinder::Clear(const char*)
@@ -141,17 +149,6 @@ static int nCall=0; nCall++;
   return &fHelix;
 }    
 //_____________________________________________________________________________
-void StvSeedFinders::Clear()
-{
-  for (int i=0;i<(int)size();i++) {(*this)[i]->Clear();}
-}
-
-//_____________________________________________________________________________
-void StvSeedFinders::Reset()
-{
-  for (int i=0;i<(int)size();i++) {(*this)[i]->Reset();}
-}
-//_____________________________________________________________________________
 void StvSeedFinder::FeedBack(const StvTrack *tk)
 {
   if (StvDebug::Debug()<2) return;
@@ -174,6 +171,27 @@ void StvSeedFinder::FeedBack(const StvTrack *tk)
   }
 }
  
+//_____________________________________________________________________________
+void StvSeedFinders::Clear()
+{
+  for (int i=0;i<(int)size();i++) {(*this)[i]->Clear();}
+}
+
+//_____________________________________________________________________________
+void StvSeedFinders::Reset()
+{
+  for (int i=0;i<(int)size();i++) {(*this)[i]->Reset();}
+}
+//_____________________________________________________________________________
+void StvSeedFinders::SetCons(const StvKonst_st *kons)
+{
+  for (int i=0;i<(int)size();i++) {(*this)[i]->SetCons(kons);}
+}
  
+//_____________________________________________________________________________
+void StvSeedFinders::Add(StvSeedFinder *sf)
+{
+  push_back(sf);
+}
  
 

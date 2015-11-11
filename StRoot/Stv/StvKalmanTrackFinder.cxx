@@ -45,9 +45,10 @@ StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name
   StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
   if (zMax < -zMin) zMax = -zMin;
   mDive->SetRZmax(rMax,zMax);
-  const StvConst  *kons = StvConst::Inst();
-  mDive->SetRZmax(kons->mRxyMax,kons->mZMax);
+  mKons = StvConst::Inst();
+  mDive->SetRZmax(mKons->mRxyMax,mKons->mZMax);
   mHitter = new StvHitter();
+  mHitCounter = new StvHitCounter();
  }  
 //_____________________________________________________________________________
 void StvKalmanTrackFinder::Clear(const char*)
@@ -58,14 +59,18 @@ void StvKalmanTrackFinder::Clear(const char*)
 void StvKalmanTrackFinder::Reset()
 {
 }    
-
+//_____________________________________________________________________________
+void StvKalmanTrackFinder::SetCons(const StvKonst_st* k)
+{
+mKons = k;
+mHitCounter->SetCons(k);
+}
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindTracks()
 {
 static int nCall = 0; nCall++;
 static int nTally = 0;
 static StvToolkit *kit = StvToolkit::Inst();
-static const StvConst  *kons = StvConst::Inst();
 enum {kRepeatSeedFinder = 2};
 
   int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
@@ -75,7 +80,6 @@ enum {kRepeatSeedFinder = 2};
 
   for (int seedFinder=0;seedFinder<(int)seedFinders->size();seedFinder++) { //Loop over seed finders
     mSeedFinder = (*seedFinders)[seedFinder];
-    int myMinHits = kons->mMinHits;
     for (int repeat =0;repeat<kRepeatSeedFinder;repeat++) {//Repeat search the same seed finder 
       nTrk = 0;nSeed=0; mSeedFinder->Again(repeat);
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
@@ -120,7 +124,7 @@ enum {kRepeatSeedFinder = 2};
 	} while((fail=0));		
 
 	nHits = mCurrTrak->GetNHits();
-	if (nHits < myMinHits)	fail+=100;		;
+	if (nHits < mKons->mMinHits)	fail+=100;		;
         if (fail) nHits=0;
 	if (fail) 	{//Track is failed, release hits & continue
           mSeedFinder->FeedBack(0);
@@ -143,8 +147,7 @@ enum {kRepeatSeedFinder = 2};
       Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\n"
           ,mSeedFinder->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
       
-      if (!nTrk && myMinHits == kons->mMinHits) break;
-      myMinHits = kons->mMinHits;
+      if (!nTrk ) break;
     }//End of repeat
   }//End of seed finders
 
@@ -168,8 +171,7 @@ StvFitErrs  err[2];
 int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
 double totLen=0;
 StvNode *curNode=0,*preNode=0,*innNode=0,*outNode=0;
-StvHitCounter *hitCount = StvHitCounter::Inst();
-hitCount->Clear();
+mHitCounter->Clear();
   
   if (mCurrTrak->empty()) {//Track empty, Backward tracking, to beam
     assert(!idir);
@@ -209,7 +211,7 @@ StvFitDers derivFit;
     do {//Stop tracking?
       idive = 99;
       if (!nNode)		continue;	//No nodes yet, OK
-      mySkip = hitCount->Skip();
+      mySkip = mHitCounter->Skip();
       if (mySkip) 		break;		//Skip stop tracking,
     } while ((idive=0));
     if (idive) 			break;
@@ -277,7 +279,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     curNode->SetHitPlane(mHitter->GetHitPlane());
     
     if (!localHits->size()) {//No hits in curNode
-      hitCount->AddNit(); continue;
+      mHitCounter->AddNit(); continue;
     } 
     fitt->Prep();
     double  minXi2[2]={1e11,1e11},myXi2;
@@ -308,7 +310,7 @@ if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__2",minXi2[0])
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<3)) {		//Hit accepted
 if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0]);}
-        hitCount->AddHit();
+        mHitCounter->AddHit();
 	nHits++;nTotHits++;assert(nHits<=100);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
@@ -317,7 +319,7 @@ if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0])
       } else { minHit[0]=0;}
     } else 		{//No Hit or ignored
       myXi2 = 1e11;
-      hitCount->AddNit(); 
+      mHitCounter->AddNit(); 
     }
 if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__4",minXi2[0]);}
     curNode->SetHit(minHit[0]); 
@@ -327,8 +329,8 @@ if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__4",minXi2[0])
 
   mCurrTrak->SetTypeEnd(mySkip);
   if (!idir) {
-    double eff = hitCount->Eff(); if (eff){}
-    int myReject = hitCount->Reject();
+    double eff = mHitCounter->Eff(); if (eff){}
+    int myReject = mHitCounter->Reject();
    if (myReject) {
 
      mCurrTrak->CutTail(); return 0; }
@@ -372,7 +374,6 @@ StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
 {
 //static double kOneMEV = 1e-3;
 static StvToolkit *kit = StvToolkit::Inst();
-//static const StvConst  *kons = StvConst::Inst();
 
   StvNode *start = tk->front();
 //		We search DCA point + errors only (no hits)
@@ -463,7 +464,6 @@ int StvKalmanTrackFinder::Refit(int idir)
 {
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
-static const StvConst  *kons = StvConst::Inst();
 static const double kEps = 1.e-2,kEPS=1e-1;
 
   int ans=0,anz=0,lane = 1;
@@ -481,14 +481,14 @@ static const double kEps = 1.e-2,kEPS=1e-1;
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
 //    ==================================
       nHits=tkf->NHits();
-      if (nHits < kons->mMinHits) break;
+      if (nHits < mKons->mMinHits) break;
       if (ans>0) break;			//Very bad
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
       anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
 //        ==========================================
       nHits=tkf->NHits();
-      if (nHits < kons->mMinHits) break;
+      if (nHits < mKons->mMinHits) break;
       if (anz>0) break;	
 
       double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
@@ -499,14 +499,14 @@ static const double kEps = 1.e-2,kEPS=1e-1;
     }// End Fit iters
     
     state = (ans!=0) + 10*((anz!=0) + 10*((!converged) 
-          + 10*((mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits < kons->mMinHits))));
+          + 10*((mCurrTrak->GetXi2()>mKons->mXi2Trk)+10*(nHits < mKons->mMinHits))));
     if (!state) 		break;
-    if (nHits < kons->mMinHits) 	break;
+    if (nHits < mKons->mMinHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
 //    StvNode *badNode=mCurrTrak->GetMaxKnnNode();
     if (!badNode) 		break;
     badNode->SetHit(0); nDrops++;
-    nHits--; if (nHits < kons->mMinHits) { state = 1000000; break;}
+    nHits--; if (nHits < mKons->mMinHits) { state = 1000000; break;}
   }//End Repair loop
 
 

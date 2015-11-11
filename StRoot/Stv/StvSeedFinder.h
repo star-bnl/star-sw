@@ -21,21 +21,16 @@
 class StvDraw;
 class StvHit;
 class StvTrack;
-
+class StvKonst_st;
 
 
 class THelixTrack;
 class StvSeedFinder : public TNamed
 {
 public:
-//enum {kMinHits=5,kMaxHits = 10};
-//enum {kMinHits=5,kMaxHits = 8};
-//enum {kMinHits=5,kMaxHits = 7};
-enum {kMinHits=5,kMaxHits = 10};
-public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
-          void SetMinHits(int mh) {fMinHits = mh;}
+          void SetCons(const StvKonst_st *kons); 
   virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
@@ -58,7 +53,7 @@ protected:
   const THelixTrack* Approx();
 protected:
 int fMinHits;		//Min number of hits accepted
-int fGoodHits;		//Good number of hits. Used in first pass
+int fMaxHits;		//Max number hits fo seed
 StvHits  fSeedHits;
 THelixFitter fHelix;
 StvDraw *fDraw;
@@ -70,6 +65,8 @@ class StvSeedFinders : public std::vector<StvSeedFinder*>
 { public:
   void Clear();
   void Reset();
+  void Add(StvSeedFinder *sf);
+  void SetCons(const StvKonst_st *kons); 
 };
 
 

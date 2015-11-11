@@ -76,6 +76,7 @@ static const StvConst  *kons = StvConst::Inst();
 
   double myXi2=3e33;
   StvNode *node=0,*preNode=0,*innNode=0,*outNode=0;
+  if(innNode){}; if(outNode){};
   int iNode=0,iFailed=0;
 
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
@@ -306,6 +307,7 @@ StvDebug::Break(nCall);
   StvFitDers derFit;
 
   StvNode *innNode=0,*outNode=0;
+  if (innNode){}; if (outNode){};
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
 
@@ -460,7 +462,7 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
   StvFitDers Fstv;
   StvHlxDers Fhlx;
   THelixFitter& hlx = *mHelx;
-  StvNode *node=0,*preNode=0;
+  StvNode *node=0,*preNode=0; if (preNode){};
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     node = *it; 
     const StvHit *hit= node->GetHit();
@@ -498,7 +500,7 @@ enum {kUseErrs=1, kUpdate=2, kPrint=4};
     totLen+=dS;
     StvNodePars hFP; hFP.set(&myHlx,sFP._hz);
     hFP.convert(Fstv,Fhlx);
-    StvFitErrs  sFE = node->GetFE(2);
+//??    StvFitErrs  sFE = node->GetFE(2);
     StvFitErrs  hFE; hFE.Set(&myHlx,sFP._hz);
 
 

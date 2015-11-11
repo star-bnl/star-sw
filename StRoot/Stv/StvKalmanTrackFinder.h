@@ -14,6 +14,8 @@ class StvHitVector;
 class StvNodePars;
 class StvFitErrs;
 class StvFitDers;
+class StvHitCounter;
+class StvKonst_st;
 /// \class StvKalmanTrackFinder
 
 class StvKalmanTrackFinder : public StvTrackFinder
@@ -21,6 +23,7 @@ class StvKalmanTrackFinder : public StvTrackFinder
 public:
   StvKalmanTrackFinder(const char *name="KalmanTrackFinder");
    ~StvKalmanTrackFinder(){;}
+ void   SetCons(const StvKonst_st*);
    int	FindTracks();
    int	Refit(int idir);
    int  FindTrack(int idir);
@@ -32,12 +35,15 @@ StvNode *MakeDcaNode(StvTrack *tk);
             ,      StvFitDers  *derivFit);
    void	Reset();
    void	Clear(const char *opt="");
-   void SetRefit(int r=1)  			{mRefit = r;} 
    
 
 protected:
 char mBeg[1];
-int  mRefit; 	//refit flag
+int mMinHits;		/*Min number of hits allowed MidEta*/
+int mNorHits;		/*Normal number of hits allowed MidEta*/
+int mGoodHits;		/*Min umber of Good hits in track MidEta*/
+const StvKonst_st *mKons;
+    StvHitCounter *mHitCounter;
     StvSeedFinder *mSeedFinder;
 const THelixTrack *mSeedHelx;
       StvTrack    *mCurrTrak;
