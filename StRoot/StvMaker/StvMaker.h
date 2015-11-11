@@ -13,6 +13,7 @@ class TTree;
 class StvPullEvent;
 class StEvent;
 class StvHit;
+class StvHitLoader;
 class StvTrack;
 class StvTrackContainer;
 class StvTrackFinder;
@@ -22,7 +23,7 @@ class StvTrack;
 class StvToolkit;
 class StvVertexFinder;
 class StvEventFiller;
-class StvSeedFinder;
+class StvSeedFinders;
 
 class StvMaker : public StMaker 
 {
@@ -40,7 +41,7 @@ class StvMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.5 2015/10/30 19:38:15 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.6 2015/11/11 02:03:12 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
 
@@ -48,9 +49,12 @@ class StvMaker : public StMaker
     int GeoTest();
 private:
   char mBeg[1]; 
-    StvSeedFinder       *mSeedFinder;
-    StvEventFiller      *mEventFiller;
-    StvVertexFinder     *mVertexFinder;
+    int                  mEtaRegion;	//bit0:TpcLike medium eta,bit1:Forward eta
+    StvHitLoader        *mHitLoader[2];
+    StvSeedFinders      *mSeedFinders[2];
+    StvEventFiller      *mEventFiller[2];
+    StvTrackFinder      *mTrackFinder[2];
+    StvVertexFinder     *mVertexFinder[2];
     TFile               *mPullFile;
     StvPullEvent        *mPullEvent;
     TTree               *mPullTTree;
