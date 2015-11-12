@@ -1472,7 +1472,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
   if (fInFile != "") {
     fInFile.ReplaceAll("\n",";");
     fInFile.ReplaceAll("#",";");
-    fInFile.ReplaceAll(":",";");
+//     fInFile.ReplaceAll(":",";");
     gMessMgr->QAInfo() << "Input file name = " << fInFile.Data() << endm;
   } else {
     if (fkChain >= 0) {
