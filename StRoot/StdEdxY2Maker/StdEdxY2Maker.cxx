@@ -413,7 +413,7 @@ Int_t StdEdxY2Maker::Make(){
     // if no hits than make only histograms. Works if kDoNotCorrectdEdx mode is set
     if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) {
       // clean old PiD traits
-      for (int l = 0; l < 2; l++) {
+      for (Int_t l = 0; l < 2; l++) {
 	track = tracks[l]; 
 	if (track) {
 	  StSPtrVecTrackPidTraits &traits = track->pidTraits();
@@ -713,43 +713,41 @@ Int_t StdEdxY2Maker::Make(){
       }
       if (fTracklengthInTpcTotal) fTracklengthInTpcTotal->Fill(TrackLengthTotal);
       if (fTracklengthInTpc)      fTracklengthInTpc->Fill(TrackLength);
-      SortdEdx();
-      Double_t I70 = 0, D70 = 0;
-      Double_t dXavLog2 = 1;
-      Double_t SumdEdX = 0;
-      Double_t SumdX = 0;
-      Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
-      if (N70 > 1) {
-	Int_t k;
-	for (k = 0; k < N70; k++) {
-	  I70 += dEdxS[k].dEdx;
-	  D70 += dEdxS[k].dEdx*dEdxS[k].dEdx;
-	  TrackLength70 += dEdxS[k].dx;
-	  if (dEdxS[k].dx > 0) {
-	    SumdEdX += dEdxS[k].dEdx;
-	    SumdX   += dEdxS[k].dEdx*TMath::Log2(dEdxS[k].dx);
-	  }
-	}
-	I70 /= N70; D70 /= N70;
-	D70  = TMath::Sqrt(TMath::Abs(D70 - I70*I70));
-	D70 /= I70;
-	if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
+      if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) {
+	SortdEdx();
+	Double_t I70 = 0, D70 = 0;
+	Double_t dXavLog2 = 1;
+	Double_t SumdEdX = 0;
+	Double_t SumdX = 0;
+	Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
 	dst_dedx_st dedx;
-	dedx.id_track  =  Id;
-	dedx.det_id    =  kTpcId;    // TPC track 
-	dedx.method    =  kEnsembleTruncatedMeanId; // == kTruncatedMeanId+1;
-	dedx.ndedx     =  N70 + 100*((int) TrackLength);
-	dedx.dedx[0]   =  I70;
-	dedx.dedx[1]   =  D70;
-	dedx.dedx[2]   =  dXavLog2;
-	if ((TESTBIT(m_Mode, kCalibration)))  // uncorrected dEdx
-	  for (int l = 0; l < 2; l++) {
-	    if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));
+	if (N70 > 1) {
+	  Int_t k;
+	  for (k = 0; k < N70; k++) {
+	    I70 += dEdxS[k].dEdx;
+	    D70 += dEdxS[k].dEdx*dEdxS[k].dEdx;
+	    TrackLength70 += dEdxS[k].dx;
+	    if (dEdxS[k].dx > 0) {
+	      SumdEdX += dEdxS[k].dEdx;
+	      SumdX   += dEdxS[k].dEdx*TMath::Log2(dEdxS[k].dx);
+	    }
 	  }
-	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
-	  m_TpcdEdxCorrection->dEdxTrackCorrection(0,dedx); 
+	  I70 /= N70; D70 /= N70;
+	  D70  = TMath::Sqrt(TMath::Abs(D70 - I70*I70));
+	  D70 /= I70;
+	  if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
+	  dedx.id_track  =  Id;
+	  dedx.det_id    =  kTpcId;    // TPC track 
+	  dedx.method    =  kEnsembleTruncatedMeanId; // == kTruncatedMeanId+1 uncorrected kTruncatedMeanId;
+	  dedx.ndedx     =  N70 + 100*((int) TrackLength);
+	  dedx.dedx[0]   =  I70;
+	  dedx.dedx[1]   =  D70;
+	  dedx.dedx[2]   =  dXavLog2;
+	  if ((TESTBIT(m_Mode, kCalibration))) 
+	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	  dedx.method    =  kTruncatedMeanId;
-	  for (int l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
+	  m_TpcdEdxCorrection->dEdxTrackCorrection(0,dedx); 
+	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	}
 	// likelihood fit
 	Double_t chisq, fitZ, fitdZ;
@@ -758,36 +756,46 @@ Int_t StdEdxY2Maker::Make(){
 	  dXavLog2 = 1;
 	  SumdEdX = 0;
 	  SumdX = 0;
-	  for (k = 0; k < NdEdx; k++) {
+	  for (Int_t k = 0; k < NdEdx; k++) {
 	    SumdEdX += dEdxS[k].dEdx;
 	    SumdX   += dEdxS[k].dEdx*TMath::Log2(dEdxS[k].dx);
 	  }
 	  if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
 	  dedx.id_track  =  Id;
 	  dedx.det_id    =  kTpcId;    // TPC track 
-	  dedx.method    =  kWeightedTruncatedMeanId;// == kLikelihoodFitId+1;
+	  dedx.method    =  kWeightedTruncatedMeanId; //  == kLikelihoodFitId+1; uncorrected kLikelihoodFitId
 	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  TMath::Exp(fitZ);
 	  dedx.dedx[1]   =  fitdZ; 
 	  dedx.dedx[2]   =  dXavLog2;
-	  if ((TESTBIT(m_Mode, kCalibration)))  // uncorrected dEdx
-	    for (int l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
-	  if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
- 	    m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx); 
-	    dedx.method    =  kLikelihoodFitId;
-	    for (int l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
-	  }
+	  if ((TESTBIT(m_Mode, kCalibration))) 
+	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
+	  dedx.method    =  kLikelihoodFitId;
+	  m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx); 
+	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	}
-	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
-	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
-	  Double_t pMomentum = g3.mag();
-	  Float_t Chisq[KPidParticles];
-	  for (int hyp = 0; hyp < KPidParticles; hyp++) {
-	    Double_t bgL10 = TMath::Log10(pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[hyp]->charge())/StProbPidTraits::mPidParticleDefinitions[hyp]->mass());
-	    Chisq[hyp] = LikeliHood(bgL10,NdEdx,FdEdx, StProbPidTraits::mPidParticleDefinitions[hyp]->charge()*StProbPidTraits::mPidParticleDefinitions[hyp]->charge());
-	  }
-	  for (int l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,KPidParticles,Chisq));}
+	// likelihood fit of no. of primary cluster per cm
+	Double_t chisqN, fitN, fitdN;
+	DoFitN(chisq, fitN, fitdN);
+	if (chisq > -900.0 &&chisq < 10000.0) {
+	  dedx.id_track  =  Id;
+	  dedx.det_id    =  kTpcId;    // TPC track 
+	  dedx.method    =  kOtherMethodId;
+	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
+	  dedx.dedx[0]   =  fitN;
+	  dedx.dedx[1]   =  fitdN/fitN; 
+	  dedx.dedx[2]   =  dXavLog2;
+	  //	  m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx); 
+	  for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StDedxPidTraits(dedx));}
 	}
+	StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+	Double_t pMomentum = g3.mag();
+	Float_t Chisq[KPidParticles];
+	for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
+	  Double_t bgL10 = TMath::Log10(pMomentum*TMath::Abs(StProbPidTraits::mPidParticleDefinitions[hyp]->charge())/StProbPidTraits::mPidParticleDefinitions[hyp]->mass());
+	  Chisq[hyp] = LikeliHood(bgL10,NdEdx,FdEdx, StProbPidTraits::mPidParticleDefinitions[hyp]->charge()*StProbPidTraits::mPidParticleDefinitions[hyp]->charge());
+	}
+	for (Int_t l = 0; l < 2; l++) {if (tracks[l]) tracks[l]->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,KPidParticles,Chisq));}
       }
     } // (hvec.size() && ! TESTBIT(m_Mode, kDoNotCorrectdEdx))
     if (pTrack) QAPlots(gTrack);
@@ -869,7 +877,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // end of Mip
   static TH1F *hdEI = 0, *hdEUI = 0, *hdERI = 0, *hdEPI = 0, *hdETI = 0, *hdESI = 0, *hdEZI = 0, *hdEMI = 0;
   static TH1F *hdEO = 0, *hdEUO = 0, *hdERO = 0, *hdEPO = 0, *hdETO = 0, *hdESO = 0, *hdEZO = 0, *hdEMO = 0;
-  static TH3F *TPoints[25][5];
+  static TH3F *TPoints[25][6];
   static TH2F *hist70B[KPidParticles][2], *histzB[KPidParticles][2];
   static TH2F *hist70BT[KPidParticles][2], *histzBT[KPidParticles][2];
   static TProfile *hist70P[KPidParticles][2], *histzP[KPidParticles][2];
@@ -957,7 +965,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			  150,-5.5,-2.5,165,-6.5,-3.0);
       Adc3Ip    = new TH2F*[KPidParticles];
       Adc3Op    = new TH2F*[KPidParticles];
-      for (int hyp = 0; hyp < KPidParticles; hyp++) {
+      for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
 	TString nameP(StProbPidTraits::mPidParticleDefinitions[hyp]->name().data());
 	nameP.ReplaceAll("-","");
 	Adc3Ip[hyp] = new 
@@ -1000,15 +1008,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 		       480,-60,60, NumberOfRows,0.5, NumberOfRows+0.5,nZBins,ZdEdxMin,ZdEdxMax);
     Theta3D   = new TH3F("Theta3D","log(dEdx/Pion) versus Theta (direction) (degrees) and row",
 			 560,-60,80, NumberOfRows,0.5, NumberOfRows+0.5,nZBins,ZdEdxMin,ZdEdxMax);
-    const Char_t *N[5] = {"B","70B","BU","70BU","70BA"};
-    const Char_t *T[5] = {"dEdx(fit)/Pion",
+    const Char_t *N[6] = {"B","70B","BU","70BU","N", "NU"};
+    const Char_t *T[6] = {"dEdx(fit)/Pion",
 			  "dEdx(I70)/Pion",
 			  "dEdx(fit_uncorrected)/Pion ",
 			  "dEdx(I70_uncorrected)/Pion",
-			  "dEdx(I70A_uncorrected)/Pion"};
+			  "dNdx/Pion",
+			  "dNdx(uncorrected)/Pion"};
     
     Int_t NZ = 1;
-    for (Int_t t = 0; t < 4; t++) {
+    for (Int_t t = 0; t < 5; t++) {
       for (Int_t z = 0; z < NZ; z++) {
 	TString ZN("");
 	TString ZT("all");
@@ -1035,8 +1044,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       zbgxO = new TH3F(nameP.Data(),"z = log(dE/dx) versus log10(beta*gamma) and log2(dx) for pion mass hypotheris (outer)",
 		      140,-1,6,Nlog2dx,log2dxLow,log2dxHigh,320,-2,6);
     } // ZBGX
-    for (int hyp=0; hyp<KPidParticles;hyp++) {
-      for (int sCharge = 0; sCharge < 2; sCharge++) {
+    for (Int_t hyp=0; hyp<KPidParticles;hyp++) {
+      for (Int_t sCharge = 0; sCharge < 2; sCharge++) {
 	nameP = "fit";
 	nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
 	nameP.ReplaceAll("-","");
@@ -1260,7 +1269,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       Prob->Fill(PiD.bghyp[kPidPion],-0.05,Z70);
       if (PiD.fProb) {
 	Int_t N = PiD.fProb->GetPidArray()->GetSize();
-	for (int i = 0; i < N; i++) {
+	for (Int_t i = 0; i < N; i++) {
 	  Double_t p = PiD.fProb->GetProbability(i);
 	  if (p > 0.99) p = 0.99;
 	  Prob->Fill(PiD.bghyp[kPidPion],i+p,Z70);
@@ -1297,6 +1306,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     if (PiD.fI70U.fPiD) {
       TPoints[0][3]->Fill(PiD.fI70U.TrackLength(),PiD.fI70U.log2dX(),TMath::Log(PiD.fI70U.I()/PiD.Pred70BT[kPidPion]));
     }
+  }
+  if (PiD.fdNdx.fPiD) {
+    TPoints[0][4]->Fill(PiD.fdNdx.TrackLength(),PiD.fdNdx.log2dX(),TMath::Log(PiD.fdNdx.I()/PiD.dNdx[kPidPion]));
+    //    Pull70->Fill(PiD.fdNdx.TrackLength(),TMath::Log(PiD.fdNdx.I()/PiD.Pred70BT[kPidPion])/PiD.fdNdx.D());
   }
   if (PiD.fFit.TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
@@ -1418,7 +1431,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  if (SecRow3 )  SecRow3->Fill(FdEdx[k].sector,FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN);
 	  if (SecRow3C) SecRow3C->Fill(FdEdx[k].sector,FdEdx[k].row,FdEdx[k].dEdxN);
 	  if (SecRow3CN) {
-	    Double_t sigma = 0.25;
+	    Double_t sigma = 0.01;
 	    Double_t n_P = FdEdx[k].dx*PiD.dNdx[kPidPion];
 	    Double_t zdE = StdEdxModel::instance()->zdE(n_P,sigma);
 	    Double_t dEN = TMath::Log(FdEdx[k].dE) - 5.50667e-01; // scale to <dE/dx>_MIP = 2.4 keV/cm
@@ -1508,7 +1521,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   Int_t N60 = NdEdx - (int) (0.4*NdEdx + 0.5);
   Double_t I70 = 0, I60 = 0;
   Double_t avrz = 0;
-  for (int i=0; i< NdEdx; i++) {
+  for (Int_t i=0; i< NdEdx; i++) {
     dEdx = 0;
     if (iop == 0)      {pdEdx = &CdEdx[i]; dEdx = CdEdx[i].dEdx;}
     else if (iop == 1) {pdEdx = &FdEdx[i]; dEdx = FdEdx[i].dEdx;}
@@ -1523,7 +1536,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
     // 	 << " R[" << dEdx->resXYZ[0] << "," << dEdx->resXYZ[1] << "," << dEdx->resXYZ[2] << "]" 
     // 	 << " Sum " << 1.e6*I << "(keV)"
     // 	 << " Prob " << dEdx->Prob << endl;
-    cout << Form("%s %2i  S/R %2i/%2i dEdx(keV/cm) %8.2f dx %5.2f x[%8.2f,%8.2f,%8.2f] Qcm %f AvC %f", 
+    cout << Form("%s %2i  S/R %2i/%2i dEdx(keV/cm) %8.2f dx %5.2f x[%8.2f,%8.2f,%8.2f] Qcm %7.2f AvC %7.3f", 
 		 Names[iop],i,pdEdx->sector,pdEdx->row,1.e6*dEdx, pdEdx->dx, pdEdx->xyz[0], pdEdx->xyz[1], pdEdx->xyz[2],pdEdx->Qcm,pdEdx->Crow);
     cout << Form(" d[%8.2f,%8.2f,%8.2f] Sum %8.2f Prob %8.5f", pdEdx->xyzD[0], pdEdx->xyzD[1], pdEdx->xyzD[2],1.e6*I,pdEdx->Prob) << endl;
     if (iop == 2) {
@@ -1550,7 +1563,7 @@ Double_t StdEdxY2Maker::LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdxY2_t *dEd
   const static Double_t ProbCut = 1.e-4;
   const static Double_t GeV2keV = TMath::Log(1.e-6);
   Double_t f = 0;
-  for (int i=0;i<NdEdx; i++) {
+  for (Int_t i=0;i<NdEdx; i++) {
     Double_t Ylog2dx = TMath::Log2(dEdx[i].dx);
     //    Double_t Ylog2dx = 1;
     Double_t sigmaC = 0;
@@ -1598,11 +1611,11 @@ void StdEdxY2Maker::fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, 
   f = 0.;
   gin[0] = 0.;
   gin[1] = 0.;
-  for (int i=0;i<NdEdx; i++) {
+  for (Int_t i=0;i<NdEdx; i++) {
     //    Double_t sigma = StTpcdEdxCorrection::SumSeries(TMath::Log(FdEdx[i].dx),3,sigma_p);
     Double_t X = TMath::Log(FdEdx[i].dx);
     Double_t sigma = sigma_p[2];
-    for (int n = 1; n>=0; n--) sigma = X*sigma + sigma_p[n];
+    for (Int_t n = 1; n>=0; n--) sigma = X*sigma + sigma_p[n];
     FdEdx[i].zdev    = (FdEdx[i].dEdxL-par[0])/sigma;
     Landau(FdEdx[i].zdev,Val);
     FdEdx[i].Prob = TMath::Exp(Val[0]);
@@ -1613,7 +1626,7 @@ void StdEdxY2Maker::fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, 
 //________________________________________________________________________________
 void StdEdxY2Maker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
   Double_t avz = 0;
-  for (int i=0;i<NdEdx;i++) avz += FdEdx[i].dEdxL;
+  for (Int_t i=0;i<NdEdx;i++) avz += FdEdx[i].dEdxL;
   if (NdEdx>5) {
     avz /= NdEdx;
     Double_t arglist[10];
@@ -1934,9 +1947,9 @@ void StdEdxY2Maker::V0CrossCheck() {
   static TH2F *hist70B[NHYPSV0][2], *histzB[NHYPSV0][2];
   static TH2F *hist70BT[NHYPSV0][2], *histzBT[NHYPSV0][2];
   if (! first) {
-    for (int hyp=0; hyp<NHYPSV0;hyp++) {
+    for (Int_t hyp=0; hyp<NHYPSV0;hyp++) {
       Int_t h = hyps[hyp];
-      for (int sCharge = 0; sCharge < 2; sCharge++) {
+      for (Int_t sCharge = 0; sCharge < 2; sCharge++) {
 	TString nameP(StProbPidTraits::mPidParticleDefinitions[h]->name().data());
 	nameP += "V0";
 	nameP.ReplaceAll("-","");
@@ -2033,3 +2046,76 @@ void StdEdxY2Maker::V0CrossCheck() {
   }
 #endif /*  StTrackMassFit_hh */
 }
+//________________________________________________________________________________
+void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
+  static Int_t _debug = 0; 
+  Double_t Val[2];
+  static TF1 *zdE = 0;
+  static TF1 *fMPV = 0;
+  if (! zdE) {
+    zdE = StdEdxModel::instance()->zdEdx(); zdE->SetParameters(0.,30.,0.0,0.25);
+    fMPV = StdEdxModel::instance()->zMPV();
+  }
+  //                                I     O
+  static Double_t sigma_p[2] = { 0.03, 0.05};
+  f = 0.;
+  //  gin[0] = 0.;
+  Double_t dNdx = par[0];
+  for (Int_t i = 0; i < NdEdx; i++) {
+    Double_t n_P = dNdx*FdEdx[i].dx;
+    Double_t n_PL10 = TMath::Log10(n_P);
+    zdE->SetParameter(1,n_P);
+    Int_t io = 0; 
+    if (FdEdx[i].row > 13) io = 1;
+    zdE->SetParameter(3,sigma_p[io]);
+    Double_t dE = 1e6*FdEdx[i].dEdx*FdEdx[i].dx; // GeV => keV
+    Double_t z  = TMath::Log(dE);
+    Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
+    Double_t prob = zdE->Eval(z-zMPV)/zdE->Eval(0);
+    FdEdx[i].Prob = prob;
+    if (prob <= 0.0) f += 100;
+    else             f -= 2*TMath::Log(prob);
+  }
+  if (_debug) {
+    cout << " dNdx = " << dNdx << "\tf = " << f << endl;
+    PrintdEdx(1);
+    cout << "===================" << endl;
+  }
+}
+//________________________________________________________________________________
+void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
+  Double_t dNdx = 0;
+  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].dEdx*1e6/StdEdxModel::instance()->W()/2;
+  if (NdEdx>5) {
+    dNdx /= NdEdx;
+    Double_t arglist[10];
+    Int_t ierflg = 0;
+    m_Minuit->SetFCN(fcnN);
+    //    m_Minuit->SetPrintLevel(-1);
+    if (Debug() < 2) {
+      arglist[0] = -1;
+      m_Minuit->mnexcm("set print",arglist, 1, ierflg);
+    }
+    m_Minuit->mnexcm("set NOW",arglist, 0, ierflg);
+    m_Minuit->mnexcm("CLEAR",arglist, 0, ierflg);
+    arglist[0] = 0.5;
+    m_Minuit->mnexcm("SET ERR", arglist ,1,ierflg);
+    //    m_Minuit->mnparm(0, "LogdNdx", TMath::Log(dNdx), 0.5, 0.,0.,ierflg); //First Guess
+    m_Minuit->DefineParameter(0, "dNdx", dNdx, 0.5, 0.1*dNdx, 10*dNdx);
+//     if (Debug() < 2)       arglist[0] = 1.;   // 1.
+//     else                   arglist[0] = 0.;   // Check gradient 
+//     m_Minuit->mnexcm("SET GRAD",arglist,1,ierflg);
+    arglist[0] = 500;
+    arglist[1] = 1.;
+    m_Minuit->mnexcm("MIGRAD", arglist ,2,ierflg);
+    m_Minuit->mnexcm("HESSE  ",arglist,0,ierflg);
+    Double_t edm,errdef;
+    Int_t nvpar,nparx,icstat;
+    m_Minuit->mnstat(chisq,edm,errdef,nvpar,nparx,icstat);
+    m_Minuit->GetParameter(0, fitZ, fitdZ);
+  }
+  else {
+    fitZ = fitdZ = chisq =  -999.;
+  }
+}
+

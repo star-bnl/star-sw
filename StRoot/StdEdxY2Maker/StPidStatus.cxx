@@ -25,6 +25,7 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
 	case kLikelihoodFitId: fFit = StdEdxStatus(pid); break;
 	case kEnsembleTruncatedMeanId: fI70U = StdEdxStatus(pid); break;// == kTruncatedMeanId+1 uncorrected
 	case kWeightedTruncatedMeanId: fFitU = StdEdxStatus(pid); break;  // == kLikelihoodFitId+1; uncorrected
+	case kOtherMethodId:           fdNdx = StdEdxStatus(pid); break;
 	default: break;
 	}
       } else {
@@ -33,7 +34,7 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
       }
     }
   }
-  if (! fI70.fPiD || ! fFit.fPiD) return;
+  if (! fI70.fPiD || ! fFit.fPiD || ! fdNdx.fPiD) return;
   PiDStatus = 0;
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
@@ -60,6 +61,10 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
     if (fI70.fPiD) {
       devZ[l]  = TMath::Log(fI70.I()/Pred70BT[l]);
       devZs[l] = TMath::Abs(devZ[l])/fI70.D();
+    }
+    if (fdNdx.fPiD) {
+      devN[l]  = TMath::Log(fdNdx.I()/dNdx[l]);
+      devNs[l] = TMath::Abs(devN[l])/fdNdx.D();
     }
   }
   PiDkey    = -1; // best

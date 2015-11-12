@@ -49,12 +49,13 @@ class StPidStatus {
   StdEdxStatus fFit; //!
   StdEdxStatus fI70U; //!
   StdEdxStatus fFitU; //!
+  StdEdxStatus fdNdx; //!
   StToFStatus  fToF; //!
   Int_t        PiDStatus; //!
   StGlobalTrack *gTrack; //!
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
-  Double_t devZ[KPidParticles], devZs[KPidParticles], devToF[KPidParticles];    //!
+  Double_t devZ[KPidParticles], devZs[KPidParticles], devToF[KPidParticles], devN[KPidParticles], devNs[KPidParticles];    //!
   Int_t  PiDkey;    //! best
   Int_t  PiDkeyU;   //! only one with devZs<3, 
   Int_t  PiDkeyU3;  //! -"- and devZs > 5 for all others 

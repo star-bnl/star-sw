@@ -50,6 +50,8 @@ StdEdxModel::~StdEdxModel() {
 Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
   static Double_t ln10 = TMath::Log(10.);
   Double_t n_PL10   = x[0];
+  if (n_PL10 > 4) n_PL10 = 4;
+  if (n_PL10 < 0.301) n_PL10 = 0.301;
   Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = x[1];
   Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
@@ -60,21 +62,24 @@ Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
 //________________________________________________________________________________
 TF2 *StdEdxModel::zMPV() {
   static TF2 *f = 0;
-  if (! f) f = new TF2("zFunc",StdEdxModel::zMPVFunc,0.3,4,0.01,0.99,0);
+  if (! f) {
+    f = new TF2("zFunc",StdEdxModel::zMPVFunc,0.3,4,0.01,0.99,0);
+  }
   return f;
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
   static Double_t ln10 = TMath::Log(10.);
-  static Double_t W = 26.2e-3;// keV
   Double_t z        = x[0]; // log (dE (keV))
   Double_t n_PL10   = p[0];
+  if (n_PL10 > 4) n_PL10 = 4;
+  if (n_PL10 < 0.301) n_PL10 = 0.301;
   Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = p[1];
   Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
   if (Sigma < 0.01) Sigma = 0.01;
   if (Sigma > 0.99) Sigma = 0.99;
-  Double_t n_T   = TMath::Exp(z)/W;
+  Double_t n_T   = n_Tz(z); // TMath::Exp(z)/W();
   Double_t w     = TMath::Log(n_T/n_P);
   if (w <-1.95) w = -1.95;
   if (w > 7.95) w =  7.95;
@@ -118,8 +123,9 @@ TF1 *StdEdxModel::zdEdx() {
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::zdE(Double_t n_P, Double_t sigma) {
+  // Most probable log(n_T) 
   static Double_t zGeVkeV = TMath::Log(1e6);
-  return instance()->zMPV()->Eval(TMath::Log10(n_P), sigma) - zGeVkeV;
+  return instance()->zMPV()->Eval(TMath::Log10(n_P), sigma);// ? - zGeVkeV;
 }
 // $Id: $
 // $Log: $

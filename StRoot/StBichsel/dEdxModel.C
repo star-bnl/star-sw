@@ -206,11 +206,11 @@ Double_t dLogNtpernPdP(Double_t *x, Double_t *p) {
 }
 //________________________________________________________________________________
 TF1 *zFunc() {
-  TF1 *f = new TF1("zFunc",dLogNtpernPdP,-5,15.,3);
+  TF1 *f = new TF1("zFunc",dLogNtpernPdP,-5,15.,2);
   f->SetNpx(1000);
   f->SetParName(0,"n_PL10");
   f->SetParName(1,"sigma");
-  f->SetParameters(TMath::Log10(30.),0.25,0.0);
+  f->SetParameters(TMath::Log10(30.),0.25);
   return f;
 }
 //________________________________________________________________________________
