@@ -135,6 +135,7 @@ Int_t StGenericVertexMaker::Init()
 	LOG_INFO << "StGenericVertexMaker::Init: fixed vertex using MC vertex" << endm;
 	theFinder->SetMode(1);
       } else {
+        theFinder->SetVertexPosition(0.,0.,0);
 	LOG_INFO << "StGenericVertexMaker::Init: fixed vertex 'finder' selected" << endm;
       }
 
