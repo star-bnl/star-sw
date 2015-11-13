@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.h,v 1.5 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuFilter.h,v 1.6 2015/11/13 00:24:47 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,6 +29,7 @@ typedef list<unsigned short>::iterator  UnsignedShortIterator;
 
 class StMuFilter : public StMuCut {
  public:
+    StMuFilter();
     void addEncodedMethod(unsigned short method) { mEncodedMethods.push_back(method); }
     void addEncodedMethod(StTrackFinderMethod find, StTrackFittingMethod fit) { mEncodedMethods.push_back( fit + (1<<find)); }
  protected:
@@ -42,7 +43,11 @@ class StMuFilter : public StMuCut {
     virtual bool accept( const StV0MuDst*);
     virtual bool accept( const StXiMuDst*);
     virtual bool accept( const StKinkMuDst*);
-       
+ protected:
+    int mMinHits;       
+    int mMinTpcHits;       
+    int mMinFTpcHits;       
+    int mMinFtsHits;       
     ClassDef(StMuFilter,1)
 };
 
@@ -51,6 +56,9 @@ class StMuFilter : public StMuCut {
 /***************************************************************************
  *
  * $Log: StMuFilter.h,v $
+ * Revision 1.6  2015/11/13 00:24:47  perev
+ * Added changable constants
+ *
  * Revision 1.5  2004/05/02 04:10:14  perev
  * private => protected
  *
