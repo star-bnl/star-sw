@@ -3,7 +3,7 @@
  *  \author Lee Barnby (University of Birmingham) May 2006.
  *  \brief StGenericVertexFinder implementation for fixing vertex.
  *
- *  $Id: StFixedVertexFinder.h,v 1.3 2006/05/18 19:14:24 lbarnby Exp $
+ *  $Id: StFixedVertexFinder.h,v 1.4 2015/11/13 04:11:40 perev Exp $
  *
  *  Modified J.Lauret for MC vertex
  *
@@ -28,7 +28,8 @@
 
 class StEvent;
 
-class StFixedVertexFinder: public StGenericVertexFinder{
+class StFixedVertexFinder: public StGenericVertexFinder
+{
 public:
     StFixedVertexFinder();
     // should we have destructor too?
@@ -45,6 +46,7 @@ public:
     
     // member not from base class
     void SetVertexPosition(double x, double y, double z);
+    int  IsFixed() const 	{return 1;}
     
 private:
     Double_t mFixedX; //!< X co-ordinate of vertex
@@ -56,6 +58,9 @@ private:
 /***************************************************************************
 *
 * $Log: StFixedVertexFinder.h,v $
+* Revision 1.4  2015/11/13 04:11:40  perev
+* Added metod IsFixed
+*
 * Revision 1.3  2006/05/18 19:14:24  lbarnby
 * Added SetVertexPosition function. Tidied up comments/docs
 *
