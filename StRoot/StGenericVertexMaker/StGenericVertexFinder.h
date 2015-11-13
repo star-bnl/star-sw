@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.21 2013/08/16 20:49:38 perev Exp $
+ * $Id: StGenericVertexFinder.h,v 1.22 2015/11/13 04:12:18 perev Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -48,7 +48,8 @@ class StGenericVertexFinder {
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;} 
  
   void                   FillStEvent(StEvent*);
-
+  virtual void SetVertexPosition(double x,double y,double z){assert(0);}
+  virtual int            IsFixed() const 	{return 0;}
  protected: //................................
 
   StGenericVertexFinder();
@@ -69,6 +70,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.22  2015/11/13 04:12:18  perev
+// Added metod IsFixed
+//
 // Revision 1.21  2013/08/16 20:49:38  perev
 // PPV with only StEvent dependency
 //
