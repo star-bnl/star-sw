@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.16 2015/11/10 23:09:45 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.17 2015/11/12 16:46:40 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.17  2015/11/12 16:46:40  akio
+ * *** empty log message ***
+ *
  * Revision 1.16  2015/11/10 23:09:45  akio
  * fixed logic flaw
  *
@@ -170,7 +173,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   if(!dbQTMap)             {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/mapping/fmsQTMap"        <<endm; return kStFatal;}
   if(!dbGain)              {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGain"                 <<endm; return kStFatal;}
   if(!dbGainCorrection)    {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsGainCorrection"       <<endm; return kStFatal;}
-  if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm; return kStFatal;}
+  if(!dbTimeDepCorr)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsTimeDepCorr"          <<endm;}
   if(!dbRec)               {LOG_ERROR << "StFmsDbMaker::InitRun - No Calibration/fms/fmsRec"                  <<endm; return kStFatal;}
   
   if(!dbFpsConstant)       {LOG_ERROR << "StFmsDbMaker::InitRun - No Geometry/fps/fpsConstant"                <<endm;}  
@@ -364,37 +367,39 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   mMaxTimeSlice=0;
   fill_n(&mTimeDep[0][0][0],mFmsTimeDepMaxTimeSlice*mFmsTimeDepMaxDet*mFmsTimeDepMaxCh,1.0);  
   memset(mTimeDepEvt,0,sizeof(mTimeDepEvt));
-  mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
-  if(mTimeDepCorr){
-      int nrow = dbTimeDepCorr->GetNRows();
-      if(nrow!=1) {
-	  LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsTimeDepCorr should have 1 row only, but found " 
-		    << nrow << " rows. No TimeDepCorr"<<endm;
-      }else{
-	  int t=0, ndata=0, keepch=0, keept=0;
-	  for(Int_t i=0; i<mFmsTimeDepMaxData; i++){      
-	      Int_t d=mTimeDepCorr[0].detectorId[i];
-	      Int_t c=mTimeDepCorr[0].ch[i];
-	      Int_t e=mTimeDepCorr[0].endEvent[i];
-	      Float_t v=mTimeDepCorr[0].corr[i];
-	      if(d==0 && c==1){
-		  mTimeDepEvt[t]=e;
-		  mTimeDep[t][d][c-1]=v;
-		  t++;
-		  mMaxTimeSlice=t;
-	      }else if(d==0 && c==0 && e==0){
-		  break;
-	      }else{		  
-		  if(c!=keepch) keept=0;
-		  for(int tt=keept; tt<mMaxTimeSlice; tt++){
-		      if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
-		      else {keept=tt; break;}
+  if(dbTimeDepCorr){
+      mTimeDepCorr = (fmsTimeDepCorr_st*) dbTimeDepCorr->GetTable();
+      if(mTimeDepCorr){
+	  int nrow = dbTimeDepCorr->GetNRows();
+	  if(nrow!=1) {
+	      LOG_DEBUG << "StFmsDbMaker::InitRun - Calibration/fms/fmsTimeDepCorr should have 1 row only, but found " 
+			<< nrow << " rows. No TimeDepCorr"<<endm;
+	  }else{
+	      int t=0, ndata=0, keepch=0, keept=0;
+	      for(Int_t i=0; i<mFmsTimeDepMaxData; i++){      
+		  Int_t d=mTimeDepCorr[0].detectorId[i];
+		  Int_t c=mTimeDepCorr[0].ch[i];
+		  Int_t e=mTimeDepCorr[0].endEvent[i];
+		  Float_t v=mTimeDepCorr[0].corr[i];
+		  if(d==0 && c==1){
+		      mTimeDepEvt[t]=e;
+		      mTimeDep[t][d][c-1]=v;
+		      t++;
+		      mMaxTimeSlice=t;
+		  }else if(d==0 && c==0 && e==0){
+		      break;
+		  }else{		  
+		      if(c!=keepch) keept=0;
+		      for(int tt=keept; tt<mMaxTimeSlice; tt++){
+			  if(e>=mTimeDepEvt[tt]) {mTimeDep[tt][d][c-1]=v;}
+			  else {keept=tt; break;}
+		      }
+		      keepch=c;
 		  }
-		  keepch=c;
+		  ndata++;
 	      }
-	      ndata++;
+	      LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsTimeDepCorr with "<<ndata<<" lines abd "<<mMaxTimeSlice<<" timeslices"<<endm;
 	  }
-	  LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsTimeDepCorr with "<<ndata<<" lines abd "<<mMaxTimeSlice<<" timeslices"<<endm;
       }
   }
 
@@ -570,7 +575,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsQTMap();
     dumpFmsGain();
     dumpFmsGainCorrection();
-    dumpFmsTimeDepCorr();
+    if(dbTimeDepCorr) dumpFmsTimeDepCorr();
     dumpFmsRec();
     if(dbFpsChannelGeometry) dumpFpsChannelGeometry(); 
     if(dbFpsSlatId) dumpFpsSlatId();          
@@ -677,14 +682,11 @@ StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t F
     y = FmsY - mDetectorPosition[detectorId].yoffset; //row# start from bottom 
     z = mDetectorPosition[detectorId].zoffset;
   }else{
-    //printf("getStarXYZ input XY=%f %f\n",FmsX,FmsY);
     float x1,x2,y1,y2;
     float lx = FmsX/getXWidth(detectorId);         
     float ly = nRow(detectorId) - FmsY/getYWidth(detectorId); //row# in getCellPosition2015xx start from top, so reverse it
-    //printf("getStarXYZ local XY=%f %f\n",lx,ly);
     int   c  = int(lx);
     int   r  = int(ly);
-    //printf("getStarXYZ column/row=%d %d\n",c,r);
     float dx = lx-c;
     if (northSouth(detectorId)==0) {dx=1.0-dx;} //north side
     float dy = 1.0-(ly-r);
@@ -693,7 +695,14 @@ StThreeVectorF StFmsDbMaker::getStarXYZ(Int_t detectorId,Float_t FmsX, Float_t F
     x = x1*(1.0-dx) + x2*dx;
     y = y1*(1.0-dy) + y2*dy;
     z = z + 15.0; // Detector front face + ShowerMax depth                                                     
-    //printf("getStarXYZ star XYZ=%f %f %f\n",x,y,z);
+    if( ( detectorId<=9  && fabs(x)<40.0 && fabs(y)<40.0) ||
+	( detectorId>=10 && y>50.0) ){
+	LOG_INFO << Form("Something wrong in getStarXYZ for det=%d",detectorId)<<endm;
+	LOG_INFO << Form("  getStarXYZ input XY=%f %f",FmsX,FmsY)<<endm;
+	LOG_INFO << Form("  getStarXYZ local XY=%f %f",lx,ly)<<endm;
+	LOG_INFO << Form("  getStarXYZ column/row=%d %d",c,r)<<endm;
+	LOG_INFO << Form("  getStarXYZ star XYZ=%f %f %f",x,y,z)<<endm;
+    }
   }
   return StThreeVectorF(x,y,z);
 }
