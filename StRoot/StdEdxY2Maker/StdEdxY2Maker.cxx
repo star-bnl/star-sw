@@ -1434,8 +1434,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    Double_t sigma = 0.01;
 	    Double_t n_P = FdEdx[k].dx*PiD.dNdx[kPidPion];
 	    Double_t zdE = StdEdxModel::instance()->zdE(n_P,sigma);
-	    Double_t dEN = TMath::Log(FdEdx[k].dE) - 5.50667e-01; // scale to <dE/dx>_MIP = 2.4 keV/cm
-	    Double_t zdEMVP = StdEdxModel::instance()->zdE(n_P,sigma);
+	    Double_t dEN = TMath::Log(1e6*FdEdx[k].dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
+	    Double_t zdEMVP = StdEdxModel::instance()->zdE(n_P,sigma); // log(dE[keV])
 	    SecRow3CN->Fill(FdEdx[k].sector,FdEdx[k].row,dEN - zdEMVP);
 	    for (Int_t i = 3; i < 8; i++) {
 	      Int_t m = inxPid[i];
@@ -2071,7 +2071,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t dE = 1e6*FdEdx[i].dEdx*FdEdx[i].dx; // GeV => keV
     Double_t z  = TMath::Log(dE);
     Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
-    Double_t prob = zdE->Eval(z-zMPV)/zdE->Eval(0);
+    Double_t prob = zdE->Eval(z-zMPV);///zdE->Eval(0);
     FdEdx[i].Prob = prob;
     if (prob <= 0.0) f += 100;
     else             f -= 2*TMath::Log(prob);
