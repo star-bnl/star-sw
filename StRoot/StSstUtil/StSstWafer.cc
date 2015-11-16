@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.4 2015/08/06 17:46:54 smirnovd Exp $
+//$Id: StSstWafer.cc,v 1.5 2015/11/16 19:18:47 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.5  2015/11/16 19:18:47  bouchet
+//revert back the cut on signal strip : using DB entry, not constant
+//
 //Revision 1.4  2015/08/06 17:46:54  smirnovd
 //Removed unused local variables
 //
@@ -25,8 +28,6 @@
 #include "St_base/Stiostream.h"
 #include "TMath.h"
 #include "StMessMgr.h"
-const int thresholdSideP = 10 ;
-const int thresholdSideN = 10 ;
 //________________________________________________________________________________
 StSstWafer::StSstWafer(Int_t nid) : TGeoHMatrix(), mDebug(0) {
   memset(first, 0, last-first);
@@ -256,24 +257,26 @@ The SsdClusterControl table seems to be useless in this method (cleaning needed 
 2) decision based on (signal/rms) > highCut is somehow obsolete
 3) use decision based on (signal) > threshold to decide whether a strip is a clusterSeed
 4) use 2 threshold for P and N side separately
+
+- Update for 2015 data :
+1) remove the threshold constants because cut is too strong for run 15
+2) instead we use as originally highCut from clusterControl table
+3) DB entries have been updated accordingly : 10 for run 14, 5 for run 15
  */
 Int_t StSstWafer::doFindCluster(StSstClusterControl *clusterControl, Int_t iSide)
 {
   StSstStripList   *CurrentStripList   =  0;
   StSstClusterList *CurrentClusterList =  0;
-  int threshold = 0;
 
   switch (iSide)
     {
     case 0:
      CurrentStripList   =  mStripP;
      CurrentClusterList =  mClusterP;
-     threshold          = thresholdSideP;
      break;
     case 1:
      CurrentStripList   =  mStripN;
      CurrentClusterList =  mClusterN;
-     threshold          = thresholdSideN;
      break;
     }
   if(!CurrentStripList->getSize()) return 0;
@@ -292,7 +295,7 @@ Int_t StSstWafer::doFindCluster(StSstClusterControl *clusterControl, Int_t iSide
   
   while(CurrentStrip) 
     {
-      if(CurrentStrip->getDigitSig()> threshold)
+      if(CurrentStrip->getDigitSig()> clusterControl->getHighCut())
 	{
 	  LastScanStrip = 0;
 	  StSstCluster *newCluster = new StSstCluster(CurrentClusterList->getSize());
