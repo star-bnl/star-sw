@@ -239,7 +239,7 @@
          call getarg(narg,crecl)
          read (crecl,'(I6)') lrecl
       endif
-      call rzopen(1,chtop,gname,'W',lrecl,istat)
+      call rzopen(1,chtop,gname,'WP',lrecl,istat)
       if (istat.ne.0) then
          print *,'Cannot open file'
          go to 90
