@@ -45,6 +45,7 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
 {
   Cop(mPos,pos);
   mRxy2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
+  mR2   = mRxy2 + mPos[2]*mPos[2];
   mRxy  = sqrt(mRxy2);
   mErr = SEED_ERR(mRxy);
 
@@ -64,15 +65,11 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
     mThet = acos(-(mDir[0]*pos[0]+mDir[1]*pos[1]+mDir[2]*(pos[2]+kZRange))*norR);
     assert(mThet< M_PI/2);
   }
-  double nor = -(mPos[0]*mDir[0]+mPos[1]*mDir[1])
-               /(mDir[0]*mDir[0]+mDir[1]*mDir[1]);
-  assert(nor>10);
   if (rad ) { mOutRad = rad;}	//rad is defined, use it
   else      { 			//rad is no defined, estimate it
-    mOutRad = mRxy/kDivLen;
+    mOutRad = sqrt(mR2)/kDivLen;
     if (mOutRad<kMinLen) mOutRad=kMinLen;
     if (mOutRad>kMaxLen) mOutRad=kMaxLen;
-    mOutRad *= nor/mRxy;
   }
   mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
   mSin = sin(mThet);
