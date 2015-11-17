@@ -696,6 +696,9 @@ double StvFitter::Xi2(const StvHit *hit)
 //       int ans = mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
       int ans = mHitErrCalc->CalcDcaErrs(hit,mHitErrs);
       if (ans) {mXi2 = 1e11; return mXi2;}
+      assert(mHitErrs[0]>=1e-8);
+      assert(mHitErrs[1]*mHitErrs[1]<=mHitErrs[0]*mHitErrs[2]);
+      assert(mHitErrs[2]>=1e-8);
     }; break;
 
     case 1: assert(0 && "Wrong case 1");
