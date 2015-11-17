@@ -30,7 +30,7 @@ void myBreak(int);
 ClassImp(StvKNSeedFinder)
 #endif
 
-enum {kMinRxy = 50};
+enum {kMinRxy = 1};
 
 
 //_____________________________________________________________________________
@@ -100,7 +100,6 @@ static int nCall=0; nCall++;
     const float *fstPos = fstHit->x();
     float fstRxy2 = fstPos[0]*fstPos[0]+fstPos[1]*fstPos[1];
     float fstRxy = sqrt(fstRxy2);
-    if (fstRxy < kMinRxy) 		continue;	//Non Tpc hit
 //VP    const StHitPlane *hp = fstHit->detector();
     float        fstDir[2]={fstPos[0]/fstRxy,fstPos[1]/fstRxy};
     mRej.Reset(fstPos);
@@ -119,9 +118,7 @@ static int nCall=0; nCall++;
       if (nexHit==fstHit)		continue;
       const float *f = nexHit->x();
       float myRxy2 = f[0]*f[0]+f[1]*f[1];
-      if (myRxy2 >=fstRxy2)  		continue;
-      float proj = fstDir[0]*f[0]+fstDir[1]*f[1];
-      if (proj < kMinRxy) 		continue;
+      if (myRxy2 >=1.2*fstRxy2)  	continue;
 
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
