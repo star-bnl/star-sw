@@ -17,6 +17,8 @@ StvConst::StvConst()
   assert(tb);
   int nCols = tb->GetNumberOfColumns();
   assert(nCols);
+  tb->Print();
+
 //	check table for zeros. All the fields either float or int
   int *row = (int*)tb->GetTable();
   for (int i=0;i<nCols;i++) {
