@@ -75,8 +75,10 @@ Int_t StPxlSimMaker::Init()
    // temporary till DIGMAPS algorithm is added and option added in StMaker
    mUseFastSim = kTRUE;
    mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
+#if 0
    mUseIdealGeom = gEnv->GetValue("IdealHFT",0) == 0;
    mUseDbGeom = ! mUseIdealGeom;
+#endif
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
    //}
 

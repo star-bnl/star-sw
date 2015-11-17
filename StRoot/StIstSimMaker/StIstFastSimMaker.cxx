@@ -27,13 +27,13 @@ StIstFastSimMaker::StIstFastSimMaker( const Char_t *name, bool useRandomSeed) : 
 
 //____________________________________________________________
 Int_t StIstFastSimMaker::Init() {
-  //   LOG_INFO << "StIstFastSimMaker::Init()" << endm;
+#if 0
   mBuildIdealGeom = gEnv->GetValue("IdealHFT",0) != 0;
    if(mBuildIdealGeom)
    {
      LOG_INFO << " Ideal geometry requested" << endm;
    }
-
+#endif
   return kStOk;
 }
 
