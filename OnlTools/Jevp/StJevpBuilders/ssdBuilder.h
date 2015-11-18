@@ -43,7 +43,6 @@ class ssdBuilder : public JevpPlotSet {
   static const int nChipPerWafer   = 6;   
   static const int nChPerLadder    = 12288;//n channel per ladder 
   //--book histograms---                     // Size
-  TH1I *hMultLadder[nSide][nLadderPerSide];  //	2*20
   TH2I *hRawAdcStrip[nSide][nLadderPerSide]; //	2*20
   TH2I *hZSAdcStrip[nSide][nLadderPerSide];  //	2*20
   TH1I *hPedStrip[nSide][nLadderPerSide];    //	2*20
@@ -52,7 +51,6 @@ class ssdBuilder : public JevpPlotSet {
   TH2I *hZSLadderWafer[nSide];   	     //	2
   TH2I *hFailedLadderChip[nSide];	     //	2          
  
-  TH1I *hMultSide[nSide]; 		     // 2
   TH2I *hErrorRdo;        		     // 1
   TH2I *hErrorFiber[nRdo];		     // 5                
   TH1I *hModeCounter;                        // 1 

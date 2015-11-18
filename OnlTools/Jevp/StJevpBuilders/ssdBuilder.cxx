@@ -37,7 +37,6 @@ ssdBuilder::~ssdBuilder()
 	  if(hZSAdcStrip[ns][nl])    delete hZSAdcStrip[ns][nl];
 	  if(hPedStrip[ns][nl])      delete hPedStrip[ns][nl];
 	  if(hRmsStrip[ns][nl])      delete hRmsStrip[ns][nl];
-	  if(hMultLadder[ns][nl])    delete hMultLadder[ns][nl];;
 	}    		
       if(hRawLadderWafer[ns]) 	 delete hRawLadderWafer[ns];
       if(hZSLadderWafer[ns])  	 delete hZSLadderWafer[ns];
@@ -141,8 +140,6 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	    //////hAdcStrip[ns][nl]->GetXaxis()->SetBinLabel((index*nStripPerWafer+448)/merge, label);  
 	  }
 
-	  nHists += 1;
-
 	  //---------------------------
 	  //Define PedStrip histograms 
 	  sprintf( buffer, "hPedStrip_%d_%d",ns,nl);
@@ -174,22 +171,6 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hRmsStrip[ns][nl]->SetFillColor(4);
 	  hRmsStrip[ns][nl]->SetFillStyle(3013);
 	  hRmsStrip[ns][nl]->SetStats(false);//true
-	  nHists += 1;
-
-	  //---------------------------------------------
-	  //Define raw hits Mult in each ladder per event
-	  sprintf( buffer, "hMultLadder_%d_%d",ns,nl);
-	  if(ns==0)
-	    sprintf( buffer2, "Raw_HitMult/East-P-%d",nl+1);
-	  else 
-	    sprintf( buffer2, "Raw_HitMult/West-N-%d",nl+1);
-
-	  hMultLadder[ns][nl] = new TH1I(buffer,buffer2,100,50,150);
-	  hMultLadder[ns][nl]->GetXaxis()->SetTitle("Raw Hit Mult Per Event");
-	  hMultLadder[ns][nl]->GetYaxis()->SetTitle("Counts");
-	  hMultLadder[ns][nl]->SetFillColor(5);
-	  hMultLadder[ns][nl]->SetFillStyle(3144);//3013
-	  hMultLadder[ns][nl]->SetStats(true);//true
 	  nHists += 1;
 	}
     }
@@ -329,10 +310,20 @@ void ssdBuilder::initialize(int argc, char *argv[])
     {
     for(int j=0;j<nLadderPerSide;j++)
       {
+	// -----------------------------------
+	// PLEASE BE CAREFUL THE INDEX ISSUES
+	// -----------------------------------
+
 	//Raw AdcStrip
 	plots[nLadderPerSide*i+j] = new JevpPlot(hRawAdcStrip[i][j]);
 	plots[nLadderPerSide*i+j]->optlogz=true;
 	plots[nLadderPerSide*i+j]->setDrawOpts("COLZ");
+	histcounter += 1;
+
+	// ZSAdcStrip
+	plots[nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hZSAdcStrip[i][j]);
+	plots[nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
+	plots[nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("COLZ");
 	histcounter += 1;
 	
 	//PedStrip
@@ -345,19 +336,6 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hRmsStrip[i][j]);
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
 	//plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("*H");
-	histcounter += 1;
-
-	//MultLadder
-	plots[4*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hMultLadder[i][j]);
-	plots[4*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
-	plots[4*nSide*nLadderPerSide+nLadderPerSide*i+j]->logy=1; //setlogy
-	//plots[4*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("*H");
-	histcounter += 1;
-
-	// ZSAdcStrip
-	plots[5*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hZSAdcStrip[i][j]);
-	plots[5*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
-	plots[5*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("COLZ");
 	histcounter += 1;
       }
     }
@@ -406,6 +384,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
   plots[histcounter]->logy=0;
   histcounter += 1;
 
+  LOG(WARN,"Number of Hist %d , Added number of hist %d",nHists,histcounter);
   //---------
   //add plots to plot set
   for ( int i=0; i<histcounter;i++ )
@@ -547,8 +526,6 @@ void ssdBuilder::event(daqReader *rdr) {
       LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
       u_int maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
-
-      if(mDataMode==COMPRESSEDMODE || mDataMode==CMNSMODE) hMultLadder[mSide][mLadder]->Fill(maxI); // number of raw hit in each wafer
 
       LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
 
