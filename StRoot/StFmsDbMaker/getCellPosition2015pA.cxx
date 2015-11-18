@@ -3,7 +3,7 @@
 void getCellPosition2015pA(int nstb, int row, int col, float &x1, float &y1, float &x2, float &y2, float &z){
   const float large_width = 58.0; // large cell width
   const float small_width = 38.0; // small cell width
-  float x,y;
+  float x=0.0, y=0.0;
   switch(nstb)
     {
     case 1:
@@ -15,6 +15,7 @@ void getCellPosition2015pA(int nstb, int row, int col, float &x1, float &y1, flo
       x = -24.0 - 8.0 + 66.6 + 58.4 * col; //new position May 5 2015
       y = 965.1 - 58.6 * row;
       z = 7188;
+      break;
     case 3:
       if(row>16.5)
         {
