@@ -61,7 +61,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
   char buffer[100];
   char buffer1[100];
   char buffer2[100];
-  int merge   = 1;
+  int merge   = 128;
   int nBinsX  = nWaferPerLadder*nStripPerWafer;
   int nBinsY  = 1024;
   int nHists  = 0;
