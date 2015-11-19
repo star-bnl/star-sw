@@ -84,7 +84,7 @@ void Track::SetParticle(std::string part) {
     spin = 1;
     particleName = "pbar";
   } else if (part == "deuteron" || part == "Deuteron" || part == "d") {
-    q = 2;
+    q = 1;
     mass = 1875.612793e6;
     spin = 2;
     particleName = "d";

@@ -29,6 +29,7 @@ float mOutRad;		// cone radius of limitation (similar to height)
 float mOutRad2;		// mOutRad**2
 float mRxy;		// Rxy    ofstart position
 float mRxy2;		// Rxy**2 
+float mR2;		// R**2 
 float mThet;		// 1/2 of cone angle
 float mCos;		// cos(mThet)
 float mSin;		// sin(mThet)

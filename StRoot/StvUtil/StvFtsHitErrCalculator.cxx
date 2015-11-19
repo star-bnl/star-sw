@@ -47,13 +47,13 @@ int StvFtsHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
    double sinFi2 = hiPos[1]*hiPos[1]/Rxy2;
    double sicoFi = hiPos[0]*hiPos[1]/Rxy2;
    memset(mDRr,0,sizeof(mDRr));
-   mDRr[kXX] = sinFi2*myRxyErr2+cosFi2*myPhiErr2*Rxy2;
-   mDRr[kYY] = cosFi2*myRxyErr2+sinFi2*myPhiErr2*Rxy2;
-   mDRr[kXY] = sicoFi*(-myRxyErr2+myPhiErr2*Rxy2);
+   mDRr[kYY] = sinFi2*myRxyErr2+cosFi2*myPhiErr2*Rxy2;
+   mDRr[kZZ] = cosFi2*myRxyErr2+sinFi2*myPhiErr2*Rxy2;
+   mDRr[kZY] = sicoFi*(-myRxyErr2+myPhiErr2*Rxy2);
    if (!hRr) return 0;
-   hRr[0] =  mDRr[kXX];
-   hRr[1] =  mDRr[kXY];
-   hRr[2] =  mDRr[kYY];
+   hRr[0] =  mDRr[kYY];
+   hRr[1] =  mDRr[kYZ];
+   hRr[2] =  mDRr[kZZ];
 
    assert(hRr[0]*hRr[2]>hRr[1]*hRr[1]);
 

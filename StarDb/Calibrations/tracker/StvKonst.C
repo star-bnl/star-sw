@@ -39,7 +39,7 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMaxTotNits =20;      	/*Max number of acceptable non hits*/
 //		ForwEta version
   row.mMinHitsFw = 3;		/*Min number of hits allowed*/
-  row.mNorHitsFw = 3;		/*Normal number of hits allowed*/
+  row.mNorHitsFw = 5;		/*Normal number of hits allowed*/
   row.mGoodHitsFw =4;		/*Good number of hits */
 
 //		ForwEta hitCount hitCount hitCount hitCount hitCount 

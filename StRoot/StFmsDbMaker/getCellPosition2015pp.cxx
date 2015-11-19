@@ -3,7 +3,7 @@
 void getCellPosition2015pp(int nstb, int row, int col, float &x1, float &y1, float &x2, float &y2, float &z){      
   const float large_width = 58.0; // large cell width
   const float small_width = 38.0; // small cell width
-  float x,y;
+  float x=0.0, y=0.0;
   switch(nstb)
     {
     case 1:

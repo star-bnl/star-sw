@@ -8,10 +8,23 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 PROJECT( Garfield CXX Fortran)
 
 ### DEPENDENCIES #######################################
+IF(DEFINED ENV{ROOTSYS})
+    SET( CMAKE_MODULE_PATH $ENV{ROOTSYS}/etc/cmake )
+ELSEIF(DEFINED ROOTSYS)
+    SET( CMAKE_MODULE_PATH ${ROOTSYS}/etc/cmake )
+ELSEIF(DEFINED ROOT_CMAKE_DIR)
+    SET( CMAKE_MODULE_PATH ${ROOT_CMAKE_DIR} )
+ELSE()
+    MESSAGE(FATAL_ERROR "Please consider to set ROOTSYS or use -DROOTSYS=..."
+                        "If still there is a proplem point to the directory which includes FindROOT.cmake using -DROOT_CMAKE_DIR=...")
+ENDIF(DEFINED ENV{ROOTSYS})
+
+
+FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
 SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
 INCLUDE( MacroCheckPackageLibs )
 INCLUDE( MacroRootDict )
-INCLUDE( FindROOT )
+#INCLUDE( FindROOT )
 
 # If you cannot create symbolic links turn FALSE the library version
 SET(BUILD_WITH_VERSION_NUMBER TRUE)
@@ -26,8 +39,7 @@ IF(BUILD_WITH_VERSION_NUMBER)
 ENDIF(BUILD_WITH_VERSION_NUMBER)
 
 ## Add root libs ##
-FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
-INCLUDE_DIRECTORIES ( ${ROOT_INCLUDE_DIRS} ) 
+INCLUDE_DIRECTORIES ( ${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} ) 
 LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 MESSAGE( STATUS "The ROOT Version is found to be ${ROOT_VERSION_MAJOR}.${ROOT_VERSION_MINOR}.${ROOT_VERSION_PATCH}" )
 
@@ -72,7 +84,9 @@ IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
 ELSE()
  ADD_DEFINITIONS( "-O2" )
 ENDIF()
-
+IF(ROOT_VERSION VERSION_GREATER 6.0)
+    ADD_DEFINITIONS( "-std=c++0x" )
+ENDIF()
 
 # Add switches used in HEED
 # -DNOT_INCLUDE_GASLIB_IN_PACSLIB is used in Heed/heed++/code/PhotoAbsCS.c
@@ -80,7 +94,6 @@ SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES COMPILE_FLAGS "-DNOT_INC
 
 ## create dictionary  ##################################
 SET( ROOT_DICT_CINT_DEFINITIONS "-DHANDLE_DICT_EXCEPTIONS=IGNORED_FOR_CINT" )
-INCLUDE( ${ROOT_DICT_MACROS_FILE} )
 PREPARE_ROOT_DICT_HEADERS( Include )
 GEN_ROOT_DICT_SOURCES( GarfieldDict.cxx )
 LIST( APPEND garfield_sources ${ROOT_DICT_OUTPUT_SOURCES} )
@@ -135,4 +148,9 @@ INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
         ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
         COMPONENT cmakefiles )
-  
+# install pcm file in case of root 6
+IF(ROOT_VERSION VERSION_GREATER 6.0)
+    INSTALL( FILES ${PROJECT_BINARY_DIR}/rootdict/${PROJECT_NAME}Dict_rdict.pcm 
+             DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ 
+             COMPONENT dict)
+ENDIF()   

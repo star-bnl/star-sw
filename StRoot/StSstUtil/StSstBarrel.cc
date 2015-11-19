@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.3 2015/07/21 14:29:22 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.4 2015/11/17 18:09:51 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.4  2015/11/17 18:09:51  bouchet
+//Long Zhou modification, move cout to LOG_DEBUG
+//
 //Revision 1.3  2015/07/21 14:29:22  bouchet
 //removed unused variables
 //
@@ -383,9 +386,9 @@ Int_t StSstBarrel::readNoiseFromTable(sstStripCalib_st *noise, StSstDynamicContr
   for (Int_t i = 0 ; i < (2*TotStripSide); i++){
     iSide  = i/TotStripSide;
     iLad   = (i - (iSide*TotStripSide))/TotStripPerLadder;
-    iWaf   = (i - (iSide*TotStripSide - iLad*TotStripPerLadder))/kSstNumStripsOnSensor;
+    iWaf   = (i - iSide*TotStripSide - iLad*TotStripPerLadder)/kSstNumStripsOnSensor;
     iStrip = i - iSide*TotStripSide - iLad*TotStripPerLadder - iWaf*kSstNumStripsOnSensor;
-    std::cout <<" i/side/lad/waf/strip/ped/rms : " << i << " " << iSide << " " << iLad <<" " << iWaf <<" " << iStrip <<" " << (int)noise[0].pedestals[i] <<" "<< (int)noise[0].rms[i] << std::endl;
+    LOG_DEBUG <<" i/side/lad/waf/strip/ped/rms : " << i << " " << iSide << " " << iLad <<" " << iWaf <<" " << iStrip <<" " << (int)noise[0].pedestals[i] <<" "<< (int)noise[0].rms[i] << endm;
     mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(iStrip+1, iSide, (int)noise[0].pedestals[i], (int)noise[0].rms[i], dynamicControl);
     NumberOfNoise++;
   }
