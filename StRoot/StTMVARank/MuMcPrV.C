@@ -173,23 +173,10 @@ void Setup(const Char_t *xmlFile = "") {
      KFV      : postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2
   */
   delete StTMVARanking::instance();
-  if (! TMVAdata::instance()->PileUp()) {
-#if 1
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-#else
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    else                               new StTMVARanking("prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-#endif
-  } else {
-#if 1
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-#else
-    if (! TMVAdata::instance()->PPV()) new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-    else                               new StTMVARanking("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE",xmlFile);
-#endif
-  }
+  TString choice;
+  if (TMVAdata::instance()->PileUp()) choice = "postx:";
+  choice += "prompt:cross:tof:notof:BEMC:noBEMC:nWE";
+  new StTMVARanking(choice,xmlFile);
 }
 //________________________________________________________________________________
 Float_t PPVRank(Float_t RankOld) {
@@ -210,6 +197,7 @@ void FillData(TMVAdata &Data, const StMuPrimaryVertex *Vtx, Float_t zVpd = -9999
   aData.postx  =  Vtx->nPostXtracks(); // noTracks;
   aData.prompt =  Vtx->nPromptTracks(); // noTracks;
   aData.beam   =  Vtx->isBeamConstrained() ? 1 : 0;
+  if (TMVAdata::instance()->PPV()) aData.beam   = 1;
   aData.cross  =  Vtx->nCrossCentralMembrane(); // noTracks;
   aData.tof    = (Vtx->nCTBMatch()     + Vtx->nBTOFMatch()); // noTracks;
   aData.notof  = (Vtx->nCTBNotMatch()  + Vtx->nBTOFNotMatch()); // noTracks;
@@ -337,20 +325,6 @@ Double_t RankMin() {
 Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   if (! Vtx) return kFALSE;
   if (Vtx->noTracks() <= 0) return kFALSE;
-#ifndef __RC__
-  //  if (! Vtx->idTruth())  return kFALSE;
-  //  if (  Vtx->qaTruth() < 90) return kFALSE;
-#endif /* ! __RC__ */
-  //10c  if (  Vtx->position().perp() > 0.3) return kFALSE;
-#if 0
-  //12 | 19
-  //  if (  Vtx->nCTBMatch()     + Vtx->nBTOFMatch() +
-  //	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 0) return kFALSE;
-  if (  Vtx->nCTBMatch()     + Vtx->nBTOFMatch() +
-  	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 1) return kFALSE; // 22
-#endif
-  //41  if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
-  //21  if (  Vtx->position().perp() > 3.0) return kFALSE;
   return kTRUE;
 } 
 //________________________________________________________________________________
@@ -379,7 +353,7 @@ void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KF
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV51") { 
+	     const  char* outFile="MuMcPrV52") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -412,9 +386,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
      4. With pileup. repeat above (a-c) with new ranking scheme for cases I-III
   */
   TString OutFile(outFile);
-  if (iTMVA) {
-    Setup("./weights/TMVAClassification_BDT.weights.xml");
-  }
+  if (iTMVA) Setup("./weights/TMVAClassification_BDT.weights.xml");
+  else       Setup();
   if (iTMVA)   OutFile += "TMVARank";
   if (RankMin) OutFile += "R"; 
   OutFile += ".root";
@@ -519,7 +492,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     if (maker->Make()) break;
     StMuDst* mu = maker->muDst();   // get a pointer to the StMuDst class, the class that points to all the data
     StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
-    doPrint = _debugAsk || ev%100 == 0 || Debug() > 1;
+    doPrint = _debugAsk || ev%100 == 1 || Debug() > 1;
     if (doPrint) 
       cout << "Read event #" << ev << "\tRun\t" << muEvent->runId() << "\tId: " << muEvent->eventId() << endl;
     PrimaryVertices   = mu->primaryVertices(); NoPrimaryVertices = PrimaryVertices->GetEntriesFast();
@@ -832,7 +805,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Int_t NoMcTracksWithHits = 0;
       if (McVx) NoMcTracksWithHits = McVx2McTkR.count(McVx);
       FillData(*TMVAdata::instance(),RcVx,VpdZ,McVx, NoMcTracksWithHits);
-      if (! TMVAdata::instance()->PPV() && ! aData.beam) continue;
+      if (! aData.beam) continue;
       Ranks[l] = aData.Rank;
       Bool_t good = (l == lMcBest);
       if (! good) {// try pileup one

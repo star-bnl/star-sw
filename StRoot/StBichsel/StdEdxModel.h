@@ -36,6 +36,7 @@ class StdEdxModel {
   static Double_t n_Tz (Double_t z = 0) {return      TMath::Exp(z)/W();} // no. of conducting electron per ln(dE[keV])
   static Double_t n_TzG(Double_t z = 0) {return 1e-6*TMath::Exp(z)/W();} // no. of conducting electron per ln(dE[GeV])
   static void MakedEdxModel();
+  static void Make2dEdxModel();
   static void h2MDF(const Char_t  *total = "mu", Int_t max=5, Int_t maxTerm = 20);
  private:
   static StdEdxModel       *fgStdEdxModel; //! last instance          
@@ -45,6 +46,7 @@ class StdEdxModel {
   static Double_t dEdxFunc(Double_t *x, Double_t *p);
   static TMultiDimFit *mDFit;    // Parameterization of ost probable log(n_t/n_p) value versus log10(n_p) and sigma
   static TH1D         *mdNdx;    // dN/dx versus beta*gamma
+  static TH1D         *mdNdE;    // dN/dE 
   static TH2D         *mdEdxMPV; // Histogram for most probable log(n_t/n_p) value versus log10(n_p) and sigma
   static TH3F         *mdEdxFun; // Distribution {log10(n_p), sigma, log(n_t/n_p) - log(n_t/n_p)_MPV}
   static Int_t        _debug;

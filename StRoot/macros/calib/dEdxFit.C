@@ -2963,10 +2963,14 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
 	mpvPion  = mpv;
 	RMSPion  = RMS;
       }
+#if 0
       Double_t dRMS2 = (RMS*RMS - RMSPion*RMSPion);
       if (dRMS2 < 0.0) dRMS2 = 0;
       Double_t dRMS = ln10*TMath::Sqrt(dRMS2);
       Double_t Sigma = TMath::Sqrt(sigma*sigma + dRMS*dRMS);
+#else
+      Double_t Sigma = sigma;
+#endif
       Int_t nx = projNs[i]->GetNbinsX();
       for (Int_t ix = 1; ix <= nx; ix++) {
 	Double_t v =  projNs[i]->GetBinContent(ix);
@@ -3029,9 +3033,9 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
     g2 = new TF1("GN",gNFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,1e-2,0.5);
+    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.,0.5);
     g2->SetParName(3,"P");      g2->SetParLimits(3,0.0,TMath::Pi()/2);
-    g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,TMath::Pi()/2);
+    g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.30);
     g2->SetParName(5,"e");      g2->FixParameter(5,0);
     g2->SetParName(6,"d");      g2->FixParameter(6,0);
     g2->SetParName(7,"Total");
@@ -3055,7 +3059,7 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
     if (xp < xpi) xpi = xp;
   }
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  g2->SetParameters(0, xpi, 0.10, 0.6, 0.1, 0.1, 0.0,0.0,-1.);
+  g2->SetParameters(0, xpi, 0.0, 0.6, 0.1, 0.1, 0.0,0.0,-1.);
   g2->FixParameter(5,0);
   g2->FixParameter(6,0);
   g2->FixParameter(7,total);

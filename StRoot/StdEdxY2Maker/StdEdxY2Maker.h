@@ -17,6 +17,7 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
+#include "TH2.h"
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
@@ -74,6 +75,11 @@ class StdEdxY2Maker : public StMaker {
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
 			 Double_t bField, 
 			 StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]);
+  void  BookBunch(Int_t i3D, TH2 **hists, Int_t nXBins, Int_t nYBins, 
+		  Int_t nZBins, Double_t ZdEdxMin, Double_t ZdEdxMax, 
+		  const Char_t *name, const Char_t *Title,
+		  const Char_t *TitleX, const Char_t *TitleY);
+  void  FillBunch(Int_t i3D, TH2 **hists, Double_t x, Double_t y, Double_t *z);
   static Int_t     NdEdx;
   static dEdxY2_t *CdEdx; // corrected
   static dEdxY2_t *FdEdx; // fit
