@@ -11,7 +11,7 @@ PROJECT( Garfield CXX Fortran)
 SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
 INCLUDE( MacroCheckPackageLibs )
 INCLUDE( MacroRootDict )
-INCLUDE( FindROOT )
+#INCLUDE( FindROOT )
 
 # If you cannot create symbolic links turn FALSE the library version
 SET(BUILD_WITH_VERSION_NUMBER TRUE)
@@ -72,7 +72,9 @@ IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
 ELSE()
  ADD_DEFINITIONS( "-O2" )
 ENDIF()
-
+IF(ROOT_VERSION VERSION_GREATER 6.0)
+    ADD_DEFINITIONS( "-std=c++0x" )
+ENDIF()
 
 # Add switches used in HEED
 # -DNOT_INCLUDE_GASLIB_IN_PACSLIB is used in Heed/heed++/code/PhotoAbsCS.c
@@ -135,4 +137,9 @@ INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
         ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
         COMPONENT cmakefiles )
-  
+# install pcm file in case of root 6
+IF(ROOT_VERSION VERSION_GREATER 6.0)
+    INSTALL( FILES ${PROJECT_BINARY_DIR}/rootdict/${PROJECT_NAME}Dict_rdict.pcm 
+             DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ 
+             COMPONENT dict)
+ENDIF()   
