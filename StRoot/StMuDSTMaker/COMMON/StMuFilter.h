@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.h,v 1.6 2015/11/13 00:24:47 perev Exp $
+ * $Id: StMuFilter.h,v 1.7 2015/11/19 17:38:45 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -48,7 +48,7 @@ class StMuFilter : public StMuCut {
     int mMinTpcHits;       
     int mMinFTpcHits;       
     int mMinFtsHits;       
-    ClassDef(StMuFilter,1)
+    ClassDef(StMuFilter,2)
 };
 
 #endif
@@ -56,6 +56,9 @@ class StMuFilter : public StMuCut {
 /***************************************************************************
  *
  * $Log: StMuFilter.h,v $
+ * Revision 1.7  2015/11/19 17:38:45  perev
+ * Version ++ according new members added
+ *
  * Revision 1.6  2015/11/13 00:24:47  perev
  * Added changable constants
  *
