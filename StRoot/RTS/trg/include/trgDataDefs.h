@@ -42,8 +42,13 @@ typedef struct {
   unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
   unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
-  unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
-  unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+    union {
+	struct {
+	    unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
+	    unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+	};
+	unsigned int tcuCtrBunch;
+    }; 
   unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
   unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
   unsigned short npre;                        /* pre value for detector raw data */
