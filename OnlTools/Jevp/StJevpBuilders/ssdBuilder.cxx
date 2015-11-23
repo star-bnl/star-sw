@@ -20,7 +20,7 @@
 #include "TStyle.h"
 #include <RTS/include/rtsLog.h>
 #include "TTree.h"
-#define  OFFSET  0
+#define  OFFSET  375
 ClassImp(ssdBuilder);
 
 ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
@@ -151,6 +151,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hPedStrip[ns][nl] = new TH1I(buffer, buffer2,nBinsX,0,nBinsX);
 	  hPedStrip[ns][nl]->GetXaxis()->SetTitle("Physical Strip Number");
 	  hPedStrip[ns][nl]->GetYaxis()->SetTitle("Pedestal");
+	  hPedStrip[ns][nl]->GetYaxis()->SetRangeUser(0,nBinsY);
 	  hPedStrip[ns][nl]->SetFillColor(4);
 	  //hPedStrip[ns][nl]->SetFillStyle(3144);
 	  hPedStrip[ns][nl]->SetFillStyle(3013);
@@ -168,6 +169,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hRmsStrip[ns][nl] = new TH1I(buffer, buffer2,nBinsX,0,nBinsX);
 	  hRmsStrip[ns][nl]->GetXaxis()->SetTitle("Physical Strip Number");
 	  hRmsStrip[ns][nl]->GetYaxis()->SetTitle("Rms");
+	  hRmsStrip[ns][nl]->GetYaxis()->SetRangeUser(0,100);
 	  hRmsStrip[ns][nl]->SetFillColor(4);
 	  hRmsStrip[ns][nl]->SetFillStyle(3013);
 	  hRmsStrip[ns][nl]->SetStats(false);//true
