@@ -81,7 +81,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 
   // --------------------------
   // Load Global Style Settings
-  globleStyle();
+  // globleStyle();
 
   // --------------------------
   // Load my style 
