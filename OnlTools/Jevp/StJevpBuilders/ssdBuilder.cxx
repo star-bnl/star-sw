@@ -169,7 +169,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hRmsStrip[ns][nl] = new TH1I(buffer, buffer2,nBinsX,0,nBinsX);
 	  hRmsStrip[ns][nl]->GetXaxis()->SetTitle("Physical Strip Number");
 	  hRmsStrip[ns][nl]->GetYaxis()->SetTitle("Rms");
-	  hRmsStrip[ns][nl]->SetMaximum(0,100);
+	  hRmsStrip[ns][nl]->SetMaximum(100);
 	  hRmsStrip[ns][nl]->SetFillColor(4);
 	  hRmsStrip[ns][nl]->SetFillStyle(3013);
 	  hRmsStrip[ns][nl]->SetStats(false);//true
