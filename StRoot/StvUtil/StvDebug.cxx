@@ -6,6 +6,7 @@
 #include <string>
 #include "TClass.h"
 #include "TH1F.h"
+#include "TBrowser.h"
 #include "TH2F.h"
 #include "TCanvas.h"
 #include "TSystem.h"
@@ -206,4 +207,11 @@ double StvDebug::dFlag(const char *flagName, double dflt)
   printf("\nStvDebug::dFlag: %s = %s\n\n",flagName,val);
 
   return atof(val);
+}
+//______________________________________________________________________________
+void StvDebug::Browse(const char *name, TObject *obj)
+{
+  auto *br = new TBrowser(name,obj);
+  if (br){};
+  return;
 }
