@@ -10,15 +10,16 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
   StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
   if (! traits.size()) return;
   for (UInt_t i = 0; i < traits.size(); i++) {
-    if (! traits[i]) continue;
-    if ( traits[i]->IsZombie()) continue;
-    Short_t id = traits[i]->detector();
+    StTrackPidTraits *trait = traits[i];
+    if (! trait) continue;
+    if ( trait->IsZombie()) continue;
+    Short_t id = trait->detector();
     if (id == kTofId) {
-      StBTofPidTraits* pid = dynamic_cast<StBTofPidTraits*>(traits[i]);
+      StBTofPidTraits* pid = dynamic_cast<StBTofPidTraits*>(trait);
       if (! pid) continue;
       if (TMath::Abs(pid->yLocal()) < 1.8) fToF = StToFStatus(pid);
     } else if (id == kTpcId) {
-      StDedxPidTraits* pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+      StDedxPidTraits* pid = dynamic_cast<StDedxPidTraits*>(trait);
       if (pid) {
 	switch (pid->method()) {
 	case kTruncatedMeanId: fI70 = StdEdxStatus(pid); break;
@@ -29,7 +30,7 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
 	default: break;
 	}
       } else {
-	StProbPidTraits *pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
+	StProbPidTraits *pidprob = dynamic_cast<StProbPidTraits*>(trait);
 	if (pidprob) fProb = pidprob;
       }
     }

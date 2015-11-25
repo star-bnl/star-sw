@@ -2914,6 +2914,8 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   // par[5] - electorn -"-
   // par[6] - deuteron -"-
   // par[7] - Total
+  // ratio dN/dx_h / dN/dx_pi:      P        K        e        d
+  static Double_t dNdxR[4] = {1.97273, 1.32040, 1.16313, 3.42753};
   static Int_t _debug = 0;
   static TCanvas *c1 = 0;
   if (_debug) {
@@ -2976,7 +2978,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
 	Double_t v =  projNs[i]->GetBinContent(ix);
 	if (v > 0.0) {
 	  Double_t n_PL10 = projNs[i]->GetBinCenter(ix);
-	  Double_t n_P = TMath::Exp(n_PL10*ln10);
+	  Double_t n_P = TMath::Exp(n_PL10*ln10 + par[6]);
 	  zdE->SetParameter(1, n_P);
 	  zdE->SetParameter(2,mpv - mpvPion);
 	  zdE->SetParameter(3,Sigma);
@@ -3037,7 +3039,8 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
     g2->SetParName(3,"P");      g2->SetParLimits(3,0.0,TMath::Pi()/2);
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.30);
     g2->SetParName(5,"e");      g2->FixParameter(5,0);
-    g2->SetParName(6,"d");      g2->FixParameter(6,0);
+    //    g2->SetParName(6,"d");      g2->FixParameter(6,0);
+    g2->SetParName(6,"ScaleL"); g2->SetParLimits(6,-2.5,2.5);
     g2->SetParName(7,"Total");
     g2->SetParName(8,"Case");
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);

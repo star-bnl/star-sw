@@ -16,5 +16,5 @@
 //________________________________________________________________________________
 void dEdxModel() {
   StdEdxModel::_debug = 1;
-  StdEdxModel::Make2dEdxModel();
+  StdEdxModel::MakedEdxModel();
 }

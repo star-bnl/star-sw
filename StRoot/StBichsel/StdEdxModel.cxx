@@ -25,6 +25,9 @@ TH1D         *StdEdxModel::mdNdx = 0;
 TH1D         *StdEdxModel::mdNdE = 0;   
 TH2D         *StdEdxModel::mdEdxMPV = 0;
 TH3F         *StdEdxModel::mdEdxFun = 0;
+Double_t      StdEdxModel::mzMin    = 0;
+Double_t      StdEdxModel::mzMax    = 0;
+Double_t      StdEdxModel::mdZ      = 0;
 Int_t         StdEdxModel::_debug   = 0;
 static        TCanvas *c1           = 0;
 //________________________________________________________________________________
@@ -44,7 +47,10 @@ StdEdxModel::StdEdxModel() {
       if (i == -1) {
 	mdEdxMPV = (TH2D *)      gDirectory->Get("dEdxMPV_MDFpar"); 
 	mdEdxFun = (TH3F *)      gDirectory->Get("dEdxFun");        
-	if (mdEdxMPV || mdEdxFun) i = 1; 
+	if (mdEdxMPV || mdEdxFun) {
+	  i = 0; 
+	  Warning("StdEdxModel","File %s has been found im memory",Files[i]);
+	}
 	continue;
       }
       Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
@@ -62,6 +68,11 @@ StdEdxModel::StdEdxModel() {
       }
       delete pFile;
       delete [] file;
+    }
+    if (mdEdxFun) {
+      mzMin = mdEdxFun->GetZaxis()->GetXmin();
+      mzMax = mdEdxFun->GetZaxis()->GetXmax();
+      mdZ   = mdEdxFun->GetZaxis()->GetBinWidth(1);
     }
     dir->cd();
   }
@@ -103,18 +114,21 @@ Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
   static Double_t ln10 = TMath::Log(10.);
   Double_t z        = x[0]; // log (dE (keV))
   Double_t n_PL10   = p[0];
-  if (n_PL10 > 4) n_PL10 = 4;
-  if (n_PL10 < 0.7) n_PL10 = 0.7;
+//   if (n_PL10 > 4) n_PL10 = 4;
+//   if (n_PL10 < 0.7) n_PL10 = 0.7;
   Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = p[1];
+#if 0
   Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
-  if (Sigma < 0.01) Sigma = 0.01;
-  if (Sigma > 0.99) Sigma = 0.99;
-  Double_t n_T   = n_Tz(z); // TMath::Exp(z)/W(); n_T from log(dE[keV])
+#else
+  Double_t Sigma = sigma;
+#endif
+  if (Sigma < 0.00) Sigma = 0.00;
+  if (Sigma > 1.00) Sigma = 1.00;
+  Double_t n_T   = n_Tz(z)*p[2]; // TMath::Exp(z)/W(); n_T from log(dE[keV])
   if (n_T < 1.) return 0;
   Double_t w     = TMath::Log(n_T/n_P);
-  if (w <-3.89) w = -3.89;
-  if (w > 5.89) w =  5.89;
+  if (w <= mzMin+mdZ/2 || w >= mzMax-mdZ/2) return 0;
   return mdEdxFun->Interpolate(n_PL10, Sigma, w);
 }
 //________________________________________________________________________________
@@ -122,9 +136,11 @@ TF1 *StdEdxModel::zFunc() {
   static TF1 *f = 0;
   if (! f) f = new TF1("zFunc",StdEdxModel::dLogNtpernPdP,-5,15.,3);
   f->SetNpx(1000);
-  f->SetParName(0,"n_PL10");
-  f->SetParName(1,"sigma");
-  f->SetParameters(TMath::Log10(30.),0.25,0.0);
+  f->SetParName(0,"n_PL10"); f->SetParLimits(0,0,4);
+  f->SetParName(1,"sigma");  f->SetParLimits(1,0,1);
+  f->SetParName(2,"scale");
+  f->SetParameters(TMath::Log10(30.),0.25,1.0);
+  //  f->FixParameter(2,1.0);
   return f;
 }
 //________________________________________________________________________________
@@ -136,25 +152,28 @@ Double_t StdEdxModel::dEdxFunc(Double_t *x, Double_t *p) {
   if (n_PL10 < 0.7) n_PL10 = 0.7;
   f->SetParameter(0,n_PL10);
   f->SetParameter(1,p[3]);
+  f->SetParameter(2,p[4]);
 #if 1
   static TF1 *fMPV = 0;
   if (! fMPV) fMPV = instance()->zMPV();
-  Double_t zMPV = fMPV->Eval(n_PL10,p[2]);
-  return TMath::Exp(p[0])*f->Eval(x[0]+zMPV-p[2]);
+  Double_t zMPV = fMPV->Eval(n_PL10,p[3]);
+  Double_t z = x[0]+zMPV-p[2];
 #else
-  return TMath::Exp(p[0])*f->Eval(x[0]-p[2]);
+  Double_t z = x[0]-p[2];
 #endif
+  return TMath::Exp(p[0])*f->Eval(z);
 }
 //________________________________________________________________________________
 TF1 *StdEdxModel::zdEdx() {
   static TF1 *f = 0;
-  if (!f) f = new TF1("zdEdx",StdEdxModel::dEdxFunc,-5,15.,4);
+  if (!f) f = new TF1("zdEdx",StdEdxModel::dEdxFunc,-5,15.,5);
   f->SetNpx(1000);
-  f->SetParName(0,"scale");
+  f->SetParName(0,"norm");
   f->SetParName(1,"n_P"); f->SetParLimits(1,2,1e4);
   f->SetParName(2,"mu");  f->SetParLimits(2,-10,10);
-  f->SetParName(3,"sigma"); f->SetParLimits(3,0.01,0.99);
-  f->SetParameters(0.,30.,0.0,0.25);
+  f->SetParName(3,"sigma"); f->SetParLimits(3,0.00,1.00);
+  f->SetParName(4,"scale"); //f->SetParLimits(3,0.01,0.99);
+  f->SetParameters(0.,30.,0.0,0.25, 1.0);
   return f;
 }
 //________________________________________________________________________________
@@ -346,10 +365,10 @@ void StdEdxModel::MakedEdxModel() {
   Double_t dsigma = (sigmaMax - sigmaMin)/Nsigma;
   yBins[0] = sigmaMin;
   for (Int_t i = 1; i <= Nsigma; i++) yBins[i] = yBins[i-1] + dsigma;
-  Int_t Nzbins = 500;
+  Int_t Nzbins = 1500;
   TArrayD     zBins(Nzbins+1);
-  zBins[0]      = -4;
-  zBins[Nzbins] =  6;
+  zBins[0]      = -5;
+  zBins[Nzbins] = 10;
   Double_t dZ = ( zBins[Nzbins] -  zBins[0])/Nzbins;
   for (Int_t i = 1; i < Nzbins; i++) zBins[i] = zBins[i-1] + dZ;
   TH3F *dEdxFun = (TH3F *) fOut->Get("dEdxFun");
@@ -373,11 +392,13 @@ void StdEdxModel::MakedEdxModel() {
     for (Int_t iX = 1; iX <= Nxbins; iX++) {
       Double_t n_pL10 = dEdxFun->GetXaxis()->GetBinCenter(iX);
       Double_t n_p    = TMath::Power(10.,n_pL10);
+#if 0
       Double_t n_pL10l= dEdxFun->GetXaxis()->GetBinLowEdge(iX);
       Int_t    n_pl   = TMath::Power(10.,n_pL10l);
       Double_t n_pL10u= dEdxFun->GetXaxis()->GetBinUpEdge(iX);
       Int_t    n_pu   = TMath::Power(10.,n_pL10u);
       Int_t    dn_p   = (n_pu - n_pl);
+#endif
       Int_t bin = x->FindBin(n_p);
       TH1D *proj = nPdT->ProjectionY("_y",bin,bin);
       if (proj->GetEntries() > 100) {
@@ -386,9 +407,11 @@ void StdEdxModel::MakedEdxModel() {
 	  TH1D *hist = dEdxFun->ProjectionZ("RnDM",iX,iX,iY,iY);
 	  hist->SetName("RnDM");
 	  hist->Reset();
-	  for (Int_t k = 0; k < 100000; k++) {
+	  Int_t NT = 100000*(1 + sigma*sigma/0.01);
+	  for (Int_t k = 0; k < NT; k++) {
 	    Double_t u = proj->GetRandom();
 	    Int_t binz = hist->GetXaxis()->FindBin(u);
+#if 0
 	    Double_t ul = hist->GetXaxis()->GetBinLowEdge(binz);
 	    Double_t uu = hist->GetXaxis()->GetBinUpEdge(binz);
 	    Int_t    nl =  n_pl*TMath::Exp(ul);
@@ -396,12 +419,14 @@ void StdEdxModel::MakedEdxModel() {
 	    Int_t   dn_e = (nu - nl);
 	    if (! dn_e) continue;
 	    Double_t w   = 1./(dn_p*dn_e);
+#endif
+	    Double_t w = 1.;
 	    if (sigma > 0) {
 	      u += gRandom->Gaus(0.,sigma);
 	    }
 	    hist->Fill(u, w);
 	  }
-	  //	hist->Smooth(25);
+	  hist->Smooth(5);
 	  Double_t norm = hist->Integral();
 	  hist->Scale(1./norm,"width");
 	  Int_t nZ = hist->GetNbinsX();
@@ -439,9 +464,10 @@ void StdEdxModel::MakedEdxModel() {
   h2MDF(dEdxMPV->GetName(),7,200);
   fOut->Write();
 }
+#if 0
 //________________________________________________________________________________
 void StdEdxModel::Make2dEdxModel() {
-  
+  // ! Does not account efficiency conversion of deposited energy to no. of conducting electons !!  
   if (_debug) {
     c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
     if (! c1 ) c1 = new TCanvas("c1","c1");
@@ -531,10 +557,12 @@ void StdEdxModel::Make2dEdxModel() {
   Double_t dsigma = (sigmaMax - sigmaMin)/Nsigma;
   yBins[0] = sigmaMin;
   for (Int_t i = 1; i <= Nsigma; i++) yBins[i] = yBins[i-1] + dsigma;
-  Int_t Nzbins = 200;
+  Int_t Nzbins = 600;
   TArrayD     zBins(Nzbins+1);
-  zBins[0]      =  0;
-  zBins[Nzbins] = 10;
+  mzMin =  0;
+  mzMax =  6;
+  zBins[0]      = mzMin;
+  zBins[Nzbins] = mzMax;
   Double_t dZ = ( zBins[Nzbins] -  zBins[0])/Nzbins;
   for (Int_t i = 1; i < Nzbins; i++) zBins[i] = zBins[i-1] + dZ;
   TH3F *dEdxFun = (TH3F *) fOut->Get("dEdxFun");
@@ -609,5 +637,6 @@ void StdEdxModel::Make2dEdxModel() {
   h2MDF(dEdxMPV->GetName(),7,200);
   fOut->Write();
 }
+#endif
 // $Id: $
 // $Log: $

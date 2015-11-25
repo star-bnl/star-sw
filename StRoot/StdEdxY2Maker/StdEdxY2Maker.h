@@ -17,14 +17,13 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
-#include "TH2.h"
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
 class StGlobalCoordinate;
 class TH2F;
 class StTpcPadrowHitCollection;
-
+class StTrack;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder     =  0,
@@ -71,15 +70,11 @@ class StdEdxY2Maker : public StMaker {
   static  Double_t gaus2(Double_t *x, Double_t *p);
   static  TF1 *Gaus2();
  private:
+  void   AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx);
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
 			 Double_t bField, 
 			 StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]);
-  void  BookBunch(Int_t i3D, TH2 **hists, Int_t nXBins, Int_t nYBins, 
-		  Int_t nZBins, Double_t ZdEdxMin, Double_t ZdEdxMax, 
-		  const Char_t *name, const Char_t *Title,
-		  const Char_t *TitleX, const Char_t *TitleY);
-  void  FillBunch(Int_t i3D, TH2 **hists, Double_t x, Double_t y, Double_t *z);
   static Int_t     NdEdx;
   static dEdxY2_t *CdEdx; // corrected
   static dEdxY2_t *FdEdx; // fit
