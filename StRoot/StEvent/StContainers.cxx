@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.36 2015/11/24 18:55:26 perev Exp $
+ * $Id: StContainers.cxx,v 2.37 2015/11/25 16:53:15 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.36  2015/11/24 18:55:26  perev
- * FTS++
- *
- * Revision 1.1  2015/10/16 15:22:29  jwebb
- * Offline area established for STAR upgrades
+ * Revision 2.37  2015/11/25 16:53:15  perev
+ * Backward
  *
  * Revision 2.35  2015/10/02 19:48:53  ullrich
  * Added Rps tracks and points
@@ -132,7 +129,6 @@
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
 #include "StFpsSlat.h"
-#include "StFtsHit.h"
 #include "StFtpcHit.h"
 #include "StHltBEmcTowerHit.h"
 #include "StHltBTofHit.h"
@@ -194,7 +190,6 @@ StCollectionImp(FmsCluster)
 StCollectionImp(FmsHit)
 StCollectionImp(FmsPoint)
 StCollectionImp(FpsSlat)
-StCollectionImp(FtsHit)
 StCollectionImp(FtpcHit)
 StCollectionImp(Hit)
 StCollectionImp(HltBEmcTowerHit)
