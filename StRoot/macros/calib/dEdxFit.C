@@ -3178,7 +3178,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       if (Fit.entries < 100) {delete proj; continue;}
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
-      else if (TString(FitName) == "NF" && TString(HistName) == "SecRow3N" && dim == 3) {
+      else if (TString(FitName) == "NF" && dim == 3) {
 	TH3 *hists[5] = {0, 0, 0, 0, 0};
 	static const Char_t *names[5] = {"pi","P","K","e","d"};
 	for (Int_t ih = 0; ih < 5; ih++) {
@@ -3198,10 +3198,10 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Opt += "S";
 	g = FitNF(proj,Opt);
       }
-      else if (TString(FitName) == "XF" && TString(HistName) == "SecRow3N" && dim == 3) {
+      else if (TString(FitName) == "XF" && dim == 3) {
 	Opt = opt;
 	Opt += "S";
-	TProfile2D *pdX = (TProfile2D *) fRootFile->Get("SecRow3dX");
+	TProfile2D *pdX = (TProfile2D *) fRootFile->Get(Form("%sdX",HistName));
 	if (pdX) {
 	  Double_t dX = 0, ddX = 0;
 	  Int_t nn = 0;
