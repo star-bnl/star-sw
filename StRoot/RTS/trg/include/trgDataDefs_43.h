@@ -42,9 +42,8 @@ typedef struct {
   unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
   unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
-#ifdef __vxworks
-  unsigned short physicsWord;
-  unsigned short TriggerWord;
+#ifndef __linux
+    unsigned int tcuCtrBunch;
 #else
   union {
       struct { 

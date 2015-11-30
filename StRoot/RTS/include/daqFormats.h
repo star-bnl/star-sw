@@ -34,9 +34,11 @@ typedef unsigned char UINT8 ;
 #include <trgDataDefs_40.h>
 #elif (TRG_VERSION == 0x41) 
 #include <trgDataDefs_41.h>
+#elif (TRG_VERSION == 0x42)
+#include <trgDataDefs_42.h>
 #else
 #ifndef TRG_VERSION
-#define TRG_VERSION 0x42       
+#define TRG_VERSION 0x43    
 #endif
 #include <trgDataDefs.h>
 #endif
