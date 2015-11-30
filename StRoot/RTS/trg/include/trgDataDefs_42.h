@@ -18,7 +18,7 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
-#define FORMAT_VERSION        0x15113043      /* Format: yymmddvv */
+#define FORMAT_VERSION        0x12112942      /* Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
@@ -42,18 +42,13 @@ typedef struct {
   unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
   unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
-#ifdef __vxworks
-  unsigned short physicsWord;
-  unsigned short TriggerWord;
-#else
-  union {
-      struct { 
-	  unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
-	  unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
-      };
-      unsigned int tcuCtrBunch;
-  };
-#endif
+    union {
+	struct {
+	    unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
+	    unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+	};
+	unsigned int tcuCtrBunch;
+    }; 
   unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
   unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
   unsigned short npre;                        /* pre value for detector raw data */
@@ -86,7 +81,6 @@ typedef struct {
   unsigned int   L1Result[32];                /* Result from L1 CPU */
   unsigned int   L2Result[64];                /* Result from L2 CPU */
   unsigned int   C2Result[64];                /* Result from last algorithm */
-  unsigned int   LocalClocks[32];	      /* localClock values from RCC2*/
 } TrgSumData;
 
 typedef struct {
@@ -190,7 +184,7 @@ typedef struct {
   int cur_token;
   int Npre;
   int Npost;
-  unsigned int localClock;                    /* Local RCC2 clock */   
+  unsigned int localClock;                    /* Local DSM clock */   
   int numGroup;                               /* Number of DSMs in first group */
   int numDSM;                                 /* Total number of DSMs */
   int byteCount;                              /* Ensure alignment of long long */
@@ -203,7 +197,7 @@ typedef struct {
 // aligned so that elements of an array remain 8 byte aligned.
 typedef struct {
   L1_Data_Block2011 l1;
-  UINT32 currentBusy;    // keep padded though!
+  unsigned int currentBusy;    // keep padded though!
   // UINT32 pad;
 } L1_Data_Storage2011;
 
