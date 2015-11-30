@@ -850,7 +850,7 @@ void KFParticleBaseSIMD::SetProductionVertex( const KFParticleBaseSIMD &Vtx )
     for(int iD2=0; iD2<6; iD2++)
       D[iD1][iD2] = 0.f;
 
-  Bool_t noS = ( fC[35]<=0 ); // no decay length allowed
+  Bool_t noS = ( fC[35][0]<=0.f ); // no decay length allowed
 
   if( noS ){ 
     TransportToDecayVertex();
@@ -1207,8 +1207,8 @@ void KFParticleBaseSIMD::Construct( const KFParticleBaseSIMD* vDaughters[], Int_
     SetNDaughters(nDaughters);
     
     fAtProductionVertex = 0;
-    fSFromDecay = 0;
-    SumDaughterMass = 0;
+    fSFromDecay = float_v(Vc::Zero);
+    SumDaughterMass = float_v(Vc::Zero);
 
     for(Int_t i=0;i<36;++i) fC[i]=0.;
     fC[35] = 1.;
@@ -1229,17 +1229,18 @@ void KFParticleBaseSIMD::Construct( const KFParticleBaseSIMD* vDaughters[], Int_
 void KFParticleBaseSIMD::TransportToDecayVertex()
 {
   //* Transport the particle to its decay vertex 
-
-  float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f}; //TODO doesn't take into account errors of the previous extrapolation
-  if( fSFromDecay != 0 ) TransportToDS( -fSFromDecay, dsdr );
+  float_v dsdr[6] = {float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero)};
+  //TODO doesn't take into account errors of the previous extrapolation
+  if( !( (abs(fSFromDecay) < float_v(1.e-6f)).isFull() ) ) TransportToDS( -fSFromDecay, dsdr );
   fAtProductionVertex = 0;
 }
 
 void KFParticleBaseSIMD::TransportToProductionVertex()
 {
   //* Transport the particle to its production vertex 
-  float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f}; //TODO doesn't take into account errors of the previous extrapolation
-  if( fSFromDecay != -fP[7] ) TransportToDS( -fSFromDecay-fP[7], dsdr );
+  float_v dsdr[6] = {float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero),float_v(Vc::Zero)}; 
+  //TODO doesn't take into account errors of the previous extrapolation
+  if( !( (abs(fSFromDecay + fP[7]) < float_v(1.e-6f)).isFull() )  ) TransportToDS( -fSFromDecay-fP[7], dsdr );
   fAtProductionVertex = 1;
 }
 
@@ -1300,7 +1301,7 @@ float_v KFParticleBaseSIMD::GetDStoPointLine( const float_v xyz[3], float_v dsdr
   //* Get dS to a certain space point without field
 
   float_v p2 = fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5];  
-  if( p2<1.e-4f ) p2 = 1.f;
+  p2( p2 < float_v(1.e-4f) )  = float_v(1.f);
   
   const float_v& a = fP[3]*(xyz[0]-fP[0]) + fP[4]*(xyz[1]-fP[1]) + fP[5]*(xyz[2]-fP[2]);
   dsdr[0] = -fP[3]/p2;
@@ -1328,7 +1329,7 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[3], flo
   const float_v& pz = param[5];
   
   const float_v kCLight = 0.000299792458f;
-  float_v bq = B*fQ*kCLight;
+  float_v bq = B*float_v(fQ)*kCLight;
   float_v pt2 = param[3]*param[3] + param[4]*param[4];
   float_v p2 = pt2 + param[5]*param[5];  
   
@@ -1464,10 +1465,10 @@ void KFParticleBaseSIMD::GetMaxDistanceToParticleBz(const float_v& B, const KFPa
   //* Get maxium distance between to particles in XY plane
   const float_v kCLight = 0.000299792458f;
   
-  const float_v& bq1 = B*fQ*kCLight;
-  const float_v& bq2 = B*p.fQ*kCLight;
-  const float_m& isStraight1 = abs(bq1) < 1.e-8f;
-  const float_m& isStraight2 = abs(bq2) < 1.e-8f;
+  const float_v& bq1 = B*float_v(fQ)*kCLight;
+  const float_v& bq2 = B*float_v(p.fQ)*kCLight;
+  const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
+  const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
   
   const float_v& px1 = fP[3];
   const float_v& py1 = fP[4];
@@ -1517,11 +1518,11 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
 
   //in XY plane
   //first root    
-  const float_v& bq1 = B*fQ*kCLight;
-  const float_v& bq2 = B*p.fQ*kCLight;
+  const float_v& bq1 = B*float_v(fQ)*kCLight;
+  const float_v& bq2 = B*float_v(p.fQ)*kCLight;
 
-  const float_m& isStraight1 = abs(bq1) < 1.e-8f;
-  const float_m& isStraight2 = abs(bq2) < 1.e-8f;
+  const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
+  const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
   
   if( isStraight1.isFull() && isStraight2.isFull() )
   {
@@ -2206,7 +2207,7 @@ void KFParticleBaseSIMD::GetDStoParticleLine( const KFParticleBaseSIMD &p, float
   float_v drp2 = p.fP[3]*(p.fP[0]-fP[0]) + p.fP[4]*(p.fP[1]-fP[1]) + p.fP[5]*(p.fP[2]-fP[2]);
 
   float_v detp =  p1p2*p1p2 - p12*p22;
-  if( abs(detp)<1.e-4f ) detp = 1.f; //TODO correct!!!
+  detp( abs(detp)<float_v(1.e-4f) ) = float_v(1.f); //TODO correct!!!
 
   dS[0]  = (drp2*p1p2 - drp1*p22) /detp;
   dS[1] = (drp2*p12  - drp1*p1p2)/detp;
@@ -2273,14 +2274,14 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v 
 {  
   //* Transport the particle on dS, output to P[],C[], for CBM field
  
-  if( (fQ == 0).isFull() ){
+  if( (fQ == int_v(Vc::Zero)).isFull() ){
     TransportLine( dS, dsdr, P, C, dsdr1, F, F1 );
     return;
   }
 
   const float_v kCLight = 0.000299792458f;
 
-  float_v c = fQ*kCLight;
+  float_v c = float_v(fQ)*kCLight;
 
   // construct coefficients 
 
@@ -2560,7 +2561,7 @@ void KFParticleBaseSIMD::TransportBz( float_v b, float_v t, const float_v* dsdr,
   //* Transport the particle on dS, output to P[],C[], for Bz field
  
   const float_v kCLight = 0.000299792458f;
-  b = b*fQ*kCLight;
+  b = b*float_v(fQ)*kCLight;
   float_v bs= b*t;
   float_v s = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
 
@@ -3075,7 +3076,7 @@ void KFParticleBaseSIMD::GetArmenterosPodolanski(KFParticleBaseSIMD& positive, K
   float_v spy = positive.GetPy() + negative.GetPy();
   float_v spz = positive.GetPz() + negative.GetPz();
   float_v sp  = sqrt(spx*spx + spy*spy + spz*spz);
-  float_v mask = float_v(  abs(sp) < float_v(1.E-10f));
+  float_m mask = float_m(  abs(sp) < float_v(1.e-10f));
   float_v pn, pp, pln, plp;
 
   pn = sqrt(negative.GetPx()*negative.GetPx() + negative.GetPy()*negative.GetPy() + negative.GetPz()*negative.GetPz());
@@ -3083,13 +3084,13 @@ void KFParticleBaseSIMD::GetArmenterosPodolanski(KFParticleBaseSIMD& positive, K
   pln  = (negative.GetPx()*spx+negative.GetPy()*spy+negative.GetPz()*spz)/sp;
   plp  = (positive.GetPx()*spx+positive.GetPy()*spy+positive.GetPz()*spz)/sp;
 
-  mask = float_v(mask & float_v(  abs(pn) < float_v(1.E-10f)));
+  mask = float_m(mask & float_m(  abs(pn) < float_v(1.E-10f)));
   float_v ptm  = (1.f-((pln/pn)*(pln/pn)));
   qt(ptm >= 0.f) =  pn*sqrt(ptm);
   alpha = (plp-pln)/(plp+pln);
 
-  QtAlfa[0] = float_v(qt & mask);
-  QtAlfa[1] = float_v(alpha & mask);
+  QtAlfa[0](mask) = qt;
+  QtAlfa[1](mask) = alpha;
 }
 
 void KFParticleBaseSIMD::RotateXY(float_v angle, float_v Vtx[3])

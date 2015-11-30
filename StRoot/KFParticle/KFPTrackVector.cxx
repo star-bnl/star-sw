@@ -134,7 +134,7 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     int_v& vec = reinterpret_cast<int_v&>(fId[iElement]);
-    vec.gather(&(track.fId[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fId[0]), index, int_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
   {
     int iElement=0;
@@ -146,7 +146,7 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     int_v& vec = reinterpret_cast<int_v&>(fPDG[iElement]);
-    vec.gather(&(track.fPDG[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fPDG[0]), index, int_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
   {
     int iElement=0;
@@ -158,7 +158,7 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     int_v& vec = reinterpret_cast<int_v&>(fQ[iElement]);
-    vec.gather(&(track.fQ[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fQ[0]), index, int_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
   {
     int iElement=0;
@@ -170,7 +170,7 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
     }
     const uint_v& index = reinterpret_cast<const uint_v&>(trackIndex[iElement]);
     int_v& vec = reinterpret_cast<int_v&>(fPVIndex[iElement]);
-    vec.gather(&(track.fPVIndex[0]), index, float_m(iElement+uint_v::IndexesFromZero()<nIndexes));
+    vec.gather(&(track.fPVIndex[0]), index, int_m(iElement+uint_v::IndexesFromZero()<nIndexes));
   }
 }
 
