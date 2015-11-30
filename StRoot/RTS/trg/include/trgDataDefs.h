@@ -202,7 +202,7 @@ typedef struct {
 // aligned so that elements of an array remain 8 byte aligned.
 typedef struct {
   L1_Data_Block2011 l1;
-  UINT32 currentBusy;    // keep padded though!
+  unsigned int currentBusy;    // keep padded though!
   // UINT32 pad;
 } L1_Data_Storage2011;
 
