@@ -28,7 +28,7 @@
 
     /* Event Descriptor Data Structures */
     
-#pragma pack(push, 1)
+#pragma pack(1)
 
 typedef struct {
   char           name[3];                     /* Contains  EVD */
@@ -66,7 +66,7 @@ typedef struct {
   unsigned short res1;                        /* Reserved for future use */
 } EvtDescData;
 
-#pragma pack(pop)
+#pragma pack()
 
       /* L1 DSM data structures */
 
