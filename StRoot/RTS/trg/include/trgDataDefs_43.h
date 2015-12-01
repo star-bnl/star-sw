@@ -28,6 +28,8 @@
 
     /* Event Descriptor Data Structures */
     
+#pragma pack(1)
+
 typedef struct {
   char           name[3];                     /* Contains  EVD */
   char           TrgDataFmtVer;               /* Exception for use by DAQ (LS byte of FORMAT_VERSION) */
@@ -42,23 +44,29 @@ typedef struct {
   unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
   unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
+
+
 #ifndef __linux
-    unsigned int tcuCtrBunch;
+  unsigned int tcuCtrBunch;
 #else
   union {
-      struct { 
-	  unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
-	  unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
-      };
-      unsigned int tcuCtrBunch;
+    struct { 
+	unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
+	unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+    };
+    unsigned int tcuCtrBunch;
   };
 #endif
+
+
   unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
   unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
   unsigned short npre;                        /* pre value for detector raw data */
   unsigned short npost;                       /* post value for detector raw data */
   unsigned short res1;                        /* Reserved for future use */
 } EvtDescData;
+
+#pragma pack()
 
       /* L1 DSM data structures */
 
@@ -202,7 +210,7 @@ typedef struct {
 // aligned so that elements of an array remain 8 byte aligned.
 typedef struct {
   L1_Data_Block2011 l1;
-  UINT32 currentBusy;    // keep padded though!
+  unsigned int currentBusy;    // keep padded though!
   // UINT32 pad;
 } L1_Data_Storage2011;
 
