@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.291 2015/11/02 15:26:53 jwebb Exp $
+* $Id: geometry.g,v 1.292 2015/12/02 15:02:35 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.292  2015/12/02 15:02:35  jwebb
+* Add y2016 first cut geometry.
+*
 * Revision 1.291  2015/11/02 15:26:53  jwebb
 * Add MutdGeo7 module with corrected radii.  Define y2015b production geometry tag to use latest MTD geometry.
 *
@@ -2402,6 +2405,35 @@ REPLACE [exe y2015b;] with ["Y2015 production geometry";
     exe y2015a; "Base off of y2015a";
     exe Mutd15; "Use corrected MTD geometry";
 ]
+
+
+REPLACE [exe y2016;] with ["Y2016 first cut geometry";
+    exe FGTDof;      "switch off FGT";
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+
+    exe VPDD08;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD15;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe IDSM14;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL62;      "Full config of the pixl detector with Al cables";
+    exe DTUB01;      "DTUB";
+    exe PSUP01;      "1st version of pixl supports";
+    exe FPDM04;      "FMS plus preshower";
+]
+
 
 REPLACE [exe dev2016;] with ["Y2016 development tag";
 
