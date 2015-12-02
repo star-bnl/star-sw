@@ -1330,7 +1330,7 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL,20Muons","St_geant_Maker"
+  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
    ,                                                                                "StarGenerator",kFALSE}, 
@@ -1398,7 +1398,7 @@ Bfc_st BFC[] = { // standard chains
   {"gmtDat"     ,"","","event","StGmtRawMaker","StGmtRawMaker",                   "GMT Data reader",kFALSE},
   {"gmtClu"   ,"","","gmtutil","StGmtClusterMaker","Spectrum,StGmtClusterMaker","GMT cluster maker",kFALSE},
   {"gmtCosmics" ,"","","Cosmics,gmt","","",  "Save only events with GMT clusters and Cosmic tracks",kFALSE},
-  {"gmtClusTree","","","gmtClu","","",                                "Fill TTree for GMT clusters",kFALSE},
+  {"gmtClusTree","","","","","",                               "WARNING *** Option is OBSOLETE ***",kFALSE},
 
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
@@ -1707,7 +1707,6 @@ Bfc_st BFC[] = { // standard chains
 
   {"gmtMatch"                                 ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"gmtPlotter"                               ,"","","", "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -1813,6 +1812,7 @@ Bfc_st BFC[] = { // standard chains
    ,                              "StHftPoolEventT,StHftPoolHftMatchedTree","Create HftMatchedTree",kFALSE},
   {"HftMatTreeB","","","","HftMatchedTree"
    ,                            "StHftPoolEventTB,StHftPoolHftMatchedTreeB","Create HftMatchedTree",kFALSE},
+  {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
