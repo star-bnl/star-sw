@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.8 2014/06/25 13:34:41 jwebb Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.9 2015/12/03 19:59:14 jwebb Exp $
 
 
 //______________________________________________________________________________
@@ -11,14 +11,14 @@
 void StGenParticle::Print(const char *opt) const
 {
   static int nCall=0; nCall++;
-  LOG_INFO << GetIdx() << " -" ;
-  LOG_INFO << " Ist=" << GetStatusCode() ;
-  LOG_INFO << " Pdg=" << GetPdgCode() ;
-  LOG_INFO << " Gea=" << GetGeaCode() ;
+  LOG_INFO << GetIdx() << " -"  << endm;
+  LOG_INFO << " Ist=" << GetStatusCode() << endm;
+  LOG_INFO << " Pdg=" << GetPdgCode() << endm;
+  LOG_INFO << " Gea=" << GetGeaCode() << endm;
 
-  double V[3];  Vertex(V); LOG_INFO << " Z=" << V[2] ;
+  double V[3];  Vertex(V); LOG_INFO << " Z=" << V[2] << endm;
 
-  if (GetNDaughters()) LOG_INFO << "\tKids=" << GetNDaughters() ;
+  if (GetNDaughters()) LOG_INFO << "\tKids=" << GetNDaughters() << endm;
 
   int moth1 = -1,moth2=-1;
   const StGenParticle *m = GetMother(0);
@@ -27,14 +27,14 @@ void StGenParticle::Print(const char *opt) const
   if (m) moth2 = m->GetIdx();
 
   if (moth1>=0 || moth2>=0) {
-    LOG_INFO << "\tMoth=(" ;
-    if (moth1>=0) {LOG_INFO << moth1 ;} else {LOG_INFO << "_" ;}
-    LOG_INFO << " " ;
-    if (moth2>=0) {LOG_INFO << moth2 ;} else {LOG_INFO << "_" ;}
-    LOG_INFO << ")" ;
+    LOG_INFO << "\tMoth=(" << endm;
+    if (moth1>=0) {LOG_INFO << moth1 << endm;} else {LOG_INFO << "_" <<endm;}
+    LOG_INFO << " " << endm;
+    if (moth2>=0) {LOG_INFO << moth2 << endm;} else {LOG_INFO << "_" << endm;}
+    LOG_INFO << ")" <<endm;
   }
 
-  LOG_INFO << endm;
+  //  LOG_INFO << endm;
 
 }
 //______________________________________________________________________________
