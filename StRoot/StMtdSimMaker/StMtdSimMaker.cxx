@@ -1,10 +1,6 @@
 /***************************************************************************
  *
-<<<<<<< StMtdSimMaker.cxx
- * $Id: StMtdSimMaker.cxx,v 1.11 2015/07/01 17:51:54 marr Exp $
-=======
  * $Id: StMtdSimMaker.cxx,v 1.13 2015/11/02 18:19:46 marr Exp $
->>>>>>> 1.13
  *
  * Author: Frank Geurts
  *
