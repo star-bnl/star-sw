@@ -11,4 +11,5 @@ struct tofTotbCorr {
   short tdcId;   /* boardId(1:8)+tdcId(1:4) - for production */
   float tot[60]; /* edge of tot intervals for corr */
   float corr[60];   /* absolute corr value */
+  octet N; /* useable size of the array */
 };
