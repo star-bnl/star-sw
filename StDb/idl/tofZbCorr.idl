@@ -10,4 +10,5 @@ struct tofZbCorr {
   short cellId;   /* cellId (1:6) - for cell-by-cell corr */
   float z[60]; /* edge of z intervals for corr */
   float corr[60];   /* absolute corr value */
+  octet N; /* useable size of the array */
 };

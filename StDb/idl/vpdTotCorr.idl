@@ -10,4 +10,5 @@ struct vpdTotCorr {
   float corr[128];   /* absolute corr value */
   short corralgo;   /* 0 - default vpd-start calibration algorithm */
                   /* 1 - non-vpd-start calibration algorithm */
+  octet N; /* useable size of the array */
 };
