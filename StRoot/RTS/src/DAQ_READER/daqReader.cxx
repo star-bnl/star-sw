@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.60 2015/07/29 16:49:39 smirnovd Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.61 2015/12/03 18:54:57 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -380,6 +380,7 @@ char *daqReader::get(int num, int type)
 		event_number--;
 		//event_number = 1;
 	    }
+	    LOG("JEFF", "x");
 	    return NULL;
 	}
     }
@@ -455,16 +456,19 @@ char *daqReader::get(int num, int type)
 
     if(status == EVP_STAT_EOR) {
 	LOG(DBG, "Status = EOR");
+	    LOG("JEFF", "x");
 	return NULL;
     }
 
     if(error == 0) {
 	status = EVP_STAT_EOR;
+	    LOG("JEFF", "x");
 	return NULL;
     }
 
     if(error < 0) {
 	status = EVP_STAT_EVT;
+	    LOG("JEFF", "x");
 	return NULL;
     }
 
@@ -477,7 +481,7 @@ char *daqReader::get(int num, int type)
 	else {
 	    status = EVP_STAT_EOR ;
 	}
-
+	    LOG("JEFF", "x");
 	return NULL;
     }
     
@@ -522,6 +526,7 @@ char *daqReader::get(int num, int type)
     if(ret < 0) {
 	LOG(ERR, "Error mounting sfs?");
 	status = EVP_STAT_EVT;
+	    LOG("JEFF", "x");
 	return NULL;
     }
 
@@ -535,6 +540,7 @@ char *daqReader::get(int num, int type)
 
 	    // Skip directory... go to next
 	    status = EVP_STAT_EVT;
+	    LOG("JEFF", "x");
 	    return NULL;
 	}
 

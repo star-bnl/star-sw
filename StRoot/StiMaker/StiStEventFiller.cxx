@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.110 2015/03/27 20:13:43 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.111 2015/12/03 19:12:24 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.111  2015/12/03 19:12:24  perev
+ * Remove redundant GTrack error: mFlag: is Negative
+ *
  * Revision 2.110  2015/03/27 20:13:43  perev
  * Add printout of good track hits
  *
@@ -698,8 +701,8 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           int ibad = gTrack->bad();
           if (ibad) {
 	  errh.Add(ibad);
-	  //YF	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
-//VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
+            if (errh.Say(ibad).Contains("Negative")) continue;
+	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
             continue;
           }
 	  fillTrackCount2++;
