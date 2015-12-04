@@ -55,7 +55,10 @@ class StPidStatus {
   StGlobalTrack *gTrack; //!
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
-  Double_t devZ[KPidParticles], devZs[KPidParticles], devToF[KPidParticles], devN[KPidParticles], devNs[KPidParticles];    //!
+  Double_t devZ[KPidParticles], devZs[KPidParticles];
+  Double_t devF[KPidParticles], devFs[KPidParticles];    //!
+  Double_t devN[KPidParticles], devNs[KPidParticles];    //!
+  Double_t devToF[KPidParticles];
   Int_t  PiDkey;    //! best
   Int_t  PiDkeyU;   //! only one with devZs<3, 
   Int_t  PiDkeyU3;  //! -"- and devZs > 5 for all others 

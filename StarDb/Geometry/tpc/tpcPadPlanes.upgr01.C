@@ -26,8 +26,8 @@ TDataSet *CreateTable() {
   row.innerSectorPadWidth	 =      0.285; // ;
   row.innerSectorPadLength	 =       1.15; // ;
   row.innerSectorPadPitch	 =      0.335; // ;
-  row.innerSectorRowPitch1	 =        4.8; // ;
-  row.innerSectorRowPitch2	 =        5.2; // ;
+  row.innerSectorRowPitch1	 =        4.8; //*8 ;
+  row.innerSectorRowPitch2	 =        5.2; //*5 ;
   row.innerSectorEdge	 =     51.905; // ;
   row.innerSectorPadPlaneZ	 =    209.707; // ;
   for (Int_t i = 0; i < row.innerPadRows; i++) {

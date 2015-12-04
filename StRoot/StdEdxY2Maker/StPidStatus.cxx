@@ -63,6 +63,10 @@ StPidStatus::StPidStatus(StGlobalTrack *Track) : PiDStatus(-1), gTrack(Track) {
       devZ[l]  = TMath::Log(fI70.I()/Pred70BT[l]);
       devZs[l] = TMath::Abs(devZ[l])/fI70.D();
     }
+    if (fFit.fPiD) {
+      devF[l]  = TMath::Log(fFit.I()/PredBT[l]);
+      devFs[l] = TMath::Abs(devZ[l])/fI70.D();
+    }
     if (fdNdx.fPiD) {
       devN[l]  = TMath::Log(fdNdx.I()/dNdx[l]);
       devNs[l] = TMath::Abs(devN[l])/fdNdx.D();

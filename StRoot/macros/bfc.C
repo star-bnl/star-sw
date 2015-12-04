@@ -24,50 +24,50 @@ StBFChain    *chain=0;
 //_________________ Prototypes _______________________________________________
 void Usage();
 void Load(const Char_t *options="");
-//TString defChain("y2010,gstar,Test.default.Fast.ITTF,NosvtIT,NossdIT,-sfs,-ssdFast");
-//TString defChain("y2011,gstar,TpcRS,TpxClu,bbcSim,btofsim,emcY2,EEfs,pmdSim,IdTruth,MakeEvent,VFMinuit,ITTF,NosvtIT,NossdIT,analysis,BTofIT,KFVertex");//,corr4,KFVertex,sdt20100107.110000");
-//TString defChain("MC.y2012a,sdt20120319,gstar,StiCA,KFVertex,BEmcChkStat,btof,fmsSim,emcSim,EEss,eemcA2E,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");//,corr4,KFVertex,sdt20100107.110000");
-//TString defChain("MC.y2012a,gstar,StiCA,KFVertex,BEmcChkStat,btof,fmsSim,emcSim,EEss,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012a,gstar,StiCA,KFVertex,xgeometry");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012a,gstar,StiVMC");//,KFVertex");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012a,gstar,StiCA,KFVertex,-hitfilt");//eemcA2E,,sdt20100107.110000");
+//TString defChain("y2010,gstar,20Muons,Test.default.Fast.ITTF,NosvtIT,NossdIT,-sfs,-ssdFast");
+//TString defChain("y2011,gstar,20Muons,TpcRS,TpxClu,bbcSim,btofsim,emcY2,EEfs,pmdSim,IdTruth,MakeEvent,VFMinuit,ITTF,NosvtIT,NossdIT,analysis,BTofIT,KFVertex");//,corr4,KFVertex,sdt20100107.110000");
+//TString defChain("MC.y2012a,sdt20120319,gstar,20Muons,StiCA,KFVertex,BEmcChkStat,btof,fmsSim,emcSim,EEss,eemcA2E,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");//,corr4,KFVertex,sdt20100107.110000");
+//TString defChain("MC.y2012a,gstar,20Muons,StiCA,KFVertex,BEmcChkStat,btof,fmsSim,emcSim,EEss,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012a,gstar,20Muons,StiCA,KFVertex,xgeometry");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012a,gstar,20Muons,StiVMC");//,KFVertex");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012a,gstar,20Muons,StiCA,KFVertex,-hitfilt");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,StiCA,beamline,-hitfilt,KFVertex,CorrX,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,Sti,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,beamline,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,TpcRS,Sti,beamline,VFPPVnoCTB,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,TpcRS,StiCA,beamline,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,TpcRS,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,TpcRS,Sti,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,TpcRS,Sti,beamline,VFPPVnoCTB,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,TpcRS,StiCA,beamline,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,TpcRS,StiCA,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,TpcRS,Sti,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2013,pythia,StiCA,-hitfilt,KFVertex,beamline");//eemcA2E,,sdt20100107.110000"); ,KFVertex
-//TString defChain("MC.y2012a,gstar,StiCA,-hitfilt,KFVertex,beamline,sdt20120408.134653,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012a,gstar,20Muons,StiCA,-hitfilt,KFVertex,beamline,sdt20120408.134653,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012a,pythia,StiCA,-hitfilt,KFVertex,beamline,sdt20120408.134653,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.y2012,gstar,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.devTX,gstar,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.y2012,gstar,20Muons,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.devTX,gstar,20Muons,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,AgML,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,AgML,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,AgML,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
-TString defChain("MC.2014,gstar,StiCA,beamline,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("P2014aPxLSim,gstar,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
-//TString defChain("MC.2014,gstar,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
-//TString defChain("MC.2014,gstar,TpcRS,StiCA,KFVertex,-hitfilt,useXgeom,pxlFastSim,IstSim,sdt20140410.123905,phys_off");
+TString defChain("MC.2014,gstar,20Muons,StiCA,beamline,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("P2014aPxLSim,gstar,20Muons,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
+//TString defChain("MC.2014,gstar,20Muons,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
+//TString defChain("MC.2014,gstar,20Muons,TpcRS,StiCA,KFVertex,-hitfilt,useXgeom,pxlFastSim,IstSim,sdt20140410.123905,phys_off");
 //TString defChain("MC.2014,Pythia,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 //"P2014a,Stv,mtd,btof,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,-SsdIt","/star/rcf/test/daq/2014/164/st_physics_15164004_raw_2000022.daq")'
-//TString defChain("MC.2015,gstar,phys_off,TpcRS,StiCA,beamline,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.2015,gstar,TpcRS,StiCA,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.2015,gstar,20Muons,phys_off,TpcRS,StiCA,beamline,KFVertex,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.2015,gstar,20Muons,TpcRS,StiCA,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
 //void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
-//	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
+//	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
-	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
+	 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
 void Load(const Char_t *options)
 {
@@ -183,7 +183,7 @@ void bfc(Int_t First, Int_t Last,
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
-  // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
+  // Chain = "gstar,20Muons" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
   chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
@@ -292,7 +292,7 @@ void Usage() {
   printf (" First     \t- First event to process\t(Default = 1)\n");
   printf (" Last      \t- Last  event to process\t(Default = 1)\n");
   printf (" Chain     \t- Chain specification   \t(without First &  Last: Default is \"\" which gives this message)\n");
-  printf ("           \t                        \t with    First || Last: Default is \"gstar tfs\")\n");
+  printf ("           \t                        \t with    First || Last: Default is \"gstar,20Muons\")\n");
   printf (" infile    \t- Name of Input file    \t(Default = 0, i.e. use preset file names depending on Chain)\n"); 
   printf (" outfile   \t- Name of Output file   \t(Default = 0, i.e. define Output file name from Input one)\n");
   printf (" outfile   \t- Name of Tree File     \t(Default = 0, i.e. define Output file name from Input one (tags TNtuple))\n");

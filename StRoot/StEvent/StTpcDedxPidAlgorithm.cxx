@@ -126,6 +126,7 @@
 #include "BetheBloch.h"
 #endif
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "TMath.h"
 static Bichsel *m_Bichsel = 0;
 static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.30 2014/01/09 20:06:45 fisyak Exp $";
@@ -197,17 +198,23 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
       const StGlobalTrack *gTrack = 
 	static_cast<const StGlobalTrack*>( mTrack->node()->track(global));
       if (gTrack && mTraits->length() > 0 ) {
-	momentum  = abs(gTrack->geometry()->momentum());
+	Double_t pq  = abs(gTrack->geometry()->momentum())*TMath::Abs(particle->charge());
+	Double_t bg = pq/particle->mass();
 	if (! m_Bichsel) m_Bichsel = Bichsel::Instance();
 	if (mDedxMethod == kTruncatedMeanId) {
 	  Double_t log2dX = mTraits->log2dX();
 	  if (log2dX <= 0) log2dX = 1;
-	  dedx_expected = 1.e-6*m_Bichsel->GetI70M(TMath::Log10(momentum/particle->mass()),log2dX);
+	  dedx_expected = 1.e-6*m_Bichsel->GetI70M(TMath::Log10(bg),log2dX);
 	  dedx_resolution = mTraits->errorOnMean();
 	  if (dedx_resolution > 0)
 	    z = TMath::Log(mTraits->mean()/dedx_expected)/dedx_resolution;
 	} else if (mDedxMethod == kLikelihoodFitId) {
-	  dedx_expected = 1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(momentum/particle->mass())));
+	  dedx_expected = 1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(bg)));
+	  dedx_resolution = mTraits->errorOnMean();
+	  if (dedx_resolution > 0)
+	    z = TMath::Log(mTraits->mean()/dedx_expected)/dedx_resolution;
+	} else if (mDedxMethod == kOtherMethodId) {
+	  dedx_expected = StdEdxModel::instance()->dNdx(bg);
 	  dedx_resolution = mTraits->errorOnMean();
 	  if (dedx_resolution > 0)
 	    z = TMath::Log(mTraits->mean()/dedx_expected)/dedx_resolution;

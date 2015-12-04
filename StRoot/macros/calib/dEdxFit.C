@@ -2608,6 +2608,13 @@ void DrawSummary(const Char_t *opt="") {
 }
 //________________________________________________________________________________
 Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
+  static Double_t sigmaOLD = -1;
+  static Double_t fracpiOld = -1;
+  if (! x || ! par) {
+    sigmaOLD = -1;
+    fracpiOld = -1;
+    return 0;
+  }
   // par[0] - norm
   // par[1] - pion position wrt Z_pion (Bichsel prediction)
   // par[2] - sigma 
@@ -2626,32 +2633,18 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
     else      c1->Clear();
     c1->cd();
   }
-  enum {NFIT_HYP = 3, NT};
-  Double_t frac[NT];
-  static TH1D *hists[5] = {0, 0, 0, 0, 0};
-  static Double_t sigmaOLD = -1;
-  static Double_t fracpiOld = -1;
+  enum {NFIT_HYP = 5, NT=6};
+  static TH1D *hists[6] = {0};
   static Int_t    icaseOLD = -1;
   static Double_t meanPion = -1, RMSPion = -1, mpvPion = -1;
   static Double_t ln10 = TMath::Log(10.);
-  if (! x || ! par) {
-    sigmaOLD = -1;
-    return 0;
-  }
-  Int_t i;
-  frac[0] = 1;
-  for (i = 1; i <= NFIT_HYP; i++) {
-    frac[i] = TMath::Sin(par[2+i]);
-    frac[i] *= frac[i];
-    frac[0] -= frac[i];
-  }
-  TF1 *zdE = StdEdxModel::instance()->zdEdx();  
   Double_t sigma = par[2];
   if (sigma != sigmaOLD) {
+    TF1 *zdE = StdEdxModel::instance()->zdEdx();  
     sigmaOLD = sigma;
     fracpiOld = -1;
     static const Char_t *names[5] = {"pi","P","K","e","d"};
-    for (i = 0; i < NFIT_HYP; i++) {
+    for (Int_t i = 0; i < NFIT_HYP; i++) {
       if (hists[i]) hists[i]->Reset();
       else          {
 	hists[i] = new TH1D(Form("dE%s",names[i]),Form("Expected dE for %s",names[i]),100,-5,5);
@@ -2672,7 +2665,7 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
 	Double_t v =  projNs[i]->GetBinContent(ix);
 	if (v > 0.0) {
 	  Double_t n_PL10 = projNs[i]->GetBinCenter(ix);
-	  Double_t n_P = TMath::Exp(n_PL10*ln10 + par[6]);
+	  Double_t n_P = TMath::Exp(n_PL10*ln10);
 	  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
 	  zdE->SetParameter(1, n_P);
 	  zdE->SetParameter(2,mpv - mpvPion);
@@ -2687,11 +2680,25 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
     }
     if (! hists[NFIT_HYP]) hists[NFIT_HYP] = new TH1D("dEAll","Expected dE for All",100,-5,5);
   }
+  Double_t frac[NFIT_HYP] = {0};
+  static Double_t fracOld[6] = {-1};
+  Int_t i;
+  frac[0] = 1;
+  Bool_t updatedFractions = kFALSE;
+  for (i = 1; i < NFIT_HYP; i++) {
+    frac[i] = TMath::Sin(par[2+i]);
+    frac[i] *= frac[i];
+    if (TMath::Abs(frac[i]-fracOld[i]) > 1e-7) {
+      fracOld[i] = frac[i];
+      updatedFractions = kTRUE;
+    }
+    frac[0] -= frac[i];
+  }
   Int_t icase = (Int_t) par[8];
   Int_t i1 = 0;
-  Int_t i2 = NFIT_HYP;
+  Int_t i2 = NFIT_HYP - 1;
   if (icase >= 0) {i1 = i2 = icase;}
-  if (icase != icaseOLD || icase >= 0 || TMath::Abs(fracpiOld - frac[0]) > 1e-7) {
+  if (icase != icaseOLD || updatedFractions) {
     icaseOLD = icase;
     fracpiOld = frac[0];
     hists[NFIT_HYP]->Reset();
@@ -2725,17 +2732,17 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
   TString Opt(opt);
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = (TF1*) gROOT->GetFunction("GN");
-  enum {NFIT_HYP = 3}; // ignore e and d
+  enum {NFIT_HYP = 5}; // ignore e and d
   if (! g2) {
     g2 = new TF1("GN",gNFunc, -5, 5, 9);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
-    g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.,0.5);
+    g2->SetParName(2,"Sigma");  g2->FixParameter(2, 0); // g2->SetParLimits(2,0.,0.5);
     g2->SetParName(3,"P");      g2->SetParLimits(3,0.0,TMath::Pi()/2);
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.30);
-    g2->SetParName(5,"e");      g2->FixParameter(5,0);
-    //    g2->SetParName(6,"d");      g2->FixParameter(6,0);
-    g2->SetParName(6,"ScaleL"); g2->SetParLimits(6,-2.5,2.5);
+    g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.30); g2->FixParameter(5,0); 
+    g2->SetParName(6,"d");      g2->SetParLimits(6,0.0,0.30); g2->FixParameter(6,0);
+    //    g2->SetParName(6,"ScaleL"); g2->SetParLimits(6,-2.5,2.5);
     g2->SetParName(7,"Total");
     g2->SetParName(8,"Case");
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
@@ -2757,7 +2764,8 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
     if (xp < xpi) xpi = xp;
   }
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  g2->SetParameters(0, xpi, 0.0, 0.6, 0.1, 0.1, 0.0,0.0,-1.);
+  g2->SetParameters(0, xpi, 0.0, 0.0, 0.1, 0.1, 0.0,0.0,-1.);
+  g2->FixParameter(2, 0); 
   g2->FixParameter(5,0);
   g2->FixParameter(6,0);
   g2->FixParameter(7,total);
@@ -2770,6 +2778,8 @@ TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
 	  << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
   }
+  //  g2->ReleaseParameter(5); g2->SetParameter(5,0.01); g2->SetParLimits(5,0.0,0.30);
+  //  g2->ReleaseParameter(6); g2->SetParameter(6,0.01); g2->SetParLimits(6,0.0,0.30);
   Opt += "m";
   gNFunc();
   res = proj->Fit(g2,Opt.Data());
@@ -3179,7 +3189,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "NF" && dim == 3) {
-	TH3 *hists[5] = {0, 0, 0, 0, 0};
+	TH3 *hists[5] = {0};
 	static const Char_t *names[5] = {"pi","P","K","e","d"};
 	for (Int_t ih = 0; ih < 5; ih++) {
 	  hists[ih] = (TH3 *) fRootFile->Get(Form("%s%s",HistName,names[ih]));
