@@ -73,7 +73,7 @@ typedef struct {
   unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
 
 
-#ifndef __linux
+#if !defined(__linux) && !defined(__APPLE__)
   unsigned int tcuCtrBunch;
 #else
   union {
