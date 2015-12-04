@@ -77,7 +77,7 @@ public:
     StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
 	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
 	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0), 
-    mLgamma(pt->lgam), mAdc(pt->adc), mMcl_x(pt->pad), mMcl_t(pt->timebucket) {}
+    mLgamma(pt->lgam), mAdc(pt->adc), mMcl_x(pt->pad), mMcl_t(pt->timebucket), mnP(pt->np) {}
   virtual ~StMcTpcHit() {}
   ULong_t sector()     const { return (mVolumeId%10000)/100; }// 1-24
   ULong_t padrow()     const { return (mVolumeId%100); }      // 1-45
@@ -95,6 +95,7 @@ private:
   Float_t     mAdc;        
   Float_t     mMcl_x;      /* average pad */
   Float_t     mMcl_t;      /* average timebucket */
+  Int_t       mnP;         /* no. of primary electrons */
   ClassDef(StMcTpcHit,2)
 };
 
