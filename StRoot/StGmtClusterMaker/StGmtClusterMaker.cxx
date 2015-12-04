@@ -214,7 +214,6 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
 StGmtClusterMaker::StGmtClusterMaker( const Char_t* name ) : //StMaker(name),
   StRTSBaseMaker( "clustser", name ) {
   SetAttr("gmtCosmics"             ,kFALSE);
-  SetAttr("gmtClusTree"            ,kFALSE);
 };
 //________________________________________________________________________________
 Int_t StGmtClusterMaker::Make() {
