@@ -5,12 +5,9 @@
 *       description:
 */ 
 
-
 struct tpcDriftVelocity { 
-
-   float  laserDriftVelocityEast;   /*   cm/us : from laser beam analysis  */
-   float  laserDriftVelocityWest;   /*   cm/us : from laser beam analysis  */
-   float  cathodeDriftVelocityEast;   /*   cm/us : from cathode emission  */
-   float  cathodeDriftVelocityWest;   /*   cm/us : from cathode emission  */
-
+  float  laserDriftVelocityEast;   /*   cm/us : from laser beam analysis  */
+  float  laserDriftVelocityWest;   /*   cm/us : from laser beam analysis  */
+  float  cathodeDriftVelocityEast; /*   cm/us : from cathode emission  */
+  float  cathodeDriftVelocityWest; /*   cm/us : from cathode emission  */
  };  
