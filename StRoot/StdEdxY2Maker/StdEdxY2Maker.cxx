@@ -980,8 +980,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // ProbabilityPlot
   static TH3F *Prob = 0;
   // end of ProbabilityPlot
+#if 0
   static TH2F *BaddEdxZPhi70[2], *BaddEdxZPhiZ[2];
   static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
+#endif
   static Int_t hMade = 0;
   
   if (! gTrack && !hMade) {
@@ -1070,6 +1072,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     hdESO = new TH1F("hdESO","log10(dES) Outer after after TimeScale + SecRow corrections",100,-8.,-3.);
     hdEZO = new TH1F("hdEZO","log10(dEZ) Outer after TimeScale + SecRow + Sec Z corrections ",100,-8.,-3.);
     hdEMO = new TH1F("hdEMO","log10(dEM) Outer after TimeScale + SecRow + Sec Z + Multiplicity corrections",100,-8.,-3.);
+#if 0
     BaddEdxZPhi70[0] = new TH2F("BaddEdxZPhi700","Z and Phi for I70 below any limits by 5 s.d.",210,-210,210,360,-180.,180.);
     BaddEdxZPhi70[1] = new TH2F("BaddEdxZPhi701","Z and Phi for I70 above any limits by 5 s.d.",210,-210,210,360,-180.,180.);
     BaddEdxMult70[0] = new TH1F("BaddEdxMult700","Multiplicity (log10) for I70 below any limits by 5 s.d.",100,0.,10.);
@@ -1078,6 +1081,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     BaddEdxZPhiZ[1] = new TH2F("BaddEdxZPhiZ1","Z and Phi for Ifit above any limits by 5 s.d.",210,-210,210,360,-180.,180.);
     BaddEdxMultZ[0] = new TH1F("BaddEdxMultZ0","Multiplicity (log10) for Ifit below any limits by 5 s.d.",100,0.,10.);
     BaddEdxMultZ[1] = new TH1F("BaddEdxMultZ1","Multiplicity (log10) for Ifit above any limits by 5 s.d.",100,0.,10.);
+#endif
     TH1::SetDefaultSumw2(fSetDefaultSumw2);
     return;
   }
@@ -1121,6 +1125,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       }
     }
   }
+#if 0
   // Bad dE/dx
   Double_t L10Mult = -1;
   if (St_trigDetSumsC::instance()) L10Mult = St_trigDetSumsC::instance()->mult();
@@ -1148,6 +1153,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       BaddEdxMultZ[1]->Fill(L10Mult);
     }
   }
+#endif
   if (PiD.PredBT[kPidPion] <= 0) {
     LOG_WARN << "StdEdxY2Maker:: Prediction for p = " 
 			<< pMomentum << " and TrackLength = " << PiD.fFit.TrackLength()
