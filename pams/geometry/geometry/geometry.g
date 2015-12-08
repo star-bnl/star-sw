@@ -3580,6 +3580,9 @@ If LL>0
   Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015b    '; exe y2015b;  }
 
+  Case y2016    { y2016 : y2016 production baseline, is y2016
+                  Geom = 'y2016    '; exe y2016;  }
+
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
 
