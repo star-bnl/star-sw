@@ -33,13 +33,14 @@ submitsimbfc.pl submit
 mergesim.pl
 
 *** Running reconstruction on daq file
-root4star runBfc.C'("/star/u/akio/pwg/fms2015/data st_fms_16077027_raw_1000002.daq")'
+root4star runBfc.C'("/star/u/akio/pwg/fms2015/data/st_fms_16077027_raw_1000002.daq")'
 runbfc /star/u/akio/pwg/fms2015/data st_fms_16077027_raw_1000002.daq
 submitbfc.pl
 submitbfc.pl submit
 
 *** Running reconsturction on MuDst file
-root4star -b -q runMudst.C'("/star/u/akio/pwg/fms2015/mudst st_fms_16077027_raw_4000001.MuDst.root",0,10000,"hist",1,0)'
+root4star -b -q runMudst.C'("/star/u/akio/fms2015/mudst/st_fms_16077027_raw_4000001.MuDst.root",0,10000,"hist",1,0)'
+root4star -b -q runMudst.C'("/star/u/akio/fms2015/mudst/st_fms_16125053_raw_4500013.MuDst.root",0,10000,"hist",1,0)'
 runmudst /star/u/akio/pwg/fms2015/mudst st_fms_16077027_raw_4000001.MuDst.root 0 10000 hist_nomerge 1 0
 submit.pl
 submit.pl submit
