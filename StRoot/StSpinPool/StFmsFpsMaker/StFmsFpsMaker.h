@@ -3,8 +3,11 @@
 //
 //   This is analysis for FMS-FPS correlations.
 // 
-//  $Id: StFmsFpsMaker.h,v 1.4 2015/10/29 21:22:01 akio Exp $
+//  $Id: StFmsFpsMaker.h,v 1.5 2015/12/08 17:00:03 akio Exp $
 //  $Log: StFmsFpsMaker.h,v $
+//  Revision 1.5  2015/12/08 17:00:03  akio
+//  updates
+//
 //  Revision 1.4  2015/10/29 21:22:01  akio
 //  more cuts for QA
 //
@@ -53,6 +56,8 @@ public:
 private:
     StFmsDbMaker* mFmsDbMaker;
     StFmsCollection* mFmsColl;
+    int mBunch;
+    int mTrigger;
     
     bool mQA;
     char* mFilename;
@@ -70,18 +75,20 @@ private:
     void isolationCone();
     
     //QA & alignment related
-    enum {NCUT1=9};   
+    enum {NCUT1=10};   
     enum {NCUT2=11};  
     
     void fmsFpsAlignment(); 
     
     //total energy ratio
     TH1F* mERatio[2];
+    TH1F* mBC;
+    TH1F* mTrig[2];
 
     //hit related
     TH1F* mFmsAdc;
-    TH2F* mFmsHitLarge;
-    TH2F* mFmsHitSmall;
+    TH2F* mFmsHitLarge[2];
+    TH2F* mFmsHitSmall[2];
     TH1F* mFpsMip[3];
     
     //cluster related
@@ -91,7 +98,8 @@ private:
     TH1F* mSigmin[2];
     TH2F* mSigmaxE[2];
     TH1F* mChi2[2];
-    TH2F* mCluXY[2];
+    TH2F* mCluXY[2][2];
+    TH1F* mCluEta[6];
 
     //point related
     TH2F* mH2[kFpsNQuad][kFpsNLayer][NCUT1];
@@ -107,6 +115,8 @@ private:
     TH1F* mHphi[NCUT1];
     TH1F* mHx[NCUT1];
     TH1F* mHy[NCUT1];
+    TH1F* mHdxL[NCUT1];
+    TH1F* mHdxS[NCUT1];
     TH2F* mHxy[NCUT1];
     TH1F* mHpid[NCUT1];
     TH1F* mHpid2[NCUT1];    
@@ -127,7 +137,7 @@ private:
     TH2F* mPxy[NCUT2];
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsFpsMaker.h,v 1.4 2015/10/29 21:22:01 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsFpsMaker.h,v 1.5 2015/12/08 17:00:03 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsFpsMaker,0);
 };
