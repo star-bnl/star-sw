@@ -189,6 +189,11 @@ void JevpServer::main(int argc, char *argv[])
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
 
+  if(serv.justUpdateDisplayPallete == 1) {
+    serv.justUpdatePallete();
+    return;
+  }
+
   // Start reader thread
   TThread *rThread = new TThread("readerThread", (void(*)(void *))(&JEVPSERVERreaderThread),(void *)&serv);
   rThread->Run();
@@ -310,6 +315,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
   throttleAlgos = 1;
   isL4 = 0;
 
+  justUpdateDisplayPallete = 0;
+
   log_output = RTS_LOG_NET;
   log_dest = (char *)"172.16.0.1";
   log_port = 8004;
@@ -351,6 +358,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-port")==0) {
       i++;
       myport = atoi(argv[i]);
+    }
+    else if (strcmp(argv[i], "-justPallette") == 0) {
+      justUpdateDisplayPallete = 1;
     }
     else if (strcmp(argv[i], "-file")==0) {
       i++;
@@ -895,6 +905,35 @@ void JevpServer::writeRootFiles()
   
   rootfile->Close();
   delete rootfile;
+}
+
+void JevpServer::justUpdatePallete() {
+  JevpPlotSet *curr;
+  TListIter next(&builders);
+
+  freePallete();
+
+  next.Reset();
+  while((curr = (JevpPlotSet *)next())) {
+    printf("Adding plot to pallete: builder=%s:\n",curr->getPlotSetName());
+    
+    JevpPlot *currplot;
+    TListIter nextplot(&curr->plots);
+    while((currplot = (JevpPlot *)nextplot())) { 
+      printf("              : plot = %s\n",currplot->GetPlotName());
+      addToPallete(currplot);
+    }
+  }
+
+  // Now write the file out!
+  char fn[256];
+  sprintf(fn, "%s/%s", basedir, displays_fn);
+
+  unlink(fn);
+  if(displays->Write(fn) < 0) {
+    LOG(ERR, "Error writing display file %s",fn);
+  }
+
 }
 
 void JevpServer::performStopRun()

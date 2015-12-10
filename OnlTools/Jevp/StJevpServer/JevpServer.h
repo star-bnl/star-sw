@@ -49,6 +49,8 @@ class JevpServer {
   char *displays_fn;      // Display Information...
   DisplayFile *displays;
   char *serverTags;
+  int justUpdateDisplayPallete;
+  void justUpdatePallete();
 
   int eventsThisRun;
   // int run;                // run number
