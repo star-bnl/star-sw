@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.28 2015/11/11 02:00:56 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.29 2015/12/12 00:50:15 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -131,14 +131,14 @@ if (myGraph) { //create canvas
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
     mDetId = did;
     int sure;
-    StvHit *stvHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
+    int nStvHits = MakeStvHit(stHit,mHitIter->UPath(),sure);
 //     if (!sure && stvHit) { //Non reliable hit
 //       double rxy = sqrt(pow(stvHit->x()[0],2)+pow(stvHit->x()[1],2));
 //       StvDebug::Count("OrphanHits",stvHit->x()[2],rxy);
 //     }
 
-    if (stvHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
-    else 	{nHitz++;nTotHitz++;}
+    if (nStvHits) {nHits+=nStvHits;nTotHits+=nStvHits;nGits+=sure;nTotGits+=sure;}  
+    else          {nHitz++;nTotHitz++;}
   }
   int nIniHits = tgp->InitHits();
   assert(nTotHits==nIniHits);
@@ -148,17 +148,21 @@ if (myGraph) { //create canvas
 }
 
 //_____________________________________________________________________________
-StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
+int StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure, StvHit *stvHit)
 {
 static StTGeoProxy *tgh = StTGeoProxy::Inst();
+static StvToolkit  *kit = StvToolkit::Inst();
    assert(stHit);
-   StvHit *stvHit = StvToolkit::Inst()->GetHit();
+   if (!stvHit) stvHit = kit->GetHit();
    StDetectorId did = stHit->detector();
+   int idTru   = stHit->idTruth(); 
+   
    UInt_t hard = stHit->hardwarePosition();
    if (!hard) hard = upath;
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
    stvHit->set(stHit,xyz);
+   stvHit->setIdTru(idTru);
    int seed = 1;
    if (did == kTpcId) {	// Special case for TPCHit. Prompt info added
 //   enum {zPrompt = 205,rMiddle=124};
@@ -186,7 +190,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
      assert(fabs(dang)<31);
    }
    stvHit->set(hp);
-   return stvHit;
+   return 1;
 }
 
 //_____________________________________________________________________________
