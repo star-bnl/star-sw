@@ -5,6 +5,7 @@
 #include "TCernLib.h"
 #include "StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
+#include "Stv/StvHit.h"
 #include <map>
 #include <string>
 
@@ -61,7 +62,7 @@ void StvHitErrCalculator::SetTrack(const double tkDir[3])
   nor = (fabs(nor-1)< 1e-2)? (nor+1)*0.5 : sqrt(nor);
   TCL::vscale(tkDir,1./nor,mTG[0],3);
   
-  nor = (1.-mTG[0][2]*mTG[0][2]);
+  nor = (1.-mTG[0][2])*(1+mTG[0][2]);
   if (nor <1e-6) { 
     mTG[1][0]=1; mTG[1][1]=0; mTG[1][2]=0;
     mTG[2][0]=0; mTG[2][1]=1; mTG[2][2]=0;
@@ -182,6 +183,16 @@ double StvHitErrCalculator::Trace(const float hiPos[3])
   double hiErr[3];
   CalcDetErrs(hiPos,0,hiErr);
   return hiErr[0]+hiErr[2];
+}
+//______________________________________________________________________________
+int StvHitRrCalculator::CalcDcaErrs(const StvHit *stvHit,double hRr[3]) 
+{
+   TCL::ucopy(stvHit->errMtx(),mDRr,6);
+   TCL::trasat(mTG[0],mDRr,mTRr,3,3); 
+   hRr[kXX] = mTRr[kYY];
+   hRr[kXY] = mTRr[kYZ];
+   hRr[kYY] = mTRr[kZZ];
+   return 0;
 }
 //______________________________________________________________________________
 int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])

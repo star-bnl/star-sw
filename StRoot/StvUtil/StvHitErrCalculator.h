@@ -46,6 +46,18 @@ char mEnd[1];
 ClassDef(StvHitErrCalculator,0)
 };
 
+class StvHitRrCalculator : public StvHitErrCalculator {
+
+public:	
+  StvHitRrCalculator(const char *name="TpcHitRr"):StvHitErrCalculator(name,0){};
+virtual int CalcDcaErrs(const StvHit *stvHit,double hRR[3]);
+virtual int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
+                       {assert(0); return 999;}
+ClassDef(StvHitRrCalculator,0)
+};
+
+
+
 class StvTpcHitErrCalculator : public StvHitErrCalculator {
 
 public:	
