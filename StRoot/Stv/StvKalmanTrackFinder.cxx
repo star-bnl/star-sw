@@ -171,6 +171,7 @@ StvFitErrs  err[2];
 int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
 double totLen=0;
 StvNode *curNode=0,*preNode=0,*innNode=0,*outNode=0;
+const StHitPlane *prevHitPlane=0;
 mHitCounter->Clear();
   
   if (mCurrTrak->empty()) {//Track empty, Backward tracking, to beam
@@ -281,6 +282,9 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     if (!localHits->size()) {//No hits in curNode
       mHitCounter->AddNit(); continue;
     } 
+    if (prevHitPlane == mHitter->GetHitPlane()) continue;
+    prevHitPlane = mHitter->GetHitPlane();
+
     fitt->Prep();
     double  minXi2[2]={1e11,1e11},myXi2;
     StvHit *minHit[2]={0};
