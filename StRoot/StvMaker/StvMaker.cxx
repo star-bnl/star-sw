@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.51 2015/11/11 02:04:25 perev Exp $
+// $Id: StvMaker.cxx,v 1.52 2015/12/12 00:56:12 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -68,6 +68,7 @@ More detailed: 				<br>
 #include "StvUtil/StvPullEvent.h"
 #include "Stv/StvDiver.h"
 #include "StvHitLoader.h"
+#include "StvFtsHitLoader.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
@@ -245,6 +246,7 @@ Int_t StvMaker::InitDetectors()
     mHitLoader[1]->AddDetector(kFtsId);
     TString myName("FtsHitErrs"); 
     StvHitErrCalculator *hec = new StvFtsHitErrCalculator(myName);
+//vp    StvHitErrCalculator *hec = new StvHitRrCalculator(myName);
     Int_t nHP = tgh->SetHitErrCalc(kFtsId,hec,0);
     Info("Init","%s: %d Hitplanes", "FtsHitErrs", nHP);
   }
@@ -314,6 +316,7 @@ static int initialized = 0;
   const char *seedAtt[2]={"seedFinders","SeedFinders.fw"};
   for (int jreg=0;jreg<2; jreg++) {	//0=midEta,1=forwardEta
     mHitLoader[jreg] = new StvHitLoader;
+//    mHitLoader[jreg] = new StvFtsHitLoader;
     mSeedFinders[jreg] = new StvSeedFinders;
     if (IAttr("useEventFiller")) 
       mEventFiller[jreg]= new StvStEventFiller;
