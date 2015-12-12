@@ -667,7 +667,7 @@ double StvFitter::Xi2(const StvHit *hit)
   mFailed = 0;
   mHit = hit;
   const float *errMtx=mHit->errMtx();
-  if (errMtx) mKase=2; 		//Hit is a vertex
+  if (!mHit->IsHit()) mKase=2; 		//Hit is a vertex
 
   mHitPlane = mHit->detector();
 
