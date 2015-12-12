@@ -111,6 +111,7 @@ int    	fLastKaze;
 int    	fLastNumb;
 int    	fHitted;
 int    	fNTarget;
+float   fNearBeam;
 float  	fStartSign;
 float  	fCurrentSign;
 float   fTooManyLength;
