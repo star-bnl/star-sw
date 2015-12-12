@@ -101,7 +101,7 @@ static int nCall=0; nCall++;
   const float *fEnd = fSeedHits.back ()->x();
   double r2Beg = fBeg[0]*fBeg[0]+fBeg[1]*fBeg[1];
   double r2End = fEnd[0]*fEnd[0]+fEnd[1]*fEnd[1];
-  assert(r2Beg > r2End);
+  if (r2Beg < r2End) return 0;
 
   for (int iNode = 0; iNode<nNode;++iNode) {
     const StvHit * hit = fSeedHits[iNode];
