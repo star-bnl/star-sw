@@ -5,8 +5,8 @@
 #ifndef StvSeedConst_HH
 #define StvSeedConst_HH
 
-//#define KNNMAP0 1
-#define KNNMAP1 1
+#define KNNMAP0 1
+//#define KNNMAP1 1
 //#define KNNMAP2 1
 
 //#define KNNGONE 1
