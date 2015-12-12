@@ -14,11 +14,12 @@
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvTrackFinder.h"
 
-class StvHitFactory  : public StvFactory<StvHit ,StvHit > 		{public:};
-class StvNodeFactory : public StvFactory<StvNode,StvNode> 		{public:};
-class StvTrackFactory: public StvFactory<StvTrack,StvTrack> 		{public:};
-class StvELossTrakFactory: public StvFactory<StvELossTrak,StvELossTrak> {public:};
-class StvVertexFactory   : public StvFactory<StvVertex ,StvVertex > 	{public:};
+class StvHitFactory  		: public StvFactory<StvHit ,StvHit > 		{public:};
+class StvHitRrFactory  		: public StvFactory<StvHitRr ,StvHit > 		{public:};
+class StvNodeFactory 		: public StvFactory<StvNode,StvNode> 		{public:};
+class StvTrackFactory		: public StvFactory<StvTrack,StvTrack> 		{public:};
+class StvELossTrakFactory	: public StvFactory<StvELossTrak,StvELossTrak> {public:};
+class StvVertexFactory   	: public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
 StvToolkit *StvToolkit::mgInstance = 0;
@@ -51,6 +52,16 @@ StvHit *StvToolkit::GetHit()
   return mHitFactory->getInstance();	
 }
 //_____________________________________________________________________________
+StvHit *StvToolkit::GetHitRr()
+{
+  if (!mHitRrFactory) {
+    mHitRrFactory = (StvHitRrFactory*)StvHitRrFactory::myInstance();
+    mHitRrFactory->setMaxIncrementCount(40000);
+    mHitRrFactory->setFastDelete();
+  }
+  return mHitRrFactory->getInstance();	
+}
+//_____________________________________________________________________________
 StvHit *StvToolkit::GetVertex()
 {
   if (!mVertexFactory) {
@@ -63,7 +74,10 @@ StvHit *StvToolkit::GetVertex()
 //_____________________________________________________________________________
 void StvToolkit::FreeHit(StvHit *&stiHit)
 {
-  StvHitFactory::Free(stiHit);	stiHit=0;
+  if (!stiHit) return;
+  if (stiHit->errMtx()) { StvHitRrFactory::Free(stiHit);}
+  else                  {   StvHitFactory::Free(stiHit);}
+  stiHit=0;
 }
 //_____________________________________________________________________________
 StvTrack *StvToolkit::GetTrack()
