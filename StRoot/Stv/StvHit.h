@@ -60,19 +60,25 @@ public:
     ///Return the global x, y, z values.
     const float *x()     const {return mGlo;}
           float getRxy() const {return sqrt(mGlo[0]*mGlo[0]+mGlo[1]*mGlo[1]);}
-    
+    ///Return the type of class
+    virtual const int IsHit() const   		{return 1;}
+        
+
     ///Return components of the error matrix.
-    virtual const float *errMtx() const   		{return 0;}
-    virtual       float *errMtx()   	   		{return 0;}
+    virtual const float *errMtx() const {return 0;}
+    virtual       float *errMtx()   	{return 0;}
                   double err2() const;
     ///Return a const pointer to the StHitPlane object from which the hit
     ///arose.
-    const StHitPlane* detector() const {return mDetector;}
-                  int detectorId() const ;
+    const StHitPlane* detector() const	{return mDetector;}
+                  int detectorId() const;
+                  int idTru() const 	{return mIdTru;};
     ///Return a const pointer to the StHit object corresponding to this StvHit
     ///instance
     //const StHit* stHit() const 
-    const void *stHit() const {return msthit;}
+    const void *stHit() const 		{return msthit;}
+    void setStHit(const void *stHit)  	{ msthit=stHit;}
+    void setIdTru(int idTru)  		{ mIdTru=idTru;}
 
     ///Set the global position one function call 
     void set(const StHitPlane* detector) {mDetector = detector;}
@@ -105,11 +111,31 @@ protected:
     float mGlo[3]; 			//global position
     const void *msthit;
     const StHitPlane *mDetector;
+    int   mIdTru;
     // drift velocities cm/mksec( 0 for non driting )
     char  mEnd[1];
 public:
     int mCount;
 };
+
+class StvHitRr : public StvHit
+{
+public: 
+
+    ///Default constructor.
+    StvHitRr(){mErr[0] = -999;}
+    ///Default destructor.
+    ~StvHitRr(){;}
+    ///Set the position error matrix for the measurement from an float array
+    ///object.
+
+    const float *errMtx() const   {return mErr;}
+          float *errMtx()         {return mErr;}
+
+protected:
+    float mErr[6];			//error matrix
+};
+
 
 class StvVertex : public StvHit
 {
@@ -121,11 +147,9 @@ public:
     ~StvVertex(){;}
     ///Set the position error matrix for the measurement from an float array
     ///object.
+    virtual const int IsHit() const   		{return 0;}
     void reset();
     void set(const float *x,const float *err);
-    void set(const StHitPlane* detector
-                  ,const void *stHit
-		  ,const float *x){assert(0);}
     virtual  int timesUsed() const 	{ return 0;}
     virtual void addTimesUsed(int){;}
     virtual void setTimesUsed(int){;}
