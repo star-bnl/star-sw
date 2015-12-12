@@ -26,8 +26,10 @@ void StvHitter::Reset()
 }
 //_____________________________________________________________________________
 const StvHits *StvHitter::GetHits(const StvNodePars *pars
-                                 ,const StvFitErrs  *errs, const float gate[2])
+                                 ,const StvFitErrs  *errs, const float gate[4])
 {
+enum {kLittleBit = 5};
+
 static int nCall=0; nCall++;
 static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   mHits.clear();
@@ -35,7 +37,9 @@ static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
 
   if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
-  if (!myHitPlane->GetNHits())	return &mHits;	//it is sensitive but no hits
+  int nHits = myHitPlane->GetNHits();
+  if (!nHits)	return &mHits;	//it is sensitive but no hits
+
   mHitPlane = myHitPlane;
 
   mHitMap  = mHitPlane->GetHitMap();
@@ -54,16 +58,11 @@ static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   tau/=den;
   for (int j=0;j<3;j++) {xNode[j]+=mom[j]*tau;}
 
-//		Obtain hit errs
-  StvHitErrCalculator *calc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
-  calc->SetTrack(mom);
-  double hRR[3],myGate[2];
-  int ans = calc->CalcDetErrs(xNode,*mDir,hRR);
-  if (ans) return 0;
+  double myGate[2];
 //		Obtain track errs
   double cos2 = den*den/(1.+mom[2]*mom[2]);
 
-  double totRr = (errs->mHH+errs->mZZ)/cos2 + hRR[0]+hRR[2];
+  double totRr = (errs->mHH+errs->mZZ)/cos2;
   totRr = sqrt(totRr);
   for (int j=0;j<2;j++) {
     myGate[j] = gate[j]*totRr;
