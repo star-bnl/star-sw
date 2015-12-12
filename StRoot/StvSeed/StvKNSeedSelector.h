@@ -17,7 +17,7 @@ typedef std::map <float,MyPhiDiv> MyTheDiv;
 
 
 typedef std::vector<void*> VoidVec;
-enum {kKNumber=4};
+enum {kKNumber=2};
 
 class StvKNAux {
 public:
@@ -25,6 +25,7 @@ public:
   void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;mNbor[i]=-1;}}
 public:
   void *mHit;			//void pointer to hit
+  const void *mDet;		//void pointer to detector plane
   float mLen;			//distance from the 1st hit
   float mDir[3];		//direction from the 1st hit
   float mDist[kKNumber];	//sorted angles to nearest hits
@@ -43,8 +44,9 @@ public:
   StvKNSeedSelector();
   virtual ~StvKNSeedSelector(){;}
      void  Reset(const float startPos[3],void *voidHit);
-     void  Add  (const float      pos[3],void *voidHit);
+     void  Add  (const float      pos[3],void *voidHit, const void *voidDet);
       int  Select();  
+      int  Zelect();  
 const VoidVec &Get() const { return mSel;} 
        int GetNHits() const{ return mSel.size();}
       void Show() const;
