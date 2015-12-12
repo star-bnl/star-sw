@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.40 2015/11/11 01:57:06 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.41 2015/12/12 00:57:10 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.41  2015/12/12 00:57:10  perev
+ * Separate mid and forward rapidity
+ *
  * Revision 1.40  2015/11/11 01:57:06  perev
  * Added SetCons(const StvKonst_st *kons)
  * Now old constants like kMinHits, kGood hits etc become variable defined by SetCons
@@ -893,7 +896,7 @@ void StvStEventFiller::fillEvent()
 
 assert(gTrack->fitTraits().numberOfFitPoints(kTpcId)<=gTrack->numberOfPossiblePoints(kTpcId));
 assert(gTrack->fitTraits().numberOfFitPoints(      )<=gTrack->numberOfPossiblePoints(      ));
-          if (gTrack->fitTraits().numberOfFitPoints(kTpcId)<15) 	continue;
+          if (gTrack->fitTraits().numberOfFitPoints()<mGoodHits) 	continue;
 	  fillTrackCountG++;
           
 	}
@@ -1028,7 +1031,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
   int nTotHits = dets[0][2];
-  int nTpcHits = dets[kTpcId][2];
+//vp  int nTpcHits = dets[kTpcId][2];
   const StvNode *node = 0;
   for (int i=1;i<kMaxDetectorId;i++) {
     int np = dets[i][1];
@@ -1048,7 +1051,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
 
 
 //		Count used hits for tracks tpc hits >10
-      if (nTpcHits >= mNorHits) {
+      if (nTotHits >= mNorHits) {
 	int gid = node->GetDetId();
 	if (mUsedHits[0]<gid) mUsedHits[0]=gid;
 	mUsedHits[gid]++;
@@ -1316,7 +1319,7 @@ bool StvStEventFiller::accept(const StvTrack* track)
     if (node->GetDetId()==kTpcId) { n++;} else {n+=2;}
 
   }
-    if (n  <  5 )		return 0;
+    if (n  <  mMinHits )		return 0;
     if(track->GetLength()<=0) 	return 0; 
     return 1;
 }
