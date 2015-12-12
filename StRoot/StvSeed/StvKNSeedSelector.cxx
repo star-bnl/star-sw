@@ -11,8 +11,8 @@
 
 #include "StvSeedConst.h"
 //static const float kMaxDis =  9*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kMaxDis =  15*3.14/180;	//???Maximal angle allowed for connected hits
-//static const float kMaxDis =  30*3.14/180;	//???Maximal angle allowed for connected hits
+//static const float kMaxDis =  15*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kMaxDis =  30*3.14/180;	//???Maximal angle allowed for connected hits
 static const float kMaxLam = (M_PI-kMaxDis)/2;
 static const float kSinDis = sin(kMaxDis/2);
 
@@ -28,7 +28,8 @@ static const float kMinDis =  5*3.14/180;;	//KN angle allowed
 //static const float kDisRatio=   0.6;		//ratio for KNN distance
 //static const float kDisRatio=   0.8;		//ratio for KNN distance
 //static const float kDisRatio=   0.9;		//ratio for KNN distance
-static const float kDisRatio=   1.5;		//ratio for KNN distance
+//static const float kDisRatio=   1.5;		//ratio for KNN distance
+static const float kDisRatio=   3.;		//ratio for KNN distance
 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
@@ -117,16 +118,26 @@ void StvKNSeedSelector::Insert( int iA,int iB,float dis)
    float *a = mAux[iA].mDist;
    int   *n = mAux[iA].mNbor;
    if (dis >= a[kKNumber-1]) return;
-   int jk=0;
-   for (;jk<kKNumber;jk++) {
-     if (dis > a[jk])	continue;
-     if (n[jk]<0) break;
-     if (iA == n[jk]) return;
-     if (mAux[iA].mHit==mAux[n[jk]].mHit) 	return;
+   auto *detB = mAux[iB].mDet;
+   int jk = 0,jj=0;
+   for (jk=0;jk<kKNumber;jk++) {
+     if (n[jk]<0) 	break;
+     auto *detJ = mAux[n[jk]].mDet;
+     if (detB != detJ) 	continue;
+     if (dis>a[jk]) 	return;
+     for (jj=jk+1;jj<kKNumber;jj++) {
+       if (n[jj]<0) 	break;
+       n[jj-1]=n[jj]; a[jj-1] = a[jj];
+     }
+     n[jj]=-99; a[jj]=1e11;
      break;
    }
+   for (jk=0;jk<kKNumber;jk++) {
+     if (n[jk]<0) 	break;
+     if (dis < a[jk])	break;
+   }
    if (n[jk]>=0) {
-     for (int jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
+     for (jj=kKNumber-2; jj>=jk;jj--) 	{a[jj+1] = a[jj]; n[jj+1]=n[jj];}       
    }
    a[jk]=dis; n[jk] = iB;
    if (mKNNDist < a[kKNumber-1]) return;
@@ -165,12 +176,13 @@ void StvKNSeedSelector::Reset(const float startPos[3], void *startHit)
 /// @param float pos[3] - position of starting hit
 /// @param void *voidHit    - addres of hit. Format of hit is not used there
 
-void  StvKNSeedSelector::Add(const float pos[3],void *voidHit)
+void  StvKNSeedSelector::Add(const float pos[3],void *voidHit,const void *voidDet)
 {
   int last = mAux.size();
   mAux.resize(last+1);
   auto &aux = mAux.back(); 
   aux.mHit = voidHit; 
+  aux.mDet = voidDet; 
   float *myDir=aux.mDir,nor=0;
   for (int i=0;i<3;i++) {myDir[i] = pos[i]-mStartPos[i];nor+= myDir[i]*myDir[i];}
   nor = sqrt(nor);
@@ -410,6 +422,7 @@ void StvKNSeedSelector::Pass(int iux, double accuAng)
 void StvKNSeedSelector::Update(int ia,int ib)
 {
 
+  if (mAux[ia].mDet == mAux[ib].mDet) return;
   float *aDir = mAux[ia].mDir;
   float *bDir = mAux[ib].mDir;
 
@@ -447,6 +460,13 @@ static int nCall = 0; nCall++;
   return sqrt(mEigen[1]/(mEigen[0]+1e-11));
 
 }
+
+//______________________________________________________________________________
+int StvKNSeedSelector::Zelect()
+{
+
+
+}
 #if 1
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -460,7 +480,7 @@ static TCanvas *myCanvas = 0;
 static TGraph  *szGraph  = 0;
 static TGraph  *ptGraph  = 0;
 static TGraph  *slGraph  = 0;
-  std::vector<double> x,y,X,Y;
+  std::vector<double> X[3],Y[3];
   double reg[2]={999,-999};
 
   TVector3 mainDir(mStartPos);mainDir*=(-1.);
@@ -479,8 +499,8 @@ static TGraph  *slGraph  = 0;
     v=v/M_PI*180;
     if (reg[0]>u) reg[0]=u;if (reg[0]>v) reg[0]=v;
     if (reg[1]<u) reg[1]=u;if (reg[1]<v) reg[1]=v;
-    if (mAux[ia].mSel) {X.push_back(u);Y.push_back(v);}
-    else               {x.push_back(u);y.push_back(v);}
+    int k = (mAux[ia].mSel&3); if (k>2) k=2;
+    X[k].push_back(u);Y[k].push_back(v);
   }
 
   if(!myCanvas) myCanvas = new TCanvas("KNSelector_Show","",600,800);
@@ -493,15 +513,13 @@ static TGraph  *slGraph  = 0;
   szGraph = new TGraph(2, reg, reg);
   szGraph->SetMarkerColor(kYellow);
   szGraph->Draw("AP");
-
-  if (x.size()) {
-    ptGraph  = new TGraph(x.size(), &x[0], &y[0]);
-    ptGraph->SetMarkerColor(kGreen);
-    ptGraph->Draw("Same *");}
-  if (X.size()) {
-    slGraph  = new TGraph(X.size(), &X[0], &Y[0]);
-    slGraph->SetMarkerColor(kRed);
-    slGraph->Draw("Same *");}
+  int color[3]={kGreen,kRed,kBlue};
+  for (int k=0;k<3;k++) {
+    if (!X[k].size()) continue;
+    ptGraph  = new TGraph(X[k].size(), &X[k][0], &Y[k][0]);
+    ptGraph->SetMarkerColor(color[k]);
+    ptGraph->Draw("Same *");
+  }
 
 #if 0
 static StvDraw *myDraw = new StvDraw;
