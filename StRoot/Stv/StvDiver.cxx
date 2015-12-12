@@ -14,6 +14,10 @@
 #include "TRandom.h"
 #include "StvToolkit.h"
 
+enum DiverCons { kNearBeam=1 };
+
+
+
 class MyRandom : public TRandom 
 {
 public:
@@ -252,6 +256,7 @@ StvMCStepping::StvMCStepping(const char *name,const char *tit)
 {
   memset(fFist,0,fLast-fFist);
   fNTarget = 2;
+  fNearBeam = kNearBeam;
   fHALLVolu = gGeoManager->FindVolumeFast("HALL");
 }   
 //_____________________________________________________________________________
@@ -500,13 +505,13 @@ int StvMCStepping::IsOverstep() const
 ///	       1=overstep of nearest to (0,0) point
 ///	      -1=overstep of far     to (0,0) point
 
-  if ((fStartSign<0) == (fCurrentSign<0)) return 0;
+  if ((fStartSign<0) == (fCurrentSign<0)) 	return 0;
   const double *p = fHelix->Pos();
   const double *d = fHelix->Dir();
   double rho = fHelix->GetRho();
   double cosl= fHelix->GetCos();
-  double dis = (d[0]*p[1]-d[1]*p[0])*rho+cosl;
-  return (dis>0)? 1:-1;
+  double dis = fabs((d[0]*p[1]-d[1]*p[0])*rho/cosl);
+  return (dis<1)? 1:-1;
 }
 
 //_____________________________________________________________________________
