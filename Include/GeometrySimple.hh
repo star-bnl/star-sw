@@ -21,22 +21,22 @@ class GeometrySimple : public GeometryBase {
   // Add a solid to the geometry
   void AddSolid(Solid* s, Medium* m);
   // Get the solid at a given location (x, y, z)
-  Solid* GetSolid(const double& x, const double& y, const double& z) const;
+  Solid* GetSolid(const double x, const double y, const double z) const;
   // Get the medium at a given location (x, y, z)
-  Medium* GetMedium(const double& x, const double& y, const double& z) const;
+  Medium* GetMedium(const double x, const double y, const double z) const;
   // Number of solids/media in the geometry
   unsigned int GetNumberOfSolids() const { return m_nSolids; }
   unsigned int GetNumberOfMedia() const { return m_nMedia; }
   // Get a solid/medium from the list
-  Solid* GetSolid(const unsigned int& i) const;
-  virtual Medium* GetMedium(const unsigned int& i) const;
+  Solid* GetSolid(const unsigned int i) const;
+  virtual Medium* GetMedium(const unsigned int i) const;
   // Reset the geometry
   void Clear();
   void PrintSolids();
 
-  bool IsInside(const double& x, const double& y, const double& z) const;
+  bool IsInside(const double x, const double y, const double z) const;
   // Bounding box (envelope of geometry)
-  bool IsInBoundingBox(const double& x, const double& y, const double& z) const;
+  bool IsInBoundingBox(const double x, const double y, const double z) const;
   bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
                       double& ymax, double& zmax) {
     xmin = m_xMinBoundingBox;

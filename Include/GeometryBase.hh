@@ -17,12 +17,12 @@ class GeometryBase {
   // Destructor
   virtual ~GeometryBase() {}
 
-  virtual Medium* GetMedium(const double& x, const double& y, 
-                            const double& z) const = 0;
+  virtual Medium* GetMedium(const double x, const double y, 
+                            const double z) const = 0;
 
   // Check if a point is inside the geometry
-  virtual bool IsInside(const double& x, const double& y, 
-                        const double& z) const = 0;
+  virtual bool IsInside(const double x, const double y, 
+                        const double z) const = 0;
 
   // Bounding box (envelope of geometry)
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
