@@ -26,20 +26,20 @@ class AvalancheMicroscopic {
   // Switch on/off drift line plotting
   void EnablePlotting(ViewDrift* view);
   void DisablePlotting();
-  void EnableExcitationMarkers() { plotExcitations = true; }
-  void DisableExcitationMarkers() { plotExcitations = false; }
-  void EnableIonisationMarkers() { plotIonisations = true; }
-  void DisableIonisationMarkers() { plotIonisations = false; }
-  void EnableAttachmentMarkers() { plotAttachments = true; }
-  void DisableAttachmentMarkers() { plotAttachments = false; }
+  void EnableExcitationMarkers() { m_plotExcitations = true; }
+  void DisableExcitationMarkers() { m_plotExcitations = false; }
+  void EnableIonisationMarkers() { m_plotIonisations = true; }
+  void DisableIonisationMarkers() { m_plotIonisations = false; }
+  void EnableAttachmentMarkers() { m_plotAttachments = true; }
+  void DisableAttachmentMarkers() { m_plotAttachments = false; }
 
   // Switch on/off calculation of induced currents
-  void EnableSignalCalculation() { useSignal = true; }
-  void DisableSignalCalculation() { useSignal = false; }
+  void EnableSignalCalculation() { m_useSignal = true; }
+  void DisableSignalCalculation() { m_useSignal = false; }
 
   // Switch on/off calculation of total induced charge
-  void EnableInducedChargeCalculation() { useInducedCharge = true; }
-  void DisableInducedChargeCalculation() { useInducedCharge = false; }
+  void EnableInducedChargeCalculation() { m_useInducedCharge = true; }
+  void DisableInducedChargeCalculation() { m_useInducedCharge = false; }
 
   // Switch on/off filling histograms for energy distribution
   void EnableElectronEnergyHistogramming(TH1* histo);
@@ -57,38 +57,38 @@ class AvalancheMicroscopic {
   void DisableSecondaryEnergyHistogramming();
 
   // Switch on/off storage of drift lines
-  void EnableDriftLines() { useDriftLines = true; }
-  void DisableDriftLines() { useDriftLines = false; }
+  void EnableDriftLines() { m_useDriftLines = true; }
+  void DisableDriftLines() { m_useDriftLines = false; }
 
   // Switch on/off photon transport
-  void EnablePhotonTransport() { usePhotons = true; }
-  void DisablePhotonTransport() { usePhotons = false; }
+  void EnablePhotonTransport() { m_usePhotons = true; }
+  void DisablePhotonTransport() { m_usePhotons = false; }
 
   // Switch on/off stepping according to band structure E(k)
-  void EnableBandStructure() { useBandStructureDefault = true; }
-  void DisableBandStructure() { useBandStructureDefault = false; }
+  void EnableBandStructure() { m_useBandStructureDefault = true; }
+  void DisableBandStructure() { m_useBandStructureDefault = false; }
 
   // Switch on/off update of coordinates for null-collision steps
-  void EnableNullCollisionSteps() { useNullCollisionSteps = true; }
-  void DisableNullCollisionSteps() { useNullCollisionSteps = false; }
+  void EnableNullCollisionSteps() { m_useNullCollisionSteps = true; }
+  void DisableNullCollisionSteps() { m_useNullCollisionSteps = false; }
 
   // Set/get energy threshold for electron transport
   // (useful for delta electrons)
-  void SetElectronTransportCut(const double cut) { deltaCut = cut; }
-  double GetElectronTransportCut() const { return deltaCut; }
+  void SetElectronTransportCut(const double cut) { m_deltaCut = cut; }
+  double GetElectronTransportCut() const { return m_deltaCut; }
 
   // Set/get energy threshold for photon transport
-  void SetPhotonTransportCut(const double cut) { gammaCut = cut; }
-  double GetPhotonTransportCut() const { return gammaCut; }
+  void SetPhotonTransportCut(const double cut) { m_gammaCut = cut; }
+  double GetPhotonTransportCut() const { return m_gammaCut; }
 
   // Enable/disable max. avalanche size
-  void EnableAvalancheSizeLimit(const int size) { sizeCut = size; }
-  void DisableAvalancheSizeLimit() { sizeCut = -1; }
-  int GetAvalancheSizeLimit() const { return sizeCut; }
+  void EnableAvalancheSizeLimit(const int size) { m_sizeCut = size; }
+  void DisableAvalancheSizeLimit() { m_sizeCut = -1; }
+  int GetAvalancheSizeLimit() const { return m_sizeCut; }
 
   // Enable/disable magnetic field in stepping algorithm
-  void EnableMagneticField() { useBfield = true; }
-  void DisableMagneticField() { useBfield = false; }
+  void EnableMagneticField() { m_useBfield = true; }
+  void DisableMagneticField() { m_useBfield = false; }
 
   // Set number of collisions to be skipped for plotting
   void SetCollisionSteps(const int n);
@@ -97,40 +97,40 @@ class AvalancheMicroscopic {
   void UnsetTimeWindow();
 
   void GetAvalancheSize(int& ne, int& ni) const {
-    ne = nElectrons;
-    ni = nIons;
+    ne = m_nElectrons;
+    ni = m_nIons;
   }
   void GetAvalancheSize(int& ne, int& nh, int& ni) const {
-    ne = nElectrons;
-    nh = nHoles;
-    ni = nIons;
+    ne = m_nElectrons;
+    nh = m_nHoles;
+    ni = m_nIons;
   }
 
-  int GetNumberOfElectronEndpoints() const { return nElectronEndpoints; }
-  void GetElectronEndpoint(const int i, double& x0, double& y0, double& z0,
+  int GetNumberOfElectronEndpoints() const { return m_nElectronEndpoints; }
+  void GetElectronEndpoint(const unsigned int i, double& x0, double& y0, double& z0,
                            double& t0, double& e0, double& x1, double& y1,
                            double& z1, double& t1, double& e1,
                            int& status) const;
-  void GetElectronEndpoint(const int i, double& x0, double& y0, double& z0,
+  void GetElectronEndpoint(const unsigned int i, double& x0, double& y0, double& z0,
                            double& t0, double& e0, double& x1, double& y1,
                            double& z1, double& t1, double& e1, double& dx1,
                            double& dy1, double& dz1, int& status) const;
-  int GetNumberOfElectronDriftLinePoints(const int i = 0) const;
-  int GetNumberOfHoleDriftLinePoints(const int i = 0) const;
+  unsigned int GetNumberOfElectronDriftLinePoints(const unsigned int i = 0) const;
+  unsigned int GetNumberOfHoleDriftLinePoints(const unsigned int i = 0) const;
   void GetElectronDriftLinePoint(double& x, double& y, double& z, double& t,
-                                 const int ip, const int iel = 0) const;
+                                 const int ip, const unsigned int iel = 0) const;
   void GetHoleDriftLinePoint(double& x, double& y, double& z, double& t,
-                             const int ip, const int iel = 0) const;
+                             const int ip, const unsigned int iel = 0) const;
 
-  int GetNumberOfHoleEndpoints() const { return nHoleEndpoints; }
-  void GetHoleEndpoint(const int i, double& x0, double& y0, double& z0,
+  int GetNumberOfHoleEndpoints() const { return m_nHoleEndpoints; }
+  void GetHoleEndpoint(const unsigned int i, double& x0, double& y0, double& z0,
                        double& t0, double& e0, double& x1, double& y1,
                        double& z1, double& t1, double& e1, int& status) const;
 
-  int GetNumberOfPhotons() const { return usePhotons ? nPhotons : 0; }
+  int GetNumberOfPhotons() const { return m_usePhotons ? m_nPhotons : 0; }
   // Status codes:
   //   -2: photon absorbed by gas molecule
-  void GetPhoton(const int i, double& e, double& x0, double& y0, double& z0,
+  void GetPhoton(const unsigned int i, double& e, double& x0, double& y0, double& z0,
                  double& t0, double& x1, double& y1, double& z1, double& t1,
                  int& status) const;
 
@@ -164,13 +164,13 @@ class AvalancheMicroscopic {
   void UnsetUserHandleIonisation();
 
   // Switch on/off debugging messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string className;
+  std::string m_className;
 
-  Sensor* sensor;
+  Sensor* m_sensor;
 
   struct point {
     double x, y, z, t;
@@ -197,11 +197,11 @@ class AvalancheMicroscopic {
     std::vector<point> driftLine;
     double xLast, yLast, zLast;
   };
-  std::vector<electron> stack;
-  std::vector<electron> endpointsElectrons;
-  std::vector<electron> endpointsHoles;
+  std::vector<electron> m_stack;
+  std::vector<electron> m_endpointsElectrons;
+  std::vector<electron> m_endpointsHoles;
 
-  int nPhotons;
+  unsigned int m_nPhotons;
   struct photon {
     // Status
     int status;
@@ -212,78 +212,77 @@ class AvalancheMicroscopic {
     // End point
     double x1, y1, z1, t1;
   };
-  std::vector<photon> photons;
+  std::vector<photon> m_photons;
 
   // Number of electrons, holes and ions produced
-  int nElectrons;
-  int nHoles;
-  int nIons;
+  int m_nElectrons;
+  int m_nHoles;
+  int m_nIons;
   // Number of electron/hole trajectories
   // (including captured electrons)
-  int nElectronEndpoints;
-  int nHoleEndpoints;
+  unsigned int m_nElectronEndpoints;
+  unsigned int m_nHoleEndpoints;
 
-  bool usePlotting;
-  ViewDrift* viewer;
-  bool plotExcitations;
-  bool plotIonisations;
-  bool plotAttachments;
+  bool m_usePlotting;
+  ViewDrift* m_viewer;
+  bool m_plotExcitations;
+  bool m_plotIonisations;
+  bool m_plotAttachments;
 
-  TH1* histElectronEnergy;
-  TH1* histHoleEnergy;
-  bool hasElectronEnergyHistogram;
-  bool hasHoleEnergyHistogram;
-  TH1* histDistance;
-  bool hasDistanceHistogram;
-  char distanceOption;
-  int nDistanceHistogramTypes;
-  std::vector<int> distanceHistogramType;
+  TH1* m_histElectronEnergy;
+  TH1* m_histHoleEnergy;
+  bool m_hasElectronEnergyHistogram;
+  bool m_hasHoleEnergyHistogram;
+  TH1* m_histDistance;
+  bool m_hasDistanceHistogram;
+  char m_distanceOption;
+  std::vector<int> m_distanceHistogramType;
 
-  TH1* histSecondary;
-  bool hasSecondaryHistogram;
+  TH1* m_histSecondary;
+  bool m_hasSecondaryHistogram;
 
-  bool useSignal;
-  bool useInducedCharge;
-  bool useDriftLines;
-  bool usePhotons;
-  bool useBandStructureDefault;
-  bool useNullCollisionSteps;
-  bool useBfield;
+  bool m_useSignal;
+  bool m_useInducedCharge;
+  bool m_useDriftLines;
+  bool m_usePhotons;
+  bool m_useBandStructureDefault;
+  bool m_useNullCollisionSteps;
+  bool m_useBfield;
 
   // Rotation matrices
-  double rb11, rb12, rb13;
-  double rb21, rb22, rb23;
-  double rb31, rb32, rb33;
-  double rx22, rx23, rx32, rx33;
+  double m_rb11, m_rb12, m_rb13;
+  double m_rb21, m_rb22, m_rb23;
+  double m_rb31, m_rb32, m_rb33;
+  double m_rx22, m_rx23, m_rx32, m_rx33;
 
   // Transport cuts
-  double deltaCut;
-  double gammaCut;
+  double m_deltaCut;
+  double m_gammaCut;
 
   // Max. avalanche size
-  int sizeCut;
+  int m_sizeCut;
 
-  int nCollSkip;
+  int m_nCollSkip;
 
-  bool hasTimeWindow;
-  double tMin, tMax;
+  bool m_hasTimeWindow;
+  double m_tMin, m_tMax;
 
   // User procedures
-  bool hasUserHandleStep;
-  bool hasUserHandleAttachment;
-  bool hasUserHandleInelastic;
-  bool hasUserHandleIonisation;
-  void (*userHandleStep)(double x, double y, double z, double t, double e,
+  bool m_hasUserHandleStep;
+  bool m_hasUserHandleAttachment;
+  bool m_hasUserHandleInelastic;
+  bool m_hasUserHandleIonisation;
+  void (*m_userHandleStep)(double x, double y, double z, double t, double e,
                          double dx, double dy, double dz, bool hole);
-  void (*userHandleAttachment)(double x, double y, double z, double t, int type,
+  void (*m_userHandleAttachment)(double x, double y, double z, double t, int type,
                                int level, Medium* m);
-  void (*userHandleInelastic)(double x, double y, double z, double t, int type,
+  void (*m_userHandleInelastic)(double x, double y, double z, double t, int type,
                               int level, Medium* m);
-  void (*userHandleIonisation)(double x, double y, double z, double t, int type,
+  void (*m_userHandleIonisation)(double x, double y, double z, double t, int type,
                                int level, Medium* m);
 
   // Switch on/off debugging messages
-  bool debug;
+  bool m_debug;
 
   // Electron transport
   bool TransportElectron(const double x0, const double y0, const double z0,
