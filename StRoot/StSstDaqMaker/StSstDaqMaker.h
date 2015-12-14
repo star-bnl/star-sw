@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.7 2015/11/05 21:56:44 zhoulong Exp $
+ * $Id: StSstDaqMaker.h,v 1.8 2015/12/14 14:33:42 zhoulong Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.8  2015/12/14 14:33:42  zhoulong
+ * fixed CMN failed chip rejection error
+ *
  * Revision 1.7  2015/11/05 21:56:44  zhoulong
  * Add pedestal subtraction and CMN suppression algorithm and did some clearence
  *
@@ -89,7 +92,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.7 2015/11/05 21:56:44 zhoulong Exp $ built " __DATE__ " " __TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.8 2015/12/14 14:33:42 zhoulong Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -186,7 +189,7 @@ private:
    static const UInt_t  HYBRID_END          = 14;
    static const UInt_t  STRIP_START         = 14;
    static const UInt_t  STRIP_END           = 24;
-   static const UInt_t  ERROR_START         = 24;//CMN Err Code Start Bit
+   static const UInt_t  ERROR_START         = 28;//CMN Err Code Start Bit
    static const UInt_t  ERROR_END           = 32;//CMN Err Code End Bit
    static const UInt_t  ADC_START           = 4;//adc length start bit
    static const UInt_t  ADC_END             = 20;//adc length end bit
