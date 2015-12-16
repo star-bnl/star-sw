@@ -45,8 +45,8 @@ class TrackHeed : public Track {
 
   double GetClusterDensity();
   double GetStoppingPower();
-  double GetW() const { return matter->W * 1.e6; }
-  double GetFanoFactor() const { return matter->F; }
+  double GetW() const;
+  double GetFanoFactor() const;
 
   void TransportDeltaElectron(const double x0, const double y0, const double z0,
                               const double t0, const double e0,
