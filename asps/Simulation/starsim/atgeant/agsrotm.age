@@ -1,5 +1,5 @@
 *
-* $Id: agsrotm.age,v 1.5 2015/12/16 19:59:28 jwebb Exp $
+* $Id: agsrotm.age,v 1.6 2015/12/17 17:06:57 jwebb Exp $
 *
 * $Name:  $
 *
@@ -17,8 +17,17 @@
 #include "geant321/gcunit.inc"
   Real Rot(6),Rota(6),eps/1.e-5/,uni(6)/90,0,90,90,0,0/
   Integer k,Im,i,Nlink,JTM,ii
-  Integer ilMod,ilTit
-* Regularize phi angles.  Could/should do for theta as well...
+  Integer ilMod,ilTit,IgOR
+  Logical alphanonzero
+* First bring theta positive
+  IF(%thetax<  0) %thetax += 360
+  IF(%thetay<  0) %thetay += 360
+  IF(%thetaz<  0) %thetaz += 360
+* Next move theta into [0,180) and phi into [0,360)
+  IF(%thetax>180) { %phix += 180.0; %thetax = 360.0 - %thetax; }
+  IF(%thetay>180) { %phiy += 180.0; %thetay = 360.0 - %thetay; }
+  IF(%thetaz>180) { %phiz += 180.0; %thetaz = 360.0 - %thetaz; }
+* And finally bring phi into [0,360)
   IF(%phix<  0) %phix = %phix + 360
   IF(%phix>360) %phix = %phix - 360
   IF(%phiy<  0) %phiy = %phiy + 360
@@ -29,13 +38,22 @@
   %Irot=0; k=0; 
   call ucopy(%Thetax,rot ,6);
   call ucopy(%Thetax,rota,6);
-  do i=1,6 { if(abs(rot(i)-uni(i))>1e-5) k=1;}
-  if (%alphaN .ne.0) { k+=2; call AGROTS(%alphaK,%alphaL,%alphaN,rota);}
+* Check if this is the unit matrix
+  do i=1,6 { 
+     if(abs(rot(i)-uni(i))>1e-5) k=1;
+  }
+  if (%alphaN .ne.0 ) { 
+     k+=2; call AGROTS(%alphaK,%alphaL,%alphaN,rota);
+  }
   call ucopy(rota,rot,6);
+* Reset flag and check to see if we are still the unit matrix or not
+  k=0; do i=1,6 { 
+     if(abs(rot(i)-uni(i))>1e-5) k=1;
+  }
   if (k.eq.0) return;
   %Irot=1;  
   IF JROTM>0    " find an old matrix or the first free slot (or the end) "
-  {  Nlink=IQ(JROTM-2);
+  {  Nlink=IQ(JROTM-2); 
 :matrix: DO  Im=1,Nlink+1
      {  %Irot=Im;  JTM=LQ(JROTM-Im);   IF (JTM<=0 | Im>Nlink)  Break
         Do i=1,6 { If (Rota(i)#Q(JTM+10+i)) Next :Matrix:; };  Return
