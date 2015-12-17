@@ -899,7 +899,7 @@ void AtomicSecondaryProducts::add_channel(
   for (long n = 0; n < q_new; ++n) {
     s += channel_prob_dens[n];
   }
-  if (s > 1.0 + 1e-7) {
+  if (s > 1.0) {
     funnw.ehdr(mcerr);
     mcerr << "s > 1.0, s=" << s << '\n';
     Iprintn(mcerr, q_new);

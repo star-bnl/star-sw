@@ -343,12 +343,6 @@ $(OBJDIR)/Sensor.o: \
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 
-$(OBJDIR)/ComponentUserMapBase.o: \
-	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh \
-	$(INCDIR)/ComponentBase.hh $(INCDIR)/FundamentalConstants.hh
-	@echo $@
-	$(CXX) $(CFLAGS) $< -o $@
-
 $(OBJDIR)/GarfieldDict.o: \
 	$(OBJDIR)/GarfieldDict.C
 	@echo $@

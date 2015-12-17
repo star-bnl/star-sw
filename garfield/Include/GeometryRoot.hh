@@ -24,8 +24,8 @@ class GeometryRoot : public GeometryBase {
   void SetGeometry(TGeoManager* geoman);
 
   // Get the medium at a given point (x, y, z)
-  Medium* GetMedium(const double& x, const double& y, 
-                    const double& z) const;
+  Medium* GetMedium(const double x, const double y, 
+                    const double z) const;
 
   // Get the number of materials defined in the ROOT geometry
   int GetNumberOfMaterials();
@@ -36,9 +36,9 @@ class GeometryRoot : public GeometryBase {
   void SetMedium(const int imat, Medium* med);
   void SetMedium(const char* mat, Medium* med);
 
-  bool IsInside(const double& x, const double& y, const double& z) const {
+  bool IsInside(const double x, const double y, const double z) const {
 
-    if (m_geoManager != NULL) {
+    if (m_geoManager) {
       m_geoManager->SetCurrentPoint(x, y, z);
       return !m_geoManager->IsOutside();
     }
@@ -50,23 +50,23 @@ class GeometryRoot : public GeometryBase {
                       double& ymax, double& zmax);
 
   // Switch on/off debugging and warning messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
   // ROOT geometry manager
   TGeoManager* m_geoManager;
 
   // List of ROOT materials associated to Garfield media
-  int nMaterials;
+  int m_nMaterials;
   struct material {
     std::string name;
     Medium* medium;
   };
-  std::vector<material> materials;
+  std::vector<material> m_materials;
 
   // Switch on/off debugging messages
-  bool debug;
+  bool m_debug;
 };
 }
 

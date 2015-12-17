@@ -15,13 +15,13 @@ double AvalancheMC::c1 = ElectronMass / (SpeedOfLight * SpeedOfLight);
 AvalancheMC::AvalancheMC()
     : m_sensor(NULL),
       m_nDrift(0),
-      stepModel(2),
-      tMc(0.02),
-      dMc(0.001),
-      nMc(100),
-      hasTimeWindow(false),
-      tMin(0.),
-      tMax(0.),
+      m_stepModel(2),
+      m_tMc(0.02),
+      m_dMc(0.001),
+      m_nMc(100),
+      m_hasTimeWindow(false),
+      m_tMin(0.),
+      m_tMax(0.),
       m_nElectrons(0),
       m_nHoles(0),
       m_nIons(0),
@@ -80,53 +80,53 @@ void AvalancheMC::DisablePlotting() {
 
 void AvalancheMC::SetTimeSteps(const double d) {
 
-  stepModel = 0;
+  m_stepModel = 0;
   if (d < Small) {
     std::cerr << m_className << "::SetTimeSteps:\n";
     std::cerr << "    Specified step size is too small.\n";
     std::cerr << "    Using default (20 ps) instead.\n";
-    tMc = 0.02;
+    m_tMc = 0.02;
   } else {
     if (m_debug) {
       std::cout << m_className << "::SetTimeSteps:\n";
       std::cout << "    Step size set to " << d << " ns.\n";
     }
-    tMc = d;
+    m_tMc = d;
   }
 }
 
 void AvalancheMC::SetDistanceSteps(const double d) {
 
-  stepModel = 1;
+  m_stepModel = 1;
   if (d < Small) {
     std::cerr << m_className << "::SetDistanceSteps:\n";
     std::cerr << "    Specified step size is too small.\n";
     std::cerr << "    Using default (10 um) instead.\n";
-    dMc = 0.001;
+    m_dMc = 0.001;
   } else {
     if (m_debug) {
       std::cout << m_className << "::SetDistanceSteps:\n";
       std::cout << "    Step size set to " << d << " cm.\n";
     }
-    dMc = d;
+    m_dMc = d;
   }
 }
 
 void AvalancheMC::SetCollisionSteps(const int n) {
 
-  stepModel = 2;
+  m_stepModel = 2;
   if (n < 1) {
     std::cerr << m_className << "::SetCollisionSteps:\n";
     std::cerr << "    Number of collisions to be skipped set to "
               << " default value (100).\n";
-    nMc = 100;
+    m_nMc = 100;
   } else {
     if (m_debug) {
       std::cout << m_className << "::SetCollisionSteps:\n";
       std::cout << "    Number of collisions to be skipped set to " << n
                 << ".\n";
     }
-    nMc = n;
+    m_nMc = n;
   }
 }
 
@@ -138,12 +138,12 @@ void AvalancheMC::SetTimeWindow(const double t0, const double t1) {
     return;
   }
 
-  tMin = std::min(t0, t1);
-  tMax = std::max(t0, t1);
-  hasTimeWindow = true;
+  m_tMin = std::min(t0, t1);
+  m_tMax = std::max(t0, t1);
+  m_hasTimeWindow = true;
 }
 
-void AvalancheMC::UnsetTimeWindow() { hasTimeWindow = false; }
+void AvalancheMC::UnsetTimeWindow() { m_hasTimeWindow = false; }
 
 void AvalancheMC::GetDriftLinePoint(const unsigned int i, double& x, double& y,
                                     double& z, double& t) {
@@ -160,7 +160,7 @@ void AvalancheMC::GetDriftLinePoint(const unsigned int i, double& x, double& y,
   t = m_drift[i].t;
 }
 
-void AvalancheMC::GetHoleEndpoint(const unsigned int& i, double& x0, double& y0,
+void AvalancheMC::GetHoleEndpoint(const unsigned int i, double& x0, double& y0,
                                   double& z0, double& t0, double& x1,
                                   double& y1, double& z1, double& t1,
                                   int& status) const {
@@ -182,7 +182,7 @@ void AvalancheMC::GetHoleEndpoint(const unsigned int& i, double& x0, double& y0,
   status = m_endpointsHoles[i].status;
 }
 
-void AvalancheMC::GetIonEndpoint(const unsigned int& i, double& x0, double& y0,
+void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
                                  double& z0, double& t0, double& x1, double& y1,
                                  double& z1, double& t1, int& status) const {
 
@@ -203,7 +203,7 @@ void AvalancheMC::GetIonEndpoint(const unsigned int& i, double& x0, double& y0,
   status = m_endpointsIons[i].status;
 }
 
-void AvalancheMC::GetElectronEndpoint(const unsigned int& i, 
+void AvalancheMC::GetElectronEndpoint(const unsigned int i, 
                                       double& x0, double& y0,
                                       double& z0, double& t0, double& x1,
                                       double& y1, double& z1, double& t1,
@@ -226,8 +226,8 @@ void AvalancheMC::GetElectronEndpoint(const unsigned int& i,
   status = m_endpointsElectrons[i].status;
 }
 
-bool AvalancheMC::DriftElectron(const double& x0, const double& y0,
-                                const double& z0, const double& t0) {
+bool AvalancheMC::DriftElectron(const double x0, const double y0,
+                                const double z0, const double t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftElectron:\n";
@@ -251,8 +251,8 @@ bool AvalancheMC::DriftElectron(const double& x0, const double& y0,
   return true;
 }
 
-bool AvalancheMC::DriftHole(const double& x0, const double& y0, 
-                            const double& z0, const double& t0) {
+bool AvalancheMC::DriftHole(const double x0, const double y0, 
+                            const double z0, const double t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftHole:\n";
@@ -276,8 +276,8 @@ bool AvalancheMC::DriftHole(const double& x0, const double& y0,
   return true;
 }
 
-bool AvalancheMC::DriftIon(const double& x0, const double& y0, 
-                           const double& z0, const double& t0) {
+bool AvalancheMC::DriftIon(const double x0, const double y0, 
+                           const double z0, const double t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftIon:\n";
@@ -301,9 +301,9 @@ bool AvalancheMC::DriftIon(const double& x0, const double& y0,
   return true;
 }
 
-bool AvalancheMC::DriftLine(const double& x0, const double& y0, 
-                            const double& z0, const double& t0,
-                            const int& type, const bool& aval) {
+bool AvalancheMC::DriftLine(const double x0, const double y0, 
+                            const double z0, const double t0,
+                            const int type, const bool aval) {
 
   // Current position
   double x = x0, y = y0, z = z0;
@@ -347,10 +347,10 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
   bool validAlphaEta = false;
   int abortReason = 0;
 
-  if (hasTimeWindow && (t0 < tMin || t0 > tMax)) {
+  if (m_hasTimeWindow && (t0 < m_tMin || t0 > m_tMax)) {
     std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Starting time " << t0 << " is outside the specified\n";
-    std::cerr << "    time window (" << tMin << ", " << tMax << ").\n";
+    std::cerr << "    time window (" << m_tMin << ", " << m_tMax << ").\n";
     ok = false;
     abortReason = StatusOutsideTimeWindow;
   }
@@ -447,19 +447,19 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
     }
 
     // Determine the time step.
-    switch (stepModel) {
+    switch (m_stepModel) {
       case 0:
         // Fixed time steps
-        delta = tMc;
+        delta = m_tMc;
         break;
       case 1:
         // Fixed distance steps
-        delta = dMc / v;
+        delta = m_dMc / v;
         break;
       case 2:
         // Steps based on collision time
         tau = c1 * v / e;
-        delta = -nMc * tau * log(RndmUniformPos());
+        delta = -m_nMc * tau * log(RndmUniformPos());
         break;
       default:
         std::cerr << m_className << "::DriftLine:\n";
@@ -640,7 +640,7 @@ bool AvalancheMC::DriftLine(const double& x0, const double& y0,
     ++m_nDrift;
 
     // Check if the time is still within the specified interval.
-    if (hasTimeWindow && point.t > tMax) {
+    if (m_hasTimeWindow && point.t > m_tMax) {
       abortReason = StatusOutsideTimeWindow;
       break;
     }

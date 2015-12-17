@@ -201,12 +201,25 @@ bool Sensor::SetArea(const double xmin, const double ymin, const double zmin,
     return false;
   }
 
-  m_xMinUser = std::min(xmin, xmax);
-  m_yMinUser = std::min(ymin, ymax);
-  m_zMinUser = std::min(zmin, zmax);
-  m_xMaxUser = std::max(xmin, xmax);
-  m_yMaxUser = std::max(ymin, ymax);
-  m_zMaxUser = std::max(zmin, zmax);
+  m_xMinUser = xmin;
+  m_yMinUser = ymin;
+  m_zMinUser = zmin;
+  m_xMaxUser = xmax;
+  m_yMaxUser = ymax;
+  m_zMaxUser = zmax;
+
+  if (xmin > xmax) {
+    m_xMinUser = xmax;
+    m_xMaxUser = xmin;
+  }
+  if (ymin > ymax) {
+    m_yMinUser = ymax;
+    m_yMaxUser = ymin;
+  }
+  if (zmin > zmax) {
+    m_zMinUser = zmax;
+    m_zMaxUser = zmin;
+  }
   m_hasUserArea = true;
   return true;
 }

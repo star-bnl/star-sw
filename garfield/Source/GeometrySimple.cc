@@ -16,13 +16,13 @@ GeometrySimple::GeometrySimple()
 void GeometrySimple::AddSolid(Solid* s, Medium* m) {
 
   // Make sure the solid and the medium are defined.
-  if (s == NULL) {
+  if (!s) {
     std::cerr << m_className << "::AddSolid:\n";
     std::cerr << "    Solid pointer is null.\n";
     return;
   }
 
-  if (m == NULL) {
+  if (!m) {
     std::cerr << m_className << "::AddSolid:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
@@ -80,8 +80,8 @@ void GeometrySimple::AddSolid(Solid* s, Medium* m) {
   ++m_nSolids;
 }
 
-Solid* GeometrySimple::GetSolid(const double& x, const double& y, 
-                                const double& z) const {
+Solid* GeometrySimple::GetSolid(const double x, const double y, 
+                                const double z) const {
 
   for (unsigned int i = 0; i < m_nSolids; ++i) {
     if (m_solids[i].solid->IsInside(x, y, z)) {
@@ -91,7 +91,7 @@ Solid* GeometrySimple::GetSolid(const double& x, const double& y,
   return NULL;
 }
 
-Medium* GeometrySimple::GetMedium(const double& x, const double& y, const double& z) const {
+Medium* GeometrySimple::GetMedium(const double x, const double y, const double z) const {
 
   for (unsigned int i = 0; i < m_nSolids; ++i) {
     if (m_solids[i].solid->IsInside(x, y, z)) {
@@ -102,7 +102,7 @@ Medium* GeometrySimple::GetMedium(const double& x, const double& y, const double
   return NULL;
 }
 
-Solid* GeometrySimple::GetSolid(const unsigned int& i) const {
+Solid* GeometrySimple::GetSolid(const unsigned int i) const {
 
   if (i >= m_nSolids) {
     std::cerr << m_className << "::GetSolid:\n";
@@ -113,7 +113,7 @@ Solid* GeometrySimple::GetSolid(const unsigned int& i) const {
   return m_solids[i].solid;
 }
 
-Medium* GeometrySimple::GetMedium(const unsigned int& i) const {
+Medium* GeometrySimple::GetMedium(const unsigned int i) const {
 
   if (i >= m_nMedia) {
     std::cerr << m_className << "::GetMedium:\n";
@@ -155,8 +155,8 @@ void GeometrySimple::PrintSolids() {
   }
 }
 
-bool GeometrySimple::IsInside(const double& x, const double& y, 
-                              const double& z) const {
+bool GeometrySimple::IsInside(const double x, const double y, 
+                              const double z) const {
 
   if (!IsInBoundingBox(x, y, z)) return false;
 
@@ -166,8 +166,8 @@ bool GeometrySimple::IsInside(const double& x, const double& y,
   return false;
 }
 
-bool GeometrySimple::IsInBoundingBox(const double& x, const double& y,
-                                     const double& z) const {
+bool GeometrySimple::IsInBoundingBox(const double x, const double y,
+                                     const double z) const {
 
   if (!m_hasBoundingBox) {
     if (m_debug) {

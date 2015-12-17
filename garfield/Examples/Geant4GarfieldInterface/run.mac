@@ -1,0 +1,31 @@
+# Macro file for exampleGarfield
+# 
+# Can only be run in batch, without graphic
+#
+
+# Initialize kernel
+/control/verbose 0
+/run/verbose 0
+/tracking/verbose 0
+
+/exampleGarfield/absorber/setMat G4_Pb
+
+/control/execute ./physics.mac			
+/run/initialize
+
+
+#inside tube
+/gun/particle e-
+/gun/direction 1 0 0
+/gun/position -50 0 15 mm
+/gun/energy 70 keV
+#/run/beamOn 5
+
+#outside tube
+/gun/particle mu+
+/gun/direction 0 0 1
+/gun/position 0 0 0 mm
+/gun/energy 4 GeV
+/run/beamOn 5
+
+

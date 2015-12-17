@@ -1366,4 +1366,8 @@ bool TrackHeed::SetupDelta(const std::string databasePath) {
   deltaCs = new Heed::HeedDeltaElectronCS(matter, elScat, lowSigma, pairProd);
   return true;
 }
+
+double TrackHeed::GetW() const { return matter->W * 1.e6; }
+double TrackHeed::GetFanoFactor() const { return matter->F; }
+
 }

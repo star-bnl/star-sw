@@ -1,0 +1,41 @@
+# Enable GarfieldModel for different particle types and energy ranges
+# Possible models: PAI, PAIPhot, Heed
+# Here we enable the PAIPhot model with default values (useDefaults = true)
+# When useDefaults is set to false, the particle types and energy ranges
+# have to be set by hand
+
+/exampleGarfield/physics/setIonizationModel PAI false
+
+# Here are the Geant4 particle types and energies that are set by useDefaults = true
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy e- 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy e+ 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy mi- 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy mu+ 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy proton 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy pi+ 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy pi- 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy alpha 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy He3 0 1e+8 MeV 
+/exampleGarfield/physics/setGeant4ParticleTypeAndEnergy GenericIon- 0 1e+8 MeV 
+
+# If PAI or PAIPhot model are chosen, per default gamma treatment in Heed is activated
+/exampleGarfield/physics/setGarfieldParticleTypeAndEnergy gamma 1e-6 1e+8 MeV 
+
+# If PAI or PAIPhot model are chosen, per default e- under 1 keV are treated as delta electrons in Heed
+/exampleGarfield/physics/setGarfieldParticleTypeAndEnergy e- 1e-6 1e-3 MeV
+
+
+# If Heed is chosen as ionization model, the following particles are set by default
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy gamma 1e-6 1e+8 MeV 
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy e- 6e-2 1e+7 MeV 
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy e+ 6e-2 1e+7 MeV 
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy mu- 1e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy mu+ 1e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy pi- 2e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy pi+ 2e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy kaon 1e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy kaon+ 1e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy proton 9e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy anti_proton 9e+1 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy deuteron 2e+2 1e+8 MeV
+# /exampleGarfield/physics/setGarfieldParticleTypeAndEnergy alpha 4e+2 1e+8 MeV
