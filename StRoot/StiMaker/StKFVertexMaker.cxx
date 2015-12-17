@@ -29,6 +29,8 @@ using std::map;
 #include "Sti/StiHit.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
+#include "Sti/StiVertexFinder.h"
+#include "StiDefaultToolkit.h"
 #include "StiStEventFiller.h"
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
@@ -417,6 +419,10 @@ Int_t StKFVertexMaker::Make() {
     LOG_WARN << "StKFVertexMaker::fit: no StEvent " << endm;
     return kStOK;        // if no event, we're done
   }
+  // add Vixed Primary vertex if any
+  if (StiToolkit::instance()->getVertexFinder() && (IAttr("VFFV") || IAttr("VFMCE"))) {
+    StiToolkit::instance()->getVertexFinder()->fit(pEvent);
+  }
   Double_t bField = 0;
 #if 0
   if (pEvent->runInfo() && ! IAttr("laserIT")) bField = pEvent->runInfo()->magneticField();
@@ -598,7 +604,22 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       if (Vp) {
 	if (Vp == Vtx) continue;
 	PrPP(Make,*Vp);
-	KFVertex Parent(*Vp->parentMF()->kfParticle()); PrPP(MakeV0,Parent);
+	KFVertex Parent;
+	if (Vp->parentMF() && Vp->parentMF()->kfParticle()) {
+	  Parent = *Vp->parentMF()->kfParticle(); 
+	} else {
+	  Float_t Param[6] = {Vp->position().x(), Vp->position().y(), Vp->position().z(), 0, 0, 0};
+	  Float_t Cov[21] = {Vp->positionError().x()*Vp->positionError().x(),
+			     0, Vp->positionError().y()*Vp->positionError().y(),
+			     0, 0, Vp->positionError().z()*Vp->positionError().z(),
+			     0, 0, 0, 999.,
+			     0, 0, 0, 0, 999.,
+			     0, 0, 0, 0, 0, 999.};
+	  Int_t   charge = 0;
+	  Float_t mass = 0;
+	  Parent.Create(Param, Cov, charge, mass);
+	}
+	PrPP(MakeV0,Parent);
 	KFVertex V02(*V0s[l]);
 	V02.SetProductionVertex(Parent);
 	PrPP(MakeV0,V02);

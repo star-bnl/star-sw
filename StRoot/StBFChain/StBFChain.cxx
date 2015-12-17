@@ -540,6 +540,8 @@ Int_t StBFChain::Instantiate()
     }
     if (maker=="StKFVertexMaker") {
       if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
+      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
+      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
     }
     if (maker=="StAssociationMaker") {
 

@@ -431,12 +431,12 @@ Int_t StiMaker::Make()
     }
     iAnz = MakeGlobalTracks(event);
     if (iAnz) {MyClear(); return iAnz;}
-
-    if (_vertexFinder) {
+    StMaker *KFV = GetMaker("KFVertex");
+    if (!KFV && _vertexFinder) {
       iAnz = MakePrimaryTracks(event);
       if (iAnz) {MyClear(); return iAnz;}
     } else {
-      iAnz = StMaker::Make();
+      iAnz = KFV->Make();
       FinishTracks(1);
     }
     if (mPullTTree) {iAns = FillPulls();}
