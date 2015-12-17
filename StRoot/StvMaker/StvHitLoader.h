@@ -30,8 +30,9 @@ class StvHitLoader : public TNamed
     int   AddDetector(StDetectorId did);
     int   NumDetectors() const {return mNDets;};
  protected:
-    StvHit *MakeStvHit(const StHit *stHit,UInt_t upath,int &sure); 
-    int     TpcHitTest(const StHit *stHit);    
+virtual int MakeStvHit(const StHit *stHit,UInt_t upath,int &sure,StvHit *stvHit=0); 
+
+    int   TpcHitTest(const StHit *stHit);    
  private:
  int             mNDets;
  StDetectorId    mDetId;

@@ -100,7 +100,7 @@ static int nCall=0; nCall++;
     const float *fstPos = fstHit->x();
     float fstRxy2 = fstPos[0]*fstPos[0]+fstPos[1]*fstPos[1];
     float fstRxy = sqrt(fstRxy2);
-//VP    const StHitPlane *hp = fstHit->detector();
+    const StHitPlane *fstHp = fstHit->detector();
     float        fstDir[2]={fstPos[0]/fstRxy,fstPos[1]/fstRxy};
     mRej.Reset(fstPos);
     mRej.Prepare();
@@ -115,7 +115,7 @@ static int nCall=0; nCall++;
       StvHit *nexHit = (StvHit*)node->GetObj();
 
       if (nexHit->isUsed()) 		continue;
-      if (nexHit==fstHit)		continue;
+      if (nexHit->detector()==fstHp)		continue;
       const float *f = nexHit->x();
       float myRxy2 = f[0]*f[0]+f[1]*f[1];
       if (myRxy2 >=1.2*fstRxy2)  	continue;
@@ -125,7 +125,7 @@ static int nCall=0; nCall++;
       if (ans) continue;
       nAccHits++;
 
-      mSel.Add(nexHit->x(),nexHit);
+      mSel.Add(nexHit->x(),nexHit,nexHit->detector());
 
     } //endMultiIter loop
     if (nAccHits<fMinHits) 	continue;

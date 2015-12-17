@@ -7,7 +7,8 @@
 #include "StvSeedConst.h"
 
 
-enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=5};
+//VP ??? enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=5};
+enum {kFstAng=88,kMinLen=3,kMaxLen=50,kDivLen=1};
 static const double kFstCos = cos(kFstAng*M_PI/180);
 
 //_____________________________________________________________________________
@@ -54,22 +55,25 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
     mThet = (theta) ? theta : kFstAng*M_PI/180;
   } else   {	//Estimate dir as direction to 0,0,0
 
-    double norL = 1./sqrt(mRxy2+pow(pos[2]-kZRange,2)); 
-    double norR = 1./sqrt(mRxy2+pow(pos[2]+kZRange,2)); 
+    double norL = 1./sqrt(mRxy2+pow(mPos[2]-kZRange,2)); 
+    double norR = 1./sqrt(mRxy2+pow(mPos[2]+kZRange,2)); 
     double norQ = (norL+norR);
-    mDir[0]= pos[0]*norQ;
-    mDir[1]= pos[1]*norQ;
-    mDir[2]= pos[2]*norQ +kZRange*(norR-norL);
+
+    mDir[0]= mPos[0]*norQ;
+    mDir[1]= mPos[1]*norQ;
+    mDir[2]= mPos[2]*norQ -kZRange*(norR-norL);
     norQ = 1./sqrt(mDir[0]*mDir[0]+mDir[1]*mDir[1]+mDir[2]*mDir[2]);
     for (int i=0;i<3;i++) {mDir[i]*=(-norQ);}
-    mThet = acos(-(mDir[0]*pos[0]+mDir[1]*pos[1]+mDir[2]*(pos[2]+kZRange))*norR);
+    mThet = (mR2 -(kZRange*kZRange))*norL*norR;
+    mThet = 0.5*acos(mThet);
+
     assert(mThet< M_PI/2);
   }
   if (rad ) { mOutRad = rad;}	//rad is defined, use it
   else      { 			//rad is no defined, estimate it
     mOutRad = sqrt(mR2)/kDivLen;
     if (mOutRad<kMinLen) mOutRad=kMinLen;
-    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
+//??    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
   }
   mOutRad2 = (mOutRad+mErr)*(mOutRad+mErr);
   mSin = sin(mThet);
@@ -103,8 +107,8 @@ static const double kSqrHlf = sqrt(0.5);
     if (mLim[1][i]<lim)	mLim[1][i] = lim;
 
 		// if spheric part of "cone" is important
-    if      (fabs(mDir[i])> mCos*nor) {mLim[1][i] =  mOutRad;} 
-    else if (fabs(mDir[i])<-mCos*nor) {mLim[0][i] = -mOutRad;}
+    if      (mDir[i]> mCos) {mLim[1][i] =  mOutRad;} 
+    else if (mDir[i]<-mCos) {mLim[0][i] = -mOutRad;}
       
       		// Move to global system 
     mLim[0][i]+= mPos[i];
