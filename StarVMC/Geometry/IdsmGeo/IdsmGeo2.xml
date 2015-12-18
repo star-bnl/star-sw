@@ -307,10 +307,8 @@
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
 
 <Create    block="IDSM"  />
-<Placement block="IDSM"   konly="'MANY'" group="TpcRefSys" in="CAVE" >
+<Placement block="IDSM"   konly="'MANY'" group="TpcRefSys" in="CAVE" x="IDSA_x"  y="IDSA_y"  z="IDSA_z"   >
     
-    <Translation  x="IDSA_x"  y="IDSA_y"  z="IDSA_z" />
-
     <Rotation thetax="IDSA_thetax" phix="IDSA_phix"
               thetay="IDSA_thetay" phiy="IDSA_phiy"
               thetaz="IDSA_thetaz" phiz="IDSA_phiz" />
