@@ -14,6 +14,7 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_TpcSecRowBC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StdEdxY2Maker/StTpcdEdxCorrection.h"
@@ -333,18 +334,32 @@ Int_t StSpaceChargeDistMaker::Make() {
 
               // dE/dx corrections to charge copied from StTpcRSMaker
               memset(&CdEdx, 0, sizeof(dEdxY2_t));
+              CdEdx.DeltaZ = 5.2;
+              CdEdx.QRatio = -2;
+              CdEdx.QRatioA= -2.;
+              CdEdx.QSumA  = 0;
               CdEdx.sector = i+1;
               CdEdx.row    = j+1;
+              Double_t Qcm = St_TpcAvgCurrentC::instance()->AcChargeRowL(CdEdx.sector,CdEdx.row); // C/cm
               CdEdx.pad    = tpcHit->pad();
-              Double_t edge = CdEdx.pad;
-              if (edge > 0.5*Npads[j])
-                edge -= Npads[j] + 1;
-              CdEdx.edge   = edge;
+              CdEdx.edge   = CdEdx.pad;
+              if (CdEdx.edge > 0.5*Npads[j])
+                CdEdx.edge += 1 - Npads[j];
               CdEdx.dE     = charge;
+              CdEdx.adc    = tpcHit->adc();
               CdEdx.dx     = XWID[j];
               CdEdx.xyz[0] = positionL.x();
               CdEdx.xyz[1] = positionL.y();
               CdEdx.xyz[2] = positionL.z();
+              Double_t probablePad = Npads[j]/2;
+              Double_t pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(CdEdx.row);
+              Double_t PhiMax = TMath::ATan2(probablePad*pitch, Xpads[j]);
+              CdEdx.PhiR   = TMath::ATan2(CdEdx.xyz[0],CdEdx.xyz[1])/PhiMax;
+              //CdEdx.xyzD[] left as 0 as these hits are not necessarily on tracks
+              CdEdx.zG     = CdEdx.xyz[2];
+              CdEdx.Qcm    = 1e6*Qcm; // uC/cm
+              CdEdx.Crow   = St_TpcAvgCurrentC::instance()->AvCurrRow(CdEdx.sector,CdEdx.row);
+              CdEdx.Zdc    = zdcc;
               //CdEdx.ZdriftDistance = coorLS.position().z(); // drift length
               // random drift length (may be wrong by as much as +/-full drift length)
               // is worse than fixed at half full drift length (wrong by as much as
@@ -589,8 +604,11 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.6 2015/05/19 19:36:09 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.7 2015/12/18 17:31:40 genevb Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.7  2015/12/18 17:31:40  genevb
+// Updated copy of TpcRS code for dE/dx
+//
 // Revision 1.6  2015/05/19 19:36:09  genevb
 // Code cleanup in preparation for C++11
 //
