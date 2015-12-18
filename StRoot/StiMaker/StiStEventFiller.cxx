@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.111 2015/12/03 19:12:24 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.112 2015/12/18 03:50:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.112  2015/12/18 03:50:06  perev
+ * *** empty log message ***
+ *
  * Revision 2.111  2015/12/03 19:12:24  perev
  * Remove redundant GTrack error: mFlag: is Negative
  *
@@ -815,6 +818,8 @@ void StiStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+      double rxy = detInfo->firstPoint().perp();
+      assert(rxy < 4);
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
@@ -831,6 +836,8 @@ void StiStEventFiller::fillEventPrimaries()
 //VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
       continue;
       }
+      rxy = pTrack->geometry()->origin().perp();
+      assert(rxy<4);
       fillTrackCount2++;
       if (kTrack->getPointCount()<15) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
@@ -883,9 +890,11 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      if (!detector) 		continue;
       assert(detector == stiHit->detector());
-      assert(stiHit->timesUsed());
+      assert(!detector || stiHit->timesUsed());
+      if (!fistNode) fistNode = node;
+      lastNode = node;
+      if (!detector) 		continue;
 
 //		Count used hits for tracks tpc hits >10
       if (nTpcHits > 10) {
@@ -896,8 +905,6 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
       } }
-      if (!fistNode) fistNode = node;
-      lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
