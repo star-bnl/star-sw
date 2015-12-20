@@ -1,5 +1,5 @@
 #ifndef __StKFVerticesCollection_h__
-// $Id: StKFVerticesCollection.h,v 2.3 2015/01/05 21:04:31 fisyak Exp $
+// $Id: StKFVerticesCollection.h,v 2.3 2015/12/20 01:06:39 fisyak Exp $
 #define __StKFVerticesCollection_h__
 #include "TObject.h"
 #include "TObjArray.h"
@@ -48,6 +48,9 @@ class Map_t {
     Double_t    Weight;
 };
 // $Log: StKFVerticesCollection.h,v $
+// Revision 2.3  2015/12/20 01:06:39  fisyak
+// Merge
+//
 // Revision 2.3  2015/01/05 21:04:31  fisyak
 // Add access to TMVA ranking
 //

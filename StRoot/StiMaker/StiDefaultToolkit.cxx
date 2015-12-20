@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.46 2015/08/28 23:57:53 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.47 2015/12/20 01:06:39 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.47  2015/12/20 01:06:39  fisyak
+ * Merge
+ *
  * Revision 2.46  2015/08/28 23:57:53  perev
  * Cleanup
  *

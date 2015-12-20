@@ -609,44 +609,11 @@
             <Material name="Air"  />
             <Medium name="Standard"  />
             <Shape type="Tube" rmax="btog_Rmax+btog_X0" rmin="btog_Rmin+btog_X0" dz="btog_dz+btog_Z0"  />
-
-            <If expr="(btog_choice==7)"  >
-                !print *,' TOF: btog_choice=7: This is the Run-IV geometry...' 
-            </If>
-            
-            <If expr="(btog_choice==8)"  >
-                !print *,' TOF: btog_choice=8: This is the Run-V geometry...' 
-            </If>
-            
-            <If expr="(btog_choice==9)"  >
-                !print *,' TOF: btog_choice=9: This is the Run-VI geometry...' 
-            </If>
-            
-            <If expr="(btog_choice==10)"  >
-                !print *,' TOF: btog_choice=10: This is the Run-VII geometry...' 
-            </If>
-            
-            <If expr="(btog_choice==11)"  >
-                !print *,' TOF: btog_choice=11: This is the Run-VIII geometry...' 
-            </If>
-            
-            <If expr="(btog_choice==12)"  >
-                !print *,' TOF: btog_choice=12: This is the Run-IX geometry...' 
-            </If>
-            
-
+     
             choice = 1                           ! ctb 
-            <If expr="(btog_choice==2)"  >
-                choice= 2     ! full tofp 
-            </If>
-            
-            <If expr="(btog_choice==6)"  >
-                choice= 6     ! full tofr 
-            </If>
-            
-            <If expr="(btog_choice==12)"  >
-                choice=12     ! run-9 selection (west) 
-            </If>
+            <If expr="(btog_choice==2)" > choice =  2     ! full tofp  </If>            
+            <If expr="(btog_choice==6)" > choice =  6     ! full tofr   </If>            
+            <If expr="(btog_choice==12)"> choice = 12     ! run-9 selection (west) </If>
             
             <Create block="BTOH"  />
             <Placement z="+btog_dz/2+btog_Z0" block="BTOH"  >
@@ -654,9 +621,7 @@
             </Placement>
             
             choice = btog_choice                    
-            <If expr="(btog_choice==12)"  >
-                choice=-12    ! run-9 selection (east) 
-            </If>
+            <If expr="(btog_choice==12)"> choice =-12    ! run-9 selection (east) </If>
             
             <Create block="BTOH"  />
             <Placement z="-btog_dz/2-btog_Z0" block="BTOH"  >
@@ -669,136 +634,72 @@
             <Shape type="Tube" dz="btog_dz/2"  />
 
             <Do var="is" from="1" to="60"  >
+
                 tof=0                                        
-                <If expr="(choice==2)"  >
-                    tof=1     
-                </If>
+                <If expr="(choice==2)">                                     tof=1                </If>                
+                <If expr="(choice==3&amp;46&lt;=is&amp;is&lt;=60)"  >       tof=1                </If>                
+                <If expr="(choice==4&amp;is==btog_posit1(1))"  >            tof=1                </If>                
+                <If expr="(choice==5&amp;is==btog_posit1(1))"  >            tof=1                </If>                
+                <If expr="(choice==5&amp;is==btog_posit2)"  >               tof=2                </If>                
+                <If expr="(choice==6)"  >                                   tof=7                </If>                
+                <If expr="(choice==7&amp;is==btog_posit1(2))"  >            tof=1                </If>                
+                <If expr="(choice==7&amp;is==btog_posit2)"  >               tof=3                </If>
+                <If expr="(choice==8&amp;is==btog_posit3)"  >               tof=4                </If>                
+                <If expr="(choice==9&amp;is==btog_posit3)"  >               tof=5                </If>                
+                <If expr="(choice==10&amp;is==btog_posit3)"  >              tof=6                </If>                
+                <If expr="(choice==11&amp;is==btog_posit4(1))"  >           tof=7                </If>                
+                <If expr="(choice==11&amp;is==btog_posit4(2))"  >           tof=7                </If>                
+                <If expr="(choice==11&amp;is==btog_posit4(3))"  >           tof=7                </If>                
+                <If expr="(choice==11&amp;is==btog_posit4(4))"  >           tof=7                </If>                
+                <If expr="(choice==11&amp;is==btog_posit4(5))"  >           tof=7                </If>                
+                <If expr="(choice==12&amp;btog_posit5(is)==1)"  >           tof= 7               </If>                
+                <If expr="(choice==12&amp;btog_posit5(is)==0)"  >           tof=-1               </If>                
+                <If expr="(choice==-12&amp;btog_posit5(is+60)==1)"  >       tof= 7               </If>                
+                <If expr="(choice==-12&amp;btog_posit5(is+60)==0)"  >       tof=-1               </If>
                 
-                <If expr="(choice==3&amp;46&lt;=is&amp;is&lt;=60)"  >
-                    tof=1    
-                </If>
-                
-                <If expr="(choice==4&amp;is==btog_posit1(1))"  >
-                    tof=1    
-                </If>
-                
-                <If expr="(choice==5&amp;is==btog_posit1(1))"  >
-                    tof=1    
-                </If>
-                
-                <If expr="(choice==5&amp;is==btog_posit2)"  >
-                    tof=2    
-                </If>
-                
-                <If expr="(choice==6)"  >
-                    tof=7    
-                </If>
-                
-                <If expr="(choice==7&amp;is==btog_posit1(2))"  >
-                    tof=1    
-                </If>
-                
-                <If expr="(choice==7&amp;is==btog_posit2)"  >
-                    tof=3    
-                </If>
-                
-                <If expr="(choice==8&amp;is==btog_posit3)"  >
-                    tof=4   
-                </If>
-                
-                <If expr="(choice==9&amp;is==btog_posit3)"  >
-                    tof=5   
-                </If>
-                
-                <If expr="(choice==10&amp;is==btog_posit3)"  >
-                    tof=6  
-                </If>
-                
-                <If expr="(choice==11&amp;is==btog_posit4(1))"  >
-                    tof=7  
-                </If>
-                
-                <If expr="(choice==11&amp;is==btog_posit4(2))"  >
-                    tof=7  
-                </If>
-                
-                <If expr="(choice==11&amp;is==btog_posit4(3))"  >
-                    tof=7  
-                </If>
-                
-                <If expr="(choice==11&amp;is==btog_posit4(4))"  >
-                    tof=7  
-                </If>
-                
-                <If expr="(choice==11&amp;is==btog_posit4(5))"  >
-                    tof=7  
-                </If>
-                
-
-                <If expr="(choice==12&amp;btog_posit5(is)==1)"  >
-                    tof= 7 
-                </If>
-                
-                <If expr="(choice==12&amp;btog_posit5(is)==0)"  >
-                    tof=-1 
-                </If>
-                
-                <If expr="(choice==-12&amp;btog_posit5(is+60)==1)"  >
-                    tof= 7 
-                </If>
-                
-                <If expr="(choice==-12&amp;btog_posit5(is+60)==0)"  >
-                    tof=-1 
-                </If>
-                
-
                 <If expr="choice==11"  >
+
                     <If expr="is==btog_posit4(1)"  >
-                        <Create block="BSEC"  />
+                        <Create    block="BSEC"  />
                         <Placement block="BSEC"  >
                             <Rotation alphaz="102+6*is+btog_dphi1(1)"  />
                         </Placement>
                         
-                        <Elif expr="is==btog_posit4(2)"  >
-                            <Create block="BSEC"  />
-                            <Placement block="BSEC"  >
-                                <Rotation alphaz="102+6*is+btog_dphi1(2)"  />
-                            </Placement>
+                    <Elif expr="is==btog_posit4(2)"  >
+                        <Create block="BSEC"  />
+                        <Placement block="BSEC"  >
+                        <Rotation alphaz="102+6*is+btog_dphi1(2)"  />
+                        </Placement>
                             
-                            <Elif expr="is==btog_posit4(3)"  >
-                                <Create block="BSEC"  />
-                                <Placement block="BSEC"  >
-                                    <Rotation alphaz="102+6*is+btog_dphi1(3)"  />
-                                </Placement>
+                    <Elif expr="is==btog_posit4(3)"  >
+                        <Create block="BSEC"  />
+                        <Placement block="BSEC"  >
+                        <Rotation alphaz="102+6*is+btog_dphi1(3)"  />
+                        </Placement>
                                 
-                                <Elif expr="is==btog_posit4(4)"  >
-                                    <Create block="BSEC"  />
-                                    <Placement block="BSEC"  >
-                                        <Rotation alphaz="102+6*is+btog_dphi1(4)"  />
-                                    </Placement>
+                    <Elif expr="is==btog_posit4(4)"  >
+                        <Create block="BSEC"  />
+                        <Placement block="BSEC"  >
+                        <Rotation alphaz="102+6*is+btog_dphi1(4)"  />
+                        </Placement>
                                     
-                                    <Elif expr="is==btog_posit4(5)"  >
+                    <Elif expr="is==btog_posit4(5)"  >
+                        <Create block="BSEC"  />
+                        <Placement block="BSEC"  >
+                        <Rotation alphaz="102+6*is+btog_dphi1(5)"  />
+                        </Placement>
+                    </Elif>
+                                    
+                                    <Else>
                                         <Create block="BSEC"  />
                                         <Placement block="BSEC"  >
-                                            <Rotation alphaz="102+6*is+btog_dphi1(5)"  />
+                                        <Rotation alphaz="102+6*is"  />
                                         </Placement>
                                         
-                                    </Elif>
-                                    
-                                    <Else  >
-                                        <Create block="BSEC"  />
-                                        <Placement block="BSEC"  >
-                                            <Rotation alphaz="102+6*is"  />
-                                        </Placement>
-                                        
-                                    </Else>
-                                    
-                                </Elif>
-                                
-                            </Elif>
-                            
-                        </Elif>
-                        
+                                    </Else>                                    
+                    </Elif>                      
+                    </Elif>                            
+                    </Elif>                      
                     </If>
                     
                     <Else  >

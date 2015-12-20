@@ -1182,7 +1182,7 @@
 	      <Call routine="trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
 	      
               <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
-              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" kOnly="'ONLY'">
+              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'ONLY'">
                 <Rotation alphaz="-SFJP_AlphaZ+tilt" />
               </Placement>
               

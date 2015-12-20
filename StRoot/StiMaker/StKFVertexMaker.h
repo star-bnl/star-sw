@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.h,v 2.5 2015/01/05 21:04:31 fisyak Exp $
+// $Id: StKFVertexMaker.h,v 2.5 2015/12/20 01:06:39 fisyak Exp $
 
 #ifndef STAR_StKFVertexMaker
 #define STAR_StKFVertexMaker
@@ -87,13 +87,16 @@ class StKFVertexMaker : public StMaker {
   Int_t                          fNGoodGlobals;
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2015/01/05 21:04:31 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2015/12/20 01:06:39 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
   ClassDef(StKFVertexMaker,0)   //StAF chain virtual base class for Makers
 };
 // $Log: StKFVertexMaker.h,v $
+// Revision 2.5  2015/12/20 01:06:39  fisyak
+// Merge
+//
 // Revision 2.5  2015/01/05 21:04:31  fisyak
 // Add access to TMVA ranking
 //

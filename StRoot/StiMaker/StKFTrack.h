@@ -1,6 +1,6 @@
 #ifndef __StKFTrack_h__
 #define __StKFTrack_h__
-// $Id: StKFTrack.h,v 2.3 2015/01/05 21:04:31 fisyak Exp $
+// $Id: StKFTrack.h,v 2.3 2015/12/20 01:06:39 fisyak Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "KFParticle/KFParticle.h"
@@ -42,6 +42,9 @@ private:
   ClassDef(StKFTrack,0)
 };
 // $Log: StKFTrack.h,v $
+// Revision 2.3  2015/12/20 01:06:39  fisyak
+// Merge
+//
 // Revision 2.3  2015/01/05 21:04:31  fisyak
 // Add access to TMVA ranking
 //

@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.9 2015/11/05 17:54:57 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.10 2015/12/11 18:05:08 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.10  2015/12/11 18:05:08  akio
+// move some LOG_INFO to LOG_DEBUG
+//
 // Revision 1.9  2015/11/05 17:54:57  akio
 // Adding option to scale up shower shape function for large cells
 //
@@ -381,7 +384,7 @@ Bool_t StFmsEventClusterer::fitClusters() {
 		(*iter)->setChiSquare(chi2);
 		//badFit = true;
 	    }else{
-		LOG_INFO << "Taking 1-photon fit" << endm;
+		LOG_DEBUG << "Taking 1-photon fit" << endm;
 	    }
 	}
     }  // if
@@ -553,18 +556,18 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
     const StFmsTower* tower = searchClusterTowers(det, row, column, **cluster);
   // If tower is nullptr, the photon doesn't hit in a tower in this cluster.
   if (!tower) {
-      LOG_INFO << "StFmsEventClusterer::validate2ndPhoton No hit on photon" << endm;
+      LOG_DEBUG << "StFmsEventClusterer::validate2ndPhoton No hit on photon" << endm;
       return false;
   }  // if
   // Check if the fitted energy is too large compared to the energy of the tower
   if (tower->hit()->energy() < VALID_FT * photon->energy) {
-      LOG_INFO << "StFmsEventClusterer::validate2ndPhoton hit on photon too low" << endm;
+      LOG_DEBUG << "StFmsEventClusterer::validate2ndPhoton hit on photon too low" << endm;
       return false;
   }  // ifvalidate2ndPhoton
   // Check if the 2nd photon's "high-hower" energy is too large compared to its
   // fitted energy. If so, it is probably splitting one photon into two
   if (tower->hit()->energy() > VALID_2ND_FT * photonEnergyInTower(tower, photon)) {
-      LOG_INFO << "StFmsEventClusterer::validate2ndPhoton photon energy too low compared to other photon" << endm;
+      LOG_DEBUG << "StFmsEventClusterer::validate2ndPhoton photon energy too low compared to other photon" << endm;
       return false;
   }  // if
   // Check that the 2nd photon is not near the edge of another cluster
@@ -573,12 +576,12 @@ bool StFmsEventClusterer::validate2ndPhoton(ClusterConstIter cluster) const {
   for (ClusterConstIter i = mClusters.begin(); i != mClusters.end(); ++i) {
     if (i != cluster) {  // Skip the photon's own cluster
       if (photonEnergyInCluster(i->get(), photon) > VALID_E_OWN * energyInOwnCluster) {
-	  LOG_INFO << "StFmsEventClusterer::validate2ndPhoton photon is at edge of another cluster" << endm;
+	  LOG_DEBUG << "StFmsEventClusterer::validate2ndPhoton photon is at edge of another cluster" << endm;
         return false;  // Stop as soon as we fail for one cluster
       }  // if
     }  // if
   }  // for
-  LOG_INFO << "StFmsEventClusterer::validate2ndPhoton OK" << endm;
+  LOG_DEBUG << "StFmsEventClusterer::validate2ndPhoton OK" << endm;
   return true;  // The photon passed all tests; it's real
 }
 }  // namespace FMSCluster

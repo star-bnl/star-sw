@@ -304,6 +304,9 @@
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
+  Revision 1.9  2015/12/20 01:06:41  fisyak
+  Merge
+
   Revision 1.8  2014/12/23 20:25:23  jwebb
   MAGP can be placed with ONLY now, as it doesn't overlap with neighbors.
 

@@ -2,7 +2,7 @@
    Reconstruction of primary vertices from MuDst.
    In directory where you have *MuDst.root files run
    root.exe lMuDstK.C MuPrmVtx.C+
-   $Id: MuPrmVtx.C,v 2.3 2013/04/10 22:14:20 fisyak Exp $
+   $Id: MuPrmVtx.C,v 2.4 2015/12/20 01:06:39 fisyak Exp $
  */
 #define DEBUG
 #define __IDTRUTH__
@@ -566,6 +566,9 @@ void MuPrmVtx(const Char_t *files = "./*MuDst.root", const Char_t *Out="") {
 }
 //________________________________________________________________________________
 // $Log: MuPrmVtx.C,v $
+// Revision 2.4  2015/12/20 01:06:39  fisyak
+// Merge
+//
 // Revision 2.3  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //

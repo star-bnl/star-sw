@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.228 2015/12/20 01:06:39 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -650,8 +650,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.228 2015/12/20 01:06:39 fisyak Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.228  2015/12/20 01:06:39  fisyak
+// Merge
+//
 // Revision 1.227  2015/07/07 23:31:52  perev
 // Clean mess of reset and clear methods
 //

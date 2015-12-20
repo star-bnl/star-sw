@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.5 2015/11/05 21:56:44 zhoulong Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.6 2015/12/14 14:33:42 zhoulong Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.6  2015/12/14 14:33:42  zhoulong
+ * fixed CMN failed chip rejection error
+ *
  * Revision 1.5  2015/11/05 21:56:44  zhoulong
  * Add pedestal subtraction and CMN suppression algorithm and did some clearence
  *
@@ -925,7 +928,7 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
 
       // Mask out CMN failed chips
       if(oldchip!=chipIndex) chipflag = 0;
-      if(strip==0 && errorcode==CMNERRORCODE) chipflag = 1;
+      if(strip%nSstStripsPerChip==0 && errorcode==CMNERRORCODE) chipflag = 1;
       if(chipflag) continue;
       
       if (!Shift(mEventrunumber, strip)) {
