@@ -98,7 +98,7 @@ Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
   //  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
   Double_t Sigma = sigma;
   if (Sigma < 0.0) Sigma = 0.0;
-  if (Sigma > 0.99) Sigma = 0.99;
+  if (Sigma > 0.50) Sigma = 0.50;
   return mdEdxMPV->Interpolate(n_PL10, Sigma);
 }
 //________________________________________________________________________________

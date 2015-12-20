@@ -17,6 +17,7 @@
 #include "TCanvas.h"
 #include "TClassTable.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "TLegend.h"
 #include "TROOT.h"
 #else
@@ -90,6 +91,22 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+}
+//________________________________________________________________________________
+Double_t dNdx(Double_t *x,Double_t *par) {
+  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = 1.;
+  Double_t dx2 = 1;
+  if (par[1] > 1.0) {
+    charge = 2;
+    poverm *= charge;
+    dx2 = TMath::Log2(5.);
+  }
+  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
 }
 #ifndef __CINT__
 //________________________________________________________________________________
@@ -187,6 +204,7 @@ void bichselG10(const Char_t *type="Bz") {
     else if (Type.Contains("I70M",TString::kIgnoreCase)) f = 5;
     else if (Type.Contains("I70",TString::kIgnoreCase))  f = 3;
     else if (Type.Contains("I60",TString::kIgnoreCase))  f = 4;
+    else if (Type.Contains("N",TString::kIgnoreCase))    f = 6;
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%s%i",type,FNames[f],Names[h],(int)log2dx[dx]);
     cout << "Make " << FunName << endl;
@@ -198,6 +216,7 @@ void bichselG10(const Char_t *type="Bz") {
     if      (f == 3) func = new TF1(FunName,bichsel70,xmin, xmax,2);
     else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,2);
     else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,2);
+    else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,2);
     else {
       return;
     }
