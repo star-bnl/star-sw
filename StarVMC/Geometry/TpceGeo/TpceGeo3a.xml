@@ -443,7 +443,7 @@
         <Fill name="TPCG" comment="// TPC basic dimensions"  >
             <var name="version" value="3.0" comment="// version    =&gt; current version "  />
             <var name="Rmin" value="46.107" comment="// Rmin          =&gt; TPC envelope inner radius "  />
-            <var name="Rmax" value="206.75" comment="// Rmax          =&gt; TPC envelope outer radius "  />
+            <var name="Rmax" value="206.75/cos15" comment="// Rmax          =&gt; TPC envelope outer radius "  />
             <var name="RminIFC" value="46.6" comment="// RminIFC    =&gt; inner radius TPC IFC  : A.Lebedev measurement 10/16/08 "  />
             <var name="LengthT" value="2*271.0" comment="// LengthT    =&gt; TPC full length up to front of EEMC "  />
             <var name="Length" value="2*259.685" comment="// Length        =&gt; TPC full length including RDOs "  />

@@ -8,7 +8,7 @@
   <Created date="19 March 1996 "  />
 
   <Content  >
-    MAGP,COIL,MTCL,MPTV,MPCV,MRET,MRGV,MSEC,MBAR,MCSE, PANC,PAWT,PTNC,PTWT
+    MAGP,COIL,MTCL,MPTV,MPCV,MRET,MRGV,MSEC,MBAR,MCSE, PANC,PAWT
   </Content>
         
 
@@ -48,11 +48,7 @@
     <var name="PoleCavR" />
     <var name="PoleCavD" />
     <var name="tcoilDZ"  />
-    <var name="dyzPancaPT"/>
-    <var name="RPTwater"/>
     <var name="etacut"   />
-    <var name="dZPMT" />
-    <var name="dRPMT" />
   </Structure>
         
 
@@ -72,19 +68,19 @@
     <var name="test" value="0" comment=" geometry type: 0-standard, 1-test "  />
   </Fill>
   
-  <Fill name="MBAR" comment="Barrel Part, 310e1a"  >
-    <var name="CoilRmn"   value="104.041 * 2.54" comment=" barrel coil inner radius (barrel minimum), John Scheblein, 01/24/14 "  />
-    <var name="CoilRmx"   value="117.909 * 2.54" comment=" barrel coil outer radius, John Scheblein, 01/24/14 "  />
-    <var name="CoilLen"   value="(247.50+17.812-20.129) * 2.54" comment=" barrel coil full length "  />
-    <var name="RetYRmn"   value="119.42 * 2.54" comment=" Return Yoke minimum radius "  />
-    <var name="RetYLen"   value="269.19 * 2.54" comment=" Return Yoke full length "  />
-    <var name="BarWidin"  value="17.5 * 2.54"  comment=" return yoke bare inner width "  />
-    <var name="BarWidou"  value="22.5 * 2.54"  comment=" return yoke bare outer width "  />
-    <var name="BarHeigh"  value="24.0 * 2.54"  comment=" return yoke bare height "  />
-    <var name="RingRmn"   value="103.750 * 2.54" comment=" Return Ring minimum radius "  />
+  <Fill name="MBAR" comment="Barrel Part"  >
+    <var name="CoilRmn"   value="264.90" comment=" barrel coil inner radius (barrel minimum) "  />
+    <var name="CoilRmx"   value="299.30" comment=" barrel coil outer radius "  />
+    <var name="CoilLen"   value="627.40" comment=" barrel coil full length "  />
+    <var name="RetYRmn"   value="303.29" comment=" Return Yoke minimum radius "  />
+    <var name="RetYLen"   value="684.40" comment=" Return Yoke full length "  />
+    <var name="BarWidin"  value="44.34"  comment=" return yoke bare inner width "  />
+    <var name="BarWidou"  value="57.15"  comment=" return yoke bare outer width "  />
+    <var name="BarHeigh"  value="60.00"  comment=" return yoke bare height "  />
+    <var name="RingRmn"   value="263.68" comment=" Return Ring minimum radius "  />
     <var name="Ncoil"     value="12"     comment=" total number of barrel coils "  />
-    <var name="Zcoil"     value="{12.34*2.54, 35.22*2.54, 58.09*2.54, 80.97*2.54, 99.42*2.54, 113.69*2.54}" comment=" coil position "  />
-    <var name="dZcoil"    value="{17.812*2.54, 17.812*2.54, 17.812*2.54, 17.812*2.54, 8.94  *2.54, 17.812*2.54}" comment=" coil width   "  />
+    <var name="Zcoil"     value="{30.95,89.05,147.17,205.25,249.0,288.35}" comment=" coil position "  />
+    <var name="dZcoil"    value="{45.24,45.24,45.24,45.24,22.71,45.24}" comment=" coil width   "  />
     <var name="dzPancake" value="5.39"   comment="aluminium" />
     <var name="dyPancake" value="4.75"   comment="aluminium" />
     <var name="Rwater"    value="0.75"   comment="central round hole radius for cooling water approximated by square" />    
@@ -92,18 +88,14 @@
         
   <Fill name="MEND" comment="EndCap Part"  >
     <var name="PoleZ" value="310.007" comment=" pole tip nominal position "  />
-    <var name="PoleRmn" value="35.440*2.54" comment=" Pole tip inner radius (encap minimum) "  />
-    <var name="PoleRmx" value="99.500*2.54" comment=" Pole tip outer radius "  />
+    <var name="PoleRmn" value="90.028" comment=" Pole tip inner radius (encap minimum) "  />
+    <var name="PoleRmx" value="252.882" comment=" Pole tip outer radius "  />
     <var name="PoleCavR" value="152.4" comment=" Pole tip cavity outer radius "  />
-    <var name="PoleCavD" value="6.5*2.54" comment=" Pole tip cavity depth "  />
-    <var name="tcoilRmn" value="35.440*2.54" comment=" Pole tip trim coil inner radius "  />
-    <var name="tcoilRmx" value="53.860*2.54" comment=" Pole tip trim coil outer radius "  />
-    <var name="tcoilDZ" value="(19.420-14.170)*2.54" comment=" full width of Pole Tip trim Coil "  />
-    <var name="dyzPancaPT" value="2.22"   comment="aluminium" />
-    <var name="RPTwater" value="1.09/2"   comment="central round hole radius (0.615 cm) for cooling water approximated by square" />
+    <var name="PoleCavD" value="18" comment=" Pole tip cavity depth "  />
+    <var name="tcoilRmn" value="91.34" comment=" Pole tip trim coil inner radius "  />
+    <var name="tcoilRmx" value="141.28" comment=" Pole tip trim coil outer radius "  />
+    <var name="tcoilDZ" value="16.5" comment=" full width of Pole Tip trim Coil "  />
     <var name="etacut" value="2" comment=" eta limits for the Pole  "  />
-    <var name="dZPMT" value="16*2.54" comment="length of PMT boxex"/>
-    <var name="dRPMT" value="4*2.54" comment="radius cut of PMT boxex"/>
   </Fill>
         
   <Use struct="MAGG"  />
@@ -114,15 +106,9 @@
     <Component name="H2" a="1"  z="1" w="2" />
     <Component name="O"  a="16" z="8" w="1" />
   </Mixture>
-  <Mixture  name="PMMA" dens="0.0232" >
-    <Component name="C"  a="12" z="6" w="5" />
-    <Component name="H"  a="1"  z="1" w="8" />
-    <Component name="O"  a="16" z="8" w="2" />
-  </Mixture>
+
 
   TanTheta = (exp(+mend_etacut)-exp(-mend_etacut))/2 
-  Rcorner  = magg_Length/TanTheta/2 
-  Zcut     = mend_tcoilRmn*TanTheta-mend_PoleZ 
 
   <Create    block="MAGP"  />
   <Placement block="MAGP" in="CAVE" group="MagRefSys" konly="ONLY" />
@@ -130,14 +116,12 @@
 
   <Volume name="MAGP" comment="is the magnet mother"  >
 
-    <Material    name="PMMA"  />
+    <Material  name="Air"  />
+    <Medium    name="Standard"  />
     <Attribute for="MAGP" seen="0" colo="1" />
 
-    <Shape type="PCON" 
-  zi="{-magg_Length/2, -mend_PoleZ, -mend_PoleZ,  mend_PoleZ,  mend_PoleZ,mend_PoleZ+Zcut,magg_Length/2}" 
- rmn="{  mend_PoleRmn,mend_PoleRmn,mbar_CoilRmn,mbar_CoilRmn,mend_PoleRmn,   mend_PoleRmn,      Rcorner}" 
- rmx="{     magg_Rmax,   magg_Rmax,   magg_Rmax,   magg_Rmax,   magg_Rmax,      magg_Rmax,    magg_Rmax}" 
- nz="7" phi1="0" dphi="360"  /> 
+    <If expr="magg_test==1"><Shape type="TUBE" rmax="magg_Rmax" rmin="mend_PoleRmn" dz="magg_Length/2"  />
+    <Else>                  <Shape type="PCON" zi="{-magg_Length/2,-mend_PoleZ,-mend_PoleZ,mend_PoleZ,mend_PoleZ,magg_Length/2}" rmn="{mend_PoleRmn,mend_PoleRmn,mbar_CoilRmn,mbar_CoilRmn,mend_PoleRmn,mend_PoleRmn}" rmx="{magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax}" nz="6" phi1="0" dphi="360"  /> </Else> </If>
             
     <Create    block="COIL"  />
     <Placement block="COIL"  />
@@ -162,7 +146,7 @@
         
   <Volume name="COIL" comment="is the main coil mother"  >
 
-    <Attribute for="COIL" seen="1" colo="2"  />
+    <Attribute for="COIL" seen="0" colo="2"  />
     <Shape type="TUBE" rmax="mbar_coilRmx" rmin="mbar_coilRmn" dz="mbar_coilLen/2"  />
 
     <Do var="I_coil" from="1" to="nint(mbar_Ncoil/2)"  >
@@ -176,6 +160,14 @@
   </Volume>
         
   <Volume name="MCSE" comment="is a single barrel coil"  >
+
+    <!-- Simplified single barrel coil -->
+    <If expr="magg_version==1.0">
+      <Material  name="Aluminium"  />
+      <Attribute for="MCSE" seen="1" colo="3"  />
+      <Shape     type="TUBE" dz="mbar_DzCoil(I_coil)/2"  />
+
+    <Else>
 
     <!-- Detailed single barrel coil.  Everything bonded w/ epoxy. -->
     <Mixture name="epoxy" dens="1.3" >    
@@ -193,21 +185,25 @@
     dR         = (mbar_CoilRmx - mbar_CoilRmn)/nYPanCakes 
 
     <!-- Loop over R and Z and place pancakes -->
-    <For var="i"     from="1"   to="nYPancakes">
+    <For var="i"     from="1"   to="nZPancakes">
       r1 = mbar_CoilRmn + dR*(i-0.5) - mbar_dyPanCake/2
       r2 = r1 + mbar_dyPanCake 
       
       <Create block="PANC" />
-      <For var="j"   from="1"   to="nZPancakes">
+      <For var="j"   from="1"   to="nYPancakes">
 	<Placement block="PANC" z="-mbar_DzCoil(I_coil)/2+dZ*(j-0.5)" />
       </For>
       
     </For>
+
+    </Else>
+    </If>
+
   </Volume>
 
   <Volume name="PANC"      comment="The coil conductor">
     <Material  name="Aluminium" />
-    <Attribute for="PANC" seen="1" colo="0" />
+    <Attribute for="PANC" seen="0" colo="0" />
     <Shape     type="TUBE"  rmin="r1"  rmax="r2"  dz="MBAR_dzPancake/2" />
     <Create    block="PAWT" />
     <Placement block="PAWT" />
@@ -215,13 +211,13 @@
 
   <Volume name="PAWT"      comment="Water cooling in the coil">
     <Material name="water" />
-    <Attribute for="PAWT" seen="1" colo="2" />
+    <Attribute for="PAWT" seen="0" colo="2" />
     <Shape type="TUBE" rmin="(r1+r2)/2-MBAR_Rwater" rmax="(r1+r2)/2+MBAR_Rwater" dz="MBAR_Rwater"/>
   </Volume>
         
 
   <Volume name="MRET" comment="is Magnet RETurn Yoke"  >
-    <Attribute for="MRET" seen="1" colo="7"  />
+    <Attribute for="MRET" seen="0" colo="3"  />
     <Shape type="TUBE" rmax="magg_Rmax" rmin="mbar_RetYRmn" dz="mbar_RetYLen/2"  />
     <Create block="MSEC"  />
   </Volume>
@@ -237,7 +233,7 @@
 	
   <Volume name="MBAR" comment="is a single return yoke bar"  >
     <Material name="Iron"  />
-    <Attribute for="MBAR" seen="1" colo="7"  />
+    <Attribute for="MBAR" seen="1" colo="3"  />
     <Shape type="TRD1" dz="mbar_BarHeigh/2" dx2="mbar_BarWidou/2" dx1="mbar_BarWidin/2" dy="mbar_RetYLen/2"  />
   </Volume>
         
@@ -249,6 +245,8 @@
   </Volume>
         
   <Volume name="MPTV" comment="is the magnet pole-tip volume"  >
+    Zcut     = mend_tcoilRmn*TanTheta-mend_PoleZ 
+    Rcorner  = magg_Length/TanTheta/2 
     <Material name="Iron"  />
     <Attribute for="MPTV" seen="1" colo="6"  />
     <Shape type="PCON" zi="{0,Zcut,magg_Length/2-mend_PoleZ}" rmn="{mend_TcoilRmn,mend_TcoilRmn,Rcorner}" rmx="{mend_PoleRmx,mend_PoleRmx,mend_PoleRmx}" nz="3" phi1="0" dphi="360"  />
@@ -256,56 +254,25 @@
     <Placement  block="MPCV" z="+mend_PoleCavD/2" />
   </Volume>
         
-  <Volume name="MPCV" comment="is the coil cavity in the pole-tip"  >
-    <Material name="Air"  />
+  <Volume name="MPCV" comment="is the coil cavity in the pole-tip (filled with cables ?)"  >
+    <Material name="Aluminium"  />
     <Attribute for="MPCV" seen="1" colo="7"  />
     <Shape type="TUBE" rmax="mend_PoleCavR" rmin="mend_tcoilRmn" dz="mend_PoleCavD/2"  />
     <Create block="MTCL"  />
-    <Placement block="MTCL" z="-mend_tcoilDZ/2+mend_PoleCavD/2" />   
+    <Placement block="MTCL" z="+mend_tcoilDZ/2-mend_PoleCavD/2" />   
   </Volume>
         
   <Volume name="MTCL" comment="is TRIM COIL Volume (filled with aluminum)"  >
-    <Material name="epoxy"  />
-    <Attribute for="MTCL" seen="1" colo="7"  />
+    <Material name="Aluminium"  />
+    <Attribute for="MTCL" seen="0" colo="3"  />
     <Shape type="TUBE" rmax="mend_tcoilRmx" rmin="mend_tcoilRmn" dz="mend_tcoilDZ/2"  />
-
-    <!-- Compute number of pancakes in the coil -->
-    nZPanCakes = mend_tcoilDZ/mend_dyzPanCaPT 
-    dZ         = mend_tcoilDZ/nZPanCakes
-    nYPanCakes = (mend_tcoilRmx - mend_tcoilRmn)/mend_dyzPanCaPT 
-    dR         = (mend_tcoilRmx - mend_tcoilRmn)/nYPanCakes 
-
-    <!-- Loop over R and Z and place pancakes -->
-    <For var="i"     from="1"   to="nYPancakes">
-      r1 = mend_tCoilRmn + dR*(i-0.5) - mend_dyzPancaPT/2
-      r2 = r1 + dR 
-      
-      <Create block="PTNC" />
-      <For var="j"   from="1"   to="nZPancakes">
-	<Placement block="PTNC" z="-mend_tcoilDZ/2+dZ*(j-0.5)" />
-      </For>
-      
-    </For>
-  </Volume>
-  <Volume name="PTNC"      comment="The coil conductor">
-    <Material  name="Aluminium" />
-    <Attribute for="PTNC" seen="1" colo="4" />
-    <Shape     type="TUBE"  rmin="r1"  rmax="r2"  dz="dZ/2" />
-    <Create    block="PTWT" />
-    <Placement block="PTWT" />
-  </Volume>
-
-  <Volume name="PTWT"      comment="Water cooling in the coil">
-    <Material name="water" />
-    <Attribute for="PTWT" seen="1" colo="2" />
-    <Shape type="TUBE" rmin="(r1+r2)/2-MEND_RPTwater" rmax="(r1+r2)/2+MEND_RPTwater" dz="MEND_RPTwater"/>
   </Volume>
         
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
-  Revision 1.9  2015/12/20 01:06:41  fisyak
-  Merge
+  Revision 1.10  2015/12/20 01:54:25  fisyak
+  Move correction done by mistake
 
   Revision 1.8  2014/12/23 20:25:23  jwebb
   MAGP can be placed with ONLY now, as it doesn't overlap with neighbors.
