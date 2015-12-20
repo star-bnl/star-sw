@@ -573,6 +573,7 @@
 	chomp($ROOT_VERSION);
 	my ($ROOT_MAIN,$ROOT_MINOR) = split ('/',$ROOT_VERSION); #print "ROOT_VERSION = $ROOT_VERSION => $ROOT_MAIN $ROOT_MINOR\n";
 	if ($ROOT_MAIN > 5.34 || $ROOT_MAIN == 5.34 && $ROOT_MINOR >= 18) {#VERSION =~ '5.34/18'
+	  # cat /proc/cpuinfo | grep flags | sort -u
 	  $CXXFLAGS .= " -msse -mfpmath=sse";
 	  $CFLAGS   .= " -msse -mfpmath=sse";
 	  $FFLAGS   .= " -msse -mfpmath=sse";
