@@ -301,7 +301,8 @@ enum StDedxMethod {kUndefinedMethodId        = kUndefinedMethodIdentifier,
                   kEnsembleTruncatedMeanId   = kEnsembleTruncatedMeanIdentifier,
                   kLikelihoodFitId           = kLikelihoodFitIdentifier,
                   kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
-                  kOtherMethodId             = kOtherMethodIdentifier};
+		  kOtherMethodId             = kOtherMethodIdentifier,
+                  kOtherMethodId2            = kOtherMethodIdentifier2};
 
 /*!
  * \enum StTrackFittingMethod

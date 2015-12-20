@@ -137,6 +137,9 @@ StDedxPidTraits::method() const
     case kOtherMethodId:
         return kOtherMethodId;
         break;
+    case kOtherMethodId2:
+        return kOtherMethodId2;
+        break;
     default:
         return kUndefinedMethodId;
         break;
