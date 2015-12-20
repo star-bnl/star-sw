@@ -70,7 +70,7 @@
         
 
         <Create block="MUTD"  />
-        <Placement block="MUTD" in="Cave"  >
+        <Placement block="MUTD" in="Cave" konly="'MANY'" >
         </Placement>
         
 
