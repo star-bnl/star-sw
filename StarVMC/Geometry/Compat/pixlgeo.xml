@@ -6,7 +6,7 @@
 <Import file="pams/geometry/pixlgeo/pixlgeo1.g" verbatim="true" />
 <Import file="pams/geometry/pixlgeo/pixlgeo2.g" verbatim="true" />
 <!--
-<Import file="$/pams/geometry/pixlgeo/pixlgeo3.g" verbatim="true" />
+<Import file="pams/geometry/pixlgeo/pixlgeo3.g" verbatim="true" />
 -->
 </Export>
 </Document>

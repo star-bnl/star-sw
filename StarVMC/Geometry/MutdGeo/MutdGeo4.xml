@@ -115,9 +115,13 @@
             <Component name="Si" a="28" z="14" w="1."  />
             <Component name="O" a="16" z="8" w="2."  />
         </Mixture>
+            <Mixture name="Electronics"  dens="1.0335" >
+    <Component name="Si"  a="28.09"   z="12" w="80" />
+    <Component name="Pb"  a="207.19"  z="82" w="20" />
+    </Mixture>
         
         <Create    block="MUTD"  />
-        <Placement block="MUTD" in="Cave" />
+        <Placement block="MUTD" in="Cave" konly="'MANY'" />
 
         
 
@@ -249,8 +253,7 @@
         </Volume>
         
         <Volume name="MTEB" comment="is the bemc electronics box"  >
-            <Material name="Air"  />
-            <Medium name="Standard"  />
+            <Medium name="Electronics"  />
             <Attribute for="MTEB" seen="1" colo="1"  />
             <Shape type="BOX" dx="MTDD_BemcElectBoxdX" dy="MTDD_BemcElectBoxdY"  />
         </Volume>

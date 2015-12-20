@@ -78,6 +78,9 @@
   <varlist type="float" > 
   D1,D2,D3,Z1, wall_xx, wall_yy, wall_zz, wall_dx, wall_dy, wall_dz
   </varlist>
+  <varlist type="float" > 
+  dXX, dYY, dZZ, XX, YY, ZZ
+  </varlist>
 
   <varlist type="int"   > i, j, k </varlist>
 
@@ -147,9 +150,8 @@
       <Component name="Calcium"   a="40.078"  z="20" w="0.2"    />
       <Component name="Iron"      a="55.85"   z="26" w="0.014"  />
     </Mixture>
-            
     <Medium name="Concrete"  />
-    <Attribute for="HALL" seen="1" colo="3"  />
+    <Attribute for="HALL" seen="1" colo="1"  />
 
     D1=cave_Rmax(1)+cave_dconc 
     D2=cave_Rmax(2)+cave_dconc 
@@ -210,11 +212,11 @@
     D3      = CDIM_Dceiling-wall_dy
     wall_yy = D3 
 
-    <Create    block="WALL"  />
+    <Create    block="WALL"  /> <!-- CAVE Floor -->
     <Placement block="WALL" y="wall_yy" />
 
     wall_dy = (D1-CDIM_Dfloor)/2
-    <Create    block="WALL"  />
+    <Create    block="WALL"  /> 
     <Placement block="WALL" y="-cave_Rmax(1)+wall_dy" />
 
 
@@ -223,11 +225,33 @@
     wall_dy = (D3 + CDIM_Dfloor)/2 
     wall_xx = -CDIM_Dnorth + wall_dx 
     wall_yy = (D3 - CDIM_Dfloor)/2  
-
-    <Create block="WALL"  />
+    wall_dz = cave_dz(1) - 244.8; <!-- complicated sourth wall -->
+    <Create block="WALL"  /> 
     <Placement y="wall_yy" x="wall_xx" block="WALL"  />
+    wall_dx = 61.2/2
+    wall_dz = 244.8/2
+    XX = wall_xx + 146.9 + 68 *2.54 / 2 - wall_dx
+    YY = wall_yy
+    ZZ = -cave_dz(1) +  wall_dz
+    <Create block="WALL"  /> 
+    <Placement y="YY" x="XX" z="ZZ"  block="WALL"  />
+    <Placement y="YY" x="XX" z="-ZZ"  block="WALL"  />
 
-                
+    wall_dx = 146.9/2
+    wall_dz = 62/2
+    ZZ = -cave_dz(1) + 244.8 + 123.9 + wall_dz
+    XX = -CDIM_Dnorth + 68 *2.54 + wall_dx
+    <Create block="WALL"  /> 
+    <Placement y="YY" x="XX" z="ZZ"  block="WALL"  />
+
+    wall_dz = (244.8-122.4)/2
+    wall_dx = 62/2
+    ZZ = -cave_dz(1) + 122.4 + wall_dz
+    XX = -CDIM_Dnorth + wall_dx
+    <Create block="WALL"  /> 
+    <Placement y="YY" x="XX" z="ZZ"  block="WALL"  />
+    <Placement y="YY" x="XX" z="-ZZ"  block="WALL"  />
+           <!-- end of complicated waill -->
     wall_zz = (cave_dz(2) + cave_dz(1))/2 
     wall_dz = (cave_dz(2) - cave_dz(1))/2 
     D1 = cave_Rmax(2) 
@@ -485,17 +509,27 @@
 	<Placement y="wall_yy" x="wall_xx" block="MGWP" in="CAVE" />
       </Do>      
     </Do>
-    
   </Volume>
 
         <Volume name="WALL" comment="is the floor (or bottom) of the cave"  >
-            <Mixture name="Concrete" dens="2.5"  >
+<!--            <Mixture name="Concrete" dens="2.5"  >
                 <Component name="Si" a="28.08" z="14" w="1"  />
                 <Component name="O2" a="16" z="8" w="2"  />
-            </Mixture>
+            </Mixture> -->
+<Mixture name="Concrete" dens="2.35"  >
+<Component name="Hydrogen " a="1.00794" z="1" w="0.006"  />
+<Component name="Carbon " a="12.011" z="6" w="0.03"  />
+<Component name="Oxygen " a="15.999" z="8" w="0.5"  />
+<Component name="Sodium " a="22.99" z="11" w="0.01"  />
+<Component name="Aluminium " a="26.98" z="13" w="0.03"  />
+<Component name="Silicon " a="28.09" z="14" w="0.2"  />
+<Component name="Potassium " a="39.098" z="19" w="0.01"  />
+<Component name="Calcium " a="40.078" z="20" w="0.2"  />
+<Component name="Iron " a="55.85" z="26" w="0.014"  />
+</Mixture>
             
             <Medium name="Concrete"  />
-            <Attribute for="WALL" seen="0" colo="3"  />
+            <Attribute for="WALL" seen="1" colo="1"  />
             <Shape type="BOX" dz="wall_dz" dx="wall_dx" dy="wall_dy"  />
         </Volume>
         
@@ -518,7 +552,7 @@
         </Volume>
         
         <Volume name="CRAT" comment="is the electronics crate"  >
-            <Mixture name="Electroncs" dens="0.13"  >
+            <Mixture name="Electronics" dens="0.13"  >
                 <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
                 <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
                 <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
@@ -552,6 +586,8 @@
             <Attribute for="MGWT" seen="0" colo="6"  />
             <Shape type="TUBE" dz="310" rmin="0" rmax="10"  />
         </Volume>
+
+  
 
 </Module>
 </Document>
