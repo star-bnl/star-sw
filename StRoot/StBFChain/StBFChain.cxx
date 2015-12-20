@@ -944,7 +944,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
 //_____________________________________________________________________
 Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort) {
   Opt.Clear();
-  TObjArray *obj = tChain.Tokenize("[^ ;,]+");
+  TObjArray *obj = tChain.Tokenize("[^ ;,]");
   Int_t nParsed = obj->GetEntries();
   Int_t k, N = 0;
   if (GetChain() && GetChain()->Debug() > 2) {
