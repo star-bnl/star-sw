@@ -50,6 +50,7 @@ class StPidStatus {
   StdEdxStatus fI70U; //!
   StdEdxStatus fFitU; //!
   StdEdxStatus fdNdx; //!
+  StdEdxStatus fdNdxU;//!
   StToFStatus  fToF; //!
   Int_t        PiDStatus; //!
   StGlobalTrack *gTrack; //!
