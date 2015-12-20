@@ -1,13 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.114 2015/12/20 01:35:12 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.115 2015/12/20 01:46:56 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.114  2015/12/20 01:35:12  fisyak
- * Move back commits done by mistate
+ * Revision 2.115  2015/12/20 01:46:56  fisyak
+ * Move back commits done by mistake
+ *
+ * Revision 2.113  2015/12/19 03:40:50  perev
+ * assert rxy<4 ==> <9 temporary
  *
  * Revision 2.112  2015/12/18 03:50:06  perev
  * *** empty log message ***
@@ -822,7 +825,7 @@ void StiStEventFiller::fillEventPrimaries()
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
       double rxy = detInfo->firstPoint().perp();
-      assert(rxy < 4);
+      assert(rxy < 9);
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
@@ -840,7 +843,7 @@ void StiStEventFiller::fillEventPrimaries()
       continue;
       }
       rxy = pTrack->geometry()->origin().perp();
-      assert(rxy<4);
+      assert(rxy<9);
       fillTrackCount2++;
       if (kTrack->getPointCount()<15) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
