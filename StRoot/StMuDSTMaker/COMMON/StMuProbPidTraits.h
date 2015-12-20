@@ -31,6 +31,8 @@ public:
   StMuProbPidTraits();
   double dEdxFit() const;                      ///< returns the fitted dEdx value
   double dEdxErrorFit() const;                 ///< returns the fitted dEdx resolution value
+  double dNdxFit() const;                      ///< returns the fitted dNdx value
+  double dNdxErrorFit() const;                 ///< returns the fitted dNdx resolution value
   double dEdxTruncated() const;                ///< returns the truncated 70% dEdx value
   double dEdxErrorTruncated() const;           ///< returns the truncated 70% dEdx resolution value
   double dEdxTrackLength() const;              ///< returns the track length in TPC used for dE/dx calculations
@@ -42,6 +44,8 @@ public:
 
   void   setdEdxFit(double dedx );             ///< sets the fitted dEdx value;
   void   setdEdxErrorFit(double dedx );        ///< sets the fitted dEdx error value;
+  void   setdNdxFit(double dedx );             ///< sets the fitted dNdx value;
+  void   setdNdxErrorFit(double dedx );        ///< sets the fitted dNdx error value;
   void   setdEdxTruncated(double dedx);        ///< sets the truncated dEdx value;
   void   setdEdxErrorTruncated(double dedx);   ///< sets the truncated dEdx error value;
   void   setdEdxTrackLength(double dedx );     ///< sets the track length in TPC used for dE/dx calculations
@@ -54,6 +58,8 @@ protected:
   float mdEdxErrorFit;
   float mdEdxTruncated;
   float mdEdxErrorTruncated;
+  float mdNdxFit;
+  float mdNdxErrorFit;
   float mdEdxTrackLength;
   float mLog2dX;
   float mProbabilities[__NPARTICLES__];      ///< array holding the pid probabilities
@@ -63,6 +69,8 @@ protected:
 
 inline double StMuProbPidTraits::dEdxFit() const {return mdEdxFit;}
 inline double StMuProbPidTraits::dEdxErrorFit() const {return mdEdxErrorFit;}
+inline double StMuProbPidTraits::dNdxFit() const {return mdNdxFit;}
+inline double StMuProbPidTraits::dNdxErrorFit() const {return mdNdxErrorFit;}
 inline double StMuProbPidTraits::dEdxTruncated() const { return mdEdxTruncated;}
 inline double StMuProbPidTraits::dEdxErrorTruncated() const { return mdEdxErrorTruncated;}
 inline double StMuProbPidTraits::dEdxTrackLength() const {return mdEdxTrackLength;}
@@ -73,6 +81,8 @@ inline int    StMuProbPidTraits::numberOfParticles() const { return __NPARTICLES
 
 inline void   StMuProbPidTraits::setdEdxFit(double dEdx ) { mdEdxFit = dEdx; }
 inline void   StMuProbPidTraits::setdEdxErrorFit(double dEdx ) { mdEdxErrorFit = dEdx; }
+inline void   StMuProbPidTraits::setdNdxFit(double dNdx ) { mdNdxFit = dNdx; }
+inline void   StMuProbPidTraits::setdNdxErrorFit(double dNdx ) { mdNdxErrorFit = dNdx; }
 inline void   StMuProbPidTraits::setdEdxTruncated(double dEdx) { mdEdxTruncated = dEdx; }
 inline void   StMuProbPidTraits::setdEdxErrorTruncated(double dEdx) { mdEdxErrorTruncated = dEdx; }
 inline void   StMuProbPidTraits::setdEdxTrackLength(double length) { mdEdxTrackLength = length; }
