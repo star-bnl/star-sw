@@ -566,7 +566,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     for (UInt_t k = 0; k < Nnodes; k++) {
       StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
       if (accept(g)) {
-	mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
+	//	mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
 	StDcaGeometry* gDCA = g->dcaGeometry();
 	if (! gDCA) continue;
 	if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
