@@ -1,7 +1,5 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
-<Export language="Mortran">
-  <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
-</Export>
+<Export language="Mortran"><Import file="pams/geometry/geometry/geometry.g" verbatim="true" /></Export>
                    
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
@@ -14,11 +12,11 @@
 
 <!--    
   Author:           $Author: fisyak $
-  Current Revision: $Id: xgeometry.xml,v 1.56 2015/12/20 01:06:40 fisyak Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.57 2015/12/20 01:54:24 fisyak Exp $
 
   $Log: xgeometry.xml,v $
-  Revision 1.56  2015/12/20 01:06:40  fisyak
-  Merge
+  Revision 1.57  2015/12/20 01:54:24  fisyak
+  Move correction done by mistake
 
   Revision 1.55  2015/12/02 15:02:35  jwebb
   Add y2016 first cut geometry.
