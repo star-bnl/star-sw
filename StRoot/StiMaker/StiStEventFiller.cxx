@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.115 2015/12/20 01:46:56 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.116 2015/12/21 19:41:31 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.116  2015/12/21 19:41:31  perev
+ * bug #3166 assert vertex closer to 0,0 <9 removed
+ *
  * Revision 2.115  2015/12/20 01:46:56  fisyak
  * Move back commits done by mistake
  *
@@ -824,8 +827,11 @@ void StiStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-      double rxy = detInfo->firstPoint().perp();
-      assert(rxy < 9);
+//      double rxy = detInfo->firstPoint().perp();
+//      assert(rxy < 9);
+      auto myDif = (detInfo->firstPoint()-vertexPosition);
+      assert(myDif.mag()<0.01);
+
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
@@ -842,8 +848,8 @@ void StiStEventFiller::fillEventPrimaries()
 //VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
       continue;
       }
-      rxy = pTrack->geometry()->origin().perp();
-      assert(rxy<9);
+//      rxy = pTrack->geometry()->origin().perp();
+//      assert(rxy<9);
       fillTrackCount2++;
       if (kTrack->getPointCount()<15) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
