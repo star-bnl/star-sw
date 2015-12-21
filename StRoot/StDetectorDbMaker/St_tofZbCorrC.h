@@ -13,8 +13,7 @@ class St_tofZbCorrC : public St_tofCorrC {
   Short_t 	cellId(Int_t i = 0) 	const {return Struct(i)->cellId;}
   Float_t* 	z(Int_t i = 0) 	const {return Struct(i)->z;}
   Float_t* 	corr(Int_t i = 0) 	const {return Struct(i)->corr;}
-  UChar_t& 	N(Int_t i = 0) 	const {return *&Struct(i)->N;}
-  Float_t       Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) const;
+  Float_t       Corr(Int_t tray, Int_t module, Int_t cell, Float_t x);
  protected:
   St_tofZbCorrC(St_tofZbCorr *table=0);
  private:

@@ -12,8 +12,7 @@ class St_vpdTotCorrC : public St_tofCorrC {
   Float_t* 	tot(Int_t i = 0) 	const {return Struct(i)->tot;}
   Float_t* 	corr(Int_t i = 0) 	const {return Struct(i)->corr;}
   short 	corralgo(Int_t i = 0) 	const {return Struct(i)->corralgo;}
-  UChar_t& 	N(Int_t i = 0)  	const {return *&Struct(i)->N;}
-  Float_t       Corr(Int_t i, Float_t x) const;
+  Float_t       Corr(Int_t i, Float_t x);
  protected:
   St_vpdTotCorrC(St_vpdTotCorr *table=0) : St_tofCorrC(table) {}
   virtual ~St_vpdTotCorrC() {fgInstance = 0;}

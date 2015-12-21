@@ -938,50 +938,57 @@ MakeChairInstance(vertexSeed,Calibrations/rhic/vertexSeed);
 //__________________Calibrations/tof______________________________________________________________
 #include "St_tofCorrC.h"
 ClassImp(St_tofCorrC);
-St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET)  {
+Int_t   St_tofCorrC::mCurrentIndx = -1;
+St_tofCorrC::St_tofCorrC(TTable *table) : TChair(table), mCalibType(NOTSET) {
+  Int_t N = 0;
+  if (table) N = getNumRows();
+  mCalibType = calibtype(N);  
+  mIndxArray.Set(N);
+  mNusedArray.Set(N);
 }
 //________________________________________________________________________________
-Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray, UChar_t &NN) {
+Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray) {
   Float_t dcorr = -9999;
-  if (! NN) {// Sort
+  assert(mCurrentIndx >= 0);
+  if (! mNusedArray[mCurrentIndx]) {// Sort
     if (N <= 0 || ! xArray || ! yArray) return dcorr;
-    NN = N;
+    mNusedArray[mCurrentIndx] = N;
     Bool_t IsSorted = kTRUE;
     Int_t nonzero = 0;
     for (Int_t bin = N-1; bin >= 0; bin--) {
       if (! nonzero && TMath::Abs(xArray[bin]) < 1e-7 && TMath::Abs(yArray[bin]) < 1e-7) {
-	NN--; // trailing entries
+	mNusedArray[mCurrentIndx]--; // trailing entries
 	if (! IsSorted) break;
 	continue;
       }
       nonzero++;
       if (bin > 0 && xArray[bin] < xArray[bin-1]) IsSorted = kFALSE;
     }
-    if (! NN) {
-      LOG_ERROR << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] is empty" << endm;
+    if (! mNusedArray[mCurrentIndx]) {
+      LOG_ERROR << " St_tofCorrC::Correction xArray[" << (Int_t ) mNusedArray[mCurrentIndx] << "] is empty" << endm;
       return dcorr;
     }
     if (! IsSorted) {
-      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] has not been sorted" << endm;
-      TArrayI Indx(NN);
-      TMath::Sort((Int_t) NN,xArray,Indx.GetArray(),0);
-      TArrayF X(NN,xArray);
-      TArrayF Y(NN,yArray);
-      for (Int_t i = 0; i < NN; i++) {
+      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) mNusedArray[mCurrentIndx] << "] has not been sorted" << endm;
+      TArrayI Indx(mNusedArray[mCurrentIndx]);
+      TMath::Sort((Int_t) mNusedArray[mCurrentIndx],xArray,Indx.GetArray(),0);
+      TArrayF X(mNusedArray[mCurrentIndx],xArray);
+      TArrayF Y(mNusedArray[mCurrentIndx],yArray);
+      for (Int_t i = 0; i < mNusedArray[mCurrentIndx]; i++) {
 	xArray[i] = X[Indx[i]];
 	yArray[i] = Y[Indx[i]];
       }
-      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) NN << "] is sorted now" << endm;
+      LOG_WARN << " St_tofCorrC::Correction xArray[" << (Int_t ) mNusedArray[mCurrentIndx] << "] is sorted now" << endm;
     }
   }
-  if (NN == 1) {return yArray[NN-1];}
-  if (x < xArray[0] || x > xArray[NN-1]) {
+  if (mNusedArray[mCurrentIndx] == 1) {return yArray[mNusedArray[mCurrentIndx]-1];}
+  if (x < xArray[0] || x > xArray[mNusedArray[mCurrentIndx]-1]) {
     if (TMath::Abs(x) < 1e-7) dcorr = 0; // Simulation
     return dcorr;
   }
-  Int_t bin = TMath::BinarySearch(NN, xArray, x);
-  if (bin >= 0 && bin < NN) {
-    if (bin == NN) bin--;
+  Int_t bin = TMath::BinarySearch(mNusedArray[mCurrentIndx], xArray, x);
+  if (bin >= 0 && bin < mNusedArray[mCurrentIndx]) {
+    if (bin == mNusedArray[mCurrentIndx]) bin--;
     Double_t x1 = xArray[bin];
     Double_t x2 = xArray[bin+1];
     Double_t y1 = yArray[bin];
@@ -991,31 +998,28 @@ Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yA
   return dcorr;
 }
 //________________________________________________________________________________
-Int_t St_tofCorrC::Index(Int_t tray, Int_t module, Int_t cell) const {
+Int_t St_tofCorrC::Index(Int_t tray, Int_t module, Int_t cell) {
   Int_t i = -1;
   switch (mCalibType) {
   case CELLCALIB:   i = cell - 1 + mNCell*(module - 1 + mNModule*(tray - 1))  ; break;
-#if 0
   case MODULECALIB: i =                    module - 1 + mNModule*(tray - 1)   ; break;
   case BOARDCALIB:  i =                   (module - 1 + mNModule*(tray - 1))/4; break;
-#endif
   default: assert(0); break;
   }
-  return i;
+  mCurrentIndx = i;
+  return mCurrentIndx;
 }
 #include "St_tofTotbCorrC.h"
 MakeChairInstance(tofTotbCorr,Calibrations/tof/tofTotbCorr);
 St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
   Int_t N = 0;
   if (table) N = getNumRows();
-  mCalibType = calibtype(N);
-  mIndxArray.Set(N);
   for (Int_t i =  0; i < N; i++) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
     if (j >= 0) {
-      if (! mIndxArray[j]) mIndxArray[j] = i + 1;
+      if (! mIndxArray[j]) mIndxArray[j] = i;
       else {
-	Int_t m = mIndxArray[j]-1;
+	Int_t m = mIndxArray[j];
 	LOG_ERROR << "St_tofTotbCorrC duplicated rows " 
 		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) << " cell:" << cellId(m) << " tot[0] = " << tot(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
 		  << "                                                       "
@@ -1025,15 +1029,15 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
   }
 }
 //________________________________________________________________________________
-Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) const {
+Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   Int_t idx = Index(tray,module,cell);
-  Int_t i = mIndxArray[idx] - 1; 
+  Int_t i = mIndxArray[idx]; 
   if (i < 0) return 0;
   Int_t Tray   = trayId(i);
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i), N(i));
+  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i));
   if (dcorr <= -9999.0) {
     LOG_ERROR << "St_tofTotbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
   }
@@ -1044,14 +1048,12 @@ MakeChairInstance(tofZbCorr,Calibrations/tof/tofZbCorr);
 St_tofZbCorrC::St_tofZbCorrC(St_tofZbCorr *table) : St_tofCorrC(table) {
   Int_t N = 0;
   if (table) N = getNumRows();
-  mCalibType = calibtype(N);
-  mIndxArray.Set(N);
   for (Int_t i =  0; i < N; i++) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
     if (j >= 0) {
-      if (! mIndxArray[j]) mIndxArray[j] = i + 1;
+      if (! mIndxArray[j]) mIndxArray[j] = i;
       else {
-	Int_t m = mIndxArray[j]-1;
+	Int_t m = mIndxArray[j];
 	LOG_ERROR << "St_tofZbCorrC duplicated rows " 
 		  << m << " tray:" << trayId(m) << " module:" << moduleId(m) << " cell:" << cellId(m) << " z[0] = " << z(m)[0] << " corr[0] = " << corr(m)[0] << " and \n"
 		  << "                                                       "
@@ -1061,15 +1063,15 @@ St_tofZbCorrC::St_tofZbCorrC(St_tofZbCorr *table) : St_tofCorrC(table) {
   }
 }
 //________________________________________________________________________________
-Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) const {
+Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   Int_t idx = Index(tray,module,cell);
-  Int_t i = mIndxArray[idx] - 1; 
+  Int_t i = mIndxArray[idx]; 
   if (i < 0) return 0;
   Int_t Tray   = trayId(i);
   Int_t Module = moduleId(i);
   Int_t Cell   = cellId(i);
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
-  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i), N(i));
+  Float_t dcorr = St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i));
   if (dcorr <= -9999.0) {
     LOG_ERROR << "tofZbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
   }
@@ -1114,9 +1116,10 @@ MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
 MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 #include "St_vpdTotCorrC.h"
 MakeChairInstance(vpdTotCorr,Calibrations/tof/vpdTotCorr);
-Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) const {
+Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   assert(tubeId(i) == i + 1);
-  Float_t dcorr = St_tofCorrC::Correction(128, tot(i), x, corr(i), N(i));
+  mCurrentIndx = i;
+  Float_t dcorr = St_tofCorrC::Correction(128, tot(i), x, corr(i));
   if (dcorr <= -9999.0) {
     LOG_ERROR << "St_vpdTotCorrC::Corr(" << i << "," << x << ") is rejected." << endm;
   }

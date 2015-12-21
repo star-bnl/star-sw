@@ -3,6 +3,7 @@
 
 #include "TChair.h"
 #include "TArrayI.h"
+#include "TArrayC.h"
 class St_tofCorrC : public TChair {
  public:
   UInt_t     	getNumRows()            const {return GetNRows();}
@@ -19,12 +20,19 @@ class St_tofCorrC : public TChair {
     mEastVpdTrayId = 122
   };
   enum calibtype {NOTSET=0, BOARDCALIB=mNTray*(mNModule/4), MODULECALIB=mNTray*mNModule, CELLCALIB=mNTray*mNModule*mNCell};
-  static Float_t Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray, UChar_t &NN);
-  Int_t   Index(Int_t tray, Int_t module, Int_t cell) const;
+  Float_t Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yArray);
+  Int_t   Index(Int_t tray, Int_t module, Int_t cell);
+#if 0
+  virtual Int_t NbinsMax()             const = 0;
+  virtual Float_t *xarray(Int_t i = 0) const = 0;
+  virtual Float_t *yarray(Int_t i = 0) const = 0;
+#endif
  protected:
   St_tofCorrC(TTable *table=0);
   calibtype mCalibType;
   TArrayI mIndxArray;
+  TArrayC mNusedArray;
+  static Int_t   mCurrentIndx;
   virtual ~St_tofCorrC() {}
  private:
   ClassDef(St_tofCorrC,1) //C++ TChair for tofCorr table class
