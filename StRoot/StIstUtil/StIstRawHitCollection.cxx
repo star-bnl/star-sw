@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.16 2014/09/09 08:23:46 ypwang Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.17 2015/12/22 20:16:27 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -83,6 +83,26 @@ void StIstRawHitCollection::Print(int nTimeBins) const
    }
 }
 
+
+/**
+ * Adds or sets a new StIstRawHit corresponding to electronic channel elecId. If
+ * istRawHit is nullptr the function does nothing. If a hit with elecId already
+ * exists the old one will be overwritten by the new one and the resources will
+ * be freed. No check is performed to test the validity of elecId.
+ */
+void StIstRawHitCollection::addRawHit(int elecId, StIstRawHit* istRawHit)
+{
+   if (!istRawHit) return;
+
+   StIstRawHit *istRawHitCurrent = mRawHitElecIdVec[elecId];
+
+   if (istRawHitCurrent)
+      delete istRawHitCurrent;
+
+   mRawHitElecIdVec[elecId] = istRawHit;
+}
+
+
 StIstRawHit *StIstRawHitCollection::getRawHit( int elecId )
 {
    StIstRawHit *&rawHitPtr = mRawHitElecIdVec[elecId];
@@ -100,6 +120,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.17  2015/12/22 20:16:27  smirnovd
+* StIstRawHitCollection: Added method to add/update hits in internal stl container
+*
 * Revision 1.16  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *
