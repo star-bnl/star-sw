@@ -27,7 +27,8 @@ endif
 source $GROUP_DIR/unix_programs.csh
 
 
-set pathtointel = `/bin/ls -1d /usr/intel* | /usr/bin/tail -1`
+#set pathtointel = `/bin/ls -1d /usr/intel* | /usr/bin/tail -1`
+set pathtointel = `/bin/ls -1d /star/subsys/tpc/fisyak/intel* | /usr/bin/tail -1`
 if ( $?DECHO ) then
    echo "$self :: Path found is [$pathtointel]"
 endif

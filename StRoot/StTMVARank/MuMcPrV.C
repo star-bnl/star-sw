@@ -173,9 +173,11 @@ void Setup(const Char_t *xmlFile = "") {
      KFV      : postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2
   */
   delete StTMVARanking::instance();
-  TString choice;
-  if (TMVAdata::instance()->PileUp()) choice = "postx:";
-  choice += "prompt:cross:tof:notof:BEMC:noBEMC:nWE";
+  TString choice("");
+  if (TMVAdata::instance()->PileUp()) choice = "postx:"; 
+  choice += "prompt:";
+  if (! TMVAdata::instance()->PPV()) choice += "beam:chi2:";
+  choice += "cross:tof:notof:BEMC:noBEMC:nWE";
   new StTMVARanking(choice,xmlFile);
 }
 //________________________________________________________________________________
@@ -353,7 +355,7 @@ void FillTrees(TTree *tree, StMuMcVertex *McVx = 0, StMuMcTrack *McTrack = 0, KF
 //________________________________________________________________________________
 void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 999999, 
 	     const char* file="*.MuDst.root",
-	     const  char* outFile="MuMcPrV52") { 
+	     const  char* outFile="MuMcPrV54") { 
   // 12 only "B"
   // 13 no request for fast detectors, no restriction to beam match but rVx < 3 cm
   // 19 require tof or emc match, QA > 25
@@ -538,6 +540,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     map<Int_t,StMuMcVertex *>                   Id2McVx; // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id];
     map<Int_t,StMuMcVertex *>                   Id2McVxR;// Reconstructable, i.e. contains > 1 Reconstructable Mc Tracks
     map<Int_t,StMuPrimaryVertex*>               Id2RcVx;
+    map<Int_t,Int_t>                            IndxRcTk2Id;
+    map<Int_t,Int_t>                            IndxKFTk2Id;
     multimap<StMuPrimaryVertex*, StMuTrack *>   RcVx2RcTk;
     map<StMuPrimaryVertex*,StMuMcVertex *>      RcVx2McVx;
     multimap<StMuMcVertex *,StMuPrimaryVertex*> McVx2RcVx;
@@ -571,6 +575,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     // Id (Truth, IdMcTk) => gTrack
     for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
       StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+      if (! gTrack) continue;
+      IndxRcTk2Id.insert(pair<Int_t,Int_t>(gTrack->id(),kg));
       if (! Accept(gTrack)) continue;
       Int_t IdTruth = gTrack->idTruth();
       if (! IdTruth) continue;
@@ -700,12 +706,15 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     PrPPD(CloneVx.size());
 #if 0
     PrPPDH(KFTrack);
+#endif
     for (Int_t m = 0; m < NoKFTracks; m++) {
       KFParticle *particle = (KFParticle *) KFTracks->UncheckedAt(m);
       if (! particle) continue;
+      IndxKFTk2Id.insert(pair<Int_t,Int_t>(particle->Id(),m));
+#if 0
       PrPPD(*particle);
-    }
 #endif
+    }
     PrPPDH(KFVx);
     for (Int_t m = 0; m < NoKFVertices; m++) {
       KFParticle *KFVx = (KFParticle *) KFVertices->UncheckedAt(m);
@@ -784,6 +793,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     map<Int_t,PVgadgets_st> dataS;
     PVgadgets_st &aData = *(TMVAdata::instance()->GetArray());
     Int_t NoAcceptedRcVx = RcVxs.size();
+    TArrayF RanksOld(NoAcceptedRcVx);
     TArrayF Ranks(NoAcceptedRcVx);
     for (Int_t l = 0; l < NoAcceptedRcVx; l++) {
       StMuPrimaryVertex *RcVx = RcVxs[l];
@@ -805,8 +815,11 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       Int_t NoMcTracksWithHits = 0;
       if (McVx) NoMcTracksWithHits = McVx2McTkR.count(McVx);
       FillData(*TMVAdata::instance(),RcVx,VpdZ,McVx, NoMcTracksWithHits);
+#if 0
       if (! aData.beam) continue;
-      Ranks[l] = aData.Rank;
+#endif
+      RanksOld[l] = aData.Rank;
+      Ranks[l]    = aData.Rank;
       Bool_t good = (l == lMcBest);
       if (! good) {// try pileup one
 	good = (McVx && ! aData.timebucket);
@@ -818,6 +831,10 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       }
       dataS[l] = aData;
     }
+#if 0
+    cout << "Old:"; for (Int_t l = 0; l < NoAcceptedRcVx; l++) cout << Form("%8.3f",RanksOld[l]); cout << endl;
+    cout << "New:"; for (Int_t l = 0; l < NoAcceptedRcVx; l++) cout << Form("%8.3f",Ranks[l]);    cout << endl;
+#endif
     Int_t lBest = TMath::LocMax(NoAcceptedRcVx, Ranks.GetArray());
     if (lBest < 0 || Ranks[lBest] < -1e9) continue; // Any reconstructed  vertices ?
     StMuPrimaryVertex *RcVx = RcVxs[lBest]; assert(RcVx);
@@ -883,6 +900,7 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
       hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
     }
+    //<<<<<<<<<<<<<<<<<
     for (auto x : Id2McVx) {
       //      StMuMcVertex *McVx = x.first;
       if (! x.first) continue;
@@ -925,6 +943,19 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	}
       }
       if (KFVx) {
+	if (McTrack) {
+	  cout << *KFVx << endl;
+	  cout << "NDaughters = " << KFVx->NDaughters() << endl;
+	  for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
+	    Int_t id = KFVx->DaughterIds()[i];
+	    Int_t m  = IndxKFTk2Id[id];
+	    KFParticle *KFTrk = (KFParticle *) KFTracks->UncheckedAt(m);
+	    if (KFTrk) cout << "\t" << *KFTrk << endl;
+	    Int_t kg = IndxRcTk2Id[id];
+	    StMuTrack *gTrack = (StMuTrack *) GlobalTracks->UncheckedAt(kg);
+	    if (gTrack) cout << "\t" << *gTrack << endl;
+	  }
+	}
 	FillTrees(tMatch,McVx,McTrack,KFVx);
       }
     }
