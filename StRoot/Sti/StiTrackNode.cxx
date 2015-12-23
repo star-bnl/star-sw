@@ -223,6 +223,9 @@ for (int ix = 0;ix<2; ix++) {
  
 double StiTrackNode::sinX(double x)
 {
+#if 0
+  assert(!TMath::IsNaN(x));
+#endif
   double x2 = x*x;
   if (x2>0.5) return (sin(x)-x)/x2/x;
   double nom = -1./6;

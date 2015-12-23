@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "StiUtilities/StiDebug.h"
@@ -133,10 +134,13 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   sinCA2=rotPars._sinCA + dsin; 
   if (sinCA2> 0.95) sinCA2= 0.95;
   if (sinCA2<-0.95) sinCA2=-0.95;
-  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
+  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2))*TMath::Sign(1.,rotPars._cosCA);
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
   dy = dx*(sumSin/sumCos);
+#if 0
+  assert(!TMath::IsNaN(dy));
+#endif
   y2 = rotPars.y()+dy;
   dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
