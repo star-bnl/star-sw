@@ -5,7 +5,7 @@
 #include "StDetectorDbRichScalers.h"
 
 St_trigDetSums* St_trigDetSumsC::fgTableCopy = 0;
-
+Int_t StDetectorDbMaker::_debug = 0;
 ClassImp(StDetectorDbMaker)
 //_____________________________________________________________________________
 Int_t StDetectorDbMaker::Make(){
