@@ -77,6 +77,7 @@ StMtdCalibMaker::StMtdCalibMaker(const char *name) : StMaker(name)
 //_____________________________________________________________________________
 StMtdCalibMaker::~StMtdCalibMaker()
 { 
+#if 0
   /// default destructor
   if(hTimeOfFlightCorr)       delete hTimeOfFlightCorr;
   if(hAllCorr)                delete hAllCorr;
@@ -87,6 +88,7 @@ StMtdCalibMaker::~StMtdCalibMaker()
   if(hTOFTimeOfFlightTray)    delete hTOFTimeOfFlightTray;
   if(hDyModule)               delete hDyModule;
   if(hDzModule)               delete hDzModule;
+#endif
 }
 
 //____________________________________________________________________________
