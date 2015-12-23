@@ -1038,7 +1038,9 @@ Float_t  St_tofTotbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) 
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
   Float_t dcorr = St_tofCorrC::Correction(mNBinMax, tot(i), x, corr(i),mNusedArray[idx]);
   if (dcorr <= -9999.0) {
-    LOG_ERROR << "St_tofTotbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
+    LOG_ERROR << "St_tofTotbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected.";
+    if (x < tot(i)[0] || x > tot(i)[mNusedArray[idx]-1]) LOG_ERROR << " Out of the range [" << tot(i)[0] << "," << tot(i)[mNusedArray[idx]-1] << "].";
+    LOG_ERROR << endm;
   }
   return dcorr;
 }
@@ -1074,7 +1076,10 @@ Float_t St_tofZbCorrC::Corr(Int_t tray, Int_t module, Int_t cell, Float_t x) {
   assert(i >= 0 && Tray == tray && Module == module && Cell == cell);
   Float_t dcorr = St_tofCorrC::Correction(mNBinMax, z(i), x, corr(i),mNusedArray[idx]);
   if (dcorr <= -9999.0) {
-    LOG_ERROR << "tofZbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected." << endm;
+    LOG_ERROR << "tofZbCorrC::Corr(" << tray << "," << module << "," << cell << "," << x << ") is rejected.";
+    if (x < z(i)[0] || x > z(i)[mNusedArray[idx]-1]) LOG_ERROR << " Out of the range [" << z(i)[0] << "," << z(i)[mNusedArray[idx]-1] << "].";
+    LOG_ERROR << endm;
+
   }
   return dcorr;
 }
@@ -1122,7 +1127,9 @@ Float_t  St_vpdTotCorrC::Corr(Int_t i, Float_t x) {
   Int_t idx = i;
   Float_t dcorr = St_tofCorrC::Correction(128, tot(i), x, corr(i),mNusedArray[idx]);
   if (dcorr <= -9999.0) {
-    LOG_ERROR << "St_vpdTotCorrC::Corr(" << i << "," << x << ") is rejected." << endm;
+    LOG_ERROR << "St_vpdTotCorrC::Corr(" << i << "," << x << ") is rejected.";
+    if (x < tot(i)[0] || x > tot(i)[mNusedArray[idx]-1]) LOG_ERROR << " Out of the range [" << tot(i)[0] << "," << tot(i)[mNusedArray[idx]-1] << "].";
+    LOG_ERROR << endm;
   }
   return dcorr;
 }
