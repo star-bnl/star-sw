@@ -16,5 +16,6 @@
 #define kLikelihoodFitIdentifier             3
 #define kWeightedTruncatedMeanIdentifier     4
 #define kOtherMethodIdentifier               5
+#define kOtherMethodIdentifier2              6
 #endif
 

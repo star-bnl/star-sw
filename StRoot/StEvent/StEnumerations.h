@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.60 2015/09/14 16:58:13 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.61 2015/12/24 00:14:44 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.61  2015/12/24 00:14:44  fisyak
+ * Add GMT and SST Id and new dE/dx method
+ *
  * Revision 2.60  2015/09/14 16:58:13  ullrich
  * Added items to StFmsDetectorId enumeration
  *
@@ -31,8 +34,11 @@
  * Revision 2.56  2014/04/10 14:35:26  ullrich
  * Add Ist constants.
  *
- * Revision 2.55  2013/07/23 11:21:49  jeromel
- * Undo past week changes
+ * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
+ *
+ *
+ * Revision 2.54  2013/07/16 14:29:03  fisyak
+ * Restore mass fit tracks
  *
  * Revision 2.53  2013/05/07 19:30:21  jeromel
  * No change but add markers
@@ -261,12 +267,13 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
+		   kGmtId       = kGmtIdentifier,
                    kMaxDetectorId = 40};
 
 /*!
  * \enum StTrackType
  */
-enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary};
+enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary, massFit, massFitAtVx};
 
 /*!
  * \enum StTrackModel
@@ -297,7 +304,8 @@ enum StDedxMethod {kUndefinedMethodId        = kUndefinedMethodIdentifier,
                   kEnsembleTruncatedMeanId   = kEnsembleTruncatedMeanIdentifier,
                   kLikelihoodFitId           = kLikelihoodFitIdentifier,
                   kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
-                  kOtherMethodId             = kOtherMethodIdentifier};
+		  kOtherMethodId             = kOtherMethodIdentifier,
+                  kOtherMethodId2            = kOtherMethodIdentifier2};
 
 /*!
  * \enum StTrackFittingMethod
@@ -522,7 +530,7 @@ enum StFgtGeneralConsts {
 };
 
 /*!
- * \enum StFgtClusterSeedType
+ * \enum StFgtClusterSeed Type
  */
 // cluster seed types
 enum StFgtClusterSeedType {
@@ -591,6 +599,50 @@ namespace StIstConsts
     const int kIstNumRowsPerSensor = 64;    ///< 64 rows in r-phi direction per each sensor
     const int kIstNumColumnsPerSensor = 12; ///< 12 columns in beam direction per each sensor
 }
+
+/*!
+ * \enum StGmtElecConsts
+ */
+// constants related to electric coordinates
+enum StGmtElecConsts {
+    kGmtNumRdos = 1,                    // rdo in {1}
+    kGmtNumArms = 2,                    // 1 arm in 2 halves (or groups) {0-1}
+    kGmtNumChannels = 128,              // channel in 0-127
+    kGmtApvsPerAssembly = 2,           //
+    kGmtMaxApvId= 15,                  // we only use ARM channels 0-3 and 12-15
+    kGmtApvGap = 8,                     // i.e. we use 0-3 and then 12-15
+    kGmtApvsPerArm = 24, 
+    kGmtNumElecIds = kGmtNumChannels * kGmtApvsPerArm * kGmtNumArms * kGmtNumRdos  // elec id in 0 to kGmtNumElecIds-1
+};
+
+/*!
+ * \enum StGmtPhysConsts
+ */
+// constants related to physical coordinates
+enum StGmtPhysConsts {
+    kGmtNumModules = 8,
+    kGmtNumLayers = 2,
+    kGmtNumStrips = 128,  // one X layer and one Y layer
+    kGmtNumConnectedStripsX = 126,  // 2 missing in X, 3 in Y
+    kGmtNumConnectedStripsY = 125,  // 2 missing in X, 3 in Y
+    kGmtNumGeoIds = kGmtNumModules * kGmtNumLayers * kGmtNumStrips,   // geoId in 0 to kGmtNumGeoIds-1
+    kGmtNumPstripsPerModule = 128,  // "pads" which are the Local Y coordinates
+    kGmtNumSstripsPerModule = 128,  // "strips" which are the Local X coordinates
+    // for that layer
+    kGmtNumStripsPerModule = kGmtNumStrips * kGmtNumLayers // accounts for X (strip) and Y (pad) layers
+};
+
+/*!
+ * \enum StGmtGeneralConsts
+ */
+// unsorted constants
+enum StGmtGeneralConsts {
+    kGmtNumTimeBins = 15,
+    kGmtNumTimeBinsForPed = 3,  // number of time bins to use for pedestal determination
+    kGmtMaxAdc = 4096,
+    kGmtPedCut = 3,   // pedestal subtracted threshold to temporarily tag a "hit" for 2nd pedestal pass
+    kGmtHitCut = 5 //HERE 5  
+};
 
 const char *detectorNameById(StDetectorId id);
 StDetectorId detectorIdByName(const char *name);
