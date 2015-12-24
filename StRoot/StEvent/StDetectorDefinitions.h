@@ -36,6 +36,8 @@
 ** FMS             = 32
 ** MTD             = 34
 ** ETR             = 35
+** SST             = 36
+** GMT             = 37
 */
 
 
@@ -106,6 +108,12 @@
  **  The following are for the SST (Beware: not same as SSD)
  */
 #define kSstIdentifier                36
+/*
+**  The following is the addition of the GEM chambers
+**  to improve TPC tracking and alignment. RW (Mar 27, 2013)
+*/
+#define kGmtIdentifier                37
+
 
 /*
 **  The following are more or less virtual detectors.
@@ -123,9 +131,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.11 2015/05/13 17:06:13 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.12 2015/12/24 00:14:44 fisyak Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.12  2015/12/24 00:14:44  fisyak
+** Add GMT and SST Id and new dE/dx method
+**
 ** Revision 2.11  2015/05/13 17:06:13  ullrich
 ** Added hooks and interfaces to Sst detector (part of HFT).
 **
