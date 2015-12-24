@@ -49,19 +49,26 @@ class StPidStatus {
   StdEdxStatus fFit; //!
   StdEdxStatus fI70U; //!
   StdEdxStatus fFitU; //!
+  StdEdxStatus fdNdx; //!
+  StdEdxStatus fdNdxU;//!
   StToFStatus  fToF; //!
   Int_t        PiDStatus; //!
   StGlobalTrack *gTrack; //!
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
-  Double_t devZ[KPidParticles], devZs[KPidParticles], devToF[KPidParticles];    //!
+  Double_t devZ[KPidParticles], devZs[KPidParticles];
+  Double_t devF[KPidParticles], devFs[KPidParticles];    //!
+  Double_t devN[KPidParticles], devNs[KPidParticles];    //!
+  Double_t devToF[KPidParticles];
   Int_t  PiDkey;    //! best
   Int_t  PiDkeyU;   //! only one with devZs<3, 
   Int_t  PiDkeyU3;  //! -"- and devZs > 5 for all others 
   Int_t  lBest;     //!
-  Double_t PredB[KPidParticles],PredBT[KPidParticles], Pred70B[KPidParticles], Pred70BT[KPidParticles];
-  Double_t PredBMN[2], Pred70BMN[2]; 
-  Double_t bghyp[KPidParticles];
+  Double_t PredB[KPidParticles],PredBT[KPidParticles], Pred70B[KPidParticles], Pred70BT[KPidParticles]; //!
+  Double_t dNdx[KPidParticles]; // no. of primary clusters per 1cm
+  Double_t PredBMN[2], Pred70BMN[2]; //!
+  Double_t bghyp[KPidParticles]; //! log10(bg)
+  Double_t bgs[KPidParticles]; //! bg
   Char_t                mEnd[1];        //!
 };
 
