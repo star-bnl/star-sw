@@ -10,6 +10,7 @@
 #include "TH3.h"
 #include "TProfile2D.h"
 #include "TString.h"
+#include "StPidParticleDefinition.h"
 class dEdxParameterization {
  private: 
   TString      fTag;                 //! Tag for  root file (Bichsel or PAI)
@@ -34,6 +35,7 @@ class dEdxParameterization {
   Double_t     fdxL2max;
   Double_t     fzmin;
   Double_t     fzmax;
+  TH1D        *fTrs[KPidParticles+1][6]; //! Histograms from TpcRS dE/dx simulation for each particle type
  public :
     dEdxParameterization(const Char_t *Tag="p10", Int_t keep3D = 0,
 			 const Double_t MostProbableZShift = 0,
@@ -43,9 +45,6 @@ class dEdxParameterization {
   virtual ~dEdxParameterization();
   Double_t    MostProbableZCorrection(Double_t log10bg);
   Double_t    I70Correction(Double_t log10bg);
-#if ROOT_VERSION_CODE < 334336 /*  5.26.0 */
-  Double_t    Interpolation(Int_t Narg, TH1 *hist, Double_t *XYZ, Int_t kase = 0);
-#endif /* ROOT_VERSION_CODE < ROOT_VERSION(5,26,0) */
   Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx) {
     log10bg = TMath::Max(fbgL10min, TMath::Min(fbgL10max,log10bg));
     log2dx = TMath::Max(fdxL2min, TMath::Min(fdxL2max,log2dx));
@@ -96,17 +95,11 @@ class dEdxParameterization {
     log2dx = TMath::Max(fdxL2min, TMath::Min(fdxL2max,log2dx));
     return I70Correction(log10bg)*GetI70(log10bg,log2dx);
   }
-#if ROOT_VERSION_CODE < 334336   /* 5.26.0 */
-  Double_t    Interpolation(TH3 *hist, Double_t X, Double_t Y, Double_t Z, Int_t kase = 0);
-  Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
-    return Interpolation(fPhi,log10bg,log2dx,z,kase);}
-#else /* ROOT_VERSION_CODE >= ROOT_VERSION(5,26,0) */
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z) {
     log10bg = TMath::Max(fbgL10min, TMath::Min(fbgL10max,log10bg));
     log2dx  = TMath::Max(fdxL2min, TMath::Min(fdxL2max,log2dx));
     z       = TMath::Max(fzmin, TMath::Min(fzmax,z));
     return fPhi->Interpolate(log10bg,log2dx,z);}
-#endif /* ROOT_VERSION_CODE < ROOT_VERSION(5,26,0) */
   void        Print();
   const Char_t      *Tag() const {return    fTag.Data();}   
   const TProfile2D  *P()   const {return     fP;}     
@@ -119,7 +112,26 @@ class dEdxParameterization {
   const TH3D        *Phi() const {return   fPhi;}     
   Double_t bgL10min() const {return fbgL10min;}
   Double_t bgL10max() const {return fbgL10max;}
+  const TH1D       *I70Trs(  Int_t part = KPidParticles) const {return fTrs[part][0];}  // Estimation for I70 from TpcRS
+  const TH1D       *I70TrsB( Int_t part = KPidParticles) const {return fTrs[part][1];}  // Estimation for I70 - Bichsel from TpcRS
+  const TH1D       *I70TrsS( Int_t part = KPidParticles) const {return fTrs[part][2];}  // Estimation for relative sigma beta*gamma dependence for I70 from TpcRS normalized to MIP
+  const TH1D       *IfitTrs( Int_t part = KPidParticles) const {return fTrs[part][3];}  // Estimation for Ifit from TpcRS
+  const TH1D       *IfitTrsB(Int_t part = KPidParticles) const {return fTrs[part][4];}  // Estimation for Ifit - Bichsel from TpcRS
+  const TH1D       *IfitTrsS(Int_t part = KPidParticles) const {return fTrs[part][5];}  // Estimation for relative sigma beta*gamma dependence for Ifit from TpcRS normalized to MIP
+  Double_t         Get(const TH1D *hist, Double_t log10bg) const;
+  Double_t I70Trs  (Int_t part, Double_t log10bg) const {return Get(fTrs[part][0], log10bg);}  // Estimation for I70 from TpcRS
+  Double_t I70TrsB (Int_t part, Double_t log10bg) const {return Get(fTrs[part][1], log10bg);}  // Estimation for I70 - Bichsel from TpcRS
+  Double_t I70TrsS (Int_t part, Double_t log10bg) const {return Get(fTrs[part][2], log10bg);}  // Estimation for relative sigma beta*gamma dependence for I70 from TpcRS normalized to MIP
+  Double_t IfitTrs (Int_t part, Double_t log10bg) const {return Get(fTrs[part][3], log10bg);}  // Estimation for Ifit from TpcRS
+  Double_t IfitTrsB(Int_t part, Double_t log10bg) const {return Get(fTrs[part][4], log10bg);}  // Estimation for Ifit - Bichsel from TpcRS
+  Double_t IfitTrsS(Int_t part, Double_t log10bg) const {return Get(fTrs[part][5], log10bg);}  // Estimation for relative sigma beta*gamma dependence for Ifit from TpcRS normalized to MIP
+
+    
   ClassDef(dEdxParameterization,0)
 };
+// $Id: dEdxParameterization.h,v 1.10 2015/12/24 00:16:26 fisyak Exp $
+// $Log: dEdxParameterization.h,v $
+// Revision 1.10  2015/12/24 00:16:26  fisyak
+// Add TpcRS model and macros
+//
 #endif
-

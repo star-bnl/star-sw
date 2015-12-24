@@ -12,6 +12,7 @@
 #include "TF1.h"
 #include "TError.h" 
 #include "TMath.h"
+
 #define  PrP(A)  cout << "\t" << (#A) << " = \t" << ( A )
 
 ClassImp(dEdxParameterization)
@@ -31,6 +32,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fdxL2min(-0.3), fdxL2max(3),
   fzmin(-4), fzmax(6)
 {
+  memset (fTrs, 0, sizeof(fTrs));
   TDirectory *dir = gDirectory;
   const Char_t                                   *rootf = "P10T.root";
   if (fTag.Contains("pai" ,TString::kIgnoreCase)) rootf = "PaiT.root";
@@ -51,7 +53,6 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fRms = (TProfile2D *) pFile->Get("bichRms"); assert(fRms); fRms->SetDirectory(0);
   fW   = (TProfile2D *) pFile->Get("bichW");   assert(fW);   fW->SetDirectory(0);
   fPhi = (TH3D       *) pFile->Get("bichPhi"); assert(fPhi); fPhi->SetDirectory(0);
-  delete pFile;  
   fbgL10min = fPhi->GetXaxis()->GetBinCenter(1) + 1e-7;
   fbgL10max = fPhi->GetXaxis()->GetBinCenter(fPhi->GetXaxis()->GetNbins()) - 1e-7;
   fdxL2min  = fPhi->GetYaxis()->GetBinCenter(1) + 1e-7;
@@ -80,6 +81,28 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1);
   fMostProbableZShift  = TMath::Log(fI70Shift);
   fAverageZShift       = fMostProbableZShift;
+  for (Int_t i = 0; i <= KPidParticles; i++) {
+    TString name("all");
+    switch (i) {
+    case kPidElectron : name = "e";        break;
+    case kPidProton   : name = "proton";   break;
+    case kPidKaon     : name = "kaon";     break;
+    case kPidPion     : name = "pi";       break;
+    case kPidMuon     : name = "mu";       break;
+    case kPidDeuteron : name = "deuteron"; break;
+    case kPidTriton   : name = "triton";   break;
+    case kPidHe3      : name = "He3";      break;
+    case kPidAlpha    : name = "alpha";    break;
+    case KPidParticles: name = "all";      break;
+    default:            name = "all";      break;
+    };
+    const Char_t *type[6] = {"70p","70","70S","zp","z","zS"};
+    for (Int_t j = 0; j < 6; j++) {
+      fTrs[i][j] = (TH1D *) pFile->Get(name + type[j]);
+      if (fTrs[i][j])  fTrs[i][j]->SetDirectory(0);
+    }
+  }
+  delete pFile;  
 }
 //________________________________________________________________________________
 dEdxParameterization::~dEdxParameterization() { 
@@ -91,96 +114,9 @@ dEdxParameterization::~dEdxParameterization() {
   SafeDelete(fRms);
   SafeDelete(fW);
   SafeDelete(fPhi);
+  for (Int_t i = 0; i <= KPidParticles; i++) 
+    for (Int_t j = 0; j < 6; j++) {SafeDelete(fTrs[i][j]);}
 }    
-#if ROOT_VERSION_CODE < 334336   /* 5.26.0 */
-//________________________________________________________________________________
-Double_t    dEdxParameterization::Interpolation(Int_t Narg, TH1 *hist, Double_t *XYZ, Int_t kase) {
-  assert(hist);
-  Int_t Ndim = hist->GetDimension();
-  assert (Ndim>=1 && Ndim <= 3);
-  assert (Ndim == Narg);
-#if defined(PRINT) || defined(PRINT2)
-  cout << "Interpolation:";
-  PrP(XYZ[0]); PrP(XYZ[1]); PrP(XYZ[2]); 
-  cout << endl;
-#endif
-  Double_t Value = 0;
-  Int_t iXYZ[3], ixyz[3];
-  Double_t dXYZ[3], pXYZ[3];
-  Int_t i;
-  for (i = 0; i< Ndim; i++) {
-    iXYZ[i] = fAXYZ[i]->FindBin(XYZ[i]); 
-    //    if (iXYZ[i] <= 0 || iXYZ[i] >= fnBins[i]) return Value; // outside of the range
-    if (iXYZ[i] < 2) iXYZ[i] = 2; 
-    if (iXYZ[i] >= fnBins[i])  iXYZ[i] =  fnBins[i] - 1; 
-    dXYZ[i] = (XYZ[i] - fAXYZ[i]->GetBinCenter(iXYZ[i]))/fbinW[i];
-    if (dXYZ[i] >=0) ixyz[i] = iXYZ[i] + 1;
-    else            {ixyz[i] = iXYZ[i] - 1; dXYZ[i] = - dXYZ[i];}
-    pXYZ[i] = 1. - dXYZ[i];
-    if (i == kase - 1) {// derivatives wrt X
-      dXYZ[i] = 1./fbinW[i];
-      if (ixyz[i] < iXYZ[i]) dXYZ[i] = - dXYZ[i];
-      pXYZ[i] =    -dXYZ[i]; 
-    }
-  } 
-  
-#ifdef PRINT
-  for (i = 0; i<Ndim; i++) {PrP(i); PrP(iXYZ[i]);} cout << endl;
-  for (i = 0; i<Ndim; i++) {PrP(i); PrP(dXYZ[i]);} cout << endl;
-  for (i = 0; i<Ndim; i++) {PrP(i); PrP(pXYZ[i]);} cout << endl;
-  
-  PrP(iXYZ[0]);PrP(iXYZ[1]);PrP(iXYZ[2]); PrP(hist->GetBinContent(iXYZ[0],iXYZ[1],iXYZ[2])); cout << endl; 
-  PrP(ixyz[0]);PrP(iXYZ[1]);PrP(iXYZ[2]); PrP(hist->GetBinContent(ixyz[0],iXYZ[1],iXYZ[2])); cout << endl; 
-  PrP(iXYZ[0]);PrP(ixyz[1]);PrP(iXYZ[2]); PrP(hist->GetBinContent(iXYZ[0],ixyz[1],iXYZ[2])); cout << endl; 
-  PrP(ixyz[0]);PrP(ixyz[1]);PrP(iXYZ[2]); PrP(hist->GetBinContent(ixyz[0],ixyz[1],iXYZ[2])); cout << endl;
-  PrP(iXYZ[0]);PrP(iXYZ[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(iXYZ[0],iXYZ[1],ixyz[2])); cout << endl; 
-  PrP(ixyz[0]);PrP(iXYZ[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(ixyz[0],iXYZ[1],ixyz[2])); cout << endl; 
-  PrP(iXYZ[0]);PrP(ixyz[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(iXYZ[0],ixyz[1],ixyz[2])); cout << endl; 
-  PrP(ixyz[0]);PrP(ixyz[1]);PrP(ixyz[2]); PrP(hist->GetBinContent(ixyz[0],ixyz[1],ixyz[2])); cout << endl;
-#endif  
-  switch (Ndim) {
-  case 3:  Value = 
-	     pXYZ[0]*pXYZ[1]*pXYZ[2]*hist->GetBinContent(iXYZ[0],iXYZ[1],iXYZ[2]) + 
-	     dXYZ[0]*pXYZ[1]*pXYZ[2]*hist->GetBinContent(ixyz[0],iXYZ[1],iXYZ[2]) + 
-	     pXYZ[0]*dXYZ[1]*pXYZ[2]*hist->GetBinContent(iXYZ[0],ixyz[1],iXYZ[2]) + 
-	     dXYZ[0]*dXYZ[1]*pXYZ[2]*hist->GetBinContent(ixyz[0],ixyz[1],iXYZ[2]) +
-	     pXYZ[0]*pXYZ[1]*dXYZ[2]*hist->GetBinContent(iXYZ[0],iXYZ[1],ixyz[2]) + 
-	     dXYZ[0]*pXYZ[1]*dXYZ[2]*hist->GetBinContent(ixyz[0],iXYZ[1],ixyz[2]) + 
-	     pXYZ[0]*dXYZ[1]*dXYZ[2]*hist->GetBinContent(iXYZ[0],ixyz[1],ixyz[2]) + 
-	     dXYZ[0]*dXYZ[1]*dXYZ[2]*hist->GetBinContent(ixyz[0],ixyz[1],ixyz[2]);
-  break;
-  case 2: Value = 
-	    pXYZ[0]*pXYZ[1]*hist->GetBinContent(iXYZ[0],iXYZ[1]) + 
-	    dXYZ[0]*pXYZ[1]*hist->GetBinContent(ixyz[0],iXYZ[1]) + 
-	    pXYZ[0]*dXYZ[1]*hist->GetBinContent(iXYZ[0],ixyz[1]) + 
-	    dXYZ[0]*dXYZ[1]*hist->GetBinContent(ixyz[0],ixyz[1]);
-  break;
-  case 1: Value = 
-	    pXYZ[0]*hist->GetBinContent(iXYZ[0]) + dXYZ[0]*hist->GetBinContent(ixyz[0]);
-  break;
-  default:
-    assert(0);
-  }
-#if defined(PRINT) || defined(PRINT2)
-  PrP(Value); cout << endl;
-#endif
-  return Value;
-}
-//________________________________________________________________________________
-Double_t    dEdxParameterization::Interpolation(TH3 *hist, Double_t X, Double_t Y, Double_t Z, Int_t kase) {
-  assert(hist);
-#if defined(PRINT) || defined(PRINT2)
-  cout << "Interpolation:";
-  PrP(X); PrP(Y); PrP(Z); 
-  cout << endl;
-#endif
-  Double_t XYZ[3];
-  XYZ[0] = X;
-  XYZ[1] = Y;
-  XYZ[2] = Z;
-  return Interpolation(3, hist, XYZ, kase);
-}
-#endif /* ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)  */
 //________________________________________________________________________________
 void dEdxParameterization::Print() {
   PrP(fTag); cout << endl;
@@ -206,3 +142,25 @@ Double_t dEdxParameterization::I70Correction(Double_t log10bg) {
   static const Double_t pars[2] = {-1.65714e-02, 3.27271e+00}; //  FitH70AllHist012P05id FitH + Prof 050905
   return TMath::Exp(pars[0]*TMath::Exp(-pars[1]*log10bg));
 }
+//________________________________________________________________________________
+Double_t dEdxParameterization::Get(const TH1D *hist, Double_t log10bg) const {
+  static TH1D *hsave = 0;
+  static Double_t xmin = -100, xmax = 100;
+  if (hist != hsave) {
+    hsave = (TH1D *) hist;
+    TAxis *x = hsave->GetXaxis();
+    Int_t f = x->GetFirst(); 
+    Int_t l = x->GetLast(); 
+    
+    xmin = x->GetBinUpEdge(f);
+    xmax = x->GetBinLowEdge(l);
+  }
+  if (log10bg < xmin) log10bg = xmin;
+  if (log10bg > xmax) log10bg = xmax;
+  return hsave->Interpolate(log10bg);
+}
+// $Id: dEdxParameterization.cxx,v 1.18 2015/12/24 00:16:26 fisyak Exp $
+// $Log: dEdxParameterization.cxx,v $
+// Revision 1.18  2015/12/24 00:16:26  fisyak
+// Add TpcRS model and macros
+//
