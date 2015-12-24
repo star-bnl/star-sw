@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.29 2014/08/06 11:43:59 jeromel Exp $
+// $Id: StdEdxY2Maker.h,v 1.30 2015/12/24 00:23:03 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -17,14 +17,13 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
-class Bichsel;
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
 class StGlobalCoordinate;
 class TH2F;
 class StTpcPadrowHitCollection;
-
+class StTrack;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder     =  0,
@@ -63,13 +62,15 @@ class StdEdxY2Maker : public StMaker {
   void    QAPlots(StGlobalTrack* gTrack = 0);
   void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
-  void    PrintdEdx(Int_t iop = 0);
-  static  Bichsel             *m_Bichsel;       //
+  void    DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
+  static  void PrintdEdx(Int_t iop = 0);
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
+  static  void fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   static  Double_t gaus2(Double_t *x, Double_t *p);
   static  TF1 *Gaus2();
  private:
+  void   AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx);
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
 			 Double_t bField, 
@@ -93,7 +94,7 @@ class StdEdxY2Maker : public StMaker {
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.29 2014/08/06 11:43:59 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.30 2015/12/24 00:23:03 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers

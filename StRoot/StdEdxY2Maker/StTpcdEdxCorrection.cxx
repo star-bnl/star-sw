@@ -291,7 +291,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
       if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
       if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
-      dE *= TMath::Exp(-dXCorr);
+      CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.dx;
       goto ENDL;
     case    kTpcdEdxCor:
       break;
@@ -377,10 +377,11 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     nrows = ((St_tpcCorrectionC *) m_Corrections[k].Chair)->nrows();
     switch (type) {
     case 0: // I70
-    case 1: // fit
-      if (nrows > 1+4*type) {
-	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(  4*type,LogTrackLength));
-	dedx.dedx[1]    =             ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(1+4*type,LogTrackLength);
+    case 1: // dNdx
+    case 2: // fit
+      if (nrows > 1+2*type) {
+	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(  2*type,LogTrackLength));
+	dedx.dedx[1]    =             ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(1+2*type,LogTrackLength);
       }
       if (nrows > 6+2*type) {
 	dedx.dedx[0]   *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(6+2*type,LogTrackLength));
@@ -394,10 +395,11 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows();
     switch (type) {
     case 0: // I70
-    case 1: // fit
-      if (nrows > 1+4*type) {
-	dedx.dedx[0]   *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(  4*type,xx));
-	dedx.dedx[1]    =             ((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(1+4*type,xx);
+    case 1: // dNdx
+    case 2: // fit
+      if (nrows > 1+2*type) {
+	dedx.dedx[0]   *= TMath::Exp(-((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(  2*type,xx));
+	dedx.dedx[1]    =             ((St_MDFCorrectionC *)m_Corrections[k].Chair)->Eval(1+2*type,xx);
       }
       break;
     default:
