@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.15 2015/07/27 18:51:01 huangbc Exp $
+* $Id: StIstRawHitMaker.h,v 1.16 2015/12/25 03:51:20 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -18,6 +18,7 @@
 
 #include "StRoot/St_base/Stypes.h"
 #include "StRoot/StChain/StRTSBaseMaker.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include <vector>
 #include <string>
@@ -43,15 +44,18 @@ public:
    void setCmnCut(float cmnCut = 3.)			{ mCmnCut = cmnCut;        };
    /// 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
    void setDataType(int nDataType = 0)		{ mDataType = nDataType;   };
+   void setDoEmbedding(Bool_t doIt) {mDoEmbedding = doIt;}
+   UChar_t getDataType() {return mDataType;} // 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.15 2015/07/27 18:51:01 huangbc Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.16 2015/12/25 03:51:20 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
 protected:
    Bool_t mIsCaliMode;
+   Bool_t mDoEmbedding;
    Bool_t mDoCmnCorrection;
    //control paramters
    Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
@@ -59,6 +63,7 @@ protected:
    UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
    StIstCollection *mIstCollectionPtr;
+   StIstCollection *mIstCollectionSimuPtr; //raw ADC container from simu data
 
    std::vector< float > mCmnVec; ///< APV chip geom. index, common mode (CM) noise
    std::vector< float > mPedVec; ///< Channel elec. index, pedestal
@@ -68,6 +73,12 @@ protected:
    std::vector< unsigned char > mConfigVec; ///< APV chip configuration status indexed by geom. id
 
 private:
+
+   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
+      int (&signalUnCorrected)[kIstNumApvChannels][kIstNumTimeBins],
+      float (&signalCorrected)[kIstNumApvChannels][kIstNumTimeBins]);
+   void FillRawHitCollectionFromSimData();
+
    Int_t mDataType; ///<  0=all, 1=adc only, 2=zs only
 
    ClassDef(StIstRawHitMaker, 0);
@@ -79,6 +90,79 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.16  2015/12/25 03:51:20  smirnovd
+* Squashed commit of the following:
+*
+* Author: bingchuhuang <bingchuhuang@gmail.com>
+* Date:   Wed Dec 9 17:01:39 2015 -0500
+*
+*     StIstRawHitMaker: Added method to fill hits in pure simulation mode
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Dec 8 11:30:39 2015 -0500
+*
+*     Changes in whitespace only
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Dec 8 11:16:14 2015 -0500
+*
+*     StIstRawHitMaker: Merge simulated ADCs with real data
+*
+* Author: bingchuhuang <bingchuhuang@gmail.com>
+* Date:   Sun Dec 6 23:49:18 2015 -0500
+*
+*     StIstRawHitMaker: Access collection with simulated ADCs
+*
+*     The collection of simulated ADCs is normally created by StIstSlowSimMaker who
+*     saves it to a globaly accessible dataset ("istRawAdcSimu"). Here we check if
+*     such dataset exists and set a pointer to access the collection. The data will be
+*     merged with real data ADC values
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Mon Dec 7 22:05:06 2015 -0500
+*
+*     StIstRawHitMaker: Refactor Make(), Define apvId for shorthand
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Dec 8 10:49:32 2015 -0500
+*
+*     StIstRawHitMaker: Refactor Make(), Changed continue to return in the new function
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Fri Dec 11 15:07:36 2015 -0500
+*
+*     StIstRawHitMaker: Refactor Make(), Split long function
+*
+*     Moved portion of Make() to a separate routine FillRawHitCollectionFromAPVData()
+*     This is done in preparation for easier merging of simulated and real ADC data
+*     for embedding studies
+*
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Fri Dec 4 17:53:14 2015 -0500
+*
+*     StIstRawHitMaker: Refactor Make(), Zero-initialize arrays with memset
+*
+* Author: bingchuhuang <bingchuhuang@gmail.com>
+* Date:   Fri Dec 4 11:03:33 2015 -0500
+*
+*     StIstRawHitMaker: Allow public access to mDataType member
+*
+*     Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+*
+* Author: bingchuhuang <bingchuhuang@gmail.com>
+* Date:   Fri Dec 4 10:46:13 2015 -0500
+*
+*     StIstRawHitMaker: Added member pointer to simulated collection of channel ADC
+*
+*     Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+*
+* Author: bingchuhuang <bingchuhuang@gmail.com>
+* Date:   Fri Dec 4 10:42:21 2015 -0500
+*
+*     StIstRawHitMaker: Added class member flag for processing embedding
+*
+*     Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+*
 * Revision 1.15  2015/07/27 18:51:01  huangbc
 * Add space before and after "__DATE__" and "__TIME__" for compling under gcc4.8.2
 *
