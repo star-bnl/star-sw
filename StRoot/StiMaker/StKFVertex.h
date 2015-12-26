@@ -53,7 +53,7 @@ public:
   Double_t  Chi2AtVx();
   static void      SetDebug(Int_t k = 0) {_debug = k;}
   static Int_t     Debug() {return _debug;}
-  static void      ResetTotalNoVertices() {fTotalNoVertices = 0;}
+  static void      ResetTotalNoVertices(Int_t n = 0) {fTotalNoVertices = n;}
 
 private:
   TList     fKFTracks;

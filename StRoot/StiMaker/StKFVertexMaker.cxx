@@ -419,9 +419,12 @@ Int_t StKFVertexMaker::Make() {
     LOG_WARN << "StKFVertexMaker::fit: no StEvent " << endm;
     return kStOK;        // if no event, we're done
   }
+  StKFVertex::ResetTotalNoVertices();
   // add Vixed Primary vertex if any
   if (StiToolkit::instance()->getVertexFinder() && (IAttr("VFFV") || IAttr("VFMCE"))) {
     StiToolkit::instance()->getVertexFinder()->fit(pEvent);
+    const std::vector<StiHit*> *vertexes = StiToolkit::instance()->getVertexFinder()->result();
+    if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
   }
   Double_t bField = 0;
 #if 0
@@ -432,7 +435,6 @@ Int_t StKFVertexMaker::Make() {
   KFParticle::SetField(bField);
   MakeParticles();
   if (fNGoodGlobals < 1) return kStOK;
-  StKFVertex::ResetTotalNoVertices();
   Fit();
   if (! fgcVertices) return kStOK;
   if (fgcVertices->IsEmpty()) {
