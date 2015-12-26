@@ -1301,6 +1301,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                "gstar","read event from MuDst",kFALSE},
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
+  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,Tree,noHistos,noRunco"
+   ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1786,7 +1788,6 @@ Bfc_st BFC[] = { // standard chains
 #else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
-  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,StrngMuDST,Tree",  "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom"

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.622 2015/07/19 23:21:20 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.623 2015/12/26 19:51:17 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -355,8 +355,14 @@ Int_t StBFChain::Instantiate()
     // Special makers already created or action which
     // need to take place before 'maker' is created.
     if (! mk) {
-      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-      else                          mk = New(fBFC[i].Maker);
+      if (maker == "StMuDstMaker" && GetOption("RMuDst")) {
+	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
+	mk = GetMaker("MuDst");
+	if (mk) mk->SetName("RMuDst");
+      } else {
+	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+	else                          mk = New(fBFC[i].Maker);
+      }
       if (! mk) {
 	LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
 	assert(mk);
