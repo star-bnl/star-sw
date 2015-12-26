@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.55 2015/12/26 19:51:18 fisyak Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.56 2015/12/26 19:56:17 fisyak Exp $
 
  Class to control "BFC" chain
 
@@ -65,7 +65,6 @@ class StBFChain : public StChain {
 #endif
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
-   virtual void        Clear(Option_t *option="");
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
    virtual Int_t       Make(){return StChain::Make();};
    virtual Int_t       Load();             
@@ -75,7 +74,7 @@ class StBFChain : public StChain {
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);}
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);}
    static  Int_t       ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort=kFALSE);
-   void                SetFlags(const Char_t *Chain=""); // *MENU*
+   void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    void                SetInputFile(const Char_t *infile=0);                          // *MENU
    void                SetOutputFile(const Char_t *outfile=0);                        // *MENU
@@ -103,7 +102,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.55 2015/12/26 19:51:18 fisyak Exp $ built " __DATE__ " " __TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.56 2015/12/26 19:56:17 fisyak Exp $ built " __DATE__ " " __TIME__ ;
        return cvs;
    }
    /// StBFChain control class
