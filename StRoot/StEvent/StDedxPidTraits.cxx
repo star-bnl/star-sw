@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.16 2012/04/29 22:51:18 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.17 2015/12/24 00:14:44 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.17  2015/12/24 00:14:44  fisyak
+ * Add GMT and SST Id and new dE/dx method
+ *
  * Revision 2.16  2012/04/29 22:51:18  fisyak
  * Add field for Log2(<dX>)
  *
@@ -65,7 +68,7 @@
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.16 2012/04/29 22:51:18 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.17 2015/12/24 00:14:44 fisyak Exp $";
 
 Float_t StDedxPidTraits::mean() const { 
 #ifdef P03ia

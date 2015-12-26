@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.60 2015/09/14 16:58:13 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.61 2015/12/24 00:14:44 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.61  2015/12/24 00:14:44  fisyak
+ * Add GMT and SST Id and new dE/dx method
+ *
  * Revision 2.60  2015/09/14 16:58:13  ullrich
  * Added items to StFmsDetectorId enumeration
  *

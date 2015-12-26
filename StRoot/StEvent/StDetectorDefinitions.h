@@ -131,9 +131,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.11 2015/05/13 17:06:13 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.12 2015/12/24 00:14:44 fisyak Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.12  2015/12/24 00:14:44  fisyak
+** Add GMT and SST Id and new dE/dx method
+**
 ** Revision 2.11  2015/05/13 17:06:13  ullrich
 ** Added hooks and interfaces to Sst detector (part of HFT).
 **
