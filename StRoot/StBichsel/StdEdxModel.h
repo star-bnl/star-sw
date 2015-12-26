@@ -60,7 +60,10 @@ class StdEdxModel {
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
 };
-// $Id: $
-// $Log: $
+// $Id: StdEdxModel.h,v 1.1 2015/12/24 00:16:25 fisyak Exp $
+// $Log: StdEdxModel.h,v $
+// Revision 1.1  2015/12/24 00:16:25  fisyak
+// Add TpcRS model and macros
+//
 #endif
 

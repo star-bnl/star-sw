@@ -129,6 +129,9 @@ class dEdxParameterization {
     
   ClassDef(dEdxParameterization,0)
 };
-// $Id: $
-// $Log: $
+// $Id: dEdxParameterization.h,v 1.10 2015/12/24 00:16:26 fisyak Exp $
+// $Log: dEdxParameterization.h,v $
+// Revision 1.10  2015/12/24 00:16:26  fisyak
+// Add TpcRS model and macros
+//
 #endif

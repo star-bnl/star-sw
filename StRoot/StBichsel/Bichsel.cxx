@@ -34,5 +34,8 @@ void Bichsel::Print() {
   cout << "Bichsel:: " << m_Tag << endl;
   if (m_dEdxParameterization) m_dEdxParameterization->Print();
 }
-// $Id: $
-// $Log: $
+// $Id: Bichsel.cxx,v 1.15 2015/12/24 00:16:25 fisyak Exp $
+// $Log: Bichsel.cxx,v $
+// Revision 1.15  2015/12/24 00:16:25  fisyak
+// Add TpcRS model and macros
+//

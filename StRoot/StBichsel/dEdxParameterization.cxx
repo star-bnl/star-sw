@@ -159,5 +159,8 @@ Double_t dEdxParameterization::Get(const TH1D *hist, Double_t log10bg) const {
   if (log10bg > xmax) log10bg = xmax;
   return hsave->Interpolate(log10bg);
 }
-// $Id: $
-// $Log: $
+// $Id: dEdxParameterization.cxx,v 1.18 2015/12/24 00:16:26 fisyak Exp $
+// $Log: dEdxParameterization.cxx,v $
+// Revision 1.18  2015/12/24 00:16:26  fisyak
+// Add TpcRS model and macros
+//

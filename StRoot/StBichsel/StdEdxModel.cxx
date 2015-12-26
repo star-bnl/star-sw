@@ -89,11 +89,11 @@ StdEdxModel::~StdEdxModel() {
 //____________________________________________________________________________
 Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
   // most probable log(dE) versys log_10(n_P) and sigma
-  static Double_t ln10 = TMath::Log(10.);
+  //  static Double_t ln10 = TMath::Log(10.);
   Double_t n_PL10   = x[0];
   if (n_PL10 > 4) n_PL10 = 4;
   if (n_PL10 < 0.7) n_PL10 = 0.7;
-  Double_t n_P      = TMath::Exp(n_PL10*ln10);
+  //  Double_t n_P      = TMath::Exp(n_PL10*ln10);
   Double_t sigma = x[1];
   //  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
   Double_t Sigma = sigma;
@@ -179,7 +179,7 @@ TF1 *StdEdxModel::zdEdx() {
 //________________________________________________________________________________
 Double_t StdEdxModel::zdE(Double_t n_P, Double_t sigma) {
   // Most probable log(n_T) 
-  static Double_t zGeVkeV = TMath::Log(1e6);
+  //  static Double_t zGeVkeV = TMath::Log(1e6);
   return instance()->zMPV()->Eval(TMath::Log10(n_P), sigma);// ? - zGeVkeV;
 }
  //________________________________________________________________________________
@@ -356,8 +356,8 @@ void StdEdxModel::MakedEdxModel() {
   const TArrayD     &xBins = *x->GetXbins();
   TArrayD XBins(Nxbins+1);
   for (Int_t ix = 0; ix <= Nxbins; ix++) XBins[ix] = TMath::Log10(xBins[ix+1]);
-  TAxis *y = nPdT->GetYaxis();
-  Int_t Nybins = y->GetNbins();
+  //  TAxis *y = nPdT->GetYaxis();
+  //  Int_t Nybins = y->GetNbins();
   Int_t    Nsigma = 51;
   Double_t sigmaMin = -.005;
   Double_t sigmaMax = 0.505;
@@ -464,5 +464,8 @@ void StdEdxModel::MakedEdxModel() {
   h2MDF(dEdxMPV->GetName(),7,200);
   fOut->Write();
 }
-// $Id: $
-// $Log: $
+// $Id: StdEdxModel.cxx,v 1.1 2015/12/24 00:16:25 fisyak Exp $
+// $Log: StdEdxModel.cxx,v $
+// Revision 1.1  2015/12/24 00:16:25  fisyak
+// Add TpcRS model and macros
+//

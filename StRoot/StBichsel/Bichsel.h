@@ -89,7 +89,10 @@ class Bichsel {
 
   ClassDef(Bichsel,0)
 };
-// $Id: $
-// $Log: $
+// $Id: Bichsel.h,v 1.15 2015/12/24 00:16:25 fisyak Exp $
+// $Log: Bichsel.h,v $
+// Revision 1.15  2015/12/24 00:16:25  fisyak
+// Add TpcRS model and macros
+//
 #endif
 
