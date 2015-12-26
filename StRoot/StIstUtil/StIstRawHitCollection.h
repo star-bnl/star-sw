@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitCollection.h,v 1.7 2014/09/09 08:23:46 ypwang Exp $
+* $Id: StIstRawHitCollection.h,v 1.8 2015/12/22 20:16:27 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -44,6 +44,7 @@ public:
 
    //get pointer to a raw hit by channel ID
    StIstRawHit *getRawHit( int elecId );
+   void         addRawHit( int elecId, StIstRawHit* istRawHit);
 
 protected:
    //function used for sorting raw hits by geoId
@@ -66,6 +67,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitCollection.h,v $
+* Revision 1.8  2015/12/22 20:16:27  smirnovd
+* StIstRawHitCollection: Added method to add/update hits in internal stl container
+*
 * Revision 1.7  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *

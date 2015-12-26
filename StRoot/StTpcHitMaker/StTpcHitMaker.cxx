@@ -821,9 +821,11 @@ void StTpcHitMaker::TpxAvLaser(Int_t sector) {
 #ifdef __NOT_ZERO_SUPPRESSED_DATA__
 #ifdef  __TOKENIZED__
     if (tb >= 368 && tb <= 383) 
-    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+      //    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
 #else /* ! __TOKENIZED__ */
-    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+    //    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+    adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
 #endif /*  __TOKENIZED__ */
 #else
     //    if (adc < 6) continue;
@@ -1020,7 +1022,8 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       Int_t tb   = daqadc.tb;
       Int_t adc  = daqadc.adc;
 #ifdef __NOT_ZERO_SUPPRESSED_DATA__
-      adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+      //      adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1,tb);
+      adc -= St_tpcPedestalC::instance()->Pedestal(sector,r+1,p+1);
       if (adc <= 0) continue;
 #endif
       ADCs[tb] = adc;
