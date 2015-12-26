@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.623 2015/12/26 19:51:17 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.624 2015/12/26 19:56:17 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -19,7 +19,6 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
-#include "TObjectTable.h"
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -43,7 +42,7 @@
 // NoChainOptions -> Number of chain options auto-calculated
 TableImpl(Bfc);
 ClassImp(StBFChain);
-static Int_t NoMakersWithInput = 0; // no. of makers which have time stamp 
+
 //_____________________________________________________________________________
 // Hack constructor.
 /*!
@@ -185,12 +184,10 @@ Int_t StBFChain::Load()
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  } else {
-#if 0
 	    if ( ! index(fBFC[i].Libs,',') || Debug() > 1 ) {
 	      LOG_WARN << "No path for Key=" << fBFC[i].Key << "-> Searched for [" << libL 
 		       << "] from Libs=" << fBFC[i].Libs << " (will proceed)" << endm;
 	    }
-#endif
 	  }
 	}
 	Libs.Delete();
@@ -221,7 +218,6 @@ Int_t StBFChain::Instantiate()
   if (! fNoChainOptions) return status;
   Long64_t maxsize = kMaxLong64;
   TTree::SetMaxTreeSize(maxsize);
-  St_db_Maker* dbMk = 0;
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     TString maker(fBFC[i].Maker);
@@ -257,7 +253,7 @@ Int_t StBFChain::Instantiate()
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	dbMk = (St_db_Maker *) mk;
+	St_db_Maker* dbMk = (St_db_Maker *) mk;
 	if (! dbMk) {
 	  TString MySQLDb("MySQL:StarDb");
 	  TString MainCintDb("$STAR/StarDb");
@@ -305,6 +301,7 @@ Int_t StBFChain::Instantiate()
 	  mk = dbMk;
 	}
 	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	SetDbOptions(dbMk);
       }
       goto Add2Chain;
     }
@@ -330,7 +327,6 @@ Int_t StBFChain::Instantiate()
 	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
 	}
         if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
-	NoMakersWithInput++;
 	goto Add2Chain;
       }
       goto Error;
@@ -355,61 +351,53 @@ Int_t StBFChain::Instantiate()
     // Special makers already created or action which
     // need to take place before 'maker' is created.
     if (! mk) {
-      if (maker == "StMuDstMaker" && GetOption("RMuDst")) {
-	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
-	mk = GetMaker("MuDst");
-	if (mk) mk->SetName("RMuDst");
-      } else {
-	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-	else                          mk = New(fBFC[i].Maker);
-      }
+      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+      else                          mk = New(fBFC[i].Maker);
       if (! mk) {
 	LOG_FATAL << Form("StBFChain::Instantiate() problem with instantiation Maker=[%s] Name=[%s]",fBFC[i].Maker,fBFC[i].Name) << endm;
 	assert(mk);
       }
     }
     strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
-    if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
+    if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
-      NoMakersWithInput++;
     }
 
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
-      if (!GetOption("fzin")  && !GetOption("fzinSDT") &&
+      if (!GetOption("fzin")  && 
 	  !GetOption("ntin")  &&
 	  !GetOption("gstar") && 
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
-      if (GetOption("verybig"))                      NwGeant = 80;
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-      TString CintF(SAttr("GeneratorFile"));
-      if (GetOption("fzin")        || GetOption("fzinSDT")        ||
-	  GetOption("ntin")        || 
-	  GetOption("gstar")       || 
-	  GetOption("PrepEmbed")   || 
-	  GetOption("mtin")        ||
-	  CintF != "") {
+      if (GetOption("fzin")      || 
+	  GetOption("ntin")      || 
+	  GetOption("gstar")     || 
+	  GetOption("pythia")    || 
+	  GetOption("hijing")    || 
+	  GetOption("PrepEmbed") || 
+	  GetOption("mtin")) {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
-	if (GetOption("PrepEmbed") || GetOption("pythiaEmbed") || GetOption("fzinSDT")) mk->SetAttr("Don'tTouchTimeStamp",1);
-	if (GetOption("flux"))      mk->SetAttr("flux",1);
-	if (GetOption("fzout"))     mk->SetAttr("fzout",1);
-	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
-	if (GetOption("Wenu"))      mk->SetAttr("Wenu",1);
-	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
-      } else mk->SetActive(kFALSE);
-      if (! mk) goto Error;
-      SetGeantOptions(mk);
-      if (GetOption("fzin")        || GetOption("fzinSDT")        ||
-	  GetOption("PrepEmbed")   || 
-	  GetOption("mtin")) {
-	NoMakersWithInput++;
+	if (GetOption("PrepEmbed") || GetOption("pythiaEmbed")) mk->SetAttr("Don'tTouchTimeStamp",kTRUE);
+	if (GetOption("flux")) mk->SetAttr("flux",kTRUE);
+	if (GetOption("pythia")) {
+	  mk->SetAttr("Pythia",kTRUE);
+	  if (GetOption("Wenu")) mk->SetAttr("Wenu",kTRUE);
+	  if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
+	}
+	if (GetOption("hijing")) {
+	  mk->SetAttr("hijing",kTRUE);
+	}
       }
+      else mk->SetActive(kFALSE);
+      //if (! mk) goto Error;
+      SetGeantOptions(mk);
     }
 
     // special maker options
@@ -419,17 +407,17 @@ Int_t StBFChain::Instantiate()
     //        z = 1 Mixer Mode
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
-	mk->SetAttr("VMCPassive",1);
+	mk->SetAttr("VMCPassive",kTRUE);
       }
       else {
-	if (GetOption("phys_off")) mk->SetAttr("phys_off",1);
-	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",1);
+	if (GetOption("phys_off")) mk->SetAttr("phys_off",kTRUE);
+	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",kTRUE);
 	if (fInFile != "")  {
 	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
 	    goto Error;
 	}
       }
-      if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
+      if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
 
     // ---
@@ -443,28 +431,28 @@ Int_t StBFChain::Instantiate()
 
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
-	mk->SetAttr("useSvt"	,0);
+	mk->SetAttr("useSvt"	,kFALSE);
       } else {
 	if (GetOption("SvtIT")){
-	  mk->SetAttr("useSvt"	  ,1);
-	  mk->SetAttr("activeSvt" ,1);
+	  mk->SetAttr("useSvt"	  ,kTRUE);
+	  mk->SetAttr("activeSvt" ,kTRUE);
 	}
       }
       if (   GetOption("NoSsdIT") &&
 	    !GetOption("SstIT") ){
-	mk->SetAttr("useSsd"	,0);
+	mk->SetAttr("useSsd"	,kFALSE);
       } else {
 	if (GetOption("SsdIT")){
-	  mk->SetAttr("useSsd"	  ,1);
-	  mk->SetAttr("activeSsd" ,1);
+	  mk->SetAttr("useSsd"	  ,kTRUE);
+	  mk->SetAttr("activeSsd" ,kTRUE);
 	}
       }
 
       // this was an R&D detector never implemented
       // simulations were made nonetheless
       if (GetOption("HpdIT")){
-	mk->SetAttr("useHpd"     ,1);
-	mk->SetAttr("activeHpd"  ,1);
+	mk->SetAttr("useHpd"     ,kTRUE);
+	mk->SetAttr("activeHpd"  ,kTRUE);
       }
 
       // back to the HFT sub-system
@@ -495,59 +483,54 @@ Int_t StBFChain::Instantiate()
 
       // other sub-systems
       if (GetOption("BTofIT")){
-	mk->SetAttr("useBTof"    ,1);
-	mk->SetAttr("activeBTof" ,1);
+	mk->SetAttr("useBTof"    ,kTRUE);
+	mk->SetAttr("activeBTof" ,kTRUE);
       }
 
       if (GetOption("StiPulls") || 
-	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,1);
-      if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,1);
-      if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,1);
-      if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,1);
-      if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
-      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,1);
-      if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,1);
+	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
+      if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
+      if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
+      if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
+      if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
+      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
+      if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,kTRUE);
       mk->PrintAttr();
     }
-    if (maker== "StGmtClusterMaker") {
-      if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  1);
-    }
-    if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
+    if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
       if (GetOption("Sti") || GetOption("StiCA") ||
 	  GetOption("Stv") ||
-	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , 1);
-      if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, 1);
-      if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, 1);
-      if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, 1);
-      if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, 1);
+	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
+      if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
+      if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
+      if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
+      if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, kTRUE);
       if (GetOption("VFPPVEv"  ) ) {
         gSystem->Load("StBTofUtil.so");
-        mk->SetAttr("VFPPVEv"      , 1);
+        mk->SetAttr("VFPPVEv"      , kTRUE);
       }
       if (GetOption("VFPPVEvNoBtof")){
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
-        mk->SetAttr("VFPPVEvNoBtof", 1);
+        mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
-      if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, 1);
-      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
-      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
-      if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, 1);
-      if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, 1);
-      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
-      if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, 1);
+      if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
+      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
+      if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
+      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
       if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
-      if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", 1);
-      if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , 1);
-      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , 1);
+      if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
+      if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
+      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
-      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
-      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
-      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
+      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
     }
     if (maker=="StAssociationMaker") {
 
@@ -608,7 +591,7 @@ Int_t StBFChain::Instantiate()
 
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
-      mk->SetAttr("BEmcCheckStatus",1);
+      mk->SetAttr("BEmcCheckStatus",kTRUE);
 
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
@@ -649,8 +632,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("SpcChgCal") ||
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
       if ( GetOption("SCScalerCal") ) mk->SetMode(4);
-      if ( GetOption("EastOff"))      mk->SetAttr("EastOff",1);
-      if ( GetOption("WestOff"))      mk->SetAttr("WestOff",1);
+      if ( GetOption("EastOff"))      mk->SetAttr("EastOff",kTRUE);
+      if ( GetOption("WestOff"))      mk->SetAttr("WestOff",kTRUE);
     }
     if (maker == "StEventQAMaker" && GetOption("QAalltrigs"))
       ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
@@ -671,20 +654,17 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
     if (maker == "StTpcRTSHitMaker") {
-      if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", 1);
-    }
-    if (GetOption("NoTpxAfterBurner") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) {
-      mk->SetAttr("NoTpxAfterBurner", 1);
+      if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
     }
     if (maker == "StTpcDbMaker"){
-      //      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
-      if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
-      if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",1) ;// uses ofl database
-      if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",1);// uses new laserDV
+      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
+      if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
+      if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
+      if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
       if (GetOption("ExB")){
-	mk->SetAttr("ExB", 1);	// bit 0 is ExB ON or OFF
-	if      ( GetOption("EB1") ) mk->SetAttr("EB1", 1);
-	else if ( GetOption("EB2") ) mk->SetAttr("EB2", 1);
+	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
+	if      ( GetOption("EB1") ) mk->SetAttr("EB1", kTRUE);
+	else if ( GetOption("EB2") ) mk->SetAttr("EB2", kTRUE);
 	else {
 	  // depend on RY option i.e. take default for that RealYear data
 	  // expectations.
@@ -693,43 +673,42 @@ Int_t StBFChain::Instantiate()
 	     GetOption("RY2001")  ||
 	     GetOption("RY2001N") ||
 	     GetOption("RY2003")  ||
-	     GetOption("RY2003X"))   mk->SetAttr("OldRuns", 1);
+	     GetOption("RY2003X"))   mk->SetAttr("OldRuns", kTRUE);
 	}
 	// Other options introduced in October 2001 for distortion corrections
 	// studies and year1 re-production. Those are OR additive to the mask.
 	//(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
 	//		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
 	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
-	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , 1);
-	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , 1);
-	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , 1);
-	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , 1);
-	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , 1);
-	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , 1);
-	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , 1);
-	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , 1);
-	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , 1);
-	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , 1);
-	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , 1);
-	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , 1);
-	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", 1);
-	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , 1);
-	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",1);
+	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);
+	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);
+	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);
+	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);
+	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);
+	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);
+	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);
+	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);
+	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);
+	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);
+	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
+	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
+	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
+	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
+	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
       }
       mk->PrintAttr();
     }
     if ((maker == "StdEdxY2Maker"  || maker == "StTpcHitMover") &&
 	GetOption("EmbeddingShortCut"))  {
-      mk->SetAttr("EmbeddingShortCut", 1);
+      mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
     }
-#if 0
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
       // If simulation running make sure pick up simu stuff from db
       if (GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetMode(1);
     }
-#endif
+
     // FTPC
     if ((maker == "StFtpcClusterMaker" ||
 	 maker == "StFtpcTrackMaker"    )  &&
@@ -746,7 +725,7 @@ Int_t StBFChain::Instantiate()
 
     // PMD
     if ( maker == "StPmdReadMaker"         &&
-         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",1);
+         GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
     // PMD
 
     // Hit filtering will be made from a single maker in
@@ -795,11 +774,7 @@ Int_t StBFChain::Instantiate()
       if (mode)
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
-    if (maker == "StBTofCalibMaker") {
-      if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
-      if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",1);
-    }
-    if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
+    if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
       TString FiltTrgFlavor = fFiltTrg(1,128);
@@ -835,7 +810,6 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
-  SetDbOptions(dbMk);
 
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
@@ -874,7 +848,7 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StTagsMaker::");
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
-#if 0
+#if 1
     // force load of geometry for VMC and Sti
     
     if (GetOption("Sti") || GetOption("StiCA") || 
@@ -950,7 +924,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
 //_____________________________________________________________________
 Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort) {
   Opt.Clear();
-  TObjArray *obj = tChain.Tokenize("[^ ;,]");
+  TObjArray *obj = tChain.Tokenize("[^ ;,]+");
   Int_t nParsed = obj->GetEntries();
   Int_t k, N = 0;
   if (GetChain() && GetChain()->Debug() > 2) {
@@ -1053,7 +1027,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     Check = kTRUE;
     if ( TPRegexp("^FiltTrg(Inc|Exc)?(_.*)*$").Match(Tag,"i") > 0) return 0;
   }
-  // Check possible Generator files
+
   if (Check) {
     gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
     abort(); //assert(1);
@@ -1066,13 +1040,12 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
   TObjArray Opts;
   Int_t nParsed = ParseString(tChain,Opts,kTRUE);
   for (Int_t l = 0; l < nParsed; l++) {
-    TString TagC = ((TObjString *)Opts[l])->GetString();
-    TString Tag(TagC);
-    Tag.ToLower();
+    TString Tag = ((TObjString *)Opts[l])->GetString();
     Int_t kgo;
     Int_t in = Tag.Index("=");
     if (in > 0) {// string with  "="
       TString subTag(Tag.Data(),in);
+      subTag.ToLower(); //printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(subTag.Data());
       if (kgo > 0) {
 	memset(fBFC[kgo].Comment,0,sizeof(fBFC[kgo].Comment)); // be careful size of Comment
@@ -1081,6 +1054,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
       }
     } else {
+      Tag.ToLower();
       // printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(Tag.Data(),kFALSE);
       if (kgo != 0) {
@@ -1100,159 +1074,139 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	    } 
 	  }
 	}
-	continue;
-      }
-      // it is 0 i.e. was not recognized. 
-      // Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS and derivative
-      // We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check) 
-      // but the goal here is to avoid user's histeria by displaying extra messages NOW.
-      //
-      // Note that kOpt() has already validated the pattern (so it has to be right here).
-      //
-      // !!! Debug: dbv20040917
-      if (Tag.BeginsWith("dbv")) {
-	if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
-	if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
-	if (Tag.Length() == 11 || Tag.Length() == 18) {
-	  gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
-			     << FDate  << "." << FTime << endm;
+      } else {
+	// it is 0 i.e. was not recognized. 
+	// Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS and derivative
+	// We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check) 
+	// but the goal here is to avoid user's histeria by displaying extra messages NOW.
+	//
+	// Note that kOpt() has already validated the pattern (so it has to be right here).
+	//
+	// !!! Debug: dbv20040917
+	if (Tag.BeginsWith("dbv")) {
+	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
+	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
+	  if (Tag.Length() == 11 || Tag.Length() == 18) {
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
+			       << FDate  << "." << FTime << endm;
 #ifdef USE_BFCTIMESTAMP
-	} else {
-	  // we passed kOpt() parsing was fine
-	  //if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
-	  TObjArray *subStrL = TPRegexp(BFC_DBREGEXP).MatchS(Tag);
-	  BFCTimeStamp TS;
-	  TString realm;
-	  
-	  TS.Type     = 1;
-	  TS.Date     = (((TObjString *) subStrL->At(2))->GetString()).Atoi();
-	  TS.Time     = 0; // for now, avoid parsing this as user use simple TS 99% of the time
-	  TS.Detector = ((TObjString *) subStrL->At(4))->GetString();
-	  TS.Realm    = ((TObjString *) subStrL->At(6))->GetString();
-	  
-	  if ( TS.Realm.IsNull() ){ realm = "*";}
-	  else {                    realm = TS.Realm;}
-	  
-	  GTSOptions.push_back(TS);
-	  
-	  LOG_WARN << "Override timestamp for detector requested\n\t" 
-		   << "Detector " << TS.Detector  << "\n\t"
-		   << "Realm    " << realm        << "\n\t"
-		   << "Date     " << TS.Date      << "\n\t"
-		   << "Time     " << TS.Time      << endm;
+	  } else {
+	    // we passed kOpt() parsing was fine
+	    //if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
+	    TObjArray *subStrL = TPRegexp(BFC_DBREGEXP).MatchS(Tag);
+	    BFCTimeStamp TS;
+	    TString realm;
+
+	    TS.Type     = 1;
+	    TS.Date     = (((TObjString *) subStrL->At(2))->GetString()).Atoi();
+	    TS.Time     = 0; // for now, avoid parsing this as user use simple TS 99% of the time
+	    TS.Detector = ((TObjString *) subStrL->At(4))->GetString();
+	    TS.Realm    = ((TObjString *) subStrL->At(6))->GetString();
+
+	    if ( TS.Realm.IsNull() ){ realm = "*";}
+	    else {                    realm = TS.Realm;}
+
+	    GTSOptions.push_back(TS);
+
+	    LOG_WARN << "Override timestamp for detector requested\n\t" 
+	             << "Detector " << TS.Detector  << "\n\t"
+	             << "Realm    " << realm        << "\n\t"
+		     << "Date     " << TS.Date      << "\n\t"
+	             << "Time     " << TS.Time      << endm;
 #endif /*  USE_BFCTIMESTAMP */
-	}
-	continue;
-      }
-      if (Tag.BeginsWith("sdt")) {
-	if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
-	if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
-	if (Tag.Length() == 11 || Tag.Length() == 18) {
-	  gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
-			     << FDateS  << "." << FTimeS << endm;
+	  }
+
+	} else if (Tag.BeginsWith("sdt")) {
+	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
+	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
+	  if (Tag.Length() == 11 || Tag.Length() == 18) {
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
+			       << FDateS  << "." << FTimeS << endm;
+
+	    // <<< same logic for GTSOptions can be inserted here
+	    // <<< if so, use TS.Type     = 2
+	  }
+
+	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
+	  char GOptName[4],GOptValue[7];
+	  //TString property(".gopt.");
+	  //TString pattern("*");
+
+	  (void) sscanf(Tag.Data(),"gopt%3s%6s",GOptName,GOptValue);
+          // sscanf adds null terminators for %s, so buffers need to be 1 longer
+
+	  // see StBFChain::Setup() for default values
+	  Gproperty += GOptName;
+
+	  // JL - this is not finished, see comment in kOpt()
 	  
-	  // <<< same logic for GTSOptions can be inserted here
-	  // <<< if so, use TS.Type     = 2
-	  continue;
-	}
-      }  
-      if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
-	char GOptName[4],GOptValue[7];
-	//TString property(".gopt.");
-	//TString pattern("*");
-	
-	(void) sscanf(Tag.Data(),"gopt%3s%6s",GOptName,GOptValue);
-	// sscanf adds null terminators for %s, so buffers need to be 1 longer
-	
-	// see StBFChain::Setup() for default values
-	Gproperty += GOptName;
-	
-	// JL - this is not finished, see comment in kOpt()
-	
-	// pattern is case sensitive, need more checks on this before
-	// setting to something else than "*"
-	//Gpattern  += GOptName;
-	//Gpattern  += "*";
-	Gvalue = GOptValue;
-	
-	gMessMgr->QAInfo() << Tag.Data() << " ... this will set an general attribute "
-			   << Gproperty.Data() << " with value " << GOptValue << " to "
-			   << Gpattern.Data() << endm;
-	// Attr() need to be set after the maker exist
-	//SetAttr(property.Data(),GOptValue,pattern.Data());
-	//SetAttr(property.Data(),GOptValue,pattern.Data());
-	continue;
-      } 
-      if (Tag.BeginsWith("rung")) {
-	fRunG = 1;
-	if (Tag.Length() > 4)  (void) sscanf(Tag.Data(),"rung.%d",&fRunG);
-	gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) " 
-			   << fRunG << " for simulation." << endm; 
-	continue;
-      }
-      if (Tag.BeginsWith("FiltTrg",TString::kIgnoreCase)) {
-	TString filtTrgTag = Tag;
-	Ssiz_t flavorIdx = Tag.Index('_');
-	if (flavorIdx > 0) {
-	  filtTrgTag = Tag(0,flavorIdx);
-	  fFiltTrg = Tag(flavorIdx+1,64);
-	}
-	if (filtTrgTag.CompareTo("FiltTrgExc",TString::kIgnoreCase)==0) {
-	  gMessMgr->QAInfo() << "Trigger Filtering exclude with flavor=" << fFiltTrg << endm;
-	  fFiltTrg.Prepend('-');
-	} else if (filtTrgTag.CompareTo("FiltTrgInc",TString::kIgnoreCase)==0 ||
-		   filtTrgTag.CompareTo("FiltTrg"   ,TString::kIgnoreCase)==0) {
-	  gMessMgr->QAInfo() << "Trigger Filtering include with flavor=" << fFiltTrg << endm;
-	  fFiltTrg.Prepend('+');
-	} else {
-	  // not a match, disable
-	  fFiltTrg = "";
-	}
-	continue;
-      } 
-      // Check for predefined db time stamps ?
-      kgo = kOpt(Tag.Data(),kFALSE);
-      if (kgo != 0){
-	SetOption(kgo,chain);
-	continue;
-      }
-      {
-	// Check that option can be library name or / and Maker
-	static const Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
-	TString File = Tag; File += ".so";
-	Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
-	if (file) {
-	  TString Maker("");
-	  Bfc_st row = {"","","","","","","",kTRUE};
-	  memcpy (&row.Key, Tag.Data(), Tag.Length());
-	  if (Tag.Contains("Maker")) memcpy (&row.Maker, Tag.Data(), Tag.Length());
-	  memcpy (&row.Libs, Tag.Data(), Tag.Length());
-	  fchainOpt->AddAt(&row);
-	  fNoChainOptions = fchainOpt->GetNRows();
-	  fBFC = fchainOpt->GetTable();
-	  delete [] file;
-	}
-	kgo = kOpt(Tag.Data(),kFALSE);
-	if (kgo != 0) {
-	  SetOption(kgo,chain);
-	  continue;
-	} 
-      }
-      {
-	static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
-	TString CintF = TagC;
-	CintF += ".C";
-	Char_t *file = gSystem->Which(path,CintF,kReadPermission);
-	if (file) {
-	  Warning("StBFChain::Init","File %s has been found as %s",CintF.Data(),file);
-	  SetAttr("GeneratorFile",file);
-	  delete [] file;
-	  continue;
+	  // pattern is case sensitive, need more checks on this before
+	  // setting to something else than "*"
+	  //Gpattern  += GOptName;
+	  //Gpattern  += "*";
+	  Gvalue = GOptValue;
+
+	  gMessMgr->QAInfo() << Tag.Data() << " ... this will set an general attribute "
+			     << Gproperty.Data() << " with value " << GOptValue << " to "
+			     << Gpattern.Data() << endm;
+	  // Attr() need to be set after the maker exist
+	  //SetAttr(property.Data(),GOptValue,pattern.Data());
+	  //SetAttr(property.Data(),GOptValue,pattern.Data());
+
+	} else if (Tag.BeginsWith("rung")) {
+	  fRunG = 1;
+	  if (Tag.Length() > 4)  (void) sscanf(Tag.Data(),"rung.%d",&fRunG);
+	  gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) " 
+			     << fRunG << " for simulation." << endm; 
+	} else if (Tag.BeginsWith("FiltTrg",TString::kIgnoreCase)) {
+          TString filtTrgTag = Tag;
+          Ssiz_t flavorIdx = Tag.Index('_');
+          if (flavorIdx > 0) {
+            filtTrgTag = Tag(0,flavorIdx);
+            fFiltTrg = Tag(flavorIdx+1,64);
+          }
+          if (filtTrgTag.CompareTo("FiltTrgExc",TString::kIgnoreCase)==0) {
+	    gMessMgr->QAInfo() << "Trigger Filtering exclude with flavor=" << fFiltTrg << endm;
+            fFiltTrg.Prepend('-');
+          } else if (filtTrgTag.CompareTo("FiltTrgInc",TString::kIgnoreCase)==0 ||
+                     filtTrgTag.CompareTo("FiltTrg"   ,TString::kIgnoreCase)==0) {
+	    gMessMgr->QAInfo() << "Trigger Filtering include with flavor=" << fFiltTrg << endm;
+            fFiltTrg.Prepend('+');
+          } else {
+            // not a match, disable
+            fFiltTrg = "";
+          }
+	} else { // Check for predefined db time stamps ?
+	  kgo = kOpt(Tag.Data(),kFALSE);
+	  if (kgo != 0){
+	    SetOption(kgo,chain);
+	  } else {
+	    // Check that option can be library name or / and Maker
+	    static const Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
+	    TString File = Tag; File += ".so";
+	    Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
+	    if (file) {
+	      TString Maker("");
+	      Bfc_st row = {"","","","","","","",kTRUE};
+	      memcpy (&row.Key, Tag.Data(), Tag.Length());
+	      if (Tag.Contains("Maker")) memcpy (&row.Maker, Tag.Data(), Tag.Length());
+	      memcpy (&row.Libs, Tag.Data(), Tag.Length());
+	      fchainOpt->AddAt(&row);
+	      fNoChainOptions = fchainOpt->GetNRows();
+	      fBFC = fchainOpt->GetTable();
+	      delete [] file;
+	    }
+	    kgo = kOpt(Tag.Data(),kFALSE);
+	    if (kgo != 0) {
+	      SetOption(kgo,chain);
+	    } else {
+	      gMessMgr->QAInfo() << " Invalid Option " << Tag.Data() << ". !! ABORT !! " << endm;
+	      abort(); //assert(1);
+	      return;
+	    }
+	  }
 	}
       }
-      gMessMgr->QAInfo() << " Invalid Option " << Tag.Data() << ". !! ABORT !! " << endm;
-      abort(); //assert(1);
-      return;
     }
   }
   Opts.Delete();
@@ -1352,7 +1306,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
     gMessMgr->QAInfo() << "\tPossible Chain Options are:" << endm;
     for (k=0;k<fNoChainOptions;k++)
     gMessMgr->QAInfo()
-      << Form(" %4d: %-30s:%-12s:%-12s:%s:%s:%s:%s"
+      << Form(" %3d: %-30s:%-12s:%-12s:%s:%s:%s:%s"
 	      ,k,fBFC[k].Key,fBFC[k].Name,fBFC[k].Chain,fBFC[k].Opts,fBFC[k].Maker,fBFC[k].Libs,fBFC[k].Comment)
       << endm;
 
@@ -1363,15 +1317,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
   gMessMgr->QAInfo() << "=============================================="  << endm;
   gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
-  if (tChain == "") return;
   SetOptions(tChain,"Chain");
   if (GetOption("NewTpcAlignment")) {
     gMessMgr->QAInfo() << "Set environment to use NewTpcAlignment" << endm;
     gEnv->SetValue("NewTpcAlignment",1);
-  }
-  if (GetOption("IdealHFT")) {
-    gMessMgr->QAInfo() << "Set environment to use IdealHFT" << endm;
-    gEnv->SetValue("IdealHFT",1);
   }
   if (!GetOption("NoDefault")) { // Default
     // Check flags consistency
@@ -1381,7 +1330,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
 #if 1 /* Not Active geant is not needed any more, except BTofUtil */
-      if (!( GetOption("fzin")   || GetOption("fzinSDT")        ||
+      if (!( GetOption("fzin")   || 
 	     GetOption("ntin")   || 
 	     GetOption("gstar" ) || 
 	     GetOption("pythia") || 
@@ -1394,12 +1343,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("-geometry","Default,-xgeometry");
 	SetOption("-geomNoField","Default,-xgeometry");
       }
-      if (GetOption("fzin") &&  FDateS) {
-	SetOption("-fzin","Default,SDT");
-	SetOption("fzinSDT","Default,SDT");
-      }
     } else {                                  // root
-      if (GetOption("fzin") || GetOption("fzinSDT")) {
+      if (GetOption("fzin")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
@@ -1441,11 +1386,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-PxlIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
     }  
-    if (TString(SAttr("GeneratorFile")) != "") {
-      SetOption("geant","GeneratorFile");
-      SetOption("-fzin","GeneratorFile");
-      SetOption("-fzinSDT","GeneratorFile");
-    }
+    
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
@@ -1479,7 +1420,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
   if (fInFile != "") {
     fInFile.ReplaceAll("\n",";");
     fInFile.ReplaceAll("#",";");
-//     fInFile.ReplaceAll(":",";");
+    fInFile.ReplaceAll(":",";");
     gMessMgr->QAInfo() << "Input file name = " << fInFile.Data() << endm;
   } else {
     if (fkChain >= 0) {
@@ -1489,7 +1430,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
     }
   }
   if (fInFile == "") {SetOption("-in","No Input File"); SetOption("-InTree","NoInput File"); return;}
-  if (!GetOption("fzin") && !GetOption("fzinSDT") &&!GetOption("ntin")) {
+  if (!GetOption("fzin") && !GetOption("ntin")) {
     fSetFiles= new StFile();
     TObjArray Files;
     ParseString(fInFile,Files);
@@ -1513,43 +1454,44 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   if (!  GetOption("NoOutput")) {
     if (outfile) { 
       fFileOut = outfile;
-    }
-    if ((fFileOut == "") & (fInFile != "")) {
-      if (GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin")) {
-	TObjArray words;
-	ParseString(fInFile,words);
-	TIter nextL(&words);
-	TObjString *word = 0;
-	while ((word = (TObjString *) nextL())) {
-	  if (word->GetString().Contains(".fz") ||
-	      word->GetString().Contains(".nt")) {
-	    fFileOut = gSystem->BaseName(word->GetName());
-	    break;
+    } else {
+      if (fInFile != "") {
+	if (GetOption("fzin") || GetOption("ntin")) {
+	  TObjArray words;
+	  ParseString(fInFile,words);
+	  TIter nextL(&words);
+	  TObjString *word = 0;
+	  while ((word = (TObjString *) nextL())) {
+	    if (word->GetString().Contains(".fz") ||
+		word->GetString().Contains(".nt")) {
+	      fFileOut = gSystem->BaseName(word->GetName());
+	      break;
+	    }
 	  }
+	} else {
+	  fFileOut = gSystem->BaseName(fInFile.Data());
 	}
-      } else {
-	fFileOut = gSystem->BaseName(fInFile.Data());
+      } 
+      if (fFileOut == "") {
+	if      (GetOption("pythia")) fFileOut = "pythia.root";
+	else if (GetOption("hijing")) fFileOut = "hijing.root";
+	else if (GetOption("VMC"))    fFileOut = "VMC.root";
+	else if (GetOption("gstar"))  fFileOut = "gtrack.root";
       }
-    } 
-    if (fFileOut == "") {
-      if      (GetOption("pythia")) fFileOut = "pythia.root";
-      else if (GetOption("hijing")) fFileOut = "hijing.root";
-      else if (GetOption("VMC"))    fFileOut = "VMC.root";
-      else if (GetOption("gstar"))  fFileOut = "gtrack.root";
-    }
-    if (  fFileOut != "") {
-      fFileOut.ReplaceAll("*","");
-      fFileOut.ReplaceAll("@","");
-      fFileOut.ReplaceAll("..",".");
-      fFileOut.ReplaceAll(".daq","");
-      fFileOut.ReplaceAll(".fzd","");
-      fFileOut.ReplaceAll(".fz","");
-      fFileOut.ReplaceAll(".nt","");
-      fFileOut.ReplaceAll(".root","");
-      fFileOut.ReplaceAll(".list","");
-      fFileOut.ReplaceAll(".lis","");
-      fFileOut.Strip();
-      fFileOut.Append(".root");
+      if (  fFileOut != "") {
+	fFileOut.ReplaceAll("*","");
+	fFileOut.ReplaceAll("@","");
+	fFileOut.ReplaceAll("..",".");
+	fFileOut.ReplaceAll(".daq","");
+	fFileOut.ReplaceAll(".fzd","");
+	fFileOut.ReplaceAll(".fz","");
+	fFileOut.ReplaceAll(".nt","");
+	fFileOut.ReplaceAll(".root","");
+	fFileOut.ReplaceAll(".list","");
+	fFileOut.ReplaceAll(".lis","");
+	fFileOut.Strip();
+	fFileOut.Append(".root");
+      }
     }
   }
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;
@@ -1577,41 +1519,34 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   Please, change SetDbOptions()
 */
 void StBFChain::SetGeantOptions(StMaker *geantMk){
-  if (! geantMk || ! geantMk->InheritsFrom("St_geant_Maker")) return;
-  SetInput("geant",".make/geant/.data");
-  TString GeomVersion("");
-  if (fRunG > 0) {
-    geantMk->SetAttr("RunG",fRunG);
-  }
-#if 0
-  if (! (GetOption("fzin") || GetOption("fzinSDT") |! GetOption("ForceGeometry")) || TString(SAttr("GeneratorFile")) != "") {
-    GeomVersion = "y2004x";
-    const DbAlias_t *DbAlias = GetDbAliases();
-    Int_t found = 0;
-    for (Int_t i = 0; DbAlias[i].tag; i++) {
-      TString r("r");
-      r +=  DbAlias[i].tag;
-      if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
-      GeomVersion = DbAlias[i].geometry;
-      found = i; 
-      break;
+  if (geantMk && geantMk->InheritsFrom("St_geant_Maker")) {
+    SetInput("geant",".make/geant/.data");
+    TString GeomVersion("");
+    if (fRunG > 0) {
+      geantMk->SetAttr("RunG",fRunG);
     }
-    if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
-    TString GeometryOpt;
-    if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",1);}
-    if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",1);}
-    GeometryOpt += ("detp geom ");
-    GeometryOpt += GeomVersion;
-    ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
-  }
-#else
-  if (! GetOption("fzin") && !  GetOption("fzinSDT")) {
-    if (GetOption("phys_off")) {geantMk->SetAttr("phys_off",1);}
-    if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",1);}
-  }
-#endif      
-  if ((GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "") {
-    ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
+    if (!GetOption("fzin") || GetOption("ForceGeometry")) {
+      GeomVersion = "y2004x";
+      const DbAlias_t *DbAlias = GetDbAliases();
+      Int_t found = 0;
+      for (Int_t i = 0; DbAlias[i].tag; i++) {
+	TString r("r");
+	r +=  DbAlias[i].tag;
+	if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
+	GeomVersion = DbAlias[i].geometry;
+	found = i;
+	break;
+      }
+      if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
+      TString GeometryOpt;
+      if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",kTRUE);}
+      if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",kTRUE);}
+      GeometryOpt += ("detp geometry ");
+      GeometryOpt += GeomVersion;
+      ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
+    }
+    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "")
+      ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }
 //_____________________________________________________________________
@@ -1668,20 +1603,14 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    if (GetOption("simu") || ! NoMakersWithInput) {
+    if (GetOption("simu")) {
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
       for (Int_t i = 0; DbAlias[i].tag; i++) {
-	for (Int_t r = 0; r < 2; r++) {
-	  TString dbTag("");
-	  if (r) dbTag += "r";
-	  dbTag += DbAlias[i].tag;
-	  if (GetOption(dbTag,kFALSE)) {
-	    db->SetDateTime(DbAlias[i].tag);
-	    found = i;
-	    break;
-	  }
-	  if (found) break;
+	if (GetOption(DbAlias[i].tag,kFALSE)) {
+	  db->SetDateTime(DbAlias[i].tag);
+	  found = i;
+	  break;
 	}
       }
       if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}
@@ -1733,7 +1662,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
   //abort();
 #endif /*  USE_BFCTIMESTAMP */
 
-  if (!GetOption("fzin") && !GetOption("fzinSDT")) {
+  if (!GetOption("fzin")) {
     struct Field_t {
       const Char_t *name;
       Float_t scale;
@@ -1799,7 +1728,7 @@ void StBFChain::SetTreeOptions()
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
   if (GetOption("AllEvent")) {
-    if (GetOption("fzin")   || GetOption("fzinSDT")   ||
+    if (GetOption("fzin")   || 
 	GetOption("ntin")   || 
 	GetOption("gstar")  || 
 	GetOption("pythia") || 
@@ -1840,8 +1769,4 @@ TString StBFChain::GetGeometry() const
   }
   return TString(""); 
 }   
-//________________________________________________________________________________
-void StBFChain::Clear(Option_t *option) {
-  StMaker::Clear(option);
-  if (GetOption("TObjTable"))  gObjectTable->Print();
-}
+   
