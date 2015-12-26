@@ -1,5 +1,5 @@
-// $Id: StdEdxY2Maker.cxx,v 1.83 2014/03/10 20:14:21 fisyak Exp $
-#define CompareWithToF 
+// $Id: StdEdxY2Maker.cxx,v 1.84 2015/12/24 00:23:03 fisyak Exp $
+//#define CompareWithToF 
 //#define __USEZ3A__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
