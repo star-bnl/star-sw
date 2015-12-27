@@ -1,12 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstRawHitMaker.cxx,v 1.35 2015/12/27 18:28:32 smirnovd Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* See header file.
-***************************************************************************/
+// $Id: StIstRawHitMaker.cxx,v 1.36 2015/12/27 18:35:40 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -31,48 +23,39 @@
 #include <string.h>
 #include <time.h>
 
-StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(false), mDoEmbedding(false), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstCollectionSimuPtr(NULL), mDataType(2)
+StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ),
+   mIsCaliMode(false), mDoEmbedding(false), mDoCmnCorrection(false),
+   mHitCut(5.), mCmnCut(3.),
+   mIstCollectionPtr(new StIstCollection()), mIstCollectionSimuPtr(nullptr),
+   mCmnVec(kIstNumApvs, 0),
+   mPedVec(kIstNumElecIds, 0),
+   mRmsVec(kIstNumElecIds, 0),
+   mGainVec(kIstNumElecIds, 0),
+   mMappingVec(kIstNumElecIds, 0),
+   mConfigVec(kIstNumApvs, 1),
+   mDataType(2)
 {
-   // set all vectors to zeros
-   mCmnVec.resize( kIstNumApvs );
-   mPedVec.resize( kIstNumElecIds );
-   mRmsVec.resize( kIstNumElecIds );
-   mGainVec.resize( kIstNumElecIds );
-   mMappingVec.resize( kIstNumElecIds );
-   mConfigVec.resize( kIstNumApvs, 1 );
-};
+}
 
 StIstRawHitMaker::~StIstRawHitMaker()
 {
    delete mIstCollectionPtr; mIstCollectionPtr = 0;
-};
+}
 
 
-/*!
+/**
  * Init(): prepare the IST raw hit collection
  * in the dataset m_DataSet (data member of StMaker)
  */
 Int_t StIstRawHitMaker::Init()
 {
-   LOG_INFO << "Initializing StIstRawHitMaker ..." << endm;
-   Int_t ierr = kStOk;
+   ToWhiteConst("istRawHitAndCluster", mIstCollectionPtr);
 
-   //prepare output data collection
-   m_DataSet = new TObjectSet("istRawHitAndCluster");
-
-   mIstCollectionPtr = new StIstCollection();
-   ((TObjectSet *) m_DataSet)->AddObject(mIstCollectionPtr);
-
-   if ( ierr || !mIstCollectionPtr ) {
-      LOG_WARN << "Error constructing istCollection" << endm;
-      ierr = kStWarn;
-   }
-
-   return ierr;
-};
+   return kStOk;
+}
 
 
-/*!
+/**
  * InitRun(): access IST calibration DB and retrieve the calibration information
  * from Db tables
  */
@@ -183,10 +166,10 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
    }
 
    return ierr;
-};
+}
 
 
-/*!
+/**
  * Make(): main functional part of the raw hit maker, which contains the below three functions:
  * (1) un-pack the IST raw ADC data (ZS or non-ZS) from daq data via daq reader;
  * (2) pedestal subtraction for the non-ZS data and dynamical common-mode noise calculation;
@@ -363,12 +346,19 @@ Int_t StIstRawHitMaker::Make()
 
    }//end while
 
+   // In case of pure simulation mode when neither real data hits from DAQ
+   // records is available nor embedding is requested fill the output container
+   // with simulated hits
    if(!mDoEmbedding && !nRawAdcFromData) FillRawHitCollectionFromSimData();
 
    return ierr;
 }
 
 
+/**
+ * A private helper function to actually insert StIstRawHits unpacked from DAQ
+ * records into the final output container mIstCollectionPtr.
+ */
 void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
    int (&signalUnCorrected)[kIstNumApvChannels][kIstNumTimeBins],
    float (&signalCorrected)[kIstNumApvChannels][kIstNumTimeBins])
@@ -485,26 +475,30 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
          LOG_WARN << "StIstRawHitMaker::Make() -- Could not access rawHitCollection for ladder " << ladder << endm;
       }
    } //end single APV chip hits filling
-};
+}
 
+
+/**
+ * Copies (and overwrites) StIstRawHits from the container with simulated hits
+ * (usually provided by StIstSlowSimMaker and pointed to by this class' member
+ * mIstCollectionSimuPtr) to the final output container with real data hits
+ * (pointed to by class member mIstCollectionPtr). This method is used internaly
+ * in the pure simulation mode when neither real data hits from DAQ records is
+ * available nor embedding is requested.
+ */
 void StIstRawHitMaker::FillRawHitCollectionFromSimData()
 {
    if(!mIstCollectionSimuPtr) return;
    for( UChar_t ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx ){
       StIstRawHitCollection *rawHitCollectionDataPtr = mIstCollectionPtr->getRawHitCollection( ladderIdx );
       std::vector<StIstRawHit *> rawAdcSimuVec = mIstCollectionSimuPtr->getRawHitCollection(ladderIdx)->getRawHitVec();
-      for (std::vector<StIstRawHit *>::iterator rawAdcSimuPtr = rawAdcSimuVec.begin(); rawAdcSimuPtr!=rawAdcSimuVec.end(); ++rawAdcSimuPtr) {
-         Int_t eId = (*rawAdcSimuPtr)->getChannelId();
-		   StIstRawHit * rawHitData = rawHitCollectionDataPtr->getRawHit(eId);
-         for(Int_t iTBin=0; iTBin<mCurrentTimeBinNum; iTBin++){
-            rawHitData->setCharge((*rawAdcSimuPtr)->getCharge(iTBin),(UChar_t)iTBin);
-            rawHitData->setChargeErr((*rawAdcSimuPtr)->getChargeErr(iTBin),(UChar_t)iTBin);
-         }
-         rawHitData->setChannelId(eId);
-         rawHitData->setGeoId((*rawAdcSimuPtr)->getGeoId());
-         rawHitData->setMaxTimeBin((*rawAdcSimuPtr)->getMaxTimeBin());
-         rawHitData->setDefaultTimeBin((*rawAdcSimuPtr)->getDefaultTimeBin());
-         rawHitData->setIdTruth((*rawAdcSimuPtr)->getIdTruth());
+
+      for (const auto rawAdcSimuPtr : rawAdcSimuVec)
+      {
+         if (!rawAdcSimuPtr) continue;
+
+         Int_t eId = rawAdcSimuPtr->getChannelId();
+         rawHitCollectionDataPtr->addRawHit(eId, new StIstRawHit(*rawAdcSimuPtr));
       }
    }
 }
@@ -516,6 +510,6 @@ void StIstRawHitMaker::Clear( Option_t *opts )
          mIstCollectionPtr->getRawHitCollection(i)->Clear( "" );
       }
    }
-};
+}
 
-ClassImp(StIstRawHitMaker);
+ClassImp(StIstRawHitMaker)
