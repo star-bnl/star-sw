@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.116 2015/12/21 19:41:31 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.117 2015/12/28 23:50:27 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.117  2015/12/28 23:50:27  perev
+ * Remove assert temporary
+ *
  * Revision 2.116  2015/12/21 19:41:31  perev
  * bug #3166 assert vertex closer to 0,0 <9 removed
  *
@@ -830,7 +833,7 @@ void StiStEventFiller::fillEventPrimaries()
 //      double rxy = detInfo->firstPoint().perp();
 //      assert(rxy < 9);
       auto myDif = (detInfo->firstPoint()-vertexPosition);
-      assert(myDif.mag()<0.01);
+//??      assert(myDif.mag()<0.01);
 
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
