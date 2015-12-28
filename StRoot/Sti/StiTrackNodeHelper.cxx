@@ -134,8 +134,9 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
-  if (sinCA2> 0.95) sinCA2= 0.95;
-  if (sinCA2<-0.95) sinCA2=-0.95;
+//   if (sinCA2> 0.95) sinCA2= 0.95;
+//   if (sinCA2<-0.95) sinCA2=-0.95;
+  if (fabs(sinCA2) > 0.99) return 2;
   cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
