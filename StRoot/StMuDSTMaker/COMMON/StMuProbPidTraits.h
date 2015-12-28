@@ -64,7 +64,7 @@ protected:
   float mLog2dX;
   float mProbabilities[__NPARTICLES__];      ///< array holding the pid probabilities
 
-  ClassDef(StMuProbPidTraits,4)
+  ClassDef(StMuProbPidTraits,5)
 };
 
 inline double StMuProbPidTraits::dEdxFit() const {return mdEdxFit;}
