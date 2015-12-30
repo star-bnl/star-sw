@@ -21,30 +21,7 @@ option nbox
 gr/set stat 111111
 filecase keep
 * alias/list
-
-** Load support libraries at program execution
-LOCAL = $FEXIST('.'//$STAR_HOST_SYS)
-IF [LOCAL]=1 THEN
-   PREFIX = '.'//$STAR_HOST_SYS//'/lib'
-   EXEC load_shared [PREFIX]
-ELSE
-   EXEC load_shared $STAR_LIB
-ENDIF
-
-** setup default production geometry
-DETP GEOM y2015a field=-5.0
-
 return
-
-
-********************************
-MACRO load_shared PREFIX
-   GEXE [PREFIX]//'/libStarAgmlUtil.so'
-RETURN
-********************************
-
-
-
 *
 Macro nice_feature 
   trace off 1   
