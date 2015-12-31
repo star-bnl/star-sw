@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.36 2015/12/27 18:35:40 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.37 2015/12/31 02:54:49 huangbc Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -434,13 +434,13 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
             //skip dead chips and bad mis-configured chips
             if (mConfigVec[apvId - 1] < 1 || mConfigVec[apvId - 1] > 9) { //1-9 good status code
                LOG_DEBUG << "Skip: Channel belongs to dead/bad/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
-               return;
+               continue;
             }
 
             //skip current channel marked as suspicious status
             if (mRmsVec[elecId] < mChanMinRmsNoiseLevel || mRmsVec[elecId] > mChanMaxRmsNoiseLevel || mRmsVec[elecId] > 99.0)  {
                LOG_DEBUG << "Skip: Noisy/hot/dead channel electronics index: " << elecId << endm;
-               return;
+               continue;
             }
 
             if ( isPassRawHitCut[iChan] ) {
