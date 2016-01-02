@@ -128,6 +128,7 @@ StPicoDstMaker::StPicoDstMaker(int mode, const char* fileName, const char* name)
       mInputFileName.Append(inputDirFile(i));
     }
     mOutputFileName=mInputFileName;
+    mOutputFileName.ReplaceAll("*","");
     mOutputFileName.ReplaceAll("MuDst.root","picoDst.root");
   }
   if(mIoMode==ioRead) {
@@ -509,6 +510,7 @@ void StPicoDstMaker::closeWrite() {
 //-----------------------------------------------------------------------
 int StPicoDstMaker::Make(){
   int returnStarCode = kStOK;
+  if (mMuDst && mMuDst->event()) setRunNumber(mMuDst->event()->runNumber());
   if (mIoMode == ioWrite){
     returnStarCode = MakeWrite();
   }
