@@ -28,7 +28,8 @@
     $INCLUDE = $BUILD  . "/include";
 
     @search_files = ();
-    $CC           = `root-config  --cc`; chomp($CC);
+    $CC           = `root-config  --cc`; chomp($CC); # print "CC = $CC\n";
+    if (! $CC) {die "ROOT has not been set !";}
     $CXX          = `root-config --cxx`; chomp($CXX);
     $SO           = $CXX;
     $FC           = `root-config --f77`; chomp($FC);
