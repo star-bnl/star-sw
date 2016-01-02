@@ -1534,7 +1534,7 @@ Bfc_st BFC[] = { // standard chains
   {"EEss"     ,"eess","","-eefs,eemcDb,EEmcUtil,MuDst","StEEmcSlowMaker","StEEmcSimulatorMaker"
    ,                                                                          "EEMC slow simulator",kFALSE},
   {"BEmcMixer", "","","",                          "StEmcMixerMaker","StEmcMixerMaker","BEMC mixer",kFALSE},
-  {"emcAtoE"  ,"bemcA2E","" ,"db","StEmcADCtoEMaker","StEmcADCtoEMaker"
+  {"emcAtoE"  ,"bemcA2E","" ,"db","StEmcADCtoEMaker","StEmcRawMaker,StEmcADCtoEMaker"
    ,                                "B-EMC ADC to E converter  OBSOLETE for data in Run 9 or later",kFALSE},
   {"PreEcl"   ,"preecl","","" ,"StPreEclMaker",              "StPreEclMaker","B-EMC Cluster finder",kFALSE},
   {"Epc"      ,"epc","","PreEcl,EmcUtil"             ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
