@@ -13,7 +13,6 @@ KFV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE
 #include <cstdlib>
 #include <string>
 #include "Riostream.h"
-#include "Rtypes.h"
 #include "TMath.h"
 #include "TROOT.h"
 #include "TSystem.h"
