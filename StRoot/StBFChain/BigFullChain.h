@@ -213,12 +213,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2013","","","TpcRS,TpxClu,y2013_1x,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,TpcHitMover,"
    "bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,EEfs,evout,IdTruth,geantout,big"        ,"","","",kFALSE},
-  {"MC.2014","","","TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt,"
-   "NoSvtIt,StiHftC,Idst,BAna,VFMinuit,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,"
-   "geantout,big,MiniMcMk,Sti,AgML"                        "","","no l0 and trg any more, +BTof RC",kFALSE},
+  {"MC.2014","","","TpcRS,bbcSim,btofsim,pxlFastSim,istSim,emcY2,eefs,TpxClu,y2014a,useXgeom,FieldOn,NoSsdIt"
+   ",NoSvtIt,StiHftC,Idst,BAna,VFMinuit,tpcDB,TpcHitMover,btofMatch,btofCalib,tags,emcY2,evout,IdTruth"
+   ",geantout,big,MiniMcMk,Sti,AgML"                      ,"","","no l0 and trg any more, +BTof RC",kFALSE},
   {"MC.2015","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
-   ,                                                                                      "","","/",kFALSE},
+   ,                                                                                      "","","",kFALSE},
   {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
@@ -667,10 +667,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq",kFALSE},
   {"eval_StiCA.RC.auau62.y2010","","","RC.y2010,StiCA","",""
    ,                              "/star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq",kFALSE},
-#if 0
-  {"eval_StiCA.RC.auau7.y2010","","","RC.y2010,StiCA","",""
-   ,                              "/star/rcf/test/daq/2010/138/st_physics_11138001_raw_2020001.daq",kFALSE},
-#endif
   {"eval_Sti.RC.auau11.y2010","","","RC.y2010,Sti","",""
    ,                              "/star/rcf/test/daq/2010/157/st_physics_11157020_raw_2030001.daq",kFALSE},
   {"eval_Sti.RC.auau200.y2010","","","RC.y2010,Sti","",""
@@ -679,10 +675,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq",kFALSE},
   {"eval_Sti.RC.auau62.y2010","","","RC.y2010,Sti","",""
    ,                              "/star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq",kFALSE},
-#if 0
-  {"eval_Sti.RC.auau7.y2010","","","RC.y2010,Sti","",""
-   ,                              "/star/rcf/test/daq/2010/138/st_physics_11138001_raw_2020001.daq",kFALSE},
-#endif
   {"eval_Stv.AgML.RC.auau200.y2010","","","RC.y2010.notof,Stv,AgML","",""
    ,                              "/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq",kFALSE},
   {"eval_Stv.AgML.RC.auau39.y2010","","","RC.y2010.notof,Stv,AgML","",""
@@ -695,10 +687,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq",kFALSE},
   {"eval_StvCA.RC.auau62.y2010","","","RC.y2010.notof,StvCA","",""
    ,                              "/star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq",kFALSE},
-#if 0
-  {"eval_StvCA.RC.auau7.y2010","","","RC.y2010.notof,StvCA","",""
-   ,                              "/star/rcf/test/daq/2010/138/st_physics_11138001_raw_2020001.daq",kFALSE},
-#endif
   {"eval_Stv.RC.auau11.y2010","","","RC.y2010.notof,Stv","",""
    ,                              "/star/rcf/test/daq/2010/157/st_physics_11157020_raw_2030001.daq",kFALSE},
   {"eval_Stv.RC.auau200.y2010","","","RC.y2010.notof,Stv","",""
@@ -707,10 +695,6 @@ Bfc_st BFC[] = { // standard chains
    ,                              "/star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq",kFALSE},
   {"eval_Stv.RC.auau62.y2010","","","RC.y2010.notof,Stv","",""
    ,                              "/star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq",kFALSE},
-#if 0
-  {"eval_Stv.RC.auau7.y2010","","","RC.y2010.notof,Stv","",""
-   ,                              "/star/rcf/test/daq/2010/138/st_physics_11138001_raw_2020001.daq",kFALSE},
-#endif
   {"eval_Sti.AgML.RC.auau200.y2011","","","RC.y2011,AgML,Sti","",""
    ,                              "/star/rcf/test/daq/2011/130/st_physics_12130084_raw_5020002.daq",kFALSE},
   {"eval_Sti.AgML.RC.auau20.y2011","","","RC.y2011,AgML,Sti","",""
@@ -961,7 +945,6 @@ Bfc_st BFC[] = { // standard chains
   {"P2008"       ,"" ,"",  // this one is final and official production ready, June 2008
    "B2008a,IAna,hitfilt,VFMinuit,emcDY2,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,NosstIT,Corr4,analysis"
    ,                        "","","Production chain for 2008 data (+ l3, tof, ftpc, e/b-emc, trgd)",kFALSE},
-
   //
   // Chains for 2009 run p+p essentially
   // Note that we always need to start with VFMinuit as VFPPV is full of asserts
@@ -1296,13 +1279,15 @@ Bfc_st BFC[] = { // standard chains
   {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
-  {"fzout"    ,"","","","","geant output should go to fz-file with name taken from TTree file name",kFALSE},
+  {"fzout" ,"","","","","","geant output should go to fz-file with name taken from TTree file name",kFALSE},
   {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                                "gstar","read event from MuDst",kFALSE},
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,Tree,noHistos,noRunco"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
+  {"RpicoDST"    ,""  ,"","","","","",kFALSE},
+  //  {"RpicoDST"    ,"PicoDst"  ,"","MuDst,Tree,noHistos,noRunco","StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1337,29 +1322,8 @@ Bfc_st BFC[] = { // standard chains
   {"StarGenerator","","","","","libMathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase"
    ,                                                                                "StarGenerator",kFALSE}, 
   {"pythia"      ,"" ,"","PythiaPP200,-fzin","", ""                             ,"set pythia pp200",kFALSE},
-#if 0
-  {"PP200"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 200 GeV",kFALSE},
-  {"PP510"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
-#endif
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"" ,"","AuAu200","", ""                                     ,"set Hijing AuAu200",kFALSE},
-#if 0
-  {"AuAu200"     ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"Hijing1_383"
-   ,                                                      "Load Hijing in starsim, set AuAu200 GeV",kFALSE},
-  {"He3Au200" ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"Hijing1_383"
-   ,                                                    "Load Hijing in starsim, set He3 Au200 GeV",kFALSE},
-  {"pAu200"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"Hijing1_383",                                         "Load Hijing in starsim, set pp 510 GeV",kFALSE},
-  {"pp510StarLight"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"StarLight",                                        "Load StarLight in starsim, set pp 510 GeV",kFALSE},
-  {"AuAu200StarLight_rho"    ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL,StarGenerator","St_geant_Maker"
-   ,"StarLight"
-   ,                                         "Load StarLight in starsim, set AuAu 200 GeV with rho",kFALSE},
-#endif
   {"fzinSDT"       ,"geant","","Simu,-gstar,-ntin,-fzin,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
   {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
@@ -1734,7 +1698,7 @@ Bfc_st BFC[] = { // standard chains
    ,"ClusterMaker for PMD"                                                                         ,kFALSE},
   {"pmdDis"    ,"pmdDis","pmdReco","PmdClust","StPmdDiscriminatorMaker"
    ,                                              "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-
+  {"trgSim"    ,"StarTrigSimu","","","StTriggerSimuMaker" ,"StTriggerUtilities","Trigger Simulator",kFALSE},
 #ifndef __NoStrangeMuDst__
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
    ,                                                                      "Find Kinks from StEvent",kFALSE},
@@ -1814,6 +1778,7 @@ Bfc_st BFC[] = { // standard chains
   {"HftMatTreeB","","","","HftMatchedTree"
    ,                            "StHftPoolEventTB,StHftPoolHftMatchedTreeB","Create HftMatchedTree",kFALSE},
   {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
+  {"picoDST"     ,"PicoDst"  ,"",""     ,                      "StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
