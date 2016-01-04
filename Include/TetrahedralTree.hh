@@ -1,10 +1,17 @@
 /**
+
 TetrahedralTree.hh
+
 This class stores the mesh nodes and elements in an Octree data 
+
 structure to optimize the element search operations
 
+
+
 Author: Ali Sheharyar 
+
 Organization: Texas A&M University at Qatar
+
 */
 
 #ifndef TETRAHEDRAL_TREE_H
@@ -17,6 +24,7 @@ Organization: Texas A&M University at Qatar
 namespace Garfield {
 
   // TODO: replace this class with ROOT's TVector3 class
+
   struct Vec3 {
     float x,y,z;
 
@@ -51,14 +59,15 @@ namespace Garfield {
       return Vec3(x*r,y*r,z*r);
     }
 
-
     Vec3 operator/(float r) const {
       return Vec3(x/r, y/r, z/r);
     }
   };
 
   class TetrahedralTree {
+
   private:
+
     // Physical position/size. This implicitly defines the bounding 
     // box of this node
     Vec3 origin;         // The physical center of this node
@@ -90,7 +99,6 @@ namespace Garfield {
     std::vector<int> tetList;
 
   public:
-
     // Constructor
     TetrahedralTree(const Vec3& origin, const Vec3& halfDimension);
 
@@ -107,7 +115,6 @@ namespace Garfield {
     std::vector<int> GetTetListInBlock(const Vec3& point);
 
   private:
-
     // Check if the given box overlaps with the box corresponding to this tree node
     bool DoesBoxOverlap(const Vec3& b_min, const Vec3& b_max) const;
 
@@ -127,7 +134,10 @@ namespace Garfield {
 
     // A helper function used by the function above. Called recursively on the child nodes.
     const TetrahedralTree* GetBlockFromPointHelper(const Vec3& point);
+
   };
+
 }
 
 #endif
+
