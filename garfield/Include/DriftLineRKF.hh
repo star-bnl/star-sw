@@ -24,18 +24,18 @@ class DriftLineRKF {
   void EnablePlotting(ViewDrift* view);
   void DisablePlotting();
 
-  void SetMaxSteps(const unsigned int& m) { m_maxSteps = m; }
+  void SetMaxSteps(const unsigned int m) { m_maxSteps = m; }
 
   void SetElectronSignalScalingFactor(const double scale) { m_scaleElectronSignal = scale; }
   void SetHoleSignalScalingFactor(const double scale) { m_scaleHoleSignal = scale; }
   void SetIonSignalScalingFactor(const double scale) { m_scaleIonSignal = scale; }
 
-  bool DriftElectron(const double& x0, const double& y0, const double& z0,
-                     const double& t0);
-  bool DriftHole(const double& x0, const double& y0, const double& z0,
-                 const double& t0);
-  bool DriftIon(const double& x0, const double& y0, const double& z0,
-                const double& t0);
+  bool DriftElectron(const double x0, const double y0, const double z0,
+                     const double t0);
+  bool DriftHole(const double x0, const double y0, const double z0,
+                 const double t0);
+  bool DriftIon(const double x0, const double y0, const double z0,
+                const double t0);
 
   void GetEndPoint(double& x, double& y, double& z, double& t, int& st) const;
   unsigned int GetNumberOfDriftLinePoints() const { return m_path.size(); }
@@ -43,7 +43,7 @@ class DriftLineRKF {
 
   double GetArrivalTimeSpread();
   double GetGain();
-  double GetDriftTime() const;
+  double GetDriftTime() const { return m_path.empty() ? 0. : m_path.back().tf; }
 
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
@@ -94,17 +94,17 @@ private:
   bool m_verbose;
 
   // Calculate a drift line starting at a given position.
-  bool DriftLine(const double& x0, const double& y0, const double& z0, 
-                 const double& t0);
+  bool DriftLine(const double x0, const double y0, const double z0, 
+                 const double t0);
   // Calculate transport parameters for the respective particle type.
-  bool GetVelocity(const double& ex, const double& ey, const double& ez,
-                   const double& bx, const double& by, const double& bz,
+  bool GetVelocity(const double ex, const double ey, const double ez,
+                   const double bx, const double by, const double bz,
                    double& vx, double& vy, double& vz) const;
-  bool GetDiffusion(const double& ex, const double& ey, const double& ez,
-                    const double& bx, const double& by, const double& bz,
+  bool GetDiffusion(const double ex, const double ey, const double ez,
+                    const double bx, const double by, const double bz,
                     double& dl, double& dt) const;
-  bool GetTownsend(const double& ex, const double& ey, const double& ez,
-                   const double& bx, const double& by, const double& bz,
+  bool GetTownsend(const double ex, const double ey, const double ez,
+                   const double bx, const double by, const double bz,
                    double& alpha) const;
   // Terminate a drift line at the edge of a boundary.
   bool EndDriftLine();
@@ -112,13 +112,13 @@ private:
   bool DriftToWire(double x0, double y0, double z0, const double& xw,
                    const double& yw, const double& rw);
   // Determine the longitudinal diffusion over the drift line.
-  double IntegrateDiffusion(const double& x, const double& y, const double& z,
-                            const double& xe, const double& ye,
-                            const double& ze);
+  double IntegrateDiffusion(const double x, const double y, const double z,
+                            const double xe, const double ye,
+                            const double ze);
   // Determine the effective gain over the drift line.
-  double IntegrateTownsend(const double& x, const double& y, const double& z,
-                           const double& xe, const double& ye, const double& ze,
-                           const double& tol);
+  double IntegrateTownsend(const double x, const double y, const double z,
+                           const double xe, const double ye, const double ze,
+                           const double tol);
   // Calculate the signal for the current drift line.
   void ComputeSignal() const;
 };

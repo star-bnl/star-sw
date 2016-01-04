@@ -3,6 +3,7 @@
 
 #include "ComponentBase.hh"
 #include "TMatrixD.h"
+#include "TetrahedralTree.hh"
 
 namespace Garfield {
 
@@ -12,7 +13,7 @@ class ComponentFieldMap : public ComponentBase {
   // Constructor
   ComponentFieldMap();
   // Destructor
-  virtual ~ComponentFieldMap() {}
+  virtual ~ComponentFieldMap();
 
   // Ranges
   // Calculates x, y, z, V and angular ranges
@@ -76,6 +77,10 @@ class ComponentFieldMap : public ComponentBase {
   void DisableCheckMapIndices() { checkMultipleElement = false; }
   void EnableDeleteBackgroundElements() { deleteBackground = true; }
   void DisableDeleteBackgroundElements() { deleteBackground = false; }
+
+  // Enable/disable the usage of tetrahedral tree for searching the element in mesh
+  void EnableTetrahedralTreeForElementSearch() { useTetrahedralTreeForSearch = true; }
+  void DisableTetrahedralTreeForElementSearch() { useTetrahedralTreeForSearch = false; }
 
   friend class ViewFEMesh;
 
@@ -154,6 +159,11 @@ class ComponentFieldMap : public ComponentBase {
   // Warnings flag
   bool warning;
 
+  // Tetrahedral tree
+  TetrahedralTree* tetTree;
+  bool useTetrahedralTreeForSearch;
+  bool isTreeInitialized;
+
   // Reset the component
   void Reset() {};
 
@@ -229,6 +239,9 @@ class ComponentFieldMap : public ComponentBase {
 
   // Calculate the bounding boxes of all elements after initialization
   void CalculateElementBoundingBoxes(void);
+
+  // Initialize the tetrahedral tree
+  bool InitializeTetrahedralTree(void);
 };
 }
 

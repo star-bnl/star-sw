@@ -343,6 +343,11 @@ $(OBJDIR)/Sensor.o: \
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
 
+$(OBJDIR)/TetrahedralTree.o: \
+	$(SRCDIR)/TetrahedralTree.cc $(INCDIR)/TetrahedralTree.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
+
 $(OBJDIR)/GarfieldDict.o: \
 	$(OBJDIR)/GarfieldDict.C
 	@echo $@
