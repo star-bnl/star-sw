@@ -20,7 +20,7 @@
 #include "TChain.h"
 #include "TSystem.h"
 #include "StMessMgr.h"
-
+#include "TDirIter.h"
 extern TSystem* gSystem;
 
 string StMuChainMaker::mSQLConnection ="";
@@ -138,8 +138,21 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
   else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
   else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
   else {
+    TDirIter Dir(dirFile.c_str());
+    Char_t *name = 0;
+    Int_t NFiles = 0;
+    TFile *f = 0;
+    Int_t numberOfEvents = TChain::kBigNumber;
+    while ((name = (Char_t *) Dir.NextFile())) {
+      if ( pass(name,mSubFilters)) {
+	mFileList.push_back( StMuStringIntPair( name, numberOfEvents) );
+	NFiles++;
+      }
+    }
+    if (! NFiles) {
     FORCEDDEBUGMESSAGE("ATTENTION: don't know how to read input (you may have used a bogus constructor syntax)");
     return NULL;
+    }
   }
  
   if ( mFileList.size() == 0 ) {

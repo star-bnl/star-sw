@@ -359,6 +359,13 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
 	mk = GetMaker("MuDst");
 	//	if (mk) mk->SetName("RMuDst");
+      } else if (maker == "StPicoDstMaker") {
+	if (GetOption("RpicoDst")) {
+	  ProcessLine(Form("new StPicoDstMaker(0,\"%s\")",fInFile.Data()));
+	} else {
+	  ProcessLine(Form("new StPicoDstMaker(1,\"%s\")",fInFile.Data()));
+	}
+	mk = GetMaker("PicoDst");
       } else {
 	if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	else                          mk = New(fBFC[i].Maker);

@@ -1,6 +1,7 @@
 
 #include <bitset>
 #include "TRegexp.h"
+#include "TSystem.h"
 #include "StChain.h"
 #include "StPicoDstMaker.h"
 #include "StPicoDst.h"
@@ -124,10 +125,14 @@ StPicoDstMaker::StPicoDstMaker(int mode, const char* fileName, const char* name)
     TString inputDirFile = fileName;  // input is actually the full name including path
     Int_t index = inputDirFile.Index("st_");
     mInputFileName="";
-    for(int i=index;i<(int)inputDirFile.Length();i++) {
-      mInputFileName.Append(inputDirFile(i));
+    if (index > 0) {
+      for(int i=index;i<(int)inputDirFile.Length();i++) {
+	mInputFileName.Append(inputDirFile(i));
+      }
+      mOutputFileName=mInputFileName;
+    } else {
+      mOutputFileName = gSystem->BaseName(fileName);
     }
-    mOutputFileName=mInputFileName;
     mOutputFileName.ReplaceAll("*","");
     mOutputFileName.ReplaceAll("MuDst.root","picoDst.root");
   }
