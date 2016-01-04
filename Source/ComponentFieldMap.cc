@@ -23,7 +23,10 @@ ComponentFieldMap::ComponentFieldMap()
       hasBoundingBox(false),
       deleteBackground(true),
       checkMultipleElement(false),
-      warning(false) {
+      warning(false),
+      tetTree(NULL),
+      useTetrahedralTreeForSearch(false),
+      isTreeInitialized(false){
 
   m_className = "ComponentFieldMap";
 
@@ -32,6 +35,11 @@ ComponentFieldMap::ComponentFieldMap()
   nodes.clear();
   wfields.clear();
   wfieldsOk.clear();
+}
+
+ComponentFieldMap::~ComponentFieldMap() {
+  if(tetTree)
+      delete tetTree;
 }
 
 void ComponentFieldMap::PrintMaterials() {
@@ -195,6 +203,24 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
     cacheElemBoundingBoxes = true;
   }
 
+  // this variable tracks how many elements to scan. with tetra tree disabled, all elements are scanned
+  int numElemToSearch = nElements;
+  // the list to store the tetra list in the block that contains the input 3D point.
+  std::vector<int> tetList;
+
+  // Check if the tetrahedral is enabled
+  if(useTetrahedralTreeForSearch) {
+    if(!isTreeInitialized) {
+      if(!InitializeTetrahedralTree()) {
+        std::cerr << m_className << "::FindElement5:\n";
+        std::cerr << "    Tetrahedral tree initialization failed.\n";
+        return -1;
+      }
+    }
+    tetList = tetTree->GetTetListInBlock( Vec3(x, y, z) );
+    numElemToSearch = tetList.size();
+  }
+
   // Backup
   double jacbak[4][4], detbak = 1.;
   double t1bak = 0., t2bak = 0., t3bak = 0., t4bak = 0.;
@@ -226,26 +252,33 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
   const double f = 0.2;
 
   // Scan all elements
-  for (int i = 0; i < nElements; ++i) {
-    element& e = elements[i];
+  for (int i = 0; i < numElemToSearch; ++i) {
+    int idxToElemList;
+    
+    if(useTetrahedralTreeForSearch)
+      idxToElemList = tetList[i];
+    else
+      idxToElemList = i;
+
+    element& e = elements[idxToElemList];
     if (x < e.xmin - f * (e.xmax - e.xmin) || x > e.xmax + f * (e.xmax - e.xmin) ||
         y < e.ymin - f * (e.ymax - e.ymin) || y > e.ymax + f * (e.ymax - e.ymin) ||
         z < e.zmin - f * (e.zmax - e.zmin) || z > e.zmax + f * (e.zmax - e.zmin))
       continue;
 
-    if (elements[i].degenerate) {
+    if (elements[idxToElemList].degenerate) {
       // Degenerate element
-      rc = Coordinates3(x, y, z, t1, t2, t3, t4, jac, det, i);
+      rc = Coordinates3(x, y, z, t1, t2, t3, t4, jac, det, idxToElemList);
       if (rc == 0 && t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 &&
           t3 <= +1) {
         ++nfound;
-        imap = i;
-        lastElement = i;
+        imap = idxToElemList;
+        lastElement = idxToElemList;
         if (debug) {
           std::cout << m_className << "::FindElement5:\n";
-          std::cout << "    Found matching degenerate element " << i << ".\n";
+          std::cout << "    Found matching degenerate element " << idxToElemList << ".\n";
         }
-        if (!checkMultipleElement) return i;
+        if (!checkMultipleElement) return idxToElemList;
         for (int j = 0; j < 4; ++j) {
           for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
         }
@@ -274,17 +307,17 @@ int ComponentFieldMap::FindElement5(const double x, const double y,
       }
     } else {
       // Non-degenerate element
-      rc = Coordinates5(x, y, z, t1, t2, t3, t4, jac, det, i);
+      rc = Coordinates5(x, y, z, t1, t2, t3, t4, jac, det, idxToElemList);
       if (rc == 0 && t1 >= -1 && t1 <= +1 && t2 >= -1 && t2 <= +1) {
         ++nfound;
-        imap = i;
-        lastElement = i;
+        imap = idxToElemList;
+        lastElement = idxToElemList;
         if (debug) {
           std::cout << m_className << "::FindElement5:\n";
-          std::cout << "    Found matching non-degenerate element " << i
+          std::cout << "    Found matching non-degenerate element " << idxToElemList
                     << ".\n";
         }
-        if (!checkMultipleElement) return i;
+        if (!checkMultipleElement) return idxToElemList;
         for (int j = 0; j < 4; ++j) {
           for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
         }
@@ -384,6 +417,24 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
       return lastElement;
   }
 
+  // this variable tracks how many elements to scan. with tetra tree disabled, all elements are scanned
+  int numElemToSearch = nElements;
+  // the list to store the tetra list in the block that contains the input 3D point.
+  std::vector<int> tetList;
+
+  // Check if the tetrahedral is enabled
+  if(useTetrahedralTreeForSearch) {
+    if(!isTreeInitialized) {
+      if(!InitializeTetrahedralTree()) {
+        std::cerr << m_className << "::FindElement13:\n";
+        std::cerr << "    Tetrahedral tree initialization failed.\n";
+        return -1;
+      }
+    }
+    tetList = tetTree->GetTetListInBlock( Vec3(x, y, z) );
+    numElemToSearch = tetList.size();
+  }
+
   // Verify the count of volumes that contain the point.
   int nfound = 0;
   int imap = -1;
@@ -392,25 +443,33 @@ int ComponentFieldMap::FindElement13(const double x, const double y,
   const double f = 0.2;
 
   // Scan all elements
-  for (int i = 0; i < nElements; i++) {
-    element& e = elements[i];
+  for (int i = 0; i < numElemToSearch; i++) {
+    int idxToElemList;
+    
+    if(useTetrahedralTreeForSearch)
+      idxToElemList = tetList[i];
+    else
+      idxToElemList = i;
+
+    element& e = elements[idxToElemList];
+
     if (x < e.xmin - f * (e.xmax - e.xmin) || x > e.xmax + f * (e.xmax - e.xmin) ||
         y < e.ymin - f * (e.ymax - e.ymin) || y > e.ymax + f * (e.ymax - e.ymin) ||
         z < e.zmin - f * (e.zmax - e.zmin) || z > e.zmax + f * (e.zmax - e.zmin))
       continue;
 
-    rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, i);
+    rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, idxToElemList);
 
     if (rc == 0 && t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 &&
         t3 <= +1 && t4 >= 0 && t4 <= +1) {
       ++nfound;
-      imap = i;
-      lastElement = i;
+      imap = idxToElemList;
+      lastElement = idxToElemList;
       if (debug) {
         std::cout << m_className << "::FindElement13:\n";
         std::cout << "    Found matching element " << i << ".\n";
       }
-      if (!checkMultipleElement) return i;
+      if (!checkMultipleElement) return idxToElemList;
       for (int j = 0; j < 4; ++j) {
         for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
       }
@@ -4279,4 +4338,72 @@ void ComponentFieldMap::CalculateElementBoundingBoxes(void) {
         std::max(nodes[elem.emap[2]].z, nodes[elem.emap[3]].z));
   }
 }
+
+bool ComponentFieldMap::InitializeTetrahedralTree(void) {
+
+  // Do not proceed if not properly initialised.
+  if (!ready) {
+    std::cerr << m_className << "::InitializeTetrahedralTree:\n";
+    std::cerr << "    Field map not yet initialised.\n";
+    std::cerr << "    Tetrahedral tree cannot be initialized.\n";
+    return false;
+  }
+
+  std::cerr << m_className << "::InitializeTetrahedralTree:\n";
+  std::cerr << "    About to initialize the tetrahedral tree.\n";
+
+  // check if the caching has not been done before
+  if(!cacheElemBoundingBoxes) {
+    CalculateElementBoundingBoxes();
+  }
+
+  // determine the bounding box
+  double xmin=0., ymin=0., zmin=0., xmax=0., ymax=0., zmax=0.;
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    const node& n = nodes[i];
+
+    // adjust the bounding box
+    if(n.x <= xmin) xmin = n.x;
+    if(n.x > xmax) xmax = n.x;
+    if(n.y <= ymin) ymin = n.y;
+    if(n.y > ymax) ymax = n.y;
+    if(n.z <= zmin) zmin = n.z;
+    if(n.z > zmax) zmax = n.z;
+  }
+
+  std::cout << "::Bounding box:\n ";
+	std::cout << std::scientific << "\tx: " << xmin << " -> " << xmax << std::endl;
+	std::cout << std::scientific << "\ty: " << ymin << " -> " << ymax << std::endl;
+	std::cout << std::scientific << "\tz: " << zmin << " -> " << zmax << std::endl;
+
+  tetTree = new TetrahedralTree(Vec3(xmin+(xmax-xmin)/2,ymin+(ymax-ymin)/2, zmin+(zmax-zmin)/2), Vec3((xmax-xmin)/2,(ymax-ymin)/2,(zmax-zmin)/2));
+
+  std::cerr << "Tree instantiated.\n";
+
+  // insert all mesh nodes in the tree
+  for(unsigned int i=0; i<nodes.size(); i++) {
+    const node& n = nodes[i];
+    //std::cerr << i << std::endl;
+    tetTree->InsertMeshNode(Vec3(n.x, n.y, n.z), i);
+  }
+
+  std::cerr << m_className << "::InitializeTetrahedralTree:\n";
+  std::cerr << "    Tetrahedral tree nodes initialized successfully.\n";
+
+  // insert all mesh elements (tetrahedrons) in the tree
+  for(unsigned int i=0; i<elements.size(); i++)
+  {
+    element& e = elements[i];
+      
+    double bb[6] = {e.xmin, e.ymin, e.zmin, e.xmax, e.ymax, e.zmax};
+    tetTree->InsertTetrahedron(bb, i);
+  }
+
+  std::cerr << m_className << "::InitializeTetrahedralTree:\n";
+  std::cerr << "    Tetrahedral tree initialized successfully.\n";
+
+  isTreeInitialized = true;
+  return true;
+}
+
 }
