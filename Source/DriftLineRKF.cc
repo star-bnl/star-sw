@@ -72,18 +72,18 @@ void DriftLineRKF::DisablePlotting() {
   m_usePlotting = false;
 }
 
-bool DriftLineRKF::DriftElectron(const double& x0, const double& y0,
-                                 const double& z0, const double& t0) {
+bool DriftLineRKF::DriftElectron(const double x0, const double y0,
+                                 const double z0, const double t0) {
 
   m_particleType = ParticleTypeElectron;
   if (!DriftLine(x0, y0, z0, t0)) return false;
-  GetGain();
+  // GetGain();
   ComputeSignal();
   return true;
 }
 
-bool DriftLineRKF::DriftHole(const double& x0, const double& y0, 
-                             const double& z0, const double& t0) {
+bool DriftLineRKF::DriftHole(const double x0, const double y0, 
+                             const double z0, const double t0) {
 
   m_particleType = ParticleTypeHole;
   if (!DriftLine(x0, y0, z0, t0)) return false;
@@ -91,8 +91,8 @@ bool DriftLineRKF::DriftHole(const double& x0, const double& y0,
   return true;
 }
 
-bool DriftLineRKF::DriftIon(const double& x0, const double& y0, 
-                            const double& z0, const double& t0) {
+bool DriftLineRKF::DriftIon(const double x0, const double y0, 
+                            const double z0, const double t0) {
 
   m_particleType = ParticleTypeIon;
   if (!DriftLine(x0, y0, z0, t0)) return false;
@@ -100,8 +100,8 @@ bool DriftLineRKF::DriftIon(const double& x0, const double& y0,
   return true;
 }
 
-bool DriftLineRKF::DriftLine(const double& x0, const double& y0, 
-                             const double& z0, const double& t0) {
+bool DriftLineRKF::DriftLine(const double x0, const double y0, 
+                             const double z0, const double t0) {
 
   // Check if the sensor is defined.
   if (!m_sensor) {
@@ -109,6 +109,8 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
+  // DEBUG HS:
+  std::cout << "Checking initial field\n";
   // Get electric and magnetic field at initial position.
   double ex = 0., ey = 0., ez = 0.;
   double bx = 0., by = 0., bz = 0.;
@@ -167,6 +169,8 @@ bool DriftLineRKF::DriftLine(const double& x0, const double& y0,
   double phi1[3] = {0., 0., 0.};
   double phi2[3] = {0., 0., 0.};
 
+  // DEBUG HS
+  std::cout << "Checking initial velocity" << std::endl;
   // Initialize particle velocity.
   if (!GetVelocity(ex, ey, ez, bx, by, bz, v0x, v0y, v0z)) {
     std::cerr << m_className << "::DriftLine:\n";
@@ -415,8 +419,7 @@ double DriftLineRKF::GetGain() {
   const unsigned int nSteps = m_path.size();
   // First get a rough estimate of the result.
   double crude = 0.;
-  double alpha0 = 0.;
-  double alpha1 = 0.;
+  double alphaPrev = 0.;
   for (unsigned int i = 0; i < nSteps; ++i) {
     // Get the Townsend coefficient at this step.
     const double x = m_path[i].xi;
@@ -429,28 +432,25 @@ double DriftLineRKF::GetGain() {
     m_sensor->ElectricField(x, y, z, ex, ey, ez, m_medium, status);
     if (status != 0) {
       std::cerr << m_className << "::GetGain:\n";
-      std::cerr << "    Initial drift line point.\n";
+      std::cerr << "    Invalid initial drift line point.\n";
       return 0.;
     }
-    if (0 == i) {
-      if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha0)) {
-        std::cerr << m_className << "::GetGain:\n";
-        std::cerr << "    Unable to retrieve Townsend coefficient.\n";
-        return 0.;
-      }
-    } else {
-      if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha1)) {
-        std::cerr << m_className << "::GetGain:\n";
-        std::cerr << "    Unable to retrieve Townsend coefficient.\n";
-        return 0.;
-      }
-      const double dx = x - m_path[i - 1].xi;
-      const double dy = y - m_path[i - 1].yi;
-      const double dz = z - m_path[i - 1].zi;
-      const double d = sqrt(dx * dx + dy * dy + dz * dz);
-      crude += 0.5 * d * (alpha1 + alpha0);
-      alpha0 = alpha1;
+    double alpha = 0.;
+    if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha)) {
+      std::cerr << m_className << "::GetGain:\n";
+      std::cerr << "    Unable to retrieve Townsend coefficient.\n";
+      return 0.;
     }
+    if (i == 0) {
+      alphaPrev = alpha;
+      continue;
+    }
+    const double dx = x - m_path[i - 1].xi;
+    const double dy = y - m_path[i - 1].yi;
+    const double dz = z - m_path[i - 1].zi;
+    const double d = sqrt(dx * dx + dy * dy + dz * dz);
+    crude += 0.5 * d * (alpha + alphaPrev);
+    alphaPrev = alpha;
   }
   // Calculate the integration tolerance based on the rough estimate.
   const double tol = 1.e-4 * crude;
@@ -463,67 +463,45 @@ double DriftLineRKF::GetGain() {
   return exp(sum);
 }
 
-double DriftLineRKF::GetDriftTime() const {
-
-  if (m_path.empty()) return 0.;
-  return m_path.back().tf;
-}
-
-bool DriftLineRKF::GetVelocity(const double& ex, const double& ey,
-                               const double& ez, const double& bx,
-                               const double& by, const double& bz, double& vx,
+bool DriftLineRKF::GetVelocity(const double ex, const double ey,
+                               const double ez, const double bx,
+                               const double by, const double bz, double& vx,
                                double& vy, double& vz) const {
 
   if (m_particleType == ParticleTypeElectron) {
-    if (m_medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
-      return true;
-    }
+    return m_medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   } else if (m_particleType == ParticleTypeIon) {
-    if (m_medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
-      return true;
-    }
+    return m_medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   } else if (m_particleType == ParticleTypeHole) {
-    if (m_medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
-      return true;
-    }
+    return m_medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
   return false;
 }
 
-bool DriftLineRKF::GetDiffusion(const double& ex, const double& ey,
-                                const double& ez, const double& bx,
-                                const double& by, const double& bz, double& dl,
+bool DriftLineRKF::GetDiffusion(const double ex, const double ey,
+                                const double ez, const double bx,
+                                const double by, const double bz, double& dl,
                                 double& dt) const {
 
   if (m_particleType == ParticleTypeElectron) {
-    if (m_medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-      return true;
-    }
+    return m_medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt);
   } else if (m_particleType == ParticleTypeIon) {
-    if (m_medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-      return true;
-    }
+    return m_medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt);
   } else if (m_particleType == ParticleTypeHole) {
-    if (m_medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-      return true;
-    }
+    return m_medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt);
   }
   return false;
 }
 
-bool DriftLineRKF::GetTownsend(const double& ex, const double& ey,
-                               const double& ez, const double& bx,
-                               const double& by, const double& bz,
+bool DriftLineRKF::GetTownsend(const double ex, const double ey,
+                               const double ez, const double bx,
+                               const double by, const double bz,
                                double& alpha) const {
 
   if (m_particleType == ParticleTypeElectron) {
-    if (m_medium->ElectronTownsend(ex, ey, ez, bx, by, bz, alpha)) {
-      return true;
-    }
+    return m_medium->ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
   } else if (m_particleType == ParticleTypeHole) {
-    if (m_medium->HoleTownsend(ex, ey, ez, bx, by, bz, alpha)) {
-      return true;
-    }
+    return m_medium->HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
   }
   return false;
 }
@@ -829,9 +807,9 @@ void DriftLineRKF::GetDriftLinePoint(const unsigned int i, double& x, double& y,
   t = 0.5*(m_path.at(i).ti+m_path.at(i).tf);
 }
 
-double DriftLineRKF::IntegrateDiffusion(const double& x, const double& y,
-                                        const double& z, const double& xe,
-                                        const double& ye, const double& ze) {
+double DriftLineRKF::IntegrateDiffusion(const double x, const double y,
+                                        const double z, const double xe,
+                                        const double ye, const double ze) {
 
   if (m_debug) {
     std::cout << m_className << "::IntegrateDiffusion:\n";
@@ -993,13 +971,13 @@ double DriftLineRKF::IntegrateDiffusion(const double& x, const double& y,
   return integral;
 }
 
-double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
-                                       const double& zi, 
-                                       const double& xe, const double& ye, 
-                                       const double& ze,
-                                       const double& tol) {
+double DriftLineRKF::IntegrateTownsend(const double xi, const double yi,
+                                       const double zi, 
+                                       const double xe, const double ye, 
+                                       const double ze,
+                                       const double tol) {
 
-  // Make sure initial position is valid.
+  // Make sure the initial position is valid.
   double ex = 0., ey = 0., ez = 0.;
   double bx = 0., by = 0., bz = 0.;
   int status = 0;
@@ -1011,14 +989,14 @@ double DriftLineRKF::IntegrateTownsend(const double& xi, const double& yi,
               << zi << ") not valid.\n";
     return 0.;
   }
-  // Determine Townsend coefficient at initial point.
+  // Determine the Townsend coefficient at the initial point.
   double alpha0 = 0.;
   if (!GetTownsend(ex, ey, ez, bx, by, bz, alpha0)) {
     std::cerr << m_className << "::IntegrateTownsend:\n";
     std::cerr << "    Cannot retrieve Townsend coefficient at initial point.\n";
     return 0.;
   }
-  // Make sure end position is valid.
+  // Make sure the end position is valid.
   m_sensor->MagneticField(xe, ye, ze, bx, by, bz, status);
   m_sensor->ElectricField(xe, ye, ze, ex, ey, ez, m_medium, status);
   if (status != 0) {
