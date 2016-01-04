@@ -8,13 +8,13 @@
 namespace Garfield {
 
 DriftLineRKF::DriftLineRKF()
-    : m_sensor(0),
-      m_medium(0),
+    : m_sensor(NULL),
+      m_medium(NULL),
       m_maxStepSize(1.e8),
       m_accuracy(1.e-8),
       m_maxSteps(1000),
       m_usePlotting(false),
-      m_view(0),
+      m_view(NULL),
       m_scaleElectronSignal(1.),
       m_scaleHoleSignal(1.),
       m_scaleIonSignal(1.),
@@ -68,7 +68,7 @@ void DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
 void DriftLineRKF::DisablePlotting() {
 
-  m_view = 0;
+  m_view = NULL;
   m_usePlotting = false;
 }
 
@@ -109,8 +109,6 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
-  // DEBUG HS:
-  std::cout << "Checking initial field\n";
   // Get electric and magnetic field at initial position.
   double ex = 0., ey = 0., ez = 0.;
   double bx = 0., by = 0., bz = 0.;
@@ -135,6 +133,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
       m_view->NewHoleDriftLine(1, iLine, x0, y0, z0);
     }
   }
+
   // Setup numerical constants for RKF integration.
   const double c10 = 214. / 891.;
   const double c11 = 1. / 33.;
@@ -150,6 +149,8 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
   const double b31 = 1. / 33.;
   const double b32 = 650. / 891.;
 
+  // Charge of the drifting particle
+  const double charge = m_particleType == ParticleTypeElectron ? -1 : 1;
   // Current position
   double x = x0;
   double y = y0;
@@ -169,8 +170,6 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
   double phi1[3] = {0., 0., 0.};
   double phi2[3] = {0., 0., 0.};
 
-  // DEBUG HS
-  std::cout << "Checking initial velocity" << std::endl;
   // Initialize particle velocity.
   if (!GetVelocity(ex, ey, ez, bx, by, bz, v0x, v0y, v0z)) {
     std::cerr << m_className << "::DriftLine:\n";
@@ -221,7 +220,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+    if (m_sensor->IsInTrapRadius(charge, x1, y1, z1, xWire, yWire, rWire) &&
         m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
@@ -249,7 +248,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+    if (m_sensor->IsInTrapRadius(charge, x1, y1, z1, xWire, yWire, rWire) &&
         m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;
@@ -277,7 +276,7 @@ bool DriftLineRKF::DriftLine(const double x0, const double y0,
       m_path[counter].status = StatusCalculationAbandoned;
       break;
     }
-    if (m_sensor->IsInTrapRadius(x1, y1, z1, xWire, yWire, rWire) &&
+    if (m_sensor->IsInTrapRadius(charge, x1, y1, z1, xWire, yWire, rWire) &&
         m_particleType != ParticleTypeIon) {
       if (!DriftToWire(x1, y1, z1, xWire, yWire, rWire)) return false;
       break;

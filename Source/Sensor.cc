@@ -288,11 +288,12 @@ bool Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
   return false;
 }
 
-bool Sensor::IsInTrapRadius(double x0, double y0, double z0, double& xw,
+bool Sensor::IsInTrapRadius(const double q0, const double x0, 
+                            const double y0, double z0, double& xw,
                             double& yw, double& rw) {
 
   for (int i = m_nComponents; i--;) {
-    if (m_components[i].comp->IsInTrapRadius(x0, y0, z0, xw, yw, rw)) {
+    if (m_components[i].comp->IsInTrapRadius(q0, x0, y0, z0, xw, yw, rw)) {
       return true;
     }
   }

@@ -73,8 +73,9 @@ class ComponentBase {
   virtual bool IsWireCrossed(const double x0, const double y0, const double z0,
                              const double x1, const double y1, const double z1,
                              double& xc, double& yc, double& zc);
-  virtual bool IsInTrapRadius(double x0, double y0, double z0, double& xw,
-                              double& yw, double& rw);
+  virtual bool IsInTrapRadius(const double q0, const double x0, 
+                              const double y0, const double z0, 
+                              double& xw, double& yw, double& rw);
 
   // Enable and disable periodicities
   void EnablePeriodicityX() {
@@ -184,7 +185,7 @@ class ComponentBase {
  protected:
   std::string m_className;
 
-  GeometryBase* theGeometry;
+  GeometryBase* m_geometry;
 
   // Ready for use?
   bool ready;

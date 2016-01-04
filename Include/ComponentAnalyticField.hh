@@ -37,8 +37,8 @@ class ComponentAnalyticField : public ComponentBase {
   bool IsWireCrossed(double x0, double y0, double z0, double x1, double y1,
                      double z1, double& xc, double& yc, double& zc);
 
-  bool IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yx,
-                      double& rw);
+  bool IsInTrapRadius(const double q0, const double x0, const double y0, 
+                      const double z0, double& xw, double& yx, double& rw);
 
   // Add a wire at (x, y) .
   void AddWire(const double x, const double y, const double diameter,

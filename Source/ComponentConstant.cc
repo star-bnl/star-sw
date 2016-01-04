@@ -37,7 +37,7 @@ void ComponentConstant::ElectricField(const double x, const double y,
   ey = fy;
   ez = fz;
   m = GetMedium(x, y, z);
-  if (m == NULL) {
+  if (!m) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
@@ -73,7 +73,7 @@ void ComponentConstant::ElectricField(const double x, const double y,
   }
 
   m = GetMedium(x, y, z);
-  if (m == NULL) {
+  if (!m) {
     if (debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
@@ -94,7 +94,7 @@ bool ComponentConstant::GetVoltageRange(double& vmin, double& vmax) {
 
   if (!hasPotential) return false;
 
-  if (theGeometry == 0) {
+  if (!m_geometry) {
     std::cerr << m_className << "::GetVoltageRange:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return false;
@@ -138,7 +138,7 @@ void ComponentConstant::WeightingField(const double x, const double y,
   if (!hasWeightingField || label != wfield) return;
 
   Medium* m = GetMedium(x, y, z);
-  if (m == NULL) {
+  if (!m) {
     wx = wy = wz = 0.;
     if (debug) {
       std::cout << m_className << "::WeightingField:\n";
@@ -158,7 +158,7 @@ double ComponentConstant::WeightingPotential(const double x, const double y,
   if (!hasWeightingPotential || label != wfield) return 0.;
 
   Medium* m = GetMedium(x, y, z); 
-  if (m == NULL) return 0.;
+  if (!m) return 0.;
 
   return w0 - (x - wx0) * fwx - (y - wy0) * fwy - (z - wz0) * fwz;
 }

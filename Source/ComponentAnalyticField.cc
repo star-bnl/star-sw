@@ -167,8 +167,8 @@ bool ComponentAnalyticField::GetBoundingBox(double& x0, double& y0, double& z0,
                                             double& z1) {
 
   // If a geometry is present, try to get the bounding box from there.
-  if (theGeometry != 0) {
-    if (theGeometry->GetBoundingBox(x0, y0, z0, x1, y1, z1)) return true;
+  if (m_geometry) {
+    if (m_geometry->GetBoundingBox(x0, y0, z0, x1, y1, z1)) return true;
   }
   // Otherwise, return the cell dimensions.
   if (!cellset) return false;
@@ -253,12 +253,14 @@ bool ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
   return false;
 }
 
-bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
+bool ComponentAnalyticField::IsInTrapRadius(const double qin, const double xin,
+                                            const double yin, const double zin,
                                             double& xw, double& yw,
                                             double& rw) {
 
   // In case of periodicity, move the point into the basic cell.
-  double x0 = xin, y0 = yin;
+  double x0 = xin;
+  double y0 = yin;
   int nX = 0, nY = 0, nPhi = 0;
   if (perx) {
     nX = int(round(xin / sx));
@@ -280,7 +282,9 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
   if (pery && ynplan[2] && y0 <= coplan[2]) y0 += sy;
   if (pery && ynplan[3] && y0 >= coplan[3]) y0 -= sy;
 
-  for (int i = 0; i < nWires; i++) {
+  for (int i = 0; i < nWires; ++i) {
+    // Skip wires with the wrong charge.
+    if (qin * w[i].e > 0.) continue;
     const double xwc = w[i].x;
     const double yxc = w[i].y;
     const double r = sqrt(pow(xwc - x0, 2) + pow(yxc - y0, 2));

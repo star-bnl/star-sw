@@ -5,7 +5,7 @@ namespace Garfield {
 
 ComponentBase::ComponentBase()
     : m_className("ComponentBase"),
-      theGeometry(0),
+      m_geometry(NULL),
       ready(false),
       xPeriodic(false),
       yPeriodic(false),
@@ -27,25 +27,25 @@ ComponentBase::ComponentBase()
 void ComponentBase::SetGeometry(GeometryBase* geo) {
 
   // Make sure the geometry is defined
-  if (geo == 0) {
+  if (!geo) {
     std::cerr << "ComponentBase::SetGeometry:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return;
   }
 
-  theGeometry = geo;
+  m_geometry = geo;
 }
 
 Medium* ComponentBase::GetMedium(const double& x, const double& y, 
                                  const double& z) {
 
-  if (theGeometry == NULL) return NULL;
-  return theGeometry->GetMedium(x, y, z);
+  if (!m_geometry) return NULL;
+  return m_geometry->GetMedium(x, y, z);
 }
 
 void ComponentBase::Clear() {
 
-  theGeometry = 0;
+  m_geometry = NULL;
   Reset();
 }
 
@@ -99,8 +99,8 @@ void ComponentBase::SetMagneticField(const double bx, const double by,
 bool ComponentBase::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                    double& xmax, double& ymax, double& zmax) {
 
-  if (theGeometry == 0) return false;
-  return (theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax));
+  if (!m_geometry) return false;
+  return (m_geometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax));
 }
 
 bool ComponentBase::IsWireCrossed(const double x0, const double y0,
@@ -116,18 +116,14 @@ bool ComponentBase::IsWireCrossed(const double x0, const double y0,
 
 }
 
-bool ComponentBase::IsInTrapRadius(double x0, double y0, double z0, double& xw,
-                                   double& yw, double& rw) {
+bool ComponentBase::IsInTrapRadius(const double /*q0*/, const double x0, 
+                                   const double y0, const double /*z0*/, 
+                                   double& xw, double& yw, double& rw) {
 
   xw = x0;
   yw = y0;
   rw = 0.;
   return false;
 
-  if (debug) {
-    std::cout << m_className << "::IsInTrapRadius:\n";
-    std::cout << "    (" << x0 << ", " << y0 << ", " << z0 << ") \n";
-    std::cout << "    not trapped by a wire.\n";
-  }
 }
 }
