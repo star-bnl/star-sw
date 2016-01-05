@@ -14,7 +14,7 @@ namespace Garfield {
 ComponentElmer::ComponentElmer() : ComponentFieldMap() {
 
   m_className = "ComponentElmer";
-  ready = false;
+  m_ready = false;
 }
 
 ComponentElmer::ComponentElmer(std::string header, std::string elist,
@@ -30,8 +30,8 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
                                 std::string nlist, std::string mplist,
                                 std::string volt, std::string unit) {
 
-  debug = false;
-  ready = false;
+  m_debug = false;
+  m_ready = false;
 
   // Keep track of the success.
   bool ok = true;
@@ -104,7 +104,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
     ok = false;
     funit = 1.0;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << "ComponentElmer::Initialise:\n";
     std::cout << "    Unit scaling factor = " << funit << ".\n";
   }
@@ -222,14 +222,14 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
     ok = false;
     return false;
   }
-  nMaterials = ReadInteger(token, 0, readerror);
-  materials.resize(nMaterials);
-  for (int i = 0; i < nMaterials; ++i) {
+  m_nMaterials = ReadInteger(token, 0, readerror);
+  materials.resize(m_nMaterials);
+  for (unsigned int i = 0; i < m_nMaterials; ++i) {
     materials[i].ohm = -1;
     materials[i].eps = -1;
     materials[i].medium = NULL;
   }
-  for (il = 2; il < (nMaterials + 2); il++) {
+  for (il = 2; il < ((int)m_nMaterials + 2); il++) {
     fmplist.getline(line, size, '\n');
     token = strtok(line, " ");
     ReadInteger(token, -1, readerror);
@@ -245,7 +245,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
     }
     materials[il - 2].eps = dc;
     std::cout << m_className << "::Initialise:\n";
-    std::cout << "    Set material " << il - 2 << " of " << nMaterials
+    std::cout << "    Set material " << il - 2 << " of " << m_nMaterials
               << " to eps " << dc << ".\n";
   }
 
@@ -253,9 +253,9 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
   fmplist.close();
 
   // Find the lowest epsilon, check for eps = 0, set default drift media.
-  double epsmin = -1;
-  int iepsmin = -1;
-  for (int imat = 0; imat < nMaterials; ++imat) {
+  double epsmin = -1.;
+  unsigned int iepsmin = 0;
+  for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       std::cerr << m_className << "::Initialise:\n";
@@ -263,19 +263,19 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
                 << " has been assigned a permittivity\n";
       std::cerr << "    equal to zero in " << mplist << ".\n";
       ok = false;
-    } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
+    } else if (epsmin < 0. || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
       iepsmin = imat;
     }
   }
 
-  if (iepsmin < 0) {
+  if (epsmin < 0.) {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    No material with positive permittivity found \n";
     std::cerr << "    in material list " << mplist << ".\n";
     ok = false;
   } else {
-    for (int imat = 0; imat < nMaterials; ++imat) {
+    for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
       if (imat == iepsmin) {
         materials[imat].driftmedium = true;
       } else {
@@ -335,7 +335,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
     token = strtok(NULL, " ");
     int in9 = ReadInteger(token, -1, readerror);
 
-    if (debug && il < 10) {
+    if (m_debug && il < 10) {
       std::cout << "    Read nodes " << in0 << ", " << in1 << ", " << in2
                 << ", " << in3 << ", ... from element " << il + 1 << " of "
                 << nElements << " with mat " << imat << ".\n";
@@ -352,7 +352,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
     }
 
     // Check the material number and ensure that epsilon is non-negative.
-    if (imat < 0 || imat > nMaterials) {
+    if (imat < 0 || imat > (int)m_nMaterials) {
       std::cerr << m_className << "::Initialise:\n";
       std::cerr << "    Out-of-range material number on file " << elist
                 << " (line " << il << ").\n";
@@ -436,7 +436,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
 
   // Set the ready flag.
   if (ok) {
-    ready = true;
+    m_ready = true;
   } else {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr
@@ -460,7 +460,7 @@ bool ComponentElmer::Initialise(std::string header, std::string elist,
 
 bool ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
 
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::SetWeightingField:\n";
     std::cerr << "    No valid field map is present.\n";
     std::cerr << "    Weighting field cannot be added.\n";
@@ -596,7 +596,7 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
   m = 0;
 
   // Do not proceed if not properly initialised.
-  if (!ready) {
+  if (!m_ready) {
     status = -10;
     std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Field map not available for interpolation.\n";
@@ -612,7 +612,7 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
-    if (debug) {
+    if (m_debug) {
       std::cout << m_className << "::ElectricField:\n";
       std::cout << "    Point (" << x << ", " << y << ", " << z
                 << " not in the mesh.\n";
@@ -621,7 +621,7 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
     return;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
@@ -703,7 +703,7 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
               rotation);
 
   // Drift medium?
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
     std::cout << "    Material " << elements[imap].matmap << ", drift flag "
               << materials[elements[imap].matmap].driftmedium << "\n";
@@ -719,13 +719,13 @@ void ComponentElmer::ElectricField(const double xin, const double yin,
 
 void ComponentElmer::WeightingField(const double xin, const double yin,
                                     const double zin, double& wx, double& wy,
-                                    double& wz, const std::string label) {
+                                    double& wz, const std::string& label) {
 
   // Initial values
   wx = wy = wz = 0;
 
   // Do not proceed if not properly initialised.
-  if (!ready) return;
+  if (!m_ready) return;
 
   // Look for the label.
   int iw = 0;
@@ -763,7 +763,7 @@ void ComponentElmer::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::WeightingField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
@@ -840,10 +840,10 @@ void ComponentElmer::WeightingField(const double xin, const double yin,
 
 double ComponentElmer::WeightingPotential(const double xin, const double yin,
                                           const double zin,
-                                          const std::string label) {
+                                          const std::string& label) {
 
   // Do not proceed if not properly initialised.
-  if (!ready) return 0.;
+  if (!m_ready) return 0.;
 
   // Look for the label.
   int iw = 0;
@@ -880,7 +880,7 @@ double ComponentElmer::WeightingPotential(const double xin, const double yin,
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::WeightingPotential:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
@@ -907,8 +907,8 @@ double ComponentElmer::WeightingPotential(const double xin, const double yin,
          4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
 }
 
-Medium* ComponentElmer::GetMedium(const double& xin, const double& yin,
-                                  const double& zin) {
+Medium* ComponentElmer::GetMedium(const double xin, const double yin,
+                                  const double zin) {
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -920,7 +920,7 @@ Medium* ComponentElmer::GetMedium(const double& xin, const double& yin,
                  rotation);
 
   // Do not proceed if not properly initialised.
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
     return NULL;
@@ -934,15 +934,15 @@ Medium* ComponentElmer::GetMedium(const double& xin, const double& yin,
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
-    if (debug) {
+    if (m_debug) {
       std::cout << m_className << "::GetMedium:\n";
       std::cout << "    Point (" << x << ", " << y << ", " << z
                 << ") not in the mesh.\n";
     }
     return NULL;
   }
-  if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials) {
-    if (debug) {
+  if (elements[imap].matmap >= m_nMaterials) {
+    if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y
                 << ") has out of range material number " << imap << ".\n";
@@ -950,7 +950,7 @@ Medium* ComponentElmer::GetMedium(const double& xin, const double& yin,
     return NULL;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::GetMedium:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4

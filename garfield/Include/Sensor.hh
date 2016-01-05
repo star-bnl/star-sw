@@ -63,8 +63,8 @@ class Sensor {
                      const double x1, const double y1, const double z1,
                      double& xc, double& yc, double& zc);
 
-  bool IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw,
-                      double& rw);
+  bool IsInTrapRadius(const double q0, const double x0, const double y0, 
+                      const double z0, double& xw, double& yw, double& rw);
 
   // Return the voltage range
   bool GetVoltageRange(double& vmin, double& vmax);

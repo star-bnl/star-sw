@@ -7,24 +7,24 @@ namespace Garfield {
 
 ComponentConstant::ComponentConstant()
     : ComponentBase(),
-      fx(0.),
-      fy(0.),
-      fz(0.),
-      hasPotential(false),
-      x0(0.),
-      y0(0.),
-      z0(0.),
-      v0(0.),
-      hasWeightingField(false),
-      wfield(""),
-      fwx(0.),
-      fwy(0.),
-      fwz(0.),
-      hasWeightingPotential(false),
-      wx0(0.),
-      wy0(0.),
-      wz0(0.),
-      w0(0.) {
+      m_fx(0.),
+      m_fy(0.),
+      m_fz(0.),
+      m_hasPotential(false),
+      m_x0(0.),
+      m_y0(0.),
+      m_z0(0.),
+      m_v0(0.),
+      m_hasWeightingField(false),
+      m_wfield(""),
+      m_fwx(0.),
+      m_fwy(0.),
+      m_fwz(0.),
+      m_hasWeightingPotential(false),
+      m_wx0(0.),
+      m_wy0(0.),
+      m_wz0(0.),
+      m_w0(0.) {
 
   m_className = "ComponentConstant";
 }
@@ -33,12 +33,12 @@ void ComponentConstant::ElectricField(const double x, const double y,
                                       const double z, double& ex, double& ey,
                                       double& ez, Medium*& m, int& status) {
 
-  ex = fx;
-  ey = fy;
-  ez = fz;
+  ex = m_fx;
+  ey = m_fy;
+  ez = m_fz;
   m = GetMedium(x, y, z);
-  if (m == NULL) {
-    if (debug) {
+  if (!m) {
+    if (m_debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
@@ -59,22 +59,22 @@ void ComponentConstant::ElectricField(const double x, const double y,
                                       double& ez, double& v, Medium*& m,
                                       int& status) {
 
-  ex = fx;
-  ey = fy;
-  ez = fz;
-  if (hasPotential) {
-    v = v0 - (x - x0) * fx - (y - y0) * fy - (z - z0) * fz;
+  ex = m_fx;
+  ey = m_fy;
+  ez = m_fz;
+  if (m_hasPotential) {
+    v = m_v0 - (x - m_x0) * m_fx - (y - m_y0) * m_fy - (z - m_z0) * m_fz;
   } else {
     v = 0.;
-    if (debug) {
+    if (m_debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Potential is not defined.\n";
     }
   }
 
   m = GetMedium(x, y, z);
-  if (m == NULL) {
-    if (debug) {
+  if (!m) {
+    if (m_debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    (" << x << ", " << y << ", " << z << ")"
                 << " is not inside a medium.\n";
@@ -92,9 +92,9 @@ void ComponentConstant::ElectricField(const double x, const double y,
 
 bool ComponentConstant::GetVoltageRange(double& vmin, double& vmax) {
 
-  if (!hasPotential) return false;
+  if (!m_hasPotential) return false;
 
-  if (theGeometry == 0) {
+  if (!m_geometry) {
     std::cerr << m_className << "::GetVoltageRange:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return false;
@@ -107,12 +107,12 @@ bool ComponentConstant::GetVoltageRange(double& vmin, double& vmax) {
     return false;
   }
   // Calculate potentials at each corner
-  const double pxmin = v0 - (xmin - x0) * fx;
-  const double pxmax = v0 - (xmax - x0) * fx;
-  const double pymin = -(ymin - y0) * fy;
-  const double pymax = -(ymax - y0) * fy;
-  const double pzmin = -(zmin - z0) * fz;
-  const double pzmax = -(zmax - z0) * fz;
+  const double pxmin = m_v0 - (xmin - m_x0) * m_fx;
+  const double pxmax = m_v0 - (xmax - m_x0) * m_fx;
+  const double pymin = m_v0 - (ymin - m_y0) * m_fy;
+  const double pymax = m_v0 - (ymax - m_y0) * m_fy;
+  const double pzmin = m_v0 - (zmin - m_z0) * m_fz;
+  const double pzmax = m_v0 - (zmax - m_z0) * m_fz;
   double p[8];
   p[0] = pxmin + pymin + pzmin;
   p[1] = pxmin + pymin + pzmax;
@@ -133,95 +133,98 @@ bool ComponentConstant::GetVoltageRange(double& vmin, double& vmax) {
 
 void ComponentConstant::WeightingField(const double x, const double y,
                                        const double z, double& wx, double& wy,
-                                       double& wz, const std::string label) {
+                                       double& wz, const std::string& label) {
 
-  if (!hasWeightingField || label != wfield) return;
+  if (!m_hasWeightingField || label != m_wfield) return;
 
   Medium* m = GetMedium(x, y, z);
-  if (m == NULL) {
+  if (!m) {
     wx = wy = wz = 0.;
-    if (debug) {
+    if (m_debug) {
       std::cout << m_className << "::WeightingField:\n";
       std::cout << "    No medium at (" << x << ", " << y << ", " << z << ")\n";
     }
     return;
   }
-  wx = fwx;
-  wy = fwy;
-  wz = fwz;
+  wx = m_fwx;
+  wy = m_fwy;
+  wz = m_fwz;
 }
 
 double ComponentConstant::WeightingPotential(const double x, const double y,
                                              const double z,
-                                             const std::string label) {
+                                             const std::string& label) {
 
-  if (!hasWeightingPotential || label != wfield) return 0.;
+  if (!m_hasWeightingPotential || label != m_wfield) return 0.;
 
   Medium* m = GetMedium(x, y, z); 
-  if (m == NULL) return 0.;
+  if (!m) return 0.;
 
-  return w0 - (x - wx0) * fwx - (y - wy0) * fwy - (z - wz0) * fwz;
+  return m_w0 - (x - m_wx0) * m_fwx - (y - m_wy0) * m_fwy - (z - m_wz0) * m_fwz;
 }
 
 void ComponentConstant::SetElectricField(const double ex, const double ey,
                                          const double ez) {
 
-  fx = ex;
-  fy = ey;
-  fz = ez;
-  if (fx * fx + fy * fy + fz * fz > Small) return;
+  m_fx = ex;
+  m_fy = ey;
+  m_fz = ez;
+  if (m_fx * m_fx + m_fy * m_fy + m_fz * m_fz > Small) return;
 
   std::cerr << m_className << "::SetField:\n";
   std::cerr << "    Electric field is set to zero.\n";
-  ready = true;
+  m_ready = true;
 }
 
 void ComponentConstant::SetPotential(const double x, const double y,
                                      const double z, const double v) {
 
-  x0 = x;
-  y0 = y;
-  z0 = z;
-  v0 = v;
-  hasPotential = true;
+  m_x0 = x;
+  m_y0 = y;
+  m_z0 = z;
+  m_v0 = v;
+  m_hasPotential = true;
 }
 
 void ComponentConstant::SetWeightingField(const double wx, const double wy,
                                           const double wz,
                                           const std::string label) {
 
-  wfield = label;
-  fwx = wx;
-  fwy = wy;
-  fwz = wz;
-  hasWeightingField = true;
+  m_wfield = label;
+  m_fwx = wx;
+  m_fwy = wy;
+  m_fwz = wz;
+  m_hasWeightingField = true;
 }
 
 void ComponentConstant::SetWeightingPotential(const double x, const double y,
                                               const double z, const double v) {
 
-  if (!hasWeightingField) {
+  if (!m_hasWeightingField) {
     std::cerr << m_className << "::SetWeightingPotential:\n";
     std::cerr << "    Set the weighting field first!\n";
     return;
   }
-  wx0 = x;
-  wy0 = y;
-  wz0 = z;
-  w0 = v;
-  hasWeightingPotential = true;
+  m_wx0 = x;
+  m_wy0 = y;
+  m_wz0 = z;
+  m_w0 = v;
+  m_hasWeightingPotential = true;
 }
 
 void ComponentConstant::Reset() {
 
-  fx = fy = fz = 0.;
-  hasPotential = false;
-  ready = false;
+  m_fx = m_fy = m_fz = 0.;
+  m_hasPotential = false;
+  m_hasWeightingField = false;
+  m_hasWeightingPotential = false;
+  m_wfield = "";
+  m_ready = false;
 }
 
 void ComponentConstant::UpdatePeriodicity() {
 
-  if (debug) {
+  if (m_debug) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Periodicities are not supported.\n";
   }

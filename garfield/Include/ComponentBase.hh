@@ -22,8 +22,8 @@ class ComponentBase {
   virtual void Clear();
 
   // Get the medium at a given location (x, y, z)
-  virtual Medium* GetMedium(const double& x, const double& y, 
-                            const double& z);
+  virtual Medium* GetMedium(const double x, const double y, 
+                            const double z);
 
   // Electric field
   //
@@ -52,9 +52,9 @@ class ComponentBase {
   // for an electrode (specified by its label)
   virtual void WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
-                              const std::string label);
+                              const std::string& label);
   virtual double WeightingPotential(const double x, const double y,
-                                    const double z, const std::string label);
+                                    const double z, const std::string& label);
 
   // Magnetic field
   // Calculate the magnetic field [Tesla] at (x, y, z)
@@ -64,7 +64,7 @@ class ComponentBase {
   void SetMagneticField(const double bx, const double by, const double bz);
 
   // Ready for use?
-  virtual bool IsReady() { return ready; }
+  virtual bool IsReady() { return m_ready; }
 
   // Get the bounding box coordinates
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
@@ -73,136 +73,137 @@ class ComponentBase {
   virtual bool IsWireCrossed(const double x0, const double y0, const double z0,
                              const double x1, const double y1, const double z1,
                              double& xc, double& yc, double& zc);
-  virtual bool IsInTrapRadius(double x0, double y0, double z0, double& xw,
-                              double& yw, double& rw);
+  virtual bool IsInTrapRadius(const double q0, const double x0, 
+                              const double y0, const double z0, 
+                              double& xw, double& yw, double& rw);
 
   // Enable and disable periodicities
   void EnablePeriodicityX() {
-    xPeriodic = true;
+    m_xPeriodic = true;
     UpdatePeriodicity();
   }
   void DisablePeriodicityX() {
-    xPeriodic = false;
+    m_xPeriodic = false;
     UpdatePeriodicity();
   }
   void EnablePeriodicityY() {
-    yPeriodic = true;
+    m_yPeriodic = true;
     UpdatePeriodicity();
   }
   void DisablePeriodicityY() {
-    yPeriodic = false;
+    m_yPeriodic = false;
     UpdatePeriodicity();
   }
   void EnablePeriodicityZ() {
-    zPeriodic = true;
+    m_zPeriodic = true;
     UpdatePeriodicity();
   }
   void DisablePeriodicityZ() {
-    zPeriodic = false;
+    m_zPeriodic = false;
     UpdatePeriodicity();
   }
 
   void EnableMirrorPeriodicityX() {
-    xMirrorPeriodic = true;
+    m_xMirrorPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityX() {
-    xMirrorPeriodic = false;
+    m_xMirrorPeriodic = false;
     UpdatePeriodicity();
   }
   void EnableMirrorPeriodicityY() {
-    yMirrorPeriodic = true;
+    m_yMirrorPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityY() {
-    yMirrorPeriodic = false;
+    m_yMirrorPeriodic = false;
     UpdatePeriodicity();
   }
   void EnableMirrorPeriodicityZ() {
-    zMirrorPeriodic = true;
+    m_zMirrorPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableMirrorPeriodicityZ() {
-    zMirrorPeriodic = false;
+    m_zMirrorPeriodic = false;
     UpdatePeriodicity();
   }
 
   void EnableAxialPeriodicityX() {
-    xAxiallyPeriodic = true;
+    m_xAxiallyPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityX() {
-    xAxiallyPeriodic = false;
+    m_xAxiallyPeriodic = false;
     UpdatePeriodicity();
   }
   void EnableAxialPeriodicityY() {
-    yAxiallyPeriodic = true;
+    m_yAxiallyPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityY() {
-    yAxiallyPeriodic = false;
+    m_yAxiallyPeriodic = false;
     UpdatePeriodicity();
   }
   void EnableAxialPeriodicityZ() {
-    zAxiallyPeriodic = true;
+    m_zAxiallyPeriodic = true;
     UpdatePeriodicity();
   }
   void DisableAxialPeriodicityZ() {
-    zAxiallyPeriodic = false;
+    m_zAxiallyPeriodic = false;
     UpdatePeriodicity();
   }
 
   void EnableRotationSymmetryX() {
-    xRotationSymmetry = true;
+    m_xRotationSymmetry = true;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryX() {
-    xRotationSymmetry = false;
+    m_xRotationSymmetry = false;
     UpdatePeriodicity();
   }
   void EnableRotationSymmetryY() {
-    yRotationSymmetry = true;
+    m_yRotationSymmetry = true;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryY() {
-    yRotationSymmetry = false;
+    m_yRotationSymmetry = false;
     UpdatePeriodicity();
   }
   void EnableRotationSymmetryZ() {
-    zRotationSymmetry = true;
+    m_zRotationSymmetry = true;
     UpdatePeriodicity();
   }
   void DisableRotationSymmetryZ() {
-    zRotationSymmetry = false;
+    m_zRotationSymmetry = false;
     UpdatePeriodicity();
   }
 
   // Switch on/off debugging messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
   std::string m_className;
 
-  GeometryBase* theGeometry;
+  GeometryBase* m_geometry;
 
   // Ready for use?
-  bool ready;
+  bool m_ready;
 
   // Simple periodicity in x, y, z
-  bool xPeriodic, yPeriodic, zPeriodic;
+  bool m_xPeriodic, m_yPeriodic, m_zPeriodic;
   // Mirror periodicity in x, y, z
-  bool xMirrorPeriodic, yMirrorPeriodic, zMirrorPeriodic;
+  bool m_xMirrorPeriodic, m_yMirrorPeriodic, m_zMirrorPeriodic;
   // Axial periodicity in x, y, z
-  bool xAxiallyPeriodic, yAxiallyPeriodic, zAxiallyPeriodic;
+  bool m_xAxiallyPeriodic, m_yAxiallyPeriodic, m_zAxiallyPeriodic;
   // Rotation symmetry around x-axis, y-axis, z-axis
-  bool xRotationSymmetry, yRotationSymmetry, zRotationSymmetry;
+  bool m_xRotationSymmetry, m_yRotationSymmetry, m_zRotationSymmetry;
 
   // Constant magnetic field
-  double bx0, by0, bz0;
+  double m_bx0, m_by0, m_bz0;
 
   // Switch on/off debugging messages
-  bool debug;
+  bool m_debug;
 
   // Geometry checks
   virtual void Reset() = 0;

@@ -42,7 +42,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
   // If the field is ok, get the medium.
   if (status == 0) {
     m = GetMedium(x, y, z);
-    if (m == NULL) {
+    if (!m) {
       status = -6;
     } else if (!m->IsDriftable()) {
       status = -5;
@@ -76,7 +76,7 @@ void ComponentAnalyticField::ElectricField(const double x, const double y,
   // If the field is ok, get the medium.
   if (status == 0) {
     m = GetMedium(x, y, z);
-    if (m == NULL) {
+    if (!m) {
       status = -6;
     } else if (!m->IsDriftable()) {
       status = -5;
@@ -104,7 +104,7 @@ bool ComponentAnalyticField::GetVoltageRange(double& pmin, double& pmax) {
 void ComponentAnalyticField::WeightingField(const double x, const double y,
                                             const double z, double& wx,
                                             double& wy, double& wz,
-                                            const std::string label) {
+                                            const std::string& label) {
 
   wx = wy = wz = 0.;
 
@@ -134,7 +134,7 @@ void ComponentAnalyticField::WeightingField(const double x, const double y,
 double ComponentAnalyticField::WeightingPotential(const double x,
                                                   const double y,
                                                   const double z,
-                                                  const std::string label) {
+                                                  const std::string& label) {
 
   double volt = 0.;
 
@@ -167,8 +167,8 @@ bool ComponentAnalyticField::GetBoundingBox(double& x0, double& y0, double& z0,
                                             double& z1) {
 
   // If a geometry is present, try to get the bounding box from there.
-  if (theGeometry != 0) {
-    if (theGeometry->GetBoundingBox(x0, y0, z0, x1, y1, z1)) return true;
+  if (m_geometry) {
+    if (m_geometry->GetBoundingBox(x0, y0, z0, x1, y1, z1)) return true;
   }
   // Otherwise, return the cell dimensions.
   if (!cellset) return false;
@@ -253,12 +253,14 @@ bool ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
   return false;
 }
 
-bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
+bool ComponentAnalyticField::IsInTrapRadius(const double qin, const double xin,
+                                            const double yin, const double zin,
                                             double& xw, double& yw,
                                             double& rw) {
 
   // In case of periodicity, move the point into the basic cell.
-  double x0 = xin, y0 = yin;
+  double x0 = xin;
+  double y0 = yin;
   int nX = 0, nY = 0, nPhi = 0;
   if (perx) {
     nX = int(round(xin / sx));
@@ -280,7 +282,9 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
   if (pery && ynplan[2] && y0 <= coplan[2]) y0 += sy;
   if (pery && ynplan[3] && y0 >= coplan[3]) y0 -= sy;
 
-  for (int i = 0; i < nWires; i++) {
+  for (int i = 0; i < nWires; ++i) {
+    // Skip wires with the wrong charge.
+    if (qin * w[i].e > 0.) continue;
     const double xwc = w[i].x;
     const double yxc = w[i].y;
     const double r = sqrt(pow(xwc - x0, 2) + pow(yxc - y0, 2));
@@ -302,7 +306,7 @@ bool ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
         y0 += sy * nY;
       }
       if (perx) xw += sx * nX;
-      if (debug) {
+      if (m_debug) {
         std::cout << m_className << "::IsInTrapRadius:\n";
         std::cout << "    (" << xin << ", " << yin << ", " << zin << ")"
                   << " within trap radius of wire " << i << ".\n";
@@ -582,7 +586,7 @@ void ComponentAnalyticField::SetPeriodicityX(const double s) {
     return;
   }
 
-  xPeriodic = true;
+  m_xPeriodic = true;
   sx = s;
   UpdatePeriodicity();
 }
@@ -595,14 +599,14 @@ void ComponentAnalyticField::SetPeriodicityY(const double s) {
     return;
   }
 
-  yPeriodic = true;
+  m_yPeriodic = true;
   sy = s;
   UpdatePeriodicity();
 }
 
 bool ComponentAnalyticField::GetPeriodicityX(double& s) {
 
-  if (!xPeriodic) {
+  if (!m_xPeriodic) {
     s = 0.;
     return false;
   }
@@ -613,7 +617,7 @@ bool ComponentAnalyticField::GetPeriodicityX(double& s) {
 
 bool ComponentAnalyticField::GetPeriodicityY(double& s) {
 
-  if (!yPeriodic) {
+  if (!m_yPeriodic) {
     s = 0.;
     return false;
   }
@@ -625,11 +629,11 @@ bool ComponentAnalyticField::GetPeriodicityY(double& s) {
 void ComponentAnalyticField::UpdatePeriodicity() {
 
   // Check if the settings have actually changed.
-  if (perx && !xPeriodic) {
+  if (perx && !m_xPeriodic) {
     perx = false;
     cellset = false;
     sigset = false;
-  } else if (!perx && xPeriodic) {
+  } else if (!perx && m_xPeriodic) {
     if (sx < Small) {
       std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in x direction was enabled"
@@ -641,11 +645,11 @@ void ComponentAnalyticField::UpdatePeriodicity() {
     }
   }
 
-  if (pery && !yPeriodic) {
+  if (pery && !m_yPeriodic) {
     pery = false;
     cellset = false;
     sigset = false;
-  } else if (!pery && yPeriodic) {
+  } else if (!pery && m_yPeriodic) {
     if (sy < Small) {
       std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicity in y direction was enabled"
@@ -658,22 +662,22 @@ void ComponentAnalyticField::UpdatePeriodicity() {
   }
 
   // Check if symmetries other than x/y periodicity have been requested
-  if (zPeriodic) {
+  if (m_zPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Periodicity in z is not possible.\n";
   }
 
-  if (xMirrorPeriodic || yMirrorPeriodic || zMirrorPeriodic) {
+  if (m_xMirrorPeriodic || m_yMirrorPeriodic || m_zMirrorPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Mirror periodicity is not possible.\n";
   }
 
-  if (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic) {
+  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Axial periodicity is not possible.\n";
   }
 
-  if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
+  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Rotation symmetry is not possible.\n";
   }
@@ -1118,7 +1122,7 @@ bool ComponentAnalyticField::Prepare() {
     std::cerr << "    The cell does not meet the requirements.\n";
     return false;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Prepare:\n";
     std::cout << "    Cell check ok.\n";
   }
@@ -1129,7 +1133,7 @@ bool ComponentAnalyticField::Prepare() {
     std::cerr << "    Type identification of the cell failed.\n";
     return false;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Prepare:\n";
     std::cout << "    Cell is of type " << cellType << ".\n";
   }
@@ -1140,7 +1144,7 @@ bool ComponentAnalyticField::Prepare() {
     std::cerr << "    Calculation of charges failed.\n";
     return false;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Prepare:\n";
     std::cout << "    Calculation of charges was successful.\n";
   }
@@ -1267,7 +1271,7 @@ bool ComponentAnalyticField::CellCheck() {
         ynplan[i + 1] = false;
       }
       if (coplan[i] > coplan[i + 1]) {
-        if (debug) {
+        if (m_debug) {
           std::cout << m_className << "::CellCheck:\n";
           std::cout << "    Planes " << i << " and " << i + 1
                     << " are interchanged.\n";
@@ -2376,7 +2380,7 @@ bool ComponentAnalyticField::SetupC10() {
   p1 = p * p;
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::SetupC10:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
@@ -2436,7 +2440,7 @@ bool ComponentAnalyticField::SetupC2X() {
   p1 = p * p;
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::SetupC2X:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
@@ -2500,7 +2504,7 @@ bool ComponentAnalyticField::SetupC2Y() {
   p1 = p * p;
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::SetupC2Y:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
@@ -2564,7 +2568,7 @@ bool ComponentAnalyticField::SetupC30() {
   p1 = p * p;
   if (p1 > 1.e-10) p2 = pow(p, 6);
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::SetupC30:\n";
     std::cout << "    p, p1, p2 = " << p << ", " << p1 << ", " << p2 << "\n";
     std::cout << "    zmult = " << zmult << "\n";
@@ -2793,7 +2797,7 @@ bool ComponentAnalyticField::Charge() {
   for (int i = 0; i < nWires; ++i) w[i].e = b[i];
 
   // If debugging is on, print the capacitance matrix.
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Charge:\n";
     std::cout << "    Dump of the capacitance matrix after inversion:\n";
     for (int i = 0; i < nWires; i += 10) {
@@ -4402,7 +4406,7 @@ bool ComponentAnalyticField::PrepareSignals() {
   }
 
   // Print some debugging output if requested.
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::PrepareSignals:\n";
     std::cout << "    Cell type:           " << cellType << "\n";
     std::cout << "    Fourier cell type:   " << cellTypeFourier << "\n";
@@ -4518,7 +4522,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
         std::cerr << "    Unknown signal cell type " << cellTypeFourier << "\n";
         return false;
       }
-      if (debug) {
+      if (m_debug) {
         std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Signal matrix MX = " << mx << ", MY = " << my
                   << " has been calculated.\n";
@@ -4530,7 +4534,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
         // IF(IFAIL.NE.0)GOTO 2010
       }
       // Dump the signal matrix before inversion, if DEBUG is requested.
-      if (debug) {
+      if (m_debug) {
         std::cout << m_className << "::SetupWireSignals:\n";
         std::cout << "    Dump of signal matrix (" << mx << ", " << my
                   << ") before inversion:\n";
@@ -4740,7 +4744,7 @@ bool ComponentAnalyticField::SetupWireSignals() {
   }
 
   // Dump the signal matrix after inversion, if DEBUG is requested.
-  if (debug) {
+  if (m_debug) {
     for (int mx = mxmin; mx <= mxmax; ++mx) {
       for (int my = mymin; my <= mymax; ++my) {
         std::cout << m_className << "::SetupWireSignals:\n";
@@ -4926,7 +4930,7 @@ bool ComponentAnalyticField::SetupPlaneSignals() {
   planes[4].ewycor = 0.;
 
   // Debugging output.
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::SetupPlaneSignals:\n";
     std::cout << "    Charges for currents induced in the planes:\n";
     std::cout << "    Wire        x-Plane 1        x-Plane 2"

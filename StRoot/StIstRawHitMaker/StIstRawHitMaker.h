@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.h,v 1.18 2015/12/27 18:35:40 smirnovd Exp $
+// $Id: StIstRawHitMaker.h,v 1.19 2016/01/05 04:10:16 smirnovd Exp $
 
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
@@ -48,7 +48,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.18 2015/12/27 18:35:40 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.19 2016/01/05 04:10:16 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
@@ -80,8 +80,8 @@ protected:
 private:
 
    void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
-      int (&signalUnCorrected)[kIstNumApvChannels][kIstNumTimeBins],
-      float (&signalCorrected)[kIstNumApvChannels][kIstNumTimeBins]);
+      const std::vector< std::vector<int> > &signalUnCorrected,
+      std::vector< std::vector<float> > &signalCorrected);
 
    void FillRawHitCollectionFromSimData();
 

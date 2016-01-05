@@ -5,54 +5,54 @@ namespace Garfield {
 
 ComponentBase::ComponentBase()
     : m_className("ComponentBase"),
-      theGeometry(0),
-      ready(false),
-      xPeriodic(false),
-      yPeriodic(false),
-      zPeriodic(false),
-      xMirrorPeriodic(false),
-      yMirrorPeriodic(false),
-      zMirrorPeriodic(false),
-      xAxiallyPeriodic(false),
-      yAxiallyPeriodic(false),
-      zAxiallyPeriodic(false),
-      xRotationSymmetry(false),
-      yRotationSymmetry(false),
-      zRotationSymmetry(false),
-      bx0(0.),
-      by0(0.),
-      bz0(0.),
-      debug(false) {}
+      m_geometry(NULL),
+      m_ready(false),
+      m_xPeriodic(false),
+      m_yPeriodic(false),
+      m_zPeriodic(false),
+      m_xMirrorPeriodic(false),
+      m_yMirrorPeriodic(false),
+      m_zMirrorPeriodic(false),
+      m_xAxiallyPeriodic(false),
+      m_yAxiallyPeriodic(false),
+      m_zAxiallyPeriodic(false),
+      m_xRotationSymmetry(false),
+      m_yRotationSymmetry(false),
+      m_zRotationSymmetry(false),
+      m_bx0(0.),
+      m_by0(0.),
+      m_bz0(0.),
+      m_debug(false) {}
 
 void ComponentBase::SetGeometry(GeometryBase* geo) {
 
   // Make sure the geometry is defined
-  if (geo == 0) {
+  if (!geo) {
     std::cerr << "ComponentBase::SetGeometry:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return;
   }
 
-  theGeometry = geo;
+  m_geometry = geo;
 }
 
-Medium* ComponentBase::GetMedium(const double& x, const double& y, 
-                                 const double& z) {
+Medium* ComponentBase::GetMedium(const double x, const double y, 
+                                 const double z) {
 
-  if (theGeometry == NULL) return NULL;
-  return theGeometry->GetMedium(x, y, z);
+  if (!m_geometry) return NULL;
+  return m_geometry->GetMedium(x, y, z);
 }
 
 void ComponentBase::Clear() {
 
-  theGeometry = 0;
+  m_geometry = NULL;
   Reset();
 }
 
 void ComponentBase::WeightingField(const double x, const double y,
                                    const double z, double& wx, double& wy,
-                                   double& wz, const std::string label) {
-  if (debug) {
+                                   double& wz, const std::string& label) {
+  if (m_debug) {
     std::cerr << m_className << "::WeightingField:\n";
     std::cerr << "    This function is not implemented.\n";
     std::cerr << "    Weighting field at (" << x << ", " << y << ", " << z
@@ -63,9 +63,9 @@ void ComponentBase::WeightingField(const double x, const double y,
 
 double ComponentBase::WeightingPotential(const double x, const double y,
                                          const double z,
-                                         const std::string label) {
+                                         const std::string& label) {
 
-  if (debug) {
+  if (m_debug) {
     std::cerr << m_className << "::WeightingPotential:\n";
     std::cerr << "    This function is not implemented.\n";
     std::cerr << "    Weighting potential at (" << x << ", " << y << ", " << z
@@ -77,10 +77,10 @@ double ComponentBase::WeightingPotential(const double x, const double y,
 void ComponentBase::MagneticField(const double x, const double y,
                                   const double z, double& bx, double& by,
                                   double& bz, int& status) {
-  bx = bx0;
-  by = by0;
-  bz = bz0;
-  if (debug) {
+  bx = m_bx0;
+  by = m_by0;
+  bz = m_bz0;
+  if (m_debug) {
     std::cout << m_className << "::MagneticField:\n";
     std::cout << "    Magnetic field at (" << x << ", " << y << ", " << z
               << ") is (" << bx << ", " << by << ", " << bz << ")\n";
@@ -91,16 +91,16 @@ void ComponentBase::MagneticField(const double x, const double y,
 void ComponentBase::SetMagneticField(const double bx, const double by,
                                      const double bz) {
 
-  bx0 = bx;
-  by0 = by;
-  bz0 = bz;
+  m_bx0 = bx;
+  m_by0 = by;
+  m_bz0 = bz;
 }
 
 bool ComponentBase::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                    double& xmax, double& ymax, double& zmax) {
 
-  if (theGeometry == 0) return false;
-  return (theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax));
+  if (!m_geometry) return false;
+  return (m_geometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax));
 }
 
 bool ComponentBase::IsWireCrossed(const double x0, const double y0,
@@ -116,18 +116,14 @@ bool ComponentBase::IsWireCrossed(const double x0, const double y0,
 
 }
 
-bool ComponentBase::IsInTrapRadius(double x0, double y0, double z0, double& xw,
-                                   double& yw, double& rw) {
+bool ComponentBase::IsInTrapRadius(const double /*q0*/, const double x0, 
+                                   const double y0, const double /*z0*/, 
+                                   double& xw, double& yw, double& rw) {
 
   xw = x0;
   yw = y0;
   rw = 0.;
   return false;
 
-  if (debug) {
-    std::cout << m_className << "::IsInTrapRadius:\n";
-    std::cout << "    (" << x0 << ", " << y0 << ", " << z0 << ") \n";
-    std::cout << "    not trapped by a wire.\n";
-  }
 }
 }

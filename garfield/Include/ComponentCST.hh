@@ -22,7 +22,7 @@ class ComponentCST : public ComponentFieldMap {
 
   void ShiftComponent(const double xShift, const double yShift, const double zShift);
 
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
   void GetNumberOfMeshLines(unsigned int &n_x, unsigned int &n_y, unsigned int &n_z);
   void GetElementBoundaries(unsigned int element, double &xmin, double &xmax,
       double &ymin, double &ymax, double &zmin, double &zmax);
@@ -34,10 +34,10 @@ class ComponentCST : public ComponentFieldMap {
                      int& status);
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
+                      const std::string& label);
 
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
   /**
    * Deprecated version of the interface based on text file import of field data.
    * \param elist Information about the element material of mesh cells. Each line contains the element number

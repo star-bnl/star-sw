@@ -43,14 +43,14 @@ void ComponentNeBem2d::ElectricField(const double x, const double y,
     return;
   }
 
-  if (!ready) {
+  if (!m_ready) {
     if (!Initialise()) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Initialisation failed.\n";
       status = -11;
       return;
     }
-    ready = true;
+    m_ready = true;
   }
 
   double dx = 0., dy = 0.;
@@ -153,7 +153,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
   panels.push_back(newPanel);
   ++nPanels;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::AddPanel:\n";
     std::cout << "    From: (" << x0 << ", " << y0 << ")\n";
     std::cout << "    To:   (" << x1 << ", " << y1 << ")\n";
@@ -177,7 +177,7 @@ void ComponentNeBem2d::AddPanel(const double x0, const double y0,
     }
   }
 
-  ready = false;
+  m_ready = false;
   matrixInversionFlag = false;
 }
 
@@ -198,14 +198,14 @@ void ComponentNeBem2d::AddWire(const double x0, const double y0, const double d,
   wires.push_back(newWire);
   ++nWires;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::AddWire:\n";
     std::cout << "    Center: (" << x0 << ", " << y0 << ")\n";
     std::cout << "    Diameter: " << d << " cm\n";
     std::cout << "    Potential: " << bcval << " V\n";
   }
 
-  ready = false;
+  m_ready = false;
   matrixInversionFlag = false;
 }
 
@@ -218,7 +218,7 @@ void ComponentNeBem2d::SetNumberOfDivisions(const int ndiv) {
   }
 
   nDivisions = ndiv;
-  ready = false;
+  m_ready = false;
   matrixInversionFlag = false;
 }
 
@@ -231,7 +231,7 @@ void ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
   }
 
   nCollocationPoints = ncoll;
-  ready = false;
+  m_ready = false;
   matrixInversionFlag = false;
 }
 
@@ -244,7 +244,7 @@ void ComponentNeBem2d::SetMinimumElementSize(const double min) {
   }
 
   minSize = min;
-  ready = false;
+  m_ready = false;
   matrixInversionFlag = false;
 }
 
@@ -267,7 +267,7 @@ bool ComponentNeBem2d::Initialise() {
     std::cerr << "    Discretisation failed.\n";
     return false;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Initialise:\n";
     std::cout << "    Discretisation ok.\n";
   }
@@ -294,7 +294,7 @@ bool ComponentNeBem2d::Initialise() {
       return false;
     }
 
-    if (debug) {
+    if (m_debug) {
       std::cout << m_className << "::Initialise:\n";
       std::cout << "    Matrix inversion ok.\n";
     }
@@ -312,7 +312,7 @@ bool ComponentNeBem2d::Initialise() {
       std::cerr << "    Error in Solve function.\n";
       return false;
     }
-    if (debug) {
+    if (m_debug) {
       std::cout << m_className << "::Initialise:\n";
       std::cout << "    Solution ok.\n";
     }
@@ -331,7 +331,7 @@ bool ComponentNeBem2d::Discretise() {
   nElements = 0;
   element newElement;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Discretise:\n";
     std::cout << "  Panel  BC Type  Bc Value  Rotation  Length\n";
   }
@@ -354,7 +354,7 @@ bool ComponentNeBem2d::Discretise() {
       newElement.cY += dy;
       elements.push_back(newElement);
       ++nElements;
-      if (debug) {
+      if (m_debug) {
         std::cout << "  " << j << "  " << newElement.bcType << "  "
                   << newElement.bcValue << "  " << newElement.phi << "  "
                   << newElement.len << "\n";
@@ -699,7 +699,7 @@ bool ComponentNeBem2d::Solve() {
     elements[i].solution = solution;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::Solve:\n";
     std::cout << "  Element  Solution\n";
     for (i = 0; i < nElements; ++i) {
@@ -727,7 +727,7 @@ bool ComponentNeBem2d::CheckConvergence() {
   double dx = 0., dy = 0.;
   double xLoc, yLoc;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::CheckConvergence:\n";
     std::cout << "element #  type      LHS      RHS\n";
   }
@@ -787,7 +787,7 @@ bool ComponentNeBem2d::CheckConvergence() {
       ne1 = ne0 + elements[i].solution /
                       (2. * elements[i].lambda * VacuumPermittivity);
     }
-    if (debug) {
+    if (m_debug) {
       if (elements[i].bcType == 0) {
         std::cout << std::setw(5) << i << "  cond.   " << std::setw(10) << v0
                   << "  " << std::setw(10) << elements[i].bcValue << "\n";
