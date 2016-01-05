@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.39 2016/01/05 04:10:23 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.40 2016/01/05 04:10:31 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -446,32 +446,33 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
             continue;
          }
 
-         if ( isPassRawHitCut[iChan] ) {
-            UChar_t tempMaxTB = -1;
-            Float_t tempMaxCharge = -999.0;
+         if ( !isPassRawHitCut[iChan] )
+            continue;
 
-            StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
+         UChar_t tempMaxTB = -1;
+         Float_t tempMaxCharge = -999.0;
 
-            for (int iTBin = 0; iTBin < ntimebin; iTBin++)      {
-               if ( mDoCmnCorrection && dataFlag == mADCdata )
-                  signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
+         StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
 
-               if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
+         for (int iTBin = 0; iTBin < ntimebin; iTBin++)      {
+            if ( mDoCmnCorrection && dataFlag == mADCdata )
+               signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
 
-               rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
-               rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
+            if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
 
-               if (signalCorrected[iChan][iTBin] > tempMaxCharge) {
-                  tempMaxCharge = signalCorrected[iChan][iTBin];
-                  tempMaxTB = (unsigned char)iTBin;
-               }
+            rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
+            rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
+
+            if (signalCorrected[iChan][iTBin] > tempMaxCharge) {
+               tempMaxCharge = signalCorrected[iChan][iTBin];
+               tempMaxTB = (unsigned char)iTBin;
             }
+         }
 
-            rawHitPtr->setChannelId( elecId );
-            rawHitPtr->setGeoId( geoId );
-            rawHitPtr->setMaxTimeBin( tempMaxTB );
-            rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
-         }//end raw hit decision cut
+         rawHitPtr->setChannelId( elecId );
+         rawHitPtr->setGeoId( geoId );
+         rawHitPtr->setMaxTimeBin( tempMaxTB );
+         rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
       }//end filling hit info
    } //end single APV chip hits filling
 }
