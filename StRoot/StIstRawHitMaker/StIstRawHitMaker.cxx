@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.38 2016/01/05 04:10:16 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.39 2016/01/05 04:10:23 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -415,64 +415,64 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
       //store raw hits information
       StIstRawHitCollection *rawHitCollectionPtr = mIstCollectionPtr->getRawHitCollection( ladder - 1 );
 
-      if ( rawHitCollectionPtr ) {
-         if ( mIsCaliMode ) { //calibration mode (non-ZS data): only write raw ADC value
-            if (dataFlag == mADCdata) {
-               StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
-
-               for (int iTimeBin = 0; iTimeBin < ntimebin; iTimeBin++) {
-                  rawHitPtr->setCharge( (float)signalUnCorrected[iChan][iTimeBin], (unsigned char)iTimeBin );
-               }
-
-               rawHitPtr->setChannelId( elecId );
-               rawHitPtr->setGeoId( geoId );
-            }
-            else return;
-         }
-         else { //physics mode: pedestal subtracted + dynamical common mode correction
-            //skip dead chips and bad mis-configured chips
-            if (mConfigVec[apvId - 1] < 1 || mConfigVec[apvId - 1] > 9) { //1-9 good status code
-               LOG_DEBUG << "Skip: Channel belongs to dead/bad/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
-               continue;
-            }
-
-            //skip current channel marked as suspicious status
-            if (mRmsVec[elecId] < mChanMinRmsNoiseLevel || mRmsVec[elecId] > mChanMaxRmsNoiseLevel || mRmsVec[elecId] > 99.0)  {
-               LOG_DEBUG << "Skip: Noisy/hot/dead channel electronics index: " << elecId << endm;
-               continue;
-            }
-
-            if ( isPassRawHitCut[iChan] ) {
-               UChar_t tempMaxTB = -1;
-               Float_t tempMaxCharge = -999.0;
-
-               StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
-
-               for (int iTBin = 0; iTBin < ntimebin; iTBin++)      {
-                  if ( mDoCmnCorrection && dataFlag == mADCdata )
-                     signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
-
-                  if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
-
-                  rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
-                  rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
-
-                  if (signalCorrected[iChan][iTBin] > tempMaxCharge) {
-                     tempMaxCharge = signalCorrected[iChan][iTBin];
-                     tempMaxTB = (unsigned char)iTBin;
-                  }
-               }
-
-               rawHitPtr->setChannelId( elecId );
-               rawHitPtr->setGeoId( geoId );
-               rawHitPtr->setMaxTimeBin( tempMaxTB );
-               rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
-            }//end raw hit decision cut
-         }//end filling hit info
-      }
-      else {
+      if ( !rawHitCollectionPtr ) {
          LOG_WARN << "StIstRawHitMaker::Make() -- Could not access rawHitCollection for ladder " << ladder << endm;
+         continue;
       }
+
+      if ( mIsCaliMode ) { //calibration mode (non-ZS data): only write raw ADC value
+         if (dataFlag == mADCdata) {
+            StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
+
+            for (int iTimeBin = 0; iTimeBin < ntimebin; iTimeBin++) {
+               rawHitPtr->setCharge( (float)signalUnCorrected[iChan][iTimeBin], (unsigned char)iTimeBin );
+            }
+
+            rawHitPtr->setChannelId( elecId );
+            rawHitPtr->setGeoId( geoId );
+         }
+         else return;
+      }
+      else { //physics mode: pedestal subtracted + dynamical common mode correction
+         //skip dead chips and bad mis-configured chips
+         if (mConfigVec[apvId - 1] < 1 || mConfigVec[apvId - 1] > 9) { //1-9 good status code
+            LOG_DEBUG << "Skip: Channel belongs to dead/bad/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+            continue;
+         }
+
+         //skip current channel marked as suspicious status
+         if (mRmsVec[elecId] < mChanMinRmsNoiseLevel || mRmsVec[elecId] > mChanMaxRmsNoiseLevel || mRmsVec[elecId] > 99.0)  {
+            LOG_DEBUG << "Skip: Noisy/hot/dead channel electronics index: " << elecId << endm;
+            continue;
+         }
+
+         if ( isPassRawHitCut[iChan] ) {
+            UChar_t tempMaxTB = -1;
+            Float_t tempMaxCharge = -999.0;
+
+            StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
+
+            for (int iTBin = 0; iTBin < ntimebin; iTBin++)      {
+               if ( mDoCmnCorrection && dataFlag == mADCdata )
+                  signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
+
+               if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
+
+               rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
+               rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
+
+               if (signalCorrected[iChan][iTBin] > tempMaxCharge) {
+                  tempMaxCharge = signalCorrected[iChan][iTBin];
+                  tempMaxTB = (unsigned char)iTBin;
+               }
+            }
+
+            rawHitPtr->setChannelId( elecId );
+            rawHitPtr->setGeoId( geoId );
+            rawHitPtr->setMaxTimeBin( tempMaxTB );
+            rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
+         }//end raw hit decision cut
+      }//end filling hit info
    } //end single APV chip hits filling
 }
 
