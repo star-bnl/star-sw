@@ -217,6 +217,12 @@ $(OBJDIR)/ComponentVoxel.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@   
+$(OBJDIR)/ComponentUserMapBase.o: \
+	$(SRCDIR)/ComponentUserMapBase.cc $(INCDIR)/ComponentUserMapBase.hh \
+	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@    
+
 $(OBJDIR)/GeometrySimple.o: \
 	$(SRCDIR)/GeometrySimple.cc $(INCDIR)/GeometrySimple.hh
 	@echo $@
