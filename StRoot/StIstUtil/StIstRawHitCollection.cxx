@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.17 2015/12/22 20:16:27 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.18 2016/01/05 15:53:15 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -96,8 +96,18 @@ void StIstRawHitCollection::addRawHit(int elecId, StIstRawHit* istRawHit)
 
    StIstRawHit *istRawHitCurrent = mRawHitElecIdVec[elecId];
 
-   if (istRawHitCurrent)
+   // In case channel elecId has been added previously: Remove the existing
+   // hit/channel entry from memory and assign the new one to the same position
+   // in the main container mRawHitVec
+   if (istRawHitCurrent) {
+      auto hitPtr = std::find(mRawHitVec.begin(), mRawHitVec.end(), istRawHitCurrent);
+      *hitPtr = istRawHit;
+
       delete istRawHitCurrent;
+
+   } else { // Otherwise just push back the new hit
+      mRawHitVec.push_back(istRawHit);
+   }
 
    mRawHitElecIdVec[elecId] = istRawHit;
 }
@@ -120,6 +130,13 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.18  2016/01/05 15:53:15  smirnovd
+* StIstRawHitCollection: Added hit to main hit container
+*
+* This is a fix to commit 7c13ccb2
+* This class has two containers with pointers to hits and both of them need to be
+* updated whenever a new hit is added
+*
 * Revision 1.17  2015/12/22 20:16:27  smirnovd
 * StIstRawHitCollection: Added method to add/update hits in internal stl container
 *
