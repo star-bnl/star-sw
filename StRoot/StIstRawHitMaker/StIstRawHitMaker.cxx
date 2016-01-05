@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.37 2015/12/31 02:54:49 huangbc Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.38 2016/01/05 04:10:16 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -247,10 +247,10 @@ Int_t StIstRawHitMaker::Make()
       mIstCollectionPtr->setNumTimeBins(ntimebin);
 
       // arrays to store ADC information per APV chip (128 channels over all time bins)
-      Int_t signalUnCorrected[kIstNumApvChannels][kIstNumTimeBins];    //signal w/o pedestal subtracted
-      Float_t signalCorrected[kIstNumApvChannels][kIstNumTimeBins];    //signal w/ pedestal subtracted
-      memset(signalUnCorrected, 0, sizeof(signalUnCorrected));
-      memset(signalCorrected, 0, sizeof(signalCorrected));
+      //signal w/o pedestal subtracted
+      std::vector< std::vector<int> > signalUnCorrected(kIstNumApvChannels, std::vector<int>(kIstNumTimeBins));
+      //signal w/ pedestal subtracted
+      std::vector< std::vector<float> > signalCorrected(kIstNumApvChannels, std::vector<float>(kIstNumTimeBins));
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
       Float_t sumAdcPerEvent[kIstNumTimeBins];
@@ -360,8 +360,8 @@ Int_t StIstRawHitMaker::Make()
  * records into the final output container mIstCollectionPtr.
  */
 void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
-   int (&signalUnCorrected)[kIstNumApvChannels][kIstNumTimeBins],
-   float (&signalCorrected)[kIstNumApvChannels][kIstNumTimeBins])
+   const std::vector< std::vector<int> > &signalUnCorrected,
+   std::vector< std::vector<float> > &signalCorrected)
 {
    // calculate the dynamical common mode noise for the current chip in this event
    Float_t commonModeNoise[kIstNumTimeBins];
@@ -377,8 +377,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
    }
 
    // raw hit decision and channel counter passed the hit decision
-   Bool_t isPassRawHitCut[kIstNumApvChannels];
-   memset(isPassRawHitCut,0,sizeof(isPassRawHitCut));
+   std::vector<bool> isPassRawHitCut(kIstNumApvChannels, false);
    Int_t nChanPassedCut = 0;
 
 
