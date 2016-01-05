@@ -1,8 +1,4 @@
-/***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.18 2016/01/05 15:53:15 smirnovd Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************/
+// $Id: StIstRawHitCollection.cxx,v 1.19 2016/01/05 16:29:25 smirnovd Exp $
 
 #include "StIstRawHit.h"
 #include "StIstRawHitCollection.h"
@@ -125,65 +121,5 @@ StIstRawHit *StIstRawHitCollection::getRawHit( int elecId )
    return rawHitPtr;
 };
 
+
 ClassImp(StIstRawHitCollection);
-
-
-/***************************************************************************
-* $Log: StIstRawHitCollection.cxx,v $
-* Revision 1.18  2016/01/05 15:53:15  smirnovd
-* StIstRawHitCollection: Added hit to main hit container
-*
-* This is a fix to commit 7c13ccb2
-* This class has two containers with pointers to hits and both of them need to be
-* updated whenever a new hit is added
-*
-* Revision 1.17  2015/12/22 20:16:27  smirnovd
-* StIstRawHitCollection: Added method to add/update hits in internal stl container
-*
-* Revision 1.16  2014/09/09 08:23:46  ypwang
-* all unsgined char was updated to int type as Victor P. suggested
-*
-* Revision 1.15  2014/09/08 19:06:57  smirnovd
-* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
-*
-* Revision 1.14  2014/03/27 22:46:47  smirnovd
-* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.13  2014/02/24 14:49:23  ypwang
-* update Clear( Option_t *opt ) to delete StIstRawHit objects from mRawHitVec
-*
-* Revision 1.12  2014/02/24 14:24:40  ypwang
-* get rid of StIstRawHitCollection::removeFlagged()
-*
-* Revision 1.11  2014/02/20 02:31:22  smirnovd
-* Minor style corrections
-*
-* Revision 1.10  2014/02/20 02:31:00  smirnovd
-* Use constructor list to initialize vectors of pointers and arrays
-*
-* Revision 1.9  2014/02/20 02:30:45  smirnovd
-* Simplified the destructor
-*
-* Revision 1.8  2014/02/20 02:30:26  smirnovd
-* Remove one level of indentation
-*
-* Revision 1.7  2014/02/20 02:29:55  smirnovd
-* Reverse if statement to remove extra indentation
-*
-* Revision 1.6  2014/02/15 23:32:57  ypwang
-* update destructor and Clear() function
-*
-* Revision 1.5  2014/02/14 14:51:06  ypwang
-* update Clear() function, and call Clear() function in deconstructor
-*
-* Revision 1.4  2014/02/13 02:35:49  smirnovd
-* Moved CVS log to the bottom of the file
-*
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-****************************************************************************
-* StIstRawHitCollection.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:05:30 Yaping
-* Initial version
-****************************************************************************/
