@@ -1,13 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstRawHitCollection.h,v 1.8 2015/12/22 20:16:27 smirnovd Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* A collection of StIstRawHit classes, and basically is a wrapper for a
-* raw hits vector. One instance corresponds to one ladder.
-****************************************************************************/
+// $Id: StIstRawHitCollection.h,v 1.9 2016/01/05 16:29:25 smirnovd Exp $
 
 #ifndef StIstRawHitCollection_hh
 #define StIstRawHitCollection_hh
@@ -16,6 +7,14 @@
 #include "StIstRawHit.h"
 #include <algorithm>
 
+
+/**
+ * A collection of StIstRawHit classes, and basically is a wrapper for a
+ * raw hits vector. One instance corresponds to one ladder.
+ *
+ * \author Yaping Wang
+ * \date March 2013
+ */
 class StIstRawHitCollection : public StObject
 {
 public:
@@ -62,32 +61,3 @@ private:
 };
 
 #endif
-
-
-/***************************************************************************
-*
-* $Log: StIstRawHitCollection.h,v $
-* Revision 1.8  2015/12/22 20:16:27  smirnovd
-* StIstRawHitCollection: Added method to add/update hits in internal stl container
-*
-* Revision 1.7  2014/09/09 08:23:46  ypwang
-* all unsgined char was updated to int type as Victor P. suggested
-*
-* Revision 1.6  2014/09/08 19:06:57  smirnovd
-* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
-*
-* Revision 1.5  2014/02/24 14:24:40  ypwang
-* get rid of StIstRawHitCollection::removeFlagged()
-*
-* Revision 1.4  2014/02/13 02:35:49  smirnovd
-* Moved CVS log to the bottom of the file
-*
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstRawHitCollection.h,v 1.0
-* Revision 1.0 2013/11/04 15:05:30 Yaping
-* Initial version
-****************************************************************************/
