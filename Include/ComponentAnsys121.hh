@@ -13,7 +13,7 @@ class ComponentAnsys121 : public ComponentFieldMap {
   // Destructor
   ~ComponentAnsys121() {}
 
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
   void ElectricField(const double x, const double y, const double z, double& ex,
@@ -22,10 +22,10 @@ class ComponentAnsys121 : public ComponentFieldMap {
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
+                      const std::string& label);
 
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
 
   bool Initialise(std::string elist = "ELIST.lis",
                   std::string nlist = "NLIST.lis",

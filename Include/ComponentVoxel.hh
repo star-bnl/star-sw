@@ -24,7 +24,7 @@ class ComponentVoxel : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
 
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
   bool GetElectricFieldRange(double& exmin, double& exmax, double& eymin,

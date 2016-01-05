@@ -260,9 +260,9 @@ void ViewFEMesh::DrawElements() {
   double sx = mapxmax - mapxmin;
   double sy = mapymax - mapymin;
   double sz = mapzmax - mapzmin;
-  const bool perX = component->xPeriodic || component->xMirrorPeriodic;
-  const bool perY = component->yPeriodic || component->yMirrorPeriodic;
-  const bool perZ = component->zPeriodic || component->zMirrorPeriodic;
+  const bool perX = component->m_xPeriodic || component->m_xMirrorPeriodic;
+  const bool perY = component->m_yPeriodic || component->m_yMirrorPeriodic;
+  const bool perZ = component->m_zPeriodic || component->m_zMirrorPeriodic;
 
   // Clear the meshes and drift line lists.
   mesh.clear();
@@ -364,7 +364,7 @@ void ViewFEMesh::DrawElements() {
     for (int nx = nMinX; nx <= nMaxX; nx++) {
 
       // Determine the x-coordinates of the tetrahedral vertices.
-      if (component->xMirrorPeriodic && nx != 2 * (nx / 2)) {
+      if (component->m_xMirrorPeriodic && nx != 2 * (nx / 2)) {
         vx1 =
             mapxmin +
             (mapxmax - component->nodes[component->elements[elem].emap[0]].x) +
@@ -392,7 +392,7 @@ void ViewFEMesh::DrawElements() {
       for (int ny = nMinY; ny <= nMaxY; ny++) {
 
         // Determine the y-coordinates of the tetrahedral vertices.
-        if (component->yMirrorPeriodic && ny != 2 * (ny / 2)) {
+        if (component->m_yMirrorPeriodic && ny != 2 * (ny / 2)) {
           vy1 = mapymin +
                 (mapymax -
                  component->nodes[component->elements[elem].emap[0]].y) +
@@ -420,7 +420,7 @@ void ViewFEMesh::DrawElements() {
         for (int nz = nMinZ; nz <= nMaxZ; nz++) {
 
           // Determine the z-coordinates of the tetrahedral vertices.
-          if (component->zMirrorPeriodic && nz != 2 * (nz / 2)) {
+          if (component->m_zMirrorPeriodic && nz != 2 * (nz / 2)) {
             vz1 = mapzmin +
                   (mapzmax -
                    component->nodes[component->elements[elem].emap[0]].z) +
@@ -673,9 +673,9 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
   double sx = mapxmax - mapxmin;
   double sy = mapymax - mapymin;
   double sz = mapzmax - mapzmin;
-  const bool perX = component->xPeriodic || component->xMirrorPeriodic;
-  const bool perY = component->yPeriodic || component->yMirrorPeriodic;
-  const bool perZ = component->zPeriodic || component->zMirrorPeriodic;
+  const bool perX = component->m_xPeriodic || component->m_xMirrorPeriodic;
+  const bool perY = component->m_yPeriodic || component->m_yMirrorPeriodic;
+  const bool perZ = component->m_zPeriodic || component->m_zMirrorPeriodic;
 
   // Clear the meshes and drift line lists
   mesh.clear();

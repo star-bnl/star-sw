@@ -12,14 +12,14 @@ namespace Garfield {
 ComponentAnsys123::ComponentAnsys123() : ComponentFieldMap() {
 
   m_className = "ComponentAnsys123";
-  ready = false;
+  m_ready = false;
 }
 
 bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
                                    std::string mplist, std::string prnsol,
                                    std::string unit) {
 
-  ready = false;
+  m_ready = false;
   // Keep track of the success.
   bool ok = true;
 
@@ -39,8 +39,9 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
   }
 
   // Read the material list.
-  nMaterials = 0;
-  int il = 0, icurrmat = -1;
+  m_nMaterials = 0;
+  int il = 0;
+  unsigned int icurrmat = 0;
   bool readerror = false;
   while (fmplist.getline(line, size, '\n')) {
     il++;
@@ -73,7 +74,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
       token = strtok(NULL, " ");
       token = strtok(NULL, " ");
       token = strtok(NULL, " ");
-      nMaterials = ReadInteger(token, -1, readerror);
+      m_nMaterials = ReadInteger(token, -1, readerror);
       if (readerror) {
         std::cerr << m_className << "::Initialise:\n";
         std::cerr << "    Error reading file " << mplist << " (line " << il
@@ -82,22 +83,22 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
         ok = false;
         return false;
       }
-      materials.resize(nMaterials);
-      for (int i = 0; i < nMaterials; ++i) {
+      materials.resize(m_nMaterials);
+      for (unsigned int i = 0; i < m_nMaterials; ++i) {
         materials[i].ohm = -1;
         materials[i].eps = -1;
         materials[i].medium = NULL;
       }
-      if (debug) {
+      if (m_debug) {
         std::cout << m_className << "::Initialise:\n";
-        std::cout << "    Number of materials: " << nMaterials << "\n";
+        std::cout << "    Number of materials: " << m_nMaterials << "\n";
       }
     } else if (strcmp(token, "MATERIAL") == 0) {
       // Version 12 format: read material number
       token = strtok(NULL, " ");
       token = strtok(NULL, " ");
-      icurrmat = ReadInteger(token, -1, readerror);
-      if (readerror) {
+      const int imat = ReadInteger(token, -1, readerror);
+      if (readerror || imat < 0) {
         std::cerr << m_className << "::Initialise:\n";
         std::cerr << "    Error reading file " << mplist << " (line " << il
                   << ").\n";
@@ -105,6 +106,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
         ok = false;
         return false;
       }
+      icurrmat = imat;
     } else if (strcmp(token, "TEMP") == 0) {
       // Version 12 format: read property tag and value
       token = strtok(NULL, " ");
@@ -125,7 +127,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
       il++;
       token = NULL;
       token = strtok(line, " ");
-      if (icurrmat < 1 || icurrmat > nMaterials) {
+      if (icurrmat < 1 || icurrmat > m_nMaterials) {
         std::cerr << m_className << "::Initialise:\n";
         std::cerr << "    Found out-of-range current material index "
                   << icurrmat << "\n";
@@ -172,7 +174,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
         fmplist.close();
         ok = false;
         return false;
-      } else if (imat < 1 || imat > nMaterials) {
+      } else if (imat < 1 || imat > (int)m_nMaterials) {
         std::cerr << m_className << "::Initialise:\n";
         std::cerr << "    Found out-of-range material index " << imat << "\n";
         std::cerr << "    in material properties file " << mplist << ".\n";
@@ -207,8 +209,8 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
 
   // Find the lowest epsilon, check for eps = 0, set default drift media
   double epsmin = -1;
-  int iepsmin = -1;
-  for (int imat = 0; imat < nMaterials; ++imat) {
+  unsigned int iepsmin = 0;
+  for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       std::cerr << m_className << "::Initialise:\n";
@@ -216,19 +218,19 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
                 << " has been assigned a permittivity\n";
       std::cerr << "    equal to zero in " << mplist << ".\n";
       ok = false;
-    } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
+    } else if (epsmin < 0. || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
       iepsmin = imat;
     }
   }
 
-  if (iepsmin < 0) {
+  if (epsmin < 0.) {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    No material with positive permittivity found \n";
     std::cerr << "    in material list " << mplist << ".\n";
     ok = false;
   } else {
-    for (int imat = 0; imat < nMaterials; ++imat) {
+    for (unsigned int imat = 0; imat < m_nMaterials; ++imat) {
       if (imat == iepsmin) {
         materials[imat].driftmedium = true;
       } else {
@@ -239,9 +241,9 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
 
   // Tell how many lines read
   std::cout << m_className << "::Initialise:\n";
-  std::cout << "    Read properties of " << nMaterials
+  std::cout << "    Read properties of " << m_nMaterials
             << " materials from file " << mplist << ".\n";
-  if (debug) PrintMaterials();
+  if (m_debug) PrintMaterials();
 
   // Open the element list
   std::ifstream felist;
@@ -344,7 +346,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
     }
 
     // Check the material number and ensure that epsilon is non-negative
-    if (imat < 1 || imat > nMaterials) {
+    if (imat < 1 || imat > (int)m_nMaterials) {
       std::cerr << m_className << "::Initialise:\n";
       std::cerr << "    Out-of-range material number on file " << elist
                 << " (line " << il << ").\n";
@@ -459,7 +461,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
     ok = false;
     funit = 1.0;
   }
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << ":Initialise:\n";
     std::cout << "    Unit scaling factor = " << funit << ".\n";
   }
@@ -635,7 +637,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
 
   // Set the ready flag
   if (ok) {
-    ready = true;
+    m_ready = true;
   } else {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr
@@ -657,7 +659,7 @@ bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
 bool ComponentAnsys123::SetWeightingField(std::string prnsol,
                                           std::string label) {
 
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::SetWeightingField:\n";
     std::cerr << "    No valid field map is present.\n";
     std::cerr << "    Weighting field cannot be added.\n";
@@ -812,7 +814,7 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
   m = 0;
 
   // Do not proceed if not properly initialised.
-  if (!ready) {
+  if (!m_ready) {
     status = -10;
     std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Field map not available for interpolation.\n";
@@ -828,7 +830,7 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
-    if (debug) {
+    if (m_debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") not in the mesh.\n";
@@ -837,7 +839,7 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
     return;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
@@ -922,7 +924,7 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
               rotation);
 
   // Drift medium?
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::ElectricField:\n";
     std::cout << "    Material " << elements[imap].matmap << ", drift flag "
               << materials[elements[imap].matmap].driftmedium << ".\n";
@@ -938,13 +940,13 @@ void ComponentAnsys123::ElectricField(const double xin, const double yin,
 
 void ComponentAnsys123::WeightingField(const double xin, const double yin,
                                        const double zin, double& wx, double& wy,
-                                       double& wz, const std::string label) {
+                                       double& wz, const std::string& label) {
 
   // Initial values
   wx = wy = wz = 0;
 
   // Do not proceed if not properly initialised.
-  if (!ready) return;
+  if (!m_ready) return;
 
   // Look for the label.
   int iw = 0;
@@ -982,7 +984,7 @@ void ComponentAnsys123::WeightingField(const double xin, const double yin,
   // Check if the point is in the mesh.
   if (imap < 0) return;
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::WeightingField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << ")\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
@@ -1059,10 +1061,10 @@ void ComponentAnsys123::WeightingField(const double xin, const double yin,
 
 double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
                                              const double zin,
-                                             const std::string label) {
+                                             const std::string& label) {
 
   // Do not proceed if not properly initialised.
-  if (!ready) return 0.;
+  if (!m_ready) return 0.;
 
   // Look for the label.
   int iw = 0;
@@ -1099,7 +1101,7 @@ double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
 
-  if (debug) {
+  if (m_debug) {
     std::cerr << m_className << "::WeightingPotential:\n";
     std::cout << "    Global: (" << x << ", " << y << ", "
               << ", " << z << ")\n";
@@ -1127,8 +1129,8 @@ double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
          4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
 }
 
-Medium* ComponentAnsys123::GetMedium(const double& xin, const double& yin,
-                                     const double& zin) {
+Medium* ComponentAnsys123::GetMedium(const double xin, const double yin,
+                                     const double zin) {
 
   // Copy the coordinates.
   double x = xin, y = yin, z = zin;
@@ -1140,7 +1142,7 @@ Medium* ComponentAnsys123::GetMedium(const double& xin, const double& yin,
                  rotation);
 
   // Do not proceed if not properly initialised.
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
     return NULL;
@@ -1154,15 +1156,15 @@ Medium* ComponentAnsys123::GetMedium(const double& xin, const double& yin,
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
-    if (debug) {
+    if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") not in the mesh.\n";
     }
     return NULL;
   }
-  if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials) {
-    if (debug) {
+  if (elements[imap].matmap >= m_nMaterials) {
+    if (m_debug) {
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z << ")"
                 << " has out of range material number " << imap << ".\n";
@@ -1170,7 +1172,7 @@ Medium* ComponentAnsys123::GetMedium(const double& xin, const double& yin,
     return NULL;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::GetMedium:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << ")\n";
     std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4

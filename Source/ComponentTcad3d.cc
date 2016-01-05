@@ -33,7 +33,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
 
   m = 0;
   // Make sure the field map has been loaded.
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Field map is not available for interpolation.\n";
     status = -10;
@@ -47,10 +47,10 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   // In case of periodicity, reduce to the cell volume.
   bool xMirrored = false;
   const double cellsx = m_xMaxBoundingBox - m_xMinBoundingBox;
-  if (xPeriodic) {
+  if (m_xPeriodic) {
     x = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
     if (x < m_xMinBoundingBox) x += cellsx;
-  } else if (xMirrorPeriodic) {
+  } else if (m_xMirrorPeriodic) {
     double xNew = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
     if (xNew < m_xMinBoundingBox) xNew += cellsx;
     int nx = int(floor(0.5 + (xNew - x) / cellsx));
@@ -62,10 +62,10 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   }
   bool yMirrored = false;
   const double cellsy = m_yMaxBoundingBox - m_yMinBoundingBox;
-  if (yPeriodic) {
+  if (m_yPeriodic) {
     y = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
     if (y < m_yMinBoundingBox) y += cellsy;
-  } else if (yMirrorPeriodic) {
+  } else if (m_yMirrorPeriodic) {
     double yNew = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
     if (yNew < m_yMinBoundingBox) yNew += cellsy;
     int ny = int(floor(0.5 + (yNew - y) / cellsy));
@@ -77,10 +77,10 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   }
   bool zMirrored = false;
   const double cellsz = m_zMaxBoundingBox - m_zMinBoundingBox;
-  if (zPeriodic) {
+  if (m_zPeriodic) {
     z = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
     if (z < m_zMinBoundingBox) z += cellsz;
-  } else if (zMirrorPeriodic) {
+  } else if (m_zMirrorPeriodic) {
     double zNew = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
     if (zNew < m_zMinBoundingBox) zNew += cellsz;
     int nz = int(floor(0.5 + (zNew - z) / cellsz));
@@ -94,7 +94,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
   // Check if the point is inside the bounding box.
   if (x < m_xMinBoundingBox || x > m_xMaxBoundingBox || y < m_yMinBoundingBox ||
       y > m_yMaxBoundingBox || z < m_zMinBoundingBox || z > m_zMaxBoundingBox) {
-    if (debug) {
+    if (m_debug) {
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") is outside the bounding box.\n";
@@ -228,7 +228,7 @@ void ComponentTcad3d::ElectricField(const double xin, const double yin,
     }
   }
   // Point is outside the mesh.
-  if (debug) {
+  if (m_debug) {
     std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Point (" << x << ", " << y << ", " << z
               << ") is outside the mesh.\n";
@@ -245,11 +245,11 @@ void ComponentTcad3d::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
-                                   const double& zin) {
+Medium* ComponentTcad3d::GetMedium(const double xin, const double yin,
+                                   const double zin) {
 
   // Make sure the field map has been loaded.
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Field map not available for interpolation.\n";
     return NULL;
@@ -258,10 +258,10 @@ Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
   double x = xin, y = yin, z = zin;
   // In case of periodicity, reduce to the cell volume.
   const double cellsx = m_xMaxBoundingBox - m_xMinBoundingBox;
-  if (xPeriodic) {
+  if (m_xPeriodic) {
     x = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
     if (x < m_xMinBoundingBox) x += cellsx;
-  } else if (xMirrorPeriodic) {
+  } else if (m_xMirrorPeriodic) {
     double xNew = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
     if (xNew < m_xMinBoundingBox) xNew += cellsx;
     int nx = int(floor(0.5 + (xNew - x) / cellsx));
@@ -271,10 +271,10 @@ Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
     x = xNew;
   }
   const double cellsy = m_yMaxBoundingBox - m_yMinBoundingBox;
-  if (yPeriodic) {
+  if (m_yPeriodic) {
     y = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
     if (y < m_yMinBoundingBox) y += cellsy;
-  } else if (yMirrorPeriodic) {
+  } else if (m_yMirrorPeriodic) {
     double yNew = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
     if (yNew < m_yMinBoundingBox) yNew += cellsy;
     int ny = int(floor(0.5 + (yNew - y) / cellsy));
@@ -284,10 +284,10 @@ Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
     y = yNew;
   }
   const double cellsz = m_zMaxBoundingBox - m_zMinBoundingBox;
-  if (zPeriodic) {
+  if (m_zPeriodic) {
     z = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
     if (z < m_zMinBoundingBox) z += cellsz;
-  } else if (zMirrorPeriodic) {
+  } else if (m_zMirrorPeriodic) {
     double zNew = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
     if (zNew < m_zMinBoundingBox) zNew += cellsz;
     int nz = int(floor(0.5 + (zNew - z) / cellsz));
@@ -354,7 +354,7 @@ Medium* ComponentTcad3d::GetMedium(const double& xin, const double& yin,
 bool ComponentTcad3d::Initialise(const std::string gridfilename,
                                  const std::string datafilename) {
 
-  ready = false;
+  m_ready = false;
   // Import mesh data from .grd file.
   if (!LoadGrid(gridfilename)) {
     std::cerr << m_className << "::Initialise:\n";
@@ -502,11 +502,11 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   if (nOtherShapes > 0) {
     std::cout << "      " << nOtherShapes << " elements of unknown type\n";
     std::cout << "      Program bug!\n";
-    ready = false;
+    m_ready = false;
     Cleanup();
     return false;
   }
-  if (debug) {
+  if (m_debug) {
     // For each element, print the indices of the constituting vertices.
     for (int i = 0; i < m_nElements; ++i) {
       if (m_elements[i].type == 2) {
@@ -523,7 +523,7 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   }
 
   std::cout << "    Number of vertices: " << m_nVertices << "\n";
-  if (debug) {
+  if (m_debug) {
     for (int i = 0; i < m_nVertices; ++i) {
       std::cout << "      " << i << ": (x, y, z) = (" << m_vertices[i].x << ", "
                 << m_vertices[i].y << ", " << m_vertices[i].z
@@ -532,12 +532,12 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
   }
 
   if (!ok) {
-    ready = false;
+    m_ready = false;
     Cleanup();
     return false;
   }
 
-  ready = true;
+  m_ready = true;
   UpdatePeriodicity();
   return true;
 }
@@ -545,22 +545,22 @@ bool ComponentTcad3d::Initialise(const std::string gridfilename,
 bool ComponentTcad3d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                      double& xmax, double& ymax, double& zmax) {
 
-  if (!ready) return false;
+  if (!m_ready) return false;
   xmin = m_xMinBoundingBox;
   ymin = m_yMinBoundingBox;
   zmin = m_zMinBoundingBox;
   xmax = m_xMaxBoundingBox;
   ymax = m_yMaxBoundingBox;
   zmax = m_zMaxBoundingBox;
-  if (xPeriodic || xMirrorPeriodic) {
+  if (m_xPeriodic || m_xMirrorPeriodic) {
     xmin = -INFINITY;
     xmax = +INFINITY;
   }
-  if (yPeriodic || yMirrorPeriodic) {
+  if (m_yPeriodic || m_yMirrorPeriodic) {
     ymin = -INFINITY;
     ymax = +INFINITY;
   }
-  if (zPeriodic || zMirrorPeriodic) {
+  if (m_zPeriodic || m_zMirrorPeriodic) {
     zmin = -INFINITY;
     zmax = +INFINITY;
   }
@@ -569,7 +569,7 @@ bool ComponentTcad3d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 
 bool ComponentTcad3d::GetVoltageRange(double& vmin, double& vmax) {
 
-  if (!ready) return false;
+  if (!m_ready) return false;
   vmin = m_pMin;
   vmax = m_pMax;
   return true;
@@ -578,7 +578,7 @@ bool ComponentTcad3d::GetVoltageRange(double& vmin, double& vmax) {
 void ComponentTcad3d::PrintRegions() {
 
   // Do not proceed if not properly initialised.
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::PrintRegions:\n";
     std::cerr << "    Field map not yet initialised.\n";
     return;
@@ -1153,7 +1153,7 @@ bool ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     m_regions[j].medium = 0;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << m_className << "::LoadGrid:\n";
     std::cout << "    Found " << m_nRegions << " regions.\n";
   }
@@ -1757,7 +1757,7 @@ bool ComponentTcad3d::CheckTetrahedron(const double x, const double y,
 
   if (m_w[3] < 0.) return false;
 
-  if (debug) {
+  if (m_debug) {
     // Reconstruct the point from the local coordinates.
     const double xr = m_w[0] * m_vertices[m_elements[i].vertex[0]].x +
                       m_w[1] * m_vertices[m_elements[i].vertex[1]].x +
@@ -1836,49 +1836,49 @@ bool ComponentTcad3d::CheckTriangle(const double x, const double y,
 void ComponentTcad3d::Reset() {
 
   Cleanup();
-  ready = false;
+  m_ready = false;
 }
 
 void ComponentTcad3d::UpdatePeriodicity() {
 
-  if (!ready) {
+  if (!m_ready) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Field map not available.\n";
     return;
   }
 
   // Check for conflicts.
-  if (xPeriodic && xMirrorPeriodic) {
+  if (m_xPeriodic && m_xMirrorPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along x requested; reset.\n";
-    xPeriodic = xMirrorPeriodic = false;
+    m_xPeriodic = m_xMirrorPeriodic = false;
   }
 
-  if (yPeriodic && yMirrorPeriodic) {
+  if (m_yPeriodic && m_yMirrorPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along y requested; reset.\n";
-    yPeriodic = yMirrorPeriodic = false;
+    m_yPeriodic = m_yMirrorPeriodic = false;
   }
 
-  if (zPeriodic && zMirrorPeriodic) {
+  if (m_zPeriodic && m_zMirrorPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Both simple and mirror periodicity\n";
     std::cerr << "    along z requested; reset.\n";
-    zPeriodic = zMirrorPeriodic = false;
+    m_zPeriodic = m_zMirrorPeriodic = false;
   }
 
-  if (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic) {
+  if (m_xAxiallyPeriodic || m_yAxiallyPeriodic || m_zAxiallyPeriodic) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Axial symmetry is not supported; reset.\n";
-    xAxiallyPeriodic = yAxiallyPeriodic = zAxiallyPeriodic = false;
+    m_xAxiallyPeriodic = m_yAxiallyPeriodic = m_zAxiallyPeriodic = false;
   }
 
-  if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
+  if (m_xRotationSymmetry || m_yRotationSymmetry || m_zRotationSymmetry) {
     std::cerr << m_className << "::UpdatePeriodicity:\n";
     std::cerr << "    Rotation symmetry is not supported; reset.\n";
-    xRotationSymmetry = yRotationSymmetry = zRotationSymmetry = false;
+    m_xRotationSymmetry = m_yRotationSymmetry = m_zRotationSymmetry = false;
   }
 }
 }

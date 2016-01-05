@@ -25,12 +25,11 @@ class ComponentElmer : public ComponentFieldMap {
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
-
+                      const std::string& label);
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
 
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
 
   bool IsInBoundingBox(const double x, const double y, const double z) {
     return x >= xMinBoundingBox && x <= xMaxBoundingBox &&

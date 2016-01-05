@@ -9,8 +9,8 @@ ComponentUserMapBase::ComponentUserMapBase(){
 
 ComponentUserMapBase::~ComponentUserMapBase(){}
 
-Medium* ComponentUserMapBase::GetMedium(const double& x, const double& y, 
-                                        const double& z){
+Medium* ComponentUserMapBase::GetMedium(const double x, const double y, 
+                                        const double z){
   double  p1 = x ,  p2 = y ,  p3 = z ;
   double u1x = 1., u2x = 0., u3x = 0.;
   double u1y = 0., u2y = 1., u3y = 0.;
@@ -20,7 +20,7 @@ Medium* ComponentUserMapBase::GetMedium(const double& x, const double& y,
                  pComponent);
   
   if(!pComponent){
-    if(debug){
+    if(m_debug){
       std::cerr << m_className << "::GetMedium:\n";
       std::cerr << "    ComponentBase pointer is NULL for point (" << x << ", "
                 << y << "," << z << ")\n";
@@ -28,7 +28,7 @@ Medium* ComponentUserMapBase::GetMedium(const double& x, const double& y,
     return NULL;
   }
   
-  if(debug){
+  if(m_debug){
     std::cerr << m_className << "::GetMedium:\n";
     std::cerr << "    Coordinates: \n";
     std::cerr << "      Global: (" << x << ", " << y << ", " << z << ")\n";
@@ -64,7 +64,7 @@ void ComponentUserMapBase::ElectricField(const double x, const double y,
                  pComponent);
             
   if(!pComponent){
-    if(debug){
+    if(m_debug){
       std::cerr << m_className << "::ElectricField:\n";
       std::cerr << "    ComponentBase pointer is NULL for point (" << x << ", "
                 << y << "," << z << ")\n";
@@ -74,7 +74,7 @@ void ComponentUserMapBase::ElectricField(const double x, const double y,
     return;
   }
   
-  if(debug){
+  if(m_debug){
     std::cerr << m_className << "::ElectricField:\n";
     std::cerr << "    Coordinates: \n";
     std::cerr << "      Global: (" << x << ", " << y << ", " << z << ")\n";
@@ -93,7 +93,7 @@ void ComponentUserMapBase::ElectricField(const double x, const double y,
 void ComponentUserMapBase::WeightingField(const double x, const double y, 
                                           const double z, double& wx, 
                                           double& wy, double& wz, 
-                                          const std::string label){
+                                          const std::string& label) {
   double  p1 = x ,  p2 = y ,  p3 = z ;
   double u1x = 1., u2x = 0., u3x = 0.;
   double u1y = 0., u2y = 1., u3y = 0.;
@@ -106,7 +106,7 @@ void ComponentUserMapBase::WeightingField(const double x, const double y,
                  pComponent, label_);
                  
   if(!pComponent){
-    if(debug){
+    if(m_debug){
       std::cerr << m_className << "::WeightingField:\n";
       std::cerr << "    ComponentBase pointer is NULL for point (" << x << ", "
                 << y << "," << z << ")\n";
@@ -115,7 +115,7 @@ void ComponentUserMapBase::WeightingField(const double x, const double y,
     return;
   }
   
-  if(debug){
+  if(m_debug){
     std::cerr << m_className << "::WeightingField:\n";
     std::cerr << "    Coordinates: \n";
     std::cerr << "      Global: (" << x << ", " << y << ", " << z << ")\n";
@@ -133,7 +133,7 @@ void ComponentUserMapBase::WeightingField(const double x, const double y,
 
 double ComponentUserMapBase::WeightingPotential(const double x, const double y, 
                                                 const double z, 
-                                                const std::string label){
+                                                const std::string& label) {
   double  p1 = x ,  p2 = y ,  p3 = z ;
   double u1x = 1., u2x = 0., u3x = 0.;
   double u1y = 0., u2y = 1., u3y = 0.;
@@ -144,7 +144,7 @@ double ComponentUserMapBase::WeightingPotential(const double x, const double y,
                  pComponent, label_);
   
   if(!pComponent){
-    if(debug){
+    if(m_debug){
       std::cerr << m_className << "::WeightingPotential:\n";
       std::cerr << "    ComponentBase pointer is NULL for point (" << x << ", "
                 << y << "," << z << ")\n";
@@ -152,7 +152,7 @@ double ComponentUserMapBase::WeightingPotential(const double x, const double y,
     return 0.;
   }
   
-  if(debug){
+  if(m_debug){
     std::cerr << m_className << "::WeightingPotential:\n";
     std::cerr << "    Coordinates: \n";
     std::cerr << "      Global: (" << x << ", " << y << ", " << z << ")\n";
@@ -167,7 +167,7 @@ double ComponentUserMapBase::WeightingPotential(const double x, const double y,
 }
 
 void ComponentUserMapBase::UpdatePeriodicity(){
-    if(debug){
+    if(m_debug){
       std::cerr << m_className << "::UpdatePeriodicity:\n";
       std::cerr << "    Periodicities should be implemented by overloading the "
                 <<     "MapCoordinates function.\n";

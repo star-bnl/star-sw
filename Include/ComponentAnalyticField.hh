@@ -27,9 +27,9 @@ class ComponentAnalyticField : public ComponentBase {
 
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
+                      const std::string& label);
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
 
   bool GetBoundingBox(double& x0, double& y0, double& z0, double& x1,
                       double& y1, double& z1);

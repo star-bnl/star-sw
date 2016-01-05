@@ -13,7 +13,7 @@ class ComponentUserMapBase : public ComponentBase
 	ComponentUserMapBase();
 	virtual ~ComponentUserMapBase();
   
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
 	
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
@@ -24,9 +24,9 @@ class ComponentUserMapBase : public ComponentBase
   
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
+                      const std::string& label);
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
 
   // This method should be overloaded in derived classes to implement the 
   // coordinate mapping. For example, when ComponentUserMapBase::ElectricField 

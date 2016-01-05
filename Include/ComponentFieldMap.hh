@@ -35,21 +35,21 @@ class ComponentFieldMap : public ComponentBase {
   // List all currently defined materials
   void PrintMaterials();
   // Make into a drift medium
-  void DriftMedium(int imat);
+  void DriftMedium(const unsigned int imat);
   // Make into a non-drift medium
-  void NotDriftMedium(int imat);
+  void NotDriftMedium(const unsigned int imat);
   // Number of materials
-  int GetNumberOfMaterials() { return nMaterials; }
+  unsigned int GetNumberOfMaterials() { return m_nMaterials; }
   // Return permittivity
-  double GetPermittivity(const int imat);
+  double GetPermittivity(const unsigned int imat);
   // Return conductivity
-  double GetConductivity(const int imat);
+  double GetConductivity(const unsigned int imat);
   // Associate a material with a Medium class
-  void SetMedium(const int imat, Medium* medium);
+  void SetMedium(const unsigned int imat, Medium* medium);
   // Returns the medium for a material
-  Medium* GetMedium(const unsigned int& i) const;
-  Medium* GetMedium(const double& x, const double& y, const double& z) = 0;
-  int GetNumberOfMedia() { return nMaterials; }
+  Medium* GetMedium(const unsigned int i) const;
+  Medium* GetMedium(const double x, const double y, const double z) = 0;
+  unsigned int GetNumberOfMedia() { return m_nMaterials; }
 
   int GetNumberOfElements() const { return nElements; }
   bool GetElement(const int i, double& vol, double& dmin, double& dmax);
@@ -63,11 +63,11 @@ class ComponentFieldMap : public ComponentBase {
 
   virtual void WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
-                              const std::string label) = 0;
+                              const std::string& label) = 0;
 
   virtual double WeightingPotential(const double x, const double y,
                                     const double z,
-                                    const std::string label) = 0;
+                                    const std::string& label) = 0;
 
   // Options
   void EnableCheckMapIndices() {
@@ -93,7 +93,7 @@ class ComponentFieldMap : public ComponentBase {
     // Nodes
     int emap[10];
     // Material
-    int matmap;
+    unsigned int matmap;
     bool degenerate;
     // Bounding box of the element
     double xmin, ymin, zmin, xmax, ymax, zmax;
@@ -116,7 +116,7 @@ class ComponentFieldMap : public ComponentBase {
   std::vector<node> nodes;
 
   // Materials
-  int nMaterials;
+  unsigned int m_nMaterials;
   struct material {
     // Permittivity
     double eps;
