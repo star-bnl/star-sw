@@ -3,9 +3,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StFastJetPars.cxx,v 1.3 2012/03/10 23:18:28 pibero Exp $
+// $Id: StFastJetPars.cxx,v 1.4 2016/01/06 22:00:17 gdwebb Exp $
 //
 // $Log: StFastJetPars.cxx,v $
+// Revision 1.4  2016/01/06 22:00:17  gdwebb
+// This is code to implement the off axis cone underlying event analysis.
+//
 // Revision 1.3  2012/03/10 23:18:28  pibero
 // Added destructor for StCDFMidPointPlugin
 //
@@ -78,5 +81,5 @@ StCDFMidPointPlugin::StCDFMidPointPlugin(double coneRadius,
 
 StCDFMidPointPlugin::~StCDFMidPointPlugin()
 {
-  delete mImpl;
+  //  delete mImpl;
 }

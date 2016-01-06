@@ -1,4 +1,4 @@
-// $Id: StProtoJet.cxx,v 1.14 2008/05/02 18:45:06 tai Exp $
+// $Id: StProtoJet.cxx,v 1.15 2016/01/06 22:00:17 gdwebb Exp $
 
 #include "StProtoJet.h"
 
@@ -6,6 +6,8 @@ using namespace std;
 
 StProtoJet::StProtoJet()
   : mPx(0), mPy(0), mPz(0), mE(0)
+  , mArea(-1.)
+  , mAreaError(-1.)
   , _charge(0) 
 {
 
@@ -13,6 +15,7 @@ StProtoJet::StProtoJet()
 
 StProtoJet::StProtoJet(const AbstractFourVec* particle)
   : mPx(particle->px()), mPy(particle->py()), mPz(particle->pz()), mE(particle->e())
+  , mArea(-1.), mAreaError(-1.)
   , _charge(particle->charge())
 {
   _particleList.push_back(particle);

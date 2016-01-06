@@ -23,6 +23,7 @@ public:
 
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StUEMaker2009;
 
   float energy()   const { return momentum().Mag(); }
   short adc()      const { return mAdc; }

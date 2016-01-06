@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.15 2010/05/30 07:07:44 pibero Exp $
+// $Id: StProtoJet.h,v 1.16 2016/01/06 22:00:17 gdwebb Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -70,7 +70,12 @@ public:
 	
   //charge
   double charge() const { return _charge; }
-	
+ //area
+  double area() const {return mArea;}
+  void setArea(double area) { mArea = area;}
+  //area error
+  double areaError() const {return mAreaError;}
+  void setAreaError(double areaError) { mAreaError = areaError;}	
 private:
 
   double p() const { return ::sqrt(mPx*mPx + mPy*mPy + mPz*mPz); }
@@ -83,6 +88,8 @@ private:
   double mPy;
   double mPz;
   double mE;
+  double mArea;
+  double mAreaError;
 
   double _charge;
 
