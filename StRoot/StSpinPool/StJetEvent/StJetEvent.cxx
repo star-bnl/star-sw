@@ -53,7 +53,7 @@ StJetTower*     StJetEvent::tower   (int i) const { return (StJetTower*)mTowers-
 StJetParticle*  StJetEvent::particle(int i) const { return (StJetParticle*)mParticles->At(i); }
 
 StJetVertex* StJetEvent::newVertex() { return new ((*mVertices)[mVertices->GetEntriesFast()]) StJetVertex; }
-StJetCandidate* StJetEvent::newJet(const TVector3& vertex, const TLorentzVector& fourMomentum) { return new ((*mJets)[mJets->GetEntriesFast()]) StJetCandidate(vertex,fourMomentum); }
+StJetCandidate* StJetEvent::newJet(const TVector3& vertex, const TLorentzVector& fourMomentum, float area, float area_error) { return new ((*mJets)[mJets->GetEntriesFast()]) StJetCandidate(vertex,fourMomentum, area, area_error); }
 StJetTrack* StJetEvent::newTrack() { return new ((*mTracks)[mTracks->GetEntriesFast()]) StJetTrack; }
 StJetTower* StJetEvent::newTower() { return new ((*mTowers)[mTowers->GetEntriesFast()]) StJetTower; }
 StJetParticle* StJetEvent::newParticle() { return new ((*mParticles)[mParticles->GetEntriesFast()]) StJetParticle; }

@@ -37,6 +37,7 @@ public:
 
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StUEMaker2009;
 
   short flag()                const { return mFlag; }
   short charge()              const { return mCharge; }
