@@ -13,8 +13,8 @@
 #include <TPC/fee_readout.h>
 
 
-
 #include "tpxCore.h"
+#include "tpx_fee_position.h"
 
 // globally visible
 struct tpx_rdo tpx_rdo[24][6] ;
@@ -91,13 +91,60 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 }
 
 int *tpx_altro_to_row_override = 0 ;
+int tpx_fy16_map = 0 ;	// moved some FEEs from RDO1 to RDO2
 
 /*
 	RDO counts from 0!
 */
 void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 {
-	
+
+	if(rdo<0 || rdo>5) {
+		LOG(ERR,"RDO should count from 0") ;
+		row = 255 ;
+		pad = 255 ;
+		return ;
+	}
+
+	if(tpx_fy16_map) {
+		int remap = 0 ;
+
+		switch(a) {
+		case 52 :
+		case 53 :
+		case 54 :
+		case 55 :
+		case 56 :
+		case 57 :
+		case 58 :
+		case 59 :
+		case 60 :
+		case 61 :
+		case 66 :
+		case 67 :
+			remap = 1 ;
+			break ;
+		}
+
+		if(remap) {
+			if(rdo==0) {
+				row = 255 ;	// those guys don't exist in RDO1 anymore!
+				pad = 255 ;
+				return ;
+
+			} else if(rdo==1) {
+				row = tpx_altro_to_pad[0][a][ch].row ;
+				pad = tpx_altro_to_pad[0][a][ch].pad ;
+				return ;
+
+			}
+		}
+
+	}
+	else {
+//		LOG(WARN,"Not FY16 Map????") ;
+	}
+
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
 
@@ -144,15 +191,23 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 	return ;
 }
 
+//used in tpxGain solely!
 int tpx_altro_to_fee(int rdo, int a)
 {
-	
+	LOG(WARN,"tpx_altro_to_fee: %d %d (map %d)",rdo,a,tpx_fy16_map) ;
+
 	rdo-- ;	// to start from 0
 
 	for(int i=0;i<36;i++) {
 		int fee, altro ;
 
-		fee = fee_position[rdo][i] ;
+		if(tpx_fy16_map) {
+			fee = tpx_fee_position[rdo][i] ;
+		}
+		else {
+			fee = fee_position[rdo][i] ;
+		}
+
 		if(fee == 255) continue ;
 
 		altro = (fee << 1) & 0xFF ;
@@ -163,11 +218,15 @@ int tpx_altro_to_fee(int rdo, int a)
 	return -1 ;
 }
 
+//used in tpxGain solely
 u_char tpx_rdo_fees(int rdo, int cou)
 {
+	LOG(WARN,"tpx_rdo_fees: %d %d (map %d)",rdo,cou,tpx_fy16_map) ;
+
 	if(cou >= 36) return 255 ;
 
-	return fee_position[rdo-1][cou] ;
+	if(tpx_fy16_map) return tpx_fee_position[rdo-1][cou] ;
+	else return fee_position[rdo-1][cou] ;
 }
 
 
@@ -218,11 +277,13 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 		return rdo->token ;
 	}
 
+
 	// get stuff from the header...
 	rdo->type = hdr->type & 0xF ; ;
 	rdo->subtype = (hdr->type >> 4) & 0xF ;
 	rdo->sector = (hdr->type >> 12) & 0x7F ;	// last bit might indicate an error!
 	rdo->rdo = (hdr->type >> 8) & 0xF ;
+
 
 
 	rdo->data_end = 0 ;
@@ -233,7 +294,18 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	// now lets move to the end...
 	trl = (struct ddl_trailer *) (buff + 4*words - sizeof(struct ddl_trailer)) ;
 
-	LOG(DBG,"Header 0x%08X 0x%08X",hdr->type,hdr->ev_cou) ;
+	// NEW: for FY16 we moved some FEEs from RDO1 to RDO2
+//	LOG(TERR,"Type 0x%08X",hdr->type) ;
+	if((hdr->type != 0xFEED0301) && (hdr->type & 0x00100000)) {
+		trl->type |= 0x00100000 ;
+		tpx_fy16_map = 1 ; ;
+		//LOG(TERR,"Setting FY16 map") ;
+	}
+
+
+//	LOG(TERR,"Header 0x%08X 0x%08X: type %d, subtype %d, sector %d, rdo %d",
+//	    hdr->type,hdr->ev_cou,
+//	    rdo->type,rdo->subtype,rdo->sector,rdo->rdo) ;
 
 //	for(u_int i=0;i<words+8;i++) {
 //		LOG(DBG,"%2d: 0x%08X",i,*((u_int *)buff + i)) ;
@@ -549,6 +621,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   ret = 0 ;
 
+//  log = 1 ;
 
   a->count = 0 ;
   a->row = 0 ;	// unknown...
@@ -596,13 +669,16 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
     ret = -4 ;
   }
 
+//  log = 1 ;
+//  if(log) {
+//	LOG(TERR,"A%d:%d wc %d (0x%08X 0x%08X)",a->id,a->ch,wc,hi,lo) ;
+//  }
+
   // we bomb out here if there was any error
   if(ret) {
 	if(log) LOG(WARN,"RDO %d: T %d: A %d:%d(?) hdr[%d]",a->rdo+1,a->t,a->id,a->ch,ret) ;
 	return 0 ;	// already error...
   }
-
-
 
 
 
@@ -1050,8 +1126,66 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 	}
 
+	//new: check for the actual, correct, FEE complement
+	int fcou ;
 
-	int fcou = 1 ;
+	fcou = 0 ;
+	for(int b=0;b<3;b++) {
+	for(int c=0;c<12;c++) {
+		int altro = rdo->fee[b][c].id ;
+
+//		LOG(TERR,"RDO %d: %2d: altro %3d, status %d",rdo->rdo,fcou,altro,rdo->fee[b][c].fee_status) ;
+
+
+		//is the altro overriden?
+		for(int i=0;i<sizeof(tpx_fee_override)/sizeof(tpx_fee_override[0]);i++) {
+			int r = tpx_fee_override[i].rdo ;
+			int s = tpx_fee_override[i].sector ;
+
+			if(r==rdo->rdo && s==rdo->sector) ;
+			else continue ;
+
+			if(altro==tpx_fee_override[i].curr_altro) {
+				altro = tpx_fee_override[i].orig_altro ;
+				break ;
+			}
+		}
+
+		//special cases
+		if(rdo->sector==6 && rdo->rdo==3) {
+			if(altro==200 || altro==214) {
+				fcou++ ;
+				continue ;
+			}
+		}
+
+
+		int fee_expect = tpx_rdo_fees(rdo->rdo, fcou) ;
+		int altro_expect = -1 ;
+
+		if(fee_expect != 255) {
+			altro_expect = (fee_expect << 1) & 0xFF ;
+		}
+
+		if(rdo->fee[b][c].fee_status) {
+			if(altro_expect != altro) {
+				LOG(WARN,"RDO %d: expect %d, got %d",rdo->rdo,altro_expect,altro) ;
+			}
+			
+		}	
+		else {
+			if(altro_expect != -1) {
+				LOG(WARN,"RDO %d: expect %d, got %d",rdo->rdo,altro_expect,altro) ;
+			}
+		}
+
+
+		fcou++ ;
+	}
+	}
+
+
+	fcou = 1 ;
 	for(int b=0;b<3;b++) {
 		for(int c=0;c<12;c++) {
 			int ix = rdo->fee[b][c].id ;	// altro id!
