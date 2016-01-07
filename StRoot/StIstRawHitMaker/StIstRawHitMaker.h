@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.h,v 1.19 2016/01/05 04:10:16 smirnovd Exp $
+// $Id: StIstRawHitMaker.h,v 1.20 2016/01/07 22:15:27 smirnovd Exp $
 
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
@@ -38,9 +38,9 @@ public:
    void Clear( Option_t *opts = "" );
 
    void setIsCalibrationMode( bool isCaliMode = false )   	{ mIsCaliMode = isCaliMode;}
-   void setHitCut(float hitCut = 5.)				{ mHitCut = hitCut;        }
+   void setHitCut(double hitCut = 5.)				{ mHitCut = hitCut;        }
    void setCmnCorrection( bool doCmnCorrection = false )	{ mDoCmnCorrection = doCmnCorrection; }
-   void setCmnCut(float cmnCut = 3.)				{ mCmnCut = cmnCut;        }
+   void setCmnCut(double cmnCut = 3.)				{ mCmnCut = cmnCut;        }
    /// 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
    void setDataType(int nDataType = 0)				{ mDataType = nDataType;   };
    void setDoEmbedding(Bool_t doIt) 				{mDoEmbedding = doIt;}
@@ -48,7 +48,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.19 2016/01/05 04:10:16 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.20 2016/01/07 22:15:27 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
@@ -57,7 +57,7 @@ protected:
    Bool_t mDoEmbedding;
    Bool_t mDoCmnCorrection;
    //control paramters
-   Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
+   double mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
    UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin, mCurrentTimeBinNum;
    UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
@@ -79,9 +79,9 @@ protected:
 
 private:
 
-   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
-      const std::vector< std::vector<int> > &signalUnCorrected,
-      std::vector< std::vector<float> > &signalCorrected);
+   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected);
 
    void FillRawHitCollectionFromSimData();
 

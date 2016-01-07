@@ -1,4 +1,4 @@
-// $Id: StIstRawHitCollection.h,v 1.9 2016/01/05 16:29:25 smirnovd Exp $
+// $Id: StIstRawHitCollection.h,v 1.10 2016/01/07 22:15:29 smirnovd Exp $
 
 #ifndef StIstRawHitCollection_hh
 #define StIstRawHitCollection_hh
@@ -43,7 +43,10 @@ public:
 
    //get pointer to a raw hit by channel ID
    StIstRawHit *getRawHit( int elecId );
-   void         addRawHit( int elecId, StIstRawHit* istRawHit);
+
+   /// Adds or sets/overwrites a new StIstRawHit corresponding to electronic channel
+   /// StIstRawHit::mChannelId.
+   void addRawHit(StIstRawHit* istRawHit);
 
 protected:
    //function used for sorting raw hits by geoId

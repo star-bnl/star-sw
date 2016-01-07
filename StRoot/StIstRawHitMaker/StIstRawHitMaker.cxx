@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.40 2016/01/05 04:10:31 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.41 2016/01/07 22:15:27 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -201,18 +201,18 @@ Int_t StIstRawHitMaker::Make()
    while (1) { //loops over input raw data
       if (dataFlag == mALLdata) {
          if (mDataType == mALLdata) {
-            rts_tbl = GetNextDaqElement("ist/zs"); 	dataFlag = mZSdata;
+            rts_tbl = GetNextDaqElement("ist/zs");      dataFlag = mZSdata;
 
             if (!rts_tbl) {
                LOG_WARN << "NO ZS-DATA BANK FOUND!!!" << endm;
-               rts_tbl = GetNextDaqElement("ist/adc"); dataFlag = mADCdata;
+               rts_tbl = GetNextDaqElement("ist/adc");  dataFlag = mADCdata;
             }
          }
          else if (mDataType == mADCdata) {
-            rts_tbl = GetNextDaqElement("ist/adc"); 	dataFlag = mADCdata;
+            rts_tbl = GetNextDaqElement("ist/adc");     dataFlag = mADCdata;
          }
          else if (mDataType == mZSdata) {
-            rts_tbl = GetNextDaqElement("ist/zs");  	dataFlag = mZSdata;
+            rts_tbl = GetNextDaqElement("ist/zs");      dataFlag = mZSdata;
          }
       }
       else if (dataFlag == mADCdata) { rts_tbl = GetNextDaqElement("ist/adc"); }
@@ -246,14 +246,14 @@ Int_t StIstRawHitMaker::Make()
 
       mIstCollectionPtr->setNumTimeBins(ntimebin);
 
-      // arrays to store ADC information per APV chip (128 channels over all time bins)
-      //signal w/o pedestal subtracted
-      std::vector< std::vector<int> > signalUnCorrected(kIstNumApvChannels, std::vector<int>(kIstNumTimeBins));
-      //signal w/ pedestal subtracted
-      std::vector< std::vector<float> > signalCorrected(kIstNumApvChannels, std::vector<float>(kIstNumTimeBins));
+      // Arrays to store ADC information per APV chip (128 channels over all time bins)
+      // Signal w/o pedestal subtracted
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalUnCorrected{};
+      // Signal w/ pedestal subtracted
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalCorrected{};
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
-      Float_t sumAdcPerEvent[kIstNumTimeBins];
+      double sumAdcPerEvent[kIstNumTimeBins];
       Int_t counterAdcPerEvent[kIstNumTimeBins];
       memset(sumAdcPerEvent, 0, sizeof(sumAdcPerEvent));
       memset(counterAdcPerEvent, 0, sizeof(counterAdcPerEvent));
@@ -265,11 +265,9 @@ Int_t StIstRawHitMaker::Make()
 
       Int_t flag = 0;
 
-      if (rdo < 1     || rdo >  kIstNumRdos)                 flag = 1;
-
-      if (arm < 0     || arm >= kIstNumArmsPerRdo)           flag = 1;
-
-      if (apv < 0     || apv >= kIstNumApvsPerArm)           flag = 1;
+      if (rdo < 1 || rdo >  kIstNumRdos)       flag = 1;
+      if (arm < 0 || arm >= kIstNumArmsPerRdo) flag = 1;
+      if (apv < 0 || apv >= kIstNumApvsPerArm) flag = 1;
 
       if (flag == 1) {
          LOG_INFO << "Corrupt data  rdo: " << rdo << " arm: " << arm << " apv: " << apv << endm;
@@ -290,11 +288,9 @@ Int_t StIstRawHitMaker::Make()
 
          flag = 0;
 
-         if ((dataFlag == mADCdata) && (adc < 0 || adc >= kIstMaxAdc))	flag = 1;
-
-         if (channel < 0 || channel >= kIstNumApvChannels)        	flag = 1;
-
-         if (timebin < 0 || timebin >= ntimebin)           		flag = 1;
+         if ((dataFlag == mADCdata) && (adc < 0 || adc >= kIstMaxAdc))  flag = 1;
+         if (channel < 0 || channel >= kIstNumApvChannels)              flag = 1;
+         if (timebin < 0 || timebin >= ntimebin)                        flag = 1;
 
          if (flag == 1) {
             LOG_INFO << "Corrupt data channel: " << channel << " tbin: " << timebin << " adc: " << adc << endm;
@@ -328,16 +324,18 @@ Int_t StIstRawHitMaker::Make()
             }
 
             if ( dataFlag == mADCdata ) { // non-ZS data
-               signalCorrected[channel][timebin]    = (float)signalUnCorrected[channel][timebin] - mPedVec[elecId];
+               signalCorrected[channel][timebin]    = signalUnCorrected[channel][timebin] - mPedVec[elecId];
 
                // exclude signal-related channels for common mode noise calculation
-               if ( (signalCorrected[channel][timebin] > (-mCmnCut)*mRmsVec[elecId]) && ( signalCorrected[channel][timebin] < mCmnCut * mRmsVec[elecId] ) )     {
+               if ( (signalCorrected[channel][timebin] > (-mCmnCut)*mRmsVec[elecId]) &&
+                    (signalCorrected[channel][timebin] <   mCmnCut *mRmsVec[elecId]) )
+               {
                   sumAdcPerEvent[timebin] += signalCorrected[channel][timebin];
                   counterAdcPerEvent[timebin]++;
                }
             }
-            else {	// ZS data
-               signalCorrected[channel][timebin]    = (float)signalUnCorrected[channel][timebin];
+            else {      // ZS data
+               signalCorrected[channel][timebin]    = signalUnCorrected[channel][timebin];
             }
          }
       } // end current APV loops
@@ -359,12 +357,13 @@ Int_t StIstRawHitMaker::Make()
  * A private helper function to actually insert StIstRawHits unpacked from DAQ
  * records into the final output container mIstCollectionPtr.
  */
-void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
-   const std::vector< std::vector<int> > &signalUnCorrected,
-   std::vector< std::vector<float> > &signalCorrected)
+void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin,
+   int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
+   std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
+   std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected)
 {
    // calculate the dynamical common mode noise for the current chip in this event
-   Float_t commonModeNoise[kIstNumTimeBins];
+   double commonModeNoise[kIstNumTimeBins];
 
    for (int tbIdx = 0; tbIdx < kIstNumTimeBins; tbIdx++)
       commonModeNoise[tbIdx] = 0.;
@@ -381,16 +380,19 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
    Int_t nChanPassedCut = 0;
 
 
-   for (int iChan = 0; iChan < kIstNumApvChannels; iChan++) {
+   for (int iChan = 0; iChan < kIstNumApvChannels; iChan++)
+   {
       Int_t elecId = apvElecId + iChan;
 
-      for (int iTB = 1; iTB < ntimebin - 1; iTB++)    {
+      for (int iTB = 1; iTB < ntimebin - 1; iTB++)
+      {
          // raw hit decision: the method is stolen from Gerrit's ARMdisplay.C
-         if ( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) &&
-               (signalCorrected[iChan][iTB - 1] > mHitCut * mRmsVec[elecId])     &&
-               (signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
-               (signalCorrected[iChan][iTB + 1] > mHitCut * mRmsVec[elecId]) ) {
-
+         if ( (signalUnCorrected[iChan][iTB] > 0) &&
+              (signalUnCorrected[iChan][iTB] < kIstMaxAdc) &&
+              (signalCorrected[iChan][iTB - 1] > mHitCut * mRmsVec[elecId]) &&
+              (signalCorrected[iChan][iTB]     > mHitCut * mRmsVec[elecId]) &&
+              (signalCorrected[iChan][iTB + 1] > mHitCut * mRmsVec[elecId]) )
+         {
             isPassRawHitCut[iChan] = kTRUE;
             nChanPassedCut++;
             iTB = 999;
@@ -405,7 +407,8 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
    }
 
    // fill IST raw hits for current APV chip
-   for (int iChan = 0; iChan < kIstNumApvChannels; iChan++) {
+   for (int iChan = 0; iChan < kIstNumApvChannels; iChan++)
+   {
       //mapping info.
       Int_t elecId = apvElecId + iChan;
       Int_t geoId  = mMappingVec[elecId]; // channel geometry ID which is numbering from 1 to 110592
@@ -422,14 +425,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
 
       if ( mIsCaliMode ) { //calibration mode (non-ZS data): only write raw ADC value
          if (dataFlag == mADCdata) {
-            StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
-
-            for (int iTimeBin = 0; iTimeBin < ntimebin; iTimeBin++) {
-               rawHitPtr->setCharge( (float)signalUnCorrected[iChan][iTimeBin], (unsigned char)iTimeBin );
-            }
-
-            rawHitPtr->setChannelId( elecId );
-            rawHitPtr->setGeoId( geoId );
+            rawHitCollectionPtr->addRawHit( new StIstRawHit(elecId, geoId, signalUnCorrected[iChan]) );
          }
          else return;
       }
@@ -441,7 +437,10 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
          }
 
          //skip current channel marked as suspicious status
-         if (mRmsVec[elecId] < mChanMinRmsNoiseLevel || mRmsVec[elecId] > mChanMaxRmsNoiseLevel || mRmsVec[elecId] > 99.0)  {
+         if (mRmsVec[elecId] < mChanMinRmsNoiseLevel ||
+             mRmsVec[elecId] > mChanMaxRmsNoiseLevel ||
+             mRmsVec[elecId] > 99.0)
+         {
             LOG_DEBUG << "Skip: Noisy/hot/dead channel electronics index: " << elecId << endm;
             continue;
          }
@@ -450,25 +449,30 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
             continue;
 
          UChar_t tempMaxTB = -1;
-         Float_t tempMaxCharge = -999.0;
+         double tempMaxCharge = -999.0;
 
          StIstRawHit *rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
 
-         for (int iTBin = 0; iTBin < ntimebin; iTBin++)      {
+         // Modify signalCorrected values in some ways
+         for (int iTBin = 0; iTBin < ntimebin; iTBin++)
+         {
             if ( mDoCmnCorrection && dataFlag == mADCdata )
                signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
 
-            if (signalCorrected[iChan][iTBin] < 0) signalCorrected[iChan][iTBin] = 0.1;
+            if (signalCorrected[iChan][iTBin] < 0)
+               signalCorrected[iChan][iTBin] = 0.1;
 
-            rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
             rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
 
             if (signalCorrected[iChan][iTBin] > tempMaxCharge) {
                tempMaxCharge = signalCorrected[iChan][iTBin];
                tempMaxTB = (unsigned char)iTBin;
             }
+
+            signalCorrected[iChan][iTBin] *= mGainVec[elecId];
          }
 
+         rawHitPtr->setCharges(signalCorrected[iChan]);
          rawHitPtr->setChannelId( elecId );
          rawHitPtr->setGeoId( geoId );
          rawHitPtr->setMaxTimeBin( tempMaxTB );
@@ -489,7 +493,9 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
 void StIstRawHitMaker::FillRawHitCollectionFromSimData()
 {
    if(!mIstCollectionSimuPtr) return;
-   for( UChar_t ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx ){
+
+   for( UChar_t ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx )
+   {
       StIstRawHitCollection *rawHitCollectionDataPtr = mIstCollectionPtr->getRawHitCollection( ladderIdx );
       std::vector<StIstRawHit *> rawAdcSimuVec = mIstCollectionSimuPtr->getRawHitCollection(ladderIdx)->getRawHitVec();
 
@@ -497,8 +503,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromSimData()
       {
          if (!rawAdcSimuPtr) continue;
 
-         Int_t eId = rawAdcSimuPtr->getChannelId();
-         rawHitCollectionDataPtr->addRawHit(eId, new StIstRawHit(*rawAdcSimuPtr));
+         rawHitCollectionDataPtr->addRawHit(new StIstRawHit(*rawAdcSimuPtr));
       }
    }
 }

@@ -1,7 +1,10 @@
-// $Id: StIstRawHit.h,v 1.11 2016/01/05 16:29:25 smirnovd Exp $
+// $Id: StIstRawHit.h,v 1.12 2016/01/07 22:15:28 smirnovd Exp $
 
 #ifndef StIstRawHit_hh
 #define StIstRawHit_hh
+
+#include <algorithm>
+#include <array>
 
 #include "StObject.h"
 #include "StEvent/StEnumerations.h"
@@ -19,17 +22,20 @@ class StIstRawHit : public StObject
 public:
    //constructors
    StIstRawHit();
-   StIstRawHit( const StIstRawHit & );
-   StIstRawHit &operator=( const StIstRawHit & );
+
+   StIstRawHit(int channelId, int geoId,
+      const std::array<double, kIstNumTimeBins> &charges,
+      const std::array<double, kIstNumTimeBins> &chargeErrs = {},
+      uint8_t maxTimeBin = 3, uint16_t idTruth = 0);
 
    //accessors
-   int       	      getChannelId()  const; //!< 0-110591
-   int		      getGeoId()      const; //!< 1-110592
+   int               getChannelId()  const; //!< 0-110591
+   int               getGeoId()      const; //!< 1-110592
    unsigned char     getLadder()     const; //!< 1-24
    unsigned char     getSensor()     const; //!< 1-6
    unsigned char     getRow()        const; //!< 1-64
    unsigned char     getColumn()     const; //!< 1-12
-   float     	      getCharge(int tb = 0) 	 const;
+   float             getCharge(int tb = 0)    const;
    float             getChargeErr(int tb = 0) const;
    unsigned char     getMaxTimeBin() const;
    unsigned char     getRdo()        const; //!< 1-6
@@ -40,10 +46,15 @@ public:
    unsigned short    getIdTruth()    const; //!< for embedding, 0 as background
 
    //modifiers
-   void        setChannelId(int rChannelId) ;
-   void	setGeoId(int rChannelId);
-   void        setCharge(float charge, int tb = -1) ;
-   void	setChargeErr(float chargeErr, int tb = -1) ;
+   void setChannelId(int rChannelId);
+   void setGeoId(int rChannelId);
+   void setCharge(float charge, int tb = -1);
+
+   /// Overwrites this channel's charges in all time bins by values in the
+   /// provided array
+   void setCharges(const std::array<double, kIstNumTimeBins> &charges);
+
+   void setChargeErr(float chargeErr, int tb = -1);
    void        setMaxTimeBin(int tb) ;
    static void setDefaultTimeBin( int tb );
    void        setIdTruth(unsigned short idTruth);
@@ -59,7 +70,8 @@ private:
                                            ///< pedestal subtracted and/or CMN correction in physics mode
    Float_t     mChargeErr[kIstNumTimeBins];///< charge error in all time bins
    UChar_t     mMaxTimeBin;                ///< the max ADC time bin index of the raw hit
-   UShort_t    mIdTruth;           	   ///< for embedding, 0 as background
+   UShort_t    mIdTruth;                   ///< for embedding, 0 as background
+
    static UChar_t mDefaultTimeBin;
 
    ClassDef(StIstRawHit, 1)
