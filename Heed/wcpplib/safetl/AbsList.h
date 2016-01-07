@@ -69,12 +69,11 @@ template <class T> void glob_pilfer(AbsList<T>&, PILF_CONST AbsList<T>&);
 
 #ifndef DONT_USE_ABSPTR
 template <class T>
-class AbsListNode : public RegPassivePtr
+class AbsListNode : public RegPassivePtr {
 #else
-                    template <class T>
-                    class AbsListNode
+template <class T>
+class AbsListNode {
 #endif
-                    {
  private:
   AbsList<T>* head_node;
   AbsListNode<T>* prev_node;

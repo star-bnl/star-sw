@@ -16,18 +16,19 @@
 
 namespace Heed {
 
+long HeedParticle::last_particle_number = 0;
+
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
                            int fs_loss_only, int fs_print_listing)
     : eparticle(primvol, pt, vel, time, fpardef),
       s_print_listing(fs_print_listing),
+      particle_number(last_particle_number++),
       transferred_energy_in_step(0.0),
       qtransfer(0),
       s_loss_only(fs_loss_only) {
 
   mfunname("HeedParticle::HeedParticle(...)");
-  particle_number = last_particle_number;
-  last_particle_number++;
   transferred_energy.allocate_block(100);
   natom.allocate_block(100);
   nshell.allocate_block(100);

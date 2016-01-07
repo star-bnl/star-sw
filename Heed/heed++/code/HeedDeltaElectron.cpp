@@ -19,6 +19,7 @@ namespace Heed {
 
 const long max_q_low_path_length_for_direct = 5;
 
+long HeedDeltaElectron::last_particle_number = 0;
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
 
@@ -28,19 +29,16 @@ HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
                                      //PassivePtr< gparticle > fparent_part
                                      int fs_print_listing)
     : eparticle(primvol, pt, vel, time, &electron_def),
-      //parent_part(fparent_part),
+      particle_number(last_particle_number++),
+      parent_particle_number(fparent_particle_number),
       s_print_listing(fs_print_listing),
       phys_mrange(0.0),
       s_stop_eloss(0),
       s_mult_low_path_length(0),
       q_low_path_length(0.0),
       s_path_length(0),
-      necessary_energy(0.0),
-      parent_particle_number(fparent_particle_number) {
+      necessary_energy(0.0) {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
-  particle_number = last_particle_number;
-  last_particle_number++;
-  //if(particle_number == 247)  // for debug of particular event
   //s_print_listing = 1;
   //set_count_references();
 

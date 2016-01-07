@@ -261,6 +261,7 @@ $(OBJDIR)/MediumGas.o: \
 $(OBJDIR)/MediumMagboltz.o: \
 	$(SRCDIR)/MediumMagboltz.cc $(INCDIR)/MediumMagboltz.hh \
 	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh $(SRCDIR)/OpticalData.cc \
+	$(SRCDIR)/MediumGas.cc $(INCDIR)/MediumGas.hh \
 	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/Random.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@

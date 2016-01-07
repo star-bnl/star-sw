@@ -23,14 +23,11 @@ extern double ener_single_transf;
 
 namespace Heed {
 
-extern long last_particle_number;  // for debug print
-// Each particle is identified by particle_number.
-// It is assigned by current last_particle_number which is then incremented
-
 class HeedParticle_BGM : public eparticle {
  public:
   int s_print_listing;
   long particle_number;
+  static long last_particle_number;
   HeedParticle_BGM(manip_absvol* primvol, const point& pt, const vec& vel,
                    vfloat time, particle_def* fpardef, int fs_loss_only = 0,
                    int fs_print_listing = 0);

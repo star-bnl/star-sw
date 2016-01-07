@@ -17,6 +17,8 @@
 
 namespace Heed {
 
+long HeedParticle_BGM::last_particle_number = 0;
+
 HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
                                    const vec& vel, vfloat time,
                                    particle_def* fpardef, int fs_loss_only,
@@ -25,10 +27,9 @@ HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
       transferred_energy_in_step(0.0),  // tnpi_in_step(0),
       qtransfer(0),
       s_loss_only(fs_loss_only),
-      s_print_listing(fs_print_listing) {
+      s_print_listing(fs_print_listing),
+      particle_number(last_particle_number++) {
   mfunname("HeedParticle_BGM::HeedParticle_BGM(...)");
-  particle_number = last_particle_number;
-  last_particle_number++;
   //set_count_references();
   transferred_energy.allocate_block(100);
   natom.allocate_block(100);

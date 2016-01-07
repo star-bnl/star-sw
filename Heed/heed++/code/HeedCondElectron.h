@@ -24,28 +24,17 @@ namespace Heed {
 
 class HeedCondElectron {
  public:
-  // position (in the first system from tid system)
-  // point pt;
   // position (in the local system, the last system from tid)
   point ptloc;
   // time
   double time;
-  // manip_absvol_treeid tid;
-  // reference to parent
-  // PassivePtr< HeedDeltaElectron > parent_de;
-  // constructors
+  // Constructors
   HeedCondElectron() {}
   HeedCondElectron(point fptloc, double ftime) : ptloc(fptloc), time(ftime) {}
-  //HeedCondElectron(point fpt, point fptloc, manip_absvol_treeid ftid,
-  //                 PassivePtr< HeedDeltaElectron > fparent_de):
-  // pt(fpt), ptloc(fptloc), tid(ftid), parent_de(fparent_de) {;}
-  // destructor
+  // Destructor
   virtual ~HeedCondElectron() {}
   virtual void print(std::ostream& file, int l) const;
 };
-
-//extern AbsList< HeedCondElectron > conduction_electron_bank;
-//extern BlkArr< HeedCondElectron > conduction_electron_bank;
 
 class SensitiveVolume {
  public:

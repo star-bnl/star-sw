@@ -2,9 +2,7 @@
 #include "wcpplib/random/ranluxint.h"
 #include "wcpplib/random/chisran.h"
 #include "wcpplib/random/pois.h"
-// to see  last_particle_number
-#include "heed++/code/HeedParticle.h"
-#include "heed++/code/HeedDeltaElectron.h"  // because it can be generated
+#include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/ParticleBank.h"
@@ -15,10 +13,13 @@
 
 namespace Heed {
 
+long HeedPhoton::last_particle_number = 0;
+
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
                        double fenergy, int fs_print_listing)
     : gparticle(primvol, pt, vel, time),
+      particle_number(last_particle_number++),
       parent_particle_number(fparent_particle_number),
       s_print_listing(fs_print_listing),
       energy(fenergy),
@@ -28,9 +29,6 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
 #endif
       s_delta_generated(0) {
   mfunname("HeedPhoton::HeedPhoton(...)");
-  particle_number = last_particle_number;
-  //set_count_references();
-  last_particle_number++;
   double length_vel = length(vel);
   check_econd11(fabs(length_vel - c_light) / (length_vel + c_light), > 1.0e-10,
                 mcerr);

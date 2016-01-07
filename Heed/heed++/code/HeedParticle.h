@@ -23,10 +23,6 @@ extern double ener_single_transf;
 
 namespace Heed {
 
-extern long last_particle_number;  // for debug print
-// Each particle is identified by particle_number.
-// It is assigned by current last_particle_number which is then incremented
-
 class HeedParticle : public eparticle {
  public:
   /// Constructors
@@ -46,6 +42,7 @@ class HeedParticle : public eparticle {
 
   int s_print_listing;
   long particle_number;
+  static long last_particle_number;
 
   double transferred_energy_in_step;
   long qtransfer;

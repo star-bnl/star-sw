@@ -83,10 +83,6 @@ void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 // This function is called by Heed after each step
 void check_point(gparticle* /*gp*/) {}
 
-// Particle id number for book-keeping
-namespace Heed {
-long last_particle_number;
-}
 extern trajestep_limit gtrajlim;
 trajestep_limit gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
                          0.2 * Heed::rad);
@@ -289,7 +285,6 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   // convert from cm to mm).
   point p0((x0 - cX) * 10., (y0 - cY) * 10., (z0 - cZ) * 10.);
   // Setup the particle.
-  Heed::last_particle_number = 0;
   if (particle != 0) {
     delete particle;
     particle = 0;
@@ -823,7 +818,6 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   // Delete the particle bank.
   // Clusters from the current track will be lost.
   hasActiveTrack = false;
-  Heed::last_particle_number = 0;
   Heed::particle_bank.clear();
   deltaElectrons.clear();
   nDeltas = 0;

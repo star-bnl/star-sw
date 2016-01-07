@@ -24,28 +24,28 @@ class Medium {
   virtual bool IsSemiconductor() const { return false; }
 
   // Temperature [K]
-  void SetTemperature(const double& t);
+  void SetTemperature(const double t);
   double GetTemperature() const { return m_temperature; }
   // Pressure [Torr]
-  void SetPressure(const double& p);
+  void SetPressure(const double p);
   double GetPressure() const { return m_pressure; }
   // Relative static dielectric constant
-  void SetDielectricConstant(const double& eps);
+  void SetDielectricConstant(const double eps);
   double GetDielectricConstant() const { return m_epsilon; }
 
   // Get number of components
   unsigned int GetNumberOfComponents() const { return m_nComponents; }
-  virtual void GetComponent(const unsigned int& i, 
+  virtual void GetComponent(const unsigned int i, 
                             std::string& label, double& f);
   // Effective atomic number and weight
-  virtual void SetAtomicNumber(const double& z);
+  virtual void SetAtomicNumber(const double z);
   virtual double GetAtomicNumber() const { return m_z; }
-  virtual void SetAtomicWeight(const double& a);
+  virtual void SetAtomicWeight(const double a);
   virtual double GetAtomicWeight() const { return m_a; }
   // Number density [cm-3] and mass density [g/cm3]
-  virtual void SetNumberDensity(const double& n);
+  virtual void SetNumberDensity(const double n);
   virtual double GetNumberDensity() const { return m_density; }
-  virtual void SetMassDensity(const double& rho);
+  virtual void SetMassDensity(const double rho);
   virtual double GetMassDensity() const;
 
   // Transport properties
@@ -59,11 +59,9 @@ class Medium {
   bool IsIonisable() const { return m_ionisable; }
 
   // W value and Fano factor
-  void SetW(const double& w) {
-    m_w = w;
-  };
+  void SetW(const double w) { m_w = w; }
   double GetW() { return m_w; }
-  void SetFanoFactor(const double& f) { m_fano = f; }
+  void SetFanoFactor(const double f) { m_fano = f; }
   double GetFanoFactor() { return m_fano; }
 
   // Transport parameters for electrons
@@ -252,14 +250,14 @@ class Medium {
   void SetInterpolationMethodIonDissociation(const unsigned int& intrp);
 
   // Scaling of fields and transport parameters.
-  virtual double ScaleElectricField(const double& e) const { return e; }
-  virtual double UnScaleElectricField(const double& e) const { return e; }
-  virtual double ScaleVelocity(const double& v) const { return v; }
-  virtual double ScaleDiffusion(const double& d) const { return d; }
-  virtual double ScaleDiffusionTensor(const double& d) const { return d; }
-  virtual double ScaleTownsend(const double& alpha) const { return alpha; }
-  virtual double ScaleAttachment(const double& eta) const { return eta; }
-  virtual double ScaleDissociation(const double &diss) const { return diss; }
+  virtual double ScaleElectricField(const double e) const { return e; }
+  virtual double UnScaleElectricField(const double e) const { return e; }
+  virtual double ScaleVelocity(const double v) const { return v; }
+  virtual double ScaleDiffusion(const double d) const { return d; }
+  virtual double ScaleDiffusionTensor(const double d) const { return d; }
+  virtual double ScaleTownsend(const double alpha) const { return alpha; }
+  virtual double ScaleAttachment(const double eta) const { return eta; }
+  virtual double ScaleDissociation(const double diss) const { return diss; }
 
   // Optical properties
   // Energy range [eV] of available optical data

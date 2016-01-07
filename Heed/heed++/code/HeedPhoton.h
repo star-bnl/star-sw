@@ -18,6 +18,7 @@ class HeedPhoton : public gparticle {
  public:
   long particle_number;
   long parent_particle_number;
+  static long last_particle_number;
   int s_print_listing;  // convenient to print internal algorithms
                         // of a selected event
 

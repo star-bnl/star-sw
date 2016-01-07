@@ -114,7 +114,7 @@ Medium::Medium()
   SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
 }
 
-void Medium::SetTemperature(const double& t) {
+void Medium::SetTemperature(const double t) {
 
   if (t <= 0.) {
     std::cerr << m_className << "::SetTemperature:\n";
@@ -125,7 +125,7 @@ void Medium::SetTemperature(const double& t) {
   m_isChanged = true;
 }
 
-void Medium::SetPressure(const double& p) {
+void Medium::SetPressure(const double p) {
 
   if (p <= 0.) {
     std::cerr << m_className << "::SetPressure:\n";
@@ -136,7 +136,7 @@ void Medium::SetPressure(const double& p) {
   m_isChanged = true;
 }
 
-void Medium::SetDielectricConstant(const double& eps) {
+void Medium::SetDielectricConstant(const double eps) {
 
   if (eps < 1.) {
     std::cerr << m_className << "::SetDielectricConstant:\n";
@@ -152,7 +152,7 @@ double Medium::GetMassDensity() const {
   return m_density * AtomicMassUnit * m_a;
 }
 
-void Medium::GetComponent(const unsigned int& i, 
+void Medium::GetComponent(const unsigned int i, 
                           std::string& label, double& f) {
 
   if (i >= m_nComponents) {
@@ -164,7 +164,7 @@ void Medium::GetComponent(const unsigned int& i,
   f = 1.;
 }
 
-void Medium::SetAtomicNumber(const double& z) {
+void Medium::SetAtomicNumber(const double z) {
 
   if (z < 1.) {
     std::cerr << m_className << "::SetAtomicNumber:\n";
@@ -175,7 +175,7 @@ void Medium::SetAtomicNumber(const double& z) {
   m_isChanged = true;
 }
 
-void Medium::SetAtomicWeight(const double& a) {
+void Medium::SetAtomicWeight(const double a) {
 
   if (a <= 0.) {
     std::cerr << m_className << "::SetAtomicWeight:\n";
@@ -186,7 +186,7 @@ void Medium::SetAtomicWeight(const double& a) {
   m_isChanged = true;
 }
 
-void Medium::SetNumberDensity(const double& n) {
+void Medium::SetNumberDensity(const double n) {
 
   if (n <= 0.) {
     std::cerr << m_className << "::SetNumberDensity:\n";
@@ -197,7 +197,7 @@ void Medium::SetNumberDensity(const double& n) {
   m_isChanged = true;
 }
 
-void Medium::SetMassDensity(const double& rho) {
+void Medium::SetMassDensity(const double rho) {
 
   if (rho <= 0.) {
     std::cerr << m_className << "::SetMassDensity:\n";
