@@ -1,4 +1,4 @@
-// $Id: StIstRawHitCollection.cxx,v 1.19 2016/01/05 16:29:25 smirnovd Exp $
+// $Id: StIstRawHitCollection.cxx,v 1.20 2016/01/07 22:15:29 smirnovd Exp $
 
 #include "StIstRawHit.h"
 #include "StIstRawHitCollection.h"
@@ -81,14 +81,19 @@ void StIstRawHitCollection::Print(int nTimeBins) const
 
 
 /**
- * Adds or sets a new StIstRawHit corresponding to electronic channel elecId. If
- * istRawHit is nullptr the function does nothing. If a hit with elecId already
- * exists the old one will be overwritten by the new one and the resources will
- * be freed. No check is performed to test the validity of elecId.
+ * Adds or sets/overwrites a new StIstRawHit corresponding to electronic channel
+ * StIstRawHit::mChannelId. If istRawHit is nullptr the function does nothing.
+ * If a hit with channelId already exists it will be overwritten by the new one
+ * and the resources will be freed. A silent check is performed to make sure the
+ * channel electronic index is within the allowed range.
  */
-void StIstRawHitCollection::addRawHit(int elecId, StIstRawHit* istRawHit)
+void StIstRawHitCollection::addRawHit(StIstRawHit* istRawHit)
 {
    if (!istRawHit) return;
+
+   int elecId = istRawHit->getChannelId();
+
+   if (elecId < 0 || elecId >= kIstNumElecIds) return;
 
    StIstRawHit *istRawHitCurrent = mRawHitElecIdVec[elecId];
 

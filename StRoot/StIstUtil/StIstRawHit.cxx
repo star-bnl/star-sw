@@ -1,4 +1,4 @@
-// $Id: StIstRawHit.cxx,v 1.15 2016/01/05 16:29:25 smirnovd Exp $
+// $Id: StIstRawHit.cxx,v 1.16 2016/01/07 22:15:28 smirnovd Exp $
 
 #include "StIstRawHit.h"
 #include "StRoot/St_base/StMessMgr.h"
@@ -18,41 +18,28 @@ bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHi
 StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(3),
    mIdTruth(0)
 {
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i] = -999.;
-      mChargeErr[i] = 0.;
-   }
+   std::fill_n(mCharge, kIstNumTimeBins, -999);
 }
 
-StIstRawHit::StIstRawHit(const StIstRawHit &h) : StObject(), mChannelId(h.mChannelId), mGeoId(h.mGeoId), mCharge(),
-   mChargeErr(), mMaxTimeBin(h.mMaxTimeBin), mIdTruth(h.mIdTruth)
+
+StIstRawHit::StIstRawHit(int channelId, int geoId,
+   const std::array<double, kIstNumTimeBins> &charges,
+   const std::array<double, kIstNumTimeBins> &chargeErrs,
+   uint8_t maxTimeBin, uint16_t idTruth) :
+   StObject(),
+   mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
+   mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
 {
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i] = h.mCharge[i];
-      mChargeErr[i] = h.mChargeErr[i];
-   }
+   std::copy(charges.begin(), charges.end(), mCharge);
+   std::copy(chargeErrs.begin(), chargeErrs.end(), mChargeErr);
 }
 
-StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
-{
-   mChannelId  = h.mChannelId;
-   mGeoId	= h.mGeoId;
-   mMaxTimeBin = h.mMaxTimeBin;
-   mIdTruth    = h.mIdTruth;
 
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i]     = h.mCharge[i];
-      mChargeErr[i]  = h.mChargeErr[i];
-   }
-
-   return *this;
-}
-
-int StIstRawHit::getChannelId() const  			{ return mChannelId;   	 };
-int StIstRawHit::getGeoId() const  			{ return mGeoId;   	 };
-unsigned char StIstRawHit::getMaxTimeBin() const  	{ return mMaxTimeBin;    };
-unsigned char StIstRawHit::getDefaultTimeBin()  	{ return mDefaultTimeBin;};
-unsigned short StIstRawHit::getIdTruth() const  	{ return mIdTruth; 	 };
+int StIstRawHit::getChannelId() const              { return mChannelId;     };
+int StIstRawHit::getGeoId() const                  { return mGeoId;      };
+unsigned char StIstRawHit::getMaxTimeBin() const   { return mMaxTimeBin;    };
+unsigned char StIstRawHit::getDefaultTimeBin()     { return mDefaultTimeBin;};
+unsigned short StIstRawHit::getIdTruth() const     { return mIdTruth;    };
 
 unsigned char StIstRawHit::getLadder() const
 {
@@ -131,6 +118,17 @@ void StIstRawHit::setCharge( float charge, int tb )
 {
    mCharge[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ] = charge;
 };
+
+
+/**
+ * Overwrites this channel's charges in all time bins by values in the
+ * provided array.
+ */
+void StIstRawHit::setCharges(const std::array<double, kIstNumTimeBins> &charges)
+{
+   std::copy( std::begin(charges), std::end(charges), mCharge);
+}
+
 
 void StIstRawHit::setChargeErr(float rChargeErr, int tb)
 {
