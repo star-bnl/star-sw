@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd"> -->
+    <command>
+        cd ${SUBMITTINGDIRECTORY}
+        setenv STARFPE NO
+        starver .DEV2
+        set logFile  = ${JOBID}B.log
+        root.exe -q -b ' bfc.C(99999999,"in,gmtAligner,tpcDb,corrX,OSpaceZ2,OGridLeak3D,analysis,mysql,nodefault","@'${FILELIST}'",0,"'${JOBID}'.root")' &gt;&amp;  ${logFile}
+    </command>
+	<stdout URL="file:/star/subsys/tpc/gnigmat/2014AuAu15/files/db4/GmtAligner$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/gnigmat/2014AuAu15/files/db4/GmtAligner$JOBID.err" />
+
+    <input URL="file:/star/subsys/tpc/gnigmat/2014AuAu15/files/dynamicDist/*.event.root" />
+</job>

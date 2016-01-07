@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+  <command>
+    cd ${SUBMITTINGDIRECTORY}
+    setenv STARFPE NO
+    #   setenv NODEBUG yes
+    starver .DEV2
+    #  echo $INPUTFILE0 | grep ':'
+    #  if (! $?) then
+    #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    #    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    #    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    #  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 5000000
+    #  endif
+    echo "${evtsFile}"
+    set filel    = `basename $evtsFile .daq`
+    set output  = ${filel}.event.root
+    set daqout  = ${filel}.root
+    if (! -r ${evtsFile}) exit 1;
+    set logFile  = ${filel}B.log
+    if ( -r $logFile) exit 0;
+    set muFile = ${filel}.MuDst.root
+    if (-r $muFile) exit 0;
+
+    #gnigmat. Dynamic distortions (CorrX+OSpaceZ2+OGridLeak3D)
+    root.exe -q -b 'bfc.C(500000,"P2014a,gmt,gmtCosmics,gmtAligner,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,NoHistos,noTags,noRunco,StiCA,KFVertex,evout","'${evtsFile}'","'$output'","'$daqout'")' &gt;&amp; ${logFile}
+  </command>
+  <stdout URL="file:/star/subsys/tpc/gnigmat/2014AuAu15/files/dynamicDist/daq2014$JOBID.log" />
+  <stderr URL="file:/star/subsys/tpc/gnigmat/2014AuAu15/files/dynamicDist/daq2014$JOBID.log" />
+
+  <input URL="file:/gpfs01/star/scratch/gnigmat/daq/2014/*/*/*.daq" />
+
+</job>

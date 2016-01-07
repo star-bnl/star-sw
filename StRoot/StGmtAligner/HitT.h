@@ -20,6 +20,8 @@ class HitT : public TObject {
   Double32_t cxPG, cyPG, czPG; // Predicted direction cos in Global
   Double32_t wGu, wGv, wGw; // Global direction for detector plane
   Double32_t xPL, yPL, zPL; // Ladder
+  Bool_t     isPrimary;     // If primary track
+  Bool_t     isCrossingMembrain; //If track crosses membrain
 #ifdef __USE_GLOBAL__
   Double32_t uPGl, vPGl;        // prediction in Wafer CS
   Double32_t tuPGl, tvPGl;      // tangs 
@@ -117,6 +119,8 @@ class HitT : public TObject {
   void SetisFitted(Int_t k=1) {isFitted = k;}
   void SetisTrack(Int_t k=1) {isTrack = k;}
   void SetUsedInFit(Int_t k=0) {isUsedInFit = k;}
+  void SetisPrimary(Bool_t k) {isPrimary = k;}
+  void SetisCrossingMembrain(Bool_t k) {isCrossingMembrain = k;}
   UInt_t      GetHitFlag()     const {return hitFlag;}
   Double32_t  GetU()           const {return u;}
   Double32_t  GetV()           const {return v;}
@@ -129,6 +133,8 @@ class HitT : public TObject {
   Double32_t  GetPredtV()      const {return tvP;}
   Double32_t  GetPredU()       const {return uP;}
   Double32_t  GetPredV()       const {return vP;}
+  Bool_t      GetisPrimary()   const {return isPrimary;}
+  Bool_t      GetisCrossingMembrain(){return isCrossingMembrain;}
 #ifdef __USE_GLOBAL__
 
   Double32_t *GetXyzPGl()              {return &xPGlG;}

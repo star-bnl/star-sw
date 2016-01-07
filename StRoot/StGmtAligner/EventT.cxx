@@ -138,6 +138,7 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
     if (! fRotList) continue;
     TIter next(fRotList);
     TGeoHMatrix *comb = 0;
+
     while ((comb = (TGeoHMatrix *) next())) {
       TString combName(comb->GetName());
       if (! combName.BeginsWith("R")) continue;
@@ -201,6 +202,18 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
       if (_debug) cout << "StHelix tU/tV =  " << tuvPred[0] << "\t" << tuvPred[1] << endl; 
       if (TMath::Abs(uvPred[1]) > dx[k] + 1.0) continue;
       if (TMath::Abs(uvPred[2]) > dz[k] + 1.0) continue;
+
+    Bool_t mIsCrossingMembrain = kTRUE;
+    Bool_t mIsPrimary = kFALSE;
+    if(pTrack!=0) {
+      mIsPrimary = kTRUE;
+    }
+    StThreeVectorF firstPoint = Track->detectorInfo()->firstPoint();
+    StThreeVectorF lastPoint = Track->detectorInfo()->lastPoint();
+    if( (firstPoint.z()>0 && lastPoint.z()>0 && xyzG.z()>0) ||
+	(firstPoint.z()<0 && lastPoint.z()<0 && xyzG.z()<0) ) {
+      mIsCrossingMembrain = kFALSE;
+    }
       
       for (UInt_t l = 0; l < NoHits; l++) {
 	StHit *hit = hitvec[l];
@@ -218,6 +231,8 @@ Int_t  EventT::Build(StEvent *pEventT, Double_t pCut) {
 	  h->SettUVPred(tuvPred[0],tuvPred[1]);
 	  h->SetXyzG(xyzG.xyz());
 	  h->SetDirG(dirGPred);
+	  h->SetisPrimary(mIsPrimary);
+	  h->SetisCrossingMembrain(mIsCrossingMembrain);
 	  SetHitT(h, hit, comb, track);
 	  NoHitPerTrack++;
 	  h->SetHitPerTrack(NoHitPerTrack);
