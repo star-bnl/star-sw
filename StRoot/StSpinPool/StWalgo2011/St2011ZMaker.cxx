@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.12 2012/10/05 17:53:53 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.13 2016/01/08 02:08:49 jlzhang Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -77,11 +77,11 @@ St2011ZMaker::findEndcap_Z_boson(){
   Wevent2011 *wEve=wMK->wEve;
   // printf("========= findEndcap_Z_boson() \n");
   
-  hA[50]->Fill("inp",1.); hA[60]->Fill("inp",1.);
+  hA[50]->Fill("inp",1.); 
 
   // search for  Zs ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
-    hA[50]->Fill("vert",1.); hA[60]->Fill("vert",1.);
+    hA[50]->Fill("vert",1.);
     WeveVertex &V=wEve->vertex[iv];
 
     //first loop over good barrel tracks
@@ -96,14 +96,14 @@ St2011ZMaker::findEndcap_Z_boson(){
       float isoET1=TB.cluster.ET /TB.cl4x4.ET;
       hA[51]->Fill(isoET1);
       hA[52]->Fill(TB.cluster.ET);
-      hA[50]->Fill("trB",1.); hA[60]->Fill("trB",1.);
+      hA[50]->Fill("trB",1.); 
       if(TB.cluster.ET<par_clusterEtZ) continue;
-      hA[50]->Fill("etB",1.); hA[60]->Fill("etB",1.);
+      hA[50]->Fill("etB",1.); 
 
       float fracET1=TB.cluster.ET /TB.nearTotET;
       hA[53]->Fill(fracET1);
       if(fracET1<par_nearTotEtFracZ) continue; 
-      hA[50]->Fill("conB",1.); hA[60]->Fill("conB",1.);
+      hA[50]->Fill("conB",1.); 
 
       // 1) try to find candidate track in the endcap
       for(uint it=0;it<V.eleTrack.size();it++) {
@@ -417,6 +417,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.13  2016/01/08 02:08:49  jlzhang
+// added couples histograms and fixed a small bug
+//
 // Revision 1.12  2012/10/05 17:53:53  balewski
 // added correlation plots for reco Q in Z, W algos
 //
