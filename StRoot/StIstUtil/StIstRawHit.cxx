@@ -1,4 +1,6 @@
-// $Id: StIstRawHit.cxx,v 1.16 2016/01/07 22:15:28 smirnovd Exp $
+// $Id: StIstRawHit.cxx,v 1.17 2016/01/08 21:11:34 smirnovd Exp $
+
+#include <algorithm>
 
 #include "StIstRawHit.h"
 #include "StRoot/St_base/StMessMgr.h"
@@ -22,16 +24,16 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), 
 }
 
 
+template<typename Container>
 StIstRawHit::StIstRawHit(int channelId, int geoId,
-   const std::array<double, kIstNumTimeBins> &charges,
-   const std::array<double, kIstNumTimeBins> &chargeErrs,
+   const Container &charges, const Container &chargeErrs,
    uint8_t maxTimeBin, uint16_t idTruth) :
    StObject(),
    mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
    mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
 {
-   std::copy(charges.begin(), charges.end(), mCharge);
-   std::copy(chargeErrs.begin(), chargeErrs.end(), mChargeErr);
+   std::copy(std::begin(charges), std::end(charges), mCharge);
+   std::copy(std::begin(chargeErrs), std::end(chargeErrs), mChargeErr);
 }
 
 
@@ -122,9 +124,10 @@ void StIstRawHit::setCharge( float charge, int tb )
 
 /**
  * Overwrites this channel's charges in all time bins by values in the
- * provided array.
+ * provided container.
  */
-void StIstRawHit::setCharges(const std::array<double, kIstNumTimeBins> &charges)
+template<typename Container>
+void StIstRawHit::setCharges(const Container &charges)
 {
    std::copy( std::begin(charges), std::end(charges), mCharge);
 }

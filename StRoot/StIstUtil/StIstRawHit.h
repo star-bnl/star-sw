@@ -1,10 +1,7 @@
-// $Id: StIstRawHit.h,v 1.12 2016/01/07 22:15:28 smirnovd Exp $
+// $Id: StIstRawHit.h,v 1.13 2016/01/08 21:11:34 smirnovd Exp $
 
 #ifndef StIstRawHit_hh
 #define StIstRawHit_hh
-
-#include <algorithm>
-#include <array>
 
 #include "StObject.h"
 #include "StEvent/StEnumerations.h"
@@ -23,9 +20,9 @@ public:
    //constructors
    StIstRawHit();
 
+   template<typename Container>
    StIstRawHit(int channelId, int geoId,
-      const std::array<double, kIstNumTimeBins> &charges,
-      const std::array<double, kIstNumTimeBins> &chargeErrs = {},
+      const Container &charges, const Container &chargeErrs = Container{},
       uint8_t maxTimeBin = 3, uint16_t idTruth = 0);
 
    //accessors
@@ -51,8 +48,9 @@ public:
    void setCharge(float charge, int tb = -1);
 
    /// Overwrites this channel's charges in all time bins by values in the
-   /// provided array
-   void setCharges(const std::array<double, kIstNumTimeBins> &charges);
+   /// provided container
+   template<typename Container>
+   void setCharges(const Container& charges);
 
    void setChargeErr(float chargeErr, int tb = -1);
    void        setMaxTimeBin(int tb) ;
