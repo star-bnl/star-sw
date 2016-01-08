@@ -1,4 +1,4 @@
-// $Id: StIstRawHit.cxx,v 1.17 2016/01/08 21:11:34 smirnovd Exp $
+// $Id: StIstRawHit.cxx,v 1.18 2016/01/08 21:11:44 smirnovd Exp $
 
 #include <algorithm>
 
@@ -27,7 +27,7 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), 
 template<typename Container>
 StIstRawHit::StIstRawHit(int channelId, int geoId,
    const Container &charges, const Container &chargeErrs,
-   uint8_t maxTimeBin, uint16_t idTruth) :
+   UChar_t maxTimeBin, UShort_t idTruth) :
    StObject(),
    mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
    mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
