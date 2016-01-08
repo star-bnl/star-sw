@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.17 2013/09/13 19:33:13 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.18 2016/01/08 02:08:49 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -66,7 +66,7 @@ St2011WMaker::initHistos(){
   ln=new TLine(-par_vertexZ,0,-par_vertexZ,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[12]=new TH1F("muNV","L2WB: # vertices per event, rank>0 & Z in range; # of vertices",10,0,10);
-  hA[13]=h=new TH1F("muZdcx","zdcx rate; zdcx rate (kHz)",400,0.,4e5);
+  hA[13]=h=new TH1F("muZdcx","zdcx rate; zdcx rate (kHz)",500,0.,5e5);
 
   //..... Tracks....
   hA[20]=h=new TH1F("muStatTrk","Barrel W-algo: track  count; cases",nCase,0,nCase);
@@ -168,6 +168,8 @@ St2011WMaker::initHistos(){
 
 
   hA[54]=h=new TH1F("muAwayTotEt","Barrel: away-cone TPC+EMC ET sum ; away ET (GeV)",200,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_awayET,0,par_awayET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[55]=h=new TH1F("muEwayET","Barrel: ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
   
@@ -258,7 +260,8 @@ St2011WMaker::initHistos(){
 
   hA[105]=h=new TH2F("muWfreeQ","reco charge vs. TPC dedx, golden W+; Q *ET/PT;  dEdx (keV)",200,-5,5,100,0,20);
 
-  hA[106]=h=new TH1F("muWzdcx","Barrel Golden W: zdcx rate, final selection ; zdcx rate (kHz)",400,0.,4e5);
+  hA[106]=h=new TH1F("muWzdcx","Barrel Golden W: zdcx rate, final selection ; zdcx rate (kHz)",500,0.,5e5);
+
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -270,13 +273,46 @@ St2011WMaker::initHistos(){
   
   //free 114-131
 
+  hA[114]=h=new TH2F("musptBalance_Eta","sptBalance vs cluster Eta; eta; sptBalance",50,-3,3,100,-100,100);
+  hA[115]=h=new TH2F("musptBalance_Phi","sptBalance vs cluster Phi; phi; sptBalance",63,-PI,PI,100,-100,100);
+
   hA[117]=h=new TH2F("mujetQAeta_phi","Input Jet phi vs eta ;  eta ; phi ",50,-3,3,63,-PI,PI);
   hA[118]=h=new TH1F("mujetQApt","Input Jet pt; pt;",100,0,100);
+  
+  // add 119-122 for jet counts and correlation, jinlong, 12/19/2014
+  hA[119]=h=new TH1F("mujetQAno","Number of Jets per event; ; counts", 10, 0,10);
+  hA[120]=h=new TH2F("mujetCorrEta","Eta Correlation: candidates vs jet; candidate #eta ; jet #eta", 50, -2.5,2.5, 50, -2.5,2.5);
+  hA[121]=h=new TH2F("mujetCorrPhi","Phi Correlation: candidates vs jet; candidate #phi; jet #phi", 63, -PI,PI, 63, -PI, PI);
+  hA[122]=h=new TH1F("mujetQApt_out","Jet pt outside nearCone; jet pt;",100, 0, 100);
+  hA[123]=h=new TH2F("mujetQApt_DeltaPhi","Jet pt outside nearCone vs #Delta#phi;jet pt; #Delta#phi ",100, 0, 100, 63, -PI, PI);
+  hA[124]=h=new TH2F("mujetQApt_Eta","Jet pt outside nearCone vs #eta;jet pt; #eta ",100, 0, 100, 50, -2.5, 2.5);
+
+  //jet check after all the cuts
+  hA[125]=h=new TH1F("muWjetQAno","Number of Jets per event, final selection; ; counts", 10, 0,10);
+  hA[126]=h=new TH2F("muWjetCorrEta","Eta Correlation: candidates vs jet, final selection; candidate #eta ; jet #eta", 50, -2.5,2.5, 50, -2.5,2.5);
+  hA[127]=h=new TH2F("muWjetCorrPhi","Phi Correlation: candidates vs jet, final selection; candidate #phi; jet #phi", 63, -PI,PI, 63, -PI, PI);
+  hA[128]=h=new TH1F("muWjetQApt_out","Jet pt outside nearCone, final selection; jet pt;",100, 0, 100);
+  hA[129]=h=new TH2F("muWjetQApt_DeltaPhi","Jet pt outside nearCone vs #Delta#phi, final selection;jet pt; #Delta#phi ",100, 0, 100, 63, -PI, PI);
+  hA[130]=h=new TH2F("muWjetQApt_Eta","Jet pt outside nearCone vs #eta, final selection;jet pt; #eta ",100, 0, 100, 50, -2.5, 2.5);
+  
+  //add to see impact on totnearCone ET fraction from the eemc 
+  hA[131]=h=new TH1F("muBjetETR_noEEMC","Barrel: ratio (2x2/nearCone) ET w/o EEMC ; cluster ET/ near cone ET w/o eemc",100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_nearTotEtFrac,0,par_nearTotEtFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
 
   hA[132]=h=new TH2F("muptBalance_clust","ptBalance vs cluster ET; 2x2 Cluster ET; ptBalance",100,0,100,100,0,100);
   hA[133]=h=new TH2F("muptBalance_awayTot","ptBalance vs awayside PT; awayside PT; ptBalance",100,0,100,100,0,100);
 
-  hA[134]=h=new TH2F("musPtBalance_clust","Barrel: sPtBalance vs cluster ET; 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
+  hA[134]=h=new TH2F("musPtBalance_clust","Barrel: sPtBalance vs cluster ET; 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,200,-100,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  //add 138,139, for charge separated 2D sptbalance. Jinlong, 12/09/2014
+  hA[138]=h=new TH2F("musPtBalance2_clust_pos","Barrel W+: sPtBalance vs cluster ET; 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,200,-100,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  hA[139]=h=new TH2F("musPtBalance2_clust_neg","Barrel W-: sPtBalance vs cluster ET; 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,200,-100,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -309,8 +345,8 @@ St2011WMaker::initHistos(){
   hA[184+5] = new TH1F("neg_muclustpTbal_back","Barrel: neg_muclustpTbal_back",nETbins,0,100);
 
   
-  hA[190]=h=new TH2F("muclustEt_etaWp","Barrel W+: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
-  hA[191]=h=new TH2F("muclustEt_etaWm","Barrel W-: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
+  hA[191]=h=new TH2F("muclustEt_etaWp","Barrel W+: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
+  hA[192]=h=new TH2F("muclustEt_etaWm","Barrel W-: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
   
   
   hA[195]=h=new TH1F("muEtaLT0_maxTowADC","max tower ADC for eta < 0",4096,0,4096);
@@ -371,6 +407,10 @@ St2011WMaker::initHistos(){
     ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   }    
 
+  hA[390]=h=new TH1F("adcB_dist","btow ADC distribution; btow softID; ;",4800,0,4800);
+  hA[391]=h=new TH2F("adcB2D_dist","btow ADC 2D distibution; iphi; ieta;",120,0,120,40,0,40);
+
+
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -383,6 +423,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.18  2016/01/08 02:08:49  jlzhang
+// added couples histograms and fixed a small bug
+//
 // Revision 1.17  2013/09/13 19:33:13  stevens4
 // Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
 //

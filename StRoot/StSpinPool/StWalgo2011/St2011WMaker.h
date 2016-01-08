@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.16 2014/08/06 11:43:41 jeromel Exp $
+// $Id: St2011WMaker.h,v 1.17 2016/01/08 02:08:49 jlzhang Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -86,6 +86,7 @@ class St2011WMaker : public StMaker {
   float parE_clustFrac24,parE_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi;
   float par_delR3D, parE_delR3D, par_highET, parE_highET,  par_ptBalance, parE_ptBalance;
+  float par_awayET, parE_awayET;
   float par_leptonEtaLow,par_leptonEtaHigh,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
   int   parE_nSmdStrip, parE_esmdGL, parE_esmdWL;
@@ -114,6 +115,7 @@ class St2011WMaker : public StMaker {
     par_clustFrac24=fr1;}
   void setEtowScale(float x){ par_etowScale=x; }
   void setBtowScale(float x){ par_btowScale=x; }
+  void setConeRadius(float nearCone, float awayCone) { par_nearDeltaR=nearCone; par_awayDeltaPhi=awayCone; } // Jinlong, easy set cone radius
   void setL0AdcThresh(int x){ par_l0emulAdcThresh=x; }
   void setL2ClusterThresh(float x){ par_l2emulClusterThresh=x; }
   void setL2SeedThresh(float x){ par_l2emulSeedThresh=x; }
@@ -224,7 +226,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.16 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.17 2016/01/08 02:08:49 jlzhang Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -235,6 +237,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.17  2016/01/08 02:08:49  jlzhang
+// added couples histograms and fixed a small bug
+//
 // Revision 1.16  2014/08/06 11:43:41  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
