@@ -1,4 +1,4 @@
-// $Id: StIstRawHit.h,v 1.13 2016/01/08 21:11:34 smirnovd Exp $
+// $Id: StIstRawHit.h,v 1.14 2016/01/08 21:11:44 smirnovd Exp $
 
 #ifndef StIstRawHit_hh
 #define StIstRawHit_hh
@@ -23,7 +23,7 @@ public:
    template<typename Container>
    StIstRawHit(int channelId, int geoId,
       const Container &charges, const Container &chargeErrs = Container{},
-      uint8_t maxTimeBin = 3, uint16_t idTruth = 0);
+      UChar_t maxTimeBin = 3, UShort_t idTruth = 0);
 
    //accessors
    int               getChannelId()  const; //!< 0-110591
