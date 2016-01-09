@@ -26,7 +26,6 @@ int HeedDeltaElectron::s_high_mult_scattering = 1;
 HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
                                      const vec& vel, vfloat time,
                                      long fparent_particle_number,
-                                     //PassivePtr< gparticle > fparent_part
                                      int fs_print_listing)
     : eparticle(primvol, pt, vel, time, &electron_def),
       particle_number(last_particle_number++),
@@ -40,7 +39,6 @@ HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
       necessary_energy(0.0) {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
   //s_print_listing = 1;
-  //set_count_references();
 
 }
 
@@ -180,10 +178,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           mcout << "This is converted to conduction\n";
         }
         HeedCondElectron hce(currpos.ptloc, currpos.time);
-        //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
         asv->conduction_electron_bank.append(hce);
-        //conduction_electron_bank.insert_after
-        //( conduction_electron_bank.get_last_node(), hce);
       }
       s_life = 0;
     }
@@ -298,10 +293,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           prevpos.tid.up_absref(&ptloc);
           if (s_print_listing == 1) mcout << "New conduction electron\n";
           HeedCondElectron hce(ptloc, currpos.time);
-          //HeedCondElectron hce(curpt, ptloc, prevpos.tid, this);
           asv->conduction_electron_bank.append(hce);
-          //conduction_electron_bank.insert_after
-          //  ( conduction_electron_bank.get_last_node(), hce);
           Eloss_left -= necessary_energy;
           curr_kin_energy_for_cond -= necessary_energy;
 // generate next random energy
@@ -501,10 +493,7 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
     if (asv != NULL) {
       if (s_print_listing == 1) mcout << "Last conduction electron\n";
       HeedCondElectron hce(currpos.ptloc, currpos.time);
-      //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
       asv->conduction_electron_bank.append(hce);
-      //conduction_electron_bank.insert_after
-      // ( conduction_electron_bank.get_last_node(), hce);
     }
   }
   if (s_print_listing == 1) {

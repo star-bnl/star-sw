@@ -13,23 +13,23 @@
 namespace Garfield {
 
 TrackBichsel::TrackBichsel()
-    : bg(3.16228),
-      speed(SpeedOfLight * bg / sqrt(1. + bg * bg)),
-      x(0.),
-      y(0.),
-      z(0.),
-      t(0.),
-      dx(0.),
-      dy(0.),
-      dz(1.),
-      imfp(4.05090e4),
-      datafile("SiM0invw.inv"),
-      iCdf(2),
-      nCdfEntries(-1),
-      isInitialised(false),
-      isInMedium(false) {
+    : m_bg(3.16228),
+      m_speed(SpeedOfLight * m_bg / sqrt(1. + m_bg * m_bg)),
+      m_x(0.),
+      m_y(0.),
+      m_z(0.),
+      m_t(0.),
+      m_dx(0.),
+      m_dy(0.),
+      m_dz(1.),
+      m_imfp(4.05090e4),
+      m_datafile("SiM0invw.inv"),
+      m_iCdf(2),
+      m_nCdfEntries(-1),
+      m_isInitialised(false),
+      m_isInMedium(false) {
 
-  className = "TrackBichsel";
+  m_className = "TrackBichsel";
 }
 
 bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
@@ -37,53 +37,53 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
                             const double dz0) {
 
   // Make sure a sensor has been defined.
-  if (sensor == 0) {
-    std::cerr << className << "::NewTrack:\n";
-    std::cerr << "    Sensor is not defined.\n";
-    isInMedium = false;
+  if (m_sensor) {
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Sensor is not defined.\n";
+    m_isInMedium = false;
     return false;
   }
 
   // If not yet done, load the cross-section table from file.
-  if (!isInitialised) {
-    if (!LoadCrossSectionTable(datafile)) {
-      std::cerr << className << "::NewTrack:\n";
-      std::cerr << "    Cross-section table could not be loaded.\n";
+  if (!m_isInitialised) {
+    if (!LoadCrossSectionTable(m_datafile)) {
+      std::cerr << m_className << "::NewTrack:\n"
+                << "    Cross-section table could not be loaded.\n";
       return false;
     }
-    isInitialised = true;
+    m_isInitialised = true;
   }
 
   // Make sure we are inside a medium.
   Medium* medium;
-  if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << className << "::NewTrack:\n";
-    std::cerr << "    No medium at initial position.\n";
-    isInMedium = false;
+  if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    No medium at initial position.\n";
+    m_isInMedium = false;
     return false;
   }
 
   // Check if the medium is silicon.
   if (medium->GetName() != "Si") {
-    std::cerr << className << "::NewTrack:" << std::endl;
-    std::cerr << "    Medium at initial position is not silicon.\n";
-    isInMedium = false;
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Medium at initial position is not silicon.\n";
+    m_isInMedium = false;
     return false;
   }
 
   // Check if primary ionisation has been enabled.
   if (!medium->IsIonisable()) {
-    std::cerr << className << "::NewTrack:\n";
-    std::cerr << "    Medium at initial position is not ionisable.\n";
-    isInMedium = false;
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Medium at initial position is not ionisable.\n";
+    m_isInMedium = false;
     return false;
   }
 
-  isInMedium = true;
-  x = x0;
-  y = y0;
-  z = z0;
-  t = t0;
+  m_isInMedium = true;
+  m_x = x0;
+  m_y = y0;
+  m_z = z0;
+  m_t = t0;
 
   // Normalise the direction vector.
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
@@ -92,22 +92,22 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
     const double phi = TwoPi * RndmUniform();
     const double ctheta = 1. - 2. * RndmUniform();
     const double stheta = sqrt(1. - ctheta * ctheta);
-    dx = cos(phi) * stheta;
-    dy = sin(phi) * stheta;
-    dz = ctheta;
+    m_dx = cos(phi) * stheta;
+    m_dy = sin(phi) * stheta;
+    m_dz = ctheta;
   } else {
-    dx = dx0 / d;
-    dy = dy0 / d;
-    dz = dz0 / d;
+    m_dx = dx0 / d;
+    m_dy = dy0 / d;
+    m_dz = dz0 / d;
   }
 
   // If the particle properties have changed, update the cross-section table.
-  if (isChanged) {
-    bg = GetBetaGamma();
-    imfp = GetClusterDensity();
-    speed = SpeedOfLight * GetBeta();
+  if (m_isChanged) {
+    m_bg = GetBetaGamma();
+    m_imfp = GetClusterDensity();
+    m_speed = SpeedOfLight * GetBeta();
     SelectCrossSectionTable();
-    isChanged = false;
+    m_isChanged = false;
   }
 
   return true;
@@ -116,49 +116,48 @@ bool TrackBichsel::NewTrack(const double x0, const double y0, const double z0,
 bool TrackBichsel::GetCluster(double& xcls, double& ycls, double& zcls,
                               double& tcls, int& n, double& e, double& extra) {
 
-  if (!isInitialised || !isInMedium) return false;
+  if (!m_isInitialised || !m_isInMedium) return false;
 
-  double d = -log(RndmUniformPos()) / imfp;
-  x += dx * d;
-  y += dy * d;
-  z += dz * d;
-  t += d / speed;
+  const double d = -log(RndmUniformPos()) / m_imfp;
+  m_x += m_dx * d;
+  m_y += m_dy * d;
+  m_z += m_dz * d;
+  m_t += d / m_speed;
 
-  xcls = x;
-  ycls = y;
-  zcls = z;
-  tcls = t;
+  xcls = m_x;
+  ycls = m_y;
+  zcls = m_z;
+  tcls = m_t;
   n = 0;
   e = 0.;
   extra = 0.;
 
   Medium* medium;
-  if (!sensor->GetMedium(x, y, z, medium)) {
-    isInMedium = false;
-    if (debug) {
-      std::cout << className << "::GetCluster:\n";
-      std::cout << "    Particle left the medium.\n";
+  if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
+    m_isInMedium = false;
+    if (m_debug) {
+      std::cout << m_className << "::GetCluster: Particle left the medium.\n";
     }
     return false;
   }
 
   if (medium->GetName() != "Si" || !medium->IsIonisable()) {
-    isInMedium = false;
-    if (debug) {
-      std::cout << className << "::GetCluster:\n";
-      std::cout << "    Particle left the medium.\n";
+    m_isInMedium = false;
+    if (m_debug) {
+      std::cout << m_className << "::GetCluster: Particle left the medium.\n";
     }
     return false;
   }
 
-  const double u = nCdfEntries * RndmUniform();
+  const double u = m_nCdfEntries * RndmUniform();
   const int j = int(u);
   if (j == 0) {
-    e = 0. + u * cdf[0][iCdf];
-  } else if (j >= nCdfEntries) {
-    e = cdf[nCdfEntries - 1][iCdf];
+    e = 0. + u * m_cdf[0][m_iCdf];
+  } else if (j >= m_nCdfEntries) {
+    e = m_cdf[m_nCdfEntries - 1][m_iCdf];
   } else {
-    e = cdf[j - 1][iCdf] + (u - j) * (cdf[j][iCdf] - cdf[j - 1][iCdf]);
+    e = m_cdf[j - 1][m_iCdf] + 
+        (u - j) * (m_cdf[j][m_iCdf] - m_cdf[j - 1][m_iCdf]);
   }
 
   return true;
@@ -183,15 +182,15 @@ double TrackBichsel::GetClusterDensity() {
       3.84293,  3.84300,  3.84304,  3.84308,  3.84310, 3.84311, 3.84312,
       3.84313,  3.84313,  3.84314};
 
-  if (isChanged) bg = GetBetaGamma();
+  if (m_isChanged) m_bg = GetBetaGamma();
 
-  if (bg < tabBg[0]) {
-    if (debug) {
-      std::cerr << className << "::GetClusterDensity:\n";
-      std::cerr << "    Bg is below the tabulated range.\n";
+  if (m_bg < tabBg[0]) {
+    if (m_debug) {
+      std::cerr << m_className << "::GetClusterDensity:\n"
+                << "    Bg is below the tabulated range.\n";
     }
     return tabImfp[0] * 1.e4;
-  } else if (bg > tabBg[nEntries - 1]) {
+  } else if (m_bg > tabBg[nEntries - 1]) {
     return tabImfp[nEntries - 1] * 1.e4;
   }
 
@@ -201,17 +200,17 @@ double TrackBichsel::GetClusterDensity() {
   int iM;
   while (iUp - iLow > 1) {
     iM = (iUp + iLow) >> 1;
-    if (bg >= tabBg[iM]) {
+    if (m_bg >= tabBg[iM]) {
       iLow = iM;
     } else {
       iUp = iM;
     }
   }
 
-  if (fabs(bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+  if (fabs(m_bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
     return tabImfp[iLow] * 1.e4;
   }
-  if (fabs(bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+  if (fabs(m_bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
     return tabImfp[iUp] * 1.e4;
   }
 
@@ -220,7 +219,7 @@ double TrackBichsel::GetClusterDensity() {
   const double logX1 = log(tabBg[iUp]);
   const double logY0 = log(tabImfp[iLow]);
   const double logY1 = log(tabImfp[iUp]);
-  double d = logY0 + (log(bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
+  double d = logY0 + (log(m_bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
   return 1.e4 * exp(d);
 }
 
@@ -249,15 +248,15 @@ double TrackBichsel::GetStoppingPower() {
       590.47720,  594.68660,  598.86880,  603.03510, 607.18890, 611.33250,
       615.46810,  619.59740,  623.72150};
 
-  if (isChanged) bg = GetBetaGamma();
+  if (m_isChanged) m_bg = GetBetaGamma();
 
-  if (bg < tabBg[0]) {
-    if (debug) {
-      std::cerr << className << "::GetStoppingPower:\n";
+  if (m_bg < tabBg[0]) {
+    if (m_debug) {
+      std::cerr << m_className << "::GetStoppingPower:\n";
       std::cerr << "    Bg is below the tabulated range.\n";
     }
     return tabdEdx[0] * 1.e4;
-  } else if (bg > tabBg[nEntries - 1]) {
+  } else if (m_bg > tabBg[nEntries - 1]) {
     return tabdEdx[nEntries - 1] * 1.e4;
   }
 
@@ -267,24 +266,24 @@ double TrackBichsel::GetStoppingPower() {
   int iM;
   while (iUp - iLow > 1) {
     iM = (iUp + iLow) >> 1;
-    if (bg >= tabBg[iM]) {
+    if (m_bg >= tabBg[iM]) {
       iLow = iM;
     } else {
       iUp = iM;
     }
   }
 
-  if (debug) {
-    std::cout << className << "::GetStoppingPower:\n";
-    std::cout << "    Bg = " << bg << "\n";
+  if (m_debug) {
+    std::cout << m_className << "::GetStoppingPower:\n";
+    std::cout << "    Bg = " << m_bg << "\n";
     std::cout << "    Interpolating between " << tabBg[iLow] << " and "
               << tabBg[iUp] << "\n";
   }
 
-  if (fabs(bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+  if (fabs(m_bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
     return tabdEdx[iLow] * 1.e4;
   }
-  if (fabs(bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+  if (fabs(m_bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
     return tabdEdx[iUp] * 1.e4;
   }
 
@@ -294,11 +293,11 @@ double TrackBichsel::GetStoppingPower() {
   const double logY0 = log(tabdEdx[iLow]);
   const double logY1 = log(tabdEdx[iUp]);
   const double dedx =
-      logY0 + (log(bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
+      logY0 + (log(m_bg) - logX0) * (logY1 - logY0) / (logX1 - logX0);
   return 1.e4 * exp(dedx);
 }
 
-bool TrackBichsel::LoadCrossSectionTable(const std::string filename) {
+bool TrackBichsel::LoadCrossSectionTable(const std::string& filename) {
 
   const int nRows = 10000;
   const int nBlocks = 2;
@@ -309,7 +308,7 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string filename) {
   // Get the path to the data directory.
   char* pPath = getenv("GARFIELD_HOME");
   if (pPath == 0) {
-    std::cerr << className << "::LoadCrossSectionTable:\n";
+    std::cerr << m_className << "::LoadCrossSectionTable:\n";
     std::cerr << "    Environment variable GARFIELD_HOME is not set.\n";
     return false;
   }
@@ -321,15 +320,13 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string filename) {
   infile.open(filepath.c_str(), std::ios::in);
   // Check if the file could be opened.
   if (!infile) {
-    std::cerr << className << "::LoadCrossSectionTable:\n";
+    std::cerr << m_className << "::LoadCrossSectionTable:\n";
     std::cerr << "    Error opening file " << filename << ".\n";
     return false;
   }
 
   // Initialise the cumulative distribution table.
-  cdf.clear();
-  cdf.resize(nRows);
-  for (int i = nRows; i--;) cdf[i].resize(nBlocks * nColumns);
+  m_cdf.assign(nRows, std::vector<double>(nBlocks * nColumns, 0.));
 
   std::string line;
   std::istringstream data;
@@ -362,39 +359,40 @@ bool TrackBichsel::LoadCrossSectionTable(const std::string filename) {
       iRow = 0;
       continue;
     } else if (dummy1 != iRow + 1) {
-      std::cerr << className << "::LoadCrossSectionTable:\n";
+      std::cerr << m_className << "::LoadCrossSectionTable:\n";
       std::cerr << "    Error reading file " << filename << ".\n";
       std::cerr << "    Expected entry " << iRow + 1 << ", got entry " << dummy1
                 << ".\n";
       infile.close();
-      cdf.clear();
+      m_cdf.clear();
       return false;
     }
     if (iRow >= nRows) {
-      std::cerr << className << "::LoadCrossSectionTable:\n";
+      std::cerr << m_className << "::LoadCrossSectionTable:\n";
       std::cerr << "    Table in file is longer than expected.\n";
       infile.close();
-      cdf.clear();
+      m_cdf.clear();
       return false;
     }
-    for (int j = nColumns; j--;) cdf[iRow][nColumns * iBlock + j] = val[j];
+    for (int j = nColumns; j--;) m_cdf[iRow][nColumns * iBlock + j] = val[j];
     ++iRow;
   }
 
   if (infile.fail()) {
-    std::cerr << className << "::LoadCrossSectionTable:\n";
+    std::cerr << m_className << "::LoadCrossSectionTable:\n";
     std::cerr << "    Error reading file " << filename << ".\n";
-    infile.close(), cdf.clear();
+    infile.close();
+    m_cdf.clear();
     return false;
   }
   infile.close();
 
-  if (debug) {
-    std::cout << className << "::LoadCrossSectionTable:\n";
+  if (m_debug) {
+    std::cout << m_className << "::LoadCrossSectionTable:\n";
     std::cout << "    Input file: " << filename << std::endl;
     std::cout << "    Successfully loaded cross-section table from file.\n";
   }
-  nCdfEntries = nRows;
+  m_nCdfEntries = nRows;
   return true;
 }
 
@@ -409,18 +407,18 @@ void TrackBichsel::SelectCrossSectionTable() {
   // Chose the table which is closest to the actual value of bg.
   for (int i = 0; i < nTables - 1; ++i) {
     double split = exp(0.5 * (log(tabBg[i]) + log(tabBg[i + 1])));
-    if (bg < split) {
-      iCdf = i;
+    if (m_bg < split) {
+      m_iCdf = i;
       gotValue = true;
       break;
     }
   }
-  if (!gotValue) iCdf = nTables - 1;
+  if (!gotValue) m_iCdf = nTables - 1;
 
-  if (debug) {
-    std::cout << className << "::SelectCrossSectionTable:\n";
-    std::cout << "    Requested value: bg = " << bg << "\n";
-    std::cout << "    Used table:      bg = " << tabBg[iCdf] << "\n";
+  if (m_debug) {
+    std::cout << m_className << "::SelectCrossSectionTable:\n";
+    std::cout << "    Requested value: bg = " << m_bg << "\n";
+    std::cout << "    Used table:      bg = " << tabBg[m_iCdf] << "\n";
   }
 }
 }

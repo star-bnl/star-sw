@@ -9,76 +9,76 @@
 namespace Garfield {
 
 TrackSimple::TrackSimple()
-    : isReady(false),
-      x(0.),
-      y(0.),
-      z(0.),
-      t(0.),
-      dx(0.),
-      dy(0.),
-      dz(1.),
-      mfp(0.04),
-      eloss(2530.),
-      useEqualSpacing(false) {
+    : m_isReady(false),
+      m_x(0.),
+      m_y(0.),
+      m_z(0.),
+      m_t(0.),
+      m_dx(0.),
+      m_dy(0.),
+      m_dz(1.),
+      m_mfp(0.04),
+      m_eloss(2530.),
+      m_useEqualSpacing(false) {
 
-  className = "TrackSimple";
+  m_className = "TrackSimple";
 }
 
 void TrackSimple::SetClusterDensity(const double d) {
 
   if (d < Small) {
-    std::cerr << className << "::SetClusterDensity:\n";
-    std::cerr << "    Cluster density (number of clusters per cm)"
-              << " must be positive.\n" << std::endl;
-    return;
-  }
-
-  mfp = 1. / d;
-}
-
-double TrackSimple::GetClusterDensity() { return 1. / mfp; }
-
-void TrackSimple::SetStoppingPower(const double dedx) {
-
-  if (dedx < Small) {
-    std::cerr << className << "::SetStoppingPower:\n";
-    std::cerr << "    Stopping power (average energy loss [eV] per cm)"
+    std::cerr << m_className << "::SetClusterDensity:\n"
+              << "    Cluster density (number of clusters per cm)"
               << " must be positive.\n";
     return;
   }
 
-  eloss = dedx;
+  m_mfp = 1. / d;
 }
 
-double TrackSimple::GetStoppingPower() { return eloss; }
+double TrackSimple::GetClusterDensity() { return 1. / m_mfp; }
+
+void TrackSimple::SetStoppingPower(const double dedx) {
+
+  if (dedx < Small) {
+    std::cerr << m_className << "::SetStoppingPower:\n"
+              << "    Stopping power (average energy loss [eV] per cm)"
+              << " must be positive.\n";
+    return;
+  }
+
+  m_eloss = dedx;
+}
+
+double TrackSimple::GetStoppingPower() { return m_eloss; }
 
 bool TrackSimple::NewTrack(const double x0, const double y0, const double z0,
                            const double t0, const double dx0, const double dy0,
                            const double dz0) {
 
   // Check if a sensor has been defined
-  if (sensor == 0) {
-    std::cerr << className << "::NewTrack:\n";
-    std::cerr << "    Sensor is not defined.\n";
-    isReady = false;
+  if (!m_sensor) {
+    std::cerr << m_className << "::NewTrack:\n"
+              << "    Sensor is not defined.\n";
+    m_isReady = false;
     return false;
   }
 
   // Make sure we are inside a medium
-  Medium* medium;
-  if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << className << "::NewTrack:\n";
+  Medium* medium = NULL;
+  if (!m_sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << m_className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
-    isReady = false;
+    m_isReady = false;
     return false;
   }
 
-  isReady = true;
+  m_isReady = true;
 
-  x = x0;
-  y = y0;
-  z = z0;
-  t = t0;
+  m_x = x0;
+  m_y = y0;
+  m_z = z0;
+  m_t = t0;
 
   // Normalise the direction
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
@@ -87,13 +87,13 @@ bool TrackSimple::NewTrack(const double x0, const double y0, const double z0,
     double phi = TwoPi * RndmUniform();
     double ctheta = 1. - 2. * RndmUniform();
     double stheta = sqrt(1. - ctheta * ctheta);
-    dx = cos(phi) * stheta;
-    dy = sin(phi) * stheta;
-    dz = ctheta;
+    m_dx = cos(phi) * stheta;
+    m_dy = sin(phi) * stheta;
+    m_dz = ctheta;
   } else {
-    dx = dx0 / d;
-    dy = dy0 / d;
-    dz = dz0 / d;
+    m_dx = dx0 / d;
+    m_dy = dy0 / d;
+    m_dz = dz0 / d;
   }
   return true;
 }
@@ -102,33 +102,32 @@ bool TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls,
                              double& tcls, int& n, double& e, double& extra) {
 
   extra = 0.;
-  if (!isReady) return false;
+  if (!m_isReady) return false;
 
-  if (useEqualSpacing) {
-    x += dx * mfp;
-    y += dy * mfp;
-    z += dz * mfp;
+  if (m_useEqualSpacing) {
+    m_x += m_dx * m_mfp;
+    m_y += m_dy * m_mfp;
+    m_z += m_dz * m_mfp;
   } else {
-    const double d = -mfp * log(RndmUniformPos());
-    x += dx * d;
-    y += dy * d;
-    z += dz * d;
+    const double d = -m_mfp * log(RndmUniformPos());
+    m_x += m_dx * d;
+    m_y += m_dy * d;
+    m_z += m_dz * d;
   }
 
-  xcls = x;
-  ycls = y;
-  zcls = z;
-  tcls = t;
+  xcls = m_x;
+  ycls = m_y;
+  zcls = m_z;
+  tcls = m_t;
 
   n = 1;
-  e = eloss * mfp;
+  e = m_eloss * m_mfp;
 
-  Medium* medium;
-  if (!sensor->GetMedium(x, y, z, medium)) {
-    isReady = false;
-    if (debug) {
-      std::cout << className << "::GetCluster:\n";
-      std::cout << "    Particle left the medium.\n";
+  Medium* medium = NULL;
+  if (!m_sensor->GetMedium(m_x, m_y, m_z, medium)) {
+    m_isReady = false;
+    if (m_debug) {
+      std::cout << m_className << "::GetCluster: Particle left the medium.\n";
     }
     return false;
   }

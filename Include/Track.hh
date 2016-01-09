@@ -28,12 +28,12 @@ class Track {
   void SetMomentum(const double p);
   void SetKineticEnergy(const double ekin);
 
-  double GetEnergy() const { return energy; }
-  double GetBetaGamma() const { return sqrt(beta2 / (1. - beta2)); }
-  double GetBeta() const { return sqrt(beta2); }
-  double GetGamma() const { return sqrt(1. / (1. - beta2)); }
-  double GetMomentum() const { return mass * sqrt(beta2 / (1. - beta2)); }
-  double GetKineticEnergy() const { return energy - mass; }
+  double GetEnergy() const { return m_energy; }
+  double GetBetaGamma() const { return sqrt(m_beta2 / (1. - m_beta2)); }
+  double GetBeta() const { return sqrt(m_beta2); }
+  double GetGamma() const { return sqrt(1. / (1. - m_beta2)); }
+  double GetMomentum() const { return m_mass * sqrt(m_beta2 / (1. - m_beta2)); }
+  double GetKineticEnergy() const { return m_energy - m_mass; }
 
   void SetSensor(Sensor* s);
 
@@ -54,30 +54,30 @@ class Track {
   void EnablePlotting(ViewDrift* viewer);
   void DisablePlotting();
 
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string className;
+  std::string m_className;
 
-  double q;
-  int spin;
-  double mass;
-  double energy;
-  double beta2;
-  bool isElectron;
-  std::string particleName;
+  double m_q;
+  int m_spin;
+  double m_mass;
+  double m_energy;
+  double m_beta2;
+  bool m_isElectron;
+  std::string m_particleName;
 
-  Sensor* sensor;
+  Sensor* m_sensor;
 
-  bool isChanged;
+  bool m_isChanged;
 
-  bool usePlotting;
-  ViewDrift* viewer;
+  bool m_usePlotting;
+  ViewDrift* m_viewer;
 
-  bool debug;
+  bool m_debug;
 
-  int plotId;
+  int m_plotId;
   void PlotNewTrack(const double x0, const double y0, const double z0);
   void PlotCluster(const double x0, const double y0, const double z0);
 };
