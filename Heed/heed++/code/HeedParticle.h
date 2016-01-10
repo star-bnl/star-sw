@@ -3,7 +3,6 @@
 
 #include <vector>
 #include "wcpplib/particle/eparticle.h"
-#include "wcpplib/safetl/AbsList.h"
 #include "HeedCluster.h"
 /*
 Definition of the particle which can be traced through the
@@ -44,7 +43,6 @@ class HeedParticle : public eparticle {
 
   int s_print_listing;
   long particle_number;
-  // static long last_particle_number;
 
   double transferred_energy_in_step;
   long qtransfer;

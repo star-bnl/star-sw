@@ -4,7 +4,6 @@
 #include <vector>
 #include "HeedCluster.h"
 #include "wcpplib/particle/eparticle.h"
-#include "wcpplib/safetl/AbsList.h"
 /*
 Definition of the particle which can be traced through the
 geometry. Also the definition of cluster (energy transfer),
@@ -29,7 +28,6 @@ class HeedParticle_BGM : public eparticle {
  public:
   int s_print_listing;
   long particle_number;
-  // static long last_particle_number;
   HeedParticle_BGM(manip_absvol* primvol, const point& pt, const vec& vel,
                    vfloat time, particle_def* fpardef, int fs_loss_only = 0,
                    int fs_print_listing = 0);

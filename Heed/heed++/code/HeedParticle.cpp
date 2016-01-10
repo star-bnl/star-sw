@@ -16,8 +16,6 @@
 
 namespace Heed {
 
-// long HeedParticle::last_particle_number = 0;
-
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
                            int fs_loss_only, int fs_print_listing)
@@ -158,7 +156,7 @@ void HeedParticle::physics(void) {
           hp.ns_absorbing = ns;
           ActivePtr<gparticle> ac;
           ac.put(&hp);
-          particle_bank.insert_after(particle_bank.get_last_node(), ac);
+          particle_bank.push_back(ac);
         }
       }
     }

@@ -18,8 +18,6 @@
 
 namespace Heed {
 
-// long HeedParticle_BGM::last_particle_number = 0;
-
 HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
                                    const vec& vel, vfloat time,
                                    particle_def* fpardef, int fs_loss_only,
@@ -44,13 +42,13 @@ void HeedParticle_BGM::physics(void) {
     Iprintn(mcout, currpos.prange);
   }
   transferred_energy_in_step = 0.0;
-  //tnpi_in_step = 0;
   qtransfer = 0;
   transferred_energy.clear();
   natom.clear();
   nshell.clear();
   if (currpos.prange <= 0.0) return;
-  const absvol* av = currpos.G_lavol();  // get least address of volume
+  // Get least address of volume
+  const absvol* av = currpos.G_lavol();  
   const EnTransfCS_BGM_Type* etcs_bgm_t =
       dynamic_cast<const EnTransfCS_BGM_Type*>(av);
   // Check if dynamic cast was successful.
@@ -89,7 +87,6 @@ void HeedParticle_BGM::physics(void) {
       long n2;
       double b1;
       double b2;
-
       int s_ret = pcm.get_interval(bg, n1, b1, n2, b2);
       if (s_ret != 1) {
         mcerr << "ERROR in void HeedParticle_BGM::physics(void)\n";
@@ -193,8 +190,7 @@ void HeedParticle_BGM::physics(void) {
           hp.ns_absorbing = ns;
           ActivePtr<gparticle> ac;
           ac.put(&hp);
-
-          particle_bank.insert_after(particle_bank.get_last_node(), ac);
+          particle_bank.push_back(ac);
         }
       }
     }

@@ -183,7 +183,10 @@ void HeedPhoton::physics_after_new_speed(void) {
     ac.pass(
         new HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
                               vel, currpos.time, particle_number));
-    particle_bank.insert_after(particle_bank.get_last_node(), ac);
+    // particle_bank.insert_after(particle_bank.get_last_node(), ac);
+    particle_bank.push_back(ac);
+    // particle_bank.push_back(HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
+    //                         vel, currpos.time, particle_number));
   }
   const long qph = ph_energy.get_qel();
   for (long nph = 0; nph < qph; nph++) {
@@ -197,7 +200,10 @@ void HeedPhoton::physics_after_new_speed(void) {
     ActivePtr<gparticle> ac;
     ac.pass(new HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
                            currpos.time, particle_number, ph_energy[nph]));
-    particle_bank.insert_after(particle_bank.get_last_node(), ac);
+    // particle_bank.insert_after(particle_bank.get_last_node(), ac);
+    particle_bank.push_back(ac);
+    // particle_bank.push_back(HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
+    //                                    currpos.time, particle_number, ph_energy[nph]));
   }
   s_delta_generated = 1;
   s_life = 0;
