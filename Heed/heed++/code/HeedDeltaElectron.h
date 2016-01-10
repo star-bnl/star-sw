@@ -11,6 +11,7 @@ through the geometry
 */
 
 namespace Heed {
+extern long last_particle_number;
 
 class HeedDeltaElectron : public eparticle {
  public:
@@ -19,7 +20,7 @@ class HeedDeltaElectron : public eparticle {
 
   long particle_number;
   long parent_particle_number;
-  static long last_particle_number;
+  // static long last_particle_number;
 
   int s_print_listing;  // convenient to print internal algorithms
                         // of a selected event

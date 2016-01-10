@@ -1,8 +1,8 @@
 #ifndef HEEDCONDELECTRON
 #define HEEDCONDELECTRON
 
-#include "heed++/code/HeedDeltaElectron.h"
-#include "wcpplib/safetl/BlkArr.h"
+#include <vector>
+#include "wcpplib/geometry/vec.h"
 
 /*
 Conduction electrons deposited in gas.
@@ -38,7 +38,7 @@ class HeedCondElectron {
 
 class SensitiveVolume {
  public:
-  BlkArr<HeedCondElectron> conduction_electron_bank;
+  std::vector<HeedCondElectron> conduction_electron_bank;
   SensitiveVolume() {}
 };
 

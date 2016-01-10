@@ -19,7 +19,7 @@ namespace Heed {
 
 const long max_q_low_path_length_for_direct = 5;
 
-long HeedDeltaElectron::last_particle_number = 0;
+// long HeedDeltaElectron::last_particle_number = 0;
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
 
@@ -177,8 +177,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           mcout << "HeedDeltaElectron::physics_after_new_speed: \n";
           mcout << "This is converted to conduction\n";
         }
-        HeedCondElectron hce(currpos.ptloc, currpos.time);
-        asv->conduction_electron_bank.append(hce);
+        // TODO: replace push_back by emplace_back.
+        asv->conduction_electron_bank.push_back(
+            HeedCondElectron(currpos.ptloc, currpos.time));
       }
       s_life = 0;
     }
@@ -292,8 +293,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           point ptloc = curpt;
           prevpos.tid.up_absref(&ptloc);
           if (s_print_listing == 1) mcout << "New conduction electron\n";
-          HeedCondElectron hce(ptloc, currpos.time);
-          asv->conduction_electron_bank.append(hce);
+          // TODO: replace push_back by emplace_back.
+          asv->conduction_electron_bank.push_back(
+              HeedCondElectron(ptloc, currpos.time));
           Eloss_left -= necessary_energy;
           curr_kin_energy_for_cond -= necessary_energy;
 // generate next random energy
@@ -492,8 +494,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
     SensitiveVolume* asv = dynamic_cast<SensitiveVolume*>(vav);
     if (asv != NULL) {
       if (s_print_listing == 1) mcout << "Last conduction electron\n";
-      HeedCondElectron hce(currpos.ptloc, currpos.time);
-      asv->conduction_electron_bank.append(hce);
+      // TODO: replace push_back by emplace_back.
+      asv->conduction_electron_bank.push_back(
+          HeedCondElectron(currpos.ptloc, currpos.time));
     }
   }
   if (s_print_listing == 1) {

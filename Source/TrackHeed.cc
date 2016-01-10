@@ -38,7 +38,8 @@ bool useBfield;
 // Global functions and variables required by Heed
 namespace Heed {
 
-BlkArr<HeedCluster> cluster_bank;
+// Particle id number for book-keeping
+long last_particle_number;
 AbsList<ActivePtr<gparticle> > particle_bank;
 
 void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
@@ -243,8 +244,8 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
 
   Heed::particle_bank.clear();
   m_deltaElectrons.clear();
-  Heed::cluster_bank.allocate_block(100);
-  m_chamber->conduction_electron_bank.allocate_block(1000);
+  m_chamber->conduction_electron_bank.reserve(1000);
+  m_chamber->conduction_electron_bank.clear();
 
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -469,7 +470,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
 
   // Look for daughter particles.
   m_deltaElectrons.clear();
-  m_chamber->conduction_electron_bank.allocate_block(1000);
+  m_chamber->conduction_electron_bank.clear();
   bool deleteNode = false;
   Heed::HeedDeltaElectron* delta = 0;
   Heed::HeedPhoton* photon = 0;
@@ -536,7 +537,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
 
   // Get the total number of electrons produced in this step.
   if (m_useDelta) {
-    n = m_chamber->conduction_electron_bank.get_qel();
+    n = m_chamber->conduction_electron_bank.size();
   } else {
     n = m_deltaElectrons.size();
   }
@@ -561,7 +562,7 @@ bool TrackHeed::GetElectron(const unsigned int i,
 
   if (m_useDelta) {
     // Make sure an electron with this number exists.
-    const unsigned int n = m_chamber->conduction_electron_bank.get_qel();
+    const unsigned int n = m_chamber->conduction_electron_bank.size();
     if (i >= n) {
       std::cerr << m_className << "::GetElectron:\n"
                 << "    Electron number out of range.\n";
@@ -686,7 +687,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   }
 
   m_deltaElectrons.clear();
-  m_chamber->conduction_electron_bank.allocate_block(1000);
+  m_chamber->conduction_electron_bank.clear();
 
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -721,7 +722,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0);
   delta.fly();
 
-  nel = m_chamber->conduction_electron_bank.get_qel();
+  nel = m_chamber->conduction_electron_bank.size();
 }
 
 void TrackHeed::TransportPhoton(const double x0, const double y0,
@@ -807,9 +808,10 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   // Delete the particle bank.
   // Clusters from the current track will be lost.
   m_hasActiveTrack = false;
+  Heed::last_particle_number = 0;
   Heed::particle_bank.clear();
   m_deltaElectrons.clear();
-  m_chamber->conduction_electron_bank.allocate_block(1000);
+  m_chamber->conduction_electron_bank.clear();
 
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -914,7 +916,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
 
   // Get the total number of electrons produced in this step.
   if (m_useDelta) {
-    nel = m_chamber->conduction_electron_bank.get_qel();
+    nel = m_chamber->conduction_electron_bank.size();
   } else {
     nel = m_deltaElectrons.size();
   }

@@ -5,7 +5,6 @@
 #include "wcpplib/random/ranluxint.h"
 #include "wcpplib/math/tline.h"
 #include "wcpplib/geometry/vfloat.h"
-#include "wcpplib/safetl/BlkArr.h"
 #include "heed++/code/PhotoAbsCS.h"
 #include "heed++/code/EnergyMesh.h"  // From this used only make_log_mesh_ec
                                      /*
@@ -60,7 +59,6 @@ double my_integr_fun(double xp1, double yp1, double xp2, double yp2,
 double my_val_fun(double xp1, double yp1, double xp2, double yp2, double xmin,
                   double /*xmax*/, double x) {
   double res = 0.;
-  //Iprint4n(mcout, xp1, yp1, xp2, yp2);
   if (sign_nonlinear_interpolation(xp1, yp1, xp2, yp2, xmin) == 1) {
     // Non-linear interpolation
     res = t_value_power_2point<double>(xp1, yp1, xp2, yp2, x);
@@ -312,15 +310,12 @@ double OveragePhotoAbsCS::get_CS(double energy) const {
   if (width == 0.0) {
     // for no modification:
     return real_pacs->get_CS(energy);
-  } else {
-    double w2 = width * 0.5;
-    double e1 = energy - w2;
-    if (e1 < 0.0) e1 = 0.0;
-    double res = real_pacs->get_integral_CS(e1, energy + w2) / width;
-    //Iprint4n(mcout, e1, energy + w2, width, res);
-    //return real_pacs->get_integral_CS(e1, energy + w2)/width;
-    return res;
-  }
+  } 
+  const double w2 = width * 0.5;
+  double e1 = energy - w2;
+  if (e1 < 0.0) e1 = 0.0;
+  const double res = real_pacs->get_integral_CS(e1, energy + w2) / width;
+  return res;
 }
 
 double OveragePhotoAbsCS::get_integral_CS(double energy1,
@@ -331,23 +326,20 @@ double OveragePhotoAbsCS::get_integral_CS(double energy1,
   if (width == 0.0 || energy1 >= energy2) {
     // for no modification:
     return real_pacs->get_integral_CS(energy1, energy2);
-  } else {
-    long q = long((energy2 - energy1) / step);
-    if (q > max_q_step) {
-      return real_pacs->get_integral_CS(energy1, energy2);
-    } else {
-      //if(q == 0)q = 1;
-      q++;
-      double rstep = (energy2 - energy1) / q;
-      double x0 = energy1 + 0.5 * rstep;
-      double s = 0.0;
-      for (long n = 0; n < q; n++) {
-        s += get_CS(x0 + rstep * n);
-      }
-      s *= rstep;
-      return s;
-    }
+  } 
+  long q = long((energy2 - energy1) / step);
+  if (q > max_q_step) {
+    return real_pacs->get_integral_CS(energy1, energy2);
+  } 
+  q++;
+  double rstep = (energy2 - energy1) / q;
+  double x0 = energy1 + 0.5 * rstep;
+  double s = 0.0;
+  for (long n = 0; n < q; n++) {
+    s += get_CS(x0 + rstep * n);
   }
+  s *= rstep;
+  return s;
 
 }
 
@@ -510,36 +502,28 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total,
   const DynLinArr<double>& ener_r = part.get_arr_ener();
   const DynLinArr<double>& cs_r = part.get_arr_CS();
   long qe_r = ener_r.get_qel();
-  BlkArr<double> new_ener;  // arrays to grow
-  BlkArr<double> new_cs;
-  long qe = 0;
-  long ne;
-  for (ne = 0; ne < qe_r; ne++)  // first write replacements
-      {
+  std::vector<double> new_ener;
+  std::vector<double> new_cs;
+  // first write replacements
+  for (long ne = 0; ne < qe_r; ne++) {
     if (ener_r[ne] >= total.get_threshold() && ener_r[ne] <= emax_repl) {
-      qe++;
-      new_ener.put_qel(qe);
-      new_cs.put_qel(qe);
-      new_ener[qe - 1] = ener_r[ne];
-      new_cs[qe - 1] = cs_r[ne];
+      new_ener.push_back(ener_r[ne]);
+      new_cs.push_back(cs_r[ne]);
     }
   }
-  for (ne = 0; ne < qe_i; ne++) {
+  for (long ne = 0; ne < qe_i; ne++) {
     if (ener[ne] >= total.get_threshold() && ener[ne] > emax_repl) {
-      qe++;
-      new_ener.put_qel(qe);
-      new_cs.put_qel(qe);
-      new_ener[qe - 1] = total.ener[ne];
-      new_cs[qe - 1] = total.cs[ne];
+      new_ener.push_back(total.ener[ne]);
+      new_cs.push_back(total.cs[ne]);
     }
   }
+  const long qe = new_ener.size();
   ener.put_qel(qe);
   cs.put_qel(qe);
-  for (ne = 0; ne < qe; ne++) {
+  for (long ne = 0; ne < qe; ne++) {
     ener[ne] = new_ener[ne];
     cs[ne] = new_cs[ne];
     //Iprint3n(mcout, ne, ener[ne], cs[ne]);
-
   }
 }
 

@@ -13,12 +13,13 @@ and traced through the geometry.
 //#define SFER_PHOTOEL  // make direction of photoelectron absolutely random
 
 namespace Heed {
+extern long last_particle_number;
 
 class HeedPhoton : public gparticle {
  public:
   long particle_number;
   long parent_particle_number;
-  static long last_particle_number;
+  // static long last_particle_number;
   int s_print_listing;  // convenient to print internal algorithms
                         // of a selected event
 

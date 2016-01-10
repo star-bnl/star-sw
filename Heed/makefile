@@ -57,6 +57,7 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/HeedDeltaElectronCS.o \
 	$(OBJDIR)/Heed/HeedMatterDef.o \
 	$(OBJDIR)/Heed/HeedParticle.o \
+	$(OBJDIR)/Heed/HeedParticle_BGM.o \
 	$(OBJDIR)/Heed/HeedPhoton.o \
 	$(OBJDIR)/Heed/PairProd.o \
 	$(OBJDIR)/Heed/ParticleBank.o \
