@@ -1,4 +1,4 @@
-// $Id: StIstRawHit.h,v 1.14 2016/01/08 21:11:44 smirnovd Exp $
+// $Id: StIstRawHit.h,v 1.15 2016/01/11 21:16:02 smirnovd Exp $
 
 #ifndef StIstRawHit_hh
 #define StIstRawHit_hh
@@ -50,7 +50,9 @@ public:
    /// Overwrites this channel's charges in all time bins by values in the
    /// provided container
    template<typename Container>
-   void setCharges(const Container& charges);
+   void setCharges(const Container& charges) {
+      std::copy( std::begin(charges), std::end(charges), mCharge);
+   }
 
    void setChargeErr(float chargeErr, int tb = -1);
    void        setMaxTimeBin(int tb) ;

@@ -1,4 +1,4 @@
-// $Id: StIstRawHit.cxx,v 1.18 2016/01/08 21:11:44 smirnovd Exp $
+// $Id: StIstRawHit.cxx,v 1.19 2016/01/11 21:16:02 smirnovd Exp $
 
 #include <algorithm>
 
@@ -120,17 +120,6 @@ void StIstRawHit::setCharge( float charge, int tb )
 {
    mCharge[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ] = charge;
 };
-
-
-/**
- * Overwrites this channel's charges in all time bins by values in the
- * provided container.
- */
-template<typename Container>
-void StIstRawHit::setCharges(const Container &charges)
-{
-   std::copy( std::begin(charges), std::end(charges), mCharge);
-}
 
 
 void StIstRawHit::setChargeErr(float rChargeErr, int tb)
