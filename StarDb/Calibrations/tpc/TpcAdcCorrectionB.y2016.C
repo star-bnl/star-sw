@@ -7,7 +7,7 @@ TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
 tpcCorrection_st row;
 St_tpcCorrection *tableSet = new St_tpcCorrection("TpcAdcCorrectionB",2);
-/* TpcT::AdcCorrections()
+/* 
 06/25/10 y2010_AuAu_200GeV_1200_1evts_y2010_TpcRS_sdt20100107.110000_Bichsel_1_100.ADC.root
 Fit innerM      log(simulated ADC) versus log(recon. ADC) and Z
  PARAMETER NUMBER   6 NOT A VARIABLE. IGNORED.
@@ -63,6 +63,34 @@ Fit outerM      log(simulated ADC) versus log(recon. ADC) and Z
    6  scale        0.00000e+00     fixed    
 
 */
+
+
+/* IRAKLI
+Au Au 200 GeV y2014 Altro_thr = 4
+Fit innerM      log(simulated ADC) versus log(recon. ADC) and Z
+ FCN=32615 FROM MINOS     STATUS=SUCCESSFUL     36 CALLS         523 TOTAL
+                     EDM=4.12568e-10    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  offset       4.58555e+01   8.44674e-02  -4.72902e-04   2.83210e-03
+   2  z           -8.14808e-01   4.19366e-03   4.37518e-05   2.33584e-01
+   3  zxAdcL       1.88595e-01   8.59523e-04  -8.83550e-06   1.19369e+00
+   4  adcL         9.94856e-01   4.15260e-04   6.19827e-07   2.32900e+00
+   5  adcL2        1.84012e-03   5.92107e-05   5.92107e-05   1.05826e+01
+   6  scale        0.00000e+00     fixed
+
+Fit outerM      log(simulated ADC) versus log(recon. ADC) and Z
+ FCN=35933.5 FROM MINOS     STATUS=SUCCESSFUL     36 CALLS         504 TOTAL
+                     EDM=7.67332e-08    STRATEGY= 1      ERROR MATRIX ACCURATE
+  EXT PARAMETER                                   STEP         FIRST
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+   1  offset       4.96486e+01   7.77673e-02  -3.46332e-04   2.13974e-03
+   2  z           -1.62851e-01   3.20249e-03   2.71982e-05   2.15214e-01
+   3  zxAdcL       3.14864e-02   6.38752e-04  -5.37666e-06   1.11620e+00
+   4  adcL         1.13922e+00   2.47400e-04   2.87935e-07   2.83562e+00
+   5  adcL2       -1.29112e-02   3.57345e-05   3.57345e-05   1.35523e+01
+   6  scale        0.00000e+00     fixed
+*/
 memset(&row,0,tableSet->GetRowSize());
     row.type	 =         11; // ;
     row.idx	 =          1; // ;
@@ -70,12 +98,12 @@ memset(&row,0,tableSet->GetRowSize());
     row.npar	 =          6; // ;
     row.min	 =          0; // ;
     row.max	 =          0; // ;
-    row.a[0]     = -6.69938e-03-4.54347e-01+1.98426e-03-1.88134e-03; //   scale 
-    row.a[1]	 =  4.88741e+01; //   offset
-    row.a[2]	 = -1.13410e-01; //   z     
-    row.a[3]	 =  2.23657e-02; //   zxAdcL
-    row.a[4]	 =  1.13113e+00; //   adcL  
-    row.a[5]	 = -1.12153e-02; //   adcL2 
+    row.a[0]     =  0.00000e+00; //   scale 
+    row.a[1]	 =  4.96486e+01; //   offset
+    row.a[2]	 = -1.62851e-01; //   z     
+    row.a[3]	 =  3.14864e-02; //   zxAdcL
+    row.a[4]	 =  1.13922e+00; //   adcL  
+    row.a[5]	 = -1.29112e-02; //   adcL2 
     tableSet->AddAt(&row);     // Outer
 memset(&row,0,tableSet->GetRowSize());
     row.type	 =         11; // ;
@@ -84,12 +112,12 @@ memset(&row,0,tableSet->GetRowSize());
     row.npar	 =          6; // ;
     row.min	 =          0; // ;
     row.max	 =          0; // ;
-    row.a[0]     = -3.15605e-01-6.42700e-01+2.59181e-01-2.12161e-01;  // scale  
-    row.a[1]	 =  2.14121e+01; //   offset
-    row.a[2]	 = -6.60222e-02; //   z     
-    row.a[3]	 =  1.76646e-02; //   zxAdcL
-    row.a[4]	 =  9.55550e-01; //   adcL  
-    row.a[5]	 =  1.84007e-03; //   adcL2 
+    row.a[0]     =  0.00000e+01;  // scale  
+    row.a[1]	 =  4.58555e+01; //   offset
+    row.a[2]	 = -8.14808e-01; //   z     
+    row.a[3]	 =  1.88595e-01; //   zxAdcL
+    row.a[4]	 =  9.94856e-01; //   adcL  
+    row.a[5]	 =  1.84012e-03; //   adcL2 
 tableSet->AddAt(&row); // Inner
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
