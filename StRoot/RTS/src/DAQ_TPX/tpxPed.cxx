@@ -84,56 +84,35 @@ void tpxPed::init(int sec, int active_rbs)
 
 		int s_real, r_real ;
 
-		ped_rdo_store[r].row_count = 8 ;
 
 		tpx36_to_real(sector,r+1,s_real,r_real) ;
 
 		ped_rdo_store[r].r_real = r_real ;
 		ped_rdo_store[r].s_real = s_real ;
 
-		switch(r_real) {
-		case 1 :
-			ped_rdo_store[r].start_row = 1 ;
-			break ;
-		case 2 :
-			ped_rdo_store[r].start_row = 8 ;
-			break ;
-		case 3 :
-			ped_rdo_store[r].start_row = 14 ;
-			break ;
-		case 4 :
-			ped_rdo_store[r].start_row = 22 ;
-			break ;
-		case 5 :
-			ped_rdo_store[r].start_row = 30 ;
-			break ;
-		case 6 :
-			ped_rdo_store[r].start_row = 38 ;
-			break ;
-		default:
-			LOG(ERR,"S%02d:%d: not done!",s_real,r_real) ;
-			break ;
+		ped_rdo_store[r].peds = (struct peds *) malloc(sizeof(struct peds)*1152) ;
+		memset(ped_rdo_store[r].peds,0,sizeof(struct peds)*1152) ;
+
+
+		int cou = 0 ;
+		for(int a=0;a<256;a++) {
+			for(int c=0;c<16;c++) {
+				int row, pad ;
+
+				tpx_from_altro(r_real-1,a,c,row,pad) ;
+				if(row==255) continue ;
+
+				//LOG(TERR,"Real RDO %d: A%d:%d = RP %d:%d",r_real,a,c,row,pad) ;
+				ped_rdo_store[r].peds[cou].row = row ;				
+				ped_rdo_store[r].peds[cou].pad = pad ;
+				cou++ ;
+			}
 		}
 
+		LOG(TERR,"peds_inited: sector %d, RDO real %d: %d",s_real,r_real,cou) ;
 
 	}
 
-
-	for(int r=0;r<6;r++) {
-		if(rb_mask & (1<<r)) ;
-		else continue ;
-
-		// add one more row for the row==0 unphysical pads
-		int bytes = (ped_rdo_store[r].row_count+1)*183*sizeof(struct peds) ;
-
-
-		ped_rdo_store[r].peds = (struct peds *) malloc(bytes) ;
-	
-
-		memset(ped_rdo_store[r].peds,0,bytes) ;
-	}
-	
-	LOG(TERR,"Pedestals zapped: sector %2d, rb_mask 0x%02X.", sector, rb_mask) ;
 }
 
 /*
@@ -210,7 +189,7 @@ void tpxPed::accum(tpx_altro_struct *a)
 	p = get(r0_logical,row, pad) ;
 
 	if(p==0) {
-		LOG(ERR,"ped::accum for row %d, pad %d, A %d:%d bad?",row,pad,a->id,a->ch) ;
+		LOG(ERR,"ped::accum for row %d, pad %d, A %d:%d bad (real RDO %d)?",row,pad,a->id,a->ch,a->rdo+1) ;
 		LOG(ERR,"Slog %d:%d, Shw %d:%d",sector,r0_logical+1,a->sector,a->rdo+1) ;
 		return ;
 	}
@@ -896,8 +875,8 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		if(ped==0) continue ;
 		
 		switch(run_type) {
-		case RUN_TYPE_PHYS :	//occupancy increase
-			for(t=30;t<(30+sub_type);t++) {
+		case RUN_TYPE_PHYS :	//occupancy increase; used e.g. in noise-calibration runs hot_channels
+			for(t=100;t<(100+sub_type);t++) {
 				ped->ped[t] -= 10 ;
 			}
 			break ;

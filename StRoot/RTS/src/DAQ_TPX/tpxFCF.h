@@ -120,12 +120,14 @@ public:
 	}
 	int fcf_style ;	// new for FY13!
 
+
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.17 2014/08/06 11:42:51 jeromel Exp $: built " __DATE__ " " __TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.18 2016/01/12 16:20:23 tonko Exp $: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 	int sector ;	// counts from 1
-	int rdo ;	// counts from 1
+	int rdo ;	// counts from 1 but can be 0 if we want the whole sector
+	int row_count ;	// will default to 45 in the constructor unless overriden!
 
 	inline int is_pad_valid(int row, int pad)
 	{
@@ -135,39 +137,42 @@ public:
 		return 1 ;
 	}
 
+	inline void event_debug()
+	{
+		for(int r=1;r<=row_count;r++) {
+			if(gain_storage[sector-1][r] == 0) continue ;
+
+			for(int p=1;p<=tpx_rowlen[r];p++) {
+				s_static_storage *ss = get_static(r,p) ;
+
+				stage1 *s1 = get_working(r,p) ;
+
+				LOG(TERR,"S %2d: RP %d:%d : gain %f, t0 %f, flags 0x%X, count %d",sector,
+				    r,p,ss->g,ss->t0,ss->f,s1->count) ;
+			}
+		}
+	}
+
+
 protected:
 	unsigned char *tpx_rowlen ;
 
+
 	struct s_static_storage {
-		unsigned short f ;
 		double g ;
 		double t0 ;
+
+		unsigned short f ;
 	} ;
 
-	static struct s_storage_stuff {
-		struct s_static_storage *storage ;
-		int row_ix[256] ;
-	} gain_storage[24][6] ;
-
+	static struct s_static_storage *gain_storage[24][256] ;
 
 	inline struct s_static_storage *get_static(int row, int pad)
 	{
 		int s = sector -1 ;
-		int r = rdo - 1 ;
+		if(gain_storage[s][row]==0) return 0 ;
 
-		if(r < 0) {	// figure out from the row & pad
-			int a, ch ;
-			tpx_to_altro(row,pad,r,a,ch) ;
-
-			r-- ;	// need to start from 0
-
-//			LOG(TERR,"r:p %d:%d - rdo is %d",row,pad,r) ;
-		}
-
-		if(gain_storage[s][r].storage == 0) return 0 ;
-		if(gain_storage[s][r].row_ix[row] < 0) return 0 ;
-
-		return gain_storage[s][r].storage + gain_storage[s][r].row_ix[row] + (pad-1) ;
+		return gain_storage[s][row] + (pad-1) ;
 
 	}
 
@@ -178,7 +183,7 @@ private:
 	int cur_row ;
 	int cur_row_clusters ;
 
-	int row_count ;	// will default to 45 in the constructor unless overriden!
+
 
 	int tpx_padplane ;
 
@@ -212,24 +217,28 @@ private:
 	int my_id ;
 
 
-	static const int max_tot_count = 1152 ;	// maximum pads per RDO
+//	static const int max_tot_count = 1152 ;	// maximum pads per RDO
+	static const int max_tot_count = 2000 ;	// maximum pads per run really -- used in FY16
 
-	struct stage1 *working_storage ;
+
+
+	struct stage1 *working_storage[24][256] ;
 	
-
 	inline struct stage1  *get_working(int row, int pad)
 	{
+
 		int s = sector -1 ;
-		int r = rdo - 1 ;
 
-		if(gain_storage[s][r].storage == 0) return 0 ;
-		if(gain_storage[s][r].row_ix[row] < 0) return 0 ;
+		if(working_storage[s][row]==0) {
+			int bytes = tpx_rowlen[row] * sizeof(stage1) ;
 
-		return working_storage + gain_storage[s][r].row_ix[row] + (pad-1) ;
+			working_storage[s][row] = (stage1 *) valloc(bytes) ;
+		}
+
+		return working_storage[s][row] + (pad-1) ;
 	}
 
 
-//	tpxGain *gains ;
 
 	unsigned int do_version ;
 	unsigned int read_version ;

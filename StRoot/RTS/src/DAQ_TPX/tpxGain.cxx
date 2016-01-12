@@ -1002,7 +1002,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.31 2015/05/22 08:08:01 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.32 2016/01/12 16:20:23 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1225,8 +1225,14 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 	// check fee sanity here!
 
 	for(s=s_start;s<=s_stop;s++) {
+//		LOG(TERR,"Doing sector %d",s) ;
+
 	for(r=1;r<=6;r++) {	// RB
 		struct fee_found_t *fee_f = get_fee_found(s,r) ;
+
+		if(fee_f == 0) {
+			LOG(ERR,"FEE %d,%d -- not found",s,r) ;
+		}
 
 		if(fee_f->got_one == 0) continue ;
 	
@@ -1240,6 +1246,8 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 		for(int i=0;i<36;i++) {
 			int fee = tpx_rdo_fees(r,i) ;
 			if(fee == 255) continue ;
+
+//			LOG(TERR,"%d %d %d %d",s,r,i,fee) ;
 
 			for(int fch=0;fch<32;fch++) {	// FEE channel! [0..15] are on the upper row, [16..31] on the lower
 
@@ -1255,11 +1263,20 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 
 				int  err = 0 ;
 
+//				LOG(TERR,"%d %d %d %d: %d %d",s,r,i,fee,a,ch) ;
+
 				int seen = fee_f->ch_count[a][ch] ;
 
-				int row = tpx_altro_to_pad[r-1][a][ch].row ;
-				int pad = tpx_altro_to_pad[r-1][a][ch].pad ;
 
+				int row, pad ;
+
+				tpx_from_altro(r-1,a,ch,row,pad) ;
+
+				//int row = tpx_altro_to_pad[r-1][a][ch].row ;
+				//int pad = tpx_altro_to_pad[r-1][a][ch].pad ;
+
+
+				//LOG(TERR,"RP %d %d",row,pad) ;
 
 				double g = get_gains(s,row,pad)->g ;
 				double t0 = get_gains(s,row,pad)->t0 ;
@@ -1427,7 +1444,7 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 			}
 		}
 					
-
+		if(ofile) fflush(ofile) ;
 
 	}
 	}

@@ -194,7 +194,7 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 //used in tpxGain solely!
 int tpx_altro_to_fee(int rdo, int a)
 {
-	LOG(WARN,"tpx_altro_to_fee: %d %d (map %d)",rdo,a,tpx_fy16_map) ;
+//	LOG(WARN,"tpx_altro_to_fee: %d %d (map %d)",rdo,a,tpx_fy16_map) ;
 
 	rdo-- ;	// to start from 0
 
@@ -221,7 +221,7 @@ int tpx_altro_to_fee(int rdo, int a)
 //used in tpxGain solely
 u_char tpx_rdo_fees(int rdo, int cou)
 {
-	LOG(WARN,"tpx_rdo_fees: %d %d (map %d)",rdo,cou,tpx_fy16_map) ;
+//	LOG(WARN,"tpx_rdo_fees: %d %d (map %d)",rdo,cou,tpx_fy16_map) ;
 
 	if(cou >= 36) return 255 ;
 
@@ -1138,7 +1138,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 
 		//is the altro overriden?
-		for(int i=0;i<sizeof(tpx_fee_override)/sizeof(tpx_fee_override[0]);i++) {
+		for(u_int i=0;i<sizeof(tpx_fee_override)/sizeof(tpx_fee_override[0]);i++) {
 			int r = tpx_fee_override[i].rdo ;
 			int s = tpx_fee_override[i].sector ;
 
