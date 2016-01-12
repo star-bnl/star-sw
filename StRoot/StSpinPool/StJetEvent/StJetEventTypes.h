@@ -16,5 +16,6 @@
 #include "StJetCandidate.h"
 #include "StJetVertex.h"
 #include "StJetEvent.h"
+#include "StUeEvent.h"
 
 #endif // ST_JET_EVENT_TYPES_H

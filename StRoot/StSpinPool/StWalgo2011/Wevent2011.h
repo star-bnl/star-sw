@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.8 2013/09/13 19:33:13 stevens4 Exp $
+// $Id: Wevent2011.h,v 1.9 2016/01/08 02:08:49 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -78,6 +78,7 @@ class WeveEleTrack { // electron track info
   TVector3 ptBalance,ptBalance_noEEMC;
   float sPtBalance,sPtBalance_noEEMC;// signed pT balance (GeV/c)
   float sPtBalance2,sPtBalance_noEEMC2;// invariant
+  int jetCount;// number of jets out the near-cone; add in Dec 19, 2014, jinlong
 
   TVector3 hadronicRecoil;
 
@@ -105,6 +106,8 @@ class WeveEleTrack { // electron track info
     ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); 
     sPtBalance=sPtBalance_noEEMC=0;
     sPtBalance2=sPtBalance_noEEMC2=0;
+	
+	jetCount=0; 
 
     hadronicRecoil=TVector3(0,0,0);
 
@@ -369,6 +372,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.9  2016/01/08 02:08:49  jlzhang
+// added couples histograms and fixed a small bug
+//
 // Revision 1.8  2013/09/13 19:33:13  stevens4
 // Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
 //

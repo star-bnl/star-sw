@@ -50,14 +50,14 @@ public:
   TTree* tree();
   StJetEvent* event(const char* branchname);
 
-private:
+protected:
   void addJet(const StProtoJet& protojet, StJetEvent* event, StJetVertex* vertex);
   void copyVertex(const StjPrimaryVertex& vertex, StJetVertex* jetvertex);
   void copyTrack(const StMuTrackEmu*, StJetTrack*);
-  void copyTower(const StMuTowerEmu*, const StJetVertex*, StJetTower*);
+  void copyTower(const StMuTowerEmu*, StJetTower*);
   void copyParticle(const StMcTrackEmu*, StJetParticle*);
 
-  struct StJetBranch {
+struct StJetBranch {
     StJetBranch(const char* name, StAnaPars* anapars, StJetPars* jetpars)
       : name(name)
       , anapars(anapars)

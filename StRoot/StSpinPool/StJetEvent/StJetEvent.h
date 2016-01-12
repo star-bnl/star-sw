@@ -60,7 +60,7 @@ public:
   TClonesArray* particles() const { return mParticles; }
 
   StJetVertex*    newVertex  ();
-  StJetCandidate* newJet     (const TVector3& vertex, const TLorentzVector& fourMomentum);
+  StJetCandidate* newJet     (const TVector3& vertex, const TLorentzVector& fourMomentum, float area = 0, float area_error = 0);
   StJetTrack*     newTrack   ();
   StJetTower*     newTower   ();
   StJetParticle*  newParticle();
@@ -68,6 +68,7 @@ public:
 private:
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StJetMaker2012;
 
   int mRunId;
   int mEventId;

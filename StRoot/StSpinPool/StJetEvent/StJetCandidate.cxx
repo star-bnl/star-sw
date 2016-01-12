@@ -10,11 +10,13 @@
 
 ClassImp(StJetCandidate);
 
-StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum)
+StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum, float area, float area_error)
   : mPt(fourMomentum.Pt())
   , mEta(fourMomentum.Eta())
   , mPhi(fourMomentum.Phi())
   , mE(fourMomentum.E())
+  , mArea(area)
+  , mAreaError(area_error)
 {
   mDetEta = detEta(vertex);
 }

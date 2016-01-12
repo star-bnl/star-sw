@@ -1,56 +1,6 @@
-/***************************************************************************
-*
-* $Id: StIstRawHit.cxx,v 1.14 2015/02/27 15:52:04 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* See header file.
-****************************************************************************
-*
-* $Log: StIstRawHit.cxx,v $
-* Revision 1.14  2015/02/27 15:52:04  ypwang
-* remove comment in the print()
-*
-* Revision 1.13  2015/02/27 14:53:00  ypwang
-* fixed a bug for the print() to list all time bin's charges and noises
-*
-* Revision 1.12  2014/09/09 08:23:46  ypwang
-* all unsgined char was updated to int type as Victor P. suggested
-*
-* Revision 1.11  2014/09/08 19:07:05  smirnovd
-* StIstRawHit: Made methods accessing static data member static
-*
-* Revision 1.10  2014/09/08 19:06:57  smirnovd
-* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
-*
-* Revision 1.9  2014/09/05 17:36:55  smirnovd
-* Slightly cleaned up (doxygen) comments
-*
-* Revision 1.8  2014/03/27 22:46:47  smirnovd
-* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.7  2014/03/13 22:10:12  smirnovd
-* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
-*
-* Revision 1.6  2014/02/20 02:30:59  smirnovd
-* Use constructor list to initialize vectors of pointers and arrays
-*
-* Revision 1.5  2014/02/20 02:29:27  smirnovd
-* Remove destructor that does nothing
-*
-* Revision 1.4  2014/02/18 07:52:40  ypwang
-* updating mDefaultTimeBin initial value to 2
-*
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstRawHit.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:05:30 Yaping
-* Initial version
-****************************************************************************/
+// $Id: StIstRawHit.cxx,v 1.19 2016/01/11 21:16:02 smirnovd Exp $
+
+#include <algorithm>
 
 #include "StIstRawHit.h"
 #include "StRoot/St_base/StMessMgr.h"
@@ -70,41 +20,28 @@ bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHi
 StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(3),
    mIdTruth(0)
 {
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i] = -999.;
-      mChargeErr[i] = 0.;
-   }
+   std::fill_n(mCharge, kIstNumTimeBins, -999);
 }
 
-StIstRawHit::StIstRawHit(const StIstRawHit &h) : StObject(), mChannelId(h.mChannelId), mGeoId(h.mGeoId), mCharge(),
-   mChargeErr(), mMaxTimeBin(h.mMaxTimeBin), mIdTruth(h.mIdTruth)
+
+template<typename Container>
+StIstRawHit::StIstRawHit(int channelId, int geoId,
+   const Container &charges, const Container &chargeErrs,
+   UChar_t maxTimeBin, UShort_t idTruth) :
+   StObject(),
+   mChannelId(channelId), mGeoId(geoId), mCharge(), mChargeErr(),
+   mMaxTimeBin(maxTimeBin), mIdTruth(idTruth)
 {
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i] = h.mCharge[i];
-      mChargeErr[i] = h.mChargeErr[i];
-   }
+   std::copy(std::begin(charges), std::end(charges), mCharge);
+   std::copy(std::begin(chargeErrs), std::end(chargeErrs), mChargeErr);
 }
 
-StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
-{
-   mChannelId  = h.mChannelId;
-   mGeoId	= h.mGeoId;
-   mMaxTimeBin = h.mMaxTimeBin;
-   mIdTruth    = h.mIdTruth;
 
-   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
-      mCharge[i]     = h.mCharge[i];
-      mChargeErr[i]  = h.mChargeErr[i];
-   }
-
-   return *this;
-}
-
-int StIstRawHit::getChannelId() const  			{ return mChannelId;   	 };
-int StIstRawHit::getGeoId() const  			{ return mGeoId;   	 };
-unsigned char StIstRawHit::getMaxTimeBin() const  	{ return mMaxTimeBin;    };
-unsigned char StIstRawHit::getDefaultTimeBin()  	{ return mDefaultTimeBin;};
-unsigned short StIstRawHit::getIdTruth() const  	{ return mIdTruth; 	 };
+int StIstRawHit::getChannelId() const              { return mChannelId;     };
+int StIstRawHit::getGeoId() const                  { return mGeoId;      };
+unsigned char StIstRawHit::getMaxTimeBin() const   { return mMaxTimeBin;    };
+unsigned char StIstRawHit::getDefaultTimeBin()     { return mDefaultTimeBin;};
+unsigned short StIstRawHit::getIdTruth() const     { return mIdTruth;    };
 
 unsigned char StIstRawHit::getLadder() const
 {
@@ -183,6 +120,7 @@ void StIstRawHit::setCharge( float charge, int tb )
 {
    mCharge[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ] = charge;
 };
+
 
 void StIstRawHit::setChargeErr(float rChargeErr, int tb)
 {

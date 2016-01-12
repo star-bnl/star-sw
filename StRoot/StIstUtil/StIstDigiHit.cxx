@@ -1,32 +1,7 @@
-/***************************************************************************
-*
-* $Id: StIstDigiHit.cxx,v 1.4 2014/04/30 12:11:23 smirnovd Exp $
-*
-* Author: Yaping Wang (Thank Dmitri Smirnov's updates)
-****************************************************************************
-* Description:
-* Data structure for additional function of StIstHit..
-****************************************************************************
-*
-* $Log: StIstDigiHit.cxx,v $
-* Revision 1.4  2014/04/30 12:11:23  smirnovd
-* Hide static member inherited from StIstHit base class and assign a new value relevant for StIstDigiHit. Redefine static operators new and delete "inherited" from the base StIstHit class
-*
-* Revision 1.3  2014/03/27 22:46:47  smirnovd
-* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.2  2014/03/01 00:19:37  ypwang
-* correct return value of getMeanRow() and Log added
-*
-*
-*
-****************************************************************************
-* StIstDigiHit.cxx,v 1.0
-* Revision 1.0 2014/02/25 21:00:00 Yaping
-* Initial version
-****************************************************************************/
-
 #include "StIstDigiHit.h"
+
+
+StMemoryPool StIstDigiHit::mPool(sizeof(StIstDigiHit));
 
 
 StIstDigiHit::StIstDigiHit() : StIstHit(), mApv(0), mMeanColumn(-1),

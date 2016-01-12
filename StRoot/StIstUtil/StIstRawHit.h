@@ -1,12 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstRawHit.h,v 1.10 2014/09/09 08:23:46 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* Data structure for individual IST pad (channel).
-****************************************************************************/
+// $Id: StIstRawHit.h,v 1.15 2016/01/11 21:16:02 smirnovd Exp $
 
 #ifndef StIstRawHit_hh
 #define StIstRawHit_hh
@@ -15,22 +7,32 @@
 #include "StEvent/StEnumerations.h"
 #include "StIstConsts.h"
 
+
+/**
+ * Data structure for individual IST pad (channel).
+ *
+ * \author Yaping Wang
+ * \date March 2013
+ */
 class StIstRawHit : public StObject
 {
 public:
    //constructors
    StIstRawHit();
-   StIstRawHit( const StIstRawHit & );
-   StIstRawHit &operator=( const StIstRawHit & );
+
+   template<typename Container>
+   StIstRawHit(int channelId, int geoId,
+      const Container &charges, const Container &chargeErrs = Container{},
+      UChar_t maxTimeBin = 3, UShort_t idTruth = 0);
 
    //accessors
-   int       	      getChannelId()  const; //!< 0-110591
-   int		      getGeoId()      const; //!< 1-110592
+   int               getChannelId()  const; //!< 0-110591
+   int               getGeoId()      const; //!< 1-110592
    unsigned char     getLadder()     const; //!< 1-24
    unsigned char     getSensor()     const; //!< 1-6
    unsigned char     getRow()        const; //!< 1-64
    unsigned char     getColumn()     const; //!< 1-12
-   float     	      getCharge(int tb = 0) 	 const;
+   float             getCharge(int tb = 0)    const;
    float             getChargeErr(int tb = 0) const;
    unsigned char     getMaxTimeBin() const;
    unsigned char     getRdo()        const; //!< 1-6
@@ -41,10 +43,18 @@ public:
    unsigned short    getIdTruth()    const; //!< for embedding, 0 as background
 
    //modifiers
-   void        setChannelId(int rChannelId) ;
-   void	setGeoId(int rChannelId);
-   void        setCharge(float charge, int tb = -1) ;
-   void	setChargeErr(float chargeErr, int tb = -1) ;
+   void setChannelId(int rChannelId);
+   void setGeoId(int rChannelId);
+   void setCharge(float charge, int tb = -1);
+
+   /// Overwrites this channel's charges in all time bins by values in the
+   /// provided container
+   template<typename Container>
+   void setCharges(const Container& charges) {
+      std::copy( std::begin(charges), std::end(charges), mCharge);
+   }
+
+   void setChargeErr(float chargeErr, int tb = -1);
    void        setMaxTimeBin(int tb) ;
    static void setDefaultTimeBin( int tb );
    void        setIdTruth(unsigned short idTruth);
@@ -60,7 +70,8 @@ private:
                                            ///< pedestal subtracted and/or CMN correction in physics mode
    Float_t     mChargeErr[kIstNumTimeBins];///< charge error in all time bins
    UChar_t     mMaxTimeBin;                ///< the max ADC time bin index of the raw hit
-   UShort_t    mIdTruth;           	   ///< for embedding, 0 as background
+   UShort_t    mIdTruth;                   ///< for embedding, 0 as background
+
    static UChar_t mDefaultTimeBin;
 
    ClassDef(StIstRawHit, 1)
@@ -73,38 +84,3 @@ struct rawHitPtrLessThan {
 };
 
 #endif
-
-
-/***************************************************************************
-*
-* $Log: StIstRawHit.h,v $
-* Revision 1.10  2014/09/09 08:23:46  ypwang
-* all unsgined char was updated to int type as Victor P. suggested
-*
-* Revision 1.9  2014/09/08 19:07:05  smirnovd
-* StIstRawHit: Made methods accessing static data member static
-*
-* Revision 1.8  2014/09/08 19:06:57  smirnovd
-* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
-*
-* Revision 1.7  2014/09/05 17:36:55  smirnovd
-* Slightly cleaned up (doxygen) comments
-*
-* Revision 1.6  2014/03/13 22:10:13  smirnovd
-* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
-*
-* Revision 1.5  2014/02/20 02:29:27  smirnovd
-* Remove destructor that does nothing
-*
-* Revision 1.4  2014/02/13 02:35:49  smirnovd
-* Moved CVS log to the bottom of the file
-*
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstRawHit.h,v 1.0
-* Revision 1.0 2013/11/04 15:05:30 Yaping
-* Initial version
-****************************************************************************/
