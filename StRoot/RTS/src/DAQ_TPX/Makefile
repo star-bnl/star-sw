@@ -75,6 +75,7 @@ tpxCore.o: ../../../../StRoot/RTS/include/DAQ1000/ddl_struct.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPC/fee_readout.h
 tpxCore.o: tpxCore.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpxCore.o: tpx_fee_position.h
 tpxFCF_2D.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxFCF_2D.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 tpxFCF_2D.o: ../DAQ_TPX/tpxCore.h

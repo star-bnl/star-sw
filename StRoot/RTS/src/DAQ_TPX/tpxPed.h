@@ -53,14 +53,15 @@ private:
 
 
 	struct peds {
+		u_short row ;
+		u_short pad ;
+
 		double ped[512] ;
 		double rms[512] ;
 		u_short cou[512] ;
 	} ; // *ped_store ;
 
 	struct peds_rdo_t {
-		int start_row ;
-		int row_count ;
 		int r_real ;
 		int s_real ;
 
@@ -78,18 +79,25 @@ private:
 		if(rb_mask & (1<<r0_logical)) ;
 		else return 0 ;	// not enabled!
 
-		if(row==0) {	// non-physical pads go first
-		}
-		else {
-			row = row - ped_rdo_store[r0_logical].start_row  ;
-			
-			if(row < 0) return 0 ;	// not in this RDO!
-			if(row >= ped_rdo_store[r0_logical].row_count) return 0 ;	// not in this RDO!
-
-			row++ ;
+		if(ped_rdo_store[r0_logical].peds == 0) {
+			LOG(ERR,"What????") ;
+			return 0 ;
 		}
 
-		return (ped_rdo_store[r0_logical].peds + row*183 + pad) ;
+
+		for(int i=0;i<1152;i++) {
+			if(ped_rdo_store[r0_logical].peds[i].row == row) {
+				//LOG(WARN,"Got row %d",row) ;
+				if(ped_rdo_store[r0_logical].peds[i].pad == pad) {
+					//LOG(WARN,"  got pad %d",pad) ;
+					return (ped_rdo_store[r0_logical].peds + i) ;
+				}
+			}
+		}
+
+		//LOG(ERR,"No row pad %d %d???",row,pad) ;
+
+		return 0 ;
 	}
 
 

@@ -293,8 +293,8 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version)
 }
 
 
-tpxFCF::s_storage_stuff tpxFCF::gain_storage[24][6] ;
-//int tpxFCF::max_tot_count ;
+tpxFCF::s_static_storage *tpxFCF::gain_storage[24][256] ;
+
 
 
 tpxFCF::tpxFCF() 
@@ -305,7 +305,7 @@ tpxFCF::tpxFCF()
 
 	rdo = 0 ;
 	fcf_style = 0 ;
-	working_storage = 0 ;
+	memset(working_storage,0,sizeof(working_storage)) ;
 
 	cl_marker = 0 ;
 	my_id = -1 ;
@@ -335,15 +335,16 @@ tpxFCF::~tpxFCF()
 		free(storage) ;
 		storage = 0 ;
 	}
-	if(working_storage) {
-		free(working_storage) ;
-		working_storage = 0 ;
-	}
+
 	for(int s=0;s<24;s++) {
-	for(int r=0;r<6;r++) {
-		if(gain_storage[s][r].storage) {
-			free(gain_storage[s][r].storage) ;
-			gain_storage[s][r].storage = 0;
+	for(int r=0;r<256;r++) {
+		if(working_storage[s][r]) {
+			free(working_storage[s][r]) ;
+			working_storage[s][r] = 0 ;
+		}
+		if(gain_storage[s][r]) {
+			free(gain_storage[s][r]) ;
+			gain_storage[s][r] = 0;
 		}
 	}
 	}
@@ -358,7 +359,9 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 {
 	int rdo0 = rdo1 - 1 ;
 	int sec0 = sec1 - 1 ;
-	int row ;
+
+	//temporary
+	sector = sec1 ;
 
 	modes = mode ;
 
@@ -373,91 +376,44 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 		tpx_padplane = 1 ;	// new padplane
 	}
 
-	if(gain_storage[sec0][rdo0].storage) {
-		LOG(WARN,"config2(%d,%d) -- already allocated",sec1,rdo1) ;
-		return ;
-	}
-	
+
+	int tot_count = 0 ;
 
 	for(int a=0;a<256;a++) {
 	for(int ch=0;ch<16;ch++) {
-		int pad ;
+		int pad, row ;
 
 		tpx_from_altro(rdo0,a,ch,row,pad) ;
 
 		if(row > 250) continue ;	// not in this RDO...
 		if(row == 0) continue ;	// will nix row 0 as well...
 
-		gain_storage[sec0][rdo0].row_ix[row] = 1  ;	// mark as needed...
-	}
-	}
-
-	// get the count of pads needed assuming _whole_ rows!
-	int tot_count = 0 ;
-	for(row=0;row<=row_count;row++) {
-		if(gain_storage[sec0][rdo0].row_ix[row]) {
-			tot_count += tpx_rowlen[row] ;	// allocate whole rows!
-		}
-	}
-
-	LOG(NOTE,"config2: [%d] S%02d:%d: allocated %d pads (%d bytes)",my_id,sec1,rdo1,tot_count,tot_count * sizeof(struct s_static_storage)) ;
-
-	// allocate storage
-	if(gain_storage[sec0][rdo0].storage) {
-		LOG(WARN,"Whoa! Storage already allocated, sec %d, rdo %d!",sec0+1,rdo0+1) ;
-		free(gain_storage[sec0][rdo0].storage) ;
-	}
-
-	gain_storage[sec0][rdo0].storage = (struct s_static_storage *) valloc(tot_count * sizeof(struct s_static_storage)) ;
-
-/*	
-	LOG(NOTE,"FCF for mask 0x%02X: alloced %d bytes for %d tot_count X %d; cleared gains",mask,
-	    tot_count * sizeof(struct stage1),
-	    tot_count,
-	    sizeof(struct stage1)) ;
-*/
-	// clear storage
-	memset(gain_storage[sec0][rdo0].storage,0,tot_count * sizeof(struct s_static_storage)) ;
+		int bytes = tpx_rowlen[row] * sizeof(s_static_storage) ;
 
 
+		if(gain_storage[sec0][row]) ;
+		else {
 
-	// re-create offsets which we use in the row+pad navigation
-	tot_count = 0 ;	// re use...
-	for(row=0;row<=row_count;row++) {
-		if(gain_storage[sec0][rdo0].row_ix[row] == 0) {
-			gain_storage[sec0][rdo0].row_ix[row] = -1 ;	// nix!
-			continue ;
+
+			gain_storage[sec0][row] = (s_static_storage *)valloc(bytes) ;
+			//and clear
+			memset(gain_storage[sec0][row],0, bytes) ;
+
+			tot_count += tpx_rowlen[row] ;
+			
 		}
 
-		gain_storage[sec0][rdo0].row_ix[row] = tot_count ;
-
-		tot_count += tpx_rowlen[row] ;
-	}
 
 
-	// HACK: this needs adjustment for iTPX!
-	sector = sec1 ;
-	rdo = rdo1 ;
+		s_static_storage *ss = get_static(row,pad) ;
 
-	for(int a=0;a<256;a++) {
-	for(int ch=0;ch<16;ch++) {
-		int pad ;
-
-		tpx_from_altro(rdo0,a,ch,row,pad) ;
-
-		if(row > 250) continue ;
-		if(row == 0) continue ;
-
-		get_static(row, pad)->f = FCF_NEED_PAD | FCF_ONEPAD ;
-		get_static(row, pad)->g = 1.0 ;
-		get_static(row, pad)->t0 = 0.0 ;
-
+		ss->f = FCF_NEED_PAD | FCF_ONEPAD ;
+		ss->g = 1.0 ;
+		ss->t0 = 0.0 ;
 	}
 	}
 
-	// return back to defaults...
-	sector = 0 ;
-	rdo = 0 ;
+	LOG(TERR,"config2: S%2d, RDO %d: %d pads",sec1,rdo1,tot_count) ;
 }
 
 
@@ -484,7 +440,7 @@ void tpxFCF::config(u_int mask, int mode, int rows, unsigned char *rowlen)
 	}
 
 
-	LOG(NOTE,"calling config: mask 0x%X, mode %d, rows %3d",mask,mode,row_count) ;
+	//LOG(WARN,"calling config: mask 0x%X, mode %d, rows %3d",mask,mode,row_count) ;
 
 	// There is some amount of acrobatics involved so
 	// bear with me...
@@ -604,8 +560,8 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 
 	// clear all flags but the existing higher ones
 	for(int s=0;s<24;s++) {
-	for(int r=0;r<6;r++) {
-		if(gain_storage[s][r].storage == 0) continue ;
+	for(int r=0;r<256;r++) {
+		if(gain_storage[s][r] == 0) continue ;
 
 		sector = s+1 ;
 		rdo = r+1 ;
@@ -624,8 +580,8 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 
 
 	for(int s=0;s<24;s++) {
-	for(int r=0;r<6;r++) {
-		if(gain_storage[s][r].storage == 0) continue ;
+	for(int r=0;r<256;r++) {
+		if(gain_storage[s][r] == 0) continue ;
 
 		sector = s+1 ;
 		rdo = r+1 ;
@@ -648,8 +604,11 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 			
 			int fl = 0 ;
 
-			if(!(ss->f & FCF_NEED_PAD)) {	// not in this RDO i.e. row 8 is split between RDO1 and RDO2
-				fl |= FCF_BROKEN_EDGE ;
+			if(tpx_fy16_map==0) {
+				if(!(ss->f & FCF_NEED_PAD)) {	// not in this RDO i.e. row 8 is split between RDO1 and RDO2
+					fl |= FCF_BROKEN_EDGE ;
+					LOG(TERR,"Broken edge in RDO %d: RP %d:%d",rdo,row,pad) ;
+				}
 			}
 
 			if(ss->g < 0.001) {
@@ -672,7 +631,10 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 			}
 			
 			ss->f |= fl | FCF_ONEPAD | kill ;
-
+			
+			//if(row<=13) {
+			//	LOG(WARN,"S %d:%d, RP %d:%d is 0x%X",sector,rdo,row,pad,ss->f) ;
+			//}
 			
 		}
 		}
@@ -693,6 +655,8 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 	int row, pad ;
 
 	if(tpx_padplane) gain = 0 ;	// force it!
+
+	LOG(WARN,"apply_gains???") ;
 
 	if(gain == 0) {
 		LOG(WARN,"Sector %2d, gains NULL",sector) ;
@@ -773,33 +737,29 @@ void tpxFCF::start_evt2(int sec1, int rdo1)
 {
 	cl_marker = 10000 ;	// used to mark unique clusters sector...
 
+//	LOG(TERR,"start_evt2: START: %d %d",sec1,rdo1) ;
+
 	sector = sec1 ;
 	rdo = rdo1 ;
 
-	if(working_storage == 0) {
-		working_storage = (stage1 *) valloc(max_tot_count*sizeof(stage1)) ;
-		LOG(TERR,"[%d] S%02d:%d: max_tot_count %d, allocated %d bytes",my_id,sector,rdo,
-		    max_tot_count,
-		    max_tot_count*sizeof(stage1)) ;
-	}
-
 	
 	for(int r=1;r<=row_count;r++) {
-		if(gain_storage[sector-1][rdo-1].row_ix[r] < 0) continue ;
+		if(gain_storage[sector-1][r] == 0) continue ;	//this is an optimization thing...
 
 		for(int p=1;p<=tpx_rowlen[r];p++) {
 			struct stage1 *w ;
 			w = get_working(r, p) ;
 			if(unlikely(w==0)) {
-				//LOG(ERR,"[%d] S%02d:%d: no row pad %d:%d???",my_id,sector,rdo,r,p) ;
+				LOG(ERR,"[%d] S%02d:%d: no row pad %d:%d???",my_id,sector,rdo,r,p) ;
 			}
 			else {
-//				LOG(TERR,"[%d] S%02d:%d: got rp %d:%d",my_id,sector,rdo,r,p) ;
+				//LOG(TERR,"[%d] S%02d:%d: got rp %d:%d",my_id,sector,rdo,r,p) ;
 				w->count = 0 ;
 			}
 		}
 	}
 
+//	LOG(TERR,"start_evt2: END: %d %d",sec1,rdo1) ;
 	
 	return ;
 }
@@ -894,6 +854,10 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		orig_flags = flags =  s->f & 0xFF ;
 	}
 
+
+//	if(a->row <= 13) {
+//		LOG(TERR,"Doing %d:%d %d",a->row,a->pad,a->count) ;
+//	}
 
 	u_int t_ave, charge ;
 	u_int tb_start ;
@@ -1133,9 +1097,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 	loc_buff = outbuff ;	// copy over
 
 
-	for(r=0;r<=row_count;r++) {
+	for(r=1;r<=row_count;r++) {
 		if(fcf_style) {
-			if(gain_storage[sector-1][rdo-1].row_ix[r] < 0) continue ;
+			if(gain_storage[sector-1][r] == 0) continue ;
 		}
 		else {
 			if(row_ix[r] < 0) continue ;
@@ -1143,9 +1107,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 
 		cur_row = r ;
-		if(cur_row == 0) {
-			LOG(WARN,"Can;t be -- row 0; row_ix %d",row_ix[r]) ;
-		}
+		//if(cur_row == 0) {
+		//	LOG(WARN,"Can;t be -- row 0; row_ix %d",row_ix[r]) ;
+		//}
 
 		int bytes_so_far = (loc_buff - outbuff)*4 ;
 		if(bytes_so_far > (max_bytes-1024)) {
@@ -1194,7 +1158,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 				cur1 = get_stage1(r,p+1) ;
 			}
 
-			//LOG(TERR,"[%d] rp %d:%d : gain %f, t0 %f",my_id,r,p,old1->g,old1->t0) ;
+			//if(r<=13) LOG(TERR,"[%d] rp %d:%d : gain %f, t0 %f, flags 0x%X",my_id,r,p,old1->g,old1->t0,old1->f) ;
 
 			old = old1->cl ;
 			cur = cur1->cl ;
