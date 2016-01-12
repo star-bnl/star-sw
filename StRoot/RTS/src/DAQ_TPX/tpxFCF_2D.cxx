@@ -254,9 +254,8 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 
 	// check to see if we have this row...
-	if(rdo) {
-		if(gain_storage[sector-1][rdo-1].row_ix[row] < 0) continue ;
-	}
+	if(gain_storage[sector-1][row] ==0) continue ;
+
 
 //	LOG(TERR,"doing sector %d, rdo %d, row %d",sector,rdo,row) ;
 
