@@ -1,9 +1,9 @@
 #ifndef HEEDPARTICLE_H
 #define HEEDPARTICLE_H
 
+#include <vector>
 #include "wcpplib/particle/eparticle.h"
-#include "wcpplib/safetl/AbsList.h"
-#include "wcpplib/safetl/BlkArr.h"
+#include "HeedCluster.h"
 /*
 Definition of the particle which can be traced through the
 geometry. Also the definition of cluster (energy transfer),
@@ -22,10 +22,7 @@ extern double ener_single_transf;
 #endif
 
 namespace Heed {
-
-extern long last_particle_number;  // for debug print
-// Each particle is identified by particle_number.
-// It is assigned by current last_particle_number which is then incremented
+extern long last_particle_number;
 
 class HeedParticle : public eparticle {
  public:
@@ -50,10 +47,11 @@ class HeedParticle : public eparticle {
   double transferred_energy_in_step;
   long qtransfer;
   int s_loss_only;
-  BlkArr<double> transferred_energy;
-  BlkArr<long> natom;
-  BlkArr<long> nshell;
+  std::vector<double> transferred_energy;
+  std::vector<long> natom;
+  std::vector<long> nshell;
 
+  std::vector<HeedCluster> cluster_bank;
 };
 
 }

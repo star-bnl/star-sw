@@ -40,6 +40,7 @@ static const int StatusTooManySteps = -2;
 static const int StatusCalculationAbandoned = -3;
 static const int StatusLeftDriftMedium = -5;
 static const int StatusAttached = -7;
+static const int StatusSharpKink = -8;
 static const int StatusBelowTransportCut = -16;
 static const int StatusOutsideTimeWindow = -17;
 static const double Small = 1.e-20;

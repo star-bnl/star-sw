@@ -16,7 +16,7 @@ class MediumCdTe : public Medium {
 
   bool IsSemiconductor() const { return true; }
 
-  void GetComponent(const unsigned int& i, 
+  void GetComponent(const unsigned int i, 
                     std::string& label, double& f);
 
   // Trapping cross-section

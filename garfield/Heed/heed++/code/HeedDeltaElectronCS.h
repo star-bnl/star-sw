@@ -13,8 +13,7 @@ Cross sections and various parameters necessary for passing delta-electron.
 
 #define USE_MEAN_COEF  // new variant, means that used mean(1-cos(theta))
 // for low angle scattering. It seems to be more straightforwad and
-// may be very slightly more precise,
-// than the old variant
+// may be very slightly more precise than the old variant
 // that is use of sqrt( mean ( square (1-cos(theta)) ) )
 
 namespace Heed {

@@ -19,30 +19,26 @@ namespace Heed {
 
 const long max_q_low_path_length_for_direct = 5;
 
+// long HeedDeltaElectron::last_particle_number = 0;
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
 
 HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
                                      const vec& vel, vfloat time,
                                      long fparent_particle_number,
-                                     //PassivePtr< gparticle > fparent_part
                                      int fs_print_listing)
     : eparticle(primvol, pt, vel, time, &electron_def),
-      //parent_part(fparent_part),
+      particle_number(last_particle_number++),
+      parent_particle_number(fparent_particle_number),
       s_print_listing(fs_print_listing),
       phys_mrange(0.0),
       s_stop_eloss(0),
       s_mult_low_path_length(0),
       q_low_path_length(0.0),
       s_path_length(0),
-      necessary_energy(0.0),
-      parent_particle_number(fparent_particle_number) {
+      necessary_energy(0.0) {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
-  particle_number = last_particle_number;
-  last_particle_number++;
-  //if(particle_number == 247)  // for debug of particular event
   //s_print_listing = 1;
-  //set_count_references();
 
 }
 
@@ -181,11 +177,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           mcout << "HeedDeltaElectron::physics_after_new_speed: \n";
           mcout << "This is converted to conduction\n";
         }
-        HeedCondElectron hce(currpos.ptloc, currpos.time);
-        //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
-        asv->conduction_electron_bank.append(hce);
-        //conduction_electron_bank.insert_after
-        //( conduction_electron_bank.get_last_node(), hce);
+        // TODO: replace push_back by emplace_back.
+        asv->conduction_electron_bank.push_back(
+            HeedCondElectron(currpos.ptloc, currpos.time));
       }
       s_life = 0;
     }
@@ -299,11 +293,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
           point ptloc = curpt;
           prevpos.tid.up_absref(&ptloc);
           if (s_print_listing == 1) mcout << "New conduction electron\n";
-          HeedCondElectron hce(ptloc, currpos.time);
-          //HeedCondElectron hce(curpt, ptloc, prevpos.tid, this);
-          asv->conduction_electron_bank.append(hce);
-          //conduction_electron_bank.insert_after
-          //  ( conduction_electron_bank.get_last_node(), hce);
+          // TODO: replace push_back by emplace_back.
+          asv->conduction_electron_bank.push_back(
+              HeedCondElectron(ptloc, currpos.time));
           Eloss_left -= necessary_energy;
           curr_kin_energy_for_cond -= necessary_energy;
 // generate next random energy
@@ -502,11 +494,9 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
     SensitiveVolume* asv = dynamic_cast<SensitiveVolume*>(vav);
     if (asv != NULL) {
       if (s_print_listing == 1) mcout << "Last conduction electron\n";
-      HeedCondElectron hce(currpos.ptloc, currpos.time);
-      //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
-      asv->conduction_electron_bank.append(hce);
-      //conduction_electron_bank.insert_after
-      // ( conduction_electron_bank.get_last_node(), hce);
+      // TODO: replace push_back by emplace_back.
+      asv->conduction_electron_bank.push_back(
+          HeedCondElectron(currpos.ptloc, currpos.time));
     }
   }
   if (s_print_listing == 1) {

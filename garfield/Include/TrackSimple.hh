@@ -14,8 +14,8 @@ class TrackSimple : public Track {
   // Destructor
   ~TrackSimple() {}
 
-  void SetEqualSpacing() { useEqualSpacing = true; }
-  void SetExponentialSpacing() { useEqualSpacing = false; }
+  void SetEqualSpacing() { m_useEqualSpacing = true; }
+  void SetExponentialSpacing() { m_useEqualSpacing = false; }
 
   void SetClusterDensity(const double d);
   double GetClusterDensity();
@@ -29,17 +29,17 @@ class TrackSimple : public Track {
                   int& n, double& e, double& extra);
 
  protected:
-  bool isReady;
+  bool m_isReady;
 
   // Particle position, time and direction
-  double x, y, z, t;
-  double dx, dy, dz;
+  double m_x, m_y, m_z, m_t;
+  double m_dx, m_dy, m_dz;
   // Mean free path (mean spacing between adjacent clusters)
-  double mfp;
+  double m_mfp;
   // Average energy per cluster
-  double eloss;
+  double m_eloss;
 
-  bool useEqualSpacing;
+  bool m_useEqualSpacing;
 };
 }
 

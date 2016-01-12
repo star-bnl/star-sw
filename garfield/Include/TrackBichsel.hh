@@ -27,31 +27,31 @@ class TrackBichsel : public Track {
   double GetClusterDensity();
   double GetStoppingPower();
 
-  void SetDataFile(const std::string filename) { datafile = filename; }
+  void SetDataFile(const std::string& filename) { m_datafile = filename; }
 
  private:
   // Particle speed and rel. momentum
-  double bg;
-  double speed;
+  double m_bg;
+  double m_speed;
 
   // Particle position and direction
-  double x, y, z, t;
-  double dx, dy, dz;
+  double m_x, m_y, m_z, m_t;
+  double m_dx, m_dy, m_dz;
 
   // Inverse mean free path
-  double imfp;
+  double m_imfp;
 
-  std::string datafile;
+  std::string m_datafile;
   // Table of cumulative distribution functions
-  std::vector<std::vector<double> > cdf;
-  int iCdf;
-  int nCdfEntries;
+  std::vector<std::vector<double> > m_cdf;
+  int m_iCdf;
+  int m_nCdfEntries;
 
-  bool isInitialised;
-  bool isInMedium;
+  bool m_isInitialised;
+  bool m_isInMedium;
 
   double GetInverseMeanFreePath(const double bg);
-  bool LoadCrossSectionTable(const std::string filename);
+  bool LoadCrossSectionTable(const std::string& filename);
   void SelectCrossSectionTable();
 };
 }

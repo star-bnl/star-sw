@@ -50,7 +50,7 @@ MediumCdTe::MediumCdTe()
   m_fano = 0.1;
 }
 
-void MediumCdTe::GetComponent(const unsigned int& i, 
+void MediumCdTe::GetComponent(const unsigned int i, 
                               std::string& label, double& f) {
 
   if (i == 0) {

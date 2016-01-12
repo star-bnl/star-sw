@@ -21,17 +21,16 @@ HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            int fs_loss_only, int fs_print_listing)
     : eparticle(primvol, pt, vel, time, fpardef),
       s_print_listing(fs_print_listing),
+      particle_number(last_particle_number++),
       transferred_energy_in_step(0.0),
       qtransfer(0),
       s_loss_only(fs_loss_only) {
 
   mfunname("HeedParticle::HeedParticle(...)");
-  particle_number = last_particle_number;
-  last_particle_number++;
-  transferred_energy.allocate_block(100);
-  natom.allocate_block(100);
-  nshell.allocate_block(100);
-
+  transferred_energy.reserve(100);
+  natom.reserve(100);
+  nshell.reserve(100);
+  cluster_bank.reserve(100);
 }
 
 void HeedParticle::physics(void) {
@@ -42,15 +41,15 @@ void HeedParticle::physics(void) {
   }
   transferred_energy_in_step = 0.0;
   qtransfer = 0;
-  transferred_energy.allocate_block(100);
-  natom.allocate_block(100);
-  nshell.allocate_block(100);
+  transferred_energy.clear();
+  natom.clear();
+  nshell.clear();
   if (currpos.prange <= 0.0) return;
   // Get least address of volume
   const absvol* av = currpos.G_lavol();
   const EnTransfCSType* etcst = dynamic_cast<const EnTransfCSType*>(av);
   // Check if dynamic cast was successful.
-  if (etcst == NULL) return;
+  if (!etcst) return;
 
   EnTransfCS* aetcs = etcst->etcs.getver();
   HeedMatterDef* ahmd = aetcs->hmd.getver();
@@ -59,12 +58,12 @@ void HeedParticle::physics(void) {
   const double* aetemp = ahmd->energy_mesh->get_ae();
   PointCoorMesh<double, const double*> pcm_e(a_energy_mesh->get_q() + 1,
                                              &(aetemp));
-  long qa = amatter->qatom();
+  const long qa = amatter->qatom();
   if (s_print_listing == 1) Iprintn(mcout, qa);
   basis tempbas(currpos.dir, "tempbas");
   for (long na = 0; na < qa; ++na) {
     if (s_print_listing == 1) Iprintn(mcout, na);
-    long qs = ahmd->apacs[na]->get_qshell();
+    const long qs = ahmd->apacs[na]->get_qshell();
     for (long ns = 0; ns < qs; ++ns) {
       if (s_print_listing == 1) Iprintn(mcout, ns);
       long qt = 0;
@@ -97,7 +96,7 @@ void HeedParticle::physics(void) {
         }
         for (long nt = 0; nt < qt; ++nt) {
 #ifdef SINGLE_TRANSFER
-          transferred_energy.append(ener_single_transf);
+          transferred_energy.push_back(ener_single_transf);
 #else
           double rn = SRANLUX();
           if (s_print_listing == 1) {
@@ -110,14 +109,14 @@ void HeedParticle::physics(void) {
               pcm_e, aetcs->fadda[na][ns], rn);
 
           // Convert to internal units.
-          transferred_energy.append(r * MeV);
+          transferred_energy.push_back(r * MeV);
 #endif
           if (s_print_listing == 1) {
             Iprint2n(mcout, nt, transferred_energy[qtransfer]);
           }
           transferred_energy_in_step += transferred_energy[qtransfer];
-          natom.append(na);
-          nshell.append(ns);
+          natom.push_back(na);
+          nshell.push_back(ns);
 #ifdef SINGLE_TRANSFER
           double arange = 0.5 * range;
 #else
@@ -127,40 +126,37 @@ void HeedParticle::physics(void) {
           point ptloc = pt;
           prevpos.tid.up_absref(&ptloc);
           qtransfer++;
-          if (s_loss_only == 0) {
-            if (s_print_listing == 1) {
-              mcout << "generating new cluster\n";
-            }
-            cluster_bank.append(HeedCluster(transferred_energy[qtransfer - 1],
-                                            0, pt, ptloc, prevpos.tid, na, ns));
+          if (s_loss_only != 0) continue;
+          if (s_print_listing == 1) mcout << "generating new cluster\n";
+          cluster_bank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
+                                             0, pt, ptloc, prevpos.tid, na, ns));
 
-            double Ep0 = mass * c_squared + curr_kin_energy;
-            double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
-            double Mp = mass;
-            double Mt = electron_def.mass;
-            double theta_p, theta_t;
-            theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
-            vec vel;
-            vel.random_conic_vec(fabs(theta_t));
-            vel.down(&tempbas);  // direction is OK
-            vel *= c_light;
-            // HS
-            double speed = length(vel);
-            double time = arange / speed;
-            if (s_print_listing == 1) {
-              mcout << "generating new virtual photon\n";
-            }
-            HeedPhoton hp(currpos.tid.eid[0].amvol.getver(), pt, vel, time,
-                          particle_number, transferred_energy[qtransfer - 1],
-                          0);
-            hp.s_photon_absorbed = 1;
-            hp.s_delta_generated = 0;
-            hp.na_absorbing = na;
-            hp.ns_absorbing = ns;
-            ActivePtr<gparticle> ac;
-            ac.put(&hp);
-            particle_bank.insert_after(particle_bank.get_last_node(), ac);
+          double Ep0 = mass * c_squared + curr_kin_energy;
+          double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
+          double Mp = mass;
+          double Mt = electron_def.mass;
+          double theta_p, theta_t;
+          theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
+          vec vel;
+          vel.random_conic_vec(fabs(theta_t));
+          vel.down(&tempbas);  // direction is OK
+          vel *= c_light;
+          // HS
+          double speed = length(vel);
+          double time = arange / speed;
+          if (s_print_listing == 1) {
+            mcout << "generating new virtual photon\n";
           }
+          HeedPhoton hp(currpos.tid.eid[0].amvol.getver(), pt, vel, time,
+                        particle_number, transferred_energy[qtransfer - 1],
+                        0);
+          hp.s_photon_absorbed = 1;
+          hp.s_delta_generated = 0;
+          hp.na_absorbing = na;
+          hp.ns_absorbing = ns;
+          ActivePtr<gparticle> ac;
+          ac.put(&hp);
+          particle_bank.push_back(ac);
         }
       }
     }

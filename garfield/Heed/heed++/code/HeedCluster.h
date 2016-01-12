@@ -1,7 +1,6 @@
 #ifndef HEEDCLUSTER_H
 #define HEEDCLUSTER_H
 
-#include "wcpplib/safetl/BlkArr.h"
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/volume.h"
 
@@ -34,8 +33,6 @@ class HeedCluster : public RegPassivePtr {
   }
   virtual void print(std::ostream& file, int l) const;
 };
-
-extern BlkArr<HeedCluster> cluster_bank;
 
 }
 
