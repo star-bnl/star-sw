@@ -318,6 +318,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
   justUpdateDisplayPallete = 0;
 
   log_output = RTS_LOG_NET;
+  //log_output = RTS_LOG_STDERR;
   log_dest = (char *)"172.16.0.1";
   log_port = 8004;
   log_level = (char *)WARN;

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+args="$*"
+cmdstr="OnlTools/Jevp/StJevpPresenter/qtTestBaseScript.C(\"$args\")"
+
+root4star  "$cmdstr"

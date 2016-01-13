@@ -34,7 +34,7 @@ void baseBuilder::initialize(int argc, char *argv[]) {
 //     }
   }
 
-  printf("base:  Confdatadir = %s",confdatadir);
+  printf("base:  Confdatadir = %s\n",confdatadir);
 
   
 }
