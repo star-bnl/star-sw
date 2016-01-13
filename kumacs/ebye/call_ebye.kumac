@@ -1,0 +1,15 @@
+ exec kumacs/ebye/run_ebye _
+          TOP=/star/u2d/lcarr/research/stafWork/98h_ebye _
+          domain='global ebye' _
+          input_data_prefix=/scr20/dhammika/data/ _
+          input_data_file=VEN_S1-184144_S2-3450220_fast_dst.xdf _
+          output_file=sca_out.xdf _
+          num_events=5 _
+          calib_dir=$STAR_CALIB/ebye _
+          prior_switch=0 _
+          ensemble_switch=0 _
+          analysis_switch=1 _
+          funit=21 _
+          nfile=ebye.ntup _
+          nid=111 _
+          table=ebye/sca/sca_out
