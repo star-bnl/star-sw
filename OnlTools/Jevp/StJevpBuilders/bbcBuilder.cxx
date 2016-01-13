@@ -53,11 +53,14 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
 
   // Build Root Histograms...
   
+  LOG(NOTE, "init");
+
   contents.h190_bbc_hitmap_EAST = new TH1F("h190_bbc_hitmap_EAST","Hit Pattern BBC EAST",24,0.5,24.5);
   contents.h191_bbc_hitmap_WEST = new TH1F("h191_bbc_hitmap_WEST","Hit Pattern BBC WEST",24,0.5,24.5);
   contents.h192_bbc_weight_hitmap_EAST = new TH1F("h192_bbc_weight_hitmap_EAST","Weighted Hit Pattern BBC EAST",24,0.5,24.5);
   contents.h193_bbc_weight_hitmap_WEST = new TH1F("h193_bbc_weight_hitmap_WEST","Weighted Hit Pattern BBC WEST",24,0.5,24.5);
-  
+ 
+
   contents.h194_bbc_hits_east = new TH1F("h194_bbc_hits_east","BBC Small-tile Hits East",17,-0.5,16.5);
   contents.h195_bbc_hits_west = new TH1F("h195_bbc_hits_west","BBC Small-tile Hits West",17,-0.5,16.5);
   contents.h196_bbcl_hits_east = new TH1F("h196_bbcl_hits_east","BBC Large-tile Hits East",9,-0.5,8.5);
@@ -98,9 +101,8 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
   contents.h452_bbc_tac_difference_ew = new TH1F("h452_bbc_tac_difference_e-w","BBC Vertex (cm)",256,-300,300);
   contents.h205_bbc_tac_e_w = new TH2F("h205_bbc_tac_e_w","BBC TAC East vs West",64,0,4096,64, 0,4096);
 
-  
   // Add root histograms to Plots
-  JevpPlot *plots[100];
+  JevpPlot *plots[400];
   int n=0;
 
   plots[n] = new JevpPlot(contents.h190_bbc_hitmap_EAST);
@@ -130,17 +132,15 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h205_bbc_tac_e_w);
   plots[n]->setDrawOpts("colz");
   plots[n]->setOptStat(0);
- 
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    LOG(DBG, "Adding plot %d",i);
+
     addPlot(plots[i]);
     if(i<8) plots[i]->logy = 1;
 
     contents.array[i]->SetFillColor(30);
   }
-  
 }
   
 void bbcBuilder::startrun(daqReader *rdr) {
