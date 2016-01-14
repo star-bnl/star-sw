@@ -6,17 +6,21 @@
 #include "StEvent/StDcaGeometry.h"
 
 #include "StPicoDstMaker/StPicoDst.h"
+#include "StPicoDstMaker/StPicoEvent.h"
 #include "StPicoDstMaker/StPicoTrack.h"
 #include "StPicoKFVertexFitter.h"
 
 using namespace std;
 
-StThreeVectorF StPicoKFVertexFitter::primaryVertexRefit(StPicoDst const* const picoDst,
-    std::vector<int>& tracksToRemove) const
+StThreeVectorF StPicoKFVertexFitter::primaryVertexRefit(StPicoDst const* picoDst,
+							std::vector<int>& tracksToRemove) const
 {
+   StThreeVectorF kfVertex(-999.,-999.,-999.);
+   if (! picoDst || ! picoDst->event()) return kfVertex;
+   Float_t bField = picoDst->event()->bField();
+   KFParticle::SetField(bField);
    // just in case it is not sorted
    std::sort(tracksToRemove.begin(),tracksToRemove.end());
-
    vector<int> goodTracks;
 
    // make a list of good tracks to be used in the KFVertex fit
@@ -60,7 +64,6 @@ StThreeVectorF StPicoKFVertexFitter::primaryVertexRefit(StPicoDst const* const p
    // clean up
    for(size_t iTrk = 0; iTrk < goodTracks.size(); ++iTrk) delete particles[iTrk];
 
-   StThreeVectorF kfVertex(-999.,-999.,-999.);
 
    if (aVertex.GetX())
    {
