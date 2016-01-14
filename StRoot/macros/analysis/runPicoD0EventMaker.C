@@ -17,7 +17,7 @@ class StPicoDstMaker;
 
 
 StChain *chain;
-void runPicoD0EventMaker(const Char_t *inputFile=, const Char_t *outputFile="test.root")
+void runPicoD0EventMaker(Int_t nEvents = 10000000, const Char_t *inputFile="Pico.list", const Char_t *outputFile="test3")
 { 
   //Check STAR Library. Please set SL_version to the original star library used in the production from http://www.star.bnl.gov/devcgi/dbProdOptionRetrv.pl
 #if 0
@@ -29,7 +29,6 @@ void runPicoD0EventMaker(const Char_t *inputFile=, const Char_t *outputFile="tes
       exit(1);
   }
 #endif
-  Int_t nEvents = 10000000;
 	
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
 	loadSharedLibraries();
@@ -78,10 +77,12 @@ void runPicoD0EventMaker(const Char_t *inputFile=, const Char_t *outputFile="tes
 	cout << "****************************************** " << endl;
 	cout << "Work done... now its time to close up shop!"<< endl;
 	cout << "****************************************** " << endl;
+#if 0
 	chain->Finish();
 	cout << "****************************************** " << endl;
 	cout << "total number of events  " << nEvents << endl;
 	cout << "****************************************** " << endl;
 	
 	delete chain;
+#endif
 }
