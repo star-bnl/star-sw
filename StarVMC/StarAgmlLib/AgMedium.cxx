@@ -7,12 +7,13 @@
 
 ClassImp(AgMedium);
 // -----------------------------------------------------------------------------------------------------------
-std::vector< TString >             AgMedium::mParameterList;
+// lifted std::vector< TString >             AgMedium::mParameterList;
 std::map   < TString, AgMedium * > AgMedium::mMediumTable;
 std::vector< TString >             AgMedium::mMediumList;
 //
 struct _MediumDummy{
   _MediumDummy(){
+#if 0 // lifted
     AgMedium::mParameterList.push_back("isvol"); // 0
     AgMedium::mParameterList.push_back("ifield");// 1
     AgMedium::mParameterList.push_back("fieldm");// 2
@@ -35,6 +36,7 @@ struct _MediumDummy{
       {
 	AgMedium::mParameterList.push_back(keys[i]);
       }
+#endif
     AgMedium::mMediumTable["Standard"]=new AgMedium("Standard");
     AgMedium::mMediumList.push_back("Standard");
   };
@@ -59,6 +61,17 @@ AgMedium::isEqual( const AgMedium &Other )
 // -----------------------------------------------------------------------------------------------------------
 AgMedium::AgMedium(const Char_t *name):TNamed(name,Form("Medium for %s",name))
 {
+
+  // Add to parameter list
+  mParameterList = {
+    "isvol", "ifield", "fieldm", "tmaxfd", 
+    "stemax","deemax","epsil", "stmin",
+    "cutgam", "cutele", "cutneu", "cuthad",
+    "cutmuo", "bcute",  "bcutm",  "dcute",   
+    "dcutm",  "ppcutm"
+  };
+
+
   par("isvol")=0;              // Set default parameters
   par("ifield")=1;
   par("fieldm")=20;
@@ -78,17 +91,18 @@ AgMedium::AgMedium(const Char_t *name):TNamed(name,Form("Medium for %s",name))
 }
 
 // -----------------------------------------------------------------------------------------------------------
+#if 0 // lifted
 Bool_t AgMedium::isSet( const Char_t *par ) const
 {
-  TString key=par;
+  const char* key=par;
   return ( mParameters.find(key) != mParameters.end() );
 }
 
 // -----------------------------------------------------------------------------------------------------------
 Bool_t AgMedium::hasPar(const Char_t *par ) const
 {
-  TString key=par;
-  std::vector<TString> parlist = mParameterList;
+  const char* key=par;
+  std::vector<std::string> parlist = mParameterList;
   for ( UInt_t i=0;i<parlist.size();i++ )
     if ( parlist[i] == key ) return true;
   return false;
@@ -96,6 +110,7 @@ Bool_t AgMedium::hasPar(const Char_t *par ) const
 
 // -----------------------------------------------------------------------------------------------------------
 Double_t &AgMedium::par(const Char_t *name){ return mParameters[name]; }
+#endif
 
 // -----------------------------------------------------------------------------------------------------------
 void AgMedium::Inherit( AgBlock *block )
@@ -278,14 +293,14 @@ void AgMedium::Print( const Option_t *opts ) const
 	TString name = GetName();
 	//LOG_INFO << "["<< ((mLock)?"-":"+") << "] " << Form("%30s:",name.Data()) << " ";
 	LOG_INFO << Form("%20s",name.Data()) << " ";
-	std::map<TString, Double_t > mypar=mParameters;
+	std::map<std::string, Double_t > mypar=mParameters;
 	for ( UInt_t j=0;j<mParameterList.size();j++ )
 	{
-		TString key=mParameterList[j];
+	  const char* key=mParameterList[j].c_str();
 		if ( isSet(key) )
-		  { LOG_INFO << Form(" %s=%9.5g",key.Data(),mypar[key]); }
+		  { LOG_INFO << Form(" %s=%9.5g",key,mypar[key]); }
 		else
-		  { LOG_INFO << Form(" %s= <unset> ",key.Data()); }
+		  { LOG_INFO << Form(" %s= <unset> ",key); }
 	}
 	LOG_INFO << endm;
 

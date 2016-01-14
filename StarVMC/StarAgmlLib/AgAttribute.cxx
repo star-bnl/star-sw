@@ -3,9 +3,10 @@
 #include "StMessMgr.h"
 ClassImp(AgAttribute);
 // -----------------------------------------------------------------------------------------------------------
-std::vector< TString > AgAttribute::mParList;
+//lift std::vector< TString > AgAttribute::mParList;
 //std::map   < TString, Double_t > AgAttribute::mParameters;
 
+#if 0 // lift
 struct _AttributeDummy{
   _AttributeDummy(){
     AgAttribute::mParList.push_back("seen");
@@ -17,17 +18,23 @@ struct _AttributeDummy{
     AgAttribute::mParList.push_back("trans");
   };
 } _attribute_dummy_init;
+#endif
+
 // -----------------------------------------------------------------------------------------------------------
 AgAttribute::AgAttribute(const Char_t *name):TNamed(name,Form("Attributes for %s",name))
 {
-
+  // Initialize parameter list
+  const char* attr[] = { "seen", "colo", "serial", "fill", "lsty", "lwid", "trans" };
+  for ( int i=0;i<7;i++ ) mParameterList.push_back(attr[i]);
 }
 AgAttribute::AgAttribute(const AgAttribute &other)
 {
-	SetName(other.GetName());
-	SetTitle(other.GetTitle());
-	mParameters = other.mParameters;
+  (*this) = other;
+  SetName(other.GetName());
+  SetTitle(other.GetTitle());
 }
+
+#if 0 // lift
 Bool_t AgAttribute::isSet( const Char_t *par ) const
 {
   TString key=par;
@@ -36,7 +43,7 @@ Bool_t AgAttribute::isSet( const Char_t *par ) const
 Bool_t AgAttribute::hasPar(const Char_t *par ) const
 {
   TString key=par;
-  std::vector<TString> parlist = mParList;
+  std::vector<TString> parlist = mParameterList;
   for ( UInt_t i=0;i<parlist.size();i++ )
     if ( parlist[i] == key ) return true;
   return false;
@@ -57,13 +64,15 @@ Bool_t AgAttribute::unSet( const Char_t *par )
     }
   return true; // didn't need to remove element
 }
+#endif
+
 
 void AgAttribute::Inherit( AgBlock *prev )
 {
   AgAttribute *other = prev->attribute();
-  for ( UInt_t i=0;i<mParList.size();i++ )
+  for ( UInt_t i=0;i<mParameterList.size();i++ )
     {
-      TString key = mParList[i];
+      const char* key = mParameterList[i].c_str();
       if ( !isSet(key) )
 	{
 	  if ( other->isSet(key) ) par(key)=other->par(key);
@@ -75,22 +84,22 @@ void AgAttribute::Inherit( AgBlock *prev )
 void AgAttribute::Print( const Option_t *o ) const
 {
   // Copy parameters
-  std::map< TString, Double_t > params = mParameters;
+  std::map< std::string, Double_t > params = mParameters;
 
   // Loop over all parameters in parlist
-  for ( UInt_t j=0;j<mParList.size();j++ )
+  for ( UInt_t j=0;j<mParameterList.size();j++ )
     {
       // Key
-      TString key=mParList[j];
+      const char* key=mParameterList[j].c_str();
 
       // If the key is set print it out
       if ( isSet(key) )
 	{
-	  LOG_INFO << Form(" %s=%7.4g",key.Data(), params[key] ) << endm;
+	  LOG_INFO << Form(" %s=%7.4g",key, params[key] ) << endm;
 	}
       else
 	{
-	  LOG_INFO << Form(" %s=<unset>",key.Data()) << endm;
+	  LOG_INFO << Form(" %s=<unset>",key) << endm;
 	}
     }
 }

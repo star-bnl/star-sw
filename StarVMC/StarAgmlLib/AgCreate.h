@@ -6,8 +6,9 @@
 #include <map>
 
 #include "AgShape.h"
-
-class AgCreate : public TNamed
+//#include "AgParameterList.h"
+#include <StarVMC/StarAgmlUtil/AgParameterList.h>
+class AgCreate : public TNamed, public AgParameterList<double>
 {
  public:
 
@@ -18,10 +19,14 @@ class AgCreate : public TNamed
   /// Class destructor
   ~AgCreate();
 
+  AgCreate &operator=( const AgCreate& other );
+
+#if 0 // lift 
   /// Returns a reference to the named parameter
   Double_t &par( const Char_t *name );
   /// Tests whether the named parameter is set
   Bool_t isSet( const Char_t *par ) const;  
+#endif
 
   /// Takes a reference to the specified shape, loops over
   /// all parameters defined in the create object and sets
@@ -36,7 +41,7 @@ class AgCreate : public TNamed
  protected:
 
   /// Map of key=value pairs
-  std::map<TString, Double_t>                   mParameters;  
+  //  std::map<TString, Double_t>                   mParameters;  
 
   /// Root dictionary interface
   ClassDef(AgCreate,1);
