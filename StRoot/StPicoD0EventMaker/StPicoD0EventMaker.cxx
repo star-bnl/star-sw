@@ -32,7 +32,7 @@ StPicoD0EventMaker::StPicoD0EventMaker(char const* makerName, StPicoDstMaker* pi
    mOutputFile = new TFile(Form("%s.picoD0.root",fileBaseName), "RECREATE");
    mOutputFile->SetCompressionLevel(1);
    int BufSize = (int)pow(2., 16.);
-   int Split = 1;
+   int Split = 99;
    mTree = new TTree("T", "T", BufSize);
    mTree->SetAutoSave(1000000); // autosave every 1 Mbytes
    mTree->Branch("dEvent", "StPicoD0Event", &mPicoD0Event, BufSize, Split);
@@ -90,6 +90,7 @@ Int_t StPicoD0EventMaker::Make()
    int nTracksFullEvt = 0;
    int nTracksSubEvt1 = 0;
    int nTracksSubEvt2 = 0;
+   const StThreeVectorF &pVtx = mPicoEvent->primaryVertex();
    
    if (isGoodEvent())
    {
@@ -101,7 +102,6 @@ Int_t StPicoD0EventMaker::Make()
 
       std::vector<int> allTracksForVtxFit;
 
-      StThreeVectorF const pVtx = mPicoEvent->primaryVertex();
       unsigned int nHftTracks = 0;
 
       for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack)
@@ -187,7 +187,7 @@ Int_t StPicoD0EventMaker::Make()
       mPicoD0Hists->addEvent(*mPicoEvent,*mPicoD0Event,nHftTracks);
    } //.. end of good event fill
 
-   mPicoD0Event->addPicoEvent(*mPicoEvent,&kfVertex);
+   mPicoD0Event->addPicoEvent(*mPicoEvent,&kfVertex, &pVtx);
    mKfVertexEvent.addEvent(*mPicoEvent,&kfVertex,&kfVertexSubEvt1,&kfVertexSubEvt2,
                             nTracksFullEvt,nTracksSubEvt1,nTracksSubEvt2);
 
