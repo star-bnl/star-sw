@@ -79,28 +79,29 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
   for( int i=0; i<nDaughters; i++ ) vtxFlag[i] = 1;
 
   Int_t nRest = nDaughters;
-//   while( nRest>2 )
-//   {    
-//     float worstChi = 0.;
-//     Int_t worstDaughter = 0;
-//     for( Int_t it=0; it<nDaughters; it++ ){
-//       if( !vtxFlag[it] ) continue;	
-//       const KFParticle &p = *(vDaughters[it]);
-//       //KFVertex tmp = *this - p;
-//       //float chi = p.GetDeviationFromVertex( tmp );      
-//       float chi = p.GetDeviationFromVertex( *this );      
-//       if( worstChi < chi ){
-//         worstChi = chi;
-//         worstDaughter = it;
-//       }
-//     }
-//     if( worstChi < ChiCut ) break;
-//       std::cout <<"worst 1 " <<  worstDaughter << " " << worstChi << std::endl;
-//     vtxFlag[worstDaughter] = 0;    
-//     //*this -= *(vDaughters[worstDaughter]);
-//     nRest--;
-//   } 
-
+#ifndef __NO_ITERATIONS__
+  while( nRest>2 )
+  {    
+    float worstChi = 0.;
+    Int_t worstDaughter = 0;
+    for( Int_t it=0; it<nDaughters; it++ ){
+      if( !vtxFlag[it] ) continue;	
+      const KFParticle &p = *(vDaughters[it]);
+      //KFVertex tmp = *this - p;
+      //float chi = p.GetDeviationFromVertex( tmp );      
+      float chi = p.GetDeviationFromVertex( *this );      
+      if( worstChi < chi ){
+        worstChi = chi;
+        worstDaughter = it;
+      }
+    }
+    if( worstChi < ChiCut ) break;
+    //      std::cout <<"worst 1 " <<  worstDaughter << " " << worstChi << std::endl;
+    vtxFlag[worstDaughter] = 0;    
+    //*this -= *(vDaughters[worstDaughter]);
+    nRest--;
+  } 
+#else /* ! __NO_ITERATIONS__ */
   for( Int_t it=0; it<nDaughters; it++ ){
     const KFParticle &p = *(vDaughters[it]);
     float chi = p.GetDeviationFromVertex( *this );      
@@ -109,7 +110,7 @@ void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[],
       nRest--;
     }
   }
-
+#endif 
   if( nRest>=2 ) {// final refit     
 //     SetVtxGuess( fP[0], fP[1], fP[2] );
     if( fIsConstrained ){
