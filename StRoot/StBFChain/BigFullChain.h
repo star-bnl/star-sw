@@ -1071,6 +1071,13 @@ Bfc_st BFC[] = { // standard chains
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                 "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  // Year 16 initial chains - no data to really test yet but placeholder
+  // 2016 standard + one base with HftC (Complete)
+  {"B2016"  ,"","","ry2016,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for 2016 ITTF (tpc)",kFALSE},
+  {"P2016","" ,"",
+   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
@@ -1098,6 +1105,7 @@ Bfc_st BFC[] = { // standard chains
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"KFParticle"  ,""  ,"","","","KFParticle",                                     "Load KFParticle",kFALSE},
   {"StUtilities" ,""  ,"","","","StUtilities",                                   "Load StUtilities",kFALSE},
   {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
   {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
@@ -1242,7 +1250,8 @@ Bfc_st BFC[] = { // standard chains
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
   {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,detDb"    ,"","StEvent","Load StEvent",kFALSE},
+  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,detDb,KFParticle","","StEvent"
+   ,                                                                                 "Load StEvent",kFALSE},
   {"PxlUtil"     ,""  ,"","","",                                       "StPxlUtil","Load StPxlUtil",kFALSE},
   {"IstUtil"     ,""  ,"","","",                                       "StIstUtil","Load StIstUtil",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
