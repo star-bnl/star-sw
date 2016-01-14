@@ -9,14 +9,19 @@ ClassImp(AgPlacement);
 AgPlacement::AgPlacement(const Char_t *block, const Char_t *mother, const Char_t *group):
   TNamed(block,Form("Place %s into %s",block,mother)), mHasRotm(false),mType(kUnknown)
 {
-	mBlock=block;
-	mMother=mother;
-	mGroup=group;
+  //mBlock=block;
+  //	mMother=mother;
+  //	mGroup=group;
+  SetBlock(block);
+  SetMother(mother);
+  SetGroup(group);
 }
 
+#if 0 // lifted to AgParameterList
 const Char_t *AgPlacement::block(){ return mBlock.Data(); }
 const Char_t *AgPlacement::mother(){ return mMother.Data(); }
 const Char_t *AgPlacement::group(){ return mGroup.Data(); }
+#endif
 
 void AgPlacement::AlphaX( Double_t ax )
 {
@@ -149,6 +154,7 @@ TGeoCombiTrans *AgPlacement::matrix()
 		else if ( mType[i]==kRot6 )
 		{
 
+
 		  //			std::cout << Form("G3 Rotation...") << std::endl;
 
 			Double_t thetax = R.rot6.thetax;
@@ -191,14 +197,15 @@ TGeoCombiTrans *AgPlacement::matrix()
 
 
 	TGeoRotation *RotInHell = new TGeoRotation(rotation);
-	RotInHell->SetName(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data()));
+	//	RotInHell->SetName(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data()));
+	RotInHell->SetName(Form("rot_%s_in_%s",block(),mother()));
 
 	//TGeoRotation *RotInHell = (TGeoRotation*)rotation.Clone(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data()));
 	//TGeoCombiTrans *translation = new TGeoCombiTrans( x, y, z, 
 	//	 (TGeoRotation*)rotation.Clone(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data())));
 
 	TGeoCombiTrans *translation = new TGeoCombiTrans( x, y, z, RotInHell );
-	translation->SetName(Form("mat_%s_in_%s",mBlock.Data(),mMother.Data()));
+	translation->SetName(Form("mat_%s_in_%s",block(),mother()));
 
 	//	return (TGeoCombiTrans*)gGeoIdentity;
 
@@ -206,6 +213,7 @@ TGeoCombiTrans *AgPlacement::matrix()
 
 }
 
+#if 0 // lifted to AgParameterList
 Double_t &AgPlacement::par( const Char_t *name )
 {
 	//static Double_t _dummy = 0;
@@ -219,3 +227,4 @@ Bool_t AgPlacement::isSet( const Char_t *par ) const
 	TString key=par;
 	return ( mParameters.find(key) != mParameters.end() );
 }
+#endif

@@ -237,12 +237,12 @@ void AgShape::Print( Option_t *otps ) const
     {
       TString name = GetName();
       LOG_INFO << "[+] " << name.Data() << ":";
-      std::map<TString, Double_t > mypar=mParameters;
+      std::map<std::string, Double_t > mypar=mParameters;
       for ( UInt_t j=0;j<mParList[mId].size();j++ )
 	{
 	  TString key=mParList[mId][j];
-	  if ( isSet(key) )
-	    {  LOG_INFO << Form(" %s=%7.4g",key.Data(),mypar[key]); }
+	  if ( isSet(key.Data()) )
+	    {  LOG_INFO << Form(" %s=%7.4g",key.Data(),mypar[key.Data()]); }
 	  else
 	    { LOG_INFO << Form(" %s=<unset>",key.Data()); }
 	}
@@ -286,11 +286,12 @@ Bool_t AgShape::operator == ( const AgShape &other ) const
   if ( mId == kDivision ) return false;
 	  
 
-  std::map<TString, Double_t> mypar = mParameters;
-  std::map<TString, Double_t> itspar = other.mParameters;
+  std::map<std::string, Double_t> mypar = mParameters;
+  std::map<std::string, Double_t> itspar = other.mParameters;
 
   for ( UInt_t i=0;i<parlist.size();i++ )
-    { TString key = parlist[i];
+    { 
+      const char* key = parlist[i].Data();
 
       if ( isSet(key) and other.isSet(key) )
 	{
@@ -321,11 +322,13 @@ Bool_t AgShape::operator == ( const AgShape &other ) const
 }
 
 // =============================================================================================================
+#if 0 // lift
 Bool_t AgShape::isSet( const Char_t *par ) const
 {
   TString key=par;
   return ( mParameters.find(key) != mParameters.end() );
 }
+#endif
 Bool_t AgShape::hasPar(const Char_t *par ) const
 {
   TString key=par;
@@ -340,7 +343,7 @@ Bool_t AgShape::hasPar(const Char_t *par ) const
 // =============================================================================================================
 Double_t &AgShape::par( const Char_t *name )
 { static Double_t _dummy = 0;
-  TString key=name;
+  // key=name;
 
   // If the named parameter is not appropriate for this shape,
   // issue a warning and return a reference to _dummy
@@ -358,7 +361,7 @@ Double_t &AgShape::par( const Char_t *name )
       return _dummy;
     }
 
-  return mParameters[key];
+  return mParameters[name];
 }
 
 // Double_t AgShape::GetPar( const Char_t *name )
@@ -486,14 +489,14 @@ TGeoShape *AgShape::MakeIfUnique()
   for ( UInt_t i=0;i<mStoredShapes.size();i++ )
     {
       TGeoShape *_shape = mStoredShapes[i];
-      std::map<TString, Double_t> params=mStoredParams[i];
+      std::map<std::string, Double_t> params=mStoredParams[i];
       // loop over parameters
       Bool_t equal = true;
       for ( UInt_t j=0;j<mParList[mId].size();j++ )
 	{
 	  TString key=mParList[mId][j];
-	  Double_t a = par(key);
-	  Double_t b = params[key];
+	  Double_t a = par(key.Data());
+	  Double_t b = params[key.Data()];
 	  equal &= a==b;
 	}
 
@@ -605,14 +608,14 @@ Bool_t AgShape::morphed()
 {
   for ( UInt_t i=0;i<mStoredParams.size();i++ )
     {
-      std::map<TString, Double_t> params=mStoredParams[i];
+      std::map<std::string, Double_t> params=mStoredParams[i];
       // loop over parameters
       Bool_t equal = true;
       for ( UInt_t j=0;j<mParList[mId].size();j++ )
 	{
 	  TString key=mParList[mId][j];
 	  Double_t a = par(key);
-	  Double_t b = params[key];
+	  Double_t b = params[key.Data()];
 	  equal &= a==b;
 	}
       if ( true ) return false; // Found one match
