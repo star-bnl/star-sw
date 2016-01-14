@@ -38,50 +38,19 @@
 #include <stack>
 
 
+// QtTestGui implementation
 
-QtTestGui *gQtTestGui;
-
-// Suspend signal emitting until this class is deleted...
-class  PresenterSuspend {
-private:
-  std::stack<QObject *> fWidgets;
-
-public:
-  PresenterSuspend(){};
-  
-  ~PresenterSuspend(){    
-    while (!fWidgets.empty()) {
-      fWidgets.top()->blockSignals(false);
-      fWidgets.pop();
-    }
-  }
-  
-  void operator<<(QObject *o) {
-    o->blockSignals(true); 
-    fWidgets.push(o);
-  }
-};
-
-//------------------------------------------------------------------------
 QtTestGui::QtTestGui() : Q3MainWindow(), mWidth(900), mHight(500)
 {
-  gQtTestGui = this;
-
-  refreshTimer = new QTimer(this);
-  connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerFired()));
-  refreshTimer->start(2500);
+    refreshTimer = new QTimer(this);
+    connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerFired()));
+    refreshTimer->start(1000);
 }
 
-//----------------------------------------------------------------
 QtTestGui::~QtTestGui()
 {
 }
 
-//----------------------------------------------------------------
-void QtTestGui::CloseWindow()
-{
-    qApp->closeAllWindows();
-}
 
 void QtTestGui::refreshTimerFired()
 { 
@@ -99,45 +68,61 @@ void QtTestGui::init()
     setWindowModality(Qt::WindowModal);
 
     CP;
-    PresenterSuspend blockWidgets;
-    blockWidgets << this;
+    QTabWidget *rootTab = new QTabWidget();
+    CP;
+    rootTab->resize(mWidth, mHight);
+    CP;
+   
+    rootTab->addTab(new QLabel(tr("Tab 1")), tr("AAAA 1"));
+    rootTab->addTab(new QLabel(tr("Tab 2")), tr("BBBB 2"));
+    rootTab->addTab(new QLabel(tr("Tab 3")), tr("CCCC 3"));
 
-    mCentralWidget = new Q3HBox(this);
-    blockWidgets << mCentralWidget;
+    CP;
+    ScreenWidget *sw = new ScreenWidget((char *)"boo", rootTab);
+    CP;
 
-    mCentralWidget->setMargin(0);
-    mCentralWidget->setSpacing(0); 
-    setCentralWidget(mCentralWidget);
+    rootTab->addTab(sw, tr("Screen Widget"));
+ 
     
-    //
-    // Define Tabs
-    //
-    // main tab holding
+    // This connects the tab to the window...
+    CP;
+    rootTab->setParent(this);
     CP;
      
-    connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
-    connect(qApp,SIGNAL(lastWindowClosed()),this, SLOT(jl_ClosePresenter()));
+    QWidget *cw = centralWidget();
+    printf("%p  vs %p\n", cw, rootTab);
+
+    // Notifies currentChangedSlot() when a tab is changed...
+    connect(rootTab, SIGNAL(currentChanged(int)), this, SLOT(currentChangedSlot(int)));
+    connect(qApp,SIGNAL(lastWindowClosed()),this, SLOT(ClosePresenter()));
     resize(mWidth,mHight);
 
-    //SetWindowName("Live...");
+    setCaption("Test...");
 
     show();
- 
-
-  
-    connect(this,SIGNAL(update()), this, SLOT(update()) ); 
-
-    pc_mCanvas = 0;
 }
 
-void QtTestGui::UpdatePlots() {
-    cout << "update plots...";
-}
-//______________________________________________________________________________ 
-void QtTestGui::jl_ClosePresenter() 
+void QtTestGui::ClosePresenter() 
 {
-  LOG("JEFF", "Exitint....");
+  LOG("JEFF", "Exit....");
   // Qt [slot] to terminate the application
   gApplication->Terminate();
 }
 
+void QtTestGui::currentChangedSlot(int x) {
+    printf("changed tab to %d\n", x);
+}
+
+
+// Screen Widget Implementation
+ScreenWidget::ScreenWidget(char *name, QTabWidget *menu) {
+    parentMenu = menu;
+}
+
+void ScreenWidget:: mouseDoubleClickEvent(QMouseEvent *e) {
+    printf("double click\n");
+}
+
+void ScreenWidget::mousePressEvent(QMouseEvent *e) {
+    printf("mouse press\n");
+}
