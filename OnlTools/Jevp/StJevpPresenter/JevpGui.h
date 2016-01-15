@@ -28,7 +28,7 @@
 #include "Jevp/StJevpPlot/JevpPlot.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "Jevp/StJevpPlot/EvpMessage.h"
-#include "Jevp/StJevpServer/DisplayDefs.h"
+#include "Jevp/StJevpPlot/DisplayDefs.h"
 
 
 #  include <q3intdict.h> 
