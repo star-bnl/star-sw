@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -27,7 +26,7 @@ ClassImp(fpdBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-fpdBuilder::fpdBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+fpdBuilder::fpdBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"fpd";
   
   int np = sizeof(contents) / sizeof(TH1 *);

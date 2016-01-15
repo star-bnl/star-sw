@@ -5,7 +5,7 @@
 #include <map>
 #include <math.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 
 class TH1;
 class daqReader;
@@ -14,7 +14,7 @@ class JevpPlot;
 /**
  Builder creating and filling plots for FMS in Jevp.
  */
-class fmsBuilder : public JevpPlotSet {
+class fmsBuilder : public JevpBuilder {
 
 public:
 

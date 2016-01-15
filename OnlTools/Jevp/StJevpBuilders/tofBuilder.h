@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -13,7 +13,7 @@
 class TLatex;
 class TPad;
 
-class tofBuilder : public JevpPlotSet {
+class tofBuilder : public JevpBuilder {
 public:
   int run;
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -10,7 +10,7 @@
 
 class StEmcDecoder;
 
-class bemcBuilder : public JevpPlotSet {
+class bemcBuilder : public JevpBuilder {
 public:
   int run;
 

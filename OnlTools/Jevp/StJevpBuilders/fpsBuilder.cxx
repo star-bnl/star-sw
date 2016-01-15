@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -20,7 +19,7 @@
 ClassImp(fpsBuilder);
   
 
-fpsBuilder::fpsBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+fpsBuilder::fpsBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"fps";
 
   // start with histograms undefined...

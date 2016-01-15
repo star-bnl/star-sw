@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -14,7 +14,7 @@
 #define nMTDtrays 30
 #define nMTDtrig 128
 
-class mtdBuilder : public JevpPlotSet {
+class mtdBuilder : public JevpBuilder {
  public:
 
   //RunStatus status;

@@ -112,8 +112,8 @@ namespace {
 } // namespace
 
 fmsBuilder::fmsBuilder(JevpServer* parent)
-: JevpPlotSet(parent) {
-  // Set plotsetname inherited from JevpPlotSet.
+: JevpBuilder(parent) {
+  // Set plotsetname inherited from JevpBuilder.
   plotsetname = (char*)"fms";
 }
 
@@ -156,7 +156,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
       j->optlogz=1;
       j->optstat=0;
       mPlots.push_back(j);
-      addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
+      addPlot(mPlots.back()); // Registers the plot with this Jevp
     } // for
   } // for
   for(int qt = kQt1; qt <= kQt4; ++qt) {
@@ -175,7 +175,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
     mHists.insert(std::make_pair(qt+8, h));
     mPlots.push_back(new JevpPlot(h));
     (mPlots.back())->optstat=0;
-    addPlot(mPlots.back()); // Registers the plot with this JevpPlotSet
+    addPlot(mPlots.back()); // Registers the plot with this Jevp
   } // for
 }
 
@@ -195,7 +195,7 @@ void fmsBuilder::stoprun(daqReader* reader) {
 void fmsBuilder::event(daqReader* reader) {
   LOG(DBG, "fmsBuilder::event %d", reader->event_number);
   // Get trigger data for the current event.
-  // getStTriggerData is inherited from JevpPlotSet.
+  // getStTriggerData is inherited from Jevp.
   std::auto_ptr<StTriggerData> trigger(getStTriggerData(reader));
   if(not trigger.get()) {
     return;

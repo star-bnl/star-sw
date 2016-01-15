@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -11,7 +11,7 @@
 #include <string>
 #include <math.h>
 #include "TTree.h"
-class ssdBuilder : public JevpPlotSet {
+class ssdBuilder : public JevpBuilder {
  public:
   int run;
   

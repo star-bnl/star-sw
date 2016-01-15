@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -261,7 +261,7 @@ void pxlBuilder::UpdateSectorErrorTypeTH2(TH1 *hist, int ret, int sector_number)
 ClassImp(pxlBuilder);
   
 
-pxlBuilder::pxlBuilder(JevpServer *parent) : JevpPlotSet(parent)
+pxlBuilder::pxlBuilder(JevpServer *parent) : JevpBuilder(parent)
 {
   plotsetname = (char *)"pxl";
 

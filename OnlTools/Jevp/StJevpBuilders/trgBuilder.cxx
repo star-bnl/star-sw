@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -44,7 +44,7 @@ const int logTimePlots = 1; // ZDC time plots
 ClassImp(trgBuilder);
   
 
-trgBuilder::trgBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+trgBuilder::trgBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"trg";
 
   h76_zdc_time_east = NULL;

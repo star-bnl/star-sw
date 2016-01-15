@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -26,7 +26,7 @@ ClassImp(eemcBuilder);
 #define min(A, B) (((A) < (B)) ? (A) : (B))
 #define max(A, B) (((A) > (B)) ? (A) : (B))
 
-eemcBuilder::eemcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+eemcBuilder::eemcBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"eemc";
 }
 

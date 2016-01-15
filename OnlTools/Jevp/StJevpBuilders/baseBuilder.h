@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 //#include "RunStatus.h"
 
@@ -18,13 +18,13 @@
 //
 
 
-class baseBuilder : public JevpPlotSet {
+class baseBuilder : public JevpBuilder {
 public:
   //RunStatus status;
   int run;
   int first_event;
 
-  baseBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
+  baseBuilder(JevpServer *parent=NULL) : JevpBuilder(parent) {
     plotsetname = (char *)"base";
     hello_cmds = (char *)"steal";
   }
