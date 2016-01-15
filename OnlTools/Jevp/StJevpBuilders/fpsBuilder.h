@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include <TH1F.h>
@@ -9,7 +9,7 @@
 
 #include <math.h>
 
-class fpsBuilder : public JevpPlotSet {
+class fpsBuilder : public JevpBuilder {
 public:
   int run;
 

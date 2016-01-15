@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
 
 #include <math.h>
 
-class fpdBuilder : public JevpPlotSet {
+class fpdBuilder : public JevpBuilder {
  public:
   //RunStatus status;
   int run;

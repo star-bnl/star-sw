@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 //#include "RunStatus.h"
 
@@ -18,10 +18,10 @@
 //
 
 
-class vpdBuilder : public JevpPlotSet {
+class vpdBuilder : public JevpBuilder {
  public:
  
-  vpdBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
+  vpdBuilder(JevpServer *parent=NULL) : JevpBuilder(parent) {
     plotsetname = (char *)"vpd";
     memset(&contents, 0, sizeof(contents));
   }

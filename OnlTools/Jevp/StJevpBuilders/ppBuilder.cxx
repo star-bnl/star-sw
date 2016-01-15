@@ -6,7 +6,7 @@
 #include <time.h>
 #include <math.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -45,7 +45,7 @@ const double TAC_TRSHLD = 100.;
 ClassImp(ppBuilder);
   
 
-ppBuilder::ppBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+ppBuilder::ppBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"pp";
 
   // start with histograms undefined...

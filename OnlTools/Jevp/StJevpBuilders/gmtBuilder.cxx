@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include <DAQ_READER/daq_dta.h>
@@ -33,7 +32,7 @@
 ClassImp(gmtBuilder);
 
 
-gmtBuilder::gmtBuilder(JevpServer *parent):JevpPlotSet(parent),evtCount(0) {
+gmtBuilder::gmtBuilder(JevpServer *parent):JevpBuilder(parent),evtCount(0) {
  plotsetname = (char *)"gmt";
 
   // start with histograms undefined...

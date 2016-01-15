@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -24,7 +24,7 @@
 ClassImp(upcBuilder);
   
 
-upcBuilder::upcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+upcBuilder::upcBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"upc";
 
   // start with histograms undefined...

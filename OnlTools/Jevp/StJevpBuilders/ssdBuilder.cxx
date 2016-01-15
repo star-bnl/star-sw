@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -23,7 +23,7 @@
 #define  OFFSET  375
 ClassImp(ssdBuilder);
 
-ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
+ssdBuilder::ssdBuilder(JevpServer *parent): JevpBuilder(parent),evtCt(0) {
   plotsetname = (char *)"ssd";
 }
 

@@ -8,15 +8,15 @@
 #include <TROOT.h>
 #include <TSocket.h>
 #include "JevpPlot.h"
-#include "DAQ_READER/daqReader.h"
+//#include "DAQ_READER/daqReader.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"
 #include "Jevp/StJevpServer/JevpServer.h"
 
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
-#include "StEvent/StTriggerData.h"
+//#include "StDaqLib/TRG/trgStructures2009.h"
+//#include "StEvent/StTriggerData2009.h"
+//#include "StEvent/StTriggerData.h"
 
 #include <unistd.h>
 //#include <RTS/include/SUNRT/clockClass.h>
@@ -115,7 +115,7 @@ class JevpPlotSet : public TObject {
 
   TList plots;    // The plots built
 
-  StTriggerData *getStTriggerData(daqReader *rdr);
+  //StTriggerData *getStTriggerData(daqReader *rdr);
 
  private:
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -37,7 +37,7 @@ ClassImp(mtdBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-mtdBuilder::mtdBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+mtdBuilder::mtdBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"mtd";
   
   int np = sizeof(contents) / sizeof(TH1 *);

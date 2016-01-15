@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -19,7 +19,7 @@ struct Def {
   int optstat;
 };
     
-class eemcBuilder : public JevpPlotSet {
+class eemcBuilder : public JevpBuilder {
 public:
   int run;
 

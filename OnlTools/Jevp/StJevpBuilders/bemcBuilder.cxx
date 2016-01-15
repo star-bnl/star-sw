@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -47,7 +46,7 @@ if (!NAME) { \
   LOG(ERR, "Histogram " NAME " not found: " TITLE);	\
 }
 
-bemcBuilder::bemcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+bemcBuilder::bemcBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"bemc";
 
   numPmtBoxes = sizeof(pmtbxMinSoftId)/sizeof(Int_t);

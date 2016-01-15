@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
@@ -33,7 +33,7 @@ enum {
   He4
 };
 
-class l4Builder : public JevpPlotSet {
+class l4Builder : public JevpBuilder {
  public:
     
 /**
@@ -125,7 +125,7 @@ class l4Builder : public JevpPlotSet {
   JevpPlot *HltPlots_UPC[30];
   PlotHisto *ph;
 
-  l4Builder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
+  l4Builder(JevpServer *parent=NULL) : JevpBuilder(parent) {
     plotsetname = (char *)"l4";
   }
  

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
@@ -32,7 +32,7 @@
 //#include <time.h>
 //#include <sys/time.h>
 
-class hltBuilder : public JevpPlotSet {
+class hltBuilder : public JevpBuilder {
  public:
     
   ///////////// struct ////////////
@@ -223,7 +223,7 @@ class hltBuilder : public JevpPlotSet {
   //const char* plotsetname; //*********************************Chris Added this to get it to compile.
   ////////////////////// Function //////////////////// 
 
-  hltBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent)
+  hltBuilder(JevpServer *parent=NULL) : JevpBuilder(parent)
     { plotsetname = (char *)"hlt"; }
  
   void initialize(int argc, char *argv[]);

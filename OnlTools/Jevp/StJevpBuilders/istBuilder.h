@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -17,7 +17,7 @@
 //#endif
 
 
-class istBuilder : public JevpPlotSet {
+class istBuilder : public JevpBuilder {
  public:
   int run;
   

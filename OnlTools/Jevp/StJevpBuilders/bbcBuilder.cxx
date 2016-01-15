@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -28,7 +28,7 @@ ClassImp(bbcBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-bbcBuilder::bbcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+bbcBuilder::bbcBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"bbc";
   
   int np = sizeof(contents) / sizeof(TH1 *);

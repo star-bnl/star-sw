@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h> //xue
 #include <DAQ_L3/daq_l3.h> //xue
@@ -33,7 +33,7 @@
 
 using namespace std;
 
-class HltphiBuilder : public JevpPlotSet {
+class HltphiBuilder : public JevpBuilder {
 public:
 
   unsigned int current_day;
@@ -59,7 +59,7 @@ public:
   JevpPlot *day[10];
   JevpPlot *all[31];
 
-  HltphiBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
+  HltphiBuilder(JevpServer *parent=NULL) : JevpBuilder(parent) {
     plotsetname = (char *)"hltp";
   }
 

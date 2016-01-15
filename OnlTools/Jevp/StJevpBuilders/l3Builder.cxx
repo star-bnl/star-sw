@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -27,7 +27,7 @@
 ClassImp(l3Builder);
   
 
-l3Builder::l3Builder(JevpServer *parent) : JevpPlotSet(parent) {
+l3Builder::l3Builder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"l3";
 
   // start with histograms undefined...

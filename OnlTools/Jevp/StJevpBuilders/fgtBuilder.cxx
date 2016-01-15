@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include <DAQ_READER/daq_dta.h>
@@ -30,7 +29,7 @@
 ClassImp(fgtBuilder);
   
 
-fgtBuilder::fgtBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
+fgtBuilder::fgtBuilder(JevpServer *parent):JevpBuilder(parent),evtCt(0) {
   plotsetname = (char *)"fgt";
   // start with histograms undefined...
   memset(&contents, 0, sizeof(contents));

@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include <DAQ_READER/daq_dta.h>
@@ -44,7 +44,7 @@ const float istBuilder::hitCut            = 5.0;
 const float istBuilder::noiseChipCut      = 10.0;
 
 
-istBuilder::istBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
+istBuilder::istBuilder(JevpServer *parent):JevpBuilder(parent),evtCt(0) {
 	plotsetname = (char *)"ist";
 	// start with histograms undefined...
 	memset( &hAdcContents,      	0, sizeof(hAdcContents) );

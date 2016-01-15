@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -27,7 +27,7 @@ int mapTF00X[6][20] =
  {33,32,31,30,29,28,27,26,25,24,83,84,85,86,87,88,89,90,91,92},
  {23,22,21,20,19,18,17,16,15,14,93,94,95,96,97,98,99,100,101,102}};
   
-tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
+tofBuilder::tofBuilder(JevpServer *parent) : JevpBuilder(parent) {
   plotsetname = (char *)"tof";
 
   np = sizeof(contents) / sizeof(TH1 *);

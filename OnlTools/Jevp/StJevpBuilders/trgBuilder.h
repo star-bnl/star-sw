@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 //#include "RunStatus.h"
 
@@ -10,7 +10,7 @@
 
 #include <math.h>
 
-class trgBuilder : public JevpPlotSet {
+class trgBuilder : public JevpBuilder {
 public:
   //RunStatus status;
   int run;

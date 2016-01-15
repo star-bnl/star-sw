@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "Jevp/StJevpPlot/JevpPlotSet.h"
+#include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
@@ -15,7 +15,7 @@
 
 const int NRDO = 10;
 
-class pxlBuilder : public JevpPlotSet {
+class pxlBuilder : public JevpBuilder {
 public:
   int run;
 
