@@ -7,12 +7,13 @@ ClassImp(AgMaterial);
 #include "AgModule.h"
 #include "StMessMgr.h"
 
-std::vector< TString >            AgMaterial::mParameterList;
+//std::vector< TString >            AgMaterial::mParameterList;
 std::map< TString, AgMaterial * > AgMaterial::mMaterialTable;
 std::vector< TString >            AgMaterial::mMaterialList;
 
 struct _MaterialDummy { // Initializes material database
   _MaterialDummy(){
+    /* lifted
     AgMaterial::mParameterList.push_back("a");
     AgMaterial::mParameterList.push_back("z");
     AgMaterial::mParameterList.push_back("dens");
@@ -20,6 +21,7 @@ struct _MaterialDummy { // Initializes material database
     AgMaterial::mParameterList.push_back("absl");
     AgMaterial::mParameterList.push_back("isvol");
     AgMaterial::mParameterList.push_back("nelem");
+    */
 
     AgMaterial &h = AgMaterial::Get("Hydrogen");
     h.par("a")=1.010; h.par("z")=1.000; h.par("dens")=0.071; h.par("radl")=0.865E+03; h.par("absl")=0.790E+03; h.lock();
@@ -159,6 +161,8 @@ struct _MaterialDummy { // Initializes material database
 AgMaterial::AgMaterial( const Char_t *name ) : TNamed(name,""), mLock(false), mType(AgMaterial::kMaterial)
 {
   par("nelem")=1;
+  const char* pars[]={"a","z","dens","radl","absl","isvol","nelem"};
+  for ( int i=0;i<7;i++ ) mParameterList.push_back(pars[i]);
 }
 
 AgMaterial::~AgMaterial()
@@ -183,6 +187,7 @@ Double_t &AgMaterial::par( const Char_t *name ){
   return mParameters[name]; 
 }
 
+#if 0
 Bool_t AgMaterial::isSet( const Char_t *par ) const
 {
   TString key=par;
@@ -191,12 +196,13 @@ Bool_t AgMaterial::isSet( const Char_t *par ) const
 
 Bool_t AgMaterial::hasPar(const Char_t *par ) const
 {
-  TString key=par;
-  std::vector<TString> parlist = mParameterList;
+  const char* key=par;
+  std::vector<std::string> parlist = mParameterList;
   for ( UInt_t i=0;i<parlist.size();i++ )
     if ( parlist[i] == key ) return true;
   return false;
 }
+#endif
 
 Bool_t AgMaterial::hasComponent( const Char_t *comp )const
 {
@@ -212,17 +218,17 @@ void AgMaterial::Print( Option_t *opts ) const
   TString output = "";
   //LOG_INFO << "["<< ((mLock)?"-":"+") << "] " << Form("%20s:",name.Data()) << " ";
   output = TString("[") + TString((mLock)?"-":"+") + TString("] ") + Form("%20s:",name.Data()) + TString(" ");
-  std::map<TString, Double_t > mypar=mParameters;
+  std::map<std::string, Double_t > mypar=mParameters;
   for ( UInt_t j=0;j<mParameterList.size();j++ )
     {
-      TString key=mParameterList[j];
+      const char* key=mParameterList[j].c_str();
       if ( isSet(key) ) 
 	{ 
-	  output += Form(" %s=%9.5g",key.Data(),mypar[key]); 
+	  output += Form(" %s=%9.5g",key,mypar[key]); 
 	}
       else
 	{ 
-	  output += Form(" %s= <unset> ",key.Data()); 
+	  output += Form(" %s= <unset> ",key); 
 	}
     }
   LOG_INFO << output.Data() << endm;
@@ -600,8 +606,11 @@ void AgMaterial::Average()
 AgMaterial::AgMaterial( const AgMaterial &other )
 {
 
+  (*this)=other;
   SetName( other.GetName() );
   SetTitle( other.GetTitle() );
+  mLock=false; // Default copy to unlocked 
+  /*
   mParameters=other.mParameters;
   mC=other.mC;
   mA=other.mA;
@@ -609,6 +618,7 @@ AgMaterial::AgMaterial( const AgMaterial &other )
   mW=other.mW;
   mLock=false; // Default copy to unlocked 
   mType=other.mType;
+  */
 }
 
 

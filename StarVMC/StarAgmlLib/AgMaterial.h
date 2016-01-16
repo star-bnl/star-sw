@@ -7,25 +7,33 @@
 #include <map>
 #include <vector>
 
+//#include "AgParameterList.h"
+#include <StarVMC/StarAgmlUtil/AgParameterList.h>
 class AgMaterial;
 class AgBlock;
 
-class AgMaterial : public TNamed
+class AgMaterial : public TNamed, public AgParameterList<double>
 {
  public:
 
   AgMaterial(const Char_t *name="None"); // default value should not be changed
   ~AgMaterial();
+
   AgMaterial( const AgMaterial &other );
 
   enum { kUnknown=0, kMaterial, kMixture, kCompound };
 
+
   /// Returns a reference to the named parameter.
   Double_t &par( const Char_t *name );
+
+#if 0 // lifted
   /// Tests whether the named parameter is set for this shape
   Bool_t isSet( const Char_t *par ) const;  
   /// Tests whether the named parameter is valid for this shape
   Bool_t hasPar( const Char_t *par ) const;
+#endif
+
   /// Tests wether the mixture has the named component.  Returns false
   /// if this is a material.
   Bool_t hasComponent( const Char_t *comp ) const;
@@ -81,7 +89,7 @@ class AgMaterial : public TNamed
  private:
  protected:
 
-  std::map< TString, Double_t > mParameters;
+  // lifted  std::map< TString, Double_t > mParameters;
 
   /// Find and return a pointer to the specified material
   static AgMaterial *Find( const Char_t *name );
@@ -100,7 +108,7 @@ class AgMaterial : public TNamed
 
   static std::map< TString, AgMaterial * > mMaterialTable; // List of existing materials  
   static std::vector< TString >            mMaterialList;  // List of defined materials
-  static std::vector< TString >            mParameterList; // List of legal parameters
+  // lifted  static std::vector< TString >            mParameterList; // List of legal parameters
 
   Bool_t mLock;
   Int_t  mType;

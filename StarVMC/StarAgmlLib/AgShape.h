@@ -11,7 +11,10 @@ class TGeoShape;
 class AgBlock;
 class AgModule;
 
-class AgShape : public TNamed
+//#include "AgParameterList.h"
+#include <StarVMC/StarAgmlUtil/AgParameterList.h>
+
+class AgShape : public TNamed, public AgParameterList<double>
 {
  public:
 
@@ -46,7 +49,7 @@ class AgShape : public TNamed
   Bool_t operator == ( const AgShape &other ) const;
 
   /// Tests whether the named parameter is set for this shape
-  Bool_t isSet( const Char_t *par ) const;  
+  //  Bool_t isSet( const Char_t *par ) const;  
   /// Tests whether the named parameter is valid for this shape
   Bool_t hasPar( const Char_t *par ) const;
 
@@ -74,7 +77,7 @@ class AgShape : public TNamed
  protected:
 
   Int_t                                         mId; // ID of this shape
-  std::map<TString, Double_t>                   mParameters;
+  //  std::map<TString, Double_t>                   mParameters;
   std::vector<Double_t>                         mZ, mRmin, mRmax;
 
   static std::map<Int_t, std::vector<TString> > mParList;
@@ -84,7 +87,7 @@ class AgShape : public TNamed
   static std::map<Int_t, std::vector<TString> > mRootMembers; // ROOT data members for each parameter
 
   std::vector<TGeoShape *>                      mStoredShapes;
-  std::vector< std::map<TString,Double_t> >     mStoredParams;
+  std::vector< std::map<std::string,Double_t> > mStoredParams;
 
   AgBlock                                      *mBlock;   // Pointer to the block which owns this shape
   AgModule                                     *mModule;  // Pointer to the module which owns this shape

@@ -13,6 +13,7 @@ class TGeoNode;
 
 #include <vector>
 #include <map>
+#include "AgPosition.h"
 
 #include "TString.h"
 
@@ -23,7 +24,9 @@ class StarTGeoStacker : public StarAgmlStacker
   ~StarTGeoStacker(){ /* nada */ };
   
   virtual  Bool_t Build( AgBlock *block );
+
   virtual  Bool_t Position ( AgBlock *block, AgPlacement position );
+  virtual  Bool_t Position ( AgBlock *block, AgPosition  position );
 
   virtual  Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr );
 

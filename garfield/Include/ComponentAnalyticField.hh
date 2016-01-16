@@ -71,7 +71,12 @@ class ComponentAnalyticField : public ComponentBase {
   void ClearCharges();
   void PrintCharges();
 
-  std::string GetCellType() { return cellType; }
+  std::string GetCellType() { 
+    if (!cellset) {
+      if (CellCheck()) CellType();
+    }
+    return m_scellType; 
+  }
   // Cells are classified according to the number
   // and orientation of planes, the presence of
   // periodicities and the location of the wires
@@ -107,6 +112,22 @@ class ComponentAnalyticField : public ComponentBase {
 
   bool GetTube(double& r, double& voltage, int& nEdges, std::string& label);
 
+  enum Cell {
+    A00,
+    B1X,
+    B1Y,
+    B2X,
+    B2Y,
+    C10,
+    C2X,
+    C2Y,
+    C30,
+    D10,
+    D20,
+    D30,
+    D40,
+    Unknown
+  };
  private:
   bool chargeCheck;
 
@@ -116,8 +137,8 @@ class ComponentAnalyticField : public ComponentBase {
   bool polar;
 
   // Cell type (as string and number)
-  std::string cellType;
-  int iCellType;
+  std::string m_scellType;
+  Cell m_cellType;
 
   // Bounding box
   double xmin, xmax;
@@ -133,7 +154,7 @@ class ComponentAnalyticField : public ComponentBase {
 
   // Signals
   int nFourier;
-  std::string cellTypeFourier;
+  std::string m_scellTypeFourier;
   bool fperx, fpery;
   int mxmin, mxmax, mymin, mymax;
   int mfexp;
@@ -236,13 +257,13 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<plane> planes;
 
   // Tube
-  bool tube;
-  int mtube, ntube;
-  double cotube;
-  double vttube;
+  bool m_tube;
+  int m_mtube, m_ntube;
+  double m_cotube;
+  double m_vttube;
 
   // Capacitance matrix
-  std::vector<std::vector<double> > a;
+  std::vector<std::vector<double> > m_a;
   // Signal matrix
   std::vector<std::vector<std::complex<double> > > sigmat;
   // Induced charges on planes

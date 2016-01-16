@@ -2,12 +2,14 @@
 #define __AgPlacement_h__
 
 #include "TNamed.h"
+//#include "AgParameterList.h"
+#include <StarVMC/StarAgmlUtil/AgParameterList.h>
 #include "TString.h"
 #include <map>
 
 class TGeoCombiTrans;
 
-class AgPlacement : public TNamed
+class AgPlacement : public TNamed, public AgParameterList<double>
 {
  public:
 
@@ -34,15 +36,15 @@ class AgPlacement : public TNamed
 
   TGeoCombiTrans *matrix();
 
-  const Char_t *block();
-  const Char_t *mother();
-  const Char_t *group();
+  //  const Char_t *block();
+  //  const Char_t *mother();
+  //  const Char_t *group();
 
   /// Returns a reference to the named parameter.
-  Double_t &par( const Char_t *name );
+  //  Double_t &par( const Char_t *name );
 
   /// Tests whether the named parameter is set for this shape
-  Bool_t isSet( const Char_t *par ) const;  
+  //  Bool_t isSet( const Char_t *par ) const;  
 
   enum { kOnly=0, kMany };
 
@@ -51,11 +53,11 @@ class AgPlacement : public TNamed
 
   bool mHasRotm;
 
-  std::map< TString, Double_t > mParameters;
+  //  std::map< TString, Double_t > mParameters;
 
-  TString mBlock;
-  TString mMother;
-  TString mGroup;
+  //  TString mBlock;
+  //  TString mMother;
+  //  TString mGroup;
 
   struct Rotation3 
   {

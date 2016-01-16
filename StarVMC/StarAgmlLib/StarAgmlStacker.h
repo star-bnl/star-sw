@@ -8,6 +8,7 @@
 #include "AgMedium.h"
 #include "AgAttribute.h"
 #include "AgPlacement.h"
+#include "AgPosition.h"
 
 #include "TString.h"
 #include "TGeoVolume.h"
@@ -30,6 +31,7 @@ class StarAgmlStacker : public TNamed
 
   virtual Bool_t Build   ( AgBlock *block )=0;//{ return true; };
   virtual Bool_t Position( AgBlock *block, AgPlacement placement )=0;//{ return true; };
+  virtual Bool_t Position( AgBlock *block, AgPosition  placement )=0;//{ return true; };
 
   virtual Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr )=0;
 			

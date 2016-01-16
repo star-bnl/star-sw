@@ -820,7 +820,420 @@ Bool_t sanityCheck( TGeoVolume *volume )
 
 
 // ------------------------------------------------------------------------------------------------------------
+Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
+{
+  assert(block);
+  //
+  // Get the block's name
+  //
+  TString block_name = block->GetName();
 
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Get the mother and daughter matching the current shape
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  AgBlock    *mother_block = AgBlock::Find( position.mother() );
+  TString     mother_name  = mother_block -> nickname();
+  TString     group_name   = position.group();
+  TGeoVolume *mother       = mVolumeTable[ mother_name ];
+  TGeoVolume *group        = mVolumeTable[ group_name ];
+  TGeoVolume *daughter     = 0;
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Obtain the pointer to the shape of the block we are positioning.
+  // If the shape is a division, issue a warning.  Divisions of volumes
+  // do not need to be positioned.  In principle this error should throw
+  // an exception in the XML.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  AgShape *shape = block->shape();
+  if ( shape->type() == AgShape::kDivision )
+    {
+      Warning("Position(...)",Form("Attempt to position %s which is a division of %s",block->GetName(),mother->GetName()));
+      return true;
+    }
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Obtain the pointer to the attribute of the block we are positioning.  
+  // This is for ensuring the serial numbers match.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  AgAttribute *attribute  = block->attribute();
+  Double_t     att_serial = -999.0;
+  if ( attribute -> isSet("serial") )
+    {
+      att_serial = attribute->par("serial");
+    }
+
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Search for the TGeo volume with the same name and shape as the given
+  // block.  This volume should have been created in the ::Build(...)
+  // phase.  If it wasn't created, we may be dealing with a parameterized
+  // volume.  In that case we will need to create the volume.  Otherwise,
+  // we will throw an error and bomb out of the program.
+  //
+  // Also ensure that serial number matches, if given.
+  //
+  ///////////////////////////////////////////////////////////////////////////////
+  //
+  TIter next( gGeoManager -> GetListOfVolumes() ),	nextG( gGeoManager->GetListOfGVolumes() );
+  TGeoVolume *vol = 0;
+  //Int_t count=0;
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // First we must resolve any parameters specified by the
+  // position operator
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  AgShape pos_shape = *block->shape();
+  AgShape sav_shape = *block->shape();
+  Int_t   nshape = 0;
+  for ( UInt_t i=0;i<pos_shape.parList().size();i++ )
+    {
+      TString key=pos_shape.parList()[i];
+      if ( position.isSet(key) )
+	{
+	  pos_shape.par(key) = position.par(key);
+	  nshape++;
+	}
+    }
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // If there were position arguements, perform first a sanity check and
+  // then inherit any remaining parameters from the active block (i.e.
+  // the one which is doing the positioning).
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  Bool_t parameterized = false;
+  if ( nshape )
+    {
+
+      if ( !block->shape()->parameterized() ) // [ERROR]: Block placed with position arguements but is not a parameterized block
+	{ gErrorIgnoreLevel=1; 
+	  Error("Position( block, position )", Form("Block %s is not setup to accept shape arguements",block->GetName()));
+	  std::cout << std::endl;
+	  std::cout << "The block was defined with shape:"<< std::endl;
+	  block->shape()->Print();
+	  assert( block->shape()->parameterized() );
+	}
+
+      //
+      // Flag this as a paramterized shape which will pick up its shape
+      // parameters from the pos_shape object
+      //
+      parameterized = true; 
+
+
+      //
+      // Inheritance from the active block
+      //
+      std::vector<TString> pars = shape->parList();
+
+      //
+      // Inherit from the active block, unless it is a division.
+      // In which case navigate back up the stack until we find
+      // a non-division
+      AgShape *ancestor = AgBlock::active()->shape();
+      //
+      if ( ancestor->type() == AgShape::kDivision )
+	{
+	  ancestor = AgBlock::previous()->shape();
+	  UInt_t hist=0;
+	  while (ancestor->type()==AgShape::kDivision)
+	    {
+	      ancestor=AgBlock::previous(hist++)->shape();
+	      assert(ancestor);
+	    }
+	}
+
+      for ( UInt_t i=0;i<pars.size();i++ )
+	{
+	  TString key=pars[i];
+	  if (pos_shape.par(key) == 0.)
+ 	    {	 
+ 	      if ( ancestor -> isSet(key) )
+ 		{
+ 		  pos_shape.par(key) = ancestor->par(key);
+ 		}
+ 	    }
+ 	}
+    }
+
+
+
+      
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // We will (temporarily) set the shape to the position shape
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  if ( nshape )
+    {
+      block->SetShape( pos_shape );
+    }
+
+  std::vector< TGeoVolume * > sisters; // list of similar volumes for error detection/debug purposes below
+  while ( (vol=(TGeoVolume*)next() ) )
+    {
+
+      TString volume_name = realname( vol->GetName() );
+
+      // Name of the block must match the name of the volume
+      if ( block_name != volume_name ) continue;
+      // Add volumes with the same name to the list of sisters
+      sisters.push_back(vol);
+
+      //
+      /////////////////////////////////////////////////////////////
+      //
+      // If the shape is a parameterized shape, we will copy/clone
+      // the specified shape and break.
+      //
+      //    >>> I believe this fails on serialization... <<<
+      //
+      /////////////////////////////////////////////////////////////
+      //
+
+      // Require matching serial numbers
+      Double_t vol_serial = -999.0;
+      if ( GetFloatValue( "serial", vol->GetTitle(), vol_serial ) )
+	{
+	  if ( (att_serial != vol_serial) && att_serial > -999.0 ) continue;
+	}
+
+      if ( parameterized )
+	{
+	  daughter = makeCopyVolume( vol, pos_shape );
+	  //	  if ( TPAD ) daughter->Print();
+	  break;
+	}
+
+      // Look for volumes which match the block's shape
+      if ( ! ::Compare( vol, block->shape() ) ) continue;
+
+
+
+      daughter = vol;
+    };
+
+  if ( !daughter )
+
+    while ( (vol=(TGeoVolume*)nextG() ) )
+      {
+
+	TString volume_name = realname( vol->GetName() );
+
+	// Name of the block must match the name of the volume
+	if ( block_name != volume_name ) continue;
+	// Add volumes with the same name to the list of sisters
+	sisters.push_back(vol);
+
+	// Require matching serial numbers
+	Double_t vol_serial = -999.0;
+	if ( GetFloatValue( "serial", vol->GetTitle(), vol_serial ) )
+	{
+	  if ( (att_serial != vol_serial) && att_serial > -999.0 ) continue;
+	}
+
+	// If the shape is a parameterized shape, we will copy/clone
+	// the specified shape
+	if ( parameterized )
+	  {
+	    daughter = makeCopyVolume( vol, pos_shape );
+	    break;
+	  }
+
+	// Look for volumes which match the block's shape
+	if ( ! ::Compare( vol, block->shape() ) ) continue;
+
+
+
+	daughter = vol;
+      };
+
+
+  if (!daughter) // ERROR: Daughter was not found, print debug information
+    { gErrorIgnoreLevel=1; 
+      Error("Position(AgBlock *block,AgPlacement position",
+	    Form("This shouldn't happen... daughter %s was not found.  Was she built?",block_name.Data()));
+      std::cout << std::endl;
+      std::cout << "Some potentially useful debug information follows:" << std::endl;
+
+      std::cout << std::endl;
+      std::cout << "List of defined blocks" << std::endl;
+      AgBlock::List();
+      std::cout << std::endl;
+      std::cout << "List of ROOT multi and runtime volumes:" << std::endl;
+      gGeoManager->GetListOfGVolumes()->Print();
+      std::cout << std::endl;
+      std::cout << "List of ROOT volumes:" << std::endl;
+      gGeoManager->GetListOfVolumes()->Print();
+      std::cout << std::endl;
+      std::cout << "We were loking for a volume with the shape: " << std::endl;
+      shape->Print();
+      std::cout << std::endl;
+      std::cout << "We found " << sisters.size() << " volumes with the same name:" << std::endl;
+      for ( UInt_t ii=0;ii<sisters.size(); ii++)
+	{
+	  sisters[ii]->InspectShape();
+	}
+
+      assert(daughter); // Because we've already created it in Build
+
+    }
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Every positioned volume (node) gets a unique copy number.  We will count the
+  // number of instances where the current block has been positioned w/in the
+  // specified mother volume, and increment the copy counter.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  Int_t copy = 1;
+  for ( Int_t i=0;i<mother->GetNdaughters();i++ )
+    {
+      TGeoNode *node   = mother->GetNode(i);
+      TString   name   = node->GetVolume()->GetName();
+      TString   myname = realname(name);
+      if ( myname.Contains( block->GetName() ) )
+	{
+	  copy++; // ok... this is simplified. 
+        	  // But we take care of not placing same block elsewhere...
+	}
+    }
+
+  // If the user has specified the copy number, use that copy number
+  if ( position.isSet("ncopy") )   {      copy = (Int_t)position.par("ncopy");    }
+
+
+	
+  // Set the only flag.  Default volumes are "only" volumes.
+  Int_t myonly = AgPlacement::kOnly;
+  if ( position.isSet("only") )     {      myonly = (Int_t)position.par("only");    }
+
+	
+  // Get the translation / rotation matrix
+  TGeoMatrix *matrix = position.matrix();
+
+  // Regularize the matrix G3 angles
+  
+
+
+
+  TString NAME=position.block();
+
+  // And name it
+  matrix -> SetName( Form("pos_%s_in_%s_%i", daughter->GetName(), mother->GetName(), copy ) );
+
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Add the daughter block to the mother block
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //
+
+
+  if ( mDebugOptions[block_name].Contains("position")  ||
+       mDebugOptions[block_name].Contains("placement") ||
+       mDebugOptions[block_name].Contains("place") )
+    {
+      std::cout << "== Debug Placement: block="<<block_name.Data() << " ==================================" << std::endl;
+      std::cout << "   konly   = " << ((myonly==AgPlacement::kOnly)?"ONLY":"MANY") << std::endl;
+      std::cout << "   copy    = " << copy << std::endl;
+      std::cout << "   runtime = " << ((parameterized)?"TRUE":"FALSE") << std::endl;
+      std::cout << "   matrix  " << std::endl;
+      matrix->Print();
+    }
+
+
+  // Add the volume to the mother volume or the group
+  TGeoVolume *target = (group)?group:mother;
+
+  // Check validity of volume group... must be placed within mother
+  if ( group ) 
+    {
+      TString name = group->GetName(); name+="_1";
+      TGeoNode *node = mother->FindNode( name );
+      if ( !node )
+	{	  
+	  AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Placing %s in group %s.  WARNING: group is in wrong mother volume.",block_name.Data(),group->GetName() ));
+	}
+    }
+  
+  if ( group && AgPlacement::kMany==myonly )   
+    {
+      AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Volume %s in %s, effect of MANY is ignored.",block_name.Data(),target->GetName()));
+    }
+
+
+
+    
+
+
+  if ( myonly == AgPlacement::kOnly )
+    { 
+      assert(daughter);
+      assert(daughter->IsValid());
+      if ( sanityCheck(daughter) )
+	target -> AddNode( daughter, copy, matrix );
+    }
+  else
+    { 
+      assert(daughter);
+      assert(daughter->IsValid());
+      if ( sanityCheck(daughter) )
+	target -> AddNodeOverlap( daughter, copy, matrix );
+    }
+
+//   //
+//   // In the case of parameterized blocks, restore the previous state of the shape
+//   //
+//   if ( nshape )
+//     {
+//       block->SetShape( sav_shape );
+//     }
+
+
+  // If the shape is a parameterized shape, reset all of the shape
+  // paramters to zero
+  if ( parameterized )
+    {
+
+      std::vector<TString> pars = block->shape()->parList();
+      for ( UInt_t i=0;i<pars.size();i++ )
+	{
+	  TString key = pars[i];
+	  block->shape()->par(key) = 0.0;
+	}
+
+    }
+
+  return true;
+};
 
 Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 {

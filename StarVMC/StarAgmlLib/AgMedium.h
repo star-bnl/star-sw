@@ -7,19 +7,25 @@
 #include <vector>
 #include <map>
 
+//#include "AgParameterList.h"
+#include <StarVMC/StarAgmlUtil/AgParameterList.h>
 class AgBlock;
-class AgMedium : public TNamed
+class AgMedium : public TNamed, public AgParameterList<double>
 {
  public:
   AgMedium(const Char_t *name="None");
   AgMedium(const AgMedium &other );
   ~AgMedium(){ /* nada */ };
+
+#if 0 // lifted to AgParameterList
   /// Returns a reference to the named parameter.
   Double_t &par( const Char_t *name );
   /// Tests whether the named parameter is set for this shape
   Bool_t isSet( const Char_t *par ) const;  
   /// Tests whether the named parameter is valid for this shape
   Bool_t hasPar( const Char_t *par ) const;
+#endif 
+
   /// Inherit properties from mother block
   void Inherit( AgBlock *other );
   /// 
@@ -45,8 +51,10 @@ class AgMedium : public TNamed
   /// Find and return a pointer to the specified material
   static AgMedium *Find( const Char_t *name );
 
+#if 0 // lifted  
   static std::vector< TString > mParameterList;
   std::map< TString, Double_t > mParameters;
+#endif
   static std::map< TString, AgMedium * > mMediumTable;
   static std::vector< TString > mMediumList;
   friend class _MediumDummy;

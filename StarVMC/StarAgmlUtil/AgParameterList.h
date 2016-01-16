@@ -1,6 +1,6 @@
 #ifndef __AgParameterList_h__
 #define __AgParameterList_h__
-#include "TString.h"
+#include <string>
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -22,16 +22,20 @@ public:
   virtual ~AgParameterList(){ /* nada */ };
 
   /// Returns a reference to the named parameter.
-  virtual  T&    par   ( const char* name ){ TString key=name; return mParameters[name]; }
+  virtual  T&    par   ( const char* name ){ std::string key=name; return mParameters[name]; }
+  //  virtual  T&    par   ( std::string name ){ return par(name.c_str()); }
   /// Returns true if the parameter is set
-  virtual  bool  isSet ( const char* name ) const { TString key=name; return (mParameters.find(key) != mParameters.end() ); }
+  virtual  bool  isSet ( const char* name ) const { std::string key=name; return (mParameters.find(key) != mParameters.end() ); }
+  //  virtual  bool  isSet ( std::string name ) const { return isSet(name.c_str()); }
 
   /// Returns true if the parameter appears in the list of valid parameters.
   /// If the list has not been defined with register, will always return true.
-  virtual  bool  hasPar( const char* name ) const { TString key=name; return (std::find(mParameterList.begin(),mParameterList.end(),key) != mParameterList.end() && mParameterList.size()>0); }
+  virtual  bool  hasPar( const char* name ) const { std::string key=name; return (std::find(mParameterList.begin(),mParameterList.end(),key) != mParameterList.end() && mParameterList.size()>0); }
+  //  virtual  bool  hasPar( std::string name ) const { return hasPar(name.c_str()); }
 
   /// Unset specified parameter
-  virtual  void  unSet( const char *name ) { TString key; typename std::map<TString,T>::iterator pos = mParameters.find(key); if (pos!=mParameters.end()) mParameters.erase(pos); };
+  virtual  void  unSet( const char *name ) { std::string key; typename std::map<std::string,T>::iterator pos = mParameters.find(key); if (pos!=mParameters.end()) mParameters.erase(pos); };
+  //  virtual  void  unSet( std::string name ) { unSet( name.c_str() ); }
 
   enum { kOnly=0, kMany };
 
@@ -40,21 +44,21 @@ public:
   void SetGroup ( const char* name ){ _Group=name;  }
   void SetTable ( const char* name ){ _Table=name;  }
 
-  const char* block() { return _Block.Data();  }
-  const char* mother(){ return _Mother.Data(); }
-  const char* group() { return _Group.Data();  }
-  const char* table() { return _Table.Data();  }
+  const char* block() { return _Block.c_str();  }
+  const char* mother(){ return _Mother.c_str(); }
+  const char* group() { return _Group.c_str();  }
+  const char* table() { return _Table.c_str();  }
 
 private:
 protected:
 
-  std::map< TString, T > mParameters;
-  std::vector< TString > mParameterList;
+  std::map< std::string, T > mParameters;
+  std::vector< std::string > mParameterList;
 
-  TString _Block;
-  TString _Mother;
-  TString _Group;
-  TString _Table;
+  std::string _Block;
+  std::string _Mother;
+  std::string _Group;
+  std::string _Table;
 
 public:
   /// Copy ctor
@@ -77,9 +81,6 @@ public:
     _Table = other._Table;
     return *this;
   }
-
-
-  //  ClassDef(AgParameterList, 1);
 
 };
 
