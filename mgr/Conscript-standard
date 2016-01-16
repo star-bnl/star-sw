@@ -337,6 +337,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       Depends $env1 [$xgeometry], qw(#pams/geometry/geometry/geometry.g);
       LinkedModule $env1 $xgeometry, @srcE;
       Install $env1 $LIB, $xgeometry;
+      $lib = $LIB . "/lib" . $xgeometry;
+      InstallAs $env1 $lib, $xgeometry;
+      
     }
   }
   # <-- end generating geometries
@@ -937,7 +940,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  my $geometry = "Geometry." . $tag . ".root";
 	  Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
 				      $LIB . "/" . "Geometry" . "." . $env1->{SUFSOLIB}),
-					qq(cd %>:d;root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null &);
+					qq(root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null; mv %>:f %>:d);
 	ENDL:
 	}
       }	else { # AgiGeometry
@@ -984,11 +987,15 @@ TDataSet *CreateTable() {
 	    if (! $xgeomList{$geom}) {
 	      Depends $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 	      Command $env1 [$rz,$geometry], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
+		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry %>:d); #   mv geom.rz %>:f;
+#		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv %>:f $geometry %>:d); #   mv geom.rz %>:f;
+#		qq (root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null; mv %>:f %>; ); #  mv geom.rz %>:f;
+#		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
 	    } else{
 	      Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
 	      Command $env1 [$rz,$geometry], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
-		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
+#		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
+		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry %>:d); #   mv geom.rz %>:f;
 	    }
 	  }
 	  my $g2root = "g2Root";
