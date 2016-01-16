@@ -14,6 +14,7 @@ void AgML(const Char_t *tag="y2013_2", const Char_t *geom="") {
       cout << " + libStStarLogger.so";
     }
   }
+  gSystem->Load("StarAgmlUtil");
   gSystem->Load("StarAgmlLib");
   //  gSystem->Load("StarGeometry");
   gSystem->Load("Geometry");

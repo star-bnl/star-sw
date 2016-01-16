@@ -11,7 +11,7 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   gROOT   -> LoadMacro("Load.C");
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
   //  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
-  Load("libGeom,St_base,StUtilities,libPhysics,StarAgmlLib,libGeometry");
+  Load("libGeom,St_base,StUtilities,libPhysics,StarAgmlUtil,StarAgmlLib,libGeometry");
 
   if (!mytag) return;
 
