@@ -255,9 +255,9 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d < Small) {
     if (m_debug) {
-      std::cout << m_className << "::NewTrack:\n";
-      std::cout << "    Direction vector has zero norm.\n";
-      std::cout << "    Initial direction is randomized.\n";
+      std::cout << m_className << "::NewTrack:\n"
+                << "    Direction vector has zero norm.\n"
+                << "    Initial direction is randomized.\n";
     }
     // Null vector. Sample the direction isotropically.
     const double ctheta = 1. - 2. * RndmUniform();
@@ -339,7 +339,6 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
 
   // Plot the new track.
   if (m_usePlotting) PlotNewTrack(x0, y0, z0);
-
   return true;
 }
 
