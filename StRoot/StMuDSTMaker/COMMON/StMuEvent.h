@@ -13,7 +13,8 @@
 #include "StMuEmcCollection.h"
 #include "StMuFmsCollection.h"
 #include "StMuTriggerIdCollection.h"
-
+#include "StMuPrimaryVertex.h"
+#include "StMuTrack.h"
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventSummary.h"
@@ -140,6 +141,8 @@ class StMuEvent : public TObject {
   UInt_t numberOfPxlOuterHits()			{ return mNHitsHFT[1]; }
   UInt_t numberOfIstHits()			{ return mNHitsHFT[2]; }
   UInt_t numberOfSsdHits()			{ return mNHitsHFT[3]; }
+
+
 
  protected:
   void clear();
