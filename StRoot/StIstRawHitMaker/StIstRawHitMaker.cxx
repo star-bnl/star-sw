@@ -248,9 +248,9 @@ Int_t StIstRawHitMaker::Make()
 
       // Arrays to store ADC information per APV chip (128 channels over all time bins)
       // Signal w/o pedestal subtracted
-      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalUnCorrected;
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalUnCorrected{};
       // Signal w/ pedestal subtracted
-      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalCorrected;
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalCorrected{};
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
       double sumAdcPerEvent[kIstNumTimeBins];
