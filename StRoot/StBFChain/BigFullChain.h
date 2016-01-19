@@ -61,7 +61,8 @@ Bfc_st BFC[] = { // standard chains
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #ifdef __AgMLonFly__
-  {"AgML"        ,""  ,"","-Agi,-VmcGeo","","StarAgmlLib,Geometry,StarGeometry"
+  {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
+  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
   {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
