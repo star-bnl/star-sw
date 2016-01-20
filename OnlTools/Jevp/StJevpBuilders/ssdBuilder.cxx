@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "JevpBuilder.h"
+#include "Jevp/StJevpPlot/JevpPlotSet.h"
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
@@ -23,7 +23,7 @@
 #define  OFFSET  375
 ClassImp(ssdBuilder);
 
-ssdBuilder::ssdBuilder(JevpServer *parent): JevpBuilder(parent),evtCt(0) {
+ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
   plotsetname = (char *)"ssd";
 }
 
@@ -151,7 +151,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hPedStrip[ns][nl] = new TH1I(buffer, buffer2,nBinsX,0,nBinsX);
 	  hPedStrip[ns][nl]->GetXaxis()->SetTitle("Physical Strip Number");
 	  hPedStrip[ns][nl]->GetYaxis()->SetTitle("Pedestal");
-	  hPedStrip[ns][nl]->SetMaximum(nBinsY);
+	  // hPedStrip[ns][nl]->SetMaximum(nBinsY);
 	  hPedStrip[ns][nl]->SetFillColor(4);
 	  //hPedStrip[ns][nl]->SetFillStyle(3144);
 	  hPedStrip[ns][nl]->SetFillStyle(3013);
@@ -169,7 +169,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hRmsStrip[ns][nl] = new TH1I(buffer, buffer2,nBinsX,0,nBinsX);
 	  hRmsStrip[ns][nl]->GetXaxis()->SetTitle("Physical Strip Number");
 	  hRmsStrip[ns][nl]->GetYaxis()->SetTitle("Rms");
-	  hRmsStrip[ns][nl]->SetMaximum(100);
+	  // hRmsStrip[ns][nl]->SetMaximum(50);
 	  hRmsStrip[ns][nl]->SetFillColor(4);
 	  hRmsStrip[ns][nl]->SetFillStyle(3013);
 	  hRmsStrip[ns][nl]->SetStats(false);//true
@@ -331,12 +331,14 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	//PedStrip
 	plots[2*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hPedStrip[i][j]);
 	plots[2*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
+	plots[2*nSide*nLadderPerSide+nLadderPerSide*i+j]->setMaxY(nBinsY);
 	//plots[2*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("*H");
 	histcounter += 1;
 
 	//RmsStrip
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hRmsStrip[i][j]);
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
+	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setMaxY(30);
 	//plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("*H");
 	histcounter += 1;
       }
@@ -531,30 +533,40 @@ void ssdBuilder::event(daqReader *rdr) {
 
       LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
 
-      int ChipFlag = 0;		// Chip Status 0-good, 1-bad
-      int OldChip  = 0;      	// Chip index buffer
-      
+      int ChipFlag     = 0;		// Chip Status 0-good, 1-bad
+      int OldChip      = 0;      	// Chip index buffer
+      int nFiredInChip = -200;		// Number of fired channels in a give chip., -200 means eventhough all channel are fired, the nFiredInChip still negative, will never to equal to 1. 
       for ( u_int i=0; i<maxI; i++ ) {
 	mWafer = sst[i].hybrid;
 	mStrip = sst[i].strip;
 	mAdc   = sst[i].adc;
-	mChip = mWafer*nChipPerWafer + mStrip/128;
+	mChip  = mWafer*nChipPerWafer + mStrip/128;
 	
 	if ( mStrip<0 || mStrip>767 )    continue; //strip 0-767
 	if ( mWafer<0 || mWafer>15 )     continue; //wafer 0 15
 	if ( mAdc > 1024 )               continue; //adc 0-1024
 	if ( mChip > 96 )                continue; //Chip 0-95
 
-	if (OldChip!=mChip) ChipFlag = 0;
+	nFiredInChip ++;
+
+	if (OldChip!=mChip) {
+	  ChipFlag = 0; 
+	  if(nFiredInChip == 2) {
+	    // only first channel  are fired --> think this one is CMN failed chip
+	    hFailedLadderChip[mSide]->Fill(mLadder,sst[i-1].hybrid*nChipPerWafer+sst[i-1].strip/128);
+	  }
+	  nFiredInChip = -200;
+	}
 	
-	if(mDataMode==CMNSMODE && mStrip==0 && mAdc==0xB)
+	if(mDataMode==CMNSMODE && mStrip%128==0)
 	  {
 	    // When CMN Algorithm failed, the first channel will be 0xB.
-	    hFailedLadderChip[mSide]->Fill(mLadder,mWafer*nChipPerWafer+mStrip/128);
+	    nFiredInChip = 1;
 	    ChipFlag = 1;
 	  }
 
-	if (ChipFlag) continue;	// Discard Bad Chips
+	// if (ChipFlag) continue;	// Discard Bad Chips
+	if(mStrip%128==0 || mStrip%128==127) { OldChip = mChip; continue;} // Rejcet first channel and last channel in one chip
 	
 	//====================
 	if(mOutPutTree) mTree->Fill();     
@@ -575,7 +587,8 @@ void ssdBuilder::event(daqReader *rdr) {
 	if(mDataMode==RAWMODE) hRawAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+OFFSET)%1024);
 	if(mDataMode==COMPRESSEDMODE || mDataMode==CMNSMODE) hZSAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+OFFSET)%1024);
        
-	OldChip = mChip;       
+	OldChip = mChip;
+
       }//end all RDO,Fiber,Ladder loop
     }
 
