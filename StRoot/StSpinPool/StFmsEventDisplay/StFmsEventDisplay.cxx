@@ -1,8 +1,11 @@
 // \class StFmsEventDisplay
 // \author Akio Ogawa
 //
-//  $Id: StFmsEventDisplay.cxx,v 1.1 2015/10/20 19:55:51 akio Exp $
+//  $Id: StFmsEventDisplay.cxx,v 1.2 2016/01/20 19:46:40 akio Exp $
 //  $Log: StFmsEventDisplay.cxx,v $
+//  Revision 1.2  2016/01/20 19:46:40  akio
+//  *** empty log message ***
+//
 //  Revision 1.1  2015/10/20 19:55:51  akio
 //  Initial version of FMS event display
 //
@@ -12,6 +15,7 @@
 
 #include "StMessMgr.h"
 #include "Stypes.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StThreeVectorF.hh"
 #include "StFmsDbMaker/StFmsDbMaker.h"
@@ -90,10 +94,23 @@ void scale(float x=100.0, float dx=5.0, float ymin=-100.0, float ymax=100.0, int
 }
 
 Int_t StFmsEventDisplay::Make(){
+    int bunch=-1;
+    StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
+    if(mudst) {
+	bunch = mudst->event()->triggerData()->bunchId7Bit();
+	LOG_INFO << Form("Bunch=%3d from Mudst\n",bunch) << endm;
+    }
+
     StEvent* event = (StEvent*)GetInputDS("StEvent");
     if(!event) {LOG_ERROR << "StFmsEventDisplay::Make did not find StEvent"<<endm; return kStErr;}
     mFmsColl = event->fmsCollection();
     if(!mFmsColl) {LOG_ERROR << "StFmsEventDisplay::Make did not find StEvent->FmsCollection"<<endm; return kStErr;}
+    if(bunch==-1){
+	if(event->triggerData()) {
+	    bunch = event->triggerData()->bunchId7Bit();
+	    LOG_INFO << Form("Bunch=%3d from StEvent\n",bunch) <<endm;
+	}
+    }
 
     StSPtrVecFmsHit& hits = mFmsColl->hits();
     StSPtrVecFmsCluster& clusters = mFmsColl->clusters();
@@ -109,6 +126,7 @@ Int_t StFmsEventDisplay::Make(){
     if(mNAccepted < mMaxEvents){
 	//filters
 	if(mFilter==1 && np<2) {mNEvents++; return kStOK;}
+	if(mFilter==2 && (bunch<30 || bunch>=40)) {mNEvents++; return kStOK;}
 
 	char cc[100]; 
 	sprintf(cc,"FMSEventDisplayEvt=%d",mNEvents);
@@ -135,8 +153,7 @@ Int_t StFmsEventDisplay::Make(){
 		}
 	    }
 	}
-	
-	
+		
 	//First draw hits 
 	for(int i=0; i<nh; i++){
 	    StFmsHit* hit=hits[i];
