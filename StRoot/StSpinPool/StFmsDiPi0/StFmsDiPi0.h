@@ -3,8 +3,11 @@
 //
 //   This is FMS di-pi0 analysis
 // 
-//  $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:50:04 akio Exp $
+//  $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:58:55 akio Exp $
 //  $Log: StFmsDiPi0.h,v $
+//  Revision 1.1  2016/01/20 19:58:55  akio
+//  *** empty log message ***
+//
 //  Revision 1.1  2016/01/20 19:50:04  akio
 //  *** empty log message ***
 //
@@ -55,7 +58,7 @@ private:
     TH1F* mDphi[kNPtBin][kNPtBin][kNCut];
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:50:04 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:58:55 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsDiPi0,0);
 };
