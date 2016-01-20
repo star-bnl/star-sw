@@ -338,7 +338,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	//RmsStrip
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hRmsStrip[i][j]);
 	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
-	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setMaxY(30);
+	plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setMaxY(200);
 	//plots[3*nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("*H");
 	histcounter += 1;
       }
