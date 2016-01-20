@@ -1,8 +1,11 @@
 // \class StFmsDiPi0
 // \author Akio Ogawa
 //
-//  $Id: StFmsDiPi0.cxx,v 1.1 2016/01/20 19:50:04 akio Exp $
+//  $Id: StFmsDiPi0.cxx,v 1.1 2016/01/20 19:58:55 akio Exp $
 //  $Log: StFmsDiPi0.cxx,v $
+//  Revision 1.1  2016/01/20 19:58:55  akio
+//  *** empty log message ***
+//
 //  Revision 1.1  2016/01/20 19:50:04  akio
 //  *** empty log message ***
 //
