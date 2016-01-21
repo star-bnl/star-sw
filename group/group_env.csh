@@ -1048,9 +1048,9 @@ if ( -x ${GROUP_DIR}/dropit) then
     endsw
     setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH /usr/lib"`
     if ($USE_64BITS) then 
-	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib64
+	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
     else                  
-	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib
+	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib:/usr/lib/mysql
     endif
     setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH}`
     setenv PATH `${GROUP_DIR}/dropit -p ${PATH} GROUPPATH`
