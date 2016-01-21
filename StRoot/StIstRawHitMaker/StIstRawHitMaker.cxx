@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.41 2016/01/07 22:15:27 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.42 2016/01/21 02:54:45 smirnovd Exp $
 
 #include "StIstRawHitMaker.h"
 
@@ -20,8 +20,6 @@
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
 
-#include <string.h>
-#include <time.h>
 
 StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ),
    mIsCaliMode(false), mDoEmbedding(false), mDoCmnCorrection(false),

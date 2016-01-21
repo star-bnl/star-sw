@@ -1,17 +1,19 @@
-// $Id: StIstRawHitMaker.h,v 1.20 2016/01/07 22:15:27 smirnovd Exp $
+// $Id: StIstRawHitMaker.h,v 1.21 2016/01/21 02:54:46 smirnovd Exp $
 
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
+
+#ifndef __CINT__
+#include <array>
+#include <iostream>
+#endif
+
+#include <vector>
 
 #include "StRoot/St_base/Stypes.h"
 #include "StRoot/StChain/StRTSBaseMaker.h"
 #include "StIstUtil/StIstConsts.h"
 
-#include <vector>
-#include <string>
-#include <list>
-#include <map>
-#include <assert.h>
 
 class StIstCollection;
 
@@ -48,7 +50,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.20 2016/01/07 22:15:27 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.21 2016/01/21 02:54:46 smirnovd Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
