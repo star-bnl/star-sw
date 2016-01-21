@@ -1,18 +1,18 @@
-// $Id: StIstRawHitMaker.cxx,v 1.41 2016/01/07 22:15:27 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.42 2016/01/21 02:54:45 smirnovd Exp $
 
-#include "StIstRawHitMaker.h"
+#include "StIstRawHitMaker/StIstRawHitMaker.h"
 
-#include "StEvent.h"
-#include "StRoot/St_base/StMessMgr.h"
+#include "StEvent/StEvent.h"
+#include "St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StChain/StRtsTable.h"
 
-#include "StRoot/StIstUtil/StIstCollection.h"
-#include "StRoot/StIstUtil/StIstRawHitCollection.h"
-#include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstCollection.h"
+#include "StIstUtil/StIstRawHitCollection.h"
+#include "StIstUtil/StIstRawHit.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StIstUtil/StIstConsts.h"
 
 #include "tables/St_istPedNoise_Table.h"
 #include "tables/St_istGain_Table.h"
@@ -20,8 +20,6 @@
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
 
-#include <string.h>
-#include <time.h>
 
 StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ),
    mIsCaliMode(false), mDoEmbedding(false), mDoCmnCorrection(false),
