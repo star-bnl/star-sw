@@ -1,4 +1,4 @@
-*#define  __TPCREFSYS__
+#define  __TPCREFSYS__
 *CMZ :  2.22/00 08/04/99  18.41.30  by  Rene Brun
 *CMZ :  2.21/05 08/02/99  12.19.15  by  Rene Brun
 *CMZ :  2.00/11 22/08/98  15.25.26  by  Rene Brun
@@ -1162,19 +1162,20 @@ C
      +           pname(1:np) .eq. 'PXMO' .or.
      +           pname(1:np) .eq. 'IGMO' .or.
      +           pname(1:np) .eq. 'FGMO' .or.
-     +           pname(1:np) .eq. 'BTOF' .or.
-     +           pname(1:np) .eq. 'IDSM')) then
+     +           pname(1:np) .eq. 'BTOF' )) then
                nmotherS = 9
                motherS(1:nmothers) = 'TpcRefSys'
             else 
                nmotherS = nmother
                motherS(1:nmothers) = mother(1:nmother)
             endif
+            if (imany.eq.1 .or. motherS(1:nmothers) .eq. 'TpcRefSys') 
+     + then
 #else /*!  __TPCREFSYS__ */ 
                nmotherS = nmother
                motherS(1:nmothers) = mother(1:nmother)
-#endif /*  __TPCREFSYS__ */
             if (imany.eq.1) then
+#endif /*  __TPCREFSYS__ */
                if (imulti.eq.0) then
                write(line,3000)cblank(1:nlevel),motherS(1:nmotherS),
      +               pname(1:np), astring(1:nci), matrixs(1:ncmats)
