@@ -999,7 +999,7 @@ TDataSet *CreateTable() {
 	    }
 	  }
 	  my $g2root = "g2Root";
-	  Depends $env1 [$geom_h], ($rz);
+	  Depends $env1 [$geom_h], ($rz, $BIN . "/" . $g2root);
 	  Command $env1 [$geom_h], ($rz), qq ( cd %>:d; $g2root %<:f %>:f >& /dev/null);
 	  if ($geomlist) { $geomlist .= "|";}
 	  $geomlist .= $geom;
