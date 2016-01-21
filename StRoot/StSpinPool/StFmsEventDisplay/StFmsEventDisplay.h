@@ -3,8 +3,11 @@
 //
 //   This is FMS-FPS event display.
 // 
-//  $Id: StFmsEventDisplay.h,v 1.1 2015/10/20 19:55:51 akio Exp $
+//  $Id: StFmsEventDisplay.h,v 1.3 2016/01/20 19:56:39 akio Exp $
 //  $Log: StFmsEventDisplay.h,v $
+//  Revision 1.3  2016/01/20 19:56:39  akio
+//  *** empty log message ***
+//
 //  Revision 1.1  2015/10/20 19:55:51  akio
 //  Initial version of FMS event display
 //
@@ -46,7 +49,7 @@ private:
     TFile* mFile;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsEventDisplay.h,v 1.1 2015/10/20 19:55:51 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsEventDisplay.h,v 1.3 2016/01/20 19:56:39 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsEventDisplay,0);
 };

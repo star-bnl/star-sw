@@ -216,10 +216,10 @@ Int_t StSsdFastSimMaker::Make()
 	if(iok==0)continue;
 	goodHits++;
 	LOG_DEBUG << "good hit after triangle rejection" << endm;
-	Local->Fill(xlSmear[0],xlSmear[2]);
 	StSsdHit  *mSmearedhit = new StSsdHit(xgSmear,error,currWafId,g2t[i].de,c);
 	//fill histograms
 	if(IAttr(".histos")){ 
+	  Local->Fill(xlSmear[0],xlSmear[2]);
 	  HitsMap->Fill(currLadder+1,currWafNumb+1,1);
 	  WaferNumb->Fill(currWafId);
 	  dX->Fill(mHit->position().x()-xgSmear[0]);
@@ -241,7 +241,8 @@ Int_t StSsdFastSimMaker::Make()
   }
   if(inContainer){
     LOG_INFO<<"####   -> "<<inContainer<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
-    Ratio->Fill(inContainer/(float)g2t_ssd_hit->GetNRows());
+    if (Ratio)
+      Ratio->Fill(inContainer/(float)g2t_ssd_hit->GetNRows());
   }
   else {
     LOG_INFO<<"######### NO SSD HITS WRITTEN INTO CONTAINER  ####"<<endm;
