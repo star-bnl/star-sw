@@ -59,7 +59,7 @@ int StFixedVertexFinder::fit(StEvent* event)
 
   prim.setCovariantMatrix(cov);
   prim.setFlag(1);                    // So that we know its the primary vertex
-  prim.setRanking(-5);                // Have to have something
+  prim.setRanking(1000.);             // Have to have something
   prim.setVertexFinderId(VFId);       // Id depends on MC or fixed position used
   addVertex(&prim);
 
