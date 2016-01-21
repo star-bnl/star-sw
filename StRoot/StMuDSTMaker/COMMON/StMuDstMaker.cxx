@@ -96,8 +96,9 @@
 #include "StG2TrackVertexMap.h"
 #include "TArrayF.h"
 #include "TUnixTime.h"
-ClassImp(StMuDstMaker)
+ClassImp(StMuDstMaker);
 
+StMuDstMaker *StMuDstMaker::gStMuDstMaker = 0;
 #if !(ST_NO_NAMESPACES)
   using namespace units;
 #endif
@@ -160,6 +161,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
   FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
 
+  gStMuDstMaker = this;
 
 }
 
@@ -357,6 +359,7 @@ mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
   mEzTree  = new StMuEzTree();
+  gStMuDstMaker = this;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -392,6 +395,7 @@ mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
   mEzTree  = new StMuEzTree();
+  gStMuDstMaker = this;
 }*/
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -415,6 +419,7 @@ StMuDstMaker::~StMuDstMaker() {
   SafeDelete(mEmcCollectionArray);
   SafeDelete(mPmdCollectionArray);
   DEBUGMESSAGE3("out");
+  gStMuDstMaker = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

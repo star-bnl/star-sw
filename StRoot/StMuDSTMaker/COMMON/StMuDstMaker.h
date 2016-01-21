@@ -109,6 +109,7 @@ class StMuMtdHeader;
 */
 class StMuDstMaker : public StIOInterFace {
  public:
+  static StMuDstMaker* instance() {return gStMuDstMaker;}
     /// Default constructor
     StMuDstMaker(const char* name="MuDst");
     /// Constructor
@@ -365,7 +366,7 @@ virtual   void closeRead();
   StMuFmsCollection *mFmsCollection;
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
-
+  static StMuDstMaker *gStMuDstMaker;
   // Increment this by 1 every time the class structure is changed
   ClassDef(StMuDstMaker, 3)
 };
