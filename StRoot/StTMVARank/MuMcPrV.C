@@ -5,7 +5,7 @@
 PPV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.250)' >& MuMcPrV28TMVAR.log &
 KFV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.183)' >& MuMcPrV28TMVAR.log &
 
-    root.exe -q -b 'lMuDst.C(0,"./*MuDst.root","RMuDst,mysql,nodefault")' MuMcPrV.C+
+    root.exe -q -b 'lMuDst.C(0,"./*MuDst.root","RMuDst,nodefault")' MuMcPrV.C+
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
@@ -428,8 +428,6 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
     "StStMuMcTrack",
     //    "CovPrimTrack",
     "CovGlobTrack",
-    "StStMuMcVertex",
-    "StStMuMcTrack",
     "KFTracks",
     "KFVertices",
     "StBTofHit",
