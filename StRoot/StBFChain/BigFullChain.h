@@ -77,7 +77,8 @@ Bfc_st BFC[] = { // standard chains
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #ifdef __AgMLonFly__
-  {"AgML"        ,""  ,"","-Agi,-VmcGeo","","StarAgmlLib,Geometry,StarGeometry"
+  {"AgMLlib",     "",  "","",                        "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
+  {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
 #else /* __AgMLonFly__ */
   {"AgML"        ,""  ,"","-Agi,-VmcGeo","",""                      //StarAgmlLib,Geometry,StarGeometry
@@ -1250,7 +1251,7 @@ Bfc_st BFC[] = { // standard chains
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
   {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,detDb,KFParticle","","StEvent"
+  {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,Stu,TbUtil,KFParticle","","TpcDb,StEvent"
    ,                                                                                 "Load StEvent",kFALSE},
   {"PxlUtil"     ,""  ,"","","",                                       "StPxlUtil","Load StPxlUtil",kFALSE},
   {"IstUtil"     ,""  ,"","","",                                       "StIstUtil","Load StIstUtil",kFALSE},
@@ -1293,7 +1294,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                "gstar","read event from MuDst",kFALSE},
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
-  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,Tree,noHistos,noRunco"
+  {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,noHistos,noRunco"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
   {"RpicoDST"    ,"PicoDst"  ,"","MuDst,Tree,noHistos,noRunco","StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1789,6 +1790,7 @@ Bfc_st BFC[] = { // standard chains
   {"picoDST"     ,"PicoDst"  ,"",""     ,                      "StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
+  {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
