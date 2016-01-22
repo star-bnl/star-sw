@@ -26,7 +26,9 @@ int StFixedVertexFinder::fit(StEvent* event)
 {
   StPrimaryVertex  prim;
   StVertexFinderId VFId;
-  Float_t cov[6] = {0.0,0.0,0.0,0.0,0.0,0.0}; // All errors are zero
+  Float_t cov[6] = {1e-6,
+		    0, 1e-6,
+		    0, 0, 1e-6}; // All errors are 10 um
 
   if (mMode == 0){
     // Really the default which takes the SetPos() TBI
@@ -53,6 +55,7 @@ int StFixedVertexFinder::fit(StEvent* event)
     			 pv->position().z());
       //cout << "DEBUG :: saving McVertex " << pos << endl;
       prim.setPosition(pos);
+      prim.setIdTruth(pv->key(),100);
     }
     VFId = mcEventVertexFFinder;
   }
