@@ -48,7 +48,7 @@
 *    if 3 sigma interval overlaps with request and Sigma is not too big:
      If Idevt0!=Idevt
      {  Idevt0=Idevt; D=abs(AvSigm(3));  Z=-1.e+10
-        if Zmin<AvCoor(3)+3*D & AvCoor(3)-3*D<Zmax & Zmax-Zmin > D/5
+        if D > 0 & Zmin<AvCoor(3)+3*D & AvCoor(3)-3*D<Zmax & Zmax-Zmin > D/5
              { until ZMin<=z&z<=ZMax { call rannor(a,b); z=Avcoor(3)+D*b } }
         else { z=Zmin+Rndm(-1.)*(Zmax-Zmin) }
         call rannor(a,b)
