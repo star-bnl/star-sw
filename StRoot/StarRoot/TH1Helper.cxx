@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TH1Helper.cxx,v 1.2 2007/07/12 20:38:41 fisyak Exp $
+ * $Id: TH1Helper.cxx,v 1.3 2016/01/22 17:45:19 smirnovd Exp $
  *
  ***************************************************************************
  *
@@ -56,7 +56,7 @@ TH1Helper::~TH1Helper()
 //______________________________________________________________________________
 void TH1Helper::Build()
 {
-  TAxis *ax = fH1->GetXaxis();
+  const TAxis *ax = fH1->GetXaxis();
   int nbins = ax->GetNbins();
   if (fBMax) { //1st constructor
     if (fBMin < 1) fBMin = 1;
@@ -85,7 +85,7 @@ void TH1Helper::Aver()
 {
   if (!fNonZeros) return;
   if (fMom[2])    return;
-  TAxis *ax = fH1->GetXaxis();
+  const TAxis *ax = fH1->GetXaxis();
   double ovl[2][6];
   double h,error,content,part,center,low,upp;
 
