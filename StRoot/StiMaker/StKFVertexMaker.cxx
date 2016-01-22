@@ -425,6 +425,13 @@ Int_t StKFVertexMaker::Make() {
     StiToolkit::instance()->getVertexFinder()->fit(pEvent);
     const std::vector<StiHit*> *vertexes = StiToolkit::instance()->getVertexFinder()->result();
     if (vertexes) StKFVertex::ResetTotalNoVertices(vertexes->size());
+    UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+    for (Int_t ipv = 0; ipv < NoPV; ipv++) {
+      StPrimaryVertex *Vp = pEvent->primaryVertex(ipv);
+      if (Vp && ! Vp->key()) {
+	Vp->setKey(ipv+1);
+      }
+    }
   }
   Double_t bField = 0;
 #if 0
@@ -605,12 +612,12 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       }
       if (Vp) {
 	if (Vp == Vtx) continue;
-	PrPP(Make,*Vp);
+	PrPP(MakeV0,*Vp);
 	KFVertex Parent;
 	if (Vp->parentMF() && Vp->parentMF()->kfParticle()) {
 	  Parent = *Vp->parentMF()->kfParticle(); 
 	} else {
-	  Float_t Param[6] = {Vp->position().x(), Vp->position().y(), Vp->position().z(), 0, 0, 0};
+	  Float_t Param[6] = {Vp->position().x(), Vp->position().y(), Vp->position().z(), 0, 0, 10000};
 	  Float_t Cov[21] = {Vp->positionError().x()*Vp->positionError().x(),
 			     0, Vp->positionError().y()*Vp->positionError().y(),
 			     0, 0, Vp->positionError().z()*Vp->positionError().z(),
@@ -620,6 +627,13 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 	  Int_t   charge = 0;
 	  Float_t mass = 0;
 	  Parent.Create(Param, Cov, charge, mass);
+	  Parent.SetId(Vp->key());
+	  StTrackMassFit *pf = new StTrackMassFit(Parent.Id(),&Parent);
+	  Vp->setParent(pf);
+	  StTrackNode *nodepf = new StTrackNode;
+	  nodepf->addTrack(pf);
+	  StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
+	  trNodeVec.push_back(nodepf);
 	}
 	PrPP(MakeV0,Parent);
 	KFVertex V02(*V0s[l]);
