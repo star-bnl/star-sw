@@ -9,7 +9,8 @@
 // #define HLT_GL3_VERSION 0x20100107
 // #define HLT_GL3_VERSION 0x20110114  // add di-electron selection method bits
 // #define HLT_GL3_VERSION 0x20130117  // optimazed mamoty layout
-#define HLT_GL3_VERSION 0x20140522 // add MTD data structure
+// #define HLT_GL3_VERSION 0x20140522 // add MTD data structure
+#define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
 
 struct hlt_track {
     int            id ;         //primary key
@@ -80,6 +81,20 @@ struct HLT_MTD {
   struct hlt_MtdHit mtdHit[10000];
 };
 
+struct HLT_MTDPair {
+    int   muonTrackId1;         // leading track
+    int   muonTrackId2;
+    float pt;                   // pair py,eta,phi
+    float eta;
+    float phi;
+    float invMass;              // pair InvMass
+};
+
+struct HLT_MTDQuarkonium {
+    int nMTDQuarkonium;
+    struct HLT_MTDPair MTDQuarkonium[1000];
+};
+
 struct HLT_PVPD {
     unsigned int      nPvpdHits;
     struct hlt_TofHit pvpdHit[10000];
@@ -106,7 +121,7 @@ struct hlt_node {
     int    primaryTrackSN;      // serial number in HLT_PT
     int    tofHitSN;            // serial number in HLT_TOF
     int    emcTowerSN;          // serial number in HLT_EMC
-
+    
     double emcMatchPhiDiff;
     double emcMatchZEdge;
 
