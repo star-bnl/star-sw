@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanluxEngine.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
+ * $Id: RanluxEngine.cc,v 1.5 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author: Original code from CLHEP by G. Cosmo
  *         modified for SCL bl
@@ -22,6 +22,19 @@
  ***************************************************************************
  *
  * $Log: RanluxEngine.cc,v $
+ * Revision 1.5  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.4  2012/06/11 15:29:26  fisyak
  * std namespace
  *
@@ -104,7 +117,7 @@ void RanluxEngine::setSeed(long seed, HepInt lux) {
   long int_seed_table[24];
   long next_seed = seed;
   long k_multiple;
-  register HepInt i;
+  HepInt i;
   
 // number of additional random numbers that need to be 'thrown away'
 // every 24 numbers is set using luxury level variable.
@@ -252,8 +265,8 @@ void RanluxEngine::showStatus() const
 HepDouble RanluxEngine::flat() {
 
   HepFloat next_random;
-  register HepFloat uni;
-  register HepInt i;
+  HepFloat uni;
+  HepInt i;
 
   uni = float_seed_table[j_lag] - float_seed_table[i_lag] - carry;
   if(uni < 0. ){
@@ -302,9 +315,9 @@ HepDouble RanluxEngine::flat() {
 void RanluxEngine::flatArray(const HepInt size, HepDouble* vect)
 {
   HepFloat next_random;
-  register HepFloat uni;
-  register HepInt i;
-  register HepInt index;
+  HepFloat uni;
+  HepInt i;
+  HepInt index;
 
   for (index=0; index<size; ++index) {
     uni = float_seed_table[j_lag] - float_seed_table[i_lag] - carry;
@@ -360,8 +373,8 @@ RanluxEngine::flatArray(vector<HepDouble,allocator<HepDouble> >& vec)
 #endif
 {
   HepFloat next_random;
-  register HepFloat uni;
-  register HepInt i;
+  HepFloat uni;
+  HepInt i;
 
   for (unsigned int index=0; index<vec.size(); ++index) {
     uni = float_seed_table[j_lag] - float_seed_table[i_lag] - carry;

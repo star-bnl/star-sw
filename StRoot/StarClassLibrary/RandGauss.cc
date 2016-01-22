@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandGauss.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
+ * $Id: RandGauss.cc,v 1.4 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,19 @@
  ***************************************************************************
  *
  * $Log: RandGauss.cc,v $
+ * Revision 1.4  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.3  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -51,7 +64,7 @@ HepDouble RandGauss::shoot()
     return getVal();
   }
 
-  register HepDouble r;
+  HepDouble r;
   HepDouble v1,v2,fac,val;
 
   do {
@@ -70,7 +83,7 @@ HepDouble RandGauss::shoot()
 void RandGauss::shootArray( const HepInt size, HepDouble* vect,
                             HepDouble mean, HepDouble stdDev )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot(mean,stdDev);
@@ -99,7 +112,7 @@ HepDouble RandGauss::shoot( HepRandomEngine* anEngine )
     return getVal();
   }
 
-  register HepDouble r;
+  HepDouble r;
   HepDouble v1,v2,fac,val;
 
   do {
@@ -119,7 +132,7 @@ void RandGauss::shootArray( HepRandomEngine* anEngine,
                             const HepInt size, HepDouble* vect,
                             HepDouble mean, HepDouble stdDev )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot(anEngine,mean,stdDev);
@@ -151,7 +164,7 @@ HepDouble RandGauss::fire()
     return nextGauss;
   }
 
-  register HepDouble r;
+  HepDouble r;
   HepDouble v1,v2,fac,val;
 
   do {
@@ -170,7 +183,7 @@ HepDouble RandGauss::fire()
 void RandGauss::fireArray( const HepInt size, HepDouble* vect,
                            HepDouble mean, HepDouble stdDev )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = fire(mean,stdDev);

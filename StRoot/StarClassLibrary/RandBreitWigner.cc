@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandBreitWigner.cc,v 1.4 2003/09/02 17:59:34 perev Exp $
+ * $Id: RandBreitWigner.cc,v 1.5 2016/01/22 17:10:49 smirnovd Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,19 @@
  ***************************************************************************
  *
  * $Log: RandBreitWigner.cc,v $
+ * Revision 1.5  2016/01/22 17:10:49  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.4  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -102,7 +115,7 @@ void RandBreitWigner::shootArray ( const HepInt size, HepDouble* vect,
                                    HepDouble a, HepDouble b,
                                    HepDouble c )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot( a, b, c );
@@ -183,7 +196,7 @@ void RandBreitWigner::shootArray ( HepRandomEngine* anEngine,
                                    HepDouble a, HepDouble b,
                                    HepDouble c )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot( anEngine, a, b, c );
@@ -260,7 +273,7 @@ void RandBreitWigner::fireArray ( const HepInt size, HepDouble* vect,
                                   HepDouble a, HepDouble b,
                                   HepDouble c )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = fire( a, b, c );
