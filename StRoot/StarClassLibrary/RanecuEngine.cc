@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanecuEngine.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
+ * $Id: RanecuEngine.cc,v 1.5 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author:  Gabriele Cosmo - Created - 2nd February 1996
  *          modified for SCL bl
@@ -20,6 +20,19 @@
  ***************************************************************************
  *
  * $Log: RanecuEngine.cc,v $
+ * Revision 1.5  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.4  2012/06/11 15:29:26  fisyak
  * std namespace
  *
@@ -172,7 +185,7 @@ void RanecuEngine::flatArray(const HepInt size, HepDouble* vect)
    long seed1 = table[index][0];
    long seed2 = table[index][1];
    HepInt k1, k2;
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
    {

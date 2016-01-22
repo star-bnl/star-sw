@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandPoisson.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
+ * $Id: RandPoisson.cc,v 1.4 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author: 
  ***************************************************************************
@@ -17,6 +17,19 @@
  ***************************************************************************
  *
  * $Log: RandPoisson.cc,v $
+ * Revision 1.4  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.3  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -49,7 +62,7 @@ HepDouble gammln(HepDouble xx) {
   static HepDouble cof[6] = {76.18009172947146,-86.50532032941677,
                              24.01409824083091, -1.231739572450155,
                              0.1208650973866179e-2, -0.5395239384953e-5};
-  register HepInt j;
+  HepInt j;
   HepDouble x = xx - 1.0;
   HepDouble tmp = x + 5.5;
   tmp -= (x + 0.5) * ::log(tmp);
@@ -69,7 +82,7 @@ long RandPoisson::shoot(HepDouble xm) {
 // as a source of uniform random numbers.
 // (Adapted from Numerical Recipes in C)
 
-  register HepDouble em;
+  HepDouble em;
   HepDouble t, y;
   HepDouble sq, alxm, g;
   HepDouble om = getOldMean();
@@ -145,7 +158,7 @@ long RandPoisson::shoot(HepRandomEngine* anEngine, HepDouble xm) {
 // of a given Random Engine as a source of uniform random numbers.
 // (Adapted from Numerical Recipes in C)
 
-  register HepDouble em;
+  HepDouble em;
   HepDouble t, y;
   HepDouble sq, alxm, g;
   HepDouble om = getOldMean();
@@ -200,7 +213,7 @@ long RandPoisson::shoot(HepRandomEngine* anEngine, HepDouble xm) {
 void RandPoisson::shootArray(HepRandomEngine* anEngine, const HepInt size,
                              long* vect, HepDouble m)
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot(anEngine,m);
@@ -224,7 +237,7 @@ long RandPoisson::fire(HepDouble xm) {
 // as a source of uniform random numbers.
 // (Adapted from Numerical Recipes in C)
 
-  register HepDouble em;
+  HepDouble em;
   HepDouble t, y;
   HepDouble sq, alxm, g;
 
@@ -276,7 +289,7 @@ long RandPoisson::fire(HepDouble xm) {
 
 void RandPoisson::fireArray(const HepInt size, long* vect, HepDouble m)
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = fire(m);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandExponential.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandExponential.cc,v 1.3 2016/01/22 17:10:49 smirnovd Exp $
  *
  * Author: Gabriele Cosmo - Created: 17th May 1996
  *         modified for SCL bl
@@ -18,6 +18,19 @@
  ***************************************************************************
  *
  * $Log: RandExponential.cc,v $
+ * Revision 1.3  2016/01/22 17:10:49  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -41,7 +54,7 @@ HepDouble RandExponential::operator()() {
 void RandExponential::shootArray( const HepInt size, HepDouble* vect,
                                   HepDouble mean )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot(mean);
@@ -84,7 +97,7 @@ RandExponential::shootArray( HepRandomEngine* anEngine,
 void RandExponential::fireArray( const HepInt size, HepDouble* vect,
                                  HepDouble mean )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = fire(mean);

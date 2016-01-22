@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.20 2012/06/11 15:29:26 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.21 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,19 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.21  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.20  2012/06/11 15:29:26  fisyak
  * std namespace
  *
@@ -912,10 +925,10 @@ template<class DataType>
 StMatrix<DataType> StMatrix<DataType>::T() const
 {
     StMatrix<DataType> mret(mCol,mRow);
-    register DataType *pl = mElement + mSize;
-    register DataType *pme = mElement;
-    register DataType *pt = mret.mElement;
-    register DataType *ptl = mret.mElement + mSize;
+    DataType *pl = mElement + mSize;
+    DataType *pme = mElement;
+    DataType *pt = mret.mElement;
+    DataType *ptl = mret.mElement + mSize;
     for (; pme < pl; pme++, pt+=mRow)
 	{
 	    if (pt >= ptl)
@@ -1226,7 +1239,7 @@ int StMatrix<DataType>::dfact(DataType &det, int *ir)
     }
  
     int ifail, jfail;
-    register int n = mCol;
+    int n = mCol;
  
     DataType tf;
     DataType g1 = 1.0e-19;
@@ -1349,11 +1362,11 @@ int StMatrix<DataType>::dfinv(int *ir)
 #endif
     }
     
-    register int n = mCol;
+    int n = mCol;
     if (n==1) return 0;
     
     DataType s31, s32;
-    register DataType s33, s34;
+    DataType s33, s34;
     
     DataType *m11 = mElement;
     DataType *m12 = m11 + 1;
@@ -1404,8 +1417,8 @@ int StMatrix<DataType>::dfinv(int *ir)
         int j;
         for (j=1; j<=i;j++) {
             s33 = *mij;
-            register DataType *mikj = mi + n + j - 1;
-            register DataType *miik = mii + 1;
+            DataType *mikj = mi + n + j - 1;
+            DataType *miik = mii + 1;
             DataType *min_end = mi + n;
             for (;miik<min_end;) {
                 s33 += (*mikj) * (*(miik++));
@@ -1555,7 +1568,7 @@ vector<DataType> operator*(const StMatrix<X>& m1, const vector<DataType>& v)
     vector<DataType> mret(m1.numRow());
     if(m1.numCol() == v.size() ) {
 	for (unsigned int i=0; i<v.size(); i++) {
-	    register DataType temp = 0;
+	    DataType temp = 0;
 	    for(unsigned int j=0; j<m1.numCol(); j++)
 		temp += m1(i+1,j+1)*v[j];
 	    mret[i]=temp;
@@ -1583,7 +1596,7 @@ vector<DataType> operator*(const vector<DataType>& v, const StMatrix<X>& m1)
     if(v.size() == m1.numRow()) {
 	vector<DataType> mret(m1.numCol());
 	for (unsigned int i=0; i<m1.numCol(); i++) {
-	    register DataType temp = 0;
+	    DataType temp = 0;
 	    for(unsigned int j=0; j<m1.numRow(); j++)
 		temp+=v[j]*m1(j+1,i+1);
 	    mret[i]=temp;
