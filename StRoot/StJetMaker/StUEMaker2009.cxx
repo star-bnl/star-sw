@@ -130,6 +130,8 @@ int StUEMaker2009::Make()
       StjMCParticleList mcparticles = uebranch->anapars->mcCuts()(mc.getMCParticleList());
       mcparticles = uebranch->anapars->particleRegion()(mcparticles,leadingjet,uebranch->name);
       addParticles(mcparticles,uebranch->event);
+      StJetVertex* uevertex = uebranch->event->newVertex();
+      copyVertex(mcvertex, uevertex);
     }
   } // End of Loop over UE Branches
 

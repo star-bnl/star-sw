@@ -65,3 +65,10 @@ float StUeEvent::sumTowerPt() const
   for (int i = 0; i < numberOfTowers(); ++i) s += tower(i)->pt();
   return s;
 }
+
+float StUeEvent::sumParticlePt() const
+{
+  float s = 0;
+  for (int i = 0; i < numberOfParticles(); ++i) s += particle(i)->pt();
+  return s;
+}

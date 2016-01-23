@@ -52,6 +52,7 @@ public:
 
   float sumTrackPt() const;
   float sumTowerPt() const;
+  float sumParticlePt() const;
   float sumPt() const { return sumTrackPt() + sumTowerPt();}
 private:
   friend class StjeJetEventTreeWriter;
