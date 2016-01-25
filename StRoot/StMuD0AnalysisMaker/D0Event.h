@@ -22,6 +22,7 @@ class KpiPair : public TObject {
  public: 
   KFParticle pair;
   Float_t    M, dM, S, dS, T, dT;
+  Float_t    distPion, distKaon, CosTheta, chi2Vx;
   ClassDef(KpiPair,1)
     
 };

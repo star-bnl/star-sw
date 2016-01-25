@@ -3,6 +3,8 @@
 #include "TChain.h"
 #include "TFile.h"
 #include "TArrayI.h"
+#include "TLorentzVector.h"
+#include "TVector.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -54,6 +56,7 @@ Int_t StMuD0AnalysisMaker::Make(){
     mu->printMcVertices();
     mu->printMcTracks();
   }
+  if (mu->numberOfPrimaryVertices() == 0) return kStOK;;
   fEvent->Set(muEvent->eventId(),muEvent->runId());
   KFParticle::SetField(muEvent->magneticField());
   Double_t VpdZ = -9999;
@@ -66,11 +69,16 @@ Int_t StMuD0AnalysisMaker::Make(){
     }
   }
   if (TMath::Abs(VpdZ) > 10) return kStOK;
+  if (! mu->primaryVertex(0)) return kStOK;
+  const Int_t IndxHighestRankVx = 0;
+  Int_t IdPV = mu->primaryVertex(IndxHighestRankVx)->id(); //higest rank vertex
+  if (TMath::Abs(mu->primaryVertex(IndxHighestRankVx)->position().z()) > 6.0) return kStOK;
   UInt_t NKFV = mu->numberOfKFVertices();
   KFVertex *KFV = 0;
   Float_t dZ = 1e8;
   for (UInt_t i = 0; i < NKFV; i++) {
     KFVertex *kfv = mu->KFvertex(i);
+    if (IdPV != kfv->Id()) continue;
     Double_t dz = kfv->GetZ() - VpdZ;
     if (TMath::Abs(dz) < dZ) {
       dZ = TMath::Abs(dz);
@@ -86,6 +94,9 @@ Int_t StMuD0AnalysisMaker::Make(){
     StMuTrack *gTrack = mu->globalTracks(kg);
     if (gTrack->bad()) continue;
     if (gTrack->nHitsFit() < 15) continue;
+    if (gTrack->pt() < 1.2) continue;
+    if (TMath::Abs(gTrack->nSigmaPion()) > 3 &&
+	TMath::Abs(gTrack->nSigmaKaon()) > 2.5) continue;
     const StMuProbPidTraits &pid = gTrack->probPidTraits();
     if (pid.dEdxTrackLength() < 40) continue;
     StTrackTopologyMap topologyMap = gTrack->topologyMap();
@@ -93,19 +104,20 @@ Int_t StMuD0AnalysisMaker::Make(){
     UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
     UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
     UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
-    if (noPxlHits < 2 || noHftHits < 3) continue;
+    if (noPxlHits < 2 || noIstHits < 1) continue;
     gl2Pr[kg] = kg + 1;
   }
   // Remove primary tracks
   UInt_t NoPrimaryTracks = mu->numberOfPrimaryTracks();
   for (UInt_t k = 0; k < NoPrimaryTracks; k++) {
     StMuTrack *pTrack = mu->primaryTracks(k);
-    if (  pTrack->vertexIndex() != 0) continue;
+    if (  pTrack->vertexIndex() != IndxHighestRankVx) continue;
     Int_t kg = pTrack->index2Global();
     if (kg < 0) continue;
     gl2Pr[kg] = 0;
   }
   // Build K pi pairs
+ 
   Double_t xyzp[6], CovXyzp[21];
   for (UInt_t ig = 0; ig < NoGlobalTracks; ig++) { // pion 
     if (! gl2Pr[ig]) continue;
@@ -123,6 +135,7 @@ Int_t StMuD0AnalysisMaker::Make(){
     trackI.SetCharge(dcaGI->charge());
     Int_t pdgI = dcaGI->charge() > 0 ? 211 : -211; // assume all tracks are pions.
     KFParticle pion(trackI, pdgI);
+    Float_t distPion = pion.GetDistanceFromVertex(*KFV);
     for (UInt_t jg = 0; jg < NoGlobalTracks; jg++) { // Kaon
       if (ig == jg) continue;
       if (! gl2Pr[jg]) continue;
@@ -140,6 +153,7 @@ Int_t StMuD0AnalysisMaker::Make(){
       trackJ.SetCharge(dcaGJ->charge());
       Int_t pdgJ = dcaGJ->charge() > 0 ? 321 : -321; // assume all tracks are Kaons.
       KFParticle Kaon(trackJ, pdgJ);
+      Float_t distKaon = Kaon.GetDistanceFromVertex(*KFV);
       // Make a pair
       KFParticle pair(pion,Kaon);
       if (pair.NDF() < 0 || pair.GetChi2() <= 0 || pair.GetChi2() > 5) continue;
@@ -153,7 +167,17 @@ Int_t StMuD0AnalysisMaker::Make(){
       if (pair.GetMass(M,dM)) continue;
       if (TMath::Abs(S/dS) < 5) continue;
       if (TMath::Abs(S) > 2) continue;
+      TLorentzVector lKpi;
+      lKpi.SetPxPyPzE(pair.Px(),pair.Py(),pair.Pz(),pair.E());
+      TVector3 bF = lKpi.BoostVector();
+      TVector3 b(-bF.X(),-bF.Y(),-bF.Z());
+      TLorentzVector Kl(Kaon.Px(),Kaon.Py(),Kaon.Pz(),Kaon.E());
+      Kl.Boost(b);
+      TVector3 dother(Kl.Vect());
+      TVector3 mother(lKpi.Vect());
+      Float_t CosTheta = dother.Dot(mother)/(dother.Mag()*mother.Mag()); 
       KpiPair *p = fEvent->AddPair();
+      
       p->pair = pair;
       p->M = M;
       p->dM = dM;
@@ -161,6 +185,10 @@ Int_t StMuD0AnalysisMaker::Make(){
       p->dS = dS;
       p->T = T;
       p->dT = dT;
+      p->distPion = distPion;
+      p->distKaon = distKaon;
+      p->CosTheta = CosTheta;
+      p->chi2Vx = pair.GetChi2();
     }
   }
   if (fEvent->GetNPairs()) {

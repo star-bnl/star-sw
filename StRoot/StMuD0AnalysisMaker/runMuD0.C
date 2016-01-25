@@ -13,7 +13,7 @@ void runMuD0(Int_t noEvents = 10000000, const Char_t *input = "./*MuDst.root", c
   MuDstMaker->SetStatus("*",0);
   const Char_t *ActiveBranches[] = {
     "MuEvent"
-    //   ,"PrimaryVertices"
+    ,"PrimaryVertices"
     //    ,"PrimaryTracks"
     ,"GlobalTracks"
     //   ,"StStMuMcVertex"
