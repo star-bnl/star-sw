@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandFlat.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandFlat.cc,v 1.3 2016/01/22 17:10:50 smirnovd Exp $
  *
  * Author:  Gabriele Cosmo - Created: 17th May 1995
  *          modified for SCL bl
@@ -18,6 +18,19 @@
  ***************************************************************************
  *
  * $Log: RandFlat.cc,v $
+ * Revision 1.3  2016/01/22 17:10:50  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -46,7 +59,7 @@ HepDouble RandFlat::operator()() {
 void RandFlat::shootArray( const HepInt size, HepDouble* vect,
                            HepDouble lx, HepDouble dx  )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = shoot(lx,dx);
@@ -89,7 +102,7 @@ void RandFlat::shootArray( HepRandomEngine* anEngine,
 void RandFlat::fireArray( const HepInt size, HepDouble* vect,
                           HepDouble lx, HepDouble dx  )
 {
-   register HepInt i;
+   HepInt i;
 
    for (i=0; i<size; ++i)
      vect[i] = fire(lx,dx);

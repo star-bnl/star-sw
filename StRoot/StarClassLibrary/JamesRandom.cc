@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: JamesRandom.cc,v 1.3 2012/06/11 15:29:26 fisyak Exp $
+ * $Id: JamesRandom.cc,v 1.4 2016/01/22 17:10:49 smirnovd Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -22,6 +22,19 @@
  ***************************************************************************
  *
  * $Log: JamesRandom.cc,v $
+ * Revision 1.4  2016/01/22 17:10:49  smirnovd
+ * StarClassLibrary: Removed deprecated storage class specifier 'register'
+ *
+ * This keyword is deprecated since C++11 and serves no purpose
+ *
+ * "
+ * The register specifier is only allowed for objects declared at block scope and
+ * in function parameter lists. It indicates automatic storage duration, which is
+ * the default for these kinds of declarations. Additionally, the presence of this
+ * keyword may be used as a hint for the optimizer to store the value of this
+ * variable in a CPU register.
+ * "
+ *
  * Revision 1.3  2012/06/11 15:29:26  fisyak
  * std namespace
  *
@@ -171,7 +184,7 @@ void HepJamesRandom::setSeeds(const long* seeds, HepInt)
 
 HepDouble HepJamesRandom::flat()
 {
-   register HepDouble uni;
+   HepDouble uni;
 
    do {
       uni = *pi97 - *pj97;
@@ -196,8 +209,8 @@ HepDouble HepJamesRandom::flat()
 
 void HepJamesRandom::flatArray(const HepInt size, HepDouble* vect)
 {
-   register HepDouble uni;
-   register HepInt i;
+   HepDouble uni;
+   HepInt i;
 
    for (i=0; i<size; ++i) {
       do {
