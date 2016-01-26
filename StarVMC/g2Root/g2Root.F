@@ -677,7 +677,7 @@ C
          write(gname,'(a4)')iq(lq(jvolum-ivod)-4)
          n1=lenocc(cname)
          Print 200, cname(1:n1)
- 200     format('Division volume', a4)
+ 200     format('Division volume ', a4)
          call markdiv2(ivod,0)
          nvflags(ivod) = 2
       endif
@@ -1204,7 +1204,7 @@ C
             nch = lenocc(line)
             if (iposp.eq.0) write(51,'(a)')line(1:nch)
 #ifdef __TPCREFSYS__
-            if (mothers(1:nmothers) .eq. 'HALL' .and. 
+            if (iposp .eq. 0 .and. mothers(1:nmothers) .eq. 'HALL' .and. 
      +           pname(1:np) .eq. 'CAVE') then
                write(51,3013)
  3013          format(2x,'CAVE->AddNode(TpcRefSys,1);')
