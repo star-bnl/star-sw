@@ -51,3 +51,6 @@ grep 'Done with' log.speed | awk '{m+=$22} END{print m/NR}'
 	 
 *** Valgrind profiles
 valgrind --tool=callgrind `which root4star` -b -q 'runMudst.C()'
+
+*** Get file from distributed disk (xrootd)
+xrdcp root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production_pp200trans_2015/ReversedFullField/P15ik/2015/069/16069001/st_fms_adc_16069001_raw_0000001.MuDst.root ./
