@@ -83,7 +83,7 @@ private:
   TFile* mFile;
   TTree* mTree;
 
-  ClassDef(StUEMaker2009,1);
+  ClassDef(StUEMaker2009,2);
 };
 
 #endif
