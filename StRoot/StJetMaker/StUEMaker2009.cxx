@@ -170,7 +170,6 @@ StJetCandidate* StUEMaker2009::findLeadingJet(StJetVertex *vertex)
   // Find highest pt jet
   StJetCandidate * leadingjet = new StJetCandidate(); 
   StJetCandidate * jets = new StJetCandidate();
-  cout << "number of Jets: " << vertex->numberOfJets() << endl;
   for (int iJet = 0; iJet < vertex->numberOfJets(); ++iJet){
     jets = (StJetCandidate*) vertex->jet(iJet);
     if(leadingjet->pt() < jets->pt()){
