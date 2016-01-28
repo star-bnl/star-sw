@@ -1,0 +1,3 @@
+*  starsim -w 1 -b y2005.kumac
+detp geom y2000
+gexec $STAR_LIB/geometry.so

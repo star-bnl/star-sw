@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.10 2015/12/11 18:05:08 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.11 2016/01/26 14:42:48 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.11  2016/01/26 14:42:48  akio
+// better chi2 handling
+//
 // Revision 1.10  2015/12/11 18:05:08  akio
 // move some LOG_INFO to LOG_DEBUG
 //
@@ -443,6 +446,7 @@ Double_t StFmsEventClusterer::fit1PhotonCluster(StFmsTowerCluster* towerCluster)
   const int nDegreesOfFreedom =
     std::max(int(towerCluster->towers().size()) - 3, 1);
   towerCluster->setChiSquare(chiSquare / nDegreesOfFreedom);
+  towerCluster->setChiSquare1(chiSquare / nDegreesOfFreedom);
   return towerCluster->chiSquare();
 }
 
@@ -464,6 +468,7 @@ Double_t StFmsEventClusterer::fit2PhotonCluster(ClusterIter towerCluster) {
   const int nDegreesOfFreedom = std::max(1,
     int((*towerCluster)->towers().size() - 6));
   (*towerCluster)->setChiSquare(chiSquare / nDegreesOfFreedom);
+  (*towerCluster)->setChiSquare2(chiSquare / nDegreesOfFreedom);
   return (*towerCluster)->chiSquare();
 }
 

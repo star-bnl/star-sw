@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.h,v 1.4 2015/10/21 15:58:05 akio Exp $
+// $Id: StFmsTowerCluster.h,v 1.5 2016/01/26 14:42:48 akio Exp $
 //
 // $Log: StFmsTowerCluster.h,v $
+// Revision 1.5  2016/01/26 14:42:48  akio
+// better chi2 handling
+//
 // Revision 1.4  2015/10/21 15:58:05  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -102,9 +105,13 @@ class StFmsTowerCluster {
   /** Angle in x-y plane that defines the direction of least-2nd-sigma axis. */
   Double_t thetaAxis() const { return mThetaAxis; }
   /** Return the &chi;<sup>2</sup> of the photon fit for this cluster. */
-  Double_t chiSquare() const { return mChiSquare; }
+  Double_t chiSquare()  const { return mChiSquare; }
+  Double_t chiSquare1() const { return mChiSquare1; }
+  Double_t chiSquare2() const { return mChiSquare2; }
   /** Set the &chi;<sup>2</sup> of the photon fit for this cluster. */
-  void setChiSquare(Double_t chi2) { mChiSquare = chi2; }
+  void setChiSquare(Double_t chi2)  { mChiSquare = chi2; }
+  void setChiSquare1(Double_t chi2) { mChiSquare1 = chi2; }
+  void setChiSquare2(Double_t chi2) { mChiSquare2 = chi2; }
   /** Cutoff on towers to use in moment calculations. */
   double energyCutoff() const { return mEnergyCutoff; }
   /** Return the list of towers in this cluster. */
@@ -137,6 +144,8 @@ class StFmsTowerCluster {
   Double_t mThetaAxis;  ///< theta angle in x-y plane that define the direction
                        ///< of least-2nd-sigma axis
   Double_t mChiSquare;  ///< Chi-square of the fitting
+  Double_t mChiSquare1;  ///< Chi-square of the fitting 1 photon
+  Double_t mChiSquare2;  ///< Chi-square of the fitting 2 photon
   Double_t mEnergyCutoff;  //!< Cutoff on towers to use in moment calculations
   Towers mTowers;  //!< Towers that make the cluster
 #ifndef __CINT__  // CINT won't parse unique_ptr so hide it

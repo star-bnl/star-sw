@@ -1,6 +1,9 @@
-// $Id: StFmsTowerCluster.cxx,v 1.5 2015/11/02 22:44:49 akio Exp $
+// $Id: StFmsTowerCluster.cxx,v 1.6 2016/01/26 14:42:48 akio Exp $
 //
 // $Log: StFmsTowerCluster.cxx,v $
+// Revision 1.6  2016/01/26 14:42:48  akio
+// better chi2 handling
+//
 // Revision 1.5  2015/11/02 22:44:49  akio
 // Fix photonEnergyInTower()
 //
@@ -50,7 +53,7 @@ StFmsTowerCluster::StFmsTowerCluster(StFmsCluster* cluster, Int_t detectorId)
 StFmsTowerCluster::~StFmsTowerCluster() {}
 
 void StFmsTowerCluster::Clear(const char* /* option */) {
-  mSigmaX = mSigmaY = mSigmaXY = mChiSquare = -1.;
+  mSigmaX = mSigmaY = mSigmaXY = mChiSquare = mChiSquare1 = mChiSquare2 = -1.;
   mThetaAxis = -10;
   mTowers.clear();
 }
@@ -168,8 +171,8 @@ Double_t StFmsTowerCluster::getSigma(Double_t theta,Double_t xwidth, Double_t yw
 }
 
 StFmsCluster* StFmsTowerCluster::release(){
-    mCluster->setChi2Ndf1Photon(mChiSquare);
-    mCluster->setChi2Ndf2Photon(mChiSquare);
+    mCluster->setChi2Ndf1Photon(mChiSquare1);
+    mCluster->setChi2Ndf2Photon(mChiSquare2);
     return mCluster.release();
 }
     
