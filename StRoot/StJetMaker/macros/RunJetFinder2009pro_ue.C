@@ -7,9 +7,9 @@
 
 void RunJetFinder2009pro_ue(int nevents = 1E3,
 			 const char* mudstfile = "/star/institutions/uky/gdwebb/UE_histos/st_physics_10103041_raw_8030001.MuDst.root",
-			 const char* jetfile = "jets.root",
-			 const char* skimfile = "skim.root",
-			 const char* uefile = "ueTree.root",
+			 const char* jetfile = "jets_copy.root",
+			 const char* skimfile = "skim_copy.root",
+			 const char* uefile = "ueTree_copy.root",
 			 int mEmbed = 0,
 			 int mPythia = 0,
 			 bool useL2 = false)
@@ -18,6 +18,7 @@ void RunJetFinder2009pro_ue(int nevents = 1E3,
   cout << "mudstfile = " << mudstfile << endl;
   cout << "jetfile = " << jetfile << endl;
   cout << "skimfile = " << skimfile << endl;
+  cout << "uefile = " << uefile << endl;
 
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
@@ -131,7 +132,7 @@ void RunJetFinder2009pro_ue(int nevents = 1E3,
   // 3. StjTowerEnergyCorrectionForTracksNull (default: no correction)
   anapars12->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
  
-
+  //
   // 1. StjTrackPtFraction
   // 2. StjTowerEnergyFraction
   //    The input parameter is the fraction which you want to increase or decrease the track/tower pT/energy. 
@@ -162,197 +163,28 @@ void RunJetFinder2009pro_ue(int nevents = 1E3,
   // Jet cuts
   anapars12->addJetCut(new StProtoJetCutPt(5,200));
   anapars12->addJetCut(new StProtoJetCutEta(-100,100));
-  
+ 
+  //---------Region Criteria---------
+  anapars12_toward = anapars12; // Toward Region for Tracks and Towers
+  anapars12_toward->setTrackRegion(new StjTrackRegion(60.0,-60.0,1.0));
+  anapars12_toward->setTowerRegion(new StjTowerRegion(60.0,-60.0,1.0));
 
-  // _________________Toward Region_____________________
- // Set analysis cuts for 12-point branch
-  StAnaPars* anapars12_tow = new StAnaPars;
-  anapars12_tow->useTpc  = true;
-  anapars12_tow->useBemc = true;
-  anapars12_tow->useEemc = false;
-
-  anapars12_tow->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
-  anapars12_tow->setTrackShift(new StjTrackPtFraction(0.0));
-  anapars12_tow->setTowerShift(new StjTowerEnergyFraction(0.0));
-  
-  // TPC cuts
-  anapars12_tow->addTpcCut(new StjTrackCutFlag(0));
-  anapars12_tow->addTpcCut(new StjTrackCutNHits(12));
-  anapars12_tow->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
-  anapars12_tow->addTpcCut(new StjTrackCutDca(3));
-  anapars12_tow->addTpcCut(new StjTrackCutTdcaPtDependent);
-  anapars12_tow->addTpcCut(new StjTrackCutPt(0.2,200));
-  anapars12_tow->addTpcCut(new StjTrackCutEta(-2.5,2.5));
-  anapars12_tow->addTpcCut(new StjTrackCutLastPoint(125));
-
-  // BEMC cuts
-  anapars12_tow->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_tow->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_tow->addBemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // EEMC cuts
-  anapars12_tow->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_tow->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_tow->addEemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // Jet cuts
-  anapars12_tow->addJetCut(new StProtoJetCutPt(5,200));
-  anapars12_tow->addJetCut(new StProtoJetCutEta(-100,100));
-  //Region Cut
-  anapars12_tow->setTrackRegion(new StjTrackRegion(60.0,-60.0,1.0));
-  anapars12_tow->setTowerRegion(new StjTowerRegion(60.0,-60.0,1.0));
-
-  //_____________________END TOWARDS_______________________________
-
-  //*********************AWAY REGION**************************
- // Set analysis cuts for 12-point branch
-  StAnaPars* anapars12_away = new StAnaPars;
-  anapars12_away->useTpc  = true;
-  anapars12_away->useBemc = true;
-  anapars12_away->useEemc = false;
-
-  anapars12_away->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
-  anapars12_away->setTrackShift(new StjTrackPtFraction(0.0));
-  anapars12_away->setTowerShift(new StjTowerEnergyFraction(0.0));
-  
-  // TPC cuts
-  anapars12_away->addTpcCut(new StjTrackCutFlag(0));
-  anapars12_away->addTpcCut(new StjTrackCutNHits(12));
-  anapars12_away->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
-  anapars12_away->addTpcCut(new StjTrackCutDca(3));
-  anapars12_away->addTpcCut(new StjTrackCutTdcaPtDependent);
-  anapars12_away->addTpcCut(new StjTrackCutPt(0.2,200));
-  anapars12_away->addTpcCut(new StjTrackCutEta(-2.5,2.5));
-  anapars12_away->addTpcCut(new StjTrackCutLastPoint(125));
-
-  // BEMC cuts
-  anapars12_away->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_away->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_away->addBemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // EEMC cuts
-  anapars12_away->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_away->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_away->addEemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // Jet cuts
-  anapars12_away->addJetCut(new StProtoJetCutPt(5,200));
-  anapars12_away->addJetCut(new StProtoJetCutEta(-100,100));
-  //Region Cut
+  anapars12_away = anapars12; // Away Region for Tracks and Towers
   anapars12_away->setTrackRegion(new StjTrackRegion(120.0,-120.0,1.0));
   anapars12_away->setTowerRegion(new StjTowerRegion(120.0,-120.0,1.0));
-  //*********************END AWAY****************************
 
-  // **********************TRANS PLUS **********************
- // Set analysis cuts for 12-point branch
-  StAnaPars* anapars12_transPlus = new StAnaPars;
-  anapars12_transPlus->useTpc  = true;
-  anapars12_transPlus->useBemc = true;
-  anapars12_transPlus->useEemc = false;
-
-  anapars12_transPlus->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
-  anapars12_transPlus->setTrackShift(new StjTrackPtFraction(0.0));
-  anapars12_transPlus->setTowerShift(new StjTowerEnergyFraction(0.0));
-  
-  // TPC cuts
-  anapars12_transPlus->addTpcCut(new StjTrackCutFlag(0));
-  anapars12_transPlus->addTpcCut(new StjTrackCutNHits(12));
-  anapars12_transPlus->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
-  anapars12_transPlus->addTpcCut(new StjTrackCutDca(3));
-  anapars12_transPlus->addTpcCut(new StjTrackCutTdcaPtDependent);
-  anapars12_transPlus->addTpcCut(new StjTrackCutPt(0.2,200));
-  anapars12_transPlus->addTpcCut(new StjTrackCutEta(-2.5,2.5));
-  anapars12_transPlus->addTpcCut(new StjTrackCutLastPoint(125));
-
-  // BEMC cuts
-  anapars12_transPlus->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_transPlus->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_transPlus->addBemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // EEMC cuts
-  anapars12_transPlus->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_transPlus->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_transPlus->addEemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // Jet cuts
-  anapars12_transPlus->addJetCut(new StProtoJetCutPt(5,200));
-  anapars12_transPlus->addJetCut(new StProtoJetCutEta(-100,100));
-  //Region Cut
+  anapars12_transPlus = anapars12; // Trans Plus for Tracks and Towers
   anapars12_transPlus->setTrackRegion(new StjTrackRegion(120.0,60.0,1.0));
   anapars12_transPlus->setTowerRegion(new StjTowerRegion(120.0,60.0,1.0));
-  //***********************END TRANS PLUS ********************
 
-  // **********************TRANS MINUS **********************
- // Set analysis cuts for 12-point branch
-  StAnaPars* anapars12_transMinus = new StAnaPars;
-  anapars12_transMinus->useTpc  = true;
-  anapars12_transMinus->useBemc = true;
-  anapars12_transMinus->useEemc = false;
-
-  anapars12_transMinus->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
-  anapars12_transMinus->setTrackShift(new StjTrackPtFraction(0.0));
-  anapars12_transMinus->setTowerShift(new StjTowerEnergyFraction(0.0));
-  
-  // TPC cuts
-  anapars12_transMinus->addTpcCut(new StjTrackCutFlag(0));
-  anapars12_transMinus->addTpcCut(new StjTrackCutNHits(12));
-  anapars12_transMinus->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
-  anapars12_transMinus->addTpcCut(new StjTrackCutDca(3));
-  anapars12_transMinus->addTpcCut(new StjTrackCutTdcaPtDependent);
-  anapars12_transMinus->addTpcCut(new StjTrackCutPt(0.2,200));
-  anapars12_transMinus->addTpcCut(new StjTrackCutEta(-2.5,2.5));
-  anapars12_transMinus->addTpcCut(new StjTrackCutLastPoint(125));
-
-  // BEMC cuts
-  anapars12_transMinus->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_transMinus->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_transMinus->addBemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // EEMC cuts
-  anapars12_transMinus->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12_transMinus->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12_transMinus->addEemcCut(new StjTowerEnergyCutEt(0.2));
-
-  // Jet cuts
-  anapars12_transMinus->addJetCut(new StProtoJetCutPt(5,200));
-  anapars12_transMinus->addJetCut(new StProtoJetCutEta(-100,100));
-  //Region Cut
+  anapars12_transMinus = anapars12; // Trans Minus for Tracks and Towers
   anapars12_transMinus->setTrackRegion(new StjTrackRegion(-60.0,-120.0,1.0));
   anapars12_transMinus->setTowerRegion(new StjTowerRegion(-60.0,-120.0,1.0));
-  //***********************END TRANS MINUS ********************
+  //---------------------------------
 
-
-  // Set cone jet finder parameters
-  StConePars* conepars = new StConePars;
-  conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
-  conepars->setConeRadius(0.6);
-  conepars->setSeedEtMin(0.5);
-  conepars->setAssocEtMin(0.1);
-  conepars->setSplitFraction(0.5);
-  conepars->setPerformMinimization(true);
-  conepars->setAddMidpoints(true);
-  conepars->setRequireStableMidpoints(true);
-  conepars->setDoSplitMerge(true);
-  conepars->setDebug(false);
-
-  // Set CDF midpoint R=0.6 parameters
-  const double coneRadius = 0.6;
-  StFastJetPars* CdfMidpointR060Pars = new StFastJetPars;
-  CdfMidpointR060Pars->setJetAlgorithm(StFastJetPars::plugin_algorithm);
-  CdfMidpointR060Pars->setRparam(coneRadius);
-  CdfMidpointR060Pars->setRecombinationScheme(StFastJetPars::E_scheme);
-  CdfMidpointR060Pars->setStrategy(StFastJetPars::plugin_strategy);
-  CdfMidpointR060Pars->setPtMin(5.0);
-
-  const double overlapThreshold = 0.75;
-  const double seedThreshold = 0.5;
-  const double coneAreaFraction = 1.0;
-
-  StPlugin* cdf = new StCDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction);
-  CdfMidpointR060Pars->setPlugin(cdf);
   //Jet Area 
   StFastJetAreaPars *JetAreaPars = new StFastJetAreaPars;
-  JetAreaPars->setGhostArea(0.01);
+  JetAreaPars->setGhostArea(0.04);
   // Set anti-kt R=0.6 parameters
   StFastJetPars* AntiKtR060Pars = new StFastJetPars;
   AntiKtR060Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
@@ -380,16 +212,11 @@ void RunJetFinder2009pro_ue(int nevents = 1E3,
   AntiKtR050Pars->setPtMin(5.0);
   AntiKtR050Pars->setJetArea(JetAreaPars);
 
-
-  jetmaker->addBranch("CdfMidpointR060NHits12",anapars12,CdfMidpointR060Pars);
-  //  jetmaker->addBranch("CdfMidpointR070NHits5",anapars5,CdfMidpointR070Pars);
   jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
   jetmaker->addBranch("AntiKtR040NHits12",anapars12,AntiKtR040Pars);
-  jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
- 
- 
+  jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars); 
 
-  uemaker->addBranch("toward",anapars12_tow,"AntiKtR060NHits12");
+  uemaker->addBranch("toward",anapars12_toward,"AntiKtR060NHits12");
   uemaker->addBranch("away",anapars12_away,"AntiKtR060NHits12");
   uemaker->addBranch("transP",anapars12_transPlus,"AntiKtR060NHits12");
   uemaker->addBranch("transM",anapars12_transMinus,"AntiKtR060NHits12");
