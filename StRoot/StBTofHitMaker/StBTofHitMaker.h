@@ -113,7 +113,7 @@ class StBTofHitMaker:public StRTSBaseMaker
   /// cvs
   virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name: $ $Id: $ built " __DATE__ " " __TIME__ ; return cvs;
+      static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
     }
   
   ClassDef(StBTofHitMaker, 1)    ///StBTofHitMaker - class to fille the StEvent from DAQ reader
