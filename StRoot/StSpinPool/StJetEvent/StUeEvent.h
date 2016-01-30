@@ -69,7 +69,7 @@ private:
   TClonesArray* mTowers;
   TClonesArray* mParticles;
 
-  ClassDef(StUeEvent,6);
+  ClassDef(StUeEvent,7);
 };
 
 #endif // ST_Ue_EVENT_H
