@@ -93,6 +93,7 @@ void tpxPed::init(int sec, int active_rbs)
 		ped_rdo_store[r].peds = (struct peds *) malloc(sizeof(struct peds)*1152) ;
 		memset(ped_rdo_store[r].peds,0,sizeof(struct peds)*1152) ;
 
+		memset(ped_rdo_store[r].ix,0xFF,sizeof(ped_rdo_store[r].ix)) ;
 
 		int cou = 0 ;
 		for(int a=0;a<256;a++) {
@@ -105,6 +106,7 @@ void tpxPed::init(int sec, int active_rbs)
 				//LOG(TERR,"Real RDO %d: A%d:%d = RP %d:%d",r_real,a,c,row,pad) ;
 				ped_rdo_store[r].peds[cou].row = row ;				
 				ped_rdo_store[r].peds[cou].pad = pad ;
+				ped_rdo_store[r].ix[row][pad] = cou ;
 				cou++ ;
 			}
 		}
