@@ -66,6 +66,7 @@ private:
 		int s_real ;
 
 		struct peds *peds ;
+		short ix[46][183] ;
 	} ped_rdo_store[6] ;	// indexed by logical r0
 
 
@@ -85,6 +86,13 @@ private:
 		}
 
 
+		int ix = ped_rdo_store[r0_logical].ix[row][pad] ;
+
+		if(ix >= 0) {
+			return ped_rdo_store[r0_logical].peds + ix ;
+		}
+	
+#if 0
 		for(int i=0;i<1152;i++) {
 			if(ped_rdo_store[r0_logical].peds[i].row == row) {
 				//LOG(WARN,"Got row %d",row) ;
@@ -94,7 +102,7 @@ private:
 				}
 			}
 		}
-
+#endif
 		//LOG(ERR,"No row pad %d %d???",row,pad) ;
 
 		return 0 ;
