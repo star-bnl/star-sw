@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.61 2015/12/03 18:54:57 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.62 2016/01/30 21:54:36 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -462,7 +462,7 @@ char *daqReader::get(int num, int type)
 
     if(error == 0) {
 	status = EVP_STAT_EOR;
-	    LOG("JEFF", "x");
+	    LOG(NOTE, "x");
 	return NULL;
     }
 
