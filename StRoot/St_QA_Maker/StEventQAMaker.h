@@ -36,6 +36,8 @@ class StEventQAMaker : public StQAMakerBase {
   Bool_t ftpHists;      // whether we're doing FTPC hists
   Bool_t hitsAvail;     // whether TPC hits are available
   Float_t vertExists;   // prim vertex : none/questionable/good
+  Bool_t printTpcHits;  // mode to output TPC hit positions
+  Int_t qaEvents;       // number of events looked at
   
   static const Int_t mNVPD = 19;
   static const Int_t mEastVpdTrayId = 121;
@@ -81,15 +83,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.22 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.23 2016/02/01 23:46:21 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.22 2015/07/17 19:09:03 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.23 2016/02/01 23:46:21 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.23  2016/02/01 23:46:21  genevb
+// Add a mode for printing out TPC hits
+//
 // Revision 2.22  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
