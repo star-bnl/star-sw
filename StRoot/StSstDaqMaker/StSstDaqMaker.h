@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.8 2015/12/14 14:33:42 zhoulong Exp $
+ * $Id: StSstDaqMaker.h,v 1.9 2016/02/03 15:50:48 zhoulong Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.9  2016/02/03 15:50:48  zhoulong
+ * Added some protection to avoid chain crash when there is no available calibration table
+ *
  * Revision 1.8  2015/12/14 14:33:42  zhoulong
  * fixed CMN failed chip rejection error
  *
@@ -92,7 +95,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.8 2015/12/14 14:33:42 zhoulong Exp $ built " __DATE__ " " __TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.9 2016/02/03 15:50:48 zhoulong Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -160,7 +163,7 @@ private:
    Int_t   mCorrectFactor[1920][2]; //chip correction table.
    Int_t   mNoiseCut[1920][2]; //Reject Noise.
    Char_t  mEnd[1]; //!
-
+   Int_t   mRunNum;
    map<Int_t, Int_t> mReadOutPed; //ReadOut Pedestal.
    map<Int_t, Float_t> mIntrinsicRms; //Intrinsic Rms
    //DAQ File parameters(please look at the SSD data formata document. )
@@ -218,6 +221,7 @@ private:
    static const Int_t   nSstStripsPerWafer  = 768;
    static const Int_t   nSstStripsPerChip   = 128;
    static const Int_t   nSigmaCut           = 4; /* N*Sigma Cuts */
+   static const Int_t   nRmsCut             = 10;
    static const Int_t   RDO2LADDER[5][8];//Ladder cards number in each RDO channel .
    static const Int_t   ReadOutMap[128];
    static const Int_t   Rev_ReadOutMap[128]; // strip number 2 readout channelmap 
