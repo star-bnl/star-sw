@@ -1223,10 +1223,10 @@ mycount = 0;
 
             <Do var="iRib" from="0" to="TECW_noribs-1"  >
 
-                r   = r2 - RIBS_x  (irib+1) * INCH 
-                y   =      RIBS_y  (irib+1) * INCH 
-                dr  =      RIBS_dx (irib+1) * INCH 
-                dy  =      RIBS_dy (irib+1) * INCH 
+                r   = r2 - RIBS_x(irib+1) * INCH 
+                y   =      RIBS_y(irib+1) * INCH 
+                dr  =      RIBS_dx(irib+1) * INCH 
+                dy  =      RIBS_dy(irib+1) * INCH 
 
                 <If expr="dy&lt;1.e-7"  >
 
