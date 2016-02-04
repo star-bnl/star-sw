@@ -210,7 +210,7 @@ void l4Builder::initialize(int argc, char *argv[])
         DiPionPlots[i]->gridy = 0;     
         DiPionPlots[i]->setPalette(1); 
    }
-   for(int i = 0; i < 7; i++) {
+   for(int i = 0; i < 8; i++) {
         DiMuonPlots[i] = new JevpPlot();
         DiMuonPlots[i]->gridx = 0;         
         DiMuonPlots[i]->gridy = 0;         
@@ -284,7 +284,7 @@ void l4Builder::initialize(int argc, char *argv[])
             LOG(DBG, "Adding plot %d", i);
             addPlot(DiPionPlots[i]);
         }*/
-	for(int i = 0; i < 7; i++) {
+	for(int i = 0; i < 8; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(DiMuonPlots[i]);
         }
@@ -330,6 +330,10 @@ void l4Builder::startrun(daqReader *rdr)
 		DiMuonPlots[i]->getHisto(1)->histo->Reset();
 	}
 	for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Reset();
+        for(int i = 7; i < 8; i++){
+                DiMuonPlots[i]->getHisto(0)->histo->Reset();
+                DiMuonPlots[i]->getHisto(1)->histo->Reset();
+        }
         for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Reset();
         for(int i = 0; i < 30; i++)HltPlots_UPC[i]->getHisto(0)->histo->Reset();
 
@@ -369,6 +373,11 @@ void l4Builder::stoprun(daqReader *rdr)
   hDiElectronInvMassFullRange_UPC->SetLineColor(4);
   hDiPionInvMassFullRange->SetLineColor(4);
   hInvMassUS->SetLineColor(4);
+
+  hMTDQmInvMassUS->SetMarkerStyle(20);
+  hMTDQmInvMassUS->SetMarkerColor(1);
+  hMTDQmInvMassUS->SetLineColor(1);
+  hMTDQmInvMassLS->SetLineColor(4);
 
   float low = -13.12;
   float high = -12.8;
@@ -582,6 +591,11 @@ void l4Builder::writeHistogram()
 		DiMuonPlots[i]->getHisto(1)->histo->Write();
 		}
 	for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Write();
+	for(int i = 7; i < 8; i++)
+        {
+                DiMuonPlots[i]->getHisto(0)->histo->Write();
+                DiMuonPlots[i]->getHisto(1)->histo->Write();
+                }
     }
     if(UPCDiElectronFilled){
         for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Write();
@@ -679,6 +693,7 @@ void l4Builder::event(daqReader *rdr)
     HLT_DIEP *hlt_diep;
     HLT_HF *hlt_hf;
     HLT_MTD *hlt_mtd;
+    HLT_MTDQuarkonium *hlt_mtdqm;
     while(dd && dd->iterate()) {
         hlt_gl3_t *hlt = (hlt_gl3_t *) dd->Void;
 
@@ -695,6 +710,7 @@ void l4Builder::event(daqReader *rdr)
         else if(strcmp(hlt->name, "HLT_UPCRHO") == 0) hlt_dipi = (HLT_RHO *)hlt->data;
         else if(strcmp(hlt->name, "HLT_UPCDIEP") == 0) hlt_upcdiep = (HLT_DIEP *)hlt->data;
         else if(strcmp(hlt->name, "HLT_MTDDIMU") == 0) hlt_mtd = (HLT_MTD *)hlt->data;
+	else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
     }
     // Check Version
     if(hlt_eve->version != HLT_GL3_VERSION) {
@@ -1260,6 +1276,26 @@ const float muMass = 0.10566;
     }
 
     }
+
+
+                        int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
+                        for(int i=0; i<nMTDQmPairs; i++){
+                                double qmMass = hlt_mtdqm->MTDQuarkonium[i].invMass;
+                                int mtrk1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
+                                int mtrk2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
+
+                                hlt_track mgtrk1 = hlt_gt->globalTrack[mtrk1];
+                                hlt_track mgtrk2 = hlt_gt->globalTrack[mtrk2];
+                                if(mgtrk1.q*mgtrk2.q<0){
+                                        hMTDQmInvMassUS->Fill(qmMass);
+                                }else{
+
+                                        hMTDQmInvMassLS->Fill(qmMass);
+                                        if(mgtrk1.q*mgtrk2.q<=0) cout<<"please debug here !!!!!!!!!!"<<endl;
+                                }
+
+                        }
+
 
     // upc di-e
     if(decision & triggerBitUPCDiElectron) {
@@ -2362,6 +2398,18 @@ void l4Builder::defineDiMuonPlots()
     ph = new PlotHisto();
     ph->histo = hMtdDeltaY;
     DiMuonPlots[index]->addHisto(ph);
+
+    index ++; //7
+        hMTDQmInvMassUS = new TH1F("hMTDQmInvMassUS", "MTD quarkonium InvMass unlike sign", 130, 0., 13.);
+    ph = new PlotHisto();
+    ph->histo = hMTDQmInvMassUS;
+    DiMuonPlots[index]->addHisto(ph);
+
+        hMTDQmInvMassLS = new TH1F("hMTDQmInvMassLS", "MTD quarkonium InvMass like sign", 130, 0., 13.);
+    ph = new PlotHisto();
+    ph->histo = hMTDQmInvMassLS;
+    DiMuonPlots[index]->addHisto(ph);
+
 }
 
 void l4Builder::defineHltPlots_UPC()
@@ -2719,7 +2767,11 @@ void l4Builder::setAllPlots()
     //hDiMuonInvMassFullRange->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
     //hDiMuonInvMassFullRangeBG->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
     //hDiMuonInvMassTpxCut->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
-    //hDiMuonInvMassTpxCutBG->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
+    //hDiMuonInvMassTpxCutBG->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}")
+    
+    hMTDQmInvMassUS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm
+    hMTDQmInvMassLS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
+           
     hdEdx_P1->GetXaxis()->SetTitle("Daughter1 Momentum");
     hdEdx_P1->GetYaxis()->SetTitle("dEdx (GeV/cm)");
     hDaughter1P_TowerEnergy->GetXaxis()->SetTitle("TowerEnergy/P");
