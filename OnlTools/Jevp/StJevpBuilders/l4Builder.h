@@ -97,10 +97,10 @@ class l4Builder : public JevpBuilder {
     struct hlt_diPionPair PionPair[1000];
   };
 
-  struct HLT_MTDDIMU {
-    unsigned int      nEPairs; 
-    struct hlt_diElectronPair ePair[1000];
-  };
+  //struct HLT_MTDDIMU {
+  // unsigned int      nEPairs; 
+  // struct hlt_diElectronPair ePair[1000];
+  // };
 
 /**
  * Plots, Functions, Histograms.
@@ -120,7 +120,7 @@ class l4Builder : public JevpBuilder {
   JevpPlot *HeavyFragmentPlots[1];
   JevpPlot *DiElectronPlots[10];
   JevpPlot *DiPionPlots[2];
-  JevpPlot *DiMuonPlots[7];
+  JevpPlot *DiMuonPlots[9];
   JevpPlot *UPCDiElectronPlots[10];   
   JevpPlot *HltPlots_UPC[30];
   PlotHisto *ph;
@@ -326,6 +326,11 @@ class l4Builder : public JevpBuilder {
   TH1F *hMTDQmInvMassUS;
   TH1F *hMTDQmInvMassLS;
  
+  TH1F *hMTDQmJpsiMassUS;
+  TH1F *hMTDQmJpsiMassLS;
+
+  TH1F *hMTDQmUpsilonMassUS;
+  TH1F *hMTDQmUpsilonMassLS;
 
   // di-pion
   TH1D *hDiPionInvMassFullRange;
