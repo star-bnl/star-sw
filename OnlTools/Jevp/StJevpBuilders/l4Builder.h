@@ -322,6 +322,10 @@ class l4Builder : public JevpBuilder {
   TH1F *hMtdDeltaZ;         
   TH2F *hMtdDeltaYvsModule; 
   TH1F *hMtdDeltaY;
+  //MTD Quarkonium QA plots
+  TH1F *hMTDQmInvMassUS;
+  TH1F *hMTDQmInvMassLS;
+ 
 
   // di-pion
   TH1D *hDiPionInvMassFullRange;
