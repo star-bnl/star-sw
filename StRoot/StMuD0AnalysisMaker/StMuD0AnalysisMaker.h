@@ -10,11 +10,14 @@
  */                                                                      
 #include "StMaker.h"
 #include "TTree.h"
+#include "TH3.h"
 #include "D0Event.h"
 class StMuD0AnalysisMaker : public StMaker {
  private:
   TTree   *fTree;
   D0Event *fEvent;
+  TH3F    *fPVxyzHFT;
+  TH3F    *fPVxyzNoHFT;
  public: 
   StMuD0AnalysisMaker(const char *name="D0Ana") : StMaker(name), fTree(0), fEvent(0) {}
   virtual       ~StMuD0AnalysisMaker() {}

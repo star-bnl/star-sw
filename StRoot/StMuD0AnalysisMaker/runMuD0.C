@@ -14,7 +14,7 @@ void runMuD0(Int_t noEvents = 10000000, const Char_t *input = "./*MuDst.root", c
   const Char_t *ActiveBranches[] = {
     "MuEvent"
     ,"PrimaryVertices"
-    //    ,"PrimaryTracks"
+    ,"PrimaryTracks"
     ,"GlobalTracks"
     //   ,"StStMuMcVertex"
     //   ,"StStMuMcTrack"

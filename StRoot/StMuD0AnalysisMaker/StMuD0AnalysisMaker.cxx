@@ -18,6 +18,27 @@
 ClassImp(StMuD0AnalysisMaker);
 //_____________________________________________________________________________
 Int_t StMuD0AnalysisMaker::Init(){
+  assert(StMuDstMaker::instance());
+  StMuDstMaker::instance()->SetStatus("*",0);
+  const Char_t *ActiveBranches[] = {
+    "MuEvent"
+    ,"PrimaryVertices"
+    ,"PrimaryTracks"
+    ,"GlobalTracks"
+    //   ,"StStMuMcVertex"
+    //   ,"StStMuMcTrack"
+    //   ,"CovPrimTrack"
+    ,"CovGlobTrack"
+    //   ,"StStMuMcVertex"
+    //   ,"StStMuMcTrack"
+    //    ,"KFTracks"
+    ,"KFVertices"
+    ,"StBTofHit"
+    ,"StBTofHeader"
+  }; 
+  Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
+  for (Int_t i = 0; i < Nb; i++) StMuDstMaker::instance()->SetStatus(ActiveBranches[i],1); // Set Active braches
+  
   TFile  *f = GetTFile();
   assert(f);
   f->cd();
@@ -37,14 +58,22 @@ Int_t StMuD0AnalysisMaker::Init(){
   TTree::SetBranchStyle(branchStyle);
   TBranch *branch = fTree->Branch("EventT", &fEvent, bufsize,split);
   branch->SetAutoDelete(kFALSE);
+  fPVxyzHFT = new TH3F("PVxyzHFT","xyz of the best PV with HFT tracks",100,-2.0,2.0,100,-2.0,2.0,200,-100.,100.);
+  fPVxyzNoHFT = new TH3F("PVxyzNoHFT","xyz of the best PV without HFT tracks",100,-2.0,2.0,100,-2.0,2.0,200,-100.,100.);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StMuD0AnalysisMaker::Make(){
+#if 1
   StMuDstMaker *muDstMaker = StMuDstMaker::instance();
   if (! muDstMaker) return kStFatal;
   StMuDst *mu = muDstMaker->muDst();
   if (! mu) return kStErr;
+#else
+  TObjectSet *muSet = (TObjectSet *) GetDataSet("muDst");
+  if (! muSet) return kStFatal;
+  StMuDst *mu = (StMuDst *) muSet->GetObject();
+#endif
   StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
   if (Debug()) {
     mu->Print();
@@ -71,8 +100,26 @@ Int_t StMuD0AnalysisMaker::Make(){
   if (TMath::Abs(VpdZ) > 10) return kStOK;
   if (! mu->primaryVertex(0)) return kStOK;
   const Int_t IndxHighestRankVx = 0;
+  mu->setVertexIndex(IndxHighestRankVx);
   Int_t IdPV = mu->primaryVertex(IndxHighestRankVx)->id(); //higest rank vertex
-  if (TMath::Abs(mu->primaryVertex(IndxHighestRankVx)->position().z()) > 6.0) return kStOK;
+  Int_t NoHFThitsAtVx = 0;
+  for (Int_t k = 0; k < mu->numberOfPrimaryTracks(); k++) {
+    StMuTrack* pTrack = mu->primaryTracks(k);
+    StTrackTopologyMap topologyMap = pTrack->topologyMap();
+    UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
+    UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
+    UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
+    UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
+    if (noPxlHits < 2 || noIstHits < 1) continue;
+    NoHFThitsAtVx++;
+  }
+  if (NoHFThitsAtVx) fPVxyzHFT->Fill(mu->primaryVertex()->position().x(),
+				     mu->primaryVertex()->position().y(),
+				     mu->primaryVertex()->position().z());
+  else               fPVxyzNoHFT->Fill(mu->primaryVertex()->position().x(),
+				       mu->primaryVertex()->position().y(),
+				       mu->primaryVertex()->position().z());
+  if (TMath::Abs(mu->primaryVertex()->position().z()) > 6.0) return kStOK;
   UInt_t NKFV = mu->numberOfKFVertices();
   KFVertex *KFV = 0;
   Float_t dZ = 1e8;
