@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.292 2015/12/02 15:02:35 jwebb Exp $
+* $Id: geometry.g,v 1.293 2016/02/04 16:33:35 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.293  2016/02/04 16:33:35  jwebb
+* Fixed bug 3187: y2016 geometry was not completely setup in geometry.g.
+*
 * Revision 1.292  2015/12/02 15:02:35  jwebb
 * Add y2016 first cut geometry.
 *
@@ -3580,8 +3583,8 @@ If LL>0
   Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015b    '; exe y2015b;  }
 
-  Case y2016    { y2016 : y2016 production baseline, is y2016
-                  Geom = 'y2016    '; exe y2016;  }
+  Case y2016  { y2016 : y2016 baseline;
+                  Geom = 'y2016     '; exe y2016; }
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }

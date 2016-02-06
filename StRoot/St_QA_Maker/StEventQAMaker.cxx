@@ -88,6 +88,7 @@ StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) 
   ftpHists = kFALSE;
   hitsAvail = kTRUE;
   vertExists = -1.;
+  printTpcHits = kFALSE;
 }
 
 //_____________________________________________________________________________
@@ -102,6 +103,8 @@ StEventQAMaker::~StEventQAMaker() {
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Init() {
 
+  qaEvents = 0;
+  if (printTpcHits) allTrigs = kTRUE;
   return StQAMakerBase::Init();
 }
 
@@ -373,6 +376,11 @@ Int_t StEventQAMaker::Make() {
   // only process if a primary vertex exists
   //   and appears not to be pileup!!!
   primVtx = event->primaryVertex();
+  if (printTpcHits) {
+    // mode for printing TPC hits ignores vertices
+    fillHists = kTRUE;
+    vertExists = -1;
+  } else
   if (primVtx) {
     Float_t min_rank = -1e6;
     switch (primVtx->vertexFinderId()) {
@@ -408,6 +416,7 @@ Int_t StEventQAMaker::Make() {
       hists->mNullPrimVtxClass->Fill(vertExists);
     if (makeStat != kStOk) break;
   }
+  qaEvents++;
   return makeStat;
 }
 
@@ -1803,6 +1812,10 @@ void StEventQAMaker::MakeHistPoint() {
           if (phi<0) phi+=360.;
 	  hists->m_z_hits->Fill(hitPos.z());
           Float_t tb = tpcHitsVec[k]->timeBucket();
+          if (printTpcHits) printf("HHHH %d %d %d %f %f %f %f %f %d\n",qaEvents,
+             tpcHitsVec[k]->sector(),tpcHitsVec[k]->padrow(),
+             hitPos.x(),hitPos.y(),hitPos.z(),
+             tpcHitsVec[k]->pad(),tb,tpcHitsVec[k]->flag());
           // correct for padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
           float density_correction = (j>12 ? 1 : 2.4);
           // scale charge by length of pads (1/1.15cm and 1/1.95cm)
@@ -2835,8 +2848,12 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.121 2015/07/17 20:18:14 genevb Exp $
-// $Log: StEventQAMaker.cxx,v $
+// Revision 2.123  2016/02/01 23:46:21  genevb
+// Add a mode for printing out TPC hits
+//
+// Revision 2.122  2015/07/20 18:00:41  genevb
+// isnan => std::isnan
+//
 // Revision 2.121  2015/07/17 20:18:14  genevb
 // More SSD=>SST (on tracks)
 //
