@@ -1077,7 +1077,7 @@ Bfc_st BFC[] = { // standard chains
   {"B2016"  ,"","","ry2016,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2016 ITTF (tpc)",kFALSE},
   {"P2016","" ,"",
-   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   "B2016,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
@@ -1791,6 +1791,7 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
+  {"MuMc"        ,"","","RMuDst","StMuMcAnalysisMaker",       "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
   {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
