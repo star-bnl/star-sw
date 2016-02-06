@@ -34,12 +34,12 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   
  public:
 
-//      void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
-//   void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
-//   void *operator new(size_t size) { return _mm_malloc(size, 16); }
-//   void *operator new[](size_t size) { return _mm_malloc(size, 16); }
-//   void operator delete(void *ptr, size_t) { _mm_free(ptr); }
-//   void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
   //*
   //*  INITIALIZATION
   //*
@@ -159,7 +159,8 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   float_v GetDecayLengthXY () const; //* decay length in XY
   float_v GetLifeTime    () const; //* life time
   float_v GetR           () const; //* distance to the origin
-
+  float_v GetRapidity() const { return float_v(0.5f)*log((fP[6] + fP[5])/(fP[6] - fP[5])); }
+  
   //* Accessors to estimated errors
 
   float_v GetErrX           () const ; //* x of current position 
@@ -394,7 +395,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 #ifdef HomogeneousField
 inline void KFParticleSIMD::SetField( float_v Bz )
 { 
-  fgBz = -Bz;
+  fgBz = Bz;
 }
 #endif
 
