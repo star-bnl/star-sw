@@ -88,8 +88,12 @@ Int_t StMuAnalysisMaker::Make()
 
     DEBUGVALUE2(mEventCounter);
 //  Get MuDst
-    StMuDst* mu; 
-    mu =  (StMuDst*) GetInputDS("MuDst"); 
+    TObjectSet *muSet = (TObjectSet *) GetInputDS("muDst");
+    if (! muSet) {
+	  gMessMgr->Warning() << "StMuAnalysisMaker::Make : No TObjectSet muDst" << endm;
+          return kStOK;        // if no event, we're done
+    }
+    StMuDst* mu = (StMuDst *) muSet->GetObject(); 
     DEBUGVALUE2(mu);
 
     if (!mu){
