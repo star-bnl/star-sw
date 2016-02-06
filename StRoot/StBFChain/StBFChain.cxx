@@ -925,10 +925,15 @@ Int_t StBFChain::Init() {
 /// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
-  TFile *tf = GetTFile();
-  if (tf) {tf->Write(); tf->Flush(); tf->Close(); delete tf; SetTFile(0);}
   if (!fBFC) return kStOK;
   Int_t ians = StChain::Finish();
+  TFile *tf = GetTFile();
+  if (tf) {
+    if (tf->IsWritable()) {
+      tf->Write(); tf->Flush(); 
+    }
+    tf->Close(); delete tf; SetTFile(0);
+  }
   SafeDelete(fchainOpt);
   fBFC = 0;
 //  delete gMessMgr; gMessMgr = 0;
