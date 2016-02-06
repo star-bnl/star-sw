@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.6 2015/12/14 14:33:42 zhoulong Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.7 2016/02/03 15:50:20 zhoulong Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.7  2016/02/03 15:50:20  zhoulong
+ * Added some protection to avoid chain crash when there is no available calibration table
+ *
  * Revision 1.6  2015/12/14 14:33:42  zhoulong
  * fixed CMN failed chip rejection error
  *
@@ -158,10 +161,10 @@ Int_t StSstDaqMaker::InitRun(Int_t runumber)
    mEventrunumber = runumber;
 
    LOG_INFO << "InitRun(Int_t runumber) - Read now Databases" << endm;
-   Int_t run = (runumber / 1000000) - 1;
+   mRunNum = (runumber / 1000000) - 1;
    stripCal = new St_sstStripCalib("sstStripCalib",1);
 
-   if (run > 14) {	
+   if (mRunNum >= 14) {		// For Run14,15,16 Raw Data Mode
      St_sstStripCalib *mStripCalib = (St_sstStripCalib*)GetDataBase("Calibrations/sst/sstStripCalib");
      if (mStripCalib) {
        LOG_INFO << "sst readout pedestal table found ... initialize" << endm;
@@ -176,18 +179,31 @@ Int_t StSstDaqMaker::InitRun(Int_t runumber)
        LOG_INFO << "sst noise table found ... initialize" << endm;
        FillNoiseTable(mNoise->GetTable());}
      else {
-       LOG_WARN << "InitRun : No access to ssdNoise - will use the default noise(rms in all channel will be 1 adc )" << endm;
+       LOG_WARN << "InitRun : No access to ssdNoise - will use the default noise(rms in all channel will be 0 adc )" << endm;
        FillDefaultNoiseTable();
      }
    }
+   else { // we will not save any data when use default tabls
+     LOG_WARN << "InitRun : Unsupported data - we will not save any information )" << endm;
+     FillDefaultReadOutPedTable();
+     FillDefaultNoiseTable();
+   }
 
-   St_sstChipCorrect *mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
-   if (mChipCorrect) {
-     LOG_INFO << "sst mask chips table found ... initialize" << endm;
-     FillChipNoiseTable(mChipCorrect->GetTable());}
+   if (mRunNum >= 14 && mRunNum <= 15) { // Only for Run14 , 15 ZS data mode
+     St_sstChipCorrect *mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
+     if (mChipCorrect) {
+       LOG_INFO << "sst mask chips table found ... initialize" << endm;
+       FillChipNoiseTable(mChipCorrect->GetTable());}
+     else {
+       LOG_WARN << " no sst masking chips table " << endm;      
+       FillDefaultChipNoiseTable();
+     }
+   }
    else {
-     LOG_WARN << " no sst masking chips table " << endm;      
-     FillDefaultChipNoiseTable();}
+     // For Run16, we will not use this table. defaults value will not touch the real data.
+     LOG_WARN << "InitRun : We will not use ChipCorrection Table any more )" << endm;
+     FillDefaultChipNoiseTable();
+   }
 
    St_sstConfiguration *configTable = (St_sstConfiguration *) GetInputDB("Geometry/sst/sstConfiguration");
    
@@ -208,7 +224,7 @@ Int_t StSstDaqMaker::InitRun(Int_t runumber)
      mConfig->setLadderIsActive(ladder, mConfigTable->ladderIsPresent[ladder - 1]);
    }
    
-   PrintConfiguration(run, mConfigTable);
+   PrintConfiguration(mRunNum, mConfigTable);
    mConfig->setNumberOfLadders(totLadderPresent);
    mConfig->setNumberOfWafers(mConfigTable->nMaxWafers / mConfigTable->nMaxLadders);
    mConfig->setNumberOfHybrids(2);
@@ -707,8 +723,10 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
 	    strip_number[n] = nSstStripsPerWafer - strip[n];	
          }
 
-	 if (gStSstDbMaker->maskChip(id_side, ladder, wafer[n], strip[n] / 128)) continue;
- 
+	 if( mRunNum >= 14 && mRunNum <=15) {
+	   if (gStSstDbMaker->maskChip(id_side, ladder, wafer[n], strip[n] / 128)) continue;
+	 }
+
          out_strip.id          = count;
          out_strip.adc_count   = data[n];
          out_strip.id_strip    = 10000 * (10 * strip_number[n] + id_side) + id_wafer[n]; //id_side:0-->p,1-->N
@@ -953,7 +971,9 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
 	 strip_number = nSstStripsPerWafer - strip;	
       }
       //chipMask table      
-      if (gStSstDbMaker->maskChip(id_side, ladder, wafer, chip)) continue;
+      if( mRunNum >= 14 && mRunNum <=15) {
+	if (gStSstDbMaker->maskChip(id_side, ladder, wafer, chip)) continue;
+      }
       //save only strips with data>0, otherwise it increases the datastrip volume for nothing
       if(data>0){
 	out_strip.id          = count;
@@ -1137,7 +1157,7 @@ void StSstDaqMaker::FillDefaultReadOutPedTable()
   Int_t size = nSstSide * nSstLadder * nSstWaferPerLadder * nSstStripsPerWafer;
   
   for (Int_t i = 0; i < size; i++) {
-    mReadOutPed[i] = 0;
+    mReadOutPed[i] = 0;	// mean value for all channels
   }
 }
 //------------------------------------------------
@@ -1156,7 +1176,7 @@ void StSstDaqMaker::FillDefaultNoiseTable()
   Int_t size = nSstSide * nSstLadder * nSstWaferPerLadder * nSstStripsPerWafer;
   
   for (Int_t i = 0; i < size; i++) {
-    mIntrinsicRms[i] = 1;
+    mIntrinsicRms[i] = nRmsCut;	// if not rms table or pedestal table can be found, then SST will not have any output.
   }
 }
 //------------------------------------------------
@@ -1281,7 +1301,7 @@ void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > v
 	adc = adc - cmnoise;
       }
 
-      // if (j % 128 == 0) adc = 0;        //first channel is not useable.
+      if (j % 128 == 0) adc = 0;        //first channel is not useable.
 
       if (id_side == 1) adc = -1 * adc;   //Reverse N-side Signal Charge Sign.
 
@@ -1289,7 +1309,9 @@ void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > v
 
       //---------------
       //hotchip masking
-      if (gStSstDbMaker->maskChip(id_side, ladder, i, j / 128)) continue;
+      if( mRunNum >= 14 && mRunNum <=15) {
+	if (gStSstDbMaker->maskChip(id_side, ladder, i, j / 128)) continue;
+      }
 
       if (id_side == 0) {
 	id_wafer = 7000 + 100 * (nSstWaferPerLadder - i) + ladder + 1;
@@ -1302,15 +1324,19 @@ void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > v
 
       //-------------------------
       //Offline Zero-Suppression
-      stripindex = id_side * nSstLadder * nSstWaferPerLadder * nSstStripsPerWafer + ladder * nSstWaferPerLadder * nSstStripsPerWafer + i * nSstStripsPerWafer + j; // readout ordering
+      stripindex = id_side * nSstLadder * nSstWaferPerLadder * nSstStripsPerWafer 
+	+ ladder * nSstWaferPerLadder * nSstStripsPerWafer 
+	+ i * nSstStripsPerWafer
+	+ j; // readout ordering
+
       intrinsicnoise = mIntrinsicRms[stripindex]; // readout ordering
       if(intrinsicnoise<std::numeric_limits<float>::epsilon()) intrinsicnoise = std::numeric_limits<unsigned short>::max(); // if the noise is 0, then reject this channel.
 
       if (adc < nSigmaCut * intrinsicnoise) continue;
       if (adc <=0) continue;
-
-      //mask dead strips.
-      if(intrinsicnoise>10) continue;
+      if (mReadOutPed[stripindex] == 0) continue; // reject channel with bad pedestal.
+      //mask bad strips., default is 10 Adc
+      if(intrinsicnoise>=nRmsCut) continue;
 
       out_strip.id          = count;
       out_strip.adc_count   = adc; //Minus the Common mode noise
