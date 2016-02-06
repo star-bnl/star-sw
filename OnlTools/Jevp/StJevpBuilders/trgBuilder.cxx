@@ -37,7 +37,7 @@ const int logYunattenuated = 1; // unattenuated plots log scale y axis
 // may need to be changed to 0 for A+A
 const int logYSum = 1; // log scale for the ZDC hardware Sum plot
 //msimko: changed to log for pp collisions might want to change back for A+A
-const int logTimePlots = 1; // ZDC time plots
+const int logTimePlots = 0; // ZDC time plots
 //msimko: changed to log because of the peak at 50 in ZDC East
 //******************************************************************************
 
@@ -172,28 +172,28 @@ void trgBuilder::initialize(int argc, char *argv[]) {
   // Build Root Histograms...
   // Trigger / ZDC
   h76_zdc_time_east = new TH1D("h76_zdc_time_east", "ZDC Time East",200,0,1500); 
-  //msimko: Upper limit was changed from 1000 to 1500 for pp (but 1000 makes more sense for A+A) collisions
+  //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
   h77_zdc_time_west = new TH1D("h77_zdc_time_west", "ZDC Time West",200,0,1500); 
-  //msimko: Upper limit was changed from 1000 to 1500 for pp (but 1000 makes more sense for A+A) collisions
+  //msimko: Upper limit was changed from 1000 to 1500 for pp ... still works well for A+A 2016
   h78_zdc_timediff_east_west = new TH1D("h78_zdc_timediff_east_west","ZDC Time (West - East)",200,-2000,2000);
   h146_zdc_Vertex_cm = new TH1D("h146_zdc_Vertex_cm","Vertex Position from ZDC (cm)",50, -100, 100);
-  //msimko: Upper limit changed to 300 for pp collisions (changed from 1000 for A+A)
-  h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,300);
-  h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,300);
+  //msimko: Upper limit changed to 4000 for A+A collisions (changed from 300 for p+p)
+  h480_zdc_unatt_eastsum = new TH1D("h480_zdc_unatt_eastsum","ZDC Unattenuated East Sum",200,0,4000);
+  h481_zdc_unatt_westsum = new TH1D("h481_zdc_unatt_westsum","ZDC Unattenuated West Sum",200,0,4000);
   
   // Trigger / ZDC_seg
-  //msimko: Upper limit changed to 300 for pp collisions (changed from 1000 for A+A)
-  h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,300);
-  h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,300);
-  h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,300);
-  h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,300);
-  h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,300);
-  h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,300);
+  //msimko: Upper limit changed to 4000 for A+A collisions (changed from 300 for p+p)
+  h474_zdc_unatt_east1 = new TH1D("h474_zdc_unatt_east1","ZDC Unattenuated East1",200,0,4000);
+  h475_zdc_unatt_west1 = new TH1D("h475_zdc_unatt_west1","ZDC Unattenuated West1",200,0,4000);
+  h476_zdc_unatt_east2 = new TH1D("h476_zdc_unatt_east2","ZDC Unattenuated East2",200,0,4000);
+  h477_zdc_unatt_west2 = new TH1D("h477_zdc_unatt_west2","ZDC Unattenuated West2",200,0,4000);
+  h478_zdc_unatt_east3 = new TH1D("h478_zdc_unatt_east3","ZDC Unattenuated East3",200,0,4000);
+  h479_zdc_unatt_west3 = new TH1D("h479_zdc_unatt_west3","ZDC Unattenuated West3",200,0,4000);
 
   // Trigger / ZDC sums
-  //msimko: Upper limit changed to 300 for pp collisions (changed from 3000 for A+A)
-  h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,300);
-  h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC Hardware Sum Central",300,0,300);
+  //msimko: Upper limit changed to 3000 for A+A collisions (changed from 300 for pp)
+  h482_zdc_sum_bbc = new TH2D("h482_zdc_sum_bbc","ZDC Sum vs. BBC Sum",100,0,60000,100,0,3000);
+  h483_zdc_hardwaresum = new TH1D("h483_zdc_hardwaresum","ZDC Hardware Sum Central",300,0,3000);
   
   // Trigger / Bunch Crossing Counter
   h266_bbc_bunchid_y = new TH1D("h266_bbc_bunchid_y","Bunch Crossing Counter (Yellow)",120,-0.5,119.5);
