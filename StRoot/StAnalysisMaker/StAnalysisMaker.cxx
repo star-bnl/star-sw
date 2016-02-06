@@ -1149,6 +1149,20 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
     }
   }
+  const StMtdCollection* mtd = event->mtdCollection();
+  if (mtd) {
+    const StSPtrVecMtdHit& mtdHits = mtd->mtdHits();
+    Int_t n = mtdHits.size();
+    if (n) {
+      Int_t m = 0;
+      for(Int_t i=0;i<n;i++) { //loop on hits in modules
+	StMtdHit *aHit = mtdHits[i];
+	if(!aHit) continue;
+	if (aHit->associatedTrack()) m++;
+      }
+      LOG_QA << Form("# Mtd    hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+    }
+  }
   const StPhmdCollection* pmdcol = event->phmdCollection();
   if (pmdcol) {
     const StPhmdDetector* pmd_det = pmdcol->detector(StDetectorId(kPhmdId));
@@ -1191,7 +1205,10 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   }
 #endif /* _ST_GMT_HIT_H_ */
   if (event->rpsCollection()) {
-    LOG_QA << "# RPS hits:            " << event->rpsCollection()->clusters().size() << endm;
+    Int_t n = event->rpsCollection()->clusters().size();
+    if (n) {
+      LOG_QA << Form("# RPS    hits:%5i",n) << endm; 
+    }
   }
   
   LOG_QA << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << endm;
