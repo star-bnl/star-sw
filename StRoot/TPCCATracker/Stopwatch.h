@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: Stopwatch.h,v 1.2 2013/09/08 18:54:21 fisyak Exp $
+// @(#)root/base:$Name:  $:$Id: Stopwatch.h,v 1.1 2016/02/05 23:27:30 fisyak Exp $
 // Author: Fons Rademakers   11/10/95
 
 /*************************************************************************
