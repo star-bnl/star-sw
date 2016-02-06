@@ -490,6 +490,9 @@ public:
   map<KFParticle*,StMuMcVertex *>             &KFVx2McVx(); 
   multimap<StMuMcVertex*,KFParticle*>         &McVx2KFVx(); 
   multimap<Int_t,StMuTrack *>                 &IdMc2RcTk(); // Reconstucted Track to IdTruth
+  map<Int_t,Int_t>                            &IdGlobalId2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
+  multimap<Int_t,Int_t>                       &IdMc2IdRcTracks(); // map between global and Mc tracks from primary Mc vertex
+  multimap<Int_t,Int_t>                       &IdMc2IdRcVertices(); // map between indexes Mc and Rc Vertices
   static Int_t                                MinNoTpcMcHits; // minimum no. of TPC hits in order to consider the MC track reconstractable
   static Int_t                                MinNoTpcRcHits; // minimum no. of TPC hits in order to consider the RC track as good
  
