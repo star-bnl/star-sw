@@ -833,9 +833,11 @@ void istBuilder::event(daqReader *rdr) {
 	StTriggerData *trgd = getStTriggerData(rdr);
 	if(!trgd) return;
 
+	/*****      -----bad code
 	long long int trgId = rdr->daqbits64;
 	//skip zerobias event
 	if((trgId>>60) & 0x1){
+	    
 	  if(trgd) delete(trgd);
 	  return;
 	}
@@ -851,12 +853,13 @@ void istBuilder::event(daqReader *rdr) {
 		mZdcVertex  += (12.88 - .55); //copy from trgBuilder.cxx
 
 		if(fabs(mZdcVertex) > 10.0) {
-			LOG(DBG, "Skipping evt %d in run %d with vertexZ = %f", trgd->eventNumber(), run, mZdcVertex);
+		    //LOG("JEFF", "Skipping evt %d in run %d with vertexZ = %f", trgd->eventNumber(), run, mZdcVertex);
 			if(trgd) delete trgd;
 			return;  //skip current event if its vertex Z was outside of +-10.0 cm
 		}
 	}
 	if(trgd) delete trgd;  
+	*/
 
 	// arrays to calculate dynamical common mode noise contribution to this chip in current event
 	float sumAdcPerEvent[totAPV];
