@@ -1,0 +1,11 @@
+/* mtdQTSlewingCorrPart2.idl
+*
+* Table: mtdQTSlewingCorrPart2
+*
+* description: // Online slewing correction for QT board, extended
+*
+*/
+struct mtdQTSlewingCorrPart2 {
+  float slewingBinEdge[512];  /* bin edges for slewing correction */
+  float slewingCorr[512]; /* slewing per bin for each module */
+};
