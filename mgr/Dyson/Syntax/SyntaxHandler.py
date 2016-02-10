@@ -128,7 +128,7 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Create'    , Language.Create        )
         self.addToken( 'Position'  , Language.Position      )
 
-        self.addToken( 'Placement',  Language.Placement     )
+        self.addToken( 'Placement',   Language.Placement    )
         self.addToken( 'Translation', Language.Translation  )
         self.addToken( 'Rotation',    Language.Rotation     )
         
