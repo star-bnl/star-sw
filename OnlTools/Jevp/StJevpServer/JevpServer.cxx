@@ -499,6 +499,9 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   rtsLogLevel(log_level);
 
 
+  //rtsLogOutput(RTS_LOG_STDERR);
+  //rtsLogLevel(DBG);
+  
   // Create builders...
   if(!isL4) {
     builders.Add(new baseBuilder(this));
