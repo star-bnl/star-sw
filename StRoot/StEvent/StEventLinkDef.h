@@ -134,7 +134,7 @@
 #pragma link C++ class FMSBlock2012+;
 #pragma link C++ class TrgOfflen2012+;
 
-//IncFile=StDaqLib/TRG/trgStructures2012.h
+//IncFile=StDaqLib/TRG/trgStructures2013.h
 #pragma link C++ class TriggerDataBlk2013+;
 #pragma link C++ class EvtDescData2013+;
 #pragma link C++ class TrgSumData2013+;
@@ -148,6 +148,21 @@
 #pragma link C++ class BELayerBlock2013+;
 #pragma link C++ class FMSBlock2013+;
 #pragma link C++ class TrgOfflen2013+;
+
+//IncFile=StDaqLib/TRG/trgStructures2016.h
+#pragma link C++ class TriggerDataBlk2016+;
+#pragma link C++ class EvtDescData2016+;
+#pragma link C++ class TrgSumData2016+;
+#pragma link C++ class L1_DSM_Data2016+;
+#pragma link C++ class DataBlock2016+;
+#pragma link C++ class BBCBlock2016+;
+#pragma link C++ class MIXBlock2016+;
+#pragma link C++ class QTBlock2016+;
+#pragma link C++ class BEastBlock2016+;
+#pragma link C++ class BWestBlock2016+;
+#pragma link C++ class BELayerBlock2016+;
+#pragma link C++ class FMSBlock2016+;
+#pragma link C++ class TrgOfflen2016+;
 
 #pragma link C++ function operator<<(ostream&, const StPxlHit&);        
 #pragma link C++ function operator<<(ostream&, const StIstHit&); 
