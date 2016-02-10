@@ -142,7 +142,7 @@ class l4Builder : public JevpBuilder {
   char Destindir_dat[256];
   char Destindir[256];
   char dEdxTheoDir[256];
-  char dEdxMeanFiles[8][256];
+  char dEdxMeanFiles[256][8];
 
   TStopwatch timer;
 
