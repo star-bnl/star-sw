@@ -229,6 +229,7 @@ void Fit() {
   run  = (Int_t) (1000000*((Int_t) (Run.date/1000000)) + Run.run);
   memset(&DVAll[0][0], 0, 6*sizeof(Double_t));
   memset(&dDVAll[0][0], 0, 6*sizeof(Double_t));
+  if (! slope) return;
   Run.events = slope->GetEntries();
   cout << "Run " << run << " has " << Run.events << " entries" <<  endl;
   TH2D *hist[2] = {dv, slope};

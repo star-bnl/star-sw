@@ -1318,7 +1318,7 @@ Bfc_st BFC[] = { // standard chains
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
-  {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
+  {"pxlDb"       ,"pxlDb","","tpcDb,PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
   {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
 
@@ -1460,7 +1460,7 @@ Bfc_st BFC[] = { // standard chains
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
-  {"pxlFastSim"  ,"","","McEvent,StEvent",     "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
+  {"pxlFastSim" ,"","","McEvent,StEvent,pxlDb","StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
@@ -1468,7 +1468,7 @@ Bfc_st BFC[] = { // standard chains
   {"istRaw",     "", "", "istUtil istDb","StIstRawHitMaker","StIstRawHitMaker","IST raw hit maker", kFALSE},
   {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","Run IST cluster maker", kFALSE},
   {"istHit",     "", "", "event istCluster", "StIstHitMaker","StIstHitMaker",  "Run IST hit Maker", kFALSE},
-  {"istSim"  ,"","", "McEvent,StEvent", "StIstFastSimMaker","StIstSimMaker"
+  {"istSim"  ,"","", "McEvent,StEvent,istDb", "StIstFastSimMaker","StIstSimMaker"
    ,                         "Load StIstSimMaker, invoke StIstSimMaker to fill StIstHitCollection", kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat"      ,"","","sst_daq"                             ,"","","SST full chain for Real Data",kFALSE},
