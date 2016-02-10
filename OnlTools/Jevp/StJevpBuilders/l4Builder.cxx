@@ -75,21 +75,23 @@ ClassImp(l4Builder);
 
 void l4Builder::initialize(int argc, char *argv[])
 {
-	cout << "Initialization ...(Timing begin)" << endl;
+    //cout << "Initialization ...(Timing begin)" << endl;
+    LOG(DBG, "Initialization... (Timing begin)");
 	timer.Start();
 
 	l4Builder me2;
 	struct stat64 st2;
 	sprintf(me2.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
 	if(stat64(me2.Destindir_dat, &st2) == 0) {
-		LOG(DBG,"%s exist.\n", me2.Destindir_dat);
+	    LOG(DBG,"%s exist.", me2.Destindir_dat);
 	} else {
-		LOG(DBG,"%s does not exist. Create.\n", me2.Destindir_dat);
+		LOG(DBG,"%s does not exist. Create.", me2.Destindir_dat);
 		if(mkdir(me2.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) LOG(DBG,"mkdir() error");
 	}
 
+       	index = 0;
+	LOG(DBG, "Index defined %d\n",index);
 
-	index = 0;
 	runnumber = 0;
 	pi = 3.1415927;
 	twopi = 6.2831854;
@@ -100,6 +102,8 @@ void l4Builder::initialize(int argc, char *argv[])
 	outerGainPara = -999;
 	eventCounter = 0;
 
+	sprintf(dEdxTheoDir, "stupid");
+	LOG(DBG, "Index now %d %s\n",index, dEdxTheoDir);
 
 	sprintf(dEdxMeanFiles[0], "%s/dedx_mean_Electron", dEdxTheoDir);
 	sprintf(dEdxMeanFiles[1], "%s/dedx_mean_Pion", dEdxTheoDir);
@@ -109,7 +113,12 @@ void l4Builder::initialize(int argc, char *argv[])
 	sprintf(dEdxMeanFiles[5], "%s/dedx_mean_Triton", dEdxTheoDir);
 	sprintf(dEdxMeanFiles[6], "%s/dedx_mean_He3", dEdxTheoDir);
 	sprintf(dEdxMeanFiles[7], "%s/dedx_mean_He4", dEdxTheoDir);
+
+	LOG(DBG, "Index now %d\n",index);
+
 	inputDedx();
+
+	LOG(DBG, "Index now %d\n",index);
 
 	fTheoDedx_e_pos   = new TF1("TheoDedx_e_pos", funcDedx_e_pos, 0.1, 5., 0);
 	fTheoDedx_e_neg   = new TF1("TheoDedx_e_neg", funcDedx_e_neg, -5., -0.1, 0);
@@ -143,7 +152,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	fTheoDedx_He3_neg->SetLineWidth(0.3);
 	fTheoDedx_He4_pos->SetLineWidth(0.3);
 	fTheoDedx_He4_neg->SetLineWidth(0.3);
-
+	LOG(DBG, "Index now %d\n",index);
 	// Initialize JevpPlot
 	gStyle->SetPalette(1);
 	gStyle->SetOptLogz(1);
@@ -229,21 +238,25 @@ void l4Builder::initialize(int argc, char *argv[])
 		HltPlots_UPC[i]->setPalette(1);
 	}
 
-	cout << "HltPlots OK" << endl;
+	LOG(DBG,"HltPlots OK");
 	defineHltPlots();
-	defineBeamPlots();
-	defineBesGoodPlots();
-	defineHLTGood2Plots();
-	defineBesMontinorPlots();
-	defineFixedTargetPlots();
-	defineFixedTargetMonitorPlots();
-	defineHeavyFragmentPlots();
-	defineDiElectronPlots();
-	defineDiPionPlots();
-	defineDiMuonPlots();
-	defineUPCDiElectronPlots();
-	defineHltPlots_UPC();
+		LOG(DBG, "Here\n");
+	defineBeamPlots();	LOG(DBG, "Here\n");
+	defineBesGoodPlots();	LOG(DBG, "Here\n");
+	defineHLTGood2Plots();	LOG(DBG, "Here\n");
+	defineBesMontinorPlots();	LOG(DBG, "Here\n");
+	defineFixedTargetPlots();	LOG(DBG, "Here\n");
+	defineFixedTargetMonitorPlots();	LOG(DBG, "Here\n");
+	defineHeavyFragmentPlots();	LOG(DBG, "Here\n");
+	defineDiElectronPlots();	LOG(DBG, "Here\n");
+	defineDiPionPlots();	LOG(DBG, "Here\n");
+	defineDiMuonPlots();	LOG(DBG, "Here\n");
+	defineUPCDiElectronPlots();	LOG(DBG, "Here\n");
+	defineHltPlots_UPC();	LOG(DBG, "Here\n");
+
+	LOG(DBG, "Here\n");
 	setAllPlots();
+	LOG(DBG, "Here\n");
 	for(int i = 0; i < 39; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
@@ -297,7 +310,9 @@ void l4Builder::initialize(int argc, char *argv[])
 		addPlot(HltPlots_UPC[i]);
 		}
 		*/
-	cout << "Initialization Done" << endl;
+	LOG(DBG, "Index now %d\n",index);
+
+	LOG(DBG,"Initialization Done");
 }
 
 void l4Builder::startrun(daqReader *rdr)
@@ -541,9 +556,10 @@ void l4Builder::stoprun(daqReader *rdr)
 
 	writeHistogram();
 	timer.Stop();
-	printf("Stopping run #%d\n", runnumber);
-	cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
-		<< " Real time: " << timer.RealTime() << endl;
+	//printf("Stopping run #%d\n", runnumber);
+	LOG(DBG, "Stopping run #%d", runnumber);
+	LOG(DBG, "Timing:   cpu = %d real = %d", timer.CpuTime(), timer.RealTime());
+
 };
 
 void l4Builder::writeHistogram()
@@ -552,7 +568,7 @@ void l4Builder::writeHistogram()
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
 	int initialno = 39;
-	cout<<"FixTar="<<FixedTargetFilled<<endl;
+	LOG(DBG,"FixTar= %d",FixedTargetFilled);
 	/* if(BESGoodFilled) initialno += 4;
 	   if(HLTGood2Filled) initialno += 4;
 	   if(BESMonitorFilled) initialno += 2;
@@ -725,7 +741,7 @@ void l4Builder::event(daqReader *rdr)
 	// Check Version
 	if(hlt_eve->version != HLT_GL3_VERSION) {
 		LOG(DBG, "ERROR: HLTFormats version doesn't match DAQ file version!");
-		cout << "DAQ version is " << hlt_eve->version << " while HLTFormats version is " << HLT_GL3_VERSION << endl;
+		//cout << "DAQ version is " << hlt_eve->version << " while HLTFormats version is " << HLT_GL3_VERSION << endl;
 		return;
 	}
 
@@ -1310,7 +1326,10 @@ void l4Builder::event(daqReader *rdr)
 			hMTDQmJpsiMassLS->Fill(qmMass);
 			hMTDQmUpsilonMassLS->Fill(qmMass);
 
-			if(mgtrk1.q*mgtrk2.q<=0) cout<<"please debug here !!!!!!!!!!"<<endl;
+			if(mgtrk1.q*mgtrk2.q<=0) {
+			    //cout<<"please debug here !!!!!!!!!!"<<endl;
+			    LOG(ERR, "Error mgtrk2");
+			}
 		}
 
 	}
@@ -1768,11 +1787,15 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par)
  */
 void l4Builder::defineHltPlots()
 {
+    LOG(DBG, "HERE %d\n", index);
 	HltPlots[index]->logy = 1;
 	hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 7, 0., 7);
 	ph = new PlotHisto();
 	ph->histo = hEvtsAccpt;
 	HltPlots[index]->addHisto(ph);
+
+
+	LOG(DBG, "Here\n");
 
 	// Tracks
 	index++; //1
@@ -1885,6 +1908,8 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hPrim_dEdx;
 	HltPlots[index]->addHisto(ph);
+
+	LOG(DBG, "Here\n");
 
 	// Event
 	index++; //14
@@ -2049,7 +2074,7 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hVzDiff;
 	HltPlots[index]->addHisto(ph);
-
+	LOG(DBG, "Here\n");
 }
 
 void l4Builder::defineBeamPlots()

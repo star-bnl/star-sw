@@ -154,7 +154,9 @@ else
     if [ $test -eq 1 ]; then
 	root4starN $shellname
     else
+	echo "Shell is: $shellname \n"
         root4star -q -b -l $shellname &
+	#echo "boo\n"
         wait
     fi
 fi
