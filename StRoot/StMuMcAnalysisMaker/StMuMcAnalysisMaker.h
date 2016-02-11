@@ -64,7 +64,7 @@ enum EChargeType {
 enum EPlotType {
   kTotalQA = 16, kTotalQAll,                                             // no. of plots for Global and Primary tracks
 #ifndef __DEVT__
-  noFit =  46,
+  noFit =  50,
 #else
   noFit = 100,
 #endif

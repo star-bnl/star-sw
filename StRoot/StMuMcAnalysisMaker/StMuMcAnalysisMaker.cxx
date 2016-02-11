@@ -1,6 +1,7 @@
 //*-- Author : Yuri Fisyak 02/02/2016
 #include "StMuMcAnalysisMaker.h"
 #include "TDirectory.h"
+#include "TROOT.h"
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalMatchType][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
@@ -337,7 +338,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (! mcTrack) continue;
     // Select only Triggered Mc Vertex
     Int_t IdVx = mcTrack->IdVx();
-    while (IdVx != 1) {
+    while (IdVx != 1) { // Find parent vertex 
       StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
       Int_t idMcTrack = mcVertex->IdParTrk();
       if (! idMcTrack) break;
@@ -346,11 +347,13 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       if (! IdVx) break;
     }
     if (IdVx != 1) continue;
+    Bool_t McTpc = mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits;
+    Bool_t McHft = mcTrack->No_pix_hit() >= 2 && mcTrack->No_ist_hit()+mcTrack->No_ssd_hit() >= 1;
     GiD[0]->Fill(mcTrack->GePid());
-    if (mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits) GiD[1]->Fill(mcTrack->GePid());
+    if (McTpc) GiD[1]->Fill(mcTrack->GePid());
     if (IdVx == 1) {
       GiD[2]->Fill(mcTrack->GePid());
-      if (mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits) GiD[3]->Fill(mcTrack->GePid());
+      if (McTpc) GiD[3]->Fill(mcTrack->GePid());
     }
     if (! mcTrack->Charge()) continue;
     EChargeType pm = kPositive;
@@ -358,8 +361,6 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     Int_t NPart = kallP;
     if (mcTrack->GePid() == 8 || mcTrack->GePid() == 9) NPart = kPion;
     for (Int_t particle = 0; particle <= NPart; particle++) {
-      Bool_t McTpc = mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits;
-      Bool_t McHft = mcTrack->No_pix_hit() >= 2 && mcTrack->No_ist_hit()+mcTrack->No_ssd_hit() >= 1;
       fHistsT[kGlobal][kMcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       if (IdVx == 1)
 	fHistsT[kPrimary][kMcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
@@ -372,22 +373,12 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	if (IdVx == 1)
 	  fHistsT[kPrimary][kMcHftTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       }
-      TrackMatchType kType    = TrackType(mcTrack,Mc2RcTracks);
-      TrackMatchType kTypeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
-      TrackMatchType type    = kNotDefined;
-      TrackMatchType typeHft = kNotDefined;
-      switch (kType) {
-      case kRecoTk:    type = kRecoTk;     break;
-      case kLostTk:    type = kLostTk;     break;
-      case kCloneTk:   type = kCloneTk;    break;
-      default:         type = kNotDefined; break;
-      }
-      switch (kTypeHft) {
-      case kRecoHftTk:    type = kRecoHftTk;     break;
-      case kLostHftTk:    type = kLostHftTk;     break;
-      case kCloneHftTk:   type = kCloneHftTk;    break;
-      default:            type = kNotDefined;    break;
-      }
+      // kNotDefined, kLostTk, kRecoTk, kCloneTk
+      TrackMatchType type    = TrackType(mcTrack,Mc2RcTracks);
+      // kNotDefined, kLostHftTk, kRecoHftTk, kCloneHftTk
+      TrackMatchType typeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
+      if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
+      if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
       if (type != kNotDefined) {
 	fHistsT[kGlobal][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
 	fHistsT[kPrimary][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
@@ -398,12 +389,11 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       }
       if (type == kRecoTk || typeHft == kRecoHftTk) {
 	Int_t Id = mcTrack->Id()-1;
-	pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret;
-	ret = Mc2RcTracks.equal_range(Id);
+	pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
 	multimap<Int_t,Int_t>::iterator it;
 	Int_t kg = -1;
 	Int_t count = 0;
-	for (it=Mc2RcTracks.equal_range(Id).first; it!=Mc2RcTracks.equal_range(Id).second; ++it, ++count) {
+	for (it = ret.first; it != ret.second; ++it, ++count) {
 	  kg = (*it).second;
 	}
 	assert(count == 1);
@@ -453,7 +443,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	}
       }
     }
-    // check for ghostsb
+    // check for ghost
     for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = muDst->globalTracks(kg);
       if ( ! AcceptGhost(gTrack)) continue;
@@ -1015,6 +1005,12 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
     {"GhostG","Ghost wrt Geom",        kGhostTk, kMcTpcTk, 0.0, 110.0}
   };
   const Double_t pTmins[4] = {0.11, 0.5, 1.01, 2.0};
+  TCanvas *c1 = 0;
+  if (Debug()) {
+    c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+    if (c1) c1->Clear();
+    else    c1 = new TCanvas();
+  }
   //                       Phi Eta pT
   const Char_t *proj3[3] = {"x","y","z"};
   
@@ -1030,7 +1026,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	  Double_t min = eff[i].min;
 	  Double_t max = eff[i].max;
 	  Int_t NS = kTotalSigns;
-	  if (pTmin < 0 && p != 2) NS *= 4;
+	  if (pTmin < 0 && p != 1) NS *= 4;
 	  TString path;
 	  for (Int_t l = kPositive; l < NS; l++) {
 	    Int_t pm = l%kTotalSigns;
@@ -1049,13 +1045,13 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    Divider->GetYaxis()->SetRange(binY1,binY2);
 	    cout << "Sum " << Divider->GetName() << "\tentries = " << Divider->GetEntries() << endl;
 	    cout << "Eff " << Dividend->GetName() << "\tentries = " << Dividend->GetEntries() << endl;
-	    if (p != 1) {
+	    if (p != 0) { // ! eta
 	      binX1 = Dividend->GetXaxis()->FindBin(-ymax);
 	      binX2 = Dividend->GetXaxis()->FindBin( ymax);
 	      Dividend->GetXaxis()->SetRange(binX1,binX2);
 	      Divider->GetXaxis()->SetRange(binX1,binX2);
 	    } 
-	    if (p != 2) {
+	    if (p != 1) { // ! pT
 	      if (NS == kTotalSigns) {
 		binY1 = Dividend->GetYaxis()->FindBin(pTmin);
 	      } else {
@@ -1065,13 +1061,11 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	      Divider->GetYaxis()->SetRange(binY1,binY2);
 	    }
 	    heff[l] = Dividend->Project3D(proj3[p]); 
-#if 1
 	    if      (p == 0) heff[l]->SetXTitle(Dividend->GetXaxis()->GetTitle());
 	    else if (p == 1) heff[l]->SetXTitle(Dividend->GetYaxis()->GetTitle());
 	    else if (p == 2) heff[l]->SetXTitle(Dividend->GetZaxis()->GetTitle());
 	    if (l == 0) heff[l]->SetName(Form("%s%s",eff[i].Name,heff[l]->GetName()));
 	    else        heff[l]->SetName(Form("%s%s_%i",eff[i].Name,heff[l]->GetName(),l));
-#endif
 	    heff[l]->SetTitle(Form("%s for %s vs %s",eff[i].Title,TitleTrType[gp],heff[l]->GetXaxis()->GetTitle()));
 	    heff[l]->SetYTitle(Form("%s (%)",eff[i]));
 	    heff[l]->SetStats(0);
@@ -1080,9 +1074,15 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    Title = heff[l]->GetTitle();
 	    if (binX1 != binX2) Title += Form(" at |  #eta | <= %3.1f",ymax);
 	    if (binY1 > 0)      Title += Form(" at pT > %3.2f",pTmins[l/2]);
-	    heff[l]->SetTitle(Title);
+	    heff[l]->SetTitle(Title);   
 	    TH1 *temp =Divider->Project3D(proj3[p]); 
 	    cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
+	    if (c1) {
+	      c1->cd(); 
+	      temp->Draw();
+	      heff[l]->Draw();
+	      c1->Update();
+	    }
 	    if (temp->GetEntries() < 1) continue;
 	    if (temp->GetNbinsX() != heff[l]->GetNbinsX()) {
 	      cout << "No. of bins in " <<  heff[l]->GetName() << " and " << temp->GetName() << " is different. Ignore these histograms" << endl;
@@ -1092,7 +1092,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    }
 	    Double_t Val = 0;
 	    Double_t Sum = 0;
-	    for (Int_t bin = binX1; bin <= binX2; bin++) {
+	    for (Int_t bin = heff[l]->GetXaxis()->GetFirst(); bin <= heff[l]->GetXaxis()->GetLast(); bin++) {
 	      Double_t val = heff[l]->GetBinContent(bin); Val += val;
 	      Double_t sum = temp->GetBinContent(bin);    Sum += sum;
 	      Double_t err = 0;
@@ -1107,6 +1107,11 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 		 << "[" << binZ1 << "," << binZ2 << "]"
 		 << " Val = " << Val << "\tSum = " << Sum << endl;
 	    MinMax(heff[l],min,max,200);
+	    if (c1) {
+	      c1->cd(); 
+	      heff[l]->Draw();
+	      c1->Update();
+	    }
 	  }
 	  if (heff[0] && heff[1]) {
 	    Name = path; Name += "/";
