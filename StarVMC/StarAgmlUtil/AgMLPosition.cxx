@@ -2,6 +2,7 @@
 #include <iostream>
 #include <assert.h>
 #include <string>
+#include <cmath>
 
 AgMLPosition *_position = 0;
 
