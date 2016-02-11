@@ -134,7 +134,7 @@
 #pragma link C++ class FMSBlock2012+;
 #pragma link C++ class TrgOfflen2012+;
 
-//IncFile=StDaqLib/TRG/trgStructures2012.h
+//IncFile=StDaqLib/TRG/trgStructures2013.h
 #pragma link C++ class TriggerDataBlk2013+;
 #pragma link C++ class EvtDescData2013+;
 #pragma link C++ class TrgSumData2013+;
