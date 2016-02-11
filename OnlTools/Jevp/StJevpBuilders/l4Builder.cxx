@@ -102,7 +102,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	outerGainPara = -999;
 	eventCounter = 0;
 
-	sprintf(dEdxTheoDir, "stupid");
+	sprintf(dEdxTheoDir, "/a/l4jevp/client/dedx");
 	LOG(DBG, "Index now %d %s\n",index, dEdxTheoDir);
 
 	sprintf(dEdxMeanFiles[0], "%s/dedx_mean_Electron", dEdxTheoDir);
