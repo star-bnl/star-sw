@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.23 2015/05/20 16:57:00 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.24 2016/02/11 14:22:02 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.24  2016/02/11 14:22:02  ullrich
+ * Add fcts to access MTD DSM and QT info.
+ *
  * Revision 2.23  2015/05/20 16:57:00  ullrich
  * Correct logic in if statement.
  *
@@ -82,7 +85,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.23 2015/05/20 16:57:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.24 2016/02/11 14:22:02 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -251,6 +254,7 @@ unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest, int prepo
 unsigned short StTriggerData::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 unsigned short StTriggerData::mxqAtSlotAddress(int address, int prepost, int slot) const {return 0;}
+unsigned short StTriggerData::mtdQtAtCh(int qtid, int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdgemAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtd3AtAddress(int address, int prepost) const {return 0;}
