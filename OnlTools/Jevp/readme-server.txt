@@ -5,6 +5,9 @@ For a local run analysis:
 // For the production server!
 OnlTools/Jevp/launch JevpServerMain -production
 
+// Just update DB on existing run, if server is already running...
+OnlTools/Jevp/launch JevpServerMain -file xxx -updatedb
+
 // For the test server
 // runs from new data, but jevp_test data dirs, no db.
 OnlTools/Jevp/launch JevpServerMain -test   

@@ -419,6 +419,11 @@ void JevpServer::parseArgs(int argc, char *argv[])
       rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
       log_output = RTS_LOG_STDERR;
     }
+    else if (strcmp(argv[i], "-updatedb")==0) {
+	nodb = 0;
+	myport = JEVP_PORT+10;
+	die = 1;
+    }
     else if (strcmp(argv[i], "-test")==0) {
       nodb = 1;
       log_output = RTS_LOG_STDERR;

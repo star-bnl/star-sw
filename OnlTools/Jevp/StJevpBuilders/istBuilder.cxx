@@ -830,8 +830,8 @@ void istBuilder::startrun(daqReader *rdr) {
 // ************IST EVENT******************
 // ---------------------------------------
 void istBuilder::event(daqReader *rdr) {
-	StTriggerData *trgd = getStTriggerData(rdr);
-	if(!trgd) return;
+	//StTriggerData *trgd = getStTriggerData(rdr);
+	//if(!trgd) return;
 
 	/*****      -----bad code
 	long long int trgId = rdr->daqbits64;
@@ -861,6 +861,7 @@ void istBuilder::event(daqReader *rdr) {
 	if(trgd) delete trgd;  
 	*/
 
+	//if(trgd) delete trgd;
 	// arrays to calculate dynamical common mode noise contribution to this chip in current event
 	float sumAdcPerEvent[totAPV];
 	int counterAdcPerEvent[totAPV];
