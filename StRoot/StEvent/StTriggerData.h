@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.44 2013/11/13 19:17:01 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.45 2016/02/11 14:22:02 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.45  2016/02/11 14:22:02  ullrich
+ * Add fcts to access MTD DSM and QT info.
+ *
  * Revision 2.44  2013/11/13 19:17:01  ullrich
  * Added mtd4AtAddress() and dsmTF201Ch(). (Akio)
  *
@@ -302,6 +305,7 @@ public:
     virtual unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;
 
     //MTD
+    virtual unsigned short mtdQtAtCh(int qtid, int address, int prepost) const;
     virtual unsigned short mtdAtAddress(int address, int prepost=0) const;
     virtual unsigned short mtdgemAtAddress(int address, int prepost=0) const;
     virtual unsigned short mtd3AtAddress(int address, int prepost=0) const;

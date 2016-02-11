@@ -17,6 +17,8 @@ from warnings import warn
 
 from pyparsing  import *
 
+oldplacement = False
+
 banner = """
 /*
  ******************************************************************************
@@ -308,8 +310,12 @@ def replacements( line ):
     myline=temp
     
     # Replace 'ONLY' and 'MANY' with kOnly and kMany
-    myline =    myline.replace("ONLY", 'AgPlacement::kOnly')
-    myline =    myline.replace("MANY", 'AgPlacement::kMany')
+    if oldplacement:
+        myline =    myline.replace("ONLY", 'AgPlacement::kOnly')
+        myline =    myline.replace("MANY", 'AgPlacement::kMany')
+    else:
+        myline =    myline.replace("ONLY", 'AgPosition::kOnly')
+        myline =    myline.replace("MANY", 'AgPosition::kMany')
    
     # System of units replacement
     myline =    myline.replace("keV","*1.0E-6")
@@ -2276,6 +2282,7 @@ class Placement(Handler):
         cond  = attr.get('if',None)   # conditional placement
         matrix= attr.get('matrix',None)
 
+
         if cond:
             cond = replacements(cond)
             cond = cond.lower()
@@ -2331,10 +2338,21 @@ class Placement(Handler):
         # If provided, add the conditional to the placement
         if cond:            document.impl( 'if ( %s )'%cond, unit=current )
 
-        if group:
-            document.impl( '{ AgPlacement place = AgPlacement("%s","%s","%s");' %( block, into, group ), unit=current )
+        ## if group:
+        ##     document.impl( '{ AgPlacement place = AgPlacement("%s","%s","%s");' %( block, into, group ), unit=current )
+        ## else:
+        ##     document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
+
+
+        document.impl( '{', unit=current ) # Open scope
+        if oldplacement:
+            document.impl( 'AgPlacement place;', unit=current )
         else:
-            document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
+            document.impl( 'AgPosition  place;', unit=current )
+        document.impl( 'place.SetBlock("%s");'%block, unit=current )
+        document.impl( 'place.SetMother("%s");'%into, unit=current )
+        if group:
+            document.impl( 'place.SetGroup("%s");'%group, unit=current )
             
         document.impl( '/// Add daughter volume %s to mother %s'%(block,into), unit=current )
         
@@ -2348,9 +2366,9 @@ class Placement(Handler):
             document.impl( 'place.TranslateZ(%s);'% z, unit=current )
             document.impl( '/// Translate z = %s'%z, unit=current )
 
-        if ( matrix != None ):
-            document.impl( '{ double matrix[] = %s; place.Matrix( matrix ); }'%matrix, unit=current )
-            document.impl( '/// Rotation Matrix = %s'%matrix, unit=current )
+        ## if ( matrix != None ):
+        ##     document.impl( '{ double matrix[] = %s; place.Matrix( matrix ); }'%matrix, unit=current )
+        ##     document.impl( '/// Rotation Matrix = %s'%matrix, unit=current )
         
         if ( only != None ):
             document.impl( 'place.par("only")=%s;'% only, unit=current )
