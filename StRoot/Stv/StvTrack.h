@@ -43,6 +43,9 @@ const StvNode *GetNode(EPointType poTy) const;
          /// 0=Dca,1 = too many continues nits,2 = too many total nits
    int GetTypeEnd () const	{return mTypeEnd;} 
 
+	 /// Returns the quality of track for montecarlo case
+double GetQua() const;  
+
    	/// Delete all the nodes started form given
   void CutTail(const StvNode *start=0);
 
