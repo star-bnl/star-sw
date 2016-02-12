@@ -148,16 +148,27 @@ static int nCall=0; nCall++;
 
   return &fHelix;
 }    
+#include "StarRoot/TIdTruUtil.h"
 //_____________________________________________________________________________
 void StvSeedFinder::FeedBack(const StvTrack *tk)
 {
   if (StvDebug::Debug()<2) return;
+  TIdTruUtil idu;
 
+  for (int ih=0;ih<(int)fSeedHits.size();ih++) {
+    auto *hit = fSeedHits[ih];
+    idu.Add(hit->idTru());
+  }
+  StvDebug::Count("SeedAllQua",idu.GetQua()*100);
   if (!tk) { //
-  StvDebug::Count("BadXi2:Xi2E",fXi2[1],fXi2[0]);
+  StvDebug::Count("SeedBadXi2:Xi2E",fXi2[1],fXi2[0]);
+  StvDebug::Count("SeedBadQua",idu.GetQua()*100);
 
   } else {
   StvDebug::Count("GooXi2:Xi2E",fXi2[1],fXi2[0]);
+  StvDebug::Count("SeedGooQua",idu.GetQua()*100);
+  StvDebug::Count("GlobGooQua",tk->GetQua()*100);
+  StvDebug::Count("GlobGooQua::SeedGooQua",tk->GetQua()*100,idu.GetQua()*100);
   const StvNode *node = tk->GetNode(StvTrack::kFirstPoint);
   double P[3];
   node->GetFP().getMom(P);
