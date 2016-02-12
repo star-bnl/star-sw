@@ -10,7 +10,8 @@
 // #define HLT_GL3_VERSION 0x20110114  // add di-electron selection method bits
 // #define HLT_GL3_VERSION 0x20130117  // optimazed mamoty layout
 // #define HLT_GL3_VERSION 0x20140522 // add MTD data structure
-#define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
+// #define HLT_GL3_VERSION 0x20160120 // add MTDQuarkonium
+#define HLT_GL3_VERSION 0x20160210 // add isTrigger to hlt_MtdHit
 
 struct hlt_track {
     int            id ;         //primary key
@@ -74,6 +75,7 @@ struct hlt_MtdHit {
   int     hlt_trackId;
   float   delta_z;
   float   delta_y;
+  int     isTrigger;
 };
 
 struct HLT_MTD {
