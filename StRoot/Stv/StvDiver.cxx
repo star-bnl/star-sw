@@ -451,6 +451,12 @@ static int nCall=0; nCall++;
 
     case 0: { // begin volume
       fStartSign = fCurrentSign; 
+      double pos[4],mom[4];
+      fCurrentPosition.GetXYZT(pos);
+      fCurrentMomentum.GetXYZT(mom);
+      double pt = fCurrentMomentum.Pt();
+      double rho = -fField->GetHz(pos)/pt*fCharge;
+      fHelix->Set(pos,mom,rho);
       return 0;
     }
 
