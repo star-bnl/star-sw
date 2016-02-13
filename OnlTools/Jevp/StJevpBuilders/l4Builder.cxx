@@ -25,6 +25,7 @@
 #include <DAQ_L4/daq_l4.h>
 #include <TStyle.h>
 #include "TVector3.h"
+#include <TLegend.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -75,21 +76,21 @@ ClassImp(l4Builder);
 
 void l4Builder::initialize(int argc, char *argv[])
 {
-    //cout << "Initialization ...(Timing begin)" << endl;
-    LOG(DBG, "Initialization... (Timing begin)");
+	cout << "Initialization ...(Timing begin)" << endl;
 	timer.Start();
 
 	l4Builder me2;
 	struct stat64 st2;
 	sprintf(me2.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
 	if(stat64(me2.Destindir_dat, &st2) == 0) {
-	    LOG(DBG,"%s exist.", me2.Destindir_dat);
+		LOG(DBG,"%s exist.\n", me2.Destindir_dat);
 	} else {
-		LOG(DBG,"%s does not exist. Create.", me2.Destindir_dat);
+		LOG(DBG,"%s does not exist. Create.\n", me2.Destindir_dat);
 		if(mkdir(me2.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) LOG(DBG,"mkdir() error");
 	}
 
-       	index = 0;
+
+	index = 0;
 	LOG(DBG, "Index defined %d\n",index);
 
 	runnumber = 0;
@@ -103,7 +104,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	eventCounter = 0;
 
 	sprintf(dEdxTheoDir, "/a/l4jevp/client/dedx");
-	LOG(DBG, "Index now %d %s\n",index, dEdxTheoDir);
+	LOG(DBG, "Index now %d %s\n",index, dEdxTheoDir);	
 
 	sprintf(dEdxMeanFiles[0], "%s/dedx_mean_Electron", dEdxTheoDir);
 	sprintf(dEdxMeanFiles[1], "%s/dedx_mean_Pion", dEdxTheoDir);
@@ -114,11 +115,9 @@ void l4Builder::initialize(int argc, char *argv[])
 	sprintf(dEdxMeanFiles[6], "%s/dedx_mean_He3", dEdxTheoDir);
 	sprintf(dEdxMeanFiles[7], "%s/dedx_mean_He4", dEdxTheoDir);
 
-	LOG(DBG, "Index now %d\n",index);
 
 	inputDedx();
 
-	LOG(DBG, "Index now %d\n",index);
 
 	fTheoDedx_e_pos   = new TF1("TheoDedx_e_pos", funcDedx_e_pos, 0.1, 5., 0);
 	fTheoDedx_e_neg   = new TF1("TheoDedx_e_neg", funcDedx_e_neg, -5., -0.1, 0);
@@ -152,7 +151,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	fTheoDedx_He3_neg->SetLineWidth(0.3);
 	fTheoDedx_He4_pos->SetLineWidth(0.3);
 	fTheoDedx_He4_neg->SetLineWidth(0.3);
-	LOG(DBG, "Index now %d\n",index);
+
 	// Initialize JevpPlot
 	gStyle->SetPalette(1);
 	gStyle->SetOptLogz(1);
@@ -213,13 +212,19 @@ void l4Builder::initialize(int argc, char *argv[])
 		DiElectronPlots[i]->gridy = 0;
 		DiElectronPlots[i]->setPalette(1);
 	}
+	for(int i = 0; i < 10; i++) {
+		DiElectron2TwrPlots[i] = new JevpPlot();
+		DiElectron2TwrPlots[i]->gridx = 0;
+		DiElectron2TwrPlots[i]->gridy = 0;
+		DiElectron2TwrPlots[i]->setPalette(1);
+	}
 	for(int i = 0; i < 2; i++) {
 		DiPionPlots[i] = new JevpPlot();
 		DiPionPlots[i]->gridx = 0;     
 		DiPionPlots[i]->gridy = 0;     
 		DiPionPlots[i]->setPalette(1); 
 	}
-	for(int i = 0; i < 10; i++) {
+	for(int i = 0; i < 14; i++) {
 		DiMuonPlots[i] = new JevpPlot();
 		DiMuonPlots[i]->gridx = 0;         
 		DiMuonPlots[i]->gridy = 0;         
@@ -238,53 +243,32 @@ void l4Builder::initialize(int argc, char *argv[])
 		HltPlots_UPC[i]->setPalette(1);
 	}
 
-	LOG(DBG,"HltPlots OK");
+	cout << "HltPlots OK" << endl;
 	defineHltPlots();
-		LOG(DBG, "Here\n");
-	defineBeamPlots();	LOG(DBG, "Here\n");
-	defineBesGoodPlots();	LOG(DBG, "Here\n");
-	defineHLTGood2Plots();	LOG(DBG, "Here\n");
-	defineBesMontinorPlots();	LOG(DBG, "Here\n");
-	defineFixedTargetPlots();	LOG(DBG, "Here\n");
-	defineFixedTargetMonitorPlots();	LOG(DBG, "Here\n");
-	defineHeavyFragmentPlots();	LOG(DBG, "Here\n");
-	defineDiElectronPlots();	LOG(DBG, "Here\n");
-	defineDiPionPlots();	LOG(DBG, "Here\n");
-	defineDiMuonPlots();	LOG(DBG, "Here\n");
-	defineUPCDiElectronPlots();	LOG(DBG, "Here\n");
-	defineHltPlots_UPC();	LOG(DBG, "Here\n");
-
-	LOG(DBG, "Here\n");
+	defineBeamPlots();
+	defineBesGoodPlots();
+	defineHLTGood2Plots();
+	defineBesMontinorPlots();
+	defineFixedTargetPlots();
+	defineFixedTargetMonitorPlots();
+	defineHeavyFragmentPlots();
+	defineDiElectronPlots();
+	defineDiPionPlots();
+	defineDiMuonPlots();
+	defineUPCDiElectronPlots();
+	defineHltPlots_UPC();
+	defineDiElectron2TwrPlots();
 	setAllPlots();
-	LOG(DBG, "Here\n");
 	for(int i = 0; i < 39; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
-	/*	for(int i = 0; i < 3; i++) {
-		LOG(DBG, "Adding plot %d", i);
-		addPlot(BeamPlots[i]);
-		}*/
-	for(int i = 0; i < 4; i++) {
-		LOG(DBG, "Adding plot %d", i);
-		addPlot(BesGoodPlots[i]);
-	}
+
 	for(int i = 0; i < 4; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HLTGood2Plots[i]);
 	}
-	/*       for(int i = 0; i < 2; i++) {
-			 LOG(DBG, "Adding plot %d", i);
-			 addPlot(BesMontinorPlots[i]);
-			 }
-			 for(int i = 0; i < 5; i++) {
-			 LOG(DBG, "Adding plot %d", i);
-			 addPlot(FixedTargetPlots[i]);
-			 }
-			 for(int i = 0; i < 5; i++) {
-			 LOG(DBG, "Adding plot %d", i);
-			 addPlot(FixedTargetMonitorPlots[i]);
-			 }*/
+
 	for(int i = 0; i < 1; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HeavyFragmentPlots[i]);
@@ -293,26 +277,16 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(DiElectronPlots[i]);
 	}
-	/*   for(int i = 0; i < 2; i++) {
-		 LOG(DBG, "Adding plot %d", i);
-		 addPlot(DiPionPlots[i]);
-		 }*/
 	for(int i = 0; i < 10; i++) {
+		LOG(DBG, "Adding plot %d", i);
+		addPlot(DiElectron2TwrPlots[i]);
+	}
+	for(int i = 0; i < 14; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(DiMuonPlots[i]);
 	}
-	/*  for(int i = 0; i < 6; i++) {
-		LOG(DBG, "Adding plot %d", i);
-		addPlot(UPCDiElectronPlots[i]);
-		}
-		for(int i = 0; i < 30; i++) {
-		LOG(DBG, "Adding plot %d", i);
-		addPlot(HltPlots_UPC[i]);
-		}
-		*/
-	LOG(DBG, "Index now %d\n",index);
 
-	LOG(DBG,"Initialization Done");
+	cout << "Initialization Done" << endl;
 }
 
 void l4Builder::startrun(daqReader *rdr)
@@ -337,6 +311,14 @@ void l4Builder::startrun(daqReader *rdr)
 			DiElectronPlots[i]->getHisto(1)->histo->Reset();
 		}
 	}
+	for(int i = 0; i < 1; i++){
+		for(int i = 3; i < 10; i++)DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
+		for(int i = 0; i < 3; i++)
+		{
+			DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
+			DiElectron2TwrPlots[i]->getHisto(1)->histo->Reset();
+		}
+	}
 	for(int i = 0; i < 2; i++)DiPionPlots[i]->getHisto(0)->histo->Reset();
 
 
@@ -345,7 +327,7 @@ void l4Builder::startrun(daqReader *rdr)
 		DiMuonPlots[i]->getHisto(1)->histo->Reset();
 	}
 	for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 7; i < 10; i++){
+	for(int i = 7; i < 14; i++){
 		DiMuonPlots[i]->getHisto(0)->histo->Reset();
 		DiMuonPlots[i]->getHisto(1)->histo->Reset();
 	}
@@ -368,12 +350,16 @@ void l4Builder::startrun(daqReader *rdr)
 	DiMuonFilled = false;
 	UPCDiElectronFilled = false;
 	HeavyFragmentFilled = false;
+	MTDQuarkoniumFilled = false;
+	DiElectron2TwrFilled = false;
+
 
 	printf("Starting run #%d\n", runnumber);
 };
 
 void l4Builder::stoprun(daqReader *rdr)
 {
+
 	//printf("Number of events processed in daq file = %d\n", eventCounter);
 	LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
 
@@ -389,15 +375,35 @@ void l4Builder::stoprun(daqReader *rdr)
 	hDiPionInvMassFullRange->SetLineColor(4);
 	hInvMassUS->SetLineColor(4);
 
+	hDiElectronInvMassTpxEmc_Twr->SetLineColor(4);
+	hDiElectronInvMassFullRange_Twr->SetLineColor(4);
+	hDiElectronInvMassCut_Twr->SetLineColor(4);
+
+	hMTDDiMuonJpsiMassUS->SetMarkerStyle(20);
+	hMTDDiMuonJpsiMassUS->SetMarkerColor(1);
+	hMTDDiMuonJpsiMassUS->SetLineColor(1);
+	hMTDDiMuonJpsiMassLS->SetLineColor(4);
+
 	hMTDQmInvMassUS->SetMarkerStyle(20);
 	hMTDQmInvMassUS->SetMarkerColor(1);
 	hMTDQmInvMassUS->SetLineColor(1);
 	hMTDQmInvMassLS->SetLineColor(4);
 
-	hMTDQmJpsiMassUS->SetMarkerStyle(20);
-	hMTDQmJpsiMassUS->SetMarkerColor(1);
-	hMTDQmJpsiMassUS->SetLineColor(1);
-	hMTDQmJpsiMassLS->SetLineColor(4);
+	hMTDQmJpsiMass_ptcut0_US->SetMarkerStyle(20);
+	hMTDQmJpsiMass_ptcut0_US->SetMarkerColor(1);
+	hMTDQmJpsiMass_ptcut0_US->SetLineColor(1);
+	hMTDQmJpsiMass_ptcut0_LS->SetLineColor(4);
+
+	hMTDQmJpsiMass_ptcut2_US->SetMarkerStyle(20);
+	hMTDQmJpsiMass_ptcut2_US->SetMarkerColor(1);
+	hMTDQmJpsiMass_ptcut2_US->SetLineColor(1);
+	hMTDQmJpsiMass_ptcut2_LS->SetLineColor(4);
+
+
+	hMTDQmJpsiMass_ptcut4_US->SetMarkerStyle(20);
+	hMTDQmJpsiMass_ptcut4_US->SetMarkerColor(1);
+	hMTDQmJpsiMass_ptcut4_US->SetLineColor(1);
+	hMTDQmJpsiMass_ptcut4_LS->SetLineColor(4);
 
 	hMTDQmUpsilonMassUS->SetMarkerStyle(20);
 	hMTDQmUpsilonMassUS->SetMarkerColor(1);
@@ -556,9 +562,9 @@ void l4Builder::stoprun(daqReader *rdr)
 
 	writeHistogram();
 	timer.Stop();
-	//printf("Stopping run #%d\n", runnumber);
-	LOG(DBG, "Stopping run #%d", runnumber);
-	LOG(DBG, "Timing:   cpu = %d real = %d", timer.CpuTime(), timer.RealTime());
+	printf("Stopping run #%d\n", runnumber);
+	cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
+		<< " Real time: " << timer.RealTime() << endl;
 
 };
 
@@ -568,15 +574,6 @@ void l4Builder::writeHistogram()
 	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
 	TFile file(histfile, "RECREATE");
 	int initialno = 39;
-	LOG(DBG,"FixTar= %d",FixedTargetFilled);
-	/* if(BESGoodFilled) initialno += 4;
-	   if(HLTGood2Filled) initialno += 4;
-	   if(BESMonitorFilled) initialno += 2;
-	   if(FixedTargetFilled) initialno += 5;
-	   if(FixedTargetMonitorFilled) initialno += 5;
-	   if(HeavyFragmentFilled) initialno += 1;
-	   if(DiElectronFilled) initialno += 14;*/
-	// if(upcFilled) initialno += 36;
 
 	for(int i = 0; i < initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
 	if(BESGoodFilled){
@@ -607,6 +604,14 @@ void l4Builder::writeHistogram()
 			DiElectronPlots[i]->getHisto(1)->histo->Write();
 		}
 	}
+	if(DiElectron2TwrFilled){
+		for(int i = 3; i < 10; i++)DiElectron2TwrPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 3; i++)
+		{
+			DiElectron2TwrPlots[i]->getHisto(0)->histo->Write();
+			DiElectron2TwrPlots[i]->getHisto(1)->histo->Write();
+		}
+	}
 	if(UPCFilled){
 		for(int i = 0; i < 2; i++)DiPionPlots[i]->getHisto(0)->histo->Write();
 	}
@@ -617,7 +622,7 @@ void l4Builder::writeHistogram()
 			DiMuonPlots[i]->getHisto(1)->histo->Write();
 		}
 		for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Write();
-		for(int i = 7; i < 10; i++)
+		for(int i = 7; i < 14; i++)
 		{
 			DiMuonPlots[i]->getHisto(0)->histo->Write();
 			DiMuonPlots[i]->getHisto(1)->histo->Write();
@@ -650,13 +655,13 @@ void l4Builder::main(int argc, char *argv[])
 		if(mkdir(me.Destindir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
 	}
 	/*    struct stat64 st2;
-		  sprintf(me.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
-		  if(stat64(me.Destindir_dat, &st2) == 0) {
-		  printf("%s exist.\n", me.Destindir_dat);
-		  } else {
-		  printf("%s does not exist. Create.\n", me.Destindir_dat);
-		  if(mkdir(me.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
-		  }*/
+	      sprintf(me.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
+	      if(stat64(me.Destindir_dat, &st2) == 0) {
+	      printf("%s exist.\n", me.Destindir_dat);
+	      } else {
+	      printf("%s does not exist. Create.\n", me.Destindir_dat);
+	      if(mkdir(me.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
+	      }*/
 
 	//-------------------
 	me.Main(argc, argv);
@@ -680,8 +685,6 @@ void l4Builder::event(daqReader *rdr)
 	int triggerBitHighPt = 0x10000;
 	int triggerBitDiElectron = 0x20000;
 	int triggerBitHeavyFragment = 0x40000;
-	int triggerBitAllEvents = 0x80000;
-	int triggerBitRandomEvents = 0x100000;
 	int triggerBitBesgoodEvents = 0x200000;
 	int triggerBitLowMult = 0x1000000;
 	int triggerBitUPC = 0x4000000;
@@ -691,6 +694,8 @@ void l4Builder::event(daqReader *rdr)
 	int triggerBitFixedTargetMonitor = 0x20000000;
 	int triggerBitBesMonitor = 0x40000000;
 	unsigned int triggerBitHLTGood2 = 0x80000000;
+	unsigned int triggerBitDiElectron2Twr     = 0x00000001; // start to up lower 16 bit.
+	unsigned int triggerBitMTDQuarkonium   =   0x00400000;
 	//cout<<"event begin"<<endl;
 
 	//EXTRACT L4 TRACK INFO FROM DAQ FILE
@@ -717,6 +722,7 @@ void l4Builder::event(daqReader *rdr)
 	HLT_NODE *hlt_node;
 	HLT_HIPT *hlt_hipt;
 	HLT_DIEP *hlt_diep;
+	HLT_DIEP *hlt_Twrdiep;
 	HLT_HF *hlt_hf;
 	HLT_MTD *hlt_mtd;
 	HLT_MTDQuarkonium *hlt_mtdqm;
@@ -737,62 +743,46 @@ void l4Builder::event(daqReader *rdr)
 		else if(strcmp(hlt->name, "HLT_UPCDIEP") == 0) hlt_upcdiep = (HLT_DIEP *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_MTDDIMU") == 0) hlt_mtd = (HLT_MTD *)hlt->data;
 		else if(strcmp(hlt->name, "HLT_MTDQuarkonium") == 0) hlt_mtdqm = (HLT_MTDQuarkonium *)hlt->data;
+		else if(strcmp(hlt->name, "HLT_DIEP2Twr") == 0) hlt_Twrdiep = (HLT_DIEP *)hlt->data;
 	}
 	// Check Version
 	if(hlt_eve->version != HLT_GL3_VERSION) {
 		LOG(DBG, "ERROR: HLTFormats version doesn't match DAQ file version!");
-		//cout << "DAQ version is " << hlt_eve->version << " while HLTFormats version is " << HLT_GL3_VERSION << endl;
+		cout << "DAQ version is " << hlt_eve->version << " while HLTFormats version is " << HLT_GL3_VERSION << endl;
 		return;
 	}
 
 	unsigned int decision = hlt_eve->hltDecision;
-	int upc = 0x2;
-	int mtd = 0x0;
-	int npehtnozdc = 0x40;
-	int vpdmb = 0x20;
-	int central = 0x4;
-	int npeht = 0x40000;
-	int npe11 = 0x800;
-	int npe15 = 0x10000;
-	int npe18 = 0x20000;
-	int atom = 0x8;
-	int central_1_protected = 0x100000;
 
 	if(!TriggerFilled) {
 		TriggerFilled = true;
 
 		addServerTags("L4Trigger");
 	}
-	if(decision & triggerBitAllEvents) {
+	if(decision & triggerBitDiMuon) {
 		hEvtsAccpt->Fill(0.);
 	}
-	if(decision & triggerBitRandomEvents) {
+	if(decision & triggerBitMTDQuarkonium) {
 		hEvtsAccpt->Fill(1.);
 	}
-	if(decision & triggerBitBesgoodEvents) {
+	if(decision & triggerBitHLTGood2) {
 		hEvtsAccpt->Fill(2.);
 	}
-	/*    if(decision & triggerBitBesMonitor) {
-		  hEvtsAccpt->Fill(3.);
-		  }
-		  if(decision & triggerBitFixedTarget) {
-		  hEvtsAccpt->Fill(4.);
-		  }
-		  if(decision & triggerBitFixedTargetMonitor) {
-		  hEvtsAccpt->Fill(5.);
-		  }*/
-	if(decision & triggerBitHLTGood2) {
+	if(decision & triggerBitDiElectron) {
 		hEvtsAccpt->Fill(3.);
 	}
-	if(decision & triggerBitDiElectron) {
+	if(decision & triggerBitDiElectron2Twr) {
 		hEvtsAccpt->Fill(4.);
 	}
 	if(decision & triggerBitHeavyFragment) {
 		hEvtsAccpt->Fill(5.);
 	}
-	if(decision & triggerBitDiMuon) {
-		hEvtsAccpt->Fill(6.);
-	}
+	hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment");
 	// fill events
 	if(!EventFilled) {
 		EventFilled = true;
@@ -1204,17 +1194,17 @@ void l4Builder::event(daqReader *rdr)
 
 			double dcaX1 = GTrack1.r0 * cos(GTrack1.phi0) - hlt_eve->lmVertexX;
 			double dcaY1 = GTrack1.r0 * sin(GTrack1.phi0) - hlt_eve->lmVertexY;
-			double cross1 = dcaX1 * sin(GTrack1.psi) - dcaY1 * cos(GTrack1.psi);
+			//double cross1 = dcaX1 * sin(GTrack1.psi) - dcaY1 * cos(GTrack1.psi);
 			double theSign1 = 1.;
 			double dcaZ1 = GTrack1.z0 - hlt_eve->lmVertexZ;
-			double dca1 = theSign1 * sqrt(pow(dcaX1, 2) + pow(dcaY1, 2) + pow(dcaZ1, 2));
+			//double dca1 = theSign1 * sqrt(pow(dcaX1, 2) + pow(dcaY1, 2) + pow(dcaZ1, 2));
 
 			double dcaX2 = GTrack2.r0 * cos(GTrack2.phi0) - hlt_eve->lmVertexX;
 			double dcaY2 = GTrack2.r0 * sin(GTrack2.phi0) - hlt_eve->lmVertexY;
-			double cross2 = dcaX2 * sin(GTrack2.psi) - dcaY2 * cos(GTrack2.psi);
+			//double cross2 = dcaX2 * sin(GTrack2.psi) - dcaY2 * cos(GTrack2.psi);
 			double theSign2 = 1.;
 			double dcaZ2 = GTrack2.z0 - hlt_eve->lmVertexZ;
-			double dca2 = theSign2 * sqrt(pow(dcaX2, 2) + pow(dcaY2, 2) + pow(dcaZ2, 2));
+			//double dca2 = theSign2 * sqrt(pow(dcaX2, 2) + pow(dcaY2, 2) + pow(dcaZ2, 2));
 
 			if(Daughter1TrackSN < 0) continue;
 			hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
@@ -1232,6 +1222,17 @@ void l4Builder::event(daqReader *rdr)
 
 		}
 	}
+
+
+	//DiElectron2Twr
+	if(decision & triggerBitDiElectron2Twr) {
+		if(!DiElectron2TwrFilled) {
+			DiElectron2TwrFilled = true;
+			addServerTags("L4DiElectron2Twr");
+		}
+	}
+
+
 
 	// di-muon
 	if(decision & triggerBitDiMuon) {
@@ -1262,18 +1263,40 @@ void l4Builder::event(daqReader *rdr)
 				hMtdDeltaZ->Fill(deltaz);
 				hMtdDeltaYvsModule->Fill(gmodule,deltay);
 				hMtdDeltaY->Fill(deltay);
+				if(fabs(deltaz)>20)continue;
+				if(fabs(deltay)>20)continue;
 				trkId.push_back(trkid);
 			}
 		}
 
 		// J/psi analysis
-		const float muMass = 0.10566;
-		unsigned int nMuon = trkId.size();
-		for(unsigned int i=0; i<nMuon; i++)
+		// find the primary track
+		vector<int> pMuTrkId;
+		pMuTrkId.clear();
+		unsigned int ngmuon = trkId.size();
+
+		for(unsigned int igm=0; igm<ngmuon; igm++)
 		{
-			hlt_track ipTrack = hlt_gt->globalTrack[trkId[i]];
+			for(int inode = 0; inode<hlt_node->nNodes; inode++)
+			{
+				int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+				int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+
+				if( (gTrackSN==trkId[igm]) && pTrackSN>=0 ) { pMuTrkId.push_back(pTrackSN);}
+			}
+		}
+
+		const float muMass = 0.10566;
+		unsigned int npmuon = pMuTrkId.size();
+		for(unsigned int i=0; i<npmuon; i++)
+		{
+			hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
 			char iq = ipTrack.q;
 			float ipt = ipTrack.pt;
+			if(ipt<1.)continue;
+			if(ipTrack.nHits<15)continue;
+			if(ipTrack.ndedx<10)continue;
+
 			float ipsi = ipTrack.psi;
 			float itanl = ipTrack.tanl;
 			float ipx = TMath::Cos(ipsi)*ipt;
@@ -1282,11 +1305,24 @@ void l4Builder::event(daqReader *rdr)
 			TLorentzVector imuon;
 			imuon.SetXYZM(ipx,ipy,ipz,muMass);
 
-			for(UInt_t j=i+1; j<nMuon; j++)
+			float imu_dedx  = ipTrack.dedx;
+			TVector3 imu(ipx, ipy, ipz);
+			double imu_dedxPi = getDedx(imu.Mag(), Pi);
+			float imu_nSigmaPi = log(imu_dedx/imu_dedxPi)/A*sqrt(ipTrack.ndedx);
+			if(imu_nSigmaPi<-1.&&imu_nSigmaPi>3.)continue;
+
+			for(UInt_t j=i+1; j<npmuon; j++)
 			{
-				hlt_track jpTrack = hlt_gt->globalTrack[trkId[j]];
+				hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
 				char jq = jpTrack.q;
 				float jpt = jpTrack.pt;
+				if(jpt<1.0)continue;
+				if(jpTrack.nHits<15)continue;
+				if(jpTrack.ndedx<10)continue;
+
+				double pt_lead = (ipt>jpt) ? ipt : jpt;
+				if(pt_lead<1.5) continue;
+
 				float jpsi = jpTrack.psi;
 				float jtanl = jpTrack.tanl;
 				float jpx = TMath::Cos(jpsi)*jpt;
@@ -1295,46 +1331,186 @@ void l4Builder::event(daqReader *rdr)
 				TLorentzVector jmuon;
 				jmuon.SetXYZM(jpx,jpy,jpz,muMass);
 
-				TLorentzVector JPsi = imuon + jmuon;
-				if(iq*jq<0) hInvMassUS->Fill(JPsi.M());
-				else        hInvMassLS->Fill(JPsi.M());
-			}
-		}
-
-	}
+				float jmu_dedx  = jpTrack.dedx;
+				TVector3 jmu(jpx, jpy, jpz);
+				double jmu_dedxPi = getDedx(jmu.Mag(), Pi);
+				float jmu_nSigmaPi = log(jmu_dedx/jmu_dedxPi)/A*sqrt(jpTrack.ndedx);
+				if(jmu_nSigmaPi<-1.&&jmu_nSigmaPi>3.)continue;
 
 
+
+				TLorentzVector muPair = imuon + jmuon;
+				if(iq*jq<0) {
+					hInvMassUS->Fill(muPair.M());
+					hMTDDiMuonJpsiMassUS->Fill(muPair.M());
+					hMTDDiMuonUpsilonMassUS->Fill(muPair.M());
+				}
+				else{
+					hInvMassLS->Fill(muPair.M());
+					hMTDDiMuonJpsiMassLS->Fill(muPair.M());
+					hMTDDiMuonUpsilonMassLS->Fill(muPair.M());
+				}
+			}//j
+		}//i
+
+		double jpsi_lowm1=2.7, jpsi_highm1=3.5;
+		int lowbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_lowm1);
+		int highbin = hMTDDiMuonJpsiMassUS->FindBin(jpsi_highm1);
+
+		US12=hMTDDiMuonJpsiMassUS->Integral(lowbin, highbin,"");
+		tlx12_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US12)));
+		LS12=hMTDDiMuonJpsiMassLS->Integral(lowbin, highbin,"");
+		tlx12_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS12)));
+		tlxmass12->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(jpsi_lowm1), double(jpsi_highm1)) );
+
+		double upsilon_lowm1=9, upsilon_highm1=11;
+		lowbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_lowm1);
+		highbin = hMTDDiMuonJpsiMassUS->FindBin(upsilon_highm1);
+
+		US13=hMTDDiMuonUpsilonMassUS->Integral(lowbin, highbin,"");
+		tlx13_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US13)));
+		LS13=hMTDDiMuonUpsilonMassLS->Integral(lowbin, highbin,"");
+		tlx13_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS13)));
+		tlxmass13->SetText(0.6, 0.7, Form("%.2f #leq m_{ee} #leq %.2f", double(upsilon_lowm1), double(upsilon_highm1)) );
+	}//di muon
+
+	//-----------------------------------------------------------------
 	//if(decision & triggerBitDiMuon) {   need the triggerBitMTDQuarkonium
 	int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
-	
-	for(int i=0; i<nMTDQmPairs; i++){
-		double qmMass = hlt_mtdqm->MTDQuarkonium[i].invMass;
-		int mtrk1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
-		int mtrk2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
 
-		hlt_track mgtrk1 = hlt_gt->globalTrack[mtrk1];
-		hlt_track mgtrk2 = hlt_gt->globalTrack[mtrk2];
-		if(mgtrk1.q*mgtrk2.q<0){
-		
+	for(int i=0; i<nMTDQmPairs; i++){
+
+		int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
+		int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
+
+		int pTrackSN1=-1, pTrackSN2=-1;
+		for(int inode = 0; inode<hlt_node->nNodes; inode++) {
+
+			if(pTrackSN1>=0&&pTrackSN2>=0) break;
+
+			int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+			int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+
+			if( (gTrackSN == mgtrkid1) && pTrackSN>=0 ) { pTrackSN1=pTrackSN; continue;}
+			if( (gTrackSN == mgtrkid2) && pTrackSN>=0 ) { pTrackSN2=pTrackSN; continue;}
+		}
+
+		if( pTrackSN1<0||pTrackSN2<0 ) continue;
+
+		hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
+		hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
+
+		if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
+		if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
+
+		double mupt1 = muPtrk1.pt;
+		double mupt2 = muPtrk2.pt;
+		double mupt_lead = (mupt1>mupt2) ? mupt1 : mupt2;
+		if(mupt1<1.0||mupt2<1.0||mupt_lead<1.5) continue;
+
+		//find the mtd hits for these two muons
+		int muhit1=-1;
+		int muhit2=-1;
+
+		int nMtdHit = hlt_mtd->nMtdHits;
+		for(int ihit=0; ihit<nMtdHit; ihit++)
+		{
+			if(muhit1>=0&&muhit2>=0) break;
+			int gtrkid  = (int)hlt_mtd->mtdHit[ihit].hlt_trackId;
+			if(gtrkid==mgtrkid1){muhit1=ihit; continue;}
+			if(gtrkid==mgtrkid2){muhit2=ihit; continue;}
+		}
+
+		double mudy1 = hlt_mtd->mtdHit[muhit1].delta_y;
+		double mudy2 = hlt_mtd->mtdHit[muhit2].delta_y;
+		if(fabs(mudy1)>20||fabs(mudy2)>20)continue;
+
+		double mudz1 = hlt_mtd->mtdHit[muhit1].delta_z;
+		double mudz2 = hlt_mtd->mtdHit[muhit2].delta_z;
+		if(fabs(mudz1)>20||fabs(mudz2)>20)continue;
+
+		const double mumass = 0.10566; 
+
+		double mupx1 = mupt1 * cos(muPtrk1.psi);
+		double mupy1 = mupt1 * sin(muPtrk1.psi);
+		double mupz1 = mupt1 * muPtrk1.tanl;
+
+		double mupx2 = mupt2 * cos(muPtrk2.psi);
+		double mupy2 = mupt2 * sin(muPtrk2.psi);
+		double mupz2 = mupt2 * muPtrk2.tanl;
+
+
+		float mu1_dedx  = muPtrk1.dedx;
+		TVector3 muPMom1(mupx1, mupy1, mupz1);
+		double mu1_dedxPi = getDedx(muPMom1.Mag(), Pi);
+		float mu1_nSigmaPi = log(mu1_dedx/mu1_dedxPi)/A*sqrt(muPtrk1.ndedx);
+		if(mu1_nSigmaPi<-1.||mu1_nSigmaPi>3.)continue;
+
+		float mu2_dedx  = muPtrk2.dedx;
+		TVector3 muPMom2(mupx2, mupy2, mupz2);
+		double mu2_dedxPi = getDedx(muPMom2.Mag(), Pi);
+		float mu2_nSigmaPi = log(mu2_dedx/mu2_dedxPi)/A*sqrt(muPtrk2.ndedx);
+		if(mu2_nSigmaPi<-1.||mu2_nSigmaPi>3.)continue;
+
+		TLorentzVector Muon1(0,0,0,0);
+		Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
+		TLorentzVector Muon2(0,0,0,0);
+		Muon2.SetXYZM(mupx2, mupy2, mupz2, mumass);
+
+		TLorentzVector QmPair = Muon1 + Muon2;
+		double qmMass=QmPair.M();
+		double qmPt=QmPair.Pt();
+
+		if(muPtrk1.q*muPtrk2.q<0){
+
 			hMTDQmInvMassUS->Fill(qmMass);
-			hMTDQmJpsiMassUS->Fill(qmMass);
+			hMTDQmJpsiMass_ptcut0_US->Fill(qmMass);
+			if(qmPt>2.)hMTDQmJpsiMass_ptcut2_US->Fill(qmMass);
+			if(qmPt>4.)hMTDQmJpsiMass_ptcut4_US->Fill(qmMass);
+
 			hMTDQmUpsilonMassUS->Fill(qmMass);
-		
+
 		}else{
 
 			hMTDQmInvMassLS->Fill(qmMass);
-			hMTDQmJpsiMassLS->Fill(qmMass);
-			hMTDQmUpsilonMassLS->Fill(qmMass);
+			hMTDQmJpsiMass_ptcut0_LS->Fill(qmMass);
+			if(qmPt>2.)hMTDQmJpsiMass_ptcut2_LS->Fill(qmMass);
+			if(qmPt>4.)hMTDQmJpsiMass_ptcut4_LS->Fill(qmMass);
 
-			if(mgtrk1.q*mgtrk2.q<=0) {
-			    //cout<<"please debug here !!!!!!!!!!"<<endl;
-			    LOG(ERR, "Error mgtrk2");
-			}
+			hMTDQmUpsilonMassLS->Fill(qmMass);
 		}
 
 	}
 
+	double lowm1=2.7, highm1=3.5;
+	int lowbin = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm1);
+	int highbin = hMTDQmJpsiMass_ptcut0_US->FindBin(highm1);
 
+	US8=hMTDQmJpsiMass_ptcut0_US->Integral(lowbin, highbin,"");
+	tlx8_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US8)));
+	LS8=hMTDQmJpsiMass_ptcut0_LS->Integral(lowbin, highbin,"");
+	tlx8_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS8)));
+
+	US9=hMTDQmJpsiMass_ptcut2_US->Integral(lowbin, highbin,"");
+	tlx9_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US9)));
+	LS9=hMTDQmJpsiMass_ptcut2_LS->Integral(lowbin, highbin,"");
+	tlx9_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS9)));
+
+	US10=hMTDQmJpsiMass_ptcut4_US->Integral(lowbin, highbin,"");
+	tlx10_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US10)));
+	LS10=hMTDQmJpsiMass_ptcut4_LS->Integral(lowbin, highbin,"");
+	tlx10_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS10)));
+
+	double lowm2=9.0, highm2=11.;
+	int lowbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(lowm2);
+	int highbin2 = hMTDQmJpsiMass_ptcut0_US->FindBin(highm2);
+
+	US11=hMTDQmUpsilonMassUS->Integral(lowbin2, highbin2,"");
+	tlx11_us->SetText(0.15, 0.65, Form("#US = %.0f", double(US11)));
+	LS11=hMTDQmUpsilonMassLS->Integral(lowbin, highbin,"");
+	tlx11_ls->SetText(0.15, 0.6, Form("#LS = %.0f", double(LS11)));
+
+	//--------------------------------------------------------------------------
 	// upc di-e
 	if(decision & triggerBitUPCDiElectron) {
 		if(!UPCDiElectronFilled) {
@@ -1366,7 +1542,6 @@ void l4Builder::event(daqReader *rdr)
 			float Daughter1nHits = Daughter1Track.nHits;
 			float Daughter1dedx  = Daughter1Track.dedx;
 			int Daughter1ndedx = Daughter1Track.ndedx;
-
 
 			TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
 			float Daughter1p = Daughter1.Mag();
@@ -1440,6 +1615,150 @@ void l4Builder::event(daqReader *rdr)
 
 		}
 	}
+
+
+	//di-e2Twr
+
+	for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
+		int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
+		int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
+		int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
+		int Daughter2TrackSN = hlt_node->node[Daughter2NodeSN].primaryTrackSN;
+		int Daughter1EmcSN = hlt_node->node[Daughter1NodeSN].emcTowerSN;
+		int Daughter2EmcSN = hlt_node->node[Daughter2NodeSN].emcTowerSN;
+		int Daughter1TofSN = hlt_node->node[Daughter1NodeSN].tofHitSN;
+		int Daughter2TofSN = hlt_node->node[Daughter2NodeSN].tofHitSN;
+
+		if(Daughter1TrackSN < 0) continue;
+		hlt_track Daughter1Track =  hlt_pt->primaryTrack[Daughter1TrackSN];
+
+		float Daughter1beta = -999.;
+		float Daughter1phidiff = -999.;
+		float Daughter1_PE_ratio = -999.;
+		float Daughter1_EP_ratio = -999.;
+
+		float Daughter1q     = Daughter1Track.q;
+		float Daughter1pt    = Daughter1Track.pt;
+		float Daughter1px    = Daughter1Track.pt * cos(Daughter1Track.psi);
+		float Daughter1py    = Daughter1Track.pt * sin(Daughter1Track.psi);
+		float Daughter1pz    = Daughter1Track.pt * Daughter1Track.tanl;
+		float Daughter1nHits = Daughter1Track.nHits;
+		float Daughter1dedx  = Daughter1Track.dedx;
+		int Daughter1ndedx = Daughter1Track.ndedx;
+
+		TVector3 Daughter1(Daughter1px, Daughter1py, Daughter1pz);
+		float Daughter1p = Daughter1.Mag();
+
+		double dedx1E = getDedx(Daughter1p, e);
+		float nSigma1 = log(Daughter1dedx / dedx1E) / A * sqrt(Daughter1ndedx);
+
+		float Daughter1eta = Daughter1.PseudoRapidity();
+		//  if (fabs(Daughter1eta) > 1.) continue;
+		float Daughter1phi = Daughter1.Phi();
+		if(Daughter1phi < 0.) Daughter1phi += twopi;
+		hdEdx_P1_Twr->Fill(Daughter1p , Daughter1dedx);
+		if(Daughter1EmcSN >= 0) {
+			float Daughter1TowerEnergy = hlt_emc->emcTower[Daughter1EmcSN].energy;
+			Daughter1_PE_ratio = Daughter1p / Daughter1TowerEnergy;
+			Daughter1_EP_ratio = Daughter1TowerEnergy / Daughter1p;
+			hDaughter1P_TowerEnergy_Twr->Fill(Daughter1_EP_ratio);
+			Daughter1phidiff = hlt_node->node[Daughter1NodeSN].emcMatchPhiDiff;
+		}
+		if(Daughter1TofSN >= 0.) {
+			Daughter1beta = hlt_node->node[Daughter1NodeSN].beta;
+		}
+
+		if(Daughter2TrackSN < 0.) continue;
+		hlt_track Daughter2Track =  hlt_pt->primaryTrack[Daughter2TrackSN];
+		float Daughter2phidiff = -999.;
+		float Daughter2beta = -999.;
+		float Daughter2_PE_ratio = -999.;
+		float Daughter2_EP_ratio = -999.;
+
+		float Daughter2q     =  Daughter2Track.q;
+		float Daughter2pt    =  Daughter2Track.pt;
+		float Daughter2px    =  Daughter2Track.pt * cos(Daughter2Track.psi);
+		float Daughter2py    =  Daughter2Track.pt * sin(Daughter2Track.psi);
+		float Daughter2pz    =  Daughter2Track.pt * Daughter2Track.tanl;
+		float Daughter2nHits =  Daughter2Track.nHits;
+		float Daughter2dedx  =  Daughter2Track.dedx;
+		int Daughter2ndedx = Daughter2Track.ndedx;
+
+		TVector3 Daughter2(Daughter2px, Daughter2py, Daughter2pz);
+		float Daughter2p = Daughter2.Mag();
+
+		double dedx2E = getDedx(Daughter2p, e);
+		float nSigma2 = log(Daughter2dedx / dedx2E) / A * sqrt(Daughter2ndedx);
+
+		float Daughter2eta = Daughter2.PseudoRapidity();
+		//    if (fabs(Daughter2eta) > 1.) continue;
+		float Daughter2phi = Daughter2.Phi();
+		if(Daughter2phi < 0.0) Daughter2phi += twopi;
+
+		hdEdx_P2_Twr->Fill(Daughter2p , Daughter2dedx);
+		if(Daughter2EmcSN >= 0) {
+			float Daughter2TowerEnergy = hlt_emc->emcTower[Daughter2EmcSN].energy;
+			Daughter2_PE_ratio = Daughter2p / Daughter2TowerEnergy;
+			Daughter2_EP_ratio = Daughter2TowerEnergy / Daughter2p;
+			hDaughter2P_TowerEnergy_Twr->Fill(Daughter2_EP_ratio);
+			Daughter2phidiff = hlt_node->node[Daughter2NodeSN].emcMatchPhiDiff;
+		}
+		if(Daughter2TofSN >= 0.) {
+			Daughter2beta = hlt_node->node[Daughter2NodeSN].beta;
+		}
+
+		// j/psi
+		float pt = hlt_Twrdiep->ePair[i].pt;
+		float px = cos(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		float py = sin(hlt_Twrdiep->ePair[i].psi) * hlt_Twrdiep->ePair[i].pt;
+		float pz = hlt_Twrdiep->ePair[i].tanl * hlt_Twrdiep->ePair[i].pt;
+		float m = hlt_Twrdiep->ePair[i].invariantMass;
+
+		if(Daughter1q * Daughter2q < 0.) {
+			hDiElectronInvMassFullRange_Twr->Fill(m);
+		} else {
+			hDiElectronInvMassFullRangeBG_Twr->Fill(m);
+		}
+
+		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+				Daughter1p > 2.3 && Daughter2p > 1.5 &&
+				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05 &&
+				fabs(1 / Daughter1beta - 1) < 0.04 && fabs(1 / Daughter2beta - 1) < 0.04) {
+			if(Daughter1q * Daughter2q < 0.) {
+				hDiElectronInvMassCut_Twr->Fill(m);
+			} else {
+				hDiElectronInvMassCutBG_Twr->Fill(m);
+			}
+		}
+
+		if(nSigma1 > -0.9 && nSigma2 > -0.9 &&
+				Daughter1p > 2.3 && Daughter2p > 1.5 &&
+				Daughter1ndedx > 16 && Daughter2ndedx > 16 &&
+				Daughter1_PE_ratio < 1.5 && Daughter1_PE_ratio > 0.5 && Daughter2_PE_ratio < 1.5 && Daughter2_PE_ratio > 0.5 &&
+				Daughter1phidiff > 0. && Daughter1phidiff < 0.05 && Daughter2phidiff > 0. && Daughter2phidiff < 0.05) {
+			if(Daughter1q * Daughter2q < 0.) {
+				hDiElectronInvMassTpxEmc_Twr->Fill(m);
+			} else {
+				hDiElectronInvMassTpxEmcBG_Twr->Fill(m);
+			}
+
+			if(Daughter1TofSN >= 0.) {
+				hDaughter1TpxEmcInverseBeta_Twr->Fill(1 / Daughter1beta);
+			}
+			if(Daughter2TofSN >= 0.) {
+				hDaughter2TpxEmcInverseBeta_Twr->Fill(1 / Daughter2beta);
+			}
+		}
+
+		TLorentzVector jpsi(0, 0, 0, 0);
+		jpsi.SetXYZM(px, py, pz, m);
+		float rapidity = jpsi.Rapidity();
+		hDiLeptonRapidity_Twr->Fill(rapidity);
+	}//nEPair
+
+
 
 	// di-e
 	for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
@@ -1582,25 +1901,6 @@ void l4Builder::event(daqReader *rdr)
 	}//nEPair
 
 
-	//   if (rdr->daqbits & central_1_protected) {
-	//     if (decision & triggerBitLowMult) hLmPrimaryMult->Fill(hlt_lm->nPrimaryTracks);
-	//   }
-
-	//   if (ddTof && ddTof->iterate()) {
-	//     unsigned short nTof = 0;
-	//     int lm_mult = 0;
-	//     TriggerDataBlk *trg = (TriggerDataBlk *)ddTof->Byte;
-	//     L1_DSM_Data *L1_DSM = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
-	//     unsigned short tof_swap = swap16(L1_DSM->TOF[1]);
-	//     nTof = tof_swap%8192;
-	//     lm_mult =  hlt_lm->nPrimaryTracks;
-	//     if (rdr->daqbits & central_1_protected) {
-	//       if (decision & triggerBitLowMult) hTofprimaryMult->Fill(lm_mult,nTof*1.);
-	//     }
-	//   }
-
-
-	//   cout<<"event "<<eventCounter <<" end"<<endl;
 
 };
 
@@ -1787,15 +2087,11 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par)
  */
 void l4Builder::defineHltPlots()
 {
-    LOG(DBG, "HERE %d\n", index);
 	HltPlots[index]->logy = 1;
-	hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 7, 0., 7);
+	hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 6, 0., 6);
 	ph = new PlotHisto();
 	ph->histo = hEvtsAccpt;
 	HltPlots[index]->addHisto(ph);
-
-
-	LOG(DBG, "Here\n");
 
 	// Tracks
 	index++; //1
@@ -1858,14 +2154,6 @@ void l4Builder::defineHltPlots()
 	index++; //9
 	//   HltPlots[index]->optstat = 0;
 	HltPlots[index]->setDrawOpts("colz");
-	/*HltPlots[index]->addElement(fTheoDedx_e_pos);
-	  HltPlots[index]->addElement(fTheoDedx_e_neg);
-	  HltPlots[index]->addElement(fTheoDedx_Pi_pos);
-	  HltPlots[index]->addElement(fTheoDedx_Pi_neg);
-	  HltPlots[index]->addElement(fTheoDedx_K_pos);
-	  HltPlots[index]->addElement(fTheoDedx_K_neg);
-	  HltPlots[index]->addElement(fTheoDedx_P_pos);
-	  HltPlots[index]->addElement(fTheoDedx_P_neg);*/
 
 	hGlob_dEdx = new TH2F("Glob_dEdx", "Glob_dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
@@ -1895,21 +2183,11 @@ void l4Builder::defineHltPlots()
 	index++; //13
 	//   HltPlots[index]->optstat = 0;
 	HltPlots[index]->setDrawOpts("colz");
-	/*    HltPlots[index]->addElement(fTheoDedx_e_pos);
-		  HltPlots[index]->addElement(fTheoDedx_e_neg);
-		  HltPlots[index]->addElement(fTheoDedx_Pi_pos);
-		  HltPlots[index]->addElement(fTheoDedx_Pi_neg);
-		  HltPlots[index]->addElement(fTheoDedx_K_pos);
-		  HltPlots[index]->addElement(fTheoDedx_K_neg);
-		  HltPlots[index]->addElement(fTheoDedx_P_pos);
-		  HltPlots[index]->addElement(fTheoDedx_P_neg);*/
 
 	hPrim_dEdx = new TH2F("Prim_dEdx", "Prim_dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
 	ph->histo = hPrim_dEdx;
 	HltPlots[index]->addHisto(ph);
-
-	LOG(DBG, "Here\n");
 
 	// Event
 	index++; //14
@@ -1975,13 +2253,6 @@ void l4Builder::defineHltPlots()
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
 
-	//   index++;
-	//   HltPlots[index]->logy=1;
-	//   hLmPrimaryMult = new TH1I("BB_low_primaryMult", "BB_low_primaryMult",2200,0,2200);
-	//   ph = new PlotHisto();
-	//   ph->histo = hLmPrimaryMult;
-	//   HltPlots[index]->addHisto(ph);
-	//   addPlot(HltPlots[index]);
 
 	// Emc
 	index++; //24
@@ -2074,15 +2345,13 @@ void l4Builder::defineHltPlots()
 	ph = new PlotHisto();
 	ph->histo = hVzDiff;
 	HltPlots[index]->addHisto(ph);
-	LOG(DBG, "Here\n");
+
 }
 
 void l4Builder::defineBeamPlots()
 {
 	index = 0; //0
 	BeamPlots[index]->setDrawOpts("p");
-	//   BeamPlots[index]->addElement(leg1);
-	//   BeamPlots[index]->addElement(leg2);
 	hBeamX = new TH1D("BeamX", "BeamX", 105, 0., 105);
 	ph = new PlotHisto();
 	ph->histo = hBeamX;
@@ -2258,28 +2527,10 @@ void l4Builder::defineHeavyFragmentPlots()
 	HeavyFragmentPlots[index]->setDrawOpts("colz");
 	HeavyFragmentPlots[index]->gridx = 1;
 	HeavyFragmentPlots[index]->gridy = 1;
-	/*    HeavyFragmentPlots[index]->addElement(fTheoDedx_e_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_e_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_K_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_K_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_P_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_P_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_D_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_D_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_T_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_T_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_neg);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_pos);
-		  HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_neg);*/
-	//HeavyFragmentPlots[index]->addElement(hdEdx); HeavyFragmentPlots[index]->addElement(hdEdx);
 	hHFM_dEdx = new TH2F("HeavyFragment_dEdx", "HeavyFragment_dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
 	ph->histo = hHFM_dEdx;
 	HeavyFragmentPlots[index]->addHisto(ph);
-	//    hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
 	ph->histo = hdEdx;
 	HeavyFragmentPlots[index]->addHisto(ph);
@@ -2296,6 +2547,11 @@ void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 	ph = new PlotHisto();
 	ph->histo = hDiElectronInvMassTpxEmcBG;
 	DiElectronPlots[index]->addHisto(ph);
+	TLegend *lega15 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega15->AddEntry(hDiElectronInvMassTpxEmc, "Unlike Sign", "l");
+        lega15->AddEntry(hDiElectronInvMassTpxEmcBG, "Like Sign", "l");
+        DiElectronPlots[index]->addElement(lega15);
+	
 
 	index++; //1
 	hDiElectronInvMassCut = new TH1D("DiElectronInvMassCut", "DiElectronInvMassCut", 120, 1., 13.);
@@ -2306,6 +2562,10 @@ void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 	ph = new PlotHisto();
 	ph->histo = hDiElectronInvMassCutBG;
 	DiElectronPlots[index]->addHisto(ph);
+	TLegend *lega16 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega16->AddEntry(hDiElectronInvMassCut, "Unlike Sign", "l");
+        lega16->AddEntry(hDiElectronInvMassCutBG, "Like Sign", "l");
+        DiElectronPlots[index]->addElement(lega16);
 
 	index++; //2
 	hDiElectronInvMassFullRange = new TH1D("DiElectronInvMassFullRange", "DiElectronInvMassFullRange", 130, 0., 13.);
@@ -2316,14 +2576,14 @@ void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 	ph = new PlotHisto();
 	ph->histo = hDiElectronInvMassFullRangeBG;
 	DiElectronPlots[index]->addHisto(ph);
+	TLegend *lega17 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega17->AddEntry(hDiElectronInvMassFullRange, "Unlike Sign", "l");
+        lega17->AddEntry(hDiElectronInvMassFullRangeBG, "Like Sign", "l");
+        DiElectronPlots[index]->addElement(lega17);
 
 	// daug e1
 	index++; //3
 	DiElectronPlots[index]->setDrawOpts("colz");
-	// DiElectronPlots[index]->addElement(fTheoDedx_e_pos);
-	//   DiElectronPlots[index]->addElement(fTheoDedx_e_neg);
-	// DiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
-	//   DiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
 	hdEdx_P1 = new TH2F("dEdx_P1", "dEdx_P1", 200, 0., 10., 55, 0., 5.5e-06);
 	ph = new PlotHisto();
 	ph->histo = hdEdx_P1;
@@ -2344,10 +2604,6 @@ void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 	// daug e2
 	index++; //6
 	DiElectronPlots[index]->setDrawOpts("colz");
-	//DiElectronPlots[index]->addElement(fTheoDedx_e_pos);
-	//DiElectronPlots[index]->addElement(fTheoDedx_e_neg);
-	//DiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
-	//DiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
 	hdEdx_P2 = new TH2F("dEdx_P2", "dEdx_P2", 200, 0., 10., 55, 0., 5.5e-06);
 	ph = new PlotHisto();
 	ph->histo = hdEdx_P2;
@@ -2372,6 +2628,102 @@ void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 	DiElectronPlots[index]->addHisto(ph);
 }
 
+void l4Builder::defineDiElectron2TwrPlots() // not only J/Psi, but di-pion, di-muon
+{
+	// jpsi invariant mass
+	index = 0;
+	hDiElectronInvMassTpxEmc_Twr = new TH1D("DiElectronInvMassTpxEmc_Twr", "DiElectronInvMassTpxEmc_Twr", 120, 1., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassTpxEmc_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	hDiElectronInvMassTpxEmcBG_Twr = new TH1D("DiElectronInvMassTpxEmcBG_Twr", "DiElectronInvMassTpxEmcBG_Twr", 120, 1., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassTpxEmcBG_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	TLegend *lega18 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega18->AddEntry(hDiElectronInvMassTpxEmc_Twr, "Unlike Sign", "l");
+        lega18->AddEntry(hDiElectronInvMassTpxEmcBG_Twr, "Like Sign", "l");
+        DiElectron2TwrPlots[index]->addElement(lega18);
+
+	index++; //1
+	hDiElectronInvMassCut_Twr = new TH1D("DiElectronInvMassCut_Twr", "DiElectronInvMassCut_Twr", 120, 1., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassCut_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	hDiElectronInvMassCutBG_Twr = new TH1D("DiElectronInvMassCutBG_Twr", "DiElectronInvMassCutBG_Twr", 120, 1., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassCutBG_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	TLegend *lega19 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega19->AddEntry(hDiElectronInvMassCut_Twr, "Unlike Sign", "l");
+        lega19->AddEntry(hDiElectronInvMassCutBG_Twr, "Like Sign", "l");
+        DiElectron2TwrPlots[index]->addElement(lega19);
+
+
+	index++; //2
+	hDiElectronInvMassFullRange_Twr = new TH1D("DiElectronInvMassFullRange_Twr", "DiElectronInvMassFullRange_Twr", 130, 0., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassFullRange_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	hDiElectronInvMassFullRangeBG_Twr = new TH1D("DiElectronInvMassFullRangeBG_Twr", "DiElectronInvMassFullRangeBG_Twr", 130, 0., 13.);
+	ph = new PlotHisto();
+	ph->histo = hDiElectronInvMassFullRangeBG_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+	TLegend *lega20 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega20->AddEntry(hDiElectronInvMassFullRange_Twr, "Unlike Sign", "l");
+        lega20->AddEntry(hDiElectronInvMassFullRangeBG_Twr, "Like Sign", "l");
+        DiElectron2TwrPlots[index]->addElement(lega20);
+
+	// daug e1
+	index++; //3
+	DiElectron2TwrPlots[index]->setDrawOpts("colz");
+	hdEdx_P1_Twr = new TH2F("dEdx_P1_Twr", "dEdx_P1_Twr", 200, 0., 10., 55, 0., 5.5e-06);
+	ph = new PlotHisto();
+	ph->histo = hdEdx_P1_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	index++; //4
+	hDaughter1P_TowerEnergy_Twr = new TH1D("Daughter1P_TowerEnergy_Twr", "Daughter1P_TowerEnergy_Twr", 100, 0, 5);
+	ph = new PlotHisto();
+	ph->histo = hDaughter1P_TowerEnergy_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	index++; //5
+	hDaughter1TpxEmcInverseBeta_Twr = new TH1D("Daughter1TpxEmcInverseBeta_Twr", "Daughter1TpxEmcInverseBeta_Twr", 100, 0, 5);
+	ph = new PlotHisto();
+	ph->histo =  hDaughter1TpxEmcInverseBeta_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	// daug e2
+	index++; //6
+	DiElectron2TwrPlots[index]->setDrawOpts("colz");
+	hdEdx_P2_Twr = new TH2F("dEdx_P2_Twr", "dEdx_P2_Twr", 200, 0., 10., 55, 0., 5.5e-06);
+	ph = new PlotHisto();
+	ph->histo = hdEdx_P2_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	index++; //7
+	hDaughter2P_TowerEnergy_Twr = new TH1D("Daughter2P_TowerEnergy_Twr", "Daughter2P_TowerEnergy_Twr", 100, 0, 5);
+	ph = new PlotHisto();
+	ph->histo = hDaughter2P_TowerEnergy_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	index++; //8
+	hDaughter2TpxEmcInverseBeta_Twr = new TH1D("Daughter2TpxEmcInverseBeta_Twr", "Daughter2TpxEmcInverseBeta_Twr", 100, 0, 5);
+	ph = new PlotHisto();
+	ph->histo =  hDaughter2TpxEmcInverseBeta_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+
+	index++; //9
+	hDiLeptonRapidity_Twr = new TH1D("DiLeptonRapidity_Twr", "DiLeptonRapidity_Twr", 150, -7.5, 7.5);
+	ph = new PlotHisto();
+	ph->histo = hDiLeptonRapidity_Twr;
+	DiElectron2TwrPlots[index]->addHisto(ph);
+}
+
+
+
+
 void l4Builder::defineDiPionPlots()
 {
 	index = 0; //0
@@ -2393,6 +2745,8 @@ void l4Builder::defineDiPionPlots()
 
 void l4Builder::defineDiMuonPlots()
 {
+
+
 	index = 0; //0
 	hInvMassLS = new TH1F("hInvMassLS","Invariant mass of di-muon pairs (LS);M_{#mu#mu} (GeV/c)^{2};counts",50,2.5,3.5);
 	ph = new PlotHisto();
@@ -2402,6 +2756,10 @@ void l4Builder::defineDiMuonPlots()
 	ph = new PlotHisto();
 	ph->histo = hInvMassUS;
 	DiMuonPlots[index]->addHisto(ph);
+	TLegend *lega21 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+        lega21->AddEntry(hInvMassUS, "Unlike Sign", "l");
+        lega21->AddEntry(hInvMassLS, "Like Sign", "l");
+        DiMuonPlots[index]->addElement(lega21);
 
 	index++; //1 
 	DiMuonPlots[index]->setDrawOpts("colz");
@@ -2453,19 +2811,95 @@ void l4Builder::defineDiMuonPlots()
 	ph = new PlotHisto();
 	ph->histo = hMTDQmInvMassLS;
 	DiMuonPlots[index]->addHisto(ph);
-	
+
+	TLegend *lega = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega->AddEntry(hMTDQmInvMassUS, "Unlike Sign", "l");
+	lega->AddEntry(hMTDQmInvMassLS, "Like Sign",  "l");
+	DiMuonPlots[index]->addElement(lega);
+
 	index ++; //8
-	hMTDQmJpsiMassUS = new TH1F("hMTDQmJpsiMassUS", "MTD quarkonium InvMass(Jpsi)", 20, 2.0, 4.);
+	hMTDQmJpsiMass_ptcut0_US = new TH1F("hMTDQmJpsiMass_ptcut0_US", "MTD quarkonium InvMass(Jpsi)", 20, 2.0, 4.);
 	ph = new PlotHisto();
-	ph->histo = hMTDQmJpsiMassUS;
+	ph->histo = hMTDQmJpsiMass_ptcut0_US;
 	DiMuonPlots[index]->addHisto(ph);
 
-	hMTDQmJpsiMassLS = new TH1F("hMTDQmJpsiMassLS", "MTD quarkonium InvMass like sign", 20, 2., 4.);
+	hMTDQmJpsiMass_ptcut0_LS = new TH1F("hMTDQmJpsiMass_ptcut0_LS", "MTD quarkonium InvMass like sign", 20, 2., 4.);
 	ph = new PlotHisto();
-	ph->histo = hMTDQmJpsiMassLS;
+	ph->histo = hMTDQmJpsiMass_ptcut0_LS;
 	DiMuonPlots[index]->addHisto(ph);
+
+	TLegend *lega8 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega8->AddEntry(hMTDQmJpsiMass_ptcut0_US, "Unlike Sign", "l");
+	lega8->AddEntry(hMTDQmJpsiMass_ptcut0_LS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega8);
+
+	tlx8_us = new TLatex();
+	tlx8_us->SetNDC();
+	tlx8_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx8_us);
+	tlx8_ls = new TLatex();
+	tlx8_ls->SetNDC();
+	tlx8_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx8_ls);
+
 
 	index ++; //9
+	hMTDQmJpsiMass_ptcut2_US = new TH1F("hMTDQmJpsiMass_ptcut2_US", "MTD quarkonium InvMass(Jpsi_ptcut2)", 20, 2.0, 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDQmJpsiMass_ptcut2_US;
+	DiMuonPlots[index]->addHisto(ph);
+
+	hMTDQmJpsiMass_ptcut2_LS = new TH1F("hMTDQmJpsiMass_ptcut2_LS", "MTD quarkonium InvMass like sign", 20, 2., 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDQmJpsiMass_ptcut2_LS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	TLegend *lega9 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega9->AddEntry(hMTDQmJpsiMass_ptcut2_US, "Unlike Sign", "l");
+	lega9->AddEntry(hMTDQmJpsiMass_ptcut2_LS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega9);
+
+
+	tlx9_us = new TLatex();
+	tlx9_us->SetNDC();
+	tlx9_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx9_us);
+	tlx9_ls = new TLatex();
+	tlx9_ls->SetNDC();
+	tlx9_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx9_ls);
+
+
+
+
+	index ++; //10
+	hMTDQmJpsiMass_ptcut4_US = new TH1F("hMTDQmJpsiMass_ptcut4_US", "MTD quarkonium InvMass(Jpsi_ptcut4)", 20, 2.0, 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDQmJpsiMass_ptcut4_US;
+	DiMuonPlots[index]->addHisto(ph);
+
+	hMTDQmJpsiMass_ptcut4_LS = new TH1F("hMTDQmJpsiMass_ptcut4_LS", "MTD quarkonium InvMass like sign", 20, 2., 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDQmJpsiMass_ptcut4_LS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	TLegend *lega10 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega10->AddEntry(hMTDQmJpsiMass_ptcut4_US, "Unlike Sign", "l");
+	lega10->AddEntry(hMTDQmJpsiMass_ptcut4_LS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega10);
+
+
+	tlx10_us = new TLatex();
+	tlx10_us->SetNDC();
+	tlx10_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx10_us);
+	tlx10_ls = new TLatex();
+	tlx10_ls->SetNDC();
+	tlx10_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx10_ls);
+
+
+	index ++; //11
 	hMTDQmUpsilonMassUS = new TH1F("hMTDQmUpsilonMassUS", "MTD quarkonium InvMass(Upsilon)", 25, 8.0, 13.);
 	ph = new PlotHisto();
 	ph->histo = hMTDQmUpsilonMassUS;
@@ -2476,8 +2910,84 @@ void l4Builder::defineDiMuonPlots()
 	ph->histo = hMTDQmUpsilonMassLS;
 	DiMuonPlots[index]->addHisto(ph);
 
+	TLegend *lega11 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega11->AddEntry(hMTDQmUpsilonMassUS, "Unlike Sign", "l");
+	lega11->AddEntry(hMTDQmUpsilonMassLS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega11);
+
+
+	tlx11_us = new TLatex();
+	tlx11_us->SetNDC();
+	tlx11_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx11_us);
+	tlx11_ls = new TLatex();
+	tlx11_ls->SetNDC();
+	tlx11_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx11_ls);
+
+	index ++; //12
+	hMTDDiMuonJpsiMassUS = new TH1F("hMTDDiMuonJpsiMassUS", "MTD DiMuon InvMass(Jpsi)", 20, 2.0, 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDDiMuonJpsiMassUS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	hMTDDiMuonJpsiMassLS = new TH1F("hMTDDiMuonJpsiMassLS", "MTD DiMuon InvMass like sign", 20, 2., 4.);
+	ph = new PlotHisto();
+	ph->histo = hMTDDiMuonJpsiMassLS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	TLegend *lega12 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega12->AddEntry(hMTDDiMuonJpsiMassUS, "Unlike Sign", "l");
+	lega12->AddEntry(hMTDDiMuonJpsiMassLS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega12);
+
+	tlx12_us = new TLatex();
+	tlx12_us->SetNDC();
+	tlx12_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx12_us);
+	tlx12_ls = new TLatex();
+	tlx12_ls->SetNDC();
+	tlx12_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx12_ls);
+	tlxmass12 = new TLatex();
+	tlxmass12->SetNDC();
+	tlxmass12->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlxmass12);
+
+	index ++; //13
+	hMTDDiMuonUpsilonMassUS = new TH1F("hMTDDiMuonUpsilonMassUS", "MTD DiMuon InvMass(Upsilon)", 25, 8.0, 13.);
+	ph = new PlotHisto();
+	ph->histo = hMTDDiMuonUpsilonMassUS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	hMTDDiMuonUpsilonMassLS = new TH1F("hMTDDiMuonUpsilonMassLS", "MTD DiMuon InvMass like sign", 25, 8., 13.);
+	ph = new PlotHisto();
+	ph->histo = hMTDDiMuonUpsilonMassLS;
+	DiMuonPlots[index]->addHisto(ph);
+
+	TLegend *lega13 = new TLegend(0.1, 0.75, 0.35, 0.90,NULL,"brNDC");
+	lega13->AddEntry(hMTDDiMuonUpsilonMassUS, "Unlike Sign", "l");
+	lega13->AddEntry(hMTDDiMuonUpsilonMassLS, "Like Sign", "l");
+	DiMuonPlots[index]->addElement(lega13);
+
+	tlx13_us = new TLatex();
+	tlx13_us->SetNDC();
+	tlx13_us->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx13_us);
+	tlx13_ls = new TLatex();
+	tlx13_ls->SetNDC();
+	tlx13_ls->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlx13_ls);
+	tlxmass13 = new TLatex();
+	tlxmass13->SetNDC();
+	tlxmass13->SetTextSize(0.05);
+	DiMuonPlots[index]->addElement(tlxmass13);
 
 }
+
+
+
+
 
 void l4Builder::defineHltPlots_UPC()
 {
@@ -2532,14 +3042,6 @@ void l4Builder::defineHltPlots_UPC()
 
 	index++; //8
 	HltPlots_UPC[index]->setDrawOpts("colz");
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_neg);
 	hGlob_dEdx_UPC = new TH2F("Glob_dEdx_UPC", "Glob_dEdx_UPC", 200, -5, 5, 100, 0, 1.e-5);
 	ph = new PlotHisto();
 	ph->histo = hGlob_dEdx_UPC;
@@ -2566,14 +3068,6 @@ void l4Builder::defineHltPlots_UPC()
 
 	index++; //12
 	HltPlots_UPC[index]->setDrawOpts("colz");
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_neg);
 	hPrim_dEdx_UPC = new TH2F("Prim_dEdx_UPC", "Prim_dEdx_UPC", 200, -5, 5, 100, 0, 1.e-5);
 	ph = new PlotHisto();
 	ph->histo = hPrim_dEdx_UPC;
@@ -2677,22 +3171,6 @@ void l4Builder::defineHltPlots_UPC()
 	HltPlots_UPC[index]->setDrawOpts("colz");
 	HltPlots_UPC[index]->gridx = 1;
 	HltPlots_UPC[index]->gridy = 1;
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_e_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_Pi_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_K_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_P_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_D_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_D_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_T_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_T_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_He3_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_He3_neg);
-	HltPlots_UPC[index]->addElement(fTheoDedx_He4_pos);
-	HltPlots_UPC[index]->addElement(fTheoDedx_He4_neg);
 	hdEdx_UPC = new TH2F("dEdx_UPC", "dEdx_UPC", 500, -5, 5, 300, 0, 3.e-5);
 	ph = new PlotHisto();
 	ph->histo = hdEdx_UPC;
@@ -2724,10 +3202,6 @@ void l4Builder::defineUPCDiElectronPlots()
 
 	index++; //1
 	UPCDiElectronPlots[index]->setDrawOpts("colz");
-	UPCDiElectronPlots[index]->addElement(fTheoDedx_e_pos);
-	//UPCDiElectronPlots[index]->addElement(fTheoDedx_e_neg);
-	UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
-	//UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
 	hdEdx_P1_UPC = new TH2F("dEdx_P1_UPC", "dEdx_P1_UPC", 200, 0., 10., 55, 0., 5.5e-06);
 	ph = new PlotHisto();
 	ph->histo = hdEdx_P1_UPC;
@@ -2741,10 +3215,6 @@ void l4Builder::defineUPCDiElectronPlots()
 
 	index++; //3
 	UPCDiElectronPlots[index]->setDrawOpts("colz");
-	UPCDiElectronPlots[index]->addElement(fTheoDedx_e_pos);
-	//UPCDiElectronPlots[index]->addElement(fTheoDedx_e_neg);
-	UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
-	//UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
 	hdEdx_P2_UPC = new TH2F("dEdx_P2_UPC", "dEdx_P2_UPC", 200, 0., 10., 55, 0., 5.5e-06);
 	ph = new PlotHisto();
 	ph->histo = hdEdx_P2_UPC;
@@ -2829,8 +3299,14 @@ void l4Builder::setAllPlots()
 	hDiElectronInvMassTpxEmcBG->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
 	hDiElectronInvMassFullRange->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
 	hDiElectronInvMassFullRangeBG->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassTpxEmc_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassTpxEmcBG_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassFullRange_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassFullRangeBG_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
 	hDiElectronInvMassCut->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
 	hDiElectronInvMassCutBG->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassCut_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
+	hDiElectronInvMassCutBG_Twr->GetXaxis()->SetTitle("M_{inv}(ee) GeV/c^{2}");
 	//hDiMuonInvMassFullRange->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
 	//hDiMuonInvMassFullRangeBG->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
 	//hDiMuonInvMassTpxCut->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
@@ -2839,21 +3315,34 @@ void l4Builder::setAllPlots()
 	hMTDQmInvMassUS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm
 	hMTDQmInvMassLS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
 
-	hMTDQmJpsiMassUS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm Jpsi
-	hMTDQmJpsiMassLS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
-	
+	hMTDQmJpsiMass_ptcut0_US->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm Jpsi
+	hMTDQmJpsiMass_ptcut0_LS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
+	hMTDQmJpsiMass_ptcut2_US->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm Jpsi
+	hMTDQmJpsiMass_ptcut2_LS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
+	hMTDQmJpsiMass_ptcut4_US->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm Jpsi
+	hMTDQmJpsiMass_ptcut4_LS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
+
 	hMTDQmUpsilonMassUS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");  //zaochen MTDQm Upsilon
 	hMTDQmUpsilonMassLS->GetXaxis()->SetTitle("M_{inv}(#mu#mu) GeV/c^{2}");
-	
+
 	hdEdx_P1->GetXaxis()->SetTitle("Daughter1 Momentum");
 	hdEdx_P1->GetYaxis()->SetTitle("dEdx (GeV/cm)");
+	hdEdx_P1_Twr->GetXaxis()->SetTitle("Daughter1 Momentum");
+	hdEdx_P1_Twr->GetYaxis()->SetTitle("dEdx (GeV/cm)");
 	hDaughter1P_TowerEnergy->GetXaxis()->SetTitle("TowerEnergy/P");
+	hDaughter1P_TowerEnergy_Twr->GetXaxis()->SetTitle("TowerEnergy/P");
 	hDaughter1TpxEmcInverseBeta->GetXaxis()->SetTitle("1/#beta");
+	hDaughter1TpxEmcInverseBeta_Twr->GetXaxis()->SetTitle("1/#beta");
 	hdEdx_P2->GetXaxis()->SetTitle("Daughter2 Momentum");
 	hdEdx_P2->GetYaxis()->SetTitle("dEdx in GeV/cm");
+	hdEdx_P2_Twr->GetXaxis()->SetTitle("Daughter2 Momentum");
+	hdEdx_P2_Twr->GetYaxis()->SetTitle("dEdx in GeV/cm");
 	hDaughter2P_TowerEnergy->GetXaxis()->SetTitle("TowerEnergy/P");
+	hDaughter2P_TowerEnergy_Twr->GetXaxis()->SetTitle("TowerEnergy/P");
 	hDaughter2TpxEmcInverseBeta->GetXaxis()->SetTitle("1/#beta");
+	hDaughter2TpxEmcInverseBeta_Twr->GetXaxis()->SetTitle("1/#beta");
 	hDiLeptonRapidity->GetXaxis()->SetTitle("Rapidity");
+	hDiLeptonRapidity_Twr->GetXaxis()->SetTitle("Rapidity");
 	hLocalZ->GetXaxis()->SetTitle("LocalZ");
 	hLocalY->GetXaxis()->SetTitle("LocalY");
 	//    hTofprimaryMult->GetXaxis()->SetTitle("Primary Multiplicity");
@@ -2918,18 +3407,12 @@ void l4Builder::setAllPlots()
 	hFixedTargetMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
 	hFixedTargetMonitorVr->GetXaxis()->SetTitle("VertexR (cm)");
 	//hFixedTargetMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
-	hEvtsAccpt->GetXaxis()->SetBinLabel(1, "All");
-	//        hEvtsAccpt->GetXaxis()->SetBinLabel(2,"BES good Events");
-	//        hEvtsAccpt->GetXaxis()->SetBinLabel(3,"HLT zerobias");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(2, "Random");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(3, "Bes Good Events");
-	//hEvtsAccpt->GetXaxis()->SetBinLabel(4, "Bes Monior");
-	//hEvtsAccpt->GetXaxis()->SetBinLabel(5, "Fixed Target");
-	//hEvtsAccpt->GetXaxis()->SetBinLabel(6, "Fixed Target Monitor");
-	hEvtsAccpt->GetXaxis()->SetBinLabel(4, "HLTGood2");  
-	hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DiElectron");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(1, "DiMuon");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(2, "MTDQuarkonium");	
+	hEvtsAccpt->GetXaxis()->SetBinLabel(3, "HLTGood2");  
+	hEvtsAccpt->GetXaxis()->SetBinLabel(4, "DiElectron");
+	hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DIEP2Twr");
 	hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment"); 
-	hEvtsAccpt->GetXaxis()->SetBinLabel(7, "DiMuon");
 
 	hGlob_Phi_UPC->SetMinimum(0.);
 	hPrim_Phi_UPC->SetMinimum(0.);
