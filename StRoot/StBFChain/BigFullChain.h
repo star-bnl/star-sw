@@ -1292,7 +1292,8 @@ Bfc_st BFC[] = { // standard chains
   {"fzout" ,"","","","","","geant output should go to fz-file with name taken from TTree file name",kFALSE},
   {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                                "gstar","read event from MuDst",kFALSE},
-  {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","","suppress mortran version of geometry",kFALSE},
+  {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","StarAgmlUtil"
+   ,                                                         "suppress mortran version of geometry",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,noHistos,noRunco"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
