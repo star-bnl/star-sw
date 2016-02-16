@@ -55,6 +55,7 @@ enum TrackType {
 enum TrackMatchType {
   kNotDefined = -1, kMcTk = 0, kMcTpcTk, kRecoTk, kCloneTk, kGhostTk, kLostTk, kMcHftTk, kRecoHftTk, kCloneHftTk, kGhostHftTk, kLostHftTk, kTotalMatchType // match type extended
 };
+enum EdEdx {NdEdxPiD = 3};
 enum EParticleType {
   kallP = 0, kPion, kPartypeT                                             // switch between All and pion
 };
@@ -119,6 +120,7 @@ class StMuMcAnalysisMaker : public StMaker {
   StMuMcAnalysisMaker(const char *name="MuMcAnalysis") : StMaker(name) {memset(mBeg,0,mEnd-mBeg+1);}
   virtual       ~StMuMcAnalysisMaker() {}
   virtual Int_t  Init();
+  virtual Int_t  InitRun(Int_t runumber);
   void           BookTrackPlots();
   void           BookVertexPlots();
   virtual Int_t  Make();
@@ -140,7 +142,13 @@ class StMuMcAnalysisMaker : public StMaker {
   void           DrawPng(TCanvas *c);
   void           DrawH3s(TH3F *h3s[2], Int_t animate = 0, Double_t min = 1e9, Double_t max = -1e9, Int_t np = 2);
   void           MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t amax = 1000);
-  TString        DirPath(const TH1* hist);
+  const TH3F    *GetTrackHist(UInt_t track, UInt_t match, UInt_t particle, UInt_t charge, UInt_t var, UInt_t i) const;
+  static TString DirPath(const TH1* hist);
+  static TString&FormName(const TH1 *hist);  
+  static void    BeginHtml();
+  static void    EndHtml();
+  static void    BeginTable();
+  static void    EndTable();
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StMuMcAnalysisMaker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
