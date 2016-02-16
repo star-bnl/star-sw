@@ -389,6 +389,27 @@ StvNode *StvTrack::GetMaxKnnNode()
   knn.GetWost((ULong_t*)&node);
   return node;
 }
+#include "StarRoot/TIdTruUtil.h"
+//_____________________________________________________________________________
+double StvTrack::GetQua() const
+{
+
+  TIdTruUtil idt;
+  const StvHit *hit=0;
+  
+  for (StvNodeConstIter it = begin();it != end();++it) 
+  {
+    StvNode *node = *it; 
+    if (node->GetType()!=StvNode::kRegNode) 	continue;
+    if (!(hit=node->GetHit())) 		 	continue;
+    if ( node->GetXi2()>1000) 			continue;
+    int idTru = hit->idTru();   
+    if (!idTru)					continue;
+    idt.Add(idTru);
+  }
+  return idt.GetQua();
+
+}
 
 
 

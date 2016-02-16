@@ -307,13 +307,10 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
 
     curNode->SetMem(minHit ,minXi2);
     if (minHit[0] ) 		{	// Fit succesful
-//  if (minHit[0] && minXi2[1]> minXi2[0]*1.2) {	// Fit succesful
-if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__2",minXi2[0]);}
       
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<3)) {		//Hit accepted
-if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0]);}
         mHitCounter->AddHit();
 	nHits++;nTotHits++;assert(nHits<=100);
         curNode->SetHE(fitt->GetHitErrs());
@@ -325,7 +322,6 @@ if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__3",minXi2[0])
       myXi2 = 1e11;
       mHitCounter->AddNit(); 
     }
-if (minHit[0] && minHit[0]->getRxy()<10) {StvDebug::Count("PxlXi2__4",minXi2[0]);}
     curNode->SetHit(minHit[0]); 
     curNode->SetXi2(myXi2,0);
     
@@ -458,6 +454,7 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     node->SetHit(hit);    
     node->SetXi2(bestXi2,0);
     goodCount++;
+StvDebug::Count("PrimGoodQua",track->GetQua());
     if (track->GetCharge()>0) { plus++; } else { minus++; }
 
   }//End track loop 
@@ -519,13 +516,6 @@ static const double kEps = 1.e-2,kEPS=1e-1;
   
   nHits = mCurrTrak->GetNHits();
   nDrops = nBegHits-nHits;
-if(ans) {
-  StvDebug::Count("FailRefit.nDrop:nIter",nIters,nDrops);
-  StvDebug::Count("FailRefit.nHits:nIter",nIters,nHits );
-} else  {
-  StvDebug::Count("GoodRefit.nDrop:nIter",nIters,nDrops);
-  StvDebug::Count("GoodRefit.nHits:nIter",nIters,nHits );
-}
   return state;
 
 }
