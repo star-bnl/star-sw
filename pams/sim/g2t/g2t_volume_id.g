@@ -309,7 +309,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (TPCG_tpadconfig==2 .or. _
               TPCG_tpadconfig==3 .or. _
               TPCG_tpadconfig==6 .or. _ 
-              TPCG_tpadconfig==7 "Inner TPC upgrade 40 pads") {
+              TPCG_tpadconfig==7 .or. _
+              TPCG_tpadconfig==8 "Inner TPC upgrade 40 pads") {
             npadi = 40 "inner"
           endif
           endif
