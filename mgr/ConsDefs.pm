@@ -60,6 +60,11 @@
     $DEBUG        = "-g";
     $FDEBUG       = $DEBUG;
     $NOOPT        = "";
+ if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
+   $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
+   $FDEBUG= $DEBUG;
+   print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
+ }
 
     $O      = "o";
     $A      = "a";
@@ -263,11 +268,6 @@
        # ATTENTION - the debug options below are global for any compiler (not
        # gcc specific). The rest is treated later
 	$GPROF= undef;
-	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = $ENV{DEBUG_OPTIONS}||"-O2 -g";
-	    $FDEBUG= $DEBUG;
-	    print "Base DEBUG options = $DEBUG\n" unless ($param::quiet);
-	}
     }
 
 
@@ -507,7 +507,7 @@
 	     } elsif ( $2 <= 82){
 	       # Note: 4.8.2 is picky, we may ned to adjust options here
 	       #$DEBUG  =  "-O1 -g -fno-merge-constants";
-	       $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+	       $DEBUG   .= " -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
 	       # Other possible options part of O1
 	       #   -fmerge-all-constants (implies merge-contstants)
 	       #   -finline-functions-called-once

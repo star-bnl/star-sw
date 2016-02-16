@@ -78,6 +78,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
 $env1 = $env->clone('Package'  => $pkg);
 my $DEBUG   = $env1->{DEBUG};
 my $FDEBUG  = $env1->{FDEBUG};
+my $NOOPTIMIZED = $DEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g; 
 my $CXXFLAGS= $env1->{CXXFLAGS}; #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
 my $CFLAGS  = $env1->{CFLAGS};
 my $FC      = $env1->{FC};
@@ -149,9 +150,18 @@ if ($pkg eq "RTS") {
     push @srcs, $s;
   }
 #  print "srcs : @srcs\n";
-  @srcL = @srcs;
+#  @srcL = @srcs;
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
+    $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED);
+    for ($i = 0; $i < $#srcL; $i++) {
+      if ($srcL[$i] =~ /FtfUtilities\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($srcL[$i]);
+	$srcL[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
 }
-
 # Some directories will need extra includes for the RTS DAQ reader
 my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
 		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker StSstDaqMaker StPP2PPMaker
@@ -525,6 +535,20 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     # According to description, all client requirering this
     # should be added here.
+#  @srcL = @srcs;
+#    print "src = @src\n srcL = @srcL\n";
+  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
+    $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED, 
+			    'CPPPATH'  => $CPPPATH
+			   );
+    for ($i = 0; $i < $#src; $i++) {
+      if ($src[$i] =~ /StHbtCorrFctnDirectYlm\.cxx/) {
+	my @objfiles = Objects $envNoDeb ($src[$i]);
+	$src[$i] = $objfiles[0];
+	last;
+      }
+    }
+  }
   } elsif ( $pkg =~ m/^StRTSClient/ ) {
     my ($basep) = $Dir;
     $basep =~ s/Client\/.*/Client/;
