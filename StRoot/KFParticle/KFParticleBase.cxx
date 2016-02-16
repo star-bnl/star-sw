@@ -33,13 +33,11 @@ KFParticleBase::KFParticleBase() :fChi2(0), fSFromDecay(0), SumDaughterMass(0), 
                                   fId(-1), fParentID(0), fIdTruth(0), fQuality(0), fIdParentMcVx(0), fAtProductionVertex(0),  
                                   fIsLinearized(0), fQ(0), fConstructMethod(0), fPDG(0), fDaughtersIds()
 { 
-#if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   static Bool_t first = kTRUE;
   if (first) {
     first = kFALSE;
     KFParticleBase::Class()->IgnoreTObjectStreamer();
   }
-#endif
   //* Constructor 
   Clear();
 }
@@ -63,24 +61,24 @@ void KFParticleBase::Print(Option_t *opt) const {
 
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
-  os << Form("p(%4i,%4i,%4i)",particle.Id(),particle.GetParentID(),particle.IdParentMcVx());
-  for (Int_t i = 0; i < 6; i++) {
-    if (particle.GetCovariance(i,i) <= 0.0) continue;
-    if (particle.GetCovariance(i,i) < 1e5) 
-      os << Form(" %s:%8.3f+/-%5.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
+  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
+  for (Int_t i = 0; i < 8; i++) {
+    if (i == 6) continue;                                    // E
+    if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
+    if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
+    if (particle.GetCovariance(i,i) > 0) 
+      os << Form(" %s:%8.3f+/-%6.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
     else 
       os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
   }
-  for (Int_t i = 0; i < 4; i++) {
-    Float_t V, dV = -1;
-    switch (i) {
-    case 0: if (particle.GetParameter(7) == 0.0) break; particle.GetDecayLength(V,dV); break;
-    case 1: if (particle.NDaughters())                  particle.GetMass(V,dV);        break;
-    case 2: if (particle.GetParameter(7) == 0.0) break; particle.GetLifeTime(V,dV);    break;
-    case 3:                                             particle.GetMomentum(V,dV);    break;
-    default: break;
-    }
-    if (dV != 1.0 && dV > 0 && dV  < 1e3) os << Form(" %s:%8.3f+/-%7.3f", vn[i+7],V,dV);
+  float Mtp[3], MtpErr[3];
+  particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
+  particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
+  particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
+  for (Int_t i = 8; i < 11; i++) {
+    if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
+    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
+    else                                       os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
@@ -212,30 +210,27 @@ Int_t KFParticleBase::GetEta( float &eta, float &error )  const
   float px = fP[3];
   float py = fP[4];
   float pz = fP[5];
-  eta = 1.e10;
   float pt2 = px*px + py*py;
-  if (pt2 < 1e13) {
-    float p2 = pt2 + pz*pz;
-    if (p2 < 1e13) {
-      float p = sqrt(p2);
-      float a = p + pz;
-      float b = p - pz;
-      if( b > 1.e-8 ){
-	float c = a/b;
-	if( c>1.e-8 ) eta = 0.5*log(c);
-      }
-      float h3 = -px*pz;
-      float h4 = -py*pz;  
-      float pt4 = pt2*pt2;
-      float p2pt4 = p2*pt4;
-      error = (h3*h3*fC[9] + h4*h4*fC[14] + pt4*fC[20] + 2*( h3*(h4*fC[13] + fC[18]*pt2) + pt2*h4*fC[19] ) );
-      
-      if( error>0 && p2pt4>1.e-10 ){
-	error = sqrt(error/p2pt4);
-	return 0;
-      }
-    }
+  float p2 = pt2 + pz*pz;
+  float p = sqrt(p2);
+  float a = p + pz;
+  float b = p - pz;
+  eta = 1.e10;
+  if( b > 1.e-8 ){
+    float c = a/b;
+    if( c>1.e-8 ) eta = 0.5*log(c);
   }
+  float h3 = -px*pz;
+  float h4 = -py*pz;  
+  float pt4 = pt2*pt2;
+  float p2pt4 = p2*pt4;
+  error = (h3*h3*fC[9] + h4*h4*fC[14] + pt4*fC[20] + 2*( h3*(h4*fC[13] + fC[18]*pt2) + pt2*h4*fC[19] ) );
+
+  if( error>0 && p2pt4>1.e-10 ){
+    error = sqrt(error/p2pt4);
+    return 0;
+  }
+
   error = 1.e10;
   return 1;
 }
@@ -280,19 +275,7 @@ Int_t KFParticleBase::GetR( float &r, float &error )  const
 Int_t KFParticleBase::GetMass( float &m, float &error ) const 
 {
   //* Calculate particle mass
-  float m2 = (fP[6]*fP[6] - fP[3]*fP[3] - fP[4]*fP[4] - fP[5]*fP[5]);
-  if(m2<0.)
-  {
-    error = 1.e3;
-    m = -sqrt(-m2);
-    return 1;
-  }
-  if (m2 > 1e9) {
-    error = 1.e3;
-    m = sqrt(m2);
-    return 1;
-    
-  }
+  
   // s = sigma^2 of m2/2
 
   float s = (  fP[3]*fP[3]*fC[9] + fP[4]*fP[4]*fC[14] + fP[5]*fP[5]*fC[20] 
@@ -309,7 +292,14 @@ Int_t KFParticleBase::GetMass( float &m, float &error ) const
 //     }
 //   }
 //   error = 1.e20;
+  float m2 = (fP[6]*fP[6] - fP[3]*fP[3] - fP[4]*fP[4] - fP[5]*fP[5]);
 
+  if(m2<0.)
+  {
+    error = 1.e3;
+    m = -sqrt(-m2);
+    return 1;
+  }
 
   m  = sqrt(m2);
   if( m>1.e-6 ){
@@ -724,7 +714,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
 
 void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
 {
-  //* Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass
+  //* Energy considered as an independent variable, fitted independently from momentum, without any constraints on mass
   //* Add daughter 
 
   float m[8], mV[36];
@@ -1473,7 +1463,7 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t nDaugh
     
   }
 
-  if( Mass>-0.5 ) SetMassConstraint( Mass );
+  if( Mass>=0 ) SetMassConstraint( Mass );
   if( Parent ) SetProductionVertex( *Parent );
 }
 
@@ -1553,16 +1543,14 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   bool mask = ( fabs(bq)<LocalSmall );
   if(mask && p2>1.e-4f)
   {
-    float ap = a/p2;
-    float pzp = pz/p2;
-    dS = ap + dz*pzp;
+    dS = (a + dz*pz)/p2;
     
     dsdr[0] = -px/p2;
     dsdr[1] = -py/p2;
-    dsdr[2] = -pzp;
-    dsdr[3] = (dx - 2.f* px *(ap + dz *pzp))/(p2);
-    dsdr[4] = (dy - 2.f* py *(ap + dz *pzp))/(p2);
-    dsdr[5] = (dz - 2.f* pz *(ap + dz *pzp))/(p2);
+    dsdr[2] = -pz/p2;
+    dsdr[3] = (dx*p2 - 2.f* px *(a + dz *pz))/(p2*p2);
+    dsdr[4] = (dy*p2 - 2.f* py *(a + dz *pz))/(p2*p2);
+    dsdr[5] = (dz*p2 - 2.f* pz *(a + dz *pz))/(p2*p2);
   }
   if(mask)
   { 

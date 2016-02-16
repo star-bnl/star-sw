@@ -34,7 +34,7 @@ class KFMCTrack
   float X()               const { return fPar[0]; }
   float Y()               const { return fPar[1]; }
   float Z()               const { return fPar[2]; }
-  float R()               const { return sqrt(X()*X() + Y()*Y() + Z()*Z()); }
+  float L()               const { return sqrt(X()*X() + Y()*Y() + Z()*Z()); }
   float Px()              const { return fPar[3]; }
   float Py()              const { return fPar[4]; }
   float Pz()              const { return fPar[5]; }
@@ -57,6 +57,7 @@ class KFMCTrack
   void SetPDG( int v )           { fPDG = v; }
   void SetNMCPoints( int v )     { fNMCPoints = v; }
   void SetReconstructed()        { fIsReconstructed = 1; }
+  void SetNotReconstructed()        { fIsReconstructed = 0; }
   void SetOutOfDetector() { fIsOutOfDetector = 1; }
   
  protected:

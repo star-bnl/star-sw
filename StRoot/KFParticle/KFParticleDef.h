@@ -29,9 +29,11 @@
 #include "TObject.h"
 #endif
 
+#define NInputSets 8
+
 #include <Vc/Vc>
 #include <Vc/limits>
-
+using ::Vc::float_v;
 using ::Vc::double_v;
 using ::Vc::float_v;
 using ::Vc::int_v;
@@ -57,33 +59,16 @@ typedef double Double_t;
 #include "Rtypes.h"
 #endif
 
-#if __GNUC__
-#if __x86_64__ || __ppc64__
-#define ENVIRONMENT64
-#else
-#define ENVIRONMENT32
-#endif
-#endif
+#include "KFPSimdAllocator.h"    
+typedef std::vector<float_v, KFPSimdAllocator<float_v> > kfvector_floatv;
 
-#if __GNUC__ && defined(ENVIRONMENT64)
-#define GCC_VERSION (  __GNUC__ * 10000 \
-                     + __GNUC_MINOR__ * 100 \
-                     + __GNUC_PATCHLEVEL__)
-  #if GCC_VERSION > 40300
-    #include "KFPSimdAllocator.h"
-    typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
-    typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
-    typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
-  #else //GCC_VERSION > 40300
-    typedef std::vector<float> kfvector_float;
-    typedef std::vector<int> kfvector_int; 
-    typedef std::vector<unsigned int> kfvector_uint; 
-  #endif //GCC_VERSION > 40300
-#else //__GNUC__ && ENVIRONMENT64
-  typedef std::vector<float> kfvector_float;
-  typedef std::vector<int> kfvector_int; 
-  typedef std::vector<unsigned int> kfvector_uint; 
-#endif //__GNUC__ && ENVIRONMENT64
+typedef std::vector<float, KFPSimdAllocator<float> > kfvector_float;
+typedef std::vector<int, KFPSimdAllocator<int> > kfvector_int;
+typedef std::vector<unsigned int, KFPSimdAllocator<unsigned int> > kfvector_uint;
+// #include "KFPVector.h"
+// typedef KFPVector<float> kfvector_float;
+// typedef KFPVector<int> kfvector_int;
+// typedef KFPVector<unsigned int> kfvector_uint;
 
 namespace KFPMath
 {

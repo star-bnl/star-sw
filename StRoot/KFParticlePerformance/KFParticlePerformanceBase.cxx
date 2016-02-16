@@ -48,8 +48,8 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     {
       for(int iPart=0; iPart<fParteff.nParticles; ++iPart)
       {
-        gDirectory->mkdir(fParteff.partName[iPart].Data());
-        gDirectory->cd(fParteff.partName[iPart].Data());
+        gDirectory->mkdir(fParteff.partName[iPart].data());
+        gDirectory->cd(fParteff.partName[iPart].data());
         {
           TString res = "res";
           TString pull = "pull";
@@ -642,7 +642,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       {
         TString chi2NamePart = "Chi2Prim";
         chi2NamePart += "_";
-        chi2NamePart += fParteff.partName[iPart].Data();
+        chi2NamePart += fParteff.partName[iPart].data();
         hTrackParameters[iPart] = new TH1F(chi2NamePart.Data(), chi2NamePart.Data(), 1000, 0, 100);
 
       }

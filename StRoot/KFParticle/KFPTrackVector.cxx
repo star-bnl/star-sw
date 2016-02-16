@@ -13,23 +13,41 @@
 
 void KFPTrackVector::SetParameter(const float_v& value, int iP, int iTr)
 { 
+//   if( (iTr+float_vLen) < Size())
+//     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
+//   else
+//   {
+//     const uint_v index(uint_v::IndexesFromZero());
+//     (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+//   }
+  
   if( (iTr+float_vLen) < Size())
     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
   else
-  {
-    const uint_v index(uint_v::IndexesFromZero());
-    (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
-  }
+    for(int i=0; i<float_v::Size; i++)
+    {
+      if(iTr + i >= Size()) continue;
+      fP[iP][iTr+i] = value[i];
+    } 
 }
 void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr) 
 { 
+//   if( (iTr+float_vLen) < Size())
+//     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
+//   else
+//   {
+//     const uint_v index(uint_v::IndexesFromZero());
+//     (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+//   }
+  
   if( (iTr+float_vLen) < Size())
     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
   else
-  {
-    const uint_v index(uint_v::IndexesFromZero());
-    (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
-  }
+    for(int i=0; i<float_v::Size; i++)
+    {
+      if(iTr + i >= Size()) continue;
+      fC[iC][iTr+i] = value[i];
+    } 
 }
   
 
@@ -270,7 +288,7 @@ void KFPTrackVector::PrintTrack(int n)
             << fPDG[n] << " " << fQ[n] << " " << fPVIndex[n] << std::endl;
 }
 
-void KFPTrackVector::PrintTracks()
+void KFPTrackVector::Print()
 {
   std::cout << "NTracks " << Size() << std::endl;
   if( Size()==0 ) return;
@@ -313,11 +331,26 @@ void KFPTrackVector::PrintTracks()
     std::cout <<  PVIndex()[iTr] << " ";
   std::cout << std::endl;
   
+#ifdef NonhomogeneousField
+  std::cout << "Field: " << std::endl;
+  for(int iF=0; iF<6; iF++)
+  {
+    std::cout << "  iF " << iF << ": ";
+    for(int iTr=0; iTr<Size(); iTr++)
+      std::cout << FieldCoefficient(iF)[iTr]<< " ";
+    std::cout << std::endl;
+  }
+#endif
+  
   std::cout << "Last particle index: " << std::endl;
   std::cout << LastElectron() << " "
             << LastMuon() << " "
             << LastPion() << " "
             << LastKaon() << " "
-            << LastProton() << std::endl;
+            << LastProton() << " "
+            << LastDeuteron() << " "
+            << LastTritium() << " "
+            << LastHe3() << " "
+            << LastHe4() << std::endl;
 }
   

@@ -28,7 +28,7 @@ class KFVertex : public KFParticle
   //* Constructor (empty)
 
   KFVertex():KFParticle(),fIsConstrained(0){ } 
-
+  KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {}
   //* Destructor (empty)
 
   ~KFVertex(){}
@@ -36,7 +36,6 @@ class KFVertex : public KFParticle
   //* Initialisation from VVertex 
 
   KFVertex( const KFPVertex &vertex );
-  KFVertex( const KFParticle &particle ): KFParticle(particle), fIsConstrained(0) {}
 
 
   //*

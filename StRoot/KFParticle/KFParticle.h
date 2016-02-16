@@ -348,7 +348,7 @@ class KFParticle :public KFParticleBase
   
  private:
 #ifdef HomogeneousField
-  static float fgBz;  //! Bz compoment of the magnetic field
+  static float fgBz;  //* Bz compoment of the magnetic field
 #endif
 #ifdef NonhomogeneousField
   float fieldRegion[10];
@@ -864,7 +864,7 @@ inline float KFParticle::GetDStoPoint( const float xyz[], float* dsdr ) const
 #ifdef HomogeneousField
   return KFParticleBase::GetDStoPointBz( GetFieldAlice(), xyz, dsdr );
 #endif
-#ifndef NonhomogeneousField
+#ifdef NonhomogeneousField
   return KFParticleBase::GetDStoPointCBM( xyz, dsdr );
 #endif
 }

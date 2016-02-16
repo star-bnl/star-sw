@@ -215,15 +215,16 @@ void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
 
 void KFParticleSIMD::Rotate()
 {
-  for(int i=0; i<6; i++)
+  for(int i=0; i<7; i++)
     fP[i] = fP[i].rotated(1);
-  for(int i=0; i<21; i++)
+  for(int i=0; i<27; i++)
     fC[i] = fC[i].rotated(1);
 #ifdef NonhomogeneousField
   for(int i=0; i<10; i++)
     fField.fField[i] = fField.fField[i].rotated(1);
 #endif
   fQ = fQ.rotated(1);
+  fId = fId.rotated(1);
 }
 
 KFParticleSIMD::KFParticleSIMD(KFPEmcCluster &track, uint_v& index, const KFParticleSIMD& vertexGuess): KFParticleBaseSIMD()

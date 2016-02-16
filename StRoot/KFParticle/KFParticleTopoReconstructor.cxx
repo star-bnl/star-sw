@@ -46,15 +46,23 @@ void KFParticleTopoReconstructor::SetField(double b)
 void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int>* pdg)
 {
   if(!fTracks) 
-    fTracks = new KFPTrackVector[4];
+    fTracks = new KFPTrackVector[NInputSets];
 
+  fTracks[0].Resize(0);
+  fTracks[1].Resize(0);
+  fTracks[2].Resize(0);
+  fTracks[3].Resize(0);
+  fTracks[4].Resize(0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
 
-  KFParticle::SetField( -tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
-  KFParticleSIMD::SetField( -tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
+  KFParticle::SetField( tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
+  KFParticleSIMD::SetField( tracker->Slice(0).Param().Bz() ); // to understand -1 see SetField
 
     // create and fill array of tracks to init KFParticleTopoReconstructor
   const int nTracks = tracker->NTracks();
@@ -206,7 +214,7 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #endif // USE_TIMERS
   
   if(!fTracks) 
-    fTracks = new KFPTrackVector[4];
+    fTracks = new KFPTrackVector[NInputSets];
   
   fParticles.clear();
   fPV.clear(); 
@@ -216,6 +224,10 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
   fTracks[1].Resize(0);
   fTracks[2].Resize(0);
   fTracks[3].Resize(0);
+  fTracks[4].Resize(0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   
   for(int iTr=0; iTr<nTracks; iTr++)
   {  
@@ -241,14 +253,14 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
 #endif /// USE_TIMERS
 }
 
-void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
+void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint)
 {
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
   
   if(!fTracks) 
-    fTracks = new KFPTrackVector[4];
+    fTracks = new KFPTrackVector[NInputSets];
   
   fParticles.clear();
   fPV.clear(); 
@@ -256,11 +268,14 @@ void KFParticleTopoReconstructor::Init(KFPTrackVector &tracks)
   int nTracks = tracks.Size();
   fTracks[0].Resize(nTracks);
   fTracks[0].Set(tracks, nTracks, 0);
-  
   fTracks[1].Resize(0);
   fTracks[2].Resize(0);
   fTracks[3].Resize(0);
-  
+  fTracks[4].Resize(tracksAtLastPoint.Size());
+  fTracks[4].Set(tracksAtLastPoint, tracksAtLastPoint.Size(), 0);
+  fTracks[5].Resize(0);
+  fTracks[6].Resize(0);
+  fTracks[7].Resize(0);
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   
 #ifdef USE_TIMERS
@@ -275,18 +290,17 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-    
   fParticles.clear();
   fPV.clear(); 
 
   fTracks = const_cast< KFPTrackVector* >(particles);
   fChiToPrimVtx[0].resize(fTracks[0].Size());
   fChiToPrimVtx[1].resize(fTracks[1].Size());
-  
   fPV.resize(pv.size());
+
   for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
     fPV[iPV] = const_cast<KFParticle&>(pv[iPV]);
-    
+
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[0] = timer.RealTime();
@@ -362,70 +376,80 @@ void KFParticleTopoReconstructor::SortTracks()
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-  int Size = fTracks[0].Size();
   
-  vector<KFPTrackIndex> sortedTracks(Size);
-  kfvector_uint trackIndex[4];
-  for(int iTV=0; iTV<4; iTV++)
-    trackIndex[iTV].resize(Size);
-  int nTracks[4] = {0};
+  int offset[2] = {0, 4};
+  int nSets = 2;
   
-  for(int iTr=0; iTr<Size; iTr++)
+  if(fTracks[4].Size() == 0)
+    nSets = 1;
+  
+  for(int iSet=nSets-1; iSet>=0; iSet--)
   {
-    sortedTracks[iTr].fIndex = iTr;
-    sortedTracks[iTr].fPdg = fTracks[0].PDG()[iTr];
-  }
-  
-  std::sort(sortedTracks.begin(), sortedTracks.end(), KFPTrackIndex::Compare);
-  
-  for(int iTr=0; iTr<Size; iTr++)
-  {
-    int iTrSorted = sortedTracks[iTr].fIndex;
+    int Size = fTracks[0].Size();
     
-    int q = fTracks[0].Q()[iTrSorted];
-    if(fTracks[0].PVIndex()[iTrSorted] < 0)
+    vector<KFPTrackIndex> sortedTracks(Size);
+    kfvector_uint trackIndex[4];
+    for(int iTV=0; iTV<4; iTV++)
+      trackIndex[iTV].resize(Size);
+    int nTracks[4] = {0,0,0,0};
+    
+    for(int iTr=0; iTr<Size; iTr++)
     {
+      sortedTracks[iTr].fIndex = iTr;
+      sortedTracks[iTr].fPdg = fTracks[0].PDG()[iTr];
+    }
+    
+    std::sort(sortedTracks.begin(), sortedTracks.end(), KFPTrackIndex::Compare);
+    
+    for(int iTr=0; iTr<Size; iTr++)
+    {
+      int iTrSorted = sortedTracks[iTr].fIndex;
+      
+      int q = fTracks[offset[iSet]].Q()[iTrSorted];
+      if(fTracks[0].PVIndex()[iTrSorted] < 0) //secondary track
+      {
 
-      if(q<0)
-      {
-        trackIndex[1][nTracks[1]] = iTrSorted;
-        nTracks[1]++;
+        if(q<0) //secondary negative track
+        {
+          trackIndex[1][nTracks[1]] = iTrSorted;
+          nTracks[1]++;
+        }
+        else //secondary positive track
+        {
+          trackIndex[0][nTracks[0]] = iTrSorted;
+          nTracks[0]++;
+        }
       }
-      else
+      else //primary track
       {
-        trackIndex[0][nTracks[0]] = iTrSorted;
-        nTracks[0]++;
+        if(q<0) //primary negative track
+        {
+          trackIndex[3][nTracks[3]] = iTrSorted;
+          nTracks[3]++;
+        }
+        else //primary positive track
+        {
+          trackIndex[2][nTracks[2]] = iTrSorted;
+          nTracks[2]++;
+        }
       }
     }
-    else
-    {
-      if(q<0)
-      {
-        trackIndex[3][nTracks[3]] = iTrSorted;
-        nTracks[3]++;
-      }
-      else
-      {
-        trackIndex[2][nTracks[2]] = iTrSorted;
-        nTracks[2]++;
-      }
-    }
+    
+    for(int iTV=1; iTV<4; iTV++)  
+      fTracks[iTV+offset[iSet]].SetTracks(fTracks[offset[iSet]], trackIndex[iTV], nTracks[iTV]);
+      
+    KFPTrackVector positive;
+    positive.SetTracks(fTracks[offset[iSet]], trackIndex[0], nTracks[0]);
+    fTracks[offset[iSet]].Resize(nTracks[0]);
+    fTracks[offset[iSet]].Set(positive,nTracks[0],0);
+      
+    for(int iTV=0; iTV<4; iTV++)
+      fTracks[iTV+offset[iSet]].RecalculateLastIndex();
   }
-  
-  for(int iTV=1; iTV<4; iTV++)  
-    fTracks[iTV].SetTracks(fTracks[0], trackIndex[iTV], nTracks[iTV]);
-    
-  KFPTrackVector positive;
-  positive.SetTracks(fTracks[0], trackIndex[0], nTracks[0]);
-  fTracks[0].Resize(nTracks[0]);
-  fTracks[0].Set(positive,nTracks[0],0);
-    
-  for(int iTV=0; iTV<4; iTV++)
-    fTracks[iTV].RecalculateLastIndex();
 
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
   fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
-
+  
 #ifdef USE_TIMERS
   timer.Stop();
   fStatTime[2] = timer.RealTime();
@@ -500,16 +524,16 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 #ifdef USE_TIMERS
   timer.Start();
 #endif // USE_TIMERS
-  
+
   fParticles.clear();
+
   if(fPV.size() < 1) return;
 
   TransportPVTracksToPrimVertex();
-  
   //calculate chi to primary vertex, chi = sqrt(dr C-1 dr)
   GetChiToPrimVertex(&(fPV[0]), fPV.size());
 
-  fKFParticleFinder->FindParticles(fTracks, fChiToPrimVtx, fParticles, &(fPV[0]), fPV.size());
+  fKFParticleFinder->FindParticles(fTracks, fChiToPrimVtx, fParticles, fPV, fPV.size());
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
 
@@ -519,6 +543,12 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 #endif // USE_TIMERS
 } // void KFParticleTopoReconstructor::ReconstructPrimVertex
 
+struct PrimVertexVector
+{
+  vector<float> fP[3];
+  vector<float> fC[6];
+};
+  
 void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool onlySecondary)
 {
   static int nEvents = 0;
@@ -532,14 +562,14 @@ void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool o
   
   //save tracks. tracks are already propagated to the beam
   
-  int nSets = 4;
+  int nSets = NInputSets;
   if(onlySecondary)
     nSets = 2;
     
   float B[3] = {0.f}, r[3] = {0.f};
   KFParticle kfpTmp;
   kfpTmp.GetFieldValue(r, B);
-  out << -B[2] << std::endl;
+  out << B[2] << std::endl;
   out << nSets << std::endl;
   for(int iSet=0; iSet<nSets; iSet++)
   {

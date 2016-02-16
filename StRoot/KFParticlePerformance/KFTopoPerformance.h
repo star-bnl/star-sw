@@ -32,6 +32,7 @@ class AliHLTTPCCAGBTracker;
 class TObject;
 class TParticle;
 class KFParticleTopoReconstructor;
+class KFPHistogram;
 class TDirectory;
 class TH1D;
 class TH2D;
@@ -72,7 +73,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
     /// Histograms
     //     virtual void CreateHistos(string histoDir);
   virtual void FillHistos();
-
+  void FillHistos(const KFPHistogram* histograms);
+  
   void AddV0Histos();
   
   void SetTrackMatch(const vector<int>& trackMatch) { fTrackMatch = trackMatch;}
@@ -113,7 +115,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   vector<int> fTrackMatch;
   vector<KFMCTrack> vMCTracks;  // MC particles
   vector<KFMCParticle> vMCParticles;  // MC particles
-
+  vector<int> fNeutralIndex;
+  
   vector<KFPartMatch> MCtoRParticleId; // array for match MC and reco particles
   vector<KFPartMatch> RtoMCParticleId;
 

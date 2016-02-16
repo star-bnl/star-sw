@@ -836,6 +836,136 @@ void KFParticleBaseSIMD::AddDaughterWithEnergyFitMC( const KFParticleBaseSIMD &D
   }
 }
 
+void KFParticleBaseSIMD::SubtractDaughter( const KFParticleBaseSIMD &Daughter )
+{
+  AddDaughterId( Daughter.Id() );
+  //* Energy considered as an independent variable, fitted independently from momentum, without any constraints on mass
+  //* Add daughter 
+
+  float_v m[8], mV[36];
+
+  float_v D[3][3];
+  GetMeasurement(Daughter, m, mV, D);
+  
+//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
+  
+  float_v mS[6]= { fC[0]+mV[0], 
+                     fC[1]+mV[1], fC[2]+mV[2], 
+                     fC[3]+mV[3], fC[4]+mV[4], fC[5]+mV[5] };    
+    InvertCholetsky3(mS);
+    //* Residual (measured - estimated)
+    
+    float_v zeta[3] = { m[0]-fP[0], m[1]-fP[1], m[2]-fP[2] };    
+
+    float_v K[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        K[i][j] = 0;
+        for(int k=0; k<3; k++)
+          K[i][j] += fC[IJ(i,k)] * mS[IJ(k,j)];
+      }
+    
+    //* CHt = CH' - D'
+    float_v mCHt0[7], mCHt1[7], mCHt2[7];
+
+    mCHt0[0]=fC[ 0] ;       mCHt1[0]=fC[ 1] ;       mCHt2[0]=fC[ 3] ;
+    mCHt0[1]=fC[ 1] ;       mCHt1[1]=fC[ 2] ;       mCHt2[1]=fC[ 4] ;
+    mCHt0[2]=fC[ 3] ;       mCHt1[2]=fC[ 4] ;       mCHt2[2]=fC[ 5] ;
+    mCHt0[3]=fC[ 6]+mV[ 6]; mCHt1[3]=fC[ 7]+mV[ 7]; mCHt2[3]=fC[ 8]+mV[ 8];
+    mCHt0[4]=fC[10]+mV[10]; mCHt1[4]=fC[11]+mV[11]; mCHt2[4]=fC[12]+mV[12];
+    mCHt0[5]=fC[15]+mV[15]; mCHt1[5]=fC[16]+mV[16]; mCHt2[5]=fC[17]+mV[17];
+    mCHt0[6]=fC[21]+mV[21]; mCHt1[6]=fC[22]+mV[22]; mCHt2[6]=fC[23]+mV[23];
+  
+    //* Kalman gain K = mCH'*S
+    
+    float_v k0[7], k1[7], k2[7];
+    
+    for(Int_t i=0;i<7;++i){
+      k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+      k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+      k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+    }
+
+    //* Add the daughter momentum to the particle momentum
+    
+    fP[ 3] -= m[ 3];
+    fP[ 4] -= m[ 4];
+    fP[ 5] -= m[ 5];
+    fP[ 6] -= m[ 6];
+  
+    fC[ 9] += mV[ 9];
+    fC[13] += mV[13];
+    fC[14] += mV[14];
+    fC[18] += mV[18];
+    fC[19] += mV[19];
+    fC[20] += mV[20];
+    fC[24] += mV[24];
+    fC[25] += mV[25];
+    fC[26] += mV[26];
+    fC[27] += mV[27];
+    
+ 
+   //* New estimation of the vertex position r += K*zeta
+    
+    for(Int_t i=0;i<7;++i) 
+      fP[i] = fP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
+    
+    //* New covariance matrix C -= K*(mCH')'
+
+    for(Int_t i=0, k=0;i<7;++i){
+      for(Int_t j=0;j<=i;++j,++k){
+        fC[k] = fC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+      }
+    }
+
+    float_v K2[3][3];
+    for(int i=0; i<3; i++)
+    {
+      for(int j=0; j<3; j++)
+        K2[i][j] = -K[j][i];
+      K2[i][i] += 1;
+    }
+
+    float_v A[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        A[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          A[i][j] += D[i][k] * K2[k][j];
+        }
+      }
+    
+    float_v M[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        M[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          M[i][j] += K[i][k] * A[k][j];
+        }
+      }
+
+    fC[0] += 2.f*M[0][0];
+    fC[1] += M[0][1] + M[1][0];
+    fC[2] += 2.f*M[1][1];
+    fC[3] += M[0][2] + M[2][0];
+    fC[4] += M[1][2] + M[2][1];
+    fC[5] += 2.f*M[2][2];
+  
+    //* Calculate Chi^2 
+
+    fNDF  += 2;
+    fQ    -=  Daughter.GetQ();
+    fSFromDecay = 0;    
+    fChi2 += (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+      +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+      +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
+}
+
 void KFParticleBaseSIMD::SetProductionVertex( const KFParticleBaseSIMD &Vtx )
 {
   //* Set production vertex for the particle, when the particle was not used in the vertex fit

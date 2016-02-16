@@ -43,7 +43,7 @@ class KFParticleFinder
   /// cut[*][3] - chi2/ndf of the reconstructed particle fitted to the PV;
 
   void FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
-                     std::vector<KFParticle>& Particles, KFParticleSIMD* PrimVtx, int nPV);
+                     std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV);
 
   void ExtrapolateToPV(std::vector<KFParticle>& vParticles, KFParticleSIMD& PrimVtx);
   float_v GetChi2BetweenParticles(KFParticleSIMD &p1, KFParticleSIMD &p2);
@@ -58,10 +58,10 @@ class KFParticleFinder
                     KFParticleSIMD& mother,
                     KFParticle& mother_temp,
                     const unsigned short NTracks,
-                    std::vector<float_v>& l,
-                    std::vector<float_v>& dl,
+                    kfvector_floatv& l,
+                    kfvector_floatv& dl,
                     std::vector<KFParticle>& Particles,
-                    KFParticleSIMD* PrimVtx,
+                    std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                     const float* cuts,
                     const int_v& pvIndex,
                     const float* secCuts,
@@ -76,7 +76,7 @@ class KFParticleFinder
   void SaveV0PrimSecCand(KFParticleSIMD& mother,
                           int& NParticles,
                           KFParticle& mother_temp,
-                          KFParticleSIMD* PrimVtx,
+                          std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                           const float* secCuts,
                           std::vector< std::vector<KFParticle> >* vMotherPrim,
                           std::vector<KFParticle>* vMotherSec);
@@ -86,13 +86,13 @@ class KFParticleFinder
                               int_v& trackPDG,
                               KFParticle* vV0[],
                               KFParticleSIMD& mother,
-                              KFParticleSIMD* motherTopo,
+                              std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& motherTopo,
                               KFParticle& mother_temp,
                               const unsigned short nElements,
-                              std::vector<float_v>& l,
-                              std::vector<float_v>& dl,
+                              kfvector_floatv& l,
+                              kfvector_floatv& dl,
                               std::vector<KFParticle>& Particles,
-                              KFParticleSIMD* PrimVtx,
+                              std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                               const float_v* cuts,
                               const int_v& pvIndex,
                               const float_v& massMotherPDG,
@@ -102,11 +102,13 @@ class KFParticleFinder
 
   void Find2DaughterDecay(KFPTrackVector* vTracks, kfvector_float* ChiToPrimVtx,
                           std::vector<KFParticle>& Particles,
-                          KFParticleSIMD* PrimVtx,
+                          std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                           const float* cuts,
                           const float* secCuts,
                           std::vector< std::vector<KFParticle> >* vMotherPrim,
                           std::vector<KFParticle>* vMotherSec );
+  
+  void NeutralDaughterDecay(KFPTrackVector* vTracks, std::vector<KFParticle>& Particles);
 
   void FindTrackV0Decay(std::vector<KFParticle>& vV0,
                         const int V0PDG,
@@ -115,7 +117,7 @@ class KFParticleFinder
                         const int firstTrack,
                         const int lastTrack,
                         std::vector<KFParticle>& Particles,    
-                        KFParticleSIMD* PrimVtx,
+                        std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                         int v0PVIndex = -1,
                         kfvector_float* ChiToPrimVtx = 0,
                         std::vector< std::vector<KFParticle> >* vMotherPrim = 0,
@@ -123,7 +125,7 @@ class KFParticleFinder
 
   void SelectParticles(std::vector<KFParticle>& Particles,
                        std::vector<KFParticle>& vCandidates,
-                       KFParticleSIMD* PrimVtx,
+                       std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                        const float& cutChi2Topo,
                        const float& cutLdL,
                        const float& mass,
@@ -133,7 +135,7 @@ class KFParticleFinder
   void CombinePartPart(std::vector<KFParticle>& particles1,
                        std::vector<KFParticle>& particles2,
                        std::vector<KFParticle>& Particles,
-                       KFParticleSIMD* PrimVtx,
+                       std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
                        const float* cuts,
                        int iPV,
                        const int MotherPDG,

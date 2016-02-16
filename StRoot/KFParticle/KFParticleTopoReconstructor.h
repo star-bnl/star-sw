@@ -61,12 +61,12 @@ class KFParticleTopoReconstructor{
 #endif
   void Init(vector<KFParticle> &particles, vector<int>* pdg=0);
   void Init(const KFPTrackVector *particles, const std::vector<KFParticle>& pv);
-  void Init(KFPTrackVector &tracks);
+  void Init(KFPTrackVector &tracks, KFPTrackVector &tracksAtLastPoint);
 
   void SetEmcClusters(KFPEmcCluster* clusters) { fKFParticleFinder->SetEmcClusters(clusters); }
   void SetMixedEventAnalysis() { fKFParticleFinder->SetMixedEventAnalysis(); }
   
-  void DeInit() { fTracks = 0; }
+  void DeInit() { fTracks = NULL; }
   
   void ReconstructPrimVertex(bool isHeavySystem = 1); // find primary vertex
   void SortTracks(); //sort tracks according to the pdg hypothesis and pv index
@@ -128,7 +128,7 @@ class KFParticleTopoReconstructor{
   KFPTrackVector *fTracks;
   kfvector_float fChiToPrimVtx[2];
   vector<KFParticle> fParticles;
-  vector<KFParticleSIMD> fPV;
+  vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> > fPV;
     
   short int fNThreads;
   

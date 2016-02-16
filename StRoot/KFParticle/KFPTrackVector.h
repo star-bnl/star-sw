@@ -20,11 +20,22 @@
 
 class KFPTrackVector
 {
+  friend class KFParticleTopoReconstructor;
  public:
   KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0), fND(0), fNT(0), fNHe3(0), fNHe4(0) { }
   ~KFPTrackVector() { }
 
   int Size() const { return fP[0].size(); }
+  int DataSize() const { 
+    const int& size = fP[0].size();
+    
+    const int dataSize = size * 31 
+#ifdef NonhomogeneousField
+                       + size * 10
+#endif
+                       + 9;
+    return dataSize; 
+  }
   
   void Resize(const int n);
   void Set(KFPTrackVector& v, int vSize, int offset);
@@ -67,7 +78,7 @@ class KFPTrackVector
   void SetQ         (int value, int iTr)           { fQ[iTr] = value; }
   void SetPVIndex   (int value, int iTr)           { fPVIndex[iTr] = value; }
   void SetLastElectron(int n) { fNE = n; }
-  void SetLastMoun    (int n) { fNMu = n; }
+  void SetLastMuon    (int n) { fNMu = n; }
   void SetLastPion    (int n) { fNPi = n; }
   void SetLastKaon    (int n) { fNK = n; }
   void SetLastProton  (int n) { fNP = n; }
@@ -142,7 +153,7 @@ class KFPTrackVector
   void RotateXY( float_v alpha, int firstElement );
   
   void PrintTrack(int n);
-  void PrintTracks();
+  void Print();
   
   const KFPTrackVector& operator = (const KFPTrackVector& track)
   {
@@ -200,6 +211,103 @@ class KFPTrackVector
     return *this;
   }
   
+  void SetDataToVector(int* data, int& offset)
+  {
+    for(int iP=0; iP<6; iP++)
+    {
+      memcpy( &(data[offset]), &(fP[iP][0]), Size()*sizeof(float));
+      offset += Size();
+    }
+    
+    for(int iC=0; iC<21; iC++)
+    {
+      memcpy( &(data[offset]), &(fC[iC][0]), Size()*sizeof(float));
+      offset += Size();
+    }
+    
+    memcpy( &(data[offset]), &(fId[0]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(data[offset]), &(fPDG[0]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(data[offset]), &(fQ[0]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(data[offset]), &(fPVIndex[0]), Size()*sizeof(float));
+    offset += Size();
+    
+#ifdef NonhomogeneousField
+    for(int iF=0; iF<10; iF++)
+    {
+      memcpy( &(data[offset]), &(fField[iF][0]), Size()*sizeof(float));
+      offset += Size();
+    }
+#endif
+
+    data[offset] = fNE;   offset++;
+    data[offset] = fNMu;  offset++;
+    data[offset] = fNPi;  offset++;
+    data[offset] = fNK;   offset++;
+    data[offset] = fNP;   offset++;
+    data[offset] = fND;   offset++;
+    data[offset] = fNT;   offset++;
+    data[offset] = fNHe3; offset++;
+    data[offset] = fNHe4; offset++;
+  }
+  
+  void ReadDataFromVector(int* data, int& offset)
+  {
+    for(int iP=0; iP<6; iP++)
+    {
+      memcpy( &(fP[iP][0]), &(data[offset]), Size()*sizeof(float));
+      offset += Size();
+    }
+    
+    for(int iC=0; iC<21; iC++)
+    {
+      memcpy( &(fC[iC][0]), &(data[offset]), Size()*sizeof(float));
+      offset += Size();
+    }
+    
+    memcpy( &(fId[0]), &(data[offset]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(fPDG[0]), &(data[offset]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(fQ[0]), &(data[offset]), Size()*sizeof(float));
+    offset += Size();
+    
+    memcpy( &(fPVIndex[0]), &(data[offset]), Size()*sizeof(float));
+    offset += Size();
+    
+#ifdef NonhomogeneousField
+    for(int iF=0; iF<10; iF++)
+    {
+      memcpy( &(fField[iF][0]), &(data[offset]), Size()*sizeof(float));
+      offset += Size();
+    }
+#endif
+
+    fNE = data[offset];   offset++;
+    fNMu = data[offset];  offset++;
+    fNPi = data[offset];  offset++;
+    fNK = data[offset];   offset++;
+    fNP = data[offset];   offset++;
+    fND = data[offset];   offset++;
+    fNT = data[offset];   offset++;
+    fNHe3 = data[offset]; offset++;
+    fNHe4 = data[offset]; offset++;
+  }
+  
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  
  private:  
   kfvector_float fP[6];  //coordinates of the track : x, y, z, px, py, pz
   kfvector_float fC[21];  //Covariance matrix of the track parameters
@@ -214,6 +322,6 @@ class KFPTrackVector
 #endif
   
   int fNE, fNMu, fNPi, fNK, fNP, fND, fNT, fNHe3, fNHe4;
-};
+} __attribute__((aligned(sizeof(float_v))));
 
 #endif

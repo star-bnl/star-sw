@@ -95,7 +95,7 @@ KFParticle::KFParticle( const KFPTrack &track, const int PID ): KFParticleBase()
   track.GetCovarianceXYZPxPyPz( fC );
 
   float mass = KFParticleDatabase::Instance()->GetMass(PID);
-  SetPDG(PID);
+
   Create(fP,fC,fQ,mass);
   fChi2 = track.GetChi2();
   fNDF = track.GetNDF();

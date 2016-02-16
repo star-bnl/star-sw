@@ -22,9 +22,7 @@
 #ifdef __ROOT__ //for the STAR experiment
 #define HomogeneousField
 #endif
-#ifndef HomogeneousField
-#define NonhomogeneousField
-#endif
+
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
 #else
@@ -283,10 +281,10 @@ class KFParticleBase :public TObject {
   Int_t        IdTruth() const { return fIdTruth;}
   Int_t        QaTruth() const { return fQuality; }
   Int_t        IdParentMcVx() const {return fIdParentMcVx;}
-  //  Int_t        IdParentVx()   const {return IdParentMcVx();}
-  //  void SetID(Int_t id=0) {fId = id;}
+  Int_t        IdParentVx()   const {return IdParentMcVx();}
+  void SetID(Int_t id=0) {fId = id;}
   void SetParentID(Int_t id=0) {fParentID = id;}
-  //  Int_t    GetID() const {return fId;}
+  Int_t    GetID() const {return fId;}
   Int_t    GetParentID() const {return fParentID;}
   void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
   void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
@@ -321,23 +319,23 @@ class KFParticleBase :public TObject {
   float fMassHypo;  //* sum of the daughter particles masse
   Int_t fNDF;   //* Number of degrees of freedom 
   int   fId;                   //* id of particle
-				   
+
 #ifdef __ROOT__ //for the STAR experiment
-  Short_t    fParentID;// Id of Parent Vertex for Particle, Id of Parent track for KFVertex
+  Short_t    fParentID;
   Short_t    fIdTruth; // MC track id 
   Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
   Short_t    fIdParentMcVx; // for track and McTrack for vertex
 #endif
 
-  Bool_t fAtProductionVertex; //! Flag shows that the particle error along
+  Bool_t fAtProductionVertex; //* Flag shows that the particle error along
                               //* its trajectory is taken from production vertex    
 
                           //* ( used for linearisation of equations )
 
-  Bool_t fIsLinearized;   //! Flag shows that the guess is present
-  
+  Bool_t fIsLinearized;   //* Flag shows that the guess is present
+
   char    fQ;     //* Particle charge 
-  char fConstructMethod; //! Determines the method for the particle construction. 
+  char fConstructMethod; //* Determines the method for the particle construction. 
   //* 0 - Energy considered as an independent veriable, fitted independently from momentum, without any constraints on mass
   //* 1 - Energy considered as a dependent variable, calculated from the momentum and mass hypothesis
   //* 2 - Energy considered as an independent variable, fitted independently from momentum, with constraints on mass of daughter particle
@@ -346,7 +344,7 @@ class KFParticleBase :public TObject {
   std::vector<int> fDaughtersIds; // id of particles it created from. if size == 1 then this is id of track. TODO use in functions. why unsigned short int doesn't work???
  
 #ifndef KFParticleStandalone
-  ClassDef( KFParticleBase, 5 )
+  ClassDef( KFParticleBase, 2 )
 #endif
 };
 

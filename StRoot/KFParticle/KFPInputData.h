@@ -40,7 +40,15 @@ struct KFPTrackIndex
 class KFPInputData
 {
  public:
-  KFPInputData():fPV(0),fCluster(0),fBz(0.f) {};
+   
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  
+  KFPInputData():fPV(0),fBz(0.f) {};
   ~KFPInputData() {};
 
   bool ReadDataFromFile( string prefix )
@@ -104,7 +112,7 @@ class KFPInputData
       ifile >> tmpInt;
       fTracks[iSet].SetLastElectron(tmpInt);
       ifile >> tmpInt;
-      fTracks[iSet].SetLastMoun    (tmpInt);
+      fTracks[iSet].SetLastMuon    (tmpInt);
       ifile >> tmpInt;
       fTracks[iSet].SetLastPion    (tmpInt);
       ifile >> tmpInt;
@@ -129,43 +137,138 @@ class KFPInputData
     return 1;
   }
   
-  void PrintTracks()
+  void SetDataToVector(int* data, int& dataSize)
   {
-    for(int iTrType=0; iTrType<4; iTrType++)
-      for(int i=0; i<fTracks[iTrType].Size(); i++)
-        std::cout << fTracks[iTrType].X()[i] << " " <<  fTracks[iTrType].Y()[i] << " " << fTracks[iTrType].Z()[i] << " " <<  std::endl;
+    dataSize = NInputSets + 1 + 1; //sizes of the track vectors and pv vector, and field
+    for(int iSet=0; iSet<NInputSets; iSet++)
+      dataSize += fTracks[iSet].DataSize();
+    dataSize += fPV.size() * 9;
+        
+    for(int iSet=0; iSet<NInputSets; iSet++)
+      data[iSet] = fTracks[iSet].Size();
+    data[NInputSets] = fPV.size();
+    
+    float& field = reinterpret_cast<float&>(data[NInputSets+1]);
+    field = fBz;
+    
+    int offset = NInputSets+2;
+        
+    for(int iSet=0; iSet<NInputSets; iSet++)
+      fTracks[iSet].SetDataToVector(data, offset);
+    
+    for(int iP=0; iP<3; iP++)
+    {
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      {
+        float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+        tmpFloat = fPV[iPV].Parameter(iP);
+      }
+      offset += fPV.size();
+    }
+    
+    for(int iC=0; iC<6; iC++)
+    {
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      {
+        float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+        tmpFloat = fPV[iPV].Covariance(iC);
+      }
+      offset += fPV.size();
+    }    
+  }
+
+  void ReadDataFromVector(int* data)
+  { 
+    int offset = NInputSets+2;
+    for(int iSet=0; iSet<NInputSets; iSet++)
+    {
+      fTracks[iSet].Resize(data[iSet]);
+      fTracks[iSet].ReadDataFromVector(data, offset);
+    }
+    
+    float& field = reinterpret_cast<float&>(data[NInputSets+1]);
+    fBz = field;
+    
+    fPV.resize(data[NInputSets]);
+                
+    for(int iP=0; iP<3; iP++)
+    {
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      {
+        float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+        fPV[iPV].Parameter(iP) = tmpFloat;
+      }
+      offset += fPV.size();
+    }
+    
+    for(int iC=0; iC<6; iC++)
+    {
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      {
+        float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+        fPV[iPV].Covariance(iC) = tmpFloat;
+      }
+      offset += fPV.size();
+    }        
+  }
+  
+  void Print()
+  {
+    for(int iSet=0; iSet<NInputSets; iSet++)
+      fTracks[iSet].Print();
+    std::cout << "N PV: " << fPV.size() << std::endl;
+    
+    std::cout << "X: ";
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      std::cout << fPV[iPV].X() <<" ";
+    std::cout << std::endl;
+        std::cout << "Y: ";
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      std::cout << fPV[iPV].Y() <<" ";
+    std::cout << std::endl;
+    std::cout << "Z: ";
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+      std::cout << fPV[iPV].Z() <<" ";
+    std::cout << std::endl;
+
+    std::cout << "Cov matrix: " << std::endl;
+    for(int iC=0; iC<6; iC++)
+    {
+      std::cout << "  iC " << iC << ":  ";
+      for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+        std::cout << fPV[iPV].Covariance(iC) <<" ";
+      std::cout << std::endl;
+    }
+    
+    std::cout << "Field: " << fBz << std::endl;
   }
   
   KFPTrackVector* GetTracks()  { return fTracks; }
   float GetBz() const { return fBz; }
   const std::vector<KFParticle>& GetPV() const { return fPV; }
-  const std::vector<short int>& GetCluster() const { return fCluster; }
 
   const KFPInputData& operator = (const KFPInputData& data)
   {
-    for(int i=0; i<4; i++)
+    for(int i=0; i<NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
-    fCluster = data.fCluster;
     fBz = data.fBz;
     
     return *this;
   }
-  KFPInputData(const KFPInputData& data):fPV(0),fCluster(0),fBz(0.f)
+  KFPInputData(const KFPInputData& data):fPV(0),fBz(0.f)
   {
-    for(int i=0; i<4; i++)
+    for(int i=0; i<NInputSets; i++)
       fTracks[i] = data.fTracks[i];
     fPV = data.fPV;
-    fCluster = data.fCluster;
     fBz = data.fBz;
   }
   
  protected:
-  KFPTrackVector fTracks[4]; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
+  KFPTrackVector fTracks[NInputSets]; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
   std::vector<KFParticle> fPV;
-  std::vector<short int> fCluster;
   float fBz;
-};
+} __attribute__((aligned(sizeof(float_v))));
 
 struct KFPInputDataArray{
   KFPInputDataArray():fInput(0){};
@@ -177,5 +280,19 @@ struct KFPInputDataArray{
    const KFPInputDataArray& operator = (const KFPInputDataArray&);
    KFPInputDataArray(const KFPInputDataArray&);
 };
+
+
+struct KFPLinkedList
+{
+  void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new[](size_t size) { return _mm_malloc(size, sizeof(float_v)); }
+  void *operator new(size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void *operator new[](size_t size, void *ptr) { return ::operator new(size, ptr);}
+  void operator delete(void *ptr, size_t) { _mm_free(ptr); }
+  void operator delete[](void *ptr, size_t) { _mm_free(ptr); }
+  
+  KFPInputData data __attribute__((aligned(sizeof(float_v))));
+  KFPLinkedList* next;
+} __attribute__((aligned(sizeof(float_v))));
 
 #endif

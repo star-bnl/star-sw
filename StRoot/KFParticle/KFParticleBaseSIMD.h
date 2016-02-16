@@ -193,6 +193,7 @@ class KFParticleBaseSIMD {
   //* Add daughter track to the particle 
 
   void AddDaughter( const KFParticleBaseSIMD &Daughter );
+  void SubtractDaughter( const KFParticleBaseSIMD &Daughter );
 
   void AddDaughterWithEnergyFit( const KFParticleBaseSIMD &Daughter );
   void AddDaughterWithEnergyFitMC( const KFParticleBaseSIMD &Daughter ); 

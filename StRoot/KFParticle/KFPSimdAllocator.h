@@ -67,11 +67,11 @@ class KFPSimdAllocator {
     new(p) T();
   }
   
-#ifdef __GNUC__
+// #ifdef __GNUC__
   void construct (pointer p, const T& value) {
     new(p) T(value);
   }
-#endif   
+// #endif   
 
   // destroy elements of initialized storage p
   void destroy (pointer p) {
