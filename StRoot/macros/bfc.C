@@ -45,7 +45,7 @@ void Load(const Char_t *options="");
 //TString defChain("MC.y2012a,gstar,20Muons,StiCA,-hitfilt,KFVertex,beamline,sdt20120408.134653,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012a,pythia,StiCA,-hitfilt,KFVertex,beamline,sdt20120408.134653,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.y2012,gstar,20Muons,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
-//TString defChain("MC.devTX,gstar,20Muons,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.devTY,gstar,20Muons,tofsim,TpcRS,StiCA,KFVertex,beamline,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,AgML,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,AgML,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,AgML,useXgeom");//eemcA2E,,sdt20100107.110000");
