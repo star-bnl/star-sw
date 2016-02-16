@@ -32,7 +32,7 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
 static const double recvCORRMAX  = 0.99999;
 static const double chekCORRMAX  = 0.99999;
 static double MAXPARS[]={500,500,500,3.15,100,100};
-
+static const Int_t offdiag[kNErrs-kNPars] = {1, 3, 4, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19};
 //______________________________________________________________________________
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 {
@@ -223,9 +223,6 @@ for (int ix = 0;ix<2; ix++) {
  
 double StiTrackNode::sinX(double x)
 {
-#if 0
-  assert(!TMath::IsNaN(x));
-#endif
   double x2 = x*x;
   if (x2>0.5) return (sin(x)-x)/x2/x;
   double nom = -1./6;
@@ -396,19 +393,26 @@ StiDebug::Break(nCall);
    } } }
 
    while (((force)? sign():zign())<=0) {
+     // scale off diagonal elements
+#if 1 /* fix for gcc 4.8.2 */
+     for (Int_t i = 0; i < kNErrs-kNPars; i++) {
+       A[offdiag[i]] *= 0.9;
+     }
+#else
     for (int i=i0,li=li0;i<kNPars ;li+=++i) {
       for (int j=i0;j<i;j++) {
         A[li+j]*=0.9;
-   } } }
-
+   } } 
+#endif
+   }
 }
 //______________________________________________________________________________
 void StiNodeErrs::print() const
 {
    const double *d = A;
    for (int n=1;n<=6;n++) {
-     LOG_INFO << Form("%d - ",n);
-     for (int i=0;i<n;i++){LOG_INFO << Form("%g\t",*(d++));}; LOG_INFO << endm;
+     LOG_DEBUG << Form("%d - ",n);
+     for (int i=0;i<n;i++){LOG_DEBUG << Form("%g\t",*(d++));}; LOG_DEBUG << endm;
    }  
 }     
 
@@ -551,9 +555,8 @@ int StiNodePars::check(const char *pri) const
 
   int ierr=0;
 //?? temp test
-      //  assert(fabs(_cosCA) <=1 && fabs(_sinCA)<=1);
+  assert(fabs(_cosCA) <=1 && fabs(_sinCA)<=1);
   double tmp = (fabs(curv())<1e-6)? 0: curv()-ptin()*hz();
-  if (! (fabs(_cosCA) <=1 && fabs(_sinCA)<=1)) {ierr = 10000; goto FAILED;}
 //		1km for 1GeV is a zero field
 //  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
   if (fabs(hz())>=1e-5 && fabs(tmp)> 1e-3*fabs(curv()))    {ierr=1313; goto FAILED;}
@@ -617,8 +620,8 @@ int StiNodePars::nan() const
 void StiNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {LOG_INFO << Form("%s = %g, ",tit[i+2],P[i]);}
-  LOG_INFO << endm;
+  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],P[i]);}
+  LOG_DEBUG << endm;
 }   
 //______________________________________________________________________________
 void StiHitErrs::rotate(double angle)
