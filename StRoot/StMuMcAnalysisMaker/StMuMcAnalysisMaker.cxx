@@ -367,7 +367,8 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       IdVx = mcTrackP->IdVx();
       if (! IdVx) break;
     }
-    if (IdVx != 1) continue;
+    if (IdVx != 1) continue; // original vertex 
+    IdVx = mcTrack->IdVx(); // for the track
     Bool_t McTpc = mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits;
     Bool_t McHft = mcTrack->No_pix_hit() >= 2 && mcTrack->No_ist_hit()+mcTrack->No_ssd_hit() >= 1;
     GiD[0]->Fill(mcTrack->GePid());
@@ -394,12 +395,14 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	if (IdVx == 1)
 	  fHistsT[kPrimary][kMcHftTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       }
-      // kNotDefined, kLostTk, kRecoTk, kCloneTk
-      TrackMatchType type    = TrackType(mcTrack,Mc2RcTracks);
-      // kNotDefined, kLostHftTk, kRecoHftTk, kCloneHftTk
-      TrackMatchType typeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
-      if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
-      if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
+    }
+    // kNotDefined, kLostTk, kRecoTk, kCloneTk
+    TrackMatchType type    = TrackType(mcTrack,Mc2RcTracks);
+    // kNotDefined, kLostHftTk, kRecoHftTk, kCloneHftTk
+    TrackMatchType typeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
+    if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
+    if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
+    for (Int_t particle = 0; particle <= NPart; particle++) {
       if (type != kNotDefined) {
 	fHistsT[kGlobal][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
 	fHistsT[kPrimary][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
@@ -408,59 +411,59 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	fHistsT[kGlobal][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
 	fHistsT[kPrimary][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       }
-      if (type == kRecoTk || typeHft == kRecoHftTk) {
-	Int_t Id = mcTrack->Id()-1;
-	pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
-	multimap<Int_t,Int_t>::iterator it;
-	Int_t kg = -1;
-	Int_t count = 0;
-	for (it = ret.first; it != ret.second; ++it, ++count) {
-	  kg = (*it).second;
-	}
-	assert(count == 1);
-	// Track QA
-	StMuTrack *gTrack = muDst->globalTracks(kg);
-	Int_t kgc = gTrack->index2Cov();
-	if (kgc < 0) continue;
-	StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
-	StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
-	if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
-	if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
-	Int_t k = Gl2Pr[kg];
-	if (! k) continue;
-	StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
-	Int_t kpc = pTrack->index2Cov();
-	if (kpc >= 0) {
-	  StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
-	  if (type    == kRecoTk)    FillQAPr(type   , pTrack, mcTrack, cov);
-	  if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
-	} else {
-	  KFParticle *particle = 0;
-	  if (k < muDst->numberOfKFTracks()) particle = muDst->KFtrack(k);
-	  if (type    == kRecoTk)    FillQAPr(type   ,pTrack, mcTrack, particle);
-	  if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, particle);
-	}
-	// dE/dx block
-	const StMuProbPidTraits &PiD = pTrack->probPidTraits();
-	Double_t I[2] = {PiD.dEdxTruncated(), PiD.dEdxFit()};
-	Double_t TrackLength = PiD.dEdxTrackLength();
-	Int_t Gid = mcTrack->GePid();
-	static Bichsel *m_Bichsel = Bichsel::Instance();
-	Double_t pMomentum = pTrack->helix().momentum(field).mag();
-	//	const StThreeVectorF &pVx  = pTrack->momentum();
-	for (Int_t h = 0; h < NHYPS; h++) {
-	  if (GEANTiD[h] == Gid) {
-	    Double_t bghyp = TMath::Log10(pMomentum/Masses[h]);
-	    Double_t Pred[2]  = {1.e-6*m_Bichsel->GetI70(bghyp,1.0),
-				 1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp,1.0))};
-	    for (Int_t mm = 0; mm < 2; mm++) {
-	      if (I[mm] <= 0 || Pred[mm] <= 0) continue;
-	      Double_t z = TMath::Log(I[mm]/Pred[mm]);
-	      PdEdx[mm][h]->Fill(pTrack->phi(), pTrack->eta(), pTrack->pt(), z);
-	      LdEdx[mm][h]->Fill(TrackLength, bghyp, z);
-	    }
-	    break;
+    }
+    if (type == kRecoTk || typeHft == kRecoHftTk) {
+      Int_t Id = mcTrack->Id()-1;
+      pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
+      multimap<Int_t,Int_t>::iterator it;
+      Int_t kg = -1;
+      Int_t count = 0;
+      for (it = ret.first; it != ret.second; ++it, ++count) {
+	kg = (*it).second;
+      }
+      assert(count == 1);
+      // Track QA
+      StMuTrack *gTrack = muDst->globalTracks(kg);
+      Int_t kgc = gTrack->index2Cov();
+      if (kgc < 0) continue;
+      StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
+      StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
+      if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
+      if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
+      Int_t k = Gl2Pr[kg];
+      if (! k) continue;
+      StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
+      Int_t kpc = pTrack->index2Cov();
+      if (kpc >= 0) {
+	StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
+	if (type    == kRecoTk)    FillQAPr(type   , pTrack, mcTrack, cov);
+	if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
+      } else {
+	KFParticle *particle = 0;
+	if (k < muDst->numberOfKFTracks()) particle = muDst->KFtrack(k);
+	if (type    == kRecoTk)    FillQAPr(type   ,pTrack, mcTrack, particle);
+	if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, particle);
+      }
+      // dE/dx block
+      const StMuProbPidTraits &PiD = pTrack->probPidTraits();
+      Double_t I[2] = {PiD.dEdxTruncated(), PiD.dEdxFit()};
+      Double_t TrackLength = PiD.dEdxTrackLength();
+      Int_t Gid = mcTrack->GePid();
+      static Bichsel *m_Bichsel = Bichsel::Instance();
+      Double_t pMomentum = pTrack->helix().momentum(field).mag();
+      //	const StThreeVectorF &pVx  = pTrack->momentum();
+      for (Int_t h = 0; h < NHYPS; h++) {
+	if (GEANTiD[h] == Gid) {
+	  Double_t bghyp = TMath::Log10(pMomentum/Masses[h]);
+	  Double_t Pred[2]  = {1.e-6*m_Bichsel->GetI70(bghyp,1.0),
+			       1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp,1.0))};
+	  for (Int_t mm = 0; mm < 2; mm++) {
+	    if (I[mm] <= 0 || Pred[mm] <= 0) continue;
+	    Double_t z = TMath::Log(I[mm]/Pred[mm]);
+	    PdEdx[mm][h]->Fill(pTrack->phi(), pTrack->eta(), pTrack->pt(), z);
+	    LdEdx[mm][h]->Fill(TrackLength, bghyp, z);
 	  }
+	  break;
 	}
       }
     }
@@ -1170,8 +1173,8 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	    heff[l]->SetMarkerColor(l+1);
 	    heff[l]->SetLineColor(l+1);
 	    Title = heff[l]->GetTitle();
-	    if (binX1 != binX2) Title += Form(" at |  #eta | <= %3.1f",ymax);
-	    if (binY1 > 0)      Title += Form(" at pT > %3.2f",pTmins[l/2]);
+	    if (binX1 != 1)     Title += Form(" at |  #eta | <= %3.1f",ymax);
+	    if (binY1 >  1)     Title += Form(" at pT > %3.2f",pTmins[l/2]);
 	    heff[l]->SetTitle(Title);   
 	    TH1 *temp =Divider->Project3D(Form("%smc",proj3[p])); 
 	    cout << heff[l]->GetName() << "\t" << heff[l]->GetEntries() << " sum " << temp->GetEntries() << endl;
