@@ -48,6 +48,7 @@ public:
 
 	int numberOfClusters(int romanPotId, int planeId) const;
 	double positionCluster(int romanPotId, int planeId, int cluster) const;
+	double positionRMSCluster(int romanPotId, int planeId, int cluster) const;
 	short lengthCluster(int romanPotId, int planeId, int cluster) const;
 	double energyCluster(int romanPotId, int planeId, int cluster) const;
 	double xyCluster(int romanPotId, int planeId, int cluster) const;
@@ -118,6 +119,7 @@ inline unsigned char StMuRpsCollection::statusPlane(int romanPotId, int planeId)
 }
 inline int StMuRpsCollection::numberOfClusters(int romanPotId, int planeId) const { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes ? mNumberOfClusters[romanPotId][planeId] : 0;}
 inline double  StMuRpsCollection::positionCluster(int romanPotId, int planeId, int cluster) const { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes && cluster < mNumberOfClusters[romanPotId][planeId]? mPositionCluster[romanPotId][planeId][cluster] : 0;}
+inline double  StMuRpsCollection::positionRMSCluster(int romanPotId, int planeId, int cluster) const { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes && cluster < mNumberOfClusters[romanPotId][planeId]? mPositionRMSCluster[romanPotId][planeId][cluster] : 0;}
 inline short  StMuRpsCollection::lengthCluster(int romanPotId, int planeId, int cluster) const { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes && cluster < mNumberOfClusters[romanPotId][planeId]? mLengthCluster[romanPotId][planeId][cluster] : 0;}
 inline double StMuRpsCollection::energyCluster(int romanPotId, int planeId, int cluster) const { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes && cluster < mNumberOfClusters[romanPotId][planeId]? mEnergyCluster[romanPotId][planeId][cluster] : 0;}
 inline double StMuRpsCollection::xyCluster(int romanPotId, int planeId, int cluster) const  { return romanPotId < mNumberOfRomanPot && planeId < mNumberOfPlanes && cluster < mNumberOfClusters[romanPotId][planeId]? mXYCluster[romanPotId][planeId][cluster] : 0;}
