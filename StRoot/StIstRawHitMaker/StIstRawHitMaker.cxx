@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.45 2016/02/18 16:11:09 huangbc Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.46 2016/02/18 16:16:03 huangbc Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent.h"
@@ -30,7 +30,7 @@ StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", n
    mGainVec(kIstNumElecIds, 0),
    mMappingVec(kIstNumElecIds, 0),
    mConfigVec(kIstNumApvs, 1),
-   mDataType(1)
+   mDataType(2)
 {
 }
 
