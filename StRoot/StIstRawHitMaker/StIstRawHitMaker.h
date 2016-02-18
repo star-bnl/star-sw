@@ -1,17 +1,19 @@
-// $Id: StIstRawHitMaker.h,v 1.22 2016/02/17 19:06:42 jeromel Exp $
+// $Id: StIstRawHitMaker.h,v 1.23 2016/02/18 16:11:09 huangbc Exp $
 
 #ifndef StIstRawHitMaker_hh
 #define StIstRawHitMaker_hh
+
+#ifndef __CINT__
+#include <array>
+#include <iostream>
+#endif
+
+#include <vector>
 
 #include "StRoot/St_base/Stypes.h"
 #include "StRoot/StChain/StRTSBaseMaker.h"
 #include "StIstUtil/StIstConsts.h"
 
-#include <vector>
-#include <string>
-#include <list>
-#include <map>
-#include <assert.h>
 
 class StIstCollection;
 
@@ -38,9 +40,9 @@ public:
    void Clear( Option_t *opts = "" );
 
    void setIsCalibrationMode( bool isCaliMode = false )   	{ mIsCaliMode = isCaliMode;}
-   void setHitCut(float hitCut = 5.)				{ mHitCut = hitCut;        }
+   void setHitCut(double hitCut = 5.)				{ mHitCut = hitCut;        }
    void setCmnCorrection( bool doCmnCorrection = false )	{ mDoCmnCorrection = doCmnCorrection; }
-   void setCmnCut(float cmnCut = 3.)				{ mCmnCut = cmnCut;        }
+   void setCmnCut(double cmnCut = 3.)				{ mCmnCut = cmnCut;        }
    /// 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
    void setDataType(int nDataType = 0)				{ mDataType = nDataType;   };
    void setDoEmbedding(Bool_t doIt) 				{mDoEmbedding = doIt;}
@@ -48,7 +50,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.22 2016/02/17 19:06:42 jeromel Exp $ built " __DATE__ " " __TIME__  ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.23 2016/02/18 16:11:09 huangbc Exp $ built " __DATE__ " " __TIME__  ;
       return cvs;
    }
 
@@ -57,7 +59,7 @@ protected:
    Bool_t mDoEmbedding;
    Bool_t mDoCmnCorrection;
    //control paramters
-   Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
+   double mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
    UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin, mCurrentTimeBinNum;
    UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
@@ -79,9 +81,9 @@ protected:
 
 private:
 
-   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], float sumAdcPerEvent[], int apvElecId,
-      int (&signalUnCorrected)[kIstNumApvChannels][kIstNumTimeBins],
-      float (&signalCorrected)[kIstNumApvChannels][kIstNumTimeBins],
+   void FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
+      std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected,
       int idTruth[]);
 
    void FillRawHitCollectionFromSimData();
