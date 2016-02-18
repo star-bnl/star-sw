@@ -146,8 +146,8 @@ foreach arch ( _ _x8664_ )
 		foreach cmpl ( 482 447 )
 		    if ($cmpl == "482" && $vers == "64" && $ospf == "sl") then
 			# this is the reference OS, skip ...
-			goto next_tag;
-		    endif
+			#goto next_tag;
+		    else
 		     set dir=$ospf$vers$arch"gcc"$cmpl
 		     if ( ! -e .$dir && -e .$refos ) then
 			echo "  Compatibility assumed between $dir -> $refos "
@@ -161,8 +161,8 @@ foreach arch ( _ _x8664_ )
 		     else
 			if ( -e $refos && -e $dir )   echo " $dir exists"
 		     endif
+		      #next_tag:
                     endif
-		    next_tag:
 		end
 	    end
 	end
