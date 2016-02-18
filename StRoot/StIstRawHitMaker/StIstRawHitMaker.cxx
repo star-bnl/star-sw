@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.46 2016/02/18 16:16:03 huangbc Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.47 2016/02/18 17:24:40 smirnovd Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent.h"
@@ -249,8 +249,7 @@ Int_t StIstRawHitMaker::Make()
       // Signal w/ pedestal subtracted
       std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalCorrected{};
       // id of mc track
-      Int_t idTruth[kIstNumApvChannels];   
-      memset(idTruth, 0, sizeof(idTruth));
+      std::array<int, kIstNumApvChannels> idTruth{};
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
       double sumAdcPerEvent[kIstNumTimeBins];
@@ -364,7 +363,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
    int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
    std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
    std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected,
-   int idTruth[])
+   std::array<int, kIstNumApvChannels> &idTruth)
 {
    // calculate the dynamical common mode noise for the current chip in this event
    double commonModeNoise[kIstNumTimeBins];
