@@ -1,4 +1,4 @@
-// $Id: StIstRawHitMaker.cxx,v 1.47 2016/02/18 17:24:40 smirnovd Exp $
+// $Id: StIstRawHitMaker.cxx,v 1.48 2016/02/18 17:24:49 smirnovd Exp $
 #include "StIstRawHitMaker.h"
 
 #include "StEvent.h"
@@ -318,10 +318,8 @@ Int_t StIstRawHitMaker::Make()
                if(rawHitCollectionSimuPtr)
                {
                   StIstRawHit * rawHitSimu = rawHitCollectionSimuPtr->getRawHit(elecId);
-                  if(rawHitSimu->getCharge(timebin)>0){
-                     signalUnCorrected[channel][timebin] += rawHitSimu->getCharge(timebin);
-                     idTruth[channel] = rawHitSimu->getIdTruth();
-                  }
+                  signalUnCorrected[channel][timebin] += rawHitSimu->getCharge(timebin);
+                  idTruth[channel] = (rawHitSimu->getCharge(timebin) > 0 ? rawHitSimu->getIdTruth() : 0);
                }
             }
 
