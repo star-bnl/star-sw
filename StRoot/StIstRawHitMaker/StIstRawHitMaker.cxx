@@ -1,6 +1,5 @@
-// $Id: StIstRawHitMaker.cxx,v 1.42 2016/01/21 02:54:45 smirnovd Exp $
-
-#include "StIstRawHitMaker/StIstRawHitMaker.h"
+// $Id: StIstRawHitMaker.cxx,v 1.48 2016/02/18 17:24:49 smirnovd Exp $
+#include "StIstRawHitMaker.h"
 
 #include "StEvent/StEvent.h"
 #include "St_base/StMessMgr.h"
@@ -249,6 +248,8 @@ Int_t StIstRawHitMaker::Make()
       std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalUnCorrected{};
       // Signal w/ pedestal subtracted
       std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > signalCorrected{};
+      // id of mc track
+      std::array<int, kIstNumApvChannels> idTruth{};
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
       double sumAdcPerEvent[kIstNumTimeBins];
@@ -318,6 +319,7 @@ Int_t StIstRawHitMaker::Make()
                {
                   StIstRawHit * rawHitSimu = rawHitCollectionSimuPtr->getRawHit(elecId);
                   signalUnCorrected[channel][timebin] += rawHitSimu->getCharge(timebin);
+                  idTruth[channel] = (rawHitSimu->getCharge(timebin) > 0 ? rawHitSimu->getIdTruth() : 0);
                }
             }
 
@@ -338,7 +340,7 @@ Int_t StIstRawHitMaker::Make()
          }
       } // end current APV loops
 
-      FillRawHitCollectionFromAPVData(dataFlag, ntimebin, counterAdcPerEvent, sumAdcPerEvent, apvElecId, signalUnCorrected, signalCorrected);
+      FillRawHitCollectionFromAPVData(dataFlag, ntimebin, counterAdcPerEvent, sumAdcPerEvent, apvElecId, signalUnCorrected, signalCorrected, idTruth);
 
    }//end while
 
@@ -358,7 +360,8 @@ Int_t StIstRawHitMaker::Make()
 void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin,
    int counterAdcPerEvent[], double sumAdcPerEvent[], int apvElecId,
    std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalUnCorrected,
-   std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected)
+   std::array< std::array<double, kIstNumTimeBins>, kIstNumApvChannels > &signalCorrected,
+   std::array<int, kIstNumApvChannels> &idTruth)
 {
    // calculate the dynamical common mode noise for the current chip in this event
    double commonModeNoise[kIstNumTimeBins];
@@ -475,6 +478,7 @@ void StIstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, i
          rawHitPtr->setGeoId( geoId );
          rawHitPtr->setMaxTimeBin( tempMaxTB );
          rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
+         rawHitPtr->setIdTruth( idTruth[iChan] );
       }//end filling hit info
    } //end single APV chip hits filling
 }
