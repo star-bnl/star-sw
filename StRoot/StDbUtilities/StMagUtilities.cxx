@@ -454,6 +454,7 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  DoOnce     = kTRUE;
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
@@ -476,6 +477,7 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+  DoOnce         = kTRUE;
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
@@ -1431,8 +1433,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
   Float_t r,phi;
   if (usingCartesian) Cart2Polar(x,r,phi);
-  else { r = x[0]; phi = x[1]; }
-  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  else { r = x[0]; phi = x[1]; }  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
   if ( DoOnce )
