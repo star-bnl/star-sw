@@ -1424,6 +1424,27 @@ map<Int_t,Int_t> &StMuDst::IdGlobalId2IdPrimaryTrack() {
   return *&IdGlobalId2IdPrimaryTrackMap;
 }
 //________________________________________________________________________________
+map<Int_t,Int_t> &StMuDst::IdGlobal2IdPrimaryTrack() {
+  static Int_t eventIdOld = -1;
+  static map<Int_t,Int_t> IdGlobal2IdPrimaryTrackMap; // Primary track Id to Global Track Id
+  if (eventId() != eventIdOld) {
+    eventIdOld = eventId();
+    IdGlobal2IdPrimaryTrackMap.clear();
+    for (Int_t k = 0; k < numberOfPrimaryTracks(); k++) {
+      StMuTrack *pTrack = (StMuTrack *) array(muPrimary)->UncheckedAt(k);
+      if (! Accept(pTrack)) continue;
+      Int_t l = pTrack->vertexIndex();
+      if (l < 0) continue;
+      StMuPrimaryVertex *Vtx = primaryVertex(l);
+      if (! Vtx) continue; // ??????
+      if (Vtx->idTruth() != 1) continue;
+      Int_t kg = pTrack->index2Global();
+      IdGlobal2IdPrimaryTrackMap.insert(pair<Int_t,Int_t>(kg+1,k+1));
+    }
+  }
+  return *&IdGlobal2IdPrimaryTrackMap;
+}
+//________________________________________________________________________________
 multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcTracks() {
   static Int_t eventIdOld = -1;
   static multimap<Int_t,Int_t> IdMc2IdRcTracksMap; // Primary track Id to Global Track Id

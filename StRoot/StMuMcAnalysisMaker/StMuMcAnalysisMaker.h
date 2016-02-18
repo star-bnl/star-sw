@@ -132,6 +132,8 @@ class StMuMcAnalysisMaker : public StMaker {
   Bool_t         AcceptGhost(const StMuTrack *gTrack = 0);
   Bool_t         AcceptVX(const StMuPrimaryVertex *Vtx = 0);
   TrackMatchType TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, Bool_t CheckHft = kFALSE);
+  Bool_t         IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack);
+  
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
   virtual Int_t  Finish();  

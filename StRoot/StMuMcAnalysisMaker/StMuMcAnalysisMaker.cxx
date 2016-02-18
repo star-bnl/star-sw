@@ -82,7 +82,7 @@ Int_t StMuMcAnalysisMaker::InitRun(Int_t runumber) {
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::BookTrackPlots(){
 #if 1
-  enum {npT    = 103};
+  enum {npT    = 108};
   //  Double_t pTMax =   10;
   const Double_t ptBins[npT+1] = {
     0.07, 0.08, 0.11, 0.14, 0.16, 0.17, 0.19, 0.21, 0.22, 0.23,
@@ -95,7 +95,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
     1.09, 1.12, 1.16, 1.19, 1.23, 1.27, 1.31, 1.35, 1.40, 1.45,
     1.51, 1.57, 1.64, 1.71, 1.80, 1.89, 2.00, 2.11, 2.24, 2.39,
     2.57, 2.78, 3.05, 3.38, 3.80, 4.28, 4.96, 5.88, 7.25,10.00, 
-    20.0, 40., 60., 100.
+    15.0, 20.0, 25.0, 30., 35., 40., 50., 60., 100.
   };
 #else
   Int_t    npT    = 100;
@@ -402,13 +402,16 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     TrackMatchType typeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
     if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
     if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
+    Bool_t isPrim = IsPrimary(mcTrack,Mc2RcTracks, muDst->IdGlobal2IdPrimaryTrack());
     for (Int_t particle = 0; particle <= NPart; particle++) {
       if (type != kNotDefined) {
 	fHistsT[kGlobal][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
+	if (isPrim)
 	fHistsT[kPrimary][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       }
       if (typeHft != kNotDefined) {
 	fHistsT[kGlobal][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
+	if (isPrim)
 	fHistsT[kPrimary][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
       }
     }
@@ -753,6 +756,23 @@ TString &StMuMcAnalysisMaker::FormName(const TH1 *hist) {
   return *&Name;
 }
 //________________________________________________________________________________
+Bool_t StMuMcAnalysisMaker::IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack) {
+  Bool_t ok = kFALSE;
+  Int_t Id = mcTrack->Id()-1;
+  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
+  Int_t count = 0;
+  for (multimap<Int_t,Int_t>::iterator it = ret.first; 
+       it != ret.second; 
+       ++it)     {
+    Int_t kg = (*it).second;
+    Int_t k = IdGlobal2IdPrimaryTrack[kg+1] - 1;
+    if (k < 0) continue;
+    count++;
+  }
+  if (count > 0) ok = kTRUE;
+  return ok;
+}
+//________________________________________________________________________________
 TrackMatchType StMuMcAnalysisMaker::TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, Bool_t CheckHft) {
   Int_t Id = mcTrack->Id()-1;
   pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
@@ -974,6 +994,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
 }
 //_____________________________________________________________________________
 Int_t StMuMcAnalysisMaker::Finish(){
+  if (gROOT->IsBatch()) return kStOk;
   if (! Check()) return kStOk;
   TString Out("indexMc.html");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
