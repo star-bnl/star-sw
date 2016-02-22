@@ -42,6 +42,7 @@ const float istBuilder::landauFit_up      = 2000.0;
 const float istBuilder::cmnCut            = 3.0;
 const float istBuilder::hitCut            = 5.0;
 const float istBuilder::noiseChipCut      = 10.0;
+const int   istBuilder::hitOccupancyCut  = 25;
 
 
 istBuilder::istBuilder(JevpServer *parent):JevpBuilder(parent),evtCt(0) {
@@ -99,9 +100,11 @@ void istBuilder::initialize(int argc, char *argv[]) {
 		runningAvg[i]      = 0;
 		runningStdDevSq[i] = 0;
 	}
-	for ( int i=0; i<totCh; i++ )         {    maxAdc[i]          = 0; maxAdc_zs[i]          = 0;  }
-	for ( int i=0; i<totCh; i++ )         {    maxTimeBin[i]      = 0; maxTimeBin_zs[i]      = 0;  }
-	for ( int i=0; i<totAPV; i++ )        {    cmNoise[i]         = 0; isNoisyApv[i]         = false; }
+	for ( int i=0; i<totCh; i++ ){    
+      maxAdc[i] = 0; maxAdc_zs[i] = 0;  
+      maxTimeBin[i] = -1; maxTimeBin_zs[i] = -1;  
+   }
+	for ( int i=0; i<totAPV; i++ ){    cmNoise[i]         = 0; isNoisyApv[i]         = false; }
 
 	// //////////////////////////////////add bad channels here///////////////////////
 	// ///////////////////isChannelBad[numAssembly*ChPerSec+channel]=true;
@@ -864,12 +867,18 @@ void istBuilder::event(daqReader *rdr) {
 	//if(trgd) delete trgd;
 	// arrays to calculate dynamical common mode noise contribution to this chip in current event
 	float sumAdcPerEvent[totAPV];
-	int counterAdcPerEvent[totAPV];
+	int   counterAdcPerEvent[totAPV];
+	int counterGoodHitPerEvent[totAPV];
+	int counterGoodHitPerEvent_zs[totAPV];
+   memset(counterGoodHitPerEvent,0,sizeof(counterGoodHitPerEvent));
+   memset(counterGoodHitPerEvent_zs,0,sizeof(counterGoodHitPerEvent_zs));
 
 	int HitCount[numLadder]; // for each ladder per event
 
-	for ( int i=0; i<totCh; i++ ) 	{    maxAdc[i]          = 0; maxAdc_zs[i]          = 0;  }
-	for ( int i=0; i<totCh; i++ )         {    maxTimeBin[i]      = 0; maxTimeBin_zs[i]      = 0;  }
+	for ( int i=0; i<totCh; i++ ){
+      maxAdc[i] = 0; maxAdc_zs[i] = 0;  
+      maxTimeBin[i] = -1; maxTimeBin_zs[i] = -1; 
+   }
 	for ( int i=0; i<numLadder; i++ )     {    HitCount[i]        = 0;   }
 	for ( int i=0; i<totAPV; i++ )        {    cmNoise[i]         = 0;   }
 
@@ -912,6 +921,9 @@ void istBuilder::event(daqReader *rdr) {
 		if ( ddZS->sec < 0 || ddZS->sec > 5 )         continue;      //valid ARM numbering: 0, 1, ..., 5
 		if ( ddZS->rdo < 1 || ddZS->rdo > 6 )         continue;      //valid ARC numbering: 1, 2, ..., 6
 
+      int elecApvId = (ddZS->rdo-1)*numARM*numAPV + ddZS->sec*numAPV + ddZS->pad;
+      int cou_zs[ChPerApv];
+		memset(cou_zs,0,sizeof(cou_zs));
 		//loop current APV chip
 		for ( u_int i=0; i<ddZS->ncontent; i++ ) {
 			if ( f_zs[i].ch  < 0 || f_zs[i].ch  > 127 )    continue;//valid Channel numbering: 0, 1, ..., 127
@@ -928,7 +940,17 @@ void istBuilder::event(daqReader *rdr) {
 				maxAdc_zs[geoId_zs-1]     = f_zs[i].adc;
 				maxTimeBin_zs[geoId_zs-1] = f_zs[i].tb;
 			}
+			if ( f_zs[i].adc > hitCut * oldStdDevs[geoId_zs-1]) {
+            cou_zs[f_zs[i].ch]++;
+         }
 		}//end current APV loop
+
+		// zero out hits less than 3 TBs
+		for(int i=0;i<ChPerApv;i++){
+			if(cou_zs[i]>=3){
+            counterGoodHitPerEvent_zs[elecApvId]++;
+         }
+		}
 	}//end all RDO, ARM, APV loops
 
 	//do for zs data and fill with num kB  
@@ -936,6 +958,7 @@ void istBuilder::event(daqReader *rdr) {
 		hEventSumContents.hEventSize->Fill(short(evtSize/1024));
 		evtSize = 0;
 	}
+		
 
 	// don't use zs data to fill histos...
 	while(dd && dd->iterate()) { 
@@ -951,6 +974,8 @@ void istBuilder::event(daqReader *rdr) {
 			sumAdcPerEvent[apvIdx]     = 0.;
 			counterAdcPerEvent[apvIdx] = 0 ;
 		}
+         
+      int elecApvId = (dd->rdo-1)*numARM*numAPV + dd->sec*numAPV + dd->pad;
 
 		int sectionIdx = (dd->rdo-1)*6*2 + dd->sec*2 + dd->pad/12;
 		bool isFilled = false;
@@ -1007,7 +1032,7 @@ void istBuilder::event(daqReader *rdr) {
 			if(isBad) continue;
 
 			//fill pedestal-subtracted ADC vs time bin index
-			if ( !isBad )     hTbVsAdcContents.tbVsAdcArray[sectionIdx]->Fill(f[i].tb, f[i].adc - (int)(runningAvg[geoId-1]+0.5));
+			hTbVsAdcContents.tbVsAdcArray[sectionIdx]->Fill(f[i].tb, f[i].adc - (int)(runningAvg[geoId-1]+0.5));
 
 			//count channel whose pedestal subtracted ADC yield one RMS
 			if ( (f[i].adc-runningAvg[geoId-1])>oldStdDevs[geoId-1] && oldStdDevs[geoId-1]>0 ) 
@@ -1038,8 +1063,10 @@ void istBuilder::event(daqReader *rdr) {
 				Int_t channelId = (dd->rdo-1)*numARM*numAPV*ChPerApv + dd->sec*numAPV*ChPerApv + dd->pad*ChPerApv + i;
 				Int_t geoId    = istMapping[channelId];     //numbering from 1 to 110592
 				maxAdc[geoId-1]     = 0;
-				maxTimeBin[geoId-1] = 0;
-			}
+				maxTimeBin[geoId-1] = -1;
+			}else{
+            counterGoodHitPerEvent[elecApvId]++;
+         }
 		}
 
 		//calculate dynamical common mode noise for current event
@@ -1096,24 +1123,30 @@ void istBuilder::event(daqReader *rdr) {
 		int apvId = (elecRdo-1)*numARM*numAPV + elecArm*numAPV + elecApv;
 		if( adc_max>hitCut*rms && rms > minRMSVal && rms < maxRMSVal ){
 		if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && adc_max>noiseChipCut*rms)){
+         if(counterGoodHitPerEvent[apvId]<=hitOccupancyCut){
 
 			HitCount[ladderIdx-1]++;
 			hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMap->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
 			hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
-			hEventSumContents.hMaxTimeBin->Fill(tb_max);
+			if(tb_max>=0) hEventSumContents.hMaxTimeBin->Fill(tb_max);
+         }
 		}
 		}
 
 		//ZS data
 		if( maxAdc_zs[geoIdx-1] > hitCut*rms && rms > minRMSVal && rms < maxRMSVal ) {//roughly cut
 			if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && maxAdc_zs[geoIdx-1] > noiseChipCut*rms)){
+         if(counterGoodHitPerEvent_zs[apvId]<=hitOccupancyCut){
 			hMipContents.mipArray[elecSec+72]->Fill(short(maxAdc_zs[geoIdx-1]+0.5));
-			hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
-			hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
+         if(maxTimeBin_zs[geoIdx-1]>=0){
+			   hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
+			   hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
+         }
 			hSumContents.hHitMap_ZS->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMapVsAPV_ZS->Fill(ladderIdx, apvGeoIdx);
+         }
 		}
 		}
 	}
@@ -1360,7 +1393,7 @@ void istBuilder::stoprun(daqReader *rdr) {
 		isChannelBad[i]    =false;
 	}
 	for ( int i=0; i<totCh; i++ )         {    maxAdc[i]          = 0; maxAdc_zs[i]          = 0;  }
-	for ( int i=0; i<totCh; i++ )         {    maxTimeBin[i]      = 0; maxTimeBin_zs[i]      = 0;  }
+	for ( int i=0; i<totCh; i++ )         {    maxTimeBin[i]      = -1; maxTimeBin_zs[i]      = -1;  }
 	for ( int i=0; i<totAPV; i++ )        {    cmNoise[i]         = 0;   }
 }
 

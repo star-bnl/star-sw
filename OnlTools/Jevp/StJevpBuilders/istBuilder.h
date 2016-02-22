@@ -81,6 +81,7 @@ class istBuilder : public JevpBuilder {
   static const float cmnCut;
   static const float hitCut;
   static const float noiseChipCut;
+  static const int   hitOccupancyCut;
 
   //IST mapping
   int istMapping[totCh]; //IST channel mapping (electronics ID to geometry ID transform)
@@ -543,12 +544,12 @@ class istBuilder : public JevpBuilder {
   int numVals[totCh];
   int aVals[totCh];
   int numOverOneSig[totCh];
-  int maxAdc[totCh];
-  int maxTimeBin[totCh];
-  int maxAdc_zs[totCh];
-  int maxTimeBin_zs[totCh];
-  double runningAvg[totCh];
-  double runningStdDevSq[totCh];
+  short maxAdc[totCh];
+  char  maxTimeBin[totCh];
+  short maxAdc_zs[totCh];
+  char  maxTimeBin_zs[totCh];
+  float runningAvg[totCh];
+  float runningStdDevSq[totCh];
 
   float oldStdDevs[totCh];
   float meanVals[totCh];
