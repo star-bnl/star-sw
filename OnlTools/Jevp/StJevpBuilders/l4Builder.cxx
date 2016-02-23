@@ -359,9 +359,7 @@ void l4Builder::startrun(daqReader *rdr)
 
 void l4Builder::stoprun(daqReader *rdr)
 {
-
-	//printf("Number of events processed in daq file = %d\n", eventCounter);
-	LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
+	LOG(DBG, "Number of events processed in daq file = %d\n", eventCounter);
 
 	gStyle->SetOptStat(000000);
 	gStyle->SetStatW(0.13);
@@ -670,6 +668,7 @@ void l4Builder::main(int argc, char *argv[])
 
 void l4Builder::event(daqReader *rdr)
 {
+    //LOG("JEFF", "Event %d", rdr->seq);
 
 	//   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
 	//   //We want all events right now (not just min-bias), min-bias is our main trigger.
@@ -703,13 +702,15 @@ void l4Builder::event(daqReader *rdr)
 	//daq_dta *dd = rdr->det("hlt")->get("gl3");
 	daq_dta *dd = rdr->det("l4")->get("gl3");
 	daq_dta *ddTof  = rdr->det("trg")->get("raw");
-	int daqID = rdr->daqbits;
+	int daqID = rdr->daqbits64;
 
 	if(!dd) {
-		LOG(DBG, "No HLT in this event");
-		return;
+	    LOG(DBG, "No HLT in this event dd=%p ddTof=%p 0x%llx", dd, ddTof, daqID);
+	    return;
 	}
 	eventCounter++;
+
+	LOG(DBG, "HLT in this event dd=%p ddTof=%p 0x%llx %d", dd, ddTof, daqID, eventCounter);
 
 	HLT_EVE *hlt_eve;
 	HLT_TOF *hlt_tof;

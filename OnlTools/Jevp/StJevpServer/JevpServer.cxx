@@ -424,6 +424,22 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	myport = JEVP_PORT+10;
 	die = 1;
     }
+    else if (strcmp(argv[i], "-l4updatedb")==0) {
+	nodb = 0;
+	myport = JEVP_PORT+10;
+	die = 1;
+
+	LOG("JEFF", "Update L4 DB");
+	isL4 = 1;
+	log_dest = "172.17.0.1";
+	nodb = 0;
+      
+	clientdatadir = (char *)"/a/l4jevp/client";
+	basedir = (char *)"/RTScache/conf/l4jevp";
+	pdfdir = (char *)"/a/l4jevp/pdf";
+	refplotdir = (char *)"/a/l4jevp/refplots";
+	rootfiledir = (char *)"/a/l4jevp/rootfiles";
+    }
     else if (strcmp(argv[i], "-test")==0) {
       nodb = 1;
       log_output = RTS_LOG_STDERR;
