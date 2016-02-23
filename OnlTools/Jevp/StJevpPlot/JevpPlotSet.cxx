@@ -408,7 +408,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
   builderStatus.setName(plotsetname);
 
   rtsLogOutput(RTS_LOG_STDERR);
-  rtsLogAddDest((char *)"172.16.0.1",8004);
+  rtsLogAddDest((char *)"172.17.0.1",8004);
   rtsLogLevel((char *)WARN);
 
   if(loglevel) rtsLogLevel(loglevel);

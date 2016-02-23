@@ -912,7 +912,7 @@ int DisplayNode::_matchTags(char *tags)
 void DisplayFile::test(char *fn)
 {
   rtsLogOutput(RTS_LOG_NET);
-  rtsLogAddDest((char *)"172.16.0.1",8004);
+  rtsLogAddDest((char *)"172.17.0.1",8004);
   rtsLogLevel((char *)DBG);
   
   LOG(DBG, "HERE...");
