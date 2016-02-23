@@ -1124,14 +1124,14 @@ void istBuilder::event(daqReader *rdr) {
 		if( adc_max>hitCut*rms && rms > minRMSVal && rms < maxRMSVal ){
 		if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && adc_max>noiseChipCut*rms)){
          if(counterGoodHitPerEvent[apvId]<=hitOccupancyCut){
-
-			HitCount[ladderIdx-1]++;
+			   HitCount[ladderIdx-1]++;
+			   hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
+			   hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
+			   if(tb_max>=0) hEventSumContents.hMaxTimeBin->Fill(tb_max);
+         }
+         //keep monitoring hot chips
 			hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 			hSumContents.hHitMap->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
-			hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
-			hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
-			if(tb_max>=0) hEventSumContents.hMaxTimeBin->Fill(tb_max);
-         }
 		}
 		}
 
@@ -1139,14 +1139,15 @@ void istBuilder::event(daqReader *rdr) {
 		if( maxAdc_zs[geoIdx-1] > hitCut*rms && rms > minRMSVal && rms < maxRMSVal ) {//roughly cut
 			if( !isNoisyApv[apvId] || (isNoisyApv[apvId] && maxAdc_zs[geoIdx-1] > noiseChipCut*rms)){
          if(counterGoodHitPerEvent_zs[apvId]<=hitOccupancyCut){
-			hMipContents.mipArray[elecSec+72]->Fill(short(maxAdc_zs[geoIdx-1]+0.5));
-         if(maxTimeBin_zs[geoIdx-1]>=0){
-			   hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
-			   hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
+			   hMipContents.mipArray[elecSec+72]->Fill(short(maxAdc_zs[geoIdx-1]+0.5));
+            if(maxTimeBin_zs[geoIdx-1]>=0){
+			      hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
+			      hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
+            }
+			   hSumContents.hHitMapVsAPV_ZS->Fill(ladderIdx, apvGeoIdx);
          }
+         //keep monitoring hot chips
 			hSumContents.hHitMap_ZS->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
-			hSumContents.hHitMapVsAPV_ZS->Fill(ladderIdx, apvGeoIdx);
-         }
 		}
 		}
 	}
