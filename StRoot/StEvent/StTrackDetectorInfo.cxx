@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.18 2015/05/19 20:09:45 perev Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.19 2016/02/24 22:02:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.19  2016/02/24 22:02:11  ullrich
+ * Set of changes to account for SST (compared to SSD)
+ *
  * Revision 2.18  2015/05/19 20:09:45  perev
  * added Ist & Pxl
  *
@@ -73,7 +76,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.18 2015/05/19 20:09:45 perev Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.19 2016/02/24 22:02:11 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -107,7 +110,7 @@ StTrackDetectorInfo::numberOfPoints() const
 		numberOfPoints(kFtpcWestId) +
 		numberOfPoints(kFtpcEastId) +
 		numberOfPoints(kSvtId) +
-		numberOfPoints(kSsdId) +	
+		numberOfPoints(kSsdId) +	// internally treat SST=SSD
 		numberOfPoints(kIstId) +	
 		numberOfPoints(kPxlId));	
     }
@@ -128,6 +131,7 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 	    return (mNumberOfPoints%10000)/1000;
 	    break;
 	case kSsdId:
+	case kSstId:
 	    return mNumberOfPoints/10000;
 	    break;
 	default:
@@ -149,6 +153,7 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 	    return mNumberOfPointsSvt;
 	    break;
 	case kSsdId:
+	case kSstId:
 	    return mNumberOfPointsSsd;
 	    break;
 	case kIstId:
@@ -238,6 +243,7 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned char val, StDetectorId det)
 	mNumberOfPointsSvt = val;
 	break;
     case kSsdId:
+    case kSstId:
 	mNumberOfPointsSsd = val;
 	break;
     case kIstId:
