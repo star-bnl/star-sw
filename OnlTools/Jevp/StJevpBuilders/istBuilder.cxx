@@ -266,17 +266,17 @@ void istBuilder::initialize(int argc, char *argv[]) {
 	hEventSumContents.hMeanRMS->SetFillColor(kYellow-9);
 	hEventSumContents.hMeanRMS->SetStats(true);
 
-	hEventSumContents.hSumTB = new TH1S("NumberOfTB", "IST - Number of Time Bins", nBinsTB, 0, TBMax); //15 bins
+	hEventSumContents.hSumTB = new TH1I("NumberOfTB", "IST - Number of Time Bins", nBinsTB, 0, TBMax); //15 bins
 	hEventSumContents.hSumTB->SetFillColor(kYellow-9);
 	hEventSumContents.hSumTB->SetStats(true);
 	hEventSumContents.hSumTB->GetXaxis()->SetTitle("No. of Time Bin");
 
-	hEventSumContents.hMaxTimeBin = new TH1S("MaxTimeBin_nonZS", "IST - Max ADC Time Bin (non-ZS)", numTimeBin, 0, numTimeBin); //9 bins
+	hEventSumContents.hMaxTimeBin = new TH1I("MaxTimeBin_nonZS", "IST - Max ADC Time Bin (non-ZS)", numTimeBin, 0, numTimeBin); //9 bins
 	hEventSumContents.hMaxTimeBin->SetFillColor(kYellow-9);
 	hEventSumContents.hMaxTimeBin->SetStats(true);
 	hEventSumContents.hMaxTimeBin->GetXaxis()->SetTitle("Time Bin Index");
 
-	hEventSumContents.hMaxTimeBin_ZS = new TH1S("MaxTimeBin_ZS", "IST - Max ADC Time Bin (ZS)", numTimeBin, 0, numTimeBin); //9 bins
+	hEventSumContents.hMaxTimeBin_ZS = new TH1I("MaxTimeBin_ZS", "IST - Max ADC Time Bin (ZS)", numTimeBin, 0, numTimeBin); //9 bins
 	hEventSumContents.hMaxTimeBin_ZS->SetFillColor(kYellow-9);
 	hEventSumContents.hMaxTimeBin_ZS->SetStats(true);
 	hEventSumContents.hMaxTimeBin_ZS->GetXaxis()->SetTitle("Time Bin Index");
