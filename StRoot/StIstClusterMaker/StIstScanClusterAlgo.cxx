@@ -27,7 +27,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
    Float_t meanRow = 0., meanColumn = 0.;
    Float_t totCharge = 0., totChargeErr = 0.;
    Int_t clusterSize = 0, clusterSizeRPhi = 0, clusterSizeZ = 0;
-	unsigned short idTruth = 0;
+   unsigned short idTruth = 0;
 
    //get number of time bin used in this event
    Int_t nTimeBins = istCollection.getNumTimeBins();
@@ -114,7 +114,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
             //used time bin index (raw hits with maximum ADC holds the time-bin priority)
             maxTb       = rawHitMaxAdcTemp->getMaxTimeBin();
-				idTruth = rawHitMaxAdcTemp->getIdTruth();
+            idTruth = rawHitMaxAdcTemp->getIdTruth();
 
             if (maxTb < 0 || maxTb >= nTimeBins)         maxTb  = rawHitMaxAdcTemp->getDefaultTimeBin();
 
@@ -159,7 +159,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
             newCluster->setNRawHitsRPhi(clusterSizeRPhi);
             newCluster->setNRawHitsZ(clusterSizeZ);
             newCluster->setMaxTimeBin(maxTb);
-				newCluster->setIdTruth(idTruth);
+            newCluster->setIdTruth(idTruth);
 
             clustersVec[sensorIdx][columnIdx].push_back(newCluster);
             clusterLabel++;
@@ -180,12 +180,12 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
                   float rowDistance = (*clusterIt1)->getMeanRow() - (*clusterIt2)->getMeanRow();
 
                   if (TMath::Abs(rowDistance) < 0.5) { //here 0.5 means the distance between two clusters' weighted centers in row direction smaller than 0.5
-							maxTb = (*clusterIt1)->getMaxTimeBin();
-							idTruth = (*clusterIt1)->getIdTruth();
-							if((*clusterIt1)->getTotCharge() < (*clusterIt2)->getTotCharge()) {
-								maxTb = (*clusterIt2)->getMaxTimeBin();
-								idTruth = (*clusterIt2)->getIdTruth();
-							}
+                     maxTb = (*clusterIt1)->getMaxTimeBin();
+                     idTruth = (*clusterIt1)->getIdTruth();
+                     if((*clusterIt1)->getTotCharge() < (*clusterIt2)->getTotCharge()) {
+                        maxTb = (*clusterIt2)->getMaxTimeBin();
+                        idTruth = (*clusterIt2)->getIdTruth();
+                     }
 
                      totCharge       = (*clusterIt1)->getTotCharge() + (*clusterIt2)->getTotCharge();
                      totChargeErr    = sqrt(((*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getNRawHits() + (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getNRawHits()) / ((*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits()));
@@ -202,7 +202,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
                      (*clusterIt2)->setNRawHits(clusterSize);
                      (*clusterIt2)->setNRawHitsRPhi(clusterSizeRPhi);
                      (*clusterIt2)->setNRawHitsZ(clusterSizeZ);
-							(*clusterIt2)->setIdTruth(idTruth);
+                     (*clusterIt2)->setIdTruth(idTruth);
 
                      int distance1 = std::distance(clustersVec[sensorIdx][columnIdx1].begin(), clusterIt1);
                      clustersVec[sensorIdx][columnIdx1].erase(clusterIt1);
@@ -240,6 +240,11 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.19  2016/02/18 17:27:19  smirnovd
+* StIstScanClusterAlgo: Whitespace corrected in "Add idTruth for clusters."
+*
+* Corrected commit 45e825e1
+*
 * Revision 1.18  2016/02/17 19:52:50  huangbc
 * Add idTruth for clusters.
 *

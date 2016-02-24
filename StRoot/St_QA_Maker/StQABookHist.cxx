@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.73 2015/07/17 19:09:03 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.74 2016/02/19 03:52:15 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.74  2016/02/19 03:52:15  genevb
+// Expand track detector ID histograms
+//
 // Revision 2.73  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
@@ -875,7 +878,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
-  m_det_id           = QAH::H1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
+  m_det_id           = QAH::H1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",48,-0.5,47.5);
   m_dcaToBeamXY      = QAH::H2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
   m_dcaToBeamXY->SetXTitle("x");
   m_dcaToBeamXY->SetYTitle("y");
@@ -1358,7 +1361,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
   m_primglob_fit    = QAH::H1F("QaPtrkGlobFit","primtrk: ratio primary/global nfit points",50,0,2);
-  m_pdet_id         = QAH::H1F("QaPtrkDetId",  "primtrk: Detector ID good tracks - all",25,0.,25.);
+  m_pdet_id         = QAH::H1F("QaPtrkDetId",  "primtrk: Detector ID good tracks - all",48,-0.5,47.5);
   if (silHists) {
     m_primtrk_meanptTTS = QAH::MH1F("QaPtrkMeanPtTTS","primtrk: <pT>, tpc, tpc+svt",50,0.,2.,2);
     m_primtrk_meanptTTS->Rebin(0,"TPC+SVT");

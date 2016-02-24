@@ -529,31 +529,8 @@ void StEventQAMaker::MakeHistGlob() {
       // so it doesn't need to be calculated here 
       
       // check if the track has hits in a detector -CPL
-      if (map.hasHitInDetector(kUnknownId)) hists->m_det_id->Fill(kUnknownId);
-      if (map.hasHitInDetector(kTpcId)) hists->m_det_id->Fill(kTpcId);
-      if (map.hasHitInDetector(kSvtId)) hists->m_det_id->Fill(kSvtId);
-      if (map.hasHitInDetector(kRichId)) hists->m_det_id->Fill(kRichId);
-      if (map.hasHitInDetector(kFtpcWestId)) hists->m_det_id->Fill(kFtpcWestId);
-      if (map.hasHitInDetector(kFtpcEastId)) hists->m_det_id->Fill(kFtpcEastId);
-      if (map.hasHitInDetector(kTofId)) hists->m_det_id->Fill(kTofId);
-      if (map.hasHitInDetector(kCtbId)) hists->m_det_id->Fill(kCtbId);
-      if (map.hasHitInDetector(kSsdId)) hists->m_det_id->Fill(kSsdId);
-      if (map.hasHitInDetector(kBarrelEmcTowerId)) hists->m_det_id->Fill(kBarrelEmcTowerId);
-      if (map.hasHitInDetector(kBarrelEmcPreShowerId)) hists->m_det_id->Fill(kBarrelEmcPreShowerId);
-      if (map.hasHitInDetector(kBarrelSmdEtaStripId)) hists->m_det_id->Fill(kBarrelSmdEtaStripId);
-      if (map.hasHitInDetector(kBarrelSmdPhiStripId)) hists->m_det_id->Fill(kBarrelSmdPhiStripId);
-      if (map.hasHitInDetector(kEndcapEmcTowerId)) hists->m_det_id->Fill(kEndcapEmcTowerId);
-      if (map.hasHitInDetector(kEndcapEmcPreShowerId)) hists->m_det_id->Fill(kEndcapEmcPreShowerId);
-      if (map.hasHitInDetector(kEndcapSmdUStripId)) hists->m_det_id->Fill(kEndcapSmdUStripId);
-      if (map.hasHitInDetector(kEndcapSmdVStripId)) hists->m_det_id->Fill(kEndcapSmdVStripId);
-      if (map.hasHitInDetector(kZdcWestId)) hists->m_det_id->Fill(kZdcWestId);
-      if (map.hasHitInDetector(kZdcEastId)) hists->m_det_id->Fill(kZdcEastId);
-      if (map.hasHitInDetector(kMwpcWestId)) hists->m_det_id->Fill(kMwpcWestId);
-      if (map.hasHitInDetector(kMwpcEastId)) hists->m_det_id->Fill(kMwpcEastId);
-      if (map.hasHitInDetector(kTpcSsdId)) hists->m_det_id->Fill(kTpcSsdId);
-      if (map.hasHitInDetector(kTpcSvtId)) hists->m_det_id->Fill(kTpcSvtId);
-      if (map.hasHitInDetector(kTpcSsdSvtId)) hists->m_det_id->Fill(kTpcSsdSvtId);
-      if (map.hasHitInDetector(kSsdSvtId)) hists->m_det_id->Fill(kSsdSvtId);
+      for (int detId=0; detId<48; detId++)
+        if (map.hasHitInDetector(static_cast<StDetectorId>(detId))) hists->m_det_id->Fill(detId);
       
       // these histogram additions are for Lanny's evr QA histograms
       hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
@@ -1142,31 +1119,8 @@ void StEventQAMaker::MakeHistPrim() {
         Float_t radf = firstPoint.perp();
 	
 	// check if the track has hits in a detector -CPL
-	if (map.hasHitInDetector(kUnknownId)) hists->m_pdet_id->Fill(kUnknownId);
-	if (map.hasHitInDetector(kTpcId)) hists->m_pdet_id->Fill(kTpcId);
-	if (map.hasHitInDetector(kSvtId)) hists->m_pdet_id->Fill(kSvtId);
-	if (map.hasHitInDetector(kRichId)) hists->m_pdet_id->Fill(kRichId);
-	if (map.hasHitInDetector(kFtpcWestId)) hists->m_pdet_id->Fill(kFtpcWestId);
-	if (map.hasHitInDetector(kFtpcEastId)) hists->m_pdet_id->Fill(kFtpcEastId);
-	if (map.hasHitInDetector(kTofId)) hists->m_pdet_id->Fill(kTofId);
-	if (map.hasHitInDetector(kCtbId)) hists->m_pdet_id->Fill(kCtbId);
-	if (map.hasHitInDetector(kSsdId)) hists->m_pdet_id->Fill(kSsdId);
-	if (map.hasHitInDetector(kBarrelEmcTowerId)) hists->m_pdet_id->Fill(kBarrelEmcTowerId);
-	if (map.hasHitInDetector(kBarrelEmcPreShowerId)) hists->m_pdet_id->Fill(kBarrelEmcPreShowerId);
-	if (map.hasHitInDetector(kBarrelSmdEtaStripId)) hists->m_pdet_id->Fill(kBarrelSmdEtaStripId);
-	if (map.hasHitInDetector(kBarrelSmdPhiStripId)) hists->m_pdet_id->Fill(kBarrelSmdPhiStripId);
-	if (map.hasHitInDetector(kEndcapEmcTowerId)) hists->m_pdet_id->Fill(kEndcapEmcTowerId);
-	if (map.hasHitInDetector(kEndcapEmcPreShowerId)) hists->m_pdet_id->Fill(kEndcapEmcPreShowerId);
-	if (map.hasHitInDetector(kEndcapSmdUStripId)) hists->m_pdet_id->Fill(kEndcapSmdUStripId);
-	if (map.hasHitInDetector(kEndcapSmdVStripId)) hists->m_pdet_id->Fill(kEndcapSmdVStripId);
-	if (map.hasHitInDetector(kZdcWestId)) hists->m_pdet_id->Fill(kZdcWestId);
-	if (map.hasHitInDetector(kZdcEastId)) hists->m_pdet_id->Fill(kZdcEastId);
-	if (map.hasHitInDetector(kMwpcWestId)) hists->m_pdet_id->Fill(kMwpcWestId);
-	if (map.hasHitInDetector(kMwpcEastId)) hists->m_pdet_id->Fill(kMwpcEastId);
-	if (map.hasHitInDetector(kTpcSsdId)) hists->m_pdet_id->Fill(kTpcSsdId);
-	if (map.hasHitInDetector(kTpcSvtId)) hists->m_pdet_id->Fill(kTpcSvtId);
-	if (map.hasHitInDetector(kTpcSsdSvtId)) hists->m_pdet_id->Fill(kTpcSsdSvtId);
-	if (map.hasHitInDetector(kSsdSvtId)) hists->m_pdet_id->Fill(kSsdSvtId);
+        for (int detId=0; detId<48; detId++)
+          if (map.hasHitInDetector(static_cast<StDetectorId>(detId))) hists->m_pdet_id->Fill(detId);
 	
 	// now fill all TPC histograms ------------------------------------------------
         if (map.trackTpcOnly()) {
@@ -2848,6 +2802,14 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
+// $Id: StEventQAMaker.cxx,v 2.125 2016/02/19 03:54:41 genevb Exp $
+// $Log: StEventQAMaker.cxx,v $
+// Revision 2.125  2016/02/19 03:54:41  genevb
+// Expand track detector ID histograms (compact syntax)
+//
+// Revision 2.124  2016/02/19 03:52:14  genevb
+// Expand track detector ID histograms
+//
 // Revision 2.123  2016/02/01 23:46:21  genevb
 // Add a mode for printing out TPC hits
 //

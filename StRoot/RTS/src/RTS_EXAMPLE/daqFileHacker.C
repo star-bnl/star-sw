@@ -43,6 +43,8 @@ int btow_histo_bht1vpd[BTOW_ADC_MAX];
 int cou_bht3 = 0;
 int cou_bht1 = 0;
 int max_adc = 0;
+int bht3_towers = 0;
+int bht1_towers = 0;
 
 void initHack() {
     memset(btow_histo_bht1vpd, 0, sizeof(btow_histo_bht1vpd));
@@ -76,8 +78,14 @@ void doHack(daqReader *rdr) {
 		    
 		    assert(adc < BTOW_ADC_MAX);
 
-		    if(isbht1) btow_histo_bht1vpd[adc]++;
-		    if(isbht3) btow_histo_bht3[adc]++;
+		    if(isbht1) {
+          		btow_histo_bht1vpd[adc]++;
+			bht1_towers++;
+		    }
+		    if(isbht3) {
+			btow_histo_bht3[adc]++;
+			bht3_towers++;
+		    }
 		}
 	    }
 	}
@@ -86,6 +94,7 @@ void doHack(daqReader *rdr) {
 
 void finishHack() {
     printf("# bht3=%d evts,  bht1=%d evts,   maxadc=%d\n", cou_bht3, cou_bht1, max_adc);
+    printf("# bht3=%d towers.  bht1=%d towers.\n", bht3_towers, bht1_towers);
 
     for(int i=0;i<BTOW_ADC_MAX;i++) {
 	printf("%d %d %d\n", i, btow_histo_bht3[i], btow_histo_bht1vpd[i]);
