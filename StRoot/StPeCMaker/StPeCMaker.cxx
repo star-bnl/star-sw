@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.34 2015/07/22 18:29:51 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.35 2016/02/24 16:50:00 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.35  2016/02/24 16:50:00  ramdebbe
+// just removed commented lines
+//
 // Revision 1.34  2015/07/22 18:29:51  ramdebbe
 // added choice to skip writting the tree to output file and added summary histograms
 //
@@ -143,7 +146,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.34 2015/07/22 18:29:51 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.35 2016/02/24 16:50:00 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -169,7 +172,7 @@ Int_t StPeCMaker::Init() {
    LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
    LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
    LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
-   LOG_INFO <<"trigger to be selected: "      << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest (const char * selectTrigger = "UPC_Main" )
+   LOG_INFO <<"trigger to be selected: "      << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest (const char * selectTrigger = "UPC_Main" ) see StPeCTrigger for details
    LOG_INFO <<"choice for output: "           << treeOff << endm;         // if argument of setter setSuppressTreeOut is kTRUE, the TTree will not be writte in output file
 
    //Get the standard root format to be independent of Star IO   
@@ -237,6 +240,7 @@ Int_t StPeCMaker::Init() {
 
 Int_t StPeCMaker::InitRun(Int_t runnr) {
    treeFileName="StPeCMaker.tree.root";
+       LOG_INFO << "InitRun StPeCMaker run  "  << runnr<<endm;
    // get TOF geometry to extrapolate tracks to it
    //
      mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");  //commenting this line stops the extrapolation
@@ -289,7 +293,7 @@ Int_t StPeCMaker::Make()
 {
    StEvent* event = 0;
    // Int_t flag = kStOk;
-
+      LOG_INFO << "StPeCMaker make: just in ---------- "  << endm;
 
    Int_t NTracks = 0 ;
    int tw        = 0 ;
@@ -317,8 +321,8 @@ Int_t StPeCMaker::Make()
       //
       // read MC information from MuDst
    //Fill geant simulations             //RD
-      LOG_INFO << "StPeCMaker make: using muDst to fill Geant +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=---------- "  << endm;
-      gReturn = geant->fill(muDst);
+//       LOG_INFO << "StPeCMaker make: using muDst to fill Geant +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++=---------- "  << endm;
+//       gReturn = geant->fill(muDst);
    }   
 
    if(readStEvent){
@@ -374,10 +378,9 @@ Int_t StPeCMaker::Make()
    LOG_INFO << "ok returnValue " <<ok<<"  "<<returnValue<< endm;
 
 
-//    if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+//    if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  ok=FALSE; good vertex in event returnValue>0; good trigger
    if ( returnValue>0) {    // || geantBranch  ) {  RD 3-JUNE2014 ignore the flag from StPeCEvent to write summary for all events
 
-//    if ( returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  //25MAR2013 to read pp fast offline  //turn off trigger check
      LOG_INFO << "Fill Event to Tree!**********************" << endm;
      if(!treeOff)uDstTree->Fill();
    }
