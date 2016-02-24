@@ -349,7 +349,8 @@ Int_t StMuMcAnalysisMaker::Make(){
 void StMuMcAnalysisMaker::FillTrackPlots(){
   if (! muDst || ! muDst->event()) return;
   const Double_t field = muDst->event()->magneticField()*kilogauss;
-  map<Int_t,Int_t> &Gl2Pr = muDst->IdGlobalId2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
+  //  map<Int_t,Int_t> &Gl2Pr = muDst->IdGlobalId2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
+  map<Int_t,Int_t> &Gl2Pr = muDst->IdGlobal2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
   multimap<Int_t,Int_t> &Mc2RcTracks = muDst->IdMc2IdRcTracks(); // map between global and Mc tracks from primary Mc vertex
   // =============  Build map between  Rc and Mc vertices 
   multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
@@ -433,8 +434,8 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
       if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
       if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
-      Int_t k = Gl2Pr[kg];
-      if (! k) continue;
+      Int_t k = Gl2Pr[kg+1] - 1;
+      if (k < 0) continue;
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       Int_t kpc = pTrack->index2Cov();
       if (kpc >= 0) {
@@ -720,7 +721,7 @@ Bool_t StMuMcAnalysisMaker::Accept(const StMuTrack *gTrack) {
   if (! gTrack->charge())  return kFALSE;
   if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) return kFALSE; // bad fit or short track pointing to EEMC
   if (  gTrack->flag() > 1000) return kFALSE;  // pile up track in TPC
-  if (  gTrack->nHitsFit() < 15) return kFALSE;
+  if (  gTrack->nHitsFit() < StMuDst::MinNoTpcRcHits) return kFALSE;
   //  if (  gTrack->qaTruth() < 90) return kFALSE;
   return kTRUE;
 }

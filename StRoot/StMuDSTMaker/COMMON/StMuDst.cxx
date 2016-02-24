@@ -73,8 +73,8 @@ TClonesArray** StMuDst::eztArrays    = 0;
 
 Int_t StMuDst::mCurrVertexId = 0;
 TObjArray* StMuDst::mCurrPrimaryTracks  = 0;
-Int_t StMuDst::MinNoTpcMcHits = 10;
-Int_t StMuDst::MinNoTpcRcHits = 10;
+Int_t StMuDst::MinNoTpcMcHits = 15;
+Int_t StMuDst::MinNoTpcRcHits = 15;
 ClassImp(StMuDst);
 
 StMuDst::StMuDst() {
