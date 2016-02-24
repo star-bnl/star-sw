@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.22 2015/09/15 15:58:14 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.23 2016/02/24 17:13:09 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.23  2016/02/24 17:13:09  ramdebbe
+// started implementing 2016 UPC triggers, not complete
+//
 // Revision 1.22  2015/09/15 15:58:14  ramdebbe
 // added 2E trigger
 //
@@ -480,7 +483,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
   //
 
    runN = mudst->event()->eventInfo().runId(); 
-//    LOG_INFO << "StPeCTrigger Run ID: " << runN << endm;
+   LOG_INFO << "StPeCTrigger Run ID: " << runN << endm;
 
   // get triggger ids
   vector<unsigned int> triggerIds;
@@ -725,7 +728,30 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 
 	LOG_INFO << "StPeCTrigger::value of trg_3000 RP triggers  ------------------------------------ " <<trg_3000<< endm;
       }
-    }
+      }
+
+      // run 2016 Au+Au 200GeV
+
+      if(runN>= 17040085 && runN<17160013) { // 
+	LOG_INFO << "StPeCTrigger::2016  ------------------------------------ " <<trg_3000<<" trigSel "<<triggerSel<<endm;                                              
+	if(triggerSel=="UPC_trig"){
+	    if(                                    ttid.isTrigger(520701)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 0.0); //UPC_main
+	      cout<<" UPC_Main "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(520702)){
+	      trg_3000 = trg_3000 | (int)pow(2.0, 1.0); //UPC_zdcsum
+	      cout<<" UPC_zdcsum "<<trg_3000<<endl;
+	    }
+	    if(                                    ttid.isTrigger(520703)) {
+	      trg_3000 = trg_3000 | (int)pow(2.0, 2.0); //UPC_JPsi
+	      cout<<" UPC_JPsi "<<trg_3000<<endl;
+	    }
+
+
+	}
+	LOG_INFO << "StPeCTrigger::2016  AFTER------------------------------------ " <<trg_3000<< endm;  
+      }
       //ignore trigger selection
       if(triggerSel=="Ignore"){
 
