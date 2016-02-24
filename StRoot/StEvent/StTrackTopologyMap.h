@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.12 2014/03/16 16:06:24 fisyak Exp $
+ * $Id: StTrackTopologyMap.h,v 2.13 2016/02/24 22:01:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.13  2016/02/24 22:01:12  ullrich
+ * Added method hasHitInSstLayer().
+ *
  * Revision 2.12  2014/03/16 16:06:24  fisyak
  * Xin\'s fix for HFT
  *
@@ -80,6 +83,7 @@ public:
     bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1
     bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1
     bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1
+    bool           hasHitInSstLayer(unsigned int) const;
     
     bool           trackTpcOnly() const;
     bool           trackSvtOnly() const;
@@ -106,4 +110,10 @@ private:
 };
 
 ostream& operator<< (ostream&, const StTrackTopologyMap&);
+
+inline bool StTrackTopologyMap::hasHitInSstLayer(unsigned int val) const
+{
+    return hasHitInSsdLayer(val);
+}
+
 #endif
