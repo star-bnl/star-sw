@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $
+ * $Id: StHit.cxx,v 2.28 2016/02/25 17:07:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.28  2016/02/25 17:07:14  ullrich
+ * Removed implentation of detector() making class pure abstract.
+ *
  * Revision 2.27  2015/10/09 17:46:14  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -103,7 +106,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.27 2015/10/09 17:46:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.28 2016/02/25 17:07:14 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -177,12 +180,6 @@ int StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
 
 //______________________________________________________________________________
 unsigned int StHit::trackReferenceCount() const { return static_cast<unsigned int>(mTrackRefCount); }
-
-//______________________________________________________________________________
-StDetectorId StHit::detector() const
-{
-    return static_cast<StDetectorId>(bits(0, 4));
-}
 
 //______________________________________________________________________________
 StThreeVectorF StHit::positionError() const { return mPositionError; }
