@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.29 2015/10/09 17:46:14 ullrich Exp $
+ * $Id: StHit.h,v 2.30 2016/02/25 17:07:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.30  2016/02/25 17:07:14  ullrich
+ * Removed implentation of detector() making class pure abstract.
+ *
  * Revision 2.29  2015/10/09 17:46:14  ullrich
  * Changed type of mIdTruth from ushort to int.
  *
@@ -160,7 +163,7 @@ public:
     void setIdTruth(int idtru, int qatru=0);
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
-    virtual StDetectorId   detector() const;
+    virtual StDetectorId   detector() const = 0;
     virtual void           Print(Option_t *option="") const;
     
 protected:
