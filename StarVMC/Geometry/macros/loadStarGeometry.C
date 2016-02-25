@@ -16,6 +16,7 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   Load("St_base.so");
   Load("StUtilities.so");
   Load("libPhysics.so");
+  Load("StarAgmlUtil.so");
   Load("StarAgmlLib.so");
   Load("libStarGeometry.so");
   Load("libGeometry.so");
