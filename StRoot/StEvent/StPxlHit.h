@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.4 2015/05/13 18:05:25 ullrich Exp $
+ * $Id: StPxlHit.h,v 2.5 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.5  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.4  2015/05/13 18:05:25  ullrich
  * New constructors for setting local hit position, proper initialization
  * of all data member, modified existing constructor, new getter and
@@ -50,7 +53,7 @@ public:
              unsigned int sensor);
     ~StPxlHit();
     
-    virtual StDetectorId detector() const;
+    StDetectorId detector() const;
     
     unsigned char sector() const;
     unsigned char ladder() const;

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.10 2012/09/16 21:33:33 fisyak Exp $
+ * $Id: StEmcCluster.h,v 2.11 2016/02/25 17:10:19 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.11  2016/02/25 17:10:19  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.10  2012/09/16 21:33:33  fisyak
  * Make one line print out
  *
@@ -82,10 +85,13 @@ public:
     void setSigmaPhi(float);
     void setEnergy(float);
     
+    StDetectorId   detector() const;
+    
     void addHit(StEmcRawHit*);
     void addNeighbor(StEmcCluster*);
     void addTrack(StTrack*);
     void Print(Option_t *option = "") const;
+    
 private:
     Float_t mEta;
     Float_t mPhi;
@@ -98,6 +104,8 @@ private:
     
     ClassDef(StEmcCluster,2)
 };
+
+inline StDetectorId StEmcCluster::detector() const {return static_cast<StDetectorId>(StHit::bits(0, 4));}
 
 ostream& operator<<(ostream&, const StEmcCluster&); // Printing operator
 #endif

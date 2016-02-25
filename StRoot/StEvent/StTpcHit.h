@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.28 2014/01/15 21:00:54 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.29 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.29  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.28  2014/01/15 21:00:54  fisyak
  * Step back with version
  *
@@ -103,30 +106,34 @@
 #include "StHit.h"
 #include "StMemoryPool.hh"
 #include "TMath.h"
+
 class StTpcHit : public StHit {
+    
 public:
-  StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mChargeModified = 0;}
+    StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mChargeModified = 0;}
     StTpcHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c = 0,
-	     UShort_t IdTruth=0, UShort_t quality=0,
-	     UShort_t Id =0,
-	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
-	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
-      :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
+             UShort_t IdTruth=0, UShort_t quality=0,
+             UShort_t Id =0,
+             Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
+             Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0)
+    :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
     ~StTpcHit() {}
+    
+    StDetectorId   detector() const;
 
     void* operator new(size_t /* sz */,void *p) { return p;}
     void* operator new(size_t) { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
-
+    
     void     setChargeModified(Float_t Charge) {mChargeModified = Charge;}
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
     void     setAdc(UShort_t Adc = 0) {mAdc = Adc;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 7);}   // bits 9-15 -> 1-128
-    UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;} 
+    UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;}
     UInt_t   pixelsInHit() const {return bits(22,10);};   // bits 22-31 obsolete (TCL only, FCF put no. of time buckets)
     UChar_t  minPad()   const {return TMath::Nint(mMcl_x/64.) - mMinpad;}
     UChar_t  maxPad()   const {return TMath::Nint(mMcl_x/64.) + mMaxpad;}
@@ -141,16 +148,17 @@ public:
     void     Print(Option_t *option="") const;
     virtual Bool_t   IsSortable() const { return kTRUE; }
     virtual Int_t    Compare(const TObject *obj) const {
-      StTpcHit *hit = (StTpcHit *) obj;
-      if (sector() > hit->sector()) return kTRUE;
-      if (padrow() > hit->padrow()) return kTRUE;
-      if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return kTRUE;
-      return kFALSE;
+        StTpcHit *hit = (StTpcHit *) obj;
+        if (sector() > hit->sector()) return kTRUE;
+        if (padrow() > hit->padrow()) return kTRUE;
+        if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return kTRUE;
+        return kFALSE;
     }
     virtual const StThreeVectorF& positionU() const {return *&mPositionU;}
     virtual const StThreeVectorF& positionL() const {return *&mPositionL;}
     virtual void setPositionU(const StThreeVectorF& p) {mPositionU = p;}
     virtual void setPositionL(const StThreeVectorF& p) {mPositionL = p;}
+    
 protected:
     static StMemoryPool mPool;  //!
     UChar_t     mMinpad;     /* central pad - lowest pad id in this hit*/
@@ -166,4 +174,7 @@ protected:
     ClassDef(StTpcHit,9)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
+
+inline StDetectorId StTpcHit::detector() const {return kTpcId;}
+
 #endif
