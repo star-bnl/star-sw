@@ -20,7 +20,7 @@ int simpleQT::main()
 
 
     printf("TQtWidget... comment this line and program works... \n");
-    //TQtWidget *wid = new TQtWidget(window);
+    TQtWidget *wid = new TQtWidget(window);
   
 
     printf("create label...\n");
