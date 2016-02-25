@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.228 2016/02/25 23:05:31 genevb Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -289,7 +289,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("useSst") && gStSstDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
     _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst")));
-    group->setGroupId(kSsdId);
+    group->setGroupId(kSstId);
 
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
@@ -608,8 +608,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.227 2015/07/07 23:31:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.228 2016/02/25 23:05:31 genevb Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.228  2016/02/25 23:05:31  genevb
+// kSsdId => kSstId
+//
 // Revision 1.227  2015/07/07 23:31:52  perev
 // Clean mess of reset and clear methods
 //
