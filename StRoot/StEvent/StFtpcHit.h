@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.12 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StFtpcHit.h,v 2.13 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
+ * Revision 2.13  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.12  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -95,6 +98,9 @@ public:
     void setTimePosition(float);
     void setSigmaPadPosition(float);
     void setSigmaTimePosition(float);
+ 
+    StDetectorId   detector() const;
+    
 
 protected:
     static StMemoryPool mPool;  //!
@@ -106,6 +112,8 @@ protected:
    
     ClassDef(StFtpcHit,2)
 };
+
+inline StDetectorId StFtpcHit::detector() const {return static_cast<StDetectorId>(StHit::bits(0, 4));} 
 
 inline double StFtpcHit::padPosition() const {return mPadPos;}
 inline double StFtpcHit::timePosition() const {return mTimePos;}

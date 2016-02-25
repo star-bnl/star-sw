@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstHit.h,v 2.2 2015/05/21 14:11:43 ullrich Exp $
+ * $Id: StSstHit.h,v 2.3 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Jonathan Bouchet, Thomas Ullrich, May 2015
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSstHit.h,v $
+ * Revision 2.3  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.2  2015/05/21 14:11:43  ullrich
  * Changed mADC from int to unsigned short.
  *
@@ -56,6 +59,8 @@ public:
     int          getADC(unsigned int) const; 
     virtual int  volumeID() const;
     void         Print(const Option_t *option="") const;
+    
+    StDetectorId detector() const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -67,6 +72,8 @@ private:
     
     ClassDef(StSstHit,2)
 };
+
+inline StDetectorId StSstHit::detector() const {return kSstId;}
 
 inline unsigned int
 StSstHit::sector(unsigned int ladder) {

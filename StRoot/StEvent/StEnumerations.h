@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.61 2015/12/24 00:14:44 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.62 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.62  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.61  2015/12/24 00:14:44  fisyak
  * Add GMT and SST Id and new dE/dx method
  *
@@ -267,7 +270,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-		   kGmtId       = kGmtIdentifier,
+		           kGmtId       = kGmtIdentifier,
                    kMaxDetectorId = 40};
 
 /*!
