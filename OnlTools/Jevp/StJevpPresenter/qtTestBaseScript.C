@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string.h>;
 
 void qtTestBaseScript(char *args)
 {
@@ -24,8 +24,8 @@ void qtTestBaseScript(char *args)
     gSystem->Load("PDFUtil");    
     gSystem->Load("Jevp");    
   }
-  QtTest::main(args);
-
+  simpleQT::main();
+  //QtTest::main(args);
   printf("Run application...\n");
   // gApplication->Run();
 }
