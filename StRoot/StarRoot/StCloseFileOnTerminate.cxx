@@ -32,7 +32,7 @@ Bool_t StCloseFileOnTerminate::Notify() {
        TIter next(files);
        while( TFile *f = (TFile *) next() ) { 
 	 if ( f-> IsWritable() ) {
-	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
+	   //	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
 	   f->Write();
 	   f->Close(); ++count; 
 	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
