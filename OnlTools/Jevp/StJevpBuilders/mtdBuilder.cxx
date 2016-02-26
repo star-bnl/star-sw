@@ -109,7 +109,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
  		if (isADC[i]){ kadc=isADC[i]; }else{ ktac=isTAC[i]; }
  		if (kadc){ kadctac=0; } else if (ktac){ kadctac=1; }
 		if (kadctac>=0){
-	 		sprintf(tmpchrt,"%s %s %s",QTboard[i].Data(),adctac[kadctac].Data(),QTchanstring[i].Data()); 
+	 		sprintf(tmpchrt,"%s %s",QTboard[i].Data(),QTchanstring[i].Data()); 
 	 		//cout<<i<<" "<<tmpchrt<<endl;
 	 		names[i] = TString(tmpchrt);
 	 	} else {
@@ -214,6 +214,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   		 ln -> SetLineColor(4);
 
   TLatex *qtid[56];						// Run-14 - 56 connections to TRG.
+  TLatex *qtid2[56];
   int kadctacind;
   //cout<<"nMTDtrig="<<nMTDtrig<<endl;
   for (int i=0;i<nMTDtrig;i++){
@@ -222,9 +223,18 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 	if (kadctacind){		
 		sprintf(tmpchr,"%s %s",QTboard[i].Data(),QTchanstring[i].Data());
 		//cout<<kadctacind<<" "<<tmpchr<<endl;
-		qtid[kadctacind-1]	= new TLatex(kadctacind+0.3,3000.,tmpchr);
-		qtid[kadctacind-1]->SetTextAngle(90);
-		qtid[kadctacind-1]->SetTextSize(0.02);
+		if(isTAC[i])
+		  {
+		    qtid[kadctacind-1]	= new TLatex(kadctacind+0.3,3000.,tmpchr);
+		    qtid[kadctacind-1]->SetTextAngle(90);
+		    qtid[kadctacind-1]->SetTextSize(0.02);
+		  }
+		if(isADC[i])
+		  {
+		    qtid2[kadctacind-1]	= new TLatex(kadctacind+0.3,3000.,tmpchr);
+		    qtid2[kadctacind-1]->SetTextAngle(90);
+		    qtid2[kadctacind-1]->SetTextSize(0.02);
+		  }
 	}
   }
   TLine *qtlines[3];
@@ -237,6 +247,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   }
   
   plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap2D);
+
   //
   for (int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
     int val3tray=tray3bl[itray3bl];
@@ -290,7 +301,8 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 		plots[i]->optstat=0;
 		if (i==nhhit+1||i==nhhit+2){
 			for (int j=0;j<56;j++){			// Run-14 56 trg connections...
-				plots[i]->addElement(qtid[j]);
+			  if(i==nhhit+1) plots[i]->addElement(qtid2[j]);
+			  else           plots[i]->addElement(qtid[j]);
 			}
 			for (int j=0;j<3;j++){			// Run-14 4 QT boards...
 				//cout<<qtlines[j]<<endl;
@@ -658,26 +670,28 @@ void mtdBuilder::event(daqReader *rdr) {
 //	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
 //	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
 
- 	const int nslots 	= 4;
- 	int slots[nslots]	= {0,10,12,14};
+ 	const int nslots 	= 8;
+ 	int slots[nslots]	= {0,9,10,11,12,13,14,15};
  	int mh				= 0;
  	int kbin;
  	for (int kslot=0;kslot<nslots;kslot++){
  		int islot		= slots[kslot];
  		for (int iaddr=0;iaddr<32;iaddr++){
- 			int kh		= islot*32 + iaddr;
- 			if (trgd->mxqAtSlotAddress(iaddr,0,islot)){
- 				contents.hMTD_trig2D->Fill(kh,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
- 				contents.hMTD_trig[mh]->Fill(trgd->mxqAtSlotAddress(iaddr,0,islot));
- 				if (isADC[mh]){
- 					kbin	= isADC[mh];
-	 				contents.hMTD_trig2D_adc->Fill(kbin,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
- 				} else if (isTAC[mh]){
- 					kbin	= isTAC[mh];
-	 				contents.hMTD_trig2D_tac->Fill(kbin,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
- 				} 
- 			}
- 			++mh;
+		  int val = trgd->mxqAtSlotAddress(iaddr,0,islot);
+		  int kh  = islot*32 + iaddr;
+		  if(val) contents.hMTD_trig2D->Fill(kh,val); 
+		  if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
+		  if (val){					
+		    contents.hMTD_trig[mh]->Fill(val);
+		    if (isADC[mh]){
+		      kbin	= isADC[mh];
+		      contents.hMTD_trig2D_adc->Fill(kbin,val); 				
+		    } else if (isTAC[mh]){
+		      kbin	= isTAC[mh];
+		      contents.hMTD_trig2D_tac->Fill(kbin,val); 				
+		    } 
+		  }
+		  ++mh;
  		}
  	}
  
@@ -906,6 +920,8 @@ int mtdBuilder::SetMtdQTmap(){
 // 	"18 (0x1c) MT003 QT8D-J8 (ch32) MTD TAC 22-4-J3"
 // 	};
 
+/*
+// Run14
 	const char* MtdQTmap[128] = {
 		"06 (0x10) MT001 QT8A-J1 (ch1) ADC 25-1 (J2)",
 		"06 (0x10) MT001 QT8A-J2 (ch2) ADC 25-1 (J3)",
@@ -1035,6 +1051,139 @@ int mtdBuilder::SetMtdQTmap(){
 		"20 (0x1E) MT004 QT8D-J6 (ch6) TAC 15-2 (J3)",
 		"20 (0x1E) MT004 QT8D-J7 (ch7) TAC 15-4 (J2)",
 		"20 (0x1E) MT004 QT8D-J8 (ch8) TAC 15-4 (J3)"
+	};
+*/
+
+// Run16
+	const char* MtdQTmap[128] = {
+		"06 (0x10) MT001 QT8A-J3 (ch3) ADC 25-1 (J2)",
+		"06 (0x10) MT001 QT8A-J4 (ch4) ADC 25-1 (J3)",
+		"06 (0x10) MT001 QT8A-J7 (ch7) TAC 25-1 (J2)",
+		"06 (0x10) MT001 QT8A-J8 (ch8) TAC 25-1 (J3)",
+		"06 (0x10) MT001 QT8B-J3 (ch3) ADC 25-5 (J2)",
+		"06 (0x10) MT001 QT8B-J4 (ch4) ADC 25-5 (J3)",
+		"06 (0x10) MT001 QT8B-J7 (ch7) TAC 25-5 (J2)",
+		"06 (0x10) MT001 QT8B-J8 (ch8) TAC 25-5 (J3)",
+		"06 (0x10) MT001 QT8C-J3 (ch3) ADC 25-2 (J2)",
+		"06 (0x10) MT001 QT8C-J4 (ch4) ADC 25-2 (J3)",
+		"06 (0x10) MT001 QT8C-J7 (ch7) TAC 25-2 (J2)",
+		"06 (0x10) MT001 QT8C-J8 (ch8) TAC 25-2 (J3)",
+		"06 (0x10) MT001 QT8D-J3 (ch3) ADC 25-4 (J2)",
+		"06 (0x10) MT001 QT8D-J4 (ch4) ADC 25-4 (J3)",
+		"06 (0x10) MT001 QT8D-J7 (ch7) TAC 25-4 (J2)",
+		"06 (0x10) MT001 QT8D-J8 (ch8) TAC 25-4 (J3)",
+		"15 (0x19) MT002 QT8A-J3 (ch3) ADC 25-3 (J2)",
+		"15 (0x19) MT002 QT8A-J4 (ch4) ADC 25-3 (J3)",
+		"15 (0x19) MT002 QT8A-J7 (ch7) TAC 25-3 (J2)",
+		"15 (0x19) MT002 QT8A-J8 (ch8) TAC 25-3 (J3)",
+		"15 (0x19) MT002 QT8B-J3 (ch3) ADC 30-3 (J2)",
+		"15 (0x19) MT002 QT8B-J4 (ch4) ADC 30-3 (J3)",
+		"15 (0x19) MT002 QT8B-J7 (ch7) TAC 30-3 (J2)",
+		"15 (0x19) MT002 QT8B-J8 (ch8) TAC 30-3 (J3)",
+		"15 (0x19) MT002 QT8C-J3 (ch3) ADC 30-1 (J2)",
+		"15 (0x19) MT002 QT8C-J4 (ch4) ADC 30-1 (J3)",
+		"15 (0x19) MT002 QT8C-J7 (ch7) TAC 30-1 (J2)",
+		"15 (0x19) MT002 QT8C-J8 (ch8) TAC 30-1 (J3)",
+		"15 (0x19) MT002 QT8D-J3 (ch3) ADC 30-5 (J2)",
+		"15 (0x19) MT002 QT8D-J4 (ch4) ADC 30-5 (J3)",
+		"15 (0x19) MT002 QT8D-J7 (ch7) TAC 30-5 (J2)",
+		"15 (0x19) MT002 QT8D-J8 (ch8) TAC 30-5 (J3)",
+		"16 (0x1A) MT003 QT8A-J3 (ch3) ADC 5-1 (J2)",
+		"16 (0x1A) MT003 QT8A-J4 (ch4) ADC 5-1 (J3)",
+		"16 (0x1A) MT003 QT8A-J7 (ch7) TAC 5-1 (J2)",
+		"16 (0x1A) MT003 QT8A-J8 (ch8) TAC 5-1 (J3)",
+		"16 (0x1A) MT003 QT8B-J3 (ch3) ADC 5-5 (J2)",
+		"16 (0x1A) MT003 QT8B-J4 (ch4) ADC 5-5 (J3)",
+		"16 (0x1A) MT003 QT8B-J7 (ch7) TAC 5-5 (J2)",
+		"16 (0x1A) MT003 QT8B-J8 (ch8) TAC 5-5 (J3)",
+		"16 (0x1A) MT003 QT8C-J3 (ch3) ADC 5-2 (J2)",
+		"16 (0x1A) MT003 QT8C-J4 (ch4) ADC 5-2 (J3)",
+		"16 (0x1A) MT003 QT8C-J7 (ch7) TAC 5-2 (J2)",
+		"16 (0x1A) MT003 QT8C-J8 (ch8) TAC 5-2 (J3)",
+		"16 (0x1A) MT003 QT8D-J3 (ch3) ADC 5-4 (J2)",
+		"16 (0x1A) MT003 QT8D-J4 (ch4) ADC 5-4 (J3)",
+		"16 (0x1A) MT003 QT8D-J7 (ch7) TAC 5-4 (J2)",
+		"16 (0x1A) MT003 QT8D-J8 (ch8) TAC 5-4 (J3)",
+		"17 (0x1B) MT004 QT8A-J3 (ch3) ADC 5-3 (J2)",
+		"17 (0x1B) MT004 QT8A-J4 (ch4) ADC 5-3 (J3)",
+		"17 (0x1B) MT004 QT8A-J7 (ch7) TAC 5-3 (J2)",
+		"17 (0x1B) MT004 QT8A-J8 (ch8) TAC 5-3 (J3)",
+		"17 (0x1B) MT004 QT8B-J3 (ch3) ",
+		"17 (0x1B) MT004 QT8B-J4 (ch4) ",
+		"17 (0x1B) MT004 QT8B-J7 (ch7) ",
+		"17 (0x1B) MT004 QT8B-J8 (ch8) ",
+		"17 (0x1B) MT004 QT8C-J3 (ch3) ADC 30-2 (J2)",
+		"17 (0x1B) MT004 QT8C-J4 (ch4) ADC 30-2 (J3)",
+		"17 (0x1B) MT004 QT8C-J7 (ch7) TAC 30-2 (J2)",
+		"17 (0x1B) MT004 QT8C-J8 (ch8) TAC 30-2 (J3)",
+		"17 (0x1B) MT004 QT8D-J3 (ch3) ADC 30-4 (J2)",
+		"17 (0x1B) MT004 QT8D-J4 (ch4) ADC 30-4 (J3)",
+		"17 (0x1B) MT004 QT8D-J7 (ch7) TAC 30-4 (J2)",
+		"17 (0x1B) MT004 QT8D-J8 (ch8) TAC 30-4 (J3)",
+		"18 (0x1C) MT005 QT8A-J3 (ch3) ADC 10-1 (J2)",
+		"18 (0x1C) MT005 QT8A-J4 (ch4) ADC 10-1 (J3)",
+		"18 (0x1C) MT005 QT8A-J7 (ch7) TAC 10-1 (J2)",
+		"18 (0x1C) MT005 QT8A-J8 (ch8) TAC 10-1 (J3)",
+		"18 (0x1C) MT005 QT8B-J3 (ch3) ADC 10-5 (J2)",
+		"18 (0x1C) MT005 QT8B-J4 (ch4) ADC 10-5 (J3)",
+		"18 (0x1C) MT005 QT8B-J7 (ch7) TAC 10-5 (J2)",
+		"18 (0x1C) MT005 QT8B-J8 (ch8) TAC 10-5 (J3)",
+		"18 (0x1C) MT005 QT8C-J3 (ch3) ADC 10-2 (J2)",
+		"18 (0x1C) MT005 QT8C-J4 (ch4) ADC 10-2 (J3)",
+		"18 (0x1C) MT005 QT8C-J7 (ch7) TAC 10-2 (J2)",
+		"18 (0x1C) MT005 QT8C-J8 (ch8) TAC 10-2 (J3)",
+		"18 (0x1C) MT005 QT8D-J3 (ch3) ADC 10-4 (J2)",
+		"18 (0x1C) MT005 QT8D-J4 (ch4) ADC 10-4 (J3)",
+		"18 (0x1C) MT005 QT8D-J7 (ch7) TAC 10-4 (J2)",
+		"18 (0x1C) MT005 QT8D-J8 (ch8) TAC 10-4 (J3)",
+		"19 (0x1D) MT006 QT8A-J3 (ch3) ADC 10-3 (J2)",
+		"19 (0x1D) MT006 QT8A-J4 (ch4) ADC 10-3 (J3)",
+		"19 (0x1D) MT006 QT8A-J7 (ch7) TAC 10-3 (J2)",
+		"19 (0x1D) MT006 QT8A-J8 (ch8) TAC 10-3 (J3)",
+		"19 (0x1D) MT006 QT8B-J3 (ch3) ADC 15-3 (J2)",
+		"19 (0x1D) MT006 QT8B-J4 (ch4) ADC 15-3 (J3)",
+		"19 (0x1D) MT006 QT8B-J7 (ch7) TAC 15-3 (J2)",
+		"19 (0x1D) MT006 QT8B-J8 (ch8) TAC 15-3 (J3)",
+		"19 (0x1D) MT006 QT8C-J3 (ch3) ",
+		"19 (0x1D) MT006 QT8C-J4 (ch4) ",
+		"19 (0x1D) MT006 QT8C-J7 (ch7) ",
+		"19 (0x1D) MT006 QT8C-J8 (ch8) ",
+		"19 (0x1D) MT006 QT8D-J3 (ch3) ",
+		"19 (0x1D) MT006 QT8D-J4 (ch4) ",
+		"19 (0x1D) MT006 QT8D-J7 (ch7) ",
+		"19 (0x1D) MT006 QT8D-J8 (ch8) ",
+		"20 (0x1E) MT007 QT8A-J3 (ch3) ADC 21-1 (J2)",
+		"20 (0x1E) MT007 QT8A-J4 (ch4) ADC 21-1 (J3)",
+		"20 (0x1E) MT007 QT8A-J7 (ch7) TAC 21-1 (J2)",
+		"20 (0x1E) MT007 QT8A-J8 (ch8) TAC 21-1 (J3)",
+		"20 (0x1E) MT007 QT8B-J3 (ch3) ADC 21-5 (J2)",
+		"20 (0x1E) MT007 QT8B-J4 (ch4) ADC 21-5 (J3)",
+		"20 (0x1E) MT007 QT8B-J7 (ch7) TAC 21-5 (J2)",
+		"20 (0x1E) MT007 QT8B-J8 (ch8) TAC 21-5 (J3)",
+		"20 (0x1E) MT007 QT8C-J3 (ch3) ADC 20-2 (J2)",
+		"20 (0x1E) MT007 QT8C-J4 (ch4) ADC 20-2 (J3)",
+		"20 (0x1E) MT007 QT8C-J7 (ch7) TAC 20-2 (J2)",
+		"20 (0x1E) MT007 QT8C-J8 (ch8) TAC 20-2 (J3)",
+		"20 (0x1E) MT007 QT8D-J3 (ch3) ADC 20-4 (J2)",
+		"20 (0x1E) MT007 QT8D-J4 (ch4) ADC 20-4 (J3)",
+		"20 (0x1E) MT007 QT8D-J7 (ch7) TAC 20-4 (J2)",
+		"20 (0x1E) MT007 QT8D-J8 (ch8) TAC 20-4 (J3)",
+		"21 (0x1F) MT008 QT8A-J3 (ch3) ADC 20-3 (J2)",
+		"21 (0x1F) MT008 QT8A-J4 (ch4) ADC 20-3 (J3)",
+		"21 (0x1F) MT008 QT8A-J7 (ch7) TAC 20-3 (J2)",
+		"21 (0x1F) MT008 QT8A-J8 (ch8) TAC 20-3 (J3)",
+		"21 (0x1F) MT008 QT8B-J3 (ch3) ",
+		"21 (0x1F) MT008 QT8B-J4 (ch4) ",
+		"21 (0x1F) MT008 QT8B-J7 (ch7) ",
+		"21 (0x1F) MT008 QT8B-J8 (ch8) ",
+		"21 (0x1F) MT008 QT8C-J3 (ch3) ADC 15-2 (J2)",
+		"21 (0x1F) MT008 QT8C-J4 (ch4) ADC 15-2 (J3)",
+		"21 (0x1F) MT008 QT8C-J7 (ch7) TAC 15-2 (J2)",
+		"21 (0x1F) MT008 QT8C-J8 (ch8) TAC 15-2 (J3)",
+		"21 (0x1F) MT008 QT8D-J3 (ch3) ADC 15-4 (J2)",
+		"21 (0x1F) MT008 QT8D-J4 (ch4) ADC 15-4 (J3)",
+		"21 (0x1F) MT008 QT8D-J7 (ch7) TAC 15-4 (J2)",
+		"21 (0x1F) MT008 QT8D-J8 (ch8) TAC 15-4 (J3)"
 	};
 	
 	TString QTmap[128];
