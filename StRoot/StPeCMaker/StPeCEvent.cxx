@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.25 2015/07/22 20:11:08 ramdebbe Exp $
+// $Id: StPeCEvent.cxx,v 1.26 2016/02/24 17:14:56 ramdebbe Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.26  2016/02/24 17:14:56  ramdebbe
+// cleaned up old commented line
+//
 // Revision 1.25  2015/07/22 20:11:08  ramdebbe
 // removed RP container copy to output, needs to come back
 //
@@ -141,7 +144,7 @@ ClassImp(StPeCEvent)
   if((useTracksLocal = useTracks)){
  
     LOG_INFO << "StPeCEvent constructor: useTracks ---------- " <<useTracks << endm;
-//         tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
+//         tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);     
     tracks    = new TClonesArray ("StMuTrack", StPeCnMaxTracks);
   }
   if((useRPLocal = useRP)){
@@ -362,7 +365,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   // nGlobals not a good UPC criteria any more 
 
   //  if ( NGlobal > StPeCnMaxTracks ) return 1 ; 
-  cout << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC;    
+  
   
   if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
       ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks ) &&( nPrimaryFTPC+nPrimaryTPC>=2 ) ) {
@@ -381,7 +384,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   nPrimaryTracks= NGlobal;
 
   
-  //cout << "Number of Primary Vertices " << event->numberOfPrimaryVertices() << endl;
+
   StPrimaryVertex* vtx = event->primaryVertex();
   if(vtx) {
     cout << "Vertex flag " << vtx->flag() << endl;    
@@ -434,50 +437,8 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 	//#endif	   
      }
   }
-  cout<<"finished loop "<<endl;
-// #ifdef SPAIRS  RD
-//   //
-//   //   Look for V0
-//   //   Do not skip the primaries here for the time being.....
-//   // 
-//   // HERE must flag be tested. 
-//   for( Int_t i=0; i<nnode-1; i++ ) {
-//     // if ( exnode[i]->entries(primary)  ) continue ; 
-//     if ( exnode[i]->entries(global)  !=1 ) continue ;
-//     for( Int_t j=i+1; j<nnode; j++ ) {
-//       //if ( exnode[j]->entries(primary)     ) continue ; 
-//       if ( exnode[j]->entries(global)  !=1 ) continue ;
-//       StTrack *trk1 = exnode[i]->track(global);
-//       StTrack *trk2 = exnode[j]->track(global);
-      
-//       // DANGER 
-//       if (! (trk1->flag()>0)) continue;
-//       if (! (trk2->flag()>0)) continue;
-//       // --------
-//       StPhysicalHelixD h1 = trk1->geometry()->helix() ;
-//       StPhysicalHelixD h2 = trk2->geometry()->helix() ;
-      
-//        pairD dcaLengths = h1.pathLengths(h2);
-//        StThreeVectorD x1 = h1.at(dcaLengths.first);
-//        StThreeVectorD x2 = h2.at(dcaLengths.second);
-//        StThreeVectorD x = (x1-x2) ;
-// 	if ( x.mag() > 10 ) continue ; // Hardwire cut
+  //removed secondary pairs:
 
-//         // TClonesArray &spairs = *sPairs;
-//         // lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
-// 	// 
-//         lPair = new((*sPairs)[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
-// #ifdef PECPRINT
-//         cout << "StPeCEvent : Secondary Pair : " 
-//            << "  sumQ = " << lPair->getSumCharge()
-//            << "  sumPt = " << lPair->getSumPt()
-//            << "  mInv = " << lPair->getMInv(pion)
-//            << "  opening angle = " << lPair->getOpeningAngle()
-//            << "  cos(theta*) = " << lPair->getCosThetaStar(pion) << endl;
-// #endif	   
-//      }
-//   }
-// #endif      RD
   return 0 ;
 }
 
@@ -507,9 +468,32 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    LOG_INFO << "StMuEvent ID: " << eventN << endm;
    
    bField = event->eventSummary().magneticField();
+  if (fabs(bField)<0.01)   LOG_INFO << "StPeCEvent fill(muDst ): BField off "  << endm;;
   acceptEvent = kFALSE;
    // RD 11-July 2013 to get BEMC data need to find it out of StMuDst (TO DO)
+    // Get EMC calorimeter clusters from StEvent  RD
 
+    // check if there is a collection
+    StMuEmcCollection *emcStEvent = mudst->muEmcCollection();
+
+    if(emcStEvent){
+
+	    Int_t n = emcStEvent->getNClusters(1);//enum {bemc=1, bprs=2, bsmde=3, bsmdp=4, eemc=5, eprs=6, esmdu=7, esmdv=8};
+
+	    LOG_INFO<<"StPeCEvent::fill(MuDst)  number of clusters in BEMC "<<n<<endm;
+	    for(Int_t j = 0;j<n;j++)
+	      {
+		StMuEmcCluster *c = emcStEvent->getCluster(j, 1); 
+		if(c)
+		  {
+		    if(useBemcLocal){
+		      new((*treecalo)[j]) StMuEmcCluster((const StMuEmcCluster &) *c);
+		    }
+
+		  }
+	      }
+
+    }    //if emc
     //
     //here we transfer TOF information in StMuEvent to UPC ntuple  RD
     //
@@ -583,6 +567,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
    if(!trigData) {
      LOG_ERROR << "In StPeCEvent summary: StTriggerData not available in StMuDst "<< endm;
+     return 1;  //reject event
    }
    lastDSM0Sum = trigData->lastDSM(0);
    lastDSM1Sum = trigData->lastDSM(1);
@@ -601,7 +586,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    //RD as I found the code, it only reads the tracks related to the last vertex
    //I do not know yet if the best vertex is placed at the end
    //I will now read all vertices and try all tracks
-   //26-MRA-2010
+   //26-MAR-2010
 
 
    nPPairs = 0 ;
@@ -640,12 +625,11 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
        }
      }    // loop over tracks in vertex
-//    LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
-//    LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
+  
 
    if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
        ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks )&& (nPrimaryFTPC+nPrimaryTPC>=2)) {
-//      LOG_INFO << " analyze vertex !" << endm;
+     LOG_INFO << " analyze vertex !" << endm;
      acceptEvent = kTRUE;
      //     nPPairs = 0 ;
      StPeCPair* lPair ; 
@@ -667,9 +651,9 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
        }  //lopp mutracks 2
      } //loop mutracks 1
-//      LOG_INFO << " number of pairs " << nPPairs<<"  in vertex index "<<verti<<endm;
+     LOG_INFO << " number of pairs " << nPPairs<<"  in vertex index "<<verti<<endm;
    } else {   //accept ev
-//      LOG_INFO << " reject  vertex !" << endm;
+     LOG_INFO << " reject  vertex !" << endm;
      // return 1; 
    }    
 
@@ -823,7 +807,8 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
   trigData =  const_cast< StTriggerData *> (mudst->event()->triggerData());
 
   if(!trigData) {
-    LOG_ERROR << "In StPeCEvent summary: StTriggerData not available in StMuDst "<< endm;
+    LOG_ERROR << "In StPeCEvent summary: StTriggerData not available in StMuDst StEvent"<< endm;
+    return vector;
   }
     lastDSM0Sum = trigData->lastDSM(0);
     lastDSM1Sum = trigData->lastDSM(1);
@@ -994,7 +979,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
        if (! (muTrk1->flag()>0)) continue;
        if (! (muTrk2->flag()>0)) continue;
        // --------
-       // get pointer to memebr ?
+       // get pointer to member ?
        // TClonesArray &ppairs = *pPairs;
        lPair = new((*sPairs)[nSPairs++]) StPeCPair(muTrk1,muTrk2,0,event) ;
 
@@ -1127,7 +1112,7 @@ void StPeCEvent::matchTOFhitsToTracks(StMuDst *mudst) {
   TObjArray* gloTracks = 0;
 //   StMuTrack *trk;
   StMuEvent* event = 0;
-  Int_t snapLimit =  10;
+  Int_t snapLimit =  0;
   Float_t angleHit;
 
   if (gROOT->IsBatch()) return;
