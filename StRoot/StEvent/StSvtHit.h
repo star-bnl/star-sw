@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.17 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.18 2016/02/26 14:45:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.18  2016/02/26 14:45:15  ullrich
+ * Implemented detector() which is abstract method inherited from StHit.
+ *
  * Revision 2.17  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -115,6 +118,8 @@ public:
     void setNumberOfAnodes(unsigned short);
     void setNumberOfPixels(unsigned short);
     void Print(Option_t *option="") const;
+    
+    StDetectorId detector() const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -137,7 +142,7 @@ StSvtHit::index() const
     return (mHardwarePosition>>4)&((1L<<9)-1);
 }
 
-
+inline StDetectorId StSvtHit::detector() const {return kSvtId;}
 inline float StSvtHit::timebucket() const { return mTimebucket; }
 inline void StSvtHit::setPeak(float val) { mPeak = val; }
 inline void StSvtHit::setAnode(float val) { mAnode = val; }
