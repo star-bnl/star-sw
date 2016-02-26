@@ -210,6 +210,9 @@
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
+  static Bool_t Done = kFALSE;
+  if (Done) return kStOK;
+  Done = kTRUE;
   // Create Needed Tables:    
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
@@ -267,7 +270,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 #endif
   }
   StTpcDb::instance()->SetTpcRotations();
-  return 0;
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
