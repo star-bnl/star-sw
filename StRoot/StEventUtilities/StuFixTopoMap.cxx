@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.6 2014/08/06 19:03:02 perev Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.7 2016/02/26 03:56:08 genevb Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -137,6 +137,7 @@ bool StuFixTopoMap(StTrack* track)
 
         // ???
         if (info->numberOfReferencedPoints(kPxlId) ||
+            info->numberOfReferencedPoints(kSstId) ||
             info->numberOfReferencedPoints(kIstId)) {
           LOG_DEBUG<<" HFT track!" << endm;
           word2 |= 1U<<29;
@@ -175,15 +176,16 @@ bool StuFixTopoMap(StTrack* track)
                 }
                 LOG_DEBUG<<"word1: "<<word1<<endm;
             }
-            else if (hits[i]->detector() == kSsdId) {
+            else if (hits[i]->detector() == kSsdId ||
+                     hits[i]->detector() == kSstId) {
                 if(word2 & 1U<<29) { // HFT format
-                  LOG_DEBUG<<"HFT format for the SSD hit map"<<endm;
+                  LOG_DEBUG<<"HFT format for the SST hit map"<<endm;
                   if (word1 & 1U<<6) {
                     word1 |= 1U<<7;  // second hit
-                    LOG_DEBUG<<"set bit for SSD 2nd-layer to 1"<<endm;
+                    LOG_DEBUG<<"set bit for SST 2nd-layer to 1"<<endm;
                   } else {
                     word1 |= 1U<<6;
-                    LOG_DEBUG<<"set bit for SSD 1st-layer to 1"<<endm;
+                    LOG_DEBUG<<"set bit for SST 1st-layer to 1"<<endm;
                   }
                 } else {
                   if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
