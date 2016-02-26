@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichHit.h,v 2.7 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StRichHit.h,v 2.8 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.h,v $
+ * Revision 2.8  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.7  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -84,6 +87,7 @@ public:
     void         setBit(StRichHitFlag f);
     void         unSetBit(StRichHitFlag f);
     unsigned int flags() const;
+    StDetectorId detector() const;
 
 protected:
     StThreeVectorF mLocal;
@@ -103,6 +107,8 @@ protected:
     
     ClassDef(StRichHit,1)
 };
+
+inline StDetectorId StRichHit::detector() const {return kRichId;}
 
 inline const StThreeVectorF& StRichHit::local() const {return mLocal;}
 inline StThreeVectorF& StRichHit::local() {return mLocal;}

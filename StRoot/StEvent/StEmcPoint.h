@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.10 2012/10/23 20:18:33 fisyak Exp $
+ * $Id: StEmcPoint.h,v 2.11 2016/02/25 17:10:19 ullrich Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.11  2016/02/25 17:10:19  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.10  2012/10/23 20:18:33  fisyak
  * Add/modify print outs
  *
@@ -85,6 +88,8 @@ public:
     void  setDeltaU(const float);
     void  setDeltaV(const float);
     
+    StDetectorId detector() const;
+    
     StPtrVecEmcCluster&       cluster(const StDetectorId);
     const StPtrVecEmcCluster& cluster(const StDetectorId) const;
     StPtrVecEmcCluster&       cluster(Int_t);
@@ -125,6 +130,9 @@ protected:
     int getDetId(Int_t /* id */) const;
     ClassDef(StEmcPoint,2)
 };
+
+inline StDetectorId StEmcPoint::detector() const {return static_cast<StDetectorId>(StHit::bits(0, 4));}
+
 ostream& operator<<(ostream&, const StEmcPoint&); // Printing operator
 #endif
 

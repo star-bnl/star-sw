@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHit.h,v 2.1 2014/04/10 16:16:24 jeromel Exp $
+* $Id: StIstHit.h,v 2.2 2016/02/25 17:10:20 ullrich Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -27,7 +27,7 @@ public:
    StIstHit(const StThreeVectorF &position, const StThreeVectorF &error, unsigned int hwPosition, float charge,
       unsigned char trackRefCount = 0);
 
-   virtual StDetectorId detector() const;
+   StDetectorId detector() const;
    void    setDetectorId(StDetectorId);
 
    unsigned char getLadder() const;
@@ -86,6 +86,9 @@ inline void StIstHit::setNRawHitsRPhi(unsigned char nRawHitsRPhi) { mNRawHitsRPh
 /***************************************************************************
 *
 * $Log: StIstHit.h,v $
+* Revision 2.2  2016/02/25 17:10:20  ullrich
+* Implemented detector() which is now a pure abstract method in StHit.
+*
 * Revision 2.1  2014/04/10 16:16:24  jeromel
 * Add hit def for Ist (Thmas OK-ed)
 *

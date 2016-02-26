@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.12 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.13 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.13  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.12  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -86,7 +89,11 @@ public:
     void         setADC(int, int);
     int          getADC(unsigned int) const;
     virtual int  volumeID() const;
+    
+    StDetectorId detector() const;
     void         Print(const Option_t *option="") const;
+    
+    
 
 protected:
     static StMemoryPool mPool;  //!
@@ -107,8 +114,8 @@ StSsdHit::sector(unsigned int ladder) {
     return 0;
 }
 
-inline unsigned int
-StSsdHit::sector() const {return sector(ladder()); }
+inline unsigned int StSsdHit::sector() const {return sector(ladder()); }
+inline StDetectorId StSsdHit::detector() const {return static_cast<StDetectorId>(StHit::bits(0, 4));}
 
 ostream&              operator<<(ostream& os, StSsdHit const & v);
 

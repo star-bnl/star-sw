@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.10 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StTofHit.h,v 2.11 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.11  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.10  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -103,6 +106,8 @@ public:
     void setSigmaKaon(float);
     void setSigmaProton(float);
     void setParticleHypothesis(StParticleDefinition*);
+    
+    StDetectorId detector() const;
 
  protected:
     Int_t   mTrayIndex;
@@ -131,5 +136,7 @@ public:
 
     ClassDef(StTofHit,3)
 };
+
+inline StDetectorId StTofHit::detector() const {return static_cast<StDetectorId>(StHit::bits(0, 4));}
 
 #endif

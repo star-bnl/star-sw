@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.cxx,v 2.1 2006/01/19 21:42:06 ullrich Exp $
+ * $Id: StRnDHit.cxx,v 2.2 2016/02/25 17:10:20 ullrich Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.cxx,v $
+ * Revision 2.2  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.1  2006/01/19 21:42:06  ullrich
  * Initial Revision.
  *
@@ -58,7 +61,7 @@ void StRnDHit::setDetectorId(StDetectorId id) {mDetectorId = id;}
 ostream& operator<<(ostream& os, const StRnDHit& hit)
 {
     return os << "HFT Hit -I- \tLayer:"<<hit.mLayer<<" ladder: "<<hit.mLadder
-	    << " wafer: "<< hit.mWafer<<"\n\t\t"<<((StHit)hit)
+	    << " wafer: "<< hit.mWafer<<"\n\t\t"<< hit
 	    <<" \n\t\tExtraByte0: "<<hit.mExtraByte0<<" ExtraByte1: "<<hit.mExtraByte1
 	    <<"\n\t\tDoubles: "<< hit.mDouble0<< " "<<hit.mDouble1<<" "<<hit.mDouble2
 	    << hit.mDouble3 << " " << hit.mDouble4<<endl;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtHit.h,v 2.4 2013/04/24 17:27:43 ullrich Exp $
+ * $Id: StFgtHit.h,v 2.5 2016/02/25 17:10:20 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtHit.h,v $
+ * Revision 2.5  2016/02/25 17:10:20  ullrich
+ * Implemented detector() which is now a pure abstract method in StHit.
+ *
  * Revision 2.4  2013/04/24 17:27:43  ullrich
  * New methods and members (Akio and Anselm)
  *
@@ -50,7 +53,9 @@ public:
     
     // deconstructor
     ~StFgtHit();
-    virtual StDetectorId detector() const 		{return kFgtId;};   
+    
+    StDetectorId detector() const {return kFgtId;};
+    
     // accessors/modifiers for the map
     stripWeightMap_t& getStripWeightMap();
     const stripWeightMap_t& getStripWeightMap() const;

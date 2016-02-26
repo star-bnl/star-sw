@@ -529,8 +529,9 @@ void StEventQAMaker::MakeHistGlob() {
       // so it doesn't need to be calculated here 
       
       // check if the track has hits in a detector -CPL
-      for (int detId=0; detId<48; detId++)
-        if (map.hasHitInDetector(static_cast<StDetectorId>(detId))) hists->m_det_id->Fill(detId);
+      for (int detId=0; detId<kMaxDetectorId; detId++)
+        if (map.hasHitInDetector(static_cast<StDetectorId>(detId)))
+          hists->m_det_id->Fill(detId);
       
       // these histogram additions are for Lanny's evr QA histograms
       hists->m_dcaToBeamXY->Fill(dcaToBeam.x(),dcaToBeam.y());
@@ -1119,8 +1120,9 @@ void StEventQAMaker::MakeHistPrim() {
         Float_t radf = firstPoint.perp();
 	
 	// check if the track has hits in a detector -CPL
-        for (int detId=0; detId<48; detId++)
-          if (map.hasHitInDetector(static_cast<StDetectorId>(detId))) hists->m_pdet_id->Fill(detId);
+        for (int detId=0; detId<kMaxDetectorId; detId++)
+          if (map.hasHitInDetector(static_cast<StDetectorId>(detId)))
+            hists->m_pdet_id->Fill(detId);
 	
 	// now fill all TPC histograms ------------------------------------------------
         if (map.trackTpcOnly()) {
@@ -2802,8 +2804,14 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.125 2016/02/19 03:54:41 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.127 2016/02/24 22:14:49 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.127  2016/02/24 22:14:49  genevb
+// Use kMaxDetectorId
+//
+// Revision 2.126  2016/02/24 22:14:05  genevb
+// Use kMaxDetectorId
+//
 // Revision 2.125  2016/02/19 03:54:41  genevb
 // Expand track detector ID histograms (compact syntax)
 //

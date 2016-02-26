@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.19 2014/03/18 13:23:04 fisyak Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -86,6 +86,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.20  2016/02/24 18:51:09  ullrich
+ * Made kSsd and kSst equivalent in numberOfHits()
+ *
  * Revision 2.19  2014/03/18 13:23:04  fisyak
  * Xin\'s fix for Ssd numberOfHits  with hftFormat
  *
@@ -154,7 +157,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.19 2014/03/18 13:23:04 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.20 2016/02/24 18:51:09 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -299,6 +302,7 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
         for (i=1; i<7; i++)
             if (hasHitInSvtLayer(i)) n++;
         break;
+    case kSstId:
     case kSsdId:
         if(! hftFormat()) {
           if (bit(7)) n++;        

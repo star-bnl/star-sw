@@ -38,7 +38,7 @@
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
-   setGroupId(kSsdId);
+   setGroupId(kSstId);
 }
 
 
