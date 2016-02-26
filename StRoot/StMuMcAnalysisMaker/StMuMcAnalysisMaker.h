@@ -128,11 +128,8 @@ class StMuMcAnalysisMaker : public StMaker {
   void           FillQAGl(TrackMatchType type,const StMuTrack *gTrack = 0, const StMuMcTrack *mcTrack = 0, const StDcaGeometry *dcaG = 0, const StMuMcVertex *mcVertex = 0);
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack = 0, const StMuMcTrack *mcTrack = 0, const StMuPrimaryTrackCovariance *cov = 0); 
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle);
-  Bool_t         Accept(const StMuTrack *gTrack = 0);
-  Bool_t         AcceptGhost(const StMuTrack *gTrack = 0);
-  Bool_t         AcceptVX(const StMuPrimaryVertex *Vtx = 0);
-  TrackMatchType TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, Bool_t CheckHft = kFALSE);
-  Bool_t         IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack);
+  TrackMatchType TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, Bool_t CheckHft = kFALSE);
+  Bool_t         IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack);
   
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();

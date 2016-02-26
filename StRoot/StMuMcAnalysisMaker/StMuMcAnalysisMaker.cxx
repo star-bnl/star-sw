@@ -349,9 +349,9 @@ Int_t StMuMcAnalysisMaker::Make(){
 void StMuMcAnalysisMaker::FillTrackPlots(){
   if (! muDst || ! muDst->event()) return;
   const Double_t field = muDst->event()->magneticField()*kilogauss;
-  //  map<Int_t,Int_t> &Gl2Pr = muDst->IdGlobalId2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
-  map<Int_t,Int_t> &Gl2Pr = muDst->IdGlobal2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
-  multimap<Int_t,Int_t> &Mc2RcTracks = muDst->IdMc2IdRcTracks(); // map between global and Mc tracks from primary Mc vertex
+  //  map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack = muDst->IdGlobalId2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
+  map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack = muDst->IdGlobal2IdPrimaryTrack(); // map global to primary track Ids from vertex with idTruth == 1
+  multimap<Int_t,Int_t> &IdMc2IdRcTracks = muDst->IdMc2IdRcTracks(); // map between global and Mc tracks from primary Mc vertex
   // =============  Build map between  Rc and Mc vertices 
   multimap<Int_t,Int_t> Mc2RcVertices = muDst->IdMc2IdRcVertices(); // Reconstructable !
   // Loop over Mc Tracks
@@ -383,42 +383,37 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     if (mcTrack->Charge() < 0) pm = kNegative;
     Int_t NPart = kallP;
     if (mcTrack->GePid() == 8 || mcTrack->GePid() == 9) NPart = kPion;
-    for (Int_t particle = 0; particle <= NPart; particle++) {
-      fHistsT[kGlobal][kMcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      if (IdVx == 1)
-	fHistsT[kPrimary][kMcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      if (! McTpc) continue; 
-      fHistsT[kGlobal][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      if (IdVx == 1)
-      fHistsT[kPrimary][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      if (McHft) {
-	fHistsT[kGlobal][kMcHftTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-	if (IdVx == 1)
-	  fHistsT[kPrimary][kMcHftTk][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      }
-    }
+    Double_t eta = mcTrack->Pxyz().pseudoRapidity();
+    Double_t pT  = mcTrack->Pxyz().perp();
+    Double_t phi = TMath::RadToDeg()*mcTrack->Pxyz().phi();
     // kNotDefined, kLostTk, kRecoTk, kCloneTk
-    TrackMatchType type    = TrackType(mcTrack,Mc2RcTracks);
+    TrackMatchType type    = TrackType(mcTrack,IdMc2IdRcTracks);
     // kNotDefined, kLostHftTk, kRecoHftTk, kCloneHftTk
-    TrackMatchType typeHft = TrackType(mcTrack,Mc2RcTracks,kTRUE);
+    TrackMatchType typeHft = TrackType(mcTrack,IdMc2IdRcTracks,kTRUE);
     if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
     if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
-    Bool_t isPrim = IsPrimary(mcTrack,Mc2RcTracks, muDst->IdGlobal2IdPrimaryTrack());
+    Bool_t isPrim = IsPrimary(mcTrack,IdMc2IdRcTracks, IdGlobal2IdPrimaryTrack);
     for (Int_t particle = 0; particle <= NPart; particle++) {
-      if (type != kNotDefined) {
-	fHistsT[kGlobal][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-	if (isPrim)
-	fHistsT[kPrimary][type][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      }
-      if (typeHft != kNotDefined) {
-	fHistsT[kGlobal][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-	if (isPrim)
-	fHistsT[kPrimary][typeHft][particle][pm][1][kTotalQA]->Fill(mcTrack->Pxyz().pseudoRapidity(),mcTrack->Pxyz().perp(), TMath::RadToDeg()*mcTrack->Pxyz().phi());
-      }
+      fHistsT[kGlobal ][kMcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (IdVx == 1) 	fHistsT[kPrimary][kMcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (! McTpc) continue; 
+      fHistsT[kGlobal ][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (IdVx == 1) 	fHistsT[kPrimary][kMcTpcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (type == kNotDefined) continue;
+      fHistsT[kGlobal ][type][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (isPrim) fHistsT[kPrimary][type][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (! McHft) continue;
+      fHistsT[kGlobal ][kMcHftTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (IdVx == 1) fHistsT[kPrimary][kMcHftTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (typeHft == kNotDefined) continue;
+      fHistsT[kGlobal ][typeHft][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
+      if (isPrim) fHistsT[kPrimary][typeHft][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
     }
+#define __NoOfPoint__
+#ifdef __NoOfPoint__
     if (type == kRecoTk || typeHft == kRecoHftTk) {
       Int_t Id = mcTrack->Id()-1;
-      pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
+      pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = IdMc2IdRcTracks.equal_range(Id);
       multimap<Int_t,Int_t>::iterator it;
       Int_t kg = -1;
       Int_t count = 0;
@@ -434,7 +429,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
       if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
       if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
-      Int_t k = Gl2Pr[kg+1] - 1;
+      Int_t k = IdGlobal2IdPrimaryTrack[kg+1] - 1;
       if (k < 0) continue;
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
       Int_t kpc = pTrack->index2Cov();
@@ -471,10 +466,11 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	}
       }
     }
+#endif /* __NoOfPoint__ */
     // check for ghost
     for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
       StMuTrack *gTrack = muDst->globalTracks(kg);
-      if ( ! AcceptGhost(gTrack)) continue;
+      if ( ! muDst->Accept(gTrack)) continue;
       if ( gTrack->idTruth()) continue;
       EChargeType pm = kPositive;
       if (gTrack->charge() < 0) pm = kNegative;
@@ -487,8 +483,10 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
 	if (! pTrack) continue;
         if (pTrack->vertexIndex() != l) continue;
-	if (! AcceptGhost(pTrack)) continue;
-	// ?? McVertex	if (pTrack->idParentVx() == 1) continue;
+	if (! muDst->Accept(pTrack)) continue;
+	if ( pTrack->idTruth()) {
+	  if (pTrack->idParentVx() == 1) continue;
+	}
 	EChargeType pm = kPositive;
 	if (pTrack->charge() < 0) pm = kNegative;
 	fHistsT[kPrimary][kGhostTk][kallP][pm][1][kTotalQA]->Fill(pTrack->eta(),pTrack->pt(),TMath::RadToDeg()*pTrack->phi());
@@ -715,35 +713,6 @@ void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, 
   }
 }
 //________________________________________________________________________________
-Bool_t StMuMcAnalysisMaker::Accept(const StMuTrack *gTrack) {
-  if (! gTrack)            return kFALSE;
-  if (! gTrack->idTruth()) return kFALSE;
-  if (! gTrack->charge())  return kFALSE;
-  if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) return kFALSE; // bad fit or short track pointing to EEMC
-  if (  gTrack->flag() > 1000) return kFALSE;  // pile up track in TPC
-  if (  gTrack->nHitsFit() < StMuDst::MinNoTpcRcHits) return kFALSE;
-  //  if (  gTrack->qaTruth() < 90) return kFALSE;
-  return kTRUE;
-}
-//________________________________________________________________________________
-Bool_t StMuMcAnalysisMaker::AcceptGhost(const StMuTrack *gTrack) {
-  if (! gTrack)            return kFALSE;
-  // if (  gTrack->idTruth()) return kFALSE;
-  if (! gTrack->charge())  return kFALSE;
-  if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) return kFALSE; // bad fit or short track pointing to EEMC
-  if (  gTrack->flag() > 1000) return kFALSE;  // pile up track in TPC
-  if (  gTrack->nHitsFit() < 10) return kFALSE;
-  //  if (  gTrack->qaTruth() < 90) return kFALSE;
-  return kTRUE;
-}
-//________________________________________________________________________________
-Bool_t StMuMcAnalysisMaker::AcceptVX(const StMuPrimaryVertex *Vtx) {
-  if (! Vtx) return kFALSE;
-  if (! Vtx->idTruth())  return kFALSE;
-  //  if (  Vtx->qaTruth() < 90) return kFALSE;
-  return kTRUE;
-}
-//________________________________________________________________________________
 TString &StMuMcAnalysisMaker::FormName(const TH1 *hist) {
   static TString Name;
   Name = "";
@@ -757,10 +726,10 @@ TString &StMuMcAnalysisMaker::FormName(const TH1 *hist) {
   return *&Name;
 }
 //________________________________________________________________________________
-Bool_t StMuMcAnalysisMaker::IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack) {
+Bool_t StMuMcAnalysisMaker::IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack) {
   Bool_t ok = kFALSE;
   Int_t Id = mcTrack->Id()-1;
-  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
+  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = IdMc2IdRcTracks.equal_range(Id);
   Int_t count = 0;
   for (multimap<Int_t,Int_t>::iterator it = ret.first; 
        it != ret.second; 
@@ -774,9 +743,9 @@ Bool_t StMuMcAnalysisMaker::IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t
   return ok;
 }
 //________________________________________________________________________________
-TrackMatchType StMuMcAnalysisMaker::TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &Mc2RcTracks, Bool_t CheckHft) {
+TrackMatchType StMuMcAnalysisMaker::TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, Bool_t CheckHft) {
   Int_t Id = mcTrack->Id()-1;
-  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = Mc2RcTracks.equal_range(Id);
+  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = IdMc2IdRcTracks.equal_range(Id);
   Int_t count = 0;
   Int_t countHft = 0;
   for (multimap<Int_t,Int_t>::iterator it = ret.first; 
@@ -1219,8 +1188,9 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
 	      Double_t val = heff[l]->GetBinContent(bin); Val += val;
 	      Double_t sum = temp->GetBinContent(bin);    Sum += sum;
 	      Double_t err = 0;
-	      if (sum < 1.e-7 || val > sum) {val = 1.05;}
-	      else { val /= sum;     err = TMath::Sqrt(val*(1.-val)/sum);}
+	      if      (sum < 1.e-7 && val < 1.e-7) {val =    0;}
+	      else if (val > sum)                  {val = 1.05;}
+	      else                                 {val /= sum;     err = TMath::Sqrt(val*(1.-val)/sum);}
 	      heff[l]->SetBinContent(bin,100*val);
 	      heff[l]->SetBinError(bin,100*err);
 	    }
