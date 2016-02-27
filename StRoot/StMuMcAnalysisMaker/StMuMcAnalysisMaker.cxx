@@ -432,6 +432,8 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       Int_t k = IdGlobal2IdPrimaryTrack[kg+1] - 1;
       if (k < 0) continue;
       StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
+      if (! pTrack) continue;
+      assert(pTrack->idTruth() ==  gTrack->idTruth());
       Int_t kpc = pTrack->index2Cov();
       if (kpc >= 0) {
 	StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
@@ -759,7 +761,7 @@ TrackMatchType StMuMcAnalysisMaker::TrackType(const StMuMcTrack *mcTrack, multim
       UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
       UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
       UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
-      if (noPxlHits < 2 || noIstHits < 1) continue;
+      if (noPxlHits < 2 || noIstHits + noSsdHits < 1) continue;
       countHft++;
     }
 
