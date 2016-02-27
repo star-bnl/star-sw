@@ -1110,7 +1110,7 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
     Transport( dS, dsdr, fP, fC, dsdp, F, F1 );
     
     float CTmp[36] = {0.};
-    MultQSQt(F1, fC, CTmp, 6);
+    MultQSQt(F1, mV, CTmp, 6);
     
     for(int iC=0; iC<21; iC++)
       fC[iC] += CTmp[iC];
@@ -1127,8 +1127,8 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
   }
 
   float mS[6] = { fC[0] + mV[0],
-                 fC[1] + mV[1], fC[2] + mV[2],
-                 fC[3] + mV[3], fC[4] + mV[4], fC[5] + mV[5] };                 
+                  fC[1] + mV[1], fC[2] + mV[2],
+                  fC[3] + mV[3], fC[4] + mV[4], fC[5] + mV[5] };                 
   InvertCholetsky3(mS);
   
   float res[3] = { m[0] - X(), m[1] - Y(), m[2] - Z() };
