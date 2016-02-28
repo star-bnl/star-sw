@@ -469,30 +469,30 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
       }
     }
 #endif /* __NoOfPoint__ */
-    // check for ghost
-    for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
-      StMuTrack *gTrack = muDst->globalTracks(kg);
-      if ( ! muDst->Accept(gTrack)) continue;
-      if ( gTrack->idTruth()) continue;
-      EChargeType pm = kPositive;
-      if (gTrack->charge() < 0) pm = kNegative;
-      fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
-    }
-    for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
-      StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
-      if (Vtx->idTruth() != 1) continue;
-      for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
-	StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
-	if (! pTrack) continue;
-        if (pTrack->vertexIndex() != l) continue;
-	if (! muDst->Accept(pTrack)) continue;
-	if ( pTrack->idTruth()) {
-	  if (pTrack->idParentVx() == 1) continue;
-	}
-	EChargeType pm = kPositive;
-	if (pTrack->charge() < 0) pm = kNegative;
-	fHistsT[kPrimary][kGhostTk][kallP][pm][1][kTotalQA]->Fill(pTrack->eta(),pTrack->pt(),TMath::RadToDeg()*pTrack->phi());
+  }
+  // check for ghost
+  for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
+    StMuTrack *gTrack = muDst->globalTracks(kg);
+    if ( ! muDst->Accept(gTrack)) continue;
+    if ( gTrack->idTruth()) continue;
+    EChargeType pm = kPositive;
+    if (gTrack->charge() < 0) pm = kNegative;
+    fHistsT[kGlobal][kGhostTk][kallP][pm][1][kTotalQA]->Fill(gTrack->eta(),(gTrack->charge()*gTrack->pt()),TMath::RadToDeg()*gTrack->phi());
+  }
+  for (Int_t l = 0; l < muDst->numberOfPrimaryVertices(); l++) {
+    StMuPrimaryVertex *Vtx = muDst->primaryVertex(l);
+    if (Vtx->idTruth() != 1) continue;
+    for (Int_t k = 0; k < muDst->numberOfPrimaryTracks(); k++) {
+      StMuTrack *pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
+      if (! pTrack) continue;
+      if (pTrack->vertexIndex() != l) continue;
+      if (! muDst->Accept(pTrack)) continue;
+      if ( pTrack->idTruth()) {
+	if (pTrack->idParentVx() == 1) continue;
       }
+      EChargeType pm = kPositive;
+      if (pTrack->charge() < 0) pm = kNegative;
+      fHistsT[kPrimary][kGhostTk][kallP][pm][1][kTotalQA]->Fill(pTrack->eta(),pTrack->pt(),TMath::RadToDeg()*pTrack->phi());
     }
   }
 }
