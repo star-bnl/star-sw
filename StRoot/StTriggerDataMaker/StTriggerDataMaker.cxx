@@ -1,6 +1,6 @@
 #include "StTriggerDataMaker.h"
 #include <stdlib.h>
-#include "StEventTypes.h"
+//#include "StEventTypes.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StTRGReader.h"
 #include "StDaqLib/TRG/trgStructures2003.h"
