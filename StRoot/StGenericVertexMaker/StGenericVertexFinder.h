@@ -6,13 +6,13 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.22 2015/11/13 04:12:18 perev Exp $
+ * $Id: StGenericVertexFinder.h,v 1.23 2016/02/29 22:58:22 jwebb Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
 #define STAR_StGenericVertexFinder
 
-#include "StEventTypes.h"
+//#include "StEventTypes.h"
 #include "StPrimaryVertex.h"
 
 class StEvent;
@@ -70,6 +70,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.23  2016/02/29 22:58:22  jwebb
+// Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
+//
 // Revision 1.22  2015/11/13 04:12:18  perev
 // Added metod IsFixed
 //

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.16 2013/08/16 20:49:38 perev Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.17 2016/02/29 22:58:22 jwebb Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -10,6 +10,7 @@
 #include "StGenericVertexFinder.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
+#include "StEventTypes.h"
 
 //______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
@@ -90,6 +91,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.17  2016/02/29 22:58:22  jwebb
+// Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
+//
 // Revision 1.16  2013/08/16 20:49:38  perev
 // PPV with only StEvent dependency
 //
