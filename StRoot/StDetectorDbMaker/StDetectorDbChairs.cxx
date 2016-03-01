@@ -3,6 +3,7 @@
 #include "StarChairDefs.h"
 #include "TEnv.h"
 #include "St_db_Maker/St_db_Maker.h"
+static Int_t _debug = 0;
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
 StDetectorDbFTPCGas* StDetectorDbFTPCGas::fgInstance = 0; 
@@ -1013,6 +1014,10 @@ St_tofTotbCorrC::St_tofTotbCorrC(St_tofTotbCorr *table) : St_tofCorrC(table) {
   if (table) N = getNumRows();
   for (Int_t i =  0; i < N; i++) {
     Int_t j = Index(trayId(i), moduleId(i), cellId(i));
+    if (_debug) {
+      Table()->Print(i,1);
+      cout << "i = " << i << "\ttray = " << trayId(i) << "\tmodule = " << moduleId(i) << "\tcellId = " << cellId(i) << "\tindex = " << j << endl;
+    }
     if (j >= 0) {
       if (! mIndxArray[j]) mIndxArray[j] = i;
       else {
