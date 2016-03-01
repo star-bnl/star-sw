@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.2 2013/08/19 21:27:32 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.3 2016/02/29 22:58:23 jwebb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -21,6 +21,7 @@
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 
 #include "StPPVertexFinder.h"
+#include <StEventTypes.h>
 #include "TrackData.h"
 #include "VertexData.h" 
 #include "Vertex3D.h"
@@ -1238,6 +1239,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.3  2016/02/29 22:58:23  jwebb
+ * Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
+ *
  * Revision 1.2  2013/08/19 21:27:32  perev
  * Check for Dca geo added
  *
