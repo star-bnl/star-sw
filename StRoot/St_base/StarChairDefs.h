@@ -15,7 +15,7 @@
     LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
 	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	\
     if (Nrows > 10) Nrows = 10;						\
-    if (table->GetRowSize() < 256) table->Print(0,Nrows);		\
+    if (table->GetRowSize() < 512) table->Print(0,Nrows);		\
   }
 #define MakeString(PATH) # PATH
 #define MakeChairInstance(STRUCT,PATH)					\
