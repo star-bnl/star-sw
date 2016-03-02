@@ -127,8 +127,10 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2013_2x",   20121215,   3001, "y2013_2x", "y2013x asymptotic geometry sans pixel.  WARNING: Geometry may change between releases,AgML,xgeometry"},
 
   {"20130509.000000", 20130509, 0, "y2013_1",  "y2013 with pixel, real data,AgML,xgeometry"},
-  {"20130509.000000", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
+  {"20130509.000001", 20130509, 1, "y2013_1c", "y2013 with pixel, real data,AgML,xgeometry"},
   {"r2013",      20121220,      0, "y2013_2x", "y2013x asymptotic geometry sans pixel.  WARNING: Geometry may change between releases,AgML,xgeometry"},
+  {"r2013_c2",   20121220,      0, "y2013_2x", "y2013x asymptotic geometry sans pixel.  WARNING: Geometry may change between releases,AgML,xgeometry"},
+  {"r2013_c1",   20130509,      1, "y2013_1x", "y2013x asymptotic geometry with pixel.  WARNING: Geometry may change between releases,AgML,xgeometry"},
     
 
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
