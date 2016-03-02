@@ -8,6 +8,7 @@ void Load() {
     gROOT->LoadMacro("bfc.C");
     //    bfc(-1,"tpcDb,detDb,CorrX,nodefault");
     bfc(-2,"tpcDb,detDb,mysql,nodefault,CorrX");
+    //   bfc(-2,"tpcDb,detDb,mysql,nodefault,Corr4,DbV20140905");
   }    
 //   gROOT->ProcessLine("typedef trgTimeOffset_st              trgTimeOffsetB_st;");
 //   gROOT->ProcessLine("typedef St_trgTimeOffset              St_trgTimeOffsetB_;");
