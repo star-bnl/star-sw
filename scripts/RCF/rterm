@@ -1,0 +1,610 @@
+#!/bin/csh
+#
+# Written J.Lauret Fri May 25 2001
+# (c) J. Lauret 2001-2012
+#
+# Version: [will increment and compare with ssh GK]
+set VERSION="V1.502";
+
+#
+# Generic enough to work everywhere.
+# Possible environment variables and features :
+#
+# - TERM_BKG_COLOR   color for the terminal to open
+# - use of + will use the first part as a pattern and
+#   get the least loaded node.
+# - Argument 1 is the nodename or the + pattern
+# - Argument 2 is a possible username
+#
+# Revision history moved at bottom.
+# Moved in CVS for easier management in 2006
+#
+
+# default values
+set help=0
+set inter=0
+set user=""
+set node=""
+set port=""
+set extra=""
+set col=""
+set excluded=""
+set DEBUG=0
+set pool="condor02.rcf.bnl.gov:9664" 
+
+# Specific path to Unix executables (security and remote call issue)
+set GREP=/bin/grep
+set AWK=/bin/awk
+set ID=/usr/bin/id
+set SED=/bin/sed
+set CAT=/bin/cat
+set SORT=/bin/sort
+set HOSTNM=/bin/hostname
+
+# check validity 
+if ( ! $?USER ) then
+    set USER=`whoami`
+endif
+if ( "$USER" == "") then
+    set USER=`whoami`
+endif
+
+
+# default argument value	    
+set X11Opt="-X"
+
+# Arguments parsing
+set count=0
+while ( $count <= $#argv)
+    set arg=$argv[$count]
+    @ count++
+
+    switch ($arg)
+	# this is the option section	
+	case "-v":
+	case "-V":
+	case "--version":
+	    echo "rterm - $VERSION"
+	    exit
+	    breaksw
+	case "-h":
+	case "--help":
+	    set help=1
+	    breaksw
+
+	case "-i":
+	    set inter=1
+	    breaksw
+
+	case "-Y":
+	    set X11Opt="-Y"
+	    breaksw
+
+	case "-x":
+	    set excluded="$excluded $argv[$count]"
+	    if( $DEBUG) then
+		echo "Exclusion list is now [$excluded]"
+	    endif
+	    @ count++
+	    breaksw
+
+	case "-coffee":
+	    # J. Lauret software trademark :)
+	    set DEBUG=1
+	    breaksw
+
+	case "-p":
+	    set port="-p $argv[$count]"
+	    set extra="$extra port $argv[$count]"
+	    if ($DEBUG) then
+		echo "Extraneous args are   [$extra]"
+	    endif
+	    @ count++
+	    breaksw
+
+	case "-funky":
+	    # for this funny feature, only some colors
+	    # with a sum R+G+B < 300 were added (too dark
+	    # otherwise)
+	    if( -e /usr/local/bin/perl) then
+		set PERL=/usr/local/bin/perl
+	    else if (-e /usr/bin/perl ) then
+		set PERL=/usr/bin/perl
+	    else if (-e /bin/perl) then
+		set PERL=/bin/perl
+	    endif
+	    if( $?PERL && `$ID | $GREP root` == "") then
+		set file="/tmp/$$Color-for-$USER.pl"
+		if ($DEBUG) then
+		    echo "Perl is located as    [$PERL]"
+		    echo "Temp file is named    [$file]"
+		endif
+		$CAT <<__EOF__ >$file
+@COLORS=(
+	"gainsboro","blanchedalmond","bisque","peachpuff","navajowhite",
+	"moccasin","dimgray","dimgrey","slategray","slategrey",
+	"lightslategray","lightslategrey","gray","grey","lightgrey",
+	"lightgray","cornflowerblue","slateblue","mediumslateblue","lightslateblue",
+	"royalblue","dodgerblue","deepskyblue","skyblue","lightskyblue",
+	"steelblue","lightsteelblue","lightblue","powderblue","paleturquoise",
+	"darkturquoise","mediumturquoise","turquoise","cyan","cadetblue",
+	"mediumaquamarine","aquamarine","darkseagreen","mediumseagreen","lightseagreen",
+	"palegreen","springgreen","lawngreen","chartreuse","mediumspringgreen",
+	"greenyellow","limegreen","yellowgreen","darkkhaki","khaki",
+	"palegoldenrod","yellow","gold","lightgoldenrod","goldenrod",
+	"darkgoldenrod","rosybrown","indianred","peru","burlywood",
+	"wheat","sandybrown","tan","chocolate","darksalmon",
+	"salmon","lightsalmon","orange","darkorange","coral",
+	"lightcoral","tomato","orangered","hotpink","deeppink",
+	"pink","lightpink","palevioletred","maroon","mediumvioletred",
+	"violetred","magenta","violet","plum","orchid",
+	"mediumorchid","darkorchid","darkviolet","blueviolet","purple",
+	"mediumpurple","thistle","snow3","snow4","seashell2",
+	"seashell3","seashell4","AntiqueWhite2","AntiqueWhite3","AntiqueWhite4",
+	"bisque1","bisque2","bisque3","bisque4","PeachPuff1",
+	"PeachPuff2","PeachPuff3","PeachPuff4","NavajoWhite1","NavajoWhite2",
+	"NavajoWhite3","NavajoWhite4","LemonChiffon2","LemonChiffon3","LemonChiffon4",
+	"cornsilk2","cornsilk3","cornsilk4","ivory3","ivory4",
+	"honeydew2","honeydew3","honeydew4","LavenderBlush2","LavenderBlush3",
+	"LavenderBlush4","MistyRose2","MistyRose3","MistyRose4","azure3",
+	"azure4","SlateBlue1","SlateBlue2","SlateBlue3","RoyalBlue1",
+	"RoyalBlue2","RoyalBlue3","DodgerBlue1","DodgerBlue2","DodgerBlue3",
+	"SteelBlue1","SteelBlue2","SteelBlue3","DeepSkyBlue1","DeepSkyBlue2",
+	"DeepSkyBlue3","SkyBlue1","SkyBlue2","SkyBlue3","SkyBlue4",
+	"LightSkyBlue1","LightSkyBlue2","LightSkyBlue3","LightSkyBlue4","SlateGray1",
+	"SlateGray2","SlateGray3","SlateGray4","LightSteelBlue1","LightSteelBlue2",
+	"LightSteelBlue3","LightSteelBlue4","LightBlue1","LightBlue2","LightBlue3",
+	"LightBlue4","LightCyan2","LightCyan3","LightCyan4","PaleTurquoise1",
+	"PaleTurquoise2","PaleTurquoise3","PaleTurquoise4","CadetBlue1","CadetBlue2",
+	"CadetBlue3","CadetBlue4","turquoise1","turquoise2","turquoise3",
+	"cyan1","cyan2","cyan3","DarkSlateGray1","DarkSlateGray2",
+	"DarkSlateGray3","DarkSlateGray4","aquamarine1","aquamarine2","aquamarine3",
+	"aquamarine4","DarkSeaGreen1","DarkSeaGreen2","DarkSeaGreen3","DarkSeaGreen4",
+	"SeaGreen1","SeaGreen2","SeaGreen3","PaleGreen1","PaleGreen2",
+	"PaleGreen3","PaleGreen4","SpringGreen1","SpringGreen2","SpringGreen3",
+	"chartreuse1","chartreuse2","chartreuse3","OliveDrab1","OliveDrab2",
+	"OliveDrab3","DarkOliveGreen1","DarkOliveGreen2","DarkOliveGreen3",
+	"DarkOliveGreen4","khaki1","khaki2","khaki3","khaki4","LightGoldenrod1",
+	"LightGoldenrod2","LightGoldenrod3","LightGoldenrod4","LightYellow2","LightYellow3",
+	"LightYellow4","yellow1","yellow2","yellow3","gold1",
+	"gold2","gold3","goldenrod1","goldenrod2","goldenrod3",
+	"DarkGoldenrod1","DarkGoldenrod2","DarkGoldenrod3","RosyBrown1","RosyBrown2",
+	"RosyBrown3","RosyBrown4","IndianRed1","IndianRed2","IndianRed3",
+	"sienna1","sienna2","sienna3","burlywood1","burlywood2",
+	"burlywood3","burlywood4","wheat1","wheat2","wheat3",
+	"wheat4","tan1","tan2","tan3","chocolate1",
+	"chocolate2","chocolate3","firebrick1","firebrick2","brown1",
+	"brown2","brown3","salmon1","salmon2","salmon3",
+	"LightSalmon1","LightSalmon2","LightSalmon3","orange1","orange2",
+	"orange3","DarkOrange1","DarkOrange2","DarkOrange3","coral1",
+	"coral2","coral3","tomato1","tomato2","tomato3",
+	"OrangeRed1","OrangeRed2","DeepPink1","DeepPink2","DeepPink3",
+	"HotPink1","HotPink2","HotPink3","pink1","pink2",
+	"pink3","pink4","LightPink1","LightPink2","LightPink3",
+	"LightPink4","PaleVioletRed1","PaleVioletRed2","PaleVioletRed3","PaleVioletRed4",
+	"maroon1","maroon2","maroon3","VioletRed1","VioletRed2",
+	"VioletRed3","magenta1","magenta2","magenta3","orchid1",
+	"orchid2","orchid3","orchid4","plum1","plum2",
+	"plum3","plum4","MediumOrchid1","MediumOrchid2","MediumOrchid3",
+	"MediumOrchid4","DarkOrchid1","DarkOrchid2","DarkOrchid3","purple1",
+	"purple2","purple3","MediumPurple1","MediumPurple2","MediumPurple3",
+	"MediumPurple4","thistle2","thistle3","thistle4",
+	"grey40","grey42","grey44","grey46","grey48","grey50",
+	"grey52","grey54","grey56","grey58","grey60","grey62",
+	"grey64","grey66","grey68","grey70","grey72","grey74",
+	"grey76","grey78","grey80","grey82","grey84","grey86",
+	"grey88","grey90","");
+
+print \$COLORS[\$#COLORS*rand()]."\n";
+__EOF__
+
+		if( -f $file) then
+		    set col=`$PERL $file`
+		    /bin/rm -f $file
+		    if ($DEBUG) then
+			echo "The color will be     [$col]"
+		    endif
+	    else
+		if(`$ID | $GREP root` != "") then
+		    echo "This option is disbaled for root"
+		else
+		    echo "Cannot generate random color"
+	        endif
+	    endif
+	    breaksw
+
+
+	# the rest is all parameters
+	default:
+	    # can be many things
+	    if ( `echo "$arg" | $GREP '^-'` == "") then
+		if ("$node" == "") then
+		    set node="$arg"
+		else
+		    set user="$arg"
+		endif
+	    else
+		echo "Untreated option $arg ignored"
+	    endif
+	    breaksw
+    endsw
+end
+
+
+if ("$node" == "") then
+    # Tom has requested an automatic node association
+    # based on group name. Easy ...
+    # BTW : this needs to be done prior to the help because
+    # help will be displayed only if we cannot resolve the
+    # default values.
+    if ( ! $?GROUP ) then
+	# We have to extract this ourselves
+	set GROUP=`$ID | $SED "s/.*gid=.*(//" | $SED "s/).*//"`
+    endif
+    
+    # Now, this block will need editing if another experiment
+    # needs this script functionality
+    switch ($GROUP)
+       case "rhstar":
+        # also support the strap domain
+        if ( `$HOSTNM | $GREP starp` != "") then
+	    # support STAR online domain 
+	    set node="onl+";
+	    set pool="-pool onlam3.starp.bnl.gov:9618";     
+ 	else
+	    # RCF
+	    set node="rcas6+"
+	    set pool="-pool  condor02.rcf.bnl.gov:9664" 
+        endif
+	breaksw;
+
+       case "rhphobos":
+        set node="rcas4+"
+        set pool="-pool  condor01.rcf.bnl.gov:9663"  
+	breaksw;
+
+       case "rhphenix":
+	set node="rcas2+"
+        set pool="-pool condor01.rcf.bnl.gov:9662"
+	breaksw;
+
+       case "rhbrahms":
+        set node="rcas0+"
+        set pool="-pool condor02.rcf.bnl.gov:9661"
+	breaksw;
+
+       case "usatlas":
+        set node="acas+"
+        set pool="-pool condor03.usatlas.bnl.gov:9660"
+	breaksw;
+
+       case "rhstaff":
+        set node="acas+"
+        set pool="-pool condor03.usatlas.bnl.gov:9660"
+	breaksw;
+
+       default:
+        if ( "$GROUP" == "root") then
+	    echo "WARN - Group [root] does not have default nodes setup"
+	else
+	    echo "WARN - No default node(s) for group [$GROUP]"
+	    echo "       Contact the administrator to extend support"
+	endif
+	if ( $#argv != 0) then
+	    set help=1
+	else
+	    echo "INFO - Use -h or -help for help"
+	    exit
+	endif
+	breaksw;
+    endsw
+else
+    switch ($node)
+       case "onl*":
+        set pool="-pool onlam3.starp.bnl.gov:9618";
+	breaksw;
+
+       case "rcas6*":
+        set pool="-pool condor02.rcf.bnl.gov:9664"
+        breaksw;
+
+       case "rcas4*":
+        set pool="-pool condor01.rcf.bnl.gov:9663"
+        breaksw;
+
+       case "rcas2*":
+        set pool="-pool condor01.rcf.bnl.gov:9662"
+        breaksw;
+
+       case "rcas0*":
+        set pool="-pool condor02.rcf.bnl.gov:9661"
+        breaksw;
+
+       case "acas*":
+        set pool="-pool condor03.usatlas.bnl.gov:9660"
+        breaksw;
+
+       default:
+        # echo "no Condor pool found for $node"
+        # set help=1
+        breaksw;
+    endsw
+endif
+
+
+
+# Display help if -h, --help or non-deterministic arguments were used
+if ($help) then
+   # for help display purposes only. Will exit afterward.
+   if ( $node == "") then
+    set node="rcas6+"
+   endif
+   set prgm=`echo $0 | $SED "s/.*\///g"`
+   set wnode=`echo $node | $SED "s/+//"`
+   $CAT <<EOF | more
+
+rterm, $VERSION - Written by J. Lauret 2001 
+This command will open a connection to any remote node using the slogin 
+command and, without node precision open a terminal on the least loaded 
+node.
+
+Syntax is
+  % $prgm [Options] [NodeSpec] [UserName]
+
+Currently implemented options are :
+  -i         interactive mode i.e. do not open an xterm but use slogin
+             directly to connect.
+  -p port    use port number 'port' to connect
+  -x node    Exclude 'node' from possible node to connect to. May be
+             a comma separated list of nodes.
+  -funky     pick a color randomly
+  -Y         use -Y option for ssh instead of -X
+
+The 'NodeSpec' argument may be a node name (specific login to a given node) 
+or a partial node name followed by the '+' sign (wildcard). For example,
+  % $prgm $node
+
+will open a connection on the least loaded node amongst all batch-available 
+$wnode* nodes. By default, this command will determine the appropriate
+wildcarded node specification for your GroupID. However, if this help
+is displayed when the command '% $prgm' is used, contact the RCF support 
+team (your group ID is probably not supported by this script).
+
+The 'UserName' argument is also optional. If unspecified, it will revert 
+to the current user ID.
+
+Finally, you may modify the xterminal layout by using the following
+environment variables 
+  TERM_BKG_COLOR     sets the xterm background color
+  TERM_OPTIONS       sets any other xterm options
+
+EOF
+   exit
+endif
+
+
+
+# Where is the xterm program ? (may differe depending on OS)
+foreach path ( /usr/openwin/bin/ /usr/bin/X11/ /usr/X11R6/bin/ /usr/bin/ )
+    if ( -e $path/xterm ) then
+	set TERM_PRGM=$path/xterm	
+    endif
+end
+if ( ! $?TERM_PRGM ) then
+    echo "Could not locate an Xterm program"
+endif
+
+
+
+
+
+# Now, check if what is requested is a 'term-wildcard'
+set TEST=`echo $node | $SED "s/+//"`
+
+
+if ("$TEST" != "$node") then
+    # Used to use LSF lsload to pickup a node
+    # now uses Condor
+    # Do not allow user to mess with us ...
+    if ("$TEST" == "") then
+	echo "The '+' syntax requires a partial node name."
+	exit
+    endif
+
+    # Note : for other batch systems, extend this ...
+    #set LOAD=`which lsload`
+    #if( "$LOAD" == "") then
+    # try to find it
+    set LOAD=""
+    foreach path ( /opt/local/bin /usr/local/bin  /usr/bin )
+	if ( -e $path) then
+	    # if (-x $path/lsload) then
+	    #	set LOAD=$path/lsload
+	    #	break
+	    # endif
+	    if (-x $path/condor_status) then
+		set LOAD=$path/condor_status
+		break
+	    endif
+	endif
+    end
+
+    # if not found, bail out
+    if( "$LOAD" != "") then    
+        # The below was for LSF
+	#   set CANDIDATES=`$LOAD -R "select[inter] order[r1m:pg]" | $GREP $TEST | 
+	#                   $GREP -i " ok" | $AWK '{print $1}'`
+        setenv CONDOR_CONFIG /dev/null
+	if ( $DEBUG ) then
+	    echo "We will try to execute $LOAD $pool -constraint 'interactive_node == True'"
+	    echo "Result in              [/tmp/$$.$USER.lis]"
+	endif
+
+	# create an intermediate file so we d not bump into
+	# command syntax error in case the $LOAD command fails
+	# and do not produce the expected result
+	$LOAD $pool -constraint 'interactive_node == True' -format "%s " Machine -format "%f\n" TotalLoadAvg  >&/tmp/$$.$USER.lis
+
+	if ( $status ) then
+	    echo "$LOAD comand failed - we cannot get queue information"
+	    echo "Please select a node manually (or use -h  for more information)"
+	    exit
+	else
+	    set TCMD=`$CAT /tmp/$$.$USER.lis`
+	    if ( "$TCMD" == "") then
+		echo "$LOAD command failed - ir produced no results"
+		echo "Please select a node manually (or use -h  for more information)"
+		exit
+	    endif
+	endif
+
+        set CANDIDATES=`$CAT /tmp/$$.$USER.lis | $SORT -un -k 2 | $GREP $TEST | $AWK '{print $1}'`
+	/bin/rm -f /tmp/$$.$USER.lis
+
+	if ( $#CANDIDATES != 0) then
+	    set i=1
+	    AGAIN:
+		set  node=$CANDIDATES[$i]
+		set rnode=`echo $node | $SED "s/\..*//"`
+		if ( $DEBUG ) echo "Found node=$node -> $rnode"
+		if( `echo $excluded | $GREP $rnode` != "") then
+		    if ($DEBUG) then
+			echo "Excluded node         [$node] $i/$#CANDIDATES"
+		    endif
+
+		    @ i++
+		    if($i >  $#CANDIDATES) then
+			echo "-x option has excluded all candidates"
+			exit
+		    else
+			goto AGAIN
+		    endif
+		endif
+	else
+	    echo "Illegal node specification or queue problem detected."
+	    echo "Please check/correct syntax and try again."
+	    exit
+	endif
+    else
+	echo "No tools to determine the least loaded system"
+	exit
+    endif
+endif
+
+
+# OK. Now the node is surely determined. Get the user
+# if that was an option, otherwise, determine it.
+if ("$user" == "") then
+  if ( $?USER) then
+    if ("$USER" != "") then
+	set user=$USER
+    endif
+  endif
+  if( "$user" == "") then
+    # guess what ? no whoami on the gateway. The safest
+    # way to get the user id would be this ...
+    set user=`$ID | $SED "s/).*//" | $SED "s/.*(//"`
+  endif
+endif
+
+
+if ($DEBUG) then
+    echo "User/port/inter mode  [$user][$port][$inter]"
+endif
+
+
+
+
+# Allow user to chose a color but set a default
+if ( "$col" != "") then
+    set TERM_BKG_COLOR=$col
+else if ( ! $?TERM_BKG_COLOR) then
+    set TERM_BKG_COLOR=PowderBlue
+endif
+# TERM_OPTIONS supersedes it all
+if( ! $?TERM_OPTIONS ) then
+    set TERM_OPTIONS=""
+endif
+
+
+
+
+# One more executable, the slogin program
+set SLOGIN = ""
+foreach path ( /usr/bin/ /usr/local/bin )
+    if ( -e $path) then
+	if (-x $path/slogin ) then	
+	    set SLOGIN=$path/slogin
+	    break
+	endif
+    endif
+end
+	
+
+
+
+#
+# Execute this command now
+#
+if ("$SLOGIN" == "") then
+    echo "Could not find slogin program"
+else
+    if ($inter) then
+	echo "Opening a connection to [$node] for $user $extra"
+	$SLOGIN $port $user@$node
+    else
+	echo "Opening a $col terminal on $node for $user $extra"
+	$TERM_PRGM -sl 500 -sb +si -sk -T "$user@$node" -n "Xterm_$node" -bg $TERM_BKG_COLOR $TERM_OPTIONS -e $SLOGIN $X11Opt $port $user@$node &
+    endif
+endif
+
+
+
+# 
+# Note - a reminder that the current condor way relies
+#        on the 'interactive_node' to be set and selectable
+#        with constraint
+#
+# Revised 2012
+# - messages and reference to LSF removed
+# - more explicit messages for the case of wrong usage
+# - modified $pool to allow no pool name even if all have
+#   a pool specified (separate specific options in one var)
+# - added -{v|V|-version}
+#
+# Revised 2006
+# - RCF personel added Condor support
+# - Misc fix for broken options + restored LSF lines
+#   as comment for historical purposes 
+#
+# Revised Feb 2005
+# - Modified call to lsload
+# - to use different load metric
+# - when choosing destination system.
+#
+# Revised Jan 2004
+# - all path specified or guessed
+# - remove `which lsload` (also guess)
+# - move down a block the treatement of TERM options
+#   (later use will be a multi-user option setup)
+#
+# Revised Aug 2001
+# - support for all experiments
+# - argument 1 is now optional
+# - nodes MUST be set with LSF resource 'inter'
+# 
+# Revised Sep 2001
+# - Misspelling corrections
+# - Small correction in case of lsf failure or
+#   inconsistent return values using a range check
+# - Added switch/case treatementfor option
+# - Added -p and -i
+# - Added TERM_OPTIONS variable
+# - Removed $NODE ; fixed logic for using $node instead
+# - Safer $USER check (was inconsistent)
+#
+# Revised Nov 2001
+# - Added '-x' option (not the smartest implementation but works)
+# - And of course, useless (but it was a challenge) -funky option 
+# - Lots of debugging lines in case ...
+#

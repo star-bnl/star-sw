@@ -1,0 +1,347 @@
+#!/usr/bin/env perl
+
+#                      Block limits                      File limits
+#User           used   soft   hard    timeleft    used   soft   hard     timeleft
+#
+# -d        debug
+# -o ofile  output to ofile
+# -html     format in html
+# arg1      path to write the reports to
+#
+
+# Written J.Lauret 2002 based on $REPQUOTA , a Solaris program.
+# This script was re-written in 2008 as quota info was no longer available.
+#
+#$TEMPLATE = "http://www.rhic.bnl.gov/RCF/UserInfo/Facilities/NFSService/Monitoring/DiskAbusers/star_quota.txt";
+$TEMPLATE = "https://www.racf.bnl.gov/Facility/NFS/RHICNFS/QUOTAS/star_quota.txt";
+
+$WGET     = "/usr/bin/wget";
+$SELF     = "showquota";
+$EXPIRES  = 3600;
+
+
+# some intrenals
+$TEMPLATE =~ m/(.*\/)(.*)/;
+$FL       = $2;
+$TARGET   = "$FL.$<";
+$GDATE    = "";
+
+$SQ::GLB  = undef;
+
+# Check necessary program
+if ( ! -x $WGET ){  
+    die "Missing $WGET\n";
+} else {
+    #print "Filename should be $TARGET\n";
+    if ( -e $TARGET){
+	# check lifetime, eventually delete, next pass will 
+	# grab a fresh version
+	@info = stat($TARGET);
+	$delta = time()-$info[10];
+	if ( $delta > $EXPIRES){
+	    if ( -e $TARGET.".old"){  unlink($TARGET.".old");}
+	    rename($TARGET,$TARGET.".old");
+	    exit;
+	}
+    } else { 
+	# help wget
+	if ( -e $FL ){  unlink($FL);}
+	# now get the file
+	system("$WGET $TEMPLATE -o /tmp/$SELF.log");
+	if ( -e $FL ){
+	    system("/bin/mv -f $FL $TARGET && /bin/touch $TARGET");
+	} else {
+	    die "$WGET did not create the expected file $FL\n";
+	}
+    }
+}
+
+
+# Parse arguments -- Do not change
+$color[0] = "#ffffff"; 
+$color[1] = "#eeeeee"; 
+$color[2] = "#dddddd"; 
+
+
+$DIRN = "";
+for ($i=0; $i <= $#ARGV ; $i++){
+    $arg = $ARGV[$i];
+    if( substr($arg,0,1) eq "-"){
+        # an option
+        $HTML = 1           if ($arg eq "-html");
+        $DIRN = $ARGV[$i+1] if ($arg eq "-o");
+        $DEBUG= 1           if ($arg eq "-d");
+    }
+}
+
+# because previous version actualy used a filename for -o, strip
+if ( ! -d $DIRN && $DIRN ne ""){ $DIRN =~ m/(.*\/)(.*)/; $DIRN = $1;}
+
+print "We got HTML=$HTML $DIRN $DEBUG $TARGET\n" if($DEBUG);
+
+
+# make quick diff if
+$DIFF = -1;
+if ( -e $TARGET && -e $TARGET.".old" ){
+    $DIFF = 0;
+    open(FI1,$TARGET);
+    open(FI2,$TARGET.".old");
+    while ( defined($line1 = <FI1>) && defined($line2 = <FI2>) ){
+	if ($line1 ne $line2){
+	    print "Differs from previous\n" if ($DEBUG);
+	    $DIFF = 1;
+	    last;
+	}
+    }
+    close(FI1);
+    close(FI2);
+}
+
+
+# Now read
+if ( -e $TARGET){
+    if ( open(FI,$TARGET) ){
+	while(  defined($line = <FI>) ){
+	    $line =~ s/^\s*(.*?)\s*$/$1/;
+
+	    if ( $line eq ""){
+		# empty lines, next will be a new disk too
+		$new = 1; 
+		if ( $#all != -1 && $disk ne ""){
+		    &PrintPreviousResults($disk,@all);
+		}
+		$disk = "";
+
+	    } elsif ( $line =~ m/^\/.*/ && $new ){
+		# a disk information has been recovered, reset counters to 0
+		$disk = $line;
+		$new  = 0;
+
+		$SQ::tots = $0;
+		$SQ::totu = $0;
+		$SQ::totf = $0;
+		$SQ::prct = $0;
+
+		&CalculateParams($disk);
+
+		print "Got $disk $SQ::tots,  $SQ::totu,  $SQ::totf and  $SQ::prct\n";
+
+	    } elsif ( $line =~ m/---/ && $disk ne ""){ 
+		undef(@all); 
+		print "Looking at individual space now ...\n" if ($DEBUG);
+		next;
+		
+	    } elsif ( $line =~ m/(.*updated on)(.*)/ ){
+		$GDATE = $2;
+		next;
+	    }
+
+	    # $total = 0;
+	    push(@all,$line);
+
+	}
+	# if improper markes are at the end (lack of empty lines), print what
+	# we have buffered
+	if ( $#all != -1 && $disk ne ""){
+	    &PrintPreviousResults($disk,@all);
+	}
+	close(FI);
+    }
+}
+
+# If files were written, write one more files
+if ( defined($SQ::GLB) ){
+    system("/bin/cat $SQ::GLB >$DIRN/SQ_all.html");
+}
+
+
+#
+# Pass array of all lignes, extract info and format
+#
+sub PrintPreviousResults
+{
+    my($disk,@lignes)=@_;
+    my(@items,$line,$fact,$total);
+    my($FO,%HOGS);
+
+    $total = 0;
+
+    foreach $line (@lignes){
+	@items = split(" ",$line);
+	$fact = 1/1024          if ($items[4] eq "B");
+	$fact = 1               if ($items[4] =~ /KB/);
+	$fact = 1024            if ($items[4] =~ /MB/);
+	$fact = 1024*1024       if ($items[4] =~ /GB/);
+	$fact = 1024*1024*1024  if ($items[4] =~ /TB/);
+	$HOGS{$items[0]} = $items[3]*$fact;
+	print "Found $items[0] -> $HOGS{$items[0]}\n" if ($DEBUG);
+	$total += $HOGS{$items[0]};
+    }
+
+    # Check open channel
+    if( $DIRN ne "" ){
+	$tag  =  $disk;
+	$tag  =~ s/\//_/g; 
+	$tag .=  ".html";
+	open(FO,">$DIRN/SQ$tag.new") || die "Cannot open $DIRN/SQ$tag.new\n";
+	$FO = FO;
+	if ( ! defined($SQ::GLB) ){
+	    $SQ::GLB  = "$DIRN/SQ$tag";
+	} else {
+	    $SQ::GLB .= " $DIRN/SQ$tag";
+	}
+    } else {
+	$tag= "";
+	$FO = STDOUT;
+    }
+
+
+    # Format result
+    if($HTML){
+	$TD = "td align=\"right\"";
+	$HL = ($DIFF==0?"b":"i");
+	print $FO
+	    "<!-- Generated on ".localtime()." -->\n",
+	    "<h2>Path $disk</h2>\n",
+	    "Partition info (kBytes) on ".localtime()."<br>\n",
+	    "<$HL>Information reflects snapshot from $GDATE</$HL>)<br>\n",
+	    "<table border=0>",
+	    "<tr><td>Total Usable</td><$TD>$SQ::tots</td>\n",
+	    "<tr><td>Total Used</td><$TD>$SQ::totu</td>\n",
+	    "<tr><td>Free Space</td><$TD>$SQ::totf</td>\n",
+	    "<tr><td>Occupency</td><$TD>$SQ::prct</td>\n",
+	    "</table><p>\n";
+
+	print $FO
+	    "<table border=\"0\" cellspacing=\"0\" width=\"500\">\n",
+	    "<tr><$TD bgcolor=\"orange\">Dir/User</td><$TD bgcolor=\"orange\">kBytes</td><$TD bgcolor=\"orange\">%tageRel</td><$TD bgcolor=\"orange\">%tageTot</td></tr>\n";
+    } else {
+	# Regular text formatting
+	print $FO
+	    "Path $disk\n",
+	    "Partition info (kBytes) on ".localtime()."\n",
+ 	    ($DIFF==0?"(Information reflect snapshot from $GDATE)":"")."\n",
+	    "     TotalUsable : $SQ::tots\n",
+	    "     TotalUsed   : $SQ::totu\n",
+	    "     Free space  : $SQ::totf\n",
+	    "     Occupency   : $SQ::prct\n";
+
+	printf $FO "%10.10s %15s  %s %s\n","Dir/User","kBytes","%tageRel","%tageTot";
+	print $FO "------------------------------------------------\n";
+    }
+
+    # Sort Hogs
+    $col   = 0;
+    $Tval1 = $Tval2 = 0;
+    foreach $user (sort  { $HOGS{$b} <=> $HOGS{$a} } keys %HOGS){
+	$val1 = ($HOGS{$user}/$total)*100;
+	$val2 = ($HOGS{$user}/$SQ::tots)*100;
+
+	$val1 = &PrctFrmt($val1);
+	$val2 = &PrctFrmt($val2);
+
+	$Tval1 += $val1;
+	$Tval2 += $val2;
+
+	if($HTML){
+	    $COL = "bgcolor=\"$color[$col]\"";
+	    $col++; if ($col > $#color){ $col = 0;}
+	    
+	    print $FO 
+		"<tr><$TD $COL><i>$user</i></td><$TD $COL>".sprintf("%.2f",$HOGS{$user})."</td>",
+		"<$TD $COL>$val1</td><$TD $COL>$val2</td></tr>\n";
+	} else {
+	    printf $FO "%10.10s %.2f  %s %%  %s %%\n",$user,$HOGS{$user},$val1,$val2;
+	}
+    }
+
+    # close document
+    my($TR) = abs(100-$Tval1);
+    my($TA) = abs($SQ::prct-$Tval2)/$SQ::prct*100;
+
+    if($HTML){  
+	print $FO "</table>\n";
+	print $FO 
+	    "<p>\n",
+	    "Consistency check - Relative accounts for $Tval1 %, absolute for $Tval2 % (disk inspection shows $SQ::prct)<br>\n",
+	    "<table border=\"0\">\n",
+	    "<tr>".sprintf("<td>%8.8s</td> <td> %8.8s %%<td> <td>%8.8s %%</td></tr>","","Confidence","Error")."</tr><br>\n",
+	    "<tr>".sprintf("<td>%8.8s</td> <td> %8.8s %%<td> <td>%8.8s %%</td></tr>","Relative",&PrctFrmt(100-$TR),&PrctFrmt($TR))."</tr>\n",
+	    "<tr>".sprintf("<td>%8.8s</td> <td> %8.8s %%<td> <td>%8.8s %%</td></tr>","Absolute",&PrctFrmt(100-$TA),&PrctFrmt($TA))."</tr>\n",
+	    "</table>\n",
+	    "<p>\n";
+    } else {
+	print $FO 
+	    "\n",
+	    "Consistency check - Relative accounts for $Tval1 %, absolute for $Tval2 % (disk inspection shows $SQ::prct)\n",
+	    "\n",
+	    sprintf("%8.8s  %8.8s %%  %8.8s %%","","Confidence","Error")."\n",
+	    sprintf("%8.8s  %8.8s %%  %8.8s %%","Relative",&PrctFrmt(100-$TR),&PrctFrmt($TR))."\n",
+	    sprintf("%8.8s  %8.8s %%  %8.8s %%","Absolute",&PrctFrmt(100-$TA),&PrctFrmt($TA))."\n",
+	    "\n";
+    }
+
+    if($FO ne STDOUT){ 
+	close(FO);
+	if ($tag ne ""){
+	    rename("$DIRN/SQ$tag.new","$DIRN/SQ$tag");
+	} else {
+	    die "Logic error - tag was empty but IO chanel opened\n";
+	}
+    }
+
+}
+
+
+# Format %tage neatly
+sub PrctFrmt
+{
+    my($val)=@_;
+
+    if ($val < 10){ 
+	$val = sprintf("0%2.2f",$val);
+    } else {
+	$val = sprintf("%2.2f",$val);
+    }
+    $val;
+}
+
+#
+# Look at disk space and initialize tots, totu, totf and prct
+# from namespace $SQ::
+#
+sub CalculateParams
+{
+    my($PATH)=@_;
+    my(@all,$line,$offset);
+
+    print "Calculating partition space $PATH\n" if($DEBUG);
+    @all  = `/bin/df -k $PATH`;
+    foreach $line (@all){
+	if( $line =~ /\%/ && $line !~ /system/){
+	    $line =~ s/\s+/ /g;
+	    $line =~ s/^\s*(.*?)\s*$/$1/;
+	    #print "--> $line\n";
+	    @items= split(" ",$line);
+	    #print join(",",@items)."\n";
+
+	    # because of leading space, we will always
+	    # have the elements at the proper place.
+	    if($#items > 4){ $offset = 1;}
+	    else           { $offset = 0;}
+	    #print "Offset $offset\n";
+
+	    $SQ::tots = $items[0+$offset];
+	    $SQ::totu = $items[1+$offset];
+	    $SQ::totf = $items[2+$offset];
+	    $SQ::prct = $items[3+$offset];
+	}
+    }
+}
+
+__END__
+
+
+
+[...]
+

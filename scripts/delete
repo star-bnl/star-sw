@@ -1,0 +1,108 @@
+#!/usr/local/bin/perl
+
+#
+# Simple script written by J.Lauret 2000 [?]
+# Revised J. Lauret 2009 to add directory deletion via -r
+#
+#
+
+$SELF = $0;
+$SELF =~ s/.*\///g; 
+
+if ( ! defined(@ARGV ) ){
+    die 
+      "\n",
+      "Usage is:\n",
+      "    \% $SELF [option] {File1|'WildcardFile'} ...\n",
+      "\n",
+      "Options are:\n",
+      "    -d   debug (print messages as it goes). Default is no debug\n",
+      "    -f   fake operation i.e. do not delete (default is to proceed)\n",
+      "    -r   recursive i.e. delete directories\n",
+      "\n",      
+      "Example :\n",
+      "    \% $SELF bla.tmp     ! delete a single file\n",
+      "    \% $SELF -d '*.tmp'  ! delete all files matching *.tmp, print operation\n",
+      "    \% $SELF -r '*'      ! recursively delete all files and directories\n",
+      "\n",
+      "You MUST use single quote to avoid shell auto-completion.\n",
+      "\n";
+}
+
+# some global vars controlling the behavior
+$FAKE     = 0;
+$DEBUG    = 0;
+$ALLOWDIR = 0;
+
+
+$e = $d   = 0;
+while ( defined($arg = shift @ARGV) ){
+    # since globbing can result is lots of files,
+    # do it as the arguments comes. Another way 
+    # would be opendir()
+    if ( $arg eq "-r"){   $ALLOWDIR = 1; next;}
+    if ( $arg eq "-d"){   $DEBUG    = 1; next;}
+    if ( $arg eq "-f"){   $FAKE     = 1; next;}
+
+    # print "DEBUG: $#ARGV $arg\n" if ($DEBUG);
+    @FILES = glob($arg);
+    
+
+    foreach $file (@FILES){
+	# print "$arg - [$file]\n" if ($DEBUG);
+	if ( $file =~ m/.*\.+$/ ){  next;}
+	
+	if ( ! -d $file ){
+	    if ( ! $FAKE ){
+		if ( ! unlink($file) ){  
+		    print STDERR "Could not delete f $file\n"; $e++;
+		} else {  
+		    print STDOUT "Deleted f $file\n" if ($DEBUG);
+		    $d++;
+		}
+	    } else {
+		print STDOUT "[FAKE] Deleted f $file\n";
+	    }
+	} else {
+	    if ( ! $ALLOWDIR ){
+		print STDERR "$file is a directory, use -d to delete\n";
+	    } else {
+		# If dirctories are allowed, delete using recursive pattern
+		
+		# printout presentation
+		@t = split(/\//,$file);
+		if ($DEBUG){
+		    for ($ii=0;$ii<$#t;$ii++){ print " ";}
+		    print "Will recurse through '$file/*'\n";
+		}
+		
+		# use associative array for sub-dir later deletion		
+		if ( ! defined($DIRS{$file}) ){
+		    push(@ARGV,"$file/*","$file/.*");
+		    $DIRS{$file}=$#t;
+		}
+	    }
+	}
+    }
+}
+
+foreach $d ( sort {$b cmp $a} keys %DIRS){
+    if ( $FAKE ){
+	print "[FAKE] Deleted d $d\n";
+    } else {
+	if ( ! rmdir($d) ) {  
+	    print STDERR "Could not delete d $file\n"; $e++;
+	} else {
+	    print "Deleted d $d (level $DIRS{$d})\n" if ($DEBUG);
+	    $d++;
+	}
+    }
+}
+
+if ($d != 0){  print "$d files deleted\n";}
+if ($e != 0){  print "$e errors on delete\n";}
+
+
+
+
+

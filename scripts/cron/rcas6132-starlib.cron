@@ -1,0 +1,22 @@
+
+
+
+# For purpose of rolling requests info to db
+# each day at 00:10:00 do day rolling
+#10 4 * * * /star/u/starlib/ROOT/scripts/failureDetector.pl
+10 4 * * * /star/data08/users/pjakl/failureStat/bin/failureDetector_backward.pl day
+
+# xrootd and Olbd startup added on Mon Oct 30 16:44:35 EST 2006
+* * * * * /star/u/starlib/ROOT/xrootd/utils/StartXRD_REDIR
+01 * * * * /star/u/starlib/ROOT/xrootd/utils/StartXRD savelog
+
+# xrootd and Olbd startup added on Mon Oct 30 16:44:35 EST 2006
+* * * * * /star/u/starlib/ROOT/xrootd/utils/StartXRD_RED
+01 * * * * /star/u/starlib/ROOT/xrootd/utils/StartXRD_RED savelog
+
+# xrootd and Olbd developement version added on Mon Oct 30 16:44:35 EST 2006
+* * * * * /star/u/starlib/ROOT/xrootd_dev/utils/StartXRD
+01 * * * * /star/u/starlib/ROOT/xrootd_dev/utils/StartXRD savelog
+# Reference for AddThisNode.csh and nova daemon added on Thu Feb  8 18:17:21 EST 2007
+19 18,20,22,0,2,4,6,8,10,12,14,16 * * * /tmp/nova/novaStart.csh
+23 0,2,4,6,8,10,12,14,16,18,20,22 * * * /usr/bin/test -e /star/u/starlib/novabin/AddThisNode.csh && /star/u/starlib/novabin/AddThisNode.csh 

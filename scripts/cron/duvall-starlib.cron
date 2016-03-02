@@ -1,0 +1,11 @@
+# Example crontab for bugs system.  You can just install the crontab.out
+# version of this file if you like.
+MAILTO=bugsystem@duvall.star.bnl.gov
+3,8,13,18,23,28,33,38,43,48,53,58 *	* * *	/home/bugs/scripts/processall > /dev/null
+9,29,49 *	* * *	/home/bugs/scripts/html-control > /dev/null
+22 7			* * *	touch /home/bugs/spool/db
+23 7			* * 3	/home/bugs/scripts/age-1
+24 7			* * *	/home/bugs/scripts/expire
+40 0			* * 5	/home/bugs/scripts/mailsummary undone
+40 0			* * 2	/home/bugs/scripts/mailsummary bymaint
+

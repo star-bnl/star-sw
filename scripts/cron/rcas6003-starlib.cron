@@ -1,0 +1,98 @@
+# Misc information related scripts and cleanups
+* * * * * /star/u/starlib/bin/token.csh
+05,35        * * * * /star/u/starlib/bin/PDSpace.csh /afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/overall.html
+35 00,06,12,18 * * * /star/u/starlib/bin/showquota.csh -html -o /afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/ 
+
+01,16,31,46 * * * * /afs/rhic.bnl.gov/star/packages/scripts/cvslog2html.pl
+45 00,12,17   * * * /afs/rhic.bnl.gov/star/packages/scripts/swguide-cron.pl .dev dev
+00 03         * * * /afs/rhic.bnl.gov/star/packages/scripts/swguide-cron.pl new pro old
+00 04         * * * /afs/rhic.bnl.gov/star/packages/scripts/doxycron.pl >&/dev/null
+00 08,20 * * * /star/u/starlib/datsum/datasum.csh >& /star/u/starlib/datsum/DataSum.log
+
+# AutoBuild
+#-> 
+00 21 * * 2,4,6 /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh Clean
+05 23 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh
+05 01 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh 64bits
+05 02 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh eval gcc
+05 03 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh eval gcc 4.5.1
+#05 04 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh gcc 4.5.1 -2
+#<-
+#15 23 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh gprof
+#00 04 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh icc9
+#00 06 * * *     /afs/rhic.bnl.gov/star/packages/scripts/AutoBuild.csh Insure
+
+# Nova processes
+10,30,50      *   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh update
+#17            *   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh cddb
+23  03,09,15,21   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh lddb
+26  04,10,16,22   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh delf
+00           01   * * 0,3 /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh newlog
+# added for peace of mind 
+15           22   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh 'hook 3'
+05  02,08,14,20   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh 'hook 7'
+15  02,08,14,20   * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/updateServers.csh hook
+
+
+## Fill with new entries as necessary / cycle every 6 hours - replaced by crons under starreco
+## 14    03,09,15,21    * * *   /afs/rhic.bnl.gov/star/users/starlib/novabin/fcheck.pl fill
+# Check for dead nodes not detectable by nova and mark FileCatalog as available 0 for storage=local
+17 03,09,15,21    * * *   /star/u/starlib/bin/MonDeadNodes.pl
+
+
+# Generate plots for nova disk - this will speed up 
+00 06 * * 1  /usr/bin/test -e /star/u/starlib/novabin/showDisk.csh && /star/u/starlib/novabin/showDisk.csh -zero
+17 1,3,5,7,9,11,13,15,17,19,21,23 * * * /usr/bin/test -e /star/u/starlib/novabin/showDisk.csh && /star/u/starlib/novabin/showDisk.csh
+
+# Xrootd
+# Cleanup data08 cache disk
+07 04             * * 1   /star/u/starlib/bin/CleanXrootd >&/dev/null
+# Xrootd statistics
+# each hour do plots
+0 * * * * /star/data08/users/pjakl/cas_loadStat/bin/publishLoadStat.csh hour
+# each day at 00:00:00 do day statistic
+5 0 * * * /star/data08/users/pjakl/cas_loadStat/bin/publishLoadStat.csh day
+# each week at 00:00:00 on Sunday do week
+20 0 * * 1 /star/data08/users/pjakl/cas_loadStat/bin/publishLoadStat.csh week
+# at 00:00:00 on 1.1.yyyy do year statistic
+0 0 1 1 * /star/data08/users/pjakl/cas_loadStat/bin/publishLoadStat.csh year
+# at 01:10:00 and 13:10:00 do a synchronization 
+10 01,13 * * * /star/data08/users/pjakl/cas_loadStat/bin/publishLoadStat.csh synch
+
+# each week at 00:00:00 on Sunday do week
+0 0 * * 1 /star/data08/users/pjakl/gangliaStat/bin/publishGangliaStat.pl week
+# each week at 01:00:00 on Sunday do synchronization
+0 1 * * 0 /star/data08/users/pjakl/gangliaStat/bin/publishGangliaStat.pl synch
+# each first day in month at 00:00:00 do month download
+0 0 * 1 * /star/data08/users/pjakl/gangliaStat/bin/publishGangliaStat.pl month
+# each first day in month at 01:00:00 do month synchronization
+0 1 * 1 * /star/data08/users/pjakl/gangliaStat/bin/publishGangliaStat.pl synch
+
+# each day at 00:30:00 do day statistic
+30 5 * * * /star/data08/users/pjakl/failureStat/bin/failureCollector.csh day
+# each week at 00:00:00 on Monday do week
+40 5 * * 1 /star/data08/users/pjakl/failureStat/bin/failureCollector.csh week
+# each first day in month at 00:50:00 do month
+50 5 * 1 * /star/data08/users/pjakl/failureStat/bin/failureCollector.csh month
+# at 02:00:00 each day do a synchronization
+00 6 * * * /star/data08/users/pjakl/failureStat/bin/failureCollector.csh synch
+
+# each hour do plots
+15 * * * * /star/data08/users/pjakl/crs_loadStat/bin/publishLoadStat.csh hour
+# each day at 00:00:00 do day statistic  
+20 0 * * * /star/data08/users/pjakl/crs_loadStat/bin/publishLoadStat.csh day
+# each week at 00:00:00 on Sunday do week
+30 0 * * 1 /star/data08/users/pjakl/crs_loadStat/bin/publishLoadStat.csh week
+# at 00:00:00 on 1.1.yyyy do year statistic
+0 0 1 1 * /star/data08/users/pjakl/crs_loadStat/bin/publishLoadStat.csh year
+# at 01:10:00 and 13:10:00 do a synchronization
+40 02,14 * * * /star/data08/users/pjakl/crs_loadStat/bin/publishLoadStat.csh synch
+
+
+# every hour, check this is running
+51 * * * * /star/u/starlib/DataCarousel/AutoBootstrap.csh
+
+
+# Reference for AddThisNode.csh and nova daemon added on Sun Nov 20 10:28:27 EST 2011
+30 10,12,14,16,18,20,22,0,2,4,6,8 * * * /tmp/nova/novaStart.csh
+26 0,2,4,6,8,10,12,14,16,18,20,22 * * * /usr/bin/test -e /star/u/starlib/novabin/AddThisNode.csh && /star/u/starlib/novabin/AddThisNode.csh 

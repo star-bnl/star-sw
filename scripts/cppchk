@@ -1,0 +1,114 @@
+#!/bin/csh
+
+#
+# Written J. Lauret 2015
+#
+# Syntax is
+#  % cppchk RepotDestination Source PatternToExclude
+#
+# Defaults are
+#  ReportDestination   ./Reports (a subdirectory cppchk will be created)
+#  Source              Your current directory - only StRoot will be looked into
+#  PatternToExclude    see this code for detail (may change)
+#
+
+#set DEST=/afs/rhic.bnl.gov/star/doc/www/comp/prod/Sanity
+#set SRCD=/afs/rhic.bnl.gov/star/packages/adev
+
+set DEST=`pwd`/Reports
+set SRCD=`pwd`
+set EXCP="macros/ .C eraseDereference"
+
+if ( "$1" != "") then
+    set DEST=$1
+endif
+if ( "$2" != "") then
+    set SRCD=$2
+endif
+if ( "$3" != "") then
+    set EXCP="$3"
+endif
+
+# Make sure all paths exists, create if not
+if ( ! $?SCRATCH ) then
+   setenv SCRATCH /tmp/$USER
+endif
+if ( ! -e $SCRATCH ) then
+    echo "Creating $SCRATCH"
+    /bin/mkdir -p $SCRATCH
+endif
+if ( ! -e $SRCD/StRoot ) then
+    echo "$SRCD does not contain an StRoot/ directory - leaving"
+    exit
+endif
+
+cat <<EOF
+
+ Running assuming 
+    ReportDestination  $DEST/cppchk 
+    Source             $SRCD/StRoot 
+    ExcludedPattern    $EXCP
+
+EOF
+
+
+if ( ! -e $DEST ) then
+    echo "Creating $DEST/cppchk"
+    /bin/mkdir -p $DEST/cppchk
+endif
+
+
+# Delete old logs if exists
+set TAG=`/bin/date +%Y%m%d`
+foreach file ( $SCRATCH/cppchec$TAG.err $SCRATCH/cppchec$TAG.err.filt $SCRATCH/cppcheck$TAG.log )
+    if ( -e $file ) then
+	/bin/rm -f $file
+    endif
+end
+
+
+# 
+# Generate error report
+#
+cd $SRCD
+echo "Executing cppcheck in `pwd` - our tag is $TAG on `/bin/date`"
+( cppcheck --force --enable=information StRoot/ --xml >$SCRATCH/cppcheck$TAG.log ) > &$SCRATCH/cppcheck$TAG.err 
+
+#
+# Filter results
+#
+if ( ! -e $SCRATCH/cppcheck$TAG.err ) then
+    echo "Code scaniing pass did not work or produced any errors"
+    exit
+endif
+echo "Filtering our known bogus on `/bin/date`"
+set i=0
+/bin/cp $SCRATCH/cppcheck$TAG.err $SCRATCH/cppcheck$TAG.tmp.$i
+foreach pat ($EXCP) 
+    echo "   Filtering out [$pat]"
+    set k=$i
+    @ i++
+    /bin/grep -v $pat $SCRATCH/cppcheck$TAG.tmp.$k >$SCRATCH/cppcheck$TAG.tmp.$i
+end
+/bin/mv $SCRATCH/cppcheck$TAG.tmp.$i $SCRATCH/cppcheck$TAG.err.filt
+
+
+#
+# Geberate HTML
+#
+if ( ! -z $SCRATCH/cppcheck$TAG.err.filt ) then
+    echo "Generating HTML report" 
+    cppcheck-htmlreport --title="StRoot, $TAG" --file=$SCRATCH/cppcheck$TAG.err.filt --report-dir=$DEST/cppchk/ --source-dir=.
+
+else
+    echo "There are not errors to be found"
+    echo <<EOF >$DEST/cppchk/index.html
+<HTML>
+<HEAD>Cppcheck - HTML report - StRoot, $TAG</HEAD>
+<h1>Cppcheck report - StRoot, $TAG</h1>
+Congratulations, no defects found at this stage.
+</HTML>
+EOF
+endif
+
+

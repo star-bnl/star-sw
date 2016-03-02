@@ -1,0 +1,431 @@
+#!/usr/bin/env perl
+
+#
+# This script move files from one path to another
+# keeping the same directory structure.
+#
+# Note that the database is also updated when
+# this is done and
+# - sanity = 0 files are removed from physical
+#   location and database
+# - file which do not exists are also removed
+# - if a file fails removal, the record will
+#   not be removed from the db
+# - if an insertion in the db (close or insert) fails
+#   physical files will not be removed.
+# - if more than one record is found in the db, the
+#   operation aborts (no deletion)
+#
+# This implies that you execute this script
+# while being ABSOLUTLY sure the path are
+# seen from where this script exist.
+#
+# Args are (first 3 are mandatory) :
+#  arg0 = old base path
+#  arg1 = new base path
+#  arg2 = {1|0}   1 implies local storage, NFS otherwise
+#
+#  arg3 = {1|0}   1 tells this script to make a smooth move
+#                   smooth move creates a soft link from
+#                   the old location to the new one.
+#                   Default is 0 .
+#
+# Global parameter $SITE is not passed as argument
+#
+# This script was written to make as many checks as
+# possible so it may appear as complicated but really
+# is trying to use a 'conservative' approach (checks
+# at perl, Unix, db level ... more than one check
+# in some cases).
+#
+# This script was tested as follow
+# From a local node
+#  % FCPathSwap /tmp/starlib /home/starlib 1
+#
+#
+
+use lib "/afs/rhic.bnl.gov/star/packages/scripts";
+use FileCatalog;
+use File::Basename;
+use File::Copy;
+
+
+$DEBUG   = 0;               # is set to 1, prints zillions of messages
+$DOIT    = 1;               # execution of real command cna be disabled if = 0
+$PRGM    = "FCPathSwap ";   # id for some message. No need to change
+
+$SITE    = "BNL";           # <--- *** CHANGE this for your site ****
+$NTRIES  = 720;             # number of tries -1 means infinit tries
+$SLPTIME = 120;             # sleep time in sec between mkpath attempts
+$SMOOTH  = 1;               # smooth trnasition leaves an soft link at the
+                            # old location.
+
+if ( ! defined($ARGV[2])  ){
+    print STDERR
+	"\n",
+	"Syntax is:\n",
+	"  % $PRGM arg0='old base path' arg1='new base path' arg2={1|0} [arg3='move mode']\n",
+	"\n",
+	"Defaults are:\n",
+	"  arg2 = 1   which assumes local files (beware, storage has to be explicit)\n",
+	"  arg3 = 0   brute force copy and delete of the original. 1 creates a soft-link\n",
+	"             for backward compatibility (you cna delete those afterward)\n",
+	"\n";
+
+    exit;
+}
+
+if ( defined($ARGV[3]) ){  $SMOOTH = $ARGV[3];}
+
+
+
+print "$PRGM:: Info   : Connecting to the Catalog\n" if ($DEBUG);
+$fC = FileCatalog->new();
+
+# The next instruction will abort everything
+# if not satisfied.
+# API MUST be of version  >= V01.260 .
+$fC->Require("V01.260");
+
+
+if ($fC){
+    chomp($NODE = `/bin/hostname`);
+    if ( ! $fC->connect_as("Admin") ){
+	print STDERR "$PRGM :: Error: Could not connect to db as [Admin]\n";
+	exit;
+    }
+
+    if ( $ARGV[2] == 1){
+	# take all records for that node
+	print "$PRGM :: Info   : Node=$NODE site=$SITE\n";
+	$fC->set_context("node=$NODE",
+			 "storage=local",
+			 "site=$SITE");
+    } else {
+	# limit to what is requested
+	print "$PRGM :: Info   : path~$ARGV[0] site=$SITE\n";
+	$fC->set_context("path~$ARGV[0]",
+			 "site=$SITE",
+			 "storage=NFS");
+    }
+    $fC->set_context("limit=0");
+
+    @FILES = $fC->run_query("path",
+			    "filename",
+			    "sanity");
+
+    if ($#FILES == 1){
+	print "$PRGM :: Info   : No record found\n";
+	exit;
+    }
+
+
+    # all is in memory now ...
+    # Be aware that we do not use buffering so the
+    # the number of records may be HUDGE for a central
+    # storage (may fail but then, @all will be undef()).
+    # If so, report and I will change the logic.
+    $DONE = $OK = $FAILED = 0;
+    foreach $el (@FILES){
+	($path,$file,$sanity) = split("::",$el);
+
+	if ( $sanity == 0 || ! -e "$path/$file"){
+	    # Either the file is not 'sane' or the file
+	    # does not exists. Database entry and/or file
+	    # needs to be removed.
+	    if ($DOIT ){
+		# context must lead to one value. If not,
+		# there are more than one entry and well, if
+		# that's the case, you need to read the doc
+		# again as you db is messed up with duplicate
+		# entries (check what make sthe recors unique :
+		# you likely have another entry with a
+
+		if ( &Delete($path,$file) ){
+		    $OK++;
+		}
+
+	    } else {
+		print "$PRGM :: Info   : Would have removed $path$file\n";
+	    }
+
+	} else {
+	    # The file exists and is 'sane'
+	    # We need to move it around. Note that
+	    # the directory tree for the target MUST
+	    # be created ... a rename() alone does not
+	    # suffice.
+	    $newpath = $path;
+	    $newpath =~ s/$ARGV[0]/$ARGV[1]/;
+
+	    if ($DOIT){
+		if ("$path/$file" ne "$newpath/$file" && ! -l "$path/$file"){
+		    if ( &FileCopy("$path/$file","$newpath/$file") ){
+			if ( &Clone($path,$file,$newpath) ){
+			    if ( &Mark($path,$file) ){
+				if ( $SMOOTH){
+				    if ( symlink("$newpath/$file","$path/$file") ){
+					print "$PRGM :: Info   : symlink $path/$file\n";
+				    }
+				}
+				$OK++;
+			    } else {
+				$FAILED++;
+			    }
+			}
+		    } else {
+			print STDERR "$PRGM :: Error: Move failed for $path/$file\n";
+			$FAILED++;
+		    }
+		} else {
+		    print "$PRGM :: Info   : Source = target (ignored)\n" if ($DEBUG);
+		    $DONE++;
+		}
+	    } else {
+		print "$PRGM :: Info   : $path/$file -> $newpath/$file\n";
+	    }
+	}
+
+    }
+}
+
+
+print "$PRGM :: Indo   : Processed=$OK, Failed=$FAILED, Already done=$DONE\n";
+
+
+
+
+
+# Set context for $path $file within the
+# scope of arguments and global variables.
+sub Context
+{
+    my($path,$file)=@_;
+
+    $fC->clear_context();
+    $fC->set_context("path=$path",
+		     "filename=$file",
+		     "site=$SITE");
+    if ($ARGV[2] == 1){
+	$fC->set_context("storage=local",
+			 "node=$NODE");
+    } else {
+	$fC->set_context("storage=NFS");
+    }
+}
+
+
+
+#
+# Delete file and record or mark it un-available
+#
+sub Delete {
+    my($path,$file)=@_;
+    return &DeleteOrMark(0,$path,$file);
+}
+sub Mark {
+    my($path,$file)=@_;
+    return &DeleteOrMark(1,$path,$file);
+}
+
+sub DeleteOrMark
+{
+    my($mode,$path,$file) = @_;
+    my(@items,$n,$cond);
+
+    &Context($path,$file);
+
+    if ($mode == 0){
+	$fC->set_delayed();
+	@items = $fC->delete_records(1);
+	$cond  = ($#items != 0);
+
+    } else {
+	$n = $fC->update_location("available",0);
+	$cond = ($n > 1);
+    }
+
+    if ($cond){
+	$fC->unset_delayed() if ($mode ==0);
+	print STDERR "$PRGM :: Warning: More than one record at Delete() for $path/$file\n";
+	return 0;
+    } else {
+	if ( -e "$path/$file"){
+	    if ( ! unlink("$path/$file") ){
+		print STDERR "$PRGM :: Error: Could not rm -f $path/$file\n";
+		return 0;
+	    }
+	}
+	if ($mode == 0){
+	    # OK, finally, delete
+	    if ( $fC->flush_delayed() ){
+		foreach (@items){
+		    print "$PRGM :: Info   : Deleted $_\n";
+		}
+	    } else {
+		print STDERR "$PRGM :: Error: Problemo\n";
+		die "\n";  # better stop or we will leave something inconsistent
+	    }
+	    $fC->unset_delayed();
+	}
+    }
+    return 1;
+}
+
+
+# Clone file in db
+sub Clone
+{
+    my($path,$file,$newpath)=@_;
+    my(@all);
+
+    &Context($path,$file);
+
+    # The context is ready ... take care of the cloning
+    @all = $fC->run_query("size");
+    if ($#all == 0){
+	if ( $fC->clone_location() ){
+	    # clone succeeded. We can now change the path.
+	    # Note that storage and site are mandatory fields
+	    # for the rest to work. This was a late addition
+	    # to ensure consistency.
+	    $fC->set_context("path=$newpath");
+	    if ($ARGV[2] == 1){
+		$fC->set_context("storage=local",
+				 "node=$NODE",
+				 "site=$SITE");
+	    } else {
+		$fC->set_context("storage=NFS",
+				 "site=$SITE");
+	    }
+
+	    if ( $fC->insert_file_location() ){
+		print "$PRGM :: Info   : Registered //".($ARGV[2]==1?$NODE:"").$newpath."/$file\n";
+		if ( ! unlink("$path/$file") ){
+		    print "$PRGM :: Warning: Could not delete $path/$file\n";
+		    return 0;
+		} else {
+		    return 1;
+		}
+	    } else {
+		print STDERR "$PRGM :: Warning: new record insert failed\n";
+		return 0;
+	    }
+	} else {
+	    print STDERR "$PRGM :: Warning: Cloning failed\n";
+	    return 0;
+	}
+    } else {
+	# can be no records or more than one
+	if ( $#all > 0){
+	    print STDERR "$PRGM :: Warning: More than one record in Clone() for $path/$file\n";
+	}
+	return 0;
+    }
+}
+
+
+#  ---------------------------------------------------------------------
+# |  Sub-routines copied from bfcca (production specific removed        |
+#  ---------------------------------------------------------------------
+#
+# Routine handling the file copy
+#
+sub FileCopy
+{
+    my($flnm,$target)=@_;
+    my($tdir,$k);
+    my(@stat);
+
+    # surely don't want to copy a symlink
+    if ( -l $flnm){ return 0;}
+
+    $tdir = dirname($target);
+    $k    = 0;
+
+  CREATE_DIR:
+    # create directory all the way up but also, try multiple times
+    # if it fails.
+    if( &MkPath($tdir,2) != 1){
+	print "$PRGM :: Info   : Failed to create $tdir on ".localtime()."\n" if ($DEBUG);
+	$k++;
+	if($k != $NTRIES){
+	    sleep($SLPTIME);
+	    goto CREATE_DIR;
+	} else {
+	    print STDERR "$PRGM :: Error: Failed to create path $tdir\n";
+	    return 0;
+	}
+    }
+
+    # if the final file already exists, remove it first
+    if(-e $target){ unlink($target);}
+
+    # Informative message
+    print "$PRGM :: Info   : Copying $flnm -> $target\n"  if ($DEBUG);
+
+    # Copy now
+    copy($flnm,$target);
+
+    # Double check this
+    if( ! -e $target){
+	print STDERR "$PRGM :: Warning: Action did not create $target\n";
+	return 0;
+    } else {
+	print "$PRGM :: $target created\n" if ($DEBUG);
+	return 1;
+    }
+}
+
+
+#
+# Subroutine to check and create path. mkpath()
+# in the perl module does not return the failure
+# reasons and do not implement special cases as
+# we do. So, screw it ...
+#
+sub MkPath
+{
+    my($dir,$level)=@_;
+    my(@items,$tmp,$el,$i);
+
+    # default
+    if( ! defined($level) ){ $level = 0;}
+
+    @items = split("/",$dir);
+    shift(@items);               # strip first blank space
+    $tmp = "";
+    $i   = 0;
+    foreach $el (@items){
+	$tmp .= "/$el";
+	$i++;
+	if( ! -d $tmp){
+	    #
+	    # BTW : In case of a NFS mount failure, this block will
+	    # be executed which means that we will go into an infinit
+	    # loop until the disk is available.
+	    #
+	    if (-f $tmp){
+		# Oopses !! File exists with same name than directory.
+		# This is a no-no in Uglix-land.
+		print STDERR
+		    "$PRGM :: Error: Cannot create dir $tmp. ",
+		    "File exists with the same name.\n";
+		return -1;
+	    }
+
+	    # we can even test where this fails ...
+	    # The level variable is used to prevent from accidental directory creation
+	    # in case of disk unmount. For example, level = 2 will prevent creation
+	    # before a /star/dataXX directory ...
+	    if ($i >= $level){
+		if( ! mkdir($tmp,0773) ){
+		    print STDERR
+			"$PRGM :: Error: Failed to create $tmp [$!]\n";
+		    return -2;
+		}
+	    }
+	}
+    }
+    1;
+}

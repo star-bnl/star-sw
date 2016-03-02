@@ -1,0 +1,156 @@
+#!/usr/local/bin/perl
+
+#
+# Written J.Lauret to add documentation
+# in doxygen format from old block documentation.
+#
+# Does, class, struct, enum and def's
+#
+
+foreach $file (@ARGV){
+    print "Reading $file ";
+    if( open(FI,"$file") ){
+	# Initialize those
+	undef(@comments);
+	$author = "";
+	$class  = "";
+	$format =  1;
+	$flag   =  0;
+	$bsfile =  0;
+	while( defined($line = <FI>) ){
+	    chomp($line);
+	    if($line =~ /(\\class|\\struct|\\enum|\\def)/i){
+		# Oupsi ! Already doxygenized
+		#print "$line\n";
+		$format = 0;
+		last;
+	    } elsif ($line   =~ /(struct|enum|^\#define\s+\w+)(\s+.*)/){
+		$bsfile = 1;
+	    } elsif ($line =~ /(Author:\s+)(.*)/ ){
+		$author = $2;
+	    } elsif ($line =~ /Description:/){
+		$flag = 1;
+	    } elsif ($line =~ /\s+\*+$/){
+		$flag = 0;
+	    } elsif ($line =~ /(class\s+)(.*)(\s+:|\s+\{)/){
+		$class = $2;
+		$class =~ s/:.*//;
+	    } else {
+		if($flag){
+		    $line =~ s/\s+\*//;
+		    push(@comments,$line);
+		}
+	    }
+	}
+	close(FI);
+
+	if( $format ){
+	    print "\n";
+
+	    $flnm = $file; $flnm =~ s/.*\///g;
+	    open(FI,"$file");
+	    open(FO,">$file-tmp");
+	    $enum = 0;
+
+	    if ($bsfile && $class eq ""){
+		print FO
+		    "/*!\n",
+		    " * \\file $flnm\n",
+		    " */\n";
+	    }
+
+	    # Dump class def at the top
+	    if($class ne ""){
+		print " Class  = $class\n";
+		print FO "/*!\n";
+		print FO " * \\class $class\n";
+		if($author ne ""){
+		    print " Author = $author\n";
+		    print FO
+			" * \\author $author\n";
+		}
+		if($#comments != -1){
+		    print " Description\n".
+			join("\n",@comments)."\n";
+		    print FO " *\n";
+		    foreach $tmp (@comments){
+			print FO " * $tmp\n";
+		    }
+		    print FO " *\n";
+		}
+		print FO " */\n";
+	    }
+
+
+	    while ( defined($line = <FI>) ){
+		if ($line =~ /(struct\s+)(.*)/){
+		    print " Found struct $2\n";
+		    print FO
+			"/*!\n",
+			" * \\struct $2\n",
+			" */\n";
+		} elsif ($line =~ /(^enum\s+)(.*\s+)(\{.*)/){
+		    print FO
+			"/*!\n",
+			" * \\enum $2\n",
+			" */\n";
+		    if ($line !~ /\}/){
+			print " Found enum $2\n";
+			$enum = 1 ;
+		    } else {
+			chomp($tmp = $line);
+			print " *** 1 line enum list [$tmp] will NOT be parsed\n";
+		    }
+		} elsif ($line =~ /(^\#define\s+)(\w+)(\s+\w+)/){
+		    print " Found #define $2\n";
+		    $line = &PadTo($line,"/*! \\def $2 */");
+		}
+
+		# enumeration needs some extra comments to have the
+		# enum members listed.
+		if ($enum){
+		    if( $line =~ m/\}/){
+			# Cannot comment a single line enum
+			$enum = 0;
+		    } else {
+			if( $line =~ /(.*\{)(\s+|)(.*)(\s+.*)/){
+			    chomp($line);
+			    $val  = $3; $val =~ s/,//; $val =~ s/=.*//;
+			    $line = &PadTo($line,"/**< enum value $val */");
+			} elsif( $line =~ /(\s+)(.*)(\s+.*)/){
+			    chomp($line);
+			    $val = $2; $val =~ s/,//; $val =~ s/=.*//;
+			    $line = &PadTo($line,"/**< enum value $val */");
+			}
+		    }
+		}
+
+		# print line or modified line
+		print FO "$line";
+	    }
+	    close(FI);
+	    close(FO);
+	    rename("$file-tmp",$file);
+	} else {
+	    print " already doxygenized\n";
+	}
+    }
+
+}
+
+#
+# pad with spaces if possible
+#
+sub PadTo
+{
+    my($line,$extra)=@_;
+    my($len,$pad,$i);
+
+    chomp($line); $line =~ s/\t/        /g;
+    $len = length($line);
+    $pad = 70-$len;
+    if($pad < 0){ $pad = 0;}
+    for($i=0; $i < $pad ; $i++){ $line .= " ";}
+
+    $line." ".$extra."\n";
+}

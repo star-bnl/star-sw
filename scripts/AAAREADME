@@ -1,0 +1,59 @@
+
+Quick summary of what script does what in this directory
+
+ - ScanLog.pl   perl script interface to the Job failure cgi.
+                This script scans a production log directory and
+                fills a database with the eventual crash information
+                it encounter.
+
+ - RunDAQ.pm    perl module interface to the online DAQ database.
+                Allows immediate copy of new records in the 
+                operation database as well as manipulation of
+                records.
+ - DAQFill.pl   Script performing the transfer online -> operation
+ - DAQFill.csh  csh interface suitable for a cron-job. A cronjob is
+                currently running on rcas6003 under starreco
+
+
+ - bfcca        Generic interface to the CRS batch system. Hopefully
+                more flexible than the preceeding ones, this script
+                should accomodate for all kind of option, chain, 
+                multiple production from the same library version 
+                etc ...
+
+ - ABUtils.pm   Per module controlling the entire set of compilation, 
+                Insure compilation, HTML formatting of the results and
+                test run + run-time output formatting. Changing this 
+                module without understanding what it does may cause a
+                complete collapse of all the other scripts. However, all
+                output directories and setup are there so a single file
+                change will update it all.
+ - AutoBuild.csh cronjob oriented Wrapper script to ...
+ - AutoBuild.pl Script managing library compilation. Use -h for help.
+                There are numerous possible options, some of which are
+                for library compilation debugging only. Noet that the 
+                wrapper uses the '-u' option as a default.
+ - insbld.pl    This script takes care of Insure++ compilation ONLY. Note
+                that unlike AutoBuild.pl, this script is meant for anyboddy
+                who wants to compile with Insure.
+ - inssort.pl   Sort Insure++ compilation warning list and output an html.
+                This script is called by insbld.pl . It was left separate
+                to allow users to format their own insure compilaton results.
+ - InsureTests.pl This script displays a list of possible Insure test runs.
+                Results are automatically piped to a unique text based file
+                name and formatted into HTML format by insrtm.pl .
+ - insrtm.pl    This script takes care of Insure++ run-time error message
+                formatting. 
+
+
+ - ChkLinks     perl wrapper to the linkcheck utility (assumed to be
+		installed in /usr/local/bin) suitable for a cronjob
+		or interractive execution. linkcheck checks for
+		Web site's broken links.
+
+ - doxygenize   Small script which reads .h class definition files
+                and adds the doxygen-like tag blocks.
+ - doxycron.pl  Script running every night, generating the doxygen
+		online documentation. Can be run by users as well
+		to double check their documentation formatting.
+		See Sofi page for more information.

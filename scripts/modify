@@ -1,0 +1,121 @@
+#!/usr/bin/env perl
+
+#
+# J.Lauret 1998
+# Revised 2002 with -r dumb implementation.
+# Revised Jan 5th 2002. 
+#    Allow only * pattern for now (some patterned-like file names)
+#    More checks on IO (wonderfull Uglix fs)
+#    Check for -l (don't trust find)
+#    Commented the not-a-plain text message
+#
+
+$PRGM = "modify";           # just a name
+$FIND = "/usr/bin/find";    # location of the find command
+
+# Any of those extensions will be skipped
+%SKIP = (".gif",1,
+	 ".jpg",1,
+	 ".img",1,
+	 ".pdf",1,
+	 ".ps",1,
+	 ".eps",1,
+	 ".ppt",1);  
+
+
+if($#ARGV < 1){
+    die 
+	"\n",
+	"Modify file content using regexp (c) J.Lauret 1998-2002\n\n",
+	"Syntax: modify Pattern1 Pattern2 file1 [file2 ...]\n",
+	"        modify -r Pattern1 Pattern2\n",
+	"\n",
+	"Note that the file names may be wildcarded.\n\n",
+	"Pattern replacements are based on perl patterns using / as a\n",
+	"separator. Therefore, you MUST escape the / character in Pattern1.\n",
+	"\n";
+}
+
+if ($ARGV[0] eq "-r"){
+    shift(@ARGV);
+    print "$PRGM :: Info   : Searching ...\n";
+    chomp(@all = `$FIND . -type f`);
+    push(@ARGV,@all);
+} 
+
+$ipat = shift @ARGV;
+$fpat = shift @ARGV;
+
+print "$PRGM :: Info   : Checking ".($#ARGV+1)." files or pattern\n";
+
+for($i=0; $i <= $#ARGV ; $i++){
+    if($ARGV[$i] =~ /\*/){
+	# this is a supported pattern
+	push(@FILES,glob($ARGV[$i]));
+    } else {
+	push(@FILES,$ARGV[$i]);
+    }
+    foreach $file (@FILES){
+	# Check this ... may happen
+	$file =~ m/(.*)(\..*)/;
+        if( defined($SKIP{$2}) ){ next;}      # skipped explicitly by exclusion
+	if( $file =~ m/\/\.backup\//){ next;} # skip as per AFS .backup/
+
+	$ofile = $file;
+
+	# never trust 'find' to tell you what a type f is.
+	if( -f $file && ! -d $file && ! -l $file){
+	    $ofile .= "-tmp";
+	    if( -e $ofile){
+		print 
+		    "$PRGM :: Warning: exiting temp file may indicate that",
+		    " another $PRGM process is running. Please delete and try",
+		    " again. [$ofile]\n";
+		next;
+	    }
+	    if( ! -e $file){
+		print "$PRGM :: Info   : $file no longer there\n";
+		next;
+	    }
+	    if( ! open(FI,$file) ){
+		print "$PRGM :: Warning: Could not open input file $file\n";
+		next;
+	    }
+	    if( ! open(FO,">$ofile") ){
+		print "$PRGM :: Warning: Could not open temp file $ofile\n";
+		next;
+	    }
+	    $changed = 0;
+	    while ( defined($line = <FI>) ){
+		$iline= $line;
+		if( $line =~ m/$ipat/){
+		    $line =~ s/$ipat/$fpat/g;
+		}
+		print FO $line;
+		if($iline ne $line){ $changed = 1;}
+	    }
+	    close(FO);
+	    close(FI);
+	    if($changed){
+		# need to replace. Restore mask.
+		@prop = stat($file);
+		rename($ofile,$file);
+		chmod($prop[2],$file);
+		print "$PRGM :: modify : $file\n";
+	    } else {
+		# no need to replace
+		unlink($ofile);
+	    }
+	} else {
+	    #print "$PRGM :: Skipped: $file is not a plain file\n";
+	}
+    }
+    undef(@FILES);
+}
+
+
+
+
+
+
+

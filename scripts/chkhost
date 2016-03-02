@@ -1,0 +1,49 @@
+#!/bin/csh
+
+#
+# Displays host network setup (name, port etc ...)
+# including Grid configuration if any.
+#
+
+echo "Set HOSTNAME is    `/bin/hostname`"
+
+
+if ( -e /etc/sysconfig/network) then
+    set test=`/bin/grep HOSTNAME /etc/sysconfig/network | /bin/sed "s/.*=//"`
+    echo "Sysconfig network  $test"
+    set test=`/bin/grep NISDOMAIN /etc/sysconfig/network |  /bin/sed "s/.*=//"`
+    echo "NIS domain         $test"
+    set DMN=$test
+else
+    set DMN=""
+endif
+
+
+set test=`which globus-hostname`
+if ("$test" != "" && `echo $test | grep "not found"` == "") then
+    set test=`$test`
+    echo "Globus HOSTNAME is $test"
+    if ( `echo $test | grep $DMN` == "") then
+	echo "--> Warning $test does not contain $DMN"
+	echo "    This may be wrong in case of dual NIC"
+    endif
+endif
+
+
+if ($?GLOBUS_TCP_PORT_RANGE) then
+    set test=`echo $GLOBUS_TCP_PORT_RANGE  | /bin/sed "s/.*=//"`
+    echo "Globus ports       $test"   
+    set GPR=$test
+else
+    set GPR=""
+endif
+
+if ( -e  /etc/xinetd.d/gsiftp ) then
+    set test=`/bin/grep GLOBUS_TCP_PORT_RANGE /etc/xinetd.d/gsiftp | /bin/sed "s/.*=//"`
+    if ("$test" != "") then
+	echo "GSI Ftp port range $test"
+	if ( `echo $test | grep $GPR` == "") then
+	    echo "--> ERROR gsiftp port range outside GLOBUS_TCP_PORT_RANGE"
+	endif
+    endif
+endif

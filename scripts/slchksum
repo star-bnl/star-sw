@@ -1,0 +1,265 @@
+#!/bin/env perl
+
+#+
+#
+# Calculates a global unique ID for a library release based on the 
+# object files or source files. This script needs to know about STAR 
+# general directory structure.
+# (c) J. Lauret 2013
+#
+# Syntax is: 
+# % %%SELF%% [arguments] 
+# where arguments are:
+#  -c SnapShotName    creates an initial reference snapshot
+#  -r SnapShotName    reports differences with current version
+#
+#  -s                 use source files instead of object files
+#
+#  -d                 enable full debugging info (-da -dd -dm)
+#  -da                shows debugging info for additional files
+#  -dm                shows debugging info for missing files 
+#  -dd                shows debugging info for checksum diff 
+
+#
+#-
+use Digest::MD5;
+
+$SELF       =  $0;  
+$SELF       =~ s/.*\///g;
+$STAR       =  $ENV{STAR};
+$OS         =  $ENV{STAR_HOST_SYS};
+$HOME       =  $ENV{HOME};
+
+if ( defined($ENV{NODEBUG}) ){
+    $OBJ    = "OBJ";
+} else {
+    $OBJ    = "obj";
+}
+
+$md5 = Digest::MD5->new();
+$md5->reset();
+$digest     = "";
+$SNAP       = 1;
+$NSAPN      = "default";
+$DEBUG      = 0;
+$DEBUGDA    = 0;
+$DEBUGDN    = 0;
+$DEBUGDD    = 0;
+$TAKES      = 0;
+
+
+for ($i=0 ; $i <= $#ARGV ; $i++ ){
+    $arg = $ARGV[$i];
+    if ( $arg eq "-c"){
+	# snapshot taken - this will be useful for making
+	# a difference between two libraries
+	$SNAP    = 1;
+	$NSAPN   = $ARGV[++$i];
+	die "Argument needed: -s SnapShotName\n" if ( ! defined($NSAPN) );
+    } elsif ($arg eq "-r"){
+	$SNAP    = 2;
+	$NSAPN   = $ARGV[++$i];
+	die "Argument needed: -r SnapShotName\n" if ( ! defined($NSAPN) );
+    } elsif ($arg eq "-s"){
+	$TAKES   = 1;
+    } elsif ($arg eq "-d"){
+	$DEBUG   = 1;
+    } elsif ($arg eq "-da"){
+	$DEBUGDA = 1;
+    } elsif ($arg eq "-dm"){
+	$DEBUGDN = 1;
+    } elsif ($arg eq "-dd"){
+	$DEBUGDD = 1;
+    } elsif ($arg eq "-h"){
+	# show help
+	if ( open(FI,$0) ){
+	    while ( defined($line = <FI>) ){
+		chomp($line);
+		if ($line =~ m/\#\+/){  $take = 1; next;}
+		if ($line =~ m/\#\-/){  last;}
+		$line =~ s/\#//;
+		if ( $line =~ m/%%SELF%%/){
+		    $line =~ s/%%SELF%%/$SELF/;
+		}
+		print "$line\n" if ( $take);
+	    }
+	    close(FI);
+	    exit;
+	}
+    }
+
+}
+
+# print something
+if ( $TAKES == 1){
+    # Avoid knowing about STAR structure here
+    # Assume each dub-directory is to be scanned
+    die "Could not find $STAR\n"       if ( ! -e $STAR );
+    @all = glob("$STAR/*");
+    foreach $file (@all){
+	if ( -d $file ){
+	    $file =~ s/$STAR\///;
+	    #print "$file\n";
+	    push(@TOSCAN,$file);
+	}
+    }
+    print 
+	"We are comparing sources from ".(join(",",@TOSCAN))." - Searching ".
+	($NSAPN ne ""?" snapshot is [$NSAPN]":"")."\n";
+
+    foreach $dir (@TOSCAN){
+	printf "\tScanning %12.12s ",$dir;
+	@tmp = `/usr/bin/find $STAR/$dir/ -type f`;
+	push(@sources,@tmp);
+	printf " - %5.5d files found - total %6.6s\n",($#tmp+1),($#sources+1);
+    }
+
+
+} else {
+    # check if directories exists
+    die "Could not find $STAR\n"       if ( ! -e $STAR );
+    die "Could not find $STAR/.$OS\n"  if ( ! -e "$STAR/.$OS" );
+    die "Missing object directory\n"   if ( ! -e "$STAR/.$OS/$OBJ" );
+
+    print 
+	"We are comparing objects - Searching in $OS/$OBJ/ ".
+	($NSAPN ne ""?" snapshot is [$NSAPN]":"")."\n";
+
+    # we passed all tests and args are parsed - search for object files
+    @sources = `/usr/bin/find $STAR/.$OS/$OBJ/ -name '*.o' -type f`;
+}
+
+
+# Do all MD5 and add to a global array $ALLDIGEST
+# Calculate a double md5
+print "Processing ".($#sources+1)."\n"                                    if ( $DEBUG );
+foreach $file (@sources){
+    chomp($file);
+
+    # exclude some files
+    if ( $TAKES ){
+	next if ( $file =~ m/.*~$/);
+	next if ( $file =~ m/\/CVS\//);
+	next if ( $file =~ m/\/\.consign.*/);
+    }
+
+    $digest = &GetMD5($file);
+    $md5->add($digest);
+    #print "$file $digest\n";
+}
+
+$FLNM   = "$HOME/.$SELF.$<.$NSAPN.$TAKES.log";
+$digest = $md5->b64digest();
+@all    = sort keys %ALLDIGEST;
+
+print "The library unique id is: ".($#all)."-$digest\n";
+
+# dump always
+if ( $SNAP != 0){
+    if ( $SNAP == 1){
+	# dump all results to a snapshot in FLNM
+	unlink($FLNM) if ( -e $FLNM);
+	if ( open(FO,">$FLNM") ){
+	    foreach $file (@all){
+		print FO "$file $ALLDIGEST{$file}\n";
+	    }
+	    close(FO);
+	}
+    } else {
+	# dump as a tmp file
+	unlink("$FLNM.tmp") if ( -e "$FLNM.tmp");
+	if ( open(FO,">$FLNM.tmp") ){
+	    foreach $file (@all){
+		print FO "$file $ALLDIGEST{$file}\n";
+	    }
+	    close(FO);
+	}
+    }
+}
+
+# if differential is aked
+if ( $SNAP == 2){
+    # this creates a difference
+    if ( ! -e $FLNM ){
+	print "Create the initial snapshot using -s first\n";
+	die "Could not find snapshot $NSAPN\n";
+    } else {
+	# open in read - such in a second assoc array
+	# and do a double check
+	my($miss,$diff,$extra)=(0,0,0);
+
+	if ( open(FI,"$FLNM") ){
+	    while ( defined($line = <FI>) ){
+		chop($line);
+		($file,$digest)   = split(" ",$line);
+		$OLDDIGEST{$file} = $digest;
+	    }	
+	    close(FI);
+	    # we have all in - check diffs, record file take
+	    foreach $file (keys %ALLDIGEST){
+		$digest = $ALLDIGEST{$file};
+		
+		if ( ! defined($OLDDIGEST{$file}) ){
+		    $extra++;
+		    print "Additional file missing [$file]\n"             if ( $DEBUG || $DEBUGDA);
+		} else {
+		    if ( $digest ne $OLDDIGEST{$file} ){
+			$diff++;
+			print "Difference in checksum [$file]\n"          if ( $DEBUG || $DEBUGDD);
+		    }
+		}
+		# mark as checked
+		$CHECKED{$file}=1;
+	    }
+	    # now do the reverse - simpler now
+	    foreach $file (keys %OLDDIGEST){
+		if ( ! defined($CHECKED{$file}) ){
+		    # we already have a problem
+		    $miss++;
+		    print "File missing in current lib [$file]\n"         if ( $DEBUG || $DEBUGDM);
+		}
+	    }
+
+	}
+	if ( $miss != 0 || $diff != 0 || $extra != 0){
+	    print 
+		"Differences detected\n".
+		"   Additional files not in your initial snapshot = $extra\n".
+		"   Files in the initial snapshot but not current = $miss\n".
+		"   Checksum Differences between the two snapshots= $diff\n";
+	} else {
+	    print "Comparison checks OK\n";
+	}
+    }
+}
+
+
+
+
+#
+# Calculate file MD5sum / standard routine
+# used in other scripts
+#
+sub GetMD5
+{
+    my($file)=@_;
+    my($digest,$f);
+    
+    if ( ! defined( $ALLDIGEST{default}) ){
+        $ALLDIGEST{default} = 1;
+    }
+    $file  =~ m/($STAR\/)(.*)/;
+    $f     =  $2.$3;
+    if ( ! defined($digest = $ALLDIGEST{$f}) ){
+        if ( open(MD5FI,$file) ){
+            binmode(MD5FI) if ( ! $TAKES);
+            $digest = Digest::MD5->new->addfile(*MD5FI)->hexdigest();
+            close(MD5FI);
+        } else {
+	    print STDERR "Could not open $file\n";
+            $digest = "0";
+        }
+        $ALLDIGEST{$f} = $digest;
+    }
+    return $digest;    
+}

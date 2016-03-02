@@ -1,0 +1,116 @@
+#!/usr/bin/env perl
+
+#
+# Physically deletes all files with available <= 0 or sanity <= 0
+# Attention: this will work for a give storage
+#
+# Written J. Lauret - 2002 - 2009
+#
+# This script is used in daemons
+# DO NOT change the arguments please
+#
+# Usage:
+#   % ./$0 localhost NFS
+#   % ./$0 rcas6001.rcf.bnl.gov
+#
+#
+
+use lib "/afs/rhic.bnl.gov/star/packages/scripts";
+use FileCatalog;
+
+my $hostName;
+
+$OK = 1;
+
+if ( defined($ARGV[0]) ){
+    $hostName = $ARGV[0];
+
+    # one instance at a time
+    if ( -e "/tmp/$hostName$<.lock"){
+	my(@items)=stat("/tmp/$hostName$<.lock");
+	my($deltatime)= time() - $items[9];
+	my($waittime)= ($hostName eq "localhost"?43200:21600); # 43200 = 12 hours / 21600 = 6 hours
+	if ( $deltatime < $waittime ){
+	    print localtime()." Found /tmp/$hostName$<.lock ; quit.\n";
+	    exit 0;
+	} else {
+	    unlink("/tmp/$hostName$<.lock");
+	}
+    }
+
+
+    my $fC = FileCatalog->new();
+    if ( $fC ){
+	$fC->connect_as("User");
+
+	open(LOCK,">/tmp/$hostName$<.lock");
+	print LOCK localtime()."\n";
+	close LOCK;
+
+
+        # those are sign that the files
+	# where marked for deletion
+	foreach $select ("available<0","sanity<=0"){
+	    $start =   0;
+	    $limit = 500;
+	    $fC->clear_context();
+	    $fC->set_delimeter("/");
+
+	    do {
+		$fC->set_context("startrecord=$start",
+				 "limit=$limit",
+				 "node=$hostName",
+				 defined($ARGV[1])?"storage=$ARGV[1]":"storage=local",
+				 "nounique=1",
+				 $select
+				 );
+		@all = $fC->run_query("path","filename");
+		if ($#all != -1){
+		    foreach $ff (@all){
+			if ( -e $ff ){
+			    push(@ALL,$ff);
+			# } else {
+			#    print localtime()." $ff not found\n";
+			}
+		    }
+		}
+		$start += $limit;
+	    } while ($#all  == ($limit-1));
+	}
+
+	# No perform the operation
+	if ($#ALL != -1){
+	    foreach $file (@ALL){
+		if ( -e $file ){
+		    # skip special cases
+		    # even if marked sanity=0 or otherwise, leave the "dev"
+		    # files as is but display a warning
+		    if ( $file =~ m/\/dev\//i ){
+			print localtime()." WARNING $file is marked bad but will not touch\n";
+			next;
+		    }
+		    
+		    # still needs to check
+		    if ($OK){
+			if ( unlink($file) ){
+			    print localtime()." $file deleted\n";
+			}
+		    } else {
+			print "/bin/rm -f $file\n";
+		    }
+		}
+	    }
+	}
+	unlink("/tmp/$hostName$<.lock") if ( -e "/tmp/$hostName$<.lock");
+
+	1;
+
+    } else {
+	print localtime()." Did not get a FC handler\n";
+	0;
+    }
+
+} else {
+    0;
+}
+

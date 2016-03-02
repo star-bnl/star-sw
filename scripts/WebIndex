@@ -1,0 +1,46 @@
+#!/usr/local/bin/perl
+
+#
+# AutoIndex is a tool from Justin Hagstrom
+# Package was reshaped by J. Lauret and Z. Chajecki 2008
+#
+# After initial generation, there is no need to re-generate. This
+# script is a simpe, wrapper around our general installation.
+# 
+#
+
+if ( $ARGV[0] ne ""){
+    # Any argument, display a blabla
+    $base = $0;
+    $base =~ s/.*\///g;
+    print qq~
+$base generates a file named AutoIndex.php suitable for the STAR Web
+server globally installed AutoIndex tool. Please, use it if you need to 
+generate an index browser script. Note that the globally installed 
+configuration takes care of of global requirements in directory browsing.
+For more information, consult the link below and related documents.
+    http://drupal.star.bnl.gov/STAR/comp/sofi/web-access
+
+~;
+} else {
+    if ( ! open(FO,">AutoIndex.php") ){
+	die "Could not create index.php ".
+	    "Please check you have access to the current directory\n";
+    } else {
+	$T = localtime();
+	print FO qq~<?
+//
+// Auto generated on $T
+// This is a simple wrapper around a globally installed utility. 
+// For more information, please consult
+//    http://www.star.bnl.gov/STAR/comp/sofi/web-access 
+//
+\$ROOT = \$_SERVER['DOCUMENT_ROOT'];
+include(\$ROOT.'/AutoIndex/AutoIndex.php');
+?>
+~;
+	close(FO);
+	chmod(0755,"AutoIndex.php");
+	print "AutoIndex.php file was generated.\n";
+    }
+}

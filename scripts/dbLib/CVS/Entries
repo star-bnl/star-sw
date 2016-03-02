@@ -1,0 +1,14 @@
+/dbTJobsSetup.pl/1.1/Wed Jan  9 19:47:37 2008//
+/dbupdateDotDEV.pl/1.1/Fri Jul 11 20:18:03 2008//
+/dbupdateNEW.pl/1.38/Sat Feb  8 14:39:51 2014//
+/scanFastDEV.pl/1.11/Fri Apr  4 12:15:59 2014//
+/submitFastJobs.pl/1.4/Fri Apr  4 12:15:59 2014//
+/dbupdateEval.pl/1.12/Tue Oct 28 13:42:18 2014//
+/updateJobsQA.pl/1.5/Thu Mar 12 13:32:03 2015//
+/copy_devQA.csh/1.1/Mon Jul 20 14:55:03 2015//
+/copy_newQA.csh/1.1/Mon Jul 20 14:55:24 2015//
+/run_devQA.csh/1.1/Mon Jul 20 14:52:51 2015//
+/run_newQA.csh/1.1/Mon Jul 20 14:53:19 2015//
+/dbupdateNEWsite.pl/1.30/Tue Jul 28 12:58:06 2015//
+/dbupdateDEV.pl/1.88/Wed Mar  2 13:48:02 2016//
+D

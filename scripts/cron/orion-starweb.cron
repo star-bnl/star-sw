@@ -1,0 +1,15 @@
+#
+# RT2 setup
+#
+*/5 * * * * /usr/bin/find /opt/rt2/WebRT/sessiondata -type f -amin +600 -exec rm -f {} \; >&/dev/null
+*/10 * * * * /star/u/starweb/bin/bla.csh
+
+#
+# Rebuild the glimpse database once a week for Hypernews
+#
+00 09          * * 0 test -e /var/www/cgi-bin/HyperNews-star/.scripts/build-forums.pl && /var/www/cgi-bin/HyperNews-star/.scripts/build-forums.pl
+00 10          * * 0 cd /star/u/starweb/WWW/hnstar && /usr/local/bin/glimpseindex -n -M 20 -H . -i -z . >&/dev/null
+
+# Sychronize Drupal files and databases on orionsbelt:
+30 0,12 * * * /home/users/starweb/bin/drupal_sync_to_orionsbelt.sh
+

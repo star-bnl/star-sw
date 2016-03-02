@@ -1,0 +1,80 @@
+#!/usr/local/bin/perl
+
+#
+# J. Lauret May 2005
+# handles df and PANFS StatFS 
+# Requires pan_statfs program.
+#
+# Note that the format MUST be compatible with the DF command
+# so this command could be used as a replacement of /bin/df.
+#
+# Note that data05 for example will be sorted out properly in terms
+# of space as expected. Those multi-volume disk are quite bothering 
+# for production automation but OK again with dfpanfs as it provides
+# sub-volume view rather than the "volume" = shelf total capacity view .
+#
+#
+
+if ( defined($ENV{OPTSTAR}) ){
+    $EXEC   = $ENV{OPTSTAR}."/bin/pan_statfs";
+} else {
+    $EXEC   = "/opt/star/bin/pan_statfs";
+}
+
+
+$result = `/bin/df -k $ARGV[0]`;
+
+if ($result =~ m/\/panasas/ && $ARGV[0] ne "" && -e $EXEC){
+    @lines = `$EXEC $ARGV[0]`;
+
+    #print  join("::",@lines)."\n";
+
+    foreach $line (@lines){
+	if ( $line =~ m/(volume_live_bytes_used = )(\d+)/){
+	    #print "Parsing [$line]\n";
+	    $volume_live_kbytes_used = $2/1024;
+	}
+	if ( $line =~ m/(volume_hard_quota_bytes = )(\d+)/){
+	    #print "Parsing [$line]\n";
+	    $volume_hard_quota_kbytes = $2/1024;
+	}
+	if ( $line =~ m/(volume_soft_quota_bytes = )(\d+)/){
+	    #print "Parsing [$line]\n";
+	    $volume_soft_quota_kbytes = $2/1024;
+	}
+    }
+
+    if ($volume_hard_quota_kbytes == 0){
+        # This is NOT a sub-volume but a full one
+	print "PAN-$result\n";
+    } else {
+	#print "panfs\n";
+
+	@items = split("\n",$result);
+	#print "::".join("\n::",@items)."\nLead to # element = $#items\n";
+
+	if ($#items == 1){
+	    $disk = (split(" ",$items[1]))[0];
+	    $items[1] = sprintf("$disk %s %s %s %d%% $ARGV[0]\n",
+				($volume_soft_quota_kbytes+$volume_hard_quota_kbytes)/2,
+				$volume_live_kbytes_used,
+				($volume_hard_quota_kbytes-$volume_live_kbytes_used),
+				100*$volume_live_kbytes_used/$volume_hard_quota_kbytes);
+	} elsif ($#items == 2){
+	    $items[2] = sprintf("%31s %s %s %d%% $ARGV[0]\n",
+				($volume_soft_quota_kbytes+$volume_hard_quota_kbytes)/2,
+				$volume_live_kbytes_used,
+				($volume_hard_quota_kbytes-$volume_live_kbytes_used),
+				100*$volume_live_kbytes_used/$volume_hard_quota_kbytes);
+	} else {
+	    $items[0] = "UPAN-".$items[0];
+	}
+	#print "------------------\n";
+	print join("\n",@items)."\n";
+	#print "------------------\n";
+    }
+
+
+} else {
+    print $result;
+}

@@ -1,0 +1,10 @@
+#!/bin/csh
+
+#
+# Simple command to dump the crontab content
+# to a standarized named format.
+#
+
+unset noclobber
+set HOST=`/bin/hostname | /bin/sed "s/\..*//"`
+/usr/bin/crontab -l >$HOME/$HOST-$USER.cron

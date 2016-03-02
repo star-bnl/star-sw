@@ -1,0 +1,6 @@
+
+
+This directory will contain scripts maintained by J. Lauret but
+for which the RCF may need to modify. 
+
+- rterm  -- frequent update of the condor master may be needed

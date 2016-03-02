@@ -1,0 +1,1284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Scheduler configuration file. This file tells how to create all the components
+of the scheduler itself. -->
+<java version="1.4.2" class="java.beans.XMLDecoder">
+  <object class="java.util.Hashtable">
+  
+    <!--This block can be turned on to trick SUMS into thinking it’s running at a different site. -->
+    <void method="put"> 
+        <string>localSite</string>
+        <string>TestSite.gov</string>
+    </void>  
+    
+<!-- Statistics configuation. This sections tells whether the scheduler should
+record the statistics and in which database. To change database, simply
+change the database URL and the username/password -->
+<!--
+    <void method="put">
+      <string>statistics</string>
+      <object class="java.util.Hashtable">
+        <void method="put">
+          <string>URL</string>
+          <string>jdbc:mysql://duvall.star.bnl.gov/Scheduler_bnl</string>
+        </void>
+        <void method="put">
+          <string>password</string>
+          <string>4stats!</string>
+        </void>
+        <void method="put">
+          <string>username</string>
+          <string>scheduler</string>
+        </void>
+      </object>
+    </void>  -->
+    
+<!-- Program location. Tells the scheduler where it can find the commands.
+Some commands are not defined here, but in the component in which they are used.
+For example, bsub is defined in the LSFDispatcher, property bsubEx. This is due
+to a change in architecture, and this section was left as legacy. It will become
+less and less important the more the scheduler moves to a  even moremodular
+architecture. -->
+<!--
+    <void method="put">
+      <string>programLocations</string>
+      <object class="java.util.Hashtable">
+        <void method="put">
+          <string>condor_submit</string>
+          <string>condor_submit</string>
+        </void> 
+        <void method="put">
+          <string>ls</string>
+          <string>/bin/ls</string>
+        </void>
+        <void method="put">
+          <string>csh</string>
+          <string>/bin/csh</string>
+        </void>
+        
+       <void method="put">
+          <string>bsub</string>
+          <string>bsub</string>
+        </void> 
+      </object>
+    </void>    
+-->    
+    
+    
+    
+<!-- CSHApplication configuration. The CSHApplication components is the one 
+responsible for creating the scripts and the file lists. -->
+    <void method="put">
+      <string>CSHApplication</string>
+      <object id="CSHApplication" class="gov.bnl.star.offline.scheduler.Dispatchers.CSHApplication">
+        <void property="recurseCopy">
+          <boolean>true</boolean>
+        </void>
+        <void property="copyScript">
+          <string>copyURIs.pl</string>
+        </void>
+        <void property="registerScript">
+          <string>register_file.pl</string>
+        </void>
+        <void property="storageScript">
+          <string>storageService.pl</string>
+        </void>
+        <void property="EnvVariableLimit">
+          <int>200</int>
+        </void>
+        <!-- Knowledge of location should be confined to programLocations -->
+        <!-- non-URI based syntax implies OS depencies                    -->
+        <!-- How can the config file be OS independent ??? Below, are a 
+            few example and syntax where it is NOT                        -->
+        <!--
+        <void property="copyCommand">
+            <string>/bin/cp $SCRATCH/(fromScratch) (toURL)</string>
+        </void>
+        <void property="recursiveCopyCommand">
+            <string>/bin/cp -r $SCRATCH/(fromScratch) (toURL)</string>
+        </void> -->
+        <void property="copyCommand">
+            <string>/bin/cp (fromScratch) (toURL)</string>
+        </void>
+        <void property="recursiveCopyCommand">
+            <string>/bin/cp -r (fromScratch) (toURL)</string>
+        </void>
+        <void property="gridCopyCommand">
+            <string>
+# This loop solves the problem of not being able to use wild cards in the globus-url-copy command.
+# However the (toURL) area will need to be different for each pass of the loop as a destination file name must be specified. 
+# In this syntax the user must put the last slash on the “toURL” or else it will concatenate the last dir to the file name.
+cd $SCRATCH
+foreach file ((fromScratch))
+  globus-url-copy -p 25 file:$SCRATCH/$file gsiftp://(copyBackGateKeeper)(toURL)$file
+ 
+end 
+            </string>
+        </void>
+        <void property="makeExecutableCommand">
+            <string>/bin/chmod +x </string>
+        </void>
+        <void property="helperScripts">  
+            <string>/afs/rhic/star/users/starjobs/dev/helpers/</string>
+        </void>
+
+      </object>
+    </void>
+    
+       
+    
+<!--The is the new RDL Application Resolver used to solve the Task and Application tags RDL requests
+    This on object is used in all queue objects however the they may all be given different RDL Application Resolvers -->    
+    <void method="put">
+      <string>RCS_RDLApplicationResolver</string>
+      <object id="RCS_RDLApplicationResolver" class="gov.bnl.star.offline.scheduler.util.RDLApplicationResolver">
+        <void method="addApplication">
+            <object class="gov.bnl.star.offline.scheduler.request.rdl.Application">
+                <void property="name">     <string>java</string>                                                    </void>
+                <void property="version">  <string>1.4.2</string>                                                   </void>
+                <void property="path">     <string>/usr/java/j2sdk1.4.2_05/bin/</string>                            </void>
+                <void property="type">     <object class="gov.bnl.star.offline.scheduler.request.rdl.JavaTask"/>    </void>
+            </object>
+        </void>
+        <void method="addApplication">
+            <object class="gov.bnl.star.offline.scheduler.request.rdl.Application">
+                <void property="name">     <string>root4star</string>                                               </void>
+                <void property="version">  <string>3.10.01</string>                                                 </void>
+                <void property="path">     <string>/afs/rhic.bnl.gov/star/packages/SL04f/.sl302_gcc323/bin/</string></void>
+                <void property="type">     <object class="gov.bnl.star.offline.scheduler.request.rdl.RootTask"/>    </void>
+            </object>
+        </void>
+        <void method="addApplication">
+            <object class="gov.bnl.star.offline.scheduler.request.rdl.Application">
+                <void property="name">     <string>root</string>                                                          </void>
+                <void property="version">  <string>3.10.01</string>                                                       </void>
+                <void property="path">     <string>/afs/rhic.bnl.gov/star/ROOT/3.10.01/.sl302_gcc323/rootdeb/bin/</string></void>
+                <void property="type">     <object class="gov.bnl.star.offline.scheduler.request.rdl.RootTask"/>          </void>
+            </object>
+        </void>
+        <void method="addApplication">
+            <object class="gov.bnl.star.offline.scheduler.request.rdl.Application">
+                <void property="name">     <string>csh</string>                                                     </void>
+                <void property="version">  <string>0</string>                                                       </void>
+                <void property="path">     <string>/bin/</string>                                                   </void>
+                <void property="type">     <object class="gov.bnl.star.offline.scheduler.request.rdl.ScriptTask"/>  </void>
+            </object>
+        </void>
+        <!--Add others here-->
+      </object>
+    </void>
+    
+    
+    
+<!-- Log configuration. The scheduler can log information at different level
+of detail (FINEST, FINER, FINE, INFO, CONFING, WARN, FATAL) and it can change
+in which directory the log is saved. A log file for each user will be created.
+Log files can be deleted at any time without any problem. 
+    <void method="put">
+      <string>log</string>
+      <object class="java.util.Hashtable">
+        <void method="put">
+          <string>directory</string>
+          <string>/afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/scheduler</string>
+        </void>
+        <void method="put">
+          <string>level</string>
+          <string>CONFIG</string>
+        </void>
+      </object>
+    </void>
+-->    
+<!-- DefaultFileCatalog configuration. The default file catalog used to resolve
+the catalog queries. You can change the class of the FileCatalog implementation. -->
+    <void method="put">
+      <string>defaultFileCatalog</string>
+      <object class="gov.bnl.star.offline.scheduler.catalog.StarCatalog"/>
+    </void>
+    
+<!-- defaultJobInitializer configuration. Here you can change the class of the
+initializer. -->
+    <void method="put">
+      <string>defaultJobInitializer</string>
+      <object class="gov.bnl.star.offline.scheduler.initializer.XMLInitializer">
+        <void property="defaultFileListSyntax">
+          <string>paths</string>
+        </void>
+        <void property="checkIfFilesExistLocally">
+          <boolean>true</boolean>
+        </void>
+      </object>
+    </void>
+    
+    
+
+    
+    <!--Testing the Local dispatcher for TX corp-->    
+    <void method="put">
+        <string>LocalTestDispatcher</string>
+        <object id="LocalTestDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.local.LocalDispatcher">
+            <void property="maxAttempts">    <int>5</int>                       </void>
+            <void property="msBtwnFailure">  <int>5000</int>                    </void>
+            <void property="msBtwnSuccess">  <int>0</int>                       </void>
+            <void property="maxElapseTime">  <int>30000</int>                   </void>
+            <void property="application">    <object idref="CSHApplication"/>   </void>
+        </object>
+    </void>
+    
+    
+
+ <!-- This object defines how to make / format a string out of the resource requirements of any job that is passed to it. -->
+    <void method="put">
+      <string>LSF_ResourceRequirementStringDefinition</string>
+      <object class="gov.bnl.star.offline.scheduler.util.GenericResourceRequirementStringDefinition">
+        <void method="setStartString">              <string>"</string>                      </void>
+        <void method="SetEndString">                <string>"</string>                      </void>
+        <!-- These are  default values, so they do nothing except provide a roadmap for writing new GenericResourceRequirementStringDefinition’s-->
+        <void method="setMaxStorageSpaceFormat">    <string></string>                      </void>
+        <void method="setMinStorageSpaceFormat">    <string>tmp&gt;minStorageSpace</string> </void>
+        <void method="setMaxMemoryFormat">          <string></string>                      </void>
+        <void method="setMinMemoryFormat">          <string>mem&gt;minMemory</string>       </void>
+        <void method="setMaxStorageSpaceVariable">  <string>maxStorageSpace</string>        </void>
+        <void method="setMinStorageSpaceVariable">  <string>minStorageSpace</string>        </void>
+        <void method="setMaxMemoryVariable">        <string>maxMemory</string>              </void>
+        <void method="setMinMemoryVariable">        <string>minMemory</string>              </void>
+     </object>
+    </void>
+    
+
+    
+<!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////// -->    
+    <void method="put">    
+        <string>gridView</string>
+        <object class="java.util.ArrayList">
+        
+           <!-- IKF Frankfurt site block - a first try -->
+           <void method="add">
+               <object class="gov.bnl.star.offline.scheduler.Site">
+                   <void property="siteName"><string>ikf.physik.uni-frankfurt.de</string></void>
+                   <void property="canonicalName"><string>IKF</string></void>
+                   <void method="AddFileTransferGatekeeper">
+                        <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                            <void property="name"><string>pcikf32.ikf.physik.uni-frankfurt.de</string></void>
+                            <void property="Utilization"><int>100</int></void>
+                        </object>
+                   </void>
+                   <!--
+                   <void property="logConf">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>/opt/star/grid/sums/logs/</string>
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>CONFIG</string>
+                            </void>
+                        </object>
+                    </void-->
+                    <void property="programLocations">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>ls</string>
+                              <string>/bin/ls</string>
+                            </void>
+                            <void method="put">
+                              <string>csh</string>
+                              <string>/bin/csh</string>
+                            </void>
+                        </object>
+                    </void>
+		</object>
+	   </void>
+           <!-- end of IKF Frankfurt block -->
+
+            <!--This block defines the site “rhic.bnl.gov”. Copy and paste this block to define other sites.  -->
+            <void method="add">
+                <object class="gov.bnl.star.offline.scheduler.Site">
+                    
+                    <void property="siteName"><string>TestSite.gov</string></void>
+                    <void property="canonicalName"><string>bnl</string></void>
+                    
+                    <!-- This block defines gatekeepers that will be used for file transfer. More blocks like this made be added as needed-->
+                    <void method="AddFileTransferGatekeeper">
+                        <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                            <void property="name"><string>stargrid03.rcf.bnl.gov</string></void>
+                            <void property="Utilization"><int>100</int></void>
+                        </object>
+                    </void> 
+                    
+                    <!--This block defines LSF batch system at bnl-->
+                    <void method="AddBatchSystem">
+                        <object class="gov.bnl.star.offline.scheduler.BatchSystem">
+                                
+                              <void property="name"><string>lsf</string></void> 
+                              
+                              <!--This local dispatcher defineds how to submit localy, (from local site to local site)-->
+                              <void property="localDispatcher">
+                                  <!-- The RCASDispatcher is an LSFDispatcher configured to dispatch jobs to the RCAS cluster. -->
+                                  <object id="RCASDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFDispatcher">
+                                    <void method="setResourceRequirementStringDefinition"><string>LSF_ResourceRequirementStringDefinition</string></void>
+                                    <void property="bsubEx">        <string>bsub</string>               </void>
+                                    <void property="bsubOptions">   <string/>                           </void>
+                                    <void property="maxAttempts">   <int>5</int>                        </void>
+                                    <void property="msBtwnFailure"> <int>5000</int>                     </void>
+                                    <void property="msBtwnSuccess"> <int>0</int>                        </void>
+                                    <void property="maxElapseTime"> <int>5000</int>                     </void>
+                                    <void property="queueName">     <string>star_cas_short</string>     </void>
+                                    <!--<void property="scratchDir">    <string>/tmp/$USER/$JOBID</string>  </void> moved to new location-->
+                                    <void property="clusterName">   <string>rcas.rcf.bnl.gov</string>   </void>
+                                    <void property="application">   <object idref="CSHApplication"/>    </void>
+                                    <void property="nodePriorityStringGenerator">
+                                        <object class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFNodePriorityStringGenerator">
+                                            <void property="otherNodes"> <string>st_cas+1</string> </void>
+                                        </object>
+                                    </void>
+                                    <void method="addResourceStrategy">
+                                      <object class="gov.bnl.star.offline.scheduler.Dispatchers.RegXResourceStrategy">
+                                        <void property="base">                          <int>12</int>                                                           </void>
+                                        <void property="fileFactor">                    <int>2</int>                                                            </void>
+                                        <void property="max">                           <int>50</int>                                                           </void>
+                                        <void method="addResourceMustNotMatch">         <string>^/star/data(03|04|05|09|10|19|20|21|25|26|31|46|47|48|49|50)/.*</string> </void> 
+                                        <void method="addResourceMustMatch">            <string>^/star/data(\d+)/.*</string>                                    </void>
+                                        <void property="regXResourceNameSelection">     <string>(^.*/data0||^.*/data)(\d+)(.*)</string>                         </void>
+                                        <void property="RegXResourceNameReplacement">   <string>sd$2={value}</string>                                           </void>
+                                        <void property="delimiterCharacter">            <string>,</string>                                                      </void>
+                                      </object>
+                                    </void>
+                                  </object>  
+                              </void> 
+
+                        
+                              
+                              <void property="gridDispatcher"> 
+                                <!--<object id="Step1Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGLSFDispatcher">-->
+                                <object id="Step1Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">                     
+                                    <!--<void method="setResourceRequirementStringDefinition"><string>LSF_ResourceRequirementStringDefinition</string></void>-->
+                                    <void property="useRSL">               <boolean>true</boolean>                                  </void>
+                                    <void property="submitCommand">             <string>condor_submit</string>                           </void>
+                                    <void property="bsubOptions">          <string/>                                                </void>
+                                    <void property="maxAttempts">          <int>5</int>                                             </void>
+                                    <void property="msBtwnFailure">        <int>5000</int>                                          </void>
+                                    <void property="msBtwnSuccess">        <int>1000</int>                                          </void>
+                                    <void property="queueName">            <string>star_cas_dd</string>                             </void>
+                                    <!--<void property="scratchDir">           <string>/tmp/$USER/$JOBID</string>                     </void> moved to new location-->
+                                    <void property="clusterName">          <string>rcas.rcf.bnl.gov</string>                        </void>
+                                    <!--<void property="globusGatekeeper">     <string>stargrid04.rcf.bnl.gov/jobmanager-lsf</string>   </void>-->
+                                    <void property="application">          <object idref="CSHApplication"/>                         </void>
+                                    <void property="resourceStrategy">
+                                        <object class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFResourceStrategy">
+                                            <void property="base">                          <int>12</int>                       </void>
+                                            <void property="dataVaultPrefix">               <string>/star/data</string>         </void>
+                                            <void property="resourceNameSyntax">            <string>sd$vaultNumber</string>     </void>
+                                            <void property="switchSyntax">                  <string>&quot;rusage[$nameEqualValueCommaSeparated]&quot;</string></void>
+                                            <void property="trimVaultNumberLeadingZeros">   <boolean>true</boolean>             </void>
+                                        </object>
+                                    </void> 
+                                </object> 
+                              </void>
+                             
+                                                           
+                              
+                              <!-- These next blocks defines queues that are part of the LSF batch system at bnl (star_cas_short, star_cas_dd, star_cas_big) -->
+                             
+                              <void method="addQueue">
+                                <object id="NFSQueueObj" class="gov.bnl.star.offline.scheduler.Queue">
+                                    <void method="setID">                   <string>star_cas_short</string>   </void> 
+                                    <void method="setName">                 <string>star_cas_short</string>   </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <void method="setCluster">              <string>rcas.rcf.bnl.gov</string> </void>
+                                    <void method="setTimeLimit">            <int>90</int>                     </void>
+                                    <void method="setMaxMemory">            <int>440</int>                    </void>
+                                    <void method="setSearchOrderPriority">  <int>1</int>                      </void> <!-- Try this queue first --> 
+                                    <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                 <string>STAR</string>             </void>
+                                    <void method="setImplementation">       <string>local</string>            </void>
+                                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                </object>
+                             </void>
+                             
+                             <void method="addQueue">
+                                <object id="NFSlocalQueueObj" class="gov.bnl.star.offline.scheduler.Queue"> 
+                                    <void method="setID">                  <string>star_cas_dd</string>        </void> 
+                                    <void method="setName">                <string>star_cas_dd</string>       </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <!--<void method="setAssociatedDispatcher"><object idref="RCASDispatcher"/>   </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                                    <void method="setCluster">             <string>rcas.rcf.bnl.gov</string>  </void>
+                                    <void method="setTimeLimit">           <int>90</int>                      </void>
+                                    <void method="setMaxMemory">           <int>440</int>                     </void>
+                                    <void method="setSearchOrderPriority"> <int>1</int>                       </void> <!-- Big numbers get tryed last -->
+                                    <void method="setType">                <string>LSF</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                <string>STAR</string>              </void>
+                                    <void method="setImplementation">      <string>local</string>             </void>
+                                    <void method="setOptimizeAsLocalQueue"/> <!--This makes this a local queue-->
+                                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>                    
+                                </object>
+                             </void>
+                             
+                             <void method="addQueue">
+                                <object id="NFSlongQueueObj" class="gov.bnl.star.offline.scheduler.Queue">
+                                    <void method="setID">                   <string>star_cas_big</string>     </void>  
+                                    <void method="setName">                 <string>star_cas_big</string>     </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <void method="setTimeLimit">            <int>14400</int>                  </void> <!--There is a ten day time limmit on this queue-->
+                                    <!--<void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>  </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                                    <void method="setCluster">              <string>rcas.rcf.bnl.gov</string> </void>
+                                    <void method="setSearchOrderPriority">  <int>100</int>                    </void> <!-- Big numbers get tryed last -->
+                                    <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                 <string>STAR</string>             </void>
+                                    <void method="setImplementation">       <string>local</string>            </void>
+                                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                </object>
+                             </void>
+                             
+                             
+                             <void method="addQueue">
+                                <object id="HBT_group_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                                    <void method="setID">                   <string>star_cas_cd</string>  </void>  
+                                    <void method="setName">                 <string>star_cas_cd</string>      </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <!--<void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>  </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                                    <void method="setCluster">              <string>rcas.rcf.bnl.gov</string> </void>
+                                    <void method="setTimeLimit">            <int>1200</int>                   </void>
+                                    <void method="setSearchOrderPriority">  <int>100</int>                    </void> <!-- Big numbers get tryed last -->
+                                    <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                 <string>STAR</string>             </void>
+                                    <void method="setImplementation">       <string>local</string>            </void>
+                                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                </object>
+                             </void>
+                             
+                             
+                              <void method="addQueue">
+                                    <object id="lsf_crs_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                                        <void method="setID">                  <string>star_crs_short</string>    </void>  
+                                        <void method="setName">                <string>star_crs_short</string>    </void> 
+                                        <!--<void method="setAssociatedDispatcher"><object idref="RCASDispatcher"/>   </void>-->
+                                        <void method="setCluster">             <string>crs.rcf.bnl.gov</string>   </void>
+                                        <void method="setSearchOrderPriority"> <int>1</int>                       </void> 
+                                        <void method="setType">                <string>LSF</string>               </void> 
+                                        <void method="setSite">                <string>STAR</string>              </void>
+                                        <void method="setImplementation">      <string>local</string>             </void>
+                                    </object>
+                              </void>
+                              
+                              <void method="addQueue">
+                                    <object id="lowMemQueue" class="gov.bnl.star.offline.scheduler.Queue">
+                                        <void method="setID">                   <string>star_cas_mem</string>     </void> 
+                                        <void method="setName">                 <string>star_cas_mem</string>     </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                        <!--<void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>  </void> --><!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                                        <void method="setCluster">              <string>rcas.rcf.bnl.gov</string> </void>
+                                        <void method="setTimeLimit">            <int>90</int>                     </void>
+                                        <void method="setMaxMemory">            <int>250</int>                    </void>
+                                        <void method="setSearchOrderPriority">  <int>1</int>                      </void> <!-- Try this queue first --> 
+                                        <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                        <void method="setSite">                 <string>STAR</string>             </void>
+                                        <void method="setImplementation">       <string>local</string>            </void>
+                                        <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                    </object>
+                              </void>
+
+                             
+                             
+                             <!--These next blocks defines gatekeepers that can submit to the LSF batch system at bnl-->
+                             <void method="addGatekeeper">
+                                <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                                    <void property="name"><string>stargrid04.rcf.bnl.gov</string></void>
+                                    <void property="Utilization"><int>100</int></void>
+                                </object>
+                             </void>
+                             
+  
+                        </object>
+                    </void>
+                    <!--End of LSF batch system at BNL block-->
+                                   
+<!--_______________________________This block defines the CONDOR CAS batch system at bnl___________________________________-->
+
+                    <void method="AddBatchSystem">
+                        <object class="gov.bnl.star.offline.scheduler.BatchSystem">
+                                
+                              <void property="name"><string>condor</string></void> 
+                              
+                              <void method="addGatekeeper">
+                                <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                                    <void property="name"><string>stargrid04.rcf.bnl.gov</string></void>
+                                    <void property="Utilization"><int>100</int></void>
+                                </object>
+                              </void>
+                             
+                              <void property="localDispatcher">
+                                <object id="condorRCASDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
+                                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                                    <void property="condorOptions"> <string>+Experiment     = &quot;star&quot;
++Job_Type       = &quot;cas&quot;</string></void>
+                                    <void property="maxAttempts">   <int>5</int>                     </void>
+                                    <void property="msBtwnFailure"> <int>5000</int>                  </void>
+                                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                                    <void property="application">   <object idref="CSHApplication"/> </void>
+                                </object>
+                              </void>
+                              
+                              
+                              <void property="gridDispatcher">
+                                <object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                                    <void property="useRSL">               <boolean>true</boolean>                                  </void>
+                                    <void property="submitCommand"><string>condor_submit</string></void>
+                                    <void property="bsubOptions"><string/></void>
+                                    <!--<void property="condorOptions"> <string>+Experiment     = &quot;star&quot;
++Job_Type       = &quot;cas&quot;</string></void>-->   <!--This has not been tested -->
+                                    <void property="maxAttempts"><int>5</int></void>
+                                    <void property="msBtwnFailure"><int>5000</int></void>
+                                    <void property="msBtwnSuccess"><int>1000</int></void>
+                                    <void property="queueName"><string>medium</string></void>
+                                    <void property="transferExecutable"><boolean>true</boolean></void>
+                                    <void property="application"><object idref="CSHApplication"/></void>
+                                </object>
+                              </void>
+                              
+                             
+                              <void method="addQueue">
+                                   <object id="bnl_condor_cas" class="gov.bnl.star.offline.scheduler.Queue">
+                                        <void method="setID">                     <string>bnl_condor_rcas</string></void>  
+                                        <void method="setName">                   <string></string></void>
+                                        <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void> 
+                                        <void method="setSearchOrderPriority">    <int>1</int>                      </void>
+                                        <void method="setType">                   <string>CONDOR</string>           </void> 
+                                        <void method="setSite">                   <string>STAR</string>             </void> 
+                                        <void method="setImplementation">         <string>local</string>            </void>
+                                        <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                    </object>
+                              </void>
+                    
+                        </object>
+                    </void> 
+                    <!--End of CONDOR CAS batchsystem at bnl block--> 
+
+
+<!--_______________________________This block defines the CONDOR CRS batch system at bnl___________________________________-->
+
+                    <void method="AddBatchSystem">
+                        <object class="gov.bnl.star.offline.scheduler.BatchSystem">
+                                
+                              <void property="name"><string>condor</string></void> 
+                              
+                              <void method="addGatekeeper">
+                                <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                                    <void property="name"><string>stargrid04.rcf.bnl.gov</string></void>
+                                    <void property="Utilization"><int>100</int></void>
+                                </object>
+                              </void>
+                             
+                              <void property="localDispatcher">
+                                  <object id="condorRCRSDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
+                                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                                    <void property="condorOptions"> <string>+Experiment     = &quot;star&quot;
++Job_Type       = &quot;crs&quot;</string>                                                           </void>
+                                    <void property="maxAttempts">    <int>5</int>                    </void>
+                                    <void property="msBtwnFailure">  <int>5000</int>                 </void>
+                                    <void property="msBtwnSuccess">  <int>1000</int>                 </void>
+                                    <void property="application">    <object idref="CSHApplication"/></void>
+                                  </object>
+                              </void>
+                              
+                              
+                              <void property="gridDispatcher">
+                                <!--<object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGLDispatcher">-->
+                                <object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                                    <void property="submitCommand"><string>condor_submit</string></void>
+                                    <void property="bsubOptions"><string/></void>
+                                <!--<void property="condorOptions"> <string>+Experiment     = &quot;star&quot;
++Job_Type       = &quot;crs&quot;</string></void>   This function will have to be added or else the jobs will go to the wrong cluster -->
+                                    <void property="maxAttempts"><int>5</int></void>
+                                    <void property="msBtwnFailure"><int>5000</int></void>
+                                    <void property="msBtwnSuccess"><int>1000</int></void>
+                                    <void property="queueName"><string>medium</string></void>
+                                    <void property="transferExecutable"><boolean>true</boolean></void>
+                                    <void property="application"><object idref="CSHApplication"/></void>
+                                </object>
+                              </void>
+                              
+                             
+                              <void method="addQueue">
+                                   <object id="bnl_condor_crs" class="gov.bnl.star.offline.scheduler.Queue">
+                                        <void method="setID">                     <string>bnl_condor_rcrs</string></void>  
+                                        <void method="setName">                   <string></string></void>
+                                        <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void> 
+                                        <void method="setSearchOrderPriority">    <int>1</int>                      </void>
+                                        <void method="setType">                   <string>CONDOR</string>           </void> 
+                                        <void method="setSite">                   <string>STAR</string>             </void> 
+                                        <void method="setImplementation">         <string>local</string>            </void>
+                                        <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
+                                    </object>
+                              </void>
+                    
+                        </object>
+                    </void> 
+                    <!--End of CONDOR CRS batchsystem at bnl block--> 
+<!-- ________________________________________________________________________________________________--> 
+
+               
+                    
+
+                    <!-- Log configuration. The scheduler can log information at different level
+                    of detail (FINEST, FINER, FINE, INFO, CONFING, WARN, FATAL) and it can change
+                    in which directory the log is saved. A log file for each user will be created.
+                    Log files can be deleted at any time without any problem. -->
+                    
+                    <void property="logConf">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>build</string>
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>CONFIG</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    
+                    <!-- Statistics configuation. This sections tells whether the scheduler 
+                    should record the statistics and in which database. To change database, 
+                    simply change the database URL and the username/password -->
+                    <!--
+                    <void property="statisticsConf">
+                          <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>URL</string>
+                              <string>jdbc:mysql://duvall.star.bnl.gov/Scheduler_bnl</string>
+                            </void>
+                            <void method="put">
+                              <string>password</string>
+                              <string>4stats!</string>
+                            </void>
+                            <void method="put">
+                              <string>username</string>
+                              <string>scheduler</string>
+                            </void>
+                          </object>
+                    </void>
+                    -->
+    
+                    <!-- Program location. Tells the scheduler where it can find the commands.
+                    Some commands are not defined here, but in the component in which they are used.
+                    For example, bsub is defined in the LSFDispatcher, property bsubEx. This is due
+                    to a change in architecture, and this section was left as legacy. It will become
+                    less and less important the more the scheduler moves to a  even moremodular
+                    architecture. -->
+                    <void property="programLocations">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>ls</string>
+                              <string>/bin/ls</string>
+                            </void>
+                            <void method="put">
+                              <string>csh</string>
+                              <string>/bin/csh</string>
+                            </void>
+                            <void method="put">
+                              <string>$SCRATCH</string>
+                              <string>/tmp/$USER/$JOBID</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    
+                    <!--The default policy a user submitting at this site will be given if they do not use the –policy option.-->
+                    <void property="defaultPolicy">
+                        <object id="bnl_lsf_cas" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+                            <void method="addQueue">         <object idref="NFSlocalQueueObj"/></void>
+                            <void method="addQueue">         <object idref="NFSQueueObj"/></void>
+                            <void method="addQueue">         <object idref="NFSlongQueueObj"/></void>
+                            <!--<void property="rootdAvailable"> <boolean>true</boolean></void>-->
+                        </object>
+                   </void>
+                        
+  
+                </object>
+            </void>
+            <!--End of BNL site block-->
+                        
+<!--____________________________________________________start of PDSF Site block________________________________________________-->
+            <void method="add">
+                <object class="gov.bnl.star.offline.scheduler.Site">
+                    <void property="siteName"><string>nersc.gov</string></void>
+                    
+                    <void method="AddFileTransferGatekeeper">
+                        <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                            <void property="name"><string>pdsfgrid2.nersc.gov</string></void>
+                            <void property="Utilization"><int>100</int></void>
+                        </object>
+                    </void> 
+                    
+                    <!--This block defines SGE batch system at PDSF-->
+                    <void method="AddBatchSystem">
+                        <object class="gov.bnl.star.offline.scheduler.BatchSystem">
+                                
+                              <void property="name"><string>sge</string></void> 
+                              
+                              <void property="localDispatcher">
+                                <object id="PDSFDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.sge.SGEDispatcher">
+                                    <void property="submitCommand"><string>qsub</string></void>
+                                    <void property="qsubOptions"><string/></void>
+                                    <void property="maxAttempts"><int>5</int></void>
+                                    <void property="msBtwnFailure"><int>5000</int></void>
+                                    <void property="msBtwnSuccess"><int>0</int></void>
+                                    <void property="maxElapseTime"> <int>30000</int></void>
+                                    <void property="application"><object idref="CSHApplication"/></void>
+                                    <void method="addResourceStrategy">
+                                      <object class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFResourceStrategy">
+                                        <void property="base"><int>75</int></void>
+                                        <void property="fileFactor"><int>0</int></void>
+                                        <void property="max"><int>75</int></void>
+                                        <void property="dataVaultPrefix"><string>/auto/pdsfdv</string></void>
+                                        <void property="resourceNameSyntax"><string>dv$vaultNumberio</string></void>
+                                        <void property="switchSyntax"><string>$nameEqualValueColumnSeparated</string></void>
+                                        <void property="trimVaultNumberLeadingZeros"><boolean>false</boolean></void>
+                                        <void property="removeCharactersFromVaultNumber"><boolean>true</boolean></void>
+                                      </object>
+                                    </void>
+                                    <void method="addResourceStrategy">
+                                      <object class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFResourceStrategy">
+                                        <void property="base"><int>75</int></void>
+                                        <void property="fileFactor"><int>0</int></void>
+                                        <void property="max"><int>75</int></void>
+                                        <void property="dataVaultPrefix"><string>/dante</string></void>
+                                        <void property="resourceNameSyntax"><string>danteio</string></void>
+                                        <void property="switchSyntax"><string>$nameEqualValueColumnSeparated</string></void>
+                                        <void property="trimVaultNumberLeadingZeros"><boolean>false</boolean></void>
+                                        <void property="removeCharactersFromVaultNumber"><boolean>true</boolean></void>
+                                      </object>
+                                    </void>
+                                </object>
+                              </void>
+                              
+                              
+                              <void property="gridDispatcher">
+                                <!--<object id="Step3Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGDispatcher">-->
+                                <object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                                    <void property="useRSL"><boolean>false</boolean></void>
+                                    <void property="submitCommand"><string>condor_submit</string></void>
+                                    <void property="bsubOptions"><string/></void>
+                                    <void property="maxAttempts"><int>5</int></void>
+                                    <void property="msBtwnFailure"><int>5000</int></void>
+                                    <void property="msBtwnSuccess"><int>1000</int></void>
+                                    <void property="queueName"><string>medium</string></void>
+                                    <void property="transferExecutable"><boolean>true</boolean></void>
+                                    <void property="application"><object idref="CSHApplication"/></void>
+                                    <void property="CondorGOptions"><string>stream_output = false
+stream_error = false </string></void>
+                                    <void property="resourceStrategy">
+                                      <object class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFResourceStrategy">
+                                        <void property="base"><int>20</int></void>
+                                        <void property="fileFactor"><int>0</int></void>
+                                        <void property="max"><int>20</int></void>
+                                        <void property="dataVaultPrefix"><string>/auto/pdsfdv</string></void>
+                                        <void property="resourceNameSyntax"><string>dv$vaultNumberio</string></void>
+                                        <void property="switchSyntax"><string>&quot;select[$definedNames] rusage[$nameEqualValueCommaSeparated]&quot;</string></void>
+                                        <void property="trimVaultNumberLeadingZeros"><boolean>false</boolean></void>
+                                        <void property="removeCharactersFromVaultNumber"><boolean>true</boolean></void>
+                                      </object>
+                                    </void>
+                                </object>
+                              </void>
+                              
+                              
+                              
+                              <void method="addQueue">
+                                  <object id="PDSF_SGE_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                                    <void method="setID">                   <string>PDSF_SGE_Queue</string>    </void>  
+                                    <void method="setName">                 <string></string></void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <!--<void method="setAssociatedDispatcher"> <object idref="PDSFDispatcher"/>   </void>--> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                                    <void method="setCluster">              <string>PDSF</string>              </void>
+                                    <void method="setSearchOrderPriority">  <int>1</int>                       </void> <!-- Big numbers get tryed last -->
+                                    <void method="setType">                 <string>SGE</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                 <string>STAR</string>              </void>
+                                    <void method="setRejectIfTargetHostStartsWith"><string>pdsf</string>       </void>
+                                  </object>
+                              </void>
+                              
+                              
+                              <!--These next blocks defines gatekeepers that can submit to the SGE batch system at PDSF-->
+                             <void method="addGatekeeper">
+                                <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                                    <void property="name"><string>pdsfgrid2.nersc.gov</string></void>
+                                    <void property="Utilization"><int>100</int></void>
+                                </object>
+                             </void>
+                               
+                              
+                       </object>      
+                    </void>  
+                    <!--end of PDSF sge batch system-->
+                    
+                    <void property="logConf">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>/auto/newspool/star_sched/</string>
+                              <!--<string>/auto/pdsfdv15/rhstar/scheduler</string> PDSF update : Eric Hjort--> 
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>CONFIG</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    <void property="statisticsConf">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>URL</string>
+                              <string>jdbc:mysql://pdsfdv16.nersc.gov/Scheduler_PDSF</string>
+                            </void>
+                            <void method="put">
+                              <string>password</string>
+                              <string>stat4PDSF!</string>
+                            </void>
+                            <void method="put">
+                              <string>username</string>
+                              <string>scheduler</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    <void property="programLocations">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                                <string>$SCRATCH</string>
+                                <string>/scratch/$USER/$JOBID</string>
+                            </void>
+                            <void method="put">
+                              <string>ls</string>
+                              <string>/bin/ls</string>
+                            </void>
+                            <void method="put">
+                              <string>csh</string>
+                              <string>/bin/csh</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    <void property="defaultPolicy"> 
+                        <object id="pdsf_sge" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+                            <void method="addQueue"><object idref="PDSF_SGE_Queue"/></void>
+                        </object>
+                    </void>
+                          
+            
+                </object>
+            </void>
+            <!-- End of pdsf site def -->
+            
+<!--____________________________________________________start of S.P. Site block________________________________________________-->
+
+            <void method="add">
+                <object class="gov.bnl.star.offline.scheduler.Site">
+                    <void property="siteName"><string>nersc.gov</string></void>
+                    
+                    <void method="AddFileTransferGatekeeper">
+                        <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                            <void property="name"><string>if.usp.br</string></void>
+                            <void property="Utilization"><int>100</int></void>
+                        </object>
+                    </void> 
+                    
+                    <!--This block defines SGE batch system at PDSF-->
+                    <void method="AddBatchSystem">
+                        <object class="gov.bnl.star.offline.scheduler.BatchSystem">
+                                
+                              <void property="name"><string>sge</string></void> 
+                              
+                              <void property="localDispatcher">
+                                <object class="gov.bnl.star.offline.scheduler.Dispatchers.sge.SGEDispatcher">
+                                    <void property="submitCommand">         <string>qsub</string>                                </void>
+                                    <void property="qsubOptions">    <string/>                                            </void>
+                                    <void property="maxAttempts">    <int>5</int>                                         </void>
+                                    <void property="msBtwnFailure">  <int>5000</int>                                      </void>
+                                    <void property="msBtwnSuccess">  <int>0</int>                                         </void>
+                                    <void property="maxElapseTime">  <int>30000</int>                                     </void>
+                                    <void property="application">    <object idref="CSHApplication"/>                     </void>
+                                </object>
+                              </void>
+                              
+                             
+                              <void property="gridDispatcher">
+                                 <!--<object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGDispatcher">-->
+                                 <object class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                                    <void property="useRSL"><boolean>false</boolean></void>
+                                    <void property="submitCommand"><string>condor_submit</string></void>
+                                    <void property="bsubOptions"><string/></void>
+                                    <void property="maxAttempts"><int>5</int></void>
+                                    <void property="msBtwnFailure"><int>5000</int></void>
+                                    <void property="msBtwnSuccess"><int>1000</int></void>
+                                    <void property="queueName"><string>medium</string></void>
+                                    <void property="transferExecutable"><boolean>true</boolean></void>
+                                    <void property="application"><object idref="CSHApplication"/></void>
+                                </object>                              
+                              </void> 
+                              
+                              <void method="addGatekeeper">
+                                <object class="gov.bnl.star.offline.scheduler.GateKeeperAccessPoint">
+                                    <void property="name"><string>stars.if.usp.br</string></void>
+                                    <void property="Utilization"><int>100</int></void>
+                                </object>
+                             </void>
+                             
+                             <void method="addQueue">
+                                <object id="sqQueue" class="gov.bnl.star.offline.scheduler.Queue">
+                                    <void method="setID">                   <string>shortQueue</string>       </void> 
+                                    <void method="setName">                 <string>short</string>            </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                                    <void method="setCluster">              <string>if.usp.br</string>        </void>
+                                    <void method="setTimeLimit">            <int>55</int>                     </void>
+                                    <void method="setMaxMemory">            <int>500</int>                    </void>
+                                    <void method="setSearchOrderPriority">  <int>1</int>                      </void> <!-- Try this queue first --> 
+                                    <void method="setType">                 <string>SGE</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                                    <void method="setSite">                 <string>STAR</string>             </void>
+                                    <void method="setImplementation">       <string>local</string>            </void>
+                               </object>
+                             </void>
+                              
+                              
+                              
+
+                        </object>   
+                    </void>
+                    <!--End of sp sge batch system-->
+                    
+                    
+                    <void property="logConf">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>The log file dir gets set here</string>
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>CONFIG</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    
+                    <void property="programLocations">
+                        <object class="java.util.Hashtable">
+                            <void method="put">
+                                <string>$SCRATCH</string>
+                                <string>/local/d1/scratch_tmp/$USER/$JOBID</string>
+                            </void>
+                            <void method="put">
+                              <string>ls</string>
+                              <string>/bin/ls</string>
+                            </void>
+                            <void method="put">
+                              <string>csh</string>
+                              <string>/bin/csh</string>
+                            </void>
+                        </object>
+                    </void>
+                    
+                    
+                    <void property="defaultPolicy"> 
+                        <object id="sp" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+                            <void method="addQueue"><object idref="sqQueue"/></void>
+                        </object> 
+                    </void>
+                    
+                </object>
+            </void>
+            <!-- ****** End of sp site block ***** -->            
+            
+            
+        </object>
+    </void>
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->    
+    
+    
+    <!--****** These blocks are used for unit tests ********-->
+    <void method="put">
+    <string>LSFDispatcher</string>
+        <object idref="RCASDispatcher"/>
+    </void>
+    
+    <void method="put">
+    <string>gridDispatcher</string>
+        <object idref="Step1Dispatcher"/>
+    </void>
+    
+    <void method="put">
+    <string>star_test_queue</string>
+        <object idref="NFSlongQueueObj"/>
+    </void>
+    
+    <void method="put">
+    <string>queues</string>
+        <object class="java.util.ArrayList"/> 
+    </void>
+    <!-- **************************************** -->
+    
+    <!--
+    <void method="put">
+    <string>registerScript</string>
+        <string> </string> 
+    </void>
+    -->
+   
+
+    <!-- The BNLDispatcher combines the RCAS and RCRS dispatchers, and chooses between them depending on the clusterName set on the job. -->
+    <!--
+    <void method="put">
+      <string>BNLDispatcher</string>
+      <object id="BNLDispatcher" class="gov.bnl.star.offline.scheduler.CompositeDispatcher">
+        <void property="chooser">
+          <object class="gov.bnl.star.offline.scheduler.bnl.ClusterDispatcherChooser"/>
+        </void>
+        <void property="dispatchers">
+          <object class="java.util.Hashtable">
+            <void method="put"> <string>rcas.rcf.bnl.gov</string>       <object idref="RCASDispatcher"/>       </void>
+            <void method="put"> <string>rcrs.rcf.bnl.gov</string>       <object idref="condorRCRSDispatcher"/> </void>
+            <void method="put"> <string>RCASDispatcher</string>         <object idref="RCASDispatcher"/>       </void>
+            <void method="put"> <string>condorRCRSDispatcher</string>   <object idref="condorRCRSDispatcher"/> </void>
+          </object>
+        </void>
+      </object>
+    </void>
+    -->
+    <!--
+    <void method="put">
+        <string>condorRCRSDispatcher</string>
+        <object id="condorRCRSDispatcher"/>
+    </void>
+    -->
+  
+    <!-- This block defines all the queues the scheduler policies may use -->
+<!--    
+    <void method="put">
+       <string>queues</string>
+       <object class="java.util.ArrayList">
+         -->  
+            <!-- def of condor_rcrs-->
+            
+           
+            <!--
+            <void method="add">
+                <object idref="condor_rcrs_queue"/> 
+            </void> -->
+            <!-- end of HBT_group_Queue--> 
+            <!-- new def-->  
+           
+            
+            <!--This queue submits to the local system the scheduler is running on-->
+            <!--
+            <void method="add">
+                <object id="local_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                  <string>local_queue</string>         </void>  
+                    <void method="setName">                <string>local_queue</string>    </void> 
+                    <void method="setCluster">             <string>crs.rcf.bnl.gov</string>   </void>
+                    <void method="setSearchOrderPriority"> <int>1</int>                       </void> 
+                    <void method="setType">                <string>local</string>               </void> 
+                    <void method="setSite">                <string>STAR</string>              </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+            </void>  
+               -->
+               <!--
+       </object>
+    </void>
+    -->
+<!-- End of the queue definitions -->  
+
+    <!--
+    <void method="put">
+        <string>notting</string>
+        <object idref="notting"/>
+    </void>
+    -->
+
+
+
+
+    
+    
+    
+<!--*************************************************************** current policys ************************************************************ -->    
+    
+<void method="put">
+  <string>sp_sge</string>
+  <object idref="sp"/>
+</void>
+
+<!--defalt policy for pdsf-->
+<void method="put">
+  <string>pdsf_sge</string>
+  <object idref="pdsf_sge"/>
+</void>
+
+
+
+<!--
+The bnl_lsf_cas is a PassivePolicy configured to prepare jobs to be submitted
+on the RCAS cluster at BNL. The queues selected are the ones meant for general
+analysis jobs. The time limit for the two short queues is 90 mintues. The cluster
+name is set to rcas.rcf.bnl.gov, which will be used by the dispatcher to 
+determine how to submit the jobs.-->
+<void method="put">
+  <string>bnl_lsf_cas</string>
+  <object idref="bnl_lsf_cas"/>
+</void>
+
+
+
+    
+    
+<!-- The ResonanceGroupPolicy is designed for the HBT group to use thery special
+queue at RCF for long jobs. It's essentially the same as the bnl_lsf_cas, except
+that the long queue is different. -->
+    <void method="put">
+      <string>ResonanceGroupPolicy</string>
+      <object class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+      <!-- This part names the names from the ID's queues of the queues to be uses -->
+        <void method="addQueue"><object idref="NFSlocalQueueObj"/></void>
+        <void method="addQueue"><object idref="NFSQueueObj"/></void>
+        <void method="addQueue"><object idref="HBT_group_Queue"/></void>
+        <void property="clusterName">
+          <string>rcas.rcf.bnl.gov</string>
+        </void>
+      </object>
+    </void>
+    
+
+    
+
+    
+    <void method="put"> <!-- new to version 1.8.6-->
+      <string>bnl_condor_cas</string>
+      <object class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="bnl_condor_cas"/></void>
+      </object>
+    </void>
+    
+    
+    
+    <void method="put">
+      <string>bnl_condor_crs</string>
+      <object id="condorRCRSPolicy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="bnl_condor_crs"/></void>
+      </object>
+    </void>
+    
+    
+    
+    
+    <!-- policy for submitting on the local system the scheduler is running on -->
+    <!--
+    <void method="put">
+      <string>localPolicy</string>
+      <object id="localPolicy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="local_queue"/></void>
+      </object>
+    </void>
+    -->
+    
+
+    
+    
+<!--********************************************************* older policys ******************************************************** -->    
+
+
+<!-- The BNLPolicy combines a ClusterAssignmentByPercentagePolicy with the above
+defined bnl_lsf_cas. Basically, takes all the jobs from the bnl_lsf_cas, and reassigns
+some of them to the RCRS cluster. It's going to redirect only jobs from the
+short queue. The queue information is not going to be changed. This is not a
+problem since jobs on the rcrs will be dispatched using condor, which doesn't
+make use of queue information. -->
+    <void method="put">
+      <string>BNLPolicy</string>
+      <object id="BNLPolicy" class="gov.bnl.star.offline.scheduler.policy.ClusterAssignmentByPercentagePolicy">
+        <void property="policy">
+          <object idref="bnl_lsf_cas" />
+        </void>
+        <void property="redirectedPercentage">
+          <double>0.5</double>
+        </void>
+        <void property="primaryCluster">
+          <string>rcas.rcf.bnl.gov</string>
+        </void>
+        <void property="secondaryCluster">
+          <string>rcrs.rcf.bnl.gov</string>
+        </void>
+        <void property="queueToRedirect">
+          <string>star_cas_short</string>
+        </void>
+      </object>
+    </void>
+
+
+      
+    
+    <!-- Combines a ClusterAssignmentByMonitorPolicy with the bnl_lsf_cas. The Monitoring
+    is done by the MonalisaClusterInfoFinder, which is written to translate from the
+    name of the cluster to the monalisa name. -->
+        <void method="put">
+          <string>MonalisaBNLPolicy</string>
+          <object id="MonalisaBNLPolicy" class="gov.bnl.star.offline.scheduler.policy.ClusterAssignmentByMonitorPolicy">
+            <void property="policy">
+              <object idref="bnl_lsf_cas" />
+            </void>
+            <void property="clusterMonitoring">
+              <object class="gov.bnl.star.offline.scheduler.monitor.MonaLisaClusterInfoFinder"/>
+            </void>
+            <void property="primaryCluster">
+              <string>rcas.rcf.bnl.gov</string>
+            </void>
+            <void property="secondaryCluster">
+              <string>rcrs.rcf.bnl.gov</string>
+            </void>
+            <void property="queueToRedirect">
+              <string>star_cas_short</string>
+            </void>
+          </object>
+        </void>
+
+
+
+ <!--********** The following Policies are for experimental use only. *********-->   
+ <!--This is a new Policy basesd on Monalisa queue Monitorring  LBH -->
+     <void method="put">
+      <string>MLQueuePolicy</string>
+      <object id="MLQueuePolicy" class="gov.bnl.star.offline.scheduler.policy.AssignmentByQueueMonitorPolicy">
+            <void method="addQueue"><object idref="NFSQueueObj"/></void>
+            <void method="addQueue"><object idref="lsf_crs_queue"/></void>
+            <void property="maxLoadBeforeSwichOverToRunTime"><double>0.4</double></void>
+            <!--<void property="rootdAvailable"><boolean>true</boolean></void>
+            <void property="xrootdAvailable"><boolean>true</boolean></void>
+            <void property="xrootdRedirectorName"><string>xrdstar.rcf.bnl.gov</string></void>
+            <void property="xrootdPort"><int>1095</int></void>-->            
+       </object>
+    </void> 
+
+
+   <!--The other Policy used for testing -->   
+   <void method="put">
+      <string>LSF_RCRSandRCAS</string>
+      <object id="RCASPolicy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="NFSQueueObj"/></void>
+            <void method="addQueue"><object idref="lsf_crs_queue"/></void>
+            <!--<void property="rootdAvailable"><boolean>true</boolean></void>
+            <void property="xrootdAvailable"><boolean>true</boolean></void>
+            <void property="xrootdRedirectorName"><string>xrdstar.rcf.bnl.gov</string></void>
+            <void property="xrootdPort"><int>1095</int></void>-->
+      </object>
+    </void> 
+
+    
+    <!-- policy for jobs that use little memeory-->
+    <void method="put">
+      <string>lowMem</string>
+      <object id="lowMemPolicy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="lowMemQueue"/></void>
+      </object>
+    </void>
+
+
+
+  </object>
+</java>
+
+
+

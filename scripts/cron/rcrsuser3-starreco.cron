@@ -1,0 +1,29 @@
+#4,14,24,34,44,54 * * * * /etc/rc.d/init.d/node_guard.py 80.0
+* * * * * /home/starreco/newcrs/bin/logbook_server.py /home/starreco/newcrs/bin/crs.conf
+* * * * * /home/starreco/newcrs/bin/loader003.py 75
+00,10,20,30,40,50 * * * *  /home/starreco/newcrs/bin/logman_check.py
+
+# Create logs if does not exists
+01 * * * * /usr/bin/test -e /star/u/starreco/CRS.log       || /bin/date >/star/u/starreco/CRS.log
+01 * * * * /usr/bin/test -e /star/u/starreco/CRSrmError.log || /bin/date >/star/u/starreco/CRSrmError.log
+01 * * * * /usr/bin/test -e /star/u/starreco/CRSsubm.log   || /bin/date >/star/u/starreco/CRSsubm.log
+01 * * * * /usr/bin/test -e /star/u/starreco/CRSrmDone.log || /bin/date >/star/u/starreco/CRSrmDone.log
+
+
+# Perform operations
+05  * * * * /star/u/starreco/bin/CRSfarm.csh    >>/star/u/starreco/CRS.log
+05  * * * * /star/u/starreco/bin/CRSsubm.csh    >>/star/u/starreco/CRSsubm.log
+08  * * * * /star/u/starreco/bin/CRSrmDone.csh   >>/star/u/starreco/CRSrmDone.log
+12  * * * * /star/u/starreco/bin/CRSrmError.csh   >>/star/u/starreco/CRSrmError.log
+
+# FastOffline operations - In 2006, I reverted bypass and Z as bypass should really
+# be done first (it can be Z, C or regular - only C needs to happen first)
+00   00 1 * *    cd /star/u/starreco/dev/requests/daq/jobfiles ; unset noclobber ; /bin/mv -f submit.log submit.log.old ; echo "" >submit.log
+04,24,44 * * * * cd /star/u/starreco/dev/requests/daq/jobfiles ; ./JobSubmit.pl dev -1 C/star/data09/reco       >>submit.log 
+06,26,46 * * * * cd /star/u/starreco/dev/requests/daq/jobfiles ; ./JobSubmit.pl dev -1 +/star/data09/reco       >>submit.log
+# 08,28,48 * * * * cd /star/u/starreco/dev/requests/daq/jobfiles ; ./JobSubmit.pl dev -1 Z/star/data+09-10/reco   >>submit.log
+08,28,48 * * * * cd /star/u/starreco/dev/requests/daq/jobfiles ; ./JobSubmit.pl dev -1  /star/data09/reco   >>submit.log
+55,25    * * * * cd /star/u/starreco/dev/requests/daq/jobfiles ; ./JobSubmit.pl  dev -1 1                       >>submit.log
+
+
+

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Scheduler configuration file. -->
+<java version="1.4.2" class="java.beans.XMLDecoder">
+  <object class="java.util.Hashtable">
+  
+<!-- Program location. Tells scheduler where to find commands. -->
+    <void method="put">
+      <string>programLocations</string>
+
+      <object class="java.util.Hashtable">
+
+        <void method="put">
+          <string>ls</string>
+          <string>/bin/ls</string>
+        </void>
+
+        <void method="put">
+          <string>csh</string>
+          <string>/bin/csh</string>
+        </void>
+
+      </object>
+    </void>
+    
+<!-- CSHApplication configuration. The CSHApplication components is the one 
+responsible for creating the scripts and the file lists. -->
+    <void method="put">
+      <string>CSHApplication</string>
+      <object id="CSHApplication"  class="gov.bnl.star.offline.scheduler.Dispatchers.CSHApplication">
+        <void property="recurseCopy">
+          <boolean>true</boolean>
+        </void>
+        <void property="copyScript">
+          <string>copyURIs.pl</string>
+        </void>
+        <void property="registerScript">
+          <string>register_file.pl</string>
+        </void>
+        <void property="storageScript">
+          <string>storageService.pl</string>
+        </void>
+        <void property="EnvVariableLimit">
+          <int>-1</int>
+        </void>
+        <void property="gatekeepr">
+            <string>stragrid04.star.bnl.gov</string>
+        </void>
+        <void property="makeExecutableCommand">
+            <string>/bin/chmod +x </string>
+        </void>
+      </object>
+    </void>
+    
+<!-- Log configuration. The scheduler can log information at different level
+of detail (FINEST, FINER, FINE, INFO, CONFING, WARN, FATAL) and it can change
+in which directory the log is saved. A log file for each user will be created.
+Log files can be deleted at any time without any problem. -->
+    <void method="put">
+      <string>log</string>
+      <object class="java.util.Hashtable">
+        <void method="put">
+          <string>directory</string>
+          <string>rdlservice/logs</string>
+        </void>
+        <void method="put">
+          <string>level</string>
+          <string>CONFIG</string>
+        </void>
+      </object>
+    </void>
+    
+<!-- DefaultFileCatalog configuration. The default file catalog used to resolve
+the catalog queries. You can change the class of the FileCatalog implementation. -->
+    <void method="put">
+      <string>defaultFileCatalog</string>
+      <object class="gov.bnl.star.offline.scheduler.catalog.StarCatalog"/>
+    </void>
+    
+<!-- defaultJobInitializer configuration. Here you can change the class of the
+initializer. -->
+    <void method="put">
+      <string>defaultJobInitializer</string>
+      <object class="gov.bnl.star.offline.scheduler.initializer.XMLInitializer">
+        <void property="defaultFileListSyntax">
+          <string>paths</string>
+        </void>
+      </object>
+    </void>
+
+    <!-- The RCASDispatcher is an LSFDispatcher configured to dispatch jobs to the
+RCAS cluster. -->
+    <void method="put">
+      <string>RCASDispatcher</string>
+      <object id="RCASDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.lsf.LSFDispatcher">
+        <void method="setResourceRequirementStringDefinition">
+            <string>LSF_ResourceRequirementStringDefinition</string>
+        </void>
+        <void property="bsubEx">
+          <string>bsub</string>
+        </void>
+        <void property="bsubOptions">           <string/>         </void>
+        <void property="maxAttempts">
+          <int>5</int>
+        </void>
+        <void property="msBtwnFailure">
+          <int>5000</int>
+        </void>
+        <void property="msBtwnSuccess">
+          <int>0</int>
+        </void>
+        <void property="maxElapseTime">
+          <int>5000</int>
+        </void>
+        <void property="queueName">
+          <string>star_cas_short</string>
+        </void>
+        <void property="scratchDir">
+          <string>/tmp/$USER/$JOBID</string>
+        </void>
+        <void property="clusterName">
+          <string>rcas.rcf.bnl.gov</string>
+        </void>
+        <void property="application">
+            <object idref="CSHApplication"/>
+        </void>
+      </object>
+    </void>
+
+<!-- The RCRSDispatcher is a CondorDispatcher configured to dispatch jobs on
+the rcrs cluster. -->
+    <void method="put">
+      <string>RCRSDispatcher</string>
+      <object id="RCRSDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
+        <void property="condorEx">
+          <string>condor_submit</string>
+        </void>
+        <void property="condorOptions">
+          <string>+Experiment     = &quot;star&quot;
++Job_Type       = &quot;cas&quot;</string><!--Note: The tab spacing of string looks funny, however this should not be changed ! -->
+        </void>
+        <void property="maxAttempts">
+          <int>5</int>
+        </void>
+        <void property="msBtwnFailure">
+          <int>5000</int>
+        </void>
+        <void property="msBtwnSuccess">
+          <int>1000</int>
+        </void>
+        <void property="scratchDir">
+          <string>/tmp/$USER/$JOBID</string>
+        </void>
+        <void property="application">
+            <object idref="CSHApplication"/>
+        </void>
+      </object>
+    </void>
+                                                                                
+<!--Testing the SGE dispatcher for PDSF-->
+    <void method="put">
+        <string>SGETestDispatcher</string>
+        <object id="SGETestDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.sge.SGEDispatcher">
+        <void property="qsubEx">
+          <string>bc; # qsub</string>
+        </void>
+        <void property="bsubOptions">
+          <string/>
+        </void>
+        <void property="maxAttempts">
+          <int>5</int>
+        </void>
+        <void property="msBtwnFailure">
+          <int>5000</int>
+        </void>
+        <void property="msBtwnSuccess">
+          <int>0</int>
+        </void>
+        <void property="maxElapseTime">
+          <int>30000</int>
+        </void>
+        <void property="application">
+            <object idref="CSHApplication"/>
+        </void>
+      </object>
+    </void>
+
+   <!--Dispatcher for dispatching to local host where scheduler is running -->
+    <void method="put">
+        <string>LocalTestDispatcher</string>         
+        <object id="LocalTestDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.local.LocalDispatcher">
+            <void property="maxAttempts">
+              <int>5</int>
+            </void>
+            <void property="msBtwnFailure">
+              <int>5000</int>
+            </void>
+            <void property="msBtwnSuccess">
+              <int>0</int>
+            </void>
+            <void property="maxElapseTime">
+              <int>30000</int>
+            </void>
+            <void property="application">
+                <object idref="CSHApplication"/>
+            </void>
+        </object>
+    </void>
+                                                                                
+<!-- The default dispatcher is the LocalTestDispatcher. -->
+    <void method="put">
+      <string>defaultDispatcher</string>
+      <object idref="LocalTestDispatcher" />
+    </void>
+
+<!-- This block defines all the queues the scheduler policies may use -->
+    <void method="put">
+       <string>queues</string>
+       <object class="java.util.ArrayList">
+            <!-- def of localQueue, a queue of star_cas_dd-->
+            <void method="add">
+                <object id="NSFlocalQueueObj" class="gov.bnl.star.offline.scheduler.Queue">                     <void method="setID">                  <string>localQueue</string>        </void>                     <void method="setName">                <string>star_cas_dd</string>       </void> <!--The true queue name useded by the bsud -q to submit this job-->                     <void method="setAssociatedDispatcher"><object idref="RCASDispatcher"/>    </void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->                     <void method="setCluster">             <string>rcas.rcf.bnl.gov</string>  </void>                     <void method="setTimeLimit">           <int>90</int>               </void>                     <void method="setMaxMemory">           <int>440</int>               </void>                     <void method="setSearchOrderPriority"> <int>1</int>               </void> <!-- Big numbers get tryed last -->                     <void method="setType">                <string>LSF</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->                     <void method="setSite">                <string>STAR</string>              </void>                     <void method="setImplementation">      <string>local</string>             </void>                     <void method="setOptimizeAsLocalQueue"/> <!--This makes this a local queue-->                                                                                 
+                  </object>
+            </void>
+            <!-- def of localQueue -->
+            <!-- def of nfsQueue, a queue of star_cas_short-->
+            <void method="add">
+                <object id="NFSQueueObj" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>nfsQueue</string>         </void>
+                    <void method="setName">                 <string>star_cas_short</string>   </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                    <void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>   </void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">             <string>rcas.rcf.bnl.gov</string>  </void>
+                    <void method="setTimeLimit">            <int>90</int>               </void>
+                    <void method="setMaxMemory">            <int>440</int>               </void>
+                    <void method="setSearchOrderPriority">  <int>1</int>               </void> <!-- Try this queue first -->
+                    <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                    <void method="setSite">                <string>STAR</string>              </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+            </void>
+            <!-- end of def of nfsQueue -->
+            <!-- def of longQueue, a queue of star_cas_big -->
+            <void method="add">
+                <object id="NSFlongQueueObj" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>longQueue</string>        </void>
+                    <void method="setName">                 <string>star_cas_big</string>     </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                    <void method="setTimeLimit">            <int>14400</int>               </void> <!--There is a ten day time limmit on this queue-->
+                    <void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>   </void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">             <string>rcas.rcf.bnl.gov</string>  </void>
+                    <void method="setSearchOrderPriority">  <int>100</int>               </void> <!-- Big numbers get tryed last -->
+                    <void method="setType">                <string>LSF</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                    <void method="setSite">                <string>STAR</string>              </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+            </void>
+            <!-- end of def of longQueue -->
+            <!-- def of condor_rcrs-->
+            <void method="add">
+                <object id="condor_rcrs_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>condor_rcrs_queue</string></void>
+                    <void method="setName">                 <string>STAR</string>             </void> <!--Codor does not need the name to submit, however the ClusterAssingnmentByMonitorPolicy still needs this name -->
+                    <void method="setAssociatedDispatcher"> <object idref="RCRSDispatcher"/>   </void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">              <string>rcrs.rcf.bnl.gov</string> </void>
+                    <void method="setSearchOrderPriority">  <int>1</int>               </void> <!-- Big numbers get tryed last -->
+                    <void method="setType">                 <string>CONDOR</string>           </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                    <void method="setSite">                 <string>STAR</string>             </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+            </void>
+            <!-- end of HBT_group_Queue-->
+            <!-- new def-->
+            <void method="add">
+                <object id="HBT_group_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>HBT_group_Queue</string>  </void>
+                    <void method="setName">                 <string>star_cas_cd</string>      </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                    <void method="setAssociatedDispatcher"> <object idref="RCASDispatcher"/>   </void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">              <string>rcas.rcf.bnl.gov</string> </void>
+                    <void method="setTimeLimit">            <int>1200</int>               </void>
+                    <void method="setSearchOrderPriority">  <int>100</int>               </void> <!-- Big numbers get tryed last -->
+                    <void method="setType">                 <string>LSF</string>              </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                    <void method="setSite">                 <string>STAR</string>             </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+             </void>
+            <!-- end of HBT_group_Queue-->
+            <!-- new def-->
+            <void method="add">
+                <object id="PDSF_SGE_Queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                   <string>PDSF_SGE_Queue</string>    </void>
+                    <void method="setName">                 <string>SGE_meta_queue</string>    </void> <!--The true queue name useded by the bsud -q to submit this job-->
+                    <void method="setAssociatedDispatcher"> <object idref="SGETestDispatcher"/></void> <!--This tells the BNLDispatcher (a base of CompositeDispatcher) what dispatcher to submit the jobs to. If another Dispatcher is set as the default, the value will be ignored. -->
+                    <void method="setCluster">              <string>PDSF</string> </void>
+                    <void method="setSearchOrderPriority">  <int>1</int>                </void> <!-- Big numbers get tryed last -->
+                    <void method="setType">                 <string>SGE</string>               </void> <!--This is used be the ClusterAssingnmentByMonitorPolicy, if this queue was not used by this policy it could be omitted-->
+                    <void method="setSite">                 <string>STAR</string>              </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+             </void>
+            <!-- end of HBT_group_Queue-->
+            <!--This queue submits to the local system the scheduler is running on-->
+            <void method="add">
+                <object id="local_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                  <string>local_queue</string>         </void>
+                    <void method="setName">                <string>local_queue</string>    </void>
+                    <void method="setAssociatedDispatcher"><object idref="LocalTestDispatcher"/>   </void>
+                   <!-- <void method="setCluster">             <string>crs.rcf.bnl.gov</string>   </void>-->
+                    <void method="setSearchOrderPriority"> <int>1</int>               </void>
+                    <void method="setType">                <string>local</string>               </void>
+                    <void method="setSite">                <string>STAR</string>              </void>
+                    <void method="setImplementation">      <string>local</string>             </void>
+                </object>
+            </void>
+                                                                                
+       </object>
+    </void>
+<!-- End of the queue definitions -->
+
+<!-- Test Default Policy (rootd must be available) -->
+    <void method="put">
+      <string>TestPolicy</string>
+      <object id="TestPolicy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+                                                                                
+       <void method="addQueue"><object idref="NSFlocalQueueObj"/></void>
+        <void method="addQueue"><object idref="NFSQueueObj"/></void>
+        <void method="addQueue"><object idref="NSFlongQueueObj"/></void>
+        <!--<void property="rootdAvailable"> <boolean>true</boolean> </void> -->
+      </object>
+    </void>
+
+<!-- The defaultPolicy is the TestPolicy. -->
+    <void method="put">
+      <string>defaultPolicy</string>
+      <object idref="TestPolicy" />
+    </void>
+
+  </object>
+</java>

@@ -1,0 +1,17 @@
+This directory contains scripts used on the CRS nodes (i.e. production). 
+It has no use for users but are general and not library specific (so
+does not fit in $STAR_MGR).
+
+   submit.pl    latest version used in production. Uses the
+                $STAR_SCRIPTS CRSQueues module.
+
+
+
+FastOffline scripts belongs here as well since they can only
+run on CRS farm gateway (rcrsuserXX).
+
+   JobSubmit.pl
+   JobAdd.pl
+
+  
+

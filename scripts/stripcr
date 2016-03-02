@@ -1,0 +1,50 @@
+#!/usr/local/bin/perl
+
+
+# This script strips explicit CR characters at the end of
+# a plain ASCII file and also removes trailing spaces.
+# Written J.Lauret 1996.
+
+
+ if( ! defined($ARGV[0]) ){
+     die "Syntax : stripcr Infile [OutFile]\n";
+ }
+ if($ARGV[1] eq ""){
+     $ARGV[1] = $ARGV[0];
+ }
+
+ open(FI,"$ARGV[0]") || die "Could not open [$ARGV[0]]\n";
+ open(FO,">$ARGV[1]-tmp")|| die "Could not open [$ARGV[1]-tmp]\n";
+
+ while (<FI>){
+     chomp($line = $_);
+     $fline = "";
+     for ($ii=0 ; $ii < length($line) ; $ii++){
+	 $c  = substr($line,$ii,1);
+	 # ^M character can appear in the middle of a file
+	 # too. There are two kind i.e. CR LF and CR alone.
+	 if( ord($c) ==  0){
+	     # skip, this is a NULL character from evil Windowzzz
+	 } elsif( ord($c) != 13 ){
+	     $fline .= $c;
+	 } else {
+	     # Whenever CR alone appears (witout the LF) the 
+	     # first character is hidden and IS a CR as well.
+	     $fline .= "\n" if ($ii != 0);
+	 }
+	 #print ord($c). " ";
+     }
+     # chomp last \n as we may do it twice otherwise.
+     chomp($fline);
+
+     # trim trailing in any case (since the freaking line can
+     # be multiple lines, do it global)
+     $fline =~ s/^(.*?)\s*$/$1/g;
+     print FO "$fline\n";
+ }
+ close(FI);
+ close(FO);
+ @prop = stat($ARGV[0]);
+ rename("$ARGV[1]-tmp","$ARGV[1]");
+ chmod($prop[2],$ARGV[1]);
+

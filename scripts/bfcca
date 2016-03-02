@@ -1,0 +1,1148 @@
+#!/usr/local/bin/perl
+
+#
+# This script will be developped as a unique flexible
+# back-end to the CRS software. Options passed to this
+# script will specify ALL of what we need to run a chain,
+# many chains, any destinations, with any library version.
+#
+# This one script may therefore handle multiple production.
+#
+# Written J.Lauret July 2001-2011.
+# Please, follow comments for more information ...
+#
+#  Some info :
+#  The job descriptor should be as follow
+#    executable=ThisProgram
+#    executableargs=STDOpt,LibraryVersion,Destination,NumEvt,options...
+#
+#  where
+#   ALLOpt         Bit-wise option setup.
+#                  Bit 1-2  0 regular (immediate/un-buffered)
+#                           1 delayed STD-IO
+#                  Bit 3    0 non-optimized
+#                           1 optimized
+#                  Bit 4-5    enables/disables compressed STDOUT
+#                             enables/disables compressed STDERR
+#
+#   LibraryVersion can be one of new, dev, old, pro or a version
+#                  understood by 'starver'
+#   Destination    is a disk-path used for file copy.
+#                  The syntax may now be either something like
+#                  /star/data32            or
+#                  /star/data+32-45        which specifies a range or even
+#                  /star/data+32-45/reco   also valid
+#
+#   Numevt         the number of events to process. -1 or 0 means
+#                  a large number. Syntax like XX-YY means between
+#                  XXand YY and passes 2 consecutive arguments
+#                  as-is.
+#
+#   Options        as many comma separated options. They will all
+#                  go as bfc chain options.
+#
+# OR
+#
+#    "/"           this interface changes mode. The next argument
+#                  after "/" will be a script to run instead of bfc.C,
+#                  all subsequent arguments will be passed to that
+#                  script as is. Note : string arguments will passed
+#                  stringified. You MUST NOT add quotes around strings.
+#
+#    "+"           The next argument is a periodicity then a script name.
+#                  What it will do is call the script with all of the other
+#                  argument but the last which will be replaced by the input
+#                  given as per the job description. In other words, it
+#                  will loop on all inputs and call the script separatly
+#                  for each call. The periodicity is used to take one input
+#                  every 'period'.
+#
+#    "@"           Same as "/" with one extra argument, a generic output filename
+#                  which will be used as the last argument of the script.
+#
+# There are 2 cases where the Destination field is used
+#
+# 1 - In outputstreamtype=HPSS, the file is therefore copied
+#     on disk before the CRS software takes care of staging the
+#     output onto HPSS.
+# 2 - The outputstreamtype=UNIX has been chose __AND__ the
+#     stdoutdir was specified as ./ . This will automatically
+#     trigger a copy of the local output to the destination.
+#
+#
+#
+#
+#use lib "/afs/rhic.bnl.gov/star/packages/scripts";
+use File::Basename;
+use File::Copy;
+use Sys::Hostname;
+use Digest::MD5;
+
+#use FileCatalog;
+
+# First of all, turn IO autoflush
+$|       = 1;
+
+# $DEBUG   = 1;
+
+# Some default hardwired values
+$AFS_RHIC= "/afs/rhic.bnl.gov";    # path to AFS head
+$NFSHOME = "/star/u/starreco";     # path to NFS home ** HARDWIRED **
+$HPSSBASE= "/home/starreco";       # base HPSS path   ** HARDWIRED **
+$NTRIES  = 100;                    # number of tries -1 means infinit tries
+$SLPTIME = 120;                    # sleep time in sec between mkpath attempts
+$PRGM    = "bfcca";                # this program logical name
+$BFC     = "bfc.C";                # arguments will be passed as numevt, chain, input
+$PERIOD  = 0;                      # See "+" mode
+$GENERICO= "";                     # Default generic output filename
+$SOFFTOL = 0.02;                   # Size offset tolerance (2%)
+$MAXFILL = 95;                     # Maximum disk occupency in %tage for free space algo
+@SETUP   = undef;                  # some setup to run before root4star
+
+# DF command allowing for multiple FS type
+$0  =~ m/(.*\/)(.*)/;
+if ( -e $1."dfpanfs"){
+    $DF = $1."dfpanfs";
+} elsif ( -e $ENV{STAR_SCRIPTS}."/dfpanfs"){
+    $DF  = $ENV{STAR_SCRIPTS}."/dfpanfs";
+} else {
+    $DF  = "/bin/df -k";
+}
+
+
+# This is for debugging purposes
+if ($DEBUG){
+    print "ENV variables debugging is ON -->\n";
+    foreach $el (keys %ENV){
+	print "Env [$el] -> Value = [$ENV{$el}]\n";
+    }
+    print "<-- End of ENV variables. We are now in business ...\n";
+    print "Script ARGV debugging is ON -->\n";
+    for ($ii=0 ; $ii <= $#ARGV ; $ii++){
+	print "Argument $ii = $ARGV[$ii]\n";
+    }
+    print "<-- End of ARGV debugging\n";
+}
+
+
+# Is this CONDOR CRS ??
+if ( defined($ENV{"_CONDOR_SCRATCH_DIR"}) ){
+    # Defined by Condor. May be volatile.
+    $CONDOR_CRS = 1;
+} elsif ( defined($ENV{"CRS_JOB_NAME"}) ) {
+    # Tomasz says this one will always be defined
+    $CONDOR_CRS = 1;
+} else {
+    $CONDOR_CRS = 0;
+}
+
+
+
+
+# The first element of the argument list
+# is rather of unknown usage. It is always
+# 0 with the old API. Afterward, this script
+# accept (in order it receives). In the new
+# Condor-based API, there is no need for this
+# shifting.
+shift @ARGV if (! $CONDOR_CRS );
+$ALLOPT       = shift @ARGV;
+$LIBRARY      = shift @ARGV;
+$DESTINATION  = shift @ARGV;
+$NUMEVT       = shift @ARGV;
+
+
+
+# ---- Chain Option or mode switch ---------------------------------
+$CHAINOPT     = shift @ARGV;
+if( $CHAINOPT eq "~" ){
+    # other arguments will be options to pass to the the setup command
+    # all dash will be replaced by spaces.
+    do {
+	$SETUP = shift @ARGV;
+	if ( $SETUP ne "~"){
+	    $SETUP =~ s/-/ /g;
+	    push(@SETUP,$SETUP);
+	}
+    } while ( $SETUP ne "~");
+
+} elsif( $CHAINOPT eq "/" ){
+    # Change mode, now arguments will be SCRIPT, ARG1,...
+    $BFC      = shift @ARGV;
+    $MULTIIN  = 1;
+
+} elsif ( $CHAINOPT eq "@"){
+    # In this mode, there cannot be Multi mode ... since we
+    # have only one filename. We may re-adress this later.
+    $BFC      = shift @ARGV;
+    $GENERICO = shift @ARGV;
+    $CHAINOPT = " ".join(" ",@ARGV);
+    $MULTIIN  = 0;
+
+} elsif( $CHAINOPT eq "+" ){
+    # One more mode, almost the same than before
+    $PERIOD   = shift @ARGV;
+    $BFC      = shift @ARGV;
+    $MULTIIN  = 1;
+} else {
+    $CHAINOPT .= " ".join(" ",@ARGV);
+    $MULTIIN  = 0;
+}
+
+
+
+# --- Option bitmask ----------------------------------------------
+$STDOPT = ($ALLOPT &  3) >> 0; # i.e.    011, on 2 bits for future extensions
+$OPTOPT = ($ALLOPT &  4) >> 2; # i.e.    100
+$COMPRS = ($ALLOPT & 24) >> 3; # i.e.  11000
+
+
+
+# --- ENV variables we may use       ------------------------------
+#
+# Take this as well for later use.
+#$MYSELF= $ENV{"CRS_JOB_FILE"};
+$JOB_ID= defined($ENV{"CRS_JOB_ID"})?$ENV{"CRS_JOB_ID"}:getppid();
+
+# $PWD   = $ENV{"PWD"};
+
+# if ( ! defined($WPD) ){
+chomp($PWD = `pwd`);
+# }
+
+
+# --- Grab STDOUT/STDERR by force (control was stolen from us) ----
+# We will restore to reading the real chosen one later ...
+if ( $CONDOR_CRS  ){
+    # new scheme using Condor has log local and agree
+    # with what we tried to do before.
+    #$STDOPT = 0;
+    $ISTDOUT= $ENV{"CRS_STDOUT_DIR"}."/".$ENV{"STD_OUT"};
+    $ISTDERR= $ENV{"CRS_STDERR_DIR"}."/".$ENV{"STD_ERR"};
+    $STDOUT = $ENV{"STD_OUT"}.".$$";
+    $STDERR = $ENV{"STD_ERR"}.".$$";
+
+    if ($DEBUG){
+	print
+	    "Attempting to steal STDOUT $ISTDOUT as $STDOUT\n",
+	    "Attempting to steal STDERR $ISTDERR as $STDERR\n";
+    }
+} else {
+    # here, we stolle STDOUT and STDERR
+    $ISTDOUT= $ENV{"STD_OUT"};
+    $ISTDERR= $ENV{"STD_ERR"};
+    $STDOUT = basename($ISTDOUT);
+    $STDERR = basename($ISTDERR);
+}
+
+
+
+if( $STDOPT == 1){
+    # Option 1 is to redirect to local file
+    # after stealing the STD channels.
+    if( defined($ISTDOUT) && defined($ISTDERR) ){
+	print "$PRGM :: Info: delayed IO mode.\n";
+	&STDtrap(0,$STDOUT,$STDERR);
+    } else {
+	print "$PRGM :: Warning: delayed IO requested but missing ENV\n";
+	print "$PRGM :: Info: Reverting to direct IO\n";
+    }
+} else {
+    # Default is to leave as-is
+    print "$PRGM :: Info: direct IO mode.\n";
+}
+# print "$PRGM :: debug : $STDOPT $ISTDOUT $STDOUT $ISTDERR $STDERR\n";
+
+
+
+# --- Parse inputs and options ------------------------------------
+#
+# The CRS software sets up environment variables
+# according to the job description file. If a file
+# is of type HPSS, the ACTUAL_XXX would refer to
+# the file as restored on local disk while the XXX
+# would refer to the initial file name (as per in HPSS)
+#
+for($i =0 ; ; $i++){
+    eval('$in = $ENV{"ACTUAL_INPUT$i"}');
+    if( ! defined($in) ){ last;}
+    eval('$cin = $ENV{"INPUT$i"}');
+    if( ! defined($cin) ){ last;}
+    push(@CINPUTS,$cin);
+    push(@INPUTS,$in);
+}
+
+
+
+# The first one is used as our input stream, the rest are
+# subject to chain options.
+# If something else needs to be done for the other input files
+# (like adding to the chain option), please, add code with backward
+# compatibility possibility. I think this code is suitable for pp
+# gstar options modulo this implementation.
+if($MULTIIN){
+    # Only take this as a test, leave everything on the stack
+    $INPUTFILE  = $INPUTS[0];
+    $CINPUTFILE = $CINPUTS[0];
+} else {
+    # Pop first input OFF the stack. Case we have a sole input
+    # the others may be options or "dormant" files but their
+    # names will not be passed to bfc.C ...
+    $INPUTFILE  = shift @INPUTS;
+    $CINPUTFILE = shift @CINPUTS;
+}
+
+
+
+
+#
+# Other input files may be options.
+# - If an input file contains the string StarDb, calibration
+#   directory is soft linked to the current directory.
+# - If the file name contains StarDb and its name is
+#   one of the above pattern. In both case, the file
+#   is assumed to contain the chain option.
+#
+#   One* : calibration is processed, run goes after (local directory)
+#   Pre* : calibration is processed, run goes after (remote soft-link)
+#   Opt* : calibration pass is done, then we leave (remote soft-link)
+#
+#
+$DBCONF = "";
+$copt   = "";
+$cdir   = "";
+print   "Taking care of $#CINPUTS inputs\n";
+for ($i=0 ; $i <= $#CINPUTS ; $i++){
+    $file = $CINPUTS[$i];
+    if ( $file =~ /LoadBalancer/){
+	# Prepare to redefine this ENV variable
+	if ( -e $file){
+	    $DBCONF = $file;
+	} else {
+	    print "Warning: Did not find $file\n";
+	}
+
+    } elsif ( $file =~ /StarDb/){
+	# Calibration run enabled. Create soft link.
+	$copt = basename($file);
+	$cdir = dirname($file);
+
+	if ($copt =~ m/One/){
+	    # Make local directory
+	    mkdir("StarDb",0755);
+	    # ***** /!\
+	    # this is hardwired for now ... will find a better
+	    # way later.
+	    foreach my $subdir (("Calibrations","Conditions")){
+		mkdir("StarDb/$subdir",0755);
+	    }
+	} else {
+	    # Create directory to remote directory
+	    symlink($cdir,"StarDb");
+	}
+	# make default option "" unless the pattern
+	# matches what is in the help list above.
+	if($copt !~ m/Pre/ &&
+	   $copt !~ m/Opt/ &&
+	   $copt !~ m/One/    ){
+	    $copt = "";
+	}
+    } else {
+	# Those are "other" inputs. Treat it as output i.e. make
+	# soft-links
+	$cin = $file;
+	$in  = $INPUTS[$i];
+	if( $cin =~ m/HPSS/){
+	    $tmp  = basename($in);
+	    if( ! -e $tmp){
+		print "$PRGM :: inX : $cin -> $tmp created\n";
+		symlink($cin,$tmp);
+		$cin = $tmp;
+	    }
+	}
+	push(@FCINPUTS,$cin);
+	push(@FINPUTS,$in);
+    }
+}
+# Swap arrays
+undef(@CINPUTS);
+undef(@INPUTS);
+
+
+
+
+
+# --- Parse outputs -----------------------------------------------
+#
+# The number of output files is unknown but we can evaluate
+# this. This loop may also be used for
+for($i =0 ; ; $i++){
+    eval('$cout  = $ENV{"OUTPUT$i"}');
+    if( ! defined($cout)  ){ last;}
+    eval('$out = $ENV{"ACTUAL_OUTPUT$i"}');
+    if( ! defined($out) ){ last;}
+    push(@COUTPUTS,$cout);
+    push(@OUTPUTS,$out);
+    # Well, some jobs have it created at startup, some don't
+    # causing a final staging failure. Therefore, do not trust
+    # the CRS pre-job and do it ourselves.
+    if( $cout =~ m/HPSS/){
+	$tmp = basename($out);
+	if( ! -e $tmp){
+	    print "$PRGM :: out : $cout -> $tmp created\n";
+	    symlink($cout,$tmp);
+	}
+    }
+}
+
+
+
+
+
+
+
+# --- Fix default values, check sanity ----------------------------
+#
+# num events default value
+if( $NUMEVT =~ /(\d+)(-)(\d+)/ ){
+    $MINEVT = $1;
+    $MAXEVT = $3;
+    $NUMEVT = -1;
+} else {
+    $MAXEVT = $MINEVT = 0;
+    if( $NUMEVT <= 0){ 
+	#        500.000 -> 500 k
+	$NUMEVT = 500000;
+    }
+}
+
+# Simplify library version change (commodity)
+if($LIBRARY =~ m/dev/i || $LIBRARY =~ m/new/i ||
+   $LIBRARY =~ m/pro/i || $LIBRARY =~ m/old/i ||
+   $LIBRARY =~ m/adev/i
+   ){
+    $CHVER = "star".lc($LIBRARY);
+} elsif ($LIBRARY =~ m/cal/i){
+    # Special calibration area where tests would be run
+    # before code gets commited.
+    if ( index($LIBRARY,"-") != -1){
+	@items  = split("-",$LIBRARY);
+	$CHVER  = "starver $items[0]\n";
+	$LIBRARY= "$items[0] (cal)";
+    } else {
+	$CHVER  = "stardev\n";
+	$LIBRARY= "dev (cal)";
+    }
+    $CHVER .= "ln -s \$STAR_PATH/cal/.\@sys ./.\$STAR_SYS";
+
+} else {
+    $CHVER = "starver $LIBRARY";
+}
+if($INPUTFILE eq ""){
+    print STDERR "$PRGM :: Error: no input file specified\n";
+    exit;
+} else {
+    # Extension check. Out chain requires a .daq extension.
+    #$ext = $CINPUTFILE;
+    #$ext =~ s/.*\.//g;
+    #print "Debug:: [$ext]\n";
+    #if($ext eq "" || $ext eq $CINPUTFILE){
+    if( $CINPUTFILE =~ m/HPSS/){
+	# An HPSS file was restored. We need to create
+	# a symlink with a .daq name and use this as
+	# our input.
+	$tmp = basename($INPUTFILE);
+	symlink($CINPUTFILE,$tmp);
+	print "$PRGM :: Uin : $CINPUTFILE -> $tmp created\n";
+
+	# Overwrite the input file name with it's local link-name
+	# This will be used as a chain input.
+	$CINPUTFILE = $tmp;
+    }
+}
+
+# Feature test
+$GZIP = "";
+if ($COMPRS){
+    foreach $file ( ("/bin/gzip","/usr/bin/gzip","/usr/local/bin/gzip") ){
+	if( -x $file){
+	    $GZIP = $file;
+	    last;
+	}
+    }
+    if($GZIP eq ""){
+	print STDERR "$PRGM :: Warning: Compress cannot be done. ".
+	    " Missing gzip program.\n";
+	$COMPRS = 0;
+    }
+}
+
+$CPUSPD = "unkown";
+if( -r "/proc/cpuinfo"){
+    open(FI,"/proc/cpuinfo");
+    while( defined($line = <FI>) ){
+	if($line =~ m/(cpu MHz.*:)(.*)/){
+	    $CPUSPD = $2;
+	    $CPUSPD =~ s/^\s*(.*?)\s*$/$1/;
+	    last;
+	}
+    }
+    close(FI);
+}
+
+
+
+
+
+# --- Display information -----------------------------------------
+#
+print "Job is starting on               ".localtime()."\n";
+print "We are running on                ".hostname()."\n";
+print "CPU speed                        $CPUSPD MHz\n";
+print "Our job ID is                    $JOB_ID\n";
+print "Our working directory            $PWD\n";
+print "We will run from library version $LIBRARY\n";
+if($MULTIIN){
+    # There is no notion of secondary input in those
+    # modes so put this one back on the stack
+    print "We will be running               $BFC\n";
+    print "Argument list will be            ".join(",",@ARGV)."\n";
+} else {
+    print "Main processing chain options    $CHAINOPT\n"    if($copt !~ m/Opt/);
+    if ($NUMEVT != -1){
+	print "The number of events would be    $NUMEVT\n";
+    } else {
+	print "The number of events would be    $MINEVT to $MAXEVT\n";
+    }
+    print "The chain will run over file     $INPUTFILE\n";
+    print "This file is stored as           $CINPUTFILE\n";
+    print "Calibration pass using           $cdir/$copt\n"  if($copt ne "" );
+}
+if($#FCINPUTS != -1){
+    print "Secondary inputs (CRS name)      ".join(" ",@FCINPUTS)."\n";
+    print "Secondary inputs (actual name)   ".join(" ",@FINPUTS)."\n";
+}
+print "The output destination will be   $DESTINATION ";
+if ( $DESTINATION =~ m/\+/){ print "(range)\n";}
+else                       { print "\n";}
+print "Our disk space usage command is  $DF\n"; 
+
+print "Outputs initial will be          ".join(" ",@COUTPUTS)."\n";
+print "Outputs final will be            ".join(" ",@OUTPUTS)."\n";
+if ( $GENERICO ne ""){
+    print "Generic output filename          $GENERICO\n";
+}
+print "Running condition                ".($OPTOPT?"Optimized":"Non-Optimized")."\n";
+
+if ( $#SETUP != -1){
+    foreach $tmp (@SETUP){
+	print "Before execution, execute    ".$tmp."\n"; 
+    }
+}
+
+if ( $DBCONF ne ""){
+    print "DB may take its data from        $DBCONF\n";
+} elsif ( -e "$NFSHOME/dbServers.xml" ){
+    print "DB may take its data from        $NFSHOME/dbServers.xml\n";
+    $ENV{STDB_SERVERS} = "$NFSHOME/dbServers.xml";
+}
+if ($COMPRS){
+    print "Output Compression was required, will use $GZIP\n";
+}
+
+
+
+
+
+
+
+
+# --- Create script, run, check outputs, move to target  ----------
+#
+# Now, we are ready to go ... What we will do is to create
+# a local csh file containing all of the required commands
+# and loading. Peffered shell will be csh (available on ALL
+# flavor of Unix) rather than tcsh which needs to be installed.
+
+$RPROG = "root4star";
+
+if ( defined($ENV{"CRS_JOB_NAME"}) ){
+    if ( $ENV{"CRS_JOB_NAME"} =~ /test_bfcc/ ){
+	$RPROG = "echo";
+    }
+}
+
+if ( ! open(FO,">$PWD/$JOB_ID.csh") ){
+    print STDERR "$PRGM :: Failure to open a temporary file $!\n";
+} else {
+
+    # Note that we will be able to dup STDOUT STDERR to a file later
+    # (and if required) as well as writing handler routine to prevent
+    # from a crash.
+    print FO
+	"#!/bin/csh\n",
+	"setenv GROUP_DIR $AFS_RHIC/star/group\n",   # default GROUP_DIR
+	"source \$GROUP_DIR/star_cshrc.csh\n",       # load basic login env
+	"unset noclobber\n";                         # over-write
+    print FO
+	"setenv NODEBUG yes\n" if($OPTOPT);          # STAR soft specific env
+
+    # before changing env, also execute the setup commands
+    if ( $#SETUP != -1){  foreach $tmp (@SETUP){   print FO $tmp."\n"; }  }
+
+    print FO
+	"$CHVER\n",                                  # load chosen library env
+	"echo \"$PRGM :: Using \`which root4star\`\"\n";  # some info/debug message
+
+    # Added 2010
+    if ( $DBCONF ){
+	print FO
+	    "setenv DB_SERVER_LOCAL_CONFIG $DBCONF\n",
+	    "echo \"$PRGM :: Using DB_SERVER_LOCAL_CONFIG as $DBCONF\"\n";
+    }
+
+
+
+    # Pre-process the calibration run first if necessary
+    if($copt ne "" ){
+	# the file contains the calibration pass chain options
+	chomp($chainopt = `/bin/cat $cdir/$copt`);
+	if ( $chainopt ne ""){
+	    print FO
+		"echo \"$PRGM :: Calibration pass is starting on \`/bin/date\`\"\n",
+		"echo \"\"\n",
+		"$RPROG -b -q '$BFC(10000,\"$chainopt\",\"$CINPUTFILE\")'\n",
+		"echo \"$PRGM :: Calibration is done on \`/bin/date\`\"\n";
+	} else {
+	    # This happened in 2005. The disk would be present, the file seen
+	    #  but cat would lead to nothing (messed up file descriptors)
+	    print STDERR "$PRGM :: Error: $cdir/$copt has empty content\n";
+	    exit;
+	}
+    }
+
+
+
+    #
+    # Also process the regular run but only if calib-only was not requested
+    #
+    if($copt !~ m/Opt/){
+	print FO
+	    "echo \"$PRGM :: Reco run is starting on \`/bin/date\`\"\n",
+	    "echo \"\"\n";
+            # Option to output memory consumption
+	    #"setenv StarEndMakerShell\n";
+
+	if( ! $MULTIIN ){
+	    if ( $GENERICO ne ""){  $extra = ",\"$GENERICO\""; }
+	    else                 {  $extra = "";}
+
+	    if ($NUMEVT != -1){
+		print FO
+		    "$RPROG -b -q '$BFC($NUMEVT,\"$CHAINOPT\",\"$CINPUTFILE\"$extra)'\n";
+	    } else {
+		print FO
+		    "$RPROG -b -q '$BFC($MINEVT,$MAXEVT,\"$CHAINOPT\",\"$CINPUTFILE\"$extra)'\n";
+	    }
+
+	} else {
+	    # stringify strings if any
+	    foreach (@ARGV){
+		if( $_ =~ /\D+/ && $_ !~ /[-\+]\D+/){
+		    push(@arg,"\"$_\"");
+		} else {
+		    push(@arg,$_);
+		}
+	    }
+	    # Separate mode "/", "+"
+	    if( $CHAINOPT eq "+"){
+		# mode "+" loops over inputs, put back primary input in
+		print "Generating job with periodicity $PERIOD $#FCINPUTS\n";
+		for($in=0 ; $in <= $#FCINPUTS ; $in += $PERIOD){
+		    print FO
+			"#  Mode \"+\". Pass ".($in/$PERIOD+1)."\n",
+			"$RPROG -b -q '$BFC(".join(",",@arg).",\"$FCINPUTS[$in]\")'\n\n",
+			"if( \$status ) echo \"$PRGM :: Error: Pass $in failed ($FCINPUTS[$in])\"\n\n";
+		}
+	    } elsif( $CHAINOPT eq "/"){
+		# mode "/"
+		print FO
+		    "$RPROG -b -q '$BFC(".join(",",@arg).")'\n";
+	    } else {
+		print "$PRGM :: Warn: I did not expect option [$CHAINOPT] in MULTI mode\n";
+	    }
+	    undef(@arg);
+	}
+    }
+    close(FO);
+    chmod(0755,"$PWD/$JOB_ID.csh");
+
+
+    # Hack for interractive debugging
+    #if ( defined($ENV{BFCC_EXIT}) ){
+	print "-=-=-=- Generated script content follows -=-=-=-\n";
+	system("/bin/cat $PWD/$JOB_ID.csh");
+    #	exit;
+    #}
+
+    #
+    # Real stuff we need to do
+    #
+    &List("Our working directory contains","We will now start to run ...");
+
+    $elaps  = time();
+    system("$PWD/$JOB_ID.csh");
+    $status = $?;
+    $elaps  = time() - $elaps;
+
+
+
+    # after this, we may have crashed or not
+    if($status == 0){
+	print "$PRGM :: Info: The chain as completed without failure\n";
+    } else {
+	print STDERR "$PRGM :: Error: chain stopped with status $status\n";
+    }
+    &List("The directory content is now ...");
+
+
+    # RDESTINATION resolve
+    if ($DESTINATION =~ m/(.*)(\+)(\d+)(-)(\d+)(.*)/){
+	# We have to chose amongst a range of disks. Only one
+	# destination will be picked. A common threshold of
+	# 1% left-over space will be applied
+	$base  = $1;
+	$start = $3;
+	$end   = $5;
+	$xtra  = $6;
+	$RDESTINATION = &GetAvailableDisk($base,$start,$end).$xtra;
+	if ( $RDESTINATION eq $xtra ){
+	    print STDERR "$PRGM :: Fatal: Disk selection did not lead to a valid choice\n";
+	    exit;
+	}
+
+    } else {
+	$RDESTINATION = $DESTINATION;
+    }
+
+
+
+    # But please, do not stop there but move the output if required
+    # Required means that the option was HPSS, UNIX option means
+    # that it will be written over NFS so we do not need to move the
+    # file. We can recognize the difference because the $cfile is
+    # different than the $file in HPSS mode and identical in NFS mode.
+    for($i=0 ; $i <= $#COUTPUTS ; $i++){
+	$cfile = $COUTPUTS[$i];
+
+	#$ffile = $file;
+
+	# In case of the MuDst, the path is stripped-out
+	# and created in local directory instead of the
+	# final destination (that's a code/macro/crs limitation
+	# since the process has to have a perticular format).
+	# Bothering but ... we can recover from that one
+	# as well.
+	if ( ! -e $cfile ){
+	    #print "$PRGM :: Info : current=$cfile final=$OUTPUTS[$i] ofile=$file\n";
+	    $file = $cfile;
+	    $file =~ s/.*\///g;
+	    if ( -e $file ){
+		print "$PRGM :: Info : Substituting current=$file for $cfile\n";
+		$cfile = $file;
+	    }
+	}
+
+	# What we want in normal case is to check that $cfile
+	# was created where we expected and declared it will be.
+	if( -e $cfile){
+	    $file  = $OUTPUTS[$i];
+	    $ffile = "";
+
+
+	    if( $file ne $cfile){
+		# Massage the substitution. This is a HPSS file
+		# cloned/copied to a disk as well.
+		if( $RDESTINATION eq "." || $RDESTINATION eq "./"){
+		    # will ignore those i.e. save in HPSS only.
+		    $ffile = $cfile;
+		} else {
+		    # do copy by doing path substitution
+		    $ffile = $file;
+		    $ffile =~ s|$HPSSBASE|$RDESTINATION|;
+		}
+	    } elsif ( dirname($file) eq "."){
+		# This is a file left on the local disk we want
+		# to move now.
+		$ffile = $file;
+		$ffile =~ s|./|$RDESTINATION/|;
+	    } else {
+		# Last case is that the directory name is
+		# not "." and the file is of type=UNIX.
+		# This means that the description file was
+		# written to do direct-IO for outputstream.
+
+	    }
+
+
+	    # OK to copy $cfile -> $ffile is defined
+	    if( $ffile ne $cfile){
+		&FileCopy($cfile,$ffile);
+	    } else {
+		print "$PRGM :: Info: $file is at its final destination\n";
+	    }
+
+	} else {
+	    # Oups ! The output file was not found
+	    print "$PRGM :: Warning: action did not produce expected $cfile\n";
+	}
+    }
+    print "$PRGM :: Info: All output checked. Done\n";
+    if( $CPUSPD ne "unkown"){
+	print "$PRGM :: Info: Chain done in $elaps seconds, Time/CPUSpeed= ".($elaps/$CPUSPD)."\n";
+    }
+
+
+    # Take care of STD.
+    if($COMPRS){ print "$PRGM :: Will now perform STD Compression\n";}
+    if( $STDOPT == 1){
+	&STDtrap(2);
+
+	if($COMPRS & 1){ ($STDOUT,$ISTDOUT) = &Compress($STDOUT,$ISTDOUT);}
+	&FileCopy($STDOUT,$ISTDOUT);
+
+	if($COMPRS & 2){ ($STDERR,$ISTDERR) = &Compress($STDERR,$ISTDERR);}
+	&FileCopy($STDERR,$ISTDERR);
+    } else {
+	# Same routine handling compression
+	&STDtrap(2);
+	if($COMPRS & 1){ ($ISTDOUT,$STDOUT) = &Compress($ISTDOUT,$STDOUT);}
+	if($COMPRS & 2){ ($ISTDERR,$STDERR) = &Compress($ISTDERR,$STDERR);}
+    }
+}
+
+
+
+
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Subroutines
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#
+# Compress or not file1. Change name and return
+# value of file1/file2 if succeded.
+#
+sub Compress
+{
+    my($file1,$file2)=@_;
+
+    if($GZIP eq ""){ return ($file1,$file2);}
+    if(-e "$file1.gz"){ unlink("$file1.gz");}
+
+    system("$GZIP $file1 ");
+    if( -e $file1.".gz"){
+	# Change fie names origin -> destination
+	$file1 .= ".gz";
+
+	# but also delete first the target file name
+	# if exists before changing its name. Otherwise,
+	# will will have a left-over.
+	if(-e "$file2" ){ unlink("$file2");}
+
+	$file2 .= ".gz";
+    }
+    ($file1,$file2);
+}
+
+
+#
+# Subroutine to check and create path. mkpath()
+# in the perl module does not return the failure
+# reasons and do not implement special cases as
+# we do. So, screw it ...
+#
+sub MkPath
+{
+    my($dir,$level)=@_;
+    my(@items,$tmp,$el,$i);
+
+    # default
+    if( ! defined($level) ){ $level = 0;}
+
+    @items = split("/",$dir);
+    shift(@items);               # strip first blank space
+    $tmp = "";
+    $i   = 0;
+    foreach $el (@items){
+	$tmp .= "/$el";
+	$i++;
+	if( ! -d $tmp){
+	    #
+	    # BTW : In case of a NFS mount failure, this block will
+	    # be executed which means that we will go into an infinit
+	    # loop until the disk is available.
+	    #
+	    if (-f $tmp){
+		# Oupses !! File exists with same name than directory.
+		# This is a no-no in Uglix-land.
+		print STDERR
+		    "$PRGM :: Error: Cannot create dir $tmp. ",
+		    "File exists with the same name.\n";
+		return -1;
+	    }
+
+	    # we can even test where this fails ...
+	    # The level variable is used to prevent from accidental directory creation
+	    # in case of disk unmount. For example, level = 2 will prevent creation
+	    # before a /star/dataXX directory ...
+	    if ($i >= $level){
+		if( ! mkdir($tmp,0773) ){
+		    print STDERR
+			"$PRGM :: Error: Failed to create $tmp [$!]\n";
+		    return -2;
+		}
+	    }
+	}
+    }
+    1;
+}
+
+
+#
+# Small common routine for doing a ls/directory
+# content (helps for debugging purposes).
+#
+sub List
+{
+    my($smess,$emess)=@_;
+    my($i);
+
+    for($i=0 ; $i < 45 ; $i++){ print "-=";}
+    print "\n";
+    print "$PRGM :: Info: $smess\n" if ( defined($smess) );
+    print `/bin/ls -al`;
+    print "$PRGM :: Info: $emess\n" if ( defined($emess) );
+    for($i=0 ; $i < 45 ; $i++){ print "-=";}
+    print "\n";
+}
+
+
+#
+# Routine handling the file copy
+#
+sub FileCopy
+{
+    my($flnm,$target)=@_;
+    my($tdir,$k);
+    my(@stat,@fstat);
+    my($szd);
+
+    $tdir = dirname($target);
+    $k    = 0;
+
+  CREATE_DIR:
+    # create directory all the way up but also, try multiple times
+    # if it fails.
+    if( &MkPath($tdir,2) != 1){
+	print "$PRGM :: Info: Failed to create $tdir on ".localtime()."\n";
+	$k++;
+	if($k != $NTRIES){
+	    sleep($SLPTIME);
+	    goto CREATE_DIR;
+	} else {
+	    print STDERR "$PRGM :: Error: Failed to create path $tdir\n";
+	}
+    }
+
+    # if the final file already exists, remove it first
+    if( -e $target){ unlink($target);}
+
+    # Informative message
+    print "$PRGM :: Info: Copying $flnm -> $target\n";
+
+    # Get information about that file
+    @stat = stat($flnm);
+    push(@stat,&MD5sum($flnm));
+
+
+    # Copy now
+    $k    = 0;
+  COPY_FILE:
+    copy($flnm,$target);
+    @fstat = stat($target);
+    if ($#fstat == -1){
+	print "$PRGM :: Error: stat() failed for $target\n";
+    } else {
+	# do not perform an 'exact file size match' check as FS may have
+	# side effects preventing from exact comparison. In principle,
+	# MD5sum is much much safer but is also expensive (has to read
+	# the file's content).
+	if ( $stat[7] != 0){
+	    $szd = abs(($fstat[7]-$stat[7])/$stat[7]);
+	    if ( $szd != 0){
+		$k++;
+		#if($k != $NTRIES){
+		if ($fstat[7] == 0) {
+		    print "$PRGM :: Error: target size is null and should have been $stat[7]\n";
+		} elsif ( $szd < $SOFFTOL ){
+		    print "$PRGM :: Info: target size missmatches $fstat[7] $stat[7]\n";
+		}
+		#	sleep($SLPTIME);
+		#	goto COPY_FILE;
+		#} else {
+		#	print STDERR "$PRGM :: Error: Failed to copy $flnm -> $target
+		#                     (size missmatches)\n";
+		#}
+	    }
+	} else {
+	    print "$PRGM :: Warning: source size is null for $flnm\n";
+	}
+    }
+
+
+    # Double check this
+    if( ! -e $target){
+	print STDERR "$PRGM :: Warning: Action did not create $target\n";
+    } else {
+	# Display all stat() information + checksum
+	print "$PRGM :: Success: $BFC $target $LIBRARY ".join(" ",@stat)."\n";
+    }
+}
+
+
+
+#
+# Sub-routine handling STDOUT/STDERR
+# 'mode' is as follow
+#  0      create
+#  1      append/create
+#  def    close
+#
+# All io in auto-flush mode.
+#
+sub STDtrap
+{
+    my($mode,$outf,$errf)=@_;
+
+    # Open create or append
+    if ($mode == 0 || $mode == 1){
+	# dup and auto-flush
+	open(SAVEERR,">&STDERR");
+	$mode==0?open(STDERR,">$errf"):open(STDERR,">>$errf");
+	select(STDERR); $| = 1;
+
+	open(SAVEOUT,">&STDOUT");
+	$mode==0?open(STDOUT,">$outf"):open(STDOUT,">>$outf");
+	select(STDOUT); $| = 1;
+
+    } elsif ( $mode == 2){
+	# trash STD-IO
+	open(STDERR,">&/dev/null");
+	open(STDOUT,">&/dev/null");
+
+    } else {
+	# default is to close those pipes
+	close(STDERR);
+	close(STDOUT);
+	open(STDERR,">&SAVEERR");
+	close(SAVEERR);
+	open(STDOUT,">&SAVEOUT");
+	close(SAVEOUT);
+    }
+}
+
+
+
+#
+#
+# This routine takes a file as input and returns
+# the MD5 checksum. This will be later used in
+# cataloging. This routine requires Digest::MD5
+# module called above.
+#
+sub  MD5sum
+{
+    my($file)=@_;
+    my($ctx,$sts);
+
+    if ( open(MD5F,$file) ){
+	binmode(MD5F);
+	$sts = Digest::MD5->new->addfile(*MD5F)->hexdigest();
+    } else {
+	$sts = 0;
+    }
+
+    $sts;
+}
+
+
+#
+# Only selects based on %tage but has logic to make
+# any selection like on available remaining space.
+# Note that this method may return "".
+#
+sub GetAvailableDisk
+{
+    my($base,$start,$end)=@_;
+    my($i,$tota,$used,$avai,$prct);
+    my($ppath);
+    my(@CANDIDATES,%SIZESORTED,$pos);
+
+    for ($i=$start ; $i <= $end ; $i++){
+        # protect against user typo
+	# This is STAR specific and assumes
+	$ppath = sprintf("%s%2.2d",$base,$i);
+	if ( ! -e $ppath ){ 
+	    next;
+	} 
+	chomp($res = `$DF $ppath | /bin/grep % | /bin/grep '/'`);
+
+	print "DEBUG $DF $ppath --> $res\n";
+
+	$res   =~ s/^\s*(.*?)\s*$/$1/;
+	if ($res eq ""){  next;}          # no info on disk (may be un-mounted)
+	$res   =~ s/\s+/ /g;
+
+	@items =  split(" ",$res);
+	if ($#items < 5){
+	    $tota = $items[0];
+	    $used = $items[1];
+	    $avai = $items[2];
+	    $prct = $items[3];
+	} else {
+	    $tota = $items[1];
+	    $used = $items[2];
+	    $avai = $items[3];
+	    $prct = $items[4];
+	}
+	$prct =~ s/%//;
+	print "DEBUG ppath=$ppath tota=$tota used=$used avail=$avai prct=$prct - ";
+
+	if ($prct <= $MAXFILL){
+	    push(@CANDIDATES,"$ppath");
+	    $SIZESORTED{"$ppath"} = $avai;
+	    print "Included\n";
+	} else {
+	    print "Excluded\n";
+	}
+    }
+
+
+    # Well, there may be no candidates. If so, pick the
+    # largest disk.
+    if ($#CANDIDATES == -1){
+	@CANDIDATES = sort { $SIZESORTED{$b} <=> $SIZESORTED{$a} } keys %SIZESORTED;
+	if ( $#CANDIDATES == -1 ){
+	    print "$PRGM :: Warning: no valid path found in range $start -> $end ($base)\n";
+	} else {
+	    print "$PRGM :: Warning: switched to biggest available space algorithm (all full)\n";
+	}
+	$pos = 0;
+    } else {
+	# Chose one randomly
+	$pos = int(rand($#CANDIDATES+1));
+    }
+
+
+    return defined($CANDIDATES[$pos])?$CANDIDATES[$pos]:"";
+}
+

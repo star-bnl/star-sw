@@ -1,0 +1,157 @@
+#!/usr/bin/env perl
+#!/usr/bin/perl -w
+# ----------------------------------------
+# STAR Scheduler template massaging script
+# J. Lauret / L.B. Hajdhu 2004-2006
+# ----------------------------------------
+
+use File::Basename;
+use Getopt::Long;
+
+$tempName = "schedTemplateExp.xml";            # temporary name after template expansion
+$SUMS     = dirname($0)."/star-submit";        # assume it will be in the path
+#$SUMS     = $ENV{STAR_SCRIPTS}."/star-submit"; # debug only
+
+print "STAR Template Scheduler 0.1 ($SUMS)\n";
+print "\n";
+
+my @entitiesAssignment=();
+GetOptions ( "template=s"   => \$filename,
+             "entities=s"   => \@entitiesAssignment,
+             "policy=s"     => \$policy,
+             "dispatcher=s" => \$dispatcher,
+	     "simulate"     => \$simulate,
+	     "debug"        => \$debug);
+
+if ( !defined($filename) ){
+    print STDERR "ERROR: The template name must be specified\n\n";
+    usage();
+}
+
+if ( $#entitiesAssignment == -1 ) {
+    print STDERR "ERROR: The entity assignment must be specified\n\n";
+    usage();
+}
+
+%entities = parseEntityList(@entitiesAssignment);
+createTemporaryJobRequest($filename, $tempName, %entities);
+submitJobRequest($tempName, $policy, $dispatcher, @ARGV);
+
+
+
+# -------------
+#  Subroutines
+# -------------
+
+sub usage {
+   print qq~
+ Usage: 
+   % star-submit-template -template <template> -entities <assignment> \
+     {-- [additional arguments]}
+
+   The template will create the DOCTYPE definition with the entity assignment
+   in your xml, save it to a temporary file and submit it with SUMS.
+
+   -debug                 Turn on debugging, no action performed.
+   -simulate              Use simulated mode for submission
+
+   -template <template>   The filename of the template (e.g. myAnalysis.xml).
+                          A template is a job request containing entities
+                          (i.e. &trigger;) and no DOCTYPE definition.
+   -entities <assignment> A comma separated list of entity assignment
+                          (i.e. trigger=minbias,collision=dAu200)
+
+   While -entities can be repeated on the command line, this script accepts
+   only one template for safety purposes.
+
+   If you want to pass options to SUMS itself, you must preceed those with
+   "--" to deferenciate from this script's option and the ones you want to
+   pass to SUMS.
+~;
+   exit;
+}
+
+# Parses an array of entities (previous version
+# parsed a single string)
+sub parseEntityList {
+   my (@entityList) = @_;
+   my (%retEntities,$entityList);
+
+   foreach $entityList (@entityList){
+       foreach $pair (split(/,/, $entityList)) {
+         @entity = split(/=/, $pair);
+         $retEntities{$entity[0]} = $entity[1];
+       }
+   }
+   return %retEntities;
+}
+
+# submit job within a pipe context
+# Note that we can safely pass the rest of the arguments
+# if defined since we use the -- separation method.
+sub submitJobRequest {
+   my ($job, $policy, $dispatcher, @ARGS) = @_;
+   $command = $SUMS;
+   if ( defined($policy) ) {
+       $command .= " -policy " . $policy;
+   }
+   if ( defined($dispatcher) ){
+       $command .= " -dispatcher " . $dispatcher;
+   }
+   if ($#ARGS != -1){
+       $command .= " ".join(" ",@ARGS);
+   }
+   if ($debug){
+       print "Would execute [$command $job]\n";
+   } else {
+       open(OUTPUT, $command . " $job |");
+       while( defined($line = <OUTPUT>) ) {
+	   print $line;
+       }
+       close(OUTPUT);
+   }
+}
+
+sub createTemporaryJobRequest {
+  my ($source, $dest, %entities) = @_;
+  my ($line);
+
+  open(INPUT,  "< $source") || die "Couldn't open file: $!\n";
+  open(OUTPUT, "> $dest")   || die "Couldn't open file: $!\n";
+
+  # Skip blank lines or comment lines
+  do {
+      $line = <INPUT>;
+  } while ( $line =~ m/^\s*$/ || $line =~ m/^\s*<!--.*-->$/);
+
+  # ... until something valid is encountered which MUST
+  # be the <?xml line by the way. Will skip pattern check.
+  print OUTPUT $line;
+  print OUTPUT "<!DOCTYPE note [\n";
+
+
+  foreach $entity (keys %entities) {
+     my $value = $entities{$entity};
+     print OUTPUT "<!ENTITY $entity \"$value\">\n";
+  }
+
+  print OUTPUT
+      "]>\n",
+      "<!-- Created on ".localtime()." -->\n";
+
+  while ( defined($line = <INPUT>) ){
+      if ($simulate){
+        # ATTENTION: This implement a specific knowledge of the
+        # scheduler internals.
+        if ($line =~ m/<job/i && $line !~ m/simulateSubmission/i) {
+          if ( $line =~ m/(<\s*job)(.*)/ ){
+             $line = "$1 simulateSubmission=\"true\" $2\n";
+          }
+        }
+      }
+      print OUTPUT $line;
+  }
+  close(INPUT);
+  close(OUTPUT);
+}
+

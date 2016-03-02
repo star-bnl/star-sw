@@ -1,0 +1,354 @@
+#!/usr/bin/env perl
+
+#
+# Initial version to help users locate files
+# J. Lauret 2009-2011
+#
+
+use Env qw(STAR_SCRIPTS);
+use lib "$STAR_SCRIPTS";
+
+use RunDAQ;
+
+# Do not change - auto
+$SELF  = $0;
+$SELF  =~ s/.*\///;
+$DEFP  = "/star/data05/scratch/".$ENV{USER};
+$DFILE = "/tmp/$SELF.$<";
+
+# Internal parameters
+$QUERY = 0;               # returns primary DB info on #Evets and coll
+$QHPSS = 0;               # query path in HPSS
+$FINFO = 0;               # display run information
+$QRAW  = 0;               # query raw DAQ file
+$ALLP  = 0;               # disable default info if $QHPSS is on
+$DIFF  = 0;               # see -diff below to enable this feature
+$ODO   = 0;               # shows only file on disks
+$PAT   = "";              # no special pattern match (all files)
+$EXT   = "";              # will be used for pattern replacement - see -x
+$BASEP = "";              # base path for -dco / do not speicfy here
+$PPATH = "";
+$DEBUG = $ENV{FOlocate_DEBUG};
+
+if ( $#ARGV == -1){
+    print qq~
+(c) J. Lauret, 2009-2013
+
+Usage:
+  % $SELF {Options} runNumber       # query a unique run
+  % $SELF {Options} runMin-runMax   # using a range of run numbers
+
+Options are
+    -Q          for querrying the primary database
+    -m=pat      only list files matching pattern 'pat'
+    -x{=ext}    default is to display .daq files, replace by ext (default=MuDst.root)
+
+    -diff       enable differential output (shows only changes since last run)
+                Limitation - please run from the same node as /tmp file will be 
+                used for this feature.
+    -odo        shows only files on disk (only disk output)
+ 
+    -raw        to display a possible path in HPSS for the raw files (will ignore -x)
+    -hpss       to display a possible path in HPSS for the processed files
+    -finfo      Display field and other run info for a given runNumber
+    -allp       to re-enable all printouts along with -hpss
+
+
+    Option modifying -raw, -hpss or -finfo outputs
+    -dco{=path} use DataCarousel output format eventually using 'path' for replacement 
+                in the default output format  (default is $DEFP). 
+                If path is specified and not terminated by "/", build a relative tree from
+                the base path 'path' respecting the HPSS structure otherwise, dump all files 
+                in the specified directory 
+
+Example:
+ % ./FOlocate 12039042        show a summary of what FO is doing with run 12039042
+ % ./FOlocate -hpss 12039042  show HPSS path for files which were processed by FO
+                              ATTENTION: push of result into HPSS may have failed.
+ % ./FOlocate -raw 12039042   show a summary of file names and path in HPSS for the
+                              raw DAQ files
+
+ % ./FOlocate -x=event.root -hpss 12039042
+                              Same but replace .daq by .event.root
+
+ % ./FOlocate -dco -x -hpss 12039042
+                              Generate a DataCarousel ready output for MuDst.root files
+                              where the destination path will be auto-build and relative 
+                              to $DEFP
+
+ % ./FOlocate -dco=/star/data03 -x -raw 12039042
+                              Generates instead a list of HPSS DAQ file ready for the 
+                              DataCarousel and to be restored on data03
+
+ % ./FOlocate -dco=/star/institution/bnl/jeromel/daq2011/ ...
+                              similar but dump all files in the same directory 
+                              /star/institution/bnl/jeromel/daq2011/ 
+
+~;
+  # just a remider to self
+  if ( $ENV{USER} =~ /jeromel/){
+      print "The environment FOlocate_DEBUG if defined, enables debugging (for developpers only)\n";
+  }
+
+  exit;
+}
+
+$obj   = rdaq_open_odatabase();
+
+for ($ii=0; $ii <= $#ARGV ; $ii++){
+    $run = $ARGV[$ii];
+    if ($run =~ /-Q/){
+	$QUERY = 1;
+
+    } elsif ($run =~ m/-hpss/){
+	$QHPSS = 1;
+
+    } elsif ($run =~ m/-finfo/){
+	$QHPSS = 1;
+	$FINFO = 1;
+
+    } elsif ($run =~ m/-raw/){
+	$QHPSS = 1;
+	$QRAW  = 1;
+
+    } elsif ($run =~ m/-allp/){
+	$ALLP  = 1;
+
+    } elsif ($run =~ m/-odo/){
+	$ODO   = 1;
+
+    } elsif ($run =~ m/-dif/){
+	# suck in diff file - hopefully not that much data (will 
+	# streamline in a later version)
+	if ( -e $DFILE){
+	    if ( open(FF,$DFILE) ){
+		while ( defined($ligne = <FF>) ){  
+		    ($file,$dt)   = split(" ",$ligne);
+		    $KNOWN{$file} = $dt;
+		}
+		close(FF);
+	    }
+	}
+	$DIFF = 1;
+	
+
+    } elsif ($run =~ m/(-m=)(.*)/){
+	$PAT   = $2;
+
+    } elsif ($run =~ m/(-x)(.*)/){
+	if ($2){
+	    $EXT   = substr($2,1,length($2)-1);
+	} else {
+	    $EXT   = "MuDst.root";
+	}
+
+    } elsif ($run =~ m/(-dco)(.*)/){
+	if ($2){
+	    $BASEP = substr($2,1,length($2)-1);
+	} else {
+	    $BASEP = $DEFP;
+	}
+	#die "Path is $BASEP\n"; 
+
+	# All the rest, range ot specific run goes through the 
+	# ProcessRun() routine
+    } elsif ($run =~ m/(\d+)-(\d+)/){
+	$lowrn = $1;
+	$highr = $2;
+	for ($r=$lowrn; $r<=$highr; $r++){
+	    &ProcessRun($r,0);
+	}
+    } else {
+	&ProcessRun($run,1);
+    }
+}
+rdaq_close_odatabase($obj);
+
+# before leaving, dump the diff file
+if ( $DIFF ){
+    if ( open(FF,">$DFILE.tmp") ){
+	foreach $key (keys %KNOWN){
+	    print FF "$key $KNOWN{$key}\n";
+	}
+	close(FF);
+	unlink($DFILE) if ( -e $DFILE);
+	rename("$DFILE.tmp",$DFILE);
+    }
+}
+
+
+
+sub ProcessRun {
+    my($run,$warn)=@_;
+
+    # prepare conditons but one by one
+    $Conds{runNumber} = $run;
+
+    @all = rdaq_get_orecords($obj,\%Conds,0,-1);
+
+
+
+    if ($#all == -1){
+	print "Do not know about runNumber=$run\n" unless ( ! $warn || $QHPSS );
+    } else {
+	print "runNumber=$run summary\n"           if ( ! $QHPSS || $ALLP );
+	foreach $ligne (@all){
+	    print "DEBUG: [$ligne]\n" if (defined($ENV{FOlocate_DEBUG}));
+	    @info = split(" ",$ligne);
+	    $file = $info[0];
+	    if ( $DIFF ){
+		next if defined($KNOWN{$file});
+		$KNOWN{$file} = time();
+	    }
+
+	    # pattern match requested
+	    if ( $PAT ne ""){
+		next if ($file !~ m/$PAT/);
+	    }
+	    if ( $EXT ne ""){
+		$file =~ s/\.daq/\.$EXT/;
+	    }
+
+	    $status = $info[$#info];
+	    $numevt = $info[2];
+	    $stsstr = rdaq_status_string($status);
+
+
+	    $xtra = "";
+	    if ($numevt == 0){
+		$reason = "Unknown/delayed evt";
+		$xtra   = "Ignored";
+	    } elsif ( $numevt<100){
+		$reason = "Low event count";
+		$xtra   = "Skipped";
+	    } else {
+		$reason = "OK";
+	    }
+
+	    # analyze/sort more potential problems
+	    if ( $info[9] == 0){
+		$reason = "Unknown detector set";
+		$xtra   = "Ignored";
+	    } elsif ( $info[9] == 0){
+		$reason = "Unknown trigger set";
+		$xtra   = "Ignored";
+	    }
+
+
+	    # check location
+	    $path = "";
+	    $loc  = rdaq_get_location($obj,$info[0]);
+
+	    if ( $QHPSS ){
+		print "DEBUG *** $info[0] $loc status=$status\n" if ($DEBUG);
+		if ( ($loc ne 0 && ( $status == 2 || $status == 3 || $status == 7)) || 
+		     $QRAW || $FINFO ){
+		    if ( $info[1] >= 10000000 ){
+			# TODO: this logic is similar to the one in JobSubmit
+			# and hence needs to be moved to the module
+			$trgsn = &rdaq_trgs2string($info[10]);
+			$field = &rdaq_scaleToString($info[6]);
+			$dm    = &rdaq_file2hpss($info[0]); 
+			
+			if ( $QRAW ){
+			    $dm =~ m/(.*\/)(.*)/;
+			    if ( $BASEP ne ""){
+				my($p,$f)=($1,$2);
+				my($d)=$p;
+				$d =~ s/\/home\/starsink\/raw/$BASEP/;
+				$path = "$p$f $d$f";
+				
+			    } else {
+				$path = "$1 $2";
+			    }
+			} elsif ( $FINFO){
+			    print "DEBUG $trgsn" if ($DEBUG);
+			    $dm   =~ s/.*daq\///;
+			    $dm   =~ s/\/st_.*//;
+			    $path = join("/",($trgsn,$field,$dm));
+
+			} else {
+			    if ( $status == 7){
+				#print substr($loc,length($loc)-1,1)."\n" if ($DEBUG);
+				if ( substr($loc,length($loc)-1,1) eq "/"){ chop($loc);}
+				$path = "$loc $file";
+			    } else {
+				$dm   =~ s/.*daq\///;
+				$dm   =~ s/\/st_.*//;
+				if ( $BASEP ne ""){
+				    $path  = "/home/starreco/reco/$trgsn/$field/dev/$dm/$file";
+				    if ( substr($BASEP,length($BASEP)-1,1) eq "/"){
+					$path .= " $BASEP$file";
+				    } else {
+					$path .= " $BASEP/$trgsn/$field/dev/$dm/$file";
+				    }
+				} else {
+				    $path  = "/home/starreco/reco/$trgsn/$field/dev/$dm $file";
+				}
+			    }
+			}
+
+		    }
+		}
+	    }
+
+
+	    if ( $loc ne 0 && $xtra eq ""){
+		if ( $loc =~ /\/home\/starreco/ ){
+		    $xtra = "ON HPSS";
+		} else {
+		    $xtra = "ON DISK";
+		}
+	    } elsif ( $status == 1 && $xtra eq ""){
+		$xtra = "Check later";
+	    }
+	    
+	    #print "DEBUG Ready to print\n" if ($DEBUG);
+
+	    if ( $ODO ){
+		if ( $xtra !~ m/DISK/){
+		    print "DEBUG Will skip this record in odo mode [$xtra]\n" if ($DEBUG);
+		    next;
+		} else {
+		    # do extra work in ODO mode
+		    next if ( ! -e "$loc/$file");
+		}
+	    }
+
+	    #print "HEY1 ...";
+	    printf "%45.45s - %10.10s (%6.6d) ",$file,$stsstr,$numevt        if ( ! $QHPSS || $ALLP );
+	    printf "%20.20s %12.12s %s\n",$reason,$xtra,($loc ne 0?$loc:"")  if ( ! $QHPSS || $ALLP );
+	    if ( $path ne ""){
+		#print "HEY1 ...";
+		if ($path ne $PPATH){
+		    #print "HEY2 ...";
+		    $PPATH = $path;
+		    if ( $ALLP ){
+			printf "%45.45s * %s\n","",$path;
+		    } else {
+			print "$path\n";
+		    }
+		}
+	    }
+	}
+    }
+
+    if ( $QUERY){
+	# rdaq_toggle_debug(1);
+	my($OO)=rdaq_open_rdatabase();
+	if ($OO){
+	    @runs = rdaq_raw_files($OO,"=$run");
+	    print "Found ".($#runs+1)." in the primary DB\n";
+	    #rdaq_toggle_debug(0);
+	    rdaq_close_rdatabase($OO);
+	    printf "\t%45.45s %5.5s %6.6s %10.10s\n","Name","#Evts","BeamE","Coll";
+	    printf "\t%64.64s\n","----------------------------------------------------------------------";
+	    foreach $ligne (@runs){
+		@items = split(" ",$ligne);
+		printf "\t%45.45s %5.5d %4.2f %10.10s\n",$items[0],$items[2],$items[7],$items[8];
+	    }
+	}
+    }
+
+}
+
