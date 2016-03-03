@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.625 2016/01/19 15:29:39 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.626 2016/03/03 22:54:57 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -750,6 +750,13 @@ Int_t StBFChain::Instantiate()
 	cmd += "Filtmk->setPtUpperCut(-99.);";
 	cmd += "Filtmk->setAbsEtaCut(-99);";
 	cmd += "Filtmk->setAbsZVertCut(999);";
+	ProcessLine(cmd);
+      } else if (GetOption("HftHitFilt")){
+	// Filter out TPC hits not on tracks
+	LOG_QA << "HFT hit filter is ON" << endm;
+	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
+	cmd += "Filtmk->setAbsZVertCut(-1);";
+	cmd += "Filtmk->setKeepWestHighEtaHitsForFgt(0);";
 	ProcessLine(cmd);
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
