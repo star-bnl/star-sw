@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlRawHitMaker.h,v 1.8 2016/03/03 07:36:10 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.h,v $
+ * Revision 1.8  2016/03/03 07:36:10  qiuh
+ * fix bug on row number, should use last row information FOR THE SAME SENSOR
+ *
  * Revision 1.7  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -49,7 +52,7 @@ public:
    Int_t Finish();
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.8 2016/03/03 07:36:10 qiuh Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
@@ -78,7 +81,7 @@ protected:
    Int_t mSector; ///< sector 1-10
    Int_t mLadder; ///< ladder 1-4
    Int_t mSensor; ///< sensor 1-10
-   Int_t mRow; ///< row 0-927
+   Int_t mRow[40]; ///< row 0-927, data from 40 sensors on a sector is mixed, need to keep 40 current row numbers
    Int_t mColumn; ///< column 0-959
 
    Int_t mJtagFileVersion; ///< Jtag configure file version

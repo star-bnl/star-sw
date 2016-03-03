@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.10 2015/05/15 05:31:44 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.11 2016/03/03 07:36:09 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.11  2016/03/03 07:36:09  qiuh
+ * fix bug on row number, should use last row information FOR THE SAME SENSOR
+ *
  * Revision 1.10  2015/05/15 05:31:44  qiuh
  * add c in wrong sector/ladder/sensor/row/column warning
  *
@@ -336,15 +339,15 @@ Int_t StPxlRawHitMaker::elementGetBit(UInt_t data, Int_t position)
 Int_t StPxlRawHitMaker::decodeState0(Int_t val)
 {
    // get row number
-   mRow = mid(mDataStartBit, mDataEndBit, val);
+    mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] = mid(mDataStartBit, mDataEndBit, val);
    // check overflow
    if (elementGetBit(val, mOverflowBit)) {
-      if (Debug() > 2) LOG_WARN << "pxl overflow at sector: " << mSector << " ladder: " << mLadder << " sensor: " << mSensor << " row: " << mRow << endm;
+       if (Debug() > 2) LOG_WARN << "pxl overflow at sector: " << mSector << " ladder: " << mLadder << " sensor: " << mSensor << " row: " << mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] << endm;
       mOverFlowCount++;
    }
    // check row number range
-   if ((mRow >= kNumberOfPxlRowsOnSensor || mRow < 0) && Debug()>2) {
-      LOG_WARN << "wrong row: " << mRow << " at sector: " << mSector << " ladder: " << mLadder << " sensor: " << mSensor << endm;
+   if ((mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] >= kNumberOfPxlRowsOnSensor || mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] < 0) && Debug()>2) {
+       LOG_WARN << "wrong row: " << mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] << " at sector: " << mSector << " ladder: " << mLadder << " sensor: " << mSensor << endm;
    }
    return 0;
 }
@@ -356,17 +359,17 @@ Int_t StPxlRawHitMaker::decodeStateN(Int_t val)
    // loop sequential fired columns and fill raw hits
    for (int c = 0; c < coding + 1; c++) {
       // check sector, ladder, sensor row and column range
-      if (mSector > 0 && mSector <= kNumberOfPxlSectors && mLadder > 0 && mLadder <= kNumberOfPxlLaddersPerSector && mSensor > 0 && mSensor <= kNumberOfPxlSensorsPerLadder && mRow >= 0 && mRow < kNumberOfPxlRowsOnSensor && mColumn + c < kNumberOfPxlColumnsOnSensor && mColumn + c >= 0) {
+       if (mSector > 0 && mSector <= kNumberOfPxlSectors && mLadder > 0 && mLadder <= kNumberOfPxlLaddersPerSector && mSensor > 0 && mSensor <= kNumberOfPxlSensorsPerLadder && mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] >= 0 && mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] < kNumberOfPxlRowsOnSensor && mColumn + c < kNumberOfPxlColumnsOnSensor && mColumn + c >= 0) {
          // check raw and column status and hot pixels
-         if (mPxlDb->rowStatus(mSector, mLadder, mSensor, mRow) == mRowColumnGoodStatus
+           if (mPxlDb->rowStatus(mSector, mLadder, mSensor, mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1]) == mRowColumnGoodStatus
              && mPxlDb->columnStatus(mSector, mLadder, mSensor, mColumn + c) == mRowColumnGoodStatus
-             && (!mPxlDb->pixelHot(mSector, mLadder, mSensor, mRow, mColumn + c))) {
+               && (!mPxlDb->pixelHot(mSector, mLadder, mSensor, mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1], mColumn + c))) {
 	   // fill raw hit
 	   StPxlRawHit pxlRawHit;
 	   pxlRawHit.setSector(mSector);
 	   pxlRawHit.setLadder(mLadder);
 	   pxlRawHit.setSensor(mSensor);
-	   pxlRawHit.setRow(mRow);
+	   pxlRawHit.setRow(mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1]);
 	   pxlRawHit.setColumn(mColumn + c);
 	   pxlRawHit.setIdTruth(0);
 	   if (Debug() > 4) pxlRawHit.print();
@@ -375,7 +378,7 @@ Int_t StPxlRawHitMaker::decodeStateN(Int_t val)
          }
       }
       else if (mColumn != mDummyState && Debug() > 2) { // 1023: dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
-          LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn <<"+"<<c<< endm;
+          LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow[(mLadder-1)*kNumberOfPxlSensorsPerLadder+mSensor-1] << "/" << mColumn <<"+"<<c<< endm;
       }
    }
    return 0;
