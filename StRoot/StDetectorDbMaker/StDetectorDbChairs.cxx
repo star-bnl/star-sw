@@ -998,11 +998,12 @@ Float_t St_tofCorrC::Correction(Int_t N, Float_t *xArray, Float_t x, Float_t *yA
 }
 //________________________________________________________________________________
 Int_t St_tofCorrC::Index(Int_t tray, Int_t module, Int_t cell) {
+  assert( tray && module );
   Int_t i = -1;
   switch (mCalibType) {
-  case CELLCALIB:   i = cell - 1 + mNCell*(module - 1 + mNModule*(tray - 1))  ; break;
-  case MODULECALIB: i =                    module - 1 + mNModule*(tray - 1)   ; break;
-  case BOARDCALIB:  i =                   (module - 1 + mNModule*(tray - 1))/4; break;
+  case CELLCALIB:  assert(cell); i = cell - 1 + mNCell*(module - 1 + mNModule*(tray - 1))  ; break;
+  case MODULECALIB: i =                                 module - 1 + mNModule*(tray - 1)   ; break;
+  case BOARDCALIB:  i =                                (module - 1 + mNModule*(tray - 1))/4; break;
   default: assert(0); break;
   }
   return i;
