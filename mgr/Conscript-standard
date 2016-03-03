@@ -1010,6 +1010,7 @@ TDataSet *CreateTable() {
 	    Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	    if (! $xgeomList{$geom}) {
 	      Depends $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+	      Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
 	      Command $env1 [$rz,$geometry], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
 		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry %>:d); #   mv geom.rz %>:f;
 #		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv %>:f $geometry %>:d); #   mv geom.rz %>:f;
