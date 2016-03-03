@@ -92,7 +92,7 @@ void fpsBuilder::initialize(int argc, char *argv[]) {
   int np = sizeof(contents) / sizeof(TH1 *);
   JevpPlot *plots[np];
 
-  char *c_title[] = { "FPS1", "FPS2", "FPS3" };
+  char *c_title[] = { (char *)"FPS1", (char *)"FPS2", (char *)"FPS3" };
   int n=0;
   plots[n]   = new JevpPlot(contents.h0_evt_size);
   plots[++n] = new JevpPlot(contents.h1_fps_size);

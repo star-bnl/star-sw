@@ -114,8 +114,8 @@ void daqBuilder::event(daqReader *rdr)
   //  int eemc_size = rdr->getDetectorSize("etow");
   //  int bsmd_size = rdr->getDetectorSize("bsmd");
   // int esmd_size = rdr->getDetectorSize("esmd");
-  int ftp_size = rdr->getDetectorSize("ftp");
-  int l3_size = rdr->getDetectorSize("hlt");
+  //int ftp_size = rdr->getDetectorSize("ftp");
+  //int l3_size = rdr->getDetectorSize("hlt");
   int tof_size = rdr->getDetectorSize("tof");
   int sz = rdr->getDetectorSize("/");
   
