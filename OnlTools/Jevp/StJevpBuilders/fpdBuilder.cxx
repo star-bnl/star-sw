@@ -122,7 +122,7 @@ void fpdBuilder::startrun(daqReader *rdr) {
 
 void fpdBuilder::event(daqReader *rdr)
 {
-  int run = rdr->run;
+    //int run = rdr->run;
 
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) return;

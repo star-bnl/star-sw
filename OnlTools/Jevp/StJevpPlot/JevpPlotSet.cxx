@@ -360,7 +360,7 @@ void JevpPlotSet::_event(daqReader *rdr)
   //unsigned long long int post_mem = getMemUse();
 
   static int evt_cnt=0;
-  static int mem_leak_cnt=0;
+  //static int mem_leak_cnt=0;
 
   //if(post_mem != prio_mem) {
     //mem_leak_cnt++;
@@ -397,7 +397,7 @@ char *JevpPlotSet::getPlotSetName()
 // Main is only called in the stand alone version!
 void JevpPlotSet::Main(int argc, char *argv[])
 {
-  static unsigned int last_update = 0;
+    //static unsigned int last_update = 0;
 
   glbPS = this;
 
@@ -485,10 +485,10 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
 
     if(maxEvts > 0) {
-      if(reader->event_number > maxEvts) {
-	reader->status = EVP_STAT_EOR;
-	ret = NULL;
-      }
+	if(reader->event_number > (unsigned int)maxEvts) {
+	    reader->status = EVP_STAT_EOR;
+	    ret = NULL;
+	}
     }
 
     if(builderStatus.running()) {

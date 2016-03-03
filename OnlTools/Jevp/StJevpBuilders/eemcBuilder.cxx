@@ -36,7 +36,7 @@ eemcBuilder::~eemcBuilder() {
 
 
 
-
+/*
 void eemcBuilder::eeJpQaMinMax(TH1 *hh) {
     if (!hh) return;
     hh->SetAxisRange(0.5, 6.4);
@@ -45,7 +45,8 @@ void eemcBuilder::eeJpQaMinMax(TH1 *hh) {
     float yMax = hh->GetBinContent(ib);
     ib = hh->GetMinimumBin();
     float yMin = hh->GetBinContent(ib);
-    float r = 0, er = 999;
+    float r = 0;   
+    float er = 999;
     if (yMin <= 0) yMin = 1;
     if (yMax <= 0) yMax = 1;    
     if ((yMin > 0) && (yMax > 0)) {
@@ -53,6 +54,7 @@ void eemcBuilder::eeJpQaMinMax(TH1 *hh) {
 	er = r * TMath::Sqrt((1 / yMax) + (1 / yMin));
     }
 }
+*/
 
 
 static Def defs[] = {

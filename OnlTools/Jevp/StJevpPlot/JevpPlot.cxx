@@ -4,6 +4,7 @@
 #include <TStyle.h>
 #include <rtsLog.h>
 #include "JLatex.h"
+#include <RTS/include/SUNRT/clockClass.h>
 
 ClassImp(PlotHisto);
 ClassImp(JevpPlot);
@@ -17,30 +18,30 @@ PlotHisto::PlotHisto(TH1 *hist)
 
 PlotHisto::PlotHisto(PlotHisto &x)
 {
-  if(x.histo) {
-    //printf("There is a plothisto\n");
-    //printf("plothisto name was %s\n",x.histo->GetName());
-    histo = (TH1 *)x.histo->Clone();
-    //printf("new plothisto name is %s\n",x.histo->GetName());
-  }
-  else {
-    //printf("There was not plothisto\n");
-    histo = NULL;
-  }
+    if(x.histo) {
+	//printf("There is a plothisto\n");
+	//printf("plothisto name was %s\n",x.histo->GetName());
+	histo = (TH1 *)x.histo->Clone();
+	//printf("new plothisto name is %s\n",x.histo->GetName());
+    }
+    else {
+	//printf("There was not plothisto\n");
+	histo = NULL;
+    }
 
-  if(x.legendText) {
-    legendText = new char[sizeof(x.legendText) + 1];
-    strcpy(legendText, x.legendText);
-  }
-  else 
-    legendText = NULL;
+    if(x.legendText) {
+	legendText = new char[sizeof(x.legendText) + 1];
+	strcpy(legendText, x.legendText);
+    }
+    else 
+	legendText = NULL;
 
-  if(x.legendArgs) {
-    legendArgs = new char[sizeof(x.legendArgs) + 1];
-    strcpy(legendArgs, x.legendArgs);
-  }
-  else 
-    legendArgs = NULL;
+    if(x.legendArgs) {
+	legendArgs = new char[sizeof(x.legendArgs) + 1];
+	strcpy(legendArgs, x.legendArgs);
+    }
+    else 
+	legendArgs = NULL;
 }
 
 
@@ -116,6 +117,8 @@ JevpPlot::JevpPlot(TH1 *firsthisto) {
   refid = 0;
   refcomment = NULL;
   myname[0] = '\0';
+
+  legend = NULL;
 
   if(firsthisto) addHisto(firsthisto);
 }
@@ -245,6 +248,8 @@ JevpPlot::JevpPlot(JevpPlot &x)
     TObject *nobj = obj->Clone();
     addElement(nobj);
   }
+
+  GetPlotName();
   //CP;
 }
 
@@ -324,6 +329,7 @@ void JevpPlot::addHisto(PlotHisto *hist) {
     hist->histo->SetLineWidth(1);
   }
   nhistos++;
+  if(nhistos == 1) GetPlotName();
 }
 
 void JevpPlot::addHisto(TH1 *roothist) {
@@ -440,120 +446,185 @@ int JevpPlot::isDataPresent()
 // Return > 0 if data
 void JevpPlot::draw()
 {
-  TListIter next(&histos);
-  PlotHisto *curr;
+    RtsTimer_root clock;
+    RtsTimer_root clock2;
+    RtsTimer_root clock3;
+    clock2.record_time();
+    clock.record_time();
+    clock3.record_time();
+    LOG(NOTE, "Draw plot %s",GetName());
 
-  // Get the plot dimension!
-  int dimension = 0;
-  curr = (PlotHisto *)histos.First();
-  if(curr && curr->histo) dimension = curr->histo->GetDimension();
+    TListIter next(&histos);
+    PlotHisto *curr;
 
-  // Find out if data is present!
-  int data_present = isDataPresent();
+    // Get the plot dimension!
+    int dimension = 0;
+    curr = (PlotHisto *)histos.First();
+    if(curr && curr->histo) dimension = curr->histo->GetDimension();
 
-  // Set the legend!
-  if(legend != NULL) {
-    delete legend;
-    legend = NULL;
-  }
+    //printf("dimension = %d\n", dimension);
 
-  if(legendx1 >= 0) {
-    legend = new TLegend(legendx1,legendy1,legendx2,legendy2);
-  }
+    // Find out if data is present!
+    int data_present = isDataPresent();
 
-  // Set various parameters of the pad & style...
-  gStyle->SetOptStat(optstat);
-  gPad->SetLogx(logx);
-  gPad->SetLogy(logy);
-  if(optlogz != -1) {
-    gStyle->SetOptLogz(optlogz);
-  }
-  gPad->SetGridx(gridx);
-  gPad->SetGridy(gridy);
-  gStyle->SetPalette(palette);  
+    //printf("data_present = %d\n", data_present);
 
-  // Worry about histogram bounds only for 1-dimensional histograms
-  // 2-d and above come from the histo itself...
-  if(dimension == 1) {
-    double max = 0;
-
-    // Find the maximum!
-    next.Reset();
-    while((curr = (PlotHisto *)next())) {
-      double m;
-      m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
-      
-      LOG(NOTE, "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
-      if(m > max) max = m;
+    LOG(NOTE, "Dimensions: %lf", clock3.record_time());
+    // Set the legend!
+    if(legend != NULL) {
+	delete legend;
+	legend = NULL;
     }
 
-    // Set all plots within to the maximum!
-    next.Reset();
-    while((curr = (PlotHisto *)next())) {
-      if(external_maxy > -9999) {
-	LOG(NOTE, "set max to %f", (float)(external_maxy));
-	curr->histo->SetMaximum(external_maxy);
-      }
-      else {
-	LOG(NOTE, "set max to %f",(float)(max*1.1));
-	curr->histo->SetMaximum(max * 1.1);
-      }
+    if(legendx1 >= 0) {
+	//	printf("Lengend1\n");
+	legend = new TLegend(legendx1,legendy1,legendx2,legendy2);
     }
-  }
-  
-  int plotnum= 1;
-  char *same = NULL;
-  
-  // printf("While loop start\n");
-  next.Reset();
-  while((curr = (PlotHisto *)next())) {
-    //printf("plot %d\n", plotnum);
-    plotnum++;
+
+    LOG(NOTE, "legends: %lf", clock3.record_time());
    
-    if(dimension == 1) {
-      if(logy) {
-	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
-	if(curr->histo->GetMinimum() == 0.0) curr->histo->SetMinimum(1.0);
-      }
-      else {
-	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
-      }
+    // Incredible hack!   This is needed to prevent a "gPad->Update()" within
+    // the gStyle->SetOptStat() call, effectively doubling the time
+    // to plot!
+    //
+    // The update is done at the end of all the drawing, as obviously it should be...
+    TVirtualPad *save = gPad;
+    gPad = NULL;
+    gStyle->SetOptStat(optstat);
+    gPad = save;
+
+    LOG(NOTE, "l1: %lf %d", clock3.record_time(), optstat);
+    gPad->SetLogx(logx);
+    LOG(NOTE, "l1: %lf", clock3.record_time());
+    gPad->SetLogy(logy);
+    LOG(NOTE, "l1: %lf", clock3.record_time());
+    if(optlogz != -1) {
+	gStyle->SetOptLogz(optlogz);
     }
- 
-    if(legend) {
-      char *text = (char *)((curr->legendText) ? curr->legendText : "no text");
-      char *args = (char *)((curr->legendArgs) ? curr->legendArgs : "");
-      
-      legend->AddEntry(curr->histo, text, args); 
-    }
+
+    LOG(NOTE, "l1: %lf", clock3.record_time());
+    gPad->SetGridx(gridx);
+    gPad->SetGridy(gridy);
+    LOG(NOTE, "l2: %lf", clock3.record_time());
+    gStyle->SetPalette(palette);  
+
+    LOG(NOTE, "logs: %lf", clock3.record_time());
     
-    char opts[256];
-    if(drawopts)
-      strcpy(opts, drawopts);
-    else opts[0] = '\0';
+    // Worry about histogram bounds only for 1-dimensional histograms
+    // 2-d and above come from the histo itself...
+    if(dimension == 1) {
+	double max = 0;
 
-    if((dimension > 1) && (strlen(opts) == 0)) {
-      sprintf(opts, "colz");
+	// Find the maximum!
+	next.Reset();
+	while((curr = (PlotHisto *)next())) {
+	    double m;
+
+	    //printf("Ploting aaa\n");
+
+	    m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
+      
+	    LOG(NOTE, "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
+	    if(m > max) max = m;
+	}
+
+	// Set all plots within to the maximum!
+	next.Reset();
+	while((curr = (PlotHisto *)next())) {
+
+	    //  printf("plotting b\n\n\n");
+	    if(external_maxy > -9999) {
+		LOG(NOTE, "set max to %f", (float)(external_maxy));
+		curr->histo->SetMaximum(external_maxy);
+	    }
+	    else {
+		LOG(NOTE, "set max to %f",(float)(max*1.1));
+		curr->histo->SetMaximum(max * 1.1);
+	    }
+	}
+    }
+  
+    LOG(NOTE, "dim: %lf", clock3.record_time());
+    int plotnum= 1;
+    char *same = NULL;
+  
+    // printf("While loop start\n");
+
+    double t = clock.record_time();
+    LOG(NOTE, "prep time: %lf", t);
+
+    next.Reset();
+    while((curr = (PlotHisto *)next())) {
+	//printf("plot %d\n", plotnum);
+	plotnum++;
+   
+	if(dimension == 1) {
+	    if(logy) {
+		if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
+		if(curr->histo->GetMinimum() == 0.0) curr->histo->SetMinimum(1.0);
+	    }
+	    else {
+		if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
+	    }
+	}
+ 
+	if(legend) {
+	    char *text = (char *)((curr->legendText) ? curr->legendText : "no text");
+	    char *args = (char *)((curr->legendArgs) ? curr->legendArgs : "");
+      
+	    legend->AddEntry(curr->histo, text, args); 
+	}
+    
+	char opts[256];
+	if(drawopts)
+	    strcpy(opts, drawopts);
+	else opts[0] = '\0';
+
+	if((dimension > 1) && (strlen(opts) == 0)) {
+	    sprintf(opts, "colz");
+	}
+
+	if(same) strcat(opts,same);
+
+	//printf("p[s %s\n", opts);
+
+	LOG(NOTE, "opts---%s\n",opts);
+	clock.record_time();
+	curr->histo->DrawCopy(opts);
+	t = clock.record_time();
+	LOG(NOTE, "time drawing histo: %s %f", curr->histo->GetName(), t);
+	same = (char *)"SAME";
     }
 
-    if(same) strcat(opts,same);
+    //#ifdef JUNK
+    // Draw additional elements...
 
-    LOG(NOTE, "opts---%s\n",opts);
-    curr->histo->DrawCopy(opts);
-    same = (char *)"SAME";
-  }
-
-  //#ifdef JUNK
-  // Draw additional elements...
-  TObject *element = (TObject *)elements.First();
-  while(element) {
-    LOG(DBG, "Drawing an element...");
-    element->Draw();
-    element = (TObject *)elements.After(element);
-  }
-  //#endif
+    clock.record_time();
+    TObject *element = (TObject *)elements.First();
+    while(element) {
+	//printf("Drawing element\n");
+	LOG(DBG, "Drawing an element...");
+	element->Draw();
+	element = (TObject *)elements.After(element);
+    }
+    t = clock.record_time();
+    LOG(NOTE, "Time drawing elements: %lf", t);
+    //#endif
   
     //#ifdef JUNK 
-  if(legend) legend->Draw();
-  //#endif
+    if(legend) {
+	//printf("legend->Draw()\n");
+	legend->Draw();
+	t = clock.record_time();
+	LOG(NOTE, "Time drawing legend: %lf", t);
+    }
+    
+    t = clock2.record_time();
+    LOG(NOTE, "Total time drawing: %lf", t);
+    //#endif
+}
+
+ULong_t JevpPlot::Hash() const {
+    TString s(myname);
+    return s.Hash();
 }

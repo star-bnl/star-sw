@@ -33,7 +33,7 @@ class PdfFileBuilder {
   // derived from same class, even though they do have this function in
   // common...
   JevpPlot *getPlotByName(char *name);  
-  void write(char *filename, int displayNumber, int ignoreServerTags = 1, char *serverTags = "");
+  void write(char *filename, int displayNumber, int ignoreServerTags = 1, char *serverTags = (char *)"");
   
  private:
   void writePdf(char *filename, int combo_index);

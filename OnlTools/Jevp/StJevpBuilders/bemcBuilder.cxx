@@ -970,7 +970,7 @@ void bemcBuilder::startrun(daqReader *rdr) {
 void bemcBuilder::event(daqReader *rdr)
 {
   // Find trigger data...
-  int run = rdr->run;
+  //int run = rdr->run;
   
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) return;

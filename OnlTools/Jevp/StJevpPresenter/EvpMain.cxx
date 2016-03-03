@@ -96,36 +96,40 @@ int EvpMain::main(char *args)
 //---- Main program ------------------------------------------------------
 int EvpMain::_main(int argc, char **argv )
 {
-  printf("_main\n");
+    // printf("_main\n");
+
+  QApplication app(argc, argv, true);
+
+
   evpMain = new EvpMain();   // store globals here...
 
-  printf("constructed\n");
+  //printf("constructed\n");
   CP;
   if(evpMain->parseArgs(argc, argv) < 0) return 0;
 
-  printf("parsed\n");
+  //printf("parsed\n");
   CP;
 
   //QApplication app(argc, argv);
 
   JevpGui *gui = new JevpGui();
   CP;
-  printf("constructeed\n");
+  //printf("constructeed\n");
   gui->init();
-  printf("initied\n");
+  //printf("initied\n");
 
   //gui->jl_JevpLogic();
   //gui->gui_JevpGui(logic);
   //gui->show();
   //gui->pc_PresenterConnect(gui, logic);
   
-  printf("arm\n");
+  // printf("arm\n");
   // This issues an update...to start the update loop...
   QTimer::singleShot (100,gui,SLOT(UpdatePlots()));
 
-  printf("done\n");
+  //printf("done\n");
 
-  //app.exec();
+  app.exec();
   return 0;  // just returns to roo4star...
 }
 

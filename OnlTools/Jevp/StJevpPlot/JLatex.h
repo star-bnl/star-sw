@@ -26,14 +26,23 @@ class JLatex : public TLatex {
   virtual ~JLatex() {
     //LOG("JEFF", "Deleting a jlatex");
   }
+
   void SetText(const char *text) {
-    TLatex::SetText(jx,jy,text);
+      TLatex::SetText(jx,jy,text);
   }
-      
+  
+  void SetText(const wchar_t *text) {
+      TLatex::SetText(jx, jy, text);
+  }
 
   void SetText(Double_t x, Double_t y, const char *text) {
-    jx = x; jy = y; TLatex::SetText(x,y,text);
+      jx = x; jy = y; TLatex::SetText(x,y,text);
   };
+
+  void SetText(Double_t x, Double_t y, const wchar_t *text) {
+      jx = x; jy = y; TLatex::SetText(x,y,text);
+  };
+
 
   void Draw(Option_t * option = "");
 
