@@ -42,6 +42,7 @@ class JevpScreenWidget : public QWidget {
  public:
     u_int combo_index;
     std::string *name;
+    u_int cleanTime;
 
     JevpScreenWidget(char *name, u_int combo_index, QWidget *parent);
     void init();

@@ -2,7 +2,7 @@
 #define _REFERENCE_WIDGET_H_
 
 #include <qdialog.h>
-#include <TQtWidget.h>
+#include <RootWidget.h>
 #include "JevpGui.h"
 #include <qgroupbox.h>
 
@@ -23,7 +23,7 @@ public:
   QLabel *comment;
   int refid;   // 0 for curr, 1 for ref, 100+refid for others...
   ReferenceWidget *refwidget;
-  TQtWidget *myrootwidget;
+  RootWidget *myrootwidget;
   Q3PopupMenu *pop;
 
   virtual ~PlotDisplay();

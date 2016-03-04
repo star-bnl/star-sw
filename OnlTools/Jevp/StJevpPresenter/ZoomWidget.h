@@ -2,15 +2,35 @@
 #define _ZOOM_WIDGET_H_
 
 #include <qdialog.h>
-#include <TQtWidget.h>
 #include "JevpGui.h"
 #include <qgroupbox.h>
 #include <qabstractbutton.h>
-
+#include "RootWidget.h"
 
 class ZoomWidget;
 class QLabel;
 class Q3PopupMenu;
+
+// The root widget will be used to set the size
+// it has a QVBoxLayout, so that the internal display widget can automatically resize
+//
+/* class RootWidget : public QWidget { */
+/*     Q_OBJECT */
+
+/*  private: */
+/*     QWidget *displayWidget; */
+/*     ULong_t wid; */
+/*     TCanvas *canvas; */
+/*     std::string *name; */
+    
+/*  public: */
+/*     RootWidget(char*, QWidget *); */
+/*     TCanvas *getCanvas(); */
+
+/*     void resizeEvent(QResizeEvent *); */
+/*     void paintEvent(QPaintEvent *); */
+/* }; */
+
 
 class ZPlotDisplay : public QFrame
 {
@@ -23,14 +43,13 @@ public:
 
   JevpPlot *plot;
   QLabel *comment;
-  int refid;   // 0 for curr, 1 for ref, 100+refid for others...
-  ZoomWidget *zoomwidget;
-  TQtWidget *myrootwidget;
+  ZoomWidget *parent;
+  RootWidget *myrootwidget;
   Q3PopupMenu *pop;
 
   virtual ~ZPlotDisplay();
 
-  ZPlotDisplay(ZoomWidget *zoomWidget, JevpPlot *plot);
+  ZPlotDisplay(ZoomWidget *parent, JevpPlot *plot);
  
   void CrossOfDeath(TCanvas *canvas);
   void mousePressEvent(QMouseEvent *e);
@@ -39,8 +58,6 @@ public:
 
   void replaceData(JevpPlot *plot);
   void invalidate();
-  int menu_refid() { return (refid<100) ? refid + 100 : refid; };
-  int true_refid() { return (refid<100) ? refid : refid - 100; };
 
   void zoomin();
   void zoomout();
