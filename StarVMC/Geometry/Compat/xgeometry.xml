@@ -4,17 +4,20 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
-                          call geometry  
+                  call geometry  
 </Export>
 </Module> 
   
     
 
 <!--    
-  Author:           $Author: fisyak $
-  Current Revision: $Id: xgeometry.xml,v 1.57 2015/12/20 01:54:24 fisyak Exp $
+  Author:           $Author: jwebb $
+  Current Revision: $Id: xgeometry.xml,v 1.58 2016/03/04 22:32:33 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.58  2016/03/04 22:32:33  jwebb
+  Corrections to MTD radii, y2015c tag added.
+
   Revision 1.57  2015/12/20 01:54:24  fisyak
   Move correction done by mistake
 
