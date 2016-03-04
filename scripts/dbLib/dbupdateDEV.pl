@@ -1667,7 +1667,7 @@ $jrun = "Run not completed";
       $nAssIstHits = $prtt[0];
       $totAssIstHits += $nAssIstHits;
 
-     }elsif($line =~ /Number of used hits:SsdId/) {
+     }elsif($line =~ /Number of used hits:SstId/) {
 
 
       @prt = ();
