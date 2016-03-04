@@ -7,4 +7,7 @@
 // Add pythia common blocks
 #pragma link C++ struct PyJets_t+;
 #pragma link C++ struct PySubs_t+;
+#pragma link C++ struct PyDat3_t+;
+#pragma link C++ struct PyPars_t+;
+#pragma link C++ struct PyInt5_t+;
 #endif
