@@ -23,7 +23,7 @@
 extern JevpGui *gJevpGui;
 
 JevpScreenWidget::JevpScreenWidget(char *name, u_int combo_index, QWidget *parent) : QWidget(parent) {
-    setAttribute(Qt::WA_NativeWindow, true);
+    //setAttribute(Qt::WA_NativeWindow, true);
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setMinimumSize(600, 400);
@@ -37,6 +37,7 @@ JevpScreenWidget::JevpScreenWidget(char *name, u_int combo_index, QWidget *paren
     LOG(DBG,"Creating JevpScreenWidget for %s\n",name);
     this->name = new std::string(name);
     npads = 0;
+    cleanTime = 0;
 }
 
 void JevpScreenWidget::init() {
@@ -44,7 +45,7 @@ void JevpScreenWidget::init() {
     //    LOG("JEFF", "init[%d]: winId=%lu", combo_index, w);
     wid = gVirtualX->AddWindow(w, 600, 400);
     tcanvas = new TCanvas(name->c_str(), width(), height(), wid);
-    tcanvas->SetDoubleBuffer(1);
+    tcanvas->SetDoubleBuffer(0);
 }
 
 JevpPlot *JevpScreenWidget::getJevpPlot(char *name) {
@@ -121,8 +122,11 @@ void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
 	    else if (ret == 2) {
 		LOG("JEFF", "Do reference plots");
 		if(hnode->name) {
+		    CP;
 		    ReferenceWidget *ref = new ReferenceWidget(gJevpGui, hnode->name);
+		    CP;
 		    ref->exec();
+		    CP;
 		    LOG(DBG,"Returned....\n");
 		    delete ref;
 		}
@@ -130,8 +134,11 @@ void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
 	    else if (ret == 3) {
 		LOG("JEFF", "Do zoom plot");
 		if(hnode->name) {
+		    CP;
 		    ZoomWidget *ref = new ZoomWidget(gJevpGui, hnode->name);
+		    CP;
 		    ref->exec();
+		    CP;
 		    LOG(DBG,"Returned....\n");
 		    delete ref;
 		}
@@ -431,7 +438,7 @@ void JevpScreenWidget::DrawOnScreen(DisplayNode *displayTab) {
     CP;
 
     double t = clock.record_time();
-
+    cleanTime = time(NULL);
     
     //LOG(NOTE, "Draw idx=%d. %d plots in %lf seconds\n", combo_index, nplots, t);
 }

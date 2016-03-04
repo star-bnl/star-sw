@@ -4,42 +4,46 @@
 #include "TText.h"
 #include "EditDialog.h"
 #include <q3popupmenu.h>
+#include "RootWidget.h"
+
+
 
 
 ZPlotDisplay::~ZPlotDisplay() {
   printf("In plot display destructor");
 }
 
-ZPlotDisplay::ZPlotDisplay(ZoomWidget *zoomwidget, JevpPlot *plot) : QFrame() {
+ZPlotDisplay::ZPlotDisplay(ZoomWidget *parent, JevpPlot *plot) : QFrame() {
 
-  this->plot = plot;
-  psizex=1150;
-  psizey=750;
+    this->plot = plot;
+    psizex=1150;
+    psizey=750;
 
-  this->zoomwidget = zoomwidget;
+    this->parent = parent;
 
-  QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *layout = new QVBoxLayout;
 
-  QScrollArea *sa = new QScrollArea;
+    QScrollArea *sa = new QScrollArea;
 
-  myrootwidget = new TQtWidget();
-  myrootwidget->GetCanvas()->cd();
-  if(plot) {
-    LOG("DBG", "Draw");
-    plot->draw();
-  }
-  else {
-    LOG("DBG", "No plot?");
-  }
-  myrootwidget->setMinimumSize(psizex,psizey);
-  myrootwidget->setEnabled(0);
+    myrootwidget = new RootWidget("zoomer", this);
+    myrootwidget->setMinimumSize(psizex,psizey);
+    // myrootwidget->setEnabled(0);
 
-  sa->setWidget(myrootwidget);
-  sa->setMinimumHeight(800);
-  sa->setMinimumWidth(1200);
+    sa->setWidget(myrootwidget);
+    sa->setMinimumHeight(800);
+    sa->setMinimumWidth(1200);
 
-  layout->addWidget(sa);
-  setLayout(layout);
+    layout->addWidget(sa);
+    setLayout(layout);
+
+    myrootwidget->getCanvas()->cd();
+    if(plot) {
+	LOG("DBG", "Draw");
+	plot->draw();
+    }
+    else {
+	LOG("DBG", "No plot?");
+    }
 }
 
 void ZPlotDisplay::gotclick()
@@ -51,8 +55,8 @@ void ZPlotDisplay::gotclick()
 
 void ZPlotDisplay::invalidate()  // ie... we changed the plot...
 {
-  myrootwidget->GetCanvas()->Clear();
-  myrootwidget->GetCanvas()->cd();
+  myrootwidget->getCanvas()->Clear();
+  myrootwidget->getCanvas()->cd();
 
   if(plot) {
     LOG("DBG", "invalidate...");
@@ -61,7 +65,7 @@ void ZPlotDisplay::invalidate()  // ie... we changed the plot...
   else {
     LOG("DBG", "No plot?");
   }
-  myrootwidget->GetCanvas()->Update();
+  myrootwidget->getCanvas()->Update();
 }
 
 void ZPlotDisplay::mousePressEvent(QMouseEvent *e)

@@ -75,7 +75,7 @@ PlotDisplay::PlotDisplay(ReferenceWidget *refwidget, JevpPlot *plot, int refid, 
       }
 
       QVBoxLayout *layout = new QVBoxLayout;
-      myrootwidget = new TQtWidget();
+      myrootwidget = new RootWidget("referencewidget", this);
   
       char *ctext = (char *)"No description available";
       if(plot && plot->refcomment) 
@@ -111,7 +111,7 @@ PlotDisplay::PlotDisplay(ReferenceWidget *refwidget, JevpPlot *plot, int refid, 
   case PD_THUMB:
     {
       comment = NULL;
-      myrootwidget = new TQtWidget();
+      myrootwidget = new RootWidget("thumb", this);
       QVBoxLayout *layout = new QVBoxLayout;
       layout->addWidget(myrootwidget);
       setLayout(layout);

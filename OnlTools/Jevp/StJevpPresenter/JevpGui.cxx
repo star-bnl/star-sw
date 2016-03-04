@@ -351,7 +351,7 @@ void JevpGui::MakeMenuBar()
     QMenu *optionMenu = menuBar()->addMenu("&Option");
     QMenu *helpMenu = menuBar()->addMenu("&Help");
     
-    AutoUpdateAction = createAction("Auto Update", true);
+    AutoUpdateAction = createAction("Auto Update", true, true);
     IgnoreServerTagsAction = createAction("Ignore Server Tags", true);
 
     QAction *UpdateAction = createAction("Update");
@@ -623,6 +623,12 @@ void JevpGui::tabChanged(QTabWidget *tab) {
 	return;
     }
     
+    if(time(NULL) - screen->cleanTime < 10) {
+	LOG("JEFF", "Not dirty yet...");
+	currentScreen = screen;
+	return;
+    }
+
     updateScreen(screen);
 }
 
