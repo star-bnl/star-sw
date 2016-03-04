@@ -115,6 +115,18 @@ class StarKinematics : public StarGenerator
   /// @param y      Distribution (TH1) to sample rapidity from.
   /// @param phi    Distribution (TH1) to sample phi from.  Optional.
   void Dist( Int_t ntrack, const Char_t *type, TH1 *pt, TH1 *y, TH1 *phi=0 );
+  
+  /// Generate ntrack cosmic rays of the specified type
+  /// @param ntrack number of cosmics per event
+  /// @param type is the particle type
+  /// @param plow is the minimum momentum
+  /// @param phigh is the maximum momentum
+  /// @param radius is the radius at which the track originates
+  /// @param zmin is the minimum z-vertex
+  /// @param zmax is the maximum z-vertex
+  /// @param dtheta is the spread in theta,phi with which  the momentum is generated
+  void Cosmic( int ntrack, const char* type="mu+", double plow=3.0, double phigh=10.0, double radius=300.0, double zmin=-3.0, double zmax=+3.0, double dtheta=15.0 );
+
 
   /// Generate event
   Int_t Generate();
