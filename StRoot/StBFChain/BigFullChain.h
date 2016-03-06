@@ -1019,6 +1019,9 @@ Bfc_st BFC[] = { // standard chains
   {"B2015b"  ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                  "Base chain for run 2015 with y2015b geometry",kFALSE},
 
+  {"B2015c"  ,"","","ry2015c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                  "Base chain for run 2015 with y2015c geometry",kFALSE},
+
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -1030,6 +1033,10 @@ Bfc_st BFC[] = { // standard chains
   {"pp2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
+  {"pp2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   {"P2015","" ,"",
@@ -1043,6 +1050,10 @@ Bfc_st BFC[] = { // standard chains
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
+  {"P2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // Year 16 initial chains - no data to really test yet but placeholder
