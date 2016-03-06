@@ -30,7 +30,7 @@ class PlottingEngineRoot : public PlottingEngine {
   bool GetRootColor(std::string color, int& rootcol);
 
  private:
-  TStyle* m_garfieldStyle;
+  TStyle m_garfieldStyle;
 
   std::string m_colorLine1Default;
   std::string m_colorLine2Default;
