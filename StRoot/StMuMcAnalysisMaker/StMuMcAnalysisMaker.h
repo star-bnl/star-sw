@@ -53,9 +53,9 @@ enum TrackType {
   kGlobal = 0, kPrimary, kTotalT  // switch between global and primary tracks
 };
 enum TrackMatchType {
-  kNotDefined = -1, kMcTk = 0, kMcTpcTk, kRecoTk, kCloneTk, kGhostTk, kLostTk, 
-  kMcToFTk, kRecoToFTk, kCloneToFTk, kGhostToFTk, kLostToFTk, 
-  kMcHftTk, kRecoHftTk, kCloneHftTk, kGhostHftTk, kLostHftTk, 
+  kNotDefined = -1, kMcTk= 0, kMcTpcTk, kRecoTk   , kCloneTk   , kGhostTk   , kLostTk
+  ,                           kMcToFTk, kRecoToFTk,              kGhostToFTk, kLostToFTk
+  ,                           kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk, 
   kTotalMatchType // match type extended
 };
 enum EdEdx {NdEdxPiD = 3};
@@ -131,7 +131,6 @@ class StMuMcAnalysisMaker : public StMaker {
   void           FillQAGl(TrackMatchType type,const StMuTrack *gTrack = 0, const StMuMcTrack *mcTrack = 0, const StDcaGeometry *dcaG = 0, const StMuMcVertex *mcVertex = 0);
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack = 0, const StMuMcTrack *mcTrack = 0, const StMuPrimaryTrackCovariance *cov = 0); 
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle);
-  TrackMatchType TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, Bool_t CheckHft = kFALSE);
   Bool_t         IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, map<Int_t,Int_t> &IdGlobal2IdPrimaryTrack);
   
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 

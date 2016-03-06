@@ -2,6 +2,8 @@
 #include "StMuMcAnalysisMaker.h"
 #include "TDirectory.h"
 #include "TROOT.h"
+#include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalMatchType][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
@@ -144,11 +146,9 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
       {kLostTk,     "Lost",  	"Mc tracks without reconstructed one"},					     	
       {kMcToFTk,    "ToF",   	Form("Mc tracks which have >= %i Mc Tpc and > 0 ToF Hits",StMuDst::MinNoTpcMcHits)},
       {kRecoToFTk,  "RecToF",   "Rc tracks matched with only Mc track"},
-      {kCloneToFTk, "CloneToF", "Mc tracks matched with > 1 Rc track (Clone)"},
       {kGhostToFTk, "GhostToF", "Rc tracks without Mc partner"},
       {kLostToFTk,  "LostToF",  "Mc tracks without reconstructed one in ToF"},
       {kRecoHftTk,  "RecHft",   "Rc tracks matched with only Mc track"},
-      {kCloneHftTk, "CloneHft", "Mc tracks matched with > 1 Rc track (Clone)"},
       {kGhostHftTk, "GhostHft", "Rc tracks without Mc partner"},
       {kLostHftTk,  "LostHft",  "Mc tracks without reconstructed one in Hft"}
     };
@@ -391,34 +391,54 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
     Double_t eta = mcTrack->Pxyz().pseudoRapidity();
     Double_t pT  = mcTrack->Pxyz().perp();
     Double_t phi = TMath::RadToDeg()*mcTrack->Pxyz().phi();
-    StMuTrack *gTrack = 0;
-    StMuTrack *pTrack = 0;
-    Int_t Id = mcTrack->Id()-1;
-    pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = IdMc2IdRcTracks.equal_range(Id);
-    multimap<Int_t,Int_t>::iterator it;
-    Int_t kg = -1;
-    Int_t count = 0;
-    for (it = ret.first; it != ret.second; ++it, ++count) {
-      if (kg < 0) kg = (*it).second; 
-    }
-    if (kg >= 0) {
-      gTrack = muDst->globalTracks(kg);
-      Int_t k = IdGlobal2IdPrimaryTrack[kg+1] - 1;
-      if (k >= 0) {
-	pTrack = (StMuTrack *) muDst->array(muPrimary)->UncheckedAt(k);
-      }   
-    } 
-    // kNotDefined, kLostTk, kRecoTk, kCloneTk
-    TrackMatchType type    = TrackType(mcTrack,IdMc2IdRcTracks);
-    // kNotDefined, kLostHftTk, kRecoHftTk, kCloneHftTk
-    TrackMatchType typeHft = TrackType(mcTrack,IdMc2IdRcTracks,kTRUE);
-    if (typeHft == kLostHftTk && ! McHft) typeHft = kNotDefined;
-    if (typeHft == kRecoHftTk && ! McHft) typeHft = kGhostHftTk;
-    TrackMatchType typeToF = kNotDefined;
     Bool_t isPrim = IsPrimary(mcTrack,IdMc2IdRcTracks, IdGlobal2IdPrimaryTrack);
     Int_t gp2 = kGlobal;
     if (IdVx == 1) gp2 = kPrimary; 
+    pair<multimap<StMuMcTrack*,StMuTrack*>::iterator,multimap<StMuMcTrack*,StMuTrack*>::iterator> McTk2RcTk;
+    pair<multimap<StMuMcTrack*,KFParticle*>::iterator, multimap<StMuMcTrack*,KFParticle*>::iterator> McTk2KFTk;
     for (Int_t gp = kGlobal; gp <= gp2; gp++) {
+      if (gp == kGlobal) McTk2RcTk = muDst->McTrack2GlobalTrack().equal_range(mcTrack);
+      else               McTk2RcTk = muDst->McTrack2PrimaryTrack().equal_range(mcTrack);
+      Int_t count = 0;
+      Int_t countHft = 0;
+      Int_t countToF = 0;
+      StMuTrack *Track = 0;
+      for (auto it = McTk2RcTk.first; it != McTk2RcTk.second; ++it, ++count) {
+	auto track = (*it).second; 
+	if (! track) continue;
+	if (! Track) Track = track;
+	StTrackTopologyMap topologyMap = track->topologyMap();
+	UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
+	UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
+	UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
+	UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
+	if (noPxlHits >= 2 && noIstHits + noSsdHits >= 1) {countHft++; Track = track;}
+      }
+      if (! Track) continue;
+      if (Track->btofPidTraits().matchFlag()) {countToF++;}
+      // kNotDefined, kLostTk, kRecoTk, kCloneTk
+      TrackMatchType type    = kNotDefined;
+      TrackMatchType typeHft = kNotDefined;
+      TrackMatchType typeToF = kNotDefined;
+      if (! count) { 
+	type ==  kLostTk;
+      } else if (count == 1) {
+	type == kRecoTk;
+	if (McToF) {
+	  if (! countToF) typeToF = kLostToFTk;
+	  else            typeToF = kRecoToFTk;
+	} else {
+	  typeToF = kGhostToFTk;
+	}
+	if (McHft) {
+	  if (! countHft) typeHft = kLostHftTk;
+	  else            typeHft = kRecoHftTk;
+	} else {
+	  typeHft = kGhostHftTk;
+	}
+      } else {
+	type = kCloneTk;
+      }
       for (Int_t particle = 0; particle <= NPart; particle++) {
 	fHistsT[gp][kMcTk][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
 	if (! McTpc) continue; 
@@ -436,56 +456,70 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	  fHistsT[gp][typeHft][particle][pm][1][kTotalQA]->Fill(eta,pT, phi);
 	}
       }
-    }
-    //#define __NoOfPoint__
+#define __NoOfPoint__
 #ifdef __NoOfPoint__
-    if ((type == kRecoTk || typeHft == kRecoHftTk) && gTrack) {
-      assert(count == 1);
-      // Track QA
-      Int_t kgc = gTrack->index2Cov();
-      if (kgc < 0) continue;
-      StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
-      StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
-      if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
-      if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
-      if (! pTrack) continue;
-      assert(pTrack->idTruth() ==  gTrack->idTruth());
-      Int_t kpc = pTrack->index2Cov();
-      if (kpc >= 0) {
-	StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
-	if (type    == kRecoTk)    FillQAPr(type   , pTrack, mcTrack, cov);
-	if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
-      } else {
-	KFParticle *particle = 0;
-	
-	if (k < muDst->numberOfKFTracks()) particle = muDst->KFtrack(k);
-	if (type    == kRecoTk)    FillQAPr(type   ,pTrack, mcTrack, particle);
-	if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, particle);
-      }
-      // dE/dx block
-      const StMuProbPidTraits &PiD = pTrack->probPidTraits();
-      Double_t I[2] = {PiD.dEdxTruncated(), PiD.dEdxFit()};
-      Double_t TrackLength = PiD.dEdxTrackLength();
-      Int_t Gid = mcTrack->GePid();
-      static Bichsel *m_Bichsel = Bichsel::Instance();
-      Double_t pMomentum = pTrack->helix().momentum(field).mag();
-      //	const StThreeVectorF &pVx  = pTrack->momentum();
-      for (Int_t h = 0; h < NHYPS; h++) {
-	if (GEANTiD[h] == Gid) {
-	  Double_t bghyp = TMath::Log10(pMomentum/Masses[h]);
-	  Double_t Pred[2]  = {1.e-6*m_Bichsel->GetI70(bghyp,1.0),
-			       1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp,1.0))};
-	  for (Int_t mm = 0; mm < 2; mm++) {
-	    if (I[mm] <= 0 || Pred[mm] <= 0) continue;
-	    Double_t z = TMath::Log(I[mm]/Pred[mm]);
-	    PdEdx[mm][h]->Fill(pTrack->phi(), pTrack->eta(), pTrack->pt(), z);
-	    LdEdx[mm][h]->Fill(TrackLength, bghyp, z);
+      if ((type == kRecoTk || typeHft == kRecoHftTk) && Track) {
+	assert(count == 1);
+	// Track QA
+	if (gp == kGlobal) {
+	  StMuTrack *gTrack = Track;
+	  Int_t kgc = gTrack->index2Cov();
+	  if (kgc < 0) continue;
+	  StDcaGeometry *dcaG = (StDcaGeometry *) muDst->covGlobTrack()->UncheckedAt(kgc);
+	  StMuMcVertex *mcVertex = muDst->MCvertex(IdVx-1);
+	  if (type    == kRecoTk)    FillQAGl(type   ,gTrack, mcTrack, dcaG, mcVertex);
+	  if (typeHft == kRecoHftTk) FillQAGl(typeHft,gTrack, mcTrack, dcaG, mcVertex);
+	  if (typeToF == kRecoToFTk) FillQAGl(typeToF,gTrack, mcTrack, dcaG, mcVertex);
+	} else { // gp = kPrimary
+	  StMuTrack *pTrack = Track;
+	  Int_t kpc = pTrack->index2Cov();
+	  if (kpc >= 0) {
+	    StMuPrimaryTrackCovariance *cov = (StMuPrimaryTrackCovariance *) muDst->covPrimTrack()->UncheckedAt(kpc);
+	    if (type    == kRecoTk)    FillQAPr(type   , pTrack, mcTrack, cov);
+	    if (typeHft == kRecoHftTk) FillQAPr(typeHft, pTrack, mcTrack, cov);
+	  } else {
+	    McTk2KFTk = muDst->McTrack2KFParticle().equal_range(mcTrack);
+	    KFParticle *kfp = 0;
+	    for (auto it = McTk2KFTk.first; it != McTk2KFTk.second; ++it, ++count) {
+	      auto *p = (*it).second; 
+	      if (! p) continue;
+	      if (p->GetID() == pTrack->id()) {
+		kfp = p;
+		break;
+	      }
+	      if (type    == kRecoTk)    FillQAPr(type   ,pTrack, mcTrack, kfp);
+	      if (typeHft == kRecoHftTk) FillQAPr(typeHft,pTrack, mcTrack, kfp);
+	    }
 	  }
-	  break;
+	  // dE/dx block
+	  const StMuProbPidTraits &PiD = pTrack->probPidTraits();
+	  Double_t I[2] = {PiD.dEdxTruncated(), PiD.dEdxFit()};
+	  Double_t TrackLength = PiD.dEdxTrackLength();
+	  Int_t Gid = mcTrack->GePid();
+	  static Bichsel *m_Bichsel = Bichsel::Instance();
+	  Double_t pMomentum = pTrack->helix().momentum(field).mag();
+	  //	const StThreeVectorF &pVx  = pTrack->momentum();
+	  for (Int_t h = 0; h < NHYPS; h++) {
+	    if (GEANTiD[h] == Gid) {
+	      Double_t bg    = pMomentum/Masses[h];
+	      Double_t bghyp = TMath::Log10(bg);
+	      Double_t Pred[3]  = {1.e-6*m_Bichsel->GetI70(bghyp,1.0),
+				   1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp,1.0)),
+				   StdEdxModel::instance()->dNdx(bg)
+	      };
+	      for (Int_t mm = 0; mm < 3; mm++) {
+		if (I[mm] <= 0 || Pred[mm] <= 0) continue;
+		Double_t z = TMath::Log(I[mm]/Pred[mm]);
+		PdEdx[mm][h]->Fill(pTrack->phi(), pTrack->eta(), pTrack->pt(), z);
+		LdEdx[mm][h]->Fill(TrackLength, bghyp, z);
+	      }
+	      break;
+	    }
+	  }
 	}
       }
-    }
 #endif /* __NoOfPoint__ */
+    }
   }
   // check for ghost
   for (Int_t kg = 0; kg < muDst->numberOfGlobalTracks(); kg++) {
@@ -760,44 +794,6 @@ Bool_t StMuMcAnalysisMaker::IsPrimary(const StMuMcTrack *mcTrack, multimap<Int_t
   }
   if (count > 0) ok = kTRUE;
   return ok;
-}
-//________________________________________________________________________________
-TrackMatchType StMuMcAnalysisMaker::TrackType(const StMuMcTrack *mcTrack, multimap<Int_t,Int_t> &IdMc2IdRcTracks, Bool_t CheckHft) {
-  Int_t Id = mcTrack->Id()-1;
-  pair<multimap<Int_t,Int_t>::iterator,multimap<Int_t,Int_t>::iterator> ret = IdMc2IdRcTracks.equal_range(Id);
-  Int_t count = 0;
-  Int_t countHft = 0;
-  for (multimap<Int_t,Int_t>::iterator it = ret.first; 
-       it != ret.second; 
-       ++it, ++count) 
-    {
-      Int_t kg = (*it).second;
-      StMuTrack *gTrack = muDst->globalTracks(kg);
-      StTrackTopologyMap topologyMap = gTrack->topologyMap();
-      UInt_t noPxlHits = topologyMap.numberOfHits(kPxlId); // 0-3
-      UInt_t noIstHits = topologyMap.numberOfHits(kIstId); // 0-2
-      UInt_t noSsdHits = topologyMap.numberOfHits(kSsdId); // 0-2
-      UInt_t noHftHits = noPxlHits + noIstHits + noSsdHits;
-      if (noPxlHits < 2 || noIstHits + noSsdHits < 1) continue;
-      countHft++;
-    }
-
-  TrackMatchType iok = kNotDefined;
-  if (! CheckHft) {
-    if      (count == 0) { iok = kLostTk;}
-    else {
-      if (count == 1) iok = kRecoTk;
-      else            iok = kCloneTk;
-    }
-    //  cout << " Marked as " << NameTrackMcName[iok] << endl;
-  } else {
-    if      (countHft == 0) { iok = kLostHftTk;}
-    else {
-      if (countHft == 1) iok = kRecoHftTk;
-      else               iok = kCloneHftTk;
-    }
-  }    
-  return iok;
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::ForceAnimate(unsigned int times, int msecDelay) {

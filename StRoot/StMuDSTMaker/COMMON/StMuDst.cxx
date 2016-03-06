@@ -1514,6 +1514,63 @@ multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcVertices() {
   return *&IdMc2IdRcVerticesMap;
 }
 //________________________________________________________________________________
+multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2GlobalTrack() { // McTrack to Reconstucted global Track
+  static Int_t eventIdOld = -1;
+  static multimap<StMuMcTrack*,StMuTrack *>                 McTrack2GlobalTrackMap; 
+  if (eventId() != eventIdOld) {
+    eventIdOld = eventId();
+    McTrack2GlobalTrackMap.clear();
+    // Id (Truth, IdMcTk) => gTrack
+    for (Int_t kg = 0; kg < numberOfGlobalTracks(); kg++) {
+      StMuTrack *gTrack = (StMuTrack *) globalTracks()->UncheckedAt(kg);
+      if (! Accept(gTrack)) continue;
+      Int_t IdTruth = gTrack->idTruth();
+      if (! IdTruth) continue;
+      StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
+      if (mcTrack) McTrack2GlobalTrackMap.insert(pair<StMuMcTrack*,StMuTrack *>(mcTrack,gTrack));
+    }
+  }
+  return *&McTrack2GlobalTrackMap;
+}
+//________________________________________________________________________________
+multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2PrimaryTrack() { // McTrack to Reconstucted primary Track
+  static Int_t eventIdOld = -1;
+  static multimap<StMuMcTrack*,StMuTrack *>                 McTrack2PrimaryTrackMap; 
+  if (eventId() != eventIdOld) {
+    eventIdOld = eventId();
+    McTrack2PrimaryTrackMap.clear();
+    // Id (Truth, IdMcTk) => pTrack
+    Int_t n_ptracks = arrays[muPrimary]->GetEntriesFast();
+    for (Int_t k = 0; k < n_ptracks; k++) {
+      StMuTrack *pTrack = (StMuTrack *) arrays[muPrimary]->UncheckedAt(k);
+      if (! Accept(pTrack)) continue;
+      Int_t IdTruth = pTrack->idTruth();
+      if (! IdTruth) continue;
+      StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
+      if (mcTrack) McTrack2PrimaryTrackMap.insert(pair<StMuMcTrack*,StMuTrack *>(mcTrack,pTrack));
+    }
+  }
+  return *&McTrack2PrimaryTrackMap;
+}
+//________________________________________________________________________________
+multimap<StMuMcTrack*,KFParticle *>                 &StMuDst::McTrack2KFParticle() { // McTrack to Reconstucted KFParticle
+  static Int_t eventIdOld = -1;
+  static multimap<StMuMcTrack*,KFParticle *>                 McTrack2KFParticleMap; 
+  if (eventId() != eventIdOld) {
+    eventIdOld = eventId();
+    McTrack2KFParticleMap.clear();
+    for (Int_t k = 0; k < numberOfKFTracks(); k++) {
+      KFParticle *pTrack = KFtrack(k);
+      if (! pTrack) continue;
+      Int_t IdTruth = pTrack->IdTruth();
+      if (! IdTruth) continue;
+      StMuMcTrack *mcTrack = MCtrack(IdTruth-1);
+      if (mcTrack) McTrack2KFParticleMap.insert(pair<StMuMcTrack*,KFParticle *>(mcTrack,pTrack));
+    }
+  }
+  return *&McTrack2KFParticleMap;
+}
+//________________________________________________________________________________
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
