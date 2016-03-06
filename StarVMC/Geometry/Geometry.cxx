@@ -760,6 +760,9 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
   if ( mutdGeom.config >= 4 ) 
     AgStructure::AgDetpAdd( "Mtdg_t", "config", (Float_t)mutdGeom.config );
 
+  if ( mutdGeom.config >= 16 ) // corrections to backlegs
+    AgStructure::AgDetpAdd( "Mtdg_t", "version", (Float_t)1.1 );
+
   if ( !CreateModule( mutdGeom.module ) )
     {
       Warning(GetName(),"Could not create module "+mutdGeom.module);
@@ -1499,6 +1502,7 @@ Bool_t Geometry::MutdInit()
   mutdGeom.select="MUTD13";    mutdGeom.module="MutdGeo4";  mutdGeom.config=13;     mutdGeom.fill();
   mutdGeom.select="MUTD14";    mutdGeom.module="MutdGeo5";  mutdGeom.config=14;     mutdGeom.fill();
   mutdGeom.select="MUTD15";    mutdGeom.module="MutdGeo7";  mutdGeom.config=15;     mutdGeom.fill();
+  mutdGeom.select="MUTD16";    mutdGeom.module="MutdGeo7";  mutdGeom.config=16;     mutdGeom.fill();
 
   return true;
 }

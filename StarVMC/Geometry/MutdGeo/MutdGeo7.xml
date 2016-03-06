@@ -22,6 +22,7 @@
         </Structure>
         
         <Structure name="MTDD"  >
+	    <var name="version" />
             <var name="Rmin" />
             <var name="Rmax" />
             <var name="Ri(30)" type="float" />
@@ -65,7 +66,8 @@
             <var name="Config" value="1" comment=" =1 single backleg (Run11), =2 full system (Run13) "  />
         </Fill>
         
-        <Fill name="MTDD" comment="Muon system geometry parameters"  >
+        <Fill name="MTDD" comment="Muon system geometry parameters"  >	    
+	    <var name="version" value="1.0" comment="default version" />
             <var name="Rmin" value="364.25" comment=" integration radius lower "  />
             <var name="Rmax" value="430.0" comment=" integration radius upper "  />
 <!--  These values of Ri come from CADD, and are in INCHES (don't mess) -->
@@ -99,9 +101,15 @@
             <var name="MtdIGstackGapThick" value="0.025" comment=" WMRPC gas thickness (0.25mm)  "  />
             <var name="MtdIGstackThinGlassThick" value="0.07" comment=" WMRPC thin glass thickness (0.7mm)  "  />
         </Fill>
-        
+
+        <Fill name="MTDD" comment="Muon system geometry parameters (revision 03/2016)"  >
+	    <var name="version" value="1.1" comment="revision 3/16" />
+            <var name="YShift08" value="-5.222" comment=" Backleg 8 shift for bus cover clearance "  />
+            <var name="YShift24" value="3.394" comment=" Backleg 24 shift for bus cover clearance "  />
+	</Fill>
+      
         <Use struct="MTDG"  />
-        <Use struct="MTDD"  />
+        <Use struct="MTDD" select="version" value="MTDG_version" />
 
         <Print level="0" fmt="' MuTD: MTDG_Version = ', F5.3"  >
             MTDG_Version
@@ -270,7 +278,7 @@
     </Do>
 			</Elif>	      
   <!-- ................................................ -->
-  <Elif expr="kTrayConfig.eq.15"  >
+  <Elif expr="kTrayConfig.ge.15"  >
 
 <!--
 <Info format="Creating Run-15 (full system) MTD geometry with kTrayConfig={3i}">kTrayConfig</Info>

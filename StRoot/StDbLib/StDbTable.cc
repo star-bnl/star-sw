@@ -1442,11 +1442,10 @@ unsigned int size = mdescriptor->getTotalSizeInBytes();
 
 
 void StDbTable::printNoDataReturned(const char* elementName){
-#if 0
+
   StString emess;
   emess<<" No data return from table="<<printName()<<" column="<<elementName;
   StDbManager::Instance()->printInfo((emess.str()).c_str(),dbMWarn,__LINE__,__CLASS__,"ReadElement(ptr,name,len,type,buffer)");
-#endif
 }
 
 #undef __CLASS__

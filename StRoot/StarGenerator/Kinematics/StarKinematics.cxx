@@ -169,3 +169,55 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TH1 *ptFunc, TH1 *e
     }
 }
 // ----------------------------------------------------------------------------
+const double deg2rad = TMath::DegToRad();
+
+void StarKinematics::Cosmic( int ntrack, const char* type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
+{
+  for ( Int_t i=0; i<ntrack; i++ )
+    {
+
+      StarGenParticle *p = AddParticle(type);
+
+      // Generate a random vertex
+      double zvertex = random( zmin, zmax );
+      double phi     = random( 0.0, TMath::TwoPi() );
+      double xvertex = radius * TMath::Cos(phi);
+      double yvertex = radius * TMath::Sin(phi);
+
+      // Initialize vertex X,Y ... to get unit vector pointing to beam line
+      TVector3 vertex(xvertex,yvertex,0);
+
+      // Unit vector pointing away from beamline
+      TVector3 direct = vertex.Unit();
+
+      // Sample momentum distribution
+      double pmag    = random(plow,  phigh);
+
+      // Momentum vector pointing in towards the beamline
+      TVector3 momentum = -pmag * direct;
+
+      // Now, randomize phi and theta by +/- dphi degrees about the momentum axis
+             phi   = momentum.Phi()   + deg2rad * random( -dphi, +dphi );
+      double theta = momentum.Theta() + deg2rad * random( -dphi, +dphi );
+
+      momentum.SetPhi(phi);
+      momentum.SetTheta(theta);            
+
+      Double_t m   = p->GetMass();
+
+      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E  = sqrt(E2);
+
+      p->SetPx( momentum.Px() );
+      p->SetPy( momentum.Py() );
+      p->SetPz( momentum.Pz() );
+      p->SetEnergy( E );
+
+      p->SetVx( xvertex ); 
+      p->SetVy( yvertex );
+      p->SetVz( zvertex );
+      p->SetTof( 0. );
+
+    }
+}
+// ----------------------------------------------------------------------------
