@@ -221,9 +221,9 @@ my @pfiles = ();
 
  }
 
-  $message = "Submitted next runnumbers and streams:  ".$runlist; 
+#  $message = "Submitted next runnumbers and streams:  ".$runlist; 
 
-   system("echo \"$message\" | mail -s \"$subject\" $email");
+#   system("echo \"$message\" | mail -s \"$subject\" $email");
 
 
     &StDbDisconnect();
