@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.294 2016/03/04 22:32:33 jwebb Exp $
+* $Id: geometry.g,v 1.295 2016/03/07 14:47:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.295  2016/03/07 14:47:00  jwebb
+* Case statement in geometry.g to support y2016c tag.
+*
 * Revision 1.294  2016/03/04 22:32:33  jwebb
 * Corrections to MTD radii, y2015c tag added.
 *
