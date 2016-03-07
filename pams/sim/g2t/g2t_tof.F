@@ -43,9 +43,9 @@
 *
 *                  add to track linked list 
 *
-*         g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_ctf_p
-*         g2t_track(trac).hit_ctf_p    = i
-*         g2t_track(trac).n_ctf_hit    = g2t_track(trac).n_ctf _hit + 1
+         g2t_ctf_hit(i).next_tr_hit_p = g2t_track(trac).hit_tof_p
+         g2t_track(trac).hit_tof_p    = i
+         g2t_track(trac).n_tof_hit    = g2t_track(trac).n_tof_hit + 1
 
       enddo    
 
