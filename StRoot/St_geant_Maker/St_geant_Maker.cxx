@@ -1173,6 +1173,12 @@ Int_t St_geant_Maker::Make() {
       fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
       fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
     }
+    static Int_t eventIdC = 0;
+    eventIdC++;
+    if (fEvtHddr->GetRunNumber() == -1 && fEvtHddr->GetEventNumber() == -1) {
+      fEvtHddr->SetRunNumber(1);
+      fEvtHddr->SetEventNumber(eventIdC);
+    }
   }
   //---------------------- inner part -------------------------//
 
