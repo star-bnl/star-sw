@@ -1829,6 +1829,7 @@ void StMuDstMaker::printArrays()
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillHddr()
 {
+  static  Int_t eventIdC = 0;
   StMuEvent 		*me = mStMuDst->event();
   if (me==0)
     return;
@@ -1842,8 +1843,13 @@ void StMuDstMaker::fillHddr()
   Int_t id, it;
   TUnixTime ut(ei.time()); ut.GetGTime(id,it);
   hd->SetDateTime(id,it);
-
+  if (ei.runId() == -2 && ei.id() == -1) {
+    ei.setRunId(1);
+    eventIdC++;
+    ei.setId(eventIdC);
+  }
   hd->SetRunNumber(ei.runId())	;
+  hd->SetEventNumber(ei.id())	;
   hd->SetEventType(ei.type().Data());
   hd->SetTriggerMask(ei.triggerMask())	;
 //hd->SetInputTriggerMask(???);
@@ -1861,7 +1867,6 @@ void StMuDstMaker::fillHddr()
   hd->SetProdDateTime(ri.productionTime());
 //hd->SetIventNumber(int iv)	;
   hd->SetEventSize(ei.eventSize());
-  hd->SetEventNumber(ei.id())	;
 //hd->SetGenerType(int g);
 }
 

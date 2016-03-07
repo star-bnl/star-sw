@@ -916,7 +916,7 @@ Bool_t StMuDst::Accept(const StMuMcTrack *McTrack) {
 Int_t StMuDst::eventId() {return event()->eventId();}
 //________________________________________________________________________________
 multimap<StMuMcVertex *,StMuMcTrack *> &StMuDst::McVx2McTkR() {// Reconstructable Mc Tracks
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcVertex *,StMuMcTrack *>      McVx2McTkRMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -948,7 +948,7 @@ multimap<StMuMcVertex *,StMuMcTrack *> &StMuDst::McVx2McTkR() {// Reconstructabl
 }
 //________________________________________________________________________________
 map<StMuMcVertex *,StMuMcTrack *>           &StMuDst::McVx2McParentTk() { 
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<StMuMcVertex *,StMuMcTrack *>           McVx2McParentTkMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -971,7 +971,7 @@ map<StMuMcVertex *,StMuMcTrack *>           &StMuDst::McVx2McParentTk() {
 }
 //________________________________________________________________________________
 map<Int_t,StMuMcTrack *>                    &StMuDst::Id2McTk() { // 
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,StMuMcTrack *>                    Id2McTkMap; // 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -993,7 +993,7 @@ map<Int_t,StMuMcTrack *>                    &StMuDst::Id2McTk() { //
 }
 //________________________________________________________________________________
 map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVx() { // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id]();
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,StMuMcVertex *>                   Id2McVxMap; // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id];
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1015,7 +1015,7 @@ map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVx() { // All Mc Vx, 
 }
 //________________________________________________________________________________
 map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVxR() {// Reconstructable, i.e. contains > 1 Reconstructable Mc Tracks
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,StMuMcVertex *>                   Id2McVxRMap;// Reconstructable, i.e. contains > 1 Reconstructable Mc Tracks
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1032,7 +1032,7 @@ map<Int_t,StMuMcVertex *>                   &StMuDst::Id2McVxR() {// Reconstruct
 }
 //________________________________________________________________________________
 map<Int_t,StMuPrimaryVertex*>               &StMuDst::Id2RcVx() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,StMuPrimaryVertex*>               Id2RcVxMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1049,7 +1049,7 @@ map<Int_t,StMuPrimaryVertex*>               &StMuDst::Id2RcVx() {
 }
 //________________________________________________________________________________
 map<Int_t,Int_t>                            &StMuDst::IndxRcTk2Id() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,Int_t>                            IndxRcTk2IdMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1064,7 +1064,7 @@ map<Int_t,Int_t>                            &StMuDst::IndxRcTk2Id() {
 }
 //________________________________________________________________________________
 map<Int_t,Int_t>                            &StMuDst::IndxKFTk2Id() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,Int_t>                            IndxKFTk2IdMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1082,7 +1082,7 @@ map<Int_t,Int_t>                            &StMuDst::IndxKFTk2Id() {
 }
 //________________________________________________________________________________
 multimap<StMuPrimaryVertex*, StMuTrack *>   &StMuDst::RcVx2RcTk() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuPrimaryVertex*, StMuTrack *>   RcVx2RcTkMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1099,7 +1099,7 @@ multimap<StMuPrimaryVertex*, StMuTrack *>   &StMuDst::RcVx2RcTk() {
 }
 //________________________________________________________________________________
 map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<StMuPrimaryVertex*,StMuMcVertex *>      RcVx2McVxMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1123,7 +1123,7 @@ map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
 }
 //________________________________________________________________________________
   multimap<StMuMcVertex *,StMuPrimaryVertex*> &StMuDst::McVx2RcVx() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcVertex *,StMuPrimaryVertex*> McVx2RcVxMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1144,7 +1144,7 @@ map<StMuPrimaryVertex*,StMuMcVertex *>      &StMuDst::RcVx2McVx() {
 }
 //________________________________________________________________________________
 vector<StMuPrimaryVertex *>                 &StMuDst::RcVxs() {  // All accepted RcVx
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static vector<StMuPrimaryVertex *>                 RcVxsVec;  // All accepted RcVx
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1161,7 +1161,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::RcVxs() {  // All accepted
 }
 //________________________________________________________________________________
 vector<StMuPrimaryVertex *>                 &StMuDst::RecoVx() {  //  1 to 1 Mc to Rc match
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static vector<StMuPrimaryVertex *>                 RecoVxVec;  //  1 to 1 Mc to Rc match
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1194,7 +1194,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::RecoVx() {  //  1 to 1 Mc 
 }
 //________________________________________________________________________________
   vector<StMuPrimaryVertex *>                 &StMuDst::CloneVx() { //  1 to many (>1) Mc to Rc match
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static vector<StMuPrimaryVertex *>                 CloneVxVec; //  1 to many (>1) Mc to Rc match
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1227,7 +1227,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::RecoVx() {  //  1 to 1 Mc 
 }
 //________________________________________________________________________________
 vector<StMuPrimaryVertex *>                 &StMuDst::GhostVx() { //  no Mc match
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static vector<StMuPrimaryVertex *>                 GhostVxVec; //  no Mc match
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1246,7 +1246,7 @@ vector<StMuPrimaryVertex *>                 &StMuDst::GhostVx() { //  no Mc matc
 }
 //________________________________________________________________________________
 vector<StMuMcVertex *>                      &StMuDst::LostVx() {  //  no Rc match
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static vector<StMuMcVertex *>                      LostVxVec;  //  no Rc match
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1276,7 +1276,7 @@ vector<StMuMcVertex *>                      &StMuDst::LostVx() {  //  no Rc matc
 }
 //________________________________________________________________________________
 map<Int_t,KFParticle*>                      &StMuDst::IdVx2KFVx() { // 
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,KFParticle*>                      IdVx2KFVxMap; // 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1303,7 +1303,7 @@ map<Int_t,KFParticle*>                      &StMuDst::IdVx2KFVx() { //
 }
 //________________________________________________________________________________
 map<KFParticle*,StMuPrimaryVertex*>         &StMuDst::KFVx2RcVx() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<KFParticle*,StMuPrimaryVertex*>         KFVx2RcVxMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1323,7 +1323,7 @@ map<KFParticle*,StMuPrimaryVertex*>         &StMuDst::KFVx2RcVx() {
 }
 //________________________________________________________________________________
 multimap<StMuPrimaryVertex*,KFParticle*>    &StMuDst::RcVx2KFVx() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuPrimaryVertex*,KFParticle*>    RcVx2KFVxMap;
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1346,7 +1346,7 @@ multimap<StMuPrimaryVertex*,KFParticle*>    &StMuDst::RcVx2KFVx() {
 }
 //________________________________________________________________________________
 map<KFParticle*,StMuMcVertex *>             &StMuDst::KFVx2McVx() { 
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<KFParticle*,StMuMcVertex *>             KFVx2McVxMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1365,7 +1365,7 @@ map<KFParticle*,StMuMcVertex *>             &StMuDst::KFVx2McVx() {
 }
 //________________________________________________________________________________
 multimap<StMuMcVertex*,KFParticle*>         &StMuDst::McVx2KFVx() { 
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcVertex*,KFParticle*>         McVx2KFVxMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1386,7 +1386,7 @@ multimap<StMuMcVertex*,KFParticle*>         &StMuDst::McVx2KFVx() {
 }
 //________________________________________________________________________________
 multimap<Int_t,StMuTrack *>                 &StMuDst::IdMc2RcTk() { // Reconstucted Track to IdTruth
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<Int_t,StMuTrack *>                 IdMc2RcTkMap; // Reconstucted Track to IdTruth
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1404,7 +1404,7 @@ multimap<Int_t,StMuTrack *>                 &StMuDst::IdMc2RcTk() { // Reconstuc
 }
 //________________________________________________________________________________
 map<Int_t,Int_t> &StMuDst::IdGlobalId2IdPrimaryTrack() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,Int_t> IdGlobalId2IdPrimaryTrackMap; // Primary track Id to Global Track Id
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1425,7 +1425,7 @@ map<Int_t,Int_t> &StMuDst::IdGlobalId2IdPrimaryTrack() {
 }
 //________________________________________________________________________________
 map<Int_t,Int_t> &StMuDst::IdGlobal2IdPrimaryTrack() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static map<Int_t,Int_t> IdGlobal2IdPrimaryTrackMap; // Primary track Id to Global Track Id
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1446,7 +1446,7 @@ map<Int_t,Int_t> &StMuDst::IdGlobal2IdPrimaryTrack() {
 }
 //________________________________________________________________________________
 multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcTracks() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<Int_t,Int_t> IdMc2IdRcTracksMap; // Primary track Id to Global Track Id
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1483,7 +1483,7 @@ multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcTracks() {
 }
 //________________________________________________________________________________
 multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcVertices() {
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<Int_t,Int_t> IdMc2IdRcVerticesMap; // 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1515,7 +1515,7 @@ multimap<Int_t,Int_t> &StMuDst::IdMc2IdRcVertices() {
 }
 //________________________________________________________________________________
 multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2GlobalTrack() { // McTrack to Reconstucted global Track
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcTrack*,StMuTrack *>                 McTrack2GlobalTrackMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1534,7 +1534,7 @@ multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2GlobalTrack
 }
 //________________________________________________________________________________
 multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2PrimaryTrack() { // McTrack to Reconstucted primary Track
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcTrack*,StMuTrack *>                 McTrack2PrimaryTrackMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
@@ -1554,7 +1554,7 @@ multimap<StMuMcTrack*,StMuTrack *>                 &StMuDst::McTrack2PrimaryTrac
 }
 //________________________________________________________________________________
 multimap<StMuMcTrack*,KFParticle *>                 &StMuDst::McTrack2KFParticle() { // McTrack to Reconstucted KFParticle
-  static Int_t eventIdOld = -1;
+  static Int_t eventIdOld = -13;
   static multimap<StMuMcTrack*,KFParticle *>                 McTrack2KFParticleMap; 
   if (eventId() != eventIdOld) {
     eventIdOld = eventId();
