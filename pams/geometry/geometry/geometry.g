@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.293 2016/02/04 16:33:35 jwebb Exp $
+* $Id: geometry.g,v 1.295 2016/03/07 14:47:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.295  2016/03/07 14:47:00  jwebb
+* Case statement in geometry.g to support y2016c tag.
+*
+* Revision 1.294  2016/03/04 22:32:33  jwebb
+* Corrections to MTD radii, y2015c tag added.
+*
 * Revision 1.293  2016/02/04 16:33:35  jwebb
 * Fixed bug 3187: y2016 geometry was not completely setup in geometry.g.
 *
@@ -1336,6 +1342,7 @@ Replace [exe MUTD12;] with [ "MTD Run 12 - 3  backlegs, 13 trays";    MUTD=on;  
 Replace [exe MUTD13;] with [ "MTD Run 13 - 15 backlegs, 75 trays";    MUTD=on;   MutdConfig=13;]
 Replace [exe MUTD14;] with [ "MTD Run 14+";    MUTD=on;   MutdConfig=14;]
 Replace [exe MUTD15;] with [ "MTD Run 14+ with corrected radii"; Mutd=on; MutdConfig=15;]
+Replace [exe MUTD16;] with [ "MTD Run 14+ with corrected radii"; Mutd=on; MutdConfig=16;]
 
 
 
@@ -2408,6 +2415,10 @@ REPLACE [exe y2015b;] with ["Y2015 production geometry";
     exe y2015a; "Base off of y2015a";
     exe Mutd15; "Use corrected MTD geometry";
 ]
+REPLACE [exe y2015c;] with ["Y2015 production geometry";
+    exe y2015b; "Base off of y2015b";
+    exe Mutd16; "Use corrected MTD geometry";
+]
 
 
 REPLACE [exe y2016;] with ["Y2016 first cut geometry";
@@ -3429,6 +3440,9 @@ If LL>0
 
   Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015b    '; exe y2015b;  }
+
+  Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections;
+                  Geom = 'y2015c    '; exe y2015c;  }
 
   Case y2016  { y2016 : y2016 baseline;
                   Geom = 'y2016     '; exe y2016; }
@@ -5208,7 +5222,12 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
          CONSTRUCT mutdgeo5;
      }
      IF MutdConfig>=15 {
-         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
+         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);        
+         CONSTRUCT mutdgeo7;
+     }
+     IF MutdConfig>=16 {
+         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);        
+         Call AgDetp ADD( 'MTDG.version=', 1.1, 1);        
          CONSTRUCT mutdgeo7;
      }
 
