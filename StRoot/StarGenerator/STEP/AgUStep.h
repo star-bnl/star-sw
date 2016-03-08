@@ -113,6 +113,8 @@ public:
   static Float_t rmax;//= 200.0;
   static Float_t zmax;//= 200.0;
   static Int_t   verbose;// = 0;
+  static Int_t   mnTruth;//=0;
+  static Int_t   mxTruth;//=-1;
 
 private:
 protected:
