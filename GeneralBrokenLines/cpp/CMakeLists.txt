@@ -17,7 +17,7 @@ INCLUDE( ilcsoft_default_settings )
 FIND_PACKAGE(ROOT REQUIRED)
 
 # require proper c++
-ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
+#ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 
 # include directories
 INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS})

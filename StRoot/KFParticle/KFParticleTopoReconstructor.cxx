@@ -543,12 +543,71 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 #endif // USE_TIMERS
 } // void KFParticleTopoReconstructor::ReconstructPrimVertex
 
+#ifdef WITHSCIF
+void KFParticleTopoReconstructor::SendDataToXeonPhi( int iHLT, scif_epd_t& endpoint, void* buffer, off_t& offsetServer, off_t& offsetSender, float Bz)
+{
+  //pack the input data
+  int* data = reinterpret_cast<int*>(buffer);
+  int dataSize = NInputSets + 1 + 1; //sizes of the track vectors and pv vector, and field
+  for(int iSet=0; iSet<NInputSets; iSet++)
+    dataSize += fTracks[iSet].DataSize();
+  dataSize += fPV.size() * 9;
+      
+  for(int iSet=0; iSet<NInputSets; iSet++)
+    data[iSet] = fTracks[iSet].Size();
+  data[NInputSets] = fPV.size();
+  
+  float& field = reinterpret_cast<float&>(data[NInputSets+1]);
+  field = Bz;
+  
+  int offset = NInputSets+2;
+      
+  for(int iSet=0; iSet<NInputSets; iSet++)
+    fTracks[iSet].SetDataToVector(data, offset);
+  
+  for(int iP=0; iP<3; iP++)
+  {
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+    {
+      float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+      tmpFloat = fPV[iPV].Parameter(iP)[0];
+    }
+    offset += fPV.size();
+  }
+  
+  for(int iC=0; iC<6; iC++)
+  {
+    for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
+    {
+      float& tmpFloat = reinterpret_cast<float&>(data[offset + iPV]);
+      tmpFloat = fPV[iPV].Covariance(iC)[0];
+    }
+    offset += fPV.size();
+  }
+  
+  //send the input data to Xeon Phi
+  int msgSize = sizeof(int) * dataSize;//1000 * sizeof(int);
+  
+  const uint16_t portSenderId = 2000 + iHLT;
+
+  int controlSignal = portSenderId;
+  scif_send(endpoint, &msgSize, sizeof(int), SCIF_SEND_BLOCK);
+  scif_recv(endpoint, &controlSignal, sizeof(controlSignal), 1);
+  if(controlSignal != portSenderId) { std::cout << controlSignal << " " << portSenderId << std::endl; return; }
+  
+  int ret = scif_writeto(endpoint, offsetServer, msgSize, offsetSender, 0);
+  if ( ret == -1 ) std::cout << "Fail sending array to the server. Error: " << errno << std::endl;
+      
+  scif_send(endpoint, &controlSignal, sizeof(int), SCIF_SEND_BLOCK); // synchronization
+}
+#endif
+
 struct PrimVertexVector
 {
   vector<float> fP[3];
   vector<float> fC[6];
 };
-  
+
 void KFParticleTopoReconstructor::SaveInputParticles(const string prefix, bool onlySecondary)
 {
   static int nEvents = 0;

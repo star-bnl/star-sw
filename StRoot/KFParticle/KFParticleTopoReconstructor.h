@@ -39,6 +39,10 @@ typedef TStopwatch Stopwatch;
 class AliHLTTPCCAGBTracker;
 #endif
 
+#ifdef WITHSCIF
+#include <scif.h>
+#endif
+
 class KFParticleTopoReconstructor{
  public:
   KFParticleTopoReconstructor():fKFParticlePVReconstructor(0),fKFParticleFinder(0),fTracks(0), fParticles(0), fPV(0), fNThreads(1)
@@ -71,7 +75,9 @@ class KFParticleTopoReconstructor{
   void ReconstructPrimVertex(bool isHeavySystem = 1); // find primary vertex
   void SortTracks(); //sort tracks according to the pdg hypothesis and pv index
   void ReconstructParticles(); //find short-lived particles 
-
+#ifdef WITHSCIF
+  void SendDataToXeonPhi( int iHLT, scif_epd_t& endpoint, void* buffer, off_t& offsetServer, off_t& offsetSender, float Bz);
+#endif
    /// Accessors
   int NPrimaryVertices() const { return fKFParticlePVReconstructor->NPrimaryVertices(); }
   KFParticle &GetPrimVertex(int iPV=0) const { return fKFParticlePVReconstructor->GetPrimVertex(iPV); }

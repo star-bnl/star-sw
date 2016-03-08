@@ -47,7 +47,7 @@ class KFMCParticle :public TObject
   void SetAsReconstructableV0(int i) { fIsV0[i] = 1;}
   
   void SetInitialParticleId(int i) {fInitialParticleId = i;}
-  const int InitialParticleId() const {return fInitialParticleId;}
+  int InitialParticleId() const {return fInitialParticleId;}
  private: //data
   vector<int> fDaughterIds;
   int fMCTrackID; // sim id of MC track, which corresponds to the particle
