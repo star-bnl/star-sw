@@ -2,14 +2,18 @@
 #include "StMuMcAnalysisMaker.h"
 #include "TDirectory.h"
 #include "TROOT.h"
+#include "TMath.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
+#include "StProbPidTraits.h"
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalMatchType][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
+static TH3F *LdEdx[kTotalT][KPidParticles][kTotalSigns][NdEdxPiD] = {0};
 static TH1F *GiD[4] = {0};
 static TH2F *McRcHit = 0;
 static const Char_t *TitleTrType[kTotalT] = {"Global", "Primary"};
+static const Char_t *TitlePiDtype[kTotalT] = {"dEdx", "ToF"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
 static const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
 					 "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
@@ -18,7 +22,11 @@ static const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tb
 static const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417,
 				       0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 static const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
-					 2, 14, 11,  8, 5, 45,    46,    49,   47};
+					 2, 14, 11,  8, 5, 45,    46,    49,    47};
+static const Int_t PiDHyp[NHYPS]     = {kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha,
+					kPidElectron, kPidProton, kPidKaon, kPidPion, kPidMuon, kPidDeuteron, kPidTriton, kPidHe3, kPidAlpha};
+static const Int_t PiDpm[NHYPS]      = {kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative, kNegative,
+					kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive, kPositive};
 static const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
 static const Char_t *HistNames70[NHYPS] = {"eN70B","protonN70B","kaonN70B","piN70B","muN70B","deuteronN70B","tritonN70B","He3N70B","alphaN70B",
@@ -29,8 +37,6 @@ static const Char_t *HitName = "vs NoFitPnts and no. bad hits";
 static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
 static const Char_t *proj[5] = {"zx","zy","x","y","yx"};
-static TProfile3D *PdEdx[NdEdxPiD][NHYPS] = {0};
-static TH3F *LdEdx[NdEdxPiD][NHYPS] = {0};
 static Int_t nPng = 0;
 ofstream out;
 TString Chapter;
@@ -152,9 +158,6 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
       {kGhostHftTk, "GhostHft", "Rc tracks with HFT without Mc partner with HFT"},
       {kLostHftTk,  "LostHft",  "Mc tracks without reconstructed one in Hft"}
     };
-    if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
-      dirs[1]->mkdir(TitleTrType[gp]);
-    }
     if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
       dirs[1]->mkdir(TitleTrType[gp]);
     }
@@ -282,42 +285,69 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   }
   delete [] phiBins;
   delete [] etaBins;
-  dirs[1]->cd();
+  dirs[1] = dirs[0]->GetDirectory(TracksVertices[0]); assert(dirs[1]);
+  dirs[1]->cd(); 
+  // PiD block
   // dE/dx block for matched primary tracks
-  const Char_t *dEdxTypes[NdEdxPiD] = {"I70","Fit","dNdx"};
-  for (Int_t h = 0; h < NHYPS; h++) {
-    for (i = 0; i < NdEdxPiD; i++) {
-      PdEdx[i][h] = (TProfile3D *) dirs[1]->Get(Form("Zav%s%s",dEdxTypes[i],HistNames[h]));
-      if (! PdEdx[i][h]) {
-	PdEdx[i][h] = new TProfile3D(Form("Zav%s%s",dEdxTypes[i],HistNames[h]),
-				     Form("< z_{%s} > versus  #phi,  #eta,  p_{T}/|q| for %s",dEdxTypes[i],Names[h]),
-				     90, -TMath::Pi(), TMath::Pi(),
-				     60, -1.2, 1.2,
-				     npT, 0, 10, "S");
-	PdEdx[i][h]->GetXaxis()->SetTitle("#phi (rad)");
-	PdEdx[i][h]->GetYaxis()->SetTitle("  #eta");         
-	PdEdx[i][h]->GetZaxis()->SetTitle(Form("Z_{%s}{%s}",dEdxTypes[i],HistNames[h]));   
-	PdEdx[i][h]->GetZaxis()->Set(npT,ptBins);
+  for (Int_t gp = kGlobal; gp < kTotalT; gp++) {
+    if (! dirs[1]->GetDirectory(TitleTrType[gp])) {
+      dirs[1]->mkdir(TitleTrType[gp]);
+    }
+    dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
+    dirs[2]->cd();
+    for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
+      if (! dirs[2]->GetDirectory(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str())) {
+	dirs[2]->mkdir(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str());
       }
-      LdEdx[i][h] = (TH3F *) dirs[1]->Get(Form("Z%s%s",dEdxTypes[i],HistNames[h]));
-      if (! LdEdx[i][h]) {
-	LdEdx[i][h] = new TH3F(Form("Z%s%s",dEdxTypes[i],HistNames[h]),
-			       Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s",dEdxTypes[i],Names[h]),
-			       110, 0, 220, 220,-1,10, 100, -1, 1); 
-	LdEdx[i][h]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
-	LdEdx[i][h]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
-	LdEdx[i][h]->GetZaxis()->SetTitle(Form(" z_{%s}{%s}",dEdxTypes[i],Names[h]));   
+      dirs[3] = dirs[2]->GetDirectory(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()); assert(dirs[3]);
+      dirs[3]->cd();
+      for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
+	if (! dirs[3]->GetDirectory(TitleCharge[pm])) {
+	  dirs[3]->mkdir(TitleCharge[pm]);
+	}
+	dirs[4] = dirs[3]->GetDirectory(TitleCharge[pm]); assert(dirs[4]);
+	dirs[4]->cd();
+	for (Int_t pidType = 0; pidType < 1; pidType++) {// 
+	  if (! dirs[4]->GetDirectory(TitlePiDtype[pidType])) {
+	    dirs[4]->mkdir(TitlePiDtype[pidType]);
+	  }
+	  dirs[5] = dirs[4]->GetDirectory(TitlePiDtype[pidType]);
+	  dirs[5]->cd();
+	  if (pidType == 0) { // dE/dx
+	    const Char_t *dEdxTypes[NdEdxPiD] = {"I70","Fit","dNdx"};
+	    for (i = 0; i < NdEdxPiD; i++) {
+	      LdEdx[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(Form("Z%s",dEdxTypes[i]));
+	      if (! LdEdx[gp][hyp][pm][i]) {
+		LdEdx[gp][hyp][pm][i] = new TH3F(Form("Z%s",dEdxTypes[i]),
+						 Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s",
+						      dEdxTypes[i],StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()),
+						 110, 0, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
+		LdEdx[gp][hyp][pm][i]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
+		LdEdx[gp][hyp][pm][i]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
+		LdEdx[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",dEdxTypes[i]));   
+	      }
+	    }
+	  } else {// Tof
+	  }
+	}
       }
     }
   }
-  GiD[0] = (TH1F *)  dirs[1]->Get("GiD");
-  if (! GiD[0]) GiD[0] = new TH1F("GiD","Geant ID for all MC tracks",50,0.5,50.5);
-  GiD[1] = (TH1F *)  dirs[1]->Get("GiDG");
-  if (! GiD[1]) GiD[1] = new TH1F("GiDG",Form("Geant ID for MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits),50,0.5,50.5);
-  GiD[2] = (TH1F *)  dirs[1]->Get("GiDPr");
-  if (! GiD[2]) GiD[2] = new TH1F("GiDPr","Geant ID for all primary MC tracks",50,0.5,50.5);
-  GiD[3] = (TH1F *)  dirs[1]->Get("GiDPrG");
-  if (! GiD[3]) GiD[3] = new TH1F("GiDPrG",Form("Geant ID for primary MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits),50,0.5,50.5);
+  PlotName_t geant[4] = {
+    {kNotDefined, "GiD",    "Geant ID for all MC tracks"},
+    {kNotDefined, "GiDG",   Form("Geant ID for MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)},
+    {kNotDefined, "GiDPr", "Geant ID for all primary MC tracks"},
+    {kNotDefined, "GiDPrG", Form("Geant ID for primary MC tracks with >= %i Tpc MC hits",StMuDst::MinNoTpcMcHits)}
+  };
+  for (Int_t i = 0; i < 4; i++) {
+    GiD[i] = (TH1F *)  dirs[1]->Get(geant[i].Name);
+    if (! GiD[i]) {
+      GiD[i] = new TH1F(geant[i].Name,geant[i].Title, 50,0.5,50.5); 
+      GiD[i]->SetMarkerColor(i%2+1);
+      GiD[i]->SetLineColor(i%2+1);
+      SetGEANTLabels(GiD[i]->GetXaxis());
+    }
+  }
   McRcHit = (TH2F *)   dirs[1]->Get("McRcHit");
   if (! McRcHit) McRcHit = new TH2F("McRcHit","No. RC hits in TPC versus No. MC ones",80,-0.5,79.5,80,-0.5,79.5);
 }
@@ -494,25 +524,25 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	  }
 	  // dE/dx block
 	  const StMuProbPidTraits &PiD = pTrack->probPidTraits();
-	  Double_t I[2] = {PiD.dEdxTruncated(), PiD.dEdxFit()};
+	  Double_t I[3] = {PiD.dEdxTruncated(), PiD.dEdxFit(), PiD.dNdxFit()};
 	  Double_t TrackLength = PiD.dEdxTrackLength();
 	  Int_t Gid = mcTrack->GePid();
-	  static Bichsel *m_Bichsel = Bichsel::Instance();
 	  Double_t pMomentum = pTrack->helix().momentum(field).mag();
 	  //	const StThreeVectorF &pVx  = pTrack->momentum();
 	  for (Int_t h = 0; h < NHYPS; h++) {
 	    if (GEANTiD[h] == Gid) {
-	      Double_t bg    = pMomentum/Masses[h];
+	      Int_t hyp = PiDHyp[h];
+	      Int_t pm  = PiDpm[h];
+	      Double_t bg    = pMomentum/StProbPidTraits::mPidParticleDefinitions[hyp]->mass();
 	      Double_t bghyp = TMath::Log10(bg);
-	      Double_t Pred[3]  = {1.e-6*m_Bichsel->GetI70(bghyp,1.0),
-				   1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp,1.0)),
+	      Double_t Pred[3]  = {1.e-6*Bichsel::Instance()->GetI70(bghyp,1.0),
+				   1.e-6*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(bghyp,1.0)),
 				   StdEdxModel::instance()->dNdx(bg)
 	      };
 	      for (Int_t mm = 0; mm < 3; mm++) {
 		if (I[mm] <= 0 || Pred[mm] <= 0) continue;
 		Double_t z = TMath::Log(I[mm]/Pred[mm]);
-		PdEdx[mm][h]->Fill(pTrack->phi(), pTrack->eta(), pTrack->pt(), z);
-		LdEdx[mm][h]->Fill(TrackLength, bghyp, z);
+		LdEdx[gp][hyp][pm][mm]->Fill(TrackLength, bghyp, z);
 	      }
 	      break;
 	    }
@@ -619,6 +649,9 @@ void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, 
   if (! dcaG   || ! mcVertex) return;
   EChargeType pm = kPositive;
   if (mcTrack->Charge() < 0) pm = kNegative;
+  Double_t eta = mcTrack->Pxyz().pseudoRapidity();
+  Double_t pT  = mcTrack->Pxyz().perp();
+  Double_t phi = TMath::RadToDeg()*mcTrack->Pxyz().phi();
   Var_t var; memset(&var.ChiSqXY, 0, sizeof(var));
   TRSymMatrix Cov(5,dcaG->errMatrix());
   Double_t vtx[3] = {mcVertex->XyzV().x(), mcVertex->XyzV().y(), mcVertex->XyzV().z()};
@@ -630,9 +663,9 @@ void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, 
   var.dDcaXY  = pars[0];
   var.dDcaZ   = pars[1];
   Double_t *Dir = thelix.Dir();
-  Double_t phi =  TMath::ATan2(Dir[1],Dir[0]);
-  var.dPsi    = phi - mcTrack->Pxyz().phi(); 
-  var.Phi = TMath::RadToDeg()*mcTrack->Pxyz().phi();
+  Double_t phiM =  TMath::ATan2(Dir[1],Dir[0]);
+  var.dPsi    = phiM - TMath::DegToRad()*phi; 
+  var.Phi = phi;
   Double_t pTqRC = gTrack->pt()/gTrack->charge();
   Double_t pTqMC = mcTrack->pT()/mcTrack->Charge();
   var.dPti    = 1./pTqRC - 1./pTqMC;
@@ -668,10 +701,10 @@ void StMuMcAnalysisMaker::FillQAGl(TrackMatchType type,const StMuTrack *gTrack, 
       if (fHistsT[kGlobal][type][particle][pm][0][i])
 	fHistsT[kGlobal][type][particle][pm][0][i]->Fill(gTrack->nHitsFit(), gTrack->nHitsFit()*(100.-gTrack->qaTruth())/100., x[i]);
       if (fHistsT[kGlobal][type][particle][pm][1][i])
-	fHistsT[kGlobal][type][particle][pm][1][i]->Fill(mcTrack->Pxyz().pseudoRapidity(), mcTrack->Pxyz().perp(), x[i]);
+	fHistsT[kGlobal][type][particle][pm][1][i]->Fill(eta, pT, x[i]);
     }
   }
-  McRcHit->Fill(gTrack->nHitsFit(),mcTrack->No_tpc_hit());
+  McRcHit->Fill(mcTrack->No_tpc_hit(),gTrack->nHitsFit());
 }
 //________________________________________________________________________________
 void StMuMcAnalysisMaker::FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const StMuPrimaryTrackCovariance *cov) {
@@ -1312,6 +1345,70 @@ void StMuMcAnalysisMaker::EndHtml() {
   out << "</body>" << endl;
   out << "</html>" << endl;
 
+}
+//________________________________________________________________________________
+#include "TAxis.h"
+void StMuMcAnalysisMaker::SetGEANTLabels(TAxis *x) {
+  struct Label_t {
+    Int_t id;
+    const Char_t *name;
+  };
+  Label_t labels[50] = {
+    {      1, "#gamma"},
+    {      2, "e^{+}"},
+    {      3, "e^{-}"},
+    {      4, "#nu"},
+    {      5, "#mu^{+}"},
+    {      6, "#mu^{-}"},
+    {      7, "#pi^{0}"},
+    {      8, "#pi^{+}"},
+    {      9, "#pi^{-}"},
+    {     10, "K^{0}_{L}"},
+    {     11, "K^{+}"},
+    {     12, "K^{-}"},
+    {     13, "n"},
+    {     14, "p"},
+    {     15, "#bar{p}"},
+    {     16, "K^{0}_{S}"},
+    {     17, "#eta"},
+    {     18, "#Lambda"},
+    {     19, "#Sigma^{+}"},
+    {     20, "#Sigma^{0}"},
+    {     21, "#Sigma^{-}"},
+    {     22, "#Xi^{0}"},
+    {     23, "#Xi^{-}"},
+    {     24, "#Omega^{-}"},
+    {     25, "#bar{n}"},
+    {     26, "#bar{#Lambda}"},
+    {     27, "#bar{#Sigma}^{-}"},
+    {     28, "#bar{#Sigma}^{0}"},
+    {     29, "#bar{#Sigma}^{+}"},
+    {     30, "#bar{#Xi}^{0}"},
+    {     31, "#bar{#Xi}^{+}"},
+    {     32, "#bar{#Omega}^{+}"},
+    {     33, "#tau^{+}"},
+    {     34, "#tau^{-}"},
+    {     35, "D^{+}"},
+    {     36, "D^{-}"},
+    {     37, "D^{0}"},
+    {     38, "#bar{D^{0}}"},
+    {     39, "D^{+}_{S}"},
+    {     40, "D^{-}_{S}"},
+    {     41, "#Lambda^{+}_{c}"},
+    {     42, "W^{+}"},
+    {     43, "W^{-}"},
+    {     44, "Z^{0}"},
+    {     45, "d"},
+    {     46, "t"},
+    {     47, "#alpha"},
+    {     48, "#zeta"},
+    {     49, "He^{3}"},
+    {     50, "C"}
+  };
+  x->SetLabelSize(2e-2);
+  for (Int_t i = 0; i < 50; i++) {
+    x->SetBinLabel(labels[i].id,labels[i].name);
+  }
 }
 //________________________________________________________________________________
 

@@ -28,6 +28,7 @@
 #include "TFile.h"
 #include "TChain.h"
 #include "TString.h"
+#include "TAxis.h"
 #include "SystemOfUnits.h"
 #include "StMuDSTMaker/COMMON/StMuTimer.h"
 #include "StMuDSTMaker/COMMON/StMuDebug.h"
@@ -148,6 +149,7 @@ class StMuMcAnalysisMaker : public StMaker {
   static void    EndHtml();
   static void    BeginTable();
   static void    EndTable();
+  static void    SetGEANTLabels(TAxis *x);
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StMuMcAnalysisMaker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
