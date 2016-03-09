@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.3 2016/02/29 22:58:23 jwebb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.4 2016/03/08 15:54:19 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1155,7 +1155,6 @@ void StPPVertexFinder::matchTrack2EEMC(const StGlobalTrack* track,TrackData &t,f
 //==========================================================
 bool StPPVertexFinder::matchTrack2Membrane(const StGlobalTrack* track,TrackData &t)
 {
-static int nCall = 0; nCall++;
   //generate bitt pattern for TPC nodes with hits 
   int nPos=0,nFit=0,jz0=0;
   const StDcaGeometry* dcaGeo = track->dcaGeometry();
@@ -1239,6 +1238,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.4  2016/03/08 15:54:19  smirnovd
+ * Removed pointless remnants of past debugging
+ *
  * Revision 1.3  2016/02/29 22:58:23  jwebb
  * Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
  *

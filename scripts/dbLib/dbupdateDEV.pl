@@ -775,13 +775,13 @@ my $pyear = 0;
 
     &fillJSTable();
 
-     if($mpath =~ /AuAu200_production_2016/) {
+#     if($mpath =~ /AuAu200_production_2016/) {
 
-       print "Fillin QA table  ", $mpath, "\n";
+#       print "Fillin QA table  ", $mpath, "\n";
 #    next if ($mpath =~ /nohft/);
-
-    &fillQATable();
-   }
+#  print "Avg #MtdHits = ",  $avgMtdHits,"   ", "Avg #PxlHits = ", $avgPxlHits,"   ", "Avg #IstHits = ", $avgIstHits,"   ", "Avg #SsdHits = ", $avgSstHits,"\n";
+#    &fillQATable();
+#   }
 
 
         foreach my $nOldJob (@old_jobs) {

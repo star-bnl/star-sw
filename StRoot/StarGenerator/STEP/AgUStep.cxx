@@ -10,6 +10,8 @@ Float_t AgUStep::rmin = 0.0;
 Float_t AgUStep::rmax = 200.0;
 Float_t AgUStep::zmax = 200.0;
 Int_t   AgUStep::verbose = 0;
+Int_t   AgUStep::mnTruth =  0;
+Int_t   AgUStep::mxTruth = -1;
 
 extern "C" {
 
@@ -217,6 +219,7 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
 // Take a step through the G3 geometry
 void AgUStep::operator()()
 {
+
   Double_t x = ctrak -> vect[0];
   Double_t y = ctrak -> vect[1];
   Double_t z = ctrak -> vect[2];
@@ -286,7 +289,7 @@ void AgUStep::operator()()
   mStep -> Z = _z;
   mStep -> dens = _dens;
 
-  if (!gGeoManager) return; // step through before complete init?
+  //  if (!gGeoManager) return; // step through before complete init?
 
   // Print out current path...
   //LOG_INFO << "N level = " << cvolu->nlevel << endm;
@@ -303,17 +306,32 @@ void AgUStep::operator()()
       path += volume; path += "_"; 
       path += cvolu->number[i];
 
-      UShort_t volumeNumber = gGeoManager->FindVolumeFast(volume)->GetNumber();
-      UShort_t copyNumber   = cvolu->number[i];
-      mStep->vnums[i] = volumeNumber;
-      mStep->cnums[i] = copyNumber;
+      if ( gGeoManager ) {
+	UShort_t volumeNumber = gGeoManager->FindVolumeFast(volume)->GetNumber();
+	UShort_t copyNumber   = cvolu->number[i];
+	mStep->vnums[i] = volumeNumber;
+	mStep->cnums[i] = copyNumber;
+      }
+      else {
+	mStep->vnums[i] = 0;
+	mStep->cnums[i] = 0;
+      }
       leaf = volume;
 
     }
-  //  LOG_INFO << path.Data() << endm;
+  
+  /////////////////////////////////////////////////////////////////////////
+  //
+  // At this point the step is considered ended.  We only handle verbose
+  // level printouts below.
+  //
+  //////////////////////////////////////////////////////////////////////////
+  if ( mTrack->idTruth < mnTruth || mTrack->idTruth > mxTruth ) return;
 
+  
   if ( verbose ) {
-    LOG_INFO << Form("[AgUStep] %8.4f %8.4f %8.4f %8.4f %4s %4i %8.4f %8.4f",
+    LOG_INFO << Form("[AgUStep] idtruth=%i %8.4f %8.4f %8.4f %8.4f %4s %4i %8.4f %8.4f %s",
+		     mTrack->idTruth,
 		     mStep->x,
 		     mStep->y,
 		     mStep->z,
@@ -321,7 +339,9 @@ void AgUStep::operator()()
 		     leaf.Data(),
 		     mStep->idTruth,
 		     aStep,
-		     mStep->step ) 
+		     mStep->step,
+		     path.Data()
+		     ) 
 	     << endm;
 		     
   }
