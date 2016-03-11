@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.47 2016/02/29 22:58:23 jwebb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.48 2016/03/11 21:18:07 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -330,25 +330,23 @@ StPPVertexFinder::printInfo(ostream& os) const
   os << "StPPVertexFinder::result "<<mVertexData.size()<<" vertices found\n" << endl;
 
   int nTpcM=0, nTpcV=0;
-  uint i;
   int k=0;
-  for(i=0;i<mTrackData.size();i++) {
-    const TrackData *t=&mTrackData[i];
-    if(  t->mTpc>0)   nTpcM++;
-    else if (  t->mTpc<0) nTpcV++;
-    hA[9]->Fill(t->zDca);
-    hA[14]->Fill(t->ezDca);
-    if(t->vertexID<=0) continue; // skip not used or pileup vertex 
+  for (const TrackData &t : mTrackData) {
+    if(  t.mTpc>0)   nTpcM++;
+    else if (  t.mTpc<0) nTpcV++;
+    hA[9]->Fill(t.zDca);
+    hA[14]->Fill(t.ezDca);
+    if(t.vertexID<=0) continue; // skip not used or pileup vertex
     k++;
     LOG_DEBUG 
       <<
       Form("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
-	   k,t->zDca,t->ezDca,t->gPt,t->vertexID) 
-      << Form("    Btof %3d,%d,%d",t->btofBin,btofList->getFired(t->btofBin),btofList->getTrack(t->btofBin))   // dongx
-      << Form("    CTB  %3d,%d,%d",t->ctbBin,ctbList->getFired(t->ctbBin),ctbList->getTrack(t->ctbBin))
-      << Form("    Bemc %3d,%d,%d",t->bemcBin,bemcList->getFired(t->bemcBin),bemcList->getTrack(t->bemcBin))
-      << Form("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),eemcList->getTrack(t->eemcBin))
-      << Form("    TPC %d",t->mTpc)
+	   k,t.zDca,t.ezDca,t.gPt,t.vertexID)
+      << Form("    Btof %3d,%d,%d",t.btofBin,btofList->getFired(t.btofBin),btofList->getTrack(t.btofBin))   // dongx
+      << Form("    CTB  %3d,%d,%d",t.ctbBin,ctbList->getFired(t.ctbBin),ctbList->getTrack(t.ctbBin))
+      << Form("    Bemc %3d,%d,%d",t.bemcBin,bemcList->getFired(t.bemcBin),bemcList->getTrack(t.bemcBin))
+      << Form("    Eemc %3d,%d,%d",t.eemcBin,eemcList->getFired(t.eemcBin),eemcList->getTrack(t.eemcBin))
+      << Form("    TPC %d",t.mTpc)
       <<endm;
   }
   hA[6]->Fill(nTpcM);
@@ -356,10 +354,10 @@ StPPVertexFinder::printInfo(ostream& os) const
   hA[15]->Fill(mTrackData.size());
   
   LOG_INFO<< Form("PPVend  eveID=%d,  list of found %d vertices from pool of %d tracks\n",eveID,mVertexData.size(),mTrackData.size())<<endm;
-  for(i=0;i<mVertexData.size();i++) {
-    const VertexData *V=& mVertexData[i];
-    V->print(os);
-  }
+
+  for (const VertexData &v : mVertexData)
+    v.print(os);
+
   float zGeant=999;
   
   if(mIsMC) {
@@ -376,10 +374,9 @@ StPPVertexFinder::printInfo(ostream& os) const
   }
   
   if(mIsMC) {
-    for(i=0;i<mTrackData.size();i++) {
-      const TrackData *t=&mTrackData[i];
-      if(t->vertexID<=0) continue; // skip not used or pileup vertex 
-      hA[12]->Fill(zGeant-t->zDca);
+    for (const TrackData &t : mTrackData) {
+      if(t.vertexID<=0) continue; // skip not used or pileup vertex
+      hA[12]->Fill(zGeant-t.zDca);
     }
   }
    
@@ -684,25 +681,23 @@ StPPVertexFinder::buildLikelihoodZ(){
   if(nt<=0) return false;
 
   int n1=0;
-  int i;
 
   double *La=hL->GetArray(); // PPV main likelyhood histogram 
   double *Ma=hM->GetArray(); // track multiplicity  histogram 
   double *Wa=hW->GetArray(); // track weight histogram 
   
-  for(i=0;i<nt;i++) {
-    const TrackData *t=&mTrackData[i];
-    if(t->vertexID!=0) continue; // track already used
-    if(t->anyMatch) n1++;
-    //  t->print();
-    float z0=t->zDca;
-    float ez=t->ezDca;
+  for (const TrackData &t : mTrackData) {
+    if(t.vertexID!=0) continue; // track already used
+    if(t.anyMatch) n1++;
+    //  t.print();
+    float z0=t.zDca;
+    float ez=t.ezDca;
     float ez2=ez*ez;
     int j1=hL->FindBin(z0-mMaxZradius-.1);
     int j2=hL->FindBin(z0+mMaxZradius+.1);
     float base=dzMax2/2/ez2;
-    float totW=t->weight;
-    //  printf("i=%d Z0=%f ez=%f j1=%d j2=%d base=%f gPt/GeV=%.3f ctbW=%.3f\n",i,z0,ez,j1,j2,base,t->gPt,ctbW);
+    float totW=t.weight;
+    //  printf("Z0=%f ez=%f j1=%d j2=%d base=%f gPt/GeV=%.3f ctbW=%.3f\n",z0,ez,j1,j2,base,t.gPt,ctbW);
 
     int j;
     for(j=j1;j<=j2;j++) {
@@ -794,39 +789,37 @@ bool
 StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
   // returns true if vertex is accepted accepted
   if(mBeamLineTracks) vertex3D->clearTracks();
-  int nt=mTrackData.size();
   LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" start ..."<<endm;
   int n1=0, nHiPt=0;
-  int i;
   
-  for(i=0;i<nt;i++) {
-    TrackData *t=&mTrackData[i];
-    if(t->vertexID!=0) continue;
-    if(! t->matchVertex(V,mMaxZradius)) continue; // track to far
+  for (TrackData &t : mTrackData)
+  {
+    if(t.vertexID!=0) continue;
+    if(! t.matchVertex(V,mMaxZradius)) continue; // track to far
     // this track belongs to this vertex
     n1++;
-    t->vertexID=V.id;
-    V.gPtSum+=t->gPt;
-    if(mBeamLineTracks) vertex3D->addTrack(t);
-    if( t->gPt>mCut_oneTrackPT && ( t->mBemc>0|| t->mEemc>0) ) nHiPt++;
+    t.vertexID=V.id;
+    V.gPtSum+=t.gPt;
+    if(mBeamLineTracks) vertex3D->addTrack(&t);
+    if( t.gPt>mCut_oneTrackPT && ( t.mBemc>0|| t.mEemc>0) ) nHiPt++;
 
-    if(  t->mTpc>0)       V.nTpc++;
-    else if (  t->mTpc<0) V.nTpcV++;
+    if(  t.mTpc>0)       V.nTpc++;
+    else if (  t.mTpc<0) V.nTpcV++;
 
-    if(  t->mBtof>0)       V.nBtof++;  // dongx
-    else if (  t->mBtof<0) V.nBtofV++;
+    if(  t.mBtof>0)       V.nBtof++;  // dongx
+    else if (  t.mBtof<0) V.nBtofV++;
 
-    if(  t->mCtb>0)       V.nCtb++;
-    else if (  t->mCtb<0) V.nCtbV++;
+    if(  t.mCtb>0)       V.nCtb++;
+    else if (  t.mCtb<0) V.nCtbV++;
 
-    if(  t->mBemc>0)       V.nBemc++;
-    else if (  t->mBemc<0) V.nBemcV++;
+    if(  t.mBemc>0)       V.nBemc++;
+    else if (  t.mBemc<0) V.nBemcV++;
 
-    if(  t->mEemc>0)       V.nEemc++;
-    else if (  t->mEemc<0) V.nEemcV++;
+    if(  t.mEemc>0)       V.nEemc++;
+    else if (  t.mEemc<0) V.nEemcV++;
 
-    if( t->anyMatch)     V.nAnyMatch++;
-    else if (t->anyVeto) V.nAnyVeto++;
+    if( t.anyMatch)     V.nAnyMatch++;
+    else if (t.anyVeto) V.nAnyVeto++;
   } 
   V.nUsedTrack=n1;  
 
@@ -839,10 +832,9 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
     //no match tracks in this vertex, tag vertex ID in tracks differently
     //V.print(cout);
     LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
-    for(i=0;i<nt;i++) {
-      TrackData *t=&mTrackData[i];
-      if(t->vertexID!=V.id) continue;
-      t->vertexID=-V.id;
+    for (TrackData &t : mTrackData) {
+      if(t.vertexID!=V.id) continue;
+      t.vertexID=-V.id;
     }
     return false;
   }
@@ -1387,6 +1379,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.48  2016/03/11 21:18:07  smirnovd
+ * StPPVertexFinder: Convert to C++11 syntax
+ *
  * Revision 1.47  2016/02/29 22:58:23  jwebb
  * Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
  *
