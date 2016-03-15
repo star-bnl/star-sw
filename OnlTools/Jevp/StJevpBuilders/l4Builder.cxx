@@ -359,7 +359,9 @@ void l4Builder::startrun(daqReader *rdr)
 
 void l4Builder::stoprun(daqReader *rdr)
 {
-	LOG(DBG, "Number of events processed in daq file = %d\n", eventCounter);
+
+	//printf("Number of events processed in daq file = %d\n", eventCounter);
+	LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
 
 	gStyle->SetOptStat(000000);
 	gStyle->SetStatW(0.13);
@@ -668,7 +670,6 @@ void l4Builder::main(int argc, char *argv[])
 
 void l4Builder::event(daqReader *rdr)
 {
-    //LOG("JEFF", "Event %d", rdr->seq);
 
 	//   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
 	//   //We want all events right now (not just min-bias), min-bias is our main trigger.
@@ -702,15 +703,13 @@ void l4Builder::event(daqReader *rdr)
 	//daq_dta *dd = rdr->det("hlt")->get("gl3");
 	daq_dta *dd = rdr->det("l4")->get("gl3");
 	daq_dta *ddTof  = rdr->det("trg")->get("raw");
-	int daqID = rdr->daqbits64;
+	int daqID = rdr->daqbits;
 
 	if(!dd) {
-	    LOG(DBG, "No HLT in this event dd=%p ddTof=%p 0x%llx", dd, ddTof, daqID);
-	    return;
+		LOG(DBG, "No HLT in this event");
+		return;
 	}
 	eventCounter++;
-
-	LOG(DBG, "HLT in this event dd=%p ddTof=%p 0x%llx %d", dd, ddTof, daqID, eventCounter);
 
 	HLT_EVE *hlt_eve;
 	HLT_TOF *hlt_tof;
@@ -1236,14 +1235,22 @@ void l4Builder::event(daqReader *rdr)
 
 
 	// di-muon
+	const int nNodes = hlt_node->nNodes;
+	int global2prim[nNodes];
+	for(int inode = 0; inode<hlt_node->nNodes; inode++)
+	  {
+	    int gTrackSN  = hlt_node->node[inode].globalTrackSN;
+	    int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
+	    global2prim[gTrackSN] = pTrackSN;
+	  }
 	if(decision & triggerBitDiMuon) {
 		if(!DiMuonFilled) {
 			DiMuonFilled = true;
 			addServerTags("L4DiMuon");
 		}
 		int nMtdHit = hlt_mtd->nMtdHits;
-		vector<int> trkId;
-		trkId.clear();
+		vector<int> pMuTrkId;
+		pMuTrkId.clear();
 		for(int i=0; i<nMtdHit; i++)
 		{
 			int backleg  = (int)hlt_mtd->mtdHit[i].backleg;
@@ -1255,38 +1262,38 @@ void l4Builder::event(daqReader *rdr)
 			hMtdHitMap->Fill(backleg,gchannel);
 
 			int trkid   = (int)hlt_mtd->mtdHit[i].hlt_trackId;
-			if(trkid>0)
-			{
-				double deltaz = hlt_mtd->mtdHit[i].delta_z;
-				double deltay = hlt_mtd->mtdHit[i].delta_y;
-				hMtdMatchHitMap->Fill(backleg,gchannel);
-				hMtdDeltaZvsModule->Fill(gmodule,deltaz);
-				hMtdDeltaZ->Fill(deltaz);
-				hMtdDeltaYvsModule->Fill(gmodule,deltay);
-				hMtdDeltaY->Fill(deltay);
-				if(fabs(deltaz)>20)continue;
-				if(fabs(deltay)>20)continue;
-				trkId.push_back(trkid);
-			}
+			if(trkid<0) continue;
+			double deltaz = hlt_mtd->mtdHit[i].delta_z;
+			double deltay = hlt_mtd->mtdHit[i].delta_y;
+			hMtdMatchHitMap->Fill(backleg,gchannel);
+			hMtdDeltaZvsModule->Fill(gmodule,deltaz);
+			hMtdDeltaZ->Fill(deltaz);
+			hMtdDeltaYvsModule->Fill(gmodule,deltay);
+			hMtdDeltaY->Fill(deltay);
+			if(fabs(deltaz)>20)continue;
+			if(fabs(deltay)>20)continue;
+
+			int pTrkId  = global2prim[trkid];
+			if(pTrkId<0) continue;
+			hlt_track pTrack = hlt_pt->primaryTrack[pTrkId];
+			float pt = pTrack.pt;
+			if(pt<1.)continue;
+			if(pTrack.nHits<15)continue;
+			if(pTrack.ndedx<10)continue;
+			float dedx  = pTrack.dedx;
+			float psi  = pTrack.psi;
+			float tanl = pTrack.tanl;
+			float px   = TMath::Cos(psi)*pt;
+			float py   = TMath::Sin(psi)*pt;
+			float pz   = tanl * pt;
+			TVector3 mu(px, py, pz);
+			double mu_dedxPi = getDedx(mu.Mag(), Pi);
+			float mu_nSigmaPi = log(dedx/mu_dedxPi)/A*sqrt(pTrack.ndedx);
+			//if(mu_nSigmaPi<-1.||mu_nSigmaPi>3.)continue;
+			pMuTrkId.push_back(pTrkId);
 		}
 
 		// J/psi analysis
-		// find the primary track
-		vector<int> pMuTrkId;
-		pMuTrkId.clear();
-		unsigned int ngmuon = trkId.size();
-
-		for(unsigned int igm=0; igm<ngmuon; igm++)
-		{
-			for(int inode = 0; inode<hlt_node->nNodes; inode++)
-			{
-				int gTrackSN  = hlt_node->node[inode].globalTrackSN;
-				int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-
-				if( (gTrackSN==trkId[igm]) && pTrackSN>=0 ) { pMuTrkId.push_back(pTrackSN);}
-			}
-		}
-
 		const float muMass = 0.10566;
 		unsigned int npmuon = pMuTrkId.size();
 		for(unsigned int i=0; i<npmuon; i++)
@@ -1294,10 +1301,6 @@ void l4Builder::event(daqReader *rdr)
 			hlt_track ipTrack = hlt_pt->primaryTrack[pMuTrkId[i]];
 			char iq = ipTrack.q;
 			float ipt = ipTrack.pt;
-			if(ipt<1.)continue;
-			if(ipTrack.nHits<15)continue;
-			if(ipTrack.ndedx<10)continue;
-
 			float ipsi = ipTrack.psi;
 			float itanl = ipTrack.tanl;
 			float ipx = TMath::Cos(ipsi)*ipt;
@@ -1306,20 +1309,11 @@ void l4Builder::event(daqReader *rdr)
 			TLorentzVector imuon;
 			imuon.SetXYZM(ipx,ipy,ipz,muMass);
 
-			float imu_dedx  = ipTrack.dedx;
-			TVector3 imu(ipx, ipy, ipz);
-			double imu_dedxPi = getDedx(imu.Mag(), Pi);
-			float imu_nSigmaPi = log(imu_dedx/imu_dedxPi)/A*sqrt(ipTrack.ndedx);
-			if(imu_nSigmaPi<-1.&&imu_nSigmaPi>3.)continue;
-
 			for(UInt_t j=i+1; j<npmuon; j++)
 			{
 				hlt_track jpTrack = hlt_pt->primaryTrack[pMuTrkId[j]];
 				char jq = jpTrack.q;
 				float jpt = jpTrack.pt;
-				if(jpt<1.0)continue;
-				if(jpTrack.nHits<15)continue;
-				if(jpTrack.ndedx<10)continue;
 
 				double pt_lead = (ipt>jpt) ? ipt : jpt;
 				if(pt_lead<1.5) continue;
@@ -1331,14 +1325,6 @@ void l4Builder::event(daqReader *rdr)
 				float jpz = jtanl * jpt;
 				TLorentzVector jmuon;
 				jmuon.SetXYZM(jpx,jpy,jpz,muMass);
-
-				float jmu_dedx  = jpTrack.dedx;
-				TVector3 jmu(jpx, jpy, jpz);
-				double jmu_dedxPi = getDedx(jmu.Mag(), Pi);
-				float jmu_nSigmaPi = log(jmu_dedx/jmu_dedxPi)/A*sqrt(jpTrack.ndedx);
-				if(jmu_nSigmaPi<-1.&&jmu_nSigmaPi>3.)continue;
-
-
 
 				TLorentzVector muPair = imuon + jmuon;
 				if(iq*jq<0) {
@@ -1378,29 +1364,17 @@ void l4Builder::event(daqReader *rdr)
 	//-----------------------------------------------------------------
 	//if(decision & triggerBitDiMuon) {   need the triggerBitMTDQuarkonium
 	int nMTDQmPairs = hlt_mtdqm->nMTDQuarkonium;
-
 	for(int i=0; i<nMTDQmPairs; i++){
 
 		int mgtrkid1 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId1;
 		int mgtrkid2 = hlt_mtdqm->MTDQuarkonium[i].muonTrackId2;
 
-		int pTrackSN1=-1, pTrackSN2=-1;
-		for(int inode = 0; inode<hlt_node->nNodes; inode++) {
-
-			if(pTrackSN1>=0&&pTrackSN2>=0) break;
-
-			int gTrackSN  = hlt_node->node[inode].globalTrackSN;
-			int pTrackSN  = hlt_node->node[inode].primaryTrackSN;
-
-			if( (gTrackSN == mgtrkid1) && pTrackSN>=0 ) { pTrackSN1=pTrackSN; continue;}
-			if( (gTrackSN == mgtrkid2) && pTrackSN>=0 ) { pTrackSN2=pTrackSN; continue;}
-		}
-
+		int pTrackSN1 = global2prim[mgtrkid1];
+		int pTrackSN2 = global2prim[mgtrkid2];
 		if( pTrackSN1<0||pTrackSN2<0 ) continue;
 
 		hlt_track muPtrk1 =  hlt_pt->primaryTrack[pTrackSN1];
 		hlt_track muPtrk2 =  hlt_pt->primaryTrack[pTrackSN2];
-
 		if(muPtrk1.nHits<15||muPtrk2.nHits<15)continue;
 		if(muPtrk1.ndedx<10||muPtrk2.ndedx<10)continue;
 
@@ -1445,13 +1419,13 @@ void l4Builder::event(daqReader *rdr)
 		TVector3 muPMom1(mupx1, mupy1, mupz1);
 		double mu1_dedxPi = getDedx(muPMom1.Mag(), Pi);
 		float mu1_nSigmaPi = log(mu1_dedx/mu1_dedxPi)/A*sqrt(muPtrk1.ndedx);
-		if(mu1_nSigmaPi<-1.||mu1_nSigmaPi>3.)continue;
+		//if(mu1_nSigmaPi<-1.||mu1_nSigmaPi>3.)continue;
 
 		float mu2_dedx  = muPtrk2.dedx;
 		TVector3 muPMom2(mupx2, mupy2, mupz2);
 		double mu2_dedxPi = getDedx(muPMom2.Mag(), Pi);
 		float mu2_nSigmaPi = log(mu2_dedx/mu2_dedxPi)/A*sqrt(muPtrk2.ndedx);
-		if(mu2_nSigmaPi<-1.||mu2_nSigmaPi>3.)continue;
+		//if(mu2_nSigmaPi<-1.||mu2_nSigmaPi>3.)continue;
 
 		TLorentzVector Muon1(0,0,0,0);
 		Muon1.SetXYZM(mupx1, mupy1, mupz1, mumass);
@@ -2127,7 +2101,7 @@ void l4Builder::defineHltPlots()
 	HltPlots[index]->addHisto(ph);
 
 	index++; //5
-	hLn_dEdx = new TH1D("Ln_dEdx", "Ln_dEdx", 500, -13.3, -12.3);
+	hLn_dEdx = new TH1D("Ln_dEdx", "Ln_dEdx", 500, -14, -11.5);
 	ph = new PlotHisto();
 	ph->histo = hLn_dEdx;
 	HltPlots[index]->addHisto(ph);
@@ -2323,7 +2297,7 @@ void l4Builder::defineHltPlots()
 
 	index++; //34
 	HltPlots[index]->setDrawOpts("colz");
-	hTrayID_TrgTime = new TH2F("Tof_TrayID_TrgTime", "Tof_TrayID_TrgTime", 124, 0., 124, 400, 2700, 3100);
+	hTrayID_TrgTime = new TH2F("Tof_TrayID_TrgTime", "Tof_TrayID_TrgTime", 124, 0., 124, 400, 900, 1300);
 	ph = new PlotHisto();
 	ph->histo = hTrayID_TrgTime;
 	HltPlots[index]->addHisto(ph);
@@ -3017,7 +2991,7 @@ void l4Builder::defineHltPlots_UPC()
 	HltPlots_UPC[index]->addHisto(ph);
 
 	index++; //4
-	hLn_dEdx_UPC = new TH1D("Ln_dEdx_UPC", "Ln_dEdx_UPC", 500, -13.3, -12.3);
+	hLn_dEdx_UPC = new TH1D("Ln_dEdx_UPC", "Ln_dEdx_UPC", 500, -14, -11.5);// previous range is -13.3, -12.3;
 	ph = new PlotHisto();
 	ph->histo = hLn_dEdx_UPC;
 	HltPlots_UPC[index]->addHisto(ph);
