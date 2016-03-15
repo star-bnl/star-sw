@@ -2591,14 +2591,18 @@ class If(Handler):
         document.impl( '}', unit=current )
         document.impl( '',  unit=current )
                 
-    def characters(self,content):        
-        content = content.lstrip()
-        content = content.rstrip()
-        content = content.lower()
-        content = replacements(content)        
-        if ( not re.match(';$',content) ):
-            content += ';'
-        document.impl( content, unit=current )
+    def characters(self,contents):
+        # Handle multiple commands sep by ;
+        for content in contents.split(';'):
+            content = content.lstrip()
+            content = content.rstrip()
+            content = content.lower()
+            content = replacements(content)        
+
+            if ( not re.match(';$',content) ):
+                content += ';'
+
+            document.impl( content, unit=current )
                 
 class Then(Handler): # always ignoring thens
     def setParent(self,p):
