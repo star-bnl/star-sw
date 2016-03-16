@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.96 2016/03/16 20:34:43 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.97 2016/03/16 20:39:21 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.97  2016/03/16 20:39:21  genevb
+// remove accidental extraneous line
+//
 // Revision 2.96  2016/03/16 20:34:43  genevb
 // Histogram list by subsystem, single TPC sector reference choice, and a couple histogram minima set
 //
@@ -1205,7 +1208,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             }
             latex.SetTextSize(sz);
             ruler.SetLineStyle(1);
-hobj->SetMinimum(1);
           }
 
           if (oName.EndsWith("QaPointPhiT")) {
