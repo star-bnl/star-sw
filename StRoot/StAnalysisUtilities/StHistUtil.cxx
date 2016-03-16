@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.95 2015/01/21 17:30:33 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.96 2016/03/16 20:34:43 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.96  2016/03/16 20:34:43  genevb
+// Histogram list by subsystem, single TPC sector reference choice, and a couple histogram minima set
+//
 // Revision 2.95  2015/01/21 17:30:33  genevb
 // Provide histogram normalization
 //
@@ -853,10 +856,17 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           if (dirListR) {
             Int_t tempint = -1;
             // try: full name
-            hobjR = (TH1*) (dirListR->FindObject(oname));
+            TString onamebase = oname;
+#define SingleTpcSectorReference false
+            if (SingleTpcSectorReference && onamebase.Contains("TpcSector")) {
+              // last parameter is the single sector to use for reference:
+              // e.g. TpcSector20 => TpcSector14 if the number is "14"
+              onamebase.Replace(onamebase.Index("TpcSector")+9,2,"14");
+            }
+            hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
             if (!hobjR) {
               // try: strip just maker from name
-              TString onamebase = StripPrefixes(oname,tempint,-1);
+              onamebase = StripPrefixes(oname,tempint,-1);
               hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
               if (!hobjR) {
                 // try: strip just trigger type from name
@@ -888,6 +898,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           // set x & y grid off by default
 	  gPad->SetGridy(0);
 	  gPad->SetGridx(0);
+
+          if (oName.Contains("GtrkPadfT")) hobj->SetMinimum(0.8);
 	  
           // set logX,Y,Z scale on/off
 
@@ -921,6 +933,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           if (oName.EndsWith("PVsDedx") ||
               oName.Contains("fms_qt_") ||
               oName.Contains("fpd_channel_") ||
+              oName.Contains("RP_cluster_xy") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc")) {
@@ -1026,11 +1039,12 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
             htmp->SetStats(kFALSE);
             htmp->Draw();
+            hobj->SetMinimum(0.9);
             if (gROOT->GetVersionInt() < 52800) {
               hobj->Draw("Pol ZCol Same");
             } else {
               // lego plots always needed phi,r from x,y
-              // (z)zcol plots, however, neded r,phi from x,y
+              // (z)col plots, however, needed r,phi from x,y
               // Now, (z)col plots also need phi,r from x,y
               // https://sft.its.cern.ch/jira/browse/ROOT-2845
               FlipAxes(hobj)->Draw("Pol ZCol Same");
@@ -1191,6 +1205,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             }
             latex.SetTextSize(sz);
             ruler.SetLineStyle(1);
+hobj->SetMinimum(1);
           }
 
           if (oName.EndsWith("QaPointPhiT")) {
@@ -2232,6 +2247,14 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
     sdefList = sdefList10; lengofList = sizeof(sdefList10)/sizeOfCharPtr;
   }
 
+// St_QA_Maker histograms for subsystems......................................
+  const Char_t* sdefList11[] = {
+    #include "St_QA_Maker/QAhlist_subsystems.h"
+  };
+  if (!strcmp(analType,"subsys")) {
+    sdefList = sdefList11; lengofList = sizeof(sdefList11)/sizeOfCharPtr;
+  }
+
   if (!sdefList) {
     // Try reading in a file as specified by analType
     ifstream analFile(analType);
@@ -2696,6 +2719,8 @@ TH1* StHistUtil::FlipAxes(TH1* hist) {
       newhist->SetBinError(ybin,xbin,hist->GetBinError(xbin,ybin));
     }
   }
+  newhist->SetMinimum(hist->GetMinimumStored());
+  newhist->SetMaximum(hist->GetMaximumStored());
   return newhist;
 }
 
