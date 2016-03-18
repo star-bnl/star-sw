@@ -123,24 +123,19 @@ public:
   /// Choose DB to access trigger definitions and thresholds
   void useOnlineDB() { mUseOnlineDB = 1; }
   void useOfflineDB() { mUseOfflineDB = 1; }
-  //add askTrigger for trigger defintion
 
-  //Define requested trigger
-  vector<string> mTrigName;
-  void askTrigger(const char * ptrgname)
-  {
-    string strgname(ptrgname);
-    mTrigName.push_back(strgname);
-  }
 
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.32 2013/10/08 23:13:13 zchang Exp $
+// $Id: StTriggerSimuMaker.h,v 1.33 2016/03/18 22:49:38 zchang Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.33  2016/03/18 22:49:38  zchang
+// updating trigger simulator for run12 analysis
+//
 // Revision 1.32  2013/10/08 23:13:13  zchang
 // Add member mTrigName and function askTrigger() to request trigger definition
 //

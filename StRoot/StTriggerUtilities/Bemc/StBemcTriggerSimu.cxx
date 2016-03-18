@@ -34,7 +34,6 @@ ClassImp(StBemcTriggerSimu)
 //==================================================
 StBemcTriggerSimu::StBemcTriggerSimu()
 {
-
   mEvent    = NULL;
   mDecoder  = new StEmcDecoder();
   mDbThres  = new StBemcTriggerDbThresholds();
@@ -854,11 +853,13 @@ void StBemcTriggerSimu::FEEini2009(int runNumber)
       assert(mConfig == kOnline || mConfig == kOffline);
       break;
     } // switch mConfig
+
     TowerStatus[towerId-1] = status == 1 || status == 18;
+
     if (!TowerStatus[towerId-1]) ++numMaskTow[triggerPatch];
     FEEped[towerId-1] = getFEEpedestal(ped12[towerId-1],pedTargetValue,debug);
     mTables->getCalib(BTOW,towerId,1,TowerGain[towerId-1]);
-    LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%.2f\t%d\t%.5f",towerId,triggerPatch,crate,seq,status,ped12[towerId-1],FEEped[towerId-1],TowerGain[towerId-1]) << endm;
+    LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%.2f\t%d\t%.5f",towerId,triggerPatch,crate,seq,TowerStatus[towerId-1],ped12[towerId-1],FEEped[towerId-1],TowerGain[towerId-1]) << endm;
   } // for towerId
 
   // These towers are swapped for Run 9
@@ -886,7 +887,11 @@ void StBemcTriggerSimu::FEEini2009(int runNumber)
   // Tower 1433 has zero gain in pp500
   if (runNumber >= 10078075 && runNumber <= 10103042) TowerStatus[1433-1] = 0;
 
-  LOG_INFO << "triggerPatch\tcrate\tseq\tHTsta\tTPsta\tbitConv\tformula\tLUTscale\tLUTped\tLUTsig\tLUTpow\tpar4\tpar5\tnumMaskTow" << endm;
+  //--zchang
+  LOG_INFO <<"LUT pedestal will be calculated by LUTped = LUTped (from database) + NumberOfMaskedOutTowers. --zchang"<<endm;
+  LOG_INFO <<"will set all trigger patch formula and bit conversion to 2 --zchang"<<endm;
+
+  LOG_INFO << "triggerPatch\tcrate\tseq\tHTsta\tTPsta\tbitConv\tformula\tLUTscale\tLUTped\tLUTsig\tLUTpow\tpar4\tpar5\tnumMaskTow" << endm;  
   for (int crate = 1; crate <= kNCrates; ++crate) {
     for (int seq = 0; seq < kNSeq; ++seq) {
       int triggerPatch;
@@ -896,13 +901,23 @@ void StBemcTriggerSimu::FEEini2009(int runNumber)
       mTables->getTriggerPatchStatus(triggerPatch,DSM_TPStatus[triggerPatch]);
       mTables->getTriggerBitConv(crate,seq,(int&)bitConvValue[triggerPatch]);
       mTables->getTriggerFormulaTag(crate,seq,formula[crate-1][seq]);
+
       int parameters[6];
       mTables->getTriggerFormulaParameters(crate,seq,parameters);
+      
       LUTscale[crate-1][seq] = parameters[0];
       LUTped  [crate-1][seq] = parameters[1];
       LUTsig  [crate-1][seq] = parameters[2];
       LUTpow  [crate-1][seq] = parameters[3];
-      LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",triggerPatch,crate,seq,DSM_HTStatus[triggerPatch],DSM_TPStatus[triggerPatch],bitConvValue[triggerPatch],formula[crate-1][seq],parameters[0],parameters[1],parameters[2],parameters[3],parameters[4],parameters[5],numMaskTow[triggerPatch]) << endm;
+      //run12 modify trigger patch pedestal due to masked out towers --zchang
+      if(runNumber > 13000000 && runNumber < 14000000){
+	//test zchang set all trigger patch formula and bit conversion to 2 --zchang
+	bitConvValue[triggerPatch] = 2;
+	formula[crate-1][seq] = 2;
+	LUTped[crate-1][seq] += numMaskTow[triggerPatch];
+      }
+      //end --zchang
+      LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%ld\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",triggerPatch,crate,seq,DSM_HTStatus[triggerPatch],DSM_TPStatus[triggerPatch],bitConvValue[triggerPatch],formula[crate-1][seq],LUTscale[crate-1][seq],LUTped[crate-1][seq],LUTsig[crate-1][seq],LUTpow[crate-1][seq],parameters[4],parameters[5],numMaskTow[triggerPatch]) << endm;
     } // for seq
   } // for crate
 
@@ -1052,6 +1067,12 @@ void StBemcTriggerSimu::simulateFEEfailure()
   if (runNumber >= 10121092 && runNumber <= 10136031) switchon (L0_TP_ADC[137],0);
   if (runNumber >= 10156031 && runNumber <= 10180034) switchon (L0_TP_ADC[137],0);
   if (runNumber >= 10154060 && runNumber <= 10155022) switchon (L0_TP_ADC[13 ],0);
+  //lut to 1 for bad trigger patch 75 --zchang
+  if(runNumber >= 13077001 && runNumber <= 14000000){
+    L0_TP_ADC[75] = 1;
+    LOG_INFO<<Form("patch 75 trigger patch output set to %d", L0_TP_ADC[75])<<endm;
+  }
+  //end -zchang
 }
 
 //==================================================

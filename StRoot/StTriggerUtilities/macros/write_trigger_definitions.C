@@ -1,28 +1,80 @@
-void write_trigger_definitions(int runNumber = 10180030)
+int write_trigger_definitions(int runNumber = 13078009)
 {
-  // Load libraries
+  // Load all required libraries
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
+  //gSystem->Load("St_base.so");
+  gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDbLib.so");
 
-  gSystem->Load("StTpcDb");
-  gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StDbUtilities");
-  gSystem->Load("StMcEvent");
-  gSystem->Load("StMcEventMaker");
-  gSystem->Load("StDaqLib");
   gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StEmcADCtoEMaker");
-  gSystem->Load("StEpcMaker");
-  gSystem->Load("StEmcSimulatorMaker");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("St_db_Maker");
+  gSystem->Load("StEmcAdctoEMaker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StTriggerUtilities");
+  //******//
+  gSystem->Setenv("DB_ACCESS_MODE","write");
+  //******//  
+  // Initialize db manager
+  StDbManager* mgr = StDbManager::Instance();
+  StDbConfigNode* node = mgr->initConfig("Calibrations_trg");
+  StDbTable* dbtable = node->addDbTable("triggerDefinition");
+  // beginTime timestamp in MySQL format: "YYYY-MM-DD HH:mm:ss"
+  ifstream intime(Form("beginTimes/%d.beginTimes.offsets.txt", runNumber));
+  if(!intime){
+    cout<<"can't open beginTime file"<<endl;
+    return 0;
+  }
+  char date[10];
+  char time[8];
+  intime >> date >> time;
+  TString storeTime(Form("%s %s", date, time));
+  mgr->setStoreTime(storeTime.Data());
+  
+  // Create your c-struct
+  triggerDefinition_st table;
+  
+  // Fill structure with data 
+  // sample setup for a single channel, please add more channels!
+  strcpy(table.comments, Form("run%d triggerDefinition uploaded by zchang", runNumber)); 
+  cout<<"comments set to "<<table.comments<<endl;
 
-  // Open connection to Run 9 online database
-  const char* database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts?timeout=60";
-  const char* user = "";
+  TObjArray objarr = readOnline(runNumber);
+  TBufferFile buf(TBuffer::kWrite);
+  buf << &objarr;
+  objarr.Delete();
+
+  cout<<"Buffer size: "<<buf.BufferSize()<<endl;
+
+  memset(table.trigdef, 0, buf.BufferSize());
+  memcpy(table.trigdef, buf.Buffer(), buf.BufferSize());
+  table.size = buf.BufferSize();
+
+  //******//
+  // Store data to the StDbTable
+  dbtable->SetTable((char*)&table, 1);
+  
+  // uncomment next line to set "sim" flavor. "ofl" flavor is set by default, no need to set it.
+  // dbtable->setFlavor("sim");
+  
+  // Store table to database
+  cout<<"Storing Db table: "<< mgr->storeDbTable(dbtable) << endl;
+  //******//
+
+  ofstream out(Form("buffer/%d.trigdef.buffer.out", runNumber));
+  assert(out);
+  out.write(buf.Buffer(),buf.BufferSize());
+  out.close();
+
+  return 1;
+}
+TObjArray readOnline(int runNumber)
+{
+  TObjArray array;
+
+  // Open connection to online database
+  const char* database = "mysql://dbbak.starp.bnl.gov:3411/Conditions_rts?timeout=60";
+  const char* user = "zchang";
   const char* pass = "";
   TMySQLServer* mysql = TMySQLServer::Connect(database,user,pass);
 
@@ -33,7 +85,6 @@ void write_trigger_definitions(int runNumber = 10180030)
 
   TString query;
   TMySQLResult* result;
-  TObjArray a;
 
   query = Form("select idx_trigger,name,offlineBit from `Conditions_rts`.`triggers` where idx_rn = %d",runNumber);
 
@@ -46,7 +97,7 @@ void write_trigger_definitions(int runNumber = 10180030)
       def->triggerIndex = triggerIndex;
       def->name = row->GetField(1);
       def->triggerId = atoi(row->GetField(2));
-      a.AddAtAndExpand(def,triggerIndex);
+      array.AddAtAndExpand(def,triggerIndex);
       delete row;
     }
     result->Close();
@@ -59,16 +110,17 @@ void write_trigger_definitions(int runNumber = 10180030)
     TMySQLRow* row;
     while (row = (TMySQLRow*)result->Next()) {
       int triggerIndex = atoi(row->GetField(0));
-      StTriggerDefinition* def = (StTriggerDefinition*)a.At(triggerIndex);
+      StTriggerDefinition* def = (StTriggerDefinition*)array.At(triggerIndex);
       if (def) {
-	def->onbits   = atoi(row->GetField(1));
-	def->offbits  = atoi(row->GetField(2));
-	def->onbits1  = atoi(row->GetField(3));
-	def->onbits2  = atoi(row->GetField(4));
-	def->onbits3  = atoi(row->GetField(5));
-	def->offbits1 = atoi(row->GetField(6));
-	def->offbits2 = atoi(row->GetField(7));
-	def->offbits3 = atoi(row->GetField(8));
+        sscanf(row->GetField(1), "%ud", &def->onbits);
+        sscanf(row->GetField(2), "%ud", &def->offbits);
+        sscanf(row->GetField(3), "%ud", &def->onbits1);
+        sscanf(row->GetField(4), "%ud", &def->onbits2);
+        sscanf(row->GetField(5), "%ud", &def->onbits3);
+        sscanf(row->GetField(6), "%ud", &def->offbits1);
+        sscanf(row->GetField(7), "%ud", &def->offbits2);
+        sscanf(row->GetField(8), "%ud", &def->offbits3);
+        //cout<<hex<<def->onbits<<" "<<def->offbits<<endl;
       }
       delete row;
     }
@@ -77,16 +129,17 @@ void write_trigger_definitions(int runNumber = 10180030)
 
   mysql->Close();
 
-  a.Compress();
+  array.Compress();
 
-  for (int triggerIndex = 0; triggerIndex < a.GetEntriesFast(); ++triggerIndex) {
-    StTriggerDefinition* def = (StTriggerDefinition*)a.At(triggerIndex);
+  for (int triggerIndex = 0; triggerIndex < array.GetEntriesFast(); ++triggerIndex) {
+    StTriggerDefinition* def = (StTriggerDefinition*)array.At(triggerIndex);
     if (def) def->print();
   }
-
+  return array;
+  /*
   TBufferFile buf(TBuffer::kWrite);
   buf << &a;
-  a.Delete();
+  array.Delete();
 
   cout << "Serialized array of " << buf.BufferSize() << " : " << buf.Buffer() << endl;
 
@@ -94,4 +147,5 @@ void write_trigger_definitions(int runNumber = 10180030)
   assert(out);
   out.write(buf.Buffer(),buf.BufferSize());
   out.close();
+  */
 }

@@ -70,12 +70,8 @@ public:
 
   //  void defineTrigger(const TriggerDefinition& trigdef);
   void defineTrigger(TriggerDefinition& trigdef);
-  //  add defineTrigger to define trigger based on year
-  void defineTrigger(TriggerDefinition& trigdef, int year);
-  void defineTrigger(int triggerIndex, const char* name, int triggerId, unsigned int onbits, unsigned int offbits, unsigned int onbits1, unsigned int onbits2, unsigned int onbits3, unsigned int offbits1, unsigned int offbits2, unsigned int offbits3);
 
-  //Add Funtion defineTrigger2012 test for 2011 and 2012 -- zchang
-  void defineTrigger2012(int triggerIndex, const char* name, int triggerId, unsigned int onbits);
+  void defineTrigger(int triggerIndex, const char* name, int triggerId, unsigned int onbits, unsigned int offbits, unsigned int onbits1, unsigned int onbits2, unsigned int onbits3, unsigned int offbits1, unsigned int offbits2, unsigned int offbits3);
 
   int  overlapJetPatchTh(int i) const;
   void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;

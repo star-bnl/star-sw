@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.8 2011/04/01 03:56:41 pibero Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.9 2016/03/18 22:49:38 zchang Exp $
 
 #include <utility>
 using std::make_pair;
@@ -19,7 +19,7 @@ using std::make_pair;
 #include "L2Emulator/L2upsilon/L2upsilonResult2006.h"
 #include <cstring>
 
-ClassImp(HttpResult)
+//ClassImp(HttpResult)
 ClassImp(StTriggerSimuResult)
 
 StTriggerSimuResult::StTriggerSimuResult() : TObject(), mBbcDecision(kDoNotCare),
@@ -121,6 +121,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.9  2016/03/18 22:49:38  zchang
+ * updating trigger simulator for run12 analysis
+ *
  * Revision 1.8  2011/04/01 03:56:41  pibero
  * Fix L2
  *
