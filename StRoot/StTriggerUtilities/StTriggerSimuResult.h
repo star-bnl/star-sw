@@ -3,7 +3,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.7 2010/08/13 00:21:27 rfatemi Exp $
+// $Id: StTriggerSimuResult.h,v 1.8 2016/03/18 22:49:38 zchang Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -40,7 +40,7 @@ public:
     int towerAdc;
     int triggerPatchId;
     int triggerPatchAdc;
-    ClassDef(HttpResult,1)
+//    ClassDef(HttpResult,1)
 };
 
 enum L2ResultType {kPed, kJet, kGammaBemc, kGammaEemc, kUpsilon};
@@ -162,6 +162,9 @@ inline const map<int,int>& StTriggerSimuResult::overlapJetPatches() const { retu
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.8  2016/03/18 22:49:38  zchang
+ * updating trigger simulator for run12 analysis
+ *
  * Revision 1.7  2010/08/13 00:21:27  rfatemi
  * changed PIG+2 address from BEMC to EEMC based on structure in StTriggerData2005::isL2Trigger()
  *
