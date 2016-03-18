@@ -94,23 +94,23 @@ $MAIN  = "/star/data";                                   # default base path
 
           "/star/data18" => "/gpfs01/star/data18",      # merged several disks together 2016/01/14
           "/star/data25" => "/gpfs01/star/data19",      # merged 2016/01/11
-          "/star/data26" => "SKIP",
-          "/star/data31" => "SKIP",
-          "/star/data36" => "SKIP",
+          #"/star/data26" => "SKIP",
+          #"/star/data31" => "SKIP",
+          #"/star/data36" => "SKIP",
           "/star/data40" => "/gpfs01/star/data20",      # merged 2016/01/11
           "/star/data41" => "SKIP",      
           "/star/data51" => "SKIP",
           "/star/data52" => "SKIP",
           "/star/data43" => "/gpfs01/star/data21", 
-          "/star/data46" => "SKIP",
-          "/star/data47" => "SKIP",
-          "/star/data48" => "SKIP",
-          "/star/data91" => "/gpfs01/star/data22",      # merged 2016/01/12
-          "/star/data92" => "SKIP",
-          "/star/data93" => "SKIP",
-          "/star/data94" => "SKIP",
-          "/star/data95" => "/gpfs01/star/data24",     # merged 2016/01/13
-          "/star/data96" => "SKIP",
+          #"/star/data46" => "SKIP",
+          #"/star/data47" => "SKIP",
+          #"/star/data48" => "SKIP",
+          #"/star/data91" => "/gpfs01/star/data22",      # merged 2016/01/12
+          #"/star/data92" => "SKIP",
+          #"/star/data93" => "SKIP",
+          #"/star/data94" => "SKIP",
+          #"/star/data95" => "/gpfs01/star/data24",     # merged 2016/01/13
+          #"/star/data96" => "SKIP",
   
 
           "/star/rcf"    => "/gpfs01/star/rcf",

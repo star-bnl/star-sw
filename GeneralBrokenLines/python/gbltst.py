@@ -8,6 +8,24 @@ Created on Jul 27, 2011
 
 ## \file
 # examples
+#
+# \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+#
+#  \copyright
+#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+#  This library is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU Library General Public License as
+#  published by the Free Software Foundation; either version 2 of the
+#  License, or (at your option) any later version. \n\n
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Library General Public License for more details. \n\n
+#  You should have received a copy of the GNU Library General Public
+#  License along with this program (see the file COPYING.LIB for more
+#  details); if not, write to the Free Software Foundation, Inc.,
+#  675 Mass Ave, Cambridge, MA 02139, USA.
 
 import numpy as np
 import math
@@ -38,9 +56,9 @@ def example1():
 #
   np.random.seed(47117)
 
-  nTry = 1000 #: number of tries
-  nLayer = 5   #: number of detector layers
-  print " Gbltst $Rev: 95 $ ", nTry, nLayer
+  nTry = 1000  #: number of tries
+  nLayer = 5  #: number of detector layers
+  print " Gbltst $Rev: 116 $ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3
@@ -52,20 +70,20 @@ def example1():
                      [-sinPhi, cosPhi, 0.], \
                      [-sinLambda * cosPhi, -sinLambda * sinPhi, cosLambda]])
 # measurement resolution
-  measErr = np.array([ 0.001, 0.001]) # 10 mu
+  measErr = np.array([ 0.001, 0.001])  # 10 mu
   measPrec = 1.0 / measErr ** 2
 # scattering error
-  scatErr = 0.001 # 1 mread
+  scatErr = 0.001  # 1 mread
 # RMS of CurviLinear track parameters (Q/P, slopes, offsets)
   clErr = np.array([0.001, -0.1, 0.2, -0.15, 0.25])
   # precision matrix for external seed (in local system)
   locSeed = None
-  seedLabel = 0 # label of point with seed
+  seedLabel = 0  # label of point with seed
   if seedLabel != 0:
     print " external seed at label ", seedLabel
 #
-  bfac = 0.2998 # Bz*c for Bz=1
-  step = 1.5 / cosLambda # constant steps in RPhi
+  bfac = 0.2998  # Bz*c for Bz=1
+  step = 1.5 / cosLambda  # constant steps in RPhi
 #
   Chi2Sum = 0.
   NdfSum = 0
@@ -124,7 +142,7 @@ def example1():
 #      point.addLocals(addDer)
 # additional global parameters?
       point.addGlobals(labGlobal, addDer)
-      addDer = -addDer # locDer flips sign every measurement      
+      addDer = -addDer  # locDer flips sign every measurement      
 # add point to trajectory      
       iLabel = traj.addPoint(point)
       if iLabel == abs(seedLabel):
@@ -181,7 +199,15 @@ def example1():
         locPar, locCov = traj.getResults(i)
         print " Point> ", i
         print " locPar ", locPar
-        #print " locCov ", locCov  
+        #print " locCov ", locCov
+# check residuals        
+      for i in range(traj.getNumPoints()):
+        numData, aResiduals, aMeasErr, aResErr, aDownWeight = traj.getMeasResults(i + 1)
+        for j in range(numData):
+          print " measRes " , i, j, aResiduals[j], aMeasErr[j], aResErr[j], aDownWeight[j]   
+        numData, aResiduals, aMeasErr, aResErr, aDownWeight = traj.getScatResults(i + 1)
+        for j in range(numData):
+          print " scatRes " , i, j, aResiduals[j], aMeasErr[j], aResErr[j], aDownWeight[j]   
 #
   end = time.clock()
   print " Time [s] ", end - start
@@ -194,7 +220,7 @@ def example2():
 #  
   binaryFile = open("milleBinaryISN.dat", "rb")
   nRec = 0
-  maxRec = 10 #: maximum number of records to read
+  maxRec = 10  #: maximum number of records to read
   Chi2Sum = 0.
   NdfSum = 0
   LostSum = 0.
@@ -205,7 +231,7 @@ def example2():
 # create trajectory
       traj = GblTrajectory(0)
 # read from file      
-      traj.milleIn(binaryFile) # get data blocks from file
+      traj.milleIn(binaryFile)  # get data blocks from file
       nRec += 1
 # fit trajectory      
       Chi2, Ndf, Lost = traj.fit()
@@ -257,7 +283,7 @@ class gblMeasSystem(object):
     ## products (T,U,V) * (I,J,K)
     self.__prod = np.dot(curviDir, measDir.T)
 
-  ## Transformation from measurement to local system 
+  ## Transformation from local to measurement system 
   #
   #  @return None (systems are identical)
   #   
@@ -271,8 +297,8 @@ class gblMeasSystem(object):
   def getTransLocalToCurvi(self):
     meas2crv = np.zeros((5, 5))
     meas2crv[0, 0] = 1.
-    meas2crv[1:3, 1:3] = self.__prod[1:3, 1:3] * self.__prod[0, 0] # (U,V)*(J,K) * T*I
-    meas2crv[3:5, 3:5] = self.__prod[1:3, 1:3] # (U,V)*(J,K)
+    meas2crv[1:3, 1:3] = self.__prod[1:3, 1:3] * self.__prod[0, 0]  # (U,V)*(J,K) * T*I
+    meas2crv[3:5, 3:5] = self.__prod[1:3, 1:3]  # (U,V)*(J,K)
     return meas2crv
  
   ## Transformation from curvilinear to measurement system 
@@ -280,15 +306,15 @@ class gblMeasSystem(object):
   #  @return Transformation for offsets; 2*2 matrix
   #   
   def getTransCurviToMeas(self):
-    return np.linalg.inv(self.__prod[1:3, 1:3]) #((U,V)*(J,K))^-1
+    return np.linalg.inv(self.__prod[1:3, 1:3])  #((U,V)*(J,K))^-1
  
   ## Scattering precision matrix in local system  
   #
   #  @return Precision; 2*2 matrix
   #   
   def getScatPrecision(self, scatErr):
-    c1 = self.__prod[0, 1] # T*J
-    c2 = self.__prod[0, 2] # T*K
+    c1 = self.__prod[0, 1]  # T*J
+    c2 = self.__prod[0, 2]  # T*K
     fac = (1 - c1 * c1 - c2 * c2) / (scatErr * scatErr)
     scatP = np.empty((2, 2))
     scatP[0, 0] = fac * (1 - c1 * c1)
@@ -313,33 +339,33 @@ class gblCurviSystem(object):
     ## projection curvilinear to measurement system: ((U,V)*(J,K))^-1
     self.__c2m = np.linalg.inv(np.dot(curviDir[1:3, 1:3], measDir[1:3, 1:3].T))
 
-  ## Transformation from measurement to local system 
+  ## Transformation from local to measurement system 
   #   
   #  @return Transformation for offsets; 2*2 matrix
   #   
   def getTransLocalToMeas(self):
-    return self.__c2m #((U,V)*(J,K))^-1
+    return self.__c2m  #((U,V)*(J,K))^-1
 
   ## Transformation of (q/p, slopes, offsets) from local to curvilinear system
   #
   #  @return Transformation for track parameters; 5*5 matrix
   # 
   def getTransLocalToCurvi(self):
-    return np.eye(5) # unit matrix 
+    return np.eye(5)  # unit matrix 
  
   ## Transformation from curvilinear to measurement system 
   #   
   #  @return Transformation for offsets; 2*2 matrix
   #   
   def getTransCurviToMeas(self):
-    return self.__c2m #((U,V)*(J,K))^-1
+    return self.__c2m  #((U,V)*(J,K))^-1
  
   ## Scattering precision matrix in local system  
   #
   #  @return Precision diagonal; vector(2)
   #
   def getScatPrecision(self, scatErr):
-    return np.array([1., 1.]) / (scatErr * scatErr) # diagonal only     
+    return np.array([1., 1.]) / (scatErr * scatErr)  # diagonal only     
         
 # create points on initial trajectory, create trajectory from points,
 # fit and write trajectory to MP-II binary file

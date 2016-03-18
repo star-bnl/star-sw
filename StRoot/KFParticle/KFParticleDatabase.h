@@ -75,6 +75,7 @@ class KFParticleDatabase
     pdgIndex(Vc::abs(pdg) == 3122) = 1;
     pdgIndex(Vc::abs(pdg) == 3312) = 2;
     pdgIndex(pdg == 22) = 3;
+    pdgIndex(Vc::abs(pdg) == 3334) = 4;
    
     massMotherPDG.gather(fMassSecPDG, pdgIndex);
     massMotherPDGSigma.gather(fMassSecPDGSigma, pdgIndex);
@@ -88,6 +89,8 @@ class KFParticleDatabase
       case  310: pdgIndex = 0; break;
       case 3122: pdgIndex = 1; break;
       case 3312: pdgIndex = 2; break;
+      case   22: pdgIndex = 3; break;
+      case 3334: pdgIndex = 4; break;
       default:   pdgIndex = 0; break;
     }
    
@@ -107,8 +110,8 @@ class KFParticleDatabase
  private:
   float fMass[13];
 
-  float fMassSecPDG[4];
-  float fMassSecPDGSigma[4];
+  float fMassSecPDG[5];
+  float fMassSecPDGSigma[5];
   
   float fMassPi0PDG;
   float fMassPi0PDGSigma;

@@ -49,6 +49,7 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDG[1] = 1.115683; //Lambda
   fMassSecPDG[2] = 1.32171; //Xi  
   fMassSecPDG[3] = 0; //gamma
+  fMassSecPDG[4] = 1.67245; //Omega
   
 #ifdef PANDA_STT
   fMassSecPDGSigma[0]=12.0e-3; //K0 TODO tune
@@ -72,7 +73,8 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDGSigma[2]=2.5e-3; //TODO tune
 #endif
   fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
-
+  fMassSecPDGSigma[4]=2.1e-3; //Xi TODO tune
+  
   fDatabase = this;
 }
 

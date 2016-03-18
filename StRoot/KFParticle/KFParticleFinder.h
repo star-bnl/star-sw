@@ -202,6 +202,9 @@ class KFParticleFinder
   std::vector<KFParticle> fK0PiPlus;
   std::vector<int> fK0PiMinusIndex;
   std::vector<KFParticle> fK0PiPi;
+  //vectors with temporary particles for charmonium reconstruction
+  std::vector< std::vector<KFParticle> > fOmegaPrim;
+  std::vector< std::vector<KFParticle> > fOmegaBarPrim;
   
   //pointer to the gamma EMC clusters
   KFPEmcCluster* fEmcClusters;

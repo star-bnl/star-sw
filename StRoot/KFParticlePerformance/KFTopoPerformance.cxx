@@ -527,8 +527,10 @@ void KFTopoPerformance::CheckMCParticleIsReconstructable(KFMCParticle &part)
     if (reco2) part.SetAsReconstructable(1);
     if (reco3) part.SetAsReconstructable(2);
     int iParticle = fParteff.GetParticleIndex(part.GetPDG());
-    if (reco4 && iParticle>=75 && iParticle<=110 ) part.SetAsReconstructable(3);
-    if (reco5 && iParticle>=75 && iParticle<=110 ) part.SetAsReconstructable(4);
+    if (reco4 && iParticle>=KFPartEfficiencies::fFirstMissingMassParticleIndex &&
+                 iParticle<=KFPartEfficiencies::fLastMissingMassParticleIndex ) part.SetAsReconstructable(3);
+    if (reco5 && iParticle>=KFPartEfficiencies::fFirstMissingMassParticleIndex &&
+                 iParticle<=KFPartEfficiencies::fLastMissingMassParticleIndex ) part.SetAsReconstructable(4);
   }
 }
 
@@ -928,7 +930,8 @@ void KFTopoPerformance::CalculateEfficiency()
     vector< vector<bool> > isReconstructable;
     vector<bool> isRecPart;
 
-    if( fParteff.GetParticleIndex(pdg)>=75 && fParteff.GetParticleIndex(pdg)<=110 )
+    if( fParteff.GetParticleIndex(pdg)>=KFPartEfficiencies::fFirstMissingMassParticleIndex &&
+        fParteff.GetParticleIndex(pdg)<=KFPartEfficiencies::fLastMissingMassParticleIndex )
     {
       isRecPart.push_back(part.IsReconstructable(4));
       isRecPart.push_back(part.IsReconstructable(1));

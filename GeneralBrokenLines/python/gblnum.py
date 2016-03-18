@@ -8,6 +8,24 @@ Created on Jul 27, 2011
 
 ## \file
 # Bordered band matrix.
+#
+# \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+#
+#  \copyright
+#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+#  This library is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU Library General Public License as
+#  published by the Free Software Foundation; either version 2 of the
+#  License, or (at your option) any later version. \n\n
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Library General Public License for more details. \n\n
+#  You should have received a copy of the GNU Library General Public
+#  License along with this program (see the file COPYING.LIB for more
+#  details); if not, write to the Free Software Foundation, Inc.,
+#  675 Mass Ave, Cambridge, MA 02139, USA.
 
 import numpy as np
 
@@ -58,7 +76,7 @@ class BorderedBandMatrix(object):
     ## size of border; int
     self.__numBorder = nBorder
     ## size of border; int
-    self.__numBand = 0        # actual band width
+    self.__numBand = 0  # actual band width
     ## size of band part of matrix; int
     self.__numCol = nSizeBand
     ## border part B; matrix(float)
@@ -104,6 +122,7 @@ class BorderedBandMatrix(object):
   #  
   def getBlockMatrix(self, aIndex):
     nBorder = self.__numBorder
+    nBand = self.__numBand
     nSize = len(aIndex)
     aMatrix = np.empty((nSize, nSize))  
     for i in range(nSize):
@@ -117,8 +136,11 @@ class BorderedBandMatrix(object):
         elif (iMin < nBorder):
           aMatrix[i, j] = self.__mixed[iMin, iMax - nBorder]       
         else:
-          nBand = iIndex - jIndex
-          aMatrix[i, j] = self.__band[nBand, jIndex - nBorder]
+          iBand = iMax - iMin
+          if iBand <= nBand:
+            aMatrix[i, j] = self.__band[iBand, iMin - nBorder]
+          else:
+            aMatrix[i, j] = 0.  
         aMatrix[j, i] = aMatrix[i, j]
     return aMatrix    
  
@@ -155,7 +177,7 @@ class BorderedBandMatrix(object):
     def decomposeBand():
       nRow = self.__numBand + 1
       nCol = self.__numCol
-      auxVec = np.copy(self.__band[0]) * 16.0 # save diagonal elements
+      auxVec = np.copy(self.__band[0]) * 16.0  # save diagonal elements
       for i in range(nCol):
         if ((self.__band[0, i] + auxVec[i]) != self.__band[0, i]):
           self.__band[0, i] = 1.0 / self.__band[0, i]
@@ -176,10 +198,10 @@ class BorderedBandMatrix(object):
       nRow = self.__numBand + 1
       nCol = self.__numCol  
       aSolution = np.copy(aRightHandSide)
-      for i in range(nCol):   # forward substitution
+      for i in range(nCol):  # forward substitution
         for j in range(min(nRow, nCol - i) - 1):
           aSolution[j + i + 1] -= self.__band[j + 1, i] * aSolution[i]    
-      for i in range(nCol - 1, -1, -1):   # backward substitution
+      for i in range(nCol - 1, -1, -1):  # backward substitution
         rxw = self.__band[0, i] * aSolution[i]    
         for j in range(min(nRow, nCol - i) - 1):
           rxw -= self.__band[j + 1, i] * aSolution[j + i + 1]    

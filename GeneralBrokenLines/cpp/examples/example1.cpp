@@ -5,6 +5,28 @@
  *      Author: kleinwrt
  */
 
+/** \file
+ *  Example application.
+ *
+ *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+ *
+ *  \copyright
+ *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+ *  This library is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU Library General Public License as
+ *  published by the Free Software Foundation; either version 2 of the
+ *  License, or (at your option) any later version. \n\n
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details. \n\n
+ *  You should have received a copy of the GNU Library General Public
+ *  License along with this program (see the file COPYING.LIB for more
+ *  details); if not, write to the Free Software Foundation, Inc.,
+ *  675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 #include <time.h>
 #include "example1.h"
 #include "TRandom3.h"
@@ -54,7 +76,7 @@ void example1() {
 //MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 10000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst $Rev: 93 $ " << nTry << ", " << nLayer << std::endl;
+	std::cout << " Gbltst $Rev: 119 $ " << nTry << ", " << nLayer << std::endl;
 
 	TRandom *r = new TRandom3();
 
@@ -239,15 +261,19 @@ void example1() {
 		 aCorrection.Print();
 		 std::cout << " cov " << std::endl;
 		 aCovariance.Print(); */
-    /* look at residuals
-     for (unsigned int label=1; label<=listOfPoints.size(); ++label) {
-       unsigned int numData=0;
-       std::cout << " measResults, label " << label << std::endl;
-       TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
-       traj.getMeasResults(label, numData, residuals, measErr, resErr, downWeights);
-       std::cout << " measResults, numData " << numData << std::endl;
-       // residuals.Print(); measErr.Print(); resErr.Print();
-     } */
+		// look at residuals
+		for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
+			unsigned int numData = 0;
+			//std::cout << " measResults, label " << label << std::endl;
+			TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
+			traj.getMeasResults(label, numData, residuals, measErr, resErr,
+					downWeights);
+			//std::cout << " measResults, numData " << numData << std::endl;
+			/* residuals.Print(); measErr.Print(); resErr.Print();
+			 for (unsigned int i = 0; i < numData; ++i) {
+			 std::cout << " measResults " << label << " " << i << " " << residuals[i] << " " << measErr[i] << " " << resErr[i] << std::endl;
+			 } */
+		}
 // debug printout
 		//traj.printTrajectory();
 		//traj.printPoints();

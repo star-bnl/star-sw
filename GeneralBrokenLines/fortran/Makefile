@@ -1,5 +1,7 @@
 # #################################################################
 # Makefile for GBLTST (test general broken lines)
+#
+# Author Claus Kleinwort, DESY, 2011
 # #################################################################
 # for gprof use -pg
 #
