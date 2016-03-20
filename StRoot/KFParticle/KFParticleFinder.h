@@ -198,7 +198,10 @@ class KFParticleFinder
   std::vector<KFParticle> fHe3PiBar; //He3- Pi+ combination
   std::vector<KFParticle> fHe4Pi; //He4+ Pi- combination
   std::vector<KFParticle> fHe4PiBar; //He4- Pi+ combination
-  
+  std::vector<KFParticle> fHe4L;
+  std::vector<KFParticle> fHe5L;
+  std::vector<KFParticle> fLLn;
+  std::vector<KFParticle> fH5LL;
   std::vector<KFParticle> fK0PiPlus;
   std::vector<int> fK0PiMinusIndex;
   std::vector<KFParticle> fK0PiPi;

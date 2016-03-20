@@ -83,7 +83,7 @@ void StEmcTriggerSimu::Make()
       {
 	mTcu->setInput((*mEM201)[0].output); //Run11 and Run12 TCU EM201 part -- zchang
       }
-    LOG_INFO << Form("TCU: %04x",mTcu->input() & 0xffff) << endm; //changed this line to LOG_INFO -- zchang
+    LOG_INFO << Form("TCU: 0x%04x",mTcu->input() & 0xffff) << endm; //changed this line to LOG_INFO -- zchang
   }
 }
 
@@ -103,13 +103,9 @@ StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 }
 void StEmcTriggerSimu::defineTrigger(TriggerDefinition& trigdef)
 {
-  mTcu->defineTrigger(trigdef);
-}
-
-void StEmcTriggerSimu::defineTrigger(TriggerDefinition& trigdef,int year)
-{
-   //Run11 and Run12 move EM201 output(onbit1 higher 16 bits) to onbits -- zchang
-  if(year > 2010)
+  // Run11 and Run12 move EM201 output(onbit1 higher 16 bits) to onbits -- zchang
+  // LOG_INFO<<Form("use year %d trigger definition", mYear)<<endm;
+  if(mYear > 2010)
     {
       trigdef.onbits = trigdef.onbits1;
       trigdef.onbits = trigdef.onbits >> 16;
@@ -125,36 +121,14 @@ void StEmcTriggerSimu::defineTrigger(int triggerIndex, const char* name, int tri
   triggerDefinition.triggerId = triggerId;
   triggerDefinition.onbits = onbits;
   triggerDefinition.offbits = offbits;
-  triggerDefinition.onbits0 = onbits;
-  triggerDefinition.offbits0 = offbits;
   triggerDefinition.onbits1 = onbits1;
   triggerDefinition.onbits2 = onbits2;
   triggerDefinition.onbits3 = onbits3;
   triggerDefinition.offbits1 = offbits1;
   triggerDefinition.offbits2 = offbits2;
   triggerDefinition.offbits3 = offbits3;
-  defineTrigger(triggerDefinition);
-}
-//Add Functions defineTrigger2012 test for 2011 and 2012 -- zchang
-void StEmcTriggerSimu::defineTrigger2012(int triggerIndex, const char* name, int triggerId, unsigned int onbits)
-{
-  TriggerDefinition triggerDefinition;
-  triggerDefinition.triggerIndex = triggerIndex;
-  strcpy(triggerDefinition.name,name);
-  triggerDefinition.triggerId = triggerId;
-  triggerDefinition.onbits = onbits;
-  triggerDefinition.offbits = 0;
-  triggerDefinition.onbits0 = 0;
-  triggerDefinition.onbits1 = 0;
-  triggerDefinition.onbits2 = 0;
-  triggerDefinition.onbits3 = 0;
-  triggerDefinition.offbits0 = 0;
-  triggerDefinition.offbits1 = 0;
-  triggerDefinition.offbits2 = 0;
-  triggerDefinition.offbits3 = 0;
-  //Print out new triggerDefinition -- zchang
   LOG_INFO <<"New Defined Trigger: "
-           << Form("triggerIndex=%d name=%s triggerId=%d onbits=0x%04x\n",triggerDefinition.triggerIndex,triggerDefinition.name,triggerDefinition.triggerId,triggerDefinition.onbits) << endm;
+           << Form("triggerIndex=%d name=%s triggerId=%d onbits=0x%04x offbits=0x%04x onbit1=0x%04x onbits2=0x%04x onbits3=0x%04x offbits1=0x%04x offbits2=0x%04x offbits3=0x%04x\n", triggerDefinition.triggerIndex,triggerDefinition.name,triggerDefinition.triggerId,triggerDefinition.onbits, triggerDefinition.offbits, triggerDefinition.onbits1, triggerDefinition.onbits2, triggerDefinition.onbits3, triggerDefinition.offbits1, triggerDefinition.offbits2, triggerDefinition.offbits3) << endm;
 
   defineTrigger(triggerDefinition);
 }
