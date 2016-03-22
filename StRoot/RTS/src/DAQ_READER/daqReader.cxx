@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.62 2016/01/30 21:54:36 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.63 2016/03/22 14:22:19 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1534,16 +1534,28 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
   int daqReader::getOfflineId(int bit)
   {
     if(trgIdsNotPresent) return -1;
+    if(bit > 63) return -1;
 
     if(trgIdsSet) {
       return trgIds[bit];
     }
 
     trgIdsSet = 1;
+    
+    fs_dirent *trgid_dir = sfs->opendirent("TRGID");
+    if(trgid_dir) {
+	UINT32 *trgid_buff = (UINT32 *)(memmap->mem + trgid_dir->offset);
+	memset(trgIds,0xffffffff,sizeof(trgIds));
 
-    int ret = sfs->read("TRGID", (char *)trgIds, sizeof(trgIds));
+	int sz = trgid_dir->sz;
+	sz /= 4;
+	if(sz > 64) sz = 64;
 
-    if(ret != sizeof(trgIds)) {
+	for(int i=0;i<sz;i++) {
+	    trgIds[i] = trgid_buff[i];
+	}
+    }
+    else { 
       LOG(ERR, "Can't find TRGID bank, can't get the offline id");
       memset(trgIds, 0xffffffff, sizeof(trgIds));
       trgIdsNotPresent = 1;
