@@ -71,7 +71,7 @@ class KFParticleBaseSIMD {
   void GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
   void GetDStoParticleBz( float_v Bz, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6], const float_v* param1 =0, const float_v* param2 =0  ) const ;
   void GetDStoParticleBy( float_v B, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
-//   void GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
+  void GetDStoParticleB( float_v B[3], const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const;
   void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const ;
   
   //* Transport on dS value along trajectory, output to P,C

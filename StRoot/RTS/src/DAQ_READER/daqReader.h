@@ -96,7 +96,7 @@ class daqReader {
 
   void init();
 
-  int trgIds[32];
+  int trgIds[64];
   int trgIdsSet;
   int trgIdsNotPresent;
 

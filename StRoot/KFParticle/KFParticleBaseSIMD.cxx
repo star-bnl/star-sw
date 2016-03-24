@@ -2315,17 +2315,55 @@ void KFParticleBaseSIMD::GetDStoParticleBy( float_v B, const KFParticleBaseSIMD 
   }
 }
 
-// void KFParticleBaseSIMD::GetDStoParticleB( float_v B, float_v alpha, const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const
-// {
-//   
-//   const float_v cosA = KFPMath::Cos(alpha);
-//   const float_v sinA = KFPMath::Sin(alpha);
-//   
-//   const float_v param1[6] = { fP[0], fP[1]*cosA+fP[2]*sinA , fP[1]*sinA-fP[2]*cosA, fP[3], fP[4]*cosA+fP[5]*sinA, fP[4]*sinA-fP[5]*cosA };
-//   const float_v param2[6] = { p.fP[0], p.fP[1]*cosA+p.fP[2]*sinA , p.fP[1]*sinA-p.fP[2]*cosA, p.fP[3], p.fP[4]*cosA+p.fP[5]*sinA, p.fP[4]*sinA-p.fP[5]*cosA };
-//   
-//   return GetDStoParticleBz(B, p, DS, DS1, param1, param2);
-// }
+void KFParticleBaseSIMD::GetDStoParticleB( float_v B[3], const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const
+{
+  const float_v& Bx = B[0];
+  const float_v& By = B[1];
+  const float_v& Bz = B[2];
+  
+  const float_v& Bxz = sqrt(Bx*Bx + Bz*Bz);
+  const float_v& Br = sqrt(Bx*Bx + By*By + Bz*Bz);
+    
+  float_v cosA = 1.f;
+  float_v sinA = 0.f;
+
+  cosA( abs(Bxz) > 1.e-8f ) = Bz/Bxz;
+  sinA( abs(Bxz) > 1.e-8f ) = Bx/Bxz;
+  
+  const float_v& sinP = By/Br;
+  const float_v& cosP = Bxz/Br;
+
+  
+  const float_v param1[6] = { cosA*fP[0] - sinA*fP[2], 
+                             -sinA*sinP*fP[0] + cosP*fP[1] - cosA*sinP*fP[2], 
+                              cosP*sinA*fP[0] + sinP*fP[1] + cosA*cosP*fP[2],
+                              cosA*fP[3] - sinA*fP[5], 
+                             -sinA*sinP*fP[3] + cosP*fP[4] - cosA*sinP*fP[5], 
+                              cosP*sinA*fP[3] + sinP*fP[4] + cosA*cosP*fP[5]};
+  const float_v param2[6] = { cosA*p.fP[0] - sinA*p.fP[2], 
+                             -sinA*sinP*p.fP[0] + cosP*p.fP[1] - cosA*sinP*p.fP[2], 
+                              cosP*sinA*p.fP[0] + sinP*p.fP[1] + cosA*cosP*p.fP[2],
+                              cosA*p.fP[3] - sinA*p.fP[5], 
+                             -sinA*sinP*p.fP[3] + cosP*p.fP[4] - cosA*sinP*p.fP[5], 
+                              cosP*sinA*p.fP[3] + sinP*p.fP[4] + cosA*cosP*p.fP[5]};
+
+  float_v dsdrBz[4][6];
+  for(int i1=0; i1<4; i1++)
+    for(int i2=0; i2<6; i2++)
+      dsdrBz[i1][i2] = 0.f;
+    
+  GetDStoParticleBz(Br, p, dS, dsdrBz, param1, param2);
+  
+  for(int iDs=0; iDs<4; iDs++)
+  {
+    dsdr[iDs][0] =  dsdrBz[iDs][0]*cosA - dsdrBz[iDs][1]*sinA*sinP + dsdrBz[iDs][2]*sinA*cosP;
+    dsdr[iDs][1] =                        dsdrBz[iDs][1]*cosP      + dsdrBz[iDs][2]*sinP;
+    dsdr[iDs][2] = -dsdrBz[iDs][0]*sinA - dsdrBz[iDs][1]*cosA*sinP + dsdrBz[iDs][2]*cosA*cosP;
+    dsdr[iDs][3] =  dsdrBz[iDs][3]*cosA - dsdrBz[iDs][4]*sinA*sinP + dsdrBz[iDs][5]*sinA*cosP;
+    dsdr[iDs][4] =                        dsdrBz[iDs][4]*cosP      + dsdrBz[iDs][5]*sinP;
+    dsdr[iDs][5] = -dsdrBz[iDs][3]*sinA - dsdrBz[iDs][4]*cosA*sinP + dsdrBz[iDs][5]*cosA*cosP;
+  }
+}
 
 void KFParticleBaseSIMD::GetDStoParticleLine( const KFParticleBaseSIMD &p, float_v dS[2], float_v dsdr[4][6] ) const
 {
