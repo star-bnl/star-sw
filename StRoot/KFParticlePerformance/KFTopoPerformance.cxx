@@ -1307,6 +1307,8 @@ void KFTopoPerformance::FillHistos()
         mcDaughterId = iMCTrack;
       else if(mcTrack.PDG() == 22 && TempPart.NDaughters() == 1)
         mcDaughterId = iMCTrack;
+      else if(iParticle >= fParteff.fFirstMissingMassParticleIndex && iParticle <= fParteff.fLastMissingMassParticleIndex)
+        mcDaughterId = mcPart.GetDaughterIds()[1]; //the charged daughter
       else
         mcDaughterId = mcPart.GetDaughterIds()[0];
       
