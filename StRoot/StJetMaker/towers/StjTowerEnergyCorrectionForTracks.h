@@ -6,7 +6,7 @@
 #include <TObject.h>
 
 #include "StjTowerEnergyList.h"
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 
 class StjTowerEnergyCorrectionForTracks : public TObject {
 

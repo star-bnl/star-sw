@@ -5,7 +5,7 @@
 #define STBET4PMAKERIMP_H
 
 #include "StjTowerEnergyList.h"
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 
 #include <utility>
 

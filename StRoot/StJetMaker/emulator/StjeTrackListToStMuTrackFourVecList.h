@@ -3,7 +3,7 @@
 #ifndef STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 #define STJTRACKLISTTOSTMUTRACKFOURVECLIST_H
 
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 
 #include <StJetFinder/AbstractFourVec.h>
 typedef std::vector<AbstractFourVec*> FourList;

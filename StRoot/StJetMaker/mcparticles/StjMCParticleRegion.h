@@ -10,7 +10,7 @@
 #define STJ_MCPARTICLE_REGION_H
 
 // STAR
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 #include <iostream>
 using namespace std;
 //Local

@@ -14,7 +14,7 @@
 
 // STAR
 #include "StjTowerEnergyList.h"
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 
 class StjAbstractTowerEnergyCorrectionForTracks : public TObject {
 public:

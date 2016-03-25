@@ -13,7 +13,7 @@
 
 // STAR
 #include "StjTowerEnergyList.h"
-#include "StjTrackList.h"
+#include "../tracks/StjTrackList.h"
 
 // Local
 #include "StjAbstractTowerEnergyCorrectionForTracks.h"
