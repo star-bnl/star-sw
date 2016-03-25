@@ -97,7 +97,6 @@ my $LD      = $env1->{LD};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
 
-my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir); # print "find_idlL: ======== @idlL ======\n";
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -214,6 +213,11 @@ if ( $pkg eq "GeoTestMaker") {
 
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
+}
+if ( $pkg eq "StVecBosAna") {
+#  $Cint_CPPPATH  .= "#StRoot/StVecBosAna/utils";
+#  print "$pkg => $CPPPATH\n";
+  $EXTRA_CPPFLAGS .= " -IStRoot/StVecBosAna/utils";
 }
 my ($i, $obj);
 my $LIBPKG = "";
@@ -535,11 +539,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     # According to description, all client requirering this
     # should be added here.
-#  @srcL = @srcs;
-#    print "src = @src\n srcL = @srcL\n";
-  if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
-    $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED, 
-			    'CPPPATH'  => $CPPPATH
+    #  @srcL = @srcs;
+    #    print "src = @src\n srcL = @srcL\n";
+    if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc482/) { # hack for  FtfUtilitieswith gcc482
+      $envNoDeb = $env->clone('DEBUG' => $NOOPTIMIZED, 
+			      'CPPPATH'  => $CPPPATH
 			   );
     for ($i = 0; $i < $#src; $i++) {
       if ($src[$i] =~ /StHbtCorrFctnDirectYlm\.cxx/) {
@@ -1085,8 +1089,7 @@ TDataSet *CreateTable() {
 		       'FDEBUG'   => $FDEBUG
 		      );
   my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
-  #  print "Cint_CPPPATH => $Cint_CPPPATH\n";
-  #    $envCint = $env2->clone(
+#  print "Cint_CPPPATH => $Cint_CPPPATH\n";
   $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
 			  'CPPPATH'  => $Cint_CPPPATH,
 			  'CPPFLAGS' => $CPPFLAGS,
@@ -1116,6 +1119,7 @@ TDataSet *CreateTable() {
   $cscanner = find scan::cpp( $env2->{_cwd}, $ROOTCINT_CPP );
   print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
   my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
+  
   if ($env2->{EXTRA_CPPFLAGS}) {
     $ROOTCINT_CPPPATH .= " " . $env2->{EXTRA_CPPFLAGS}; # Requested By Frank Laue
   }

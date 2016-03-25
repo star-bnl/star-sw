@@ -89,6 +89,7 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
 	my $classG = $class;
 	if ($classG =~ /</) {($classG) = split '<', $classG;} 
 	if (!$classG) 			{goto PRINT;}
+	if ($classG =~ /::/) {$classG =~ s/.*:://;}
 	if ($class_written{$class} and $class eq $classG)		{next;}
 	push @classes, $classG;
 	$class_written{$classG} = 1; 	#print "class: $class, written: $class_written{$class}\n";

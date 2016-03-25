@@ -1274,6 +1274,7 @@ Bfc_st BFC[] = { // standard chains
   {"GmtUtil"     ,""  ,"","",""                                       ,"StGmtUtil","Load StGmtUtil",kFALSE},
   {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+  {"EmcTrig"     ,""  ,"","","",                                             "StEmcTriggerMaker","",kFALSE},
 
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
 
@@ -1802,6 +1803,10 @@ Bfc_st BFC[] = { // standard chains
    ,                            "StHftPoolEventTB,StHftPoolHftMatchedTreeB","Create HftMatchedTree",kFALSE},
   {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"picoDST"     ,"PicoDst"  ,"",""     ,                      "StPicoDstMaker","StPicoDstMaker","",kFALSE},
+  {"fastjet"     ,""  ,"",""     ,         "","fastjet,siscone,siscone_spherical,fastjetplugins","",kFALSE},
+  {"Jet"         ,"","","gen_T",""
+   ,      "StJetEvent,StJetSkimEvent,StJets,StRandomSelector,StUeEvent,StSpinDbMaker,StMCAsymMaker,StJetFinder,fastjet,StJetMaker","",kFALSE},
+  {"VecBos","" ,"","fastjet","","boost_program_options,StJets,StVecBosAna", "Vector Boson analysis",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
