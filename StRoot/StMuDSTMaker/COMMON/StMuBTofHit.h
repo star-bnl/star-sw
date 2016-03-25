@@ -50,6 +50,8 @@ public:
     
     int idTruth() const;
     int qaTruth() const;
+    Float_t pathLength() const { return mPathLength;}
+    Float_t time()       const { return mTime;}
 
     void setTrayIndex(unsigned char);
     void setModuleIndex(unsigned char);
@@ -62,6 +64,8 @@ public:
     void setIndex2Global(int);
 
     void setIdTruth(Int_t idtru, Int_t qatru=0);
+    void setPathLength(Float_t p = 0)       { mPathLength = p;}
+    void setTime(Float_t p = 0)             { mTime = p;}
 
  protected:
     UChar_t mTray;
@@ -74,10 +78,12 @@ public:
     Int_t mIndex2Global;
     UShort_t mIdTruth;
     UShort_t mQuality;
+    Float_t   mPathLength; // MC
+    Float_t   mTime;       // MC
 
     friend class StMuDst;
     
-    ClassDef(StMuBTofHit,1)
+    ClassDef(StMuBTofHit,2)
 };
 
 inline int StMuBTofHit::tray() const { return mTray; }

@@ -719,6 +719,8 @@ Int_t StBTofSimMaker::fillEvent()
 	    aBTofHit.setTrailingEdgeTime(tdc+tot);
 	    aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
 	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 100);
+	    aBTofHit.setPathLength(aMcBTofHit->pathLength());
+	    aBTofHit.setTime(aMcBTofHit->time());
 	    mBTofCollection->addHit(new StBTofHit(aBTofHit));
 
 	    //Fill the StBTofRawHit

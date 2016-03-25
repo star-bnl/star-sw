@@ -58,12 +58,16 @@ public:
     Double_t          tot()              const { return mTrailingEdgeTime - mLeadingEdgeTime; }
     StTrack*          associatedTrack();
     const StTrack*    associatedTrack() const;
+    Float_t           pathLength() const { return mPathLength;}
+    Float_t           time()       const { return mTime;}
     void setTray(UChar_t trayId)            { mTray = trayId; }
     void setModule(UChar_t moduleId)        { mModule = moduleId; }
     void setCell(UChar_t cellId)            { mCell = cellId; }
     void setLeadingEdgeTime(Double_t time)  { mLeadingEdgeTime = time; }
     void setTrailingEdgeTime(Double_t time) { mTrailingEdgeTime = time; }
     void setAssociatedTrack(StTrack*);
+    void setPathLength(Float_t p = 0)       { mPathLength = p;}
+    void setTime(Float_t p = 0)             { mTime = p;}
     const StThreeVectorF& position() const;
     static Float_t    padWidth()            { return mBTofPadWidth;}
     StDetectorId   detector() const;
@@ -74,6 +78,8 @@ protected:
     UChar_t   mCell;
     Double_t  mLeadingEdgeTime;
     Double_t  mTrailingEdgeTime;
+    Float_t   mPathLength; // MC
+    Float_t   mTime;       // MC
     const static Float_t mBTofPadWidth;
     //    StTrack *mAssociatedTrack;   //$LINK
 #ifdef __CINT__
@@ -81,7 +87,7 @@ protected:
 #else
     StLink<StTrack>  mAssociatedTrack;
 #endif //__CINT__
-    ClassDef(StBTofHit,2)
+    ClassDef(StBTofHit,3)
 };
 
 inline StDetectorId StBTofHit::detector() const {return kBTofId;}

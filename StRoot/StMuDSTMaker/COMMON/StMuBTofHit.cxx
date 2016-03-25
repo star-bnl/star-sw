@@ -36,6 +36,8 @@ StMuBTofHit::StMuBTofHit()
   mIndex2Global  = -1;
   mIdTruth       = 0;
   mQuality       = 0;
+  mPathLength       = 0;
+  mTime             = 0;
 }
 
 /// constructor from StBTofHit
@@ -52,6 +54,8 @@ StMuBTofHit::StMuBTofHit(const StBTofHit* tofHit)
   mIndex2Global  = -1;
   mIdTruth       = tofHit->idTruth();
   mQuality       = tofHit->qaTruth();
+  mPathLength    = tofHit->pathLength();
+  mTime          = tofHit->time();
 }
 
 StMuBTofHit::~StMuBTofHit()

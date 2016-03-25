@@ -43,6 +43,8 @@ StBTofHit::StBTofHit() {
   mLeadingEdgeTime  = 0.;
   mTrailingEdgeTime = 0.;
   mAssociatedTrack  = 0;
+  mPathLength       = 0;
+  mTime             = 0;
 }
 //________________________________________________________________________________
 const StTrack* StBTofHit::associatedTrack() const { return mAssociatedTrack; }

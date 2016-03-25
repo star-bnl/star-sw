@@ -135,7 +135,7 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 
   if (dirFile.find(".lis")!=string::npos) 	        fromList(dirFile);
   else if (dirFile.find(".files")!=string::npos)        fromList(dirFile);
-  else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
+  //  else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
   else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
   else {
     TDirIter Dir(dirFile.c_str());
