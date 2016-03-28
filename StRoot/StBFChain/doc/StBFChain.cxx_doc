@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.146 2016/01/12 20:53:37 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.147 2016/03/28 15:33:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -52,7 +52,8 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"AgML" ,"" ,"","-Agi,-VmcGeo","","StarAgmlLib,Geometry,StarGeometry"
+  {"AgMLlib", "", "","", "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
+  {"AgML" ,"" ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    , "Alias VmcGeometry to AgiLGeometry",kFALSE},
   {"Agi" ,"" ,"","-VmcGeo","","" ,"Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},
   {"VmcGeo" ,"" ,"","-AgML,-Agi" ,"","" ,"Alias VmcGeometry to VmcGeo",kFALSE},
@@ -932,6 +933,8 @@ Bfc_st BFC[] = {
    , "Base chain for run 2015a data",kFALSE},
   {"B2015b" ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    , "Base chain for run 2015 with y2015b geometry",kFALSE},
+  {"B2015c" ,"","","ry2015c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   , "Base chain for run 2015 with y2015c geometry",kFALSE},
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -941,6 +944,9 @@ Bfc_st BFC[] = {
   {"pp2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"pp2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   , "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"P2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -950,10 +956,13 @@ Bfc_st BFC[] = {
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   , "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2016" ,"","","ry2016,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    , "Base chain for 2016 ITTF (tpc)",kFALSE},
   {"P2016","" ,"",
-   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   "B2016,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
@@ -1061,6 +1070,7 @@ Bfc_st BFC[] = {
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
   {"min2trkVtx" ,"" ,"","","" ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
@@ -1301,10 +1311,12 @@ Bfc_st BFC[] = {
   {"pxlRaw" ,"","","pxlDb", "StPxlRawHitMaker", "StPxlRawHitMaker", "PXL raw hit maker",kFALSE},
   {"pxlCluster" ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "PXL cluster maker",kFALSE},
   {"pxlHit" ,"","","event pxlCluster", "StPxlHitMaker", "StPxlHitMaker", "PXL hit maker",kFALSE},
-  {"istRaw", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
-  {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
-  {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
+  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker",
+                                                             "StIstSimMaker", "IST Slow simulator", kFALSE},
   {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
+  {"istRawHit", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
+  {"istCluster", "", "", "istRawHit","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
+  {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
   {"ssddat" ,"","","ssd_daq" ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat" ,"","","sst_daq" ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
@@ -1564,6 +1576,7 @@ Bfc_st BFC[] = {
   {"HitFilt" ,"", "","", "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"SvtHitFilt" ,"", "","HitFilt", "","","SVT Hit filter Maker",kFALSE},
   {"TpcHitFilt" ,"", "","HitFilt", "","","filter out TPC Hits not on tracks",kFALSE},
+  {"HftHitFilt" ,"", "","HitFilt", "","","filter out non-HFT hits",kFALSE},
   {"KeepTpcHit" ,"", "","HitFilt", "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
   {"KeepSvtHit" ,"", "","HitFilt", "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"KeepFgtHit" ,"", "","HitFilt", "","","Keep all FGT hits in StHitFilterMaker",kFALSE},
@@ -1612,7 +1625,8 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"AgML" ,"" ,"","-Agi,-VmcGeo","","StarAgmlLib,Geometry,StarGeometry"
+  {"AgMLlib", "", "","", "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
+  {"AgML" ,"" ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    , "Alias VmcGeometry to AgiLGeometry",kFALSE},
   {"Agi" ,"" ,"","-VmcGeo","","" ,"Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},
   {"VmcGeo" ,"" ,"","-AgML,-Agi" ,"","" ,"Alias VmcGeometry to VmcGeo",kFALSE},
@@ -2492,6 +2506,8 @@ Bfc_st BFC[] = {
    , "Base chain for run 2015a data",kFALSE},
   {"B2015b" ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    , "Base chain for run 2015 with y2015b geometry",kFALSE},
+  {"B2015c" ,"","","ry2015c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   , "Base chain for run 2015 with y2015c geometry",kFALSE},
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -2501,6 +2517,9 @@ Bfc_st BFC[] = {
   {"pp2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"pp2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   , "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"P2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -2510,10 +2529,13 @@ Bfc_st BFC[] = {
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   , "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"B2016" ,"","","ry2016,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    , "Base chain for 2016 ITTF (tpc)",kFALSE},
   {"P2016","" ,"",
-   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   "B2016,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    , "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
@@ -2621,6 +2643,7 @@ Bfc_st BFC[] = {
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
   {"min2trkVtx" ,"" ,"","","" ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
@@ -2861,10 +2884,12 @@ Bfc_st BFC[] = {
   {"pxlRaw" ,"","","pxlDb", "StPxlRawHitMaker", "StPxlRawHitMaker", "PXL raw hit maker",kFALSE},
   {"pxlCluster" ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "PXL cluster maker",kFALSE},
   {"pxlHit" ,"","","event pxlCluster", "StPxlHitMaker", "StPxlHitMaker", "PXL hit maker",kFALSE},
-  {"istRaw", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
-  {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
-  {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
+  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker",
+                                                             "StIstSimMaker", "IST Slow simulator", kFALSE},
   {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
+  {"istRawHit", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
+  {"istCluster", "", "", "istRawHit","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
+  {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
   {"ssddat" ,"","","ssd_daq" ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat" ,"","","sst_daq" ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
@@ -3124,6 +3149,7 @@ Bfc_st BFC[] = {
   {"HitFilt" ,"", "","", "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"SvtHitFilt" ,"", "","HitFilt", "","","SVT Hit filter Maker",kFALSE},
   {"TpcHitFilt" ,"", "","HitFilt", "","","filter out TPC Hits not on tracks",kFALSE},
+  {"HftHitFilt" ,"", "","HitFilt", "","","filter out non-HFT hits",kFALSE},
   {"KeepTpcHit" ,"", "","HitFilt", "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
   {"KeepSvtHit" ,"", "","HitFilt", "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"KeepFgtHit" ,"", "","HitFilt", "","","Keep all FGT hits in StHitFilterMaker",kFALSE},
@@ -3286,8 +3312,10 @@ Int_t StBFChain::Load()
 	      break;
 	    } else {
 	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
-
-	      LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
+	      
+	      //if (Debug() > 1) 
+	      {LOG_QA  << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;}
+	      //else             {LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;}
 
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
@@ -3535,6 +3563,11 @@ Int_t StBFChain::Instantiate()
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
+      }
+
+      // Option to re-use hits in other tracks
+      if ( GetOption("hitreuseon") ){
+	mk->SetAttr("SetMaxTimes", 100); 
       }
 
       // old logic for svt and ssd
@@ -3856,6 +3889,13 @@ Int_t StBFChain::Instantiate()
 	cmd += "Filtmk->setPtUpperCut(-99.);";
 	cmd += "Filtmk->setAbsEtaCut(-99);";
 	cmd += "Filtmk->setAbsZVertCut(999);";
+	ProcessLine(cmd);
+      } else if (GetOption("HftHitFilt")){
+	// Filter out TPC hits not on tracks
+	LOG_QA << "HFT hit filter is ON" << endm;
+	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
+	cmd += "Filtmk->setAbsZVertCut(-1);";
+	cmd += "Filtmk->setKeepWestHighEtaHitsForFgt(0);";
 	ProcessLine(cmd);
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.625 2016/01/19 15:29:39 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.627 2016/03/28 15:33:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -431,6 +431,11 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
       }
 
+      // Option to re-use hits in other tracks
+      if ( GetOption("hitreuseon") ){
+	mk->SetAttr("SetMaxTimes", 100); 
+      }
+
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
 	mk->SetAttr("useSvt"	,kFALSE);
@@ -750,6 +755,13 @@ Int_t StBFChain::Instantiate()
 	cmd += "Filtmk->setPtUpperCut(-99.);";
 	cmd += "Filtmk->setAbsEtaCut(-99);";
 	cmd += "Filtmk->setAbsZVertCut(999);";
+	ProcessLine(cmd);
+      } else if (GetOption("HftHitFilt")){
+	// Filter out TPC hits not on tracks
+	LOG_QA << "HFT hit filter is ON" << endm;
+	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
+	cmd += "Filtmk->setAbsZVertCut(-1);";
+	cmd += "Filtmk->setKeepWestHighEtaHitsForFgt(0);";
 	ProcessLine(cmd);
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
