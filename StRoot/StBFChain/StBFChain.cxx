@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.626 2016/03/03 22:54:57 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.627 2016/03/28 15:33:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -444,6 +444,11 @@ Int_t StBFChain::Instantiate()
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
+      }
+
+      // Option to re-use hits in other tracks
+      if ( GetOption("hitreuseon") ){
+	mk->SetAttr("SetMaxTimes", 100); 
       }
 
       // old logic for svt and ssd
