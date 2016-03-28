@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.228 2016/02/25 23:05:31 genevb Exp $
+// $Id: StiMaker.cxx,v 1.229 2016/03/28 00:15:53 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -153,6 +153,7 @@ StiMaker::StiMaker(const Char_t *name) :
     _loaderHitFilter(0)
 
 {
+  mMaxTimes = 0;
   memset(mTimg,0,sizeof(mTimg));
   cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
   mPullFile=0; mPullEvent=0;mPullTTree=0;
@@ -329,6 +330,7 @@ Int_t StiMaker::InitRun(int run)
       _seedFinder->initialize();
       _hitLoader  = _toolkit->getHitLoader();
       _tracker=0;
+      mMaxTimes = IAttr("setMaxTimes");
       if (IAttr("useTracker")) {
 
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
@@ -388,6 +390,7 @@ Int_t StiMaker::Make()
 
     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
     _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+    if (mMaxTimes) _hitLoader->setMaxTimes(mMaxTimes);
     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
 
     iAnz = MakeGlobalTracks(event);
@@ -608,8 +611,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.228 2016/02/25 23:05:31 genevb Exp $
+// $Id: StiMaker.cxx,v 1.229 2016/03/28 00:15:53 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.229  2016/03/28 00:15:53  perev
+// Add max number of tracks assigned to one hit
+//
 // Revision 1.228  2016/02/25 23:05:31  genevb
 // kSsdId => kSstId
 //

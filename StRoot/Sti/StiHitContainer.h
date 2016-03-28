@@ -162,6 +162,7 @@ public:
   virtual void sortHits();
   //Ignore hits marked as used (std::stable_partition)
   void partitionUsedHits();
+  void setMaxTimes(int nTimes);
   vector<StiHit*> & getHits();
   vector<StiHit*> & getHits(Filter<StiHit> & filter);
   vector<StiHit*> & getHits(StiHit& ref, double dY, double dZ, bool fetchAll=false);
