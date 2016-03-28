@@ -58,6 +58,7 @@ StiHitContainer::StiHitContainer(const string & name,
   //_maxPoint = new StiHit();
 }
 
+//________________________________________________________________________________
 StiHitContainer::~StiHitContainer()
 {
   cout <<"StiHitContainer::~StiHitContainer()"<<endl;
@@ -72,6 +73,7 @@ StiHitContainer::~StiHitContainer()
 //void StiHitContainer::update()
 //{}
 
+//________________________________________________________________________________
 /*! The time complexity of push_back has two components:\n
   1) The correct hit-vector must be retrieved (or inserted if it doesn't
   exist) from the map.  This portion is O(logN) where N is the number of
@@ -94,6 +96,7 @@ void StiHitContainer::add(StiHit* hit)
   return;
 }
 
+//________________________________________________________________________________
 void StiHitContainer::reset()
 {
    HitMapToVectorAndEndType::iterator it;
@@ -110,6 +113,7 @@ void StiHitContainer::reset()
      }
 }
 
+//________________________________________________________________________________
 /*! A call to clear() must call std::vector<StiHit*>::clear() for all vectors
   stored in the map.  Thus a call to clear is of O(N) *M where N is the number
   of keys in the map (see documenation of hits() for an estimate of N) and
@@ -126,6 +130,7 @@ void StiHitContainer::clear()
 //    cout<<"StiHitContainer::clear() -I- Done"<<endl;
 }
 
+//________________________________________________________________________________
 /*! The time complexity of size is of O(logN) where N is the number of
   keys in the map.  For an estimate of N please see the documnation for
   hits() method.
@@ -141,6 +146,8 @@ unsigned int StiHitContainer::size() const
 }
 
 
+//________________________________________________________________________________
+//________________________________________________________________________________
 vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
 {
   //_key.refangle = layer->getPlacement()->getNormalRefAngle();
@@ -151,6 +158,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsBegin(const StiDetector* layer)
     return _map[_key].begin();
 }
 
+//________________________________________________________________________________
 vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 {
   //_key.refangle = layer->getPlacement()->getNormalRefAngle();
@@ -162,6 +170,7 @@ vector<StiHit*>::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 }
 
 
+//________________________________________________________________________________
 /*! Get hits specified by the filter condition implied by the given position 
     and search radius.
 
@@ -254,6 +263,7 @@ vector<StiHit*> & StiHitContainer::getHits(StiHit& ref, double dY, double dZ, bo
   return _selectedHits;
 }
 
+//________________________________________________________________________________
 /*! This function calls the STL sort algorithm for each hit-vector in the
   map.  The StiHit objects are ordered via the struct StizHitLessThan.
   
@@ -280,6 +290,7 @@ void StiHitContainer::sortHits()
   return;
 }
 
+//________________________________________________________________________________
 void StiHitContainer::partitionUsedHits()
 {
     for (HitMapToVectorAndEndType::iterator it=_map.begin(); it!=_map.end(); ++it)
@@ -291,6 +302,7 @@ void StiHitContainer::partitionUsedHits()
     }
 }
 
+//________________________________________________________________________________
 ostream& operator<<(ostream& os, const vector<StiHit*>& vec)
 {
     for (vector<StiHit*>::const_iterator vit=vec.begin(); vit!=vec.end(); vit++) {
@@ -299,6 +311,7 @@ ostream& operator<<(ostream& os, const vector<StiHit*>& vec)
     return os;
 }
 
+//________________________________________________________________________________
 ostream& operator<<(ostream& os, const StiHitContainer& store)
 {
     for (HitMapToVectorAndEndType::const_iterator it=store._map.begin(); it!=store._map.end(); it++) {
@@ -309,6 +322,7 @@ ostream& operator<<(ostream& os, const StiHitContainer& store)
 }
 
 
+//________________________________________________________________________________
 /// Get hits selected by the given filter. If no filter is given (i.e. filter==0)
 //  then return all hits.
 vector<StiHit*> & StiHitContainer::getHits()
@@ -323,6 +337,7 @@ vector<StiHit*> & StiHitContainer::getHits()
   return _selectedHits;
 }
 
+//________________________________________________________________________________
 /// Get hits selected by the given filter. If no filter is given (i.e. filter==0)
 //  then return all hits.
 vector<StiHit*> & StiHitContainer::getHits(Filter<StiHit> & filter)
@@ -345,6 +360,7 @@ vector<StiHit*> & StiHitContainer::getHits(Filter<StiHit> & filter)
 }
 
 
+//________________________________________________________________________________
 StiHit * StiHitContainer::getNearestHit(StiHit& ref, double dY, double dZ, bool fetchAll)
 { 
   StiHit* hit = 0;
@@ -365,5 +381,16 @@ StiHit * StiHitContainer::getNearestHit(StiHit& ref, double dY, double dZ, bool 
         }
     }
   return closestHit;
+}
+//________________________________________________________________________________
+/// Set max time for all hits
+void StiHitContainer::setMaxTimes(int nTimes)
+{
+  for(HitMapToVectorAndEndType::const_iterator iter= _map.begin(); iter !=_map.end(); iter++)
+   {
+      const vector<StiHit*> & t_hits = (*iter).second.hits();
+      for (vector<StiHit*>::const_iterator it=t_hits.begin();it!=t_hits.end();++it)
+        (*it)->setMaxTimes(nTimes);
+   }  
 }
 
