@@ -457,7 +457,10 @@ switch ($pkg)
     case "gcc447":
     case "gcc":
       unsetenv QTDIR
-      setenv OPTSTAR $optstar
+      unsetenv OPTSTAR
+      unsetenv XOPTSTAR
+#      if ( $?optstar != 0 ) setenv  OPTSTAR  $optstar
+#      if ( $?xoptstar!= 0 ) setenv XOPTSTAR  $xoptstar
       unsetenv XOPTSTAR
       if ( -x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 intel rcassoft`

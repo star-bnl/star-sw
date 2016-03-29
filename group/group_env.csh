@@ -76,11 +76,16 @@ endif
 
 # Clear this out. First block STAF, second STAR
 if ( $?DECHO) echo "$self :: Executing STAR_SYS"
-source ${GROUP_DIR}/STAR_SYS;
+source ${GROUP_DIR}/STAR_SYS;#  echo "STAR_HOST_SYS = $STAR_HOST_SYS"
 
 # Define /opt/star (or equivalent)
-if ( ! $?OPTSTAR) then
-   setenv OPTSTAR /opt/star
+#if ( ! $?OPTSTAR) then
+   if (-d /opt/star) then 
+     setenv OPTSTAR /opt/star
+   else 
+    setenv OPTSTAR $AFS_RHIC/opt/star
+   endif
+   setenv XOPTSTAR ${OPTSTAR}
    if (-d ${OPTSTAR}/${STAR_HOST_SYS}) then 
      setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
    else                                
@@ -89,62 +94,17 @@ if ( ! $?OPTSTAR) then
        setenv  OPTSTAR  ${XOPTSTAR}
      endif
    endif
-endif
+#endif
 # X indicates points to the AFS reference
-if ( ! $?XOPTSTAR ) then
-    if (-d ${OPTSTAR}/${STAR_HOST_SYS}) setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
+#if ( ! $?XOPTSTAR ) then
+#    if (-d ${OPTSTAR}/${STAR_HOST_SYS}) setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
 #    # keep a reference to the AFS one
 #    # this -e test may fail - don't do it
 #    if ( "$READ_AFS" == "" ) then
 ##	setenv XOPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
 #	setenv XOPTSTAR $OPTSTAR #${AFS_RHIC}/opt/star
 #    endif
-endif
-
-#if ( -r ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
-#    setenv  OPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
 #endif
-if ( ! $?OPTSTAR ) then
-    # local first - BEWARE this may be a link over
-    # AFS as well and as it turns out, -e test locks as well
-
-    # there is not even a /opt, -e will be safe
-    # if there is no star in /opt, also safe to do -e
-    # note that ALL ls must be escaped to avoid argument aliasing
-    # forcing color, fancy display etc ... all doing a form of stat
-    # hence locking again
-    set IS_OPTSTAR_AFS=""
-    set TEST=""
-
-    if ( -d /opt ) then
-        set TEST=`/bin/ls /opt/ | $GREP star`
-	if ( "$TEST" == "star" )  then
-#            set IS_OPTSTAR_AFS=`ls -ld /star/packages/.DEV2/misc/opt/star | grep afs`
-            set IS_OPTSTAR_AFS=`ls -ld /opt/star | $GREP afs`
-	endif
-    endif
-
-    if ( "$IS_OPTSTAR_AFS" == "" || "$READ_AFS" == "") then
-#	if ( $?DECHO) echo "$self :: Safe to test -e on ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star"
-	if ( $?DECHO) echo "$self :: Safe to test -e on /opt/star"
-#	if ( -e ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
-#	    setenv  OPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
-	if ( -e /opt/star ) then
-	    setenv  OPTSTAR /opt/star
-	endif
-	#else -> note that eventually, we could set blindly OPTSTAR if TEST!=""
-    endif
-
-    # remote second
-#    if ( $?DECHO) echo "$self :: Not safe to check ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} OPTSTAR_AFS=[$IS_OPTSTAR_AFS] READ_AFS=[$READ_AFS]"
-    if ( $?DECHO) echo "$self :: Not safe to check /opt/star OPTSTAR_AFS=[$IS_OPTSTAR_AFS] READ_AFS=[$READ_AFS]"
-    if ( $?XOPTSTAR && ! $?OPTSTAR ) then
-        setenv OPTSTAR ${XOPTSTAR}
-    else
-        setenv FAIL "$FAIL OPTSTAR"
-    endif
-endif
-
 # define but feedback later
 if ( $?DECHO) echo "$self :: Defining GROUP_DIR STAR_PATH"
 if ( ! $?GROUP_DIR )   setenv GROUP_DIR ${STAR_ROOT}/group     # Defined to AFS Group Dir
@@ -317,48 +277,48 @@ endif
 #
 
 # There is a second chance to define XOPTSTAR
-if ( $?DECHO) echo "$self :: Checking  XOPTSTAR "
-if ( ! $?XOPTSTAR ) then
+#if ( $?DECHO) echo "$self :: Checking  XOPTSTAR "
+#if ( ! $?XOPTSTAR ) then
 #    if ( -e ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
 #	setenv XOPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
-    if ( -e ${AFS_RHIC}/${STAR_SYS}/opt/star ) then
-       setenv XOPTSTAR ${AFS_RHIC}/${STAR_SYS}/opt/star
-    else
-	# well, as good as anything else (we cannot find a
-	# global reference)
-	setenv XOPTSTAR $OPTSTAR
-    endif
-endif
+#    if ( -e ${AFS_RHIC}/${STAR_SYS}/opt/star ) then
+#       setenv XOPTSTAR ${AFS_RHIC}/${STAR_SYS}/opt/star
+#    else
+#	# well, as good as anything else (we cannot find a
+#	# global reference)
+#	setenv XOPTSTAR $OPTSTAR
+#    endif
+#endif
 
-if ( $?OPTSTAR ) then
-    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
-    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}
-
-    if ( -e ${OPTSTAR}/${STAR_HOST_SYS} ) then
-	# Redhat > 7.3  transition ; adding one level
-	setenv OPTSTAR    ${optstar}/${STAR_HOST_SYS}
-    endif
-    if ( -e ${xoptstar}/${STAR_HOST_SYS} ) then
-	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
-    endif
-endif
+#if ( $?OPTSTAR ) then
+#    if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
+#    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
+#
+#    if ( -e ${OPTSTAR}/${STAR_HOST_SYS} ) then
+#	# Redhat > 7.3  transition ; adding one level
+#	setenv OPTSTAR    ${optstar}/${STAR_HOST_SYS}
+#    endif
+#    if ( -e ${xoptstar}/${STAR_HOST_SYS} ) then
+#	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
+#    endif
+#endif
 
 
 # Display the messages here now
-if (  $?OPTSTAR ) then
-    if ($ECHO) echo   "Setting up OPTSTAR   = ${OPTSTAR}"
-else
-    # nothing found, so set it to nothing and the login
-    # will be able to proceed (at least, repair will be
-    # possible)...
-    setenv OPTSTAR
-
-endif
-if (  $XOPTSTAR == "/dev/null" ) then
-    if ($ECHO) echo   "WARNING : XOPTSTAR points to /dev/null (no AFS area for it)"
-else
-    if ($ECHO) echo   "Setting up XOPTSTAR  = ${XOPTSTAR}"
-endif
+#if (  $?OPTSTAR ) then
+#    if ($ECHO) echo   "Setting up OPTSTAR   = ${OPTSTAR}"
+#else
+#    # nothing found, so set it to nothing and the login
+#    # will be able to proceed (at least, repair will be
+#    # possible)...
+#    setenv OPTSTAR
+#
+#endif
+#if (  $XOPTSTAR == "/dev/null" ) then
+#    if ($ECHO) echo   "WARNING : XOPTSTAR points to /dev/null (no AFS area for it)"
+#else
+#    if ($ECHO) echo   "Setting up XOPTSTAR  = ${XOPTSTAR}"
+#endif
 
 
 
@@ -505,12 +465,17 @@ else if ($?GPROF) then
   setenv MY_BIN          .${STAR_HOST_SYS}/GBIN
 
 else if ($?NODEBUG) then
-  setenv STAR_lib  $STAR/.${STAR_HOST_SYS}/LIB ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
-  setenv MINE_lib        .${STAR_HOST_SYS}/LIB
-  setenv STAR_BIN  $STAR/.${STAR_HOST_SYS}/BIN
-  setenv MY_BIN          .${STAR_HOST_SYS}/BIN
-  setenv STAR_OBJ  $STAR/.${STAR_HOST_SYS}/OBJ
-  setenv MY_OBJ          .${STAR_HOST_SYS}/OBJ
+    setenv OVersion ""
+    if ($NODEBUG == "-O3" || $NODEBUG == "-o3") then 
+      setenv OVersion "3"
+      setenv DEBUG_OPTIONS "-O3"
+    endif
+  setenv STAR_lib  $STAR/.${STAR_HOST_SYS}/LIB${OVersion} ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
+  setenv MINE_lib        .${STAR_HOST_SYS}/LIB${OVersion} 
+  setenv STAR_BIN  $STAR/.${STAR_HOST_SYS}/BIN${OVersion} 
+  setenv MY_BIN          .${STAR_HOST_SYS}/BIN${OVersion} 
+  setenv STAR_OBJ  $STAR/.${STAR_HOST_SYS}/OBJ${OVersion} 
+  setenv MY_OBJ          .${STAR_HOST_SYS}/OBJ${OVersion} 
 
 else
   if ( $STAR_LEVEL != "cal" ) then
@@ -627,10 +592,10 @@ endif
 if ( $?DECHO ) echo "$self :: Paths alteration for STAR_MGR, STAR_SCRIPTS STAR_CGI etc ... begins"
 if ( -x ${GROUP_DIR}/dropit) then
     setenv GROUPPATH `${GROUP_DIR}/dropit -p ${GROUP_DIR} -p mgr -p ${STAR_MGR}  -p mgr/bin -p ${STAR_MGR}/bin -p ${STAR_SCRIPTS} -p ${STAR_CGI} -p ${MY_BIN} -p ${STAR_BIN} -p ${STAF}/mgr -p ${STAF_BIN}`
-    setenv PATH `${GROUP_DIR}/dropit -p ${OPTSTAR}/bin -p $PATH`
+    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p $PATH`
 else
     setenv GROUPPATH ${GROUP_DIR}:mgr:${STAR_MGR}:mgr/bin:${STAR_MGR}/bin:${STAR_SCRIPTS}:${STAR_CGI}:${MY_BIN}:${STAR_BIN}:${STAF}/mgr:${STAF_BIN}
-    setenv PATH  ${OPTSTAR}/bin:$PATH
+    setenv PATH  ${XOPTSTAR}/bin:$PATH
 endif
 
 # test return value of PTEST from dropit
@@ -660,14 +625,14 @@ if ( $?DECHO ) echo "$self :: Re-adjusting xxPATH for OPTSTAR and STAR_PATH"
 if ( $?DECHO ) echo "$self :: PATH is now $PATH"
 if ( -x ${GROUP_DIR}/dropit) then
   # clean-up PATH
-  setenv MANPATH `${GROUP_DIR}/dropit -p ${OPTSTAR}/man -p ${MANPATH}`
+  setenv MANPATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/man -p ${MANPATH}`
   setenv PATH    `${GROUP_DIR}/dropit -p ${PATH} GROUPPATH`
   setenv PATH    `${GROUP_DIR}/dropit -p ${PATH} $STAR_PATH`
   #if ($?LD_LIBRARY_PATH == 1) setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} $STAR_PATH`
   setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "${LD_LIBRARY_PATH}" $STAR_PATH`
   if ($?SHLIB_PATH == 1)      setenv SHLIB_PATH      `${GROUP_DIR}/dropit -p ${SHLIB_PATH} $STAR_PATH`
 
-  setenv PATH `${GROUP_DIR}/dropit -p ${GROUPPATH} -p /usr/afsws/bin -p /usr/afsws/etc -p ${OPTSTAR}/bin -p /usr/sue/bin -p /usr/local/bin -p ${PATH}`
+  setenv PATH `${GROUP_DIR}/dropit -p ${GROUPPATH} -p /usr/afsws/bin -p /usr/afsws/etc -p ${XOPTSTAR}/bin -p /usr/sue/bin -p /usr/local/bin -p ${PATH}`
 else
   if ( $?DECHO ) echo "$self ::  ${GROUP_DIR}/dropit is not -x"
 endif
@@ -912,39 +877,13 @@ endif
 
 
 # Support for Qt
-    if (! $?QTDIR) then
-      if (-d $XOPTSTAR/qt ) then
-	if ( $?DECHO ) echo "$self :: Defining QTDIR as OPTSTAR/qt"
-	if ( -l $XOPTSTAR/qt ) then
-	    set b = `/bin/ls -ld $OPTSTAR/qt | /usr/bin/cut -f2 -d">" | sed 's/ //g'`
-	    setenv QTDIR $XOPTSTAR/$b
-        else
-	    setenv QTDIR $XOPTSTAR/qt
-	endif
-
-	# set path=($path $QTDIR/bin)
-	setenv MANPATH ${MANPATH}:$QTDIR/man
-	setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$QTDIR/lib
-      else
-	# make some more conditional logic - we assume
-	# those will be soft-links form example. Qt4 will
-	# take precedence over Qt3 in this scheme
-	if ( $?DECHO ) echo "$self :: Checking QTDIR as OPTSTAR/qt{3|4}"
-	if ( ! $?QTDIR && -d $XOPTSTAR/qt4 ) then
-	    setenv QTDIR $XOPTSTAR/qt4
-	endif
-	if ( ! $?QTDIR && -d $XOPTSTAR/qt3 ) then
-	    setenv QTDIR $XOPTSTAR/qt3
-	endif
-      endif
-    endif
-    if (! $?QTDIR) then
+#    if (! $?QTDIR) then
       if ($USE_64BITS == 1) then
         if ( -d /usr/lib64/qt4) setenv QTDIR /usr/lib64/qt4
       else
         if ( -d /usr/lib/qt4) setenv QTDIR /usr/lib/qt4
       endif
-    endif
+#    endif
 if ( $?QTDIR ) then
     setenv MANPATH ${MANPATH}:$QTDIR/man
     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${QTDIR}/lib
@@ -996,7 +935,7 @@ endif
 
 # CLHEP library support
 if (! $?CLHEP_BASE_DIR ) then
-    setenv CLHEP_BASE_DIR ${OPTSTAR}
+    setenv CLHEP_BASE_DIR ${XOPTSTAR}
 endif
 
 
@@ -1018,23 +957,23 @@ if ( -x ${GROUP_DIR}/dropit) then
 	setenv PATH  `${GROUP_DIR}/dropit cern`
 	setenv PATH `${GROUP_DIR}/dropit -p ${PATH} -p ${CERN_ROOT}/bin`
     endif
-    setenv PATH `${GROUP_DIR}/dropit -p ${OPTSTAR}/bin -p ${PATH}`
+    setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${PATH}`
     switch ($STAR_SYS)
 	case "hp_ux102":
 	#  ====================
-	setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${OPTSTAR}/lib`
-	if ( -d ${OPTSTAR}/lib/mysql ) then
-	    setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${OPTSTAR}/lib/mysql`
+	setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${XOPTSTAR}/lib`
+	if ( -d ${XOPTSTAR}/lib/mysql ) then
+	    setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} -p ${XOPTSTAR}/lib/mysql`
 	endif
 	setenv SHLIB_PATH `${GROUP_DIR}/dropit -p "$SHLIB_PATH"`
 	breaksw
 
     default:
 	#  ====================
-	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${OPTSTAR}/lib`
+	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${XOPTSTAR}/lib`
 	# Note from 2011/10 - Unofrtunately, MySQL has not been there for a while
-	if ( -d ${OPTSTAR}/lib/mysql ) then
-	    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${OPTSTAR}/lib/mysql`
+	if ( -d ${XOPTSTAR}/lib/mysql ) then
+	    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p ${XOPTSTAR}/lib/mysql`
 
 	# ... but in the default system path - changing this may chang previous 
 	# behavior however

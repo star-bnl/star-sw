@@ -470,7 +470,7 @@
 
         # -fpermissive ?
 	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
-	    $CXXFLAGS    .= " -pedantic"; 
+	  $CXXFLAGS    .= " -pedantic"; 
 	}
 	$CXXFLAGS    .= " -Wno-long-long";
 
@@ -478,60 +478,32 @@
 	# Additional GCC optimization flags if NODEBUG
 	#
 	if ( (defined( $ARG{NODEBUG} ) or $NODEBUG) && !defined($ENV{DEBUG_OPTIONS}) ) {
-           my $optflags = "";
-#	$CXXFLAGS    .= " -Wno-long-long";
-#       print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
-
-	if ($CXX_VERSION < 3){
-	  $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	} elsif ( $CXX_VERSION < 4.5 ){
-	  # this naiming convention starts at gcc 3.2 which happens to
-	  # have a change in the options.
-	  # Valid and used up to 4.4.7
-	  $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
-	} elsif ( $CXX_VERSION == 4.8 ){
-	  # 4.8.2
-	  # leave the alignement to the compiler.
-	  #   2015 NB: does it make sense to align on 2 bytes nowadays?
-	  $optflags = "-falign-loops -falign-jumps -falign-functions";
+	  #	$CXXFLAGS    .= " -Wno-long-long";
+	  #       print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
+	  if ($CXX_VERSION < 3){
+	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
+	  } elsif ( $CXX_VERSION < 4.5 ){
+	    # this naiming convention starts at gcc 3.2 which happens to
+	    # have a change in the options.
+	    # Valid and used up to 4.4.7
+	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	  }
+	  # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
+	  if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
+	    print "Notice: Enabling gcc patch for V4.x series\n";
+	    if ( $2 <= 49 ){
+	      # Note: all inlining failed with gcc 4.4.7 with no indication
+	      # of a resolve up to 4.4.9 . Symbols would be removed and
+	      # linking would fail.
+	      $DEBUG .= " -fno-inline";
+	    }
+	    
+	    $DEBUG .= " ".$optflags;
+	    $FDEBUG = $DEBUG;
+	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	  }
 	}
-
-           # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
-           if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-	     print "Notice: Enabling gcc patch for V4.x series\n";
-	     if ( $2 <= 49 ){
-	       # Note: all inlining failed with gcc 4.4.7 with no indication
-	       # of a resolve up to 4.4.9 . Symbols would be removed and
-	       # linking would fail.
-	       $DEBUG .= " -fno-inline";
-	     } elsif ( $2 <= 82){
-	       # Note: 4.8.2 is picky, we may ned to adjust options here
-	       #$DEBUG  =  "-O1 -g -fno-merge-constants";
-	       $DEBUG   .= " -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
-	       # Other possible options part of O1
-	       #   -fmerge-all-constants (implies merge-contstants)
-	       #   -finline-functions-called-once
-	       #   -fcombine-stack-adjustments
-	       #   -fcompare-elim
-	       #   -fcprop-registers
-	       #   -fdce -fdse
-	       #   -ftree-dce -ftree-dse 
-	       #   -frerun-cse-after-loop
-	       #   -ftree-dominator-opts
-	       # With O2
-	       #   -fpartial-inlining
-	       #   -foptimize-sibling-calls
-	       #  With O3
-	       #   -finline-functions
-	     }
-	   }
-
-           $DEBUG .= " ".$optflags;
-           $FDEBUG = $DEBUG;
-	   print "set DEBUG = $DEBUG\n" unless ($param::quiet);
-	 }
-
-        $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
+	$CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
         $SOFLAGS  .= " -shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
