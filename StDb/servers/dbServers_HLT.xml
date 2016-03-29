@@ -1,0 +1,6 @@
+<StDbServer>
+<server> l409 </server>
+<host> l409.l4.bnl.local </host>
+<port> 3316 </port>
+<socket> /tmp/mysql.3306.sock </socket>
+</StDbServer>
