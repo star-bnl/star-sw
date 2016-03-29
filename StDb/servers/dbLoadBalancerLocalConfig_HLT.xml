@@ -1,6 +1,23 @@
-<StDbServer>
-<server> l409 </server>
-<host> l409.l4.bnl.local </host>
-<port> 3316 </port>
-<socket> /tmp/mysql.3316.sock </socket>
-</StDbServer>
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<!DOCTYPE Scatalog [
+   <!ELEMENT Scatalog (Site*)>
+       <!ATTLIST Scatalog VERSION CDATA #REQUIRED>
+   <!ELEMENT Site (Server+)>
+       <!ATTLIST Site name (BNL | LBL) #REQUIRED>
+       <!ATTLIST Site description CDATA #IMPLIED>
+       <!ATTLIST Site URI CDATA #IMPLIED>
+   <!ELEMENT Server (Host+)>
+       <!ATTLIST Server scope (Master | Admin | User | Production | Analysis) #REQUIRED>
+   <!ELEMENT Host (Access+)>
+       <!ATTLIST Host name CDATA #REQUIRED>
+       <!ATTLIST Host dbType CDATA #IMPLIED>
+       <!ATTLIST Host dbName CDATA #REQUIRED>
+       <!ATTLIST Host port CDATA #IMPLIED>
+   <!ELEMENT Access EMPTY>
+       <!ATTLIST access user CDATA #IMPLIED>
+       <!ATTLIST access pass CDATA #IMPLIED>
+]>
+               <Server scope="Analysis" accessMode="read">
+                            <Host name="l409.l4.bnl.local" port="3316" machinePower="1.0" />
+                </Server> 
+</Scatalog>
