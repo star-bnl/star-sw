@@ -34,20 +34,20 @@ public:
 
   ///Free an object for reuse 
   static void Free(void *obj);
-  static  int Alive(void *obj);
+  static  Int_t Alive(void *obj);
 
   void setFastDelete()	{fFastDel=1;}
-  void setMaxIncrementCount(uint maxCount)	{fMaxCount=maxCount;}
-  uint getMaxIncrementCount() const		{return fMaxCount;  }
-  uint getCurrentSize()  const 			{return fCurCount;  }
-  uint getCurrentCount() const 			{return fCurCount;  }
+  void setMaxIncrementCount(UInt_t maxCount)	{fMaxCount=maxCount;}
+  UInt_t getMaxIncrementCount() const		{return fMaxCount;  }
+  UInt_t getCurrentSize()  const 			{return fCurCount;  }
+  UInt_t getCurrentCount() const 			{return fCurCount;  }
 protected:
-  uint fMaxCount;
-  uint fCurCount;
-  uint fUseCount;
-  uint fFastDel;
-  uint fInstCount;
-  uint fFreeCount;
+  UInt_t fMaxCount;
+  UInt_t fCurCount;
+  UInt_t fUseCount;
+  UInt_t fFastDel;
+  UInt_t fInstCount;
+  UInt_t fFreeCount;
 static double fgTotal;  
 };
 
@@ -76,11 +76,11 @@ inline void FactoryB::Free(void *obj)
    void **v = ((void**)obj) - 1;
    if (!*v) v--;
    assert((*v)!=(void*)0xFF);
-   assert(((*(int*)v)&3)==0);
+   assert(((*(Int_t*)v)&3)==0);
    FactoryB *f = (FactoryB*)((*v));
    f->free(obj);
 }
-inline int FactoryB::Alive(void *obj)
+inline Int_t FactoryB::Alive(void *obj)
 {
    void **v = ((void**)obj) - 1;
    if (!*v) v--;

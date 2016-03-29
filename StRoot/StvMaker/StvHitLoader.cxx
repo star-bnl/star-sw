@@ -173,7 +173,7 @@ static StvToolkit  *kit = StvToolkit::Inst();
      hard <<=1; hard |= (fabs(xyz[2]) > zPrompt);
      if (xyz[0]*xyz[0]+xyz[1]*xyz[1] >rMiddle*rMiddle) seed = 1;
    }
-   hard *= (uint)kMaxDetectorId; hard+=(uint)did;
+   hard *= (UInt_t)kMaxDetectorId; hard+=(UInt_t)did;
    
    const StHitPlane *hp = tgh->AddHit(stvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();

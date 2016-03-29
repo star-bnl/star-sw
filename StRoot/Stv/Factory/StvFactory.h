@@ -33,7 +33,7 @@ public:
 enum {kSize=100};
      StvBlock(StvBlock **bTop,StvHolder<Object> **hTop,char *buf);
 void reset(StvBlock **bTop,StvHolder<Object> **hTop);
-uint getSize() const {return kSize;}
+UInt_t getSize() const {return kSize;}
 
 StvBlock *fNext;
 char     *fBuff;
@@ -80,7 +80,7 @@ template <class Object>
 void StvBlock<Object>::reset(StvBlock **bTop,StvHolder<Object> **hTop)
 {
   fNext=*bTop; *bTop=this;
-  for (int i=0;i<kSize;i++) {
+  for (Int_t i=0;i<kSize;i++) {
     fArr[i].fNext = *hTop;
    *hTop = fArr+i;
   }
@@ -119,7 +119,7 @@ Abstract *StvFactory<Concrete,Abstract>::getInstance()
             this->fCurCount < this->fMaxCount);
 
     if (this->fFastDel)    {
-       uint   nBuf = sizeof(StvBlock<Concrete>) + FENCE;
+       UInt_t   nBuf = sizeof(StvBlock<Concrete>) + FENCE;
        char *cBuf = new char[nBuf];
        cBuf[nBuf-1]=46;
        new((StvBlock<Concrete>*)cBuf) StvBlock<Concrete>(&fBTop,&fHTop,cBuf);
@@ -144,7 +144,7 @@ Abstract *StvFactory<Concrete,Abstract>::getInstance()
 template <class Concrete, class Abstract>
 void StvFactory<Concrete,Abstract>::free(Abstract *obj)
 {
-  static const uint shift = (char*)(&(((StvHolder<Concrete>*)1)->fObj))-(char*)1;
+  static const UInt_t shift = (char*)(&(((StvHolder<Concrete>*)1)->fObj))-(char*)1;
   obj->unset();
   StvHolder<Concrete>* h = (StvHolder<Concrete>*)((char*)obj-shift);
   assert(h->fFact == this); 
