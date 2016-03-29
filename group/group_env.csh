@@ -411,6 +411,10 @@ if ( ! $?SITE ) then
             setenv SITE "KISTI"
             breaksw
 
+        case "l4.bnl.local":
+            setenv SITE "HLT"
+            breaksw
+
 	default:
 	    # Not implemented
 	    setenv SITE "generic"
