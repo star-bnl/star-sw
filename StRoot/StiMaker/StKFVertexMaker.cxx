@@ -963,6 +963,7 @@ void StKFVertexMaker::ReFitToVertex() {
 //________________________________________________________________________________
 void StKFVertexMaker::SecondaryVertices() {
   static const Float_t MinimumDistance = 5.0; 
+  static const Double_t probCut = 1e-5;
   Int_t LastGlobal = fParticles->GetLast();
   Double_t TempLog = 0;
   Double_t Temperature = TMath::Exp(TempLog);
@@ -993,7 +994,7 @@ void StKFVertexMaker::SecondaryVertices() {
 	KFVertex tempV;
 	tempV.Construct(vDaughters,2); PrPP2(Fit,tempV);
 	Double_t prob = TMath::Prob(tempV.GetChi2(),tempV.GetNDF());
-	if (prob < 1e-5) continue;
+	if (prob < probCut) continue;
 	particleV = tempV;	PrPP2(Fit,particleV);
 	// Create new Vertex 
 	vtx = new StKFVertex(); PrPP2(newvtx, *vtx);
@@ -1008,7 +1009,7 @@ void StKFVertexMaker::SecondaryVertices() {
 	KFVertex tempV = particleV;
 	tempV += *particleL;   PrPP2(Fit,tempV);
 	Double_t prob = TMath::Prob(tempV.GetChi2(),tempV.GetNDF());
-	if (prob < 1e-5) continue;
+	if (prob < probCut) continue;
 	particleV = tempV;
       }
       particleL->SetId(l);
@@ -1034,7 +1035,7 @@ void StKFVertexMaker::SecondaryVertices() {
     SecondaryVertices->AddVertex(vtx);
 #if 0 /* ??? */
     Double_t prob = TMath::Prob(vtx->Vertex().GetChi2(),vtx->Vertex().GetNDF());
-    if (N > 2 || prob > 1.e-5) {// Allow V2 to share tracks
+    if (N > 2 || prob > probCut) {// Allow V2 to share tracks
       TIter next(&vtx->Tracks());
       StKFTrack *Track = 0;
       while ((Track = (StKFTrack *) next())) {
