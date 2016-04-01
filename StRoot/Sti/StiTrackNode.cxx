@@ -32,7 +32,6 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
 static const double recvCORRMAX  = 0.99999;
 static const double chekCORRMAX  = 0.99999;
 static double MAXPARS[]={500,500,500,3.15,100,100};
-static const Int_t offdiag[kNErrs-kNPars] = {1, 3, 4, 6, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19};
 //______________________________________________________________________________
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 {
@@ -394,16 +393,10 @@ StiDebug::Break(nCall);
 
    while (((force)? sign():zign())<=0) {
      // scale off diagonal elements
-#if 1 /* fix for gcc 4.8.2 */
-     for (Int_t i = 0; i < kNErrs-kNPars; i++) {
-       A[offdiag[i]] *= 0.9;
-     }
-#else
     for (int i=i0,li=li0;i<kNPars ;li+=++i) {
       for (int j=i0;j<i;j++) {
         A[li+j]*=0.9;
    } } 
-#endif
    }
 }
 //______________________________________________________________________________
