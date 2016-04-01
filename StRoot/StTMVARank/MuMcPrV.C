@@ -1,5 +1,5 @@
 /* 
-   root.exe -q -b lMuDst.C MuMcPrV.C+; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE)'; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.1)'
+   root.exe -q -b 'lMuDst.C(0,"./*.MuDst.root")' MuMcPrV.C+; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE)'; root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.1)'
 
    root.exe TMVA.root  $ROOTROOT/root/tmva/test/TMVAGui.C
 PPV: test -f MuMcPrV28TMVARank.root && root.exe -q -b lMuDst.C 'MuMcPrV.C+(kTRUE,0.250)' >& MuMcPrV28TMVAR.log &
@@ -480,6 +480,125 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
 	VpdZ = BTofHeader->vpdVz();
       }
     }
+    //<<<<<<<<<<<<<<<<<
+    for (auto x : mu->Id2McVx()) {
+      //      StMuMcVertex *McVx = x.first;
+      if (! x.first) continue;
+      StMuMcVertex *McVx = x.second;
+      if (! McVx) continue;
+      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
+      FillTrees(tMcAll,McVx,McTrack,0);
+    }
+    for (auto x : mu->Id2McVxR()) {
+      //      StMuMcVertex *McVx = x.first;
+      if (! x.first) continue;
+      StMuMcVertex *McVx = x.second;
+      if (! McVx) continue;
+      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
+      FillTrees(tMc,McVx,McTrack,0);
+    }
+    PrPPDH(RecoVx);
+    for (StMuPrimaryVertex *RcVx : mu->RecoVx()) {
+      PrPP(*RcVx);
+      StMuMcVertex *McVx = mu->RcVx2McVx()[RcVx];
+      assert(McVx);
+      mu->PrintMcVx(McVx->Id());
+      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
+#if 0
+      PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif      
+      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
+      KFParticle* KFVx = 0;
+      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
+	KFParticle* aKFVx = it->second;
+	if (! KFVx) KFVx = aKFVx;
+	else {
+	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
+	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
+	    PrPP(*KFVx);
+	    PrPP(*aKFVx);
+	    KFVx = aKFVx;
+	  }
+	}
+      }
+      if (KFVx) {
+	if (McTrack) {
+	  cout << *KFVx << endl;
+	  cout << "NDaughters = " << KFVx->NDaughters() << endl;
+	  for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
+	    Int_t id = KFVx->DaughterIds()[i];
+	    Int_t m  = mu->IndxKFTk2Id()[id];
+	    KFParticle *KFTrk = mu->KFtrack(m);
+	    if (KFTrk) cout << "\t" << *KFTrk << endl;
+	    Int_t kg = mu->IndxRcTk2Id()[id];
+	    StMuTrack *gTrack = mu->globalTracks(kg);
+	    if (gTrack) cout << "\t" << *gTrack << endl;
+	  }
+	}
+	FillTrees(tMatch,McVx,McTrack,KFVx);
+      }
+    }
+    PrPPDH(CloneVx);
+    for (StMuPrimaryVertex *RcVx : mu->CloneVx()) {
+      PrPP(*RcVx);
+      StMuMcVertex *McVx = mu->RcVx2McVx()[RcVx];
+      assert(McVx);
+      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
+      mu->PrintMcVx(McVx->Id());
+#if 0
+      PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif
+      KFParticle* KFVx = 0;
+      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
+      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
+	KFParticle* aKFVx = it->second;
+	if (! KFVx) KFVx = aKFVx;
+	else {
+	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
+	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
+	    PrPP(*KFVx);
+	    PrPP(*aKFVx);
+	    KFVx = aKFVx;
+	  }
+	}
+      }
+      if (KFVx) {
+	FillTrees(tClone,McVx,McTrack,KFVx);
+      }
+    }
+    PrPPDH(Lost);
+    for (StMuMcVertex *McVx :mu-> LostVx()) {
+      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
+      mu->PrintMcVx(McVx->Id());
+#if 0
+      PrPP(*McVx);
+      if (McTrack) PrPP(*McTrack);
+#endif
+      FillTrees(tLost,McVx,McTrack,0);
+    }
+    PrPPDH(Ghost);
+    for (StMuPrimaryVertex *RcVx : mu->GhostVx()) {
+     PrPP(*RcVx); 
+      KFParticle* KFVx = 0;
+      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
+      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
+	KFParticle* aKFVx = it->second;
+	if (! KFVx) KFVx = aKFVx;
+	else {
+	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
+	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
+	    PrPP(*KFVx);
+	    PrPP(*aKFVx);
+	    KFVx = aKFVx;
+	  }
+	}
+      }
+      if (KFVx) {
+	FillTrees(tGhost,0,0,KFVx);
+      }
+    }
     // Primary vertices:
     StMuMcVertex *McVx1 = mu->Id2McVx()[1];
     Int_t NoMcTracksWithHitsAtMC1 = mu->McVx2McTkR().count(McVx1); // @ primary vertex 
@@ -600,131 +719,12 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
       hists[h][1]->Fill(NoMcTracksWithHitsL,noTracksQA);
       hists[h][2]->Fill(NoMcTracksWithHitsAtMC1);
     }
-    //<<<<<<<<<<<<<<<<<
-    for (auto x : mu->Id2McVx()) {
-      //      StMuMcVertex *McVx = x.first;
-      if (! x.first) continue;
-      StMuMcVertex *McVx = x.second;
-      if (! McVx) continue;
-      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
-      FillTrees(tMcAll,McVx,McTrack,0);
-    }
-    for (auto x : mu->Id2McVxR()) {
-      //      StMuMcVertex *McVx = x.first;
-      if (! x.first) continue;
-      StMuMcVertex *McVx = x.second;
-      if (! McVx) continue;
-      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
-      FillTrees(tMc,McVx,McTrack,0);
-    }
-    PrPPDH(RecoVx);
-    for (StMuPrimaryVertex *RcVx : mu->RecoVx()) {
-      PrPP(*RcVx);
-      StMuMcVertex *McVx = mu->RcVx2McVx()[RcVx];
-      assert(McVx);
-      mu->PrintMcVx(McVx->Id());
-      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
-#if 0
-      PrPP(*McVx);
-      if (McTrack) PrPP(*McTrack);
-#endif      
-      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
-      KFParticle* KFVx = 0;
-      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
-	KFParticle* aKFVx = it->second;
-	if (! KFVx) KFVx = aKFVx;
-	else {
-	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
-	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
-	    PrPP(*KFVx);
-	    PrPP(*aKFVx);
-	    KFVx = aKFVx;
-	  }
-	}
-      }
-      if (KFVx) {
-	if (McTrack) {
-	  cout << *KFVx << endl;
-	  cout << "NDaughters = " << KFVx->NDaughters() << endl;
-	  for (Int_t i = 0; i < KFVx->NDaughters(); i++) {
-	    Int_t id = KFVx->DaughterIds()[i];
-	    Int_t m  = mu->IndxKFTk2Id()[id];
-	    KFParticle *KFTrk = mu->KFtrack(m);
-	    if (KFTrk) cout << "\t" << *KFTrk << endl;
-	    Int_t kg = mu->IndxRcTk2Id()[id];
-	    StMuTrack *gTrack = mu->globalTracks(kg);
-	    if (gTrack) cout << "\t" << *gTrack << endl;
-	  }
-	}
-	FillTrees(tMatch,McVx,McTrack,KFVx);
-      }
-    }
-    PrPPDH(CloneVx);
-    for (StMuPrimaryVertex *RcVx : mu->CloneVx()) {
-      PrPP(*RcVx);
-      StMuMcVertex *McVx = mu->RcVx2McVx()[RcVx];
-      assert(McVx);
-      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
-      mu->PrintMcVx(McVx->Id());
-#if 0
-      PrPP(*McVx);
-      if (McTrack) PrPP(*McTrack);
-#endif
-      KFParticle* KFVx = 0;
-      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
-      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
-	KFParticle* aKFVx = it->second;
-	if (! KFVx) KFVx = aKFVx;
-	else {
-	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
-	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
-	    PrPP(*KFVx);
-	    PrPP(*aKFVx);
-	    KFVx = aKFVx;
-	  }
-	}
-      }
-      if (KFVx) {
-	FillTrees(tClone,McVx,McTrack,KFVx);
-      }
-    }
-    PrPPDH(Lost);
-    for (StMuMcVertex *McVx :mu-> LostVx()) {
-      StMuMcTrack *McTrack = mu->McVx2McParentTk()[McVx];
-      mu->PrintMcVx(McVx->Id());
-#if 0
-      PrPP(*McVx);
-      if (McTrack) PrPP(*McTrack);
-#endif
-      FillTrees(tLost,McVx,McTrack,0);
-    }
-    PrPPDH(Ghost);
-    for (StMuPrimaryVertex *RcVx : mu->GhostVx()) {
-     PrPP(*RcVx); 
-      KFParticle* KFVx = 0;
-      pair<RcVx2KFVxIter,RcVx2KFVxIter> ret = mu->RcVx2KFVx().equal_range(RcVx);
-      for (RcVx2KFVxIter it = ret.first; it != ret.second; ++it) {
-	KFParticle* aKFVx = it->second;
-	if (! KFVx) KFVx = aKFVx;
-	else {
-	  if ((aKFVx->GetNDF() > KFVx->GetNDF()) || 
-	      (aKFVx->GetNDF() ==  KFVx->GetNDF() && aKFVx->GetChi2() < KFVx->GetChi2())) {
-	    PrPP(*KFVx);
-	    PrPP(*aKFVx);
-	    KFVx = aKFVx;
-	  }
-	}
-      }
-      if (KFVx) {
-	FillTrees(tGhost,0,0,KFVx);
-      }
-    }
     if (! gROOT->IsBatch()) {
       if (Ask()) return;
     } else {_debugAsk = 0;}
   }
   fOut->Write();
-  if(! iTMVA) {
+  if(! iTMVA && Signal && Signal->GetEntriesFast() > 1000) {
     Setup();
     StTMVARanking::TMVAClassification(TMVAMethod,Signal,Background);
     TMVAdata::instance()->Print();

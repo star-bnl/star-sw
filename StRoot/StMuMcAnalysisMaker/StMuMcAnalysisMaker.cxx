@@ -342,6 +342,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   for (Int_t i = 0; i < 4; i++) {
     GiD[i] = (TH1F *)  dirs[1]->Get(geant[i].Name);
     if (! GiD[i]) {
+      dirs[1]->cd();
       GiD[i] = new TH1F(geant[i].Name,geant[i].Title, 50,0.5,50.5); 
       GiD[i]->SetMarkerColor(i%2+1);
       GiD[i]->SetLineColor(i%2+1);
