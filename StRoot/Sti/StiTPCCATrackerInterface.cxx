@@ -532,21 +532,21 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
       A[i+i1+2] = caCov[i];
     }
   }*/
-  nodeErrs._cYY = caCov[ 0];
-  nodeErrs._cZY = caCov[ 1]*J[0]*J[1];
-  nodeErrs._cZZ = caCov[ 2]*J[1]*J[1]; 
-  nodeErrs._cEY = caCov[ 3]*J[0]*J[2];
-  nodeErrs._cEZ = caCov[ 4]*J[1]*J[2];
-  nodeErrs._cEE = caCov[ 5]*J[2]*J[2];
-  nodeErrs._cTY = caCov[ 6]*J[0]*J[4];
-  nodeErrs._cTZ = caCov[ 7]*J[1]*J[4];
-  nodeErrs._cTE = caCov[ 8]*J[2]*J[4];    
-  nodeErrs._cTT = caCov[ 9]*J[4]*J[4];
-  nodeErrs._cPY = caCov[10]*J[0]*J[3];
-  nodeErrs._cPZ = caCov[11]*J[1]*J[3];
-  nodeErrs._cPE = caCov[12]*J[2]*J[3];
-  nodeErrs._cTP = caCov[13]*J[4]*J[3];
-  nodeErrs._cPP = caCov[14]*J[3]*J[3];
+  nodeErrs.cYY() = caCov[ 0];
+  nodeErrs.cZY() = caCov[ 1]*J[0]*J[1];
+  nodeErrs.cZZ() = caCov[ 2]*J[1]*J[1]; 
+  nodeErrs.cEY() = caCov[ 3]*J[0]*J[2];
+  nodeErrs.cEZ() = caCov[ 4]*J[1]*J[2];
+  nodeErrs.cEE() = caCov[ 5]*J[2]*J[2];
+  nodeErrs.cTY() = caCov[ 6]*J[0]*J[4];
+  nodeErrs.cTZ() = caCov[ 7]*J[1]*J[4];
+  nodeErrs.cTE() = caCov[ 8]*J[2]*J[4];    
+  nodeErrs.cTT() = caCov[ 9]*J[4]*J[4];
+  nodeErrs.cPY() = caCov[10]*J[0]*J[3];
+  nodeErrs.cPZ() = caCov[11]*J[1]*J[3];
+  nodeErrs.cPE() = caCov[12]*J[2]*J[3];
+  nodeErrs.cTP() = caCov[13]*J[4]*J[3];
+  nodeErrs.cPP() = caCov[14]*J[3]*J[3];
 #if 1  
   A[0] = 1; // don't use parameter X
   A[1] = 0;
@@ -805,21 +805,21 @@ void StiTPCCATrackerInterface::FillStiPerformance()
     GBTrackParam.SetQPt   ( JI[3] * NodePar->fitPars().ptin() );
     GBTrackParam.SetDzDs  ( JI[4] * NodePar->fitPars().tanl() );
 
-    GBTrackParam.SetCov( 0, NodePar->fitErrs()._cYY);
-    GBTrackParam.SetCov( 1, NodePar->fitErrs()._cZY*J[0]*J[1]);
-    GBTrackParam.SetCov( 2, NodePar->fitErrs()._cZZ*J[0]*J[1]);
-    GBTrackParam.SetCov( 3, NodePar->fitErrs()._cEY*J[0]*J[2]);
-    GBTrackParam.SetCov( 4, NodePar->fitErrs()._cEZ*J[1]*J[2]);
-    GBTrackParam.SetCov( 5, NodePar->fitErrs()._cEE*J[2]*J[2]);
-    GBTrackParam.SetCov( 6, NodePar->fitErrs()._cTY*J[0]*J[4]);
-    GBTrackParam.SetCov( 7, NodePar->fitErrs()._cTZ*J[1]*J[4]);
-    GBTrackParam.SetCov( 8, NodePar->fitErrs()._cTE*J[2]*J[4]);    
-    GBTrackParam.SetCov( 9, NodePar->fitErrs()._cTT*J[4]*J[4]);
-    GBTrackParam.SetCov(10, NodePar->fitErrs()._cPY*J[0]*J[3]);
-    GBTrackParam.SetCov(11, NodePar->fitErrs()._cPZ*J[1]*J[3]);
-    GBTrackParam.SetCov(12, NodePar->fitErrs()._cPE*J[2]*J[3]);
-    GBTrackParam.SetCov(13, NodePar->fitErrs()._cTP*J[4]*J[3]);
-    GBTrackParam.SetCov(14, NodePar->fitErrs()._cPP*J[3]*J[3]);
+    GBTrackParam.SetCov( 0, NodePar->fitErrs().cYY());
+    GBTrackParam.SetCov( 1, NodePar->fitErrs().cZY()*J[0]*J[1]);
+    GBTrackParam.SetCov( 2, NodePar->fitErrs().cZZ()*J[0]*J[1]);
+    GBTrackParam.SetCov( 3, NodePar->fitErrs().cEY()*J[0]*J[2]);
+    GBTrackParam.SetCov( 4, NodePar->fitErrs().cEZ()*J[1]*J[2]);
+    GBTrackParam.SetCov( 5, NodePar->fitErrs().cEE()*J[2]*J[2]);
+    GBTrackParam.SetCov( 6, NodePar->fitErrs().cTY()*J[0]*J[4]);
+    GBTrackParam.SetCov( 7, NodePar->fitErrs().cTZ()*J[1]*J[4]);
+    GBTrackParam.SetCov( 8, NodePar->fitErrs().cTE()*J[2]*J[4]);    
+    GBTrackParam.SetCov( 9, NodePar->fitErrs().cTT()*J[4]*J[4]);
+    GBTrackParam.SetCov(10, NodePar->fitErrs().cPY()*J[0]*J[3]);
+    GBTrackParam.SetCov(11, NodePar->fitErrs().cPZ()*J[1]*J[3]);
+    GBTrackParam.SetCov(12, NodePar->fitErrs().cPE()*J[2]*J[3]);
+    GBTrackParam.SetCov(13, NodePar->fitErrs().cTP()*J[4]*J[3]);
+    GBTrackParam.SetCov(14, NodePar->fitErrs().cPP()*J[3]*J[3]);
     
     GBTrackParam.SetSignCosPhi(sgnCos);
     

@@ -138,7 +138,7 @@ StiDebug::Break(nCall);
 
 //TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
 // static TVector3  C, Cd, Cn, N;
- double C[2], Cd[2], Cn[2], N[2];
+ double C[2], Cd[2], Cn[2], N[3];
  //D.SetXYZ( Dp[0], Dp[1], 0.0 );
  // X.SetXYZ( Xp[0], Xp[1], 0.0 );
 
@@ -368,7 +368,7 @@ static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
 
   int i0=1,li0=1,isMod=0;
-  if (_cXX>0) {i0=0;li0=0;}
+  if (cXX()>0) {i0=0;li0=0;}
 
    double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
    int isTouched[kNPars]={0};
@@ -421,7 +421,7 @@ int StiNodeErrs::check(const char *pri) const
 {
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
-  int i0=0; if (!_cXX) i0 = 1;
+  int i0=0; if (!cXX()) i0 = 1;
   for (i=i0;i<kNPars;i++) {
     aii = A[idx66[i][i]];
     if (aii<0) {kase = 1; break;}	//Diagonal must be positive
@@ -630,15 +630,15 @@ void StiHitErrs::rotate(double angle)
   t[0][0] = cos(angle); t[0][1] = -sin(angle);
   t[1][0] = -t[0][1]  ; t[1][1] = t[0][0];
   double r[3];
-  TCL::trasat(t[0],&hXX,r,2,2);
-  TCL::ucopy(r,&hXX,3);
+  TCL::trasat(t[0],A,r,2,2);
+  TCL::ucopy(r,A,3); // YF ?
 }
 //______________________________________________________________________________
 void StiNode2Pars::set(const StiNodePars &pars,StiNodeErrs &errs)
 {
   mPar[0]=pars.y(); mPar[1]=pars.z();
-  mErr[0]=errs._cYY;
-  mErr[1]=errs._cZY;
-  mErr[2]=errs._cZZ;
+  mErr[0]=errs.cYY();
+  mErr[1]=errs.cZY();
+  mErr[2]=errs.cZZ();
 }
 

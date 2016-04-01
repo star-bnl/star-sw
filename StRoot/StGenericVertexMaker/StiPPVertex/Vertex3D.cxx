@@ -120,8 +120,8 @@ Vertex3D::doExtrapolation(){ // study track cov matrix for individual tracks usi
        float Lx=node->x();
        float Ly=node->y();
        float Lz=node->z();
-       float sLy=sqrt(node->fitErrs()._cYY);
-       float sLz=sqrt(node->fitErrs()._cZZ);
+       float sLy=sqrt(node->fitErrs().cYY());
+       float sLz=sqrt(node->fitErrs().cZZ());
        float Rxy=sqrt(Lx*Lx+Ly*Ly);
        if(minLx>Lx) minLx=Lx;
        if(maxLx<Lx) maxLx=Lx;
@@ -152,8 +152,8 @@ Vertex3D::doExtrapolation(){ // study track cov matrix for individual tracks usi
 	 if(fabs(Ly)>40.) break; // to not cross sector boundary ??
 	 if(iDir==1 && fabs(Ly)>36.) break; // to not cross sector boundary ??
 	 node->propagateError();
-	 float sLy=sqrt(node->fitErrs()._cYY);
-	 float sLz=sqrt(node->fitErrs()._cZZ);
+	 float sLy=sqrt(node->fitErrs().cYY());
+	 float sLz=sqrt(node->fitErrs().cZZ());
 	 printf("%diN=%d Lx=%.2f  Ly=%.2f %.2f   Lz=%.2f %.2f gX=%.2f gY=%.2f\n",iDir,iI,Lx,Ly,sLy,Lz,sLz,node->x_g(),node->y_g());
 	 printf("TT%d %.2f   %.2f %.3f   %.2f %.3f  %f\n",iDir,node->x_g(),node->y_g(),sLy,node->z_g(),sLz,node->getAlpha());
        }
@@ -265,7 +265,7 @@ Vertex3D::dumpPrimTracks4beamLine(float z0, int eveID) {
       float px=tr.gP.x();
       float py=tr.gP.y();
       float pz=tr.gP.z();
-      printf("track4beamLine %f %f %f   %f %f %f   %f %f %f   %d %f  %.1f %d \n",x,y,z,px,py,pz,er->_cYY,er->_cZY,er->_cZZ , tr.nFitPoint,tr.gChi2,z0,eveID);
+      printf("track4beamLine %f %f %f   %f %f %f   %f %f %f   %d %f  %.1f %d \n",x,y,z,px,py,pz,er->cYY(),er->cZY(),er->cZZ() , tr.nFitPoint,tr.gChi2,z0,eveID);
   }
 }
 

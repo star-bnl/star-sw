@@ -1739,7 +1739,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.A,hr.hZZ);
+    circ.AddErr(hr.A,hr.hZZ());
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1806,8 +1806,8 @@ double Xi2=0;
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
     cirl.StiEmx(E.A);
-    TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
-    E._cPP*=hh; E._cTP*=hh;
+    TCL::vscale(&(E.cPX()),hh,&(E.cPX()),5);
+    E.cPP()*=hh; E.cTP()*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
     E.check("In aprox");
   }   

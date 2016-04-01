@@ -22,7 +22,7 @@ class DcaTrack { // approximtion of track as stright line @ DCA to beamLine=0,0
   float gChi2; // global track, from Kalman 
   int nFitPoint; 
   void print() { printf("#track@DCA(0,0) R/cm=[%5.2f %5.2f %.1f], errYloc=%.2fcm , errZ=%.1fcm,  glob P=[%6.2f %6.2f %6.1f]GeV/c, PT=%.2f\n",R.x(),R.y(),R.z(),sigYloc, sigZ,gP.x(),gP.y(),gP.z(), gP.Pt() );
-  printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr._cXX,fitErr._cYX,fitErr._cYY,fitErr._cZX,fitErr._cZY,fitErr._cZZ); 
+    printf("   chi2=%f, nFitP=%d,  fitErr: cXX=%f cYX=%f cYY=%f cZX=%f cZY=%f cZZ=%f\n",gChi2, nFitPoint,fitErr.cXX(),fitErr.cYX(),fitErr.cYY(),fitErr.cZX(),fitErr.cZY(),fitErr.cZZ()); 
 }
   
 };

@@ -1444,11 +1444,11 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
     for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
 #else
-  Double_t sete[15] = {  errs._cYY,                       
-			 errs._cZY, errs._cZZ,                 
-			 errs._cEY, errs._cEZ, errs._cEE,           
-			 errs._cPY, errs._cPZ, errs._cPE, errs._cPP,     
-			 errs._cTY, errs._cTZ, errs._cTE, errs._cTP, errs._cTT
+  Double_t sete[15] = {  errs.cYY(),                       
+			 errs.cZY(), errs.cZZ(),                 
+			 errs.cEY(), errs.cEZ(), errs.cEE(),           
+			 errs.cPY(), errs.cPZ(), errs.cPE(), errs.cPP(),     
+			 errs.cTY(), errs.cTZ(), errs.cTE(), errs.cTP(), errs.cTT()
   };
 #endif
   StDcaGeometry *dca = new StDcaGeometry;
@@ -1577,21 +1577,21 @@ enum dcaEmx {kImpImp,
   aux.lXHit = stiHit->x();
   aux.lYHit = stiHit->y(timeFlight);
   aux.lZHit = stiHit->z(timeFlight);
-  aux.lYHitErr = sqrt(mHrr.hYY);
-  aux.lZHitErr = sqrt(mHrr.hZZ);
-  aux.lHitEmx[0] = mHrr.hYY;
-  aux.lHitEmx[1] = mHrr.hZY;
-  aux.lHitEmx[2] = mHrr.hZZ;
+  aux.lYHitErr = sqrt(mHrr.hYY());
+  aux.lZHitErr = sqrt(mHrr.hZZ());
+  aux.lHitEmx[0] = mHrr.hYY();
+  aux.lHitEmx[1] = mHrr.hZY();
+  aux.lHitEmx[2] = mHrr.hZZ();
 
 // local FIT
   aux.lXFit = mFP.x();
   aux.lYFit = mFP.y();
   aux.lZFit = mFP.z();
-  aux.lYFitErr = sqrt(mFE._cYY);
-  aux.lZFitErr = sqrt(mFE._cZZ);
-  aux.lFitEmx[0] = mFE._cYY;
-  aux.lFitEmx[1] = mFE._cZY;
-  aux.lFitEmx[2] = mFE._cZZ;
+  aux.lYFitErr = sqrt(mFE.cYY());
+  aux.lZFitErr = sqrt(mFE.cZZ());
+  aux.lFitEmx[0] = mFE.cYY();
+  aux.lFitEmx[1] = mFE.cZY();
+  aux.lFitEmx[2] = mFE.cZZ();
 //  assert(fabs(aux.lYFit-aux.lYHit)>1e-10 || fabs(aux.lXHit)<4);
 
 // local Pull

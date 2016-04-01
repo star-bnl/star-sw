@@ -152,10 +152,10 @@ public:
   double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;  }
   const double *hitErrs() const         {return mHrr.A;  }
-  double getEyy()   const 		{return mHrr.hYY;}
-  double getEzz()   const 		{return mHrr.hZZ;}
-  double getCyy()   const 		{return mFE._cYY;}
-  double getCzz()   const 		{return mFE._cZZ;}
+  double getEyy()   const 		{return mHrr.hYY();}
+  double getEzz()   const 		{return mHrr.hZZ();}
+  double getCyy()   const 		{return mFE.cYY();}
+  double getCzz()   const 		{return mFE.cZZ();}
   double const *getPars()const          {return mFP.P;}
   double getDiag(int idx)const          {return mFE.A[(idx*(idx+3))/2];}
   int    getHitCount () const		{return hitCount;}

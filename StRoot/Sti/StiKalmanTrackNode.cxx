@@ -113,7 +113,7 @@
  * Account field=0
  *
  * Revision 2.128  2010/04/01 20:25:34  perev
- * Remove test to small error _cPP
+ * Remove test to small error cPP()
  *
  * Revision 2.127  2010/04/01 00:27:33  perev
  * Zero fied = 2e-6
@@ -396,7 +396,7 @@
  * Removed calls to center representation and replaced by normal representation
  *
  * Revision 2.33  2004/03/17 21:01:53  andrewar
- * Trapping for negative track error (^2) values _cYY and _cZZ. This should
+ * Trapping for negative track error (^2) values cYY() and cZZ(). This should
  * be a temporary fix until the root of the problem is found. Problem seems
  * localized to trackNodes without hits.
  * Also trapping for asin(x), x>1 in ::length; point to point cord length
@@ -592,11 +592,11 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DPti=1.,DTan=0.05;
 
   if (!fak) {
     mFE.reset();
-    mFE._cYY=DY*DY;
-    mFE._cZZ=DZ*DZ;
-    mFE._cEE=DEta*DEta;
-    mFE._cPP=DPti*DPti;
-    mFE._cTT=DTan*DTan;
+    mFE.cYY()=DY*DY;
+    mFE.cZZ()=DZ*DZ;
+    mFE.cEE()=DEta*DEta;
+    mFE.cPP()=DPti*DPti;
+    mFE.cTT()=DTan*DTan;
   } else {
     for (int i=0;i<kNErrs;i++) mFE.A[i] *=fak;
   }  
@@ -1264,7 +1264,7 @@ void StiKalmanTrackNode::propagateError()
   errPropag6(mFE.A,mMtx().A,kNPars);
   int force = (fabs(mgP.dl) > StiNodeErrs::kBigLen); 
   mFE.recov(force);
-  mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
+  mFE.cXX() = mFE.cYX()= mFE.cZX() = mFE.cEX() = mFE.cPX() = mFE.cTX() = 0;
 // now set hiterrors
    if (_hit) setHitErrors();
 
@@ -1340,12 +1340,12 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   if (TMath::Abs(mFP._sinCA+dsin)>0.99   )	return 1e41;
   if (TMath::Abs(mFP.eta())       >kMaxEta) 	return 1e41;
   if (TMath::Abs(mFP.curv())      >kMaxCur)    return 1e41;
-  if (mHrr.hYY>1000*mFE._cYY
-   && mHrr.hZZ>1000*mFE._cZZ)		return 1e41;
+  if (mHrr.hYY()>1000*mFE.cYY()
+      && mHrr.hZZ()>1000*mFE.cZZ())		return 1e41;
   setHitErrors(hit);
-  r00=mHrr.hYY+mFE._cYY;
-  r01=mHrr.hZY+mFE._cZY;  
-  r11=mHrr.hZZ+mFE._cZZ;
+  r00=mHrr.hYY()+mFE.cYY();
+  r01=mHrr.hZY()+mFE.cZY();  
+  r11=mHrr.hZZ()+mFE.cZZ();
 
 #ifdef Sti_DEBUG
   TRSymMatrix R(2,
@@ -1495,10 +1495,10 @@ if (keepElossBug) {	//Old Eloss bug prezerved
 
  double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
  
- mFE._cEE += cos2Li 		*theta2;
- mFE._cPP += tanl*tanl*pti*pti	*theta2;
- mFE._cTP += pti*tanl*cos2Li	*theta2;
- mFE._cTT += cos2Li*cos2Li	*theta2;
+ mFE.cEE() += cos2Li 		*theta2;
+ mFE.cPP() += tanl*tanl*pti*pti	*theta2;
+ mFE.cTP() += pti*tanl*cos2Li	*theta2;
+ mFE.cTT() += cos2Li*cos2Li	*theta2;
 
   double dE=0;
   double sign = (mgP.dx>0)? 1:-1;
@@ -1556,13 +1556,13 @@ assert(calculator);
   
   double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
  
-  mFE._cEE += cos2Li 		*theta2;
-  mFE._cPP += tanl*tanl*pti*pti	*theta2;
-  mFE._cTP += pti*tanl*cos2Li	*theta2;
-  mFE._cTT += cos2Li*cos2Li	*theta2;
-assert(mFE._cEE>0);
-assert(mFE._cPP>0);
-assert(mFE._cTT>0);
+  mFE.cEE() += cos2Li 		*theta2;
+  mFE.cPP() += tanl*tanl*pti*pti	*theta2;
+  mFE.cTP() += pti*tanl*cos2Li	*theta2;
+  mFE.cTT() += cos2Li*cos2Li	*theta2;
+assert(mFE.cEE()>0);
+assert(mFE.cPP()>0);
+assert(mFE.cTT()>0);
 
 assert(mFE.zign()>0); ///??? 
 
@@ -1618,14 +1618,14 @@ int StiKalmanTrackNode::updateNode()
 static int nCall=0; nCall++;
   _state = kTNFitBeg;
 assert(mFE.zign()>0); ///??? 
-  assert(mFE._cXX<1e-8);
+  assert(mFE.cXX()<1e-8);
   double r00,r01,r11;
-  r00 = mHrr.hYY + mFE._cYY;
-  r01 = mHrr.hZY + mFE._cZY;
-  r11 = mHrr.hZZ + mFE._cZZ;
+  r00 = mHrr.hYY() + mFE.cYY();
+  r01 = mHrr.hZY() + mFE.cZY();
+  r11 = mHrr.hZZ() + mFE.cZZ();
 #ifdef Sti_DEBUG
-  TRSymMatrix V(2,mHrr.hYY,
-		  mHrr.hZY, mHrr.hZZ);  
+  TRSymMatrix V(2,mHrr.hYY(),
+		  mHrr.hZY(), mHrr.hZZ());  
   TRSymMatrix R1(2,r00,
 		   r01, r11);
   static const TRMatrix H(2,5, 1., 0., 0., 0., 0.,
@@ -1640,11 +1640,11 @@ assert(mFE.zign()>0); ///???
   // inverse matrix
   double tmp=r00; r00=r11/_det; r11=tmp/_det; r01=-r01/_det;
   // update error matrix
-  double k00=mFE._cYY*r00+mFE._cZY*r01, k01=mFE._cYY*r01+mFE._cZY*r11;
-  double k10=mFE._cZY*r00+mFE._cZZ*r01, k11=mFE._cZY*r01+mFE._cZZ*r11;
-  double k20=mFE._cEY*r00+mFE._cEZ*r01, k21=mFE._cEY*r01+mFE._cEZ*r11;
-  double k30=mFE._cPY*r00+mFE._cPZ*r01, k31=mFE._cPY*r01+mFE._cPZ*r11;
-  double k40=mFE._cTY*r00+mFE._cTZ*r01, k41=mFE._cTY*r01+mFE._cTZ*r11;
+  double k00=mFE.cYY()*r00+mFE.cZY()*r01, k01=mFE.cYY()*r01+mFE.cZY()*r11;
+  double k10=mFE.cZY()*r00+mFE.cZZ()*r01, k11=mFE.cZY()*r01+mFE.cZZ()*r11;
+  double k20=mFE.cEY()*r00+mFE.cEZ()*r01, k21=mFE.cEY()*r01+mFE.cEZ()*r11;
+  double k30=mFE.cPY()*r00+mFE.cPZ()*r01, k31=mFE.cPY()*r01+mFE.cPZ()*r11;
+  double k40=mFE.cTY()*r00+mFE.cTZ()*r01, k41=mFE.cTY()*r01+mFE.cTZ()*r11;
   double dyt  = getHit()->y() - mFP.y();
   double dzt  = getHit()->z() - mFP.z();
   double dp3  = k30*dyt + k31*dzt;
@@ -1725,16 +1725,16 @@ assert(mFE.zign()>0); ///???
   assert(!_detector || mFP.x() > 0.);
 
 // update error matrix
-  double c00=mFE._cYY;                       
-  double c10=mFE._cZY, c11=mFE._cZZ;                 
-  double c20=mFE._cEY, c21=mFE._cEZ;//, c22=mFE._cEE;           
-  double c30=mFE._cPY, c31=mFE._cPZ;//, c32=mFE._cPE, c33=mFE._cPP;     
-  double c40=mFE._cTY, c41=mFE._cTZ;//, c42=mFE._cTE, c43=mFE._cTP, c44=mFE._cTT;
-  mFE._cYY-=k00*c00+k01*c10;
-  mFE._cZY-=k10*c00+k11*c10;mFE._cZZ-=k10*c10+k11*c11;
-  mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
-  mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
-  mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
+  double c00=mFE.cYY();                       
+  double c10=mFE.cZY(), c11=mFE.cZZ();                 
+  double c20=mFE.cEY(), c21=mFE.cEZ();//, c22=mFE.cEE();           
+  double c30=mFE.cPY(), c31=mFE.cPZ();//, c32=mFE.cPE(), c33=mFE.cPP();     
+  double c40=mFE.cTY(), c41=mFE.cTZ();//, c42=mFE.cTE(), c43=mFE.cTP(), c44=mFE.cTT();
+  mFE.cYY()-=k00*c00+k01*c10;
+  mFE.cZY()-=k10*c00+k11*c10;mFE.cZZ()-=k10*c10+k11*c11;
+  mFE.cEY()-=k20*c00+k21*c10;mFE.cEZ()-=k20*c10+k21*c11;mFE.cEE()-=k20*c20+k21*c21;
+  mFE.cPY()-=k30*c00+k31*c10;mFE.cPZ()-=k30*c10+k31*c11;mFE.cPE()-=k30*c20+k31*c21;mFE.cPP()-=k30*c30+k31*c31;
+  mFE.cTY()-=k40*c00+k41*c10;mFE.cTZ()-=k40*c10+k41*c11;mFE.cTE()-=k40*c20+k41*c21;mFE.cTP()-=k40*c30+k41*c31;mFE.cTT()-=k40*c40+k41*c41;
   mFE.recov(1);
 
   _state = kTNFitEnd;
@@ -1813,7 +1813,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
      << " p2:" << n.mFP.eta() 
      << " p3:" << n.mFP.ptin() 
      << " p4:" << n.mFP.tanl()
-     << " c00:" <<n.mFE._cYY<< " c11:"<<n.mFE._cZZ 
+     << " c00:" <<n.mFE.cYY()<< " c11:"<<n.mFE.cZZ() 
      << " pT:" << n.getPt() << endl;
   if (n.debug() & 2) {
     StiHit * hit = n.getHit();
@@ -1838,7 +1838,7 @@ double StiKalmanTrackNode::getWindowY()
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   double myEyy,myEzz;
   calc->calculateError(&mFP,myEyy,myEzz);
-  double window = searchWindowScale*::sqrt(mFE._cYY+myEyy);
+  double window = searchWindowScale*::sqrt(mFE.cYY()+myEyy);
   if      (window<minSearchWindow) window = minSearchWindow;
   else if (window>maxSearchWindow) window = maxSearchWindow;
   return window;
@@ -1857,7 +1857,7 @@ double StiKalmanTrackNode::getWindowZ()
   double myEyy,myEzz;
   calc->calculateError(&mFP,myEyy,myEzz);
   
-  double window = searchWindowScale*::sqrt(mFE._cZZ+myEzz); 
+  double window = searchWindowScale*::sqrt(mFE.cZZ()+myEzz); 
   if      (window<minSearchWindow) window = minSearchWindow;
   else if (window>maxSearchWindow) window = maxSearchWindow;
   return window;
@@ -1939,7 +1939,7 @@ int StiKalmanTrackNode::locate()
   case kCylindrical: // cylinder
     yOff    = nice(_alpha - place->getLayerAngle());
     yAbsOff = TMath::Abs(yOff);
-    yAbsOff -=kNStd*sqrt((mFE._cXX+mFE._cYY)/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
+    yAbsOff -=kNStd*sqrt((mFE.cXX()+mFE.cYY())/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
     if (yAbsOff<0) yAbsOff=0;
     detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
     innerY = outerY = detHW;
@@ -1947,7 +1947,7 @@ int StiKalmanTrackNode::locate()
   case kPlanar: 
   default:
     yOff = mFP.y() - place->getNormalYoffset();
-    yAbsOff = TMath::Abs(yOff) - kNStd*sqrt(mFE._cYY);
+    yAbsOff = TMath::Abs(yOff) - kNStd*sqrt(mFE.cYY());
     if (yAbsOff<0) yAbsOff=0;
     detHW = sh->getHalfWidth();
     innerY = detHW - edge;
@@ -2213,9 +2213,9 @@ void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
   //       _ext->mPP 
   //       _ext->mPE
   //       _ext->mMtx
-  Double_t dpTOverpT = 100*TMath::Sqrt(mFE._cPP/(mFP.ptin()*mFP.ptin()));
+  Double_t dpTOverpT = 100*TMath::Sqrt(mFE.cPP()/(mFP.ptin()*mFP.ptin()));
   if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
-  comment += ::Form(" %s pT %8.3f+-%6.1f sy %6.4f",opt,getPt(),dpTOverpT,TMath::Sqrt(mFE._cYY));
+  comment += ::Form(" %s pT %8.3f+-%6.1f sy %6.4f",opt,getPt(),dpTOverpT,TMath::Sqrt(mFE.cYY()));
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
@@ -2453,11 +2453,11 @@ double StiKalmanTrackNode::evaluateChi2Info(const StiHit * hit) const
   if (fabs(myFP._sinCA+dsin)>0.99)	return 1e41;
   if (fabs(myFP.eta())   >kMaxEta) 	return 1e41;
   if (fabs(myFP.curv())  >kMaxCur)      return 1e41;
-  if (myHrr.hYY>1000*myFE._cYY
-   && myHrr.hZZ>1000*myFE._cZZ)		return 1e41;
-  r00=myHrr.hYY+myFE._cYY;
-  r01=myHrr.hZY+myFE._cZY;  
-  r11=myHrr.hZZ+myFE._cZZ;
+  if (myHrr.hYY()>1000*myFE.cYY()
+   && myHrr.hZZ()>1000*myFE.cZZ())		return 1e41;
+  r00=myHrr.hYY()+myFE.cYY();
+  r01=myHrr.hZY()+myFE.cZY();  
+  r11=myHrr.hZZ()+myFE.cZZ();
 
   det=r00*r11 - r01*r01;
   if (det<r00*r11*1.e-5) {

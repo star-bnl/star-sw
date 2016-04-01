@@ -8,10 +8,10 @@ class StiMcsErrs {
 public:
 void reset()		{memset(this,0,sizeof(*this));}
 public:
-double _cEE ;		//add err to <eta*eta> eta crossing angle
-double _cPP;    	//add err to <ptin*ptin>
-double _cTP;    	//add err to <tanL*ptin>
-double _cTT;    	//add err to <tanL*tanL>
+double cEE ;		//add err to <eta*eta> eta crossing angle
+double cPP;    	//add err to <ptin*ptin>
+double cTP;    	//add err to <tanL*ptin>
+double cTT;    	//add err to <tanL*tanL>
 double _ptinCorr;	//ptin correction factor -1
 };
 
