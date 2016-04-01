@@ -30,7 +30,7 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TSystem.h"
-#include "TQtCanvas2Html.h"
+#include "QtRoot/qtgui/inc/TQtCanvas2Html.h"
 #include "StTProfile2D.h"
 #include "StiELossTrk.h"
 
