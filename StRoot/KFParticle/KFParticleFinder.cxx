@@ -22,8 +22,9 @@ using std::vector;
 KFParticleFinder::KFParticleFinder():
 //  fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(6.f),fCutLVMPt(0.2f),fCutLVMP(1.0f),fCutJPsiPt(1.0f),
   fNPV(-1),fNThreads(1),fCutCharmPt(0.2f),fCutCharmChiPrim(85.f),fCutLVMPt(0.0f),fCutLVMP(0.0f),fCutJPsiPt(1.0f),
-  fD0(0), fD0bar(0), fD04(0), fD04bar(0), fDPlus(0), fDMinus(0), fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), fK0PiPlus(),
-  fK0PiMinusIndex(), fK0PiPi(), fOmegaPrim(0), fOmegaBarPrim(0), fEmcClusters(0), fMixedEventAnalysis(0)
+  fD0(0), fD0bar(0), fD04(0), fD04bar(0), fDPlus(0), fDMinus(0), fLPi(0), fLPiPIndex(0), fHe3Pi(0), fHe3PiBar(0), fHe4Pi(0), fHe4PiBar(0), 
+  fHe4L(0), fHe5L(0),  fLLn(0), fH5LL(0),
+  fK0PiPlus(), fK0PiMinusIndex(), fK0PiPi(), fOmegaPrim(0), fOmegaBarPrim(0), fEmcClusters(0), fMixedEventAnalysis(0)
 {
   //Cuts
   //track + track
@@ -1478,7 +1479,7 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
           {
             KFParticle mother_sec = mother_temp;
             mother_sec.SetNonlinearMassConstraint(massMotherPDG[iv]);
-            vMotherSec->push_back(mother_temp);          
+            vMotherSec->push_back(mother_temp);
           }
         }
       }
@@ -1754,7 +1755,11 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
         else if( V0PDG == 3203 )
           motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) ) = 3009;
         else if( V0PDG == 3010 )
-          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) ) = 3011;
+        {
+          const int_v& id = reinterpret_cast<const int_v&>(vTracks.Id()[iTr]);
+          int_m isSameProton = (id == Particles[vV0[iV0].DaughterIds()[1]].DaughterIds()[2]);
+          motherPDG( isSecondary && int_m(trackPdgPos[iPDGPos] == 2212) && (!isSameProton)) = 3011;
+        }
         
         active[iPDGPos] &= (motherPDG != -1);
 
@@ -1805,6 +1810,9 @@ void KFParticleFinder::FindTrackV0Decay(vector<KFParticle>& vV0,
             case   3222: motherType = 1; break; //Sigma+
             case   3006: motherType = 1; break; //He4L
             case   3007: motherType = 1; break; //He5L
+            case   3008: motherType = 1; break; //H4LL
+            case   3009: motherType = 1; break; //H4LL
+            case   3011: motherType = 1; break; //He6LL
             default:   motherType = 2; break; //resonances
           }
           for(int iCut=0; iCut<3; iCut++)
