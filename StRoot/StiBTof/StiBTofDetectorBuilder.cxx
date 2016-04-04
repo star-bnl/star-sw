@@ -104,8 +104,11 @@ void StiBTofDetectorBuilder::useVMCGeometry() {
 	TString pathT(Form(BTofVolume.path,half,sector,module));
 	gGeoManager->RestoreMasterVolume(); 
 	gGeoManager->CdTop();
+	if (! gGeoManager->CheckPath(pathT)) {
+	  pathT.ReplaceAll("CAVE_1","CAVE_1/TpcRefSys_1");
+	  if (! gGeoManager->CheckPath(pathT)) continue;
+	}
 	TGeoPhysicalNode *nodeP = gGeoManager->MakePhysicalNode(pathT);
-	assert(nodeP);
 	//Extract volume geometry from TGeoPhysicalNode
 	// position information
 	TGeoHMatrix  *hmat   = nodeP->GetMatrix();  if (debug()) hmat->Print("");
@@ -118,6 +121,7 @@ void StiBTofDetectorBuilder::useVMCGeometry() {
     Int_t tray = StBTofHit::kNTray/2*(half-1) + sector;
     Int_t module = StBTofHit::kNModule;
     TGeoHMatrix  *hmat = (TGeoHMatrix  *) fRotList->FindObject(Form("BTof_Tray_%i_Module_%i",tray,module));
+    if (! hmat) continue;
     Double_t     *xyz    = hmat->GetTranslation();
     Double_t     *rot    = hmat->GetRotationMatrix();
     TString name(hmat->GetName());

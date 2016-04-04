@@ -1621,6 +1621,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiSst"   ,"","",""                        ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd(t)",kFALSE},
   {"StiPxl"   ,"","",""                           ,"","StPxlUtil,StPxlDbMaker,StiPxl","Load StiPxl",kFALSE},
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
+  {"StiBToF"  ,"","",""                                                ,"",",StiBTof","Load StiIst",kFALSE},
 
   // left for historical purpose
   {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,BTofUtil" ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
@@ -1663,7 +1664,7 @@ Bfc_st BFC[] = { // standard chains
   {"PxlIT"  ,""  ,"","ITTF",""                                       ,"","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Ist geom",kFALSE},
   {"SstIT"  ,""  ,"","ITTF",""                                         ,"","Sti tracking: Sst geom",kFALSE},
-  {"BTofIT"  ,""  ,"","ITTF",""                                       ,"","Sti tracking: BTof geom",kFALSE},
+  {"BTofIT"  ,""  ,"","ITTF,StiBToF",""                               ,"","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
   {"NoSstIT"     ,""  ,"","-SstIT",""                    ,"","ITTF: track with switch off SST geom",kFALSE},
