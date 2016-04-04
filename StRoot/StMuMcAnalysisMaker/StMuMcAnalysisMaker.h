@@ -59,7 +59,7 @@ enum TrackMatchType {
   ,                           kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk, 
   kTotalMatchType // match type extended
 };
-enum EdEdx {NdEdxPiD = 3};
+enum EdEdx {NdEdxPiD = 3, NToFPiD = 2};
 enum EParticleType {
   kallP = 0, kPion, kPartypeT                                             // switch between All and pion
 };
@@ -139,12 +139,15 @@ class StMuMcAnalysisMaker : public StMaker {
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
   void           DrawdEdx();
+  void           DrawToF();
   void           DrawPng(TCanvas *c);
   void           DrawH3s(TH3F *h3s[2], Int_t animate = 0, Double_t min = 1e9, Double_t max = -1e9, Int_t np = 2);
   void           MinMax(TH1 *h, Double_t &min, Double_t &max, Double_t amax = 1000);
-  const TH3F    *GetTrackHist(UInt_t track, UInt_t match, UInt_t particle, UInt_t charge, UInt_t var, UInt_t i) const;
-  static TString DirPath(const TH1* hist);
-  static TString&FormName(const TH1 *hist);  
+  static         TH3F *GetTrackHist(UInt_t track, UInt_t match, UInt_t particle, UInt_t charge, UInt_t var, UInt_t i);
+  static         TH3F *GetdEdxHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
+  static         TH3F *GetToFHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var);
+  static         TString DirPath(const TH1* hist);
+  static         TString&FormName(const TH1 *hist);  
   static void    BeginHtml();
   static void    EndHtml();
   static void    BeginTable();
