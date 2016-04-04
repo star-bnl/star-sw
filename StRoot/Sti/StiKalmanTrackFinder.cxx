@@ -292,28 +292,28 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   int trackExtended   =0;  
   int trackExtendedOut=0;
   int status = 0;
-    // invoke tracker to find or extend this track
-    //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
+  // invoke tracker to find or extend this track
+  //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
   {
     if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) track);
     trackExtended = find(track,kOutsideIn,rMin);
     if (trackExtended) {
-StiHftHits::hftHist("HFTBefore",track);//???????????????????????
-    status = track->refit();
-StiHftHits::hftHist("HFTAfter",track);//???????????????????????
+      StiHftHits::hftHist("HFTBefore",track);//???????????????????????
+      status = track->refit();
+      StiHftHits::hftHist("HFTAfter",track);//???????????????????????
       if(status) return kNotRefitedIn;
     }	
-
   }
-    // decide if an outward pass is needed.
+  // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = track->getOuterMostNode(kGoodHit);
   if (!outerMostNode)
-  {
-    track->setFlag(-1);
-    return kNotExtended;
-  }
-  if (outerMostNode->getX()<185. )
-  {
+    {
+      track->setFlag(-1);
+      return kNotExtended;
+    }
+  if (outerMostNode->getX() < kStarMaxTrackRangeR && 
+      outerMostNode->getZ() > kStarMinTrackRangeZ &&
+      outerMostNode->getZ() < kStarMaxTrackRangeZ) {// including BEMC and EEMC  
     trackExtendedOut= find(track,kInsideOut);
     if (!trackExtendedOut) return kExtended;
     status = track->refit();
