@@ -5,24 +5,27 @@
 ClassImp(JLatex);
 
 JLatex::JLatex() {
-  ndcY = 1;   // NDC coordinates for Y
-  ndcX = 0;   // user coordinates for X
+    SetBit(kNoContextMenu | kCannotPick);
+    ndcY = 1;   // NDC coordinates for Y
+    ndcX = 0;   // user coordinates for X
 }
 
 JLatex::JLatex(Double_t x, Double_t y, const char *text) : TLatex(x,y,text) {
-  ndcY = 1;
-  ndcX = 0;
-  jx = x;
-  jy = y;
+    SetBit(kNoContextMenu | kCannotPick);
+    ndcY = 1;
+    ndcX = 0;
+    jx = x;
+    jy = y;
 }
 
 JLatex::JLatex(JLatex &l) : TLatex(l) {
-  ndcY = l.ndcY;
-  ndcX = l.ndcX;
-  jx = l.jx;
-  jy = l.jy;
+    SetBit(kNoContextMenu | kCannotPick);
+    ndcY = l.ndcY;
+    ndcX = l.ndcX;
+    jx = l.jx;
+    jy = l.jy;
 
-  LOG(DBG, "Copy constructor for JLatex");
+    LOG(DBG, "Copy constructor for JLatex");
 }
 
 void JLatex::SetNDC_x(int ndc) {

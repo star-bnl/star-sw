@@ -590,7 +590,8 @@ void JevpPlot::draw()
 
 	LOG(NOTE, "opts---%s\n",opts);
 	clock.record_time();
-	curr->histo->DrawCopy(opts);
+	curr->histo->SetBit(kNoContextMenu | kCannotPick);
+	curr->histo->Draw(opts);
 	t = clock.record_time();
 	LOG(NOTE, "time drawing histo: %s %f", curr->histo->GetName(), t);
 	same = (char *)"SAME";
@@ -604,6 +605,7 @@ void JevpPlot::draw()
     while(element) {
 	//printf("Drawing element\n");
 	LOG(DBG, "Drawing an element...");
+	element->SetBit(kNoContextMenu | kCannotPick);
 	element->Draw();
 	element = (TObject *)elements.After(element);
     }
@@ -614,6 +616,7 @@ void JevpPlot::draw()
     //#ifdef JUNK 
     if(legend) {
 	//printf("legend->Draw()\n");
+	legend->SetBit(kNoContextMenu | kCannotPick);
 	legend->Draw();
 	t = clock.record_time();
 	LOG(NOTE, "Time drawing legend: %lf", t);

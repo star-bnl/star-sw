@@ -756,6 +756,28 @@ u_int DisplayFile::getTabIdxAtDepth(u_int idx, u_int depth)
   return idx % TAB_BASE;
 }
 
+u_int DisplayFile::getFinalTabIdx(u_int idx) {
+    int fi=0;
+    int depth=0;
+    while((fi = getTabIdxAtDepth(idx, depth)) > 0) {
+	depth++;
+    }
+    return fi;
+}
+
+u_int DisplayFile::getPenultimateTabIdx(u_int idx) {
+    int pi=0;
+    int fi=0;
+    int depth=1;
+    while((fi = getTabIdxAtDepth(idx, depth)) > 0) {
+	depth++;
+    }
+    if(depth >=2) pi = getTabIdxAtDepth(idx, depth-2);
+    return pi;
+}
+
+
+
 // Now returns a displayNode
 // isCanvas means it has histograms rather than tabs...
 //
@@ -772,13 +794,16 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
   //LOG("JEFF", "get: %d", combo_index);
 
   // "1" == first child...
+    //printf("here %p %d\n", displayRoot, combo_index);
+    
   DisplayNode *node = displayRoot->child;
-
+  //printf("  ... %p", node);
+  
   for(int depth=0;;depth++) {
     int idx = getTabIdxAtDepth(combo_index, depth);
     int next_idx = getTabIdxAtDepth(combo_index, depth+1);
 
-    //LOG("JEFF","A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
+    //printf("A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
     
     while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
       node = node->next;   

@@ -140,6 +140,8 @@ class DisplayFile {
   static unsigned int getTabNextIdx(u_int idx);
   static unsigned int getTabChildIdx(u_int idx);
   static unsigned int getTabIdxAtDepth(u_int idx, u_int depth);
+  static unsigned int getFinalTabIdx(u_int idx);
+  static unsigned int getPenultimateTabIdx(u_int idx);
 
   //DisplayNode *getTab(u_int combo_index, int *isCanvas);
   //
