@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.24 2015/07/24 03:33:24 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.25 2016/04/05 12:46:02 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.25  2016/04/05 12:46:02  zhux
+# update to gcc482 at PDSF
+#
 # Revision 1.24  2015/07/24 03:33:24  zhux
 # Embedding output disk is set to /global/projecta/projectdirs/starprod/embedding, and '-eliza' option is dropped.
 # temporary log files is stored in /global/projecta/projectdirs/starprod/log.
@@ -927,7 +930,7 @@ sub getLocalLibraryPath {
     return ".sl53_gcc432";
   }
   elsif ( $chos =~ "sl64" ){
-    return ".sl64_gcc447";
+    return ".sl64_gcc482";
   }
   else{
     print "Unknown OS : $chos. Set the sl44 path\n";
