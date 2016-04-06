@@ -7,6 +7,8 @@
 #include <Rtypes.h>
 #include <TROOT.h>
 #include <TSocket.h>
+#include <THashList.h>
+
 #include "JevpPlot.h"
 //#include "DAQ_READER/daqReader.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
@@ -113,7 +115,7 @@ class JevpPlotSet : public TObject {
     return (processingTime / n);
   }
 
-  TList plots;    // The plots built
+  THashList plots;    // The plots built
 
   //StTriggerData *getStTriggerData(daqReader *rdr);
 

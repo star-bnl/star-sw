@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <TThread.h>
 #include <TApplication.h>
+#include <TList.h>
 #include <setjmp.h>
 
 #include "EvpConstants.h"
@@ -312,178 +313,178 @@ void JevpServer::readSocket()
 
 void JevpServer::parseArgs(int argc, char *argv[])
 {
-  throttleAlgos = 1;
-  isL4 = 0;
+    throttleAlgos = 1;
+    isL4 = 0;
 
-  justUpdateDisplayPallete = 0;
+    justUpdateDisplayPallete = 0;
 
-  log_output = RTS_LOG_NET;
-  //log_output = RTS_LOG_STDERR;
-  log_dest = (char *)"172.16.0.1";
-  log_port = 8004;
-  log_level = (char *)WARN;
-  makepallete = 0;
+    log_output = RTS_LOG_NET;
+    //log_output = RTS_LOG_STDERR;
+    log_dest = (char *)"172.16.0.1";
+    log_port = 8004;
+    log_level = (char *)WARN;
+    makepallete = 0;
 
-  rtsLogOutput(log_output);
-  rtsLogAddDest(log_dest, log_port);
-  rtsLogLevel(log_level);
+    rtsLogOutput(log_output);
+    rtsLogAddDest(log_dest, log_port);
+    rtsLogLevel(log_level);
 
-  clientdatadir =  "/a/jevp/client";
-  ndaqfilenames = 0;
-  cdaqfilename = 0;
+    clientdatadir =  (char *)"/a/jevp/client";
+    ndaqfilenames = 0;
+    cdaqfilename = 0;
 
-  for(int i=1;i<argc;i++) {
-    if(strcmp(argv[i], "-dd")==0) {
-      i++;
-      displays_fn = argv[i];
-    }
-    else if (strcmp(argv[i], "-stderr") == 0) {
-      log_output = RTS_LOG_STDERR;
-    }
-    else if (strcmp(argv[i], "-basedir") == 0) {
-      i++;
-      basedir = argv[i];
-    }
-    else if (strcmp(argv[i], "-nothrottle") == 0) {
-      throttleAlgos = 0;
-    }
-    else if (strcmp(argv[i], "-nopdf")==0) {
-      pdfdir = NULL;
-    }
-    else if (strcmp(argv[i], "-nodb")==0) {
-      nodb = 1;
-    }
-    else if (strcmp(argv[i], "-db") == 0) {
-      nodb = 0;
-    }
-    else if (strcmp(argv[i], "-port")==0) {
-      i++;
-      myport = atoi(argv[i]);
-    }
-    else if (strcmp(argv[i], "-justPallette") == 0) {
-      justUpdateDisplayPallete = 1;
-    }
-    else if (strcmp(argv[i], "-file")==0) {
-      i++;
-      daqfilename = argv[i];
-    }
-    else if (strcmp(argv[i], "-log") == 0) {
-      logevent=1;
-    }
-    else if (strcmp(argv[i], "-pallete") == 0) {
-      makepallete = 1;
-    }
-    else if (strcmp(argv[i], "-files") == 0) {
-      i++;
+    for(int i=1;i<argc;i++) {
+	if(strcmp(argv[i], "-dd")==0) {
+	    i++;
+	    displays_fn = argv[i];
+	}
+	else if (strcmp(argv[i], "-stderr") == 0) {
+	    log_output = RTS_LOG_STDERR;
+	}
+	else if (strcmp(argv[i], "-basedir") == 0) {
+	    i++;
+	    basedir = argv[i];
+	}
+	else if (strcmp(argv[i], "-nothrottle") == 0) {
+	    throttleAlgos = 0;
+	}
+	else if (strcmp(argv[i], "-nopdf")==0) {
+	    pdfdir = NULL;
+	}
+	else if (strcmp(argv[i], "-nodb")==0) {
+	    nodb = 1;
+	}
+	else if (strcmp(argv[i], "-db") == 0) {
+	    nodb = 0;
+	}
+	else if (strcmp(argv[i], "-port")==0) {
+	    i++;
+	    myport = atoi(argv[i]);
+	}
+	else if (strcmp(argv[i], "-justPallette") == 0) {
+	    justUpdateDisplayPallete = 1;
+	}
+	else if (strcmp(argv[i], "-file")==0) {
+	    i++;
+	    daqfilename = argv[i];
+	}
+	else if (strcmp(argv[i], "-log") == 0) {
+	    logevent=1;
+	}
+	else if (strcmp(argv[i], "-pallete") == 0) {
+	    makepallete = 1;
+	}
+	else if (strcmp(argv[i], "-files") == 0) {
+	    i++;
 
-      LOG("JEFF", "files...");
+	    LOG("JEFF", "files...");
 
-      while(i<argc && strcmp(argv[i], "-endfiles") != 0) {
+	    while(i<argc && strcmp(argv[i], "-endfiles") != 0) {
 
-	LOG("JEFF", "testing ndaq=%d i=%d arg=%s",i, ndaqfilenames, argv[i]);
-	daqfilenames[ndaqfilenames] = argv[i];
-	ndaqfilenames++;
-	i++;
-      }
+		LOG("JEFF", "testing ndaq=%d i=%d arg=%s",i, ndaqfilenames, argv[i]);
+		daqfilenames[ndaqfilenames] = argv[i];
+		ndaqfilenames++;
+		i++;
+	    }
 
-      LOG("JEFF", "ndaqfilenames = %d", ndaqfilenames);
-    }
-    else if (strcmp(argv[i], "-die")==0) {
-      die = 1;
-    }
-    else if (strcmp(argv[i], "-production") == 0) {
-      nodb = 0;
-      myport = JEVP_PORT;
-    }
-    else if (strcmp(argv[i], "-l4production") == 0) {
-      LOG("JEFF", "Using L4");
-      isL4 = 1;
-      log_dest = "172.17.0.1";
-      nodb = 0;
-      myport = JEVP_PORT;
-      clientdatadir = (char *)"/a/l4jevp/client";
-      basedir = (char *)"/RTScache/conf/l4jevp";
-      pdfdir = (char *)"/a/l4jevp/pdf";
-      refplotdir = (char *)"/a/l4jevp/refplots";
-      rootfiledir = (char *)"/a/l4jevp/rootfiles";
-    }
-    else if (strcmp(argv[i], "-l4test") == 0) {
-      LOG("JEFF", "Using L4 test");
-      isL4 = 1;
-      nodb = 0;
-      myport = JEVP_PORT+10;
-      clientdatadir = (char *)"/a/l4jevp/client";
-      basedir = (char *)"/RTScache/conf/l4jevp";
-      pdfdir = (char *)"/a/l4jevp/pdf";
-      refplotdir = (char *)"/a/l4jevp/refplots";
-      rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
-      log_output = RTS_LOG_STDERR;
-    }
-    else if (strcmp(argv[i], "-updatedb")==0) {
-	nodb = 0;
-	myport = JEVP_PORT+10;
-	die = 1;
-    }
-    else if (strcmp(argv[i], "-l4updatedb")==0) {
-	nodb = 0;
-	myport = JEVP_PORT+10;
-	die = 1;
+	    LOG("JEFF", "ndaqfilenames = %d", ndaqfilenames);
+	}
+	else if (strcmp(argv[i], "-die")==0) {
+	    die = 1;
+	}
+	else if (strcmp(argv[i], "-production") == 0) {
+	    nodb = 0;
+	    myport = JEVP_PORT;
+	}
+	else if (strcmp(argv[i], "-l4production") == 0) {
+	    LOG("JEFF", "Using L4");
+	    isL4 = 1;
+	    log_dest = (char *)"172.17.0.1";
+	    nodb = 0;
+	    myport = JEVP_PORT;
+	    clientdatadir = (char *)"/a/l4jevp/client";
+	    basedir = (char *)"/RTScache/conf/l4jevp";
+	    pdfdir = (char *)"/a/l4jevp/pdf";
+	    refplotdir = (char *)"/a/l4jevp/refplots";
+	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
+	}
+	else if (strcmp(argv[i], "-l4test") == 0) {
+	    LOG("JEFF", "Using L4 test");
+	    isL4 = 1;
+	    nodb = 0;
+	    myport = JEVP_PORT+10;
+	    clientdatadir = (char *)"/a/l4jevp/client";
+	    basedir = (char *)"/RTScache/conf/l4jevp";
+	    pdfdir = (char *)"/a/l4jevp/pdf";
+	    refplotdir = (char *)"/a/l4jevp/refplots";
+	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
+	    log_output = RTS_LOG_STDERR;
+	}
+	else if (strcmp(argv[i], "-updatedb")==0) {
+	    nodb = 0;
+	    myport = JEVP_PORT+10;
+	    die = 1;
+	}
+	else if (strcmp(argv[i], "-l4updatedb")==0) {
+	    nodb = 0;
+	    myport = JEVP_PORT+10;
+	    die = 1;
 
-	LOG("JEFF", "Update L4 DB");
-	isL4 = 1;
-	log_dest = "172.17.0.1";
-	nodb = 0;
+	    LOG("JEFF", "Update L4 DB");
+	    isL4 = 1;
+	    log_dest = (char *)"172.17.0.1";
+	    nodb = 0;
       
-	clientdatadir = (char *)"/a/l4jevp/client";
-	basedir = (char *)"/RTScache/conf/l4jevp";
-	pdfdir = (char *)"/a/l4jevp/pdf";
-	refplotdir = (char *)"/a/l4jevp/refplots";
-	rootfiledir = (char *)"/a/l4jevp/rootfiles";
+	    clientdatadir = (char *)"/a/l4jevp/client";
+	    basedir = (char *)"/RTScache/conf/l4jevp";
+	    pdfdir = (char *)"/a/l4jevp/pdf";
+	    refplotdir = (char *)"/a/l4jevp/refplots";
+	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
+	}
+	else if (strcmp(argv[i], "-test")==0) {
+	    nodb = 1;
+	    log_output = RTS_LOG_STDERR;
+	    basedir = (char *)"/RTScache/conf/jevp_test";
+	    pdfdir = (char *)"/a/jevp_test/pdf";
+	    refplotdir = (char *)"/a/jevp_test/refplots";
+	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
+	    myport = JEVP_PORT + 10;
+	}
+	else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
+	    i++;
+	    diska = argv[i];
+	}
+	else {
+	    printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
+	    printf("\t[-dd filename]       for each display definition:\n");
+	    printf("\t[-basedir basedir]   config file directory\n");
+	    printf("\t[-nodb]\n");
+	    printf("\t[-db]    not usually needed, but db usually disabled in reanalysis\n");
+	    printf("\t[-port] port]\n");
+	    printf("\t[-die]    (exit after end of run..)\n");
+	    printf("\t[-file daqfilename]\n");
+	    printf("\t[-test]   (set port to %d)\n",myport+10);
+	    printf("\t[-production]\n");
+	    printf("\t[-diska [/net/a]]  (used to pass to builders on launch)\n");
+	    printf("\t[-nothrottle]\n");
+	    printf("\t[-log]   (log each event)\n");
+	    printf("\n\n");
+	    printf("Defaults:  \n");
+	    printf("\tbasedir      = '/RTScache/conf'\n");
+	    printf("\tdisplay file = 'HistoDefs.txt'\n");
+	    printf("\tport         = %d\n", JEVP_PORT);
+	    printf("\tuse database!\n");
+	    printf("\n\n");
+	    exit(0);
+	}
     }
-    else if (strcmp(argv[i], "-test")==0) {
-      nodb = 1;
-      log_output = RTS_LOG_STDERR;
-      basedir = (char *)"/RTScache/conf/jevp_test";
-      pdfdir = (char *)"/a/jevp_test/pdf";
-      refplotdir = (char *)"/a/jevp_test/refplots";
-      rootfiledir = (char *)"/a/jevp_test/rootfiles";
-      myport = JEVP_PORT + 10;
-    }
-    else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
-      i++;
-      diska = argv[i];
-    }
-    else {
-      printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
-      printf("\t[-dd filename]       for each display definition:\n");
-      printf("\t[-basedir basedir]   config file directory\n");
-      printf("\t[-nodb]\n");
-      printf("\t[-db]    not usually needed, but db usually disabled in reanalysis\n");
-      printf("\t[-port] port]\n");
-      printf("\t[-die]    (exit after end of run..)\n");
-      printf("\t[-file daqfilename]\n");
-      printf("\t[-test]   (set port to %d)\n",myport+10);
-      printf("\t[-production]\n");
-      printf("\t[-diska [/net/a]]  (used to pass to builders on launch)\n");
-      printf("\t[-nothrottle]\n");
-      printf("\t[-log]   (log each event)\n");
-      printf("\n\n");
-      printf("Defaults:  \n");
-      printf("\tbasedir      = '/RTScache/conf'\n");
-      printf("\tdisplay file = 'HistoDefs.txt'\n");
-      printf("\tport         = %d\n", JEVP_PORT);
-      printf("\tuse database!\n");
-      printf("\n\n");
-      exit(0);
-    }
-  }
 
-  JEVPSERVERport = myport;
+    JEVPSERVERport = myport;
      
-  LOG(NOTE, "isL4=%d",isL4);
-  if(!displays_fn) {
-    displays_fn = (char *)"HistoDefs.txt";
-  }    
+    LOG(NOTE, "isL4=%d",isL4);
+    if(!displays_fn) {
+	displays_fn = (char *)"HistoDefs.txt";
+    }    
 }
 
 int JevpServer::updateDisplayDefs()
@@ -900,36 +901,36 @@ void JevpServer::performStartRun()
 
 void JevpServer::writeRootFiles()
 {
-  char filename[256];
-  sprintf(filename, "%s/run_%d.root",rootfiledir, runStatus.run);
+    char filename[256];
+    sprintf(filename, "%s/run_%d.root",rootfiledir, runStatus.run);
   
-  LOG(NOTE, "Writing to rootfile: %s",filename);
-  TFile *rootfile = new TFile(filename, "recreate");
+    LOG(NOTE, "Writing to rootfile: %s",filename);
+    TFile *rootfile = new TFile(filename, "recreate");
   
-  // Got through all histos...
-  JevpPlotSet *curr;
-  JevpPlot *currplot = NULL;
-  PlotHisto *currhisto = NULL;
+    // Got through all histos...
+    JevpPlotSet *curr;
+    JevpPlot *currplot = NULL;
+    PlotHisto *currhisto = NULL;
 
-  TListIter next(&builders);
+    TListIter next(&builders);
   
-  while((curr = (JevpPlotSet *)next())) {
+    while((curr = (JevpPlotSet *)next())) {
     
-    TListIter nextplot(&curr->plots);
+	TListIter nextplot(&curr->plots);
   
-    while((currplot = (JevpPlot *)nextplot())) {
+	while((currplot = (JevpPlot *)nextplot())) {
 
 
-      TListIter nexthisto(&currplot->histos);
+	    TListIter nexthisto(&currplot->histos);
 
-      while((currhisto = (PlotHisto *)nexthisto())) {
-	currhisto->histo->Write();
-      }
+	    while((currhisto = (PlotHisto *)nexthisto())) {
+		currhisto->histo->Write();
+	    }
+	}
     }
-  }
   
-  rootfile->Close();
-  delete rootfile;
+    rootfile->Close();
+    delete rootfile;
 }
 
 void JevpServer::justUpdatePallete() {
@@ -1062,46 +1063,51 @@ void JevpServer::clearForNewRun()
 
 
 JevpPlot *JevpServer::getPlot(char *name) {
-  RtsTimer_root clock;
-  clock.record_time();
-  int nexamined=0;
+    RtsTimer_root clock;
+    clock.record_time();
+    int nexamined=0;
 
-  if(strcmp(name, "serv_JevpSummary") == 0) {
-    return getJevpSummaryPlot();
-  }
-
-  JevpPlotSet *curr;
-  TListIter next(&builders);
-  
-  JevpPlot *currplot = NULL;
-
-  while((curr = (JevpPlotSet *)next())) {
-    
-    char *ps_name = curr->getPlotSetName();
-    int len = strlen(ps_name);
-
-    if(strncmp(name,ps_name,len) != 0) continue;
-
-
-    TListIter nextplot(&curr->plots);
-  
-    while((currplot = (JevpPlot *)nextplot())) {
-
-      LOG(DBG, "getPlot():  checking %s vs %s",name,currplot->GetPlotName());
-      nexamined++;
-
-      if(strcmp(currplot->GetPlotName(), name) == 0) {
-	goto done;
-      }
+    if(strcmp(name, "serv_JevpSummary") == 0) {
+	return getJevpSummaryPlot();
     }
-  }
 
- done:
+    JevpPlotSet *curr;
+    TListIter next(&builders);
+  
+    JevpPlot *currplot = NULL;
 
-  double t1 = clock.record_time();
-  LOG(DBG, "Ethernet: getPlot(%s) %lf nsearched=%d",name,t1,nexamined);
+    while((curr = (JevpPlotSet *)next())) {
+    
+	char *ps_name = curr->getPlotSetName();
+	int len = strlen(ps_name);
 
-  return currplot;
+	if(strncmp(name,ps_name,len) != 0) continue;
+
+	currplot = curr->getPlot(name);
+	//LOG("JEFF", "name: %s currplot: %p", name, currplot);
+	if(currplot) break;
+
+	/*   
+	     TListIter nextplot(&curr->plots);
+  
+	     while((currplot = (JevpPlot *)nextplot())) {
+
+	     LOG(DBG, "getPlot():  checking %s vs %s",name,currplot->GetPlotName());
+	     nexamined++;
+
+	     if(strcmp(currplot->GetPlotName(), name) == 0) {
+	     goto done;
+	     }
+	     }
+	*/
+    }
+
+    //done:
+
+    double t1 = clock.record_time();
+    LOG(DBG, "Ethernet: getPlot(%s) %lf",name,t1);
+
+    return currplot;
 }
 
 
