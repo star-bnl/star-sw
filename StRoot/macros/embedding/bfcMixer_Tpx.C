@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.39 2015/07/11 02:04:02 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.40 2016/04/05 13:32:45 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.40  2016/04/05 13:32:45  zhux
+// added chain for : Run13 pp500; Run14 AuAu200 HFT & MTD; Run12 CuAu200.
+//
 // Revision 1.39  2015/07/11 02:04:02  zhux
 // chain for Run14 Au+Au 14.5 added.
 //
@@ -124,8 +127,20 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run12 pp200 chain
   TString prodP12idpp200("DbV20130212,pp2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-hitfilt");
 
+  // Run13 pp500 chain
+  TString prodP14igpp500("DbV20140905,pp2013b,StiHftP,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-hitfilt");
+
   // Run14 AuAu15 chain
   TString prodP14iiAuAu15("DbV20150110,P2014a,btof,mtd,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run14 AuAu200 chain
+  TString prodP15icAuAu200("DbV20150316,P2014a,pxlHit,istHit,btof,mtd,mtdCalib,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run14 AuAu200 MTD chain
+  TString prodP15ieAuAu200("DbV20150504,P2014a,btof,mtd,mtdCalib,pxlHit,istHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
+
+  // Run12 CuAu200 chain
+  TString prodP15ieCuAu200("DbV20150529,P2012b,AgML,mtd,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-VFMinuit,-hitfilt");
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
@@ -133,7 +148,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString geomP11id("ry2011");
   TString geomP12id("ry2012a");
+  TString geomP14ig("ry2013_1c");
   TString geomP14ii("ry2014a");
+  TString geomP15ic("ry2014a");
+  TString geomP15ie("ry2014a");
 
   TString xgeom(" useXgeom");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
@@ -170,7 +188,11 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11idpp500")   { chain3Opt = prodP11idpp500;    chain2Opt += geomP11id;}
   else if (prodName == "P12idUU193")   { chain3Opt = prodP12idUU193;    chain2Opt += geomP12id;}
   else if (prodName == "P12idpp200")   { chain3Opt = prodP12idpp200;    chain2Opt += geomP12id;}
-  else if (prodName == "P14iiAuAu15")  { chain1Opt += xgeom; chain3Opt = prodP14iiAuAu15;   chain2Opt += geomP14ii;}
+  else if (prodName == "P14igpp500")   { chain1Opt += xgeom; chain3Opt = prodP14igpp500;    chain3Opt += ",mtdsim";  chain2Opt += geomP14ig;}
+  else if (prodName == "P14iiAuAu15")  { chain1Opt += xgeom; chain3Opt = prodP14iiAuAu15;   chain3Opt += ",mtdsim";  chain2Opt += geomP14ii;}
+  else if (prodName == "P15icAuAu200") { chain1Opt += xgeom; chain3Opt = prodP15icAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP15ic;}
+  else if (prodName == "P15ieAuAu200") { chain1Opt += xgeom; chain3Opt = prodP15ieAuAu200;  chain3Opt += ",mtdsim";  chain2Opt += geomP15ie;}
+  else if (prodName == "P15ieCuAu200") { chain3Opt = prodP15ieCuAu200;  chain2Opt += geomP12id;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
@@ -313,6 +335,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
   	embMk->SetTemp(0.35);
 
+	//embMk->SetRapidityMode(kFALSE);
+
   	// Make trigger and z-vertex cuts (only if SkipMode is true)
   	// Trigger cut
   	//   Can put multiple trigger id's 
@@ -325,6 +349,10 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   	embMk->SetZVertexCut(vzlow, vzhigh) ;
   	// vr = sqrt{vx^2 + vy^2} cut
   	embMk->SetVrCut(vr);
+
+	//embMk->SetVpdVzCutMode(kTRUE);
+	//embMk->SetVpdVzCut(3);
+
 	}
 
   TAttr::SetDebug(0);
