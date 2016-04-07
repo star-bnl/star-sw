@@ -1776,7 +1776,7 @@ TDataSet *St_geant_Maker::Work()
   if (!gGeometry) new TGeometry("STAR","nash STAR");
   GtHash *H = new GtHash;
   
-  printf(" looping on agvolume \n");
+  if (Debug()) { LOG_INFO << "looping on agvolume" << endm;}
   //   ===============================================================
   //  while(agvolume(node,volu,position,mother,who,copy,p,npar)) {
     //  while(agvolume(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) {
