@@ -1333,7 +1333,7 @@ Bfc_st BFC[] = { // standard chains
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb,PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
+  {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1639,11 +1639,11 @@ Bfc_st BFC[] = { // standard chains
    ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,  "... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""	     ,"","...VFPPVEv with no Btof ",kFALSE},
   // Sti/Stv chains
-  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
-   ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
+   ,                                                          "StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
-  {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil,TMVARank"
-   ,                     "StiMaker","StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
+  {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,Stu,StEvent,StDbT,TpcIT,compend,tbutil,TMVARank"
+   ,                                      "StiMaker","libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"HLTCA"    ,""  ,"","",                     "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-VFMinuit,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
@@ -1651,8 +1651,8 @@ Bfc_st BFC[] = { // standard chains
    "libHist,libHistPainter,GeoTestMaker,StvUtil,Stv,StvMaker"
    ,                                                                                          "Stv",kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
-  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
-   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
+  {"StiVMC"   ,"StiVMC","","-Sti,SCL,stu,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
+   ,                                                       "StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
   {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
   {"laserIT"  ,"","","","",                              "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"    ,"","","ITTF"                                              ,"","","Sti tracking: TPC",kFALSE},
@@ -1780,8 +1780,8 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __NoStrangeMuDst__ */
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
-  {"Display"     ,"","","TbUtil,St_geom"
-   ,           "StEventDisplayMaker","StEvent,StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
+  {"Display"     ,"","","TbUtil,St_geom,Stu"
+   ,                            "StEventDisplayMaker","StEvent,StEventDisplayMaker","Event Display",kFALSE},
 #else /* ! __NoDisplay__ */
   {"Display"     ,"","","",       "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
 #endif /* __NoDisplay__ */
