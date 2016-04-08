@@ -25,12 +25,7 @@ ClassImp(vpdBuilder);
 	
 void vpdBuilder::initialize(int argc, char *argv[]) {
 
-	pulserSwitch = false;
-	refChannelEast = 1;
-	refChannelWest = 1;
-
-	ReadConfig();
-	readParams();
+	
 
 	char tmp[256];
 	char tmp1[256];
@@ -134,10 +129,10 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 
 	sprintf(tmp,"vpd_tac_align_east");
 	sprintf(tmp1,"VPD-vtx TAC Alignment East; Channel # ; TAC_{ch} - TAC_{ch=%i}", refChannelEast);
-	contents.tac_align_east = new TH2D(tmp,tmp1, 16,-0.5,15.5, 100, -200, 200);
+	contents.tac_align_east = new TH2D(tmp,tmp1, 16,-0.5,15.5, 100, -400, 400);
 	sprintf(tmp,"vpd_tac_align_west");
 	sprintf(tmp1,"VPD-vtx TAC Alignment West; Channel # ; TAC_{ch} - TAC_{ch=%i}", refChannelWest);
-	contents.tac_align_west = new TH2D(tmp,tmp1, 16,-0.5,15.5, 100, -200, 200);
+	contents.tac_align_west = new TH2D(tmp,tmp1, 16,-0.5,15.5, 100, -400, 400);
 
 	sprintf(tmp,"vtx_TAC_diff");
 	contents.vtx_TAC_diff = new TH1D( tmp, "TAC Diff; <West> - <East>", 200, -100, 100 );
@@ -165,14 +160,14 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	for ( int i = 0; i < 4; i ++ ){
 		sprintf(tmp,"vpd_pulser_west_%i", i+1);
 		sprintf(tmp1,"Pulser West D%i", i+1);
-		int wsize = 100;
+		int wsize = 550;
 		int minx = /*expected_pulser_means_west[i]*/ - wsize;
 		int maxx = /*expected_pulser_means_west[i]*/ + wsize;
 		contents.pulser_west[i] = new TH1D( tmp, tmp1, wsize*2, minx, maxx );
 
 		sprintf(tmp,"vpd_pulser_east_%i", i+1);
 		sprintf(tmp1,"Pulser East D%i", i+1);
-		wsize = 100;
+		wsize = 550;
 		minx = /*expected_pulser_means_east[i]*/ - wsize;
 		maxx = /*expected_pulser_means_east[i]*/ + wsize;
 		contents.pulser_east[i] = new TH1D( tmp, tmp1, wsize*2, minx, maxx );
@@ -239,6 +234,14 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 	
 void vpdBuilder::startrun(daqReader *rdr) {
 	resetAllPlots();
+
+	pulserSwitch = false;
+	noiseCorr = false;
+	refChannelEast = 1;
+	refChannelWest = 1;
+
+	ReadConfig();
+	readParams();
 }
 
 void vpdBuilder::stoprun(daqReader *rdr) {
@@ -281,14 +284,15 @@ void vpdBuilder::event(daqReader *rdr) {
 
 
 			int adc_lo = trgd->vpdADC( (StBeamDirection)side, ich+1);
-			// int tdc_lo = trgd->vpdTDC( (StBeamDirection)side, ich+1);
-			int tdc_lo = correctedTAC( trgd, (StBeamDirection)side, ich );
+			int tdc_lo = trgd->vpdTDC( (StBeamDirection)side, ich+1);
+			int tdc_corr = correctedTAC( trgd, (StBeamDirection)side, ich );
 
-			if ( goodHit( adc_lo, tdc_lo ) ){
-				sumTAC[ side ] += tdc_lo;
+			if ( goodHit( adc_lo, tdc_corr ) ){
+				sumTAC[ side ] += tdc_corr;
 				sumADC[ side ] += adc_lo;
 				nHit[ side ] += 1;
-
+			}
+			if ( goodHit( adc_lo, tdc_lo ) ){
 				contents.cdb[2*side+0]->Fill(ich, adc_lo);
 				contents.cdb[2*side+1]->Fill(ich, tdc_lo);
 			}
@@ -296,7 +300,7 @@ void vpdBuilder::event(daqReader *rdr) {
 	}
 
 	contents.tac_east_vs_tac_west->Fill(sumTAC[0] / (float)nHit[0], sumTAC[1] / (float)nHit[1]);
-	contents.vtx_TAC_diff->Fill( (sumTAC[1] / (float)nHit[1]) - (sumTAC[0] / (float)nHit[0]) );
+	
 
 	int On_sumTacEast = trgd->bbcVP101( 5 );
 	int On_sumAdcEast = (trgd->bbcVP101( 4 )&0xfff);
@@ -305,8 +309,9 @@ void vpdBuilder::event(daqReader *rdr) {
 	int On_sumAdcWest = (trgd->bbcVP101( 6 )&0xfff);
 	int On_nHitsWest = (trgd->bbcVP101( 6 )>>12);
 	
-
-
+	// contents.vtx_TAC_diff->Fill( (sumTAC[1] / (float)nHit[1]) - (sumTAC[0] / (float)nHit[0]) );
+	if ( On_nHitsWest > 0 && On_nHitsEast > 0 )
+		contents.vtx_TAC_diff->Fill( (On_sumTacWest / On_nHitsWest) - (On_sumTacEast / On_nHitsEast) );
 
 	contents.vtx_east_tacsum_on_vs_off->Fill( On_sumTacEast, sumTAC[ 0 ] );
 	contents.vtx_west_tacsum_on_vs_off->Fill( On_sumTacWest, sumTAC[ 1 ] );
@@ -333,11 +338,11 @@ void vpdBuilder::event(daqReader *rdr) {
 		int pindex = ich / 4;
 		contents.pulser_west[pindex]->Fill( tdcW - expected_pulser_means_west[ pindex ] );
 		if ((int)contents.pulser_west[pindex]->GetEntries() % 100 == 0  )
-			contents.pulser_west[pindex]->Fit( "gaus", "Q" );
+			contents.pulser_west[pindex]->Fit( "gaus", "QR", "", -25, 25 );
 		
 		contents.pulser_east[pindex]->Fill( tdcE - expected_pulser_means_east[ pindex ] );
 		if ((int)contents.pulser_east[pindex]->GetEntries() % 100 == 0  )
-			contents.pulser_east[pindex]->Fit( "gaus", "Q" );
+			contents.pulser_east[pindex]->Fit( "gaus", "QR", "", -25, 25 );
 	}
 
 	// TAC alignment
@@ -482,6 +487,9 @@ void vpdBuilder::ReadConfig(){
 		else if ( "pulseronoff" == tk[0] && tk.size() >= 2 ){
 			pulserSwitch = (bool) atoi( tk[1].c_str() );
 		}
+		else if ( "noisecorr" == tk[0] && tk.size() >= 2 ){
+			noiseCorr = (bool) atoi( tk[1].c_str() );
+		}
 		else if ( "pulsermeanseast" == tk[0] )
 			expected_pulser_means_east = readIntVector( cValues[ i ], 1 );
 		else if ( "pulsermeanswest" == tk[0] )
@@ -492,13 +500,21 @@ void vpdBuilder::ReadConfig(){
 			refChannelWest = atoi( tk[1].c_str() );
 	}
 
+	char tmp[256];
+	sprintf(tmp,"VPD-vtx TAC Alignment West; Channel # ; TAC_{ch} - TAC_{ch=%i}", refChannelWest);
+	contents.tac_align_west->SetTitle( tmp );
+	sprintf(tmp,"VPD-vtx TAC Alignment East; Channel # ; TAC_{ch} - TAC_{ch=%i}", refChannelEast);
+	contents.tac_align_east->SetTitle( tmp );
 
-
+	eastGoodCh.clear();
+	westGoodCh.clear();
 	// init the channel masks
 	for ( int i = 0; i < 16; i++ ){
 		eastGoodCh.push_back( true ); // default to good
 		westGoodCh.push_back( true ); // default to good
 	}
+
+
 
 
 	bool debug = false;
@@ -534,6 +550,8 @@ void vpdBuilder::ReadConfig(){
 
 		cout << "Reference Channel East " << refChannelEast << endl;
 		cout << "Reference Channel West " << refChannelWest << endl;
+
+
 	}
 
 
@@ -541,7 +559,7 @@ void vpdBuilder::ReadConfig(){
 }
 
 
-int vpdBuilder::correctedTAC( StTriggerData2016 * td, int side, int channel ){
+int vpdBuilder::correctedTAC( StTriggerData2016 * td, int side, int channel  ){
 
 
 
@@ -570,8 +588,11 @@ int vpdBuilder::correctedTAC( StTriggerData2016 * td, int side, int channel ){
 
 	// Apply the jitter correction
 	int jitterCorr = pulserTac - pulserMean;
+	if ( !noiseCorr )
+		jitterCorr = 0;
 
 	int corrTac = slewTac - jitterCorr;
+
 
 	return corrTac;
 
@@ -584,6 +605,10 @@ void vpdBuilder::readParams(){
 	sprintf(mConfigFile, "%s/tof/%s",confdatadir,"Slewing.txt");
 	ifstream inf(mConfigFile); 
 	
+	if(!inf.good()){
+		LOG( "====VPD====", "BAD or NO SLEWING FILE" );
+		return;
+	}
 
 	for ( int i = 0; i < 19; i ++ ){
 		for ( int j = 0; j < 10; j++){
