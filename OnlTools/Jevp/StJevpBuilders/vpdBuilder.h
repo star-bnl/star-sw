@@ -66,6 +66,7 @@ class vpdBuilder : public JevpBuilder {
   int refChannelWest;
 
   bool pulserSwitch;
+  bool noiseCorr;
 
   // Histo declarations!
   union {
