@@ -31,6 +31,7 @@ class JevpServer {
   JTMonitor *mon;
   
   int throttleAlgos;
+  double throttle_time;
 
   int isL4;
 
