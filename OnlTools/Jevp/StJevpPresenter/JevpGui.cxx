@@ -586,11 +586,15 @@ void JevpGui::updateScreen(JevpScreenWidget *screen) {
     RtsTimer_root clock;
 
     clock.record_time();
- 
+    CP;
     DisplayNode *displayTab = screen->getDisplayTab(jl_displayFile);
+    CP;
     screen->DownloadAllPlotsFromServer(jl_socket, displayTab);
+    CP;
     double t1 = clock.record_time();
+    CP;
     screen->DrawOnScreen(displayTab);	  
+    CP;
     double t2 = clock.record_time();
 
     if(t1 > LOG_DRAW_TIME)

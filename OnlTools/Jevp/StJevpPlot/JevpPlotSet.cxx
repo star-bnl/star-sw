@@ -376,6 +376,7 @@ void JevpPlotSet::_event(daqReader *rdr)
     PCPC;
     builderStatus.events++;
     builderStatus.lastEventTime = time(NULL);
+    LOG(NOTE, "call event");
     event(rdr);
     PCPC;
 

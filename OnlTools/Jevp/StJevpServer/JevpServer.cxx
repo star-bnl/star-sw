@@ -219,95 +219,95 @@ void JevpServer::main(int argc, char *argv[])
 
 void JevpServer::readSocket()
 {
-  TSocket *s;
-  TMessage *mess;
+    TSocket *s;
+    TMessage *mess;
   
-  CP;
-  s = mon->Select(100);
-  if((long) s <= 0) {
     CP;
-    LOG(DBG, "Got a timeout or an error reading socket");
-    return;
-  }
-  CP;
-
-  // Check if it is a new connection!
-  if(s == ssocket) {
-    CP;
-    TSocket *nsocket = ssocket->Accept();
-    //TInetAddress adr = nsocket->GetInetAddress();
-    mon->Add(nsocket);
-    return;
-  }
-  CP;
-
-  // No it is data...
-  int ret = s->Recv(mess);
-  CP;
-
-  if(ret == 0) {
-    CP;
-    LOG(DBG, "Disconnecting a client...");
-    mon->Remove(s);
-    delete s;
-    delete mess;
-    return;
-  }
-  CP;
-
-  // If it is an EvpMessage
-  if(strcmp(mess->GetClass()->GetName(),"EvpMessage") == 0) {
-    CP;
-    EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
+    s = mon->Select(100);
+    if((long) s <= 0) {
+	CP;
+	LOG(DBG, "Got a timeout or an error reading socket");
+	return;
+    }
     CP;
 
-    if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
-      CP;
-      //LOG("JEFF", "Handle message from reader");
+    // Check if it is a new connection!
+    if(s == ssocket) {
+	CP;
+	TSocket *nsocket = ssocket->Accept();
+	//TInetAddress adr = nsocket->GetInetAddress();
+	mon->Add(nsocket);
+	return;
+    }
+    CP;
 
-      handleNewEvent(msg);
+    // No it is data...
+    int ret = s->Recv(mess);
+    CP;
+
+    if(ret == 0) {
+	CP;
+	LOG(DBG, "Disconnecting a client...");
+	mon->Remove(s);
+	delete s;
+	delete mess;
+	return;
+    }
+    CP;
+
+    // If it is an EvpMessage
+    if(strcmp(mess->GetClass()->GetName(),"EvpMessage") == 0) {
+	CP;
+	EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
+	CP;
+
+	if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
+	    CP;
+	    //LOG("JEFF", "Handle message from reader");
+
+	    handleNewEvent(msg);
       
-      EvpMessage m;
-      m.setSource((char *)"serverThread");
-      m.setCmd((char *)"release");
+	    EvpMessage m;
+	    m.setSource((char *)"serverThread");
+	    m.setCmd((char *)"release");
   
-      TMessage mess(kMESS_OBJECT);
-      mess.WriteObject(&m);
-      s->Send(mess);
-      CP;
-    }
-    else {                                // from a client!
-      CP;
-      //LOG("JEFF", "Handle message from client");
-      handleEvpMessage(s, msg);
-      CP;
-    }
+	    TMessage mess(kMESS_OBJECT);
+	    mess.WriteObject(&m);
+	    s->Send(mess);
+	    CP;
+	}
+	else {                                // from a client!
+	    CP;
+	    //LOG("JEFF", "Handle message from client");
+	    handleEvpMessage(s, msg);
+	    CP;
+	}
     
-    delete mess;
-    delete msg;
-    return;
-  }
-  CP;
-  // Well it must be a JevpPlot from the client!
-  if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
+	delete mess;
+	delete msg;
+	return;
+    }
     CP;
-    JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
+    // Well it must be a JevpPlot from the client!
+    if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
+	CP;
+	JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
     
-    if(plot->refid != 0) {
-      saveReferencePlot(plot);
-    }
-    else {
-      LOG(ERR, "Got a JevpPlot from client, but doesn't seem to be a reference plot...");
-    }
+	if(plot->refid != 0) {
+	    saveReferencePlot(plot);
+	}
+	else {
+	    LOG(ERR, "Got a JevpPlot from client, but doesn't seem to be a reference plot...");
+	}
     
-    delete plot;
-    delete mess;
-    return;
-  }
+	delete plot;
+	delete mess;
+	return;
+    }
 
-  CP;
-  LOG(ERR, "Got invalid message type: %s\n",mess->GetClass()->GetName());
-  delete mess;
+    CP;
+    LOG(ERR, "Got invalid message type: %s\n",mess->GetClass()->GetName());
+    delete mess;
 }  
 
 
@@ -317,6 +317,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
     isL4 = 0;
 
     justUpdateDisplayPallete = 0;
+    
+    throttle_time = .05;
 
     log_output = RTS_LOG_NET;
     //log_output = RTS_LOG_STDERR;
@@ -421,9 +423,12 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_output = RTS_LOG_STDERR;
 	}
 	else if (strcmp(argv[i], "-updatedb")==0) {
+	    log_output = RTS_LOG_STDERR;
 	    nodb = 0;
 	    myport = JEVP_PORT+10;
 	    die = 1;
+	    log_level = WARN;
+	    throttle_time = .005;
 	}
 	else if (strcmp(argv[i], "-l4updatedb")==0) {
 	    nodb = 0;
@@ -625,13 +630,15 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 
     eventsThisRun++;
     
+    if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far", eventsThisRun);
+
     // Now we have an event!
     //
     // fill histograms!
     CP;
     while((curr = (JevpPlotSet *)next())) {
       
-      double throttle_time = .05;
+	//double throttle_time = .05;
       
       if(throttleAlgos) {
 	if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
@@ -648,9 +655,9 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       if(sigsetjmp(env, 1)) {
-	LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
-	curr->setDisabled();
-	CP_LEAVE_BUILDER;
+	  LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
+	  curr->setDisabled();
+	  CP_LEAVE_BUILDER;
       }
       else {
 	CP_ENTER_BUILDER(curr->getPlotSetName());
