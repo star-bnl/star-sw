@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.18 2016/04/11 20:44:26 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.19 2016/04/11 20:53:13 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -94,7 +94,36 @@ void StGenericVertexFinder::NoVertexConstraint()
 }
 
 
+/**
+ * Stores beamline parameters (aka vertexSeed) from DB record in this class
+ * static member sBeamline.
+ */
+void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
+{
+   sBeamline = beamline;
+
+   sBeamline.err_x0 = std::max(0.01f, sBeamline.err_x0);
+   sBeamline.err_y0 = std::max(0.01f, sBeamline.err_y0);
+
+   // 0.0001f radians corresponds to a 0.1mm arc at 1m = 1000mm length
+   sBeamline.err_dxdz = std::max(0.0001f, sBeamline.err_dxdz);
+   sBeamline.err_dydz = std::max(0.0001f, sBeamline.err_dydz);
+
+   LOG_INFO << "BeamLine constraint: weight =  " << sBeamline.weight << endm;
+   LOG_INFO << "x(z) = (" << sBeamline.x0 << " +/- " << sBeamline.err_x0 << ") + (" << sBeamline.dxdz << " +/- " << sBeamline.err_dxdz << ") * z" << endm;
+   LOG_INFO << "y(z) = (" << sBeamline.y0 << " +/- " << sBeamline.err_y0 << ") + (" << sBeamline.dydz << " +/- " << sBeamline.err_dydz << ") * z" << endm;
+}
+
+
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.19  2016/04/11 20:53:13  smirnovd
+// Use all available beamline (aka vertex seed) parameters from DB
+//
+// We overload StGenericVertexFinder::UseVertexConstraint for this puspose. The
+// parameters are cached in static StGenericVertexFinder::sBeamline. Note that if
+// there is a need to do so, UseVertexConstraint can do some preprocessing of the
+// raw DB values before caching them.
+//
 // Revision 1.18  2016/04/11 20:44:26  smirnovd
 // StGenericVertexFinder: Added static member to keep beamline parameters
 //
