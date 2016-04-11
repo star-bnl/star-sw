@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.23 2016/02/29 22:58:22 jwebb Exp $
+ * $Id: StGenericVertexFinder.h,v 1.24 2016/04/11 20:44:26 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -14,6 +14,7 @@
 
 //#include "StEventTypes.h"
 #include "StPrimaryVertex.h"
+#include "vertexSeed.h"
 
 class StEvent;
 
@@ -65,11 +66,17 @@ class StGenericVertexFinder {
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
+  /// All measured parameters of the beamline. Updated whenever
+  /// UseVertexConstraint(const vertexSeed_st&) is called
+  static vertexSeed_st  sBeamline;
 };
 
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.24  2016/04/11 20:44:26  smirnovd
+// StGenericVertexFinder: Added static member to keep beamline parameters
+//
 // Revision 1.23  2016/02/29 22:58:22  jwebb
 // Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
 //

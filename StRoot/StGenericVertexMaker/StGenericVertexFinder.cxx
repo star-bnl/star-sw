@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.17 2016/02/29 22:58:22 jwebb Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.18 2016/04/11 20:44:26 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -11,6 +11,10 @@
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StEventTypes.h"
+
+// Initialize static variable with default values
+vertexSeed_st StGenericVertexFinder::sBeamline;
+
 
 //______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
@@ -91,6 +95,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.18  2016/04/11 20:44:26  smirnovd
+// StGenericVertexFinder: Added static member to keep beamline parameters
+//
 // Revision 1.17  2016/02/29 22:58:22  jwebb
 // Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
 //
