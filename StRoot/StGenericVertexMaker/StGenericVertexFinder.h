@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.25 2016/04/11 20:53:13 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.26 2016/04/11 20:53:20 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -67,6 +67,9 @@ class StGenericVertexFinder {
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
+  /// Caclulates chi2 for the beamline and a point
+  static double CalcBeamlineChi2(const StThreeVectorD& point);
+
   /// All measured parameters of the beamline. Updated whenever
   /// UseVertexConstraint(const vertexSeed_st&) is called
   static vertexSeed_st  sBeamline;
@@ -75,6 +78,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.26  2016/04/11 20:53:20  smirnovd
+// StGenericVertexFinder: Added static method to calculate chi2 for beamline and a point
+//
 // Revision 1.25  2016/04/11 20:53:13  smirnovd
 // Use all available beamline (aka vertex seed) parameters from DB
 //
