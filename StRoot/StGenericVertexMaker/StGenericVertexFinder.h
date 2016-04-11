@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.24 2016/04/11 20:44:26 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.25 2016/04/11 20:53:13 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -28,6 +28,7 @@ class StGenericVertexFinder {
   void                   addVertex(StPrimaryVertex*);
   int                    size() const;
   virtual void           UseVertexConstraint(double, double, double, double, double)=0;
+          void           UseVertexConstraint(const vertexSeed_st& beamline);
           void           NoVertexConstraint();
           int            IsVertexConstraint() const {return mVertexConstrain;}
   virtual void           UsePCT(bool usePCT = true);
@@ -74,6 +75,14 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.25  2016/04/11 20:53:13  smirnovd
+// Use all available beamline (aka vertex seed) parameters from DB
+//
+// We overload StGenericVertexFinder::UseVertexConstraint for this puspose. The
+// parameters are cached in static StGenericVertexFinder::sBeamline. Note that if
+// there is a need to do so, UseVertexConstraint can do some preprocessing of the
+// raw DB values before caching them.
+//
 // Revision 1.24  2016/04/11 20:44:26  smirnovd
 // StGenericVertexFinder: Added static member to keep beamline parameters
 //
