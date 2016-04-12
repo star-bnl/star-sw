@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.20 2016/04/11 20:53:20 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.21 2016/04/12 19:48:47 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -7,9 +7,8 @@
  * Description: Base class for vertex finders
  *
  ***************************************************************************/
-#include "TRMatrix.h"
-#include "TRSymMatrix.h"
-
+#include "StarRoot/TRMatrix.h"
+#include "StarRoot/TRSymMatrix.h"
 #include "StGenericVertexFinder.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
@@ -200,6 +199,9 @@ void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.21  2016/04/12 19:48:47  smirnovd
+// [Cosmetic] Prefixed included headers with path to corresponding module
+//
 // Revision 1.20  2016/04/11 20:53:20  smirnovd
 // StGenericVertexFinder: Added static method to calculate chi2 for beamline and a point
 //
