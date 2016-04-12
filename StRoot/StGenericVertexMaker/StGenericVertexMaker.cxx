@@ -183,10 +183,6 @@ void StGenericVertexMaker::Clear(const char* opt){
 Int_t StGenericVertexMaker::InitRun(int runnumber){
   theFinder->InitRun(runnumber);
   if (useBeamline) {
-     double x0 = 0.;
-     double y0 = 0.;
-     double dxdz = 0.;
-     double dydz = 0.;
 
      // Get Current Beam Line Constraint from database
      TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
@@ -199,18 +195,21 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
        }
        
        
-       x0 = vSeed->x0;
-       y0 = vSeed->y0;
-       dxdz = vSeed->dxdz;
-       dydz = vSeed->dydz;
+       double x0 = vSeed->x0;
+       double y0 = vSeed->y0;
+       double dxdz = vSeed->dxdz;
+       double dydz = vSeed->dydz;
+
+       LOG_INFO << "BeamLine Constraint: " << endm;
+       LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+       LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
+       theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
+       theFinder->UseVertexConstraint(*vSeed);
+
      } else {
        LOG_ERROR << "StGenericVertexMaker -- No 'Calibrations/rhic' Database for beamline, makse no sens to proceed, Jan" << endm;
        assert(1==2);
      }
-     LOG_INFO << "BeamLine Constraint: " << endm;
-     LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
-     LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
-     theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
   }
   return StMaker::InitRun(runnumber);
 }

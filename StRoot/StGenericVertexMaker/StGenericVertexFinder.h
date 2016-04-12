@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.23 2016/02/29 22:58:22 jwebb Exp $
+ * $Id: StGenericVertexFinder.h,v 1.26 2016/04/11 20:53:20 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -14,6 +14,9 @@
 #include "StEnumerations.h"
 #include "Stiostream.h"
 #include <assert.h>
+#include "StPrimaryVertex.h"
+#include "vertexSeed.h"
+
 class StEvent;
 class StPrimaryVertex;
 class StGenericVertexFinder {
@@ -26,6 +29,7 @@ class StGenericVertexFinder {
   void                   addVertex(StPrimaryVertex*);
   int                    size() const;
   virtual void           UseVertexConstraint(double, double, double, double, double)=0;
+          void           UseVertexConstraint(const vertexSeed_st& beamline);
           void           NoVertexConstraint();
           int            IsVertexConstraint() const {return mVertexConstrain;}
   virtual void           UsePCT(bool usePCT = true);
@@ -64,11 +68,31 @@ class StGenericVertexFinder {
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
+  /// Caclulates chi2 for the beamline and a point
+  static double CalcBeamlineChi2(const StThreeVectorD& point);
+
+  /// All measured parameters of the beamline. Updated whenever
+  /// UseVertexConstraint(const vertexSeed_st&) is called
+  static vertexSeed_st  sBeamline;
 };
 
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.26  2016/04/11 20:53:20  smirnovd
+// StGenericVertexFinder: Added static method to calculate chi2 for beamline and a point
+//
+// Revision 1.25  2016/04/11 20:53:13  smirnovd
+// Use all available beamline (aka vertex seed) parameters from DB
+//
+// We overload StGenericVertexFinder::UseVertexConstraint for this puspose. The
+// parameters are cached in static StGenericVertexFinder::sBeamline. Note that if
+// there is a need to do so, UseVertexConstraint can do some preprocessing of the
+// raw DB values before caching them.
+//
+// Revision 1.24  2016/04/11 20:44:26  smirnovd
+// StGenericVertexFinder: Added static member to keep beamline parameters
+//
 // Revision 1.23  2016/02/29 22:58:22  jwebb
 // Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
 //
