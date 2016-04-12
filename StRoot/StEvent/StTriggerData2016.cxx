@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2016.cxx,v 2.2 2016/02/11 14:22:02 ullrich Exp $
+ * $Id: StTriggerData2016.cxx,v 2.3 2016/04/12 14:26:10 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2015
  ***************************************************************************
@@ -9,7 +9,10 @@
  *
  ***************************************************************************
  *
- * $Log
+ * $Log: StTriggerData2016.cxx,v $
+ * Revision 2.3  2016/04/12 14:26:10  ullrich
+ * method bbcVP101() added.
+ *
  *
  **************************************************************************/
 #include <string.h>
@@ -1078,6 +1081,19 @@ unsigned short StTriggerData2016::vpdTimeDifference() const
 {
 	return L1_DSM->VTX[7]%8192;
 }
+
+
+unsigned short StTriggerData2016::bbcVP101(int ch, int prepost) const
+{
+        int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
+    if(ch<0 || ch>7) return 0;
+        int buffer = prepostAddress(prepost);
+        if (buffer >= 0){
+                return mBBC[buffer]->VPD[map[ch]];
+        }
+        return 0;
+}
+
 
 unsigned short StTriggerData2016::dsmTF201Ch(int ch) const   // read TF201 data            
 {                                                                 

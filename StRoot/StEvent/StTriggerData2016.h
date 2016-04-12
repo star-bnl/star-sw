@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2016.h,v 2.2 2016/02/11 14:22:03 ullrich Exp $
+ * $Id: StTriggerData2016.h,v 2.3 2016/04/12 14:26:10 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2015
  ***************************************************************************
@@ -10,12 +10,14 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2016.h,v $
+ * Revision 2.3  2016/04/12 14:26:10  ullrich
+ * method bbcVP101() added.
+ *
  * Revision 2.2  2016/02/11 14:22:03  ullrich
  * Add fcts to access MTD DSM and QT info.
  *
  * Revision 2.1  2015/12/02 08:21:04  ullrich
  * Initial Revision.
- *
  *
  **************************************************************************/
 #ifndef StTriggerData2016_hh
@@ -159,6 +161,8 @@ public:
     unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdTimeDifference() const;
+
+    unsigned short bbcVP101(int ch, int prepost = 0) const;
 
     //MXQ crate
     unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;
