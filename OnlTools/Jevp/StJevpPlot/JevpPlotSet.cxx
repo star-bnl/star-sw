@@ -267,9 +267,9 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
     plotTime->logy=1;
     // plotTime->logx=1;
 
-    PCPC;
+    PCPC(-1);
     initialize(argc, argv);
-    PCPC;
+    PCPC(-1);
 
     if(buildxml) {
 	buildTheXml();
@@ -311,10 +311,10 @@ void JevpPlotSet::_startrun(daqReader *rdr)
     PCP;
     plotTime->getHisto(0)->histo->Reset();
     PCP;
-    PCPC;
+    PCPC(-1);
 
     startrun(rdr);
-    PCPC;
+    PCPC(-1);
     PCP;
 }
 
@@ -326,9 +326,9 @@ void JevpPlotSet::startrun(daqReader *rdr)
 void JevpPlotSet::_stoprun(daqReader *rdr)  
 {
     PCP;
-    PCPC;
+    PCPC(-1);
     stoprun(rdr);   // perform user actions first...
-    PCPC;
+    PCPC(-1);
 
     builderStatus.setStatus("stopped");
 
@@ -373,12 +373,12 @@ void JevpPlotSet::_event(daqReader *rdr)
 
     //unsigned long long prio_mem = getMemUse();
 
-    PCPC;
+    PCPC(rdr->seq);
     builderStatus.events++;
     builderStatus.lastEventTime = time(NULL);
     LOG(NOTE, "call event");
     event(rdr);
-    PCPC;
+    PCPC(0);
 
     //unsigned long long int post_mem = getMemUse();
 

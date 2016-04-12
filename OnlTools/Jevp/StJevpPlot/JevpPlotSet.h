@@ -28,7 +28,7 @@ class JevpServer;
 #define DEFAULT_CLIENTDATADIR "/a/jevp/client"
 
 
-#define PCPC dbgCallSourceLine=__LINE__
+#define PCPC(x) dbgCallSourceLine=__LINE__;dbgCallParam=x
 #define PCP dbgSourceLine=__LINE__
 
 class RtsTimer_root;
@@ -41,11 +41,12 @@ class JevpPlotSet : public TObject {
   unsigned long long int getMemUse();
   int dbgSourceLine;
   int dbgCallSourceLine;
+  int dbgCallParam;
 
   char *getPlotSetName();
   char *getDebugInfo() {
     static char str[256];
-    sprintf(str, "%d:call %d", dbgSourceLine, dbgCallSourceLine);
+    sprintf(str, "%d:call %d: param %d", dbgSourceLine, dbgCallSourceLine, dbgCallParam);
     return str;
   }
   

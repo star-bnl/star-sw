@@ -22,13 +22,23 @@ ClassImp(JevpBuilder);
 // Helper for getting data
 StTriggerData *JevpBuilder::getStTriggerData(daqReader *rdr)
 {
+    if(!rdr) {
+	LOG(ERR, "No reader?");
+	return NULL;
+    }
+
     StTriggerData *trgd = NULL;
     int run = rdr->run;
   
     daq_dta *dd = rdr->det("trg")->get("raw");
     if(dd && dd->iterate()) {
 	char *td = (char *)dd->Void;
-    
+	
+	if(!td) {
+	    LOG(ERR, "td does not exist: evt=%d", rdr->seq);
+	    return NULL;
+	}
+	
 	if(td[3] == 0x40) {
 	    TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
 	    StTriggerData2009 *trgd2009 = new StTriggerData2009(trgdatablock2009, run);
@@ -59,6 +69,6 @@ StTriggerData *JevpBuilder::getStTriggerData(daqReader *rdr)
     }
 
 
-    LOG(ERR, "No trigger data exists...");
+    LOG(ERR, "No trigger data exists: evt=%d tkn=%d", rdr->seq, rdr->token);
     return NULL;
 }
