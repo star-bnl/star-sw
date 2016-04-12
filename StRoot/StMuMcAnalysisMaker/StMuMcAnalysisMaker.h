@@ -38,6 +38,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+#include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryTrackCovariance.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StarRoot/TPolynomial.h"
@@ -56,10 +57,10 @@ enum TrackType {
 enum TrackMatchType {
   kNotDefined = -1, kMcTk= 0, kMcTpcTk, kRecoTk   , kCloneTk   , kGhostTk   , kLostTk
   ,                           kMcToFTk, kRecoToFTk,              kGhostToFTk, kLostToFTk
-  ,                           kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk, 
-  kTotalMatchType // match type extended
+  ,                           kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk 
+  ,                           kTotalMatchType // match type extended
 };
-enum EdEdx {NdEdxPiD = 3, NToFPiD = 2};
+enum EdEdx {NdEdxPiD = 3, NToFPiD = 2, NoPiDs = 2};
 enum EParticleType {
   kallP = 0, kPion, kPartypeT                                             // switch between All and pion
 };
@@ -138,7 +139,7 @@ class StMuMcAnalysisMaker : public StMaker {
   Bool_t         Check();
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
-  void           DrawdEdx();
+  void           DrawdEdx(Double_t lenMin=40);
   void           DrawToF();
   void           DrawPng(TCanvas *c);
   void           DrawH3s(TH3F *h3s[2], Int_t animate = 0, Double_t min = 1e9, Double_t max = -1e9, Int_t np = 2);
