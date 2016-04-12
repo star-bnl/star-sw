@@ -19,6 +19,7 @@
 #include <TApplication.h>
 #include <TList.h>
 #include <setjmp.h>
+#include <sys/syscall.h>
 
 #include "EvpConstants.h"
 #include "JevpServer.h"
@@ -58,6 +59,8 @@
 
 static int line_number=0;
 static char *line_builder = NULL;
+static int builderTid;
+
 #define CP line_number=__LINE__
 #define CP_ENTER_BUILDER(x) line_builder = x
 #define CP_LEAVE_BUILDER line_builder = NULL;
@@ -70,7 +73,7 @@ JevpServer serv;
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
   static char str[255];
-  
+ 
   if(arg == SIGCHLD) {
     int status;
     waitpid(-1, &status, WNOHANG);
@@ -78,6 +81,9 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
     return;
   }
 
+  int mythread = syscall(SYS_gettid);
+
+  LOG("JEFF", "signal TID, me: %d,  builder: %d", mythread, builderTid);
   // If we are trying to cleam up after a builder!
   if(line_builder) {
     siglongjmp(env,1);
@@ -199,7 +205,8 @@ void JevpServer::main(int argc, char *argv[])
   TThread *rThread = new TThread("readerThread", (void(*)(void *))(&JEVPSERVERreaderThread),(void *)&serv);
   rThread->Run();
 
-  
+  LOG("JEFF", "Readsocket TID = %d", syscall(SYS_gettid));
+  //LOG("JEFF", "Readsocket TID:   pid %u", getpid());
   for(;;) {
     
     serv.readSocket();
@@ -427,7 +434,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    nodb = 0;
 	    myport = JEVP_PORT+10;
 	    die = 1;
-	    log_level = WARN;
+	    log_level = (char *)WARN;
 	    throttle_time = .005;
 	}
 	else if (strcmp(argv[i], "-l4updatedb")==0) {
@@ -580,98 +587,95 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
   
-  if(strcmp(m->cmd,"stoprun") == 0) {
-    LOG(DBG, "SERVThread: Got stoprun from reader");
-    CP;
-    if(runStatus.running()) {
-      CP;
-      performStopRun();
-
-      if(ndaqfilenames) {
-	cdaqfilename++;
-
-	if(cdaqfilename < ndaqfilenames) {
-	  daqfilename = daqfilenames[cdaqfilename];
-	  delete rdr;
-	  LOG("JEFF", "Next file is :%s",daqfilename);
-
-	  rdr = new daqReader(daqfilename);
-	}
-      }
-
-      if(die && (cdaqfilename >= ndaqfilenames)) {
-	LOG("JEFF", "die is set, so now exit");
+    if(strcmp(m->cmd,"stoprun") == 0) {
+	LOG(DBG, "SERVThread: Got stoprun from reader");
 	CP;
+	if(runStatus.running()) {
+	    CP;
+	    performStopRun();
+
+	    if(ndaqfilenames) {
+		cdaqfilename++;
+
+		if(cdaqfilename < ndaqfilenames) {
+		    daqfilename = daqfilenames[cdaqfilename];
+		    delete rdr;
+		    LOG("JEFF", "Next file is :%s",daqfilename);
+
+		    rdr = new daqReader(daqfilename);
+		}
+	    }
+
+	    if(die && (cdaqfilename >= ndaqfilenames)) {
+		LOG("JEFF", "die is set, so now exit");
+		CP;
 	
-	ignoreSignals();
-	gApplication->Terminate();
-	//exit(0);
-      }
+		ignoreSignals();
+		gApplication->Terminate();
+		//exit(0);
+	    }
       
-      CP;
-    }
-	CP;
-  }
-  else if(strcmp(m->cmd, "readerr") == 0) {
-    LOG(ERR, "A read err...");
-  }
-  else if(strcmp(m->cmd,"newevent") == 0) {
-    LOG(DBG, "SERVThread: Got newevent");
-    CP;
-    JevpPlotSet *curr;
-    TListIter next(&builders);
-    
-    if(rdr->run != (unsigned int)runStatus.run) {
-      CP;
-      LOG(DBG, "Starting new run #%d  (%d)",rdr->run, runStatus.run);
-      performStartRun();
-      eventsThisRun = 0;
-    }
-
-    eventsThisRun++;
-    
-    if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far", eventsThisRun);
-
-    // Now we have an event!
-    //
-    // fill histograms!
-    CP;
-    while((curr = (JevpPlotSet *)next())) {
-      
-	//double throttle_time = .05;
-      
-      if(throttleAlgos) {
-	if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
-	  LOG(NOTE, "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
-	      rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
-	  
-	  continue;
+	    CP;
 	}
-      }
-      
-      CP;
-      if(logevent) {
-	printf("Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)\n",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
-      }
-      
-      if(sigsetjmp(env, 1)) {
-	  LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
-	  curr->setDisabled();
-	  CP_LEAVE_BUILDER;
-      }
-      else {
-	CP_ENTER_BUILDER(curr->getPlotSetName());
-	curr->_event(rdr);
-	CP_LEAVE_BUILDER;
-      }
-      
-      CP;
+	CP;
     }
-    CP;
-  }
-  else {
-    LOG(ERR, "handleNewEvent got invalid command: %s",m->cmd);
-  }
+    else if(strcmp(m->cmd, "readerr") == 0) {
+	LOG(ERR, "A read err...");
+    }
+    else if(strcmp(m->cmd,"newevent") == 0) {
+	LOG(DBG, "SERVThread: Got newevent");
+	CP;
+	JevpPlotSet *curr;
+	TListIter next(&builders);
+    
+	if(rdr->run != (unsigned int)runStatus.run) {
+	    CP;
+	    LOG(DBG, "Starting new run #%d  (%d)",rdr->run, runStatus.run);
+	    performStartRun();
+	    eventsThisRun = 0;
+	}
+
+	eventsThisRun++;
+    
+	if((eventsThisRun % 100) == 0) LOG(WARN, "Processed %d events this run so far", eventsThisRun);
+
+	// Now we have an event!
+	//
+	// fill histograms!
+	CP;
+	while((curr = (JevpPlotSet *)next())) {
+     	    if(throttleAlgos) {
+		if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
+		    LOG(NOTE, "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
+			rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+	  
+		    continue;
+		}
+	    }
+      
+	    CP;
+	    if(logevent) {
+		printf("Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)\n",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+	    }
+      
+	    if(sigsetjmp(env, 1)) {
+		LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
+		curr->setDisabled();
+		CP_LEAVE_BUILDER;
+	    }
+	    else {
+		CP_ENTER_BUILDER(curr->getPlotSetName());
+		curr->_event(rdr);
+		CP_LEAVE_BUILDER;
+	    }
+      
+	    CP;
+	}
+	CP;
+    }
+    else {
+	LOG(ERR, "handleNewEvent got invalid command: %s",m->cmd);
+    }
 
 
   
@@ -1037,7 +1041,7 @@ void JevpServer::performStopRun()
   }
 
   char *args[4];
-  args[0] = "OnlTools/Jevp/archiveHistoDefs.pl";
+  args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
   args[1] = basedir;
   args[2] = displays_fn;
   args[3] = NULL;
@@ -1072,7 +1076,7 @@ void JevpServer::clearForNewRun()
 JevpPlot *JevpServer::getPlot(char *name) {
     RtsTimer_root clock;
     clock.record_time();
-    int nexamined=0;
+    //int nexamined=0;
 
     if(strcmp(name, "serv_JevpSummary") == 0) {
 	return getJevpSummaryPlot();
@@ -1963,75 +1967,81 @@ void readerThreadWait(TSocket *socket)
 
 void *JEVPSERVERreaderThread(void *)
 {
-  // First connect a socket to myself!
+    // First connect a socket to myself!
 
-  TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
-  if(!socket) {
-    LOG(CRIT, "Can not connect to my own socket!");
-    exit(0);
-  }
-
-  // Now, the rule is that I attempt to get an event.   
-  // Once I have an event, then I send a message to the server
-  // via the socket.   I then wait for a response from the server before I 
-  // next ask the reader for an event!
-
-  int nevts = 0;
-
-  for(;;) {
+    builderTid = syscall(SYS_gettid);
     
-    usleep(100);  // otherwise we can starve out clients...
+    LOG("JEFF", "Builder TID = %d", builderTid);
 
-    char *ret = serv.rdr->get(0, EVP_TYPE_ANY);
+    TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
+    if(!socket) {
+	LOG(CRIT, "Can not connect to my own socket!");
+	exit(0);
+    }
+
+    // Now, the rule is that I attempt to get an event.   
+    // Once I have an event, then I send a message to the server
+    // via the socket.   I then wait for a response from the server before I 
+    // next ask the reader for an event!
+
+    int nevts = 0;
+
+    for(;;) {
     
-    // Obviously some problem, what is it!
-    if(ret == NULL) {
-      switch(serv.rdr->status) {
-      case EVP_STAT_OK:
-	LOG(DBG, "EVP reader burped a bit...");
-	continue;
+	usleep(100);  // otherwise we can starve out clients...
+
+	char *ret = serv.rdr->get(0, EVP_TYPE_ANY);
+    
+	// Obviously some problem, what is it!
+	if(ret == NULL) {
+	    switch(serv.rdr->status) {
+	    case EVP_STAT_OK:
+		LOG(DBG, "EVP reader burped a bit...");
+		continue;
       
-      case EVP_STAT_EOR:
-	LOG(DBG, "RDRThread: End of the run!");
-	readerThreadSend(socket, "stoprun");
-	readerThreadWait(socket);
-	nevts = 0;
-	continue;
+	    case EVP_STAT_EOR:
+		if(nevts > 0) {
+		    LOG("JEFF", "RDRThread: End of the run!");
+		    readerThreadSend(socket, (char *)"stoprun");
+		    readerThreadWait(socket);
+		    nevts = 0;
+		}
+		continue;
 	
-      case EVP_STAT_EVT:
-      case EVP_STAT_CRIT:
-      default:
+	    case EVP_STAT_EVT:
+	    case EVP_STAT_CRIT:
+	    default:
 
-	LOG(ERR, "Problem reading event:  perhaps the file is bad?");
-	sleep(1);
-	readerThreadSend(socket, "readerr");
-	readerThreadWait(socket);
-	continue;
+		LOG(ERR, "Problem reading event:  perhaps the file is bad?");
+		sleep(1);
+		readerThreadSend(socket, (char *)"readerr");
+		readerThreadWait(socket);
+		continue;
 	
-      }
-    }
+	    }
+	}
     
-    if(serv.rdr->status) {
-      LOG(ERR, "Bad status on read?  rdr->status=%d",serv.rdr->status);
-      continue;
-    }
+	if(serv.rdr->status) {
+	    LOG(ERR, "Bad status on read?  rdr->status=%d",serv.rdr->status);
+	    continue;
+	}
 
-    nevts++;
-    if(serv.makepallete) {
-      if(nevts > 1) {
-	nevts = 0;
-	readerThreadSend(socket, "stoprun");
+	nevts++;
+	if(serv.makepallete) {
+	    if(nevts > 1) {
+		nevts = 0;
+		readerThreadSend(socket, (char *)"stoprun");
+		readerThreadWait(socket);
+		continue;
+	    }
+	}
+
+	LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
+	readerThreadSend(socket, (char *)"newevent");
+	LOG(DBG, "RDRThread: Waiting for JevpServer");
 	readerThreadWait(socket);
-	continue;
-      }
+	LOG(DBG, "RDRThread: Trying to read a new event...");
     }
-
-    LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
-    readerThreadSend(socket, "newevent");
-    LOG(DBG, "RDRThread: Waiting for JevpServer");
-    readerThreadWait(socket);
-    LOG(DBG, "RDRThread: Trying to read a new event...");
-  }
   
-  return NULL;
+    return NULL;
 }
