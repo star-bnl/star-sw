@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.24 2016/04/12 19:48:57 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.25 2016/04/12 19:49:05 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.25  2016/04/12 19:49:05  smirnovd
+ * StMinuitVertexFinder: Set static variable value at initialization
+ *
  * Revision 1.24  2016/04/12 19:48:57  smirnovd
  * [Cosmetic] Revert if and save one level of indentation
  *
@@ -165,7 +168,7 @@ vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 vector<Double_t >          StMinuitVertexFinder::mSigma;
 vector<Double_t >          StMinuitVertexFinder::mZImpact;
-Double_t                   StMinuitVertexFinder::mWidthScale = 1;
+Double_t                   StMinuitVertexFinder::mWidthScale = 0.1; // 1./TMath::Sqrt(5.);
 Double_t                   StMinuitVertexFinder::mX0;
 Double_t                   StMinuitVertexFinder::mY0;
 Double_t                   StMinuitVertexFinder::mdxdz;
@@ -572,7 +575,6 @@ StMinuitVertexFinder::fit(StEvent* event)
     for (UInt_t k = 0; k < Nnodes; k++) {
       StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
       if (!accept(g)) continue;
-      mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
       if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
