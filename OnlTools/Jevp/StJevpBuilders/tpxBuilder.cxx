@@ -522,7 +522,7 @@ void tpxBuilder::event(daqReader *rdr)
   case 9:
     {
       
-      LOG("JEFF", "Got a laser...");
+      LOG(DBG, "Got a laser...");
 
       //contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
       contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
@@ -530,7 +530,7 @@ void tpxBuilder::event(daqReader *rdr)
 
       double vDrift = laserReader->Make(rdr);
      
-      LOG("JEFF","%d vDrift = %lf",rdr->event_number, vDrift);
+      //LOG("JEFF","%d vDrift = %lf",rdr->event_number, vDrift);
 
       if((vDrift > 5.4) && (vDrift < 5.8)) {
 	nlasers++;

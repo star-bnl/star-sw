@@ -59,7 +59,7 @@
 
 static int line_number=0;
 static char *line_builder = NULL;
-static int builderTid;
+static int readerTid;
 
 #define CP line_number=__LINE__
 #define CP_ENTER_BUILDER(x) line_builder = x
@@ -72,28 +72,34 @@ JevpServer serv;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
-  static char str[255];
+    static char str[255];
  
-  if(arg == SIGCHLD) {
-    int status;
-    waitpid(-1, &status, WNOHANG);
-    LOG(DBG, "Got signal SIGCHLD (reading pdf?) ");
-    return;
-  }
+    if(arg == 28) return;
 
-  int mythread = syscall(SYS_gettid);
+    if(arg == SIGCHLD) {
+	int status;
+	waitpid(-1, &status, WNOHANG);
+	LOG(DBG, "Got signal SIGCHLD (reading pdf?) ");
+	return;
+    }
 
-  LOG("JEFF", "signal TID, me: %d,  builder: %d", mythread, builderTid);
-  // If we are trying to cleam up after a builder!
-  if(line_builder) {
-    siglongjmp(env,1);
-  }
+    int mythread = syscall(SYS_gettid);
 
-  // Otherwise just get out!
-  sprintf(str,"Signal %d: shutting down! (line=%d)", arg, line_number);
-  LOG(ERR, "%s", str);
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d", arg, mythread, readerTid);
 
-  exit(-1);
+    // If we are trying to cleam up after a builder!
+    //
+    //   Must both be in right thread, and be inside a builder!
+    if((mythread != readerTid) && line_builder) {
+	LOG(ERR, "signal in builder: %d", arg);
+	siglongjmp(env,1);
+    }
+    
+    // Otherwise just get out!
+    sprintf(str,"Signal %d: shutting down! (line=%d)", arg, line_number);
+    LOG(ERR, "%s", str);
+
+    exit(-1);
 }
 
 static void ignoreSignals()
@@ -685,89 +691,89 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 
 
 void JevpServer::handleClient(int delay) {
-  TMessage *mess;
-  TSocket *s;
+    TMessage *mess;
+    TSocket *s;
 
-  CP;
+    CP;
 
-  // printf("Got a message\n");
-  //  LOG(NOTE, "calling sleep");
-  //   sleep(1);
-  LOG(DBG, "calling select");
+    // printf("Got a message\n");
+    //  LOG(NOTE, "calling sleep");
+    //   sleep(1);
+    LOG(DBG, "calling select");
 
-  s = mon->Select(delay);
-  LOG(DBG, "back from select");
-  CP;
-  if((long)s <= 0) {
-    if(delay > 0) {
-      LOG(DBG, "Got a timeout or an error: %d (delay was %d)",s,delay);
+    s = mon->Select(delay);
+    LOG(DBG, "back from select");
+    CP;
+    if((long)s <= 0) {
+	if(delay > 0) {
+	    LOG(DBG, "Got a timeout or an error: %d (delay was %d)",s,delay);
+	}
+	CP;
+	return;
     }
-    CP;
-    return;
-  }
-
-  CP;
-  LOG(NOTE, "Got a message:  s=%d",s);
-
-  if(s == ssocket) {
-    CP;
-    TSocket *nsock = ssocket->Accept();
-    TInetAddress adr = nsock->GetInetAddress();
-    mon->Add(nsock);
-  }
-  else {
-    CP;
-    // read...
-  
-    int ret = s->Recv(mess);
 
     CP;
-    if(ret == 0) {    // Got a disconnection...
-      CP;
-      LOG(DBG, "Disconnecting a client!");
+    LOG(NOTE, "Got a message:  s=%d",s);
 
-      mon->Remove(s);
-      delete s;
-      delete mess;
-      CP;
-      return;
-    }
-    
-    CP;
-
-    // Handle control messages...
-    if(strcmp(mess->GetClass()->GetName(),"EvpMessage")==0) {
-      CP;
-
-      EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
-	
-      handleEvpMessage(s, msg);
-	
-      delete msg;
-    }
-    else if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
-      CP;
-      JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
-      
-      if(plot->refid != 0) {
-	saveReferencePlot(plot);
-      }
-      else {
-	LOG(ERR, "Got a JevpPlot from client, but doesn't seem to be a reference plot...");
-      }
-      
-      delete plot;
+    if(s == ssocket) {
+	CP;
+	TSocket *nsock = ssocket->Accept();
+	TInetAddress adr = nsock->GetInetAddress();
+	mon->Add(nsock);
     }
     else {
-      CP;
-      LOG(ERR, "Got invalid message type: %s\n",mess->GetClass()->GetName());
-    }
+	CP;
+	// read...
+  
+	int ret = s->Recv(mess);
 
+	CP;
+	if(ret == 0) {    // Got a disconnection...
+	    CP;
+	    LOG(DBG, "Disconnecting a client!");
+
+	    mon->Remove(s);
+	    delete s;
+	    delete mess;
+	    CP;
+	    return;
+	}
+    
+	CP;
+
+	// Handle control messages...
+	if(strcmp(mess->GetClass()->GetName(),"EvpMessage")==0) {
+	    CP;
+
+	    EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
+	
+	    handleEvpMessage(s, msg);
+	
+	    delete msg;
+	}
+	else if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
+	    CP;
+	    JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
+      
+	    if(plot->refid != 0) {
+		saveReferencePlot(plot);
+	    }
+	    else {
+		LOG(ERR, "Got a JevpPlot from client, but doesn't seem to be a reference plot...");
+	    }
+      
+	    delete plot;
+	}
+	else {
+	    CP;
+	    LOG(ERR, "Got invalid message type: %s\n",mess->GetClass()->GetName());
+	}
+
+	CP;
+	delete(mess);
+	CP;
+    }    
     CP;
-    delete(mess);
-    CP;
-  }    
-  CP;
 }
 
 void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
@@ -1969,9 +1975,9 @@ void *JEVPSERVERreaderThread(void *)
 {
     // First connect a socket to myself!
 
-    builderTid = syscall(SYS_gettid);
+    readerTid = syscall(SYS_gettid);
     
-    LOG("JEFF", "Builder TID = %d", builderTid);
+    LOG("JEFF", "Reader TID = %d", readerTid);
 
     TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
     if(!socket) {
