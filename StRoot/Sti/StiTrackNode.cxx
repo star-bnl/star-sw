@@ -278,25 +278,25 @@ double StiTrackNode::getRefPosition() const
 //______________________________________________________________________________
 double StiNodeErrs::operator()(int i,int j) const
 {
-  return A[idx66[i][j]];
+  return G()[idx66[i][j]];
 }
 //______________________________________________________________________________
 StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
-   for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
+   for (int i=0;i<kNErrs;i++) {G()[i] = wt0*G()[i] + wt*other.G()[i];}
 
    return *this;
 }
 //______________________________________________________________________________
 void StiNodeErrs::get00(      double *a) const
 {
-   memcpy(a,A,6*sizeof(double));
+   memcpy(a,G(),6*sizeof(double));
 }
 //______________________________________________________________________________
 void StiNodeErrs::set00(const double *a) 
 {
-   memcpy(A,a,6*sizeof(double));
+   memcpy(G(),a,6*sizeof(double));
 
 }
 //______________________________________________________________________________
@@ -308,6 +308,7 @@ void StiNodeErrs::get10(double *a) const
 // 6: 30 31 32 33
 //10: 40 41 42 43 44
 //15: 50 51 52 53 54 55
+  const double *A = G();
   memcpy(a+0,A+ 6,3*sizeof(double));
   memcpy(a+3,A+10,3*sizeof(double));
   memcpy(a+6,A+15,3*sizeof(double));
@@ -315,6 +316,7 @@ void StiNodeErrs::get10(double *a) const
 //______________________________________________________________________________
 void StiNodeErrs::set10(const double *a) 
 {
+  double *A = G();
   memcpy(A+ 6,a+0,3*sizeof(double));
   memcpy(A+10,a+3,3*sizeof(double));
   memcpy(A+15,a+6,3*sizeof(double));
@@ -322,6 +324,7 @@ void StiNodeErrs::set10(const double *a)
 //______________________________________________________________________________
 void StiNodeErrs::get11(      double *a) const
 {
+  const double *A = G();
   memcpy(a+0,A+ 9,1*sizeof(double));
   memcpy(a+1,A+13,2*sizeof(double));
   memcpy(a+3,A+18,3*sizeof(double));
@@ -329,6 +332,7 @@ void StiNodeErrs::get11(      double *a) const
 //______________________________________________________________________________
 void StiNodeErrs::set11(const double *a) 
 {
+  double *A = G();
   memcpy(A+ 9,a+0,1*sizeof(double));
   memcpy(A+13,a+1,2*sizeof(double));
   memcpy(A+18,a+3,3*sizeof(double));
@@ -336,6 +340,7 @@ void StiNodeErrs::set11(const double *a)
 //______________________________________________________________________________
 void StiNodeErrs::zeroX() 
 { 
+  double *A = G();
   for (int i=0;i<kNPars;i++) {A[idx66[i][0]]=0;}
 }
 //____________________________________________________________
@@ -343,6 +348,7 @@ void StiNodeErrs::rotate(double alpha,const StiNodePars &pars)
 {
 // it is rotation by -alpha
 
+  double *A = G();
   double ca = cos(alpha),sa=sin(alpha);
   double dX = (fabs(pars._cosCA)<1e-5)? 1e-5:pars._cosCA; 
   double dYdX = pars._sinCA/dX;
@@ -366,6 +372,7 @@ void StiNodeErrs::recov(int force)
 {
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
+  double *A = G();
 
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
@@ -402,7 +409,7 @@ StiDebug::Break(nCall);
 //______________________________________________________________________________
 void StiNodeErrs::print() const
 {
-   const double *d = A;
+   const double *d = G();
    for (int n=1;n<=6;n++) {
      LOG_DEBUG << Form("%d - ",n);
      for (int i=0;i<n;i++){LOG_DEBUG << Form("%g\t",*(d++));}; LOG_DEBUG << endm;
@@ -412,6 +419,8 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
+  
+  const double *A = G();
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -448,6 +457,7 @@ RETN:
 //____________________________________________________________
 double StiNodeErrs::zign() const
 {
+   const double *A = G();
    double dia[kNPars];
    double minCorr = 1e11;
    for (int i=1,li=1;i<kNPars ;li+=++i) {
@@ -468,8 +478,8 @@ double StiNodeErrs::sign() const
 {
    enum {n=kNPars};
    double ans=3e33;
-   const double *a = A;
-   double *xx = (double *)A;
+   const double *a = G();
+   double *xx = (double *)G();
    double save = *xx; if (!save) *xx = 1;
    double B[kNErrs];
          double *b = B;
@@ -536,6 +546,7 @@ RETN: *xx=save;
 //______________________________________________________________________________
 int StiNodeErrs::nan() const
 {
+  const double *A = G();
   for (int i=0; i<kNPars;i++) {
     if (!finite(A[i])) return 100+i;
   }

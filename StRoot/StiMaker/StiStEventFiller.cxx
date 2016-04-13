@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.117 2015/12/28 23:50:27 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.118 2016/04/13 23:09:13 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.118  2016/04/13 23:09:13  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
  * Revision 2.117  2015/12/28 23:50:27  perev
  * Remove assert temporary
  *
@@ -1399,7 +1402,7 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
-    for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
+    for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
@@ -1511,7 +1514,7 @@ enum dcaEmx {kImpImp,
   const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
   const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
   StiHitErrs  mHrr;
-  memcpy(mHrr.A, (inf)? inf->mHrr.A : node->hitErrs(),sizeof(StiHitErrs));
+  memcpy(mHrr.G(), (inf)? inf->mHrr.G() : node->hitErrs(),sizeof(StiHitErrs));
 
   StiPullHit aux;
 // local frame

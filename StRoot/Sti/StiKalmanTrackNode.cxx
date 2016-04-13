@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.169 2015/07/29 01:28:05 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.170 2016/04/13 23:08:44 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.170  2016/04/13 23:08:44  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
  * Revision 2.169  2015/07/29 01:28:05  smirnovd
  * Added std:: to resolve ambiguity for isnan in g++ (4.8.2)
  *
@@ -597,7 +600,7 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DPti=1.,DTan=0.05;
     mFE._cPP=DPti*DPti;
     mFE._cTT=DTan*DTan;
   } else {
-    for (int i=0;i<kNErrs;i++) mFE.A[i] *=fak;
+    for (int i=0;i<kNErrs;i++) mFE.G()[i] *=fak;
   }  
   mPE() = mFE;
 }
@@ -638,7 +641,7 @@ void StiKalmanTrackNode::get(double& alpha,
   alpha = _alpha;
   xRef  = getRefPosition();
   memcpy(x,mFP.P,kNPars*sizeof(mFP.x()));
-  memcpy(e,mFE.A,sizeof(mFE));
+  memcpy(e,mFE.G(),sizeof(mFE));
   chi2 = getChi2();
 }
 
@@ -744,7 +747,7 @@ enum {jX=0,jY,jZ,jE,jP,jT};
   F[jZ][jT] =  pt;
   
   
-  TCL::trasat(F[0],mFE.A,e,3,kNPars);  
+  TCL::trasat(F[0],mFE.G(),e,3,kNPars);  
 }
 //______________________________________________________________________________
 /**
@@ -794,7 +797,7 @@ void StiKalmanTrackNode::getGlobalRadial(double  x[6],double  e[15])
   memset(e,0,sizeof(*e)*15);
   for (int k1=0;k1<kNPars;k1++) {
   for (int k2=0;k2<kNPars;k2++) {
-    double cc = mFE.A[idx66[k1][k2]];    
+    double cc = mFE.G()[idx66[k1][k2]];    
     for (int j1=jPhi;j1<= 5;j1++){
     for (int j2=jPhi;j2<=j1;j2++){
       e[idx55[j1-1][j2-1]]+= cc*F[j1][k1]*F[j2][k2];
@@ -1255,7 +1258,7 @@ void StiKalmanTrackNode::propagateError()
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
   propagateMtx();
-  errPropag6(mFE.A,mMtx().A,kNPars);
+  errPropag6(mFE.G(),mMtx().A,kNPars);
   int force = (fabs(mgP.dl) > StiNodeErrs::kBigLen); 
   mFE.recov(force);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
@@ -1650,7 +1653,7 @@ assert(mFE.zign()>0); ///???
     PrPP(updateNode,R1);
     PrPP(updateNode,V);
   }
-  TRSymMatrix C(kNPars,mFE.A);  
+  TRSymMatrix C(kNPars,mFE.G());  
   TRSymMatrix R(H,TRArray::kAxSxAT,C);
   R += V;
   TRSymMatrix G(R,TRArray::kInverted); 
@@ -1773,7 +1776,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP._sinCA = sin(mFP.eta());
   mFP._cosCA = cos(mFP.eta());
 #ifdef Sti_DEBUG  
-  TRSymMatrix C(kNPars,mFE.A);
+  TRSymMatrix C(kNPars,mFE.G());
   if (debug() & 4) {PrPP(rotate,C);}
 #endif
 //cout << " mFP._sinCA:"<<mFP._sinCA<<endl;
@@ -2098,7 +2101,7 @@ void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
      for (int is=-1;is<=1;is+=2) {
        myNode = *this;
        backStatics(save);
-       double step = 0.1*sqrt((mFE.A)[idx66[ipar][ipar]]);
+       double step = 0.1*sqrt((mFE.G())[idx66[ipar][ipar]]);
        if (step>maxStep[ipar]) step = maxStep[ipar];
 //       if (step>0.1*fabs(pars[ipar])) step = 0.1*pars[ipar];
 //       if (fabs(step)<1.e-7) step = 1.e-7;
