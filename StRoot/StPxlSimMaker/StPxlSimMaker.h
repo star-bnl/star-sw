@@ -1,11 +1,26 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.9 2015/03/13 18:45:01 perev Exp $
+ * $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.10  2016/04/13 19:15:06  mstftsm
+ * The choice of geometry should be mutually exclusive
+ *
+ * streamline inlined methods and define them outside the header
+ *
+ * Use one flag to control geometry source
+ *
+ * Use fundamental C++ types; this is not a persistent class
+ *
+ * Fix a logic bug
+ *
+ * fix bug: missing inline keyword
+ *
+ * The choice of geometry source shoule be mutually exclusive
+ *
  * Revision 1.9  2015/03/13 18:45:01  perev
  * Roll back
  *
@@ -79,38 +94,56 @@ class StPxlSimMaker : public StMaker
   */
   virtual Int_t InitRun(Int_t);
 
-  void useDIGMAPSSim() {SetAttr("useDIGMAPSSim",kTRUE);}
-  void useIdealGeom() {mUseIdealGeom = kTRUE;}
-  void useDbGeom() {mUseDbGeom = kTRUE;}
-  void useRandomSeed(Bool_t use = kTRUE) {mUseRandomSeed = use;}
+  void useDIGMAPSSim();
+  void useIdealGeom(bool ideal = true);
+  void useDbGeom(bool db = true);
+  void useRandomSeed(bool use = true);
 
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.9 2015/03/13 18:45:01 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
 
-    Bool_t mUseFastSim;
-    Bool_t mUseDIGMAPSSim;
+    bool mUseFastSim;
+    bool mUseDIGMAPSSim;
 
-    Bool_t mUseIdealGeom;
-    Bool_t mUseDbGeom;
-    Bool_t mUseRandomSeed;
+    bool mUseDbGeom;
+    bool mUseRandomSeed;
 
 
   ClassDef(StPxlSimMaker,1)   //StAF chain virtual base class for Makers
 };
+inline void StPxlSimMaker::useDIGMAPSSim() {SetAttr("useDIGMAPSSim",true);}
+inline void StPxlSimMaker::useIdealGeom(bool ideal) { useDbGeom(!ideal); }
+inline void StPxlSimMaker::useDbGeom(bool db) {mUseDbGeom = db;}
+inline void StPxlSimMaker::useRandomSeed(bool use) {mUseRandomSeed = use;}
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.9 2015/03/13 18:45:01 perev Exp $
+ * $Id: StPxlSimMaker.h,v 1.10 2016/04/13 19:15:06 mstftsm Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.10  2016/04/13 19:15:06  mstftsm
+ * The choice of geometry should be mutually exclusive
+ *
+ * streamline inlined methods and define them outside the header
+ *
+ * Use one flag to control geometry source
+ *
+ * Use fundamental C++ types; this is not a persistent class
+ *
+ * Fix a logic bug
+ *
+ * fix bug: missing inline keyword
+ *
+ * The choice of geometry source shoule be mutually exclusive
+ *
  * Revision 1.9  2015/03/13 18:45:01  perev
  * Roll back
  *
