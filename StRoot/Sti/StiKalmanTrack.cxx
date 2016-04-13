@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.140  2016/04/13 23:08:44  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
  * Enum keepHit and kGoodHir added instead of using 1 & 2.
@@ -1699,7 +1702,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.A,hr.hZZ);
+    circ.AddErr(hr.G(),hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1761,7 +1764,7 @@ double Xi2=0;
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.A);
+    cirl.StiEmx(E.G());
     TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
     E._cPP*=hh; E._cTP*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
