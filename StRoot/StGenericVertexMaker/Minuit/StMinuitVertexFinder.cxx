@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.23 2016/03/08 15:54:19 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.25 2016/04/12 19:49:05 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.25  2016/04/12 19:49:05  smirnovd
+ * StMinuitVertexFinder: Set static variable value at initialization
+ *
+ * Revision 1.24  2016/04/12 19:48:57  smirnovd
+ * [Cosmetic] Revert if and save one level of indentation
+ *
  * Revision 1.23  2016/03/08 15:54:19  smirnovd
  * Removed pointless remnants of past debugging
  *
@@ -162,7 +168,7 @@ vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 vector<Double_t >          StMinuitVertexFinder::mSigma;
 vector<Double_t >          StMinuitVertexFinder::mZImpact;
-Double_t                   StMinuitVertexFinder::mWidthScale = 1;
+Double_t                   StMinuitVertexFinder::mWidthScale = 0.1; // 1./TMath::Sqrt(5.);
 Double_t                   StMinuitVertexFinder::mX0;
 Double_t                   StMinuitVertexFinder::mY0;
 Double_t                   StMinuitVertexFinder::mdxdz;
@@ -568,37 +574,35 @@ StMinuitVertexFinder::fit(StEvent* event)
     UInt_t Nnodes = nodes.size();
     for (UInt_t k = 0; k < Nnodes; k++) {
       StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
-      if (accept(g)) {
-	//	mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
-	StDcaGeometry* gDCA = g->dcaGeometry();
-	if (! gDCA) continue;
-	if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
-	mDCAs.push_back(gDCA);
-	// 	  StPhysicalHelixD helix = gDCA->helix(); 
-	// 	  mHelices.push_back(helix);
-	mHelices.push_back(g->geometry()->helix());
-	mHelixFlags.push_back(1);
-	Double_t z_lin = gDCA->z();
-	mZImpact.push_back(z_lin);
-	mSigma.push_back(-1);
-	
-	Bool_t shouldHitCTB = kFALSE;
-	Double_t etaInCTBFrame = -999;
-	ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
-	if (ctb_match) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
-	  n_ctb_match_tot++;
-	}
-	
-	if (matchTrack2BEMC(g)) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
-	  n_bemc_match_tot++;
-	}
-	
-	if (checkCrossMembrane(g)) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
-	  n_cross_tot++;
-	}
+      if (!accept(g)) continue;
+      StDcaGeometry* gDCA = g->dcaGeometry();
+      if (! gDCA) continue;
+      if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
+      mDCAs.push_back(gDCA);
+      // 	  StPhysicalHelixD helix = gDCA->helix(); 
+      // 	  mHelices.push_back(helix);
+      mHelices.push_back(g->geometry()->helix());
+      mHelixFlags.push_back(1);
+      Double_t z_lin = gDCA->z();
+      mZImpact.push_back(z_lin);
+      mSigma.push_back(-1);
+
+      Bool_t shouldHitCTB = kFALSE;
+      Double_t etaInCTBFrame = -999;
+      ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+      if (ctb_match) {
+        mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
+        n_ctb_match_tot++;
+      }
+
+      if (matchTrack2BEMC(g)) {
+        mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
+        n_bemc_match_tot++;
+      }
+
+      if (checkCrossMembrane(g)) {
+        mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
+        n_cross_tot++;
       }
     }
     if (mDebugLevel) {
@@ -872,22 +876,24 @@ Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
   if (fabs(vtx.y())> 10) return 1e6;
   if (fabs(vtx.z())>300) return 1e6;
   for (UInt_t i=0; i<mDCAs.size(); i++) {
-    if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
-      const StDcaGeometry* gDCA = mDCAs[i];
-      if (! gDCA) continue;
-      const StPhysicalHelixD helix = gDCA->helix();
-      e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
-      //VP version
-      //VP	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
-      Double_t err2;
-      Double_t chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
-      chi2*=chi2/err2;
-      //EndVP
-      Double_t scale = 1./(mWidthScale*mWidthScale);
-      f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
-      //	f -= scale*TMath::Exp(-chi2/scale); // robust potential
-      if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
-    }
+
+    if ( !(mHelixFlags[i] & kFlagDcaz) || (requireCTB && !(mHelixFlags[i] & kFlagCTBMatch)) )
+       continue;
+
+    const StDcaGeometry* gDCA = mDCAs[i];
+    if (! gDCA) continue;
+    const StPhysicalHelixD helix = gDCA->helix();
+    e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
+    //VP version
+    //VP	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
+    Double_t err2;
+    Double_t chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
+    chi2*=chi2/err2;
+    //EndVP
+    Double_t scale = 1./(mWidthScale*mWidthScale);
+    f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
+    //	f -= scale*TMath::Exp(-chi2/scale); // robust potential
+    if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
   }
   return f;
 }
