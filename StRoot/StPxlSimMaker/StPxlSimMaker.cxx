@@ -1,6 +1,21 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.11  2016/04/13 19:15:02  mstftsm
+ * The choice of geometry should be mutually exclusive
+ *
+ * streamline inlined methods and define them outside the header
+ *
+ * Use one flag to control geometry source
+ *
+ * Use fundamental C++ types; this is not a persistent class
+ *
+ * Fix a logic bug
+ *
+ * fix bug: missing inline keyword
+ *
+ * The choice of geometry source shoule be mutually exclusive
+ *
  * Revision 1.10  2015/03/13 18:45:01  perev
  * Roll back
  *
@@ -50,7 +65,7 @@ ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kFALSE), mUseDbGeom(kTRUE), mUseRandomSeed(kTRUE)
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(false), mUseDIGMAPSSim(false) , mUseDbGeom(true), mUseRandomSeed(true)
 {
 }
 //____________________________________________________________
@@ -72,7 +87,7 @@ Int_t StPxlSimMaker::Init()
    //else
    //{
    // temporary till DIGMAPS algorithm is added and option added in StMaker
-   mUseFastSim = kTRUE;
+   mUseFastSim = true;
    mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
 
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
@@ -135,8 +150,8 @@ Int_t StPxlSimMaker::Make()
       return kStOk;
    }
 
-   if (mUseIdealGeom && !gGeoManager) GetDataBase("VmcGeometry");
-   if (mUseIdealGeom && !gGeoManager)
+   if (!mUseDbGeom && !gGeoManager) GetDataBase("VmcGeometry");
+   if (!mUseDbGeom && !gGeoManager)
    {
       LOG_ERROR << " StPxlSimMaker - E - gGeoManager is not available." << endm;
       return kStErr;
@@ -194,6 +209,21 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.11  2016/04/13 19:15:02  mstftsm
+ * The choice of geometry should be mutually exclusive
+ *
+ * streamline inlined methods and define them outside the header
+ *
+ * Use one flag to control geometry source
+ *
+ * Use fundamental C++ types; this is not a persistent class
+ *
+ * Fix a logic bug
+ *
+ * fix bug: missing inline keyword
+ *
+ * The choice of geometry source shoule be mutually exclusive
+ *
  * Revision 1.10  2015/03/13 18:45:01  perev
  * Roll back
  *
