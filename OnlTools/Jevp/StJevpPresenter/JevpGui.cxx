@@ -45,7 +45,7 @@
 
 JevpGui *gJevpGui;
 
-#define LOG_DRAW_TIME 0.0
+#define LOG_DRAW_TIME .1
 #define CM showMyMemory(__LINE__)
 
 void showMyMemory(int line) {
@@ -154,7 +154,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
 	//char lab[100];
 	//sprintf(lab, "%s - not available",nwidget->name->c_str());
 
-	double t3 = clock.record_time();
+	//double t3 = clock.record_time();
 
 	//LOG(DBG, "fill leaf  %lf %lf %lf",t1,t2,t3);
     }
@@ -163,7 +163,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
 	QTabWidget *nwidget = new QTabWidget();
 	suspend << nwidget;
 
-	double t1 = clock.record_time();
+	//double t1 = clock.record_time();
 	// We want to know when the tabs are selected...
 
 	//LOG("JEFF", "connect %p", nwidget);
@@ -172,7 +172,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
 	tab->addTab(nwidget, mynode->name);
 	fillTab(nwidget, child_idx);
 
-	double t2 = clock.record_time();
+	//double t2 = clock.record_time();
 
 	//LOG(DBG, "Fill tab: (%s) %lf %lf",mynode->name,t1,t2);
     }
@@ -246,7 +246,7 @@ void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   strcpy(evpMainDisplay, newdisplay);
   evpMain->display = evpMainDisplay;
 
-  LOG("JEFF", "Setting servertags to %s",newbuilderlist);
+  LOG(NOTE, "Setting servertags to %s",newbuilderlist);
   jl_displayFile->setServerTags(newbuilderlist);
 
   double t1 = clock.record_time();
@@ -582,7 +582,7 @@ void  JevpGui::SetWindowName(const char* displayText)
 }
 
 void JevpGui::updateScreen(JevpScreenWidget *screen) {
-    LOG("JEFF","Screen changed to %s",screen->name->c_str());
+    //LOG("JEFF","Screen changed to %s",screen->name->c_str());
     RtsTimer_root clock;
 
     clock.record_time();
@@ -628,7 +628,7 @@ void JevpGui::tabChanged(QTabWidget *tab) {
     }
     
     if(time(NULL) - screen->cleanTime < 10) {
-	LOG("JEFF", "Not dirty yet...");
+	//LOG("JEFF", "Not dirty yet...");
 	currentScreen = screen;
 	return;
     }
@@ -812,8 +812,8 @@ void JevpGui::UpdatePlots()
 	    clock.record_time();
 	    switchTabs(evpMain->display, serverTags);
 	    CP;
-	    double t1 = clock.record_time();
-	    LOG("JEFF", "Ethernet: switchTags:   (%lf)",t1);
+	    //double t1 = clock.record_time();
+	    //LOG("JEFF", "Ethernet: switchTags:   (%lf)",t1);
 	}
 	else {  // if not, update visible plots and redraw...
 	    CP;
@@ -831,7 +831,7 @@ void JevpGui::UpdatePlots()
 void JevpGui::refreshTimerFired()
 { 
     if(AutoUpdateAction->isOn()) {
-       	LOG("JEFF", "Auto Update Starting...");
+       	//LOG("JEFF", "Auto Update Starting...");
 	UpdatePlots();
     }
 }
@@ -1050,7 +1050,7 @@ void JevpGui::init()
     ftoolbar = NULL;
     //fTab = NULL;
 
-    LOG("JEFF", "Presenter pid=%d",getpid());
+    //LOG("JEFF", "Presenter pid=%d",getpid());
 
     CP;
     setAttribute(Qt::WA_DeleteOnClose);
@@ -1252,7 +1252,7 @@ void JevpGui::jl_ClosePresenter()
 
 void JevpGui::closeEvent(QCloseEvent *e)
 {
-    LOG("JEFF", "Done with close");
+    LOG("JEFF", "Done Closing Presenter!");
     gApplication->Terminate();
 }
 

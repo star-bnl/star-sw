@@ -95,67 +95,74 @@ void daqBuilder::initialize(int argc, char *argv[]) {
 }
   
 void daqBuilder::startrun(daqReader *rdr) {
-  LOG(NOTE, "daqBuilder starting run #%d",rdr->run);
-  resetAllPlots();
+    LOG(NOTE, "daqBuilder starting run #%d",rdr->run);
+    resetAllPlots();
 
-  t_2min = time(NULL);
-  t_10min = time(NULL);
-  t_120min = time(NULL);
+    t_2min = time(NULL);
+    t_10min = time(NULL);
+    t_120min = time(NULL);
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
 
 void daqBuilder::event(daqReader *rdr)
 {
-  // Fill Histograms...
+    // Fill Histograms...
   
-  int tpc_size = rdr->getDetectorSize("tpx");
-  int bemc_size = rdr->getDetectorSize("btow");
-  //  int eemc_size = rdr->getDetectorSize("etow");
-  //  int bsmd_size = rdr->getDetectorSize("bsmd");
-  // int esmd_size = rdr->getDetectorSize("esmd");
-  //int ftp_size = rdr->getDetectorSize("ftp");
-  //int l3_size = rdr->getDetectorSize("hlt");
-  int tof_size = rdr->getDetectorSize("tof");
-  int sz = rdr->getDetectorSize("/");
+#ifdef PROVOKE_ERROR
+    if(rdr->seq > 500) {
+	int *xxx = NULL;
+	*xxx = 10;
+    }
+#endif
+
+    int tpc_size = rdr->getDetectorSize("tpx");
+    int bemc_size = rdr->getDetectorSize("btow");
+    //  int eemc_size = rdr->getDetectorSize("etow");
+    //  int bsmd_size = rdr->getDetectorSize("bsmd");
+    // int esmd_size = rdr->getDetectorSize("esmd");
+    //int ftp_size = rdr->getDetectorSize("ftp");
+    //int l3_size = rdr->getDetectorSize("hlt");
+    int tof_size = rdr->getDetectorSize("tof");
+    int sz = rdr->getDetectorSize("/");
   
-  //printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
+    //printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
 
-  contents.h2_tpc->Fill(safelog(tpc_size));
-  contents.h0_evt_size->Fill(safelog(sz));
-  //contents.h10_bemc_evsize->Fill(safelog(bemc_size));
-  //contents.h11_ftp_evsize->Fill(safelog(ftp_size));
-  //contents.h12_l3_evsize->Fill(safelog(l3_size));
-  //contents.h14_tof_evsize->Fill(safelog(tof_size));
+    contents.h2_tpc->Fill(safelog(tpc_size));
+    contents.h0_evt_size->Fill(safelog(sz));
+    //contents.h10_bemc_evsize->Fill(safelog(bemc_size));
+    //contents.h11_ftp_evsize->Fill(safelog(ftp_size));
+    //contents.h12_l3_evsize->Fill(safelog(l3_size));
+    //contents.h14_tof_evsize->Fill(safelog(tof_size));
   
-  // Reset rolling histos if necessary..
-  int tm = time(NULL);
-  if(tm > t_2min + 120) {
-    t_2min = tm;
-    contents.h155_time_size_2min->Reset();
-  }
-  if(tm > t_10min + 600) {
-    t_10min = tm;
-    contents.h156_time_size_10min->Reset();
-  }
-  if(tm > t_120min + 60*120) {
-    t_120min = tm;
-    contents.h157_time_size_2hour->Reset();
-    //contents.h337_ftp_time_size_2hour->Reset();
-  }
+    // Reset rolling histos if necessary..
+    int tm = time(NULL);
+    if(tm > t_2min + 120) {
+	t_2min = tm;
+	contents.h155_time_size_2min->Reset();
+    }
+    if(tm > t_10min + 600) {
+	t_10min = tm;
+	contents.h156_time_size_10min->Reset();
+    }
+    if(tm > t_120min + 60*120) {
+	t_120min = tm;
+	contents.h157_time_size_2hour->Reset();
+	//contents.h337_ftp_time_size_2hour->Reset();
+    }
 
 
-  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
-  contents.h156_time_size_10min->Fill(tm-t_10min, safelog(sz));
-  contents.h157_time_size_2hour->Fill(tm-t_120min, safelog(sz));
-  //contents.h337_ftp_time_size_2hour->Fill(tm-t_120min, safelog(ftp_size));
+    contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
+    contents.h156_time_size_10min->Fill(tm-t_10min, safelog(sz));
+    contents.h157_time_size_2hour->Fill(tm-t_120min, safelog(sz));
+    //contents.h337_ftp_time_size_2hour->Fill(tm-t_120min, safelog(ftp_size));
 
-  contents.h103_tpc_frac->Fill(100.0 * (double)tpc_size / (double)sz);
-  contents.h106_bemc_frac->Fill(100.0 * (double)bemc_size / (double)sz);
-  //contents.h105_ftp_frac->Fill(100.0 * (double)ftp_size / (double)sz);
-  //contents.h108_l3_frac->Fill(100.0 * (double)l3_size / (double)sz);
-  contents.h107_tof_frac->Fill(100.0 * (double)tof_size / (double)sz);
-  // End Fill Histograms...
+    contents.h103_tpc_frac->Fill(100.0 * (double)tpc_size / (double)sz);
+    contents.h106_bemc_frac->Fill(100.0 * (double)bemc_size / (double)sz);
+    //contents.h105_ftp_frac->Fill(100.0 * (double)ftp_size / (double)sz);
+    //contents.h108_l3_frac->Fill(100.0 * (double)l3_size / (double)sz);
+    contents.h107_tof_frac->Fill(100.0 * (double)tof_size / (double)sz);
+    // End Fill Histograms...
 }
 
 void daqBuilder::stoprun(daqReader *rdr) {

@@ -282,8 +282,9 @@ void JevpScreenWidget::DownloadPlotFromServer(TSocket *server, char *name) {
 	JevpPlot *plot = (JevpPlot *)rmsg->ReadObject(rmsg->GetClass());
 
 	double t2 = clock.record_time() + t1;
-	if(t2 > .25)
-	    LOG("JEFF", "Download plot %s took %lf seconds (%lf for ethernet)",name, t2, t1);
+
+	//if(t2 > .25)
+	//  LOG("JEFF", "Download plot %s took %lf seconds (%lf for ethernet)",name, t2, t1);
 	
 	delete rmsg;
 	
