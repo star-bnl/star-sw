@@ -5,6 +5,16 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.13  2016/04/14 23:10:19  smirnovd
+ * Cosmetic changes
+ *
+ * * Make sure we call functions from std library as it was probably intended
+ *
+ * * Removed unnecessary #included dependency
+ *   - Nothing in the code seems to come from the stdio.h header
+ *
+ * * End log messages with endm to flush the internal buffer
+ *
  * Revision 1.12  2015/05/14 18:57:52  smirnovd
  * Squashed commit of the following:
  *
@@ -51,7 +61,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cmath>
 
 #include "StMessMgr.h"
 #include "Stypes.h"
@@ -139,8 +149,8 @@ Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDat
       return kStErr;
    }
 
-   mResXPix = sqrt(pxlHitError->coeff[0]); // local x
-   mResZPix = sqrt(pxlHitError->coeff[3]); // local Y
+   mResXPix = std::sqrt(pxlHitError->coeff[0]); // local x
+   mResZPix = std::sqrt(pxlHitError->coeff[3]); // local Y
    mResYPix = 0;//sqrt(pxlHitError->coeff[2]); // needs to be updated in the DB later
 
    return kStOk;
@@ -231,7 +241,7 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
 double StPxlFastSim::distortHit(const double x, const double res, const double detLength) const
 {
    // Do not smear x when it is outside the physical limits. Issue a warning instead
-   if (fabs(x) > detLength) {
+   if (std::fabs(x) > detLength) {
       LOG_WARN << "distortHit() - Generated hit is outside detector sensor plane" << endm;
       return x;
    }
@@ -240,7 +250,7 @@ double StPxlFastSim::distortHit(const double x, const double res, const double d
 
    do {
       smeared_x = mRandom->gauss(x, res);
-   } while ( fabs(smeared_x) > detLength);
+   } while ( std::fabs(smeared_x) > detLength);
 
    return smeared_x;
 }
@@ -274,6 +284,16 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.13  2016/04/14 23:10:19  smirnovd
+ * Cosmetic changes
+ *
+ * * Make sure we call functions from std library as it was probably intended
+ *
+ * * Removed unnecessary #included dependency
+ *   - Nothing in the code seems to come from the stdio.h header
+ *
+ * * End log messages with endm to flush the internal buffer
+ *
  * Revision 1.12  2015/05/14 18:57:52  smirnovd
  * Squashed commit of the following:
  *

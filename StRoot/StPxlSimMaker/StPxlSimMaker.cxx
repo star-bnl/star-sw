@@ -1,6 +1,16 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.12  2016/04/14 23:10:19  smirnovd
+ * Cosmetic changes
+ *
+ * * Make sure we call functions from std library as it was probably intended
+ *
+ * * Removed unnecessary #included dependency
+ *   - Nothing in the code seems to come from the stdio.h header
+ *
+ * * End log messages with endm to flush the internal buffer
+ *
  * Revision 1.11  2016/04/13 19:15:02  mstftsm
  * The choice of geometry should be mutually exclusive
  *
@@ -131,14 +141,14 @@ Int_t StPxlSimMaker::Make()
    StEvent* rcEvent = (StEvent*) GetInputDS("StEvent");
    if (! rcEvent)
    {
-      LOG_INFO << "No StEvent on input" << endl;
+      LOG_INFO << "No StEvent on input" << endm;
       return kStWarn;
    }
 
    StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
    if (! mcEvent)
    {
-      LOG_INFO << "No StMcEvent on input" << endl;
+      LOG_INFO << "No StMcEvent on input" << endm;
       return kStWarn;
    }
 
@@ -209,6 +219,16 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.12  2016/04/14 23:10:19  smirnovd
+ * Cosmetic changes
+ *
+ * * Make sure we call functions from std library as it was probably intended
+ *
+ * * Removed unnecessary #included dependency
+ *   - Nothing in the code seems to come from the stdio.h header
+ *
+ * * End log messages with endm to flush the internal buffer
+ *
  * Revision 1.11  2016/04/13 19:15:02  mstftsm
  * The choice of geometry should be mutually exclusive
  *
