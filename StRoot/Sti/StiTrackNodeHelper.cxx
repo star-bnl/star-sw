@@ -1,11 +1,9 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "StiUtilities/StiDebug.h"
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
-#include "StiTrack.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #if 1
@@ -138,9 +136,6 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
   dy = dx*(sumSin/sumCos);
-#if 0
-  assert(!TMath::IsNaN(dy));
-#endif
   y2 = rotPars.y()+dy;
   dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
@@ -238,13 +233,13 @@ int StiTrackNodeHelper::propagateError()
 {
 static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
-  StiTrackNode::errPropag6(mPredErrs.A,mMtx.A,kNPars);
+  StiTrackNode::errPropag6(mPredErrs.G(),mMtx.A,kNPars);
   int force = fabs(dl)> StiNodeErrs::kBigLen;
   mPredErrs.recov(force);
-  mPredErrs.cEE()+=mMcs.cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
-  mPredErrs.cPP()+=mMcs.cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
-  mPredErrs.cTP()+=mMcs.cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
-  mPredErrs.cTT()+=mMcs.cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL>
+  mPredErrs._cEE+=mMcs.cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
+  mPredErrs._cPP+=mMcs.cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
+  mPredErrs._cTP+=mMcs.cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
+  mPredErrs._cTT+=mMcs.cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL>
   int ierr = mPredErrs.check();
   if (ierr) return 1;
   return 0;
@@ -353,10 +348,10 @@ StiDebug::Break(nCall);
     if (!mParentNode) 			break;
     double accu,errr;
     accu = mJoinPars.ptin() - mBestParentPars.ptin()*(1+mMcs._ptinCorr);
-    errr = sqrt(0.5*(fabs(mJoinErrs.cPP())+fabs(mBestParentErrs.cPP())));
+    errr = sqrt(0.5*(fabs(mJoinErrs._cPP)+fabs(mBestParentErrs._cPP)));
     if (errr > 0) mCurvQa.add(accu/errr);    
     accu = mJoinPars.tanl() - mBestParentPars.tanl();
-    errr = sqrt(0.5*(fabs(mJoinErrs.cTT())+fabs(mBestParentErrs.cTT())));
+    errr = sqrt(0.5*(fabs(mJoinErrs._cTT)+fabs(mBestParentErrs._cTT)));
     if (errr > 0) mTanlQa.add(accu/errr);    
   }while(0);
     
@@ -408,22 +403,22 @@ if (!oldJoinPrim) {
 
         mTargetNode->mPE().recov();
         mFitdErrs.recov();
-	chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
-                      ,kNPars,mFitdPars.P         ,mFitdErrs.A
-                             ,mJoinPars.P         ,mJoinErrs.A);
+	chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().G()
+                      ,kNPars,mFitdPars.P         ,mFitdErrs.G()
+                             ,mJoinPars.P         ,mJoinErrs.G());
         mJoinPars.hz() = mTargetHz;
 	mJoinErrs.recov();
 
 
 	if (kase == (kOLdValid|kNewFitd)) {	//Check errors improvements
-          if (mHrr.hYY() <= mJoinErrs.cYY()) {
+          if (mHrr.hYY <= mJoinErrs._cYY) {
             LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
-                   ,mHrr.hYY(),mFitdErrs.cYY())<< endm;
+                   ,mHrr.hYY,mFitdErrs._cYY)<< endm;
             return -13;
 	  }
-          if (mHrr.hZZ() <= mJoinErrs.cZZ()) {
+          if (mHrr.hZZ <= mJoinErrs._cZZ) {
             LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)"
-                  ,mHrr.hZZ(),mFitdErrs.cZZ()) << endm;
+                  ,mHrr.hZZ,mFitdErrs._cZZ) << endm;
             return -14;
 	  }
         } //End  Check errors improvements
@@ -626,17 +621,18 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   enum {nP1=3,nE1=6,nP2=6,nE2=21};
 
   StiNodeErrs Ai=A;	//Inverted A
+
   double chi2 = 3e33;
-  Ai.cXX()=1;
+  Ai._cXX=1;
 #if 0
-  TCL::trsinv(Ai.A,Ai.A,nP2);
+  TCL::trsinv(Ai.G(),Ai.G(),nP2);
 #else
-  TRSymMatrix AA(nP2,Ai.A);
+  TRSymMatrix AA(nP2,Ai.G());
   TRSymMatrix AI(AA,TRArray::kInvertedA);
   if (! AI.IsValid()) return chi2;
-  TCL::ucopy(AI.GetArray(),Ai.A, nP2*(nP2+1)/2);
+  TCL::ucopy(AI.GetArray(),Ai.G(), nP2*(nP2+1)/2);
 #endif
-  Ai.cXX()=0;
+  Ai._cXX=0;
 
 
   double Ai11i[6],Ai10[3][3],T10[3][3],dif[6],m[6];
@@ -654,7 +650,7 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 #if 0
   double chi2;
 #endif
-  TCL::trasat(dif,Ai.A,&chi2,1,nP2);		//calc chi2
+  TCL::trasat(dif,Ai.G(),&chi2,1,nP2);		//calc chi2
   if (!C) return chi2;
 		// Error matrix calculation
   C->reset();
@@ -662,15 +658,15 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   double TX[nP1][nP2];memset(TX[0],0,sizeof(TX));
   for (int i=0;i<3;i++) {TCL::ucopy(T10[i],TX[i],3); TX[i][i+3]=1;}
   double C11[nE1];
-  TCL::trasat(TX[0],A.A,C11,nP1,nP2);
+  TCL::trasat(TX[0],A.G(),C11,nP1,nP2);
   C->set11(C11);
   
   double TY[nP2][nP1];memset(TY[0],0,sizeof(TX));
   for (int i=0;i<3;i++) {TCL::vcopyn(T10[i],TY[i+3],3); TY[i][i]=1;}
   TY[0][0] = 0;
   double CYY[nE2];
-  TCL::trasat(TY[0],B.A,CYY,nP2,nP1);
-  TCL::vadd(CYY,C->A,C->A,nE2);
+  TCL::trasat(TY[0],B.G(),CYY,nP2,nP1);
+  TCL::vadd(CYY,C->G(),C->G(),nE2);
   return chi2;
 }
 //______________________________________________________________________________
@@ -897,13 +893,13 @@ double StiTrackNodeHelper::evalChi2()
   if (fabs(mPredPars.curv())      >kMaxCur)      return 1e41;
   if (!mDetector) 	{ //Primay vertex
     mHitPars[0] = mPredPars.x();
-//    chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
+//    chi2 = joinVtx(mHitPars,mHrr.G(),mPredPars.P,mPredErrs.G());
     chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs);
   } else 		{ //Normal hit
 
-    r00=mPredErrs.cYY()+mHrr.hYY();
-    r01=mPredErrs.cZY()+mHrr.hZY();
-    r11=mPredErrs.cZZ()+mHrr.hZZ();
+    r00=mPredErrs._cYY+mHrr.hYY;
+    r01=mPredErrs._cZY+mHrr.hZY;
+    r11=mPredErrs._cZZ+mHrr.hZZ;
     mDetm = r00*r11 - r01*r01;
     if (mDetm<r00*r11*1.e-5) {
       LOG_DEBUG << Form("StiTrackNodeHelper::evalChi2 *** zero determinant %g",mDetm)<< endm;
@@ -949,12 +945,12 @@ double StiTrackNodeHelper::recvChi2()
   if (!mDetector) {//Primary vertex
 #if 1
     // Check positiveness of mHrr
-    TRSymMatrix A(3,&mHrr.hXX());
+    TRSymMatrix A(3,&mHrr.hXX);
     TRSymMatrix AI(A,TRArray::kInvertedA);
     if (! AI.IsValid()) return 1e41;
 #endif
-//  double chi2 =joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
-    double chi2 =joinVtx(mHitPars,mHrr  ,mPredPars  ,mPredErrs  );
+//  double chi2 =joinVtx(mHitPars,mHrr.G(),mPredPars.P,mPredErrs.G());
+    double chi2 =joinVtx(mHitPars,mHrr    ,mPredPars  ,mPredErrs    );
     return chi2;
   }
 
@@ -964,15 +960,15 @@ double StiTrackNodeHelper::recvChi2()
   double f = -(1./mHitsErrFactor);
   myHrr*=f;
   double r11,r12,r22;
-  if ((r11=myHrr.hYY()+mJoinErrs.cYY()) >=0) 	return 1e41;
-  if ((r22=myHrr.hZZ()+mJoinErrs.cZZ()) >=0) 	return 1e41;
-  r12 =myHrr.hZY()+mJoinErrs.cZY();
+  if ((r11=myHrr.hYY+mJoinErrs._cYY) >=0) 	return 1e41;
+  if ((r22=myHrr.hZZ+mJoinErrs._cZZ) >=0) 	return 1e41;
+  r12 =myHrr.hZY+mJoinErrs._cZY;
   if (r11*r22-r12*r12<0)			return 1e41;	  
 
 
-  double chi2 = joinTwo(3,mHitPars    ,    myHrr.A
-                       ,3,mJoinPars.P,mJoinErrs.A
-		         ,recovPars.P,recovErrs.A);
+  double chi2 = joinTwo(3,mHitPars    ,    myHrr.G()
+                       ,3,mJoinPars.P,mJoinErrs.G()
+		         ,recovPars.P,recovErrs.G());
   if (fabs(recovPars.y()-mHitPars[1])>10) StiDebug::Break(-1);
   if (fabs(recovPars.z()-mHitPars[2])>10) StiDebug::Break(-1);
 
@@ -1015,7 +1011,6 @@ static int nCall=0; nCall++;
   StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
     mHitPars[0] = mPredPars.x();
-//  double chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A,mFitdPars.P,mFitdErrs.A);
     double chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
     mFitdPars.curv() = mTargetHz*mFitdPars.ptin();
     assert(chi2>900 || fabs(mChi2-chi2)<1e-10);
@@ -1023,9 +1018,9 @@ static int nCall=0; nCall++;
       StiKalmanTrackNode::ResetComment(Form("Vertex                        "));
     }
   } else 		{ //Normal Hit
-    r00=mHrr.hYY()+mPredErrs.cYY();
-    r01=mHrr.hZY()+mPredErrs.cZY();
-    r11=mHrr.hZZ()+mPredErrs.cZZ();
+    r00=mHrr.hYY+mPredErrs._cYY;
+    r01=mHrr.hZY+mPredErrs._cZY;
+    r11=mHrr.hZZ+mPredErrs._cZZ;
     mDetm=r00*r11 - r01*r01;
     if (!(mDetm>(r00*r11)*1.e-5)) return 99;
     assert(mDetm>(r00*r11)*1.e-5);
@@ -1033,11 +1028,11 @@ static int nCall=0; nCall++;
     // inverse matrix
     double tmp=r00; r00=r11/mDetm; r11=tmp/mDetm; r01=-r01/mDetm;
     // update error matrix
-    double k00=mPredErrs.cYY()*r00+mPredErrs.cZY()*r01, k01=mPredErrs.cYY()*r01+mPredErrs.cZY()*r11;
-    double k10=mPredErrs.cZY()*r00+mPredErrs.cZZ()*r01, k11=mPredErrs.cZY()*r01+mPredErrs.cZZ()*r11;
-    double k20=mPredErrs.cEY()*r00+mPredErrs.cEZ()*r01, k21=mPredErrs.cEY()*r01+mPredErrs.cEZ()*r11;
-    double k30=mPredErrs.cPY()*r00+mPredErrs.cPZ()*r01, k31=mPredErrs.cPY()*r01+mPredErrs.cPZ()*r11;
-    double k40=mPredErrs.cTY()*r00+mPredErrs.cTZ()*r01, k41=mPredErrs.cTY()*r01+mPredErrs.cTZ()*r11;
+    double k00=mPredErrs._cYY*r00+mPredErrs._cZY*r01, k01=mPredErrs._cYY*r01+mPredErrs._cZY*r11;
+    double k10=mPredErrs._cZY*r00+mPredErrs._cZZ*r01, k11=mPredErrs._cZY*r01+mPredErrs._cZZ*r11;
+    double k20=mPredErrs._cEY*r00+mPredErrs._cEZ*r01, k21=mPredErrs._cEY*r01+mPredErrs._cEZ*r11;
+    double k30=mPredErrs._cPY*r00+mPredErrs._cPZ*r01, k31=mPredErrs._cPY*r01+mPredErrs._cPZ*r11;
+    double k40=mPredErrs._cTY*r00+mPredErrs._cTZ*r01, k41=mPredErrs._cTY*r01+mPredErrs._cTZ*r11;
 
     double myY = mPredPars.y();
     double myZ = mPredPars.z();
@@ -1078,16 +1073,16 @@ static int nCall=0; nCall++;
     assert(mFitdPars.x()>0);
     if (mFitdPars.check()) return -11;
   // update error matrix
-    double c00=mPredErrs.cYY();                       
-    double c10=mPredErrs.cZY(), c11=mPredErrs.cZZ();                 
-    double c20=mPredErrs.cEY(), c21=mPredErrs.cEZ();//, c22=mPredErrs.cEE();           
-    double c30=mPredErrs.cPY(), c31=mPredErrs.cPZ();//, c32=mPredErrs.cPE(), c33=mPredErrs.cPP();     
-    double c40=mPredErrs.cTY(), c41=mPredErrs.cTZ();//, c42=mPredErrs.cTE(), c43=mPredErrs.cTP(), c44=mPredErrs.cTT();
-    mFitdErrs.cYY()-=k00*c00+k01*c10;
-    mFitdErrs.cZY()-=k10*c00+k11*c10;mFitdErrs.cZZ()-=k10*c10+k11*c11;
-    mFitdErrs.cEY()-=k20*c00+k21*c10;mFitdErrs.cEZ()-=k20*c10+k21*c11;mFitdErrs.cEE()-=k20*c20+k21*c21;
-    mFitdErrs.cPY()-=k30*c00+k31*c10;mFitdErrs.cPZ()-=k30*c10+k31*c11;mFitdErrs.cPE()-=k30*c20+k31*c21;mFitdErrs.cPP()-=k30*c30+k31*c31;
-    mFitdErrs.cTY()-=k40*c00+k41*c10;mFitdErrs.cTZ()-=k40*c10+k41*c11;mFitdErrs.cTE()-=k40*c20+k41*c21;mFitdErrs.cTP()-=k40*c30+k41*c31;mFitdErrs.cTT()-=k40*c40+k41*c41;
+    double c00=mPredErrs._cYY;                       
+    double c10=mPredErrs._cZY, c11=mPredErrs._cZZ;                 
+    double c20=mPredErrs._cEY, c21=mPredErrs._cEZ;//, c22=mPredErrs._cEE;           
+    double c30=mPredErrs._cPY, c31=mPredErrs._cPZ;//, c32=mPredErrs._cPE, c33=mPredErrs._cPP;     
+    double c40=mPredErrs._cTY, c41=mPredErrs._cTZ;//, c42=mPredErrs._cTE, c43=mPredErrs._cTP, c44=mPredErrs._cTT;
+    mFitdErrs._cYY-=k00*c00+k01*c10;
+    mFitdErrs._cZY-=k10*c00+k11*c10;mFitdErrs._cZZ-=k10*c10+k11*c11;
+    mFitdErrs._cEY-=k20*c00+k21*c10;mFitdErrs._cEZ-=k20*c10+k21*c11;mFitdErrs._cEE-=k20*c20+k21*c21;
+    mFitdErrs._cPY-=k30*c00+k31*c10;mFitdErrs._cPZ-=k30*c10+k31*c11;mFitdErrs._cPE-=k30*c20+k31*c21;mFitdErrs._cPP-=k30*c30+k31*c31;
+    mFitdErrs._cTY-=k40*c00+k41*c10;mFitdErrs._cTZ-=k40*c10+k41*c11;mFitdErrs._cTE-=k40*c20+k41*c21;mFitdErrs._cTP-=k40*c30+k41*c31;mFitdErrs._cTT-=k40*c40+k41*c41;
   }
   mFitdErrs.recov(0);
 
@@ -1099,17 +1094,17 @@ static int nCall=0; nCall++;
 static int ERRTEST=0;
 if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
 
-//prod  assert(mHrr.hYY() > mFitdErrs.cYY());
-//prod  assert(mHrr.hZZ() > mFitdErrs.cZZ());
+//prod  assert(mHrr.hYY > mFitdErrs._cYY);
+//prod  assert(mHrr.hZZ > mFitdErrs._cZZ);
   if (mDetector) { //Not a primary
-    if (mHrr.hYY() <= mFitdErrs.cYY()) {
+    if (mHrr.hYY <= mFitdErrs._cYY) {
       LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
-            ,mHrr.hYY(),mFitdErrs.cYY())<< endm;
+            ,mHrr.hYY,mFitdErrs._cYY)<< endm;
       return -13;
     }  
-    if (mHrr.hZZ() <= mFitdErrs.cZZ()) {
+    if (mHrr.hZZ <= mFitdErrs._cZZ) {
       LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hZZ(%g) < nZZ(%g)"
-            ,mHrr.hZZ(),mFitdErrs.cZZ())<< endm;
+            ,mHrr.hZZ,mFitdErrs._cZZ)<< endm;
       return -14;
     }  
   } //EndIf Not a primary	  
@@ -1125,21 +1120,21 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
 void StiTrackNodeHelper::resetError(double fk)
 { 
   if (fk) do {//fake loop
-    if(mPredErrs.cYY()>DY*DY) 		break;
-    if(mPredErrs.cZZ()>DZ*DZ) 		break;
-    if(mPredErrs.cEE()>DEta*DEta) 	break;
-    if(mPredErrs.cPP()>DPti*DPti) 	break;
-    if(mPredErrs.cTT()>DTan*DTan) 	break;
+    if(mPredErrs._cYY>DY*DY) 		break;
+    if(mPredErrs._cZZ>DZ*DZ) 		break;
+    if(mPredErrs._cEE>DEta*DEta) 	break;
+    if(mPredErrs._cPP>DPti*DPti) 	break;
+    if(mPredErrs._cTT>DTan*DTan) 	break;
     mPredErrs*=fk;
     return;
   }while(0);
 
   mPredErrs.reset();
-  mPredErrs.cYY()=DY*DY;
-  mPredErrs.cZZ()=DZ*DZ;
-  mPredErrs.cEE()=DEta*DEta;
-  mPredErrs.cPP()=DPti*DPti;
-  mPredErrs.cTT()=DTan*DTan;
+  mPredErrs._cYY=DY*DY;
+  mPredErrs._cZZ=DZ*DZ;
+  mPredErrs._cEE=DEta*DEta;
+  mPredErrs._cPP=DPti*DPti;
+  mPredErrs._cTT=DTan*DTan;
 }
 //______________________________________________________________________________
 int StiTrackNodeHelper::cutStep(StiNodePars *pars,StiNodePars *base)
@@ -1202,10 +1197,10 @@ int StiTrackNodeHelper::getHitErrors(const StiHit *hit,const StiNodePars *pars,S
   const StiDetector *det = hit->detector();
   const StiHitErrorCalculator *calc = (det)? det->getHitErrorCalculator():0;
   if (calc) {//calculate it
-     calc->calculateError(pars,hrr->hYY(),hrr->hZZ());
+     calc->calculateError(pars,hrr->hYY,hrr->hZZ);
   } else    {//get from hit
     const float *ermx = hit->errMtx();    
-    for (int i=0;i<6;i++){hrr->A[i]=ermx[i];}
+    for (int i=0;i<6;i++){hrr->G()[i]=ermx[i];}
   }
   return (!det);
 }
@@ -1220,12 +1215,12 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
   hittP.x() = hit->x();
   hittP.y() = hit->y();
   hittP.z() = hit->z();
-  memcpy(hittE.A,hitErr.A,sizeof(StiNodeErrs));
+  memcpy(hittE.G(),hitErr.G(),sizeof(StiNodeErrs));
   
   double myChi2 = StiTrackNodeHelper::joinTwo(
-                  3,hittP.P,hittE.A,
-		  6,predP.P,predE.A,
-		    mineP.P,mineE.A);
+                  3,hittP.P,hittE.G(),
+		  6,predP.P,predE.G(),
+		    mineP.P,mineE.G());
 
 
   int ndif = 0;
@@ -1235,17 +1230,17 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
     diff/=0.5*(fabs(mineP.P[i])+fabs(fitdP.P[i]));
     if (diff < 1e-5 ) continue;
     ndif++;
-    LOG_DEBUG << Form("errTest(P): %g(%d) - %g(%d) = %g",mineE.A[i],i,fitdE.A[i],i,diff)<< endm;
+    LOG_DEBUG << Form("errTest(P): %g(%d) - %g(%d) = %g",mineE.G()[i],i,fitdE.G()[i],i,diff)<< endm;
   }
   if (ndif){ mineP.print();fitdP.print();}
 
   for (int i=0;i<kNErrs;i++) {
-    double diff = fabs(mineE.A[i]-fitdE.A[i]);
+    double diff = fabs(mineE.G()[i]-fitdE.G()[i]);
     if (diff < 1e-10) continue;
-    diff/=0.5*(fabs(mineE.A[i])+fabs(fitdE.A[i]));
+    diff/=0.5*(fabs(mineE.G()[i])+fabs(fitdE.G()[i]));
     if (diff < 1e-5 ) continue;
     ndif+=100;
-    LOG_DEBUG << Form("errTest(E): %g(%d) - %g(%d) = %g",mineE.A[i],i,fitdE.A[i],i,diff)<< endm;
+    LOG_DEBUG << Form("errTest(E): %g(%d) - %g(%d) = %g",mineE.G()[i],i,fitdE.G()[i],i,diff)<< endm;
   }
   if (ndif>=100){ mineE.print();fitdE.print();}
   

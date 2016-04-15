@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.117 2015/12/28 23:50:27 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.118 2016/04/13 23:09:13 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.118  2016/04/13 23:09:13  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
  * Revision 2.117  2015/12/28 23:50:27  perev
  * Remove assert temporary
  *
@@ -1438,19 +1441,9 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   Double_t setp[6] = {pars.y(),    pars.z(),    pars.eta(),
 		      pars.ptin(), pars.tanl(), pars.curv()};
   setp[2]+= alfa;  
-#if 0
-  // gcc 4.8 and 4.9 has optimized this out 
-  Double_t sete[15];1
+  Double_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
-    for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
-#else
-  Double_t sete[15] = {  errs.cYY(),                       
-			 errs.cZY(), errs.cZZ(),                 
-			 errs.cEY(), errs.cEZ(), errs.cEE(),           
-			 errs.cPY(), errs.cPZ(), errs.cPE(), errs.cPP(),     
-			 errs.cTY(), errs.cTZ(), errs.cTE(), errs.cTP(), errs.cTT()
-  };
-#endif
+    for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
   dca->set(setp,sete);
   gTrack->setDcaGeometry(dca);
@@ -1562,7 +1555,7 @@ enum dcaEmx {kImpImp,
   const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
   const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
   StiHitErrs  mHrr;
-  memcpy(mHrr.A, (inf)? inf->mHrr.A : node->hitErrs(),sizeof(StiHitErrs));
+  memcpy(mHrr.G(), (inf)? inf->mHrr.G() : node->hitErrs(),sizeof(StiHitErrs));
 
   StiPullHit aux;
 // local frame
@@ -1577,21 +1570,21 @@ enum dcaEmx {kImpImp,
   aux.lXHit = stiHit->x();
   aux.lYHit = stiHit->y(timeFlight);
   aux.lZHit = stiHit->z(timeFlight);
-  aux.lYHitErr = sqrt(mHrr.hYY());
-  aux.lZHitErr = sqrt(mHrr.hZZ());
-  aux.lHitEmx[0] = mHrr.hYY();
-  aux.lHitEmx[1] = mHrr.hZY();
-  aux.lHitEmx[2] = mHrr.hZZ();
+  aux.lYHitErr = sqrt(mHrr.hYY);
+  aux.lZHitErr = sqrt(mHrr.hZZ);
+  aux.lHitEmx[0] = mHrr.hYY;
+  aux.lHitEmx[1] = mHrr.hZY;
+  aux.lHitEmx[2] = mHrr.hZZ;
 
 // local FIT
   aux.lXFit = mFP.x();
   aux.lYFit = mFP.y();
   aux.lZFit = mFP.z();
-  aux.lYFitErr = sqrt(mFE.cYY());
-  aux.lZFitErr = sqrt(mFE.cZZ());
-  aux.lFitEmx[0] = mFE.cYY();
-  aux.lFitEmx[1] = mFE.cZY();
-  aux.lFitEmx[2] = mFE.cZZ();
+  aux.lYFitErr = sqrt(mFE._cYY);
+  aux.lZFitErr = sqrt(mFE._cZZ);
+  aux.lFitEmx[0] = mFE._cYY;
+  aux.lFitEmx[1] = mFE._cZY;
+  aux.lFitEmx[2] = mFE._cZZ;
 //  assert(fabs(aux.lYFit-aux.lYHit)>1e-10 || fabs(aux.lXHit)<4);
 
 // local Pull

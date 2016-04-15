@@ -26,7 +26,6 @@
 #include "VertexData.h" 
 #include "Vertex3D.h"
 #include "StGenericVertexMaker.h"
-#include "StEventTypes.h"
 #include "St_VertexCutsC.h"
 
 #include <Sti/StiToolkit.h>

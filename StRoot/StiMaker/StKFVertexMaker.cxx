@@ -353,7 +353,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   if (extended) {
     if (Debug() > 2) {
       TRVector Pext(8,extended->fitPars().A()); PrPP2(FitTrack2Vertex,Pext);
-      TRSymMatrix CovExt(6,extended->fitErrs().A); PrPP2(FitTrack2Vertex,CovExt);
+      TRSymMatrix CovExt(6,extended->fitErrs().G()); PrPP2(FitTrack2Vertex,CovExt);
     }
     if (extended && !extended->isValid())      {extended=0;}
     if (extended && extended->getChi2()>1000)  {extended=0;}
@@ -366,7 +366,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   kTrack->setPrimary(V->ID());
   if (Debug() > 2) {
     TRVector POext(6,extended->fitPars().A()); PrPP2(FitTrack2Vertex,POext);
-    TRSymMatrix CovO(6,extended->fitErrs().A); PrPP2(FitTrack2Vertex,CovO);
+    TRSymMatrix CovO(6,extended->fitErrs().G()); PrPP2(FitTrack2Vertex,CovO);
   }
   if (cVert.NDF() > 2) { //refit with vertex only if this is possible
     kTrack->add(extended,kOutsideIn);
@@ -386,7 +386,7 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     return pTrack; // failed to refit
   }
   if (Debug() > 2) {
-    TRSymMatrix CovF(6,extended->fitErrs().A); PrPP2(FitTrack2Vertex,CovF);
+    TRSymMatrix CovF(6,extended->fitErrs().G()); PrPP2(FitTrack2Vertex,CovF);
     const KFParticle   *PO = track->OrigParticle(); PrPP2(FitTrack2Vertex,*PO); PrPP2(FitTrack2Vertex,P);
     TRVector Pxyz(6);
     TRSymMatrix covPxyz(8);

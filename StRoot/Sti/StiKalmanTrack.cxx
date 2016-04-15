@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139 2015/04/02 16:29:16 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.140  2016/04/13 23:08:44  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
  * Enum keepHit and kGoodHir added instead of using 1 & 2.
@@ -743,8 +746,8 @@ int StiKalmanTrack::getTpcSector() const
   StiKTNIterator it;
   for (it=begin();it!=end();it++) {
     StiKalmanTrackNode *node = &(*it);
-    if (!node->isValid()) 	continue;
-    if (!node->getHit())	continue;
+    if (!node->isValid())      continue;
+    if (!node->getHit())       continue;
     const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(node->getHit()->stHit());
     if (! tpcHit) continue;
     return tpcHit->sector();
@@ -1266,24 +1269,24 @@ static int nCall=0; nCall++;
       }
 
 #ifdef Sti_DEBUG      
-	int npoints[2] = {0,0};
-	vector<StMeasuredPoint*> hitVec = stHits();
-	for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
-	  StHit * hit = dynamic_cast<StHit *>(*point);
-	  if (hit) {
-	    StDetectorId detId = hit->detector();
-	    if (detId == kTpcId) ++npoints[0];
-	    if (detId == kSvtId) ++npoints[1];
-	  }
-	}
-	cout << "StiKalmanTrack::extendToVertex: localVertex: " << localVertex << endl;
-	cout << "StiKalmanTrack::extendToVertex: chi2 @ vtx: " << chi2 
-	     << " dx:"<< dx
-	     << " dy:"<< dy
-	     << " dz:"<< dz
-	     << " d: "<< d
-	     << " dca: " << _dca << " npoints tpc/svt: " << npoints[0] << "/" << npoints[1] << endl;
-	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
+       int npoints[2] = {0,0};
+       vector<StMeasuredPoint*> hitVec = stHits();
+       for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
+         StHit * hit = dynamic_cast<StHit *>(*point);
+         if (hit) {
+           StDetectorId detId = hit->detector();
+           if (detId == kTpcId) ++npoints[0];
+           if (detId == kSvtId) ++npoints[1];
+         }
+       }
+       cout << "StiKalmanTrack::extendToVertex: localVertex: " << localVertex << endl;
+       cout << "StiKalmanTrack::extendToVertex: chi2 @ vtx: " << chi2 
+            << " dx:"<< dx
+            << " dy:"<< dy
+            << " dz:"<< dz
+            << " d: "<< d
+            << " dca: " << _dca << " npoints tpc/svt: " << npoints[0] << "/" << npoints[1] << endl;
+       cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
 #endif
 
 //    if (chi2<StiKalmanTrackFinderParameters::instance()->maxChi2Vertex  && d<4.)
@@ -1739,7 +1742,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.A,hr.hZZ());
+    circ.AddErr(hr.G(),hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1795,6 +1798,7 @@ double Xi2=0;
     hh = (fabs(hh)<1e-10)? 0:1./hh;
     P.ptin() = (hh)? curv*hh:1e-3;
 #endif
+
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
@@ -1805,9 +1809,9 @@ double Xi2=0;
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.A);
-    TCL::vscale(&(E.cPX()),hh,&(E.cPX()),5);
-    E.cPP()*=hh; E.cTP()*=hh;
+    cirl.StiEmx(E.G());
+    TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
+    E._cPP*=hh; E._cTP*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
     E.check("In aprox");
   }   
@@ -1838,7 +1842,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 
   mSeedHitCount=tk.mSeedHitCount; 	//number of points used to seed the track
   mFlag        =tk.mFlag;         	//A flag to pack w/ topo info
-  _pdgId       =tk._pdgId;             	// mass hypothesis
+  _pdgId       =tk._pdgId;                     // mass hypothesis
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
   mVertex      =tk.mVertex;
