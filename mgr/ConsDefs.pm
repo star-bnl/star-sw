@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.141 2015/09/21 21:40:47 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.142 2016/04/15 17:02:44 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -598,9 +598,13 @@
 		    # linking would fail.
 		    $DEBUG .= " -fno-inline";
 		} elsif ( $2 <= 82){
-		    # Note: 4.8.2 is picky, we may ned to adjust options here
+		    # Note: 4.8.2 is picky, we may need to adjust options here
 		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
-		    $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    if ( defined($ENV{DEBUG_WITH_O2}) ) {
+			$DEBUG   = "-g -O2";
+		    } else {
+			$DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    }
 		    # Other possible options part of O1
 		    #   -fmerge-all-constants (implies merge-contstants)
 		    #   -finline-functions-called-once
