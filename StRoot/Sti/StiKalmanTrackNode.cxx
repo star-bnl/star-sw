@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.170 2016/04/13 23:08:44 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.171 2016/04/15 20:13:06 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.171  2016/04/15 20:13:06  perev
+ * Warnoff
+ *
  * Revision 2.170  2016/04/13 23:08:44  perev
  * -opt2 proble solved. Array A[1] removed
  *
@@ -2231,7 +2234,7 @@ static const char *HHH = "xyzXYZ";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
   printf("%p(%s)",(void*)this,ts.Data());
   if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
-  double val;
+  double val=-9999;
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
     switch(i) {
