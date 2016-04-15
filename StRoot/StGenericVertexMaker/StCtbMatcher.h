@@ -80,7 +80,7 @@ void  ctb_get_slat_from_data(int slat, int tray, double & ctbphi, double & ctbet
     // slat=0,...,119
     
     int iz ;	    
-    double phi,eta ;
+    double phi;
     
     if ( tray < 60 )  {
 	phi = phiZero1 - tray * deltaPhi ; 
@@ -94,7 +94,6 @@ void  ctb_get_slat_from_data(int slat, int tray, double & ctbphi, double & ctbet
     if ( phi > 360. ) phi -= 360 ;
     
     ctbphi=phi;
-    eta = (1-2*iz)*(1+2*slat)*0.25;
     ctbeta =(1-2*iz)*(1+2*slat)*0.25;
     
     //printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,ctbphi,ctbeta);
