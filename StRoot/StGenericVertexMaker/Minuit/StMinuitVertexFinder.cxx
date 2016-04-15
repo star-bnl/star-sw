@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.25 2016/04/12 19:49:05 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.26 2016/04/15 19:24:14 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.26  2016/04/15 19:24:14  smirnovd
+ * Got rid of unused variables reported by compiler
+ *
  * Revision 1.25  2016/04/12 19:49:05  smirnovd
  * StMinuitVertexFinder: Set static variable value at initialization
  *
@@ -521,8 +524,6 @@ void StMinuitVertexFinder::calculateRanks() {
 int
 StMinuitVertexFinder::fit(StEvent* event)
 {
-    Double_t arglist[4];
-
     setFlagBase();
 
     // get CTB info
@@ -642,12 +643,6 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  Skip this step if an external seed is given.
     //
     if (!mExternalSeedPresent) {
-      if (!mVertexConstrain){ 
-	arglist[0] = 3;
-      }
-      else {
-        arglist[0]=1;
-      }
       findSeeds();
     }
     else {
@@ -678,13 +673,6 @@ StMinuitVertexFinder::fit(StEvent* event)
       }
       else {
 	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
-      }
-
-      if (!mVertexConstrain){ 
-	arglist[0] = 3;
-      }
-      else {
-	arglist[0] = 1;
       }
 
       Int_t done = 0;

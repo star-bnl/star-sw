@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.25 2014/07/28 18:07:59 jeromel Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.26 2016/04/15 19:24:14 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -287,7 +287,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   sigma=0;
   const double Rctb=213.6; // (cm) radius of the CTB 
-  uint nPoss=0, nFitP=0, nSvtP=0;
+  uint nFitP=0;
 
   if (!track) return false; // it should never happen
   if(!finite(track->geometry()->helix().curvature())){
@@ -315,8 +315,6 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   n2++;
   
   nFitP = track->detectorInfo()->numberOfPoints(kTpcId);
-  nSvtP = track->detectorInfo()->numberOfPoints(kSvtId);
-  nPoss=track->numberOfPossiblePoints(kTpcId);
 
   if(  nFitP <= mMinNumberOfFitPointsOnTrack) return false;
   n3++;
@@ -350,7 +348,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   float strag=0.0136/beta/pmomM*spathL; 
   if(fabs(mBfield)<0.01) strag=0.0136*spathL; // no field case, pT makes no sense
 
-  //  printf("stragling=%f %f p=%f %f nFp=%d nPp=%d\n",strag,beta,pmom.mag(),spath, track->fitTraits().numberOfFitPoints(),nPoss );
+  //  printf("stragling=%f %f p=%f %f nFp=%d nPp=%d\n",strag,beta,pmom.mag(),spath, track->fitTraits().numberOfFitPoints(), track->numberOfPossiblePoints(kTpcId) );
   
 
   if ( !track->outerGeometry() )  return false;
@@ -398,7 +396,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
     // printf("  CTB match OK:  del_eta=%.2f, del_phi/deg=%.1f \n", del_eta,del_phi/C_PI*180);
     sigma=strag;
     n6++;    
-    //  printf("add tr %d w/ sigma=%f p/GeV=%f spath/cm=%f nFitP=%d nPoss=%d nSVT=%d\n",mPrimCand.size(),sigma,pmom.mag(),spath,nFitP, nPoss,nSvtP);
+    //  printf("add tr %d w/ sigma=%f p/GeV=%f spath/cm=%f nFitP=%d nSVT=%d\n",mPrimCand.size(),sigma,pmom.mag(),spath,nFitP, track->detectorInfo()->numberOfPoints(kSvtId) );
     
     return true;
   }
@@ -608,6 +606,9 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.26  2016/04/15 19:24:14  smirnovd
+ * Got rid of unused variables reported by compiler
+ *
  * Revision 1.25  2014/07/28 18:07:59  jeromel
  * Cst for C++11 and added comment for cov elements as per StVertex
  *
