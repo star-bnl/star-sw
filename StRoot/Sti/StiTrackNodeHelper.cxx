@@ -708,7 +708,7 @@ static const int keepElossBug = StiDebug::iFlag("keepElossBug");
 assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
-  double pL1,pL2,pL3,d1,d2,d3,dxEloss,dx;
+  double pL1=0,pL2=0,pL3=0,d1=0,d2=0,d3=0,dxEloss=0,dx=0;
   pL1=0.5*pathIn(mParentNode->getDetector(),&mBestParentPars);
   // Half path length in this node
   pL3=0.5*pathIn(mDetector,&mBestPars);
