@@ -55,10 +55,12 @@ enum TrackType {
   kGlobal = 0, kPrimary, kTotalT  // switch between global and primary tracks
 };
 enum TrackMatchType {
-  kNotDefined = -1, kMcTk= 0, kMcTpcTk, kRecoTk   , kCloneTk   , kGhostTk   , kLostTk
-  ,                           kMcToFTk, kRecoToFTk,              kGhostToFTk, kLostToFTk
-  ,                           kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk 
-  ,                           kTotalMatchType // match type extended
+  kNotDefined = -1, kMcTk = 0, kMcTpcTk, kRecoTk   , kCloneTk   , kGhostTk   , kLostTk
+  ,                            kMcToFTk, kRecoToFTk,              kGhostToFTk, kLostToFTk
+  ,                            kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk 
+  ,                            kTotalTkTypes                       
+  ,                 kMcVx = 0, kMcTpcVx, kRecoVx   , kCloneVx   , kGhostVx   , kLostVx
+  ,                            kTotalVxTypes                       
 };
 enum EdEdx {NdEdxPiD = 3, NToFPiD = 2, NoPiDs = 2};
 enum EParticleType {

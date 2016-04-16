@@ -9,7 +9,7 @@
 #include "TArrayD.h"
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
-static TH3F *fHistsT[kTotalT][kTotalMatchType][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
+static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
 static TH3F *LdEdx[kTotalT][KPidParticles][kTotalSigns][NdEdxPiD] = {0};
 static TH3F *LToF[kTotalT][KPidParticles][kTotalSigns][NToFPiD] = {0};
 static TH1F *GiD[4] = {0};
@@ -48,15 +48,15 @@ TString SubSection;
 TH3F *StMuMcAnalysisMaker::GetTrackHist(UInt_t track, UInt_t match, 
 					      UInt_t particle, UInt_t charge, 
 					      UInt_t var, UInt_t i) {
-  //  fHistsT[kTotalT][kTotalMatchType][kPartypeT][kTotalSigns][kVariables][kTotalQAll]
+  //  fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll]
   TH3F *h = 0;
-  if (track < kTotalT && match < kTotalMatchType && particle < kPartypeT && 
+  if (track < kTotalT && match < kTotalTkTypes && particle < kPartypeT && 
       charge < kTotalSigns && var < kVariables && i < kTotalQAll)
     h = fHistsT[track][match][particle][charge][var][i];
   else {
     cout << "Illegal request :" 
 	 << track << "[" << kTotalT << "]" 
-	 << match << "[" << kTotalMatchType << "]"
+	 << match << "[" << kTotalTkTypes << "]"
 	 << particle << "[" << kPartypeT << "]"
 	 << charge << "[" << kTotalSigns << "]"
 	 << var << "[" << kVariables  << "]"
@@ -189,7 +189,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[0]); assert(dirs[1]);
   dirs[1]->cd();
   for (Int_t gp = kGlobal; gp < kTotalT; gp++) {
-    const  PlotName_t plotNameMatch[kTotalMatchType] = {
+    const  PlotName_t plotNameMatch[kTotalTkTypes] = {
       {kMcTk,       "Mc",       "Mc tracks All"},								      	
       {kMcTpcTk,    "Tpc",   	Form("Mc tracks which have >= %i Mc Tpc Hits",StMuDst::MinNoTpcMcHits)},	     	
       {kRecoTk,     "Rec",   	"Rc tracks matched with only Mc track"},					     	
@@ -210,7 +210,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
     }
     dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
     dirs[2]->cd();
-    for (Int_t t = kMcTk; t < kTotalMatchType; t++) {
+    for (Int_t t = kMcTk; t < kTotalTkTypes; t++) {
       TrackMatchType type = plotNameMatch[t].k;
       if (! dirs[2]->GetDirectory(plotNameMatch[t].Name)) {
 	dirs[2]->mkdir(plotNameMatch[t].Name);
