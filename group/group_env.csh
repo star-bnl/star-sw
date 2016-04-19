@@ -882,11 +882,15 @@ endif
 
 # Support for Qt
 #    if (! $?QTDIR) then
+    if ( -r "${XOPTSTAR}/qt4") then
+      setenv  QTDIR ${XOPTSTAR}/qt4
+    else
       if ($USE_64BITS == 1) then
         if ( -d /usr/lib64/qt4) setenv QTDIR /usr/lib64/qt4
       else
         if ( -d /usr/lib/qt4) setenv QTDIR /usr/lib/qt4
       endif
+    endif
 #    endif
 if ( $?QTDIR ) then
     setenv MANPATH ${MANPATH}:$QTDIR/man
