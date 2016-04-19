@@ -1180,7 +1180,7 @@ void KFParticleFinder::ConstructPrimaryBG(KFPTrackVector* vTracks, kfvector_floa
           posPVIndex[iV] = positivePrimaryTracks.PVIndex()[iTrP+iV];
         }
 
-        float_m active = float_m(activeNeg && (int_v::IndexesFromZero() < int_v(NTracks)));
+        int_m active = (activeNeg && (int_v::IndexesFromZero() < int_v(NTracks)));
         if(active.isEmpty()) continue;
         
         active &= (posPDG != int_v(-1));

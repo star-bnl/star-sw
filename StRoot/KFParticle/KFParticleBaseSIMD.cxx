@@ -1314,7 +1314,7 @@ void KFParticleBaseSIMD::SetNoDecayLength()
   {
     s = 1.f/s;
     fChi2 += zeta*zeta*s;
-    fNDF  += 1.f;
+    fNDF  += 1;
     for( Int_t i=0, ii=0; i<7; ++i ){
       float_v ki = fC[28+i]*s;
       fP[i]+= ki*zeta;

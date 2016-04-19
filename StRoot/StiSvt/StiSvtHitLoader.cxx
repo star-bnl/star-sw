@@ -37,9 +37,9 @@ void StiSvtHitLoader::loadHits(StEvent* source,
     cout << "StiSvtHitLoader::loadHits(StEvent* source) -W- NO SVT hits"<<endl;
     return;
     }
-  StSvtHit* hit;
-  StiHit* stiHit;
-  StiDetector* detector;
+  StSvtHit* hit=0;
+  StiHit* stiHit=0;
+  StiDetector* detector=0;
   if (!_hitContainer) throw runtime_error("StiSvtHitLoader::loadHits() -F- _hitContainer==0 ");
   int hitCounter = 0;
   for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel)
