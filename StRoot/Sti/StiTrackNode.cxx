@@ -145,7 +145,6 @@ StiDebug::Break(nCall);
  double XX,XN,L;
  N[0] = -Dp[1];
  N[1] =  Dp[0];  
- N[2] =  0.0;
  XX = MAG2(Xp); //X*X;  
  XN = DOT(Xp,N);//X*N;
 
