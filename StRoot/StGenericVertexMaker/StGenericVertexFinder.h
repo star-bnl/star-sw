@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.27 2016/04/15 19:07:43 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.28 2016/04/20 22:03:30 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -75,95 +75,4 @@ class StGenericVertexFinder {
   static vertexSeed_st  sBeamline;
 };
 
-
-
-// $Log: StGenericVertexFinder.h,v $
-// Revision 1.27  2016/04/15 19:07:43  smirnovd
-// Switch to another but equivalent header file
-//
-// Revision 1.26  2016/04/11 20:53:20  smirnovd
-// StGenericVertexFinder: Added static method to calculate chi2 for beamline and a point
-//
-// Revision 1.25  2016/04/11 20:53:13  smirnovd
-// Use all available beamline (aka vertex seed) parameters from DB
-//
-// We overload StGenericVertexFinder::UseVertexConstraint for this puspose. The
-// parameters are cached in static StGenericVertexFinder::sBeamline. Note that if
-// there is a need to do so, UseVertexConstraint can do some preprocessing of the
-// raw DB values before caching them.
-//
-// Revision 1.24  2016/04/11 20:44:26  smirnovd
-// StGenericVertexFinder: Added static member to keep beamline parameters
-//
-// Revision 1.23  2016/02/29 22:58:22  jwebb
-// Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
-//
-// Revision 1.22  2015/11/13 04:12:18  perev
-// Added metod IsFixed
-//
-// Revision 1.21  2013/08/16 20:49:38  perev
-// PPV with only StEvent dependency
-//
-// Revision 1.20  2010/09/10 21:06:45  rjreed
-// Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
-//
-// Revision 1.19  2009/11/11 03:52:14  genevb
-// Re-order the vertices upon filling StEvent
-//
-// Revision 1.18  2009/07/09 00:16:12  genevb
-// Create a calib mode for StGenericVertex when using VtxSeedCalG
-//
-// Revision 1.17  2008/10/23 20:37:31  genevb
-// Add switches for turning on/off use of Post-Crossing Tracks [default:off]
-//
-// Revision 1.16  2006/04/26 15:37:04  jeromel
-// mVertexOrderMethod (To be tested)
-//
-// Revision 1.15  2006/04/08 00:18:10  mvl
-// Added member for debuglevel
-//
-// Revision 1.14  2005/07/19 21:45:53  perev
-// MultiVertex
-//
-// Revision 1.13  2005/06/21 02:16:36  balewski
-// multiple prim vertices are stored in StEvent
-//
-// Revision 1.12  2005/03/11 22:23:53  balewski
-// towards PPV
-//
-// Revision 1.11  2005/03/09 19:24:18  balewski
-// preparation for PPV vertex finder
-//
-// Revision 1.10  2004/12/13 20:39:58  fisyak
-// Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
-//
-// Revision 1.9  2004/09/13 15:41:30  balewski
-// fix bug in ppLMV4/5 switch
-//
-// Revision 1.8  2004/09/03 00:09:08  jeromel
-// Modified code to Implement Init() and SetMode() and allow passing a switch
-// to chose the vertex finder from within the same code implementation. Was
-// needed for ppLMV (one implementation, two algorithm)
-//
-// Revision 1.7  2004/08/04 21:57:56  balewski
-// toward smarter ppLMV5
-//
-// Revision 1.6  2004/07/24 19:40:38  balewski
-// fix swap of vert & errVert
-//
-// Revision 1.5  2004/07/24 02:57:40  balewski
-// clean up of ppLMV, CTB-util separated
-//
-// Revision 1.4  2004/07/23 02:24:38  jeromel
-// Oops ... Worng swithc (had twice Minuit). Now corrected.
-//
-// Revision 1.3  2004/07/23 00:58:19  jeromel
-// Base class method+data member (was duplicated in implementation)
-//
-// Revision 1.2  2004/04/06 02:43:43  lbarnby
-// Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
-//
-// Revision 1.1  2003/05/09 22:22:36  lbarnby
-// Initial revision: a base class for STAR (StEvent-based) vertex finders
-//
 #endif
