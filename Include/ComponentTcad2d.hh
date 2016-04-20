@@ -21,6 +21,10 @@ class ComponentTcad2d : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
 
+  void WeightingField(const double x, const double y, const double z,
+                            double& wx, double& wy, double& wz,
+                            const std::string label); 
+
   Medium* GetMedium(const double x, const double y, const double z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
@@ -58,6 +62,22 @@ class ComponentTcad2d : public ComponentBase {
   bool GetMobility(const double x, const double y, const double z, double& emob,
                    double& hmob);
 
+  // Trapping 
+  int GetNumberOfDonors(){return nDonor;}
+  int GetNumberOfAcceptors(){return nAcceptor;}
+  bool GetDonorOccupation(const double x, const double y, const double z, const int donorNumber,
+		  double& occupationFraction);
+  bool GetAcceptorOccupation(const double x, const double y, const double z, const int acceptorNumber,
+                   double& occupationFraction);
+  bool SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec);
+  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec);
+  bool SetDonorConc(const int donorNumber, const double concentration);
+  bool SetAcceptorConc(const int acceptorNumber, const double concentration);
+  bool ElectronAttachment(const double x, const double y, const double z,
+                          double& eta);
+  bool HoleAttachment(const double x, const double y, const double z,
+                          double& eta);
+
  private:
   // Max. number of vertices per element
   static const int nMaxVertices = 4;
@@ -82,6 +102,9 @@ class ComponentTcad2d : public ComponentBase {
     double p, ex, ey;
     // Mobilities [cm2 / (V ns)]
     double emob, hmob;
+    // Trap occupations [Dimensionless]
+    std::vector<float> donorOcc;
+    std::vector<float> acceptorOcc;
     // Flag indicating if vertex belongs to more than one region
     bool isShared;
   };
@@ -112,6 +135,22 @@ class ComponentTcad2d : public ComponentBase {
   bool hasField;
   bool hasElectronMobility;
   bool hasHoleMobility;
+
+  // Number of available traps
+  int nDonor;
+  int nAcceptor;
+
+  // List of cross-sections and trap concentrations
+  std::vector<double> donorElectronXsec;
+  std::vector<double> donorHoleXsec;
+  std::vector<double> acceptorElectronXsec;
+  std::vector<double> acceptorHoleXsec;
+  std::vector<double> donorConc;
+  std::vector<double> acceptorConc;
+
+  // Are all the crossections and concentrations are valid and set
+  bool validXsec;
+  bool validConc;
 
   // Voltage range
   double pMin, pMax;
