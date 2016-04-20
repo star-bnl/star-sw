@@ -77,8 +77,21 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-Medium* ComponentVoxel::GetMedium(const double xin, const double yin,
-                                  const double zin) {
+//START: ADDED BY ASMUND
+void ComponentVoxel::WeightingField(const double x, const double y, const double z,
+                                   double& wx, double& wy, double& wz, 
+				   const std::string label) {
+  int pointlessVariable = 0;
+  int& status = pointlessVariable;
+  Medium* med = 0;
+  double v = 0.;
+  ElectricField(x, y, z, wx, wy, wz, v, med, status);
+}
+//END: ADDED BY ASMUND
+
+
+Medium* ComponentVoxel::GetMedium(const double& xin, const double& yin,
+                                  const double& zin) {
 
   // Make sure the field map has been loaded.
   if (!m_ready) {
@@ -195,6 +208,8 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
     fmt = 3;
   } else if (format == "IJK") {
     fmt = 4;
+  } else if (format == "YXZ") {
+    fmt = 5;
   } else {
     std::cerr << m_className << "::LoadData:\n";
     std::cerr << "    Unkown format (" << format << ").\n";
@@ -291,7 +306,31 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
         bad = true;
         break;
       }
-    }
+    } else if (fmt == 5) {
+      // "YXZ"
+      // To obtain a right handed coordinate system we need z->-z with switching of Y and X. 
+      double x, y, z, temp;
+      data >> y >> x >> temp;
+      z = temp;
+      if (data.fail()) {
+        std::cerr << m_className << "::LoadData:\n";
+        std::cerr << "    Error reading line " << nLines << ".\n";
+        std::cerr << "    Cannot retrieve element coordinates.\n";
+        bad = true;
+        break;
+      }
+      x *= scaleX;
+      y *= scaleX;
+      z *= scaleX;
+      bool xMirrored, yMirrored, zMirrored;
+      if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
+        std::cerr << m_className << "::LoadData:\n";
+        std::cerr << "    Error reading line " << nLines << ".\n";
+        std::cerr << "    Point is outside mesh.\n";
+        bad = true;
+        break;
+      }
+    }  
     // Check the indices.
     if (i >= m_nX || j >= m_nY || k >= m_nZ) {
       std::cerr << m_className << "::LoadData:\n";
@@ -312,6 +351,10 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
       // Two-dimensional field-map
       ez = 0.;
       data >> ex >> ey;
+    } else if (fmt == 5){
+      double temp;
+      data >> ey >> ex >> temp;
+      ez = temp;
     } else {
       data >> ex >> ey >> ez;
     }
@@ -379,7 +422,7 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
   std::cout << "    Read " << nValues << " values from file " << filename
             << ".\n";
   unsigned int nExpected = m_nX * m_nY;
-  if (fmt == 2 || fmt == 4) nExpected *= m_nZ;
+  if (fmt == 2 || fmt == 4 || fmt == 5) nExpected *= m_nZ;
   if (nExpected != nValues) {
     std::cerr << m_className << "::LoadData:\n";
     std::cerr << "   Expected " << nExpected << " values.\n";
@@ -565,7 +608,7 @@ bool ComponentVoxel::GetElement(const double xi, const double yi,
   // Check if the point is outside the mesh.
   if (y < m_yMin || y > m_yMax) return false;
 
-  const double cellsz = m_zMax - m_xMin;
+  const double cellsz = m_zMax - m_zMin;
   if (m_zPeriodic) {
     z = m_zMin + fmod(z - m_zMin, cellsz);
     if (z < m_zMin) z += cellsz;
