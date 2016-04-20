@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.50 2016/04/20 22:03:54 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.51 2016/04/20 22:04:10 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -396,7 +396,6 @@ StPPVertexFinder::CalibBeamLine(){
 //======================================================
 void 
 StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
-  mVertexConstrain = true;
   mX0 = x0;
   mY0 = y0;
   mdxdz = dxdz;
@@ -848,10 +847,11 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
-  if ( ! mVertexConstrain ){
+  if (mVertexFitMode != VertexFit_t::Beamline1D)
+  {
     // code is not ready for reco w/o beamLine
     LOG_FATAL << "StPPVertexFinder code is not ready for reco w/o beamLine" << endm;
-    assert(mVertexConstrain); 
+    assert(mVertexFitMode == VertexFit_t::Beamline1D);
   }
   uint i;
   for(i=0;i<mVertexData.size();i++) {
