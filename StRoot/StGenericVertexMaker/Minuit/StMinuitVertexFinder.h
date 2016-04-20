@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.15 2016/04/20 22:03:54 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.16 2016/04/20 22:04:25 smirnovd Exp $
  *
  */
 
@@ -144,6 +144,7 @@ private:
 
     static void fcn(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
     static void fcn1D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
+    static void Chi2Beamline3D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t);
     static Double_t Chi2atVertex(StThreeVectorD &vtx);
     
     bool                   mUseITTF;          // Use only tracks with ITTF encoded method
