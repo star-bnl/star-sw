@@ -99,10 +99,20 @@ Int_t StGenericVertexMaker::Init()
   eval          = IAttr("eval");
   minTracks     = IAttr("minTracks");
 
+  // Recognize different beamline options to be used with some vertex finders
+  StGenericVertexFinder::VertexFit_t vertexFitMode;
+
+  if ( IAttr("beamline") )
+     vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline1D;
+  else if ( IAttr("beamline3D") )
+     vertexFitMode = StGenericVertexFinder::VertexFit_t::Beamline3D;
+  else
+     vertexFitMode = StGenericVertexFinder::VertexFit_t::NoBeamline;
+
   Bool_t isMinuit=kFALSE;
 
   if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")){ // 3 versions of Minuit for ranking modes
-    theFinder= new StMinuitVertexFinder();
+    theFinder= new StMinuitVertexFinder(vertexFitMode);
     if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
     if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
     if (minTracks > 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
@@ -118,7 +128,7 @@ Int_t StGenericVertexMaker::Init()
 
   } else if ( (IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")) && !IAttr("VFPPVev")) { // 2 version of PPV w/ & w/o CTB
       LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
-      theFinder= new StPPVertexFinder();
+      theFinder= new StPPVertexFinder(vertexFitMode);
     if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
@@ -186,7 +196,7 @@ void StGenericVertexMaker::Clear(const char* opt){
  */
 Int_t StGenericVertexMaker::InitRun(int runnumber){
   theFinder->InitRun(runnumber);
-  if (useBeamline) {
+  if (useBeamline || IAttr("Beamline3D")) {
 
      // Get Current Beam Line Constraint from database
      TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
