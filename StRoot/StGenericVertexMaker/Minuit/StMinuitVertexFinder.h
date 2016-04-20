@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.14 2016/04/20 22:03:30 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.15 2016/04/20 22:03:54 smirnovd Exp $
  *
  */
 
@@ -104,7 +104,7 @@ class TMinuit;
 class StDcaGeometry;
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
-    StMinuitVertexFinder();
+    StMinuitVertexFinder(VertexFit_t fitMode=VertexFit_t::NoBeamline);
 
     // mandatory implementations
     virtual        ~StMinuitVertexFinder();
