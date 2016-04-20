@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.22 2016/04/20 22:03:30 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.23 2016/04/20 22:03:45 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -19,8 +19,8 @@ vertexSeed_st StGenericVertexFinder::sBeamline;
 
 
 //______________________________________________________________________________
-StGenericVertexFinder::StGenericVertexFinder() : 
-  mVertexConstrain(false), mMode(0), mDebugLevel(0)
+StGenericVertexFinder::StGenericVertexFinder(VertexFit_t fitMode) :
+  mVertexConstrain(false), mMode(0), mVertexFitMode(fitMode), mDebugLevel(0)
 {
   
   mIsMC	  =0;            	// flag minor differences between Data & M-C
@@ -173,6 +173,7 @@ double StGenericVertexFinder::CalcBeamlineChi2(const StThreeVectorD& point)
 void StGenericVertexFinder::NoVertexConstraint() 
 {
   mVertexConstrain = false; 
+  mVertexFitMode = VertexFit_t::NoBeamline;
   LOG_INFO << "StGenericVertexFinder::No Vertex Constraint" << endm;
 }
 

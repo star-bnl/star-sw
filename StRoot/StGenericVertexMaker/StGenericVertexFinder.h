@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.28 2016/04/20 22:03:30 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.29 2016/04/20 22:03:45 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -20,6 +20,11 @@ class StEvent;
 
 class StGenericVertexFinder {
  public:
+
+  /// Options used to define the type of vertex fit performed in a concrete
+  /// implementation
+  enum class VertexFit_t : int { Unspecified, NoBeamline, Beamline1D, Beamline3D };
+
   // virtual and '=0' ; those MUST be implemented
   virtual ~StGenericVertexFinder();                           // virtual destructor
   virtual int            fit(StEvent*)=0;                     // fit the vertex
@@ -54,7 +59,8 @@ class StGenericVertexFinder {
   virtual int            IsFixed() const 	{return 0;}
  protected: //................................
 
-  StGenericVertexFinder();
+  StGenericVertexFinder(VertexFit_t fitMode=VertexFit_t::Unspecified);
+
  private:
   vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
 
@@ -62,6 +68,10 @@ class StGenericVertexFinder {
   StPrimaryVertexOrder   mVertexOrderMethod; // will default to 0 i.e. orderByNumberOfDaughters
   bool                   mVertexConstrain;   // Use vertex constraint from db
   int                    mMode;              // used for any Finder behavior change
+
+  /// The type of vertex fit to use in derived concrete implementation
+  VertexFit_t            mVertexFitMode;
+
   int                    mDebugLevel;
   bool   		 mIsMC;              // flag minor differences between Data & M-C
   bool                   mUseBtof;           // default use btof = false
