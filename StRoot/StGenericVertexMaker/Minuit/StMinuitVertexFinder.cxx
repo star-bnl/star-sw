@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.31 2016/04/20 22:04:25 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.32 2016/04/20 22:04:32 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -60,9 +60,23 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) : StGenericVerte
   mBeamHelix =0;
   
   mMinuit = new TMinuit(3);         
-  mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
+
+  switch (mVertexFitMode)
+  {
+  case VertexFit_t::Beamline1D:
+     mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
+     break;
+  case VertexFit_t::Beamline3D:
+     mMinuit->SetFCN(&StMinuitVertexFinder::Chi2Beamline3D);
+     break;
+  case VertexFit_t::NoBeamline:
+  default:
+     mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
+     break;
+  }
+
   mExternalSeedPresent = kFALSE;
   mRequireCTB = kFALSE;
   requireCTB = kFALSE;
