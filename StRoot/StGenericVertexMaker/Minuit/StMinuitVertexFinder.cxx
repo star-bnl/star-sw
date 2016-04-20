@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.28 2016/04/20 22:03:53 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.29 2016/04/20 22:04:02 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -527,13 +527,13 @@ StMinuitVertexFinder::fit(StEvent* event)
 	LOG_INFO << "Vertex seed = " << seed_z << endm;
       }
       
-      if (!mVertexConstrain){ 
+      if (mVertexConstrain){ 
+	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
+      }
+      else {
 	mMinuit->mnparm(0, "x", 0, step[0], 0, 0, mStatusMin);
 	mMinuit->mnparm(1, "y", 0, step[1], 0, 0, mStatusMin);
 	mMinuit->mnparm(2, "z", seed_z, step[2], 0, 0, mStatusMin);
-      }
-      else {
-	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
       }
 
       Int_t done = 0;
@@ -587,11 +587,11 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnhess();
 
 	Double_t new_z, zerr;
-	if (!mVertexConstrain) {
-	  mMinuit->GetParameter(2, new_z, zerr); 
+	if (mVertexConstrain) {
+	  mMinuit->GetParameter(0, new_z, zerr); 
 	}
 	else {
-	  mMinuit->GetParameter(0, new_z, zerr); 
+	  mMinuit->GetParameter(2, new_z, zerr); 
 	}
 
 	if (fabs(new_z - seed_z) > 1) // refit if vertex shifted
@@ -635,7 +635,16 @@ StMinuitVertexFinder::fit(StEvent* event)
       memset(cov,0,sizeof(cov));
     
       Double_t val, verr;
-      if (!mVertexConstrain) {
+      if (mVertexConstrain) {
+	mMinuit->GetParameter(0, val, verr); 
+	XVertex.setZ(val);  cov[5]=verr*verr;
+	
+	// LSB Really error in x and y should come from error on constraint
+	// At least this way it is clear that those were fixed paramters
+	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
+	XVertex.setY(beamY(val));  cov[2]=0.1;
+      }
+      else {
 	XVertex = StThreeVectorD(mMinuit->fU[0],mMinuit->fU[1],mMinuit->fU[2]);
 	Double_t emat[9];
 	/* 0 1 2
@@ -648,15 +657,6 @@ StMinuitVertexFinder::fit(StEvent* event)
 	cov[3] = emat[6];
 	cov[4] = emat[7];
 	cov[5] = emat[8];
-      }
-      else {
-	mMinuit->GetParameter(0, val, verr); 
-	XVertex.setZ(val);  cov[5]=verr*verr;
-	
-	// LSB Really error in x and y should come from error on constraint
-	// At least this way it is clear that those were fixed paramters
-	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
-	XVertex.setY(beamY(val));  cov[2]=0.1;
       }
       StPrimaryVertex primV;
       primV.setPosition(XVertex);
