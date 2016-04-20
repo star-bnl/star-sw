@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.21 2016/04/12 19:48:47 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.22 2016/04/20 22:03:30 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -196,76 +196,3 @@ void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
    LOG_INFO << "x(z) = (" << sBeamline.x0 << " +/- " << sBeamline.err_x0 << ") + (" << sBeamline.dxdz << " +/- " << sBeamline.err_dxdz << ") * z" << endm;
    LOG_INFO << "y(z) = (" << sBeamline.y0 << " +/- " << sBeamline.err_y0 << ") + (" << sBeamline.dydz << " +/- " << sBeamline.err_dydz << ") * z" << endm;
 }
-
-
-// $Log: StGenericVertexFinder.cxx,v $
-// Revision 1.21  2016/04/12 19:48:47  smirnovd
-// [Cosmetic] Prefixed included headers with path to corresponding module
-//
-// Revision 1.20  2016/04/11 20:53:20  smirnovd
-// StGenericVertexFinder: Added static method to calculate chi2 for beamline and a point
-//
-// Revision 1.19  2016/04/11 20:53:13  smirnovd
-// Use all available beamline (aka vertex seed) parameters from DB
-//
-// We overload StGenericVertexFinder::UseVertexConstraint for this puspose. The
-// parameters are cached in static StGenericVertexFinder::sBeamline. Note that if
-// there is a need to do so, UseVertexConstraint can do some preprocessing of the
-// raw DB values before caching them.
-//
-// Revision 1.18  2016/04/11 20:44:26  smirnovd
-// StGenericVertexFinder: Added static member to keep beamline parameters
-//
-// Revision 1.17  2016/02/29 22:58:22  jwebb
-// Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
-//
-// Revision 1.16  2013/08/16 20:49:38  perev
-// PPV with only StEvent dependency
-//
-// Revision 1.15  2010/09/10 21:06:45  rjreed
-// Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
-//
-// Revision 1.14  2009/11/11 03:52:14  genevb
-// Re-order the vertices upon filling StEvent
-//
-// Revision 1.13  2008/10/23 20:37:31  genevb
-// Add switches for turning on/off use of Post-Crossing Tracks [default:off]
-//
-// Revision 1.12  2006/05/04 20:01:30  jeromel
-// Switched to logger
-//
-// Revision 1.11  2006/04/26 15:37:03  jeromel
-// mVertexOrderMethod (To be tested)
-//
-// Revision 1.10  2006/04/08 00:18:09  mvl
-// Added member for debuglevel
-//
-// Revision 1.9  2005/07/19 21:45:07  perev
-// MultiVertex
-//
-// Revision 1.8  2005/07/14 15:39:22  balewski
-// nothing, to force recompilation of this code by Autobuild
-//
-// Revision 1.7  2005/06/21 02:16:36  balewski
-// multiple prim vertices are stored in StEvent
-//
-// Revision 1.6  2004/12/13 20:39:58  fisyak
-// Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
-//
-// Revision 1.5  2004/07/30 22:59:00  calderon
-// Setting the primary vertex flag to 1 for the moment, as per
-// dst_vertex.idl.  This was causing the FTPC code to reject the
-// primary vertex used as their seed.
-//
-// Revision 1.4  2004/07/24 02:57:40  balewski
-// clean up of ppLMV, CTB-util separated
-//
-// Revision 1.3  2004/07/23 00:57:43  jeromel
-// Base class method implementation
-//
-// Revision 1.2  2004/04/06 02:43:43  lbarnby
-// Fixed identification of bad seeds (no z~0 problem now). Better flagging. Message manager used.
-//
-// Revision 1.1  2003/05/09 22:22:46  lbarnby
-// Initial revision: a base class for STAR (StEvent-based) vertex finders
-//
