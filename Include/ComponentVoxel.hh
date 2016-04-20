@@ -24,7 +24,13 @@ class ComponentVoxel : public ComponentBase {
   void ElectricField(const double x, const double y, const double z, double& ex,
                      double& ey, double& ez, Medium*& m, int& status);
 
-  Medium* GetMedium(const double x, const double y, const double z);
+  // START: ADDED BY ASMUND
+  void WeightingField(const double x, const double y, const double z,
+                            double& wx, double& wy, double& wz,
+                            const std::string label); 
+  // END: ADDED BY ASMUND
+  
+  Medium* GetMedium(const double& x, const double& y, const double& z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
   bool GetElectricFieldRange(double& exmin, double& exmax, double& eymin,
