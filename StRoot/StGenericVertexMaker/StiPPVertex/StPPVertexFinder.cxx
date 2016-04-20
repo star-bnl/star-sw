@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.49 2016/04/20 22:03:30 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.50 2016/04/20 22:03:54 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -66,7 +66,7 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder() {
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
   LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
   mdxdz=mdydz=mX0=mY0  = 0; // beam line params
