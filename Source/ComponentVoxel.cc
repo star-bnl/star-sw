@@ -77,17 +77,15 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-//START: ADDED BY ASMUND
 void ComponentVoxel::WeightingField(const double x, const double y, const double z,
                                    double& wx, double& wy, double& wz, 
-				   const std::string label) {
+				   const std::string& label) {
   int pointlessVariable = 0;
   int& status = pointlessVariable;
   Medium* med = 0;
   double v = 0.;
   ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }
-//END: ADDED BY ASMUND
 
 
 Medium* ComponentVoxel::GetMedium(const double& xin, const double& yin,
