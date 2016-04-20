@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.29 2016/04/20 22:04:02 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.30 2016/04/20 22:04:10 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -64,7 +64,6 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) : StGenericVerte
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
   mExternalSeedPresent = kFALSE;
-  mVertexConstrain = kFALSE;
   mRequireCTB = kFALSE;
   requireCTB = kFALSE;
   mUseITTF   = kFALSE;
@@ -527,7 +526,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	LOG_INFO << "Vertex seed = " << seed_z << endm;
       }
       
-      if (mVertexConstrain){ 
+      if (mVertexFitMode == VertexFit_t::Beamline1D){ 
 	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
       }
       else {
@@ -587,7 +586,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mMinuit->mnhess();
 
 	Double_t new_z, zerr;
-	if (mVertexConstrain) {
+	if (mVertexFitMode == VertexFit_t::Beamline1D) {
 	  mMinuit->GetParameter(0, new_z, zerr); 
 	}
 	else {
@@ -635,7 +634,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       memset(cov,0,sizeof(cov));
     
       Double_t val, verr;
-      if (mVertexConstrain) {
+      if (mVertexFitMode == VertexFit_t::Beamline1D) {
 	mMinuit->GetParameter(0, val, verr); 
 	XVertex.setZ(val);  cov[5]=verr*verr;
 	
@@ -806,7 +805,11 @@ StMinuitVertexFinder::printInfo(ostream& os) const
 }
 
 void StMinuitVertexFinder::UseVertexConstraint(Double_t x0, Double_t y0, Double_t dxdz, Double_t dydz, Double_t weight) {
-  mVertexConstrain = kTRUE;
+
+  // Historically, this method was designed for a 1D fit with beamline
+  // So, we'll keep it this way for backward compatibility
+  if (mVertexFitMode != VertexFit_t::Beamline1D) return;
+
   mX0 = x0;
   mY0 = y0;
   mdxdz = dxdz;
