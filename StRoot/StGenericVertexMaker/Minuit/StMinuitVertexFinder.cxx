@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.30 2016/04/20 22:04:10 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.31 2016/04/20 22:04:25 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -759,6 +759,17 @@ void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, I
 {
   StThreeVectorD vtx(par);
   f = Chi2atVertex(vtx);
+}
+
+
+void StMinuitVertexFinder::Chi2Beamline3D(int& npar, double* gin, double& f, double* par, Int_t iflag)
+{
+  StThreeVectorD vtx(par);
+  f = Chi2atVertex(vtx);
+
+  // Add to the chi2 with the beamline
+  static double scale = 1./(mWidthScale*mWidthScale);
+  f += scale*(1. - TMath::Exp(-CalcBeamlineChi2(vtx)/scale));
 }
 
 
