@@ -18,6 +18,8 @@ ComponentTcad2d::ComponentTcad2d()
       hasField(false),
       hasElectronMobility(false),
       hasHoleMobility(false),
+      nDonor(0),
+      nAcceptor(0),
       pMin(0.),
       pMax(0.),
       hasRangeZ(false),
@@ -31,7 +33,206 @@ ComponentTcad2d::ComponentTcad2d()
   vertices.clear();
   elements.reserve(1000);
   elements.clear();
+
+  donorElectronXsec.clear();
+  donorHoleXsec.clear();
+  acceptorElectronXsec.clear();
+  acceptorHoleXsec.clear();
+  donorConc.clear();
+  acceptorConc.clear();
+
   for (int i = nMaxVertices; i--;) w[i] = 0.;
+}
+
+
+bool ComponentTcad2d::SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec){
+  if (nDonor < 1) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    No donor occupation maps exists.\n";
+    return false;
+  }
+  if (donorNumber > nDonor - 1) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    This donor occupation map does not exist.\n";
+    return false;
+  }
+  if (donorNumber < 0) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    Negative indicies not allowed.\n";
+    return false;
+  }
+  donorElectronXsec[donorNumber] = eXsec; 
+  donorHoleXsec[donorNumber] = hXsec; 
+
+  validXsec = true;
+  for(int i = 0; i<nDonor; i++){
+    if(donorElectronXsec[i] < 0) validXsec = false;
+    if(donorHoleXsec[i] < 0) validXsec = false;
+  }
+  for(int i = 0; i<nAcceptor; i++){
+    if(acceptorElectronXsec[i] < 0) validXsec = false;
+    if(acceptorHoleXsec[i] < 0) validXsec = false;
+  }
+
+  return true;
+}
+
+bool ComponentTcad2d::SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec){
+  if (nAcceptor < 1) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    No acceptor occupation maps exists.\n";
+    return false;
+  }
+  if (acceptorNumber > nAcceptor - 1) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    This acceptor occupation map does not exist.\n";
+    return false;
+  }
+  if (acceptorNumber < 0) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    Negative indicies not allowed.\n";
+    return false;
+  }
+  acceptorElectronXsec[acceptorNumber] = eXsec; 
+  acceptorHoleXsec[acceptorNumber] = hXsec; 
+
+  validXsec = true;
+  for(int i = 0; i<nDonor; i++){
+    if(donorElectronXsec[i] < 0) validXsec = false;
+    if(donorHoleXsec[i] < 0) validXsec = false;
+  }
+  for(int i = 0; i<nAcceptor; i++){
+    if(acceptorElectronXsec[i] < 0) validXsec = false;
+    if(acceptorHoleXsec[i] < 0) validXsec = false;
+  }
+  return true;
+}
+
+bool ComponentTcad2d::SetDonorConc(const int donorNumber, const double concentration){
+  if (nDonor < 1) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    No donor occupation maps exists.\n";
+    return false;
+  }
+  if (donorNumber > nDonor - 1) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    This donor occupation map does not exist.\n";
+    return false;
+  }
+  if (donorNumber < 0) {
+    std::cerr << m_className << "::SetDonorXsec:\n";
+    std::cerr << "    Negative indicies not allowed.\n";
+    return false;
+  }
+  donorConc[donorNumber] = concentration; 
+
+  validConc = true;
+  for(int i = 0; i<nDonor; i++){
+    if(donorConc[i] < 0) validConc = false;
+  }
+  for(int i = 0; i<nAcceptor; i++){
+    if(acceptorConc[i] < 0) validConc = false;
+  }
+  return true;
+}
+
+bool ComponentTcad2d::SetAcceptorConc(const int acceptorNumber, const double concentration){
+  if (nAcceptor < 1) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    No acceptor occupation maps exists.\n";
+    return false;
+  }
+  if (acceptorNumber > nAcceptor - 1) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    This acceptor occupation map does not exist.\n";
+    return false;
+  }
+  if (acceptorNumber < 0) {
+    std::cerr << m_className << "::SetAcceptorXsec:\n";
+    std::cerr << "    Negative indicies not allowed.\n";
+    return false;
+  }
+  acceptorConc[acceptorNumber] = concentration; 
+
+  validConc = true;
+  for(int i = 0; i<nDonor; i++){
+    if(donorConc[i] < 0) validConc = false;
+  }
+  for(int i = 0; i<nAcceptor; i++){
+    if(acceptorConc[i] < 0) validConc = false;
+  }
+  return true;
+}
+
+bool ComponentTcad2d::ElectronAttachment(const double x, const double y, const double z, double& eta){
+  //Check for nTraps > 1, valid Xsec, valid Donor
+  if(!validConc){
+    std::cerr << m_className << "::ElectronAttachment:\n";
+    std::cerr << "    Trap concentrations are invalid.\n";
+    return false;
+  }
+  if(!validXsec){
+    std::cerr << m_className << "::ElectronAttachment:\n";
+    std::cerr << "    Trap cross-sections are invalid.\n";
+    return false;
+  }
+  if(nAcceptor + nDonor < 1){
+    std::cerr << m_className << "::ElectronAttachment:\n";
+    std::cerr << "    This component has not traps.\n";
+    return false;
+  }
+  eta = 0;
+  double occupationFraction;
+  for(int i = 0; i<nAcceptor; i++){
+	  this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
+	  eta += acceptorConc[i]*acceptorElectronXsec[i]*(1-occupationFraction);
+  }
+  for(int i = 0; i<nDonor; i++){
+	  this->GetDonorOccupation(x, y, z, i, occupationFraction);
+	  eta += donorConc[i]*donorElectronXsec[i]*occupationFraction;
+  }
+  return true;
+}
+
+bool ComponentTcad2d::HoleAttachment(const double x, const double y, const double z,
+                           double& eta){
+  //Check for nTraps > 1, valid Xsec, valid Acceptor
+  if(!validConc){
+    std::cerr << m_className << "::HoleAttachment:\n";
+    std::cerr << "    Trap concentrations are invalid.\n";
+    return false;
+  }
+  if(!validXsec){
+    std::cerr << m_className << "::HoleAttachment:\n";
+    std::cerr << "    Trap cross-sections are invalid.\n";
+    return false;
+  }
+  if(nAcceptor + nDonor < 1){
+    std::cerr << m_className << "::HoleAttachment:\n";
+    std::cerr << "    This component has not traps.\n";
+    return false;
+  }
+  eta = 0;
+  double occupationFraction;
+  for(int i = 0; i<nAcceptor; i++){
+	  this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
+	  eta += acceptorConc[i]*acceptorHoleXsec[i]*occupationFraction;
+  }
+  for(int i = 0; i<nDonor; i++){
+	  this->GetDonorOccupation(x, y, z, i, occupationFraction);
+	  eta += donorConc[i]*acceptorElectronXsec[i]*(1-occupationFraction);
+  }
+  return true;
+}
+
+void ComponentTcad2d::WeightingField(const double x, const double y, const double z,
+                                   double& wx, double& wy, double& wz, 
+				   const std::string label) {
+  int pointlessVariable = 0;
+  int& status = pointlessVariable;
+  Medium* med = 0;
+  double v = 0.;
+  ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }
 
 void ComponentTcad2d::ElectricField(const double xin, const double yin,
@@ -664,6 +865,364 @@ bool ComponentTcad2d::GetMobility(const double xin, const double yin,
   return false;
 }
 
+bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
+                                  const double zin, int donorNumber ,
+                                  double& occupationFraction ) {
+  if (donorNumber > nDonor) {
+    std::cerr << m_className << "::GetDonorOccupation:\n";
+    std::cerr << "    This donor does not exist.\n";
+    return false;
+  }
+
+  occupationFraction = 0;
+  // Make sure the field map has been loaded.
+  if (!m_ready) {
+    std::cerr << m_className << "::GetDonorOccupation:\n";
+    std::cerr << "    Field map is not available for interpolation.\n";
+    return false;
+  }
+
+  double x = xin, y = yin, z = zin;
+  // In case of periodicity, reduce to the cell volume.
+  const double cellsx = xMaxBoundingBox - xMinBoundingBox;
+  if (m_xPeriodic) {
+    x = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (x < xMinBoundingBox) x += cellsx;
+  } else if (m_xMirrorPeriodic) {
+    double xNew = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (xNew < xMinBoundingBox) xNew += cellsx;
+    int nx = int(floor(0.5 + (xNew - x) / cellsx));
+    if (nx != 2 * (nx / 2)) {
+      xNew = xMinBoundingBox + xMaxBoundingBox - xNew;
+    }
+    x = xNew;
+  }
+  const double cellsy = xMaxBoundingBox - xMinBoundingBox;
+  if (m_yPeriodic) {
+    y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (y < yMinBoundingBox) y += cellsy;
+  } else if (m_yMirrorPeriodic) {
+    double yNew = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (yNew < yMinBoundingBox) yNew += cellsy;
+    int ny = int(floor(0.5 + (yNew - y) / cellsy));
+    if (ny != 2 * (ny / 2)) {
+      yNew = yMinBoundingBox + yMaxBoundingBox - yNew;
+    }
+    y = yNew;
+  }
+
+  // Check if the point is inside the bounding box.
+  if (x < xMinBoundingBox || x > xMaxBoundingBox || y < yMinBoundingBox ||
+      y > yMaxBoundingBox) {
+    return false;
+  }
+  if (hasRangeZ) {
+    if (z < zMinBoundingBox || z > zMaxBoundingBox) {
+      return false;
+    }
+  }
+
+  // Check if the point is still located in the previously found element.
+  int i = lastElement;
+  switch (elements[i].type) {
+    case 1:
+      if (CheckLine(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+        return true;
+      }
+      break;
+    case 2:
+      if (CheckTriangle(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+               w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+        return true;
+      }
+      break;
+    case 3:
+      if (CheckRectangle(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+               w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+               w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+        return true;
+      }
+      break;
+    default:
+      std::cerr << m_className << "::GetDonorOccupation:\n";
+      std::cerr << "    Unknown element type (" << elements[i].type << ").\n";
+      return false;
+      break;
+  }
+
+  // The point is not in the previous element.
+  // Check the adjacent elements.
+  for (int j = elements[lastElement].nNeighbours; j--;) {
+    i = elements[lastElement].neighbours[j];
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+                 w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << m_className << "::GetDonorOccupation:\n";
+        std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+
+  // The point is not in the previous element nor in the adjacent ones.
+  // We have to loop over all elements.
+  for (i = nElements; i--;) {
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+                 w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << m_className << "::GetDonorOccupation:\n";
+        std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+  // Point is outside the mesh.
+  if (m_debug) {
+    std::cerr << m_className << "::GetDonorOccupation:\n";
+    std::cerr << "    Point (" << x << ", " << y << ") is outside the mesh.\n";
+  }
+  return false;
+}
+
+bool ComponentTcad2d::GetAcceptorOccupation(const double xin, const double yin,
+                                  const double zin, int acceptorNumber,
+                                  double& occupationFraction ) {
+  if (acceptorNumber > nAcceptor) {
+    std::cerr << m_className << "::GetAcceptorOccupation:\n";
+    std::cerr << "    This acceptor does not exist.\n";
+    return false;
+  }
+
+  occupationFraction = 0;
+  // Make sure the field map has been loaded.
+  if (!m_ready) {
+    std::cerr << m_className << "::GetAcceptorOccupation:\n";
+    std::cerr << "    Field map is not available for interpolation.\n";
+    return false;
+  }
+
+  double x = xin, y = yin, z = zin;
+  // In case of periodicity, reduce to the cell volume.
+  const double cellsx = xMaxBoundingBox - xMinBoundingBox;
+  if (m_xPeriodic) {
+    x = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (x < xMinBoundingBox) x += cellsx;
+  } else if (m_xMirrorPeriodic) {
+    double xNew = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (xNew < xMinBoundingBox) xNew += cellsx;
+    int nx = int(floor(0.5 + (xNew - x) / cellsx));
+    if (nx != 2 * (nx / 2)) {
+      xNew = xMinBoundingBox + xMaxBoundingBox - xNew;
+    }
+    x = xNew;
+  }
+  const double cellsy = xMaxBoundingBox - xMinBoundingBox;
+  if (m_yPeriodic) {
+    y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (y < yMinBoundingBox) y += cellsy;
+  } else if (m_yMirrorPeriodic) {
+    double yNew = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (yNew < yMinBoundingBox) yNew += cellsy;
+    int ny = int(floor(0.5 + (yNew - y) / cellsy));
+    if (ny != 2 * (ny / 2)) {
+      yNew = yMinBoundingBox + yMaxBoundingBox - yNew;
+    }
+    y = yNew;
+  }
+
+  // Check if the point is inside the bounding box.
+  if (x < xMinBoundingBox || x > xMaxBoundingBox || y < yMinBoundingBox ||
+      y > yMaxBoundingBox) {
+    return false;
+  }
+  if (hasRangeZ) {
+    if (z < zMinBoundingBox || z > zMaxBoundingBox) {
+      return false;
+    }
+  }
+
+  // Check if the point is still located in the previously found element.
+  int i = lastElement;
+  switch (elements[i].type) {
+    case 1:
+      if (CheckLine(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+        return true;
+      }
+      break;
+    case 2:
+      if (CheckTriangle(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+               w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+        return true;
+      }
+      break;
+    case 3:
+      if (CheckRectangle(x, y, i)) {
+        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+               w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
+               w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+        return true;
+      }
+      break;
+    default:
+      std::cerr << m_className << "::GetAcceptorOccupation:\n";
+      std::cerr << "    Unknown element type (" << elements[i].type << ").\n";
+      return false;
+      break;
+  }
+
+  // The point is not in the previous element.
+  // Check the adjacent elements.
+  for (int j = elements[lastElement].nNeighbours; j--;) {
+    i = elements[lastElement].neighbours[j];
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
+                 w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << m_className << "::GetAcceptorOccupation:\n";
+        std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+
+  // The point is not in the previous element nor in the adjacent ones.
+  // We have to loop over all elements.
+  for (i = nElements; i--;) {
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
+                 w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << m_className << "::GetAcceptorOccupation:\n";
+        std::cerr << "    Invalid element type (" << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+  // Point is outside the mesh.
+  if (m_debug) {
+    std::cerr << m_className << "::GetAcceptorOccupation:\n";
+    std::cerr << "    Point (" << x << ", " << y << ") is outside the mesh.\n";
+  }
+  return false;
+}
+
 bool ComponentTcad2d::Initialise(const std::string gridfilename,
                                  const std::string datafilename) {
 
@@ -677,8 +1236,9 @@ bool ComponentTcad2d::Initialise(const std::string gridfilename,
 
   hasPotential = hasField = false;
   hasElectronMobility = hasHoleMobility = false;
+  nDonor = nAcceptor = 0;
 
-  // Import electric field and potential from .dat file.
+  // Import electric field, potential, mobilities and trap occupation values from .dat file.
   if (!LoadData(datafilename)) {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Importing electric field and potential failed.\n";
@@ -722,6 +1282,12 @@ bool ComponentTcad2d::Initialise(const std::string gridfilename,
   }
   if (hasHoleMobility) {
     std::cout << "      Hole mobility\n";
+  }
+  if (nDonor > 0){
+      std::cout << "      Donor trap occupation maps: " << nDonor <<"\n";
+  }
+  if (nAcceptor > 0){
+      std::cout << "      Acceptor trap occupation maps: " << nAcceptor <<"\n";
   }
   std::cout << "    Bounding box:\n";
   std::cout << "      " << xMinBoundingBox << " < x [cm] < " << xMaxBoundingBox
@@ -1118,8 +1684,16 @@ bool ComponentTcad2d::LoadData(const std::string datafilename) {
     vertices[i].ey = 0.;
     vertices[i].emob = 0.;
     vertices[i].hmob = 0.;
+    vertices[i].donorOcc.clear();
+    vertices[i].acceptorOcc.clear();
     vertices[i].isShared = false;
   }
+  donorElectronXsec.clear();
+  donorHoleXsec.clear();
+  acceptorElectronXsec.clear();
+  acceptorHoleXsec.clear();
+  donorConc.clear();
+  acceptorConc.clear();
 
   std::string::size_type pBra, pKet, pEq;
 
@@ -1508,6 +2082,192 @@ bool ComponentTcad2d::LoadData(const std::string datafilename) {
           ++ivertex;
         }
         hasHoleMobility = true;
+      } else if (dataset.substr(0,14) == "TrapOccupation" && dataset.substr(17,2) == "Do") {
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        // Get the region name (given in brackets).
+        pBra = line.find('[');
+        pKet = line.find(']');
+        if (pKet < pBra || pBra == std::string::npos ||
+            pKet == std::string::npos) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        std::string name;
+        data.str(line);
+        data >> name;
+        data.clear();
+        // Check if the region name matches one from the mesh file.
+        int index = -1;
+        for (int j = 0; j < nRegions; ++j) {
+          if (name == regions[j].name) {
+            index = j;
+            break;
+          }
+        }
+        if (index == -1) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Unknown region " << name << ".\n";
+          continue;
+        }
+        // Get the number of values.
+        std::getline(datafile, line);
+        pBra = line.find('(');
+        pKet = line.find(')');
+        if (pKet < pBra || pBra == std::string::npos ||
+            pKet == std::string::npos) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        int nValues;
+        data.str(line);
+        data >> nValues;
+        data.clear();
+        // Mark the vertices belonging to this region.
+        for (int j = nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < nElements; ++j) {
+          if (elements[j].region != index) continue;
+          for (int k = 0; k <= elements[j].type; ++k) {
+            isInRegion[elements[j].vertex[k]] = true;
+          }
+        }
+        int ivertex = 0;
+        double val;
+        for (int j = 0; j < nValues; ++j) {
+          // Read the next value.
+          datafile >> val;
+          // Find the next vertex belonging to the region.
+          while (ivertex < nVertices) {
+            if (isInRegion[ivertex]) break;
+            ++ivertex;
+          }
+          // Check if there is a mismatch between the number of vertices
+          // and the number of trap occupation values.
+          if (ivertex >= nVertices) {
+            std::cerr << m_className << "::LoadData:\n";
+            std::cerr << "    Dataset DonorOccupation:\n";
+            std::cerr << "      More values than vertices in region " << name
+                      << "\n";
+            datafile.close();
+            Cleanup();
+            return false;
+          }
+          vertices[ivertex].donorOcc.push_back(val);
+          ++fillCount[ivertex];
+          ++ivertex;
+        }
+	donorElectronXsec.push_back(-1);
+	donorHoleXsec.push_back(-1);
+	donorConc.push_back(-1);
+        nDonor++;
+      } else if (dataset.substr(0,14) == "TrapOccupation" && dataset.substr(17, 2) == "Ac") {
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        std::getline(datafile, line);
+        // Get the region name (given in brackets).
+        pBra = line.find('[');
+        pKet = line.find(']');
+        if (pKet < pBra || pBra == std::string::npos ||
+            pKet == std::string::npos) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        std::string name;
+        data.str(line);
+        data >> name;
+        data.clear();
+        // Check if the region name matches one from the mesh file.
+        int index = -1;
+        for (int j = 0; j < nRegions; ++j) {
+          if (name == regions[j].name) {
+            index = j;
+            break;
+          }
+        }
+        if (index == -1) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Unknown region " << name << ".\n";
+          continue;
+        }
+        // Get the number of values.
+        std::getline(datafile, line);
+        pBra = line.find('(');
+        pKet = line.find(')');
+        if (pKet < pBra || pBra == std::string::npos ||
+            pKet == std::string::npos) {
+          std::cerr << m_className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        int nValues;
+        data.str(line);
+        data >> nValues;
+        data.clear();
+        // Mark the vertices belonging to this region.
+        for (int j = nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < nElements; ++j) {
+          if (elements[j].region != index) continue;
+          for (int k = 0; k <= elements[j].type; ++k) {
+            isInRegion[elements[j].vertex[k]] = true;
+          }
+        }
+        int ivertex = 0;
+        double val;
+        for (int j = 0; j < nValues; ++j) {
+          // Read the next value.
+          datafile >> val;
+          // Find the next vertex belonging to the region.
+          while (ivertex < nVertices) {
+            if (isInRegion[ivertex]) break;
+            ++ivertex;
+          }
+          // Check if there is a mismatch between the number of vertices
+          // and the number of trap occupation values.
+          if (ivertex >= nVertices) {
+            std::cerr << m_className << "::LoadData:\n";
+            std::cerr << "    Dataset DonorOccupation:\n";
+            std::cerr << "      More values than vertices in region " << name
+                      << "\n";
+            datafile.close();
+            Cleanup();
+            return false;
+          }
+          vertices[ivertex].acceptorOcc.push_back(val);
+          ++fillCount[ivertex];
+          ++ivertex;
+        }
+        nAcceptor++;
+	acceptorElectronXsec.push_back(-1);
+	acceptorHoleXsec.push_back(-1);
+	acceptorConc.push_back(-1);
       }
     }
   }
