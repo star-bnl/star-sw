@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.20 2007/05/17 08:56:19 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.21 2016/04/21 01:36:24 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.21  2016/04/21 01:36:24  perev
+ * Remove redundant commentout
+ *
  * Revision 1.20  2007/05/17 08:56:19  caines
  * Remove printf
  *
@@ -371,13 +374,6 @@ void StSvtDaqMaker::Clear(const char*)
 Int_t StSvtDaqMaker::Reset()
 {
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
-  /*
-  fSvtData = NULL;
-  fHybridSet = NULL;
-  fSvtPed = NULL;
-  fSvtSet = NULL;
-  m_ConstSet->Delete();
-  */
   return kStOK;
 }
 
@@ -395,7 +391,7 @@ void StSvtDaqMaker::PrintInfo()
   gMessMgr->Info() << 
     "**************************************************************" << endm;
   gMessMgr->Info() <<
-    "* $Id: StSvtDaqMaker.cxx,v 1.20 2007/05/17 08:56:19 caines Exp $" << endm;
+    "* $Id: StSvtDaqMaker.cxx,v 1.21 2016/04/21 01:36:24 perev Exp $" << endm;
   gMessMgr->Info() <<
     "**************************************************************" << endm;
   if (Debug()) StMaker::PrintInfo();

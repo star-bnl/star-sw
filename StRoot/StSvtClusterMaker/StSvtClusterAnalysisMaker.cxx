@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.32 2007/07/12 20:06:49 fisyak Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.33 2016/04/21 01:34:53 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.33  2016/04/21 01:34:53  perev
+ * Remove dangerous delete
+ *
  * Revision 1.32  2007/07/12 20:06:49  fisyak
  * Move initialization to IntRun from Init, empty GetSvtDriftCurve, clean up
  *
@@ -689,7 +692,6 @@ Int_t StSvtClusterAnalysisMaker::Reset(){
    mSvtHit          = NULL;
    mSvtAnalClusters = NULL; 
 
-   m_ConstSet->Delete();
 
    return kStOK;
 }

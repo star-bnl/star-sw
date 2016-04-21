@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.48 2016/03/11 21:18:07 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.51 2016/04/20 22:04:10 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -66,7 +66,7 @@
 //==========================================================
 //==========================================================
 
-StPPVertexFinder::StPPVertexFinder() {
+StPPVertexFinder::StPPVertexFinder(VertexFit_t fitMode) : StGenericVertexFinder(fitMode) {
   LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
   mdxdz=mdydz=mX0=mY0  = 0; // beam line params
@@ -396,7 +396,6 @@ StPPVertexFinder::CalibBeamLine(){
 //======================================================
 void 
 StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
-  mVertexConstrain = true;
   mX0 = x0;
   mY0 = y0;
   mdxdz = dxdz;
@@ -848,10 +847,11 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
-  if ( ! mVertexConstrain ){
+  if (mVertexFitMode != VertexFit_t::Beamline1D)
+  {
     // code is not ready for reco w/o beamLine
     LOG_FATAL << "StPPVertexFinder code is not ready for reco w/o beamLine" << endm;
-    assert(mVertexConstrain); 
+    assert(mVertexFitMode == VertexFit_t::Beamline1D);
   }
   uint i;
   for(i=0;i<mVertexData.size();i++) {
@@ -1376,186 +1376,6 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
   return false;
 }
 
-/**************************************************************************
- **************************************************************************
- * $Log: StPPVertexFinder.cxx,v $
- * Revision 1.48  2016/03/11 21:18:07  smirnovd
- * StPPVertexFinder: Convert to C++11 syntax
- *
- * Revision 1.47  2016/02/29 22:58:23  jwebb
- * Moved include of StEventTypes from header of generic class to implementation files of generic and concrete classes.
- *
- * Revision 1.46  2015/08/31 20:28:02  genevb
- * Correct a typo in a print statement present since version 1.1 : bemc->eemc
- *
- * Revision 1.45  2013/08/16 20:49:38  perev
- * PPV with only StEvent dependency
- *
- * Revision 1.44  2013/04/09 22:37:56  genevb
- * Remove boostEfficiency codes: DB usage implemented
- *
- * Revision 1.43  2013/04/09 21:11:58  genevb
- * Use database table for track selection cuts
- *
- * Revision 1.42  2013/04/05 21:00:02  jeromel
- * Implemented and merged back to source the boostEfficiency (i.e. change of
- * nFit /nPossible points on the track fract to consider). No DB imp yet.
- *
- * Fixed boostEfficiency()
- *
- * Changed cout to LOG_INFO
- *
- * Revision 1.41  2012/11/06 20:58:04  fisyak
- * Remove second addition of btofGeom to db maker
- *
- * Revision 1.40  2012/05/25 20:19:40  balewski
- * convert many LOG_INFO to LOG_DEBUG to make PPV more silent. No intencional change of PPV logic.
- *
- * Revision 1.39  2012/05/07 15:55:30  fisyak
- * Proper handing of btofGeometry
- *
- * Revision 1.38  2010/09/16 04:18:55  rjreed
- * Moved intialized of btof from init to initrun and changed it so that the btof class is not utilized if mUseBtof is false
- *
- * Revision 1.37  2010/09/10 21:08:35  rjreed
- * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
- * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
- *
- * Revision 1.36  2009/11/20 18:54:08  genevb
- * Avoid compiler warning about operator order precedence
- *
- * Revision 1.35  2009/11/05 21:40:08  rjreed
- * Last line of matchTrack2Membrane was deleted between version 1.29 and 1.30.  This line checks
- * tracks to determine whether they've crossed the TPC CM.  This rev reinstates the line.
- *
- * Revision 1.34  2009/07/09 21:29:03  balewski
- * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
- * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c
- *
- * Revision 1.33  2009/02/05 21:43:59  balewski
- * Oleksandr renamed StEEmcDbMaker to StEEmcDb and requested this set of code corrections
- *
- * Revision 1.32  2008/12/02 14:35:05  balewski
- * I forgot to require EMC hit for highPT track, now it is in
- *
- * Revision 1.31  2008/12/01 22:57:39  balewski
- * Added capability to reco 1 high pT track vertices with positive rank. 2+ match vertices will have rank above 1e6. Sub-prime vertices (for Akio) have negative rank. More details is given at:
- * http://drupal.star.bnl.gov/STAR/comp/reco/vf/ppv-vertex/2009-algo-upgrade-1
- *
- * Revision 1.30  2008/10/21 19:23:05  balewski
- * store unqualified vertices on Akio's request
- *
- * Revision 1.29  2008/08/21 22:09:31  balewski
- * - In matchTrack2Membrane()
- *   - Cut on hit max R chanegd from 190 to 199cm
- *   - Fixed logic failure of counting possible hits
- *   - Fixed logic failure of crossing CM for certain pattern of hits
- * - Added a new function bool isPostCrossingTrack()
- *   - it returns true if track have 2 or more hits in wrong z
- * - Use isPostCrossingTrack() in fit()
- * - Added switch setDropPostCrossingTrack(bool), defaulted to true
- * All changes tested & implemented by Akio in preparation for 2008 pp production.
- * The key change (removing PostCrossingTrack) is in response to the change of the TPC cluster finder
- * - now we use the on-line version which allows for longer range of TPC time buckets to be used.
- *
- * Revision 1.28  2008/04/03 16:24:31  fisyak
- * replace sti->getToolkit() by StiToolkit::instance()
- *
- * Revision 1.27  2008/02/12 17:51:20  jeromel
- * Assert of Year number removed. Assert on beamLine left but added an explaination (so we won't have to rediscover this).
- *
- * Revision 1.26  2007/03/22 08:42:05  balewski
- * extend validity of PPV for 2007 data taking
- *
- * Revision 1.25  2006/10/17 13:38:03  fisyak
- * Remove dependencies from dead classes
- *
- * Revision 1.24  2006/07/31 17:57:54  balewski
- * cleanup before 2006 prod, no changes in algo, CTB stays out all the time
- *
- * Revision 1.23  2006/06/02 20:46:55  perev
- * Accoun DCA node added
- *
- * Revision 1.22  2006/05/04 20:01:31  jeromel
- * Switched to logger
- *
- * Revision 1.21  2006/04/26 15:37:04  jeromel
- * mVertexOrderMethod (To be tested)
- *
- * Revision 1.20  2006/03/12 18:47:29  balewski
- * small corrections of histograms and printouts
- *
- * Revision 1.19  2006/03/12 17:01:01  jeromel
- * Minor change + use ppvNoCtbVertexFinder
- *
- * Revision 1.18  2006/03/11 04:12:49  balewski
- * 2 changes in preparation for 2006 data processing:
- * - CTB matching  ON/OFF switch activated by m_Mode 0x8 or 0x10
- * - vertex enum extension depending on CTB usage - hack in the moment, 
- *   Jerome needs to provide actual new enum
- * - BTOW calibration wil change for 2006+ from maxt eT of ~27 --> 60 GeV
- * NOTE : this new code was NOT executed - it is late, I want to get it in CVS
- * Tomorrow I'll do some tests
- * Jan
- *
- * Revision 1.17  2006/01/24 17:53:39  balewski
- * small fix
- *
- * Revision 1.16  2006/01/24 17:26:06  balewski
- * drop hardcoded mask of BTOW lower East, now it takes BTOW mask & ped+sigPed from DB
- * Watch the DB  time stamp !
- *
- * Revision 1.15  2005/09/03 16:41:53  balewski
- * bug fix: <<endm replaced with <<endl
- *
- * Revision 1.14  2005/08/30 22:08:43  balewski
- * drop '*' from declaration of   mTrackData &  mVertexData
- *
- * Revision 1.13  2005/08/17 15:07:39  balewski
- * cleanup, irrelevant for pp200 production
- *
- * Revision 1.12  2005/08/15 13:04:08  balewski
- * Z-range +/- 250 cm
- *
- * Revision 1.11  2005/08/14 23:49:55  balewski
- * smaller bins for Z-likelihood, limit siZ >=1 mm
- *
- * Revision 1.10  2005/08/12 18:35:27  balewski
- * more accurate calculation of Z-vertex error
- * by accounting for average weight of tracks contributing to the likelihood,
- *  Now errZ is of 0.5-1.5 mm, was ~2x smaller
- *
- * Revision 1.9  2005/07/28 20:57:14  balewski
- * extand zMax range to 200cm, call it PPV-2
- *
- * Revision 1.8  2005/07/27 06:08:19  balewski
- * tuning PPV cuts
- *
- * Revision 1.7  2005/07/26 02:49:08  balewski
- * more flexible for node pathologies
- *
- * Revision 1.6  2005/07/22 21:02:08  balewski
- * bug fix & cleanup
- *
- * Revision 1.5  2005/07/20 05:34:16  balewski
- * cleanup
- *
- * Revision 1.4  2005/07/19 22:01:24  perev
- * MultiVertex
- *
- * Revision 1.3  2005/07/15 20:53:25  balewski
- * cleanup
- *
- * Revision 1.2  2005/07/14 15:39:25  balewski
- * nothing, to force recompilation of this code by Autobuild
- *
- * Revision 1.1  2005/07/11 20:38:12  balewski
- * PPV added for real
- *
- *
- **************************************************************************
- **************************************************************************
- **************************************************************************/
 
 #if 0
 
