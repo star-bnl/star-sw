@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.263 2015/07/19 23:01:21 fisyak Exp $
+// $Id: StMaker.cxx,v 1.264 2016/04/21 01:39:24 perev Exp $
 //
 //
 /*!
@@ -192,9 +192,9 @@ static void doPs(const Char_t *who,const Char_t *where);
 
 //_____________________________________________________________________________
 StMaker::StMaker(const Char_t *name,const Char_t *):TDataSet(name,".maker"),
-						m_Mode(0), m_Number(0), m_LastRun(-3),
+						m_Number(0), m_LastRun(-3),
 						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
-						fLogger(0),fLoggerHold(0)
+						fLogger(0),fLoggerHold(0),m_Mode(0)
 {
    m_Attr=0;
    m_Inputs = 0;
@@ -363,6 +363,7 @@ TDataSet  *StMaker::GetData(const Char_t *name, const Char_t *dir) const
 { 
   TDataSet *set = Find(dir);
   if (!set) return 0;
+  if (!name || !name[0]) return set;
   return set->Find(name);
 }
 //______________________________________________________________________________
@@ -1456,7 +1457,7 @@ void  StMaker::SetDebug(Int_t l)
 {
    m_DebugLevel = l;
    StMessMgr    *log = GetLogger();
-   if (log) log->SetLevel(m_DebugLevel);
+   if (log) log->SetLevel(Debug());
 }
 
 //_____________________________________________________________________________
@@ -1830,6 +1831,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.264  2016/04/21 01:39:24  perev
+// Warnoff
+//
 // Revision 1.263  2015/07/19 23:01:21  fisyak
 // Remove numbers from lsMakers
 //
