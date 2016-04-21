@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.56 2007/04/28 17:57:10 perev Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.57 2016/04/21 01:37:04 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.57  2016/04/21 01:37:04  perev
+ * Remove dangerous delete
+ *
  * Revision 1.56  2007/04/28 17:57:10  perev
  * Redundant StChain.h removed
  *
@@ -1151,8 +1154,6 @@ Int_t StSvtSeqAdjMaker::Reset(){
   mSvtBadAnodes = NULL;
   mInvProd = NULL;
   mProbValue = NULL;
-
-  m_ConstSet->Delete();
   
   return kStOK;
 }
