@@ -1560,6 +1560,13 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
       for(int i=0;i<8;i++) {
 	printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
       }
+      printf("ids: ");
+      for(int i=0;i<64;i++) {
+	  if(rdr->daqbits64 & (1ll << i)) {
+	      printf("{%d}",rdr->getOfflineId(i));
+	  }
+      }
+      printf("\n");
     }
   }
   
