@@ -22,6 +22,7 @@ class StarNoStacker : public StarAgmlStacker
 
   Bool_t Build( AgBlock *block ){ return true; }
   Bool_t Position( AgBlock *block, AgPlacement placement ){ return true; }
+  Bool_t Position( AgBlock *block, AgPosition  placement ){ return true; }; 
   Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attribute ){ return true; }
   void   AddGroup( const Char_t *name ){ /* nada */ };
 
