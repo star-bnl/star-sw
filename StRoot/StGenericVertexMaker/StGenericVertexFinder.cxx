@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.26 2016/04/25 23:59:23 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.27 2016/04/25 23:59:31 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -111,7 +111,7 @@ StGenericVertexFinder::Clear()
  * \author Dmitri Smirnov
  * \date April, 2016
  */
-double StGenericVertexFinder::CalcBeamlineChi2(const StThreeVectorD& point)
+double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
 {
    // Just for shorthand
    const vertexSeed_st& bl = sBeamline;

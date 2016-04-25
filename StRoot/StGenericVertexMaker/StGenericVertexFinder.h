@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.32 2016/04/25 23:59:23 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.33 2016/04/25 23:59:31 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -90,7 +90,7 @@ class StGenericVertexFinder {
   static double beamY(double z);
 
   /// Caclulates chi2 for the beamline and a point
-  static double CalcBeamlineChi2(const StThreeVectorD& point);
+  static double CalcChi2Beamline(const StThreeVectorD& point);
 
   /// A static container with pointers to DCA states to be used in a vertex fit
   static std::vector<const StDcaGeometry*>  sDCAs;
