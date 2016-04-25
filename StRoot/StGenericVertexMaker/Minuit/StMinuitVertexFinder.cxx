@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.32 2016/04/20 22:04:32 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.33 2016/04/25 23:58:51 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -26,7 +26,7 @@
 #include "StDcaGeometry.h"
 #include "St_VertexCutsC.h"
 #include "StMaker.h"
-vector<StDcaGeometry*>     StMinuitVertexFinder::mDCAs;
+vector<const StDcaGeometry*>     StMinuitVertexFinder::mDCAs;
 vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 vector<Double_t >          StMinuitVertexFinder::mSigma;
