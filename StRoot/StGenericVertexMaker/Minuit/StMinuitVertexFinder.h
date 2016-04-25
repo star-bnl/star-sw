@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.18 2016/04/25 23:59:07 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.19 2016/04/25 23:59:16 smirnovd Exp $
  *
  */
 
@@ -101,7 +101,7 @@
 class StEvent;
 class StTrack;
 class TMinuit;
-class StDcaGeometry;
+
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
     StMinuitVertexFinder(VertexFit_t fitMode=VertexFit_t::NoBeamline);
@@ -166,7 +166,6 @@ private:
     Int_t                  mNSeed;
     Float_t                mSeedZ[maxSeed];
     Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
-    static vector<const StDcaGeometry*>   mDCAs;
     static vector<StPhysicalHelixD> mHelices;
     static vector<UShort_t>         mHelixFlags;
     static vector<Double_t>         mSigma;
