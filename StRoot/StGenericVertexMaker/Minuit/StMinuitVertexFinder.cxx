@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.35 2016/04/25 23:59:16 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.36 2016/04/25 23:59:23 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -429,7 +429,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  fcn to calculate the fit potential which
     //  gets minimized by Minuit.
     //
-    mDCAs.clear();
+    sDCAs.clear();
     mHelices.clear();
     mHelixFlags.clear();
     mSigma.clear();
@@ -451,7 +451,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
       if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
-      mDCAs.push_back(gDCA);
+      sDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
       mHelices.push_back(g->geometry()->helix());
@@ -735,12 +735,12 @@ Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
   if (fabs(vtx.x())> 10) return 1e6;
   if (fabs(vtx.y())> 10) return 1e6;
   if (fabs(vtx.z())>300) return 1e6;
-  for (UInt_t i=0; i<mDCAs.size(); i++) {
+  for (UInt_t i=0; i<sDCAs.size(); i++) {
 
     if ( !(mHelixFlags[i] & kFlagDcaz) || (requireCTB && !(mHelixFlags[i] & kFlagCTBMatch)) )
        continue;
 
-    const StDcaGeometry* gDCA = mDCAs[i];
+    const StDcaGeometry* gDCA = sDCAs[i];
     if (! gDCA) continue;
     const StPhysicalHelixD helix = gDCA->helix();
     e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
