@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.24 2016/04/25 23:59:07 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.25 2016/04/25 23:59:16 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -12,9 +12,14 @@
 #include "StGenericVertexFinder.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
+#include "StEvent/StDcaGeometry.h"
 #include "StEventTypes.h"
 
 // Initialize static variable with default values
+
+/// Pointers to DCA states to be used in a vertex fit
+std::vector<const StDcaGeometry*>  StGenericVertexFinder::mDCAs;
+
 vertexSeed_st StGenericVertexFinder::sBeamline;
 
 
