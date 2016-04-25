@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.16 2016/04/20 22:04:25 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.17 2016/04/25 23:58:52 smirnovd Exp $
  *
  */
 
@@ -166,7 +166,7 @@ private:
     Int_t                  mNSeed;
     Float_t                mSeedZ[maxSeed];
     Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
-    static vector<StDcaGeometry*>   mDCAs;
+    static vector<const StDcaGeometry*>   mDCAs;
     static vector<StPhysicalHelixD> mHelices;
     static vector<UShort_t>         mHelixFlags;
     static vector<Double_t>         mSigma;
