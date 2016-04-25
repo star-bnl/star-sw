@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.33 2016/04/25 23:58:51 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.34 2016/04/25 23:59:07 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -869,17 +869,6 @@ void StMinuitVertexFinder::UseVertexConstraint(Double_t x0, Double_t y0, Double_
     mExternalSeedPresent = kFALSE;
 
 
-}
-
-
-Double_t StMinuitVertexFinder::beamX(Double_t z) {
-  Float_t x = mX0 + mdxdz*z;
-  return x;
-}
-
-Double_t StMinuitVertexFinder::beamY(Double_t z) {
-  Float_t y = mY0 + mdydz*z;
-  return y;
 }
 
 Int_t  StMinuitVertexFinder::NCtbMatches() { 

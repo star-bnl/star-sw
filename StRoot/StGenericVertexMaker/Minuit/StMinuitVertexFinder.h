@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.17 2016/04/25 23:58:52 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.18 2016/04/25 23:59:07 smirnovd Exp $
  *
  */
 
@@ -179,8 +179,6 @@ private:
     static Double_t                 mY0  ; // starting point of beam parameterization
     static Double_t                 mdxdz; // beam slope
     static Double_t                 mdydz; // beam slope
-    static Double_t beamX(Double_t z); // beamline parameterization
-    static Double_t beamY(Double_t z); // beamline parameterization
     Int_t                    mStatusMin;           // Minuit status flag 
     StThreeVectorD           mExternalSeed;
     Bool_t                   mExternalSeedPresent;

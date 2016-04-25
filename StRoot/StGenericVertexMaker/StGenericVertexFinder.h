@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.29 2016/04/20 22:03:45 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.30 2016/04/25 23:59:07 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -76,6 +76,14 @@ class StGenericVertexFinder {
   bool   		 mIsMC;              // flag minor differences between Data & M-C
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
+
+  /// Returns x coordinate on the beamline (given by sBeamline) corresponding to
+  /// the passed value of z.
+  static double beamX(double z);
+
+  /// Returns y coordinate on the beamline (given by sBeamline) corresponding to
+  /// the passed value of z.
+  static double beamY(double z);
 
   /// Caclulates chi2 for the beamline and a point
   static double CalcBeamlineChi2(const StThreeVectorD& point);
