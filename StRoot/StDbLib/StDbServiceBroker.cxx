@@ -75,6 +75,14 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   MyHostList(vector<ChapiDbHost>()),
   MyStatus(st_db_service_broker::NO_ERROR)
 {
+  last_succeeded_connect_time = time(NULL);
+  seconds_to_reach_for_connect = 1800;
+  char* secs = 0;
+  secs = getenv("STAR_DEBUG_DB_RETRIES_SECONDS");
+  if (secs) {
+	seconds_to_reach_for_connect = atoi(secs);
+  }
+
   char* whoami = getenv("USER");
   if (!whoami) whoami = getenv("LOGNAME");
   if (!whoami) 
@@ -169,6 +177,15 @@ StDbServiceBroker::StDbServiceBroker
   MyHostList(vector<ChapiDbHost>()),
   MyStatus(st_db_service_broker::NO_ERROR)
 {
+  last_succeeded_connect_time = time(NULL);
+  seconds_to_reach_for_connect = 1800;
+  char* secs = 0;
+  secs = getenv("STAR_DEBUG_DB_RETRIES_SECONDS");
+  if (secs) {
+	seconds_to_reach_for_connect = atoi(secs);
+  }
+
+
   StlXmlTree* f = new StlXmlTree(xmlfilter);
   f->ShowTree();
   ParsedXml = StlXmlTree(xmlbase,f);
@@ -201,6 +218,7 @@ void StDbServiceBroker::DoLoadBalancing()
 #endif
   bool host_found = false;
   const int MAX_COUNT = 500;
+  last_succeeded_connect_time = time(NULL);
   for (int i = 0; i < MAX_COUNT; i++) {
 	if (!RecommendHost()) {
 		host_found = true;
@@ -303,6 +321,39 @@ void StDbServiceBroker::PrintHostList()
       LOG_DEBUG << (*i).HostName << endm;
     }
 }
+
+namespace {
+
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    return buf;
+}
+
+}
+
+void StDbServiceBroker::SendEmail(time_t timediff) {
+
+  std::string admin_emails;
+  char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
+  if (!admins) { return; }
+  char* hostname = getenv("HOSTNAME");
+  pid_t mypid = getpid();
+  std::string host = "unknown host";
+  if (hostname) { host = hostname; }
+  admin_emails = admins;
+
+  std::string curtime = currentDateTime();
+  std::stringstream exec_command;
+  exec_command << "echo \"We waited for " << timediff << " seconds (threshold: "<< seconds_to_reach_for_connect <<"), and did not get a db connection at " << host 
+	<< " at " << curtime << ", process id = " << mypid << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< host << " at " << curtime << "\" " << admin_emails;
+  system(exec_command.str().c_str());
+
+}
+
 //////////////////////////////////////////////////////
 int StDbServiceBroker::RecommendHost()
 {
@@ -320,6 +371,8 @@ int StDbServiceBroker::RecommendHost()
   srand ( unsigned ( time (NULL) ) );                                                                                                                        
   random_shuffle( MyHostList.begin(), MyHostList.end() ); 
 
+  int scanned_hosts = 0;
+  bool host_found = false;
   for (vector<ChapiDbHost>::const_iterator I=MyHostList.begin(); I!=MyHostList.end(); ++I)
     {
       conn = mysql_init(0);
@@ -334,12 +387,19 @@ int StDbServiceBroker::RecommendHost()
 
       if (mysql_real_connect
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
-        {
+        {	
           LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
 	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" did not succeed"<<endm;
           mysql_close(conn);
+		  time_t timediff = time(NULL) - last_succeeded_connect_time;
+		  if ( timediff > seconds_to_reach_for_connect) { // default: 1800 
+			last_succeeded_connect_time = time(NULL);
+			SendEmail(timediff);
+		  }
           continue;
-        }
+        } else {
+			last_succeeded_connect_time = time(NULL);
+		}
 
       if (mysql_query(conn, "show status like \"%Threads_running\"") != 0 )
         {
@@ -383,12 +443,18 @@ int StDbServiceBroker::RecommendHost()
 #endif
       mysql_close(conn);
 
-      if (dproc<dproc_min && nproc<(*I).Cap)
-        {
+
+      if ( dproc<dproc_min && nproc<(*I).Cap ) {
           	dproc_min = dproc;
 	  		MyBestHost = I;
+			host_found = true;
         }
+	  	scanned_hosts += 1;
 
+		if (scanned_hosts > 2 && host_found == true ) {
+			LOG_INFO << "StDbLib: db server found in " << scanned_hosts << " iterations" << endm;
+			return 0;
+		}
     }
 
     if ( MyBestHost != MyHostList.end() ) {                                                                                                                  

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.48 2013/02/18 16:30:42 fisyak Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.49 2013/03/26 15:56:00 genevb Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.49  2013/03/26 15:56:00  genevb
+ * Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
+ *
  * Revision 1.48  2013/02/18 16:30:42  fisyak
  * gufld => agufld
  *
@@ -194,8 +197,7 @@ using namespace std;
 #include "StMcEvent.hh"
 #include "StMcTrack.hh"
 #include "StMcSvtHit.hh"
-#define agufld   agufld_
-extern "C" {void agufld(Float_t *, Float_t *);}
+#include "StarMagField.h"
 
 ClassImp(StSvtSimulationMaker)
 
@@ -361,7 +363,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   // Get BField;
   Float_t x[3] = {0,0,0};
   Float_t b[3];
-  agufld(x,b);
+  StarMagField::Instance()->BField(x,b);
   mBField = b[2]*tesla;
 
   LOG_DEBUG << "StSvtSimulationMaker::InitRun()-END"<<endm;

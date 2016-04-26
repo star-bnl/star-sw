@@ -8,17 +8,17 @@
 
 #include "StSpaceChargeEbyEMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
-#include "StEventTypes.h"
+#include "StEvent/StEventTypes.h"
 #include "StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StDcaGeometry.h"
-#include "StBTofCollection.h"
-#include "StBTofHit.h"
-#include "StBTofHeader.h"
-#include "StBTofPidTraits.h"
-#include "StTrackPidTraits.h"
+#include "StEvent/StBTofCollection.h"
+#include "StEvent/StBTofHit.h"
+#include "StEvent/StBTofHeader.h"
+#include "StEvent/StBTofPidTraits.h"
+#include "StEvent/StTrackPidTraits.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcGridLeakC.h"
 #include "StDetectorDbMaker/St_spaceChargeCorC.h"
@@ -1154,58 +1154,71 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
     }
   }
 
-  TH1D* dcaproj = dcehist->ProjectionY();
-
-  // Initial fits to DCA distribution
-  ga1.SetParameters(1.,0.,1.);
-  dcaproj->Fit(&ga1,"Q");
-  float hm = ga1.GetParameter(1);
-  float hw = TMath::Abs(ga1.GetParameter(2));
-  float hd = 0.6*hw;
-  ga1.SetRange(hm-hd,hm+hd);
-  dcaproj->Fit(&ga1,"RQ");
-  float gm = ga1.GetParameter(1);
-  float gw = TMath::Abs(ga1.GetParameter(2));
-  float gm1 = gm;
-  float gw1 = gw;
-
-  // Iterate fit to get best answer
-  ga1.SetRange(gm-0.9*gw,gm+0.9*gw);
-  dcaproj->Fit(&ga1,"RQ");
-  gm = ga1.GetParameter(1);
-  gw = TMath::Abs(ga1.GetParameter(2));
-  ga1.SetRange(gm-0.8*gw,gm+0.8*gw);
-  dcaproj->Fit(&ga1,"RQ");
-  gm = ga1.GetParameter(1);
-  gw = TMath::Abs(ga1.GetParameter(2));
-  ga1.SetRange(gm-0.7*gw,gm+0.7*gw);
-  dcaproj->Fit(&ga1,"RQ");
-  gm = ga1.GetParameter(1);
-  gw = TMath::Abs(ga1.GetParameter(2));
-  float gme = TMath::Abs(ga1.GetParError(1));
-  float gwe = TMath::Abs(ga1.GetParError(2));
-
-  // Average SC
-  scehist->Fit("pol0","Q");
-  TF1* pl0 = scehist->GetFunction("pol0");
-  float pm = 0, pw = 0;
-  if (pl0) {
-    pm = pl0->GetParameter(0);
-    pw = pl0->GetParError(0);
-  }
   // Other counts
   float spc = (float) (scehist->GetEntries());
   float dcc = (float) (dcehist->GetEntries());
   float evc = (float) (timehist->GetEntries());
-  timehist->GetXaxis()->SetRange(1,(int) evc);
-  timehist->Fit("pol0","LQ");
-  pl0 = timehist->GetFunction("pol0");
-  float epsec = 0;
-  if (pl0) epsec = pl0->GetParameter(0); // events per second
 
-  // Quality measures
-  float wid = TMath::Min(10.,TMath::Log10(gw1*gw1+gw*gw));
-  float frac = spc/evc; // fraction of events for which SC was found
+  float hm=0,hw=0,hd=0,gm=0,gw=0,gm1=0,gw1=0,gme=0,gwe=0,pm=0,pw=0,epsec=0,frac=0,wid=9.99;
+  TF1* pl0 = 0;
+
+  if (dcc>0) {
+    TH1D* dcaproj = dcehist->ProjectionY();
+
+    // Initial fits to DCA distribution
+    ga1.SetParameters(1.,0.,1.);
+    dcaproj->Fit(&ga1,"Q");
+    hm = ga1.GetParameter(1);
+    hw = TMath::Abs(ga1.GetParameter(2));
+    hd = 0.6*hw;
+    ga1.SetRange(hm-hd,hm+hd);
+    dcaproj->Fit(&ga1,"RQ");
+    gm = ga1.GetParameter(1);
+    gw = TMath::Abs(ga1.GetParameter(2));
+    gm1 = gm;
+    gw1 = gw;
+
+    // Iterate fit to get best answer
+    ga1.SetRange(gm-0.9*gw,gm+0.9*gw);
+    dcaproj->Fit(&ga1,"RQ");
+    gm = ga1.GetParameter(1);
+    gw = TMath::Abs(ga1.GetParameter(2));
+    ga1.SetRange(gm-0.8*gw,gm+0.8*gw);
+    dcaproj->Fit(&ga1,"RQ");
+    gm = ga1.GetParameter(1);
+    gw = TMath::Abs(ga1.GetParameter(2));
+    ga1.SetRange(gm-0.7*gw,gm+0.7*gw);
+    dcaproj->Fit(&ga1,"RQ");
+    gm = ga1.GetParameter(1);
+    gw = TMath::Abs(ga1.GetParameter(2));
+    gme = TMath::Abs(ga1.GetParError(1));
+    gwe = TMath::Abs(ga1.GetParError(2));
+
+    // Quality measures
+    wid = gw1*gw1+gw*gw;
+    if (wid>0) wid = TMath::Min(10.,TMath::Log10(wid));
+  }
+
+  if (spc>0) {
+    // Average SC
+    scehist->Fit("pol0","Q");
+    pl0 = scehist->GetFunction("pol0");
+    if (pl0) {
+      pm = pl0->GetParameter(0);
+      pw = pl0->GetParError(0);
+    }
+  }
+
+  if (evc) {
+    timehist->GetXaxis()->SetRange(1,(int) evc);
+    timehist->Fit("pol0","LQ");
+    pl0 = timehist->GetFunction("pol0");
+    if (pl0) epsec = pl0->GetParameter(0); // events per second
+
+    // Quality measures
+    frac = spc/evc; // fraction of events for which SC was found
+  }
+
 
   float code=0;
   if (frac<0.2) code = 1. + frac;               // code = 1.x
@@ -1221,8 +1234,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.50 2013/03/11 20:04:31 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.51 2013/04/26 20:00:54 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.51  2013/04/26 20:00:54  genevb
+// Protection against 0 entry histos for EvalCalib()
+//
 // Revision 1.50  2013/03/11 20:04:31  genevb
 // make ugl and average over data
 //

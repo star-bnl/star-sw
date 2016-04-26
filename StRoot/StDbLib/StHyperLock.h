@@ -4,13 +4,14 @@
 #include <string>
 #include <ctime>
 #include <unistd.h>
+#include <stdint.h>
 
 class StHyperLock {
 	public:
 		StHyperLock(const std::string& filename, bool create_lock_file = false);
 		~StHyperLock();
 
-		bool try_lock(useconds_t usec = 0); // 1 sec = 1000000 usec
+		bool try_lock(int32_t usec = 0); // 1 sec = 1000000 usec
 		void unlock();
 
 	private:

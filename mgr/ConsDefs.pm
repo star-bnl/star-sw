@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.132 2012/12/02 17:26:31 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.144 2016/04/26 17:58:26 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -204,7 +204,7 @@
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
-    if ( $G77 eq "gfortran" ){
+    if ( $G77 =~ m/gfortran/ ){
 	# JL: For gfortran version <  4.3, -lg2c may still be needed for ensuring 
 	#   symbol resolve but this is a messy hack and should likely be avoided.
 	#   The below line was tried and would not work in those cases.
@@ -234,6 +234,11 @@
     # now treat NODEBUG and GPROF - kind of assume generic gcc
     # and flag will need to be reset otherwise
     #-
+
+    # historical had DEBUG_OPTIONS used to set optimizer options (confusing)
+    # Kept it as support but added {OPTIM_OPTIONS, a more natural naming
+    my($OPTIM_OPTS) = $ENV{OPTIM_OPTIONS}||$ENV{DEBUG_OPTIONS};
+
     if ( defined( $ARG{GPROF} ) or defined($ENV{GPROF}) ){
 	print "Using GPROF\n" unless ($param::quiet);
 	$EXTRA_CXXFLAGS= " -pg ";
@@ -244,19 +249,21 @@
 	$GPROF         = "yes";
     } else {
 	# GPROF will imply that we do not allow optimized
+	# ATTENTION - the debug options below are global for any compiler (not
+	# gcc specific). The rest is treated later
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
-	    $DEBUG = "-O -g";
-	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
-	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
-		print "Notice: Enabling gcc patch for V4.x series\n";
-		if ( $2 <= 49 ){
-		    $DEBUG .= " -fno-inline";
-		}
-	    }
+	    $DEBUG = $OPTIM_OPTS||"-O2 -g";
 	    $FDEBUG= $DEBUG;
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
+    }
+    unless ($param::quiet){
+	print 
+	    "Base ".(defined($NODEBUG)?"OPTIM":"DEBUG")." options = $DEBUG\n",
+	    defined($NODEBUG)?"\tOPTIM is enabled (the ENV NODEBUG is enabled)\n":
+	                      "\tDEBUG is enabled (enable optimize by setting the ENV NODEBUG)\n",
+	    defined($OPTIM_OPTS)?"":
+	                         "\tThe ENV variable OPTIM_OPTIONS may override the default optimize options\n";
     }
 
 
@@ -528,7 +535,7 @@
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
       
-	if ( $G77 eq "gfortran" ){
+	if ( $G77 =~ m/gfortran/ ){
 	  # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
 	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
 	}
@@ -543,42 +550,106 @@
 	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
-        # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+        print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
-	my $optflags = "";
 
         if ($CXX_VERSION < 3) {
 	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	} else {
-            # ansi works only with gcc3.2 actually ... may be removed later ...
-	    $CXXFLAGS    .= " -ansi";
+	    # can do elsif () later but for now, enable if CXX11 is defined
+	    # AND version is al least 4.4 
+	    if ( $CXX_MAJOR <= 4 && $CXX_MINOR <= 4 ){   # || ! defined($ENV{CXX11}) ) {
+		# ansi works only with gcc3.2 actually ... may be removed later ...
+		print "\tCXX version implies using C++ ansi syntax standards\n";
+		$CXXFLAGS    .= " -ansi";
+	    } else {
+		# Starting from 4.4, c++0x has been implemented - feature metric
+		# is not even though - see https://gcc.gnu.org/gcc-4.4/cxx0x_status.html
+		# and related documents
+		#   SL5 we had  4.3.2 supporting a weak set of c++11
+		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations via std=c++0x
+		#   SL6 with gcc 4.8.2 supports all c++11 features via std=c++0x - for backward compat, 
+		$CXXFLAGS    .= " -std=c++0x"; # -fpermissive";
+		print "\tCXX version implies using C++/C++11 c++0x standard\n";
+	    }
 	}
 
         # -fpermissive ?
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
-	#	  else {
-	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
-	#	}
-
+	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
+	    $CXXFLAGS    .= " -pedantic"; 
+	}
 	$CXXFLAGS    .= " -Wno-long-long";
 
-	# Additional optimization flags if NODEBUG
-	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+	#
+	# Additional GCC optimization flags if NODEBUG
+	#
+	if ( (defined( $ARG{NODEBUG} ) or $NODEBUG) && !defined($ENV{DEBUG_OPTIONS}) ) {
+	    # Optimization is requested
+	    my $optflags = "";
+
 	    if ($CXX_VERSION < 3){
 		$optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	    } else {
-		# this na1ming convention starts at gcc 3.2 which happens to
-		# have a change in the options
+	    } elsif ( $CXX_VERSION < 4.5 ){
+		# this naming convention starts at gcc 3.2 which happens to
+		# have a change in the options.
+		# Valid and used up to 4.4.7
 		$optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	    } else {
+		# 4.8.2
+		# leave the alignement to the compiler.
+		#   2015 NB: does it make sense to align on 2 bytes nowadays?
+		$optflags = "-falign-loops -falign-jumps -falign-functions";
 	    }
-	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+
+	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
+	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
+		print "\tChecking if OPTIM options tweak are needed for gcc V4.x series\n";
+		if ( $2 <= 49 ){
+		    # Note: all inlining failed with gcc 4.4.7 with no indication
+		    # of a resolve up to 4.4.9 . Symbols would be removed and
+		    # linking would fail.
+		    $DEBUG .= " -fno-inline";
+		    $FDEBUG = $DEBUG;
+		} elsif ( $2 <= 82){
+		    # Note: 4.8.2 is picky, we may need to adjust options here
+		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
+		    if ( defined($ENV{OPTIM_WITH_O}) ) {
+			# -O2 initially did ot work due to code issues (i.e. bugs
+			# or tricks used with array overbound, the compiler resshuffled)
+			# In case this happens again, the minal set of optimizing options
+			# below worked fine and could be re-used
+			#
+			# Other possible options part of O1
+			#   -fmerge-all-constants (implies merge-contstants)
+			#   -finline-functions-called-once
+			#   -fcombine-stack-adjustments
+			#   -fcompare-elim
+			#   -fcprop-registers
+			#   -fdce -fdse
+			#   -ftree-dce -ftree-dse 
+			#   -frerun-cse-after-loop
+			#   -ftree-dominator-opts
+			# With O2
+			#   -fpartial-inlining
+			#   -foptimize-sibling-calls
+			#  With O3
+			#   -finline-functions
+			$FDEBUG = $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    } else {
+			# STAR default optimization options
+			$DEBUG   = "-O2 -g";
+                        # downgraded pon request 2016/04/26
+			$FDEBUG  = "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+		    }
+		}
+	    }
+
+	    $DEBUG  .= " ".$optflags;
+	    $FDEBUG .= " ".$optflags; # $DEBUG;
+	    print "Set final OPTIM/DEBUG options as [$DEBUG]\n" unless ($param::quiet);
 	}
 
-	if ($optflags) {
-	    $CFLAGS   .= " " . $optflags;
-	    $CXXFLAGS .= " " . $optflags;
-	    $G77FLAGS .= " " . $optflags;
-	}
         $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
         $SOFLAGS  .= " -shared -Wl,-Bdynamic";
 
@@ -605,7 +676,7 @@
 	    $FEXTEND = $G77EXTEND;
 	}
 
-	if ( $G77 eq "gfortran"){
+	if ( $G77 =~ m/gfortran/ ){
 #	  $LIBIFCPATH  = `$FC -print-file-name=libgfortranbegin.a`; chomp($LIBIFCPATH);
 #	  $FLIBS     =  $LIBFRTBEGIN;
 #	  $FLIBS    .= " -lgfortran";
@@ -765,8 +836,54 @@
 
     $SYSLIBS   .= $threadlib;
     $CLIBS     .= $threadlib;
-    $CFLAGS    .= $ROOTCFLAGS;
-    $CXXFLAGS  .= $ROOTCFLAGS;
+
+    #+
+    # Option clean-up - JL 2015
+    #-
+    # Cleanup conflicting or redundant -ansi -std
+    if ( $ROOTCFLAGS =~ m/std=/ && $CXXFLAGS =~ m/std=/ || $CXXFLAGS =~ /ansi/){
+	# trim so we do not duplicate
+	# NOTE: chosing to remove from ROOTCFLAGS though this may be a problem too. 
+	#       Decided this as we begun introducing C++11 with a forward compatible
+	#       compiler and ROOTCFLAGS are added to both CXXFLAGS and CFLAGS
+	#
+	my $tmp=$ROOTCFLAGS;
+	$tmp =~ s/-std=[\w+-]*\s//;
+	#print "DEBUG >> APPEND $tmp to CFLAGS and CXXFLAGS\n";
+	$CFLAGS    .= $tmp;
+	$CXXFLAGS  .= $tmp;
+    } else {
+	#print "DEBUG >> APPEND $tmp to CFLAGS [$CFLAGS] and CXXFLAGS [$CXXFLAGS]\n";
+	$CFLAGS    .= $ROOTCFLAGS;
+	$CXXFLAGS  .= $ROOTCFLAGS;
+    }
+    # remove duplicates options coming from ROOTCFLAGS - used block to be sure
+    # vars are gone when we go out of scope
+    {
+	my(@ARGS)  =($CFLAGS ,$CXXFLAGS);    # to clean for duplicates / restore below in the same order
+	my(@LABELS)=("CFLAGS","CXXFLAGS");   # labels should also relate to @ARGS order - for printing
+	for ($i =0 ; $i <= $#ARGS ; $i++){
+	    my $Arg =  $ARGS[$i]; 
+	    my(@CmpArgs)=split(" ",$Arg);
+	    my(%CmpOpts)=undef; 
+	    $ARGS[$i] = "";
+	    
+	    foreach $tmp (@CmpArgs){
+		if ( ! defined($CmpOpts{$tmp}) ){
+		    $ARGS[$i] .= $tmp." ";
+		    $CmpOpts{$tmp} = 1;
+		    #print "DEBUG found $tmp\n";
+		} else {
+		    print "\tRemoving duplicate $tmp from $LABELS[$i]\n" unless ($param::quiet);
+		}
+	    }
+	}
+	# restore  
+	($CFLAGS,$CXXFLAGS) = @ARGS;        # <--- same order than above
+    }
+
+
+
 #    $OSFID .= " " . $STAR_SYS; $OSFCFID .= " " . $STAR_SYS;
 #    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
     $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
@@ -829,19 +946,19 @@
 
     # search for the config    
     my ($MYSQLCONFIG,$mysqlconf);
-    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
+    # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLCONFIG,$mysqlconf) =
 	    script::find_lib($XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
-			     "/usr/bin /usr/bin/mysql /sw/bin ",
+			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
 			     "mysql_config");
-    } else {
-	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($MYSQL . " ".
-			     "/usr/bin /usr/bin/mysql ".
-			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
-			     "mysql_config");
-    }
+    # } else {
+    #	($MYSQLCONFIG,$mysqlconf) =
+    #	    script::find_lib($MYSQL . " ".
+    #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
+    #			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
+    #			     "mysql_config");
+    # } 
 
 
     # Associate the proper lib with where the inc was found
@@ -852,33 +969,56 @@
     # Note - there is a trick here - the first element uses mysqllibdir
     #        which is dreived from where the INC is found hence subject to 
     #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-    my ($MYSQLLIBDIR,$MYSQLLIB) =
-	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
-			 "libmysqlclient");
-			 #"libmysqlclient_r libmysqlclient");
-    #print "*** $MYSQLLIBDIR,$MYSQLLIB\n";
+    # my ($MYSQLLIBDIR,$MYSQLLIB) =
+    #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
+    #			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
+    #			 "libmysqlclient");
+    #			 # "libmysqlclient_r libmysqlclient");
+    # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
 
-    if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-        # if ( $mysqlconf ){
-	if ( 1==0 ){
-	    # Do not guess, just take it - this leads to a cons error though TBC
-	    chomp($MYSQLLIB = `$mysqlconf  --libs`);
-	    # mysqlconf returns (on SL5, 64 bits)
-	    #  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-	} else {
-	    $MYSQLLIB .= " -L/usr/$LLIB";
-	    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-	    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-	    $MYSQLLIB .= " -lz";
-	    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
+    if ( $mysqlconf ){
+	$mysqlconf = "$MYSQLCONFIG/$mysqlconf";
+	# if ( 1==1 ){
+	# Do not guess, just take it - this leads to a cons error though TBC
+	chomp($MYSQLLIB = `$mysqlconf  --libs`);
+	# but remove -L which are treated separately by cons
+	my(@libs) = split(" ", $MYSQLLIB);
+	my($test) = shift(@libs);
+	if ( $test =~ /-L/){
+	    $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+	    $MYSQLLIB = "";
+	    foreach my $el (@libs){
+		$MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+	    }
 	}
+	
+	# here is a check for libmysqlclient
+	
+	
+	# die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
+	
+	# mysqlconf returns (on SL5, 64 bits)
+	#  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
+	# } else {
+	#    $MYSQLLIB .= " -L/usr/$LLIB";
+	#    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+	#    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+	#    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	#    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
+	#    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
+	#    $MYSQLLIB .= " -lz";
+	#    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+	# }
+    } else {
+	die "No mysql_config found\n";
     }
-    print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-	if $MYSQLLIBDIR && ! $param::quiet;
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
+          if ! $param::quiet;
+
+    # die "\n";
+
+
 
     # QT
     if ( defined($QTDIR) && -d $QTDIR) {
@@ -929,14 +1069,14 @@
 	}
 
 	# Coin3D - WHAT??! JL 2009
-	#if ( !defined($IVROOT)) {
+	# if ( !defined($IVROOT)) {
 	#    if ($QT_VERSION==4) {
 	#	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package
 	#    } else {
 	#	$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
 	#    }
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
-	#}
+	# }
 	if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    # This is an initial logic relying on IVROOT to be defined
@@ -995,7 +1135,7 @@
 	$XMLINCDIR = `$xml --cflags`;
 	chomp($XMLINCDIR);
 	$XMLINCDIR =~ s/-I//;
-	my $XML  = `$xml --libs`;# print "$XML\n";
+	my $XML  = `$xml --libs`; # die "$XML\n";
 	my(@libs)= split(" ", $XML);
 
 	$XMLLIBDIR = shift(@libs);
@@ -1009,13 +1149,14 @@
 	    $XMLLIBDIR = "/usr/$LLIB";
 	}
 
-	#($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-	#if ($XMLLIBDIR =~ /-L/){
+
+	# ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
+	# if ($XMLLIBDIR =~ /-L/){
 	#    $XMLLIBDIR =~ s/-L//;
-	#} else {
+	# } else {
 	#    # may not have any -L
 	#    if ($XMLLIBS
-	#}
+	# }
 
 	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
 	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";

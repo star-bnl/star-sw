@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.41 2012/06/11 14:33:47 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.47 2015/04/13 19:43:43 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,24 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.47  2015/04/13 19:43:43  dmitry
+ * added new db domain: SST
+ *
+ * Revision 1.46  2014/10/31 16:11:59  dmitry
+ * adding FPS to the database domain list
+ *
+ * Revision 1.45  2013/09/11 17:40:06  dmitry
+ * new database support: IST
+ *
+ * Revision 1.44  2013/06/10 17:45:15  dmitry
+ * unknown db fix - to be backported into old libraries
+ *
+ * Revision 1.43  2013/05/28 18:07:43  dmitry
+ * new db domain: MTD
+ *
+ * Revision 1.42  2013/04/01 14:42:51  dmitry
+ * added new domain - PXL
+ *
  * Revision 1.41  2012/06/11 14:33:47  fisyak
  * std namespace
  *
@@ -403,7 +421,11 @@ addDbDomain(dbZdc,"zdc");
 addDbDomain(dbFms,"fms"); 
 addDbDomain(dbpp2pp,"pp2pp"); 
 addDbDomain(dbFgt,"fgt"); 
-
+addDbDomain(dbPxl,"pxl"); 
+addDbDomain(dbMtd,"mtd"); 
+addDbDomain(dbIst,"ist"); 
+addDbDomain(dbFps,"fps"); 
+addDbDomain(dbSst,"sst");
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1140,7 +1162,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1647,7 +1672,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
-
+  if (!typeName || !domainName) return 0;
   std::string tpName(typeName);
   std::string dmName(domainName);
   std::string mergedName = tpName + "_" + dmName;

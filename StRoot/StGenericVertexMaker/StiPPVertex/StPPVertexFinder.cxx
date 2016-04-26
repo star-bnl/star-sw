@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.41 2012/11/06 20:58:04 fisyak Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.44 2013/04/09 22:37:56 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -24,7 +24,8 @@
 #include "TrackData.h"
 #include "VertexData.h" 
 #include "Vertex3D.h"
-#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StGenericVertexMaker.h"
+#include "St_VertexCutsC.h"
 
 #include <Sti/StiToolkit.h>
 #include <Sti/StiKalmanTrack.h>
@@ -101,35 +102,25 @@ StPPVertexFinder::StPPVertexFinder() {
 void 
 StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
-  LOG_INFO << Form("PPV-algo switches=0x%0x,  following cuts have been activated:",mAlgoSwitches)<<endm;
+  LOG_INFO << Form("PPV-algo  switches=0x%0x,  following cuts have been activated:",mAlgoSwitches)<<endm;
   //.. set various params 
-  mMaxTrkDcaRxy = 3.0;  // cm 
-  mMinTrkPt     = 0.20; // GeV/c  //was 0.2 in 2005 prod
-  mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
-  mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
-  mMaxZrange    = 200;  // to accept Z_DCA of a track           
-  mMinMatchTr   = 2;    // required to accept vertex
-  mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
-  mMinZBtof     = -3.0; //
-  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
-  mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
-
   mStoreUnqualifiedVertex=5; // extension requested by Akio, October 2008, set to 0 do disable it
-  
+  mFitPossWeighting=false;          // default prior to 2012 
 
   //get pointer to Sti toolkit
   mToolkit = StiToolkit::instance();
-  assert(mToolkit); // internal error of Sti
+  assert(mToolkit);          // internal error of Sti
   
-  ctbList =new CtbHitList;
-  bemcList =new BemcHitList;
+  ctbList  = new CtbHitList;
+  bemcList = new BemcHitList;
   btofList = new BtofHitList;
-  vertex3D=0; // default
+  vertex3D = 0; // default
+  
 
   // access EEMC-DB
   eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
-  cout<<"eeDb done"<<endl;
+  LOG_INFO << "eeDb done" <<endm;
   geomE= new EEmcGeomSimple();
   // choose which 'stat' bits are fatal for mip detection
   uint  killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
@@ -137,13 +128,13 @@ StPPVertexFinder::Init() {
    
   HList=new TObjArray(0);   
   initHisto();
-  cout<<"initiated histos"<<endl;
+  LOG_INFO << "initiated histos" << endm;
   if (mUseBtof)
     btofList->initHisto( HList); // dongx
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
-  cout<<"Finished Init"<<endl;
+  LOG_INFO << "Finished Init" << endm;
 }
 
 //==========================================================
@@ -174,6 +165,32 @@ StPPVertexFinder::InitRun(int runnumber){
       btofGeom->Init(mydb, starHall);
     }
   }
+
+  //.. set various params 
+  if (!isMC && runnumber < 13000000) {
+    // old defaults, pre-Run12
+    // (important if we want to reprocess old data with different cuts!)
+    LOG_INFO << "PPV InitRun() using old, hardwired cuts" << endm;
+    mMaxTrkDcaRxy = 3.0;  // cm 
+    mMinTrkPt     = 0.20; // GeV/c  //was 0.2 in 2005 prod
+    mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
+    mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
+    mMinMatchTr   = 2;    // required to accept vertex
+  } else {
+    St_VertexCutsC* vtxCuts = St_VertexCutsC::instance();
+    mMaxTrkDcaRxy = vtxCuts->RImpactMax();
+    mMinTrkPt     = vtxCuts->MinTrackPt();
+    mMinFitPfrac  = vtxCuts->MinFracOfPossFitPointsOnTrack();
+    mMaxZradius   = vtxCuts->DcaZMax();  //+sigTrack, to match tracks to Zvertex
+    mMinMatchTr   = vtxCuts->MinTrack();    // required to accept vertex
+    mFitPossWeighting = true;
+  }
+  mMaxZrange    = 200;  // to accept Z_DCA of a track           
+  mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
+  mMinZBtof     = -3.0; //
+  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
+  mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
+
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
@@ -205,29 +222,34 @@ StPPVertexFinder::InitRun(int runnumber){
     vertex3D->initRun();
   }
 
-  gMessMgr->Message("","I") 
+  //gMessMgr->Message("","I") 
+  LOG_INFO 
     << "PPV::cuts "
-    <<"\n MinFitPfrac=nFit/nPos  ="<< mMinFitPfrac 
-    <<"\n MaxTrkDcaRxy/cm="<<mMaxTrkDcaRxy
-    <<"\n MinTrkPt GeV/c ="<<mMinTrkPt
-    <<"\n MinMatchTr of prim tracks ="<< mMinMatchTr
-    <<"\n MaxZrange (cm)for glob tracks ="<< mMaxZrange
-    <<"\n MaxZradius (cm) for prim tracks &Likelihood  ="<< mMaxZradius
+    <<"\n MinNumberOfFitPointsOnTrack = unused"
+    <<"\n MinFitPfrac=nFit/nPos  = " << mMinFitPfrac 
+    <<"\n MaxTrkDcaRxy/cm= " << mMaxTrkDcaRxy
+    <<"\n MinTrkPt GeV/c = " << mMinTrkPt
+    <<"\n MinMatchTr of prim tracks = " << mMinMatchTr
+    <<"\n MaxZrange (cm)for glob tracks = " << mMaxZrange
+    <<"\n MaxZradius (cm) for prim tracks &Likelihood  = " << mMaxZradius
     <<"\n DeltaY (cm) for BTOF local posision = "<< mDyBtof
-    <<"\n Min/Max Z position for BTOF hit = "<<mMinZBtof<<" "<<mMaxZBtof   // dongx
-    <<"\n MinAdcBemc for MIP ="<<mMinAdcBemc
-    <<"\n MinAdcEemc for MIP ="<<mMinAdcEemc
-    <<"\n bool   isMC ="<<isMC
-    <<"\n bool useCtb ="<<mUseCtb
-    <<"\n bool useBtof ="<<mUseBtof
-    <<"\n bool DropPostCrossingTrack ="<<mDropPostCrossingTrack
-    <<"\n Store # of UnqualifiedVertex ="<<mStoreUnqualifiedVertex
-    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT)<<" oneTrack-vertex if track PT/GeV>"<< mCut_oneTrackPT 
-    <<"\n dump tracks for beamLine study ="<<mBeamLineTracks
+    <<"\n Min/Max Z position for BTOF hit = " << mMinZBtof<<" "<<mMaxZBtof   
+    <<"\n MinAdcBemc for MIP = " << mMinAdcBemc
+    <<"\n MinAdcEemc for MIP = " << mMinAdcEemc
+    <<"\n bool    isMC = " << isMC
+    <<"\n bool  useCtb = " << mUseCtb
+    <<"\n bool useBtof = " << mUseBtof
+    <<"\n bool nFit/nPoss weighting = " << mFitPossWeighting
+    <<"\n bool DropPostCrossingTrack = " << mDropPostCrossingTrack
+    <<"\n Store # of UnqualifiedVertex = " << mStoreUnqualifiedVertex
+    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT) <<
+               " oneTrack-vertex if track PT/GeV>"<< mCut_oneTrackPT 
+    <<"\n dump tracks for beamLine study = " << mBeamLineTracks
     <<"\n"
     <<endm; 
 
 }
+
 
 //==========================================================
 //==========================================================
@@ -396,7 +418,7 @@ StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double 
 //==========================================================
 int 
 StPPVertexFinder::fit(StEvent* event) {
-  cout<<"***** START FIT"<<endl;
+  LOG_INFO << "***** START FIT" << endm;
   if(mBeamLineTracks) vertex3D->clearEvent();
 
   hA[0]->Fill(1);
@@ -516,7 +538,8 @@ StPPVertexFinder::fit(StEvent* event) {
     if(!matchTrack2Membrane(track,t)) {ntrk[5]++; continue;}  // kill if nFitP too small	   
     ntrk[6]++;
 
-    // cout <<"\n#e itr="<<k<<" gPt="<<track->getPt()<<" gEta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<" of "<<track->getMaxPointCount()<<" poolSize="<< mTrackData->size()<<endl;
+    //cout <<"\n#e itr="<<k<<" gPt="<<track->getPt()<<" gEta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<" of "<<track->getMaxPointCount()<<" poolSize="<< mTrackData->size()<<"  myW="<<t.weight<<endl;
+    //printf(" t.weight AA=%f\n", t.weight);
 
     hA[1]->Fill(track->getChi2());
     hA[2]->Fill(track->getFitPointCount());
@@ -942,16 +965,17 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   TString tagPlp=" "; if((nTpc-nh)>10) tagPlp=" plp";
   TString tagMemb=" "; if(zH*zL<0) tagMemb=" memb";
 
-  cout <<"\n#e dumpKalmanNodes nNodes="<<nn<<" actv: nTPC="<<nTpc<<" nHit="<<nh
-       <<" zL="<<zL<<" zH="<<zH <<tagPlp<<tagMemb
-      <<endl;
+  LOG_INFO
+    <<"\n#e dumpKalmanNodes nNodes="<<nn<<" actv: nTPC="<<nTpc<<" nHit="<<nh
+    <<" zL="<<zL<<" zH="<<zH <<tagPlp<<tagMemb
+    <<endm;
  
   // ........................print both ends  ....................
-  cout <<"#e  |P|="<<track->getP()<<" pT="<<track->getPt()<<" eta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<endl; 
+  LOG_INFO << "#e  |P|="<<track->getP()<<" pT="<<track->getPt()<<" eta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount() << endm; 
   StiKalmanTrackNode* inNode=track->getInnerMostNode();
-  cout<<"#e @InnerMostNode x:"<< inNode->x_g()<<" y:"<< inNode->y_g()<<" z:"<< inNode->z_g()<<" Eta="<<inNode->getEta()<<" |P|="<<inNode->getP()<<endl;
+  LOG_INFO << "#e @InnerMostNode x:"<< inNode->x_g()<<" y:"<< inNode->y_g()<<" z:"<< inNode->z_g()<<" Eta="<<inNode->getEta()<<" |P|="<<inNode->getP() << endm;
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
-  cout<<"#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<" |P|="<<ouNode->getP()<<endl;
+  LOG_INFO << "#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<" |P|="<<ouNode->getP() << endm;
 
  in=0;
   for (it=track->begin();it!=track->end();it++,in++) {
@@ -963,12 +987,15 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     float sz=sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
     assert(!(ktn.x()) || det);
-    cout<<"#e in="<<in<<" |P|="<<ktn.getP()<<" Local: x="<<ktn.getX()<<" y="<<ktn.getY()<<" +/- "<<sy<<" z="<<ktn.getZ()<<" +/- "<<sz;
-    if(ktn.getHit()) cout <<" hit=1";
-    else cout <<" hit=0";
-    if(det==0)  cout<<" noDet ";
-    else cout<<" detActv="<<(!det || det->isActive(ktn.getY(), ktn.getZ()));
-    cout <<endl;
+
+    LOG_INFO << "#e in="<<in<<" |P|="<<ktn.getP()<<" Local: x="<<ktn.getX()<<" y="<<ktn.getY()<<" +/- "<<sy<<" z="<<ktn.getZ()<<" +/- "<<sz;
+
+    if(ktn.getHit()) {LOG_INFO <<" hit=1";}
+    else             {LOG_INFO <<" hit=0";}
+
+    if(det==0)       {LOG_INFO <<" noDet ";}
+    else             {LOG_INFO <<" detActv="<<(!det || det->isActive(ktn.getY(), ktn.getZ()));}
+    LOG_INFO << endm;
     //    break; // tmp
   }
 }
@@ -1118,9 +1145,9 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
     StiKalmanTrackNode* ctbNode=track2.extrapolateToRadius(Rctb);
 
     if(ctbNode==0)  { 
-      cout<<"#e @ctbNode NULL"<<endl;
-      cout<<"#e @track dump"<< *track;
-      cout<<"#e @OuterMostNode dump"<< *ouNode <<endl;
+      LOG_INFO <<"#e @ctbNode NULL"<<endm;
+      LOG_INFO <<"#e @track dump"<< *track << endm;
+      LOG_INFO <<"#e @OuterMostNode dump"<< *ouNode <<endm;
       return; 
     }
     //1 cout<<"#e inCTB |P|="<<ctbNode->getP()<<" local x="<<xL(ctbNode)<<" y="<<yL(ctbNode)<<" +/- "<<eyL(ctbNode)<<" z="<<zL(ctbNode)<<" +/- "<<ezL(ctbNode)<<endl;
@@ -1311,7 +1338,13 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   // cout<<"#m nFit="<<nFit<<" of nPos="<<nPos<<endl;
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
-  t.scanNodes(hitPatt,jz0); // if central membrane is crossed
+
+  if( mFitPossWeighting)
+    t.weight*=1.*nFit/nPos;// introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51, Jan
+  
+  t.scanNodes(hitPatt,jz0); // if central membrane is crossed, scale weight inside
+
+
   return true;
 }
 
@@ -1353,6 +1386,20 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.44  2013/04/09 22:37:56  genevb
+ * Remove boostEfficiency codes: DB usage implemented
+ *
+ * Revision 1.43  2013/04/09 21:11:58  genevb
+ * Use database table for track selection cuts
+ *
+ * Revision 1.42  2013/04/05 21:00:02  jeromel
+ * Implemented and merged back to source the boostEfficiency (i.e. change of
+ * nFit /nPossible points on the track fract to consider). No DB imp yet.
+ *
+ * Fixed boostEfficiency()
+ *
+ * Changed cout to LOG_INFO
+ *
  * Revision 1.41  2012/11/06 20:58:04  fisyak
  * Remove second addition of btofGeom to db maker
  *

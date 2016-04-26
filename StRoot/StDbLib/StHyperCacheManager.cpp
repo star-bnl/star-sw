@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <fstream>
 #include <cstdlib>
+#include <utility>
 
 StHyperCacheManager::StHyperCacheManager() : m_Name("STAR HyperCache Manager"), m_Version("1.0.0"), m_Type("ST_HYPERCACHE_MANAGER"),
 	m_ValueFound(false), m_Active(false), m_PathToConfigFile(""),
@@ -376,7 +377,7 @@ bool StHyperCacheManager::processOutput(StDbBuffer* aBuff) {
 		for (picojson::object::const_iterator ait = attr.begin(); ait != attr.end(); ++ait) {
 			std::string aname = (*ait).first;
 			const std::string& avalue = ((*ait).second).get<std::string>();
-			encCols.insert(std::make_pair<std::string, std::string>(aname, avalue));
+			encCols.insert(std::make_pair(aname, avalue));
 		}
 	}
 	//std::cout << "processOutput: binary attribute search complete" << std::endl;
@@ -421,8 +422,9 @@ char** StHyperCacheManager::DecodeStrArray(const char* strinput , int &aLen) {
         //   cout<< "null input string from mysql " << endl;
         char** tmparr = new char*[1];
         aLen = 1;
-        *tmparr = new char[2];
-        strcpy(*tmparr,"0");
+		tmparr[0] = (char*)"0";
+        //*tmparr = new char[2];
+        //strcpy(*tmparr,"0");
         return tmparr;
     }
 

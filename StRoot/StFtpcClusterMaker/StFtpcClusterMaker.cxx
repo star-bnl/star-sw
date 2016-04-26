@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.108  2013/03/26 15:56:00  genevb
+// Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
+//
 // Revision 1.107  2013/02/18 16:30:42  fisyak
 // gufld => agufld
 //
@@ -369,11 +372,6 @@
 #include "TObjectSet.h"
 #include "PhysicalConstants.h"
 
-#ifndef agufld
-#define agufld agufld_
-extern "C" void agufld(float *, float *);
-#endif
-
 #include "tables/St_fcl_ftpcsqndx_Table.h"
 #include "tables/St_fcl_ftpcadc_Table.h"
 
@@ -431,7 +429,7 @@ StFtpcClusterMaker::~StFtpcClusterMaker(){
 Int_t StFtpcClusterMaker::InitRun(int runnumber){
   Float_t x[3] = {0,0,0};
   Float_t b[3];
-  agufld(x,b);
+  StarMagField::Instance()->BField(x,b);
   Double_t gFactor = b[2]/4.980;
 
   mDbMaker     = (St_db_Maker*)GetMaker("db");

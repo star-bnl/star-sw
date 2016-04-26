@@ -1151,7 +1151,7 @@ Bfc_st BFC[] = {
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
-  {"MtdUtil"    ,""  ,"","",                                        "","StMtdUtil","Load StMtdUtil",kFALSE},
+  {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
@@ -1382,8 +1382,15 @@ Bfc_st BFC[] = {
    ,                                                                               "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
   // MTD related chains
-  {"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
+  //{"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  // ,                                                                              "MTD hit maker",kFALSE},
+  {"mtdDat"   ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
+
+
+
+
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
@@ -1423,7 +1430,7 @@ Bfc_st BFC[] = {
   {"VFMinuit2"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV"           ,""  ,"","genvtx"                            ,"","","... Fixed dummy VF method",kFALSE},
-  {"VFMCE"          ,""  ,"","VFMinuit"                      ,"","","... Fixed vertex from MCEvent",kFALSE},
+  {"VFMCE"          ,""  ,"","genvtx"                        ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV"        ,""  ,"","genvtx"                 ,"","","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"        ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
   // Sti options
@@ -1471,10 +1478,12 @@ Bfc_st BFC[] = {
    ,                                                           "Beam background tracker in the TPC",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
+
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib"  ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",      "BTOF calibration",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker"     ,"TPC-MTD track matching",kFALSE},
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
