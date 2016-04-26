@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.143 2016/04/19 14:59:42 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.144 2016/04/26 17:58:26 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -610,6 +610,7 @@
 		    # of a resolve up to 4.4.9 . Symbols would be removed and
 		    # linking would fail.
 		    $DEBUG .= " -fno-inline";
+		    $FDEBUG = $DEBUG;
 		} elsif ( $2 <= 82){
 		    # Note: 4.8.2 is picky, we may need to adjust options here
 		    #$DEBUG  =  "-O1 -g -fno-merge-constants";
@@ -634,16 +635,18 @@
 			#   -foptimize-sibling-calls
 			#  With O3
 			#   -finline-functions
-			$DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
+			$FDEBUG = $DEBUG   =  "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
 		    } else {
 			# STAR default optimization options
-			# $DEBUG   = "-O2 -g";
+			$DEBUG   = "-O2 -g";
+                        # downgraded pon request 2016/04/26
+			$FDEBUG  = "-g -fif-conversion -fif-conversion2 -fforward-propagate -fmerge-constants -finline-small-functions -findirect-inlining -fpartial-inlining -fdevirtualize -floop-interchange -ftree-ccp";
 		    }
 		}
 	    }
 
-	    $DEBUG .= " ".$optflags;
-	    $FDEBUG = $DEBUG;
+	    $DEBUG  .= " ".$optflags;
+	    $FDEBUG .= " ".$optflags; # $DEBUG;
 	    print "Set final OPTIM/DEBUG options as [$DEBUG]\n" unless ($param::quiet);
 	}
 
