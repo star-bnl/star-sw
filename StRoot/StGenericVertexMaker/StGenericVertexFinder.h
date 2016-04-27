@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.34 2016/04/27 21:31:40 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.35 2016/04/27 21:31:48 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -24,6 +24,9 @@ class StDcaGeometry;
 
 class StGenericVertexFinder {
  public:
+
+  // Alias for shorthand
+  using StDcaList = std::vector<const StDcaGeometry*>;
 
   /// Options used to define the type of vertex fit performed in a concrete
   /// implementation
@@ -93,7 +96,7 @@ class StGenericVertexFinder {
   static double CalcChi2Beamline(const StThreeVectorD& point);
 
   /// A static container with pointers to DCA states to be used in a vertex fit
-  static std::vector<const StDcaGeometry*>&  sDCAs();
+  static StDcaList&  sDCAs();
 
   /// All measured parameters of the beamline. Updated whenever
   /// UseVertexConstraint(const vertexSeed_st&) is called
