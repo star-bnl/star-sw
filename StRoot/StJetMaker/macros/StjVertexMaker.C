@@ -17,7 +17,7 @@ public:
   virtual ~StjVertexMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjVertexMaker.C,v 1.1.6.1 2016/04/27 15:23:07 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjVertexMaker.C,v 1.1.6.2 2016/04/27 17:32:02 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 
