@@ -75,11 +75,12 @@ Int_t StMuDst::mCurrVertexId = 0;
 TObjArray* StMuDst::mCurrPrimaryTracks  = 0;
 Int_t StMuDst::MinNoTpcMcHits = 15;
 Int_t StMuDst::MinNoTpcRcHits = 15;
+StMuDst *StMuDst::fgMuDst = 0;
 ClassImp(StMuDst);
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
-  /* no-op */
+  fgMuDst = this;
 }
 
 //-----------------------------------------------------------------------
@@ -774,8 +775,12 @@ void StMuDst::Print(Option_t *option) const {
   }
   else 
     cout << "No event structure (StMuEvent) found!" << endl;
-  cout << "PrimaryVertices " << numberOfPrimaryVertices();
-  cout << "\tPrimaryTracks " << numberOfPrimaryTracks();
+  if (StMuDst::primaryTracks()) {
+    cout << "PrimaryVertices " << numberOfPrimaryVertices();
+    cout << "\tPrimaryTracks " << numberOfPrimaryTracks();
+  } else {
+    cout << "Current PrimaryVertex is not set" << endl;
+  }
   cout << "\tGlobalTracks "  << numberOfGlobalTracks();
   cout << "\tCovPrimTrack "  << covPrimTrack()->GetEntriesFast();
   cout << "\tCovGlobTrack "  << covGlobTrack()->GetEntriesFast();

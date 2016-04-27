@@ -152,8 +152,9 @@ public:
   void fixMtdTrackIndices();
 
   void setMtdArray(StMtdCollection *mtd_coll); 
-
+  static StMuDst *instance() {return fgMuDst;}
  protected:
+  static StMuDst *fgMuDst; //!
   /// array of TClonesArrays
   static TClonesArray** arrays;
 #ifndef __NO_STRANGE_MUDST__
