@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.7 2010/09/08 04:54:30 pibero Exp $
+// $Id: StjEEMCMuDst.h,v 1.7.6.1 2016/04/27 15:23:07 zchang Exp $
 #ifndef STJEEMCMUDST_H
 #define STJEEMCMUDST_H
 
@@ -15,7 +15,13 @@ public:
   virtual ~StjEEMCMuDst() { }
 
   void Init();
-
+  void setVertex(float vx, float vy, float vz)
+  {
+    _setVertex = true;
+    _vx = vx;
+    _vy = vy;
+    _vz = vz;
+  }
   StjTowerEnergyList getEnergyList();
 
 

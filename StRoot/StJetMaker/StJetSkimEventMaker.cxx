@@ -45,6 +45,8 @@
 #include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
 #include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
 
+#include "StSpinPool/StNNPDFAsymMaker/StNNPDFAsymMaker.h"
+
 //StTriggerUtilities
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
@@ -92,7 +94,13 @@ Int_t StJetSkimEventMaker::Init()
         mEvent->setMcEvent(mcAsymMaker->pythiaEvent());
         isRealData = false;
     }
-    
+    //NNPDF Asymmetry Maker
+    StNNPDFAsymMaker* asymMaker  = dynamic_cast<StNNPDFAsymMaker*>(GetMaker("NNPDFAsym"));		
+    if(asymMaker != NULL) {
+        mEvent->setMcEvent(asymMaker->pythiaEvent());
+        isRealData = false;
+    }
+				    
     return kStOk;
 }
 

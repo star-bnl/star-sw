@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.5 2010/04/27 16:31:51 pibero Exp $
+// $Id: StjTrackList.h,v 1.5.6.1 2016/04/27 15:23:07 zchang Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
@@ -11,6 +11,7 @@
 
 class StjTrack : public TObject {
 public:
+  virtual ~StjTrack() {}
   int            runNumber;
   int            eventId;
   int            detectorId; // 1: TPC

@@ -17,7 +17,7 @@ public:
   virtual ~StjMCKinMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCKinMaker.C,v 1.1 2008/08/22 22:31:59 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCKinMaker.C,v 1.1.4.1 2016/04/27 15:23:06 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

@@ -103,15 +103,18 @@ int StJetMaker2009::Make()
 
 	// Found good vertex
 	++nvertices;
-
-	StjTrackList trackList = jetbranch->anapars->tpcCuts()(tpc.getTrackList());
+	StjTrackList trackList = tpc.getTrackList();
+	if (jetbranch->anapars->changeTracks) trackList = (*jetbranch->anapars->changeTracks)(trackList);
+	trackList = jetbranch->anapars->tpcCuts()(trackList);
 
 	// Get BEMC towers
 	StjTowerEnergyList bemcEnergyList;
 
 	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
-	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
+	  bemcEnergyList = bemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(bemcEnergyList);
+	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemcEnergyList);
 	}
 
 	// Get EEMC towers
@@ -119,7 +122,9 @@ int StJetMaker2009::Make()
 
 	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
-	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
+	  eemcEnergyList = eemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(eemcEnergyList);
+	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
 	}
 
 	// Merge BEMC and EEMC towers
@@ -170,15 +175,20 @@ int StJetMaker2009::Make()
 	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
 	  bemc.setVertex(0,0,0);
-	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
+	  bemcEnergyList = bemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(bemcEnergyList);
+	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemcEnergyList);
 	}
 
 	// Get EEMC towers
-	StjTowerEnergyList eemcEnergyList;
+	StjTowerEnergyList eemcEnergyList_temp, eemcEnergyList;
 
 	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
-	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
+	  eemcEnergyList = eemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(eemcEnergyList);
+	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
+	  
 	}
 
 	// Merge BEMC and EEMC towers
@@ -290,7 +300,7 @@ StJetEvent* StJetMaker2009::event(const char* branchname)
 
 void StJetMaker2009::addJet(const StProtoJet& protojet, StJetEvent* event, StJetVertex* vertex)
 {
-  StJetCandidate* jet = event->newJet(vertex->position(),TLorentzVector(protojet.px(),protojet.py(),protojet.pz(),protojet.e()));
+  StJetCandidate* jet = event->newJet(vertex->position(),TLorentzVector(protojet.px(),protojet.py(),protojet.pz(),protojet.e()), static_cast<float>(protojet.area()), static_cast<float>(protojet.areaError()));
   vertex->addJet(jet);
   jet->setVertex(vertex);
 
@@ -307,7 +317,7 @@ void StJetMaker2009::addJet(const StProtoJet& protojet, StJetEvent* event, StJet
 
     if (const StMuTowerEmu* t = particle->tower()) {
       StJetTower* tower = event->newTower();
-      copyTower(t,vertex,tower);
+      copyTower(t,tower);
       jet->addTower(tower)->setJet(jet);
     }
 
@@ -376,7 +386,7 @@ void StJetMaker2009::copyTrack(const StMuTrackEmu* t, StJetTrack* track)
   track->mNSigmaElectron = t->nSigmaElectron();
 }
 
-void StJetMaker2009::copyTower(const StMuTowerEmu* t, const StJetVertex* jetvertex, StJetTower* tower)
+void StJetMaker2009::copyTower(const StMuTowerEmu* t, StJetTower* tower)
 {
   tower->mId         = t->id();
   tower->mDetectorId = t->detectorId();
@@ -384,25 +394,7 @@ void StJetMaker2009::copyTower(const StMuTowerEmu* t, const StJetVertex* jetvert
   tower->mPedestal   = t->pedestal();
   tower->mRms        = t->rms();
   tower->mStatus     = t->status();
-
-  // StMuTowerEmu has the tower momentum from
-  // the origin. Here we correct for vertex.
-
   TVector3 mom(t->px(),t->py(),t->pz());
-  float energy = mom.Mag();
-
-  switch (t->detectorId()) {
-  case kBarrelEmcTowerId:
-    mom.SetPtEtaPhi(StEmcGeom::instance("bemc")->Radius(),mom.Eta(),mom.Phi());
-    break;
-  case kEndcapEmcTowerId:
-    mom.SetMag(EEmcGeomSimple::Instance().getZMean()/mom.Unit().z());
-    break;
-  }
-
-  mom -= jetvertex->position();
-  mom.SetMag(energy);
-
   tower->mPt  = mom.Pt();
   tower->mEta = mom.Eta();
   tower->mPhi = mom.Phi();
