@@ -1999,7 +1999,7 @@ type = $stagedon
 file = $prefix$mfile.laser.root
 
 [exec-0]
-args = 4  $LIBV $destination $NEVT $chain
+args = 0  $LIBV $destination $NEVT $chain
 gzip_output = True
 stdout = $DSKLOG/prodlog/$LIB/log/daq/$mfile.log
 stderr = $DSKLOG/prodlog/$LIB/log/daq/$mfile.err 
@@ -2088,7 +2088,7 @@ type = $stagedon
 file = $prefix$mfile.tags.root     
 
 [exec-0]
-args = 4  $LIBV $destination $NEVT $chain
+args = 0  $LIBV $destination $NEVT $chain
 gzip_output = True
 stdout = $DSKLOG/prodlog/$LIB/log/daq/$mfile.log
 stderr = $DSKLOG/prodlog/$LIB/log/daq/$mfile.err 
@@ -2128,7 +2128,7 @@ type = $stagedon
 file = $prefix$mfile.tags.root      
 
 [exec-0]
-args = 4  $LIBV $destination $NEVT $chain
+args = 0  $LIBV $destination $NEVT $chain
 gzip_output = True
 stdout = $DSKLOG/prodlog/$LIB/log/daq/$mfile.log
 stderr = $DSKLOG/prodlog/$LIB/log/daq/$mfile.err 
