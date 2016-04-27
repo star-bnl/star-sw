@@ -265,7 +265,7 @@ class KFPInputData
   }
   
  protected:
-  KFPTrackVector fTracks[NInputSets]; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
+  KFPTrackVector fTracks[NInputSets]__attribute__((aligned(sizeof(float_v)))); //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
   std::vector<KFParticle> fPV;
   float fBz;
 } __attribute__((aligned(sizeof(float_v))));

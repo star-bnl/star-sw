@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.32 2016/04/20 22:04:32 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.37 2016/04/25 23:59:31 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -26,7 +26,6 @@
 #include "StDcaGeometry.h"
 #include "St_VertexCutsC.h"
 #include "StMaker.h"
-vector<StDcaGeometry*>     StMinuitVertexFinder::mDCAs;
 vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 vector<Double_t >          StMinuitVertexFinder::mSigma;
@@ -94,7 +93,6 @@ StMinuitVertexFinder::~StMinuitVertexFinder()
    delete mBeamHelix; mBeamHelix=0;
    LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
-   mDCAs.clear();
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();
@@ -431,7 +429,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  fcn to calculate the fit potential which
     //  gets minimized by Minuit.
     //
-    mDCAs.clear();
+    sDCAs.clear();
     mHelices.clear();
     mHelixFlags.clear();
     mSigma.clear();
@@ -453,7 +451,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       StDcaGeometry* gDCA = g->dcaGeometry();
       if (! gDCA) continue;
       if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
-      mDCAs.push_back(gDCA);
+      sDCAs.push_back(gDCA);
       // 	  StPhysicalHelixD helix = gDCA->helix(); 
       // 	  mHelices.push_back(helix);
       mHelices.push_back(g->geometry()->helix());
@@ -737,12 +735,12 @@ Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
   if (fabs(vtx.x())> 10) return 1e6;
   if (fabs(vtx.y())> 10) return 1e6;
   if (fabs(vtx.z())>300) return 1e6;
-  for (UInt_t i=0; i<mDCAs.size(); i++) {
+  for (UInt_t i=0; i<sDCAs.size(); i++) {
 
     if ( !(mHelixFlags[i] & kFlagDcaz) || (requireCTB && !(mHelixFlags[i] & kFlagCTBMatch)) )
        continue;
 
-    const StDcaGeometry* gDCA = mDCAs[i];
+    const StDcaGeometry* gDCA = sDCAs[i];
     if (! gDCA) continue;
     const StPhysicalHelixD helix = gDCA->helix();
     e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
@@ -783,7 +781,7 @@ void StMinuitVertexFinder::Chi2Beamline3D(int& npar, double* gin, double& f, dou
 
   // Add to the chi2 with the beamline
   static double scale = 1./(mWidthScale*mWidthScale);
-  f += scale*(1. - TMath::Exp(-CalcBeamlineChi2(vtx)/scale));
+  f += scale*(1. - TMath::Exp(-StGenericVertexFinder::CalcChi2Beamline(vtx)/scale));
 }
 
 
@@ -869,17 +867,6 @@ void StMinuitVertexFinder::UseVertexConstraint(Double_t x0, Double_t y0, Double_
     mExternalSeedPresent = kFALSE;
 
 
-}
-
-
-Double_t StMinuitVertexFinder::beamX(Double_t z) {
-  Float_t x = mX0 + mdxdz*z;
-  return x;
-}
-
-Double_t StMinuitVertexFinder::beamY(Double_t z) {
-  Float_t y = mY0 + mdydz*z;
-  return y;
 }
 
 Int_t  StMinuitVertexFinder::NCtbMatches() { 

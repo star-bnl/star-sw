@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.23 2016/04/20 22:03:45 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.27 2016/04/25 23:59:31 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -14,9 +14,15 @@
 #include "StPrimaryVertex.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
+#include "StEvent/StDcaGeometry.h"
 #include "StEventTypes.h"
 
+
 // Initialize static variable with default values
+
+/// Pointers to DCA states to be used in a vertex fit
+std::vector<const StDcaGeometry*>  StGenericVertexFinder::sDCAs;
+
 vertexSeed_st StGenericVertexFinder::sBeamline;
 
 
@@ -107,7 +113,7 @@ StGenericVertexFinder::Clear()
  * \author Dmitri Smirnov
  * \date April, 2016
  */
-double StGenericVertexFinder::CalcBeamlineChi2(const StThreeVectorD& point)
+double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
 {
    // Just for shorthand
    const vertexSeed_st& bl = sBeamline;
@@ -198,4 +204,24 @@ void StGenericVertexFinder::UseVertexConstraint(const vertexSeed_st& beamline)
    LOG_INFO << "BeamLine constraint: weight =  " << sBeamline.weight << endm;
    LOG_INFO << "x(z) = (" << sBeamline.x0 << " +/- " << sBeamline.err_x0 << ") + (" << sBeamline.dxdz << " +/- " << sBeamline.err_dxdz << ") * z" << endm;
    LOG_INFO << "y(z) = (" << sBeamline.y0 << " +/- " << sBeamline.err_y0 << ") + (" << sBeamline.dydz << " +/- " << sBeamline.err_dydz << ") * z" << endm;
+}
+
+
+/**
+ * Returns x coordinate on the beamline (given by sBeamline) corresponding to
+ * the passed value of z.
+ */
+double StGenericVertexFinder::beamX(double z)
+{
+  return sBeamline.x0 + sBeamline.dxdz*z;
+}
+
+
+/**
+ * Returns y coordinate on the beamline (given by sBeamline) corresponding to
+ * the passed value of z.
+ */
+double StGenericVertexFinder::beamY(double z)
+{
+  return sBeamline.y0 + sBeamline.dydz*z;
 }

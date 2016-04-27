@@ -67,6 +67,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
     // create and fill array of tracks to init KFParticleTopoReconstructor
   const int nTracks = tracker->NTracks();
   fTracks[1].Resize( int(nTracks/float_vLen+1)*float_vLen );
+  fTracks[5].Resize( int(nTracks/float_vLen+1)*float_vLen );
   fParticles.clear();
   int iOTr = 0; // index in out array
   
@@ -75,112 +76,133 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
   
   for ( int iTr = 0; iTr < nTracks; iTr++ ) {
       // get track params in local CS
-    AliHLTTPCCATrackParam trParam = tracker->Tracks()[ iTr ].InnerParam();
-        
-    const float x0 = 0;
-    trParam.TransportToXWithMaterial( x0, tracker->Slice(0).Param().cBz( ) );
-
-      // -- convert parameters
-    fTracks[1].SetParameter(trParam.X(), 0, iOTr); // X
-    fTracks[1].SetParameter(trParam.Y(), 1, iOTr); // Y
-    fTracks[1].SetParameter(trParam.Z(), 2, iOTr); // Z
-
-    const float pt = CAMath::Abs( 1.f / trParam.QPt() );
-    const int q = -(trParam.QPt()>=0 ? 1 : -1);
-//    if ( pt < 1 ) continue; // dbg
-    if ( trParam.NDF() < 10+5 ) continue; // at least 15 hits in track
-    if ( trParam.Chi2() > 10*trParam.NDF() ) continue; // dbg
-//    if ( iOTr >= 4 ) continue; // dbg
     
-    const float cosL = trParam.DzDs();
-    fTracks[1].SetParameter(pt * trParam.GetCosPhi(), 3, iOTr); // Px
-    fTracks[1].SetParameter(pt * trParam.SinPhi()   , 4, iOTr); // Py
-    fTracks[1].SetParameter(pt * cosL               , 5, iOTr); // Pz
+    bool ok = true;
+    const int q = -(tracker->Tracks()[ iTr ].InnerParam().QPt()>=0 ? 1 : -1);
     
-      // -- convert cov matrix
-      // get jacobian
-    float J[6][6];
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++)
-        J[i][j] = 0;
-    J[0][0] = 1; // x -> x
-    J[1][1] = 1; // y -> y
-    J[2][2] = 1; // z -> z
-    J[3][3] = -pt * trParam.SinPhi() / trParam.GetCosPhi();
-    J[3][5] = -q * pt * pt * trParam.GetCosPhi(); // q/pt -> px
-    J[4][3] = pt; // sinPhi -> py
-    J[4][5] = -q* pt * pt * trParam.SinPhi(); // q/pt -> py
-    J[5][4] = pt; // dz/ds -> pz
-    J[5][5] = -q* pt * pt * cosL; // q/pt -> pz
-
-    float CovIn[6][6]; // triangular -> symmetric matrix
+    for(int iParamSet=0; iParamSet<2; iParamSet++)
     {
-      CovIn[0][0] = .001f*.001f; // dx. From nowhere. TODO
-      for (int i = 1; i < 6; i++) {
-        CovIn[i][0] = 0;
-        CovIn[0][i] = 0;
+      AliHLTTPCCATrackParam trParam;
+      int arrayIndex = -1;
+      if(iParamSet==0)
+      {
+        arrayIndex = 1;
+        trParam = tracker->Tracks()[ iTr ].InnerParam();
       }
-      int k = 0;
-      for (int i = 1; i < 6; i++) {
-        for (int j = 1; j <= i; j++, k++) {
-          CovIn[i][j] = trParam.Cov()[k];
-          CovIn[j][i] = trParam.Cov()[k];
-        }
+      if(iParamSet==1)
+      {
+        arrayIndex = 5;
+        trParam = tracker->Tracks()[ iTr ].OuterParam();
       }
-    }
-    
-    float CovInJ[6][6];      // CovInJ = CovIn * J^t
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++) {
-        CovInJ[i][j] = 0;
-        for (int k = 0; k < 6; k++) {
-          CovInJ[i][j] += CovIn[i][k] * J[j][k];
-        }
-      }
-    
-    float CovOut[6][6];      // CovOut = J * CovInJ
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 6; j++) {
-        CovOut[i][j] = 0;
-        for (int k = 0; k < 6; k++) {
-          CovOut[i][j] += J[i][k] * CovInJ[k][j];
-        }
-      }
+          
+      const float x0 = 0;
+      trParam.TransportToXWithMaterial( x0, tracker->Slice(0).Param().cBz( ) );
 
-    float KFPCov[21]; // symmetric matrix -> triangular
-    {
-      int k = 0;
-      for (int i = 0; i < 6; i++) {
-        for (int j = 0; j <= i; j++, k++) {
-          KFPCov[k] = CovOut[i][j];
-          ASSERT( !CAMath::Finite(CovOut[i][j]) ||  CovOut[i][j] == 0 || fabs( 1. - CovOut[j][i]/CovOut[i][j] ) <= 0.05,
-            "CovOut[" << i << "][" << j << "] == CovOut[" << j << "][" << i << "] : " << CovOut[i][j] << " == " << CovOut[j][i]);
+        // -- convert parameters
+      fTracks[arrayIndex].SetParameter(trParam.X(), 0, iOTr); // X
+      fTracks[arrayIndex].SetParameter(trParam.Y(), 1, iOTr); // Y
+      fTracks[arrayIndex].SetParameter(trParam.Z(), 2, iOTr); // Z
+
+      const float pt = CAMath::Abs( 1.f / trParam.QPt() );
+//       const int q = -(trParam.QPt()>=0 ? 1 : -1);
+  //    if ( pt < 1 ) continue; // dbg
+      ok = ok && !( trParam.NDF() < 10+5); //if ( trParam.NDF() < 10+5 ) continue; // at least 15 hits in track
+      ok = ok && !( trParam.Chi2() > 10*trParam.NDF() ); //if ( trParam.Chi2() > 10*trParam.NDF() ) continue; // dbg
+  //    if ( iOTr >= 4 ) continue; // dbg
+      
+      const float cosL = trParam.DzDs();
+      fTracks[arrayIndex].SetParameter(pt * trParam.GetCosPhi(), 3, iOTr); // Px
+      fTracks[arrayIndex].SetParameter(pt * trParam.SinPhi()   , 4, iOTr); // Py
+      fTracks[arrayIndex].SetParameter(pt * cosL               , 5, iOTr); // Pz
+      
+        // -- convert cov matrix
+        // get jacobian
+      float J[6][6];
+      for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 6; j++)
+          J[i][j] = 0;
+      J[0][0] = 1; // x -> x
+      J[1][1] = 1; // y -> y
+      J[2][2] = 1; // z -> z
+      J[3][3] = -pt * trParam.SinPhi() / trParam.GetCosPhi();
+      J[3][5] = -q * pt * pt * trParam.GetCosPhi(); // q/pt -> px
+      J[4][3] = pt; // sinPhi -> py
+      J[4][5] = -q* pt * pt * trParam.SinPhi(); // q/pt -> py
+      J[5][4] = pt; // dz/ds -> pz
+      J[5][5] = -q* pt * pt * cosL; // q/pt -> pz
+
+      float CovIn[6][6]; // triangular -> symmetric matrix
+      {
+        CovIn[0][0] = .001f*.001f; // dx. From nowhere. TODO
+        for (int i = 1; i < 6; i++) {
+          CovIn[i][0] = 0;
+          CovIn[0][i] = 0;
+        }
+        int k = 0;
+        for (int i = 1; i < 6; i++) {
+          for (int j = 1; j <= i; j++, k++) {
+            CovIn[i][j] = trParam.Cov()[k];
+            CovIn[j][i] = trParam.Cov()[k];
+          }
         }
       }
-    }
-     
-    {   // check cov matrix
-      bool ok = true;
-      int k = 0;
-      for (int i = 0; i < 6; i++) {
-        for (int j = 0; j <= i; j++, k++) {
-          ok &= CAMath::Finite( KFPCov[k] );
+      
+      float CovInJ[6][6];      // CovInJ = CovIn * J^t
+      for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 6; j++) {
+          CovInJ[i][j] = 0;
+          for (int k = 0; k < 6; k++) {
+            CovInJ[i][j] += CovIn[i][k] * J[j][k];
+          }
         }
-        ok &= ( KFPCov[k-1] > 0 );
+      
+      float CovOut[6][6];      // CovOut = J * CovInJ
+      for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 6; j++) {
+          CovOut[i][j] = 0;
+          for (int k = 0; k < 6; k++) {
+            CovOut[i][j] += J[i][k] * CovInJ[k][j];
+          }
+        }
+
+      float KFPCov[21]; // symmetric matrix -> triangular
+      {
+        int k = 0;
+        for (int i = 0; i < 6; i++) {
+          for (int j = 0; j <= i; j++, k++) {
+            KFPCov[k] = CovOut[i][j];
+            ASSERT( !CAMath::Finite(CovOut[i][j]) ||  CovOut[i][j] == 0 || fabs( 1. - CovOut[j][i]/CovOut[i][j] ) <= 0.05,
+              "CovOut[" << i << "][" << j << "] == CovOut[" << j << "][" << i << "] : " << CovOut[i][j] << " == " << CovOut[j][i]);
+          }
+        }
       }
-      if (!ok) continue;
+      
+      if(iParamSet == 0)
+      {   // check cov matrix
+        int k = 0;
+        for (int i = 0; i < 6; i++) {
+          for (int j = 0; j <= i; j++, k++) {
+            ok &= CAMath::Finite( KFPCov[k] );
+          }
+          ok &= ( KFPCov[k-1] > 0 );
+        }
+      }
+      
+      if(ok)
+      {
+        short trackPDG = -1;  
+        if(pdg)
+          trackPDG = (*pdg)[iTr];
+      
+        for(int iC=0; iC<21; iC++)
+          fTracks[arrayIndex].SetCovariance( KFPCov[iC], iC, iOTr);
+        fTracks[arrayIndex].SetId(iTr, iOTr);
+        fTracks[arrayIndex].SetPDG(trackPDG, iOTr);
+        fTracks[arrayIndex].SetQ(q, iOTr);
+        fTracks[arrayIndex].SetPVIndex(-1, iOTr);
+      }
     }
-    
-    short trackPDG = -1;  
-    if(pdg)
-      trackPDG = (*pdg)[iTr];
-    
-    for(int iC=0; iC<21; iC++)
-      fTracks[1].SetCovariance( KFPCov[iC], iC, iOTr);
-    fTracks[1].SetId(iTr, iOTr);
-    fTracks[1].SetPDG(trackPDG, iOTr);
-    fTracks[1].SetQ(q, iOTr);
-    fTracks[1].SetPVIndex(-1, iOTr);
+    if (!ok) continue;
     
     iOTr++;
     
@@ -190,14 +212,21 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
     if(nElements == float_vLen)
     {
       fTracks[1].RotateXY( alpha, iOTr-nElements);
+      fTracks[5].RotateXY( alpha, iOTr-nElements);
       nElements=0;
     }
   }
   if(nElements>0)
+  {
     fTracks[1].RotateXY( alpha, iOTr-nElements);
+    fTracks[5].RotateXY( alpha, iOTr-nElements);
+  }
     
   fTracks[0].Resize(iOTr);
   fTracks[0].Set(fTracks[1],iOTr,0);
+
+  fTracks[4].Resize(iOTr);
+  fTracks[4].Set(fTracks[5],iOTr,0);
   
   fKFParticlePVReconstructor->Init( &fTracks[0], iOTr );
 #ifdef USE_TIMERS
@@ -299,7 +328,7 @@ void KFParticleTopoReconstructor::Init(const KFPTrackVector *particles, const ve
   fPV.resize(pv.size());
 
   for(unsigned int iPV=0; iPV<fPV.size(); iPV++)
-    fPV[iPV] = const_cast<KFParticle&>(pv[iPV]);
+    fPV[iPV] = KFParticleSIMD(const_cast<KFParticle&>(pv[iPV]));
 
 #ifdef USE_TIMERS
   timer.Stop();
@@ -446,7 +475,7 @@ void KFParticleTopoReconstructor::SortTracks()
     for(int iTV=0; iTV<4; iTV++)
       fTracks[iTV+offset[iSet]].RecalculateLastIndex();
   }
-
+  
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
   fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
   

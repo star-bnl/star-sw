@@ -6,19 +6,22 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.29 2016/04/20 22:03:45 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.33 2016/04/25 23:59:31 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
 #define STAR_StGenericVertexFinder
-#include "StEnumerations.h"
-#include "Stiostream.h"
-#include <assert.h>
+
+#include <vector>
+
+//#include "StEventTypes.h"
 #include "StPrimaryVertex.h"
 #include "tables/St_vertexSeed_Table.h"
 
 class StEvent;
-class StPrimaryVertex;
+class StDcaGeometry;
+
+
 class StGenericVertexFinder {
  public:
 
@@ -78,8 +81,19 @@ class StGenericVertexFinder {
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
+  /// Returns x coordinate on the beamline (given by sBeamline) corresponding to
+  /// the passed value of z.
+  static double beamX(double z);
+
+  /// Returns y coordinate on the beamline (given by sBeamline) corresponding to
+  /// the passed value of z.
+  static double beamY(double z);
+
   /// Caclulates chi2 for the beamline and a point
-  static double CalcBeamlineChi2(const StThreeVectorD& point);
+  static double CalcChi2Beamline(const StThreeVectorD& point);
+
+  /// A static container with pointers to DCA states to be used in a vertex fit
+  static std::vector<const StDcaGeometry*>  sDCAs;
 
   /// All measured parameters of the beamline. Updated whenever
   /// UseVertexConstraint(const vertexSeed_st&) is called
