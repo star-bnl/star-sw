@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.141 2015/09/21 21:40:47 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.144 2016/04/26 17:58:26 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;

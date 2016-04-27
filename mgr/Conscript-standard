@@ -239,23 +239,26 @@ if( $FC eq 'pgf77'){
     $FEXTEND  = $env1->{G77EXTEND};
   }
 }
-if ($FC eq 'g77' or $FC eq 'gfortran'){
-  if ( $DirPath =~ /pams/ and
-       ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
-    $FCCOM    = $env1->{FCviaAGETOFCOM};
-  }
-  # If fortran, grab the -lg2c or -lgfortran for linking
-  if ( $DirPath =~ /StarVMC/ ){
-    $LIBS .= " " . $env1->{FLIBS};
-  }
-  # this is done not only for stand-alone library purpose but for backward
-  # compatibility of root4star linked with -lg2c rather than gfortran (hence
-  # libs would not work as symbol would fail to resolve)
-  if ( $FC eq 'gfortran' && (grep(/.F$/,@srcL) || grep(/.g$/,@srcL)) ){
-    print "\tFound .F or .g in sources and adding [".
-      $env1->{FLIBS}."] to $pkg\n" if $param::debug;
-    $SOFLAGS .= " " . $env1->{FLIBS};
-  }
+if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
+    if ( $DirPath =~ /pams/ and
+	 ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
+	$FCCOM    = $env1->{FCviaAGETOFCOM};
+    }
+    # If fortran, grab the -lg2c or -lgfortran for linking
+    if ( $DirPath =~ /StarVMC/ ){
+	#print "\tAppending ".$env1->{FLIBS}." to LIBS=$LIBS\n";
+	$LIBS .= " " . $env1->{FLIBS};
+    }
+  
+    ## this is done not only for stand-alone library purpose but for backward
+    ## compatibility of root4star linked with -lg2c rather than gfortran (hence
+    ## libs would not work as symbol would fail to resolve)
+    #if ( $FC eq 'gfortran' && (grep(/.F$/,@srcL) || grep(/.g$/,@srcL)) ){
+    #	print "\tFound .F or .g in sources and adding [".
+    #	    $env1->{FLIBS}."] to $pkg\n" ; # if $param::debug;
+    #	$SOFLAGS .= " " . $env1->{FLIBS};
+    #	#print "\tFinal SOFLAGS are $SOFLAGS\n";
+    #}
 }
 
 #+
