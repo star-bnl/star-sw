@@ -71,6 +71,7 @@ private:
   St_db_Maker *starDb;
   StTriggerSimuMaker *mHeadMaker;
   int mConfig; // see enum  
+  TString mBemcStatus;
   
   // DB information
   Int_t HT_FEE_Offset;                     //same as bitConvValue but set by support class
@@ -149,6 +150,7 @@ private:
   void getPed();
   void GetTriggerPatchFromCrate(int crate, int seq, int& triggerPatch) const;
   void FEEout();
+  void FEEini2009();
   void FEEini2009(int runNumber);
   void FEEout2009();
   void switchoff(int& x, int n) const { x &= ~(1 << n); }
@@ -233,6 +235,7 @@ public:
 public:
   enum {kOnline=1, kOffline, kExpert};
   void setConfig(int x) {mConfig=x;}
+  void setBemcStatus(const char* bemcStatus) { mBemcStatus = bemcStatus; }
   
   /// default tables come from emcSim or adc2e, but you can supply your own if you prefer
   void setTables(StBemcTables *tab) { mTables = tab; }

@@ -1,7 +1,7 @@
 #ifndef STAR_StVirtualTriggerSimu
 #define STAR_StVirtualTriggerSimu
 
-// $Id: StVirtualTriggerSimu.h,v 1.6 2010/01/08 15:18:27 pibero Exp $
+// $Id: StVirtualTriggerSimu.h,v 1.6.8.1 2016/04/27 15:24:53 zchang Exp $
 
 /*****************************************************************************
  * @class StVirtualTriggerSimu
@@ -31,7 +31,7 @@ public:
     
     /// 0 == real data, 1 or more == Monte Carlo
     virtual void setMC(int flag) { mMCflag = flag; }
-
+    virtual void setYear(int year) { mYear = year; }
     /// Options are: "MuDst", "StEvent"
     virtual void setSource(const char* source) { mSource = source; }
 
@@ -46,6 +46,9 @@ protected:
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.h,v $
+ * Revision 1.6.8.1  2016/04/27 15:24:53  zchang
+ * SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ *
  * Revision 1.6  2010/01/08 15:18:27  pibero
  * Default input source is "MuDst" for all subdetectors.
  *
