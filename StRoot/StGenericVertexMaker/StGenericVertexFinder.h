@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.36 2016/04/27 21:32:01 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.37 2016/04/27 21:32:07 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -94,6 +94,10 @@ class StGenericVertexFinder {
 
   /// Caclulates chi2 for the beamline and a point
   static double CalcChi2Beamline(const StThreeVectorD& point);
+
+  /// Recalculates the vertex position from DCA measurements in the input list
+  /// of DCAs
+  static StThreeVectorD CalcVertexSeed(const StDcaList &trackDcas);
 
   /// Caclulates total chi2 for the track DCAs stored in sDCAs and a point
   static double CalcChi2DCAs(const StThreeVectorD &point);
