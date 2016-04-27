@@ -2044,7 +2044,7 @@ iShape = kTrd1;
             <Cut name="CUTELE" value="1e-4"  />
             <Cut name="DCUTE" value="1e-4"  />
             <Cut name="DCUTM" value="1e-4"  />
-            <Par name="STRA" value="1."  />
+<!--            <Par name="STRA" value="1."  /> -->
 
 
             <Instrument block="TPAD">
