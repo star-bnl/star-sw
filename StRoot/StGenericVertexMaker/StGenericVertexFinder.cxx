@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.30 2016/04/27 21:32:01 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.31 2016/04/27 21:32:07 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -210,6 +210,46 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    double chi2 = dist_mag*dist_mag/covarianceMprime[0];
 
    return chi2;
+}
+
+
+/**
+ * Estimates vertex position from track DCA states in sDCAs.
+ * The beam position is not taken into account.
+ *
+ * \author Dmitri Smirnov
+ * \date April 2016
+ */
+StThreeVectorD StGenericVertexFinder::CalcVertexSeed(const StDcaList &trackDcas)
+{
+   // Estimate new seed position using provided tracks
+   StThreeVectorD vertexSeed(0, 0, 0);
+   StThreeVectorD totalWeigth(0, 0, 0);
+
+   if (trackDcas.size() == 0) {
+      LOG_WARN << "StGenericVertexFinder::CalcVertexSeed: Empty container with track DCAs. "
+	          "Returning default seed: StThreeVectorD(0, 0, 0)" << endm;
+      return vertexSeed;
+   }
+
+
+   double xyzp[6], covXyzp[21];
+
+   for (const StDcaGeometry* trackDca : trackDcas)
+   {
+      trackDca->GetXYZ(xyzp, covXyzp);
+
+      double x_weight = 1./sqrt(covXyzp[0]);
+      double y_weight = 1./sqrt(covXyzp[2]);
+      double z_weight = 1./sqrt(covXyzp[5]);
+
+      vertexSeed  += StThreeVectorD(xyzp[0]*x_weight, xyzp[1]*y_weight, xyzp[2]*z_weight);
+      totalWeigth += StThreeVectorD(x_weight, y_weight, z_weight);
+   }
+
+   vertexSeed.set(vertexSeed.x()/totalWeigth.x(), vertexSeed.y()/totalWeigth.y(), vertexSeed.z()/totalWeigth.z());
+
+   return vertexSeed;
 }
 
 
