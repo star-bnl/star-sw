@@ -1,4 +1,4 @@
-#!/opt/star/bin/perl
+#!/usr/bin/env perl
 #use Env;
 ############################################################
 # $Id: Conscript,v 1.21 2016/04/27 11:29:09 jeromel Exp $
