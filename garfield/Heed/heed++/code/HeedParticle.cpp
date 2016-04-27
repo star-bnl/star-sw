@@ -134,6 +134,7 @@ void HeedParticle::physics(void) {
           double Ep0 = mass * c_squared + curr_kin_energy;
           double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
           double Mp = mass;
+	  if (Ep1 <= Mp * c_squared) continue; // ??
           double Mt = electron_def.mass;
           double theta_p, theta_t;
           theta_two_part(Ep0, Ep1, Mp, Mt, theta_p, theta_t);
