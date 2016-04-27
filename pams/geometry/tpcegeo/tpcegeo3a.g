@@ -1627,7 +1627,7 @@ BLOCK TPAD is a REAL padrow WITH dimensions defined at positioning time
       CALL     GSTPAR(ag_imed,'CUTELE',1e-4)
       CALL     GSTPAR(ag_imed,'DCUTE', 1e-4)
       CALL     GSTPAR(ag_imed,'DCUTM', 1e-4)
-      CALL     GSTPAR(ag_imed,'STRA',1.)
+*      CALL     GSTPAR(ag_imed,'STRA',1.)
 !
 !     The following is the corrected hits definition: 25-dec-98 (PN)
       HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10: cy:10: cz:10:,

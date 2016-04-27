@@ -573,7 +573,7 @@
             <Material name="p10"  />
             <Material stemax="2.5*tprs_width" isvol="1" name="sensitive_gas"  />
             <Shape type="BOX" dz="0" dx="0" dy="0"  />
-            <Par name="STRA" value="1."  />
+<!--            <Par name="STRA" value="1."  /> -->
 
             <Instrument block="TPAD">
 
@@ -823,7 +823,7 @@
             <Attribute for="TMEA" seen="1" colo="4"  />
             <Shape type="TRD1" dz="tecw_MWChei/2" dx2="tecw_MWCout/2" dx1="tecw_MWCinn/2" dy="tecw_MWCdepth/2"  />
             <Create block="TMSE"  />
-            <Par name="STRA" value="1."  />
+<!--            <Par name="STRA" value="1."  /> -->
         </Block>
         
         <Block name="TMSE" comment="is a single sensitive volume"  >

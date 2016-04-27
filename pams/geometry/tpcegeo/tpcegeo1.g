@@ -475,7 +475,7 @@ block TPAD is a real padrow with dimensions defined at positioning time
       material p10
       material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0    
-      Call     GSTPAR(ag_imed,'STRA',1.)
+*      Call     GSTPAR(ag_imed,'STRA',1.)
 *
 *     The following is the corrected hits definition: 25-dec-98 (PN)
       HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10: cy:10: cz:10:,
@@ -715,7 +715,7 @@ Block TMEA  is a double sensitive layer around gating grid
       SHAPE     TRD1 dx1=tecw_MWCinn/2        dx2=tecw_MWCout/2,
                      dy=tecw_MWCdepth/2       dz=tecw_MWChei/2
       Create    TMSE
-      Call      GSTPAR(ag_imed,'STRA',1.)
+*      Call      GSTPAR(ag_imed,'STRA',1.)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TMSE  is a single sensitive volume
