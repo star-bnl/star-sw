@@ -1,4 +1,6 @@
-#!/opt/star/bin/perl
+#!/usr/bin/env perl
+# $Id: Conscript,v 1.21 2016/04/27 11:29:09 jeromel Exp $
+# $Log: Conscript,v $
 Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 my @GDIRS = qw( block cdf cgpack erdecks erpremc fiface fluka gbase gcons gdraw 
@@ -12,10 +14,13 @@ $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $FC     = $env->{FC};
 my $FCPATH = $env->{FCPATH};
-my $FFLAGS = $env->{FFLAGS};
+my $FFLAGS = $env->{FFLAGS};# print "FFLAGS = $FFLAGS\n";
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
 my $CPPPATH  = $env->{CPPPATH};
+my $DEBUG   = $env->{DEBUG};# print "DEBUG = $DEBUG\n";
+my $FDEBUG  = $env->{FDEBUG};
+my $NOOPTIMIZED = $FDEBUG; $NOOPTIMIZED =~ s/-O2//g; $NOOPTIMIZED =~ s/-O//g;# print "FDEBUG = $FDEBUG, NOOPTIMIZED = $NOOPTIMIZED\n";
 my $pkg  = geant321; 
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
@@ -48,6 +53,7 @@ $env2 = $env->clone('FC'           => $FC,
 		    'LIBS'         => $LIBS,
 		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries);
+$envNoDeb = $env2->clone('FDEBUG'    => $NOOPTIMIZED);
 my @sources = ();
 foreach my $d (@GDIRS){
   my $dir = $Dir . "/" . $d;    #  print "dir = $dir\n";
@@ -55,13 +61,20 @@ foreach my $d (@GDIRS){
   foreach my $s (@src) { 
     next if $s =~ /\.cdf$/;
     next if $s =~ /gxint/;
-    my $ss = $d . "/" . $s;# print "ss = $s  =>  $ss\n";
+    my $ss = $d . "/" . $s; # print "ss = $s  =>  $ss\n";
     next if $d eq 'gstrag' and $FPPFLAGS !~ /CERNLIB_ASHO/ and 
       ($s =~ /gasho\.F$/ || 
        $s =~ /goscmg\.F$/ || 
        $s =~ /gdifmg\.F$/ || 
        $s =~ /giasho\.F$/);
-    push @sources, $ss; 
+    if ($DEBUG ne $NOOPTIMIZED and 
+	($d eq 'gstrag' or 
+	 $d eq 'gphys' and $s =~ /gfshdc\.F$|gphot\.F$|gphoti\.F$|gphsg1\.F$|gphsg2\.F$|gphsgp\.F$|gphxsi\.F$|gphysi\.F/)) {
+      my @objfiles = Objects $envNoDeb ($ss);
+      push @sources, $objfiles[0];
+    } else {
+      push @sources, $ss; 
+    }
   }
 }
 if ($#sources > -1) {
