@@ -134,6 +134,11 @@ class TrackHeed : public Track {
   bool SetupGas(Medium* medium);
   bool SetupMaterial(Medium* medium);
   bool SetupDelta(const std::string& databasePath);
+public:
+  Heed::EnergyMesh* EnergyMesh() {return m_energyMesh;}
+  Heed::EnTransfCS* Transfercs() {return m_transferCs;}
+  Heed::HeedMatterDef* Matter()  {return m_matter;}
+  const Heed::MolecPhotoAbsCS** Molpacs() {return (const Heed::MolecPhotoAbsCS**)  m_molPacs;}
 };
 }
 
