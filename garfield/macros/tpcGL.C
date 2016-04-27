@@ -100,8 +100,8 @@ void tpcGL(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   // Setup the gas.
   const Double_t BarPressure         = 1010.8; // [mbar], TPC-PTB, barometricPressure
   const Double_t inputTPCGasPressure = 1.93;   // [mbar], TPC-PT8, difference between barometer pressure and pressure in TPC
-  //  const Double_t pressure = (1011. / 1000.) * 750.; // 1 bar = 750 torr 
-  const Double_t pressure = ((BarPressure + inputTPCGasPressure)/ 1000.) * 750.; // [torr], 1 bar = 750 torr 
+  //  const Double_t pressure = (1011. / 1000.) * 750.; // 1 bar = 750.06 torr 
+  const Double_t pressure = ((BarPressure + inputTPCGasPressure)/ 1000.) * 750.06; // [torr], 1 bar = 750.06 torr 
   const Double_t temperature = 297.839; //273.15 + 24.7; // inputGasTemperature (degree K)
   Double_t BField = 0.5; // Tesla
   Double_t Angle  = 0.0; // rad
