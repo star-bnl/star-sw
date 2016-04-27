@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.112 2013/03/13 22:41:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.112.2.1 2016/04/27 12:28:00 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1051,7 +1051,7 @@ Bfc_st BFC[] = {
   {"TbUtil" ,"" ,"","sim_T,tpc_t,globT,SCL","" ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil" ,"" ,"","","" ,"StBTofUtil","Load StBTofUtil",kFALSE},
-  {"MtdUtil" ,"" ,"","", "","StMtdUtil","Load StMtdUtil",kFALSE},
+  {"MtdUtil" ,"" ,"","","" ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent" ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
   {"SsdUtil" ,"" ,"","StarMagField,StEvent","" ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
@@ -1246,7 +1246,8 @@ Bfc_st BFC[] = {
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"mtdDat" ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  {"mtd" ,"MtdChain","","mtdDat,mtdMatch","StMaker", "StChain","MTD Chain",kFALSE},
+  {"mtdDat" ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
    , "MTD hit maker",kFALSE},
   {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib" ,"StMaker","StChain","ToFx Chain",kFALSE},
@@ -1281,7 +1282,7 @@ Bfc_st BFC[] = {
   {"VFMinuit2" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV" ,"" ,"","genvtx" ,"","","... Fixed dummy VF method",kFALSE},
-  {"VFMCE" ,"" ,"","VFMinuit" ,"","","... Fixed vertex from MCEvent",kFALSE},
+  {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV" ,"" ,"","genvtx" ,"","","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
@@ -1328,6 +1329,7 @@ Bfc_st BFC[] = {
    , "Bichsel method used for dEdx",kFALSE},
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib" ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker", "BTOF calibration",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker" ,"TPC-MTD track matching",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -2472,7 +2474,7 @@ Bfc_st BFC[] = {
   {"TbUtil" ,"" ,"","sim_T,tpc_t,globT,SCL","" ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil" ,"" ,"","","" ,"StBTofUtil","Load StBTofUtil",kFALSE},
-  {"MtdUtil" ,"" ,"","", "","StMtdUtil","Load StMtdUtil",kFALSE},
+  {"MtdUtil" ,"" ,"","","" ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent" ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
   {"SsdUtil" ,"" ,"","StarMagField,StEvent","" ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
@@ -2667,7 +2669,8 @@ Bfc_st BFC[] = {
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"mtdDat" ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  {"mtd" ,"MtdChain","","mtdDat,mtdMatch","StMaker", "StChain","MTD Chain",kFALSE},
+  {"mtdDat" ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
    , "MTD hit maker",kFALSE},
   {"ToF" ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx" ,"TofChain","","tofXDat,tofrMatch,tofCalib" ,"StMaker","StChain","ToFx Chain",kFALSE},
@@ -2702,7 +2705,7 @@ Bfc_st BFC[] = {
   {"VFMinuit2" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV" ,"" ,"","genvtx" ,"","","... Fixed dummy VF method",kFALSE},
-  {"VFMCE" ,"" ,"","VFMinuit" ,"","","... Fixed vertex from MCEvent",kFALSE},
+  {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV" ,"" ,"","genvtx" ,"","","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
@@ -2749,6 +2752,7 @@ Bfc_st BFC[] = {
    , "Bichsel method used for dEdx",kFALSE},
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},
   {"btofCalib" ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker", "BTOF calibration",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker" ,"TPC-MTD track matching",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -2995,12 +2999,14 @@ Int_t StBFChain::Load()
 	    iok = gSystem->Load(libL);
 	    if (iok < 0)  {
 
-	      LOG_QA  << "problem with loading of " << libL.Data() << endm;
-	      LOG_QA  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
+	      LOG_FATAL  << "problem with loading of " << libL.Data() << endm;
+	      LOG_FATAL  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
 
-	      fBFC[i].Flag = kFALSE;
-	      status = kStErr;
-	      assert(iok >= 0);
+	      //fBFC[i].Flag = kFALSE;
+	      //status = kStErr;
+	      //assert(iok >= 0); ?? obviously it is so, but not very specific
+	      Int_t libraryload = kStErr;
+	      assert(libraryload!=kStErr); // this is obvious and will display an explicit
 	      break;
 	    } else {
 	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
@@ -3032,7 +3038,7 @@ Int_t StBFChain::Load()
   here which deserves attention
   - The maker's SetMode() mechanism is treated here.
   - Calibration options like NoMySQLDb, NoCintCalDb or NoCintDb and path are set
-  - SetFlavor() sim+ofl or sim is made
+  - SetFlavor() sim+ofl or sim, and filestreams is made
 
   If a maker is added along with some flag options, this is the place to
   implement the switches.
@@ -3101,9 +3107,26 @@ Int_t StBFChain::Instantiate()
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
 	  if (!dbMk) goto Error;
 	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
+
+	  // Determine flavors
+	  TString flavors = "ofl"; // default flavor for offline
+
+	  // simulation flavors
+	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
+
+	  // filestream flavors
+	  if (fSetFiles) {
+	    TString firstFileName = fSetFiles->GetFileName(0);
+	    firstFileName = firstFileName(firstFileName.Last('/')+1,firstFileName.Length());
+	    if (firstFileName.BeginsWith("st_")) {
+	      TString fileStream = firstFileName(3,firstFileName.Index('_',3)-3);
+	      if (fileStream.Length()>0) flavors.Prepend(fileStream += '+');
+	    }
+	  }
+ 
+	  LOG_INFO << "Using DB flavors: " << flavors << endm;
+	  dbMk->SetFlavor(flavors.Data());
 	  mk = dbMk;
-	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
-	  else                                              dbMk->SetFlavor("ofl");
 	}
 	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
 	SetDbOptions(dbMk);

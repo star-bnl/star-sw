@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.7 2013/01/28 20:27:25 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.7.2.1 2016/04/27 12:28:02 jeromel Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.7.2.1  2016/04/27 12:28:02  jeromel
+    Patches for getting SL13b compiled with gcc44
+
     Revision 1.7  2013/01/28 20:27:25  fisyak
     Move cluters to global coordinatate system
 
@@ -87,7 +90,7 @@ Int_t StTpcFastSimMaker::Make() {
     transform(coorG,coorLT,sector,row);
     StTpcLocalCoordinate  coorLTD = coorLT;
     // ExB corrections
-    Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
+    Float_t pos[3] = {(Float_t) coorLTD.position().x(), (Float_t) coorLTD.position().y(), (Float_t) coorLTD.position().z()};
     Float_t posMoved[3];
     if ( mExB ) {
       mExB->DoDistortion(pos,posMoved);   // input pos[], returns posMoved[]

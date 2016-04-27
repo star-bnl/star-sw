@@ -223,7 +223,7 @@ if( $FC eq 'pgf77'){
     $FEXTEND  = $env1->{G77EXTEND};
   }
 }
-if ($FC eq 'g77' or $FC eq 'gfortran'){
+if ($FC =~ m/g77/ || $FC =~ m/gfortran/){
     if ( $DirPath =~ /pams/ and
 	 ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
 	$FCCOM    = $env1->{FCviaAGETOFCOM};

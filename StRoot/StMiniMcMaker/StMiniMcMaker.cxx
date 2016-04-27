@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.41.2.1 2016/04/27 12:28:02 jeromel Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.41.2.1  2016/04/27 12:28:02  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 1.41  2012/05/25 18:35:30  perev
  * Wrong DcaGl fixed. Thanx #2362
  *
@@ -177,6 +180,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.41.2.1  2016/04/27 12:28:02  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 1.41  2012/05/25 18:35:30  perev
  * Wrong DcaGl fixed. Thanx #2362
  *
@@ -342,7 +348,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.41.2.1 2016/04/27 12:28:02 jeromel Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1823,9 +1829,11 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setCurvGl(dcaGeo->curvature());
     tinyRcTrack->setTanLGl(dcaGeo->tanDip());
     tinyRcTrack->setSeedQuality(glTrack->seedQuality());
-    float errorGl[5] = {dcaErr[kImpImp],dcaErr[kZZ],dcaErr[kPsiPsi]
-                       ,dcaErr[kPtiPti]*pow(pt,4)
-		       ,dcaErr[kTanTan]};
+    float errorGl[5] = {float(dcaErr[kImpImp]),
+			float(dcaErr[kZZ]),
+			float(dcaErr[kPsiPsi]),
+			float(dcaErr[kPtiPti]*pow(pt,4)),
+			float(dcaErr[kTanTan])};
     for (int j=0;j<5;j++) {errorGl[j] = sqrt(errorGl[j]);} 
     tinyRcTrack->setErrGl(errorGl);
     double vtx[3]={mRcVertexPos[0][0],mRcVertexPos[0][1],mRcVertexPos[0][2]};
@@ -1856,11 +1864,11 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setSeedQuality(glTrack->seedQuality());
     StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
 //VP Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
-    Float_t errorGl[5] = {gCM[0][0]*pow(M_PI/180,2)  		//YY
-                         ,gCM[1][1]				//ZZ
-			 ,gCM[3][3]*pow(M_PI/180,2)		//PsiPsi
-			 ,gCM[4][4]*pow(pt,4)			//PtPt
-			 ,gCM[2][2]};				//tanLtanL
+    Float_t errorGl[5] = {Float_t(gCM[0][0]*pow(M_PI/180,2)),  	//YY
+			  Float_t(gCM[1][1]),			//ZZ
+			  Float_t(gCM[3][3]*pow(M_PI/180,2)),	//PsiPsi
+			  Float_t(gCM[4][4]*pow(pt,4)),		//PtPt
+			  Float_t(gCM[2][2])};			//tanLtanL
     for (int j=0;j<5;j++) {errorGl[j] = sqrt(errorGl[j]);} 
     tinyRcTrack->setErrGl(errorGl);
     //
@@ -1962,11 +1970,11 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setFitSvt(prTrack->fitTraits().numberOfFitPoints(kSvtId));
     tinyRcTrack->setFitSsd(prTrack->fitTraits().numberOfFitPoints(kSsdId));
     StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
-    Float_t errorPr[5] = {pCM[0][0]*pow(M_PI/180,2)  		//YY
-                         ,pCM[1][1]				//ZZ
-			 ,pCM[3][3]*pow(M_PI/180,2)		//PsiPsi
-			 ,pCM[4][4]*pow(pt,4)			//PtPt
-			 ,pCM[2][2]};				//tanLtanL
+    Float_t errorPr[5] = {Float_t(pCM[0][0]*pow(M_PI/180,2)), 	//YY
+			  Float_t(pCM[1][1]),			//ZZ
+			  Float_t(pCM[3][3]*pow(M_PI/180,2)),	//PsiPsi
+			  Float_t(pCM[4][4]*pow(pt,4)),		//PtPt
+			  Float_t(pCM[2][2])};			//tanLtanL
     for (int j=0;j<5;j++) {errorPr[j] = sqrt(errorPr[j]);} 
     tinyRcTrack->setErrPr(errorPr);
     size_t ftpcFitPts = 0;
@@ -2823,9 +2831,12 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $
+// $Id: StMiniMcMaker.cxx,v 1.41.2.1 2016/04/27 12:28:02 jeromel Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.41.2.1  2016/04/27 12:28:02  jeromel
+// Patches for getting SL13b compiled with gcc44
+//
 // Revision 1.41  2012/05/25 18:35:30  perev
 // Wrong DcaGl fixed. Thanx #2362
 //
@@ -2855,6 +2866,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.41.2.1  2016/04/27 12:28:02  jeromel
+// Patches for getting SL13b compiled with gcc44
+//
 // Revision 1.41  2012/05/25 18:35:30  perev
 // Wrong DcaGl fixed. Thanx #2362
 //

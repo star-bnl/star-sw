@@ -136,7 +136,9 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   static StTpcLocalCoordinate  coorLTD; // after undo distortions
   coorLTD = coorLT;          // distortions
   // ExB corrections
-  Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
+  Float_t pos[3] = {(Float_t) coorLTD.position().x(),
+		    (Float_t) coorLTD.position().y(),
+		    (Float_t) coorLTD.position().z()};
   if ( mExB ) {
     Float_t posMoved[3];
     mExB->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]

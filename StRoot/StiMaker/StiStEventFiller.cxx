@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.103 2013/01/28 21:51:17 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.103.2.1 2016/04/27 12:28:02 jeromel Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.103.2.1  2016/04/27 12:28:02  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 2.103  2013/01/28 21:51:17  fisyak
  * Correct ranking
  *
@@ -1315,7 +1318,7 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   const StiNodePars &pars = tNode->fitPars(); 
   const StiNodeErrs &errs = tNode->fitErrs();
   float alfa = tNode->getAlpha();
-  Float_t setp[7] = {pars.y(), pars.z(), pars.eta(), pars.ptin(), pars.tanl(), pars.curv(), pars.hz()};
+  Float_t setp[7] = {(Float_t) pars.y(), (Float_t) pars.z(), (Float_t) pars.eta(), (Float_t) pars.ptin(), (Float_t) pars.tanl(), (Float_t) pars.curv(), (Float_t)  pars.hz()};
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {

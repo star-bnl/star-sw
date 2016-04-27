@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.24 2013/02/22 18:40:03 perev Exp $
+ * $Id: StarMagField.cxx,v 1.24.2.1 2016/04/27 12:28:02 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.24.2.1  2016/04/27 12:28:02  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 1.24  2013/02/22 18:40:03  perev
  * Remove gufld definition
  *
@@ -391,7 +394,7 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 //________________________________________
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
 void StarMagField::BField( const Double_t x[], Double_t B[] ) {
-  Float_t xx[3] = {x[0], x[1], x[2]};
+  Float_t xx[3] = {(Float_t) x[0], (Float_t) x[1], (Float_t) x[2]};
   Float_t bb[3];
   BField(xx,bb);
   B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];
@@ -534,7 +537,7 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
   
 }
 void StarMagField::B3DField( const Double_t x[], Double_t B[] ) {
-  Float_t xx[3] = {x[0], x[1], x[2]};
+  Float_t xx[3] = { (Float_t) x[0], (Float_t) x[1], (Float_t) x[2]};
   Float_t bb[3];
   B3DField(xx,bb);
   B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];

@@ -83,9 +83,9 @@ void AgStarReader::ReadEvent()
 
 	  // Build the vertex
 	  Float_t v[] = {
-	    part->Vx(),
-	    part->Vy(),
-	    part->Vz()
+	    (Float_t) part->Vx(),
+	    (Float_t) part->Vy(),
+	    (Float_t) part->Vz()
 	  };
 
 	  myvtx = geant3->Gsvert( v, 0, 0 );
@@ -94,7 +94,9 @@ void AgStarReader::ReadEvent()
 	}
 
       // Now connect the particle to the vertex
-      Float_t plab[3] = { part->Px(), part->Py(), part->Pz() };
+      Float_t plab[3] = { (Float_t) part->Px(), 
+			  (Float_t) part->Py(), 
+			  (Float_t) part->Pz() };
       Int_t   ipdg    = part->GetPdgCode();
       Int_t   g3id    = TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg);
 

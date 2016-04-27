@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.38 2012/06/17 19:13:36 fisyak Exp $
+// $Id: StFtpcTrack.cc,v 1.38.2.1 2016/04/27 12:28:01 jeromel Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.38.2.1  2016/04/27 12:28:01  jeromel
+// Patches for getting SL13b compiled with gcc44
+//
 // Revision 1.38  2012/06/17 19:13:36  fisyak
 // Resolve  ambiguity in TMath::Power
 //
@@ -770,9 +773,9 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
 	Double_t propagateZMomentum = currentMomentum.z();
 	
 	// get local magnetic field
-	Float_t positionArray[3] = {currentPosition.x(), 
-				    currentPosition.y(), 
-				    currentPosition.z() + stepSize/2};
+	Float_t positionArray[3] = {(Float_t) currentPosition.x(), 
+				    (Float_t) currentPosition.y(), 
+				    (Float_t) (currentPosition.z() + stepSize/2)};
 	Float_t localField[3];
 	StFtpcTrackingParams::Instance()->MagField()->B3DField(positionArray, localField);
 	

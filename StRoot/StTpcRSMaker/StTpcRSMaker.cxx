@@ -56,7 +56,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.67 2013/02/01 15:54:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.67.2.1 2016/04/27 12:28:02 jeromel Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -251,8 +251,8 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 			   St_TpcResponseSimulatorC::instance()->tauF(), 
 			   St_TpcResponseSimulatorC::instance()->tauP(), 
 			   St_TpcResponseSimulatorC::instance()->tauIntegration(), 
-			   TimeBinWidth,     0, io};
-    Double_t params0[5] = {t0IO[io],             St_TpcResponseSimulatorC::instance()->tauX()[io], TimeBinWidth,     0, io};
+			   TimeBinWidth,     0, (Double_t) io};
+    Double_t params0[5] = {t0IO[io],             St_TpcResponseSimulatorC::instance()->tauX()[io], TimeBinWidth,     0, (Double_t) io};
     if (! fgTimeShape3[io]) {// old electronics, intergation + shaper alltogether
       fgTimeShape3[io] = new TF1F(Form("TimeShape3%s",Names[io]),
 				 shapeEI3,timeBinMin*TimeBinWidth,timeBinMax*TimeBinWidth,7);
@@ -677,7 +677,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	transform(   BG,    BLT,sector,row); PrPP(Make,BLT);   
 	// Distortions 
 	if (TESTBIT(m_Mode, kDistortion) && StMagUtilities::Instance()) {
-	  Float_t pos[3] = {coorLT.position().x(), coorLT.position().y(), coorLT.position().z()};
+	  Float_t pos[3] = { (Float_t) coorLT.position().x(), (Float_t) coorLT.position().y(), (Float_t) coorLT.position().z()};
 	  Float_t posMoved[3];
 	  StMagUtilities::Instance()->DoDistortion(pos,posMoved,sector);   // input pos[], returns posMoved[]
 	  StThreeVector<double> postion(posMoved[0],posMoved[1],posMoved[2]);
@@ -792,9 +792,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	if (dEdxCor < minSignal) continue;
 	// Initialize propagation
-	Float_t BField[3] = {TrackSegmentHits[iSegHits].BLS.position().x(), 
-			     TrackSegmentHits[iSegHits].BLS.position().y(), 
-			     TrackSegmentHits[iSegHits].BLS.position().z()};
+	Float_t BField[3] = {(Float_t) TrackSegmentHits[iSegHits].BLS.position().x(), 
+			     (Float_t) TrackSegmentHits[iSegHits].BLS.position().y(), 
+			     (Float_t) TrackSegmentHits[iSegHits].BLS.position().z()};
 	StPhysicalHelixD track(TrackSegmentHits[iSegHits].dirLS.position(),
 			       TrackSegmentHits[iSegHits].coorLS.position(),
 			       BField[2]*kilogauss*charge,1);  
@@ -1653,8 +1653,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.67 2013/02/01 15:54:09 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.67.2.1 2016/04/27 12:28:02 jeromel Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.67.2.1  2016/04/27 12:28:02  jeromel
+// Patches for getting SL13b compiled with gcc44
+//
 // Revision 1.67  2013/02/01 15:54:09  fisyak
 // Add handle for separate Inner and Outer sector time off set
 //

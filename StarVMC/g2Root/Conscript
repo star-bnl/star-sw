@@ -55,7 +55,7 @@ my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
 #  $Libraries .= " " . $env->{LIBG2C};
 #}
 
-if ($FC eq 'g77' || $FC eq 'gfortran') { 
+if ($FC =~ m/g77/ || $FC =~ m/gfortran/) { 
     $Libraries .= " ".$env->{FLIBS};
 }
 
