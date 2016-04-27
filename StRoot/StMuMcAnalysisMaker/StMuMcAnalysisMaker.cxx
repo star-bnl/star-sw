@@ -10,8 +10,8 @@
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
-static TH3F *LdEdx[kTotalT][KPidParticles][kTotalSigns][NdEdxPiD] = {0};
-static TH3F *LToF[kTotalT][KPidParticles][kTotalSigns][NToFPiD] = {0};
+static TH3F *LdEdx[kTotalT][NHypTypes][kTotalSigns][NdEdxPiD] = {0};
+static TH3F *LToF[kTotalT][NHypTypes][kTotalSigns][NToFPiD] = {0};
 static TH1F *GiD[4] = {0};
 static TH2F *McRcHit = 0;
 static const Char_t *TitleTrType[kTotalT] = {"Global", "Primary"};
@@ -66,15 +66,15 @@ TH3F *StMuMcAnalysisMaker::GetTrackHist(UInt_t track, UInt_t match,
 }
 //________________________________________________________________________________
 TH3F *StMuMcAnalysisMaker::GetdEdxHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var) {
-  //  LdEdx[kTotalT][KPidParticles][kTotalSigns][NdEdxPiD]
+  //  LdEdx[kTotalT][NHypTypes][kTotalSigns][NdEdxPiD]
   TH3F *h = 0;
-  if (track < kTotalT && particle < KPidParticles && 
+  if (track < kTotalT && particle < NHypTypes && 
       charge < kTotalSigns && var < NdEdxPiD )
     h =LdEdx [track][particle][charge][var];
   else {
     cout << "Illegal request :" 
 	 << track << "[" << kTotalT << "]" 
-	 << particle << "[" << KPidParticles << "]"
+	 << particle << "[" << NHypTypes << "]"
 	 << charge << "[" << kTotalSigns << "]"
 	 << var << "[" << NdEdxPiD  << "]" << endl;
   }
@@ -82,15 +82,15 @@ TH3F *StMuMcAnalysisMaker::GetdEdxHist(UInt_t track, UInt_t particle, UInt_t cha
 }
 //_____________________________________________________________________________
 TH3F *StMuMcAnalysisMaker::GetToFHist(UInt_t track, UInt_t particle, UInt_t charge, UInt_t var) {
-  //  LToF[kTotalT][KPidParticles][kTotalSigns][NToFPiD]
+  //  LToF[kTotalT][NHypTypes][kTotalSigns][NToFPiD]
   TH3F *h = 0;
-  if (track < kTotalT && particle < KPidParticles && 
+  if (track < kTotalT && particle < NHypTypes && 
       charge < kTotalSigns && var < NToFPiD )
     h =LToF [track][particle][charge][var];
   else {
     cout << "Illegal request :" 
 	 << track << "[" << kTotalT << "]" 
-	 << particle << "[" << KPidParticles << "]"
+	 << particle << "[" << NHypTypes << "]"
 	 << charge << "[" << kTotalSigns << "]"
 	 << var << "[" << NToFPiD  << "]" << endl;
   }
@@ -345,17 +345,19 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
       }
       dirs[3] = dirs[2]->GetDirectory(TitlePiDtype[pidType]);
       dirs[3]->cd();
-      for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
-	if (! dirs[3]->GetDirectory(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str())) {
-	  dirs[3]->mkdir(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str());
+      for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
+	if (! dirs[3]->GetDirectory(TitleCharge[pm])) {
+	  dirs[3]->mkdir(TitleCharge[pm]);
 	}
-	dirs[4] = dirs[3]->GetDirectory(StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()); assert(dirs[4]);
+	dirs[4] = dirs[3]->GetDirectory(TitleCharge[pm]); assert(dirs[4]);
 	dirs[4]->cd();
-	for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
-	  if (! dirs[4]->GetDirectory(TitleCharge[pm])) {
-	    dirs[4]->mkdir(TitleCharge[pm]);
+	for (Int_t hyp = 0; hyp < NHypTypes; hyp++) {
+	  Int_t h = hyp;
+	  if (pm == kPositive) h += NHypTypes;
+	  if (! dirs[4]->GetDirectory(NamesF[h])) {
+	    dirs[4]->mkdir(NamesF[h]);
 	  }
-	  dirs[5] = dirs[4]->GetDirectory(TitleCharge[pm]); assert(dirs[5]);
+	  dirs[5] = dirs[4]->GetDirectory(NamesF[h]); assert(dirs[5]);
 	  dirs[5]->cd();
 	  if (pidType == 0) { // dE/dx
 	    const Char_t *dEdxTypes[NdEdxPiD] = {"I70","Fit","dNdx"};
@@ -363,8 +365,8 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	      LdEdx[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(Form("Z%s",dEdxTypes[i]));
 	      if (LdEdx[gp][hyp][pm][i]) continue;
 	      LdEdx[gp][hyp][pm][i] = new TH3F(Form("Z%s",dEdxTypes[i]),
-					       Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s",
-						    dEdxTypes[i],StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()),
+					       Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s %s",
+						    dEdxTypes[i],TitleTrType[gp],NamesF[h]),
 					       100, 20, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
 	      LdEdx[gp][hyp][pm][i]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
 	      LdEdx[gp][hyp][pm][i]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
@@ -392,15 +394,15 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	      LToF[gp][hyp][pm][i] = (TH3F *) dirs[5]->Get(ToFTypes[i]);
 	      if (LToF[gp][hyp][pm][i]) continue;
 	      if (i == 0) { // dM2
-		LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#Delta M^2 versus #eta and p for %s",
-							   StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()),
+		LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#Delta M^2 versus #eta and p for %s %s",
+							   TitleTrType[gp],NamesF[h]),
 						neta, etaBins,
 						npT, ptBins,
 						nz, zBins);
 		LToF[gp][hyp][pm][i]->GetZaxis()->SetTitle("#Delta M^2"); 
 	      } else { // (1/beta^2 - 1/beta_exp^2)/beta^2
-		LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#delta 1/#beta versus #eta and p for ",
-							   StProbPidTraits::mPidParticleDefinitions[hyp]->name().c_str()),
+		LToF[gp][hyp][pm][i] = new TH3F(ToFTypes[i],Form("#delta 1/#beta versus #eta and p for %s %s ",
+							   TitleTrType[gp],NamesF[h]),
 						neta, etaBins,
 						npT, ptBins,
 						nz, zBins);
@@ -632,7 +634,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	  if (GEANTiD[h] == Gid) {
 	    Int_t hyp = PiDHyp[h];
 	    Int_t pm  = PiDpm[h];
-	    Double_t bg    = pMomentum/StProbPidTraits::mPidParticleDefinitions[hyp]->mass();
+	    Double_t bg    = pMomentum/Masses[h];
 	    Double_t bghyp = TMath::Log10(bg);
 	    if (TrackLength > 0) {
 	      Double_t Pred[3]  = {1.e-6*Bichsel::Instance()->GetI70(bghyp,1.0),
@@ -647,9 +649,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	    }
 	    if (pathLength > 0) {
 	      Double_t bg2 = beta*beta/(1. - beta*beta);
-	      Double_t dM2 = pMomentum*pMomentum/bg2 - 
-		StProbPidTraits::mPidParticleDefinitions[hyp]->mass()*
-		StProbPidTraits::mPidParticleDefinitions[hyp]->mass();
+	      Double_t dM2 = pMomentum*pMomentum/bg2 - Masses[h]*Masses[h];
 	      Double_t b_exp = bg/TMath::Sqrt(1+ bg*bg);
 	      Double_t dbInv = 1. - beta/b_exp; // (1./beta - 1./b_exp)/(1./beta)
 	      LToF[gp][hyp][pm][0]->Fill(Eta,pMomentum, dM2);
@@ -1387,7 +1387,7 @@ void StMuMcAnalysisMaker::DrawdEdx(Double_t lenMin) {
     Section = Chapter; Section += "."; Section += gp+1;
     out << "<h3>" << Section.Data() << ". " << TitleTrType[gp] << " tracks. </h3>" << endl;
     Int_t subsection = 0;
-    for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
+    for (Int_t hyp = 0; hyp < NHypTypes; hyp++) {
       TString h4line;
       TString tag;
       if (gp == kGlobal) tag += "Global ";
@@ -1418,7 +1418,7 @@ void StMuMcAnalysisMaker::DrawToF() {
     Section = Chapter; Section += "."; Section += gp+1;
     out << "<h3>" << Section.Data() << ". " << TitleTrType[gp] << " tracks. </h3>" << endl;
     Int_t subsection = 0;
-    for (Int_t hyp = 0; hyp < KPidParticles; hyp++) {
+    for (Int_t hyp = 0; hyp < NHypTypes; hyp++) {
       TString h4line;
       TString tag;
       if (gp == kGlobal) tag += "Global ";
