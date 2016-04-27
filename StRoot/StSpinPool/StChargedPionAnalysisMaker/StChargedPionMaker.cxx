@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.22 2010/04/25 16:07:57 pibero Exp $
+// $Id: StChargedPionMaker.cxx,v 1.22.2.1 2016/04/27 15:18:31 zchang Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -219,7 +219,7 @@ Int_t StChargedPionMaker::Make()
     TString inputFile(mMuDstMk->chain()->GetFile()->GetName());
     if(mCurrentFile != inputFile){
         mCurrentFile = inputFile;
-        char *baseName = strrchr(mCurrentFile.Data(), '/');
+        const char *baseName = strrchr(mCurrentFile.Data(), '/');
         mEvent->setMuDstName( baseName );
         
         if(simu) {
@@ -452,6 +452,9 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.22.2.1  2016/04/27 15:18:31  zchang
+ * SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ *
  * Revision 1.22  2010/04/25 16:07:57  pibero
  * Modified StChargedPionMaker.cxx to use the safer StJetMaker::getStJets()
  * instead of the outdated and no longer available StJetMaker::getJets().

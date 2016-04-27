@@ -14,7 +14,7 @@
 #include "tables/St_g2t_pythia_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_particle_Table.h"
-#include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
+//#include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
 
 // Local
 #include "StPythiaEventMaker.h"
@@ -43,7 +43,7 @@ int StPythiaEventMaker::Make()
   getPythia();
   getVertex();
   getParticles();
-  getAsymmetries();
+  //  getAsymmetries();
 
   if (Debug()) { LOG_DEBUG << *mPythiaEvent << endm; }
 
@@ -141,7 +141,7 @@ void StPythiaEventMaker::getParticles()
     }
   }
 }
-
+/*
 void StPythiaEventMaker::getAsymmetries()
 {
   float s = mPythiaEvent->s();
@@ -226,7 +226,7 @@ void StPythiaEventMaker::getAsymmetries()
 
   mPythiaEvent->setPartonALL(StMCAsymMaker::getPartonicALL(s,t,u,pid,flavor1,flavor2,flavor3,flavor4));
 }
-
+*/
 ostream& operator<<(ostream& out, const TVector3& v)
 {
   return out << v.x() << '\t' << v.y() << '\t' << v.z();

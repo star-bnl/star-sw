@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.14 2012/12/10 21:52:46 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.14.8.1 2016/04/27 15:18:32 zchang Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.14.8.1  2016/04/27 15:18:32  zchang
+// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+//
 // Revision 1.14  2012/12/10 21:52:46  pibero
 // More simplifications...
 //
@@ -92,8 +95,8 @@ public:
   virtual ~StPythiaEvent();
   StPythiaEvent(const StPythiaEvent& other);
   StPythiaEvent& operator=(const StPythiaEvent& rhs);
-  enum { NPDF=34 };
-  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30, LSS2010_delGpos=31, LSS2010_chsign_delG=32, BB2010=33 };
+  enum { NPDF=35, NUMNNPDF=101};
+  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30, LSS2010_delGpos=31, LSS2010_chsign_delG=32, BB2010=33, DSSV2014=34};
   int runId() const;
   int eventId() const;
   int processId() const;
@@ -116,6 +119,12 @@ public:
   float f1(PDF scenario = STD) const;
   float f2(PDF scenario = STD) const;
   float ALL(PDF scenario = STD) const;
+  //NNPDF
+  float dF1NNPDF(int iset) const;
+  float dF2NNPDF(int iset) const;
+  float f1NNPDF() const;
+  float f2NNPDF() const;
+  float aLLNNPDF(int iset = 0) const;
 
   const TClonesArray* particles() const;
   int numberOfParticles() const;
@@ -142,6 +151,11 @@ public:
   void setDF2(PDF scenario, float val);
   void setF1(PDF scenario, float val);
   void setF2(PDF scenario, float val);
+  //NNPDF
+  void setDF1NNPDF(int iset, float val);
+  void setDF2NNPDF(int iset, float val);
+  void setF1NNPDF(float val);
+  void setF2NNPDF(float val);
   
   void addParticle(const TParticle& particle);
   void print() const;
@@ -168,10 +182,16 @@ private:
   float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a][LSS2010_delGpos][LSS2010_chsign_delG][BB2010]
   float mF1[2];   //[LO][NLO]
   float mF2[2];   //[LO][NLO]
-  
+
+  //NNPDF
+  float mDF1NNPDF[NUMNNPDF];
+  float mDF2NNPDF[NUMNNPDF];
+  float mF1NNPDF;
+  float mF2NNPDF;
+
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent,7);
+  ClassDef(StPythiaEvent, 9);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
@@ -207,6 +227,16 @@ inline float StPythiaEvent::f2(PDF scenario) const
 inline float StPythiaEvent::ALL(PDF scenario) const
 {
   return (dF1(scenario)*dF2(scenario)*partonALL())/(f1(scenario)*f2(scenario));
+}
+//NNPDF
+inline float StPythiaEvent::dF1NNPDF(int iset) const { return mDF1NNPDF[iset]; }
+inline float StPythiaEvent::dF2NNPDF(int iset) const { return mDF2NNPDF[iset]; }
+inline float StPythiaEvent::f1NNPDF() const { return mF1NNPDF; }
+inline float StPythiaEvent::f2NNPDF() const { return mF2NNPDF; }
+inline float StPythiaEvent::aLLNNPDF(int iset) const {
+  if(f1NNPDF()*f2NNPDF() > 0 || f1NNPDF()*f2NNPDF() < 0)
+  return (dF1NNPDF(iset)*dF2NNPDF(iset)*partonALL())/(f1NNPDF()*f2NNPDF());
+  else return 0;
 }
 
 inline const TClonesArray* StPythiaEvent::particles() const { return mParticles; }
@@ -262,7 +292,6 @@ inline void StPythiaEvent::setMstp111(int mstp111) { mMstp111 = mstp111; }
 inline void StPythiaEvent::setPartonALL(float a) { mPartonALL = a; }
 inline void StPythiaEvent::setDF1(PDF scenario, float val) { mDF1[scenario] = val; }
 inline void StPythiaEvent::setDF2(PDF scenario, float val) { mDF2[scenario] = val; }
-
 inline void StPythiaEvent::setF1(PDF scenario, float val) 
 {
     if(scenario == LO) mF1[0] = val;
@@ -274,7 +303,11 @@ inline void StPythiaEvent::setF2(PDF scenario, float val)
     if(scenario == LO) mF2[0] = val;
     mF2[1] = val;
 }
-
+//NNPDF
+inline void StPythiaEvent::setDF1NNPDF(int iset, float val) { mDF1NNPDF[iset] = val; }
+inline void StPythiaEvent::setDF2NNPDF(int iset, float val) { mDF2NNPDF[iset] = val; }
+inline void StPythiaEvent::setF1NNPDF(float val) { mF1NNPDF = val;}
+inline void StPythiaEvent::setF2NNPDF(float val) { mF2NNPDF = val;}
 
 inline void StPythiaEvent::print() const
 {

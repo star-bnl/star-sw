@@ -9,6 +9,10 @@
 #ifndef ST_JET_CANDIDATE_H
 #define ST_JET_CANDIDATE_H
 
+#include <map>
+#include <string>
+using namespace std;
+
 #include "TLorentzVector.h"
 #include "TRef.h"
 #include "TRefArray.h"
@@ -28,10 +32,12 @@ public:
     , mE(0)
     , mDetEta(0)
     , mRt(0)
+    , mArea(0)
+    , mAreaError(0)
   {
   }
 
-  StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum);
+  StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum, float area = 0, float area_error = 0);
 
   TLorentzVector fourMomentum() const;
   TVector3 momentum() const;
@@ -40,6 +46,8 @@ public:
   float eta() const { return mEta; }
   float phi() const { return mPhi; }
   float E  () const { return mE  ; }
+  float area() const{ return mArea; }
+  float areaError() const{ return mAreaError; }
   float px () const { return momentum().Px(); }
   float py () const { return momentum().Py(); }
   float pz () const { return momentum().Pz(); }
@@ -92,6 +100,9 @@ public:
   void setPtEtaPhiE(float pt, float eta, float phi, float E);
   void setPxPyPzE(float px, float py, float pz, float E);
   void setVertex(const StJetVertex* vertex) { mVertex = (TObject*)vertex; }
+
+  void setUeDensity(const char* name, float density){ string str(name); mUeDensity[str] = density; }
+  map<string, float> ueDensity() const { return mUeDensity; }
   StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
   StJetTower* addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); return (StJetTower*)mTowers.Last(); }
   StJetParticle* addParticle(StJetParticle* particle) { mParticles.Add((TObject*)particle); return (StJetParticle*)mParticles.Last(); }
@@ -106,13 +117,17 @@ private:
   float mE;
   float mDetEta;
   float mRt;
+  float mArea;
+  float mAreaError;
+
+  map<string, float> mUeDensity;
 
   TRef mVertex;
   TRefArray mTracks;
   TRefArray mTowers;
   TRefArray mParticles;
 
-  ClassDef(StJetCandidate,4);
+  ClassDef(StJetCandidate,5);
 };
 
 inline TLorentzVector StJetCandidate::fourMomentum() const

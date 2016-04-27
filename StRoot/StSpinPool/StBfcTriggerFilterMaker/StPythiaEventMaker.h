@@ -45,7 +45,7 @@ private:
   void getPythia();
   void getVertex();
   void getParticles();
-  void getAsymmetries();
+  //  void getAsymmetries();
 
   TString mFileName;
   TFile* mFile;

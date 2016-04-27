@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.16 2011/09/14 14:23:20 stevens4 Exp $
+// $Id: St2009WMaker.h,v 1.16.4.1 2016/04/27 15:18:33 zchang Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -200,7 +200,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.16 2011/09/14 14:23:20 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.16.4.1 2016/04/27 15:18:33 zchang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -211,6 +211,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.16.4.1  2016/04/27 15:18:33  zchang
+// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+//
 // Revision 1.16  2011/09/14 14:23:20  stevens4
 // update used for cross section PRD paper
 //

@@ -67,6 +67,8 @@ public:
 
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StJetMaker2012;
+  friend class StUEMaker2009;
 
 private:
   TVector3 mPosition;

@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.7.2.1 2016/04/27 15:18:32 zchang Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -24,7 +24,7 @@ class StSpinDbMaker : public StMaker {
   spinDbStar_st   *mTabSpinStar;
   spinDbBXmask_st *mTabSpinBXmask;
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.7.2.1 2016/04/27 15:18:32 zchang Exp $";
 
   void clearTables(); /// clear local lookup tables
   void requestDataBase(); /// reads tables from STAR-DB
@@ -96,7 +96,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.7.2.1 2016/04/27 15:18:32 zchang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -107,6 +107,9 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.7.2.1  2016/04/27 15:18:32  zchang
+// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+//
 // Revision 1.7  2009/09/26 20:34:50  balewski
 // additional methods added for 2009 data processing,
 // since allignment of STAR bXing changed from yellow beam (2005) to blue (2009) the names of some methods were adjusted
