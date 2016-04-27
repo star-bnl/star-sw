@@ -1,7 +1,7 @@
 #ifndef ST_CHARGED_PION_MAKER_HH
 #define ST_CHARGED_PION_MAKER_HH
 
-// $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $
+// $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -40,7 +40,7 @@ public:
     void addTrigger(int trigId);
     
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     TFile *mFile;                           //!
@@ -82,20 +82,20 @@ addTrigger(int trigId) { mTriggers.push_back(trigId); }
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.h,v $
- * Revision 1.11.2.1  2016/04/27 15:18:31  zchang
- * SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ * Revision 1.11.2.2  2016/04/27 17:47:49  zchang
+ * *** empty log message ***
  *
  * Revision 1.11  2012/11/09 03:31:34  perev
  * Cleanup
  *
  * Revision 1.10  2008/12/29 15:58:30  kocolosk
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $/$Log: StChargedPionMaker.h,v $
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/Revision 1.11.2.1  2016/04/27 15:18:31  zchang
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $/$Log: StChargedPionMaker.h,v $
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/Revision 1.11.2.2  2016/04/27 17:47:49  zchang
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/*** empty log message ***
  * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $/Revision 1.11  2012/11/09 03:31:34  perev
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $/Cleanup
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.1 2016/04/27 15:18:31 zchang Exp $/ as needed
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $/Revision 1.11  2012/11/09 03:31:34  perev
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $/Cleanup
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11.2.2 2016/04/27 17:47:49 zchang Exp $/ as needed
  *
  *****************************************************************************/
 

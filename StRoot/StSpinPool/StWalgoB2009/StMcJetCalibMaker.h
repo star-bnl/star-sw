@@ -1,4 +1,4 @@
-// $Id: StMcJetCalibMaker.h,v 1.1.4.1 2016/04/27 15:18:33 zchang Exp $
+// $Id: StMcJetCalibMaker.h,v 1.1.4.2 2016/04/27 17:47:53 zchang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // calibrates jets event by event using partonic 2->W/Z-> process
@@ -66,7 +66,7 @@ class StMcJetCalibMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMcJetCalibMaker.h,v 1.1.4.1 2016/04/27 15:18:33 zchang Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMcJetCalibMaker.h,v 1.1.4.2 2016/04/27 17:47:53 zchang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -77,8 +77,8 @@ class StMcJetCalibMaker : public StMaker {
 
 
 // $Log: StMcJetCalibMaker.h,v $
-// Revision 1.1.4.1  2016/04/27 15:18:33  zchang
-// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+// Revision 1.1.4.2  2016/04/27 17:47:53  zchang
+// *** empty log message ***
 //
 // Revision 1.1  2010/05/01 01:31:45  balewski
 // added W->JJ code & JES calibration

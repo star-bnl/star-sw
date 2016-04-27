@@ -1,4 +1,4 @@
-// $Id: St2011WlumiMaker.h,v 1.2.2.1 2016/04/27 15:18:33 zchang Exp $
+// $Id: St2011WlumiMaker.h,v 1.2.2.2 2016/04/27 17:47:52 zchang Exp $
 //
 //*-- Author :  Jan Balewski, MIT
 
@@ -49,7 +49,7 @@ class St2011WlumiMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WlumiMaker.h,v 1.2.2.1 2016/04/27 15:18:33 zchang Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WlumiMaker.h,v 1.2.2.2 2016/04/27 17:47:52 zchang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -60,8 +60,8 @@ class St2011WlumiMaker : public StMaker {
 
 
 // $Log: St2011WlumiMaker.h,v $
-// Revision 1.2.2.1  2016/04/27 15:18:33  zchang
-// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+// Revision 1.2.2.2  2016/04/27 17:47:52  zchang
+// *** empty log message ***
 //
 // Revision 1.2  2012/09/14 21:02:29  balewski
 // *lumi-maker re-written to accumulate alternative rel lumi monitors,

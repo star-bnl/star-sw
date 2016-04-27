@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.7.2.1 2016/04/27 15:18:31 zchang Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.7.2.2 2016/04/27 17:47:49 zchang Exp $
 
 #include "TLorentzVector.h"
 
@@ -379,8 +379,8 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
- * Revision 1.7.2.1  2016/04/27 15:18:31  zchang
- * SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ * Revision 1.7.2.2  2016/04/27 17:47:49  zchang
+ * *** empty log message ***
  *
  * Revision 1.7  2010/07/16 20:24:08  rfatemi
  * Changes in code to preserve backward compatibility with changes in jet code.  Affects info about particles in jets.

@@ -4,8 +4,8 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
-// Revision 1.6.8.1  2016/04/27 15:18:32  zchang
-// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+// Revision 1.6.8.2  2016/04/27 17:47:49  zchang
+// *** empty log message ***
 //
 // Revision 1.6  2012/12/10 21:52:46  pibero
 // More simplifications...

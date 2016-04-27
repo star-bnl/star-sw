@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.22.2.1 2016/04/27 15:18:31 zchang Exp $
+// $Id: StChargedPionMaker.cxx,v 1.22.2.2 2016/04/27 17:47:49 zchang Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -452,8 +452,8 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
- * Revision 1.22.2.1  2016/04/27 15:18:31  zchang
- * SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+ * Revision 1.22.2.2  2016/04/27 17:47:49  zchang
+ * *** empty log message ***
  *
  * Revision 1.22  2010/04/25 16:07:57  pibero
  * Modified StChargedPionMaker.cxx to use the safer StJetMaker::getStJets()

@@ -1,4 +1,4 @@
-// $Id: St2009WlumiMaker.h,v 1.2.4.1 2016/04/27 15:18:33 zchang Exp $
+// $Id: St2009WlumiMaker.h,v 1.2.4.2 2016/04/27 17:47:53 zchang Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -62,7 +62,7 @@ class St2009WlumiMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WlumiMaker.h,v 1.2.4.1 2016/04/27 15:18:33 zchang Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WlumiMaker.h,v 1.2.4.2 2016/04/27 17:47:53 zchang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -73,8 +73,8 @@ class St2009WlumiMaker : public StMaker {
 
 
 // $Log: St2009WlumiMaker.h,v $
-// Revision 1.2.4.1  2016/04/27 15:18:33  zchang
-// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+// Revision 1.2.4.2  2016/04/27 17:47:53  zchang
+// *** empty log message ***
 //
 // Revision 1.2  2010/12/02 18:31:43  rcorliss
 // updated lumi code to match the starnote version
