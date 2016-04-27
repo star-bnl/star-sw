@@ -1,9 +1,11 @@
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_geant_Maker")) return 0;
   St_geant_Maker *geantMk = StMaker::GetChain()->GetMaker("geant");
-  gSystem->Load("Pythia6_4_26");
+  gSystem->Load("Pythia6_4_28s");
   gSystem->Load("bpythia");
   geantMk->Do("call bpythia");
+//   gSystem->Load("apythia");
+//   geantMk->Do("call apythia");
   //   ** These particles will be decayed by geant instead of pythia **
   //  geantMk->Do("/PYTHIA/MDCY (102,1)=0");//  ! PI0 111
   geantMk->Do("/PYTHIA/MDCY (106,1)=0");//  ! PI+ 211
@@ -25,7 +27,11 @@ TDataSet *CreateTable() {
   TString SqrtS(Form("/PYTHIA/ener  %f",sqrtS));
   cout << "Set sqrtS " << SqrtS << " GeV" <<endl;
   geantMk->Do(SqrtS.Data());
-  geantMk->Do("CALL PyTUNE(329)"); // set the pythia tune
+  //  geantMk->Do("CALL PyTUNE(329)"); // set the pythia tune Professor pT-ordered tune w. S0 CR model  (Feb 2009)
+  // https://drupal.star.bnl.gov/STAR/system/files/Run12_EmbedRequest_0.pdf
+  // Perugia 2012 tune, with nominal primordial kT and PDF set. Set PARP(90)=0.213
+  geantMk->Do("CALL PyTUNE(383)"); // Perugia 2012 with Innsbruck ee fragmentation parameters
+  geantMk->Do("/PYTHIA/PARP(90) = 0.213"); // 
   geantMk->Do("gspread   0.015 0.015 42.00");
 #ifdef __Wenu__
   //  select W --> e nu production
