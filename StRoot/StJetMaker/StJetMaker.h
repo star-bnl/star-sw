@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.58.2.1 2016/04/27 15:22:49 zchang Exp $
+// $Id: StJetMaker.h,v 1.58.2.2 2016/04/27 17:31:22 zchang Exp $
 #ifndef STJETMAKER_H
 #define STJETMAKER_H
 
@@ -50,7 +50,7 @@ public:
   StjeTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.58.2.1 2016/04/27 15:22:49 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.58.2.2 2016/04/27 17:31:22 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
   struct StJetBranch {

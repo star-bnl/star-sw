@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetScratch.h,v 1.7.6.1 2016/04/27 15:22:49 zchang Exp $
+// $Id: StJetScratch.h,v 1.7.6.2 2016/04/27 17:31:22 zchang Exp $
 #ifndef STJETSCRATCH_H
 #define STJETSCRATCH_H
 
@@ -25,7 +25,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.7.6.1 2016/04/27 15:22:49 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetScratch.h,v 1.7.6.2 2016/04/27 17:31:22 zchang Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 
