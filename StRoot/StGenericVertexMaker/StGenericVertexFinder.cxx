@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.28 2016/04/27 21:31:40 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.29 2016/04/27 21:31:55 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -136,6 +136,13 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    double ky_dy_zv_2 = ky_dy_zv*ky_dy_zv;
    double kx_dx_zv_2 = kx_dx_zv*kx_dx_zv;
 
+   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
+
+   // The denominator is zero when the point is exactly on the beamline
+   // We just return a zero for the chi2 in this case. This makes sense for all
+   // non-zero errors and if they are zero they are unphysical anyway.
+   if (denom_sqrt == 0) return 0;
+
    // The distance between the line and the point
    StThreeVectorD dist_vec (
       (  (ky2 + 1)*dx -     kx*ky*dy -          kx*zv)/kx2_ky2_1,
@@ -143,7 +150,6 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
       (       - kx*dx -        ky*dy + (kx2 + ky2)*zv)/kx2_ky2_1
    );
 
-   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
 
    double denom = kx2_ky2_1 * denom_sqrt;
 
