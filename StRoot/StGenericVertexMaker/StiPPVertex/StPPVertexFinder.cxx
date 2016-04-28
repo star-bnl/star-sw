@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.54 2016/04/28 18:17:48 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.55 2016/04/28 18:17:55 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -16,6 +16,7 @@
 #include <TFile.h>
 #include <TLine.h>
 #include <TCanvas.h> //tmp
+#include "TMinuit.h"
 
 #include <math_constants.h>
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
@@ -638,6 +639,10 @@ StPPVertexFinder::fit(StEvent* event) {
       else if(rank>0)   hA[17]->Fill(log(rank));
       else   hA[17]->Fill(log(rank+1e6)-10);
     }
+
+    if (mVertexFitMode == VertexFit_t::Beamline3D) {
+       fitTracksToVertex(V);
+    }
     
     mVertexData.push_back(V);
     if(trigV && mBeamLineTracks) vertex3D->study(V.r,eveID);
@@ -884,6 +889,68 @@ void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
       dca->set(setp, sete);
       sDCAs().push_back(dca);
    }
+}
+
+
+/**
+ * Takes a list of vertex candidates/seeds and updates each vertex position by
+ * fitting tracks pointing to it. The fit is performed by minimizing the chi2
+ * robust potential. The method uses the base class static container with track
+ * DCAs as input.
+ *
+ * \author Dmitri Smirnov, BNL
+ * \date February, 2016
+ */
+void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
+{
+   createTrackDcas(vertex);
+
+   if (sDCAs().size() == 0) {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
+               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+      return;
+   }
+
+   static TMinuit minuit(3);
+
+   minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
+   minuit.SetPrintLevel(-1);
+   minuit.SetMaxIterations(1000);
+
+   int minuitStatus;
+
+   minuit.mnexcm("clear", 0, 0, minuitStatus);
+
+   static double step[3] = {0.03, 0.03, 0.03};
+
+   minuit.mnparm(0, "x", vertex.r.X(), step[0], 0, 0, minuitStatus);
+   minuit.mnparm(1, "y", vertex.r.Y(), step[1], 0, 0, minuitStatus);
+   minuit.mnparm(2, "z", vertex.r.Z(), step[2], 0, 0, minuitStatus);
+
+   minuit.mnexcm("minimize", 0, 0, minuitStatus);
+
+   // Check fit result
+   if (minuitStatus) {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
+	       << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
+               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+      return;
+   }
+
+   double chisquare, fedm, errdef;
+   int npari, nparx;
+
+   minuit.mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
+   minuit.mnhess();
+
+   double emat[9];
+   /* 0 1 2
+      3 4 5
+      6 7 8 */
+   minuit.mnemat(emat, 3);
+
+   vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
+   vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
 }
 
  
