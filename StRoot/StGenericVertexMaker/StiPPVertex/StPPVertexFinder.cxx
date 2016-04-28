@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.55 2016/04/28 18:17:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.56 2016/04/28 18:18:01 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -911,6 +911,9 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
       return;
    }
 
+   // Recalculate vertex seed coordinates to be used as initial point in the fit
+   StThreeVectorD vertexSeed = StGenericVertexFinder::CalcVertexSeed(sDCAs());
+
    static TMinuit minuit(3);
 
    minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
@@ -923,9 +926,9 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 
    static double step[3] = {0.03, 0.03, 0.03};
 
-   minuit.mnparm(0, "x", vertex.r.X(), step[0], 0, 0, minuitStatus);
-   minuit.mnparm(1, "y", vertex.r.Y(), step[1], 0, 0, minuitStatus);
-   minuit.mnparm(2, "z", vertex.r.Z(), step[2], 0, 0, minuitStatus);
+   minuit.mnparm(0, "x", vertexSeed.x(), step[0], vertexSeed.x()-10, vertexSeed.x()+10, minuitStatus);
+   minuit.mnparm(1, "y", vertexSeed.y(), step[1], vertexSeed.y()-10, vertexSeed.y()+10, minuitStatus);
+   minuit.mnparm(2, "z", vertexSeed.z(), step[2], vertexSeed.z()-30, vertexSeed.z()+30, minuitStatus);
 
    minuit.mnexcm("minimize", 0, 0, minuitStatus);
 
