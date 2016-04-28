@@ -1182,6 +1182,7 @@ Bfc_st BFC[] = { // standard chains
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
+  {"beamLine3D"  ,""  ,"","",""                                 ,"","Use beamline in 3D vertex fit",kFALSE},
   {"min2trkVtx"  ,""  ,"","",""                    ,"","...only 2 tracks needed for vertex finding",kFALSE},
   {"hitreuseon"  ,""  ,"","",""                     ,"","...do re-use hits for other tracks in Sti",kFALSE},
   // WARNING: introduction of usePct4Vtx with default:false breaks backward compatibility.
