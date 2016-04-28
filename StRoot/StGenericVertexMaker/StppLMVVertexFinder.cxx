@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.26 2016/04/15 19:24:14 smirnovd Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.27 2016/04/28 18:17:38 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -418,15 +418,18 @@ StppLMVVertexFinder::ppLMV5() {
   //printf("passed %d tracks match to CTB,  BeamLine=%d\n",totTr,mVertexConstrain );
   LOG_DEBUG << "passed " << totTr << " tracks match to CTB,  BeamLine=" << mVertexConstrain << endm;
    
-  double xo=0.0,yo=0.0;
-  xo=mX0;
-  yo=mY0; 
+  double xo = mX0;
+  double yo = mY0;
  
   //Do the actual vertex fitting, continue until good
-  double A11=0.0,A12=0.0,A13=0.0,A21=0.0,A22=0.0,A23=0.0;
+  double A11=0.0,A12=0.0,A13=0.0;
+  double A21=0.0,A22=0.0,A23=0.0;
   double A31=0.0,A32=0.0,A33=0.0; // Matrix Elements
-  double C11=0.0,C12=0.0,C13=0.0,C21=0.0,C22=0.0,C23=0.0;
+
+  double C11=0.0,C12=0.0,C13=0.0;
+  double C21=0.0,C22=0.0,C23=0.0;
   double C31=0.0,C32=0.0,C33=0.0; // C = A^-1
+
   int done = 0;
   int vertIter=0;
   double chi2=0;
@@ -440,10 +443,14 @@ StppLMVVertexFinder::ppLMV5() {
     }
   
     // Begin by doing a fit
-    A11=0.0,A12=0.0,A13=0.0,A21=0.0,A22=0.0,A23=0.0;
+    A11=0.0,A12=0.0,A13=0.0;
+    A21=0.0,A22=0.0,A23=0.0;
     A31=0.0,A32=0.0,A33=0.0; // Matrix Elements
-    C11=0.0,C12=0.0,C13=0.0,C21=0.0,C22=0.0,C23=0.0;
+
+    C11=0.0,C12=0.0,C13=0.0;
+    C21=0.0,C22=0.0,C23=0.0;
     C31=0.0,C32=0.0,C33=0.0; // C = A^-1
+
     double b1=0.0,b2=0.0,b3=0.0;
 
     // Compute matrix A and vector b
@@ -452,6 +459,7 @@ StppLMVVertexFinder::ppLMV5() {
       double spath = mPrimCand[itr].helix.pathLength(xo,yo);
       StThreeVectorD XClosest =  mPrimCand[itr].helix.at(spath);
       StThreeVectorD XMomAtClosest =  mPrimCand[itr].helix.momentumAt(spath,mBfield*tesla );
+
       double xp   = XClosest.x(); double yp= XClosest.y(); double zp= XClosest.z();  
       // printf("itr=%d  DCA x=%f y=%f z=%f  sig=%f\n",itr,xp,yp,zp,mPrimCand[itr].sigma);
       
@@ -606,6 +614,9 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.27  2016/04/28 18:17:38  smirnovd
+ * [Cosmetic] Whitespace, doxygen, comments, and readability changes only
+ *
  * Revision 1.26  2016/04/15 19:24:14  smirnovd
  * Got rid of unused variables reported by compiler
  *
