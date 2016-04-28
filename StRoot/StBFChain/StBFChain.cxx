@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.627 2016/03/28 15:33:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.628 2016/04/28 18:55:19 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -529,6 +529,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
       if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
       if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("beamLine3D" ) ) mk->SetAttr("BeamLine3D"  	, kTRUE);
       if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
       if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
