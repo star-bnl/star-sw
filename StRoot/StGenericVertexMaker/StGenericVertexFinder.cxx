@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.27 2016/04/25 23:59:31 smirnovd Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.31 2016/04/27 21:32:07 smirnovd Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -21,7 +21,12 @@
 // Initialize static variable with default values
 
 /// Pointers to DCA states to be used in a vertex fit
-std::vector<const StDcaGeometry*>  StGenericVertexFinder::sDCAs;
+StGenericVertexFinder::StDcaList&  StGenericVertexFinder::sDCAs()
+{
+   static StDcaList* sDCAs = new StDcaList();
+   return *sDCAs;
+}
+
 
 vertexSeed_st StGenericVertexFinder::sBeamline;
 
@@ -95,6 +100,33 @@ StGenericVertexFinder::Clear()
 }
 
 
+double StGenericVertexFinder::CalcChi2DCAs(const StThreeVectorD &point)
+{
+   static double scale = 100;
+
+   // Initialize f with value for beamline
+   double f = 0;
+
+   for (const StDcaGeometry* dca : sDCAs())
+   {
+      double err2;
+      double dist = dca->thelix().Dca( &point.x(), &err2);
+      double chi2 = dist*dist/err2;
+
+      f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
+   }
+
+   return f;
+}
+
+
+double StGenericVertexFinder::CalcChi2DCAsBeamline(const StThreeVectorD &point)
+{
+   static double scale = 100;
+
+   return CalcChi2DCAs(point) + scale*(1. - TMath::Exp(-CalcChi2Beamline(point)/scale));
+}
+
 
 /**
  * Calculates chi^2 for the beamline and a point (xv, yv, zv) passed as input
@@ -133,6 +165,13 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    double ky_dy_zv_2 = ky_dy_zv*ky_dy_zv;
    double kx_dx_zv_2 = kx_dx_zv*kx_dx_zv;
 
+   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
+
+   // The denominator is zero when the point is exactly on the beamline
+   // We just return a zero for the chi2 in this case. This makes sense for all
+   // non-zero errors and if they are zero they are unphysical anyway.
+   if (denom_sqrt == 0) return 0;
+
    // The distance between the line and the point
    StThreeVectorD dist_vec (
       (  (ky2 + 1)*dx -     kx*ky*dy -          kx*zv)/kx2_ky2_1,
@@ -140,7 +179,6 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
       (       - kx*dx -        ky*dy + (kx2 + ky2)*zv)/kx2_ky2_1
    );
 
-   double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
 
    double denom = kx2_ky2_1 * denom_sqrt;
 
@@ -174,6 +212,46 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    double chi2 = dist_mag*dist_mag/covarianceMprime[0];
 
    return chi2;
+}
+
+
+/**
+ * Estimates vertex position from track DCA states in sDCAs.
+ * The beam position is not taken into account.
+ *
+ * \author Dmitri Smirnov
+ * \date April 2016
+ */
+StThreeVectorD StGenericVertexFinder::CalcVertexSeed(const StDcaList &trackDcas)
+{
+   // Estimate new seed position using provided tracks
+   StThreeVectorD vertexSeed(0, 0, 0);
+   StThreeVectorD totalWeigth(0, 0, 0);
+
+   if (trackDcas.size() == 0) {
+      LOG_WARN << "StGenericVertexFinder::CalcVertexSeed: Empty container with track DCAs. "
+	          "Returning default seed: StThreeVectorD(0, 0, 0)" << endm;
+      return vertexSeed;
+   }
+
+
+   double xyzp[6], covXyzp[21];
+
+   for (const StDcaGeometry* trackDca : trackDcas)
+   {
+      trackDca->GetXYZ(xyzp, covXyzp);
+
+      double x_weight = 1./sqrt(covXyzp[0]);
+      double y_weight = 1./sqrt(covXyzp[2]);
+      double z_weight = 1./sqrt(covXyzp[5]);
+
+      vertexSeed  += StThreeVectorD(xyzp[0]*x_weight, xyzp[1]*y_weight, xyzp[2]*z_weight);
+      totalWeigth += StThreeVectorD(x_weight, y_weight, z_weight);
+   }
+
+   vertexSeed.set(vertexSeed.x()/totalWeigth.x(), vertexSeed.y()/totalWeigth.y(), vertexSeed.z()/totalWeigth.z());
+
+   return vertexSeed;
 }
 
 

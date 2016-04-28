@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.33 2016/04/25 23:59:31 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.37 2016/04/27 21:32:07 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -24,6 +24,9 @@ class StDcaGeometry;
 
 class StGenericVertexFinder {
  public:
+
+  // Alias for shorthand
+  using StDcaList = std::vector<const StDcaGeometry*>;
 
   /// Options used to define the type of vertex fit performed in a concrete
   /// implementation
@@ -92,8 +95,24 @@ class StGenericVertexFinder {
   /// Caclulates chi2 for the beamline and a point
   static double CalcChi2Beamline(const StThreeVectorD& point);
 
+  /// Recalculates the vertex position from DCA measurements in the input list
+  /// of DCAs
+  static StThreeVectorD CalcVertexSeed(const StDcaList &trackDcas);
+
+  /// Caclulates total chi2 for the track DCAs stored in sDCAs and a point
+  static double CalcChi2DCAs(const StThreeVectorD &point);
+
+  /// Caclulates total chi2 for the beamline and track DCAs stored in sDCAs and a point
+  static double CalcChi2DCAsBeamline(const StThreeVectorD &point);
+
+  /// Just an interface to CalcChi2DCAsBeamline(...)
+  static void fcnCalcChi2DCAsBeamline(int& npar, double* gin, double& f, double* par, int iflag)
+  {
+     f = CalcChi2DCAsBeamline( StThreeVectorD(par) );
+  }
+
   /// A static container with pointers to DCA states to be used in a vertex fit
-  static std::vector<const StDcaGeometry*>  sDCAs;
+  static StDcaList&  sDCAs();
 
   /// All measured parameters of the beamline. Updated whenever
   /// UseVertexConstraint(const vertexSeed_st&) is called
