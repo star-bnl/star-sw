@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.21 2016/04/20 22:03:54 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.22 2016/04/28 18:17:48 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -31,6 +31,11 @@ class Vertex3D;
 
 class StPPVertexFinder: public StGenericVertexFinder {
  private:
+
+  /// Creates DCA states for selected tracks (mTrackData) and fills the static
+  /// container sDCAs
+  void createTrackDcas(const VertexData &vertex) const;
+
   enum {mxH=32};
   bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
   void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);  // dongx

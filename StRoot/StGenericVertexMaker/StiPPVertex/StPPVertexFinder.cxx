@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.53 2016/04/28 18:17:43 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.54 2016/04/28 18:17:48 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -841,6 +841,49 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
   
   LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
   return true;
+}
+
+
+/**
+ * Creates DCA states for selected tracks (mTrackData) and fills the static
+ * container sDCAs
+ *
+ * \author Dmitri Smirnov, BNL
+ * \date April, 2016
+ */
+void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
+{
+   // Fill static array of pointers to StDcaGeometry objects for selected tracks
+   // in mTrackData corresponding to this vertex. These will be used in static
+   // minimization function
+   while (!sDCAs().empty()) delete sDCAs().back(), sDCAs().pop_back();
+
+
+   for (const TrackData & track : mTrackData)
+   {
+      if (track.vertexID != vertex.id) continue;
+      if (!track.mother) continue;
+
+      // This code is adopted from StiStEventFiller::fillDca()
+      StiKalmanTrack tmpTrack = *track.mother;
+      StiKalmanTrackNode *tNode = tmpTrack.extrapolateToBeam();
+
+      if (!tNode) continue;
+
+      const StiNodePars &pars = tNode->fitPars();
+      const StiNodeErrs &errs = tNode->fitErrs();
+      float alfa = tNode->getAlpha();
+      Float_t setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.phi()
+                        ,(float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
+      setp[2]+= alfa;
+      Float_t sete[15];
+      for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
+        for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
+
+      StDcaGeometry* dca = new StDcaGeometry();
+      dca->set(setp, sete);
+      sDCAs().push_back(dca);
+   }
 }
 
  
