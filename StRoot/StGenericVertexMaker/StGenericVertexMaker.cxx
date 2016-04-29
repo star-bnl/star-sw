@@ -165,8 +165,6 @@ Int_t StGenericVertexMaker::Init()
     assert(!eval); // current implementation support only Minuit Vertex finder, JB 
   }
  
-  //    theFinder->UseVertexConstraint(-0.265,0.4088,-0.00135,0.0004333,0.0001);
-  //theFinder->UseVertexConstraint(0.0,0.0,0.0,0.0,0.0001);
   if (eval) mEvalNtuple = new TNtuple("results","results","thX:thY:thZ:thStat:goodGlob:evX:evY:evZ:evStat:nPrim:nCTB:geantX:geantY:geantZ");
 
   theFinder->Init();

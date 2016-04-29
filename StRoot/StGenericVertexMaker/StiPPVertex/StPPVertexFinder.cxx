@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.51 2016/04/20 22:04:10 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.56 2016/04/28 18:18:01 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -16,6 +16,7 @@
 #include <TFile.h>
 #include <TLine.h>
 #include <TCanvas.h> //tmp
+#include "TMinuit.h"
 
 #include <math_constants.h>
 #include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
@@ -200,8 +201,12 @@ StPPVertexFinder::InitRun(int runnumber){
     // in late 2008 Matt uploaded ideal (aka sim) gians matching endcap
     if(dateY>=2008)  mMinAdcBemc =8; //ideal BTOW gain 60 GeV ET @ 4076 ADC
 
-    if(dateY>2006)  LOG_WARN <<
-	  "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
+    if(dateY>2006) {
+       LOG_WARN << "PPV InitRun() , M-C time stamp differs from 2005,\n"
+          "BTOW status tables questionable,\n PPV results qauestionable,\n\n"
+          "F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!\n\n"
+          "chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n" << endm;
+    }
   }
 
   if(dateY<2006) {
@@ -314,10 +319,7 @@ StPPVertexFinder::Clear(){
 //==========================================================
 //==========================================================
 StPPVertexFinder::~StPPVertexFinder() {
-  //x delete mTrackData;
-  //x delete mVertexData;
   delete geomE;
-  //yf  if(btofGeom) delete btofGeom; // dongx 
 }
 
 //======================================================
@@ -637,6 +639,10 @@ StPPVertexFinder::fit(StEvent* event) {
       else if(rank>0)   hA[17]->Fill(log(rank));
       else   hA[17]->Fill(log(rank+1e6)-10);
     }
+
+    if (mVertexFitMode == VertexFit_t::Beamline3D) {
+       fitTracksToVertex(V);
+    }
     
     mVertexData.push_back(V);
     if(trigV && mBeamLineTracks) vertex3D->study(V.r,eveID);
@@ -842,16 +848,126 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
   return true;
 }
 
+
+/**
+ * Creates DCA states for selected tracks (mTrackData) and fills the static
+ * container sDCAs
+ *
+ * \author Dmitri Smirnov, BNL
+ * \date April, 2016
+ */
+void StPPVertexFinder::createTrackDcas(const VertexData &vertex) const
+{
+   // Fill static array of pointers to StDcaGeometry objects for selected tracks
+   // in mTrackData corresponding to this vertex. These will be used in static
+   // minimization function
+   while (!sDCAs().empty()) delete sDCAs().back(), sDCAs().pop_back();
+
+
+   for (const TrackData & track : mTrackData)
+   {
+      if (track.vertexID != vertex.id) continue;
+      if (!track.mother) continue;
+
+      // This code is adopted from StiStEventFiller::fillDca()
+      StiKalmanTrack tmpTrack = *track.mother;
+      StiKalmanTrackNode *tNode = tmpTrack.extrapolateToBeam();
+
+      if (!tNode) continue;
+
+      const StiNodePars &pars = tNode->fitPars();
+      const StiNodeErrs &errs = tNode->fitErrs();
+      float alfa = tNode->getAlpha();
+      Float_t setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.phi()
+                        ,(float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
+      setp[2]+= alfa;
+      Float_t sete[15];
+      for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
+        for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
+
+      StDcaGeometry* dca = new StDcaGeometry();
+      dca->set(setp, sete);
+      sDCAs().push_back(dca);
+   }
+}
+
+
+/**
+ * Takes a list of vertex candidates/seeds and updates each vertex position by
+ * fitting tracks pointing to it. The fit is performed by minimizing the chi2
+ * robust potential. The method uses the base class static container with track
+ * DCAs as input.
+ *
+ * \author Dmitri Smirnov, BNL
+ * \date February, 2016
+ */
+void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
+{
+   createTrackDcas(vertex);
+
+   if (sDCAs().size() == 0) {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: At least one track is required. "
+               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+      return;
+   }
+
+   // Recalculate vertex seed coordinates to be used as initial point in the fit
+   StThreeVectorD vertexSeed = StGenericVertexFinder::CalcVertexSeed(sDCAs());
+
+   static TMinuit minuit(3);
+
+   minuit.SetFCN(&StGenericVertexFinder::fcnCalcChi2DCAsBeamline);
+   minuit.SetPrintLevel(-1);
+   minuit.SetMaxIterations(1000);
+
+   int minuitStatus;
+
+   minuit.mnexcm("clear", 0, 0, minuitStatus);
+
+   static double step[3] = {0.03, 0.03, 0.03};
+
+   minuit.mnparm(0, "x", vertexSeed.x(), step[0], vertexSeed.x()-10, vertexSeed.x()+10, minuitStatus);
+   minuit.mnparm(1, "y", vertexSeed.y(), step[1], vertexSeed.y()-10, vertexSeed.y()+10, minuitStatus);
+   minuit.mnparm(2, "z", vertexSeed.z(), step[2], vertexSeed.z()-30, vertexSeed.z()+30, minuitStatus);
+
+   minuit.mnexcm("minimize", 0, 0, minuitStatus);
+
+   // Check fit result
+   if (minuitStatus) {
+      LOG_WARN << "StPPVertexFinder::fitTracksToVertex: Fit did not converge. "
+	       << "Check TMinuit::mnexcm() status flag: " << minuitStatus << ". "
+               << "This vertex (id = " << vertex.id << ") coordinates will not be updated" << endm;
+      return;
+   }
+
+   double chisquare, fedm, errdef;
+   int npari, nparx;
+
+   minuit.mnstat(chisquare, fedm, errdef, npari, nparx, minuitStatus);
+   minuit.mnhess();
+
+   double emat[9];
+   /* 0 1 2
+      3 4 5
+      6 7 8 */
+   minuit.mnemat(emat, 3);
+
+   vertex.r.SetXYZ(minuit.fU[0], minuit.fU[1], minuit.fU[2]);
+   vertex.er.SetXYZ( sqrt(emat[0]), sqrt(emat[4]), sqrt(emat[8]) );
+}
+
  
 //-------------------------------------------------
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
-  if (mVertexFitMode != VertexFit_t::Beamline1D)
+  if ( mVertexFitMode != VertexFit_t::Beamline1D &&
+       mVertexFitMode != VertexFit_t::Beamline3D )
   {
     // code is not ready for reco w/o beamLine
     LOG_FATAL << "StPPVertexFinder code is not ready for reco w/o beamLine" << endm;
-    assert(mVertexFitMode == VertexFit_t::Beamline1D);
+    assert(mVertexFitMode == VertexFit_t::Beamline1D ||
+           mVertexFitMode == VertexFit_t::Beamline3D);
   }
   uint i;
   for(i=0;i<mVertexData.size();i++) {

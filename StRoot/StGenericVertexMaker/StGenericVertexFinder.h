@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.37 2016/04/27 21:32:07 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.38 2016/04/28 18:17:38 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -111,7 +111,8 @@ class StGenericVertexFinder {
      f = CalcChi2DCAsBeamline( StThreeVectorD(par) );
   }
 
-  /// A static container with pointers to DCA states to be used in a vertex fit
+  /// A static container with pointers to DCA states to be used in a vertex fit.
+  /// The DCAs are assumed to be calculated w.r.t. the z-axis, i.e. x = y = 0.
   static StDcaList&  sDCAs();
 
   /// All measured parameters of the beamline. Updated whenever

@@ -1,8 +1,8 @@
 #!/bin/csh -f
 
 # Help
-if ($#argv == 0 || $#argv > 3) then
-    cat <<EOF
+if ($#argv == 0 || $#argv > 3 || "$1" == "help" || "$1" == "-h") then
+    /bin/cat <<EOF
 
  Usage is:
    % setup 'Package' {version}

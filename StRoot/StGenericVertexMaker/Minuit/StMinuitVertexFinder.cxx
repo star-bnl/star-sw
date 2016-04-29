@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.38 2016/04/27 21:31:39 smirnovd Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.39 2016/04/28 18:17:38 smirnovd Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -478,6 +478,7 @@ StMinuitVertexFinder::fit(StEvent* event)
         n_cross_tot++;
       }
     }
+
     if (mDebugLevel) {
       LOG_INFO << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endm; 
     }
@@ -875,8 +876,3 @@ Int_t  StMinuitVertexFinder::NCtbMatches() {
 Int_t  StMinuitVertexFinder::NCtbSlats() { 
   return -777; // dum result, perhaps not needed at all,JB
 }
-
-
-//void StMinuitVertexFinder::SetFitPointsCut(Int_t fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;return;}
-
-
