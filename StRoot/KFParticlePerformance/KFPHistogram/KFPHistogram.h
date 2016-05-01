@@ -137,6 +137,9 @@ class KFPHistogram
   std::string fOutFileName;
   KFPHistogramSet fKFPHistogramSet[KFPartEfficiencies::nParticles];
   int* fMemory;
+  
+  KFPHistogram(const KFPHistogram&);
+  KFPHistogram& operator=(const KFPHistogram&);
 };
 
 #endif

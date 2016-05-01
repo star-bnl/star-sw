@@ -56,13 +56,8 @@ class KFPHistogram1D
       fHistogram[i] += h.fHistogram[i];
   }
   
-  KFPHistogram1D(const KFPHistogram1D& h)
+  KFPHistogram1D(const KFPHistogram1D& h): fHistogram(h.fHistogram), fSize(h.fSize), fName(h.fName), fMinBin(h.fMinBin), fMaxBin(h.fMaxBin)
   {
-    fHistogram = h.fHistogram;
-    fSize = h.fSize;
-    fName = h.fName;
-    fMinBin = h.fMinBin;
-    fMaxBin = h.fMaxBin;
   }
   
   const KFPHistogram1D& operator=(const KFPHistogram1D& h)
@@ -73,7 +68,7 @@ class KFPHistogram1D
     fMinBin = h.fMinBin;
     fMaxBin = h.fMaxBin;
     
-    return h;
+    return *this;
   }
   
  private:
