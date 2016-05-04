@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.156 2015/10/30 13:37:10 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.157 2016/05/02 17:24:54 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.157  2016/05/02 17:24:54  jwebb
+// Remove unused call to geant3->Gfhead, whose only purpose seems to be to cause a corruption of the stack (see ticket 3204).
+//
 // Revision 1.156  2015/10/30 13:37:10  jwebb
 // Removed unnecessary printout of number of FTS hits.
 //
@@ -1064,21 +1067,15 @@ Int_t St_geant_Maker::Make() {
   int iRes = 0; if(iRes) {/*touch*/};
   Do("trig");
   
-  //  LOG_INFO << "Make() " << endm;
-
   // check EoF
   if (cquest->iquest[0]) {return kStEOF;}
-  Int_t Nwhead,Ihead[100];
-  Int_t Nwbuf;
-  Float_t Ubuf[100];
-  
   // prepare an empty g2t_event
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
   m_DataSet->Add(g2t_event);
   
   Char_t   cgnam[21] = "                   \0";                               
   Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
-  geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
+
   //  if (m_Mode%10 != 1) {
   if (! IAttr("Don'tTouchTimeStamp")) {
     if (fEvtHddr) {
