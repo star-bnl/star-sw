@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.h,v 1.6 2004/05/02 04:10:13 perev Exp $
+ * $Id: StMuDbReader.h,v 1.7 2016/05/04 19:08:27 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -40,12 +40,23 @@ class StMuDbReader  {
     ClassDef(StMuDbReader,0)
 };
 
+
+/// number of entries in internal data base
+inline int StMuDbReader::entriesDb() { return mDb.size(); }
+
+
 #endif
 
 
 /***************************************************************************
  *
  * $Log: StMuDbReader.h,v $
+ * Revision 1.7  2016/05/04 19:08:27  smirnovd
+ * StMuDbReader: Moved inlined method in the header
+ *
+ * Inlined methods need to be defined in the header to avoid unresolved external
+ * errors from the linker
+ *
  * Revision 1.6  2004/05/02 04:10:13  perev
  * private => protected
  *
