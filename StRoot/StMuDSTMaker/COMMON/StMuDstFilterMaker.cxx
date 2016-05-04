@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.17 2011/08/18 18:41:36 fisyak Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.18 2016/05/04 19:24:07 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -44,7 +44,6 @@ void StMuDstFilterMaker::open(const Char_t *fname) {
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
   
-  TBranch* branch;
   mTTree = new TTree("MuDst", "StMuDst",__SPLIT__);
   if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
@@ -57,21 +56,21 @@ void StMuDstFilterMaker::open(const Char_t *fname) {
   DEBUGMESSAGE2("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
     DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], __BUFFER__, __SPLIT__);
+    mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], __BUFFER__, __SPLIT__);
   }
 #ifndef __NO_STRANGE_MUDST__
   // strange stuff
   DEBUGMESSAGE2("strange arrays");
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i],  __BUFFER__, __SPLIT__);
+    mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i],  __BUFFER__, __SPLIT__);
   }
 #endif
   // emc stuff
   DEBUGMESSAGE2("emc arrays");
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i],  __BUFFER__, __SPLIT__);
+    mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i],  __BUFFER__, __SPLIT__);
   }
 }
 
@@ -323,6 +322,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.18  2016/05/04 19:24:07  smirnovd
+ * Addressed compiler warning by removing set but never used variables
+ *
  * Revision 1.17  2011/08/18 18:41:36  fisyak
  * set max. tree size = 100 GB
  *

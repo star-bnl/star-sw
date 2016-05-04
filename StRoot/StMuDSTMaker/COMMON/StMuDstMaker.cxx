@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.125 2015/11/06 17:47:16 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.126 2016/05/04 19:24:07 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -894,7 +894,6 @@ void StMuDstMaker::openWrite(string fileName) {
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
 
-  TBranch* branch;
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
   //  all stuff
@@ -909,7 +908,7 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
-    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, mSplit);
+    mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, mSplit);
   }
   mCurrentFileName = fileName;
 }
@@ -1504,10 +1503,9 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3, covgTCA, covpTCA);
   }
   /// do primary track track
-  int index;
   if (pTCA) {
     tr = node->track(primary);
-    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
+    if (tr && !tr->bad()) addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
   }
   /// all other tracks
   if (oTCA) {
@@ -1515,7 +1513,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
       tr = node->track(j);
       if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
-	index = addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
+	addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
       }
     }
   }
@@ -1835,6 +1833,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.126  2016/05/04 19:24:07  smirnovd
+ * Addressed compiler warning by removing set but never used variables
+ *
  * Revision 1.125  2015/11/06 17:47:16  jdb
  * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
  *
