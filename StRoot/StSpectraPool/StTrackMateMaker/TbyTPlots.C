@@ -1039,7 +1039,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       for (Int_t i = 0; i < 2; i++) {
 	Name = Form("pTdiff%s%s",charge[i],GP[k]);
 	Title = Form("pT_%s - pT_%s for %s",Old.Data(),New.Data(),GPTitle[k]);
-	pTdiff[k][i] = new TH2D(Name,Title,40,0,4,200,-.8,.8);
+	pTdiff[k][i] = new TH2D(Name,Title,40,0,4,601,-.15025,0.15025);
 	pTdiff[k][i]->SetXTitle(Form("p_{T} %s (GeV/c)",New.Data()));
 	TString YTitle = Form("p_{T} Difference (pT_%s - pT_%s),",Old.Data(),New.Data());
 	TString title("");
@@ -1056,7 +1056,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	pTdiff[k][i]->SetMarkerStyle(20);
 	pTdiff[k][i]->SetMarkerColor(i+2);
 	Name = Form("pTdiffR%s%s",charge[i],GP[k]);
-	pTdiffR[k][i] = new TH2D(Name,Title,40,0,4,600,-0.15,0.15);
+	pTdiffR[k][i] = new TH2D(Name,Title,40,0,4,601,-.15025,0.15025);
 	pTdiffR[k][i]->SetXTitle(Form("p_{T} %s (GeV/c)",New.Data()));
 	YTitle = Form("(pT_%s - pT_%s)/pT_%s,",Old.Data(),New.Data(),New.Data());
 	yTitle = YTitle; yTitle += title;
@@ -1066,7 +1066,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	pTdiffR[k][i]->SetMarkerColor(i+2);
 	
 	Name = Form("pTInvdiffR%s%s",charge[i],GP[k]);
-	pTInvdiffR[k][i] = new TH2D(Name,Title,40,0.,4.,600,-0.15,0.15);
+	pTInvdiffR[k][i] = new TH2D(Name,Title,40,0.,4.,601,-.15025,0.15025);
 	pTInvdiffR[k][i]->SetXTitle(Form("pT_%s",New.Data()));
 	YTitle = Form("(1/pT_%s - 1/pT_%s)/(1/pT_%s), versus pT_%s",Old.Data(),New.Data(),New.Data(),New.Data());
 	yTitle = YTitle; yTitle += title;
@@ -1079,7 +1079,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	for (Int_t l = 0; l < 3; l++) {
 	  Name = Form("Phi%sdiffR%s%s",NameEta[l],charge[i],GP[k]);
 	  Title = Form("pT_%s - pT_%s for %s and %s",Old.Data(),New.Data(),GPTitle[k],TitleEta[l]);
-	  PhidiffR[l][k][i] = new TH2D(Name,Title,72,-TMath::Pi(),TMath::Pi(),600,-0.15,0.15);
+	  PhidiffR[l][k][i] = new TH2D(Name,Title,72,-TMath::Pi(),TMath::Pi(),601,-.15025,0.15025);
 	  PhidiffR[l][k][i]->SetXTitle(Form("#phi_%s",New.Data()));
 	  YTitle = Form("(pT_%s - pT_%s)/(pT_%s), versus #phi_%s",Old.Data(),New.Data(),New.Data(),New.Data());
 	  yTitle = YTitle; yTitle += title; 
@@ -1089,7 +1089,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	  PhidiffR[l][k][i]->SetMarkerColor(i+2);
 	  
 	  Name = Form("Phi5%sdiffR%s%s",NameEta[l],charge[i],GP[k]);
-	  Phi5diffR[l][k][i] = new TH2D(Name,Title,72,-TMath::Pi(),TMath::Pi(),600,-0.15,0.15);
+	  Phi5diffR[l][k][i] = new TH2D(Name,Title,72,-TMath::Pi(),TMath::Pi(),601,-.15025,0.15025);
 	  Phi5diffR[l][k][i]->SetXTitle(Form("#phi_%s",New.Data()));
 	  YTitle = Form("(pT_%s - pT_%s)/(pT_%s), versus #phi_{%s} for pT > 0.5 GeV/c",Old.Data(),New.Data(),New.Data(),New.Data());
 	  yTitle = YTitle; yTitle += title;
