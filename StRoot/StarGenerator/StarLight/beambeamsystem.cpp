@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:31 $: date of last commit
+// $Date: 2016/05/05 22:40:12 $: date of last commit
 //
 // Description:
 //
@@ -94,7 +94,7 @@ double
 beamBeamSystem::probabilityOfBreakup(const double D)
 {
 	static int    NStep = 1426;// 1000;
-	static double ProbTot[1000];
+	static double ProbTot[1001];
    
 	const double Bmin = 1.75 * (_beam1.nuclearRadius());  
 	// const double Bmin = 12.2815005;
