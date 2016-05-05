@@ -68,7 +68,7 @@ class StMuTrack : public TObject {
     Int_t index2BTofHit() const; /// dongx
     Int_t index2MtdHit() const; ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
-	const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
+        const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
 	const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
 	const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     const StMuBTofHit* tofHit() const;  /// dongx
@@ -259,10 +259,20 @@ inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p)
 inline void StMuTrack::setProbabilityPidCentrality(Double_t cent) { mProbabilityPidCentrality = cent;}
 inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPidTraits = pid; }
 
-inline const StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
-inline const StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
-inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
-inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;} ///
+inline const StMuTrack* StMuTrack::globalTrack() const { 
+  return (mIndex2Global>=0 && mIndex2Global < StMuDst::array(muGlobal)->GetEntriesFast()) ? 
+    (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;
+}
+inline const StRichSpectra* StMuTrack::richSpectra() const { 
+  return (mIndex2RichSpectra>=0 && mIndex2RichSpectra < StMuDst::array(muRich)->GetEntriesFast()) ? 
+    (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;
+}
+inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) && StMuDst::btofArray(muBTofHit)->GetEntriesFast() ? 
+    (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;
+} /// dongx
+inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0 && StMuDst::mtdArray(muMTDHit)->GetEntriesFast()) ? 
+    (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;
+} ///
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif
 
