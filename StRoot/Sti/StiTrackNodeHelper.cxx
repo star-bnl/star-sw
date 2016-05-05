@@ -597,7 +597,11 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   StiNodeErrs Ai=A;	//Inverted A
   
   Ai._cXX=1;
-  TCL::trsinv(Ai.A,Ai.A,nP2);
+  TRSymMatrix AA(nP2,Ai.A);
+  TRSymMatrix AI(AA,TRArray::kInvertedA);
+  double chi2 = 3e33;
+  if (! AI.IsValid()) return chi2;
+  TCL::ucopy(AI.GetArray(),Ai.A, nP2*(nP2+1)/2);
   Ai._cXX=0;
 
 
@@ -613,7 +617,6 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   if (M) {TCL::ucopy(m,M->P,nP2); M->ready();}	//fill resulting params
 
   TCL::vsub(X.P,m,dif,nP2);			//dif = X - M
-  double chi2;
   TCL::trasat(dif,Ai.A,&chi2,1,nP2);		//calc chi2
   if (!C) return chi2;
 		// Error matrix calculation
