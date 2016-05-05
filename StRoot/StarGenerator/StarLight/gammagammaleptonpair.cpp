@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:32 $: date of last commit
+// $Date: 2016/05/05 22:45:09 $: date of last commit
 //
 // Description:
 //    Nystrand 220710
@@ -358,7 +358,7 @@ void Gammagammaleptonpair::twoBodyDecay(starlightConstants::particleTypeEnum &ip
     double mdec=0.,E1=0.,E2=0.;
     double pmag, anglelep[20001];
     // double ytest=0.,dndtheta;
-    double phi,theta,xtest,Ecm;
+    double phi,theta = 999.0,xtest,Ecm;
     double betax,betay,betaz;
     double hirestheta,hirestest,hiresw;  //added from JN->needed precision
 
@@ -414,6 +414,7 @@ void Gammagammaleptonpair::twoBodyDecay(starlightConstants::particleTypeEnum &ip
     if(getSpin() != 0.5)
         cout<<" This model cannot yet handle this spin value for lepton pairs: "<<getSpin()<<endl; 
 
+    assert(theta!=999.0); // angle has not been calculated -- JCW
 
     //     compute unboosted momenta
     px1 = sin(theta)*cos(phi)*pmag;
