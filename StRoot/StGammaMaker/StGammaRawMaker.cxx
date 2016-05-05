@@ -585,7 +585,7 @@ void StGammaRawMaker::GetEndcap()
             TVector3 Momentum;
             Momentum.SetMagThetaPhi(tower.energy(), TMath::ATan(TanTheta), Phi );
             
-            StGammaTower  *etower;
+            StGammaTower  *etower = 0;
             
             if(layer == 0)       etower = mGammaEvent->newTower();
             else if (layer == 1) etower = mGammaEvent->newPreshower1();
