@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.cxx,v 1.4 2003/04/15 16:57:42 laue Exp $
+ * $Id: StMuDbReader.cxx,v 1.5 2016/05/04 19:08:27 smirnovd Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -185,13 +185,16 @@ int StMuDbReader::createDB(const char* dbName, const char* inputList) {
   dbFile.close();
   return count;
 }
-  
-/// number of entries in internal data base
-inline int StMuDbReader::entriesDb() { return mDb.size(); }
 
 /***************************************************************************
  *
  * $Log: StMuDbReader.cxx,v $
+ * Revision 1.5  2016/05/04 19:08:27  smirnovd
+ * StMuDbReader: Moved inlined method in the header
+ *
+ * Inlined methods need to be defined in the header to avoid unresolved external
+ * errors from the linker
+ *
  * Revision 1.4  2003/04/15 16:57:42  laue
  * Minor changes to be able to filter MuDst.root files and an example
  * how to do this. The StMuDstFilterMaker is just an example, it has to be
