@@ -1,10 +1,14 @@
 #ifdef DO_TPCCATRACKER
 #include "StiTPCCATrackerInterface.h"
-
+#ifdef __NEW_TPCCATracker__
+#include "TPCCATracker/AliHLTTPCCAGBHit.h"
+#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
+#include "TPCCATracker/AliHLTTPCCAParam.h"
+#else /* ! __NEW_TPCCATracker__ */
 #include "TPCCATracker/code/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/code/AliHLTTPCCAGBTrack.h"
 #include "TPCCATracker/code/AliHLTTPCCAParam.h"
-
+#endif /* __NEW_TPCCATracker__ */
   // need for hits data
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
@@ -26,12 +30,18 @@
 #include "StarMagField/StarMagField.h"
 
   // for sti perfo
-#include "TPCCATracker/code/AliHLTTPCCAStiPerformance.h"
-#include "TPCCATracker/code/AliHLTTPCCAMergerPerformance.h"
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+#ifdef __NEW_TPCCATracker__
+#include "TPCCATrackerPerformance/AliHLTTPCCAStiPerformance.h"
+#include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
+#else /* ! __NEW_TPCCATracker__ */
+#include "TPCCATrackerPerformance/code/AliHLTTPCCAStiPerformance.h"
+#include "TPCCATrackerPerformance/code/AliHLTTPCCAMergerPerformance.h"
+#endif /* __NEW_TPCCATracker__ */
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
-
+#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
 #include <algorithm>
 using std::vector;
@@ -39,8 +49,9 @@ using std::vector;
 #include <string>
 using std::string;
 
-
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 //#define STORE_STANDALONE_DATA // write data in files for Standalone
+#endif
 
 StiTPCCATrackerInterface &StiTPCCATrackerInterface::Instance()
 {
@@ -51,12 +62,13 @@ StiTPCCATrackerInterface &StiTPCCATrackerInterface::Instance()
 
 StiTPCCATrackerInterface::StiTPCCATrackerInterface()
 {
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fOutFile = StMaker::GetChain()->GetTFile();
   if(!fOutFile) cout << "W StiTPCCATrackerInterface: Warning - There isn't any tag file, so histograms won't be saved!" << endl;
 
   fPerformance = &(AliHLTTPCCAPerformance::Instance());
   fPerformance->SetOutputFile(fOutFile);
-
+#endif
   //yf   SetNewEvent();
 } // StiTPCCATrackerInterface::StiTPCCATrackerInterface()
 
@@ -66,8 +78,6 @@ StiTPCCATrackerInterface::~StiTPCCATrackerInterface(  )
 
 void StiTPCCATrackerInterface::SetNewEvent()
 {
-  assert(fPerformance != 0);
-  
   fHitsMap = 0;
   fSeeds.clear();
 
