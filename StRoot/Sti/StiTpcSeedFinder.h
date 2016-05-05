@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 2.4 2013/01/14 22:21:14 fisyak Exp $
+// $Id: StiTpcSeedFinder.h,v 2.4.8.1 2016/05/05 16:10:21 smirnovd Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -14,13 +14,20 @@ struct SeedHit_t {
   Double_t x,y,z;
   StiHit   *hit;
 };
-struct Seed_t {
+class Seed_t {
+ public:
   vector<SeedHit_t *> vhit;
   Int_t total_hits;
   StiNodePars firstNodePars;
   StiNodePars lastNodePars;
   StiNodeErrs firstNodeErrs;
   StiNodeErrs lastNodeErrs;
+  virtual void Print(Option_t *option="") const {
+    firstNodePars.print();
+    firstNodeErrs.print();
+    lastNodePars.print();
+    lastNodeErrs.print();
+  }
 };
 class StiTpcSeedFinder {
  public:
@@ -28,6 +35,9 @@ class StiTpcSeedFinder {
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
+// Revision 2.4.8.1  2016/05/05 16:10:21  smirnovd
+// debug related Print() function added
+//
 // Revision 2.4  2013/01/14 22:21:14  fisyak
 // Clean up unused variables
 //
