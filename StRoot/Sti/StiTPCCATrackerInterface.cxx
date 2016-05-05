@@ -85,10 +85,12 @@ void StiTPCCATrackerInterface::SetNewEvent()
   fStiTracks = 0;
 
   fIdTruth.clear(); // id of the Track, which has created CaHit
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+  assert(fPerformance != 0);
   fMCTracks.clear();
   fMCPoints.clear();
   fHitLabels.clear();
-
+#endif
   fCaParam.clear();// settings for all sectors to give CATracker
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
@@ -100,7 +102,9 @@ void StiTPCCATrackerInterface::SetNewEvent()
   if (fStiTracker) delete fStiTracker;
   fStiTracker = new AliHLTTPCCAGBTracker; 
   
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SetTracker(fTracker);
+#endif
 }
 
 
