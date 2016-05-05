@@ -6,6 +6,8 @@
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
+#include "TRSymMatrix.h"
+#include "TRVector.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -487,27 +489,32 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
 
-  do {//empty loop
-//  	Join errors
-    TCL::vadd(e1,e2,sumE,nE1);
-    int negati = sumE[2]<0;
-    if (negati) TCL::vcopyn(sumE,sumE,nE1);
-    int ign0re = sumE[0]<=0;
-    if (ign0re) sumE[0] = 1;
-    TCL::trsinv(sumE,sumEI,nP1);
-    if (ign0re) {sumE[0]  = 0; sumEI[0] = 0;}
-    if (negati) {TCL::vcopyn(sumE,sumE,nE1);TCL::vcopyn(sumEI,sumEI,nE1);}
-    TCL::vsub(p2       ,p1   ,subP       ,nP1);
-    TCL::trasat(subP,sumEI,&chi2,1,nP1); 
-    if (!EJ) break;
-    TCL::trqsq (e1  ,sumEI,e1sumEIe1,nP2); 
-    TCL::vsub(e1,e1sumEIe1,EJ,nE2);
-  } while(0);
-//  	Join params
+  TRSymMatrix EE1(nP1,e1);
+  TRSymMatrix EE2(nP1,e2);
+  TRVector    PP1(nP1,p1);
+  TRVector    PP2(nP1,p2);
+  TRVector SubP(PP2);
+  SubP -= PP1;
+  //   Join errors
+  TRSymMatrix SumE(EE1);
+  SumE += EE2;
+  int negati = SumE[2]<0;
+  if (negati) SumE *= -1.;
+  int ign0re = SumE[0]<=0;
+  if (ign0re) SumE[0] = 1;
+  TRSymMatrix SumEI(SumE,TRArray::kInvertedA);
+  if (! SumEI.IsValid()) return chi2;
+  if (ign0re) {SumE[0]  = 0; SumEI[0] = 0;}
+  if (negati) {SumE *= -1.; SumEI *= -1.;}
+  chi2 = SumEI.Product(SubP);
+  if (!EJ) return chi2;
+  TRSymMatrix E1sumEIe1(EE1,TRArray::kRxSxR,SumEI);
+  TCL::vsub(EE1.GetArray(),E1sumEIe1.GetArray(),EJ,nE1);
+  //   Join params
   if (PJ) {
-    TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
-    TCL::tras(sumEIsubP,e1   ,PJ       ,1,nP2);
-    TCL::vadd(PJ       ,p1   ,PJ         ,nP2);
+    TCL::tras(SubP.GetArray(),SumEI.GetArray(),sumEIsubP,1,nP1);
+    TCL::tras(sumEIsubP,EE1.GetArray()  ,PJ       ,1,nP2);
+    TCL::vadd(PJ       ,PP1.GetArray()  ,PJ         ,nP2);
   }
   return chi2;
 }
