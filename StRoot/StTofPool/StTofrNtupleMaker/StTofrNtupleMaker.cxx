@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.10 2012/12/14 06:35:52 geurts Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.11 2016/05/05 16:18:07 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.11  2016/05/05 16:18:07  geurts
+ * addressed Cppcheck report: fixed uninitialized variables and remove one unused variable.
+ *
  * Revision 1.10  2012/12/14 06:35:52  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -378,7 +381,7 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
 
         //- track information
         StTrack *thisTrack = thisCell->associatedTrack();
-        StTrack *globalTrack = thisTrack->node()->track(global);
+        //StTrack *globalTrack = thisTrack->node()->track(global);
 
         StTrackGeometry *theTrackGeometry = thisTrack->geometry();
         const StThreeVectorF momentum = theTrackGeometry->momentum();
@@ -409,10 +412,10 @@ cout<<"runId: "<<event->runId()<<"  runnumber"<<event->id()<<endl;
         StThreeVector<double> tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
         StThreeVector<double> dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);//real dca
 
-        float mNSigmaElectron;
-        float mNSigmaPion;
-        float mNSigmaKaon;
-        float mNSigmaProton; 
+        float mNSigmaElectron(0.);
+        float mNSigmaPion(0.);
+        float mNSigmaKaon(0.);
+        float mNSigmaProton(0.); 
         
         static StTpcDedxPidAlgorithm PidAlgorithm;
         static StElectron* Electron = StElectron::instance();
