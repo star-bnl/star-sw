@@ -6,6 +6,7 @@ ClassImp(StarParticleData);
 #include "THashList.h"
 #include "assert.h"
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -23,6 +24,13 @@ Int_t hid( Int_t z, Int_t a, Int_t l=0 )
 }
 
 
+
+
+
+
+
+
+
 // Functor class which converts PDG code to STAR definition.
 class StarTrackingCode { 
 public: 
@@ -30,12 +38,15 @@ public:
 };
 class G3TrackingCode : public StarTrackingCode { 
 public:
-  virtual Int_t operator()( Int_t ipdg ){ return TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); }
+  virtual Int_t operator()( Int_t ipdg )
+  { 
+    return TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); 
+  }
 };
 
+// Instance should exist from the start
+StarParticleData *StarParticleData::sInstance = 0;
 
-
-  StarParticleData *StarParticleData::sInstance = 0;
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
 {
@@ -50,6 +61,7 @@ StarParticleData &StarParticleData::instance(){
 StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
   TObjectSet(name)
 {
+
 
   if ( parent )                Shunt(parent); 
 
@@ -205,3 +217,28 @@ void StarParticleData::AddAlias( const Char_t *alias, const Char_t *name )
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
+TParticlePDG *StarParticleData::SetTrackingCode( const int pdgid, const int g3id )
+{
+  TParticlePDG *particle = GetParticle(pdgid);
+
+  TString   name   = particle->GetName();
+  TString   title  = particle->GetTitle();
+  double    mass   = particle->Mass();
+  bool      stable = particle->Stable();
+  double    width  = particle->Width();
+  double    charge = particle->Charge();
+  TString   class_ = particle->ParticleClass();
+  
+  int   code = particle->PdgCode();
+  int   anti = 0; if ( particle->AntiParticle() == particle ) anti = -code;
+      
+  TParticlePDG *myparticle = new TParticlePDG( name, title, mass, stable, width, charge, class_, code, anti, g3id );
+      
+  mParticleList. Add( myparticle );   
+  mParticleNameMap[ name ] = myparticle;
+  mParticleIdMap[ code ]   = myparticle; 
+  mParticleG3IdMap[ g3id ] = myparticle;
+
+  return myparticle;
+
+}

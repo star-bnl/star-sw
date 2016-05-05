@@ -366,7 +366,8 @@ Int_t StarPrimaryMaker::PreGenerate()
 
     }
 
-  LOG_INFO << Form("mDoBeamline=%i run=%i vx=%6.4f vy=%6.4f vz=%6.3f dxdz=%6.4f dydz=%6.4f",mDoBeamline,mRunNumber,mVx,mVy,mVz,mVdxdz,mVdydz) << endm;
+  if ( mDoBeamline ) 
+  LOG_INFO << Form("[%i]Beamline Parameters run=%i vx=%6.4f vy=%6.4f vz=%6.3f dxdz=%6.4f dydz=%6.4f",mDoBeamline,mRunNumber,mVx,mVy,mVz,mVdxdz,mVdydz) << endm;
 
 
   TIter Next( GetMakeList() );
