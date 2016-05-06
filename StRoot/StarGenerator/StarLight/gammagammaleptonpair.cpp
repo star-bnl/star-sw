@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2016/05/05 22:45:09 $: date of last commit
+// $Date: 2016/05/06 13:46:33 $: date of last commit
 //
 // Description:
 //    Nystrand 220710
@@ -40,7 +40,7 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
-
+#include <assert.h>
 #include "starlightconstants.h"
 #include "gammagammaleptonpair.h"
 
