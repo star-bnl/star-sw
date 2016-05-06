@@ -2435,7 +2435,15 @@ void KFParticleBaseSIMD::GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_
   float_v fld[3];
   GetFieldValue( fP, fld );
 
-  GetDStoParticleBy(fld[1], p, dS, dsdr);
+  const float_v& bq1 = fld[1]*float_v(fQ);
+  const float_v& bq2 = fld[1]*float_v(p.fQ);
+  const float_m& isStraight1 = abs(bq1) < float_v(1.e-8f);
+  const float_m& isStraight2 = abs(bq2) < float_v(1.e-8f);
+  
+  if( isStraight1.isFull() && isStraight2.isFull() )
+    GetDStoParticleLine(p, dS, dsdr);
+  else
+    GetDStoParticleBy(fld[1], p, dS, dsdr);
 }
 
 void KFParticleBaseSIMD::TransportCBM( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const

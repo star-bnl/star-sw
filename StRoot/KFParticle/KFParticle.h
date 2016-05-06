@@ -314,6 +314,9 @@ class KFParticle :public KFParticleBase
 #endif
   float GetDeviationFromParticleXY( const KFParticle &p ) const ;
 
+  //* Get parameters at an arbitrary reconstructed point taking into account its errors
+  void GetParametersAtPoint(const float* point, const float* pointCov, float* m, float* mV);
+  
   //* Calculate opennig angle between two particles
 
   float GetAngle  ( const KFParticle &p ) const ;
@@ -938,9 +941,9 @@ inline void KFParticle::GetFieldValue( const float * /*xyz*/, float B[] ) const
 
 #ifdef NonhomogeneousField
 
-#ifndef KFParticleStandalone
-#include "CbmKF.h"
-#endif
+// #ifndef KFParticleStandalone
+// #include "CbmKF.h"
+// #endif
 
 inline void KFParticle::GetFieldValue( const float xyz[], float B[] ) const 
 {

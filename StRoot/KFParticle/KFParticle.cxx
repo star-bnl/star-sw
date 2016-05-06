@@ -286,6 +286,29 @@ float KFParticle::GetDeviationFromVertexXY( const KFPVertex &Vtx ) const
 }
 #endif
 
+void KFParticle::GetParametersAtPoint(const float* point, const float* pointCov, float* m, float* mV)
+{
+  float dsdr[6] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+  float dS = GetDStoPoint(point, dsdr);
+  float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
+    
+  float F[36], F1[36];
+  for(int i2=0; i2<36; i2++){
+    mV[i2] = 0.f;
+    F[i2]  = 0.f;
+    F1[i2] = 0.f;
+  }
+  Transport(dS, dsdr, m, mV, dsdp, F, F1);
+    
+  float V1Tmp[36];
+  for(int i=0; i<36; i++)
+    V1Tmp[i] = 0.f;
+  KFParticle::MultQSQt(F1, pointCov, V1Tmp, 6);
+    
+  for(int iC=0; iC<21; iC++)
+    mV[iC] += V1Tmp[iC];
+}
+
 float KFParticle::GetAngle  ( const KFParticle &p ) const 
 {
   //* Calculate the opening angle between two particles

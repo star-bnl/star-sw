@@ -585,8 +585,6 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float D[3][3];
     if(! GetMeasurement(Daughter, m, mV, D) )
       return;
-
-//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
     
     float mS[6]= { fC[0]+mV[0], 
                    fC[1]+mV[1], fC[2]+mV[2], 
@@ -1112,7 +1110,7 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
     float CTmp[36] = {0.};
     MultQSQt(F1, mV, CTmp, 6);
     
-    for(int iC=0; iC<21; iC++)
+    for(int iC=0; iC<6; iC++)
       fC[iC] += CTmp[iC];
           
     for(int i=0; i<6; i++)
@@ -2416,8 +2414,16 @@ void KFParticleBase::GetDStoParticleCBM( const KFParticleBase &p, float dS[2], f
 
   float fld[3];
   GetFieldValue( fP, fld );
-
-  GetDStoParticleBy(fld[1], p, dS, dsdr);
+  
+  const float& bq1 = fld[1]*fQ;
+  const float& bq2 = fld[1]*p.fQ;
+  const bool& isStraight1 = fabs(bq1) < 1.e-8f;
+  const bool& isStraight2 = fabs(bq2) < 1.e-8f;
+  
+  if( isStraight1 && isStraight2 )
+    GetDStoParticleLine(p, dS, dsdr);
+  else
+    GetDStoParticleBy(fld[1], p, dS, dsdr);
 }
 
 void KFParticleBase::TransportCBM( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1) const
