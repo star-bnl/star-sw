@@ -50,82 +50,83 @@ class ViewFEMesh {
   void SetYaxis(TGaxis* ay);
   void SetXaxisTitle(const char* xtitle);
   void SetYaxisTitle(const char* ytitle);
-  void EnableAxes() { drawAxes = true; }
-  void DisableAxes() { drawAxes = false; }
+  void EnableAxes() { m_drawAxes = true; }
+  void DisableAxes() { m_drawAxes = false; }
 
   // Plot method to be called by user
   bool Plot();
 
   // Element fill switch; 2D only, set false for wireframe mesh
-  void SetFillMesh(bool f) { fillMesh = f; }
+  void SetFillMesh(const bool f) { m_fillMesh = f; }
 
   // Associate a color with each element material map ID;
   //  Uses ROOT color numberings
-  void SetColor(int matID, int colorID) { colorMap[matID] = colorID; }
-  void SetFillColor(int matID, int colorID) { colorMap_fill[matID] = colorID; }
+  void SetColor(int matID, int colorID) { m_colorMap[matID] = colorID; }
+  void SetFillColor(int matID, int colorID) { m_colorMap_fill[matID] = colorID; }
 
   // Set the optional associated ViewDrift
-  void SetViewDrift(ViewDrift* vd) { viewDrift = vd; }
+  void SetViewDrift(ViewDrift* vd) { m_viewDrift = vd; }
 
   // Show filled mesh elements
   void SetFillMeshWithBorders() {
-    plotMeshBorders = true;
-    fillMesh = true;
+    m_plotMeshBorders = true;
+    m_fillMesh = true;
   }
 
   // Debugging switch
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
   // Create a default set of custom-made axes.
   void CreateDefaultAxes();
 
   // Disable a material so that its mesh cells are not drawn
-  void DisableMaterial(int materialID) { disabledMaterial[materialID] = true; }
+  void DisableMaterial(int materialID) { m_disabledMaterial[materialID] = true; }
 
  private:
-  std::string className;
-  std::string label;
+  std::string m_className;
+  std::string m_label;
 
   // Options
-  bool debug;
-  bool fillMesh;
+  bool m_debug;
+  bool m_fillMesh;
 
   // Canvas
-  TCanvas* canvas;
-  bool hasExternalCanvas;
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
 
   // Viewing plane
   double project[3][3];
   double plane[4];
 
   // Box dimensions
-  bool hasUserArea;
-  double xMin, yMin, zMin, xMax, yMax, zMax;
+  bool m_hasUserArea;
+  double m_xMin, m_yMin, m_zMin;
+  double m_xMax, m_yMax, m_zMax;
 
   // The field map object
-  ComponentFieldMap* component;
+  ComponentFieldMap* m_component;
 
   // Optional associated ViewDrift object
-  ViewDrift* viewDrift;
-  bool plotMeshBorders;
+  ViewDrift* m_viewDrift;
+  bool m_plotMeshBorders;
 
   // Axes
-  TGaxis* xaxis, *yaxis;
-  TH2D* axes;
-  bool drawAxes;
+  TGaxis* m_xaxis, *m_yaxis;
+  TH2D* m_axes;
+  bool m_drawAxes;
 
   // The mesh, stored as a vector of TPolyLine(3D) objects
-  std::vector<TPolyLine*> mesh;
-  std::vector<TPolyLine*> driftLines;
+  std::vector<TPolyLine*> m_mesh;
+  std::vector<TPolyLine*> m_driftLines;
 
 // The color map
 #ifndef __CINT__
-  std::map<int, int> colorMap;
-  std::map<int, int> colorMap_fill;
+  std::map<int, int> m_colorMap;
+  std::map<int, int> m_colorMap_fill;
 
   // Disabled materials -> not shown in the mesh view
-  std::map<int, bool> disabledMaterial;
+  std::map<int, bool> m_disabledMaterial;
 #endif
   // Element plotting methods
   void DrawElements();
