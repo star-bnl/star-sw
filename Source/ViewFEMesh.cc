@@ -222,16 +222,18 @@ void ViewFEMesh::SetYaxisTitle(const char* ytitle) {
 void ViewFEMesh::CreateDefaultAxes() {
 
   // Create a new x and y axis
-  m_xaxis = new TGaxis(
-      m_xMin + std::abs(m_xMax - m_xMin) * 0.1, m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
-      m_xMax - std::abs(m_xMax - m_xMin) * 0.1, m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
-      m_xMin + std::abs(m_xMax - m_xMin) * 0.1, m_xMax - std::abs(m_xMax - m_xMin) * 0.1,
-      2405, "x");
-  m_yaxis = new TGaxis(
-      m_xMin + std::abs(m_xMax - m_xMin) * 0.1, m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
-      m_xMin + std::abs(m_xMax - m_xMin) * 0.1, m_yMax - std::abs(m_yMax - m_yMin) * 0.1,
-      m_yMin + std::abs(m_yMax - m_yMin) * 0.1, m_yMax - std::abs(m_yMax - m_yMin) * 0.1,
-      2405, "y");
+  m_xaxis = new TGaxis(m_xMin + std::abs(m_xMax - m_xMin) * 0.1,
+                       m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
+                       m_xMax - std::abs(m_xMax - m_xMin) * 0.1,
+                       m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
+                       m_xMin + std::abs(m_xMax - m_xMin) * 0.1,
+                       m_xMax - std::abs(m_xMax - m_xMin) * 0.1, 2405, "x");
+  m_yaxis = new TGaxis(m_xMin + std::abs(m_xMax - m_xMin) * 0.1,
+                       m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
+                       m_xMin + std::abs(m_xMax - m_xMin) * 0.1,
+                       m_yMax - std::abs(m_yMax - m_yMin) * 0.1,
+                       m_yMin + std::abs(m_yMax - m_yMin) * 0.1,
+                       m_yMax - std::abs(m_yMax - m_yMin) * 0.1, 2405, "y");
 
   // Label sizes
   m_xaxis->SetLabelSize(0.025);
@@ -333,7 +335,8 @@ void ViewFEMesh::DrawElements() {
   for (int elem = 0; elem < m_component->nElements; elem++) {
 
     // Do not plot the drift medium.
-    if (m_component->materials[m_component->elements[elem].matmap].driftmedium &&
+    if (m_component->materials[m_component->elements[elem].matmap]
+            .driftmedium &&
         !(m_plotMeshBorders))
       continue;
     // Do not create Polygons for disabled materials
@@ -354,7 +357,8 @@ void ViewFEMesh::DrawElements() {
       colorID = 1;
 
     // Get the fill color for this element (default colorID).
-    int colorID_fill = m_colorMap_fill.count(m_component->elements[elem].matmap);
+    int colorID_fill =
+        m_colorMap_fill.count(m_component->elements[elem].matmap);
     if (colorID_fill != 0)
       colorID_fill = m_colorMap_fill[m_component->elements[elem].matmap];
     else
@@ -365,27 +369,31 @@ void ViewFEMesh::DrawElements() {
 
       // Determine the x-coordinates of the tetrahedral vertices.
       if (m_component->m_xMirrorPeriodic && nx != 2 * (nx / 2)) {
-        vx1 =
-            mapxmin +
-            (mapxmax - m_component->nodes[m_component->elements[elem].emap[0]].x) +
-            sx * nx;
-        vx2 =
-            mapxmin +
-            (mapxmax - m_component->nodes[m_component->elements[elem].emap[1]].x) +
-            sx * nx;
-        vx3 =
-            mapxmin +
-            (mapxmax - m_component->nodes[m_component->elements[elem].emap[2]].x) +
-            sx * nx;
-        vx4 =
-            mapxmin +
-            (mapxmax - m_component->nodes[m_component->elements[elem].emap[3]].x) +
-            sx * nx;
+        vx1 = mapxmin +
+              (mapxmax -
+               m_component->nodes[m_component->elements[elem].emap[0]].x) +
+              sx * nx;
+        vx2 = mapxmin +
+              (mapxmax -
+               m_component->nodes[m_component->elements[elem].emap[1]].x) +
+              sx * nx;
+        vx3 = mapxmin +
+              (mapxmax -
+               m_component->nodes[m_component->elements[elem].emap[2]].x) +
+              sx * nx;
+        vx4 = mapxmin +
+              (mapxmax -
+               m_component->nodes[m_component->elements[elem].emap[3]].x) +
+              sx * nx;
       } else {
-        vx1 = m_component->nodes[m_component->elements[elem].emap[0]].x + sx * nx;
-        vx2 = m_component->nodes[m_component->elements[elem].emap[1]].x + sx * nx;
-        vx3 = m_component->nodes[m_component->elements[elem].emap[2]].x + sx * nx;
-        vx4 = m_component->nodes[m_component->elements[elem].emap[3]].x + sx * nx;
+        vx1 =
+            m_component->nodes[m_component->elements[elem].emap[0]].x + sx * nx;
+        vx2 =
+            m_component->nodes[m_component->elements[elem].emap[1]].x + sx * nx;
+        vx3 =
+            m_component->nodes[m_component->elements[elem].emap[2]].x + sx * nx;
+        vx4 =
+            m_component->nodes[m_component->elements[elem].emap[3]].x + sx * nx;
       }
 
       // Loop over the periodicities in y.
@@ -410,10 +418,14 @@ void ViewFEMesh::DrawElements() {
                  m_component->nodes[m_component->elements[elem].emap[3]].y) +
                 sy * ny;
         } else {
-          vy1 = m_component->nodes[m_component->elements[elem].emap[0]].y + sy * ny;
-          vy2 = m_component->nodes[m_component->elements[elem].emap[1]].y + sy * ny;
-          vy3 = m_component->nodes[m_component->elements[elem].emap[2]].y + sy * ny;
-          vy4 = m_component->nodes[m_component->elements[elem].emap[3]].y + sy * ny;
+          vy1 = m_component->nodes[m_component->elements[elem].emap[0]].y +
+                sy * ny;
+          vy2 = m_component->nodes[m_component->elements[elem].emap[1]].y +
+                sy * ny;
+          vy3 = m_component->nodes[m_component->elements[elem].emap[2]].y +
+                sy * ny;
+          vy4 = m_component->nodes[m_component->elements[elem].emap[3]].y +
+                sy * ny;
         }
 
         // Loop over the periodicities in z.
@@ -438,14 +450,14 @@ void ViewFEMesh::DrawElements() {
                    m_component->nodes[m_component->elements[elem].emap[3]].z) +
                   sz * nz;
           } else {
-            vz1 =
-                m_component->nodes[m_component->elements[elem].emap[0]].z + sz * nz;
-            vz2 =
-                m_component->nodes[m_component->elements[elem].emap[1]].z + sz * nz;
-            vz3 =
-                m_component->nodes[m_component->elements[elem].emap[2]].z + sz * nz;
-            vz4 =
-                m_component->nodes[m_component->elements[elem].emap[3]].z + sz * nz;
+            vz1 = m_component->nodes[m_component->elements[elem].emap[0]].z +
+                  sz * nz;
+            vz2 = m_component->nodes[m_component->elements[elem].emap[1]].z +
+                  sz * nz;
+            vz3 = m_component->nodes[m_component->elements[elem].emap[2]].z +
+                  sz * nz;
+            vz4 = m_component->nodes[m_component->elements[elem].emap[3]].z +
+                  sz * nz;
           }
 
           // Store the x and y coordinates of the relevant mesh vertices.
@@ -612,8 +624,8 @@ void ViewFEMesh::DrawElements() {
         // Project this point onto the plane.
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
         // Add this point if it is within the view.
-        if (xMat(0, 0) >= m_xMin && xMat(0, 0) <= m_xMax && xMat(1, 0) >= m_yMin &&
-            xMat(1, 0) <= m_yMax) {
+        if (xMat(0, 0) >= m_xMin && xMat(0, 0) <= m_xMax &&
+            xMat(1, 0) >= m_yMin && xMat(1, 0) <= m_yMax) {
           poly->SetPoint(polyPts, xMat(0, 0), xMat(1, 0));
           polyPts++;
         }
@@ -752,12 +764,14 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     ViewFEMesh::SetXaxisTitle("x [cm]");
     ViewFEMesh::SetYaxisTitle("y [cm]");
     // calculate the z position
-    unsigned int i,j,z;
-    if(!componentCST->Coordinate2Index(0,0,project[2][2],i,j,z)){
-      std::cerr << "Could determine the position of the plane in z direction." << std::endl;
+    unsigned int i, j, z;
+    if (!componentCST->Coordinate2Index(0, 0, project[2][2], i, j, z)) {
+      std::cerr << "Could determine the position of the plane in z direction."
+                << std::endl;
       return;
     }
-    std::cout << "    The plane position in z direction is: " << project[2][2] << "\n";
+    std::cout << "    The plane position in z direction is: " << project[2][2]
+              << "\n";
     nMinU = nMinX;
     nMaxU = nMaxX;
     nMinV = nMinY;
@@ -777,8 +791,9 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     mirrorv = perY;
     for (unsigned int y = 0; y < (n_y - 1); y++) {
       for (unsigned int x = 0; x < (n_x - 1); x++) {
-        elem = componentCST->Index2Element(x,y,z);
-        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax, e_zmin, e_zmax);
+        elem = componentCST->Index2Element(x, y, z);
+        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax,
+                                           e_zmin, e_zmax);
         PolygonInfo tmp_info;
         tmp_info.element = elem;
         tmp_info.p1[0] = e_xmin;
@@ -800,12 +815,14 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     ViewFEMesh::SetXaxisTitle("x [cm]");
     ViewFEMesh::SetYaxisTitle("z [cm]");
     // calculate the y position
-    unsigned int i = 0,j = 0,y = 0;
-    if(!componentCST->Coordinate2Index(0,project[2][1],0,i,y,j)){
-      std::cerr << "Could determine the position of the plane in y direction." << std::endl;
+    unsigned int i = 0, j = 0, y = 0;
+    if (!componentCST->Coordinate2Index(0, project[2][1], 0, i, y, j)) {
+      std::cerr << "Could determine the position of the plane in y direction."
+                << std::endl;
       return;
     }
-    std::cout << "    The plane position in y direction is: " << project[2][1] << "\n";
+    std::cout << "    The plane position in y direction is: " << project[2][1]
+              << "\n";
 
     nMinU = nMinX;
     nMaxU = nMaxX;
@@ -826,8 +843,9 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     mirrorv = perZ;
     for (unsigned int z = 0; z < (n_z - 1); z++) {
       for (unsigned int x = 0; x < (n_x - 1); x++) {
-        elem = componentCST->Index2Element(x,y,z);
-        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax, e_zmin, e_zmax);
+        elem = componentCST->Index2Element(x, y, z);
+        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax,
+                                           e_zmin, e_zmax);
         PolygonInfo tmp_info;
         tmp_info.element = elem;
         tmp_info.p1[0] = e_xmin;
@@ -850,12 +868,14 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     ViewFEMesh::SetXaxisTitle("z [cm]");
     ViewFEMesh::SetYaxisTitle("y [cm]");
     // calculate the x position
-    unsigned int i,j,x;
-    if(!componentCST->Coordinate2Index(project[2][0],0,0,x,i,j)){
-      std::cerr << "Could determine the position of the plane in x direction." << std::endl;
+    unsigned int i, j, x;
+    if (!componentCST->Coordinate2Index(project[2][0], 0, 0, x, i, j)) {
+      std::cerr << "Could determine the position of the plane in x direction."
+                << std::endl;
       return;
     }
-    std::cout << "    The plane position in x direction is: " << project[2][0] << "\n";
+    std::cout << "    The plane position in x direction is: " << project[2][0]
+              << "\n";
     nMinU = nMinZ;
     nMaxU = nMaxZ;
     nMinV = nMinY;
@@ -873,10 +893,11 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
     sv = sy;
     mirroru = perZ;
     mirrorv = perY;
-    for (unsigned int z = 0; z < (n_z-1); z++) {
-      for (unsigned int y = 0; y < (n_y-1); y++) {
-        elem = componentCST->Index2Element(x,y,z);
-        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax, e_zmin, e_zmax);
+    for (unsigned int z = 0; z < (n_z - 1); z++) {
+      for (unsigned int y = 0; y < (n_y - 1); y++) {
+        elem = componentCST->Index2Element(x, y, z);
+        componentCST->GetElementBoundaries(elem, e_xmin, e_xmax, e_ymin, e_ymax,
+                                           e_zmin, e_zmax);
         PolygonInfo tmp_info;
         tmp_info.element = elem;
         tmp_info.p1[0] = e_zmin;
@@ -959,7 +980,8 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
           tmp_v[2] = (*it).p3[1] + sv * nv;
           tmp_v[3] = (*it).p4[1] + sv * nv;
         }
-        if(tmp_u[0] < uMin || tmp_u[1] > uMax || tmp_v[0] < vMin || tmp_v[2] > vMax){
+        if (tmp_u[0] < uMin || tmp_u[1] > uMax || tmp_v[0] < vMin ||
+            tmp_v[2] > vMax) {
           it++;
           continue;
         }
@@ -971,11 +993,11 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
         m_mesh.push_back(poly);
         it++;
       }  // end element loop
-    }  // end v-periodicity loop
-  }  // end u-periodicity loop
+    }    // end v-periodicity loop
+  }      // end u-periodicity loop
   std::cout << m_className << "::PlotCST:\n";
-  std::cout << "    Number of polygons to be drawn:"
-            << m_mesh.size() << std::endl;
+  std::cout << "    Number of polygons to be drawn:" << m_mesh.size()
+            << std::endl;
   // If we have an associated ViewDrift, plot projections of the drift lines
   if (m_viewDrift) {
     const int nDlines = m_viewDrift->m_driftLines.size();

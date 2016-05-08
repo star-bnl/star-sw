@@ -25,9 +25,9 @@ class ComponentVoxel : public ComponentBase {
                      double& ey, double& ez, Medium*& m, int& status);
 
   void WeightingField(const double x, const double y, const double z,
-                            double& wx, double& wy, double& wz,
-                            const std::string& label); 
-  
+                      double& wx, double& wy, double& wz,
+                      const std::string& label);
+
   Medium* GetMedium(const double x, const double y, const double z);
 
   bool GetVoltageRange(double& vmin, double& vmax);

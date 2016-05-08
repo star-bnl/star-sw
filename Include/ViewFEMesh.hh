@@ -37,7 +37,7 @@ class ViewFEMesh {
 
   // Set area to be plotted
   void SetArea();
-  void SetArea(const double xmin, const double ymin, const double zmin, 
+  void SetArea(const double xmin, const double ymin, const double zmin,
                const double xmax, const double ymax, const double zmax);
 
   // Projection plane
@@ -62,7 +62,9 @@ class ViewFEMesh {
   // Associate a color with each element material map ID;
   //  Uses ROOT color numberings
   void SetColor(int matID, int colorID) { m_colorMap[matID] = colorID; }
-  void SetFillColor(int matID, int colorID) { m_colorMap_fill[matID] = colorID; }
+  void SetFillColor(int matID, int colorID) {
+    m_colorMap_fill[matID] = colorID;
+  }
 
   // Set the optional associated ViewDrift
   void SetViewDrift(ViewDrift* vd) { m_viewDrift = vd; }
@@ -81,7 +83,9 @@ class ViewFEMesh {
   void CreateDefaultAxes();
 
   // Disable a material so that its mesh cells are not drawn
-  void DisableMaterial(int materialID) { m_disabledMaterial[materialID] = true; }
+  void DisableMaterial(int materialID) {
+    m_disabledMaterial[materialID] = true;
+  }
 
  private:
   std::string m_className;

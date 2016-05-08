@@ -77,15 +77,14 @@ void ComponentVoxel::ElectricField(const double x, const double y,
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 }
 
-void ComponentVoxel::WeightingField(const double x, const double y, const double z,
-                                   double& wx, double& wy, double& wz, 
-				   const std::string& label) {
+void ComponentVoxel::WeightingField(const double x, const double y,
+                                    const double z, double& wx, double& wy,
+                                    double& wz, const std::string& label) {
   int status = 0;
   Medium* med = NULL;
   double v = 0.;
   ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }
-
 
 Medium* ComponentVoxel::GetMedium(const double xin, const double yin,
                                   const double zin) {
@@ -104,7 +103,7 @@ Medium* ComponentVoxel::GetMedium(const double xin, const double yin,
   }
   if (m_media.count(m_mesh[i][j][k].region) < 1) {
     return NULL;
-  } 
+  }
   return m_media[m_mesh[i][j][k].region];
 }
 
@@ -211,7 +210,7 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
     std::cerr << m_className << "::LoadData:\n";
     std::cerr << "    Unkown format (" << format << ").\n";
     return false;
-  } 
+  }
   std::string line;
   unsigned int nLines = 0;
   bool bad = false;
@@ -251,7 +250,7 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
       }
       x *= scaleX;
       y *= scaleX;
-      const double z = 0.5 * (m_zMin + m_zMax); 
+      const double z = 0.5 * (m_zMin + m_zMax);
       bool xMirrored, yMirrored, zMirrored;
       if (!GetElement(x, y, z, i, j, k, xMirrored, yMirrored, zMirrored)) {
         std::cerr << m_className << "::LoadData:\n";
@@ -305,7 +304,8 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
       }
     } else if (fmt == 5) {
       // "YXZ"
-      // To obtain a right handed coordinate system we need z->-z with switching of Y and X. 
+      // To obtain a right handed coordinate system we need z->-z with switching
+      // of Y and X.
       double x, y, z, temp;
       data >> y >> x >> temp;
       z = temp;
@@ -327,7 +327,7 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
         bad = true;
         break;
       }
-    }  
+    }
     // Check the indices.
     if (i >= m_nX || j >= m_nY || k >= m_nZ) {
       std::cerr << m_className << "::LoadData:\n";
@@ -348,7 +348,7 @@ bool ComponentVoxel::LoadData(const std::string filename, std::string format,
       // Two-dimensional field-map
       ez = 0.;
       data >> ex >> ey;
-    } else if (fmt == 5){
+    } else if (fmt == 5) {
       double temp;
       data >> ey >> ex >> temp;
       ez = temp;
