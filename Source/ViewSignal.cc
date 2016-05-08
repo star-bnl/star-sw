@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include <TAxis.h>
 
@@ -11,25 +12,25 @@ namespace Garfield {
 ViewSignal::ViewSignal()
     : m_className("ViewSignal"),
       m_debug(false),
-      m_sensor(0),
-      m_canvas(0),
+      m_sensor(NULL),
+      m_canvas(NULL),
       m_hasExternalCanvas(false),
-      m_hSignal(0),
-      m_gCrossings(0) {
+      m_hSignal(NULL),
+      m_gCrossings(NULL) {
 
   plottingEngine.SetDefaultStyle();
 }
 
 ViewSignal::~ViewSignal() {
 
-  if (!m_hasExternalCanvas && m_canvas != 0) delete m_canvas;
-  if (m_hSignal != 0) delete m_hSignal;
-  if (m_gCrossings != 0) delete m_gCrossings;
+  if (!m_hasExternalCanvas && m_canvas) delete m_canvas;
+  if (m_hSignal) delete m_hSignal;
+  if (m_gCrossings) delete m_gCrossings;
 }
 
 void ViewSignal::SetSensor(Sensor* s) {
 
-  if (s == 0) {
+  if (!s) {
     std::cerr << m_className << "::SetSensor:\n";
     std::cerr << "    Sensor pointer is null.\n";
     return;
@@ -40,25 +41,25 @@ void ViewSignal::SetSensor(Sensor* s) {
 
 void ViewSignal::SetCanvas(TCanvas* c) {
 
-  if (c == 0) return;
-  if (!m_hasExternalCanvas && m_canvas != 0) {
+  if (!c) return;
+  if (!m_hasExternalCanvas && m_canvas) {
     delete m_canvas;
-    m_canvas = 0;
+    m_canvas = NULL;
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
 }
 
-void ViewSignal::PlotSignal(const std::string label) {
+void ViewSignal::PlotSignal(const std::string& label) {
 
-  if (m_sensor == 0) {
+  if (!m_sensor) {
     std::cerr << m_className << "::PlotSignal:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
 
   // Setup the canvas
-  if (m_canvas == 0) {
+  if (!m_canvas) {
     m_canvas = new TCanvas();
     m_canvas->SetTitle("Signal");
     if (m_hasExternalCanvas) m_hasExternalCanvas = false;
@@ -69,11 +70,21 @@ void ViewSignal::PlotSignal(const std::string label) {
   double t0, dt;
   m_sensor->GetTimeWindow(t0, dt, nBins);
 
-  if (m_hSignal != 0) {
+  if (m_hSignal) {
     delete m_hSignal;
-    m_hSignal = 0;
+    m_hSignal = NULL;
   }
-  m_hSignal = new TH1D("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
+  std::string hname = "hSignal_0";
+  int idx = 0;
+  while (gDirectory->GetList()->FindObject(hname.c_str())) {
+    ++idx;
+    std::stringstream ss;
+    ss << "hSignal_";
+    ss << idx;
+    hname = ss.str();
+  }
+
+  m_hSignal = new TH1D(hname.c_str(), label.c_str(), nBins, t0, t0 + nBins * dt);
   m_hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
   m_hSignal->GetXaxis()->SetTitle("time [ns]");
   m_hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
@@ -84,9 +95,9 @@ void ViewSignal::PlotSignal(const std::string label) {
     m_hSignal->SetBinContent(i + 1, sig);
   }
 
-  if (m_gCrossings != 0) {
+  if (m_gCrossings) {
     delete m_gCrossings;
-    m_gCrossings = 0;
+    m_gCrossings = NULL;
   }
 
   // Get threshold crossings.
