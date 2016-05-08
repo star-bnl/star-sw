@@ -227,10 +227,9 @@ bool ComponentTcad2d::HoleAttachment(const double x, const double y, const doubl
 
 void ComponentTcad2d::WeightingField(const double x, const double y, const double z,
                                    double& wx, double& wy, double& wz, 
-				   const std::string label) {
-  int pointlessVariable = 0;
-  int& status = pointlessVariable;
-  Medium* med = 0;
+				   const std::string& label) {
+  int status = 0;
+  Medium* med = NULL;
   double v = 0.;
   ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }

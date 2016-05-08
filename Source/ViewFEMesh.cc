@@ -11,11 +11,11 @@
 namespace Garfield {
 
 ViewFEMesh::ViewFEMesh()
-    : className("ViewCell"),
+    : className("ViewFEMesh"),
       label("Cell Layout"),
       debug(false),
       fillMesh(false),
-      canvas(0),
+      canvas(NULL),
       hasExternalCanvas(false),
       hasUserArea(false),
       xMin(-1.),
@@ -24,12 +24,12 @@ ViewFEMesh::ViewFEMesh()
       xMax(1.),
       yMax(1.),
       zMax(1.),
-      component(0),
-      viewDrift(0),
+      component(NULL),
+      viewDrift(NULL),
       plotMeshBorders(false),
-      xaxis(0),
-      yaxis(0),
-      axes(0),
+      xaxis(NULL),
+      yaxis(NULL),
+      axes(NULL),
       drawAxes(false) {
 
   plottingEngine.SetDefaultStyle();
@@ -44,12 +44,12 @@ ViewFEMesh::ViewFEMesh()
 
 ViewFEMesh::~ViewFEMesh() {
 
-  if (!hasExternalCanvas && canvas != 0) delete canvas;
+  if (!hasExternalCanvas && canvas) delete canvas;
 }
 
 void ViewFEMesh::SetComponent(ComponentFieldMap* comp) {
 
-  if (comp == 0) {
+  if (!comp) {
     std::cerr << className << "::SetComponent:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
@@ -60,10 +60,10 @@ void ViewFEMesh::SetComponent(ComponentFieldMap* comp) {
 
 void ViewFEMesh::SetCanvas(TCanvas* c) {
 
-  if (c == 0) return;
-  if (!hasExternalCanvas && canvas != 0) {
+  if (!c) return;
+  if (!hasExternalCanvas && canvas) {
     delete canvas;
-    canvas = 0;
+    canvas = NULL;
   }
   canvas = c;
   hasExternalCanvas = true;
@@ -96,7 +96,7 @@ void ViewFEMesh::SetArea() { hasUserArea = false; }
 //  with some inclusion of code from ViewCell.cc
 bool ViewFEMesh::Plot() {
 
-  if (component == 0) {
+  if (!component) {
     std::cerr << className << "::Plot:\n";
     std::cerr << "    Component is not defined.\n";
     return false;
@@ -118,7 +118,7 @@ bool ViewFEMesh::Plot() {
   }
 
   // Set up a canvas if one does not already exist.
-  if (canvas == 0) {
+  if (!canvas) {
     canvas = new TCanvas();
     canvas->SetTitle(label.c_str());
     if (hasExternalCanvas) hasExternalCanvas = false;
@@ -127,7 +127,7 @@ bool ViewFEMesh::Plot() {
 
   // Plot the elements
   ComponentCST* componentCST = dynamic_cast<ComponentCST*>(component);
-  if (componentCST != 0) {
+  if (componentCST) {
     std::cout << className << "::Plot:\n";
     std::cout << "    The given component is a CST component.\n";
     std::cout << "    Method PlotCST is called now!.\n";
@@ -595,7 +595,7 @@ void ViewFEMesh::DrawElements() {
   }          // end loop over elements
 
   // If we have an associated ViewDrift, plot projections of the drift lines.
-  if (viewDrift != 0) {
+  if (viewDrift) {
 
     for (int dline = 0; dline < (int)viewDrift->m_driftLines.size(); dline++) {
 
@@ -630,15 +630,15 @@ void ViewFEMesh::DrawElements() {
   canvas->cd();
 
   // Draw default axes by using a blank 2D histogram.
-  if (xaxis == 0 && yaxis == 0 && drawAxes) {
+  if (!xaxis && !yaxis && drawAxes) {
     axes->GetXaxis()->SetLimits(xMin, xMax);
     axes->GetYaxis()->SetLimits(yMin, yMax);
     axes->Draw();
   }
 
   // Draw custom axes.
-  if (xaxis != 0 && drawAxes) xaxis->Draw();
-  if (yaxis != 0 && drawAxes) yaxis->Draw();
+  if (xaxis && drawAxes) xaxis->Draw();
+  if (yaxis && drawAxes) yaxis->Draw();
 
   // Draw the mesh on the canvas.
   for (int m = mesh.size(); m--;) {
@@ -978,7 +978,7 @@ void ViewFEMesh::DrawCST(ComponentCST* componentCST) {
   std::cout << "    Number of polygons to be drawn:"
             << mesh.size() << std::endl;
   // If we have an associated ViewDrift, plot projections of the drift lines
-  if (viewDrift != 0) {
+  if (viewDrift) {
 
     for (int dline = 0; dline < (int)viewDrift->m_driftLines.size(); dline++) {
 

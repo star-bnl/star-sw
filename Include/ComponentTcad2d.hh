@@ -23,7 +23,7 @@ class ComponentTcad2d : public ComponentBase {
 
   void WeightingField(const double x, const double y, const double z,
                             double& wx, double& wy, double& wz,
-                            const std::string label); 
+                            const std::string& label); 
 
   Medium* GetMedium(const double x, const double y, const double z);
 

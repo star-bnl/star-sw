@@ -37,8 +37,8 @@ class ViewFEMesh {
 
   // Set area to be plotted
   void SetArea();
-  void SetArea(double xmin, double ymin, double zmin, double xmax, double ymax,
-               double zmax);
+  void SetArea(const double xmin, const double ymin, const double zmin, 
+               const double xmax, const double ymax, const double zmax);
 
   // Projection plane
   void SetDefaultProjection();

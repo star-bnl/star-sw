@@ -28,7 +28,7 @@ class ComponentVoxel : public ComponentBase {
                             double& wx, double& wy, double& wz,
                             const std::string& label); 
   
-  Medium* GetMedium(const double& x, const double& y, const double& z);
+  Medium* GetMedium(const double x, const double y, const double z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
   bool GetElectricFieldRange(double& exmin, double& exmax, double& eymin,

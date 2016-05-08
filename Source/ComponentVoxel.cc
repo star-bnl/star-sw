@@ -80,16 +80,15 @@ void ComponentVoxel::ElectricField(const double x, const double y,
 void ComponentVoxel::WeightingField(const double x, const double y, const double z,
                                    double& wx, double& wy, double& wz, 
 				   const std::string& label) {
-  int pointlessVariable = 0;
-  int& status = pointlessVariable;
-  Medium* med = 0;
+  int status = 0;
+  Medium* med = NULL;
   double v = 0.;
   ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }
 
 
-Medium* ComponentVoxel::GetMedium(const double& xin, const double& yin,
-                                  const double& zin) {
+Medium* ComponentVoxel::GetMedium(const double xin, const double yin,
+                                  const double zin) {
 
   // Make sure the field map has been loaded.
   if (!m_ready) {
