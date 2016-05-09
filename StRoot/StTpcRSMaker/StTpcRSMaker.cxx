@@ -130,7 +130,6 @@ Int_t StTpcRSMaker::Finish() {
     SafeDelete(mPolya[io]);
   }
   SafeDelete(m_TpcdEdxCorrection);
-  SafeDelete(mPAI);
   return StMaker::Finish();
 }
 //________________________________________________________________________________
@@ -158,11 +157,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
   gInterpreter->ProcessLine(cmd.Data(), &error);
   assert(error == TInterpreter::kNoError);
 #endif
-  if (TESTBIT(m_Mode, kPAI)) {
-    mPAI = PAI::Instance(); 
-    LOG_INFO << "StTpcRSMaker:: use PAI model for dE/dx simulation" << endm;
-  }
-  else if (TESTBIT(m_Mode, kBICHSEL)) {
+  if (TESTBIT(m_Mode, kBICHSEL)) {
     LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
     if (! mdNdE || ! mdNdx) {
       const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
@@ -179,8 +174,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 	delete [] file;
       }
     }
-  }
-  else {LOG_INFO << "StTpcRSMaker:: use GEANT321 model for dE/dx simulation" << endm;}
+  } else {LOG_INFO << "StTpcRSMaker:: use GEANT321 model for dE/dx simulation" << endm;}
   // Distortions
   if (TESTBIT(m_Mode,kdEdxCorr)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
@@ -974,15 +968,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Float_t dS = 0;
 	  Float_t dE = 0;
 	  if (charge) {
-	    if (TESTBIT(m_Mode, kPAI)) {
-	      mPAI->xNext(betaGamma,dS,dE);
-	    }
-	    else {
-	      dS = - TMath::Log(gRandom->Rndm())/NP;
-	      if (TESTBIT(m_Mode, kBICHSEL)) dE = TMath::Exp(mdNdE->GetRandom());
-	      else                           dE = St_TpcResponseSimulatorC::instance()->W()*
-		gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
-	    }
+	    dS = - TMath::Log(gRandom->Rndm())/NP;
+	    if (TESTBIT(m_Mode, kBICHSEL)) dE = TMath::Exp(mdNdE->GetRandom());
+	    else                           dE = St_TpcResponseSimulatorC::instance()->W()*
+	      gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
 	  }
 	  else { // charge == 0 geantino
 	    // for Laserino assume dE/dx = 25 keV/cm;

@@ -19,7 +19,6 @@ using namespace units;
 #include "TF1F.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "PAI.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
@@ -32,7 +31,7 @@ struct SignalSum_t {
 };
 class StTpcRSMaker : public StMaker {
  public:
-  enum EMode {kPAI         = 0,// switch to PAI from GEANT
+  enum EMode {kPAI         = 0,// switch to PAI from GEANT (obsolete)
 	      kBICHSEL     = 1,// switch to Bichsel from GEANT 
 	      kGAINOAtALL  = 2,// do not use GAIN at all
 	      kdEdxCorr    = 3,// do use TpcdEdxCorrection
@@ -90,7 +89,6 @@ class StTpcRSMaker : public StMaker {
   TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  PAI  *mPAI;                         //!
   Double_t InnerAlphaVariation;       //!
   Double_t OuterAlphaVariation;       //!
   Altro *mAltro;                      //!
