@@ -44,8 +44,8 @@ ComponentTcad2d::ComponentTcad2d()
   for (int i = nMaxVertices; i--;) w[i] = 0.;
 }
 
-
-bool ComponentTcad2d::SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec){
+bool ComponentTcad2d::SetDonorXsec(const int donorNumber, const double eXsec,
+                                   const double hXsec) {
   if (nDonor < 1) {
     std::cerr << m_className << "::SetDonorXsec:\n";
     std::cerr << "    No donor occupation maps exists.\n";
@@ -61,23 +61,24 @@ bool ComponentTcad2d::SetDonorXsec(const int donorNumber, const double eXsec, co
     std::cerr << "    Negative indicies not allowed.\n";
     return false;
   }
-  donorElectronXsec[donorNumber] = eXsec; 
-  donorHoleXsec[donorNumber] = hXsec; 
+  donorElectronXsec[donorNumber] = eXsec;
+  donorHoleXsec[donorNumber] = hXsec;
 
   validXsec = true;
-  for(int i = 0; i<nDonor; i++){
-    if(donorElectronXsec[i] < 0) validXsec = false;
-    if(donorHoleXsec[i] < 0) validXsec = false;
+  for (int i = 0; i < nDonor; i++) {
+    if (donorElectronXsec[i] < 0) validXsec = false;
+    if (donorHoleXsec[i] < 0) validXsec = false;
   }
-  for(int i = 0; i<nAcceptor; i++){
-    if(acceptorElectronXsec[i] < 0) validXsec = false;
-    if(acceptorHoleXsec[i] < 0) validXsec = false;
+  for (int i = 0; i < nAcceptor; i++) {
+    if (acceptorElectronXsec[i] < 0) validXsec = false;
+    if (acceptorHoleXsec[i] < 0) validXsec = false;
   }
 
   return true;
 }
 
-bool ComponentTcad2d::SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec){
+bool ComponentTcad2d::SetAcceptorXsec(const int acceptorNumber,
+                                      const double eXsec, const double hXsec) {
   if (nAcceptor < 1) {
     std::cerr << m_className << "::SetAcceptorXsec:\n";
     std::cerr << "    No acceptor occupation maps exists.\n";
@@ -93,22 +94,23 @@ bool ComponentTcad2d::SetAcceptorXsec(const int acceptorNumber, const double eXs
     std::cerr << "    Negative indicies not allowed.\n";
     return false;
   }
-  acceptorElectronXsec[acceptorNumber] = eXsec; 
-  acceptorHoleXsec[acceptorNumber] = hXsec; 
+  acceptorElectronXsec[acceptorNumber] = eXsec;
+  acceptorHoleXsec[acceptorNumber] = hXsec;
 
   validXsec = true;
-  for(int i = 0; i<nDonor; i++){
-    if(donorElectronXsec[i] < 0) validXsec = false;
-    if(donorHoleXsec[i] < 0) validXsec = false;
+  for (int i = 0; i < nDonor; i++) {
+    if (donorElectronXsec[i] < 0) validXsec = false;
+    if (donorHoleXsec[i] < 0) validXsec = false;
   }
-  for(int i = 0; i<nAcceptor; i++){
-    if(acceptorElectronXsec[i] < 0) validXsec = false;
-    if(acceptorHoleXsec[i] < 0) validXsec = false;
+  for (int i = 0; i < nAcceptor; i++) {
+    if (acceptorElectronXsec[i] < 0) validXsec = false;
+    if (acceptorHoleXsec[i] < 0) validXsec = false;
   }
   return true;
 }
 
-bool ComponentTcad2d::SetDonorConc(const int donorNumber, const double concentration){
+bool ComponentTcad2d::SetDonorConc(const int donorNumber,
+                                   const double concentration) {
   if (nDonor < 1) {
     std::cerr << m_className << "::SetDonorXsec:\n";
     std::cerr << "    No donor occupation maps exists.\n";
@@ -124,19 +126,20 @@ bool ComponentTcad2d::SetDonorConc(const int donorNumber, const double concentra
     std::cerr << "    Negative indicies not allowed.\n";
     return false;
   }
-  donorConc[donorNumber] = concentration; 
+  donorConc[donorNumber] = concentration;
 
   validConc = true;
-  for(int i = 0; i<nDonor; i++){
-    if(donorConc[i] < 0) validConc = false;
+  for (int i = 0; i < nDonor; i++) {
+    if (donorConc[i] < 0) validConc = false;
   }
-  for(int i = 0; i<nAcceptor; i++){
-    if(acceptorConc[i] < 0) validConc = false;
+  for (int i = 0; i < nAcceptor; i++) {
+    if (acceptorConc[i] < 0) validConc = false;
   }
   return true;
 }
 
-bool ComponentTcad2d::SetAcceptorConc(const int acceptorNumber, const double concentration){
+bool ComponentTcad2d::SetAcceptorConc(const int acceptorNumber,
+                                      const double concentration) {
   if (nAcceptor < 1) {
     std::cerr << m_className << "::SetAcceptorXsec:\n";
     std::cerr << "    No acceptor occupation maps exists.\n";
@@ -152,85 +155,85 @@ bool ComponentTcad2d::SetAcceptorConc(const int acceptorNumber, const double con
     std::cerr << "    Negative indicies not allowed.\n";
     return false;
   }
-  acceptorConc[acceptorNumber] = concentration; 
+  acceptorConc[acceptorNumber] = concentration;
 
   validConc = true;
-  for(int i = 0; i<nDonor; i++){
-    if(donorConc[i] < 0) validConc = false;
+  for (int i = 0; i < nDonor; i++) {
+    if (donorConc[i] < 0) validConc = false;
   }
-  for(int i = 0; i<nAcceptor; i++){
-    if(acceptorConc[i] < 0) validConc = false;
+  for (int i = 0; i < nAcceptor; i++) {
+    if (acceptorConc[i] < 0) validConc = false;
   }
   return true;
 }
 
-bool ComponentTcad2d::ElectronAttachment(const double x, const double y, const double z, double& eta){
-  //Check for nTraps > 1, valid Xsec, valid Donor
-  if(!validConc){
+bool ComponentTcad2d::ElectronAttachment(const double x, const double y,
+                                         const double z, double& eta) {
+  // Check for nTraps > 1, valid Xsec, valid Donor
+  if (!validConc) {
     std::cerr << m_className << "::ElectronAttachment:\n";
     std::cerr << "    Trap concentrations are invalid.\n";
     return false;
   }
-  if(!validXsec){
+  if (!validXsec) {
     std::cerr << m_className << "::ElectronAttachment:\n";
     std::cerr << "    Trap cross-sections are invalid.\n";
     return false;
   }
-  if(nAcceptor + nDonor < 1){
+  if (nAcceptor + nDonor < 1) {
     std::cerr << m_className << "::ElectronAttachment:\n";
     std::cerr << "    This component has not traps.\n";
     return false;
   }
   eta = 0;
   double occupationFraction;
-  for(int i = 0; i<nAcceptor; i++){
-	  this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
-	  eta += acceptorConc[i]*acceptorElectronXsec[i]*(1-occupationFraction);
+  for (int i = 0; i < nAcceptor; i++) {
+    this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
+    eta += acceptorConc[i] * acceptorElectronXsec[i] * (1 - occupationFraction);
   }
-  for(int i = 0; i<nDonor; i++){
-	  this->GetDonorOccupation(x, y, z, i, occupationFraction);
-	  eta += donorConc[i]*donorElectronXsec[i]*occupationFraction;
+  for (int i = 0; i < nDonor; i++) {
+    this->GetDonorOccupation(x, y, z, i, occupationFraction);
+    eta += donorConc[i] * donorElectronXsec[i] * occupationFraction;
   }
   return true;
 }
 
-bool ComponentTcad2d::HoleAttachment(const double x, const double y, const double z,
-                           double& eta){
-  //Check for nTraps > 1, valid Xsec, valid Acceptor
-  if(!validConc){
+bool ComponentTcad2d::HoleAttachment(const double x, const double y,
+                                     const double z, double& eta) {
+  // Check for nTraps > 1, valid Xsec, valid Acceptor
+  if (!validConc) {
     std::cerr << m_className << "::HoleAttachment:\n";
     std::cerr << "    Trap concentrations are invalid.\n";
     return false;
   }
-  if(!validXsec){
+  if (!validXsec) {
     std::cerr << m_className << "::HoleAttachment:\n";
     std::cerr << "    Trap cross-sections are invalid.\n";
     return false;
   }
-  if(nAcceptor + nDonor < 1){
+  if (nAcceptor + nDonor < 1) {
     std::cerr << m_className << "::HoleAttachment:\n";
     std::cerr << "    This component has not traps.\n";
     return false;
   }
   eta = 0;
   double occupationFraction;
-  for(int i = 0; i<nAcceptor; i++){
-	  this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
-	  eta += acceptorConc[i]*acceptorHoleXsec[i]*occupationFraction;
+  for (int i = 0; i < nAcceptor; i++) {
+    this->GetAcceptorOccupation(x, y, z, i, occupationFraction);
+    eta += acceptorConc[i] * acceptorHoleXsec[i] * occupationFraction;
   }
-  for(int i = 0; i<nDonor; i++){
-	  this->GetDonorOccupation(x, y, z, i, occupationFraction);
-	  eta += donorConc[i]*acceptorElectronXsec[i]*(1-occupationFraction);
+  for (int i = 0; i < nDonor; i++) {
+    this->GetDonorOccupation(x, y, z, i, occupationFraction);
+    eta += donorConc[i] * acceptorElectronXsec[i] * (1 - occupationFraction);
   }
   return true;
 }
 
-void ComponentTcad2d::WeightingField(const double x, const double y, const double z,
-                                   double& wx, double& wy, double& wz, 
-				   const std::string label) {
-  int pointlessVariable = 0;
-  int& status = pointlessVariable;
-  Medium* med = 0;
+void ComponentTcad2d::WeightingField(const double x, const double y,
+                                     const double z, double& wx, double& wy,
+                                     double& wz, const std::string& label) {
+  int status = 0;
+  Medium* med = NULL;
   double v = 0.;
   ElectricField(x, y, z, wx, wy, wz, v, med, status);
 }
@@ -866,8 +869,8 @@ bool ComponentTcad2d::GetMobility(const double xin, const double yin,
 }
 
 bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
-                                  const double zin, int donorNumber ,
-                                  double& occupationFraction ) {
+                                         const double zin, int donorNumber,
+                                         double& occupationFraction) {
   if (donorNumber > nDonor) {
     std::cerr << m_className << "::GetDonorOccupation:\n";
     std::cerr << "    This donor does not exist.\n";
@@ -927,25 +930,28 @@ bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
   switch (elements[i].type) {
     case 1:
       if (CheckLine(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
         return true;
       }
       break;
     case 2:
       if (CheckTriangle(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-               w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+            w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
         return true;
       }
       break;
     case 3:
       if (CheckRectangle(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-               w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
-               w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+            w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+            w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
         return true;
       }
       break;
@@ -964,27 +970,30 @@ bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
     switch (elements[i].type) {
       case 1:
         if (CheckLine(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+              w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
-                 w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+              w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+              w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
@@ -1004,27 +1013,30 @@ bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
     switch (elements[i].type) {
       case 1:
         if (CheckLine(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+              w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
-                 w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
+          occupationFraction =
+              w[0] * vertices[elements[i].vertex[0]].donorOcc[donorNumber] +
+              w[1] * vertices[elements[i].vertex[1]].donorOcc[donorNumber] +
+              w[2] * vertices[elements[i].vertex[2]].donorOcc[donorNumber] +
+              w[3] * vertices[elements[i].vertex[3]].donorOcc[donorNumber];
           lastElement = i;
           return true;
         }
@@ -1045,8 +1057,9 @@ bool ComponentTcad2d::GetDonorOccupation(const double xin, const double yin,
 }
 
 bool ComponentTcad2d::GetAcceptorOccupation(const double xin, const double yin,
-                                  const double zin, int acceptorNumber,
-                                  double& occupationFraction ) {
+                                            const double zin,
+                                            int acceptorNumber,
+                                            double& occupationFraction) {
   if (acceptorNumber > nAcceptor) {
     std::cerr << m_className << "::GetAcceptorOccupation:\n";
     std::cerr << "    This acceptor does not exist.\n";
@@ -1106,25 +1119,28 @@ bool ComponentTcad2d::GetAcceptorOccupation(const double xin, const double yin,
   switch (elements[i].type) {
     case 1:
       if (CheckLine(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
         return true;
       }
       break;
     case 2:
       if (CheckTriangle(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-               w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+            w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
         return true;
       }
       break;
     case 3:
       if (CheckRectangle(x, y, i)) {
-        occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-               w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-               w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
-               w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+        occupationFraction =
+            w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
+            w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
+            w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
+            w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
         return true;
       }
       break;
@@ -1143,27 +1159,36 @@ bool ComponentTcad2d::GetAcceptorOccupation(const double xin, const double yin,
     switch (elements[i].type) {
       case 1:
         if (CheckLine(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[2] * vertices[elements[i].vertex[2]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
-                 w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[2] * vertices[elements[i].vertex[2]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[3] * vertices[elements[i].vertex[3]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
@@ -1183,27 +1208,36 @@ bool ComponentTcad2d::GetAcceptorOccupation(const double xin, const double yin,
     switch (elements[i].type) {
       case 1:
         if (CheckLine(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 2:
         if (CheckTriangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[2] * vertices[elements[i].vertex[2]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
         break;
       case 3:
         if (CheckRectangle(x, y, i)) {
-          occupationFraction = w[0] * vertices[elements[i].vertex[0]].acceptorOcc[acceptorNumber] +
-                 w[1] * vertices[elements[i].vertex[1]].acceptorOcc[acceptorNumber] +
-                 w[2] * vertices[elements[i].vertex[2]].acceptorOcc[acceptorNumber] +
-                 w[3] * vertices[elements[i].vertex[3]].acceptorOcc[acceptorNumber];
+          occupationFraction = w[0] * vertices[elements[i].vertex[0]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[1] * vertices[elements[i].vertex[1]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[2] * vertices[elements[i].vertex[2]]
+                                          .acceptorOcc[acceptorNumber] +
+                               w[3] * vertices[elements[i].vertex[3]]
+                                          .acceptorOcc[acceptorNumber];
           lastElement = i;
           return true;
         }
@@ -1238,7 +1272,8 @@ bool ComponentTcad2d::Initialise(const std::string gridfilename,
   hasElectronMobility = hasHoleMobility = false;
   nDonor = nAcceptor = 0;
 
-  // Import electric field, potential, mobilities and trap occupation values from .dat file.
+  // Import electric field, potential, mobilities and trap occupation values
+  // from .dat file.
   if (!LoadData(datafilename)) {
     std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Importing electric field and potential failed.\n";
@@ -1283,11 +1318,11 @@ bool ComponentTcad2d::Initialise(const std::string gridfilename,
   if (hasHoleMobility) {
     std::cout << "      Hole mobility\n";
   }
-  if (nDonor > 0){
-      std::cout << "      Donor trap occupation maps: " << nDonor <<"\n";
+  if (nDonor > 0) {
+    std::cout << "      Donor trap occupation maps: " << nDonor << "\n";
   }
-  if (nAcceptor > 0){
-      std::cout << "      Acceptor trap occupation maps: " << nAcceptor <<"\n";
+  if (nAcceptor > 0) {
+    std::cout << "      Acceptor trap occupation maps: " << nAcceptor << "\n";
   }
   std::cout << "    Bounding box:\n";
   std::cout << "      " << xMinBoundingBox << " < x [cm] < " << xMaxBoundingBox
@@ -2082,7 +2117,8 @@ bool ComponentTcad2d::LoadData(const std::string datafilename) {
           ++ivertex;
         }
         hasHoleMobility = true;
-      } else if (dataset.substr(0,14) == "TrapOccupation" && dataset.substr(17,2) == "Do") {
+      } else if (dataset.substr(0, 14) == "TrapOccupation" &&
+                 dataset.substr(17, 2) == "Do") {
         std::getline(datafile, line);
         std::getline(datafile, line);
         std::getline(datafile, line);
@@ -2171,11 +2207,12 @@ bool ComponentTcad2d::LoadData(const std::string datafilename) {
           ++fillCount[ivertex];
           ++ivertex;
         }
-	donorElectronXsec.push_back(-1);
-	donorHoleXsec.push_back(-1);
-	donorConc.push_back(-1);
+        donorElectronXsec.push_back(-1);
+        donorHoleXsec.push_back(-1);
+        donorConc.push_back(-1);
         nDonor++;
-      } else if (dataset.substr(0,14) == "TrapOccupation" && dataset.substr(17, 2) == "Ac") {
+      } else if (dataset.substr(0, 14) == "TrapOccupation" &&
+                 dataset.substr(17, 2) == "Ac") {
         std::getline(datafile, line);
         std::getline(datafile, line);
         std::getline(datafile, line);
@@ -2265,9 +2302,9 @@ bool ComponentTcad2d::LoadData(const std::string datafilename) {
           ++ivertex;
         }
         nAcceptor++;
-	acceptorElectronXsec.push_back(-1);
-	acceptorHoleXsec.push_back(-1);
-	acceptorConc.push_back(-1);
+        acceptorElectronXsec.push_back(-1);
+        acceptorHoleXsec.push_back(-1);
+        acceptorConc.push_back(-1);
       }
     }
   }

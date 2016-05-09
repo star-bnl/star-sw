@@ -22,8 +22,8 @@ class ComponentTcad2d : public ComponentBase {
                      double& ey, double& ez, Medium*& m, int& status);
 
   void WeightingField(const double x, const double y, const double z,
-                            double& wx, double& wy, double& wz,
-                            const std::string label); 
+                      double& wx, double& wy, double& wz,
+                      const std::string& label);
 
   Medium* GetMedium(const double x, const double y, const double z);
 
@@ -62,21 +62,24 @@ class ComponentTcad2d : public ComponentBase {
   bool GetMobility(const double x, const double y, const double z, double& emob,
                    double& hmob);
 
-  // Trapping 
-  int GetNumberOfDonors(){return nDonor;}
-  int GetNumberOfAcceptors(){return nAcceptor;}
-  bool GetDonorOccupation(const double x, const double y, const double z, const int donorNumber,
-		  double& occupationFraction);
-  bool GetAcceptorOccupation(const double x, const double y, const double z, const int acceptorNumber,
-                   double& occupationFraction);
-  bool SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec);
-  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec);
+  // Trapping
+  int GetNumberOfDonors() { return nDonor; }
+  int GetNumberOfAcceptors() { return nAcceptor; }
+  bool GetDonorOccupation(const double x, const double y, const double z,
+                          const int donorNumber, double& occupationFraction);
+  bool GetAcceptorOccupation(const double x, const double y, const double z,
+                             const int acceptorNumber,
+                             double& occupationFraction);
+  bool SetDonorXsec(const int donorNumber, const double eXsec,
+                    const double hXsec);
+  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec,
+                       const double hXsec);
   bool SetDonorConc(const int donorNumber, const double concentration);
   bool SetAcceptorConc(const int acceptorNumber, const double concentration);
   bool ElectronAttachment(const double x, const double y, const double z,
                           double& eta);
   bool HoleAttachment(const double x, const double y, const double z,
-                          double& eta);
+                      double& eta);
 
  private:
   // Max. number of vertices per element
