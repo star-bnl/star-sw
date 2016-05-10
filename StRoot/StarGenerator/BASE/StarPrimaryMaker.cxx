@@ -271,8 +271,8 @@ Int_t StarPrimaryMaker::Make()
 	//
 	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
 
-
-	return kStOK;
+	// Break out of loop and accept event.  
+	break;
 	
       }
 
@@ -292,9 +292,7 @@ Int_t StarPrimaryMaker::Make()
 
   }// infinite loop
 
-
-
-  return kStWarn;
+  return kStOK;
 }
 // --------------------------------------------------------------------------------------------------------------
 // Intialize for this run
