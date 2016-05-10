@@ -40,7 +40,7 @@ extern "C"
 
 
 // ----------------------------------------------------------------------------
-StarRandom::StarRandom() : TObject()
+StarRandom::StarRandom() : TObject(), mSeed(0), mState()
 {
 
 }
