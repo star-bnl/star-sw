@@ -99,7 +99,7 @@
   gSystem->Load("libEG.so");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
-#if 0
+#if 1
     if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
       gSystem->Load("KFParticle");
     }

@@ -210,9 +210,9 @@ if ( $pkg eq "Jevp") {
 if ( $pkg eq "GeoTestMaker") {
   $LIBS = "-lQtGui"; 
 }
-if ( $pkg eq "StarRoot") {
-  $LIBS = "-lKFParticle"; 
-}
+#if ( $pkg eq "StarRoot") {
+#  $LIBS = "-lKFParticle"; 
+#}
 
 if ($pkg eq "StDAQMaker") {
   $LIBS = "-lStDaqLib -lRTS";
