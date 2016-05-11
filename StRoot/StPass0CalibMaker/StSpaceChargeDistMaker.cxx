@@ -57,6 +57,7 @@ StSpaceChargeDistMaker::StSpaceChargeDistMaker(const char *name):StMaker(name),
     thrownP(0), acceptedP(0),
     ZdcC(0) {
   run = 0;
+  GGZ = 0; NP = 0; NR = 0; NS = 0;
   throws = 500000; // default = 500k throws
   trigs.Set(0);
   memset(Xpads,0,128*sizeof(Float_t));
@@ -351,7 +352,7 @@ Int_t StSpaceChargeDistMaker::Make() {
               CdEdx.xyz[0] = positionL.x();
               CdEdx.xyz[1] = positionL.y();
               CdEdx.xyz[2] = positionL.z();
-              Double_t probablePad = Npads[j]/2;
+              Double_t probablePad = ((Double_t) Npads[j])/2.;
               Double_t pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(CdEdx.row);
               Double_t PhiMax = TMath::ATan2(probablePad*pitch, Xpads[j]);
               CdEdx.PhiR   = TMath::ATan2(CdEdx.xyz[0],CdEdx.xyz[1])/PhiMax;
@@ -604,8 +605,11 @@ void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.7 2015/12/18 17:31:40 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.8 2016/05/11 20:44:52 genevb Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.8  2016/05/11 20:44:52  genevb
+// Initialize vars, cast to double for division
+//
 // Revision 1.7  2015/12/18 17:31:40  genevb
 // Updated copy of TpcRS code for dE/dx
 //
