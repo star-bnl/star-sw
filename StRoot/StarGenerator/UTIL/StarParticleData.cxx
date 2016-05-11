@@ -58,8 +58,8 @@ StarParticleData &StarParticleData::instance(){
   return *sInstance; 
 }
 // ---------------------------------------------------------------------------------------------
-StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
-  TObjectSet(name)
+StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
+  TObjectSet(_name)
 {
 
 

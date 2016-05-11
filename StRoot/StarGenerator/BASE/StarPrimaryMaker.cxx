@@ -50,6 +50,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0), mVdxdz(0), mVdydz(0),
   mDoBeamline(0),
   mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(-999), mZMax(+999),
+  mRunNumber(0),
   mPrimaryVertex(0,0,0,0),
   mFilter(0),mAccepted(0)
 {
@@ -296,9 +297,7 @@ Int_t StarPrimaryMaker::Make()
 
   }// infinite loop
 
-
-
-  return kStWarn;
+  return kStOK;
 }
 // --------------------------------------------------------------------------------------------------------------
 // Intialize for this run
