@@ -78,9 +78,5 @@ inline unsigned int trgQTCrateMask(int my_trg_instance, unsigned int stp_system_
 }
 
 
-/* Trigger QT board/system masks for each mixed Trigger crate */
 
-#define TRG_QTx_FMS_MASK	(
-
-#define TRG_FEQ_VPD_MASK	((
 #endif
