@@ -82,13 +82,18 @@ Bool_t isTriggerAmong(const StTriggerId* tr, UInt_t n, ... ) {
 
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
-StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) {
+StQAMakerBase(name,title,"StE"), event(0), primVtx(0), mHitHist(0), mPmdGeom(0), maputil(0) {
   mRunNumber = -1;
   silHists = kFALSE;
   ftpHists = kFALSE;
   hitsAvail = kTRUE;
   vertExists = -1.;
   printTpcHits = kFALSE;
+
+  n_prim_good = 0;
+  n_glob_good = 0;
+  multiplicity = 0;
+  qaEvents = 0;
 }
 
 //_____________________________________________________________________________
@@ -2078,7 +2083,7 @@ void StEventQAMaker::MakeHistEMC() {
     Float_t trackmom=point->chiSquare();
     Float_t deltaeta=point->deltaEta();
     Float_t deltaphi=point->deltaPhi();
-    if (ncat>3) ncat=3;
+    //if (ncat>3) ncat=3; // unnecessary
     Point_Mult[ncat]++;
     if (energy>0) hists->m_emc_point_energy[ncat]->Fill(energy);
     if (primVtx) {
@@ -2216,10 +2221,15 @@ void StEventQAMaker::MakeHistPMD() {
 		maputil->ReverseChannelConverted(sm+1,row+1,col+1,channelCR);
 		maputil->ChainNumber(sm+1,row+1,col+1,chainR);
 	      }
+              // GVB 2016-05-13: chainR goes 1..48, but either 48 (or 49) would
+              // give chainR/2 = 24, which overruns these arrays. I will comment
+              // out this section for now
+              /*
 	      if (chainR>0 && channelCR>=0 && chainR<=49) {
 		hists->m_pmd_chain_adc[chainR/2]->Fill(channelCR,chainR%2,adc);
 		hists->m_pmd_chain_hit[chainR/2]->Fill(channelCR,chainR%2);
 	      }
+              */
               TOTAL_HIT_DETECTOR++;;
               TOTAL_ADC_DETECTOR+=adc;
 	    }
@@ -2364,7 +2374,7 @@ void StEventQAMaker::MakeHistTOF() {
     int moduleId = ( index%192 )/6 + 1;
     if(trayId>0 && trayId<=120) { // tray
       nHitsvsTray[trayId-1]++;
-      nHitsvsModule[(trayId-1)/60][moduleId]++;
+      nHitsvsModule[(trayId-1)/60][moduleId-1]++; // JDB corrected 2016-05-13
       nHitsTof++;
     } else {  // vpd
       nHitsVpd[trayId-121]++;
@@ -2802,8 +2812,11 @@ void StEventQAMaker::MakeHistRP() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.127 2016/02/24 22:14:49 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.128 2016/05/13 22:04:49 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.128  2016/05/13 22:04:49  genevb
+// Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
+//
 // Revision 2.127  2016/02/24 22:14:49  genevb
 // Use kMaxDetectorId
 //

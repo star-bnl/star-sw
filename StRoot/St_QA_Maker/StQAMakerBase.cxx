@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.46 2015/07/17 19:09:03 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.47 2016/05/13 22:04:49 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.47  2016/05/13 22:04:49  genevb
+// Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
+//
 // Revision 2.46  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
@@ -163,6 +166,8 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   Int_t i;
   for (i=0;i<32;i++) histsList.AddAt(0,i);
   histsSet = StQA_Undef;
+  fillHists = kFALSE;
+  eventCount = 0;
   eventClass = 3;
   ITTF = kFALSE;
   EST = -1; // -1 = unknown
@@ -232,13 +237,11 @@ Int_t StQAMakerBase::Make() {
   switch (histsSet) {
     case (StQA_AuAuOld) :
       mMultClass->Fill((float) eventClass);
-    default : {
-      if (!eventClass) { hists=0; return kStOk; }
-      hists = (StQABookHist*) histsList.At((--eventClass));
- 
-    }
+      break;
+    default : {}
   }
-
+  if (!eventClass) { hists=0; return kStOk; }
+  hists = (StQABookHist*) histsList.At((--eventClass));
   if (!hists) NewQABookHist();
 
     
