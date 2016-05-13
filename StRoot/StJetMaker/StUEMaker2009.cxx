@@ -25,7 +25,7 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/database/StEEmcDb.h"
-#include "StJetMaker2009.h"
+#include "StJetMaker2012.h"
 #include "StJetSkimEventMaker.h"
 #include "StUEMaker2009.h"
 
@@ -57,7 +57,7 @@ int StUEMaker2009::Init()
   }
 
   mTree->BranchRef();
-  mJetMaker  = dynamic_cast<StJetMaker2009*>( GetMakerInheritsFrom("StJetMaker2009") );
+  mJetMaker  = dynamic_cast<StJetMaker2012*>( GetMakerInheritsFrom("StJetMaker2012") );
   mSkimMaker = dynamic_cast<StJetSkimEventMaker*>( GetMakerInheritsFrom("StJetSkimEventMaker") );
   // StEEmcDb* eemcDb = (StEEmcDb*)GetDataSet("StEEmcDb");
   // eemcDb->setThreshold(3);
