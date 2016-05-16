@@ -13,8 +13,11 @@
 #define KFPTrack_H
 
 #include <cmath>
-
-class KFPTrack
+#include "TObject.h"
+class KFPTrack 
+#ifdef __ROOT__
+: public TObject
+#endif
 {
 
 public:
@@ -148,6 +151,9 @@ public:
   
 #ifdef NonhomogeneousField
   float fieldRegion[10];
+#endif
+#ifdef __ROOT__
+  ClassDef(KFPTrack,1)
 #endif
 };
 

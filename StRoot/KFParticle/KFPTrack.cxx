@@ -12,8 +12,9 @@
 #include "KFPTrack.h"
 
 #include <cmath>
-
-
+#ifdef __ROOT__
+ClassImp(KFPTrack);
+#endif
   // rotate on alpha in XY plane
 void KFPTrack::RotateXY( float alpha )
 {
