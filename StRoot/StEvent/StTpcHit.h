@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.29 2016/02/25 17:10:20 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.30 2016/05/16 02:44:00 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.30  2016/05/16 02:44:00  perev
+ * Added init of mAdd. (Coverity)
+ *
  * Revision 2.29  2016/02/25 17:10:20  ullrich
  * Implemented detector() which is now a pure abstract method in StHit.
  *
@@ -110,7 +113,7 @@
 class StTpcHit : public StHit {
     
 public:
-    StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mChargeModified = 0;}
+    StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mAdc =0; mChargeModified = 0;}
     StTpcHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c = 0,
