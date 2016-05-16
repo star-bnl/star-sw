@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.74 2016/02/19 03:52:15 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.75 2016/05/13 22:04:49 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.75  2016/05/13 22:04:49  genevb
+// Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
+//
 // Revision 2.74  2016/02/19 03:52:15  genevb
 // Expand track detector ID histograms
 //
@@ -247,6 +250,7 @@ ClassImp(StQABookHist)
 //_____________________________________________________________________________
 StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
+  histsSet = StQA_Undef;
   silHists = kFALSE;
   ftpHists = kFALSE;
 
@@ -732,6 +736,44 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_geant_reco_pvtx_z=0;  //! prim vtx z, diff geant - reco
   m_geant_reco_vtx_z_z=0; //! prim vtx z, diff geant - reco vs reco z
 
+// for EMC hits
+  m_emc_nhit=0;            //!
+  m_emc_etot=0;            //!
+  for (i=0; i<4; i++) {
+    m_emc_hits[i]=0;         //!
+    m_emc_energy2D[i]=0;     //!
+    m_emc_adc[i]=0;          //!
+    m_emc_energy[i]=0;       //!
+  }
+
+// for EMC cluster finder
+  m_emc_ncl=0;             //!
+  m_emc_etotCl=0;          //!
+  m_emc_sig_e=0;           //!
+  m_emc_sig_p=0;           //!
+  for (i=0; i<4; i++) {
+    m_emc_cl[i]=0;           //!
+    m_emc_energyCl[i]=0;     //!
+    m_emc_HitsInCl[i]=0;     //!
+    m_emc_EnergyCl[i]=0;     //!
+    m_emc_EtaInCl[i]=0;      //!
+    m_emc_PhiInCl[i]=0;      //!
+  }
+
+// for EMC points
+  for (i=0; i<4; i++) {
+    m_emc_point_energy[i]=0; //! Point Energy spectra
+    m_emc_point_eta[i]=0;    //! Point Eta spectra
+    m_emc_point_phi[i]=0;    //! Point Phi spectra
+    m_emc_point_sigeta[i]=0; //! Point SigmaEta spectra
+    m_emc_point_sigphi[i]=0; //! Point SigmaPhi spectra
+    m_emc_point_deleta[i]=0; //! Point DeltaEta spectra
+    m_emc_point_delphi[i]=0; //! Point DeltaPhi spectra
+    m_emc_point_trmom[i]=0;  //! Point TrMom spectra
+    m_emc_points[i]=0;       //! Emc Point multiplicity
+  }
+  m_emc_point_flag=0;      //! Point Flag spectra
+
 // for BBC
   for (i=0; i<4; i++) {
     m_bbc_adc[i] = 0;
@@ -815,6 +857,15 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_ist_nhit_tof_mult = 0;
   m_global_ist_hit = 0;
   m_primary_ist_hit = 0;
+
+// for TOF
+  m_tof_hit_tray=0;        //! # of hits vs tray # (int over modules)
+  m_tof_hit_module=0;      //! # of hits vs module # (int over trays, east side use -32 - -1)
+  m_tof_match_tray=0;      //! # of matched hits vs tray #
+  m_tof_match_module=0;    //! # of matched hits vs module #
+  m_tof_vpd_hit=0;         //! # of tof hits vs # of vpd hits
+  m_tof_vtx_z=0;           //! vertex z from vpd vs verex z from TPC
+  m_tof_PID=0;             //! TOF PID:  1/beta vs p
 
 // for MTD
   m_MtdNHits = 0;

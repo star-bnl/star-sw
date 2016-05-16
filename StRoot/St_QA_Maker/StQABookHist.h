@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.37 2015/07/17 19:09:03 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.38 2016/05/13 22:04:49 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.38  2016/05/13 22:04:49  genevb
+// Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
+//
 // Revision 2.37  2015/07/17 19:09:03  genevb
 // SSD copied for SST, and HFT histogams use SST now too
 //
@@ -136,7 +139,6 @@ class StQABookHist : public TObject {
 // ************************ Public Functions *****************************
  public:
 
-  StQABookHist() {}
   StQABookHist(const char *type);
   virtual       ~StQABookHist() {}
   virtual void   BookHist(Int_t hSet);
@@ -145,7 +147,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.37 2015/07/17 19:09:03 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.38 2016/05/13 22:04:49 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************

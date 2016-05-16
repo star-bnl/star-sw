@@ -595,6 +595,7 @@ if ( $ThisYear == 2005 ){
         $DCHAIN{"PPAl"} = "P2015,btof,mtd,pp2pp,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
    } elsif ($ThisYear == 2016) {
         $DCHAIN{"AuAu"} = "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
+	$DCHAIN{"DAu"} = "P2016,btof,mtd,pxlHit,istHit,sstHit,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt";
 
    } else {
         $DCHAIN{"PPPP"} =

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.106 2015/06/30 21:43:40 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.107 2016/05/13 06:02:51 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.107  2016/05/13 06:02:51  genevb
+ * Compile and Coverity warnings, one typo in Radius calc, very minor optimizations
+ *
  * Revision 1.106  2015/06/30 21:43:40  genevb
  * Allow for a (dummy) initialization call of UndoDistortion()
  *
@@ -919,7 +922,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
                          | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign ))) 
     {
        mDistortionMode |= kPadrow13 ;
-       if (! mDistortionMode & kDisableTwistClock) {
+       if (! (mDistortionMode & kDisableTwistClock)) {
 	 mDistortionMode |= kFast2DBMap ;
 	 mDistortionMode |= kTwist ;
 	 mDistortionMode |= kClock ;
@@ -2520,6 +2523,10 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
   Int_t j_one = (COLUMNS-1)/4 ;
   Int_t loops = 1 + (int) ( 0.5 + TMath::Log2( (double) TMath::Max(i_one,j_one) ) ) ;  // Solve for N in 2**N and add one
 
+  Float_t coef1[ROWS],coef2[ROWS];
+  memset(coef1,0,ROWS*sizeof(Float_t));
+  memset(coef2,0,ROWS*sizeof(Float_t));
+
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // Do several loops as the matrix expands and the resolution increases
 
     // array index offsets ending in '__' are units of rows
@@ -2534,7 +2541,6 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
     Float_t tempRatio     = Ratio * i_one * i_one / ( j_one * j_one ) ;
     Float_t tempFourth    = 1.0 / (2.0 + 2.0*tempRatio) ;
 
-    Float_t coef1[ROWS],coef2[ROWS];
     for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
       Float_t Radius = IFCRadius + i*GRIDSIZER ;
       coef1[i] = 1.0 + tempGRIDSIZER/(2*Radius);
@@ -2543,7 +2549,7 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
 
     for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
       Int_t i__ = i*COLUMNS;
-      Float_t Radius = IFCRadius + i_one*GRIDSIZER ;
+      Float_t Radius = IFCRadius + i*GRIDSIZER ;
       for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
         Int_t i__j = i__ + j;
         if ( i_one == 1 && j_one == 1 ) SumCharge[i__j] = Charge[i__j] ;
@@ -2553,10 +2559,10 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
           SumCharge[i__j]= 0.0 ;
           for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
             for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
-              if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
-              else weight = 1.0 ;
-              SumCharge[i__j]  += Charge[ii*COLUMNS+jj]*weight*Radius ;   // Note that this is cylindrical geometry
-              sum += weight*Radius ;
+              if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5*Radius ;
+              else weight = Radius ;
+              SumCharge[i__j]  += Charge[ii*COLUMNS+jj]*weight ;   // Note that this is cylindrical geometry
+              sum += weight ;
             }
           }
           SumCharge[i__j] /= sum ;
@@ -2567,11 +2573,9 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
 
     for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {               // Solve Poisson's Equation
 
-      Float_t OverRelax   = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
-      Float_t OverRelaxM1 = OverRelax - 1.0 ;
-      Float_t OverRelaxtempFourth, OverRelaxcoef5 ;
-      OverRelaxtempFourth = OverRelax * tempFourth ;
-      OverRelaxcoef5 = OverRelaxM1 / OverRelaxtempFourth ; 
+    //Float_t OverRelax   = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
+      Float_t OverRelaxM1 = TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ;
+      Float_t OverRelaxtempFourth = (1.0 + OverRelaxM1) * tempFourth ;
 
       for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
         Int_t i__ = i*COLUMNS;
@@ -2587,37 +2591,38 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMat
 
         }
       }
+    }
 
-      if ( k == ITERATIONS ) {       // After full solution is achieved, copy low resolution solution into higher res array
-        for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
-          Int_t i__ = i*COLUMNS;
-          for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
-            Int_t i__j = i__ + j;
+    // After full solution is achieved, copy low resolution solution into higher res array
+    if ( i_one > 1 || j_one > 1 ) {
+      for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
+        Int_t i__ = i*COLUMNS;
+        for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+          Int_t i__j = i__ + j;
 
-            if ( i_one > 1 ) {              
-              ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]        ) / 2 ;
+          if ( i_one > 1 ) {              
+            ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]        ) / 2 ;
+            if ( i == i_one )
+              ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]   ) / 2 ;
+          }
+          if ( j_one > 1 ) {
+            ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]        ) / 2 ;
+            if ( j == j_one )
+              ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one] ) / 2 ;
+
+            if ( i_one > 1 ) { // i_one > 1 && j_one > 1
+              ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]        ) / 2 ;
               if ( i == i_one )
-                ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]   ) / 2 ;
-            }
-            if ( j_one > 1 ) {
-              ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]        ) / 2 ;
+                ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[one__ + j]   ) / 2 ;
               if ( j == j_one )
-                ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one] ) / 2 ;
-
-              if ( i_one > 1 ) { // i_one > 1 && j_one > 1
-                ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]        ) / 2 ;
-                if ( i == i_one )
-                  ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[one__ + j]   ) / 2 ;
-                if ( j == j_one )
-                  ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__ + j_one] ) / 2 ;
-                // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
-              }
+                ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__ + j_one] ) / 2 ;
+              // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
             }
           }
         }
       }
-
     }
+
 
     /* //JT test block for viewing histogams and solutions
        TCanvas*  c1 =  new TCanvas("Volts","Volts",50,50,840,600) ;  // JT test
@@ -2747,6 +2752,12 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     OverRelaxers[k-1] = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
   }
 
+  Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS];
+  memset(coef1,0,ROWS*sizeof(Float_t));
+  memset(coef2,0,ROWS*sizeof(Float_t));
+  memset(coef3,0,ROWS*sizeof(Float_t));
+  memset(coef4,0,ROWS*sizeof(Float_t));
+
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // START the master loop and do the binary expansion
    
     // array index offsets ending in '__' are units of rows
@@ -2761,7 +2772,6 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     Float_t  tempRatioPhi    =  RatioPhi * i_one * i_one ; // Used to be divided by ( m_one * m_one ) when m_one was != 1
     Float_t  tempRatioZ      =  RatioZ   * i_one * i_one / ( j_one * j_one ) ;
 
-    Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS];
     for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
       Float_t Radius = IFCRadius + i*GRIDSIZER ;
       coef1[i] = 1.0 + tempGRIDSIZER/(2*Radius);
@@ -2785,10 +2795,10 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
             SumCharge[i__j]= 0.0 ;
             for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
               for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
-                if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
-                else weight = 1.0 ; 
-                SumCharge[i__j] += Charge[ii*COLUMNS+jj]*weight*Radius ;  
-                sum += weight*Radius ;
+                if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5*Radius ;
+                else weight = Radius ; 
+                SumCharge[i__j] += Charge[ii*COLUMNS+jj]*weight ;
+                sum += weight ;
               }
             }
             SumCharge[i__j] /= sum ;
@@ -3219,7 +3229,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    Float_t  B[3], Direction, xx[3], xxprime[3] ;
    Double_t Xreference, Yreference ;
    Double_t Xtrack[ROWS], Ytrack[ROWS], Ztrack[ROWS] ;
-   Double_t R[ROWS], C0, X0, Y0, R0, Pt, R2, DeltaTheta, DCA ;
+   Double_t R[ROWS], C0, X0, Y0, R0, Pt, R2, DeltaTheta ;
    Double_t Xprime[ROWS+1], Yprime[ROWS+1], Zprime[ROWS+1], dX[ROWS+1], dY[ROWS+1] ;  
    Double_t U[ROWS+1], V[ROWS+1], eU[ROWS+1], eV[ROWS+1] ;  
    // Extra index is to accomodate the vertex in the fit for primaries
@@ -3235,7 +3245,6 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
    X0 = x[0] + ChargeB * p[1] * R0 / Pt ;
    Y0 = x[1] - ChargeB * p[0] * R0 / Pt ;
-   DCA = TMath::Sqrt( X0*X0 + Y0*Y0 ) - R0 ;  // Negative means (0,0) is inside the circle
 
    memcpy(R,TPCROWR,ROWS*sizeof(Double_t));
    // Not correct because TPC rows aren't circles ... but we dont' care
@@ -3429,7 +3438,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t Xreference, Yreference ;
    Double_t Xtrack[ROWS], Ytrack[ROWS], Ztrack[ROWS] ;
    Double_t R[ROWS], C0, X0, Y0, R0, Pz_over_Pt, Z_coef, DeltaTheta ;
-   Double_t Xprime[ROWS+1], Yprime[ROWS+1], Zprime[ROWS+1], dX[ROWS+1], dY[ROWS+1] ;  
+   Double_t Xprime[ROWS+1], Yprime[ROWS+1], /* Zprime[ROWS+1], */ dX[ROWS+1], dY[ROWS+1] ;  
    Double_t U[ROWS+1], V[ROWS+1], eU[ROWS+1], eV[ROWS+1] ;  
 
    // Temporarily overide settings for space charge data (only)
@@ -3508,7 +3517,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) == 0 )) continue ;  // Skip this row if not in bit mask
        if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) == 0 )) continue ;  // Skip this row if not in bit mask
        Index++ ;   
-       Xprime[Index] = Xtrack[i] ; Yprime[Index] = Ytrack[i] ; Zprime[Index] = Ztrack[i] ;
+       Xprime[Index] = Xtrack[i] ; Yprime[Index] = Ytrack[i] ; // Zprime[Index] = Ztrack[i] ;
        dX[Index] = 0.2 ; dY[Index] = 1.0 ;
        // Inner pads are smaller, but noisier, in the real world. Toy model requires adjustment to match STAR tracker.
        if ( i < INNER ) { dX[Index] *= InnerOuterRatio ; dY[Index] *= InnerOuterRatio ; } ;  
@@ -3643,7 +3652,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Float_t  B[3], xx[3], xxprime[3] ;
    Double_t Xtrack[BITS], Ytrack[BITS], Ztrack[BITS] ;
    Double_t R[BITS], X0, Y0, X0Prime, Y0Prime, R0, Pz_over_Pt, Z_coef, DeltaTheta ;
-   Double_t Xprime[BITS+1], Yprime[BITS+1], Zprime[BITS+1], dX[BITS+1], dY[BITS+1] ;  
+   Double_t Xprime[BITS+1], Yprime[BITS+1], /* Zprime[BITS+1], */ dX[BITS+1], dY[BITS+1] ;  
    Float_t PhiPrime, HitPhi, HitLocalPhi ;
    Double_t cosPhi, sinPhi, cosPhiPrime, sinPhiPrime, cosPhiMPrime, sinPhiMPrime ;
 
@@ -3653,7 +3662,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                    // but keep EWRatio that was previously defined 
    if (DoOnce) {
-     xx[0] = R[TPCOFFSET]; xx[1] = 0; xx[2] = 50;
+     xx[0] = TPCROWR[0]; xx[1] = 0; xx[2] = 50;
      DoDistortion ( xx, xxprime ) ;
    }
    Int_t tempDistortionMode = mDistortionMode;
@@ -3776,7 +3785,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        if ( ( i <  32 ) && (( RowMask1 & OneBit<<(i)    ) == 0 )) continue ;  // Skip this row if not in bit mask
        if ( ( i >= 32 ) && (( RowMask2 & OneBit<<(i-32) ) == 0 )) continue ;  // Skip this row if not in bit mask
        Index++ ;   if ( i >= TPCOFFSET ) TPCIndex++ ;
-       Xprime[Index] = Xtrack[i] ;        Yprime[Index] = Ytrack[i] ;         Zprime[Index] = Ztrack[i] ;
+       Xprime[Index] = Xtrack[i] ;        Yprime[Index] = Ytrack[i] ;         // Zprime[Index] = Ztrack[i] ;
        dX[Index]     = RowMaskErrorR[i] ;     dY[Index] = RowMaskErrorRPhi[i] ;   
        // printf("%9.2f  %9.2f  %9.2f  %9.2f  %9.2f \n", Xprime[Index], Yprime[Index], Zprime[Index], dX[Index], dY[Index] ) ; // JT Test
      }
