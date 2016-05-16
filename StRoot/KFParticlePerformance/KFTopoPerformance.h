@@ -103,6 +103,16 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   void FindReconstructableMCParticles();
   void CheckMCParticleIsReconstructable(KFMCParticle &part);
   void FindReconstructableMCVertices();
+  void FillParticleParameters(KFParticle& TempPart,
+                              int iParticle,
+                              int iP,
+                              int iPV,
+                              TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
+                              TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                              TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
+                              TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
+                              TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
+                              vector<int>* multiplicities = 0);
   
   const KFParticleTopoReconstructor *fTopoReconstructor;
 

@@ -172,6 +172,55 @@ class KFParticleFinder
   // Mixed Event Analysis
   void SetMixedEventAnalysis() { fMixedEventAnalysis = 1; }
   
+  //Get secondary particles with the mass constraint
+  static const int GetNSecondarySets() { return fNSecCandidatesSets; }
+  const std::vector<KFParticle>* GetSecondaryCandidates() const { return fSecCandidates;    }
+  const std::vector<KFParticle>& GetSecondaryK0()         const { return fSecCandidates[0]; }
+  const std::vector<KFParticle>& GetSecondaryLambda()     const { return fSecCandidates[1]; }
+  const std::vector<KFParticle>& GetSecondaryAntiLambda() const { return fSecCandidates[2]; }
+  const std::vector<KFParticle>& GetSecondaryGamma()      const { return fSecCandidates[3]; }
+  const std::vector<KFParticle>& GetSecondaryPi0()        const { return fSecCandidates[4]; }
+  
+  //Get primary particles with the mass constraint
+  static const int GetNPrimarySets() { return fNPrimCandidatesTopoSets; }
+  const std::vector< std::vector<KFParticle> >* GetPrimaryCandidates() const { return fPrimCandidates;    }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryK0()         const { return fPrimCandidates[0]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryLambda()     const { return fPrimCandidates[1]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryAntiLambda() const { return fPrimCandidates[2]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryGamma()      const { return fPrimCandidates[3]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryPi0()        const { return fPrimCandidates[4]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryXi()         const { return fPrimCandidates[5]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryAntiXi()     const { return fPrimCandidates[6]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryOmega()      const { return fPrimCandidates[7]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryAntiOmega()  const { return fPrimCandidates[8]; }
+  
+  //Get primary particles with the topologigal constraint
+  const std::vector< std::vector<KFParticle> >* GetPrimaryTopoCandidates() const { return fPrimCandidatesTopo;    }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoK0()         const { return fPrimCandidatesTopo[0]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoLambda()     const { return fPrimCandidatesTopo[1]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoAntiLambda() const { return fPrimCandidatesTopo[2]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoGamma()      const { return fPrimCandidatesTopo[3]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoPi0()        const { return fPrimCandidatesTopo[4]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoXi()         const { return fPrimCandidatesTopo[5]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoAntiXi()     const { return fPrimCandidatesTopo[6]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoOmega()      const { return fPrimCandidatesTopo[7]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoAntiOmega()  const { return fPrimCandidatesTopo[8]; }
+
+  //Get primary particles with the topologigal and mass constraint
+  const std::vector< std::vector<KFParticle> >* GetPrimaryTopoMassCandidates() const { return fPrimCandidatesTopoMass;    }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassK0()         const { return fPrimCandidatesTopoMass[0]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassLambda()     const { return fPrimCandidatesTopoMass[1]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassAntiLambda() const { return fPrimCandidatesTopoMass[2]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassGamma()      const { return fPrimCandidatesTopoMass[3]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassPi0()        const { return fPrimCandidatesTopoMass[4]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassXi()         const { return fPrimCandidatesTopoMass[5]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassAntiXi()     const { return fPrimCandidatesTopoMass[6]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassOmega()      const { return fPrimCandidatesTopoMass[7]; }
+  const std::vector< std::vector<KFParticle> >& GetPrimaryTopoMassAntiOmega()  const { return fPrimCandidatesTopoMass[8]; }
+  
+  void AddCandidate(const KFParticle& candidate, int iPV = -1);
+  void SetNPV(int nPV);
+  
  private:
 
   short int fNPV;
@@ -213,9 +262,15 @@ class KFParticleFinder
   std::vector<KFParticle> fK0PiPlus;
   std::vector<int> fK0PiMinusIndex;
   std::vector<KFParticle> fK0PiPi;
-  //vectors with temporary particles for charmonium reconstruction
-  std::vector< std::vector<KFParticle> > fOmegaPrim;
-  std::vector< std::vector<KFParticle> > fOmegaBarPrim;
+  
+  //vectors of candidates with the mass constraint
+  static const int fNSecCandidatesSets = 5;
+  std::vector<KFParticle> fSecCandidates[fNSecCandidatesSets]; //Ks, Lambda, LambdaBar, gamma, pi0
+  static const int fNPrimCandidatesSets = 11;
+  std::vector< std::vector<KFParticle> > fPrimCandidates[fNPrimCandidatesSets]; //0 Ks, 1 Lambda,2 LambdaBar, 3 gamma, 4 pi0, 5 Xi, 6 XiBar, 7 Omega, 8 OmegaBar, 9 XiStar, 10 XiStarBar
+  static const int fNPrimCandidatesTopoSets = 9;
+  std::vector< std::vector<KFParticle> > fPrimCandidatesTopo[fNPrimCandidatesTopoSets];
+  std::vector< std::vector<KFParticle> > fPrimCandidatesTopoMass[fNPrimCandidatesTopoSets];
   
   //pointer to the gamma EMC clusters
   KFPEmcCluster* fEmcClusters;

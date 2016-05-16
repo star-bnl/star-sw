@@ -43,8 +43,11 @@ class KFParticle :public KFParticleBase
 #endif
   //* Constructor (empty)
 
+#ifdef __ROOT__ //for the STAR experiment
+  KFParticle():KFParticleBase(), fRefId(-1) { }
+#else
   KFParticle():KFParticleBase(){ ; }
-
+#endif
   //* Destructor (empty)
 
   ~KFParticle(){ ; }
@@ -337,13 +340,20 @@ class KFParticle :public KFParticleBase
   void GetFieldValue( const float xyz[], float B[] ) const ;
 
   void Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const ;
+#ifdef __ROOT__ //for the STAR experiment
+  void SetRefId(Short_t r=-1){fRefId = r;}
+  Short_t RefId() {return fRefId;}
+#endif
+
 
  protected: 
   
   //*
   //*  INTERNAL STUFF
   //* 
-
+#ifdef __ROOT__ //for the STAR experiment
+    Short_t fRefId; // reference to global or primary track, or vertex 
+#endif
   //* Method to access ALICE field 
 #ifdef HomogeneousField
   static float GetFieldAlice();

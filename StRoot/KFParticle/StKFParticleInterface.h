@@ -39,6 +39,7 @@ class StKFParticleInterface: public TObject
   void AddPV(const KFVertex &pv, const std::vector<int> &tracks);
   void AddPV(const KFVertex &pv);
   void AddParticle(const KFParticle& p);
+  void AddCandidate(const KFParticle& candidate, int iPV = -1);
   
   const KFParticleTopoReconstructor* GetTopoReconstructor() const { return fKFParticleTopoReconstructor; }
   

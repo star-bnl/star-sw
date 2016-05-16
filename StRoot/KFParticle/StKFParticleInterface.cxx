@@ -58,3 +58,7 @@ void StKFParticleInterface::AddPV(const KFVertex &pv) {
 void StKFParticleInterface::AddParticle(const KFParticle &p) { 
   fKFParticleTopoReconstructor->AddParticle(p);
 }
+
+void StKFParticleInterface::AddCandidate(const KFParticle& candidate, int iPV) {
+  fKFParticleTopoReconstructor->AddCandidate(candidate, iPV);
+}

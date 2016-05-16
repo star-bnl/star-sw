@@ -31,7 +31,6 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
 {
 }
 
-
 void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 {
   TDirectory *curdir = gDirectory;
@@ -93,315 +92,69 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           }
           gDirectory->cd(".."); //particle directory
           
-          gDirectory->mkdir("FitQA");
-          gDirectory->cd("FitQA");
-          {
-            TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
-            int nBins = 50;
-            float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
-//             float xMax[nFitQA/2] = {2.,2.,5.,0.3,0.3,0.3,0.03,0.03};
-            float mult[nFitQA/2]={1.f,1.f,1.f,1.f,1.f,1.f,1.f,1.f};
-            if(iPart>63 && iPart<75)
-              for(int iMult=3; iMult<nFitQA/2; iMult++)
-                mult[iMult] = 3;
-            if(iPart>45 && iPart<64)
-            {
-              for(int iMult=0; iMult<3; iMult++)
-                mult[iMult] = 0.03;
-              for(int iMult=3; iMult<nFitQA/2; iMult++)
-                mult[iMult] = 3;
-            }
-            if(iPart==44 || iPart==45)
-            {
-              mult[0] = 0.25;
-              mult[1] = 0.5;
-              mult[2] = 0.15;
-              for(int iMult=3; iMult<nFitQA/2; iMult++)
-                mult[iMult] = 4;
-            }
-            
-            for( int iH=0; iH<nFitQA/2; iH++ ){
-              hFitQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
-                                            (res+parName[iH]).Data(), 
-                                            nBins, -mult[iH]*xMax[iH],mult[iH]*xMax[iH]);
-              hFitQA[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
-                                            (pull+parName[iH]).Data(), 
-                                            nBins, -6,6);
-            }
-          }
-          gDirectory->cd(".."); //particle directory
-  
-          gDirectory->mkdir("Efficiency");
-          gDirectory->cd("Efficiency");
-          {//vs p, pt, y, z, c*tau, decay length, l, r
-            TString partNameEff[nPartEfficiency] = {"EffVsP","EffVsPt","EffVsY","EffVsZ","EffVsCT","EffVsDL","EffVsL","EffVsR"};
-            TString partAxisNameEff[nPartEfficiency] = {"p [GeV/c]","p_{t} [GeV/c]",
-                                                        "y", "z [cm]", "Life time c#tau [cm]", "Decay length [cm]", 
-                                                        "L [cm]", "Rxy [cm]"};
-            int nBinsEff[nPartEfficiency]  = { 200 , 100 , 100 ,  1000 ,  100 ,  100 , 1000 , 1000  };
-            float xMinEff[nPartEfficiency] = {   0.,   0.,  -6.,  -200.,    0.,    0.,    0.,    0. };
-            float xMaxEff[nPartEfficiency] = {  20.,  10.,   6.,   200.,  100.,  100.,  400.,  200. };
-            
-            TString effTypeName[3] = {"All particles",
-                                      "Reconstructable daughters",
-                                      "Reconstructed daughters"};
-            
-            for(int iEff=0; iEff<3; iEff++)
-            {
-              gDirectory->mkdir(effTypeName[iEff].Data());
-              gDirectory->cd(effTypeName[iEff].Data());
-              {
-                for(int iH=0; iH<nPartEfficiency; iH++)
-                {
-                  hPartEfficiency[iPart][iEff][iH] = 
-                    new TProfile( partNameEff[iH].Data(), partAxisNameEff[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
-                  hPartEfficiency[iPart][iEff][iH]->GetYaxis()->SetTitle("Efficiency");                  
-                  hPartEfficiency[iPart][iEff][iH]->GetXaxis()->SetTitle(partAxisNameEff[iH].Data());
-                }
-              }
-              gDirectory->cd("..");// particle directory / Efficiency
-            }
-          }
-          gDirectory->cd("..");// particle directory 
+          CreateFitHistograms(hFitQA[iPart], iPart);
+          CreateEfficiencyHistograms(hPartEfficiency[iPart]);
             
           gDirectory->mkdir("Parameters");
           gDirectory->cd("Parameters");
           {
-            TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
-            TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
-                                                    "y","Decay length [cm]","Life time c#tau [cm]",
-                                                    "chi2/ndf","prob","#theta [rad]",
-                                                    "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","Multiplicity"};
-#ifdef CBM
-            int nBins[nHistoPartParam] = {1000, // M
-                                           100, // p
-                                           100, // pt
-                                           100, // y
-                                           100, // DecayL
-                                           100, // ctau
-                                           100, // chi2/ndf
-                                           100, // prob
-                                           100, // theta
-                                           100, // phi
-                                           200, // X
-                                           200, // Y
-                                           360, // Z
-                                           200, // R
-                                           200, // L
-                                           200, // L/dL
-                                          fParteff.partMaxMult[iPart]+1};
-            float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
-                                              0.f, // p
-                                              0.f, // pt
-                                              0.f, // y
-                                             -5.f, // DecayL
-                                              0.f, // ctau
-                                              0.f, // chi2/ndf
-                                              0.f, // prob
-                                             -2.f, // theta
-                                             -2.f, // phi
-                                            -50.f, // X
-                                            -50.f, // Y
-                                            -10.f, // Z
-                                              0.f, // R
-                                              0.f, // L
-                                             -1.f, // L/dL
-                                             -0.5f };
-            float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
-                                              10.f, // p
-                                               3.f, // pt
-                                               6.f, // y
-                                              55.f, // DecayL
-                                              30.f, // ctau
-                                              20.f, // chi2/ndf
-                                               1.f, // prob
-                                               2.f, // theta
-                                               2.f, // phi
-                                              50.f, // X
-                                              50.f, // Y
-                                              80.f, // Z
-                                              50.f, // R
-                                             100.f, // L
-                                              35.f, // L/dL
-                                            float(fParteff.partMaxMult[iPart])+0.5f};
-#else
-            int nBins[nHistoPartParam] = {1000, // M
-                                           100, // p
-                                           100, // pt
-                                           100, // y
-                                           100, // DecayL
-                                           100, // ctau
-                                           100, // chi2/ndf
-                                           100, // prob
-                                           100, // theta
-                                           100, // phi
-                                           100, // X
-                                          1000, // Y
-                                          1000, // Z
-                                          1000, // R
-                                          1000, // L
-                                          1000, // L/dL
-                                          fParteff.partMaxMult[iPart]+1};
-            float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
-                                              0.f, // p
-                                              0.f, // pt
-                                             -6.f, // y
-                                             -5.f, // DecayL
-                                              0.f, // ctau
-                                              0.f, // chi2/ndf
-                                              0.f, // prob
-                                             -2.f, // theta
-                                             -2.f, // phi
-                                           -200.f, // X
-                                           -200.f, // Y
-                                           -200.f, // Z
-                                              0.f, // R
-                                              0.f, // L
-                                             -1.f, // L/dL
-                                             -0.5f };
-            float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
-                                              10.f, // p
-                                               3.f, // pt
-                                               6.f, // y
-                                              55.f, // DecayL
-                                              30.f, // ctau
-                                              20.f, // chi2/ndf
-                                               1.f, // prob
-                                               2.f, // theta
-                                               2.f, // phi
-                                             200.f, // X
-                                             200.f, // Y
-                                             200.f, // Z
-                                             200.f, // R
-                                             400.f, // L
-                                              35.f, // L/dL
-                                            float(fParteff.partMaxMult[iPart])+0.5f};
-#endif
-            for(int iH=0; iH<nHistoPartParam; iH++)
-            {
-              hPartParam[iPart][iH]       = new TH1F(parName[iH].Data(),parName[iH].Data(),
-                                              nBins[iH],xMin[iH],xMax[iH]);
-              hPartParam[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
-            }
-    
-            hPartParam2D[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
-                                              nBins[3],xMin[3],xMax[3],
-                                              nBins[2],xMin[2],xMax[2]);
-            hPartParam2D[iPart][0]->GetXaxis()->SetTitle("y");
-            hPartParam2D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-
             bool drawZR = (iPart<5) || (iPart==41);
-            if(drawZR)
-            {
-              hPartParam2D[iPart][1] = new TH2F("Z-R","Z-R",
-                                                nBins[12],xMin[12],xMax[12],
-                                                nBins[13],xMin[13],xMax[13]);
-              hPartParam2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-              hPartParam2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
-            }
+            CreateParameterHistograms(hPartParam[0], hPartParam2D[0], iPart, drawZR);
 
             gDirectory->mkdir("Signal");
             gDirectory->cd("Signal");
             {
-              for(int iH=0; iH<nHistoPartParam; iH++)
-              {
-                hPartParamSignal[iPart][iH] = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
-                                              nBins[iH],xMin[iH],xMax[iH]);
-                hPartParamSignal[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
-              }
-  
-              hPartParam2DSignal[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
-                                                      nBins[3],xMin[3],xMax[3],
-                                                      nBins[2],xMin[2],xMax[2]);
-              hPartParam2DSignal[iPart][0]->GetXaxis()->SetTitle("y");
-              hPartParam2DSignal[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-            
-              if( drawZR )
-              {
-                hPartParam2DSignal[iPart][1] = new TH2F("Z-R","Z-R",
-                                                        nBins[12],xMin[12],xMax[12],
-                                                        nBins[13],xMin[13],xMax[13]);
-                hPartParam2DSignal[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-                hPartParam2DSignal[iPart][1]->GetYaxis()->SetTitle("R [cm]");
-              }
+              CreateParameterHistograms(hPartParam[1], hPartParam2D[1], iPart, drawZR);
             }
             gDirectory->cd(".."); // particle directory / Parameters
             gDirectory->mkdir("Background");
             gDirectory->cd("Background");
             {
-              for(int iH=0; iH<nHistoPartParam; iH++)
-              {
-                hPartParamBG[iPart][iH]     = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
-                                              nBins[iH],xMin[iH],xMax[iH]);
-                hPartParamBG[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
-              }
-  
-              hPartParam2DBG[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
-                                                  nBins[3],xMin[3],xMax[3],
-                                                  nBins[2],xMin[2],xMax[2]);
-              hPartParam2DBG[iPart][0]->GetXaxis()->SetTitle("y");
-              hPartParam2DBG[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-              
-              if( drawZR )
-              {
-                hPartParam2DBG[iPart][1] = new TH2F("Z-R","Z-R",
-                                                    nBins[12],xMin[12],xMax[12],
-                                                    nBins[13],xMin[13],xMax[13]);
-                hPartParam2DBG[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-                hPartParam2DBG[iPart][1]->GetYaxis()->SetTitle("R [cm]");
-              }
+              CreateParameterHistograms(hPartParam[2], hPartParam2D[2], iPart, drawZR);
             }
-  //           gDirectory->cd(".."); // particle directory
-  //           gDirectory->mkdir("CorrBG");
-  //           gDirectory->cd("CorrBG");
-  //           {
-  //             for(int iH=0; iH<nHistoPartParam; iH++)
-  //             {
-  //               hPartParamCorrBG[iPart][iH]     = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
-  //                                             nBins[iH],xMin[iH],xMax[iH]);
-  //               hPartParamCorrBG[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
-  //             }
-  // 
-  //             hPartParam2DCorrBG[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
-  //                                                 nBins[3],xMin[3],xMax[3],
-  //                                                 nBins[2],xMin[2],xMax[2]);
-  //             hPartParam2DCorrBG[iPart][0]->GetXaxis()->SetTitle("y");
-  //             hPartParam2DCorrBG[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-  //           }
             gDirectory->cd(".."); // particle directory
             gDirectory->mkdir("Ghost");
             gDirectory->cd("Ghost");
             {
-              for(int iH=0; iH<nHistoPartParam; iH++)
-              {
-                hPartParamGhost[iPart][iH]     = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
-                                              nBins[iH],xMin[iH],xMax[iH]);
-                hPartParamGhost[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
-              }
-
-              hPartParam2DGhost[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
-                                                  nBins[3],xMin[3],xMax[3],
-                                                  nBins[2],xMin[2],xMax[2]);
-              hPartParam2DGhost[iPart][0]->GetXaxis()->SetTitle("y");
-              hPartParam2DGhost[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-              
-              if( drawZR )
-              {
-                hPartParam2DGhost[iPart][1] = new TH2F("Z-R","Z-R",
-                                                       nBins[12],xMin[12],xMax[12],
-                                                       nBins[13],xMin[13],xMax[13]);
-                hPartParam2DGhost[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
-                hPartParam2DGhost[iPart][1]->GetYaxis()->SetTitle("R [cm]");
-              }
+              CreateParameterHistograms(hPartParam[3], hPartParam2D[3], iPart, drawZR);
             }
-            gDirectory->cd(".."); // particle directory
+            gDirectory->cd(".."); // Parameters
+            
+            bool plotPrimaryHistograms = abs(fParteff.partPDG[iPart]) == 310 ||
+                                         abs(fParteff.partPDG[iPart]) == 3122 ||
+                                         abs(fParteff.partPDG[iPart]) == 22 ||
+                                         abs(fParteff.partPDG[iPart]) == 111 ||
+                                         abs(fParteff.partPDG[iPart]) == 3312 ||
+                                         abs(fParteff.partPDG[iPart]) == 3334;  
+                                         
+            bool plotSecondaryHistograms = abs(fParteff.partPDG[iPart]) == 310 ||
+                                           abs(fParteff.partPDG[iPart]) == 3122 ||
+                                           abs(fParteff.partPDG[iPart]) == 22 ||
+                                           abs(fParteff.partPDG[iPart]) == 111;
+                                           
+            if(plotPrimaryHistograms)
+            {
+              gDirectory->mkdir("Primary");
+              gDirectory->cd("Primary");
+              {
+                CreateParameterSubfolder("MassConstraint", hPartParamPrimaryMass, hPartParam2DPrimaryMass, hFitQAMassConstraint, iPart);
+                CreateParameterSubfolder("TopoConstraint", hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, hFitQATopoConstraint, iPart);
+                CreateParameterSubfolder("TopoMassConstraint", hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, hFitQATopoMassConstraint, iPart);
+              }
+              gDirectory->cd(".."); // particle directory / Parameters
+            }
+            
+            if(plotSecondaryHistograms)
+            {
+              CreateParameterSubfolder("Secondary", hPartParamSecondary, hPartParam2DSecondary, 0, iPart);
+            }
           }
           gDirectory->cd(".."); //particle directory
         }
         gDirectory->cd(".."); //Particles
       }
     }
-    gDirectory->cd(".."); //L1
+    gDirectory->cd(".."); //main
     gDirectory->mkdir("PrimaryVertexQA");
     gDirectory->cd("PrimaryVertexQA");
     {
@@ -666,6 +419,254 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
   SetHistoCreated();
 }
 
+void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPart)
+{
+  TString res = "res";
+  TString pull = "pull";
+  
+  gDirectory->mkdir("FitQA");
+  gDirectory->cd("FitQA");
+  {
+    TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
+    int nBins = 50;
+    float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
+    float mult[nFitQA/2]={1.f,1.f,1.f,1.f,1.f,1.f,1.f,1.f};
+    if(iPart>63 && iPart<75)
+      for(int iMult=3; iMult<nFitQA/2; iMult++)
+        mult[iMult] = 3;
+    if(iPart>45 && iPart<64)
+    {
+      for(int iMult=0; iMult<3; iMult++)
+        mult[iMult] = 0.03;
+      for(int iMult=3; iMult<nFitQA/2; iMult++)
+        mult[iMult] = 3;
+    }
+    if(iPart==44 || iPart==45)
+    {
+      mult[0] = 0.25;
+      mult[1] = 0.5;
+      mult[2] = 0.15;
+      for(int iMult=3; iMult<nFitQA/2; iMult++)
+        mult[iMult] = 4;
+    }
+    
+    for( int iH=0; iH<nFitQA/2; iH++ ){
+      histo[iH]   = new TH1F((res+parName[iH]).Data(),
+                             (res+parName[iH]).Data(), 
+                             nBins, -mult[iH]*xMax[iH],mult[iH]*xMax[iH]);
+      histo[iH+8] = new TH1F((pull+parName[iH]).Data(),
+                             (pull+parName[iH]).Data(), 
+                             nBins, -6,6);
+    }
+  }
+  gDirectory->cd("..");
+}
+
+void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency])
+{
+  gDirectory->mkdir("Efficiency");
+  gDirectory->cd("Efficiency");
+  {//vs p, pt, y, z, c*tau, decay length, l, r
+    TString partNameEff[nPartEfficiency] = {"EffVsP","EffVsPt","EffVsY","EffVsZ","EffVsCT","EffVsDL","EffVsL","EffVsR"};
+    TString partAxisNameEff[nPartEfficiency] = {"p [GeV/c]","p_{t} [GeV/c]",
+                                                "y", "z [cm]", "Life time c#tau [cm]", "Decay length [cm]", 
+                                                "L [cm]", "Rxy [cm]"};
+    int nBinsEff[nPartEfficiency]  = { 200 , 100 , 100 ,  1000 ,  100 ,  100 , 1000 , 1000  };
+    float xMinEff[nPartEfficiency] = {   0.,   0.,  -6.,  -200.,    0.,    0.,    0.,    0. };
+    float xMaxEff[nPartEfficiency] = {  20.,  10.,   6.,   200.,  100.,  100.,  400.,  200. };
+    
+    TString effTypeName[3] = {"All particles",
+                              "Reconstructable daughters",
+                              "Reconstructed daughters"};
+    
+    for(int iEff=0; iEff<3; iEff++)
+    {
+      gDirectory->mkdir(effTypeName[iEff].Data());
+      gDirectory->cd(effTypeName[iEff].Data());
+      {
+        for(int iH=0; iH<nPartEfficiency; iH++)
+        {
+          histo[iEff][iH] = new TProfile( partNameEff[iH].Data(), partAxisNameEff[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+          histo[iEff][iH]->GetYaxis()->SetTitle("Efficiency");                  
+          histo[iEff][iH]->GetXaxis()->SetTitle(partAxisNameEff[iH].Data());
+        }
+      }
+      gDirectory->cd("..");// particle directory / Efficiency
+    }
+  }
+  gDirectory->cd("..");// particle directory 
+}
+
+void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[KFPartEfficiencies::nParticles][nHistoPartParam],
+                                                          TH2F *histoParameters2D[KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                                                          int iPart, bool drawZR)
+{
+  TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
+  TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
+                                          "y","Decay length [cm]","Life time c#tau [cm]",
+                                          "chi2/ndf","prob","#theta [rad]",
+                                          "phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","Multiplicity"};
+#ifdef CBM
+  int nBins[nHistoPartParam] = {1000, // M
+                                  100, // p
+                                  100, // pt
+                                  100, // y
+                                  100, // DecayL
+                                  100, // ctau
+                                  100, // chi2/ndf
+                                  100, // prob
+                                  100, // theta
+                                  100, // phi
+                                  200, // X
+                                  200, // Y
+                                  360, // Z
+                                  200, // R
+                                  200, // L
+                                  200, // L/dL
+                                fParteff.partMaxMult[iPart]+1};
+  float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
+                                    0.f, // p
+                                    0.f, // pt
+                                    0.f, // y
+                                    -5.f, // DecayL
+                                    0.f, // ctau
+                                    0.f, // chi2/ndf
+                                    0.f, // prob
+                                    -2.f, // theta
+                                    -2.f, // phi
+                                  -50.f, // X
+                                  -50.f, // Y
+                                  -10.f, // Z
+                                    0.f, // R
+                                    0.f, // L
+                                    -1.f, // L/dL
+                                    -0.5f };
+  float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
+                                    10.f, // p
+                                      3.f, // pt
+                                      6.f, // y
+                                    55.f, // DecayL
+                                    30.f, // ctau
+                                    20.f, // chi2/ndf
+                                      1.f, // prob
+                                      2.f, // theta
+                                      2.f, // phi
+                                    50.f, // X
+                                    50.f, // Y
+                                    80.f, // Z
+                                    50.f, // R
+                                    100.f, // L
+                                    35.f, // L/dL
+                                  float(fParteff.partMaxMult[iPart])+0.5f};
+#else
+  int nBins[nHistoPartParam] = {1000, // M
+                                  100, // p
+                                  100, // pt
+                                  100, // y
+                                  100, // DecayL
+                                  100, // ctau
+                                  100, // chi2/ndf
+                                  100, // prob
+                                  100, // theta
+                                  100, // phi
+                                  100, // X
+                                1000, // Y
+                                1000, // Z
+                                1000, // R
+                                1000, // L
+                                1000, // L/dL
+                                fParteff.partMaxMult[iPart]+1};
+  float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
+                                    0.f, // p
+                                    0.f, // pt
+                                    -6.f, // y
+                                    -5.f, // DecayL
+                                    0.f, // ctau
+                                    0.f, // chi2/ndf
+                                    0.f, // prob
+                                    -2.f, // theta
+                                    -2.f, // phi
+                                  -200.f, // X
+                                  -200.f, // Y
+                                  -200.f, // Z
+                                    0.f, // R
+                                    0.f, // L
+                                    -1.f, // L/dL
+                                    -0.5f };
+  float xMax[nHistoPartParam] = { fParteff.partMHistoMax[iPart], // M
+                                    10.f, // p
+                                      3.f, // pt
+                                      6.f, // y
+                                    55.f, // DecayL
+                                    30.f, // ctau
+                                    20.f, // chi2/ndf
+                                      1.f, // prob
+                                      2.f, // theta
+                                      2.f, // phi
+                                    200.f, // X
+                                    200.f, // Y
+                                    200.f, // Z
+                                    200.f, // R
+                                    400.f, // L
+                                    35.f, // L/dL
+                                  float(fParteff.partMaxMult[iPart])+0.5f};
+#endif
+  for(int iH=0; iH<nHistoPartParam; iH++)
+  {
+    histoParameters[iPart][iH] = new TH1F(parName[iH].Data(),parName[iH].Data(),
+                                          nBins[iH],xMin[iH],xMax[iH]);
+    histoParameters[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
+  }
+
+  histoParameters2D[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
+                                    nBins[3],xMin[3],xMax[3],
+                                    nBins[2],xMin[2],xMax[2]);
+  histoParameters2D[iPart][0]->GetXaxis()->SetTitle("y");
+  histoParameters2D[iPart][0]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
+
+  if(drawZR)
+  {
+    histoParameters2D[iPart][1] = new TH2F("Z-R","Z-R",
+                                      nBins[12],xMin[12],xMax[12],
+                                      nBins[13],xMin[13],xMax[13]);
+    histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
+    histoParameters2D[iPart][1]->GetYaxis()->SetTitle("R [cm]");
+  }
+}
+
+void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName, 
+                                                         TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
+                                                         TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                                                         TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart)
+{
+  gDirectory->mkdir(folderName.Data());
+  gDirectory->cd(folderName.Data());
+  {
+    gDirectory->mkdir("Signal");
+    gDirectory->cd("Signal");
+    {
+      CreateParameterHistograms(histoParameters[1], histoParameters2D[1], iPart);
+    }
+    gDirectory->cd("..");
+    gDirectory->mkdir("Background");
+    gDirectory->cd("Background");
+    {
+      CreateParameterHistograms(histoParameters[2], histoParameters2D[2], iPart);
+    }
+    gDirectory->cd("..");
+    gDirectory->mkdir("Ghost");
+    gDirectory->cd("Ghost");
+    {
+      CreateParameterHistograms(histoParameters[3], histoParameters2D[3], iPart);
+    }
+    gDirectory->cd("..");
+    
+    CreateParameterHistograms(histoParameters[0], histoParameters2D[0], iPart);
+    if(histoFit!=0)
+      CreateFitHistograms(histoFit[iPart], iPart);
+  }
+  gDirectory->cd("..");
+}
 
 void KFParticlePerformanceBase::FillHistos()
 {
