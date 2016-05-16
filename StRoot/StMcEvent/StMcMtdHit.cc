@@ -10,7 +10,14 @@
 
 ClassImp(StMcMtdHit);
 //___________________________________________________________________________
-StMcMtdHit::StMcMtdHit(){}
+StMcMtdHit::StMcMtdHit()
+{
+ mBackleg=0;
+ mModule=0;
+ mCell=0;
+ mPathLength=0;
+ mParentTrackId=0;
+}
 //___________________________________________________________________________
 StMcMtdHit::~StMcMtdHit() {/* noop */ }
     
@@ -87,6 +94,6 @@ StMcMtdHit::StMcMtdHit(g2t_mtd_hit_st* pt):
   mModule       = ires%10;
   mBackleg      = ires/10;
   mCell         = Int_t((pt->x[1] + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
-
+  mParentTrackId = 0;
 }        
     
