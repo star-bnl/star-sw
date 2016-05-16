@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.13 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcHit.hh,v 2.14 2016/05/16 23:47:09 perev Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.14  2016/05/16 23:47:09  perev
+ * Coverity fix
+ *
  * Revision 2.13  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -69,10 +72,10 @@ public:
   enum EMcHitBits {
     kMatched = BIT(23) // if hit has matched with reconstructed one
   };
-  StMcHit()  : mPosition(0,0,0), mLocalMomentum(0,0,0), mdE(0),mdS(0),mTof(0),mVolumeId(0),mParentTrack(0) {}
+  StMcHit()  : mPosition(0,0,0), mLocalMomentum(0,0,0), mdE(0),mdS(0),mTof(0),mKey(0),mVolumeId(0),mParentTrack(0) {}
   StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
 	  Float_t de, Float_t ds, Float_t tof, Long_t k, Long_t volId, StMcTrack* parent=0)
-    : mPosition(x), mLocalMomentum(p), mdE(de), mdS(ds), mTof(tof), mKey(k), mVolumeId(volId),  mParentTrack(parent) {}
+    : mPosition(x), mLocalMomentum(p), mdE(de), mdS(ds), mTof(tof), mKey(k), mVolumeId(volId), mParentTrack(parent) {}
   StMcHit(g2t_hits_st* pt) : mPosition(pt->x[0],pt->x[1],pt->x[2]), mLocalMomentum(pt->p[0],pt->p[1],pt->p[2]),
 			     mdE(pt->de), mdS(pt->ds), mTof(pt->tof), mKey(pt->id), mVolumeId(0),
 			     mParentTrack(0) {}

@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.38 2015/03/13 18:44:58 perev Exp $
+ * $Id: StMcEvent.cc,v 2.39 2016/05/16 23:47:09 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.39  2016/05/16 23:47:09  perev
+ * Coverity fix
+ *
  * Revision 2.38  2015/03/13 18:44:58  perev
  * Roll back
  *
@@ -178,8 +181,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.38 2015/03/13 18:44:58 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.38 2015/03/13 18:44:58 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.39 2016/05/16 23:47:09 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.39 2016/05/16 23:47:09 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -247,10 +250,10 @@ const StMcEvent& StMcEvent::operator=(const StMcEvent&) { return *this;} // priv
 //______________________________________________________________________________
 StMcEvent::~StMcEvent()
 {
-  for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
-    delete mBegColl[jk]; mBegColl[jk]=0;
+  for (auto jk=mBegColl; jk<mEndColl;jk++) { 
+    delete *jk; *jk=0;
   }
-  for(int jk=0;jk<(int)mTracks.size()  ;jk++) {delete mTracks[jk]  ;}    
+  for(auto jk=0;jk<(int)mTracks.size()  ;jk++) {delete mTracks[jk]  ;}    
   mTracks.clear();
   
   for(int jk=0;jk<(int)mVertices.size();jk++) {delete mVertices[jk];}
@@ -658,8 +661,8 @@ void StMcEvent::Print(Option_t *option) const {
 void StMcEvent::Browse(TBrowser *b)
 {
   // Browse this event (called by TBrowser).
-   for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
-     TObject *obj = mBegColl[jk]; if (!obj) continue;
+   for (auto jk=mBegColl; jk<mEndColl;jk++) { 
+     TObject *obj = *jk; if (!obj) continue;
      b->Add(obj,obj->GetName());
    }
    TDataSet::Browse(b);

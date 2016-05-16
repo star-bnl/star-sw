@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcVertex.cc,v 2.13 2016/05/16 23:47:09 perev Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.13  2016/05/16 23:47:09  perev
+ * Coverity fix
+ *
  * Revision 2.12  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -66,7 +69,7 @@ using std::find;
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.13 2016/05/16 23:47:09 perev Exp $";
 
 ClassImp(StMcVertex);
 
@@ -77,6 +80,9 @@ StMcVertex::StMcVertex()
     mGeantVolume = "aaaa";
     mTof = 0;
     mGeantProcess = 0;
+    mGeneratorProcess = 0;
+    mKey = 0;
+    mGeantMedium = 0;
 }
 
 StMcVertex::StMcVertex(g2t_vertex_st* vtx)
