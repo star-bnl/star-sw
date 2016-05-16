@@ -560,6 +560,7 @@ using namespace std;
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 #include "TRSymMatrix.h"
 #include "TRVector.h"
+#include "KFPTrack.h"
 map<StiKalmanTrack*, StTrackNode*> StiStEventFiller::mTrkNodeMap;
 map<StTrackNode*, StiKalmanTrack*> StiStEventFiller::mNodeTrkMap;
 StiStEventFiller *StiStEventFiller::fgStiStEventFiller = 0;
@@ -698,11 +699,11 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       try 
 	{
 	  fillTrackCount1++;
+	  gTrack->setKey(kTrack->getId());
 	  fillTrack(gTrack,kTrack,detInfo);
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
-	  gTrack->setKey(kTrack->getId());
           gTrack->setIdTruth();
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
@@ -1007,8 +1008,15 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     gTrack->setOuterGeometry(geometry);
   else
     gTrack->setGeometry(geometry);
-
-
+  Double_t xyzp[6], CovXyzp[21];
+  node->getXYZ(xyzp,CovXyzp);
+  KFPTrack *KFPTrackAtHit = new KFPTrack();
+  KFPTrackAtHit->SetID(gTrack->key());
+  KFPTrackAtHit->SetCharge(track->getCharge());
+  KFPTrackAtHit->SetParameters(xyzp);
+  KFPTrackAtHit->SetCovarianceMatrix(CovXyzp);
+  if (outer) gTrack->setKFPTrackatLastHit(KFPTrackAtHit);
+  else       gTrack->setKFPTrackatFirstHit(KFPTrackAtHit);
   return;
 }
 

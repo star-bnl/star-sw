@@ -129,7 +129,7 @@ public:
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
   static void setFmsCollection(StFmsCollection *fms_coll) { mFmsCollection=fms_coll; }
-
+  void  ResetMaps();
   /// resets the pointers to the TClonesArrays to 0
   static void unset();
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
@@ -469,7 +469,13 @@ public:
   virtual Bool_t Accept(const StMuMcTrack *McTrack = 0);
   virtual Bool_t Accept(const StMuMcVertex *McVx = 0);
 #endif
-  multimap<StMuMcVertex *,StMuMcTrack *>      &McVx2McTkR();
+  map<Int_t,Int_t>                            &IdGlTk2Indx();
+  map<Int_t,Int_t>                            &IdPrTk2Indx();
+  map<Int_t,Int_t>                            &IdPrVx2Indx();
+  map<Int_t,Int_t>                            &IdKFTk2Indx();
+  map<Int_t,Int_t>                            &IdKFVx2Indx();
+  
+  multimap<StMuMcVertex *,StMuMcTrack *>      &McVx2McTkR(); // 
   map<StMuMcVertex *,StMuMcTrack *>           &McVx2McParentTk(); 
   map<Int_t,StMuMcTrack *>                    &Id2McTk(); // 
   map<Int_t,StMuMcVertex *>                   &Id2McVx(); // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id]();
@@ -500,7 +506,41 @@ public:
   multimap<StMuMcTrack*,KFParticle*>          &McTrack2KFParticle();  // McTrack => KFParticle fitted to vertex
   static Int_t                                MinNoTpcMcHits; // minimum no. of TPC hits in order to consider the MC track reconstractable
   static Int_t                                MinNoTpcRcHits; // minimum no. of TPC hits in order to consider the RC track as good
- 
+  static multimap<StMuMcVertex *,StMuMcTrack *>      McVx2McTkRMap; 
+  static map<StMuMcVertex *,StMuMcTrack *>           McVx2McParentTkMap; 
+  static map<Int_t,StMuMcTrack *>                    Id2McTkMap; // 
+  static map<Int_t,StMuMcVertex *>                   Id2McVxMap; // All Mc Vx, StMuMcVertex *McVx = Id2McVx[Id];
+  static map<Int_t,StMuMcVertex *>                   Id2McVxRMap;// Reconstructable, i.e. contains > 1 Reconstructable Mc Tracks
+  static map<Int_t,StMuPrimaryVertex*>               Id2RcVxMap;
+  static map<Int_t,Int_t>                            IndxRcTk2IdMap;
+  static map<Int_t,Int_t>                            IndxKFTk2IdMap;
+  static multimap<StMuPrimaryVertex*, StMuTrack *>   RcVx2RcTkMap;
+  static map<StMuPrimaryVertex*,StMuMcVertex *>      RcVx2McVxMap;
+  static multimap<StMuMcVertex *,StMuPrimaryVertex*> McVx2RcVxMap;
+  static map<Int_t,KFParticle*>                      IdVx2KFVxMap; // 
+  static map<KFParticle*,StMuPrimaryVertex*>         KFVx2RcVxMap;
+  static multimap<StMuPrimaryVertex*,KFParticle*>    RcVx2KFVxMap;
+  static map<KFParticle*,StMuMcVertex *>             KFVx2McVxMap; 
+  static multimap<StMuMcVertex*,KFParticle*>         McVx2KFVxMap; 
+  static multimap<Int_t,StMuTrack *>                 IdMc2RcTkMap; // Reconstucted Track to IdTruth
+  static map<Int_t,Int_t>                            IdGlobalId2IdPrimaryTrackMap; // Primary track Id to Global Track Id
+  static map<Int_t,Int_t>                            IdGlobal2IdPrimaryTrackMap; // Primary track Id to Global Track Id
+  static multimap<Int_t,Int_t>                       IdMc2IdRcTracksMap; // Primary track Id to Global Track Id
+  static multimap<Int_t,Int_t>                       IdMc2IdRcVerticesMap; // 
+  static multimap<StMuMcTrack*,StMuTrack *>          McTrack2GlobalTrackMap; 
+  static multimap<StMuMcTrack*,StMuTrack *>          McTrack2PrimaryTrackMap; 
+  static multimap<StMuMcTrack*,KFParticle *>         McTrack2KFParticleMap; 
+  static vector<StMuPrimaryVertex *>                 RcVxsVec;  // All accepted RcVx
+  static vector<StMuPrimaryVertex *>                 RecoVxVec;  //  1 to 1 Mc to Rc match
+  static vector<StMuPrimaryVertex *>                 CloneVxVec; //  1 to many (>1) Mc to Rc match
+  static vector<StMuPrimaryVertex *>                 GhostVxVec; //  no Mc match
+  static vector<StMuMcVertex *>                      LostVxVec;  //  no Rc match
+  static map<Int_t,Int_t>                            IdGlTk2IndxMap;
+  static map<Int_t,Int_t>                            IdPrTk2IndxMap;
+  static map<Int_t,Int_t>                            IdPrVx2IndxMap;
+  static map<Int_t,Int_t>                            IdKFTk2IndxMap;
+  static map<Int_t,Int_t>                            IdKFVx2IndxMap;
+
   // Increment this by 1 every time the class structure is changed
   ClassDef(StMuDst,4)
 };

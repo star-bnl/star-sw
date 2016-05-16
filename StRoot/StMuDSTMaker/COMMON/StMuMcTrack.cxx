@@ -1,9 +1,12 @@
 // $Id: StMuMcTrack.cxx,v 1.4 2014/08/06 19:19:02 perev Exp $
 #include "StMuMcTrack.h"
+#include "StMuMcVertex.h"
+#include "StMuDst.h"
 #include <string.h>
 #include "Stiostream.h"
 #include "TString.h"
 #include "TMath.h"
+#include "TDatabasePDG.h"
 ClassImp(StMuMcTrack);
 //________________________________________________________________________________
 StMuMcTrack::StMuMcTrack() {
@@ -94,6 +97,30 @@ const Char_t *StMuMcTrack::GeName() {
 }
 //________________________________________________________________________________
 void StMuMcTrack::Print(Option_t *option) const {cout << *this << endl;}
+//________________________________________________________________________________
+void StMuMcTrack::FillKFMCTrack(KFMCTrack &mcTrackKF) {
+  Float_t q = Charge();
+  Int_t pdgRoot = TDatabasePDG::Instance()->ConvertGeant3ToPdg(GePid());
+  if(pdgRoot == 0 && q>0) pdgRoot = 211;
+  if(pdgRoot == 0 && q<0) pdgRoot = -211;
+  mcTrackKF.SetPDG( pdgRoot );
+  Float_t pXYZ[3] = {Pxyz().x(), Pxyz().y(), Pxyz().z()};
+  for (Int_t i = 0; i < 3; i++) {
+    mcTrackKF.SetPar( 3+i, pXYZ[i] );
+  }
+  mcTrackKF.SetPar(6, q/mcTrackKF.P()/3 ); // q=3q            
+  mcTrackKF.SetNMCPoints(No_tpc_hit());
+  mcTrackKF.SetMotherId(-1);
+  Int_t IdV = IdVx() - 1;
+  StMuMcVertex *mcVertex = StMuDst::instance()->MCvertex(IdV);
+  Int_t IdP = mcVertex->IdParTrk() - 1;
+  if( IdP < 0 ) IdP = -(IdV+1);
+  mcTrackKF.SetMotherId(IdP);
+  Float_t vXYZ[3] = {mcVertex->XyzV().x(), mcVertex->XyzV().y(), mcVertex->XyzV().z()};
+  for (Int_t i = 0; i < 3; i++) { // TODO
+    mcTrackKF.SetPar( i,  vXYZ[i] );
+  }
+}
 //________________________________________________________________________________
 // $Log: StMuMcTrack.cxx,v $
 // Revision 1.4  2014/08/06 19:19:02  perev

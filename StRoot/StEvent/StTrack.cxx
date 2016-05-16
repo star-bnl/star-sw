@@ -199,6 +199,14 @@ StTrack::StTrack(const StTrack& track) {
         mOuterGeometry = track.mOuterGeometry->copy();
     else
         mOuterGeometry = 0;
+    if (track.mKFPTrackAtFirstHit)
+      *mKFPTrackAtFirstHit = *track.mKFPTrackAtFirstHit;
+    else
+        mKFPTrackAtFirstHit = 0;
+    if (track.mKFPTrackAtLastHit)
+      *mKFPTrackAtLastHit = *track.mKFPTrackAtLastHit;
+    else
+        mKFPTrackAtLastHit = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
     mPidTraitsVec = track.mPidTraitsVec;
     mNode = 0;                                 // do not assume any context here
@@ -221,6 +229,14 @@ StTrack::operator=(const StTrack& track) {
             mOuterGeometry = track.mOuterGeometry->copy();
         else
             mOuterGeometry = 0;
+    if (track.mKFPTrackAtFirstHit)
+      *mKFPTrackAtFirstHit = *track.mKFPTrackAtFirstHit;
+    else
+        mKFPTrackAtFirstHit = 0;
+    if (track.mKFPTrackAtLastHit)
+      *mKFPTrackAtLastHit = *track.mKFPTrackAtLastHit;
+    else
+        mKFPTrackAtLastHit = 0;
         mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
         mPidTraitsVec = track.mPidTraitsVec;
     }
@@ -231,6 +247,8 @@ StTrack::~StTrack()
 {
     delete mGeometry;
     delete mOuterGeometry;
+    delete mKFPTrackAtFirstHit;
+    delete mKFPTrackAtLastHit;
 }
 
 Short_t

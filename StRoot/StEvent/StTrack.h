@@ -178,6 +178,7 @@
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
+#include "KFPTrack.h"
 class StTrack;
 ostream&  operator<<(ostream& os,  const StTrack& t);
 
@@ -244,8 +245,12 @@ public:
     bool       isRejected()              const {return testBit(kRejectedTrack);}
     bool       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
     bool       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
+    KFPTrack       *kfpTrackAtFirstHit()       {return mKFPTrackAtFirstHit;}
+    const KFPTrack *kfpTrackAtFirstHit() const {return mKFPTrackAtFirstHit;}
+    KFPTrack       *kfpTrackAtLastHit()        {return mKFPTrackAtLastHit;}
+    const KFPTrack *kfpTrackAtLastHit() const  {return mKFPTrackAtLastHit;}
 
-    virtual void setCtbMatched()       {setBit(kCtbMatched);}
+    virtual void setCtbMatched()           {setBit(kCtbMatched);}
     virtual void setToFMatched()  	   {setBit(kToFMatched);}   
     virtual void setBToFMatched()  	   {setBit(kToFMatched);}   
     virtual void setBemcMatched() 	   {setBit(kBemcMatched);}  
@@ -256,8 +261,8 @@ public:
     virtual void setBToFNotMatched()  	   {setBit(kToFNotMatched);}   
     virtual void setBemcNotMatched() 	   {setBit(kBemcNotMatched);}  
     virtual void setEemcNotMatched() 	   {setBit(kEemcNotMatched);}  
-    virtual void setDecayTrack()  	       {setBit(kDecayTrack);}
-    virtual void setPromptTrack() 	       {setBit(kPromptTrack);}       
+    virtual void setDecayTrack()  	   {setBit(kDecayTrack);}
+    virtual void setPromptTrack() 	   {setBit(kPromptTrack);}       
     virtual void setPostCrossingTrack()    {setBit(kPostXTrack);} 
     virtual void setMembraneCrossingTrack(){setBit(kXMembrane);} 
     virtual void setShortTrack2EMC()       {reSetBit(kRejectedTrack); setBit(kShortTrack2EMC);}
@@ -296,6 +301,8 @@ public:
     Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
     void         invertBit(UInt_t f) { mFlagExtension ^= f; }
     virtual void Print(Option_t *option="") const {cout << option << (*this) << endl; }
+    void         setKFPTrackatFirstHit(KFPTrack *t) {mKFPTrackAtFirstHit = t;}
+    void         setKFPTrackatLastHit (KFPTrack *t) {mKFPTrackAtLastHit  = t;}
     
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete
@@ -321,6 +328,8 @@ protected:
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
     StVertex               *mEndVertex;
+    KFPTrack               *mKFPTrackAtFirstHit;
+    KFPTrack               *mKFPTrackAtLastHit;
     Char_t                  mEnd[1]; //!
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
@@ -337,9 +346,9 @@ protected:
     StLink<StTrackNode>          mNode;                 	
     StLink<StVertex>             mVertex;                 	
 #endif //__CINT__
-
+    
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
-    ClassDef(StTrack,11)
+    ClassDef(StTrack,12)
 };
 #endif

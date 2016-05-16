@@ -463,6 +463,7 @@ void  StMuDstMaker::streamerOff() {
   StMuFgtCluster::Class()->IgnoreTObjectStreamer();
   StMuFgtStripAssociation::Class()->IgnoreTObjectStreamer();
   StMuFgtAdc::Class()->IgnoreTObjectStreamer();
+  KFPTrack::Class()->IgnoreTObjectStreamer();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -882,6 +883,7 @@ void StMuDstMaker::read(){
   fillHddr();
   mStMuDst->setVertexIndex(0);
   mStMuDst->collectVertexTracks();   // Make temp list of tracks for current prim vtx
+  mStMuDst->ResetMaps();
   return;
 }
 //-----------------------------------------------------------------------
@@ -1470,20 +1472,22 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
 //-----------------------------------------------------------------------
 #ifdef StTrackMassFit_hh
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillKFTracks(const KFParticle *particle) {
-  if (!particle) return;
+Int_t StMuDstMaker::fillKFTracks(const KFParticle *particle) {
+  if (!particle) return -1;
   TClonesArray &KFTracks = *mStMuDst->KFTracks();
   Int_t j = KFTracks.GetEntriesFast();
-  new (KFTracks[j++]) KFParticle(*particle);
+  new (KFTracks[j]) KFParticle(*particle);
+  return j;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillKFVertices(const KFParticle *particle) {
-  if (!particle) return;
+Int_t StMuDstMaker::fillKFVertices(const KFParticle *particle) {
+  if (!particle) return -1;
   TClonesArray &KFVertices = *mStMuDst->KFVertices();
   Int_t j = KFVertices.GetEntriesFast();
-  new (KFVertices[j++]) KFVertex(*particle);
+  new (KFVertices[j]) KFVertex(*particle);
+  return j;
 }
 #endif /* StTrackMassFit_hh */
 //-----------------------------------------------------------------------
@@ -1528,7 +1532,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
   const StTrack *pTrack=0;
   /// do global track
   int index2Global =-1;
-  int index;
+  int index = -1;
   if (! gTCA) return;
   gTrack= dynamic_cast<const StGlobalTrack *>(node->track(global));
   // check that there is KFParticle fit at vertex
@@ -1563,10 +1567,15 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     track = node->track(j);
     if (! track || (track->type() == global) || (track->type() == primary) ) continue; // exclude global and primary tracks
     if (track->type() == massFitAtVx || track->type() == massFit) {
-      const KFParticle *particle = ((StTrackMassFit *) track)-> kfParticle();
+      KFParticle *particle = ((StTrackMassFit *) track)-> kfParticle();
       if (! particle) continue;
-      if (track->type() == massFitAtVx)  fillKFTracks(particle);
-      else                               fillKFVertices(particle);
+      if (track->type() == massFitAtVx)  {
+	if (index > -1) particle->SetRefId(index);
+	fillKFTracks(particle);
+      } else {
+	if (index2Global > -1) particle->SetRefId(index2Global);
+	fillKFVertices(particle);
+      }
       continue;
     }
     if (oTCA) {
@@ -1681,12 +1690,16 @@ void StMuDstMaker::fillMC() {
   StMuMcTrack  *mctr = 0;
   g2t_vertex_st  *vertex =  g2t_vertex->GetTable();
   UInt_t NV = g2t_vertex->GetNRows();
-  for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
+  for (UInt_t i = 0; i < NV; i++) {
+    Int_t counter = addType(mMCArrays[MCVertex], vertex[i], mcvx);   
+    assert(counter == vertex[i].id-1);
+  }
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
   for (UInt_t i = 0; i < NT; i++) {
     if (track[i].pt<=1e-3) track[i].pt = -999;
-    addType(mMCArrays[MCTrack], track[i], mctr);   
+    Int_t counter = addType(mMCArrays[MCTrack], track[i], mctr);   
+    assert(counter == track[i].id-1);
   }
   
 }

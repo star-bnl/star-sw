@@ -298,9 +298,9 @@ virtual   void closeRead();
   void fillBTof(StEvent* ev);
   void fillMtd(StEvent* ev);
   void fillFgt(StEvent* ev);
-  void fillKFTracks(const KFParticle *p);
-  void fillKFVertices(const KFParticle *p);
-    void fillEzt(StEvent* ev);
+  Int_t fillKFTracks(const KFParticle *p);
+  Int_t fillKFVertices(const KFParticle *p);
+  void fillEzt(StEvent* ev);
 
   void fillHddr();
 

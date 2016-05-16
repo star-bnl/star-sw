@@ -36,6 +36,7 @@
 
 #include "TObject.h"
 #include "TVector.h"
+#include "KFPTrack.h"
 
 #define __PROB_SCALE__  1000.
 #define __SIGMA_SCALE__ 1000.
@@ -68,11 +69,12 @@ class StMuTrack : public TObject {
     Int_t index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
     Int_t index2MtdHit()  const {return mIndex2MtdHit;}   ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
-    const StMuTrack*     globalTrack()  const {return (mIndex2Global >= 0) ? (StMuTrack*)StMuDst::array(muGlobal)->At(mIndex2Global) : 0;}
+    const StMuTrack*     globalTrack()  const {return (mIndex2Global      >= 0) ? (StMuTrack*)StMuDst::array(muGlobal)->At(mIndex2Global) : 0;}
     const StMuTrack*     primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
     const StRichSpectra* richSpectra()  const {return (mIndex2RichSpectra >= 0) ? (StRichSpectra*)StMuDst::array(muRich)->At(mIndex2RichSpectra) : 0;}
-    const StMuBTofHit*   tofHit()       const {return (mIndex2BTofHit >= 0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->At(mIndex2BTofHit) : 0;}
-    const StMuMtdHit*    mtdHit()       const {return (mIndex2MtdHit >= 0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->At(mIndex2MtdHit) : 0;}
+    const StMuBTofHit*   tofHit()       const {return (mIndex2BTofHit     >= 0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->At(mIndex2BTofHit) : 0;}
+    const StMuMtdHit*    mtdHit()       const {return (mIndex2MtdHit      >= 0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->At(mIndex2MtdHit) : 0;}
+    const StDcaGeometry* dcaGeom()      const {return (mIndex2Cov         >= 0) ? StMuDst::instance()->covGlobTracks(mIndex2Cov) : 0;}
     UShort_t nHits() const {return mNHits;}      ///< Return total number of hits on track.
     UShort_t nHitsPoss() const; ///< Return number of possible hits on track.
     UShort_t nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
@@ -141,6 +143,8 @@ class StMuTrack : public TObject {
     void setIndex2BTofHit(Int_t i) {mIndex2BTofHit=i;} /// dongx
     void setIndex2MtdHit(Int_t i) {mIndex2MtdHit=i;} /// Bingchu
     void setIndex2Cov(Int_t i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+    void         setKFPTrackatFirstHit(KFPTrack t) {mkfpTrackAtFirstHit = t;}
+    void         setKFPTrackatLastHit (KFPTrack t) {mkfpTrackAtLastHit  = t;}
 
     //Matching to BEMC related functions
     TArrayI getTower(Bool_t useExitRadius=false, Int_t det=1) const; //Get Tower track is pointing too -  1=BTOW, 3=BSMDE, 4=BSMDP //1=BTOW, 3=BSMDE, 4=BSMDP Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
@@ -151,6 +155,10 @@ class StMuTrack : public TObject {
     Int_t           idParentVx() const {return mIdParentVx;}
     void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
+    KFPTrack       &kfpTrackAtFirstHit()       {return mkfpTrackAtFirstHit;}
+    const KFPTrack &kfpTrackAtFirstHit() const {return mkfpTrackAtFirstHit;}
+    KFPTrack       &kfpTrackAtLastHit()        {return mkfpTrackAtLastHit;}
+    const KFPTrack &kfpTrackAtLastHit() const  {return mkfpTrackAtLastHit;}
 
 protected:
   Int_t mId;
@@ -201,6 +209,8 @@ protected:
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
   Int_t         mIdParentVx;
   Float_t mLengthInTracking;
+  KFPTrack               mkfpTrackAtFirstHit;
+  KFPTrack               mkfpTrackAtLastHit;
   void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -215,7 +225,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,16)
+  ClassDef(StMuTrack,17)
 };
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif

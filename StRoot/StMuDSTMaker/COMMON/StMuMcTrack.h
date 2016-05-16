@@ -3,6 +3,7 @@
 #define __StMuMcTrack_h__
 #include "tables/St_g2t_track_Table.h" 
 #include "StThreeVectorF.hh"
+#include "KFParticlePerformance/KFMCTrack.h"
 class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
@@ -52,6 +53,7 @@ class StMuMcTrack : public TObject {
   virtual void          Print(Option_t* option = "") const;  ///< Print track info
   static Int_t          CorrectGePid(Int_t gePid);
   const Char_t         *GeName();
+  void                  FillKFMCTrack(KFMCTrack &mcTrackKF);
  private:
   Char_t         mBeg[1];      //!
   Int_t          mGePid;       /* GEANT particle id */
