@@ -200,22 +200,32 @@ else
 	if ( ! $?STARCMPL) setenv STARCMPL "gcc"
 	set vers = ""
 	switch ($STARCMPL)
-	 case "icc":
-	    #set vers = `which icc | sed 's/.*compiler//i;s/\/.*//'`
+	 case "*icc*":
+	    #set vers = `which icc | /bin/sed 's/.*compiler//i;s/\/.*//'`
 	    #set vers = `icc -V -dryrun > & /tmp/icc_version; \
 	    #awk '{ if (NR==1) print $8 }' /tmp/icc_version | awk -F\. '{print $1$2}'; \
 	    #rm  /tmp/icc_version;`
 	    set test=`which icc | $GREP "not found"`
 	    if ( "$test" == "") then
-		set vers =  `icc -v >&/tmp/icc_version$$ ; $AWK '{print $2}' /tmp/icc_version$$ | sed "s/\.//" && rm  /tmp/icc_version$$;`
+		set vers =  `$STARCMPL -v >&/tmp/icc_version$$ ; $AWK '{print $2}' /tmp/icc_version$$ | /bin/sed "s/\.//" && /bin/rm  /tmp/icc_version$$;`
 	    endif
+	    setenv STARCMPLC "icc"
 	    breaksw
 
 	 default:
-	    setenv STARCMPL "gcc"
-	    set test=`which gcc | $GREP "not found"`
+	    if ( $?DECHO ) echo "$self :: case default with $STARCMPL"
+	    if ("$STARCMPL" == "") then
+		# verify the compiler actually exists
+		set test=`which gcc | $GREP "not found"`
+		setenv STARCMPLC "gcc"
+            else
+		set test=""
+	    endif
 	    if ( "$test" == "") then
-		set vers = `gcc -dumpversion | $AWK -F. '{print $1$2$3}'`
+		set vers = `$STARCMPL -dumpversion | $AWK -F. '{print $1$2$3}'`
+		if ( $?DECHO ) echo "$self :: Determined version as [$vers]"
+		# now reset it as we will use the canonical compiler name
+		setenv STARCMPLC "gcc"
 	    endif
        endsw
        setenv xSTARCMPL "$STARCMPL$vers"
@@ -233,14 +243,14 @@ else
 		    breaksw
 		case "x86*":
 		case "amd64*":
-		    if ($USE_64BITS == 1) then
-                       setenv STAR_HOST_SYS $rhflavor${redhat}_x8664_${xSTARCMPL}
+		    if ( $USE_64BITS == 1 ) then
+			setenv STAR_HOST_SYS $rhflavor${redhat}_x8664_${STARCMPLC}${vers}
 		    else
-                       setenv STAR_HOST_SYS $rhflavor${redhat}_${xSTARCMPL}
+			setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
 		    endif
 		    breaksw
 		default:
-		    setenv STAR_HOST_SYS $rhflavor${redhat}_${xSTARCMPL}
+		    setenv STAR_HOST_SYS $rhflavor${redhat}_${STARCMPLC}${vers}
 	    endsw
 	endif
 #	echo "STAR_HOST_SYS => $STAR_HOST_SYS"
@@ -259,8 +269,8 @@ if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
 
 
 #  $Log: STAR_SYS,v $
-#  Revision 1.1.1.1  2013/08/22 01:27:48  fisyak
-#  Freeze
+#  Revision 1.56  2016/04/28 14:44:25  jeromel
+#  Allow for wildcard support of compiler family (so we can specify STARCMPL to anything defining STAR_SYS / STAR_HOST_SYS properly)
 #
 #  Revision 1.55  2013/02/15 22:34:46  jeromel
 #  Added GREP to unix_programs.csh to support Unbuntu (and other flavors)
@@ -438,5 +448,5 @@ if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 2013/08/22 01:27:48 $
+#             Last modification $Date: 2016/04/28 14:44:25 $
 #
