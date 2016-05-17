@@ -292,6 +292,8 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mBestVertRef = NULL;
     mFill = mRunId = mEventId = mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
+    mVpdTdiff = mVpdTstart = mVpdZvertex = -999.;
+    mVpdEastHits = mVpdWestHits = -1;
     mZdcWestRate = 0;
     mZdcEastRate = 0;
     mZdcCoincidenceRate = 0;
@@ -341,6 +343,12 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mEbbc         = other.eBbc();
     this->mWbbc         = other.wBbc();
     this->mBbcTimeBin   = other.bbcTimeBin();
+
+    this->mVpdTdiff   = other.vpdTdiff();
+    this->mVpdTstart   = other.vpdTstart();
+    this->mVpdZvertex   = other.vpdZvertex();
+    this->mVpdEastHits   = other.vpdEastHits();
+    this->mVpdWestHits   = other.vpdWestHits();
 
     mZdcWestRate = other.mZdcWestRate;
     mZdcEastRate = other.mZdcEastRate;
@@ -409,6 +417,12 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mWbbc         = rhs.wBbc();
         this->mBbcTimeBin   = rhs.bbcTimeBin();
 
+        this->mVpdTdiff   = rhs.vpdTdiff();
+        this->mVpdTstart   = rhs.vpdTstart();
+        this->mVpdZvertex   = rhs.vpdZvertex();
+        this->mVpdEastHits   = rhs.vpdEastHits();
+        this->mVpdWestHits   = rhs.vpdWestHits();
+
 	mZdcWestRate = rhs.mZdcWestRate;
 	mZdcEastRate = rhs.mZdcEastRate;
 	mZdcCoincidenceRate = rhs.mZdcCoincidenceRate;
@@ -447,6 +461,8 @@ void StJetSkimEvent::clear()
     mMudstFileName = "Undefined";
     mFill = mRunId = mEventId =  mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
+    mVpdTdiff = mVpdTstart = mVpdZvertex = -999.;
+    mVpdEastHits = mVpdWestHits = -1;
     mZdcWestRate = 0;
     mZdcEastRate = 0;
     mZdcCoincidenceRate = 0;
