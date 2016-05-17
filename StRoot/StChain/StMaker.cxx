@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.264 2016/04/21 01:39:24 perev Exp $
+// $Id: StMaker.cxx,v 1.265 2016/05/17 16:00:23 jeromel Exp $
 //
 //
 /*!
@@ -751,13 +751,18 @@ void StMaker::StartMaker()
 void StMaker::EndMaker(Int_t ierr)
 {
   SetMakeReturn(ierr);
-  fgTallyMaker[ierr%10]++;
-  fTallyMaker [ierr%10]++;
+
+  // check dimension in case of logic problem
+  int idx = ierr%10;
+  if ( idx <= kStFatal ){
+    fgTallyMaker[idx]++;
+    fTallyMaker [idx]++;
+  }
   if (m_DataSet) m_DataSet->Pass(ClearDS,0);
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  /*if (GetNumber()>3)*/ 
+  /* if (GetNumber()>3)*/ 
   if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
 
   StopTimer();
@@ -1831,6 +1836,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.265  2016/05/17 16:00:23  jeromel
+// Dinension check protection
+//
 // Revision 1.264  2016/04/21 01:39:24  perev
 // Warnoff
 //
