@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.147 2016/03/28 15:33:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.148 2016/05/17 12:06:43 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1069,6 +1069,7 @@ Bfc_st BFC[] = {
   {"VtxOffSet" ,"" ,"","","" ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
+  {"beamLine3D" ,"" ,"","","" ,"","Use beamline in 3D vertex fit",kFALSE},
   {"min2trkVtx" ,"" ,"","","" ,"","...only 2 tracks needed for vertex finding",kFALSE},
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
@@ -2642,6 +2643,7 @@ Bfc_st BFC[] = {
   {"VtxOffSet" ,"" ,"","","" ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
+  {"beamLine3D" ,"" ,"","","" ,"","Use beamline in 3D vertex fit",kFALSE},
   {"min2trkVtx" ,"" ,"","","" ,"","...only 2 tracks needed for vertex finding",kFALSE},
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
@@ -3663,6 +3665,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
       if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
       if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("beamLine3D" ) ) mk->SetAttr("BeamLine3D"  	, kTRUE);
       if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
       if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
@@ -4196,10 +4199,16 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
       subTag.ToLower(); //printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(subTag.Data());
       if (kgo > 0) {
-	memset(fBFC[kgo].Comment,0,sizeof(fBFC[kgo].Comment)); // be careful size of Comment
+	int len= sizeof(fBFC[kgo].Comment);
+	memset(fBFC[kgo].Comment,0,len); // be careful size of Comment
 	TString Comment(Tag.Data()+in+1,Tag.Capacity()-in-1);
-	strcpy (fBFC[kgo].Comment, Comment.Data());
-	gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
+	if ( Comment.Length() <= len ){
+	  strcpy (fBFC[kgo].Comment, Comment.Data());
+	  gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
+	} else {
+	  gMessMgr->Error()  << Form(" Cpy problem [%s] is > %d - adjust BFC Comment field size", 
+				     Comment.Data(),len) << endm;
+	}
       }
     } else {
       Tag.ToLower();
