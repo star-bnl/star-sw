@@ -1352,6 +1352,18 @@ void KFParticleBase::SetNonlinearMassConstraint( float mass )
 {
   //* Set nonlinear mass constraint (mass)
 
+  const float& px = fP[3];
+  const float& py = fP[4];
+  const float& pz = fP[5];
+  const float& energy  = fP[6];
+  
+  const float residual = (energy*energy - px*px - py*py - pz*pz) - mass*mass;
+  const float dm2 = float(4.f) * ( fC[9]*px*px + fC[14]*py*py + fC[20]*pz*pz + fC[27]*energy*energy +
+                      float(2.f) * ( (fC[13]*py + fC[18]*pz - fC[24]*energy)*px + (fC[19]*pz - fC[25]*energy)*py - fC[26]*pz*energy) );
+  const float dChi2 = residual*residual / dm2;
+  fChi2 += dChi2;
+  fNDF  += 1;
+  
   float mJ[7][7];
   SetMassConstraint( fP, fC, mJ, mass );
   fMassHypo = mass;

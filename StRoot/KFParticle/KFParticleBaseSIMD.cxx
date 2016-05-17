@@ -1151,7 +1151,7 @@ void KFParticleBaseSIMD::SetMassConstraint( float_v *mP, float_v *mC, float_v mJ
   //* Set nonlinear mass constraint (Mass) on the state vector mP with a covariance matrix mC.
   
   const float_v energy2 = mP[6]*mP[6], p2 = mP[3]*mP[3]+mP[4]*mP[4]+mP[5]*mP[5], mass2 = mass*mass;
-
+  
   const float_v a = energy2 - p2 + 2.f*mass2;
   const float_v b = -2.f*(energy2 + p2);
   const float_v c = energy2 - p2 - mass2;
@@ -1244,6 +1244,18 @@ void KFParticleBaseSIMD::SetNonlinearMassConstraint( float_v mass )
 {
   //* Set nonlinear mass constraint (mass)
 
+  const float_v& px = fP[3];
+  const float_v& py = fP[4];
+  const float_v& pz = fP[5];
+  const float_v& energy  = fP[6];
+  
+  const float_v residual = (energy*energy - px*px - py*py - pz*pz) - mass*mass;
+  const float_v dm2 = float_v(4.f) * ( fC[9]*px*px + fC[14]*py*py + fC[20]*pz*pz + fC[27]*energy*energy +
+                      float_v(2.f) * ( (fC[13]*py + fC[18]*pz - fC[24]*energy)*px + (fC[19]*pz - fC[25]*energy)*py - fC[26]*pz*energy) );
+  const float_v dChi2 = residual*residual / dm2;
+  fChi2 += dChi2;
+  fNDF  += 1;
+  
   float_v mJ[7][7];
   SetMassConstraint( fP, fC, mJ, mass, float_m(true) );
   fMassHypo = mass;

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.628 2016/04/28 18:55:19 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.629 2016/05/17 12:05:53 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -280,7 +280,16 @@ Int_t StBFChain::Instantiate()
 	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
-	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
+	  
+	  TString namec = dbMk->GetName();
+	  int len       = sizeof(fBFC[i].Name);
+	  if ( namec.Length() <= len){
+	    strcpy (fBFC[i].Name, namec.Data() );
+	  } else {
+	    gMessMgr->Error() << "Maker name [" << namec
+			      << "] length is > " << len 
+			      << " - increase BFC Name field length" << endm;
+	  }
 
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
@@ -317,7 +326,16 @@ Int_t StBFChain::Instantiate()
       else inpMk = new StIOMaker("inputStream","r",fSetFiles);
       mk = inpMk;
       if (mk) {
-	strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
+	TString namec = mk->GetName();
+	int      len  = sizeof(fBFC[i].Name);
+	if ( namec.Length() <= len){
+	  strcpy (fBFC[i].Name, namec.Data() );
+	} else {
+	  gMessMgr->Error() << "Maker name [" << namec
+			    << "] length is > " << len 
+			    << " - increase BFC Name field length" << endm;
+	}
+
 	SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
 	if (GetOption("ReadAll")) {	//activate all branches
 	  // inpMk->SetBranch("*",0,"r");
@@ -344,7 +362,15 @@ Int_t StBFChain::Instantiate()
       else treeMk = new StTreeMaker("outputStream",fFileOut.Data());
       mk = treeMk;
       if (mk) {
-	strcpy (fBFC[i].Name,(Char_t *) treeMk->GetName());
+	TString namec =  treeMk->GetName();
+	int len       = sizeof(fBFC[i].Name);
+	if ( namec.Length() <= len ){
+	  strcpy (fBFC[i].Name, namec.Data() );
+	} else {
+	  gMessMgr->Error() << "Maker name [" << namec
+			    << "] length is > " << len 
+			    << " - increase BFC Name field length" << endm;
+	}
 	treeMk->SetIOMode("w");
 	SetTreeOptions();
 	goto Add2Chain;
@@ -1098,10 +1124,16 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
       TString subTag(Tag.Data(),in);
       kgo = kOpt(subTag.Data());
       if (kgo > 0) {
-	memset(fBFC[kgo].Comment,0,sizeof(fBFC[kgo].Comment)); // be careful size of Comment
+	int len= sizeof(fBFC[kgo].Comment);
+	memset(fBFC[kgo].Comment,0,len); // be careful size of Comment
 	TString Comment(Tag.Data()+in+1,Tag.Capacity()-in-1);
-	strcpy (fBFC[kgo].Comment, Comment.Data());
-	gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
+	if ( Comment.Length() <= len ){
+	  strcpy (fBFC[kgo].Comment, Comment.Data());
+	  gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
+	} else {
+	  gMessMgr->Error()  << Form(" Cpy problem [%s] is > %d - adjust BFC Comment field size", 
+				     Comment.Data(),len) << endm;
+	}
       }
     } else {
       // printf ("Chain %s\n",tChain.Data());

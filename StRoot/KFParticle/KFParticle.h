@@ -368,7 +368,7 @@ class KFParticle :public KFParticleBase
 #endif
   
 #ifndef KFParticleStandalone
-  ClassDef( KFParticle, 2 )
+  ClassDef( KFParticle, 3 )
 #endif
 };
 

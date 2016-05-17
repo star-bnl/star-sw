@@ -589,7 +589,9 @@ inline void KFParticleFinder::ConstructV0(KFPTrackVector* vTracks,
 
     mother.GetMass(mass, errMass);
     saveMother = saveParticle;
+#ifdef __CUT_MASS__
     saveMother &= (abs(mass - massMotherPDG)/massMotherPDGSigma) < secCuts[0];
+#endif
     saveMother &= ((ldlMin > secCuts[2]) && !isGamma) || isGamma;
     saveMother &= (isK0 || isLambda || isGamma);
   }
