@@ -7,11 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
-<<<<<<< StBFChain.h
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.55 2015/12/26 19:51:18 fisyak Exp $
-=======
  @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.57 2016/05/17 12:05:33 jeromel Exp $
->>>>>>> 1.57
 
  Class to control "BFC" chain
 
