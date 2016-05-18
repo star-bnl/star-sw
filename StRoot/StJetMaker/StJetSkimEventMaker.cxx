@@ -52,6 +52,10 @@
 #include "StTriggerUtilities/Eemc/StEemcTriggerSimu.h"
 #include "StTriggerUtilities/Emc/StEmcTriggerSimu.h"
 
+// StBtofHeader
+#include "StBTofHeader.h"
+#include "StEnumerations.h"
+
 void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv);
 
 ClassImp(StJetSkimEventMaker)
@@ -231,6 +235,23 @@ Int_t StJetSkimEventMaker::Make()
     mEvent->setBbcEastRate(muEvent->runInfo().bbcEastRate());
     mEvent->setBbcCoincidenceRate(muEvent->runInfo().bbcCoincidenceRate());
 
+    // VPD Stuff:
+    if (muDst->btofHeader()){
+      mEvent->setVpdTdiff(muDst->btofHeader()->tDiff());
+      mEvent->setVpdTstart(muDst->btofHeader()->tStart());
+      mEvent->setVpdZvertex(muDst->btofHeader()->vpdVz());
+      mEvent->setVpdEastHits(muDst->btofHeader()->numberOfVpdHits(east));
+      mEvent->setVpdWestHits(muDst->btofHeader()->numberOfVpdHits(west));
+    }
+    else { // No StBTofHeader
+      cout << "BAD BTOFHEADER" << endl;
+      mEvent->setVpdTdiff(-999.);
+      mEvent->setVpdTstart(-999.);
+      mEvent->setVpdZvertex(-999.);
+      mEvent->setVpdEastHits(-1);
+      mEvent->setVpdWestHits(-1);
+    }
+    
     //spin specific info from Mudst:
     int bx7 = muEvent->l0Trigger().bunchCrossingId7bit(muEvent->runId());
     int bx48 =  muEvent->l0Trigger().bunchCrossingId();
