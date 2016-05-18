@@ -72,10 +72,7 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
       }
       else  {
 	if (debug()) {
-          if (targetDet)
-            targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
-          else
-            targetNode->ResetComment(::Form("%30s start refit","Vertex"));
+	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
 	  targetNode->PrintpT("S");}
 //        pNode = targetNode;		continue;
         pNode = targetNode;		
