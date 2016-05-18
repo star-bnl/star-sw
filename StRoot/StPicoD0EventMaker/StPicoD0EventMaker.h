@@ -43,13 +43,15 @@ class StPicoD0EventMaker : public StMaker
     virtual Int_t Finish();
     
   private:
-    bool  isGoodEvent();
+    bool  isGoodEvent() const;
+    bool  isGoodTrigger() const;
     bool  isGoodForVertexFit(StPicoTrack const*,StThreeVectorF const& vtx) const;
     bool  isGoodTrack(StPicoTrack const*) const;
     bool  isPion(StPicoTrack const*) const;
     bool  isKaon(StPicoTrack const*) const;
     bool  isGoodPair(StKaonPion const &) const;
     bool  isGoodMass(StKaonPion const &) const;
+    int   getD0PtIndex(StKaonPion const& kp) const;
     bool  isGoodQaPair(StKaonPion const&, StPicoTrack const&,StPicoTrack const&);
     size_t popcount(size_t) const;
 

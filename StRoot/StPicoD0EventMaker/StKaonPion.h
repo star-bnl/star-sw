@@ -14,6 +14,7 @@
  *
  * **************************************************
  */
+#include <cmath>
 
 #include "TObject.h"
 #include "TClonesArray.h"
@@ -44,6 +45,7 @@ class StKaonPion : public TObject
   unsigned short   pionIdx() const;
   float dcaDaughters() const;
   float cosThetaStar() const;
+  float perpDcaToVtx() const;
           
  private:
   // disable copy constructor and assignment operator by making them private (once C++11 is available in STAR you can use delete specifier instead)
@@ -77,6 +79,7 @@ inline unsigned short   StKaonPion::kaonIdx() const { return mKaonIdx;}
 inline unsigned short   StKaonPion::pionIdx() const { return mPionIdx;}
 inline float StKaonPion::dcaDaughters() const { return mDcaDaughters;}
 inline float StKaonPion::cosThetaStar() const { return mCosThetaStar;}
+inline float StKaonPion::perpDcaToVtx() const { return mDecayLength*std::sin(mPointingAngle);}
 
 #endif
 #endif

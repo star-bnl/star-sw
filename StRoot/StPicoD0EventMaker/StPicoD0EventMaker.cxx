@@ -32,7 +32,7 @@ StPicoD0EventMaker::StPicoD0EventMaker(char const* makerName, StPicoDstMaker* pi
    mOutputFile = new TFile(Form("%s.picoD0.root",fileBaseName), "RECREATE");
    mOutputFile->SetCompressionLevel(1);
    int BufSize = (int)pow(2., 16.);
-   int Split = 99;
+   int Split = 1;
    mTree = new TTree("T", "T", BufSize);
    mTree->SetAutoSave(1000000); // autosave every 1 Mbytes
    mTree->Branch("dEvent", "StPicoD0Event", &mPicoD0Event, BufSize, Split);
@@ -90,9 +90,9 @@ Int_t StPicoD0EventMaker::Make()
    int nTracksFullEvt = 0;
    int nTracksSubEvt1 = 0;
    int nTracksSubEvt2 = 0;
-   const StThreeVectorF &pVtx = mPicoEvent->primaryVertex();
+   unsigned int nHftTracks = 0;
    
-   if (isGoodEvent())
+   if (isGoodTrigger() && isGoodEvent())
    {
       UInt_t nTracks = picoDst->numberOfTracks();
 
@@ -102,7 +102,7 @@ Int_t StPicoD0EventMaker::Make()
 
       std::vector<int> allTracksForVtxFit;
 
-      unsigned int nHftTracks = 0;
+      StThreeVectorF const pVtx = mPicoEvent->primaryVertex();
 
       for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack)
       {
@@ -183,13 +183,12 @@ Int_t StPicoD0EventMaker::Make()
           } // .. end make Kπ pairs
         } // .. end of kaons loop
       }
-
-      mPicoD0Hists->addEvent(*mPicoEvent,*mPicoD0Event,nHftTracks);
    } //.. end of good event fill
 
-   mPicoD0Event->addPicoEvent(*mPicoEvent,&kfVertex, &pVtx);
+   mPicoD0Event->addPicoEvent(*mPicoEvent,&kfVertex);
    mKfVertexEvent.addEvent(*mPicoEvent,&kfVertex,&kfVertexSubEvt1,&kfVertexSubEvt2,
                             nTracksFullEvt,nTracksSubEvt1,nTracksSubEvt2);
+   mPicoD0Hists->addEvent(*mPicoEvent,*mPicoD0Event,nHftTracks);
 
    // This should never be inside the good event block
    // because we want to save header information about all events, good or bad
@@ -199,11 +198,24 @@ Int_t StPicoD0EventMaker::Make()
    return kStOK;
 }
 
-bool StPicoD0EventMaker::isGoodEvent()
+bool StPicoD0EventMaker::isGoodEvent() const
 {
-   return (mPicoEvent->triggerWord() & cuts::triggerWord) &&
-          fabs(mPicoEvent->primaryVertex().z()) < cuts::vz &&
+   return fabs(mPicoEvent->primaryVertex().z()) < cuts::vz &&
           fabs(mPicoEvent->primaryVertex().z() - mPicoEvent->vzVpd()) < cuts::vzVpdVz;
+}
+
+bool StPicoD0EventMaker::isGoodTrigger() const
+{
+#if 0
+  for(auto trg: cuts::triggers)
+  {
+    if(mPicoEvent->isTrigger(trg)) return true;
+  }
+
+  return false;
+#else
+  return true;
+#endif
 }
 
 bool StPicoD0EventMaker::isGoodForVertexFit(StPicoTrack const* const trk, StThreeVectorF const& vtx) const
@@ -247,12 +259,26 @@ bool StPicoD0EventMaker::isGoodMass(StKaonPion const & kp) const
    return kp.m() > cuts::minMass && kp.m() < cuts::maxMass;
 }
 
+int StPicoD0EventMaker::getD0PtIndex(StKaonPion const& kp) const
+{
+   for (int i = 0; i < cuts::nPtBins; i++)
+   {
+      if ((kp.pt() >= cuts::PtBinsEdge[i]) && (kp.pt() < cuts::PtBinsEdge[i + 1]))
+         return i;
+   }
+   return cuts::nPtBins - 1;
+}
+
 bool  StPicoD0EventMaker::isGoodQaPair(StKaonPion const& kp, StPicoTrack const& kaon,StPicoTrack const& pion)
 {
-  return pion.gPt() >= cuts::qaPt && kaon.gPt() >= cuts::qaPt && 
-         pion.nHitsFit() >= cuts::qaNHitsFit && kaon.nHitsFit() >= cuts::qaNHitsFit &&
+  int tmpIndex = getD0PtIndex(kp);
+
+  return pion.nHitsFit() >= cuts::qaNHitsFit && kaon.nHitsFit() >= cuts::qaNHitsFit &&
          fabs(kaon.nSigmaKaon()) < cuts::qaNSigmaKaon && 
-         cos(kp.pointingAngle()) > cuts::qaCosTheta &&
-         kp.pionDca() > cuts::qaPDca && kp.kaonDca() > cuts::qaKDca &&
-         kp.dcaDaughters() < cuts::qaDcaDaughters;
+         cos(kp.pointingAngle()) > cuts::qaCosTheta[tmpIndex] &&
+         kp.pionDca() > cuts::qaPDca[tmpIndex] && kp.kaonDca() > cuts::qaKDca[tmpIndex] &&
+         kp.dcaDaughters() < cuts::qaDcaDaughters[tmpIndex] &&
+         kp.decayLength() > cuts::qaDecayLength[tmpIndex] &&
+         fabs(kp.lorentzVector().rapidity()) < cuts::qaRapidityCut &&
+         ((kp.decayLength()) * sin(kp.pointingAngle())) < cuts::qaDcaV0ToPv[tmpIndex];
 }

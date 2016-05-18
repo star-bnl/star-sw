@@ -2,28 +2,23 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <algorithm>
 
 #include "TH1F.h"
 
-#include "../StPicoDstMaker/StPicoConstants.h"
+#include "StPicoPrescalesConstants.h"
 #include "StPicoPrescales.h"
 
 using namespace std;
 
 ClassImp(StPicoPrescales);
 
-StPicoPrescales::StPicoPrescales(string prescalesFilesDirectoryName): mPrescalesFilesDirectoryName(prescalesFilesDirectoryName)
+StPicoPrescales::StPicoPrescales(string prescalesFilesDirectoryName): 
+  mPrescalesFilesDirectoryName(prescalesFilesDirectoryName)
 {
 
-  for(int i=0;i<nTrigger;++i)
-  {
-    mTriggersIds.push_back(Pico::mTriggerId[i]);
-  }
-
-  for(int i=0;i<nTriggerMtd;++i)
-  {
-    mTriggersIds.push_back(Pico::mTriggerIdMtd[i]);
-  }
+  mTriggersIds = PicoPrescalesConstants::triggerId;
+  std::copy(PicoPrescalesConstants::triggerIdMtd.begin(),PicoPrescalesConstants::triggerIdMtd.end(),std::back_inserter(mTriggersIds));
 
   for(size_t iTrg=0;iTrg<mTriggersIds.size();++iTrg)
   {

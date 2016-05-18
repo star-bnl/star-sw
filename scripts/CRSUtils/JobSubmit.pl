@@ -620,6 +620,8 @@ if ( $ThisYear == 2005 ){
     $SCALIB{"PPPP"}      = "OptLaser";
     $SCALIB{"UU"}        = "OptLaser";
     $SCALIB{"CuAu"}      = "OptLaser";
+    $SCALIB{"DAu"}       = "OptLaser";
+
 
 } else {
     # Well, at first you may get that message ... should tell you that
