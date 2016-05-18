@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 2.4.8.2 2016/05/18 20:07:20 smirnovd Exp $
+// $Id: StiTpcSeedFinder.h,v 2.4.8.3 2016/05/18 20:07:31 smirnovd Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -14,13 +14,20 @@ struct SeedHit_t {
   Double_t x,y,z;
   StiHit   *hit;
 };
-struct Seed_t {
+class Seed_t {
+ public:
   vector<SeedHit_t *> vhit;
   Int_t total_hits;
   StiNodePars firstNodePars;
   StiNodePars lastNodePars;
   StiNodeErrs firstNodeErrs;
   StiNodeErrs lastNodeErrs;
+  virtual void Print(Option_t *option="") const {
+    firstNodePars.print();
+    firstNodeErrs.print();
+    lastNodePars.print();
+    lastNodeErrs.print();
+  }
 };
 class StiTpcSeedFinder {
  public:
@@ -28,6 +35,20 @@ class StiTpcSeedFinder {
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
+// Revision 2.4.8.3  2016/05/18 20:07:31  smirnovd
+// Squashed proposed changes from Irakli and the focus group
+//
+// These changes do not modify pure Sti code. The changes modify the code protected
+// with preprocessor directives such as DO_TPCCATRACKER and therefore is not
+// included in the Sti libary.
+//
+// StiTPCCATrackerInterface: Added DO_TPCCATRACKER_EFF_PERFORMANCE preprocessor
+// directives + other changes
+//
+// StiTpcSeedFinder: Debug related Print() function added
+//
+// StiKalmanTrackFinder: Added DO_TPCCATRACKER_EFF_PERFORMANCE preprocessor directives
+//
 // Revision 2.4.8.2  2016/05/18 20:07:20  smirnovd
 // Revert previous commits on this branch
 //
