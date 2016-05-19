@@ -63,10 +63,10 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
   
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitDaughtersQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
-                                                      (res+parName[iH]).Data(), 
+                                                      (GetDirectoryPath()+res+parName[iH]).Data(), 
                                                       nBins, -xMax[iH],xMax[iH]);
               hFitDaughtersQA[iPart][iH+8] = new TH1F((pull+parName[iH]).Data(),
-                                                      (pull+parName[iH]).Data(), 
+                                                      (GetDirectoryPath()+pull+parName[iH]).Data(), 
                                                       nBins, -6,6);
             }
           }
@@ -81,14 +81,14 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
   
             for( int iH=0; iH<3; iH++ ){
               hDSToParticleQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
-                                                      (res+parName[iH]).Data(), 
+                                                      (GetDirectoryPath()+res+parName[iH]).Data(), 
                                                       nBins, -xMax[iH],xMax[iH]);
               hDSToParticleQA[iPart][iH+3] = new TH1F((pull+parName[iH]).Data(),
-                                                                      (pull+parName[iH]).Data(), 
-                                                                      nBins, -6,6);
+                                                      (GetDirectoryPath()+pull+parName[iH]).Data(), 
+                                                      nBins, -6,6);
             }
             
-            hDSToParticleQA[iPart][6] = new TH1F("r", "r", 1000, 0.0, 20.0);
+            hDSToParticleQA[iPart][6] = new TH1F("r", (GetDirectoryPath()+TString("r")).Data(), 1000, 0.0, 20.0);
           }
           gDirectory->cd(".."); //particle directory
           
@@ -137,16 +137,23 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
               gDirectory->mkdir("Primary");
               gDirectory->cd("Primary");
               {
-                CreateParameterSubfolder("MassConstraint", hPartParamPrimaryMass, hPartParam2DPrimaryMass, hFitQAMassConstraint, iPart);
-                CreateParameterSubfolder("TopoConstraint", hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, hFitQATopoConstraint, iPart);
-                CreateParameterSubfolder("TopoMassConstraint", hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, hFitQATopoMassConstraint, iPart);
+                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamPrimary, hPartParam2DPrimary, hFitQANoConstraint, iPart);
+                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamPrimaryMass, hPartParam2DPrimaryMass, hFitQAMassConstraint, iPart);
+                CreateParameterSubfolder("PVConstraint (3C-Fit)", hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, hFitQATopoConstraint, iPart);
+                CreateParameterSubfolder("PVMassConstraint (4C-Fit)", hPartParamPrimaryTopoMass, hPartParam2DPrimaryTopoMass, hFitQATopoMassConstraint, iPart);
               }
               gDirectory->cd(".."); // particle directory / Parameters
             }
             
             if(plotSecondaryHistograms)
             {
-              CreateParameterSubfolder("Secondary", hPartParamSecondary, hPartParam2DSecondary, 0, iPart);
+              gDirectory->mkdir("Secondary");
+              gDirectory->cd("Secondary");
+              {
+                CreateParameterSubfolder("NoConstraint (1C-Fit)", hPartParamSecondary, hPartParam2DSecondary, 0, iPart);
+                CreateParameterSubfolder("MassConstraint (2C-Fit)", hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, iPart);
+              }
+              gDirectory->cd(".."); // particle directory / Parameters
             }
           }
           gDirectory->cd(".."); //particle directory
@@ -159,19 +166,19 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     gDirectory->cd("PrimaryVertexQA");
     {
       struct {
-        string name;
-        string title;
+        TString name;
+        TString title;
         Int_t n;
         Double_t l,r;
       } Table[nHistosPV]=
       {
-        {"PVResX", "x_{rec}-x_{mc}, cm",     100, -0.1f, 0.1f},
-        {"PVResY", "y_{rec}-y_{mc}, cm",     100, -0.1f, 0.1f},
-        {"PVResZ", "z_{rec}-z_{mc}, cm",     100, -1.f, 1.f},
-        {"PVPullX", "Pull X",     100, -6.f, 6.f},
-        {"PVPullY", "Pull Y",     100, -6.f, 6.f},
-        {"PVPullZ", "Pull Z",     100, -6.f, 6.f},
-        {"Lost", "Lost tracks", 102, -0.01f, 1.01f}        
+        {"PVResX",  "x_{rec}-x_{mc}, cm", 100, -0.1f, 0.1f},
+        {"PVResY",  "y_{rec}-y_{mc}, cm", 100, -0.1f, 0.1f},
+        {"PVResZ",  "z_{rec}-z_{mc}, cm", 100, -1.f, 1.f},
+        {"PVPullX", "Pull X",             100, -6.f, 6.f},
+        {"PVPullY", "Pull Y",             100, -6.f, 6.f},
+        {"PVPullZ", "Pull Z",             100, -6.f, 6.f},
+        {"Lost",    "Lost tracks",        102, -0.01f, 1.01f}        
       };
       
       TString parName[nHistosPVParam] = {"x","y","z","r","Ntracks","Chi2","NDF","Chi2NDF","prob", "PVpurity", 
@@ -194,14 +201,14 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       
       for(int iH=0; iH<nHistosPVParam; iH++)
       {
-        hPVParam[iH]       = new TH1F(parName[iH].Data(),parName[iH].Data(),
+        hPVParam[iH]       = new TH1F(parName[iH].Data(),(GetDirectoryPath()+parName[iH]).Data(),
                                         nBins[iH],xMin[iH],xMax[iH]);
         hPVParam[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
       }
 
       for(int iH=0; iH<nHistosPVParam2D; iH++)
       {
-        hPVParam2D[iH]       = new TH2F(parName2D[iH].Data(),parName2D[iH].Data(),
+        hPVParam2D[iH]       = new TH2F(parName2D[iH].Data(),(GetDirectoryPath()+parName2D[iH]).Data(),
                                         nBinsX2D[iH],xMin2D[iH],xMax2D[iH],
                                         nBinsY2D[iH],yMin2D[iH],yMax2D[iH]);
         hPVParam2D[iH]->GetXaxis()->SetTitle(parXAxisName2D[iH].Data());
@@ -220,7 +227,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->cd("Signal");
         {
           for( int iH=0; iH<nPVefficiency; iH++ ){
-            hPVefficiency[0][iH]   = new TProfile( effName[iH].Data(), effName[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+            hPVefficiency[0][iH]   = new TProfile( effName[iH].Data(), (GetDirectoryPath()+effName[iH]).Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           }
         }
         gDirectory->cd(".."); //L1
@@ -229,7 +236,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->cd("Pileup");
         {
           for( int iH=0; iH<nPVefficiency; iH++ ){
-            hPVefficiency[1][iH]   = new TProfile( effName[iH].Data(), effName[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+            hPVefficiency[1][iH]   = new TProfile( effName[iH].Data(), (GetDirectoryPath()+effName[iH].Data()), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           }
         }
         gDirectory->cd(".."); //L1
@@ -238,7 +245,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->cd("Signal_MCReconstructable");
         {
           for( int iH=0; iH<nPVefficiency; iH++ ){
-            hPVefficiency[2][iH]   = new TProfile( effName[iH].Data(), effName[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+            hPVefficiency[2][iH]   = new TProfile( effName[iH].Data(), (GetDirectoryPath()+effName[iH].Data()), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           }
         }
         gDirectory->cd(".."); //L1
@@ -247,7 +254,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         gDirectory->cd("Pileup_MCReconstructable");
         {
           for( int iH=0; iH<nPVefficiency; iH++ ){
-            hPVefficiency[3][iH]   = new TProfile( effName[iH].Data(), effName[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+            hPVefficiency[3][iH]   = new TProfile( effName[iH].Data(), (GetDirectoryPath()+effName[iH].Data()), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           }
         }
         gDirectory->cd(".."); //L1
@@ -265,10 +272,10 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 
         for( int iH=0; iH<nFitPVTracksQA/2; iH++ ){
           hFitPVTracksQA[iH]   = new TH1F((resTrPV+parNameTrPV[iH]).Data(),
-                                                  (resTrPV+parNameTrPV[iH]).Data(), 
+                                                  (GetDirectoryPath()+resTrPV+parNameTrPV[iH]).Data(), 
                                                   nBinsTrPV, -xMaxTrPV[iH],xMaxTrPV[iH]);
           hFitPVTracksQA[iH+nFitPVTracksQA/2] = new TH1F((pullTrPV+parNameTrPV[iH]).Data(),
-                                                  (pullTrPV+parNameTrPV[iH]).Data(), 
+                                                  (GetDirectoryPath()+pullTrPV+parNameTrPV[iH]).Data(), 
                                                   nBinsTrPV, -6,6);
         }
       }      
@@ -284,7 +291,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd("FitQAvcNMCPVTracks");
           {
             for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
-              hPVFitQa2D[0][0][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+              hPVFitQa2D[0][0][iHPV] = new TH2F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                                 500, 0., 5000.,
                                                 Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
             }
@@ -295,7 +302,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd("FitQAvcNPVTracks");
           {
             for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
-              hPVFitQa2D[0][1][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+              hPVFitQa2D[0][1][iHPV] = new TH2F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                                 500, 0., 5000.,
                                                 Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
             }
@@ -303,7 +310,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd(".."); //FitQA
           
           for(int iHPV=0; iHPV<nHistosPV; ++iHPV){
-            hPVFitQa[0][iHPV] = new TH1F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+            hPVFitQa[0][iHPV] = new TH1F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                          Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
           }
         }
@@ -311,7 +318,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 
         for(int iH=0; iH<nHistosPVParam; iH++)
         {
-          hPVParamSignal[iH] = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
+          hPVParamSignal[iH] = new TH1F((parName[iH]).Data(),(GetDirectoryPath()+parName[iH]).Data(),
                                         nBins[iH],xMin[iH],xMax[iH]);
           hPVParamSignal[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
         }
@@ -328,7 +335,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd("FitQAvcNMCPVTracks");
           {
             for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
-              hPVFitQa2D[1][0][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+              hPVFitQa2D[1][0][iHPV] = new TH2F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                                 500, 0., 5000.,
                                                 Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
             }
@@ -339,7 +346,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd("FitQAvcNPVTracks");
           {
             for(int iHPV=0; iHPV<nHistosPV-1; ++iHPV){
-              hPVFitQa2D[1][1][iHPV] = new TH2F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+              hPVFitQa2D[1][1][iHPV] = new TH2F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                                 500, 0., 5000.,
                                                 Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
             }
@@ -347,7 +354,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
           gDirectory->cd(".."); //FitQA
           
           for(int iHPV=0; iHPV<nHistosPV; ++iHPV){
-            hPVFitQa[1][iHPV] = new TH1F(Table[iHPV].name.data(),Table[iHPV].title.data(),
+            hPVFitQa[1][iHPV] = new TH1F(Table[iHPV].name.Data(),(GetDirectoryPath()+Table[iHPV].title).Data(),
                                          Table[iHPV].n, Table[iHPV].l, Table[iHPV].r);
           }
         }
@@ -355,7 +362,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         
         for(int iH=0; iH<nHistosPVParam; iH++)
         {
-          hPVParamPileup[iH] = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
+          hPVParamPileup[iH] = new TH1F((parName[iH]).Data(),(GetDirectoryPath()+parName[iH]).Data(),
                                         nBins[iH],xMin[iH],xMax[iH]);
           hPVParamPileup[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
         }
@@ -367,7 +374,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       {
         for(int iH=0; iH<nHistosPVParam; iH++)
         {
-          hPVParamBG[iH] = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
+          hPVParamBG[iH] = new TH1F((parName[iH]).Data(),(GetDirectoryPath()+parName[iH]).Data(),
                                         nBins[iH],xMin[iH],xMax[iH]);
           hPVParamBG[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
         }
@@ -379,7 +386,7 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       {
         for(int iH=0; iH<nHistosPVParam; iH++)
         {
-          hPVParamGhost[iH] = new TH1F((parName[iH]).Data(),(parName[iH]).Data(),
+          hPVParamGhost[iH] = new TH1F((parName[iH]).Data(),(GetDirectoryPath()+parName[iH]).Data(),
                                         nBins[iH],xMin[iH],xMax[iH]);
           hPVParamGhost[iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
         }
@@ -396,18 +403,18 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
         TString chi2NamePart = "Chi2Prim";
         chi2NamePart += "_";
         chi2NamePart += fParteff.partName[iPart].data();
-        hTrackParameters[iPart] = new TH1F(chi2NamePart.Data(), chi2NamePart.Data(), 1000, 0, 100);
+        hTrackParameters[iPart] = new TH1F(chi2NamePart.Data(), (GetDirectoryPath()+chi2NamePart).Data(), 1000, 0, 100);
 
       }
-      hTrackParameters[KFPartEfficiencies::nParticles  ] = new TH1F("Chi2Prim_total", "Chi2Prim_total", 1000, 0, 100);
-      hTrackParameters[KFPartEfficiencies::nParticles+1] = new TH1F("Chi2Prim_prim", "Chi2Prim_prim", 1000, 0, 100);
-      hTrackParameters[KFPartEfficiencies::nParticles+2] = new TH1F("Chi2Prim_sec", "Chi2Prim_sec", 1000, 0, 100);
-      hTrackParameters[KFPartEfficiencies::nParticles+3] = new TH1F("Chi2Prim_ghost", "Chi2Prim_ghost", 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles  ] = new TH1F("Chi2Prim_total", (GetDirectoryPath()+TString("Chi2Prim_total")), 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+1] = new TH1F("Chi2Prim_prim", (GetDirectoryPath()+TString("Chi2Prim_prim")), 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+2] = new TH1F("Chi2Prim_sec", (GetDirectoryPath()+TString("Chi2Prim_sec")), 1000, 0, 100);
+      hTrackParameters[KFPartEfficiencies::nParticles+3] = new TH1F("Chi2Prim_ghost", (GetDirectoryPath()+TString("Chi2Prim_ghost")), 1000, 0, 100);
       
-      hTrackParameters[KFPartEfficiencies::nParticles+4] = new TH1F("ProbPrim_total", "ProbPrim_total", 10000, 0, 1);
-      hTrackParameters[KFPartEfficiencies::nParticles+5] = new TH1F("ProbPrim_prim", "ProbPrim_prim", 10000, 0, 1);
-      hTrackParameters[KFPartEfficiencies::nParticles+6] = new TH1F("ProbPrim_sec", "ProbPrim_sec", 10000, 0, 1);
-      hTrackParameters[KFPartEfficiencies::nParticles+7] = new TH1F("ProbPrim_ghost", "ProbPrim_ghost", 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+4] = new TH1F("ProbPrim_total", (GetDirectoryPath()+TString("ProbPrim_total")), 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+5] = new TH1F("ProbPrim_prim", (GetDirectoryPath()+TString("ProbPrim_prim")), 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+6] = new TH1F("ProbPrim_sec", (GetDirectoryPath()+TString("ProbPrim_sec")), 10000, 0, 1);
+      hTrackParameters[KFPartEfficiencies::nParticles+7] = new TH1F("ProbPrim_ghost", (GetDirectoryPath()+TString("ProbPrim_ghost")), 10000, 0, 1);
     }
     gDirectory->cd(".."); //particle directory
 
@@ -452,10 +459,10 @@ void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPa
     
     for( int iH=0; iH<nFitQA/2; iH++ ){
       histo[iH]   = new TH1F((res+parName[iH]).Data(),
-                             (res+parName[iH]).Data(), 
+                             (GetDirectoryPath()+res+parName[iH]).Data(), 
                              nBins, -mult[iH]*xMax[iH],mult[iH]*xMax[iH]);
       histo[iH+8] = new TH1F((pull+parName[iH]).Data(),
-                             (pull+parName[iH]).Data(), 
+                             (GetDirectoryPath()+pull+parName[iH]).Data(), 
                              nBins, -6,6);
     }
   }
@@ -486,7 +493,7 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
       {
         for(int iH=0; iH<nPartEfficiency; iH++)
         {
-          histo[iEff][iH] = new TProfile( partNameEff[iH].Data(), partAxisNameEff[iH].Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
+          histo[iEff][iH] = new TProfile( partNameEff[iH].Data(), (GetDirectoryPath()+partAxisNameEff[iH]).Data(), nBinsEff[iH], xMinEff[iH], xMaxEff[iH]);
           histo[iEff][iH]->GetYaxis()->SetTitle("Efficiency");                  
           histo[iEff][iH]->GetXaxis()->SetTitle(partAxisNameEff[iH].Data());
         }
@@ -502,6 +509,17 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                                           int iPart, bool drawZR)
 {
   TString parName[nHistoPartParam] = {"M","p","p_{t}","y","DecayL","c#tau","chi2ndf","prob","#theta","phi","X","Y","Z","R", "L", "l/dl","Multiplicity"};
+  TString parTitle[nHistoPartParam];
+  TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R"};
+  TString parTitle2D[nHistoPartParam2D];
+  for(int iParam=0; iParam<nHistoPartParam; iParam++)
+  {
+    TString path = GetDirectoryPath();
+    parTitle[iParam] = path + parName[iParam];
+    if(iParam<nHistoPartParam2D)
+      parTitle2D[iParam] = path + parName2D[iParam];
+  }
+  
   TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
                                           "y","Decay length [cm]","Life time c#tau [cm]",
                                           "chi2/ndf","prob","#theta [rad]",
@@ -613,12 +631,12 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
 #endif
   for(int iH=0; iH<nHistoPartParam; iH++)
   {
-    histoParameters[iPart][iH] = new TH1F(parName[iH].Data(),parName[iH].Data(),
+    histoParameters[iPart][iH] = new TH1F(parName[iH].Data(),parTitle[iH].Data(),
                                           nBins[iH],xMin[iH],xMax[iH]);
     histoParameters[iPart][iH]->GetXaxis()->SetTitle(parAxisName[iH].Data());
   }
 
-  histoParameters2D[iPart][0] = new TH2F("y-p_{t}","y-p_{t}",
+  histoParameters2D[iPart][0] = new TH2F(parName2D[0].Data(),parTitle2D[0].Data(),
                                     nBins[3],xMin[3],xMax[3],
                                     nBins[2],xMin[2],xMax[2]);
   histoParameters2D[iPart][0]->GetXaxis()->SetTitle("y");
@@ -626,7 +644,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
 
   if(drawZR)
   {
-    histoParameters2D[iPart][1] = new TH2F("Z-R","Z-R",
+    histoParameters2D[iPart][1] = new TH2F(parName2D[1].Data(),parTitle2D[1].Data(),
                                       nBins[12],xMin[12],xMax[12],
                                       nBins[13],xMin[13],xMax[13]);
     histoParameters2D[iPart][1]->GetXaxis()->SetTitle("Z [cm]");
@@ -666,6 +684,17 @@ void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName,
       CreateFitHistograms(histoFit[iPart], iPart);
   }
   gDirectory->cd("..");
+}
+
+TString KFParticlePerformanceBase::GetDirectoryPath()
+{
+  TString path = gDirectory->GetPath();
+  int fileNamePosition = path.Index("Finder/");
+  path.Remove(0, fileNamePosition+7);
+  path.ReplaceAll("Particles/", "");
+  path.ReplaceAll("/Parameters", "");
+  path+=" ";
+  return path;
 }
 
 void KFParticlePerformanceBase::FillHistos()

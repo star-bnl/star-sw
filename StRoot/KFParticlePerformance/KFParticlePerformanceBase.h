@@ -93,6 +93,7 @@ class KFParticlePerformanceBase
   static const int nFitQA = 16;
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA];
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA];
+  TH1F *hFitQANoConstraint[KFPartEfficiencies::nParticles][nFitQA];
   TH1F *hFitQAMassConstraint[KFPartEfficiencies::nParticles][nFitQA];
   TH1F *hFitQATopoConstraint[KFPartEfficiencies::nParticles][nFitQA];
   TH1F *hFitQATopoMassConstraint[KFPartEfficiencies::nParticles][nFitQA];
@@ -102,17 +103,21 @@ class KFParticlePerformanceBase
   
   static const int nHistoPartParam = 17;
   TH1F *hPartParam[4][KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, Y, decay length, c*tau, chi/ndf, prob, theta, phi, z, multiplicity
+  TH1F *hPartParamPrimary[4][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamPrimaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamPrimaryTopo[4][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamPrimaryTopoMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamSecondary[4][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamSecondaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
 
   static const int nHistoPartParam2D = 2;
   TH2F *hPartParam2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r
+  TH2F *hPartParam2DPrimary[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryTopo[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryTopoMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DSecondary[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DSecondaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
 
   static const int nPartEfficiency = 8; 
   //1 index - prticle index, 2 - index of efficiency, 3 - hystogram dependency (vs p, pt ..)
@@ -159,6 +164,8 @@ class KFParticlePerformanceBase
                                 TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
                                 TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
                                 TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart);
+  
+  TString GetDirectoryPath();
 };
 
 #endif

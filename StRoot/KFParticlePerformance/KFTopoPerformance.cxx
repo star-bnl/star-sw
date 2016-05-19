@@ -1262,7 +1262,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
     float mcX =  mcTrack.X();
     float mcY =  mcTrack.Y();
     float mcZ =  mcTrack.Z();
-    if(histoDSToParticleQA)
+    if(histoDSToParticleQA || hPartParamPrimary == histoParameters)
     {
       mcX =  mcDaughter.X();
       mcY =  mcDaughter.Y();
@@ -1470,11 +1470,15 @@ void KFTopoPerformance::FillHistos()
     const std::vector<KFParticle>& SecondaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
     for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)
     {
-      KFParticle TempPart =  SecondaryCandidates[iP];
+      KFParticle TempPart = SecondaryCandidates[iP];
       int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
       if(iParticle < 0) continue;
       
-      FillParticleParameters(TempPart,iParticle, TempPart.Id(), 0, hPartParamSecondary, hPartParam2DSecondary);
+      const int id = TempPart.Id();
+      FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass);
+      
+      TempPart = fTopoReconstructor->GetParticles()[id];
+      FillParticleParameters(TempPart, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary);
     }
   }
   
@@ -1489,7 +1493,11 @@ void KFTopoPerformance::FillHistos()
         int iParticle = fParteff.GetParticleIndex(TempPart.GetPDG());
         if(iParticle < 0) continue;
         
-        FillParticleParameters(TempPart,iParticle, TempPart.Id(), iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass,hFitQAMassConstraint);
+        const int id = TempPart.Id();
+        FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass,hFitQAMassConstraint);
+        
+        TempPart = fTopoReconstructor->GetParticles()[id];
+        FillParticleParameters(TempPart,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, hFitQANoConstraint);
       }
       
       const std::vector<KFParticle>& PrimaryCandidatesTopo = fTopoReconstructor->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
