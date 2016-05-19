@@ -54,7 +54,8 @@ switch ($pkg)
         setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS opt /usr/lib`
       endif
       source $GROUP_DIR/STAR_SYS
-      setenv CERN /cern64
+#      setenv CERN /cern64
+      setup cern
 #      setenv CERN /afs/rhic.bnl.gov/.asis/x8664_sl5/cern64
 #      setenv CERN /afs/rhic.bnl.gov/star/packages/.DEV2/misc/sl53_x8664_gcc451
       unsetenv CERN_ROOT
@@ -85,7 +86,8 @@ switch ($pkg)
       endif
 #      setenv OPTSTAR /afs/rhic.bnl.gov/star/packages/.DEV2/misc/opt/star/$STAR_HOST_SYS
       source $GROUP_DIR/STAR_SYS
-      setenv CERN /cern
+#      setenv CERN /cern
+      setup cern
       unsetenv CERN_ROOT
       unsetenv OPTSTAR
       unsetenv QTDIR
@@ -219,9 +221,9 @@ switch ($pkg)
 	    if ( ! $?CERN ) then
 		# Define one value - some of the path below are historical
 		if ( $USE_64BITS == 1) then
-		    set x="/cern64 /cern ${AFS_RHIC}/asis/@sys/cern64 ${AFS_RHIC}/asis/@sys/cern /usr/local/cern64 /usr/local/cern /common/star/cern64 /common/star/cern"
+		    set x="/cern64 /cern ${AFS_RHIC}/asis/@sys/cern64 ${AFS_RHIC}/asis/@sys/cern /usr/local/cern64 /usr/local/cern /common/star/cern64 /common/star/cern /software/fisyak/STAR/cern64"
 		else
-		    set x="/cern ${AFS_RHIC}/asis/@sys/cern /usr/local/cern /common/star/cern"
+		    set x="/cern ${AFS_RHIC}/asis/@sys/cern /usr/local/cern /common/star/cern /software/fisyak/STAR/cern"
 		endif
             else
 		# Either it was set before by the search above or there is an 

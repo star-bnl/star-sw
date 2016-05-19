@@ -207,7 +207,9 @@ endif
 
 # If still undefined, set it to /cern and proceed
 # This will act as a safety net / minimal setup
-if ($?CERN == 0)       setenv CERN "/cern"
+if ($?CERN == 0)       then
+    setup cern
+endif
 if ($?CERN_LEVEL == 0) setenv CERN_LEVEL pro
 # add one more check - if does not existing, switch to pro
 if ( ! -e $CERN/$CERN_LEVEL ) then
