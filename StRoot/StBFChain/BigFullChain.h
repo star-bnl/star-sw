@@ -1809,13 +1809,13 @@ Bfc_st BFC[] = { // standard chains
   {"gmtAligner"    ,"","","detDb",             "StGmtAligner","StGmtAligner","GMT cluster plotting",kFALSE},
   {"picoDST"     ,"PicoDst"  ,"",""     ,                      "StPicoDstMaker","StPicoDstMaker","",kFALSE},
   {"fastjet"     ,""  ,"",""     ,         "","fastjet,siscone,siscone_spherical,fastjetplugins","",kFALSE},
-  {"Jet"         ,"","","gen_T",""
-   ,      "StJetEvent,StJetSkimEvent,StJets,StRandomSelector,StUeEvent,StSpinDbMaker,StMCAsymMaker,StJetFinder,fastjet,StJetMaker","",kFALSE},
+  {"Jet"         ,"","","gen_T","", "StJetEvent,StJetSkimEvent,StJets,StRandomSelector,StUeEvent,"
+   "StSpinDbMaker,StMCAsymMaker,StJetFinder,fastjet,StJetMaker"                                 ,"",kFALSE},
   {"VecBos","" ,"","fastjet","","boost_program_options,StJets,StVecBosAna", "Vector Boson analysis",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"MuMc"        ,"","","RMuDst","KFParticle,StMuMcAnalysisMaker"
+  {"MuMc"        ,"","","RMuDst,KFParticle","StMuMcAnalysisMaker"
    ,                                    "KFParticlePerformance,StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},
