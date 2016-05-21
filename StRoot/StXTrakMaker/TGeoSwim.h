@@ -1,4 +1,4 @@
-// $Id: TGeoSwim.h,v 1.1 2016/05/20 18:40:41 perev Exp $
+// $Id: TGeoSwim.h,v 1.2 2016/05/21 02:37:38 perev Exp $
 //
 //
 // Class StTGeoSwim
@@ -52,8 +52,8 @@ public:
 
 TGeoSwim(const char *name="");
 
-void Set(TGeoSwimMag *mag, TGeoSwimLoss *loss,TGeoSwimEnd* endd) {mMag=mag;mLoss=loss;mEnd=endd;}
-void Set(double Rmax,double Zmin,double Zmax);
+void Set(TGeoSwimMag *mag=0, TGeoSwimLoss *loss=0,TGeoSwimEnd* endd=0) {fMag=mag;fLoss=loss;fEnd=endd;}
+void Set(double Rmax,double Zmin,double Zmax,double sMax=10);
  int Set(THelixTrack *inHelx,THelixTrack *otHelx);
  int Set(const double* pos,const double* dir, double curv);
  int OutScene(const double *x) const ;
@@ -66,20 +66,26 @@ const double      *GetDir  (int idx=1) const;
 const char        *GetPath() const;
 const TGeoMaterial*GetMate() const; 
 const double       GetTime() const		{return fTimeFly;} 
+const double       GetPt()   const		{return fPt     ;} 
+const double       GetP()    const		{return fP      ;} 
 
 void Swap() { THelixTrack *h=fHelx[0];fHelx[0]=fHelx[1];fHelx[1]=h;}
 protected:
 
-TGeoSwimMag  *mMag;
-TGeoSwimLoss *mLoss;
-TGeoSwimEnd  *mEnd;
-
+TGeoSwimMag  *fMag;
+TGeoSwimLoss *fLoss;
+TGeoSwimEnd  *fEnd;
+double fSmax;	// Max step size
 double fRmax;
 double fZmin;
 double fZmax;
 double fInOutLen[2];
+double fC;			//curvature 1/cm 
+double fP;			//momentum  loss(GeV) 
+double fPt;			//momentum  loss(GeV) 
 double fPLoss;			//momentum  loss(GeV) 
 double fTimeFly;		//time in seconds 
+double fB[3];
 THelixTrack 	*fHelx[2];
 const TGeoNode  *fNode[2];
 ClassDef(TGeoSwim,0)
