@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.1 2016/05/20 18:40:41 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.2 2016/05/21 02:38:21 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -200,7 +200,7 @@ static const double EC = 2.99792458e-3;
 
       const TGeoMaterial *gmate=0;
       TString path;
-      double maxLen = 200;
+      double maxLen = 10;
 
 //	Loop inside one volume with big ELoss
 
@@ -213,6 +213,7 @@ static const double EC = 2.99792458e-3;
         path = swim.GetPath();
 	inLen = swim.GetLen(0);
 	otLen = swim.GetLen(1);
+
 #ifdef StvELoss
         mELoss->Reset(1);
         mELoss->Set(gmate,p);
@@ -237,8 +238,10 @@ static const double EC = 2.99792458e-3;
     if (iend) break;
     myPos = swim.GetPos(1);
     myDir = swim.GetDir(1);
+    rxy = sqrt(myPos[0]*myPos[0]+myPos[1]*myPos[1]);
     memcpy(pos,myPos,sizeof(pos));
     memcpy(dir,myDir,sizeof(dir));
+    StiDebug::Count("StepSize:Rxy",rxy,otLen);
     double dca = hlxBeg.Dca(pos);
     cosTh2 = (1.-dir[2])*(1.+dir[2]);
     cosTh = sqrt(cosTh2);
