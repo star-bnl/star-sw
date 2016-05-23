@@ -36,7 +36,7 @@ StKFParticlePerformanceInterface::~StKFParticlePerformanceInterface()
   {
     TDirectory *curr = TDirectory::CurrentDirectory();
     TFile *currentFile = TFile::CurrentFile();
-    if (currentFile->IsWritable()) {
+    if (currentFile && currentFile->IsWritable()) {
       fOutFile->cd();
       WriteHistosCurFile(fKFTopoPerformance->GetHistosDirectory());
       
