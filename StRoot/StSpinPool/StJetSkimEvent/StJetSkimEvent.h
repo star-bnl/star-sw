@@ -264,6 +264,12 @@ public:
   void setWbbc(int i) {mWbbc = i;}
   void setBbcTimeBin(int i) {mBbcTimeBin = i;}
 
+  void setVpdTdiff  (float x) {mVpdTdiff   = x;}
+  void setVpdTstart (float x) {mVpdTstart  = x;}
+  void setVpdZvertex(float x) {mVpdZvertex = x;}
+  void setVpdEastHits(int i) {mVpdEastHits = i;}
+  void setVpdWestHits(int i) {mVpdWestHits = i;}
+
   void setZdcWestRate(float x) { mZdcWestRate = x; }
   void setZdcEastRate(float x) { mZdcEastRate = x; }
   void setZdcCoincidenceRate(float x) { mZdcCoincidenceRate = x; }
@@ -294,6 +300,12 @@ public:
   int eBbc() const {return mEbbc;}
   int wBbc() const {return mWbbc;}
   int bbcTimeBin() const {return mBbcTimeBin;}
+
+  float vpdTdiff() const {return mVpdTdiff;}
+  float vpdTstart() const {return mVpdTstart;}
+  float vpdZvertex() const {return mVpdZvertex;}
+  int vpdEastHits() const {return mVpdEastHits;}
+  int vpdWestHits() const {return mVpdWestHits;}
 
   float zdcWestRate() const { return mZdcWestRate; }
   float zdcEastRate() const { return mZdcEastRate; }
@@ -428,6 +440,13 @@ private:
   int mEbbc; //E-bbc summed ADC
   int mWbbc; //W-bbc summed ADC
   int mBbcTimeBin;
+
+  //vpd info:
+  float mVpdTdiff;
+  float mVpdTstart;
+  float mVpdZvertex;
+  int mVpdEastHits;
+  int mVpdWestHits;
     
   //spin db
   int mIsValid;
@@ -456,7 +475,7 @@ private:
 
   TDatime mDatime;
 
-  ClassDef(StJetSkimEvent,6);
+  ClassDef(StJetSkimEvent,7);
 };
 
 // Getters
