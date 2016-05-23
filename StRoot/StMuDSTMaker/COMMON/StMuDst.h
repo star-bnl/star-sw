@@ -233,6 +233,7 @@ public:
 
   /// returns pointer to the primary vertex list
   static TClonesArray* primaryVertices() { return arrays[muPrimaryVertex]; }
+  static TClonesArray* allPrimaryTracks() { return arrays[muPrimary]; } 
   /// returns pointer to a list of tracks belonging to the selected primary vertex
   static TObjArray* primaryTracks() { return mCurrPrimaryTracks; } 
   /// returns pointer to the global tracks list

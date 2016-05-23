@@ -45,7 +45,7 @@ class TDirectory;
 class TH1;
 class TH1F;
 class TH2F;
-class TFile;
+class TDirectory;
 
 class KFParticle;
 class TProfile;
@@ -63,7 +63,7 @@ class KFParticlePerformanceBase
   virtual ~KFParticlePerformanceBase(){};
     
     /// Histograms
-  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);
+  virtual void CreateHistos(string histoDir = "", TDirectory* outFile = 0);
 #ifndef KFPWITHTRACKER
   TDirectory* GetHistosDirectory() { return fHistoDir; }
 #endif

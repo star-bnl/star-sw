@@ -31,21 +31,26 @@ KFParticlePerformanceBase::KFParticlePerformanceBase():
 {
 }
 
-void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
+void KFParticlePerformanceBase::CreateHistos(string histoDir, TDirectory* outFile)
 {
   TDirectory *curdir = gDirectory;
-  if ( (histoDir != "") && outFile) {  // create in file
+  if (outFile) {
     outFile->cd();
-    fHistoDir = outFile->mkdir( TString(histoDir) );
-    fHistoDir->cd();
-
+    if (histoDir != "") {
+      fHistoDir = outFile->mkdir( TString(histoDir) );
+      fHistoDir->cd();
+    }
+  } else {
+    fHistoDir = TDirectory::CurrentDirectory();
+  }
+  {
+  {
     gDirectory->mkdir("KFParticlesFinder");
     gDirectory->cd("KFParticlesFinder");
     histodir = gDirectory;
     gDirectory->mkdir("Particles");
     gDirectory->cd("Particles");
-    {
-      for(int iPart=0; iPart<fParteff.nParticles; ++iPart)
+    for(int iPart=0; iPart<fParteff.nParticles; ++iPart)
       {
         gDirectory->mkdir(fParteff.partName[iPart].data());
         gDirectory->cd(fParteff.partName[iPart].data());
@@ -421,9 +426,9 @@ void KFParticlePerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 
     curdir->cd();    
 
-  }
+    }
 
-  SetHistoCreated();
+    SetHistoCreated();
 }
 
 void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPart)

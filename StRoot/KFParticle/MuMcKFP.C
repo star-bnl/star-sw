@@ -32,7 +32,7 @@
 int nK0=0;
 
 void MuMcKFP(Long64_t Nevent = 999999,
-             const char* file="*.MuDst.root",
+             const char* file="/star/subsys/tpc/fisyak/reco/2014/V0B/*MuDst.root",
              const  char* outFile="MuMcPrV23")
 { 
   
@@ -180,7 +180,6 @@ void MuMcKFP(Long64_t Nevent = 999999,
     for (Int_t l = 0; l < NoPrimaryVertices; l++) {
       StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
 //       Vtx->Print();
-      UShort_t noTracks = Vtx->noTracks();
       if (bestRank>Vtx->ranking()) continue;
       bestRank=Vtx->ranking();
       bestPV=l;
@@ -191,11 +190,11 @@ void MuMcKFP(Long64_t Nevent = 999999,
       double dy = Vtx->posError().y();
       double dz = Vtx->posError().z();
       primVtx_tmp.SetCovarianceMatrix( dx*dx, 0, dy*dy, 0, 0, dz*dz );
+      UShort_t noTracks = Vtx->noTracks();
       primVtx_tmp.SetNContributors(noTracks);
       primVtx_tmp.SetChi2(Vtx->chiSquared());
       vector<int> tracks;
       PrimVertex[l] = KFVertex(primVtx_tmp);
-      if (! noTracks) continue;
       Int_t idd = Vtx->idTruth();
       // Check Mc
       if (idd > 0 && idd <= NoMuMcVertices) {
@@ -374,10 +373,10 @@ void MuMcKFP(Long64_t Nevent = 999999,
       KFVertex pv(primVtx_tmp);
       mStKFParticleInterface.AddPV(pv, tracks);
     }
-#if 1 /* Maksym reconstruction */
+#if 0 /* Maksym reconstruction */
     mStKFParticleInterface.ReconstructParticles();
 #else
-    for(int iPart=0; iPart<particles.size(); iPart++)
+    for(UInt_t iPart=0; iPart<particles.size(); iPart++)
     {
       particles[iPart].SetId(iPart);
       particles[iPart].AddDaughterId(iPart);
@@ -386,14 +385,15 @@ void MuMcKFP(Long64_t Nevent = 999999,
     
     for (Int_t l = 0; l < NoKFVertices; l++)
     {
-      KFVertex *vx = (KFVertex *) KFVertices->UncheckedAt(l);
+      KFVertex *vx = StMuDst::instance()->KFvertex(l);
       if (! vx) continue;
       //if( vx->GetNDF() != 1 ) continue;
             
       KFParticle particle = *vx;
 
       if(particle.NDaughters() != 2) continue;
-      if(particle.DaughterIds()[0] >= particles.size() || particle.DaughterIds()[1] >= particles.size() ) 
+      Int_t np = particles.size();
+      if(particle.DaughterIds()[0] >= np || particle.DaughterIds()[1] >= np ) 
         continue;
 
       vector<int> newIds;

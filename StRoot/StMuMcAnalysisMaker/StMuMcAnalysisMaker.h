@@ -51,6 +51,8 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+class StKFParticleInterface;
+class StKFParticlePerformanceInterface;
 enum TrackType {
   kGlobal = 0, kPrimary, kTotalT  // switch between global and primary tracks
 };
@@ -120,12 +122,14 @@ class StMuMcAnalysisMaker : public StMaker {
   };
   
   Char_t                mBeg[1];        //!
-  StMuDst              *muDst;          //!
+  StMuDst                          *muDst;                             //!
+  StKFParticleInterface            *mStKFParticleInterface;            //!
+  StKFParticlePerformanceInterface *mStKFParticlePerformanceInterface; //!
   Char_t                mEnd[1];        //!
  protected:
  public: 
-  StMuMcAnalysisMaker(const char *name="MuMcAnalysis") : StMaker(name) {memset(mBeg,0,mEnd-mBeg+1);}
-  virtual       ~StMuMcAnalysisMaker() {}
+  StMuMcAnalysisMaker(const char *name="MuMcAnalysis");
+  virtual       ~StMuMcAnalysisMaker();
   virtual Int_t  Init();
   virtual Int_t  InitRun(Int_t runumber);
   void           BookTrackPlots();
@@ -137,8 +141,8 @@ class StMuMcAnalysisMaker : public StMaker {
   void           FillQAPr(TrackMatchType type,const StMuTrack *pTrack, const StMuMcTrack *mcTrack, const KFParticle *particle);
   void           ForceAnimate(unsigned int times=0, int msecDelay=0); 
   void           FillVertexPlots();
-  virtual Int_t  Finish();  
   Bool_t         Check();
+  Int_t          Draw();
   void           DrawQA(Int_t gp = -1, Int_t pp = -1, Int_t xx = -1, Int_t ii = -1);
   void           DrawEff(Double_t ymax=1.0, Double_t pTmin = -1, Int_t animate=0);
   void           DrawdEdx(Double_t lenMin=40);

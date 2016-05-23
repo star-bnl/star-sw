@@ -14,38 +14,40 @@ StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParti
   fKFTopoPerformance = new KFTopoPerformance();
   fKFTopoPerformance->SetTopoReconstructor(tr);
   
-  TFile* curFile = gFile;
-  TDirectory* curDirectory = gDirectory;
+  TFile* curFile = TFile::CurrentFile();
+  TDirectory* curDirectory = TDirectory::CurrentDirectory();
   
   fOutFileName = "StKFParticleFinderQA.root";
   
-  if(!(fOutFileName == ""))
+  if( !TFile::CurrentFile())
     fOutFile = new TFile(fOutFileName.Data(),"RECREATE");
   else
-    fOutFile = gFile;
-  fKFTopoPerformance->CreateHistos("KFTopoReconstructor",fOutFile);
+    fOutFile = TFile::CurrentFile();
+  TDirectory *dir = TDirectory::CurrentDirectory();
+  fKFTopoPerformance->CreateHistos("",dir);
   
-  gFile = curFile;
-  gDirectory = curDirectory;
+  TFile::CurrentFile() = curFile;
+  TDirectory::CurrentDirectory() = curDirectory;
 }
 
 StKFParticlePerformanceInterface::~StKFParticlePerformanceInterface()
 {
   if(fKFTopoPerformance)
   {
-    TDirectory *curr = gDirectory;
-    TFile *currentFile = gFile;
-    
-    fOutFile->cd();
-    WriteHistosCurFile(fKFTopoPerformance->GetHistosDirectory());
-    
-    if(!(fOutFileName == ""))
-    {   
-      fOutFile->Close();
-      fOutFile->Delete();
+    TDirectory *curr = TDirectory::CurrentDirectory();
+    TFile *currentFile = TFile::CurrentFile();
+    if (currentFile->IsWritable()) {
+      fOutFile->cd();
+      WriteHistosCurFile(fKFTopoPerformance->GetHistosDirectory());
+      
+      if(!(fOutFileName == ""))
+	{   
+	  fOutFile->Close();
+	  fOutFile->Delete();
+	}
     }
-    gFile = currentFile;
-    gDirectory = curr;
+    TFile::CurrentFile() = currentFile;
+    TDirectory::CurrentDirectory() = curr;
     
     std::fstream eff(fEfffileName.Data(),std::fstream::out);
     eff << fKFTopoPerformance->fParteff;
@@ -72,8 +74,8 @@ void StKFParticlePerformanceInterface::WriteHistosCurFile( TObject *obj ){
   
   if( !obj->IsFolder() ) obj->Write();
   else{
-    TDirectory *cur = gDirectory;
-    TFile *currentFile = gFile;
+    TDirectory *cur = TDirectory::CurrentDirectory();
+    TFile *currentFile = TFile::CurrentFile();
 
     TDirectory *sub = cur->GetDirectory(obj->GetName());
     sub->cd();
@@ -81,8 +83,8 @@ void StKFParticlePerformanceInterface::WriteHistosCurFile( TObject *obj ){
     TIter it(listSub);
     while( TObject *obj1=it() ) WriteHistosCurFile(obj1);
     cur->cd();
-    gFile = currentFile;
-    gDirectory = cur;
+    TFile::CurrentFile() = currentFile;
+    TDirectory::CurrentDirectory() = cur;
   }
 }
 

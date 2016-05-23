@@ -7,6 +7,11 @@
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
 #include "TArrayD.h"
+#include "KFVertex.h"
+#include "KFParticle.h"
+#include "KFPTrack.h"
+#include "StKFParticleInterface.h"
+#include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
 ClassImp(StMuMcAnalysisMaker);
 //                  [gp]     [type]           [particle] [pm]         [x]         [i]                  
 static TH3F *fHistsT[kTotalT][kTotalTkTypes][kPartypeT][kTotalSigns][kVariables][kTotalQAll] = {0};
@@ -14,6 +19,7 @@ static TH3F *LdEdx[kTotalT][NHypTypes][kTotalSigns][NdEdxPiD] = {0};
 static TH3F *LToF[kTotalT][NHypTypes][kTotalSigns][NToFPiD] = {0};
 static TH1F *GiD[4] = {0};
 static TH2F *McRcHit = 0;
+static const Char_t *TracksVertices[2] = {"Tracks","Vertices"};
 static const Char_t *TitleTrType[kTotalT] = {"Global", "Primary"};
 static const Char_t *TitlePiDtype[NoPiDs] = {"dEdxPiD", "ToFPiD"};
 static const Char_t *TitleCharge[kTotalSigns] = {"(+)", "(-)"};	  
@@ -40,10 +46,19 @@ static const Char_t *KinName = "vs   #eta and pT/|q|";
 static const Char_t *KinPionName = "vs   #eta and pT/|q| for pion";
 static const Char_t *proj[5] = {"zx","zy","x","y","yx"};
 static Int_t nPng = 0;
-ofstream out;
-TString Chapter;
-TString Section;
-TString SubSection;
+static ofstream out;
+static TString Chapter;
+static TString Section;
+static TString SubSection;
+//________________________________________________________________________________
+StMuMcAnalysisMaker::StMuMcAnalysisMaker(const char *name) : StMaker(name) {
+  memset(mBeg,0,mEnd-mBeg+1);
+}
+//________________________________________________________________________________
+StMuMcAnalysisMaker::~StMuMcAnalysisMaker() {
+  SafeDelete(mStKFParticleInterface);
+  SafeDelete(mStKFParticlePerformanceInterface);
+}
 //________________________________________________________________________________
 TH3F *StMuMcAnalysisMaker::GetTrackHist(UInt_t track, UInt_t match, 
 					      UInt_t particle, UInt_t charge, 
@@ -180,7 +195,6 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   Double_t *etaBins = EtaBins.GetArray();
   for (i = 0; i <= neta; i++) {etaBins[i] = -etamax + deta*i;}
   TDirectory *dirs[7] = {0};
-  const Char_t *TracksVertices[2] = {"Tracks","Vertices"};
   dirs[0] = TDirectory::CurrentDirectory(); assert(dirs[0]);
   dirs[0]->cd();
   if (! dirs[0]->GetDirectory(TracksVertices[0])) {
@@ -443,9 +457,22 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   }
   McRcHit = (TH2F *)   dirs[1]->Get("McRcHit");
   if (! McRcHit) McRcHit = new TH2F("McRcHit","No. RC hits in TPC versus No. MC ones",80,-0.5,79.5,80,-0.5,79.5);
+  dirs[0]->cd();
 }
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::BookVertexPlots(){
+  TDirectory *dirs[2] = {0};
+  dirs[0] = TDirectory::CurrentDirectory(); assert(dirs[0]);
+  dirs[0]->cd();
+  if (! dirs[0]->GetDirectory(TracksVertices[1])) {
+    dirs[0]->mkdir(TracksVertices[1]);
+  }
+  dirs[1] = dirs[0]->GetDirectory(TracksVertices[1]); assert(dirs[1]);
+  dirs[1]->cd();
+  
+  mStKFParticleInterface = new StKFParticleInterface;
+  mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
+  dirs[0]->cd();
 }
 //_____________________________________________________________________________
 Int_t StMuMcAnalysisMaker::Make(){
@@ -691,66 +718,352 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillVertexPlots(){
 #if 0
-    // Loop over KF Vetrices and KF particles
-    // Map between Id and position in Clones Array
-    map<Int_t,Int_t> VerId2k;
-    for (Int_t l = 0; l < NoKFVertices; l++) {
-      const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-      if (! vertex) continue;
-      Int_t Id = vertex->GetID();
-      VerId2k[Id] = l;
+  // Loop over KF Vetrices and KF particles
+  // Map between Id and position in Clones Array
+  map<Int_t,Int_t> VerId2k;
+  for (Int_t l = 0; l < NoKFVertices; l++) {
+    const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
+    if (! vertex) continue;
+    Int_t Id = vertex->GetID();
+    VerId2k[Id] = l;
+  }
+  map<Int_t,Int_t> ParId2k;
+  for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
+    const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
+    if (! particle) continue;
+    Int_t Id = particle->GetID();
+    ParId2k[Id] = k;
+  }
+  for (Int_t l = 0; l < NoKFVertices; l++) {
+    const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
+    cout << *vertex << endl;
+    if (vertex->IdTruth()) {
+      StMuMcVertex *mcVertex = muDst->MCtrack(vertex->IdTruth()-1);
+      if (mcVertex) cout << "Mc Vertex:" << *mcVertex << endl;
     }
-    map<Int_t,Int_t> ParId2k;
-    for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
+    Int_t IdPtrk = vertex->GetParentID(); //reconstructed parent track
+    if (IdPtrk) {
+      Int_t k = ParId2k[IdPtrk];
       const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-      if (! particle) continue;
-      Int_t Id = particle->GetID();
-      ParId2k[Id] = k;
+      if (particle) cout << "Parent Track:" << *particle << endl;
     }
-    for (Int_t l = 0; l < NoKFVertices; l++) {
+    Int_t m = vertex->IdParentMcVx(); // MC parent track
+    if (m) {
+      StMuMcTrack *mcTrack = muDst->MCtrack(m-1);
+      if (! mcTrack) continue;
+      cout << "Parent Mc Track:" << *mcTrack << endl;
+    }
+  }
+  cout << "-----------------------------------" << endl;
+  for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
+    const KFParticle *particle = (const KFVertex *) KFTracks->UncheckedAt(k);
+    cout << *particle << endl;
+    if (! particle->GetID()) {cout << "beam" << endl; continue;}
+    Int_t IdPVx = particle->GetParentID(); //reconstructed parent vertex
+    if (particle->IdTruth()) {
+      StMuMcTrack *mcTrack = muDst->MCtrack(particle->IdTruth()-1);
+      if (mcTrack) cout << "Mc Track:" << *mcTrack << endl;
+    }
+    if (IdPVx) {
+      Int_t l = VerId2k[IdPVx];
       const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-      cout << *vertex << endl;
-      if (vertex->IdTruth()) {
-	StMuMcVertex *mcVertex = muDst->MCtrack(vertex->IdTruth()-1);
-	if (mcVertex) cout << "Mc Vertex:" << *mcVertex << endl;
-      }
-      Int_t IdPtrk = vertex->GetParentID(); //reconstructed parent track
-      if (IdPtrk) {
-	Int_t k = ParId2k[IdPtrk];
-	const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-	if (particle) cout << "Parent Track:" << *particle << endl;
-      }
-      Int_t m = vertex->IdParentMcVx(); // MC parent track
-      if (m) {
-	StMuMcTrack *mcTrack = muDst->MCtrack(m-1);
-	if (! mcTrack) continue;
-	cout << "Parent Mc Track:" << *mcTrack << endl;
-      }
+      if (vertex) cout << "Parent Vertex:" << *vertex << endl;
     }
-    cout << "-----------------------------------" << endl;
-    for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
-      const KFParticle *particle = (const KFVertex *) KFTracks->UncheckedAt(k);
-      cout << *particle << endl;
-      if (! particle->GetID()) {cout << "beam" << endl; continue;}
-      Int_t IdPVx = particle->GetParentID(); //reconstructed parent vertex
-      if (particle->IdTruth()) {
-	StMuMcTrack *mcTrack = muDst->MCtrack(particle->IdTruth()-1);
-	if (mcTrack) cout << "Mc Track:" << *mcTrack << endl;
+    Int_t m = particle->IdParentMcVx(); // MC parent vertex
+    if (m) {
+      StMuMcVertex *mcVertex = muDst->MCtrack(m-1);
+      if (! mcVertex) continue;
+      cout << "Parent Mc Vertex:" << *mcVertex << endl;
+    }
+    
+  }
+  cout << "===================================" << endl;
+#else
+#define StRootPV //St root 
+  static Int_t nTracksAll = 0;
+  static Int_t nTracksGhost = 0;
+  static Int_t nStiVertex = 0;
+  static Int_t nKFVertex = 0;
+  Int_t NoMuMcVertices = StMuDst::instance()->numberOfMcVertices(); //if (_debugAsk) cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << NoMuMcVertices << std::endl;
+  Int_t NoMuMcTracks = StMuDst::instance()->numberOfMcTracks();
+  if (! NoMuMcVertices || ! NoMuMcTracks) {
+    cout << "Ev. has no MC information ==> skip it" << endl;
+    return;
+  }
+  vector<KFMCTrack> mcTracks(NoMuMcTracks);
+  for (Int_t k = 0; k < NoMuMcTracks; k++) {
+    StMuMcTrack *mcTrack = StMuDst::instance()->MCtrack(k);
+    if (! mcTrack) continue;
+    //       cout << "McTk: " << *mcTrack << endl;
+    
+    KFMCTrack &mcTrackKF = mcTracks[k];
+    mcTrack->FillKFMCTrack(mcTrackKF);
+  }
+  Int_t NoKFTracks =  StMuDst::instance()->numberOfKFTracks();
+  Int_t NoKFVertices = StMuDst::instance()->numberOfKFVertices();
+  
+  nTracksAll += NoKFTracks;
+  nStiVertex += NoKFVertices;
+  
+#ifdef StRootPV    
+  Int_t NoPrimaryVertices = StMuDst::instance()->numberOfPrimaryVertices();  //if (_debugAsk) cout << "\tPrimaryVertices " << NoPrimaryVertices<< std::endl;
+  const int NoStVertices = 1;
+  //  const int NoStVertices = NoPrimaryVertices;
+  vector<KFVertex> PrimVertex(NoStVertices);
+  //vector<KFVertex> PrimVertex(NoPrimaryVertices);
+  vector< vector<int> > PrimTracks(NoPrimaryVertices);
+  
+  float bestRank=-1000000;
+  int bestPV=0;
+  
+  for (Int_t l = 0; l < NoPrimaryVertices; l++) {
+    StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
+    //       Vtx->Print();
+    if (bestRank>Vtx->ranking()) continue;
+    bestRank=Vtx->ranking();
+    bestPV=l;
+    //convert StMuPrimaryVertex to KFVertex
+    KFPVertex primVtx_tmp;
+    primVtx_tmp.SetXYZ(Vtx->position().x(), Vtx->position().y(), Vtx->position().z());
+    double dx = Vtx->posError().x();
+    double dy = Vtx->posError().y();
+    double dz = Vtx->posError().z();
+    primVtx_tmp.SetCovarianceMatrix( dx*dx, 0, dy*dy, 0, 0, dz*dz );
+    UShort_t noTracks = Vtx->noTracks();
+    primVtx_tmp.SetNContributors(noTracks);
+    primVtx_tmp.SetChi2(Vtx->chiSquared());
+    PrimVertex[l] = KFVertex(primVtx_tmp);
+    Int_t idd = Vtx->idTruth();
+    // Check Mc
+    if (idd > 0 && idd <= NoMuMcVertices) {
+      StMuMcVertex *mcVertex = StMuDst::instance()->MCvertex(idd-1);
+      if (mcVertex->Id() != idd) {
+	cout << "Mismatched idTruth " << idd << " and mcVertex Id " <<  mcVertex->Id() 
+	     << " The vertex is ignored" <<  endl;
       }
-      if (IdPVx) {
-	Int_t l = VerId2k[IdPVx];
-	const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-	if (vertex) cout << "Parent Vertex:" << *vertex << endl;
-      }
-      Int_t m = particle->IdParentMcVx(); // MC parent vertex
-      if (m) {
-	StMuMcVertex *mcVertex = muDst->MCtrack(m-1);
-	if (! mcVertex) continue;
-	cout << "Parent Mc Vertex:" << *mcVertex << endl;
-      }
+      //      mcVertex->Print();
       
     }
-    cout << "===================================" << endl;
+  }
+#endif
+  
+  
+  Int_t NoGlobalTracks = StMuDst::instance()->numberOfGlobalTracks();
+  
+  std::map<int,int> trackIdMap;
+  std::map<int,int> trackIdMap2;
+  
+  vector<KFParticle> particles(NoGlobalTracks*4);
+  vector<int> mcIndexes(NoGlobalTracks*4);
+  vector<int> particlesPdg(NoGlobalTracks*4);
+  int nPartSaved = 0;
+  for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+    StMuTrack *gTrack = StMuDst::instance()->globalTracks(kg);
+    if (! gTrack)            continue;
+    
+    //if (! gTrack->idTruth()) return kFALSE;
+    //       if (! gTrack->charge())  continue;
+    //       if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) continue; // bad fit or short track pointing to EEMC
+    //       if (  gTrack->flag() > 1000) continue;  // pile up track in TPC
+    //       if (  gTrack->nHitsFit() < 10) continue;
+    //  if (  gTrack->qaTruth() < 90) return kFALSE;
+    
+    
+    Int_t kgc = gTrack->index2Cov();
+    if (kgc < 0) continue;
+    StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(kgc);
+    if (! dcaG) continue;
+    //       cout << "dcaG:" <<  *dcaG << endl;
+    Double_t xyzp[6], CovXyzp[21];
+    dcaG->GetXYZ(xyzp,CovXyzp);
+    static KFPTrack track;
+    track.SetParameters(xyzp);
+    track.SetCovarianceMatrix(CovXyzp);
+    track.SetNDF(1);
+    //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
+    track.SetID(kg);
+    Int_t q   = 1;
+    Int_t pdg = 211;
+    if (dcaG->charge() < 0) {
+      q = -1;
+      pdg = -211;
+    } 
+    track.SetCharge(q);
+    
+    
+    
+    trackIdMap[gTrack->id()] = nPartSaved;
+    trackIdMap2[nPartSaved] = gTrack->id();
+    
+#ifdef StRootPV    
+    bool isSecondary = true;
+    const StMuTrack *primTrack = gTrack->primaryTrack();
+    if(primTrack)
+      {
+        const int iPV = primTrack->vertexIndex(); 
+        //continue;
+	//if ((iPV!=bestPV)) continue;
+        {
+          vector<int> &tracksPV = PrimTracks[iPV];
+          tracksPV.push_back(nPartSaved);
+        }
+	
+        if ( iPV==bestPV )
+	  {
+	    KFParticle particle(track, pdg);
+	    particle.SetId(kg);
+	    
+	    particles[nPartSaved] = particle;
+	    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+	    
+	    if(mcIndexes[nPartSaved] > -1)
+	      {
+		particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+		mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+	      }
+	    else
+	      {
+		particlesPdg[nPartSaved] = -1;
+	      }
+	    nPartSaved++;
+	    isSecondary = false;
+	  }
+      }
+    
+    if(isSecondary)
+      {
+        int pdg[3] = {211, 2212, -11};
+        if(q<0)
+	  {
+	    pdg[0] = -211;
+	    pdg[1] = -2212;
+	    pdg[2] = 11;
+	  }
+	
+        for(int iHypo=0; iHypo<3; iHypo++)
+	  {
+	    KFParticle particle(track, pdg[iHypo]);
+	    particle.SetId(kg);
+	    
+	    particles[nPartSaved] = particle;
+	    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+	    
+	    if(mcIndexes[nPartSaved] > -1)
+	      mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+	    
+	    particlesPdg[nPartSaved] = pdg[iHypo];
+	    nPartSaved++;
+	  }
+      }
+#else
+    KFParticle particle(track, pdg);
+    particle.SetId(kg);
+    
+    particles[nPartSaved] = particle;
+    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+    
+    if(mcIndexes[nPartSaved] > -1)
+      {
+        particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+        mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+      }
+    else
+      {
+        particlesPdg[nPartSaved] = -1;
+      }
+    nPartSaved++;
+#endif
+  }
+  
+  particles.resize(nPartSaved);
+  mcIndexes.resize(nPartSaved);
+  particlesPdg.resize(nPartSaved);
+  
+  const Double_t field = StMuDst::instance()->event()->magneticField();
+  
+  mStKFParticleInterface->SetField(field);
+  if(NoKFTracks > 0)
+    mStKFParticleInterface->SetBeamLine( *(StMuDst::instance()->KFtrack(0)));
+  
+  mStKFParticleInterface->SetParticles(particles);
+  mStKFParticleInterface->SetParticlesPdg(particlesPdg);
+  
+#ifdef StRootPV
+  
+  mStKFParticleInterface->InitParticles();
+  if(NoPrimaryVertices>0)
+    {
+      for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
+	{
+	  if (iPV==bestPV)
+	    mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]);
+	}
+    }
+  else
+    {
+      KFPVertex primVtx_tmp;
+      primVtx_tmp.SetXYZ(0, 0, 0);
+      primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
+      primVtx_tmp.SetNContributors(0);
+      primVtx_tmp.SetChi2(-100);
+      
+      vector<int> tracks;
+      KFVertex pv(primVtx_tmp);
+      mStKFParticleInterface->AddPV(pv, tracks);
+    }
+#if 0 /* Maksym reconstruction */
+  mStKFParticleInterface->ReconstructParticles();
+#else
+  for(int iPart=0; iPart<particles.size(); iPart++)
+    {
+      particles[iPart].SetId(iPart);
+      particles[iPart].AddDaughterId(iPart);
+      mStKFParticleInterface->AddParticle(particles[iPart]);
+    }
+  
+  for (Int_t l = 0; l < NoKFVertices; l++)
+    {
+      KFVertex *vx = StMuDst::instance()->KFvertex(l);
+      if (! vx) continue;
+      //if( vx->GetNDF() != 1 ) continue;
+      
+      KFParticle particle = *vx;
+      
+      if(particle.NDaughters() != 2) continue;
+      if(particle.DaughterIds()[0] >= particles.size() || particle.DaughterIds()[1] >= particles.size() ) 
+        continue;
+      
+      vector<int> newIds;
+      newIds.push_back( trackIdMap[particle.DaughterIds()[0]]);
+      newIds.push_back( trackIdMap[particle.DaughterIds()[1]]);
+      
+      particle.CleanDaughtersId();
+      particle.AddDaughterId(newIds[0]);
+      particle.AddDaughterId(newIds[1]);
+      
+      mStKFParticleInterface->AddParticle(particle);
+      if(vx->GetNDF() > 2)
+        mStKFParticleInterface->AddCandidate(particle, 0);
+      else if(vx->GetNDF() > 1)
+        mStKFParticleInterface->AddCandidate(particle, 0);
+    }
+#endif
+#else
+  mStKFParticleInterface->ReconstructTopology();
+#endif //StRootPV
+  
+  
+  mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
+  mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
+  Int_t nevent = 1000000;
+  mStKFParticlePerformanceInterface->SetPrintEffFrequency(nevent);
+  mStKFParticlePerformanceInterface->PerformanceAnalysis();
+#if 0  
+  double GhostTracksRate = double(nTracksGhost)/double(nTracksAll);
+  
+  std::cout << "Ghost Tracks: N = " <<nTracksGhost << " All tracks: " <<  nTracksAll << " Ghost Rate: " << GhostTracksRate << std::endl;
+  std::cout << "nKFVertex " << nKFVertex << " nStiVertex "  << nStiVertex << std::endl;
+#endif
 #endif
 }
 //________________________________________________________________________________
@@ -1109,8 +1422,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3s[2], Int_t animate, Double_t min, Dou
   }
 }
 //_____________________________________________________________________________
-Int_t StMuMcAnalysisMaker::Finish(){
-  if (gROOT->IsBatch()) return kStOk;
+Int_t StMuMcAnalysisMaker::Draw(){
   if (! Check()) return kStOk;
   TString Out("indexMc.html");
   out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
