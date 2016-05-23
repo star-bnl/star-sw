@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.629 2016/05/17 12:05:53 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.630 2016/05/20 16:00:34 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1128,7 +1128,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	memset(fBFC[kgo].Comment,0,len); // be careful size of Comment
 	TString Comment(Tag.Data()+in+1,Tag.Capacity()-in-1);
 	if ( Comment.Length() <= len ){
-	  strcpy (fBFC[kgo].Comment, Comment.Data());
+	  strncpy (fBFC[kgo].Comment, Comment.Data(),sizeof(fBFC[kgo].Comment));
 	  gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
 	} else {
 	  gMessMgr->Error()  << Form(" Cpy problem [%s] is > %d - adjust BFC Comment field size", 
