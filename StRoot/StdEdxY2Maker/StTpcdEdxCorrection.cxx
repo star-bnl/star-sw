@@ -226,6 +226,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (nrows > 1 && nrows < mNumberOfRows) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
       else  {if (nrows == mNumberOfRows) l = row - 1;}
       corl = cor + l;
+    } else {
+      goto ENDL;
     }
     iCut = 0;
     switch (k) {

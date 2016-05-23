@@ -1,6 +1,7 @@
 // $Id: StdEdxY2Maker.cxx,v 1.84 2015/12/24 00:23:03 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
+//#define __CHECK_LargedEdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
@@ -55,6 +56,9 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
+#ifdef  __CHECK_LargedEdx__
+#include "tables/St_g2t_track_Table.h" 
+#endif
 const static Int_t tZero= 19950101;
 const static Int_t tMin = 20090301;
 const static Int_t tMax = 20200101;
@@ -741,6 +745,19 @@ Int_t StdEdxY2Maker::Make(){
 	I70 /= N70; D70 /= N70;
 	D70  = TMath::Sqrt(TMath::Abs(D70 - I70*I70));
 	D70 /= I70;
+#ifdef __CHECK_LargedEdx__
+        static Double_t dEdxMin = 6e-6; // 6keV
+	static Int_t iBreak = 0;
+	if (I70 > dEdxMin) {
+	  iBreak++;
+	  gTrack->Print();
+	  if (gTrack->idTruth() > 0) {
+	    St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");
+	    if (g2t_track) g2t_track->Print(gTrack->idTruth()-1,1);
+	  }
+	  PrintdEdx(2);
+	}
+#endif	
 	if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
 	dst_dedx_st dedx;
 	dedx.id_track  =  Id;
