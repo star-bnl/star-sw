@@ -351,8 +351,8 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   Int_t pitch = s;
   if (iXZ) pitch = 2;
   Double_t Vars[7] = {
-    Npads,             // 0 => no. of pads in cluster
-    Ntmbks,            // 1 => no. of time buckets in cluster
+    (Double_t) Npads,             // 0 => no. of pads in cluster
+    (Double_t) Ntmbks,            // 1 => no. of time buckets in cluster
     -TMath::Tan(_eta), // 2 => tan(phiL)
     _tanl,             // 3 => tan(dipL)
     _z,                // 4 => zL

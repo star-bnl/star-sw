@@ -1,11 +1,38 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.7 2012/01/18 18:11:36 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.7.2.1 2016/05/23 18:33:20 jeromel Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.7.2.1  2016/05/23 18:33:20  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.14.8.2  2016/04/27 17:47:49  zchang
+// *** empty log message ***
+//
+// Revision 1.14  2012/12/10 21:52:46  pibero
+// More simplifications...
+//
+// Revision 1.13  2012/12/10 21:40:06  pibero
+// Simplify code
+//
+// Revision 1.12  2012/12/06 20:45:41  pibero
+// const correctess
+//
+// Revision 1.11  2012/12/06 20:37:26  pibero
+// Print PYTHIA record
+//
+// Revision 1.10  2012/11/25 21:56:58  pibero
+// small bug fix
+//
+// Revision 1.9  2012/11/24 17:16:03  pibero
+// small bug fix
+//
+// Revision 1.8  2012/11/24 03:12:43  pibero
+// Add LSS2010 and BB2010
+//
 // Revision 1.7  2012/01/18 18:11:36  pibero
 // Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
 //
@@ -58,8 +85,12 @@
 #ifndef ST_PYTHIA_EVENT
 #define ST_PYTHIA_EVENT
 
+#include <cstdio>
+#include <algorithm>
 #include "TParticle.h"
 #include "TClonesArray.h"
+
+using std::fill;
 
 class StPythiaEvent : public TObject {
 public:
@@ -67,8 +98,8 @@ public:
   virtual ~StPythiaEvent();
   StPythiaEvent(const StPythiaEvent& other);
   StPythiaEvent& operator=(const StPythiaEvent& rhs);
-  enum { NPDF=31 };
-  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30 };
+  enum { NPDF=35, NUMNNPDF=101};
+  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30, LSS2010_delGpos=31, LSS2010_chsign_delG=32, BB2010=33, DSSV2014=34};
   int runId() const;
   int eventId() const;
   int processId() const;
@@ -91,6 +122,12 @@ public:
   float f1(PDF scenario = STD) const;
   float f2(PDF scenario = STD) const;
   float ALL(PDF scenario = STD) const;
+  //NNPDF
+  float dF1NNPDF(int iset) const;
+  float dF2NNPDF(int iset) const;
+  float f1NNPDF() const;
+  float f2NNPDF() const;
+  float aLLNNPDF(int iset = 0) const;
 
   const TClonesArray* particles() const;
   int numberOfParticles() const;
@@ -117,8 +154,15 @@ public:
   void setDF2(PDF scenario, float val);
   void setF1(PDF scenario, float val);
   void setF2(PDF scenario, float val);
+  //NNPDF
+  void setDF1NNPDF(int iset, float val);
+  void setDF2NNPDF(int iset, float val);
+  void setF1NNPDF(float val);
+  void setF2NNPDF(float val);
   
   void addParticle(const TParticle& particle);
+  void print() const;
+  void printHelper(int first, int last) const;
   
 private:
   int mRunId;
@@ -137,14 +181,20 @@ private:
   int mMstu73;
   int mMstp111;
   float mPartonALL;
-  float mDF1[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
-  float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
+  float mDF1[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a][LSS2010_delGpos][LSS2010_chsign_delG][BB2010]
+  float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a][LSS2010_delGpos][LSS2010_chsign_delG][BB2010]
   float mF1[2];   //[LO][NLO]
   float mF2[2];   //[LO][NLO]
-  
+
+  //NNPDF
+  float mDF1NNPDF[NUMNNPDF];
+  float mDF2NNPDF[NUMNNPDF];
+  float mF1NNPDF;
+  float mF2NNPDF;
+
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent,6);
+  ClassDef(StPythiaEvent, 9);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
@@ -169,53 +219,27 @@ inline float StPythiaEvent::dF2(PDF scenario) const { return mDF2[scenario]; }
 
 inline float StPythiaEvent::f1(PDF scenario) const 
 {
-    if(scenario == LO) return mF1[0];
-    return mF1[1];
+  return (scenario == LO) ? mF1[LO] : mF1[NLO];
 }
 
 inline float StPythiaEvent::f2(PDF scenario) const 
 {
-    if(scenario == LO) return mF2[0];
-    return mF2[1];
+  return (scenario == LO) ? mF2[LO] : mF2[NLO];
 }
 
 inline float StPythiaEvent::ALL(PDF scenario) const
 {
-  switch(scenario) 
-    {
-    case(LO):   return (mDF1[0]*mDF2[0]*mPartonALL) / (mF1[0]*mF2[0]);
-    case(NLO):  return (mDF1[1]*mDF2[1]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(ZERO): return (mDF1[2]*mDF2[2]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(MAX):  return (mDF1[3]*mDF2[3]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(MIN):  return (mDF1[4]*mDF2[4]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M015):  return (mDF1[5]*mDF2[5]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M030):  return (mDF1[6]*mDF2[6]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M045):  return (mDF1[7]*mDF2[7]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M060):  return (mDF1[8]*mDF2[8]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M075):  return (mDF1[9]*mDF2[9]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M090):  return (mDF1[10]*mDF2[10]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M105):  return (mDF1[11]*mDF2[11]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P030):  return (mDF1[12]*mDF2[12]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P045):  return (mDF1[13]*mDF2[13]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P060):  return (mDF1[14]*mDF2[14]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P070):  return (mDF1[15]*mDF2[15]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOA):  return (mDF1[16]*mDF2[16]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOB):  return (mDF1[17]*mDF2[17]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOC):  return (mDF1[18]*mDF2[18]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DSSV):  return (mDF1[19]*mDF2[19]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS1):  return (mDF1[20]*mDF2[20]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS2):  return (mDF1[21]*mDF2[21]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS3):  return (mDF1[22]*mDF2[22]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC1):  return (mDF1[23]*mDF2[23]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC2):  return (mDF1[24]*mDF2[24]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC3):  return (mDF1[25]*mDF2[25]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(BB1):  return (mDF1[26]*mDF2[26]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(BB2):  return (mDF1[27]*mDF2[27]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DNS1):  return (mDF1[28]*mDF2[28]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DNS2):  return (mDF1[29]*mDF2[29]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DSSV2009a): return (mDF1[DSSV2009a]/mF1[1])*(mDF2[DSSV2009a]/mF2[1])*mPartonALL;
-    default:    return -999;
-    }
+  return (dF1(scenario)*dF2(scenario)*partonALL())/(f1(scenario)*f2(scenario));
+}
+//NNPDF
+inline float StPythiaEvent::dF1NNPDF(int iset) const { return mDF1NNPDF[iset]; }
+inline float StPythiaEvent::dF2NNPDF(int iset) const { return mDF2NNPDF[iset]; }
+inline float StPythiaEvent::f1NNPDF() const { return mF1NNPDF; }
+inline float StPythiaEvent::f2NNPDF() const { return mF2NNPDF; }
+inline float StPythiaEvent::aLLNNPDF(int iset) const {
+  if(f1NNPDF()*f2NNPDF() > 0 || f1NNPDF()*f2NNPDF() < 0)
+  return (dF1NNPDF(iset)*dF2NNPDF(iset)*partonALL())/(f1NNPDF()*f2NNPDF());
+  else return 0;
 }
 
 inline const TClonesArray* StPythiaEvent::particles() const { return mParticles; }
@@ -245,10 +269,8 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mMstu73 = 0;
     mMstp111 = 0;
     mPartonALL = 0;
-    for (int ii=0; ii<30; ii++) {
-      mDF1[ii] = 0;
-      mDF2[ii] = 0;
-    }
+    fill(mDF1,mDF1+NPDF,0);
+    fill(mDF2,mDF2+NPDF,0);
     mF1[0] = 0; mF1[1] = 0;
     mF2[0] = 0; mF2[1] = 0;
 
@@ -273,7 +295,6 @@ inline void StPythiaEvent::setMstp111(int mstp111) { mMstp111 = mstp111; }
 inline void StPythiaEvent::setPartonALL(float a) { mPartonALL = a; }
 inline void StPythiaEvent::setDF1(PDF scenario, float val) { mDF1[scenario] = val; }
 inline void StPythiaEvent::setDF2(PDF scenario, float val) { mDF2[scenario] = val; }
-
 inline void StPythiaEvent::setF1(PDF scenario, float val) 
 {
     if(scenario == LO) mF1[0] = val;
@@ -284,6 +305,44 @@ inline void StPythiaEvent::setF2(PDF scenario, float val)
 {
     if(scenario == LO) mF2[0] = val;
     mF2[1] = val;
+}
+//NNPDF
+inline void StPythiaEvent::setDF1NNPDF(int iset, float val) { mDF1NNPDF[iset] = val; }
+inline void StPythiaEvent::setDF2NNPDF(int iset, float val) { mDF2NNPDF[iset] = val; }
+inline void StPythiaEvent::setF1NNPDF(float val) { mF1NNPDF = val;}
+inline void StPythiaEvent::setF2NNPDF(float val) { mF2NNPDF = val;}
+
+inline void StPythiaEvent::print() const
+{
+  // Header
+  puts("                            Event listing (standard)\n");
+  puts("    I  particle/jet  K(I,1)   K(I,2) K(I,3)     K(I,4)      K(I,5)       P(I,1)       P(I,2)       P(I,3)       P(I,4)       P(I,5)\n");
+
+  // Colliding protons
+  printHelper(0,2);
+  puts(" ==================================================================================================================================");
+
+  // Hard collision
+  printHelper(2,mstu72());
+  puts(" ==================================================================================================================================");
+
+  // Fragmentation
+  printHelper(mstu72(),mstu73());
+  puts(" ==================================================================================================================================");
+
+  // Hadronization
+  printHelper(mstu73(),numberOfParticles());
+  puts(" ==================================================================================================================================");
+}
+
+inline void StPythiaEvent::printHelper(int first, int last) const
+{
+  for (int i = first; i < last; ++i) {
+    const TParticle* part = particle(i);
+    TLorentzVector mom;
+    part->Momentum(mom);
+    printf("%5d%14s%8d%9d%7d%11d%12d%13f%13f%13f%13f%13f\n",i+1,part->GetName(),part->GetStatusCode(),part->GetPdgCode(),part->GetFirstMother(),part->GetFirstDaughter(),part->GetLastDaughter(),mom.Px(),mom.Py(),mom.Pz(),mom.E(),mom.M());
+  }
 }
 
 #endif

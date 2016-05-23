@@ -1,4 +1,4 @@
-// $Id: St2011Wlumi_histo.cxx,v 1.1 2011/02/10 20:33:24 balewski Exp $
+// $Id: St2011Wlumi_histo.cxx,v 1.1.2.1 2016/05/23 18:33:22 jeromel Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -14,69 +14,27 @@
 void
 St2011WlumiMaker::initHistos(){
   //  const float PI=TMath::Pi();
-  TString core="lumi_"; // prefix added to every histo name, to allow for multipl maker saving histos in the same root file
+  TString core="lum"; // prefix added to every histo name, to allow for multipl maker saving histos in the same root file
 
 
   //...... data histograms
   memset(hA,0,sizeof(hA));
-  TList *Lx;  TLine *ln;TH1 *h;
-  char txt[1000], txt0[100];
-  int nCase=2;
+  TH1 *h;
+  int nCase=4;
 
-  hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
+  hA[0]=h=new TH1F(core+"StatEve",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
 
-  char key[][200]={"L2W","L2Wnormal","L2Wrandom"};
-  for(int i=0;i<3;i++) h->Fill(key[i],0.); // preset the order of keys
+  char key[][200]={"inp","ver","PT>10","B ET>1"};
+  for(int i=0;i<4;i++) h->Fill(key[i],0.); // preset the order of keys
   
-  // free 1-4, can be used
-  hA[5]=h=new TH1F(core+"WET","  Final W selection; 2x2 cluster ET (GeV), scaled by fdet", 100,0,100);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(par_highET,0,par_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  sprintf(txt,"TPC GLOB Q/PT  ; 2x2 cluster ET (GeV); Q/PT");
-  hA[6]=h=new TH2F(core+"chRecPNg", txt,100,0.,100.,100,-0.1,0.1);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  hA[1]=new TH1F(core+"EleTrET","max ET of track w/ PT>10 GeV/c;barrel  2x2  ET (GeV)", 50,0,50);
 
-  sprintf(txt,"TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT");
-  hA[7]=h=new TH2F(core+"chRecPNp", txt,100,0.,100.,100,-0.1,0.1);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-
-  //free 8-9
-
-  //use 10-15
-  char cPM[2]={'P','N'}; // Positive, Negative
-  for(int ipn=0;ipn<2;ipn++){ 
-    sprintf(txt0,"chWET%cg",cPM[ipn]);
-    sprintf(txt,"Final W  glob sign=%c; 2x2 cluster ET ",cPM[ipn]);
-    hA[10+ipn]=h=new TH1F(core+txt0, txt, 100,0,100);
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(par_highET,0,par_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-       
-    sprintf(txt0,"chWET%cp",cPM[ipn]);
-    sprintf(txt,"Final W  prim sign=%c; 2x2 cluster ET ",cPM[ipn]);
-    hA[12+ipn]=h=new TH1F(core+txt0, txt, 100,0,100);
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(par_highET,0,par_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-       
- 
-    sprintf(txt0,"chCF%c0",cPM[ipn]);
-    sprintf(txt,"prim sign=%c flip after V-refit; 2x2 cluster ET ",cPM[ipn]);
-    hA[14+ipn]=h=new TH1F(core+txt0, txt, 100,0,100);
-  }
-
-  //use 16+
-  sprintf(txt,"Integrated (per run) Lumi vs Time; run number;Luminosity (pb^-1)");
-  hA[16]=h=new TH1F(core+"LvsT", txt,200000,10000000,10200000);
-
-  sprintf(txt,"Live fraction of BEMC vs Time; run number;Fraction of towers with good status");
-  hA[17]=h=new TH1F(core+"GoodvsT", txt,200000,10000000,10200000);
-
-  sprintf(txt,"Single Beam Background Counts vs Time;run number;Background BHT3 counts");
-  hA[18]=h=new TH1F(core+"SBBvsT",txt,200000,10000000,10200000);
+  hA[2]=new TH1F(core+"Y0","input event w/ OK prim tracks; spin4 ",16,-0.5,15.5);
+  hA[3]=new TH1F(core+"Y2","EleTrET [5,10] GeV; spin4 ",16,-0.5,15.5);
+  hA[4]=new TH1F(core+"Y3","EleTrET [10,14] GeV; spin4 ",16,-0.5,15.5);
 
 
   // add histos to the list (if provided)
@@ -85,12 +43,19 @@ St2011WlumiMaker::initHistos(){
     HList->Add( hA[i]);
   }
   //  HList->ls();
-  LOG_INFO<<Form("%s::initHistos done1",GetName())<<endm;
+  LOG_INFO<<Form("%s::initHistos done",GetName())<<endm;
 
 }
 
 
 // $Log: St2011Wlumi_histo.cxx,v $
+// Revision 1.1.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.2  2012/09/14 21:02:29  balewski
+// *lumi-maker re-written to accumulate alternative rel lumi monitors,
+// * added spin sorting to Zs
+//
 // Revision 1.1  2011/02/10 20:33:24  balewski
 // start
 //

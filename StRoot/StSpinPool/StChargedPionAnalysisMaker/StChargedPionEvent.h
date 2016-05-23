@@ -1,7 +1,7 @@
 #ifndef ST_CHARGED_PION_EVENT_HH
 #define ST_CHARGED_PION_EVENT_HH
 
-// $Id: StChargedPionEvent.h,v 1.6 2008/12/29 15:58:28 kocolosk Exp $
+// $Id: StChargedPionEvent.h,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $
 
 #include <string>
 using std::string;
@@ -221,7 +221,19 @@ addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
 
 /*****************************************************************************
  * $Log: StChargedPionEvent.h,v $
+ * Revision 1.6.2.1  2016/05/23 18:33:18  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.7  2012/11/09 03:31:34  perev
+ * Cleanup
+ *
  * Revision 1.6  2008/12/29 15:58:28  kocolosk
- * removed commented code and added Id and Log as needed
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $/$Log: StChargedPionEvent.h,v $
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.7 2012/11/09 03:31:34 perev Exp $/Revision 1.6.2.1  2016/05/23 18:33:18  jeromel
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.7 2012/11/09 03:31:34 perev Exp $/Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.7 2012/11/09 03:31:34 perev Exp $/
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $/Revision 1.7  2012/11/09 03:31:34  perev
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $/Cleanup
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $/ as needed
  *
  *****************************************************************************/

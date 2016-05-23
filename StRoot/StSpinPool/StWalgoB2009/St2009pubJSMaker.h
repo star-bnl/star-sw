@@ -1,4 +1,4 @@
-// $Id: St2009pubJSMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubJSMaker.h,v 1.1.6.1 2016/05/23 18:33:23 jeromel Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -67,7 +67,7 @@ class St2009pubJSMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubJSMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubJSMaker.h,v 1.1.6.1 2016/05/23 18:33:23 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -78,6 +78,12 @@ class St2009pubJSMaker : public StMaker {
 
 
 // $Log: St2009pubJSMaker.h,v $
+// Revision 1.1.6.1  2016/05/23 18:33:23  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.1.4.2  2016/04/27 17:47:53  zchang
+// *** empty log message ***
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

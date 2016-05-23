@@ -4,6 +4,15 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.5.2.1  2016/05/23 18:33:20  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.6.8.2  2016/04/27 17:47:49  zchang
+// *** empty log message ***
+//
+// Revision 1.6  2012/12/10 21:52:46  pibero
+// More simplifications...
+//
 // Revision 1.5  2012/01/18 18:11:36  pibero
 // Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
 //
@@ -35,15 +44,32 @@
 // use Pibero's StPythiaEvent class to supply mcAsymMaker results to user
 //
 
+#include <algorithm>
 #include "StPythiaEvent.h"
+
+using std::copy;
 
 ClassImp(StPythiaEvent);
 
 StPythiaEvent::StPythiaEvent()
 {
-    mParticles = new TClonesArray("TParticle");
-
-    Clear();
+  mF1NNPDF = 1000.;
+  mF2NNPDF = 1000.;
+  mF1[0] = 1000.;
+  mF1[1] = 1000.;
+  mF2[0] = 1000.;
+  mF2[1] = 1000.;
+  for(int i = 0; i < NUMNNPDF; i++){
+    mDF1NNPDF[i] = 0.;
+    mDF2NNPDF[i] = 0.;
+  }
+  for(int i = 0; i < NPDF; i++){
+    mDF1[i] = 0.;
+    mDF2[i] = 0.;
+  }
+  mParticles = new TClonesArray("TParticle");
+  Clear();
+    
 }
 
 StPythiaEvent::~StPythiaEvent()
@@ -71,16 +97,18 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mMstu73     = t.mMstu73;
     mMstp111    = t.mMstp111;
     mPartonALL  = t.mPartonALL;
+
+    copy(t.mDF1,t.mDF1+NPDF,mDF1);
+    copy(t.mDF2,t.mDF2+NPDF,mDF2);
     
-    for(int i=0; i<NPDF; i++) {
-        mDF1[i] = t.mDF1[i];
-        mDF2[i] = t.mDF2[i];
-    }
-    
-    for(int i=0; i<2; i++) {
-        mF1[i]  = t.mF1[i];
-        mF2[i]  = t.mF2[i];
-    }
+    copy(t.mF1,t.mF1+2,mF1);
+    copy(t.mF2,t.mF2+2,mF2);
+
+    mF1NNPDF = t.mF1NNPDF;
+    mF2NNPDF = t.mF2NNPDF;
+
+    copy(t.mDF1NNPDF, t.mDF1NNPDF+NUMNNPDF, mDF1NNPDF);
+    copy(t.mDF2NNPDF, t.mDF2NNPDF+NUMNNPDF, mDF2NNPDF);
 
     mParticles = new TClonesArray("TParticle");
 
@@ -111,16 +139,18 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mMstp111    = rhs.mMstp111;
     mPartonALL  = rhs.mPartonALL;
     
-    for(int i=0; i<NPDF; i++) {
-        mDF1[i] = rhs.mDF1[i];
-        mDF2[i] = rhs.mDF2[i];
-    }
+    copy(rhs.mDF1,rhs.mDF1+NPDF,mDF1);
+    copy(rhs.mDF2,rhs.mDF2+NPDF,mDF2);
     
-    for(int i=0; i<2; i++) {
-        mF1[i]  = rhs.mF1[i];
-        mF2[i]  = rhs.mF2[i];
-    }
+    copy(rhs.mF1,rhs.mF1+2,mF1);
+    copy(rhs.mF2,rhs.mF2+2,mF2);
 
+    mF1NNPDF = rhs.mF1NNPDF;
+    mF2NNPDF = rhs.mF2NNPDF;
+
+    copy(rhs.mDF1NNPDF, rhs.mDF1NNPDF+NUMNNPDF, mDF1NNPDF);
+    copy(rhs.mDF2NNPDF, rhs.mDF2NNPDF+NUMNNPDF, mDF2NNPDF);
+    
     mParticles->Clear();
     
     for (int i = 0; i < rhs.mParticles->GetEntriesFast(); ++i) {

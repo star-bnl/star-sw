@@ -1,4 +1,4 @@
-// $Id: St2011pubSpin_histo.cxx,v 1.4 2012/08/28 14:28:28 stevens4 Exp $
+// $Id: St2011pubSpin_histo.cxx,v 1.4.2.1 2016/05/23 18:33:22 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -104,6 +104,16 @@ St2011pubSpinMaker::initHistos(){
     hA[18+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,10,0,100);
     h->SetFillColor(iCol[ipn]);
 
+    sprintf(txt0,"Y6_%c",cPM[ipn]);
+    sprintf(txt,"High pT Barrel QCD Q=%c, 2x2 ET=[25,50]GeV: %s; spin4  ",cPM[ipn],coreTitle.Data());
+    hA[20+ipn]=h=new TH1F(core+txt0,txt,16,-0.5,15.5);
+    h->SetFillColor(iCol[ipn]);
+
+    sprintf(txt0,"Y7_%c",cPM[ipn]);
+    sprintf(txt,"High pT Barrel  QCD 2x2 ET  Q=%c; spin4 : %s; 2x2 cluster ET (GeV) ",cPM[ipn],coreTitle.Data());
+    hA[22+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,100,0,100);
+    h->SetFillColor(iCol[ipn]);
+
     sprintf(txt0,"LepEta_%c",cPM[ipn]);
     sprintf(txt,"selecting Barrel Ws Q=%c : %s ; lepton LAB eta",cPM[ipn],coreTitle.Data());
     hA[29+ipn]=h=new TH1F(core+txt0,txt,400, -2.0,2.0);
@@ -111,7 +121,7 @@ St2011pubSpinMaker::initHistos(){
     ln=new TLine(par_leptonEta1,0,par_leptonEta1,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
     ln=new TLine(par_leptonEta2,0,par_leptonEta2,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   }
-  // free 20-29
+  // free 24-29
 
   hA[31]=h=new TH1F(core+"LumET","Lumi monitor; 2x2 ET (GeV)",100,0.,100.);
 
@@ -221,6 +231,15 @@ St2011pubSpinMaker::initHistos(){
 
 
 // $Log: St2011pubSpin_histo.cxx,v $
+// Revision 1.4.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.6  2012/09/26 14:21:00  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
+// Revision 1.5  2012/09/17 03:29:30  stevens4
+// Updates to Endcap algo and Q*ET/PT charge separation
+//
 // Revision 1.4  2012/08/28 14:28:28  stevens4
 // add histos for barrel and endcap algos
 //

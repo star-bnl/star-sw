@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.11 2012/06/11 16:38:35 fisyak Exp $
+ * $Id: RecHeaderFormats.hh,v 1.11.4.1 2016/05/23 18:33:13 jeromel Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,12 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.11.4.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.11.2.1  2016/04/27 12:28:01  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 1.11  2012/06/11 16:38:35  fisyak
  * std namespace, remove clash with rtsSystems.h
  *
@@ -43,6 +49,7 @@
  *
  **************************************************************************/
 #include <ctype.h>
+#include <cstring>
 
 #ifndef RECHEADERFORMATS_HH
 #define RECHEADERFORMATS_HH

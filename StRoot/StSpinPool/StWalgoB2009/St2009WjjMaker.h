@@ -1,4 +1,4 @@
-// $Id: St2009WjjMaker.h,v 1.2 2010/05/01 01:31:44 balewski Exp $
+// $Id: St2009WjjMaker.h,v 1.2.6.1 2016/05/23 18:33:23 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -74,7 +74,7 @@ class St2009WjjMaker : public StMaker {
  
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WjjMaker.h,v 1.2 2010/05/01 01:31:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WjjMaker.h,v 1.2.6.1 2016/05/23 18:33:23 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -85,6 +85,12 @@ class St2009WjjMaker : public StMaker {
 
 
 // $Log: St2009WjjMaker.h,v $
+// Revision 1.2.6.1  2016/05/23 18:33:23  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.2.4.2  2016/04/27 17:47:53  zchang
+// *** empty log message ***
+//
 // Revision 1.2  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //

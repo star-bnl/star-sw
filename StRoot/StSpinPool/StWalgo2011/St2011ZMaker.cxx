@@ -1,8 +1,10 @@
-// $Id: St2011ZMaker.cxx,v 1.5 2012/08/21 17:40:09 stevens4 Exp $
+// $Id: St2011ZMaker.cxx,v 1.5.2.1 2016/05/23 18:33:22 jeromel Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
 //  changes Justin Stevens, MIT
+
+#include <TMath.h>
 
 #include "St2011WMaker.h"
 #include "WeventDisplay.h"
@@ -293,6 +295,7 @@ St2011ZMaker::find_Z_boson(){
 
 	TVector3 psum=p1+p2;
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
+	float yZ=0.5*log((e1+e2+psum.Z())/(e1+e2-psum.Z()));
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
 	hA[0]->Fill("m2",1.);
 	
@@ -311,8 +314,11 @@ St2011ZMaker::find_Z_boson(){
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
 	hA[35]->Fill(p1.Eta(),p2.Eta());
-	hA[36]->Fill(psum.Eta());
-	hA[37]->Fill(psum.Pt());
+	
+	if(T1.prMuTrack->charge()>0) hA[42]->Fill(p1.Phi(),p2.Phi());
+	else hA[42]->Fill(p2.Phi(),p1.Phi());
+	hA[43]->Fill(T1.cluster.ET,T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt()); 
+	hA[43]->Fill(T2.cluster.ET,T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt()); 
 
 #if 0
 	printf("RCC:  Found Z w/ invmass=%f\n",mass);
@@ -338,8 +344,39 @@ St2011ZMaker::find_Z_boson(){
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
 
-	// **** I stoped changes here, Jan 
+	hA[36]->Fill(yZ);//psum.Eta());
+	hA[37]->Fill(psum.Pt());
+	
+	int bxStar7=wMK->wEve->bxStar7;
+	int bxStar48=wMK->wEve->bxStar48; 
+	if(bxStar48!=bxStar7) {
+	  hA[0]->Fill("badBx48",1.);
+	  return; // both counters must be in sync
+	}
+	
+	int spin4=wMK->wEve->spin4;  
+	hA[38]->Fill(spin4); 
+	if(yZ<0) hA[39]->Fill(spin4);
+	else if(yZ>0) hA[40]->Fill(spin4);
 
+	// L0 x1 and x2 computation
+	float mZ = 91.188; 
+	float roots = 510.;
+	float x1 = mZ/roots * TMath::Exp(yZ);
+	float x2 = mZ/roots * TMath::Exp(-1.*yZ);
+	hA[44]->Fill(x1,x2);
+	hA[45]->Fill(x1*mass/mZ,x2*mass/mZ);
+
+	// free quark search
+	if(T1.prMuTrack->charge()>0) 
+	  hA[46]->Fill( T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt(),
+			T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt());
+	else
+	  hA[46]->Fill( T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt(),
+			T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt());
+	
+	// **** I stoped changes here, Jan 
+	
 	float fmax1=T1.cluster.ET/T1.cl4x4.ET;
 	float fmax2=T2.cluster.ET/T2.cl4x4.ET;
 
@@ -380,6 +417,31 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.5.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.12  2012/10/05 17:53:53  balewski
+// added correlation plots for reco Q in Z, W algos
+//
+// Revision 1.11  2012/10/05 16:44:31  stevens4
+// final z plots: update x1-x2 correlation in z maker
+//
+// Revision 1.10  2012/10/01 19:48:20  stevens4
+// add plots for Z result and move esmd cross point calculation outside plane loop
+//
+// Revision 1.9  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
+// Revision 1.8  2012/09/24 19:28:15  balewski
+// moved eta & pT hitso to be filled after invM cut, now they are 'golden Z'
+//
+// Revision 1.7  2012/09/18 19:34:22  balewski
+// fill eta-dependent spin sort
+//
+// Revision 1.6  2012/09/14 21:02:29  balewski
+// *lumi-maker re-written to accumulate alternative rel lumi monitors,
+// * added spin sorting to Zs
+//
 // Revision 1.5  2012/08/21 17:40:09  stevens4
 // Revert to previous version
 //

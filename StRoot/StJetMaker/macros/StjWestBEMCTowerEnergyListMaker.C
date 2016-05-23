@@ -23,7 +23,7 @@ public:
   virtual ~StjWestBEMCTowerEnergyListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjWestBEMCTowerEnergyListMaker.C,v 1.3 2008/09/21 03:21:54 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjWestBEMCTowerEnergyListMaker.C,v 1.3.6.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

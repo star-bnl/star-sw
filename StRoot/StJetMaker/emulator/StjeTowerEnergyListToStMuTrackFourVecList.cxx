@@ -1,4 +1,4 @@
-// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.4 2009/12/09 05:12:12 pibero Exp $
+// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.4.8.1 2016/05/23 18:33:16 jeromel Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
 
@@ -29,10 +29,7 @@ FourList StjeTowerEnergyListToStMuTrackFourVecList::operator()(const StjTowerEne
 StMuTowerEmu* StjeTowerEnergyListToStMuTrackFourVecList::createTowerEmu(const StjTowerEnergy& tower)
 {
   StMuTowerEmu* ret = new StMuTowerEmu;
-
-  TVector3 mom;
-  mom.SetPtEtaPhi(tower.towerR, tower.towerEta, tower.towerPhi);
-  mom.SetMag(tower.energy);
+  TLorentzVector mom = _energyTo4p(tower);
 
   ret->_px         = mom.Px();
   ret->_py         = mom.Py();

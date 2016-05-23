@@ -37,7 +37,7 @@ public:
   virtual ~StjMCAsymMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCAsymMaker.C,v 1.2 2009/04/28 02:38:07 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCAsymMaker.C,v 1.2.6.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

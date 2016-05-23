@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.6 2011/04/08 01:25:51 fisyak Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.6.2.1 2016/05/23 18:33:18 jeromel Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -77,7 +77,7 @@ int StMuMomentumShiftMaker::Make() {
     return kStErr;
   }
   if (mWriteMuDst) {
-    Char_t *inBaseName= strrchr(mudstMaker->chain()->GetFile()->GetName(),'/');
+    const Char_t *inBaseName= strrchr(mudstMaker->chain()->GetFile()->GetName(),'/');
     if ( ! inBaseName ) inBaseName = (Char_t *) mudstMaker->chain()->GetFile()->GetName();
     else                inBaseName = inBaseName+1;
 

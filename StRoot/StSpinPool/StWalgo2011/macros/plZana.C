@@ -1,8 +1,8 @@
 TCanvas *can=0;
 
 //=================================================
-plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="./out/z/"){ //1=gif, 2=ps, 3=both
-  
+plZana(  int page=0,int pl=2,  char *core0="run12long", char *iPath="../9.10.12/", char *oPath="./out/z/"){ //1=gif, 2=ps, 3=both
+  //core0="jba322";
   if(page==0) {
     doAll(core0,iPath);
     return;
@@ -14,9 +14,9 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
   char *nameC[]={"_Z_phi12","_Z_ZmassLike","_Z_chRecPNp","_Z_ZmassUnlike"};
   char *nameD[]={"muEne_Deta","_Z_Ene_Deta"};// pg 4
 
-  char *nameE[]={"_Z_Endcap_EventType"}; //pg 1
-  char *nameF[]={"_Z_Eet1iso","_Z_Eet1val","_Z_Eet1frac","_Z_Eet2iso","_Z_Eet2val","_Z_Eet2frac"}; //pg 2
-  char *nameG[]={"_Z_Ephi12","_Z_ELike_chRecPNp","_Z_E_ZmassLike","_Z_Eeta12","_Z_EUnlike_chRecPNp","_Z_E_ZmassUnlike"}
+  char *nameE[]={"_Z_Endcap_EventType","_Z_Y2","_Z_etaZ"}; //pg 5
+  char *nameF[]={"_Z_Eet1iso","_Z_Eet1val","_Z_Eet1frac","_Z_Eet2iso","_Z_Eet2val","_Z_Eet2frac"}; //pg 6
+  char *nameG[]={"_Z_Ephi12","_Z_ELike_chRecPNp","_Z_E_ZmassLike","_Z_Eeta12","_Z_EUnlike_chRecPNp","_Z_E_ZmassUnlike"} //pg7
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -124,14 +124,19 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
 
  case 5:{   
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(1,1);gStyle->SetOptStat(0);
+    c->Divide(2,2);gStyle->SetOptStat(0);
     char **nameX=nameE;
-    for(int i=0;i<1;i++) {
+    for(int i=0;i<3;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  //assert(h);
+      if(h==0) continue;
       c->cd(i+1); h->Draw();
-      if(i==0) h->Draw("h text");
+      if(i<2) {  h->Draw("h text");
+	h->SetMarkerSize(2); // for bigger text
+      }
+      if(i==2) { h->Rebin(8); h->Draw(); }
+      
     }
     c->GetPad(1)->SetLogy();
    
@@ -244,6 +249,16 @@ void doAll(char *core0="", char *iPath=""){
 
 
 // $Log: plZana.C,v $
+// Revision 1.4.2.1  2016/05/23 18:33:23  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.6  2012/09/18 15:46:00  balewski
+// added etaZ to movie
+//
+// Revision 1.5  2012/09/14 21:02:31  balewski
+// *lumi-maker re-written to accumulate alternative rel lumi monitors,
+// * added spin sorting to Zs
+//
 // Revision 1.4  2012/08/28 14:28:49  stevens4
 // updates to movie makers
 //

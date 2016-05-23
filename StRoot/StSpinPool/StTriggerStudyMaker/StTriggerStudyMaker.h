@@ -55,7 +55,7 @@ class StTriggerStudyMaker : public StMaker {
   virtual Int_t Finish();
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTriggerStudyMaker.h,v 1.1 2008/09/24 22:11:28 mattheww Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTriggerStudyMaker.h,v 1.1.4.1 2016/05/23 18:33:21 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StTriggerStudyMaker,0)   //StAF chain virtual base class for Makers
 };

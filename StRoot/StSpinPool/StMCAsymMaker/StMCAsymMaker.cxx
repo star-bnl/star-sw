@@ -31,9 +31,9 @@ StMCAsymMaker::~StMCAsymMaker() {
 }
 
 Int_t StMCAsymMaker::Init() {
-    int iset = 0;
-    dssvini2009a_(&iset);
-    return StMaker::Init();
+  int iset = 0;
+  dssvini2009a_(&iset);
+  return StMaker::Init();
 }
 
 void StMCAsymMaker::Zero() {
@@ -150,6 +150,14 @@ void StMCAsymMaker::Zero() {
     df2_NLO_LSS3=0;
     weight_NLO_LSS3=0;
 
+    df1_NLO_LSS2010_delGpos = 0;
+    df2_NLO_LSS2010_delGpos = 0;
+    weight_NLO_LSS2010_delGpos = 0;
+
+    df1_NLO_LSS2010_chsign_delG = 0;
+    df2_NLO_LSS2010_chsign_delG = 0;
+    weight_NLO_LSS2010_chsign_delG = 0;
+
     df1_NLO_AAC1=0;
     df2_NLO_AAC1=0;
     weight_NLO_AAC1=0;
@@ -169,6 +177,10 @@ void StMCAsymMaker::Zero() {
     df1_NLO_BB2=0;
     df2_NLO_BB2=0;
     weight_NLO_BB2=0;
+
+    df1_NLO_BB2010 = 0;
+    df2_NLO_BB2010 = 0;
+    weight_NLO_BB2010 = 0;
 
     df1_NLO_DNS1=0;
     df2_NLO_DNS1=0;
@@ -446,6 +458,20 @@ Int_t StMCAsymMaker::Make() {
       f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
       f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
       weight_NLO_LSS3=(df1_NLO_LSS3*df2_NLO_LSS3*partonic_all)/(f1_NLO*f2_NLO);
+
+      //NLO LSS2010 pos x*DeltaG
+      df1_NLO_LSS2010_delGpos = get_polPDF_NLO_LSS2010_delGpos(flavor1,x1,Q2);
+      df2_NLO_LSS2010_delGpos = get_polPDF_NLO_LSS2010_delGpos(flavor2,x2,Q2);
+      f1_NLO = get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO = get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_LSS2010_delGpos = (df1_NLO_LSS2010_delGpos*df2_NLO_LSS2010_delGpos*partonic_all)/(f1_NLO*f2_NLO);
+
+      //NLO LSS2010 node x*DeltaG
+      df1_NLO_LSS2010_chsign_delG = get_polPDF_NLO_LSS2010_chsign_delG(flavor1,x1,Q2);
+      df2_NLO_LSS2010_chsign_delG = get_polPDF_NLO_LSS2010_chsign_delG(flavor2,x2,Q2);
+      f1_NLO = get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO = get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_LSS2010_chsign_delG = (df1_NLO_LSS2010_chsign_delG*df2_NLO_LSS2010_chsign_delG*partonic_all)/(f1_NLO*f2_NLO);
       
       //NLO AAC SCENARIO 1
       df1_NLO_AAC1=get_polPDF_NLO_AAC1(flavor1,x1,Q2);
@@ -481,6 +507,13 @@ Int_t StMCAsymMaker::Make() {
       f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
       f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
       weight_NLO_BB2=(df1_NLO_BB2*df2_NLO_BB2*partonic_all)/(f1_NLO*f2_NLO);
+
+      //NLO BB2010
+      df1_NLO_BB2010 = get_polPDF_NLO_BB2010(flavor1,x1,Q2);
+      df2_NLO_BB2010 = get_polPDF_NLO_BB2010(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_BB2010 = (df1_NLO_BB2010*df2_NLO_BB2010*partonic_all)/(f1_NLO*f2_NLO);
       
       //NLO DNS SCENARIO 1
       df1_NLO_DNS1=get_polPDF_NLO_DNS1(flavor1,x1,Q2);
@@ -588,11 +621,14 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF1(StPythiaEvent::LSS1, df1_NLO_LSS1);
     pythia->setDF1(StPythiaEvent::LSS2, df1_NLO_LSS2);
     pythia->setDF1(StPythiaEvent::LSS3, df1_NLO_LSS3);
+    pythia->setDF1(StPythiaEvent::LSS2010_delGpos, df1_NLO_LSS2010_delGpos);
+    pythia->setDF1(StPythiaEvent::LSS2010_chsign_delG, df1_NLO_LSS2010_chsign_delG);
     pythia->setDF1(StPythiaEvent::AAC1, df1_NLO_AAC1);
     pythia->setDF1(StPythiaEvent::AAC2, df1_NLO_AAC2);
     pythia->setDF1(StPythiaEvent::AAC3, df1_NLO_AAC3);
     pythia->setDF1(StPythiaEvent::BB1, df1_NLO_BB1);
     pythia->setDF1(StPythiaEvent::BB2, df1_NLO_BB2);
+    pythia->setDF1(StPythiaEvent::BB2010, df1_NLO_BB2010);
     pythia->setDF1(StPythiaEvent::DNS1, df1_NLO_DNS1);
     pythia->setDF1(StPythiaEvent::DNS2, df1_NLO_DNS2);
 
@@ -620,11 +656,14 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF2(StPythiaEvent::LSS1, df2_NLO_LSS1);
     pythia->setDF2(StPythiaEvent::LSS2, df2_NLO_LSS2);
     pythia->setDF2(StPythiaEvent::LSS3, df2_NLO_LSS3);
+    pythia->setDF2(StPythiaEvent::LSS2010_delGpos, df2_NLO_LSS2010_delGpos);
+    pythia->setDF2(StPythiaEvent::LSS2010_chsign_delG, df2_NLO_LSS2010_chsign_delG);
     pythia->setDF2(StPythiaEvent::AAC1, df2_NLO_AAC1);
     pythia->setDF2(StPythiaEvent::AAC2, df2_NLO_AAC2);
     pythia->setDF2(StPythiaEvent::AAC3, df2_NLO_AAC3);
     pythia->setDF2(StPythiaEvent::BB1, df2_NLO_BB1);
     pythia->setDF2(StPythiaEvent::BB2, df2_NLO_BB2);
+    pythia->setDF2(StPythiaEvent::BB2010, df2_NLO_BB2010);
     pythia->setDF2(StPythiaEvent::DNS1, df2_NLO_DNS1);
     pythia->setDF2(StPythiaEvent::DNS2, df2_NLO_DNS2);
     
@@ -636,7 +675,7 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
 
     particle_st* particleTable = particleTabPtr->GetTable();
 
-    for (int i = 4; i < 8; ++i)
+    for (int i = 0; i < particleTabPtr->GetNRows(); ++i)
       pythia->addParticle(TParticle(particleTable[i].idhep,
 				    particleTable[i].isthep,
 				    particleTable[i].jmohep[0],
@@ -1228,6 +1267,70 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS3(int flavor, double x, double Q2){
     return pdf;
 }
 
+//LSS2010 pos x*DeltaG
+Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_delGpos(int flavor, double x, double Q2)
+{
+  static int iini = 0;
+  int iset = 1;  
+  double uub, ddb, u, d, ub, db, st, gl;
+
+  if (iini == 0) intini_.iini = 0;
+
+  lss2010_(&iset,&x,&Q2,&uub,&ddb,&u,&d,&ub,&db,&st,&gl);
+
+  if (iini == 0) iini = 1;
+
+  switch (flavor) {
+  case 1: return ddb/x;
+  case 2: return uub/x;
+  case -1: return db/x;
+  case -2: return ub/x;
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case -3:
+  case -4:
+  case -5:
+  case -6: return st/x;
+  case 21: return gl/x;
+  }
+
+  return 1000;
+}
+
+//LSS2010 node x*DeltaG
+Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_chsign_delG(int flavor, double x, double Q2)
+{
+  static int iini = 0;
+  int iset = 2;
+  double uub, ddb, u, d, ub, db, st, gl;
+
+  if (iini == 0) intini_.iini = 0;
+
+  lss2010_(&iset,&x,&Q2,&uub,&ddb,&u,&d,&ub,&db,&st,&gl);
+
+  if (iini == 0) iini = 1;
+
+  switch (flavor) {
+  case 1: return ddb/x;
+  case 2: return uub/x;
+  case -1: return db/x;
+  case -2: return ub/x;
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case -3:
+  case -4:
+  case -5:
+  case -6: return st/x;
+  case 21: return gl/x;
+  }
+
+  return 1000;
+}
+
 //AAC NLO Scenario 1
 Double_t StMCAsymMaker::get_polPDF_NLO_AAC1(int flavor, double x, double Q2){
 
@@ -1341,6 +1444,38 @@ Double_t StMCAsymMaker::get_polPDF_NLO_BB2(int flavor, double x, double Q2){
     if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
 
     return pdf;
+}
+
+//BB NL0 2010
+Double_t StMCAsymMaker::get_polPDF_NLO_BB2010(int flavor, double x, double Q2)
+{
+  static int iini = 0;
+  int iset = 1;
+  double uv, duv, dv, ddv, gl, dgl, qb, dqb, g1p, dg1p, g1n, dg1n;
+
+  if (iini == 0) intini_.iini = 0;
+
+  polpdf_(&iset,&x,&Q2,&uv,&duv,&dv,&ddv,&gl,&dgl,&qb,&dqb,&g1p,&dg1p,&g1n,&dg1n);
+
+  if (iini == 0) iini = 1;
+
+  switch (flavor) {
+  case 1: return (dv+qb)/x;
+  case 2: return (uv+qb)/x;
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+  case -1:
+  case -2:
+  case -3:
+  case -4:
+  case -5:
+  case -6: return qb/x;
+  case 21: return gl/x;
+  }
+
+  return 1000;
 }
 
 //DNS NLO Scenario 1
@@ -1580,7 +1715,10 @@ const PDFWrapper::PDF PDFWrapper::pdfs[StPythiaEvent::NPDF] = {
   StMCAsymMaker::get_polPDF_NLO_BB2,
   StMCAsymMaker::get_polPDF_NLO_DNS1,
   StMCAsymMaker::get_polPDF_NLO_DNS2,
-  StMCAsymMaker::get_polPDF_NLO_DSSV2009a
+  StMCAsymMaker::get_polPDF_NLO_DSSV2009a,
+  StMCAsymMaker::get_polPDF_NLO_LSS2010_delGpos,
+  StMCAsymMaker::get_polPDF_NLO_LSS2010_chsign_delG,
+  StMCAsymMaker::get_polPDF_NLO_BB2010
 };
 
 PDFWrapper::PDF PDFWrapper::pdf = 0;

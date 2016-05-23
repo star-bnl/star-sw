@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.35 2010/05/24 20:44:09 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.35.6.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.35.6.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.37  2015/05/15 19:05:12  dmitry
+ * missed instance, assign zero to the pointer after delete
+ *
+ * Revision 1.36  2015/05/15 19:02:21  dmitry
+ * assign zero to the pointer after delete
+ *
  * Revision 1.35  2010/05/24 20:44:09  dmitry
  * suppressed excessive output for indexed tables
  *
@@ -1214,12 +1223,17 @@ StDbSql::readNodeInfo(StDbNode* node){
   if(!buff.ReadScalar(tmpString,"nodeType"))return false;
   node->setNodeType(tmpString);
   delete [] tmpString;
+  tmpString = 0;
 
   if(!buff.ReadScalar(tmpString,"name"))return false;
-  node->setName(tmpString); delete [] tmpString;
+  node->setName(tmpString);
+  delete [] tmpString;
+  tmpString = 0;
 
   if(!buff.ReadScalar(tmpString,"versionKey"))return false;
-  node->setVersion(tmpString); delete [] tmpString;
+  node->setVersion(tmpString);
+  delete [] tmpString;
+  tmpString = 0;
 
   node->setNodeID(nodeID);
   node->setConfigured(true);
@@ -1277,12 +1291,15 @@ char* tmpString;
 	} 
         table->setElementID(tmpElements,len);
         delete [] tmpElements;
+        tmpElements = 0;
       } else {
        delete [] tmpString;
+	   tmpString = 0;
        if(!buff.ReadScalar(tmpString,"indexName")) return false;
        table->setElementName(tmpString);
       }
       delete [] tmpString;
+      tmpString = 0;
     }
 
 

@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.7 2010/07/16 20:24:08 rfatemi Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.7.4.1 2016/05/23 18:33:18 jeromel Exp $
 
 #include "TLorentzVector.h"
 
@@ -29,7 +29,7 @@ translateEvent(StJetSkimEvent *skimEvent, StChargedPionBaseEv *ev) {
     ev->setRunId(skimEvent->runId());
     ev->setEventId(skimEvent->eventId());
     ev->setBbcTimeBin(skimEvent->bbcTimeBin());
-    char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
+    const char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
     baseName = baseName + 1;
     ev->setMuDstName( baseName );
     
@@ -379,6 +379,12 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.7.4.1  2016/05/23 18:33:18  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.7.2.2  2016/04/27 17:47:49  zchang
+ * *** empty log message ***
+ *
  * Revision 1.7  2010/07/16 20:24:08  rfatemi
  * Changes in code to preserve backward compatibility with changes in jet code.  Affects info about particles in jets.
  *

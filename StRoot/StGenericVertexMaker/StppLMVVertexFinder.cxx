@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.24 2010/01/26 21:01:49 fisyak Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.24.4.1 2016/05/23 18:33:14 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -533,7 +533,7 @@ StppLMVVertexFinder::ppLMV5() {
   //  double  chi2pdof = chi2/(mPrimCand.size()-1);
 
   StPrimaryVertex primV;
-  Float_t cov[6] = {C11,0.0,C22,0.0,0.0,C33  };  //  cxx,?,cyy,?,?,czz
+  Float_t cov[6] = { (Float_t) C11,0.0, (Float_t) C22,0.0,0.0, (Float_t) C33 };  //  cxx,?,cyy,?,?,czz
   
   primV.setPosition(XVertex);
   primV.setCovariantMatrix(cov); 
@@ -606,6 +606,12 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.24.4.1  2016/05/23 18:33:14  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.24.2.1  2016/04/27 12:28:01  jeromel
+ * Patches for getting SL13b compiled with gcc44
+ *
  * Revision 1.24  2010/01/26 21:01:49  fisyak
  * Clean up, switch from bit mask to attributes
  *

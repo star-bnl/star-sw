@@ -9,7 +9,7 @@ root [7] muWET->Draw()
 // Endcap reco algo
 
 //=================================================
-plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/eemc/", int isMC=0, char *etaBin="Eta7"){ //1=gif, 2=ps, 3=both
+void plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/eemc/", int isMC=0, char *etaBin="Eta8"){ //1=gif, 2=ps, 3=both
     
   cout<<iPath<<core0<<endl;
 
@@ -49,6 +49,8 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameR2[]={"muEchRecPNg","muEchRecPNp"};// pg 19
   char *nameR3[]={"muE_WETPg"  ,"muE_WETPp","muE_CFP0" ,"muE_WETNg" ,"muE_WETNp","muE_CFN0"};// pg 20
 
+  char *nameSMD[]={"muE_UoffStr","muE_VoffStr"}; // pg21
+
   TString spinPre='A';
   char *nameS1[]={"spinEStatEve","spinEs4mon","spinEbX48","spinEbX7","spinEbX48c","spinEbX7c"};// pg 23
   char *nameS5[]={"spinE_ET_P","spinE_ET_N","spinEQpT","spinEQpT2"};// pg 24
@@ -74,7 +76,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
 
   //switch to TDirectory for eta binning
   if(fd->Get("muEStatEve")==0) {
-    cout<<"Switching to etaBin"<<etaBin<<" now have to use gDirectory"<<endl;
+    cout<<"Switching to etaBin="<<etaBin<<" now have to use gDirectory"<<endl;
     spinPre+=etaBin;
     if(!fd->cd(etaBin)) {
       cout<<"Missing TDirectory of interest, no plots!"<<endl;
@@ -93,12 +95,11 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
 
   //skip tpc plots if using tree reader code
   if( ((page>=2 && page<=6) || (page>=30 && page<=42)) && !fd->cd("tpc")) return;
-  fd->cd(etaBin);
-
- gStyle->SetPalette(1,0);
- gStyle->SetOptStat(0);
- char padTit[1000];
- sprintf(padTit,"%s",core0);
+  fd->cd(etaBin); 
+  gStyle->SetPalette(1,0);
+  gStyle->SetOptStat(0);
+  char padTit[1000];
+  sprintf(padTit,"%s",core0);
 
  switch (page) {
 
@@ -462,6 +463,25 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     }
  } break;//--------------------------------------
 
+  case 21:{    sprintf(padTit,"TRack-SMD peak offset , %s",core0);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(1,2);gStyle->SetOptStat(10);
+    char **nameX=nameSMD;
+    for(int i=0;i<2;i++) {
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      c->cd(i+1);  h->Draw("box");
+      for(int sec=1;sec<=12;sec++) {
+	float phiC= (3-sec)*30;
+	if(phiC<-179) phiC+=360;
+	float phiL= (phiC-15.)/180*3.1416;
+	//printf("sec=%d phiC/deg=%.0d  phiL/rad=%.2f\n",sec,phiC, phiL);
+	ln=new TLine(phiL,-7,phiL,7); ln->Draw(); ln->SetLineColor(8);
+	tx=new TText(phiL+0.05,5,Form("sec %d",sec)); tx->Draw();
+      }
+    }
+ } break;//--------------------------------------
+
  case 23:{    sprintf(padTit,"bXing & spin QA, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,3);gStyle->SetOptStat(1000010);
@@ -727,7 +747,7 @@ void doAllMC(char *core0="", char *iPath=""){
     if(i==3) continue;
     if(i==4) continue;
     if(i==15) continue;
-    if(i>=20 && i<=22) continue;
+    if(i==20 || i==22) continue;
     plEana(i,2,core0,iPath);
   }
   
@@ -737,6 +757,16 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.13.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.15  2012/09/21 21:14:08  balewski
+// plane/sectord dependent Z-location for ESMD implemented in matching of TPC track to ESMD shower.
+// I'm done
+//
+// Revision 1.14  2012/09/21 16:59:13  balewski
+// added ESMD peak adjustement - partialy finished
+//
 // Revision 1.13  2012/08/28 14:28:48  stevens4
 // updates to movie makers
 //

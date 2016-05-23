@@ -15,7 +15,7 @@ public:
   virtual ~StjTPCTrackListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackListMaker.C,v 1.2 2008/08/06 05:49:52 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTPCTrackListMaker.C,v 1.2.8.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

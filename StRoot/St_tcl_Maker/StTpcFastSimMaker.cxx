@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.5 2012/05/07 14:54:45 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.5.2.1 2016/05/23 18:33:27 jeromel Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.5.2.1  2016/05/23 18:33:27  jeromel
+    Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+
     Revision 1.5  2012/05/07 14:54:45  fisyak
     Add printout
 
@@ -79,7 +82,7 @@ Int_t StTpcFastSimMaker::Make() {
     transform(coorG,coorLT,sector,row);
     StTpcLocalCoordinate  coorLTD = coorLT;
     // ExB corrections
-    Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
+    Float_t pos[3] = {(Float_t) coorLTD.position().x(),(Float_t) coorLTD.position().y(),(Float_t) coorLTD.position().z()};
     Float_t posMoved[3];
     if ( mExB ) {
       mExB->DoDistortion(pos,posMoved);   // input pos[], returns posMoved[]

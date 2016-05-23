@@ -4,9 +4,18 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StFastJetPars.h,v 1.3 2012/03/10 23:18:28 pibero Exp $
+// $Id: StFastJetPars.h,v 1.3.8.1 2016/05/23 18:33:15 jeromel Exp $
 //
 // $Log: StFastJetPars.h,v $
+// Revision 1.3.8.1  2016/05/23 18:33:15  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.3.6.1  2016/04/27 15:20:51  zchang
+// SL13b embedding library for run12 pp500 production with fastjet area calculationCVS: ----------------------------------------------------------------------
+//
+// Revision 1.4  2016/01/06 22:00:17  gdwebb
+// This is code to implement the off axis cone underlying event analysis.
+//
 // Revision 1.3  2012/03/10 23:18:28  pibero
 // Added destructor for StCDFMidPointPlugin
 //
@@ -25,6 +34,7 @@
 #define ST_FAST_JET_PARS_H
 
 #include "StJetPars.h"
+#include "StFastJetAreaPars.h"
 
 class StPlugin : public TObject {
 public:
@@ -139,6 +149,7 @@ public:
     , mStrategy(Best)
     , mPtMin(5.0)
     , mPlugin(0)
+    , mJetAreaFlag(false)
   {
   }
 
@@ -149,6 +160,9 @@ public:
   int    recombinationScheme() const { return mRecombScheme; }
   int    strategy           () const { return mStrategy;     }
   double ptMin              () const { return mPtMin;        }
+  StFastJetAreaPars* jetArea () const { return mJetArea;      }
+  bool jetAreaFlag          () const { return mJetAreaFlag;  }
+
   void* plugin() const { return mPlugin->impl(); }
 
   void setJetAlgorithm       (int    jetAlgorithm) { mJetAlgorithm = jetAlgorithm; }
@@ -157,7 +171,7 @@ public:
   void setStrategy           (int    strategy    ) { mStrategy     = strategy;     }
   void setPtMin              (double ptmin       ) { mPtMin        = ptmin;        }
   void setPlugin(StPlugin* plugin) { mPlugin = plugin; }
-
+  void setJetArea (StFastJetAreaPars* area_pars){ mJetArea = area_pars; mJetAreaFlag = true;};
 private:
   int    mJetAlgorithm;
   double mRparam;
@@ -165,6 +179,8 @@ private:
   int    mStrategy;
   double mPtMin;
   StPlugin* mPlugin;
+  StFastJetAreaPars *mJetArea;
+  bool mJetAreaFlag;
 
   ClassDef(StFastJetPars,0)
 };

@@ -66,7 +66,10 @@ class StDbServiceBroker
   void FormHostList();
   void PrintHostList();
   int RecommendHost();
+  void SendEmail(time_t timediff);
   short MyStatus;  // see namespace st_db_service_broker
+  time_t last_succeeded_connect_time;
+  time_t seconds_to_reach_for_connect;
 
  public:
 

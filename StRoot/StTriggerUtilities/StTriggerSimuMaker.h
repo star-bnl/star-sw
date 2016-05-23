@@ -124,14 +124,24 @@ public:
   void useOnlineDB() { mUseOnlineDB = 1; }
   void useOfflineDB() { mUseOfflineDB = 1; }
 
+
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.31 2012/07/13 16:47:26 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.31.4.1 2016/05/23 18:33:24 jeromel Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.31.4.1  2016/05/23 18:33:24  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.31.2.1  2016/04/27 15:24:53  zchang
+// SL13b embedding library for run12 pp500 productionCVS: ----------------------------------------------------------------------
+//
+// Revision 1.32  2013/10/08 23:13:13  zchang
+// Add member mTrigName and function askTrigger() to request trigger definition
+//
 // Revision 1.31  2012/07/13 16:47:26  pibero
 // Users must now specify database to use for trigger definitions and thresholds
 //

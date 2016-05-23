@@ -68,7 +68,7 @@ class StLuminosityMaker : public StMaker {
   const vector<unsigned int> getNSoftTrig() const {return mNSoftTrig;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLuminosityMaker.h,v 1.2 2008/08/20 16:11:50 mattheww Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLuminosityMaker.h,v 1.2.4.1 2016/05/23 18:33:20 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StLuminosityMaker,0)   //StAF chain virtual base class for Makers
 };

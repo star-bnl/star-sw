@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.cc,v 1.7 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbXmlWriter.cc,v 1.7.10.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.cc,v $
+ * Revision 1.7.10.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.8  2015/05/15 19:37:11  dmitry
+ * fixed type issue, as signed int was assumed
+ *
  * Revision 1.7  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -104,10 +110,10 @@ StDbXmlWriter::ioTable(StDbTable* table){
     int nrows;
     int* elements = table->getElementID(nrows);
 
-    if(!elements){
-      elements = new int[nrows];
-      for(k=0;k<nrows;k++)elements[k]=k;
-    }
+//    if(!elements){
+//      elements = new int[nrows];
+//      for(k=0;k<nrows;k++)elements[k]=k;
+//    }
 
     table->setRowNumber(); // set to 0
 

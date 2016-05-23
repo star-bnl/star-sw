@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.h,v 1.4 2011/09/14 14:23:21 stevens4 Exp $
+// $Id: St2009pubMcMaker.h,v 1.4.6.1 2016/05/23 18:33:23 jeromel Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -79,7 +79,7 @@ class St2009pubMcMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.4 2011/09/14 14:23:21 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.4.6.1 2016/05/23 18:33:23 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -90,6 +90,12 @@ class St2009pubMcMaker : public StMaker {
 
 
 // $Log: St2009pubMcMaker.h,v $
+// Revision 1.4.6.1  2016/05/23 18:33:23  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.4.4.2  2016/04/27 17:47:53  zchang
+// *** empty log message ***
+//
 // Revision 1.4  2011/09/14 14:23:21  stevens4
 // update used for cross section PRD paper
 //

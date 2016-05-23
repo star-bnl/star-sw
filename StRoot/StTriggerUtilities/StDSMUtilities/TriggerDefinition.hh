@@ -11,14 +11,14 @@ struct TriggerDefinition {
   int  triggerIndex;
   char name[64];
   int  triggerId;
-  int  onbits;
-  int  offbits;
-  int  onbits1;
-  int  onbits2;
-  int  onbits3;
-  int  offbits1;
-  int  offbits2;
-  int  offbits3;
+  unsigned int  onbits;
+  unsigned int  offbits;
+  unsigned int  onbits1;
+  unsigned int  onbits2;
+  unsigned int  onbits3;
+  unsigned int  offbits1;
+  unsigned int  offbits2;
+  unsigned int  offbits3;
 };
 
 #endif	// TRIGGER_DEFINITION_HH

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.98 2012/05/07 14:56:14 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.98.2.1 2016/05/23 18:33:27 jeromel Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.98.2.1  2016/05/23 18:33:27  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
  * Revision 2.98  2012/05/07 14:56:14  fisyak
  * Add StKFVertexMaker
  *
@@ -1265,7 +1268,13 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   const StiNodePars &pars = tNode->fitPars(); 
   const StiNodeErrs &errs = tNode->fitErrs();
   float alfa = tNode->getAlpha();
-  Float_t setp[7] = {pars.y(), pars.z(), pars.eta(), pars.ptin(), pars.tanl(), pars.curv(), pars.hz()};
+  Float_t setp[7] = { (Float_t) pars.y(), 
+		      (Float_t) pars.z(), 
+		      (Float_t) pars.eta(), 
+		      (Float_t) pars.ptin(), 
+		      (Float_t) pars.tanl(), 
+		      (Float_t) pars.curv(), 
+		      (Float_t) pars.hz()};
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {

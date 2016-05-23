@@ -31,7 +31,7 @@ public:
   virtual ~StjTrigger2006MCMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2006MCMaker.C,v 1.1 2008/11/21 01:48:45 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2006MCMaker.C,v 1.1.6.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

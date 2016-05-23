@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.41.2.1 2013/06/13 14:14:41 didenko Exp $
+ * $Id: StDbManagerImpl.cc,v 1.41.2.1.2.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,8 +10,26 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
- * Revision 1.41.2.1  2013/06/13 14:14:41  didenko
- * branch revision for db fixes
+ * Revision 1.41.2.1.2.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.47  2015/04/13 19:43:43  dmitry
+ * added new db domain: SST
+ *
+ * Revision 1.46  2014/10/31 16:11:59  dmitry
+ * adding FPS to the database domain list
+ *
+ * Revision 1.45  2013/09/11 17:40:06  dmitry
+ * new database support: IST
+ *
+ * Revision 1.44  2013/06/10 17:45:15  dmitry
+ * unknown db fix - to be backported into old libraries
+ *
+ * Revision 1.43  2013/05/28 18:07:43  dmitry
+ * new db domain: MTD
+ *
+ * Revision 1.42  2013/04/01 14:42:51  dmitry
+ * added new domain - PXL
  *
  * Revision 1.41  2012/06/11 14:33:47  fisyak
  * std namespace
@@ -406,7 +424,11 @@ addDbDomain(dbZdc,"zdc");
 addDbDomain(dbFms,"fms"); 
 addDbDomain(dbpp2pp,"pp2pp"); 
 addDbDomain(dbFgt,"fgt"); 
-
+addDbDomain(dbPxl,"pxl"); 
+addDbDomain(dbMtd,"mtd"); 
+addDbDomain(dbIst,"ist"); 
+addDbDomain(dbFps,"fps"); 
+addDbDomain(dbSst,"sst");
 }
 
 ////////////////////////////////////////////////////////////////

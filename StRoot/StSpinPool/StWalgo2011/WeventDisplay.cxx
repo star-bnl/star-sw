@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.4 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.4.2.1 2016/05/23 18:33:22 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -71,6 +71,8 @@ WeventDisplay::WeventDisplay( St2011WMaker* mk, int mxEv) {
     sprintf(txt1,"eveEsmdShower_%c",cEsmdPlane[iuv]);
     sprintf(txt2,"ESMD_%c Shower Shape; i_strip position - track position (cm) ; MeV",cEsmdPlane[iuv]);
     hEsmdShower[iuv]=new TH1F(txt1,txt2,41,-10.25,10.25);
+    bxEs[iuv]=new TBox(-5,0, 3,20.);  bxEs[iuv]->SetFillStyle(3002); bxEs[iuv]->SetFillColor(kYellow);
+
   }
   hEsmdXpt=new TH2F("eveEsmdXpt","ESMD Cross Point; X (cm); Y (cm)",100,0.,100,100,0.,100.);
 
@@ -253,6 +255,11 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
       tlineGlob->SetLineStyle(2); tlineGlob->Draw(); Lx->Add(tlineGlob);
       hEsmdShower[iuv]->Draw();
 
+      bxEs[iuv]->SetX1( 0.5*(-wMK->parE_esmdGL+myTr.esmdPeakOffset[iuv]) -0.25);
+      bxEs[iuv]->SetX2( 0.5*(+wMK->parE_esmdGL+myTr.esmdPeakOffset[iuv]+1)-0.25);
+      bxEs[iuv]->SetY2( myTr.esmdPeakSumE[iuv]/(2*wMK->parE_esmdGL+1));
+      bxEs[iuv]->Draw();
+
       //print Q/Pt warning
       if( iuv==1 && myTr.prMuTrack->pt() >= 100.0 ) {
 	TLatex* tx = new TLatex(3,0.9*hEsmdShower[iuv]->GetMaximum(),"| Q/P_{T} | < 0.01");  tx->SetTextColor(kRed); tx->SetTextSize(0.1); tx->Draw();
@@ -329,7 +336,7 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
     printf("WeventDisplay:: %s\n",txt);
     pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
     
-    sprintf(txt,"Q/Pt = %.3f   : ESMD E/MeV  U plane= %.1f  V plane= %.1f ",(1.0*myTr.prMuTrack->charge())/myTr.prMuTrack->pt(),myTr.esmdE[0],myTr.esmdE[1]);
+    sprintf(txt,"Q/Pt = %.3f   : ESMD E/MeV  U peak= %.1f  V peak= %.1f ",(1.0*myTr.prMuTrack->charge())/myTr.prMuTrack->pt(),myTr.esmdPeakSumE[0],myTr.esmdPeakSumE[1]);
     printf("WeventDisplay:: %s\n",txt);
     pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
 
@@ -471,7 +478,7 @@ WeventDisplay::getPrimTracks( int vertID,int pointTowId) {
   assert(V);
   wMK-> mMuDstMaker->muDst()->setVertexIndex(vertID);
   float rank=V->ranking();
-  assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+  assert(rank>0);
   
   Int_t nPrimTrAll=wMK->mMuDstMaker->muDst()->GetNPrimaryTrack();
   for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -535,7 +542,7 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
   assert(V);
   wMK-> mMuDstMaker->muDst()->setVertexIndex(vertID);
   float rank=V->ranking();
-  assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+  assert(rank>0);
   const StThreeVectorF &rV=V->position();
   Int_t nPrimTrAll=wMK->mMuDstMaker->muDst()->GetNPrimaryTrack();
   for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -597,6 +604,15 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.4.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.6  2012/09/21 16:59:10  balewski
+// added ESMD peak adjustement - partialy finished
+//
+// Revision 1.5  2012/09/18 21:10:09  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.4  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //

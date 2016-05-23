@@ -22,7 +22,7 @@ public:
   virtual ~StjMCParticleListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.3 2008/11/24 22:46:55 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.3.6.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

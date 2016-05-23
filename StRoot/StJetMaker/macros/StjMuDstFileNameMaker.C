@@ -26,7 +26,7 @@ public:
   virtual ~StjMuDstFileNameMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMuDstFileNameMaker.C,v 1.1 2008/11/10 22:17:25 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMuDstFileNameMaker.C,v 1.1.6.1 2016/05/23 18:33:16 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

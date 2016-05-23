@@ -56,7 +56,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.66 2012/11/13 20:46:16 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.66.2.1 2016/05/23 18:33:24 jeromel Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -251,8 +251,10 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 			   St_TpcResponseSimulatorC::instance()->tauF(), 
 			   St_TpcResponseSimulatorC::instance()->tauP(), 
 			   St_TpcResponseSimulatorC::instance()->tauIntegration(), 
-			   TimeBinWidth,     0, io};
-    Double_t params0[5] = {t0IO[io],             St_TpcResponseSimulatorC::instance()->tauX()[io], TimeBinWidth,     0, io};
+			   TimeBinWidth,     0, (Double_t) io};
+    Double_t params0[5] = {t0IO[io],          
+			   St_TpcResponseSimulatorC::instance()->tauX()[io], 
+			   TimeBinWidth,     0, (Double_t) io};
     if (! fgTimeShape3[io]) {// old electronics, intergation + shaper alltogether
       fgTimeShape3[io] = new TF1F(Form("TimeShape3%s",Names[io]),
 				 shapeEI3,timeBinMin*TimeBinWidth,timeBinMax*TimeBinWidth,7);
@@ -667,7 +669,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	static StTpcLocalCoordinate  coorLTD; // before do distortions
 	coorLTD = coorLT;
 	if (TESTBIT(m_Mode, kDistortion) && StMagUtilities::Instance()) {
-	  Float_t pos[3] = {coorLTD.position().x(), coorLTD.position().y(), coorLTD.position().z()};
+	  Float_t pos[3] = { (Float_t) coorLTD.position().x(), 
+			     (Float_t) coorLTD.position().y(), 
+			     (Float_t) coorLTD.position().z()};
 	  Float_t posMoved[3];
 	  StMagUtilities::Instance()->DoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
 	  StThreeVector<double> postion(posMoved[0],posMoved[1],posMoved[2]);
@@ -788,9 +792,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	if (dEdxCor < minSignal) continue;
 	// Initialize propagation
-	Float_t BField[3] = {TrackSegmentHits[iSegHits].BLS.position().x(), 
-			     TrackSegmentHits[iSegHits].BLS.position().y(), 
-			     TrackSegmentHits[iSegHits].BLS.position().z()};
+	Float_t BField[3] = {(Float_t) TrackSegmentHits[iSegHits].BLS.position().x(), 
+			     (Float_t) TrackSegmentHits[iSegHits].BLS.position().y(), 
+			     (Float_t) TrackSegmentHits[iSegHits].BLS.position().z()};
 	StPhysicalHelixD track(TrackSegmentHits[iSegHits].dirLS.position(),
 			       TrackSegmentHits[iSegHits].coorLS.position(),
 			       BField[2]*kilogauss*charge,1);  
@@ -1636,8 +1640,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.66 2012/11/13 20:46:16 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.66.2.1 2016/05/23 18:33:24 jeromel Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.66.2.1  2016/05/23 18:33:24  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
 // Revision 1.66  2012/11/13 20:46:16  fisyak
 // Add wider Voltage range for accepted clusteds (-500V) than for dEdx calculation
 //

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeReader.h,v 1.3 2009/12/03 09:57:36 pibero Exp $
+// $Id: StjTreeReader.h,v 1.3.8.1 2016/05/23 18:33:18 jeromel Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEREADER_H
 #define STJTREEREADER_H
@@ -20,7 +20,7 @@ public:
   virtual void Init();
 
   virtual Long64_t GetEntryWithIndex(const StjTreeIndex& idx);
-  virtual Long64_t GetEntryWithIndex(Int_t major, Int_t minor);
+  virtual Long64_t GetEntryWithIndex(Int_t big, Int_t small);
 
 protected:
 

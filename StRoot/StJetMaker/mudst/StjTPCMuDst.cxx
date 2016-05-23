@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.9 2010/05/30 07:10:06 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.9.2.1 2016/05/23 18:33:17 jeromel Exp $
 #include "StjTPCMuDst.h"
 
 #include "StEventTypes.h"
@@ -118,14 +118,14 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;
 
-  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius))
+  if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, magneticField, track.bemcRadius))
     {
       track.exitDetectorId = kBarrelEmcTowerId;
       track.exitEta = positionAt.pseudoRapidity();
       track.exitPhi = positionAt.phi();
       StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, track.exitTowerId);
     }
-  else if(EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
+  else if (EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack, magneticField, kEEmcZSMD))
     {
       track.exitDetectorId = kEndcapEmcTowerId;
       track.exitEta = positionAt.pseudoRapidity();

@@ -25,6 +25,7 @@ St2011ZMaker::initHistos(){
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
+  h->SetMarkerSize(2);//<-- large text
   const char *key[]={"inp","vert","TT","tr1","et1","con1","tr2","et2","con2","phi12","m2","QQ","Zlow","Zhigh"};
   for(int i=0;i<14;i++) h->Fill(key[i],0.); // preset the order of keys
 
@@ -106,9 +107,23 @@ St2011ZMaker::initHistos(){
 
   hA[35]=h=new TH2F(core+"eta12","Final Z selection #eta_{1} vs #eta_{2} with two Barrel tracks; #eta_{1} ; #eta_{2} ", 60,-1.0,2.0,60,-1.0,2.0);
   
-  hA[36]=h=new TH1F(core+"etaZ","Z boson #eta; #eta_{Z}",100,-5.,5.);
-  hA[37]=h=new TH1F(core+"ptZ","Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
+  hA[36]=h=new TH1F(core+"etaZ","golden Z boson #eta; #eta_{Z}",100,-5.,5.);
+  hA[37]=h=new TH1F(core+"ptZ","golden Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
 
+  hA[38]=h=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
+  hA[39]=h=new TH1F(core+"Y2a","golden Z , STAR #eta<0 , spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
+  hA[40]=h=new TH1F(core+"Y2b","golden Z , STAR #eta>0 , spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
+  
+  hA[42]=h=new TH2F(core+"phiCorr12","#phi correlation; #phi_{e+} (rad); #phi_{e-} (rad)", 240,-PI,PI,240,-PI,PI);
+  hA[43]=h=new TH2F(core+"ChRecHypCorrPNp","TPC PRIM  Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT",100,0.,100.,100,-4,4);
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  hA[44]=h=new TH2F(core+"xCorr12","reconstructed bjorken-x correlation; x_{1}; x_{2}", 300,0,0.5,300,0,0.5);
+  hA[45]=h=new TH2F(core+"xCorr12recoM","reconstructed bjorken-x correlation (reco mass); x_{1}; x_{2}", 300,0,0.5,300,0,0.5);
+
+  hA[46]=h=new TH2F(core+"FreeQ","reco charges correlation, golden Z; e+ Q *ET/PT; e- Q *ET/PT",100,0.,5.,100,-5.,0);
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement

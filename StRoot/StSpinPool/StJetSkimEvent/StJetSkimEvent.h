@@ -12,6 +12,7 @@
 #include "TObjString.h"
 #include "TRef.h"
 #include "TLorentzVector.h"
+#include "TDatime.h"
 
 class StPythiaEvent;
 
@@ -175,6 +176,12 @@ public:
     void setRefMultFtpcEast( UShort_t i) { mRefMultFtpcEast = i;}
     
     //gets
+    float x() const { return mPosition[0]; }
+    float y() const { return mPosition[1]; }
+    float z() const { return mPosition[2]; }
+    float dx() const { return  mPosError[0]; }
+    float dy() const { return mPosError[1]; }
+    float dz() const { return mPosError[2]; }
     const float* position() const { return mPosition;}
     const float*  posError() const { return mPosError;}
     int vertexFinderId() const { return mVertexFinderId;} 
@@ -371,6 +378,17 @@ public:
 
   void setEmcLayer2(int value);
 
+  // Event time stamp (GMT)
+  const TDatime& dateTime() const { return mDatime; }
+  int year  () const { return mDatime.GetYear  (); }
+  int month () const { return mDatime.GetMonth (); }
+  int day   () const { return mDatime.GetDay   (); }
+  int hour  () const { return mDatime.GetHour  (); }
+  int minute() const { return mDatime.GetMinute(); }
+  int second() const { return mDatime.GetSecond(); }
+  unsigned int unixTime() const { return mDatime.Convert(); }
+  void setDateTime(const TDatime& datime) { mDatime = datime; }
+
 private:
   // returns value of bit from x at position pos
   int btest(int x, int pos) const { return x >> pos & 1; }
@@ -436,7 +454,9 @@ private:
 
   int mEmcLayer2;
 
-  ClassDef(StJetSkimEvent,5);
+  TDatime mDatime;
+
+  ClassDef(StJetSkimEvent,6);
 };
 
 // Getters

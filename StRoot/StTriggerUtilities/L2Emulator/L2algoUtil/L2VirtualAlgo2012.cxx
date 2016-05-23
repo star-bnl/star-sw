@@ -96,7 +96,7 @@ L2VirtualAlgo2012::initRun( int runNo, int *rc_ints, float *rc_floats) {
   
   mLogFile = fopen(Fname,"w");
   if( mLogFile==0) {
-    LOG(ERR," L2-%s() UNABLE to open run summary log file, continue anyhow\n",getName());
+    LOG(ERR," L2-%s() UNABLE to open run summary log file, continue anyhow (%s)",getName(),Fname);
   }
 
   //set default for par_RndAcceptPrescale, just in case initRunUser() doesn't define it:
@@ -160,7 +160,7 @@ L2VirtualAlgo2012::finishRun() {  /* called once at the end of the run */
   
   
   if( mHistFile==0) {
-    LOG(ERR," L2-%s: finishRun() UNABLE to open run summary log file, continue anyhow\n",getName());
+    LOG(ERR," L2-%s: finishRun() UNABLE to open run summary log file, continue anyhow (fn=%s)\n",getName(),Fname);
     if (mLogFile)
       fprintf(mLogFile,"#L2-%s histos NOT saved, I/O error\n",getName());
   } else { // save histos  
@@ -514,6 +514,12 @@ unsigned short L2VirtualAlgo2012::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2012.cxx,v $
+  Revision 1.5.2.1  2016/05/23 18:33:25  jeromel
+  Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+
+  Revision 1.6  2012/12/19 17:25:18  jml
+  logging
+
   Revision 1.5  2012/03/21 18:18:03  jml
   got rid of printfs from 2012 files
 

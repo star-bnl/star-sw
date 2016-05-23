@@ -1,3 +1,6 @@
+// example uses bin 8 : root4star -b -q 'readWtree.C("./R13109027.lis",8,1e8)'
+// W+ M-C:  root4star -b -q 'readWtree.C("./jbc310.lis",8,1e2,false)'
+
 class StChain;
 class St2011WMaker;
 
@@ -6,7 +9,7 @@ St2011WMaker *wTreeMk = 0;
 TString jetTreeDir = "";
 bool isZ=false;
 
-void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxEvents=1e8, bool spinSort=true)
+void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxEvents=1e8, bool spinSort=true)
 {
 
   if(etaBin==8) isZ=true;
@@ -23,31 +26,41 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
   assert( !gSystem->Load("StWalgo2011"));
   assert( !gSystem->Load("StSpinDbMaker"));
   assert( !gSystem->Load("StJets"));
+  assert( !gSystem->Load("StJetEvent"));
     
   // create analysis chain
   chain = new StChain("chain");
   TObjArray* HListZ=new TObjArray;
   TObjArray* HListEta=new TObjArray;;
   
-  //define eta ranges
-  float etaLow[8] = {-1.0, -0.5, 0.0, 0.5, 1.0, 1.15, 0.7, -1.5};
-  float etaHigh[8] = {-0.5, 0.0, 0.5, 1.0, 1.15, 1.5, 2.5, 2.0};
+  //define eta ranges (skip bin 5+6 and 9 is same as 8 except spin sorting)
+  float etaLow[9] =  {-1.0,-0.5, 0.0, 0.5, 0.0, 0.0, 0.7,-1.5,-1.5};
+  float etaHigh[9] = {-0.5, 0.0, 0.5, 1.0, 0.0, 0.0, 2.5, 2.0, 2.0};
 
   //initiate W maker
   wTreeMk = new St2011WMaker(Form("Eta%d",etaBin));
-  wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+  //wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+  wTreeMk->setJetTreeBranch("AntiKtR060NHits12","AntiKtR060NHits12_noEEMC");
+
   //set cuts for barrle and endcap algos
   wTreeMk->setWbosonCuts(25., 0.88, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
-  wTreeMk->setE_WbosonCuts(25., 0.9, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
+  wTreeMk->setE_WbosonCuts(25., 0.85, 20., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
   wTreeMk->setHList(HListEta);
   wTreeMk->setMaxDisplayEve(1e6); // only first N events will get displayed 
 
   //......... spin sorting
   if(spinSort){
-    enum {mxSM=1}; // only one for now
+ 
+    if(etaBin==8){
+      St2011WlumiMaker *lumiMk=new St2011WlumiMaker;
+      lumiMk->setHList(HListEta);
+      lumiMk->attachWalgoMaker(wTreeMk);
+    }
+ 
+    enum {mxSM=2};
     St2011pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
-      char ttx[100]; sprintf(ttx,"%cEta%dspin",'A',etaBin);
+      char ttx[100]; sprintf(ttx,"%cEta%dspin",'A'+kk,etaBin);
       printf("add spinMaker %s %d \n",ttx,kk);
       spinMkA[kk]=new St2011pubSpinMaker(ttx,Form("Eta%d",etaBin)); 
       spinMkA[kk]->attachWalgoMaker(wTreeMk);
@@ -55,6 +68,7 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
       //assign eta bin same as W maker
       spinMkA[kk]->setEta(etaLow[etaBin-1],etaHigh[etaBin-1]); 
       spinMkA[kk]->setEtaE(etaLow[etaBin-1],etaHigh[etaBin-1]); 
+      if(kk==1) spinMkA[kk]->setQPT(-1,-1); //disable Q/pT cut
 
       //special cases
       if(etaBin==7) {
@@ -79,10 +93,10 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
     ZMk->attachWalgoMaker(wTreeMk);
     ZMk->setHList(HListZ); 
     ZMk->setNearEtFrac(0.88);
-    ZMk->setClusterMinEt(15);
+    ZMk->setClusterMinEt(14);
     ZMk->setPhi12Min(3.1416/2.);
-    ZMk->setMinZMass(73.); // Zmass -20%
-    ZMk->setMaxZMass(114.);// Zmass +20%
+    ZMk->setMinZMass(70.); // Zmass -20%
+    ZMk->setMaxZMass(110.);// Zmass +20%
   }
 
   //chain W and jet trees in W maker

@@ -30,6 +30,8 @@ public:
 
   int runId  () const { return mRunId;   }
   int eventId() const { return mEventId; }
+
+  // Event time should really be moved to skim tree
   const TDatime& dateTime() const { return mDatime; }
   int year  () const { return mDatime.GetYear  (); }
   int month () const { return mDatime.GetMonth (); }
@@ -37,6 +39,7 @@ public:
   int hour  () const { return mDatime.GetHour  (); }
   int minute() const { return mDatime.GetMinute(); }
   int second() const { return mDatime.GetSecond(); }
+  unsigned int unixTime() const { return mDatime.Convert(); }
 
   int numberOfVertices () const;
   int numberOfJets     () const;
@@ -57,7 +60,7 @@ public:
   TClonesArray* particles() const { return mParticles; }
 
   StJetVertex*    newVertex  ();
-  StJetCandidate* newJet     (const TVector3& vertex, const TLorentzVector& fourMomentum);
+  StJetCandidate* newJet     (const TVector3& vertex, const TLorentzVector& fourMomentum, float area = 0, float area_error = 0);
   StJetTrack*     newTrack   ();
   StJetTower*     newTower   ();
   StJetParticle*  newParticle();
@@ -65,10 +68,11 @@ public:
 private:
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StJetMaker2012;
 
   int mRunId;
   int mEventId;
-  TDatime mDatime;
+  TDatime mDatime; // Event time should really be moved to skim tree
 
   TClonesArray* mVertices;
   TClonesArray* mJets;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.24 2011/06/16 14:44:00 dmitry Exp $
+ * $Id: StDbDefs.hh,v 1.24.2.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,24 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.24.2.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.29  2015/04/13 19:43:43  dmitry
+ * added new db domain: SST
+ *
+ * Revision 1.28  2014/10/31 16:11:59  dmitry
+ * adding FPS to the database domain list
+ *
+ * Revision 1.27  2013/09/11 17:40:06  dmitry
+ * new database support: IST
+ *
+ * Revision 1.26  2013/05/28 18:07:43  dmitry
+ * new db domain: MTD
+ *
+ * Revision 1.25  2013/04/01 14:42:51  dmitry
+ * added new domain - PXL
+ *
  * Revision 1.24  2011/06/16 14:44:00  dmitry
  * added new domain - FGT
  *
@@ -123,7 +141,7 @@
 enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbScalers, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
 
 // enumerated standard set of database domains
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbPmd, dbBbc, dbTracker, dbZdc, dbFms, dbpp2pp, dbFgt, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbPmd, dbBbc, dbTracker, dbZdc, dbFms, dbpp2pp, dbFgt, dbPxl, dbMtd, dbIst, dbFps, dbSst, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
 
 // enumerated sets of storage models (different sql content)
 enum StDbStoreType { dbV00=0 };

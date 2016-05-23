@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.7 2007/08/20 18:21:29 deph Exp $
+ * $Id: StDbModifier.cxx,v 1.7.8.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,18 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.7.8.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.10  2015/05/15 19:56:09  dmitry
+ * more cleanup
+ *
+ * Revision 1.9  2015/05/15 19:47:16  dmitry
+ * proper delete added before overwrite
+ *
+ * Revision 1.8  2015/05/15 18:34:39  dmitry
+ * now deallocating memory in destructor of StDbModifier + cleanup
+ *
  * Revision 1.7  2007/08/20 18:21:29  deph
  * New Version of Load Balancer
  *
@@ -69,7 +81,8 @@
 ClassImp(StDbModifier)
 
 //_____________________________________________________________________________
-  StDbModifier::StDbModifier() : funixTime(0), fTimestamp(0)
+  StDbModifier::StDbModifier() : fDbName(0), fDebug(0), fTableName(0), funixTime(0), fTimestamp(0), fVersionName(0),
+	fOutputFileName(0), fInputFileName(0), fFlavorName(0)
 {
   // constructor of StDbModifier
 
@@ -79,16 +92,16 @@ ClassImp(StDbModifier)
   // Timestamp of the data requested.
   // To get recent one, here, it is assigned as end of UNIX time.
 
-  fDebug = 0;        // set No-debug mode.
+  //fDebug = 0;        // set No-debug mode.
 
-  fDbName    = 0;    // set Database name on DB server  as brank.
-  fTableName = 0;    // set Table name on DB server  as brank.
+  //fDbName    = 0;    // set Database name on DB server  as brank.
+  //fTableName = 0;    // set Table name on DB server  as brank.
                      // If either fDbName or fTableName is still 0 
                      // in ReadDataFromBD() and WriteDataToDB(),
                      // the program will be terminated.
-  fVersionName = 0;
+  //fVersionName = 0;
 
-  fFlavorName = 0;
+  //fFlavorName = 0;
 
   fOutputFileName = new char[200];
   strcpy(fOutputFileName,"./database_data.C");
@@ -103,8 +116,13 @@ ClassImp(StDbModifier)
 StDbModifier::~StDbModifier()
 {
   // destructor of StDbModifier
-  if(fTimestamp) delete [] fTimestamp;
-
+  delete [] fTimestamp;
+  delete [] fDbName;
+  delete [] fTableName;
+  delete [] fVersionName;
+  delete [] fFlavorName;
+  delete [] fOutputFileName;
+  delete [] fInputFileName;
 }
 
 //_____________________________________________________________________________
@@ -293,8 +311,7 @@ Int_t StDbModifier::WriteDataToDB()
 
   int retVal=0;
   if(mgr -> storeDbTable(dbtable)) retVal=1;             // Fetch the data 
-  if(eidList) delete [] eidList;
-
+  delete [] eidList;
 
   return retVal;
 }
@@ -302,6 +319,7 @@ Int_t StDbModifier::WriteDataToDB()
 //_____________________________________________________________________________
 void StDbModifier::SetDateTime(const char* timestamp)
 {
+  delete [] fTimestamp;
   fTimestamp = new char[strlen(timestamp)+1];
   strcpy(fTimestamp,timestamp);
 }
@@ -311,6 +329,7 @@ void StDbModifier::SetTime(unsigned int time){ funixTime=time;}
 //_____________________________________________________________________________
 void StDbModifier::SetDbName(const char* dbname)
 {
+  delete [] fDbName;
   fDbName = new char[strlen(dbname)+1];
   strcpy(fDbName,dbname);
 }
@@ -318,6 +337,7 @@ void StDbModifier::SetDbName(const char* dbname)
 //_____________________________________________________________________________
 void StDbModifier::SetInputFileName(const char* inputfilename)
 {
+  delete [] fInputFileName;
   fInputFileName = new char[strlen(inputfilename)+1];
   strcpy(fInputFileName,inputfilename);
 }
@@ -325,6 +345,7 @@ void StDbModifier::SetInputFileName(const char* inputfilename)
 //_____________________________________________________________________________
 void StDbModifier::SetOutputFileName(const char* outputfilename)
 {
+  delete [] fOutputFileName;
   fOutputFileName = new char[strlen(outputfilename)+1];
   strcpy(fOutputFileName,outputfilename);
 }
@@ -332,6 +353,7 @@ void StDbModifier::SetOutputFileName(const char* outputfilename)
 //_____________________________________________________________________________
 void StDbModifier::SetTableName(const char* tablename)
 {
+  delete [] fTableName;
   fTableName = new char[strlen(tablename)+1];
   strcpy(fTableName,tablename);
 }
@@ -339,6 +361,7 @@ void StDbModifier::SetTableName(const char* tablename)
 //_____________________________________________________________________________
 void StDbModifier::SetVersionName(const char* versionname)
 {
+  delete [] fVersionName;
   fVersionName = new char[strlen(versionname)+1];
   strcpy(fVersionName,versionname);
 }
@@ -346,6 +369,7 @@ void StDbModifier::SetVersionName(const char* versionname)
 //_____________________________________________________________________________
 void StDbModifier::SetFlavor(const char* flavorname)
 {
+  delete [] fFlavorName;
   fFlavorName = new char[strlen(flavorname)+1];
   strcpy(fFlavorName,flavorname);
   cout << "       Flavor is set " << flavorname  << endl;

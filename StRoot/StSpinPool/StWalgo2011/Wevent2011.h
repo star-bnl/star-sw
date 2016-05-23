@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.5 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: Wevent2011.h,v 1.5.2.1 2016/05/23 18:33:22 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -8,6 +8,9 @@
 #ifndef W_EVENT_2011_HH
 #define W_EVENT_2011_HH
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <TVector3.h>
 #include <TH1.h>
 //get L2
@@ -83,7 +86,8 @@ class WeveEleTrack { // electron track info
   float esmdShower[mxEsmdPlane][41];
   float esmdDca[mxEsmdPlane]; float esmdDcaGlob[mxEsmdPlane];
   float esmdE[mxEsmdPlane]; float esmdEsum7[mxEsmdPlane]; int esmdNhit[mxEsmdPlane];
-  float esmdShowerCentroid[mxEsmdPlane]; float esmdShowerWidth[mxEsmdPlane];
+  float esmdPeakSumE[mxEsmdPlane]; int esmdPeakOffset[mxEsmdPlane];//in strips 
+
   TVector3 esmdXPcentroid;
   int esmdMaxADC;
 
@@ -105,7 +109,7 @@ class WeveEleTrack { // electron track info
     hadronicRecoil=TVector3(0,0,0);
 
     memset(esmdGlobStrip,-999,sizeof(esmdGlobStrip));
-    memset(esmdDca,-999.,sizeof(esmdDca)); memset(esmdDcaGlob,-999.,sizeof(esmdDcaGlob)); memset(esmdE,0.,sizeof(esmdE)); memset(esmdEsum7,0.,sizeof(esmdEsum7)); memset(esmdNhit,0,sizeof(esmdNhit)); memset(esmdShowerCentroid,999.,sizeof(esmdShowerCentroid)); memset(esmdShowerWidth,999.,sizeof(esmdShowerWidth));
+    memset(esmdDca,-999.,sizeof(esmdDca)); memset(esmdDcaGlob,-999.,sizeof(esmdDcaGlob)); memset(esmdE,0.,sizeof(esmdE)); memset(esmdEsum7,0.,sizeof(esmdEsum7)); memset(esmdNhit,0,sizeof(esmdNhit)); memset(esmdPeakSumE,0,sizeof(esmdPeakSumE)); memset(esmdPeakOffset,0,sizeof(esmdPeakOffset));
     esmdXPcentroid=TVector3(0,0,0);
 
   } 
@@ -125,7 +129,7 @@ class WeveEleTrack { // electron track info
 
  private:
  protected:
-  ClassDef(WeveEleTrack,1);
+  ClassDef(WeveEleTrack,2);
 
 };
 
@@ -363,6 +367,15 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.5.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.7  2013/01/15 23:26:35  fisyak
+// add sys/types.h for APPLE
+//
+// Revision 1.6  2012/09/21 16:59:10  balewski
+// added ESMD peak adjustement - partialy finished
+//
 // Revision 1.5  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //

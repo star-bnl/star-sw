@@ -1,7 +1,7 @@
 #ifndef ST_TRIGGER_FILTER_MAKER_HH
 #define ST_TRIGGER_FILTER_MAKER_HH
 
-// $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $
+// $Id: StTriggerFilterMaker.h,v 1.2.6.1 2016/05/23 18:33:21 jeromel Exp $
 
 /*****************************************************************************
  * @class StTriggerFilterMaker
@@ -33,7 +33,7 @@ public:
     const vector<unsigned int> getTriggers() const {return mGoodTriggers;}
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.2.6.1 2016/05/23 18:33:21 jeromel Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 private:
     vector<unsigned int> mGoodTriggers; //!
@@ -45,6 +45,12 @@ private:
 
 /*****************************************************************************
  * $Log: StTriggerFilterMaker.h,v $
+ * Revision 1.2.6.1  2016/05/23 18:33:21  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.2.4.2  2016/04/27 17:47:52  zchang
+ * *** empty log message ***
+ *
  * Revision 1.2  2008/07/31 18:02:14  mattheww
  * Added method to get trigger list
  *

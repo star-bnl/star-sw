@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.12 2012/08/28 14:28:27 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.12.2.1 2016/05/23 18:33:21 jeromel Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -40,11 +40,11 @@ class  St2011pubWanaMaker;
 class  St2011pubSpinMaker;
 class  St2011pubMcMaker;
 
-class  StJetReader;
-class  StJets;
-class  StJet;
 class  TClonesArray;
 class  TTree;
+
+//new jet tree format
+class StJetEvent;
 
 class St2011WMaker : public StMaker {
  friend class WeventDisplay;
@@ -56,10 +56,7 @@ class St2011WMaker : public StMaker {
 
  private:
   StMuDstMaker* mMuDstMaker;
-  StJetReader* mJetReaderMaker;
-  int nJets;
   TString mJetTreeBranch,mJetTreeBranch_noEEMC;
-  TClonesArray* mJets;
   Wevent2011 *wEve;
   TTree *mWtree; TString mTreeName; TFile *mTreeFile;
   WeventDisplay *wDisaply;
@@ -91,7 +88,7 @@ class St2011WMaker : public StMaker {
   float par_delR3D, parE_delR3D, par_highET, parE_highET,  par_ptBalance, parE_ptBalance;
   float par_leptonEtaLow,par_leptonEtaHigh,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
-  int   parE_nSmdStrip;
+  int   parE_nSmdStrip, parE_esmdGL, parE_esmdWL;
   float parE_smdRatio;
         
   float par_etowScale;
@@ -170,12 +167,11 @@ class St2011WMaker : public StMaker {
   void  findAwayJet();
   void  findPtBalance();
   void  esmdAnalysis();
-  
-  // jets
-  StJet* getJet(int i){return (StJet*)mJets->At(i);}
-  TClonesArray* getJets(TString branchName);
-  StJets* getStJetsCopy(TString branchName); 
-  TClonesArray* getJetsTreeAnalysis(TString branchName);
+
+  // new jet tree format
+  StJetEvent* mJetEvent;
+  StJetEvent* mJetEvent_noEEMC;
+  void getJetEvent();
 
   // tools
   float sumTpcCone( int vertID, TVector3 refAxis, int flag,int pointTowId);
@@ -232,7 +228,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.12 2012/08/28 14:28:27 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.12.2.1 2016/05/23 18:33:21 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -243,6 +239,18 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.12.2.1  2016/05/23 18:33:21  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.14.2.2  2016/04/27 17:47:52  zchang
+// *** empty log message ***
+//
+// Revision 1.14  2012/09/21 16:59:10  balewski
+// added ESMD peak adjustement - partialy finished
+//
+// Revision 1.13  2012/09/18 22:30:18  stevens4
+// change to new jet tree format with access to all rank>0 vertices
+//
 // Revision 1.12  2012/08/28 14:28:27  stevens4
 // add histos for barrel and endcap algos
 //

@@ -1,5 +1,8 @@
 #include "StHyperUtilFilesystem.h"
 
+#include "StHyperUtilGeneric.h"
+#include "StHyperLock.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -7,25 +10,130 @@
 #include <cstdlib>
 #include <cstdio>
 #include <sstream>
+#include <deque>
+#include <algorithm>
 #include <limits.h>
 #include <sys/statvfs.h>
+#include <sys/stat.h>
+#include <iostream>
+
+namespace {
+	struct cached_file_st {
+		std::string name;
+		size_t size;
+		time_t time;
+	};
+    bool operator < (const cached_file_st& a, const cached_file_st& b) {
+          return a.time < b.time;
+    }
+}
 
 namespace StHyperUtilFilesystem
 {
 
-float get_free_space_percentage(const char* path) {
-    size_t size_free = 0;
-    size_t size_total = 0;
-    float percentage = 0;
+double get_free_space_percentage(const char* path, size_t& bytes_free, size_t& bytes_total) {
+    double percentage = 0;
     struct statvfs info;
     if ( -1 == statvfs ( path, &info) ) {
+		bytes_free = 0; bytes_total = 0;
     } else {
-        size_free = info.f_bsize * info.f_bfree;
-        size_total = info.f_bsize * info.f_blocks;
-        percentage = (float) ( ( (double)size_free / (double)size_total ) * 100.0 );
+        bytes_free = info.f_bsize * info.f_bfree;
+        bytes_total = info.f_bsize * info.f_blocks;
+		if (bytes_total > 0) {
+        	percentage = (double) ( ( (double)bytes_free / (double)bytes_total ) * 100.0 );
+		}
     }
     return percentage;
 }
+
+bool remove_dir_fifo(std::string unlink_path, const std::string& base_path, double bytes_free) {
+    std::string path_resolved = resolve_path(unlink_path);
+	StHyperUtilGeneric::rtrim(unlink_path, " /\\\n\r\t");
+    if (path_resolved != unlink_path) { return false; }
+    DIR *dp = NULL;
+    struct dirent *ep = NULL;
+    dp = NULL;
+    dp = opendir(path_resolved.c_str());
+    if (dp == NULL) { return false; }
+	std::deque<cached_file_st> file_queue;
+    struct stat st;
+    int ierr;
+    while ( (ep = readdir(dp) ) ) {
+        if (ep->d_type != DT_REG) { continue; }
+        std::string name(ep->d_name);
+        if (name == std::string(".") || name == std::string("..")) { continue; }
+        std::ostringstream fullname;
+        fullname << path_resolved << "/" << name;
+        std::string fullname_resolved = resolve_path(fullname.str());
+        if (fullname_resolved == "/") { continue; }
+        if (fullname_resolved.compare(0, base_path.size(), base_path) != 0) { continue; }
+		cached_file_st tmp;
+		tmp.name = fullname_resolved;
+		tmp.size = StHyperUtilFilesystem::filesize(fullname_resolved.c_str());
+		ierr = stat(fullname_resolved.c_str(), &st);
+	    tmp.time = st.st_mtime;
+		file_queue.push_back(tmp);
+    }
+    closedir(dp);
+	std::sort(file_queue.begin(), file_queue.end());
+	// start erasing files until free space reaches desired 'bytes_free'
+	size_t cur_bytes_free = 0, cur_bytes_total = 0;
+	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
+	if (cur_bytes_free > bytes_free) return true;
+	while (!file_queue.empty() && cur_bytes_free < bytes_free) {
+		cached_file_st tmp = file_queue.front();
+		cur_bytes_free += tmp.size;
+		remove(tmp.name.c_str());
+	}
+	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
+	if (cur_bytes_free > bytes_free) { return true; }
+	return false;
+}
+
+bool remove_dir_lru(std::string unlink_path, const std::string& base_path, double bytes_free) {
+    std::string path_resolved = resolve_path(unlink_path);
+	StHyperUtilGeneric::rtrim(unlink_path, " /\\\n\r\t");
+    if (path_resolved != unlink_path) { return false; }
+    DIR *dp = NULL;
+    struct dirent *ep = NULL;
+    dp = NULL;
+    dp = opendir(path_resolved.c_str());
+    if (dp == NULL) { return false; }
+	std::deque<cached_file_st> file_queue;
+    struct stat st;
+    int ierr;
+    while ( (ep = readdir(dp) ) ) {
+        if (ep->d_type != DT_REG) { continue; }
+        std::string name(ep->d_name);
+        if (name == std::string(".") || name == std::string("..")) { continue; }
+        std::ostringstream fullname;
+        fullname << path_resolved << "/" << name;
+        std::string fullname_resolved = resolve_path(fullname.str());
+        if (fullname_resolved == "/") { continue; }
+        if (fullname_resolved.compare(0, base_path.size(), base_path) != 0) { continue; }
+		cached_file_st tmp;
+		tmp.name = fullname_resolved;
+		tmp.size = StHyperUtilFilesystem::filesize(fullname_resolved.c_str());
+		ierr = stat(fullname_resolved.c_str(), &st);
+	    tmp.time = st.st_atime;
+		file_queue.push_back(tmp);
+    }
+    closedir(dp);
+	std::sort(file_queue.begin(), file_queue.end());
+	// start erasing files until free space reaches desired 'bytes_free'
+	size_t cur_bytes_free = 0, cur_bytes_total = 0;
+	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
+	if (cur_bytes_free > bytes_free) return true;
+	while (!file_queue.empty() && cur_bytes_free < bytes_free) {
+		cached_file_st tmp = file_queue.front();
+		cur_bytes_free += tmp.size;
+		remove(tmp.name.c_str());
+	}
+	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
+	if (cur_bytes_free > bytes_free) { return true; }
+	return false;
+}
+
 
 bool path_exists (const std::string& file)
 {
@@ -44,29 +152,32 @@ std::string resolve_path(const std::string& path)
 }
 
 void create_dir_recursive(std::string path) {
-        char opath[256];
-        char *p;
-        size_t len;
-        strncpy(opath, path.c_str(), sizeof(opath));
-        len = strlen(opath);
-        if(opath[len - 1] == '/')
+		char *opath = strdup(path.c_str());
+        size_t len = strlen(opath);
+        if (opath[len - 1] == '/') {
                 opath[len - 1] = '\0';
-        for(p = opath; *p; p++)
-                if(*p == '/') {
-                        *p = '\0';
-                        if(access(opath, F_OK))
-                                mkdir(opath, S_IRWXU);
-                        *p = '/';
-                }
-        if(access(opath, F_OK))         /* if path is not terminated with / */
-                mkdir(opath, S_IRWXU);
+		}
+        for (char* p = opath; *p; p++) {
+            if (*p == '/') {
+                *p = '\0';
+                if(access(opath, F_OK)) {
+                    mkdir(opath, S_IRWXU);
+				}
+                *p = '/';
+            }
+		}
+        if(access(opath, F_OK)) {        /* if path is not terminated with / */
+            mkdir(opath, S_IRWXU);
+		}
 }
 
 unsigned long remove_dir_recursive(std::string unlink_path, const std::string& base_path)
 {
     std::string path_resolved = resolve_path(unlink_path);
+	StHyperUtilGeneric::rtrim(unlink_path, " /\\\n\r\t");
+
     if (path_resolved != unlink_path) {
-        //LOG_DEBUG << "ERR: RESOLVED PATH != UNLINK_PATH. " << path_resolved << " != " << unlink_path << LOG_EOM;
+        //std::cerr << "ERR: RESOLVED PATH != UNLINK_PATH. " << path_resolved << " != " << unlink_path << std::endl; //FIXME
         return 0;
     } // path should be fully specified, no relative paths allowed
     unsigned long count = 1;
@@ -75,7 +186,7 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
     dp = NULL;
     dp = opendir(path_resolved.c_str());
     if (dp == NULL) {
-        //LOG_DEBUG << "ERR: BASE DIRECTORY CANNOT BE OPENED. " << path_resolved << LOG_EOM;
+        //std::cerr << "ERR: BASE DIRECTORY CANNOT BE OPENED. " << path_resolved << std::endl; // FIXME
         return count;
     }
     while ( (ep = readdir(dp) ) ) {
@@ -95,10 +206,15 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
             count += remove_dir_recursive(fullname_resolved, base_path);
         } else {
             if (fullname_resolved.compare(0, base_path.size(), base_path) != 0) {
-                //LOG_DEBUG << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << fullname_resolved << LOG_EOM;
+                //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << fullname_resolved << std::endl; // FIXME
                 continue;
             }
-            remove(fullname_resolved.c_str());
+			StHyperLock lock(fullname_resolved);
+			if (lock.try_lock(0)) {
+				lock.unlock();
+            	remove(fullname_resolved.c_str());
+			}
+			
         }
     }
     closedir(dp);
@@ -106,10 +222,17 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
         if (path_resolved.compare(0, base_path.size(), base_path) == 0) {
             remove(path_resolved.c_str());
         } else {
-            //LOG_DEBUG << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << path_resolved << LOG_EOM;
+            //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << path_resolved << std::endl; // FIXME
         }
     }
     return count;
+}
+
+std::ifstream::pos_type filesize(const char* filename)
+{
+    std::ifstream in(filename, std::ifstream::in | std::ifstream::binary);
+    in.seekg(0, std::ifstream::end);
+    return in.tellg(); 
 }
 
 } // namespace StHyperUtilFilesystem

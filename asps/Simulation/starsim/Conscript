@@ -1,9 +1,15 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.19 2009/11/13 17:31:45 fisyak Exp $
+# $Id: Conscript,v 1.19.4.1 2016/05/23 18:32:42 jeromel Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.19.4.1  2016/05/23 18:32:42  jeromel
+# Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+#
+# Revision 1.19.2.1  2016/04/27 12:28:03  jeromel
+# Patches for getting SL13b compiled with gcc44
+#
 # Revision 1.19  2009/11/13 17:31:45  fisyak
 # remove second FLIBS
 #
@@ -155,7 +161,7 @@ my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age
 my $pgm = "starsim";
 script::Keep $pgm;
 my $LD = $env->{LD};
-if ($LD eq 'g++' and $FC ne 'gfortran') {$LD = $env->{CC};}
+if ($LD =~ m/g++/ && $FC !~ m/gfortran/) {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
 if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}

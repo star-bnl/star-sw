@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.9 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbBuffer.h,v 1.9.10.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.9.10.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.10  2015/05/21 19:46:53  dmitry
+ * fixed - unused internal pseudotype access considered as array out of bounds access
+ *
  * Revision 1.9  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -58,7 +64,7 @@ const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(uns
 #if defined(__sun) && !defined(__i386) || defined(__hpux) || defined(__alpha) && !defined(linux)
 const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1}; // same swapping than Solaris
 #else
-const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1};
+const int mycswapl[]={1,1,1,1,1,1,1,1,1,1,1,1,1};
 #endif
 
 struct column {

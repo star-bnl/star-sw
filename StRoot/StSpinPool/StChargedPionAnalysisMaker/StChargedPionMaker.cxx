@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.22 2010/04/25 16:07:57 pibero Exp $
+// $Id: StChargedPionMaker.cxx,v 1.22.4.1 2016/05/23 18:33:19 jeromel Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -219,7 +219,7 @@ Int_t StChargedPionMaker::Make()
     TString inputFile(mMuDstMk->chain()->GetFile()->GetName());
     if(mCurrentFile != inputFile){
         mCurrentFile = inputFile;
-        char *baseName = strrchr(mCurrentFile.Data(), '/');
+        const char *baseName = strrchr(mCurrentFile.Data(), '/');
         mEvent->setMuDstName( baseName );
         
         if(simu) {
@@ -452,6 +452,12 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.22.4.1  2016/05/23 18:33:19  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.22.2.2  2016/04/27 17:47:49  zchang
+ * *** empty log message ***
+ *
  * Revision 1.22  2010/04/25 16:07:57  pibero
  * Modified StChargedPionMaker.cxx to use the safer StJetMaker::getStJets()
  * instead of the outdated and no longer available StJetMaker::getJets().

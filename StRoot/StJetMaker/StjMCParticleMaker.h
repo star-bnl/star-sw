@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $
+// $Id: StjMCParticleMaker.h,v 1.4.8.1 2016/05/23 18:33:15 jeromel Exp $
 #ifndef STJMCPARTICLEMAKER_H
 #define STJMCPARTICLEMAKER_H
 
@@ -28,7 +28,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleMaker.h,v 1.4.8.1 2016/05/23 18:33:15 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

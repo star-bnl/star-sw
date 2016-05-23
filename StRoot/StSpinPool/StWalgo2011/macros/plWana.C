@@ -55,6 +55,8 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
   char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 26
   char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta_P","spinLepEta_N"};// pg 27
+  char *nameLum[]={"AEta8spinY1", "lumStatEve","lumEleTrET", "lumY0", "lumY2", "lumY3", "lumY1"}; // pg28
+
 
   //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
@@ -564,6 +566,28 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     }
  } break;//--------------------------------------
 
+ case 28:{    sprintf(padTit,"  alternative rel spin monitors, %s",core0);
+     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
+     c->Divide(3,2);gStyle->SetOptStat(10);
+     char **nameX=nameLum;
+     TH1F *hRef=0;
+     for(int i=0;i<6;i++) {
+       printf("->%s<\n",nameX[i]);
+       h=(TH1F*)gDirectory->Get(nameX[i]);  assert(h);
+       if(hRef==0) hRef=h;
+       c->cd(i+1);  h->Draw();
+       if(i>=3) {
+	 h->SetMarkerStyle(20);
+	 h->Sumw2();
+	 h->Divide(hRef);
+	 if(h->GetEntries()>0)h->Fit("pol0");
+	 h->SetMinimum( h->GetMinimum());
+      }
+    }
+ } break;//--------------------------------------
+
+
+
 
 
  case 30: // TPC stats 
@@ -719,7 +743,7 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* etaBin=""){
-  for(int i=1;i<=27;i++)  {
+  for(int i=1;i<=28;i++)  {
     if ( isMC && i==2 ) continue;
     if ( isMC && i==3 ) continue;
     if ( isMC && i==4 ) continue;
@@ -733,6 +757,13 @@ void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* eta
 
 
 // $Log: plWana.C,v $
+// Revision 1.17.2.1  2016/05/23 18:33:22  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.18  2012/09/14 21:02:31  balewski
+// *lumi-maker re-written to accumulate alternative rel lumi monitors,
+// * added spin sorting to Zs
+//
 // Revision 1.17  2012/08/31 20:56:06  balewski
 // Toy pol eve generator and reco
 //

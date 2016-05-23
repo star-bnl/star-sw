@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.61.2.1 2013/11/15 19:14:12 didenko Exp $
+ * $Id: MysqlDb.cc,v 1.61.2.1.2.1 2016/05/23 18:33:13 jeromel Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,38 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.61.2.1  2013/11/15 19:14:12  didenko
- * patch due to user id problem on SL6
+ * Revision 1.61.2.1.2.1  2016/05/23 18:33:13  jeromel
+ * Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+ *
+ * Revision 1.71  2015/07/10 18:58:57  dmitry
+ * fixing warning - MYSQL_RES pointer is not supposed to be deleted by client in destructor
+ *
+ * Revision 1.70  2015/05/21 20:01:15  dmitry
+ * fixed false positive aka uninitialized use of memory
+ *
+ * Revision 1.69  2015/05/15 19:56:09  dmitry
+ * more cleanup
+ *
+ * Revision 1.68  2015/05/15 19:47:16  dmitry
+ * proper delete added before overwrite
+ *
+ * Revision 1.67  2015/05/15 18:55:02  dmitry
+ * redundant pointer check removed
+ *
+ * Revision 1.66  2014/06/10 14:52:12  dmitry
+ * Jeff L. spotted INSERT DELAYED in our API (thanks!), and I removed DELAYED keyword
+ *
+ * Revision 1.65  2013/11/15 17:46:38  dmitry
+ * do not try to free memory which we don\'t own..
+ *
+ * Revision 1.64  2013/11/14 21:25:47  dmitry
+ * override for the mysql user autodetect functionality
+ *
+ * Revision 1.63  2013/05/23 19:27:08  dmitry
+ * simple hook to use database with login/pass when really needed
+ *
+ * Revision 1.62  2012/12/12 21:58:37  fisyak
+ * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
  *
  * Revision 1.61  2012/05/04 17:19:14  dmitry
  * Part One integration for Hyper Cache. HyperCache added to workflow, but config is set to DISABLE
@@ -238,6 +268,7 @@
  * each header and src file
  *
  **************************************************************************/
+#include <assert.h>
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
 #include "stdb_streams.h"
@@ -298,9 +329,13 @@
 namespace {
 
 time_t get_time_nanosec() {
+#ifdef HAVE_CLOCK_GETTIME
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec*1000 + ts.tv_nsec/1000000);
+#else
+    return 0;
+#endif
 }
 
 }
@@ -313,6 +348,11 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 ////////////////////////////////////////////////////////////////////////
 
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
+
+	if (mdbuser == NULL && getenv("USE_LB_LOGIN") != NULL) {
+		mdbuser = (char*)"loadbalancer";
+		mdbpw = (char*)"lbdb";
+	}
 
 mhasConnected=false;
 mhasBinaryQuery=false;
@@ -327,23 +367,23 @@ mRes= new MysqlResult;
   pwd = getpwuid(geteuid());
   if (pwd) {
     mSysusername = pwd->pw_name;
-    mdbuser = (char*)mSysusername.c_str();
-    std::cout << "DB OVERRIDE default user with: " << mdbuser << std::endl;
+	mdbuser = (char*)mSysusername.c_str();
+	std::cout << "DB OVERRIDE default user with: " << mdbuser << std::endl;
   } else {
-    std::cout << "DB OVERRIDE failure, user ID cannot be retrieved" << std::endl;
+	std::cout << "DB OVERRIDE failure, user ID cannot be retrieved" << std::endl;
   }
 }
-
 //////////////////////////////////////////////////////////////////////
 
 MysqlDb::~MysqlDb(){
 if(mQuery) delete [] mQuery;
 if(mQueryLast) delete [] mQueryLast;
 Release();
-if(mRes) delete mRes;
+//if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-//if(mdbhost) delete [] mdbhost;
-//if(mdbuser) delete [] mdbuser;
+
+//if(mdbhost) delete [] mdbhost; // no guarantee that we own this data, really
+//if(mdbuser) delete [] mdbuser; // thus do not destroy..
 //if(mdbpw)   delete [] mdbpw;
 //if(mdbName)  delete [] mdbName;
 // if(mdbServerVersion) delete [] mdbServerVersion;
@@ -376,9 +416,11 @@ bool MysqlDb::reConnect(){
 
     // always returns 0, no way to check for SSL validity     
 	// "AES-128-SHA" = less CPU-intensive than AES-256                                                                                               
+#ifndef __APPLE__
     mysql_ssl_set(&mData, NULL, NULL, NULL, NULL, "AES128-SHA");
-
+#endif
 	unsigned long client_flag = CLIENT_COMPRESS;
+
 
     if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,client_flag)) {
     	connected=true;
@@ -687,7 +729,7 @@ bool MysqlDb::InputStart(const char* table,StDbBuffer *aBuff, const char* colLis
   if(change) aBuff->SetStorageMode();
 
   *this << "select * from " << table << " where null"<< endsql;
-  *this << "insert delayed into " << table << " ("<<colList<<") VALUES(";
+  *this << "insert into " << table << " ("<<colList<<") VALUES(";
   int i;
 
     char* tmpString=new char[strlen(colList)+1];
@@ -791,7 +833,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
   aBuff->SetStorageMode();
-  if (aBuff) {
+  //if (aBuff) {
     *this << "select * from " << table << " where null"<< endsql;
     *this << "insert into " << table << " set ";
     bool tFirst=true;
@@ -854,7 +896,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
       *this << endsql;
       if(mqueryState)tRetVal=true;
     };
-  };
+  //};
   //  if (!tRetVal) cout << "insert Failed"<< endl;
   if (change) aBuff->SetClientMode();
   aBuff->SetClientMode();
@@ -950,8 +992,9 @@ char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
     //   cout<< "null input string from mysql " << endl;
     char** tmparr = new char*[1];
     aLen = 1;
-    *tmparr = new char[2];
-    strcpy(*tmparr,"0");
+    //*tmparr = new char[2];
+    //strcpy(*tmparr,"0");
+    tmparr[0] = (char*)"0";
     return tmparr;
   }
 
@@ -1038,7 +1081,7 @@ char* MysqlDb::CodeStrArray(char** strarr , int aLen){
   *tWrite='\0';
   char *tRetVal=new char[strlen(tTempVal)+1];
   strcpy(tRetVal,tTempVal);
-  if (tTempVal) delete [] tTempVal;
+  delete [] tTempVal;
   return tRetVal;
 };
   

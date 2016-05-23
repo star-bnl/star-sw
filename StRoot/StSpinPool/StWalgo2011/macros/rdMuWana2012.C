@@ -20,8 +20,7 @@ int rdMuWana2012(
 	     int  geant=false
   ) { 
   
-  if(isMC==0) //jetDir="/star/institutions/iucf/stevens4/run12w/sampler-pass2-A/jets/";
-    //jetDir="./"; 
+  if(isMC==0) jetDir="./"; 
 
   //if(isMC &&  useJetFinder==2) geant=true;
   
@@ -38,7 +37,7 @@ int rdMuWana2012(
   else if(isMC < 400) {
     char *file1;
     //private 2012 MC
-    if(isMC==100) file1=strstr(file,"jb");   
+    if(isMC==100) file1=strstr(file,"j");   
     //embedding run with geant files
     if(isMC==350) file1=strstr(file,"W");
     if(isMC==351) file1=strstr(file,"Wtau");
@@ -159,6 +158,7 @@ int rdMuWana2012(
     //dbMk->SetFlavor("sim","eemcPMTcal"); // use ideal gains 
   }     
   else if (isMC<400) {
+    if(isMC>=350) dbMk->SetMaxEntryTime(20101215,0); // run 9 embedding
     dbMk->SetFlavor("Wbose2","bsmdeCalib");// Willie's abs gains E-plane, run 9
     dbMk->SetFlavor("Wbose2","bsmdpCalib"); // P-plane
   }
@@ -191,55 +191,124 @@ int rdMuWana2012(
     // Makers for clusterfinding
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
     
-    //here we also tag whether or not to do the swap:
-    bool doTowerSwapFix = true;
-    bool use2003TowerCuts = false;
-    bool use2006TowerCuts = true;
-    //4p maker using 100% tower energy correction
-    StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
-    bet4pMakerFrac100->setUse2003Cuts(use2003TowerCuts);
-    bet4pMakerFrac100->setUseEndcap(true);
-    bet4pMakerFrac100->setUse2006Cuts(use2006TowerCuts);
-    //4p maker using 100% tower energy correction (no endcap)
-    StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
-    bet4pMakerFrac100_noEEMC->setUse2003Cuts(use2003TowerCuts);
-    bet4pMakerFrac100_noEEMC->setUseEndcap(false);
-    bet4pMakerFrac100_noEEMC->setUse2006Cuts(use2006TowerCuts);
+     // Jet maker
+    StJetMaker2009* jetmaker = new StJetMaker2009;
+    jetmaker->setJetFile(jetFile);
+
+    // Set analysis cuts for 12-point branch
+    StAnaPars* anapars12 = new StAnaPars;
+    anapars12->useTpc  = true;
+    anapars12->useBemc = true;
+    anapars12->useEemc = true;
+    anapars12->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
+
+    // TPC cuts
+    anapars12->addTpcCut(new StjTrackCutFlag(0));
+    anapars12->addTpcCut(new StjTrackCutNHits(12));
+    anapars12->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
+    anapars12->addTpcCut(new StjTrackCutDca(3));
+    anapars12->addTpcCut(new StjTrackCutTdcaPtDependent);
+    anapars12->addTpcCut(new StjTrackCutPt(0.2,200));
+    anapars12->addTpcCut(new StjTrackCutEta(-2.5,2.5));
+    anapars12->addTpcCut(new StjTrackCutLastPoint(125));
+
+    // BEMC cuts
+    anapars12->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
+    anapars12->addBemcCut(new StjTowerEnergyCutAdc(4,3)); // ADC-ped>4 AND ADC-ped>3*RMS
+    anapars12->addBemcCut(new StjTowerEnergyCutEt(0.2));
+
+    // EEMC cuts
+    anapars12->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
+    anapars12->addEemcCut(new StjTowerEnergyCutAdc(4,3)); // ADC-ped>4 AND ADC-ped>3*RMS
+    anapars12->addEemcCut(new StjTowerEnergyCutEt(0.2));
     
-    //Instantiate the JetMaker and SkimEventMaker
-    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muMk, jetFile);
-    //StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muMk,outSkimFile);
-    
-    //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
-    StppAnaPars* anapars = new StppAnaPars();
-    anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(12); //track->nHitsFit()>12
-    anapars->setCutPtMin(0.2); //track->pt() > 0.2
-    anapars->setAbsEtaMax(2.0); //abs(track->eta())<1.6
-    anapars->setJetPtMin(3.5);
-    anapars->setJetEtaMax(100.0);
-    anapars->setJetEtaMin(0);
-    anapars->setJetNmin(0);
-    
-    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
-    StConePars* cpars = new StConePars();
-    cpars->setGridSpacing(105, -3.0, 3.0, 120, -pi, pi);  //include EEMC
-    cpars->setConeRadius(0.7); // default=0.7
-    cpars->setSeedEtMin(0.5);
-    cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.5); //default=0.5. if 0.3 less split? 
-    cpars->setPerformMinimization(true);
-    cpars->setAddMidpoints(true);
-    cpars->setRequireStableMidpoints(true);
-    cpars->setDoSplitMerge(true);
-    
-    cpars->setDebug(false);
-    
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
-    
-    
-    
+    // Jet cuts
+    anapars12->addJetCut(new StProtoJetCutPt(3.5,200));
+    anapars12->addJetCut(new StProtoJetCutEta(-100,100));
+
+    // Set analysis cuts for 12-point noEEMC branch
+    StAnaPars* anapars12_noEEMC = new StAnaPars;
+    anapars12_noEEMC->useTpc  = true;
+    anapars12_noEEMC->useBemc = true;
+    anapars12_noEEMC->useEemc = true;
+    anapars12_noEEMC->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
+
+    // TPC cuts
+    anapars12_noEEMC->addTpcCut(new StjTrackCutFlag(0));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutNHits(12));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutDca(3));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutTdcaPtDependent);
+    anapars12_noEEMC->addTpcCut(new StjTrackCutPt(0.2,200));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutEta(-2.5,2.5));
+    anapars12_noEEMC->addTpcCut(new StjTrackCutLastPoint(125));
+
+    // BEMC cuts
+    anapars12_noEEMC->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
+    anapars12_noEEMC->addBemcCut(new StjTowerEnergyCutAdc(4,3)); // ADC-ped>4 AND ADC-ped>3*RMS
+    anapars12_noEEMC->addBemcCut(new StjTowerEnergyCutEt(0.2));
+
+    // EEMC cuts
+    anapars12_noEEMC->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
+    anapars12_noEEMC->addEemcCut(new StjTowerEnergyCutAdc(4,3)); // ADC-ped>4 AND ADC-ped>3*RMS
+    anapars12_noEEMC->addEemcCut(new StjTowerEnergyCutEt(10000.0)); // nothing is this high JS
+
+    // Jet cuts
+    anapars12_noEEMC->addJetCut(new StProtoJetCutPt(3.5,200));
+    anapars12_noEEMC->addJetCut(new StProtoJetCutEta(-100,100));
+
+    // Set cone jet finder parameters
+    StConePars* conepars = new StConePars;
+    conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
+    conepars->setConeRadius(0.7);
+    conepars->setSeedEtMin(0.5);
+    conepars->setAssocEtMin(0.1);
+    conepars->setSplitFraction(0.5);
+    conepars->setPerformMinimization(true);
+    conepars->setAddMidpoints(true);
+    conepars->setRequireStableMidpoints(true);
+    conepars->setDoSplitMerge(true);
+    conepars->setDebug(false);
+
+    // Set CDF midpoint R=0.7 parameters
+    const double coneRadius = 0.7;
+    StFastJetPars* CdfMidpointR070Pars = new StFastJetPars;
+    CdfMidpointR070Pars->setJetAlgorithm(StFastJetPars::plugin_algorithm);
+    CdfMidpointR070Pars->setRparam(coneRadius);
+    CdfMidpointR070Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+    CdfMidpointR070Pars->setStrategy(StFastJetPars::plugin_strategy);
+    CdfMidpointR070Pars->setPtMin(3.5);
+
+    const double overlapThreshold = 0.75;
+    const double seedThreshold = 0.5;
+    const double coneAreaFraction = 1.0;
+
+    StPlugin* cdf = new StCDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction);
+    CdfMidpointR070Pars->setPlugin(cdf);
+
+    // Set anti-kt R=0.6 parameters
+    StFastJetPars* AntiKtR060Pars = new StFastJetPars;
+    AntiKtR060Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
+    AntiKtR060Pars->setRparam(0.6);
+    AntiKtR060Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+    AntiKtR060Pars->setStrategy(StFastJetPars::Best);
+    AntiKtR060Pars->setPtMin(3.5);
+
+    // Set anti-kt R=0.5 parameters
+    StFastJetPars* AntiKtR050Pars = new StFastJetPars;
+    AntiKtR050Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
+    AntiKtR050Pars->setRparam(0.5);
+    AntiKtR050Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+    AntiKtR050Pars->setStrategy(StFastJetPars::Best);
+    AntiKtR050Pars->setPtMin(3.5);
+
+    jetmaker->addBranch("ConeJets12_100",anapars12,CdfMidpointR070Pars);
+    jetmaker->addBranch("ConeJets12_100_noEEMC",anapars12_noEEMC,CdfMidpointR070Pars);
+    jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
+    jetmaker->addBranch("AntiKtR060NHits12_noEEMC",anapars12_noEEMC,AntiKtR060Pars);
+    jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
+    jetmaker->addBranch("AntiKtR050NHits12_noEEMC",anapars12_noEEMC,AntiKtR050Pars);
+
     chain->Init();
     chain->ls(3);
     
@@ -251,7 +320,7 @@ int rdMuWana2012(
     for (Int_t iev=0;iev<nEntries; iev++) {
       if(eventCounter>=nEve) break;
       chain->Clear();
-      cout<<iev<<endl;
+      if(iev%100 == 0) cout<<"iev="<<iev<<endl;
       int stat = chain->Make();
       if(stat != kStOk && stat != kStSkip) break; // EOF or input error
       eventCounter++;
@@ -268,16 +337,8 @@ int rdMuWana2012(
     cout << "END: jet finder " << endl;
     return;
   }
-
-  if (useJetFinder == 2)
-    {
-      cout << "Configure to read jet trees " << endl;
-      StJetReader *jetReader = new StJetReader;
-      jetReader->InitFile(jetFile);
-    }
-
   
-  
+
   //.... W reconstruction code ....
   St2011WMaker *WmuMk=new St2011WMaker();
   if(isMC) { // MC specific
@@ -292,8 +353,12 @@ int rdMuWana2012(
   TString outFtree=wtreeDir; outFtree+=outF; outFtree+=".Wtree.root";
   WmuMk->setTreeName(outFtree);
   
-  if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
-  
+  if (useJetFinder == 2) {
+    cout << "Configure to read jet trees " << endl;
+    WmuMk->chainJetFile(jetFile);
+    WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+  }
+
   WmuMk->setMaxDisplayEve(100); // only first N events will get displayed 
   
   /* evaluation of result, has full acess to W-algo internal data
@@ -320,7 +385,7 @@ int rdMuWana2012(
       spinMkA[kk]->setHList(HList); 
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);
-      if(kk==3) spinMkA[kk]->setQPT(-1);// disable Q/PT cut
+      if(kk==3) spinMkA[kk]->setQPT(-1,-1);// disable Q/PT cut
       if(kk==4) spinMkA[kk]->setNoEEMC(); 
     }  
   }
@@ -394,7 +459,23 @@ int rdMuWana2012(
 }
 
 
+// ----------------------------------------------------------------------------
+void chainFiles(const Char_t *fileList)
+{
+
+  cout << "chaining files from list: " << fileList << endl;
+    wTreeMk->chainJetFile(jetName);
+
+}
+
+
 // $Log: rdMuWana2012.C,v $
+// Revision 1.8.2.1  2016/05/23 18:33:23  jeromel
+// Updates for SL12d / gcc44 embedding library - StDbLib, QtRoot update, new updated StJetMaker, StJetFinder, StSpinPool ... several cast fix to comply with c++0x and several cons related fixes (wrong parsing logic). Changes are similar to SL13b (not all ode were alike). Branch BSL12d_5_embed.
+//
+// Revision 1.10  2012/09/18 22:33:07  stevens4
+// remove hardcoded jet tree path
+//
 // Revision 1.8  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //

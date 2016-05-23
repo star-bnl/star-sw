@@ -16,44 +16,44 @@
 
 class StJetParticle : public StJetElement {
 public:
-  StJetParticle() {}
+  float                     m() const { return mM; }
+  float                     e() const { return mE; }
+  int                     pdg() const { return mPdg; }
+  int                  status() const { return mStatus; }
+  int             firstMother() const { return mFirstMother; }
+  int              lastMother() const { return mLastMother; }
+  int           firstDaughter() const { return mFirstDaughter; }
+  int            lastDaughter() const { return mLastDaughter; }
 
-  const char*            name() const;
-  float                     m() const;
-  float                     e() const;
-  int                     pdg() const;
-  int                  status() const;
-  TLorentzVector fourMomentum() const;
+  TLorentzVector fourMomentum() const
+  {
+    TLorentzVector p;
+    p.SetPtEtaPhiE(mPt,mEta,mPhi,mE);
+    return p;
+  }
+
+  const char* name() const
+  {
+    static const char* noname = "???";
+    const TParticlePDG* ap = TDatabasePDG::Instance()->GetParticle(mPdg);
+    return ap ? ap->GetName() : noname;
+  }
 
 private:
   friend class StjeJetEventTreeWriter;
   friend class StJetMaker2009;
+  friend class StUEMaker2009;
 
   float mM;
   float mE;
   int   mPdg;
   int   mStatus;
+  int   mFirstMother;
+  int   mLastMother;
+  int   mFirstDaughter;
+  int   mLastDaughter;
 
-  ClassDef(StJetParticle,1);
+  ClassDef(StJetParticle,2);
 };
-
-inline float StJetParticle::m     () const { return mM     ; }
-inline float StJetParticle::e     () const { return mE     ; }
-inline int   StJetParticle::pdg   () const { return mPdg   ; }
-inline int   StJetParticle::status() const { return mStatus; }
-
-inline TLorentzVector StJetParticle::fourMomentum() const
-{
-  TLorentzVector p;
-  p.SetPtEtaPhiE(mPt,mEta,mPhi,mE);
-  return p;
-}
-
-inline const char* StJetParticle::name() const
-{
-  static const char* noname = "???";
-  const TParticlePDG* ap = TDatabasePDG::Instance()->GetParticle(mPdg);
-  return ap ? ap->GetName() : noname;
-}
 
 #endif	// ST_JET_PARTICLE_H

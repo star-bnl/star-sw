@@ -94,7 +94,7 @@ foreach arch ( _ _x8664_ )
     echo "Checking possible backward compatibility through refos $refos"
     if ( -e .$refos || -e $refos ) then
 	foreach ospf ( sl rh )
-	    foreach vers ( 55 56 57 )
+	    foreach vers ( 55 56 57 58 59 )
 		set dir=$ospf$vers$arch"gcc432"
 		if ( ! -e .$dir && -e .$refos ) then
 		    echo "  Backward compatibility assumed between $dir -> $refos "
@@ -115,6 +115,39 @@ end
 
 
 # <--- started to be more complicated with 32 bits and 64 bits
+
+#
+# Added for patch with gcc 44 compilation done under SL64
+# of older libraries
+#
+
+foreach arch ( _ _x8664_ )
+    set refos="sl64"$arch"gcc447"
+    echo "Checking possible backward compatibility through refos $refos"
+    if ( -e .$refos || -e $refos ) then
+	foreach ospf ( sl rh )
+	    foreach vers ( 64 65 66 67 )
+	      foreach cv ( 482 )
+		set dir=$ospf$vers$arch"gcc$cv"
+		if ( ! -e .$dir && -e .$refos ) then
+		    echo "  Backward compatibility assumed between $dir -> $refos "
+		    /bin/ln -s .$refos .$dir
+		else
+		    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+		endif
+		if ( ! -e $dir && -e $refos ) then
+		    echo "  Backward compatibility assumed between $dir -> $refos "
+		    /bin/ln -s $refos $dir
+		else
+		    if ( -e $refos && -e $dir )   echo " $dir exists"
+		endif
+              end
+	    end
+	end
+    endif
+end
+
+
 
 
 if ( -e .sl44_gcc346) then

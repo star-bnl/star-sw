@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.10 2012/08/31 20:10:52 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.10.2.1 2016/05/23 18:33:21 jeromel Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -148,7 +148,6 @@ St2011WMaker::initEHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_nearTotEtFrac,0,parE_nearTotEtFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-
   // .... track-EMC distance cuts
   hE[43]=h=new TH2F("muEdist1","Endcap: X-Y Distance(track-ETOW cluster) vs. 2x2 E;2x2 cluster E (GeV); | distance | (cm)",40,0,120,40,0,25);
   hE[44]=h=new TH2F("muEdist2","Endcap: R#Delta #phi   (track-ETOW cluster) vs.#phi-clust;  .#phi-clust(rad) ;R#Delta #phi (cm)",100,-3.2,3.2,40,-20,20);
@@ -180,7 +179,27 @@ St2011WMaker::initEHistos(){
   hE[61]=new TH1F("muEbX7eht","L2W-EHT-rnd  events vs. bXing; bXing= raw bx7",128,-0.5,127.5); // filled on input
   hE[62]=h=new TH2F("muEEne_Deta","Endcap W: ETOW 2x2 cluster energy vs. detector eta, final selection; endcap eta bin; 2x2 Energy (GeV)",12,0,12,50,0,100);
 
+  // track matched to cluster plots
+  hE[63]=h=new TH1F("muETrNfitTr2Cl","Endcap: primary track in-muTr2Cl; nFitPoints",50,0,50);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_nFitPts,0,parE_nFitPts,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  hE[64]=h=new TH1F("muETrFitFracTr2Cl","Endcap: primary track in-muTr2Cl; nFit/nPoss ",50,0,1.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_nHitFrac,0,parE_nHitFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  
+  hE[65]=h=new TH1F("muETrRxyInTr2Cl","Endcap: primary track first hit  in-muTr2Cl; Rxy (cm)",60,50,170.);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_trackRin,0,parE_trackRin,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  // misc...
   hE[69]=h=new TH2F("muEeXY","Endcap W: Projected track XY at SMD depth;  X (cm); Y (cm)",100,-280,280,100,-280,280);
+  hE[70]=h=new TH1F("muETEMCjetETR_EMC","Endcap: ratio (2x2/nearEmcCone) ET ; cluster ET/ nearEmcCone ET",100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_nearTotEtFrac,0,parE_nearTotEtFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  hE[71]=h=new TH1F("muETEMCjetETR_ETOW","Endcap: ratio (2x2/nearEtowCone) ET ; cluster ET/ nearEtowCone ET",100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_nearTotEtFrac,0,parE_nearTotEtFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   //.... final Ws
   hE[90]=h=new TH1F("muE_WET","Endcap W: Final selection; 2x2 ETOW cluster ET (GeV)", 100,0,100);
@@ -190,7 +209,7 @@ St2011WMaker::initEHistos(){
   sprintf(txt,"Endcap W: Final selection, ET>%.0f GeV 'goldenW'; detector eta ; detector phi (rad)",parE_highET);
   hE[91]=new TH2F("muE_W2D1",txt,15,0.5,2.0,12,-PI,PI);
 
-  hE[92]=new TH2F("muE_Wdedx","Endcap W: Track dEdx, final W selection; 2x2 ET (GeV); dEdx (keV)",100,0,100,100,0,10);
+  hE[92]=new TH2F("muE_Wdedx","Endcap W: Track dEdx, final W selection; 2x2 ET (GeV); dEdx (keV)",100,0,100,100,0,20);
   hE[93]=new TH2F("muE_WglDca","Endcap W: Track glob vertex abs(DCA), final selection ; 2x2 ET (GeV); |DCA| (cm)",100,0,100,100,0,5);
   hE[94]=new TH2F("muE_WglDcaSP","Endcap W: Track prim POSITIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
   hE[95]=new TH2F("muE_WglDcaSN","Endcap W: Track prim NEGATIVE glob signed DCA, final selection ; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
@@ -209,7 +228,16 @@ St2011WMaker::initEHistos(){
 
   hE[101]=h=new TH2F("muE_W_sPtBalsmallIso","Endcap W: sPt-Bal vs 2x2/4x4 ratio, final selection ; 2x2/4x4 ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
   hE[102]=h=new TH2F("muE_W_sPtBalnearIso","Endcap W: sPt-Bal vs 2x2/nearCone ratio, final selection ; 2x2/nearCone ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
-  hE[103]=h=new TH2F("muE_W_sPtBaldedx","Endcap W: sPt-Bal vs dE/dx, final selection ; dE/dx (keV); signed Pt-Balance",100,0,10,100,-100,100);
+  hE[103]=h=new TH2F("muE_W_sPtBalnearIsoEmc","Endcap W: sPt-Bal vs 2x2/nearEmcCone ratio, final selection ; 2x2/nearEmcCone ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
+  hE[104]=h=new TH2F("muE_W_sPtBalnearIsoEtow","Endcap W: sPt-Bal vs 2x2/nearEtowCone ratio, final selection ; 2x2/nearEtowCone ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
+
+  hE[105]=h=new TH2F("muE_W_sPtBaldedx","Endcap W: sPt-Bal vs dE/dx, final selection ; dE/dx (keV); signed Pt-Balance",100,0,20,100,-100,100);
+  hE[106]=h=new TH2F("muE_W_dEdxFit","Endcap W: dEdxFit vs dE/dx (nominal), final selection ; nominal dE/dx (keV); dEdxFit",100,0,20,100,0,20);
+  //hE[107]=h=new TH2F("muE_W_dEdxFitTrunc","Endcap W: dEdxFit vs dEdxTruncated, final selection ; dEdxTruncated; dEdxFit",100,0,20,100,0,20);
+
+  hE[107]=h=new TH2F("muE_W_sector_hypCorrP","Endcap W: Q*ET/PT vs TPC sector, final selection ; TPC sector ID; Q*ET/PT",20,0.,20.,100,-4,4);
+  hE[108]=h=new TH2F("muE_W_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, final selection ; nHit; Q*ET/PT",50,0,50,100,-4,4);
+  hE[109]=h=new TH2F("muE_W_dEdx_hypCorrP","Endcap W: Q*ET/PT vs dEdx, final selection ; dEdx; Q*ET/PT",100,0.,20.,100,-4,4);
 
   // free 101-109
   //..... series of electron ET plots after succesive cuts
@@ -258,12 +286,23 @@ St2011WMaker::initEHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
+  // "straightened" charge separation plots
+  sprintf(txt,"Endcap: TPC GLOB Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
+  hE[202]=h=new TH2F("muEchRecHypCorrPNg", txt,100,0.,100.,100,-4,4);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  sprintf(txt,"Endcap: TPC PRIM Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
+  hE[203]=h=new TH2F("muEchRecHypCorrPNp", txt,100,0.,100.,100,-4,4);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
   hE[211]=h=new TH2F("muEsmdNhit","Number of hit strips; U plane; V plane",50,0.,50.,50,0.,50.);
   hE[212]=h=new TH2F("muEsmdEne","Energy in SMD Planes; U plane; V plane",100,0.,500.,100,0.,500.);
   hE[213]=h=new TH2F("muEsmdNhit_Ene","Number of hit strips vs Energy in SMD Planes; Nhit (U+V); Energy (U+V)",100,0.,100.,500,0.,1000.);
   hE[214]=h=new TH2F("muEclustET_esmdEne","Tower cluster E_{T} vs. Energy in SMD Planes; Tower cluster E_{T}; SMD Energy (U+V)",100,0.,100.,500,0.,1000.);
   hE[215]=h=new TH2F("muEclustET_esmdNhit","Tower cluster E_{T} vs. Number of hit strips; Tower cluster E_{T}; Nhit (U+V)",100,0.,100.,100,0.,100.);
-  hE[216]=h=new TH2F("muEsmdWidth","Width of of shower shape; U plane; V plane",50,0.,5.,50,0.,5.);
+  hE[216]=0;
   hE[217]=h=new TH2F("muEsmdCrossXY","Difference in SMD XP (track - SMD); X position; Y postion",50,-2.5,2.5,50,-2.5,2.5);
   hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.05,.05,50,-.05,.05);
   hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
@@ -284,13 +323,13 @@ St2011WMaker::initEHistos(){
   hE[232]=h=new TH2F("muEsPtBalance_clustFailSMD","Endcap: sPtBalance vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
   hE[233]=h=new TH2F("muEsPtBalance2_clustFailSMD","Endcap: sPtBalance2 vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance 2 (GeV)",100,0,100,100,-100,100);
 
-  hE[235]=h=new TH2F("muEsmdRatioUVfailPtBal_highET","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
-  hE[236]=h=new TH2F("muEclustET_esmdRatiofailPtBal","Tower cluster E_{T} vs. Ratio of 7 strip sum to 41 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
+  hE[235]=h=new TH2F("muEsmdRatioUVfailPtBal_ET25","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",100,0.,1.,100,0.,1.);
+  hE[236]=h=new TH2F("muEclustET_esmdRatiofailPtBal","Tower cluster E_{T} vs. Ratio of 7 strip sum to 41 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,100,0.,1.);
 
-  hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_highET","sPtBalance vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,50,0.,1.);
-  hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_highET","sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,50,0.,1.);
+  hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_ET25","sPtBalance vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,100,0.,1.);
+  hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_ET25","sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
 
-  hE[239]=h=new TH2F("muEsPtBalance_awayTot_highEt","Endcap (ET > 25): sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
+  hE[239]=h=new TH2F("muEsPtBalance_awayTot_ET25","Endcap (ET > 25): sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,parE_ptBalance,100,parE_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
   
@@ -315,6 +354,27 @@ St2011WMaker::initEHistos(){
     hE[244+ipn]=h=new TH1F(txt0, txt, 100,0,100);
   }
   
+  hE[250]=h=new TH2F("muEsPtBalance2_esmdRatio_ET25_P","Q+ : sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+  hE[251]=h=new TH2F("muEsPtBalance2_esmdRatio_ET25_N","Q- : sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+
+  hE[252]=h=new TH2F("muEsPtBalance_esmdRatio_ET20","ET>20: sPtBalance vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,100,0.,1.);
+  hE[253]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20","ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+  hE[254]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_P","Q+ ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+  hE[255]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_N","Q- ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+
+  hE[256]=h=new TH2F("muE_UoffStr","peak offset from track ESMD-U; track phi(rad); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  Lx=h->GetListOfFunctions();
+  int dd=parE_esmdWL-parE_esmdGL+0.5;
+  ln=new TLine(-PI,-dd, PI, -dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,dd, PI, dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
+  
+  hE[257]=h=new TH2F("muE_VoffStr","peak offset from track ESMD-V; (4 bins per TPC sector)      TPC track phi(rad); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  Lx=h->GetListOfFunctions();  
+  ln=new TLine(-PI,-dd, PI, -dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,dd, PI, dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
+
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHE;i++) {

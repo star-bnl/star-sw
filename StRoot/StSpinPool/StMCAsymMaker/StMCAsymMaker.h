@@ -17,6 +17,9 @@ extern "C" void denom_(double*,double*,double*,double*,double*,double*,double*,d
 extern "C" void polpar_(double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" void dssvini2009a_(int*);
 extern "C" void dssvfit2009a_(double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" void lss2010_(int*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" { extern struct { int iini; } intini_; }
+extern "C" void polpdf_(int*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" double dinteg_(double (*)(double&),double&,double&,double&);
 //extern "C" void parpol_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
 //extern "C" void parpol2_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
@@ -87,6 +90,8 @@ private:
     double df1_NLO_LSS1,df2_NLO_LSS1,weight_NLO_LSS1;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
     double df1_NLO_LSS2,df2_NLO_LSS2,weight_NLO_LSS2;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
     double df1_NLO_LSS3,df2_NLO_LSS3,weight_NLO_LSS3;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
+    double df1_NLO_LSS2010_delGpos,df2_NLO_LSS2010_delGpos,weight_NLO_LSS2010_delGpos;
+    double df1_NLO_LSS2010_chsign_delG,df2_NLO_LSS2010_chsign_delG,weight_NLO_LSS2010_chsign_delG;
 
     double df1_NLO_AAC1,df2_NLO_AAC1,weight_NLO_AAC1;   //NLO Asymmetry Analysis Collaboration PDF Scenario 1/2/3
     double df1_NLO_AAC2,df2_NLO_AAC2,weight_NLO_AAC2;   //NLO Asymmetry Analysis Collaboration PDF Scenario 1/2/3
@@ -94,6 +99,7 @@ private:
 
     double df1_NLO_BB1,df2_NLO_BB1,weight_NLO_BB1;      //NLO Blumlein & Bottcher PDF Scenario 1/2
     double df1_NLO_BB2,df2_NLO_BB2,weight_NLO_BB2;      //NLO Blumlein & Bottcher PDF Scenario 1/2
+    double df1_NLO_BB2010,df2_NLO_BB2010,weight_NLO_BB2010;
 
     double df1_NLO_DNS1,df2_NLO_DNS1,weight_NLO_DNS1;   //NLO de Florian, Navarro, & Sassot PDF Scenario 1/2
     double df1_NLO_DNS2,df2_NLO_DNS2,weight_NLO_DNS2;   //NLO de Florian, Navarro, & Sassot PDF Scenario 1/2
@@ -133,6 +139,8 @@ public:
     static Double_t get_polPDF_NLO_LSS1(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_LSS2(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_LSS3(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_LSS2010_delGpos(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_LSS2010_chsign_delG(int flavor, double x1, double Q2);
 
     //AAC PDF
     static Double_t get_polPDF_NLO_AAC1(int flavor, double x1, double Q2);
@@ -142,6 +150,7 @@ public:
     //BB PDF
     static Double_t get_polPDF_NLO_BB1(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_BB2(int flavor, double x1, double Q2);
+    static Double_t get_polPDF_NLO_BB2010(int flavor, double x1, double Q2);
 
     //DNS PDF
     static Double_t get_polPDF_NLO_DNS1(int flavor, double x1, double Q2);
@@ -167,7 +176,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.12 2011/09/19 18:58:39 pibero Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.12.2.1 2016/05/23 18:33:21 jeromel Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
