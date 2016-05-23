@@ -221,8 +221,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       Double_t mass = 0.1057;
       Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
       Double_t bgMax  = 1e5;  // 1e2;// 1e5;
-      Double_t pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-      Double_t pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
       if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 
 	if    (Opt.Contains("muon-",TString::kIgnoreCase))     ID =  6;}
       else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
@@ -252,6 +250,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       Double_t bgMin10 = TMath::Log10(bgMin);
       Double_t bgMax10 = TMath::Log10(bgMax);
     }
+      Double_t pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
+      Double_t pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
     TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
     cout << "Set kinematics: " << Kine.Data() << endl;
     geant->Do(Kine.Data());
