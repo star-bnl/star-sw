@@ -1,33 +1,34 @@
-#ifndef __StiCATpcTrackerInterface_h__
-#define __StiCATpcTrackerInterface_h__
-#include "StiCATpcSeedFinder.h"
+#ifndef __StiTPCCATrackerInterface_h__
+#define __StiTPCCATrackerInterface_h__
+#ifdef DO_TPCCATRACKER
+#include "StiTpcSeedFinder.h"
 #define __NEW_TPCCATracker__
 #ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBTracker.h"
 #else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
+#include "TPCCATracker/code/AliHLTTPCCAGBTracker.h"
 #endif /* __NEW_TPCCATracker__ */
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 #ifdef __NEW_TPCCATracker__
 #include "TPCCATrackerPerformance/AliHLTTPCCAPerformance.h"
 #include "TPCCATrackerPerformance/AliHLTTPCCAMCTrack.h"
 #else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/Performance/AliHLTTPCCAPerformance.h"
-#include "TPCCATracker/Performance/AliHLTTPCCAMCTrack.h"
+#include "TPCCATrackerPerformance/code/AliHLTTPCCAPerformance.h"
+#include "TPCCATrackerPerformance/code/AliHLTTPCCAMCTrack.h"
 #endif /* __NEW_TPCCATracker__ */
 #endif
 
-#include "Sti/StiTrackContainer.h"
+#include "StiTrackContainer.h"
 
-class StiCATpcTrackerInterface {
+class StiTPCCATrackerInterface {
  public:
 
     /// Instance
-  static StiCATpcTrackerInterface &Instance();
+  static StiTPCCATrackerInterface &Instance();
   
     /// constructor - destructor
-  StiCATpcTrackerInterface();
-  ~StiCATpcTrackerInterface();
+  StiTPCCATrackerInterface();
+  ~StiTPCCATrackerInterface();
 
   void SetNewEvent(); // clean and initialize before new event
 
@@ -56,7 +57,7 @@ class StiCATpcTrackerInterface {
   HitMapToVectorAndEndType *fHitsMap;
   vector<Seed_t> fSeeds;
 
-  StiCATpcSeedFinder *fSeedFinder;
+  StiTpcSeedFinder *fSeedFinder;
   AliHLTTPCCAGBTracker *fTracker;
 
   vector<int> fIdTruth; // id of the Track, which has created CaHit
@@ -90,4 +91,5 @@ class StiCATpcTrackerInterface {
 #endif
   double fPreparationTime_real, fPreparationTime_cpu; // time for coping data and performance
 };
-#endif //  __StiCATpcTrackerInterface_h__
+#endif /* DO_TPCCATRACKER */
+#endif //  __StiTPCCATrackerInterface_h__
