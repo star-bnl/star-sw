@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.61 2015/05/21 21:51:34 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.62 2016/05/24 17:44:16 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.62  2016/05/24 17:44:16  dmitry
+ * first batch of fixes for Coverity findings
+ *
  * Revision 1.61  2015/05/21 21:51:34  dmitry
  * avoid memleak by moving check to the entrance of the func
  *
@@ -242,16 +245,16 @@ char **StDbBroker::GetComments(St_Table *parentTable)
     //    MakeZombie();
     return NULL;
   }
-  char **ElementComment = new char*[m_nElements]; 
-  
   TClass *classPtr = parentTable->GetRowClass();
   if (!classPtr) return NULL;
-  
+
   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
   
   TIter next(classPtr->GetListOfDataMembers());
   TDataMember *member = 0;
   UInt_t i=0, j=0;
+  char **ElementComment = new char*[m_nElements]; 
+
   while ( (member = (TDataMember *) next()) ) {
     ElementComment[i] = strdup(member->GetTitle());
  // strip trailing blanks from Comments (they are stripped in mysql anyway)
@@ -882,7 +885,7 @@ int cID;
 // check for tables in this Node
    if( (parentNode->hasData()) ){   
       StDbTableIter* itr = parentNode->getStDbTableIter();
-      while(!itr->done())cID=m_Nodes->addNode(itr->next(),pID);
+      while( !itr->done() ) { m_Nodes->addNode(itr->next(),pID); }
       delete itr;
    }
 

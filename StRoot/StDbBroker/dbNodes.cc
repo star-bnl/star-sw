@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.cc,v 1.3 2000/01/27 20:30:40 porter Exp $
+ * $Id: dbNodes.cc,v 1.4 2016/05/24 17:44:16 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbNodes.cc,v $
+ * Revision 1.4  2016/05/24 17:44:16  dmitry
+ * first batch of fixes for Coverity findings
+ *
  * Revision 1.3  2000/01/27 20:30:40  porter
  * cleaned up dtor & error logic
  *
@@ -43,14 +46,7 @@ dbNodes::deleteLists() {
     mpids = 0;
   }
   
-  nodeVec::iterator itr;
-
-  do {
-    for(itr = mnodes.begin(); itr!=mnodes.end(); ++itr){
-        mnodes.erase(itr);
-        break;
-    }
-  } while (mnodes.begin() != mnodes.end());
+  mnodes.clear();
 
 }
 ////////////////////////////////////////////////////////
