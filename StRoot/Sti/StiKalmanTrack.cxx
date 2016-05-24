@@ -1,11 +1,229 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.2 2016/05/24 22:36:55 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.2 2016/05/24 22:36:55 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.3 2016/05/24 22:49:17 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.3 2016/05/24 22:49:17 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.139.4.3  2016/05/24 22:49:17  smirnovd
+ * Squashed commit of the following:
+ *
+ * commit 169aac1e9a4e5291586418783d9b969a1d047035
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 18:07:56 2016 -0400
+ *
+ *     StiMaker: Included missing header for templated class
+ *
+ * commit ebf9abbd2d31db0bfb053a5c1e2715c969496b8f
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 17:30:47 2016 -0400
+ *
+ *     Moved StiDefaultToolkit from StiMaker/ to Sti/ to break circular dependancy
+ *
+ *     Relevant include paths and LinkDef's have been updated.
+ *
+ * commit 3dfd849439f6350577937ac042944d9d1b0b0978
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 17:19:33 2016 -0400
+ *
+ *     StiMaker: Added method to update internal toolkit to StiCA
+ *
+ * commit 9e34887223d52f7ab3a784bb81879f303ac5d2fc
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 17:11:10 2016 -0400
+ *
+ *     StiKalmanTrack: Make initialize() virtual
+ *
+ *     We call it for StiCAKalmanTrack via a base pointer. For example, see
+ *
+ *     bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
+ *
+ * commit 04044129cc01bf326261b5934e8feb48fcac9798
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 17:09:36 2016 -0400
+ *
+ *     StiCAKalmanTrack: [Style] Mark refit() virtual as that's what it is
+ *
+ * commit fac70613e865d1d3f9312dcac6a3c4bc5270abc6
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 16:25:56 2016 -0400
+ *
+ *     StiFactory: Include proper dependency
+ *
+ * commit 45404e1dcdcff8311184663c40cd0f8fe4ef0625
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 19:05:32 2016 -0400
+ *
+ *     StiCATpcSeedFinder: [Cosmetic] Removed irrelevant code/comments
+ *
+ * commit 4bb50aac320c58c2fa2c2da47c8875800d92fac0
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 21:36:08 2016 -0400
+ *
+ *     Make use of StiKalmanTrack's static members
+ *
+ * commit 90c647615138540a1f59810d9259da70f6f162f4
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 21:34:17 2016 -0400
+ *
+ *     StiKalmanTrack: Moved static global entities from file scope to class
+ *
+ * commit 1105164c6f4c569ee5e2a3ff64fa8132c5f95914
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 15:41:50 2016 -0400
+ *
+ *     StiCAKalmanTrackFinder: Accept pointers to base class StiKalmanTrack
+ *
+ *     The method does not do anything specific to derived class StiCAKalmanTrack hence
+ *     it is safe to accept a pointer to the base class
+ *
+ * commit 1e7e9f26806bad39cec6e02d83a12e8def577671
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 12:38:01 2016 -0400
+ *
+ *     StiCAKalmanTrack: Added include declaring kTpcId
+ *
+ * commit ed22761b7dd81a2a3bc9efa55d037541bbaad2bd
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Fri May 13 00:07:18 2016 -0400
+ *
+ *     StiKalmanTrackFinder: Changed access to protected for private data member
+ *
+ *     This member is used in derived StiCAKalmanTrackFinder class so allow direct use
+ *
+ * commit fe547209f89d8d9981aade883fd86fae1ee8b304
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 23:47:14 2016 -0400
+ *
+ *     StiCATpcSeedFinder: Cast StiKalmanTrack to StiCAKalmanTrack
+ *
+ *     In StiCA we would like to work with StiCAKalmanTrack's
+ *     It is safe to cast to derived class as derived class does not introduce any new
+ *     data members
+ *
+ * commit 2ee090b303f76c2f431173c81b3a54cdbb492682
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Tue May 24 16:50:47 2016 -0400
+ *
+ *     StiCADefaultToolkit: Modifed config for StiCA to instantiate StiCA specific objects
+ *
+ * commit 62e6095815e15dad7ddb66f20a8151d0c9b4c7fd
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 16:20:25 2016 -0400
+ *
+ *     StiCADefaultToolkit: Remove duplicate code belonging to base class
+ *
+ * commit 05cbe67227dc31778148cd8a92707d940bf77e72
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 15:50:41 2016 -0400
+ *
+ *     StiCADefaultToolkit: Inherit from StiDefaultToolkit
+ *
+ * commit c56f4d0a216f905f734d6af2764c9f9c6df41337
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Tue May 24 16:14:35 2016 -0400
+ *
+ *     StiCAKalmanTrackFinder: Removed duplicate code that exists in parent class StiKalmanTrackFinder
+ *
+ * commit 6becbb84ed39a587d3c4d01e71f9210c7d683a65
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 23:43:37 2016 -0400
+ *
+ *     StiCAKalmanTrackFinder inherits from StiKalmanTrackFinder
+ *
+ * commit a992c34fc7d1642617952053327378cf39f3af0d
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 12:35:51 2016 -0400
+ *
+ *     StiCAKalmanTrack: Removed duplicate code that exists in parent class StiKalmanTrack
+ *
+ * commit 805f37719570820a95069144dfb9d28356a95e1c
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 16 12:37:10 2016 -0400
+ *
+ *     StiCAKalmanTrack: Inherit from Sti/ to avoid duplicate code
+ *
+ *     Conflicts:
+ *     	StiCA/StiCAKalmanTrack.h
+ *
+ * commit e967b188bad7f7cdc0f48ededa58365a1f145697
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 15:42:30 2016 -0400
+ *
+ *     StiCA: Removed DO_TPCCATRACKER protection
+ *
+ *     For StiCA we assume DO_TPCCATRACKER is defined
+ *
+ * commit e80e0659619f2d0369549bfb717639a4a5b02eb7
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 14:49:04 2016 -0400
+ *
+ *     Sti: Removed DO_TPCCATRACKER protection
+ *
+ *     For Sti we assume DO_TPCCATRACKER is not defined
+ *
+ * commit e9df39949dc387f2eab3cb1812ebf99832fafaaf
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 18:13:26 2016 -0400
+ *
+ *     StiCA: Path of includes corrected
+ *
+ * commit dbc98816057b09b843e86e6b36ed1c81a7932ea0
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 18:08:46 2016 -0400
+ *
+ *     StiCA: Classes renamed for consistency
+ *
+ *     The following substitutions were made:
+ *
+ *     s/StiKalmanTrackFinder/StiCAKalmanTrackFinder/
+ *     s/StiTpcSeedFinder/StiCATpcSeedFinder/
+ *     s/StiKalmanTrack/StiCAKalmanTrack/
+ *     s/StiTPCCATrackerInterface/StiCATpcTrackerInterface/
+ *     s/StiDefaultToolkit/StiCADefaultToolkit/
+ *
+ * commit b0c26b55a4b491ce0dd92b6da1c4c74a70440c52
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Mon May 23 15:11:48 2016 -0400
+ *
+ *     StiCA: Renamed StiDefaultToolkit.cxx -> StiCADefaultToolkit
+ *
+ * commit 4a738dbe2290203cbdc69dc213bd97661693661a
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 15:31:11 2016 -0400
+ *
+ *     Added in StiCA/ direct copies of corresponding files from Sti/
+ *
+ * commit 25cf766787a65f6d6b1b2789637941c0dd016b55
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 14:33:45 2016 -0400
+ *
+ *     Moved StiCA related files from Sti/ to StiCA/
+ *
+ *     Some files have been renamed. We'll use StiCA prefix for files in StiCA/
+ *
+ * commit a51e816f2d21645cc4768098a6867b78724e5215
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Thu May 12 19:47:58 2016 -0400
+ *
+ *     Fixes to catch up with latest changes in Sti
+ *
+ * commit 27264048a6fd93ff9b03613df04eec9452aa332f
+ * Author: Dmitri Smirnov <d.s@plexoos.com>
+ * Date:   Tue May 24 12:11:25 2016 -0400
+ *
+ *     StiKalmanTrack: Change from original code found in "eval"
+ *
+ *     This change was reverted by Irakli but in fact needed to avoid triggereing of assert
+ *     See commit 4d993f28
+ *
+ * commit 8391c593621c48e775efa453c9b694c46229aba8
+ * Author: Irakli Chakaberia <iraklic@rcas6007.rcf.bnl.gov>
+ * Date:   Tue Apr 26 11:39:42 2016 -0400
+ *
+ *     assert removed to allow for multiple use of hit
+ *
  * Revision 2.139.4.2  2016/05/24 22:36:55  smirnovd
  * Revert "Squashed commit of the following:"
  *
@@ -455,7 +673,6 @@
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StiHitContainer.h"
-#include "StiTrackNodeHelper.h"
 #include "StiUtilities/StiDebug.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -470,13 +687,8 @@ int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
-// hidden static variables for refit & refiL
-static StiTrackNodeHelper sTNH;
-static double diff(const StiNodePars &p1,const StiNodeErrs &e1
-                  ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
+StiTrackNodeHelper StiKalmanTrack::sTNH;
 
-
-// end of hidden static variables for refit & refiL
 
 /*! 
    Reset the class members to their default state.
@@ -556,70 +768,12 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
-#ifdef DO_TPCCATRACKER
-  initialize0(hits);
-  
-  int ierr = approx(0);
-  if (!ierr) return 0;
-  BFactory::Free(this);
-  return 1;
-}
-
-
-int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
-{
-#endif /* DO_TPCCATRACKER */
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
-#ifdef DO_TPCCATRACKER
-  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
-  const StiDetector* detectorOld = 0;
-  StiHit *hit_Old = 0;
-  for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
-    StiHit *hit = hits[ihit];
-    detector = hit->detector();
-    assert(detector);
-    // look for gaps in hit list
-    if (hit_Old && detector->getGroupId() == kTpcId) {
-      Double_t R_hit = detector->getPlacement()->getLayerRadius();
-      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
-      detectorOld = hit_Old->detector();
-      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-      if (_debug && detectorOld == detector) {
-	cout << "The same detector for hit " << ihit << endl;
-	cout << "hit     \t" << *hit << endl;
-	if (hit_Old) 
-	  cout << "hitOld\t" << *hit_Old << endl;
-      }
-      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
-      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
-	while ((R_hit < R_hit_OLD)) {
-	  detectorContainer->setToDetector( detectorOld );
-	  if ( detectorContainer->moveIn()) {
-	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
-	    if (d == detector) break;
-	    detectorOld = d;
-	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-	    if (detectorOld->isActive()) {
-	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
-	      nI->initialize(d);
-	      add(nI,kOutsideIn);
-	    }
-	  }
-	}
-      }
-    }
-    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-    n->initialize(hit);
-    add(n,kOutsideIn);
-    detectorOld = (StiDetector*) detector;
-    hit_Old = hit;
-  }  
-#else  
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];
@@ -629,29 +783,10 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     n->initialize(hit);
     add(n,kOutsideIn);
   }
-#endif
-#ifdef DO_TPCCATRACKER
-  if (firstPars){
-    firstNode->fitPars() = *firstPars;
-  }
-  if (firstErrs){ 
-    firstNode->fitErrs() = *firstErrs;
-      //    firstNode->resetError();
-  }
-  if (lastPars){
-    lastNode ->fitPars() = *lastPars;
-  }
-  if (lastErrs){ 
-    lastNode->fitErrs() = *lastErrs;
-      //    firstNode->resetError();
-  }
-  return 0;  
-#else /* !DO_TPCCATRACKER */
   int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
-#endif /* DO_TPCCATRACKER */
 }
 
 //_____________________________________________________________________________
@@ -1085,36 +1220,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
 }
-#ifdef DO_TPCCATRACKER
-StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
-{
-  if (firstNode==0 || lastNode==0)
- {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
- }
-
-  StiKalmanTrackNode *node = 0;
-  StiKalmanTrackNode* leaf = getLastNode();
-  StiKTNForwardIterator it(leaf);
-  StiKTNForwardIterator end = it.end();
-  for (;it!=end;++it) 
-  {
-    StiKalmanTrackNode& node_t = *it;
-    if (!node_t.isValid())		continue;
-    if (node_t.getChi2()>10000.) 	continue;
-    StiHit* hit = node_t.getHit();
-    if (!hit) 			continue;
-    if(hit->x()<58.f) continue;
-    node = &node_t;
-    return node;
-  }
-  
-  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");*/
-  return 0;
-}
-#endif /* DO_TPCCATRACKER */
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
 {
@@ -1506,7 +1611,7 @@ int StiKalmanTrack::refit()
       if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
-      qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
+      qA = StiKalmanTrack::diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
         if (qA>0.5)		{fail=-2; errType = kBadQA; continue;} 
@@ -1570,11 +1675,7 @@ int StiKalmanTrack::refit()
   }
 
   if (fail) setFlag(-1);
-#ifdef DO_TPCCATRACKER
-  return errType;
-#else /* !DO_TPCCATRACKER */
   return fail;
-#endif /* DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
@@ -1752,9 +1853,8 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
-    assert(hh);
-    hh = 1./hh;
-    P.ptin() = curv*hh; 
+    hh = (fabs(hh)<1e-10)? 0:1./hh;
+    P.ptin() = (hh)? curv*hh:1e-3;
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
@@ -1778,7 +1878,7 @@ double Xi2=0;
   return 0;
 }    
 //_____________________________________________________________________________
-double diff(const StiNodePars &p1,const StiNodeErrs &e1
+double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;
