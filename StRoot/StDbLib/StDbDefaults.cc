@@ -36,14 +36,14 @@ char* StDbDefaults::getFileName(const char* fileName){
   StString fn;
 
   if(strcmp(fileName,"HOME")==0){
-    fn<<getenv("HOME")<<"/"<<mdbServerFile;
+    fn << ( getenv("HOME") ? getenv("HOME") : "" ) << "/" << mdbServerFile;
   } else if(strcmp(fileName,"STAR")==0){
-    fn<<getenv("STAR")<<"/"<<"StDb/servers/"<<mdbServerFile;
+    fn << ( getenv("STAR") ? getenv("STAR") : "" ) << "/" << "StDb/servers/" <<mdbServerFile;
   } else {
-    char* fname=getenv(fileName);
-    if(!fname)return nullReturn;
-    fn<<fname;
-    if(opendir(fname))fn<<"/"<<mdbServerFile;  
+    char* fname = getenv(fileName);
+    if ( fname == NULL || !fname ) { return nullReturn; }
+    fn << fname;
+    if ( opendir(fname) ) { fn << "/" << mdbServerFile; }
   }
 
   string fns=fn.str();
