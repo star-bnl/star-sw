@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServerImpl.cc,v 1.3 2002/01/30 15:40:48 porter Exp $
+ * $Id: StDbServerImpl.cc,v 1.4 2016/05/24 20:26:48 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbServerImpl.cc,v $
+ * Revision 1.4  2016/05/24 20:26:48  dmitry
+ * coverity - unreachable delete loop suppression
+ *
  * Revision 1.3  2002/01/30 15:40:48  porter
  * changed limits on flavor tag & made defaults retrieving more readable
  *
@@ -136,16 +139,8 @@ StDbServerImpl::useDb(){
 void
 StDbServerImpl::deleteDataBases() {
 
- DbList::iterator itr;
- StDataBaseI* db;
-  do {
-      for(itr = mdataBases.begin(); itr != mdataBases.end(); ++itr){
-         db = *itr;
-         mdataBases.erase(itr);
-         delete db;
-         break;
-        }
-     } while( mdataBases.begin() != mdataBases.end() );
+  for( auto &it : mdataBases ) delete it;
+  mdataBases.clear();
 
 }
 /////////////////////////////////////////////////////////////////////
