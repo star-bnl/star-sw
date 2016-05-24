@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.37 2015/05/15 19:05:12 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.38 2016/05/24 20:26:48 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.38  2016/05/24 20:26:48  dmitry
+ * coverity - unreachable delete loop suppression
+ *
  * Revision 1.37  2015/05/15 19:05:12  dmitry
  * missed instance, assign zero to the pointer after delete
  *
@@ -1114,19 +1117,9 @@ StDbSql::addDescriptor(StDbTableDescriptor* td){
 
 ////////////////////////////////////////////////////////////
 void
-StDbSql::deleteDescriptors(){
-DescList::iterator itr;
-StDbTableDescriptor* desc;
-
-  do {
-     for(itr=mdescriptors.begin(); itr != mdescriptors.end(); ++itr){
-         desc=*itr;
-         mdescriptors.erase(itr);
-         if(desc)delete desc;
-         break;
-     }
-  } while (mdescriptors.begin() != mdescriptors.end() );
-
+StDbSql::deleteDescriptors() {
+  for( auto &it : mdescriptors ) delete it;
+  mdescriptors.clear();
 }
 
 ////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbLogger.hh,v 1.1 2001/01/22 18:37:55 porter Exp $
+ * $Id: StDbLogger.hh,v 1.2 2016/05/24 20:26:48 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbLogger.hh,v $
+ * Revision 1.2  2016/05/24 20:26:48  dmitry
+ * coverity - unreachable delete loop suppression
+ *
  * Revision 1.1  2001/01/22 18:37:55  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -42,7 +45,7 @@ protected:
 
 public:
   
-  StDbLogger(): mtotalTimes(0), mnTotal(0) {};
+  StDbLogger(): mt0(0), mtotalTimes(0), mnTotal(0) {};
   ~StDbLogger(){};
 
   void   start();
