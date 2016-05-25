@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.17 2015/05/15 19:11:44 dmitry Exp $
+ * $Id: StDbXmlReader.cc,v 1.18 2016/05/25 21:01:30 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.18  2016/05/25 21:01:30  dmitry
+ * coverity - buffer size
+ *
  * Revision 1.17  2015/05/15 19:11:44  dmitry
  * typo, now doing proper deallocation
  *
@@ -385,7 +388,7 @@ int iline;
 
    p2=strstr(loca[e->istart],">");
    len = strlen(p1) - strlen(p2);
-   e->type = new char[len];
+   e->type = new char[len+1];
    memcpy(e->type,p1,len);
    e->type[len]='\0';
 
@@ -394,7 +397,7 @@ int iline;
    while(p2[0]==' ')p2++;
    p1 = strstr(p2,"<");
    len = strlen(p2) - strlen(p1);
-   e->name = new char[len];
+   e->name = new char[len+1];
    memcpy(e->name,p2,len);
    e->name[len]='\0';
 
@@ -406,9 +409,9 @@ if(p1){
    p1+=strlen(e->size.startKey);
    p2=strstr(loca[e->istart],e->size.endKey);
    len = strlen(p1) - strlen(p2)+1;
-   hlen = new char[len];
+   hlen = new char[len+1];
    memcpy(hlen,p1,len);
-   hlen[len-1]='\0';
+   hlen[len]='\0';
    e->size.isize = atoi(hlen);
    delete [] hlen;
 } 
