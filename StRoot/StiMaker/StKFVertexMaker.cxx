@@ -16,6 +16,9 @@ using std::map;
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFPTrack.h"
+#include "KFParticle/StKFParticleInterface.h"
+#include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
+
 #include "StAnneling.h"
 #include "StKFTrack.h"
 #include "StKFVertex.h"
@@ -46,12 +49,13 @@ using std::map;
 #include "StTMVARank/StTMVARanking.h"
 using namespace TMVA;
 ClassImp(StKFVertexMaker);
-#ifdef StTrackMassFit_hh
+#ifdef StTrackMassFit_hh_1
 #define __MakeV0__
 #endif
 StKFVerticesCollection *StKFVertexMaker::fgcVertices = 0;
 #define PrPP(A,B)  if (Debug() > 1) {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrPP2(A,B) if (Debug() > 2) {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#define PrParticle2(A) if (Debug() > 2) {cout << "StKFVertexMaker::" << (#A)  << endl; PrintParticles();}
 static map<Int_t,StTrackNode*> TrackNodeMap;
 /* Bookkeeping: 
    kg =  gTrack->key(); 
@@ -215,16 +219,16 @@ void StKFVertexMaker::CalculateRank(StPrimaryVertex *primV) {
   else               SimpleMindedRank(primV);
 }
 //________________________________________________________________________________
-void StKFVertexMaker::TMVARank(StPrimaryVertex *primV) {    
-  Float_t rank = StTMVARanking::TMVARank(primV);
-  primV->setRanking(rank); 
-  if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
-}
-//________________________________________________________________________________
-void StKFVertexMaker::SimpleMindedRank(StPrimaryVertex *primV) {    
-  Float_t rank = StTMVARanking::SimpleMindedRank(primV);
-  primV->setRanking(rank); 
-  if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
+void StKFVertexMaker::ClearParentIDs() {
+  UInt_t N = fParticles->GetSize();
+  for (UInt_t k = 0; k < N; k++) {
+    KFParticle *particle = (KFParticle *) fParticles->UncheckedAt(k);
+    if (particle) {
+      PrPP2(ClearParentIDs before, *particle);
+      particle->SetParentID();
+      PrPP2(ClearParentIDs  after, *particle);
+    }
+  }
 }
 //________________________________________________________________________________
 void StKFVertexMaker::Clear(Option_t *option) {
@@ -442,13 +446,16 @@ Int_t StKFVertexMaker::Make() {
   KFParticle::SetField(bField);
   MakeParticles();
   if (fNGoodGlobals < 1) return kStOK;
+  PrParticle2(Afer MakeParticles);
   Fit();
+  PrParticle2(After Fit);
   if (! fgcVertices) return kStOK;
   if (fgcVertices->IsEmpty()) {
     SafeDelete(fgcVertices); 
     return kStOK;
   }
   ReFitToVertex();
+  PrParticle2(After ReFitToVertex);
   
 #ifdef  __MakeV0__
   // Loop for V0
@@ -463,6 +470,8 @@ Int_t StKFVertexMaker::Make() {
     if (pf->kfParticle()->GetQ()) continue;
     MakeV0(V0);
   }
+#else
+  ParticleFinder();
 #endif /* __MakeV0__ */
   SafeDelete(fgcVertices);
   return kStOK;
@@ -710,6 +719,286 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   return ok;
 }  
 //________________________________________________________________________________
+void StKFVertexMaker::PrintParticles() {
+  UInt_t noTrack = fParticles->GetSize();
+  for (UInt_t k = 0; k < noTrack; k++) {
+    KFParticle *particle = (KFParticle *) (*fParticles)[k];
+    if (! particle) continue;
+    particle->Print("");
+  }
+}
+//________________________________________________________________________________
+Bool_t StKFVertexMaker::ParticleFinder() {
+  UInt_t noPV = pEvent->numberOfPrimaryVertices();
+  for (UInt_t i = 0; i < noPV; i++) {
+    pEvent->primaryVertex(i)->Print("");
+  }
+  PrParticle2(ParticleFinder);
+#if 0
+#ifdef StRootPV    
+    Int_t NoPrimaryVertices = StMuDst::instance()->numberOfPrimaryVertices();  //if (_debugAsk) cout << "\tPrimaryVertices " << NoPrimaryVertices<< std::endl;
+    const int NoStVertices = 1;
+   //  const int NoStVertices = NoPrimaryVertices;
+    vector<KFVertex> PrimVertex(NoStVertices);
+    //vector<KFVertex> PrimVertex(NoPrimaryVertices);
+    vector< vector<int> > PrimTracks(NoPrimaryVertices);
+    
+    float bestRank=-1000000;
+    int bestPV=0;
+
+    for (Int_t l = 0; l < NoPrimaryVertices; l++) {
+      StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
+//       Vtx->Print();
+      if (bestRank>Vtx->ranking()) continue;
+      bestRank=Vtx->ranking();
+      bestPV=l;
+      //convert StMuPrimaryVertex to KFVertex
+      KFPVertex primVtx_tmp;
+      primVtx_tmp.SetXYZ(Vtx->position().x(), Vtx->position().y(), Vtx->position().z());
+      double dx = Vtx->posError().x();
+      double dy = Vtx->posError().y();
+      double dz = Vtx->posError().z();
+      primVtx_tmp.SetCovarianceMatrix( dx*dx, 0, dy*dy, 0, 0, dz*dz );
+      UShort_t noTracks = Vtx->noTracks();
+      primVtx_tmp.SetNContributors(noTracks);
+      primVtx_tmp.SetChi2(Vtx->chiSquared());
+      vector<int> tracks;
+      PrimVertex[l] = KFVertex(primVtx_tmp);
+      Int_t idd = Vtx->idTruth();
+      // Check Mc
+      if (idd > 0 && idd <= NoMuMcVertices) {
+        StMuMcVertex *mcVertex = StMuDst::instance()->MCvertex(idd-1);
+        if (mcVertex->Id() != idd) {
+          cout << "Mismatched idTruth " << idd << " and mcVertex Id " <<  mcVertex->Id() 
+          << " The vertex is ignored" <<  endl;
+        }
+//      mcVertex->Print();
+
+      }
+    }
+#endif
+
+
+    Int_t NoGlobalTracks = StMuDst::instance()->numberOfGlobalTracks();
+
+    std::map<int,int> trackIdMap;
+    std::map<int,int> trackIdMap2;
+    
+    vector<KFParticle> particles(NoGlobalTracks*4);
+    vector<int> mcIndexes(NoGlobalTracks*4);
+    vector<int> particlesPdg(NoGlobalTracks*4);
+    int nPartSaved = 0;
+    for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+      StMuTrack *gTrack = StMuDst::instance()->globalTracks(kg);
+      if (! gTrack)            continue;
+
+      //if (! gTrack->idTruth()) return kFALSE;
+//       if (! gTrack->charge())  continue;
+//       if (  gTrack->flag() < 100 ||  gTrack->flag()%100 == 11) continue; // bad fit or short track pointing to EEMC
+//       if (  gTrack->flag() > 1000) continue;  // pile up track in TPC
+//       if (  gTrack->nHitsFit() < 10) continue;
+  //  if (  gTrack->qaTruth() < 90) return kFALSE;
+
+  
+      Int_t kgc = gTrack->index2Cov();
+      if (kgc < 0) continue;
+      StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(kgc);
+      if (! dcaG) continue;
+      //       cout << "dcaG:" <<  *dcaG << endl;
+      Double_t xyzp[6], CovXyzp[21];
+      dcaG->GetXYZ(xyzp,CovXyzp);
+      static KFPTrack track;
+      track.SetParameters(xyzp);
+      track.SetCovarianceMatrix(CovXyzp);
+      track.SetNDF(1);
+      //    track.SetChi2(GlobalTracks_mChiSqXY[k]);
+      track.SetID(kg);
+      Int_t q   = 1;
+      Int_t pdg = 211;
+      if (dcaG->charge() < 0) {
+        q = -1;
+        pdg = -211;
+      } 
+      track.SetCharge(q);
+      
+
+      
+      trackIdMap[gTrack->id()] = nPartSaved;
+      trackIdMap2[nPartSaved] = gTrack->id();
+      
+#ifdef StRootPV    
+      bool isSecondary = true;
+      const StMuTrack *primTrack = gTrack->primaryTrack();
+      if(primTrack)
+      {
+        const int iPV = primTrack->vertexIndex(); 
+        //continue;
+         //if ((iPV!=bestPV)) continue;
+        {
+          vector<int> &tracksPV = PrimTracks[iPV];
+          tracksPV.push_back(nPartSaved);
+        }
+         
+        if ( iPV==bestPV )
+        {
+          KFParticle particle(track, pdg);
+          particle.SetId(kg);
+          
+          particles[nPartSaved] = particle;
+          mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+          
+          if(mcIndexes[nPartSaved] > -1)
+          {
+            particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+            mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+          }
+          else
+          {
+            particlesPdg[nPartSaved] = -1;
+          }
+          nPartSaved++;
+          isSecondary = false;
+        }
+      }
+      
+      if(isSecondary)
+      {
+        int pdg[3] = {211, 2212, -11};
+        if(q<0)
+        {
+          pdg[0] = -211;
+          pdg[1] = -2212;
+          pdg[2] = 11;
+        }
+        
+        for(int iHypo=0; iHypo<3; iHypo++)
+        {
+          KFParticle particle(track, pdg[iHypo]);
+          particle.SetId(kg);
+          
+          particles[nPartSaved] = particle;
+          mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+          
+          if(mcIndexes[nPartSaved] > -1)
+            mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+
+          particlesPdg[nPartSaved] = pdg[iHypo];
+          nPartSaved++;
+        }
+      }
+#else
+      KFParticle particle(track, pdg);
+      particle.SetId(kg);
+      
+      particles[nPartSaved] = particle;
+      mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+      
+      if(mcIndexes[nPartSaved] > -1)
+      {
+        particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+        mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+      }
+      else
+      {
+        particlesPdg[nPartSaved] = -1;
+      }
+      nPartSaved++;
+#endif
+    }
+
+    particles.resize(nPartSaved);
+    mcIndexes.resize(nPartSaved);
+    particlesPdg.resize(nPartSaved);
+
+    const Double_t field = StMuDst::instance()->event()->magneticField();
+
+    mStKFParticleInterface.SetField(field);
+    if(NoKFTracks > 0)
+      mStKFParticleInterface.SetBeamLine( *(StMuDst::instance()->KFtrack(0)));
+    
+    mStKFParticleInterface.SetParticles(particles);
+    mStKFParticleInterface.SetParticlesPdg(particlesPdg);
+
+#ifdef StRootPV
+
+    mStKFParticleInterface.InitParticles();
+    if(NoPrimaryVertices>0)
+    {
+      for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
+      {
+        if (iPV==bestPV)
+          mStKFParticleInterface.AddPV(PrimVertex[iPV], PrimTracks[iPV]);
+      }
+    }
+    else
+    {
+      KFPVertex primVtx_tmp;
+      primVtx_tmp.SetXYZ(0, 0, 0);
+      primVtx_tmp.SetCovarianceMatrix( 0, 0, 0, 0, 0, 0 );
+      primVtx_tmp.SetNContributors(0);
+      primVtx_tmp.SetChi2(-100);
+
+      vector<int> tracks;
+      KFVertex pv(primVtx_tmp);
+      mStKFParticleInterface.AddPV(pv, tracks);
+    }
+#if 0 /* Maksym reconstruction */
+    mStKFParticleInterface.ReconstructParticles();
+#else
+    for(UInt_t iPart=0; iPart<particles.size(); iPart++)
+    {
+      particles[iPart].SetId(iPart);
+      particles[iPart].AddDaughterId(iPart);
+      mStKFParticleInterface.AddParticle(particles[iPart]);
+    }
+    
+    for (Int_t l = 0; l < NoKFVertices; l++)
+    {
+      KFVertex *vx = StMuDst::instance()->KFvertex(l);
+      if (! vx) continue;
+      //if( vx->GetNDF() != 1 ) continue;
+            
+      KFParticle particle = *vx;
+
+      if(particle.NDaughters() != 2) continue;
+      Int_t np = particles.size();
+      if(particle.DaughterIds()[0] >= np || particle.DaughterIds()[1] >= np ) 
+        continue;
+
+      vector<int> newIds;
+      newIds.push_back( trackIdMap[particle.DaughterIds()[0]]);
+      newIds.push_back( trackIdMap[particle.DaughterIds()[1]]);
+            
+      particle.CleanDaughtersId();
+      particle.AddDaughterId(newIds[0]);
+      particle.AddDaughterId(newIds[1]);
+      
+      mStKFParticleInterface.AddParticle(particle);
+      if(vx->GetNDF() > 2)
+        mStKFParticleInterface.AddCandidate(particle, 0);
+      else if(vx->GetNDF() > 1)
+        mStKFParticleInterface.AddCandidate(particle, 0);
+    }
+#endif
+#else
+    mStKFParticleInterface.ReconstructTopology();
+#endif //StRootPV
+    
+
+    mStKFParticlePerformanceInterface.SetMCTracks(mcTracks);
+    mStKFParticlePerformanceInterface.SetMCIndexes(mcIndexes);    
+    mStKFParticlePerformanceInterface.SetPrintEffFrequency(nevent);
+    mStKFParticlePerformanceInterface.PerformanceAnalysis();
+  }
+  
+  double GhostTracksRate = double(nTracksGhost)/double(nTracksAll);
+  
+  std::cout << "Ghost Tracks: N = " <<nTracksGhost << " All tracks: " <<  nTracksAll << " Ghost Rate: " << GhostTracksRate << std::endl;
+  std::cout << "nKFVertex " << nKFVertex << " nStiVertex "  << nStiVertex << std::endl;
+#endif
+  return kTRUE;
+}
+//________________________________________________________________________________
 void StKFVertexMaker::PrimaryVertices() {
   Double_t TempLog = fTempLog; // default Temperature Log
   StKFVerticesCollection *allVertices = 0;
@@ -758,6 +1047,7 @@ void StKFVertexMaker::PrimaryVertices() {
     LOG_INFO << "StKFVertexMaker::AnnelingFcn\tTemperature = " << Temperature << " Chi2 = " << Chi2 
 	     << " with " << fgcVertices->NoVertices() << " vertices" << endm;
   }
+  ClearParentIDs();
   fgcVertices->UniqueTracks2VertexAssociation();
 }
 //________________________________________________________________________________
@@ -1058,6 +1348,18 @@ void StKFVertexMaker::SecondaryVertices() {
   }
   SafeDelete(SecondaryVertices);
   // end of loop for secondary vertices
+}
+//________________________________________________________________________________
+void StKFVertexMaker::SimpleMindedRank(StPrimaryVertex *primV) {    
+  Float_t rank = StTMVARanking::SimpleMindedRank(primV);
+  primV->setRanking(rank); 
+  if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
+}
+//________________________________________________________________________________
+void StKFVertexMaker::TMVARank(StPrimaryVertex *primV) {    
+  Float_t rank = StTMVARanking::TMVARank(primV);
+  primV->setRanking(rank); 
+  if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
 }
 //________________________________________________________________________________
 void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *particle) {

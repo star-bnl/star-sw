@@ -56,7 +56,9 @@ class StKFVertexMaker : public StMaker {
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
   Bool_t           	 	 MakeV0(StPrimaryVertex *V);                                          		   
-  void                   	 PrimaryVertices();								   
+  Bool_t                         ParticleFinder();
+  void                   	 PrimaryVertices();	
+  void                           ClearParentIDs();
   StKFVerticesCollection 	*PrimaryVertexSeeds(Int_t *parents);								   
   void                   	 ReFitToVertex();  // refit Sti Track to primary vertices			   
   void                   	 SecondaryVertices();								   
@@ -65,6 +67,7 @@ class StKFVertexMaker : public StMaker {
   void                   	 SetZwindow(Double_t z = 2) {fzWindow = z;}					   
   void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
+  void                           PrintParticles();
  private:
   TObjArray                     *fParticles; // KF particles = global tracks + decay particles
   TObjArray                     *fVertices;  // KF vertices and decay particles

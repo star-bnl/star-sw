@@ -252,15 +252,38 @@ Double_t StKFVerticesCollection::UpdateWeights() {
 }
 //________________________________________________________________________________
 void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
+  // remove 2-prongs if there is no beam as ill defined vertex 
   // Make track associated with only vertex (by maximum weight to the vertex) 
   if (StKFVertex::Debug()) {
-    cout << "StKFVerticesCollection::UniqueTracks2VertexAssociation\t" << *this << endl;
+    cout << "StKFVerticesCollection::UniqueTracks2VertexAssociation\t" << endl << *this << endl;
   }
   std::multimap<const KFParticle*,Map_t> Particle2Track;
   std::vector<const KFParticle *>     ParticleM;
   TIter nextL(&fVertices,kIterBackward);
+  // Remove 2 prong vertex if no beam line
   StKFVertex *vtxl = 0;
-  Int_t k = 0;
+  while ((vtxl = (StKFVertex *)  nextL())) {
+    // recalculate weights
+    TIter nextlT(&vtxl->Tracks(),kIterForward);
+    StKFTrack *TrackL = 0;
+    Int_t NoTracks = 0;
+    while ((TrackL = (StKFTrack *) nextlT())) {
+      NoTracks++;
+      if (! TrackL->Id()) NoTracks++; // beam line
+    }
+    if (NoTracks <= 2) {
+      nextlT.Reset();
+      while ((TrackL = (StKFTrack *) nextlT())) {
+	delete vtxl->Tracks().Remove(TrackL);
+      }
+      delete fVertices.Remove(vtxl);
+    }
+  }
+  if (StKFVertex::Debug()) {
+    cout << "StKFVerticesCollection::UniqueTracks2VertexAssociation. After clean up V2\t" << endl << *this << endl;
+  }
+  // Select the best track to vertex assoiciation
+  nextL.Reset();
   while ((vtxl = (StKFVertex *)  nextL())) {
     // recalculate weights
     TIter nextlT(&vtxl->Tracks(),kIterForward);
