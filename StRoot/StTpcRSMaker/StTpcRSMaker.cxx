@@ -491,7 +491,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     {"adc","adc"},// 17
     {"NE","Total no. of generated electors"}, // 18
     {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
-    {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus no. primary electrons"} // 20 
+    {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus log(no. primary electrons)"} // 20 
   };
   const Int_t Npbins  = 151;
   const Int_t NpbinsL =  10;
