@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.10 2016/05/25 15:47:30 smirnovd Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.11 2016/05/25 15:47:38 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.11  2016/05/25 15:47:38  smirnovd
+ * StSstDaqMaker: Removed commented-out code destined to rot
+ *
  * Revision 1.10  2016/05/25 15:47:30  smirnovd
  * StSstDaqMaker: Initializing variable once is enough
  *
@@ -290,7 +293,6 @@ Int_t StSstDaqMaker::Make()
       Int_t id_side, ladder;
       Int_t ladderCountN[20] = {0};
       Int_t ladderCountP[20] = {0};
-      // Int_t count = 1;
       Int_t c_correct;
       Int_t channelindex = 0;
       mSec     = rts_table->Sector();
@@ -382,8 +384,6 @@ Int_t StSstDaqMaker::Make()
      stripCal->Write();
      f1.Close();
    }
-
-   // delete stripCal;
 
    return kStOk;
 }
@@ -626,7 +626,6 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    Int_t count              = 1;
 
    //initialize St_spa_strip and St_ssdPedStrip table.
-   //St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
    spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
 
    if (!spa_strip) {
@@ -772,8 +771,6 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
          LOG_DEBUG << "Make()/  spa_strip->NRows= " << spa_strip->GetNRows() << endm;
       }
    }
-
-   //delete spa_strip;
 }
 //-------------------------------------------------
 void StSstDaqMaker::DecodeRawWords_r15(UInt_t *val, Int_t vallength, Int_t channel)
@@ -913,7 +910,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    UInt_t errorcode        = 0;	// CMN algorithm error code.
  
    LOG_DEBUG << "Current Event data length : " << vallength << endm;
-   //St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
    spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
 
    if (!spa_strip) {
@@ -1015,8 +1011,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
          LOG_DEBUG << "Make()/  spa_strip->NRows= " << spa_strip->GetNRows() << endm;
       }
    }
-
-   //delete spa_strip;
 }
 
 //-------------------------------------------------
@@ -1171,14 +1165,11 @@ void StSstDaqMaker::FillDefaultNoiseTable()
 //------------------------------------------------
 void StSstDaqMaker::FillChipNoiseTable(sstChipCorrect_st *chipCorrectTable){
   int side=0,ladder=0,wafer=0,chip=0;
-  //mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
-  //if(mChipCorrect){
   LOG_DEBUG<<"New ChipNoiseTable was used! "<<endm;
   int totChipSst       = nSstSide*nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
   int totChipSstSide   = nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
   int totChipSstLadder = nSstWaferPerLadder*nSstChipPerWafer;
   
-  //sstChipCorrect_st *g  = mChipCorrect->GetTable() ;
   for(Int_t i=0; i<totChipSst;i++){
     side   = i/totChipSstSide;
     ladder = (i - side*totChipSstSide)/totChipSstLadder;
