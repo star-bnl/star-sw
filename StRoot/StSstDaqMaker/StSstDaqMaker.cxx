@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.8 2016/05/25 15:47:15 smirnovd Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.9 2016/05/25 15:47:23 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.9  2016/05/25 15:47:23  smirnovd
+ * StSstDaqMaker: Got rid of unused local variable
+ *
  * Revision 1.8  2016/05/25 15:47:15  smirnovd
  * StSstDaqMaker: Refactored how output file name is formed
  *
@@ -790,10 +793,8 @@ void StSstDaqMaker::DecodeRawWords_r15(UInt_t *val, Int_t vallength, Int_t chann
   Int_t readout_correct[3] = {0};
   Int_t ladder             = 0;
   Int_t id_side            = 0;
-  Int_t count              = 0;
   Int_t readoutindex       = 0;
 
-  count = 1;
   LOG_DEBUG << "DECODING RAW MODE data....." << endm;
   //grab ladder and side
   FindLadderSide(mRDO, channel, ladder, id_side);
