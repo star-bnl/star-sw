@@ -13,6 +13,7 @@
   //  set FloatPointException trap
   namespace rootlogon {
     int fpe=0;const char *env=0;
+    const Char_t *path  = ".:~";
   }
   // eliminate the need to provide the custom ".rootrc" to activate Qt-layer 
   if (gSystem->Getenv("WITH_QT") && gSystem->Getenv("QTDIR")) 
@@ -177,4 +178,10 @@
     //    gSystem->AddIncludePath(" -I$ROOTSYS/include");
     gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);
   }
+  Char_t *file = gSystem->Which(rootlogon::path,"rootlogon.C",kReadPermission);
+  if (file) {
+    cout << "Found local " << file  << endl;
+    gROOT->Macro(file);
+  }
+  delete [] file;
 }
