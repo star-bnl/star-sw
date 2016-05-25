@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.44 2015/06/23 20:21:12 dmitry Exp $
+ * $Id: StDbTable.cc,v 1.45 2016/05/25 20:40:01 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.45  2016/05/25 20:40:01  dmitry
+ * coverity - reverse_inull
+ *
  * Revision 1.44  2015/06/23 20:21:12  dmitry
  * char type: null-terminator assignment fixed
  *
@@ -186,6 +189,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.45  2016/05/25 20:40:01  dmitry
+ * coverity - reverse_inull
+ *
  * Revision 1.44  2015/06/23 20:21:12  dmitry
  * char type: null-terminator assignment fixed
  *
@@ -599,9 +605,11 @@ StDbTable::getDataValue(const char* name, int rowNumber){
 
   for(int i=0;i<max;i++){ 
     getElementSpecs(i,ptr,ename,length,type);
-    if(strcmp(name,ename)==0)break;
-    if(ename) delete [] ename;
-    ename=0;
+	if ( ename ) {
+	    if ( strcmp(name,ename) == 0 ) break;
+    	delete [] ename;
+ 		ename=0;
+	}
   }
 
   mrowNumber=saveRowNum;

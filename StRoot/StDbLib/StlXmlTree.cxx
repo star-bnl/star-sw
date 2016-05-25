@@ -243,12 +243,20 @@ the attribute, the name and value are read out in one step.*/
     }
 
  xmlChar* atname = xmlTextReaderName(reader);
- string AttributeName = (char*)atname;
- if ( atname != NULL )  { xmlFree(atname); atname = NULL; }
+ string AttributeName;
+ if ( atname != NULL ) {
+ 	AttributeName = (char*)atname;
+	xmlFree(atname);
+	atname = NULL;
+ }
 
  xmlChar* tmp = xmlTextReaderValue(reader);
- string NodeValue = filter_string((char*)tmp);
- if ( tmp != NULL )  { xmlFree(tmp); tmp = NULL; }
+ string NodeValue;
+ if ( tmp != NULL ) {
+	NodeValue = filter_string((char*)tmp);
+	xmlFree(tmp);
+	tmp = NULL;
+ }
 
  IdString += AttributeName + "=" + NodeValue + ";";
 }
@@ -259,8 +267,11 @@ void StlXmlTree::ProcessNode()
   short HasValue = xmlTextReaderHasValue(reader);
   short HasAttributes = xmlTextReaderHasAttributes(reader);
   xmlChar* name = xmlTextReaderName(reader);
-  NodeName = (char*)name;
-  if ( name != NULL )  { xmlFree(name); name = NULL; }
+  if ( name != NULL ) {
+  	NodeName = (char*)name;
+  	xmlFree(name);
+  	name = NULL;
+  }
   
   string NodeValue = "";
 
@@ -268,8 +279,11 @@ void StlXmlTree::ProcessNode()
   if (HasValue)
     {
 	  xmlChar* tmp = xmlTextReaderValue(reader);
-      NodeValue = filter_string((char*)tmp);
-  	  if ( tmp != NULL )  { xmlFree(tmp); tmp = NULL; }
+	  if ( tmp != NULL ) {
+      	NodeValue = filter_string((char*)tmp);
+  	  	xmlFree(tmp);
+		tmp = NULL;
+	  }
 
       IdString = NodeName + "=" + NodeValue + ";";
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.10 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbNode.cc,v 1.11 2016/05/25 20:40:01 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.11  2016/05/25 20:40:01  dmitry
+ * coverity - reverse_inull
+ *
  * Revision 1.10  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -201,13 +204,16 @@ while(id){
  char* p1=&tmpName[0];
  char* anID=0;
  anID = getNextID(p1);
- tmpElements[0] = atoi(anID);
- if(anID)delete [] anID;
+ if ( anID ) {
+   tmpElements[0] = atoi(anID);
+   delete [] anID;
+ }
  numElements = 1;
  int iEnd, iStart, k;
  for(int ient=1;ient<numEntries;ient++){
    anID = getNextID(p1);
-   if(islist[ient-1]=='r'){
+   if ( anID ) {
+   	if(islist[ient-1]=='r'){
      iEnd = atoi(anID);
      iStart = tmpElements[numElements-1];
      int irange=iEnd-iStart;
@@ -215,11 +221,12 @@ while(id){
        numElements++;
        tmpElements[numElements-1]=iStart+ir;
      }
-   } else {
+   	} else {
      numElements++;
      tmpElements[numElements-1]=atoi(anID);
+   	}
+   	delete [] anID;
    }
-   if(anID) delete [] anID;
  }
 
  retVal = new int[numElements];
