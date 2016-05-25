@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.7 2016/02/03 15:50:20 zhoulong Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.8 2016/05/25 15:47:15 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,11 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.8  2016/05/25 15:47:15  smirnovd
+ * StSstDaqMaker: Refactored how output file name is formed
+ *
+ * Memory leak fixed. Note different width for time field for values less < 999
+ *
  * Revision 1.7  2016/02/03 15:50:20  zhoulong
  * Added some protection to avoid chain crash when there is no available calibration table
  *
@@ -362,27 +367,9 @@ Int_t StSstDaqMaker::Make()
 
    // Directly write sstStripCalib table in strip ordering.
    if(mMode == 1) {
-     char* myLabel = new char[100];
-     char* myTime  = new char[100]; 
-     char* myDate  = new char[100];
-     char* name    = new char[100] ;
+     char name[50];
+     sprintf(name, "sstStripCalib.%d.%06d.root", GetDate(), GetTime());
 
-     if (GetTime()<999)
-       sprintf(myTime,"000%d",GetTime());
-     else
-       if ((GetTime()<9999)&&(GetTime()>999))
-	 sprintf(myTime,"00%d",GetTime());
-       else
-	 if ((GetTime()<99999)&&(GetTime()>9999))
-	   sprintf(myTime,"0%d",GetTime());
-	 else 
-	   sprintf(myTime,"%d",GetTime());
-
-     sprintf(myDate,"%d%s",GetDate(),".");
-     sprintf(myLabel,"%s%s",myDate,myTime);
-     LOG_INFO<<"TimeStamp : "<<myLabel<<endm;
-
-     sprintf(name,"%s%s%s","sstStripCalib.",myLabel,".root");
      TFile f1(name,"RECREATE","SSD ped and noise file",9);
      stripCal->AddAt(&noise_strip);
      stripCal->Print();
