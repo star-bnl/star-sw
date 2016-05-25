@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.10 2016/05/24 20:26:48 dmitry Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.11 2016/05/25 20:40:01 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.11  2016/05/25 20:40:01  dmitry
+ * coverity - reverse_inull
+ *
  * Revision 1.10  2016/05/24 20:26:48  dmitry
  * coverity - unreachable delete loop suppression
  *
@@ -223,14 +226,16 @@ StDbConfigNodeImpl::addDbTable(const char* tableName, const char* version){
 StDbTable*
 StDbConfigNodeImpl::addTable(const char* tableName, const char* version){
 
-  StDbTable* table = StDbManager::Instance()->newDbTable(mdbName,tableName);
-  if(table) mTables.push_back(table);
-  table->setVersion((char*)version);
-  table->setNodeType("table");
-
+  StDbTable* table = 0;
+  table = StDbManager::Instance()->newDbTable(mdbName,tableName);
+  if (table) { 
+	mTables.push_back(table);
+	table->setVersion((char*)version);
+ 	table->setNodeType("table");
+  }
   StDataBaseI* db = StDbManager::Instance()->findDb(mdbType, mdbDomain);
-  if(db && table && db->QueryDb((StDbNode*)table))mhasData=true;
-return table;
+  if(db && table && db->QueryDb((StDbNode*)table)) { mhasData = true; }
+  return table;
 }
 
 ////////////////////////////////////////////////////////////////

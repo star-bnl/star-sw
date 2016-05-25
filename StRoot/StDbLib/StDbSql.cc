@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.38 2016/05/24 20:26:48 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.39 2016/05/25 20:40:01 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.39  2016/05/25 20:40:01  dmitry
+ * coverity - reverse_inull
+ *
  * Revision 1.38  2016/05/24 20:26:48  dmitry
  * coverity - unreachable delete loop suppression
  *
@@ -1329,9 +1332,11 @@ StDbSql::storeConfigNode(StDbConfigNode* node){
   if(node->getNumIndeces()){
     char* ename=0; int eid;
     node->getElementIndexInfo(ename,eid);
-    Db<<", indexName='"<<ename<<"'";
-    Db<<", indexVal="<<eid;
-    if(ename) delete [] ename;
+	if ( ename ) { 
+	    Db<<", indexName='"<<ename<<"'";
+    	Db<<", indexVal="<<eid;
+    	delete [] ename;
+	}
   }
   Db<<endsql;
 
