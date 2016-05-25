@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.9 2011/11/28 17:03:08 dmitry Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.10 2016/05/24 20:26:48 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.10  2016/05/24 20:26:48  dmitry
+ * coverity - unreachable delete loop suppression
+ *
  * Revision 1.9  2011/11/28 17:03:08  dmitry
  * dbv override support in StDbLib,StDbBroker,St_db_Maker
  *
@@ -383,16 +386,8 @@ buildTree(opt);
 ////////////////////////////////////////////////////////////////
 void
 StDbConfigNodeImpl::deleteTables(){
-
-  TableList::iterator itr;
-  StDbTable* table;
-  do {  for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-            table=*itr;
-            mTables.erase(itr);
-            delete table;
-            break;
-         }
-  } while (mTables.begin() != mTables.end());
+  for( auto &it : mTables ) delete it;
+  mTables.clear();
   mhasData=false;
 }
 
