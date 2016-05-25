@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.12 2001/01/22 18:37:59 porter Exp $
+ * $Id: StDbServer.hh,v 1.13 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.13  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.12  2001/01/22 18:37:59  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -86,13 +89,13 @@ class StDbServer {
 
 protected:
   
-  char* mserverName;
-  char* mhostName;
-  char* munixSocket;
-  char* muserName;
-  char* mpword;
-  int   mportNumber;
-  bool  misDefault;
+  char* mserverName = 0;
+  char* mhostName = 0;
+  char* munixSocket = 0;
+  char* muserName = 0;
+  char* mpword = 0;
+  int   mportNumber = 0;
+  bool  misDefault = false;
 
   char* mstringDup(const char * str) const;
 

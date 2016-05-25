@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.6 2001/02/08 23:23:56 porter Exp $
+ * $Id: StDbNode.hh,v 1.7 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.7  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.6  2001/02/08 23:23:56  porter
  * fixed initialization of schemaID in table & fixed some warnings when
  * compiled with NODEBUG
@@ -75,8 +78,8 @@ protected:
   char * mname;
   char * mversion;
   char * mdbName;
-  StDbType mdbType;
-  StDbDomain mdbDomain;
+  StDbType mdbType = dbStDb;
+  StDbDomain mdbDomain = dbDomainUnknown;
 
   // from db
   int   mnodeID;

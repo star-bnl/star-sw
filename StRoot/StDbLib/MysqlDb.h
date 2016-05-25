@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.29 2012/05/04 17:19:14 dmitry Exp $
+ * $Id: MysqlDb.h,v 1.30 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.30  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.29  2012/05/04 17:19:14  dmitry
  * Part One integration for Hyper Cache. HyperCache added to workflow, but config is set to DISABLE
  *
@@ -167,7 +170,7 @@ class MysqlResult {
 private:
   MYSQL_RES * mRes;
   MYSQL_ROW mRow;
-  char mSep;
+  char mSep = '\0';
 
 public: 
   MysqlResult() {mRes=0;};

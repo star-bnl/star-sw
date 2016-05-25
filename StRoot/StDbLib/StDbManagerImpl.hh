@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.9 2012/06/11 14:33:47 fisyak Exp $
+ * $Id: StDbManagerImpl.hh,v 1.10 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.10  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.9  2012/06/11 14:33:47  fisyak
  * std namespace
  *
@@ -87,7 +90,11 @@ public:
 #define MAX_ENV_VARS 50
 class dbEnvList {
 public:
-  dbEnvList(): num(0) {}; 
+  dbEnvList(): num(0) {
+	for ( int i = 0; i < MAX_ENV_VARS; i++) {
+		envVar[i] = 0; envDef[i] = 0;
+	}
+  }; 
   ~dbEnvList() {
     for(int i=0;i<num;i++){
       delete [] envVar[i];

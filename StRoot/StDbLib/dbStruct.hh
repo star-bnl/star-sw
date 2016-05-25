@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbStruct.hh,v 1.9 2000/01/27 05:54:35 porter Exp $
+ * $Id: dbStruct.hh,v 1.10 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbStruct.hh,v $
+ * Revision 1.10  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.9  2000/01/27 05:54:35  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -44,8 +47,8 @@ class basic {
   virtual ~basic(){};
  char startKey[20];
  char endKey[20];
- int istart;
- int iend;
+ int istart = 0;
+ int iend = 0;
   virtual void setStartKey(const char* key){ strcpy(startKey,key); };
   virtual void setEndKey(const char* key){ strcpy(endKey,key); };
 
@@ -65,7 +68,7 @@ public:
 class datav : public basic {
 
 public:
- char* data;
+ char* data = 0;
    datav() { setStartKey("<value>");
    setEndKey("</value>") ;};
 
@@ -77,8 +80,8 @@ class elem : public basic {
  public:
 
   datav val;
-  char* name;
-  char* type;
+  char* name = 0;
+  char* type = 0;
   stsize size;
 
    elem() { setStartKey("<db");
@@ -100,7 +103,7 @@ class accessor : public basic {
  public:
 
  elemVec e;
- int nelems;
+ int nelems = 0;
 
    accessor() { setStartKey("<StDbAccessor>");
                 setEndKey("</StDbAccessor>");};
@@ -114,8 +117,8 @@ class dbRow : public accessor {
 
 public:
   
-  int rowNumber;
-  int rowID;
+  int rowNumber = 0;
+  int rowID = 0;
 
   dbRow() { setStartKey("<TabRow>");
             setEndKey("</TabRow>"); };
@@ -134,11 +137,11 @@ class dbTable : public basic {
 
   accessor a;
   rowVec row;
-  int curRow;
-  int numRows;
+  int curRow = 0;
+  int numRows = 0;
   //  elemVec e;
   //  int nelems;
-  char* name;
+  char* name = 0;
 
    dbTable() { setStartKey("<StDbTable>");
                setEndKey("</StDbTable>");};
