@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.13 2012/06/11 14:33:19 fisyak Exp $
+ * $Id: DbUse.cxx,v 1.14 2016/05/24 17:44:16 dmitry Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.14  2016/05/24 17:44:16  dmitry
+ * first batch of fixes for Coverity findings
+ *
  * Revision 1.13  2012/06/11 14:33:19  fisyak
  * std namespace
  *
@@ -438,6 +441,11 @@ if (count!=nVar)
       }
     
     *nRows=0;
+	delete [] types;
+	delete [] names;
+	delete [] offset;
+	delete [] nDims;
+	delete [] firstDim;
     return NULL;
   }
 
@@ -453,6 +461,12 @@ if (pDbData==NULL){
       << *nRows <<" structs " <<structName <<" each of "
       <<sizeOfStruct <<" bytes"<<endm;
   *nRows=0;
+	delete [] types;
+	delete [] names;
+	delete [] offset;
+	delete [] nDims;
+	delete [] firstDim;
+	free(pDbData);
   return NULL;
 }
 
@@ -480,6 +494,14 @@ else // query succeeded, get result
       {
 	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
+	delete [] types;
+	delete [] names;
+	delete [] offset;
+	delete [] nDims;
+	delete [] firstDim;
+	free(pDbData);
+	pCurrent = 0;
+
 	return NULL;
       }
     else 
@@ -495,6 +517,13 @@ else // query succeeded, get result
   		 <<structName<<"+"<< tableName 
  		 << " valid for "<<currentDateTime <<endm;
 	    mysql_close(&mysql);
+		delete [] types;
+		delete [] names;
+		delete [] offset;
+		delete [] nDims;
+		delete [] firstDim;
+		free(pDbData);
+		pCurrent = 0;
 	    return NULL;
 	  }
 	else
@@ -520,6 +549,13 @@ else // query succeeded, get result
 			 <<endm;
 		    mysql_close(&mysql);
 		    *nRows=0;
+
+			delete [] types;
+			delete [] names;
+			delete [] offset;
+			delete [] nDims;
+			delete [] firstDim;
+			free(pDbData);
 		    return NULL;
 		  }
 		
@@ -687,6 +723,13 @@ else // query succeeded, get result
       {
 	LOG_ERROR << "no result: Error: " <<  mysql_error(&mysql) << endm;
 	mysql_close(&mysql);
+	delete [] types;
+	delete [] names;
+	delete [] offset;
+	delete [] nDims;
+	delete [] firstDim;
+	free(pDbData);
+	pCurrent = 0;
 	return NULL;
       }
   }

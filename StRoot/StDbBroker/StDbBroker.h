@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.32 2011/11/28 17:03:07 dmitry Exp $
+ * $Id: StDbBroker.h,v 1.33 2016/05/24 17:44:16 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.33  2016/05/24 17:44:16  dmitry
+ * first batch of fixes for Coverity findings
+ *
  * Revision 1.32  2011/11/28 17:03:07  dmitry
  * dbv override support in StDbLib,StDbBroker,St_db_Maker
  *
@@ -157,44 +160,44 @@ struct oldDescriptor {
 };
 
   protected:
-    StDbTable*   m_node;
-    oldDescriptor *m_descriptor;
-    Descriptor  *mdescriptor;
-    Char_t *     m_structName;  //name of the struct type used in this TTable
-    Char_t *     m_tableName;   //name of this instance of TTable
-    UInt_t       m_sizeOfStruct;// byte size of this struct
-    UInt_t       m_nElements;   // Number of variables in the structure
-    UInt_t       m_nRows;       // number of rows in the table
+    StDbTable*   m_node = 0;
+    oldDescriptor *m_descriptor = 0;
+    Descriptor  *mdescriptor = 0;
+    Char_t *     m_structName = 0;  //name of the struct type used in this TTable
+    Char_t *     m_tableName = 0;   //name of this instance of TTable
+    UInt_t       m_sizeOfStruct = 0;// byte size of this struct
+    UInt_t       m_nElements = 0;   // Number of variables in the structure
+    UInt_t       m_nRows = 0;       // number of rows in the table
 
     Int_t        m_DateTime[2]; // Current DateTime
 
-    Int_t        m_BeginDate;   // begin date: 2021 05 31
-    Int_t        m_BeginTime;   // begin date: HH MM SS
-    Int_t        m_EndDate;     // end date
-    Int_t        m_EndTime;     // end time
+    Int_t        m_BeginDate = 0;   // begin date: 2021 05 31
+    Int_t        m_BeginTime = 0;   // begin date: HH MM SS
+    Int_t        m_EndDate = 0;     // end date
+    Int_t        m_EndTime = 0;     // end time
 
-    UInt_t       m_beginTimeStamp; // unix beginTime
-    UInt_t       m_endTimeStamp; // unix endTime
-    UInt_t       m_requestTimeStamp; // unix requestTime
+    UInt_t       m_beginTimeStamp = 0; // unix beginTime
+    UInt_t       m_endTimeStamp = 0; // unix endTime
+    UInt_t       m_requestTimeStamp = 0; // unix requestTime
 
-    Int_t        m_runNumber;  // run number of queries of runlog
+    Int_t        m_runNumber = 0;  // run number of queries of runlog
 
-    char*        m_tableVersion; // name of the version of the table
-    char*        m_database;     // name of the database for this table
-    char*        m_ParentType;   // named dbType when "top" db is domain-level
+    char*        m_tableVersion = 0; // name of the version of the table
+    char*        m_database = 0;     // name of the database for this table
+    char*        m_ParentType = 0;   // named dbType when "top" db is domain-level
 
-    int       m_isVerbose;
-    dbNodeArray *m_Nodes;
-    StDbConfigNode* m_Tree;
+    int       m_isVerbose = 0;
+    dbNodeArray *m_Nodes = 0;
+    StDbConfigNode* m_Tree = 0;
 
-    char*        m_flavor;
-    unsigned int m_prodTime;
+    char*        m_flavor = 0;
+    unsigned int m_prodTime = 0;
     std::map<std::pair<char*,char*>,unsigned int> m_prodTimeOverride; // DBV override for specific subsystems
 
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
-    Bool_t         m_isZombie;
+    Bool_t         m_isZombie = false;
     
     void          makeDateTime(const char* dateTime, Int_t & iDate, Int_t & iTime); 
 
