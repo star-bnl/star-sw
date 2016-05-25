@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.12 2009/09/28 19:14:10 dmitry Exp $
+ * $Id: StDbTableDescriptor.h,v 1.13 2016/05/25 20:17:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.13  2016/05/25 20:17:51  dmitry
+ * coverity - uninit ctor
+ *
  * Revision 1.12  2009/09/28 19:14:10  dmitry
  * row size is not *static* anymore, tables have different row sizes
  *
@@ -77,10 +80,10 @@
 class StDbBuffer;
 #endif
 struct tableDescriptor {
-  StTypeE type;      // enumerated basic type
+  StTypeE type = Stchar;      // enumerated basic type
   char name[60];     //  element name
-  unsigned int size; //  element size in bytes
-  unsigned int  offset; // byte offset in table to this element
+  unsigned int size = 0; //  element size in bytes
+  unsigned int  offset = 0; // byte offset in table to this element
   unsigned int  dimensionlen[4]; // len per dimension if multi-D array
 };
 
@@ -89,26 +92,26 @@ class StDbTableDescriptor : public StTableDescriptorI {
 
 protected:
 
- unsigned int mnumElements;
- unsigned int mtableSize;
- int offsetToNextEmptyByte;
- int offsetToLast4Bytes;
- StTypeE lastType;
- int padsize;
+ unsigned int mnumElements = 0;
+ unsigned int mtableSize = 0;
+ int offsetToNextEmptyByte = 0;
+ int offsetToLast4Bytes = 0;
+ StTypeE lastType = Stchar;
+ int padsize = 0;
 
  unsigned int mAlign[Stmaxtype];
 
- tableDescriptor* mcols;
- int mMax;
- int mCur;
+ tableDescriptor* mcols = 0;
+ int mMax = 0;
+ int mCur = 0;
 
  // db unique ids
- int mstructID;
- int mschemaID;
- int rowSizeTT;
- bool misValid;  // schema has been filled
- bool mhasDouble;
- unsigned int maxAlign;
+ int mstructID = 0;
+ int mschemaID = 0;
+ int rowSizeTT = 0;
+ bool misValid = false;  // schema has been filled
+ bool mhasDouble = false;
+ unsigned int maxAlign = 0;
 
   void init();
   virtual void reSize();

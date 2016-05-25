@@ -68,8 +68,8 @@ class StDbServiceBroker
   int RecommendHost();
   void SendEmail(time_t timediff);
   short MyStatus;  // see namespace st_db_service_broker
-  time_t last_succeeded_connect_time;
-  time_t seconds_to_reach_for_connect;
+  time_t last_succeeded_connect_time = 0;
+  time_t seconds_to_reach_for_connect = 1800;
 
  public:
 
