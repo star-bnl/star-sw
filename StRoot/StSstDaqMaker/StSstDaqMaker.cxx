@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.9 2016/05/25 15:47:23 smirnovd Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.10 2016/05/25 15:47:30 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.10  2016/05/25 15:47:30  smirnovd
+ * StSstDaqMaker: Initializing variable once is enough
+ *
  * Revision 1.9  2016/05/25 15:47:23  smirnovd
  * StSstDaqMaker: Got rid of unused local variable
  *
@@ -620,7 +623,7 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    Int_t readout_correct[3] = {0};
    Int_t ladder             = 0;
    Int_t id_side            = 0;
-   Int_t count              = 0;
+   Int_t count              = 1;
 
    //initialize St_spa_strip and St_ssdPedStrip table.
    //St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
@@ -632,7 +635,6 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    }
 
    spa_strip_st   out_strip;
-   count = 1;
    LOG_DEBUG << "DECODING RAW MODE data....." << endm;
    //grab ladder and side
    FindLadderSide(mRDO, channel, ladder, id_side);
@@ -898,7 +900,7 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    Int_t  strip_number     = 0;
    Int_t  id_side          = 0;
    Int_t  id_wafer         = 0;
-   Int_t  count            = 0;
+   Int_t  count            = 1;
    Int_t  data             = 0;
    Int_t  wafer            = 0;
    Int_t  strip            = 0;
@@ -920,7 +922,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    }
 
    spa_strip_st  out_strip;
-   count = 1;
    //grab ladder and side
    FindLadderSide(mRDO, channel, ladder, id_side); //convert channel to real Ladder number and side
 
