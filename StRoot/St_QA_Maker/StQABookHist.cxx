@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.75 2016/05/13 22:04:49 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.76 2016/05/25 03:59:44 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.76  2016/05/25 03:59:44  genevb
+// fix uninit members
+//
 // Revision 2.75  2016/05/13 22:04:49  genevb
 // Address coverity findings: uninit vars, dead code, one PMD error, and one TOF error
 //
@@ -317,6 +320,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   mNullPrimVtxClass = 0;
 
 // for method MakeGlob - from table globtrk
+  m_globtrk_fit_prob=0;
   m_globtrk_tot=0;
   m_globtrk_good=0;
   m_globtrk_good_sm=0;
@@ -480,6 +484,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_chisq0_dipT = 0;
   m_chisq0_zfT = 0;
   m_chisq0_phiT = 0;
+  m_psi_phiT = 0;
 
   m_pT_eta_recTS= 0;
   m_globtrk_xf_yfTS = 0;
@@ -493,6 +498,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_chisq0_dipTS = 0;
   m_chisq0_zfTS = 0;
   m_chisq0_phiTS = 0;
+  m_psi_phiTS = 0;
 
 // for method MakeDE - from table dst_dedx
   m_ndedxr=0;        //! number of tracks with dedx info
@@ -520,6 +526,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_primtrk_goodF=0;
   m_primtrk_iflag=0;
   m_primglob_good=0;
+  m_primglob_fit=0;
   m_pdet_id=0;
   m_primtrk_meanptTTS=0;
   m_primtrk_meanptF=0;
@@ -536,6 +543,9 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pmax_pointFW=0;
   m_pfit_pointT=0;
   m_prim_ratiomT=0;
+  m_prim_ratioF=0;
+  m_prim_ratioFE=0;
+  m_prim_ratioFW=0;
   m_prim_ratiomF=0;
   m_prim_ratiomFE=0;
   m_prim_ratiomFW=0;
@@ -587,6 +597,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_ppTFE=0;
   m_ppTFW=0;
   m_pmomT=0; 
+  m_pmomTS=0; 
   m_pmomF=0;
   m_pmomFE=0;
   m_pmomFW=0;
@@ -652,6 +663,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pchisq0_etaT = 0;
   m_pchisq0_dipT = 0;
   m_pchisq0_zfT = 0;
+  m_ppsi_phiT = 0;
 
   m_ppT_eta_recTS= 0;
   m_primtrk_xf_yfTS = 0;
@@ -664,6 +676,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pchisq0_etaTS = 0;
   m_pchisq0_dipTS = 0;
   m_pchisq0_zfTS = 0;
+  m_ppsi_phiTS = 0;
 
   // for MakeHistPID - from tables primtrk & dst_dedx 
   m_p_dedx_rec=0;   //! dedx vs p
