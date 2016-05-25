@@ -83,7 +83,9 @@ bool remove_dir_fifo(std::string unlink_path, const std::string& base_path, doub
 	while (!file_queue.empty() && cur_bytes_free < bytes_free) {
 		cached_file_st tmp = file_queue.front();
 		cur_bytes_free += tmp.size;
-		remove(tmp.name.c_str());
+		if ( remove(tmp.name.c_str()) != 0 ) {
+			// FIXME: error, file was not removed for some reason
+		}
 	}
 	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
 	if (cur_bytes_free > bytes_free) { return true; }
@@ -127,7 +129,9 @@ bool remove_dir_lru(std::string unlink_path, const std::string& base_path, doubl
 	while (!file_queue.empty() && cur_bytes_free < bytes_free) {
 		cached_file_st tmp = file_queue.front();
 		cur_bytes_free += tmp.size;
-		remove(tmp.name.c_str());
+		if ( remove(tmp.name.c_str()) != 0 ) {
+			// FIXME: error, file was not removed for some reason
+		}
 	}
 	get_free_space_percentage(path_resolved.c_str(), cur_bytes_free, cur_bytes_total);
 	if (cur_bytes_free > bytes_free) { return true; }
@@ -161,13 +165,17 @@ void create_dir_recursive(std::string path) {
             if (*p == '/') {
                 *p = '\0';
                 if(access(opath, F_OK)) {
-                    mkdir(opath, S_IRWXU);
+                    if ( mkdir(opath, S_IRWXU) != 0 ) {
+						// FIXME: directory was not created for some reason
+					}
 				}
                 *p = '/';
             }
 		}
-        if(access(opath, F_OK)) {        /* if path is not terminated with / */
-            mkdir(opath, S_IRWXU);
+        if ( access(opath, F_OK)) {        /* if path is not terminated with / */
+            if ( mkdir(opath, S_IRWXU) != 0 ) {
+				// FIXME: directory was not created for some reason
+			}
 		}
 }
 
@@ -212,7 +220,9 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
 			StHyperLock lock(fullname_resolved);
 			if (lock.try_lock(0)) {
 				lock.unlock();
-            	remove(fullname_resolved.c_str());
+            	if ( remove(fullname_resolved.c_str()) != 0 ) {
+					// FIXME: error, file was not removed for some reason
+				}
 			}
 			
         }
@@ -220,7 +230,9 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
     closedir(dp);
     if (path_resolved != "/") {
         if (path_resolved.compare(0, base_path.size(), base_path) == 0) {
-            remove(path_resolved.c_str());
+            if ( remove(path_resolved.c_str()) != 0 ) {
+				// FIXME: error, file was not removed for some reason
+			}
         } else {
             //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << path_resolved << std::endl; // FIXME
         }
