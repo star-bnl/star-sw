@@ -1097,12 +1097,12 @@ Int_t StMiniMcMaker::openFile()
   // - for the case of running in bfc, the Infilename will have only the extension .root
   //   so we can keep this working in both cases by checking that the first and the last "." are
   //   not the same before attempting to remove what's in between them.
-  cout << "Infilename = " << mInFileName << endl;
-  if (mInFileName == "") {
-    TFile *tfile = GetTFile();
-    assert(tfile);
+  TFile *tfile = GetTFile();
+  if (tfile) {
     tfile->cd();
   } else {
+    if (mInFileName == "") mInFileName = "gtrack.minimc.root";
+    cout << "Infilename = " << mInFileName << endl;
     TString outFileName(mInFileName);
     //outFileName.ReplaceAll("geant.root","minimc.root");
     short indx1 = outFileName.First('.');
