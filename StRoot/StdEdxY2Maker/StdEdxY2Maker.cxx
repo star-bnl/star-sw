@@ -605,10 +605,6 @@ Int_t StdEdxY2Maker::Make(){
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	transform(localSect[3],Pad);
-	CdEdx[NdEdx].Reset();
-	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
-	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
-	CdEdx[NdEdx].resXYZ[2] = localSect[3].position().z() - localSect[0].position().z();
 	TrackLengthTotal += dx;
 	if (! tpcHit->usedInFit()) {
 	  BadHit(0,tpcHit->position());
@@ -664,6 +660,9 @@ Int_t StdEdxY2Maker::Make(){
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
 	// Corrections
 	CdEdx[NdEdx].Reset();
+	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
+	CdEdx[NdEdx].resXYZ[1] = localSect[3].position().y() - localSect[0].position().y();
+	CdEdx[NdEdx].resXYZ[2] = localSect[3].position().z() - localSect[0].position().z();
 	CdEdx[NdEdx].DeltaZ = 5.2; 
 	CdEdx[NdEdx].QRatio = -2;
 	CdEdx[NdEdx].QRatioA = -2.;
