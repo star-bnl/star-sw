@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbModifier.cxx,v 1.10 2015/05/15 19:56:09 dmitry Exp $
+ * $Id: StDbModifier.cxx,v 1.11 2016/05/25 20:57:11 dmitry Exp $
  *
  * Author: Masashi Kaneta, updated by R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbModifier.cxx,v $
+ * Revision 1.11  2016/05/25 20:57:11  dmitry
+ * coverity - resource leakage
+ *
  * Revision 1.10  2015/05/15 19:56:09  dmitry
  * more cleanup
  *
@@ -272,6 +275,7 @@ Int_t StDbModifier::WriteDataToDB()
 
   if ( dbtable == 0 ){                            // If table asigned by fTableName does not exist in Dababase,
     cout << " No Table : " << fTableName << endl; // program is stoped and exit from this function.
+	delete TD;
     return 0;                                     //
   }
 
@@ -309,6 +313,7 @@ Int_t StDbModifier::WriteDataToDB()
   int retVal=0;
   if(mgr -> storeDbTable(dbtable)) retVal=1;             // Fetch the data 
   delete [] eidList;
+  delete TD;
 
   return retVal;
 }
