@@ -37,6 +37,8 @@ public:
 		it = m_CacheConfig.find(key);
 		if ( it != m_CacheConfig.end() ) {
 			obj = StHyperUtilGeneric::fromString<T>((*it).second);
+		} else {
+			obj = StHyperUtilGeneric::fromString<T>("");
 		}
 		return obj;
 	};
