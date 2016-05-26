@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.630 2016/05/20 16:00:34 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.631 2016/05/26 12:33:29 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -284,7 +284,7 @@ Int_t StBFChain::Instantiate()
 	  TString namec = dbMk->GetName();
 	  int len       = sizeof(fBFC[i].Name);
 	  if ( namec.Length() <= len){
-	    strcpy (fBFC[i].Name, namec.Data() );
+	    strncpy (fBFC[i].Name, namec.Data(),len);
 	  } else {
 	    gMessMgr->Error() << "Maker name [" << namec
 			      << "] length is > " << len 
@@ -330,7 +330,7 @@ Int_t StBFChain::Instantiate()
 	TString namec = mk->GetName();
 	int      len  = sizeof(fBFC[i].Name);
 	if ( namec.Length() <= len){
-	  strcpy (fBFC[i].Name, namec.Data() );
+	  strncpy (fBFC[i].Name, namec.Data() , len);
 	} else {
 	  gMessMgr->Error() << "Maker name [" << namec
 			    << "] length is > " << len 
@@ -365,7 +365,7 @@ Int_t StBFChain::Instantiate()
 	TString namec =  treeMk->GetName();
 	int len       = sizeof(fBFC[i].Name);
 	if ( namec.Length() <= len ){
-	  strcpy (fBFC[i].Name, namec.Data() );
+	  strncpy (fBFC[i].Name, namec.Data() , len);
 	} else {
 	  gMessMgr->Error() << "Maker name [" << namec
 			    << "] length is > " << len 
@@ -386,7 +386,19 @@ Int_t StBFChain::Instantiate()
 	assert(mk);
       }
     }
-    strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
+
+    {
+      TString namec = mk->GetName();
+      int len       = sizeof(fBFC[i].Name);
+      if ( namec.Length() <= len){
+	strncpy (fBFC[i].Name,namec.Data(),len);
+      } else {
+	gMessMgr->Error() << "Maker name [" << namec
+			  << "] length is > " << len 
+			  << " - increase BFC Name field length" << endm;
+      }
+    }
+
     if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
@@ -824,7 +836,7 @@ Int_t StBFChain::Instantiate()
     }
   Add2Chain:
     if (! mk) continue;
-    if (name == "") strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
+    if (name == "") strncpy (fBFC[i].Name,(Char_t *) mk->GetName() , sizeof(fBFC[i].Name));
     if (myChain) myChain->AddMaker(mk);
     continue;
   Error:
