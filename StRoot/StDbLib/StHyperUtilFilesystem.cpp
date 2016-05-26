@@ -71,8 +71,10 @@ bool remove_dir_fifo(std::string unlink_path, const std::string& base_path, doub
 		tmp.name = fullname_resolved;
 		tmp.size = StHyperUtilFilesystem::filesize(fullname_resolved.c_str());
 		ierr = stat(fullname_resolved.c_str(), &st);
-	    tmp.time = st.st_mtime;
-		file_queue.push_back(tmp);
+		if ( ierr == 0 ) {
+		    tmp.time = st.st_mtime;
+			file_queue.push_back(tmp);
+		}
     }
     closedir(dp);
 	std::sort(file_queue.begin(), file_queue.end());
@@ -117,8 +119,10 @@ bool remove_dir_lru(std::string unlink_path, const std::string& base_path, doubl
 		tmp.name = fullname_resolved;
 		tmp.size = StHyperUtilFilesystem::filesize(fullname_resolved.c_str());
 		ierr = stat(fullname_resolved.c_str(), &st);
-	    tmp.time = st.st_atime;
-		file_queue.push_back(tmp);
+		if ( ierr == 0 ) {
+		    tmp.time = st.st_atime;
+			file_queue.push_back(tmp);
+		}
     }
     closedir(dp);
 	std::sort(file_queue.begin(), file_queue.end());
