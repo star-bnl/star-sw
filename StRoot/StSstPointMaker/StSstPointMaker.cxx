@@ -1,6 +1,9 @@
-//$Id: StSstPointMaker.cxx,v 1.1 2015/06/23 16:29:04 jeromel Exp $
+//$Id: StSstPointMaker.cxx,v 1.2 2016/05/27 15:20:38 bouchet Exp $
 //
 //$Log: StSstPointMaker.cxx,v $
+//Revision 1.2  2016/05/27 15:20:38  bouchet
+//coverity DEAD_CODE fixed ; cleanup cout
+//
 //Revision 1.1  2015/06/23 16:29:04  jeromel
 //Version of the SSD code for the SST - strated revision 1
 //
@@ -162,22 +165,17 @@ Int_t StSstPointMaker::Make()
   m_DataSet->Add(scf_cluster);
   
   StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
-  StSstHitCollection *sstHitCollection;
+  //  StSstHitCollection *sstHitCollection;
   if (!pEvent) {
-    LOG_WARN << "StSstPointMaker::Make(): There is no StEvent " << endm;
-    return kStWarn;
+    LOG_ERROR << "StSstPointMaker::Make(): There is no StEvent " << endm;
+    return kStErr;
   }
-  if(pEvent){
-    sstHitCollection = pEvent->sstHitCollection();
-    if (!sstHitCollection){
-      LOG_WARN << "The SST hit collection does not exist  - creating a new one" << endm;
-      sstHitCollection = new StSstHitCollection;
-      pEvent->setSstHitCollection(sstHitCollection);
-    }
+  StSstHitCollection *sstHitCollection = pEvent->sstHitCollection();
+  if (!sstHitCollection){
+    LOG_WARN << "The SST hit collection does not exist  - creating a new one" << endm;
+    sstHitCollection = new StSstHitCollection;
+    pEvent->setSstHitCollection(sstHitCollection);
   }
-  else              
-    sstHitCollection = 0;
-  
   LOG_INFO<<"#################################################"<<endm;
   LOG_INFO<<"####     START OF NEW SST POINT MAKER        ####"<<endm;
   LOG_INFO<<"####        SST BARREL INITIALIZATION        ####"<<endm;
@@ -189,7 +187,7 @@ Int_t StSstPointMaker::Make()
     int stripTableSize = mySst->readStripFromTable(spa_strip);
     LOG_INFO<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endm;
     mySst->sortListStrip();
-    PrintStripSummary(mySst);
+    //PrintStripSummary(mySst);
     LOG_INFO<<"####       NUMBER OF DB ENTRIES "<< ReadNoiseTable(mySst) <<"       ####"<<endm;
     int nClusterPerSide[2]={0,0};
     mySst->doSideClusterisation(nClusterPerSide,mWaferStatus);
@@ -198,7 +196,7 @@ Int_t StSstPointMaker::Make()
     mySst->sortListCluster();
     int nClusterWritten = mySst->writeClusterToTable(scf_cluster,spa_strip);
     LOG_INFO<<"####   -> "<<nClusterWritten<<" CLUSTERS WRITTEN INTO TABLE       ####"<<endm;
-    PrintClusterSummary(mySst);
+    //PrintClusterSummary(mySst);
     //PrintStripDetails(mySst,8310);
     //PrintClusterDetails(mySst,8310); 
     //debugUnPeu(mySst);
@@ -206,17 +204,8 @@ Int_t StSstPointMaker::Make()
     LOG_INFO<<"####   -> "<<nPackage<<" PACKAGES IN THE SST           ####"<<endm;
     mySst->convertDigitToAnalog(mDynamicControl);
     mySst->convertUFrameToOther();
-    PrintPointSummary(mySst);
-    if(Debug()>2){
-      for(int i=1;i<=20;i++){
-	for(int j=1;j<=16;j++){
-	  //PrintStripDetails(mySst,7000+(100*j)+i);
-	  //PrintClusterDetails(mySst,7000+(100*j)+i);
-	  //PrintPointDetails(mySst,7000+(100*j)+i);
-	  //PrintPackageDetails(mySst,7000+(100*j)+i);
-	}
-      }
-    }
+    //PrintPointSummary(mySst);
+
     //get McEvent here
     int nSptWritten    = 0;
     StMcEvent* mcEvent = 0;
@@ -259,8 +248,8 @@ Int_t StSstPointMaker::Make()
 
 void StSstPointMaker::PrintStripSummary(StSstBarrel *mySst)
 {
-  int ladderCountN[20]={0};//,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  int ladderCountP[20]={0};//,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  int ladderCountN[20]={0};
+  int ladderCountP[20]={0};
   for (int i=0;i<20;i++) 
     if (mySst->isActiveLadder(i)>0) {
       for (int j=0; j<mySst->mLadders[i]->getWaferPerLadder();j++) {
