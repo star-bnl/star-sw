@@ -18,32 +18,46 @@
 #include "TMath.h"
 ClassImp(StMultiH1F)
 
-StMultiH1F::StMultiH1F() : fMOffset(0.) {}
+StMultiH1F::StMultiH1F() : fMOffset(0.), subHists(0), aHist(0) {}
 
 StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 		       Axis_t xlow,Axis_t xup ,Int_t nbinsy) :
-  TH2F(name,title,nbinsx,xlow,xup,nbinsy,-0.5,-0.5+nbinsy), fMOffset(0.) {}
+  TH2F(name,title,nbinsx,xlow,xup,nbinsy,-0.5,-0.5+nbinsy),
+  fMOffset(0.), subHists(0), aHist(0) {}
 
 StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 		       Double_t *xbins,Int_t nbinsy) :
-  TH2F(name,title,nbinsx,xbins,nbinsy,-0.5,-0.5+nbinsy), fMOffset(0.) {}
+  TH2F(name,title,nbinsx,xbins,nbinsy,-0.5,-0.5+nbinsy),
+  fMOffset(0.), subHists(0), aHist(0) {}
+
+StMultiH1F::~StMultiH1F() {
+  if (subHists) {
+    int ybins = TMath::Min(GetNbinsY(),StMultiH1FMaxBins);
+    for (int ybin=0; ybin<ybins; ybin++) delete subHists[ybin];
+  }
+}
 
 void StMultiH1F::Draw(Option_t *option) {
 
-  Int_t x0 = fXaxis.GetFirst();
-  Int_t x1 = fXaxis.GetLast();
+  int x0 = fXaxis.GetFirst();
+  int x1 = fXaxis.GetLast();
   fXaxis.SetRange();
-  Int_t ybins = TMath::Min(GetNbinsY(),StMultiH1FMaxBins);
+  int ybins = TMath::Min(GetNbinsY(),StMultiH1FMaxBins);
+
+  // dummy histogram pointer(s)
+  if (!subHists) { subHists = new TH1F*[ybins]; memset(subHists,0,ybins*sizeof(TH1F*)); }
+
   if (ybins == 1) {
-    TH1F* temp0 = XProjection(GetName());
-    temp0->SetStats((!TestBit(kNoStats)));
-    TAxis* taxis = temp0->GetXaxis();
+    delete subHists[0];
+    subHists[0] = XProjection(GetName());
+    subHists[0]->SetStats((!TestBit(kNoStats)));
+    TAxis* taxis = subHists[0]->GetXaxis();
     fXaxis.Copy(*taxis);
     taxis->SetRange(x0,x1);
     fXaxis.SetRange(x0,x1);
-    if (fMinimum != -1111)  temp0->SetMinimum(fMinimum);
-    if (fMaximum != -1111)  temp0->SetMaximum(fMaximum);
-    temp0->Draw();
+    if (fMinimum != -1111)  subHists[0]->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  subHists[0]->SetMaximum(fMaximum);
+    subHists[0]->Draw();
     return;
   }
 
@@ -56,78 +70,77 @@ void StMultiH1F::Draw(Option_t *option) {
   legend->SetFillStyle(0);
   legend->SetMargin(0.25);
 
-  Int_t ybin;
-  Double_t maxval = -1e31;
-  Double_t minval = 1e31;
-  Int_t maxbin = -1;
-  Int_t minbin = -1;
-  Float_t offset = fMOffset;
+  int ybin;
+  double maxval = -1e31;
+  double minval = 1e31;
+  int maxbin = -1;
+  int minbin = -1;
+  float offset = fMOffset;
   if (fMOffset && gPad->GetLogy()) {
-    Float_t max_offset = TMath::Power(
+    float max_offset = TMath::Power(
       1.0e10*GetNonZeroMinimum()/GetNonZeroMaximum(),
       1.0/(ybins-1.0));
     if (offset > max_offset) offset = max_offset;
   }
 
-  // dummy histogram pointer
-  TH1F** temp = new TH1F*[ybins];
-
   TString n0;
   for (ybin=0; ybin<ybins; ybin++) {
-    if ((ybin >= 10) || (names[ybin].IsNull())) n0 = GetName();
+    if (names[ybin].IsNull()) n0 = GetName();
     else n0 = names[ybin];
-    Int_t slice = ybin+1;
-    temp[ybin] = XProjection(n0.Data(),slice);
-    temp[ybin]->SetLineStyle(slice);
-    temp[ybin]->SetStats(kFALSE);
-    TAxis* taxis = temp[ybin]->GetXaxis();
+    int slice = ybin+1;
+    delete subHists[ybin];
+    subHists[ybin] = XProjection(n0.Data(),slice);
+    subHists[ybin]->SetLineStyle(slice);
+    subHists[ybin]->SetStats(kFALSE);
+    TAxis* taxis = subHists[ybin]->GetXaxis();
     fXaxis.Copy(*taxis);
     taxis->SetRange(x0,x1);
 
     if (fMOffset && ybin) {
-      temp[ybin]->SetLineColor(slice);
+      subHists[ybin]->SetLineColor(slice);
       if (gPad->GetLogy()) {
-        temp[ybin]->Scale(TMath::Power(offset,ybin));
+        subHists[ybin]->Scale(TMath::Power(offset,ybin));
       } else {
-        for (Int_t xbin=0; xbin<GetNbinsX(); xbin++)
-          temp[ybin]->AddBinContent(xbin,offset*ybin);
+        for (int xbin=0; xbin<GetNbinsX(); xbin++)
+          subHists[ybin]->AddBinContent(xbin,offset*ybin);
       }
     }
 
-    Double_t binmax = temp[ybin]->GetMaximum();
-    Double_t binmin = temp[ybin]->GetMinimum();
+    double binmax = subHists[ybin]->GetMaximum();
+    double binmin = subHists[ybin]->GetMinimum();
     if (binmax > maxval) { maxval = binmax; maxbin = ybin; }
     if (binmin < minval) { minval = binmin; minbin = ybin; }
-    legend->AddEntry(temp[ybin],n0.Data(),"l");
+    legend->AddEntry(subHists[ybin],n0.Data(),"l");
   }
 
   // can't use the option argument in Draw() since this is called from
   // StHistUtil::DrawHists(), which defaults 2D histograms to a box plot
   if (maxbin == minbin) {
-    if (fMinimum != -1111)  temp[maxbin]->SetMinimum(fMinimum);
-    if (fMaximum != -1111)  temp[maxbin]->SetMaximum(fMaximum);
-    temp[maxbin]->Draw();
+    if (fMinimum != -1111)  subHists[maxbin]->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  subHists[maxbin]->SetMaximum(fMaximum);
+    subHists[maxbin]->Draw();
   } else {
-    TH1F* tempb = new TH1F(*(temp[maxbin]));
-    tempb->SetName(Form("%s_%d",GetName(),ybins+1));
-    tempb->SetBinContent(1,maxval);
-    tempb->SetBinContent(2,minval);
-    tempb->SetMarkerStyle(1); tempb->SetMarkerColor(0);
-    if (fMinimum != -1111)  tempb->SetMinimum(fMinimum);
-    if (fMaximum != -1111)  tempb->SetMaximum(fMaximum);
-    tempb->Draw("p");
+    delete aHist;
+    aHist = new TH1F(*(subHists[maxbin]));
+    aHist->SetName(Form("%s_%d",GetName(),ybins+1));
+    aHist->SetBinContent(1,maxval);
+    aHist->SetBinContent(2,minval);
+    aHist->SetMarkerStyle(1); aHist->SetMarkerColor(0);
+    if (fMinimum != -1111)  aHist->SetMinimum(fMinimum);
+    if (fMaximum != -1111)  aHist->SetMaximum(fMaximum);
+    aHist->Draw("p");
     maxbin = -1;
   }
   for (ybin=0; ybin<ybins; ybin++) {
-    if (ybin != maxbin) temp[ybin]->Draw("same");
+    if (ybin != maxbin) subHists[ybin]->Draw("same");
   }
 
   // Draw statistics for full set if stats are turned on
   if (!TestBit(kNoStats)) {
-    temp[0] = XProjection(GetName());
-    temp[0]->SetEntries(GetEntries());
-    temp[0]->SetStats(kTRUE);
-    temp[0]->Draw("boxsames");
+    subHists[0] = XProjection(GetName());
+    subHists[0]->SetEntries(GetEntries());
+    subHists[0]->SetStats(kTRUE);
+    subHists[0]->Draw("boxsames");
     legend->SetX1(0.59);
     legend->SetX2(0.77);
   }
@@ -151,7 +164,7 @@ TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
   TAttLine::Copy(*temp);
   TAttFill::Copy(*temp);
   TAttMarker::Copy(*temp);
-  return temp; // up to the user to delete
+  return temp; // up to the user of this function to delete
 }
 
 void StMultiH1F::SetBarOffset(Float_t offset) {
@@ -167,13 +180,13 @@ Double_t StMultiH1F::GetNonZeroMinimum() const {
   Double_t value, minimum = GetMinimum();
   if (minimum) return minimum;
   minimum = GetMaximum();
-  Int_t bin, binx, biny, binz;
-  Int_t xfirst  = fXaxis.GetFirst();
-  Int_t xlast   = fXaxis.GetLast();
-  Int_t yfirst  = fYaxis.GetFirst();
-  Int_t ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
-  Int_t zfirst  = fZaxis.GetFirst();
-  Int_t zlast   = fZaxis.GetLast();
+  int bin, binx, biny, binz;
+  int xfirst  = fXaxis.GetFirst();
+  int xlast   = fXaxis.GetLast();
+  int yfirst  = fYaxis.GetFirst();
+  int ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
+  int zfirst  = fZaxis.GetFirst();
+  int zlast   = fZaxis.GetLast();
   for (binz=zfirst;binz<=zlast;binz++) {
      for (biny=yfirst;biny<=ylast;biny++) {
         for (binx=xfirst;binx<=xlast;binx++) {
@@ -191,13 +204,13 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   Double_t value, maximum = GetMaximum();
   if (maximum) return maximum;
   maximum = GetMinimum();
-  Int_t bin, binx, biny, binz;
-  Int_t xfirst  = fXaxis.GetFirst();
-  Int_t xlast   = fXaxis.GetLast();
-  Int_t yfirst  = fYaxis.GetFirst();
-  Int_t ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
-  Int_t zfirst  = fZaxis.GetFirst();
-  Int_t zlast   = fZaxis.GetLast();
+  int bin, binx, biny, binz;
+  int xfirst  = fXaxis.GetFirst();
+  int xlast   = fXaxis.GetLast();
+  int yfirst  = fYaxis.GetFirst();
+  int ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
+  int zfirst  = fZaxis.GetFirst();
+  int zlast   = fZaxis.GetLast();
   for (binz=zfirst;binz<=zlast;binz++) {
      for (biny=yfirst;biny<=ylast;biny++) {
         for (binx=xfirst;binx<=xlast;binx++) {
@@ -214,8 +227,8 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
 void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   // Save primitive as a C++ statement(s) on output stream out
 
-  Bool_t nonEqiX = kFALSE;
-  Int_t i;
+  bool nonEqiX = kFALSE;
+  int i;
 
   // Check if the histogram has equidistant X bins or not.  If not, we
   // create an array holding the bins.
@@ -243,9 +256,9 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   out << "," << GetYaxis()->GetNbins() << ");" << endl;
 
   // save bin contents
-  Int_t bin;
+  int bin;
   for (bin=0;bin<fNcells;bin++) {
-    Double_t bc = GetBinContent(bin);
+    double bc = GetBinContent(bin);
     if (bc) {
       out<<"   "<<GetName()<<"->SetBinContent("<<bin<<","<<bc<<");"<<endl;
     }
@@ -254,7 +267,7 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   // save bin errors
   if (fSumw2.fN) {
     for (bin=0;bin<fNcells;bin++) {
-      Double_t be = GetBinError(bin);
+      double be = GetBinError(bin);
       if (be) {
         out <<"   "<<GetName()<<"->SetBinError("<<bin<<","<<be<<");"<<endl;
       }
@@ -272,8 +285,11 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH1F.cxx,v 1.16 2015/05/26 15:40:30 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.17 2016/05/27 18:02:41 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.17  2016/05/27 18:02:41  genevb
+// Garbage collection (Coverity), remove unnecessary ROOT types
+//
 // Revision 1.16  2015/05/26 15:40:30  genevb
 // Handle set min/maxima
 //
