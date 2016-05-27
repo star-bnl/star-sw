@@ -191,7 +191,9 @@ bool recursiveMkdir(const std::string& path)
 		}
         found = str.find_first_of('/', found+1);
     }
-    mkdir(str.c_str(), S_IRWXU);
+	if ( mkdir(str.c_str(), S_IRWXU) != 0 ) {
+		// FIXME: directory was not created?
+	}
     return true;
 }
 
