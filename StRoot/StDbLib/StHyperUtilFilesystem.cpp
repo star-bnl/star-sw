@@ -181,6 +181,7 @@ void create_dir_recursive(std::string path) {
 				// FIXME: directory was not created for some reason
 			}
 		}
+		free (opath);
 }
 
 unsigned long remove_dir_recursive(std::string unlink_path, const std::string& base_path)
