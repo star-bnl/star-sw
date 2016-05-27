@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.4 2015/11/17 18:09:51 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.5 2016/05/27 15:21:13 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.5  2016/05/27 15:21:13  bouchet
+//cleanup cout
+//
 //Revision 1.4  2015/11/17 18:09:51  bouchet
 //Long Zhou modification, move cout to LOG_DEBUG
 //
@@ -370,7 +373,6 @@ Int_t  StSstBarrel::readNoiseFromTable(St_ssdNoise *strip_noise, StSstDynamicCon
 }
 //________________________________________________________________________________
 Int_t StSstBarrel::readNoiseFromTable(sstStripCalib_st *noise, StSstDynamicControl *dynamicControl){
-  std::cout <<" StSsdBarrel::readNoiseFromTable() " << std::endl;
   Int_t NumberOfNoise     = 0;
   Int_t iWaf              = 0;
   Int_t iLad              = 0;
