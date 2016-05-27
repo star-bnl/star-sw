@@ -186,7 +186,9 @@ bool recursiveMkdir(const std::string& path)
     rtrim(str, "/ \n\r\t");
     size_t found = str.find_first_of('/');
     while (found != std::string::npos) {
-        mkdir(str.substr(0, found).c_str(), S_IRWXU);
+        if ( mkdir(str.substr(0, found).c_str(), S_IRWXU) != 0 ) {
+			// FIXME: directory was not created by some reason
+		}
         found = str.find_first_of('/', found+1);
     }
     mkdir(str.c_str(), S_IRWXU);

@@ -53,7 +53,7 @@ ClassImp(StChain)
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name,  const Bool_t UseOwnHeader):
-StMaker(name),m_EvtHddr(0)
+StMaker(name),m_EvtHddr(0),mChainOpt(0)
 {
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
@@ -304,8 +304,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.81 2013/07/18 14:05:25 fisyak Exp $
+// $Id: StChain.cxx,v 1.82 2016/05/26 15:27:11 jeromel Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.82  2016/05/26 15:27:11  jeromel
+// Missing init added
+//
 // Revision 1.81  2013/07/18 14:05:25  fisyak
 // Open garbage can at Finish
 //

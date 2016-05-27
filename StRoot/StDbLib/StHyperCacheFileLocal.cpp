@@ -79,17 +79,11 @@ void StHyperCacheFileLocal::doCacheCleanup() {
 
 	size_t bytes_free = 0, bytes_total = 0;
 	getDiskUsage(bytes_free, bytes_total);
-	if (bytes_total == 0) {
+	if (bytes_total <= 0) {
 		// something is wrong, no fs stats => no cleanup
 		return;
 	} else { 
-		double percentage = 0;
-		if (bytes_total > 0) {
-			percentage = (double)bytes_free / (double)bytes_total;
-		} else {
-			// total size of the fs cannot be zero
-			return;
-		}
+		double percentage = (double)bytes_free / (double)bytes_total;
 		if (percentage < m_DiskFreeUpper) {
 			if (lock.try_lock(15000000)) { // try getting lock within 15 seconds
 			// do cleanup until it reaches m_DiskFreeLower				

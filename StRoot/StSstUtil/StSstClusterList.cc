@@ -1,6 +1,9 @@
-//$Id: StSstClusterList.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstClusterList.cc,v 1.3 2016/05/26 14:10:34 bouchet Exp $
 //
 //$Log: StSstClusterList.cc,v $
+//Revision 1.3  2016/05/26 14:10:34  bouchet
+//cpp-check for leak in splitCluster()
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -187,9 +190,9 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
   Int_t isClimbOrFall = 0;
   
   Float_t testTolerance = clusterControl->getTestTolerance();//20%
-  Int_t *minima = new int[CurrentClusterSize];
-  Int_t *maxima = new int[CurrentClusterSize];
-  Int_t *keyToIdStrip = new int[CurrentClusterSize];
+  vector<int> minima(CurrentClusterSize,0);
+  vector<int> maxima(CurrentClusterSize,0);
+  vector<int> keyToIdStrip(CurrentClusterSize,0);
   Int_t nMinima = 0;
   Int_t nMaxima = 0; 
   Int_t iStrip = 0;
@@ -201,11 +204,6 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
       keyToIdStrip[iStrip] = keyToIdStrip[iStrip-1]+1;
     }
 
-  for(iStrip = 0; iStrip<CurrentClusterSize; iStrip++)
-    {
-      minima[iStrip] = 0;
-      maxima[iStrip] = 0;
-    }
   iStrip = 0;
 
   for (iStrip = 0; iStrip<CurrentClusterSize-1; iStrip++) // we check both iStrip and iStrip+1
@@ -240,13 +238,12 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
 	}
     }
   
-  if (nMaxima<2) 
-    {
-      delete [] maxima;
-      delete [] minima;
-      delete [] keyToIdStrip;
-      return 0;
-    }
+  if (nMaxima<2){
+    if(maxima.size()>0) maxima.clear();
+    if(minima.size()>0) minima.clear();
+    if(keyToIdStrip.size()>0) keyToIdStrip.clear();
+    return 0;
+  }
   Int_t iMaxima = 0;
   Int_t maxLeft = 0;
   Int_t maxRight =0;
@@ -278,7 +275,7 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
       Float_t meanAdc = (float)ListAdc[minima[iMinima]];
       localFirstStrip = CurrentCluster->getFirstStrip()+strip_offset;
       weight = 1.;
-
+      
       while(!theEnd)
 	{
 	  if (fabs(((float)ListAdc[iStripLeft]-meanAdc)/meanAdc)<testTolerance)
@@ -320,13 +317,11 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
 	      nStripInTheGroup++;
 	      iStripRight++;
 	      addRight = 0;
-	    }
-	  
+	    }	    
 	}
-
+      
       if (iSuccess)
 	{
-
 	  if (nStripInTheGroup%2==0)
 	    {
 	      StSstCluster *newCluster = new StSstCluster(this->getSize());
@@ -361,24 +356,25 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
 	}
       strip_offset = strip_diff;
     }
-
-    if(nSubCluster)
-      {
-	StSstCluster *newCluster = new StSstCluster(this->getSize());
-	newCluster->setFlag(1);
-	Int_t currentStrip = localFirstStrip;
-	for (currentStrip = localFirstStrip; currentStrip<(CurrentCluster->getFirstStrip()+CurrentCluster->getClusterSize()); currentStrip++)
+  
+  if(nSubCluster)
+    {
+      StSstCluster *newCluster = new StSstCluster(this->getSize());
+      newCluster->setFlag(1);
+      Int_t currentStrip = localFirstStrip;
+      for (currentStrip = localFirstStrip; currentStrip<(CurrentCluster->getFirstStrip()+CurrentCluster->getClusterSize()); currentStrip++)
 	  {		  
 	    newCluster->update(currentStripList->getStrip(currentStrip),weight);
 	    weight=1.;
 	  }
-	this->addNewCluster(newCluster);
-	nSubCluster++;
-      }
-    delete [] maxima;
-    delete [] minima;
-    delete [] keyToIdStrip;
-    return nSubCluster;
+      this->addNewCluster(newCluster);
+      nSubCluster++;
+    }
+  if(maxima.size()>0) maxima.clear();
+  if(minima.size()>0) minima.clear();
+  if(keyToIdStrip.size()>0) keyToIdStrip.clear();
+  
+  return nSubCluster;
 }
 
 Int_t StSstClusterList::isSorted()

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.7 2016/02/03 15:50:20 zhoulong Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.11 2016/05/25 15:47:38 smirnovd Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,20 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.11  2016/05/25 15:47:38  smirnovd
+ * StSstDaqMaker: Removed commented-out code destined to rot
+ *
+ * Revision 1.10  2016/05/25 15:47:30  smirnovd
+ * StSstDaqMaker: Initializing variable once is enough
+ *
+ * Revision 1.9  2016/05/25 15:47:23  smirnovd
+ * StSstDaqMaker: Got rid of unused local variable
+ *
+ * Revision 1.8  2016/05/25 15:47:15  smirnovd
+ * StSstDaqMaker: Refactored how output file name is formed
+ *
+ * Memory leak fixed. Note different width for time field for values less < 999
+ *
  * Revision 1.7  2016/02/03 15:50:20  zhoulong
  * Added some protection to avoid chain crash when there is no available calibration table
  *
@@ -279,7 +293,6 @@ Int_t StSstDaqMaker::Make()
       Int_t id_side, ladder;
       Int_t ladderCountN[20] = {0};
       Int_t ladderCountP[20] = {0};
-      // Int_t count = 1;
       Int_t c_correct;
       Int_t channelindex = 0;
       mSec     = rts_table->Sector();
@@ -362,35 +375,15 @@ Int_t StSstDaqMaker::Make()
 
    // Directly write sstStripCalib table in strip ordering.
    if(mMode == 1) {
-     char* myLabel = new char[100];
-     char* myTime  = new char[100]; 
-     char* myDate  = new char[100];
-     char* name    = new char[100] ;
+     char name[50];
+     sprintf(name, "sstStripCalib.%d.%06d.root", GetDate(), GetTime());
 
-     if (GetTime()<999)
-       sprintf(myTime,"000%d",GetTime());
-     else
-       if ((GetTime()<9999)&&(GetTime()>999))
-	 sprintf(myTime,"00%d",GetTime());
-       else
-	 if ((GetTime()<99999)&&(GetTime()>9999))
-	   sprintf(myTime,"0%d",GetTime());
-	 else 
-	   sprintf(myTime,"%d",GetTime());
-
-     sprintf(myDate,"%d%s",GetDate(),".");
-     sprintf(myLabel,"%s%s",myDate,myTime);
-     LOG_INFO<<"TimeStamp : "<<myLabel<<endm;
-
-     sprintf(name,"%s%s%s","sstStripCalib.",myLabel,".root");
      TFile f1(name,"RECREATE","SSD ped and noise file",9);
      stripCal->AddAt(&noise_strip);
      stripCal->Print();
      stripCal->Write();
      f1.Close();
    }
-
-   // delete stripCal;
 
    return kStOk;
 }
@@ -630,10 +623,9 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    Int_t readout_correct[3] = {0};
    Int_t ladder             = 0;
    Int_t id_side            = 0;
-   Int_t count              = 0;
+   Int_t count              = 1;
 
    //initialize St_spa_strip and St_ssdPedStrip table.
-   //St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
    spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
 
    if (!spa_strip) {
@@ -642,7 +634,6 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
    }
 
    spa_strip_st   out_strip;
-   count = 1;
    LOG_DEBUG << "DECODING RAW MODE data....." << endm;
    //grab ladder and side
    FindLadderSide(mRDO, channel, ladder, id_side);
@@ -780,8 +771,6 @@ void StSstDaqMaker::DecodeRawWords(UInt_t *val, Int_t vallength, Int_t channel)
          LOG_DEBUG << "Make()/  spa_strip->NRows= " << spa_strip->GetNRows() << endm;
       }
    }
-
-   //delete spa_strip;
 }
 //-------------------------------------------------
 void StSstDaqMaker::DecodeRawWords_r15(UInt_t *val, Int_t vallength, Int_t channel)
@@ -803,10 +792,8 @@ void StSstDaqMaker::DecodeRawWords_r15(UInt_t *val, Int_t vallength, Int_t chann
   Int_t readout_correct[3] = {0};
   Int_t ladder             = 0;
   Int_t id_side            = 0;
-  Int_t count              = 0;
   Int_t readoutindex       = 0;
 
-  count = 1;
   LOG_DEBUG << "DECODING RAW MODE data....." << endm;
   //grab ladder and side
   FindLadderSide(mRDO, channel, ladder, id_side);
@@ -910,7 +897,7 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    Int_t  strip_number     = 0;
    Int_t  id_side          = 0;
    Int_t  id_wafer         = 0;
-   Int_t  count            = 0;
+   Int_t  count            = 1;
    Int_t  data             = 0;
    Int_t  wafer            = 0;
    Int_t  strip            = 0;
@@ -923,7 +910,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    UInt_t errorcode        = 0;	// CMN algorithm error code.
  
    LOG_DEBUG << "Current Event data length : " << vallength << endm;
-   //St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");
    spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
 
    if (!spa_strip) {
@@ -932,7 +918,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    }
 
    spa_strip_st  out_strip;
-   count = 1;
    //grab ladder and side
    FindLadderSide(mRDO, channel, ladder, id_side); //convert channel to real Ladder number and side
 
@@ -1026,8 +1011,6 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
          LOG_DEBUG << "Make()/  spa_strip->NRows= " << spa_strip->GetNRows() << endm;
       }
    }
-
-   //delete spa_strip;
 }
 
 //-------------------------------------------------
@@ -1182,14 +1165,11 @@ void StSstDaqMaker::FillDefaultNoiseTable()
 //------------------------------------------------
 void StSstDaqMaker::FillChipNoiseTable(sstChipCorrect_st *chipCorrectTable){
   int side=0,ladder=0,wafer=0,chip=0;
-  //mChipCorrect = (St_sstChipCorrect*)GetDataBase("Calibrations/sst/sstChipCorrect");
-  //if(mChipCorrect){
   LOG_DEBUG<<"New ChipNoiseTable was used! "<<endm;
   int totChipSst       = nSstSide*nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
   int totChipSstSide   = nSstLadder*nSstWaferPerLadder*nSstChipPerWafer;
   int totChipSstLadder = nSstWaferPerLadder*nSstChipPerWafer;
   
-  //sstChipCorrect_st *g  = mChipCorrect->GetTable() ;
   for(Int_t i=0; i<totChipSst;i++){
     side   = i/totChipSstSide;
     ladder = (i - side*totChipSstSide)/totChipSstLadder;
