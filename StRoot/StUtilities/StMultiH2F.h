@@ -20,7 +20,7 @@ class StMultiH2F : public TH3F {
   StMultiH2F();
   StMultiH2F(const char *name,const char *title,Int_t nbinsx,Axis_t xlow,
 	     Axis_t xup,Int_t nbinsy,Axis_t ylow,Axis_t yup,Int_t nbinsz);
-  virtual ~StMultiH2F() {}
+  virtual ~StMultiH2F();
   virtual        void Draw(Option_t *option="");
   // Probably only the "box" and "cont" options are reasonable here
   virtual        void Draw3F(Option_t *option="") { TH3F::Draw(option); } // access inherited
@@ -39,16 +39,21 @@ class StMultiH2F : public TH3F {
   virtual        TH1* Rebin(Int_t ngroup, const char* newname, const Double_t* xbins)
                               { SetNames(ngroup, newname); return 0; }
   virtual        void SavePrimitive(std::ostream& out, Option_t* option = "");
+  virtual       TH2D* GetSubHist(Int_t zbin) { return (subHists ? subHists[zbin] : 0); }
  protected:
   TString names[StMultiH2FMaxBins];
   virtual       TH2D* XYProjection(const char* name, Int_t zbin=-1);
-  ClassDef(StMultiH2F,1)
+  TH2D** subHists; //!
+  ClassDef(StMultiH2F,2)
 };
 
 #endif
 
-// $Id: StMultiH2F.h,v 1.5 2013/11/22 16:48:39 genevb Exp $
+// $Id: StMultiH2F.h,v 1.6 2016/05/27 18:02:41 genevb Exp $
 // $Log: StMultiH2F.h,v $
+// Revision 1.6  2016/05/27 18:02:41  genevb
+// Garbage collection (Coverity), remove unnecessary ROOT types
+//
 // Revision 1.5  2013/11/22 16:48:39  genevb
 // Access to inherited Draw() functions
 //

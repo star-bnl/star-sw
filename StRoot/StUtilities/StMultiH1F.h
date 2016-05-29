@@ -21,7 +21,7 @@ class StMultiH1F : public TH2F {
 	     Axis_t xup,Int_t nbinsy);
   StMultiH1F(const char *name,const char *title,Int_t nbinsx,Double_t *xbins,
 	     Int_t nbinsy);
-  virtual ~StMultiH1F() {}
+  virtual ~StMultiH1F();
   virtual        void Draw(Option_t *option="");
   virtual        void Draw2F(Option_t *option="") { TH2F::Draw(option); } // access inherited
   virtual        void SetNames(Int_t   ybin, const char* name)
@@ -42,17 +42,24 @@ class StMultiH1F : public TH2F {
   virtual    Double_t GetNonZeroMinimum() const;
   virtual    Double_t GetNonZeroMaximum() const;
   virtual        void SavePrimitive(std::ostream& out, Option_t* option = "");
+  virtual       TH1F* GetSubHist(Int_t ybin) { return (subHists ? subHists[ybin] : 0); }
+  virtual       TH1F* GetAHist() { return aHist; }
  protected:
   TString names[StMultiH1FMaxBins];
   Float_t fMOffset;
   virtual       TH1F* XProjection(const char* name, Int_t ybin=-1);
-  ClassDef(StMultiH1F,1)
+  TH1F** subHists; //!
+  TH1F*  aHist;    //!
+  ClassDef(StMultiH1F,2)
 };
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.10 2013/11/22 16:48:39 genevb Exp $
+// $Id: StMultiH1F.h,v 1.11 2016/05/27 18:02:41 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.11  2016/05/27 18:02:41  genevb
+// Garbage collection (Coverity), remove unnecessary ROOT types
+//
 // Revision 1.10  2013/11/22 16:48:39  genevb
 // Access to inherited Draw() functions
 //

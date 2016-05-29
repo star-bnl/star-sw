@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.cc,v 1.9 2016/05/26 15:15:30 dmitry Exp $
+ * $Id: StDbXmlWriter.cc,v 1.10 2016/05/27 16:26:23 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.cc,v $
+ * Revision 1.10  2016/05/27 16:26:23  dmitry
+ * more coverity
+ *
  * Revision 1.9  2016/05/26 15:15:30  dmitry
  * unused variable in unused code - commented out
  *
@@ -107,7 +110,7 @@ StDbXmlWriter::ioTable(StDbTable* table){
     endAccessor();
 
     int k;
-    int nrows;
+    int nrows = 1;
 //    int* elements = table->getElementID(nrows);
 
 //    if(!elements){
