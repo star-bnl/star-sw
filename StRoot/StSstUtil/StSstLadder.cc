@@ -1,6 +1,9 @@
-//$Id: StSstLadder.cc,v 1.5 2015/07/21 14:27:43 bouchet Exp $
+//$Id: StSstLadder.cc,v 1.6 2016/05/29 19:35:06 bouchet Exp $
 //
 //$Log: StSstLadder.cc,v $
+//Revision 1.6  2016/05/29 19:35:06  bouchet
+//coverity : CTOR_DTOR_LEAK fixed
+//
 //Revision 1.5  2015/07/21 14:27:43  bouchet
 //removed unused variable ; cleanup
 //
@@ -46,10 +49,8 @@ StSstLadder::StSstLadder(Int_t rLadderNumb,Int_t rSstLayer,Int_t rNWaferPerLadde
     }
 }
 
-StSstLadder::~StSstLadder()
-{
-  for (Int_t iWaf = 0 ; iWaf < mNWaferPerLadder ; iWaf++)
-    delete mWafers[iWaf];
+StSstLadder::~StSstLadder(){
+  delete [] mWafers;
 }
 
 void StSstLadder::initWafers(St_sstWafersPosition *Position)
