@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.5 2016/05/27 15:21:13 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.6 2016/05/29 19:34:51 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.6  2016/05/29 19:34:51  bouchet
+//coverity : CTOR_DTOR_LEAK fixed
+//
 //Revision 1.5  2016/05/27 15:21:13  bouchet
 //cleanup cout
 //
@@ -117,7 +120,10 @@ StSstBarrel::StSstBarrel(sstDimensions_st  *dimensions, sstConfiguration_st *con
   }
 }
 //________________________________________________________________________________
-StSstBarrel::~StSstBarrel(){for (Int_t iLad = 0 ; iLad < mNLadder; iLad++) delete mLadders[iLad]; fSstBarrel = 0;}
+StSstBarrel::~StSstBarrel(){
+  delete [] mLadders;
+  fSstBarrel = 0;
+}
 //________________________________________________________________________________
 void StSstBarrel::setSstParameters(sstDimensions_st *geom_par){
   mDimensions          = geom_par;
