@@ -1,6 +1,9 @@
-//$Id: StSstPointList.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstPointList.cc,v 1.2 2016/05/30 21:44:30 bouchet Exp $
 //
 //$Log: StSstPointList.cc,v $
+//Revision 1.2  2016/05/30 21:44:30  bouchet
+//coverity : RESOURCE_LEAK fixed in exchangePoints method
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -121,63 +124,10 @@ Int_t StSstPointList::removePoint(StSstPoint *ptr)
 
 void StSstPointList::exchangeTwoPoints(StSstPoint *ptr1,StSstPoint *ptr2)
 {
-  
-  StSstPoint *ptrTemp = ptr1->giveCopy();
-
-  Int_t i =0;
-
-  ptr1->setFlag(ptr2->getFlag()) ;
-  ptr1->setNPoint(ptr2->getNPoint()) ;
-  ptr1->setNCluster(ptr2->getNCluster()) ;
-  ptr1->setNMatched(ptr2->getNMatched());
-  for (i = 0; i < 5; i++)
-    ptr1->setNMchit(ptr2->getNMchit(i),i);
-  ptr1->setNWafer(ptr2->getNWafer());
-  for (i = 0; i < 3; i++)
-    { 
-      ptr1->setXg(ptr2->getXg(i),i);
-      ptr1->setXl(ptr2->getXl(i),i);
-    }
-  for (i = 0; i < 2; i++)
-    { 
-      ptr1->setDe(ptr2->getDe(i),i);
-    }
-
-  /*
-  ptr2->setFlag(ptr1->getFlag()) ;
-  ptr2->setNPoint(ptr1->getNPoint()) ;
-  ptr2->setNCluster(ptr1->getNCluster()) ;
-  ptr2->setNMatched(ptr1->getNMatched());
-  for (i = 0; i < 5; i++)
-    ptr2->setNMchit(ptr1->getNMchit(i),i);
-  ptr2->setNWafer(ptr1->getNWafer());
-  for (i = 0; i < 3; i++)
-    { 
-      ptr2->setXg(ptr1->getXg(i),i);
-      ptr2->setXl(ptr1->getXl(i),i);
-    }
-  for (i = 0; i < 2; i++)
-    {
-      ptr1->setDe(ptr2->getDe(i),i);
-    }
-  */
-  
-  ptr2->setFlag(ptrTemp->getFlag()) ;
-  ptr2->setNPoint(ptrTemp->getNPoint()) ;
-  ptr2->setNCluster(ptrTemp->getNCluster()) ;
-  ptr2->setNMatched(ptrTemp->getNMatched());
-  for (i = 0; i < 5; i++)
-    ptr2->setNMchit(ptrTemp->getNMchit(i),i);
-  ptr2->setNWafer(ptrTemp->getNWafer());
-  for (i = 0; i < 3; i++)
-    { 
-      ptr2->setXg(ptrTemp->getXg(i),i);
-      ptr2->setXl(ptrTemp->getXl(i),i);
-    }
-  for (i = 0; i < 2; i++)
-    {
-      ptr2->setDe(ptrTemp->getDe(i),i);
-    }  
+  StSstPoint *ptrTemp = ptr1;
+  ptr1 = ptr2;
+  ptr2 = ptrTemp;
+  delete ptrTemp;
 }
 
 StSstPointList* StSstPointList::addPointList(StSstPointList *list)
