@@ -1,6 +1,9 @@
-//$Id: StSstPackage.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstPackage.cc,v 1.3 2016/05/30 21:43:07 bouchet Exp $
 //
 //$Log: StSstPackage.cc,v $
+//Revision 1.3  2016/05/30 21:43:07  bouchet
+//coverity : RESOURCE_LEAK fixed in exchange method
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -233,26 +236,11 @@ Int_t StSstPackage::removeMatched(StSstCluster *ptr)
 
 void StSstPackage::exchangeTwoMatcheds(StSstCluster *ptr1, StSstCluster *ptr2)
 {
-  StSstCluster *ptrTmp = ptr1->giveCopy();
-
-  ptr1->setNCluster(ptr2->getNCluster()) ;
-  ptr1->setFirstStrip(ptr2->getFirstStrip()) ;
-  ptr1->setClusterSize(ptr2->getClusterSize());
-  ptr1->setTotAdc(ptr2->getTotAdc());
-  ptr1->setFirstAdc(ptr2->getFirstAdc());
-  ptr1->setLastAdc(ptr2->getLastAdc());
-  ptr1->setTotNoise(ptr2->getTotNoise());
-  ptr1->setFlag(ptr2->getFlag());
-
-  ptr2->setNCluster(ptrTmp->getNCluster()) ;
-  ptr2->setFirstStrip(ptrTmp->getFirstStrip()) ;
-  ptr2->setClusterSize(ptrTmp->getClusterSize());
-  ptr2->setTotAdc(ptrTmp->getTotAdc());
-  ptr2->setFirstAdc(ptrTmp->getFirstAdc());
-  ptr2->setLastAdc(ptrTmp->getLastAdc());
-  ptr2->setTotNoise(ptrTmp->getTotNoise());
-  ptr2->setFlag(ptrTmp->getFlag());
-
+  StSstCluster *ptrTemp = new StSstCluster(ptr1->getNCluster());
+  ptr1->copyTo(ptrTemp);
+  ptr2->copyTo(ptr1);
+  ptrTemp->copyTo(ptr2);
+  delete ptrTemp;
 }
 
 void StSstPackage::sortMatched()
