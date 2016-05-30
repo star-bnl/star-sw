@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.6 2016/05/30 21:39:21 bouchet Exp $
+//$Id: StSstWafer.cc,v 1.7 2016/05/30 23:52:22 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.7  2016/05/30 23:52:22  bouchet
+//forget cleanup at previous commit
+//
 //Revision 1.6  2016/05/30 21:39:21  bouchet
 //coverity : FORWARD_NULL fixed ; cleanup + simplified method
 //
@@ -403,31 +406,14 @@ Does the loretnz shift of the mean strip of the cluster
  */
 void StSstWafer::doLorentzShift(sstDimensions_st *dimensions,Float_t mShift_hole,Float_t mShift_elec)
 {
-  //Int_t iSide = 0;
-  //side P
   Float_t pitch = dimensions[0].stripPitch;
+  //side P
   doLorentzShiftSide(mShift_hole, pitch, mClusterP);
   //side N
   doLorentzShiftSide(mShift_elec, pitch, mClusterN);
-  //iSide = 1;
-  //doLorentzShiftSide(iSide,mShift_elec,dimensions);
 }
 //___________________________________________________________________________________________
 void StSstWafer::doLorentzShiftSide(Float_t shift,Float_t pitch, StSstClusterList *currentList){
-  //StSstClusterList *CurrentClusterList = new StSstClusterList();
-  //Float_t pitch = dimensions[0].stripPitch;
-  /*
-    switch (side)
-    {
-    case 0:
-    CurrentClusterList =  mClusterP;
-    break;
-    case 1:
-    CurrentClusterList =  mClusterN;
-    break;
-    }
-    if(CurrentClusterList->getSize()>0) {
-  */
   Int_t iCluster = 0;
   StSstCluster *CurrentCluster = currentList->first();
     for(iCluster = 0 ; iCluster < currentList->getSize(); iCluster++){   
