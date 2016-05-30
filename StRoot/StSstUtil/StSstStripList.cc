@@ -1,6 +1,9 @@
-//$Id: StSstStripList.cc,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstStripList.cc,v 1.3 2016/05/30 21:40:29 bouchet Exp $
 //
 //$Log: StSstStripList.cc,v $
+//Revision 1.3  2016/05/30 21:40:29  bouchet
+//coverity : REVERSE_INULL fixed
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -215,7 +218,14 @@ int* StSstStripList::getListAdc(Int_t idStrip, Int_t sizeCluster)
 {
   StSstStrip *CurrentStrip = first();
   int* localListAdc = new int[sizeCluster];
-  while((CurrentStrip->getNStrip()!=idStrip)&&(CurrentStrip)) CurrentStrip = next(CurrentStrip);
+  while(CurrentStrip){
+    if(CurrentStrip->getNStrip() == idStrip){
+      break;
+    }
+    if(CurrentStrip!=last()){
+      CurrentStrip = next(CurrentStrip);
+    }
+  }
   if (!CurrentStrip) return localListAdc;
   Int_t iStrip = 0;
   for (iStrip=0; iStrip<sizeCluster;iStrip++) 
