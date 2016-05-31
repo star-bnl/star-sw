@@ -237,7 +237,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       else if (Opt.Contains("He3",TString::kIgnoreCase))      {ID = 49; mass = 2.80925;}
       else if (Opt.Contains("alpha",TString::kIgnoreCase))    {ID = 47; mass = 3.727;}
       else if (Opt.Contains("phi",TString::kIgnoreCase))      {ID = 10151; mass = 1.0194; NTRACK = 1; pTmin = 0.010, pTmax = 2.000;}
-      if (Opt.Contains("MIP",TString::kIgnoreCase))           {pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 5;}
+      if (Opt.Contains("MIP",TString::kIgnoreCase))           { pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 5;}
+      if (Opt.Contains("MIP1",TString::kIgnoreCase))          {NTRACK = 5;pTmin = 0.2; pTmax = 0.5; bgMin = 3; bgMax = 5;}
       if (Opt.Contains("1GeV",TString::kIgnoreCase))          {pTmin = pTmax = 1.0;}
       if (Opt.Contains("0.5GeV",TString::kIgnoreCase))        {pTmin = pTmax = 0.5;}
       if (Opt.Contains("50",TString::kIgnoreCase))            {NTRACK =   50;}
