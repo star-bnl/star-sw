@@ -41,11 +41,9 @@ public:
 
    Int_t maskChip(Int_t side, Int_t ladder, Int_t wafer, Int_t chip) const; 
    void  setMaskChips(sstMaskChip_st *maskChipTable);
-
    St_sstWafersPosition  *m_positions;//!
-
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.10 2015/08/03 13:07:20 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.11 2016/05/31 21:51:59 bouchet Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
