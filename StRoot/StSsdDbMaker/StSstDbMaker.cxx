@@ -1,6 +1,9 @@
-//$Id: StSstDbMaker.cxx,v 1.20 2015/08/03 13:07:20 bouchet Exp $
+//$Id: StSstDbMaker.cxx,v 1.21 2016/05/31 21:51:49 bouchet Exp $
 //
 //$Log: StSstDbMaker.cxx,v $
+//Revision 1.21  2016/05/31 21:51:49  bouchet
+//coverity : UNINIT_CTOR (m_positions)
+//
 //Revision 1.20  2015/08/03 13:07:20  bouchet
 //getSstDimensions() returns the table data, not the structure
 //
@@ -47,7 +50,7 @@ ClassImp(StSstDbMaker)
 //_____________________________________________________________________________
   StSstDbMaker::StSstDbMaker(const char *name):
     StMaker(name), mySst(0), dimensions(0), config(0), ctrl(0), mode(0),
-    mReady(kStErr)
+    mReady(kStErr),m_positions(0)
 {
   gStSstDbMaker = this;
 }
