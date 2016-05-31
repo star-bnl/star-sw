@@ -41,8 +41,9 @@ void trig( Int_t n=1 )
     chain->Clear();
 
     // Generate 1 mu minus at high pT
-    kinematics->Kine( 1, "D0", 0.1, 0.25, -2.0, 2.0 );
+    kinematics->Kine( 1, "MyD0", 10.0, 100.0, -2.0, 2.0 );
 
+    //    kinematics->Kine( 1, "pi0", 0.5, 5 0, -2.0, 2.0 );
 
     // Generate 4 muons flat in pT and eta 
     //    kinematics->Kine(4, "mu+", 0., 5., -2.0, +2.0 );
@@ -95,6 +96,8 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // Setup RNG seed and map all ROOT TRandom here
   StarRandom::seed( rngSeed );
   StarRandom::capture();
+
+
   
   //
   // Create the primary event generator and insert it
@@ -109,6 +112,8 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 
   Kinematics();
 
+
+
   //
   // Setup decay manager
   //
@@ -119,9 +124,16 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   decayPy8->Set("WeakSingleBoson:all = on");
 
 
-  //  decayMgr->AddDecayer( 23, decayPy8 ); // Z0 decays by py8
-  //  decayMgr->AddDecayer( 24, decayPy8 ); //  W+ decays by py8
 
+
+  TString name;
+  double mass, lifetime, charge;
+  int tracktype, pdgcode, g3code;
+
+  // Particle data
+  StarParticleData& data = StarParticleData::instance();
+  //  One can add a particle to G3 using...
+  data.AddParticleToG3( "MyD0", 0.1865E+01, 0.42800E-12, 0., 3, 421, 37, 0, 0 );
 
 
 
@@ -136,19 +148,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   geometry("y2012");
   command("gkine -4 0");
   command("gfile o kinematics.starsim.fzd");
-  
-
-  //
-  // Setup PT and ETA distributions
-  //
-
-  Double_t pt0 = 3.0;
-  ptDist = new TF1("ptDist","(x/[0])/(1+(x/[0])^2)^6",0.0,10.0);
-  ptDist->SetParameter(0, pt0);
-  ptDist->Draw();
-
-  etaDist = new TF1("etaDist","-TMath::Erf(x+2.6)*TMath::Erf(x-2.6)",-0.8,+0.8);
-
+ 
   //
   // Trigger on nevents
   //

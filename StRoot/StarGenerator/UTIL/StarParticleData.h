@@ -58,6 +58,11 @@ class StarParticleData : public TObjectSet
   */
   TParticlePDG *AddParticle( const Char_t *name, const Char_t *title, Double_t mass, Bool_t Stable, Double_t Width, Double_t Charge3, const char* ParticleClass, Int_t PdgCode, Int_t Anti, Int_t geantCode );
 
+  /*!
+    Particle definition to DB and G3 
+  */
+  TParticlePDG *AddParticleToG3( const char*   name, const double mass, const double lifetime, const double charge, const int tracktype, const int pdgcode, const int g3code, const double* bratio=0, const int* mode=0 );
+  TParticlePDG *AddParticleToG3( TParticlePDG *part, const int g3code );
 
   /// Maps the particle with the given PDG id to G3 tracking ID and returns pointer to the particle data.
   TParticlePDG *SetTrackingCode( const int pdgid, const int g3id );

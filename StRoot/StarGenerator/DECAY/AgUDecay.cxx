@@ -31,21 +31,31 @@ extern "C" {
 //
 Int_t AgUDecay::operator()()
 {
-  LOG_INFO << "decay() called" << endm;
+  
+  
+  Gctrak_t& gctrak = *(geant3->Gctrak()); // kinematics of current track
+  Gcking_t& gcking = *(geant3->Gcking()); // kinematics of decay products
+  Gckin3_t& gckin3 = *(geant3->Gckin3()); // vertex of decay products
+
+  float x = gctrak.vect[0];
+  float y = gctrak.vect[1];
+  float z = gctrak.vect[2];
+
+  LOG_INFO << Form(">>> decay() called x=%f y=%f z=%f <<<",x,y,z) << endm;
   if (0==mDecayer) return 0; // no decayer registerd
 
-  //  Int_t np = 0;
+  //  int np = 0;
 
   mArray   -> Clear();
   mDecayer -> ForceDecay();
 
-  Int_t idGeant3 = geant3->Gckine()->ipart;
+  int idGeant3 = geant3->Gckine()->ipart;
 
-  Double_t pmom = Double_t( geant3->Gctrak()->vect[6] );
-  Double_t px   = Double_t( geant3->Gctrak()->vect[3] ) * pmom;
-  Double_t py   = Double_t( geant3->Gctrak()->vect[4] ) * pmom;
-  Double_t pz   = Double_t( geant3->Gctrak()->vect[5] ) * pmom;
-  Double_t E    = Double_t( geant3->Gctrak()->getot   );
+  double pmom = double( gctrak.vect[6] );
+  double px   = double( gctrak.vect[3] ) * pmom;
+  double py   = double( gctrak.vect[4] ) * pmom;
+  double pz   = double( gctrak.vect[5] ) * pmom;
+  double E    = double( gctrak.getot   );
 
   mP[0] = px; mP[1] = py; mP[2] = pz; mP[3] = E;
 
@@ -53,55 +63,74 @@ Int_t AgUDecay::operator()()
   // Long64_t idPart = StarParticleData::ConvertG3Id( idGeant3 );
 
   // Extract PDG ID from idPart
-  Int_t idPdg = pdb.GetParticleG3( idGeant3 )->PdgCode();
+  int idPdg = pdb.GetParticleG3( idGeant3 )->PdgCode();
 
   // Perform the decay
   mDecayer -> Decay( idPdg, &mP );
 
   // Retrieve the particles into the clones array
-  Int_t np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
+  int np = mDecayer -> ImportParticles( mArray ); if ( np<1 ) return np;
 
   // Flag deselected particles
-  vector<Int_t> flags(np);
+  vector<int> flags(np);
 
-  for ( Int_t i=1 /* first daughter */; i < np; i++ )
+  for ( int i=1 /* first daughter */; i < np; i++ )
     {
 
-      TParticle    *particle = (TParticle *)mArray->At(i);
-      Int_t         first    = particle->GetFirstDaughter();
-      Int_t         last     = particle->GetLastDaughter();
-      Int_t         pdgid    = particle->GetPdgCode();
-      Int_t         status   = particle->GetStatusCode();
+      TParticle    *particle    = (TParticle *)mArray->At(i);
+      int           first       = particle->GetFirstDaughter();
+      int           last        = particle->GetLastDaughter();
+      int           pdgid       = particle->GetPdgCode();
+      int           status      = particle->GetStatusCode();
       TParticlePDG *particlePDG = pdb.GetParticle(pdgid); 
-      Int_t         g3id        = particlePDG->TrackingCode();
-
-
-      // LOG_INFO << "-- particle i= " << i 
-      // 	       << " first=" << first 
-      // 	       << " last=" << last
-      // 	       << " -----------------------------------" << endm;
-      // particlePDG->Print();
+      int           g3id        = particlePDG->TrackingCode();
 
       // If the particle has been deselected skip and deselect its daughters as well
       if ( 1 == flags[i] )
       	{
-      	  if (first>0) for ( Int_t j=first-1;j<last;j++ ) flags[j]=1;
+      	  if (first>0) for ( int j=first-1;j<last;j++ ) flags[j]=1;
       	  continue;
       	}
+
+      // If the particle is not known to G3 we skip it, and make sure the daughters
+      // are selected... or we add it to the database dynamically
+      if ( 0 == g3id ) 
+	{
+
+	  //
+	  // kDecay Policy -- On discovery of unknown G3 id, push the daughters onto the stack
+	  //
+	  if ( kDecay == mDiscovery ) 
+	    {
+	      if (first>0) for ( int j=first-1;j<last;j++ ) flags[j]=0;
+	      continue;
+	    }
+
+	  //
+	  // kSpawn Policy -- On discovery of unknown G3 id, add the particle state
+	  //
+	  else if ( kSpawn == mDiscovery ) 
+	    {
+	      pdb.AddParticleToG3( particlePDG, mNextG3id++ ); assert(mNextG3id < 60000);
+	    }
+
+
+	}
+
 
       // Long lived particles are stacked for further tracking.  
       if ( 1 != status )
       	{
-      	  Double_t lifetime = mDecayer->GetLifetime(pdgid); 
-      	  if ( true /* lifetime > Double_t( 1.0E-15 ) */ )
+      	  double lifetime = mDecayer->GetLifetime(pdgid); 
+      	  if ( true /* lifetime > double( 1.0E-15 ) */ )
       	    {
       	      // Particle is stacked, skip daughters
-      	      if (first>0) for (Int_t j=first;j<=last;j++ ) flags[j]=1;
-      	      LOG_INFO << "Stack particle, skip daughters tlife=" << lifetime 
-      		       << " first=" << first 
-      		       << " last=" << last
-      		       << endm;
-      	      particlePDG->Print();
+      	      if (first>0) for (int j=first;j<=last;j++ ) flags[j]=1;
+      	      // LOG_INFO << "Stack particle, skip daughters tlife=" << lifetime 
+      	      // 	       << " first=" << first 
+      	      // 	       << " last=" << last
+      	      // 	       << endm;
+      	      // particlePDG->Print();
       	    }
       	  else if (first>0)
       	    {
@@ -122,25 +151,27 @@ Int_t AgUDecay::operator()()
       if ( pdgid == 14 || pdgid == -14 ){ flags[i]=1; continue; }
       if ( pdgid == 16 || pdgid == -16 ){ flags[i]=1; continue; }
 
+
+
       // This is the current stack position
-      Int_t &index = geant3->Gcking()->ngkine;
+      int &index = gcking.ngkine;
 
       // Throw particle on the stack
-      (geant3->Gcking()->gkin[index][0]) = particle->Px();
-      (geant3->Gcking()->gkin[index][1]) = particle->Py();
-      (geant3->Gcking()->gkin[index][2]) = particle->Pz();
-      (geant3->Gcking()->gkin[index][3]) = particle->Energy();
+      (gcking.gkin[index][0]) = particle->Px();
+      (gcking.gkin[index][1]) = particle->Py();
+      (gcking.gkin[index][2]) = particle->Pz();
+      (gcking.gkin[index][3]) = particle->Energy();
 
-      (geant3->Gcking()->gkin[index][4]) = Float_t(g3id);
-      particlePDG->Print();
+      (gcking.gkin[index][4]) = float(g3id);
+      //      particlePDG->Print();
 
       // Decay vertex
-      (geant3->Gckin3()->gpos[index][0]) = geant3->Gctrak()->vect[0];
-      (geant3->Gckin3()->gpos[index][1]) = geant3->Gctrak()->vect[1];
-      (geant3->Gckin3()->gpos[index][2]) = geant3->Gctrak()->vect[2];
+      (gckin3.gpos[index][0]) = gctrak.vect[0];
+      (gckin3.gpos[index][1]) = gctrak.vect[1];
+      (gckin3.gpos[index][2]) = gctrak.vect[2];
 
       // time of flight offset (mm)... (huh?)
-      (geant3->Gcking()->tofd[index])    = 0.;
+      (gcking.tofd[index])    = 0.;
 
       // And increase stack counter
       index++;
@@ -152,7 +183,9 @@ Int_t AgUDecay::operator()()
 
 AgUDecay::AgUDecay() : mDecayer( 0 ), 
 		       mArray( new TClonesArray("TParticle",1000) ), 
-		       mP()
+		       mP(),
+		       mDiscovery( kDecay ),
+		       mNextG3id( 12345 ) // dynamic G3 id
 {
 
 }
