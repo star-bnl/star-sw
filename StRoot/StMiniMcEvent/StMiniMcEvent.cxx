@@ -7,7 +7,6 @@
 
 #include "Stiostream.h"
 
-Int_t StMiniMcEvent::mSFirst=1; 
 ClassImp(StMiniMcEvent)
 
 //___________________
@@ -52,7 +51,14 @@ StMiniMcEvent::StMiniMcEvent() :
     mNSplitPair(0),
     mNGhostPair(0),
     mNContamPair(0),
-    mNMatGlobPair(0)
+    mNMatGlobPair(0),
+    mMcTracks(0),
+    mMatchedPairs(0),
+    mMergedPairs(0),
+    mSplitPairs(0),
+    mGhostPairs(0), 
+    mContamPairs(0),
+    mMatGlobPairs(0)
 {
   cout << "###StMiniMcEvent::StMiniMcEvent()" << endl;
   //
@@ -70,19 +76,18 @@ StMiniMcEvent::StMiniMcEvent() :
   const Int_t nGhostPair   = 500;
   const Int_t nContamPair  = 500;
   const Int_t nMatGlobPair = 6000;
-  if(mSFirst){ 
+  if(! mMcTracks){ 
     cout << "\tCreating the clones arrays" << endl;
-    mSFirst = 0; // flag so we dont create any more arrays;
+    mMcTracks     = new TClonesArray("StTinyMcTrack",nMcTrack);
+    mMatchedPairs = new TClonesArray("StMiniMcPair",nMatchedPair);
+    mMergedPairs  = new TClonesArray("StMiniMcPair",nMergedPair);
+    mSplitPairs   = new TClonesArray("StMiniMcPair",nSplitPair);
+    
+    mGhostPairs   = new TClonesArray("StMiniMcPair",nGhostPair);
+    mContamPairs  = new TClonesArray("StContamPair",nContamPair); 
+    mMatGlobPairs = new TClonesArray("StMiniMcPair",nMatGlobPair);
+    memset (mVertexCovMatrix, 0, 6*sizeof(Float_t));
   }
-  mMcTracks     = new TClonesArray("StTinyMcTrack",nMcTrack);
-  mMatchedPairs = new TClonesArray("StMiniMcPair",nMatchedPair);
-  mMergedPairs  = new TClonesArray("StMiniMcPair",nMergedPair);
-  mSplitPairs   = new TClonesArray("StMiniMcPair",nSplitPair);
-  
-  mGhostPairs   = new TClonesArray("StMiniMcPair",nGhostPair);
-  mContamPairs  = new TClonesArray("StContamPair",nContamPair); 
-  mMatGlobPairs = new TClonesArray("StMiniMcPair",nMatGlobPair);
-  memset (mVertexCovMatrix, 0, 6*sizeof(Float_t));
 }
 
 //__________________

@@ -196,7 +196,6 @@ private:
   TClonesArray* mGhostPairs; 
   TClonesArray* mContamPairs;
   TClonesArray* mMatGlobPairs;
-  static Int_t mSFirst; //!
 
   ClassDef(StMiniMcEvent,5)
 };
