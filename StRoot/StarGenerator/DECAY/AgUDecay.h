@@ -29,6 +29,15 @@ public:
 
   Int_t operator()();
 
+  enum DiscoveryPolicy_t 
+    {
+      kDecay = 0, // Decayer handles the decay (may miss materials)
+      kSpawn      // Add particle to G3 and DB      
+    };
+
+  void SetDiscovery( DiscoveryPolicy_t p ){ mDiscovery = p; }
+    
+ 
 private:
 protected:
 
@@ -39,6 +48,9 @@ protected:
   StarDecayManager *mDecayer;
   TClonesArray *mArray;
   TLorentzVector mP;
+
+  DiscoveryPolicy_t mDiscovery;
+  int mNextG3id;
 
   ClassDef(AgUDecay,1);
 };
