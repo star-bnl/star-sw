@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.2 2016/05/21 02:38:21 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.3 2016/06/01 01:06:33 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -85,9 +85,15 @@ Int_t StXTrakMaker::Finish()
 //_____________________________________________________________________________
 Int_t StXTrakMaker::Init()
 {
-  mELoss = new StvELossTrak;
-  mELoss->Reset(1);
-  mMyMag = new MyMag;
+  mSwim = new TGeoSwim;
+  TGeoSwimMag  *myMag  = new MyMag;
+  TGeoSwimLoss *myLoss = new MyLoss;
+  mSwim->Set(myMag,myLoss,0);
+  mSwim->Set(400.,-400.,400.,5.);
+  mELoss=0;mMyMag=0;
+//   mELoss = new StvELossTrak;
+//   mELoss->Reset(1);
+//   mMyMag = new MyMag;
 
   return StMaker::Init();
 }
@@ -104,13 +110,15 @@ static const char* farDets[]={
 
 static const double EC = 2.99792458e-3;
 
+  auto *myMag = mSwim->GetMag();
   double B[3];
   static double B00=0;
   if (B00<=0) { 
     double pos[3]={0};
-    (*mMyMag)(pos,B);
+    (*myMag)(pos,B);
     B00=B[2];
   }
+
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (!event) return kStWarn;
   const StVertex *vtx=0;
@@ -124,7 +132,6 @@ static const double EC = 2.99792458e-3;
   int iend=0,nFound=0;
   const StSPtrVecTrackNode& nodes= event->trackNodes();
   int nNodes = nodes.size();
-  TGeoSwim swim;
   for (int iNode = 0;iNode <nNodes; iNode++) {
     vtx = 0;
     double maxStep = 0;
@@ -179,8 +186,8 @@ static const double EC = 2.99792458e-3;
     myDir = STDIR.xyz();
     P  = STMOM.mag(); p = P;
     Pt = STMOM.perp(); pt = Pt;
-    double Eta = stmom.pseudoRapidity();
-    double Phi = stmom.phi()*57.;
+//     double Eta = stmom.pseudoRapidity();
+//     double Phi = stmom.phi()*57.;
     memcpy(pos,myPos,sizeof(pos));
     memcpy(dir,myDir,sizeof(dir));
     memcpy(POS,myPos,sizeof(pos));
@@ -188,7 +195,8 @@ static const double EC = 2.99792458e-3;
     double rxyPre = 0;
     int found = 0,oldFound = 0;
 
-    (*mMyMag)(pos,B);
+//   (*mMyMag)(pos,B);
+     (*myMag)(pos,B);
 //		Loop over volumes
     int iVol = 0;
     for ( iVol=0; iVol<1000;iVol++) {
@@ -200,25 +208,30 @@ static const double EC = 2.99792458e-3;
 
       const TGeoMaterial *gmate=0;
       TString path;
-      double maxLen = 10;
+      double maxLen = 5;
 
 //	Loop inside one volume with big ELoss
 
       do {
-        swim.Set(pos,dir,curv);
-        gmate = swim.GetMate();
+        mSwim->Set(pos,dir,curv);
+        gmate = mSwim->GetMate();
         if (!gmate) {iend = 11; break;}
-	iend = swim.Swim(maxLen);
+	iend = mSwim->Swim(maxLen);
 	if (iend>1) {printf("End=%d\n",iend); break; }
-        path = swim.GetPath();
-	inLen = swim.GetLen(0);
-	otLen = swim.GetLen(1);
-
+        path = mSwim->GetPath();
+	inLen = mSwim->GetLen(0);
+	otLen = mSwim->GetLen(1);
+        dP = 0;
+#if 0	
+        dP = (*myLoss)(gmate,p,otLen);
+#endif
 #ifdef StvELoss
         mELoss->Reset(1);
         mELoss->Set(gmate,p);
+
+
 #endif
-#ifndef StvELoss
+#ifdef StiELoss
       double A = gmate->GetA(),Z=gmate->GetZ(),D=gmate->GetDensity();
 //    double X0=gmate->GetRadLen();
       StiElossCalculator ecal(Z/A,0,A,Z,D);
@@ -234,10 +247,10 @@ static const double EC = 2.99792458e-3;
     }while(0);
 
 //		We got new position
-    if (iend) StiDebug::Count("Ens:Rxy",rxy,iend);
+    if (iend) StiDebug::Count("End:Rxy",rxy,iend);
     if (iend) break;
-    myPos = swim.GetPos(1);
-    myDir = swim.GetDir(1);
+    myPos = mSwim->GetPos(1);
+    myDir = mSwim->GetDir(1);
     rxy = sqrt(myPos[0]*myPos[0]+myPos[1]*myPos[1]);
     memcpy(pos,myPos,sizeof(pos));
     memcpy(dir,myDir,sizeof(dir));
@@ -254,7 +267,7 @@ static const double EC = 2.99792458e-3;
     double lenxy2 = cosTh2*otLen*otLen;
     double lenxy = cosTh*otLen;
 
-    (*mMyMag)(pos,B);
+    (*myMag)(pos,B);
     double dc = -B[2]*CHARGE/pt -curv;
     double dphi = dc*lenxy /2.;
     double dh   = dc*lenxy2/6.;
@@ -266,18 +279,18 @@ static const double EC = 2.99792458e-3;
     double cosPhi = dir[0]; if (cosPhi){}
     dir[0] += -dir[1]*dphi;
     dir[1] +=  dir[0]*dphi;
-
     rxy = sqrt(pos[0]*pos[0]+pos[1]*pos[1]);
     if (rxy<400 && fabs(B[2]/B00)>1e-3) {
       StiDebug::Count("Br/Bz:Rxy",rxy   ,sqrt(B[0]*B[0]+B[1]*B[1])/B[2]);
       StiDebug::Count("Br/Bz:Z"  ,pos[2],sqrt(B[0]*B[0]+B[1]*B[1])/B[2]);
       StiDebug::Count("Bz:Rxy)"    ,rxy,B[2]/B00);
     }
-
+    dP = mSwim->GetPLoss();
+    dPtot += dP;
 static int pri=0;
 if (pri)
       printf("%6d - Rxy = %g(%g %g) \tName=%s/%s\n",iVol,rxy,inLen,dP/p
-            ,swim.GetNode(1)->GetName()
+            ,mSwim->GetNode(1)->GetName()
             ,path.Data());
 
       if (rxy>kRxyMax) 	break;
@@ -293,12 +306,10 @@ if (pri)
 	    THelixTrack hlx(STPOS.xyz(),STMOM.xyz(),CURV);
 	    double dist = (stpos-StThreeVectorD(pos)).mag();
 	    hlx.Move(dist);
-	    double dca = hlx.Dca(pos);
+	    dca = hlx.Dca(pos);
 
 
 	    lenTofOt = hlx.Path(pos)+dist;
-	  //  if (dca<0.05) continue;
-	  //  if (fabs(pos[2])>200) continue;
 	    if (iprim) {
               int i = path.Index("RefSys");
               if (i>=0) {path.Remove(0,i+9);}
@@ -316,12 +327,24 @@ if (pri)
 	      StiDebug::Count("PriPLoss:Z",pos[2],dPtot);
 	      StiDebug::Count("PriPLoss:Ptin",1./pt, dPtot);
 	      StiDebug::Count("LenInnRes:Z",pos[2],lenTofIn-lenStTr);
+
               ts="PriDca:Z_";  ts+=farDets[found-1];
 	      StiDebug::Count(ts.Data(),pos[2], dca);
+              ts="PriDca:Rxy_";  ts+=farDets[found-1];
+	      StiDebug::Count(ts.Data(),rxy, dca);
+
               ts="LenOutRes:Z_";
 	      StiDebug::Count(ts.Data(),pos[2],lenTofOt-lenExt);
 	      ts+=farDets[found-1]; 
 	      StiDebug::Count(ts.Data(),pos[2],lenTofOt-lenExt);
+              ts="LenOutRes:Rxy_";ts+=farDets[found-1]; 
+	      StiDebug::Count(ts.Data(),rxy,lenTofOt-lenExt);
+              ts="PLoss:Rxy_";ts+=farDets[found-1]; 
+	      StiDebug::Count(ts.Data(),rxy,dPtot);
+              ts="PLoss:Z_";ts+=farDets[found-1]; 
+	      StiDebug::Count(ts.Data(),pos[2],dPtot);
+
+
 
 	    } else {
 	    }
@@ -334,18 +357,3 @@ if (pri)
   return kStOK;
 }
 
-#include "StarMagField/StarMagField.h"
-//______________________________________________________________________________
-/*! Calculates mag field 
-  Field is calcualated via StarMagField class 
-*/
-void MyMag::operator()(const double x[3],double b[3]) const
-{
-  
-static const double EC = 2.99792458e-4;
-static StarMagField *magf = StarMagField::Instance();
-     magf->BField(x,b);
-     b[0]*=EC;
-     b[1]*=EC;
-     b[2]*=EC;
-}
