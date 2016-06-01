@@ -1091,6 +1091,7 @@ void l4Builder::event(daqReader *rdr)
 		hBesGoodVertexXY->Fill(vertX, vertY);
 		hBesGoodVertexZ->Fill(vertZ);
 		hBesGoodVr->Fill(vertR);
+		hBesGoodVrVsVz->Fill(vertZ,vertR);
 	}
 
 	//HLTGood2
@@ -2382,6 +2383,12 @@ void l4Builder::defineBesGoodPlots()
 	ph = new PlotHisto();
 	ph->histo = hBesGoodprimaryMult;
 	BesGoodPlots[index]->addHisto(ph);
+
+	index++; //4
+	hBesGoodVrVsVz = new TH2D("BesGood_VrVsVz","BesGood_VrVsVz",1000,-150,150,400,0,10);
+        ph = new PlotHisto();
+        ph->histo = hBesGoodVrVsVz;
+        BesGoodPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineHLTGood2Plots()
@@ -3361,6 +3368,8 @@ void l4Builder::setAllPlots()
 	hMeanDcaXy->SetLabelSize(0.04, "X");
 	hBesGoodVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
 	hBesGoodVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+	hBesGoodVrVsVz->GetXaxis()->SetTitle("VertexZ (cm)");
+	hBesGoodVrVsVz->GetYaxis()->SetTitle("VertexR (cm)");
 	hBesGoodVertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
 	//hBesGoodVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
 	hBesGoodVr->GetXaxis()->SetTitle("VertexR (cm)");

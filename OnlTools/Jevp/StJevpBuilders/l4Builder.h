@@ -440,6 +440,7 @@ class l4Builder : public JevpBuilder {
 
 		// BesGood
 		TH2D *hBesGoodVertexXY;
+		TH2D *hBesGoodVrVsVz;
 		TH1D *hBesGoodVr;
 		TH1D *hBesGoodVertexZ;
 		TH1I *hBesGoodprimaryMult;
