@@ -7,6 +7,7 @@
 #include "StEvent/StEnumerations.h"
 class StvELossTrak;
 class MyMag;
+class TGeoSwim;
 
 class StXTrakMaker : public StMaker 
 {
@@ -20,9 +21,10 @@ class StXTrakMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StXTrakMaker.h,v 1.1 2016/05/20 18:40:41 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StXTrakMaker.h,v 1.2 2016/06/01 01:06:33 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
  protected:
+ TGeoSwim*     mSwim;		//Swimmer
  StvELossTrak* mELoss;		//ELoss calculator
  MyMag*        mMyMag;		//Mag field calculator
 

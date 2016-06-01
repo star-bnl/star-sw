@@ -1,4 +1,4 @@
-// $Id: TGeoSwim.h,v 1.2 2016/05/21 02:37:38 perev Exp $
+// $Id: TGeoSwim.h,v 1.3 2016/06/01 01:05:27 perev Exp $
 //
 //
 // Class StTGeoSwim
@@ -17,7 +17,7 @@ class TGeoMaterial;
 class TGeoSwimMag {
 public:
 TGeoSwimMag(){};
-virtual void operator()(const double X[3],double B[3]);
+virtual void operator()(const double X[3],double B[3])=0;
 };
 
 class TGeoSwimLoss {
@@ -25,7 +25,7 @@ public:
 TGeoSwimLoss(double charge=1,double mass=0.13956995){mCharge = charge;mMass = mass;};
 //		returns momentum loss
 virtual double operator()(const TGeoMaterial* mate,double P,double len
-                       ,double *theta2=0);
+                       ,double *theta2=0)=0;
 protected:
 double mCharge;
 double mMass;
@@ -52,7 +52,13 @@ public:
 
 TGeoSwim(const char *name="");
 
-void Set(TGeoSwimMag *mag=0, TGeoSwimLoss *loss=0,TGeoSwimEnd* endd=0) {fMag=mag;fLoss=loss;fEnd=endd;}
+void Set(TGeoSwimMag *mag=0, TGeoSwimLoss *loss=0,TGeoSwimEnd* endd=0) 
+        {fMag=mag;fLoss=loss;fEnd=endd;}
+TGeoSwimMag  *GetMag() {return fMag; }
+TGeoSwimLoss *GetLoss(){return fLoss;}
+TGeoSwimEnd  *GetEnd() {return fEnd; }
+
+
 void Set(double Rmax,double Zmin,double Zmax,double sMax=10);
  int Set(THelixTrack *inHelx,THelixTrack *otHelx);
  int Set(const double* pos,const double* dir, double curv);
@@ -68,6 +74,7 @@ const TGeoMaterial*GetMate() const;
 const double       GetTime() const		{return fTimeFly;} 
 const double       GetPt()   const		{return fPt     ;} 
 const double       GetP()    const		{return fP      ;} 
+const double       GetPLoss()const		{return fPLoss  ;} 
 
 void Swap() { THelixTrack *h=fHelx[0];fHelx[0]=fHelx[1];fHelx[1]=h;}
 protected:
