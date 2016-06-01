@@ -1,5 +1,5 @@
 
-// $Id: TGeoSwim.cxx,v 1.2 2016/05/21 02:37:38 perev Exp $
+// $Id: TGeoSwim.cxx,v 1.3 2016/06/01 01:05:27 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -30,7 +30,7 @@ ClassImp(TGeoSwim)
 //_____________________________________________________________________________
 TGeoSwim::TGeoSwim(const char *name):TNamed(name,"TGeoSwim")
 {
-  fSmax = 10;
+  fSmax = 5;
   fRmax = 1000;
   fZmin =-1000;
   fZmax = 1000;
