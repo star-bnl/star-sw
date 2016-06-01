@@ -2,7 +2,7 @@
 
 #ifndef StXTrak_HH
 #define StXTrak_HH
-
+#include "TGeoSwim.h"
 class StvELossTrak;
 class MyMag;
 
@@ -28,10 +28,20 @@ int    mCharge;
 
 };
 
-class MyMag 
+class MyMag: public TGeoSwimMag
 {
 public:
   MyMag(){}
-  virtual void operator()(const double* x, double* b) const;
+  virtual void operator()(const double* x, double* b);
+};
+
+class MyLoss: public TGeoSwimLoss {
+public:
+MyLoss();
+//		returns momentum loss
+virtual double operator()(const TGeoMaterial* mate,double P,double len
+                       ,double *theta2=0);
+protected:
+StvELossTrak *mELoss;
 };
 #endif
