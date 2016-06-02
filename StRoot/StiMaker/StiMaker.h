@@ -50,7 +50,7 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.34.6.1 2016/05/24 22:49:19 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.34.6.2 2016/06/02 16:45:44 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
@@ -70,6 +70,7 @@ class StiMaker : public StMaker
 
     bool                 eventIsFinished;
     bool                 _initialized;
+     int                 mMaxTimes; //max amount of tracks could be assigned to one hit
     StiToolkit  *        _toolkit;
     StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
     StiTrackFinder *       _seedFinder;

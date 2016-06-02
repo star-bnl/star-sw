@@ -7,6 +7,7 @@
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/StiToolkit.h"
+#include "Sti/StiHitContainer.h"
 class StiHit;
 class StiTrack;
 class StiHitContainer;
@@ -51,6 +52,7 @@ class StiHitLoader : public Named
   virtual void setHitContainer(StiHitContainer* hitContainer);
   virtual void setHitFactory(Factory<StiHit>*hitFactory);
   virtual void setDetector(Detector*detector);
+          void setMaxTimes(int nMaxTimes){_hitContainer->setMaxTimes(nMaxTimes);}
   virtual Detector* getDetector(); 
  protected:
   StiHitContainer     * _hitContainer;

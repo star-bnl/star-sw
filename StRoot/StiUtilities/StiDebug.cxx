@@ -108,8 +108,10 @@ static TGraph  *graph[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
   if (!myCanvas) {myCanvas = new TCanvas("C1","",600,800);
                   myCanvas->Divide(1,3);}
   if(kt) { 
-    double curv = 0,xPrev,yPrev; int nCurv = 0;
+    double curv = 0,xPrev=0,yPrev=0; int nCurv = 0;
+
     for (int i=0;i<9;i++) {delete graph[0][i];graph[0][i]=0;}
+
     StiKTNBidirectionalIterator it;
     for (int ig=0;ig<3;ig++) {
       int n=0;

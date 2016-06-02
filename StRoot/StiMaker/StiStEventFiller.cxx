@@ -1,11 +1,98 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.117 2015/12/28 23:50:27 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.117.2.1 2016/06/02 16:45:44 smirnovd Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.117.2.1  2016/06/02 16:45:44  smirnovd
+ * Squashed changes on MAIN branch after StiCA_2016 was brached off
+ *
+ * commit 0b534582b5bf40a64870088f6864387a7941a9be
+ * Author: perev <perev>
+ * Date:   Tue May 31 17:11:46 2016 +0000
+ *
+ *     Coverity
+ *
+ * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:58:39 2016 +0000
+ *
+ *     Assignment out of array boundary removed(J.Lauret)
+ *
+ * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:37:22 2016 +0000
+ *
+ *     WarnOff
+ *
+ * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:47:42 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit b1b0f73cef0f5675bd84106241067329e0221079
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:13:06 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit 393adde57febc06a90d054f71e621e8efd082e10
+ * Author: perev <perev>
+ * Date:   Wed Apr 13 23:08:44 2016 +0000
+ *
+ *     -opt2 proble solved. Array A[1] removed
+ *
+ * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:17:55 2016 +0000
+ *
+ *     1st hit must be not used at all
+ *
+ * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:15:53 2016 +0000
+ *
+ *     Add max number of tracks assigned to one hit
+ *
+ * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
+ * Author: genevb <genevb>
+ * Date:   Thu Feb 25 23:04:50 2016 +0000
+ *
+ *     kSsdId => kSstId
+ *
+ * commit a06d8162931b223b4a405ea5714e703b1cad14e3
+ * Author: perev <perev>
+ * Date:   Mon Dec 28 23:50:27 2015 +0000
+ *
+ *     Remove assert temporary
+ *
+ * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
+ * Author: perev <perev>
+ * Date:   Mon Dec 21 19:41:31 2015 +0000
+ *
+ *     bug #3166 assert vertex closer to 0,0 <9 removed
+ *
+ * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
+ * Author: perev <perev>
+ * Date:   Sat Dec 19 03:40:50 2015 +0000
+ *
+ *     assert rxy<4 ==> <9 temporary
+ *
+ * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
+ * Author: perev <perev>
+ * Date:   Fri Dec 18 03:50:06 2015 +0000
+ *
+ *     *** empty log message ***
+ *
+ * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
+ * Author: perev <perev>
+ * Date:   Thu Dec 3 19:12:24 2015 +0000
+ *
+ *     Remove redundant GTrack error: mFlag: is Negative
+ *
  * Revision 2.117  2015/12/28 23:50:27  perev
  * Remove assert temporary
  *
@@ -1399,7 +1486,7 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
-    for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
+    for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
@@ -1511,7 +1598,7 @@ enum dcaEmx {kImpImp,
   const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
   const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
   StiHitErrs  mHrr;
-  memcpy(mHrr.A, (inf)? inf->mHrr.A : node->hitErrs(),sizeof(StiHitErrs));
+  memcpy(mHrr.G(), (inf)? inf->mHrr.G() : node->hitErrs(),sizeof(StiHitErrs));
 
   StiPullHit aux;
 // local frame

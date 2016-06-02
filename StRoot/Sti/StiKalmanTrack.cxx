@@ -1,233 +1,100 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.3 2016/05/24 22:49:17 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.3 2016/05/24 22:49:17 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.4 2016/06/02 16:45:42 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.4 2016/06/02 16:45:42 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.139.4.3  2016/05/24 22:49:17  smirnovd
- * Squashed commit of the following:
+ * Revision 2.139.4.4  2016/06/02 16:45:42  smirnovd
+ * Squashed changes on MAIN branch after StiCA_2016 was brached off
  *
- * commit 169aac1e9a4e5291586418783d9b969a1d047035
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 18:07:56 2016 -0400
+ * commit 0b534582b5bf40a64870088f6864387a7941a9be
+ * Author: perev <perev>
+ * Date:   Tue May 31 17:11:46 2016 +0000
  *
- *     StiMaker: Included missing header for templated class
+ *     Coverity
  *
- * commit ebf9abbd2d31db0bfb053a5c1e2715c969496b8f
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 17:30:47 2016 -0400
+ * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:58:39 2016 +0000
  *
- *     Moved StiDefaultToolkit from StiMaker/ to Sti/ to break circular dependancy
+ *     Assignment out of array boundary removed(J.Lauret)
  *
- *     Relevant include paths and LinkDef's have been updated.
+ * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:37:22 2016 +0000
  *
- * commit 3dfd849439f6350577937ac042944d9d1b0b0978
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 17:19:33 2016 -0400
+ *     WarnOff
  *
- *     StiMaker: Added method to update internal toolkit to StiCA
+ * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:47:42 2016 +0000
  *
- * commit 9e34887223d52f7ab3a784bb81879f303ac5d2fc
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 17:11:10 2016 -0400
+ *     Warnoff
  *
- *     StiKalmanTrack: Make initialize() virtual
+ * commit b1b0f73cef0f5675bd84106241067329e0221079
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:13:06 2016 +0000
  *
- *     We call it for StiCAKalmanTrack via a base pointer. For example, see
+ *     Warnoff
  *
- *     bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
+ * commit 393adde57febc06a90d054f71e621e8efd082e10
+ * Author: perev <perev>
+ * Date:   Wed Apr 13 23:08:44 2016 +0000
  *
- * commit 04044129cc01bf326261b5934e8feb48fcac9798
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 17:09:36 2016 -0400
+ *     -opt2 proble solved. Array A[1] removed
  *
- *     StiCAKalmanTrack: [Style] Mark refit() virtual as that's what it is
+ * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:17:55 2016 +0000
  *
- * commit fac70613e865d1d3f9312dcac6a3c4bc5270abc6
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 16:25:56 2016 -0400
+ *     1st hit must be not used at all
  *
- *     StiFactory: Include proper dependency
+ * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:15:53 2016 +0000
  *
- * commit 45404e1dcdcff8311184663c40cd0f8fe4ef0625
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 19:05:32 2016 -0400
+ *     Add max number of tracks assigned to one hit
  *
- *     StiCATpcSeedFinder: [Cosmetic] Removed irrelevant code/comments
+ * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
+ * Author: genevb <genevb>
+ * Date:   Thu Feb 25 23:04:50 2016 +0000
  *
- * commit 4bb50aac320c58c2fa2c2da47c8875800d92fac0
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 21:36:08 2016 -0400
+ *     kSsdId => kSstId
  *
- *     Make use of StiKalmanTrack's static members
+ * commit a06d8162931b223b4a405ea5714e703b1cad14e3
+ * Author: perev <perev>
+ * Date:   Mon Dec 28 23:50:27 2015 +0000
  *
- * commit 90c647615138540a1f59810d9259da70f6f162f4
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 21:34:17 2016 -0400
+ *     Remove assert temporary
  *
- *     StiKalmanTrack: Moved static global entities from file scope to class
+ * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
+ * Author: perev <perev>
+ * Date:   Mon Dec 21 19:41:31 2015 +0000
  *
- * commit 1105164c6f4c569ee5e2a3ff64fa8132c5f95914
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 15:41:50 2016 -0400
+ *     bug #3166 assert vertex closer to 0,0 <9 removed
  *
- *     StiCAKalmanTrackFinder: Accept pointers to base class StiKalmanTrack
+ * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
+ * Author: perev <perev>
+ * Date:   Sat Dec 19 03:40:50 2015 +0000
  *
- *     The method does not do anything specific to derived class StiCAKalmanTrack hence
- *     it is safe to accept a pointer to the base class
+ *     assert rxy<4 ==> <9 temporary
  *
- * commit 1e7e9f26806bad39cec6e02d83a12e8def577671
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 12:38:01 2016 -0400
+ * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
+ * Author: perev <perev>
+ * Date:   Fri Dec 18 03:50:06 2015 +0000
  *
- *     StiCAKalmanTrack: Added include declaring kTpcId
+ *     *** empty log message ***
  *
- * commit ed22761b7dd81a2a3bc9efa55d037541bbaad2bd
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Fri May 13 00:07:18 2016 -0400
+ * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
+ * Author: perev <perev>
+ * Date:   Thu Dec 3 19:12:24 2015 +0000
  *
- *     StiKalmanTrackFinder: Changed access to protected for private data member
+ *     Remove redundant GTrack error: mFlag: is Negative
  *
- *     This member is used in derived StiCAKalmanTrackFinder class so allow direct use
- *
- * commit fe547209f89d8d9981aade883fd86fae1ee8b304
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 23:47:14 2016 -0400
- *
- *     StiCATpcSeedFinder: Cast StiKalmanTrack to StiCAKalmanTrack
- *
- *     In StiCA we would like to work with StiCAKalmanTrack's
- *     It is safe to cast to derived class as derived class does not introduce any new
- *     data members
- *
- * commit 2ee090b303f76c2f431173c81b3a54cdbb492682
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Tue May 24 16:50:47 2016 -0400
- *
- *     StiCADefaultToolkit: Modifed config for StiCA to instantiate StiCA specific objects
- *
- * commit 62e6095815e15dad7ddb66f20a8151d0c9b4c7fd
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 16:20:25 2016 -0400
- *
- *     StiCADefaultToolkit: Remove duplicate code belonging to base class
- *
- * commit 05cbe67227dc31778148cd8a92707d940bf77e72
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 15:50:41 2016 -0400
- *
- *     StiCADefaultToolkit: Inherit from StiDefaultToolkit
- *
- * commit c56f4d0a216f905f734d6af2764c9f9c6df41337
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Tue May 24 16:14:35 2016 -0400
- *
- *     StiCAKalmanTrackFinder: Removed duplicate code that exists in parent class StiKalmanTrackFinder
- *
- * commit 6becbb84ed39a587d3c4d01e71f9210c7d683a65
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 23:43:37 2016 -0400
- *
- *     StiCAKalmanTrackFinder inherits from StiKalmanTrackFinder
- *
- * commit a992c34fc7d1642617952053327378cf39f3af0d
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 12:35:51 2016 -0400
- *
- *     StiCAKalmanTrack: Removed duplicate code that exists in parent class StiKalmanTrack
- *
- * commit 805f37719570820a95069144dfb9d28356a95e1c
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 16 12:37:10 2016 -0400
- *
- *     StiCAKalmanTrack: Inherit from Sti/ to avoid duplicate code
- *
- *     Conflicts:
- *     	StiCA/StiCAKalmanTrack.h
- *
- * commit e967b188bad7f7cdc0f48ededa58365a1f145697
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 15:42:30 2016 -0400
- *
- *     StiCA: Removed DO_TPCCATRACKER protection
- *
- *     For StiCA we assume DO_TPCCATRACKER is defined
- *
- * commit e80e0659619f2d0369549bfb717639a4a5b02eb7
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 14:49:04 2016 -0400
- *
- *     Sti: Removed DO_TPCCATRACKER protection
- *
- *     For Sti we assume DO_TPCCATRACKER is not defined
- *
- * commit e9df39949dc387f2eab3cb1812ebf99832fafaaf
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 18:13:26 2016 -0400
- *
- *     StiCA: Path of includes corrected
- *
- * commit dbc98816057b09b843e86e6b36ed1c81a7932ea0
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 18:08:46 2016 -0400
- *
- *     StiCA: Classes renamed for consistency
- *
- *     The following substitutions were made:
- *
- *     s/StiKalmanTrackFinder/StiCAKalmanTrackFinder/
- *     s/StiTpcSeedFinder/StiCATpcSeedFinder/
- *     s/StiKalmanTrack/StiCAKalmanTrack/
- *     s/StiTPCCATrackerInterface/StiCATpcTrackerInterface/
- *     s/StiDefaultToolkit/StiCADefaultToolkit/
- *
- * commit b0c26b55a4b491ce0dd92b6da1c4c74a70440c52
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Mon May 23 15:11:48 2016 -0400
- *
- *     StiCA: Renamed StiDefaultToolkit.cxx -> StiCADefaultToolkit
- *
- * commit 4a738dbe2290203cbdc69dc213bd97661693661a
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 15:31:11 2016 -0400
- *
- *     Added in StiCA/ direct copies of corresponding files from Sti/
- *
- * commit 25cf766787a65f6d6b1b2789637941c0dd016b55
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 14:33:45 2016 -0400
- *
- *     Moved StiCA related files from Sti/ to StiCA/
- *
- *     Some files have been renamed. We'll use StiCA prefix for files in StiCA/
- *
- * commit a51e816f2d21645cc4768098a6867b78724e5215
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Thu May 12 19:47:58 2016 -0400
- *
- *     Fixes to catch up with latest changes in Sti
- *
- * commit 27264048a6fd93ff9b03613df04eec9452aa332f
- * Author: Dmitri Smirnov <d.s@plexoos.com>
- * Date:   Tue May 24 12:11:25 2016 -0400
- *
- *     StiKalmanTrack: Change from original code found in "eval"
- *
- *     This change was reverted by Irakli but in fact needed to avoid triggereing of assert
- *     See commit 4d993f28
- *
- * commit 8391c593621c48e775efa453c9b694c46229aba8
- * Author: Irakli Chakaberia <iraklic@rcas6007.rcf.bnl.gov>
- * Date:   Tue Apr 26 11:39:42 2016 -0400
- *
- *     assert removed to allow for multiple use of hit
- *
- * Revision 2.139.4.2  2016/05/24 22:36:55  smirnovd
- * Revert "Squashed commit of the following:"
- *
- * This reverts commit daccbb56f7b0005fb0e74c60f93da93c95c166c4.
+ * Revision 2.140  2016/04/13 23:08:44  perev
+ * -opt2 proble solved. Array A[1] removed
  *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
@@ -1805,7 +1672,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.A,hr.hZZ);
+    circ.AddErr(hr.G(),hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1866,7 +1733,7 @@ double Xi2=0;
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.A);
+    cirl.StiEmx(E.G());
     TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
     E._cPP*=hh; E._cTP*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
