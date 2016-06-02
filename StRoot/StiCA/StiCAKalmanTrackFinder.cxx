@@ -30,16 +30,12 @@ void StiCAKalmanTrackFinder::findTracks()
 //   if (_trackFilter) _trackFilter->reset();
   StiCATpcTrackerInterface& caTrackerInt = StiCATpcTrackerInterface::Instance();
   caTrackerInt.SetNewEvent();
-  findTpcTracks(caTrackerInt); // find track starting with TPC (CA seed finder)
+  StiCATpcSeedFinder::findTpcTracks(caTrackerInt); // find track starting with TPC (CA seed finder)
   findAllTracks(); // find track left
   caTrackerInt.SetStiTracks(_trackContainer);
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   caTrackerInt.RunPerformance();
 #endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
-}
-//________________________________________________________________________________
-void StiCAKalmanTrackFinder::findTpcTracks(StiCATpcTrackerInterface &caTrackerInt) {
-  StiCATpcSeedFinder::findTpcTracks(caTrackerInt);
 }
 //________________________________________________________________________________
 Int_t StiCAKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {

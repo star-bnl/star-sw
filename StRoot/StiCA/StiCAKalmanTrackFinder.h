@@ -13,7 +13,6 @@ public:
   StiCAKalmanTrackFinder() : StiKalmanTrackFinder() {}
   StiCAKalmanTrackFinder(StiToolkit *toolkit) : StiKalmanTrackFinder(toolkit) {}
   /// Find all tracks of the currently loaded event
-  virtual void findTpcTracks(StiCATpcTrackerInterface &caTrackerInt); 
   virtual void findTracks(); 
   virtual Int_t Fit(StiKalmanTrack *track, Double_t rMin=0);
   static void PrintFitStatus(const int status, const StiCAKalmanTrack* track); // print message according to the status value
