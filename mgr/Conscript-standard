@@ -1376,25 +1376,34 @@ if ( $#src > -1 ) {
       Depends $envg, [($SO_PKG)], ($libs); #print "libs = $libs\n";
       $env2 = $envg;
     }
-    if ($pkg =~ m/^Sti$/) { # For use CATracker
-      if (  -e "StRoot/TPCCATracker" ) {
-#	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
-	$SO_PKG_PLAIN = $pkg . "CA";
+    if ($pkg =~ m/^StiCA$/) { #print "check  For use CATracker\n";
+      my $locf = "./StRoot/TPCCATracker";
+      my $libf = $env->{ENV}->{STAR} . "/StRoot/TPCCATracker";
+      my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
+#      if ( -r $locf) {print "$locf\n";}	
+#      if ( -r $libf) {print "$libf\n";}	
+#      if ( -r $libv) {print "$libv\n";}	
+      if ((  -r $locf or -r $libf) and -r $libv ) {
+	#	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
+	$SO_PKG_PLAIN = $pkg;
 	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
 	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-	$envCA = $env2->clone('SUFOBJ'   => "CA.o",
-			      'CXXFLAGS' => $CXXFLAGS . "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2");
-	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx);
-	my $ListCA = join('|',@ListCA);
+	if ((-e "StRoot/TPCCATracker"       and  -e "StRoot/TPCCATracker/code")  or
+	    (-e "$STAR/StRoot/TPCCATracker" and  -e  "$STAR/StRoot/TPCCATracker/code")) {
+	} else {
+#	  $CPPFLAGS .= " -D__NEW_TPCCATracker__";
+	}
+#	print "CPPFLAGS = $CPPFLAGS <<<<<<<<<<<<<<<<\n";
+	$envCA = $env2->clone('CPPFLAGS' => $CPPFLAGS,
+                              'SUFOBJ'   => ".o",
+			      'CXXFLAGS' => $CXXFLAGS . " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION" . $SSE_FLAGS); # -msse -msse2"
 	@PlainObj = ();
 	@Obj = ();
 	my @o;
 	foreach my $s (@src) {
 	  $o[0] = $s;
-	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
-	  push  @Obj, $o[0];
-	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
-	  else                  {push @PlainObj, $o[0];}
+          if ($s !~ m/\.o$/) {@o = Objects $envCA ($s);}
+          push  @Obj, $o[0];
 	}
 	@src = @Obj;
 #	print "$#src => @src \n";
