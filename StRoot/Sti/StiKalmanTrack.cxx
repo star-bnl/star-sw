@@ -1,11 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.4 2016/06/02 16:45:42 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.4 2016/06/02 16:45:42 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.5 2016/06/02 16:50:03 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.5 2016/06/02 16:50:03 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.139.4.5  2016/06/02 16:50:03  smirnovd
+ * StiKalmanTrack: Refactored public refit() to use protected refit(int&)
+ *
+ * Two return values from protected refit(int&) can be used in different context.
+ * For example, derived class StiCAKalmanTrack return a value different from the
+ * base class.
+ *
  * Revision 2.139.4.4  2016/06/02 16:45:42  smirnovd
  * Squashed changes on MAIN branch after StiCA_2016 was brached off
  *
@@ -1445,9 +1452,22 @@ void StiKalmanTrack::removeLastNode()
   BFactory::Free(node);
 }
 //_____________________________________________________________________________
+
+
+/**
+ * Public interface to protected method capable of returning two return values
+ * used in this and derived StiCAKalmanTrack classes.
+ */
 int StiKalmanTrack::refit() 
 {
-  int errType = kNoErrors;
+  int errType; // This return value is ignored
+  return refit(errType);
+}
+
+
+int StiKalmanTrack::refit(int &errType)
+{
+  errType = kNoErrors;
   
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);

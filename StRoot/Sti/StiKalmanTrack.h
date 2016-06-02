@@ -322,6 +322,14 @@ protected:
                     ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
   // end of hidden static variables for refit & refiL
 
+  /**
+   * Two return values can be obtained by calling this protected version of
+   * refit(). By default the original value is used in the publicly available
+   * refit() of this class while the other is used in derived class
+   * StiCAKalmanTrack.
+   */
+  int refit(int &errType);
+
 protected:
     
   static int mgMaxRefiter;		//max number of refit iteratins allowed
