@@ -20,12 +20,12 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="Embedding_job_stats";
 
-my $JobStatusT = "jobs_prod_2013";
+my $JobStatusT = "jobs_prod_2016";
 
 $fC1 = FileCatalog->new();
 $fC1->connect_as("Admin");
 
-my $nfspath = "/star/data23/GRID/daq/2012/";
+my $nfspath = "/star/data16/GRID/daq/2015/";
 my $nfile = 0;
 my $dbfile = "none";
 my $daqstat;

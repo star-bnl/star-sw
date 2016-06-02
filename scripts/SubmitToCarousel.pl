@@ -28,17 +28,20 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="Embedding_job_stats";
 
-my $JobStatusT = "jobs_prod_2013";
+my $JobStatusT = "jobs_prod_2016";
 
-my $nfspath = "/star/data23/GRID/daq/2012/";
+my $nfspath = "/star/data16/GRID/daq/2015/";
 my $daqpat = $nfspath."*.daq";
 my @prdset = ();
 my $nl = 0;
 
 my @daqlist = `ls $daqpat` ;
 
-my $MAXNUM = 900;
-my $LIMNUM = 600;
+#my $MAXNUM = 900;
+#my $LIMNUM = 600;
+my $MAXNUM = 400;
+my $LIMNUM = 200;
+
 my $NNUM = 100;
 
 print "There are  ", scalar(@daqlist),"  daq files in the ", $nfspath,"  directory", "\n";
@@ -144,7 +147,7 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
 
 # $fC1->set_context("runnumber=$prodrun","filetype=online_daq","filename~st_physics");
 
- $fC1->set_context("runnumber=$prodrun","filetype=online_daq","sanity=1","limit=0");
+ $fC1->set_context("runnumber=$prodrun","filetype=online_daq","filename~st_physics","sanity=1","limit=0");
 
  @fileset = $fC1->run_query("trgsetupname","path","filename");
 
