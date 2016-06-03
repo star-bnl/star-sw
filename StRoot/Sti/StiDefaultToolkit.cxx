@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.46.2.3 2016/06/03 16:07:15 smirnovd Exp $
+ * $Id: StiDefaultToolkit.cxx,v 1.1.2.3 2016/06/03 17:00:48 smirnovd Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 1.1.2.3  2016/06/03 17:00:48  smirnovd
+ * Sti and StiCA refactoring
+ *
  * Revision 2.46.2.3  2016/06/03 16:07:15  smirnovd
  * Sync with MAIN branch as of 2016-05-31
  *

@@ -26,6 +26,7 @@ using namespace std;
 #include "Sti/Base/Factory.h"
 #include "StiKTNIterator.h"
 #include "StiTrack.h"
+#include "StiTrackNodeHelper.h"
 
 #include "StThreeVectorD.hh"
 #include "StMCTruth.h"
@@ -240,9 +241,6 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getOuterMostHitNode(int qua=0)  const;
    		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
-#ifdef DO_TPCCATRACKER
-   StiKalmanTrackNode * getInnerMostTPCHitNode(int qua=0)   const;
-#endif /* DO_TPCCATRACKER */
    int                  getNNodes(int qua=0) const;
    int                  releaseHits(double rMin=4,double rMax=50);
    /// Accessor method returns the first node associated with the track.
@@ -261,10 +259,7 @@ class StiKalmanTrack : public StiTrack
    virtual void add(StiTrackNode * node,int direction,StiTrackNode *near=0);
 
   /// Convenience method to initialize a track based on seed information 
-  int initialize(const vector<StiHit*> &);
-#ifdef DO_TPCCATRACKER
-  int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars = 0, StiNodePars *lastPars = 0, StiNodeErrs *firstErrs = 0, StiNodeErrs *lastErrs = 0);
-#endif /* DO_TPCCATRACKER */
+  virtual int initialize(const vector<StiHit*> &);
     /// Method to return the pointer to the fitter parameters.
   
    StThreeVector<double> getMomentumAtOrigin() const;
@@ -320,6 +315,21 @@ class StiKalmanTrack : public StiTrack
   
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
+
+  // hidden static variables for refit & refiL
+  static StiTrackNodeHelper sTNH;
+  static double diff(const StiNodePars &p1,const StiNodeErrs &e1
+                    ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
+  // end of hidden static variables for refit & refiL
+
+  /**
+   * Two return values can be obtained by calling this protected version of
+   * refit(). By default the original value is used in the publicly available
+   * refit() of this class while the other is used in derived class
+   * StiCAKalmanTrack.
+   */
+  int refit(int &errType);
+
 protected:
     
   static int mgMaxRefiter;		//max number of refit iteratins allowed

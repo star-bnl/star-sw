@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.227.4.4 2016/06/03 16:07:15 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.227.4.5 2016/06/03 17:00:49 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -100,7 +100,8 @@ More detailed: 				<br>
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiStEventFiller.h"
-#include "StiDefaultToolkit.h"
+#include "Sti/StiDefaultToolkit.h"
+#include "StiCA/StiCADefaultToolkit.h"
 #include "StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
@@ -244,6 +245,10 @@ Int_t StiMaker::Init()
     for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
       mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
     } }
+
+
+  // Process attributes and update the toolkit used by this maker
+  UpdateToolkit();
 
   return StMaker::Init();
 }
@@ -479,6 +484,45 @@ void StiMaker::MyClear()
       _toolkit->getTrackFactory()->clear();
 //      StMemStat::PrintMem("After  StiFactory clear()");
 }
+
+
+/**
+ * Updates the internal toolkit (i.e. StiMaker configuration) based on set
+ * attributes specified by the user. Currently, we process only the
+ * 'seedFinders' attribute and check if the "CA" value is set.
+ */
+void StiMaker::UpdateToolkit()
+{
+  TString seedFinders = SAttr("seedFinders");
+
+  // Return without changing anything if attribute's value is empty
+  if (!seedFinders.Length()) return;
+
+  bool requestedCASeedFinder = false;
+  TObjArray *sub_strings = seedFinders.Tokenize(" .,");
+
+  for (int i=0; i <= sub_strings->GetLast(); i++)
+  {
+    TString &sub_string = static_cast<TObjString*>( sub_strings->At(i) )->String();
+
+    if ( !sub_string.CompareTo("CA", TString::kIgnoreCase) ) {
+      requestedCASeedFinder = true;
+      break;
+    }
+  }
+
+  delete sub_strings;
+
+  if (requestedCASeedFinder) {
+    StiToolkit::kill();
+    new StiCADefaultToolkit();
+    _toolkit = StiToolkit::instance();
+
+    LOG_WARN << "StiMaker's toolkit has been updated to StiCADefaultToolkit" << endm;
+  }
+}
+
+
 //_____________________________________________________________________________
 Int_t StiMaker::InitPulls()
 {
@@ -611,8 +655,11 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.227.4.4 2016/06/03 16:07:15 smirnovd Exp $
+// $Id: StiMaker.cxx,v 1.227.4.5 2016/06/03 17:00:49 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.227.4.5  2016/06/03 17:00:49  smirnovd
+// Sti and StiCA refactoring
+//
 // Revision 1.227.4.4  2016/06/03 16:07:15  smirnovd
 // Sync with MAIN branch as of 2016-05-31
 //

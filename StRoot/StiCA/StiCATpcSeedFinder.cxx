@@ -1,14 +1,13 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.7.8.5 2016/06/03 16:07:13 smirnovd Exp $
-#ifdef DO_TPCCATRACKER
-#include "StiTpcSeedFinder.h"
-#include "StiToolkit.h"
-#include "StiHit.h"
+// $Id: StiCATpcSeedFinder.cxx,v 1.1.2.5 2016/06/03 17:00:49 smirnovd Exp $
+#include "StiCATpcSeedFinder.h"
+#include "Sti/StiToolkit.h"
+#include "Sti/StiHit.h"
 #include "StMessMgr.h"
 #include "StTpcHit.h"
-#include "StiKalmanTrack.h"
-#include "StiKalmanTrackFinder.h"
+#include "StiCAKalmanTrack.h"
+#include "StiCAKalmanTrackFinder.h"
 
-#include "StiTPCCATrackerInterface.h"
+#include "StiCATpcTrackerInterface.h"
 //#define PRINT_SEED_STATISTIC
 //#define PRINT_FIT_ERR_STATISTIC
 #ifdef PRINT_FIT_ERR_STATISTIC
@@ -18,11 +17,11 @@
 //#define KINK_REJECTION  
 #define OVERLAP_REJECTION
 //________________________________________________________________________________
-Bool_t StiTpcSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b){
+Bool_t StiCATpcSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b){
   return (a.total_hits < b.total_hits);
 }
 //________________________________________________________________________________
-void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
+void StiCATpcSeedFinder::findTpcTracks(StiCATpcTrackerInterface &caTrackerInt) {
 #ifdef PRINT_FIT_ERR_STATISTIC
    static std::map<int,unsigned int> statusMap;
 #endif // PRINT_FIT_ERR_STATISTIC
@@ -61,14 +60,14 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 #endif // PRINT_SEED_STATISTIC
       continue;
     }
-    StiKalmanTrack* track = StiToolkit::instance()->getTrackFactory()->getInstance();
+    StiCAKalmanTrack* track = static_cast<StiCAKalmanTrack*>(StiToolkit::instance()->getTrackFactory()->getInstance());
     
 //   if (track->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;} // use helix approximation
    track->initialize0(_seedHits, &aSeed.firstNodePars, &aSeed.lastNodePars/*, &aSeed.firstNodeErrs, &aSeed.lastNodeErrs*/ ); // use CATracker parameters. P.S errors should not be copied, they'd be initialized.
-   StiKalmanTrackFinder *finderTmp = (StiKalmanTrackFinder *)track->getTrackFinder();
+   StiCAKalmanTrackFinder *finderTmp = (StiCAKalmanTrackFinder *)track->getTrackFinder();
    int status = finderTmp->Fit(track);
 #ifdef PRINT_FIT_ERR_STATISTIC
-   StiKalmanTrackFinder::PrintFitStatus(status,track);
+   StiCAKalmanTrackFinder::PrintFitStatus(status,track);
 
    if ( statusMap.find(status) != statusMap.end() ) statusMap[status]++;
    else statusMap[status] = 1;
@@ -85,12 +84,14 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
    cout << " ---- Fit status statistic.  ---- " << endl;
    for ( std::map<int, unsigned int>::iterator it = statusMap.begin(); it != statusMap.end(); it++) {
      cout << (*it).second << " entries for:" << endl;
-     StiKalmanTrackFinder::PrintFitStatus((*it).first,0);
+     StiCAKalmanTrackFinder::PrintFitStatus((*it).first,0);
    }
 #endif // PRINT_FIT_ERR_STATISTIC
 }
-#endif /* DO_TPCCATRACKER */
-// $Log: StiTpcSeedFinder.cxx,v $
+// $Log: StiCATpcSeedFinder.cxx,v $
+// Revision 1.1.2.5  2016/06/03 17:00:49  smirnovd
+// Sti and StiCA refactoring
+//
 // Revision 2.7.8.5  2016/06/03 16:07:13  smirnovd
 // Sync with MAIN branch as of 2016-05-31
 //
