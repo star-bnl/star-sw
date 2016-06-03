@@ -526,7 +526,7 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
   //   cout << "Warrning: Bad Node Cov Matrix." << endl;
 
-  double *A = nodeErrs.A;
+  double *A = nodeErrs.G();
 /*  for (int i1 = 0, i = 0; i1 < 5; i1++){
     for (int i2 = 0; i2 <= i1; i2++, i++){
       A[i+i1+2] = caCov[i];
