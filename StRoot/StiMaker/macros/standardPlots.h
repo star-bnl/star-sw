@@ -1,9 +1,14 @@
 /*
- * $Id: standardPlots.h,v 1.7 2003/09/02 18:00:00 perev Exp $
+ * $Id: standardPlots.h,v 1.7.14.1 2016/06/03 15:49:01 smirnovd Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.7.14.1  2016/06/03 15:49:01  smirnovd
+ * Revert "Squashed commit of the following:"
+ *
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ *
  * Revision 1.7  2003/09/02 18:00:00  perev
  * gcc 3.2 updates + WarnOff
  *

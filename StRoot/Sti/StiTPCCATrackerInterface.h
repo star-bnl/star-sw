@@ -1,33 +1,22 @@
-#ifndef __StiCATpcTrackerInterface_h__
-#define __StiCATpcTrackerInterface_h__
-#include "StiCATpcSeedFinder.h"
-#define __NEW_TPCCATracker__
-#ifdef __NEW_TPCCATracker__
-#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/AliHLTTPCCAGBTracker.h"
-#endif /* __NEW_TPCCATracker__ */
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
-#ifdef __NEW_TPCCATracker__
-#include "TPCCATrackerPerformance/AliHLTTPCCAPerformance.h"
-#include "TPCCATrackerPerformance/AliHLTTPCCAMCTrack.h"
-#else /* ! __NEW_TPCCATracker__ */
-#include "TPCCATracker/Performance/AliHLTTPCCAPerformance.h"
-#include "TPCCATracker/Performance/AliHLTTPCCAMCTrack.h"
-#endif /* __NEW_TPCCATracker__ */
-#endif
+#ifndef __StiTPCCATrackerInterface_h__
+#define __StiTPCCATrackerInterface_h__
+#ifdef DO_TPCCATRACKER
+#include "StiTpcSeedFinder.h"
+#include "TPCCATracker/code/AliHLTTPCCAGBTracker.h"
+#include "TPCCATracker/code/AliHLTTPCCAPerformance.h"
+#include "TPCCATracker/code/AliHLTTPCCAMCTrack.h"
 
-#include "Sti/StiTrackContainer.h"
+#include "StiTrackContainer.h"
 
-class StiCATpcTrackerInterface {
+class StiTPCCATrackerInterface {
  public:
 
     /// Instance
-  static StiCATpcTrackerInterface &Instance();
+  static StiTPCCATrackerInterface &Instance();
   
     /// constructor - destructor
-  StiCATpcTrackerInterface();
-  ~StiCATpcTrackerInterface();
+  StiTPCCATrackerInterface();
+  ~StiTPCCATrackerInterface();
 
   void SetNewEvent(); // clean and initialize before new event
 
@@ -43,36 +32,37 @@ class StiCATpcTrackerInterface {
   vector<SeedHit_t>        GetSeedHits()    { return fSeedHits;}
   
 
- protected:
+ private:
+  typedef AliHLTTPCCAPerformance::AliHLTTPCCAHitLabel AliHLTTPCCAHitLabel;
+
   
   void MakeSettings(); // fill fCaParam
-  virtual void MakeHits();     // fill fCaHits & fSeedHits
+  void MakeHits();     // fill fCaHits & fSeedHits
   void MakeSeeds();    // fill fSeeds & fTrackParameters
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   void FillPerformance(const vector<AliHLTTPCCAGBHit>& hits, const vector<int>& idTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels); // fill fPerformance by MCTracks, MCPoints and Hit-MCPointsMatch
-#endif
+
   void ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs); // convert caPars into NodePars
+
 
   HitMapToVectorAndEndType *fHitsMap;
   vector<Seed_t> fSeeds;
 
-  StiCATpcSeedFinder *fSeedFinder;
+  StiTpcSeedFinder *fSeedFinder;
   AliHLTTPCCAGBTracker *fTracker;
 
   vector<int> fIdTruth; // id of the Track, which has created CaHit
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   vector<AliHLTTPCCAMCTrack> fMCTracks;
   vector<AliHLTTPCCALocalMCPoint> fMCPoints;
   vector<AliHLTTPCCAHitLabel> fHitLabels;
   AliHLTTPCCAPerformance *fPerformance;
 
-  TFile *fOutFile; // file for perfo histos
-#endif
 
   vector<AliHLTTPCCAParam> fCaParam;// settings for all sectors to give CATracker
   vector<AliHLTTPCCAGBHit> fCaHits; // hits to give CATracker
   vector<SeedHit_t> fSeedHits;          // hits to make seeds
 
+  TFile *fOutFile; // file for perfo histos
+  
     // for StiPefro
   void FillStiPerformance();
 
@@ -83,11 +73,12 @@ class StiCATpcTrackerInterface {
   vector<int> fStiIdTruth; // id of the Track, which has created CaHit
   vector<AliHLTTPCCAGBTrack> fStiCaTracks;
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   AliHLTResizableArray<AliHLTTPCCAHitLabel> fStiHitLabels;
   AliHLTResizableArray<AliHLTTPCCAMCTrack> fStiMCTracks;
   AliHLTResizableArray<AliHLTTPCCALocalMCPoint> fStiMCPoints;
-#endif
+
+
   double fPreparationTime_real, fPreparationTime_cpu; // time for coping data and performance
 };
-#endif //  __StiCATpcTrackerInterface_h__
+#endif /* DO_TPCCATRACKER */
+#endif //  __StiTPCCATrackerInterface_h__

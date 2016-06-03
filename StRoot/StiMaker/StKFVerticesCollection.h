@@ -1,5 +1,5 @@
 #ifndef __StKFVerticesCollection_h__
-// $Id: StKFVerticesCollection.h,v 2.2 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StKFVerticesCollection.h,v 2.2.8.1 2016/06/03 15:49:00 smirnovd Exp $
 #define __StKFVerticesCollection_h__
 #include "TObject.h"
 #include "TObjArray.h"
@@ -40,6 +40,11 @@ public:
   ClassDef(StKFVerticesCollection,0)
 };
 // $Log: StKFVerticesCollection.h,v $
+// Revision 2.2.8.1  2016/06/03 15:49:00  smirnovd
+// Revert "Squashed commit of the following:"
+//
+// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+//
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace
 //

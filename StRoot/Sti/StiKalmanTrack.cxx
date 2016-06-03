@@ -1,107 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.5 2016/06/02 16:50:03 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.5 2016/06/02 16:50:03 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.6 2016/06/03 15:48:57 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.6 2016/06/03 15:48:57 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.139.4.5  2016/06/02 16:50:03  smirnovd
- * StiKalmanTrack: Refactored public refit() to use protected refit(int&)
+ * Revision 2.139.4.6  2016/06/03 15:48:57  smirnovd
+ * Revert "Squashed commit of the following:"
  *
- * Two return values from protected refit(int&) can be used in different context.
- * For example, derived class StiCAKalmanTrack return a value different from the
- * base class.
- *
- * Revision 2.139.4.4  2016/06/02 16:45:42  smirnovd
- * Squashed changes on MAIN branch after StiCA_2016 was brached off
- *
- * commit 0b534582b5bf40a64870088f6864387a7941a9be
- * Author: perev <perev>
- * Date:   Tue May 31 17:11:46 2016 +0000
- *
- *     Coverity
- *
- * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
- * Author: perev <perev>
- * Date:   Tue Apr 19 01:58:39 2016 +0000
- *
- *     Assignment out of array boundary removed(J.Lauret)
- *
- * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
- * Author: perev <perev>
- * Date:   Tue Apr 19 01:37:22 2016 +0000
- *
- *     WarnOff
- *
- * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
- * Author: perev <perev>
- * Date:   Fri Apr 15 20:47:42 2016 +0000
- *
- *     Warnoff
- *
- * commit b1b0f73cef0f5675bd84106241067329e0221079
- * Author: perev <perev>
- * Date:   Fri Apr 15 20:13:06 2016 +0000
- *
- *     Warnoff
- *
- * commit 393adde57febc06a90d054f71e621e8efd082e10
- * Author: perev <perev>
- * Date:   Wed Apr 13 23:08:44 2016 +0000
- *
- *     -opt2 proble solved. Array A[1] removed
- *
- * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
- * Author: perev <perev>
- * Date:   Mon Mar 28 00:17:55 2016 +0000
- *
- *     1st hit must be not used at all
- *
- * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
- * Author: perev <perev>
- * Date:   Mon Mar 28 00:15:53 2016 +0000
- *
- *     Add max number of tracks assigned to one hit
- *
- * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
- * Author: genevb <genevb>
- * Date:   Thu Feb 25 23:04:50 2016 +0000
- *
- *     kSsdId => kSstId
- *
- * commit a06d8162931b223b4a405ea5714e703b1cad14e3
- * Author: perev <perev>
- * Date:   Mon Dec 28 23:50:27 2015 +0000
- *
- *     Remove assert temporary
- *
- * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
- * Author: perev <perev>
- * Date:   Mon Dec 21 19:41:31 2015 +0000
- *
- *     bug #3166 assert vertex closer to 0,0 <9 removed
- *
- * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
- * Author: perev <perev>
- * Date:   Sat Dec 19 03:40:50 2015 +0000
- *
- *     assert rxy<4 ==> <9 temporary
- *
- * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
- * Author: perev <perev>
- * Date:   Fri Dec 18 03:50:06 2015 +0000
- *
- *     *** empty log message ***
- *
- * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
- * Author: perev <perev>
- * Date:   Thu Dec 3 19:12:24 2015 +0000
- *
- *     Remove redundant GTrack error: mFlag: is Negative
- *
- * Revision 2.140  2016/04/13 23:08:44  perev
- * -opt2 proble solved. Array A[1] removed
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
  *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
@@ -547,6 +455,7 @@
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StiHitContainer.h"
+#include "StiTrackNodeHelper.h"
 #include "StiUtilities/StiDebug.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -561,8 +470,13 @@ int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
-StiTrackNodeHelper StiKalmanTrack::sTNH;
+// hidden static variables for refit & refiL
+static StiTrackNodeHelper sTNH;
+static double diff(const StiNodePars &p1,const StiNodeErrs &e1
+                  ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
 
+
+// end of hidden static variables for refit & refiL
 
 /*! 
    Reset the class members to their default state.
@@ -642,12 +556,70 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
+#ifdef DO_TPCCATRACKER
+  initialize0(hits);
+  
+  int ierr = approx(0);
+  if (!ierr) return 0;
+  BFactory::Free(this);
+  return 1;
+}
+
+
+int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
+{
+#endif /* DO_TPCCATRACKER */
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
+#ifdef DO_TPCCATRACKER
+  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
+  const StiDetector* detectorOld = 0;
+  StiHit *hit_Old = 0;
+  for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
+    StiHit *hit = hits[ihit];
+    detector = hit->detector();
+    assert(detector);
+    // look for gaps in hit list
+    if (hit_Old && detector->getGroupId() == kTpcId) {
+      Double_t R_hit = detector->getPlacement()->getLayerRadius();
+      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
+      detectorOld = hit_Old->detector();
+      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+      if (_debug && detectorOld == detector) {
+	cout << "The same detector for hit " << ihit << endl;
+	cout << "hit     \t" << *hit << endl;
+	if (hit_Old) 
+	  cout << "hitOld\t" << *hit_Old << endl;
+      }
+      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
+      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
+	while ((R_hit < R_hit_OLD)) {
+	  detectorContainer->setToDetector( detectorOld );
+	  if ( detectorContainer->moveIn()) {
+	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
+	    if (d == detector) break;
+	    detectorOld = d;
+	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+	    if (detectorOld->isActive()) {
+	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
+	      nI->initialize(d);
+	      add(nI,kOutsideIn);
+	    }
+	  }
+	}
+      }
+    }
+    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+    n->initialize(hit);
+    add(n,kOutsideIn);
+    detectorOld = (StiDetector*) detector;
+    hit_Old = hit;
+  }  
+#else  
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];
@@ -657,10 +629,29 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
     n->initialize(hit);
     add(n,kOutsideIn);
   }
+#endif
+#ifdef DO_TPCCATRACKER
+  if (firstPars){
+    firstNode->fitPars() = *firstPars;
+  }
+  if (firstErrs){ 
+    firstNode->fitErrs() = *firstErrs;
+      //    firstNode->resetError();
+  }
+  if (lastPars){
+    lastNode ->fitPars() = *lastPars;
+  }
+  if (lastErrs){ 
+    lastNode->fitErrs() = *lastErrs;
+      //    firstNode->resetError();
+  }
+  return 0;  
+#else /* !DO_TPCCATRACKER */
   int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
+#endif /* DO_TPCCATRACKER */
 }
 
 //_____________________________________________________________________________
@@ -1094,6 +1085,36 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
 }
+#ifdef DO_TPCCATRACKER
+StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
+{
+  if (firstNode==0 || lastNode==0)
+ {
+  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
+  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+ }
+
+  StiKalmanTrackNode *node = 0;
+  StiKalmanTrackNode* leaf = getLastNode();
+  StiKTNForwardIterator it(leaf);
+  StiKTNForwardIterator end = it.end();
+  for (;it!=end;++it) 
+  {
+    StiKalmanTrackNode& node_t = *it;
+    if (!node_t.isValid())		continue;
+    if (node_t.getChi2()>10000.) 	continue;
+    StiHit* hit = node_t.getHit();
+    if (!hit) 			continue;
+    if(hit->x()<58.f) continue;
+    node = &node_t;
+    return node;
+  }
+  
+  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
+  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");*/
+  return 0;
+}
+#endif /* DO_TPCCATRACKER */
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
 {
@@ -1452,22 +1473,9 @@ void StiKalmanTrack::removeLastNode()
   BFactory::Free(node);
 }
 //_____________________________________________________________________________
-
-
-/**
- * Public interface to protected method capable of returning two return values
- * used in this and derived StiCAKalmanTrack classes.
- */
 int StiKalmanTrack::refit() 
 {
-  int errType; // This return value is ignored
-  return refit(errType);
-}
-
-
-int StiKalmanTrack::refit(int &errType)
-{
-  errType = kNoErrors;
+  int errType = kNoErrors;
   
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
@@ -1498,7 +1506,7 @@ int StiKalmanTrack::refit(int &errType)
       if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
-      qA = StiKalmanTrack::diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
+      qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
         if (qA>0.5)		{fail=-2; errType = kBadQA; continue;} 
@@ -1562,7 +1570,11 @@ int StiKalmanTrack::refit(int &errType)
   }
 
   if (fail) setFlag(-1);
+#ifdef DO_TPCCATRACKER
+  return errType;
+#else /* !DO_TPCCATRACKER */
   return fail;
+#endif /* DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
@@ -1692,7 +1704,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.G(),hr.hZZ);
+    circ.AddErr(hr.A,hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1740,8 +1752,9 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
-    hh = (fabs(hh)<1e-10)? 0:1./hh;
-    P.ptin() = (hh)? curv*hh:1e-3;
+    assert(hh);
+    hh = 1./hh;
+    P.ptin() = curv*hh; 
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
@@ -1753,7 +1766,7 @@ double Xi2=0;
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.G());
+    cirl.StiEmx(E.A);
     TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
     E._cPP*=hh; E._cTP*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
@@ -1765,7 +1778,7 @@ double Xi2=0;
   return 0;
 }    
 //_____________________________________________________________________________
-double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
+double diff(const StiNodePars &p1,const StiNodeErrs &e1
            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;

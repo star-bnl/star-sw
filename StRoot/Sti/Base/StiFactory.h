@@ -1,6 +1,5 @@
 #ifndef StiFactory_H
 #define StiFactory_H 
-#include <stdexcept>
 #include <string.h>
 #include <assert.h>
 #include <typeinfo>
@@ -116,7 +115,7 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
   enum {FENCE = sizeof(double)+2*sizeof(long)+1};
   if (!fHTop)  {
     if (this->fCurCount >= this->fMaxCount) {
-    throw std::runtime_error("StiFactory::getInstance() - Too many instances");
+    throw runtime_error("StiFactory::getInstance() - Too many instances");
     }
     assert(this->fCurCount < this->fMaxCount);  
     if (this->fFastDel)    {

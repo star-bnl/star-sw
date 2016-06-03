@@ -1,4 +1,4 @@
-// $Id: StKFTrack.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StKFTrack.cxx,v 2.2.8.1 2016/06/03 15:48:59 smirnovd Exp $
 #include "StKFTrack.h"
 ClassImp(StKFTrack);
 //________________________________________________________________________________
@@ -54,6 +54,11 @@ std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p) {
   return os;
 }
 // $Log: StKFTrack.cxx,v $
+// Revision 2.2.8.1  2016/06/03 15:48:59  smirnovd
+// Revert "Squashed commit of the following:"
+//
+// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+//
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace
 //

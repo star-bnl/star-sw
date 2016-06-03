@@ -1,6 +1,6 @@
 #ifndef __StAnneling_h__
 #define __StAnneling_h__
-// $Id: StAnneling.h,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StAnneling.h,v 2.1.8.1 2016/06/03 15:48:59 smirnovd Exp $
 #include "TMath.h"
 #include "TObject.h"
 //________________________________________________________________________________
@@ -20,6 +20,11 @@ private:
   ClassDef(StAnneling,1)
 };
 // $Log: StAnneling.h,v $
+// Revision 2.1.8.1  2016/06/03 15:48:59  smirnovd
+// Revert "Squashed commit of the following:"
+//
+// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

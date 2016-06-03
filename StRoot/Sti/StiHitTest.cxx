@@ -38,8 +38,7 @@ void StiHitTest::doIt()
 {
   if (!fN) 		return;
   if (fW[0]>=0.) 	return;
-  for (int i=0;i<3;i++) {fX[i]/=fN;}
-  for (int i=0;i<9;i++) {fM[0][i]/=fN;}
+  for (int i=0;i<3*4;i++) {fX[i]/=fN;}
   for (int i=0;i<3;i++) {
     for (int j=0;j<3;j++) {
       fM[i][j] -= fX[i]*fX[j];

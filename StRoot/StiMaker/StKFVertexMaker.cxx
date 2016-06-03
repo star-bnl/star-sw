@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.6 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.6.8.1 2016/06/03 15:49:00 smirnovd Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -590,6 +590,11 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.6.8.1  2016/06/03 15:49:00  smirnovd
+// Revert "Squashed commit of the following:"
+//
+// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+//
 // Revision 2.6  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.8 2012/11/09 18:52:33 perev Exp $
+ * $Id: StiPullEvent.h,v 1.8.8.1 2016/06/03 15:49:02 smirnovd Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,11 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.8.8.1  2016/06/03 15:49:02  smirnovd
+ * Revert "Squashed commit of the following:"
+ *
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ *
  * Revision 1.8  2012/11/09 18:52:33  perev
  * Erros added
  *

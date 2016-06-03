@@ -26,9 +26,7 @@ enum {kBigLen = 20};
 void reset()				{memset(this,0,sizeof(StiNodeErrs));}
 double getDelta()  const 		{return sqrt(_cXX+_cYY+_cZZ);}
 double getDelta2() const 		{return     (_cXX+_cYY+_cZZ);}
-const double* G() const { return &_cXX;} 
-      double* G()       { return &_cXX;} 
-StiNodeErrs &operator*=(double f) 	{for (int i=0;i<kNErrs;i++){G()[i]*=f;}; return *this;}
+StiNodeErrs &operator*=(double f) 	{for (int i=0;i<kNErrs;i++){A[i]*=f;}; return *this;}
 StiNodeErrs &merge(double wt,StiNodeErrs &other);
 void rotate(double alpha,const StiNodePars &pars );
  int nan() const;
@@ -49,7 +47,7 @@ void zeroX();
 void print() const;
 
 public:	
-  double _cXX;
+union{double A[1];double _cXX;};
   double _cYX,_cYY;                       
   double _cZX,_cZY, _cZZ;                 
   double _cEX,_cEY, _cEZ, _cEE;           
@@ -59,12 +57,10 @@ public:
 class StiHitErrs{
 public:
 void reset()			 {memset(this,0,sizeof(*this));}
-StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){G()[i]*=f;};return *this;}
+StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
 void rotate(double angle);
-const double* G() const { return &hXX;} 
-      double* G()       { return &hXX;} 
-
-  double hXX;	
+union{
+  double hXX;		double A[1];};
   double hYX,hYY;                       
   double hZX,hZY, hZZ;                 
 };

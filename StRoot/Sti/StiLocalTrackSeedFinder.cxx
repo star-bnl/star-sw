@@ -60,7 +60,7 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
       try 
 	{
           StiHit *hit = &(*_hitIter);
-	  if (hit->timesUsed()) continue;
+	  if (hit->isUsed()) continue;
 	  if (fRxyMin && pow(hit->x(),2)+pow(hit->y(),2)<fRxyMin*fRxyMin) continue;
 	  track = makeTrack(&*_hitIter);
 	}

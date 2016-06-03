@@ -384,7 +384,7 @@ void StBemcHitList::initRun() {
     myTable->getStatus(BTOW, id, status);
     Int_t m,e,s;
     geomB->getBin(id,m,e,s);
-    Float_t eta=0,phi=0;
+    Float_t eta,phi;
     geomB->getEta(m,e,eta);
     geomB->getPhi(m,s,phi);  // -pi <= phi < pi
     if( phi < phiMin) phi+=2*TMath::Pi(); // I want phi in [0,2Pi]
@@ -407,7 +407,7 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
       Int_t m=rawHit[k]->module();
       Int_t e=rawHit[k]->eta();
       Int_t s=abs(rawHit[k]->sub());
-      Float_t eta=0,phi=0;
+      Float_t eta,phi;
       geomB->getEta(m,e,eta);
       geomB->getPhi(m,s,phi);  // -pi <= phi < pi
       if( phi < phiMin                ) phi += 2*TMath::Pi(); // I want phi in [0,2Pi]

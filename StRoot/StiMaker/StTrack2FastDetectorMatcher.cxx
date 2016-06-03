@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.5 2013/03/22 23:29:15 genevb Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.5.8.1 2016/06/03 15:49:00 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -304,6 +304,11 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.5.8.1  2016/06/03 15:49:00  smirnovd
+ * Revert "Squashed commit of the following:"
+ *
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ *
  * Revision 2.5  2013/03/22 23:29:15  genevb
  * Initialize mTotEve to zero
  *

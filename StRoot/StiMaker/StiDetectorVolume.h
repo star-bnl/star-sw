@@ -1,6 +1,6 @@
 #ifndef STAR_StiGeomMake
 #define STAR_StiGeomMake
-// $Id: StiDetectorVolume.h,v 2.5 2015/12/20 01:35:12 fisyak Exp $
+// $Id: StiDetectorVolume.h,v 2.5.2.1 2016/06/03 15:49:00 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "TVolume.h"

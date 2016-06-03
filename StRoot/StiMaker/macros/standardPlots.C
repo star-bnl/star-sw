@@ -1,10 +1,15 @@
 /*
  *
- * $Id: standardPlots.C,v 1.6 2002/08/26 22:17:15 andrewar Exp $
+ * $Id: standardPlots.C,v 1.6.14.1 2016/06/03 15:49:01 smirnovd Exp $
  *  A. Rose, WSU
  *  
   *
  * $Log: standardPlots.C,v $
+ * Revision 1.6.14.1  2016/06/03 15:49:01  smirnovd
+ * Revert "Squashed commit of the following:"
+ *
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ *
  * Revision 1.6  2002/08/26 22:17:15  andrewar
  * Added multi-file input functionality (see doRun() for examples of use). Added
  * cut string to provided easy equivalence of cut function in on-the-fly hists.

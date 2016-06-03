@@ -1,102 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.169.2.1 2016/06/02 16:45:42 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.169.2.2 2016/06/03 15:48:57 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.169.2.1  2016/06/02 16:45:42  smirnovd
- * Squashed changes on MAIN branch after StiCA_2016 was brached off
+ * Revision 2.169.2.2  2016/06/03 15:48:57  smirnovd
+ * Revert "Squashed commit of the following:"
  *
- * commit 0b534582b5bf40a64870088f6864387a7941a9be
- * Author: perev <perev>
- * Date:   Tue May 31 17:11:46 2016 +0000
- *
- *     Coverity
- *
- * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
- * Author: perev <perev>
- * Date:   Tue Apr 19 01:58:39 2016 +0000
- *
- *     Assignment out of array boundary removed(J.Lauret)
- *
- * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
- * Author: perev <perev>
- * Date:   Tue Apr 19 01:37:22 2016 +0000
- *
- *     WarnOff
- *
- * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
- * Author: perev <perev>
- * Date:   Fri Apr 15 20:47:42 2016 +0000
- *
- *     Warnoff
- *
- * commit b1b0f73cef0f5675bd84106241067329e0221079
- * Author: perev <perev>
- * Date:   Fri Apr 15 20:13:06 2016 +0000
- *
- *     Warnoff
- *
- * commit 393adde57febc06a90d054f71e621e8efd082e10
- * Author: perev <perev>
- * Date:   Wed Apr 13 23:08:44 2016 +0000
- *
- *     -opt2 proble solved. Array A[1] removed
- *
- * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
- * Author: perev <perev>
- * Date:   Mon Mar 28 00:17:55 2016 +0000
- *
- *     1st hit must be not used at all
- *
- * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
- * Author: perev <perev>
- * Date:   Mon Mar 28 00:15:53 2016 +0000
- *
- *     Add max number of tracks assigned to one hit
- *
- * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
- * Author: genevb <genevb>
- * Date:   Thu Feb 25 23:04:50 2016 +0000
- *
- *     kSsdId => kSstId
- *
- * commit a06d8162931b223b4a405ea5714e703b1cad14e3
- * Author: perev <perev>
- * Date:   Mon Dec 28 23:50:27 2015 +0000
- *
- *     Remove assert temporary
- *
- * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
- * Author: perev <perev>
- * Date:   Mon Dec 21 19:41:31 2015 +0000
- *
- *     bug #3166 assert vertex closer to 0,0 <9 removed
- *
- * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
- * Author: perev <perev>
- * Date:   Sat Dec 19 03:40:50 2015 +0000
- *
- *     assert rxy<4 ==> <9 temporary
- *
- * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
- * Author: perev <perev>
- * Date:   Fri Dec 18 03:50:06 2015 +0000
- *
- *     *** empty log message ***
- *
- * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
- * Author: perev <perev>
- * Date:   Thu Dec 3 19:12:24 2015 +0000
- *
- *     Remove redundant GTrack error: mFlag: is Negative
- *
- * Revision 2.171  2016/04/15 20:13:06  perev
- * Warnoff
- *
- * Revision 2.170  2016/04/13 23:08:44  perev
- * -opt2 proble solved. Array A[1] removed
+ * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
  *
  * Revision 2.169  2015/07/29 01:28:05  smirnovd
  * Added std:: to resolve ambiguity for isnan in g++ (4.8.2)
@@ -690,7 +602,7 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DPti=1.,DTan=0.05;
     mFE._cPP=DPti*DPti;
     mFE._cTT=DTan*DTan;
   } else {
-    for (int i=0;i<kNErrs;i++) mFE.G()[i] *=fak;
+    for (int i=0;i<kNErrs;i++) mFE.A[i] *=fak;
   }  
   mPE() = mFE;
 }
@@ -731,7 +643,7 @@ void StiKalmanTrackNode::get(double& alpha,
   alpha = _alpha;
   xRef  = getRefPosition();
   memcpy(x,mFP.P,kNPars*sizeof(mFP.x()));
-  memcpy(e,mFE.G(),sizeof(mFE));
+  memcpy(e,mFE.A,sizeof(mFE));
   chi2 = getChi2();
 }
 
@@ -837,7 +749,7 @@ enum {jX=0,jY,jZ,jE,jP,jT};
   F[jZ][jT] =  pt;
   
   
-  TCL::trasat(F[0],mFE.G(),e,3,kNPars);  
+  TCL::trasat(F[0],mFE.A,e,3,kNPars);  
 }
 //______________________________________________________________________________
 /**
@@ -887,7 +799,7 @@ void StiKalmanTrackNode::getGlobalRadial(double  x[6],double  e[15])
   memset(e,0,sizeof(*e)*15);
   for (int k1=0;k1<kNPars;k1++) {
   for (int k2=0;k2<kNPars;k2++) {
-    double cc = mFE.G()[idx66[k1][k2]];    
+    double cc = mFE.A[idx66[k1][k2]];    
     for (int j1=jPhi;j1<= 5;j1++){
     for (int j2=jPhi;j2<=j1;j2++){
       e[idx55[j1-1][j2-1]]+= cc*F[j1][k1]*F[j2][k2];
@@ -1348,7 +1260,7 @@ void StiKalmanTrackNode::propagateError()
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
   propagateMtx();
-  errPropag6(mFE.G(),mMtx().A,kNPars);
+  errPropag6(mFE.A,mMtx().A,kNPars);
   int force = (fabs(mgP.dl) > StiNodeErrs::kBigLen); 
   mFE.recov(force);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
@@ -1743,7 +1655,7 @@ assert(mFE.zign()>0); ///???
     PrPP(updateNode,R1);
     PrPP(updateNode,V);
   }
-  TRSymMatrix C(kNPars,mFE.G());  
+  TRSymMatrix C(kNPars,mFE.A);  
   TRSymMatrix R(H,TRArray::kAxSxAT,C);
   R += V;
   TRSymMatrix G(R,TRArray::kInverted); 
@@ -1866,7 +1778,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP._sinCA = sin(mFP.eta());
   mFP._cosCA = cos(mFP.eta());
 #ifdef Sti_DEBUG  
-  TRSymMatrix C(kNPars,mFE.G());
+  TRSymMatrix C(kNPars,mFE.A);
   if (debug() & 4) {PrPP(rotate,C);}
 #endif
 //cout << " mFP._sinCA:"<<mFP._sinCA<<endl;
@@ -2191,7 +2103,7 @@ void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
      for (int is=-1;is<=1;is+=2) {
        myNode = *this;
        backStatics(save);
-       double step = 0.1*sqrt((mFE.G())[idx66[ipar][ipar]]);
+       double step = 0.1*sqrt((mFE.A)[idx66[ipar][ipar]]);
        if (step>maxStep[ipar]) step = maxStep[ipar];
 //       if (step>0.1*fabs(pars[ipar])) step = 0.1*pars[ipar];
 //       if (fabs(step)<1.e-7) step = 1.e-7;
@@ -2321,7 +2233,7 @@ static const char *HHH = "xyzXYZ";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
   printf("%p(%s)",(void*)this,ts.Data());
   if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
-  double val=-9999;
+  double val;
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
     switch(i) {

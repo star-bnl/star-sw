@@ -1,6 +1,6 @@
 #ifndef __StKFVertex_h__
 #define __StKFVertex_h__
-// $Id: StKFVertex.h,v 2.4 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StKFVertex.h,v 2.4.8.1 2016/06/03 15:49:00 smirnovd Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "StKFTrack.h"
@@ -68,6 +68,11 @@ private:
   ClassDef(StKFVertex,0)
 };
 // $Log: StKFVertex.h,v $
+// Revision 2.4.8.1  2016/06/03 15:49:00  smirnovd
+// Revert "Squashed commit of the following:"
+//
+// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+//
 // Revision 2.4  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //
