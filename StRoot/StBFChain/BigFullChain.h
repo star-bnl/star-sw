@@ -1019,6 +1019,9 @@ Bfc_st BFC[] = { // standard chains
   {"B2015b"  ,"","","ry2015b,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                  "Base chain for run 2015 with y2015b geometry",kFALSE},
 
+  {"B2015c"  ,"","","ry2015c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                  "Base chain for run 2015 with y2015c geometry",kFALSE},
+
   {"pp2015","" ,"",
    "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2015 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
@@ -1030,6 +1033,10 @@ Bfc_st BFC[] = { // standard chains
   {"pp2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
+  {"pp2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   {"P2015","" ,"",
@@ -1043,6 +1050,10 @@ Bfc_st BFC[] = { // standard chains
   {"P2015b","" ,"",
    "B2015b,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for year 2015b data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+
+  {"P2015c","" ,"",
+   "B2015c,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for year 2015c data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // Year 16 initial chains - no data to really test yet but placeholder
@@ -1171,7 +1182,9 @@ Bfc_st BFC[] = { // standard chains
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
-  {"min2trkVtx"     ,""  ,"","",""                 ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"beamLine3D"  ,""  ,"","",""                                 ,"","Use beamline in 3D vertex fit",kFALSE},
+  {"min2trkVtx"  ,""  ,"","",""                    ,"","...only 2 tracks needed for vertex finding",kFALSE},
+  {"hitreuseon"  ,""  ,"","",""                     ,"","...do re-use hits for other tracks in Sti",kFALSE},
   // WARNING: introduction of usePct4Vtx with default:false breaks backward compatibility.
   // See related code in StBFChain.cxx for details
   {"usePct4Vtx"     ,""  ,"","",""                ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
@@ -1444,11 +1457,13 @@ Bfc_st BFC[] = { // standard chains
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
 
-  {"istRaw",     "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
-  {"istCluster", "", "", "istRaw","StIstClusterMaker",     "StIstClusterMaker","IST Cluster maker", kFALSE},
+  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker", 
+                                                             "StIstSimMaker", "IST Slow simulator", kFALSE},
+  {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
+  {"istRawHit",  "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
+  {"istCluster", "", "", "istRawHit","StIstClusterMaker",  "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit",     "", "", "event,istCluster", "StIstHitMaker",       "StIstHitMaker","IST Hit Maker",kFALSE},
 
-  {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat"      ,"","","sst_daq"                             ,"","","SST full chain for Real Data",kFALSE},
@@ -1581,7 +1596,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                           ,"","Sti,StiUtilities","Load Sti",kFALSE},
-  {"StiCALib" ,"","",""                                      ,"","TPCCATracker,StiCA","Load Sti+CA",kFALSE},
+  {"StiCALib" ,"","",""                                                   ,"","StiCA","Load Sti+CA",kFALSE},
   {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd",kFALSE},
@@ -1609,7 +1624,7 @@ Bfc_st BFC[] = { // standard chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
-  {"StiCA"    ,"Sti","","Sti,StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+  {"StiCA"    ,"Sti","","[-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"HLTCA"    ,""  ,"Sti","",                  "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
   {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
@@ -1795,6 +1810,7 @@ Bfc_st BFC[] = { // standard chains
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"SvtHitFilt"  ,"", "","HitFilt",                                    "","","SVT Hit filter Maker",kFALSE},
   {"TpcHitFilt"  ,"", "","HitFilt",                       "","","filter out TPC Hits not on tracks",kFALSE},
+  {"HftHitFilt"  ,"", "","HitFilt",                                 "","","filter out non-HFT hits",kFALSE},
   {"KeepTpcHit"  ,"", "","HitFilt",                   "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
   {"KeepSvtHit"  ,"", "","HitFilt",                   "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"KeepFgtHit"  ,"", "","HitFilt",                   "","","Keep all FGT hits in StHitFilterMaker",kFALSE},
