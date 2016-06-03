@@ -1,11 +1,32 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.7 2016/06/03 16:07:13 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.7 2016/06/03 16:07:13 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.8 2016/06/03 16:19:49 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.8 2016/06/03 16:19:49 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.139.4.8  2016/06/03 16:19:49  smirnovd
+ * Squashed proposed changes from Irakli and the focus group
+ *
+ * These changes do not modify pure Sti code. The changes modify the code protected
+ * with preprocessor directives such as DO_TPCCATRACKER and therefore is not
+ * included in the Sti libary.
+ *
+ * StiTPCCATrackerInterface: Added DO_TPCCATRACKER_EFF_PERFORMANCE preprocessor
+ * directives + other changes
+ *
+ * StiTpcSeedFinder: Debug related Print() function added
+ *
+ * StiKalmanTrackFinder: Added DO_TPCCATRACKER_EFF_PERFORMANCE preprocessor directives
+ *
+ * assert removed to allow for multiple use of hit
+ *
+ * StiKalmanTrack: Change from original code found in "eval"
+ *
+ * This change was reverted by Irakli but in fact needed to avoid triggereing of assert
+ * See commit 4d993f28
+ *
  * Revision 2.139.4.7  2016/06/03 16:07:13  smirnovd
  * Sync with MAIN branch as of 2016-05-31
  *
@@ -1753,9 +1774,8 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
-    assert(hh);
-    hh = 1./hh;
-    P.ptin() = curv*hh; 
+    hh = (fabs(hh)<1e-10)? 0:1./hh;
+    P.ptin() = (hh)? curv*hh:1e-3;
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
