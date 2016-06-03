@@ -1,15 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.139.4.6 2016/06/03 15:48:57 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.139.4.6 2016/06/03 15:48:57 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.7 2016/06/03 16:07:13 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.139.4.7 2016/06/03 16:07:13 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.139.4.6  2016/06/03 15:48:57  smirnovd
- * Revert "Squashed commit of the following:"
+ * Revision 2.139.4.7  2016/06/03 16:07:13  smirnovd
+ * Sync with MAIN branch as of 2016-05-31
  *
- * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ * Revision 2.140  2016/04/13 23:08:44  perev
+ * -opt2 proble solved. Array A[1] removed
  *
  * Revision 2.139  2015/04/02 16:29:16  perev
  * Member mCombUsed introdused to memorize combination of hits selected
@@ -1704,7 +1705,7 @@ double Xi2=0;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
     hr = targetNode->getGlobalHitErrs(hit);
-    circ.AddErr(hr.A,hr.hZZ);
+    circ.AddErr(hr.G(),hr.hZZ);
     nNode++;
   }  
   if (!nNode) 				return 1; 
@@ -1766,7 +1767,7 @@ double Xi2=0;
     if(ians) {nNode--; targetNode->setInvalid();continue;}
     P = targetNode->fitPars();
     StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.A);
+    cirl.StiEmx(E.G());
     TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
     E._cPP*=hh; E._cTP*=hh;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;

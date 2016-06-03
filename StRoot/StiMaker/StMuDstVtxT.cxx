@@ -1,4 +1,4 @@
-// $Id: StMuDstVtxT.cxx,v 2.6.2.1 2016/06/03 15:49:00 smirnovd Exp $
+// $Id: StMuDstVtxT.cxx,v 2.6.2.2 2016/06/03 16:07:14 smirnovd Exp $
 #include "StMuDstVtxT.h"
 #include "StKFVertex.h"
 ClassImp(StMuDstVtxT);
@@ -14,10 +14,11 @@ std::ostream&  operator<<(std::ostream& os,  const StMuDstVtxT& v) {
   return os;
 }
 // $Log: StMuDstVtxT.cxx,v $
-// Revision 2.6.2.1  2016/06/03 15:49:00  smirnovd
-// Revert "Squashed commit of the following:"
+// Revision 2.6.2.2  2016/06/03 16:07:14  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.6  2015/12/20 01:35:12  fisyak
+// Move back commits done by mistate
 //
 // Revision 2.4  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013

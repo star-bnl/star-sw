@@ -1,6 +1,6 @@
 #ifndef __StKFTrack_h__
 #define __StKFTrack_h__
-// $Id: StKFTrack.h,v 2.2.8.1 2016/06/03 15:49:00 smirnovd Exp $
+// $Id: StKFTrack.h,v 2.2.8.2 2016/06/03 16:07:14 smirnovd Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "KFParticle.h"
@@ -41,10 +41,8 @@ private:
   ClassDef(StKFTrack,0)
 };
 // $Log: StKFTrack.h,v $
-// Revision 2.2.8.1  2016/06/03 15:49:00  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.2.8.2  2016/06/03 16:07:14  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace

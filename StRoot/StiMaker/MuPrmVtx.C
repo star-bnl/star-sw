@@ -2,7 +2,7 @@
    Reconstruction of primary vertices from MuDst.
    In directory where you have *MuDst.root files run
    root.exe lMuDstK.C MuPrmVtx.C+
-   $Id: MuPrmVtx.C,v 2.3.8.1 2016/06/03 15:48:59 smirnovd Exp $
+   $Id: MuPrmVtx.C,v 2.3.8.2 2016/06/03 16:07:14 smirnovd Exp $
  */
 #define DEBUG
 #define __IDTRUTH__
@@ -566,10 +566,8 @@ void MuPrmVtx(const Char_t *files = "./*MuDst.root", const Char_t *Out="") {
 }
 //________________________________________________________________________________
 // $Log: MuPrmVtx.C,v $
-// Revision 2.3.8.1  2016/06/03 15:48:59  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.3.8.2  2016/06/03 16:07:14  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 2.3  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013

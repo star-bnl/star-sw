@@ -5,10 +5,8 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
-// Revision 1.2.14.1  2016/06/03 15:49:01  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 1.2.14.2  2016/06/03 16:07:15  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 1.2  2002/09/15 15:54:35  andrewar
 // Added bool simulated to argument list; true = simulated data,

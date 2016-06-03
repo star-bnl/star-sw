@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.7.8.4 2016/06/03 15:48:58 smirnovd Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.7.8.5 2016/06/03 16:07:13 smirnovd Exp $
 #ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
@@ -91,10 +91,8 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 }
 #endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
-// Revision 2.7.8.4  2016/06/03 15:48:58  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.7.8.5  2016/06/03 16:07:13  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 2.7  2012/05/07 14:55:38  fisyak
 // Clean up from hard coded Tpc parameters

@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.8.2.1 2016/06/03 15:49:00 smirnovd Exp $
+// $Id: StiDetectorVolume.cxx,v 2.8.2.2 2016/06/03 16:07:15 smirnovd Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"

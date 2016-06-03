@@ -1,15 +1,34 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.117.2.2 2016/06/03 15:49:00 smirnovd Exp $
+ * $Id: StiStEventFiller.cxx,v 2.117.2.3 2016/06/03 16:07:15 smirnovd Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
- * Revision 2.117.2.2  2016/06/03 15:49:00  smirnovd
- * Revert "Squashed commit of the following:"
+ * Revision 2.117.2.3  2016/06/03 16:07:15  smirnovd
+ * Sync with MAIN branch as of 2016-05-31
  *
- * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ * Revision 2.118  2016/04/13 23:09:13  perev
+ * -opt2 proble solved. Array A[1] removed
+ *
+ * Revision 2.117  2015/12/28 23:50:27  perev
+ * Remove assert temporary
+ *
+ * Revision 2.116  2015/12/21 19:41:31  perev
+ * bug #3166 assert vertex closer to 0,0 <9 removed
+ *
+ * Revision 2.115  2015/12/20 01:46:56  fisyak
+ * Move back commits done by mistake
+ *
+ * Revision 2.113  2015/12/19 03:40:50  perev
+ * assert rxy<4 ==> <9 temporary
+ *
+ * Revision 2.112  2015/12/18 03:50:06  perev
+ * *** empty log message ***
+ *
+ * Revision 2.111  2015/12/03 19:12:24  perev
+ * Remove redundant GTrack error: mFlag: is Negative
  *
  * Revision 2.110  2015/03/27 20:13:43  perev
  * Add printout of good track hits
@@ -703,8 +722,8 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
           int ibad = gTrack->bad();
           if (ibad) {
 	  errh.Add(ibad);
+            if (errh.Say(ibad).Contains("Negative")) continue;
 	    printf("GTrack error: %s\n",errh.Say(ibad).Data());
-//VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
             continue;
           }
 	  fillTrackCount2++;
@@ -817,6 +836,11 @@ void StiStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+//      double rxy = detInfo->firstPoint().perp();
+//      assert(rxy < 9);
+      auto myDif = (detInfo->firstPoint()-vertexPosition);
+//??      assert(myDif.mag()<0.01);
+
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
@@ -833,6 +857,8 @@ void StiStEventFiller::fillEventPrimaries()
 //VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
       continue;
       }
+//      rxy = pTrack->geometry()->origin().perp();
+//      assert(rxy<9);
       fillTrackCount2++;
       if (kTrack->getPointCount()<15) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
@@ -885,9 +911,11 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!node->isFitted()) 	continue;
 
       const StiDetector *detector = node->getDetector();
-      if (!detector) 		continue;
       assert(detector == stiHit->detector());
-      assert(stiHit->timesUsed());
+      assert(!detector || stiHit->timesUsed());
+      if (!fistNode) fistNode = node;
+      lastNode = node;
+      if (!detector) 		continue;
 
 //		Count used hits for tracks tpc hits >10
       if (nTpcHits > 10) {
@@ -898,8 +926,6 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
           if (mUsedGits[0]<gid) mUsedGits[0]=gid;
           mUsedGits[gid]++;
       } }
-      if (!fistNode) fistNode = node;
-      lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
@@ -1379,7 +1405,7 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
-    for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
+    for (int j=1;j<=i;j++) {sete[jj++]=errs.G()[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
@@ -1491,7 +1517,7 @@ enum dcaEmx {kImpImp,
   const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
   const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
   StiHitErrs  mHrr;
-  memcpy(mHrr.A, (inf)? inf->mHrr.A : node->hitErrs(),sizeof(StiHitErrs));
+  memcpy(mHrr.G(), (inf)? inf->mHrr.G() : node->hitErrs(),sizeof(StiHitErrs));
 
   StiPullHit aux;
 // local frame

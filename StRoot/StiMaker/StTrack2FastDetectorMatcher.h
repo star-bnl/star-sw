@@ -1,7 +1,7 @@
 /*!
  * \class StTrack2FastDetectorMatcher
  * \author Jan Balewski, July 2004
- * $Id: StTrack2FastDetectorMatcher.h,v 2.3.8.1 2016/06/03 15:49:00 smirnovd Exp $
+ * $Id: StTrack2FastDetectorMatcher.h,v 2.3.8.2 2016/06/03 16:07:15 smirnovd Exp $
  *
  */
 #include "TObject.h"
@@ -74,10 +74,8 @@ class StTrack2FastDetectorMatcher: public TObject {
 /***************************************************************************
  *
  * $Log: StTrack2FastDetectorMatcher.h,v $
- * Revision 2.3.8.1  2016/06/03 15:49:00  smirnovd
- * Revert "Squashed commit of the following:"
- *
- * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ * Revision 2.3.8.2  2016/06/03 16:07:15  smirnovd
+ * Sync with MAIN branch as of 2016-05-31
  *
  * Revision 2.3  2013/01/18 15:03:37  fisyak
  * Fix TrackData data name clash with StiPPVertexFinder

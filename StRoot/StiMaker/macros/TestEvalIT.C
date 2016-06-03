@@ -1,12 +1,10 @@
 //
-// $Id: TestEvalIT.C,v 1.15.10.1 2016/06/03 15:49:01 smirnovd Exp $
+// $Id: TestEvalIT.C,v 1.15.10.2 2016/06/03 16:07:15 smirnovd Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
-// Revision 1.15.10.1  2016/06/03 15:49:01  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 1.15.10.2  2016/06/03 16:07:15  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 1.15  2006/08/15 21:42:27  jeromel
 // Fix rhic -> rhic.bnl.gov

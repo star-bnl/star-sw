@@ -162,6 +162,7 @@ public:
   virtual void sortHits();
   //Ignore hits marked as used (std::stable_partition)
   void partitionUsedHits();
+  void setMaxTimes(int nTimes);
   vector<StiHit*> & getHits();
   vector<StiHit*> & getHits(Filter<StiHit> & filter);
   vector<StiHit*> & getHits(StiHit& ref, double dY, double dZ, bool fetchAll=false);
@@ -264,7 +265,7 @@ inline bool StiHitContainer::hasDetector(const StiDetector* layer)
 {  
    double refangle = layer->getPlacement()->getLayerAngle();
    double position = layer->getPlacement()->getLayerRadius();
-   return  layer ? hasKey(refangle,position) : false;  
+   return  hasKey(refangle,position);  
 }
 /// Get all hits from the specified detector component
 inline vector<StiHit*>& StiHitContainer::getHits(const StiDetector* layer)

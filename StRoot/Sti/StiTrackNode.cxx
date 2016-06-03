@@ -145,7 +145,6 @@ StiDebug::Break(nCall);
  double XX,XN,L;
  N[0] = -Dp[1];
  N[1] =  Dp[0];  
- N[2] =  0.0;
  XX = MAG2(Xp); //X*X;  
  XN = DOT(Xp,N);//X*N;
 
@@ -278,25 +277,25 @@ double StiTrackNode::getRefPosition() const
 //______________________________________________________________________________
 double StiNodeErrs::operator()(int i,int j) const
 {
-  return A[idx66[i][j]];
+  return G()[idx66[i][j]];
 }
 //______________________________________________________________________________
 StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
-   for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
+   for (int i=0;i<kNErrs;i++) {G()[i] = wt0*G()[i] + wt*other.G()[i];}
 
    return *this;
 }
 //______________________________________________________________________________
 void StiNodeErrs::get00(      double *a) const
 {
-   memcpy(a,A,6*sizeof(double));
+   memcpy(a,G(),6*sizeof(double));
 }
 //______________________________________________________________________________
 void StiNodeErrs::set00(const double *a) 
 {
-   memcpy(A,a,6*sizeof(double));
+   memcpy(G(),a,6*sizeof(double));
 
 }
 //______________________________________________________________________________
@@ -308,6 +307,7 @@ void StiNodeErrs::get10(double *a) const
 // 6: 30 31 32 33
 //10: 40 41 42 43 44
 //15: 50 51 52 53 54 55
+  const double *A = G();
   memcpy(a+0,A+ 6,3*sizeof(double));
   memcpy(a+3,A+10,3*sizeof(double));
   memcpy(a+6,A+15,3*sizeof(double));
@@ -315,6 +315,7 @@ void StiNodeErrs::get10(double *a) const
 //______________________________________________________________________________
 void StiNodeErrs::set10(const double *a) 
 {
+  double *A = G();
   memcpy(A+ 6,a+0,3*sizeof(double));
   memcpy(A+10,a+3,3*sizeof(double));
   memcpy(A+15,a+6,3*sizeof(double));
@@ -322,6 +323,7 @@ void StiNodeErrs::set10(const double *a)
 //______________________________________________________________________________
 void StiNodeErrs::get11(      double *a) const
 {
+  const double *A = G();
   memcpy(a+0,A+ 9,1*sizeof(double));
   memcpy(a+1,A+13,2*sizeof(double));
   memcpy(a+3,A+18,3*sizeof(double));
@@ -329,6 +331,7 @@ void StiNodeErrs::get11(      double *a) const
 //______________________________________________________________________________
 void StiNodeErrs::set11(const double *a) 
 {
+  double *A = G();
   memcpy(A+ 9,a+0,1*sizeof(double));
   memcpy(A+13,a+1,2*sizeof(double));
   memcpy(A+18,a+3,3*sizeof(double));
@@ -336,6 +339,7 @@ void StiNodeErrs::set11(const double *a)
 //______________________________________________________________________________
 void StiNodeErrs::zeroX() 
 { 
+  double *A = G();
   for (int i=0;i<kNPars;i++) {A[idx66[i][0]]=0;}
 }
 //____________________________________________________________
@@ -343,6 +347,7 @@ void StiNodeErrs::rotate(double alpha,const StiNodePars &pars)
 {
 // it is rotation by -alpha
 
+  double *A = G();
   double ca = cos(alpha),sa=sin(alpha);
   double dX = (fabs(pars._cosCA)<1e-5)? 1e-5:pars._cosCA; 
   double dYdX = pars._sinCA/dX;
@@ -366,12 +371,12 @@ void StiNodeErrs::recov(int force)
 {
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
+  double *A = G();
 
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
 
    double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
-   int isTouched[kNPars]={0};
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
      double &aii = A[li+i];
      if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
@@ -383,7 +388,7 @@ StiDebug::Break(nCall);
        if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
        double qwe = aij*aij/(dia[i]*dia[j]);
        if (corrMax>=qwe) continue;
-       corrMax=qwe; isTouched[i]=1; isTouched[j]=1;
+       corrMax=qwe;
    } } 
    if (corrMax>=chekCORRMAX) { 
      corrMax = sqrt(corrMax/recvCORRMAX);
@@ -402,7 +407,7 @@ StiDebug::Break(nCall);
 //______________________________________________________________________________
 void StiNodeErrs::print() const
 {
-   const double *d = A;
+   const double *d = G();
    for (int n=1;n<=6;n++) {
      LOG_DEBUG << Form("%d - ",n);
      for (int i=0;i<n;i++){LOG_DEBUG << Form("%g\t",*(d++));}; LOG_DEBUG << endm;
@@ -412,6 +417,8 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
+  
+  const double *A = G();
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -448,6 +455,7 @@ RETN:
 //____________________________________________________________
 double StiNodeErrs::zign() const
 {
+   const double *A = G();
    double dia[kNPars];
    double minCorr = 1e11;
    for (int i=1,li=1;i<kNPars ;li+=++i) {
@@ -468,8 +476,8 @@ double StiNodeErrs::sign() const
 {
    enum {n=kNPars};
    double ans=3e33;
-   const double *a = A;
-   double *xx = (double *)A;
+   const double *a = G();
+   double *xx = (double *)G();
    double save = *xx; if (!save) *xx = 1;
    double B[kNErrs];
          double *b = B;
@@ -536,6 +544,7 @@ RETN: *xx=save;
 //______________________________________________________________________________
 int StiNodeErrs::nan() const
 {
+  const double *A = G();
   for (int i=0; i<kNPars;i++) {
     if (!finite(A[i])) return 100+i;
   }
@@ -555,7 +564,9 @@ int StiNodePars::check(const char *pri) const
   if (fabs(hz())>=1e-5 && fabs(tmp)> 1e-3*fabs(curv()))    {ierr=1313; goto FAILED;}
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
   if(ierr) goto FAILED;
-  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
+//  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
+  if (fabs(_cosCA) > 1) {ierr = 12;}
+  if (fabs(_sinCA) > 1) {ierr = 13;}
 FAILED: 
   if (!ierr) return ierr;
   if (!pri ) return ierr;
@@ -604,8 +615,9 @@ void StiNodePars::rotate(double alpha)
 //______________________________________________________________________________
 int StiNodePars::nan() const
 {
+  const double *d = &(_cosCA);
   for (int i=-2; i<=kHz;i++) {
-    if (!finite(P[i])) return 100+i;
+    if (!finite(*(d++))) return 100+i;
   }
   return 0;
 }
@@ -613,7 +625,8 @@ int StiNodePars::nan() const
 void StiNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
-  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],P[i]);}
+  const double *d = P-2;
+  for (int i=-2;i<kNPars+1;i++) {LOG_DEBUG << Form("%s = %g, ",tit[i+2],*(d++));}
   LOG_DEBUG << endm;
 }   
 //______________________________________________________________________________

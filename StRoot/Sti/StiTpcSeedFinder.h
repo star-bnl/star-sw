@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 2.4.8.7 2016/06/03 15:48:58 smirnovd Exp $
+// $Id: StiTpcSeedFinder.h,v 2.4.8.8 2016/06/03 16:07:13 smirnovd Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -28,10 +28,8 @@ class StiTpcSeedFinder {
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
-// Revision 2.4.8.7  2016/06/03 15:48:58  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.4.8.8  2016/06/03 16:07:13  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 2.4  2013/01/14 22:21:14  fisyak
 // Clean up unused variables

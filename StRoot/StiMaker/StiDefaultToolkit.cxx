@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.46.2.2 2016/06/03 15:49:00 smirnovd Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.46.2.3 2016/06/03 16:07:15 smirnovd Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,10 +19,8 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
- * Revision 2.46.2.2  2016/06/03 15:49:00  smirnovd
- * Revert "Squashed commit of the following:"
- *
- * This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+ * Revision 2.46.2.3  2016/06/03 16:07:15  smirnovd
+ * Sync with MAIN branch as of 2016-05-31
  *
  * Revision 2.46  2015/08/28 23:57:53  perev
  * Cleanup

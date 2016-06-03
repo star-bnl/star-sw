@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.h,v 2.4.8.1 2016/06/03 15:49:00 smirnovd Exp $
+// $Id: StKFVertexMaker.h,v 2.4.8.2 2016/06/03 16:07:14 smirnovd Exp $
 
 #ifndef STAR_StKFVertexMaker
 #define STAR_StKFVertexMaker
@@ -71,7 +71,7 @@ class StKFVertexMaker : public StMaker {
   TCanvas                 *fc1;
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.4.8.1 2016/06/03 15:49:00 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.4.8.2 2016/06/03 16:07:14 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -79,10 +79,8 @@ class StKFVertexMaker : public StMaker {
 };
 #endif
 // $Log: StKFVertexMaker.h,v $
-// Revision 2.4.8.1  2016/06/03 15:49:00  smirnovd
-// Revert "Squashed commit of the following:"
-//
-// This reverts commit b0c5699a781ed8e5724e065390d3870af5de5b7c.
+// Revision 2.4.8.2  2016/06/03 16:07:14  smirnovd
+// Sync with MAIN branch as of 2016-05-31
 //
 // Revision 2.4  2014/08/06 11:43:59  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
