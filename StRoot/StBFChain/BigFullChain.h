@@ -1622,7 +1622,7 @@ Bfc_st BFC[] = { // standard chains
   {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""	     ,"","...VFPPVEv with no Btof ",kFALSE},
   // Sti/Stv chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
-   ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
+   ,                      "TPCCATracker,StiCA,StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
   {"StiCA"    ,"Sti","","Sti,StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
