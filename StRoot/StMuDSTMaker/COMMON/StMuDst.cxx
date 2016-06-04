@@ -1575,7 +1575,7 @@ map<Int_t,Int_t> &StMuDst::IdKFTk2Indx() {
     for (Int_t k = 0; k < N; k++) {
       KFParticle*                 kftrack = KFtrack(k);
       if (! kftrack) continue;
-      IdKFTk2IndxMap[kftrack->GetID()] = k+1; // ! shift by 1 in order to pick up missing entries
+      IdKFTk2IndxMap[kftrack->Id()] = k+1; // ! shift by 1 in order to pick up missing entries
     }
   }
   return *&IdKFTk2IndxMap;
@@ -1587,7 +1587,7 @@ map<Int_t,Int_t> &StMuDst::IdKFVx2Indx() {
     for (Int_t k = 0; k < N; k++) {
       const KFVertex* kfv = KFvertex(k);
       if (! kfv) continue;
-      IdGlTk2IndxMap[kfv->GetID()] = k+1; // ! shift by 1 in order to pick up missing entries
+      IdGlTk2IndxMap[kfv->Id()] = k+1; // ! shift by 1 in order to pick up missing entries
     }
   }
   return *&IdGlTk2IndxMap;
