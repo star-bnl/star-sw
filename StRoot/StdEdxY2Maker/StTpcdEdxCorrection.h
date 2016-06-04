@@ -37,34 +37,34 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector  {kTpcOuter = 0, kTpcInner = 1};
   enum EOptions {
-    kUncorrected   = 0, //U
-    kEdge             , //E correction near edge of chamber
-    kAdcCorrection    , //R
-    kTpcdCharge       , //D
-    kTpcrCharge       , //D
-    kTpcCurrentCorrection,
-    kTpcRowQ          ,
-    kTpcSecRowB       , //S
-    kTpcSecRowC       , //S
-    ktpcPressure      , //P
-    ktpcTime          , //t
-    kDrift            , //O
-    kMultiplicity     , //M
-    kzCorrection      , //Z
-    ktpcMethaneIn     , //m
-    ktpcGasTemperature, //T
-    ktpcWaterOut      , //W 
-    kSpaceCharge      , //C space charge near the wire
-    kPhiDirection     , //p correction wrt local interception angle 
-    kdXCorrection     , //X
-    kTpcPadTBins      , //d
-    kTpcZDC           ,
-    kTpcNoAnodeVGainC ,
-    kTpcLast          ,
-    kTpcLengthCorrection,
-    kTpcLengthCorrectionMDF,
-    kTpcdEdxCor       ,
-    kTpcAllCorrections
+    kUncorrected   = 0,     //U   0 				           
+    kEdge             ,     //E   1 correction near edge of chamber	     
+    kAdcCorrection    ,     //R   2					     
+    kTpcdCharge       ,     //D   3					     
+    kTpcrCharge       ,     //D   4					     
+    kTpcCurrentCorrection,  //    5   					     
+    kTpcRowQ          ,     //    6	 					       	   
+    kTpcSecRowB       ,     //S   7					     
+    kTpcSecRowC       ,     //S   8					     
+    ktpcPressure      ,     //P   9					     
+    ktpcTime          ,     //t  10					     
+    kDrift            ,     //O  11					     
+    kMultiplicity     ,     //M  12					     
+    kzCorrection      ,     //Z  13					     
+    ktpcMethaneIn     ,     //m  13					     
+    ktpcGasTemperature,     //T  15					     
+    ktpcWaterOut      ,     //W	 16 				       	   
+    kSpaceCharge      ,     //C	 17 space charge near the wire	       	   
+    kPhiDirection     ,     //p	 18 correction wrt local interception angle  
+    kdXCorrection     ,     //X  19					     
+    kTpcPadTBins      ,     //d  20					     
+    kTpcZDC           ,     //   21					     
+    kTpcNoAnodeVGainC ,     //   22					     
+    kTpcLast          ,     // 	 23                                          
+    kTpcLengthCorrection,   // 	 24                                          
+    kTpcLengthCorrectionMDF,// 	 25					   
+    kTpcdEdxCor       ,     // 	 26					   
+    kTpcAllCorrections      // 	 27                                          
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();

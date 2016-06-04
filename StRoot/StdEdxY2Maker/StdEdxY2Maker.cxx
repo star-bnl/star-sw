@@ -680,7 +680,8 @@ Int_t StdEdxY2Maker::Make(){
 	//	CdEdx[NdEdx].dE     = tpcHit->chargeModified();
 	CdEdx[NdEdx].dE     = tpcHit->charge();
 	//	CdEdx[NdEdx].dCharge= tpcHit->chargeModified()/tpcHit->charge() - 1.;
-	CdEdx[NdEdx].dCharge= tpcHit->chargeModified() - tpcHit->charge();
+	//	CdEdx[NdEdx].dCharge= tpcHit->chargeModified() - tpcHit->charge();
+	CdEdx[NdEdx].dCharge = 0;
 	Int_t p1 = tpcHit->minPad();
 	Int_t p2 = tpcHit->maxPad();
 	Int_t t1 = tpcHit->minTmbk();
@@ -714,6 +715,8 @@ Int_t StdEdxY2Maker::Make(){
 	if (iok) {BadHit(4+iok, tpcHit->position()); continue;} 
 	if (fZOfGoodHits) fZOfGoodHits->Fill(tpcHit->position().z());
 	if (NdEdx < kNdEdxMax) {
+	  tpcHit->setChargeModified(CdEdx[NdEdx].dEdx);
+	  //	  tpcHit->setdX(CdEdx[NdEdx].dx);
 	  TrackLength         += CdEdx[NdEdx].dx;
 	  NdEdx++; 
 	  NoOfTpcHitsUsed++; 	
