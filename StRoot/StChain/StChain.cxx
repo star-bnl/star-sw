@@ -49,6 +49,7 @@
 #include "StCloseFileOnTerminate.h"
 #include "TApplication.h"
 #include "TError.h"
+#include "TEnv.h"
 ClassImp(StChain)
 
 //_____________________________________________________________________________
@@ -131,6 +132,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 {
   TBenchmark evnt;
   int jCur=0,iMake=0;
+  Bool_t quiet = gEnv->GetValue("quiet", 0);
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
 // Add a record to MySQL tracking Db     
@@ -212,12 +214,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      if (iMake%10 == kStEOF || iMake%10==kStFatal)	break;
      mNTotal++;
      evnt.Stop("QAInfo:");
+     if (! quiet) {
      //  evnt.Show("QAInfo:");
      LOG_QA << Form
      /*printf */ ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds",
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
+     }
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
 // Add a record to MySQL tracking Db     

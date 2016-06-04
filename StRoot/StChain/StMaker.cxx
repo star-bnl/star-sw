@@ -37,7 +37,7 @@
 #include "TList.h"
 #include "TClonesArray.h"
 #include "TBrowser.h"
-
+#include "TEnv.h"
 #include "StChainOpt.h"
 #include "TObjectSet.h"
 #include "StChain.h"
@@ -901,7 +901,7 @@ Int_t StMaker::Finish()
 Int_t StMaker::Make()
 {
    TURN_LOGGER(this);
-
+   Bool_t quiet = gEnv->GetValue("quiet", 0);
 //   Loop on all makers
    Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
@@ -940,7 +940,7 @@ Int_t StMaker::Make()
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
-     
+     if (! quiet) {
      if (Debug() || ret) {
 #ifdef STAR_LOGGER     
         LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
@@ -950,6 +950,7 @@ Int_t StMaker::Make()
         printf("*** %s::Make() == %s(%d) ***\n"
                         ,maker->ClassName(),RetCodeAsString(ret),ret);
 #endif     
+     }
      }
      maker->ResetBIT(kMakeBeg);
      StMkDeb::SetCurrent(curr);
