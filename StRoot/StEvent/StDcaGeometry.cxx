@@ -195,6 +195,7 @@ KFParticle& StDcaGeometry::Particle(Int_t kg)  const {
   fParticle = KFParticle(track, pdg);
   fParticle.SetPDG(pdg);
   fParticle.SetId(kg);
+  fParticle.AddDaughterId(kg);
 #if 0
   Float_t d = fParticle.GetCovariance(0) + fParticle.GetCovariance(2) + fParticle.GetCovariance(5);
   if (d <= 0 || d >= 1e6) {
