@@ -1847,6 +1847,7 @@ Bfc_st BFC[] = { // standard chains
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"NewTpcAlignment","","",""                           ,"","","Switch on new Tpc Alignment schema",kFALSE},
   {"IdealHFT"    ,"","",""                                                   ,"","","Use Ideal HFT",kFALSE},
+  {"quiet","","","","","",                                                      "make chain quier", kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}

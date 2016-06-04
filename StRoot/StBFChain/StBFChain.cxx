@@ -219,6 +219,7 @@ Int_t StBFChain::Instantiate()
   if (! fNoChainOptions) return status;
   Long64_t maxsize = kMaxLong64;
   TTree::SetMaxTreeSize(maxsize);
+  if (GetOption("quiet")) gEnv->SetValue("quiet", 1); 
   St_db_Maker* dbMk = 0;
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
