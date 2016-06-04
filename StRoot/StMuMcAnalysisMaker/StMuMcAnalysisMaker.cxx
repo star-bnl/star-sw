@@ -632,7 +632,7 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 	    for (auto it = McTk2KFTk.first; it != McTk2KFTk.second; ++it, ++count) {
 	      auto *p = (*it).second; 
 	      if (! p) continue;
-	      if (p->GetID() == pTrack->id()) {
+	      if (p->Id() == pTrack->id()) {
 		kfp = p;
 		break;
 	      }
@@ -724,14 +724,14 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   for (Int_t l = 0; l < NoKFVertices; l++) {
     const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
     if (! vertex) continue;
-    Int_t Id = vertex->GetID();
+    Int_t Id = vertex->Id();
     VerId2k[Id] = l;
   }
   map<Int_t,Int_t> ParId2k;
   for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
     const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
     if (! particle) continue;
-    Int_t Id = particle->GetID();
+    Int_t Id = particle->Id();
     ParId2k[Id] = k;
   }
   for (Int_t l = 0; l < NoKFVertices; l++) {
@@ -758,7 +758,7 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
     const KFParticle *particle = (const KFVertex *) KFTracks->UncheckedAt(k);
     cout << *particle << endl;
-    if (! particle->GetID()) {cout << "beam" << endl; continue;}
+    if (! particle->Id()) {cout << "beam" << endl; continue;}
     Int_t IdPVx = particle->GetParentID(); //reconstructed parent vertex
     if (particle->IdTruth()) {
       StMuMcTrack *mcTrack = muDst->MCtrack(particle->IdTruth()-1);
