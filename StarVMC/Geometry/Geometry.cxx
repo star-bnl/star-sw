@@ -661,8 +661,8 @@ Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
   AgStructure::AgDetpAdd( "Btog_t", "choice", (Float_t)btofGeom.config );
   if ( btofGeom.itof > 5 )
     {
-      AgStructure::AgDetpAdd("Btog_t","X0",(Float_t)btofGeom.tofX0);
-      AgStructure::AgDetpAdd("Btog_t","Z0",(Float_t)btofGeom.tofZ0);      
+      AgStructure::AgDetpAdd("Btog_t","x0",(Float_t)btofGeom.tofX0);
+      AgStructure::AgDetpAdd("Btog_t","z0",(Float_t)btofGeom.tofZ0);      
     }
 
   if ( go )
@@ -1888,7 +1888,7 @@ Bool_t Geometry::SvttInit()
   //
   // Uses SvttGeo10.xml
   //
-  svttGeom.module="SvttGeo6";
+  svttGeom.module="SvttGeo10";
 
   svttGeom.select="SVT310x";
   {
