@@ -39,10 +39,11 @@ my @daqlist = `ls $daqpat` ;
 
 #my $MAXNUM = 900;
 #my $LIMNUM = 600;
-my $MAXNUM = 400;
-my $LIMNUM = 200;
+my $MAXNUM = 500;
+my $LIMNUM = 300;
 
 my $NNUM = 100;
+my $SUMNUM = scalar(@daqlist);
 
 print "There are  ", scalar(@daqlist),"  daq files in the ", $nfspath,"  directory", "\n";
  
@@ -61,9 +62,7 @@ print "There are  ", scalar(@daqlist),"  daq files in the ", $nfspath,"  directo
     $cursor->finish();
 
 
- if(scalar(@daqlist) <= $MAXNUM and scalar(@prdset) < $NNUM  ) {
-
-# if(scalar(@daqlist) <= $MAXNUM  ) {
+ if(scalar(@daqlist) <= $LIMNUM and scalar(@prdset) < $NNUM  ) {
 
  if( -f $lockfile) {
      `/bin/rm  $lockfile` ;
@@ -155,6 +154,10 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
 
 ########
 
+ $SUMNUM = $SUMNUM + scalar(@fileset);
+
+ if($SUMNUM <= $MAXNUM ) {
+
  foreach my $line (@fileset) {
 
  @prt = ();
@@ -178,10 +181,16 @@ my $dcsubm = "/star/u/starreco/runkisti/".$dclog;
 
   $nruns++;
 
+ }else{
+
+     print "Number of suggested files > $MAXNUM ","\n";
+ goto GO_END;    
+ }
 #####
 
 #  if($nlist >= $MAXNUM ) {
-  if($nlist >= $LIMNUM ) {
+
+ if($nlist >= 10 ) {
 
   close (CFILE);
   goto GO_SUBMIT; 
@@ -230,6 +239,8 @@ GO_SUBMIT:
 	 }
 
 #########
+
+GO_END:  
 
      if (!open (SUBFILE, ">$lockfile" ))  {printf ("Unable to create file %s\n",$lockfile);}
  

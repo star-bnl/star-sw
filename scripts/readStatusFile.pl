@@ -16,7 +16,7 @@ $dbuser="starreco";
 $dbpass="";
 $dbname="Embedding_job_stats";
 
-my $JobStatusT = "jobs_prod_2013";
+my $JobStatusT = "jobs_prod_2016";
 
 my $statusPath = $ARGV[0];
 
@@ -29,7 +29,7 @@ my $prodtg;
 my $daqfile;
 my $jbstat;
 my $dqsize = 0;
-my $nfspath = "/star/data23/GRID/daq/2012/";
+my $nfspath = "/star/data16/GRID/daq/2015/";
 my $statSize = 0;
 my $fulldname;
 my $inpsize = 0;
