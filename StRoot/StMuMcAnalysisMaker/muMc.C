@@ -9,7 +9,7 @@ void muMc(Int_t N = 1000000, const Char_t *input = "/star/subsys/tpc/fisyak/reco
   gROOT->LoadMacro("lMuDst.C");
   Char_t *file = gSystem->Which("./",output,kReadPermission);
   if (! file) {
-    lMuDst(N,input,"MuMc,nodefault",output);
+    lMuDst(N,input,"MuMc,quiet,nodefault",output);
   } else {
     lMuDst(-1,"","MuMc,nodefault");
     TFile *f = new TFile(file);
