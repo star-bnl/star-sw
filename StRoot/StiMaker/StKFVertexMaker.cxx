@@ -418,50 +418,8 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
   BFactory::Free(kTrack);
   return pTrack;
 }
-//_____________________________________________________________________________
-Int_t StKFVertexMaker::MakeParticles() {
-  fParticles = new TObjArray(); // TClonesArray("KFParticle");
-  fParticles->SetOwner(kTRUE);
-  TObjectSet *part = new TObjectSet("KFTracks");
-  part->SetObject(fParticles);
-  AddData(part);
-  TObjectSet *vert = new TObjectSet("KFVertices");
-  fVertices = new TObjArray();
-  fVertices->SetOwner(kFALSE);
-  vert->SetObject(fVertices);
-  AddData(vert);
-  fNGoodGlobals = 0;
-  fLastGlobalId = 0;
-  if (mBeamLine) {AddBeamTrack();}
-  StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
-  UInt_t nTracks = trackNode.size();
-  StTrackNode *node=0;
-  TrackNodeMap.clear();
-  for (UInt_t i=0; i < nTracks; i++) {
-    node = trackNode[i]; 
-    if (!node) continue;
-    StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
-    if (! gTrack) continue;
-    Int_t kg = gTrack->key();
-    //    fParticles->AddAtAndExpand(0, kg);
-    if (gTrack->bad())            continue;
-    if (gTrack->flag()     <   0) continue;     // Bad fit
-    if (gTrack->flag()     > 700) continue;     // FTPC
-    if (gTrack->flag()%100 == 11) continue;     // Short track pointing to EEMC
-    //!    if ((gTrack->isWestTpcOnly() || gTrack->isEastTpcOnly()) && gTrack->isPostXTrack()) continue; // wrong TPC side track
-    TrackNodeMap[kg] = node;
-    KFParticle *particle = AddTrackAt(gTrack);
-    if (! particle) continue;
-    if (Debug() > 2) {
-      LOG_INFO << Form("particle: %4i/%4i ",fNGoodGlobals,kg) << *particle << endm;
-      //      LOG_INFO << "Add to map[" << kg << "] node = " << TrackNodeMap[kg] << endm;
-    }
-    fNGoodGlobals++;
-  }
-  return fNGoodGlobals;
-}
 //________________________________________________________________________________
-Int_t StKFVertexMaker::MakeV0() {
+Int_t StKFVertexMaker::Make() {
   pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
   if (! pEvent) {
     LOG_WARN << "StKFVertexMaker::fit: no StEvent " << endm;
@@ -521,6 +479,48 @@ Int_t StKFVertexMaker::MakeV0() {
 #endif /* __MakeV0__ */
   SafeDelete(fgcVertices);
   return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StKFVertexMaker::MakeParticles() {
+  fParticles = new TObjArray(); // TClonesArray("KFParticle");
+  fParticles->SetOwner(kTRUE);
+  TObjectSet *part = new TObjectSet("KFTracks");
+  part->SetObject(fParticles);
+  AddData(part);
+  TObjectSet *vert = new TObjectSet("KFVertices");
+  fVertices = new TObjArray();
+  fVertices->SetOwner(kFALSE);
+  vert->SetObject(fVertices);
+  AddData(vert);
+  fNGoodGlobals = 0;
+  fLastGlobalId = 0;
+  if (mBeamLine) {AddBeamTrack();}
+  StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
+  UInt_t nTracks = trackNode.size();
+  StTrackNode *node=0;
+  TrackNodeMap.clear();
+  for (UInt_t i=0; i < nTracks; i++) {
+    node = trackNode[i]; 
+    if (!node) continue;
+    StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
+    if (! gTrack) continue;
+    Int_t kg = gTrack->key();
+    //    fParticles->AddAtAndExpand(0, kg);
+    if (gTrack->bad())            continue;
+    if (gTrack->flag()     <   0) continue;     // Bad fit
+    if (gTrack->flag()     > 700) continue;     // FTPC
+    if (gTrack->flag()%100 == 11) continue;     // Short track pointing to EEMC
+    //!    if ((gTrack->isWestTpcOnly() || gTrack->isEastTpcOnly()) && gTrack->isPostXTrack()) continue; // wrong TPC side track
+    TrackNodeMap[kg] = node;
+    KFParticle *particle = AddTrackAt(gTrack);
+    if (! particle) continue;
+    if (Debug() > 2) {
+      LOG_INFO << Form("particle: %4i/%4i ",fNGoodGlobals,kg) << *particle << endm;
+      //      LOG_INFO << "Add to map[" << kg << "] node = " << TrackNodeMap[kg] << endm;
+    }
+    fNGoodGlobals++;
+  }
+  return fNGoodGlobals;
 }
 //________________________________________________________________________________
 Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
