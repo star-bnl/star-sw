@@ -273,8 +273,9 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
     fTracks[0].SetQ(particles[iTr].Q(), iTr);
     fTracks[0].SetPVIndex(-1, iTr);
   }
-  
+#if 0  
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
+#endif
   
 #ifdef USE_TIMERS
   timer.Stop();
@@ -566,7 +567,7 @@ void KFParticleTopoReconstructor::ReconstructParticles()
 // #pragma omp critical 
 //   std::cout << "NPart " << fParticles.size() << " " << fTracks[0].Size() << " "<< fTracks[1].Size() << " " << fTracks[2].Size() << " " << fTracks[3].Size()<< std::endl;
 
-  #ifdef USE_TIMERS
+#ifdef USE_TIMERS
   timer.Stop();
   fStatTime[3] = timer.RealTime();
 #endif // USE_TIMERS

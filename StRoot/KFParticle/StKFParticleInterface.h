@@ -1,11 +1,10 @@
 #ifndef StKFParticleInterface_H
 #define StKFParticleInterface_H
+#include <vector>
 
 #include "KFParticle.h"
-
 #include "TObject.h"
 
-#include <vector>
 
 class KFParticleTopoReconstructor;
 class KFTopoPerformance;
@@ -21,7 +20,12 @@ class StKFParticleInterface: public TObject
   void InitParticles();
   void ReconstructParticles();
   void ReconstructTopology();
-
+  
+  const std::vector<KFParticle> &GetParticles() const;
+  const std::vector<KFParticle>* GetSecondaryCandidates() const;                      // Get secondary particles with the mass constraint
+  const std::vector< std::vector<KFParticle> >* GetPrimaryCandidates() const;         // Get primary particles with the mass constraint
+  const std::vector< std::vector<KFParticle> >* GetPrimaryTopoCandidates() const;     // Get primary particles with the topologigal constraint
+  const std::vector< std::vector<KFParticle> >* GetPrimaryTopoMassCandidates() const; // Get primary particles with the topologigal and mass constraint
   void SetParticles(std::vector<KFParticle>& particles)
   {
     fParticles = particles;

@@ -27,20 +27,18 @@
 #undef ClassStMessMgr
 
 
-#define StRootPV //St root 
+//#define StRootPV //St root 
 
 int nK0=0;
 
 void MuMcKFP(Long64_t Nevent = 999999,
              const char* file="/star/subsys/tpc/fisyak/reco/2014/V0B/*MuDst.root",
-             const  char* outFile="MuMcPrV23")
+             const  char* outFile="MuMcPrV23.root")
 { 
   
   StKFParticleInterface mStKFParticleInterface;
-  StKFParticlePerformanceInterface mStKFParticlePerformanceInterface(mStKFParticleInterface.GetTopoReconstructor());
+  StKFParticlePerformanceInterface mStKFParticlePerformanceInterface(mStKFParticleInterface.GetTopoReconstructor(), outFile);
     
-  TString OutFile(outFile);
-
   StMuDstMaker* maker = new StMuDstMaker(0,0,"",file,"st:MuDst.root",1e9);   // set up maker in read mode
   //                       0,0                        this mean read mode
   //                           dir                    read all files in this directory
@@ -263,12 +261,12 @@ void MuMcKFP(Long64_t Nevent = 999999,
       if(primTrack)
       {
         const int iPV = primTrack->vertexIndex(); 
-        //continue;
-         //if ((iPV!=bestPV)) continue;
-        {
-          vector<int> &tracksPV = PrimTracks[iPV];
-          tracksPV.push_back(nPartSaved);
-        }
+//         //continue;
+//          //if ((iPV!=bestPV)) continue;
+//         {
+//           vector<int> &tracksPV = PrimTracks[iPV];
+//           tracksPV.push_back(nPartSaved);
+//         }
          
         if ( iPV==bestPV )
         {
