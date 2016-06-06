@@ -61,7 +61,7 @@ void KFParticleBase::Print(Option_t *opt) const {
 
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
-  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
+  os << Form("p(%4i,%4i,%4i)",particle.Id(),particle.GetParentID(),particle.IdParentMcVx());
   for (Int_t i = 0; i < 8; i++) {
     if (i == 6) continue;                                    // E
     if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
@@ -82,6 +82,15 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   }
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
+  int nd = particle.NDaughters();
+  if (nd > 1) {
+    os << " ND: " << nd << ":";
+    if (nd > 3) nd = 3;
+    for (int d = 0; d < nd; d++) {
+      os << particle.DaughterIds()[d];
+      if (d < nd-1) os << ",";
+    }
+  }
   return os;
 }
 #endif
