@@ -1,6 +1,9 @@
-//$Id: StSstClusterControl.cxx,v 1.2 2015/06/24 17:37:21 smirnovd Exp $
+//$Id: StSstClusterControl.cxx,v 1.3 2016/06/06 18:48:39 bouchet Exp $
 //
 //$Log: StSstClusterControl.cxx,v $
+//Revision 1.3  2016/06/06 18:48:39  bouchet
+//coverity : UNINIT_CTOR
+//
 //Revision 1.2  2015/06/24 17:37:21  smirnovd
 //StSstUtil: Prepend included headers with path to submodule
 //
@@ -19,25 +22,20 @@
 /*! 
 Basic constructor. The members are filled in the code
 */
-StSstClusterControl::StSstClusterControl()
-{
-  // Former scf_ctrl table
-//   mHighCut       = 5.0;
-//   mTestTolerance = 0.2;
-
-
-//   // Former scm_ctrl table
-//   mClusterTreat  = 13;
-//   mAdcTolerance  =  0.2;
-//   mMatchMean     =  0.;
-//   mMatchSigma    =  8.;
+StSstClusterControl::StSstClusterControl(){
+  mHighCut       = 0.;
+  mTestTolerance = 0.;
+  mClusterTreat  = 0.;
+  mAdcTolerance  = 0.;
+  mMatchMean     = 0.;
+  mMatchSigma    = 0.;
 }
+
 /*!
 Constructor loading the parameters from the Db table
  */
-StSstClusterControl::StSstClusterControl(St_clusterControl *clusterCtrl)
-{
-
+StSstClusterControl::StSstClusterControl(St_clusterControl *clusterCtrl){
+  
   clusterControl_st *cluster = clusterCtrl->GetTable();
   if (!cluster) gMessMgr->Error() << "No clusterControl_st table available" << endm;
   else
