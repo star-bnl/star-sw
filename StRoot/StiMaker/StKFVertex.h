@@ -35,7 +35,6 @@ public:
   Int_t        QaTruth() const { return Vertex().QaTruth(); }
   Int_t        IdParentTk() const {return Vertex().GetParentID();}
   void         SetIdTruth(Int_t idtru,Int_t qatru=0) {Vertex().SetIdTruth(idtru,qatru);}
-  void         SetIdParentTk(Int_t id) {Vertex().SetParentID(id);}
   void         SetParent(Int_t *parents) const;
   void         ResetParticles();
   void         CheckBeamConstraint();

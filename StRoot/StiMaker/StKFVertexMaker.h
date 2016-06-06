@@ -22,6 +22,7 @@
 #include "StEnumerations.h"
 #include "TCanvas.h"
 #include "THStack.h"
+#include "KFParticle/KFParticle.h"
 class StEvent;
 class StPrimaryVertex;
 class StEvent;
@@ -29,11 +30,11 @@ class StGlobalTrack;
 class StPrimaryTrack;
 class StDcaGeometry;
 class StTrack;
-class KFParticle;
 class StKFVerticesCollection;
 class StiHit;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
+class StKFParticleInterface;
 class StKFVertexMaker : public StMaker {
  public: 
   StKFVertexMaker(const char *name="KFVertex");
@@ -68,6 +69,9 @@ class StKFVertexMaker : public StMaker {
   void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
   void                           PrintParticles();
+#ifndef __CINT__
+  void                           ResetDaughterIds(KFParticle *particle, vector<KFParticle> &particles);
+#endif
  private:
   TObjArray                     *fParticles; // KF particles = global tracks + decay particles
   TObjArray                     *fVertices;  // KF vertices and decay particles
@@ -88,6 +92,8 @@ class StKFVertexMaker : public StMaker {
   TCanvas                       *fc1;
   StEvent                       *pEvent;
   Int_t                          fNGoodGlobals;
+  Int_t                          fLastGlobalId;
+  StKFParticleInterface         *mStKFParticleInterface;            //!
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2015/12/20 01:06:39 fisyak Exp $ built " __DATE__ " " __TIME__ ; 

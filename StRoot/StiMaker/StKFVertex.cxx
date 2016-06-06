@@ -71,9 +71,11 @@ void StKFVertex::ResetParticles() {
   TIter next(&fKFTracks,kIterBackward);
   StKFTrack *Track = 0;
   while ((Track = (StKFTrack *) next())) {
-    if (!  Track->OrigParticle() || Track->Weight() <= 0.) {// Track->W() <= 0.
+    KFParticle *particle = (KFParticle *) Track->OrigParticle();
+    if (! particle || Track->Weight() <= 0.) {// Track->W() <= 0.
       delete Remove(Track);
     } else {
+      particle->SetParentID();
       Track->ResetParticle();
     } 
   }
@@ -200,6 +202,7 @@ void StKFVertex::UpdateVertex2TrackChi2() {
     //    PrPP(UpdateVertex2TrackChi2,*particle);
     Double_t chi2il = particle->GetDeviationFromVertex(vTmp);
     if (chi2il < 0 || chi2il > StAnneling::Chi2Cut()) {
+      particle->SetParentID();
       delete Remove(Track);
       continue;
     }

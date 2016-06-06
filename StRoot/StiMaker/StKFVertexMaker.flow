@@ -50,8 +50,44 @@ StKFVertexMaker::Make
 		  fgcVertices->Fit()
 		  
 	ReFitToVertex();
+#if 0
 	MakeV0()
-
+#else 
+        ParticleFinder
+          Fill particles[] and particlesPdg[] for each global track with hypthesises for pip, p and e
+          StKFParticleInterface::SetField(bField);
+	     KFParticleTopoReconstructor::SetField(field);			
+               KFParticle::SetField(b);	     
+  	       KFParticleSIMD::SetField(float(b));
+  	  StKFParticleInterface::SetParticles(particles);	
+  	  StKFParticleInterface::SetParticlesPdg(particlesPdg);
+  	  StKFParticleInterface::InitParticles();  
+            KFParticleTopoReconstructor::Init( fParticles, &fParticlesPdg );  
+              fTracks[0] initialization from  fParticles and  fParticlesPdg 
+#if 0
+                  fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
+                    fill fParticles 
+                    fPrimVertices.clear();
+                    fClusters.clear();
+                    reconstruct PV
+#endif
+	  for (Int_t l = 0; l < noPV; l++) {
+            get PV particle and 
+            StKFParticleInterface::AddPV(*particle);
+	      KFParticleTopoReconstructor::AddPV(pv)
+		KFParticlePVReconstructor::AddPV(pv);
+		  fPrimVertices.push_back(pv);
+	          fClusters.push_back(cluster);
+	        fPV.push_back(pvPart);
+                KFParticleFinder::SetNPV(fPV.size());
+          }
+          StKFParticleInterface::ReconstructParticles();
+            KFParticleTopoReconstructor::SortTracks(); over pdg
+            KFParticleTopoReconstructor::ReconstructParticles();
+              KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
+                                           GetChiToPrimVertex(&(fPV[0]), fPV.size());
+              KFParticleFinder::FindParticles(fTracks, fChiToPrimVtx, fParticles, fPV, fPV.size());
+#endif
 --------------------------------------------------------------------------------
 KFTracks:
    kg =  gTrack->key(); 
