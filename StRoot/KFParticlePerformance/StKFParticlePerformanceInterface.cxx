@@ -16,13 +16,8 @@ StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParti
   
   TFile* curFile = TFile::CurrentFile();
   TDirectory* curDirectory = TDirectory::CurrentDirectory();
-  
-  fOutFileName = "StKFParticleFinderQA.root";
-  
-  if( !TFile::CurrentFile())
-    fOutFile = new TFile(fOutFileName.Data(),"RECREATE");
-  else
-    fOutFile = TFile::CurrentFile();
+  if (fOutFileName == "")  fOutFileName = "StKFParticleFinderQA.root";
+  if(! curFile)     fOutFile = new TFile(fOutFileName.Data(),"RECREATE");
   TDirectory *dir = TDirectory::CurrentDirectory();
   fKFTopoPerformance->CreateHistos("",dir);
   
@@ -34,12 +29,14 @@ StKFParticlePerformanceInterface::~StKFParticlePerformanceInterface()
 {
   if(fKFTopoPerformance)
   {
+#if 0
     TDirectory *curr = TDirectory::CurrentDirectory();
     TFile *currentFile = TFile::CurrentFile();
     if (currentFile && currentFile->IsWritable()) {
       fOutFile->cd();
-      WriteHistosCurFile(fKFTopoPerformance->GetHistosDirectory());
-      
+      if (fKFTopoPerformance->GetHistosDirectory()) {
+	WriteHistosCurFile(fKFTopoPerformance->GetHistosDirectory());
+      }
       if(!(fOutFileName == ""))
 	{   
 	  fOutFile->Close();
@@ -48,13 +45,15 @@ StKFParticlePerformanceInterface::~StKFParticlePerformanceInterface()
     }
     TFile::CurrentFile() = currentFile;
     TDirectory::CurrentDirectory() = curr;
+#else
+    if (fOutFile && fOutFile->IsWritable()) fOutFile->Write();
+#endif
     
     std::fstream eff(fEfffileName.Data(),std::fstream::out);
     eff << fKFTopoPerformance->fParteff;
     eff.close();
   }
-  
-  if(fKFTopoPerformance) delete fKFTopoPerformance;
+  SafeDelete(fKFTopoPerformance);
 }
 
 void StKFParticlePerformanceInterface::PerformanceAnalysis()
@@ -69,7 +68,7 @@ void StKFParticlePerformanceInterface::PerformanceAnalysis()
     fKFTopoPerformance->FillHistos();
   }
 }
-
+#if 0
 void StKFParticlePerformanceInterface::WriteHistosCurFile( TObject *obj ){
   
   if( !obj->IsFolder() ) obj->Write();
@@ -87,7 +86,7 @@ void StKFParticlePerformanceInterface::WriteHistosCurFile( TObject *obj ){
     TDirectory::CurrentDirectory() = cur;
   }
 }
-
+#endif
 void StKFParticlePerformanceInterface::SetPrintEffFrequency(Int_t n)
 { 
   fKFTopoPerformance->SetPrintEffFrequency(n); 

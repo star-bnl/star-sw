@@ -1199,46 +1199,57 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   if(drawZR)
     histoParameters2D[0][iParticle][1]->Fill(Z,R,1);
 
+  int iSet = 1;
   if(!RtoMCParticleId[iP].IsMatchedWithPdg()) //background
   {
-    if(!RtoMCParticleId[iP].IsMatched())
+    if(!RtoMCParticleId[iP].IsMatched()) iSet = 3; // for ghost particles - combinatorial background
+    else iSet = 2; // for physical background
+  }
+  
+  //Check if PV association is correct
+  if(!histoDSToParticleQA && iSet == 1)
+  { 
+    int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
+    KFMCParticle &mcPart = vMCParticles[iMCPart];
+    int iMCTrack = mcPart.GetMCTrackID();
+    KFMCTrack &mcTrack = vMCTracks[iMCTrack];
+    int motherId = mcTrack.MotherId();
+    bool isSecondaryParticle = motherId >= 0;
+    
+    if(iPV >=0)
     {
-      // for ghost particles - combinatorial background
-      for(int iParam=0; iParam<16; iParam++)
-        histoParameters[3][iParticle][iParam]->Fill(parameters[iParam]);
-
-      if(multiplicities)
-        multiplicities[3][iParticle]++;
-
-      histoParameters2D[3][iParticle][0]->Fill(Rapidity,Pt,1);
-      if(drawZR)
-        histoParameters2D[3][iParticle][1]->Fill(Z,R,1);
+      if(isSecondaryParticle)
+        iSet = 4;
+      else 
+      {
+        int iMCPV = -1;
+        if(RtoMCPVId[iPV].IsMatchedWithPdg())
+          iMCPV = RtoMCPVId[iPV].GetBestMatch();
+        
+        int iMCPVFromParticle = fMCTrackToMCPVMatch[iMCTrack];
+        if(iMCPV != iMCPVFromParticle)
+          iSet = 4;
+      }
     }
     else
     {
-      // for physical background
-      for(int iParam=0; iParam<16; iParam++)
-        histoParameters[2][iParticle][iParam]->Fill(parameters[iParam]);
-
-      if(multiplicities)
-        multiplicities[2][iParticle]++;
-      
-      histoParameters2D[2][iParticle][0]->Fill(Rapidity,Pt,1);
-      if(drawZR)
-        histoParameters2D[2][iParticle][1]->Fill(Z,R,1);
+      if(!isSecondaryParticle)
+        iSet = 4;
     }
-    return;
   }
+  
   //for signal particles
   for(int iParam=0; iParam<16; iParam++)
-    histoParameters[1][iParticle][iParam]->Fill(parameters[iParam]);
+    histoParameters[iSet][iParticle][iParam]->Fill(parameters[iParam]);
     
   if(multiplicities)
-    multiplicities[1][iParticle]++;
+    multiplicities[iSet][iParticle]++;
   
-  histoParameters2D[1][iParticle][0]->Fill(Rapidity,Pt,1);
+  histoParameters2D[iSet][iParticle][0]->Fill(Rapidity,Pt,1);
   if(drawZR)
-    histoParameters2D[1][iParticle][1]->Fill(Z,R,1);
+    histoParameters2D[iSet][iParticle][1]->Fill(Z,R,1);
+  
+  if(iSet != 1) return;
 
   int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
   KFMCParticle &mcPart = vMCParticles[iMCPart];

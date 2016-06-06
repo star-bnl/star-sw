@@ -102,22 +102,23 @@ class KFParticlePerformanceBase
   TH1F *hDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA];
   
   static const int nHistoPartParam = 17;
-  TH1F *hPartParam[4][KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, Y, decay length, c*tau, chi/ndf, prob, theta, phi, z, multiplicity
-  TH1F *hPartParamPrimary[4][KFPartEfficiencies::nParticles][nHistoPartParam];
-  TH1F *hPartParamPrimaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
-  TH1F *hPartParamPrimaryTopo[4][KFPartEfficiencies::nParticles][nHistoPartParam];
-  TH1F *hPartParamPrimaryTopoMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
-  TH1F *hPartParamSecondary[4][KFPartEfficiencies::nParticles][nHistoPartParam];
-  TH1F *hPartParamSecondaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam];
+  static const int nParametersSet = 5;
+  TH1F *hPartParam[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam]; // mass, p, pt, Y, decay length, c*tau, chi/ndf, prob, theta, phi, z, multiplicity
+  TH1F *hPartParamPrimary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamPrimaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamPrimaryTopo[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamPrimaryTopoMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
+  TH1F *hPartParamSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
 
   static const int nHistoPartParam2D = 2;
-  TH2F *hPartParam2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r
-  TH2F *hPartParam2DPrimary[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
-  TH2F *hPartParam2DPrimaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
-  TH2F *hPartParam2DPrimaryTopo[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
-  TH2F *hPartParam2DPrimaryTopoMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
-  TH2F *hPartParam2DSecondary[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
-  TH2F *hPartParam2DSecondaryMass[4][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r
+  TH2F *hPartParam2DPrimary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DPrimaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DPrimaryTopo[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DPrimaryTopoMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
+  TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
 
   static const int nPartEfficiency = 8; 
   //1 index - prticle index, 2 - index of efficiency, 3 - hystogram dependency (vs p, pt ..)
@@ -161,9 +162,9 @@ class KFParticlePerformanceBase
                                  TH2F *histoParameters2D[KFPartEfficiencies::nParticles][nHistoPartParam2D], 
                                  int iPart, bool drawZR = 0);
   void CreateParameterSubfolder(TString folderName, 
-                                TH1F* histoParameters[4][KFPartEfficiencies::nParticles][nHistoPartParam],
-                                TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
-                                TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart);
+                                TH1F* histoParameters[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam],
+                                TH2F* histoParameters2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D],
+                                TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA], int iPart, bool withWrongPVHypothesis = 0);
   
   TString GetDirectoryPath();
 };

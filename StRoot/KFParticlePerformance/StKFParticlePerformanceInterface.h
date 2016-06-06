@@ -27,9 +27,9 @@ class StKFParticlePerformanceInterface: public TObject
   void SetPrintEffFrequency(Int_t n = 100);
   
  private:
-  
+#if 0  
   void WriteHistosCurFile( TObject *obj );
-  
+#endif  
   //output file with histograms
   TString fOutFileName;
   TFile* fOutFile;
