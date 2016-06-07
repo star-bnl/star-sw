@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.7 2015/10/29 21:19:16 akio Exp $                                            
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.8 2016/06/07 15:51:41 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.8  2016/06/07 15:51:41  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.7  2015/10/29 21:19:16  akio
 // adjust debug prints
 //
@@ -81,11 +84,6 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
   StFmsDbMaker* dbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
   StFmsCollection * fmscollection = event->fmsCollection();
 
-  //table to keep pointer to hit for each det & channel
-  static const int NDET=16, NCH=600;
-  StFmsHit* map[NDET][NCH];
-  memset(map,0,sizeof(map));
-
   // Read the g2t table
   St_g2t_emc_hit* hitTable = static_cast<St_g2t_emc_hit*>(GetDataSet("g2t_fpd_hit"));
   if (!hitTable) {
@@ -96,9 +94,24 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
   // Loop over FPD hits and accumurate hits
   const Int_t nHits = hitTable->GetNRows();
   //LOG_DEBUG << "g2t_fpd_hit table has " << nHits << " hits" << endm;
+  if(nHits<1){
+      LOG_DEBUG << "g2t_fpd_hit table has 0 rows" << endm;
+      return;  
+  }
   const g2t_emc_hit_st* hit = hitTable->GetTable();
+  if(!hit){
+      LOG_DEBUG << "g2t_fpd_hit GetTable failed" << endm;
+      return;
+  }
+
   StPtrVecFmsHit hits; //temp storage for hits
-  for (Int_t i=0; i < nHits; ++i, ++hit) {
+  //table to keep pointer to hit for each det & channel
+  static const int NDET=16, NCH=600;
+  //StFmsHit* map[NDET][NCH];   using heap memory (new) instead of stack (local)
+  //memset(map,0,sizeof(map));
+  auto map = new StFmsHit*[NDET][NCH](); //no need for memset with ()
+
+  for (Int_t i=0; i < nHits; ++i) {
     if (hit) {
       const Int_t detectorId = getDetectorId(*hit);
       Int_t channel;
@@ -126,9 +139,11 @@ void StFmsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	fmshit = map[detectorId][channel];
 	fmshit->setEnergy(fmshit->energy() + energy);
       }
+      hit++;
     }
   }
   int nfmshit=hits.size();
+  delete [] map;
 
   // Loop over hits and digitize
   for(int i=0; i<nfmshit; i++){

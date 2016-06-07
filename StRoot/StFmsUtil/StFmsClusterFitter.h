@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.7 2015/11/05 17:54:57 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.8 2016/06/07 15:51:44 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.8  2016/06/07 15:51:44  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.7  2015/11/05 17:54:57  akio
 // Adding option to scale up shower shape function for large cells
 //
@@ -89,7 +92,7 @@ class StFmsClusterFitter : public TObject {
 
    \todo Actually initialize things!
    */
-  StFmsClusterFitter() { }
+  StFmsClusterFitter() : mScaleShowerShape(0) { }
   /** Destructor */
   virtual ~StFmsClusterFitter();
   /**

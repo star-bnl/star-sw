@@ -25,7 +25,7 @@ using namespace std;
 
 ClassImp(StFmsHitMaker);
 
-StFmsHitMaker::StFmsHitMaker(const char* name) : StMaker(name), mReadMuDst(0) {
+StFmsHitMaker::StFmsHitMaker(const char* name) : StMaker(name), mReadMuDst(0), mCurrentRunNumber(0) {
 	mFmsDbMaker = NULL;
 	mFmsCollection = NULL;
 	mMuFmsColl = NULL;
@@ -123,7 +123,7 @@ int StFmsHitMaker::Make(){
 				for(unsigned short ch=0; ch<32; ch++){
 	  				unsigned short adc=0;
 	  				unsigned short tdc=0;
-	  				if(flag<=4){ //wont work when flag=3
+	  				if(flag<=4 && triggerData){ //wont work when flag=3
 	    					adc=triggerData->fmsADC(crt,slot-1,ch);
 	    					tdc=triggerData->fmsTDC(crt,slot-1,ch);
 	  				}

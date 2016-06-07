@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFinder.cxx,v 1.5 2015/11/02 22:44:49 akio Exp $
+// $Id: StFmsClusterFinder.cxx,v 1.6 2016/06/07 15:51:44 akio Exp $
 //
 // $Log: StFmsClusterFinder.cxx,v $
+// Revision 1.6  2016/06/07 15:51:44  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.5  2015/11/02 22:44:49  akio
 // Fix photonEnergyInTower()
 //
@@ -335,7 +338,7 @@ class TowerClusterAssociation : public TObject {
 };
 
 StFmsClusterFinder::StFmsClusterFinder(double energyCutoff)
-    : mEnergyCutoff(energyCutoff), mNClusts(0) { }
+    : mEnergyCutoff(energyCutoff), mNClusts(0), mDetectorId(0) { }
 
 StFmsClusterFinder::~StFmsClusterFinder() { }
 

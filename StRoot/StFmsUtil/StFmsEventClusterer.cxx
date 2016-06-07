@@ -1,6 +1,9 @@
-// $Id: StFmsEventClusterer.cxx,v 1.11 2016/01/26 14:42:48 akio Exp $
+// $Id: StFmsEventClusterer.cxx,v 1.12 2016/06/07 15:51:44 akio Exp $
 //
 // $Log: StFmsEventClusterer.cxx,v $
+// Revision 1.12  2016/06/07 15:51:44  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.11  2016/01/26 14:42:48  akio
 // better chi2 handling
 //
@@ -282,8 +285,8 @@ namespace FMSCluster {
 					   Int_t globalrefit, Int_t mergeSmallToLarge, 
 					   Int_t try1PhotonFit, Int_t categorizationAlgo,
 					   Int_t scaleShowerShape)
-      : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mFmsDbMaker(db), 
-	mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
+      : mClusterFinder(0.5), /*mGeometry(geometry),*/ mDetectorId(detectorId), mTowers(0), 
+	mFmsDbMaker(db), mGlobalRefit(globalrefit), mMergeSmallToLarge(mergeSmallToLarge), 
 	mTry1PhotonFitWhen2PhotonFitFailed(try1PhotonFit), mCategorizationAlgo(categorizationAlgo),
         mScaleShowerShape(scaleShowerShape) { }
     

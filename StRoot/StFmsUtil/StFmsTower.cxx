@@ -1,6 +1,9 @@
-// $Id: StFmsTower.cxx,v 1.2 2015/10/21 15:58:05 akio Exp $
+// $Id: StFmsTower.cxx,v 1.3 2016/06/07 15:51:44 akio Exp $
 //
 // $Log: StFmsTower.cxx,v $
+// Revision 1.3  2016/06/07 15:51:44  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.2  2015/10/21 15:58:05  akio
 // Code speed up (~x2) by optimizing minimization fuctions and showershape function
 // Add option to merge small cells to large, so that it finds cluster at border
@@ -27,10 +30,10 @@
 
 namespace FMSCluster {
 StFmsTower::StFmsTower()
-    : mHit(nullptr), mColumn(-1), mRow(-1), mCluster(-1) {}
+    : mHit(nullptr), mColumn(-1), mRow(-1), mCluster(-1), mX(0.0), mY(0.0), mE(0.0), mW(0.0) {}
 
 StFmsTower::StFmsTower(StFmsHit* fmsHit)
-    : mHit(fmsHit), mColumn(-1), mRow(-1), mCluster(-1) {}
+    : mHit(fmsHit), mColumn(-1), mRow(-1), mCluster(-1), mX(0.0), mY(0.0), mE(0.0), mW(0.0) {}
 
 StFmsTower::~StFmsTower() { }
 

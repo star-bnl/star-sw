@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.45 2016/02/11 14:22:02 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.46 2016/06/07 15:51:34 akio Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.46  2016/06/07 15:51:34  akio
+ * Making code better based on Coverity reports
+ *
  * Revision 2.45  2016/02/11 14:22:02  ullrich
  * Add fcts to access MTD DSM and QT info.
  *
@@ -194,6 +197,9 @@ public:
     virtual unsigned long long l2sum() const;
 
     // bunch and spin bits
+    virtual unsigned int tcuCounter() const;
+    virtual unsigned int rccCounter(int crate) const;
+    virtual unsigned long long bunchCounter() const;
     virtual unsigned int bunchCounterHigh() const;
     virtual unsigned int bunchCounterLow() const;
     virtual unsigned int bunchId48Bit() const;
@@ -279,6 +285,7 @@ public:
     virtual unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcTimeDifference() const;
+    virtual unsigned short bbcTacSum() const;
     virtual unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcTimeDifferenceLarge() const;
   

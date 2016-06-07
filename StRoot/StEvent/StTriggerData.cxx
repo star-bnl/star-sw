@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.24 2016/02/11 14:22:02 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.25 2016/06/07 15:51:34 akio Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.25  2016/06/07 15:51:34  akio
+ * Making code better based on Coverity reports
+ *
  * Revision 2.24  2016/02/11 14:22:02  ullrich
  * Add fcts to access MTD DSM and QT info.
  *
@@ -85,7 +88,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.24 2016/02/11 14:22:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.25 2016/06/07 15:51:34 akio Exp $";
 
 ClassImp(StTriggerData)
 
@@ -173,6 +176,9 @@ unsigned short StTriggerData::dsmAddress() const {return 0;}
 unsigned short StTriggerData::mAddBits() const {return 0;}
 unsigned short StTriggerData::bcData(int address) const {return 0;}
 unsigned short StTriggerData::busyStatus() const {return 0;}
+unsigned int StTriggerData::tcuCounter() const {return 0;}
+unsigned int StTriggerData::rccCounter(int crate) const {return 0;}
+unsigned long long StTriggerData::bunchCounter() const {return 0;}
 unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
 unsigned int StTriggerData::bunchCounterLow() const {return 0;}
 unsigned int StTriggerData::bunchId48Bit() const {return 0;}
@@ -240,6 +246,7 @@ unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) c
 unsigned short StTriggerData::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
+unsigned short StTriggerData::bbcTacSum() const {return 0;}
 unsigned short StTriggerData::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcTimeDifferenceLarge() const {return 0;}
 unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
