@@ -17,6 +17,7 @@ using std::map;
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFPTrack.h"
 #include "KFParticle/StKFParticleInterface.h"
+#include "KFParticle/KFParticleFinder.h"
 #include "KFParticlePerformance/StKFParticlePerformanceInterface.h"
 
 #include "StAnneling.h"
@@ -57,6 +58,8 @@ StKFVerticesCollection *StKFVertexMaker::fgcVertices = 0;
 #define PrPP2(A,B) if (Debug() > 2) {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrParticle2(A) if (Debug() > 2) {cout << "StKFVertexMaker::" << (#A)  << endl; PrintParticles();}
 static map<Int_t,StTrackNode*> TrackNodeMap;
+Double_t StKFVertexMaker::fgProbCut = 1e-5;
+
 /* Bookkeeping: 
    kg =  gTrack->key(); 
    TObjArray *fParticles; // KF particles
@@ -525,7 +528,6 @@ Int_t StKFVertexMaker::MakeParticles() {
 //________________________________________________________________________________
 Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   Bool_t ok = kTRUE;
-  static const Double_t probCut = 1e-5;
 #ifdef  __MakeV0__
   PrPP(MakeV0,*Vtx->parentMF()->kfParticle());
   KFVertex V(*Vtx->parentMF()->kfParticle());
@@ -600,7 +602,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
     PrPP(MakeV0,V0);
     Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
-    if (prob < probCut) continue;
+    if (prob < fgProbCut) continue;
     V0.SetPDG(pdgV0[l]);
     //    V0.SetId(kg);
     SafeDelete(V0s[l]); V0s[l] = new KFVertex(V0); PrPP(MakeV0,*V0s[l]);
@@ -654,7 +656,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 	V02.SetProductionVertex(Parent);
 	PrPP(MakeV0,V02);
 	Double_t prob2 = TMath::Prob(V02.GetChi2(),V02.GetNDF());
-	if (prob2 < probCut) continue;
+	if (prob2 < fgProbCut) continue;
 	SafeDelete(V03s[l]); 
 	V03s[l] = new KFVertex(V02); 
 	//      V03s[l]->SetId(kg); 
@@ -665,7 +667,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 	Parent.AddDaughter(*V03s[l]);
 	PrPP(MakeV0 after fit ,Parent);
 	Double_t prob3 = TMath::Prob(Parent.GetChi2(),Parent.GetNDF());
-	if (prob3 < probCut) continue;
+	if (prob3 < fgProbCut) continue;
 #endif
 	// V0 track 
 	V0track = new StTrackMassFit(V03s[l]->Id(),V03s[l]); 
@@ -820,57 +822,39 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     mStKFParticleInterface->AddPV(PrimVertex[l], PrimTracks[l]);
   }
   mStKFParticleInterface->ReconstructParticles();
-  //    mStKFParticleInterface->ReconstructTopology();
-  if (Debug() > 1) {
-    vector<KFParticle> const &RCparticles = mStKFParticleInterface->GetParticles();
-    cout << "1C-fit particles just intersection" << endl;
-    Int_t noV0 = RCparticles.size();
-    for (Int_t i = 0; i < noV0; i++) {
-      const KFParticle& V0 =  RCparticles[i];
-      if (V0.NDaughters() < 2) continue;
-      cout << V0 << "\tND" << V0.NDaughters();
-      if (V0.NDaughters() > 0) cout << ":" << V0.DaughterIds()[0];
-      cout <<  endl;
-      ResetDaughterIds((KFParticle *) &V0, particles);
-      cout << V0 << "\tND" << V0.NDaughters();
-      if (V0.NDaughters() > 0) cout << ":" << V0.DaughterIds()[0];
-      cout <<  endl;
-    }
-    const vector<KFParticle> *SCparticles = mStKFParticleInterface->GetSecondaryCandidates();
-    if (SCparticles) {
-      cout << "2C-fit particles mass fit" << endl;
-      Int_t noV0 = SCparticles->size();
-      for (Int_t i = 0; i < noV0; i++) {
-	const KFParticle& V0 =  (*SCparticles)[i];
-	cout << V0 << endl;
-      }
-    }
-    for (Int_t k = 0; k < 3; k++) {
-      const std::vector< std::vector<KFParticle> >* V0list;
-      if (k == 0)      V0list = mStKFParticleInterface->GetPrimaryCandidates();
-      else if (k == 1) V0list = mStKFParticleInterface->GetPrimaryTopoCandidates();
-      else             V0list = mStKFParticleInterface->GetPrimaryTopoMassCandidates();
-      if (! V0list) continue;
-      Int_t noV0 = V0list->size();
-      if (noV0) {
-	cout << k+2 << "C-fit particles ";
-	if      (k == 0) cout << " mass fit";
-	else if (k == 1) cout << " fit to vertex";
-	else             cout << " fit to vertex and mass";
-	cout << endl;
-        for (Int_t l = 0; l < noV0; l++) {
-	  const std::vector<KFParticle>& V0s = (*V0list)[l]; 
-	  Int_t nv = V0s.size();
-	  for (Int_t m = 0; m < nv; m++) {
-	    const KFParticle& V0 =  V0s[m];
-	    cout << V0 << endl;
-	    ResetDaughterIds((KFParticle *) &V0, particles);
-	    cout << V0 << endl;
+  const Char_t *Types[5] = {"1C-fit: Intesections", "2C-fit: Mass Fit", 
+			    "2C-fit: Mass Fit", "3C-fit: Fit to Vertex", "4C-fit: Fit to Vertex with mass constrain"};
+  std::vector<KFParticle> *V0List;
+  for (Int_t k = 0; k < 5; k++) { 
+    if (Debug() > 1) cout << Types[k] << endl;
+    Int_t            NH = 1;
+    if      (k == 1) NH = KFParticleFinder::GetNSecondarySets();
+    else if (k >= 2) NH = KFParticleFinder::GetNPrimarySets();
+    for (Int_t h = 0; h < NH; h++) {
+      Int_t NPV = 1;
+      if (k >= 2) NPV = noPV;
+      for (Int_t iPV = 0; iPV < NPV; iPV++) {
+	if      (k == 0) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetParticles();
+	else if (k == 1) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetSecondaryCandidates()[h];
+	else if (k == 2) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryCandidates()[h][iPV];
+	else if (k == 3) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryTopoCandidates()[h][iPV];
+	else if (k == 4) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryTopoMassCandidates()[h][iPV];
+	Int_t NV0 = V0List->size();
+	for (Int_t i = 0; i < NV0; i++) {
+	  const KFParticle& V0 = (*V0List)[i];
+	  if (V0.NDaughters() < 2) continue;
+	  // Reset to initial track Ids
+	  ResetDaughterIds((KFParticle *) &V0, particles);
+	  if (k > 1) {
+	    // Set parent
+	    ((KFParticle *) &V0)->SetParentID(PrimVertex[iPV].Id());
 	  }
+	  if (Debug() > 1) cout << V0 << endl;
 	}
       }
     }
   }
+  // Store V0
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -1144,7 +1128,6 @@ void StKFVertexMaker::ResetDaughterIds(KFParticle *particle, vector<KFParticle> 
 //________________________________________________________________________________
 void StKFVertexMaker::SecondaryVertices() {
   static const Float_t MinimumDistance = 5.0; 
-  static const Double_t probCut = 1e-5;
   Int_t LastGlobal = fParticles->GetLast();
   Double_t TempLog = 0;
   Double_t Temperature = TMath::Exp(TempLog);
@@ -1175,7 +1158,7 @@ void StKFVertexMaker::SecondaryVertices() {
 	KFVertex tempV;
 	tempV.Construct(vDaughters,2); PrPP2(Fit,tempV);
 	Double_t prob = TMath::Prob(tempV.GetChi2(),tempV.GetNDF());
-	if (prob < probCut) continue;
+	if (prob < fgProbCut) continue;
 	particleV = tempV;	PrPP2(Fit,particleV);
 	// Create new Vertex 
 	vtx = new StKFVertex(); PrPP2(newvtx, *vtx);
@@ -1190,7 +1173,7 @@ void StKFVertexMaker::SecondaryVertices() {
 	KFVertex tempV = particleV;
 	tempV += *particleL;   PrPP2(Fit,tempV);
 	Double_t prob = TMath::Prob(tempV.GetChi2(),tempV.GetNDF());
-	if (prob < probCut) continue;
+	if (prob < fgProbCut) continue;
 	particleV = tempV;
       }
       particleL->SetId(l);
@@ -1216,7 +1199,7 @@ void StKFVertexMaker::SecondaryVertices() {
     SecondaryVertices->AddVertex(vtx);
 #if 0 /* ??? */
     Double_t prob = TMath::Prob(vtx->Vertex().GetChi2(),vtx->Vertex().GetNDF());
-    if (N > 2 || prob > probCut) {// Allow V2 to share tracks
+    if (N > 2 || prob > fgProbCut) {// Allow V2 to share tracks
       TIter next(&vtx->Tracks());
       StKFTrack *Track = 0;
       while ((Track = (StKFTrack *) next())) {

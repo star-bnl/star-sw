@@ -23,6 +23,11 @@ class StKFParticleInterface: public TObject
   
   const std::vector<KFParticle> &GetParticles() const;
   const std::vector<KFParticle>* GetSecondaryCandidates() const;                      // Get secondary particles with the mass constraint
+  const std::vector<KFParticle>& GetSecondaryK0()         const;
+  const std::vector<KFParticle>& GetSecondaryLambda()     const;
+  const std::vector<KFParticle>& GetSecondaryAntiLambda() const;
+  const std::vector<KFParticle>& GetSecondaryGamma()      const;
+  const std::vector<KFParticle>& GetSecondaryPi0()        const;
   const std::vector< std::vector<KFParticle> >* GetPrimaryCandidates() const;         // Get primary particles with the mass constraint
   const std::vector< std::vector<KFParticle> >* GetPrimaryTopoCandidates() const;     // Get primary particles with the topologigal constraint
   const std::vector< std::vector<KFParticle> >* GetPrimaryTopoMassCandidates() const; // Get primary particles with the topologigal and mass constraint

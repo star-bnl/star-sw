@@ -65,6 +65,7 @@ class StKFVertexMaker : public StMaker {
   void                   	 SecondaryVertices();								   
   void                   	 SetCanvas(TCanvas *c1) {fc1 = c1;}						   
   void                   	 SetDefaultTempLog(Double_t tLog = 2) {fTempLog = tLog;}			   
+  static void                    SetProbCut(Double_t prob) {fgProbCut = prob;}
   void                   	 SetZwindow(Double_t z = 2) {fzWindow = z;}					   
   void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
@@ -94,6 +95,7 @@ class StKFVertexMaker : public StMaker {
   Int_t                          fNGoodGlobals;
   Int_t                          fLastGlobalId;
   StKFParticleInterface         *mStKFParticleInterface;            //!
+  static Double_t                fgProbCut; // Cut for fits
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2015/12/20 01:06:39 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
