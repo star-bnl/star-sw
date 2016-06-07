@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.7 2016/05/30 23:52:22 bouchet Exp $
+//$Id: StSstWafer.cc,v 1.8 2016/06/07 21:44:07 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.8  2016/06/07 21:44:07  bouchet
+//coverity : multiple RESOURCE_LEAK fixed ; add point to list after having set the flag ; cleanup
+//
 //Revision 1.7  2016/05/30 23:52:22  bouchet
 //forget cleanup at previous commit
 //
@@ -725,22 +728,18 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
 
 // traitement propre aux space points..(probabilite)
  	  Double_t setA[2], setB[2], setC[2], setD[2];
@@ -761,30 +760,37 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      probBC = (setB[1]*setC[1])/tmp;
 	      if(probAD>probBC)// we store only pointA and pointD because this configuration has the higher probability 
 		{
+		  newPointA->setFlag(int(100*probAD));
+		  newPointD->setFlag(int(100*probAD));
 		  mPoint->addNewPoint(newPointA);
 		  mPoint->addNewPoint(newPointD);
+		  delete newPointC;
+		  delete newPointB;
 		}
 	      else
 		{
+		  newPointB->setFlag(int(100*probBC));
+		  newPointC->setFlag(int(100*probBC));
 		  mPoint->addNewPoint(newPointB);
 		  mPoint->addNewPoint(newPointC);
+		  delete newPointA;
+		  delete newPointD;
 		}
 	    }
 	  else
 	    {
 	      probAD = 0.5;
 	      probBC = 0.5;
+	      newPointA->setFlag(int(100*probAD));
+	      newPointB->setFlag(int(100*probBC));
+	      newPointC->setFlag(int(100*probBC));
+	      newPointD->setFlag(int(100*probAD));	      
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	    }
-	  newPointA->setFlag(int(100*probAD));
-	  newPointB->setFlag(int(100*probBC));
-	  newPointC->setFlag(int(100*probBC));
-	  newPointD->setFlag(int(100*probAD));
           nSolved++;
-	  
 	}
 // 7 *********************************************************************
         else if(!strcmp(currentKind,"1p1n2n2p2n3n"))//        case (2-3)A checked
@@ -792,22 +798,18 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
   	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
   	  newPointC->setEnergyLossCorrected(Adc[3]-Adc[5], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
           newPointD->setFlag(100);
- 	  //mPoint->addNewPoint(newPointD);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setD[2];
@@ -834,6 +836,7 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointD);
+	      delete newPointC;
 	    }
 	  else
 	    {
@@ -842,6 +845,7 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
+	      delete newPointD;
 	    }
           nSolved++;
   	}
@@ -851,22 +855,18 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
    	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
    	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4]-Adc[5],CalibArray);
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(4));
           newPointD->setFlag(100);
- 	  //mPoint->addNewPoint(newPointD);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setD[2];
@@ -893,6 +893,7 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointD);
+	      delete newPointC;
 	    }
 	  else
 	    {
@@ -901,6 +902,7 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
+	      delete newPointD;
 	    }
           nSolved++;
   	}
@@ -910,25 +912,20 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
   	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
   	  newPointC->setEnergyLossCorrected(Adc[0]-Adc[1], Adc[3],CalibArray);
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
- 	  //mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setD[2], setE[2];
@@ -962,7 +959,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
-
+	      //delete newPointC;
+	      //delete newPointD;
 	    }
 	  else if ((probACD > probABE)&&(probACD > probADE))
 	    {
@@ -971,6 +969,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointD);
+	      //delete newPointB;
+	      //delete newPointE;
 	    }
 	  else if ((probADE > probABE)&&(probADE > probACD))
 	    {
@@ -980,6 +980,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
+	      //delete newPointC;
+	      //delete newPointD;
 	    }
           nSolved++;
   	}
@@ -989,25 +991,20 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
   	  newPointB->setEnergyLossCorrected(Adc[2], Adc[1]-Adc[0],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(1));
   	  newPointD->setEnergyLossCorrected(Adc[5], Adc[1]-Adc[0],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(4));
- 	  //mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setC[2], setE[2];
@@ -1041,6 +1038,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
+	      //delete newPointC;
+	      //delete newPointD;
 	    }
 	  else if ((probACD > probABE)&&(probACD > probACE))
 	    {
@@ -1049,6 +1048,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointD);
+	      //delete newPointB;
+	      //delete newPointE;
 	    }
 	  else if ((probACE > probABE)&&(probACE > probACD))
 	    {
@@ -1058,6 +1059,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
+	      //delete newPointC;
+	      //delete newPointD;
 	    }
           nSolved++;
   	}
@@ -1066,26 +1069,21 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
   	{
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
   	  newPointC->setEnergyLossCorrected(Adc[3]-Adc[6],Adc[1],CalibArray);
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
   	  newPointD->setEnergyLossCorrected(Adc[3]-Adc[6], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
           newPointE->setFlag(100);
- 	  //mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setB[2], setE[2];
@@ -1120,50 +1118,51 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointE);
+	      //delete newPointC;
+	      //delete newPointD;
 	    }
-	  else if ((probADE > probABE)&&(probADE > probBCE))
+	  if ((probADE > probABE)&&(probADE > probBCE))
 	    {
 	      newPointA->setEnergyLossCorrected(Adc[0],Adc[1],CalibArray);
 	      newPointE->setEnergyLossCorrected(Adc[3]-Adc[2],Adc[6],CalibArray);
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE);
+	      //delete newPointB;
+	      //delete newPointC;
 	    }
-	  else if ((probBCE > probABE)&&(probBCE > probADE))
+	  if ((probBCE > probABE)&&(probBCE > probADE))
 	    {
 	      newPointB->setEnergyLossCorrected(Adc[0],Adc[2],CalibArray);
 	      newPointE->setEnergyLossCorrected(Adc[3]-Adc[1],Adc[6],CalibArray);
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
+	      //delete newPointA;
+	      //delete newPointD;
 	    }
           nSolved++;
   	}
-// 12 ********************************************************************
+      // 12 ********************************************************************
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3p2n"))//        case (3-2)BSP
   	{
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0]-Adc[6], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3]-Adc[6], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
           newPointE->setFlag(100);
- 	  //mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setC[2], setE[2];
@@ -1198,6 +1197,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
+	      delete newPointB;
+	      delete newPointD;
 	    }
 	  else if ((probADE > probACE)&&(probADE > probBCE))
 	    {
@@ -1206,6 +1207,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE); 
+	      delete newPointB;
+	      delete newPointC;
 	    }
 	  else if ((probBCE > probACE)&&(probBCE > probADE))
 	    {
@@ -1214,6 +1217,8 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointE); 
+	      delete newPointA;
+	      delete newPointD;
 	    }
           nSolved++;
   	}
@@ -1314,27 +1319,21 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
   	{
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
-	  mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
-	  mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
- 	  mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
- 	  mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
- 	  mPoint->addNewPoint(newPointE);
 
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
- 	  mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2];
@@ -1378,6 +1377,12 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointD->setFlag(int(100*prob[3]));
 	  newPointE->setFlag(int(100*prob[4]));
 	  newPointF->setFlag(int(100*prob[5]));
+	  mPoint->addNewPoint(newPointA);
+	  mPoint->addNewPoint(newPointB);
+	  mPoint->addNewPoint(newPointC);
+	  mPoint->addNewPoint(newPointD);
+	  mPoint->addNewPoint(newPointE);
+	  mPoint->addNewPoint(newPointF);
           nSolved++;
   	}
 // 18 ********************************************************************
@@ -1385,27 +1390,21 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
   	{
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
-	  mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
-	  mPoint->addNewPoint(newPointB);
 
  	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
- 	  mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
- 	  mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(1));
- 	  mPoint->addNewPoint(newPointE);
 
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(2));
- 	  mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
 	  Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2];
@@ -1449,6 +1448,12 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointD->setFlag(int(100*prob[3]));
 	  newPointE->setFlag(int(100*prob[4]));
 	  newPointF->setFlag(int(100*prob[5]));
+	  mPoint->addNewPoint(newPointA);
+	  mPoint->addNewPoint(newPointB);
+	  mPoint->addNewPoint(newPointC);
+	  mPoint->addNewPoint(newPointD);
+	  mPoint->addNewPoint(newPointE);
+	  mPoint->addNewPoint(newPointF);
           nSolved++;
   	}
 // 19 ********************************************************************
@@ -1504,27 +1509,22 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[5],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
  	  newPointE->setEnergyLossCorrected(Adc[6], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointE);
 
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointF->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
- 	  //mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
           Double_t setC[2], setD[2], setE[2], setF[2];
@@ -1541,22 +1541,27 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+ setC[1]*setF[1]+setD[1]*setE[1];
 	  probACF = (setC[1]*setF[1])/tmp;
 	  probADE = (setD[1]*setE[1])/tmp;
+	  newPointC->setFlag(int(100*probACF));
+	  newPointD->setFlag(int(100*probADE));
+	  newPointE->setFlag(int(100*probADE));
+	  newPointF->setFlag(int(100*probACF));
+
 	  if(probACF>probADE)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointF); 
+	      delete newPointD;
+	      delete newPointE;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE);  
+	      delete newPointC;
+	      delete newPointF;
 	    }
-	  newPointC->setFlag(int(100*probACF));
-	  newPointD->setFlag(int(100*probADE));
-	  newPointE->setFlag(int(100*probADE));
-	  newPointF->setFlag(int(100*probACF));
           nSolved++;
   	}
 // 22 *********************************************************************
@@ -1566,28 +1571,23 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
 	  newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
-
+	
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
-
+	
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLossCorrected(Adc[2], Adc[5],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
-
+	
  	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(4));
  	  newPointE->setEnergyLossCorrected(Adc[6], Adc[4],CalibArray);
- 	  //mPoint->addNewPoint(newPointE);
-
+ 	
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointF->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
- 	  //mPoint->addNewPoint(newPointF);
-
+ 	
 // traitement propre aux space points..(probabilite)
           Double_t setC[2], setD[2], setE[2], setF[2];
           Double_t probACF, probADE;
@@ -1603,22 +1603,26 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+ setC[1]*setF[1]+setD[1]*setE[1];
 	  probACF = (setC[1]*setF[1])/tmp;
 	  probADE = (setD[1]*setE[1])/tmp;
+	  newPointC->setFlag(int(100*probACF));
+	  newPointD->setFlag(int(100*probADE));
+	  newPointE->setFlag(int(100*probADE));
+	  newPointF->setFlag(int(100*probACF));
 	  if(probACF>probADE)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
-	      mPoint->addNewPoint(newPointF); 
+	      mPoint->addNewPoint(newPointF);
+	      delete newPointD; 
+	      delete newPointE; 
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointE);  
-	    }
-	  newPointC->setFlag(int(100*probACF));
-	  newPointD->setFlag(int(100*probADE));
-	  newPointE->setFlag(int(100*probADE));
-	  newPointF->setFlag(int(100*probACF));
+	      delete newPointC; 
+	      delete newPointF; 
+	    }	  
           nSolved++;
   	}
 // 23 *********************************************************************
@@ -1627,29 +1631,24 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
-
+	
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
-
+	
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
-
+	
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
-
+ 	
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(8));
  	  newPointF->setEnergyLossCorrected(Adc[6], Adc[8],CalibArray);
  	  newPointF->setFlag(100);
- 	  //mPoint->addNewPoint(newPointF);
-
+ 	
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2];
           Double_t probADF, probBCF;
@@ -1665,23 +1664,27 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
 	  probADF = (setA[1]*setD[1])/tmp;
 	  probBCF = (setB[1]*setC[1])/tmp;
+	  newPointA->setFlag(int(100*probADF));
+	  newPointB->setFlag(int(100*probBCF));
+	  newPointC->setFlag(int(100*probBCF));
+	  newPointD->setFlag(int(100*probADF));
 	  if(probADF>probBCF)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointF); 
+	      delete newPointB;
+	      delete newPointC;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointF);  
+	      delete newPointA;
+	      delete newPointD;
 	    }
-	  newPointA->setFlag(int(100*probADF));
-	  newPointB->setFlag(int(100*probBCF));
-	  newPointC->setFlag(int(100*probBCF));
-	  newPointD->setFlag(int(100*probADF));
-          nSolved++;
+	  nSolved++;
   	}
 // 24 *********************************************************************
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3n3p3n"))//    case (3-3)BSP
@@ -1689,29 +1692,24 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
 
  	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
- 	  //mPoint->addNewPoint(newPointD);
 
  	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointF->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
           newPointF->setNMatched(33);
  	  newPointF->setFlag(100);
- 	  //mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2];
@@ -1728,22 +1726,26 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
 	  probADF = (setA[1]*setD[1])/tmp;
 	  probBCF = (setB[1]*setC[1])/tmp;
+	  newPointA->setFlag(int(100*probADF));
+	  newPointB->setFlag(int(100*probBCF));
+	  newPointC->setFlag(int(100*probBCF));
+	  newPointD->setFlag(int(100*probADF));
 	  if(probADF>probBCF)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointF); 
+	      delete newPointB;
+	      delete newPointC;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointF);  
+	      delete newPointA;
+	      delete newPointD;
 	    }
-	  newPointA->setFlag(int(100*probADF));
-	  newPointB->setFlag(int(100*probBCF));
-	  newPointC->setFlag(int(100*probBCF));
-	  newPointD->setFlag(int(100*probADF));
           nSolved++;
   	}
 // 25 *********************************************************************
@@ -1801,27 +1803,22 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointE->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
-	  //mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointF->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(3));
  	  newPointG->setEnergyLossCorrected(Adc[7], Adc[3],CalibArray);
-	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
           Double_t setD[2], setE[2], setF[2], setG[2];
@@ -1838,23 +1835,26 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setD[1]*setG[1]+setE[1]*setF[1]);
 	  probADG = (setD[1]*setG[1])/tmp;
 	  probAEF = (setE[1]*setF[1])/tmp;
+	  newPointD->setFlag(int(100*probADG));
+	  newPointE->setFlag(int(100*probAEF));
+	  newPointF->setFlag(int(100*probAEF));
+	  newPointG->setFlag(int(100*probADG));
 	  if(probADG>probAEF)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointG); 
+	      delete newPointE;
+	      delete newPointF;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointE);
-	      mPoint->addNewPoint(newPointF);  
+	      mPoint->addNewPoint(newPointF);
+	      delete newPointD;
+	      delete newPointG;  
 	    }
-	  newPointD->setFlag(int(100*probADG));
-	  newPointE->setFlag(int(100*probAEF));
-	  newPointF->setFlag(int(100*probAEF));
-	  newPointG->setFlag(int(100*probADG));
-
           nSolved++;
   	}
 // 28 *********************************************************************
@@ -1864,27 +1864,22 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
           newPointA->setFlag(100);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLossCorrected(Adc[2], Adc[4],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLossCorrected(Adc[2], Adc[5],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(4));
  	  newPointF->setEnergyLossCorrected(Adc[6], Adc[4],CalibArray);
-	  //mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointG->setEnergyLossCorrected(Adc[6], Adc[5],CalibArray);
-	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
           Double_t setC[2], setD[2], setF[2], setG[2];
@@ -1901,23 +1896,26 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setC[1]*setG[1]+setD[1]*setF[1]);
 	  probACG = (setC[1]*setG[1])/tmp;
 	  probADF = (setD[1]*setF[1])/tmp;
+	  newPointC->setFlag(int(100*probACG));
+	  newPointD->setFlag(int(100*probADF));
+	  newPointF->setFlag(int(100*probADF));
+	  newPointG->setFlag(int(100*probACG));
 	  if(probACG>probADF)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointG); 
+	      delete newPointD;
+	      delete newPointF;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointF);  
+	      delete newPointC;
+	      delete newPointG;
 	    }
-	  newPointC->setFlag(int(100*probACG));
-	  newPointD->setFlag(int(100*probADF));
-	  newPointF->setFlag(int(100*probADF));
-	  newPointG->setFlag(int(100*probACG));
-
           nSolved++;
   	}
 // 29 *********************************************************************
@@ -1926,28 +1924,23 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(9));
  	  newPointG->setEnergyLossCorrected(Adc[6], Adc[9],CalibArray);
           newPointG->setFlag(100);
-	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2];
@@ -1964,23 +1957,26 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
 	  probADG = (setA[1]*setD[1])/tmp;
 	  probBCG = (setB[1]*setC[1])/tmp;
+	  newPointA->setFlag(int(100*probADG));
+	  newPointB->setFlag(int(100*probBCG));
+	  newPointC->setFlag(int(100*probBCG));
+	  newPointD->setFlag(int(100*probADG));
 	  if(probADG>probBCG)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointG); 
+	      delete newPointB;
+	      delete newPointC;
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointC);
 	      mPoint->addNewPoint(newPointG);  
+	      delete newPointA;
+	      delete newPointD;
 	    }
-	  newPointA->setFlag(int(100*probADG));
-	  newPointB->setFlag(int(100*probBCG));
-	  newPointC->setFlag(int(100*probBCG));
-	  newPointD->setFlag(int(100*probADG));
-
           nSolved++;
   	}
 // 30 *********************************************************************
@@ -1989,28 +1985,23 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointG->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
           newPointG->setFlag(100);
-	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setD[2], setE[2];
@@ -2027,23 +2018,27 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  Double_t tmp = 3e-33+(setA[1]*setE[1]+setB[1]*setD[1]);
 	  probAEG = (setA[1]*setE[1])/tmp;
 	  probBDG = (setB[1]*setD[1])/tmp;
+	  newPointA->setFlag(int(100*probAEG));
+	  newPointB->setFlag(int(100*probBDG));
+	  newPointD->setFlag(int(100*probBDG));
+	  newPointE->setFlag(int(100*probAEG));
+
 	  if(probAEG>probBDG)
 	    {
 	      mPoint->addNewPoint(newPointA);
 	      mPoint->addNewPoint(newPointE);
-	      mPoint->addNewPoint(newPointG); 
+	      mPoint->addNewPoint(newPointG);
+	      delete newPointB; 
+	      delete newPointD; 
 	    }
 	  else
 	    {
 	      mPoint->addNewPoint(newPointB);
 	      mPoint->addNewPoint(newPointD);
 	      mPoint->addNewPoint(newPointG);  
+	      delete newPointA; 
+	      delete newPointE; 
 	    }
-	  newPointA->setFlag(int(100*probAEG));
-	  newPointB->setFlag(int(100*probBDG));
-	  newPointD->setFlag(int(100*probBDG));
-	  newPointE->setFlag(int(100*probAEG));
-
           nSolved++;
   	}
 // 31 *********************************************************************
@@ -2098,37 +2093,30 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
-	  //mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
  	  newPointE->setEnergyLossCorrected(Adc[3], Adc[6],CalibArray);
-	  //mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointF->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
-	  //mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointG->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
-	  //mPoint->addNewPoint(newPointG);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2], setG[2];
@@ -2152,25 +2140,6 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  probADG = (setA[1]*setD[1]*setG[1])/tmp;
 	  probAEF = (setA[1]*setE[1]*setF[1])/tmp;
 	  probBCG = (setB[1]*setC[1]*setG[1])/tmp;
-	  if ((probADG > probAEF)&&(probADG > probBCG))
-	    {
-	     
-	      mPoint->addNewPoint(newPointA);
-	      mPoint->addNewPoint(newPointD);
-	      mPoint->addNewPoint(newPointG); 
-	    }
-	  else if ((probAEF > probADG)&&(probAEF > probBCG))
-	    {
-	      mPoint->addNewPoint(newPointA);
-	      mPoint->addNewPoint(newPointE);
-	      mPoint->addNewPoint(newPointF); 
-	    }
-	  else if ((probBCG > probADG)&&(probBCG > probAEF))
-	    {
-	      mPoint->addNewPoint(newPointB);
-	      mPoint->addNewPoint(newPointC);
-	      mPoint->addNewPoint(newPointG); 
-	    }
 	  newPointA->setFlag(int(100*(probADG+probAEF)));
 	  newPointB->setFlag(int(100*probBCG));
 	  newPointC->setFlag(int(100*probBCG));
@@ -2179,6 +2148,37 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointF->setFlag(int(100*probAEF));
 	  newPointG->setFlag(int(100*(probADG+probBCG)));
 
+	  if ((probADG > probAEF)&&(probADG > probBCG))
+	    {
+	     
+	      mPoint->addNewPoint(newPointA);
+	      mPoint->addNewPoint(newPointD);
+	      mPoint->addNewPoint(newPointG); 
+	      delete newPointB;
+	      delete newPointC;
+	      delete newPointE;
+	      delete newPointF;
+	    }
+	  else if ((probAEF > probADG)&&(probAEF > probBCG))
+	    {
+	      mPoint->addNewPoint(newPointA);
+	      mPoint->addNewPoint(newPointE);
+	      mPoint->addNewPoint(newPointF); 
+	      delete newPointB;
+	      delete newPointC;
+	      delete newPointD;
+	      delete newPointG;
+	    }
+	  else if ((probBCG > probADG)&&(probBCG > probAEF))
+	    {
+	      mPoint->addNewPoint(newPointB);
+	      mPoint->addNewPoint(newPointC);
+	      mPoint->addNewPoint(newPointG); 
+	      delete newPointA;
+	      delete newPointD;
+	      delete newPointE;
+	      delete newPointF;
+	    }
           nSolved++;
   	}
 // 34 *********************************************************************
@@ -2187,42 +2187,34 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  newPointC->setEnergyLossCorrected(Adc[0], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointF->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(2));
  	  newPointG->setEnergyLossCorrected(Adc[8], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointG);
 
 	  StSstPoint *newPointH = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointH->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointH);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2], setG[2], setH[2];
@@ -2257,7 +2249,14 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointF->setFlag(int(100*probAFG));
 	  newPointG->setFlag(int(100*(probAFG+probCDG)));
 	  newPointH->setFlag(int(100*(probAEH+probBDH)));
-
+	  mPoint->addNewPoint(newPointA);
+	  mPoint->addNewPoint(newPointB);
+	  mPoint->addNewPoint(newPointC);
+	  mPoint->addNewPoint(newPointD);
+	  mPoint->addNewPoint(newPointE);
+	  mPoint->addNewPoint(newPointF);
+	  mPoint->addNewPoint(newPointG);
+	  mPoint->addNewPoint(newPointH);
           nSolved++;
   	}
 // 35 *********************************************************************
@@ -2266,42 +2265,34 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0],  Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLossCorrected(Adc[3], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLossCorrected(Adc[3], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
  	  newPointE->setEnergyLossCorrected(Adc[3], Adc[6],CalibArray);
-	  mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(1));
  	  newPointF->setEnergyLossCorrected(Adc[7], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointG->setEnergyLossCorrected(Adc[7], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointG);
 
 	  StSstPoint *newPointH = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointH->setEnergyLossCorrected(Adc[7], Adc[6],CalibArray);
-	  mPoint->addNewPoint(newPointH);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2], setG[2], setH[2];
@@ -2336,6 +2327,14 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointF->setFlag(int(100*probBEF));
 	  newPointG->setFlag(int(100*probAEG));
 	  newPointH->setFlag(int(100*(probADH+probBCH)));
+	  mPoint->addNewPoint(newPointA);
+	  mPoint->addNewPoint(newPointB);
+	  mPoint->addNewPoint(newPointC);
+	  mPoint->addNewPoint(newPointD);
+	  mPoint->addNewPoint(newPointE);
+	  mPoint->addNewPoint(newPointF);
+	  mPoint->addNewPoint(newPointG);
+	  mPoint->addNewPoint(newPointH);
 
           nSolved++;
   	}
@@ -2345,47 +2344,38 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  StSstPoint *newPointA = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLossCorrected(Adc[0], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointA);
 
 	  StSstPoint *newPointB = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLossCorrected(Adc[0], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointB);
 
 	  StSstPoint *newPointC = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  newPointC->setEnergyLossCorrected(Adc[0], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointC);
 
 	  StSstPoint *newPointD = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLossCorrected(Adc[4], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointD);
 
 	  StSstPoint *newPointE = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLossCorrected(Adc[4], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointE);
 
 	  StSstPoint *newPointF = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointF->setEnergyLossCorrected(Adc[4], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointF);
 
 	  StSstPoint *newPointG = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(1));
  	  newPointG->setEnergyLossCorrected(Adc[8], Adc[1],CalibArray);
-	  mPoint->addNewPoint(newPointG);
 
 	  StSstPoint *newPointH = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(2));
  	  newPointH->setEnergyLossCorrected(Adc[8], Adc[2],CalibArray);
-	  mPoint->addNewPoint(newPointH);
 
 	  StSstPoint *newPointI = new StSstPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
           setMatcheds(dimensions, newPointI, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointI->setEnergyLossCorrected(Adc[8], Adc[3],CalibArray);
-	  mPoint->addNewPoint(newPointI);
 
 // traitement propre aux space points..(probabilite)
           Double_t setA[2], setB[2], setC[2], setD[2], setE[2], setF[2], setG[2], setH[2], setI[2];
@@ -2425,7 +2415,15 @@ Int_t StSstWafer::doSolvePackage(sstDimensions_st *dimensions, StSstClusterContr
 	  newPointG->setFlag(int(100*(probCEG+probBFG)));
 	  newPointH->setFlag(int(100*(probAFH+probCDH)));
 	  newPointI->setFlag(int(100*(probAEI+probBDI)));
-
+	  mPoint->addNewPoint(newPointA);
+	  mPoint->addNewPoint(newPointB);
+	  mPoint->addNewPoint(newPointC);
+	  mPoint->addNewPoint(newPointD);
+	  mPoint->addNewPoint(newPointE);
+	  mPoint->addNewPoint(newPointF);
+	  mPoint->addNewPoint(newPointG);
+	  mPoint->addNewPoint(newPointH);
+	  mPoint->addNewPoint(newPointI);	
           nSolved++;
   	}
       else LOG_INFO<<" Warning unsolved case ("<<currentKind<<")\n";// other cases
@@ -2622,7 +2620,7 @@ Int_t StSstWafer::geoMatched(sstDimensions_st *dimensions, StSstCluster *ptr1, S
 /*!
 Must be useful but for what ???
  */
-Int_t StSstWafer::setMatcheds(sstDimensions_st *dimensions, StSstPoint *Point, StSstCluster *pMatched, StSstCluster *nMatched)
+void StSstWafer::setMatcheds(sstDimensions_st *dimensions, StSstPoint *Point, StSstCluster *pMatched, StSstCluster *nMatched)
 {// strip(1) -> Upos(0)...
   Point->setPositionU((pMatched->getStripMean()-1)*dimensions[0].stripPitch,0);
   Point->setPositionU((nMatched->getStripMean()-1)*dimensions[0].stripPitch,1);
@@ -2644,7 +2642,6 @@ Int_t StSstWafer::setMatcheds(sstDimensions_st *dimensions, StSstPoint *Point, S
 	      Point->setNMchit(pMatched->getIdMcHit(pHitIndex),sptHitIndex++);
 	}
     }
-  return 1;
 }
 //________________________________________________________________________________
 Double_t StSstWafer::matchDistr(StSstClusterControl *clusterControl, Double_t x)
