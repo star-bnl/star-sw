@@ -1,6 +1,9 @@
-//$Id: StSstConfig.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstConfig.cc,v 1.2 2016/06/06 18:48:12 bouchet Exp $
 //
 //$Log: StSstConfig.cc,v $
+//Revision 1.2  2016/06/06 18:48:12  bouchet
+//coverity : UNINIT_CTOR
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -31,8 +34,15 @@ StSstConfig::StSstConfig()
 StSstConfig::~StSstConfig()
 {}
 
-StSstConfig::StSstConfig(const StSstConfig& geom)
-{}
+StSstConfig::StSstConfig(const StSstConfig& geom){
+  totLadderPresent =  geom.mNumberOfLadders;
+  mNumberOfLadders = geom.mNumberOfLadders;
+  mNumberOfWafers = geom.mNumberOfWafers;
+  mNumberOfHybrids = geom.mNumberOfHybrids;
+  mNumberOfStrips = geom.mNumberOfStrips;
+  mTotalNumberOfLadders = geom.mTotalNumberOfLadders;
+  mTotalNumberOfHybrids = geom.mTotalNumberOfHybrids;
+}
 
 StSstConfig& StSstConfig::operator = (const StSstConfig& geom)
 {
