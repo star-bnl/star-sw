@@ -99,6 +99,7 @@ KFParticle::KFParticle( const KFPTrack &track, const int PID ): KFParticleBase()
   Create(fP,fC,fQ,mass);
   fChi2 = track.GetChi2();
   fNDF = track.GetNDF();
+  SetPDG(PID);
 #ifdef NonhomogeneousField
   for(int iF=0; iF<10; iF++)
     SetFieldCoeff( track.GetFieldCoeff()[iF], iF);
