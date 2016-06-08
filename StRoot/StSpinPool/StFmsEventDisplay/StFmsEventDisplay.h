@@ -3,8 +3,11 @@
 //
 //   This is FMS-FPS event display.
 // 
-//  $Id: StFmsEventDisplay.h,v 1.3 2016/01/20 19:56:39 akio Exp $
+//  $Id: StFmsEventDisplay.h,v 1.4 2016/06/08 16:31:50 akio Exp $
 //  $Log: StFmsEventDisplay.h,v $
+//  Revision 1.4  2016/06/08 16:31:50  akio
+//  c++11 style initialization
+//
 //  Revision 1.3  2016/01/20 19:56:39  akio
 //  *** empty log message ***
 //
@@ -37,19 +40,19 @@ public:
     void setFileName(char* file){mFilename=file;} 
     
 private:
-    StFmsDbMaker* mFmsDbMaker;
-    StFmsCollection* mFmsColl;
-    TApplication* mApplication;
-    TCanvas* mCanvas;    
-    int mFilter;
-    int mNEvents;
-    int mNAccepted;
-    int mMaxEvents;
-    char* mFilename;
-    TFile* mFile;
+    StFmsDbMaker* mFmsDbMaker=0;
+    StFmsCollection* mFmsColl=0;
+    TApplication* mApplication=0;
+    TCanvas* mCanvas=0;    
+    int mFilter=0;
+    int mNEvents=0;
+    int mNAccepted=0;
+    int mMaxEvents=20;
+    char* mFilename=0;
+    TFile* mFile=0;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsEventDisplay.h,v 1.3 2016/01/20 19:56:39 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsEventDisplay.h,v 1.4 2016/06/08 16:31:50 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsEventDisplay,0);
 };
