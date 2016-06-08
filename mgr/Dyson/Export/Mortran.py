@@ -3,7 +3,7 @@ from Handler import Handler
 import Dyson.Utils.Shapes
 from   Dyson.Utils.Shapes import shape_params
 
-import os
+import os, copy
 
 export_comments = True
 
@@ -1335,7 +1335,6 @@ class Create_and_Position(Position):
         Position.__init__(self)                
     def startElement(self,tag,attr):
 
-
         # Arrange shape arguements first
         for key in shape_params:
             val = attr.get(key,None)
@@ -1355,6 +1354,20 @@ class Create_and_Position(Position):
             output += " %s"% pos.strip(',')
         form( output             )
 
+def tryFloat( value ):
+    result = value
+    try:
+        result = float(value) # convert 1 to 1.0
+    except ValueError:
+        result = 'real(%s)'%result # wrap expressions in explicit cast to real
+    return str(result)
+
+def stripQuotes( value ):
+    value = value.strip('"')
+    value = value.strip("'")
+    return value
+    
+
 # ====================================================================================================
 class Placement(Handler):
     def __init__(self):
@@ -1369,9 +1382,9 @@ class Placement(Handler):
         # Positional arguements
         self.block = attr.get('block')
         self.into  = attr.get('in',None)
-        self.x     = attr.get('x',None)
-        self.y     = attr.get('y',None)
-        self.z     = attr.get('z',None)
+        self.x     = attr.get('x',0.0)
+        self.y     = attr.get('y',0.0)
+        self.z     = attr.get('z',0.0)
         self.only  = attr.get('konly',None)
         self.copy  = attr.get('ncopy',None)
         self.cond  = attr.get('if',   None)
@@ -1384,6 +1397,163 @@ class Placement(Handler):
 
     def endElement(self,tag):
 
+        # Conditional placement
+        cond   = self.attr.pop('if', None)
+        if cond: formatter( 'IF %s {'%cond )
+
+        attr = copy.copy(self.attr)
+#       self.agstar_placement(tag) 
+
+        self.attr = attr
+        self.agml_placement(tag)
+
+        self.attr = attr
+
+        if cond: formatter( '} !//IF %s '%cond )        
+
+    def agml_placement(self,tag):
+        block  = self.attr.pop('block')
+        mother = self.attr.pop('in',None)
+        copy   = self.attr.pop('ncopy',None)
+        only   = self.attr.pop('konly',None)
+        cond   = self.attr.pop('if', None)
+        matrix = self.attr.pop('matrix', None)
+        group  = self.attr.pop('group',None)
+        x      = self.attr.pop('x',None)
+        y      = self.attr.pop('y',None)
+        z      = self.attr.pop('z',None)
+
+
+        parlist = []
+
+        formatter( "CALL AgsReset" )
+        formatter( "CALL agml_position_begin('%s')"%block )
+
+        if mother:
+            mother = mother.upper()
+            formatter( "%%mother = '%s'"%mother ) # name of mother volume
+            parlist.append('MOTHER')
+
+        block = block.upper()
+        formatter( "%%title  = '%s'"%block )  # name of daughter volume
+        formatter( "%exname = 'POSITION' ! agml placement" )
+        if copy:
+            formatter( "%%ncopy = %s"% tryFloat(copy) ) # copy number
+            parlist.append( "NCOPY" )
+        if only:
+            only = only.upper()
+            formatter( "%%konly = '%s'"% stripQuotes(only) ) # ONLY/MANY
+            parlist.append( "KONLY" )
+
+
+
+        #
+        # Now create the executive code
+        #
+        if x:
+            formatter( "%%x = %s"% tryFloat(self.x), cchar="_" )
+            parlist.append( "X" )
+        if y:
+            formatter( "%%y = %s"% tryFloat(self.y), cchar="_" )
+            parlist.append( "Y" )
+        if z:
+            formatter( "%%z = %s"% tryFloat(self.z), cchar="_" )
+            parlist.append( "Z" )
+
+        for key in self.attr.keys():
+
+            
+            val = self.attr.pop(key,None)
+            if val:
+                formatter( "%%%s = %s"%( key, tryFloat(val) ) )
+        
+            
+        #
+        # Handle rotations
+        #
+        for rotation in self.contents:
+
+            #
+            # Is a rotation about an axis, or a definition of axes
+            #
+            if rotation.key:
+
+                key  = rotation.key
+                axis = None
+
+                if key == 'alphax':
+                    val  = tryFloat(rotation.value)                    
+                    formatter( '%%alphax = %s'%val )
+                    formatter( 'CALL agml_rotate_x(%alphax)' )
+                if key == 'alphay':
+                    val  = tryFloat(rotation.value)                    
+                    formatter( '%%alphay = %s'%val )
+                    formatter( 'CALL agml_rotate_y(%alphay)' )                    
+                if key == 'alphaz':
+                    val  = tryFloat(rotation.value)                    
+                    formatter( '%%alphaz = %s'%val )
+                    formatter( 'CALL agml_rotate_z(%alphaz)' )                    
+
+                if key == 'ort':
+                    val = rotation.value
+                    formatter( "CALL agml_ortho('%s'//char(0))"%val )
+
+            #
+            # Is defined by the six G3 angles
+            if rotation.angles:
+                #'thetax','phix','thetay','phiy','thetaz','phiz'
+
+                #
+                # Extract 6 G3 angles
+                #
+                angles = rotation.angles
+                thetax = tryFloat( angles.get('thetax', 90.0 ) )
+                thetay = tryFloat( angles.get('thetay', 90.0 ) )
+                thetaz = tryFloat( angles.get('thetaz',  0.0 ) )
+                phix   = tryFloat( angles.get('phix',    0.0 ) )
+                phiy   = tryFloat( angles.get('phiy',   90.0 ) )
+                phiz   = tryFloat( angles.get('phiz',    0.0 ) )
+                
+                #
+                # And set them
+                #
+                formatter( "%%thetax = %s"%thetax )
+                formatter( "%%thetay = %s"%thetay )
+                formatter( "%%thetaz = %s"%thetaz )
+                formatter( "%%phix = %s"%phix )
+                formatter( "%%phiy = %s"%phiy )
+                formatter( "%%phiz = %s"%phiz )                                
+                formatter( "CALL agml_set_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
+
+
+        #
+        # Next, any remaining attributes
+        #
+
+        #
+        # Now get the rotation angles from the matrix and output
+        #
+        formatter( "CALL agml_get_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
+        parlist.append( 'THETAX' )
+        parlist.append( 'PHIX' )
+        parlist.append( 'THETAY' )
+        parlist.append( 'PHIY' )
+        parlist.append( 'THETAZ' )
+        parlist.append( 'PHIZ' )
+
+        formatter( "%%parlist = '%s'"%'_'.join(parlist) )
+        #
+        # And finally invoke AgStar executive action
+        #
+        formatter( "CALL AxPosition" )
+
+        
+
+            
+
+        
+
+    def agstar_placement(self,tag):
 
         block  = self.attr.pop('block')
         mother = self.attr.pop('in',None)
@@ -1393,8 +1563,6 @@ class Placement(Handler):
         matrix = self.attr.pop('matrix', None)
 
         if cond: formatter( 'IF %s {'%cond )
-
-
 
         # Handle rotation matrix
         if matrix:
