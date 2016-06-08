@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.8 2016/06/07 21:44:07 bouchet Exp $
+//$Id: StSstWafer.cc,v 1.9 2016/06/08 20:53:54 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.9  2016/06/08 20:53:54  bouchet
+//coverity : PASS_BY_VALUE, FORWARD_NULL
+//
 //Revision 1.8  2016/06/07 21:44:07  bouchet
 //coverity : multiple RESOURCE_LEAK fixed ; add point to list after having set the flag ; cleanup
 //
@@ -288,6 +291,8 @@ Int_t StSstWafer::doFindCluster(StSstClusterControl *clusterControl, Int_t iSide
      CurrentClusterList =  mClusterN;
      break;
     }
+
+  if(!CurrentStripList) return 0;
   if(!CurrentStripList->getSize()) return 0;
   
   Int_t nCluster = 0;
@@ -374,7 +379,7 @@ Int_t StSstWafer::doClusterSplitting(StSstClusterControl *clusterControl, Int_t 
       CurrentClusterList =  mClusterN;
       break;
     }
-
+  if(!CurrentClusterList) return 0;
   Int_t ClusterListSize = CurrentClusterList->getSize();
   if(!ClusterListSize) return 0;
   
@@ -2593,7 +2598,7 @@ StSstWafer::StSstWafer(const StSstWafer & originalWafer)
   mPoint    = new StSstPointList();
 }
 
-StSstWafer& StSstWafer::operator=(const StSstWafer originalWafer) {
+StSstWafer& StSstWafer::operator=(const StSstWafer & originalWafer) {
   memset(first, 0, last-first);
   mId         = originalWafer.mId;
   SetName(originalWafer.GetName());
