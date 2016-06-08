@@ -164,7 +164,7 @@ void StiVMCToolKit::SetDebug(Int_t m) {m_Debug = m;}
 Int_t StiVMCToolKit::Debug() {return m_Debug;}
 //________________________________________________________________________________
 void StiVMCToolKit::PrintShape(TGeoShape *shape) {
-  TGeoBBox *box = 0, *Box = 0;
+  TGeoBBox *box = 0;
   TGeoTrd1 *trd1 = 0;
   TGeoTrd2 *trd2 = 0;
   TGeoTube *tube = 0;
@@ -183,7 +183,6 @@ void StiVMCToolKit::PrintShape(TGeoShape *shape) {
   Int_t Nz = 0;
   shape->GetBoundingCylinder(paramsBC);
   shape->ComputeBBox();
-  Box = (TGeoBBox *) shape;
   for (Int_t bit = 24; bit >= 9; bit--) {//cout << bit << "\t"; 
     if (shape->TestShapeBit(BIT(bit))) {
       switch (BIT(bit)) {

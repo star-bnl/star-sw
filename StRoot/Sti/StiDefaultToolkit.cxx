@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.46 2015/08/28 23:57:53 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.1 2016/06/08 23:32:44 smirnovd Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,14 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.1  2016/06/08 23:32:44  smirnovd
+ * Integration of StiCA
+ *
+ * This is a squashed commit with all changes combined. To see individual
+ * modifications check out the ds-StiCA_2016 branch in star-sti repository.
+ * Alternatively, one can explore the StiCA_2016 branch in the STAR's CVS
+ * repository.
+ *
  * Revision 2.46  2015/08/28 23:57:53  perev
  * Cleanup
  *
@@ -140,7 +148,7 @@
 
 #include "TSystem.h"
 #include "TROOT.h"
-#include "StiDefaultToolkit.h"
+#include "Sti/StiDefaultToolkit.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/EditableParameter.h"
