@@ -1,9 +1,0 @@
-# STAR LEVEL for EVP code
-
-# pro as of 10/28/11
-#starver SL11d
-#stardev
-#setenv USE_64BITS 1
-starver SL15l
-
-#echo `STAR_LEVELS`

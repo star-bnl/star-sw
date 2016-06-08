@@ -1,5 +1,0 @@
-# $Id $
-# package StarVMCApplication
-# author: 
-Library:libStarVMCApplication.so:LIBS +=   -lminicern -lgeant3 -lgen_Tables  -lsim_Tables  -lStarMagField  -lStChain  -lEG  -lPhysics  -lVMC
-#Library:libStarVMCApplication.so:LIBS +=   -lgen_Tables  -lsim_Tables  -lStarMagField  -lStChain  -lEG  -lPhysics  -lVMC

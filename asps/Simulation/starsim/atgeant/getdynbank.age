@@ -1,7 +1,0 @@
-      subroutine getdynbank (IDYN, IADR)
-#include "geant321/gcbank.inc"
-#include "slug/sclink.inc"
-*              dependant dynamic banks now - if any required 
-      lk   = LQ(LkArP3-IDYN)
-      IADR = LOCB(IQ(lk+3))         " 2-words fence "
-      end

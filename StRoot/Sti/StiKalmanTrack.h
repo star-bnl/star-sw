@@ -24,9 +24,9 @@
 using namespace std;
 //Sti
 #include "Sti/Base/Factory.h"
-#include "StiKTNIterator.h"
-#include "StiTrack.h"
-#include "StiTrackNodeHelper.h"
+#include "Sti/StiKTNIterator.h"
+#include "Sti/StiTrack.h"
+#include "Sti/StiTrackNodeHelper.h"
 
 #include "StThreeVectorD.hh"
 #include "StMCTruth.h"
