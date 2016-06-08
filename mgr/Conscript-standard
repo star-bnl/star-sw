@@ -1376,34 +1376,6 @@ if ( $#src > -1 ) {
       Depends $envg, [($SO_PKG)], ($libs); #print "libs = $libs\n";
       $env2 = $envg;
     }
-    if ($pkg =~ m/^Sti$/) { # For use CATracker
-      if (  -e "StRoot/TPCCATracker" ) {
-#	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
-	$SO_PKG_PLAIN = $pkg . "CA";
-	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
-	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-	$envCA = $env2->clone('SUFOBJ'   => "CA.o",
-			      'CXXFLAGS' => $CXXFLAGS . "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2");
-	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx);
-	my $ListCA = join('|',@ListCA);
-	@PlainObj = ();
-	@Obj = ();
-	my @o;
-	foreach my $s (@src) {
-	  $o[0] = $s;
-	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
-	  push  @Obj, $o[0];
-	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
-	  else                  {push @PlainObj, $o[0];}
-	}
-	@src = @Obj;
-#	print "$#src => @src \n";
-#	print "$#PlainObj => @PlainObj \n";
-	
-	$envPlain = $env2->clone('LIBPATH'  => $LIB, 
-				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
-      }
-    }
 #________________________________________________________________________________
     if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
       $SO_PKG_PLAIN = $pkg . "NoSti";
