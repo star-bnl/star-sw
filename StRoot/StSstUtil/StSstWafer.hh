@@ -1,6 +1,9 @@
-//$Id: StSstWafer.hh,v 1.6 2016/05/30 21:39:28 bouchet Exp $
+//$Id: StSstWafer.hh,v 1.7 2016/06/07 21:40:14 bouchet Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.7  2016/06/07 21:40:14  bouchet
+//setMatcheds() changed to void (since it returns nothing)
+//
 //Revision 1.6  2016/05/30 21:39:28  bouchet
 //coverity : FORWARD_NULL fixed ; cleanup + simplified method
 //
@@ -91,7 +94,7 @@ class StSstWafer: public TGeoHMatrix {
   Double_t          matchDistr(StSstClusterControl *clusterControl, Double_t x);
   static Double_t   myErf(Double_t x);
   void              setIsActive(Int_t rIsActive, Int_t iSide, Int_t rNStrip);
-  Int_t             setMatcheds(sstDimensions_st *dimensions, StSstPoint *Point, StSstCluster *pMatched, StSstCluster *nMatched);
+  void              setMatcheds(sstDimensions_st *dimensions, StSstPoint *Point, StSstCluster *pMatched, StSstCluster *nMatched);
   void              setPedestalSigmaStrip(Int_t iStrip, Int_t iSide, Int_t iPedestal, Int_t iSigma, StSstDynamicControl *dynamicControl);
 
   void              Reset();

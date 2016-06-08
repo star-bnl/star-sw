@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: StFmsCluster.cxx,v 2.4 2015/10/21 14:52:09 ullrich Exp $
+ * $Id: StFmsCluster.cxx,v 2.5 2016/06/07 15:51:34 akio Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  * ***************************************************************************
@@ -10,6 +10,9 @@
  * ***************************************************************************
  *
  * $Log: StFmsCluster.cxx,v $
+ * Revision 2.5  2016/06/07 15:51:34  akio
+ * Making code better based on Coverity reports
+ *
  * Revision 2.4  2015/10/21 14:52:09  ullrich
  * Modified print out format and added info.
  *
@@ -28,10 +31,10 @@
 
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.4 2015/10/21 14:52:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsCluster.cxx,v 2.5 2016/06/07 15:51:34 akio Exp $";
 
 StFmsCluster::StFmsCluster()
-: StObject(), mCategory(0), mNTowers(0), mEnergy(0.), mX(0.),
+: StObject(), mDetectorId(0),mCategory(0), mNTowers(0), mEnergy(0.), mX(0.),
 mY(0.), mSigmaMin(0.), mSigmaMax(0.), mChi2Ndf1Photon(-1.),
 mChi2Ndf2Photon(-1.), mId(0), mFourMomentum(0.,0.,0.,0.) { /* no op */ }
 

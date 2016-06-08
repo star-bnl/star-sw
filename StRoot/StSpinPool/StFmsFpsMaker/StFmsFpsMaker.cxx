@@ -1,8 +1,18 @@
 // \class StFmsFpsMaker
 // \author Akio Ogawa
 //
-//  $Id: StFmsFpsMaker.cxx,v 1.7 2016/01/26 19:53:14 akio Exp $
+//  $Id: StFmsFpsMaker.cxx,v 1.8 2016/06/07 18:00:52 akio Exp $
 //  $Log: StFmsFpsMaker.cxx,v $
+//  Revision 1.8  2016/06/07 18:00:52  akio
+//  Removing data member initialization from constructor (moved to c++11 style initialization in .h	file)
+//  Moving project() and distance() as private member function (from global scope)
+//  Adding "const" for many of local variables
+//  Adding "unsigned" for loop variables for consistency
+//  Removing hardcoded zvertex=0.0 and replaced with mMeanVertexZ which is defaulted to 0 and settable via setMeanVertexZ(float v)
+//  Removed obsoluted lines
+//  Added some local const variable for loop condition
+//  Remove commented out cout for debugging, or replaced with LOG_DEBUG
+//
 //  Revision 1.7  2016/01/26 19:53:14  akio
 //  Drop QA/alignment histograms and just do the analysis/filling StEvent structure
 //  Offline QA and Alignment histograms will be moved to StRoot/StSpinPool/StFmsOfflineQaMaker
@@ -41,35 +51,9 @@
 #include "StEvent/StFmsPointPair.h"
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
-inline float project(float x, float z, float zp, float vz){
-    return x/(z-vz)*(zp-vz);
-}
-
-//find minimal distance between a point (x,y) and edge of a rectange with center (x0,y0) and width (xw,yw)
-//return negative distance if its inside, positive outside
-float distance(float x, float y, float x0, float y0, float xw, float yw){
-    float xx=x-x0;
-    float yy=y-y0;
-    float dx1=xx-xw/2.0, adx1=fabs(dx1);
-    float dx2=xx+xw/2.0, adx2=fabs(dx2);
-    float dy1=yy-yw/2.0, ady1=fabs(dy1);
-    float dy2=yy+yw/2.0, ady2=fabs(dy2);
-    float adx=(adx1<adx2) ? adx1 : adx2;
-    float ady=(ady1<ady2) ? ady1 : ady2;
-    float ad =(adx <ady ) ? adx  : ady ; 
-    float oix=dx1*dx2;
-    float oiy=dy1*dy2;
-    if(oix<0.0 && oiy<0.0) return -ad; //inside
-    if(oix<0.0 && oiy>0.0) return ady; //outside in y direction
-    if(oix>0.0 && oiy<0.0) return adx; //outside in x direction
-    return sqrt( pow(fabs(xx)-xw/2.0,2.0) + pow(fabs(yy)-yw/2.0,2.0) ); //outside both ways, return dist from corner
-}
-
 ClassImp(StFmsFpsMaker);
 
-StFmsFpsMaker::StFmsFpsMaker(const Char_t* name):
-    StMaker(name),mReadMuDST(0),mMaxDistanceToAssociate(2.0),mPidMethod(1)
-{}
+StFmsFpsMaker::StFmsFpsMaker(const Char_t* name): StMaker(name) {}
 
 StFmsFpsMaker::~StFmsFpsMaker(){}
 
@@ -99,57 +83,55 @@ Int_t StFmsFpsMaker::Make(){
 
 //Correlation between FMS and FPS
 void StFmsFpsMaker::corrFmsFps(){
-    int npoint=mFmsColl->numberOfPoints();
+    const unsigned int npoint=mFmsColl->numberOfPoints();
     StSPtrVecFmsPoint& points = mFmsColl->points(); 
     
     //loop over FMS points
-    for(int i=0; i<npoint; i++) { 
-	float x=points[i]->XYZ().x();
-	float y=points[i]->XYZ().y();
-	float z=points[i]->XYZ().z();
+    for(unsigned int i=0; i<npoint; i++) { 
+	const float x=points[i]->XYZ().x();
+	const float y=points[i]->XYZ().y();
+	const float z=points[i]->XYZ().z();
 	StLorentzVectorF v1=points[i]->fourMomentum();
 	points[i]->resetFps();
 	//loop over FPS layers to and project 
-	for(int l=1; l<=kFpsNLayer; l++){
+	for(unsigned int l=1; l<=kFpsNLayer; l++){
 	    int nFpsFound=0;
 	    //loop pver FPS quad and slats
-	    for(int q=1; q<=kFpsNQuad; q++){	
-		for(int s=1; s<=kFpsNSlat; s++) {
-		    int slatid = mFmsDbMaker->fpsSlatId(q,l,s);	  
+	    for(unsigned int q=1; q<=kFpsNQuad; q++){	
+		for(unsigned int s=1; s<=kFpsNSlat; s++) {
+		    const int slatid = mFmsDbMaker->fpsSlatId(q,l,s);	  
 		    if(slatid<0) continue;
 		    float xyz[3],width[3];
 		    mFmsDbMaker->fpsPosition(slatid,xyz,width);	 
-		    static const float zvertex=0.0;
-		    float projx=project(x,z,xyz[2],zvertex);
-		    float projy=project(y,z,xyz[2],zvertex);	
-		    float d = distance(projx,projy,xyz[0],xyz[1],width[0],width[1]); 
+		    const float projx=project(x,z,xyz[2],mMeanVertexZ);
+		    const float projy=project(y,z,xyz[2],mMeanVertexZ);	
+		    const float d = distance(projx,projy,xyz[0],xyz[1],width[0],width[1]); 
 		    if(d<mMaxDistanceToAssociate){
 			float mip=mFmsColl->fps(slatid)->mip();
-			unsigned short status=mFmsDbMaker->fpsStatus(slatid);
+			const unsigned short status=mFmsDbMaker->fpsStatus(slatid);
 			if(status != 0) mip=-9.0; //check FPS status from DB
-			//LOG_DEBUG << Form("%3d proj=%5.1f %5.1f slatid=%4d Q%1dL%1dS%02d d=%4.1f n=%d\n",
-			//		  i,projx,projy,slatid,q,l,s,d,nFpsFound) << endm;
+			LOG_DEBUG << Form("%3d proj=%5.1f %5.1f slatid=%4d Q%1dL%1dS%02d d=%4.1f n=%d\n",
+					  i,projx,projy,slatid,q,l,s,d,nFpsFound) << endm;
 			points[i]->setFps(l,mip,slatid,d);
 			nFpsFound++;
 		    } // if this hit a fps slat
 		} //loop over fps slat
 	    } //loop over fps quad
 	    if(nFpsFound==0){
-		// LOG_DEBUG << FORM("%3d proj=%5.1f %5.1f E=%5.1f  L%1d not found!!!\n",i,x,y,e,l) << endm;
+		LOG_DEBUG << Form("%3d proj=%5.1f %5.1f E=%5.1f  L%1d not found!!!\n",i,x,y,points[i]->energy(),l) << endm;
 	    }else if(nFpsFound>kFpsNCandidate){
 		LOG_WARN << Form("found %d FPS slats assosicated with FmsPoint, which is more than %d!!!",nFpsFound,kFpsNCandidate) <<endm;
 	    }
 	} //loop over fps layer
-	//points[i]->orderFpsCandidates();
     }
 }
 
 //opt: 0=take closest only, 1=sum of all associated, 2=closest, if mip=0 at closest, take 2nd if available
 void StFmsFpsMaker::pid(int opt){  
-    int npoint=mFmsColl->numberOfPoints();
+    const unsigned int npoint=mFmsColl->numberOfPoints();
     StSPtrVecFmsPoint& points = mFmsColl->points();
     
-    for(int i=0; i<npoint; i++) {
+    for(unsigned int i=0; i<npoint; i++) {
 	int pid=StFmsPoint::kFpsPidNoFps;
 	int i1=0,i2=0,i3=0;
 	if(opt==0 || opt==2){
@@ -194,33 +176,35 @@ void StFmsFpsMaker::pid(int opt){
 }
 
 void StFmsFpsMaker::isolationCone(){  
-    for(unsigned int i=0; i<mFmsColl->numberOfPointPairs(); i++){
+    const unsigned int nPointPairs = mFmsColl->numberOfPointPairs(); 
+    const unsigned int nHits = mFmsColl->numberOfHits();
+    for(unsigned int i=0; i<nPointPairs; i++){
 	StFmsPointPair* pair=mFmsColl->pointPairs()[i];
 	StThreeVectorF v1=pair->fourMomentum().vect();
 	float sum[StFmsPointPair::kFmsPointMaxCone];
 	memset(sum,0,sizeof(sum));
-	for(unsigned int h=0; h<mFmsColl->numberOfHits(); h++){
+	for(unsigned int h=0; h<nHits; h++){
 	    StFmsHit* hit=mFmsColl->hits()[h];
 	    if(hit->detectorId()>=kFmsNorthLargeDetId && hit->detectorId()<=kFmsSouthSmallDetId){
 		StThreeVectorF v2=mFmsDbMaker->getStarXYZ(hit);
 		float angle=v1.angle(v2);
-		for(int c=0; c<StFmsPointPair::kFmsPointMaxCone; c++){
+		for(unsigned int c=0; c<StFmsPointPair::kFmsPointMaxCone; c++){
 		    if(angle < pair->coneRadius(c)){
 			sum[c]+=hit->energy();
 		    }//if within cone radius
 		}//loop over difference cone sizes
 	    }//if fms hits
 	}//loop over hits
-	for(int c=0; c<StFmsPointPair::kFmsPointMaxCone; c++) pair->setConeEnergy(c,sum[c]);     
+	for(unsigned int c=0; c<StFmsPointPair::kFmsPointMaxCone; c++) pair->setConeEnergy(c,sum[c]);     
     }//loop over point pairs
 }
 
 //Read MuDST if available, and update FPS hits in StEvent using current DB values
 void StFmsFpsMaker::readMuDST(){  
-    int nh=mFmsColl->numberOfHits();
+    const unsigned int nh=mFmsColl->numberOfHits();
     StSPtrVecFmsHit& hits = mFmsColl->hits();
     int nfpshit=0;
-    for(int j=0; j<nh; j++){ //count fps hits in StEvent->StFmsCollection->Hit
+    for(unsigned int j=0; j<nh; j++){ //count fps hits in StEvent->StFmsCollection->Hit
 	if(hits[j]->detectorId()==kFpsDetId) nfpshit++; 
     }
     StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
@@ -229,18 +213,18 @@ void StFmsFpsMaker::readMuDST(){
     StMuFmsCollection* muFmsColl = StMuDst::muFmsCollection();
     if(!muFmsColl){ LOG_INFO<<"StFmsFpsMaker::readMuDST found no StMuFmsCollection in MuDST"<<endm; return;}
     int nfps=0;
-    int nhits = muFmsColl->numberOfHits();  
-    for(int i=0; i<nhits; i++){
+    const unsigned int nhits = muFmsColl->numberOfHits();  
+    for(unsigned int i=0; i<nhits; i++){
 	StMuFmsHit* h = muFmsColl->getHit(i);
 	if(h->detectorId()==15) h->setDetectorId(kFpsDetId); //hack to deal with wrong DetId
 	if(h->detectorId()==kFpsDetId) { //only updating FPS hits... StFmsHitMaker deal with the rest
 	    int flag=0;
-	    int ch=h->channel();	  
-	    float gain=mFmsDbMaker->fpsGain(ch);
-	    float nmip=h->adc()/gain;
-	    //printf("ch=%3d adc=%4d gain=%6.2f nmip=%6.2f\n",ch,h->adc(),gain,nmip);
+	    const int ch=h->channel();	  
+	    const float gain=mFmsDbMaker->fpsGain(ch);
+	    const float nmip=h->adc()/gain;
+	    LOG_DEBUG << Form("ch=%3d adc=%4d gain=%6.2f nmip=%6.2f\n",ch,h->adc(),gain,nmip)<<endm;
 	    if(nfpshit>0){ //only if there were FPS hits in StEnvent...
-		for(int j=0; j<nh; j++){ //loop over fmsHits in StEvent and updating energy with new calibration
+		for(unsigned int j=0; j<nh; j++){ //loop over fmsHits in StEvent and updating energy with new calibration
 		    if(hits[j]->detectorId()==kFpsDetId && hits[j]->channel()==ch){
 			if(h->adc()!= hits[j]->adc()) {
 			    LOG_ERROR << "StFmsFpsMaker::readMuDst Found inconsistent FPS hit" <<endm;
@@ -248,7 +232,7 @@ void StFmsFpsMaker::readMuDST(){
 			    hits[j]->print();
 			    break;
 			}
-			//LOG_INFO<<"StFmsFpsMaker::readMuDST found matching hits in StEvent->StFmsCollection, updating energy with new DB value "<<endm;
+			LOG_DEBUG<<"StFmsFpsMaker::readMuDST found matching hits in StEvent->StFmsCollection, updating energy with new DB value "<<endm;
 			hits[j]->setEnergy(nmip);
 			flag=1;
 			break;
@@ -260,10 +244,35 @@ void StFmsFpsMaker::readMuDST(){
 					     h->qtCrate(),h->qtSlot(),h->qtChannel(),
 					     h->adc(), h->tdc(), nmip);
 		mFmsColl->addHit(hit);
-		//LOG_INFO<<"StFmsFpsMaker::readMuDST did not find matching hits in StEvent->StFmsCollection. Creating and adding"<<endm;
+		LOG_DEBUG<<"StFmsFpsMaker::readMuDST did not find matching hits in StEvent->StFmsCollection. Creating and adding"<<endm;
 	    }
 	    nfps++;
 	}
     }
     LOG_INFO<<"StFmsFpsMaker::readMuDST Found "<<nhits<<" FMS hits in MuDst, updated "<<nfps<<" FPS hits"<<endm;
+}
+
+Float_t StFmsFpsMaker::project(float x, float z, float zp, float vz){
+    if(z==vz) return 0.0;
+    return x/(z-vz)*(zp-vz);
+}
+
+//find minimal distance between a point (x,y) and edge of a rectange with center (x0,y0) and width (xw,yw)
+//return negative distance if its inside, positive outside
+Float_t StFmsFpsMaker::distance(float x, float y, float x0, float y0, float xw, float yw){
+    const float xx=x-x0;
+    float yy=y-y0;
+    float dx1=xx-xw/2.0, adx1=fabs(dx1);
+    float dx2=xx+xw/2.0, adx2=fabs(dx2);
+    float dy1=yy-yw/2.0, ady1=fabs(dy1);
+    float dy2=yy+yw/2.0, ady2=fabs(dy2);
+    float adx=(adx1<adx2) ? adx1 : adx2;
+    float ady=(ady1<ady2) ? ady1 : ady2;
+    float ad =(adx <ady ) ? adx  : ady ; 
+    float oix=dx1*dx2;
+    float oiy=dy1*dy2;
+    if(oix<0.0 && oiy<0.0) return -ad; //inside
+    if(oix<0.0 && oiy>0.0) return ady; //outside in y direction
+    if(oix>0.0 && oiy<0.0) return adx; //outside in x direction
+    return sqrt( pow(fabs(xx)-xw/2.0,2.0) + pow(fabs(yy)-yw/2.0,2.0) ); //outside both ways, return dist from corner
 }

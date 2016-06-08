@@ -1,6 +1,9 @@
-// $Id: StFmsPointMaker.cxx,v 1.9 2015/11/05 17:53:09 akio Exp $
+// $Id: StFmsPointMaker.cxx,v 1.10 2016/06/07 15:51:43 akio Exp $
 //
 // $Log: StFmsPointMaker.cxx,v $
+// Revision 1.10  2016/06/07 15:51:43  akio
+// Making code better based on Coverity reports
+//
 // Revision 1.9  2015/11/05 17:53:09  akio
 // Adding setScaleShowerShape() option for scaling up shower shape function for large cell
 //
@@ -69,7 +72,8 @@ namespace {
 }  // unnamed namespace
 
 StFmsPointMaker::StFmsPointMaker(const char* name)
-    : StMaker(name), mObjectCount(0), mMaxEnergySum(255.0), mReadMuDst(0), 
+    : StMaker(name), mFmsDbMaker(0), mFmsCollection(0), mObjectCount(0),
+      mMaxEnergySum(255.0), mReadMuDst(0), 
       mGlobalRefit(0), mMergeSmallToLarge(1), mTry1PhotonFitWhen2PhotonFitFailed(1), 
       mCategorizationAlgo(1), mScaleShowerShape(1) { }
 

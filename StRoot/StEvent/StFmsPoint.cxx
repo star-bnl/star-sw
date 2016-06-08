@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsPoint.cxx,v 2.6 2015/09/14 16:59:22 ullrich Exp $
+ * $Id: StFmsPoint.cxx,v 2.7 2016/06/07 15:51:34 akio Exp $
  *
  * Author: Thomas Burton, Yuxi Pan, 2014
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFmsPoint.cxx,v $
+ * Revision 2.7  2016/06/07 15:51:34  akio
+ * Making code better based on Coverity reports
+ *
  * Revision 2.6  2015/09/14 16:59:22  ullrich
  * Added comments and modified print out.
  *
@@ -32,7 +35,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.6 2015/09/14 16:59:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsPoint.cxx,v 2.7 2016/06/07 15:51:34 akio Exp $";
 
 StFmsPoint::StFmsPoint()
 : mDetectorId(0), mEnergy(-1.0), mX(-99.0), mY(-99.0),
@@ -51,7 +54,7 @@ int   StFmsPoint::fpsNCandidate(int layer) {
 }
 
 float StFmsPoint::fpsMip(int layer, int candidate) {
-    if(layer<1 && layer>kFpsNLayer) return -1;
+    if(layer<1 || layer>kFpsNLayer) return -1;
     if(candidate>=0 && candidate<kFpsNCandidate) return mFpsMip[layer-1][candidate];  //return mip for a candidate
     if(candidate>=kFpsNCandidate && candidate<=kFpsNCandidate+2){    // candidate=kFpsNCandidate   return 1+2
         float sum=0.0;                                               // candidate=kFpsNCandidate+1 return 1+2+3

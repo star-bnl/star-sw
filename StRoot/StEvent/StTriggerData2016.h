@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2016.h,v 2.3 2016/04/12 14:26:10 ullrich Exp $
+ * $Id: StTriggerData2016.h,v 2.4 2016/06/07 15:51:34 akio Exp $
  *
  * Author: Akio Ogawa, Dec 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2016.h,v $
+ * Revision 2.4  2016/06/07 15:51:34  akio
+ * Making code better based on Coverity reports
+ *
  * Revision 2.3  2016/04/12 14:26:10  ullrich
  * method bbcVP101() added.
  *
@@ -61,6 +64,9 @@ public:
     unsigned long long l2sum() const;
     
     // Bunch and spin bits
+    unsigned int tcuCounter() const;
+    unsigned int rccCounter(int crate) const;
+    unsigned long long bunchCounter() const;
     unsigned int bunchCounterHigh() const;
     unsigned int bunchCounterLow() const;
     unsigned int bunchId48Bit() const;
@@ -100,6 +106,7 @@ public:
     unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifference() const;
+    unsigned short bbcTacSum() const;
     unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifferenceLarge() const;
     
