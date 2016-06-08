@@ -5,9 +5,6 @@
 #include "Sti/StiTrackFinder.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#ifdef DO_TPCCATRACKER 
-class StiTPCCATrackerInterface;
-#endif /* DO_TPCCATRACKER */
 class TStopwatch;
 class StiDetector;
 class StiDetectorBuilder;
@@ -42,9 +39,6 @@ public:
   /// Set timing of tracking
           void setTiming();
   /// Find all tracks of the currently loaded event
-#ifdef DO_TPCCATRACKER 
-  virtual void findTpcTracks(StiTPCCATrackerInterface &caTrackerInt); 
-#endif /* DO_TPCCATRACKER */  
   virtual void findAllTracks(); 
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
@@ -79,9 +73,6 @@ public:
   void doNextTrackStep();
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
-#ifdef DO_TPCCATRACKER
-  static void PrintFitStatus(const int status, const StiKalmanTrack* track); // print message according to the status value
-#endif /* DO_TPCCATRACKER */  
   typedef enum{ // type of return value for the Fit() procedure
     kNoErrors = 0,
     kApproxFail,
@@ -115,12 +106,13 @@ class QAFind;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
     int                           _nPrimTracks;
+    int         mEventPerm;	//Count number of permutations
+
 private:
         
     double    chi2;
     TStopwatch *mTimg[3]; 	//seeds,traks,prims
     int         mTrackPerm;	//Count number of permutations
-    int         mEventPerm;	//Count number of permutations
     int         mUseComb;	//useComb() saved 
     static int   _debug;
 };

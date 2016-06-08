@@ -27,6 +27,7 @@
 #pragma link C++ class StiSortedHitIterator;
 #pragma link C++ class StiStarVertexFinder;
 #pragma link C++ class StiToolkit;
+#pragma link C++ class StiDefaultToolkit;
 #pragma link C++ class StiTrackContainer;
 #pragma link C++ class StiTrackFinderFilter;
 #pragma link C++ class StiTrackFinder;

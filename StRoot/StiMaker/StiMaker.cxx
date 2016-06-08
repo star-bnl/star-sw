@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.229 2016/03/28 00:15:53 perev Exp $
+// $Id: StiMaker.cxx,v 1.230 2016/06/08 23:32:47 smirnovd Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -100,8 +100,9 @@ More detailed: 				<br>
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiStEventFiller.h"
-#include "StiDefaultToolkit.h"
-#include "StiMaker.h"
+#include "Sti/StiDefaultToolkit.h"
+#include "StiCA/StiCADefaultToolkit.h"
+#include "StiMaker/StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
@@ -245,6 +246,10 @@ Int_t StiMaker::Init()
       mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
     } }
 
+
+  // Process attributes and update the toolkit used by this maker
+  UpdateToolkit();
+
   return StMaker::Init();
 }
 
@@ -379,7 +384,7 @@ Int_t StiMaker::InitRun(int run)
 Int_t StiMaker::Make()
 {
   cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
-  Int_t iAns=kStOK,iAnz=0;
+  Int_t iAnz=0;
   if (! _tracker) return kStWarn;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (!event) return kStWarn;
@@ -402,7 +407,7 @@ Int_t StiMaker::Make()
     } else {
       iAnz = StMaker::Make();
     }
-    if (mPullTTree) {iAns = FillPulls();}
+    if (mPullTTree) { FillPulls();}
     cout<< "StiMaker::Make() -I- Done"<<endl;
     MyClear();
     if (iAnz) return iAnz;
@@ -479,6 +484,45 @@ void StiMaker::MyClear()
       _toolkit->getTrackFactory()->clear();
 //      StMemStat::PrintMem("After  StiFactory clear()");
 }
+
+
+/**
+ * Updates the internal toolkit (i.e. StiMaker configuration) based on set
+ * attributes specified by the user. Currently, we process only the
+ * 'seedFinders' attribute and check if the "CA" value is set.
+ */
+void StiMaker::UpdateToolkit()
+{
+  TString seedFinders = SAttr("seedFinders");
+
+  // Return without changing anything if attribute's value is empty
+  if (!seedFinders.Length()) return;
+
+  bool requestedCASeedFinder = false;
+  TObjArray *sub_strings = seedFinders.Tokenize(" .,");
+
+  for (int i=0; i <= sub_strings->GetLast(); i++)
+  {
+    TString &sub_string = static_cast<TObjString*>( sub_strings->At(i) )->String();
+
+    if ( !sub_string.CompareTo("CA", TString::kIgnoreCase) ) {
+      requestedCASeedFinder = true;
+      break;
+    }
+  }
+
+  delete sub_strings;
+
+  if (requestedCASeedFinder) {
+    StiToolkit::kill();
+    new StiCADefaultToolkit();
+    _toolkit = StiToolkit::instance();
+
+    LOG_WARN << "StiMaker's toolkit has been updated to StiCADefaultToolkit" << endm;
+  }
+}
+
+
 //_____________________________________________________________________________
 Int_t StiMaker::InitPulls()
 {
@@ -611,8 +655,16 @@ void StiMaker::FinishTracks (int gloPri)
 }
 
 
-// $Id: StiMaker.cxx,v 1.229 2016/03/28 00:15:53 perev Exp $
+// $Id: StiMaker.cxx,v 1.230 2016/06/08 23:32:47 smirnovd Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.230  2016/06/08 23:32:47  smirnovd
+// Integration of StiCA
+//
+// This is a squashed commit with all changes combined. To see individual
+// modifications check out the ds-StiCA_2016 branch in star-sti repository.
+// Alternatively, one can explore the StiCA_2016 branch in the STAR's CVS
+// repository.
+//
 // Revision 1.229  2016/03/28 00:15:53  perev
 // Add max number of tracks assigned to one hit
 //

@@ -1,10 +1,13 @@
-#ifdef DO_TPCCATRACKER
-#include "StiTPCCATrackerInterface.h"
-
-#include "TPCCATracker/code/AliHLTTPCCAGBHit.h"
-#include "TPCCATracker/code/AliHLTTPCCAGBTrack.h"
-#include "TPCCATracker/code/AliHLTTPCCAParam.h"
-
+#include "StiCA/StiCATpcTrackerInterface.h"
+#ifdef __NEW_TPCCATracker__
+#include "TPCCATracker/AliHLTTPCCAGBHit.h"
+#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
+#include "TPCCATracker/AliHLTTPCCAParam.h"
+#else /* ! __NEW_TPCCATracker__ */
+#include "TPCCATracker/AliHLTTPCCAGBHit.h"
+#include "TPCCATracker/AliHLTTPCCAGBTrack.h"
+#include "TPCCATracker/AliHLTTPCCAParam.h"
+#endif /* __NEW_TPCCATracker__ */
   // need for hits data
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
@@ -14,11 +17,10 @@
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
-#include "StBFChain.h"
-#include "StiDetectorBuilder.h"
-#include "StiDetectorGroups.h"
-#include "StiGenericDetectorGroup.h"
-#include "StiToolkit.h"
+#include "Sti/StiDetectorBuilder.h"
+#include "Sti/StiDetectorGroups.h"
+#include "Sti/StiGenericDetectorGroup.h"
+#include "Sti/StiToolkit.h"
   //to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
@@ -26,12 +28,19 @@
 #include "StarMagField/StarMagField.h"
 
   // for sti perfo
-#include "TPCCATracker/code/AliHLTTPCCAStiPerformance.h"
-#include "TPCCATracker/code/AliHLTTPCCAMergerPerformance.h"
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+#ifdef __NEW_TPCCATracker__
+#include "TPCCATrackerPerformance/AliHLTTPCCAStiPerformance.h"
+#include "TPCCATrackerPerformance/AliHLTTPCCAMergerPerformance.h"
+#else /* ! __NEW_TPCCATracker__ */
+#include "TPCCATracker/Performance/AliHLTTPCCAStiPerformance.h"
+#include "TPCCATracker/Performance/AliHLTTPCCAMergerPerformance.h"
+#endif /* __NEW_TPCCATracker__ */
+#include "StBFChain/StBFChain.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
-#include "StiKalmanTrack.h"
-#include "StiKalmanTrackNode.h"
-
+#include "StiCA/StiCAKalmanTrack.h"
+#include "Sti/StiKalmanTrackNode.h"
+#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
 #include <algorithm>
 using std::vector;
@@ -39,35 +48,35 @@ using std::vector;
 #include <string>
 using std::string;
 
-
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 //#define STORE_STANDALONE_DATA // write data in files for Standalone
+#endif
 
-StiTPCCATrackerInterface &StiTPCCATrackerInterface::Instance()
+StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance()
 {
     // reference to static object
-  static StiTPCCATrackerInterface g;
+  static StiCATpcTrackerInterface g;
   return g;
 }
 
-StiTPCCATrackerInterface::StiTPCCATrackerInterface()
+StiCATpcTrackerInterface::StiCATpcTrackerInterface()
 {
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fOutFile = StMaker::GetChain()->GetTFile();
-  if(!fOutFile) cout << "W StiTPCCATrackerInterface: Warning - There isn't any tag file, so histograms won't be saved!" << endl;
+  if(!fOutFile) cout << "W StiCATpcTrackerInterface: Warning - There isn't any tag file, so histograms won't be saved!" << endl;
 
   fPerformance = &(AliHLTTPCCAPerformance::Instance());
   fPerformance->SetOutputFile(fOutFile);
-
+#endif
   //yf   SetNewEvent();
-} // StiTPCCATrackerInterface::StiTPCCATrackerInterface()
+} // StiCATpcTrackerInterface::StiCATpcTrackerInterface()
 
-StiTPCCATrackerInterface::~StiTPCCATrackerInterface(  )
+StiCATpcTrackerInterface::~StiCATpcTrackerInterface(  )
 { // never called for static object
-} // StiTPCCATrackerInterface::StiTPCCATrackerInterface()
+} // StiCATpcTrackerInterface::StiCATpcTrackerInterface()
 
-void StiTPCCATrackerInterface::SetNewEvent()
+void StiCATpcTrackerInterface::SetNewEvent()
 {
-  assert(fPerformance != 0);
-  
   fHitsMap = 0;
   fSeeds.clear();
 
@@ -75,27 +84,31 @@ void StiTPCCATrackerInterface::SetNewEvent()
   fStiTracks = 0;
 
   fIdTruth.clear(); // id of the Track, which has created CaHit
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+  assert(fPerformance != 0);
   fMCTracks.clear();
   fMCPoints.clear();
   fHitLabels.clear();
-
+#endif
   fCaParam.clear();// settings for all sectors to give CATracker
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
 
-  if (!fSeedFinder) fSeedFinder = new StiTpcSeedFinder;
+  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
   
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
   if (fStiTracker) delete fStiTracker;
   fStiTracker = new AliHLTTPCCAGBTracker; 
   
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SetTracker(fTracker);
+#endif
 }
 
 
   /// Copy data to CATracker. Run CATracker. Copy tracks in fSeeds.
-void StiTPCCATrackerInterface::Run()
+void StiCATpcTrackerInterface::Run()
 {
   assert(fHitsMap != 0);
 
@@ -127,20 +140,25 @@ void StiTPCCATrackerInterface::Run()
   name += iEvent;
   name += "_";
   fTracker->SaveHitsInFile(string(name));
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SaveDataInFiles(string(name));
-
+#endif
 // check
   if(1){
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SetTracker(fTracker);
+#endif
   TString name = "./data/";
   fTracker->ReadSettingsFromFile(string(name));
   name += "event";
   name += iEvent;
   name += "_";
   fTracker->ReadHitsFromFile(string(name));
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->ReadDataFromFiles(string(name));
+#endif
   fTracker->SetSettings(fCaParam);
   fTracker->SetHits(fCaHits);
 
@@ -163,9 +181,9 @@ void StiTPCCATrackerInterface::Run()
   timer.Stop();
   fPreparationTime_real += timer.RealTime();
   fPreparationTime_cpu += timer.CpuTime();    
-} // void StiTPCCATrackerInterface::Run()
+} // void StiCATpcTrackerInterface::Run()
 
-void StiTPCCATrackerInterface::RunPerformance()
+void StiCATpcTrackerInterface::RunPerformance()
 {
   cout << " ---- CA TPC Tracker ---- " << endl;
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
@@ -207,9 +225,10 @@ void StiTPCCATrackerInterface::RunPerformance()
         
     std::cout << "Sector reconstruction Time"
               << " Real = " << std::setw( 10 ) << fTracker->SliceTrackerTime() * 1.e3 << " ms,"
-              << " CPU = " << std::setw( 10 ) << fTracker->SliceTrackerCpuTime() * 1.e3 << " ms,"
-              << " parallelization speedup: " << fTracker->SliceTrackerCpuTime() / fTracker->SliceTrackerTime()
-              << std::endl;
+              << " CPU = " << std::setw( 10 ) << fTracker->SliceTrackerCpuTime() * 1.e3 << " ms,";
+    if (fTracker->SliceTrackerTime() > 0)
+      std::cout        << " parallelization speedup: " << fTracker->SliceTrackerCpuTime() / fTracker->SliceTrackerTime();
+    std::cout        << std::endl;
     if ((fullTiming == 2) || (fullTiming == 3)) {
       std::cout
         << " |  sum slice trackers: " << std::setw( 10 ) << fTracker->StatTime( 0 ) * 1000. << " ms\n"
@@ -253,11 +272,12 @@ void StiTPCCATrackerInterface::RunPerformance()
     statPreparationTime_real += fPreparationTime_real;
     statPreparationTime_cpu  += fPreparationTime_cpu;
         
-    std::cout << "Avarage sector reconstruction Time"
+    std::cout << "Average sector reconstruction Time"
               << " Real = " << std::setw( 10 ) << 1./statIEvent*statTime_SliceTrackerTime * 1.e3 << " ms,"
-              << " CPU = " << std::setw( 10 ) << 1./statIEvent*statTime_SliceTrackerCpuTime * 1.e3 << " ms,"
-              << " parallelization speedup: " << statTime_SliceTrackerCpuTime / statTime_SliceTrackerTime
-              << std::endl;
+              << " CPU = " << std::setw( 10 ) << 1./statIEvent*statTime_SliceTrackerCpuTime * 1.e3 << " ms,";
+    if (statTime_SliceTrackerTime > 0)
+      std::cout       << " parallelization speedup: " << statTime_SliceTrackerCpuTime / statTime_SliceTrackerTime;
+    std::cout       << std::endl;
     if ((fullTiming == 1) || (fullTiming == 3)) {
       std::cout
         << " |  sum slice trackers: " << std::setw( 10 ) << 1./statIEvent*statTime[ 0 ] * 1000. << " ms\n"
@@ -279,13 +299,13 @@ void StiTPCCATrackerInterface::RunPerformance()
   }
 #endif // 0 timing
   
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE  
+#if 0//def DO_TPCCATRACKER_EFF_PERFORMANCE   outdated
   ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillTree();
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
-} // void StiTPCCATrackerInterface::Run()
+} // void StiCATpcTrackerInterface::Run()
 
 
-void StiTPCCATrackerInterface::MakeSettings()
+void StiCATpcTrackerInterface::MakeSettings()
 {
 
   const int NSlices = 24; //TODO initialize from StRoot
@@ -315,11 +335,15 @@ void StiTPCCATrackerInterface::MakeSettings()
     SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner                        //TODO initialize from StRoot
     SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
       //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
+#if 0
     if (! StiKalmanTrackNode::IsLaser()) {
+#endif
       float x[3]={0,0,0},b[3];
       StarMagField::Instance()->BField(x,b);
       SlicePar.SetBz       ( - b[2] );   // change sign because change z
+#if 0
     } else SlicePar.SetBz (0.);
+#endif
     if (sector <= 12) {
       SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
       SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
@@ -377,10 +401,10 @@ void StiTPCCATrackerInterface::MakeSettings()
     
     fCaParam.push_back(SlicePar);
   } // for iSlice
-} // void StiTPCCATrackerInterface::MakeSettings()
+} // void StiCATpcTrackerInterface::MakeSettings()
 
 
-void StiTPCCATrackerInterface::MakeHits()
+void StiCATpcTrackerInterface::MakeHits()
 {
   StTpcCoordinateTransform tran(gStTpcDb);
   StTpcLocalSectorCoordinate loc;
@@ -435,9 +459,9 @@ void StiTPCCATrackerInterface::MakeHits()
     }
   }
 
-} // void StiTPCCATrackerInterface::MakeHits()
+} // void StiCATpcTrackerInterface::MakeHits()
 
-void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs)
+void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, double _alpha, StiNodePars& nodePars, StiNodeErrs& nodeErrs)
 {
     // set jacobian integral coef
   double JI[5]; 
@@ -471,7 +495,11 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   double h2 = - fTracker->Slice(0).Param().Bz(); // change sign because change z
 #endif // 1
   h2 *= EC;
+#if 0
   if (fabs(h2) < ZEROHZ || StiKalmanTrackNode::IsLaser()) h2 = 0;
+#else
+  if (fabs(h2) < ZEROHZ) h2 = 0;
+#endif
     // get parameters. continue
   nodePars.hz() = h2;  // Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
   nodePars.ready(); // set cosCA, sinCA & curv
@@ -486,18 +514,21 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   
     // get cov matrises
   const float *caCov = caPar.GetCov();
+
+#ifdef DEBUG
   double nodeCov[15];
   for (int i1 = 0, i = 0; i1 < 5; i1++){
     for (int i2 = 0; i2 <= i1; i2++, i++){
       nodeCov[i] = J[i1]*J[i2]*caCov[i];
     }
   }
-  // if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
-  //   cout << "Warrning: Bad CA Cov Matrix." << endl;
-  // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
-  //   cout << "Warrning: Bad Node Cov Matrix." << endl;
+  if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
+    cout << "Warrning: Bad CA Cov Matrix." << endl;
+  if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
+    cout << "Warrning: Bad Node Cov Matrix." << endl;
+#endif
 
-  double *A = nodeErrs.A;
+  double *A = nodeErrs.G();
 /*  for (int i1 = 0, i = 0; i1 < 5; i1++){
     for (int i2 = 0; i2 <= i1; i2++, i++){
       A[i+i1+2] = caCov[i];
@@ -519,16 +550,17 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   nodeErrs._cPE = caCov[12]*J[2]*J[3];
   nodeErrs._cTP = caCov[13]*J[4]*J[3];
   nodeErrs._cPP = caCov[14]*J[3]*J[3];
-  
+#if 1  
   A[0] = 1; // don't use parameter X
-  A[2] = 0;
-  A[5] = 0;
-  A[9] = 0;
-  A[14] = 0;
-  A[20] = 0;
+  A[1] = 0;
+  A[3] = 0;
+  A[6] = 0;
+  A[10] = 0;
+  A[15] = 0;
+#endif
 }
 
-void StiTPCCATrackerInterface::MakeSeeds()
+void StiCATpcTrackerInterface::MakeSeeds()
 {
   const int NRecoTracks = fTracker->NTracks();
   for ( int iTr = 0; iTr < NRecoTracks; iTr++ ) {
@@ -537,14 +569,10 @@ void StiTPCCATrackerInterface::MakeSeeds()
     Seed_t seed;
 
     const int NHits = tr.NHits();
-    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
       const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
       const int hId   = fTracker->Hit( index ).ID();
-//      if ( last_x == fSeedHits[hId].hit->position() ) continue; // track can have 2 hits on 1 row because of track segments merger.
       seed.vhit.push_back(&(fSeedHits[hId]));
-      assert( last_x >= fSeedHits[hId].hit->position() ); // should be back order - from outer to inner
-      last_x = fSeedHits[hId].hit->position();
     }
 
     seed.total_hits = seed.vhit.size();
@@ -554,13 +582,14 @@ void StiTPCCATrackerInterface::MakeSeeds()
 
     fSeeds.push_back(seed);
   }
-} // void StiTPCCATrackerInterface::MakeSeeds()
+} // void StiCATpcTrackerInterface::MakeSeeds()
 
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 bool myfunction (AliHLTTPCCALocalMCPoint i,AliHLTTPCCALocalMCPoint j) { 
   return (i.TrackI() < j.TrackI()) || ( i.TrackI()==j.TrackI() && i.IRow() < j.IRow() ); 
 }
   /// fill fPerformance by MCTracks, MCPoints and Hit-MCPointsMatch
-void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& caHits, const vector<int>& idsTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels)
+void StiCATpcTrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& caHits, const vector<int>& idsTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels)
 {
   mcTracks.clear();
   mcPoints.clear();
@@ -693,9 +722,9 @@ void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& c
     }
     mcTracks[iTr].SetNMCPoints(mcPoints.size() - iPLast);
   }
-} // void StiTPCCATrackerInterface::FillPerformance()
+} // void StiCATpcTrackerInterface::FillPerformance()
 
-void StiTPCCATrackerInterface::FillStiPerformance()
+void StiCATpcTrackerInterface::FillStiPerformance()
 {
   fStiCaHits.clear();
   fStiIdTruth.clear();
@@ -710,7 +739,7 @@ void StiTPCCATrackerInterface::FillStiPerformance()
 
   for(int iTr=0; iTr<fStiTracks->getTrackCount(0); iTr++)
   {
-    StiKalmanTrack * track = (StiKalmanTrack*) fStiTracks->at(iTr);
+    StiCAKalmanTrack * track = (StiCAKalmanTrack*) fStiTracks->at(iTr);
     vector<StiHit*> hits_v = track-> getHits();
 
     AliHLTTPCCAGBTrack GBTrack;
@@ -823,5 +852,5 @@ void StiTPCCATrackerInterface::FillStiPerformance()
   }
   
 
-} // void StiTPCCATrackerInterface::FillStiPerformance()
-#endif /* DO_TPCCATRACKER */
+} // void StiCATpcTrackerInterface::FillStiPerformance()
+#endif // DO_TPCCATRACKER_EFF_PERFORMANCE

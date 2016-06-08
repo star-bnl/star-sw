@@ -1,11 +1,19 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.140 2016/04/13 23:08:44 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.141 2016/06/08 23:32:44 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.141 2016/06/08 23:32:44 smirnovd Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.141  2016/06/08 23:32:44  smirnovd
+ * Integration of StiCA
+ *
+ * This is a squashed commit with all changes combined. To see individual
+ * modifications check out the ds-StiCA_2016 branch in star-sti repository.
+ * Alternatively, one can explore the StiCA_2016 branch in the STAR's CVS
+ * repository.
+ *
  * Revision 2.140  2016/04/13 23:08:44  perev
  * -opt2 proble solved. Array A[1] removed
  *
@@ -452,8 +460,7 @@
 #include "StHelix.hh"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
-#include "StiHitContainer.h"
-#include "StiTrackNodeHelper.h"
+#include "Sti/StiHitContainer.h"
 #include "StiUtilities/StiDebug.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -468,13 +475,8 @@ int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
-// hidden static variables for refit & refiL
-static StiTrackNodeHelper sTNH;
-static double diff(const StiNodePars &p1,const StiNodeErrs &e1
-                  ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
+StiTrackNodeHelper StiKalmanTrack::sTNH;
 
-
-// end of hidden static variables for refit & refiL
 
 /*! 
    Reset the class members to their default state.
@@ -554,70 +556,12 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
-#ifdef DO_TPCCATRACKER
-  initialize0(hits);
-  
-  int ierr = approx(0);
-  if (!ierr) return 0;
-  BFactory::Free(this);
-  return 1;
-}
-
-
-int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
-{
-#endif /* DO_TPCCATRACKER */
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
-#ifdef DO_TPCCATRACKER
-  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
-  const StiDetector* detectorOld = 0;
-  StiHit *hit_Old = 0;
-  for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
-    StiHit *hit = hits[ihit];
-    detector = hit->detector();
-    assert(detector);
-    // look for gaps in hit list
-    if (hit_Old && detector->getGroupId() == kTpcId) {
-      Double_t R_hit = detector->getPlacement()->getLayerRadius();
-      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
-      detectorOld = hit_Old->detector();
-      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-      if (_debug && detectorOld == detector) {
-	cout << "The same detector for hit " << ihit << endl;
-	cout << "hit     \t" << *hit << endl;
-	if (hit_Old) 
-	  cout << "hitOld\t" << *hit_Old << endl;
-      }
-      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
-      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
-	while ((R_hit < R_hit_OLD)) {
-	  detectorContainer->setToDetector( detectorOld );
-	  if ( detectorContainer->moveIn()) {
-	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
-	    if (d == detector) break;
-	    detectorOld = d;
-	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-	    if (detectorOld->isActive()) {
-	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
-	      nI->initialize(d);
-	      add(nI,kOutsideIn);
-	    }
-	  }
-	}
-      }
-    }
-    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-    n->initialize(hit);
-    add(n,kOutsideIn);
-    detectorOld = (StiDetector*) detector;
-    hit_Old = hit;
-  }  
-#else  
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];
@@ -627,37 +571,15 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     n->initialize(hit);
     add(n,kOutsideIn);
   }
-#endif
-#ifdef DO_TPCCATRACKER
-  if (firstPars){
-    firstNode->fitPars() = *firstPars;
-  }
-  if (firstErrs){ 
-    firstNode->fitErrs() = *firstErrs;
-      //    firstNode->resetError();
-  }
-  if (lastPars){
-    lastNode ->fitPars() = *lastPars;
-  }
-  if (lastErrs){ 
-    lastNode->fitErrs() = *lastErrs;
-      //    firstNode->resetError();
-  }
-  return 0;  
-#else /* !DO_TPCCATRACKER */
   int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
-#endif /* DO_TPCCATRACKER */
 }
 
 //_____________________________________________________________________________
 StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
-  double px,py,pz;
-  px=py=pz=0;
-
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
@@ -1083,36 +1005,6 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
 }
-#ifdef DO_TPCCATRACKER
-StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
-{
-  if (firstNode==0 || lastNode==0)
- {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
- }
-
-  StiKalmanTrackNode *node = 0;
-  StiKalmanTrackNode* leaf = getLastNode();
-  StiKTNForwardIterator it(leaf);
-  StiKTNForwardIterator end = it.end();
-  for (;it!=end;++it) 
-  {
-    StiKalmanTrackNode& node_t = *it;
-    if (!node_t.isValid())		continue;
-    if (node_t.getChi2()>10000.) 	continue;
-    StiHit* hit = node_t.getHit();
-    if (!hit) 			continue;
-    if(hit->x()<58.f) continue;
-    node = &node_t;
-    return node;
-  }
-  
-  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
-  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");*/
-  return 0;
-}
-#endif /* DO_TPCCATRACKER */
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
 {
@@ -1471,9 +1363,22 @@ void StiKalmanTrack::removeLastNode()
   BFactory::Free(node);
 }
 //_____________________________________________________________________________
+
+
+/**
+ * Public interface to protected method capable of returning two return values
+ * used in this and derived StiCAKalmanTrack classes.
+ */
 int StiKalmanTrack::refit() 
 {
-  int errType = kNoErrors;
+  int errType; // This return value is ignored
+  return refit(errType);
+}
+
+
+int StiKalmanTrack::refit(int &errType)
+{
+  errType = kNoErrors;
   
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
@@ -1504,7 +1409,7 @@ int StiKalmanTrack::refit()
       if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
-      qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
+      qA = StiKalmanTrack::diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
         if (qA>0.5)		{fail=-2; errType = kBadQA; continue;} 
@@ -1568,11 +1473,7 @@ int StiKalmanTrack::refit()
   }
 
   if (fail) setFlag(-1);
-#ifdef DO_TPCCATRACKER
-  return errType;
-#else /* !DO_TPCCATRACKER */
   return fail;
-#endif /* DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
@@ -1750,9 +1651,8 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
-    assert(hh);
-    hh = 1./hh;
-    P.ptin() = curv*hh; 
+    hh = (fabs(hh)<1e-10)? 0:1./hh;
+    P.ptin() = (hh)? curv*hh:1e-3;
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
@@ -1776,7 +1676,7 @@ double Xi2=0;
   return 0;
 }    
 //_____________________________________________________________________________
-double diff(const StiNodePars &p1,const StiNodeErrs &e1
+double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;

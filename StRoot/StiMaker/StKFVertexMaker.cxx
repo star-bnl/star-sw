@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.6 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.7 2016/06/08 23:32:46 smirnovd Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -371,7 +371,10 @@ void StKFVertexMaker::calculateRank(StPrimaryVertex *primV) {
   rank += Wmatch*primV->numMatchesWithBTOF() 
     -     Wveto*primV->numNotMatchesWithBTOF();
   rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC());
-    -     Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
+  // It is unclear why the next line was uncommented but apparently it is not
+  // used. So, either this line or the semicolumn at the end of the preceeding
+  // line should be removed
+  //-     Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
   if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
     rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
   primV->setRanking(rank); 
@@ -590,6 +593,14 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.7  2016/06/08 23:32:46  smirnovd
+// Integration of StiCA
+//
+// This is a squashed commit with all changes combined. To see individual
+// modifications check out the ds-StiCA_2016 branch in star-sti repository.
+// Alternatively, one can explore the StiCA_2016 branch in the STAR's CVS
+// repository.
+//
 // Revision 2.6  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //
