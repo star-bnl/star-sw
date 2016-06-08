@@ -1,9 +1,0 @@
-/*    sstWaferConfiguration.idl
-*
-*  Table: sstWaferConfiguration
-*
-*  description:  SST wafer status : 1 = wafer active, 0 = wafer inactive 
-*/ 
-struct sstWaferConfiguration { 
-	octet nStatus[320];/* ladder[0-19]*16 + wafer[0-15]*/
-};
