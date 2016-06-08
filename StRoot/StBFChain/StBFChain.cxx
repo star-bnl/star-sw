@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.631 2016/05/26 12:33:29 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.632 2016/06/08 23:17:25 smirnovd Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -467,6 +467,11 @@ Int_t StBFChain::Instantiate()
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
+      }
+
+      // When StiCA library is requested CA will be used as seed finder in StiMaker
+      if ( GetOption("StiCA") ) {
+        mk->SetAttr("seedFinders", "CA");
       }
 
       // Option to re-use hits in other tracks
