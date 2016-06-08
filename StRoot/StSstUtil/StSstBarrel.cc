@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.6 2016/05/29 19:34:51 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.7 2016/06/08 20:52:57 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.7  2016/06/08 20:52:57  bouchet
+//coverity : PASS_BY_VALUE
+//
 //Revision 1.6  2016/05/29 19:34:51  bouchet
 //coverity : CTOR_DTOR_LEAK fixed
 //
@@ -1199,7 +1202,7 @@ StSstBarrel::StSstBarrel(const StSstBarrel & originalBarrel)
     mLadders[iLad] = new StSstLadder(iLad,mSstLayer,mNWaferPerLadder,mNStripPerSide);
 }
 
-StSstBarrel& StSstBarrel::operator=(const StSstBarrel  originalBarrel)
+StSstBarrel& StSstBarrel::operator=(const StSstBarrel & originalBarrel)
 {
   mSstLayer             = originalBarrel.mSstLayer;
   mNLadder              = originalBarrel.mNLadder;

@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.hh,v 1.2 2015/06/27 19:48:51 bouchet Exp $
+//$Id: StSstBarrel.hh,v 1.3 2016/06/08 20:53:01 bouchet Exp $
 //
 //$Log: StSstBarrel.hh,v $
+//Revision 1.3  2016/06/08 20:53:01  bouchet
+//coverity : PASS_BY_VALUE
+//
 //Revision 1.2  2015/06/27 19:48:51  bouchet
 //removed obsolete libraries : ssdConfiguration, ssdDimensions, ssdWafersPosition ; fixed static StSstBarrel name
 //
@@ -77,7 +80,7 @@ class StSstBarrel
   ~StSstBarrel();
 
   StSstBarrel(const StSstBarrel & originalBarrel);
-  StSstBarrel& operator=(const StSstBarrel  originalBarrel);
+  StSstBarrel& operator=(const StSstBarrel & originalBarrel);
 
   void  initLadders(St_sstWafersPosition *wafpos);
 
