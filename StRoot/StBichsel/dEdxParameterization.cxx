@@ -81,21 +81,9 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1);
   fMostProbableZShift  = TMath::Log(fI70Shift);
   fAverageZShift       = fMostProbableZShift;
+  const Char_t *Names[KPidParticles+1] = {"e","proton","kaon","pi","mu","deuteron","triton","He3","alpha","all"};
   for (Int_t i = 0; i <= KPidParticles; i++) {
-    TString name("all");
-    switch (i) {
-    case kPidElectron : name = "e";        break;
-    case kPidProton   : name = "proton";   break;
-    case kPidKaon     : name = "kaon";     break;
-    case kPidPion     : name = "pi";       break;
-    case kPidMuon     : name = "mu";       break;
-    case kPidDeuteron : name = "deuteron"; break;
-    case kPidTriton   : name = "triton";   break;
-    case kPidHe3      : name = "He3";      break;
-    case kPidAlpha    : name = "alpha";    break;
-    case KPidParticles: name = "all";      break;
-    default:            name = "all";      break;
-    };
+    TString name(Names[i]);
     const Char_t *type[6] = {"70p","70","70S","zp","z","zS"};
     for (Int_t j = 0; j < 6; j++) {
       fTrs[i][j] = (TH1D *) pFile->Get(name + type[j]);

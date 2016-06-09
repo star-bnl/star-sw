@@ -50,7 +50,10 @@ void StKFParticleInterface::ReconstructTopology()
 void StKFParticleInterface::AddPV(const KFVertex &pv, const vector<int> &tracks) { 
   fKFParticleTopoReconstructor->AddPV(pv, tracks);
 }
-  
+void StKFParticleInterface::CleanPV() {
+  fKFParticleTopoReconstructor->CleanPV();
+}
+
 void StKFParticleInterface::AddPV(const KFVertex &pv) { 
   fKFParticleTopoReconstructor->AddPV(pv);
 }

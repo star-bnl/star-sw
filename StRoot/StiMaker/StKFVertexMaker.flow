@@ -63,7 +63,10 @@ StKFVertexMaker::Make
   	  StKFParticleInterface::SetParticlesPdg(particlesPdg);
   	  StKFParticleInterface::InitParticles();  
             KFParticleTopoReconstructor::Init( fParticles, &fParticlesPdg );  
-              fTracks[0] initialization from  fParticles and  fParticlesPdg 
+              fTracks[NInputSets] initialization from  fParticles and  fParticlesPdg 
+                      NInputSets = 8; //0 - pos sec, 1 - neg sec, 2 - pos prim, 3 - neg prim
+                       at Last point:   4 - pos sec, 5 - neg sec, 6 - pos prim, 7 - neg prim
+ 	      fTracks[0].SetId(iTr, iTr); // no. in fParticles vector
 #if 0
                   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
                     fill fParticles 
@@ -71,6 +74,7 @@ StKFVertexMaker::Make
                     fClusters.clear();
                     reconstruct PV
 #endif
+          StKFParticleInterface::CleanPV()
 	  for (Int_t l = 0; l < noPV; l++) {
             get PV particle and 
             StKFParticleInterface::AddPV(*particle);
@@ -82,11 +86,13 @@ StKFVertexMaker::Make
                 KFParticleFinder::SetNPV(fPV.size());
           }
           StKFParticleInterface::ReconstructParticles();
-            KFParticleTopoReconstructor::SortTracks(); over pdg
+            KFParticleTopoReconstructor::SortTracks(); over pdg 
             KFParticleTopoReconstructor::ReconstructParticles();
               KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
                                            GetChiToPrimVertex(&(fPV[0]), fPV.size());
               KFParticleFinder::FindParticles(fTracks, fChiToPrimVtx, fParticles, fPV, fPV.size());
+              KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
+                     std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
 #endif
 --------------------------------------------------------------------------------
 KFTracks:

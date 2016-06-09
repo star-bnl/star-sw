@@ -45,6 +45,7 @@ class StKFParticleInterface: public TObject
   void SetField(float field);
   void SetBeamLine(KFParticle& p);
   
+  void CleanPV();
   void AddPV(const KFVertex &pv, const std::vector<int> &tracks);
   void AddPV(const KFVertex &pv);
   void AddParticle(const KFParticle& p);

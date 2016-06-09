@@ -760,13 +760,18 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   vector<int> particlesPdg(0);
   StSPtrVecTrackNode& trackNodes = pEvent->trackNodes();
   UInt_t nTracks = trackNodes.size();
-  for (UInt_t i=0; i < nTracks; i++) {
+  UInt_t noGlob = fParticles->GetEntries();
+  for (UInt_t i = 0; i < nTracks; i++) {
     StTrackNode *node = trackNodes[i]; 
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
     StPrimaryTrack  *pTrack = static_cast<StPrimaryTrack *>(node->track(primary));
     Int_t kg = gTrack->key();
+    if (kg < 0 || kg >= noGlob) continue;
+    KFParticle *partDCA = (KFParticle *) fParticles->UncheckedAt(kg);
+    if (! partDCA) continue;
+    //    if (Debug() > 2 &&partDCA ) cout << "O" << i << "\t" << *partDCA << endl;
     static KFPTrack track;
     KFPTrack *kfpT = gTrack->kfpTrackAtFirstHit();
     if (! kfpT) continue;
@@ -791,9 +796,18 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     }
     for(int iHypo=0; iHypo<nHypo; iHypo++){
       KFParticle particle(track, pdg[iHypo]);
-      particle.SetId(kg);
       particle.AddDaughterId(kg);
+      if (partDCA) {
+	particle.SetIdTruth(partDCA->IdTruth(), partDCA->QaTruth());
+	particle.SetIdParentMcVx(partDCA->IdParentMcVx());
+	particle.SetParentID(partDCA->GetParentID());
+	particle.Chi2() = partDCA->Chi2();
+	particle.NDF() = partDCA->NDF();
+      }
       Int_t nPartSaved = particles.size();
+      //      particle.SetId(kg);
+      particle.SetId(nPartSaved);
+      //      if (Debug() > 2) cout << "N" << nPartSaved << "\t" << particle << "\tD:" << particle.NDaughters() << " " << particle.DaughterIds()[0] << endl;
       particles.push_back(particle);
       particlesPdg.push_back(pdg[iHypo]);
       if (IdPV > 0) {
@@ -810,7 +824,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     }
     Int_t NT = particles.size();
     for (Int_t i = 0; i < NT; i++) {
-      cout << i << "\t" << particles[i] << "\tpdg:" << particlesPdg[i] << endl; 
+      cout << i << "\t" << particles[i] << "\tD:" << particles[i].NDaughters() << " " << particles[i].DaughterIds()[0] << endl; 
     }
   }
   Double_t bField = pEvent->runInfo()->magneticField();
@@ -818,6 +832,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   mStKFParticleInterface->SetParticles(particles);
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
   mStKFParticleInterface->InitParticles();
+  mStKFParticleInterface->CleanPV(); // because commented fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   for (Int_t l = 0; l < noPV; l++) {
     mStKFParticleInterface->AddPV(PrimVertex[l], PrimTracks[l]);
   }
@@ -825,6 +840,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   const Char_t *Types[5] = {"1C-fit: Intesections", "2C-fit: Mass Fit", 
 			    "2C-fit: Mass Fit", "3C-fit: Fit to Vertex", "4C-fit: Fit to Vertex with mass constrain"};
   std::vector<KFParticle> *V0List;
+  std::vector<KFParticle> *ParList;
   for (Int_t k = 0; k < 5; k++) { 
     if (Debug() > 1) cout << Types[k] << endl;
     Int_t            NH = 1;
@@ -834,7 +850,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
       Int_t NPV = 1;
       if (k >= 2) NPV = noPV;
       for (Int_t iPV = 0; iPV < NPV; iPV++) {
-	if      (k == 0) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetParticles();
+	if      (k == 0) ParList = V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetParticles();
 	else if (k == 1) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetSecondaryCandidates()[h];
 	else if (k == 2) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryCandidates()[h][iPV];
 	else if (k == 3) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryTopoCandidates()[h][iPV];
@@ -842,7 +858,11 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	Int_t NV0 = V0List->size();
 	for (Int_t i = 0; i < NV0; i++) {
 	  const KFParticle& V0 = (*V0List)[i];
-	  if (V0.NDaughters() < 2) continue;
+	  if (V0.NDaughters() < 2) {
+	    cout << V0 << "\tD:" << V0.NDaughters() << " " << V0.DaughterIds()[0] << endl;
+	    continue;
+	  }
+	  if (Debug() > 1) cout << V0 << endl;
 	  // Reset to initial track Ids
 	  ResetDaughterIds((KFParticle *) &V0, particles);
 	  if (k > 1) {
@@ -850,11 +870,13 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	    ((KFParticle *) &V0)->SetParentID(PrimVertex[iPV].Id());
 	  }
 	  if (Debug() > 1) cout << V0 << endl;
+	  // Store V0
+#if 0
+#endif
 	}
       }
     }
   }
-  // Store V0
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -1120,7 +1142,7 @@ void StKFVertexMaker::ResetDaughterIds(KFParticle *particle, vector<KFParticle> 
   Int_t  ID = -1;
   for (UInt_t i = 0; i < N; i++) {
     Int_t j = OldDaughterIds[i];
-    if (j < NO) ID = particles[j].Id();
+    if (j < NO) ID = particles[j].DaughterIds()[0];
     else        ID = j;
     particle->AddDaughterId(ID);
   }

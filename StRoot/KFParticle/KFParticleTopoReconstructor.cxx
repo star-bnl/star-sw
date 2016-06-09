@@ -268,10 +268,12 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
       fTracks[0].SetParameter(particles[iTr].Parameters()[iP], iP, iTr);
     for(int iC=0; iC<21; iC++)
       fTracks[0].SetCovariance(particles[iTr].CovarianceMatrix()[iC], iC, iTr);
-    fTracks[0].SetId(iTr, iTr);
+    //    fTracks[0].SetId(iTr, iTr);
+    fTracks[0].SetId(particles[iTr].Id(), iTr);
     fTracks[0].SetPDG(trackPDG, iTr);
     fTracks[0].SetQ(particles[iTr].Q(), iTr);
     fTracks[0].SetPVIndex(-1, iTr);
+    if (particles[iTr].GetParentID() > 0) fTracks[0].SetPVIndex(particles[iTr].GetParentID(), iTr);
   }
 #if 0  
   fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );

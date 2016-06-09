@@ -90,6 +90,9 @@ class KFParticleTopoReconstructor{
   
   const KFParticleFinder* GetKFParticleFinder() const { return fKFParticleFinder; }
   
+  void CleanPV() {
+    fKFParticlePVReconstructor->CleanPV();
+  }
   void AddPV(const KFVertex &pv, const vector<int> &tracks) { 
     fKFParticlePVReconstructor->AddPV(pv,tracks);
     KFParticle pvPart=pv;
