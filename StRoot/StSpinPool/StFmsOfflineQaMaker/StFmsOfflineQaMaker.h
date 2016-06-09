@@ -3,8 +3,11 @@
 //
 //   This is for FMS offline QA
 // 
-//  $Id: StFmsOfflineQaMaker.h,v 1.1 2016/01/26 19:54:33 akio Exp $
+//  $Id: StFmsOfflineQaMaker.h,v 1.2 2016/06/08 19:55:11 akio Exp $
 //  $Log: StFmsOfflineQaMaker.h,v $
+//  Revision 1.2  2016/06/08 19:55:11  akio
+//  applying coverity report
+//
 //  Revision 1.1  2016/01/26 19:54:33  akio
 //  Separated from StFmsFpsMaker... This is for FMS offline QA and also FMS-FPS alignments
 //
@@ -33,14 +36,14 @@ public:
     void print();
     
 private:
-    StFmsDbMaker* mFmsDbMaker;
-    StFmsCollection* mFmsColl;
-    int mBunch;
-    int mTrigger;
+    StFmsDbMaker* mFmsDbMaker=0;
+    StFmsCollection* mFmsColl=0;
+    int mBunch=0;
+    int mTrigger=0;
     
-    char* mFilename;
-    TFile* mFile;
-    int mPrint;
+    char* mFilename=0;
+    TFile* mFile=0;
+    int mPrint=0;
     
     //QA & alignment related
     enum {NCUT1=10};   
@@ -48,11 +51,11 @@ private:
     
     //total energy ratio
     TH1F* mERatio[2];
-    TH1F* mBC;
+    TH1F* mBC=0;
     TH1F* mTrig[2];
 
     //hit related
-    TH1F* mFmsAdc;
+    TH1F* mFmsAdc=0;
     TH2F* mFmsHitLarge[2];
     TH2F* mFmsHitSmall[2];
     TH1F* mFpsMip[3];
@@ -87,7 +90,7 @@ private:
     TH1F* mHpid[NCUT1];
     TH1F* mHpid2[NCUT1];    
     
-    TH1F* mPn[NCUT1];
+    TH1F* mPn[NCUT2];
     TH1F* mPene[NCUT2];
     TH1F* mPpt[NCUT2];
     TH2F* mPept[NCUT2];
@@ -103,7 +106,7 @@ private:
     TH2F* mPxy[NCUT2];
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsOfflineQaMaker.h,v 1.1 2016/01/26 19:54:33 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsOfflineQaMaker.h,v 1.2 2016/06/08 19:55:11 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsOfflineQaMaker,0);
 };

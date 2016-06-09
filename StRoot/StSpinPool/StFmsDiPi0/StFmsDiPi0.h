@@ -3,8 +3,11 @@
 //
 //   This is FMS di-pi0 analysis
 // 
-//  $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:58:55 akio Exp $
+//  $Id: StFmsDiPi0.h,v 1.2 2016/06/08 16:28:09 akio Exp $
 //  $Log: StFmsDiPi0.h,v $
+//  Revision 1.2  2016/06/08 16:28:09  akio
+//  *** empty log message ***
+//
 //  Revision 1.1  2016/01/20 19:58:55  akio
 //  *** empty log message ***
 //
@@ -20,7 +23,6 @@
 #define STAR_StFmsDiPi0_HH
 
 #include "StMaker.h"
-#include "StEnumerations.h"
 
 class StFmsDbMaker;
 class StFmsCollection;
@@ -37,28 +39,36 @@ public:
     void setPythia(int v=1) {mPythia=v;}
 
 private:
-    StFmsDbMaker* mFmsDbMaker;
-    StFmsCollection* mFmsColl;
-    char* mFilename;
-    TFile* mFile;
+    StFmsDbMaker* mFmsDbMaker=0;
+    StFmsCollection* mFmsColl=0;
+    char* mFilename=0;
+    TFile* mFile=0;
 
-    int mPythia;
+    int mPythia=0;
     void readPythia();
     
-    enum {kNPtBin=6,kNCut=10};
+    enum {kNPtBin=6,kNCut=15};
     Int_t ptbin(float pt);
 
-    TH1F* mBC;
-    TH1F* mBBC;
-    TH1F* mM0[kNPtBin][kNCut];
-    TH1F* mM1[kNPtBin][kNPtBin][kNCut];
-    TH1F* mM2[kNPtBin][kNPtBin][kNCut];
-    TH1F* mZ1[kNPtBin][kNPtBin][kNCut];
-    TH1F* mZ2[kNPtBin][kNPtBin][kNCut];
-    TH1F* mDphi[kNPtBin][kNPtBin][kNCut];
+    TH1F* mBC=0;
+    TH1F* mBBC=0;
+    TH1F* mM0[kNPtBin][kNCut+1];
+    TH1F* mM1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mM2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mZ1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mZ2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mE1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mE2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mPt1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mPt2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mEta1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mEta2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mPhi1[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mPhi2[kNPtBin][kNPtBin][kNCut+1];
+    TH1F* mDphi[kNPtBin][kNPtBin][kNCut+1];
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.1 2016/01/20 19:58:55 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFmsDiPi0.h,v 1.2 2016/06/08 16:28:09 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFmsDiPi0,0);
 };

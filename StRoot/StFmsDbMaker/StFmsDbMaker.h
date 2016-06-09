@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.12 2015/11/10 19:06:02 akio Exp $
+ * $Id: StFmsDbMaker.h,v 1.13 2016/06/08 19:58:03 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.13  2016/06/08 19:58:03  akio
+ * Applying Coverity report
+ *
  * Revision 1.12  2015/11/10 19:06:02  akio
  * Adding TimeDepCorr for LED gain correction based on event#
  *
@@ -102,7 +105,7 @@ class StFmsDbMaker : public StMaker {
   fpsStatus_st*           FpsStatus();
 
   //! Utility functions related to FMS ChannelGeometry
-  Int_t maxDetectorId(); //! maximum value of detector Id
+  UShort_t maxDetectorId(); //! maximum value of detector Id
   Int_t detectorId(Int_t ew, Int_t ns, Int_t type);  //! convert to detector Id
   Int_t eastWest(Int_t detectorId); //! east or west to the STAR IP
   Int_t northSouth(Int_t detectorId); //! north or south side
@@ -110,7 +113,7 @@ class StFmsDbMaker : public StMaker {
   Int_t type(Int_t detectorId); //! type of the detector
   Int_t nRow(Int_t detectorId); //! number of rows
   Int_t nColumn(Int_t detectorId); //! number of column
-  Int_t maxChannel(Int_t detectorId); //! maximum number of channels
+  UShort_t maxChannel(Int_t detectorId); //! maximum number of channels
   Int_t getRowNumber(Int_t detectorId, Int_t ch); //! get the row number for the channel
   Int_t getColumnNumber(Int_t detectorId, Int_t ch); //! get the column number for the channel
   Int_t getChannelNumber(Int_t detectorId, Int_t row, Int_t column); //! get the channel number
@@ -212,62 +215,62 @@ class StFmsDbMaker : public StMaker {
 
  private:
   void                  deleteArrays();
-  Int_t                 mDebug; //! >0 dump tables to text files
+  Int_t                 mDebug=0; //! >0 dump tables to text files
 
-  fmsChannelGeometry_st *mChannelGeometry;  //! channel configuration for each detector
-  Int_t                 mMaxDetectorId;  //! max detector Id
+  fmsChannelGeometry_st *mChannelGeometry=0;  //! channel configuration for each detector
+  UShort_t              mMaxDetectorId=0;     //! max detector Id
 
-  fmsDetectorPosition_st *mDetectorPosition;  //! position (in STAR frame) of each detector
+  fmsDetectorPosition_st *mDetectorPosition=0;  //! position (in STAR frame) of each detector
 
-  unsigned int          mPositionModel; //! Position model (0=uniform, 1=run15pp, 2=run15pA)
+  unsigned int          mPositionModel=0; //! Position model (0=uniform, 1=run15pp, 2=run15pA)
 
-  fmsMap_st             *mMap;    //! detector map
-  fmsMap_st             **mmMap;
-  Int_t                  mMaxMap;
+  fmsMap_st             *mMap=0;    //! detector map
+  fmsMap_st             **mmMap=0;
+  Int_t                  mMaxMap=0;
   enum {mMaxCrate=8, mMaxSlot=17, mMaxCh=32};
   Int_t                  mReverseMapDetectorId[mMaxCrate][mMaxSlot][mMaxCh]; //!
   Int_t                  mReverseMapChannel[mMaxCrate][mMaxSlot][mMaxCh];    //!
 
-  fmsPatchPanelMap_st   *mPatchPanelMap; //! patch panel map
-  Int_t                  mMaxModule;
+  fmsPatchPanelMap_st   *mPatchPanelMap=0; //! patch panel map
+  Int_t                  mMaxModule=0;
 
-  fmsQTMap_st           *mQTMap;  //! Qt map
-  Int_t                  mMaxNS;
+  fmsQTMap_st           *mQTMap=0;  //! Qt map
+  Int_t                  mMaxNS=0;
 
-  fmsGain_st            *mGain;   //! gain table
-  fmsGain_st            **mmGain; 
-  Int_t                  mMaxGain;
+  fmsGain_st            *mGain=0;   //! gain table
+  fmsGain_st            **mmGain=0; 
+  Int_t                  mMaxGain=0;
 
-  fmsGainCorrection_st  *mGainCorrection; //! gain correction table
-  fmsGainCorrection_st  **mmGainCorrection;
-  Int_t                   mMaxGainCorrection;
+  fmsGainCorrection_st  *mGainCorrection=0; //! gain correction table
+  fmsGainCorrection_st  **mmGainCorrection=0;
+  Int_t                   mMaxGainCorrection=0;
 
     enum {mFmsTimeDepMaxData=20000,mFmsTimeDepMaxTimeSlice=200,mFmsTimeDepMaxDet=4,mFmsTimeDepMaxCh=578};
-  fmsTimeDepCorr_st     *mTimeDepCorr;
-  int mMaxTimeSlice;
+  fmsTimeDepCorr_st     *mTimeDepCorr=0;
+  int mMaxTimeSlice=0;
   int mTimeDepEvt[mFmsTimeDepMaxTimeSlice];    
   float mTimeDep[mFmsTimeDepMaxTimeSlice][mFmsTimeDepMaxDet][mFmsTimeDepMaxCh];
 
-  fmsRec_st             *mRecPar; //! rec. parameters table
-  Int_t                 mMaxRecPar;
+  fmsRec_st             *mRecPar=0; //! rec. parameters table
+  Int_t                 mMaxRecPar=0;
   StFmsDbConfig&        mRecConfig; //reference to StFmsDbConfig singleton, for accessing rec. parameter values by name
 
-  Float_t                 mForceUniformGain; //!
-  Float_t                 mForceUniformGainCorrection; //!
-  Int_t                   mReadGainFile; //!             
+  Float_t                 mForceUniformGain=0.0; //!
+  Float_t                 mForceUniformGainCorrection=0.0; //!
+  Int_t                   mReadGainFile=0; //!             
 
-  Int_t                   mReadRecParam; //!
+  Int_t                   mReadRecParam=0; //!
 
-  fpsConstant_st*         mFpsConstant;
-  Int_t                   mMaxSlatId;
-  fpsChannelGeometry_st** mFpsChannelGeometry;
-  fpsSlatId_st*           mFpsSlatId;
-  Int_t***                mFpsReverseSlatId;
-  fpsPosition_st*         mFpsPosition;
-  fpsMap_st*              mFpsMap;
-  Int_t**                 mFpsReverseMap;
-  fpsGain_st*             mFpsGain;
-  fpsStatus_st*           mFpsStatus;
+  fpsConstant_st*         mFpsConstant=0;
+  Int_t                   mMaxSlatId=0;
+  fpsChannelGeometry_st** mFpsChannelGeometry=0;
+  fpsSlatId_st*           mFpsSlatId=0;
+  Int_t***                mFpsReverseSlatId=0;
+  fpsPosition_st*         mFpsPosition=0;
+  fpsMap_st*              mFpsMap=0;
+  Int_t**                 mFpsReverseMap=0;
+  fpsGain_st*             mFpsGain=0;
+  fpsStatus_st*           mFpsStatus=0;
   
   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsDbMaker,2)   //StAF chain virtual base class for Makers

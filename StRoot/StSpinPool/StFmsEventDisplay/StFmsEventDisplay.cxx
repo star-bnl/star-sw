@@ -1,8 +1,11 @@
 // \class StFmsEventDisplay
 // \author Akio Ogawa
 //
-//  $Id: StFmsEventDisplay.cxx,v 1.4 2016/01/20 19:56:39 akio Exp $
+//  $Id: StFmsEventDisplay.cxx,v 1.5 2016/06/08 16:31:50 akio Exp $
 //  $Log: StFmsEventDisplay.cxx,v $
+//  Revision 1.5  2016/06/08 16:31:50  akio
+//  c++11 style initialization
+//
 //  Revision 1.4  2016/01/20 19:56:39  akio
 //  *** empty log message ***
 //
@@ -47,7 +50,7 @@
 ClassImp(StFmsEventDisplay);
 
 StFmsEventDisplay::StFmsEventDisplay(const Char_t* name):
-    StMaker(name),mFilter(0),mNEvents(0),mNAccepted(0),mMaxEvents(20),mFilename((char *)"fmsEventDisplay.pdf"){}
+    StMaker(name),mFilename((char *)"fmsEventDisplay.pdf"){}
 
 StFmsEventDisplay::~StFmsEventDisplay(){}
 

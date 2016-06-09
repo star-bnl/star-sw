@@ -1,6 +1,9 @@
-//$Id: StSstWafer.hh,v 1.7 2016/06/07 21:40:14 bouchet Exp $
+//$Id: StSstWafer.hh,v 1.8 2016/06/08 20:53:24 bouchet Exp $
 //
 //$Log: StSstWafer.hh,v $
+//Revision 1.8  2016/06/08 20:53:24  bouchet
+//coverity : PASS_BY_VALUE
+//
 //Revision 1.7  2016/06/07 21:40:14  bouchet
 //setMatcheds() changed to void (since it returns nothing)
 //
@@ -54,7 +57,7 @@ class StSstWafer: public TGeoHMatrix {
   StSstWafer(Int_t id);
   ~StSstWafer();
   StSstWafer(const StSstWafer & originalWafer);
-  StSstWafer& operator=(const StSstWafer originalWafer);
+  StSstWafer& operator=(const StSstWafer & originalWafer);
 
   void init(Int_t rId, Double_t *rD, Double_t *rN, Double_t *rT, Double_t *rX);
 
