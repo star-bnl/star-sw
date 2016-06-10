@@ -1,6 +1,9 @@
-//$Id: StSstWafer.cc,v 1.9 2016/06/08 20:53:54 bouchet Exp $
+//$Id: StSstWafer.cc,v 1.10 2016/06/10 19:28:31 bouchet Exp $
 //
 //$Log: StSstWafer.cc,v $
+//Revision 1.10  2016/06/10 19:28:31  bouchet
+//coverity : REVERSE_INULL
+//
 //Revision 1.9  2016/06/08 20:53:54  bouchet
 //coverity : PASS_BY_VALUE, FORWARD_NULL
 //
@@ -516,14 +519,11 @@ Int_t StSstWafer::doFindPackage(sstDimensions_st *dimensions, StSstClusterContro
 	      else
 		{
 		  currentClusterN = mClusterN->next(lastMatchedN);
-		  if (currentPackage)
-		    {
-		      StSstPackage *newPackage = new StSstPackage(currentPackageList->getSize(), currentPackage->getSize());
-		      newPackage->takeMatcheds(currentPackage);
-		      currentPackageList->addNewPackage(newPackage);
-		      currentPackage->purgePackage();
-		      numPackage++;
-		    }
+		  StSstPackage *newPackage = new StSstPackage(currentPackageList->getSize(), currentPackage->getSize());
+		  newPackage->takeMatcheds(currentPackage);
+		  currentPackageList->addNewPackage(newPackage);
+		  currentPackage->purgePackage();
+		  numPackage++;
 		}
 	    }
 	  else
@@ -536,14 +536,11 @@ Int_t StSstWafer::doFindPackage(sstDimensions_st *dimensions, StSstClusterContro
 	}
       else
 	{
-	  if (currentPackage)
-	    {
-	      StSstPackage *newPackage = new StSstPackage(currentPackageList->getSize(), currentPackage->getSize());
-	      newPackage->takeMatcheds(currentPackage);
-	      currentPackageList->addNewPackage(newPackage);
-	      currentPackage->purgePackage();
-	      numPackage++;
-	    }
+	  StSstPackage *newPackage = new StSstPackage(currentPackageList->getSize(), currentPackage->getSize());
+	  newPackage->takeMatcheds(currentPackage);
+	  currentPackageList->addNewPackage(newPackage);
+	  currentPackage->purgePackage();
+	  numPackage++;
 	}
       currentClusterP = mClusterP->next(currentClusterP);
     }
