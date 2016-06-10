@@ -1,6 +1,9 @@
-//$Id: StSstPoint.cc,v 1.1 2015/06/23 16:26:20 jeromel Exp $
+//$Id: StSstPoint.cc,v 1.2 2016/06/10 19:29:58 bouchet Exp $
 //
 //$Log: StSstPoint.cc,v $
+//Revision 1.2  2016/06/10 19:29:58  bouchet
+//coverity : UNINIT_CTOR
+//
 //Revision 1.1  2015/06/23 16:26:20  jeromel
 //First version created from the SSD code and reshaped
 //
@@ -24,6 +27,12 @@ StSstPoint::StSstPoint(Int_t rNPoint, Int_t rNWafer, Int_t rNumPackage, Int_t rK
   mNMatched       = rKindPackage;
   mIdClusterP     = -1;
   mIdClusterN     = -1;
+  mFlag = 0;
+  mNId = 0;
+  mNWafer = 0;
+  mMcTrack = 0;
+  mPrevPoint = 0;
+  mNextPoint = 0;
 }
 StSstPoint::StSstPoint(Int_t rNId , Int_t rMcHit , Int_t rMcTrack , Float_t *rXg , Float_t rDe, Float_t *rAngle)
 {
@@ -34,6 +43,15 @@ StSstPoint::StSstPoint(Int_t rNId , Int_t rMcHit , Int_t rMcTrack , Float_t *rXg
   for(Int_t k = 0; k < 3; k++)      mXg[k]     = rXg[k];
   for(Int_t i = 0; i < 2; i++)      mAngle[i]  = rAngle[i];
   mDe[0]      = rDe;
+  mNPoint = 0;
+  mNCluster = 0;
+  mNMatched = 0;
+  mIdClusterP = -1;
+  mIdClusterN = -1;
+  mFlag = 0;
+  mNWafer = 0;
+  mPrevPoint = 0;
+  mNextPoint = 0;
 }
 
 StSstPoint::StSstPoint(const StSstPoint & originalPoint)
@@ -47,7 +65,9 @@ StSstPoint::StSstPoint(const StSstPoint & originalPoint)
   mIdClusterP     = originalPoint.mIdClusterP;
   mIdClusterN     = originalPoint.mIdClusterN;
   mNWafer         = originalPoint.mNWafer;
-
+  mPrevPoint = originalPoint.mPrevPoint;
+  mNextPoint = originalPoint.mNextPoint;
+  mMcTrack = originalPoint.mMcTrack;
   Int_t i = 0;
   for (i = 0; i < 5; i++)
       mMcHit[i]    = originalPoint.mMcHit[i];
