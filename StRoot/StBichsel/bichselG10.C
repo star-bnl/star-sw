@@ -38,8 +38,8 @@ const Double_t Masses[NMasses] = {0.93827231,
 };
 const Int_t   Index[NMasses] = { 4,    3,   2,   0,   5,    1,  6,    7,       8,    -2};
 const Char_t *Names[NMasses] = {"p", "K","#pi","e", "d","#mu","t","He3","#alpha","2#pi"};
-const Int_t NF = 4;
-const Char_t *FNames[6] = {"Girrf","Sirrf","Bz","B70","B60","B70M"};
+const Int_t NF = 4;  //         0       1    2     3     4      5   6     7
+const Char_t *FNames[8] = {"Girrf","Sirrf","Bz","B70","B60","B70M","dNdx","BzM"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
 //________________________________________________________________________________
@@ -57,6 +57,23 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   return  TMath::Log10(scale*charge*charge*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+}
+//________________________________________________________________________________
+Double_t bichselZM(Double_t *x,Double_t *par) {
+  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = 1.;
+  Double_t dx2 = 1;
+  if (par[1] > 1.0) {
+    charge = 2;
+    poverm *= charge;
+    dx2 = TMath::Log2(5.);
+  }
+  return  TMath::Log10(scale*charge*charge*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
 }
 //________________________________________________________________________________
@@ -200,13 +217,14 @@ void bichselG10(const Char_t *type="Bz") {
   //  for (int h = 0; h < NMasses; h++) { // Masses
   for (int h = 0; h < 7; h++) { // Masses
     Int_t f = 3;
-    if      (Type.Contains("Bz",TString::kIgnoreCase))   f = 2;
+    if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
+    else if (Type.Contains("Bz",TString::kIgnoreCase))   f = 2;
     else if (Type.Contains("I70M",TString::kIgnoreCase)) f = 5;
     else if (Type.Contains("I70",TString::kIgnoreCase))  f = 3;
     else if (Type.Contains("I60",TString::kIgnoreCase))  f = 4;
     else if (Type.Contains("N",TString::kIgnoreCase))    f = 6;
     Int_t dx = 1;
-    Char_t *FunName = Form("%s%s%s%i",type,FNames[f],Names[h],(int)log2dx[dx]);
+    Char_t *FunName = Form("%s%s%i",FNames[f],Names[h],(int)log2dx[dx]);
     cout << "Make " << FunName << endl;
     Double_t xmin = -1;
     //    if (h == 0 || h >= 5) xmin = -0.75;
@@ -217,6 +235,7 @@ void bichselG10(const Char_t *type="Bz") {
     else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,2);
     else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,2);
     else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,2);
+    else if (f == 7) func = new TF1(FunName,bichselZM,xmin, xmax,2);
     else {
       return;
     }
