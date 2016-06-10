@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.18 2014/08/06 11:42:52 jeromel Exp $
+// $Id: StHistUtil.h,v 2.19 2016/06/10 02:55:54 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.19  2016/06/10 02:55:54  genevb
+// Coverity: memory leaks, possible null pointer dereferences, over-write character buffers
+//
 // Revision 2.18  2014/08/06 11:42:52  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -86,6 +89,8 @@ class TPaveLabel;
 class TPaveText;
 class TDatime;
 
+const int maxPathLen = 1024;
+
 class StHistUtil {
 
  private:
@@ -119,7 +124,7 @@ class StHistUtil {
   TH1**   newHist;      //! array of new histograms that other will be copied into
   Bool_t  debug;
   Int_t   m_RunYear;    // Run year
-  Char_t  m_dirName[256];//! Directory name for histograms in StIO tree
+  Char_t  m_dirName[maxPathLen];//! Directory name for histograms in StIO tree
   Bool_t  ignorePrefixes;// whether or not to ignore prefixes when combining histograms
   Int_t numOfPosPrefixes; // number of possible prefixes
   const Char_t** possiblePrefixes; //!
@@ -129,8 +134,8 @@ class StHistUtil {
 
   // For reference analyses:
   Bool_t m_analMode;
-  Char_t m_refResultsFile[1024];
-  Char_t m_refOutFile[1024];
+  Char_t m_refResultsFile[maxPathLen];
+  Char_t m_refOutFile[maxPathLen];
   TList* m_refCuts;
   TFile* m_refInFile;
 
@@ -208,7 +213,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.18 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.19 2016/06/10 02:55:54 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
