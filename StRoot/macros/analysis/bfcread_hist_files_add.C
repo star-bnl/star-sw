@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.21 2015/03/19 17:51:28 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.22 2016/06/10 15:51:47 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.22  2016/06/10 15:51:47  genevb
+// Fix memory leak
+//
 // Revision 2.21  2015/03/19 17:51:28  genevb
 // Minimize dependencies (tpc_Tables, number of files)
 //
@@ -238,6 +241,8 @@ void bfcread_hist_files_add(
        HM[bnum]->Make();
 
      }  //else (ifl not #1)
+
+     dirList->Delete();
 
 // to see an example of histograms being added together:   
 //   TH1** kathyArray = HU[bnum]->getNewHist();
