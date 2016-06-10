@@ -1,6 +1,9 @@
-//$Id: StSstBarrel.cc,v 1.7 2016/06/08 20:52:57 bouchet Exp $
+//$Id: StSstBarrel.cc,v 1.8 2016/06/10 19:26:55 bouchet Exp $
 //
 //$Log: StSstBarrel.cc,v $
+//Revision 1.8  2016/06/10 19:26:55  bouchet
+//coverity : FORWARD_NULL
+//
 //Revision 1.7  2016/06/08 20:52:57  bouchet
 //coverity : PASS_BY_VALUE
 //
@@ -640,22 +643,22 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 	    
             StSstClusterList *currentListP_j = mLadders[iLad]->mWafers[iWaf]->getClusterP();
             StSstCluster     *cluster_P_j   = currentListP_j->first();
-            while(cluster_P_j)
-	    {
+	    do{
 	      if(cluster_P_j->getNCluster()==Id_P_Side) 
                 break;
               cluster_P_j = currentListP_j->next(cluster_P_j);
 	    }
+            while(cluster_P_j!=currentListP_j->last());
 
             StSstClusterList *currentListN_j = mLadders[iLad]->mWafers[iWaf]->getClusterN();
             StSstCluster *cluster_N_j       = currentListN_j->first();
-            while(cluster_N_j)
-	    {
+	    do{
 	      if(cluster_N_j->getNCluster()==Id_N_Side) 
 		break;
 	      cluster_N_j = currentListN_j->next(cluster_N_j);
 	    }
-
+            while(cluster_N_j!=currentListN_j->last());
+	      
 	    // encode the hardware position
 	    // 2^3  detector ID number (8) 
 	    // 2^4  4-12 num_wafer (0-319)
@@ -801,21 +804,23 @@ Int_t StSstBarrel::writePointToContainer(St_scm_spt *scm_spt, StSstHitCollection
 	    
 	    StSstClusterList *currentListP_j = mLadders[iLad]->mWafers[iWaf]->getClusterP();
 	    StSstCluster     *cluster_P_j   = currentListP_j->first();
-	    while(cluster_P_j)
-	      {
-		if(cluster_P_j->getNCluster()==Id_P_Side) 
-		  break;
-		cluster_P_j = currentListP_j->next(cluster_P_j);
-	      }
+
+	    do{
+	      if(cluster_P_j->getNCluster()==Id_P_Side) 
+		break;
+	      cluster_P_j = currentListP_j->next(cluster_P_j);
+	    }
+            while(cluster_P_j!=currentListP_j->last());
+
 	    StSstClusterList *currentListN_j = mLadders[iLad]->mWafers[iWaf]->getClusterN();
 	    StSstCluster *cluster_N_j       = currentListN_j->first();
-	    while(cluster_N_j)
-	      {
-		if(cluster_N_j->getNCluster()==Id_N_Side) 
-		  break;
-		cluster_N_j = currentListN_j->next(cluster_N_j);
-	      }
-	    
+	    do{
+	      if(cluster_N_j->getNCluster()==Id_N_Side) 
+		break;
+	      cluster_N_j = currentListN_j->next(cluster_N_j);
+	    }	
+            while(cluster_N_j!=currentListN_j->last());
+    
 	    // encode the hardware position
 	    // 2^3  detector ID number (8) 
 	    // 2^4  4-12 num_wafer (0-319)
