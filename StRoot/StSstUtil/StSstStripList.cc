@@ -1,6 +1,9 @@
-//$Id: StSstStripList.cc,v 1.3 2016/05/30 21:40:29 bouchet Exp $
+//$Id: StSstStripList.cc,v 1.4 2016/06/10 19:27:41 bouchet Exp $
 //
 //$Log: StSstStripList.cc,v $
+//Revision 1.4  2016/06/10 19:27:41  bouchet
+//coverity : FORWARD_NULL
+//
 //Revision 1.3  2016/05/30 21:40:29  bouchet
 //coverity : REVERSE_INULL fixed
 //
@@ -325,23 +328,6 @@ void StSstStripList::updateStrip(StSstStrip *ptr)
       delete ptr;
       return;
     }
-}
-
-StSstStripList* StSstStripList::addStripList(StSstStripList *list)
-{
-  Int_t size2 = list->getSize();
-  if (!size2) return this;
-  
-  StSstStrip *st1 =0 ;
-  StSstStrip *st2 = list->first();
-  Int_t i = 0;
-  for (i=0 ; i < size2 ; i++)
-    {
-      st2->copyTo(st1);
-      addNewStrip(st1);
-      st2 = list->next(st2);
-    }
-  return this;  
 }
 //________________________________________________________________________________
 void StSstStripList::updateStripList(StSpaListNoise *ptr)
