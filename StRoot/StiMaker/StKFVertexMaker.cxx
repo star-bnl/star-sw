@@ -526,6 +526,26 @@ Int_t StKFVertexMaker::MakeParticles() {
   return fNGoodGlobals;
 }
 //________________________________________________________________________________
+void StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
+  Int_t NoTracks = 0;
+  if (KVx) NoTracks = KVx->NDaughters();
+  if (NoTracks <= 1 ||
+      KVx->GetCovariance(0) < 0 ||
+      KVx->GetCovariance(2) < 0 ||
+      KVx->GetCovariance(5) < 0) {SafeDelete(primV); return;}
+  StThreeVectorF XVertex(&KVx->X());
+  primV->setKey(KVx->Id());
+  primV->setPosition(XVertex);
+  primV->setChiSquared(KVx->Chi2()/KVx->GetNDF());  
+  primV->setProbChiSquared(TMath::Prob(KVx->GetChi2(),KVx->GetNDF()));
+  primV->setIdTruth(KVx->IdTruth(), KVx->QaTruth());
+  Float_t cov[6];
+  TCL::ucopy((&((KFParticle *) &KVx)->Covariance(0)), cov, 6);
+  primV->setCovariantMatrix(cov); 
+  primV->setFlag(1); // Set default values
+  return;
+}
+//________________________________________________________________________________
 Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
   Bool_t ok = kTRUE;
 #ifdef  __MakeV0__
@@ -710,7 +730,6 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
       StSPtrVecV0Vertex& v0Vertices = pEvent->v0Vertices();
       v0Vertices.push_back(V0Vx);
       V0track->setEndVertex(V0Vx);
-      V0Vx->setPosition(StThreeVectorF(V0s[l]->GetX(), V0s[l]->GetY(), V0s[l]->GetZ()));;
       V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[negative]->track(primary))));
       V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[positive]->track(primary))));
       V0Vx->setDcaDaughterToPrimaryVertex(positive,trks[negative]->impactParameter());
@@ -871,8 +890,60 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	  }
 	  if (Debug() > 1) cout << V0 << endl;
 	  // Store V0
-#if 0
-#endif
+	  Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
+	  if (prob < fgProbCut) continue;
+	  StV0Vertex *V0Vx = new StV0Vertex(); 
+	  FillVertex(&V0, V0Vx);
+	  if (! V0Vx) continue;
+	  Int_t IdV = V0.Id();
+	  StTrackMassFit *V0Track = new StTrackMassFit(V0.Id(),(KFParticle *) &V0);
+	  PrPP(ParticleFinder,*V0Track);
+	  V0Vx->setParent(V0Track);
+	  StTrackNode *nodepf = TrackNodeMap[IdV];
+	  if (! nodepf) {
+	    nodepf = new StTrackNode;
+	    StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
+	    trNodeVec.push_back(nodepf);
+	    TrackNodeMap[IdV] = nodepf;
+	  }
+	  StThreeVectorF XVertex(V0.X(),V0.Y(),V0.Z());
+	  V0Vx->setKey(V0.Id());
+	  V0Vx->setPosition(XVertex);
+	  V0Vx->setChiSquared(V0.Chi2()/V0.GetNDF());  
+	  V0Vx->setProbChiSquared(TMath::Prob(V0.GetChi2(),V0.GetNDF()));
+	  Float_t cov[6];
+	  TCL::ucopy(&((KFParticle *) &V0)->Covariance(0),cov,6);
+	  V0Vx->setCovariantMatrix(cov); 
+	  StSPtrVecV0Vertex& v0Vertices = pEvent->v0Vertices();
+	  v0Vertices.push_back(V0Vx);
+	  V0Track->setEndVertex(V0Vx);
+	  //       V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[negative]->track(primary))));
+	  //       V0Vx->addDaughter(new StPrimaryTrack(*((StPrimaryTrack *)Nodes[positive]->track(primary))));
+	  //       V0Vx->setDcaDaughterToPrimaryVertex(positive,trks[negative]->impactParameter());
+	  //       V0Vx->setDcaDaughterToPrimaryVertex(negative,trks[positive]->impactParameter());
+	  //       //3VectorF vs 3VectorD???
+	  //       V0Vx->setMomentumOfDaughter(positive,StThreeVectorF(pos.GetPx(),pos.GetPy(),pos.GetPz()));
+	  //       V0Vx->setMomentumOfDaughter(negative,StThreeVectorF(neg.GetPx(),neg.GetPy(),neg.GetPz()));
+	  PrPP(ParticleFinder, *V0Vx);
+	  Int_t IdP = V0.GetParentID();
+	  StPrimaryVertex * Vp = 0;
+	  if (IdP) {
+	    for (UInt_t i = 0; i < noPV; i++) {
+	      StPrimaryVertex *Vtx = pEvent->primaryVertex(i);
+	      if (! Vtx) continue;
+	      StTrackMassFit *pf = Vtx->parentMF();
+	      if (! pf) continue;
+	      KFParticle* Vx = pf->kfParticle();
+	      if (! Vx) continue;
+	      if (Vx->Id() == IdP) {Vp = Vtx; break;}
+	    }
+	  }
+	  if (Vp) {
+	    Vp->addMassFit(V0Track);
+	    PrPP(ParticleFinder,*Vp); 
+	  } else {
+	    nodepf->addTrack(V0Track);
+	  }
 	}
       }
     }
@@ -1010,35 +1081,20 @@ void StKFVertexMaker::ReFitToVertex() {
     Bool_t ok = kTRUE;
     Int_t NoTracks = V->NoTracks();
     KFVertex     &KVx = V->Vertex();
-    if (NoTracks <= 1) ok = kFALSE;
-    else {
-      if (KVx.Covariance(0) < 0 ||
-	  KVx.Covariance(2) < 0 ||
-	  KVx.Covariance(5) < 0) ok = kFALSE;
-    }
-    if (! ok) {
+    // Store vertex
+    StPrimaryVertex *primV = new StPrimaryVertex;
+    FillVertex(&KVx, primV);
+    if (! primV) {
       delete fgcVertices->Vertices()->Remove(V);
       continue;
     }
-    // Store vertex
-    StPrimaryVertex *primV  = new StPrimaryVertex;
-    StThreeVectorF XVertex(&KVx.X());
-    primV->setKey(V->ID());
-    primV->setPosition(XVertex);
-    primV->setChiSquared(KVx.Chi2()/KVx.GetNDF());  
-    primV->setProbChiSquared(TMath::Prob(KVx.GetChi2(),KVx.GetNDF()));
-    primV->setIdTruth(KVx.IdTruth(), KVx.QaTruth());
-    Float_t cov[6];
-    TCL::ucopy(&KVx.Covariance(0), cov, 6);
-    primV->setCovariantMatrix(cov); 
-    primV->setVertexFinderId(KFVertexFinder);
-    primV->setFlag(1); // Set default values
     primV->setRanking(333);
-    primV->setNumTracksUsedInFinder(V->NoTracks());
+    primV->setNumTracksUsedInFinder(NoTracks);
+    primV->setVertexFinderId(KFVertexFinder);
     Bool_t beam = kFALSE;
     StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
     Vertex->setGlobal(0, 0, KVx.X(), KVx.Y(), KVx.Z(), 0);
-    Vertex->setError(cov);
+    Vertex->setError(primV->covariance());
 
     TArrayI indexT(NoTracks); Int_t *indexes = indexT.GetArray();
     TArrayI IdT(NoTracks);    Int_t *Ids     = IdT.GetArray();
@@ -1107,6 +1163,8 @@ void StKFVertexMaker::ReFitToVertex() {
       primV->setParent(pf);
       StTrackNode *nodepf = new StTrackNode;
       nodepf->addTrack(pf);
+      Int_t IdV = KVx.Id();
+      TrackNodeMap[IdV] = nodepf;
       StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
       trNodeVec.push_back(nodepf);
       for (UInt_t i = 0; i < NoTracks; i++) {

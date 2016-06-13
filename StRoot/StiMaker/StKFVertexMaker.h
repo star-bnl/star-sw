@@ -24,6 +24,7 @@
 #include "THStack.h"
 #include "KFParticle/KFParticle.h"
 class StEvent;
+class StVertex;
 class StPrimaryVertex;
 class StEvent;
 class StGlobalTrack;
@@ -56,6 +57,7 @@ class StKFVertexMaker : public StMaker {
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
+  void                           FillVertex(const KFParticle *KVx, StVertex *V);
   Bool_t           	 	 MakeV0(StPrimaryVertex *V);                                          		   
   Bool_t                         ParticleFinder();
   void                   	 PrimaryVertices();	

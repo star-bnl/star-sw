@@ -86,13 +86,17 @@ StKFVertexMaker::Make
                 KFParticleFinder::SetNPV(fPV.size());
           }
           StKFParticleInterface::ReconstructParticles();
-            KFParticleTopoReconstructor::SortTracks(); over pdg 
+            KFParticleTopoReconstructor::SortTracks(); over pdg and Input Sets
             KFParticleTopoReconstructor::ReconstructParticles();
               KFParticleTopoReconstructor::TransportPVTracksToPrimVertex()
-                                           GetChiToPrimVertex(&(fPV[0]), fPV.size());
+                for fTracks[2-3] 
+              KFParticleTopoReconstructor::GetChiToPrimVertex(&(fPV[0]), fPV.size());
               KFParticleFinder::FindParticles(fTracks, fChiToPrimVtx, fParticles, fPV, fPV.size());
               KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
                      std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
+		KFParticleFinder::Find2DaughterDecay(vRTracks, ChiToPrimVtx,Particles, PrimVtx, fCuts2D,fSecCuts, fPrimCandidates, fSecCandidates);
+			KFParticleFinder::ConstructV0(...)
+			  KFParticleFinder::SaveV0PrimSecCand
 #endif
 --------------------------------------------------------------------------------
 KFTracks:
