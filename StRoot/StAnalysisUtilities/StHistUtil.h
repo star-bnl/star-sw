@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.19 2016/06/10 02:55:54 genevb Exp $
+// $Id: StHistUtil.h,v 2.20 2016/06/13 20:31:11 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.20  2016/06/13 20:31:11  genevb
+// Resolve Coverity BUFFER_SIZE_WARNING with careful copy function
+//
 // Revision 2.19  2016/06/10 02:55:54  genevb
 // Coverity: memory leaks, possible null pointer dereferences, over-write character buffers
 //
@@ -145,6 +148,7 @@ class StHistUtil {
   virtual Bool_t  CheckOutFile(const Char_t* histName);
   virtual TList*  TrimListByPrefix(TList* dList, const Char_t* withPrefix);
   virtual TH1*    FlipAxes(TH1* hist);
+  virtual void    PathCopy(char *destination, const char* source);
 
 
  public: 
@@ -213,7 +217,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.19 2016/06/10 02:55:54 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.20 2016/06/13 20:31:11 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
