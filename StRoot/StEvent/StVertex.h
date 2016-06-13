@@ -98,6 +98,7 @@ public:
     Int_t                  flag() const {return mFlag; }
     Float_t                chiSquared() const { return mChiSquared; }
     Float_t                probChiSquared() const { return mProbChiSquared; }
+    const Float_t         *covariance() const {return mCovariantMatrix;}
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
     StTrackMassFit*        parent()        { return mParent; }
