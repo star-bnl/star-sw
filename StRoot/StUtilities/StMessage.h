@@ -45,7 +45,7 @@ class StMessage {
 
  public:
    StMessage(const char* mess="", const char* ty="I", const char* opt="O");
-   StMessage(const StMessage&){;}
+   StMessage(const StMessage&){option=0;messTime=0;message=0;}
    virtual ~StMessage();
           void PrintInfo();
            int Print(int nChars=-1);
@@ -65,8 +65,11 @@ class StMessage {
 
 #endif
 
-// $Id: StMessage.h,v 1.16 2004/04/02 22:17:14 genevb Exp $
+// $Id: StMessage.h,v 1.17 2016/06/14 06:26:34 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.17  2016/06/14 06:26:34  genevb
+// better initializations (Coverity)
+//
 // Revision 1.16  2004/04/02 22:17:14  genevb
 // Added protected Ignore/AllowRepeats() for friend StBFChain class
 //
