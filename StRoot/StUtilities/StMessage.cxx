@@ -134,7 +134,7 @@ int StMessage::Print(int nChars) {
   }
   if ((option & kMessOptE) && (nChars == 0)) {
     myerr << messBuffer.str();
-    if (addedMessage) myout << addedMessage;
+    if (addedMessage) myerr << addedMessage;
     myerr.flush();
   }
   return messBuffer.tellp();
@@ -178,7 +178,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.28 2012/06/11 15:05:34 fisyak Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.29 2016/06/14 06:24:54 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -193,8 +193,11 @@ int StMessage::InitBuffer() {
 int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.28 2012/06/11 15:05:34 fisyak Exp $
+// $Id: StMessage.cxx,v 1.29 2016/06/14 06:24:54 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.29  2016/06/14 06:24:54  genevb
+// Very old cut-and-paste typo (Coverity)
+//
 // Revision 1.28  2012/06/11 15:05:34  fisyak
 // std namespace
 //

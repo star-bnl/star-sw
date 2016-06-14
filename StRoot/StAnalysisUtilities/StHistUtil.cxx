@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.98 2016/06/10 02:55:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.99 2016/06/13 20:31:10 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.99  2016/06/13 20:31:10  genevb
+// Resolve Coverity BUFFER_SIZE_WARNING with careful copy function
+//
 // Revision 2.98  2016/06/10 02:55:54  genevb
 // Coverity: memory leaks, possible null pointer dereferences, over-write character buffers
 //
@@ -728,10 +731,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
   // Now find the histograms
   // get the TList pointer to the histograms:
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
   if (!dirList) { LOG_INFO << " DrawHists - histograms not available! " << endm; }
 
@@ -1388,10 +1388,7 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 //     have to check if there's really anything there (so use First method)
 
 //
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
   StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
     if (temp) {
       LOG_INFO << "FindHists - found pointer to maker" << endm;
@@ -2083,10 +2080,7 @@ void StHistUtil::SetDefaultLogYList(const Char_t *dirName)
   }
 
 
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -2131,10 +2125,7 @@ void StHistUtil::SetDefaultLogXList(const Char_t *dirName)
     LOG_INFO << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endm;
   }
 
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -2184,10 +2175,7 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
   Int_t lengofList = 0;
   bool mustDeleteList = false;
 
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -2378,10 +2366,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   LOG_INFO << " **** Now in StHistUtil::Overlay1D **** " << endm;
 
   Int_t n1dHists = 0;
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
@@ -2502,10 +2487,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   LOG_INFO << " **** Now in StHistUtil::Overlay2D **** " << endm;
 
   Int_t n2dHists = 0;
-  if (dirName && strcmp(m_dirName,dirName)) { 
-    if (strlen(dirName) < maxPathLen) strncpy(m_dirName,dirName,maxPathLen);
-    else { LOG_ERROR << " dirName too long: " << dirName << endm; }
-  }
+  PathCopy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
@@ -2682,11 +2664,9 @@ void StHistUtil::SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResul
   }
 
   // refOutFile will not be used if no reference histograms are found
-  if (strlen(refResultsFile) < maxPathLen) strncpy(m_refResultsFile,refResultsFile,maxPathLen);
-  else { LOG_ERROR << " refResultsFile too long: " << refResultsFile << endm; }
+  PathCopy(m_refResultsFile,refResultsFile);
   // refOutFile will not be used if already writing hists to a ROOT file
-  if (strlen(refOutFile) < maxPathLen) strncpy(m_refOutFile,refOutFile,maxPathLen);
-  else { LOG_ERROR << " refOutFile too long: " << refOutFile << endm; }
+  PathCopy(m_refOutFile,refOutFile);
 }
 
 //_____________________________________________________________________________
@@ -2769,6 +2749,20 @@ TH1* StHistUtil::FlipAxes(TH1* hist) {
   newhist->SetMinimum(hist->GetMinimumStored());
   newhist->SetMaximum(hist->GetMaximumStored());
   return newhist;
+}
+
+//_____________________________________________________________________________
+
+void StHistUtil::PathCopy(char* destination, const char* source) {
+  // carefully copy path strings to avoid buffer over-writes or over-reads
+  if (source && strcmp(destination,source)) {
+    if (strlen(source) < maxPathLen) {
+      strncpy(destination,source,maxPathLen-1);
+      destination[maxPathLen-1] = 0;
+    } else {
+      LOG_ERROR << " source path too long: " << source << endm;
+    }
+  }
 }
 
 //_____________________________________________________________________________

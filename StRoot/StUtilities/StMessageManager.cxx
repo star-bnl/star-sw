@@ -346,11 +346,11 @@ void StMessageManager::Summary(size_t nTerms) {
   int agree;
   char* temp;
   myout << "  ***** StMessageManager message summary *****" << endl;
+  toks.resize(nMess);
   for (i=0; i<nMess; i++) {
     done.push_back(0);
     temp = const_cast<char*> (messList[i]->GetType());
     mType.push_back(temp);
-    toks.push_back(*(new CharPtrVec));
     messBlocks.push_back(new char[mmax]);
     temp = strncpy(messBlocks[i],(messList[i]->GetMessage()),messmax);
     temp = strtok(temp, " ");
@@ -436,7 +436,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.50 2015/05/21 21:22:40 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.51 2016/06/14 06:25:45 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -466,8 +466,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.50 2015/05/21 21:22:40 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.51 2016/06/14 06:25:45 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.51  2016/06/14 06:25:45  genevb
+// Infrequently used memory leak (Coverity)
+//
 // Revision 1.50  2015/05/21 21:22:40  genevb
 // Fix memory leak: unnecessary char array in FindMessageList()
 //

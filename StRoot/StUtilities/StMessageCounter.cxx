@@ -46,7 +46,7 @@ void StMessageCounter::SetLimit(const char* str, int n) {
         limitTList[typeN] = n;
     } else {                            // Waiting list for type limits
       if (limitWList.size()) {
-        index = 0;
+        size_t index = 0;
         for (curString=limitWList.begin(); curString!=limitWList.end();
 	                                   curString++) {
           if (*str == *(*curString)) {  // Already in the waiting list
@@ -63,7 +63,7 @@ void StMessageCounter::SetLimit(const char* str, int n) {
       limitWNList.push_back(n);
     }
   } else {                              // Limits by string
-    index=0;
+    size_t index=0;
     for (curString=limitList.begin(); curString!=limitList.end();
                                       curString++) {
       if (!strcmp(str,(*curString))) {
@@ -97,7 +97,7 @@ int StMessageCounter::GetLimit(const char* str) {
       return limitTList[typeN];
     } else {                            // Waiting list for type limits
       if (limitWList.size()) {
-        index = 0;
+        size_t index = 0;
         for (curString=limitWList.begin(); curString!=limitWList.end();
 	                                   curString++) {
           if (*str == *(*curString)) return limitWNList[index];
@@ -106,7 +106,7 @@ int StMessageCounter::GetLimit(const char* str) {
       }
     }
   } else {                              // Limits by string
-    index=0;
+    size_t index=0;
     for (curString=limitList.begin(); curString!=limitList.end();
                                       curString++) {
       if (!strcmp(str,(*curString))) return limitNList[index];
@@ -121,6 +121,7 @@ void StMessageCounter::ListLimits() {
     myout << "StMessage Limits: negative limit means no limit, ";
     myout << "-5 means fixed with no limit\n";
     myout << "  Limits :   counts : on message types" << endl;
+    size_t index=0;
     for (index = 1; index < limitTList.size(); index++) {
       myout.width(8);
       myout << limitTList[index] << " : ";
@@ -173,7 +174,7 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
       printIt = 0;
     }
 
-    index=0;
+    size_t index=0;
     for (curString=limitList.begin(); curString!=limitList.end();
                                       curString++) {
       if (strstr(mess,(*curString))) {
@@ -197,7 +198,7 @@ void StMessageCounter::AddType(const char* type) {
   limitTList.push_back(-1);
   limitTCountList.push_back(0);
   if (limitWList.size()) {
-    index=0;                                // Now check the waiting list
+    size_t index=0;                                // Now check the waiting list
     for (curString=limitWList.begin(); curString!=limitWList.end();
                                        curString++) {
       if (*type == *(*curString)) {
@@ -212,8 +213,11 @@ void StMessageCounter::AddType(const char* type) {
 }
 
 //_____________________________________________________________________________
-// $Id: StMessageCounter.cxx,v 1.21 2012/06/11 15:05:34 fisyak Exp $
+// $Id: StMessageCounter.cxx,v 1.22 2016/06/14 06:26:34 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.22  2016/06/14 06:26:34  genevb
+// better initializations (Coverity)
+//
 // Revision 1.21  2012/06/11 15:05:34  fisyak
 // std namespace
 //

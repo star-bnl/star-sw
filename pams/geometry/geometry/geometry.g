@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.295 2016/03/07 14:47:00 jwebb Exp $
+* $Id: geometry.g,v 1.296 2016/06/13 15:53:49 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.296  2016/06/13 15:53:49  jwebb
+* Corrected logic error which creates mtd twice in y2015c+
+*
 * Revision 1.295  2016/03/07 14:47:00  jwebb
 * Case statement in geometry.g to support y2016c tag.
 *
@@ -5406,7 +5409,7 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
          CONSTRUCT mutdgeo5;
      }
-     IF MutdConfig>=15 {
+     IF MutdConfig=15 {
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);        
          CONSTRUCT mutdgeo7;
      }
