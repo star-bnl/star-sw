@@ -27,7 +27,6 @@ class StMessageCounter : public ostrstream {
    int yesLimits;
    int noLimits;
    messCharVecIter curString;
-   size_t index;
 
  protected:
    StMessageCounter();
@@ -53,8 +52,11 @@ class StMessageCounter : public ostrstream {
 
 #endif
 
-// $Id: StMessageCounter.h,v 1.13 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessageCounter.h,v 1.14 2016/06/14 06:26:34 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.14  2016/06/14 06:26:34  genevb
+// better initializations (Coverity)
+//
 // Revision 1.13  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //
