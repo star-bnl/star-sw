@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsUtil.cxx,v 1.5 2015/11/06 17:47:16 jdb Exp $
+ * $Id: StMuFmsUtil.cxx,v 1.6 2016/06/14 17:11:34 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StMuFmsUtil.cxx,v $
+ * Revision 1.6  2016/06/14 17:11:34  jdb
+ * Fixing Coverity Errors:
+ * StMuFmsCluster.cxx : UNINIT_CTOR on member mEnergy
+ * StMuFmsUtile.cxx : DEADCODE on check for null pointer
+ *
  * Revision 1.5  2015/11/06 17:47:16  jdb
  * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
  *
@@ -278,7 +283,6 @@ void StMuFmsUtil::fillFmsClusters(StFmsCollection* fmscol,
     TIter next(muCluster->photons());
     StMuFmsPoint* muPoint(NULL);
     while ((muPoint = static_cast<StMuFmsPoint*>(next()))) {
-      if(!muPoint) continue;
       const int index = muFms->getPointArray()->IndexOf(muPoint);
       if(index != -1) {
 	StFmsPoint* point = fmscol->points().at(index);
