@@ -1,5 +1,5 @@
-*  starsim -w 1 -b devTF.kumac
-DETP geom devTZ  field=-5  hadr_off=1 
+*  starsim -w 1 -b dev2019.kumac
+DETP geom dev2019  field=-5  hadr_off=1 
   gexec $STAR_LIB/StarMagFieldNoDict.so
   gexec $STAR_LIB/xgeometry.so
 *gexec .$STAR_HOST_SYS/lib/xgeometry.so
