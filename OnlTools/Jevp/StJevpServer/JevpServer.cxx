@@ -1232,111 +1232,122 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
 
 JevpPlot *JevpServer::getJevpSummaryPlot()
 {
-  if(jevpSummaryPlot) {
-    delete jevpSummaryPlot;
-    jevpSummaryPlot = NULL;
-  }
+    if(jevpSummaryPlot) {
+	delete jevpSummaryPlot;
+	jevpSummaryPlot = NULL;
+    }
 
-  debugBuilders(__LINE__);
+    debugBuilders(__LINE__);
 
-  CP;
-  jevpSummaryPlot = new JevpPlot();
-  jevpSummaryPlot->needsdata = 0;
-  jevpSummaryPlot->setParent((char *)"serv");
-  TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
-  //h->GetXaxis()->SetAxisColor(kWhite);
-  h->GetXaxis()->SetTickLength(0);
-  h->GetXaxis()->SetLabelColor(kWhite);
-  //h->GetYaxis()->SetAxisColor(kWhite);
-  h->GetYaxis()->SetTickLength(0);
-  h->GetYaxis()->SetLabelColor(kWhite);
-  //h->SetLineColor(kWhite);
-  //h->SetAxisColor(kWhite);
-  //h->SetLabelColor(kWhite);
+    CP;
+    jevpSummaryPlot = new JevpPlot();
+    jevpSummaryPlot->needsdata = 0;
+    jevpSummaryPlot->setParent((char *)"serv");
+    TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
+    //h->GetXaxis()->SetAxisColor(kWhite);
+    h->GetXaxis()->SetTickLength(0);
+    h->GetXaxis()->SetLabelColor(kWhite);
+    //h->GetYaxis()->SetAxisColor(kWhite);
+    h->GetYaxis()->SetTickLength(0);
+    h->GetYaxis()->SetLabelColor(kWhite);
+    //h->SetLineColor(kWhite);
+    //h->SetAxisColor(kWhite);
+    //h->SetLabelColor(kWhite);
 
-  jevpSummaryPlot->addHisto(h);
+    jevpSummaryPlot->addHisto(h);
 
-  jevpSummaryPlot->setOptStat(0);
-  jevpSummaryPlot->gridx = 0;
-  jevpSummaryPlot->gridy = 0;
+    jevpSummaryPlot->setOptStat(0);
+    jevpSummaryPlot->gridx = 0;
+    jevpSummaryPlot->gridy = 0;
   
   
-  CP;
-  JLatex *l;
+    CP;
+    JLatex *l;
   
   
-  int i = 0;
-  char tmp[512];
+    int i = 0;
+    char tmp[512];
 
-  sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
-  l = new JLatex(2, liney(i++), tmp);
-  i++;
-  l->SetTextSize(.05);
-  jevpSummaryPlot->addElement(l);
-
-  sprintf(tmp, "Tags:   %s", serverTags);
-  l = new JLatex(2, liney(i++), tmp);
-  i++;
-  l->SetTextSize(.035);
-  jevpSummaryPlot->addElement(l);
-
-  CP;
-  // Now show builders...
-  TListIter next(&builders);
-  JevpPlotSet *obj;
-  int n=0;
-
-  debugBuilders(__LINE__);
-
-  CP;
-  while((obj = (JevpPlotSet *)next())) {
-    LOG(DBG, "object");
-    LOG(DBG, "name=%s",obj->getPlotSetName());
-    BuilderStatus *curr = &obj->builderStatus;
-
-    n++;
-    sprintf(tmp, "builder %15s: (events %d, avgtime %06.4lf)",
-	    curr->name, curr->events, obj->getAverageProcessingTime());
-    
-    LOG(DBG, "here %s",tmp);
+    sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
     l = new JLatex(2, liney(i++), tmp);
-    l->SetTextSize(.035);
+    //l->SetTextFont(8);   // courier new
+    i++;
+    l->SetTextSize(.05);
+    jevpSummaryPlot->addElement(l);
 
-    LOG(DBG, "Here");
-    jevpSummaryPlot->addElement(l); 
-
-    LOG(DBG, "HEre");
-  }
-  
-  CP;
-  if(n == 0) {
-    sprintf(tmp,"There are no builders");
+    sprintf(tmp, "Tags:   %s", serverTags);
     l = new JLatex(2, liney(i++), tmp);
+    //l->SetTextFont(8);
+    i++;
     l->SetTextSize(.035);
     jevpSummaryPlot->addElement(l);
-  }
-  CP;
 
-  return jevpSummaryPlot;
+    CP;
+    // Now show builders...
+    TListIter next(&builders);
+    JevpPlotSet *obj;
+    int n=0;
+
+    debugBuilders(__LINE__);
+
+    i = 0;
+    
+    CP;
+    while((obj = (JevpPlotSet *)next())) {
+	LOG(DBG, "object");
+	LOG(DBG, "name=%s",obj->getPlotSetName());
+	BuilderStatus *curr = &obj->builderStatus;
+
+	n++;
+	sprintf(tmp, "%6s: %6d evts - %06.4lf sec",
+		curr->name, curr->events, obj->getAverageProcessingTime());
+    
+	LOG(DBG, "here %s",tmp);
+	int xpos = ((i > 11) ? 32 : 0);
+	int ypos = 5 + ((i > 11) ? i-12 : i);
+       
+	i++;
+
+	l = new JLatex(xpos, liney(ypos), tmp);
+	l->SetTextFont(82);
+	l->SetTextSize(.03);
+	l->SetLineColor(4);
+
+	LOG(DBG, "Here");
+	jevpSummaryPlot->addElement(l); 
+
+	LOG(DBG, "HEre");
+    }
+  
+    CP;
+    if(n == 0) {
+	sprintf(tmp,"There are no builders");
+	l = new JLatex(2, liney(10), tmp);
+	l->SetTextSize(.035);
+	jevpSummaryPlot->addElement(l);
+    }
+    CP;
+
+    return jevpSummaryPlot;
 }
 
 void JevpServer::handleSwapRefs(char *name)
 {
-  char name1[256];
-  char name2[256];
-  char tmp[256];
-  char base[256];
-  int idx1, idx2;
-  sscanf(name, "%s %d %d", base, &idx1, &idx2);
+    char name1[256];
+    char name2[256];
+    char tmp[256];
+    char base[256];
+    int idx1, idx2;
+    sscanf(name, "%s %d %d", base, &idx1, &idx2);
   
-  LOG(DBG,"Swapping %s (%d <--> %d)\n",base,idx1,idx2);
-  sprintf(name1, "%s/REF.%s.%d.root",refplotdir, base, idx1);
-  sprintf(name2, "%s/REF.%s.%d.root",refplotdir, base, idx2);
+    LOG(DBG,"Swapping %s (%d <--> %d)\n",base,idx1,idx2);
+    sprintf(name1, "%s/REF.%s.%d.root",refplotdir, base, idx1);
+    sprintf(name2, "%s/REF.%s.%d.root",refplotdir, base, idx2);
 
-  sprintf(tmp, "%s/REF.%s.root.tmp",refplotdir, base);
-  rename(name1, tmp);
-  rename(name2, name1);
-  rename(tmp, name2);
+    sprintf(tmp, "%s/REF.%s.root.tmp",refplotdir, base);
+    rename(name1, tmp);
+    rename(name2, name1);
+    rename(tmp, name2);
 }
 
 void JevpServer::writeRunPdf(int display, int run)
