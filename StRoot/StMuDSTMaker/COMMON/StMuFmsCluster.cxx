@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: StMuFmsCluster.cxx,v 1.2 2015/09/02 22:09:58 jdb Exp $
+ * $Id: StMuFmsCluster.cxx,v 1.3 2016/06/14 17:11:34 jdb Exp $
  *
  * Author: Thomas Burton , 2014
  *****************************************************************************
@@ -10,6 +10,11 @@
  *****************************************************************************
  *
  * $Log: StMuFmsCluster.cxx,v $
+ * Revision 1.3  2016/06/14 17:11:34  jdb
+ * Fixing Coverity Errors:
+ * StMuFmsCluster.cxx : UNINIT_CTOR on member mEnergy
+ * StMuFmsUtile.cxx : DEADCODE on check for null pointer
+ *
  * Revision 1.2  2015/09/02 22:09:58  jdb
  * Added Akios changes to Fms
  *
@@ -27,7 +32,7 @@ StMuFmsCluster::StMuFmsCluster(int detectorId, int category, float energy,
       mChi2Ndf1Photon(chi1), mChi2Ndf2Photon(chi2), mId(id){ }
 
 StMuFmsCluster::StMuFmsCluster(const StFmsCluster& cluster)
-    : mDetectorId(cluster.detectorId()), mCategory(cluster.category()),
+    : mDetectorId(cluster.detectorId()), mCategory(cluster.category()), mEnergy(cluster.energy()),
       mX(cluster.x()), mY(cluster.y()), 
       mSigmaMin(cluster.sigmaMin()), mSigmaMax(cluster.sigmaMax()), 
       mChi2Ndf1Photon(cluster.chi2Ndf1Photon()), mChi2Ndf2Photon(cluster.chi2Ndf2Photon()), 
