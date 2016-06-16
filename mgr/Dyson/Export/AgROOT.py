@@ -2140,11 +2140,11 @@ class Create(Handler):
 
         document.impl('_create = AgCreate("%s");'%block, unit=current );
         if count:
-            document.impl('{ // Paramters passed in via the Create operatir', unit=current );            
-            document.impl('AgCreate create("%s");'%block, unit=current )
+            document.impl('{ // Paramters passed in via the Create operator', unit=current );            
+            document.impl('AgCreate createin("%s");'%block, unit=current )
             for key,value in shape.iteritems():
-                document.impl('create.par("%s")=%s;'%(key,value), unit=current)
-            document.impl('_create = create;', unit=current )                
+                document.impl('createin.par("%s")=%s;'%(key,value), unit=current)
+            document.impl('_create = createin;', unit=current )                
             document.impl('}', unit=current );
 
 
