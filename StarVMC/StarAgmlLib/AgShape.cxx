@@ -178,7 +178,7 @@ struct _Dummy {
 #undef Mbr
 
 // =============================================================================================================
-AgShape::AgShape(const Char_t *name): TNamed(name,"An AgShape") 
+AgShape::AgShape(const Char_t *name): TNamed(name,"An AgShape"), mBlock(0), mModule(0)
 {
   mId = mShapeIds[ GetName() ];
   mIsRunTime = false;
