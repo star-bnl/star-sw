@@ -44,7 +44,13 @@ void AgBlock::Fatal  ( const Char_t *name, const Char_t *msg, ... ) const {
   
 
 AgBlock::AgBlock(const Char_t *name, const Char_t *title)
-  : TNamed(name,title)
+  : TNamed(name,title),
+    mMother(0),
+    mDaughters(),
+    _volume(0),
+    mNicknames(),
+    mGroups(),
+    mMakeAssembly(0)
 {
   addNickname(name); // ensure that the vector is populated
   _valid = true;
@@ -136,7 +142,7 @@ AgBlock* AgBlock::previous(Int_t offset)
   UInt_t off  = offset;
   UInt_t index = size - off - 1;
 
-  if (index>=0)
+  // if (index>=0) should always be satisfied
     {
       return mStack[index];
     }
