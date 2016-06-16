@@ -36,7 +36,13 @@ protected:
     double ptmx;
     double etamn;
     double etamx;
-    Trigger_t(){ };
+    Trigger_t() :
+      pdgid(0), 
+      ptmn (0.), 
+      ptmx (0.), 
+      etamn(0.), 
+      etamx(0.) 
+    { };
     Trigger_t( int _pdgid, double _ptmn, double _ptmx, double _etamn, double _etamx ) : 
       pdgid(_pdgid), 
       ptmn (_ptmn), 
