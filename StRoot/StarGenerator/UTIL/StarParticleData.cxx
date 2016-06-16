@@ -299,7 +299,12 @@ TParticlePDG *StarParticleData::AddParticleToG3( const char* name,
   else {
     AgStarParticle::Add( name, g3code, type, float(mass), float(charge), float(lifetime), 0, 0, pdgcode );
   }
-  
+
+  TParticlePDG *myparticle = part;
+  mParticleList. Add( myparticle );   
+  mParticleNameMap[ name ] = myparticle;
+  mParticleIdMap[ pdgcode ]   = myparticle; 
+  mParticleG3IdMap[ g3code ] = myparticle;
 
   return part;
   
