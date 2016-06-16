@@ -74,8 +74,8 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
   int del_mess = 0;
   if (*lines>1) {
     char* mess1 = const_cast<char*> (mess);
-    mess2 = new char[messSize];          // Build a new version of the
-    *mess2 = 0;                          // message with trailing spaces
+    mess2 = new char[(messSize+1)]{};    // Build a new version of the
+                                         // message with trailing spaces
     for (int i=(*lines); i>0; i--) {     // removed, and \n's inserted.
       int clen = len;                    // Now trusting line length argument.
       while (mess1[--clen] == space) {}
@@ -92,9 +92,8 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
     sMessLength = len;
 #endif
     if ((len>1) && (messSize > len)) {
-      mess2 = new char[(len+1)];
+      mess2 = new char[(len+1)]{};
       strncpy(mess2,mess,len);
-      mess2[len]=0;
       del_mess = 1;
     }
   }
@@ -105,9 +104,8 @@ void type_of_call Message_(const char* mess, int* lines, int*, size_t len) {
 void type_of_call Msg_Enable_(const char* mess, size_t len) {
   size_t messlen = strlen(mess);
   if ((len>1) && (messlen > len)) {
-    char* mess2 = new char[(len+1)];
+    char* mess2 = new char[(len+1)]{};
     strncpy(mess2,mess,len);
-    mess2[len] = 0;
     gMessMgr->SwitchOn(mess2);
     delete [] mess2;
   } else {
@@ -119,9 +117,8 @@ int type_of_call Msg_Enabled_(const char* mess, int*, size_t len) {
   size_t messlen = strlen(mess);
   int ret_val = 1;
   if ((len>1) && (messlen > len)) {
-    char* mess2 = new char[(len+1)];
+    char* mess2 = new char[(len+1)]{};
     strncpy(mess2,mess,len);
-    mess2[len] = 0;
     if ((gMessMgr->GetLimit(mess2))==0) ret_val = 0;
     delete [] mess2;
   } else {
@@ -133,9 +130,8 @@ int type_of_call Msg_Enabled_(const char* mess, int*, size_t len) {
 void type_of_call Msg_Disable_(const char* mess, size_t len) {
   size_t messlen = strlen(mess);
   if ((len>1) && (messlen > len)) {
-    char* mess2 = new char[(len+1)];
+    char* mess2 = new char[(len+1)]{};
     strncpy(mess2,mess,len);
-    mess2[len] = 0;
     gMessMgr->SwitchOff(mess2);
     delete [] mess2;
   } else {
@@ -159,9 +155,8 @@ void type_of_call StCaller(const char* mess, const char* typString,
 
   size_t messlen = strlen(mess);
   if ((len>1) && (messlen > len)) messlen = len;
-  char* mess2 = new char[(messlen+1)];
+  char* mess2 = new char[(messlen+1)]{};
   strncpy(mess2,mess,messlen);
-  mess2[messlen] = 0;
   
   gMessMgr->Message(mess2,typString,opt);
   delete [] mess2;
@@ -176,9 +171,8 @@ void type_of_call StCallerOpt(const char* mess, const char* typString,
   if (len2<=0) {
     opt2=optString;
   } else if (strlen(opt) > len2) {
-    opt2 = new char[(len2+1)];
+    opt2 = new char[(len2+1)]{};
     strncpy(opt2,opt,len2);
-    opt2[len2]=0;
     del_opt = 1;
   }
 
@@ -195,9 +189,8 @@ void type_of_call StMessage_(const char* mess, const char* type,
   if (len2<=0) {
     type2=emptyString;
   } else if (strlen(type) > len2) {
-    type2 = new char[(len2+1)];
+    type2 = new char[(len2+1)]{};
     strncpy(type2,type,len2);
-    type2[len2]=0;
     del_type = 1;
   }
 
@@ -267,4 +260,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.7 2009/06/22 22:36:02 fine Exp $
+// $Id: StMessMgr.cxx,v 1.8 2016/06/16 17:52:50 genevb Exp $
