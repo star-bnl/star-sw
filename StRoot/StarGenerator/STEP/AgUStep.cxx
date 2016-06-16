@@ -120,6 +120,7 @@ void  Track::Clear( const Option_t *opts ) {
 // .................................................................. Step ................
 Step::Step() : TObject(), 
 	       idStep(-1), 
+	       idTruth(0),
 	       x(0), y(0), z(0), r(0), 
 	       state(0), 
 	       dEstep(-1), 
@@ -135,7 +136,7 @@ Step::Step() : TObject(),
 
 void Step::Clear(Option_t *opts)
 {
-  idStep=-1;
+  idStep=-1; idTruth=0;
   x=0; y=0; z=0; dEstep=-1; adEstep=-1; step=-1; state=0; nStep=-1;
   for( Int_t i=0;i<15;i++ ) { vnums[i]=0; cnums[i]=0; }
 }
@@ -196,7 +197,13 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
 		     mFile(0),
 		     mEvent( new Event() ),
 		     mTrack(0),
-		     idEvent(-1)
+		     idEvent(-1),
+		     idTruth(0),
+		     aDeStep(0.),
+		     nStep(0),
+		     aStep(0.),
+		     vect0{0.,0.,0., 0.,0.,0., 0.}, oldEvent(-1)
+  
 { 
   geant3 = St_geant_Maker::instance()->Geant3();
   cquest = (Quest_t  *) geant3->Quest();
