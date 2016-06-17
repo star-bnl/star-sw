@@ -1,7 +1,8 @@
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_geant_Maker")) return 0;
   St_geant_Maker *geantMk = StMaker::GetChain()->GetMaker("geant");
-  gSystem->Load("Pythia6_4_26");
+  gSystem->Load("Pythia6_4_26"); // from Yuri
+  // gSystem->Load("Pythia6_4_22");
   gSystem->Load("bpythia");
   geantMk->Do("call bpythia");
   //   ** These particles will be decayed by geant instead of pythia **
@@ -25,7 +26,8 @@ TDataSet *CreateTable() {
   TString SqrtS(Form("/PYTHIA/ener  %f",sqrtS));
   cout << "Set sqrtS " << SqrtS << " GeV" <<endl;
   geantMk->Do(SqrtS.Data());
-  geantMk->Do("CALL PyTUNE(329)"); // set the pythia tune
+  //  geantMk->Do("CALL PyTUNE(329)"); // set the pythia tune  //from yuri
+  geantMk->Do("CALL PyTUNE(320)"); // set the pythia tune
   geantMk->Do("gspread   0.015 0.015 42.00");
   //  geantMk->Do("gkine -4 0");
   //  select W --> e nu production
