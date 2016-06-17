@@ -1037,18 +1037,18 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	}
       }
     }
-    if (! ifz && IAttr("beamLine")) {
-      St_vertexSeedC* vSeed = St_vertexSeedC::instance();
-      if (vSeed) {
-	Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
-	Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
-	Double_t z0   = 0            ;// Double_t err_z0   = 60; 
-	Double_t dxdz = vSeed->dxdz();
-	Double_t dydz = vSeed->dydz(); 
-	Do(Form("gvertex   %f %f %f",x0,y0,z0)); // ** setup the vertex
-	//	Do(Form("gspread %f %f %f",err_x0,err_y0,err_z0));
-	Do(Form("gslope  %f %f", dxdz, dydz));
-      }
+  }
+  if (! ifz && IAttr("beamLine")) {
+    St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+    if (vSeed) {
+      Double_t x0   = vSeed->x0()  ;// Double_t err_x0   = vSeed->err_x0();
+      Double_t y0   = vSeed->y0()  ;// Double_t err_y0   = vSeed->err_y0();
+      Double_t z0   = 0            ;// Double_t err_z0   = 60; 
+      Double_t dxdz = vSeed->dxdz();
+      Double_t dydz = vSeed->dydz(); 
+      Do(Form("gvertex   %f %f %f",x0,y0,z0)); // ** setup the vertex
+      //	Do(Form("gspread %f %f %f",err_x0,err_y0,err_z0));
+      Do(Form("gslope  %f %f", dxdz, dydz));
     }
   }
   if (IAttr("fzout") && GetChain()->GetTFile()) {
