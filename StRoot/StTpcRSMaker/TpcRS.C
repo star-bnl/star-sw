@@ -221,6 +221,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       Double_t mass = 0.1057;
       Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
       Double_t bgMax  = 1e5;  // 1e2;// 1e5;
+      Double_t pTmin = -1;
+      Double_t pTmax = -1;
       if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 
 	if    (Opt.Contains("muon-",TString::kIgnoreCase))     ID =  6;}
       else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
@@ -247,12 +249,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       if (Opt.Contains("Single",TString::kIgnoreCase))         NTRACK = 1;
       if (Opt.Contains("LamXi2430",TString::kIgnoreCase))     {NTRACK = 50;   ID = 60002;  pTmin = 0.1; pTmax = 10.0;}
       if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
+      if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
+      if (pTmax < 0) pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
       TRandom3 R(0);
       Double_t bgMin10 = TMath::Log10(bgMin);
       Double_t bgMax10 = TMath::Log10(bgMax);
     }
-      Double_t pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-      Double_t pTmax = mass*bgMax; if (pTmax > 1000.00) pTmax = 1000.00;
     TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
     cout << "Set kinematics: " << Kine.Data() << endl;
     geant->Do(Kine.Data());
