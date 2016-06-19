@@ -121,7 +121,7 @@ if( scalar(@statusfile) >= 1) {
      $fulldname = $nfspath.$daqfile;
      if($inpsize == $sitedsize ) {
 
-     `rm -f $fulldname`;
+#     `rm -f $fulldname`;
      `rm -f $outfile`;
 
   print "File removed  ", $fulldname, "\n";

@@ -38,6 +38,7 @@ StarFilterMaker::StarFilterMaker( const Char_t *name )  :
   AcceptedEvents(0),
   RejectedEvents(0),
   RejectedSinceLast(0),
+  mEvent(0),
   bFlag(false)
 {
 }
