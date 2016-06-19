@@ -297,23 +297,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	  npadi = 0
           npado = 32 "outer"  
           npada = 0
-          if (TPCG_tpadconfig==1 .or. _
-              TPCG_tpadconfig==4 .or. _
-              TPCG_tpadconfig==6 "Inner TPC upgrade 32 pads") {
-            npadi = 32 "inner"
-	  else 
-          if (TPCG_tpadconfig==5 "Inner TPC upgrade 50 pads") { 
-            npadi = 50 "inner"
-
-	  else 
-          if (TPCG_tpadconfig==2 .or. _
-              TPCG_tpadconfig==3 .or. _
-              TPCG_tpadconfig==6 .or. _ 
-              TPCG_tpadconfig==7 .or. _
-              TPCG_tpadconfig==8 "Inner TPC upgrade 40 pads") {
+          if (TPCG_tpadconfig>0 "Inner TPC upgrade 40 pads") {
             npadi = 40 "inner"
-          endif
-          endif
           endif
 	  if (npadi .gt. 0) then 
 	    npada = npadi + npado

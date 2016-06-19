@@ -2595,6 +2595,35 @@ REPLACE [exe dev2018;] with ["Y2018 development tag";
 
 ];    
 
+REPLACE [exe dev2019;] with ["Y2019 development tag";
+    exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; 
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of VPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe SISDof;      "No sisd";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD14;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+*   exe IDSM14;      "Inner detector support";
+*    exe SISD85;      "SSD version 7"
+*    exe PIPEv3;      "The small diameter beam pipe";
+*    exe ISTD02;      "IST version 2";
+*    exe PXST01;      "PIXEL detector support version 1";
+*    exe PIXL06;      "Full config of the pixl detector";
+*    exe DTUB01;      "DTUB";
+*    exe PSUP01;      "1st version of pixl supports";
+*    exe FGTDv56;     "12 disk FGT";
+    exe HCALv1;      "HCAL prototype";
+]
+
 REPLACE [exe dev2020;] with ["DEV 2020 first cut";
      exe y2015a;
      exe FTSDv0;
@@ -2669,34 +2698,6 @@ Replace [exe devT;] with ["DEVT TPC Upgrade Geometry";
        exe devE;    "eSTAR baseline";
        exe Tpcx10;  "TPC upgrade geometry w/ default pads"; ]
 
-Replace [exe devTA;] with ["DEVTA TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rA;   "A: TPC upgrade studies 32 inner pad rows 0.67 x 2.0"; ]
-Replace [exe devTB;] with ["DEVTB TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rB;   "B : TPC upgrade studies 40 inner pad rows 0.67 x 1.6"; ]
-Replace [exe devTC;] with ["DEVTC TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rC;   "C : TPC upgrade studies 40 inner pad rows 0.50 x 1.6"; ]
-Replace [exe devTD;] with ["DEVTD TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rD;   "D : TPC upgrade studies 32 inner pad rows 0.50 x 2.0"; ]
-Replace [exe devTE;] with ["DEVTE TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rE;   "E : TPC upgrade studies 50 inner pad rows 0.335 x 1.28"; ]
-Replace [exe devTF;] with ["DEVTF TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rF;   "F : TPC upgrade studies 32 inner pad rows 0.400 x 2.00"; ]
-Replace [exe devTX;] with ["DEVTX TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rX;   "X : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; ]
-Replace [exe devTY;] with ["DEVTX TPC Upgrade Geometry";
-       exe y2014a;    "Y2014A upgrade geometry";
-       exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; ]
-
-Replace [exe devTZ;] with ["DEVTZ TPC Upgrade Geometry: devTY with no HFT";
-       exe dev2018;    "dev2018 upgrade geometry";
-       exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; ]
 
 ** Aliases to devE and devT geometries to work around the field bug **
 Replace [exe estar1;] with [exe devE;]
@@ -3626,33 +3627,9 @@ If LL>0
   Case DevT  { devT : TPC upgrade studies;
                Geom = 'devT';
                exe devT; }
-  Case DevTA  { devTA : TPC upgrade studies 32 inner pad rows 0.67 x 2.0;
-               Geom = 'devTA';
-               exe devTA; }
-  Case DevTB  { devTB : TPC upgrade studies 40 inner pad rows 0.67 x 1.6;
-               Geom = 'devTB';
-               exe devTB; }
-  Case DevTC  { devTC : TPC upgrade studies 40 inner pad rows 0.50 x 1.6;
-               Geom = 'devTC';
-               exe devTC; }
-  Case DevTD  { devTD : TPC upgrade studies 32 inner pad rows 0.50 x 2.0;
-               Geom = 'devTD';
-               exe devTD; }
-  Case DevTE  { devTE : TPC upgrade studies 50 inner pad rows 0.335 x 1.28;
-               Geom = 'devTE';
-               exe devTE; }
-  Case DevTF  { devTF : TPC upgrade studies 32 inner pad rows 0.400 x 2.00;
-               Geom = 'devTF';
-               exe devTF; }
-  Case DevTX  { devTX : TPC upgrade studies 40 inner pad rows 0.500 x 1.60;
-               Geom = 'devTX';
-               exe devTX; }
-  Case DevTY  { devty : TPC upgrade studies 40 inner pad rows 0.500 x 1.60;
-               Geom = 'devTY';
-               exe devty; }
-  Case DevTZ  { devty : TPC upgrade studies 40 inner pad rows 0.500 x 1.60 no HFT;
-               Geom = 'devTZ';
-               exe devTZ; }
+  Case dev2019  { dev2019 : TPC upgrade studies 40 inner pad rows 0.500 x 1.60 no HFT;
+               Geom = 'dev2019';
+               exe dev2019; }
 
   Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
   Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }

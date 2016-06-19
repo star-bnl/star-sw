@@ -155,15 +155,16 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"dev2018",     20180101,     0, "dev2018",   "dev2018, no HFT,xgeometry"}, // 
-  {"devTA",       20180101,     2, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
-  {"devTB",       20180101,     3, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
-  {"devTC",       20180101,     4, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
-  {"devTD",       20180101,     5, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4,xgeometry"}, // 
-  {"devTE",       20180101,     6, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-  {"devTF",       20180101,     7, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-  {"devTX",       20180101,     8, "devTX",     "dev geo for Inner Tpc Sector Upgrade, Tonko 09/05/14,xgeometry"}, // 
-  {"devTY",       20180101,     9, "devTY",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
-  {"devTZ",       20180101,    10, "devTZ",     "devTY with no HFT,xgeometry"}, // 
+  {"dev2019",     20190101,     0, "dev2019",   "dev2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
+  {"devTA",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
+  {"devTB",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
+  {"devTC",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
+  {"devTD",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 4,xgeometry"}, // 
+  {"devTE",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
+  {"devTF",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
+  {"devTX",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Tonko 09/05/14,xgeometry"}, // 
+  {"devTY",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
+  {"devTZ",       20190101,     0, "dev2019",     "devTY with no HFT,xgeometry"}, // 
 
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
