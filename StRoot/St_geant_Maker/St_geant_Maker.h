@@ -230,6 +230,7 @@ protected:
    static Gcphys_t  *cphys; //!
    static Int_t      nlev;  //!
    static Bool_t     fInitRunDone; //!
+   static Kine_gdat_t *kine_gdat;  //!
    virtual const char *GetCVS() const
    {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers

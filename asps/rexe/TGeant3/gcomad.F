@@ -95,10 +95,21 @@ C
 #include "geant321/ertrio.inc"
 #include "geant321/eropts.inc"
 #include "geant321/erwork.inc"
-* Commons for GEANE
+#if 1
+* Commons for starsim 
+      INTEGER          IKineOld,IdInp,Kevent
+      REAL             AVflag,AVcoor,AVsigm,AVslope,Ptype,PTmin,PTmax,
+     >                 Etamin,Etamax,PhiMin1,PhiMax1,Ptflag,
+     >                 Zmin,Zmax,BgMult,BgTime,BgSkip,
+     >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
+      COMMON /AgCKINE/ IKineOld,IdInp,Kevent(3),
+     >                 AVflag,AVcoor(3),AVsigm(3),AvSlope(3),
+     >                 Ptype,PTmin,PTmax,Etamin,Etamax,
+     >                 PhiMin1,PhiMax1,Ptflag,Zmin,Zmax,
+     >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
+#endif
 *
       COMMON / QUEST / IQUEST(100)
-*
       CHARACTER *(*) CHCOMM
 #if defined(CERNLIB_DECS)
       INTEGER*8 GCADDI, GCADDF, GCADDL, GCADDC, GCADDD, IADD
@@ -256,6 +267,8 @@ C
          IADD=GCADDD(EI)
       ELSE IF(CHCOMM.EQ.'GCBANK') THEN
          IADD=GCADDI(NZEBRA)
+      ELSE IF(CHCOMM.EQ.'AgCKINE') THEN
+         IADD=GCADDI(IKineOld)
       ELSE
          WRITE(6,123) CHCOMM
          IADD=0

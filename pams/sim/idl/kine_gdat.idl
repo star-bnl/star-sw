@@ -1,0 +1,13 @@
+/* File kine_gdat.idl
+** 
+** Description: GEANT Kine DATA from AgCKINE common block
+** Author     : Yuri Fisyak
+** Created    : June 2016
+*/
+  struct  kine_gdat   { 
+    long  IKineOld,IdInp,Kevent[3];
+    float AVflag,AVcoor[3],AVsigm[3],AvSlope[3];
+    float Ptype,PTmin,PTmax,Etamin,Etamax;
+    float PhiMin,PhiMax,Ptflag,Zmin,Zmax;
+    float Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax;
+};

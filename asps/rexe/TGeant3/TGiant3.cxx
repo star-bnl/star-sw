@@ -649,6 +649,8 @@ void TGiant3::LoadAddress()
   gcomad(PASSCHARD("EROPTC"),(int*&) fEroptc  PASSCHARL("EROPTC"));
   gcomad(PASSCHARD("ERWORK"),(int*&) fErwork  PASSCHARL("ERWORK"));
 
+  // Commons for starsim
+  gcomad(PASSCHARD("AgCKINE"),(int*&) fKine_gdat  PASSCHARL("AgCKINE"));
   // Variables for ZEBRA store
   gcomad(PASSCHARD("IQ"), addr  PASSCHARL("IQ"));
   fZiq = addr;

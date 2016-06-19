@@ -544,6 +544,7 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_geom_gdat_Table.h"
+#include "tables/St_kine_gdat_Table.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
 #include "tables/St_det_user_Table.h"
 #include "tables/St_det_hit_Table.h"
@@ -625,6 +626,7 @@
 #endif
 #define    dstkine       F77_NAME(dstkine,DSTKINE)
 #define    g2t_version   F77_NAME(g2t_version,G2T_VERSION)
+#define    gcomad	 F77_NAME(gcomad,GCOMAD)
 #endif
 typedef long int (*addrfun)(); 
 R__EXTERN "C" {
@@ -670,6 +672,7 @@ R__EXTERN "C" {
   void type_of_call agfpath(Int_t *);
   void type_of_call dstkine();
   Float_t type_of_call g2t_version(DEFCHARD DEFCHARL);
+  void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL); 
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
 
@@ -688,6 +691,7 @@ Gcmate_t *St_geant_Maker::cmate;
 Gccuts_t *St_geant_Maker::ccuts;
 Gcphys_t *St_geant_Maker::cphys;
 Int_t     St_geant_Maker::nlev;
+Kine_gdat_t *St_geant_Maker::kine_gdat = 0;
 static Int_t irot = 0;
 static TVolume *topnode=0;
 typedef struct {
@@ -807,6 +811,7 @@ Int_t St_geant_Maker::Init(){
   cmate  = (Gcmate_t *) geant3->Gcmate();
   ccuts  = (Gccuts_t *) geant3->Gccuts();
   cphys  = (Gcphys_t *) geant3->Gcphys();
+  kine_gdat = (Kine_gdat_t *) geant3->Kine_gdat();
   Do("kuip/s/filecase KEEP");
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
@@ -1061,6 +1066,16 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make() {
+  // Check kinematics
+  if (kine_gdat) {
+    St_kine_gdat *kineT = ( St_kine_gdat *) GetData("kine_gdat",".const");
+    if (! kineT) {
+      kineT = new St_kine_gdat("kine_gdat",1);
+      AddConst(kineT);
+    }
+    kineT->AddAt(&kine_gdat->IKineOld,0);
+  }
+  
   Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }

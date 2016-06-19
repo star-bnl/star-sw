@@ -507,9 +507,30 @@ typedef struct {
 
 /************************************************************************
  *                                                                      *
- *      Commons for GEANE                                               *
+ *      Commons for starsim                                             *
  *                                                                      *
  ************************************************************************/
+/* 
+     Integer           IKineOld,IdInp,Kevent,
+     >                 Iback,IbackOld,IbMode,IbBefor,IbAfter,
+     >                 IbCurrent,IvCurrent,Ioutp,IoutpOld
+      Real             AVflag,AVcoor,AVsigm,AVslope,Ptype,PTmin,PTmax,
+     >                 Etamin,Etamax,PhiMin,PhiMax,Ptflag,
+     >                 Zmin,Zmax,BgMult,BgTime,BgSkip,
+     >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
+      COMMON /AgCKINE/ IKineOld,IdInp,Kevent(3),
+     >                 AVflag,AVcoor(3),AVsigm(3),AvSlope(3),
+     >                 Ptype,PTmin,PTmax,Etamin,Etamax,
+     >                 PhiMin,PhiMax,Ptflag,Zmin,Zmax,
+     >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
+*/
+typedef struct {
+  Int_t   IKineOld,IdInp,Kevent[3];
+  Float_t AVflag,AVcoor[3],AVsigm[3],AvSlope[3];
+  Float_t Ptype,PTmin,PTmax,Etamin,Etamax;
+  Float_t PhiMin,PhiMax,Ptflag,Zmin,Zmax;
+  Float_t Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax;
+} Kine_gdat_t;
 class TVolume;
 
 class TGiant3 : public StarMC { 
@@ -549,6 +570,9 @@ protected:
   Eropts_t *fEropts;   //!
   Eroptc_t *fEroptc;   //!
   Erwork_t *fErwork;   //!
+
+  // commons for starsim
+  Kine_gdat_t *fKine_gdat; // !
 
   //Put here all volume names
 
@@ -673,7 +697,9 @@ public:
   virtual Eroptc_t* Eroptc() const {return fEroptc;}
   virtual Erwork_t* Erwork() const {return fErwork;}
 
-
+  // Access to starsim
+  
+  virtual Kine_gdat_t* Kine_gdat() const {return fKine_gdat;}
 
       // functions from GBASE 
    virtual  void  Gpcxyz(); 
