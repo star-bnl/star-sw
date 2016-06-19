@@ -376,135 +376,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
    EndFill
         }	
-	if (TPCG_TpadConfig == 1) {
-   Fill TPRS                    ! devTA: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 32               ! number of padrows in the sector
-      pitch  = 0.67             ! tpc padrow pitch width  
-      width  = 1.95             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 42, 44, 46, 48, 50, 50, 52, 54, 56, 58,
-                 58, 60, 62, 64, 66, 66, 68, 70, 72, 74,
-                 74, 76, 78, 80, 82, 82, 84, 86, 88, 90,
-                 90, 92} ! number of pads in row
-      Rpads  = { 57.2, 59.2, 61.2, 63.2, 65.2, 67.2, 69.2, 71.2, 73.2, 75.2,
-                 77.2, 79.2, 81.2, 83.2, 85.2, 87.2, 89.2, 91.2, 93.2, 95.2,
-                 97.2, 99.2,101.2,103.2,105.2,107.2,109.2,111.2,113.2,115.2,
-                117.2,119.2} ! tpc padrow radii
-   EndFill
-        }	
-	if (TPCG_TpadConfig == 2) {
-   Fill TPRS                    ! devTB: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 40               ! number of padrows in the sector
-      pitch  = 0.67             ! tpc padrow pitch width  
-      width  = 1.55             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 40, 40, 42, 44, 44, 46, 48, 48, 50, 50,
-                 52, 54, 54, 56, 58, 58, 60, 62, 62, 64,
-                 64, 66, 68, 68, 70, 72, 72, 74, 76, 76,
-                 78, 78, 80, 82, 82, 84, 86, 86, 88, 90} ! number of pads in row
-      Rpads  = { 57.0, 58.6, 60.2, 61.8, 63.4, 65.0, 66.6, 68.2, 69.8, 71.4,
-                 73.0, 74.6, 76.2, 77.8, 79.4, 81.0, 82.6, 84.2, 85.8, 87.4,
-                 89.0, 90.6, 92.2, 93.8, 95.4, 97.0, 98.6,100.2,101.8,103.4,
-                105.0,106.6,108.2,109.8,111.4,113.0,114.6,116.2,117.8,119.4} ! tpc padrow radii
-   EndFill
-        }	
-	if (TPCG_TpadConfig == 3) {
-   Fill TPRS                    ! devTC: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 40               ! number of padrows in the sector
-      pitch  = 0.5              ! tpc padrow pitch width  
-      width  = 1.55             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 54, 56, 58, 60, 60, 62, 64, 66, 68, 70,
-                 72, 72, 74, 76, 78, 80, 82, 84, 84, 86,
-                 88, 90, 92, 94, 96, 96, 98,100,102,104,
-                106,108,108,110,112,114,116,118,118,120} ! number of pads in row
-      Rpads  = { 57.0, 58.6, 60.2, 61.8, 63.4, 65.0, 66.6, 68.2, 69.8, 71.4,
-                 73.0, 74.6, 76.2, 77.8, 79.4, 81.0, 82.6, 84.2, 85.8, 87.4,
-                 89.0, 90.6, 92.2, 93.8, 95.4, 97.0, 98.6,100.2,101.8,103.4,
-                105.0,106.6,108.2,109.8,111.4,113.0,114.6,116.2,117.8,119.4} ! tpc padrow radii
-   EndFill
-        }	
-	if (TPCG_TpadConfig == 4) {
-   Fill TPRS                    ! devTD: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 32               ! number of padrows in the sector
-      pitch  = 0.5              ! tpc padrow pitch width  
-      width  = 1.95             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 54, 56, 58, 60, 62, 64, 66, 68, 70, 72,
-                 74, 76, 78, 80, 84, 86, 88, 90, 92, 94,
-                 96, 98,100,102,104,106,108,110,112,116,
-                118,120} ! number of pads in row
-      Rpads  = { 57.2, 59.2, 61.2, 63.2, 65.2, 67.2, 69.2, 71.2, 73.2, 75.2,
-                 77.2, 79.2, 81.2, 83.2, 85.2, 87.2, 89.2, 91.2, 93.2, 95.2,
-                 97.2, 99.2,101.2,103.2,105.2,107.2,109.2,111.2,113.2,115.2,
-                117.2,119.2} ! tpc padrow radii
-   EndFill
-        }	
-	if (TPCG_TpadConfig == 5) {
-   Fill TPRS                    ! devTE: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 50               ! number of padrows in the sector
-      pitch  = 0.335            ! tpc padrow pitch width  
-      width  = 1.23             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 80, 82, 84, 86, 88, 90, 92, 94, 96, 98,
-                100,102,104,106,108,110,112,114,116,118,
-                120,122,124,126,128,130,132,134,138,140,
-                142,144,146,148,150,152,154,156,158,160,
-                162,164,166,168,170,172,174,176,178,180} ! number of pads in row
-      Rpads  = { 56.8, 58.1, 59.4, 60.7, 62.0, 63.2, 64.5, 65.8, 67.1, 68.4,
-                 69.6, 70.9, 72.2, 73.5, 74.8, 76.0, 77.3, 78.6, 79.9, 81.2,
-                 82.4, 83.7, 85.0, 86.3, 87.6, 88.8, 90.1, 91.4, 92.7, 94.0,
-                 95.2, 96.5, 97.8, 99.1,100.4,101.6,102.9,104.2,105.5,106.8,
-                108.0,109.3,110.6,111.9,113.2,114.4,115.7,117.0,118.3,119.6} ! tpc padrow radii
-   EndFill
-        }
-	if (TPCG_TpadConfig == 6) {
-   Fill TPRS                    ! devTF: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 32               ! number of padrows in the sector  
-      pitch  = 0.4              ! tpc padrow pitch width  
-      width  = 1.95             ! tpc padrow thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 66, 70, 72, 74, 78, 80, 82, 86, 88, 90,
-                 94, 96, 98,102,104,106,110,112,114,118,
-                120,122,126,128,130,134,136,138,142,144,
-                146,150} ! number of pads in row
-      Rpads  = { 57.2, 59.2, 61.2, 63.2, 65.2, 67.2, 69.2, 71.2, 73.2, 75.2,
-                 77.2, 79.2, 81.2, 83.2, 85.2, 87.2, 89.2, 91.2, 93.2, 95.2,
-                 97.2, 99.2,101.2,103.2,105.2,107.2,109.2,111.2,113.2,115.2,
-                117.2,119.2} ! tpc padrow radii
-   EndFill
-        }
-	if (TPCG_TpadConfig == 7) {
-   Fill TPRS                    ! devTX: sector of padrows  
-      sec    = 1                ! sector number: 1 for inner, 2 for outer  
-      nRow   = 40               ! number of padrows in the sector  
-      pitch  = 0.5              ! tpc padrow pitch width  
-      width  = 1.6              ! tpc padrow (pitch) thickness 
-      super  = 0                ! number of padraws in a superpadrow  
-      dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = { 56, 58, 60, 62, 62, 64, 66, 68, 70, 72,
-                 74, 74, 76, 78, 80, 82, 84, 86, 86, 88,
-	         90, 92, 94, 96, 98, 98,100,102,104,106,
-                108,110,112,112,114,116,118,120,122,122} ! number of pads in row
-      Rpads  = { 56.975, 58.575, 60.175, 61.775, 63.375, 64.975, 66.575, 68.175, 69.775, 71.375,
-                 72.975, 74.575, 76.175, 77.775, 79.375, 80.975, 82.575, 84.175, 85.775, 87.375,
-                 88.975, 90.575, 92.175, 93.775, 95.375, 96.975, 98.575,100.175,101.775,103.375,
-                104.975,106.575,108.175,109.775,111.375,112.975,114.575,116.175,117.775,119.375} ! tpc padrow radii
-   EndFill
-        }
-	if (TPCG_TpadConfig == 8) {
+	else { ! if (TPCG_TpadConfig == 8) {
    Fill TPRS                    ! devTY: sector of padrows  
       sec    = 1                ! sector number: 1 for inner, 2 for outer  
       nRow   = 40               ! number of padrows in the sector  
@@ -512,10 +384,10 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
       width  = 1.6              ! tpc padrow (pitch) thickness 
       super  = 0                ! number of padraws in a superpadrow  
       dAnode = 0.2              ! distance to anode wire from pad plane
-      Npads  = {  50,  52,  54,  56,  58,  60,  62,  62,  64,  66,
-                  68,  70,  72,  74,  74,  76,  78,  80,  82,  84,	
-                  86,  86,  88,  90,  92,  94,  96,  98,  98, 100,
-                 102, 104, 106, 108, 110, 110, 112, 114, 116, 118} ! number of pads in row
+      Npads  = {     52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
+                     70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
+                     86, 88, 90, 92, 94, 96, 98, 98,100,102,
+                    104,106,108,110,110,112,114,116,118,120} ! number of pads in row, J.Thomas : 05/31/2016
       Rpads  = {55.8,  57.4,    59,  60.6,  62.2,  63.8,  65.4,    67,  68.6,  70.2,
                 71.8,  73.4,    75,  76.6,  78.2,  79.8,  81.4,    83,  84.6,  86.2,
                 87.8,  89.4,    91,  92.6,  94.2,  95.8,  97.4,    99, 100.6, 102.2,
