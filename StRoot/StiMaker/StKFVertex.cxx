@@ -5,6 +5,7 @@
 #include "TArrayI.h"
 #include "TArrayD.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
+#include "StG2TrackVertexMap.h"
 
 #define __DEBUG__
 #if defined(__DEBUG__)
@@ -39,7 +40,7 @@ ostream&  operator<<(ostream& os,  const StKFVertex& v) {
        << Form(" prob = %6.4f",prob);
     Float_t M, dM;
     if (! v.GetMass(M,dM)) {
-      if (dM < 1e3)     os << " M = " << Form("%7.3f +/- %5.3f",M,dM);
+      if (dM < 1e2)     os << " M = " << Form("%7.3f +/- %5.3f",M,dM);
     }
   }
   Int_t kv = v.IdTruth();
@@ -140,33 +141,7 @@ Bool_t StKFVertex::Fit() {
     }
     return kFALSE;
   }
-  // Assign MC and RC
-  struct vertexPing {
-    Int_t  Id;
-    Int_t nPings;
-  };
-  static vertexPing candidates[20];
-  memset(candidates,0,sizeof(candidates));
-  Int_t NC = 0;
-  next.Reset();
-  while ((Track = (StKFTrack *) next())) {
-    if (! Track) continue;
-    Int_t IdVx = Track->Particle().IdParentMcVx();
-    if (IdVx <= 0) continue;
-    Int_t J = -1;
-    for (Int_t j = 0; j < NC; j++) if (candidates[j].Id == IdVx) {J = j; break;}
-    if (J < 0) {J = NC; if (NC < 18) NC++;}
-    candidates[J].Id = IdVx;
-    candidates[J].nPings++;
-  }
-  Int_t dominant = -1;
-  Int_t J = -1;
-  for (Int_t j = 0; j < NC; j++) if (candidates[j].nPings > dominant) {dominant = candidates[j].nPings; J = j;}
-  if (J > -1) {
-    Int_t Id = candidates[J].Id;
-    Int_t QA      = (100*dominant)/N;
-    SetIdTruth(Id,QA);
-  }
+  SetMc();
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -368,11 +343,52 @@ Double_t StKFVertex::Chi2AtVx() {
   return chi2Vx;  
 }
 //________________________________________________________________________________
-void StKFVertex::SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDaughters, Int_t gePid) {
-  fTimeMc = 1e9*time;
-  fXyzMc = TVector3(x,y,z);
-  fNoDaughtersMc = NoDaughters;
-  fgePidMc = StKFTrack::CorrectGePid(gePid);
+void StKFVertex::SetMc() {
+  if (! StG2TrackVertexMap::instance()) return;
+  if (! StG2TrackVertexMap::instance()->Tracks() || ! StG2TrackVertexMap::instance()->Vertices()) return;
+  Int_t NoMuMcVertex = StG2TrackVertexMap::instance()->Vertices()->GetNRows();
+  Int_t NoMuMcTracks = StG2TrackVertexMap::instance()->Tracks()->GetNRows();
+  const g2t_vertex_st *mcVtx = StG2TrackVertexMap::instance()->Vertices()->GetTable();
+  const g2t_track_st  *mcTrk = StG2TrackVertexMap::instance()->Tracks()->GetTable();
+  // Set IdTruth
+  std::map< Int_t,Float_t> idTruths;
+  Int_t IdVx = 0;
+  Int_t qa = 0;
+  TIter nextlT(&Tracks(),kIterForward);
+  StKFTrack *TrackL = 0;
+  while ((TrackL = (StKFTrack *) nextlT())) {
+    const KFParticle *particle = TrackL->OrigParticle();
+    Int_t IdTk = particle->IdTruth();
+    if (!IdTk) continue;
+    IdVx = particle->IdParentMcVx();
+    if (IdVx <= 0) continue;
+    qa = particle->QaTruth(); if (!qa) qa = 1;
+    idTruths[IdVx] += qa;
+  }
+  if (! idTruths.size()) return;		//no simu info
+  Int_t vxBest = 0; 
+  Float_t qaBest = 0, qaSum = 0;
+  for (std::map< Int_t,Float_t>::const_iterator it=idTruths.begin(); it!=idTruths.end(); ++it) {
+    qaSum += (*it).second;
+    if ((*it).second < qaBest) continue;
+    vxBest = (*it).first; qaBest = (*it).second;
+  }
+  if (vxBest <= 0) return;
+  Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
+  SetIdTruth(vxBest,avgQua);
+  Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
+  Vertex().SetIdParentMcVx(IdParentTk);
+  
+  Int_t kv = IdTruth() - 1;
+  if (kv >= 0 && kv < NoMuMcVertex) {
+    Int_t kvp = mcVtx[kv].parent_p - 1;
+    Int_t gePid = 0;
+    if (kvp >= 0 &&  kvp < NoMuMcTracks) gePid = mcTrk[kvp].ge_pid;
+    fTimeMc = 1e9*mcVtx[kv].ge_tof;
+    fXyzMc = TVector3(mcVtx[kv].ge_x);
+    fNoDaughtersMc = mcVtx[kv].n_daughter;
+    fgePidMc = StKFTrack::CorrectGePid(gePid);
+  }
 }
 //________________________________________________________________________________
 Int_t StKFVertex::NoTracks() const {

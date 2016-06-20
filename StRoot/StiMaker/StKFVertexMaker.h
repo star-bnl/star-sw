@@ -75,6 +75,7 @@ class StKFVertexMaker : public StMaker {
 #ifndef __CINT__
   void                           ResetDaughterIds(KFParticle *particle, vector<KFParticle> &particles);
 #endif
+  static Int_t                   Key2(Int_t Id1, Int_t Id2) {return (Id1 > Id2) ? 1000000*Id1 + Id2 : 1000000*Id2 + Id1;}
  private:
   TObjArray                     *fParticles; // KF particles = global tracks + decay particles
   TObjArray                     *fVertices;  // KF vertices and decay particles

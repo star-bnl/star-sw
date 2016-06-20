@@ -1,4 +1,6 @@
 // $Id: StKFVerticesCollection.cxx,v 2.5 2015/12/20 01:06:39 fisyak Exp $
+#include <map>
+#include <algorithm>
 #include "StKFVerticesCollection.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
@@ -6,10 +8,8 @@
 #include "TRVector.h"
 #include "TPolyMarker.h"
 #include "TList.h"
-#include "StG2TrackVertexMap.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
-#include <map>
-#include <algorithm>
+#include "StG2TrackVertexMap.h"
 using namespace std;
 ClassImp(StKFVerticesCollection);
 Double_t StKFVerticesCollection::fgVxPenaltyFactor = 1000;
@@ -45,22 +45,10 @@ void StKFVerticesCollection::operator +=(StKFVerticesCollection &col) {
 }
 //________________________________________________________________________________
 void StKFVerticesCollection::SetMc() {
-  if (! StG2TrackVertexMap::instance()) return;
-  if (! StG2TrackVertexMap::instance()->Tracks() || ! StG2TrackVertexMap::instance()->Vertices()) return;
-  Int_t NoMuMcVertex = StG2TrackVertexMap::instance()->Vertices()->GetNRows();
-  Int_t NoMuMcTracks = StG2TrackVertexMap::instance()->Tracks()->GetNRows();
-  const g2t_vertex_st *mcVtx = StG2TrackVertexMap::instance()->Vertices()->GetTable();
-  const g2t_track_st  *mcTrk = StG2TrackVertexMap::instance()->Tracks()->GetTable();
   TIter next(&fVertices);
   StKFVertex *V;
   while ((V = (StKFVertex *)  next())) {
-    Int_t kv = V->IdTruth() - 1;
-    if (kv >= 0 && kv < NoMuMcVertex) {
-      Int_t kvp = mcVtx[kv].parent_p - 1;
-      Int_t ge = 0;
-      if (kvp >= 0 &&  kvp < NoMuMcTracks) ge = mcTrk[kvp].ge_pid;
-      V->SetMc(mcVtx[kv].ge_tof,mcVtx[kv].ge_x[0],mcVtx[kv].ge_x[1],mcVtx[kv].ge_x[2],mcVtx[kv].n_daughter,ge);
-    }
+    V->SetMc();
   }
 }
 //________________________________________________________________________________
@@ -260,8 +248,9 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   std::multimap<const KFParticle*,Map_t> Particle2Track;
   std::vector<const KFParticle *>     ParticleM;
   TIter nextL(&fVertices,kIterBackward);
-  // Remove 2 prong vertex if no beam line
   StKFVertex *vtxl = 0;
+#if 0
+  // Remove 2 prong vertex if no beam line
   while ((vtxl = (StKFVertex *)  nextL())) {
     // recalculate weights
     TIter nextlT(&vtxl->Tracks(),kIterForward);
@@ -282,8 +271,9 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   if (StKFVertex::Debug()) {
     cout << "StKFVerticesCollection::UniqueTracks2VertexAssociation. After clean up V2\t" << endl << *this << endl;
   }
-  // Select the best track to vertex assoiciation
   nextL.Reset();
+#endif
+  // Select the best track to vertex association (no compition between 2-prong vertices)
   while ((vtxl = (StKFVertex *)  nextL())) {
     // recalculate weights
     TIter nextlT(&vtxl->Tracks(),kIterForward);
@@ -305,16 +295,20 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
     std::pair< std::multimap<const KFParticle*,Map_t>::iterator, std::multimap<const KFParticle*,Map_t>::iterator> ret;
     ret = Particle2Track.equal_range(part);
     Double_t Wmax = -1;
+    StKFVertex *vertMax = 0;
     std::multimap<const KFParticle*,Map_t>::iterator itMax;
     for (std::multimap<const KFParticle*,Map_t>::iterator it = ret.first; it!=ret.second; ++it) {
       if (it->second.Weight > Wmax) {
 	itMax = it;
 	Wmax = it->second.Weight;
+	vertMax = it->second.vert;
       }
     }
     for (std::multimap<const KFParticle*,Map_t>::iterator it = ret.first; it!=ret.second; ++it) {
       if (it == itMax) continue;
       StKFVertex *vert = it->second.vert;
+      // No compition between 2-prong vertices
+      if (vert->NoTracks() == 2 && vertMax->NoTracks() == 2) continue;
       StKFTrack  *track = it->second.track;
       delete vert->Tracks().Remove(track);
     }

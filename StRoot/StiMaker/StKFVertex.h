@@ -15,6 +15,8 @@ class StKFVertex : public KFVertex  {
 public:
   StKFVertex() : KFVertex(), fTimeMc(0), fNoDaughtersMc(0), fgePidMc(0)
     { Clear(); Vertex().SetId(++fTotalNoVertices); fKFTracks.SetOwner(kTRUE);}
+  StKFVertex(const KFParticle &Vertex) : KFVertex(Vertex), fTimeMc(0), fNoDaughtersMc(0), fgePidMc(0)
+    { Clear(); SetId(++fTotalNoVertices); fKFTracks.SetOwner(kTRUE);}
     StKFVertex(const StKFVertex&);
   virtual     ~StKFVertex() {Clear();}
   void         AddTrack(const StKFTrack *track);
@@ -44,7 +46,7 @@ public:
   StKFVertex &operator  =(const KFVertex &vtx);
   void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
   void PrintW(Option_t *option="") const;
-  void SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDaughters, Int_t gePid);
+  void SetMc();
   Float_t   TimeMc()   const {return fTimeMc;}
   const TVector3 &XyzMc()    const {return *&fXyzMc;}
   Int_t     NoDaughtersMc() const {return fNoDaughtersMc;}
