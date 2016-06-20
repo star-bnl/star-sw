@@ -978,9 +978,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	ENDL:
 	}
       }	else { # AgiGeometry
-	foreach my $geom (@versionList) { # create geometries itself
-	  if ( -d "./StarDb/starsim") {
-	    my $starsim_geom = "./StarDb/starsim/geometry." . $geom . ".C";
+	if ( -d "./StarDb/starsim") {
+	  #	foreach my $geom (@versionList) { # create geometries itself
+	  foreach my $tag ( sort keys %tagList ) {
+	    my $geom = $AgMLList{$tag};
+	    next if ! $geom;
+	    my $starsim_geom = "./StarDb/starsim/geometry." . $tag . ".C";
+#	    Depends $env1 [$starsim_geom], ($GeometryDbAliases);
 	    if (! -r $starsim_geom) {
 	      open (Out, ">$starsim_geom") or die "Can't open $starsim_geom";
 	      print Out "
