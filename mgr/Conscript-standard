@@ -968,7 +968,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       }
       if ($pkg eq 'AgMLGeometry') {
 	foreach my $tag ( sort keys %tagList ) {
-	  my $geom = $AgMLList{$tag};
+#	  my $geom = $AgMLList{$tag};
+	  my $geom = $tagLList{$tag};
 	  next if ! $geom;
 	  print "Build $geometry for $tag\n" if $param::debug;
 	  my $geometry = "Geometry." . $tag . ".root";
@@ -981,7 +982,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	if ( -d "./StarDb/starsim") {
 	  #	foreach my $geom (@versionList) { # create geometries itself
 	  foreach my $tag ( sort keys %tagList ) {
-	    my $geom = $AgMLList{$tag};
+	    my $geom = $tagList{$tag};
+#	    print "tag = $tag => geom = $geom\n";
 	    next if ! $geom;
 	    my $starsim_geom = "./StarDb/starsim/geometry." . $tag . ".C";
 #	    Depends $env1 [$starsim_geom], ($GeometryDbAliases);
