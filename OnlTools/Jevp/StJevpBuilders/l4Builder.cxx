@@ -2404,7 +2404,7 @@ void l4Builder::defineHLTGood2Plots()
 	HLTGood2Plots[index]->addHisto(ph);
 
 	index++; //1
-	hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",100,-250.,250.);
+	hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",100,-10.,10.);
 	ph = new PlotHisto();
 	ph->histo = hHLTGood2VertexZ;
 	HLTGood2Plots[index]->addHisto(ph);
