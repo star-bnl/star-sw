@@ -959,13 +959,12 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 		vtx->AddTrack(Tr);
 	      }
 	      vtx->SetMc();
-	      PrPP(ParticleFinder,*KVx);
-	      V0.SetId(KVx->Id());
-	      V0.SetIdTruth(KVx->IdTruth(), KVx->QaTruth());
-	      V0.SetIdParentMcVx(KVx->IdParentMcVx());
 	      PrPP(ParticleFinder,*vtx);
 	    }
 	    PrPP2(ParticleFinder,*KVx);
+	    V0.SetId(KVx->Id());
+	    V0.SetIdTruth(KVx->IdTruth(), KVx->QaTruth());
+	    V0.SetIdParentMcVx(KVx->IdParentMcVx());
 	    StPrimaryVertex *stVtx = KVx2StPrimVxMap[KVx];
 	    if (stVtx) {
 	      PrPP(ParticleFinder,*stVtx);
