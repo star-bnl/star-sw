@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.159 2016/06/21 15:56:54 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.160 2016/06/21 15:59:36 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.160  2016/06/21 15:59:36  jwebb
+// Coverity believes index may go out of bounds here.  Add guard.
+//
 // Revision 1.159  2016/06/21 15:56:54  jwebb
 // Global pointer gGeometry is set during NEW at line 1776.  Test here is redundant (but makes life easy on static checking tool which can't see the pointer get set).
 //
@@ -2867,9 +2870,9 @@ void St_geant_Maker::usflux() {
       if (ctrak->vect[6] > 0.300 && p <= 0) {
 	for (Int_t i = 0; i < ctrak->nmec; i++) {
 	  if (ctrak->lmec[i] >= 12 && ctrak->lmec[i] <= 20) {
-	    histV2[r][6][p]->Fill(ZZ, RR); 
+	    if ( p>=0 ) histV2[r][6][p]->Fill(ZZ, RR); 
 	    OmegaN = dose(cmate->z);
-	    histV2[r][7][p]->Fill(ZZ, RR, OmegaN ); 
+	    if ( p>=0 ) histV2[r][7][p]->Fill(ZZ, RR, OmegaN ); 
 	    break;
 	  }
 	}
