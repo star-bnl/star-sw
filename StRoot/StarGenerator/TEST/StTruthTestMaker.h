@@ -9,7 +9,23 @@ class StTruthTestMaker : public StMaker
 {
 
  public:
-  StTruthTestMaker( const Char_t *name="testGeant" ):StMaker(name){ 
+  StTruthTestMaker( const Char_t *name="testGeant" ):
+    StMaker(name),
+    mDoGeant(false),
+    hMatchedEta(0),
+    hMatchedPhi(0),
+    hMatchedPt(0),
+    hMatchedInv(0),
+    hMatchedPID(0),
+    hMatchedQA(0),
+    hMatchedEtaRes(0),
+    hMatchedPhiRes(0),
+    hMatchedPtRes(0),
+    hMatchedInvRes(0),
+    hNumMismatched(0),
+    hPerMismatched(0),
+    hPidMismatched(0)
+  { 
     /* nada */ 
   };
   ~StTruthTestMaker(){ /* nada */ };
