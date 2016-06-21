@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.157 2016/05/02 17:24:54 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.158 2016/06/21 15:53:14 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.158  2016/06/21 15:53:14  jwebb
+// No need to store result if we're not checking it.
+//
 // Revision 1.157  2016/05/02 17:24:54  jwebb
 // Remove unused call to geant3->Gfhead, whose only purpose seems to be to cause a corruption of the stack (see ticket 3204).
 //
@@ -1099,7 +1102,7 @@ Int_t St_geant_Maker::Make() {
   }
   if (npart>0) {  
     St_particle  *particle   = new St_particle("particle",npart);
-    m_DataSet->Add(particle);  iRes = g2t_particle(particle);
+    m_DataSet->Add(particle);  /*iRes =*/ g2t_particle(particle);
     //    =======================
     if (Debug() > 1) particle->Print(0,10);
     particle_st *p = particle->GetTable();
@@ -1151,7 +1154,7 @@ Int_t St_geant_Maker::Make() {
   St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
   m_DataSet->Add(g2t_track);
   
-  iRes = g2t_get_kine (g2t_vertex,g2t_track);
+  /*iRes =*/ g2t_get_kine (g2t_vertex,g2t_track);
   if (Debug() > 1) {
     g2t_vertex->Print(0,10);
     g2t_track->Print(0,10);
@@ -1166,7 +1169,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_pythia *g2t_pythia = new St_g2t_pythia("g2t_pythia",1); // prepare an empty g2t_pythia
     m_DataSet->Add(g2t_pythia);
     LOG_INFO << "Pythia event header captured" << endm;
-    iRes = g2t_get_pythia(g2t_pythia);
+    /*iRes =*/ g2t_get_pythia(g2t_pythia);
   }
   
   // --max-- Filling the event header, addition due to the new coding
@@ -1188,7 +1191,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
     m_DataSet->Add(g2t_svt_hit); 
     
-    iRes = g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
+    /*iRes =*/ g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1198,7 +1201,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_ssd_hit *g2t_ssd_hit = new St_g2t_ssd_hit("g2t_ssd_hit",nhits);
     m_DataSet->Add(g2t_ssd_hit);
     
-    iRes = g2t_ssd(g2t_track,g2t_ssd_hit); if (Debug() > 1) g2t_ssd_hit->Print(0,10);
+    /*iRes =*/ g2t_ssd(g2t_track,g2t_ssd_hit); if (Debug() > 1) g2t_ssd_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1210,7 +1213,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
     m_DataSet->Add(g2t_pix_hit);
     
-    iRes = g2t_pix(g2t_track,g2t_pix_hit); if (Debug() > 1) g2t_pix_hit->Print(0,10);
+    /*iRes =*/ g2t_pix(g2t_track,g2t_pix_hit); if (Debug() > 1) g2t_pix_hit->Print(0,10);
     //	     ===============================
   }
   
@@ -1221,7 +1224,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_hpd_hit *g2t_hpd_hit = new St_g2t_hpd_hit("g2t_hpd_hit",nhits);
     m_DataSet->Add(g2t_hpd_hit);
     
-    iRes = g2t_hpd(g2t_track,g2t_hpd_hit); if (Debug() > 1) g2t_hpd_hit->Print(0,10);
+    /*iRes =*/ g2t_hpd(g2t_track,g2t_hpd_hit); if (Debug() > 1) g2t_hpd_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1232,7 +1235,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_ist_hit *g2t_ist_hit = new St_g2t_ist_hit("g2t_ist_hit",nhits);
     m_DataSet->Add(g2t_ist_hit);
     
-    iRes = g2t_ist(g2t_track,g2t_ist_hit); if (Debug() > 1) g2t_ist_hit->Print(0,10);
+    /*iRes =*/ g2t_ist(g2t_track,g2t_ist_hit); if (Debug() > 1) g2t_ist_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1243,7 +1246,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_gem_hit *g2t_gem_hit = new St_g2t_gem_hit("g2t_gem_hit",nhits);
     m_DataSet->Add(g2t_gem_hit);
     
-    iRes = g2t_gem(g2t_track,g2t_gem_hit); if (Debug() > 1) g2t_gem_hit->Print(0,10);
+    /*iRes =*/ g2t_gem(g2t_track,g2t_gem_hit); if (Debug() > 1) g2t_gem_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1254,7 +1257,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_igt_hit *g2t_igt_hit = new St_g2t_igt_hit("g2t_igt_hit",nhits);
     m_DataSet->Add(g2t_igt_hit);
     
-    iRes = g2t_igt(g2t_track,g2t_igt_hit); if (Debug() > 1) g2t_igt_hit->Print(0,10);
+    /*iRes =*/ g2t_igt(g2t_track,g2t_igt_hit); if (Debug() > 1) g2t_igt_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1265,7 +1268,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_fst_hit *g2t_fst_hit = new St_g2t_fst_hit("g2t_fst_hit",nhits);
     m_DataSet->Add(g2t_fst_hit);
     
-    iRes = g2t_fst(g2t_track,g2t_fst_hit); if (Debug() > 1) g2t_fst_hit->Print(0,10);
+    /*iRes =*/ g2t_fst(g2t_track,g2t_fst_hit); if (Debug() > 1) g2t_fst_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1280,7 +1283,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
     m_DataSet->Add(g2t_fgt_hit);
     
-    iRes = g2t_fgt(g2t_track,g2t_fgt_hit); if (Debug() > 1) g2t_fgt_hit->Print(0,10);
+    /*iRes =*/ g2t_fgt(g2t_track,g2t_fgt_hit); if (Debug() > 1) g2t_fgt_hit->Print(0,10);
     //	     ===============================
   }
 
@@ -1289,7 +1292,7 @@ Int_t St_geant_Maker::Make() {
     St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
     m_DataSet->Add(g2t_tpc_hit);
     
-    iRes = g2t_tpc(g2t_track,g2t_tpc_hit); if (Debug() > 1) g2t_tpc_hit->Print(0,10);
+    /*iRes =*/ g2t_tpc(g2t_track,g2t_tpc_hit); if (Debug() > 1) g2t_tpc_hit->Print(0,10);
     //	     ==============================
   }
   
@@ -1299,7 +1302,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) { 
     St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
     m_DataSet->Add(g2t_mwc_hit);
-    iRes = g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
+    /*iRes =*/ g2t_mwc(g2t_track,g2t_mwc_hit);if (Debug() > 1) g2t_mwc_hit->Print(0,10);
     //	     ==============================
   }
   
@@ -1308,7 +1311,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0){
     St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
     m_DataSet->Add(g2t_ftp_hit);
-    iRes = g2t_ftp(g2t_track,g2t_ftp_hit);
+    /*iRes =*/ g2t_ftp(g2t_track,g2t_ftp_hit);
     //           ===============================
   }
   
@@ -1317,7 +1320,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) { 
     St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
     m_DataSet->Add(g2t_ctb_hit);
-    iRes = g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
+    /*iRes =*/ g2t_ctb(g2t_track,g2t_ctb_hit); if (Debug() > 1) g2t_ctb_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1326,7 +1329,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
     m_DataSet->Add(g2t_tof_hit);
-    iRes = g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
+    /*iRes =*/ g2t_tof(g2t_track,g2t_tof_hit); if (Debug() > 1) g2t_tof_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1335,7 +1338,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
     m_DataSet->Add(g2t_tfr_hit);
-    iRes = g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
+    /*iRes =*/ g2t_tfr(g2t_track,g2t_tfr_hit); if (Debug() > 1) g2t_tfr_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1350,7 +1353,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
     m_DataSet->Add(g2t_rch_hit);
-    iRes = g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
+    /*iRes =*/ g2t_rch(g2t_track,g2t_rch_hit); if (Debug() > 1) g2t_rch_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1360,7 +1363,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
     m_DataSet->Add(g2t_emc_hit);
-    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
+    /*iRes =*/ g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1369,7 +1372,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
     m_DataSet->Add(g2t_smd_hit);
-    iRes = g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
+    /*iRes =*/ g2t_smd(g2t_track,g2t_smd_hit); if (Debug() > 1) g2t_smd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1381,7 +1384,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
     m_DataSet->Add(g2t_eem_hit);
-    iRes = g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
+    /*iRes =*/ g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
     //           ==============================
   }
   nhit1 = nhit2 = 0;
@@ -1391,7 +1394,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
     m_DataSet->Add(g2t_esm_hit);
-    iRes = g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
+    /*iRes =*/ g2t_esm(g2t_track,g2t_esm_hit); if (Debug() > 1) g2t_esm_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1400,7 +1403,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
     m_DataSet->Add(g2t_vpd_hit);
-    iRes = g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
+    /*iRes =*/ g2t_vpd(g2t_track,g2t_vpd_hit); if (Debug() > 1) g2t_vpd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1409,7 +1412,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
     m_DataSet->Add(g2t_pmd_hit);
-    iRes = g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
+    /*iRes =*/ g2t_pmd(g2t_track,g2t_pmd_hit); if (Debug() > 1) g2t_pmd_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1418,7 +1421,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
     m_DataSet->Add(g2t_zdc_hit);
-    iRes = g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
+    /*iRes =*/ g2t_zdc(g2t_track,g2t_zdc_hit); if (Debug() > 1) g2t_zdc_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1429,7 +1432,7 @@ Int_t St_geant_Maker::Make() {
     {
       St_g2t_ctf_hit *g2t_bbc_hit = new St_g2t_ctf_hit("g2t_bbc_hit",nhits);
       m_DataSet->Add(g2t_bbc_hit);
-      iRes = g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
+      /*iRes =*/ g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
       //           ==============================
     }
 
@@ -1441,7 +1444,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
     m_DataSet->Add(g2t_fpd_hit);
-    iRes = g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
+    /*iRes =*/ g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
     //           ==============================
   }
 
@@ -1450,7 +1453,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_fsc_hit = new St_g2t_emc_hit("g2t_fsc_hit",nhits);
     m_DataSet->Add(g2t_fsc_hit);
-    iRes = g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
+    /*iRes =*/ g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
     //           ==============================
   }
 
@@ -1462,7 +1465,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
     m_DataSet->Add(g2t_mtd_hit);
-    iRes = g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
+    /*iRes =*/ g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
     //           ==============================
   }
  
@@ -1472,7 +1475,7 @@ Int_t St_geant_Maker::Make() {
     {
       St_g2t_etr_hit *g2t_etr_hit = new St_g2t_etr_hit("g2t_etr_hit",nhits);
       m_DataSet->Add(g2t_etr_hit);
-      iRes = g2t_etr( g2t_track, g2t_etr_hit); 
+      /*iRes =*/ g2t_etr( g2t_track, g2t_etr_hit); 
       if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
     }
   
@@ -1490,7 +1493,7 @@ Int_t St_geant_Maker::Make() {
   {
     St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
     m_DataSet->Add(g2t_hca_hit);
-    iRes = g2t_hca( g2t_track, g2t_hca_hit);
+    /*iRes =*/ g2t_hca( g2t_track, g2t_hca_hit);
   } 
 
   nhits=0;
@@ -1499,7 +1502,7 @@ Int_t St_geant_Maker::Make() {
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
     m_DataSet->Add(  g2t_fts_hit );
-    iRes = g2t_fts( g2t_track, g2t_fts_hit );
+    /*iRes =*/ g2t_fts( g2t_track, g2t_fts_hit );
   };
 
 
