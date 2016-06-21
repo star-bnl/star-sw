@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.160 2016/06/21 15:59:36 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.161 2016/06/21 16:02:36 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.161  2016/06/21 16:02:36  jwebb
+// Return value not checked / remove to make static checker happy.
+//
 // Revision 1.160  2016/06/21 15:59:36  jwebb
 // Coverity believes index may go out of bounds here.  Add guard.
 //
@@ -1610,10 +1613,10 @@ TVolume *St_geant_Maker::MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_
 	    Names[Nlevel] = z_iq[jvolum+ivom];
 	    Numbers[Nlevel] = nuser;
 	    Int_t   nlevv = Nlevel+1;
-	    Int_t   Ierr;
+	    // Int_t   Ierr; 
 	    Float_t xx[3], theta1,phi1, theta2,phi2, theta3,phi3, type;
 	    
-	    Ierr = geant3->Glvolu(nlevv, Names, Numbers);
+	    geant3->Glvolu(nlevv, Names, Numbers);
 	    
 	    Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
 		   theta1,phi1, theta2,phi2, theta3,phi3, type);
