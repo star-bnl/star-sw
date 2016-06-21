@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGENParticle.cxx,v 1.2 2009/08/25 20:49:16 fine Exp $
+// @(#)root/eg:$Id: StGENParticle.cxx,v 1.3 2016/06/21 20:28:51 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -9,7 +9,17 @@
 #include "StGENParticle.h"
 
 //______________________________________________________________________________
-StGENParticle::StGENParticle(int idx) : StGenParticle(idx),fDaughter(0)
+StGENParticle::StGENParticle(int idx) : 
+  StGenParticle(idx),
+  fBeg{0},
+  fPdgCode{0},
+  fGeaCode{0},
+  fStatusCode{0},
+  fMother{0,0},
+  fWeight{0},
+  fP{0,0,0,0,0},
+  fV{0,0,0,0},
+  fDaughter(0)
 {
   Clear();
 }
