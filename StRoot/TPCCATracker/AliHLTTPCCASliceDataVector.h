@@ -45,7 +45,7 @@ typedef unsigned int uint_i;
 class AliHLTTPCCASliceData
 {
   public:
-    AliHLTTPCCASliceData() : fMemorySize( 0 ), fMemory( 0 ), fParam( 0 ) {}
+    AliHLTTPCCASliceData() : fRows(), fNumberOfHits(0), fMemorySize( 0 ), fMemory( 0 ), fParam( 0 ) {}
     ~AliHLTTPCCASliceData() { if (fMemory) delete[] fMemory; }
 
     void InitializeRows( const AliHLTTPCCAParam &parameters );
