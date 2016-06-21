@@ -1,6 +1,6 @@
 #include "AgStarParticle.h"
 #include <stdio.h>
-
+#include <cstring>
 //____________________________________________________________________________________
 #define address_of_agcpart F77_NAME( address_of_agcpart, ADDRESS_OF_AGCPART )
 #define address_of_agcloca F77_NAME( address_of_agcloca, ADDRESS_OF_AGCLOCA )
@@ -74,7 +74,8 @@ void AgStarParticle::Add( const char* name, const int g3id, const int type, cons
   Agcpart_t &agcpart = *(address_of_agcpart());
   Agcloca_t &ag      = *(address_of_agcloca());
 
-  sprintf( ag.title, "%-20s", name );
+  //sprintf( ag.title, "%-20s", name );
+  strncpy( ag.title, name, 20 );
   
   agcpart.code = g3id;
   agcpart.type = type;
