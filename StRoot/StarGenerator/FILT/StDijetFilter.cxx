@@ -108,6 +108,7 @@ Int_t StDijetFilter::Filter( StarGenEvent *mEvent )
 	jf.push_back(finalparticles[l]);
 	nChange++;
       }
+      if (j) delete j; // prevent resource leak when combineTracks overwrites
       j = combineTracks(jf);
       nIter++;
     }
