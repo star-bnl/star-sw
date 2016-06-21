@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.158 2016/06/21 15:53:14 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.159 2016/06/21 15:56:54 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.159  2016/06/21 15:56:54  jwebb
+// Global pointer gGeometry is set during NEW at line 1776.  Test here is redundant (but makes life easy on static checking tool which can't see the pointer get set).
+//
 // Revision 1.158  2016/06/21 15:53:14  jwebb
 // No need to store result if we're not checking it.
 //
@@ -1891,7 +1894,7 @@ TDataSet *St_geant_Maker::Work()
     //  gGeometry->GetListOfNodes()->Add(volume);
     delete H;
     fVolume=node;
-    gGeometry->GetListOfNodes()->Add(node);
+    if ( gGeometry ) gGeometry->GetListOfNodes()->Add(node);
     return GetVolume();
 }
 //_____________________________________________________________________________
