@@ -71,7 +71,7 @@ Double_t StKFVertexMaker::fgProbCut = 1e-5;
    
 */
 //________________________________________________________________________________
-StKFVertexMaker::StKFVertexMaker(const char *name) : StMaker(name),
+StKFVertexMaker::StKFVertexMaker(const Char_t *name) : StMaker(name),
 						     fParticles(0), fVertices(0),
 						     fPass(0), fNzBins(2500),  fNPasses(2), fSpectrum(0), fzWindow(2), 
 						     fTempLog(2), fminBrent(0), func(0),
@@ -550,9 +550,7 @@ void StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
   primV->setChiSquared(KVx->Chi2()/KVx->GetNDF());  
   primV->setProbChiSquared(TMath::Prob(KVx->GetChi2(),KVx->GetNDF()));
   primV->setIdTruth(KVx->IdTruth(), KVx->QaTruth());
-  Float_t cov[6];
-  TCL::ucopy((&((KFParticle *) &KVx)->Covariance(0)), cov, 6);
-  primV->setCovariantMatrix(cov); 
+  primV->setCovariantMatrix(&(((KFParticle *) KVx)->Covariance(0))); 
   primV->setFlag(1); // Set default values
   return;
 }
@@ -769,11 +767,9 @@ Bool_t StKFVertexMaker::ParticleFinder() {
   UInt_t noPVT = pEvent->numberOfPrimaryVertices();
   Int_t IdVLast = -1;
   std::map<Int_t,Int_t> primIdMap;
-  std::map<Int_t,Int_t> Indx2TrackIdMap;
   std::map<Int_t,Int_t> Id2TrackIndxMap;
   std::map<Int_t, KFParticle *> V0TrackIdss2KVx;
   std::map<Int_t,Int_t> V0TrackKey2Id;
-  std::map<Int_t, KFParticle *> Id2GlobTrackMap;
   std::map<KFParticle *, StPrimaryVertex *> KVx2StPrimVxMap;
   vector<KFParticle *> PrimVertex;
   for (UInt_t i = 0; i < noPVT; i++) {
@@ -863,8 +859,6 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     //    particle.SetId(nPartSaved);
     //      if (Debug() > 2) cout << "N" << nPartSaved << "\t" << particle << "\tD:" << particle.NDaughters() << " " << particle.DaughterIds()[0] << endl;
     particles.push_back(particle);
-    Id2GlobTrackMap[gTrack->key()] = &particles.back();
-    Indx2TrackIdMap[nPartSaved] = gTrack->key();
     Id2TrackIndxMap[gTrack->key()] = particles.size();
     //      particlesPdg.push_back(pdg[iHypo]);
     if (IdV > 0) {
@@ -907,7 +901,6 @@ Bool_t StKFVertexMaker::ParticleFinder() {
     const Char_t *Types[5] = {"1C-fit: Intesections", "2C-fit: Mass Fit", 
 			      "2C-fit: Mass Fit", "3C-fit: Fit to Vertex", "4C-fit: Fit to Vertex with mass constrain"};
     std::vector<KFParticle> *V0List;
-    std::vector<KFParticle> *ParList;
     for (Int_t k = 0; k < 5; k++) { 
       if (Debug() > 1) cout << Types[k] << endl;
       Int_t            NH = 1;
@@ -917,7 +910,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	Int_t NPV = 1;
 	if (k >= 2) NPV = noPV;
 	for (Int_t iPV = 0; iPV < NPV; iPV++) {
-	  if      (k == 0) ParList = V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetParticles();
+	  if      (k == 0) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetParticles();
 	  else if (k == 1) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetSecondaryCandidates()[h];
 	  else if (k == 2) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryCandidates()[h][iPV];
 	  else if (k == 3) V0List = (std::vector<KFParticle> *) &mStKFParticleInterface->GetPrimaryTopoCandidates()[h][iPV];
@@ -952,8 +945,6 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 		Int_t kg = V0.DaughterIds()[s];
 		Int_t l  = Id2TrackIndxMap[kg] - 1;
 		if (l < 0) continue;
-		// KFParticle *kfTrack = Id2GlobTrackMap[kg];
-		// assert(kfTrack);
 		KFParticle *kfTrack = &particles[l];
 		StKFTrack *Tr = new StKFTrack(kfTrack);
 		vtx->AddTrack(Tr);
@@ -974,6 +965,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	      pEvent->addPrimaryVertex(stVtx,orderByRanking);
 	    }
 	    FillVertex(&V0, stVtx);
+	    if (! stVtx) continue;
 	    for (Int_t s = 0; s < 2; s++) {
 	      Int_t kg = V0.DaughterIds()[s];
 	      StTrackNode *node = TrackNodeMap[kg];

@@ -3,9 +3,10 @@
 // $Id: StKFVertex.h,v 2.5 2015/12/20 01:06:39 fisyak Exp $
 #include "Riostream.h"
 #include "TObject.h"
-#include "StKFTrack.h"
 #include "TList.h"
+#include "StKFTrack.h"
 #include "KFParticle/KFVertex.h"
+#include "KFParticle/KFParticle.h"
 #include "TVector3.h"
 class StVertex;
 

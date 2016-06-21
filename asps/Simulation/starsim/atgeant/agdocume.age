@@ -1,6 +1,9 @@
-* $Id: agdocume.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agdocume.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
 * $Name:  $
 * $Log: agdocume.age,v $
+* Revision 1.2  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
 *
@@ -35,8 +38,10 @@ Iprin=Idebug;  Prin2 %L(Bank),%L(Module),Flag
 do i=1,LL1 { if (Map(1,i)<0 | Map(2,i)<0) goto :fill: }; Return;
  
 :fill: itype=1
+#if 0
 call agDBFILL (Module,MTitle,Author,Created,Btit,Bank,Bpath,Num,Lb,
                       Map,Names,Comment,Par,LL,LL1,Link,Flag,itype)
+#endif 
 end
 
 

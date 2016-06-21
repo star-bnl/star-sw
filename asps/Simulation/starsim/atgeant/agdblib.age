@@ -1,6 +1,9 @@
-* $Id: agdblib.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agdblib.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
 * $Name:  $
 * $Log: agdblib.age,v $
+* Revision 1.2  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
 *
@@ -12,6 +15,7 @@
 *
 *
 **********************************************************************
+#if 0
         Subroutine   AgDBLIB 
 Implicit       None
 Integer        CSADDR,iadbset,iadbget,iadbfill,iadbuse,iadbls
@@ -61,3 +65,4 @@ Entry   AgDBUSE               (Module,Oper,kstat,Bank,Name,Value,Bpath,
                                Num,Lb,Map,Names,Par,LL,LL1,Link,Flag);}
 return
 end
+#endif

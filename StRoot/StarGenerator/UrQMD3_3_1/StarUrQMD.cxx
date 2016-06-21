@@ -164,9 +164,9 @@ Int_t StarUrQMD::Generate()
       Int_t    id = isys().uid(idx); // or isys().itypd(idx). It isn't clear which is right
       Int_t    stat = StarGenParticle::kFinal; //JFN 11/25/12 12:28pm- for the moment I am setting every status to be a final state particle.
       //Int_t    stat = mStatusCode[ hepevt().isthep(idx) ]; */@
-      if ( !stat ) {
-	stat = StarGenParticle::kUnknown;
-      }
+      //    if ( !stat ) {
+      //	stat = StarGenParticle::kUnknown;
+      //    }
       Int_t    m1 = itdelay().ityptd(idx,1);
       Int_t    m2 = itdelay().ityptd(idx,2);
       Int_t    d1 = 0; //JFN- I don't think daughter information is preserved

@@ -216,8 +216,8 @@ Int_t StiMaker::Finish()
   StiTimer::Print();
   StiTimer::Clear();
 
-static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
   if (mTimg[0]) {
+    static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
     for (int i=0;timg[i];i++) {
       Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
       ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()

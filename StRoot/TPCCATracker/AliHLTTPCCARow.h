@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCARow.h,v 1.1 2016/02/05 23:27:28 fisyak Exp $
+// @(#) $Id: AliHLTTPCCARow.h,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -31,7 +31,8 @@ class AliHLTTPCCARow
   friend class AliHLTTPCCASliceData;
   public:
 
-    AliHLTTPCCARow() {}
+    AliHLTTPCCARow(): fGrid(), fNHits(0), fMaxY(0), fHitNumberOffset(0), fLinkUpData(0), fLinkDownData(0),
+     fHitDataY(0), fHitDataZ(0), fHitDataIsUsed(0), fClusterDataIndex(0), fHitWeights(0), fFirstHitInBin(0) {}
 
     short NHits()    const { return fNHits; }
     //float X()        const { return fX; }

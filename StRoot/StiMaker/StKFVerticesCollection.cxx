@@ -316,34 +316,7 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   nextL.Reset();
   while ((vtxl = (StKFVertex *)  nextL())) {
     if (vtxl->Tracks().IsEmpty()) {delete fVertices.Remove(vtxl); continue;}
-    // Set IdTruth
-    std::map< Int_t,Float_t> idTruths;
-    Int_t IdVx = 0;
-    Int_t qa = 0;
-    TIter nextlT(&vtxl->Tracks(),kIterForward);
-    StKFTrack *TrackL = 0;
-    while ((TrackL = (StKFTrack *) nextlT())) {
-      const KFParticle *particle = TrackL->OrigParticle();
-      Int_t IdTk = particle->IdTruth();
-      if (!IdTk) continue;
-      IdVx = particle->IdParentMcVx();
-      if (IdVx <= 0) continue;
-      qa = particle->QaTruth(); if (!qa) qa = 1;
-      idTruths[IdVx] += qa;
-    }
-    if (! idTruths.size()) continue;		//no simu info
-    Int_t vxBest = 0; 
-    Float_t qaBest = 0, qaSum = 0;
-    for (std::map< Int_t,Float_t>::const_iterator it=idTruths.begin(); it!=idTruths.end(); ++it) {
-      qaSum += (*it).second;
-      if ((*it).second < qaBest) continue;
-      vxBest = (*it).first; qaBest = (*it).second;
-    }
-    if (vxBest <= 0) continue;
-    Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
-    vtxl->SetIdTruth(vxBest,avgQua);
-    Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
-    vtxl->Vertex().SetIdParentMcVx(IdParentTk);
+    vtxl->SetMc();
   }
   //  SetParents();
   nextL.Reset();
@@ -451,9 +424,8 @@ void  StKFVerticesCollection::SetParents(Int_t *parents) const {
 //________________________________________________________________________________
 Int_t StKFVerticesCollection::NoVertices() const {
   TIter next(&fVertices);
-  TObject *o = 0;
   Int_t N = 0;
-  while ((o = next())) {
+  while ((next())) {
     N++;
   }
   return N;

@@ -28,7 +28,7 @@ $JobQAT = "newJobsQA";
 my $TOP_DIRD = "/star/rcf/test/dev/";
 
 my @dir_year = ("year_2000", "year_2001", "year_2003", "year_2004", "year_2005", "year_2006", "year_2007", "year_2008","year_2009", "year_2010", "year_2011", "year_2012", "year_2013", "year_2014", "year2015", "2016");
-my @node_dir = ("daq_sl302.ittf", "daq_sl302.ittf_opt" ,"trs_sl302.ittf", "trs_sl302.ittf_opt","simu");
+my @node_dir = ("daq_sl302.ittf", "daq_sl302.ittf_opt" ,"trs_sl302.ittf", "trs_sl302.ittf_opt","simu","daq_sl302.stica", "daq_sl302.stica_opt" );
 
 
 my @OUT_DIR0 = ();
@@ -36,11 +36,15 @@ my @OUT_DIR1 = ();
 my @OUT_DIR2 = ();
 my @OUT_DIR3 = ();
 my @OUT_DIR4 = ();
+my @OUT_DIR5 = ();
+my @OUT_DIR6 = ();
 my @OUT_DIRB0 = ();
 my @OUT_DIRB1 = ();
 my @OUT_DIRB2 = ();
 my @OUT_DIRB3 = ();
 my @OUT_DIRB4 = ();
+my @OUT_DIRB5 = ();
+my @OUT_DIRB6 = ();
 my @OUT_DIR;
 my @TDIR = ();
 my @BDIR = ();
@@ -101,6 +105,8 @@ my $thistime;
     @OUT_DIR2 = `ls -d $TDIR[2]`;
     @OUT_DIR3 = `ls -d $TDIR[3]`;
     @OUT_DIR4 = `ls -d $TDIR[4]`;
+    @OUT_DIR5 = `ls -d $TDIR[5]`;
+    @OUT_DIR6 = `ls -d $TDIR[6]`;
 
  $ii = 0;
 
@@ -137,6 +143,20 @@ my $thistime;
       $ii++;
   }
 
+ for ($i = 0; $i < scalar(@OUT_DIR5); $i++) {
+     $OUT_DIR[$ii] = $OUT_DIR5[$i];
+     chop $OUT_DIR[$ii];
+  print "Output Dir for $testDay :", $OUT_DIR[$ii],"\n";
+      $ii++;
+  }
+
+  for ($i = 0; $i < scalar(@OUT_DIR6); $i++) {
+     $OUT_DIR[$ii] = $OUT_DIR6[$i];
+     chop $OUT_DIR[$ii];
+  print "Output Dir for $testDay :", $OUT_DIR[$ii],"\n";
+      $ii++;
+  }
+
 
  @BDIR = ();  
 
@@ -151,6 +171,9 @@ my $thistime;
     @OUT_DIRB2 = `ls -d $BDIR[2]`;
     @OUT_DIRB3 = `ls -d $BDIR[3]`;
     @OUT_DIRB4 = `ls -d $BDIR[4]`;
+    @OUT_DIRB5 = `ls -d $BDIR[5]`;
+    @OUT_DIRB6 = `ls -d $BDIR[6]`;
+
 
 $ik = $ii;
 
@@ -187,6 +210,22 @@ $ik = $ii;
   print "Output Dir for $beforeDay :", $OUT_DIR[$ik],"\n";
       $ik++;
   }
+
+  for ($i = 0; $i < scalar(@OUT_DIRB5); $i++) {
+     $OUT_DIR[$ik] = $OUT_DIRB5[$i];
+     chop $OUT_DIR[$ik];
+  print "Output Dir for $beforeDay :", $OUT_DIR[$ik],"\n";
+      $ik++;
+  }
+
+  for ($i = 0; $i < scalar(@OUT_DIRB6); $i++) {
+     $OUT_DIR[$ik] = $OUT_DIRB6[$i];
+     chop $OUT_DIR[$ik];
+  print "Output Dir for $beforeDay :", $OUT_DIR[$ik],"\n";
+      $ik++;
+  }
+
+
 
 struct FileAttr => {
       fjbID     => '$',

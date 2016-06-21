@@ -1,6 +1,9 @@
-//$Id: StSstDbMaker.cxx,v 1.21 2016/05/31 21:51:49 bouchet Exp $
+//$Id: StSstDbMaker.cxx,v 1.22 2016/06/20 18:48:31 bouchet Exp $
 //
 //$Log: StSstDbMaker.cxx,v $
+//Revision 1.22  2016/06/20 18:48:31  bouchet
+//coverity : STACK_USE ; heap allocation for sstWafersPosition
+//
 //Revision 1.21  2016/05/31 21:51:49  bouchet
 //coverity : UNINIT_CTOR (m_positions)
 //
@@ -169,8 +172,8 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
    St_sstWafersPosition *sstwafer = new St_sstWafersPosition("sstWafersPosition", NoSensors);
    // yf AddConst(sstwafer);
    Int_t num = 0;
-   sstWafersPosition_st row;
-   memset (&row, 0, sizeof(sstWafersPosition_st));
+   sstWafersPosition_st *row = new sstWafersPosition_st();
+   memset(row,0, 4*960*sizeof(Double_t));
 
    for (Int_t i = 0; i < NoSensors; i++, sensorOnLadder++) {
       Int_t Id = sensorOnLadder->Id;
@@ -265,22 +268,22 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
 
       Double_t *r = WG.GetRotationMatrix();
       Int_t index = num*3;
-      row.driftDirection[index+0]      = r[0];
-      row.driftDirection[index+1]      = r[3];
-      row.driftDirection[index+2]      = r[6];
+      row->driftDirection[index+0]      = r[0];
+      row->driftDirection[index+1]      = r[3];
+      row->driftDirection[index+2]      = r[6];
       
-      row.normalDirection[index+0]     = r[1];
-      row.normalDirection[index+1]     = r[4];
-      row.normalDirection[index+2]     = r[7];
+      row->normalDirection[index+0]     = r[1];
+      row->normalDirection[index+1]     = r[4];
+      row->normalDirection[index+2]     = r[7];
       
-      row.transverseDirection[index+0] = r[2];
-      row.transverseDirection[index+1] = r[5];
-      row.transverseDirection[index+2] = r[8];
+      row->transverseDirection[index+0] = r[2];
+      row->transverseDirection[index+1] = r[5];
+      row->transverseDirection[index+2] = r[8];
 
       Double_t *wgtr = WG.GetTranslation();
-      row.centerPosition[index+0]      = wgtr[0];
-      row.centerPosition[index+1]      = wgtr[1];
-      row.centerPosition[index+2]      = wgtr[2];
+      row->centerPosition[index+0]      = wgtr[0];
+      row->centerPosition[index+1]      = wgtr[1];
+      row->centerPosition[index+2]      = wgtr[2];
 
       comb->SetRotation(WG.GetRotationMatrix());
       comb->SetTranslation(WG.GetTranslation());
@@ -293,7 +296,8 @@ St_sstWafersPosition *StSstDbMaker::calculateWafersPosition()
          comb->Print();
       }
    }
-   sstwafer->AddAt(&row);
+   sstwafer->AddAt(row);
+   delete row;
    return sstwafer;
 }
 //_____________________________________________________________________________

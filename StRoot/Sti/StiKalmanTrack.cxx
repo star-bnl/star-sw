@@ -469,13 +469,7 @@ int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
 int debugCount=0;
 
-// hidden static variables for refit & refiL
-static StiTrackNodeHelper sTNH;
-static double diff(const StiNodePars &p1,const StiNodeErrs &e1
-                  ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor);
-
-
-// end of hidden static variables for refit & refiL
+StiTrackNodeHelper StiKalmanTrack::sTNH;
 
 /*! 
    Reset the class members to their default state.
@@ -1544,7 +1538,7 @@ int StiKalmanTrack::refit()
       if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
-      qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
+      qA = StiKalmanTrack::diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
         if (qA>0.5)		{fail=-2; errType = kBadQA; continue;} 
@@ -1790,14 +1784,8 @@ double Xi2=0;
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
     double hh = P.hz();
-#if 0
-    assert(hh);
-    hh = 1./hh;
-    P.ptin() = curv*hh; 
-#else
     hh = (fabs(hh)<1e-10)? 0:1./hh;
     P.ptin() = (hh)? curv*hh:1e-3;
-#endif
 
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
@@ -1821,7 +1809,7 @@ double Xi2=0;
   return 0;
 }    
 //_____________________________________________________________________________
-double diff(const StiNodePars &p1,const StiNodeErrs &e1
+Double_t  StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 
 {
   double est=0;

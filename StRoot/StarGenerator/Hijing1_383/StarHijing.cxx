@@ -271,7 +271,7 @@ Int_t StarHijing::Generate()
   // Loop over all particles in the event
   //
   mNumberOfParticles = himain1().natt;
-  StarGenParticle *particles[ mNumberOfParticles ]; // temporary list of particles
+  StarGenParticle *particles[ mNumberOfParticles + 1]; // temporary list of particles [1<=idx<=mNumber]
   StarGenParticle *current = 0;
   for ( Int_t idx=1; idx<=mNumberOfParticles; idx++ )
     {

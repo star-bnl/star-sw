@@ -365,7 +365,7 @@ void StKFVertex::SetMc() {
     qa = particle->QaTruth(); if (!qa) qa = 1;
     idTruths[IdVx] += qa;
   }
-  if (! idTruths.size()) return;		//no simu info
+  if (idTruths.empty()) return;		//no simu info
   Int_t vxBest = 0; 
   Float_t qaBest = 0, qaSum = 0;
   for (std::map< Int_t,Float_t>::const_iterator it=idTruths.begin(); it!=idTruths.end(); ++it) {
@@ -394,9 +394,8 @@ void StKFVertex::SetMc() {
 Int_t StKFVertex::NoTracks() const {
   if (fKFTracks.IsEmpty()) return 0;
   TIter next(&fKFTracks);
-  TObject *o = 0;
   Int_t N = 0;
-  while ((o = next())) {
+  while ((next())) {
     N++;
   }
   return N;

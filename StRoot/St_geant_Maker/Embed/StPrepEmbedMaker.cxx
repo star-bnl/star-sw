@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.12 2013/03/26 13:38:18 fisyak Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.13 2016/06/21 16:05:18 jwebb Exp $
  *
  */
 
@@ -95,10 +95,12 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mFile = 0;
   mMoreFile = 0 ;
   mTree = 0;
+  mMoreTree = 0;
   mSkipMode = kFALSE; /// Do not skip the false vertex
   mSpreadMode = kFALSE; /// Do not smear z-vertex
   mOpenFzFile = kFALSE; /// Do not write .fz file
   mPrimeMode = kFALSE; /// Do not prime the first event
+  mSavePid = 0;
   mPrimed = kFALSE;
   mVpdVzCutMode = kFALSE; /// Do not cut on VpdVz
   mPVRankCutMode = kFALSE; /// Do not cut on PVRank
@@ -830,6 +832,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.13  2016/06/21 16:05:18  jwebb
+ * Init all members.
+ *
  * Revision 1.12  2013/03/26 13:38:18  fisyak
  * restore back modififcations as not related to drop in no. of reconstructed tracks
  *

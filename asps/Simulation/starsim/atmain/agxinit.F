@@ -5,7 +5,6 @@
       CHARACTER*80 GUID
       COMMON /KCGUID/ GUID(MGUIDL)
       EXTERNAL AGXUSER
-      EXTERNAL DBUSER
       EXTERNAL DZEDRW
 
       CALL KUCMD(' ','AGUSER','C')
@@ -1104,32 +1103,6 @@
      +.00000    5.00000  0.'
       CALL KUGUID('USE',GUID,63,'S')
       CALL KUACT('USE',AGXUSER)
-
-      CALL KUCMD(' ','DBSET','C')
-      CALL KUPAR('DBSET','user',
-     +'username for database connection: "reader" or "writer"','CO','S')
-      CALL KUPVAL('DBSET','user',0,0.,'reader','D')
-      CALL KUPAR('DBSET','passwd',
-     +'password for database connection, required for writing','CO','S')
-      CALL KUPVAL('DBSET','passwd',0,0.,' ','D')
-      CALL KUPAR('DBSET','server',
-     +'ip-name of computer running database server','CO','S')
-      CALL KUPVAL('DBSET','server',0,0.,'atlassw1.phy.bnl.gov','D')
-      CALL KUPAR('DBSET','dbname',
-     +'name of the database to use (for writing use "test_NOVA")','CO',
-     +'S')
-      CALL KUPVAL('DBSET','dbname',0,0.,'NOVA','D')
-      GUID(1)='should provide a guidance'
-      CALL KUGUID('DBSET',GUID,1,'S')
-      CALL KUACT('DBSET',DBUSER)
-
-      CALL KUCMD(' ','DBLS','C')
-      CALL KUPAR('DBLS','directory',
-     +'directory (=system) name for listing','CO','S')
-      CALL KUPVAL('DBLS','directory',0,0.,'ATLSGEO','D')
-      GUID(1)='should provide a guidance'
-      CALL KUGUID('DBLS',GUID,1,'S')
-      CALL KUACT('DBLS',DBUSER)
 
       CALL KUCMD(' ','GENZ','C')
       GUID(1)='                  *************************'

@@ -490,7 +490,7 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     p=fabs(e1[i]);q=fabs(e2[i]);choice += (p-q)/(p+q+1e-10);
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
-#if 0
+#if 1
   do {//empty loop
 //  	Join errors
     TCL::vadd(e1,e2,sumE,nE1);

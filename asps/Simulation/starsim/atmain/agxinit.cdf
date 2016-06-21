@@ -1,5 +1,8 @@
-* $Id: agxinit.cdf,v 1.4 2012/07/19 21:33:14 jwebb Exp $
+* $Id: agxinit.cdf,v 1.5 2016/06/21 14:23:19 jwebb Exp $
 * $Log: agxinit.cdf,v $
+* Revision 1.5  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.4  2012/07/19 21:33:14  jwebb
 * Added KUIP interface to configuration parameters of the filters.
 *
@@ -898,26 +901,26 @@ not present in the bank, are left intact.
 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
->Command DBSET
->Parameters
-+
-user   'username for database connection: "reader" or "writer"'  C D='reader'
-passwd 'password for database connection, required for writing'  C D=' '
-server 'ip-name of computer running database server' C D='atlassw1.phy.bnl.gov'
-dbname 'name of the database to use (for writing use "test_NOVA")' C D='NOVA'
+*>Command DBSET
+*>Parameters
+*+
+*user   'username for database connection: "reader" or "writer"'  C D='reader'
+*passwd 'password for database connection, required for writing'  C D=' '
+*server 'ip-name of computer running database server' C D='atlassw1.phy.bnl.gov'
+*dbname 'name of the database to use (for writing use "test_NOVA")' C D='NOVA'
 
->Guidance.
-should provide a guidance
->Action DBUSER
-*-----------------------------------------------------------------------------
->Command DBLS
->Parameters
-+
-directory 'directory (=system) name for listing' C D='ATLSGEO'
-
->Guidance.
-should provide a guidance
->Action DBUSER
+*>Guidance.
+*should provide a guidance
+*>Action DBUSER
+**-----------------------------------------------------------------------------
+*>Command DBLS
+*>Parameters
+*+
+*directory 'directory (=system) name for listing' C D='ATLSGEO'
+*
+*>Guidance.
+*should provide a guidance
+*>Action DBUSER
 *-----------------------------------------------------------------------------
 >Command GENZ
 >Guidance

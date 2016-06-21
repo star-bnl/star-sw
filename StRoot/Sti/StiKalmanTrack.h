@@ -24,8 +24,9 @@
 using namespace std;
 //Sti
 #include "Sti/Base/Factory.h"
-#include "StiKTNIterator.h"
-#include "StiTrack.h"
+#include "Sti/StiKTNIterator.h"
+#include "Sti/StiTrack.h"
+#include "Sti/StiTrackNodeHelper.h"
 
 #include "StThreeVectorD.hh"
 #include "StMCTruth.h"
@@ -318,6 +319,21 @@ class StiKalmanTrack : public StiTrack
   
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
+
+  // hidden static variables for refit & refiL
+  static StiTrackNodeHelper sTNH;
+  static Double_t diff(const StiNodePars &p1,const StiNodeErrs &e1
+		       ,const StiNodePars &p2,const StiNodeErrs &e2,Int_t &igor);
+  // end of hidden static variables for refit & refiL
+
+  /**
+   * Two return values can be obtained by calling this protected version of
+   * refit(). By default the original value is used in the publicly available
+   * refit() of this class while the other is used in derived class
+   * StiCAKalmanTrack.
+   */
+  Int_t refit(Int_t &errType);
+
 protected:
     
   static int mgMaxRefiter;		//max number of refit iteratins allowed

@@ -38,7 +38,7 @@ class StiKalmanTrack;
 class StKFParticleInterface;
 class StKFVertexMaker : public StMaker {
  public: 
-  StKFVertexMaker(const char *name="KFVertex");
+  StKFVertexMaker(const Char_t *name="KFVertex");
                                 
   virtual                       ~StKFVertexMaker();						   		   
   KFParticle 	 	 	*AddBeamTrack();                                      		  		   

@@ -1,6 +1,9 @@
-* $Id: agdocum.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agdocum.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
 * $Name:  $
 * $Log: agdocum.age,v $
+* Revision 1.2  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
 *
@@ -89,8 +92,10 @@ If L1Doc<=0
    If L>0  { " both DETM?" if (IQ(L-4)==IQ(LKDETM-4)) L1doc=L; }
 }
 Iprin=Idebug; Itype=0;
+#if 0
 call agDBFILL (Module,MTitle,Author,Created,Btit,Bank,Bpath,num,Lb,
                       Map,Names,Comment,Par,LL,LL1,Link,Flag,Itype)
+#endif
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - *
 * - - - - - -          create the information bank itself           - - - - - *
