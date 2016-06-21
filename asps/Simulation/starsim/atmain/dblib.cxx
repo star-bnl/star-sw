@@ -1,8 +1,11 @@
-
+#if 0
 /*
-** $Id: dblib.cxx,v 1.9 2010/08/27 16:28:06 perev Exp $
+** $Id: dblib.cxx,v 1.10 2016/06/21 14:23:19 jwebb Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.10  2016/06/21 14:23:19  jwebb
+** Retire unused DB / Zebra interface.
+**
 ** Revision 1.9  2010/08/27 16:28:06  perev
 ** Simlification
 **
@@ -3311,3 +3314,4 @@ extern "C" void  dbls_   (){assert(0);};
 extern "C" void  dbprint_(){assert(0);};
 
 #endif
+#endif//if 0
