@@ -114,6 +114,8 @@ Int_t StDijetFilter::Filter( StarGenEvent *mEvent )
     }
     if(jf.size() == 0)continue;
     jetFour.push_back(jf);
+    // j goes out of scope here, so time to clean up
+    if (j) delete j;
   }
 
   jetFour = EtOrderedList(jetFour);
