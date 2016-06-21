@@ -1,10 +1,15 @@
-* $Id: dbuser.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: dbuser.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
 * $Log: dbuser.age,v $
+* Revision 1.2  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.1  2001/02/27 10:14:50  nevski
 *  first working release
 *
+#if 0
        subroutine dbuser
        character*1  o
        character*80 command,
@@ -24,4 +29,4 @@
 *     print *,' server=',server
   }
   end
-
+#endif

@@ -1,8 +1,12 @@
 *
-* $Id: agdgetp.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agdgetp.age,v 1.2 2016/06/21 14:23:19 jwebb Exp $
 * $Name:  $
 * $Log: agdgetp.age,v $
+* Revision 1.2  2016/06/21 14:23:19  jwebb
+* Retire unused DB / Zebra interface.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
+*
 *
 * Revision 1.6  2003/10/28 20:29:17  nevski
 * use selection verified at the very end to allow for schema evolution
@@ -85,7 +89,8 @@ REPLACE [ERR#{#}] with [;    IF (#1) {  IQUEST(1)=0;
 *
 * trace module changes - a module may have only ONE default Ctop bank
 Cbank=Bank;  Jstat=-1;  ie=0;  ia=0;  Iprin=Idebug;
-Call DBget('u',DBuser); Call CUTOL(DBuser); op=Oper;
+c$$$ Call DBget('u',DBuser); Call CUTOL(DBuser); 
+op=Oper;
 
 if Op=='N' & (Istat==0 | Istat=-999) " this is a NEXT request "
 { Err LINK<0 { Bank was not selected for NEXT};   Lk=%LINK(LINK);
@@ -144,20 +149,20 @@ else
         If (LQ(Lk)>0) Call MZDROP(IxSTOR,LQ(Lk),'L')
  } }
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-if (Lk<=0 | Ie>0) & DBuser='read'
-{  " use database "
-   call DBUSE(Module,Oper,kstat,Bank,Name,Value,Bpath,Num,Lb,
-                                Map,Names,Par,LL,LL1,Link,Flag)
-   if DBuser='read'
-   {  if Lb==1 & Bpath(1:1)!='/'  { Call Rebank (Cbank, Num,LL,LK,Ia) }
-      else                        { Call Rebank (bbpath,Num,LL,LK,Ia) }
-      If (Lk>0)
-      {  JOX=IOX;  Ie=0;
-         Call UCOPY (Par,Q(LK+1+Ia),LL);    Call SBIT0(IQ(Lk),1)
-         LkArP3=Lk  "temporary save bank address"
-         If Lvl==3  { "RbCDir"  LkArP2=Lk;  Ddef=Cbank//Dup }
-   }  }
-}
+c$$$if (Lk<=0 | Ie>0) & DBuser='read'
+c$$${  " use database "
+c$$$   call DBUSE(Module,Oper,kstat,Bank,Name,Value,Bpath,Num,Lb,
+c$$$                                Map,Names,Par,LL,LL1,Link,Flag)
+c$$$   if DBuser='read'
+c$$$   {  if Lb==1 & Bpath(1:1)!='/'  { Call Rebank (Cbank, Num,LL,LK,Ia) }
+c$$$      else                        { Call Rebank (bbpath,Num,LL,LK,Ia) }
+c$$$      If (Lk>0)
+c$$$      {  JOX=IOX;  Ie=0;
+c$$$         Call UCOPY (Par,Q(LK+1+Ia),LL);    Call SBIT0(IQ(Lk),1)
+c$$$         LkArP3=Lk  "temporary save bank address"
+c$$$         If Lvl==3  { "RbCDir"  LkArP2=Lk;  Ddef=Cbank//Dup }
+c$$$   }  }
+c$$$}
 if (Ie>0) Jstat=-Ie;
 Err Lk<=0|Ia<0  {No bank exists for this path}
 Err Ie==1       {No bank exists with this value}
