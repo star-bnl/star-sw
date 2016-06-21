@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.1 2016/02/05 23:27:28 fisyak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -151,6 +151,9 @@ AliHLTTPCCAMerger::AliHLTTPCCAMerger()
 {
   //* constructor
   Clear();
+  
+  for(int iSlice=0; iSlice<fgkNSlices; iSlice++)
+    slices[iSlice] = 0;
 }
 
 /*

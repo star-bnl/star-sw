@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -54,12 +54,16 @@ AliHLTTPCCATracker::AliHLTTPCCATracker()
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     fParam(),
     fClusterData( 0 ),
+    fData(),
     fHitMemory( 0 ),
     fHitMemorySize( 0 ),
     fTrackMemory( 0 ),
     fTrackMemorySize( 0 ),
     fTrackletStartHits( 0 ),
     fNTracklets( 0 ),
+    fTrackletVectors(),
+    fNumberOfTracks(0),
+    fTracks(0),
     fNTrackHits( 0 ),
     fOutput( 0 )
 {
