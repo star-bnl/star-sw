@@ -50,6 +50,7 @@ public:
   TMD5  operator+=( const Double_t   &rhs ){ assert(sizeof(rhs)==8); return add(rhs); }
   TMD5  operator+=( const Bool_t     &rhs ){ assert(sizeof(rhs)==1); return add(rhs); }
   TMD5  operator+=( const TString    &rhs ){                       ; return add(rhs); }
+  TMD5  operator+=( const char*      &rhc ){ TString rhs(rhc);       return add(rhs); }
 
   /// Total number of values checked.
   Int_t count(){ return mCount; }
