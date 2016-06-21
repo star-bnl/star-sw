@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.3 2016/06/21 03:39:54 smirnovd Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -287,7 +287,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
     }
 
     if ( fOutput ) delete[] ( ( char* )( fOutput ) );
-    int size = fOutput->EstimateSize( nTracksTotal, nTrackClustersTotal );
+    int size = AliHLTTPCCAMergerOutput::EstimateSize( nTracksTotal, nTrackClustersTotal );
     fOutput = ( AliHLTTPCCAMergerOutput* )( new float2[size/sizeof( float2 )+1] );
   }
 
