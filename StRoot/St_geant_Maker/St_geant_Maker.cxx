@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.161 2016/06/21 16:02:36 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.162 2016/06/21 16:12:24 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.162  2016/06/21 16:12:24  jwebb
+// Compiler warning: nin set but not used.
+//
 // Revision 1.161  2016/06/21 16:02:36  jwebb
 // Return value not checked / remove to make static checker happy.
 //
@@ -1799,7 +1802,7 @@ TDataSet *St_geant_Maker::Work()
 		    PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
       TShape*  t;
       shapes   shape   = (shapes) volu[1];
-      Int_t    nin     = 0;
+      //Int_t    nin     = 0;
       //   Int_t    medium  = (Int_t)  volu[3]; 
       Int_t    np      = (Int_t)  volu[4];
       Float_t* p0      = volu+6;
@@ -1808,7 +1811,7 @@ TDataSet *St_geant_Maker::Work()
       Char_t   nick[]  = {0,0,0,0,0};
       float    xx[3]   = {0.,0.,0.};
       TVolume *newVolume = 0;
-      if (mother)  nin = (Int_t) mother[2];
+      //if (mother)  nin = (Int_t) mother[2];
       TVolume *Hp      = 0;
       
       strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
