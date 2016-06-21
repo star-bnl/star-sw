@@ -38,7 +38,7 @@ Bool_t StCloseFileOnTerminate::Notify() {
 	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
 	 }
        }
-       files->Delete();
+       //       files->Delete();
    }
    if (count) Error(__FUNCTION__, "%d files have been closed", count);
    else Print(" There was no open file to close");
