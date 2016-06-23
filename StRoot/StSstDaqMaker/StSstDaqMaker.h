@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.h,v 1.9 2016/02/03 15:50:48 zhoulong Exp $
+ * $Id: StSstDaqMaker.h,v 1.10 2016/06/23 20:24:12 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013, according codes from Hao Qiu
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.h,v $
+ * Revision 1.10  2016/06/23 20:24:12  bouchet
+ * sstBadStrips table decoding and use
+ *
  * Revision 1.9  2016/02/03 15:50:48  zhoulong
  * Added some protection to avoid chain crash when there is no available calibration table
  *
@@ -84,6 +87,7 @@ class St_sstNoise;
 class sstConfiguration_st;
 class sstChipCorrect_st;
 class sstStripCalib_st;
+class sstBadStrips_st;
 class sstNoise_st;
 
 class StSstDaqMaker : public StRTSBaseMaker
@@ -95,7 +99,7 @@ public:
    virtual Int_t Make();
    void Clear(const Option_t * = "");
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.9 2016/02/03 15:50:48 zhoulong Exp $ built " __DATE__ " " __TIME__;
+      static const char cvs[] = "Tag $Name:  $ $Id: StSstDaqMaker.h,v 1.10 2016/06/23 20:24:12 bouchet Exp $ built " __DATE__ " " __TIME__;
       return cvs;
    }
 
@@ -124,6 +128,7 @@ private:
    void   FillDefaultNoiseTable();
    void   FillChipNoiseTable(sstChipCorrect_st *chipCorrectTable);
    void   FillDefaultChipNoiseTable();
+   void   FillBadStripsTable(sstBadStrips_st* badStripTable);
    Int_t  idWaferToWafer(Int_t idWafer);
    Int_t  idWaferToLadderNumb(Int_t idWafer);
 
@@ -166,6 +171,7 @@ private:
    Int_t   mRunNum;
    map<Int_t, Int_t> mReadOutPed; //ReadOut Pedestal.
    map<Int_t, Float_t> mIntrinsicRms; //Intrinsic Rms
+   map<Int_t, char> mBadStrip; //strips status
    //DAQ File parameters(please look at the SSD data formata document. )
    static const UInt_t  HEADER_LENGTH       = 8;
    static const UInt_t  FIBER_HEADER_LENGTH = 10;
