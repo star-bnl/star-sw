@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.11 2016/05/25 15:47:38 smirnovd Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.12 2016/06/23 20:23:34 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.12  2016/06/23 20:23:34  bouchet
+ * sstBadStrips table decoding and use ; COVERITY : DIVIDE_BY_ZERO, NO_EFFECT fixed
+ *
  * Revision 1.11  2016/05/25 15:47:38  smirnovd
  * StSstDaqMaker: Removed commented-out code destined to rot
  *
@@ -106,6 +109,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "tables/St_sstChipCorrect_Table.h"
 #include "tables/St_sstNoise_Table.h"
+#include "tables/St_sstBadStrips_Table.h"
 #include <map>
 #include <vector>
 using std::vector;
@@ -219,6 +223,15 @@ Int_t StSstDaqMaker::InitRun(Int_t runumber)
      FillDefaultChipNoiseTable();
    }
 
+   if (mRunNum >= 16) { // Only for Run16
+     LOG_DEBUG << " searching for a bad Strip table" << endm;
+     St_sstBadStrips *mBadStrip = (St_sstBadStrips*)GetDataBase("Calibrations/sst/sstBadStrips");
+     if (mBadStrip) {
+       LOG_DEBUG << "sst bad strips table found ... initialize" << endm;
+       FillBadStripsTable(mBadStrip->GetTable());
+     }
+   }
+
    St_sstConfiguration *configTable = (St_sstConfiguration *) GetInputDB("Geometry/sst/sstConfiguration");
    
    if (!configTable) {
@@ -299,8 +312,7 @@ Int_t StSstDaqMaker::Make()
       mRDO     = rts_table->Rdo();
       mFiber   = rts_table->Pad();
 
-      if (mSec == 1) mRDO = mRDO; //sector 1
-      else mRDO = mRDO + 3;       //sector 2
+      if (mSec != 1) mRDO = mRDO + 3;//sector 2
 
       if (mRDO < 1 || mRDO > 5)     flag = 1;
 
@@ -908,6 +920,9 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
    Int_t  oldchip          = 0;
    Int_t  chipflag         = 0;	// CMN algorithm faild flag.
    UInt_t errorcode        = 0;	// CMN algorithm error code.
+   int wafDecodeBadStrip = 0; // used for bad strip table
+   int stripDecodeBadStrip = 0;// used for decoding bad strip table 
+   int indexDecodeBadStrip = 0; // used for bad strip table
  
    LOG_DEBUG << "Current Event data length : " << vallength << endm;
    spa_strip = dynamic_cast<St_spa_strip *>( m_DataSet->Find("spa_strip"));
@@ -959,6 +974,24 @@ void StSstDaqMaker::DecodeCompressedWords(UInt_t *val, Int_t vallength, Int_t ch
       if( mRunNum >= 14 && mRunNum <=15) {
 	if (gStSstDbMaker->maskChip(id_side, ladder, wafer, chip)) continue;
       }
+
+      if(mRunNum >= 16){
+	if(id_side == 0){
+	  wafDecodeBadStrip = nSstWaferPerLadder - wafer - 1;
+	  stripDecodeBadStrip = strip + 1;
+	}
+	else {
+	  wafDecodeBadStrip = wafer + 1 - 1;
+	  stripDecodeBadStrip = nSstStripsPerWafer - strip;	
+	}
+	
+	indexDecodeBadStrip = id_side * nSstLadder * nSstWaferPerLadder * nSstStripsPerWafer 
+	  + ladder * nSstWaferPerLadder * nSstStripsPerWafer 
+	  + wafDecodeBadStrip * nSstStripsPerWafer
+	  + stripDecodeBadStrip -1;
+	if(mBadStrip[indexDecodeBadStrip]!=0) continue;
+      }
+
       //save only strips with data>0, otherwise it increases the datastrip volume for nothing
       if(data>0){
 	out_strip.id          = count;
@@ -1201,6 +1234,13 @@ void StSstDaqMaker::FillDefaultChipNoiseTable(){
   }
 }
 //------------------------------------------------
+void StSstDaqMaker::FillBadStripsTable(sstBadStrips_st* badStripTable){
+  int totChipSst = nSstSide*nSstLadder*nSstWaferPerLadder*nSstStripsPerWafer;  
+  for(Int_t i=0; i<totChipSst;i++){    
+    mBadStrip[i] = badStripTable[0].status[i];
+  }
+}			       
+//------------------------------------------------
 Float_t StSstDaqMaker::CalculateCommonModeNoiseSimple(vector<int> vadc) //Simplify algorithm
 {
   Float_t preSum  = 0;
@@ -1242,7 +1282,7 @@ Float_t StSstDaqMaker::CalculateCommonModeNoiseSimple(vector<int> vadc) //Simpli
     counter = counter + 1;
   }
 
-  return sum / counter;
+  return (counter>0)?(sum/counter):0;
 }
 //------------------------------------------------
 void StSstDaqMaker::FillData(vector<vector<int> > vadc, vector<vector<float> > vcmnoise, Int_t id_side, Int_t ladder, Int_t vallength)

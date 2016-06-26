@@ -2155,6 +2155,9 @@ TString PCA(int Nmax, int debug) {
   unsigned int combo = (unsigned int) (TMath::Power(2,N1-1));
   if (debug>0) printf("Npoints = %d, Nsca = %d, Possible combinations = %d\n",Count,N1-1,combo-1);
 
+  // For bug: https://sft.its.cern.ch/jira/browse/ROOT-8238
+  if (debug>1 && Count<100 && gROOT->GetVersionInt()<60900)
+    printf("Please ignore any warnings about nbins from TH1::TH1 ...\n");
 
   // Try all combinations
   unsigned int l,m,one = 1;
@@ -2180,7 +2183,7 @@ TString PCA(int Nmax, int debug) {
       pp->AddRow(x);
     }
     pp->MakePrincipals();
-    pp->MakeHistograms(Form("PCA_SC%d",l),"xp");
+    pp->MakeHistograms(Form("PCA_SC%d",l),(debug>1 ? "xp" : "p"));
     TH1F* pca_sc = (TH1F*) (gROOT->FindObject(Form("PCA_SC%d_p%03d",l,N-1)));
 
     const Double_t* mean = pp->GetMeanValues()->GetMatrixArray();
@@ -2230,6 +2233,7 @@ TString PCA(int Nmax, int debug) {
         pcacoef[n] = coef[n];
       }
     }
+
     
   } // m loop
   if (debug>0) printf("Max limit on Nsca = %d, Explored combinations = %d\n",
@@ -2242,6 +2246,13 @@ TString PCA(int Nmax, int debug) {
     for (m=1;m<l;m++) {
       //printf("%d :: %d :: %s\n",l,rmsi[l],scl[rmsi[l]].Data());
       printf("%s\n",scl[rmsi[m]].Data());
+    }
+  }
+
+  if (debug<1) {
+    for (m=0;m<l;m++) {
+      delete ppl[m]; // cleans up histograms too
+      ppl[m]=0;
     }
   }
 
@@ -2289,8 +2300,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.6 2014/11/19 22:11:53 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.7 2016/06/22 20:51:55 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.7  2016/06/22 20:51:55  genevb
+// PCA: delete classes for debug=0, create x hists for debug>1 only
+//
 // Revision 2.6  2014/11/19 22:11:53  genevb
 // Print used ewratio from input files
 //
