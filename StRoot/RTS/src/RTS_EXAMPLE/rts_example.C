@@ -42,6 +42,8 @@
 #include <DAQ_SST/daq_sst.h>
 #include <DAQ_FPS/daq_fps.h>
 
+#include <TPC/rowlen.h>
+
 /* various test routines... typically used by Tonko only */
 #include <DAQ_FGT/fgtPed.h>
 static int fgt_test(daqReader *rdr, const char *do_print, int which) ;
@@ -604,7 +606,10 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				if(do_print) {
 
 					for(int row=0;row<=45;row++) {
-						printf("+sector %2d, row %2d: pixels %d\n",s,row,pixel_count[row]) ;
+						int max_cou = tpc_rowlen[row] * 400 ;
+						if(max_cou==0) max_cou = 1 ;
+						double occ = 100.0*(double)pixel_count[row]/(double)max_cou ;
+						printf("+sector %2d, row %2d: pixels %d, occupancy %.1f%%\n",s,row,pixel_count[row],occ) ;
 					}
 				}
 			}

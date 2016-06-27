@@ -26,7 +26,28 @@
 #define ESMD_DATSIZE   192
 
 
+#define EMC_PED_VERSION	0x01
 
+
+struct emc_ped_t {
+	u_char crate_id ;	//1..48
+	u_char ch_cou ;		//160; 192
+	u_char version ;	//for alignment
+	u_char dummy0 ;		//ibid
+
+	struct {
+		float rms ;
+		float ped ;
+	} ped[0] ;
+} ;
+
+struct emc_ped_full_t {
+	u_char rts_id ;		//ETOW, BTOW, ESMD
+	u_char crate_cou ;	//6, 30, 48
+	u_char version ;	
+	u_char dummy ;	
+	struct emc_ped_t crates[0] ;
+} ;
 
 struct emc_t {
 	u_char btow_in ;
@@ -87,8 +108,10 @@ extern int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char
 class daq_emc : public daq_det {
 private:
 	class daq_dta *handle_legacy() ;
+	class daq_dta *handle_pedrms() ;
 
 	class daq_dta *legacy ;	// "legacy" bank
+	class daq_dta *pedrms ;
 
 	static const char *help_string ;
 protected:

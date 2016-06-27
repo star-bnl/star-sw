@@ -1190,6 +1190,10 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 		for(int c=0;c<12;c++) {
 			int ix = rdo->fee[b][c].id ;	// altro id!
 
+			if((altro[ix] & 2)) {
+				LOG(ERR,"Duplicate ALTRO %d status 0x%X at %d:%d",ix,altro[ix],b,c) ;
+			}
+
 			if(rdo->fee[b][c].fee_status) {	// found in the scan..
 
 				altro[ix] |= 0x2 ;	// found
@@ -1254,7 +1258,8 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 					if(overriden) ;
 					else {
-					LOG(ERR,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X",sector,rdo->rdo,fcou,
+					LOG(ERR,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X",
+					    sector,rdo->rdo,fcou,
 					    rdo->fee[b][c].pad_id,
 					    rdo->fee[b][c].id,
 					    rdo->fee[b][c].jumpers,
@@ -1279,6 +1284,9 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 		if(altro[a] == 0) continue ;	// skip unneeded and not found...
 		if(altro[a] == 3) continue ;	// needed and found; all ok...
 
+		//I want the FEE for easier entry into the bad log...
+		int fee = tpx_altro_to_fee(rb+1,a) ;
+
 		if(altro[a] == 1) {	// needed but missing
 			int overriden = 0 ;
 
@@ -1292,12 +1300,13 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 			if(overriden) continue ;
 
-			LOG(ERR,"msc: Sector %2d, RDO %d: ALTRO %3d missing: status 0x%X",sector,rb+1,a,altro[a]) ;
+
+			LOG(ERR,"msc: Sector %2d, RDO %d: ALTRO %3d [FEE %3d] missing: status 0x%X",sector,rb+1,a,fee,altro[a]) ;
 			
 			err |= 2 ;
 		}	
 		else {
-			LOG(WARN,"msc: Sector %2d, RDO %d: ALTRO %3d odd status: status 0x%X",sector,rb+1,a,altro[a]) ;
+			LOG(WARN,"msc: Sector %2d, RDO %d: ALTRO %3d [FEE %3d] odd status: status 0x%X",sector,rb+1,a,fee,altro[a]) ;
 			if((altro[a] & 0xB)==0xB) {	// needed, found & error
 				err |= 2 ;
 			}
