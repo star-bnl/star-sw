@@ -38,7 +38,7 @@
 #include "TPCCATracker/Performance/AliHLTTPCCAMergerPerformance.h"
 #endif /* __NEW_TPCCATracker__ */
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
-#include "StiCAKalmanTrack.h"
+#include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 #endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
@@ -94,7 +94,7 @@ void StiCATpcTrackerInterface::SetNewEvent()
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
 
-  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
+//VP  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
   
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
@@ -416,7 +416,9 @@ void StiCATpcTrackerInterface::MakeHits()
 
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
-      if (! hit->stHit()) continue;
+      if (! hit->stHit()) 	continue;
+      if (  hit->timesUsed()) 	continue;//VP
+      
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
       StGlobalCoordinate glob(tpcHit->position());
@@ -740,7 +742,7 @@ void StiCATpcTrackerInterface::FillStiPerformance()
 
   for(int iTr=0; iTr<fStiTracks->getTrackCount(0); iTr++)
   {
-    StiCAKalmanTrack * track = (StiCAKalmanTrack*) fStiTracks->at(iTr);
+    auto * track = (StiKalmanTrack*) fStiTracks->at(iTr);
     vector<StiHit*> hits_v = track-> getHits();
 
     AliHLTTPCCAGBTrack GBTrack;
@@ -751,7 +753,8 @@ void StiCATpcTrackerInterface::FillStiPerformance()
     for(unsigned iH=0; iH<hits_v.size(); iH++)
     {
       StiHit *hit = hits_v[iH];
-      if (! hit->stHit()) continue;
+      if (! hit->stHit()) 	continue;
+      if (  hit->timesUsed()) 	continue;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
       StGlobalCoordinate glob(tpcHit->position());

@@ -1,7 +1,9 @@
 #ifndef __StiCATpcSeedFinder_h__
 #define __StiCATpcSeedFinder_h__
 #include "Sti/StiHitContainer.h"
+#include "Sti/StiTrackFinder.h"
 
+class StiTrack;
 class StiCATpcTrackerInterface;
 
 struct SeedHit_t {
@@ -27,9 +29,25 @@ class Seed_t {
     lastNodeErrs.print();
   }
 };
-class StiCATpcSeedFinder {
+class StiCATpcSeedFinder: public StiTrackFinder 
+{
  public:
+  StiCATpcSeedFinder(){mSeeds=0;mEnded=0;setName("CASeedFinder");}
+  virtual void startEvent(){mEnded=0;}; 
+  virtual StiTrack *findTrack(double rMin=0); 
   static Bool_t   SeedsCompareStatus(const Seed_t a, const Seed_t b);
-  static void     findTpcTracks(StiCATpcTrackerInterface &caTrackerInt);
+//??  static void     findTpcTracks(StiCATpcTrackerInterface &caTrackerInt);
+  protected:
+  int mEnded;
+  std::vector<Seed_t> *mSeeds;
 };
+
+class StiCALoader {
+public:
+static StiCATpcSeedFinder* New();
+#if 0
+ClassDef(StiCALoader,0)
+#endif
+};
+
 #endif
