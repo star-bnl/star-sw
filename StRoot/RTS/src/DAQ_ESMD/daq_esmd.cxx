@@ -273,7 +273,7 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 	}
 
 	if(err) {
-		LOG(WARN,"RDO %d: 0x%04X 0x%04X 0x%04X 0x%04X 0x04X",rdo1, us[0],us[1],us[2],us[3],us[4]) ;
+		LOG(WARN,"RDO %d error: 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X",rdo1, us[0],us[1],us[2],us[3],us[4]) ;
 		
 	}
 
