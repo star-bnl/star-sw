@@ -100,6 +100,17 @@ extern __inline void ws32(volatile unsigned int *addr, unsigned int data)
 }
 
 /*
+	writes the data byte-spawed to address addr WIHTOUT eieio
+	Used for endian conversion
+*/
+extern __inline void ws32_no_eieio(volatile unsigned int *addr, unsigned int data)
+{
+	__asm__ volatile ("stwbrx %0,0,%1 " : : "r" (data) , "rI" (addr)) ;
+
+	return ;
+}
+
+/*
 	see above except for 16bit data
 */
 extern __inline void ws16(volatile unsigned short *addr, unsigned short data)
