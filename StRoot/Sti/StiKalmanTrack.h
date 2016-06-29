@@ -259,7 +259,9 @@ class StiKalmanTrack : public StiTrack
    virtual void add(StiTrackNode * node,int direction,StiTrackNode *near=0);
 
   /// Convenience method to initialize a track based on seed information 
-  virtual int initialize(const vector<StiHit*> &);
+  virtual int initialize (const vector<StiHit*> &);
+  virtual int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars=0, StiNodePars *lastPars=0, StiNodeErrs *firstErrs=0, StiNodeErrs *lastErrs=0);
+  
     /// Method to return the pointer to the fitter parameters.
   
    StThreeVector<double> getMomentumAtOrigin() const;
@@ -279,7 +281,7 @@ class StiKalmanTrack : public StiTrack
   bool find(int direction=kOutsideIn);
   int  refit();
   int  refitL();
-  void reserveHits();
+  void reserveHits(int yes=1);
   StiTrackNode *extendToVertex(StiHit* vertex);
 #if 0
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);
@@ -289,7 +291,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
-  int approx(int mode=0);
+  int approx(int mode=0,int nNodes=999);
   
   void reduce();
 
@@ -328,7 +330,6 @@ protected:
    * refit() of this class while the other is used in derived class
    * StiCAKalmanTrack.
    */
-  int refit(int &errType);
 
 protected:
     
