@@ -37,6 +37,8 @@ class StiTrackFinder;
 class StiTrackFitter;
 class StiTrack;
 class StiTrackNode;
+class StiNodePars;
+class StiNodeErrs;
 
 /** 
     \enum Direction
@@ -87,7 +89,11 @@ public:
 
   StiTrack();
   virtual ~StiTrack()  { /* nops */  }
-  virtual int  fit (int direction=kOutsideIn); 
+
+  virtual int initialize(const vector<StiHit*> &)=0;
+  virtual int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)=0;
+
+  virtual int  fit (int direction=kOutsideIn);
   virtual bool find(int direction=kOutsideIn);
   virtual void reset()=0;
   virtual void unset(){;}
