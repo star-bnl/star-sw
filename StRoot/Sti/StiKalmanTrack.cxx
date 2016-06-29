@@ -1,18 +1,107 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.141 2016/06/08 23:32:44 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.141 2016/06/08 23:32:44 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.142 2016/06/29 18:18:30 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.142 2016/06/29 18:18:30 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.141  2016/06/08 23:32:44  smirnovd
- * Integration of StiCA
+ * Revision 2.142  2016/06/29 18:18:30  perev
+ * See comments in StiKalmanTrack.h
  *
- * This is a squashed commit with all changes combined. To see individual
- * modifications check out the ds-StiCA_2016 branch in star-sti repository.
- * Alternatively, one can explore the StiCA_2016 branch in the STAR's CVS
- * repository.
+ * Revision 2.139.4.5  2016/06/02 16:50:03  smirnovd
+ * StiKalmanTrack: Refactored public refit() to use protected refit(int&)
+ *
+ * Two return values from protected refit(int&) can be used in different context.
+ * For example, derived class StiCAKalmanTrack return a value different from the
+ * base class.
+ *
+ * Revision 2.139.4.4  2016/06/02 16:45:42  smirnovd
+ * Squashed changes on MAIN branch after StiCA_2016 was brached off
+ *
+ * commit 0b534582b5bf40a64870088f6864387a7941a9be
+ * Author: perev <perev>
+ * Date:   Tue May 31 17:11:46 2016 +0000
+ *
+ *     Coverity
+ *
+ * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:58:39 2016 +0000
+ *
+ *     Assignment out of array boundary removed(J.Lauret)
+ *
+ * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:37:22 2016 +0000
+ *
+ *     WarnOff
+ *
+ * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:47:42 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit b1b0f73cef0f5675bd84106241067329e0221079
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:13:06 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit 393adde57febc06a90d054f71e621e8efd082e10
+ * Author: perev <perev>
+ * Date:   Wed Apr 13 23:08:44 2016 +0000
+ *
+ *     -opt2 proble solved. Array A[1] removed
+ *
+ * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:17:55 2016 +0000
+ *
+ *     1st hit must be not used at all
+ *
+ * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:15:53 2016 +0000
+ *
+ *     Add max number of tracks assigned to one hit
+ *
+ * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
+ * Author: genevb <genevb>
+ * Date:   Thu Feb 25 23:04:50 2016 +0000
+ *
+ *     kSsdId => kSstId
+ *
+ * commit a06d8162931b223b4a405ea5714e703b1cad14e3
+ * Author: perev <perev>
+ * Date:   Mon Dec 28 23:50:27 2015 +0000
+ *
+ *     Remove assert temporary
+ *
+ * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
+ * Author: perev <perev>
+ * Date:   Mon Dec 21 19:41:31 2015 +0000
+ *
+ *     bug #3166 assert vertex closer to 0,0 <9 removed
+ *
+ * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
+ * Author: perev <perev>
+ * Date:   Sat Dec 19 03:40:50 2015 +0000
+ *
+ *     assert rxy<4 ==> <9 temporary
+ *
+ * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
+ * Author: perev <perev>
+ * Date:   Fri Dec 18 03:50:06 2015 +0000
+ *
+ *     *** empty log message ***
+ *
+ * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
+ * Author: perev <perev>
+ * Date:   Thu Dec 3 19:12:24 2015 +0000
+ *
+ *     Remove redundant GTrack error: mFlag: is Negative
  *
  * Revision 2.140  2016/04/13 23:08:44  perev
  * -opt2 proble solved. Array A[1] removed
@@ -460,7 +549,7 @@
 #include "StHelix.hh"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
-#include "Sti/StiHitContainer.h"
+#include "StiHitContainer.h"
 #include "StiUtilities/StiDebug.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -505,9 +594,6 @@ static int mIdCount = 0;
   _vChi2=-2;
   StiDebug::Break(mIdDb);
 }
-
- 
-
 //_____________________________________________________________________________
 /*! 
   Set the factory used for the creation of kalman track nodes.
@@ -576,10 +662,85 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
   BFactory::Free(this);
   return 1;  
 }
+//_____________________________________________________________________________
+int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
+{
+  //cout << "StiCAKalmanTrack::initialize() -I- Started"<<endl;
+  reset();
+  //StiKalmanTrackNode * node  = 0;
+  const StiDetector* detector=0;
+  UInt_t nhits = hits.size();
+  setSeedHitCount(nhits);
+  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
+  const StiDetector* detectorOld = 0;
+  StiHit *hit_Old = 0;
+  for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
+    StiHit *hit = hits[ihit];
+    detector = hit->detector();
+    assert(detector);
+    // look for gaps in hit list
+    if (hit_Old && detector->getGroupId() == kTpcId) {
+      Double_t R_hit = detector->getPlacement()->getLayerRadius();
+      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
+      detectorOld = hit_Old->detector();
+      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+      if (_debug && detectorOld == detector) {
+	cout << "The same detector for hit " << ihit << endl;
+	cout << "hit     \t" << *hit << endl;
+	if (hit_Old) 
+	  cout << "hitOld\t" << *hit_Old << endl;
+      }
+      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
+      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
+	while ((R_hit < R_hit_OLD)) {
+	  detectorContainer->setToDetector( detectorOld );
+	  if ( detectorContainer->moveIn()) {
+	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
+	    if (d == detector) break;
+	    detectorOld = d;
+	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+	    if (detectorOld->isActive()) {
+	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
+	      nI->initialize(d);
+	      add(nI,kOutsideIn);
+	    }
+	  }
+	}
+      }
+    }
+    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+    n->initialize(hit);
+    add(n,kOutsideIn);
+    detectorOld = (StiDetector*) detector;
+    hit_Old = hit;
+  }  
+  if (!firstPars){approx(0,10); return 0;}
+
+
+  if (firstPars){
+    firstNode->fitPars() = *firstPars;
+  }
+  if (firstErrs){ 
+    firstNode->fitErrs() = *firstErrs;
+      //    firstNode->resetError();
+  }
+  if (lastPars){
+    lastNode ->fitPars() = *lastPars;
+  }
+  if (lastErrs){ 
+    lastNode->fitErrs() = *lastErrs;
+      //    firstNode->resetError();
+  }
+  return 0;  
+}
+
 
 //_____________________________________________________________________________
 StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
+  double px,py,pz;
+  px=py=pz=0;
+
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
@@ -1071,10 +1232,16 @@ vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
   node (when there is a hit) is set to "used".
 */	
 //_____________________________________________________________________________
-void StiKalmanTrack::reserveHits()
+void StiKalmanTrack::reserveHits(int yes)
 {
-  StiKTNForwardIterator it(lastNode);
-  for_each( it, it.end(), SetHitUsed() );
+  if (yes) {
+   StiKTNForwardIterator it(lastNode);
+   for_each( it, it.end(), SetHitUsed()   );
+  } else {
+   StiKTNForwardIterator it(lastNode);
+   for_each( it, it.end(), SetHitUnused() );
+  } 
+
 }
 
 /*! Extend track to the given vertex.
@@ -1369,19 +1536,10 @@ void StiKalmanTrack::removeLastNode()
  * Public interface to protected method capable of returning two return values
  * used in this and derived StiCAKalmanTrack classes.
  */
-int StiKalmanTrack::refit() 
+int StiKalmanTrack::refit()
 {
-  int errType; // This return value is ignored
-  return refit(errType);
-}
-
-
-int StiKalmanTrack::refit(int &errType)
-{
-  errType = kNoErrors;
+  int errType = kNoErrors;
   
-  static int nCall=0; nCall++;
-  StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
   static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
@@ -1427,20 +1585,20 @@ int StiKalmanTrack::refit(int &errType)
       //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
-    {//worstNode->getHit()->subTimesUsed();
+    { //worstNode->getHit()->subTimesUsed();
       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
-    if (rejectByHitSet()) { releaseHits()            ; continue;}
+    if (rejectByHitSet()) { releaseHits()            ;continue;}
     
     if (!fail) 							break;
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-    {//flipFlopNode->getHit()->subTimesUsed();
+    { //flipFlopNode->getHit()->subTimesUsed();
       flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
       //	The last resource
       //    errConfidence = 0.5*(errConfidence+1);
-      //    if (errConfidence>0.99) 					break;
+      //    if (errConfidence>0.99) 				break;
   }
   StiKalmanTrackNode *vertexNode= sTNH.getVertexNode();
 
@@ -1448,14 +1606,14 @@ int StiKalmanTrack::refit(int &errType)
   while (!fail && vertexNode) {
     fail = 13;			//prim node invalid
     errType = kVertexNodeInvalid;
-    if (!vertexNode->isValid()) 				break;
+    if (!vertexNode->isValid()) 			break;
     fail = 99;			//prim node Chi2 too big
     errType = kNodeNotValid;
     if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
     fail = 98;			//too many dropped nodes
     errType = kTooManyDroppedNodes;    
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
-        &&  nNEnd+kHitLoss < nNBeg)					break;
+        &&  nNEnd+kHitLoss < nNBeg)			break;
     fail = 0;
     errType = kNoErrors;
     break;    
@@ -1473,7 +1631,7 @@ int StiKalmanTrack::refit(int &errType)
   }
 
   if (fail) setFlag(-1);
-  return fail;
+  return errType;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
@@ -1559,28 +1717,13 @@ void StiKalmanTrack::print(const char *opt) const
 #include "TProfile.h"
 #endif // APPROX_DEBUG
 //_____________________________________________________________________________
-int StiKalmanTrack::approx(int mode)
+int StiKalmanTrack::approx(int mode,int nNodes)
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
 
-#ifdef APPROX_DEBUG
-static TCanvas *myCanvas=0;
-static TH1  *H[4];
-
-if(!myCanvas) {
-   myCanvas=new TCanvas("Approx","",600,800);
-   H[0] = new TH1F("Approx0l","Approx0l", 100,0,5);
-   H[1] = new TH1F("Approx1l","Approx1l", 100,0,5);
-   H[2] = new TProfile("Approx0 ","Approx0",  30,0,30);
-   H[3] = new TProfile("Approx1 ","Approx1 ", 30,0,30);
-   myCanvas->Divide(1,4);
-   for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
-}
-#endif // APPROX_DEBUG
-
 const double BAD_XI2[2]={99,22},XI2_FACT=9;
-int nNode,nNodeIn,iNode=0;
+int nNode,nNodeIn;
 double Xi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
@@ -1591,8 +1734,7 @@ double Xi2=0;
   THelixFitter circ;
   THelixTrack  cirl;
   int zeroH = -1;
-  for (source=rbegin();(targetNode=source());++source) {
-    iNode++;
+  for (source=begin();(targetNode=source())&&nNode<nNodes;++source) {
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1622,6 +1764,43 @@ double Xi2=0;
   if (zeroH) circ.Set(kZEROCURV);
   circ.MakeErrs();
   
+  circ.Backward();
+  double s=0,xyz[3]; 
+  const StiHit *hit = firstNode->getHit();
+  assert(hit);
+  xyz[0] = hit->x_g();
+  xyz[1] = hit->y_g();
+  xyz[2] = hit->z_g();
+  double ds = circ.Path(xyz[0],xyz[1]);
+  double curv = circ.GetRho();
+  circ.Move(ds);
+  cirl = circ;
+  double alfa = firstNode->getAlpha();
+  cirl.Rot(-alfa);
+  StiNodePars P = firstNode->fitPars();
+  P.x()  =  cirl.Pos()[0];
+  P.y()  =  cirl.Pos()[1];
+  P.z()  =  cirl.Pos()[2];
+  P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
+  P.curv() = curv;
+  double hh = P.hz();
+  hh = (fabs(hh)<1e-10)? 0:1./hh;
+  P.ptin() = (hh)? curv*hh:1e-3;
+
+  P.tanl() = cirl.GetSin()/cirl.GetCos();
+  P._cosCA = cirl.Dir()[0]/cirl.GetCos();
+  P._sinCA = cirl.Dir()[1]/cirl.GetCos();
+  if (fabs(P._cosCA)>0.99 || fabs(P._sinCA)>0.99) P.ready();
+  firstNode->fitPars() = P;
+  P = firstNode->fitPars();
+  StiNodeErrs &E = firstNode->fitErrs();
+  cirl.StiEmx(E.G());
+  TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
+  E._cPP*=hh; E._cTP*=hh;
+
+
+
+#if 0
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
   iNode = 0;
@@ -1670,6 +1849,7 @@ double Xi2=0;
     if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
     E.check("In aprox");
   }   
+#endif
   if (Xi2>BAD_XI2[mode])return 2;
   if (nNode==nNodeIn) 	return 0;
   if (nNode<2)		return 3;
@@ -1753,6 +1933,7 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
     if (hit->x()<rMin)		continue;
     if (hit->x()>rMax)		break;
     sum++;
+    if (hit->timesUsed())	hit->subTimesUsed();
     node->setHit(0);
   }
   return sum;
