@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.117.2.3 2016/06/03 16:07:15 smirnovd Exp $
+ * $Id: StiStEventFiller.cxx,v 2.117.2.4 2016/06/29 20:09:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.117.2.4  2016/06/29 20:09:06  perev
+ * Small simplificatoins
+ *
  * Revision 2.117.2.3  2016/06/03 16:07:15  smirnovd
  * Sync with MAIN branch as of 2016-05-31
  *
@@ -687,9 +690,9 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   int fillTrackCountG=0;
   StErrorHelper errh;
   mTrackNumber=0;
-  for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
+  for (int trackIt = 0;trackIt <(int)mTrackStore->size(); trackIt++) 
     {
-      StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(*trackIt);
+      StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*mTrackStore)[trackIt]);
       if (!accept(kTrack)) continue; // get rid of riff-raff
       mTrackNumber++;
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
