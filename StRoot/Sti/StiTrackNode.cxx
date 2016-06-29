@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include "StiTrackNode.h"
 #include "TMath.h"
-#include "TRMatrix.h"
-#include "TRVector.h"
+#include "TCernLib.h"
 #include "StMessMgr.h"
 #include "StiUtilities/StiDebug.h"
 
@@ -551,6 +550,77 @@ int StiNodeErrs::nan() const
   return 0;
 }
 
+//____________________________________________________________
+double sign(const double *a,int n)
+{
+   double ans=3e33;
+   double *aa = (double *)a;
+   double save = aa[0]; if (!save) aa[0] = 1;
+   double B[kNErrs];
+   double *b = B;
+   if (n>kNErrs) b = new double[n];
+
+   // trchlu.F -- translated by f2c (version 19970219).
+   //
+   //see original documentation of CERNLIB package F112 
+
+   /* Local variables */
+   int ipiv, kpiv, i__, j;
+   double r__, dc;
+   int id, kd;
+   double sum;
+
+
+   /* CERN PROGLIB# F112    TRCHLU          .VERSION KERNFOR  4.16  870601 */
+   /* ORIG. 18/12/74 W.HART */
+
+
+   /* Parameter adjuTments */
+   --b;    --a;
+
+   /* Function Body */
+   ipiv = 0;
+
+   i__ = 0;
+
+   do {
+      ++i__;
+      ipiv += i__;
+      kpiv = ipiv;
+      r__ = a[ipiv];
+
+      for (j = i__; j <= n; ++j) {
+         sum = 0.;
+         if (i__ == 1)       goto L40;
+         if (r__ == 0.)      goto L42;
+         id = ipiv - i__ + 1;
+         kd = kpiv - i__ + 1;
+
+         do {
+            sum += b[kd] * b[id];
+            ++kd;   ++id;
+         } while (id < ipiv);
+
+L40:
+         sum = a[kpiv] - sum;
+L42:
+         if (j != i__) b[kpiv] = sum * r__;
+         else {
+            if (sum<ans) ans = sum;
+            if (sum<=0.) goto RETN;
+            dc = sqrt(sum);
+            b[kpiv] = dc;
+            if (r__ > 0.)  r__ = (double)1. / dc;
+         }
+         kpiv += j;
+      }
+
+   } while  (i__ < n);
+
+RETN: aa[0]=save; 
+   if (n>kNErrs) delete [] b;
+   return ans;
+} /* trchlu_ */
 //______________________________________________________________________________
 int StiNodePars::check(const char *pri) const
 {
