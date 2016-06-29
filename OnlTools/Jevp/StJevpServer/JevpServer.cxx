@@ -192,7 +192,10 @@ void JevpServer::main(int argc, char *argv[])
 {
   // gErrorIgnoreLevel = kBreak;   // suppress root messages...
   serv.parseArgs(argc, argv);
-  
+
+  gMessMgr->SwitchOff("I");
+  gMessMgr->SwitchOff("W");
+
   rtsLogOutput(serv.log_output);
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
