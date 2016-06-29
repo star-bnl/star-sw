@@ -8,6 +8,7 @@
 #include "StiHit.h"
 #include "StiNodePars.h"
 class StiDetector;
+double sign(const double *b,int n); 
 
 enum eTkPars {kNPars=6,kNErrs=21};
 class StiNodeMtx {
