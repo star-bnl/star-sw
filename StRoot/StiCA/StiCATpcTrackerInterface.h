@@ -1,6 +1,6 @@
 #ifndef __StiCATpcTrackerInterface_h__
 #define __StiCATpcTrackerInterface_h__
-#include "StiCA/StiCATpcSeedFinder.h"
+#include "StiCATpcSeedFinder.h"
 #define __NEW_TPCCATracker__
 #ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBTracker.h"
