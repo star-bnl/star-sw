@@ -48,7 +48,7 @@ public:
     bool isDiscreteScatterer() const 		{ return 0; }
      int insideL(const double xl[3],int mode=1,double fakt=1) const ;
      int insideG(const double xl[3],int mode=1,double fakt=1) const ;
-  double getCenterX() const;
+
 //		Gas is under detector
     StiMaterial* getGas() const 		{ assert(gas); return gas; }
     StiMaterial* getMaterial() const 		{ assert(material) ;return material; }
@@ -98,6 +98,7 @@ public:
 
     double getVolume() const;
     double getWeight() const;
+    void   getDetPlane(double plane[4]) const;
 
  static int    mgIndex;
  static double mgValue[2];
