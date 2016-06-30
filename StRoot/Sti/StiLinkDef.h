@@ -16,7 +16,6 @@
 #pragma link C++ class StiKalmanTrack;
 #pragma link C++ class StiKalmanTrackNode;
 #pragma link C++ class StiKTNIterator;
-#pragma link C++ class StiLocalTrackMerger;
 #pragma link C++ class StiLocalTrackSeedFinder;
 #pragma link C++ class StiMasterDetectorBuilder;
 #pragma link C++ class StiMaterial;
@@ -33,7 +32,6 @@
 #pragma link C++ class StiTrackFinder;
 #pragma link C++ class StiTrackFitter;
 #pragma link C++ class StiTrack;
-#pragma link C++ class StiTrackMerger;
 #pragma link C++ class StiTrackNode;
 #pragma link C++ class StiTreeNode;
 #pragma link C++ class StiVertexFinder;
