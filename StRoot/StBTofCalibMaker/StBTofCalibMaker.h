@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $
+ * $Id: StBTofCalibMaker.h,v 1.9 2016/06/30 17:09:56 jdb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.9  2016/06/30 17:09:56  jdb
+ * Fixed Several errors identified by Coverity
+ *
  * Revision 1.8  2014/08/06 11:42:53  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -182,11 +185,11 @@ private:
 
   static const Double_t mC_Light;  // = C_C_LIGHT/1.e9;
 
-    Bool_t     mValidCalibPar;
-    Bool_t     mValidStartTime;
+    Bool_t     mValidCalibPar = kFALSE;
+    Bool_t     mValidStartTime = kFALSE;
 
-    Int_t      mVPDEastHitsCut;
-    Int_t      mVPDWestHitsCut;
+    Int_t      mVPDEastHitsCut = 0;
+    Int_t      mVPDWestHitsCut = 0;
 
     Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t 
     Float_t   mTofTotCorr[mNTray][mNModule][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
@@ -196,18 +199,18 @@ private:
 
     Double_t   mVPDLeTime[2*mNVPD];
     
-    Double_t   mTSumEast;
-    Double_t   mTSumWest;
-    UInt_t     mVPDHitPatternEast;
-    UInt_t     mVPDHitPatternWest;
-    Int_t      mNEast;
-    Int_t      mNWest;            //! for Run8 to save time, these stored first
-    Double_t   mVPDVtxZ;          //! vertex z from VPD
-    Double_t   mProjVtxZ;         //! vertex z from track projection, track closest to beam line
-    Double_t   mEvtVtxZ;          //! vertex z from event vertex (mostly TPC vertex)
-    Double_t   mTDiff;            //! time difference between east and west
-    Double_t   mTStart;           //! start time
-    Int_t      mNTzero;           //! number of hits used in T0 (non-vpd-start)
+    Double_t   mTSumEast = 0.0;
+    Double_t   mTSumWest = 0.0;
+    UInt_t     mVPDHitPatternEast = 0;
+    UInt_t     mVPDHitPatternWest = 0;
+    Int_t      mNEast = 0;
+    Int_t      mNWest = 0;            //! for Run8 to save time, these stored first
+    Double_t   mVPDVtxZ = 0.0;          //! vertex z from VPD
+    Double_t   mProjVtxZ = 0.0;         //! vertex z from track projection, track closest to beam line
+    Double_t   mEvtVtxZ = 0.0;          //! vertex z from event vertex (mostly TPC vertex)
+    Double_t   mTDiff = 0.0;            //! time difference between east and west
+    Double_t   mTStart = 0.0;           //! start time
+    Int_t      mNTzero = 0;           //! number of hits used in T0 (non-vpd-start)
 
     StPhysicalHelixD* mBeamHelix;  //! beamline helix used for Run 8
     ///
@@ -218,7 +221,7 @@ private:
 
     Bool_t            mOuterGeometry;
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
-    Bool_t            mUseEventVertex; //! switch for using event vertices
+    Bool_t            mUseEventVertex = kFALSE; //! switch for using event vertices
     Bool_t            mInitFromFile; //! switch for reading from files
     Bool_t            mUseVpdStart;  //! switch for vpd start
 
@@ -229,10 +232,10 @@ private:
 
     Bool_t   mHisto;            //! switch to fill QA histograms
     string   mHistoFileName;    //! histogram file name
-    TH1D*    hEventCounter;     //!
+    TH1D*    hEventCounter = nullptr;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.9 2016/06/30 17:09:56 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };
