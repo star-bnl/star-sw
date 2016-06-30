@@ -261,15 +261,10 @@ class StiKalmanTrack : public StiTrack
   /// Convenience method to initialize a track based on seed information 
   virtual int initialize (const vector<StiHit*> &);
   virtual int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars=0, StiNodePars *lastPars=0, StiNodeErrs *firstErrs=0, StiNodeErrs *lastErrs=0);
-  
-    /// Method to return the pointer to the fitter parameters.
-  
-   StThreeVector<double> getMomentumAtOrigin() const;
-   StThreeVector<double> getPoint(int firstLast=0) const;
-
-   virtual vector<StiHit*> getHits();
-   virtual vector<const StMeasuredPoint*> stHits() const;
-   virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
+    
+  virtual vector<StiHit*> getHits();
+  virtual vector<const StMeasuredPoint*> stHits() const;
+  virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 
 
   double  getMass() const;   // mass when pid known
