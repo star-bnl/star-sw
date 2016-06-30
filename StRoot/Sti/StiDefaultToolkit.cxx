@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.2 2016/06/29 18:03:13 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.3 2016/06/30 19:50:26 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.3  2016/06/30 19:50:26  perev
+ * StiTrackMerger removed
+ *
  * Revision 2.2  2016/06/29 18:03:13  perev
  * Added two seed finders CA & KNN
  *
@@ -384,8 +387,6 @@
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackMerger.h"
 #include "Sti/StiStarVertexFinder.h"
-//#include "Sti/StiCompositeSeedFinder.h"
-#include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiDetectorGroups.h"
@@ -419,7 +420,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackSeedFinder(0),
   _trackFinder(0),
   _trackFitter(0),
-  _trackMerger(0),
   _vertexFinder(0),
   _hitLoader(0),
   _loaderHitFilter(0),
@@ -448,7 +448,6 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _trackSeedFinder;
   delete _trackFinder;
   delete _trackFitter;
-  delete _trackMerger;
 }
 
 //______________________________________________________________________________
@@ -668,14 +667,6 @@ StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
   return _trackFitter;
 }
 
-//______________________________________________________________________________
-StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
-{
-  if (_trackMerger)
-    return _trackMerger;
-  _trackMerger = new StiLocalTrackMerger(getTrackContainer());
-  return _trackMerger;
-}
 
 //______________________________________________________________________________
 StiVertexFinder * StiDefaultToolkit::getVertexFinder()

@@ -49,7 +49,6 @@ public:
   virtual StiTrackFinder         *getTrackSeedFinderKNN();
   virtual StiTrackFinder         *getTrackFinder();
   virtual StiTrackFitter         *getTrackFitter();
-  virtual StiTrackMerger         *getTrackMerger();
   virtual StiVertexFinder        *getVertexFinder();
   virtual StiHitLoader<StEvent,StiDetectorBuilder> *getHitLoader();
 
@@ -95,7 +94,6 @@ public:
   StiTrackFinder          *_trackSeedFinder;
   StiTrackFinder          *_trackFinder;
   StiTrackFitter          *_trackFitter;
-  StiTrackMerger          *_trackMerger;
   StiVertexFinder         *_vertexFinder;
   StiHitLoader<StEvent,StiDetectorBuilder> *_hitLoader;
 
