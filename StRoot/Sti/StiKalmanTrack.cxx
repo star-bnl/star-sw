@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.142 2016/06/29 18:18:30 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.142 2016/06/29 18:18:30 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.143 2016/06/30 19:51:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.143 2016/06/30 19:51:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.143  2016/06/30 19:51:52  perev
+ * WarnOff
+ *
  * Revision 2.142  2016/06/29 18:18:30  perev
  * See comments in StiKalmanTrack.h
  *
@@ -735,22 +738,6 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
 }
 
 
-//_____________________________________________________________________________
-StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
-{
-  double px,py,pz;
-  px=py=pz=0;
-
-  StiKalmanTrackNode * inner = getInnerMostNode();
-
-  if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-  inner->propagate(0.,0,kOutsideIn);
-  double p[3];
-  inner->getMomentum(p,0);
-  StThreeVector<double> p3(p[0],p[1],p[2]);
-  p3.rotateZ(inner->getAlpha());
-  return p3;
-}
 
 //_____________________________________________________________________________
 /*! Return the track sign
@@ -1722,7 +1709,7 @@ int StiKalmanTrack::approx(int mode,int nNodes)
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
 
-const double BAD_XI2[2]={99,22},XI2_FACT=9;
+const double BAD_XI2[2]={99,22};
 int nNode,nNodeIn;
 double Xi2=0;
   StiHitErrs hr;
@@ -1765,7 +1752,7 @@ double Xi2=0;
   circ.MakeErrs();
   
   circ.Backward();
-  double s=0,xyz[3]; 
+  double xyz[3]; 
   const StiHit *hit = firstNode->getHit();
   assert(hit);
   xyz[0] = hit->x_g();
@@ -1890,13 +1877,6 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
     add(myNode,kOutsideIn);
   }
   return *this;
-}
-
-//_____________________________________________________________________________
-StThreeVector<double> StiKalmanTrack::getPoint(int firstLast) const
-{
-  const StiKalmanTrackNode* node = getInnOutMostNode(firstLast,3);
-  return StThreeVector<double>(node->x_g(),node->y_g(),node->z_g());
 }
 
 //_____________________________________________________________________________
