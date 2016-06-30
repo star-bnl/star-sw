@@ -516,12 +516,12 @@ void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   
     // get cov matrises
   const float *caCov = caPar.GetCov();
-  double nodeCov[15];
-  for (int i1 = 0, i = 0; i1 < 5; i1++){
-    for (int i2 = 0; i2 <= i1; i2++, i++){
-      nodeCov[i] = J[i1]*J[i2]*caCov[i];
-    }
-  }
+//   double nodeCov[15];
+//   for (int i1 = 0, i = 0; i1 < 5; i1++){
+//     for (int i2 = 0; i2 <= i1; i2++, i++){
+//       nodeCov[i] = J[i1]*J[i2]*caCov[i];
+//     }
+//   }
   // if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
   //   cout << "Warrning: Bad CA Cov Matrix." << endl;
   // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
@@ -568,14 +568,14 @@ void StiCATpcTrackerInterface::MakeSeeds()
     Seed_t seed;
 
     const int NHits = tr.NHits();
-    float last_x = 1e10; // for check
+//VP    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
       const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
       const int hId   = fTracker->Hit( index ).ID();
 //      if ( last_x == fSeedHits[hId].hit->position() ) continue; // track can have 2 hits on 1 row because of track segments merger.
       seed.vhit.push_back(&(fSeedHits[hId]));
 //      assert( last_x >= fSeedHits[hId].hit->position() ); // should be back order - from outer to inner.
-      last_x = fSeedHits[hId].hit->position();
+//VP      last_x = fSeedHits[hId].hit->position();
     }
 
     seed.total_hits = seed.vhit.size();

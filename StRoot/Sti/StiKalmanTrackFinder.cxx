@@ -477,13 +477,12 @@ assert(direction || leadNode==track->getLastNode());
   StiKalmanTrackNode testNode;
   int position;
   StiHit * stiHit;
-  double  leadAngle,leadRadius;
+  double  leadRadius;
 
   const StiDetector *leadDet = leadNode->getDetector();
   leadRadius = leadDet->getPlacement()->getLayerRadius();
   assert(leadRadius>0 && leadRadius<1000);
   if (leadRadius < qa.rmin()) {gLevelOfFind--;qa.setQA(-4);return;}
-  leadAngle  = leadDet->getPlacement()->getLayerAngle();  
   
   double xg = leadNode->x_g();
   double yg = leadNode->y_g();
