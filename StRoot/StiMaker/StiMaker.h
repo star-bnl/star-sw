@@ -50,7 +50,7 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.36 2016/06/08 23:32:47 smirnovd Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.37 2016/06/30 18:41:20 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
@@ -64,9 +64,6 @@ class StiMaker : public StMaker
     
  private:
     void  MyClear();
-
-    /// Updates the internal toolkit based on set the maker's attributes
-    void UpdateToolkit();
 
     bool                 eventIsFinished;
     bool                 _initialized;
