@@ -45,7 +45,6 @@ class 	StiTrackContainer;
 // service and convenience class objects.
 class 	StiTrackFinder;
 class 	StiTrackFitter;
-class 	StiTrackMerger;
 class   StiVertexFinder;
 class   EditableParameter;
 
@@ -81,7 +80,6 @@ public:
   virtual StiTrackFinder        * getTrackSeedFinderKNN()=0;
   virtual StiTrackFinder        * getTrackFinder()=0;
   virtual StiTrackFitter        * getTrackFitter()=0;
-  virtual StiTrackMerger        * getTrackMerger()=0;
   virtual StiVertexFinder       * getVertexFinder()=0;
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
 
