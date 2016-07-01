@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSstDaqMaker.cxx,v 1.12 2016/06/23 20:23:34 bouchet Exp $
+ * $Id: StSstDaqMaker.cxx,v 1.13 2016/07/01 18:30:52 bouchet Exp $
  *
  * Author: Long Zhou, Nov 2013
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StSstDaqMaker.cxx,v $
+ * Revision 1.13  2016/07/01 18:30:52  bouchet
+ * COVERITY : STACK_USE, UNINIT_CTOR fixed
+ *
  * Revision 1.12  2016/06/23 20:23:34  bouchet
  * sstBadStrips table decoding and use ; COVERITY : DIVIDE_BY_ZERO, NO_EFFECT fixed
  *
@@ -167,7 +170,37 @@ const Int_t StSstDaqMaker::Rev_ReadOutMap[128] = {
 StSstDaqMaker::StSstDaqMaker(const Char_t *name)
   : StRTSBaseMaker("sst", name),mMode(1)
 {
-  memset(mBeg,0,mEnd-mBeg+1);
+   mConfig=0;
+   mConfigTable=0;
+   spa_strip=0;
+   stripCal=0;
+   mRdoData=0;
+   mRdoDataLength=0;
+   mHeaderData=0;
+   mTrailerData=0;
+   mTrailerDataLength=0;
+   mMode=0;
+   mRdoFlag=0;
+   mTrigger=0;
+   mSec=0;
+   mFiber=0;
+   mPed=0;
+   mRms=0;
+   mRDO=0;
+   mEventnumber=0;
+   mEventrunumber=0;
+   mEventTime=0;
+   mPEventTime=0;
+   mRunNum=0;
+   for(int i=0;i<8;i++){
+     mAdc[i] = 0;
+     mAdcHeader[i] = 0;
+     mAdcLength[i] = 0;
+     mFiberFlag[i] = 0;
+     mFlag[i] = 0;
+     mChannel[i] = 0;
+     mDataMode[i] = 0;
+   }
 }
 //-----------------------------------------------
 StSstDaqMaker::~StSstDaqMaker()
@@ -294,8 +327,8 @@ Int_t StSstDaqMaker::Make()
    }
 
    //pedestal mode   
-   // St_sstStripCalib *stripCal = new St_sstStripCalib("sstStripCalib",nSstSide*nSstLadder*nSstStripsPerWafer*nSstWaferPerLadder);
-   sstStripCalib_st noise_strip;
+   sstStripCalib_st *noise_strip = new sstStripCalib_st();
+   memset(noise_strip,0,491520*(sizeof(Short_t) + sizeof(Char_t)));
    while ( (rts_table = GetNextDaqElement("sst/pedrms")) != 0 ) {
       mMode    = 1;
       mRdoData = (UInt_t *)rts_table->At(0);
@@ -349,10 +382,9 @@ Int_t StSstDaqMaker::Make()
 		 + ladder*nSstWaferPerLadder*nSstStripsPerWafer
 		 + h*nSstStripsPerWafer
 		 + c_correct;		 // + s;
-               noise_strip.rms[channelindex]       = mRms;
-               noise_strip.pedestals[channelindex] = mPed;
-               // stripCal->AddAt(&noise_strip);
-	       // cout<<"--->Channel is : "<<channelindex<<endl;
+               noise_strip->rms[channelindex]       = mRms;
+               noise_strip->pedestals[channelindex] = mPed;
+   	       // cout<<"--->Channel is : "<<channelindex<<endl;
                if (id_side == 0) ladderCountP[ladder]++;
                else            ladderCountN[ladder]++;
             }
@@ -391,12 +423,13 @@ Int_t StSstDaqMaker::Make()
      sprintf(name, "sstStripCalib.%d.%06d.root", GetDate(), GetTime());
 
      TFile f1(name,"RECREATE","SSD ped and noise file",9);
-     stripCal->AddAt(&noise_strip);
+     stripCal->AddAt(noise_strip);
      stripCal->Print();
      stripCal->Write();
      f1.Close();
    }
 
+   delete noise_strip;
    return kStOk;
 }
 //-------------------------------------------------
