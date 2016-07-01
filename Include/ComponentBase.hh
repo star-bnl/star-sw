@@ -77,6 +77,7 @@ class ComponentBase {
                               const double y0, const double z0, 
                               double& xw, double& yw, double& rw);
 
+
   // Enable and disable periodicities
   void EnablePeriodicityX() {
     m_xPeriodic = true;
@@ -182,6 +183,30 @@ class ComponentBase {
   void EnableDebugging() { m_debug = true; }
   void DisableDebugging() { m_debug = false; }
 
+  // Active trapping taken care of by component (for TCAD components)
+  void ActivateTraps(){m_activeTraps = true;}
+  void DeactivateTraps(){m_activeTraps = false;}
+  bool IsTrapActive(){return m_activeTraps;}
+
+  // Activate velocity taken care of by component (for TCAD components) 
+  void ActivateVelocityMap(){m_hasVelocityMap = true;};
+  void DectivateVelocityMap(){m_hasVelocityMap = false;};
+  bool IsVelocityActive(){return m_hasVelocityMap;};
+
+  // Get Electron attachments and velocities. 
+  virtual bool ElectronAttachment(const double /* x */, const double /* y */, const double /* z */,
+                          double& eta){eta = 0; return false;};
+  virtual bool HoleAttachment(const double /* x */, const double /* y */, const double /* z */, 
+		          double& eta){eta = 0; return false;};
+  virtual void ElectronVelocity(const double /* x */, const double /* y */, const double /* z */,
+                             double& vx, double& vy, double& vz, Medium*& /* m */,
+                             int& status){vx=vy=vz=0; status = -100;};
+  virtual void HoleVelocity(const double /* x */, const double /* y */, const double /* z */,
+                             double& vx, double& vy, double& vz, Medium*& /* m */,
+                             int& status){vx=vy=vz=0; status = -100;};
+  virtual bool GetElectronLifetime(const double /* x */, const double /* y */, const double /* z */, double& etau){ etau = -1; return false;}
+  virtual bool GetHoleLifetime(const double /* x */, const double /* y */, const double /* z */, double& htau){htau = -1; return false;}
+
  protected:
   std::string m_className;
 
@@ -189,6 +214,11 @@ class ComponentBase {
 
   // Ready for use?
   bool m_ready;
+
+  // Does the component have traps?
+  bool m_activeTraps;
+  // Does the component have velocity maps? 
+  bool m_hasVelocityMap;
 
   // Simple periodicity in x, y, z
   bool m_xPeriodic, m_yPeriodic, m_zPeriodic;

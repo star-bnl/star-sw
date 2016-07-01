@@ -46,6 +46,14 @@ class AvalancheMC {
   void EnableAttachment() { m_useAttachment = true; }
   void DisableAttachment() { m_useAttachment = false; }
 
+  // Switch on calculating trapping with TCAD traps
+  void EnableTcadTraps(){m_useTcadTrapping = true;}
+  void DisableTcadTraps(){m_useTcadTrapping = false;}
+
+  // Switch on/off TCAD velocity maps
+  void EnableTcadVelocity(){m_useTcadVelocity = true;}
+  void DisableTcadVelocity(){m_useTcadVelocity = false;}
+
   // Enable/disable magnetic field in stepping algorithm.
   void EnableMagneticField() { m_useBfield = true; }
   void DisableMagneticField() { m_useBfield = false; }
@@ -196,6 +204,10 @@ class AvalancheMC {
   double m_scaleElectronSignal;
   double m_scaleHoleSignal;
   double m_scaleIonSignal;
+
+  // Use traps and velocity from the field component, ComponentTcad2d;
+  bool m_useTcadTrapping;
+  bool m_useTcadVelocity;
 
   bool m_debug;
 

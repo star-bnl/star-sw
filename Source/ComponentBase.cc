@@ -7,6 +7,7 @@ ComponentBase::ComponentBase()
     : m_className("ComponentBase"),
       m_geometry(NULL),
       m_ready(false),
+      m_activeTraps(false),
       m_xPeriodic(false),
       m_yPeriodic(false),
       m_zPeriodic(false),

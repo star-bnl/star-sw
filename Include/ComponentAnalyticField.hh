@@ -59,6 +59,12 @@ class ComponentAnalyticField : public ComponentBase {
   void AddStripOnPlaneY(const char direction, const double y, const double smin,
                         const double smax, const std::string label,
                         const double gap = -1.);
+  void AddPixelOnPlaneX(const double x, const double ymin, const double ymax,
+                        const double zmin, const double zmax, const std::string label,
+			const double gap = -1.);
+  void AddPixelOnPlaneY(const double y, const double xmin, const double xmax,
+                        const double zmin, const double zmax, const std::string label,
+			const double gap = -1.);
 
   // Set the periodic length [cm] in x/y direction
   void SetPeriodicityX(const double s);
@@ -238,6 +244,17 @@ class ComponentAnalyticField : public ComponentBase {
     double gap;
   };
 
+  struct pixel {
+    // Label
+    std::string type;
+    // Readout group
+    int ind;
+    // Coordinates
+    double smin, smax;
+    double zmin, zmax;
+    double gap;
+  };
+
   struct plane {
     // Labels
     std::string type;
@@ -252,6 +269,9 @@ class ComponentAnalyticField : public ComponentBase {
     // z strips
     int nStrips2;
     std::vector<strip> strips2;
+    // Pixels
+    int nPixels;
+    std::vector<pixel> pixels;
   };
 
   std::vector<plane> planes;
@@ -414,6 +434,9 @@ class ComponentAnalyticField : public ComponentBase {
   void WfieldStripXy(const double xpos, const double ypos, const double zpos,
                      double& ex, double& ey, double& ez, double& volt,
                      const int ip, const int is, const bool opt);
+  void WfieldPixel(const double xpos, const double ypos, const double zpos,
+                   double& ex, double& ey, double& ez, double& volt,
+                   const int ip, const int is, const bool opt);
 
   // Auxiliary functions for C type cells
   double Ph2(const double xpos, const double ypos);

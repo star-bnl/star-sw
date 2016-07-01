@@ -68,6 +68,12 @@ class MediumSilicon : public Medium {
   void SetImpactIonisationModelVanOverstraetenDeMan();
   void SetImpactIonisationModelGrant();
 
+
+  // Scaling 
+  void SetDiffusionScaling(const double d){
+    diffScale = d;
+  }
+
   // Microscopic transport properties
   bool SetMaxElectronEnergy(const double e);
   double GetMaxElectronEnergy() const { return eFinalG; }
@@ -144,6 +150,9 @@ class MediumSilicon : public Medium {
   static const int HighFieldMobilityModelConstant = 3;
   static const int ImpactIonisationModelVanOverstraeten = 0;
   static const int ImpactIonisationModelGrant = 1;
+
+  // DiffusionScale
+  double diffScale;
 
   double m_bandGap;
   // Doping
