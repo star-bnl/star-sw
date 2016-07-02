@@ -53,14 +53,17 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
       }
       _seedHits.push_back(hit);
     }
-    mSeeds->pop_back(); mEnded = !mSeeds->size(); if (mEnded) return 0;
-    if (_seedHits.size() < 4) continue;
+    StiKalmanTrack* track = 0;
+    if (_seedHits.size() >=4)  {
 
-    StiKalmanTrack* track = static_cast<StiKalmanTrack*>(StiToolkit::instance()->getTrackFactory()->getInstance());
+    track = static_cast<StiKalmanTrack*>(StiToolkit::instance()->getTrackFactory()->getInstance());
     if (1 || !begEndFail)
       track->initialize0(_seedHits, &aSeed.firstNodePars, &aSeed.lastNodePars/*, &aSeed.firstNodeErrs, &aSeed.lastNodeErrs*/ ); // use CATracker parameters. P.S errors should not be copied, they'd be initialized.
     else 
       track->initialize0(_seedHits); 
+    }
+    mSeeds->pop_back(); mEnded = !mSeeds->size();
+    if (!track && !mEnded) continue;
     return track;
   }
   mEnded = 3; return 0;
