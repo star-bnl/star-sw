@@ -1,11 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.143 2016/06/30 19:51:52 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.143 2016/06/30 19:51:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.144 2016/07/07 01:15:00 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.144 2016/07/07 01:15:00 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.144  2016/07/07 01:15:00  perev
+ * Removed changing of timesUsed in releaseHits.
+ * This method is called inside refit when hits is not yet marked as used
+ *
  * Revision 2.143  2016/06/30 19:51:52  perev
  * WarnOff
  *
@@ -1913,7 +1917,6 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
     if (hit->x()<rMin)		continue;
     if (hit->x()>rMax)		break;
     sum++;
-    if (hit->timesUsed())	hit->subTimesUsed();
     node->setHit(0);
   }
   return sum;
