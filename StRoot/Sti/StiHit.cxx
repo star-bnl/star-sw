@@ -240,6 +240,7 @@ static int nCall =0; nCall++;
  void StiHit::addTimesUsed()
 {
     mTimesUsed++;
+    assert(mTimesUsed <=mMaxTimes);
 }
 //_____________________________________________________________________________
  void StiHit::subTimesUsed()
