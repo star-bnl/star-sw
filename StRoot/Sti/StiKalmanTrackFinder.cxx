@@ -170,11 +170,9 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
 //     if (status) 	{nTSeed++; errType = abs(status)*100 + kApproxFail; break;}
     status = track->fit(kOutsideIn);
     if (status) 	{nTSeed++; errType = abs(status)*100 + kFitFail; break;}
-    status = extendTrack(track,rMin); // 0 - can't extend. 1 - can extend and refit -1 - can extend and can't refit. 
-    if (_trackFilter){
-      status = _trackFilter->filter(track);
-      if (status) {nTFilt++; errType = abs(status)*100 + kCheckFail; break;}
-    }
+    status = extendTrack(track,rMin); // 0 = OK 
+    if (!status) status = _trackFilter->filter(track);
+    if (status) {nTFilt++; errType = abs(status)*100 + kCheckFail;}
     if (errType!=kNoErrors) {track->reduce(); return errType;}
 
     //cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
@@ -264,10 +262,9 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   {
     if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) track);
     trackExtended = find(track,kOutsideIn,rMin);
-    if (trackExtended) {
+    if (trackExtended){/* in CA case not extended is ok*/}
     status = track->refit();
     if(status) return kNotRefitedIn;
-    }	
 
   }
     // decide if an outward pass is needed.
