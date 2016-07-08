@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsHit.h,v 1.2 2015/08/28 18:36:04 jdb Exp $
+ * $Id: StMuFmsHit.h,v 1.3 2016/07/08 16:07:31 jdb Exp $
  *
  * Author: Jingguo Ma, Jan 2010
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsHit.h,v $
+ * Revision 1.3  2016/07/08 16:07:31  jdb
+ * Did not increment the version number in last commit, doing so now. StMuFmsHit v1->v2 due to change from StObject->TObject
+ *
  * Revision 1.2  2015/08/28 18:36:04  jdb
  * Added Akios FMS codes
  *
@@ -68,7 +71,7 @@ protected:
     UShort_t mTdc;         // TDC values
     Float_t  mEnergy;      // corrected energy
     
-    ClassDef(StMuFmsHit,1)
+    ClassDef(StMuFmsHit,2)
 };
 
 ostream& operator<<(ostream&, const StMuFmsHit&);
