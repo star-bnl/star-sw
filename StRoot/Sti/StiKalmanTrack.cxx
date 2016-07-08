@@ -1,11 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.144 2016/07/07 01:15:00 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.144 2016/07/07 01:15:00 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.145 2016/07/08 16:16:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.145 2016/07/08 16:16:55 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.145  2016/07/08 16:16:55  perev
+ * It is workaround for bug in CA (#3230). CA sometimes gives the same hit twice
+ * Here I test all hits to be in decreasing order of x() (local x).
+ *  If not, bad hits skipped.
+ * It is not the best way, it is better to fix it inside CA.
+ *  but temporary it will work(VP)
+ *
  * Revision 2.144  2016/07/07 01:15:00  perev
  * Removed changing of timesUsed in releaseHits.
  * This method is called inside refit when hits is not yet marked as used
@@ -681,8 +688,13 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
   const StiDetector* detectorOld = 0;
   StiHit *hit_Old = 0;
+  double xOld = 1e33;
   for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
     StiHit *hit = hits[ihit];
+//		It is workaround of bug in CA (VP)
+    if (xOld <= hits[ihit]->x()) continue;
+    xOld = hits[ihit]->x();
+
     detector = hit->detector();
     assert(detector);
     // look for gaps in hit list
