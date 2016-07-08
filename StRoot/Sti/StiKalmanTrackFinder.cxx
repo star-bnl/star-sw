@@ -221,7 +221,7 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
 
       if (mTimg[kSeedTimg]) mTimg[kSeedTimg]->Stop();
       if (!track) break; // no more seeds
-
+      track->reserveHits(0); 	//Set timesUsed hits to zero
 
       nTTot++;nTtot++;
       if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
