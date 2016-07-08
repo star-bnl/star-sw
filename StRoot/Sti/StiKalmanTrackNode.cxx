@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.172 2016/06/29 18:37:39 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.173 2016/07/08 16:11:32 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.173  2016/07/08 16:11:32  perev
+ * Method print enhancened
+ *
  * Revision 2.172  2016/06/29 18:37:39  perev
  * 1. Removed debug codes non actual now.
  *
@@ -2254,7 +2257,12 @@ static const char *HHH = "xyzXYZ";
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
-  printf("%p(%s)",(void*)this,ts.Data());
+  if (hit && strchr(opt,'H')) {
+    printf("%p(%s=%p)",(void*)this,ts.Data(),hit);
+  } else {
+    printf("%p(%s)",(void*)this,ts.Data());
+  }
+
   if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
   double val=-9999;
   for (int i=0;txt[i];i++) {
