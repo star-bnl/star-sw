@@ -41,6 +41,15 @@ Sensor::Sensor()
   m_thresholdCrossings.clear();
 }
 
+ComponentBase* Sensor::GetComponent(const int compNumber) {
+	if(compNumber < 0 || compNumber > m_nComponents){
+          std::cerr << m_className << "::GetComponent:\n";
+	  std::cerr << "    That component does not exist.\n";
+	  return NULL;	
+	};
+	return m_components[compNumber].comp;
+}
+
 void Sensor::ElectricField(const double x, const double y, const double z,
                            double& ex, double& ey, double& ez, double& v,
                            Medium*& medium, int& status) {
@@ -410,7 +419,6 @@ void Sensor::ClearSignal() {
 void Sensor::AddSignal(const double& q, const double& t, const double& dt,
                        const double& x, const double& y, const double& z,
                        const double& vx, const double& vy, const double& vz) {
-
   // Get the time bin.
   if (t < m_tStart || dt <= 0.) {
     if (m_debug) {

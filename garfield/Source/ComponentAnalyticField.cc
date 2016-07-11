@@ -578,6 +578,90 @@ void ComponentAnalyticField::AddStripOnPlaneY(const char direction,
   }
 }
 
+void ComponentAnalyticField::AddPixelOnPlaneX(const double x,
+                                              const double ymin, const double ymax,
+					      const double zmin, const double zmax,
+                                              const std::string label,
+                                              const double gap) {
+
+  if (!ynplan[0] && !ynplan[1]) {
+    std::cerr << m_className << "::AddPixelOnPlaneX:\n";
+    std::cerr << "    There are no planes at constant x defined.\n";
+    return;
+  }
+
+  if (fabs(ymax - ymin) < Small || fabs(zmax - zmin) < Small) {
+    std::cerr << m_className << "::AddSPixelOnPlaneX:\n";
+    std::cerr << "    Pixel width must be greater than zero.\n";
+    return;
+  }
+
+  pixel newPixel;
+  newPixel.type = label;
+  newPixel.ind = -1;
+  newPixel.smin = std::min(ymin, ymax);
+  newPixel.smax = std::max(ymin, ymax);
+  newPixel.zmin = std::min(zmin, zmax);
+  newPixel.zmax = std::max(zmin, zmax);
+  if (gap > Small) {
+    newPixel.gap = gap;
+  } else {
+    newPixel.gap = -1.;
+  }
+
+  int iplane = 0;
+  if (ynplan[1]) {
+    const double d0 = fabs(coplan[0] - x);
+    const double d1 = fabs(coplan[1] - x);
+    if (d1 < d0) iplane = 1;
+  }
+
+    planes[iplane].nPixels++;
+    planes[iplane].pixels.push_back(newPixel);
+}
+
+void ComponentAnalyticField::AddPixelOnPlaneY(const double y,
+                                              const double xmin, const double xmax,
+                                              const double zmin, const double zmax,
+                                              const std::string label,
+					      const double gap) {
+
+  if (!ynplan[2] && !ynplan[3]) {
+    std::cerr << m_className << "::AddPixelOnPlaneY:\n";
+    std::cerr << "    There are no planes at constant y defined.\n";
+    return;
+  }
+
+  if (fabs(xmax - xmin) < Small || fabs(zmax - zmin) < Small) {
+    std::cerr << m_className << "::AddPixelOnPlaneY:\n";
+    std::cerr << "    Pixel width must be greater than zero.\n";
+    return;
+  }
+
+  pixel newPixel;
+  newPixel.type = label;
+  newPixel.ind = -1;
+  newPixel.smin = std::min(xmin, xmax);
+  newPixel.smax = std::max(xmin, xmax);
+  newPixel.zmin = std::min(zmin, zmax);
+  newPixel.zmax = std::max(zmin, zmax);
+  if (gap > Small) {
+    newPixel.gap = gap;
+  } else {
+    newPixel.gap = -1.;
+  }
+
+  int iplane = 2;
+  if (ynplan[3]) {
+    const double d0 = fabs(coplan[2] - y);
+    const double d1 = fabs(coplan[3] - y);
+    if (d1 < d0) iplane = 3;
+  }
+
+  planes[iplane].nPixels++;
+  planes[iplane].pixels.push_back(newPixel);
+}
+
 void ComponentAnalyticField::SetPeriodicityX(const double s) {
 
   if (s < Small) {
@@ -1960,6 +2044,7 @@ void ComponentAnalyticField::AddReadout(const std::string label) {
 
   int nPlanesFound = 0;
   int nStripsFound = 0;
+  int nPixelsFound = 0;
   for (int i = 0; i < 5; ++i) {
     if (planes[i].type == label) ++nPlanesFound;
     for (int j = 0; j < planes[i].nStrips1; ++j) {
@@ -1968,9 +2053,13 @@ void ComponentAnalyticField::AddReadout(const std::string label) {
     for (int j = 0; j < planes[i].nStrips2; ++j) {
       if (planes[i].strips2[j].type == label) ++nStripsFound;
     }
+    for (int j = 0; j < planes[i].nPixels; ++j) {
+      if (planes[i].pixels[j].type == label) ++nPixelsFound;
+    }
   }
 
-  if (nWiresFound == 0 && nPlanesFound == 0 && nStripsFound == 0) {
+  if (nWiresFound == 0 && nPlanesFound == 0 && 
+      nStripsFound == 0 && nPixelsFound == 0) {
     std::cerr << m_className << "::AddReadout:\n";
     std::cerr << "    At present there are no wires, planes or strips\n";
     std::cerr << "    associated to readout group " << label << ".\n";
@@ -1991,6 +2080,11 @@ void ComponentAnalyticField::AddReadout(const std::string label) {
       std::cout << "      " << nStripsFound << " strips\n";
     } else if (nStripsFound == 1) {
       std::cout << "      1 strip\n";
+    }
+    if (nPixelsFound > 1) {
+      std::cout << "      " << nPixelsFound << " pixels\n";
+    } else if (nPixelsFound == 1) {
+      std::cout << "      1 pixel\n";
     }
   }
 
@@ -4448,6 +4542,11 @@ bool ComponentAnalyticField::PrepareSignals() {
           planes[j].strips2[i].ind = i;
         }
       }
+      for (int k = 0; k < planes[j].nPixels; ++k) {
+        if (planes[j].pixels[k].type == readout[i]) {
+          planes[j].pixels[i].ind = i;
+        }
+      }
     }
   }
 
@@ -5432,6 +5531,17 @@ bool ComponentAnalyticField::Wfield(const double xpos, const double ypos,
       }
     }
   }
+  // Add pixels, if there are any.
+  for (int ip = 0; ip < 5; ++ip) {
+    for (int ipix = 0; ipix < planes[ip].nPixels; ++ipix) {
+      if (planes[ip].pixels[ipix].ind != isw) continue;
+      WfieldPixel(xpos, ypos, zpos, ex, ey, ez, volt, ip, ipix, opt);
+      exsum += ex;
+      eysum += ey;
+      ezsum += ez;
+      if (opt) vsum += volt;
+    }
+  } 
   return true;
 }
 
@@ -6673,5 +6783,194 @@ void ComponentAnalyticField::WfieldStripXy(const double xpos, const double ypos,
       ez = -ewx;
       break;
   }
+}
+
+void ComponentAnalyticField::WfieldPixel(const double xpos, const double ypos,
+                                         const double zpos, double& ex,
+                                         double& ey, double& ez, double& volt,
+                                         const int ip, const int is,
+                                         const bool opt) {
+  //-----------------------------------------------------------------------
+  //   Weighting field for pixels.
+  //   (Last changed on  13/04/16.)
+  //-----------------------------------------------------------------------
+
+  // Initialise the weighting field and potential.
+  ex = ey = ez = volt = 0.;
+
+  pixel thePixel = planes[ip].pixels[is];
+  float d = thePixel.gap;
+
+  // Define maximum error in the field components.
+  float maxError = 1e-5;
+
+  // Transform to normalised coordinates.
+  float xw = 0., yw = 0., zw = 0.;
+
+  // Pixel dimensions in normalised coordinates.
+  float dxw; float dyw;
+  
+  switch (ip) {
+    case 0:
+      xw = ypos - (thePixel.smin + thePixel.smax)/2.; 
+      yw = zpos - (thePixel.zmin + thePixel.zmax)/2.;
+      zw = xpos - coplan[ip];
+      dxw =  thePixel.smax - thePixel.smin; 
+      dyw =  thePixel.zmax - thePixel.zmin; 
+      break;
+    case 1:
+      xw = ypos - (thePixel.smin + thePixel.smax)/2.; 
+      yw = -zpos + (thePixel.zmin + thePixel.zmax)/2.;
+      zw = coplan[ip] - xpos;
+      dxw =  thePixel.smax - thePixel.smin; 
+      dyw =  thePixel.zmax - thePixel.zmin; 
+      break;
+    case 2:
+      xw = xpos - (thePixel.smin + thePixel.smax)/2. ;
+      yw = - zpos + (thePixel.zmin + thePixel.zmax)/2.;
+      zw = ypos - coplan[ip];
+      dxw =  thePixel.smax - thePixel.smin; 
+      dyw =  thePixel.zmax - thePixel.zmin; 
+      break;
+    case 3:
+      xw = xpos - (thePixel.smin + thePixel.smax)/2. ;
+      yw = zpos - (thePixel.zmin + thePixel.zmax)/2. ;
+      zw = coplan[ip] - ypos;
+      dxw =  thePixel.smax - thePixel.smin; 
+      dyw =  thePixel.zmax - thePixel.zmin; 
+      break;
+    default:
+      return;
+  }
+
+  // Make sure we are in the fiducial part of the weighting map.
+  // Commenting out this lines either brakes the simulation or the plot!
+  if (zw <= 0. || zw > d) return;
+
+  float ewx = 0;
+  float ewy = 0;
+  float ewz = 0;
+
+  // Define shorthand notations and common terms. 
+  float x1 = xw - dxw/2.0;  
+  float y1 = yw - dyw/2.0;  
+  float x2 = xw + dxw/2.0;  
+  float y2 = yw + dyw/2.0;  
+  float x1s = x1*x1;
+  float x2s = x2*x2;
+  float y1s = y1*y1;
+  float y2s = y2*y2;
+  float zs = zw * zw;
+  float x1y1 = sqrt(x1s + y1s + zs);
+  float x1y2 = sqrt(x1s + y2s + zs);
+  float x2y1 = sqrt(x2s + y1s + zs);
+  float x2y2 = sqrt(x2s + y2s + zs);
+
+  // Calculate number of terms needed to have sufficiently small error.
+  int Nz = ceil(sqrt(dxw * dyw / (8*M_PI*d*d*d*maxError)));
+  int Nx = ceil(sqrt(dyw * zw  / (4*M_PI*d*d*d*maxError))); 
+  int Ny = ceil(sqrt(dxw * zw  / (4*M_PI*d*d*d*maxError))); 
+
+  for(int i = std::max(Ny, std::max(Nx, Nz)); i > 0; --i){
+    float u1 = 2*i*d - zw;
+    float u2 = 2*i*d + zw;
+    float u1s = u1*u1;
+    float u2s = u2*u2;
+    float u1x1y1 = sqrt(x1s + y1s + u1s);
+    float u1x1y2 = sqrt(x1s + y2s + u1s);
+    float u1x2y1 = sqrt(x2s + y1s + u1s);
+    float u1x2y2 = sqrt(x2s + y2s + u1s);
+    float u2x1y1 = sqrt(x1s + y1s + u2s);
+    float u2x1y2 = sqrt(x1s + y2s + u2s);
+    float u2x2y1 = sqrt(x2s + y1s + u2s);
+    float u2x2y2 = sqrt(x2s + y2s + u2s);
+
+    if(i <= Nx){
+      //-df/dx(x,y,2nd-z)
+      ewx -= + u1*y1 / ( (u1s + x2s)*u1x2y1 ) 
+             - u1*y1 / ( (u1s + x1s)*u1x1y1 )
+             + u1*y2 / ( (u1s + x1s)*u1x1y2 ) 
+             - u1*y2 / ( (u1s + x2s)*u1x2y2 );
+
+      //-df/dx(x,y,2nd+z)
+      ewx += + u2*y1 / ( (u2s + x2s)*u2x2y1 ) 
+             - u2*y1 / ( (u2s + x1s)*u2x1y1 )
+             + u2*y2 / ( (u2s + x1s)*u2x1y2 ) 
+             - u2*y2 / ( (u2s + x2s)*u2x2y2 );
+    }
+    if(i <= Ny){
+      //-df/dy(x,y,2nd-z)
+      ewy -= + u1*x1 / ( (u1s + y2s)*u1x1y2 ) 
+             - u1*x1 / ( (u1s + y1s)*u1x1y1 )
+             + u1*x2 / ( (u1s + y1s)*u1x2y1 ) 
+             - u1*x2 / ( (u1s + y2s)*u1x2y2 );
+
+      //-df/dy(x,y,2nd+z)
+      ewy += + u2*x1 / ( (u2s + y2s)*u2x1y2 ) 
+             - u2*x1 / ( (u2s + y1s)*u2x1y1 )
+             + u2*x2 / ( (u2s + y1s)*u2x2y1 ) 
+             - u2*x2 / ( (u2s + y2s)*u2x2y2 );
+    }
+    if(i <= Nz){
+      //-df/dz(x,y,2nd-z)
+      ewz += + x1*y1*(x1s + y1s + 2*u1s) / ( (x1s + u1s)*(y1s + u1s)*u1x1y1 )    
+             + x2*y2*(x2s + y2s + 2*u1s) / ( (x2s + u1s)*(y2s + u1s)*u1x2y2 )    
+             - x1*y2*(x1s + y2s + 2*u1s) / ( (x1s + u1s)*(y2s + u1s)*u1x1y2 )   
+             - x2*y1*(x2s + y1s + 2*u1s) / ( (x2s + u1s)*(y1s + u1s)*u1x2y1 ); 
+
+      //-df/dz(x,y,2nd+z)
+      ewz += + x1*y1*(x1s + y1s + 2*u2s) / ( (x1s + u2s)*(y1s + u2s)*u2x1y1 )    
+             + x2*y2*(x2s + y2s + 2*u2s) / ( (x2s + u2s)*(y2s + u2s)*u2x2y2 )    
+             - x1*y2*(x1s + y2s + 2*u2s) / ( (x1s + u2s)*(y2s + u2s)*u2x1y2 )   
+             - x2*y1*(x2s + y1s + 2*u2s) / ( (x2s + u2s)*(y1s + u2s)*u2x2y1 ); 
+    }
+  }
+
+  //-df/dx(x,y,z)
+  ewx += + zw*y1 / ( (zs + x2s)*x2y1 ) 
+         - zw*y1 / ( (zs + x1s)*x1y1 )
+         + zw*y2 / ( (zs + x1s)*x1y2 ) 
+         - zw*y2 / ( (zs + x2s)*x2y2 );
+
+  //-df/y(x,y,z)
+  ewy += + zw*x1 / ( (zs + y2s)*x1y2 ) 
+         - zw*x1 / ( (zs + y1s)*x1y1 )
+         + zw*x2 / ( (zs + y1s)*x2y1 ) 
+         - zw*x2 / ( (zs + y2s)*x2y2 );
+
+  //-df/dz(x,y,z)
+  ewz += + x1*y1*(x1s + y1s + 2*zs) / ( (x1s + zs)*(y1s + zs)*x1y1 )    
+         + x2*y2*(x2s + y2s + 2*zs) / ( (x2s + zs)*(y2s + zs)*x2y2 )    
+         - x1*y2*(x1s + y2s + 2*zs) / ( (x1s + zs)*(y2s + zs)*x1y2 )   
+         - x2*y1*(x2s + y1s + 2*zs) / ( (x2s + zs)*(y1s + zs)*x2y1 );    
+  
+  ewx = ewx / (2.*M_PI);
+  ewy = ewy / (2.*M_PI);
+  ewz = ewz / (2.*M_PI);
+
+  // Rotate the field back to the original coordinates.
+  switch (ip) {
+    case 0:
+      ex = ewz;
+      ey = ewx;
+      ez = ewy;
+      break;
+    case 1:
+      ex = -ewz;
+      ey = ewx;
+      ez = -ewy;
+      break;
+    case 2:
+      ex = ewx;
+      ey = ewz;
+      ez = - ewy;
+      break;
+    case 3:
+      ex = ewx;
+      ey = -ewz;
+      ez = ewy;
+      break;
+  }
+
 }
 }

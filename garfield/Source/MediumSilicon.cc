@@ -14,6 +14,7 @@ namespace Garfield {
 
 MediumSilicon::MediumSilicon()
     : Medium(),
+      diffScale(1.0),
       m_bandGap(1.12),
       m_dopingType('i'),
       m_dopingConcentration(0.),
@@ -1615,6 +1616,7 @@ void MediumSilicon::UpdateLatticeMobilitySentaurus() {
   hLatticeMobility = hMu0 * pow(t, -2.2);
 }
 
+
 void MediumSilicon::UpdateLatticeMobilityReggiani() {
 
   // Reference:
@@ -1747,6 +1749,7 @@ void MediumSilicon::UpdateHighFieldMobilityCanali() {
   hBetaCanaliInv = 1. / hBetaCanali;
 }
 
+/*
 void MediumSilicon::UpdateImpactIonisationVanOverstraetenDeMan() {
 
   // References:
@@ -1766,6 +1769,29 @@ void MediumSilicon::UpdateImpactIonisationVanOverstraetenDeMan() {
   // Low field coefficients taken from Maes, de Meyer, van Overstraeten
   eImpactA0 = gamma * 3.318e5;
   eImpactB0 = gamma * 1.135e6;
+  eImpactA1 = gamma * 7.03e5;
+  eImpactB1 = gamma * 1.231e6;
+
+  hImpactA0 = gamma * 1.582e6;
+  hImpactB0 = gamma * 2.036e6;
+  hImpactA1 = gamma * 6.71e5;
+  hImpactB1 = gamma * 1.693e6;
+}
+*/
+
+void MediumSilicon::UpdateImpactIonisationVanOverstraetenDeMan() {
+  // - Sentaurus Device User Guide (2007)
+
+  // Temperature dependence as in Sentaurus Device
+  // Optical phonon energy
+  const double hbarOmega = 0.063;
+  // Temperature scaling coefficient
+  const double gamma = tanh(hbarOmega / (2. * BoltzmannConstant * 300.)) /
+                       tanh(hbarOmega / (2. * BoltzmannConstant * m_temperature));
+
+  // Low field coefficients taken from Maes, de Meyer, van Overstraeten
+  eImpactA0 = gamma * 7.03e5;
+  eImpactB0 = gamma * 1.231e6;
   eImpactA1 = gamma * 7.03e5;
   eImpactB1 = gamma * 1.231e6;
 
@@ -1844,6 +1870,7 @@ bool MediumSilicon::ElectronMobilityReggiani(const double e, double& mu) const {
   return true;
 }
 
+/*
 bool MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(
     const double e, double& alpha) const {
 
@@ -1856,6 +1883,26 @@ bool MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(
   if (e < Small) {
     alpha = 0.;
   } else if (e < 1.2786e5) {
+    alpha = eImpactA0 * exp(-eImpactB0 / e);
+  } else {
+    alpha = eImpactA1 * exp(-eImpactB1 / e);
+  }
+  return true;
+}
+*/
+
+bool MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(
+    const double e, double& alpha) const {
+
+  // References:
+  //  - R. van Overstraeten and H. de Man,
+  //    Solid State Electronics 13 (1970), 583-608
+  //  - W. Maes, K. de Meyer and R. van Overstraeten,
+  //    Solid State Electronics 33 (1990), 705-718
+
+  if (e < Small) {
+    alpha = 0.;
+  } else if (e < 4e5) {
     alpha = eImpactA0 * exp(-eImpactB0 / e);
   } else {
     alpha = eImpactA1 * exp(-eImpactB1 / e);
@@ -1922,6 +1969,7 @@ bool MediumSilicon::HoleMobilityReggiani(const double e, double& mu) const {
   return true;
 }
 
+/*
 bool MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(
     const double e, double& alpha) const {
 
@@ -1935,6 +1983,25 @@ bool MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(
     alpha = hImpactA1 * exp(-hImpactB1 / e);
   }
   return true;
+}
+*/
+
+bool MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(
+    const double e, double& alpha) const {
+
+  // Reference:
+  //  - R. van Overstraeten and H. de Man,
+  //    Solid State Electronics 13 (1970), 583-608
+
+  if (e < Small) {
+    alpha = 0.;
+  } else if (e < 4e5) {
+    alpha = hImpactA0 * exp(-hImpactB0 / e);
+  } else {
+    alpha = hImpactA1 * exp(-hImpactB1 / e);
+  }
+  return true;
+
 }
 
 bool MediumSilicon::HoleImpactIonisationGrant(const double e,

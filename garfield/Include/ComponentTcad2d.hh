@@ -22,8 +22,8 @@ class ComponentTcad2d : public ComponentBase {
                      double& ey, double& ez, Medium*& m, int& status);
 
   void WeightingField(const double x, const double y, const double z,
-                      double& wx, double& wy, double& wz,
-                      const std::string& label);
+                            double& wx, double& wy, double& wz,
+                            const std::string& label); 
 
   Medium* GetMedium(const double x, const double y, const double z);
 
@@ -62,24 +62,32 @@ class ComponentTcad2d : public ComponentBase {
   bool GetMobility(const double x, const double y, const double z, double& emob,
                    double& hmob);
 
-  // Trapping
-  int GetNumberOfDonors() { return nDonor; }
-  int GetNumberOfAcceptors() { return nAcceptor; }
-  bool GetDonorOccupation(const double x, const double y, const double z,
-                          const int donorNumber, double& occupationFraction);
-  bool GetAcceptorOccupation(const double x, const double y, const double z,
-                             const int acceptorNumber,
-                             double& occupationFraction);
-  bool SetDonorXsec(const int donorNumber, const double eXsec,
-                    const double hXsec);
-  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec,
-                       const double hXsec);
+  // Velocity field maps
+  void ElectronVelocity(const double xin, const double yin,
+                                    const double zin, double& vx, double& vy,
+                                    double& vz, Medium*& m, int& status);
+  void HoleVelocity(const double xin, const double yin,
+                                    const double zin, double& vx, double& vy,
+                                    double& vz, Medium*& m, int& status);
+  // Lifetime field maps
+  bool GetElectronLifetime(const double x, const double y, const double z, double& etau);
+  bool GetHoleLifetime(const double x, const double y, const double z, double& htau);
+
+  // Trapping 
+  int GetNumberOfDonors(){return nDonor;}
+  int GetNumberOfAcceptors(){return nAcceptor;}
+  bool GetDonorOccupation(const double x, const double y, const double z, const int donorNumber,
+		  double& occupationFraction);
+  bool GetAcceptorOccupation(const double x, const double y, const double z, const int acceptorNumber,
+                   double& occupationFraction);
+  bool SetDonorXsec(const int donorNumber, const double eXsec, const double hXsec);
+  bool SetAcceptorXsec(const int acceptorNumber, const double eXsec, const double hXsec);
   bool SetDonorConc(const int donorNumber, const double concentration);
   bool SetAcceptorConc(const int acceptorNumber, const double concentration);
   bool ElectronAttachment(const double x, const double y, const double z,
                           double& eta);
   bool HoleAttachment(const double x, const double y, const double z,
-                      double& eta);
+                          double& eta);
 
  private:
   // Max. number of vertices per element
@@ -105,7 +113,12 @@ class ComponentTcad2d : public ComponentBase {
     double p, ex, ey;
     // Mobilities [cm2 / (V ns)]
     double emob, hmob;
-    // Trap occupations [Dimensionless]
+    // Velocities [cm/ns]
+    double eVx, eVy;
+    double hVx, hVy;
+    // Lifetimes [1/ns]
+    double eTau, hTau;
+    // Trap occupations [dimensionless] 
     std::vector<float> donorOcc;
     std::vector<float> acceptorOcc;
     // Flag indicating if vertex belongs to more than one region
@@ -138,6 +151,11 @@ class ComponentTcad2d : public ComponentBase {
   bool hasField;
   bool hasElectronMobility;
   bool hasHoleMobility;
+
+  bool hasElectronVelocity;
+  bool hasHoleVelocity; 
+  bool hasElectronLifetime;
+  bool hasHoleLifetime;
 
   // Number of available traps
   int nDonor;

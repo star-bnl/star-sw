@@ -25,9 +25,14 @@ class ComponentVoxel : public ComponentBase {
                      double& ey, double& ez, Medium*& m, int& status);
 
   void WeightingField(const double x, const double y, const double z,
-                      double& wx, double& wy, double& wz,
-                      const std::string& label);
+                            double& wx, double& wy, double& wz,
+                            const std::string& label); 
 
+  // Offset coordinates in the weighting field, such that
+  // same numerical weighting field map can be used for pixels at 
+  // different positions.
+  void SetWeightingFieldOffset(const double x, const double y, const double z);
+  
   Medium* GetMedium(const double x, const double y, const double z);
 
   bool GetVoltageRange(double& vmin, double& vmax);
@@ -90,6 +95,11 @@ class ComponentVoxel : public ComponentBase {
   bool m_hasMesh;
   bool m_hasPotential;
   bool m_hasField;
+
+  // Offset for weighting field
+  double m_wField_xOffset;
+  double m_wField_yOffset;
+  double m_wField_zOffset;
 
   // Voltage range
   double m_pMin, m_pMax;
