@@ -244,7 +244,7 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getInnerMostTPCHitNode(int qua=0)   const;
 #endif /* DO_TPCCATRACKER */
    int                  getNNodes(int qua=0) const;
-   int                  releaseHits(double rMin=4,double rMax=50);
+   int                  releaseHits(double rMin=0,double rMax=50);
    /// Accessor method returns the first node associated with the track.
    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
    /// Accessor method returns the last node associated with the track.
@@ -265,10 +265,6 @@ class StiKalmanTrack : public StiTrack
 #ifdef DO_TPCCATRACKER
   int initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars = 0, StiNodePars *lastPars = 0, StiNodeErrs *firstErrs = 0, StiNodeErrs *lastErrs = 0);
 #endif /* DO_TPCCATRACKER */
-    /// Method to return the pointer to the fitter parameters.
-  
-   StThreeVector<double> getMomentumAtOrigin() const;
-   StThreeVector<double> getPoint(int firstLast=0) const;
 
    virtual vector<StiHit*> getHits();
    virtual vector<const StMeasuredPoint*> stHits() const;
@@ -283,7 +279,7 @@ class StiKalmanTrack : public StiTrack
   bool find(int direction=kOutsideIn);
   int  refit();
   int  refitL();
-  void reserveHits();
+  void reserveHits(int yes=1);
   StiTrackNode *extendToVertex(StiHit* vertex);
 #if 0
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);
@@ -293,7 +289,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
-  int approx(int mode=0);
+  int approx(int mode=0,int nNodes=999);
   
   void reduce();
 
@@ -332,7 +328,6 @@ protected:
    * refit() of this class while the other is used in derived class
    * StiCAKalmanTrack.
    */
-  Int_t refit(Int_t &errType);
 
 protected:
     

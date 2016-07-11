@@ -34,7 +34,7 @@ my $dsite;
 
  $dsite = "rcf";
  $TOP_DIRD = "/star/rcf/test/new/";
-  @node_dir = ("daq_sl302.ittf", "trs_sl302.ittf", "simu", "daq_sl302.ittf_opt", "trs_sl302.ittf_opt"); 
+  @node_dir = ("daq_sl302.ittf", "trs_sl302.ittf", "simu", "daq_sl302.ittf_opt", "trs_sl302.ittf_opt", "daq_sl302.stica", "daq_sl302.stica_opt"); 
 
  }elsif($SITE eq "rcf_embed" ) {
 
@@ -46,7 +46,7 @@ my $dsite;
 
    $dsite = "pdsf"; 
   $TOP_DIRD = "/star/data14/GRID/librarytest/pdsf/new/";
-  @node_dir = ("daq_sl53.ittf", "trs_sl53.ittf","simu");  
+  @node_dir = ("daq_sl53.ittf", "trs_sl53.ittf","simu","daq_sl53.stica");  
 
  }elsif($SITE eq "pdsf_embed" ) {
 
@@ -76,6 +76,8 @@ my @OUT_DIR1 = ();
 my @OUT_DIR2 = ();
 my @OUT_DIR3 = ();
 my @OUT_DIR4 = ();
+my @OUT_DIR5 = ();
+my @OUT_DIR6 = ();
 
 my @OUT_DIR = ();
 my @OUTD_DIR = ();
@@ -104,11 +106,18 @@ my $ii = 0;
     @OUT_DIR1 = `ls -d $TDIR[1]`;
     @OUT_DIR2 = `ls -d $TDIR[2]`;
 
-  if ($dsite eq "rcf" ) { 
+  if ($dsite eq "rcf" or $dsite eq "rcf_embed") { 
 
     @OUT_DIR3 = `ls -d $TDIR[3]`;
     @OUT_DIR4 = `ls -d $TDIR[4]`;
-}
+    @OUT_DIR5 = `ls -d $TDIR[5]`;
+    @OUT_DIR6 = `ls -d $TDIR[6]`;
+
+  }elsif($dsite eq "pdsf" or $dsite eq "pdsf_embed") {
+
+       @OUT_DIR3 = `ls -d $TDIR[3]`; 
+ }
+
  $ii = 0;
   
   for ($i = 0; $i < scalar(@OUT_DIR0); $i++) {
@@ -145,7 +154,30 @@ my $ii = 0;
   print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
       $ii++;  
   }
+
+  for ($i = 0; $i < scalar(@OUT_DIR5); $i++) {
+     $OUT_DIR[$ii] = $OUT_DIR5[$i];
+     chop $OUT_DIR[$ii];  
+  print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
+   $ii++; 
 }
+  for ($i = 0; $i < scalar(@OUT_DIR6); $i++) {
+     $OUT_DIR[$ii] = $OUT_DIR6[$i];
+     chop $OUT_DIR[$ii]; 
+  print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
+      $ii++;  
+  }
+
+} elsif ($dsite eq "pdsf" or $dsite eq "pdsf_embed") {
+
+  for ($i = 0; $i < scalar(@OUT_DIR3); $i++) {
+     $OUT_DIR[$ii] = $OUT_DIR3[$i];
+     chop $OUT_DIR[$ii];  
+  print "Output Dir for NEW :", $OUT_DIR[$ii],"\n";
+   $ii++; 
+  }
+ }
+
 
 struct JFileAttr => {
        oldjbId   => '$',

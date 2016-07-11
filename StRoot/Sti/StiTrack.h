@@ -37,6 +37,8 @@ class StiTrackFinder;
 class StiTrackFitter;
 class StiTrack;
 class StiTrackNode;
+class StiNodePars;
+class StiNodeErrs;
 
 /** 
     \enum Direction
@@ -87,13 +89,13 @@ public:
 
   StiTrack();
   virtual ~StiTrack()  { /* nops */  }
-  virtual int  fit (int direction=kOutsideIn); 
+
+  virtual int  fit (int direction=kOutsideIn);
   virtual bool find(int direction=kOutsideIn);
   virtual void reset()=0;
   virtual void unset(){;}
   virtual void reduce(){;}
-  virtual void getMomentum(double p[3], double e[6]) const =0;
-  virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point
+  //  virtual void getMomentum(double p[3], double e[6]) const =0;
   virtual double  getCurvature()      const=0;   // transverse curvature
   virtual double  getP()              const=0;   // transverse momentum
   virtual double  getPt()             const=0;   // transverse momentum

@@ -1,10 +1,103 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.171 2016/04/15 20:13:06 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.173 2016/07/08 16:11:32 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.173  2016/07/08 16:11:32  perev
+ * Method print enhancened
+ *
+ * Revision 2.172  2016/06/29 18:37:39  perev
+ * 1. Removed debug codes non actual now.
+ *
+ * Revision 2.169.2.1  2016/06/02 16:45:42  smirnovd
+ * Squashed changes on MAIN branch after StiCA_2016 was brached off
+ *
+ * commit 0b534582b5bf40a64870088f6864387a7941a9be
+ * Author: perev <perev>
+ * Date:   Tue May 31 17:11:46 2016 +0000
+ *
+ *     Coverity
+ *
+ * commit cbfeeef5e8f9a6e24ddd7329ff5770086e535493
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:58:39 2016 +0000
+ *
+ *     Assignment out of array boundary removed(J.Lauret)
+ *
+ * commit a49f5f23dc613c1ee8ab61c543e713f776d3c7fe
+ * Author: perev <perev>
+ * Date:   Tue Apr 19 01:37:22 2016 +0000
+ *
+ *     WarnOff
+ *
+ * commit 48ca225cc052db66cd8a3934f15c46345c9862c6
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:47:42 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit b1b0f73cef0f5675bd84106241067329e0221079
+ * Author: perev <perev>
+ * Date:   Fri Apr 15 20:13:06 2016 +0000
+ *
+ *     Warnoff
+ *
+ * commit 393adde57febc06a90d054f71e621e8efd082e10
+ * Author: perev <perev>
+ * Date:   Wed Apr 13 23:08:44 2016 +0000
+ *
+ *     -opt2 proble solved. Array A[1] removed
+ *
+ * commit 1c105bdc0cbde40ccec63fdbf40e79dfb3e7f0e0
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:17:55 2016 +0000
+ *
+ *     1st hit must be not used at all
+ *
+ * commit 1eca42192ef93788d149625ecebc8390f8b0bc3a
+ * Author: perev <perev>
+ * Date:   Mon Mar 28 00:15:53 2016 +0000
+ *
+ *     Add max number of tracks assigned to one hit
+ *
+ * commit b349ba99342bc38eaa82f3d2a8d25aa29ba73c29
+ * Author: genevb <genevb>
+ * Date:   Thu Feb 25 23:04:50 2016 +0000
+ *
+ *     kSsdId => kSstId
+ *
+ * commit a06d8162931b223b4a405ea5714e703b1cad14e3
+ * Author: perev <perev>
+ * Date:   Mon Dec 28 23:50:27 2015 +0000
+ *
+ *     Remove assert temporary
+ *
+ * commit f8646d17ed86b9be5b5fa940691f9871346a5ee2
+ * Author: perev <perev>
+ * Date:   Mon Dec 21 19:41:31 2015 +0000
+ *
+ *     bug #3166 assert vertex closer to 0,0 <9 removed
+ *
+ * commit 48a6813db30f593a90a79beb688c27d0e8946bfa
+ * Author: perev <perev>
+ * Date:   Sat Dec 19 03:40:50 2015 +0000
+ *
+ *     assert rxy<4 ==> <9 temporary
+ *
+ * commit d49576f25ba887ba4ff82c3bf1ffcc760c8da6b2
+ * Author: perev <perev>
+ * Date:   Fri Dec 18 03:50:06 2015 +0000
+ *
+ *     *** empty log message ***
+ *
+ * commit 23e9c0447bd41151e45728a6f4dd3cc554be1cfb
+ * Author: perev <perev>
+ * Date:   Thu Dec 3 19:12:24 2015 +0000
+ *
+ *     Remove redundant GTrack error: mFlag: is Negative
+ *
  * Revision 2.171  2016/04/15 20:13:06  perev
  * Warnoff
  *
@@ -486,7 +579,7 @@
 #include <stdio.h>
 #include <assert.h>
 using namespace std;
-
+#include "TCernLib.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -1353,11 +1446,6 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   r01=mHrr.hZY+mFE._cZY;  
   r11=mHrr.hZZ+mFE._cZZ;
 
-#ifdef Sti_DEBUG
-  TRSymMatrix R(2,
-		r00,
-		r01, r11);
-#endif
   _det=r00*r11 - r01*r01;
   if (_det<r00*r11*1.e-5) {
     LOG_DEBUG << Form("StiKalmanTrackNode::evalChi2 *** zero determinant %g",_det)<< endm;
@@ -1371,19 +1459,6 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dyt=(mFP.y()-hit->y()) + deltaY;
   double dzt=(mFP.z()-hit->z()) + deltaZ;
   double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/_det;
-
-#ifdef Sti_DEBUG
-  if (debug() & 4) {
-    TRSymMatrix G(R,TRArray::kInverted);
-    TRVector r(2,hit->y()-mFP.y(),hit->z()-mFP.z());
-    Double_t chisq = G.Product(r,TRArray::kATxSxA);
-    Double_t diff = chisq - cc;
-    Double_t sum  = chisq + cc;
-    if (diff > 1e-7 || (sum > 2. && (2 * diff ) / sum > 1e-7)) {
-      LOG_DEBUG << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endm;
-    }
-  }
-#endif
   if (debug() & 8) {comment += Form(" chi2 = %6.2f",cc);}
   return cc;
 }
@@ -1628,14 +1703,6 @@ assert(mFE.zign()>0); ///???
   r00 = mHrr.hYY + mFE._cYY;
   r01 = mHrr.hZY + mFE._cZY;
   r11 = mHrr.hZZ + mFE._cZZ;
-#ifdef Sti_DEBUG
-  TRSymMatrix V(2,mHrr.hYY,
-		  mHrr.hZY, mHrr.hZZ);  
-  TRSymMatrix R1(2,r00,
-		   r01, r11);
-  static const TRMatrix H(2,5, 1., 0., 0., 0., 0.,
-			       0., 1., 0., 0., 0.);
-#endif
   _det=r00*r11 - r01*r01;
   if (!finite(_det) || _det<(r00*r11)*1.e-5) {
     LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** zero determinant %g",_det)
@@ -1655,42 +1722,6 @@ assert(mFE.zign()>0); ///???
   double dp3  = k30*dyt + k31*dzt;
   double dp2  = k20*dyt + k21*dzt;
   double dp4  = k40*dyt + k41*dzt;
-#ifdef Sti_DEBUG
-  double dp0  = k00*dyt + k01*dz;
-  double dp1  = k10*dyt + k11*dz;
-  if (debug() & 4) {
-    PrPP(updateNode,R1);
-    PrPP(updateNode,V);
-  }
-  TRSymMatrix C(kNPars,mFE.G());  
-  TRSymMatrix R(H,TRArray::kAxSxAT,C);
-  R += V;
-  TRSymMatrix G(R,TRArray::kInverted); 
-  if (debug() & 4) {
-    PrPP(updateNode,C);
-    PrPP(updateNode,R);
-    PrPP(updateNode,G);
-  }
-  // K = C * HT * G
-  TRMatrix T(C,TRArray::kSxAT,H); 
-  TRMatrix K(T,TRArray::kAxS,G);  
-  TRMatrix K1(5,2,
-	      k00, k01,
-	      k10, k11,
-	      k20, k21,
-	      k30, k31,
-	      k40, k41);   
-  if (debug() & 4) {
-    PrPP(updateNode,T);
-    PrPP(updateNode,K1);
-    PrPP(updateNode,K);
-    K1.Verify(K);
-  }
-  TRVector dR(2,dyt, dzt);
-  TRVector dP1(5, dp0, dp1, dp2, dp3, dp4);
-  TRVector dP(K,TRArray::kAxB,dR);
-  if (debug() & 4) dP1.Verify(dP);//,1e-7,2);
-#endif
   double eta  = nice(mFP.eta() + dp2);
   if (fabs(eta)>kMaxEta) return -14;
   double pti  = mFP.ptin() + dp3;
@@ -1784,10 +1815,6 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   mFP.eta()= nice(mFP.eta()-alpha); /*VP*/
   mFP._sinCA = sin(mFP.eta());
   mFP._cosCA = cos(mFP.eta());
-#ifdef Sti_DEBUG  
-  TRSymMatrix C(kNPars,mFE.G());
-  if (debug() & 4) {PrPP(rotate,C);}
-#endif
 //cout << " mFP._sinCA:"<<mFP._sinCA<<endl;
   assert(fabs(mFP._sinCA)<=1.);
   assert(fabs(mFP._cosCA)<=1.);
@@ -2241,7 +2268,12 @@ static const char *HHH = "xyzXYZ";
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
-  printf("%p(%s)",(void*)this,ts.Data());
+  if (hit && strchr(opt,'H')) {
+    printf("%p(%s=%p)",(void*)this,ts.Data(),hit);
+  } else {
+    printf("%p(%s)",(void*)this,ts.Data());
+  }
+
   if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
   double val=-9999;
   for (int i=0;txt[i];i++) {

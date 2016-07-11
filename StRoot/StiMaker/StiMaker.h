@@ -10,7 +10,7 @@ using std::string;
 #include "StEvent/StEnumerations.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrackFitter.h"
-
+#include "Sti/StiHitLoader.h"
 class TFile;
 class TTree;
 class StiPullEvent;
@@ -49,7 +49,7 @@ class StiMaker : public StMaker
              void FinishTracks(int gloPri);
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.35 2016/03/28 00:15:54 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.37 2016/06/30 18:41:20 perev Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();

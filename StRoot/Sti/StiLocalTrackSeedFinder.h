@@ -40,7 +40,6 @@ public:
   virtual void initialize(){};
   virtual void print() const;
   Filter<StiTrack>    * getTrackFilter();
-  EditableParameters  & getParameters();
   virtual void reset();
   virtual void unset(){;}
   bool isReset();
@@ -51,14 +50,12 @@ public:
   friend ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f);
 
 protected:
-  StiKalmanTrack*makeTrack(StiHit* hit);
+  StiKalmanTrack *makeTrack(StiHit* hit);
   ///Extend hit looking for closest neighbor in z
   bool extendHit(StiHit & hit);
   ///Extrapolate to next layer using straight line, add hit closest in z
   bool extrapolate();
   StiKalmanTrack* initializeTrack(StiKalmanTrack*);
-//   void calculate(StiKalmanTrack*);
-//   void calculateWithOrigin(StiKalmanTrack*);
   //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
   bool fit(StiKalmanTrack*);
 
@@ -69,8 +66,6 @@ protected:
 
   StiSortedHitIterator _hitIter;
   vector<StiHit*>        _seedHits;
-//VP  StiHelixCalculator     _helixCalculator;
-//VP  StiHelixFitter         _helixFitter;
   StiDefaultTrackFilter  _trackFilter;
   double fRxyMin;
  private:

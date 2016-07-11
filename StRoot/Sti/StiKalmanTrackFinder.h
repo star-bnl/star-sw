@@ -31,11 +31,12 @@ template<class Factorized>class Factory;
 ///to us gracioulsy by Jouri Belikov from the ALICE       
 ///collaboration. i.e. code reproduced with autorization. 
 ///
-class StiKalmanTrackFinder : public StiTrackFinder, public Named, public Described
+class StiKalmanTrackFinder : public StiTrackFinder
 {
 public:
   StiKalmanTrackFinder() {}
   StiKalmanTrackFinder(StiToolkit *toolkit);
+  void addSeedFinder(StiTrackFinder* sf) {_seedFinders.push_back(sf);}
   virtual ~StiKalmanTrackFinder() {}
   /// Initialize the finder
   virtual void initialize();
@@ -116,11 +117,11 @@ class QAFind;
     void printState();
     StiToolkit                  * _toolkit;
     Filter<StiTrack>            * _trackFilter;
-    StiTrackFinder              * _trackSeedFinder;
     Factory<StiKalmanTrackNode> * _trackNodeFactory;
     StiDetectorContainer        * _detectorContainer;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
+    std::vector<StiTrackFinder*>  _seedFinders;
     int                           _nPrimTracks;
 private:
         

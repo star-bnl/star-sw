@@ -34,7 +34,7 @@ using std::map;
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiVertexFinder.h"
-#include "StiDefaultToolkit.h"
+#include "Sti/StiDefaultToolkit.h"
 #include "StiStEventFiller.h"
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
