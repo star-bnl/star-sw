@@ -101,7 +101,10 @@ Vertex3D::doExtrapolation(){ // study track cov matrix for individual tracks usi
      if( fabs(tr->getPt())<1.) continue;
      hA[5]->Fill(5);
       
-     printf("TTT global phi/rad=%.3f PT=%.2f curv=%f Rxy=%.1f nFitP=%d eta=%.2f  chi2/dof=%.1f\n",tr->getPhi(),tr->getPt(),tr->getCurvature(),tr->getPoint().perp(),tr->getFitPointCount(),tr->getPseudoRapidity(),tr->getChi2());
+     const StiKalmanTrackNode* node = tr->getInnOutMostNode(0, 3);
+     StThreeVector<double> trackNodeCoord(node->x_g(),node->y_g(),node->z_g());
+
+     printf("TTT global phi/rad=%.3f PT=%.2f curv=%f Rxy=%.1f nFitP=%d eta=%.2f  chi2/dof=%.1f\n",tr->getPhi(),tr->getPt(),tr->getCurvature(), trackNodeCoord.perp(),tr->getFitPointCount(),tr->getPseudoRapidity(),tr->getChi2());
      printf("T: track position along nodes, N=%d\n",tr->getFitPointCount());
      StiKTNIterator tNode = tr->rbegin();
      StiKTNIterator eNode = tr->rend();

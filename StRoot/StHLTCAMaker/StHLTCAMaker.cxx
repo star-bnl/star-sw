@@ -31,7 +31,7 @@
 #include "StEvent/StL3Trigger.h"
 #include "StEvent/StTrackDetectorInfo.h"
 #include "StEvent/StTrackNode.h"
-#include "StiMaker/StiDefaultToolkit.h"
+#include "Sti/StiDefaultToolkit.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "TMath.h"
 
