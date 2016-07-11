@@ -520,7 +520,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	  transform(globalOfTrack,localSect[l],sector,row);
 	}
-#ifdef __PROMP_HITS__
+#ifdef __PROMPT_HITS__
 	Double_t zP = TMath::Abs(xyz[0].z());
 	//----------------------------- Prompt Hits ? ------------------------------
 	if (zP > 205.0 && zP < 215.) {
@@ -601,7 +601,7 @@ Int_t StdEdxY2Maker::Make(){
 	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
 	}
-#endif /* __PROMP_HITS__ */
+#endif /* __PROMPT_HITS__ */
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	transform(localSect[3],Pad);
@@ -835,9 +835,11 @@ Int_t StdEdxY2Maker::Make(){
     if ((TESTBIT(m_Mode, kCalibration))) {
       if (! pTrack) continue; // reject non primary tracks
       if (! pEvent->primaryVertex()) continue; 
-      if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
-      if (pEvent->primaryVertex()->ranking() < 0) continue;
-      //      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
+      // AuAu could have wrong ranking
+      if (pEvent->primaryVertex()->ranking() > 0) {
+	if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
+	//      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
+      }
       Histogramming(gTrack);
     }
   }
