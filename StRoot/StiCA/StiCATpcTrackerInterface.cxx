@@ -1,4 +1,4 @@
-#include "StiCA/StiCATpcTrackerInterface.h"
+#include "StiCATpcTrackerInterface.h"
 #ifdef __NEW_TPCCATracker__
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
@@ -17,6 +17,7 @@
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
+#include "StBFChain.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiDetectorGroups.h"
 #include "Sti/StiGenericDetectorGroup.h"
@@ -36,9 +37,8 @@
 #include "TPCCATracker/Performance/AliHLTTPCCAStiPerformance.h"
 #include "TPCCATracker/Performance/AliHLTTPCCAMergerPerformance.h"
 #endif /* __NEW_TPCCATracker__ */
-#include "StBFChain/StBFChain.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
-#include "StiCA/StiCAKalmanTrack.h"
+#include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 #endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #include <vector>
@@ -94,7 +94,7 @@ void StiCATpcTrackerInterface::SetNewEvent()
   fCaHits.clear(); // hits to give CATracker
   fSeedHits.clear();          // hits to make seeds
 
-  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
+//VP  if (!fSeedFinder) fSeedFinder = new StiCATpcSeedFinder;
   
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
@@ -416,7 +416,9 @@ void StiCATpcTrackerInterface::MakeHits()
 
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
-      if (! hit->stHit()) continue;
+      if (! hit->stHit()) 	continue;
+      if (  hit->timesUsed()) 	continue;//VP
+      
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
       StGlobalCoordinate glob(tpcHit->position());
@@ -514,19 +516,16 @@ void StiCATpcTrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   
     // get cov matrises
   const float *caCov = caPar.GetCov();
-
-#ifdef DEBUG
-  double nodeCov[15];
-  for (int i1 = 0, i = 0; i1 < 5; i1++){
-    for (int i2 = 0; i2 <= i1; i2++, i++){
-      nodeCov[i] = J[i1]*J[i2]*caCov[i];
-    }
-  }
-  if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
-    cout << "Warrning: Bad CA Cov Matrix." << endl;
-  if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
-    cout << "Warrning: Bad Node Cov Matrix." << endl;
-#endif
+//   double nodeCov[15];
+//   for (int i1 = 0, i = 0; i1 < 5; i1++){
+//     for (int i2 = 0; i2 <= i1; i2++, i++){
+//       nodeCov[i] = J[i1]*J[i2]*caCov[i];
+//     }
+//   }
+  // if ( (caCov[0] <= 0) || (caCov[2] <= 0) || (caCov[5] <= 0) || (caCov[9] <= 0) || (caCov[14] <= 0))
+  //   cout << "Warrning: Bad CA Cov Matrix." << endl;
+  // if ( (nodeCov[0] <= 0) || (nodeCov[2] <= 0) || (nodeCov[5] <= 0) || (nodeCov[9] <= 0) || (nodeCov[14] <= 0))
+  //   cout << "Warrning: Bad Node Cov Matrix." << endl;
 
   double *A = nodeErrs.G();
 /*  for (int i1 = 0, i = 0; i1 < 5; i1++){
@@ -569,10 +568,14 @@ void StiCATpcTrackerInterface::MakeSeeds()
     Seed_t seed;
 
     const int NHits = tr.NHits();
+//VP    float last_x = 1e10; // for check
     for ( int iHit = NHits-1; iHit >= 0; iHit-- ){ 
       const int index = fTracker->TrackHit( tr.FirstHitRef() + iHit );
       const int hId   = fTracker->Hit( index ).ID();
+//      if ( last_x == fSeedHits[hId].hit->position() ) continue; // track can have 2 hits on 1 row because of track segments merger.
       seed.vhit.push_back(&(fSeedHits[hId]));
+//      assert( last_x >= fSeedHits[hId].hit->position() ); // should be back order - from outer to inner.
+//VP      last_x = fSeedHits[hId].hit->position();
     }
 
     seed.total_hits = seed.vhit.size();
@@ -739,7 +742,7 @@ void StiCATpcTrackerInterface::FillStiPerformance()
 
   for(int iTr=0; iTr<fStiTracks->getTrackCount(0); iTr++)
   {
-    StiCAKalmanTrack * track = (StiCAKalmanTrack*) fStiTracks->at(iTr);
+    auto * track = (StiKalmanTrack*) fStiTracks->at(iTr);
     vector<StiHit*> hits_v = track-> getHits();
 
     AliHLTTPCCAGBTrack GBTrack;
@@ -750,7 +753,8 @@ void StiCATpcTrackerInterface::FillStiPerformance()
     for(unsigned iH=0; iH<hits_v.size(); iH++)
     {
       StiHit *hit = hits_v[iH];
-      if (! hit->stHit()) continue;
+      if (! hit->stHit()) 	continue;
+      if (  hit->timesUsed()) 	continue;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
       StGlobalCoordinate glob(tpcHit->position());
