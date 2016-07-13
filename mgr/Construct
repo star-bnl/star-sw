@@ -287,6 +287,7 @@ if ($STAR_HOST_SYS =~ /darwin/) {
   push @items, "StEEmcIUPi0";
   push @items, "StHLTCAMaker";
   push @items, "StMaxStripPi0";
+  push @items, "StVecBosAna";
 #  push @items, "TPCCATracker";
 #ifdef ____MAC_____
 #  push @items, "StEStructPool";
@@ -449,7 +450,9 @@ if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
 #    print "$qtRoot does not exist\n";
   }
 }
-push @packages, "garfield";
+if ($STAR_HOST_SYS !~ /darwin/) {
+  push @packages, "garfield";
+}
 push @packages, "MillepedeII";
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
