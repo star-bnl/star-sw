@@ -347,7 +347,7 @@ Int_t StdEdxY2Maker::Make(){
   static  StThreeVectorD xyz[4];
   static  StThreeVectorD dirG;
   static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx;
-  if (Debug() > 0) timer.start();
+  if (Debug()) timer.start();
   enum {kNdEdxMax  = 100};
   static dEdxY2_t CdEdxT[3*kNdEdxMax];//,FdEdxT[kNdEdxMax],dEdxST[kNdEdxMax];
   CdEdx = CdEdxT; 
