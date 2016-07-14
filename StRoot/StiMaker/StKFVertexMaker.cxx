@@ -55,6 +55,7 @@ ClassImp(StKFVertexMaker);
 //#define __UseMakeV0__
 #endif
 StKFVerticesCollection *StKFVertexMaker::fgcVertices = 0;
+#define PrP(A,B)                    {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrPP(A,B)  if (Debug() > 1) {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrPP2(A,B) if (Debug() > 2) {LOG_INFO << "StKFVertexMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #define PrParticle2(A) if (Debug() > 2) {cout << "StKFVertexMaker::" << (#A)  << endl; PrintParticles();}
@@ -292,12 +293,12 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
-  StiKalmanTrack* kTrack = StiToolkit::instance()->getTrackFactory()->getInstance();
   const StiKalmanTrack* kTrackC = (*StiStEventFiller::Node2TrackMap())[node];
   if (! kTrackC) {
     UpdateParticleAtVertex(0, &track->Particle());
     return pTrack;
   }
+  StiKalmanTrack* kTrack = StiToolkit::instance()->getTrackFactory()->getInstance();
   *kTrack = *kTrackC;
   StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
   if (! gTrack) {
@@ -345,14 +346,14 @@ StPrimaryTrack *StKFVertexMaker::FitTrack2Vertex(StKFVertex *V, StKFTrack*   tra
     if ( tdet) { // remove Dca node or nodes below the vertex
       const StiPlacement* pl = tdet->getPlacement();
       if (pl->getNormalRadius() > R) break;
-#if 0
+#if 1
       // Check for hits at radius less than Vertex
       if (lastNode->getHit()) {fail = 1; break;}
 #endif
     }
     kTrack->removeLastNode();
   }
-  if (! kTrack->getFirstNode() || ! kTrack->getLastNode()) fail = 1;
+  if (kTrack->getPointCount() < 5 || ! kTrack->getFirstNode() || ! kTrack->getLastNode()) fail = 1;
   if (fail) {
     BFactory::Free(kTrack);
     UpdateParticleAtVertex(0, &track->Particle());
@@ -537,13 +538,15 @@ Int_t StKFVertexMaker::MakeParticles() {
   return fNGoodGlobals;
 }
 //________________________________________________________________________________
-void StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
+Bool_t StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
   Int_t NoTracks = 0;
   if (KVx) NoTracks = KVx->NDaughters();
   if (NoTracks <= 1 ||
       KVx->GetCovariance(0) < 0 ||
       KVx->GetCovariance(2) < 0 ||
-      KVx->GetCovariance(5) < 0) {SafeDelete(primV); return;}
+      KVx->GetCovariance(5) < 0) {
+    return kFALSE;
+  }
   StThreeVectorF XVertex(&KVx->X());
   primV->setKey(KVx->Id());
   primV->setPosition(XVertex);
@@ -552,7 +555,7 @@ void StKFVertexMaker::FillVertex(const KFParticle *KVx, StVertex *primV) {
   primV->setIdTruth(KVx->IdTruth(), KVx->QaTruth());
   primV->setCovariantMatrix(&(((KFParticle *) KVx)->Covariance(0))); 
   primV->setFlag(1); // Set default values
-  return;
+  return kTRUE;
 }
 //________________________________________________________________________________
 Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
@@ -959,13 +962,16 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	    StPrimaryVertex *stVtx = KVx2StPrimVxMap[KVx];
 	    if (stVtx) {
 	      PrPP(ParticleFinder,*stVtx);
+	      if (! FillVertex(&V0, stVtx)) continue;
 	    } else {
 	      stVtx = new StPrimaryVertex;
+	      //	      PrintPrimVertices();
+	      if (! FillVertex(&V0, stVtx)) {
+		SafeDelete(stVtx); continue;
+	      }
 	      stVtx->setRanking(-1.);
 	      pEvent->addPrimaryVertex(stVtx,orderByRanking);
 	    }
-	    FillVertex(&V0, stVtx);
-	    if (! stVtx) continue;
 	    for (Int_t s = 0; s < 2; s++) {
 	      Int_t kg = V0.DaughterIds()[s];
 	      StTrackNode *node = TrackNodeMap[kg];
@@ -986,8 +992,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 
 	    // Store V0
 	    StV0Vertex *V0Vx = new StV0Vertex(); 
-	    FillVertex(&V0, V0Vx);
-	    if (! V0Vx) continue;
+	    if ( ! FillVertex(&V0, V0Vx)) {SafeDelete(V0Vx); continue;}
 	    Int_t kgp = V0TrackKey2Id[key2];
 	    if (! kgp) {
 	      kgp = ++fLastGlobalId;
@@ -1174,26 +1179,29 @@ StKFVerticesCollection *StKFVertexMaker::PrimaryVertexSeeds(Int_t *Parents) {
 void StKFVertexMaker::ReFitToVertex() {
   Int_t NoVertices = fgcVertices->Vertices()->GetSize();
   for (Int_t l = fgcVertices->Vertices()->GetSize() - 1; l >= 0; l--) {
+    StPrimaryVertex *primV = 0;
     StKFVertex *V = (StKFVertex *) fgcVertices->Vertices()->At(l);
     if (! V) continue;
     Bool_t ok = kTRUE;
     Int_t NoTracks = V->NoTracks();
     KFVertex     &KVx = V->Vertex();
     // Store vertex
-    StPrimaryVertex *primV = new StPrimaryVertex;
-    FillVertex(&KVx, primV);
-    if (! primV) {
+    primV = new StPrimaryVertex;
+    if (! FillVertex(&KVx,primV)) {
+      SafeDelete(primV);
       delete fgcVertices->Vertices()->Remove(V);
       continue;
     }
     primV->setRanking(333);
     primV->setNumTracksUsedInFinder(NoTracks);
     primV->setVertexFinderId(KFVertexFinder);
+    PrPP(ReFitToVertex,KVx);
+    PrPP(ReFitToVertex,*primV);
     Bool_t beam = kFALSE;
     StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
     Vertex->setGlobal(0, 0, KVx.X(), KVx.Y(), KVx.Z(), 0);
     Vertex->setError(primV->covariance());
-
+    
     TArrayI indexT(NoTracks); Int_t *indexes = indexT.GetArray();
     TArrayI IdT(NoTracks);    Int_t *Ids     = IdT.GetArray();
     TIter next(&V->Tracks());
@@ -1258,6 +1266,7 @@ void StKFVertexMaker::ReFitToVertex() {
 	n->removeTrack(t);
 	pTracks[i] = 0;
       }
+      PrPP(ReFitToVertex SafeDelete,*primV);
       SafeDelete(primV);
       delete fgcVertices->Vertices()->Remove(V);
     } else {
@@ -1288,6 +1297,7 @@ void StKFVertexMaker::ReFitToVertex() {
       primV->setTrackNumbers();
       CalculateRank(primV);
       pEvent->addPrimaryVertex(primV,orderByRanking);
+      //      PrintPrimVertices();
       fVertices->AddLast(new KFVertex(KVx)); //<<<<<<<<<<<<<<<< ????????
     }
     delete [] tracks;   
@@ -1444,6 +1454,15 @@ void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *
   particle->NDF() = 2;
   particle->Chi2() = extended->getChi2();
   PrPP(UpdateParticleAtVertex  after,*particle);
+}
+//________________________________________________________________________________
+void StKFVertexMaker::PrintPrimVertices() {
+  StPrimaryVertex *pVertex = 0;
+  for (Int_t ipr=0;(pVertex=pEvent->primaryVertex(ipr));ipr++) {
+    Int_t key = pVertex->key();
+    if (key <= 0)  pVertex->setKey(ipr);
+    cout << ipr << "\t" <<  *pVertex << endl;
+  }// end prim vtx    
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $

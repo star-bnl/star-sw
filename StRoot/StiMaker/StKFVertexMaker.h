@@ -57,7 +57,7 @@ class StKFVertexMaker : public StMaker {
   TH1F           	 	*GetVertexZPlots(Int_t pass = 0) {return fVertexZPlots[pass];}	  		   
   virtual Int_t  	 	 Make();							  		   
   Int_t          	 	 MakeParticles();						  		   
-  void                           FillVertex(const KFParticle *KVx, StVertex *V);
+  Bool_t                         FillVertex(const KFParticle *KVx, StVertex *V);
   Bool_t           	 	 MakeV0(StPrimaryVertex *V);                                          		   
   Bool_t                         ParticleFinder();
   void                   	 PrimaryVertices();	
@@ -72,6 +72,7 @@ class StKFVertexMaker : public StMaker {
   void                   	 UpdateParticleAtVertex(StiKalmanTrack */* kTrack */, KFParticle */* particle */);
   TH1                       	*VertexZPlot() {return fVertexZPlot;}                                             
   void                           PrintParticles();
+  void                           PrintPrimVertices();
 #ifndef __CINT__
   void                           ResetDaughterIds(KFParticle *particle, vector<KFParticle> &particles);
 #endif
