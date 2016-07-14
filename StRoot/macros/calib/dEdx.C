@@ -62,7 +62,6 @@ void dEdx(Int_t nevents=1000,
   }
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->GetMaker("dEdxY2"); 
-  dEdxY2->SetDebug(1);
   StMaker *tofCalib = chain->Maker("tofCalib");
   if (tofCalib) chain->AddAfter("tofCalib",dEdxY2);
   Int_t Mode = 0;
