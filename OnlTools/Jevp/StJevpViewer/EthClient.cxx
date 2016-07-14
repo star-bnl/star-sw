@@ -66,7 +66,8 @@ void EthClient::readDisplayFromServer(const char *displayName) {
 
     displayFile = new DisplayFile();
     displayFile->ReadBuff(tabdata->args, strlen(tabdata->args));   
-    displayFile->setDisplay((char *)displayName);
+    displayFile->setDisplay(displayFile->getDisplayNodeFromName(displayName));
+    displayFile->updateDisplayRoot();
     
     delete tabdata;
 }

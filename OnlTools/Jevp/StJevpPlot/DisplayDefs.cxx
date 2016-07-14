@@ -23,6 +23,14 @@ DisplayProperty::~DisplayProperty()
   if(value) delete value;
 }
 
+DisplayProperty::DisplayProperty(DisplayProperty &x) {
+    name = NULL;
+    value = NULL;
+    if(x.name) setName(x.name);
+    if(x.value) setValue(x.value);
+    next = NULL;
+}
+
 void DisplayProperty::dump(int indent)
 {  
   for(int i=0;i<indent;i++) printf(" ");
@@ -46,12 +54,37 @@ void DisplayProperty::setValue(const char *s)
 DisplayNode::DisplayNode()
 {
   child = NULL;
-  prev = NULL;
+  //prev = NULL;
   next = NULL;
   parent = NULL;
   name = NULL;
   properties = NULL;
   leaf = 0;
+}
+
+DisplayNode::DisplayNode(DisplayNode &x)
+{
+    child = NULL;
+    //prev = NULL;
+    next = NULL;
+    parent = NULL;
+    name = NULL;
+    properties = NULL;
+    leaf = x.leaf;
+    if(x.name) setName(x.name);
+
+    if(x.properties) {
+	properties = new DisplayProperty(*(x.properties));
+	
+	DisplayProperty *xprop =x.properties;
+	DisplayProperty *prop = properties;
+
+	while(xprop->next) {
+	    prop->next = new DisplayProperty(*(xprop->next));
+	    xprop = xprop->next;
+	    prop = prop->next;
+	}
+    }
 }
 
 DisplayNode::~DisplayNode()
@@ -66,21 +99,25 @@ DisplayNode::~DisplayNode()
   }
 }
 
-void DisplayNode::dump(int indent)
+void DisplayNode::dump(int indent, const char *str)
 {
-  for(int i=0;i<indent;i++) printf(" ");
+    if(str) {
+	printf(str);
+    }
+
+    for(int i=0;i<indent;i++) printf(" ");
   
-  printf("%s-%s\n", leaf ? "histo" : "tab", name);
+    printf("%s-%s  -- parent = %s\n", leaf ? "histo" : "tab", name, parent ? parent->name : "none");
 
-  DisplayProperty *p = properties;
+    DisplayProperty *p = properties;
 
-  while(p) {
-    p->dump(indent+2);
-    p = p->next;
-  }
+    while(p) {
+	p->dump(indent+2);
+	p = p->next;
+    }
 
-  if(child) child->dump(indent+3);
-  if(next) next->dump(indent);
+    if(child) child->dump(indent+3, str);
+    if(next) next->dump(indent, str);
 }
 
 void DisplayNode::setName(const char *s)
@@ -228,51 +265,69 @@ void DisplayNode::writeXML(FILE *out, int depth)
   if(next) next->writeXML(out, depth);
 }
 
+// alphabetical
 void DisplayNode::insertChildAlpha(DisplayNode *node)
 {
-  node->parent = this;
+    node->parent = this;
 
-  DisplayNode *curr = child;
-  if(!child) {
-    child = node;
-    LOG(DBG, "no other children...");
-    return;
-  }
-  
-  DisplayNode *p = curr;
+    DisplayNode *curr = child;
+    DisplayNode *prev = NULL;
 
-  while(curr) {
-    if(strcmp(node->name, curr->name) < 0) {  // Insert before curr!
+    while(curr) {
+	if(strcmp(node->name, curr->name) < 0) {  // Insert before curr
+	    LOG(DBG, "insert before %s", curr->name);
 
-      LOG(DBG, "insert before %s", curr->name);
+	    if(prev == NULL) {
+		this->child = node;
+	    }
+	    else {
+		prev->next = node;
+	    }
 
-      if(curr->prev == NULL) this->child = node;
-      else curr->prev->next = node;
-      node->prev = curr->prev;
-      node->next = curr;
-      curr->prev = node;
-      return;
+	    node->next = curr;
+	    return;
+	}
+	prev = curr;
+	curr = curr->next;
     }
-    p = curr;
-    curr = curr->next;
-  }
 
-  // Insert after p
-  LOG(DBG, "insert after %s", p->name);
-  if(p->next) p->next->prev = node;
-  node->next = p->next;
-  p->next = node;
-  node->prev = p;
+    // Insert at end of list...
+    if(curr) {
+	LOG(DBG, "insert after %s", curr->name);
+    }
+    else {
+	LOG(DBG, "insert as child of %s", name);
+    }
+
+    if(curr) {
+	curr->next = node;
+    }
+    else {
+	this->child = node;
+    }
 }
 
 
-DisplayFile::DisplayFile() {
+DisplayFile::DisplayFile(int pallete) {
   root = NULL;
   displayRoot = NULL;
   textBuffLen = 0;
+  displayDirty = 0;
   textBuff = NULL;
   ignoreServerTags = 0;
   serverTags = NULL;
+
+  if(pallete == 1) {
+      DisplayNode *myroot = new DisplayNode();
+      myroot->setName("doc");
+      myroot->leaf = 0;
+
+      DisplayNode *pal = new DisplayNode();
+      pal->setName("pallete");
+      myroot->leaf = 0;
+      myroot->insertChildAlpha(pal);
+      root = myroot;
+  }
 }
 
 DisplayFile::~DisplayFile() {
@@ -383,7 +438,7 @@ int DisplayFile::Read(char *fn)
   int len = sbuff.st_size;
 
   if(textBuff) free(textBuff);
-  textBuff = (char *)malloc(len);
+  textBuff = (char *)malloc(len+1);
   textBuffLen = len;
 
   char *buff = textBuff;
@@ -392,25 +447,14 @@ int DisplayFile::Read(char *fn)
     len -= ret;
     buff += ret;
   }
+
+  *buff = '\0';
   
   close(fd);
 
-  displayRoot = root->child;
+  //displayRoot = root->child;
 
   return ret;
-}
-
-void DisplayFile::setServerTags(const char *builders)
-{
-  if(serverTags) free(serverTags);
-  int len = strlen(builders);
-  serverTags = (char *)malloc(len+1);
-  if(!serverTags) {
-    LOG(ERR, "Error allocating serverTags");
-  }
-  else {
-    strcpy(serverTags, builders);
-  }
 }
 
 int DisplayFile::Write(char *fn)
@@ -567,7 +611,7 @@ DisplayNode *DisplayFile::readNewNode(xmlTextReaderPtr reader)
 	  }
 
 	  child->next->parent = node;
-	  child->next->prev = child;
+	  //child->next->prev = child;
 	}
       }
 
@@ -652,7 +696,7 @@ int DisplayFile::getDisplayIdx()
 
   int i=0;
   while(disp) {
-    if(disp == displayRoot)  return i;
+    if(disp == localDisplayRoot)  return i;
     disp = disp->next;
     i++;
   }
@@ -672,45 +716,7 @@ char *DisplayFile::getDisplay(int idx)
   return NULL;
 }
 
-int DisplayFile::setDisplay(char *display_name)
-{
-  DisplayNode *disp = root->child;
 
-  int i=0;
-  while(disp) {
-    LOG(DBG, "0x%x",disp->name);
-    LOG(DBG, "disp->name = %s",disp->name);
-
-    if(strcmp(disp->name, display_name) == 0) {
-      displayRoot = disp;
-      return i;
-     }
-    
-    disp = disp->next;
-    i++;
-  }
-
-  return -1;
-}
-
-// Forget the index, go by the order...
-int DisplayFile::setDisplay(int idx)
-{
-  DisplayNode *disp = root->child;
-  int i=0;
-  while(disp) {
-    if(i == idx) {
-      displayRoot = disp;
-      printf("Set display  %s : %d\n",disp->name, idx);
-      return idx;
-    }
-    
-    disp = disp->next;
-    i++;
-  }
-  
-  return -1;
-}
 
 #define TAB_BASE 100
 
@@ -791,87 +797,71 @@ u_int DisplayFile::getPenultimateTabIdx(u_int idx) {
 
 DisplayNode *DisplayFile::getTab(u_int combo_index)
 {
-  //LOG("JEFF", "get: %d", combo_index);
+    //LOG("JEFF", "get: %d", combo_index);
 
-  // "1" == first child...
+    // "1" == first child...
     //printf("here %p %d\n", displayRoot, combo_index);
     
-  DisplayNode *node = displayRoot->child;
-  //printf("  ... %p", node);
+    DisplayNode *node = displayRoot->child;
+    //printf("  ... %p", node);
   
-  for(int depth=0;;depth++) {
-    int idx = getTabIdxAtDepth(combo_index, depth);
-    int next_idx = getTabIdxAtDepth(combo_index, depth+1);
+    for(int depth=0;;depth++) {
+	int idx = getTabIdxAtDepth(combo_index, depth);
+	int next_idx = getTabIdxAtDepth(combo_index, depth+1);
 
-    //printf("A:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
+	int x;
+	for(x=1;x<idx;x++) {
+	    LOG(DBG,"---->horizontal search[%d / %d] looking at: %s\n",x,idx,node ? node->name : "null");
+
+	    node = node->next;
+	    if(!node) return NULL;
+	}
     
-    while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
-      node = node->next;   
-      if(node) {
-	//LOG("JEFF","B:idx(%d@%d)=%d next=%d (%s) ignore=%d match=%d\n",combo_index,depth,idx,next_idx,node ? node->name : "null", ignoreServerTags, node->matchTags(serverTags));
-      }
-      else {
-	//LOG("JEFF", "no siblings");
-	continue;
-      }
-    }
-    
-    if(!node) return NULL;
-
-    int x;
-    for(x=1;x<idx;x++) {
-      LOG(DBG,"---->horizontal search[%d / %d] looking at: %s\n",x,idx,node ? node->name : "null");
-
-      node = node->next;
-
-      while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
-	node = node->next;
-      }
-
-      if(!node) return NULL;
-    }
-    
-    if(!node) return NULL;
+	if(!node) return NULL;
  
-    LOG(DBG, "---->horizontal search[%d / %d] found %s\n",x,idx,node->name);
+	LOG(DBG, "---->horizontal search[%d / %d] found %s\n",x,idx,node->name);
     
-    if(next_idx == 0) {
-      //printf("Got a tab...%s\n",node->name);
-      return node;
-    }
+	if(next_idx == 0) {
+	    //printf("Got a tab...%s\n",node->name);
+	    return node;
+	}
 
-    if(!node->child) {
-      LOG(ERR, "No child node for %s?",node->name);
-      return NULL;
-    }
+	if(!node->child) {
+	    LOG(ERR, "No child node for %s?",node->name);
+	    return NULL;
+	}
 
-    node = node->child;
-  }
+	node = node->child;
+    }
 }
 
-int DisplayNode::matchTags(char *tags) {
-  if(!_matchTags(tags)) return 0;
+// int DisplayNode::matchTags(char *tags) {
+//   if(!_matchTags(tags)) return 0;
 
-  // Ok if a leaf
-  if(leaf) return 1;
+//   // Ok if a leaf
+//   if(leaf) return 1;
 
-  // If a tab, some subtab must be filled...
-  DisplayNode *node = child;
+//   // If a tab, some subtab must be filled...
+//   DisplayNode *node = child;
 
-  while(node) {
-    if(node->matchTags(tags)) return 1;
-    node = node->next;
-  }
+//   while(node) {
+//     if(node->matchTags(tags)) return 1;
+//     node = node->next;
+//   }
 
-  return 0;
-}
+//   return 0;
+// }
 
-int DisplayNode::_matchTags(char *tags)
+int DisplayNode::matchTags(char *tags)
 {
-  if(!tags) return 0;
 
+ 
   const char *val = _getProperty("requireTag");
+
+  //printf("Do they match? req: %s vs exist: %s for %s\n", val, tags, name); 
   if(!val) return 1;
+
+  if(!tags) return 0;
 
   static char requiredTags[256];
   static char req[32];
@@ -891,60 +881,170 @@ int DisplayNode::_matchTags(char *tags)
   
   LOG(DBG, "Match builders return true: found %s in %s",val, tags);
   return 1;
+}    
+   
+
+
+// int DisplayFile::setDisplay(char *display_name)
+// {
+//   DisplayNode *disp = root->child;
+
+//   int i=0;
+//   while(disp) {
+//     LOG(DBG, "0x%x",disp->name);
+//     LOG(DBG, "disp->name = %s",disp->name);
+
+//     if(strcmp(disp->name, display_name) == 0) {
+//       displayRoot = disp;
+//       return i;
+//      }
+    
+//     disp = disp->next;
+//     i++;
+//   }
+
+//   return -1;
+// }
+
+// Forget the index, go by the order...
+
+
+// These functions potentially update the displayRoot 
+//
+//
+
+void DisplayFile::setIgnoreServerTags(int ignore) {
+    if(ignore != ignoreServerTags) displayDirty = 1;
+    ignoreServerTags = ignore;
 }
 
+void DisplayFile::setServerTags(const char *builders)
+{
+    if(serverTags) {
+	if(strcmp(builders, serverTags) == 0) {
+	    return;
+	}
+    }
 
-// Surely these are obsolete?
+    displayDirty = 1;
 
-// TabDescriptor *DisplayDefinition::GetTab(int i, int j)
-// {
-//   TabDescriptor *tab = tabs;
-  
-//   for(int x=0;x<i;x++) {
-//     if(tab == NULL) return NULL;
-//     tab = tab->next;
-//   }
+    if(serverTags) free(serverTags);
+    int len = strlen(builders);
+    serverTags = (char *)malloc(len+1);
+    if(!serverTags) {
+	LOG(ERR, "Error allocating serverTags");
+    }
+    else {
+	strcpy(serverTags, builders);
+    }
+}
 
-//   if(j == -1) return tab;
-
-//   tab = tab->child;
-//   for(int x=0;x<j;x++) {
-//     if(tab == NULL) return NULL;
-//     tab = tab->next;
-//   }
-  
-//   return tab;
-// }
-
-// HistogramDescriptor *DisplayDefinition::GetHist(int i, int j, int k)
-// {
-//   TabDescriptor *tab = GetTab(i,j);
-//   if(!tab) return NULL;
-  
-//   if(!tab->canvas) return NULL;
-  
-//   HistogramDescriptor *hd = tab->canvas->first_histo;
-  
-//   for(int x=0;x<k;x++) {
-//     if(hd == NULL) return NULL;
-//     hd = hd->next;
-//   }
-
-//   return hd;
-// }
+void DisplayFile::setDisplay(DisplayNode *dRoot)
+{
+    if(dRoot == localDisplayRoot) {
+	return;
+    }
     
-    
+    localDisplayRoot = dRoot;
+    displayDirty = 1;
+}
+
+void DisplayFile::updateDisplayRoot() {
+    if(!displayDirty) return;
+    if(!localDisplayRoot) {
+	LOG(CRIT, "localDisplayRoot is NULL, chan't update!");
+	return;
+    }
+
+    if(displayRoot) {
+	displayRoot->freeChildren();
+	delete displayRoot;
+	displayRoot = NULL;
+    }
+
+    displayRoot = DisplayNode::copyTree(localDisplayRoot, NULL, ignoreServerTags ? 0 : 1, serverTags);
+}
+
+DisplayNode *DisplayNode::copyTree(DisplayNode *src, DisplayNode *parent, int requireTags, const char *tags)
+{
+    //LOG("JEFF", "requireTags = %d", requireTags);
+
+    if(requireTags) {
+	if(!src->matchTags((char *)tags)) {   
+	    // This node doesn't satisfy requirements!
+	    // Check siblings, but not children...
+	    
+	    if(!src->next) return NULL;
+	    
+	    return copyTree(src->next, parent, requireTags, tags);
+	}
+    }
+
+    DisplayNode *dest = new DisplayNode(*src);
+    dest->parent = parent;
+
+    // Add children...
+    if(src->child) {
+	dest->child = copyTree(src->child, dest, requireTags, tags);
+    }
+
+    if(src->next) {
+	dest->next = copyTree(src->next, parent, requireTags, tags);
+    }
+
+    return dest;
+}
+
+DisplayNode *DisplayFile::getDisplayNodeFromIndex(int idx)
+{
+    DisplayNode *disp = root->child;
+    int i=0;
+    while(disp) {
+	if(i == idx) {
+	    return disp;
+	}
+	
+	disp = disp->next;
+	i++;
+    }
+  
+    return NULL;
+}
+
+DisplayNode *DisplayFile::getDisplayNodeFromName(const char *name)
+{
+    // Second find DisplayRoot() among immediate children of root.
+    DisplayNode *root_disp = root->findChild((char *)name);
+    if(!root_disp) {
+	LOG(CRIT, "Couldn't find display: %s", name);
+	return NULL;
+    }
+
+    return root_disp;
+}
+
 void DisplayFile::test(char *fn)
 {
-  rtsLogOutput(RTS_LOG_NET);
-  rtsLogAddDest((char *)"172.17.0.1",8004);
-  rtsLogLevel((char *)DBG);
+    rtsLogOutput(RTS_LOG_STDERR);
+    //rtsLogAddDest((char *)"172.17.0.1",8004);
+    rtsLogLevel((char *)WARN);
   
-  LOG(DBG, "HERE...");
-  DisplayFile *dd = new DisplayFile();
-  LOG(DBG, "Read...");
-  dd->Read(fn);
-  LOG(DBG, "Done...");
-  dd->root->dump();
-  delete dd;
+    LOG(DBG, "HERE...");
+  
+    //DisplayFile *dd = new DisplayFile(0);
+    // LOG(DBG, "Read...");
+    // dd->Read(fn);
+    // //LOG(DBG, "Done...");
+    // //dd->root->dump(0, "rr:");
+    // dd->setDisplay(dd->getDisplayNodeFromName("shift"));
+    // dd->updateDisplayRoot();
+    // dd->displayRoot->dump(0, "dr:");
+    // int combo_index = 1;
+    
+
+    // Create pallete
+    DisplayFile *dd = new DisplayFile(1);
+    dd->Write(fn);
+
+    delete dd;
 }

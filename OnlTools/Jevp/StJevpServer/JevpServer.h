@@ -18,6 +18,8 @@
 #include "EvpConstants.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
 
+class PdfFileBuilder;
+
 #define MAX_DISPLAY_DEFS 20
 
 class JevpServer {
@@ -26,6 +28,8 @@ class JevpServer {
   char *log_dest;
   int log_port;
   char *log_level;
+
+  PdfFileBuilder *pdfFileBuilder;
 
   TServerSocket *ssocket;
   JTMonitor *mon;
@@ -57,6 +61,8 @@ class JevpServer {
   // int run;                // run number
   int nodb;               // send to db?
   int die;                // die when the run is over? or wait for the next run...
+  int maxevts;
+  int evtsInRun;
   char *daqfilename;      // NULL if running real data
   
   int cdaqfilename;
@@ -75,6 +81,8 @@ class JevpServer {
   JevpServer() {
     myport = JEVP_PORT;
     logevent = 0;
+    maxevts = 0;
+    evtsInRun = 0;
     ssocket = NULL;
     mon = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
@@ -111,7 +119,6 @@ class JevpServer {
 
   void archive_display_file();                           // Archive utilities
 
-  DisplayNode *getPalleteNode();
   void freePallete();
   void addToPallete(JevpPlot *plot);
 
@@ -136,16 +143,17 @@ class JevpServer {
   void saveReferencePlot(JevpPlot *plot);
 
   // Write the histograms out....
-  int writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);
-  int writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs);
+  //int writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);
+  //int writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs);
   void writeRunPdf(int display, int run);
-  void writePdf(char *fn, int combo_index);
+  //void writePdf(char *fn, int combo_index);
 
 
 
   JevpPlot *getPlot(char *name);
 
   void dump();
+  void writePalleteFile();
   int updateDisplayDefs();
   void DrawCrossOfDeath(char *str);
 

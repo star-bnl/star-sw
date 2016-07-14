@@ -294,7 +294,7 @@ void l4Builder::initialize(int argc, char *argv[])
 
 void l4Builder::startrun(daqReader *rdr)
 {
-	printf("hello there. This is startrun\n");
+    //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
 	int initialno = 39;
@@ -357,7 +357,7 @@ void l4Builder::startrun(daqReader *rdr)
 	DiElectron2TwrFilled = false;
 
 
-	printf("Starting run #%d\n", runnumber);
+	//printf("Starting run #%d\n", runnumber);
 };
 
 void l4Builder::stoprun(daqReader *rdr)
