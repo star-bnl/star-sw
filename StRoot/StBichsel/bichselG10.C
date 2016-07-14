@@ -214,8 +214,8 @@ void bichselG10(const Char_t *type="Bz") {
   TString Type(type);
   TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
   Double_t xmax = 4;
-  //  for (int h = 0; h < NMasses; h++) { // Masses
-  for (int h = 0; h < 7; h++) { // Masses
+  for (int h = 0; h < NMasses; h++) { // Masses
+  //  for (int h = 0; h < 7; h++) { // Masses
     Int_t f = 3;
     if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
     else if (Type.Contains("Bz",TString::kIgnoreCase))   f = 2;
