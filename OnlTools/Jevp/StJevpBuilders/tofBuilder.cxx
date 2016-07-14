@@ -1012,7 +1012,7 @@ void tofBuilder::ReadValidBunchidPhase(){
   char mBunchShiftList[256];
   char mBunchShiftListLocal[256];
   
-  cout << "confDIR = " << confdatadir << endl;
+  //cout << "confDIR = " << confdatadir << endl;
 
   sprintf(mBunchShiftList, "%s/tof/%s",confdatadir,"TOF_ValidBunchidPhase.txt");
   ifstream filein(mBunchShiftList);

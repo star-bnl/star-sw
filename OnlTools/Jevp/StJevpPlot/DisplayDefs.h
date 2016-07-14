@@ -20,7 +20,8 @@ class DisplayProperty {
 
   DisplayProperty();
   ~DisplayProperty();
-  
+  DisplayProperty(DisplayProperty &x);
+
   void dump(int indent=0);
   void setName(const char *s);
   void setValue(const char *s);
@@ -28,55 +29,57 @@ class DisplayProperty {
 
 class DisplayNode {
  public:
-  DisplayNode *child;
-  DisplayNode *prev;
-  DisplayNode *next;
-  DisplayNode *parent;
+    DisplayNode *child;
+    //DisplayNode *prev;
+    DisplayNode *next;
+    DisplayNode *parent;
 
-  char *name;
-  DisplayProperty *properties;  // array of properties
-  int leaf;                     // 1 if this is a histogram
+    char *name;
+    DisplayProperty *properties;  // array of properties
+    int leaf;                     // 1 if this is a histogram
 
-  DisplayNode();
-  ~DisplayNode();
+    DisplayNode();
+    DisplayNode(DisplayNode &x);
+    ~DisplayNode();
 
-  void dump(int indent=0);
-  void setName(const char *s);
-  void addProperty(DisplayProperty *p);
-  const char *_getProperty(const char *s);
-  const char *getProperty(const char *s);
-  int matchTags(char *tags);
-  int _matchTags(char *tags);
+    void dump(int indent=0, const char *str=NULL);
+    void setName(const char *s);
+    void addProperty(DisplayProperty *p);
+    const char *_getProperty(const char *s);
+    const char *getProperty(const char *s);
+    int matchTags(char *tags);
 
-  int nSiblings() { 
-    LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned long) next);
-    if(!next) return 0; 
-    return next->nSiblings() + 1;
-  }
-
-  int getIntParentProperty(const char *str)
-  {
-    const char *ret;
-
-    if(!parent) {
-      LOG(ERR, "No parent for node %s\n",name);
-      return -1;
+    int nSiblings() { 
+	LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned long) next);
+	if(!next) return 0; 
+	return next->nSiblings() + 1;
     }
 
-    ret = parent->getProperty((char *)str);
-    if(!ret) return -1;
+    int getIntParentProperty(const char *str)
+    {
+	const char *ret;
+
+	if(!parent) {
+	    LOG(ERR, "No parent for node %s\n",name);
+	    return -1;
+	}
+
+	ret = parent->getProperty((char *)str);
+	if(!ret) return -1;
     
-    return atoi(ret);
-  }
+	return atoi(ret);
+    }
 
-  void freeChildren();
-  DisplayNode *findChild(char *name);
+    void freeChildren();
+    DisplayNode *findChild(char *name);
   
-  void writeXML(FILE *out, int depth);
-  void spaces(FILE *out, int depth);
-  void printProperties(FILE *out, int depth);
+    void writeXML(FILE *out, int depth);
+    void spaces(FILE *out, int depth);
+    void printProperties(FILE *out, int depth);
 
-  void insertChildAlpha(DisplayNode *node);
+    void insertChildAlpha(DisplayNode *node);
+
+    static DisplayNode *copyTree(DisplayNode *src, DisplayNode *parent=NULL, int requireTags=0, const char *tags=NULL);
 };
 
 
@@ -97,15 +100,17 @@ class DisplayNode {
 class DisplayFile {
  public:
   int ignoreServerTags;
+  int displayDirty;
   char *serverTags;    // The detectors in the run
 
-  DisplayNode *root;  // The parsed display
-  DisplayNode *displayRoot;   // The root node of the current display
+  DisplayNode *root;               // The parsed display
+  DisplayNode *localDisplayRoot;   // The root node of the current display in the bare tree
+  DisplayNode *displayRoot;        // The root node of the current display in the pruned tree
 
   char *textBuff;     // The text buffer & its length
   int textBuffLen;    // The text buffer is passed around and reparsed
   
-  DisplayFile();
+  DisplayFile(int pallete=0);
   ~DisplayFile();
   void chomp(char *to, char *from, int max);
   
@@ -120,18 +125,28 @@ class DisplayFile {
   DisplayNode *readNewNode(xmlTextReaderPtr reader);
   DisplayProperty *readNewProperty(xmlTextReaderPtr reader);
 
-  // Manipulate displays
-  void setServerTags(const char *tags);
-
   char *getDisplayName();
   int getDisplayIdx();
   char *getDisplay(int idx);
-  int setDisplay(char *display_name);
-  int setDisplay(int display);
+  
+ public:
+  DisplayNode *getDisplayNodeFromName(const char *display_name);
+  DisplayNode *getDisplayNodeFromIndex(int i);
+  
+  // These never change actual displayRoot tree
+  //
+  // They do set "displayDirty"
+  void setServerTags(const char *tags);
+  void setIgnoreServerTags(int ignore);
+  void setDisplay(DisplayNode *node);
+
+  // This updates the displayRoot tree
+  void updateDisplayRoot();     
+
   int nDisplays() {
     if(!root) return 0;
     if(!root->child) return 0;
-    return root->child->nSiblings();   // Don't include pallete, but do include me...
+    return root->child->nSiblings()+1;   // Don't include pallete, but do include me...
   }
 
   // Interface for usage...

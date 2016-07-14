@@ -18,9 +18,10 @@ void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTa
 {    
   this->serverTags = serverTags;
 
-  displays->ignoreServerTags = ignoreServerTags;
+  displays->setIgnoreServerTags(ignoreServerTags);
   displays->setServerTags(serverTags);
-  displays->setDisplay(displayNumber);
+  displays->setDisplay(displays->getDisplayNodeFromIndex(displayNumber));
+  displays->updateDisplayRoot();
 
   LOG("JEFF", "write");
   writePdf(filename, 1);
@@ -29,6 +30,11 @@ void PdfFileBuilder::write(char *filename, int displayNumber, int ignoreServerTa
 void PdfFileBuilder::writePdf(char *filename, int combo_index)
 {
   LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
+
+  //displays->displayRoot->dump(0, "dr:");
+
+  LOG("JEFF", "Now write it...");
+
   DisplayNode *root = displays->getTab(combo_index);
 
   if(combo_index == 0) {
@@ -39,7 +45,7 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
   LOG("JEFF", "writeNodePdf root: %s",filename);
 
   PdfIndex index;
-  writeNodePdf(root, &index, NULL, filename, 1, 0);
+  writeNodePdf(root, &index, NULL, filename, 1);
   
   LOG(DBG, "write endfilename");
 
@@ -56,50 +62,38 @@ void PdfFileBuilder::writePdf(char *filename, int combo_index)
   strcpy(indexedfilename, filename);
   // strcat(indexedfilename, ".idx");
   index.CreateIndexedFile(filename, indexedfilename);
-
-  
 }
 
-int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
+int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
-  LOG("JEFF", "Checking node %s against server tags %s", node->name, serverTags);
+    LOG("JEFF", "Checking node %s against server tags %s", node->name, serverTags);
 
-  int npages = 0;
+    int npages = 0;
 
-  if(!node->matchTags(serverTags)) {
-    LOG(DBG, "node %s does not match tags %s", node->name, serverTags);
-
-    // But, handle siblings!   
-    if(node->next && !nosibs) {
-      npages += writeNodePdf(node->next, index, prevIndexEntry, filename, page, 0);
+    if(node->leaf) {   // We are writing histograms...
+	writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
+	return 1;
     }
-    return npages;
-  }
-
-  if(node->leaf) {   // We are writing histograms...
-    writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
-    return 1;
-  }
-  else {   // We are just writing index entries
-    // are we the child?
-    index_entry *currIndexEntry;
-    if(node->prev == NULL) {
-      currIndexEntry = index->add_child(prevIndexEntry, node->name, page, 0);
-    }
-    else {
-      currIndexEntry = index->add_sibling(prevIndexEntry, node->name, page, 0);
-    }
+    else {   // We are just writing index entries
+	// are we the child?
+	index_entry *currIndexEntry;
+	if(!node->parent || (node->parent->child == node)) {
+	    currIndexEntry = index->add_child(prevIndexEntry, node->name, page, 0);
+	}
+	else {
+	    currIndexEntry = index->add_sibling(prevIndexEntry, node->name, page, 0);
+	}
     
-    if(node->child) {
-      npages += writeNodePdf(node->child, index, currIndexEntry, filename, page, 0);
-    }
+	if(node->child) {
+	    npages += writeNodePdf(node->child, index, currIndexEntry, filename, page);
+	}
     
-    if(node->next && !nosibs) {
-      npages += writeNodePdf(node->next, index, currIndexEntry, filename, page + npages, 0);
-    }
+	if(node->next) {
+	    npages += writeNodePdf(node->next, index, currIndexEntry, filename, page + npages);
+	}
 
-    return npages;
-  }
+	return npages;
+    }
 }    
 
 
@@ -109,12 +103,10 @@ int PdfFileBuilder::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry
 int PdfFileBuilder::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
   LOG("JEFF", "Write histogram leaves: %s",node->name);
-
   
-  if((node->prev != NULL) || (!node->leaf)) {
-    LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);
-  }
-
+  //if((node->prev != NULL) || (!node->leaf)) {
+  //LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);
+  //}
   
   // create index first
   index_entry *cindex = index->add_child(prevIndexEntry, node->name, page, 0);

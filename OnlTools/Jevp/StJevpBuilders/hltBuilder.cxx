@@ -1515,7 +1515,7 @@ void hltBuilder::initialize(int argc, char *argv[]) {
 };
   
   void hltBuilder::startrun(daqReader *rdr) {
-  printf("hello there. This is startrun\n");
+      //printf("hello there. This is startrun\n");
       cVz1->Reset();  cVz2->Reset();  cVz3->Reset();  cVz4->Reset();
       cVx1->Reset();  cVx2->Reset();  cVx3->Reset();
       cVy1->Reset();  cVy2->Reset();  cVy3->Reset();
@@ -1591,7 +1591,7 @@ void hltBuilder::initialize(int argc, char *argv[]) {
      }
      //**************** End new Periodic histos for Vertex Method of counting
 
-    printf("Starting run #%d\n",rdr->run);
+     //printf("Starting run #%d\n",rdr->run);
     
   };
 

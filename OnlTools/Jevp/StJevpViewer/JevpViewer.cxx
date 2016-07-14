@@ -193,7 +193,9 @@ JevpViewer::JevpViewer(const TGWindow *p,UInt_t w,UInt_t h) {
     server.readDisplayFromServer();
     
     server.display()->setServerTags("");
-    server.display()->setDisplay((char *)"shift");
+    server.display()->setDisplay(server.display()->getDisplayNodeFromName("shift"));
+    server.display()->updateDisplayRoot();
+
     //server.display()->ignoreServerTags = 0;
     //server.display()->dump();
     //printf("\n\n\n---------------------\n");
@@ -339,6 +341,7 @@ void JevpViewer::updateServerTags() {
 	strcpy(serverTags, args);
 
 	server.display()->setServerTags(serverTags);
+	server.display()->updateDisplayRoot();
 	tabs->rebuildTabs();
     }
 

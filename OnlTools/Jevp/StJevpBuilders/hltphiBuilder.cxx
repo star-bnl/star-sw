@@ -975,7 +975,7 @@ void HltphiBuilder::startrun(daqReader *rdr){
       printf("Starting day #%d\n",current_day);
 
       }*/
-  printf("Starting run #%d\n",rdr->run);
+  //printf("Starting run #%d\n",rdr->run);
 
   delete TempFlowPhi;
 };
