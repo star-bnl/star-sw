@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.2 2016/07/15 14:43:33 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -109,18 +109,12 @@ void AliHLTTPCCATrackletSelector::run()
       const ushort_v &hitIndexes = tracklet.HitIndexAtRow( rowIndex ); // hit index for the current row
       debugTS() << hitIndexes << invalidMarker << validHitIndexes( hitIndexes ) << endl;
       const ushort_m &validHits = valid && validHitIndexes( hitIndexes );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( nShared );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( tNHitsNew );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( kMaximumSharedPerHits );
       //cerr << rowIndex << hitIndexes << weight << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
       const ushort_m own = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, weight );
       //cerr << own << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
       //const ushort_m &own = fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) == weight;
       const ushort_m &sharedOK = nShared < static_cast<ushort_v>( static_cast<sfloat_v>( tNHitsNew ) * kMaximumSharedPerHits );
       const ushort_m &outHit = validHits && ( own || sharedOK );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( own );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( sharedOK );
 #ifndef NODEBUG
       const ushort_m &invalidTrack = !( own || sharedOK );
 //      std::cout << invalidTrack << "       "<< outHit <<"            "<<firstRow.min()<<"  "<<lastRow.max()<<"         "<< firstRow<<"  "<<lastRow<<std::endl;

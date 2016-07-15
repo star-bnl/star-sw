@@ -84,15 +84,8 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
 ushort_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 {
   // get next hit index
-  
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fIh );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fHitYlst );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fIz );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fBZmax );
   ushort_m yIndexOutOfRange = fIh >= fHitYlst;     // current y is not in the area
   ushort_m nextZIndexOutOfRange = fIz >= fBZmax;   // there isn't any new z-line
-  VALGRIND_CHECK_VALUE_IS_DEFINED( yIndexOutOfRange );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( nextZIndexOutOfRange );
   if ( yIndexOutOfRange && nextZIndexOutOfRange ) { // all iterators are over the end
     return ushort_m(false);
   }

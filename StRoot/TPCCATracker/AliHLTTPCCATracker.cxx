@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.3 2016/07/15 14:43:33 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -251,11 +251,6 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );
