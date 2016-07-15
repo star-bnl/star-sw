@@ -47,12 +47,12 @@ class AvalancheMC {
   void DisableAttachment() { m_useAttachment = false; }
 
   // Switch on calculating trapping with TCAD traps
-  void EnableTcadTraps(){m_useTcadTrapping = true;}
-  void DisableTcadTraps(){m_useTcadTrapping = false;}
+  void EnableTcadTraps() { m_useTcadTrapping = true; }
+  void DisableTcadTraps() { m_useTcadTrapping = false; }
 
   // Switch on/off TCAD velocity maps
-  void EnableTcadVelocity(){m_useTcadVelocity = true;}
-  void DisableTcadVelocity(){m_useTcadVelocity = false;}
+  void EnableTcadVelocity() { m_useTcadVelocity = true; }
+  void DisableTcadVelocity() { m_useTcadVelocity = false; }
 
   // Enable/disable magnetic field in stepping algorithm.
   void EnableMagneticField() { m_useBfield = true; }
@@ -80,8 +80,8 @@ class AvalancheMC {
   void SetHoleSignalScalingFactor(const double scale) {
     m_scaleHoleSignal = scale;
   }
-  void SetIonSignalScalingFactor(const double scale) { 
-    m_scaleIonSignal = scale; 
+  void SetIonSignalScalingFactor(const double scale) {
+    m_scaleIonSignal = scale;
   }
 
   void GetAvalancheSize(int& ne, int& ni) const {
@@ -93,26 +93,19 @@ class AvalancheMC {
   void GetDriftLinePoint(const unsigned int i, double& x, double& y, double& z,
                          double& t);
 
-  unsigned int GetNumberOfElectronEndpoints() const { 
-    return m_nEndpointsElectrons; 
+  unsigned int GetNumberOfElectronEndpoints() const {
+    return m_nEndpointsElectrons;
   }
-  unsigned int GetNumberOfHoleEndpoints() const { 
-    return m_nEndpointsHoles; 
-  }
-  unsigned int GetNumberOfIonEndpoints() const { 
-    return m_nEndpointsIons; 
-  }
+  unsigned int GetNumberOfHoleEndpoints() const { return m_nEndpointsHoles; }
+  unsigned int GetNumberOfIonEndpoints() const { return m_nEndpointsIons; }
 
-  void GetElectronEndpoint(const unsigned int i, 
-                           double& x0, double& y0, double& z0,
-                           double& t0, double& x1, double& y1, double& z1,
-                           double& t1, int& status) const;
-  void GetHoleEndpoint(const unsigned int i, 
-                       double& x0, double& y0, double& z0,
+  void GetElectronEndpoint(const unsigned int i, double& x0, double& y0,
+                           double& z0, double& t0, double& x1, double& y1,
+                           double& z1, double& t1, int& status) const;
+  void GetHoleEndpoint(const unsigned int i, double& x0, double& y0, double& z0,
                        double& t0, double& x1, double& y1, double& z1,
                        double& t1, int& status) const;
-  void GetIonEndpoint(const unsigned int i, 
-                      double& x0, double& y0, double& z0,
+  void GetIonEndpoint(const unsigned int i, double& x0, double& y0, double& z0,
                       double& t0, double& x1, double& y1, double& z1,
                       double& t1, int& status) const;
 
@@ -221,7 +214,6 @@ class AvalancheMC {
   // Compute the induced signal for the current drift line
   void ComputeSignal(const double q);
   void ComputeInducedCharge(const double q);
-
 };
 }
 

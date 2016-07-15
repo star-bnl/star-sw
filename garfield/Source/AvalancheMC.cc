@@ -35,8 +35,6 @@ AvalancheMC::AvalancheMC()
       m_useEquilibration(true),
       m_useDiffusion(true),
       m_useAttachment(false),
-      m_useTcadTrapping(false),
-      m_useTcadVelocity(false),
       m_useBfield(false),
       m_useIons(true),
       m_withElectrons(true),
@@ -44,6 +42,8 @@ AvalancheMC::AvalancheMC()
       m_scaleElectronSignal(1.),
       m_scaleHoleSignal(1.),
       m_scaleIonSignal(1.),
+      m_useTcadTrapping(false),
+      m_useTcadVelocity(false),
       m_debug(false) {
 
   m_className = "AvalancheMC";
@@ -205,11 +205,10 @@ void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
   status = m_endpointsIons[i].status;
 }
 
-void AvalancheMC::GetElectronEndpoint(const unsigned int i, 
-                                      double& x0, double& y0,
-                                      double& z0, double& t0, double& x1,
-                                      double& y1, double& z1, double& t1,
-                                      int& status) const {
+void AvalancheMC::GetElectronEndpoint(const unsigned int i, double& x0,
+                                      double& y0, double& z0, double& t0,
+                                      double& x1, double& y1, double& z1,
+                                      double& t1, int& status) const {
 
   if (i >= m_nEndpointsElectrons) {
     std::cerr << m_className << "::GetElectronEndpoint:\n";
@@ -253,8 +252,8 @@ bool AvalancheMC::DriftElectron(const double x0, const double y0,
   return true;
 }
 
-bool AvalancheMC::DriftHole(const double x0, const double y0, 
-                            const double z0, const double t0) {
+bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
+                            const double t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftHole:\n";
@@ -278,8 +277,8 @@ bool AvalancheMC::DriftHole(const double x0, const double y0,
   return true;
 }
 
-bool AvalancheMC::DriftIon(const double x0, const double y0, 
-                           const double z0, const double t0) {
+bool AvalancheMC::DriftIon(const double x0, const double y0, const double z0,
+                           const double t0) {
 
   if (!m_sensor) {
     std::cerr << m_className << "::DriftIon:\n";
@@ -303,12 +302,11 @@ bool AvalancheMC::DriftIon(const double x0, const double y0,
   return true;
 }
 
-bool AvalancheMC::DriftLine(const double x0, const double y0, 
-                            const double z0, const double t0,
-                            const int type, const bool aval) {
+bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
+                            const double t0, const int type, const bool aval) {
 
   // Current position
-  double x = x0, y=y0, z = z0;
+  double x = x0, y = y0, z = z0;
   // Time step
   double delta;
   // Medium
@@ -389,33 +387,34 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
   while (ok) {
     // Compute the drift velocity and the diffusion coefficients.
     if (type < 0) {
-      if(m_useTcadVelocity){
-	// Only one component with active velocity is assumed to be attached to AvalancheMC. 
-	ComponentBase* velocityCmp;
-	for(int i=0; i<m_sensor->GetNumberOfComponents(); i++){
-	  velocityCmp = m_sensor->GetComponent(i);		
-	  if(velocityCmp->IsVelocityActive()){
-            Medium *m = 0;
+      if (m_useTcadVelocity) {
+        // Only one component with active velocity is assumed to be attached to
+        // AvalancheMC.
+        ComponentBase* velocityCmp;
+        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+          velocityCmp = m_sensor->GetComponent(i);
+          if (velocityCmp->IsVelocityActive()) {
+            Medium* m = 0;
             velocityCmp->ElectronVelocity(x, y, z, vx, vy, vz, m, status);
-	    if(!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)){
-             std::cerr << m_className << "::DriftLine:\n";
-             std::cerr << "    Error calculating electron"
-                       << " diffusion\n";
-             std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
-             ok = false;
-             abortReason = StatusCalculationAbandoned;
-             break;
-	    } else if (status != 0){
-             std::cerr << m_className << "::DriftLine:\n";
-             std::cerr << "    Error calculating electron"
-                       << " TCAD velocity\n";
-             std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
-             ok = false;
-             abortReason = StatusCalculationAbandoned;
-             break;
-	    }
-	  }
-	}
+            if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+              std::cerr << m_className << "::DriftLine:\n";
+              std::cerr << "    Error calculating electron"
+                        << " diffusion\n";
+              std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
+              ok = false;
+              abortReason = StatusCalculationAbandoned;
+              break;
+            } else if (status != 0) {
+              std::cerr << m_className << "::DriftLine:\n";
+              std::cerr << "    Error calculating electron"
+                        << " TCAD velocity\n";
+              std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
+              ok = false;
+              abortReason = StatusCalculationAbandoned;
+              break;
+            }
+          }
+        }
       } else {
         if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
             !medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
@@ -429,43 +428,44 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
         }
       }
     } else if (type == 1) {
-      if(m_useTcadVelocity){
-	// Only one component with active velocity is assumed to be attached to AvalancheMC. 
-	ComponentBase* velocityCmp;
-	for(int i=0; i<m_sensor->GetNumberOfComponents(); i++){
-	  velocityCmp = m_sensor->GetComponent(i);		
-	  if(velocityCmp->IsVelocityActive()){
-            Medium *m = 0;
+      if (m_useTcadVelocity) {
+        // Only one component with active velocity is assumed to be attached to
+        // AvalancheMC.
+        ComponentBase* velocityCmp;
+        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+          velocityCmp = m_sensor->GetComponent(i);
+          if (velocityCmp->IsVelocityActive()) {
+            Medium* m = 0;
             velocityCmp->HoleVelocity(x, y, z, vx, vy, vz, m, status);
-	    if(!medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)){
-             std::cerr << m_className << "::DriftLine:\n";
-             std::cerr << "    Error calculating hole"
-                       << " diffusion\n";
-             std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
-             ok = false;
-             abortReason = StatusCalculationAbandoned;
-             break;
-	    } else if(status != 0){
-             std::cerr << m_className << "::DriftLine:\n";
-             std::cerr << "    Error calculating hole"
-                       << " TCAD velocity\n";
-             std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
-             ok = false;
-             abortReason = StatusCalculationAbandoned;
-             break;
-	    }
-	  }
-	}
+            if (!medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+              std::cerr << m_className << "::DriftLine:\n";
+              std::cerr << "    Error calculating hole"
+                        << " diffusion\n";
+              std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
+              ok = false;
+              abortReason = StatusCalculationAbandoned;
+              break;
+            } else if (status != 0) {
+              std::cerr << m_className << "::DriftLine:\n";
+              std::cerr << "    Error calculating hole"
+                        << " TCAD velocity\n";
+              std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
+              ok = false;
+              abortReason = StatusCalculationAbandoned;
+              break;
+            }
+          }
+        }
       } else {
-          if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
-              !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-            std::cerr << m_className << "::DriftLine:\n";
-            std::cerr << "    Error calculating hole"
-                      << " velocity or diffusion\n";
-            std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
-            ok = false;
-            abortReason = StatusCalculationAbandoned;
-            break;
+        if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
+            !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+          std::cerr << m_className << "::DriftLine:\n";
+          std::cerr << "    Error calculating hole"
+                    << " velocity or diffusion\n";
+          std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
+          ok = false;
+          abortReason = StatusCalculationAbandoned;
+          break;
         }
       }
     } else if (type == 2) {
@@ -535,8 +535,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
     }
     if (m_debug) {
       std::cout << m_className << "::DriftLine:\n";
-      std::cout << "    Adding diffusion step " 
-                << dx << ", " << dy << ", " << dz << "\n";
+      std::cout << "    Adding diffusion step " << dx << ", " << dy << ", "
+                << dz << "\n";
     }
     // Compute the rotation angles to align the diffusion
     // and drift velocity vectors
@@ -560,8 +560,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
 
     if (m_debug) {
       std::cout << m_className << "::DriftLine:\n";
-      std::cout << "    New point: " 
-                << x << ", " << y << ", " << z << "\n";
+      std::cout << "    New point: " << x << ", " << y << ", " << z << "\n";
     }
     // Compute the electric field at the new point.
     m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
@@ -742,27 +741,27 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
 
         // Loop over the subdivisions.
         for (int j = 0; j < nDiv; ++j) {
-           if (ne > 1000) {
-             // Gaussian approximation.
-             const int gain = int(
-                 ne * alpha + RndmGaussian() * sqrt(ne * alpha * (1. - alpha)));
-             const int loss =
-                 int(ne * eta + RndmGaussian() * sqrt(ne * eta * (1. - eta)));
-             ne += gain - loss;
-             ni += gain;
-           } else {
-             // Binomial approximation
-             for (int k = ne; k--;) {
-               if (RndmUniform() < alpha) {
-                 ++ne;
-                 ++ni;
-               }
-               if (RndmUniform() < eta) {
-                 --ne;
-               }
-             }
-           }
-	  
+          if (ne > 1000) {
+            // Gaussian approximation.
+            const int gain = int(
+                ne * alpha + RndmGaussian() * sqrt(ne * alpha * (1. - alpha)));
+            const int loss =
+                int(ne * eta + RndmGaussian() * sqrt(ne * eta * (1. - eta)));
+            ne += gain - loss;
+            ni += gain;
+          } else {
+            // Binomial approximation
+            for (int k = ne; k--;) {
+              if (RndmUniform() < alpha) {
+                ++ne;
+                ++ni;
+              }
+              if (RndmUniform() < eta) {
+                --ne;
+              }
+            }
+          }
+
           // Check if the particle has survived.
           if (ne <= 0) {
             trapped = true;
@@ -814,8 +813,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
             std::cout << m_className << "::DriftLine:\n";
             std::cout << "    Particle attached.\n";
             std::cout << "    At " << m_drift[m_nDrift - 1].x << ", "
-                      << m_drift[m_nDrift - 1].y << ", " << m_drift[m_nDrift - 1].z
-                      << "\n";
+                      << m_drift[m_nDrift - 1].y << ", "
+                      << m_drift[m_nDrift - 1].z << "\n";
           }
           break;
         }
@@ -888,14 +887,17 @@ bool AvalancheMC::DriftLine(const double x0, const double y0,
     int jL;
     if (type < 0) {
       m_viewer->NewElectronDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y,
-                                   m_drift[0].z);
+                                     m_drift[0].z);
     } else if (type == 1) {
-      m_viewer->NewHoleDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y, m_drift[0].z);
+      m_viewer->NewHoleDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y,
+                                 m_drift[0].z);
     } else {
-      m_viewer->NewIonDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y, m_drift[0].z);
+      m_viewer->NewIonDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y,
+                                m_drift[0].z);
     }
     for (unsigned int iP = 0; iP < m_nDrift; ++iP) {
-      m_viewer->SetDriftLinePoint(jL, iP, m_drift[iP].x, m_drift[iP].y, m_drift[iP].z);
+      m_viewer->SetDriftLinePoint(jL, iP, m_drift[iP].x, m_drift[iP].y,
+                                  m_drift[iP].z);
     }
   }
 
@@ -1046,8 +1048,8 @@ bool AvalancheMC::Avalanche() {
         // Loop over the ions at this location.
         for (int iI = 0; iI < m_aval[iAval].ni; ++iI) {
           // Compute an ion drift line.
-          DriftLine(m_aval[iAval].x, m_aval[iAval].y, m_aval[iAval].z, m_aval[iAval].t,
-                    2, false);
+          DriftLine(m_aval[iAval].x, m_aval[iAval].y, m_aval[iAval].z,
+                    m_aval[iAval].t, 2, false);
           continue;
         }
 
@@ -1143,32 +1145,33 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
         by *= Tesla2Internal;
         bz *= Tesla2Internal;
       }
-      if(m_useTcadTrapping == true){
-	// Only one component with active traps and velocity map is assumed to be attached to AvalancheMC. 
-	ComponentBase* trapCmp;
-	for(int i=0; i<m_sensor->GetNumberOfComponents(); i++){
-          trapCmp = m_sensor->GetComponent(i);		
-	  Medium* trapMed = trapCmp->GetMedium(x,y,z);
-          if(trapCmp->IsTrapActive()){
-            if(type < 0){
-              if(trapCmp->IsVelocityActive()){
-               trapCmp->ElectronVelocity(x, y, z, vx, vy, vz, trapMed, status); 
+      if (m_useTcadTrapping == true) {
+        // Only one component with active traps and velocity map is assumed to
+        // be attached to AvalancheMC.
+        ComponentBase* trapCmp;
+        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+          trapCmp = m_sensor->GetComponent(i);
+          Medium* trapMed = trapCmp->GetMedium(x, y, z);
+          if (trapCmp->IsTrapActive()) {
+            if (type < 0) {
+              if (trapCmp->IsVelocityActive()) {
+                trapCmp->ElectronVelocity(x, y, z, vx, vy, vz, trapMed, status);
               } else {
-               trapMed->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+                trapMed->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
               }
               trapMed->ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
               trapCmp->ElectronAttachment(x, y, z, eta);
             } else {
-              if(trapCmp->IsVelocityActive()){
+              if (trapCmp->IsVelocityActive()) {
                 trapCmp->HoleVelocity(x, y, z, vx, vy, vz, trapMed, status);
-	      } else {
+              } else {
                 trapMed->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
-	      }
+              }
               trapMed->HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
               trapCmp->HoleAttachment(x, y, z, eta);
             }
           }
-	}
+        }
       } else {
         if (type < 0) {
           medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
@@ -1183,7 +1186,7 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
       vdx += wg[j] * vx;
       vdy += wg[j] * vy;
       vdz += wg[j] * vz;
-      m_drift[i].alpha += wg[j] * alpha; 
+      m_drift[i].alpha += wg[j] * alpha;
       m_drift[i].eta += wg[j] * eta;
     }
     // Compute the scaling factor for the projected length.
@@ -1204,10 +1207,10 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
 
     // m_drift[i].alpha *= 0.5 * del * scale;
     // m_drift[i].eta *= 0.5 * del * scale;
-    //TEST BUG BUG BUG
-    //m_drift[i].alpha *= 0.5;
-    m_drift[i].alpha *=  del * scale;
-    m_drift[i].eta *=  del * scale;
+    // TEST BUG BUG BUG
+    // m_drift[i].alpha *= 0.5;
+    m_drift[i].alpha *= del * scale;
+    m_drift[i].eta *= del * scale;
   }
 
   // Skip equilibration if projection has not been requested.
@@ -1395,7 +1398,7 @@ void AvalancheMC::ComputeSignal(const double q) {
     dy = m_drift[i + 1].y - m_drift[i].y;
     dz = m_drift[i + 1].z - m_drift[i].z;
     m_sensor->AddSignal(q, m_drift[i].t, dt, m_drift[i].x + 0.5 * dx,
-                        m_drift[i].y + 0.5 * dy, m_drift[i].z + 0.5 * dz, 
+                        m_drift[i].y + 0.5 * dy, m_drift[i].z + 0.5 * dz,
                         dx / dt, dy / dt, dz / dt);
   }
 }

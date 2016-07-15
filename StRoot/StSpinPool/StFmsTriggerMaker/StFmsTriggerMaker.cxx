@@ -460,6 +460,7 @@ void StFmsTriggerMaker::runFmsLayer0(int t){
     fms_fm006_2011_a(fm012,t);
     break;
   case 2015:
+  default:
     fms_fm001_2015_a(fm001,t,mUseDsmData);
     fms_fm001_2015_a(fm002,t,mUseDsmData);
     fms_fm001_2015_a(fm003,t,mUseDsmData);
@@ -493,6 +494,7 @@ void StFmsTriggerMaker::runFmsLayer1(int t){
     fms_fm102_2012_a(fm103,t);
     break;
   case 2015:
+  default:
     if(mForceRun<16056024){ 
       fms_fm101_2015_a(fm101,t,mUseDsmData);
       fms_fm101_2015_a(fm102,t,mUseDsmData);
@@ -512,6 +514,7 @@ void StFmsTriggerMaker::runFpdLayer2(int t){
   case 2012: l1_fp201_2012_b(fp201,t); break;
   case 2013: l1_fp201_2012_b(fp201,t); break;
   case 2015: 
+  default:
     if(mForceRun<16056024)  {l1_fp201_2015_a(fp201,t,mUseDsmData);} 
     else                    {l1_fp201_2015_b(fp201,t,mUseDsmData);}
     break;
@@ -696,8 +699,8 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
     LOG_INFO << Form("DB Year=%d forceYear=%d\n",mDBTime.GetYear(),year) <<endm;
   }
   unsigned int port = 3400+year%100-1; 
-  if(year==2015) {port=3501; host=host2;}
-  if(year>2016) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
+  if(year==2016) {port=3501; host=host2;}
+  if(year>2017) {printf("NO RUN16 DB yet.... Skip for now...\n"); return kStOK; }
   
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
