@@ -178,19 +178,12 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       assert( neighUp[upperNeighbourIndex].fLinks < rowUp.NHits() || !neighUp[upperNeighbourIndex].fValid );
       debugS() << neighUp[upperNeighbourIndex];
 
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fLinks );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fValid );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fY );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fZ );
 #ifdef DRAW_NEIGHBOURSFINDING
       neighUpY[upperNeighbourIndex] = neighUp[upperNeighbourIndex].fY;
       neighUpZ[upperNeighbourIndex] = neighUp[upperNeighbourIndex].fZ;
 #endif      
       neighUp[upperNeighbourIndex].fY = DnDx * ( neighUp[upperNeighbourIndex].fY - y );
       neighUp[upperNeighbourIndex].fZ = DnDx * ( neighUp[upperNeighbourIndex].fZ - z );
-
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fY );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fZ );
       
       maxUpperNeighbourIndex(neighUp[upperNeighbourIndex].fValid)++;
       ++upperNeighbourIndex;
@@ -220,10 +213,6 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       if ( ISUNLIKELY( ((Vc::Zero < maxUpperNeighbourIndex) && neighDn.fValid).isEmpty() ) ) continue; // no both neighbours
         
       assert( neighDn.fLinks < rowDn.NHits() || !neighDn.fValid );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fLinks );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fValid );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fY );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fZ );
       debugS() << neighDn;
 
       nNeighDn++;

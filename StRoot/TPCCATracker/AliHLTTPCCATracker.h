@@ -178,9 +178,6 @@ inline void AliHLTTPCCATracker::GetErrors2( int iRow, const sfloat_v &z, const s
   // Use calibrated cluster error from OCDB
   //
 
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( DzDs );
-
   fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
 }
 inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &iRow, const sfloat_v &z, const sfloat_v &sinPhi,

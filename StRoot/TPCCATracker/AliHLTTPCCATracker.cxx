@@ -251,11 +251,6 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );

@@ -59,7 +59,6 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // up part
       assert( ( validHitsMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) ) == validHitsMask );
       const short_v up = short_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       const ushort_v upIndexes = up.staticCast<ushort_v>();
       assert ( (validHitsMask && (up >= minusOne) ) == validHitsMask );
       short_m upMask = validHitsMask && up >= short_v( Vc::Zero );
@@ -68,7 +67,6 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // down part
       const short_v dn = short_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
       assert ( ( validHitsMask && (dn >= minusOne) ) == validHitsMask );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       const ushort_v downIndexes = dn.staticCast<ushort_v>();
       short_m dnMask = validHitsMask && dn >= short_v( Vc::Zero );
       assert( ( dnMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == dnMask );
@@ -197,12 +195,11 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
 #endif // USE_EDGE_HITS
         // delete one-way links (all other one-way links)
       const short_m badUpMask = validHitsMask && (downFromUp != static_cast<short_v>(hitIndexes));
-      VALGRIND_CHECK_VALUE_IS_DEFINED( up );
+
       assert( ( badUpMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) )  == badUpMask );
       data.SetHitLinkUpData( row, hitIndexes, minusOne, badUpMask );
 
       const short_m badDnMask = validHitsMask && (upFromDown != static_cast<short_v>(hitIndexes));
-      VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       assert( ( badDnMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) )  == badDnMask );
       data.SetHitLinkDownData( row, hitIndexes, minusOne, badDnMask );
     } // for iHit
