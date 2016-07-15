@@ -415,14 +415,6 @@ inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
     const ushort_v &hitIndex, const ushort_v &weight )
 {
   const short_m mask = validHitIndexes( hitIndex );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
-#ifndef NVALGRIND
-  for ( int i = 0; i < hitIndex.Size; ++i ) {
-    if ( mask[i] ) {
-      VALGRIND_CHECK_VALUE_IS_DEFINED( row.fHitWeights[hitIndex[i]] );
-    }
-  }
-#endif
   // XXX critical section if the TrackletConstructor gets multi-threaded
   const ushort_v oldWeight( row.fHitWeights, hitIndex, mask );
   debugF() << "scatter HitWeigths " << weight << " to " << hitIndex << ( weight > oldWeight && mask ) << " old: " << oldWeight << std::endl;
@@ -431,14 +423,6 @@ inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
 
 inline ushort_v AliHLTTPCCASliceData::HitWeight( const AliHLTTPCCARow &row, const ushort_v &hitIndex, const ushort_m &mask ) const
 {
-#ifndef NVALGRIND
-  for ( int i = 0; i < hitIndex.Size; ++i ) {
-    if ( mask[i] ) {
-      debugF() << i << ": " << hitIndex[i] << std::endl;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( row.fHitWeights[hitIndex[i]] );
-    }
-  }
-#endif
   return ushort_v( row.fHitWeights, hitIndex, mask );
 }
 
