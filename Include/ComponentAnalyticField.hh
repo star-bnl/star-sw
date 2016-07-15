@@ -78,7 +78,7 @@ class ComponentAnalyticField : public ComponentBase {
   void PrintCharges();
 
   std::string GetCellType() { 
-    if (!cellset) {
+    if (!m_cellset) {
       if (CellCheck()) CellType();
     }
     return m_scellType; 
@@ -103,8 +103,8 @@ class ComponentAnalyticField : public ComponentBase {
 
   void AddReadout(const std::string label);
 
-  void EnableChargeCheck() { chargeCheck = true; }
-  void DisableChargeCheck() { chargeCheck = false; }
+  void EnableChargeCheck() { m_chargeCheck = true; }
+  void DisableChargeCheck() { m_chargeCheck = false; }
 
   int GetNumberOfWires() { return nWires; }
   bool GetWire(const int i, double& x, double& y, double& diameter,
@@ -135,10 +135,10 @@ class ComponentAnalyticField : public ComponentBase {
     Unknown
   };
  private:
-  bool chargeCheck;
+  bool m_chargeCheck;
 
-  bool cellset;
-  bool sigset;
+  bool m_cellset;
+  bool m_sigset;
 
   bool polar;
 
@@ -155,8 +155,8 @@ class ComponentAnalyticField : public ComponentBase {
   double vmin, vmax;
 
   // Periodicities
-  bool perx, pery;
-  double sx, sy;
+  bool m_perx, m_pery;
+  double m_sx, m_sy;
 
   // Signals
   int nFourier;
@@ -210,8 +210,8 @@ class ComponentAnalyticField : public ComponentBase {
   std::vector<double> b2sin;
   // Parameters for C type cells
   int mode;
-  std::complex<double> zmult;
-  double p1, p2, c1;
+  std::complex<double> m_zmult;
+  double m_p1, m_p2, c1;
   // Parameters for D3 type cells
   // Conformal mapping in polygons
   std::vector<std::complex<double> > wmap;
@@ -441,7 +441,7 @@ class ComponentAnalyticField : public ComponentBase {
   // Auxiliary functions for C type cells
   double Ph2(const double xpos, const double ypos);
   double Ph2Lim(const double radius) {
-    return -log(abs(zmult) * radius * (1. - 3. * p1 + 5. * p2));
+    return -log(abs(m_zmult) * radius * (1. - 3. * m_p1 + 5. * m_p2));
   }
   void E2Sum(const double xpos, const double ypos, double& ex, double& ey);
 
