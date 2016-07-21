@@ -2564,6 +2564,37 @@ REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
     exe HCALv1;      "Naked HCAL";
 ]
 
+REPLACE [exe dev2017;] with ["Y2017 development tag";
+
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of VPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe SISDof;      "No sisd";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD14;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+*   exe IDSM14;      "Inner detector support";
+*    exe SISD85;      "SSD version 7"
+*    exe PIPEv3;      "The small diameter beam pipe";
+*    exe ISTD02;      "IST version 2";
+*    exe PXST01;      "PIXEL detector support version 1";
+*    exe PIXL06;      "Full config of the pixl detector";
+*    exe DTUB01;      "DTUB";
+*    exe PSUP01;      "1st version of pixl supports";
+*    exe FGTDv56;     "12 disk FGT";
+    exe HCALv1;      "HCAL prototype";
+
+];    
+
 REPLACE [exe dev2018;] with ["Y2018 development tag";
 
     exe TPCE31;      "agstar version of yf model with reduced Rmax";
@@ -3607,7 +3638,10 @@ If LL>0
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
 
-  Case dev2018  { dev2018 : y2018 baseline, is y2012 lus FMS preshower;
+  Case dev2017  { dev2017 : y2017 baseline, is y2012 plus FMS preshower;
+                  Geom = 'dev2018   '; exe dev2018; }
+
+  Case dev2018  { dev2018 : y2018 baseline, is y2012 plus FMS preshower;
                   Geom = 'dev2018   '; exe dev2018; }
 
   Case dev15a   { dev15a : y2014 a plus FMS preshower;          

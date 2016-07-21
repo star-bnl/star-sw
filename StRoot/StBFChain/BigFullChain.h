@@ -220,6 +220,9 @@ Bfc_st BFC[] = { // standard chains
   {"MC.2015","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2015,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
    ,                                                                                      "","","",kFALSE},
+  {"MC.2016","","","TpcRS,pxlFastSim,istSim,emcY2,EEfs,TpxClu,y2016,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,evout,IdTruth,geantout,big,Sti,AgML"
+   ,                                                                                      "","","",kFALSE},
   {"MC.devT","","","TpcRS,TpxClu,devT,useXgeom,FieldOn,NoSsdIt,NoSvtIt,StiHftC,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti,AgML"
    ,                                                                                      "","","/",kFALSE},
@@ -1815,7 +1818,7 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"MuMc"        ,"","","RMuDst,KFParticle","StMuMcAnalysisMaker"
+  {"MuMc"        ,"","","KFParticle","StMuMcAnalysisMaker"
    ,                                    "KFParticlePerformance,StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
    ,   "StEandBDirMaker","MathMore,Spectrum,StEandBDirMaker",                   "get E&B direction",kFALSE},

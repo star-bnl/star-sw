@@ -154,6 +154,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
+  {"dev2017",     20170101,     0, "dev2017",   "dev2017, no HFT,xgeometry"}, // 
   {"dev2018",     20180101,     0, "dev2018",   "dev2018, no HFT,xgeometry"}, // 
   {"dev2019",     20190101,     0, "dev2019",   "dev2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"devTA",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
