@@ -57,6 +57,7 @@ class StdEdxModel {
   static TH2D         *mdEdxMPV; // Histogram for most probable log(n_t/n_p) value versus log10(n_p) and sigma
   static TH3F         *mdEdxFun; // Distribution {log10(n_p), sigma, log(n_t/n_p) - log(n_t/n_p)_MPV}
   static Double_t      mzMin, mzMax, mdZ;  //
+  static Double_t      mnPLmin, mnPLmax;
   static Int_t        _debug;
   ClassDef(StdEdxModel,0)
 };
