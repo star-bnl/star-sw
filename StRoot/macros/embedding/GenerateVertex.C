@@ -82,10 +82,10 @@ void GenerateVertex(const char *dataFileName = 0,
    assert(ofile);
 
    // histograms
-   TH1F *hVz  = new TH1F("hVz ", ";vz [cm]"        , 500, -250, 250);
-   TH2F *hVxy = new TH2F("hVxy", ";vx [cm];vy [cm]", 150, 0.0, 0.6, 160, 0.0, 0.2);
-   TH2F *hVzx = new TH2F("hVzx", ";vz [cm];vx [cm]", 500, -250, 250, 150, 0.0, 0.6);
-   TH2F *hVzy = new TH2F("hVzy", ";vz [cm];vy [cm]", 500, -250, 250, 160, 0.0, 0.2);
+   TH1F *hVz  = new TH1F("hVz ", "; vz [cm]",          100,  -50,  50);
+   TH2F *hVxy = new TH2F("hVxy", "; vx [cm]; vy [cm]",  50, -2.5, 2.5, 50, -2.5, 2.5);
+   TH2F *hVzx = new TH2F("hVzx", "; vz [cm]; vx [cm]", 100,  -50,  50, 50, -2.5, 2.5);
+   TH2F *hVzy = new TH2F("hVzy", "; vz [cm]; vy [cm]", 100,  -50,  50, 50, -2.5, 2.5);
 
    // Randomize
    gRandom->SetSeed(seed);
