@@ -14,26 +14,6 @@ void GenerateVertex(char *dataFileName,
    const TVector3 vtxSpread=TVector3(0.03, 0.03, 50), const double vtxZOffset = 0,
    int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
-   // vertex spreads and offsets
-   const double xsigma = 0.055;	    // cm
-   const double ysigma = 0.02;       // cm
-   //const double zsigma = 48.79;    // cm
-   //const double zoffset = -2.107;  // cm
-
-   /* ====W embedding=======
-   const double xsigma = 0.0150; // cm
-   const double ysigma = 0.0150; // cm
-   const double zsigma = 42.0;   // cm
-   const double zoffset = 0.0;   // cm
-   */
-
-   /* ==== VPDMB ====
-   const double xsigma = 0.0372;	// cm
-   const double ysigma = 0.0150;	// cm
-   const double zsigma = 33.43;	// cm
-   const double zoffset = -1.443; // cm
-   */
-
    // load generic STAR libraries
    gSystem->Load("St_base");
    gSystem->Load("StChain");
@@ -151,4 +131,43 @@ void GenerateVertex(char *dataFileName,
    // write histograms and close ROOT file
    ofile->Write();
    ofile->Close();
+}
+
+
+/**
+ * Specific vertex spreads and z offset for J/psi embedding as found in Chanaka's private area.
+ */
+void GenerateVertex4Jpsi(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.055, 0.02, 48.79); // in cm
+   const double vertexZOffset = -2.107; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
+}
+
+
+/**
+ * Specific vertex spreads and z offset for W embedding taken from Jinlong's private area.
+ */
+void GenerateVertex4WBoson(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.015, 0.015, 42); // in cm
+   const double vertexZOffset = 0; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
+}
+
+
+/**
+ * Specific vertex spreads and z offset for VPD.
+ */
+void GenerateVertex4VPD(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.0372, 0.015, 33.43); // in cm
+   const double vertexZOffset = -1.443; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
 }
