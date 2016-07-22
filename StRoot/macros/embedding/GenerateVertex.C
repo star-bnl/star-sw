@@ -10,7 +10,9 @@
  * y and z, and offset in z, and the distribution in z is base on the
  * zVertexOneTofMatch histogram from the 'dataFileName' file in ROOT format.
  */
-void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+void GenerateVertex(char *dataFileName,
+   const TVector3 vtxSpread=TVector3(0.03, 0.03, 50), const double vtxZOffset = 0,
+   int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
    // vertex spreads and offsets
    const double xsigma = 0.055;	    // cm
@@ -129,11 +131,11 @@ void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const 
 
       cout << "Random zVertex Value from Data is: " << zVertexOneTofMatch->GetRandom() << endl;
 
-      //double vz = gRandom->Gaus(zoffset,zsigma);
+      //double vz = gRandom->Gaus(vtxZOffset, vtxSpread.Z());
 
       double vz = zVertexOneTofMatch->GetRandom();
-      double vx = gRandom->Gaus(x0 + dxdz * vz, xsigma);
-      double vy = gRandom->Gaus(y0 + dydz * vz, ysigma);
+      double vx = gRandom->Gaus(x0 + dxdz * vz, vtxSpread.X() );
+      double vy = gRandom->Gaus(y0 + dydz * vz, vtxSpread.Y() );
 
       fprintf(VERTEXFILE, "%14f %14f %14f\n", vx, vy, vz);
 
