@@ -10,7 +10,7 @@
  * y and z, and offset in z, and the distribution in z is base on the
  * zVertexOneTofMatch histogram from the 'dataFileName' file in ROOT format.
  */
-void GenerateVertex(char *dataFileName,
+void GenerateVertex(const char *dataFileName = 0,
    const TVector3 vtxSpread=TVector3(0.03, 0.03, 50), const double vtxZOffset = 0,
    int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
@@ -105,15 +105,19 @@ void GenerateVertex(char *dataFileName,
          }
       }
 
-      tf = new TFile(dataFileName);
+      double vz = 0;
 
-      gDirectory->cd("Event");
+      // Set z component based on actual distribution provided by the user
+      if (dataFileName)
+      {
+         tf = new TFile(dataFileName);
+         gDirectory->cd("Event");
+         vz = zVertexOneTofMatch->GetRandom();
+         cout << "Random zVertex Value from Data is: " << vz << endl;
+      } else {
+         vz = gRandom->Gaus(vtxZOffset, vtxSpread.Z());
+      }
 
-      cout << "Random zVertex Value from Data is: " << zVertexOneTofMatch->GetRandom() << endl;
-
-      //double vz = gRandom->Gaus(vtxZOffset, vtxSpread.Z());
-
-      double vz = zVertexOneTofMatch->GetRandom();
       double vx = gRandom->Gaus(x0 + dxdz * vz, vtxSpread.X() );
       double vy = gRandom->Gaus(y0 + dydz * vz, vtxSpread.Y() );
 
@@ -137,7 +141,7 @@ void GenerateVertex(char *dataFileName,
 /**
  * Specific vertex spreads and z offset for J/psi embedding as found in Chanaka's private area.
  */
-void GenerateVertex4Jpsi(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+void GenerateVertex4Jpsi(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
    const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
    const TVector3 vertexSpread(0.055, 0.02, 48.79); // in cm
@@ -150,7 +154,7 @@ void GenerateVertex4Jpsi(char *dataFileName, int nevents = 1000, int seed = 0, c
 /**
  * Specific vertex spreads and z offset for W embedding taken from Jinlong's private area.
  */
-void GenerateVertex4WBoson(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+void GenerateVertex4WBoson(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
    const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
    const TVector3 vertexSpread(0.015, 0.015, 42); // in cm
@@ -163,7 +167,7 @@ void GenerateVertex4WBoson(char *dataFileName, int nevents = 1000, int seed = 0,
 /**
  * Specific vertex spreads and z offset for VPD.
  */
-void GenerateVertex4VPD(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+void GenerateVertex4VPD(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
    const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
    const TVector3 vertexSpread(0.0372, 0.015, 33.43); // in cm
