@@ -168,7 +168,7 @@ class StMuDstMaker : public StIOInterFace {
   void setBufferSize(int=65536*4);
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp=9);
-
+  Int_t IOMode() {return mIoMode;}
   //Set for StTriggerData. Default is 2009.
   void setStTriggerYear(int);
 //______________________________________________________________________________
@@ -191,6 +191,7 @@ protected:
   void connectEmcCollection();
   void connectFmsCollection();
   void connectPmdCollection();
+ public:
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts.
       ioFix = use filename specified in when calling the constructor, right in the
@@ -201,7 +202,7 @@ protected:
       from current input file of the StTreeMaker.
   */
   enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
-
+ protected:
   StEvent* mStEvent;
   StMuDst* mStMuDst;
 #ifndef __NO_STRANGE_MUDST__
