@@ -1,0 +1,20 @@
+<job  name="MuPrmVtx" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  starver .DEV2 
+#  setup gcc451
+  set file = $INPUTFILE0;
+  set base = `basename $file MuDst.root`;
+  echo "${base}"
+  set logFile  = ${base}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${base}*.root"`
+  if ("$f" == "") then
+    root.exe -q -b lMuDstK.C 'MuPrmVtx.C+("'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="file:/star/rcf/test/dev/trs_sl302.ittf/Thu/*/*/*.MuDst.root" /> 
+</job>

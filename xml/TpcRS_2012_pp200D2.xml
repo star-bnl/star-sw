@@ -1,0 +1,21 @@
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+  starver .DEV2 
+  setup gcc451
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .MuDst`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  if ("$f" == "") then
+#    root4star -q -b 'TpcRS.C(4000,"P2011a,TpcRS,Tree,evout,-l3onl,-emcDY2,-fpd,-ftpc,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
+    root4star -q -b 'TpcRS.C(4000,"y2012b,TpcRS,TpxClu2D","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2012_pp200/*MuDst.root" /> 
+</job>

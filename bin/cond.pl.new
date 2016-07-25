@@ -1,0 +1,69 @@
+#! /usr/bin/env perl
+use File::Basename;
+use Cwd;
+#my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|NumCkpts_RAW|Iwd|ClusterId|RemoteUserCpu =)'`;
+my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|Iwd|RemoteUserCpu =|HoldReasonCode|ClusterId )'`;
+#my @list = ` condor_q -l -s fisyak | egrep '(GlobalJobId|Iwd|CurrentHosts =|HoldReasonCode)'`;
+#print "@list\n";
+my $line = "";
+my %Hash = ();
+my %HashR = (); # RUN
+my %HashH = (); # HOLD
+my %HashId = ();
+my $keyd = "";
+my $debug = 0;
+if ($#ARGV >= 0) {
+  $debug = $ARGV[0]; print "debug $debug\n";
+}
+$Hash{$keyd} = 0;
+my $GlobalJobId = "";
+my $Iwd = "";
+my $Id = "";
+my $RemoteUserCpu = 0;
+
+for (my $i = 0; $i < $#list; $i += 5) {
+  my ($dum,$dum,$Id) = split(" ",$list[$i+1]);
+  my ($dum1,$dum2) = split('"',$list[$i+2]);
+  my ($node) = split('\.',$dum2);
+  #  print "$node from $list[$i]";
+  my $hold = 0;
+  if ($list[$i+1] =~ /HoldReasonCode/) {
+    $hold = 1;
+    $i++;
+  }
+  my ($dum3,$pwd) = split('"',$list[$i+3]);
+  $pwd =~ s#/afs/rhic.bnl.gov/star/users/fisyak/work/##;
+  $pwd =~ s#/gpfs01/star/pwg/fisyak/##;
+  $pwd =~ s#/afs/rhic.bnl.gov/star/users/fisyak/pwg/##;
+  $pwd =~ s#/afs/rhic.bnl.gov/star/users/fisyak/##;
+  if (!$pwd) { next;}
+  #  print "$pwd from $list[$i+3]";
+  my ($dum4,$dum5,$cpu) = split(' ',$list[$i+4]);
+  #  print "$cpu from $list[$i+4]";
+  $keyd = $node . ":" . $pwd;
+  $Hash{$keyd}++;
+  if ($cpu > 0.0) {
+    $HashR{$keyd}++;
+  }
+  if ($hold) {
+    $HashH{$keyd}++;
+  }
+  if ($Id != 0) {
+    if ($HashId{$keyd}) { $HashId{$keyd} .= " " . $Id;}
+    else                { $HashId{$keyd}  =       $Id;}
+  }
+}
+my $total = 0;
+my $run   = 0;
+my $hold  = 0;
+foreach my $key ( sort keys %Hash ) {
+  if ($Hash{$key} and $Hash{$key} != ':') {
+    printf("%-60s = %6i runs = %6i/hold = %6i",$key,$Hash{$key},$HashR{$key},$HashH{$key});
+    if ($HashId{$key} and $debug) {print "\tId: $HashId{$key}";}
+    print "\n";
+    $total += $Hash{$key};
+    $run   += $HashR{$key};
+    $hold  += $HashH{$key};
+  }
+}
+printf("Total                                                        = %6i runs = %6i/hold = %6i\n",$total,$run,$hold);

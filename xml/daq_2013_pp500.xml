@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+  cd ${SUBMITTINGDIRECTORY}
+#   cd $SCRATCH
+  starver .DEV2 
+#  starver eval
+#  setup gcc45
+#  source ~/.tcshrc
+  setenv StarEndMakerShell
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 1000
+  endif
+
+  if (! -r ${evtsFile}) exit 1;
+  echo "${evtsFile}"
+  set file     = `basename $evtsFile .daq`
+  set filel   = ${file}_${f}_${l}
+  set output  = ${filel}.event.root
+  set logFile  = ${filel}B.log
+#  root4star -q -b 'TpcRS.C(999999,"RCy2012,TpxRaw,TpxClu,-evout,KFVertex,NoRunco,NoTags,noHistos","'${evtsFile}'","")' &gt;&amp; ${logFile}
+  set fx=`find ${SUBMITTINGDIRECTORY}  -maxdepth 1 -type f -name "${filel}*.root"`
+  if ("$fx" == "") then
+#    touch ${SUBMITTINGDIRECTORY}/${file}.bla.root
+#dev2     root4star -q -b 'bfc.C('$f','$l',"RC.pp.y2013,StiCA,NoRunco,NoTags,noHistos,TpcHitFilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#Sti     
+root4star -q -b 'bfc.C('$f','$l',"RC.pp.y2013,Sti,NoRunco,NoTags,noHistos,TpcHitFilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#dev2 KF    root4star -q -b 'bfc.C('$f','$l',"RC.pp.y2013,StiCA,KFVertex,NoRunco,NoTags,noHistos,TpcHitFilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#eval    root4star -q -b 'bfc.C('$f','$l',"pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,NoRunco,NoTags,noHistos,-hitfilt","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#    rm ${SUBMITTINGDIRECTORY}/${file}.bla.root
+#    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
+  endif
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.err" />
+<!-- <input URL="file:/star/data03/daq/2012/122/13122001/st_physics_adc_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/1*/*/st_physics_*_raw_1010005.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/11*/*/st_physics_*_raw_1010001.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/12*/*/st_physics_*_raw_1010001.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/13*/*/st_physics_*_raw_1010001.daq" /> -->
+<input URL="command:pp500dEdxSample.pl" />
+<!-- <output fromScratch="*.root" toURL="file:/star/data16/calib/2012/UU193/" />  -->
+<!--  <output fromScratch="*.log" toURL="file:/star/data16/calib/2012/UU193/" /> -->
+
+</job>

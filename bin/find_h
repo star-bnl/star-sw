@@ -1,0 +1,7 @@
+#! /bin/csh -f 
+set list = "ls -d *"
+foreach dir ($list) 
+   echo "dir = " $dir
+   grep -i hbook_hpux.h $dir/*/*.*
+end
+#cd $cwd

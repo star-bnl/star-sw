@@ -1,0 +1,8 @@
+#! /bin/csh -f
+ set list = `ls *.F` 
+ foreach f ($list) 
+   echo $f; 
+   cat $HOME/bin/head.  > tmp
+   cat  $f >> tmp
+   mv tmp $f
+end

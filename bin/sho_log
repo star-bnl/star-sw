@@ -1,0 +1,8 @@
+#! /bin/csh -f
+ set list = `ls -alF | grep  2733`
+ foreach f ($list) 
+    set  n = `echo $f | gawk -F_ '{print $4"_"$5"_"$6"_"$7"_"$1"_"$2"_"$3}'` 
+   echo $n
+
+ end
+end

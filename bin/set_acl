@@ -1,0 +1,7 @@
+#!/bin/sh
+find .  -type d -exec fs setacl -dir {} -acl  perev  rlidwk \; 
+find .  -type d -exec fs setacl -dir {} -acl  nevski  rlidwk \; 
+find .  -type d -exec fs setacl -dir {} -acl  didenko rlidwk \; 
+find .  -type d -exec fs setacl -dir {} -acl  starlib  rlidwk \; 
+find .  -type d -exec fs setacl -dir {} -acl  wenaus   rlidwk \; 
+find .  -type d -exec fs setacl -dir {} -acl  star   rl \; 

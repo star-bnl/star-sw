@@ -1,0 +1,2 @@
+#! /bin/csh 
+kill -l | awk 'BEGIN{n=0}{for (i=1; i<=NF;i++) {printf("%i \t%s\n",n,$i);n++}}'

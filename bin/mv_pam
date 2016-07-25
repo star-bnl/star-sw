@@ -1,0 +1,29 @@
+#! /bin/csh -f
+cd $STAR_ROOT/pams
+*set list = `ls -d *`
+set list = global
+foreach dir ($list) 
+  if ($dir != CVS) then
+    cd $dir
+    if (-d inc == 0) mkdir inc
+    if (-d idl == 0) mkdir idl
+    set list2 = `ls -d *`
+    foreach dir2 ($list2)
+      if ($dir2 != CVS && $dir2 != idl && $dir2 != inc) then
+        cd $dir2
+        echo $dir2
+        cp /afs/rhic/star/starlib/ref/*/$dir2/src/*.* .
+        mv_idlm
+        cp /afs/rhic/star/starlib/ref/*/$dir2/inc/*.*  ../inc/
+        cp /afs/rhic/star/starlib/ref/*/$dir2/idl/*.*  ../inc/
+        cp /afs/rhic/star/starlib/ref/*/$dir2/idl/*.*  ../inc
+        cp /afs/rhic/star/starlib/ref/*/$dir2/incx4/*.*  ../inc
+        cp /afs/rhic/star/starlib/ref/*/$dir2/inc/idl/*.* ../inc/
+        mv ../inc/*.idl ../idl/
+        cd ..
+      endif
+    end
+    cd ..
+  endif
+end
+

@@ -1,0 +1,21 @@
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+#  setup gcc451
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile _ry2011_Tree_evout_BAna__1_999999O.MuDst.root`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set tree     = ${file}.Tree.root
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'bfc.C(4000,"MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,NoHistos,NoRunco,CMuDst,IdTruth,useInTracker,tpcDB,TpcFastSim,mtin,y2011,evout,TpcAligner","'${evtsFile}'",0,"'${tree}'")' > ${logFile}
+  endif
+</command>
+<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/daq_2011_Cosmics/*MuDst.root" /> 
+</job>

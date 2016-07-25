@@ -1,0 +1,83 @@
+#! /bin/csh -f 
+#set dirlist  = "/opt/SUNWspro/lib /opt/SUNWspro/SC4.2/lib /usr/ucblib"
+#set dirlist  = "/usr/ucblib  /usr/ucblib/sparcv9"
+#set dirlist = "/opt/star/lib /usr/pgi/linux86/lib /usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66"# 
+#set dirlist = "/usr/lib /usr/local/lib"
+#set dirlist = "/usr/pgi/linux86/lib";# /opt/star/rh80_gcc32/lib /opt/star/lib /usr/lib/gcc-lib/i386-redhat-linux/3.2 /usr/lib"
+#set dirlist = "${STAR_LIB}"
+#set dirlist = "/usr/4lib /usr/ucblib /usr/local/lib /usr/openwin/lib /usr/local/lib"
+#/usr/local/lib/egcs/ "/usr/lib /usr/lib"# /usr/local/lib"# /cern/new/lib /usr/pgi/linux86/lib"
+#set dirlist = "/cern/2000/lib"
+#set dirlist = "/usr/local/gcc-alt-2.95.2/lib/gcc-lib/i686-pc-linux-gnu/2.95.2 /lib" #
+#set dirlist = "/usr/lib/gcc-lib/i386-redhat-linux/2.96 /usr/lib/gcc-lib/i386-redhat-linux/3.0.2/";#/lib /usr/lib /usr/local/lib" #
+# /usr/local/gcc-alt-2.95.2/lib/gcc-lib/i686-pc-linux-gnu";#/usr/local/gc/lib /usr/lib /usr/local/lib /usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 /cern/2000/lib" 
+#set dirlist = "/opt/star/lib"#$ROOTSYS/lib
+#set dirlist = "/usr/lib  /opt/aCC/lib /opt/fortran/lib"
+#set dirlist = "/afs/rhic/.asis/sun4x_56/usr.local/lib/gcc-lib/sparc-sun-solaris2.6/egcs-2.91.66"
+#/afs/rhic/.asis/sun4x_58/usr.local/lib"# /cern/2001/lib"#/opt/star/lib /opt/WS5.0/lib /opt/WS5.0/SC5.0/lib /usr/local/lib"
+#set dirlist = "/opt/WS6.0/lib /opt/WS6.0/lib/v7 /opt/WS6.0/lib/v8 /opt/WS6.0/lib/v8a /opt/WS6 .0/lib/v9"#/usr/ucblib/sparcv9 /usr/ucblib"
+#set dirlist =  "$ROOTSYS/lib /usr/lib /opt/WS6.0/lib /opt/WS6.0/WS6/lib /usr/local/lib"
+#set dirlist = "$ROOTSYS/lib /usr/X11R6/lib"
+#set  dirlist = ".i386_redhat61/lib"
+#set dirlist = "/afs/cern.ch/atlas/software/dist/current/installed/i586-pc-linux-gnu/egcs-1.1/lib"
+#set dirlist = "/afs/cern.ch/atlas/offline/external/Gaudi/0.6.1x/Athena/v1r5/i386_linux22"
+#set dirlist = `find /afs/usatlas.bnl.gov/offline/external -type d`;
+#set dirlist = "$ROOTSYS/lib/"
+#set dirlist = "/afs/usatlas/offline/external/Qt/qt/.rh61_gcc2952/lib"; 
+#/usr/lib /usr/local/lib /usr/afsws/lib /usr/local/afsws/lib /usr/athena/lib /usr/local/athena/lib /opt/afs/lib /usr/local/afs/lib" 
+#set dirlist = "/usr/local/gcc-alt-3.2/lib /lib /usr/lib /usr/local/lib"
+#set dirlist = "/opt/WS6.0/lib /usr/lib /usr/ucblib/sparcv9 /usr/ucblib /usr/local/lib"
+#set dirlist = "/cern/pro/lib"
+#set dirlist = ".sun4x_58/obj/StRoot/St_base"
+#set dirlist = ~/Latest/Applications/AtlsimMain/AtlsimMain-01-99-99/Linux-gcc-dbg/;# $ROOTSYS/lib
+#set dirlist = " /home/intel/lfc/compiler70/ia32/lib /home/intel/lcc/compiler70/ia32/lib $ROOTSYS/lib"
+#set dirlist = "/afs/usatlas.bnl.gov/users/fisyak/public/Latest/lib /afs/usatlas.bnl.gov/users/fisyak/public/Latest/bin":
+#set dirlist = "./";
+#set dirlist = "/afs/usatlas.bnl.gov/offline/external/Gaudi/0.12.1-beta/InstallArea/i686-rh73-gcc32-dbg/lib"
+    #/afs/usatlas.bnl.gov/software/dist/latest/InstallArea/i686-rh73-gcc32-dbg/lib"
+#set dirlist = "/afs/usatlas.bnl.gov/software/dist/6.6.0/InstallArea/i686-rh73-gcc32-dbg/lib"
+#set dirlist = "/usr/intel/icc/compiler70/ia32/lib"# /usr/lib"
+#set dirlist = " /usr/intel80/icc/lib/  /usr/intel80/ifc/lib /usr/intel/ifc/compiler70/ia32/lib /usr/intel/icc/compiler70/ia32/lib"# /afs/rhic.bnl.gov/.asis/i386_redhat73/usr.local/lib";#/usr/intel80/ifc/lib /usr/lib/gcc-lib/i386-redhat-linux/3.2 /afs/rhic.bnl.gov/.asis/i386_redhat73/cern/2003/other.ports/intel_ifc_70/2003/lib"
+#set dirlist = "/afs/rhic.bnl.gov/star/packages/.DEV2/.rh80_icc80/mysql-standard-4.0.16-pc-linux-i686/lib"#/usr/lib/mysql"# /afs/rhic.bnl.gov/i386_linux22/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_linux22/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_linux2/opt/star/lib/libmysqlclient.a /afs/rhic.bnl.gov/i386_linux2/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_linux2/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_linux61/opt/star/lib/libmysqlclient.a /afs/rhic.bnl.gov/i386_linux61/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_linux61/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_linux6/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_linux6/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_redhat50/opt/star/lib/libmysqlclient.a /afs/rhic.bnl.gov/i386_redhat50/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_redhat50/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_redhat51/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_redhat51/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_redhat60/opt/star/lib/libmysqlclient.a /afs/rhic.bnl.gov/i386_redhat60/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_redhat60/opt/star/lib/mysql /afs/rhic.bnl.gov/i386_redhat61/opt/star/lib/libmysqlclient.a /afs/rhic.bnl.gov/i386_redhat61/opt/star/lib/libmysqlclient.so /afs/rhic.bnl.gov/i386_redhat61/opt/star/lib/mysql"
+#set dirlist = "/usr/lib/gcc-lib/i386-redhat-linux/3.2";#/lib";#/usr/lib/gcc-lib/i386-redhat-linux/3.2 /lib /usr/lib";#/usr/lib /lib/i686 /usr/intel80/icc/lib /usr/intel80/ifc/lib/"
+#set dirlist =  "/usr/pgi/linux86/lib /usr/lib/gcc-lib/i386-redhat-linux/3.2"
+#set dirlist = "/cern/2003/lib"#$STAR/.$STAR_HOST_SYS/obj/asps/* $STAR/.$STAR_HOST_SYS/obj/asps/*/*" 
+#set dirlist = "/usr/intel80/ifc/lib"
+#set dirlist = "$STAR_LIB";# 
+#set dirlist = " /usr/lib/gcc-lib/i386-redhat-linux/3.2* /usr/lib /lib";# /usr/lib/gcc-lib/i386-redhat-linux/2.96/";#/usr/intel80/ifc/lib";# /usr/lib/gcc-lib/i386-redhat-linux/3.2";# $PGI/linux86/lib"
+#set dirlist = "/usr/local/pkg/pgi51/linux86/5.1/lib"
+#set dirlist = "/usr/intel80/*/lib"
+#set dirlist = "/usr/kerberos/lib/";
+#set dirlist = "/usr/pgi/linux86/5.1/lib";#/cern/2004/lib";
+#set dirlist = $ROOTSYS/lib
+#set dirlist = /usr/intel80/ifc/lib
+#set dirlist = /cern/2004/lib 
+#set dirlist = "/usr/intel/fc/9*/lib /usr/intel/icc/9*/lib"
+#set dirlist = $STAR_LIB
+#set dirlist = /usr/intel/fc/9.1/lib
+#set dirlist = `echo /lib /usr/lib /usr/lib/*`
+#set dirlist = /usr/pgi/linux86/5.1/lib
+#set dirlist = /usr/lib/gcc/x86_64-redhat-linux6E/4.3.2/
+#set dirlist = /usr/lib/gcc/x86_64-redhat-linux6E/4.3.2
+#set dirlist = "/usr/lib/gcc/x86_64-redhat-linux/4.1.1 /usr/lib"
+#set dirlist = "$STAR/.sl53_gcc451/obj/StRoot/StMuDSTMaker $STAR/.sl53_gcc451/obj/StRoot/StMuDSTMaker/COMMON"
+#set dirlist = $ROOTSYS/lib
+#set dirlist = /opt/gcc/4.8.2/lib/gcc/x86_64-redhat-linux7E/4.8.2/32
+#set dirlist = `gfortran -print-search-dirs | grep libraries | awk -F= '{print $2}' | sed -e 's/:/ /g'`
+#set dirlist = `echo .${STAR_HOST_SYS}/LIB`;# ${STAR}/.${STAR_HOST_SYS}/lib`
+set dirlist = /usr/lib
+foreach p ($dirlist) 
+#    set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
+    set list = `echo ${p}/libboost*.so`
+#    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
+    foreach lib ($list) 
+	echo "lib = " $lib 
+	nm -p $lib |  grep -i _ZNK5boost15program_options29value_semantic_codecvt_helperIcE5parseERNS_3anyERKSt6vectorISsSaISsEEb
+    end
+end
+#set list = `find .sl64_gcc447/obj/StarVMC/Geometry/ -name "*.o"`
+#foreach lib ($list) 
+#   echo "lib = " $lib 
+#   nm -p $lib |  grep _ZNK5boost15program_options29value_semantic_codecvt_helperIcE5parseERNS_3anyERKSt6vectorISsSaISsEEb
+#end
+#cd $cwd

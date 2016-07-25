@@ -1,0 +1,23 @@
+#!/bin/csh -f
+ foreach tag (ctf emc ftpc global mwc svt tpc macro)
+   set tagg =  "/dui/constants/$tag"
+   echo "$tagg -> [params]/$tag"
+   set LIBLIST = `grep -l "$tagg"   pams/*/kumac/*.kumac kumacs/*/*.kumac`
+   echo $LIBLIST
+   set pad = `echo $tagg | awk -F/ '{for(i=2;i<=NF;i++) {printf "\/"$i}}'`
+   echo $pad
+   if (-e tmp.tmp) rm tmp.tmp
+   cat > tmp.tmp <<EOF
+s/ $pad/ \[params\]\/$tag/g
+EOF
+#   more tmp.tmp
+   foreach file ($LIBLIST)
+     echo $file 
+     if (-e $file.tmp) rm $file.tmp
+     sed -f tmp.tmp  $file > $file.tmp
+     diff $file $file.tmp
+     mv $file.tmp $file
+   end
+   rm tmp.tmp
+  end
+

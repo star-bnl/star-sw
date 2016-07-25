@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+#  cd $SCRATCH
+#   pwd
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  setup  gcc
+  setup  32b
+  starver DEV2/SL15
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set chain    = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 5000000
+    set chain    = "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt";
+  endif
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`_${f}_${l}
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
+  set muFile = ${filel}.MuDst.root
+  set blaFile = ${filel}.bla.root
+  if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
+  echo "Output MuDst file : $muFile" 
+# P15ic "DbV20150316 P2014a pxlHit istHit btof mtd mtdCalib BEmcChkStat CorrX OSpaceZ2 OGridLeak3D -hitfilt"
+  echo $0 &gt; ${logFile}
+  root4star -q -b 'bfc.C('$f','$l',"'${chain}'","'${evtsFile}'","'$output'")' &gt;&gt;&amp; ${logFile}
+  if (-r  ${SUBMITTINGDIRECTORY}/${blaFile}) rm ${SUBMITTINGDIRECTORY}/${blaFile};
+  echo $0 &gt;&gt; ${logFile}
+#  mv ${logFile} ${muFile} ${SUBMITTINGDIRECTORY}
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.err" />
+<input URL="command:daq_2014.pl" />
+</job>

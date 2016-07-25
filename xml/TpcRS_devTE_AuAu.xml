@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  starver .DEV2 
+#  setup gcc451
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .fzd`
+#  set file = $INPUTFILE0;
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'TpcRS.C(50,"devTE,TpcRS","'${evtsFile}'","Bichsel")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="command:TpcRS_Part.pl" /> -->
+<input URL="file:/star/data05/scratch/wanghui6/AuAu_devTE/AuAu200_2?_50evts.fzd" />
+</job>

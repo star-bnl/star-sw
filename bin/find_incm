@@ -1,0 +1,26 @@
+#! /bin/csh -f 
+set list = `ls -d $STAR_ROOT/pams/*/*`
+#echo $list
+foreach idldir ($list) 
+#   echo "idldir = " $idldir
+   cd $idldir
+   set list2 = `ls *.idlm`
+#   echo $list2
+   foreach idl ($list2)
+     echo "find inc/h  for " $idldir/$idl
+     set inc = "$idl:r.inc"
+     set h   = "$idl:r.h"
+     set linc = `ls $STAR_ROOT/pams/*/*/$inc`
+     if ( "$linc" != "") then
+        echo "mv $linc to junk_inc"
+        mv $linc $STAR_ROOT/junk_inc
+     endif
+     set lh  = `ls $STAR_ROOT/pams/*/*/$h`
+     if ("$lh" != "") then
+        echo "mv $lh to junk_inc"
+        mv $lh $STAR_ROOT/junk_inc
+     endif
+   end
+   cd ..
+end
+cd $cwd

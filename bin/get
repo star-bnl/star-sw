@@ -1,0 +1,4 @@
+get_file_list.pl -distinct -onefile -keys 'grp(magscale),sum(events)' \
+   -cond production=P02ge,collision=AuAu200,trgsetupname=MinBiasVertex,\
+   filetype=daq_reco_MuDst,sanity=1,storage!=HPSS
+

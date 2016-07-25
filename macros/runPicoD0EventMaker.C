@@ -1,0 +1,1 @@
+/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/analysis/runPicoD0EventMaker.C

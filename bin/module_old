@@ -1,0 +1,35 @@
+#!/bin/sh
+gawk  '
+BEGIN {}
+{      r =",";s = " "; t=$0; gsub(r,s,t);
+       u ="[()]"; gsub(u,s,t);# print t;
+       d =":"; gsub(d,s,t);# print t;
+       split(t,list);# print list[1]"  "list[2];
+       if (n>0) {
+           if (index(list[1],"inout")>0) {m++; k++;inn[m-1]=list[2]; out[k-1]=list[2];
+#                                          print "m="m",k="k", list[1]="list[1]", list[2]="list[2];
+                                         }
+           else {
+                 if (index(list[1],"in")>0)  {m++; inn[m-1]=list[2];}
+                 if (index(list[1],"out")>0) {k++; out[k-1]=list[2];}
+                }            
+                }
+       else { if (index("interface",list[1])>0) {n++; x=list[2];}}
+       nn = n; 
+       if (m>nn) nn=m;
+       if (k>nn) nn=k;
+}
+END {#  print "m="m",k="k;
+        print "========================== " x " =========================================";
+                          {printf "%16s | \t %16s \t -> %16s \n", "Module", "Input", "Output"} 
+#      print "==========================================================================";
+      f = x ; print FILENAME;
+      for (i=1;i<=nn;i++){
+        if (i<=m && i<=k) {printf "%16s | \t %16s \t -> %16s \n", f, inn[i-1], out[i-1]};
+        if (i>m  && i<=k) {printf "%16s | \t %16s \t -> %16s \n", f, " ", out[i-1]};
+        if (i<=m && i>k ) {printf "%16s | \t %16s \t -> %16s \n", f, inn[i-1], " "};
+        f = " ";
+}
+}
+' $1
+exit

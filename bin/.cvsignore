@@ -1,0 +1,2 @@
+.consign* ir.out *.bck *.HOLD*  *.hold* *.tgz i686* i386*  hold *.d *PACKAGE *.log .svn* .svn/* *~ build test* .#* .s* .x* htop
+

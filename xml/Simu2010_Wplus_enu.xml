@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<job maxFilesPerProcess="1"  simulateSubmission ="true" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  set evtsFile = $INPUTFILE0;
+  set filel    = `basename $evtsFile .fzd`
+  set file1    = `basename $evtsFile _10evts_Wplus_enu.fzd` #_4000evts_minb
+  set file     = `basename $file1    _10evts_Wminus_enu.fzd` #_4000evts_minb
+  set dir      = `dirname  $evtsFile`;          
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set fitter = ,KFVertex
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep PPV
+  if (! $?) set fitter = ",VFPPVnoCTB";
+  echo "fitter $fitter"
+  set tagFile = ${filel}.root
+  echo $case | grep pileup
+  set Nopileup = $?
+  if ($Nopileup) then
+  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","","'${tagFile}'")' &gt;&amp; ${logFile}
+  else 
+  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin'${fitter}',beamline,StiCA,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","","'${tagFile}'")' &gt;&amp; ${logFile}
+  endif
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<input URL="command:Simu2010_Wplus_enu.pl" />
+
+</job>

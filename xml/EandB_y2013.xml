@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="2" filesPerHour="20"  fileListSyntax="paths" simulateSubmission="false">
+<command>
+#starver eval
+cd ${SUBMITTINGDIRECTORY}
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,Corr4","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,Corr6,OSectorAlign","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB,OShortR","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB,OShortR,OBmap","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+root.exe  -q -b 'bfc.C(1000000,"EandBDir,CorrX","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB,OShortR,OBmap,OPr13,OIFC","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+</command>
+<!--- <input URL="file:/star/subsys/tpc/2013/Cosmics/2DFF/*event.root" />  -->
+<input URL="command:EandBSample2013.pl" />
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+</job>

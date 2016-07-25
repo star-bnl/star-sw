@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false"> -->
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+#  starver eval
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+#    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 500
+#  endif
+#  echo "${evtsFile}"
+foreach input (`cat $FILELIST`) 
+  set filel    = `basename ${input} .daq`
+  set output  = ${filel}.event.root
+  if (! -r ${input}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set tFile = ${filel}.root
+  if (-r $tFile) exit 0;
+  root4star -q -b 'bfc.C('${f}','${l}',"B2015,in,Tpx,CMuDst,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,CorrX,-evout,NoHistos,noTags,noRunco,BAna,analysis,Alignment","'${input}'","'${output}'","'${tFile}'")' &gt;&amp; ${logFile}
+end
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Cosmics$JOBID.err" />
+<input URL="file:/star/data03/daq/2015/124/*/st_physics_16*.daq" />
+<!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2015.pl" /> -->
+</job>

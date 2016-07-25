@@ -1,0 +1,2 @@
+#! /usr/local/bin/tcsh -f
+diff -r --exclude=.consign --exclude=CVS $1 $2

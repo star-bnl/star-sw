@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths"> -->
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 50000
+  endif
+  echo "${evtsFile}"
+  set file    = `basename $evtsFile .daq`
+  set filel   = ${file}_${f}_${l}
+  set output  = ${filel}.event.root
+  set ddir     = ${SUBMITTINGDIRECTORY};
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set fitter = ",KFVertex"
+  set case = `basename $ddir`; echo "case = $case";
+  if ($case == "PPV") set fitter = "";
+  echo "fitter $fitter"
+#  set tagFile = ${filel}.root          #,Corr4,OSpaceZ2,OGridLeak3D,sdt20110401.060500
+  root4star -q -b 'bfc.C('${f}','${l}',"RC.pp.y2011.VFPPV'${fitter}',StiCA,-evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="file:/star/data03/daq/2011/108/13108073/st_physics_13108073*.daq" /> -->
+<input URL="command:daq_y2011pp500.pl" />
+<!-- <input URL="file:/star/simu/simu/gstardata/Simu2011/rcf12010/out/rcf12010_1499_10evts_Wplus_enu.fzd" /> -->
+</job>

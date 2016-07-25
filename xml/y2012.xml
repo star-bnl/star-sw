@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  set evtsFile = $INPUTFILE0;
+  set filel    = `basename $evtsFile .fzd`
+  set file1    = `basename $evtsFile _10evts_Wplus_enu.fzd` #_4000evts_minb
+  set file     = `basename $file1    _10evts_Wminus_enu.fzd` #_4000evts_minb
+  set dir      = `dirname  $evtsFile`;          
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set  out = ${filel}.event.root
+  set fitter = ",KFVertex,StiCA"; #,HLTCA"
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep PPV
+#  if (! $?) set fitter = ",VFPPVnoCTB,Sti";
+  if (! $?) set fitter = ",VFPPVnoCTB,useBTOF4Vtx,Sti";
+  echo "fitter $fitter"
+  set tagFile = ${filel}.root
+  echo $case | grep pileup
+  set Nopileup = $?
+# 2012-03-19 03:27:48 
+# /star/simu/simu/gstardata/Simu2012/rcf12010/runWPileup2012.kumac; sqrt(s) = 510 
+
+  if ($Nopileup) then
+# Total rate 0.1*10^9/106.6 = 0.1*10^7 = 1 MHz => 10 MHz
+  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',TpxClu2D,beamline,evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  else 
+#  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',beamline,evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',beamline,evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',TpxClu2D,beamline,evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"MC.y2012,sdt20120319.033000,fzin'${fitter}',TpxClu2D,NoTpxAfterBurner,beamline,evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(1,5,"MC.y2012,verybig,sdt20120319.033000,fzin'${fitter}',beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 1.066 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  endif
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<input URL="command:Simu2012_Wplus_enu.pl" />
+
+</job>

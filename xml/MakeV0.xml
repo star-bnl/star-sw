@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  setenv STARFPE NO
+#  starver .DEV2
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set N     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set name  = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+  set base = ${name}_${rung};
+  set file = ${base}.MuDst.root
+  set logFile  = ${base}.log
+  echo "${file}"
+  if ( ! -r ${file}) then
+    root4star -q -b -x 'MakeV0.C('$N',"'${name}'",'${rung}')' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:MakeV0.pl" />
+</job>

@@ -1,0 +1,12 @@
+#! /bin/csh -f
+ cd $STAR_ROOT/pams
+ set list = `ls */*/README` 
+ foreach fz ($list) 
+   echo $fz; 
+   set  fn = `echo $fz | awk -F/ '{print ($1"/"$2)}' `
+   echo $fn
+   cd $fn
+   cvs add README
+   cd ../..
+end
+

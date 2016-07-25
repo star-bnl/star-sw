@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+#         starver .DEV2
+#         root.exe -q -b lMuDst.C MuPrmVtx.C+\(\"\@${FILELIST}\"\) &gt;&amp; ${JOBID}B.log 
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile _200evts_Wplus_enu.fzd`
+  set dir      = `dirname  $evtsFile`;          
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  if ( -r $logFile) exit 0;
+  root4star -q -b 'fz2root.C(9999,"'${evtsFile}'")' &gt;&amp; ${logFile}
+	</command>
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="catalog:star.bnl.gov?production=P07ic,trgsetupname=cuProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P10ij,collision=auau200,filetype=daq_reco_mudst,tpx=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="100" /> -->
+<!-- <input URL="file:/star/simu/simu/jwebb/11-12-2010-pp500-pileup/*_5evts_Wplus_enu.fzd" /> -->
+<input URL="file:/star/simu/simu/gstardata/Simu2010/JWRequest/output/rcf10100_*_200evts_Wplus_enu.fzd" />
+
+</job>

@@ -1,0 +1,6 @@
+#! /bin/csh -f 
+set list = `ls -d */.[a-z]*/bin `
+foreach dir ($list)
+   ln -s /afs/rhic/common/RL98c/.@sys/bin/tbr   ${dir}/tbr
+   ls -alF $dir/tbr
+end

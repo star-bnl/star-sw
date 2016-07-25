@@ -1,0 +1,11 @@
+#!/bin/csh -f
+ set LIBLIST = `ls btofsys.idl`
+ foreach file ($LIBLIST)
+   echo $file 
+   set temp = `echo ${file} | sed -e 's/\.idl/\.F/g'`
+   sed -e 's/\/\*/\*/' -e 's/  struct/    subroutine/g' -e 's/{/()/g' -e 's/};/      end/g'  \
+  $file > $temp
+   diff $file $temp
+   fsplit $temp
+#   mv $file.tmp $file
+ end

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  echo $INPUTFILE0 | grep ':'
+#  setenv NODEBUG yes
+#  setenv STARFPE NO
+#  starver .DEV2
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+  set base = flux.${rung}.${f}_${l}
+  set file = ${base}.root
+  set logFile  = ${base}.log
+  echo "${file}"
+# Extended tunnel and hall: y2011b, y2012c, y2013_?a, y2013_?b, y2013_?c, y2013_?d, y2013_?x, y2014*
+  if ( ! -r ${file}) then
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,geant,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,geant,StEvent,noRunco,noHistos,hijingpAu,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2014a,useXgeom,geant,StEvent,noRunco,noHistos,pAu200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,geant,StEvent,noRunco,noHistos,pAu200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,geant,StEvent,noRunco,noHistos,pp200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,geant,StEvent,noRunco,noHistos,PythiaPP510,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2015,useXgeom,geant,StEvent,noRunco,noHistos,PythiaPP200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+#   root4star -q -b 'bfc.C('$l',"y2015,useXgeom,geant,StEvent,noRunco,noHistos,HijingPAu200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+    root4star -q -b 'bfc.C('$l',"y2015,useXgeom,geant,StEvent,noRunco,noHistos,HijingPAl200,flux,rung.'${rung}',nodefault,NoOutput","","","'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:flux.pl" />
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbiasHe3*.nt" /> -->
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbias/*.nt" /> -->
+</job>

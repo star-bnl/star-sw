@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="10" filesPerHour="20"  fileListSyntax="paths" simulateSubmission="false">
+<command>
+#setup 64b
+#setup gcc
+#starver .DEV2
+#starver eval
+cd ${SUBMITTINGDIRECTORY}
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,Corr4","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,Corr6,OSectorAlign","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB,OShortR","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,ExB,OShortR,OBmap","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,CorrX","@'${FILELIST}'",0,"'${JOBID}'.root")'  &gt;&amp;  ${JOBID}B.log 
+##  set filel    = `basename ${INPUTFILE0}`
+#  set filel    = `basename ${INPUTFILE0} .event.root`
+#  set output  = ${filel}.root
+#  if (-r ${output}) exit 0;
+#  set logFile  = ${filel}B.log
+##root.exe  -q -b 'bfc.C(1000000,"EandBDir,CorrX","'${INPUTFILE0}'*.event.root",0,"'${output}'")'  &gt;&amp;  ${logFile}
+#root.exe  -q -b 'bfc.C(1000000,"EandBDir,CorrX","'${INPUTFILE0}'",0,"'${output}'")'  &gt;&amp;  ${logFile}
+
+foreach input (`cat $FILELIST`) 
+#  set filel    = `basename ${input}`
+  set filel    = `basename ${input} .event.root`
+  set output  = ${filel}.root
+  if (! -r ${output}) then
+    set logFile  = ${filel}B.log
+    root.exe  -q -b 'bfc.C(1000000,"EandBDir,CorrX","'${input}'",0,"'${output}'")'  &gt;&amp;  ${logFile}
+  endif
+end
+
+</command>
+<!--- <input URL="file:/star/subsys/tpc/2013/Cosmics/2DFF/*event.root" />  -->
+<!-- <input URL="command:EandBSample.pl" /> -->
+<input URL="command:EandBSample2014.pl" />
+<!-- <input URL="file:/gpfs/scratch/users/fisyak/Cosmics/2014/*event.root" /> -->
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/EandB$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/EandB$JOBID.err" />
+</job>

@@ -1,0 +1,254 @@
+#!/bin/csh
+
+#
+# Written J.Lauret Fri May 25 2001
+# generic enough to work everywhere.
+# Possible environment variables and features :
+#
+# - TERM_BKG_COLOR   color for the terminal to open
+# - use of + will use the first part as a pattern and
+#   get the least loaded node.
+# - Argument 1 is the nodename or the + pattern
+# - Argument 2 is a possible username
+#
+# Revision history moved at bottom ...
+#
+
+# default values
+set help=0
+set inter=0
+set user=""
+set node=""
+set port=""
+set extra=""
+
+# Arguments parsing
+set count=0
+while ( $count <= $#argv)
+    set arg=$argv[$count]
+    @ count++
+
+    switch ($arg)
+	# this is the option section
+	case "-h":
+	case "--help":
+	    set help=1
+	    breaksw
+	case "-i":
+	    set inter=1
+	    breaksw
+	case "-p":
+	    set port="-p $argv[$count]"
+	    set extra="$extra port $argv[$count]"
+	    @ count++
+	    breaksw
+
+	# the rest is all parameters
+	default:
+	    # can be many things
+	    if ( `echo "$arg" | grep \-` == "") then
+		if ("$node" == "") then
+		    set node="$arg"
+		else
+		    set user="$arg"
+		endif
+	    else
+		echo "Untreated option $arg ignored"
+	    endif
+	    breaksw
+    endsw
+end
+
+
+if ("$node" == "") then
+    # Tom has requested an automatic node association
+    # based on group name. Easy ...
+    # BTW : this needs to be done prior to the help because
+    # help will be displayed only if we cannot resolve the
+    # default values.
+    if ( ! $?GROUP ) then
+	# We have to extract this ourselves
+	set GROUP=`id | sed "s/.*gid=.*(//" | sed "s/).*//"`
+    endif
+    
+    # Now, this block will need editing if another experiment
+    # needs this script functionality
+    switch ($GROUP)
+       case "rhstar":
+	set node="rcas6+"
+	breaksw;
+
+       case "rhphobos":
+        set node="rcas4+"
+	breaksw;
+
+       case "rhphenix":
+	set node="rcas2+"
+	breaksw;
+
+       case "rhbrahms":
+        set node="rcas0+"
+	breaksw;
+
+       default:
+	echo "no default node for group $GROUP"
+	set help=1
+	breaksw;
+    endsw
+endif
+
+
+
+# Display help if -h, --help or non-deterministic arguments were used
+if ($help) then
+   # for help display purposes only. Will exit afterward.
+   if ( $node == "") then
+    set node="rcas6+"
+   endif
+   set prgm=`echo $0 | sed "s/.*\///g"`
+   set wnode=`echo $node | sed "s/+//"`
+   cat <<EOF | more
+
+This command will open a connection to any remote node using the slogin 
+command. 
+
+Syntax is
+  % $prgm [Options] [NodeSpec] [UserName]
+
+Currently implemented options are :
+  -i         interactive mode i.e. do not open an xterm but use slogin
+             directly to connect.
+  -p port    use port number 'port' to connect
+
+The 'NodeSpec' argument may be a node name (specific login to a given node) 
+or a partial node name followed by the '+' sign (wildcard). For example,
+  % $prgm $node
+
+will open a connection on the least loaded node amongst all LSF-available 
+$wnode* nodes. By default, this command will determine the appropriate
+wildcarded node specification for your GroupID. However, if this help
+is displayed when the command '% $prgm' is used, contact the RCF support 
+team (your group ID is probably not supported by this script).
+
+The 'UserName' argument is also optional. If unspecified, it will revert 
+to the current user ID.
+
+Finally, you may modify the xterminal layout by using the following
+environment variables 
+  TERM_BKG_COLOR     sets the xterm background color
+  TERM_OPTIONS       sets any other xterm options
+
+EOF
+   exit
+endif
+
+
+
+# Where is the xterm program ? (may differe depending on OS)
+if( -e /usr/openwin/bin/xterm) then
+    # Damned open window systems
+    set TERM_PRGM=/usr/openwin/bin/xterm
+endif
+if (-e /usr/bin/X11/xterm) then
+    # Digital Unix etc ...
+    set TERM_PRGM=/usr/bin/X11/xterm
+endif 
+if( -e /usr/X11R6/bin/xterm) then
+    # Linux with R6
+    set TERM_PRGM=/usr/X11R6/bin/xterm
+endif
+if ( ! $?TERM_PRGM ) then
+    echo "Could not locate an Xterm program"
+endif
+
+
+
+
+# Allow user to chose a color but set a default
+if ( ! $?TERM_BKG_COLOR) then
+    set TERM_BKG_COLOR="-fn fixed  -bg black -fg white  -sb -sl 4000 -geometry 132x64"
+endif
+# TERM_OPTIONS supersedes it all
+if( ! $?TERM_OPTIONS ) then
+    set TERM_OPTIONS=""
+endif
+
+
+
+
+# Now, check if what is requested is a 'term-wildcard'
+set TEST=`echo $node | sed "s/+//"`
+
+if ("$TEST" != "$node") then
+    # use LSF lsload to pickup a node
+    # Do not allow user to mess with us ...
+    if ("$TEST" == "") then
+	echo "The '+' syntax requires a partial node name."
+	exit
+    endif
+
+    # Note : for other batch systems, extend this ...
+    set LOAD=`which lsload`
+    if( "$LOAD" != "") then
+#        set CANDIDATES=`lsload -R inter | grep $TEST | grep -i " ok" | awk '{print $1}'`
+	set CANDIDATES=`lsload -R inter | grep $TEST | grep -i " ok" |  sort -n -k6 | awk '{print $1}'`
+	if ( $#CANDIDATES != 0) then
+	    set node=$CANDIDATES[1]
+	else
+	    echo "Illegal node specification or LSF problem detected. Please correct and try again."
+	    exit
+	endif
+    else
+	echo "No tools to determine the least loaded system"
+	exit
+    endif
+endif
+
+
+# OK. Now the node is surely determined. Get the user
+# if that was an option, otherwise, determine it.
+if ("$user" == "") then
+  if ( $?USER) then
+    if ("$USER" != "") then
+	set user=$USER
+    endif
+  endif
+  if( "$user" == "") then
+    # guess what ? no whoami on the gateway. The safest
+    # way to get the user id would be this ...
+    set user=`id | sed "s/).*//" | sed "s/.*(//"`
+  endif
+endif
+
+
+
+
+
+# Execute this command now
+if ($inter) then
+    echo "Opening a connection to $node for $user $extra"
+    slogin $port $user@$node
+else
+    echo "Opening a terminal on $node for $user $extra"
+    $TERM_PRGM -sl 500 -sb +si -sk -T "$node" -n "$node" $TERM_BKG_COLOR $TERM_OPTIONS -e slogin $port $user@$node &
+    endif
+endif
+
+
+
+
+# Revised Aug 2001
+# - support for all experiments
+# - argument 1 is now optional
+# - nodes MUST be set with LSF resource 'inter'
+# 
+# Revised Sep 2001
+# - Misspelling corrections
+# - Small correction in case of lsf failure or
+#   inconsistent return values using a range check
+# - Added switch/case treatementfor option
+# - Added -p and -i
+# - Added TERM_OPTIONS variable
+# - Removed $NODE ; fixed logic for using $node instead
+# - Safer $USER check (was inconsistent)
+#

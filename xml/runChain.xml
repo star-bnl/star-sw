@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job maxFilesPerProcess="1" minFilesPerProcess="1" filesPerHour="1" name="laserProc" simulateSubmission="false">
+    <command>
+
+starver dev
+cd /star/data07/calib/fisyak/RunIX/10076161
+set log = `basename ${INPUTFILE0} daq`B.log
+root4star -b -q -l bfc.C\(1000,\"pp2009a,ITTF,BEmcChkStat,QAalltrigs,btofDat,Corr3,KeepTpcHit,StiPulls\",\"$INPUTFILE0\"\) &gt;&amp; $log
+
+    </command>
+    <input URL="file:/star/data03/daq/2009/076/10076161/st_phy*.daq" />
+    <stdout URL="file:/star/data07/calib/fisyak/RunIX/10076161/$JOBID.out" />
+</job>

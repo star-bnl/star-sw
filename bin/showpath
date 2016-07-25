@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+use Env;
+my $path = $ENV{PATH};
+print "$ARGV[0] : $#ARGV\n";
+if ($#ARGV > -1) {$path = $ARGV[0];}
+my @pieces = ();
+@pieces = split ' *(:|\s|,|;)', $path;
+#if ($path =~ /:/) {@pieces = split /:/, $path;}
+#else              {@pieces = split / /, $path;}
+foreach my $piece (@pieces) {print "$piece\n" if $piece ne ' ' and $piece !~ '(:|\s|,|;)';}
+exit 0;

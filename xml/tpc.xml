@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Garfield" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Garfield$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Garfield$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+   echo $INPUTFILE0 | grep ':'
+   if (! $?) then
+     set fin   = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+     set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+   else 
+     set fin   = $INPUTFILE0
+     set f     =  1000
+   endif
+   set logFile  = ${fin}_${f}B.log
+   if ( -e ${logFile}) exit 0;
+   root.exe -q -b lGarfield.C 'tpc.C+("'${fin}'",'${f}')' &gt;&amp; ${logFile}
+</command>
+<input URL="command:tpc.pl" />
+</job>

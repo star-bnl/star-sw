@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+   setenv STARFPE NO
+   starver dev
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 5000000
+#  endif
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,Cosmics,KFVertex,Corr4,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,in,tpcX,TpxClu2D,gmt,UseXgeom,tpcDB,TpcHitMover,StiCA,KFVertex,Corr4,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# P2014a mtd btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D -hitfilt
+# B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfil
+# B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# 2014/AuAu15C
+#  root.exe -q -b 'bfc.C('${f}','${l}',"B2014,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C('${f}','${l}',"P2014a,-l3onl,-fpd,-hitfilt,gmt,Alignment,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(100,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C(200,"P2014a,-l3onl,-fpd,-hitfilt,mtd,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/da2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2014$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/061/*/*.daq" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<input URL="command:daq_2014AuAu200LowLum.pl" />
+</job>

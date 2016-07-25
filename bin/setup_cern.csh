@@ -1,0 +1,5 @@
+setenv CERN_LEVEL 2006b
+setenv CERN `pwd`
+setenv CERN_ROOT $CERN/$CERN_LEVEL
+setenv CVSCOSRC $CERN/$CERN_LEVEL/src
+setenv PATH $CERN_ROOT/bin:$PATH

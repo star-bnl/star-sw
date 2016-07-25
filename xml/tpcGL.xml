@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="TpcGL" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcGL$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcGL$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv NODEBUG yes
+  setenv STARFPE NO
+  starver .DEV2
+  if (! $?) then
+    set file  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set N     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+  else
+    exit 1;
+  endif
+  set base = `basename $file .root`;
+  set logFile  = ${base}.log
+  echo "${file}"
+  set f=`find . -maxdepth 1 -type f -name "*${file}"`
+  if ("$f" == "") then
+    root.exe -b -q lGarfield.C 'tpcGL.C+('$N',"'$file'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:tpcGL.pl" />
+</job>

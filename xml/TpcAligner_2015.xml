@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="20" fileListSyntax="paths" simulateSubmission ="false">
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+# setup 64b
+# setup gcc
+# setenv NODEBUG yes
+  setenv STARFPE NO
+#  starver .DEV2
+foreach input (`cat $FILELIST`) 
+#  set filel    = `basename ${input}`
+  set filel    = `basename ${input} .event.root`
+  set output  = ${filel}.root
+  set logFile  = ${filel}B.log
+  if (! -r ${logFile} ) then
+    root.exe -q -b 'TpcAligner.C(9999999,"'${input}'","P2015a,CorrX,Alignment","'${output}'")' &gt;&amp;  ${logFile}
+  endif
+end
+
+	</command>
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2015$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcAligner_2015$JOBID.err" />
+<input URL="command:EandBSample2015.pl" />
+</job>

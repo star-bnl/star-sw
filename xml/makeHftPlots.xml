@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+  cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set l        = 10000000
+  set evtsFile = $INPUTFILE0;
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set fileb    = `basename $evtsFile`
+  set filel    = `basename $evtsFile .tree.root`
+  set output  = ${filel}.plot.root
+  if ( -r $output) exit 0;
+  set logFile  = ${filel}.plotB.log
+  if ( -r $logFile) exit 0;
+  root.exe -q -b 'makeHftPlots.C("'${fileb}'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/HftPlot$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/HftPlot$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/061/*/*.daq" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<!-- <input URL="file:/gpfs01/star/scratch/fisyak/reco/2014/AuAu200A701/*.MuDst.root" /> -->
+<input URL="command:ListTree.pl" />
+</job>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="100" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+#  cd $SCRATCH
+#   pwd
+  setenv STARFPE NO
+#  setenv NODEBUG yes
+#  setup  gcc
+#  setup  32b
+#  starver DEV2/SL15
+   root.exe -q -b -x 'runMuD0.C('10000000',"'${FILELIST}'","'${JOBID}'.root")'  &gt;&amp; ${JOBID}.log
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.err" />
+<input URL="command:MuDST.pl" />
+</job>

@@ -1,0 +1,39 @@
+void DrawFitP(const Char_t *dir="Qcm", const Char_t *draw="mu:y", 
+	      const Char_t *cut = "(i&&j&&abs(mu)<1)/(dmu**2)", Char_t *opt = "profw") {
+  TString Current(gDirectory->GetName());
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) {cout << "No root files " << endl; return;}
+  TIter  next(files, kIterBackward);
+  TFile *f = 0;  
+  TString Dir(dir);
+  TRegexp reg(dir);
+  Int_t icol = 0;
+  TLegend *leg = new TLegend(0.5,0.5,1.0,1.0);
+  TString Draw(draw);
+  Draw += " >> "; Draw += dir;
+  while ((f = (TFile *) next())) {
+    TString name(gSystem->BaseName(f->GetName()));
+    if (Dir != "" && Dir != "*" && ! name.Contains(reg)) continue; 
+    name.ReplaceAll(".root","");
+    cout << "dir \t" << name;
+    if (Current == TString(f->GetName())) cout << "\t <======= ";
+    cout << endl;
+    f->cd();
+    TNtuple *FitP = (TNtuple *) f->Get("FitP");
+    if (! FitP ) continue;
+    icol++;
+    FitP->SetMarkerColor(icol);
+    FitP->SetLineColor(icol);
+    TString same(opt);
+    if (icol > 1) same += "same";
+    cout << "FitP->Draw(\"" << Draw << "\",\"" << cut << "\",\"" << same << "\")" << endl;
+    FitP->Draw(Draw,cut,same);
+    TH1 *hist = (TH1 *) gDirectory->Get(dir);
+    if (hist) {
+      TString Name(f->GetName());
+      Name.ReplaceAll(".root",""); 
+      leg->AddEntry(hist,Name);
+    }
+  }
+  leg->Draw();
+}

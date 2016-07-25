@@ -1,0 +1,62 @@
+#! /usr/bin/env perl
+#
+#print "no. of ARGV = $#ARGV\n";
+if ($#ARGV <= 0) {
+  print "Usage: subst \'\*.c\' \'pattern\'=\'replacement\'\n";
+  exit 1;
+}
+#my $glob = shift @ARGV; print "glob = $glob\n";
+my %HoC = ();	     
+my @files = ();
+while (@ARGV) {
+  $_ = shift @ARGV;
+  if (/=/) {
+    my($var, $val) = /([^=]*)=(.*)/;
+    $HoC{$var} = $val; print "Set regexp \'$var\' replacement with \'$val\'\n";
+  }
+  else {
+    my @ff = glob $_;
+    foreach my $f (@ff) {
+      push @files, $f;
+    }
+  }
+}
+#my @files = glob $glob; 
+print "files = @files\n";
+foreach my $file (@files) {
+  my $found = 0;
+  my $l = 0;
+  open (INPUT, $file) || die "Cannot open $file";
+  while ($line = <INPUT>) {
+    $l++;
+    for my $key (sort  keys %HoC) {
+      next if ! $key;
+      if ($line =~ m#$key#) {
+	$found++;
+#	print "$key found in $file\n"; 
+	goto ENDF;
+      }
+#      else {print "$l ==>$line $key not found in $file\n";}
+    }
+  }  
+ ENDF:
+  close (INPUT);
+  if ($found) {
+    my $newfile = $file . ".BAK";
+    rename $file, $newfile or die "Can't rename $file to $newfile";
+    open (INPUT, "$newfile") or die "Can't open $newfile";
+    open (OUTPUT, ">$file") or die "Can't overwrite $file";
+    print "--- $newfile\n+++ $file\n";
+    while ($lineo = <INPUT>) {
+      my $line = $lineo;
+      for my $key (sort  keys %HoC) {$line =~ s|$key|$HoC{$key}|g;}
+      print OUTPUT $line;  #print $line;
+      if ($lineo ne $line) {
+	print "- ", $lineo;
+	print "+ ", $line;
+      }
+    }
+    close (INPUT);
+    close (OUTPUT);
+  }
+}

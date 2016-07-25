@@ -1,0 +1,10 @@
+#! /bin/csh -f 
+set cwd = `pwd`
+#cd $1
+set list = `ls *.h`
+foreach idl ($list) 
+#   stic $idl
+    set h = `echo $idl | sed -e 's/.h//g'`
+    root -b -q ../GEN/lib/libbase.so Stream.c\(\"$h\"\)
+end
+#cd $cwd

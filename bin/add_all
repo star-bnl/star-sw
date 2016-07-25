@@ -1,0 +1,12 @@
+#!/bin/csh -f
+# more tmp.tmp
+ set LIST = `find . -type d`
+ foreach dir ($LIST)
+   echo "directory ="$dir 
+   set tmp = `basename ${dir}`
+   if ("$tmp" == "CVS") continue;
+   if ("$tmp" == ".") continue;
+   echo $tmp 
+   cd $dir; cvs add *; cd -;
+ end
+#end

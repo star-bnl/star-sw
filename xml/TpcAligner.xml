@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set evtsFile = $INPUTFILE0;
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set file     = `basename $evtsFile .root`
+  set dir      = `dirname  $evtsFile`;          
+  set logFile  = ${file}B.log
+  if ( -r $logFile) exit 0;
+  root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
+	</command>
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="command:CosmicsAnalysis.pl" /> -->
+<input URL="command:EandBSample.pl" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y201?RC.E/*event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.E/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2011RC.F/st_tofcosmic_12*event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Alignment/Y2010RC.E/st_tofcosmic_11159008_raw_2020001_25001.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*1_50000.event.root" /> -->
+<!--  <input URL="file:/star/data06/TPCCalib/Y2011RC.G/ZeroF/*.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/RFF/*.event.root" />  -->
+<!-- <input URL="file:/star/data06/TPCCalib/Y2011RC.G/FF/*.event.root" /> -->
+</job>

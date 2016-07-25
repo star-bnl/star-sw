@@ -1,0 +1,9 @@
+#! /bin/csh -f
+ set list = `ls *.f` 
+ foreach f ($list) 
+   echo $f; 
+   set  n = `echo $f | gawk -F. '{print (tolower($1)".F")}'` 
+   echo "mv"  $f $n
+   cat $HOME/bin/head.  > $n
+   cat  $f >> $n
+end

@@ -1,0 +1,8 @@
+#! /bin/csh -f
+ set list = `ls /star/mds/data/SD98/auau200/gst/central/hijing/set0001/regular/*.fzd`; 
+foreach f ($list) 
+   set r=`basename $f .fzd` 
+   echo "========================================================================"
+   ls -lF  /star/mds/data/SD98/auau200/g2t/central/hijing/set0001/regular/$r.xdf
+   ls -lF  /star/mds/data/SD98/auau200/gst/central/hijing/set0001/regular/$r.fzd
+end

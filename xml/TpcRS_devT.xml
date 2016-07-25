@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv NODEBUG yes
+  starver .DEV2 
+#  setup gcc451
+  set file = $INPUTFILE0;
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  set vers = `basename ${SUBMITTINGDIRECTORY}`
+  echo "Use version $vers"
+  if ("$f" == "") then
+#    root4star -q -b 'TpcRS.C(100,"devT,useXgeom,TpcRS,phys_off,Sti",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+    root4star -q -b 'TpcRS.C(20,"'${vers}',TpcRS,phys_off,StiCA",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:TpcRS_Part.pl" />
+</job>

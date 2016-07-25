@@ -1,0 +1,195 @@
+#!/usr/bin/env perl 
+#!/apps/perl5/bin/perl -w
+
+use strict;
+use Getopt::Long qw(GetOptions);
+use lib "/afs/rhic.bnl.gov/star/users/fisyak/bin/lib";
+use File::DirSync;
+
+my $usage   = undef;
+my $rebuild = undef;
+my $nocache = undef;
+my $verbose = undef;
+my $localmode = undef;
+my $concur  = undef;
+my @ignore  = ();
+my @only    = ();
+
+GetOptions
+  ("help"    => \$usage,
+   "rebuild" => \$rebuild,
+   "nocache" => \$nocache,
+   "verbose" => \$verbose,
+   "ignore=s"=> \@ignore,
+   "only=s"  => \@only,
+   "local"   => \$localmode,
+   "concur=s"=> \$concur,
+   ) || &usage();
+
+$| = 1 if $verbose;
+
+&usage() if $usage;
+
+my $dirsync = new File::DirSync {
+  verbose => $verbose,
+  nocache => $nocache,
+  localmode => $localmode,
+};
+
+if ($concur) {
+  $dirsync->lockfile( $concur );
+}
+
+
+my $dir_from = shift;
+my $dir_to = shift;
+
+if ((!defined $dir_from) || (!length $dir_from)) {
+  &usage("Missing <source_dir>\n");
+}
+
+if (!$rebuild &&
+    ((!defined $dir_to) || (!length $dir_to))) {
+  &usage("Missing <dest_dir>\n");
+}
+
+if (!-d $dir_from) {
+  &usage("Not a directory [$dir_from]\n");
+}
+
+$dirsync->ignore( @ignore );
+
+if ($rebuild) {
+  foreach my $dir (@only) {
+    if ($dir =~ /^$dir_from/) {
+      $dirsync->only( $dir );
+    } else {
+      &usage("$dir is not a subdirectory of $dir_from\n");
+    }
+  }
+  $dirsync->rebuild( $dir_from );
+}
+
+if ($dir_to) {
+  $dirsync->dirsync( $dir_from, $dir_to );
+  exit;
+}
+
+sub usage {
+  if (@_) {
+    print STDERR @_;
+    sleep 2;
+  }
+  my $me = $1 if $0 =~ m%^([\w\.\-/]+)$%;
+  %ENV =( PATH => "/bin:/usr/bin:/usr/local/bin",
+          TERM => $ENV{TERM} );
+  exec perldoc => $me
+    or exit 1;
+}
+
+__END__
+
+=head1 NAME
+
+dirsync - Syncronize two directories rapidly
+
+$Id: dirsync,v 1.2 2014/06/10 15:45:13 fisyak Exp $
+
+=head1 SYNOPSIS
+
+  # Rebuild the source cache for rapid updating.
+  dirsync  [ options ]  --rebuild  <source_dir>
+
+  # Quickly update source to destination.
+  dirsync  [ options ]  <source_dir> <dest_dir>
+
+    -or-
+
+  # Mirror source to destination ignoring cache.
+  # (almost like: cp -a <source_dir>/. <dest_dir>/.
+  #  except files may be deleted in destination
+  #  to ensure exact consistency with source.)
+  dirsync  [ options ]  --nocache <source_dir> <dest_dir>
+
+=head1 DESCRIPTION
+
+This is just a wrapper script for easy commandline
+access to File::DirSync.  It mirrors all files and
+symlinks recursively from source_dir to dest_dir.
+
+=head1 OPTIONS
+
+=head2 --help (or -h)
+
+Show this help screen
+
+=head2 --rebuild (or -r)
+
+Rebuilds the dirsync cache on source_dir.
+Write access to source_dir is required to rebuild.
+If dest_dir is not specified when this option is,
+then nothing is mirrored to anywhere after the
+cache is rebuilt.
+
+=head2 --local (or -l)
+
+Local directory only, no recursion.
+
+=head2 --nocache (or -n)
+
+When mirroring from source_dir to dest_dir, do not
+assume that --rebuild has built the dirsync cache
+on source_dir already.  It is ignored and all files
+are mirrored.  This option will significantly slow
+the performance of the mirroring process.
+
+=head2 --ignore <dir> (or -i=<dir>)
+
+Avoid recursing into directories named <dir> within
+the entire descent of source_dir.  This option
+applies to both the --rebuild option and the mirroring
+process if a second directory is supplied.  It may be
+specified multiple times to ignore several directories.
+
+=head2 --only <node> (or -o=<node>)
+
+If this option is used, this will be the only node
+checked for changes, but the cache will still be
+rebuilt all the way to source_dir.  This only node
+must always be a subdirectory or a file within a
+subdirectory of source_dir.  This option only applies
+to the --rebuild option.  It may be specified multiple
+times to rebuild several nodes.
+
+=head2 --concur <lockfile> (or -c=<lockfile>)
+
+If this option is used, <lockfile> will be used to
+ensure that only one dirsync process is running at
+a time.  If another process is concurrently running,
+this process will immediately abort without doing
+anything.  If <lockfile> does not exist, it will be
+created.
+
+=head2 --verbose (or -v)
+
+Show extra details.
+
+=head1 AUTHOR
+
+Rob Brown, bbb@cpan.org
+
+=head1 COPYRIGHT
+
+Copyright (C) 2001, Rob Brown, rob@roobik.com
+
+All rights reserved.
+
+This may be copied, modified, and distributed under the same
+terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<cp(1)>,
+L<perl(1)>
+
+=cut

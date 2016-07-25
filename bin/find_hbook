@@ -1,0 +1,11 @@
+#! /bin/csh -f 
+set list = `find $STAR/pams -type f -name "*.F"`; 
+foreach file ($list)
+  echo $file
+  foreach h (hbook1  hbookn  hdelet  hexist  hf1  hfill  hfith  hfitv  \
+             hfn  hie  hif  hij  hmax  hmin  hrend  hrndm1  hropen \
+             hrout  hspfun  hstati  hsum  hx  hxe  hxy)
+   grep -i $h $file | grep '('
+  end
+end
+#cd $cwd

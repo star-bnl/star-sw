@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="TpcRSClu" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcRSClu$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcRSClu$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  setup  gcc
+  setup  32b
+#  starver SL15j
+#  starver .DEV2
+  starver DEV2/SL15
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+#    exit 1;
+#  endif
+  set f =  1;
+  set l = 20;
+  switch ($PWD) 
+    case '*2013*': 
+set year  = "y2013_1x,beamline,sdt20130317.070000,Corr4,OSpaceZ2,OGridLeak3"; breaksw
+    case '*2014*': 
+set year  = "y2014a,beamline,sdt20140330.151000,CorrX,OSpaceZ2,OGridLeak3D";   breaksw
+    case '*2015*': 
+set year  = "y2015";    breaksw
+    default: exit 1;
+  endsw
+  set base = `basename ${INPUTFILE0} _pileup.fz`_${f}_${l};
+  set file = ${base}.root
+  set logFile  = ${base}.log
+  if ( -r ${logFile}) exit 0;
+  root4star -q -b 'bfc.C('${f}','${l}',"fzin,'${year}',tpcRS,TpxClu,useXgeom,MakeEvent,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,evout,geantout,verybig,analysis,noRunco,noHistos","'${INPUTFILE0}'","'${file}'")' &gt;&amp; ${logFile}
+</command>
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W+pileupB/*.fz" /> -->
+<!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/gstar_pileup_Oct05/*.pileup.fzd" /> -->
+<!-- <input URL="file:/star/data99/reco/AuAu200/hijing_382/b0_20/minbias/y2014a/gheisha_on/gstar_pileup_Oct05/rcf15005_999_10evts.pileup.fzd" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W+pileupB/pythiapp510wenu_0099_pileup.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200mixedBL2/*.fz" /> -->
+<input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200mixedBL3/*.fz" />
+</job>

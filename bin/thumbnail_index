@@ -1,0 +1,301 @@
+#!/bin/sh
+#
+# thumbnail_index - make an index.html file with image thumbnails
+#
+# Run this script in a web directory consisting of all or mostly image
+# files.  It'll create an index.html of thumbnail images, putting
+# the thumbnail files in a hidden subdirectory.
+#
+# It avoids unnecessary work by comparing the dates on already existing
+# thumbnail files and not re-creating them if the corresponding original
+# has not changed.
+#
+# It also refuses to overwrite an index.html file not created by this script.
+#
+# (C) 1995,1996 by Jef Poskanzer <jef@acme.com>.  All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+# Defaults.
+recurse=no
+size=70
+colsperrow=5
+rowspertable=10
+indexname=index.html
+
+# Parse args.
+while true ; do
+    case "$1" in
+
+	-r )
+	recurse=yes
+	shift
+	;;
+
+	-s )
+	shift
+	if [ $# -eq 0 ] ; then
+	    echo "usage: $0 [-r] [-s size] [-c cols] [-i indexname]" >&2
+	    exit 1
+	fi
+	size="$1"
+	shift
+	;;
+
+	-c )
+	shift
+	if [ $# -eq 0 ] ; then
+	    echo "usage: $0 [-r] [-s size] [-c cols] [-i indexname]" >&2
+	    exit 1
+	fi
+	colsperrow="$1"
+	shift
+	;;
+
+	-i )
+	shift
+	if [ $# -eq 0 ] ; then
+	    echo "usage: $0 [-r] [-s size] [-c cols] [-i indexname]" >&2
+	    exit 1
+	fi
+	indexname="$1"
+	shift
+	;;
+
+	-* )
+	echo "usage: $0 [-r] [-s size] [-c cols] [-i indexname]" >&2
+	exit 1
+	;;
+
+	* )
+	break
+	;;
+    esac
+done
+if [ $# -ne 0 ] ; then
+    echo "usage: $0 [-r] [-s size] [-c cols] [-i indexname]" >&2
+    exit 1
+fi
+
+subdir=.thumbnails
+nindexname=/tmp/tinind.$$
+stamp='This file produced by thumbnail_index - do not edit.'
+cwd=`pwd`
+makefile=/tmp/timake.$$
+infoscript=/tmp/tiinsc.$$
+rm -f $nindexname $makefile $infoscript
+
+if [ -f "$indexname" ] ; then
+    if egrep -s "$stamp" "$indexname" > /dev/null 2>&1 ; then
+	echo > /dev/null # Why the fuck doesn't an empty command work??
+    else
+	echo "thumbnail_index: $indexname exists, not produced by this script" >&2
+	exit 1
+    fi
+fi
+
+# Make temporary script to extract info.
+cat > $infoscript << 'EOF'
+#!/bin/sh
+
+file="$1"
+what="$2"
+thumb="$3"
+
+kb=`wc -c < "$file" | awk '{print int(($1+1023)/1024)}'`
+# (Slower but more portable than using ls.)
+
+set junk `"$what" "$file" | pnmfile` ; shift
+width=$4
+height=$6
+
+set junk `djpeg "$thumb" | pnmfile` ; shift
+twidth=$4
+theight=$6
+
+echo "$kb" "$width" "$height" "$twidth" "$theight"
+EOF
+chmod 755 $infoscript
+
+if [ ! -d $subdir ] ; then
+    mkdir $subdir
+fi
+
+(
+    if [ ! -f $subdir/.parent.gif ] ; then
+	(
+	    cd $subdir
+	    cat << 'EOF' | uudecode
+begin 644 .parent.gif
+M1TE&.#EA%``6`(```````/___R'Y!`$```$`+``````4`!8```(VC(^I".L'
+MVENQQFFLKG3[FWVB-'Y0N9UH(X6,YC))&UA8[4VCPXI/R</E?J:?T(9)W7JW
+%YJ$``#NL
+`
+end
+EOF
+	)
+    fi
+    cat << EOF
+<!-- $stamp -->
+<HTML><HEAD><TITLE>Index of $cwd/</TITLE></HEAD>
+<BODY>
+<H2>Index of $cwd/</H2>
+<TABLE><TR>
+<TD ALIGN=CENTER><TABLE><TR><TD ALIGN=CENTER><A HREF="../"><IMG BORDER=0 WIDTH=20 HEIGHT=22 SRC="$subdir/.parent.gif"></A></TD></TR><TR><TD ALIGN=CENTER><SMALL><A HREF="../">Parent dir</A></SMALL></TD></TR></TABLE></TD>
+EOF
+    row=0
+    col=1
+    for file in * ; do
+	if [ "$col" -ge "$colsperrow" ] ; then
+	    col=0
+	    row=`echo $row + 1 | bc`
+	    if [ "$row" -ge "$rowspertable" ] ; then
+		row=0
+		echo "</TR></TABLE><TABLE><TR>"
+	    else
+		echo "</TR><TR>"
+	    fi
+	fi
+	case "$file" in
+	    "$indexname")             what=SKIP ;;
+	    *.gif)    ext=.gif ;    what='giftopnm' ;;
+	    *.GIF)    ext=.GIF ;    what='giftopnm' ;;
+	    *.jpg)    ext=.jpg ;    what='djpeg' ;;
+	    *.JPG)    ext=.JPG ;    what='djpeg' ;;
+	    *.jpeg)   ext=.jpeg ;   what='djpeg' ;;
+	    *.JPEG)   ext=.JPEG ;   what='djpeg' ;;
+	    *.tif)    ext=.tif ;    what='tifftopnm' ;;
+	    *.tif.Z)  ext=.tif.Z ;  what='(zcat|tifftopnm)' ;;
+	    *.tiff)   ext=.tiff ;   what='tifftopnm' ;;
+	    *.tiff.Z) ext=.tiff.Z ; what='(zcat|tifftopnm)' ;;
+	    *.r)      ext=.r ;      what='rasttopnm' ;;
+	    *.r.Z)    ext=.r.Z ;    what='(zcat|rasttopnm)' ;;
+	    *.x)      ext=.x ;      what='xbmtopbm' ;;
+	    *.x.Z)    ext=.x.Z ;    what='(zcat|xbmtopbm)' ;;
+	    *.xbm)    ext=.xbm ;    what='xbmtopbm' ;;
+	    *.xbm.Z)  ext=.xbm.Z ;  what='(zcat|xbmtopbm)' ;;
+	    *.xwd)    ext=.xwd ;    what='xwdtopnm' ;;
+	    *.xwd.Z)  ext=.xwd.Z ;  what='(zcat|xwdtopnm)' ;;
+	    *.fs)     ext=.fs ;     what='fstopgm' ;;
+	    *.fs.Z)   ext=.fs.Z ;   what='(zcat|fstopgm)' ;;
+	    *.pbm)    ext=.pbm ;    what='cat' ;;
+	    *.pbm.Z)  ext=.pbm.Z ;  what='zcat' ;;
+	    *.pgm)    ext=.pgm ;    what='cat' ;;
+	    *.pgm.Z)  ext=.pgm.Z ;  what='zcat' ;;
+	    *.ppm)    ext=.ppm ;    what='cat' ;;
+	    *.ppm.Z)  ext=.ppm.Z ;  what='zcat' ;;
+	    *.pnm)    ext=.pnm ;    what='cat' ;;
+	    *.png)    ext=.png ;    what='cat' ;;
+	    *.pnm.Z)  ext=.pnm.Z ;  what='zcat' ;;
+	    *)                      what=FILE ;;
+	esac
+	case $what in
+	    SKIP)
+		continue
+	    ;;
+	    FILE)
+		if [ -d "$file" ] ; then
+		    if [ ! -f $subdir/.folder.gif ] ; then
+			(
+			    cd $subdir
+			    cat << 'EOF' | uudecode
+begin 644 .folder.gif
+M1TE&.#EA%``6`,(``````)EF,S,S,\S____,F0```````````"'Y!`$```,`
+M+``````4`!8```-4.+K<_C#*21FX^$Y`NN]`Q'UDIBE`0'IJB1)!+,<K'([U
+M&@M7G@<\G(\%[`U)1>%Q9SRR@DXB--I)4F%6F%;%W<)X@]1L/!:`P^:T>LT3
+(+$SPC#L!`#L%
+`
+end
+EOF
+			)
+		    fi
+		    nf=`ls "$file" | egrep -v "$indexname" | wc -l | awk '{print $1}'`
+		    echo "<TD ALIGN=CENTER><TABLE><TR><TD ALIGN=CENTER><A HREF=\"$file/index.html\"><IMG BORDER=0 WIDTH=20 HEIGHT=22 SRC=\"$subdir/.folder.gif\"></A></TD></TR><TR><TD ALIGN=CENTER><SMALL><A HREF=\"$file/index.html\">$file/</A></SMALL></TD></TR><TR><TD ALIGN=CENTER><SMALL>${nf} files</SMALL></TD></TR></TABLE></TD>"
+		    if [ $recurse = yes ] ; then
+			echo "$file/" >&2
+			( cd "$file" ; thumbnail_index -r -s "$size" -c "$colsperrow" -i "$indexname" )
+		    fi
+		else
+		    if [ ! -f $subdir/.file.gif ] ; then
+			(
+			    cd $subdir
+			    cat << 'EOF' | uudecode
+begin 644 .file.gif
+M1TE&.#EA%``6`,(``````)F9F3,S,\S______P```````````"'Y!`$```,`
+M+``````4`!8```-0*+J\\W`(0JN=(KYI.\\1UU4BN(W7!8DH(+CPB5)`;0/R
+M3`5\@$LZ2^_'"A)\.>.1J*P@@<UETO@L!JM1*;2)C7:Y3"]1T"N;>:_(;<W^
+$)0``.TLZ
+`
+end
+EOF
+			)
+		    fi
+		    kb=`ls -l "$file" | awk '{print int(($4+1023)/1024)}'`
+		    echo "<TD ALIGN=CENTER><TABLE><TR><TD ALIGN=CENTER><A HREF=\"$file\"><IMG BORDER=0 WIDTH=20 HEIGHT=22 SRC=\"$subdir/.file.gif\"></A></TD></TR><TR><TD ALIGN=CENTER><SMALL><A HREF=\"$file\">$file</A></SMALL></TD></TR><TR><TD ALIGN=CENTER><SMALL>${kb}K</SMALL></TD></TR></TABLE></TD>"
+		fi
+	    ;;
+	    *)
+		thumb=$subdir/`echo "$file" | sed "s/$ext\$/_t.jpg/"`
+		if [ -f "$thumb" -a ! -s "$thumb" ] ; then
+		    rm -f "$thumb"
+		fi
+		info=$subdir/`echo "$file" | sed "s/$ext\$/_t.info/"`
+		if [ -f "$info" -a ! -s "$info" ] ; then
+		    rm -f "$info"
+		fi
+		cat << EOF > $makefile
+all:		$thumb $info
+$thumb:		$file
+	@echo "$file" >&2
+	@$what "$file" | pnmscale -xy "$size" "$size" | cjpeg > "$thumb"
+$info:		$thumb
+	@$infoscript "$file" "$what" "$thumb" > "$info"
+EOF
+		make -f $makefile | egrep -v 'is up to date' >&2
+		rm -f $makefile
+		set junk `cat "$info"` ; shift
+		kb="$1"
+		width="$2"
+		height="$3"
+		twidth="$4"
+		theight="$5"
+		if [ "$width" -le "$size" -a "$height" -le "$size" ] ; then
+		    echo "<TD ALIGN=CENTER><TABLE><TR><TD ALIGN=CENTER><IMG WIDTH=$width HEIGHT=$height SRC=\"$file\"></TD></TR><TR><TD ALIGN=CENTER><SMALL>$file</SMALL></TD></TR><TR><TD ALIGN=CENTER><SMALL>${kb}K ${width}x${height}</SMALL></TD></TR></TABLE></TD>"
+		else
+		    echo "<TD ALIGN=CENTER><TABLE><TR><TD ALIGN=CENTER><A HREF=\"$file\"><IMG WIDTH=$twidth HEIGHT=$theight SRC=\"$thumb\"></A></TD></TR><TR><TD ALIGN=CENTER><SMALL><A HREF=\"$file\">$file</A></SMALL></TD></TR><TR><TD ALIGN=CENTER><SMALL>${kb}K ${width}x${height}</SMALL></TD></TR></TABLE></TD>"
+		fi
+	    ;;
+	esac
+	col=`echo $col + 1 | bc`
+    done
+
+    cat << 'EOF'
+</TR></TABLE>
+<HR>
+<SMALL>Index produced by
+<A HREF="http://www.acme.com/software/thumbnail_index/">thumbnail_index</A>.</SMALL>
+</BODY></HTML>
+EOF
+) > $nindexname
+rm -f "$indexname"
+cp $nindexname "$indexname"
+rm -f $nindexname $infoscript

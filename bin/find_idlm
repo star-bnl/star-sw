@@ -1,0 +1,17 @@
+#! /bin/csh -f 
+set list = `ls -d $STAR_ROOT/pams/*/idl`
+#echo $list
+foreach idldir ($list) 
+#   echo "idldir = " $idldir
+   cd $idldir
+   set list2 = `ls *.idl`
+#   echo $list2
+   foreach idl ($list2)
+#     echo "find idlm for " $idldir/$idl
+     if (`grep $idl $STAR_ROOT/pams/*/*/*.idlm |wc -l` == 0) then
+       echo "idlm for" $idldir/$idl " is not found"
+       mv $idldir/$idl $STAR_ROOT/junk_idl/
+     endif
+   end
+end
+cd $cwd

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="0.1"  fileListSyntax="paths">
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+#  setup 64b
+  setup gcc451
+  set dir = `dirname $PWD`
+  set ver = `basename $dir`
+  starver $ver
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 50000
+  endif
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set file     = `basename $evtsFile .daq`
+  set dir      = `dirname  $evtsFile`;          
+  set logFile  = ${file}_${f}_${l}B.log
+  set output   = ${file}_${f}_${l}.event.root
+  if ( -r $output) exit 0;
+# P2011a => B2011,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis
+# BAna   => dEdxY2,CMuDst,analysis
+#  root4star -q -b 'bfc.C('${f}','${l}',"B2011,BAna,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,pmdReco,btof,mtdDat,BEmcChkStat,Corr4,alignment,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('${f}','${l}',"B2011,BAna,VFMinuit,l3onl,trgd,ZDCvtx,NosvtIT,NossdIT,btof,mtdDat,Corr4,alignment,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+#P2011a pmdReco btof mtdDat BEmcChkStat -evout Corr4 OSpaceZ2 OGridLeak3D -hitfilt
+  root4star -q -b 'bfc.C('${f}','${l}',"P2011a,pmdReco,btof,mtdDat,BEmcChkStat,Sti,-evout,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+	</command>
+	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<input URL="command:Get2011RFF_FF_Daq.pl" />
+</job>

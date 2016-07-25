@@ -1,0 +1,6 @@
+set list = `ls ??_Jul*`
+foreach f ($list)
+  set  n = `echo $f | gawk -F_ '{print $7"_"$1"_"$2"_"$3"_"$4"_"$5"_"$6}'`
+  echo "mv" $f done/$n
+  mv $f done/$n
+end

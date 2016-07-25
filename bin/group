@@ -1,0 +1,10 @@
+#!/bin/csh -f
+   set file_list1 = `grep -l cern\.ch  /afs/rhic/.asis/*/usr.local/lib/hepix/shells/site/*sh`
+   set file_list2 = `grep -l mailreg  /afs/rhic/.asis/*/usr.local/lib/hepix/shells/site/*sh`
+   foreach file ( $file_list1 $file_list2 )
+     perl ~/bin/group.pl < $file > tmpfile
+     diff -u $file tmpfile 
+     mv $file $file.old
+     mv  tmpfile $file
+   end
+#last line 

@@ -1,0 +1,7 @@
+#! /bin/csh -f
+ set list = `ls *.idl` 
+ foreach f ($list) 
+   echo $f; 
+   set  n = "$f:r.idlm"
+   mv  $f ../$n
+end

@@ -1,0 +1,37 @@
+#! /bin/csh -f 
+set cwd = `pwd`
+#cd $1
+set list = `egrep -l 'interface.*:.*amiModule' ~/sol/SL98c/pams/*/*/*.idl*`
+foreach idlm ($list) 
+# cp $idlm .
+/star/sol/users/fisyak/RL98c/.sun4x_56/bin/stic  -r  -I/afs/rhic/star/packages/dev/asps/staf/inc\
+ -I/star/sol/users/fisyak/SL98c/pams/tpc \
+ -I/star/sol/users/fisyak/SL98c/pams/ctf/idl \
+ -I/star/sol/users/fisyak/SL98c/pams/emc/idl \
+-I/star/sol/users/fisyak/SL98c/pams/ftpc/idl \
+-I/star/sol/users/fisyak/SL98c/pams/gen/idl \
+-I/star/sol/users/fisyak/SL98c/pams/global/idl \
+-I/star/sol/users/fisyak/SL98c/pams/magnet/idl \
+-I/star/sol/users/fisyak/SL98c/pams/mwc/idl \
+-I/star/sol/users/fisyak/SL98c/pams/sim/idl \
+-I/star/sol/users/fisyak/SL98c/pams/svt/idl \
+-I/star/sol/users/fisyak/SL98c/pams/tpc/idl \
+-I/star/sol/users/fisyak/SL98c/pams/trg/idl \
+-I/star/sol/users/fisyak/SL98c/pams/vpd/idl \
+-I/afs/rhic/star/packages/dev/pams/ctf/idl \
+-I/afs/rhic/star/packages/dev/pams/emc/idl \
+-I/afs/rhic/star/packages/dev/pams/ftpc/idl \
+-I/afs/rhic/star/packages/dev/pams/gen/idl \
+-I/afs/rhic/star/packages/dev/pams/global/idl \
+-I/afs/rhic/star/packages/dev/pams/magnet/idl \
+-I/afs/rhic/star/packages/dev/pams/mwc/idl \
+-I/afs/rhic/star/packages/dev/pams/sim/idl \
+-I/afs/rhic/star/packages/dev/pams/svt/idl \
+-I/afs/rhic/star/packages/dev/pams/tpc/idl \
+-I/afs/rhic/star/packages/dev/pams/trg/idl \
+-I/afs/rhic/star/packages/dev/pams/vpd/idl $idlm 
+end
+#cd $cwd
+# rm *Table*
+#  -I/afs/rhic/star/packages/dev/pams/geometry/idl
+# \-I/star/sol/users/fisyak/SL98c/pams/geometry/idl \

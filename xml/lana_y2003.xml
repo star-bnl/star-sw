@@ -1,0 +1,21 @@
+<job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/lana$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/lana$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+#  setup gcc451
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .daq`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  setenv STARFPE NO
+  if ("$f" == "") then
+    root.exe -q -b 'bfc.C(99999,"lana,B2003,Corr2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="file:/star/subsys/tpc/fisyak/daq/2003/*/*.daq"/> 
+</job>

@@ -1,0 +1,10 @@
+#! /bin/csh -f 
+set cwd = `pwd`
+#cd $1
+set list = `ls St_*_Module.h`
+foreach idlm ($list) 
+ sed -e 's/.idl//g' $idlm > temp
+ diff $idlm temp
+ mv temp $idlm
+end
+#cd $cwd

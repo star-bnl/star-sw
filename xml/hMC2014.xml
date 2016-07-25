@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+#  set evtsFile = "hijing";
+#  set filel    = `basename $evtsFile .fz`
+#  set dir      = `dirname  $evtsFile`;          
+#  echo "${evtsFile}"
+# if (! -r ${evtsFile}) exit 1;
+  set filel = "hijing_"${rung}; 
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set  out = ${filel}.event.root
+  set tagFile = ${filel}.root
+  if (-r ${tagFile}) exit 0;
+# setup version
+  setenv STARFPE NO
+  setenv NODEBUG yes
+  set fitter = ""; #",KFVertex,StiCA"; #,HLTCA"
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+#  echo $case | grep PPV
+#  if (! $?) set fitter = ",VFPPVnoCTB,useBTOF4Vtx,Sti";
+  echo $case | grep CA
+  if (! $?) set fitter = ",StiCA";
+  echo $case | grep KF
+  if (! $?) set fitter = ",KFVertex,StiCA";
+  echo $case | grep Ideal
+  if ( $? ) set fitter = ${fitter}",CorrX,OSpaceZ2,OGridLeak3D";
+  echo "fitter $fitter"
+#  echo $case | grep .DEV2
+#  if (! $?) then
+#    setup gcc492
+#    setup  32b
+#    setenv NODEBUG yes
+#    starver .DEV2
+#  endif
+   setup gcc
+   setup 32b
+   starver .DEV2
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fmsDat,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C(9999,"in'${fitter}',pp2013a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+# with HFT
+#  root4star -q -b 'bfc.C(9999,"fzin,-in,y2014a,sdt20140330.151000,tpcRS,TpxClu,McEvent,pxlFastSim,istSim,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014a,mtd,btof,fgt,fgtPoint,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+# Ideal, no Pxl, Ist
+#  root4star -q -b 'bfc.C(9999,"fzin,-in,y2014a,ReverseField,tpcRS,TpxClu,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+# non Ideal, no Pxl, Ist
+#  root4star -q -b 'bfc.C(9999,"fzin,-in,y2014a,sdt20140330.151000,tpcRS,TpxClu,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+# Ideal, with HFT
+#  root4star -q -b -x 'bfc.C(9999,"fzin,-in,y2014a,tpcRS,TpxClu,McEvent,pxlFastSim,istSim,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b -x 'bfc.C(9999,"fzin,MC.2014,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}'","'${evtsFile}'","'${out}'")' &gt;&amp; ${logFile}
+# Ideal, with HFT 
+#  root4star -q -b -x 'bfc.C(100,"HijingAuAu200Z6cm,verybig,ReverseField,MC.2014,-hitfilt,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcMk,-MiniMcEvent,'${fitter}',rung.'${rung}'",0,"'${out}'")' &gt;&amp; ${logFile}
+# sdt, no HFT
+  root4star -q -b 'bfc.C(9999,"HijingAuAu200Z6cm,sdt20140330.151000,y2014a,ReverseField,tpcRS,TpxClu,McEvent,bbcSim,btofsim,mtdSim,emcY2,EEfs,'${fitter}',P2014,mtd,btof,BEmcChkStat,beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Tree,ReadAll",0,"'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
+  endif
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/*.event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.DEV2/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/*.event.root" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/reco/2013/MC.SL15.ExB/pythiapp510wenu_0055_pileup_1_10.event.root" /> -->
+<!-- <input URL="command:MC2013.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/*.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_2999.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL/hijingauau200_0999.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL2/*.fz" /> -->
+<!--  <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL2/hijingauau200z6cm_0898.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" /> -->
+<!-- <input URL="command:tMC2014.pl" /> -->
+<input URL="command:RunId.pl 201 1000" />
+</job>

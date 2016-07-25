@@ -1,0 +1,9 @@
+#! /bin/csh -f
+ set list = `ls *.txt` 
+ foreach f ($list) 
+   echo $f; 
+   set  n = `echo $f | gawk -F. '{print (tolower($1)".kumac")}'` 
+   echo "mv"  $f $n
+#   cat $HOME/bin/head.  > $n
+   mv  $f  $n
+end

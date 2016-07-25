@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+  cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set file = $INPUTFILE0;
+  set rung = `echo $file | awk -F\: '{print $2}'`
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set filef    = ${file}.root
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'bfc.C(20,"HijingAuAu200,'rung.${rung}',MC.y2014,TpcFastSim,-evout,-hitfilt,Alignment,noTags,noRunco,NoHistos,geantout,StiCA,KFVertex","","'${filef}'.root")' &gt;&amp; ${logFile}
+  endif
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/tfs2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/tfs2014$JOBID.err" />
+<!-- <input URL="file:/star/institutions/bnl/fisyak/Generators/AuAu200/*.nt" /> -->
+<input URL="command:TpcRS_Hijing.pl" />
+</job>

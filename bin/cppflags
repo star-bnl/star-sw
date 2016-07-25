@@ -1,0 +1,2 @@
+cpp -dM -o - << EOF
+EOF

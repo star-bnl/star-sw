@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+use Env; 
+#open(In,"$CVSROOT/CVSROOT/avail") || die ("Can't open avail"); 
+my $c = 0;
+#while (my $line = <In>) {
+while (my $line = <>) {
+  chomp($line);
+#  print "line = $line\n";
+  my @words = split '\|', $line;
+# print "words[0] = $words[0]\n";
+# print "words[1] = $words[1]\n";
+# print "words[2] = $words[2]\n";
+  next if !$words[1];
+  my @list = split '\,', $words[1];
+  foreach my $l (@list) {$l =~ s/\s*$//; $l=~ s/\s//g; if ($l) {print "$l\n";}}
+  $c++;
+#  last if $c > 5;
+}
+#close (In);

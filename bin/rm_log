@@ -1,0 +1,2 @@
+#! /bin/csh -f
+dir *Jul | grep 58005 | awk '{print "rm " $9}'

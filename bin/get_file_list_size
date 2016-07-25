@@ -1,0 +1,4 @@
+#! /usr/local/bin/tcsh -f
+get_file_list.pl -delim "#" -keys 'path,basename,events,size' -cond 'magscale=FullField,filetype=online_daq,trgsetupname=CosmicLocalClock,year=2013,events>1000' -limit 0 | grep -v adc | awk -F\# 'BEGIN {n=0;j = 0;}{j++; n += $4;} END {print "Total = "n/1.e9"(GB) in "j" files"}'
+# eod
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<!-- <job name="jobs" maxFilesPerProcess="10" simulateSubmission="false" fileListSyntax="paths"> -->
+<job name="jobs" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths">
+         <command>
+         cd ${SUBMITTINGDIRECTORY}
+if ($?INPUTFILE0) csh -x $INPUTFILE0
+<!--
+if ($?INPUTFILE1) csh -x $INPUTFILE1
+if ($?INPUTFILE2) csh -x $INPUTFILE2
+if ($?INPUTFILE3) csh -x $INPUTFILE3
+if ($?INPUTFILE4) csh -x $INPUTFILE4
+if ($?INPUTFILE5) csh -x $INPUTFILE5
+if ($?INPUTFILE6) csh -x $INPUTFILE6
+if ($?INPUTFILE7) csh -x $INPUTFILE7
+if ($?INPUTFILE8) csh -x $INPUTFILE8
+if ($?INPUTFILE9) csh -x $INPUTFILE9
+-->
+         </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<!--
+rm hold
+touch hold
+foreach f ( `condq | grep -w H | awk '{print $9}'` )
+ls -1d ${f} >> hold
+end
+
+-->
+<input URL="command:/bin/cat $PWD/hold" />
+</job>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+   cd $SCRATCH
+#  starver .DEV2 
+#  setup gcc45
+#  source ~/.tcshrc
+  set evtsFile = $INPUTFILE0;
+  if (! -r ${evtsFile}) exit 1;
+  echo "${evtsFile}"
+  set file     = `basename $evtsFile .event.root`
+  set logFile  = ${file}B.log
+#  root4star -q -b 'TpcRS.C(999999,"RC.y2012,TpxRaw,TpxClu,-evout,KFVertex,NoRunco,NoTags,noHistos","'${evtsFile}'","")' &gt;&amp; ${logFile}
+  set f=`find ${SUBMITTINGDIRECTORY}  -maxdepth 1 -type f -name "${file}*.root"`
+  if ("$f" == "") then
+    touch ${SUBMITTINGDIRECTORY}/${file}.bla.root
+    root4star -q -b 'bfc.C(500,"B2012,Bana,-Tpx,vpdCalib,btofMatch,btofCalib,,KFVertex,NoRunco,NoTags,noHistos","'${evtsFile}')' &gt;&amp; ${logFile}
+    rm ${SUBMITTINGDIRECTORY}/${file}.bla.root
+#    mv *.log *.root  ${SUBMITTINGDIRECTORY}  
+  endif
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<!-- <input URL="file:/star/data03/daq/2012/122/13122001/st_physics_adc_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/1*/*/st_physics_*_raw_1010005.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/11*/*/st_physics_*_raw_1010001.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/12*/*/st_physics_*_raw_1010001.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2012/13*/*/st_physics_*_raw_1010001.daq" /> -->
+<!-- <input URL="command:UU193dEdxSample.pl" /> -->
+<input URL="file:/star/data16/TPC/2012/UU193/*01.event.root" /> 
+<output fromScratch="*.root" toURL="file:/star/data15/TPC/2012/UU193/" />
+<output fromScratch="*.log" toURL="file:/star/data15/TPC/2012/UU193/" />
+</job>

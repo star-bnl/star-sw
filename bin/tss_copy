@@ -1,0 +1,9 @@
+#!/bin/csh
+set list =  `ls /star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/auau_ce_b0*.xdf`
+foreach file ($list)
+  set name = `basename $file`
+  if (! -r $name) then
+    echo "copy $file to $name"
+    cp  $file  $name
+  endif
+end

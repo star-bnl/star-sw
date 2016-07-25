@@ -1,0 +1,7 @@
+#! /bin/csh -f
+ set list = `ls *Jul*` 
+ foreach f ($list) 
+   set  n = `echo $f | gawk -F_ '{print $5"_"$6"_"$7"_"$1"_"$2"_"$3"_"$4}'`
+   echo "mv"  $f ../$n
+   mv $f ../$n
+ end

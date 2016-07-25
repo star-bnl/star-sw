@@ -1,0 +1,9 @@
+#! /bin/csh -f
+#  set list = `grep -l CFPUT *Jul` 
+# set list = `grep -l "VECTOR/WRITE: Error" *Jul` 
+  set list = `ls bfc_mdc*`
+ foreach f ($list) 
+    set  n = `echo $f | gawk -F_  '{print $3"_"$4"_"$5"_"$6"_"$7"_"$1}'`
+   echo "mv"  $f $n
+   mv $f $n
+ end

@@ -1,0 +1,15 @@
+#!/bin/csh -f
+ cd $GROUP_DIR
+ set FILELIST = `find */usr.local/lib/hepix -type f`
+# echo "FILELIST = " $FILELIST
+ set FILEs = `grep -l "/usr/local/lib/hepix" $FILELIST`
+# echo "FILES = " $FILEs
+ foreach file ($FILEs)
+   echo $file
+   sed \
+ -e 's/\/usr\/local\/lib\/hepix/${GROUP_DIR}\/${STAR_SYS}\/usr.local\/lib\/hepix/g' \
+ /afs/rhic/asis/$file > tmpfile
+    diff /afs/rhic/asis/$file tmpfile 
+#   rm tmpfile
+    mv  tmpfile $file
+  end

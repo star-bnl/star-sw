@@ -1,0 +1,31 @@
+<job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/lana$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/lana$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  setup 64b
+#  setup gcc
+#  starver .DEV2 
+# setup gcc451
+  setup gcc
+  starver dev
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .daq`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  setenv STARFPE NO
+  if ("$f" == "") then
+    if (-r $logFile) rm $logFile
+#    root.exe -q -b 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,Corr4,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,CorrX,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+# dev
+    root4star -q -b 'bfc.C(99999,"lana,B2014,LaserIT,Sti,CorrX,OGridLeak3D,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout,useXgeom","'${evtsFile}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="file:/gpfs/scratch/users/fisyak/daq/2014/*/*/st_laser*.daq"/>  -->
+<input URL="command:Lana2014.pl"/> 
+</job>

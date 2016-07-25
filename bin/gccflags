@@ -1,0 +1,4 @@
+touch temp_gccflags.c
+gcc -E -dM -o - temp_gccflags.c
+rm temp_gccflags.c
+

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job simulateSubmission ="true" maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">  -->
+<job maxFilesPerProcess="1"  simulateSubmission ="false" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  starver eval
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 50000
+  endif
+  if (! -r ${evtsFile}) exit 1;
+  set file = `basename ${evtsFile} .fzd` 
+  set filel = ${file}_${f}_${l};
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+  set evFile = ${filel}.event.root
+  if (-r $evFile) exit 0;
+  set tagFile = ${filel}.root
+  set fitter = "Sti";
+  set ddir = `pwd`
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep CA
+  if (! $?) set fitter = "StiCA";
+  echo "fitter $fitter"
+  set tagFile = ${filel}.root
+#  root4star -q -b 'bfc.C(9999,"MC.y2010a,fzin,sdt20100218.060152,Sti,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100218.060152,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
+  root4star -q -b 'bfc.C('${f}','${l}',"MC.y2010a,fzin,sdt20100228.040000,'${fitter}',-hitfilt,evout,geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D","'${evtsFile}'","'${evFile}'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<input URL="command:Simu2010AuAu200.pl" /> 
+<!-- <input URL="command:Simu2010_Wplus_enu.pl" /> -->
+<!-- <input URL="file:/star/simu/simu/gstardata/Simu2014/rcf14010/out/*.fzd" /> -->
+
+</job>

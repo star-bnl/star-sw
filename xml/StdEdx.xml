@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="dEdx" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+         cd ${SUBMITTINGDIRECTORY}
+         set file = `basename ${INPUTFILE0} .event.root`;
+         set log  = ${file}.log         
+         set rootf  = ${file}.root
+         if (-r ${rootf}) exit 0;
+         root.exe -q -b  'dEdx.C(50000,"'${INPUTFILE0}'","'${rootf}'",2)'  &gt;&amp; ${log}
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/dEdx_sched$JOBID.err" />
+
+<!-- #You can find files from the Au + Au  FXT run here: 
+<input URL="file:/star/data01/pwg/kmeehan/AuAuProd/4_5GeV/mudsts/fullDataFiles/eventFiles/*event.root" />
+-->
+<!-- from the Al + Au FXT run here: -->
+<!-- <input URL="file:/star/data01/pwg/kmeehan/AlAuProd/sampleDataFiles/eventFiles/*event.root" /> -->
+<!--  have re-run a sample with the new chain options. You can find the Au + Au data here (let me know if the sample is too small): -->
+<!-- <input URL="file:/star/data01/pwg/kmeehan/AuAuProd/4_5GeV/mudsts/dataSample2/eventFiles/*event.root" /> -->
+<!--The Al + Au data can be found here: -->
+<!-- <input URL="file:/star/data01/pwg/kmeehan/AlAuProd/dataSample2/eventFiles/*event.root" /> -->
+<!-- RunXV27FixTag -->
+<input URL="file:/star/data01/pwg/kmeehan/AuAuProd/4_5GeV/mudsts/dataSample2/eventFiles/*event.root" />
+</job>

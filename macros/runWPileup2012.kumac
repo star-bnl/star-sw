@@ -1,0 +1,446 @@
+****************************************************************
+** MACRO runWRequest
+** 
+** A macro to generate MC events for the spin pwg W simulation request. 
+**
+MACRO runWPileup2012 NEVENTS=5 RUN=11027 SET=1000 CONFIG=Wplus_enu WHERE=rcf  XVERTEX=0.0 YVERTEX=0.0 ZVERTEX=0.0 main=true TAG=y2012 
+
+                                                               ** pileup
+   /macro/global/create NPRE           400
+   /macro/global/create NPOST          400
+   IF [run]=11027 THEN
+      /macro/global/create PROB        0.2
+   ENDIF
+   IF [run]=11028 THEN
+      /macro/global/create PROB        0.4
+   ENDIF   
+   /macro/global/create STRUCT       106.5
+   /macro/global/create NSKIP          1.0
+
+   **
+   ** Main job will generate the two files needed for the pileup
+   ** simulation, and then merge them
+   **
+   if [main]=true then     
+
+   ** Generate the W+ signal **
+      MESSAGE =============================================================================================================
+      MESSAGE                                                                               Generating the signal Wplus_enu
+      MESSAGE
+      SHELL starsim -w 0 -b runWPileup2012 nevents=[NEVENTS] run=[RUN] set=[SET] config=Wplus_enu where=[WHERE] xvertex=[XVERTEX] yvertex=[YVERTEX] zvertex=[ZVERTEX] main=false
+
+   ** Generate the W- signal **
+      MESSAGE =============================================================================================================
+      MESSAGE                                                                              Generating the signal Wminus_enu
+      MESSAGE
+      SHELL starsim -w 0 -b runWPileup2012 nevents=[NEVENTS] run=[RUN] set=[SET] config=Wminus_enu where=[WHERE] xvertex=[XVERTEX] yvertex=[YVERTEX] zvertex=[ZVERTEX] main=false
+
+   ** Generate the minbias signal **
+      MESSAGE =============================================================================================================
+      MESSAGE                                                                               Generating the signal Wplus_enu
+      MESSAGE
+      SHELL starsim -w 0 -b runWPileup2012 nevents=[NEVENTS] run=[RUN] set=[SET] config=minb where=[WHERE] xvertex=[XVERTEX] yvertex=[YVERTEX] zvertex=[ZVERTEX] main=false tag=y2011
+   
+   ** Generate the minbias background **
+      MESSAGE =============================================================================================================
+      MESSAGE                                                                                 Generating the minbias sample
+      MESSAGE
+****      BEVENTS=$SIGMA(int(2.50*[nevents]/[prob]))
+      BEVENTS=4[nevents]
+
+      SHELL starsim -w 0 -b runWPileup2012 nevents=[BEVENTS] run=[RUN] set=[SET] config=minb where=[WHERE] xvertex=[XVERTEX] yvertex=[YVERTEX] zvertex=[ZVERTEX] main=false
+
+   ** Perform pileup merging of the two files
+      MESSAGE =============================================================================================================
+      MESSAGE                                                                                             Performing pileup
+
+      MESSAGE P [WHERE]//[RUN]_[SET]_[NEVENTS]evts_Wplus_enu.fzd
+      MESSAGE B [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+
+      gfile p [WHERE]//[RUN]_[SET]_[NEVENTS]evts_Wplus_enu.fzd
+      gfile b [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+      gfile o [WHERE]//[RUN]_[SET]_[NEVENTS]evts_pileup_Wplus_[prob].fzd
+
+      gback [npre] [npost] [prob] [struct] [nskip]
+      mode  TPCE BACK 3761376
+
+      do i=1,[nevents]
+         MESSAGE Merging event [i] / [nevents]
+         trig 1
+      enddo
+
+      MESSAGE P [WHERE]//[RUN]_[SET]_[NEVENTS]evts_Wminus_enu.fzd
+      MESSAGE B [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+
+      gfile p [WHERE]//[RUN]_[SET]_[NEVENTS]evts_Wminus_enu.fzd
+      gfile b [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+      gfile o [WHERE]//[RUN]_[SET]_[NEVENTS]evts_pileup_Wminus_[prob].fzd
+
+      gback [npre] [npost] [prob] [struct] [nskip]
+      mode  TPCE BACK 3761376
+
+      do i=1,[nevents]
+         MESSAGE Merging event [i] / [nevents]
+         trig 1
+      enddo
+
+      MESSAGE P [WHERE]//[RUN]_[SET]_[NEVENTS]evts_minb_enu.fzd
+      MESSAGE B [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+
+      gfile p [WHERE]//[RUN]_[SET]_[NEVENTS]evts_minb.fzd
+      gfile b [WHERE]//[RUN]_[SET]_[BEVENTS]evts_minb.fzd
+      gfile o [WHERE]//[RUN]_[SET]_[NEVENTS]evts_pileup_minb_[prob].fzd
+
+      gback [npre] [npost] [prob] [struct] [nskip]
+      mode  TPCE BACK 3761376
+
+      do i=1,[nevents]
+         MESSAGE Merging event [i] / [nevents]
+         trig 1
+      enddo
+
+   else
+
+   **
+   ** If we are not in main we simply perform the simulation
+   **
+      exec dosimulation nevents=[NEVENTS] run=[RUN] set=[SET] config=[CONFIG] where=[where] xvertex=[xvertex] yvertex=[yvertex] zvertex=[zvertex] tag=[TAG]
+
+   endif
+
+RETURN
+
+
+MACRO dosimulation NEVENTS RUN SET CONFIG WHERE XVERTEX=0.0 YVERTEX=0.0 ZVERTEX=0.0 main=true pileup=false TAG=y2012
+                                                              ** run configuration, y2009a&B=-5 or y2011
+
+   MESSAGE Starting simulation
+   MESSAGE ---------------------------------
+   MESSAGE Nevents:              [Nevents]
+   MESSAGE Run:                  [Run]
+   MESSAGE Set:                  [Set]
+   MESSAGE Tag:                  [Tag]
+   MESSAGE Config:               [Config]
+   
+
+
+   LIBRARY  =                   $STAR_LIB 
+** TAG      =                      y2009c
+   FIELD    =                        -5.0
+
+                                                              ** pythia configuration, Pro-PT0=329
+   PYTHIA   =          libPythia6_4_23.so 
+   MYTUNE   =                         329
+   ROOTS    =                       500.0 
+   PTmin    =                         0.0 
+   PTmax    =                        -1.0 
+   ETAmin   =                        -3.0
+   ETAmax   =                        +3.0 
+
+                                                               ** vertex offset in cm from input
+   XSIGMA   =                       0.015 
+   YSIGMA   =                       0.015
+   ZSIGMA   =                      42.000
+
+
+                                                                ** open output file
+   FILE     = [WHERE]//[RUN]_[SET]_[NEVENTS]evts_[CONFIG].fzd
+   gfile o [FILE]
+
+
+                                                                ** setup random number generator
+                                                                ** run number, and starting event
+   rndm [RUN] [SET]
+   istart=1
+   rung [RUN] [istart]
+                                                                ** setup geometry 
+   detp    geom [TAG] field=[field]
+   gexec   [LIBRARY]/xgeometry.so
+   gexec   [LIBRARY]/gstar.so
+   gclose  all
+
+                                                                ** configure pythia
+   exec select_pythia [PYTHIA] [LIBRARY]                        ** select pythia version 
+   TFM = "http://projects.hepforge.org/pythia6/"                ** RTFM for more information
+
+                                                  
+
+                                                                ** setup the collision kinematics for pythia
+   frame CMS
+   beam  p p
+   ener  [ROOTS]                       
+                                                                ** set the pythia tune
+   CALL PyTUNE([MYTUNE])
+
+                                                                ** setup the vertex
+   gvertex   [xvertex] [yvertex] [zvertex]
+   gspread   [xsigma]  [ysigma]  [zsigma]
+   	
+   echo gvertex   [xvertex] [yvertex] [zvertex]
+   echo gspread   [xsigma]  [ysigma]  [zsigma]
+                                                                ** setup histograms w/ title
+   title [file] geom [tag] config [config]
+   gstat time size mult stak
+
+                                                                ** setup the requested interaction
+   exec  [config] [RUN] [SET]
+                                                                ** trigger and list one event
+
+   GKINE -4 0 0. 500. -3.0 +3.0
+
+   DO i=1,[nevents]  					
+     echo #############  THROW  [config] set=[set] eve=[i] ##################################                            
+     TRIG 1
+     if [i] < 1 then
+        CALL PyLIST(1)                                
+        gprint hits calb 
+     endif	
+	
+   ENDDO
+                                                                ** final printout of pythia xsec 
+   CALL PySTAT(1) 
+
+                                                                ** this is the end of starsim
+   EXIT
+   
+Return
+
+****************************************************************************************************
+** MACRO select_pythia
+**
+** Selects the pythia library and loads the interactive pythia command definitions.  Additionally,
+** it flags several decay modes as stable so that geant will handle them.
+**
+MACRO select_pythia pythia=libPythia6_4_23.so path=$STAR_LIB
+
+   MESSAGE Loading PYTHIA Library [pythia] from [path]
+
+   GExec [path]/[pythia]
+   GExec [path]/bpythia.so
+
+   ****************************************************************
+   ** These particles will be decayed by geant instead of pythia **
+   MDCY (102,1)=0  ! PI0 111
+   MDCY (106,1)=0  ! PI+ 211
+   MDCY (109,1)=0  ! ETA 221
+   MDCY (116,1)=0  ! K+ 321
+   MDCY (112,1)=0  ! K_SHORT 310
+   MDCY (105,1)=0  ! K_LONG 130
+   MDCY (164,1)=0  ! LAMBDA0 3122
+   MDCY (167,1)=0  ! SIGMA0 3212
+   MDCY (162,1)=0  ! SIGMA- 3112
+   MDCY (169,1)=0  ! SIGMA+ 3222
+   MDCY (172,1)=0  ! Xi- 3312
+   MDCY (174,1)=0  ! Xi0 3322
+   MDCY (176,1)=0  ! OMEGA- 3334
+   ****************************************************************
+
+Return
+
+****************************************************************************************************
+** MACRO Wplus_enu
+**
+** Configure the physics for the W plus request.
+**
+MACRO Wplus_enu
+
+   ** select W --> e nu production
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel  12
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(24)
+
+   ** enable W+ --> e+ nu
+   call openDecay(24,206,2)
+
+RETURN
+
+****************************************************************************************************
+** MACRO Wminus_enu
+**
+** Configure the physics for the W minus request
+**
+MACRO Wminus_enu
+
+   ** select W --> e nu production
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel  12
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(24)
+
+   ** enable W- --> e- nu
+   call openDecay(24,206,3)
+
+RETURN
+
+****************************************************************************************************
+** MACRO W_tau_nu
+**
+** Configure the physics for the W-->tau nu
+**
+MACRO W_tau_nu
+
+   ** select W --> e nu production
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel  12
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(24)
+
+   ** enable W --> tau nu
+   call openDecay(24,208,1)
+
+RETURN
+
+****************************************************************************************************
+** MACRO W_any
+**
+** Configure the physics for the W plus request.
+**
+MACRO W_any
+   ** select W --> e nu production
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel  12
+
+RETURN
+
+
+****************************************************************************************************
+** MACRO W_jet
+**
+** Configure the physics for the W + jet request
+**
+MACRO W_jet
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 14                     ! selects isub 16 and 31 
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(24)
+
+   ** enable W+/- --> e+/- nu
+   call openDecay(24,206,1)
+
+RETURN
+
+****************************************************************************************************
+** MACRO Z_eplus_eminus
+**
+** Configure the physics for the Z --> e+e-.  Explicitly disable DY interference
+**
+MACRO Z_eplus_eminus
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 11                    ! selects isub 1 and 96
+   mstp 43=2                  ! Z0 only, no DY interference :(
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(23)
+
+   ** Z --> e+ e- only   
+   call openDecay(23,182,1) 
+
+RETURN
+
+****************************************************************************************************
+** MACRO Z_eplus_eminus_inter
+**
+** Configure the physics for the Z/gamma* --> e+e-
+**
+MACRO Z_eplus_eminus_inter
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 11                    ! selects isub 1 and 96
+   mstp 43=3                  ! Z0 only and gamma* with interference
+
+   ** close all decay channels
+   gexec closeDecays.F
+   call closeDecays(23)
+
+   ** Z --> e+ e- only
+   call openDecay(23,182,1)
+
+RETURN
+
+
+****************************************************************************************************
+** MACRO Z_any
+**
+** Configure the physics for the Z --> any.
+**
+MACRO Z_any
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 11                    ! selects isub 1 and 96
+   mstp 43=2                  ! Z0 only, no DY interference :(
+
+RETURN
+
+****************************************************************************************************
+** MACRO Z_any_inter
+**
+** Configure the physics for the Z --> any with gamma* interference.
+**
+MACRO Z_any_inter
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 11                    ! selects isub 1 and 96
+   mstp 43=3                  ! Z0 and gamma* with interference
+
+RETURN
+
+
+
+****************************************************************************************************
+** MACRO Z_other
+**
+** Configure the physics for the Z --> any.
+**
+MACRO Z_other
+
+   ckin 3=10.0
+   ckin 4=-1.0
+   msel 11                     ! selects isub 1 and 96
+   mstp 43=2                   ! Z0 only, no DY interference :(
+   MDME(182,1)=0               ! and not the e+ e- branch
+
+RETURN
+
+
+****************************************************************************************************
+** MACRO QCD
+**
+** Configure the physics for QCD with PT > 30
+**
+MACRO QCD min=[PTmin] max=[PTmax]
+   ckin 3=[min]                ! min pT = 30 GeV
+   ckin 4=[max]                ! no maximum
+   msel 1
+RETURN 
+
+MACRO minb 
+
+   msel 0
+   FOR sub IN 11 12 13 28 53 68 93 95
+       MSUB [sub]=1
+   ENDFOR
+
+RETURN
+
+

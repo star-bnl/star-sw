@@ -1,0 +1,3 @@
+#!/bin/csh
+ cd /afs/cern.ch/asis/$1
+ find . ! -type d -mtime -$2 -type f -print | tar acfv - - | ( cd /afs/rhic/.asis/$1 ; tar xvf - )

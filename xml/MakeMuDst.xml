@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="200" filesPerHour="100" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+         starver .DEV2
+         set log=`basename ${INPUTFILE0} event.root`
+         set MuDst = ${log}.MuDst.root
+         if (-r ${MuDst}) exit 0;
+         root.exe -q -b bfc.C\(99999,\"MakeMuDst\"\,\"${INPUTFILE0}\"\) &gt;&amp; ${log}D.log 
+	</command>
+	<stdout URL="file:./$JOBID.log" />
+	<stderr URL="file:./$JOBID.err" />
+<input URL="file:/star/subsys/tpc/fisyak/Tpc/TpcRS/TpcRS_2014_AuAu200Z3C/*.event.root" /> 
+</job>

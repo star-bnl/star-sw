@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+  cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set evtsFile = $INPUTFILE0;
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`
+  set output  = ${filel}.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  if ( -r $output) exit 0;
+  root.exe -q -b -x 'TpcPrompt.C(999999,"'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/TpcPrompt2014$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/TpcPrompt2014$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/061/*/*.daq" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2014.pl" /> -->
+<input URL="file:/star/data03/daq/2016/035/17035170/st_physics_adc_17035170_raw_*.daq" />
+</job>

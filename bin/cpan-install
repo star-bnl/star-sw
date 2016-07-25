@@ -1,0 +1,30 @@
+#!/opt/usatlas/bin/perl -w
+use strict;
+use CPAN;
+my $file = $ARGV[0];
+open (FILE, $file) or error_message("Cannot open $file: $!");
+my $distribution = <FILE>;
+close FILE or error_message("Cannot close $file: $!");
+error_message("$distribution does not appear to be a valid name")
+   unless $distribution =~ m!^[/+\-_\.\@0-9\w]+(\.tar\.gz|\.tgz|\.zip)$!;
+
+print "\n\nPreparing to install $distribution\n\n";
+
+# Comment out the next two lines to proceed immediately
+# with installation without the opportunity for an interrupt
+print "Press Control-C to abort ...\n";
+sleep(7);
+
+CPAN::Shell->install($distribution);
+
+# comment out the next two lines if you want
+# the window to automatically close when done
+print "\nPress return to exit the window ";
+my $ans = <STDIN>;
+
+sub error_message {
+   my $message = shift;
+   warn "\n $message \n";
+   sleep(10);
+   die;
+}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+   setenv STARFPE NO
+   setenv NODEBUG yes
+   starver .DEV2
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 5000000
+#  endif
+  echo "${evtsFile}"
+  set filel    = `basename $evtsFile .daq`
+  set output  = ${filel}.event.root
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${filel}B.log
+  if ( -r $logFile) exit 0;
+  set muFile = ${filel}.MuDst.root
+  if (-r $muFile) exit 0;
+#  root.exe -q -b 'bfc.C(100,"B2015,gmt,Alignment,ITTF,BAna,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+#  root.exe -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# GL:  root.exe -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,VFMinuit,pxlHit,istHit","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# NoGL:  root4star -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit,useXgeom","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+# GLKV
+  root4star -q -b 'bfc.C(10000,"B2015,BAna,emcDY2,fpd,trgd,ZDCvtx,StiHftC,NosvtIT,NossdIT,analysis,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeak3D,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,pxlHit,istHit,useXgeom","'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/da2015$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/daq2015$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/FF_adc/*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2015/*/*/st_cosmic_adc_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2015.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2015/061/*/*.daq" /> -->
+<!-- <input URL="file:/star/subsys/tpc/daq/2015/*/*/st_physics_15*.daq" /> -->
+<!-- <input URL="command:Cosmics2015.pl" /> -->
+<!-- <input URL="command:daq_2014.pl" /> -->
+<!-- <input URL="file://star/data03/daq/2015/140/*/*.daq" /> -->
+<input URL="file:/star/data03/daq/2015/140/1614003*/st_physics_*.daq" />
+<input URL="file:/star/data03/daq/2015/169/1616907*/st_physics_*.daq" />
+</job>

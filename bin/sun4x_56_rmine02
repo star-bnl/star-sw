@@ -1,0 +1,553 @@
+ASISwsm: 
+ASISwsm: V1.11 Perl 5.00503 run by root@rmine02.cern.ch on repository /afs/rhic/asis (sun4x_56)
+ASISwsm: Local copy directory is /tmp/dummy_copydir
+ASISwsm: 
+ASISwsm: Executing pre-commands
+ASISwsm: Reading configuration in file: /tmp/dummy.cfg
+ASISwsm: No configuration in /tmp/dummy.cfg
+ASISwsm: Recording operations for prefix /cern
+ASISwsm: No local copy space needed for /cern
+ASISwsm: Performing operations for prefix /cern
+ASISwsm: *WARNING in main::perform_operations line 1319: Do relative links with prefix /cern and repository /afs/rhic/asis makes no sense: option dropped - Can't do it
+ASISwsm: Cleaning up old archs in /tmp/dummy_copydir
+ASISwsm: Cleaning up root dirs
+ASISwsm: Recording operations for prefix /usr/local
+ASISwsm: ASIS/doc-1.01 InProduction Default Force None sun4x_56
+ASISwsm: ASIS/faq-1.01 InProduction Default Force None sun4x_56
+ASISwsm: ASIS/man_pages_db-1.0 InProduction Default Force None share
+ASISwsm: ASIS/share_links-1.01 InProduction Default Force None sun4x_56
+ASISwsm: ASIS/test2 no version on sun4x_56
+ASISwsm: ASIS/testdesy no version on sun4x_56
+ASISwsm: ASIS/tools-1.6 InProduction Default Force None sun4x_56
+ASISwsm: Athena/krb4 no version on sun4x_56
+ASISwsm: Athena/zephyr no version on sun4x_56
+ASISwsm: CERN/3270-3.5 InProduction Default Force None sun4x_56
+ASISwsm: CERN/PathFinder-1.00 InProduction Default Force None sun4x_56
+ASISwsm: CERN/accounting-1.18 InProduction Default Force None sun4x_56
+ASISwsm: CERN/acctools no version on sun4x_56
+ASISwsm: CERN/adam-1.3.2 InProduction Default Force None sun4x_56
+ASISwsm: CERN/afs_cmd-3.3b InProduction Default Force None sun4x_56
+ASISwsm: CERN/afs_tools-1.06 InProduction Default Force None sun4x_56
+ASISwsm: CERN/afs_ug-1.2r95.04 InProduction Default Force None share
+ASISwsm: CERN/async-1.00 InProduction Default Force None sun4x_56
+ASISwsm: CERN/ccdata-1.0 InProduction Default Force None sun4x_56
+ASISwsm: CERN/clio-2.1 InProduction Default Force None sun4x_56
+ASISwsm: CERN/edh-2.1e InProduction Default Force None sun4x_56
+ASISwsm: CERN/emdir-5.0 InProduction Default Force None sun4x_56
+ASISwsm: CERN/guesskbd-1.1 InProduction Default Force None sun4x_56
+ASISwsm: CERN/hpglview-4.0 InProduction Default Force None sun4x_56
+ASISwsm: CERN/iWindow-1.02 InProduction Default Force None sun4x_56
+ASISwsm: CERN/kbds-2.22 InProduction Default Force None sun4x_56
+ASISwsm: CERN/nagf90-1.0 InProduction Default Force None sun4x_56
+ASISwsm: CERN/netscape-4.05.08 InProduction Default Force None sun4x_56
+ASISwsm: CERN/netscape-light-1.00 InProduction Default Force None sun4x_56
+ASISwsm: CERN/news-config-1.3 InProduction Default Force None sun4x_56
+ASISwsm: CERN/normalised-icons-1.0 InProduction Default Force None share
+ASISwsm: CERN/nqs-2.01 InProduction Default Force None sun4x_56
+ASISwsm: CERN/parc_apps-1.02 InProduction Default Force None sun4x_56
+ASISwsm: CERN/phone-2.0 InProduction Default Force None sun4x_56
+ASISwsm: CERN/pine_conf-1.02 InProduction Default Force None sun4x_56
+ASISwsm: CERN/pubarch-1.05 InProduction Default Force None sun4x_56
+ASISwsm: CERN/servants-1.3 InProduction Default Force None sun4x_56
+ASISwsm: CERN/svt-copytape no version on sun4x_56
+ASISwsm: CERN/svt-print no version on sun4x_56
+ASISwsm: CERN/sys-names-0.99 InProduction Default Force None sun4x_56
+ASISwsm: CERN/texi2html-1.52 InProduction Default Force None sun4x_56
+ASISwsm: CERN/tools-1.37 InProduction Default Force None sun4x_56
+ASISwsm: CERN/umtf-1.27 InProduction Default Force None sun4x_56
+ASISwsm: CERN/unixguide-2.1 InProduction Default Force None share
+ASISwsm: CERN/vmtools-1.07 InProduction Default Force None sun4x_56
+ASISwsm: CERN/wgstools-1.06 InProduction Default Force None sun4x_56
+ASISwsm: CERN/www-2.14 InProduction Default Force None sun4x_56
+ASISwsm: CERN/wwwtools-1.54 InProduction Default Force None sun4x_56
+ASISwsm: CERN/x3270_kbd-1.04 InProduction Default Force None share
+ASISwsm: CERN/xtools-1.34 InProduction Default Force None sun4x_56
+ASISwsm: CERN/xumtf-1.01 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/abi-fonts no version on sun4x_56
+ASISwsm: GNU.DESK/expat-1.0.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/fnlib-0.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/freetype-1.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/giflib-4.1.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/gimp-1.0.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/gnome-admin no version on sun4x_56
+ASISwsm: GNU.DESK/gnome-network no version on sun4x_56
+ASISwsm: GNU.DESK/gnotes_applet no version on sun4x_56
+ASISwsm: GNU.DESK/gphoto no version on sun4x_56
+ASISwsm: GNU.DESK/gtk+-1.0.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/jpeg-6b InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/lesstif no version on sun4x_56
+ASISwsm: GNU.DESK/libpng-1.0.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/libungif-4.1.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/magicpoint-1.05a InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/mc-4.1.35 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/midnight no version on sun4x_56
+ASISwsm: GNU.DESK/mini-commander_applet no version on sun4x_56
+ASISwsm: GNU.DESK/think no version on sun4x_56
+ASISwsm: GNU.DESK/tiff-3.4beta036 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DESK/xmp-kt no version on sun4x_56
+ASISwsm: GNU.DESK/zlib-1.1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/autoconf-2.13 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/automake-1.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/bison-1.28 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/cvs-1.10.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/dejagnu-1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/flex-2.5.4a InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/gawk-3.0.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/indent-2.2.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/libtool-1.3.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/make-3.77 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/nana-1.14 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/prcs-1.2.0b5 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/rcs-5.7 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/rsync-2.3.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.DVP/swig-1.1p5 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/auctex-9.9p InProduction Default Force None share
+ASISwsm: GNU.EDIT/bbdb-1.50.1 InProduction Default Force None share
+ASISwsm: GNU.EDIT/calc-2.02f InProduction Default Force None share
+ASISwsm: GNU.EDIT/dict_dansk-1.2.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/dict_deutsch-1.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/dict_espa~nol-1.3a InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/dict_francais-1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/dictd-1.4.9 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/elib-1.0 InProduction Default Force None share
+ASISwsm: GNU.EDIT/elisp-manual-19.2.4 InProduction Default Force None share
+ASISwsm: GNU.EDIT/emacs-20.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/filladapt-2.04 InProduction Default Force None share
+ASISwsm: GNU.EDIT/gnuplot-3.7 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/hm--html-menus-5.8.1 InProduction Default Force None share
+ASISwsm: GNU.EDIT/info_dir-19.29.1 InProduction Default Force None share
+ASISwsm: GNU.EDIT/ispell-3.1.20 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/kumac-mode-2.3 InProduction Default Force None share
+ASISwsm: GNU.EDIT/leim no version on sun4x_56
+ASISwsm: GNU.EDIT/lyx-1.0.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/nvi-1.49 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/oleo-1.6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.EDIT/pcl-cvs-1.05.1 InProduction Default Force None share
+ASISwsm: GNU.EDIT/psgml-1.2.0 InProduction Default Force None share
+ASISwsm: GNU.EDIT/site-start-19.33 InProduction Default Force None share
+ASISwsm: GNU.EDIT/vm-6.32 InProduction Default Force None share
+ASISwsm: GNU.EDIT/w3-mode-4.0pre.44 InProduction Default Force None share
+ASISwsm: GNU.EDIT/yudit-1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/f2c-19970425 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/gcc-2.91.66 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/gcl no version on sun4x_56
+ASISwsm: GNU.LANG/gdb-4.18 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/gforth-0.3.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/gpc-1.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/guavac-0.3.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/guile-1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/m4-1.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/python-1.5.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/scm-4e1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/slib-2a3 InProduction Default Force None share
+ASISwsm: GNU.LANG/tile-forth-2.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.LANG/ucblogo-4.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/bc-1.05 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/gmp-2.0.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/jacal-1a5 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/nn no version on sun4x_56
+ASISwsm: GNU.MATH/octave-2.0.14 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/pari-1.39.03 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MATH/pspp-0.1.17 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/Mesa-3.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/Ygl-3.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/acct-6.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/bzip2-0.9.0c InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/cfengine-1.4.10 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/cgicc-3.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/electric-5.4g6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/enscript-1.6.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/finger-1.37 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/fontutils-0.6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/gcal-2.40 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/ghostscript-5.50 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/ghostscript-fonts-other-5.50 InProduction Default Force None share
+ASISwsm: GNU.MISC/ghostscript-fonts-std-5.50 InProduction Default Force None share
+ASISwsm: GNU.MISC/ghostview-1.91 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/git-4.3.19 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/gnuchess no version on sun4x_56
+ASISwsm: GNU.MISC/graphics no version on sun4x_56
+ASISwsm: GNU.MISC/groff_manhp-9.01 InProduction Default Force None share
+ASISwsm: GNU.MISC/gv-3.5.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/gzip-1.2.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/hp2xx no version on sun4x_56
+ASISwsm: GNU.MISC/html2ps-1.0b1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/id-utils-3.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/java2html-1.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/libwmf-0.1.16 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/metahtml-5.04 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/mswordview-0.5.29 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/mtools-3.9.6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/plotutils-2.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/saoimage-1.08 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/screen-3.7.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/vrweb-1.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/wdiff-0.5 InProduction Default Force None sun4x_56
+ASISwsm: GNU.MISC/wget-1.5.3 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/bash-1.14.6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/cpio-2.4.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/db-2.4.14 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/diffutils-2.7 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/ed-0.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/file-3.20.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/fileutils-4.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/findutils-4.1 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/gdbm-1.8.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/gettext-0.10.35 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/grep-2.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/groff-1.11a InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/less-3.40 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/lprng-3.5.3.5 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/man_db-2.3.11a InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/mkisofs-1.05 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/mmalloc-2.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/ncurses-4.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/patch-2.4 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/pth-1.0.6 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/readline-4.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/sed-3.02 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/sh-utils-1.16 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/sharutils-4.2 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/tar-1.12 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/termutils-2.0 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/textutils-1.22 InProduction Default Force None sun4x_56
+ASISwsm: GNU.SYS/time-1.7 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/adamo no version on sun4x_56
+ASISwsm: HEPiX/hepf77-1.03 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/mirdir-1.44 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/scripts-X11-3.2.2 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/scripts-X11-cern-3.2.4 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/scripts-shells-3.2 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/scripts-shells-cern-3.2 InProduction Default Force None sun4x_56
+ASISwsm: HEPiX/uco-3.3.03 InProduction Default Force None sun4x_56
+ASISwsm: LIC.HEP/hpglview no version on sun4x_56
+ASISwsm: MAIL/MHonArc-1.1b InProduction Default Force None sun4x_56
+ASISwsm: MAIL/cern-mail-config-0.02 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/chkmail-3.2 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/fetchmail-4.3.4 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/imap-4.03 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/inews-1.5.8 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/ldap no version on sun4x_56
+ASISwsm: MAIL/march-3.23 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/mm-2.7.2 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/mxrn-6.18.30 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/net-ldap no version on sun4x_56
+ASISwsm: MAIL/nn-6.5.1 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/pgp-2.6.3 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/pine-3.95d InProduction Default Force None sun4x_56
+ASISwsm: MAIL/procmail-3.11.01 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/sendmail no version on sun4x_56
+ASISwsm: MAIL/tkpostage-2.00 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/tools-1.16 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/trn-3.6 InProduction Default Force None sun4x_56
+ASISwsm: MAIL/xrn-9.01 InProduction Default Force None sun4x_56
+ASISwsm: MISC/ElectricFence no version on sun4x_56
+ASISwsm: MISC/a2ps no version on sun4x_56
+ASISwsm: MISC/arc no version on sun4x_56
+ASISwsm: MISC/cockpit no version on sun4x_56
+ASISwsm: MISC/collage no version on sun4x_56
+ASISwsm: MISC/cxref no version on sun4x_56
+ASISwsm: MISC/docxx no version on sun4x_56
+ASISwsm: MISC/ftnchek no version on sun4x_56
+ASISwsm: MISC/glimpse no version on sun4x_56
+ASISwsm: MISC/htmlchek no version on sun4x_56
+ASISwsm: MISC/lfu no version on sun4x_56
+ASISwsm: MISC/lha no version on sun4x_56
+ASISwsm: MISC/lsof no version on sun4x_56
+ASISwsm: MISC/lynx no version on sun4x_56
+ASISwsm: MISC/mirror no version on sun4x_56
+ASISwsm: MISC/ncftp no version on sun4x_56
+ASISwsm: MISC/pgp no version on sun4x_56
+ASISwsm: MISC/pps no version on sun4x_56
+ASISwsm: MISC/python no version on sun4x_56
+ASISwsm: MISC/regina no version on sun4x_56
+ASISwsm: MISC/rman no version on sun4x_56
+ASISwsm: MISC/scilab no version on sun4x_56
+ASISwsm: MISC/tcsh no version on sun4x_56
+ASISwsm: MISC/the no version on sun4x_56
+ASISwsm: MISC/unarj no version on sun4x_56
+ASISwsm: MISC/unzip no version on sun4x_56
+ASISwsm: MISC/webify no version on sun4x_56
+ASISwsm: MISC/weblint no version on sun4x_56
+ASISwsm: MISC/xemacs no version on sun4x_56
+ASISwsm: MISC/xlisp no version on sun4x_56
+ASISwsm: MISC/zoo no version on sun4x_56
+ASISwsm: MISC/zsh no version on sun4x_56
+ASISwsm: PERL/DBD-Oracle-0.61 InProduction Default Force None sun4x_56
+ASISwsm: PERL/DBI-1.06 InProduction Default Force None sun4x_56
+ASISwsm: PERL/DProf-19970614.1 InProduction Default Force None sun4x_56
+ASISwsm: PERL/Digest-MD5-2.06 InProduction Default Force None sun4x_56
+ASISwsm: PERL/Font-AFM-1.18 InProduction Default Force None sun4x_56
+ASISwsm: PERL/GD-1.18 InProduction Default Force None sun4x_56
+ASISwsm: PERL/HTML-Parser-2.22 InProduction Default Force None sun4x_56
+ASISwsm: PERL/HTML-Tree-0.51 InProduction Default Force None sun4x_56
+ASISwsm: PERL/MIME-Base64-2.11 InProduction Default Force None sun4x_56
+ASISwsm: PERL/MailTools-1.13 InProduction Default Force None sun4x_56
+ASISwsm: PERL/Quota-1.2.3a InProduction Default Force None sun4x_56
+ASISwsm: PERL/Tk-800.014 InProduction Default Force None sun4x_56
+ASISwsm: PERL/URI-1.02 InProduction Default Force None sun4x_56
+ASISwsm: PERL/jfriedl-tools-9610 InProduction Default Force None sun4x_56
+ASISwsm: PERL/libnet-1.0606 InProduction Default Force None sun4x_56
+ASISwsm: PERL/libwww-perl-5.42 InProduction Default Force None sun4x_56
+ASISwsm: PERL/net-ldap no version on sun4x_56
+ASISwsm: PERL/perl-4.0p36 InProduction Default Force None sun4x_56
+ASISwsm: PERL/perl-5.005_03 InProduction Default Force None sun4x_56
+ASISwsm: PERL/perl_default-2.0 InProduction Default Force None sun4x_56
+ASISwsm: PERL/perlhelp-1.6 InProduction Default Force None sun4x_56
+ASISwsm: SHIFT/hsm-1.01 InProduction Default Force None sun4x_56
+ASISwsm: SHIFT/shift-1.10.3.2 InProduction Default Force None sun4x_56
+ASISwsm: SHIFT/tms-1.01 InProduction Default Force None share
+ASISwsm: TCL/BLT-1.7 InProduction Default Force None sun4x_56
+ASISwsm: TCL/SpecTcl-1.1 InProduction Default Force None sun4x_56
+ASISwsm: TCL/addressManager-1.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/beth no version on sun4x_56
+ASISwsm: TCL/default_share-1.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/expect-5.26 InProduction Default Force None sun4x_56
+ASISwsm: TCL/ical-2.2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/itcl-1.5b InProduction Default Force None sun4x_56
+ASISwsm: TCL/itcl-2.2p2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/itcl_blt-1.5 InProduction Default Force None sun4x_56
+ASISwsm: TCL/jstools-2.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/mxedit no version on sun4x_56
+ASISwsm: TCL/oratcl-2.2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/picasso-3.8 InProduction Default Force None sun4x_56
+ASISwsm: TCL/rootmenu-0.12 InProduction Default Force None sun4x_56
+ASISwsm: TCL/surfit-0.4 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl-7.3b InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl-7.6p2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl-8.0p2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl-8.2.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl-dp-3.4b2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tclX-7.3b InProduction Default Force None sun4x_56
+ASISwsm: TCL/tclX-7.6.0b2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tcl_default-8.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tk-3.6b InProduction Default Force None sun4x_56
+ASISwsm: TCL/tk-4.2p2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tk-8.0p2 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tk-8.2.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkPostit-1.4 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkcvs-6.0 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkdesk-1.0b4 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkgnats-1.14c InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkispell-1.3 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkman-1.6 InProduction Default Force None sun4x_56
+ASISwsm: TCL/tkpostage no version on sun4x_56
+ASISwsm: TCL/tkrat-1.1 InProduction Default Force None sun4x_56
+ASISwsm: TCL/xf-2.3p1 InProduction Default Force None sun4x_56
+ASISwsm: TCL/xka-0.91 InProduction Default Force None sun4x_56
+ASISwsm: TCL/xtem-3.12.1 InProduction Default Force None sun4x_56
+ASISwsm: TeX/LH no version on sun4x_56
+ASISwsm: TeX/a4 no version on sun4x_56
+ASISwsm: TeX/achemso no version on sun4x_56
+ASISwsm: TeX/acronim no version on sun4x_56
+ASISwsm: TeX/adrlist no version on sun4x_56
+ASISwsm: TeX/aguplus no version on sun4x_56
+ASISwsm: TeX/alg no version on sun4x_56
+ASISwsm: TeX/answers no version on sun4x_56
+ASISwsm: TeX/bbm no version on sun4x_56
+ASISwsm: TeX/booktabs no version on sun4x_56
+ASISwsm: TeX/calc no version on sun4x_56
+ASISwsm: TeX/calrsfs no version on sun4x_56
+ASISwsm: TeX/camel no version on sun4x_56
+ASISwsm: TeX/caption no version on sun4x_56
+ASISwsm: TeX/carlisle no version on sun4x_56
+ASISwsm: TeX/cchess no version on sun4x_56
+ASISwsm: TeX/cernspecific no version on sun4x_56
+ASISwsm: TeX/changebar no version on sun4x_56
+ASISwsm: TeX/chemcono no version on sun4x_56
+ASISwsm: TeX/chemsym no version on sun4x_56
+ASISwsm: TeX/cite no version on sun4x_56
+ASISwsm: TeX/cmcyralt no version on sun4x_56
+ASISwsm: TeX/codepage no version on sun4x_56
+ASISwsm: TeX/concmath no version on sun4x_56
+ASISwsm: TeX/count1to no version on sun4x_56
+ASISwsm: TeX/custombib no version on sun4x_56
+ASISwsm: TeX/deleq no version on sun4x_56
+ASISwsm: TeX/dmfonts no version on sun4x_56
+ASISwsm: TeX/dotseqn no version on sun4x_56
+ASISwsm: TeX/draftcopy no version on sun4x_56
+ASISwsm: TeX/dvips no version on sun4x_56
+ASISwsm: TeX/elsevier no version on sun4x_56
+ASISwsm: TeX/envbig no version on sun4x_56
+ASISwsm: TeX/eqnarray no version on sun4x_56
+ASISwsm: TeX/euler no version on sun4x_56
+ASISwsm: TeX/everyshi no version on sun4x_56
+ASISwsm: TeX/exams no version on sun4x_56
+ASISwsm: TeX/expdlist no version on sun4x_56
+ASISwsm: TeX/expert no version on sun4x_56
+ASISwsm: TeX/fax no version on sun4x_56
+ASISwsm: TeX/foiltex no version on sun4x_56
+ASISwsm: TeX/fontload no version on sun4x_56
+ASISwsm: TeX/footnpag no version on sun4x_56
+ASISwsm: TeX/fp no version on sun4x_56
+ASISwsm: TeX/fragments no version on sun4x_56
+ASISwsm: TeX/frankenstein no version on sun4x_56
+ASISwsm: TeX/gbrief no version on sun4x_56
+ASISwsm: TeX/harpoon no version on sun4x_56
+ASISwsm: TeX/harvard no version on sun4x_56
+ASISwsm: TeX/hh no version on sun4x_56
+ASISwsm: TeX/hyper no version on sun4x_56
+ASISwsm: TeX/ieeepes no version on sun4x_56
+ASISwsm: TeX/ifaccong no version on sun4x_56
+ASISwsm: TeX/ifacmtg no version on sun4x_56
+ASISwsm: TeX/ipa no version on sun4x_56
+ASISwsm: TeX/jknappen no version on sun4x_56
+ASISwsm: TeX/komascript no version on sun4x_56
+ASISwsm: TeX/la2mml no version on sun4x_56
+ASISwsm: TeX/labels no version on sun4x_56
+ASISwsm: TeX/lastpage no version on sun4x_56
+ASISwsm: TeX/latex209 no version on sun4x_56
+ASISwsm: TeX/levy no version on sun4x_56
+ASISwsm: TeX/lgreek no version on sun4x_56
+ASISwsm: TeX/lifiath no version on sun4x_56
+ASISwsm: TeX/lineno no version on sun4x_56
+ASISwsm: TeX/localloc no version on sun4x_56
+ASISwsm: TeX/mailing no version on sun4x_56
+ASISwsm: TeX/makeindex no version on sun4x_56
+ASISwsm: TeX/mapcodes no version on sun4x_56
+ASISwsm: TeX/maple no version on sun4x_56
+ASISwsm: TeX/midaswww no version on sun4x_56
+ASISwsm: TeX/minitoc no version on sun4x_56
+ASISwsm: TeX/mslapa no version on sun4x_56
+ASISwsm: TeX/myletter no version on sun4x_56
+ASISwsm: TeX/natbib no version on sun4x_56
+ASISwsm: TeX/newalg no version on sun4x_56
+ASISwsm: TeX/nomencl no version on sun4x_56
+ASISwsm: TeX/numline no version on sun4x_56
+ASISwsm: TeX/objectz no version on sun4x_56
+ASISwsm: TeX/ogonek no version on sun4x_56
+ASISwsm: TeX/paper no version on sun4x_56
+ASISwsm: TeX/parallel no version on sun4x_56
+ASISwsm: TeX/piff no version on sun4x_56
+ASISwsm: TeX/prelim2e no version on sun4x_56
+ASISwsm: TeX/program no version on sun4x_56
+ASISwsm: TeX/psfrag no version on sun4x_56
+ASISwsm: TeX/qobitree no version on sun4x_56
+ASISwsm: TeX/qsymbols no version on sun4x_56
+ASISwsm: TeX/rcs no version on sun4x_56
+ASISwsm: TeX/rcsinfo no version on sun4x_56
+ASISwsm: TeX/rotfloat no version on sun4x_56
+ASISwsm: TeX/rplain no version on sun4x_56
+ASISwsm: TeX/script no version on sun4x_56
+ASISwsm: TeX/seetex no version on sun4x_56
+ASISwsm: TeX/semantic no version on sun4x_56
+ASISwsm: TeX/setspace no version on sun4x_56
+ASISwsm: TeX/shadethm no version on sun4x_56
+ASISwsm: TeX/showlabels no version on sun4x_56
+ASISwsm: TeX/siam no version on sun4x_56
+ASISwsm: TeX/ssqquote no version on sun4x_56
+ASISwsm: TeX/stmaryrd no version on sun4x_56
+ASISwsm: TeX/subfigure no version on sun4x_56
+ASISwsm: TeX/texmfcfg no version on sun4x_56
+ASISwsm: TeX/textmerg no version on sun4x_56
+ASISwsm: TeX/thesis no version on sun4x_56
+ASISwsm: TeX/tie no version on sun4x_56
+ASISwsm: TeX/tpcmfont no version on sun4x_56
+ASISwsm: TeX/treesvr no version on sun4x_56
+ASISwsm: TeX/ulsy no version on sun4x_56
+ASISwsm: TeX/umlaute no version on sun4x_56
+ASISwsm: TeX/utthesis no version on sun4x_56
+ASISwsm: TeX/uwthesis no version on sun4x_56
+ASISwsm: TeX/vdm no version on sun4x_56
+ASISwsm: TeX/vector no version on sun4x_56
+ASISwsm: TeX/vita no version on sun4x_56
+ASISwsm: TeX/vmsps no version on sun4x_56
+ASISwsm: TeX/vrsion no version on sun4x_56
+ASISwsm: TeX/wasysym no version on sun4x_56
+ASISwsm: TeX/web2c no version on sun4x_56
+ASISwsm: TeX/williams no version on sun4x_56
+ASISwsm: TeX/xdvik no version on sun4x_56
+ASISwsm: TeX/yhmath no version on sun4x_56
+ASISwsm: TeX/zedcsp no version on sun4x_56
+ASISwsm: X11/AIcons-1.5a InProduction Default Force None share
+ASISwsm: X11/CERNIcons no version on sun4x_56
+ASISwsm: X11/HobbesIcons-1.0 InProduction Default Force None share
+ASISwsm: X11/ImageMagick no version on sun4x_56
+ASISwsm: X11/OffiX no version on sun4x_56
+ASISwsm: X11/RealmImages no version on sun4x_56
+ASISwsm: X11/Xaw3d no version on sun4x_56
+ASISwsm: X11/acrobat no version on sun4x_56
+ASISwsm: X11/axe no version on sun4x_56
+ASISwsm: X11/dxpc no version on sun4x_56
+ASISwsm: X11/fvwm no version on sun4x_56
+ASISwsm: X11/fvwm95 no version on sun4x_56
+ASISwsm: X11/jpeg no version on sun4x_56
+ASISwsm: X11/mit no version on sun4x_56
+ASISwsm: X11/mosaic no version on sun4x_56
+ASISwsm: X11/mpdist no version on sun4x_56
+ASISwsm: X11/mpeg_play no version on sun4x_56
+ASISwsm: X11/mxconns no version on sun4x_56
+ASISwsm: X11/nedit no version on sun4x_56
+ASISwsm: X11/netlib no version on sun4x_56
+ASISwsm: X11/netpbm no version on sun4x_56
+ASISwsm: X11/pixmap no version on sun4x_56
+ASISwsm: X11/pstoedit no version on sun4x_56
+ASISwsm: X11/tgif no version on sun4x_56
+ASISwsm: X11/tiff no version on sun4x_56
+ASISwsm: X11/transfig no version on sun4x_56
+ASISwsm: X11/x3270 no version on sun4x_56
+ASISwsm: X11/xanim no version on sun4x_56
+ASISwsm: X11/xarchie no version on sun4x_56
+ASISwsm: X11/xautolock no version on sun4x_56
+ASISwsm: X11/xbmbrowser no version on sun4x_56
+ASISwsm: X11/xcal no version on sun4x_56
+ASISwsm: X11/xfig no version on sun4x_56
+ASISwsm: X11/xfm no version on sun4x_56
+ASISwsm: X11/xforms no version on sun4x_56
+ASISwsm: X11/xgrabsc no version on sun4x_56
+ASISwsm: X11/xkeycaps no version on sun4x_56
+ASISwsm: X11/xless no version on sun4x_56
+ASISwsm: X11/xlock_afs no version on sun4x_56
+ASISwsm: X11/xlockmore no version on sun4x_56
+ASISwsm: X11/xmgr no version on sun4x_56
+ASISwsm: X11/xmosaic no version on sun4x_56
+ASISwsm: X11/xpaint no version on sun4x_56
+ASISwsm: X11/xpm no version on sun4x_56
+ASISwsm: X11/xrgb no version on sun4x_56
+ASISwsm: X11/xrsh no version on sun4x_56
+ASISwsm: X11/xv no version on sun4x_56
+ASISwsm: X11/xwpick no version on sun4x_56
+ASISwsm: X11/xxgdb no version on sun4x_56
+ASISwsm: X11.R6/Xaw3d no version on sun4x_56
+ASISwsm: No local copy space needed for /usr/local
+ASISwsm: Performing operations for prefix /usr/local
+ASISwsm: *WARNING in main::perform_operations line 1319: Do relative links with prefix /usr/local and repository /afs/rhic/asis makes no sense: option dropped - Can't do it
+ASISwsm: Cleaning up old archs in /tmp/dummy_copydir
+ASISwsm: Updating directory .
+ASISwsm: *WARNING in asis::File::listdir line 846: Cannot list files in directory /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Permission denied
+ASISwsm: in asis::fns::_cleanup_dir line 1198: Readdir /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS/logdir - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf - Can't do it
+ASISwsm: in asis::fns::perform_operations_on_dir line 833: Cleaning /usr/local - Can't do it
+ASISwsm: Updating directory bin
+ASISwsm: Updating directory com
+ASISwsm: Updating directory doc
+ASISwsm: Updating directory electric
+ASISwsm: Updating directory etc
+ASISwsm: Updating directory html
+ASISwsm: Updating directory include
+ASISwsm: Updating directory info
+ASISwsm: Updating directory lib
+ASISwsm: Updating directory libexec
+ASISwsm: Updating directory man
+ASISwsm: Updating directory sbin
+ASISwsm: Updating directory share
+ASISwsm: Updating directory sparc-sun-solaris2.6
+ASISwsm: Cleaning up root dirs
+ASISwsm: *ERROR in asis::File::listdir line 846: Cannot list files in directory /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Permission denied
+ASISwsm: in asis::fns::_cleanup_dir line 1198: Readdir /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS/logdir/info - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS/logdir - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work/RHIC_CAS - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt/work - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf/mnt - Can't do it
+ASISwsm: in asis::fns::_cleanup_dir line 1238: Cleaning /usr/local/lsf - Can't do it
+ASISwsm: in asis::fns::cleanup_root line 1090: Cleaning /usr/local - Can't do it
+ASISwsm: in main::perform_operations line 1357: Cleaning root dirs - Can't do it
+ASISwsm: Executing post-commands
+ASISwsm: Mailing the log file to Asis.account@asismgr.cern.ch
+ASISwsm: Terminated successfully

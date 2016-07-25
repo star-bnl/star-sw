@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job maxFilesPerProcess="200" filesPerHour="1" fileListSyntax="paths"  simulateSubmission="true"> -->
+<!-- <job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="xrootd"> -->
+<job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="paths">
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+#         setup 64b
+#         starver .DEV2
+         root.exe -q -b lMuDst.C MuGamma.C+\(9999999,\"${FILELIST}\",\"${JOBID}\.root\"\)  &gt;&amp; ${JOBID}B.log 
+#get_file_list.pl -keys 'path,filename' -cond trgsetupname=AuAu_200_production_low_2014,production=P15ic,filetype=daq_reco_MuDst,storage=nfs
+	</command>
+	<stdout URL="file:./$JOBID.log" />
+	<stderr URL="file:./$JOBID.err" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/MuDst/2014/AuAu200/P15ic/*MuDst.root" /> -->
+<input URL="file:/star/data9*/reco/AuAu_200_production_low_2014/ReversedFullField/P15ic/2014/*/*/st_physics_151*MuDst.root" />
+</job>

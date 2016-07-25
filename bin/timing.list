@@ -1,0 +1,16 @@
+.DEV2:debug:gcc492:32b
+.DEV2:opt:gcc492:32b
+.DEV2:debug:gcc492:64b
+.DEV2:opt:gcc492:64b
+.DEV2:debug:gcc482:32b
+.DEV2:opt:gcc482:32b
+.DEV2:debug:gcc482:64b
+.DEV2:opt:gcc482:64b
+.DEV2:debug:gcc:32b
+.DEV2:opt:gcc:32b
+.DEV2:debug:gcc:64b
+.DEV2:opt:gcc:64b
+dev:debug:gcc:32b
+dev:opt:gcc:32b
+dev:debug:gcc:64b
+dev:opt:gcc:64b

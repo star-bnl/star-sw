@@ -1,0 +1,11 @@
+#!/bin/csh -f
+#   set file_list = `grep -l cern\.ch  /afs/rhic/.asis/*/usr.local/lib/hepix/shells/site/*sh`
+   set file_list = `grep -l usatlas CVS/Root */CVS/Root */*/CVS/Root */*/*/CVS/Root */*/*/*/CVS/Root`
+   foreach file ($file_list)
+     perl ~/bin/change_cvs.pl < $file > tmpfile
+     diff -u $file tmpfile 
+     mv $file $file.old
+     mv  tmpfile $file
+#     rm tmpfile
+   end
+#last line 

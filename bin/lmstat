@@ -1,0 +1,25 @@
+#! /bin/sh -x
+
+KAI=/usr/local/KAI
+LMDOWN="$KAI/KCC.flex-3.4f-1/KCC_BASE/flexlm/lmutil lmdown"
+LMGRD=$KAI/KCC.flex-3.4f-1/KCC_BASE/flexlm/lmgrd.kai
+LM_LICENSE_FILE=$KAI/KCC_BASE/flexlm/license.dat
+LOG=/home/kai/flexlm.log
+case "$1" in
+start)
+        if test -f $LMGRD ; then
+                cd $KAI/KCC.flex-3.4f-1/KCC_BASE/flexlm; $LMGRD -c $LM_LICENSE_FILE >> $LOG 2>&1 &
+        fi
+        ;;
+stop)
+        $LMDOWN -q -c $LM_LICENSE_FILE
+        ;;
+restart)
+        $0 stop
+        $0 start
+        ;;
+*)
+        echo "Usage: $0 [-n] { start | stop }"
+        ;;
+esac
+exit 0

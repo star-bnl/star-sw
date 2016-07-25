@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="paths" simulateSubmission ="false">
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+    if (! -r .sl64_gcc492) ln -s ../../.sl64_gcc492 .
+#  cd $SCRATCH
+#   pwd
+  setenv STARFPE NO
+#  setenv NODEBUG yes
+#  setup  gcc
+#  setup  32b
+#  starver DEV2/SL15
+  set filelist = `cat $FILELIST | awk '{print $1}'`
+  echo "file list = ${filelist}"
+  set NL = `echo ${filelist} | wc -l`
+  echo "NL = ${NL}"
+  if (${NL} == 0) exit 0;
+  foreach input ( ${filelist} )
+    echo ${input} | grep ':'
+    if (! $?) then
+      set dir      = `echo ${input} | awk -F\: '{print $1}'`
+      set tag      = `echo ${input} | awk -F\: '{print $2}'`
+    else
+      exit 1;
+    endif
+    set log = ${tag}.log
+#  if (-r ${log}) exit 0;
+    if (! -r "${tag}.picoDst.root") then
+      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'*.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
+    endif
+  end
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/PicoDST$JOBID.err" />
+<input URL="command:PicoDST.pl" />
+</job>

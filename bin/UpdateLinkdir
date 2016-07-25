@@ -1,0 +1,51 @@
+#!/bin/sh
+
+#PARTIAL_PLATF="sgi_64 rs_aix42"
+PARTIAL_PLATF=""
+#FROZEN_PLATF="alpha_osf32 sun4c_411 sun4m_54 hp700_ux90"
+FROZEN_PLATF="sun4x_55"
+
+DUMMY_CFG=/tmp/dummy.cfg
+DUMMY_COPYDIR=/tmp/dummy_copydir
+LOG_DIR=/tmp
+
+#ASIS_ROOT=/afs/cern.ch/asis
+ASIS_ROOT=/afs/rhic/cern.tmp
+ASISWSM="$ASIS_ROOT/adm/bin/asis-wrapper ASISwsm"
+ASIS_LINKDIR=$ASIS_ROOT/linkdir
+
+echo ''
+echo UpdateLinkdir: `date` - starting
+echo ''
+
+rm -f $DUMMY_CFG
+touch $DUMMY_CFG
+rm -rf $DUMMY_COPYDIR
+mkdir -p $DUMMY_COPYDIR
+
+
+echo ''
+echo UpdateLinkdir: `date` - dealing with partial arcitectures $PARTIAL_PLATF
+echo ''
+for arch in $PARTIAL_PLATF; do \
+echo UpdateLinkdir: `date` - doing $arch;\
+echo $ASISWSM --rellinks --configfile $DUMMY_CFG --logdir $LOG_DIR \
+--archtarget $arch --localcopydir $DUMMY_COPYDIR --changeprefix \
+/usr/local=$ASIS_LINKDIR/$arch/usr.local --force --now ;\
+done
+
+echo ''
+echo UpdateLinkdir: `date` - dealing with partial arcitectures $FROZEN_PLATF
+echo ''
+
+for arch in $FROZEN_PLATF; do \
+echo UpdateLinkdir: `date` - doing $arch;\
+echo $ASISWSM --rellinks --configfile $DUMMY_CFG --logdir $LOG_DIR \
+--archtarget $arch --localcopydir $DUMMY_COPYDIR --changeprefix \
+/usr/local=$ASIS_LINKDIR/$arch/usr.local --force --now ;\
+done
+
+rm -f $DUMMY_CFG
+rm -rf $DUMMY_COPYDIR
+
+exit 0

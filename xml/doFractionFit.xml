@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+         starver .DEV2
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set r1       = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set r2       = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+    set i1       = `echo $INPUTFILE0 | awk -F\: '{print $5}'`
+    set i2       = `echo $INPUTFILE0 | awk -F\: '{print $6}'`
+    set j1       = `echo $INPUTFILE0 | awk -F\: '{print $7}'`
+    set j2       = `echo $INPUTFILE0 | awk -F\: '{print $8}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set r1        = 1
+    set r2        =-1
+    set i1        = 1
+    set i2        =-1
+    set j1        = 1
+    set j2        =-1
+  endif
+  echo  "root.exe -q -b ${evtsFile} 'doFractionFit.C('${r1}','${r2}','${i1}','${i2}','${j1}','${j2}',1,0,0)'"
+         root.exe -q -b ${evtsFile} 'doFractionFit.C('${r1}','${r2}','${i1}','${i2}','${j1}','${j2}',1,0,0)' &gt;&amp; ${JOBID}B.log 
+	</command>
+	<stdout URL="file:./$JOBID.log" />
+	<stderr URL="file:./$JOBID.err" />
+<input URL="command:GetREpT.pl" />
+</job>

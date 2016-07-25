@@ -1,0 +1,6 @@
+#! /usr/local/bin/tcsh -f
+foreach file ($argv)
+   echo $file
+   cp $file . &
+end
+#end of script

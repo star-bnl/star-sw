@@ -1,0 +1,1 @@
+dir `$STAR/scripts/get_file_list.pl -limit 20 -keys path,filename -cond 'production = P03ia,storage = NFS, filetype = daq_reco_MuDst, trgsetupname = dAuMinBias,magscale = FullField' | sed -e 's/::/\//'`

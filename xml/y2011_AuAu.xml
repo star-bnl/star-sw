@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths"  simulateSubmission ="false" >
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+  cd ${SUBMITTINGDIRECTORY}
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .nt` #_4000evts_minb
+  set tfile    = `echo $file | sed -e 's/\./_/g'`
+  set nfile    = ${tfile}.nt
+  ln -s ${evtsFile} ${nfile}
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${tfile}B.log
+  if ( -r $logFile) exit 0;
+  set fitter = "KFVertex,StiCA,HLTCA"
+  set case = `basename $PWD`; echo "case = $case";
+  echo $case | grep VFM
+  if (! $?) set fitter = "VFMinuit,Sti";
+  echo "fitter $fitter"
+  root4star -q -b 'bfc.C(100,"MC.y2011,dbV20111124,ntin,'${fitter}',NoHistos,NoRunco,geantOut,EvOut","'${nfile}'")' &gt;&amp;  ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="file:/star/data01/pwg/wanghui6/my_iTPX/new/HIJING/*.10.nt" /> -->
+<input URL="file:/star/data01/pwg/wanghui6/my_iTPX/new/HIJING/*.nt" />
+<!-- <input URL="file:/star/simu/simu/gstardata/Simu2010/JWRequest/output/rcf10100_9?_200evts_Wplus_enu.fzd" />  -->
+
+</job>

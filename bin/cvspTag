@@ -1,0 +1,3 @@
+#! /usr/local/bin/tcsh -f
+set VERS = $1
+set file = $2  ; rm $file ; cvs update -p -r $VERS $file > $file ;

@@ -1,0 +1,17 @@
+#! /usr/bin/env perl
+use lib "/afs/rhic/star/packages/scripts";
+use FileCatalog;
+
+my($fC);
+
+$fC = new FileCatalog; 
+$fC->connect();        
+
+$fC->set_context("library=SL04i","filetype=daq_reco_dst");
+
+@all = $fC->run_query("path","production","filetype");
+foreach $line (@all){
+   print "$line\n";
+}
+
+$fC->destroy();         # Delete the instance

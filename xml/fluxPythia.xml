@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Flux$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#if pp500 pp200
+  set f        = 1
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set vers  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    exit 1;
+  endif
+  set file = flux${vers}${rung}.root
+  set logFile  = flux${vers}${rung}.log
+  echo "${file}"
+  if ( ! -r ${file}) then
+#if pp500
+#   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+#else pp200 y2014
+ root4star -q -b 'bfc.C('$l',"y2014a,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+#endif
+  endif
+</command>
+<input URL="command:fluxPythia.pl" />
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbiasHe3*.nt" /> -->
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbias/*.nt" /> -->
+</job>

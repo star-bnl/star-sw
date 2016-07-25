@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job name="Timing" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+  echo $INPUTFILE0
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set VERSION = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set DEBUG   = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set GCCVERS = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set BITS    = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    exit 1;
+  endif
+  set NODE = `hostname -s`;
+  set dir  = ${NODE}_${VERSION}_${DEBUG}_${GCCVERS}_${BITS}
+  if (! -d $dir) mkdir -p $dir
+  cd $dir;
+  set logFile  = st_physics_11029020_raw_1030002.log
+  if (-r $logFile) exit 0;
+  setenv StarEndMakerShell
+  if ("${DEBUG}" == "opt") setenv NODEBUG yes
+  setup ${GCCVERS}
+  setup ${BITS}
+  starver ${VERSION}
+  set exec = "root4star"
+  echo ${BITS} | grep '64\.'
+ if (! $?)  set exec = "root.exe"
+#  ${exec} -q -b 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
+ ${exec} -q -b 'bfc.C(100,"P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq")' &gt;&amp; ${logFile}
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<!-- <input URL="command:Nightlies.pl" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2009*.csh" /> -->
+<input URL="command:timing.pl" />
+</job>

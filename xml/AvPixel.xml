@@ -1,0 +1,31 @@
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Av$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Av$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+#  setup 64b
+#  setup gcc451
+  setenv STARFPE NO
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .daq`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}.ClnoW.log
+  set rootF    = ${file}.ClnoW.root
+#  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+#  if ("$f" == "") then
+  if (! -r $rootF) then
+    root.exe -q -b 'bfc.C(99999,"in,tpcDb,detDb,StEvent,TpxAvLaser,nodefault","'${evtsFile}'","","'$rootF'")' > ${logFile}
+  endif
+</command>
+<!-- <input URL="file:/star/subsys/tpc/fisyak/Tpc/Laser/y2010/st_laser*.daq"/> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/daq/2003/*/st_laser*.daq"/> -->
+<!-- <input URL="file:/star/data03/daq/2013/046/14046081/st_laser_adc_*.daq"/>  laser Full Field -->
+<!-- <input URL="file:/star/data03/daq/2013/*/*/st_laser_adc_*.daq"/>  laser Reverse Full Field -->
+<!-- <input URL="file:/star/data03/daq/2013/046/14046066/st_pedestal_adc_14046066_raw_0540001.daq"/> peds -->
+<!-- <input URL="file:/star/data03/daq/2013/158/14158028/st_laser*.daq" />  -->
+<input URL="command:AvPixel2014.pl" />
+<!-- <input URL="file:/star/data03/daq/2013/161/14161023/st_laser*.daq" />  -->
+</job>

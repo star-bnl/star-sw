@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+#  setup gcc45
+#  source ~/.tcshrc
+  set evtsFile = $INPUTFILE0;
+  if (! -r ${evtsFile}) exit 1;
+  echo "${evtsFile}"
+  set file     = `basename $evtsFile .daq`
+  set logFile  = ${file}B.log
+  root.exe -q -b 'TpcRS.C(999999,"P2011a,Tree,-evout,-l3onl,-emcDY2,-fpd,-ftpc,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,","'${evtsFile}'","")' &gt;&amp; ${logFile}
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<input URL="file:/star/data03/daq/2011/172/*/st_physics_adc_*.daq" />
+
+</job>

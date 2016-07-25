@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="1" filesPerHour="0.1" fileListSyntax="xrootd"> -->
+        <command>
+         cd ${SUBMITTINGDIRECTORY}
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile _200evts_Wplus_enu.fzd` #_4000evts_minb
+  set dir      = `dirname  $evtsFile`;          
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  if ( -r $logFile) exit 0;
+  set File = "${evtsFile}\n  gfile b ${dir}/${file}_4000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6"
+  echo "${File}"
+  set fitter = "KFVertex"
+  set case = `basename $ddir`; echo "case = $case";
+  echo $case | grep PPV
+  if (! $?) set fitter = "";
+  echo "fitter $fitter"
+  root4star -q -b 'bfc.C(9999,"MC.y2011,fzin,'${fitter}',beamline,StiCA","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_4000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 0.1 106.6")' &gt;&amp; ${logFile}
+        </command>
+        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<input URL="file:/star/simu/simu/gstardata/Simu2010/JWRequest/output/rcf10100_*_200evts_Wplus_enu.fzd" />
+<!-- <input URL="file:/star/simu/simu/gstardata/Simu2010/JWRequest/output/rcf10100_99_200evts_Wplus_enu.fzd" /> -->
+
+</job>

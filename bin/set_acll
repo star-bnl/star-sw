@@ -1,0 +1,5 @@
+#!/bin/csh -f
+ set LIBLIST = `ls -d  SL*/.[a-z]*/bin`
+ foreach file ($LIBLIST)
+   fs sa $file ward rlidwk
+ end

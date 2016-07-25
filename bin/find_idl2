@@ -1,0 +1,14 @@
+#! /bin/csh -f 
+set cwd = `pwd`
+#cd $1
+set list = `ls $STAR_ROOT/pams/*/*/*.idlm`
+foreach idlm ($list) 
+   echo "idlm = " $idlm
+   set list2 = `grep include $idlm | awk -F\" '{print $2}'`
+   echo $list2
+   foreach idl ($list2)
+     echo "idlm =" $idlm " inlcudes =" $idl
+     ls $STAR_ROOT/pams/*/idl/$idl; ls $STAR_ROOT/pams/*/idl/$idl | wc -l
+   end
+end
+#cd $cwd

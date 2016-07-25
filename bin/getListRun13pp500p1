@@ -1,0 +1,1 @@
+get_file_list.pl -delim '/' -keys 'path,filename,events' -cond 'filetype=online_daq,filename~st_phy,tpx=1,runnumber[]14074001-14128999,events>1000' -limit 10

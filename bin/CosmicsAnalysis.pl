@@ -1,0 +1,146 @@
+#! /usr/bin/env perl
+use File::Basename;
+use Cwd;
+ 
+#get_file_list.pl -keys 'path,filename,events' -cond 'filetype=online_daq,runnumber[]12032056-12180055,trgsetupname=CosmicLocalClock,storage=HPSS' -limit 0
+# get_file_list.pl -delim "#" -all -keys 'magscale,path,basename,events' -cond 'filetype=online_daq,trgsetupname=CosmicLocalClock' -limit 0 | tee daq_full.list
+#get_no_events.csh st_tofcosmic_12179074_raw_1010001.daq 
+#get_file_list.pl -keys 'events' -cond 'filename='$1 -limit 1
+my $pwd = cwd();
+my $Field = "Undefined";
+my $dir = File::Basename::basename($pwd);# print "dir = $dir\n";
+if    ($dir eq 'RFF') {$Field = 'ReversedFullField';}
+elsif ($dir eq 'FF' ) {$Field = 'FullField';}
+elsif ($dir eq 'ZF' ) {$Field = 'FieldOff';}
+if ($Field eq "Undefined") {die "Field is not defined";}
+#my $tmp = "tmp.list";
+#if (-r "tmp.list") {unlink $tmp;} # magscale, events
+#my $cmd = "get_file_list.pl -delim \"#\" -keys 'path,basename,events' -cond 'magscale=$Field,filetype=online_daq,trgsetupname=CosmicLocalClock,events>10000' -limit 0 >> $tmp";
+#print "cmd = $cmd\n";
+#my @list = system($cmd);
+my @BadFiles = qw (
+st_tofcosmic_12148028_raw_5040001_1_18206
+st_tofcosmic_12148027_raw_2010005_1_16885
+st_tofcosmic_12148026_raw_1030001_1_36393
+st_tofcosmic_12032066_raw_2010001_1_26056
+st_tofcosmic_12148026_raw_1010001_1_47039
+st_tofcosmic_12148027_raw_2010004_1_20009
+st_tofcosmic_12148028_raw_5020001_1_17103
+st_tofcosmic_12148027_raw_2030003_1_20036
+st_tofcosmic_12148028_raw_1020001_1_15166
+st_tofcosmic_12148027_raw_2030001_1_27454
+st_tofcosmic_12148028_raw_2040001_1_12513
+st_tofcosmic_12148027_raw_1030002_1_24227
+st_tofcosmic_12148027_raw_1010004_1_20357
+st_tofcosmic_12148026_raw_4020001_1_42002
+st_tofcosmic_12148027_raw_4010002_1_26874
+st_tofcosmic_12148027_raw_2030002_1_24483
+st_tofcosmic_12148027_raw_3010002_1_27512
+st_tofcosmic_12148027_raw_4030002_1_21811
+st_tofcosmic_12148027_raw_5020001_1_25546
+st_tofcosmic_12148026_raw_3030002_1_18364
+st_tofcosmic_12148027_raw_3010001_1_28770
+st_tofcosmic_12148027_raw_5010003_1_11071
+st_tofcosmic_12148026_raw_5010001_1_42567
+st_tofcosmic_12148027_raw_1030001_1_27588
+st_tofcosmic_12148028_raw_2010002_1_18415
+st_tofcosmic_12148027_raw_2010002_1_26004
+st_tofcosmic_12032066_raw_4010001_1_24802
+st_tofcosmic_12032068_raw_5010001_1_55508
+st_tofcosmic_12148028_raw_3030002_1_17933
+st_tofcosmic_12148027_raw_2010003_1_23957
+st_tofcosmic_12148027_raw_4010005_1_19517
+st_tofcosmic_12148028_raw_3030001_1_18495
+st_tofcosmic_12148028_raw_1010002_1_17097
+st_tofcosmic_12148027_raw_1010002_1_26222
+st_tofcosmic_12148026_raw_1020001_1_36309
+st_tofcosmic_12148028_raw_4010001_1_18519
+st_tofcosmic_12146040_raw_4010002_1_36848
+st_tofcosmic_12032068_raw_3010001_1_58818
+st_tofcosmic_12148028_raw_1030001_1_18052
+st_tofcosmic_12148026_raw_4020002_1_27143
+st_tofcosmic_12148026_raw_2010002_1_41843
+st_tofcosmic_12033085_raw_4010001_1_33144
+st_tofcosmic_12148027_raw_2030004_1_10660
+st_tofcosmic_12148027_raw_4010001_1_28638
+st_tofcosmic_12148028_raw_2020001_1_11146
+st_tofcosmic_12148028_raw_2010001_1_18460
+st_tofcosmic_12148026_raw_4010002_1_37766
+st_tofcosmic_12032066_raw_3010001_1_25869
+st_tofcosmic_12032066_raw_5010001_1_24813
+st_tofcosmic_12148028_raw_3010001_1_18305
+st_tofcosmic_12148026_raw_3030001_1_37511
+st_tofcosmic_12148028_raw_3010003_1_14261
+st_tofcosmic_12148027_raw_1010005_1_19084
+st_tofcosmic_12033085_raw_2010001_1_34630
+st_tofcosmic_12148027_raw_1030003_1_19996
+st_tofcosmic_12148026_raw_2010001_1_46895
+st_tofcosmic_12148026_raw_4010001_1_45622
+st_tofcosmic_12148026_raw_2020001_1_19826
+st_tofcosmic_12032066_raw_1010001_1_26079
+st_tofcosmic_12148028_raw_5010001_1_18400
+st_tofcosmic_12148027_raw_3010003_1_25971
+st_tofcosmic_12148027_raw_4010006_1_11155
+st_tofcosmic_12032068_raw_1010001_1_59595
+st_tofcosmic_12148027_raw_4030003_1_15916
+st_tofcosmic_12148027_raw_2010001_1_28170
+st_tofcosmic_12140023_raw_1010001_1_67233
+st_tofcosmic_12148028_raw_2030001_1_12779
+st_tofcosmic_12148027_raw_3020001_1_21990
+st_tofcosmic_12148026_raw_2030001_1_21795
+st_tofcosmic_12148027_raw_5040002_1_19532
+st_tofcosmic_12148027_raw_1010003_1_23990
+st_tofcosmic_12140023_raw_5010001_1_38307
+st_tofcosmic_12148026_raw_5040002_1_17542
+st_tofcosmic_12148026_raw_3010003_1_34256
+st_tofcosmic_12148027_raw_5020002_1_11494
+st_tofcosmic_12148027_raw_1010001_1_28535
+st_tofcosmic_12148026_raw_1040001_1_36513
+st_tofcosmic_12032068_raw_2010001_1_59379
+st_tofcosmic_12148026_raw_1010002_1_35449
+st_tofcosmic_12148028_raw_3010002_1_18204
+st_tofcosmic_12148026_raw_3010002_1_40849
+st_tofcosmic_12148026_raw_4010003_1_33095
+st_tofcosmic_12148026_raw_5010002_1_28390
+st_tofcosmic_12148027_raw_3010004_1_21856
+st_tofcosmic_12033085_raw_1010001_1_34691
+st_tofcosmic_12148026_raw_3010004_1_19507
+st_tofcosmic_12148026_raw_5030002_1_20535
+st_tofcosmic_12148027_raw_5010001_1_28132
+st_tofcosmic_12148027_raw_5030002_1_20072
+st_tofcosmic_12148026_raw_5040001_1_40855
+st_tofcosmic_12148028_raw_4040001_1_16223
+st_tofcosmic_12148027_raw_4010003_1_25009
+st_tofcosmic_12148027_raw_4010004_1_22119
+st_tofcosmic_12033085_raw_3010001_1_34139
+st_tofcosmic_12148027_raw_4030001_1_25930
+st_tofcosmic_12148026_raw_2010003_1_36326
+st_tofcosmic_12148028_raw_4010002_1_18156
+st_tofcosmic_12148027_raw_5040001_1_25976
+st_tofcosmic_12148027_raw_5010002_1_22971
+st_tofcosmic_12148027_raw_5030001_1_25991
+st_tofcosmic_12148028_raw_2010003_1_15050
+st_tofcosmic_12032068_raw_4010001_1_56534
+st_tofcosmic_12148028_raw_4030001_1_16514
+st_tofcosmic_12148026_raw_5030001_1_41074
+st_tofcosmic_12148027_raw_3040001_1_22143
+st_tofcosmic_12148027_raw_3030001_1_22162
+st_tofcosmic_12148028_raw_5030001_1_18152
+st_tofcosmic_12148026_raw_4010004_1_10896
+st_tofcosmic_12140023_raw_0030001_1_10508
+st_tofcosmic_12148026_raw_2040001_1_21521
+st_tofcosmic_12148028_raw_1040001_1_17997
+st_tofcosmic_12148026_raw_3010001_1_46872
+st_tofcosmic_12033085_raw_5010001_1_32420
+st_tofcosmic_12178056_raw_4010001_1_118869
+st_tofcosmic_12170036_raw_1010001_1_58989
+st_tofcosmic_12166047_raw_4030001_1_37048
+);
+my $BadFiles = join ('|',@BadFiles);
+my @list = glob "/star/institutions/bnl/fisyak/Tpc/Alignment/Y2011RC.L/$dir/*.event.root";
+foreach my $fullpath (@list) {
+  my $file = File::Basename::basename($fullpath,".event.root");
+#  print "$fullpath => $file\n";
+  if ($file =~ m/$BadFiles/) {next;}
+  print "string:$fullpath\n";
+}

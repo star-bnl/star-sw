@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Pileup" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Pileup$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Pileup$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  setenv STARFPE NO
+#  starver .DEV2
+  set base = `basename ${INPUTFILE0} .fz`;
+  set s    = `echo ${base} | awk -F_ '{print $2}'`
+  set logFile  = ${base}.log
+  if (! -r  pileup.list) then
+#    ls ../pp510B/*.fz | egrep -v '(pythia_0144)' > pileup.list
+#    ls ../pp510B/*.fz  > pileup.list
+     ls ../AuAu200pileupBL3/*.fz > pileup.list
+  endif
+  echo "${logFile}"
+  if ( -r ${logFile}) exit 0;
+  starsim -w 0 -G 500 -b $STAR/kumacs/merge input=${INPUTFILE0} pileup=pileup.list set=${s} &gt; ${logFile}
+</command>
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythia_*.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510WB/pythiapp510wenu_*.fz" /> -->
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2013/pp510W/pythiapp510wenu_999_10.fz" />  -->
+<input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z6cmBL3/*.fz" />
+<!-- <input URL="file:/star/subsys/tpc/fisyak/simu/2014/AuAu200Z3cm/hijingauau200z3cm_1999.fz" /> -->
+</job>

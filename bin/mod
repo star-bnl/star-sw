@@ -1,0 +1,87 @@
+#!/bin/csh
+set all_idl = `find $STAR/pams -name "*.idl"`
+set list_idlm = `egrep -l 'interface.*:.*amiModule' $all_idl`
+set list_idl  = `egrep -l 'struct'                  $all_idl`
+echo "<HTML>"
+echo "<HEAD>"
+echo "<TITLE>List of STAR pams and tables</TITLE>"
+echo "</HEAD>"
+echo "<BODY>"
+echo "<H1>List of STAR pams</H1>"
+echo "<hr>"
+echo "<hr>"
+set domain = ""
+# list of all modules
+ foreach idlm ($list_idlm) 
+   set dom = `echo $idlm | gawk -F / '{for (i=1;i<=NF;i++) {if(index($i,"pams")>0) {l=i+1; print $l;break;}}};'`
+   if ($dom != $domain) then
+      set domain = $dom;
+      echo '<H2>Domain '$domain'</H2>'
+      echo "<hr>"
+      set count = 0
+   endif
+   set id = `basename $idlm .idl`
+   echo '<a href="#'$id'"><strong>'$id'</strong></a>     ,'
+   set count = `expr $count + 1`;
+#   if ($count >= 10) then
+#       echo "<br>"
+#       set count = 0;
+#   endif
+ end
+echo "<hr>"
+echo "<H1>List of STAR tables</H1>"
+echo "<hr>"
+echo "<hr>"
+set count = 0
+set domain = ""
+ foreach idl ($list_idl) 
+   set dom = `echo $idl | gawk -F / '{for (i=1;i<=NF;i++) {if(index($i,"pams")>0) {l=i+1; print $l;break;}}};'`
+   if ($dom != $domain) then
+      set domain = $dom;
+      echo '<H2>Domain '$domain'</H2>'
+      echo "<hr>"
+      set count = 0
+   endif
+
+   set id = `basename $idl .idl`
+   echo '<a href="#'$id'"><strong>'$id'</strong></a>   ,'
+   set count = `expr $count + 1`;
+#   if ($count >= 5) then
+#       echo "<br>"
+#       set count = 0;
+#   endif
+ end
+echo "<H1>List of STAR pams</H1>"
+echo "<hr>"
+echo "<ol>"
+ foreach idl ($list_idlm) 
+   set id = `basename $idl .idl`
+   set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
+   echo '<li>Module <a name="'$id'"><strong>'$id'</strong></a> defined in <a href="'$hid'">'$idl'</a>'
+echo '<BR>'
+#echo '<DIV ALIGN="CENTER">'
+echo '<TABLE CELLPADDING=3 BORDER="1">'
+#echo '<CAPTION><a href="#'$id'"><strong>'$id'</strong></a> module specification</CAPTION>'
+echo '<TR><TD>Module</TD><TD>Input tables</TD><TD>Output tables</TD></TR>'
+   module   $idl
+echo '</TABLE>'                                                                                                 
+ end
+echo "</ol>"
+echo "<hr>"
+echo "<H1>List of STAR tables</H1>"
+echo "<hr>"
+echo "<ol>"
+ foreach idl ($list_idl) 
+   set id = `basename $idl .idl`
+   set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
+   echo '<li> Table <a name="'$id'"><strong>'$id'</strong></a> is defined in <a href="'$hid'">'$idl'</a> and used by the following modules:'
+   set idlm_idl = `egrep -l ${id}.idl $list_idlm`
+   foreach idlm ($idlm_idl)
+     set did = `basename $idlm .idl`
+     echo '<a href="#'$did'">'$did'</a>    ,'
+   end
+ end
+echo "</ol>"
+echo "<hr>"
+echo "</BODY>"
+echo "</HTML>"

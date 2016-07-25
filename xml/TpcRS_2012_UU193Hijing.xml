@@ -1,0 +1,20 @@
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/hijing$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/hijing$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver .DEV2 
+  set file = $INPUTFILE0;
+  set rung = `echo $file | awk -F\: '{print $2}'`
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set fileO  = "hijing_"${rung}
+  set output = ${fileO}.root;
+  set f=`find . -maxdepth 1 -type f -name "${fileO}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'TpcRS.C(10,"y2012b,TpcRS,StiCA,KFVertex,sdt20120502,HijingUU193,'rung.${rung}'","","Bichsel,PhysicsOff",0,"'${output}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:TpcRS_Hijing.pl" />
+</job>

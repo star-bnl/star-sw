@@ -1,0 +1,8 @@
+#! /bin/csh -f
+set list = `ls */*/*.idlm,v`
+foreach idlm ($list) 
+   set  idl = "$idlm:r.idl,v"
+   echo $idlm "->" $idl
+   mv $idlm $idl
+end
+

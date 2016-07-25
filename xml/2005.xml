@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false"  fileListSyntax="paths">
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+#  setup 64b
+#  setup gcc451
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 50000
+  endif
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set file     = `basename $evtsFile .daq`
+  set dir      = `dirname  $evtsFile`;          
+  set logFile  = ${file}_${f}_${l}B.log
+  set output   = ${file}_${f}_${l}.event.root
+  if ( -r $output) exit 0;
+  root4star -q -b 'bfc.C('${f}','${l}',"RC.y2005,Corr4,NoHistos,noRunco,noTags,-EvOut,KFVertex,StiCA","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+	</command>
+	<stdout URL="file:/star/institutions/bnl/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/institutions/bnl/fisyak/prodlog/$JOBID.err" />
+<!-- <input URL="command:GetCosmicsDaq.pl" /> -->
+<input URL="file:/star/data03/daq/2005/*/*.daq" />
+</job>

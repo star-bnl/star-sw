@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# lscvs [module [module [ ... ]]]
+#
+#       recursively showing every thing in every specified module, or
+#       names of all modules in the repository, if none is specified.
+#
+#       CVSROOT must be properly set for host and repository
+#
+#       lscvs is inspired by Alan Jonckheere
+#
+# 27mar97 D. Adams - Modified for AIX.
+# AIX wants "rsh host -l name command" instead of "rsh name@host command"
+
+if [ ${CVSROOT:-} ]
+then
+        namehost=`echo $CVSROOT|cut -d: -f1`
+        name=`echo $namehost|cut -d@ -f1`
+        host=`echo $namehost|cut -d@ -f2`
+        repository=`echo $CVSROOT|cut -d: -f2`
+
+        rsh $host -l $name show $repository $*
+else
+        echo CVSROOT is not properly set
+fi
+

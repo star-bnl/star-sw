@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- <job maxFilesPerProcess="200" filesPerHour="1" fileListSyntax="paths"  simulateSubmission="true"> -->
+<!-- <job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="xrootd"> -->
+<job maxFilesPerProcess="20" filesPerHour="100" fileListSyntax="paths">
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+#         setup 64b
+#         starver .DEV2
+         root.exe -q -b lMuDst.C MudEdx.C+\(\"${FILELIST}\",\"${JOBID}\.root\"\)  &gt;&amp; ${JOBID}B.log 
+	</command>
+	<stdout URL="file:./$JOBID.log" />
+	<stderr URL="file:./$JOBID.err" />
+<!-- <input URL="catalog:star.bnl.gov?trgsetupname=AuHe3_production_2014,production=P15ib,filetype=daq_reco_MuDst,storage=nfs" nFiles="1000" /> -->
+<input URL="catalog:star.bnl.gov?production=P10ik,trgsetupname=AuAu39_production,filetype=daq_reco_MuDst,tpx=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" nFiles="100" />
+<!-- <input URL="catalog:star.bnl.gov?production=P10ik,trgsetupname=AuAu200_production,filetype=daq_reco_MuDst,tpx=1,sanity=1,filename~st_physics,storage!=HPSS" preferStorage="local" nFiles="100" /> -->
+<!-- <input URL="catalog:star.bnl.gov?trgsetupname=cuAu_production_2012,production=P14ia,filetype=daq_reco_Mudst,storage=NFS,sanity=1" nFiles="100" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P13ib,trgsetupname=pp500_production_2012,filetype=daq_reco_MuDst,filename~st_W,storage=local,sanity=1" preferStorage="local" nFiles="all" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P13ib,trgsetupname=pp500_production_2012,filetype=daq_reco_MuDst,filename~st_W,storage=NFS,sanity=1" preferStorage="local" nFiles="all" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10000" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage=NFS" preferStorage="NFS" nFiles="10000" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage=NFS" nFiles="all" /> -->
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="all" />  -->   
+<!-- <output fromScratch="*.root" toURL="file:${SUBMITTINGDIRECTORY}/" /> -->
+</job>

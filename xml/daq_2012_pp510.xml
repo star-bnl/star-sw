@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job name="recoJob" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<command>
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv NODEBUG yes
+  starver .DEV2 
+  setenv STARFPE NO
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set file     = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 5000
+    set file     = `basename $evtsFile .daq`
+  endif
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set output   = ${file}.MuDst.root
+  if (-r ${output}) exit 0;
+# root4star -b -q 'bfc.C(500000,"DbV20130502 pp2012b AgML mtdDat btof fmsDat KFVertex BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D -hitfilt","st_physics_13076023_raw_5020002.daq")'
+  root4star -q -b 'bfc.C('${f}','${l}',"pp2012b,beamline,mtdDat,btof,fmsDat,StiCA,KFVertex,BEmcChkStat,Tree,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,-evout,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
+</command>
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<!-- <input URL="file:/star/data03/daq/2012/065/*/st_physics_adc_*.daq" /> -->
+<input URL="command:SplitJobs2012.pl"/>
+</job>

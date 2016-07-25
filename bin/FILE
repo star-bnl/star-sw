@@ -1,0 +1,2 @@
+#!/bin/sh
+file "$1" | grep -Fq executable && printf "%s is executable.\n" "$1"

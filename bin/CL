@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+use File::Basename;
+
+my @list = `condor_q -l -global -submitter fisyak | egrep 'Cmd|RemoteHost'`;
+#my @list = `condor_q -l -global | egrep 'Cmd|RemoteHost|'Owner`;
+my %hash = ();
+my $dir;
+my $user = "";
+my $dummy;
+my $file;
+foreach my $line (@list) {
+#  print "$line\n";
+  if ($line =~ /Owner/) {
+    ($dummy,$user) =  split '"', $line;
+  }
+  if ($line =~ /^Cmd/) {
+    ($dummy,$file) = split '"', $line;
+    $file =~ s|\"||g;
+    #  print "-----> $file\n";
+    $dir = File::Basename::dirname($file);
+    $dir =~ s/\/created.*//;
+    #  print "$dir\n";
+    if ($user) {
+      $dir = $user;
+    }
+    $hash{$dir} += 1;
+  } elsif ($line =~ /^RemoteHost/) {
+    $hash{$dir . " Run"} += 1;
+  }
+}
+foreach my $key (sort keys %hash) {
+  print "$key => $hash{$key}\n";
+}

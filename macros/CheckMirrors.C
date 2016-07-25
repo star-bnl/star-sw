@@ -1,0 +1,1 @@
+/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StLaserAnalysisMaker/CheckMirrors.C

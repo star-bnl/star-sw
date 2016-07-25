@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="200" filesPerHour="1" fileListSyntax="paths">
+<!-- <job maxFilesPerProcess="200" filesPerHour="100" fileListSyntax="xrootd"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+         starver .DEV2
+         root.exe -q -b lMuDst.C MuKpi.C+\(\"\@${FILELIST}\",\"${JOBID}\.root\"\) &gt;&amp; ${JOBID}B.log 
+	</command>
+	<stdout URL="file:./$JOBID.log" />
+	<stderr URL="file:./$JOBID.err" />
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="10000" /> -->
+<input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage=NFS" preferStorage="NFS" nFiles="10000" />
+<!-- <input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,svt=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
+<!--	<input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage=NFS" nFiles="all" /> -->
+<!--	<input URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_mudst,tpc=1,sanity=1,filename~physics,storage!=HPSS" preferStorage="local" nFiles="all" />  -->   
+<!--	<output fromScratch="*.root" toURL="file:${SUBMITTINGDIRECTORY}/" /> -->
+</job>

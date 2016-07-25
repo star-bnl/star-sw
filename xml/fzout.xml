@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="Fzout" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Fzout$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/Fzout$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+  setenv NODEBUG yes
+  setenv STARFPE NO
+#  setup gcc
+  starver .DEV2
+#  starver DEV2/SL15
+#  echo $INPUTFILE0 | grep ':'
+   set rung  = $INPUTFILE0
+#  if (! $?) then
+#    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+#    exit 1;
+#  endif
+#  set Gname = "PythiaPP510Wenu";
+#  set Gname = "PythiaPP510";
+  switch ($PWD) 
+    case '*pp510W*':
+      set N = 10;
+      set Gname = "PythiaPP510Wenu"; 
+      set gname = "Wenu";
+      breaksw
+    case '*pp510*':
+      set N = 1000;
+      set Gname = "PythiaPP510"; 
+      set gname = "mb";
+      breaksw
+    case '*AuAu200Z3cm*':
+      set N = 10;
+      set Gname = "HijingAuAu200Z3cm";
+      gname = "tg";
+      breaksw
+    case '*AuAu200Z6cm*':
+      set N = 10;
+      set Gname = "HijingAuAu200Z6cm";
+      gname = "tg";
+      breaksw
+    case '*AuAu200*':
+      set N = 500;
+      set Gname = "HijingAuAu200";
+      gname = "mb";
+      breaksw
+    default: exit 1;
+  endsw
+#  set year  = "y2013_1x";
+# Extended tunnel and hall: y2011b, y2012c, y2013_?a, y2013_?b, y2013_?c, y2013_?d, y2013_?x, y2014*
+  switch ($PWD) 
+    case '*2013*': 
+set year  = "y2013_1x,beamline,sdt20130317.070000"; breaksw
+    case '*2014*': 
+set year  = "y2014a,beamline,sdt20140330.151000";   breaksw
+    case '*2015*': 
+set year  = "y2015";    breaksw
+    default: exit 1;
+  endsw
+  set gname = `echo ${Gname} | awk '{print tolower($1)}'`
+  set Rung = `echo ${rung} | awk '{printf("%04i",$1)}'`
+  set base = ${gname}_${Rung}
+# set base = pythia_${Rung}
+  set file = ${base}.root
+  set logFile  = ${base}.log
+  echo "${file}"
+  if ( -r ${file}) exit 0;
+  root4star -q -b 'bfc.C('$N',"'${year}',verybig,useXgeom,geant,noRunco,noHistos,'${Gname}',fzout,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+</command>
+<input URL="command:flux.pl" />
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbiasHe3*.nt" /> -->
+<!-- <input URL="file:/star/simu/simu/jwebb/2014/HijingMinbias/*.nt" /> -->
+</job>

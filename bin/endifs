@@ -1,0 +1,11 @@
+#!/bin/csh -f
+# more tmp.tmp
+# set LIBLIST = `grep -l "<T" St*/*.* base/*.* xd*/*.*`
+ set ccLIST = `ls *.cxx`
+#          grep -l "StMatrix" *; grep -l "StThreeVector" *;`
+ foreach file ($ccLIST)
+   echo $file 
+   endifs.pl $file 
+#   break
+ end
+#end

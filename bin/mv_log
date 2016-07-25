@@ -1,0 +1,7 @@
+#! /bin/csh -f
+ set list = `grep -l "Break" *evts`  
+ foreach f ($list) 
+   echo "mv"  ${f} ${f}.Break
+   mv $f ${f}.Break
+ end
+#end

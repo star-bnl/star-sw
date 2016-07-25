@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/institutions/bnl/fisyak/prodlog/TpcRS$JOBID.log" />
+<stderr URL="file:/star/institutions/bnl/fisyak/prodlog/TPCRS$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+#  starver .DEV2 
+#  setup gcc451
+  set filed = `basename ${INPUTFILE0} .nt` ;
+  set filee = `echo ${filed} | sed -e 's/\./_/g`;
+  set file  = ${filee}.nt;
+  if (! -r $file) ln -s $INPUTFILE0 $file;
+  echo "$INPUTFILE0 => ${file}"
+  set logFile  = ${filee}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${filee}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'TpcRS.C(100,"devT,TpcRS,StiCA,KFVertex","'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="command:TpcRS_Part.pl" /> -->
+<input URL="file:/star/institutions/bnl/fisyak/Generators/AuAu200/*.fzd" />
+<!-- <input URL="file:/star/institutions/bnl/fisyak/Generators/AuAu200/evgen_1.nt" /> -->
+</job>

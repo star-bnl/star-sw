@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
+<stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+# setenv NODEBUG yes
+  starver SL10k_embed 
+  setup gcc
+  set file = $INPUTFILE0;
+  echo "${file}"
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("$f" == "") then
+    root4star -q -b 'TpcRS.C(100,"y2010a,sdt20100401.031009,DbV20110413,TpcRS,phys_off",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<input URL="command:TpcRS_Part.pl" />
+</job>

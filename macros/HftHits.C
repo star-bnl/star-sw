@@ -1,0 +1,18 @@
+rcd("P15icAuAu200_rMu");
+HftHist->SetName("HftHitsSti");
+Double_t n = VxZ->GetEntries();
+HftHitsSti->Scale(1./n);
+HftHitsSti->ProjectionY()->Draw("");
+HftHitsSti_py->SetXTitle("noPxlHits + 3*(noIstHits + 2*noSsdHits)");
+HftHitsSti_py->SetXTitle("noPxlHits + 3*(noIstHits + 2*noSsdHits))");
+HftHitsSti_py->SetTitle("No. HFT hits on track per event");
+TLegend *l  = new TLegend(0.6,0.3,0.8,0.5);
+l->AddEntry(HftHitsSti,"P15ic, Sti");
+l->Draw();
+rcd("StiCAAuAu200_rMu");
+HftHist->SetName("HftHitsStiCA");
+  n = VxZ->GetEntries();
+HftHitsStiCA->Scale(1./n);
+HftHitsStiCA->ProjectionY()->Draw("sames");
+HftHitsStiCA_py->SetLineColor(2);
+l->AddEntry(HftHitsStiCA_py,"DEV2/SL15, StiCA");
