@@ -113,7 +113,10 @@ int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
       j = combineTracks(jf);
       nIter++;
     }
-    if(jf.size() == 0)continue;
+    if(jf.size() == 0){ 
+      if(j) delete j;
+      continue;
+    }
     jetFour.push_back(jf);
 
     if (j) delete j; // plug leak
@@ -448,9 +451,11 @@ vector< vector<JetFourVec*> > StDijetFilter::doSplitMerge(vector< vector<JetFour
 	  jetFour.erase(njit2);
 	  jetFour.erase(njit1);
 	  jetFour.insert(jetFour.begin(),mj);
+	  if(nj) delete nj;
 	  continue;
 	}else{
 	  split(*njit1,*njit2);
+	  if(nj) delete nj;
 	  continue;
 	}}
 	delete nj;
