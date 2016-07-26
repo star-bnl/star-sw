@@ -8,15 +8,15 @@
 
 ClassImp(StMcBTofHit);
 StMcBTofHit::StMcBTofHit()
- : mTray(0),mModule(0),mCell(0),mdE(0),mPathLength(0),mTime(0),mTof(0),mCharge(0),mPosition(0.,0.,0.),mParentTrack(0)
+  : mTray(0),mModule(0),mCell(0),mdE(0),mPathLength(0),mTime(0),mTof(0),mCharge(0),mPosition(0.,0.,0.),mParentTrack(0),mParentTrackId(0)
 { /* noop */   }
 
 StMcBTofHit::StMcBTofHit(int t,int m,int c,float de,float pl,float time,float tof,float q)
-    :mTray(t),mModule(m),mCell(c),mdE(de),mPathLength(pl),mTime(time),mTof(tof),mCharge(q),mPosition(0.,0.,0.),mParentTrack(0)
+  :mTray(t),mModule(m),mCell(c),mdE(de),mPathLength(pl),mTime(time),mTof(tof),mCharge(q),mPosition(0.,0.,0.),mParentTrack(0),mParentTrackId(0)
 { /* noop */ }
 
 StMcBTofHit::StMcBTofHit(int t,int m,int c,float de,float pl,float time,float tof,float q,StThreeVectorF& x,StMcTrack* parent)
-    :mTray(t),mModule(m),mCell(c),mdE(de),mPathLength(pl),mTime(time),mTof(tof),mCharge(q),mPosition(x),mParentTrack(parent)
+  :mTray(t),mModule(m),mCell(c),mdE(de),mPathLength(pl),mTime(time),mTof(tof),mCharge(q),mPosition(x),mParentTrack(parent),mParentTrackId(0)
 { /* noop */ }
 
 StMcBTofHit::~StMcBTofHit() { /* noop */ }
