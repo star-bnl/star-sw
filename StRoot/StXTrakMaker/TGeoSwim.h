@@ -1,4 +1,4 @@
-// $Id: TGeoSwim.h,v 1.4 2016/07/22 19:00:21 perev Exp $
+// $Id: TGeoSwim.h,v 1.5 2016/07/26 00:59:22 perev Exp $
 //
 //
 // Class StTGeoSwim
@@ -72,7 +72,7 @@ void Set(double Rmax,double Zmin,double Zmax,double sMax=10);
  int OutScene(const double *x) const ;
 
  int Swim(double maxLen);
-double             GetLen  (int idx=1) const 	{return fInOutLen[idx];}
+double             GetLen  (int idx=2) const 	{return fInOutLen[idx];}
 const TGeoNode    *GetNode (int idx=1) const 	{return fNode[idx];}
       THelixTrack *GetHelix(int idx=1) const 	{return fHelx[idx];}
 const double      *GetPos  (int idx=1) const;   
@@ -96,7 +96,7 @@ double fSmax;	// Max step size
 double fRmax;
 double fZmin;
 double fZmax;
-double fInOutLen[2];
+double fInOutLen[3];
 double fC;			//curvature 1/cm 
 double fP;			//momentum  loss(GeV) 
 double fPti;			//signed invers pt
