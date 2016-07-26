@@ -1560,7 +1560,11 @@ else {
   if ($Production) {
     if ($disk !~ /^\//) {
 #      $glb =  "/star/" . $disk . $RECO . $Production . "*" . $year . $FILE . $select . ".event.root";
-      $glb =  "/star/" . $disk . $RECO . $Production . $year . $FILE . $select . ".event.root";
+      if (-d "/direct/star") {
+	$glb =  "/direct/star/" . $disk . $RECO . $Production . $year . $FILE . $select . ".event.root";
+      } else {
+	$glb =  "/star/" . $disk . $RECO . $Production . $year . $FILE . $select . ".event.root";
+      }
     } else {
       $glb =  $disk . $RECO . $Production . "*" . $year . $FILE . $select . ".event.root";
     }
