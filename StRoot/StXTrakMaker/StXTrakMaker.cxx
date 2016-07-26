@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.4 2016/07/22 19:00:20 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.5 2016/07/26 01:06:47 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -114,7 +114,7 @@ Int_t StXTrakMaker::Make()
     const StTrackNode *node = nodes[iNode];
     const StTrack *track = node->track(primary);
     int iprim = track!=0;
-//VP    if (!iprim) continue;
+    if (!iprim) continue;
     if (!track) { track = node->track(global);}
     assert(track);
     lenStTr = track->length();
@@ -158,7 +158,7 @@ Int_t StXTrakMaker::Make()
       lenExt = aux.mLen;
       rxy = TVector3(pos).Perp();
       dca = HLX.Dca(pos);
-      lenHlx = HLX.Path(pos);
+      lenHlx = HLX.Path(pos)+mSwim->GetAux(1).mLen;
       TString ts;
       if (iprim) {
 	ts ="PriDca:Z."; ts+=found;
@@ -178,7 +178,7 @@ Int_t StXTrakMaker::Make()
 	ts ="PriPLoss:Pti."; ts+=found;
 	StiDebug::Count(ts,aux.mPti, aux.mPLoss);
 	ts ="LenInnRes:Z."; ts+=found;
-	StiDebug::Count("LenInnRes:Z",pos[2],lenExt-lenHlx);
+	StiDebug::Count(ts,pos[2],lenExt-lenHlx);
 	StiDebug::Count("Detectors",found.Data());
 
       } else {//global track
