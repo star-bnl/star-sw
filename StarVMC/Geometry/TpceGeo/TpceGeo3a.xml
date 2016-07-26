@@ -2035,7 +2035,7 @@ iShape = kTrd1;
                  <Hit meas="lptot" nbits="18"  min="-3" max="2" />
                  <Hit meas="sleng" bins="0.1"  min="0"  max="800" />
                  <Hit meas="tof"   nbits="16"  min="0"  max="TPCG_tofmax" />
-                 <Hit meas="lgam"  nbits="16"  min="-2" max="+2" />
+                 <Hit meas="lgam"  nbits="16"  min="-2" max="+6" />
                  <Hit meas="step"  nbits="11"  min="0"  max="10" />
                  <Hit meas="user"  nbits="21"  min="-0.01" max="0.01" />
 
