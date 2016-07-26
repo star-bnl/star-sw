@@ -3,6 +3,32 @@
 // 11 Dec 2010
 
 
+class vertexSeed_st;
+class St_db_Maker;
+
+
+void UpdateBeamline(St_db_Maker* db, vertexSeed_st& beamline)
+{
+   // get beam line constraint
+   TDataSet *ds = db->GetInputDB("Calibrations/rhic");
+
+   vertexSeed_st *vs = ds ? ((St_vertexSeed *)ds->FindObject("vertexSeed"))->GetTable() : 0;
+
+   if (!ds || !vs) {
+      std::cout << "UpdateBeamline: Data from \"Calibrations/rhic/vertexSeed\" not found\n"
+                << "Beamline parameters won't be updated" << std::endl;
+      return;
+   }
+
+   std::cout << "BeamLine parameters:\n"
+             << "x(z) = (" << vs->x0 << " +/- " << vs->err_x0 << ") + (" << vs->dxdz << " +/- " << vs->err_dxdz << ") * z\n"
+             << "y(z) = (" << vs->y0 << " +/- " << vs->err_y0 << ") + (" << vs->dydz << " +/- " << vs->err_dydz << ") * z" << std::endl;
+
+   beamline = *vs;
+}
+
+
+
 /**
  * Generates a text file (vertex.txt) with vertex coordinates (format: vx vy vz)
  * based on the beam line position corresponding to real data file(s) specified
@@ -10,28 +36,10 @@
  * y and z, and offset in z, and the distribution in z is base on the
  * zVertexOneTofMatch histogram from the 'dataFileName' file in ROOT format.
  */
-void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+void GenerateVertex(const char *dataFileName = 0,
+   const TVector3 vtxSpread=TVector3(0.03, 0.03, 50), const double vtxZOffset = 0,
+   int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list", const char *vertexfile = "vertex.txt", const char *flag = "Jet")
 {
-   // vertex spreads and offsets
-   const double xsigma = 0.055;	    // cm
-   const double ysigma = 0.02;       // cm
-   //const double zsigma = 48.79;    // cm
-   //const double zoffset = -2.107;  // cm
-
-   /* ====W embedding=======
-   const double xsigma = 0.0150; // cm
-   const double ysigma = 0.0150; // cm
-   const double zsigma = 42.0;   // cm
-   const double zoffset = 0.0;   // cm
-   */
-
-   /* ==== VPDMB ====
-   const double xsigma = 0.0372;	// cm
-   const double ysigma = 0.0150;	// cm
-   const double zsigma = 33.43;	// cm
-   const double zoffset = -1.443; // cm
-   */
-
    // load generic STAR libraries
    gSystem->Load("St_base");
    gSystem->Load("StChain");
@@ -61,11 +69,7 @@ void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const 
    // initialize chain and read first event to get time stamp
    chain->Init();
 
-   // some variables to remember
-   double x0 = 0;
-   double y0 = 0;
-   double dxdz = 0;
-   double dydz = 0;
+   vertexSeed_st beamline;// =0;
 
    // output files
    FILE *VERTEXFILE = fopen(vertexfile, "w");
@@ -78,10 +82,10 @@ void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const 
    assert(ofile);
 
    // histograms
-   TH1F *hVz  = new TH1F("hVz ", ";vz [cm]"        , 500, -250, 250);
-   TH2F *hVxy = new TH2F("hVxy", ";vx [cm];vy [cm]", 150, 0.0, 0.6, 160, 0.0, 0.2);
-   TH2F *hVzx = new TH2F("hVzx", ";vz [cm];vx [cm]", 500, -250, 250, 150, 0.0, 0.6);
-   TH2F *hVzy = new TH2F("hVzy", ";vz [cm];vy [cm]", 500, -250, 250, 160, 0.0, 0.2);
+   TH1F *hVz  = new TH1F("hVz ", "; vz [cm]",          100,  -50,  50);
+   TH2F *hVxy = new TH2F("hVxy", "; vx [cm]; vy [cm]",  50, -2.5, 2.5, 50, -2.5, 2.5);
+   TH2F *hVzx = new TH2F("hVzx", "; vz [cm]; vx [cm]", 100,  -50,  50, 50, -2.5, 2.5);
+   TH2F *hVzy = new TH2F("hVzy", "; vz [cm]; vy [cm]", 100,  -50,  50, 50, -2.5, 2.5);
 
    // Randomize
    gRandom->SetSeed(seed);
@@ -101,39 +105,33 @@ void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const 
 
       // new run number?
       if (chain->GetEvtHddr()->IsNewRun()) {
-         // get beam line constraint
-         TDataSet *ds = db->GetInputDB("Calibrations/rhic");
-
-         if (ds) {
-            vertexSeed_st *vs = ((St_vertexSeed *)ds->FindObject("vertexSeed"))->GetTable();
-
-            if (vs) {
-               printf("run number = %d\n", chain->GetRunNumber());
-               printf("time stamp = %s\n", chain->GetDateTime().AsSQLString());
-               puts("beamline constraint:");
-               printf("x(z) = %f + %f * z\n", vs->x0, vs->dxdz);
-               printf("y(z) = %f + %f * z\n", vs->y0, vs->dydz);
-
-               // save beam line constraint
-               x0 = vs->x0;
-               y0 = vs->y0;
-               dxdz = vs->dxdz;
-               dydz = vs->dydz;
-            }
-         }
+         printf("run number = %d\n", chain->GetRunNumber());
+         printf("time stamp = %s\n", chain->GetDateTime().AsSQLString());
+         UpdateBeamline(db, beamline);
       }
 
-      tf = new TFile(dataFileName);
+      double vz = 0;
 
-      gDirectory->cd("Event");
+      // Set z component based on actual distribution provided by the user
+      if (dataFileName)
+      {
+         tf = new TFile(dataFileName);
+         gDirectory->cd("Event");
+         vz = zVertexOneTofMatch->GetRandom();
+         cout << "Random zVertex Value from Data is: " << vz << endl;
+      } else {
+         vz = gRandom->Gaus(vtxZOffset, vtxSpread.Z());
+      }
 
-      cout << "Random zVertex Value from Data is: " << zVertexOneTofMatch->GetRandom() << endl;
+      // Smear beamline parameters extracted from DB
+      double x0 = gRandom->Gaus(beamline.x0, beamline.err_x0);
+      double y0 = gRandom->Gaus(beamline.y0, beamline.err_y0);
 
-      //double vz = gRandom->Gaus(zoffset,zsigma);
+      double dxdz = gRandom->Gaus(beamline.dxdz, beamline.err_dxdz);
+      double dydz = gRandom->Gaus(beamline.dydz, beamline.err_dydz);
 
-      double vz = zVertexOneTofMatch->GetRandom();
-      double vx = gRandom->Gaus(x0 + dxdz * vz, xsigma);
-      double vy = gRandom->Gaus(y0 + dydz * vz, ysigma);
+      double vx = gRandom->Gaus(x0 + dxdz * vz, vtxSpread.X() );
+      double vy = gRandom->Gaus(y0 + dydz * vz, vtxSpread.Y() );
 
       fprintf(VERTEXFILE, "%14f %14f %14f\n", vx, vy, vz);
 
@@ -149,4 +147,43 @@ void GenerateVertex(char *dataFileName, int nevents = 1000, int seed = 0, const 
    // write histograms and close ROOT file
    ofile->Write();
    ofile->Close();
+}
+
+
+/**
+ * Specific vertex spreads and z offset for J/psi embedding as found in Chanaka's private area.
+ */
+void GenerateVertex4Jpsi(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.055, 0.02, 48.79); // in cm
+   const double vertexZOffset = -2.107; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
+}
+
+
+/**
+ * Specific vertex spreads and z offset for W embedding taken from Jinlong's private area.
+ */
+void GenerateVertex4WBoson(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.01, 0.01, 5); // in cm
+   const double vertexZOffset = 0; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
+}
+
+
+/**
+ * Specific vertex spreads and z offset for VPD.
+ */
+void GenerateVertex4VPD(char *dataFileName = 0, int nevents = 1000, int seed = 0, const char *daqfile = "@run10179086.list",
+   const char *vertexfile = "vertex.txt", const char *flag = "Jet")
+{
+   const TVector3 vertexSpread(0.0372, 0.015, 33.43); // in cm
+   const double vertexZOffset = -1.443; // in cm
+
+   GenerateVertex(dataFileName, vertexSpread, vertexZOffset, nevents, seed, daqfile, vertexfile, flag);
 }
