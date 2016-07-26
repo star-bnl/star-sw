@@ -160,6 +160,7 @@ class StMuMcAnalysisMaker : public StMaker {
   static void    BeginTable();
   static void    EndTable();
   static void    SetGEANTLabels(TAxis *x);
+  static void    PrintMem(const Char_t *opt = "");
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StMuMcAnalysisMaker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;

@@ -6,6 +6,7 @@
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
+#include "TSystem.h"
 #include "TArrayD.h"
 #include "KFVertex.h"
 #include "KFParticle.h"
@@ -119,31 +120,45 @@ Int_t StMuMcAnalysisMaker::Init(){
     BookTrackPlots();
     BookVertexPlots();
   }
-  return StMaker::Init();
+  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StMuMcAnalysisMaker::InitRun(Int_t runumber) {
   assert(StMuDstMaker::instance());
-  StMuDstMaker::instance()->SetStatus("*",0);
-  const Char_t *ActiveBranches[] = {
-    "MuEvent"
-    ,"PrimaryVertices"
-    ,"PrimaryTracks"
-    ,"GlobalTracks"
-    ,"StStMuMcVertex"
-    ,"StStMuMcTrack"
-    ,"CovPrimTrack"
-    ,"CovGlobTrack"
-    ,"StStMuMcVertex"
-    ,"StStMuMcTrack"
-    ,"KFTracks"
-    ,"KFVertices"
-    ,"StBTofHit"
-    ,"StBTofHeader"
-  }; 
-  Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
-  for (Int_t i = 0; i < Nb; i++) StMuDstMaker::instance()->SetStatus(ActiveBranches[i],1); // Set Active braches
+  if (StMuDstMaker::instance()->IOMode() == StMuDstMaker::ioRead) {
+    StMuDstMaker::instance()->SetStatus("*",0);
+    const Char_t *ActiveBranches[] = {
+      "MuEvent"
+      ,"PrimaryVertices"
+      ,"PrimaryTracks"
+      ,"GlobalTracks"
+      ,"StStMuMcVertex"
+      ,"StStMuMcTrack"
+      ,"CovPrimTrack"
+      ,"CovGlobTrack"
+      ,"StStMuMcVertex"
+      ,"StStMuMcTrack"
+      ,"KFTracks"
+      ,"KFVertices"
+      ,"StBTofHit"
+      ,"StBTofHeader"
+    }; 
+    Int_t Nb = sizeof(ActiveBranches)/sizeof(Char_t *);
+    for (Int_t i = 0; i < Nb; i++) StMuDstMaker::instance()->SetStatus(ActiveBranches[i],1); // Set Active braches
+  }
   return StMaker::InitRun(runumber);
+}
+//_____________________________________________________________________________
+void StMuMcAnalysisMaker::PrintMem(const Char_t *opt){
+  MemInfo_t info;
+  gSystem->GetMemInfo(&info);
+  cout << opt 
+       << "\tMemory : Total = " << info.fMemTotal 
+       << "\tUsed = " << info.fMemUsed
+       << "\tFree = " << info.fMemFree
+       << "\tSwap Total = " << info.fSwapTotal
+       << "\tUsed = " << info.fSwapUsed
+       << "\tFree = " << info.fSwapFree << endl;
 }
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::BookTrackPlots(){
@@ -194,6 +209,8 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
   TArrayD EtaBins(neta+1);
   Double_t *etaBins = EtaBins.GetArray();
   for (i = 0; i <= neta; i++) {etaBins[i] = -etamax + deta*i;}
+  PrintMem("");
+
   TDirectory *dirs[7] = {0};
   dirs[0] = TDirectory::CurrentDirectory(); assert(dirs[0]);
   dirs[0]->cd();
@@ -224,6 +241,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
     }
     dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
     dirs[2]->cd();
+    PrintMem(dirs[2]->GetPath());
     for (Int_t t = kMcTk; t < kTotalTkTypes; t++) {
       TrackMatchType type = plotNameMatch[t].k;
       if (! dirs[2]->GetDirectory(plotNameMatch[t].Name)) {
@@ -257,23 +275,23 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	    TString dir(Form("/%s/%s/%s/%s/%s/%s",TracksVertices[0],TitleTrType[gp],
 			     plotNameMatch[t].Name,ParticleType[particle],TitleCharge[pm],VarSet[x]));
 	    const VarName_t plotVar[kTotalQAll] = {         //no.fit                      no.bad,                               
-	      {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100,  0.,  10., 0.000, 6.000, 1},
-	      {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100,  0., 100., 0.000,10.000,-1},
-	      {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -5.,   5., -.250, 1.500, 0},
-	      {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -5.,   5., -.250, 1.500, 0},
-	      {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -0.1, 0.1, -.004, 0.040, 1},
-	      {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -0.1, 0.1, -.020, 0.200, 1},
-	      {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -0.1, 0.1, -.004, 0.040, 1},
-	      {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -0.1, 0.1, -.004, 0.040, 1},
-	      {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -0.1, 0.1, -.002, 0.025,-1},
-	      {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.300, 3.000, 0},
-	      {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.100,10.000, 0},
-	      {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.300, 3.000, 1},
-	      {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.250, 2.500, 1},
-	      {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.230, 3.500, 1},
-	      {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10., -.600, 6.000, 0},
-	      {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5, 100, -10., 10.,-1.000,10.000,-1},
-	      {"Phi",       "#phi (degrees)",                      0,   0,           0,  0,   0,    0, 120,-180.,180.,-1.000,10.000, 1}
+	      {"ChiSqXY",   "#chi^{2}_{Track}/NDF",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0.,  10., 0.000, 6.000, 1},
+	      {"ChiSqZ",    "#chi^{2}_{Vx} ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50,  0., 100., 0.000,10.000,-1},
+	      {"dDcaXY",    "difference in Dca_{XY}",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
+	      {"dDcaZ",     "difference in Dca_{Z}",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -5.,   5., -.250, 1.500, 0},
+	      {"dPsi",      "difference in  #Psi ",          noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+	      {"dPti" ,     "difference in q/pT",            noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.020, 0.200, 1},
+	      {"dPtiR" ,    "difference in relative q/pT",   noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+	      {"dTanL",     "difference in tan( #lambda )",  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.004, 0.040, 1},
+	      {"deta",      "difference in  #eta",           noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -0.1, 0.1, -.002, 0.025,-1},
+	      {"pDcaXY",    "pull in Dca_{XY}",              noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 0},
+	      {"pDcaZ",     "pull in Dca_{Z}",               noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.100,10.000, 0},
+	      {"pPsi",      "pull in  #Psi ",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.300, 3.000, 1},
+	      {"pPti" ,     "pull in q/pT",                  noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.250, 2.500, 1},
+	      {"pPtiR" ,    "pull in relative q/pT",         noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.230, 3.500, 1},
+	      {"pTanL",     "pull in tan( #lambda )",        noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10., -.600, 6.000, 0},
+	      {"peta",      "pull for  #eta",                noFit-9, 9.5, noFit + 0.5, 11,-0.5, 10.5,  50, -10., 10.,-1.000,10.000,-1},
+	      {"Phi",       "#phi (degrees)",                      0,   0,           0,  0,   0,    0,  60,-180.,180.,-1.000,10.000, 1}
 	    };
 	    Int_t i1 = 0;
 	    if (type != kRecoTk) i1 = kTotalQA;
@@ -353,6 +371,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
     }
     dirs[2] = dirs[1]->GetDirectory(TitleTrType[gp]); assert(dirs[2]);
     dirs[2]->cd();
+    PrintMem(dirs[2]->GetPath());
     for (Int_t pidType = 0; pidType < NoPiDs; pidType++) {// 
       if (! dirs[2]->GetDirectory(TitlePiDtype[pidType])) {
 	dirs[2]->mkdir(TitlePiDtype[pidType]);
@@ -381,7 +400,7 @@ void StMuMcAnalysisMaker::BookTrackPlots(){
 	      LdEdx[gp][hyp][pm][i] = new TH3F(Form("Z%s",dEdxTypes[i]),
 					       Form(" z_{%s}  versus TpcTrackLength and log_{10} (#beta #gamma) for %s %s",
 						    dEdxTypes[i],TitleTrType[gp],NamesF[h]),
-					       100, 20, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
+					        50, 20, 220, 292,-1.6, 5.7, 200, -0.5, 0.5); 
 	      LdEdx[gp][hyp][pm][i]->GetXaxis()->SetTitle("TpcTrackLength (cm)");
 	      LdEdx[gp][hyp][pm][i]->GetYaxis()->SetTitle("log_{10} (#beta #gamma)");         
 	      LdEdx[gp][hyp][pm][i]->GetZaxis()->SetTitle(Form(" z_{%s}",dEdxTypes[i]));   
@@ -469,13 +488,19 @@ void StMuMcAnalysisMaker::BookVertexPlots(){
   }
   dirs[1] = dirs[0]->GetDirectory(TracksVertices[1]); assert(dirs[1]);
   dirs[1]->cd();
+  PrintMem(dirs[1]->GetPath());
   
   mStKFParticleInterface = new StKFParticleInterface;
   mStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(mStKFParticleInterface->GetTopoReconstructor());
   dirs[0]->cd();
+  PrintMem(dirs[1]->GetPath());
 }
 //_____________________________________________________________________________
 Int_t StMuMcAnalysisMaker::Make(){
+  if (! GiD[0]) {
+    LOG_ERROR << "StMuMcAnalysisMaker::Make histograms have not been initialized. Probably you have missed TTree file in bfc parameters" << endm;
+    return kStFatal;
+  }
   StMuDstMaker *muDstMaker = StMuDstMaker::instance();
   if (! muDstMaker) return kStFatal;
   muDst = muDstMaker->muDst();
@@ -717,69 +742,9 @@ void StMuMcAnalysisMaker::FillTrackPlots(){
 }
 //_____________________________________________________________________________
 void StMuMcAnalysisMaker::FillVertexPlots(){
-#if 0
-  // Loop over KF Vetrices and KF particles
-  // Map between Id and position in Clones Array
-  map<Int_t,Int_t> VerId2k;
-  for (Int_t l = 0; l < NoKFVertices; l++) {
-    const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-    if (! vertex) continue;
-    Int_t Id = vertex->Id();
-    VerId2k[Id] = l;
-  }
-  map<Int_t,Int_t> ParId2k;
-  for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
-    const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-    if (! particle) continue;
-    Int_t Id = particle->Id();
-    ParId2k[Id] = k;
-  }
-  for (Int_t l = 0; l < NoKFVertices; l++) {
-    const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-    cout << *vertex << endl;
-    if (vertex->IdTruth()) {
-      StMuMcVertex *mcVertex = muDst->MCtrack(vertex->IdTruth()-1);
-      if (mcVertex) cout << "Mc Vertex:" << *mcVertex << endl;
-    }
-    Int_t IdPtrk = vertex->GetParentID(); //reconstructed parent track
-    if (IdPtrk) {
-      Int_t k = ParId2k[IdPtrk];
-      const KFParticle *particle = (const KFParticle *) KFTracks->UncheckedAt(k);
-      if (particle) cout << "Parent Track:" << *particle << endl;
-    }
-    Int_t m = vertex->IdParentMcVx(); // MC parent track
-    if (m) {
-      StMuMcTrack *mcTrack = muDst->MCtrack(m-1);
-      if (! mcTrack) continue;
-      cout << "Parent Mc Track:" << *mcTrack << endl;
-    }
-  }
-  cout << "-----------------------------------" << endl;
-  for (Int_t k = 0; k < muDst->numberOfKFTracks(); k++) {
-    const KFParticle *particle = (const KFVertex *) KFTracks->UncheckedAt(k);
-    cout << *particle << endl;
-    if (! particle->Id()) {cout << "beam" << endl; continue;}
-    Int_t IdPVx = particle->GetParentID(); //reconstructed parent vertex
-    if (particle->IdTruth()) {
-      StMuMcTrack *mcTrack = muDst->MCtrack(particle->IdTruth()-1);
-      if (mcTrack) cout << "Mc Track:" << *mcTrack << endl;
-    }
-    if (IdPVx) {
-      Int_t l = VerId2k[IdPVx];
-      const KFVertex *vertex = (const KFVertex *) KFVertices->UncheckedAt(l);
-      if (vertex) cout << "Parent Vertex:" << *vertex << endl;
-    }
-    Int_t m = particle->IdParentMcVx(); // MC parent vertex
-    if (m) {
-      StMuMcVertex *mcVertex = muDst->MCtrack(m-1);
-      if (! mcVertex) continue;
-      cout << "Parent Mc Vertex:" << *mcVertex << endl;
-    }
-    
-  }
-  cout << "===================================" << endl;
-#else
-#define StRootPV //St root 
+  StMuDst::instance()->printKFVertices();
+  StMuDst::instance()->printKFTracks();
+  //  return;
   static Int_t nTracksAll = 0;
   static Int_t nTracksGhost = 0;
   static Int_t nStiVertex = 0;
@@ -805,9 +770,8 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   nTracksAll += NoKFTracks;
   nStiVertex += NoKFVertices;
   
-#ifdef StRootPV    
   Int_t NoPrimaryVertices = StMuDst::instance()->numberOfPrimaryVertices();  //if (_debugAsk) cout << "\tPrimaryVertices " << NoPrimaryVertices<< std::endl;
-  const int NoStVertices = 1;
+  const int NoStVertices = NoPrimaryVertices;
   //  const int NoStVertices = NoPrimaryVertices;
   vector<KFVertex> PrimVertex(NoStVertices);
   //vector<KFVertex> PrimVertex(NoPrimaryVertices);
@@ -845,7 +809,6 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
       
     }
   }
-#endif
   
   
   Int_t NoGlobalTracks = StMuDst::instance()->numberOfGlobalTracks();
@@ -895,84 +858,42 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
     trackIdMap[gTrack->id()] = nPartSaved;
     trackIdMap2[nPartSaved] = gTrack->id();
     
-#ifdef StRootPV    
-    bool isSecondary = true;
     const StMuTrack *primTrack = gTrack->primaryTrack();
-    if(primTrack)
-      {
-        const int iPV = primTrack->vertexIndex(); 
-        //continue;
-	//if ((iPV!=bestPV)) continue;
-        {
-          vector<int> &tracksPV = PrimTracks[iPV];
-          tracksPV.push_back(nPartSaved);
-        }
-	
-        if ( iPV==bestPV )
-	  {
-	    KFParticle particle(track, pdg);
-	    particle.SetId(kg);
-	    
-	    particles[nPartSaved] = particle;
-	    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-	    
-	    if(mcIndexes[nPartSaved] > -1)
-	      {
-		particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
-		mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
-	      }
-	    else
-	      {
-		particlesPdg[nPartSaved] = -1;
-	      }
-	    nPartSaved++;
-	    isSecondary = false;
-	  }
+    if(primTrack)      {
+      const int iPV = primTrack->vertexIndex(); 
+      vector<int> &tracksPV = PrimTracks[iPV];
+      tracksPV.push_back(nPartSaved);
+      if ( iPV==bestPV ) 	  {
+	KFParticle particle(track, pdg);
+	particle.SetId(kg);
+	particles[nPartSaved] = particle;
+	mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+	if(mcIndexes[nPartSaved] > -1)	      {
+	  particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
+	  mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+	}	    else {
+	  particlesPdg[nPartSaved] = -1;
+	}
+	nPartSaved++;
       }
-    
-    if(isSecondary)
-      {
-        int pdg[3] = {211, 2212, -11};
-        if(q<0)
-	  {
-	    pdg[0] = -211;
-	    pdg[1] = -2212;
-	    pdg[2] = 11;
-	  }
-	
-        for(int iHypo=0; iHypo<3; iHypo++)
-	  {
-	    KFParticle particle(track, pdg[iHypo]);
-	    particle.SetId(kg);
-	    
-	    particles[nPartSaved] = particle;
-	    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-	    
-	    if(mcIndexes[nPartSaved] > -1)
-	      mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
-	    
-	    particlesPdg[nPartSaved] = pdg[iHypo];
-	    nPartSaved++;
-	  }
+    } else {
+      int pdg[3] = {211, 2212, -11};
+      if(q<0) 	  {
+	pdg[0] = -211;
+	pdg[1] = -2212;
+	pdg[2] = 11;
       }
-#else
-    KFParticle particle(track, pdg);
-    particle.SetId(kg);
-    
-    particles[nPartSaved] = particle;
-    mcIndexes[nPartSaved] = gTrack->idTruth()-1;
-    
-    if(mcIndexes[nPartSaved] > -1)
-      {
-        particlesPdg[nPartSaved] = mcTracks[mcIndexes[nPartSaved]].PDG();
-        mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+      for(int iHypo=0; iHypo<3; iHypo++)	  {
+	KFParticle particle(track, pdg[iHypo]);
+	particle.SetId(kg);
+	particles[nPartSaved] = particle;
+	mcIndexes[nPartSaved] = gTrack->idTruth()-1;
+	if(mcIndexes[nPartSaved] > -1)
+	  mcTracks[mcIndexes[nPartSaved]].SetReconstructed();
+	particlesPdg[nPartSaved] = pdg[iHypo];
+	nPartSaved++;
       }
-    else
-      {
-        particlesPdg[nPartSaved] = -1;
-      }
-    nPartSaved++;
-#endif
+    }
   }
   
   particles.resize(nPartSaved);
@@ -988,7 +909,6 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   mStKFParticleInterface->SetParticles(particles);
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
   
-#ifdef StRootPV
   
   mStKFParticleInterface->InitParticles();
   if(NoPrimaryVertices>0)
@@ -1048,10 +968,6 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
         mStKFParticleInterface->AddCandidate(particle, 0);
     }
 #endif
-#else
-  mStKFParticleInterface->ReconstructTopology();
-#endif //StRootPV
-  
   
   mStKFParticlePerformanceInterface->SetMCTracks(mcTracks);
   mStKFParticlePerformanceInterface->SetMCIndexes(mcIndexes);    
@@ -1063,7 +979,6 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   
   std::cout << "Ghost Tracks: N = " <<nTracksGhost << " All tracks: " <<  nTracksAll << " Ghost Rate: " << GhostTracksRate << std::endl;
   std::cout << "nKFVertex " << nKFVertex << " nStiVertex "  << nStiVertex << std::endl;
-#endif
 #endif
 }
 //________________________________________________________________________________
