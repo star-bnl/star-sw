@@ -444,12 +444,14 @@ Int_t StKFVertexMaker::Make() {
       if (Vp && ! Vp->key()) {
 	Vp->setKey(ipv+1);
       }
+      Vp->setIdTruth();
       KFParticle KVx;
       KVx.Initialize();
       KVx.SetId(Vp->key());
       TCL::ucopy(Vp->position().xyz(), &KVx.Parameter(0), 3);
       TCL::ucopy(Vp->covariance(), &KVx.Covariance(0), 6);
       KVx.NDF() = 1;
+      KVx.SetIdTruth(Vp->idTruth(),Vp->qaTruth());
       // copy Point fit as MassFit
       StTrackMassFit *pf = new StTrackMassFit(KVx.Id(),&KVx);
       PrPP(Make,*pf);
