@@ -37,7 +37,7 @@ class StXTrak
   double GetLength  (int idx = 2) const;	     
 const char *GetName() const { return (mMyEnd)?mMyEnd->GetName():"" ;}
 TGeoSwimMag *GetMag()  	{return mMyMag;}
-StXTrakAux  &GetAux() 	{return mCurTk;}     
+StXTrakAux  &GetAux(int idx=2) 	{return (&m1stTk)[idx];}     
 
  int Next();
 //=========================
@@ -67,6 +67,7 @@ public:
   virtual void operator()(const double* x, double* b);
 };
 
+#if 0
 class StvELossTrak;
 class MyLoss: public TGeoSwimLoss {
 public:
@@ -77,4 +78,22 @@ virtual double operator()(const TGeoMaterial* mate,double P,double len
 protected:
 StvELossTrak *mELoss;
 };
+#endif
+#if 1
+class StiElossCalculator;
+class MyLoss: public TGeoSwimLoss {
+public:
+MyLoss();
+//		returns momentum loss
+virtual double operator()(const TGeoMaterial* mate,double P,double len
+                       ,double *theta2=0);
+protected:
+StiElossCalculator *mELoss;
+};
+#endif
+
+
+
+
+
 #endif
