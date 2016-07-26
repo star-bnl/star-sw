@@ -116,7 +116,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   RootFile += ".root";
   RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
-  
   if (Last < 0) {
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
@@ -133,8 +132,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     if (tpcRS) {
       //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
       Int_t m_Mode = tpcRS->GetMode();
-      if (Opt.Contains("pai",TString::kIgnoreCase))         {SETBIT(m_Mode,StTpcRSMaker::kPAI); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
-      if (Opt.Contains("bichsel",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); CLRBIT(m_Mode,StTpcRSMaker::kPAI);}
+      if (Opt.Contains("heed",TString::kIgnoreCase))        {SETBIT(m_Mode,StTpcRSMaker::kHEED); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
+      if (Opt.Contains("bichsel",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); CLRBIT(m_Mode,StTpcRSMaker::kHEED);}
       if (! ChainOpt.Contains("Corr",TString::kIgnoreCase)) {CLRBIT(m_Mode,StTpcRSMaker::kDistortion);}  // Check that distorton are IN chain
       tpcRS->SetMode(m_Mode);
       //      tpcRS->SetDebug(13);
@@ -204,7 +203,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
-    cout << Opt << endl;
+    cout << "Options: " << Opt.Data() << "=========================================================" << endl;
     if (kuip) {
       TString Kuip(kuip);
       geant->Do(kuip);
@@ -258,6 +257,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
     cout << "Set kinematics: " << Kine.Data() << endl;
     geant->Do(Kine.Data());
+    
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }

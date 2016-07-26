@@ -46,6 +46,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   //  m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"        	,"Variation on cluster size");
   m_Corrections[kSpaceCharge           ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Dependence of the Gain on space charge near the wire");
   m_Corrections[kPhiDirection          ] = dEdxCorrection_t("TpcPhiDirection"     ,"Dependence of the Gain on interception angle");
+  m_Corrections[kTanL                  ] = dEdxCorrection_t("TpcTanL"             ,"Dependence of the Gain on Tan(lambda)");
   m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"         	,"dEdx correction wrt Bichsel parameterization"); 
   m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation vs Track length and relative error in Ionization");
   m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX) >  and relative error in Ionization");
@@ -314,18 +315,26 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       goto ENDL;
     case kEdge:
       VarX = CdEdx.PhiR;
-      if (corl->type == 200) {
-	VarX = TMath::Abs(CdEdx.edge);
-	if (corl->min > 0 && corl->min > VarX    ) return 2;
-	if (corl->max > 0 && VarX     > corl->max) return 2;
-      }
+      if (corl->type == 200) VarX = TMath::Abs(CdEdx.edge);
       break;
     case kPhiDirection:
       VarX = 999.;
       if (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) VarX = TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]);
       break;
+    case kTanL:
+      VarX = CdEdx.TanL;
+      break;
     default:
       goto ENDL;
+    }
+    if (corl->type == 200) {
+      VarX = TMath::Abs(CdEdx.edge);
+      if (corl->min > 0 && corl->min > VarX    ) return 2;
+      if (corl->max > 0 && VarX     > corl->max) return 2;
+    }
+    if (corl->type == 300) {
+      if (corl->min > 0 && corl->min > VarX    ) VarX = corl->min;
+      if (corl->max > 0 && VarX     > corl->max) VarX = corl->max;
     }
     if (TMath::Abs(corl->npar) >= 100 || iCut) {
       Int_t iok = 2;

@@ -56,15 +56,16 @@ class StTpcdEdxCorrection : public TObject {
     ktpcWaterOut      ,     //W	 16 				       	   
     kSpaceCharge      ,     //C	 17 space charge near the wire	       	   
     kPhiDirection     ,     //p	 18 correction wrt local interception angle  
-    kdXCorrection     ,     //X  19					     
-    kTpcPadTBins      ,     //d  20					     
-    kTpcZDC           ,     //   21					     
-    kTpcNoAnodeVGainC ,     //   22					     
-    kTpcLast          ,     // 	 23                                          
-    kTpcLengthCorrection,   // 	 24                                          
-    kTpcLengthCorrectionMDF,// 	 25					   
-    kTpcdEdxCor       ,     // 	 26					   
-    kTpcAllCorrections      // 	 27                                          
+    kTanL             ,     //p	 19 correction wrt local tan(lambda)  
+    kdXCorrection     ,     //X  20					     
+    kTpcPadTBins      ,     //d  21					     
+    kTpcZDC           ,     //   22					     
+    kTpcNoAnodeVGainC ,     //   23					     
+    kTpcLast          ,     // 	 24                                          
+    kTpcLengthCorrection,   // 	 25                                          
+    kTpcLengthCorrectionMDF,// 	 26					   
+    kTpcdEdxCor       ,     // 	 27					   
+    kTpcAllCorrections      // 	 28                                          
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -181,6 +182,7 @@ class dEdxY2_t : public TObject {
   Double_t Zdc;     // ZDC rate from trigger
   Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
   Double_t adc;     //  adc count from cluster finder
+  Double_t TanL;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}

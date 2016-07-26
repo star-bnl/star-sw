@@ -21,6 +21,10 @@ while (@ARGV) {
     }
   }
 }
+for my $key (sort  keys %HoC) {
+  next if ! $key;
+  print "$key\n";
+}
 #my @files = glob $glob; 
 print "files = @files\n";
 foreach my $file (@files) {
@@ -31,9 +35,10 @@ foreach my $file (@files) {
     $l++;
     for my $key (sort  keys %HoC) {
       next if ! $key;
-      if ($line =~ m#$key#) {
+      if (index($line, $key) != -1) {
+#      if ($line =~ m#$key#) {
 	$found++;
-#	print "$key found in $file\n"; 
+	print "$key found in $file\n"; 
 	goto ENDF;
       }
 #      else {print "$l ==>$line $key not found in $file\n";}
@@ -49,7 +54,12 @@ foreach my $file (@files) {
     print "--- $newfile\n+++ $file\n";
     while ($lineo = <INPUT>) {
       my $line = $lineo;
-      for my $key (sort  keys %HoC) {$line =~ s|$key|$HoC{$key}|g;}
+      for my $key (sort  keys %HoC) {
+#	print "$line";
+#	print "$key => $HoC{$key}\n";
+	$line =~ s#$key#$HoC{$key}#g;
+#	print "$line\n";
+      }
       print OUTPUT $line;  #print $line;
       if ($lineo ne $line) {
 	print "- ", $lineo;

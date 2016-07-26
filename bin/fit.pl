@@ -26,7 +26,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		percentMethaneInP percentMethaneInPA percentMethaneInPC
 		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
 		Z3C Z3OC
-		Zdc3C dX3C
+		Zdc3C dX3C TanL3DC
 	      );
   @histRL5 = @histGF;
   @histGP = qw (
@@ -36,7 +36,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
 		 PullI70 PullIfit PullNfit
 	      ); 
-#  @histNF = qw(PressureN PressureTN VoltageN VoltN AvCurrentN QcmN Zdc3N Z3N Z3ON Edge3N  SecRow3N dX3N);
+#  @histNF = qw(PressureN PressureTN VoltageN VoltN AvCurrentN QcmN Zdc3N Z3N Z3ON Edge3N  SecRow3N dX3N TanL3DN);
 #  @histXF = @histNF;
 }
 print "fit.pl for  @rootfiles \n";

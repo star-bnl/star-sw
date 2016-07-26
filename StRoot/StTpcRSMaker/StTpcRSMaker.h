@@ -33,6 +33,7 @@ class StTpcRSMaker : public StMaker {
  public:
   enum EMode {kPAI         = 0,// switch to PAI from GEANT (obsolete)
 	      kBICHSEL     = 1,// switch to Bichsel from GEANT 
+	      kHEED        = 6,// switch to HEED
 	      kGAINOAtALL  = 2,// do not use GAIN at all
 	      kdEdxCorr    = 3,// do use TpcdEdxCorrection
 	      kDistortion  = 4,// include distortions
@@ -81,7 +82,8 @@ class StTpcRSMaker : public StMaker {
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!
   TH1D*    mdNdx;                     //!
-  TH1D*    mdNdE;                     //!
+  TH1D*    mdNdxL10;                  //!
+  TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
   TF1F  *mChargeFraction[2];          //!
   TF1F  *mPadResponseFunction[2];     //!

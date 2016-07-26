@@ -120,7 +120,8 @@ Int_t StTpcRSMaker::Finish() {
   //  SafeDelete(fTree);
   free(m_SignalSum); m_SignalSum = 0;
   SafeDelete(mdNdx);
-  SafeDelete(mdNdE);
+  SafeDelete(mdNdxL10);
+  SafeDelete(mdNdEL10);
   for (Int_t io = 0; io < 2; io++) {// Inner/Outer
     for (Int_t sec = 0; sec < NoOfSectors; sec++) {
       if (mShaperResponses[io][sec] && !mShaperResponses[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mShaperResponses[io][sec]);}
@@ -159,7 +160,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 #endif
   if (TESTBIT(m_Mode, kBICHSEL)) {
     LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
-    if (! mdNdE || ! mdNdx) {
+    if (! mdNdEL10 || ! mdNdx) {
       const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
 	":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
       const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
@@ -168,8 +169,25 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 	if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
 	else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
 	TFile       *pFile = new TFile(file);
-	if (i == 0) {mdNdE = (TH1D *) pFile->Get("dNdELnr"); assert(mdNdE);   mdNdE->SetDirectory(0);}
+	if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
 	if (i == 1) {mdNdx = (TH1D *) pFile->Get("dNdx"); assert(mdNdx);   mdNdx->SetDirectory(0);}
+	delete pFile;
+	delete [] file;
+      }
+    }
+  } else if (TESTBIT(m_Mode, kHEED)) {
+    LOG_INFO << "StTpcRSMaker:: use Heed model for dE/dx simulation" << endm;
+    if (! mdNdEL10 || ! mdNdxL10) {
+      const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
+	":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
+      const Char_t *Files[2] = {"dNdx_Heed.root","dNdx_Heed.root"};
+      for (Int_t i = 0; i < 2; i++) { // Inner/Outer
+	Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
+	if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
+	else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
+	TFile       *pFile = new TFile(file);
+	if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
+	if (i == 1) {mdNdxL10 = (TH1D *) pFile->Get("dNdxL10"); assert(mdNdxL10);   mdNdxL10->SetDirectory(0);}
 	delete pFile;
 	delete [] file;
       }
@@ -944,7 +962,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t GainLocal = Gain/dEdxCor/St_TpcResponseSimulatorC::instance()->NoElPerAdc(); // Account dE/dx calibration
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
-	if (TESTBIT(m_Mode, kBICHSEL)) {
+	if (mdNdx || mdNdxL10) {
 	  NP = GetNoPrimaryClusters(betaGamma,charge); // per cm
 #ifdef __DEBUG__
 	  if (NP <= 0.0) {
@@ -969,8 +987,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Float_t dE = 0;
 	  if (charge) {
 	    dS = - TMath::Log(gRandom->Rndm())/NP;
-	    if (TESTBIT(m_Mode, kBICHSEL)) dE = TMath::Exp(mdNdE->GetRandom());
-	    else                           dE = St_TpcResponseSimulatorC::instance()->W()*
+	    static Double_t cLog10 = TMath::Log(10.);
+	    if (mdNdEL10) dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
+	    else          dE = St_TpcResponseSimulatorC::instance()->W()*
 	      gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
 	  }
 	  else { // charge == 0 geantino
@@ -1249,13 +1268,17 @@ Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
 #else
 #if defined(ElectronHack) 
   Int_t elepos = charge/100;
-  Double_t dNdx = mdNdx->Interpolate(betaGamma);
+  Double_t dNdx = 0;
+  if      (mdNdx   ) dNdx = mdNdx->Interpolate(betaGamma);
+  else if (mdNdxL10) dNdx = mdNdxL10->Interpolate(TMath::Log10(betaGamma));
   if (elepos) {
     dNdx += 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
     dNdx /= 2;
   }  
 #else /* new H.Bichsel dNdx table 09/12/11 */
-  Double_t dNdx = mdNdx->Interpolate(betaGamma);
+  Double_t dNdx = 0;
+  if      (mdNdx   ) dNdx = mdNdx->Interpolate(betaGamma);
+  else if (mdNdxL10) dNdx = mdNdxL10->Interpolate(TMath::Log10(betaGamma));
 #endif /* Old_dNdx_Table || ElectronHack */
 #endif
   Double_t Q_eff = TMath::Abs(charge%100);

@@ -379,6 +379,24 @@ Int_t StdEdxY2Maker::Make(){
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
+  const StBTofCollection* tof = pEvent->btofCollection();
+  StPrimaryVertex *pVbest  = 0;
+  if (tof) {
+    Double_t VpdZ = -300;
+    if (tof->tofHeader()) VpdZ = tof->tofHeader()->vpdVz();
+    if (TMath::Abs(VpdZ) < 200) {
+      Double_t dZbest = 999;
+      StPrimaryVertex *pVertex = 0;
+      for (Int_t ipr=0;(pVertex=pEvent->primaryVertex(ipr));ipr++) {
+	Double_t dZ = TMath::Abs(pVertex->position().z()-VpdZ);
+	if (dZ < dZbest) {
+	  dZbest = dZ;
+	  pVbest = pVertex;
+	}
+      }
+      if (dZbest > 3.0) pVbest = 0;
+    }
+  }
   // no of tpc hits
   Int_t TotalNoOfTpcHits = 0;
   Int_t NoOfTpcHitsUsed  = 0;
@@ -707,6 +725,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
 	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
 	CdEdx[NdEdx].Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+	CdEdx[NdEdx].TanL = -CdEdx[NdEdx].xyzD[2]/TMath::Sqrt(CdEdx[NdEdx].xyzD[0]*CdEdx[NdEdx].xyzD[0]+CdEdx[NdEdx].xyzD[1]*CdEdx[NdEdx].xyzD[1]);
 	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	CdEdx[NdEdx].adc     = tpcHit->adc();
 	Bool_t doIT = kTRUE;
@@ -716,6 +735,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (fZOfGoodHits) fZOfGoodHits->Fill(tpcHit->position().z());
 	if (NdEdx < kNdEdxMax) {
 	  tpcHit->setChargeModified(CdEdx[NdEdx].dEdx);
+	  tpcHit->setCharge(CdEdx[NdEdx].dE);
 	  //	  tpcHit->setdX(CdEdx[NdEdx].dx);
 	  TrackLength         += CdEdx[NdEdx].dx;
 	  NdEdx++; 
@@ -839,6 +859,8 @@ Int_t StdEdxY2Maker::Make(){
       if (pEvent->primaryVertex()->ranking() > 0) {
 	if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
 	//      if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
+      } else {// try to use VpdZ to select best vertex
+	if (pTrack->vertex() != pVbest) continue;
       }
       Histogramming(gTrack);
     }
@@ -906,9 +928,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  Double_t zmin = ZdEdxMin;
 	  Double_t zmax = ZdEdxMax;
 	  if (j > 2) {
-	    nz   =  40;
-	    zmin = 1.4;
-	    zmax = 3.4;
+	    nz   =  50;
+	    zmin = 3.0;
+	    zmax = 8.0;
 	  }
 	  hists[j] = (TH1 *) new TH3F(name,title,
 				      nXBins,0.5, nXBins+0.5, nYBins,ymin, ymax,nz, zmin, zmax);
@@ -976,6 +998,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","row","Average Current [#{mu}A]",NumberOfRows,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","row","Accumulated Charge [uC/cm]",NumberOfRows,200,0.,1000);
   static Hists3D SecRow3;
+  static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NumberOfRows,200,-2.,2.);
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
   static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
@@ -1283,11 +1306,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN,
 	  FdEdx[k].dEdxN,
 	  dEN - zdEMVP,
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidElectron]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidPion]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidKaon]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidProton]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.dNdx[kPidDeuteron]),
+	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidElectron]),
+	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidPion]),
+	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidKaon]),
+	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidProton]),
+	  TMath::Log(FdEdx[k].dxC*PiD.dNdx[kPidDeuteron]),
 	  FdEdx[k].dx
 	};
 	Double_t Pad2Edge = FdEdx[k].edge;
@@ -1299,7 +1322,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
 	Double_t PhiD = 180./TMath::Pi()*TMath::ATan2(xyzD[0],xyzD[1]); 
-	Double_t ThetaD = 180./TMath::Pi()*TMath::ATan2(-xyzD[2],TMath::Sqrt(xyzD[0]*xyzD[0]+xyzD[1]*xyzD[1]));
+	TanL3D.Fill(FdEdx[k].row,FdEdx[k].TanL,Vars);
 	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
 	  Double_t t     = tpcGas->inputGasTemperature/298.2;
@@ -1865,13 +1888,18 @@ void StdEdxY2Maker::V0CrossCheck() {
 void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   static Int_t _debug = 0; 
   Double_t Val[2];
-  static TF1 *zdE = 0;
-  static TF1 *fMPV = 0;
-  if (! zdE) {
-    zdE = StdEdxModel::instance()->zdEdx(); zdE->SetParameters(0.,30.,0.0,0.25,1.0);
-    fMPV = StdEdxModel::instance()->zMPV();
+  static TF1 *zdE[2] = {0};
+  static TF1 *fMPV[2] = {0};
+  StdEdxModel::ESector kTpcOuterInner;
+  if (! zdE[0]) {
+    for (Int_t kk = 0; kk < 2; kk++) {
+      kTpcOuterInner = static_cast<StdEdxModel::ESector>(kk);
+      zdE[kTpcOuterInner] = StdEdxModel::instance()->zdEdx(kTpcOuterInner); 
+      zdE[kTpcOuterInner]->SetParameters(0.,30.,0.0,0.25,1.0);
+      fMPV[kTpcOuterInner] = StdEdxModel::instance()->zMPV(kTpcOuterInner);
+    }
   }
-  //                                I     O
+  //                                O     I
   //  static Double_t sigma_p[2] = { 0.03, 0.05};
   static Double_t sigma_p[2] = { 0.00, 0.00};
   f = 0.;
@@ -1879,16 +1907,16 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   Double_t dNdx = par[0];
   for (Int_t i = 0; i < NdEdx; i++) {
     Double_t n_P = dNdx*FdEdx[i].dxC;
-    Double_t n_PL10 = TMath::Log10(n_P);
-    zdE->SetParameter(1,n_P);
-    Int_t io = 0; 
-    if (FdEdx[i].row > 13) io = 1;
-    Double_t Sigma = TMath::Sqrt(sigma_p[io]*sigma_p[io] + 1./n_P);
-    zdE->SetParameter(3,Sigma);
+    Double_t n_PL = TMath::Log(n_P);
+    kTpcOuterInner = StdEdxModel::kTpcOuter;
+    if (FdEdx[i].row < 13) kTpcOuterInner = StdEdxModel::kTpcInner;
+    zdE[kTpcOuterInner]->SetParameter(1,n_P);
+    Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
+    zdE[kTpcOuterInner]->SetParameter(3,Sigma);
     Double_t dE = 1e6*FdEdx[i].dEdx*FdEdx[i].dxC; // GeV => keV
     Double_t z  = TMath::Log(dE);
-    Double_t zMPV = fMPV->Eval(n_PL10,sigma_p[io]);
-    Double_t prob = zdE->Eval(z-zMPV);///zdE->Eval(0);
+    Double_t zMPV = fMPV[kTpcOuterInner]->Eval(n_PL,sigma_p[kTpcOuterInner]);
+    Double_t prob = zdE[kTpcOuterInner]->Eval(z-zMPV);///zdE->Eval(0);
     FdEdx[i].Prob = prob;
     if (prob <= 0.0) f += 100;
     else             f -= 2*TMath::Log(prob);

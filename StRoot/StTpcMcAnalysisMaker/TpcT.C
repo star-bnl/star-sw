@@ -296,7 +296,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
   const UShort_t*&   fPixels_mTimeBin                         = iter("fPixels.mTimeBin");
   const UShort_t*&   fPixels_mAdc                             = iter("fPixels.mAdc");
 #ifdef PRINT
-  const UShort_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
+  const Int_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
 #endif
 #ifndef __REAL_DATA__
 #if 0
@@ -339,7 +339,7 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "H", const Char_t *O
 #if 0
   const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
 #endif
-  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
 #endif
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
 #if 0
@@ -1020,7 +1020,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
   const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
   //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
-  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
   if (! fOut) fOut = new TFile(output,"recreate");
   fOut->cd();
@@ -1053,6 +1053,103 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       if (ratio < 0.1 || ratio > 10) continue;
       inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k]));
       inout[io+2]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
+    }
+  }
+  fOut->Write();
+}
+//________________________________________________________________________________
+void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
+  TDirIter Dir(files);
+  Char_t *file = 0;
+  Char_t *file1 = 0;
+  Int_t NFiles = 0;
+  TTreeIter iter("TpcT");
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString File(file);
+    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
+	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
+	File.Contains("minimc") || File.Contains("event") ||
+	File.Contains("All") || File.Contains("Sparse") ||
+	File.Contains("MuDst.root")) continue;
+    TFile *f = new TFile (File);
+    if (f) {
+      TTree *tree = (TTree *) f->Get("TpcT");
+      if (! tree ) continue;
+      //    tree->Show(0);
+      iter.AddFile(file); 
+      NFiles++; 
+      file1 = file;
+      SetInnerPadrows();
+    }
+    delete f;
+  }
+  cout << files << "\twith " << NFiles << " files" << endl; 
+  if (! file1 ) return;
+  TString output(Out);
+  if (output == "") {
+    output = file1;
+    output.ReplaceAll(".root",".dENP.root");
+  }
+  cout << "Output for " << output << endl;
+  // TpcT->Draw("log(1e9*fRcHit.mCharge/fMcHit.mnP):log(fMcHit.mnP)>>h(200,0,8,500,0,10)","fMcHit.mVolumeId%100<=13&&fNoMcHit==1&&fNoRcHit==1&&fRcHit.mIdTruth==fMcHit.mKey&&fRcHit.mQuality>90","colz")
+  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
+  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
+  const Int_t&       fSector                                  = iter("fSector");
+  const Int_t&       fRow                                     = iter("fRow");
+  const Int_t&       fAdcSum                                  = iter("fAdcSum");
+  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+  const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
+  const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
+  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
+  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+  const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
+  const Int_t*&      fMcHit_mnP                               = iter("fMcHit.mnP");
+  //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
+  const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  if (! fOut) fOut = new TFile(output,"recreate");
+  fOut->cd();
+#if 0
+  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
+#endif
+  const Int_t Npbins  = 151;
+  const Int_t NpbinsL =  10;
+  const Double_t Xmax = 1e5;
+  Double_t    dX = TMath::Log(Xmax/10)/(Npbins - NpbinsL);
+  Double_t *pbins = new Double_t[Npbins];
+  Double_t *pbinsL =  new Double_t[Npbins];
+  pbins[0] = 0.5;
+  pbinsL[0] = TMath::Log(pbins[0]);
+  for (Int_t bin = 1; bin < Npbins; bin++) {
+    if (bin <= NpbinsL) {
+      pbins[bin] = pbins[bin-1] + 1;
+    } else if (bin == Npbins - 1) {
+      pbins[bin] = 1e5;
+    } else {
+      Int_t nM = 0.5*(pbins[NpbinsL-2] + pbins[NpbinsL-1])*TMath::Exp(dX*(bin-NpbinsL)); 
+      Double_t dbin = TMath::Nint(nM - pbins[bin-1]);
+      if (dbin < 1.0) dbin = 1.0;
+      pbins[bin] = pbins[bin-1] + dbin;
+    }
+    pbinsL[bin] = TMath::Log(pbins[bin]);
+  }
+  TH2D *inout[2] = {0};
+  inout[0] = new TH2D("dPdTI","log(dE(eV)/nP) versus log(nP) for Inner sector",Npbins-1,pbinsL,500,0.0,10.0);
+  inout[1] = new TH2D("dPdTO","log(dE(eV)/nP) versus log(nP) for Outer sector",Npbins-1,pbinsL,500,0.0,10.0);
+  while (iter.Next()) {
+    if (fNoRcHit != 1) continue;
+    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
+    for (Int_t k = 0; k < fNoMcHit; k++) {
+      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
+      if (fRcHit_mQuality[k] < 95) continue;
+      if (fRcHit_mCharge[k] <= 0) continue;
+      Int_t io = 0;
+      if (fMcHit_mVolumeId[k]%100 > NoInnerRows) io = 1;
+      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
+      if (fMcHit_mAdc[k] <= 0) continue;
+      if (fMcHit_mnP[k] <= 0) continue;
+      inout[io]->Fill(TMath::Log(fMcHit_mnP[k]),TMath::Log(1e9*fRcHit_mCharge[k]/fMcHit_mnP[k]));
     }
   }
   fOut->Write();
@@ -1131,7 +1228,7 @@ void TpcTPads(const Char_t *files="*.root", const Char_t *Out = "") {
   const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
   //  const UShort_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
-  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
 #if 0
   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
@@ -2641,7 +2738,7 @@ void TpcTPadSp(const Char_t *Out = "SpXSpZ", const Char_t *files="*.root") {
   const UShort_t*&   fPixels_mTimeBin                         = iter("fPixels.mTimeBin");
   const UShort_t*&   fPixels_mAdc                             = iter("fPixels.mAdc");
 #ifdef PRINT
-  const UShort_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
+  const Int_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
 #endif
 #endif
   const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
@@ -2668,7 +2765,7 @@ void TpcTPadSp(const Char_t *Out = "SpXSpZ", const Char_t *files="*.root") {
   const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
   const UShort_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
-  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
 #if 0
   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
@@ -3960,7 +4057,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
   const Float_t*&    fMcHit_mTof                              = iter("fMcHit.mTof");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
-  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
   const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
   const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
