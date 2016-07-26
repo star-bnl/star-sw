@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMCTruth.cxx,v 1.3 2009/12/17 08:37:26 fisyak Exp $
+ * $Id: StMCTruth.cxx,v 1.5 2016/07/25 17:33:49 jwebb Exp $
  *
  * Author: Victor Perev, Jun 2005
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StMCTruth.cxx,v $
+ * Revision 1.5  2016/07/25 17:33:49  jwebb
+ * Init members in ctor / coverity
+ *
+ * Revision 1.4  2016/07/25 17:18:57  jwebb
+ * Comment out deadcode / coverity
+ *
  * Revision 1.3  2009/12/17 08:37:26  fisyak
  * account signature change snce root 5.24
  *
@@ -39,7 +45,12 @@ StMCTruth::operator int() const
   return trackId | (trackWt<<16);
 }
 //__________________________________________________________________________________________________
-StMCPivotTruth::StMCPivotTruth(int normInput)
+StMCPivotTruth::StMCPivotTruth(int normInput) : 
+  fN(0), fNorm(normInput), 
+  mTrackIds{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, 
+  mTrackWts{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, 
+  mTrackNum{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
+  qwe(0)
 {
  fNorm = normInput;
  Reset();
@@ -131,7 +142,7 @@ StMCTruth StMCPivotTruthMap::Get(LongKey_t token,int byCount) const
 {
   LongKey_t word = fMap->GetValue(TMath::Hash(&token,sizeof(token)),token);
   assert(word);
-  if (!word) return StMCTruth(0,0);
+  //if (!word) return StMCTruth(0,0); // deadcode 
   
   StMCPivotTruth *pivo = (StMCPivotTruth*)word;
   return pivo->Get(byCount);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.cc,v 1.3 2009/10/13 18:31:39 perev Exp $
+ * $Id: StParticleDefinition.cc,v 1.4 2016/07/25 17:45:33 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.cc,v $
+ * Revision 1.4  2016/07/25 17:45:33  jwebb
+ * Init members in ctor / coverity
+ *
  * Revision 1.3  2009/10/13 18:31:39  perev
  * Unonimous update
  *
@@ -68,7 +71,8 @@ StParticleDefinition::StParticleDefinition(
     mPDGEncoding(aEncoding),
     mAntiPDGEncoding(-1*aEncoding),
     mPDGStable(aIsStableFlag), 
-    mPDGLifeTime(aLifetime) 
+  mPDGLifeTime(aLifetime) ,
+  mParticleTable(0)
 {
     //
     // check name and register this particle into ParticleTable
@@ -77,9 +81,31 @@ StParticleDefinition::StParticleDefinition(
     mParticleTable->insert(this);
 }
 
-StParticleDefinition::StParticleDefinition(const StParticleDefinition&) {/* private */}
+StParticleDefinition::StParticleDefinition(const StParticleDefinition&){/* private */}
 
-StParticleDefinition::StParticleDefinition() {/* private */}
+StParticleDefinition::StParticleDefinition() :
+  mParticleName(""), 
+    mPDGMass(0),
+    mPDGWidth(0),
+    mPDGCharge(0),
+    mPDGiSpin(0),
+    mPDGSpin(0),
+    mPDGiParity(0), 
+    mPDGiConjugation(0),
+    mPDGiIsospin(0),
+    mPDGiIsospin3(0),
+    mPDGIsospin(0),
+    mPDGIsospin3(0),
+    mPDGiGParity(0),
+    mLeptonNumber(0),
+    mBaryonNumber(0),
+    mParticleType(0), 
+    mPDGEncoding(0),
+    mAntiPDGEncoding(0),
+    mPDGStable(0), 
+  mPDGLifeTime(0) ,
+  mParticleTable(0)
+ {/* private */}
 
 StParticleDefinition::~StParticleDefinition() {/* noop */}
 
