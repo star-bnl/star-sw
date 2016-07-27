@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.13 2012/03/01 16:48:30 perev Exp $
+ * $Id: StMcTpcHit.hh,v 2.14 2016/07/26 15:10:13 jwebb Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.14  2016/07/26 15:10:13  jwebb
+ * Initialize members in ctor / coverity
+ *
  * Revision 2.13  2012/03/01 16:48:30  perev
  * method Browse() added
  *
@@ -68,7 +71,13 @@
 
 class StMcTpcHit : public StMcHit {
 public:
-     StMcTpcHit() {}
+  StMcTpcHit() : StMcHit(),
+		 mLgamma(0),
+		 mAdc(0),
+		 mMcl_x(0),
+		 mMcl_t(0),
+		 mnP(0)
+  {}
 //   StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
 // 	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0, 
 // 	     Float_t adc = 0, Float_t cl_x = 0, Float_t cl_t = 0): 
