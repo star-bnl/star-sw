@@ -34,6 +34,15 @@ StMtdTrackingMaskMaker::StMtdTrackingMaskMaker(const Char_t *name) : StMaker(nam
   mTpcSectorsForTracking(0)
 {
   // default constructor
+
+  mSaveHistos               = false;
+  mhEventStat               = NULL;
+  mhNQTsignals              = NULL;
+  mhNMIXsignals             = NULL;
+  mhNMuons                  = NULL;
+  mhNMtdHits                = NULL;  
+  mhNTrigMtdHits            = NULL;
+  mhNTpcSectorForTracking   = NULL;
 }
  
 //_____________________________________________________________________________
@@ -623,8 +632,11 @@ void StMtdTrackingMaskMaker::bookHistos()
 }
 
 
-// $Id: StMtdTrackingMaskMaker.cxx,v 1.3 2015/05/01 21:37:20 marr Exp $
+// $Id: StMtdTrackingMaskMaker.cxx,v 1.4 2016/07/27 15:24:30 marr Exp $
 // $Log: StMtdTrackingMaskMaker.cxx,v $
+// Revision 1.4  2016/07/27 15:24:30  marr
+// Fix coverity check: initialization of data members
+//
 // Revision 1.3  2015/05/01 21:37:20  marr
 // Apply online slewing correction and position correction to QT data to make
 // sure the correct trigger patches are found offline.
