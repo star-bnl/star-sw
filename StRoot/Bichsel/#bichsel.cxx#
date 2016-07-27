@@ -1,4 +1,0 @@
-#include "StarCallf77.h" 
-#define    simsin	 F77_NAME(simsin,SIMSIN)
-extern "C" {void type_of_call simsin();}
-Bichsel* Bichsel::fgBichsel = 0;
