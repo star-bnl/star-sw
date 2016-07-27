@@ -427,6 +427,7 @@ void StMtdCalibMaker::processStEvent()
     {
       StMtdHit *aHit = mtdHits[i];
       if(!aHit) continue;
+      if(aHit->idTruth()>0) continue; // Do not apply calibration on MC hits
       Int_t backlegId = aHit->backleg();
       Int_t moduleId  = aHit->module();
       Int_t cellId    = aHit->cell();
@@ -554,6 +555,7 @@ void StMtdCalibMaker::processMuDst()
     {
       StMuMtdHit* aHit = mMuDst->mtdHit(i) ;
       if(!aHit) continue;
+      if(aHit->idTruth()>0) continue; // Do not apply calibration on MC hits
       Int_t backlegId = aHit->backleg();
       Int_t moduleId = aHit->module();
       Int_t cellId = aHit->cell();
@@ -692,8 +694,11 @@ void StMtdCalibMaker::bookHistograms()
 
 
 //
-// $Id: StMtdCalibMaker.cxx,v 1.3 2015/02/04 22:35:24 marr Exp $
+// $Id: StMtdCalibMaker.cxx,v 1.4 2016/07/27 14:21:15 marr Exp $
 // $Log: StMtdCalibMaker.cxx,v $
+// Revision 1.4  2016/07/27 14:21:15  marr
+// Check not to apply calibration parameters to MC hits
+//
 // Revision 1.3  2015/02/04 22:35:24  marr
 // Check the existance of the matched primary track
 //
