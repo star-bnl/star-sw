@@ -66,12 +66,15 @@ StMtdCalibMaker::StMtdCalibMaker(const char *name) : StMaker(name)
   mCalibFileTrigger       = "";
   mCalibFileDy            = "";
   mCalibFileDz            = "";
-  hTimeOfFlightCorr       = 0;
-  hAllCorr                = 0;
-  hTimeOfFlightCorrModule = 0;
-  hTriggerTimeBL          = 0;
-  hVertexzVsTpcz          = 0;
-  hTOFTimeOfFlightTray    = 0;
+  hTimeOfFlightCorr       = 0x0;
+  hAllCorr                = 0x0;
+  hTimeOfFlightModule     = 0x0;
+  hTimeOfFlightCorrModule = 0x0;
+  hTriggerTimeBL          = 0x0;
+  hVertexzVsTpcz          = 0x0;
+  hTOFTimeOfFlightTray    = 0x0;
+  hDyModule               = 0x0;
+  hDzModule               = 0x0;
 }
 
 //_____________________________________________________________________________
@@ -223,8 +226,13 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
 	    {
 	      inData>>backlegId>>moduleId>>cellId;
 	      inData>>t0Corr;
-	      mMtdT0Corr[backlegId-1][moduleId-1][cellId]=t0Corr;
-	      if (mDebug) { LOG_INFO << "mMtdT0Corr=" <<mMtdT0Corr[backlegId-1][moduleId-1][cellId] << endm;}
+	      if(backlegId>=1 && backlegId<=mNBackleg &&
+		 moduleId>=1  && moduleId<=mNModule &&
+		 cellId>=0 && cellId<=mNCell-1)
+		{
+		  mMtdT0Corr[backlegId-1][moduleId-1][cellId]=t0Corr;
+		  if (mDebug) { LOG_INFO << "mMtdT0Corr=" <<mMtdT0Corr[backlegId-1][moduleId-1][cellId] << endm;}
+		}
 	    }
 	  }
 	}
@@ -252,9 +260,13 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
           {
               inData>>backlegId>>moduleId;
               inData>>yCorr;
-              mMtdDyCorr[backlegId-1][moduleId-1]=yCorr;
-              if (mDebug) { LOG_INFO << "mMtdDyCorr=" <<mMtdDyCorr[backlegId-1][moduleId-1]<< endm;}
-          }
+	      if(backlegId>=1 && backlegId<=mNBackleg &&
+		 moduleId>=1  && moduleId<=mNModule)
+		{
+		  mMtdDyCorr[backlegId-1][moduleId-1]=yCorr;
+		  if (mDebug) { LOG_INFO << "mMtdDyCorr=" <<mMtdDyCorr[backlegId-1][moduleId-1]<< endm;}
+		}
+	  }
         }
       inData.close();
 
@@ -282,9 +294,14 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
               {
                 inData>>backlegId>>moduleId>>cellId;
                 inData>>zCorr;
-                mMtdDzCorr[backlegId-1][moduleId-1][cellId]=zCorr;
-                if (mDebug) { LOG_INFO << "mMtdDzCorr=" <<mMtdDzCorr[backlegId-1][moduleId-1][cellId] << endm;}
-              }
+	      if(backlegId>=1 && backlegId<=mNBackleg &&
+		 moduleId>=1  && moduleId<=mNModule &&
+		 cellId>=0 && cellId<=mNCell-1)
+		{
+		  mMtdDzCorr[backlegId-1][moduleId-1][cellId]=zCorr;
+		  if (mDebug) { LOG_INFO << "mMtdDzCorr=" <<mMtdDzCorr[backlegId-1][moduleId-1][cellId] << endm;}
+		}
+	      }
           }
         }
       inData.close();
@@ -313,14 +330,22 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
 	      if (mDebug) { LOG_INFO << "BL,MOD=" <<backlegId<<","<<moduleId<<" ,bin="<<nbin << endm; }
 	      for(Int_t k=0;k<nbin;k++)
 		{
-		  inData>>mMtdTotEdge[backlegId-1][moduleId-1][k];
-		  if (mDebug)  { LOG_INFO << "edge=" <<mMtdTotEdge[backlegId-1][moduleId-1][k] << endm; }
+		  if(backlegId>=1 && backlegId<=mNBackleg &&
+		     moduleId>=1  && moduleId<=mNModule)
+		    {
+		      inData>>mMtdTotEdge[backlegId-1][moduleId-1][k];
+		      if (mDebug)  { LOG_INFO << "edge=" <<mMtdTotEdge[backlegId-1][moduleId-1][k] << endm; }
+		    }
 		}
 
 	      for(Int_t k=0;k<nbin;k++)
 		{
-		  inData>>mMtdTotCorr[backlegId-1][moduleId-1][k];
-		  if (mDebug)  { LOG_INFO << "Corr=" <<mMtdTotCorr[backlegId-1][moduleId-1][k] << endm; }
+		  if(backlegId>=1 && backlegId<=mNBackleg &&
+		     moduleId>=1  && moduleId<=mNModule)
+		    {
+		      inData>>mMtdTotCorr[backlegId-1][moduleId-1][k];
+		      if (mDebug)  { LOG_INFO << "Corr=" <<mMtdTotCorr[backlegId-1][moduleId-1][k] << endm; }
+		    }
 		}
 	    }
 	}
@@ -432,6 +457,9 @@ void StMtdCalibMaker::processStEvent()
       Int_t moduleId  = aHit->module();
       Int_t cellId    = aHit->cell();
       pair<Double_t,Double_t>  leadTime =  aHit->leadingEdgeTime();//ns
+      if(backlegId<1 || backlegId>mNBackleg) continue;
+      if(moduleId<1 || moduleId>mNModule) continue;
+      if(cellId<0 || cellId>mNCell-1) continue;
 
       //trigger time cut, and fill trigger histo
       Int_t thub = 2;
@@ -561,6 +589,9 @@ void StMtdCalibMaker::processMuDst()
       Int_t cellId = aHit->cell();
       pair<Double_t,Double_t>  leadTime  = aHit->leadingEdgeTime();//ns
       pair<Double_t,Double_t>  trailTime = aHit->trailingEdgeTime();
+      if(backlegId<1 || backlegId>mNBackleg) continue;
+      if(moduleId<1 || moduleId>mNModule) continue;
+      if(cellId<0 || cellId>mNCell-1) continue;
 
       //trigger time cut, and fill trigger histo
       Int_t thub = 2;
@@ -694,8 +725,11 @@ void StMtdCalibMaker::bookHistograms()
 
 
 //
-// $Id: StMtdCalibMaker.cxx,v 1.4 2016/07/27 14:21:15 marr Exp $
+// $Id: StMtdCalibMaker.cxx,v 1.5 2016/07/27 15:17:19 marr Exp $
 // $Log: StMtdCalibMaker.cxx,v $
+// Revision 1.5  2016/07/27 15:17:19  marr
+// Fix coverity checks: check values of backleg, module, cell
+//
 // Revision 1.4  2016/07/27 14:21:15  marr
 // Check not to apply calibration parameters to MC hits
 //

@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdCalibMaker.h,v 1.2 2015/02/04 14:35:59 marr Exp $ 
+ * $Id: StMtdCalibMaker.h,v 1.3 2016/07/27 15:17:19 marr Exp $ 
  * StMtdCalibMaker - class to in inplement Mtd related Calibration paraments
  * Author: Xinjie Huang
  *--------------------------------------------------------------------------
@@ -69,7 +69,6 @@ class StMtdCalibMaker : public StMaker{
   Double_t          mMtdDzCorr[mNBackleg][mNModule][mNCell];    // dz correction for each cell 
   Double_t          mTriggerHighEdge[mNBackleg][mNModule];      // Lower edge of trigger time cut
   Double_t          mTriggerLowEdge[mNBackleg][mNModule];       // Upper edge of trigger time cut
-  Double_t          mTStart;                                    // Collision start time
 
   StEvent*          mStEvent;
   StMuDst*          mMuDst;
