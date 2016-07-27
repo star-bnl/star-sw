@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.24 2015/05/01 20:04:33 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.25 2016/07/27 15:31:15 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -437,9 +437,9 @@ Int_t StMtdHitMaker::UnpackMtdRawData()
 	    }
 	  // range checks
 	  if(halfbacklegid<0) continue;
-	  if(backlegid<1 || backlegid >124) 
+	  if(backlegid<1 || backlegid>gMtdNBacklegs) 
 	    {
-	      LOG_ERROR<<"StMtdHitMaker::DATA ERROR!! unexpected backlegid ! "<<endm;
+	      LOG_ERROR<<"StMtdHitMaker::DATA ERROR!! unexpected backlegid "<< backlegid << " !" << endm;
 	      continue;
 	    }
 
@@ -1101,8 +1101,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.24 2015/05/01 20:04:33 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.25 2016/07/27 15:31:15 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.25  2016/07/27 15:31:15  marr
+// Fix coverity check: check the range of backlegid
+//
 // Revision 1.24  2015/05/01 20:04:33  marr
 // Use AddData() to pass the information from event filtering stage
 //
