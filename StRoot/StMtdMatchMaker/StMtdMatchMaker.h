@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.14 2015/10/16 19:04:55 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.15 2016/07/27 15:46:34 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.15  2016/07/27 15:46:34  marr
+ * Fix coverity check: initialization of data members
+ *
  * Revision 1.14  2015/10/16 19:04:55  marr
  * Remove filling trees
  *
@@ -257,7 +260,6 @@ class StMtdMatchMaker: public StMaker
 
 		StEvent *mEvent;
 		StMuDst *mMuDst;
-  		StTriggerData *trgData;
 		StMtdGeometry *mMtdGeom;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 		typedef vector<Int_t> idVector;
@@ -322,7 +324,7 @@ class StMtdMatchMaker: public StMaker
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.14 2015/10/16 19:04:55 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.15 2016/07/27 15:46:34 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
