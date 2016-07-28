@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.34 2016/07/27 15:46:34 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.35 2016/07/28 14:31:23 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.35  2016/07/28 14:31:23  marr
+ * Fix coverity check: initialization of data member
+ *
  * Revision 1.34  2016/07/27 15:46:34  marr
  * Fix coverity check: initialization of data members
  *
@@ -215,24 +218,29 @@ using namespace std;
 /// Default constructor: set default values
 StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 {
+        mBeamHelix = NULL;
 	doPrintMemoryInfo = kFALSE;
 	doPrintCpuInfo    = kFALSE;
+	mCosmicFlag=kFALSE;
+
 	mMinFitPointsPerTrack=15;
 	mMindEdxFitPoints=10;
+	mMinFitPointsOverMax=0.52;
 	mMinEta=-0.8;
 	mMaxEta=0.8;
 	mMinPt = 1.0;
-	mMinFitPointsOverMax=0.52;
-	mCosmicFlag=kFALSE;
+
+	mMuDstIn = kFALSE;
+	mHisto = kFALSE;
+	memset(mVDrift,0,sizeof(mVDrift));
+	mnNeighbors = kTRUE;
+	mNExtraCells = 3;
+	index2Primary.clear();
+
 	mELossFlag=kTRUE;
 	mLockBField = kFALSE;
 	mMtdGeom = 0;
 
-	mnNeighbors = kTRUE;
-	mNExtraCells = 3;
-	//mZLocalCut = 43.5;
-	mNSigReso = 3.; // n sigma of z and y resolution.
-	mHisto = kFALSE;
 	ngTracks = 0;
 	mEvent = NULL;
 	mMuDst = NULL;
