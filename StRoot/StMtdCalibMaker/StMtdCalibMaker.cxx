@@ -328,6 +328,7 @@ Int_t StMtdCalibMaker::InitRun(Int_t runnumber)
 	      inData>>backlegId>>moduleId;
 	      inData>>nbin;
 	      if (mDebug) { LOG_INFO << "BL,MOD=" <<backlegId<<","<<moduleId<<" ,bin="<<nbin << endm; }
+	      if(nbin<0) continue;
 	      for(Int_t k=0;k<nbin;k++)
 		{
 		  if(backlegId>=1 && backlegId<=mNBackleg &&
@@ -725,8 +726,11 @@ void StMtdCalibMaker::bookHistograms()
 
 
 //
-// $Id: StMtdCalibMaker.cxx,v 1.5 2016/07/27 15:17:19 marr Exp $
+// $Id: StMtdCalibMaker.cxx,v 1.6 2016/07/28 14:17:44 marr Exp $
 // $Log: StMtdCalibMaker.cxx,v $
+// Revision 1.6  2016/07/28 14:17:44  marr
+// Fix coverity check: check variable nbin
+//
 // Revision 1.5  2016/07/27 15:17:19  marr
 // Fix coverity checks: check values of backleg, module, cell
 //
