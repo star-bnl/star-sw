@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.26 2015/07/31 21:32:58 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.27 2016/07/29 15:38:51 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.27  2016/07/29 15:38:51  jwebb
+ * Fixed error in G3ID to PDGid mapping.
+ *
  * Revision 1.26  2015/07/31 21:32:58  jwebb
  * Attempt to propagate a PDG id for antideuteron.
  *
@@ -322,7 +325,7 @@ StParticleTable::StParticleTable()
     /// Embedding particle definitions
     ///@{
 
-    Geant2Pdg( 10007, 130, pi0 --> e+ e- gamma );
+    Geant2Pdg( 10007, 111, pi0 --> e+ e- gamma );
 
     Geant2Pdg( 10010, 130, K0 Long --> nu e- pi+ );
     Geant2Pdg( 10110, 130, K0 Long --> nu e+ pi- );
