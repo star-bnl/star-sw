@@ -1,5 +1,0 @@
-# $Id $
-# package St_geom_Maker
-# author: 
-Library:libSt_geom_Maker.so:LIBS +=   -lStChain
-#Library:libSt_geom_Maker.so:LIBS +=   -lStChain
