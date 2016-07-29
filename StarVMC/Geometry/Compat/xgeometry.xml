@@ -4,17 +4,19 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
-
-                  call geometry  
+          call geometry  
 </Export>
 </Module> 
   
    
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.60 2016/06/13 15:54:45 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.61 2016/07/29 18:56:00 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.61  2016/07/29 18:56:00  jwebb
+  Add support for y2014c / y2015d / y2016a geometries, taking into account lasted changes in IST and SST
+
   Revision 1.60  2016/06/13 15:54:45  jwebb
   Force update.
 

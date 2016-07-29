@@ -1533,7 +1533,12 @@ void y2014()
     geom.hcalFlag = "HCALv0"; geom.hcalStat = 1; // HCAL prototype
     geom.fill();
   }
-
+  geom.Use("select","y2014a");  
+  geom.select="y2014c"; 
+  {
+    geom.istdFlag = "ISTD03"; geom.istdStat = 1;
+    geom.fill();
+  }
 
 }
 
@@ -1608,6 +1613,13 @@ void y2015()
     //
     geom.fill();
   }    
+  geom.select = "y2015d"; /* y2015b production reference */ {
+    //
+    geom.tpcRefSys = true; 
+    geom.istdFlag = "ISTD03"; geom.istdStat = 1;
+    //
+    geom.fill();
+  }    
 
  
 }
@@ -1644,6 +1656,48 @@ void y2016()
     // ================================================
     geom.pixlFlag = "PIXL62";  geom.pixlStat = 1;
     geom.istdFlag = "ISTD02";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
+    // ================================================
+    geom.fpdmFlag = "FPDM04";  geom.fpdmStat = 1;  
+    // ================================================
+    geom.fill();
+  }
+
+  geom.select = "y2016a"; /* y2016 first cut */
+  {
+    geom.tpcRefSys = true; // set reference system for TPC
+    //
+    // ================================================
+    geom.caveFlag = "CAVE06";  geom.caveStat = 1;
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
+    // ================================================
+    geom.magpFlag = "MAGPv1";  geom.magpStat = 1;
+    geom.tpceFlag = "TPCE31";  geom.tpceStat = 1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD08";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD16";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL62";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD03";  geom.istdStat = 1;
     // ================================================
     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
     geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
