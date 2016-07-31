@@ -1652,6 +1652,7 @@ Bool_t Geometry::IstdInit() // Probably breaks config=-1 scheme
   istdGeom.select="ISTDof";  istdGeom.config=0;  istdGeom.module="NONE"    ;  istdGeom.fill(); 
   istdGeom.select="ISTD01";  istdGeom.config=1;  istdGeom.module="IstdGeo0";  istdGeom.fill(); 
   istdGeom.select="ISTD02";  istdGeom.config=2;  istdGeom.module="IstdGeo1";  istdGeom.fill(); 
+  istdGeom.select="ISTD03";  istdGeom.config=3;  istdGeom.module="IstdGeo2";  istdGeom.fill(); 
   return true;
 }
 // ----------------------------------------------------------------------------
