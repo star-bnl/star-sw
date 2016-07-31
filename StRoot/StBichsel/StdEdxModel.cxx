@@ -29,9 +29,9 @@ TH3F         *StdEdxModel::mdEdxFun[2] = {0};
 Double_t      StdEdxModel::mzMin[2]    = {0};
 Double_t      StdEdxModel::mzMax[2]    = {0};
 Double_t      StdEdxModel::mdZ[2]      = {0};
-Int_t         StdEdxModel::_debug   = 0;
+Int_t         StdEdxModel::_debug   = 1;
 static        TCanvas *c1           = 0;
-Double_t      StdEdxModel::mnPLmin   = 1.6;
+Double_t      StdEdxModel::mnPLmin   = 0.4;
 Double_t      StdEdxModel::mnPLmax   = 8.3;
 Char_t *StdEdxModel::namesOI[2] = {"Outer","Inner"};
 Char_t *StdEdxModel::nOI[2] = {"O","I"};
@@ -124,14 +124,14 @@ Double_t StdEdxModel::zMPVFunc(Double_t *x, Double_t *p) {
 TF2 *StdEdxModel::zMPV(ESector kTpcOuterInner) {
   static TF2 *f[2] = {0};
   if (! f[kTpcOuterInner]) {
-    f[kTpcOuterInner] = new TF2(Form("zFunc%s",namesOI[kTpcOuterInner]),StdEdxModel::zMPVFunc, 0.3,4, 0.0,0.50, 1);
+    f[kTpcOuterInner] = new TF2(Form("zMPVFunc%s",namesOI[kTpcOuterInner]),StdEdxModel::zMPVFunc, mnPLmin, mnPLmax, 0.0,0.50, 1);
     f[kTpcOuterInner]->SetParameter(0, kTpcOuterInner);
   }
   return f[kTpcOuterInner];
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
-  Double_t z        = x[0]; // log (dE (keV))
+Double_t StdEdxModel::dLogdEpernPdP(Double_t *x, Double_t *p) {
+  Double_t z        = x[0]; // log (dE (eV))
   Double_t n_PL     = p[0];
   if (n_PL > mnPLmax) n_PL = mnPLmax;
   if (n_PL < mnPLmin) n_PL = mnPLmin;
@@ -144,9 +144,9 @@ Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
 #endif
   if (Sigma < 0.00) Sigma = 0.00;
   if (Sigma > 0.50) Sigma = 0.50;
-  Double_t n_T   = n_Tz(z)*p[2]; // TMath::Exp(z)/W(); n_T from log(dE[keV])
-  if (n_T < 1.) return 0;
-  Double_t w     = TMath::Log(n_T/n_P);
+  Double_t dE   = TMath::Exp(z)*p[2]; // eV
+  if (dE < 1.) return 0;
+  Double_t w     = TMath::Log(dE/n_P);
   ESector kTpcOuterInner = kTpcOuter;
   if (p[3] > 0.5) kTpcOuterInner = kTpcInner;
   if (w <= mzMin[kTpcOuterInner]+mdZ[kTpcOuterInner]/2 || w >= mzMax[kTpcOuterInner]-mdZ[kTpcOuterInner]/2) return 0;
@@ -155,7 +155,7 @@ Double_t StdEdxModel::dLogNtpernPdP(Double_t *x, Double_t *p) {
 //________________________________________________________________________________
 TF1 *StdEdxModel::zFunc(ESector kTpcOuterInner) {
   static TF1 *f[2] = {0};
-  if (! f[kTpcOuterInner]) f[kTpcOuterInner] = new TF1(Form("zFunc%s",namesOI[kTpcOuterInner]),StdEdxModel::dLogNtpernPdP,-5,15.,4);
+  if (! f[kTpcOuterInner]) f[kTpcOuterInner] = new TF1(Form("zFunc%s",namesOI[kTpcOuterInner]),StdEdxModel::dLogdEpernPdP,0,10.,4);
   f[kTpcOuterInner]->SetNpx(1000);
   f[kTpcOuterInner]->SetParName(0,"n_PL");   f[kTpcOuterInner]->SetParLimits(0,mnPLmin,mnPLmax);
   f[kTpcOuterInner]->SetParName(1,"sigma");  f[kTpcOuterInner]->SetParLimits(1,0,1);
@@ -203,7 +203,7 @@ TF1 *StdEdxModel::zdEdx(ESector kTpcOuterInner) {
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::zdE(Double_t n_P, Double_t sigma, ESector kTpcOuterInner) {
-  // Most probable log(n_T) 
+  // Most probable log(dE) 
   //  static Double_t zGeVkeV = TMath::Log(1e6);
   return instance()->zMPV(kTpcOuterInner)->Eval(TMath::Log(n_P), sigma);// ? - zGeVkeV;
 }
@@ -336,13 +336,13 @@ void StdEdxModel::MakedEdxModel() {
     if (! c1 ) c1 = new TCanvas("c1","c1");
   }
   cout << "Make dEdxModel" << endl;
-  /* nPdTO/nPdTI - log(Total no. of conducting electrons) - log(no. of primary one) versus no. primary electrons:Outer/Inner
-     n_e - Total no. of conducting electrons
+  /* nPdTO/nPdTI - log(Total dE[eV]) - log(no. of primary one) versus no. primary electrons:Outer/Inner
+     dE - Total dE[eV]
      n_P - no. primary electrons; n_p = dX * BB(beta*gamma), dX track segment length, BB is Bether Bloch function = no. of primary clusters per cm
-     w = log(n_e/n_P); 
+     w = log(dE/n_P); 
      dN/dw = f(w;n_P); // histogram
-     Y = n_e = n_P*exp(w);
-     dn_e/dw = n_e; 
+     Y = dE = n_P*exp(w);
+     ddE/dw = dE; 
      dN/dY = dN/dw*dw/Y = f(w;n_P)/Y;
      
      Log Normal distribution:
@@ -383,88 +383,89 @@ void StdEdxModel::MakedEdxModel() {
     for (Int_t i = 1; i <= Nsigma; i++) yBins[i] = yBins[i-1] + dsigma;
     Int_t Nzbins = 100;
     TArrayD     zBins(Nzbins+1);
-    zBins[0]      = -2.5;
-    zBins[Nzbins] =  7.5;
+    zBins[0]      =  0;
+    zBins[Nzbins] = 10;
     Double_t dZ = ( zBins[Nzbins] -  zBins[0])/Nzbins;
     for (Int_t i = 1; i < Nzbins; i++) zBins[i] = zBins[i-1] + dZ;
-    TH3F *dEdxFun = (TH3F *) fOut->Get(Form("dEdxFun%s",namesOI[kTpcOutIn]));
-    if (! dEdxFun) dEdxFun = new TH3F(Form("dEdxFun%s",namesOI[kTpcOutIn]),
-				      Form("w = log(n_T/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
-				      Nxbins, XBins.GetArray(),
-				      Nsigma, yBins.GetArray(),
-				      Nzbins, zBins.GetArray());
-    TH2D *dEdxMPV = (TH2D *) fOut->Get(Form("dEdxMPV%s",namesOI[kTpcOutIn]));
-    if (! dEdxMPV)   dEdxMPV = new TH2D(Form("dEdxMPV%s",namesOI[kTpcOutIn]),
-					Form("most probable value of w = log(n_T/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
+    mdEdxFun[kTpcOutIn] = (TH3F *) fOut->Get(Form("dEdxFun%s",namesOI[kTpcOutIn]));
+    if (! mdEdxFun[kTpcOutIn]) mdEdxFun[kTpcOutIn] = new TH3F(Form("dEdxFun%s",namesOI[kTpcOutIn]),
+							      Form("w = log(dE/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
+							      Nxbins, XBins.GetArray(),
+							      Nsigma, yBins.GetArray(),
+							      Nzbins, zBins.GetArray());
+    mzMin[kTpcOutIn] = mdEdxFun[kTpcOutIn]->GetZaxis()->GetXmin();
+    mzMax[kTpcOutIn] = mdEdxFun[kTpcOutIn]->GetZaxis()->GetXmax();
+    mdZ[kTpcOutIn]   = mdEdxFun[kTpcOutIn]->GetZaxis()->GetBinWidth(1);
+    mdEdxMPV[kTpcOutIn] = (TH2D *) fOut->Get(Form("dEdxMPV%s",namesOI[kTpcOutIn]));
+    if (! mdEdxMPV[kTpcOutIn])   mdEdxMPV[kTpcOutIn] = new TH2D(Form("dEdxMPV%s",namesOI[kTpcOutIn]),
+					Form("most probable value of w = log(dE/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
 					Nxbins, XBins.GetArray(),
 					Nsigma, yBins.GetArray());
     TH2D *dEdxMean = (TH2D *) fOut->Get(Form("dEdxMean%s",namesOI[kTpcOutIn]));
     if (! dEdxMean) dEdxMean = new TH2D(Form("dEdxMean%s",namesOI[kTpcOutIn]),
-					Form("mean value of w = log(n_T/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
+					Form("mean value of w = log(dE/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
 					Nxbins, XBins.GetArray(),
 					Nsigma, yBins.GetArray());
     TH2D *dEdxRMS = (TH2D *) fOut->Get(Form("dEdxRMS%s",namesOI[kTpcOutIn]));
     if (! dEdxRMS) dEdxRMS = new TH2D(Form("dEdxRMS%s",namesOI[kTpcOutIn]),
-				      Form("RMS value of w = log(n_T/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
+				      Form("RMS value of w = log(dE/n_P) versus log(n_P) and sigma for %s",namesOI[kTpcOutIn]),
 				      Nxbins, XBins.GetArray(),
 				      Nsigma, yBins.GetArray());
-    if (! dEdxFun->GetEntries()) {
-      for (Int_t iX = 1; iX <= Nxbins; iX++) {
-	Double_t n_pL = dEdxFun->GetXaxis()->GetBinCenter(iX);
-	Double_t n_p  = TMath::Exp(n_pL);
-	Int_t bin = x->FindBin(n_pL);
-	TH1D *proj = nPdT->ProjectionY("_y",bin,bin);
-	if (proj->GetEntries() > 10) {
-	  for (Int_t iY = 1; iY <= Nsigma; iY++) {
-	    Double_t sigma = dEdxFun->GetYaxis()->GetBinCenter(iY);
-	    TH1D *hist = dEdxFun->ProjectionZ("RnDM",iX,iX,iY,iY);
-	    hist->SetName("RnDM");
-	    hist->Reset();
-	    Int_t NT = 100000;
-	    for (Int_t k = 0; k < NT; k++) {
-	      Double_t u = proj->GetRandom();
-	      Double_t w = 1.;
-	      if (sigma > 0) {
-		u += gRandom->Gaus(0.,sigma);
-	      }
-	      hist->Fill(u, w);
-	    }
-	    hist->Smooth(5);
-	    Double_t norm = hist->Integral();
-	    hist->Scale(1./norm,"width");
-	    Int_t nZ = hist->GetNbinsX();
-	    for (Int_t iZ = 1; iZ <= nZ; iZ++) {
-	      dEdxFun->SetBinContent(iX,iY,iZ,hist->GetBinContent(iZ));
-	    }
-	    dEdxMean->SetBinContent(iX,iY,hist->GetMean());
-	    dEdxRMS->SetBinContent(iX,iY,hist->GetRMS());
-	    if (c1) {
-	      hist->Draw();
-	      TH1 *test = dEdxFun->ProjectionZ("Test",iX,iX,iY,iY);
-	      test->SetLineColor(2);
-	      test->Draw("samel");
-	      c1->Update();
-	      delete test;
-	    }
-	    delete hist;
+    if (mdEdxFun[kTpcOutIn]->GetEntries()) continue;
+    for (Int_t iX = 1; iX <= Nxbins; iX++) {
+      Double_t n_pL = mdEdxFun[kTpcOutIn]->GetXaxis()->GetBinCenter(iX);
+      Double_t n_p  = TMath::Exp(n_pL);
+      Int_t bin = x->FindBin(n_pL);
+      TH1D *proj = nPdT->ProjectionY("_y",bin,bin);
+      if (proj->GetEntries() < 10) {delete proj; continue;}
+      for (Int_t iY = 1; iY <= Nsigma; iY++) {
+	Double_t sigma = mdEdxFun[kTpcOutIn]->GetYaxis()->GetBinCenter(iY);
+	TH1D *hist = mdEdxFun[kTpcOutIn]->ProjectionZ("RnDM",iX,iX,iY,iY);
+	hist->SetName("RnDM");
+	hist->Reset();
+	Int_t NT = 100000;
+	for (Int_t k = 0; k < NT; k++) {
+	  Double_t u = proj->GetRandom();
+	  Double_t w = 1.;
+	  if (sigma > 0) {
+	    u += gRandom->Gaus(0.,sigma);
 	  }
+	  hist->Fill(u, w);
 	}
-	delete proj;
-	cout << "Done with iX = " << iX << endl;
+	hist->Smooth(5);
+	Double_t norm = hist->Integral();
+	hist->Scale(1./norm,"width");
+	Int_t nZ = hist->GetNbinsX();
+	for (Int_t iZ = 1; iZ <= nZ; iZ++) {
+	  mdEdxFun[kTpcOutIn]->SetBinContent(iX,iY,iZ,hist->GetBinContent(iZ));
+	}
+	dEdxMean->SetBinContent(iX,iY,hist->GetMean());
+	dEdxRMS->SetBinContent(iX,iY,hist->GetRMS());
+	if (c1) {
+	  hist->Draw();
+	  TH1 *test = mdEdxFun[kTpcOutIn]->ProjectionZ("Test",iX,iX,iY,iY);
+	  test->SetLineColor(2);
+	  test->Draw("samel");
+	  c1->Update();
+	  delete test;
+	}
+	delete hist;
       }
+      delete proj;
+      cout << "Done with iX = " << iX << endl;
     }
     TF1 *f = StdEdxModel::instance()->zFunc(kTpcOutIn);
     for (Int_t iY = 1; iY <= Nsigma; iY++) {
-      Double_t sigma = dEdxFun->GetYaxis()->GetBinCenter(iY);
+      Double_t sigma = mdEdxFun[kTpcOutIn]->GetYaxis()->GetBinCenter(iY);
       f->SetParameter(1,sigma);
       for (Int_t iX = 1; iX <= Nxbins; iX++) {
-	Double_t n_pL = dEdxFun->GetXaxis()->GetBinCenter(iX);
+	Double_t n_pL = mdEdxFun[kTpcOutIn]->GetXaxis()->GetBinCenter(iX);
 	f->SetParameter(0,n_pL);
 	Double_t mpv = f->GetMaximumX(mnPLmin, mnPLmax);
-	dEdxMPV->SetBinContent(iX,iY,mpv);
+	mdEdxMPV[kTpcOutIn]->SetBinContent(iX,iY,mpv);
       }
     }
-    mDFit[kTpcOutIn] = h2MDF(dEdxMPV->GetName(),7,200);
+    mDFit[kTpcOutIn] = h2MDF(mdEdxMPV[kTpcOutIn]->GetName(),7,200);
   }
   fOut->Write();
 }

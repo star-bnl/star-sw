@@ -33,9 +33,8 @@ class StdEdxModel {
   TF1    *zdEdxA( ESector kTpcOuterInner =  kTpcOuter);  // log(dE[GeV]) 
   Double_t zdE(Double_t n_P = 30, Double_t sigma = 0.25, ESector =  kTpcOuter);
   Double_t dNdx(Double_t betagamma = 4.0, Double_t charge = 1.0) {return charge*charge*(mdNdx->Interpolate(betagamma));}
-  static Double_t W(ESector kTpcOuterInner =  kTpcOuter) {return 45.44e-3;}// keV => eV per conducting electron P10: 26.2e-3*TMath::Exp(5.50667e-01) = 45.44e-3
-  static Double_t n_Tz (Double_t z = 0, ESector kTpcOuterInner =  kTpcOuter) {return      TMath::Exp(z)/W(kTpcOuterInner);} // no. of conducting electron per ln(dE[keV])
-  static Double_t n_TzG(Double_t z = 0, ESector kTpcOuterInner =  kTpcOuter) {return 1e-6*TMath::Exp(z)/W(kTpcOuterInner);} // no. of conducting electron per ln(dE[GeV])
+  static Double_t dEz (Double_t z = 0, ESector kTpcOuterInner =  kTpcOuter) {return 1e-3*TMath::Exp(z);} // dE[eV] from per ln(dE[keV])
+  static Double_t dEzG(Double_t z = 0, ESector kTpcOuterInner =  kTpcOuter) {return 1e-6*TMath::Exp(z);} // dE[eV] from per ln(dE[GeV])
   static void MakedEdxModel();
 #if 0
   static void Make2dEdxModel();
@@ -50,7 +49,7 @@ class StdEdxModel {
   static StdEdxModel       *fgStdEdxModel; //! last instance          
   StdEdxModel();
   static Double_t zMPVFunc(Double_t *x, Double_t *p=0);
-  static Double_t dLogNtpernPdP(Double_t *x, Double_t *p);
+  static Double_t dLogdEpernPdP(Double_t *x, Double_t *p);
   static Double_t dEdxFunc(Double_t *x, Double_t *p);
   static TMultiDimFit *mDFit[2];    // Parameterization of most probable log(n_t/n_p) value versus log(n_p) and sigma
   static TH1D         *mdNdx;    // dN/dx versus beta*gamma
