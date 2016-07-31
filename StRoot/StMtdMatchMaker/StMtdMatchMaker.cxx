@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.33 2015/10/16 19:04:55 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.35 2016/07/28 14:31:23 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,12 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.35  2016/07/28 14:31:23  marr
+ * Fix coverity check: initialization of data member
+ *
+ * Revision 1.34  2016/07/27 15:46:34  marr
+ * Fix coverity check: initialization of data members
+ *
  * Revision 1.33  2015/10/16 19:04:55  marr
  * Remove filling trees
  *
@@ -212,24 +218,29 @@ using namespace std;
 /// Default constructor: set default values
 StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 {
+        mBeamHelix = NULL;
 	doPrintMemoryInfo = kFALSE;
 	doPrintCpuInfo    = kFALSE;
+	mCosmicFlag=kFALSE;
+
 	mMinFitPointsPerTrack=15;
 	mMindEdxFitPoints=10;
+	mMinFitPointsOverMax=0.52;
 	mMinEta=-0.8;
 	mMaxEta=0.8;
 	mMinPt = 1.0;
-	mMinFitPointsOverMax=0.52;
-	mCosmicFlag=kFALSE;
+
+	mMuDstIn = kFALSE;
+	mHisto = kFALSE;
+	memset(mVDrift,0,sizeof(mVDrift));
+	mnNeighbors = kTRUE;
+	mNExtraCells = 3;
+	index2Primary.clear();
+
 	mELossFlag=kTRUE;
 	mLockBField = kFALSE;
 	mMtdGeom = 0;
 
-	mnNeighbors = kTRUE;
-	mNExtraCells = 3;
-	//mZLocalCut = 43.5;
-	mNSigReso = 3.; // n sigma of z and y resolution.
-	mHisto = kFALSE;
 	ngTracks = 0;
 	mEvent = NULL;
 	mMuDst = NULL;
@@ -240,7 +251,52 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 	fPhiReso = new TF1("fPhiReso","sqrt([0]/x/x+[1])",0,100);
 	fPhiReso->SetParameters(9.514e-4,7.458e-6); //rad
 
-	return;
+	mEventCounterHisto            = NULL;
+	mCellsMultInEvent             = NULL;
+	mHitsMultInEvent              = NULL;
+	mHitsPrimaryInEvent           = NULL;
+	mHitsGlobalInEvent            = NULL;
+	mHitsMultPerTrack             = NULL;
+	mHitsPosition                 = NULL;
+	for(int i=0; i<mNBacklegs; i++)
+	  {
+	    mDaqOccupancy[i]          = NULL;
+	    mDaqOccupancyProj[i]      = NULL;
+	    mHitCorr[i]               = NULL;
+	    mHitCorrModule[i]         = NULL;
+	    mDeltaHitFinal[i]         = NULL;
+	  }
+	mTrackPtEta                   = NULL;
+	mTrackPtPhi                   = NULL;
+	mTrackNFitPts                 = NULL;
+	mTrackdEdxvsp                 = NULL;
+	mNSigmaPivsPt                 = NULL;
+	mCellsPerEventMatch1          = NULL;
+	mHitsPerEventMatch1           = NULL;
+	mCellsPerTrackMatch1          = NULL;
+	mTracksPerCellMatch1          = NULL;
+	mDaqOccupancyMatch1           = NULL;
+	mDeltaHitMatch1               = NULL;
+	mCellsPerEventMatch2          = NULL;
+	mHitsPerEventMatch2           = NULL;
+	mCellsPerTrackMatch2          = NULL;
+	mTracksPerCellMatch2          = NULL;
+	mDaqOccupancyMatch2           = NULL;
+	mDeltaHitMatch2               = NULL;
+	mCellsPerEventMatch3          = NULL;
+	mHitsPerEventMatch3           = NULL;
+	mCellsPerTrackMatch3          = NULL;
+	mTracksPerCellMatch3          = NULL;
+	mDaqOccupancyMatch3           = NULL;
+	mDeltaHitMatch3               = NULL;
+	mCellsPrimaryPerEventMatch3   = NULL;
+	hphivsz                       = NULL;
+	hTofPhivsProj                 = NULL;
+	hTofZvsProj                   = NULL;
+	hMtdZvsProj                   = NULL;
+	hMtdPhivsProj                 = NULL;
+	hMtddPhivsBackleg             = NULL;
+	hMtddZvsBackleg               = NULL;
 }
 
 StMtdMatchMaker::~StMtdMatchMaker(){
@@ -1710,11 +1766,11 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			// get track-id from cell hit vector
 			StSPtrVecTrackNode &nodes = mEvent->trackNodes();
 			StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(nodes[trackNode]->track(global));
-			StPrimaryTrack *primaryTrack =dynamic_cast<StPrimaryTrack*>(globalTrack->node()->track(primary));
 			if(!globalTrack) {
 				LOG_WARN << "Wrong global track!" << endm;
 				continue;
 			}
+			StPrimaryTrack *primaryTrack =dynamic_cast<StPrimaryTrack*>(globalTrack->node()->track(primary));
 
 			// Fill association in MTD Hit Collection
 			StMtdCollection *theMtd  = mEvent->mtdCollection();

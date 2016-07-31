@@ -47,16 +47,20 @@ StMtdEvtFilterMaker::StMtdEvtFilterMaker(const Char_t *name) : StMaker(name)
   mIsDiMuonOnly          = kFALSE;
 
      
-   mMinTrkPtAll           = 1.0;
-   mMinTrkPtLead          = 0;
-   mMinNHitsFit           = 15;
-   mMinNHitsDedx          = 10;
-   mMinFitHitsFraction    = 0.52;
-   mMaxDca                = 1e4;
-   mMinNsigmaPi           = -1e4;
-   mMaxNsigmaPi           = 1e4;
-   mMaxDeltaZ             = 1e4;
-   nMinMuonCandidates     = 2;
+  mMinTrkPtAll           = 1.0;
+  mMinTrkPtLead          = 0;
+  mMinNHitsFit           = 15;
+  mMinNHitsDedx          = 10;
+  mMinFitHitsFraction    = 0.52;
+  mMaxDca                = 1e4;
+  mMinNsigmaPi           = -1e4;
+  mMaxNsigmaPi           = 1e4;
+  mMaxDeltaZ             = 1e4;
+  nMinMuonCandidates     = 2;
+
+  mSaveHistos            = false;
+  mhEventStat            = NULL;
+  mhNMuonCandidates      = NULL;
 }
  
 //_____________________________________________________________________________
@@ -484,8 +488,11 @@ void StMtdEvtFilterMaker::bookHistos()
 
 }
 
-// $Id: StMtdEvtFilterMaker.cxx,v 1.2 2015/04/23 21:10:19 marr Exp $
+// $Id: StMtdEvtFilterMaker.cxx,v 1.3 2016/07/27 15:24:30 marr Exp $
 // $Log: StMtdEvtFilterMaker.cxx,v $
+// Revision 1.3  2016/07/27 15:24:30  marr
+// Fix coverity check: initialization of data members
+//
 // Revision 1.2  2015/04/23 21:10:19  marr
 // 1. remove dz and pTlead cuts in the filtering by default
 // 2. change the number scheme for shouldHaveRejectEvent()

@@ -64,11 +64,86 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mMaxVtxZ(100.), mMaxVtxDz(5.),
   mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), mMinNsigmaPi(-1.), mMaxNsigmaPi(3.),
-  mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(0)
+  mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(NULL)
 {
   // default constructor
   mTrigTime[0] = -1;
   mTrigTime[1] = -1;
+
+  memset(&mMtdData, 0, sizeof(mMtdData));
+
+  mhEventTrig              = NULL;
+  mhEventCuts              = NULL;
+  mhRunId                  = NULL;
+  mhVertexXY               = NULL;
+  mhVertexZ                = NULL;
+  mhVtxZvsVpdVz            = NULL;
+  mhVtxZvsVpdVz            = NULL;
+  mhVtxZDiff               = NULL;
+  mhTofStartTime           = NULL;
+  mhVpdQTadc               = NULL;
+  mhVpdQTtac               = NULL;
+  mhMtdQTadc               = NULL;
+  mhMtdQTAllTac            = NULL;
+  mhMtdQTBestTac           = NULL;
+  mhMtdMthQTTac            = NULL;
+  mhMtdQTvsHit             = NULL;
+  mhMtdVpdTacDiffMT001     = NULL;
+  mhMtdVpdMthTacDiffMT001  = NULL;
+  mhMtdVpdTacDiffMT101     = NULL;
+  mhMtdVpdMthTacDiffMT101  = NULL;
+  mhMtdQTJ2J3Diff          = NULL;
+  for(int i=0; i<kNQTboard; i++)
+    {
+      for(int j=0; j<2; j++)
+	mhMixMtdTacSumvsMxqMtdTacSum[i][j] = NULL;
+    }
+  for(int j=0; j<2; j++)
+    mhMtdTriggerTime[j]    = NULL;
+
+  mhMtdNRawHits            = NULL;
+  mhMtdRawHitMap           = NULL;
+  mhMtdRawHitLeTime        = NULL;
+  mhMtdRawHitTrTime        = NULL;
+  mhMtdRawHitTrigTime      = NULL;
+  mhMtdRawHitLeNEast       = NULL;
+  mhMtdRawHitLeNWest       = NULL;
+  mhMtdRawHitTrNEast       = NULL;
+  mhMtdRawHitTrNWest       = NULL;
+  mhMtdRawHitLeNDiff       = NULL;
+  mhMtdRawHitTrNDiff       = NULL;
+
+  mhMtdNHits               = NULL;
+  mhMtdHitMap              = NULL;
+  mhMtdHitLeTimeWest       = NULL;
+  mhMtdHitLeTimeEast       = NULL;
+  mhMtdHitLeTimeDiff       = NULL;
+  mhMtdHitTotWest          = NULL;
+  mhMtdHitTotEast          = NULL;
+  mhMtdHitTrigTime         = NULL;
+
+  mhMtdNMatchHits          = NULL;
+  mhMtdMatchHitMap         = NULL;
+  mhMtdMatchPhi            = NULL;
+  mhMtdMatchDzVsChan       = NULL;
+  mhMtdMatchDyVsChan       = NULL;
+  mhMtdMatchLocalyVsChan   = NULL;
+  mhMtdMatchLocalzVsChan   = NULL;
+  mhMtdMatchDzVsPt         = NULL;
+  mhMtdMatchDyVsPt         = NULL;
+  mhMtdMatchTrkPt          = NULL;
+  mhMtdMatchTrkPhiEta      = NULL;
+  mhMtdMatchTrkDedx        = NULL;
+
+  mhTrkPt                  = NULL;
+  mhTrkDca                 = NULL;
+  mhTrkPhiEta              = NULL;
+  mhMtdTrackProjMap        = NULL;
+  mhTrkProjPhiZAtMtd       = NULL;
+  mhTrkPhiVsMtdPhi         = NULL;
+  mhTofMthTrkLocaly        = NULL;
+  mhTofMthTrkLocalz        = NULL;
+  mhMtdDtofVsChannel       = NULL;
 }
  
 //_____________________________________________________________________________
@@ -378,6 +453,7 @@ Int_t StMtdQAMaker::processStEvent()
       StTrack *gTrack = nodes[i]->track(global);
       if(!gTrack) continue;
       StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(gTrack);
+      if(!globalTrack) continue;
       THelixTrack    thelix      =  globalTrack->dcaGeometry()->thelix();
       const Double_t *pos        = thelix.Pos();
       StThreeVectorF dcaGlobal   = StThreeVectorF(pos[0],pos[1],pos[2]) - priVertex->position(); 
@@ -992,7 +1068,7 @@ void StMtdQAMaker::fillHistos()
 	}
     }
   
-  if(maxm!=-1 && maxi!=-1)
+  if(maxm>=0 && maxi>=0)
     {
       mhMtdQTBestTac->Fill(maxm*16+maxi+1,mMtdData.mtdQTtac[maxm][maxi]);
       mhMtdQTBestTac->Fill(maxm*16+maxi+2,mMtdData.mtdQTtac[maxm][maxi+1]);
@@ -1719,7 +1795,7 @@ Bool_t StMtdQAMaker::isValidTrack(StTrack *track, StVertex *vtx) const
   if(nHitsFit<mMinNHitsFit) return kFALSE;
 
   Int_t nHitsPoss = track->numberOfPossiblePoints(kTpcId);
-  if(nHitsFit/nHitsPoss<mMinFitHitsFraction) return kFALSE;
+  if(nHitsFit/(1.0*nHitsPoss)<mMinFitHitsFraction) return kFALSE;
   
   StTpcDedxPidAlgorithm pidAlgorithm;
   const StParticleDefinition *pd = track->pidTraits(pidAlgorithm);
@@ -1733,6 +1809,7 @@ Bool_t StMtdQAMaker::isValidTrack(StTrack *track, StVertex *vtx) const
   if(!mIsCosmic)
     {
       StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(track);
+      if(!globalTrack) return kFALSE;
       THelixTrack    thelix      = globalTrack->dcaGeometry()->thelix();
       const Double_t *pos        = thelix.Pos();
       StThreeVectorF dcaGlobal   = StThreeVectorF(pos[0],pos[1],pos[2]) - vtx->position();
@@ -1798,8 +1875,14 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.11 2015/10/28 19:51:10 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.13 2016/07/28 14:33:23 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.13  2016/07/28 14:33:23  marr
+//// Fix coverity check: initialization of data member
+////
+//// Revision 1.12  2016/07/27 16:03:51  marr
+//// Fix coverity check: initialization of data member
+////
 //// Revision 1.11  2015/10/28 19:51:10  marr
 //// Remove printout
 ////
