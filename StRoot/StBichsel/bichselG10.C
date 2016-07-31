@@ -212,10 +212,10 @@ void bichselG10(const Char_t *type="Bz") {
     m_Bichsel = Bichsel::Instance();
   }
   TString Type(type);
-  TLegend *leg = new TLegend(0.65,0.2,0.75,0.9,"");
+  TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
   Double_t xmax = 4;
-  //  for (int h = 0; h < NMasses; h++) { // Masses
-  for (int h = 0; h < 7; h++) { // Masses
+  for (int h = 0; h < NMasses; h++) { // Masses
+  //  for (int h = 0; h < 7; h++) { // Masses
     Int_t f = 3;
     if      (Type.Contains("BzM",TString::kIgnoreCase))  f = 7;
     else if (Type.Contains("Bz",TString::kIgnoreCase))   f = 2;
@@ -246,7 +246,7 @@ void bichselG10(const Char_t *type="Bz") {
     Int_t color = h+1;
     if (color > 8) color -= 8;
     //    if (color > 7) color++;
-#if 0
+#if 1
     func->SetLineColor(color);
     func->SetMarkerColor(color);
 #endif
@@ -262,5 +262,5 @@ void bichselG10(const Char_t *type="Bz") {
     leg->AddEntry(fA,Names[h]);
 #endif
   }
-  //  leg->Draw();
+  leg->Draw();
 }
