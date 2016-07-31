@@ -1300,7 +1300,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	}
 	Double_t n_P = FdEdx[k].dxC*PiD.dNdx[kPidPion];
 	Double_t sigma = 1./n_P;
-	Double_t dEN = TMath::Log(1e6*FdEdx[k].dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
+	Double_t dEN = TMath::Log(1e9*FdEdx[k].dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
 	Double_t zdEMVP = StdEdxModel::instance()->zdE(n_P,sigma); // log(dE[keV])
 	Double_t Vars[9] = {
 	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB-1].dEdxN,
@@ -1888,15 +1888,14 @@ void StdEdxY2Maker::V0CrossCheck() {
 void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   static Int_t _debug = 0; 
   Double_t Val[2];
-  static TF1 *zdE[2] = {0};
-  static TF1 *fMPV[2] = {0};
+  static TF1 *zFunc[2] = {0};
+  //  static TF1 *fMPV[2] = {0};
   StdEdxModel::ESector kTpcOuterInner;
-  if (! zdE[0]) {
+  if (! zFunc[0]) {
     for (Int_t kk = 0; kk < 2; kk++) {
       kTpcOuterInner = static_cast<StdEdxModel::ESector>(kk);
-      zdE[kTpcOuterInner] = StdEdxModel::instance()->zdEdx(kTpcOuterInner); 
-      zdE[kTpcOuterInner]->SetParameters(0.,30.,0.0,0.25,1.0);
-      fMPV[kTpcOuterInner] = StdEdxModel::instance()->zMPV(kTpcOuterInner);
+      zFunc[kTpcOuterInner] = StdEdxModel::instance()->zFunc(kTpcOuterInner); 
+      //      fMPV[kTpcOuterInner] = StdEdxModel::instance()->zMPV(kTpcOuterInner);
     }
   }
   //                                O     I
@@ -1906,17 +1905,19 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   //  gin[0] = 0.;
   Double_t dNdx = par[0];
   for (Int_t i = 0; i < NdEdx; i++) {
-    Double_t n_P = dNdx*FdEdx[i].dxC;
+    Double_t dX = FdEdx[i].dxC;
+    Double_t n_P = dNdx*dX;
     Double_t n_PL = TMath::Log(n_P);
     kTpcOuterInner = StdEdxModel::kTpcOuter;
     if (FdEdx[i].row < 13) kTpcOuterInner = StdEdxModel::kTpcInner;
-    zdE[kTpcOuterInner]->SetParameter(1,n_P);
+    zFunc[kTpcOuterInner]->SetParameter(0,n_PL);
     Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
-    zdE[kTpcOuterInner]->SetParameter(3,Sigma);
-    Double_t dE = 1e6*FdEdx[i].dEdx*FdEdx[i].dxC; // GeV => keV
+    zFunc[kTpcOuterInner]->SetParameter(1,Sigma);
+    Double_t dE = 1e9*FdEdx[i].dEdx*dX; // GeV => eV
     Double_t z  = TMath::Log(dE);
-    Double_t zMPV = fMPV[kTpcOuterInner]->Eval(n_PL,sigma_p[kTpcOuterInner]);
-    Double_t prob = zdE[kTpcOuterInner]->Eval(z-zMPV);///zdE->Eval(0);
+    Double_t w  = z; // - n_PL;
+    //    Double_t zMPV = fMPV[kTpcOuterInner]->Eval(n_PL,sigma_p[kTpcOuterInner]);
+    Double_t prob = zFunc[kTpcOuterInner]->Eval(w);///zFunc->Eval(0);
     FdEdx[i].Prob = prob;
     if (prob <= 0.0) f += 100;
     else             f -= 2*TMath::Log(prob);
@@ -1930,7 +1931,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
 //________________________________________________________________________________
 void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
   Double_t dNdx = 0;
-  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].dEdx*1e6/StdEdxModel::instance()->W()/2;
+  for (Int_t i=0;i<NdEdx;i++) dNdx += FdEdx[i].dEdx*1e6/45.44e-3/2; //StdEdxModel::instance()->W()/2;
   if (NdEdx>5) {
     dNdx /= NdEdx;
     Double_t arglist[10];
