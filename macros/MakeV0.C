@@ -40,7 +40,7 @@ void MakeV0(Int_t nevents=1000, const Char_t *parn = "K0s", Int_t RunID = 1)
   TString ParName(parn);
   Int_t Npart = 10;
   if      (ParName == "K0s"  )      iD = 16;
-  else if (ParName == "StK0s"  )   {iD =707; Npart =   1;}
+  else if (ParName == "StK0s"  )   {iD = 16; Npart =   1;}
   else if (ParName == "K0l"  )      iD = 10;
   else if (ParName == "gamma")     {iD =  1; Npart = 100;}
   else if (ParName == "Lambda")     iD = 18;
