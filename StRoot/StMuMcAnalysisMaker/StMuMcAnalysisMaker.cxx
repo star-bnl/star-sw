@@ -771,21 +771,22 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   nStiVertex += NoKFVertices;
   
   Int_t NoPrimaryVertices = StMuDst::instance()->numberOfPrimaryVertices();  //if (_debugAsk) cout << "\tPrimaryVertices " << NoPrimaryVertices<< std::endl;
-  const int NoStVertices = NoPrimaryVertices;
+  const int NoStVertices = 1; // NoPrimaryVertices;
   //  const int NoStVertices = NoPrimaryVertices;
   vector<KFVertex> PrimVertex(NoStVertices);
   //vector<KFVertex> PrimVertex(NoPrimaryVertices);
   vector< vector<int> > PrimTracks(NoPrimaryVertices);
   
   float bestRank=-1000000;
-  int bestPV=0;
+  int bestPV=-1;
   
-  for (Int_t l = 0; l < NoPrimaryVertices; l++) {
+  for (Int_t l = 0; l < NoStVertices; l++) {//NoPrimaryVertices; l++) {
     StMuPrimaryVertex *Vtx = StMuDst::instance()->primaryVertex(l);
     //       Vtx->Print();
-    if (bestRank>Vtx->ranking()) continue;
-    bestRank=Vtx->ranking();
-    bestPV=l;
+    if (bestRank < Vtx->ranking()) {
+      bestRank = Vtx->ranking();
+      bestPV = l;
+    }
     //convert StMuPrimaryVertex to KFVertex
     KFPVertex primVtx_tmp;
     primVtx_tmp.SetXYZ(Vtx->position().x(), Vtx->position().y(), Vtx->position().z());
@@ -903,20 +904,21 @@ void StMuMcAnalysisMaker::FillVertexPlots(){
   const Double_t field = StMuDst::instance()->event()->magneticField();
   
   mStKFParticleInterface->SetField(field);
+#if 0
   if(NoKFTracks > 0)
     mStKFParticleInterface->SetBeamLine( *(StMuDst::instance()->KFtrack(0)));
-  
+#endif  
   mStKFParticleInterface->SetParticles(particles);
   mStKFParticleInterface->SetParticlesPdg(particlesPdg);
   
   
   mStKFParticleInterface->InitParticles();
-  if(NoPrimaryVertices>0)
+  if(NoStVertices>0)
     {
-      for(int iPV=0; iPV<NoPrimaryVertices; iPV++)
+      for(int iPV=0; iPV<NoStVertices; iPV++)
 	{
 	  if (iPV==bestPV)
-	    mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]);
+	    mStKFParticleInterface->AddPV(PrimVertex[iPV], PrimTracks[iPV]); // <<<<<<<<<<<
 	}
     }
   else
