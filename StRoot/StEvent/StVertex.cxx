@@ -267,6 +267,7 @@ StPtrVecTrackMassFit StVertex::massFits(StTrackFilter& filter) {
 }
 //______________________________________________________________________________
 void StVertex::addMassFit(StTrackMassFit* p) {
+  p->SetParentID(key());
   mMassFits.push_back(p);
   p->setVertex(this);
 }

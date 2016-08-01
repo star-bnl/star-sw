@@ -44,6 +44,7 @@ public:
     virtual StTrackType     type() const {return (!vertex()) ? massFit : massFitAtVx; }
     const KFParticle* kfParticle() const {return mKFParticle;}
     KFParticle*       kfParticle()       {return mKFParticle;}
+    void SetParentID(Int_t id) {mKFParticle->SetParentID(id);}
     void setKFParticle(KFParticle* particle = 0) {mKFParticle = (particle) ? new KFParticle(*particle) : 0;}
     virtual void Print(Option_t *option="") const {cout << option << *this << endl; }
     
