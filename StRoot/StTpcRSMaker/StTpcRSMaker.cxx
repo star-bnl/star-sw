@@ -415,6 +415,10 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
       mChargeFraction[io]->SetRange(-x,x);
       mChargeFraction[io]->Save(xminP,xmaxP,0,0,0,0);
     }
+    memset(mLocalYDirectionCoupling[io], 0, sizeof(mLocalYDirectionCoupling[io]));
+    for (Int_t j = 0; j < 7; j++) {
+      mLocalYDirectionCoupling[io][j] = mChargeFraction[io]->Eval(anodeWirePitch*j);
+    }
     //  TF1F *func = new TF1F("funcP","x*sqrt(x)/exp(2.5*x)",0,10);
     // see http://www4.rcf.bnl.gov/~lebedev/tec/polya.html
     // Gain fluctuation in proportional counters follows Polya distribution. 
@@ -1112,8 +1116,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		St_TpcResponseSimulatorC::instance()->T0offsetI() : 
 		St_TpcResponseSimulatorC::instance()->T0offsetO();
 	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);  // #1
+#if 0
 	      Double_t dely[1]      = {transform.yFromRow(r)-yOnWire};            
 	      Double_t localYDirectionCoupling = mChargeFraction[io]->GetSaveL(dely);
+#else
+	      Int_t idWire = TMath::Abs(TMath::Nint((transform.yFromRow(r)-yOnWire)/anodeWirePitch));
+	      if (idWire > 6) continue;
+	      Double_t localYDirectionCoupling = mLocalYDirectionCoupling[io][idWire];
+#endif
     if (ClusterProfile) {
 	      checkList[io][10]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),localYDirectionCoupling);
     }

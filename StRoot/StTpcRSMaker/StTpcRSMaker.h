@@ -119,6 +119,7 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower;  //!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
+  Double_t    mLocalYDirectionCoupling[2][7]; //!
   const Int_t NoOfSectors;            //!
   Int_t       NoOfRows;               //!
   Int_t       NoOfInnerRows;          //!
