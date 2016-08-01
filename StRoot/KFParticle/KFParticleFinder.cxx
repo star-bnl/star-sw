@@ -56,24 +56,10 @@ KFParticleFinder::KFParticleFinder():
   fCutsPartPart[1][0] = -10;  fCutsPartPart[1][1] = 3;  fCutsPartPart[1][2] = 3;  
 }
 
-void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
-                     std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
-{
-  //* Finds particles (K0s and Lambda) from a given set of tracks
-// std::cout << "kfp size  " <<  sizeof(KFParticle) << std::endl;
+//________________________________________________________________________________
+void KFParticleFinder::Init(int nPV) {
   fNPV = nPV;
   
-  const int nPartPrim = vRTracks[2].NPions() * vRTracks[3].NKaons() + 
-                        vRTracks[3].NPions() * vRTracks[2].NKaons() + 
-                        vRTracks[2].NKaons() * vRTracks[3].NKaons() + 
-                        vRTracks[2].NKaons() * vRTracks[3].NProtons() + 
-                        vRTracks[3].NKaons() * vRTracks[2].NProtons() + 
-                        vRTracks[2].NElectrons() * vRTracks[3].NElectrons() + 
-                        vRTracks[2].NMuons() * vRTracks[3].NMuons();
-
-  const int nPart = vRTracks[0].NPions() * vRTracks[1].NPions() +
-                    vRTracks[0].NPions() * vRTracks[1].NProtons() +
-                    vRTracks[1].NPions() * vRTracks[0].NProtons() + nPartPrim;
   
 //std::cout << "NPart estim " << nPart << std::endl;
 //   Particles.reserve(vRTracks.size() + nPart);
@@ -117,6 +103,24 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
     fPrimCandidatesTopoMass[iCandidates].resize(fNPV);
   }
   
+}
+//________________________________________________________________________________
+
+void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* ChiToPrimVtx,
+                     std::vector<KFParticle>& Particles, std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx, int nPV)
+{
+  Init(nPV);
+  const int nPartPrim = vRTracks[2].NPions() * vRTracks[3].NKaons() + 
+                        vRTracks[3].NPions() * vRTracks[2].NKaons() + 
+                        vRTracks[2].NKaons() * vRTracks[3].NKaons() + 
+                        vRTracks[2].NKaons() * vRTracks[3].NProtons() + 
+                        vRTracks[3].NKaons() * vRTracks[2].NProtons() + 
+                        vRTracks[2].NElectrons() * vRTracks[3].NElectrons() + 
+                        vRTracks[2].NMuons() * vRTracks[3].NMuons();
+
+  const int nPart = vRTracks[0].NPions() * vRTracks[1].NPions() +
+                    vRTracks[0].NPions() * vRTracks[1].NProtons() +
+                    vRTracks[1].NPions() * vRTracks[0].NProtons() + nPartPrim;
   int nEmcClusters = 0;
   if(fEmcClusters)
     nEmcClusters = fEmcClusters->Size();
@@ -126,6 +130,8 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
 
   if(nPartEstimation < 100000)
     Particles.reserve(nPartEstimation);
+  //* Finds particles (K0s and Lambda) from a given set of tracks
+// std::cout << "kfp size  " <<  sizeof(KFParticle) << std::endl;
   {
     KFPTrack kfTrack;
     for(int iV=0; iV<4; iV++)

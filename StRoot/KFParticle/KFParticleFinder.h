@@ -28,6 +28,7 @@ class KFParticleFinder
   KFParticleFinder();
   ~KFParticleFinder() {};
   
+  void Init(int nPV);
   void SetNThreads(short int n) { fNThreads = n;}
 
   /// Find particles with 2-body decay channel from input tracks vRTracks with primary vertex PrimVtx:

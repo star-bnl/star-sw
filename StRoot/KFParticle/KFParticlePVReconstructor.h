@@ -38,7 +38,7 @@ class KFParticlePVReconstructor{
   void ReconstructPrimVertex(); // find primary vertex
 
      /// Accessors
-  int NPrimaryVertices() const { return fPrimVertices.size(); }
+  int NPrimaryVertices() { return fPrimVertices.size(); }
   KFParticle &GetPrimVertex(int iPV=0)   { return fPrimVertices[iPV]; };
   KFVertex   &GetPrimKFVertex(int iPV=0)   { return fPrimVertices[iPV]; };
   vector<int>& GetPVTrackIndexArray(int iPV=0) { return fClusters[iPV].fTracks; }

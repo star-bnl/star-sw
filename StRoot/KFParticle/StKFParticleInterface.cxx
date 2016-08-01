@@ -31,6 +31,8 @@ void StKFParticleInterface::SetBeamLine(KFParticle& p)
 void StKFParticleInterface::InitParticles()
 { 
   fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg );
+  Int_t NPV =  fKFParticleTopoReconstructor->NPrimaryVertices();
+  fKFParticleTopoReconstructor->GetKFParticleFinder()->Init(NPV);
 }
 
 void StKFParticleInterface::ReconstructParticles()

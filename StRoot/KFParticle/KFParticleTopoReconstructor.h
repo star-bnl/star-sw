@@ -88,6 +88,7 @@ class KFParticleTopoReconstructor{
   const KFPTrackVector* GetTracks() const { return fTracks; }
   const kfvector_float* GetChiPrim() const { return fChiToPrimVtx; }
   
+  KFParticleFinder* GetKFParticleFinder() { return fKFParticleFinder; }
   const KFParticleFinder* GetKFParticleFinder() const { return fKFParticleFinder; }
   
   void CleanPV() {

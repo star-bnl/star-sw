@@ -51,7 +51,7 @@ class StKFParticleInterface: public TObject
   void AddParticle(const KFParticle& p);
   void AddCandidate(const KFParticle& candidate, int iPV = -1);
   
-  const KFParticleTopoReconstructor* GetTopoReconstructor() const { return fKFParticleTopoReconstructor; }
+  const KFParticleTopoReconstructor* GetTopoReconstructor() { return fKFParticleTopoReconstructor; }
   
  private:
    
