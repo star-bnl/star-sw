@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.296 2016/06/13 15:53:49 jwebb Exp $
+* $Id: geometry.g,v 1.297 2016/07/29 18:56:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.297  2016/07/29 18:56:00  jwebb
+* Add support for y2014c / y2015d / y2016a geometries, taking into account lasted changes in IST and SST
+*
 * Revision 1.296  2016/06/13 15:53:49  jwebb
 * Corrected logic error which creates mtd twice in y2015c+
 *
@@ -1382,6 +1385,7 @@ replace [exe DTUB01;] with [ "Add DTUB (no op)"; ]
 
 replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
 replace [exe ISTD02;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=2; ]
+replace [exe ISTD03;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=3; ]
 
 replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
 replace [exe PSUPof;] with [ "Add the pixel supports to the IDSM"; PSUP=off; ]
@@ -2431,6 +2435,7 @@ REPLACE [exe y2014c;] with ["Y2014 production plus hcal prototype";
     exe y2014a;      "y2014a baseline";
     exe TPCE05r;      "agstar version of yf model with reduced Rmax";
     exe hcalv0;      "Prototype hcal";
+    exe ISTD03;      "Updated IST";
 ]
 
 REPLACE [exe y2015;] with ["Y2015 first cut geometry";
@@ -2494,6 +2499,10 @@ REPLACE [exe y2015c;] with ["Y2015 production geometry";
     exe y2015b; "Base off of y2015b";
     exe Mutd16; "Use corrected MTD geometry";
 ]
+REPLACE [exe y2015d;] with ["Y2015 production geometry";
+    exe y2015c; "Base off of y2015b";
+    exe ISTD03; "Updated IST"
+]
 
 
 REPLACE [exe y2016;] with ["Y2016 first cut geometry";
@@ -2522,6 +2531,35 @@ REPLACE [exe y2016;] with ["Y2016 first cut geometry";
     exe PSUP01;      "1st version of pixl supports";
     exe FPDM04;      "FMS plus preshower";
 ]
+
+REPLACE [exe y2016a;] with ["Y2016 production level geometry";
+    exe FGTDof;      "switch off FGT";
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+
+    exe VPDD08;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD16;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe IDSM14;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD03;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL62;      "Full config of the pixl detector with Al cables";
+    exe DTUB01;      "DTUB";
+    exe PSUP01;      "1st version of pixl supports";
+    exe FPDM04;      "FMS plus preshower";
+]
+
+
 
 
 REPLACE [exe dev2016;] with ["Y2016 development tag";
@@ -3617,7 +3655,7 @@ If LL>0
   Case y2014b   { y2014b : y2014a plus hcal prototype;          
                   Geom = 'y2014b    '; exe y2014b; }
 
-  Case y2014c   { y2014c : y2014a plus hcal prototype;          
+  Case y2014c   { y2014c : y2014a with updated ist   ;          
                   Geom = 'y2014c    '; exe y2014c; }
 
   Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
@@ -3632,8 +3670,15 @@ If LL>0
   Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015c    '; exe y2015c;  }
 
+  Case y2015d   { y2015d : y2015c production baseline, with updated IST;
+                  Geom = 'y2015d    '; exe y2015d;  }
+
+
   Case y2016  { y2016 : y2016 baseline;
                   Geom = 'y2016     '; exe y2016; }
+
+  Case y2016a { y2016a : y2016 baseline;
+                  Geom = 'y2016a    '; exe y2016a; }
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
                   Geom = 'dev2016   '; exe dev2016; }
@@ -5396,6 +5441,7 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
    IF ISTD {
      IF IstdConfig==1 { CONSTRUCT istdgeo0; }
      IF IstdConfig==2 { CONSTRUCT istdgeo1; }
+     IF IstdConfig==3 { CONSTRUCT istdgeo2; }
    }
 
 
