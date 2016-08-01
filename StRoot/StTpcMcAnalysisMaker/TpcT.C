@@ -1134,9 +1134,9 @@ void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
     }
     pbinsL[bin] = TMath::Log(pbins[bin]);
   }
-  TH2D *inout[2] = {0};
-  inout[0] = new TH2D("dPdTI","log(dE(eV)/nP) versus log(nP) for Inner sector",Npbins-1,pbinsL,500,0.0,10.0);
-  inout[1] = new TH2D("dPdTO","log(dE(eV)/nP) versus log(nP) for Outer sector",Npbins-1,pbinsL,500,0.0,10.0);
+  TH2F *inout[2] = {0};
+  inout[0] = new TH2F("nPdTI","log(dE(eV)/nP) versus log(nP) for Inner sector",Npbins-1,pbinsL,500,0.0,10.0);
+  inout[1] = new TH2F("nPdTO","log(dE(eV)/nP) versus log(nP) for Outer sector",Npbins-1,pbinsL,500,0.0,10.0);
   while (iter.Next()) {
     if (fNoRcHit != 1) continue;
     if (fNoMcHit != 1 && fNoMcHit != 3) continue;
