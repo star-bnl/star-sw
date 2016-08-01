@@ -938,22 +938,19 @@ void StMuDst::printMcTracks() {
 //________________________________________________________________________________
 void StMuDst::PrintMcVx(UInt_t idVx) {
   if (! mcVertices()) return;
-  if (idVx > 0 && idVx <= numberOfMcVertices()) {
-    StMuMcVertex *mcVertex = MCvertex(idVx-1);	
-    if (! mcVertex) return;
-    if (mcTracks()) {
-      UInt_t iMcTk = mcVertex->IdParTrk();
-      if (iMcTk > 0 && iMcTk <= numberOfMcTracks()) {
-	StMuMcTrack *mcTrack = MCtrack(iMcTk-1);
-	if (mcTrack) {
-	  cout << *mcVertex << "\t" << *mcTrack << "\t" << mcTrack->GeName() << endl;
-	} else {
-	  cout << *mcVertex << endl;
-	}
+  if (idVx <= 0 || idVx > numberOfMcVertices()) return;
+  StMuMcVertex *mcVertex = MCvertex(idVx-1);	
+  if (! mcVertex) return;
+  if (mcTracks()) {
+    UInt_t iMcTk = mcVertex->IdParTrk();
+    if (iMcTk > 0 && iMcTk <= numberOfMcTracks()) {
+      StMuMcTrack *mcTrack = MCtrack(iMcTk-1);
+      if (mcTrack) {
+	cout << *mcVertex << "\t" << *mcTrack << "\t" << mcTrack->GeName() << endl;
+	return;
       }
-    } else {
-      cout << *mcVertex << endl;
     }
+    cout << *mcVertex << endl;
   }
 }
 //________________________________________________________________________________
