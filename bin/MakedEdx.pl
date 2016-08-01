@@ -1506,7 +1506,10 @@ my @badruns = qw(
 #$hist = "RunXVIAuAu200p12"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 07/22/16 remove TpcAdcCorrectionB to test Z dependence
 #$hist = "RunXVIAuAu200p13"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/23/16 Z-dependence exits, step back to RunXVIAuAu200p9 with new TpcAdcCorrectionB correction
 #$hist = "RunXVIAuAu200p14"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/25/16 new TpcSecRowB & TpcRowQ, add TanL histograms
-$hist = "RunXVIAuAu200p15"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/26/16 add TanL correction
+#$hist = "RunXVIAuAu200p15"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/26/16 add TanL correction
+#$hist = "RunXVIAuAu200p16"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/29/16 new TpcSecRowB & TpcRowQ
+#$hist = "RunXVIAuAu200p17"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";# 07/31/16 step back to RunXVIAuAu200p14 (TanL correction does not work), back to Bichsel model (take CVS version) check retreat
+$hist = "RunXVIAuAu200p18"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/01/16 TpcZCorrectionB.20160207.000017.C
 my $prod = $hist; #$Production;
 
 $prod =~ s/\*//g;
@@ -1681,7 +1684,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT "source $GROUP_DIR/setup gcc451;\n";
       if ($STAR_LEVEL ne "\.DEV2") {
 	print OUT "source $GROUP_DIR/setup gcc;\n";
-	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+#	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       } 
 #      else {
 #	print OUT "setenv NODEBUG yes\n";

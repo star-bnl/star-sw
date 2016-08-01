@@ -1,6 +1,10 @@
+#include "Riostream.h"
 #include "TPrincipal.h"
-   
-void dEdxPrincipal(Int_t n=45, Int_t m=10000) 
+#include "TMath.h"   
+#include "TH1.h"
+#include "TRandom.h"
+using namespace std;
+void dEdxPrincipal(Int_t n=45, Int_t m=1000000) 
 {
 
   cout << "*************************************************" << endl; 
@@ -30,7 +34,22 @@ void dEdxPrincipal(Int_t n=45, Int_t m=10000)
   Double_t IC[7] = {0.989,  0.850,  0.100,  0.004,  0.000,  0.000,  0.000};
   Double_t OC[7] = {0.986,  0.953,  0.726,  0.223,  0.036,  0.005,  0.001};
   Double_t* data = new Double_t[n];
-  Double_t* data = new Double_t[n];
+  Double_t xmin = -5, xmax = 5;
+  TH1F *X = new TH1F("X","x - distribution (cm)", 100, xmin,xmax);
+  TH1F *YI = new TH1F("YI","y - distribution (cm) Inner", 100, xmin,xmax);
+  TH1F *YO = new TH1F("YO","y - distribution (cm) Outer", 100, xmin,xmax);
+  for (Int_t i = 0; i < m; i++) {
+    Double_t x = xmin + (xmax - xmin)*random->Rndm(-1);
+    X->Fill(x);
+    Int_t iGG = TMath::Nint(x/0.1); // Gating Grid wire
+    Int_t iA  = TMath::Nint(x/0.4); // Anode wire
+    Int_t jA = TMath::Abs(iA);
+    if (jA > 6) continue;
+    YI->Fill(x,IC[jA]);
+    YO->Fill(x,OC[jA]);
+  }
+  
+#if 0
   for (Int_t i = 0; i < m; i++) {
 
     // First we create the un-correlated, random variables, according
@@ -76,5 +95,5 @@ void dEdxPrincipal(Int_t n=45, Int_t m=10000)
   // Start a browser, so that we may browse the histograms generated
   // above 
   TBrowser* b = new TBrowser("principalBrowser", principal);
-  
+#endif  
 }
