@@ -2623,12 +2623,14 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   // par[5] - electorn -"-
   // par[6] - deuteron -"-
   // par[7] - Total
+#ifdef __HEED_MODEL__
   // par[8] - case
   // par[9] - scale
   // par[10]- row
   Int_t row = par[10];
   StdEdxModel::ESector kTpcOuterInner = StdEdxModel::kTpcOuter;
   if (row > 0 && row <= 13) kTpcOuterInner = StdEdxModel::kTpcInner;
+#endif /* __HEED_MODEL__ */
   // ratio dN/dx_h / dN/dx_pi:      P        K        e        d
   static Double_t dNdxR[4] = {1.97273, 1.32040, 1.16313, 3.42753};
   static Int_t _debug = 0;
@@ -2646,7 +2648,11 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
   static Double_t ln10 = TMath::Log(10.);
   Double_t sigma = par[2];
   if (sigma != sigmaOLD) {
+#ifndef __HEED_MODEL__
+    TF1 *zdE = StdEdxModel::instance()->zdEdx();  
+#else /* __HEED_MODEL__ */
     TF1 *zdE = StdEdxModel::instance()->zdEdx(kTpcOuterInner);  
+#endif /* __HEED_MODEL__ */
     sigmaOLD = sigma;
     fracpiOld = -1;
     static const Char_t *names[5] = {"pi","P","K","e","d"};
@@ -2659,7 +2665,11 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       }
       Double_t entries = projNs[i]->GetEntries();
       Double_t mean    = projNs[i]->GetMean();
+#ifndef __HEED_MODEL__
+      Double_t mpv     = StdEdxModel::instance()->zMPV()->Eval(mean,sigma);
+#else /* __HEED_MODEL__ */
       Double_t mpv     = StdEdxModel::instance()->zMPV(kTpcOuterInner)->Eval(mean,sigma);
+#endif /* __HEED_MODEL__ */
       Double_t RMS     = projNs[i]->GetRMS();
       if (i == 0) {
 	meanPion = mean;
@@ -2670,8 +2680,13 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       for (Int_t ix = 1; ix <= nx; ix++) {
 	Double_t v =  projNs[i]->GetBinContent(ix);
 	if (v > 0.0) {
+#ifndef __HEED_MODEL__
+	  Double_t n_PL10 = projNs[i]->GetBinCenter(ix);
+	  Double_t n_P = TMath::Exp(n_PL10*ln10);
+#else /* __HEED_MODEL__ */
 	  Double_t n_PL = projNs[i]->GetBinCenter(ix);
 	  Double_t n_P = TMath::Exp(n_PL);
+#endif /* __HEED_MODEL__ */
 	  Double_t Sigma = TMath::Sqrt(sigma*sigma + 1./n_P);
 	  zdE->SetParameter(1, n_P);
 	  zdE->SetParameter(2,mpv - mpvPion);
@@ -2719,11 +2734,19 @@ Double_t gNFunc(Double_t *x=0, Double_t *par=0) {
       c1->Update();
     }
   }  
+#ifndef __HEED_MODEL__
+  Double_t Value = par[7]*TMath::Exp(par[0])*hists[NFIT_HYP]->Interpolate(x[0]-par[1]);
+#else /* __HEED_MODEL__ */
   Double_t Value = par[7]*TMath::Exp(par[0])*hists[NFIT_HYP]->Interpolate(par[9]*(x[0]-par[1]));
+#endif /* __HEED_MODEL__ */
   return Value;
 }
 //________________________________________________________________________________
+#ifndef __HEED_MODEL__
+TF1 *FitNF(TH1 *proj, Option_t *opt) {// fit with no. of primary clusters
+#else /* __HEED_MODEL__ */
 TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t row) {// fit with no. of primary clusters
+#endif /* __HEED_MODEL__ */
   for (Int_t ih = 0; ih < 5; ih++) {
     if (! projNs[ih]) {
       cout << "projNs[" << ih << "] is not defined. Abort." << endl;
@@ -2741,8 +2764,13 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t row) {// fit with no. of primary clus
   TF1 *g2 = (TF1*) gROOT->GetFunction("GN");
   enum {NFIT_HYP = 5}; // ignore e and d
   if (! g2) {
+#ifndef __HEED_MODEL__
+    g2 = new TF1("GN",gNFunc, -5, 5, 9);
+    g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
+#else /* __HEED_MODEL__ */
     g2 = new TF1("GN",gNFunc, -5, 5, 11);
     g2->SetParName(0,"norm");   g2->SetParLimits(0,-80,80);
+#endif /* __HEED_MODEL__ */
     g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
     g2->SetParName(2,"Sigma");  g2->FixParameter(2, 0); // g2->SetParLimits(2,0.,0.5);
     g2->SetParName(3,"P");      g2->SetParLimits(3,0.0,TMath::Pi()/2);
@@ -2752,8 +2780,10 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t row) {// fit with no. of primary clus
     //    g2->SetParName(6,"ScaleL"); g2->SetParLimits(6,-2.5,2.5);
     g2->SetParName(7,"Total");
     g2->SetParName(8,"Case");
+#ifdef __HEED_MODEL__
     g2->SetParName(9,"Scale"); g2->SetParameter(9,1); g2->SetParLimits(9,0.5,1.5);
     g2->SetParName(10,"row");
+#endif /* __HEED_MODEL__ */
     //    g2->SetParName(7,"factor"); g2->SetParLimits(7,-.1,0.1);
   }
   // Find pion peak
@@ -2773,16 +2803,24 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t row) {// fit with no. of primary clus
     if (xp < xpi) xpi = xp;
   }
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
+#ifndef __HEED_MODEL__
+  g2->SetParameters(0, xpi, 0.0, 0.0, 0.1, 0.1, 0.0,0.0,-1.);
+#else /* __HEED_MODEL__ */
   g2->SetParameters(0, xpi, 0.0, 0.0, 0.1, 0.1, 0.0,0.0,-1., 1., row);
+#endif /* __HEED_MODEL__ */
   g2->FixParameter(2, 0); 
+#ifdef __HEED_MODEL__
   g2->FixParameter(3, 0); 
   g2->FixParameter(4, 0); 
+#endif /* __HEED_MODEL__ */
   g2->FixParameter(5,0);
   g2->FixParameter(6,0);
   g2->FixParameter(7,total);
   g2->FixParameter(8,-1);
+#ifdef __HEED_MODEL__
   g2->SetParameter(9,1); //TMath::Log(10.));
   g2->FixParameter(10, row);
+#endif /* __HEED_MODEL__ */
   gNFunc();
   TFitResultPtr res =  proj->Fit(g2,Opt.Data());
   Int_t iok = res->Status();
@@ -3086,8 +3124,10 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
     Float_t da3;
     Float_t da4;
     Float_t da5;
+#ifdef __HEED_MODEL__
     Float_t Scale;
     Float_t dScale;
+#endif /* __HEED_MODEL__ */
   };
   Fit_t Fit;
   //  TString NewRootFile(gSystem->DirName(fRootFile->GetName()));
@@ -3112,7 +3152,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   }
   if (! FitP) {
     FitP = new TNtuple("FitP","Fit results",
+#ifndef __HEED_MODEL__
+		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
+#else /* __HEED_MODEL__ */
 		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5:Scale:dScale");
+#endif /* __HEED_MODEL__ */
     FitP->SetMarkerStyle(20);
     FitP->SetLineWidth(2);
   }
@@ -3221,7 +3265,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	}
 	Opt = opt;
 	Opt += "S";
+#ifndef __HEED_MODEL__
+	g = FitNF(proj,Opt);
+#else /* __HEED_MODEL__ */
 	g = FitNF(proj,Opt,Fit.j);
+#endif /* __HEED_MODEL__ */
       }
       else if (TString(FitName) == "XF" && dim == 3) {
 	Opt = opt;
@@ -3293,10 +3341,12 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	Fit.da3  	 = g->GetParError(6);
 	Fit.da4  	 = g->GetParError(7);
 	Fit.da5  	 = g->GetParError(8);
+#ifdef __HEED_MODEL__
 	if (Fit.Npar > 9) {
 	  Fit.Scale      = params[9];
 	  Fit.dScale     = g->GetParError(9);
 	}
+#endif /* __HEED_MODEL__ */
       } else {
 	delete proj; continue;
       }
