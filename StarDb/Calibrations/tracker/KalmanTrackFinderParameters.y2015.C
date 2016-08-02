@@ -22,7 +22,7 @@ memset(&row,0,tableSet->GetRowSize());
 //SST 4 -- 21 < R < 28 cm 
 
     row.mHitRegions	 =   28170904; // pxl1<4>pxl2<9<pxl3<17<SST<28;
-    row.mHitWeights	 =    9090309; // Coeffs of nhits. sum must be >=20;
+    row.mHitWeights	 =   22220101; // Coeffs of nhits. sum must be >=20;
     row.maxChi2Vertex	 =        900; // max vertex incremental chi2 value acceptable;
     row.massHypothesis	 =      0.139; // mass used in the tracking for mcs and eloss calculation purposes;
     row.maxDca2dZeroXY	 =          6; // max 2d dca to X=Y=0  for primary track;
