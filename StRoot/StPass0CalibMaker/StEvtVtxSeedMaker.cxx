@@ -29,7 +29,7 @@ Int_t StEvtVtxSeedMaker::Make() {
     return kStErr;
   }
  
-  Int_t result = kStOk;
+  int result = kStOk;
   for (pvn=0; pvn<event->numberOfPrimaryVertices(); pvn++) {
     result = StVertexSeedMaker::Make();
     if (result != kStOk) break;
@@ -38,8 +38,8 @@ Int_t StEvtVtxSeedMaker::Make() {
   return result;
 }
 //_____________________________________________________________________________
-Bool_t StEvtVtxSeedMaker::CheckTriggers() {
-  Bool_t notTrig = kTRUE;
+bool StEvtVtxSeedMaker::CheckTriggers() {
+  bool notTrig = kTRUE;
 
   // Check trigger ids
   StTriggerIdCollection* trigIdColl = event->triggerIdCollection();
@@ -56,7 +56,7 @@ Bool_t StEvtVtxSeedMaker::CheckTriggers() {
   return notTrig;
 }
 //_____________________________________________________________________________
-Int_t StEvtVtxSeedMaker::GetEventData() {
+int StEvtVtxSeedMaker::GetEventData() {
   // Get primary vertex from StEvent
   StPrimaryVertex* primVtx = event->primaryVertex(pvn);
   if (!primVtx) {
@@ -69,6 +69,7 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
     fill = (int) (runInfo->beamFillNumber(blue));
     run = runInfo->runId();
   }
+  timeEvent = event->time();
 
   StThreeVectorF pvert = primVtx->position();
   StThreeVectorF epvert = primVtx->positionError();
@@ -140,14 +141,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.13 2015/05/19 19:36:09 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.13 2015/05/19 19:36:09 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.14 2016/08/02 21:17:16 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.14  2016/08/02 21:17:16  genevb
+// Added tDay,tFill to resNtuple, and improved C++11 compliance
+//
 // Revision 1.13  2015/05/19 19:36:09  genevb
 // Code cleanup in preparation for C++11
 //

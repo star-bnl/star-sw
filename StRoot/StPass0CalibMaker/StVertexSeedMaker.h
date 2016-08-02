@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.25 2016/08/02 21:17:17 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -29,7 +29,7 @@
  * The ntuple is called resNtuple and includes the following quantities
  * for each vertex:
  * - event  : serial ID number of the event in which the vertex was found
- * - run    : run in which the event was acquired
+ * - run    : run in which the event was acquired (excludes Run year digits)
  * - fill   : collider fill in which the run was acquired
  * - zdc    : ZDC coincidence rate at the time the event was acquired
  * - trig   : an offline trigger ID which the event satisfies
@@ -49,6 +49,8 @@
  * - hmatch : uncapped number of daughter tracks matched to HFT
  * - pmatch : uncapped number of daughter tracks with TPC prompt hits
  * - pct    : uncapped number of daughter post-crossing tracks
+ * - tDay   : time of event after start of the day (GMT) [seconds]
+ * - tFill  : time of event after start of the fill [seconds]
  * - detmap : packed information on daughter tracks matched in detectors
  *   (the number of matched tracks is always a subset of mult)...
  *   <table cellspacing=0 cellpadding=3>
@@ -94,10 +96,10 @@ class StVertexSeedMaker : public StMaker {
    virtual void PrintInfo();
    virtual void Clear(Option_t *option);
    virtual Int_t Finish();
-   virtual Int_t Aggregate(Char_t* dir=0, const Char_t* cuts="", const Int_t offset=0);
+   virtual int Aggregate(char* dir=0, const char* cuts="", const int offset=0);
 
    virtual void FitData();
-   virtual void FindResult(Bool_t checkDb=kTRUE);
+   virtual void FindResult(bool checkDb=kTRUE);
    virtual int GetValidityDate();
    virtual int GetValidityTime();
    virtual void UseEventDateTime();
@@ -105,33 +107,33 @@ class StVertexSeedMaker : public StMaker {
    virtual void UseAllTriggers();
    virtual St_vertexSeed* VertexSeedTable();
    virtual void WriteTableToFile();     // Write vertex seed table
-   virtual void SetOffset(Int_t offset=0) {foffset = offset;} // time offset in writing table name
-   virtual void SetNoClobber(Bool_t noclob=kTRUE) {noclobber = noclob;} // clobber existing files?
+   virtual void SetOffset(int offset=0) {foffset = offset;} // time offset in writing table name
+   virtual void SetNoClobber(bool noclob=kTRUE) {noclobber = noclob;} // clobber existing files?
    virtual void SetMinEntries(int entries);  //minimum number of valid events for seed
    virtual void SetMaxX0Err(float err);  //maximum allowed error for x0 
    virtual void SetMaxY0Err(float err);  //maximum allowed error for y0 
-   virtual void WriteHistFile(Bool_t writeFit);   // Write out vertexseedhist.root file w/results
+   virtual void WriteHistFile(bool writeFit);   // Write out vertexseedhist.root file w/results
    virtual void HistFileByDefault();   // Write out file on Finish
    virtual void SetVertexZmax(float zmax);  //Set max z vertex for seed calculation
    virtual void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $ built " __DATE__ " " __TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.25 2016/08/02 21:17:17 genevb Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
  protected:
    virtual void Reset();
-   virtual Int_t FillAssumed();
-   virtual Int_t GetVertexSeedTriggers();
-   virtual void FillDateTime();
+   virtual int FillAssumed();
+   virtual int GetVertexSeedTriggers();
+   virtual void GetADateTime();
    virtual void GetFillDateTime();
-   virtual Bool_t BetterErrors();
-   virtual Bool_t ChangedValues();
-   virtual Bool_t CheckTriggers() { return kTRUE; }
-   virtual Bool_t ValidTrigger(unsigned int);
-   virtual Int_t GetEventData() { return kStErr; }
+   virtual bool BetterErrors();
+   virtual bool ChangedValues();
+   virtual bool CheckTriggers() { return kTRUE; }
+   virtual bool ValidTrigger(unsigned int);
+   virtual int GetEventData() { return kStErr; }
    virtual void AddResults(TNtupleD* ntup);
    virtual TString NameFile(const char* type, const char* prefix, const char* suffix);
    virtual TNtupleD* newBLpars();
@@ -158,35 +160,37 @@ class StVertexSeedMaker : public StMaker {
   float zVertexMax; //maximum allowed z vertex for mean calculation
   float zVertexMin; //minimum allowed z vertex for mean calculation
   float r2VertexMax; //minimum allowed radius^2 vertex for mean calculation
-  int    fill;
-  int    date;
-  int    time;
-  int    foffset;
-  Bool_t noclobber;
-  int    run;
-  float  zdc; // ZDC coincidence rate
-  float  sumzdc; // running sum of zdc
+  int   fill;
+  int   date;
+  int   time;
+  int   foffset;
+  bool  noclobber;
+  int   run; // excludes first 2 digits (Run year) for 24 bit precision limit
+  float zdc; // ZDC coincidence rate
+  float sumzdc; // running sum of zdc
+  int   timeEvent; // unix time of event
+  int   timeFill; // unix time of fill
   // The following integer maps can only be stored to 24 bits
   // because of the conversion to float
-  int    itpc; // inner tpc track map
-  int    otpc; // inner tpc track map
-  int    detmap; // map any other detectors
-  int    bmatch; // matches with BEMC
-  int    ematch; // matches with EEMC
-  int    tmatch; // matches with BTOF
-  int    cmatch; // matches across TPC Central Membrane
-  int    hmatch; // matches with HFT
-  int    pmatch; // matches with TPC prompt hits
-  int    pct; // post-crossing tracks
-  float  rank;
+  int   itpc; // inner tpc track map
+  int   otpc; // inner tpc track map
+  int   detmap; // map any other detectors
+  int   bmatch; // matches with BEMC
+  int   ematch; // matches with EEMC
+  int   tmatch; // matches with BTOF
+  int   cmatch; // matches across TPC Central Membrane
+  int   hmatch; // matches with HFT
+  int   pmatch; // matches with TPC prompt hits
+  int   pct; // post-crossing tracks
+  float rank;
   unsigned int pvn; // primery vertex index number
-  int    minEntries;
-  float    maxX0Err;
-  float    maxY0Err;
-  Bool_t   mHistOut;
-  TFile*   mTempOut;
-  Bool_t   useEventDateTime;
-  Bool_t   useAllTriggers;
+  int   minEntries;
+  float maxX0Err;
+  float maxY0Err;
+  bool  mHistOut;
+  TFile* mTempOut;
+  bool  useEventDateTime;
+  bool  useAllTriggers;
   double p[4];  // calculated params
   double ep[4]; // calculated errs
   double a[4];  // database params
@@ -214,8 +218,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.24 2015/05/18 21:25:47 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.25 2016/08/02 21:17:17 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.25  2016/08/02 21:17:17  genevb
+// Added tDay,tFill to resNtuple, and improved C++11 compliance
+//
 // Revision 1.24  2015/05/18 21:25:47  genevb
 // Use HFT hits
 //
