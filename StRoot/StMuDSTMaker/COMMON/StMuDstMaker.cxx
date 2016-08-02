@@ -1430,8 +1430,14 @@ void StMuDstMaker::fillVertices(StEvent* ev) {
   mVtxList.Clear();
   for (Int_t i_vtx=0; i_vtx < n_vtx; i_vtx++) {
     const StPrimaryVertex *vtx=ev->primaryVertex(i_vtx);
+    if (! vtx) continue;
     addType( mArrays[muPrimaryVertex], vtx, typeOfVertex );
     mVtxList.AddAtAndExpand(ev->primaryVertex(i_vtx),i_vtx);
+    const StTrackMassFit* parent = vtx->parent();
+    if (! parent) continue;
+    const KFParticle* particle = parent->kfParticle();
+    if (! particle) continue;
+    fillKFVertices(particle);
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1562,6 +1568,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     }
   }
   // all other tracks
+#if 0
   const StTrack* track=0;
   for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
     track = node->track(j);
@@ -1569,18 +1576,18 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     if (track->type() == massFitAtVx || track->type() == massFit) {
       KFParticle *particle = ((StTrackMassFit *) track)-> kfParticle();
       if (! particle) continue;
-      if (track->type() == massFitAtVx)  {
-	if (index > -1) particle->SetRefId(index);
-	fillKFTracks(particle);
-      } else {
-	if (index2Global > -1) particle->SetRefId(index2Global);
-	fillKFVertices(particle);
-      }
-      continue;
+      fillKFTracks(particle);
     }
-    if (oTCA) {
-      if (track->bad()) continue;
-      index = addTrack(oTCA, ev, track, track->vertex(), cut, index2Global, l3);
+  }
+#endif
+  if (oTCA) {
+    const StTrack* tr=0;
+    size_t nEntries = node->entries();
+    for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
+      tr = node->track(j);
+      if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
+	index = addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
+      }
     }
   }
 }
