@@ -341,12 +341,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (corl->min >= corl->max) {
 	iok = 0;
       } else {
-	for (; l < nrows; l += 2) {
-	  corl = cor + l;
-	  if (corl->min <= VarX && VarX <= corl->max) {
-	    iok = 0;
-	    break;
-	  }
+	if (corl->min <= VarX && VarX <= corl->max) {
+	  iok = 0;
 	}
       }
       if (iok) return iok;

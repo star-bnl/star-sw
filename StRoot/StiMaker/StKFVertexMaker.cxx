@@ -1002,6 +1002,7 @@ Bool_t StKFVertexMaker::ParticleFinder() {
 	    }
 	    StTrackMassFit *V0Track = new StTrackMassFit(V0.Id(),(KFParticle *) &V0);
 	    PrPP(ParticleFinder,*V0Track);
+	    stVtx->setParent(V0Track);
 	    V0Vx->setParent(V0Track);
 	    StTrackNode *nodepf = TrackNodeMap[kgp];
 	    if (! nodepf) {
