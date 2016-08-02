@@ -1,7 +1,7 @@
 /*!
  * \class StEvtVtxSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $
+ * \version $Id: StEvtVtxSeedMaker.h,v 1.5 2016/08/02 21:17:17 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -29,13 +29,13 @@ class StEvtVtxSeedMaker : public StVertexSeedMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StEvtVtxSeedMaker.h,v 1.5 2016/08/02 21:17:17 genevb Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
  protected:
-   virtual Bool_t CheckTriggers();
-   virtual Int_t  GetEventData();
+   virtual bool   CheckTriggers();
+   virtual int    GetEventData();
 
    StEvent* event;
 
@@ -46,8 +46,11 @@ class StEvtVtxSeedMaker : public StVertexSeedMaker {
 
 #endif
 
-// $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $
+// $Id: StEvtVtxSeedMaker.h,v 1.5 2016/08/02 21:17:17 genevb Exp $
 // $Log: StEvtVtxSeedMaker.h,v $
+// Revision 1.5  2016/08/02 21:17:17  genevb
+// Added tDay,tFill to resNtuple, and improved C++11 compliance
+//
 // Revision 1.4  2014/08/06 11:43:32  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //

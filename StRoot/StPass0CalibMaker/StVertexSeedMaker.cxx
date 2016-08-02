@@ -37,12 +37,12 @@
 static TArrayF xVert, yVert, zVert, multA, exVert, eyVert;
 int nverts,nsize;
 double beamWidth;
-Double_t funcX(float z,Double_t *par) {
-  Double_t x = par[0] + par[1]*z;
+double funcX(float z,Double_t *par) {
+  double x = par[0] + par[1]*z;
   return x;
 }
-Double_t funcY(float z,Double_t *par) {
-  Double_t y = par[2] + par[3]*z;
+double funcY(float z,Double_t *par) {
+  double y = par[2] + par[3]*z;
   return y;
 }
 void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
@@ -146,7 +146,7 @@ void StVertexSeedMaker::Reset() {
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch:pmatch:pct:vpdz");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch:pmatch:pct:vpdz:tDay:tFill");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
 
   date = 0;
@@ -198,15 +198,17 @@ void StVertexSeedMaker::Clear(Option_t *option){
   hmatch = 0;
   pmatch = 0;
   pct = 0;
+  timeEvent = -1;
+  timeFill = -1;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Make(){
-  if (date==0) FillDateTime();
+  if (date==0) GetADateTime();
 
   // Currently only finds database values for first event
   if (a[0] == -888) {
     LOG_INFO << "Reading db values at the start..." << endm;
-    Int_t status = FillAssumed();
+    int status = FillAssumed();
     if (status != kStOk) return status;
     status = GetVertexSeedTriggers();
     if (status != kStOk) return status;
@@ -217,7 +219,7 @@ Int_t StVertexSeedMaker::Make(){
     return kStOk;
   }
 
-  Int_t eventResult = GetEventData();
+  int eventResult = GetEventData();
   if (eventResult != kStOk) return eventResult;
 
   if (zvertex<-998) {
@@ -240,14 +242,14 @@ Int_t StVertexSeedMaker::Make(){
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
 
-    float XX[24];
+    float XX[26];
     XX[0]  = (float) GetEventNumber();
     XX[1]  = xvertex;
     XX[2]  = yvertex;
     XX[3]  = zvertex;
     XX[4]  = mult;
     XX[5]  = trig;
-    XX[6]  = (float) run;
+    XX[6]  = (float) (run % 1000000);
     XX[7]  = (float) fill;
     XX[8]  = zdc;
     XX[9]  = rank;
@@ -265,6 +267,8 @@ Int_t StVertexSeedMaker::Make(){
     XX[21] = (float) pmatch;
     XX[22] = (float) pct;
     XX[23] = vpd_zvertex;
+    XX[24] = (float) (timeEvent % 86400);
+    XX[25] = (float) (timeFill >=0 ? timeEvent - timeFill : timeFill);
     resNtuple->Fill(XX);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
     sumzdc += zdc;
@@ -278,12 +282,12 @@ Int_t StVertexSeedMaker::Finish() {
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
-Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
+bool StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   // Determine if trigger id is among valid set
   if (!dbTriggersTable) return kTRUE; // running without DB access
   vertexSeedTriggers_st* trigsTable = dbTriggersTable->GetTable();
-  Int_t nTrigs = (Int_t) dbTriggersTable->GetNRows();
-  for (Int_t i = 0; i < nTrigs; i++, trigsTable++) {
+  int nTrigs = (int) (dbTriggersTable->GetNRows());
+  for (int i = 0; i < nTrigs; i++, trigsTable++) {
     unsigned int dbTid = trigsTable->trigid;
     if (useAllTriggers || dbTid == 9999999 || (dbTid > 0 && tid == dbTid)) {
       trig = (float) tid;
@@ -293,8 +297,8 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   return kFALSE;
 }
 //_____________________________________________________________________________
-void StVertexSeedMaker::FindResult(Bool_t checkDb) {
-  Bool_t writeIt = kFALSE;
+void StVertexSeedMaker::FindResult(bool checkDb) {
+  bool writeIt = kFALSE;
   if (nverts >= minEntries){
     FitData();
     if (ep[0] > maxX0Err){
@@ -308,7 +312,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
         // Do comparison of this data with data from database to see if
         // values have changed or improved.
         LOG_INFO << "Reading db values at the end..." << endm;
-        Int_t status = FillAssumed();
+        int status = FillAssumed();
         if (status == kStOk) {
           if (ChangedValues() || BetterErrors()) writeIt = kTRUE;
           else { LOG_INFO << "Values have not changed/improved." << endm; }
@@ -333,7 +337,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.61 2015/08/31 19:17:00 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -383,7 +387,7 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
   return table;
 }
 //_____________________________________________________________________________
-void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
+void StVertexSeedMaker::WriteHistFile(bool writeFit){
   if (resNtuple->GetEntries() == 0) {
     LOG_INFO << "Not writing histograms - no entries!!!" << endm;
     return;
@@ -452,7 +456,7 @@ TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const 
   return fileName;
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::FillAssumed(){
+int StVertexSeedMaker::FillAssumed(){
   TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeed");
   if (!dbDataSet) {
     LOG_ERROR << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
@@ -482,7 +486,7 @@ Int_t StVertexSeedMaker::FillAssumed(){
   return kStOk;
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::GetVertexSeedTriggers(){
+int StVertexSeedMaker::GetVertexSeedTriggers(){
   TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeedTriggers");
   if (!dbDataSet) {
     LOG_ERROR << "Could not find Calibrations/rhic/vertexSeedTriggers in database" << endm;
@@ -497,16 +501,16 @@ Int_t StVertexSeedMaker::GetVertexSeedTriggers(){
   return kStOk;
 }
 //_____________________________________________________________________________
-Bool_t StVertexSeedMaker::BetterErrors(){
-  Bool_t better = kFALSE;
+bool StVertexSeedMaker::BetterErrors(){
+  bool better = kFALSE;
   if ((ep[0] < ea[0]) || (ep[1] < ea[1]) ||
       (ep[2] < ea[2]) || (ep[3] < ea[3])) better = kTRUE;
   if (better) { LOG_INFO << "Values have improved" << endm; }
   return better;
 }
 //_____________________________________________________________________________
-Bool_t StVertexSeedMaker::ChangedValues(){
-  Bool_t changed = kFALSE;
+bool StVertexSeedMaker::ChangedValues(){
+  bool changed = kFALSE;
   for (int i = 0; i<4; i++) {
     double diff = TMath::Abs(p[i] - a[i]);
     if ((diff >= ep[i]) || (diff >= ea[i])) changed = kTRUE;
@@ -515,7 +519,7 @@ Bool_t StVertexSeedMaker::ChangedValues(){
   return changed;
 }
 //_____________________________________________________________________________
-void StVertexSeedMaker::FillDateTime() {
+void StVertexSeedMaker::GetADateTime() {
   date = GetDate();
   time = GetTime();
   LOG_INFO << "event date = " << date << endm;
@@ -544,9 +548,9 @@ void StVertexSeedMaker::GetFillDateTime() {
 
   if (ts) {
     // Find earliest entry for this fill
-    run = *(int*) (tab->getDataValue("runNumber",0));
+    run = *(static_cast<int*>(tab->getDataValue("runNumber",0)));
     LOG_INFO << tdstr << " is from run " << run << endm;
-    float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
+    float thisFill = *(static_cast<float*>(tab->getDataValue("blueFillNumber",0)));
     sprintf(queryStr,
       " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
       thisFill);
@@ -558,6 +562,7 @@ void StVertexSeedMaker::GetFillDateTime() {
     time = atoi(&(start[8]));
     start[8] = 0;
     date = atoi(start);
+    timeFill = tab->getBeginTime();
 
     LOG_INFO << "Using fill no.  = " << fill << endm;
     LOG_INFO << "Using fill date = " << date << endm;
@@ -629,7 +634,7 @@ void StVertexSeedMaker::Packer(int firstbit, int nbits, int& var, unsigned short
   (detmap &= ~(cap<<firstbit)) |= (TMath::Min(var,cap)<<firstbit);
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t offset) {
+int StVertexSeedMaker::Aggregate(char* dir, const char* cuts, const int offset) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
   // where D and T are 8 and 6 digit representations of date and time
@@ -680,6 +685,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
       int fillp = fill;
       int datep = date;
       int timep = time;
+      int timeFillp = timeFill;
       fill = fillf;
       date = datef;
       time = timef;
@@ -690,6 +696,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
       fill = fillp;
       date = datep;
       time = timep;
+      timeFill = timeFillp;
     }
 
     LOG_INFO << "Now opening file:\n  " << fileName << endm;
@@ -701,16 +708,18 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
       continue;
     }
     curNtuple->Draw(">>elistVtxSeed",cuts);
-    TEventList* elist = (TEventList*) gDirectory->Get("elistVtxSeed");
-    Int_t nentries = (elist ? (Int_t) elist->GetN() : 0);
-    Int_t nvar = curNtuple->GetNvar();
-    Int_t rvar = resNtuple->GetNvar();
-    for (Int_t entryn = 0; entryn < nentries; entryn++) {
+    TEventList* elist = static_cast<TEventList*>(gDirectory->Get("elistVtxSeed"));
+    int nentries = (elist ? (int) elist->GetN() : 0);
+    int nvar = curNtuple->GetNvar();
+    int rvar = resNtuple->GetNvar();
+    for (int entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
       unsigned int tid = (unsigned int) vals[5];
+      bool updateForTimeFill = (nvar > 24 && timeFill >=0 &&
+                                vals[24] >= 0 && vals[25] < 0);
       if (ValidTrigger(tid)) {
-        if (nvar < rvar) {
+        if (nvar < rvar || updateForTimeFill) {
           float vals2[32];
           memset(vals2,0,32*sizeof(float));
           memcpy(vals2,vals,nvar*sizeof(float));
@@ -732,6 +741,15 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
             vals2[21] = (float) pmatch;
             vals2[22] = (float) pct;
             vals2[23] = vpd_zvertex;
+          }
+          if (nvar < 25) {
+            vals2[24] = (float) (timeEvent % 86400);
+            vals2[25] = (float) (timeFill >= 0 ? timeEvent - timeFill : timeFill);
+          } else if (updateForTimeFill) {
+            // timeFill not obtained previously, but available now
+            int timeTemp = ((int) vals[24]) - (timeFill % 86400);
+            while (timeTemp < 0) timeTemp += 86400;
+            vals2[25] = (float) timeTemp;
           }
           resNtuple->Fill(vals2);
         } else
@@ -759,8 +777,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t 
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.61 2015/08/31 19:17:00 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.62 2016/08/02 21:17:17 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.62  2016/08/02 21:17:17  genevb
+// Added tDay,tFill to resNtuple, and improved C++11 compliance
+//
 // Revision 1.61  2015/08/31 19:17:00  genevb
 // Add chi and beamwidth to BLpars ntuple
 //
