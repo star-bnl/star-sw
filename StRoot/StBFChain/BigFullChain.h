@@ -1064,6 +1064,11 @@ Bfc_st BFC[] = { // standard chains
    "B2016,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
+  {"B2016a"  ,"","","ry2016a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Production chain for 2016 data (tpc)",kFALSE},
+  {"P2016a","" ,"",
+   "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // TEST
