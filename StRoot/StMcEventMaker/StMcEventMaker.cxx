@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.78 2013/03/25 23:51:19 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.79 2016/08/04 01:54:33 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.79  2016/08/04 01:54:33  perev
+ * Fix mess in indices started from 0 and 1
+ *
  * Revision 1.78  2013/03/25 23:51:19  perev
  * Mustafa.Pxl corrs
  *
@@ -330,7 +333,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.78 2013/03/25 23:51:19 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.79 2016/08/04 01:54:33 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -965,6 +968,7 @@ Int_t StMcEventMaker::Make()
 		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 							 mCurrentMcEvent->tracks().end(),
 							 ttempParticle[iEventGeneratorLabel]);
+//??????????????????Why delete(VP)????
 		    delete *trkToErase; // if we delete using the iterator, deleting should be done before erasing!
 		    mCurrentMcEvent->tracks().erase(trkToErase);
 		    
@@ -976,8 +980,8 @@ Int_t StMcEventMaker::Make()
 		// Track from GEANT, use next_parent_p to get to the parent
 		// track.  Use the same scheme as for the particle table.
 		motherIndex = trackTable[itrk].next_parent_p;
-		if ((motherIndex > 0) && (motherIndex < NTracks)) {
-		    if (motherIndex > itrk) { 
+		if ((motherIndex > 0) && (motherIndex <= NTracks)) {
+		    if (motherIndex > itrk+1) { 
 			if (Debug()) {
 			    gMessMgr->Warning()
 				<< "Wrong ordering!  Track " << itrk+1 << "from particle table: "
@@ -992,8 +996,8 @@ Int_t StMcEventMaker::Make()
 	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
 	    // Find Mother...
 	    motherIndex = particleTable[gtrk].jmohep[0];
-	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks)) {
-		if (motherIndex > gtrk) {
+	    if ((motherIndex > 0) && (motherIndex <= NGeneratorTracks)) {
+		if (motherIndex > gtrk+1) {
 		    if (Debug()) {
 			gMessMgr->Warning()
 			    << "Wrong ordering!  Track " << gtrk+1 << " from particle table: "
