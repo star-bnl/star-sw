@@ -5,6 +5,11 @@
 
 ClassImp(StMuMtdRawHit)
 
+StMuMtdRawHit::StMuMtdRawHit() : mFlag(-1), mBackLeg(-1), mChannel(-1), mTdc(-1)
+{	
+  // default constructor
+}
+
 StMuMtdRawHit::StMuMtdRawHit(const StMtdRawHit *hit){
 
 	mFlag = hit->flag();;

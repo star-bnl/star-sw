@@ -10,42 +10,42 @@ class StMuMtdHit : public TObject {
 
 public:
 
-	StMuMtdHit() {; }
-	StMuMtdHit(const StMtdHit* hit);
-	~StMuMtdHit() {; }
+  StMuMtdHit();
+  StMuMtdHit(const StMtdHit* hit);
+  ~StMuMtdHit() {; }
 
-    int             backleg() const;
-    int             module() const;
-    int             cell() const;
-    pair<double,double>   leadingEdgeTime() const;
-    pair<double,double>   trailingEdgeTime() const;
-    pair<double,double>   tot() const;
-    double          tof() const;
+  int             backleg() const;
+  int             module() const;
+  int             cell() const;
+  pair<double,double>   leadingEdgeTime() const;
+  pair<double,double>   trailingEdgeTime() const;
+  pair<double,double>   tot() const;
+  double          tof() const;
 	
-    short associatedTrackKey() const;
-    int             idTruth() const;
-    int             qaTruth() const;
-    int       index2Primary() const;
-    int        index2Global() const;
+  short associatedTrackKey() const;
+  int             idTruth() const;
+  int             qaTruth() const;
+  int       index2Primary() const;
+  int        index2Global() const;
 
 
-    void setAssociatedTrackKey(short);
-    void setIndex2Primary(int);
-    void setIndex2Global(int);
+  void setAssociatedTrackKey(short);
+  void setIndex2Primary(int);
+  void setIndex2Global(int);
 	
-private:
+ private:
 
-	UChar_t   mBackLeg;
-    UChar_t   mModule;
-    UChar_t   mCell;
-    pair<Double_t,Double_t>  mLeadingEdgeTime;
-    pair<Double_t,Double_t>  mTrailingEdgeTime;
+  UChar_t   mBackLeg;
+  UChar_t   mModule;
+  UChar_t   mCell;
+  pair<Double_t,Double_t>  mLeadingEdgeTime;
+  pair<Double_t,Double_t>  mTrailingEdgeTime;
 	
-    UShort_t  mIdTruth;  // simulation associated track id
-    UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
-    UShort_t  mTrackKey;
-    Int_t     mIndex2Primary;
-    Int_t     mIndex2Global;
+  UShort_t  mIdTruth;  // simulation associated track id
+  UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
+  UShort_t  mTrackKey;
+  Int_t     mIndex2Primary;
+  Int_t     mIndex2Global;
 
 
 ClassDef(StMuMtdHit,2)
