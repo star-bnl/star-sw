@@ -257,9 +257,14 @@ class StMtdQAMaker : public StMaker {
   TH1F             *mhEventCuts;                               // Analysis cuts used
   TH1F             *mhRunId;                                   // Run indices
   TH2F             *mhVertexXY;                                // Correlation between vertex x and y
+  TH2F             *mhVertexXZ;                                // Correlation between vertex x and z
+  TH2F             *mhVertexYZ;                                // Correlation between vertex y and z
   TH1F             *mhVertexZ;                                 // Distribution of vertex z
-  TH2F             *mhVtxZvsVpdVz;                             // Correlation between z of vertices reconstructed using tracks and VPD
-  TH1F             *mhVtxZDiff;                                // Difference between z of vertices reconstructed using tracks and VPD
+  TH2F             *mhVtxZvsVpdVzDefault;                      // Correlation between z of TPC and VPD vertices (default)
+  TH1F             *mhVtxZDiffDefault;                         // Difference between z of TPC and VPD vertices (default)
+  TH2F             *mhVtxZvsVpdVzClosest;                      // Correlation between z of TPC and VPD vertices (closest)
+  TH1F             *mhVtxZDiffClosest;                         // Difference between z of TPC and VPD vertices (closest)
+  TH2F             *mhVtxIndClosestVsRank;                     // Correlation between indices of TPC vertex closest to VPD and close/ranking to VPD
   TH1F             *mhTofStartTime;                            // Distribution of start time from BTOF
   TH2F             *mhVpdQTadc;                                // Distribution of ADC per VPD QT channel
   TH2F             *mhVpdQTtac;                                // Distribution of TAC per VPD QT channel
@@ -322,6 +327,8 @@ class StMtdQAMaker : public StMaker {
 
   // global T0 alignment
   TH2F             *mhMtdDtofVsChannel;                        // dTof of primary tracks vs channel for global alignment
+  TH2F             *mhMtdTofVsChannel;                         // MTD time of primary tracks vs channel
+  TH2F             *mhMtdExpTofVsChannel;                      // TPC time of primary tracks vs channel
 
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; 
