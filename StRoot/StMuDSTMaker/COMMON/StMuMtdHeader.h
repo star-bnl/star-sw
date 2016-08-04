@@ -11,7 +11,7 @@ class StMuMtdHeader : public TObject {
 
  public:
 
-  StMuMtdHeader() {; }
+  StMuMtdHeader();
   StMuMtdHeader(const StMtdHeader* header);
   ~StMuMtdHeader() {; }
 

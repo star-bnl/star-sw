@@ -6,6 +6,14 @@
 
 ClassImp(StMuMtdHit)
 
+
+StMuMtdHit::StMuMtdHit(): mBackLeg(-1), mModule(-1), mCell(-1),
+  mLeadingEdgeTime{-999,-999}, mTrailingEdgeTime{-999,-999},
+  mIdTruth(-1), mQuality(0), mTrackKey(0), mIndex2Primary(-1), mIndex2Global(-1)
+{
+  // default constructor
+}
+
 StMuMtdHit::StMuMtdHit(const StMtdHit *hit)
 {
 
