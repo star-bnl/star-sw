@@ -275,6 +275,7 @@ MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
 #include "St_tpcPadPlanesC.h"
+#include "St_TpcAvgPowerSupplyC.h"
 //________________________________________________________________________________
 void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
   if (St_tpcPadPlanesC::instance()->padRows() != 45) {
@@ -338,8 +339,17 @@ void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, 
   }
 }
 //________________________________________________________________________________
+Float_t St_tpcAnodeHVC::voltage(Int_t i) const {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+     LOG_ERROR << "St_tpcAnodeHVC::voltage(" << i << " is called but the valid St_TpcAvgPowerSupplyC::instance() exists" << endm;
+  }
+  return Struct(i)->voltage;
+}
+//________________________________________________________________________________
 Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
-  
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+    return St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,padrow);
+  }
   Int_t e1 = 0, e2 = 0;
   Float_t f2 = 0;
   St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
@@ -355,7 +365,6 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
-#include "St_TpcAvgPowerSupplyC.h"
 MakeChairOptionalInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
 //________________________________________________________________________________
 Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
@@ -367,6 +376,7 @@ Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t v1=Voltage()[8*(sector-1)+ch1-1] ;
   if (f2==0) return v1;
   Int_t ch2 = St_TpcAvgCurrentC::ChannelFromSocket((e2-1)%19 + 1);
+  if (ch1 == ch2) return v1;
   Float_t v2=Voltage()[8*(sector-1)+ch2-1] ;
   if (v2==v1) return v1;
   // different voltages on influencing HVs
@@ -395,6 +405,13 @@ Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
 
 #include "St_tpcAnodeHVavgC.h"
 MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
+//________________________________________________________________________________
+Float_t St_tpcAnodeHVavgC::voltage(Int_t i) const {
+  if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
+     LOG_ERROR << "St_tpcAnodeHVavgC::voltage(" << i << " is called but the valid St_TpcAvgPowerSupplyC::instance() exists" << endm;
+  }
+  return Struct(i)->voltage;
+}
 //________________________________________________________________________________
 Bool_t St_tpcAnodeHVavgC::tripped(Int_t sector, Int_t padrow) const {
   if (! St_TpcAvgPowerSupplyC::instance()->Table()->IsMarked()) {
