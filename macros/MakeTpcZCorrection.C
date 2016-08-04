@@ -8,7 +8,7 @@ root.exe Z3CGFRunXVIAuAu200p14.root lDb.C
   TF1* Pol = pol2;
   Pol->SetRange(xmin,xmax); 
   TH2 *Mu = mu;
-  MakeTpcZCorrection(Mu,Pol);
+  MakeRow(Mu,1,2,0,1);
  */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
