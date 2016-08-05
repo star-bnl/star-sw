@@ -1,0 +1,525 @@
+* * $Id: bfc.kumac,v 1.82 1999/03/11 16:56:52 kathy Exp $
+* $Log: bfc.kumac,v $
+* Revision 1.82  1999/03/11 16:56:52  kathy
+* changed default directory to pick up input file
+*
+* Revision 1.81  1999/01/26 18:39:20  kathy
+* changed location of input data files to disk00000/star/test_data
+*
+* Revision 1.80  1999/01/26 14:37:53  didenko
+* added fde and dftpc to chain from Janet
+*
+* Revision 1.79  1998/12/15 15:04:26  kathy
+* fix for writing out hijing files
+*
+* Revision 1.78  1998/12/09 22:04:54  kathy
+* changed all examples and default chains to use ev02 ev0d instead of ev0
+*
+* Revision 1.77  1998/12/08 19:25:50  kathy
+* now allow skip events when using mdin
+*
+* Revision 1.76  1998/11/06 19:32:55  kathy
+* allow 2 ntuples to be written to same ntuple file
+*
+* Revision 1.75  1998/11/04 16:50:32  kathy
+* implement ntup2 chain and inputs to bfc macro - now can write 2 ntuples while processing
+*
+* Revision 1.74  1998/10/26 21:45:43  kathy
+* add input to run bfc_cleanup at end of job
+*
+* Revision 1.73  1998/10/20 21:08:09  kathy
+* changed default settings
+*
+* Revision 1.72  1998/10/13 16:14:29  kathy
+* change default input settings
+*
+* Revision 1.71  1998/09/30 15:58:23  kathy
+* implement dchkt correctly
+*
+* Revision 1.70  1998/09/30 13:30:51  kathy
+* make log a global variable
+*
+* Revision 1.69  1998/09/25 19:25:07  kathy
+* fix error conditions; correct nev_total and nev_proc for EOF or end run records
+*
+* Revision 1.68  1998/09/25 15:38:55  kathy
+* bfc & bfc_util --> corrected how parts are skipped out of if there are errors; for rg2t -> had to create newtable with large rowcount for hepe_gent in order to copy it since copy does not take care of extending rows
+*
+* Revision 1.67  1998/09/24 20:18:14  kathy
+* make default order: egr, evr, ev0 in all chains
+*
+* Revision 1.66  1998/09/24 19:02:10  kathy
+* put in calin and emc chain variables; move bfc information to README
+*
+* Revision 1.65  1998/09/24 16:33:19  kathy
+* implement new ev0j chain variable; fix print message for log file in bfc.kumac; kumac to read dst and create ev0join table; kumacs to analyse ev0join ntuple
+*
+* Revision 1.64  1998/09/24 15:10:15  kathy
+* update event counters and messages
+*
+* Revision 1.63  1998/09/23 19:48:27  kathy
+* make global macros more standard
+*
+* Revision 1.62  1998/09/23 19:33:10  kathy
+* put line continuations in where missing
+*
+* Revision 1.61  1998/09/23 19:25:06  kathy
+* new example list in bfc and new examples
+*
+* Revision 1.60  1998/09/23 17:38:07  kathy
+* fix event counters; fix output messages; Pavels fix for rg2t; remove first from input list and change all call examples for this; revise dictionary in bfc to make current
+*
+* Revision 1.59  1998/09/22 14:43:23  kathy
+* change input file name
+*
+* Revision 1.58  1998/09/21 20:26:34  kathy
+* example to see how to implement user code in call_bfc_read_dst_user.kumac; updated documentation in bfc.kumac
+*
+* Revision 1.57  1998/09/21 19:56:41  kathy
+* new (ebye1) and (user) chain variables implemented;  new example to read in dst and do analysis -> call_bfc_read_dst_ebye.kumac
+*
+* Revision 1.55  1998/09/16 19:39:10  kathy
+* rm dst_chain.kumac because don't want to keep them up; fix dictionary in bfc; put emacs bfc.kumac &! into bfc to show users where to add in their own calls for testing
+*
+* Revision 1.54  1998/09/16 18:51:01  kathy
+* put in new dictionary items and example list
+*
+* Revision 1.53  1998/09/16 16:08:54  kathy
+* new chain variable ntup to write ntuple in bfc
+*
+* Revision 1.52  1998/09/16 15:27:14  kathy
+*  fix for skip events so it picks up correct bfc_util
+*
+* Revision 1.51  1998/09/15 21:08:55  kathy
+* make bfc skip events for fzin & dstin also
+*
+* Revision 1.50  1998/09/14 21:34:25  kathy
+* put print stmt in bfc to tell # events; put new chain variable dstin in bfc_util; call_bfc_read_dst is shell to read in dst
+*
+* Revision 1.49  1998/09/14 16:49:41  kathy
+* clean up
+*
+* Revision 1.48  1998/09/14 15:14:56  kathy
+* clean up
+*
+* Revision 1.47  1998/09/14 15:11:04  kathy
+*  removed input_data_prefix from input to macro bfc and now have directory and file read in from input_data_file
+*
+* Revision 1.46  1998/09/11 21:22:07  kathy
+*  made dout default in bfc instead of evout
+*
+* Revision 1.45  1998/09/11 21:04:57  kathy
+* made new default call_bfc_readfz_to_dst.kumac to read the fz file and do all processing thru dst packages
+*
+* Revision 1.44  1998/09/11 20:25:22  kathy
+* make default settings of bfc macro correct for MDC
+*
+* Revision 1.43  1998/09/11 14:39:04  kathy
+* take care of errors when reading input file using evin; take care of case when next record on file is run directory in bfc_process -- skip out and go to bfc_finish
+*
+* Revision 1.42  1998/09/10 18:33:01  kathy
+* add new chain variable - dout - and make new output file output_dst_file; changed steering kumac for ftpc from call_bfc_reco_ftpc to call_bfc_reco_trk_ftpc; cleaned up call_bfc_tpc_svt_sim_global_dst.kumac
+*
+* Revision 1.41  1998/09/03 19:47:42  kathy
+* fixed skipping events in bfc, added 2 new example chains
+*
+* Revision 1.40  1998/08/31 20:16:18  kathy
+* rearranged order of chain variables in call*.kumac to make it correct; cleaned up bfc*.kumac; now have aliases stafcv_ok,bad defined in setup.kumac
+*
+* Revision 1.39  1998/08/25 00:32:11  fisyak
+* Add log summary
+*
+* Revision 1.38  1998/08/25 00:20:16  kathy
+* put in Lanny's changes: now have dpnt, desum working
+*
+* Revision 1.37  1998/08/24 23:36:43  kathy
+* cleaned up
+*
+* Revision 1.36  1998/08/20 12:37:07  fisyak
+* Add STAF_STATUS checks
+*
+* Revision 1.35  1998/08/19 21:43:27  fisyak
+* Add spr
+*
+* Revision 1.34  1998/08/17 14:34:09  fisyak
+* Add splitted output
+*
+* Revision 1.33  1998/08/13 20:33:26  fisyak
+* Add log_file as parameters for fmessage
+*
+* Revision 1.32  1998/08/12 23:08:39  kathy
+* now have all ftpc modules in bfc
+*
+* Revision 1.31  1998/08/12 22:27:09  kathy
+* added new chain values to bfc_util:  evr,ddedx,dmsft,dmhrd,desum,drsum,emc,jet,ctf,mwc,trg
+*
+* Revision 1.30  1998/08/12 15:48:28  kathy
+* more comments; combine geomtype+phystype into gstar_settings, use gstar_settings=field_only as default when not running gstar
+*
+* Revision 1.29  1998/08/10 15:51:03  kathy
+* added comments for fzin
+*
+* Revision 1.28  1998/08/07 23:44:50  kathy
+* made output_file to be used for fzout or evout; removed unnecessary user/input from bfc_util with evgin
+*
+* Revision 1.27  1998/08/03 20:41:57  kathy
+* now use detp geometry instead of bfc_util#bfc_gstar_setup to load settings for gstar
+*
+* Revision 1.26  1998/08/01 20:34:01  kathy
+* separated tid from tpt - now it's a separate variable in chain as it should be
+*
+* Revision 1.25  1998/07/31 21:22:38  kathy
+* now can skip events in bfc.kumac
+*
+* Revision 1.24  1998/07/29 20:53:36  kathy
+* corrected for unecessary inputs to macros
+*
+* Revision 1.23  1998/07/28 22:18:55  kathy
+* oops!
+*
+* Revision 1.22  1998/07/28 21:37:54  kathy
+* moved bfc_defaults and bfc_load out of bfc_util and into kumacs/util setup_defaults and load_libraries; changed bfc kumacs to reflect this - also now allow input text file to run gstar off of; fixed up some comments
+*
+* Revision 1.21  1998/07/22 21:31:22  kathy
+* changed all names in chains to be 5 characters or less: evg2tin -> g2tin and ev0_eval2 -> ev0_e
+*
+* Revision 1.20  1998/07/22 15:32:51  kathy
+*  fixed space in input parameters that caused it not to run
+*
+* Revision 1.19  1998/07/21 23:35:13  kathy
+* changed names of some items in chain, separated gstar and g2t parts, made bfc and bfc_mdc consistent
+*
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* ************************************************************************
+* 
+* SYNOPSIS: STAF analysis driver 
+* 
+* NOTE ==> (Kathy 9/16/98) 
+* - to add in user code while testing, search this kumac for "!!!"
+* - this is to be done for personal use.  When your stuff is ready to
+*   be released, ask Kathy to make it official and she'll put it in bfc_util
+* 
+* TO RUN:
+*
+*  1. stardev (or whichever version you want)
+*  2. staf
+*  3. exec $STAR/kumacs/chain/bfc
+* 
+* if you want to change anything, copy kumac to your area and change:
+*  4. input values on macro command line
+*  5. default directory list where you pick up kumacs from 
+*
+******************************************************************
+*
+* History:
+*  Feb 24, 97 - created by H. Caines, C. Pruneau
+*  editted May 1, 1998 -  Kathy Turner
+*  editted May 5, 1998 - Kathy
+*  editted May 22, 1998 - editted by Kathy Turner 
+*                       - broke up tpc into simulation & tracker
+*  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs
+*  editted June 3, 1998 by Kathy Turner - new versions of svt kumacs
+*  editted 6/10/98 Kathy Turner - new tpc tables in new version of tpc kumac
+*  editted 6/12/98 Kathy Turner - put in tpc slow sim - had to add new inputs
+*                               to macro (adcxyzon,tpc_sector_first,_last)
+* editted 6/22/98 Yuri Fisyak - split into bfc & bfc_util to make into a 
+*                               real chain & 
+*                               changed to work with new pam kumacs that
+*                               have different directories, new svt pams that
+*                               have separate inits and make into a chain
+* editted 6/25/98 Kathy Turner - fixing up after Yuri - get all pkgs working
+* editted 6/26/98 Kathy Turner - put in dictionary of input values &
+*                                example chains
+* editted 7/2/98 Kathy Turner - tpc code now required geometry libraries!
+* editted 7/9/98 Kathy Turner - track evaluation now available for tpc slowsim
+* editted 7/11/98 K. Turner - no longer need input value adcxyzon - use tfc
+*                             in chain instead
+* editted 7/11/98 K. Turner - added evgin,rgst,rg2t
+* editted 7/11/98 K. Turner - added evin
+* editted 7/21/98 K. Turner - renamed rgst -> rungst
+*                                     rg2t -> rung2t
+*                                      g2t -> rdg2t 
+* editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
+* editted 7/31/98 K. Turner - now can skip events at beginning (g2tin)
+* editted 8/1/98  K. Turner - separated out tid from tpt as requested
+* editted 8/3/98  K. Turner - use detp geometry command for gstar setup
+* editted 8/12/98 K. Turner - more comments; combine geomtype+phystype into
+*                             gstar_settings; use gstar_settings=field_only
+*                             if not running gstar
+* editted 8/12/98 K. Turner - added new modules to chain:
+*                               ==> chain name/module
+*                                    evr       evr
+*                                    ddedx     dst_dedx_filler
+*                                    dmsft     dst_monitor_soft_filler
+*                                    dmhrd     not available yet
+*                                    desum     fill_dst_event_summary
+*                                    drsum     fill_dst_run_summary
+*                                    emc       ems_interface2
+*                                    jet       emc_egrid,emc_erj
+*                                    ctf       cts,ctu
+*                                    mwc       mws,mwu
+*                                    trg       l3cl,ftf_tpc - won't work yet
+* 
+* editted 8/12/98 K. Turner - added new module to chain: 
+*                               ==> chain name/module
+*                                     ffs - ftpc fast sim
+*                                     fss - ftpc slow sim
+*                                     fcl - ftpc clustering
+*                                     fpt - ftpc tracking
+*                                     fte - ftpc track evaluator
+* 
+* 
+* editted 8/24/98 K. Turner - put in changes from Lanny:
+*                               ==> chain name/module
+*                                   dpnt  - dst point filler
+*                                   desum - dst event summary - now works
+* 
+* editted 9/10/98 K. Turner - check on vector havedstrunsum and 
+*                             skip out - was set in bfc_util
+* editted 9/10/98 K. Turner - add new calculation to bfc: output_dst_file
+*                             for use with new chain variable dout
+* editted 9/11/98 K. Turner - check if problem during read from 
+*                             read_table_from_file and skip out
+*                             
+* editted 9/14/98 K. Turner - removed input_data_prefix as input to macro bfc
+*                             and input put both dir + file in input_data_file
+* editted 9/16/98 K. Turner - put in !!! to show where to put user code
+* 
+* editted 9/21/98 K. Turner - add inputs and global macros for ebye stuff
+*                           - remove !!! for user kumacs
+* editted 9/23/98 K. Turner - fixing messages and event counters
+*                               nev_total = total # events read in, including skipped events
+*                               nev_proc = total # events processed (not incl. skipped)
+*                               nev_pass = total # events passed the processing
+* 
+* editted 9/24/98 K. Turner - moved BFC information to README file
+* 
+* editted 11/4/98 K. Turner - allow more than 1 ntuple in the ntuple file
+* 
+* editted 12/14/98 K.Turner - create name of output generator file
+* 
+* editted 01/25/99 J. Seyboth - added fde and dftpc to chain
+*
+****************************************************************
+***  see README file for explanation of BFC *** 
+*****************************************************************
+*****************************************************************
+*****************************************************************
+*****************************************************************
+*****************************************************************
+*****************************************************************
+*****************************************************************
+ 
+MACRO bfc _
+   TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   ebye_prior_switch=0 _
+   ebye_ensemble_switch=0 _
+   ebye_analysis_switch=1 _
+   gstar_settings=' field_only' _
+   domain=' geometry g2t ftpc tpc emc ctf mwc svt global ' _
+   chain=' fzin rg2t tpg svg tss tcl tcl_e srs ems ctf mwc fss fcl fpt fte fde tpt tid tte_e sgr spr drhd dehd svm egr evr ev02 ev0d ddedx dpnt dftpc desum dmsft drsum dout ' _
+   skip=0 _
+   no_events=1 _
+   input_data_file=/disk00000/star/mdc1_test_data/mdc1_year2a_psc079_01_46evts.fza _
+   output_file=year2a_psc079_01_46evts _
+   log=bfc.log _
+   nunit=21 _
+   nfile=globtrk.ntup _
+   nid=111 _
+   ntable=event/data/global/dst/globtrk _
+   nid2=112 _
+   ntable2=event/data/global/dst/event_summary _
+   cleanup=0
+  
+* **********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+    
+ input_file = [input_data_file]
+ first = [skip]+1
+ last = [skip]+[no_events]
+ 
+  output_xdf_file = [output_file].xdf
+  output_fzd_file = [output_file].fzd
+  output_dst_file = [output_file]_dst.xdf  
+  output_gen_file = [output_file]_gen.xdf
+  
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** Calibration Directory   --> ' [calib_dir]
+ message ' *** Input file              --> ' [input_file]
+ message ' *** Num Events to skip      --> ' [skip]
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ message ' *** modules to process      --> ' [chain]  
+ message ' *** gstar settings          --> ' [gstar_settings]
+ message ' *** output xdf (evout)file name  --> ' [output_file].xdf
+ message ' *** output fzd (fzout)file name  --> ' [output_file].fzd
+ message ' *** output dst (dout) file name  --> ' [output_file]_dst.xdf
+ message ' *** tpc_sector_first        --> ' [tpc_sector_first]
+ message ' *** tpc_sector_last         --> ' [tpc_sector_last]
+ message ' *** ntuple file unit #      --> ' [nunit]
+ message ' *** ntuple file name        --> ' [nfile]
+ message ' *** ntuple id               --> ' [nid]
+ message ' *** ntuple table            --> ' [ntable]
+ message ' *** Ebye Prior Switch       --> ' [ebye_prior_switch]
+ message ' *** Ebye Ensemble Switch    --> ' [ebye_ensemble_switch]
+ message ' *** Ebye Analysis Switch    --> ' [ebye_analysis_switch] 
+ message ' *** log                     --> ' [log]
+ message ' *** run cleanup at end 1=yes --> ' [cleanup] 
+***********************************************************
+* GLOBAL VARIABLES - created from macro inputs 
+***********************************************************
+ 
+ macro/global/create TOP              [TOP] 
+ macro/global/create calib_dir        [calib_dir]
+ macro/global/create tpc_sector_first [tpc_sector_first]  'first sector in TPC'
+ macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
+ macro/global/create ebye_prior_switch    [ebye_prior_switch]
+ macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
+ macro/global/create ebye_analysis_switch [ebye_analysis_switch]
+ macro/global/create input_file       [input_file]        'Input file name'
+ macro/global/create output_file      [output_file]       'Output file name'
+ macro/global/create gstar_settings   [gstar_settings]
+ macro/global/create output_xdf_file  [output_xdf_file] 
+ macro/global/create output_fzd_file  [output_fzd_file]
+ macro/global/create output_dst_file  [output_dst_file]
+ macro/global/create output_gen_file  [output_gen_file]       
+ macro/global/create log_file         [log]
+ macro/global/create nunit            [nunit]
+ macro/global/create nfile            [nfile]
+ macro/global/create nid              [nid]
+ macro/global/create ntable           [ntable]
+ macro/global/create nid2             [nid2]
+ macro/global/create ntable2          [ntable2]
+	   
+
+***********************************************************
+* BEGINNING STUFF 
+* **********************************************************
+    
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup
+ 
+ macro/global/import *
+   
+ exec bfc_util#bfc_start _
+   domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
+ if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
+ 
+* macro/global/import *
+   
+ string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
+   fmessage $quote([string])  [log_file]
+ string =   '---<bfc>-- s:'//[skip]//' f:'//[first]//' l:'//[last]
+   fmessage $quote([string])  [log_file]
+ string =  '---<bfc>-- c:'//[chain]
+   fmessage $quote([string])  [log_file]
+   
+ if $iquest(1)<>0 goto ABEND
+ 
+ exec bfc_util#bfc_init chain=[chain]
+ if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
+
+  
+***********************************************************
+* SKIP EVENTS 
+* **********************************************************
+
+   if [skip].ge.1 then
+     test=[chain]
+     nw=$words([test])
+     do i=1,[nw]
+       mod=$word([test],[i],1)
+       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin.or.[mod].eq.fzin.or.[mod].eq.dstin.or.[mod].eq.mdin then 
+           message ' SKIP ' [skip] ' EVENTS FOR ' [mod]
+	   do ievent = 1,[skip]
+	       nev_total = [nev_total] + 1
+               exec bfc_util#bfc_process chain=[mod]
+               if (STAF_STATUS(1).ne. stafcv_ok) goto FINISH
+      message ' =====> BFC skip, #events total,processed,passed = ' _
+          [nev_total] [nev_proc] [nev_pass]
+           enddo
+       endif
+     enddo
+   endif
+
+*****************************************
+*  MAIN EVENT LOOP 
+***************************************** 
+ 
+ message cpu time = $cptime
+   
+ do ievent=[first],[last]	| loop over events
+   message ' =====> BFC in processing loop, ievent = ' [ievent]
+   nev_total = [nev_total] + 1
+   nev_proc = [nev_proc] + 1
+   tabclear [event]          | zero all tables
+   exec bfc_util#bfc_process [chain]
+   if (STAF_STATUS(1).ne. stafcv_ok) goto FINISH
+   
+   if ($vexist(havedstrunsum).ne.0) then
+     message ' BFC: skip to bfc_finish because got to run_summary'
+     goto FINISH
+   endif
+   if ($vexist(readprob).ne.0) then
+     message ' BFC: skip to bfc_finish because problem reading input file'
+     goto FINISH
+   endif 
+   
+   nev_pass = [nev_pass] + 1
+
+   message ' =====> BFC proc: #events total,processed,passed = ' _
+      [nev_total] [nev_proc] [nev_pass]
+ enddo
+
+*****************************************
+*  FINISH
+* ****************************************
+ 
+FINISH:
+  vec/input staf_status(1) stafcv_ok 
+  exec bfc_util#bfc_finish [chain]
+  if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
+  
+  message ' =====> BFC FINAL: #events total,processed,passed = ' _
+      [nev_total] [nev_proc] [nev_pass]
+  
+  if ([cleanup].eq.1) then
+    exec bfc_cleanup#run [chain]
+  endif
+  
+  
+ goto END
+  
+ABEND:
+ message "<bfc> Fatal error"
+fmessage "<bfc> Fatal error" [log_file]
+ 
+END:
+ 
+RETURN
+ 
+******************************************************************
+****************************************************************** 
+
+
+
+
+
+
+
+
+
+
