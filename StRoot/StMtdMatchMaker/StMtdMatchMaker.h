@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.16 2016/07/28 14:31:23 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.17 2016/08/05 16:12:24 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.17  2016/08/05 16:12:24  marr
+ * Add MTD hit IdTruth to avoid applying dy shift for BL 8 and 24 for MC hits
+ *
  * Revision 1.16  2016/07/28 14:31:23  marr
  * Fix coverity check: initialization of data member
  *
@@ -287,6 +290,7 @@ class StMtdMatchMaker: public StMaker
 			Double_t theta;
 			Double_t pathLength;
 			Double_t expTof2MTD;
+		        Int_t idTruth;
 		};
 		Bool_t  mELossFlag;
 		Bool_t  mLockBField;
@@ -324,7 +328,7 @@ class StMtdMatchMaker: public StMaker
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.16 2016/07/28 14:31:23 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.17 2016/08/05 16:12:24 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
