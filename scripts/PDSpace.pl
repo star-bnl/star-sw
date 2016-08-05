@@ -58,6 +58,7 @@ $MAIN  = "/star/data";                                   # default base path
           "/star/institutions/*"   => 3,
 
           "/gpfs01/star/data*"     => 4, # a link reading will be done, duplicate removed
+          "/gpfs03/star/data*"     => 4, # a link reading will be done, duplicate removed
           "/star/data*"            => 4, # so order matters 
 
   	  "/star/simu"             => 5,
@@ -94,24 +95,11 @@ $MAIN  = "/star/data";                                   # default base path
 
           "/star/data18" => "/gpfs01/star/data18",      # merged several disks together 2016/01/14
           "/star/data25" => "/gpfs01/star/data19",      # merged 2016/01/11
-          #"/star/data26" => "SKIP",
-          #"/star/data31" => "SKIP",
-          #"/star/data36" => "SKIP",
           "/star/data40" => "/gpfs01/star/data20",      # merged 2016/01/11
           "/star/data41" => "SKIP",      
           "/star/data51" => "SKIP",
           "/star/data52" => "SKIP",
           "/star/data43" => "/gpfs01/star/data21", 
-          #"/star/data46" => "SKIP",
-          #"/star/data47" => "SKIP",
-          #"/star/data48" => "SKIP",
-          #"/star/data91" => "/gpfs01/star/data22",      # merged 2016/01/12
-          #"/star/data92" => "SKIP",
-          #"/star/data93" => "SKIP",
-          #"/star/data94" => "SKIP",
-          #"/star/data95" => "/gpfs01/star/data24",     # merged 2016/01/13
-          #"/star/data96" => "SKIP",
-  
 
           "/star/rcf"    => "/gpfs01/star/rcf",
           "/star/xrootd" => "/gpfs01/star/XROOTD",
@@ -127,6 +115,7 @@ $MAIN  = "/star/data";                                   # default base path
 %REPLICATION = (
           "/gpfs01/star/XROOTD" => 1,
           "/gpfs01/"            => 2,
+          "/gpfs03/"            => 2,
           );
 
 
@@ -142,7 +131,8 @@ $DINFO = "(check '<A HREF=\"$SpiderControl\">nova</A>' Spiders)"; # Many tools m
 $DINFO =~ s/%%RELP%%/public/;
 
 
-@COLORS = ("#7FFFD4","#40E0D0","#00DEFF","#87CEFA","#CCCCEE","#D8BFD8","#DB7093"); #"#D02090"); #"#FF69B4");
+@COLORS = ("#7FFFD4","#40E0D0","#00DEFF","#87CEFA","#CCCCEE","#D8BFD8","#DB7093"); #"#D02090"); 
+
 $RED    = "#B03060";
 
 $DGREY  = "#777777";     # dark grey color for some info
@@ -182,6 +172,9 @@ my %RDMEXCLUDE;
 # Standard header style
 $TD  = "<TD BGCOLOR=\"black\" align=\"center\"><FONT FACE=\"Arial, Helvetica\"><FONT COLOR=\"white\"><B>";
 $ETD = "</FONT></B></FONT></TD>\n\t";
+
+
+$DEBUG = $ENV{PDSSpace_DEBUG} || 0;
 
 
 # Re-define DF command to be the generic dfpanfs command
@@ -269,24 +262,26 @@ foreach $disk (@DISKS){
 
 
 
-    # print "DEBUG Checking $disk using $DF\n";
+    print "DEBUG Checking $disk using $DF\n" if ( $DEBUG );
     chomp($res = `$DF $disk | /bin/grep % | /bin/grep '/'`);
     $res   =~ s/^\s*(.*?)\s*$/$1/;
     $res   =~ s/\s+/ /g;
     @items =  split(" ",$res);
 
-    # print STDERR "$disk $res\n";
+    print STDERR "$disk $res\n" if ( $DEBUG);
 
     $rep    = 0;
+    $dlink  = readlink($disk)||$disk;
+
     foreach $pat (keys %REPLICATION){
-	if ($disk =~ m/$pat/){
+	if ($disk =~ m/$pat/ || $dlink =~ m/$pat/ ){
 	    $rep = $REPLICATION{$pat};
-	    #print "DEBUG: $disk matches $pat => $rep\n";
+	    print "DEBUG: $disk matches $pat => $rep\n" if ($DEBUG);
 	    last;
 	}
     }
     if ( $rep == 0){
-	#print "DEBUG: $disk did not match any patterns\n";
+	print "DEBUG: $disk did not match any patterns\n" if ($DEBUG);
 	$rep = 1;
     }
 
@@ -351,7 +346,7 @@ foreach $disk (@DISKS){
 	$trg .= "$tmp ";
     }
 
-    # print "DEBUG Will now search for a README file on $disk\n";
+    print "DEBUG Will now search for a README file on $disk\n" if ( $DEBUG );
 
     if ( ! defined($RDMEXCLUDE{$disk}) && ! defined($RDMEXCLUDE{$pdisk}) ){
 	if ( -e "$disk/AAAREADME"){
