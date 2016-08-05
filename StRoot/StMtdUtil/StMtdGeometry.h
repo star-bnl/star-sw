@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.10 2015/07/29 01:11:25 smirnovd Exp $
+ * $Id: StMtdGeometry.h,v 1.11 2016/08/05 16:12:34 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.11  2016/08/05 16:12:34  marr
+ * Add MTD hit IdTruth to avoid applying dy shift for BL 8 and 24 for MC hits
+ *
  * Revision 1.10  2015/07/29 01:11:25  smirnovd
  * Initialize static constants outside of class definition
  *
@@ -162,7 +165,7 @@ class StMtdGeoModule : public StMtdGeoNode {
   Int_t	       FindCellId(const Double_t *local);
   Float_t      GetCellPhiCenter(Int_t iCell);
   Float_t      GetCellZCenter(Int_t iCell);
-  Float_t      GetCellLocalYCenter(Int_t iCell, Int_t iBL);
+  Float_t      GetCellLocalYCenter(Int_t iCell, Int_t iBL, Int_t idTruth = 0);
 
  private:
   Int_t	       mMTRAIndex;
@@ -248,7 +251,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.10 2015/07/29 01:11:25 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.11 2016/08/05 16:12:34 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1);
 };
 
