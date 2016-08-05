@@ -1,5 +1,5 @@
 
-// $Id: TGeoSwim.cxx,v 1.5 2016/07/26 01:02:33 perev Exp $
+// $Id: TGeoSwim.cxx,v 1.6 2016/08/05 18:11:11 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -88,6 +88,11 @@ const double *TGeoSwim::GetDir  (int idx) const      {return fHelx[idx]->Dir();}
 //_____________________________________________________________________________
 const char   *TGeoSwim::GetPath ()        const      {return gGeoManager->GetPath();}
 //_____________________________________________________________________________
+double        TGeoSwim::GetTime ()        const      
+{
+  return fTimeFly/TMath::C();
+}
+//_____________________________________________________________________________
 int TGeoSwim::OutScene(const double *x) const
 {
   if (x[2]<fZmin  || x[2] > fZmax) 	return 1;
@@ -115,7 +120,7 @@ double *inOut = fInOutLen;
   *fHelx[1] = *fHelx[0];
   double maxLen = maxLenP;
   double cutLen = 1e11;
-  fInOutLen[2]=0;
+  fInOutLen[2]=0; fTimeFly=0;
   while(1) {
     const double *poz = fHelx[0]->Pos();
     double range = fabs(poz[0])+fabs(poz[1])+fabs(poz[2]);
@@ -176,7 +181,6 @@ double *inOut = fInOutLen;
     if (OutScene(fHelx[1]->Pos()))	return kOutScene;
     myLen = fInOutLen[1];
     fInOutLen[2]+=fInOutLen[1];
-
     if (fLoss) { // Account of energy loss
 
       dP = -(*fLoss)(gmate,fP,myLen,0);
@@ -219,6 +223,14 @@ double *inOut = fInOutLen;
       dir[0]+= -dir[1]*dPhi;
       dir[1]+=  dir[0]*dPhi;
       fHelx[1]->Set(pos,dir,fC);       
+//		Time of flight calculation
+      double m = fLoss->GetMass();
+      double p = fP-dP;
+      double betIn0 = sqrt((p*p+m*m)/(p*p));
+      p = fP;
+      double betIn1 = sqrt((p*p+m*m)/(p*p));
+      fTimeFly += 0.5*(betIn0+betIn1)*fInOutLen[1];
+//
     }
     gGeoManager->SetCurrentPoint    ((double*)fHelx[1]->Pos());
     gGeoManager->SetCurrentDirection((double*)fHelx[1]->Dir());
