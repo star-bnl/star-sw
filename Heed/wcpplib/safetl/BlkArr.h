@@ -62,14 +62,10 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
-//#include <CLHEP/Alist/AList.h>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-//#include "math/minmax.h"
-#include "wcpplib/util/emul_new_stand.h"
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/safetl/AbsList.h"
-//#include "wcpplib/math/DoubleAc.h"
 
 //#define DEBUG_BLKARR  // make some print
 
@@ -515,9 +511,8 @@ template <class T>
   //const BlkArr<T>& f)");
   Ifile << "BlkArr<T>: qel=" << f.get_qel() << '\n';
   f.print_struct(file);
-  long n;
   indn.n += 2;
-  for (n = 0; n < f.get_qel(); n++) {
+  for (long n = 0; n < f.get_qel(); n++) {
     Ifile << "n=" << n << " el[n]=" << noindent << f[n] << yesindent << '\n';
   }
   file << yesindent;
@@ -527,13 +522,10 @@ template <class T>
 
 template <class T>
 void print_BlkArr(std::ostream& file, const DynLinArr<T>& f, int l) {
-  //mfunnamep("template<class T> void print_BlkArr(std::ostream& file, const
-  //BlkArr<T>& f, int l)");
   Ifile << "BlkArr<T>: qel=" << f.get_qel() << '\n';
   f.print_struct(file);
-  long n;
   indn.n += 2;
-  for (n = 0; n < f.get_qel(); n++) {
+  for (long n = 0; n < f.get_qel(); n++) {
     Ifile << "n=" << n << " el[n]=" << noindent;
     f[n].print(file, l);
   }
@@ -543,9 +535,8 @@ void print_BlkArr(std::ostream& file, const DynLinArr<T>& f, int l) {
 
 template <class T> int operator==(const BlkArr<T>& f1, const BlkArr<T>& f2) {
   if (f1.get_qel() != f2.get_qel()) return 0;
-  long q = f1.get_qel();
-  long n;
-  for (n = 0; n < q; n++) {
+  const long q = f1.get_qel();
+  for (long n = 0; n < q; n++) {
     if (!(f1[n] == f2[n])) return 0;
   }
   return 1;
@@ -554,32 +545,25 @@ template <class T> int operator==(const BlkArr<T>& f1, const BlkArr<T>& f2) {
 template <class T, class P>
 int apeq_mant(const BlkArr<T>& f1, const BlkArr<T>& f2, P prec) {
   if (f1.get_qel() != f2.get_qel()) return 0;
-  long q = f1.get_qel();
-  long n;
-  for (n = 0; n < q; n++) {
+  const long q = f1.get_qel();
+  for (long n = 0; n < q; n++) {
     if (!apeq_mant(f1[n], f2[n], prec)) return 0;
   }
   return 1;
 }
 
 template <class T> int operator!=(const BlkArr<T>& f1, const BlkArr<T>& f2) {
-  if (f1 == f2)
-    return 0;
-  else
-    return 1;
+  return f1 == f2 ? 0 : 1;
 }
 
 template <class T>
-DynLinArr<T> convert(const BlkArr<T>& f)  // may be useful if one
-    // needs single chunk
-    {
-  long q = f.get_qel();
+DynLinArr<T> convert(const BlkArr<T>& f) {
+  // may be useful if one needs single chunk
+  const long q = f.get_qel();
   DynLinArr<T> temp(q);
-  long n;
-  for (n = 0; n < q; n++) {
+  for (long n = 0; n < q; ++n) {
     temp[n] = f[n];
   }
   return DynLinArr<T>(temp, steal);
-
 }
 #endif

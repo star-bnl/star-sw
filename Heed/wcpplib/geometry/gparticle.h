@@ -8,7 +8,7 @@ It is particle which does not interact with materials.
 It flyes by polyline line or by circumferences from one volume to another.
 The flying is represented by changing of class members representing
 particle position.
-Interacted particle should be derivated class from this one.
+Interacted particle should be derived class from this one.
 
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -20,11 +20,6 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
-
-//#define vec_stvpoint_def 10
-//const double PRECISION_OF_SWITCH=1.0e-5;
-//#define PRECISION_OF_SWITCH 1.0e-5
-//#define PRECISION_OF_SWITCH 1.0e-8
 
 // point in space, time and velocity
 class stvpoint {
@@ -168,11 +163,6 @@ class stvpoint {
   virtual void print(std::ostream& file, int l) const;
 };
 
-class gparticle;
-
-void check_point(gparticle* gp);
-// Seems that this is any function which can be executed after each step.
-
 extern trajestep_limit gtrajlim;
 
 class gparticle : public RegPassivePtr {
@@ -190,7 +180,6 @@ class gparticle : public RegPassivePtr {
   vec curr_relcen;  // current relcen computed
   // at the last call of calc_step_to_bord(), only for debug print
 
-  //static vfloat precision_of_switch;
   gparticle(void) : s_life(0), nstep(0) { ; }
   gparticle(const stvpoint& sp)
       : s_life(1), nstep(0), origin(sp), prevpos(), currpos(sp), nextpos() {
@@ -213,8 +202,6 @@ class gparticle : public RegPassivePtr {
   // at the end point of each interval the velocity is corrected (but the
   // point currpos is not).
 
-  //virtual void check_point( )
-  //  {};
   virtual void change_vol(void) { currpos.tid.G_lavol()->income(this); }
   virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
                          vfloat prec);
@@ -235,7 +222,7 @@ class gparticle : public RegPassivePtr {
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
   virtual void physics_mrange(double& fmrange);
-  // Allows to reduce maxumal possible range due to continious processes.
+  // Allows to reduce maximal possible range due to continuous processes.
   // Called from calc_step_to_bord() after the call of curvature(...)
   // but before considering the crossing with volumes.
   // Therefore mrange may be reduced after this.
@@ -243,7 +230,6 @@ class gparticle : public RegPassivePtr {
   virtual stvpoint calc_step_to_bord();
   // produces nextpos
 
-  //stvpoint switch_new_vol(manip_absvol* famvol[pqamvol], int fnamvol);
   stvpoint switch_new_vol(void);
 
   virtual void fly(void) {
@@ -251,7 +237,6 @@ class gparticle : public RegPassivePtr {
     while (s_life == 1) {
       step();
       physics();
-      check_point(this);
     }
   }
   virtual void print(std::ostream& file, int l) const;

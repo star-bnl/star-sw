@@ -3,7 +3,6 @@
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/straight.h"
 #include "wcpplib/geometry/plane.h"
-#include "wcpplib/util/emul_new_stand.h"
 
 /*
 Copyright (c) 2000 Igor B. Smirnov

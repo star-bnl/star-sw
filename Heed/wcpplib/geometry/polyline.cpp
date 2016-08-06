@@ -275,7 +275,8 @@ std::ostream& operator<<(std::ostream& file, const polyline_pl& p) {
   Ifile << "polyline_pl:\n";
   indn.n += 2;
   file << p.pn;
-  file << statcast(const polyline&, p);
+  // file << statcast(const polyline&, p);
+  file << static_cast<const polyline&>(p);
   indn.n -= 2;
   return file;
 }
@@ -420,7 +421,8 @@ std::ostream& operator<<(std::ostream& file, const polygon& p) {
   Ifile << "polygon:\n";
   indn.n += 2;
   Ifile << "s_convex=" << p.s_convex << '\n';
-  file << statcast(const polyline_pl&, p);
+  // file << statcast(const polyline_pl&, p);
+  file << static_cast<const polyline_pl&>(p);
   indn.n -= 2;
   return file;
 }
@@ -477,7 +479,7 @@ std::ostream& operator<<(std::ostream& file, const rectangle& f) {
   Ifile << "piv:\n" << f.piv;
   Ifile << "dir1,2(directions of sides):\n" << f.dir1 << f.dir2;
   Ifile << "dim (dimensions):" << f.dim[0] << ' ' << f.dim[1] << '\n';
-  file << statcast(const polygon&, f);
+  file << static_cast<const polygon&>(f);
   indn.n -= 2;
   return file;
 }
@@ -541,7 +543,7 @@ std::ostream& operator<<(std::ostream& file, const spquadr& p) {
   Ifile << "dir2:\n";
   file << p.dir2;
   Ifile << " awidth=" << p.awidth << '\n';
-  file << statcast(const polygon&, p);
+  file << static_cast<const polygon&>(p);
   indn.n -= 2;
   return file;
 }

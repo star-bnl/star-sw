@@ -233,7 +233,7 @@ Parabol::Parabol(double x[3], double y[3], int /*ii*/) : s_det(0), s_dxzero(0) {
 
 int Parabol::find_zero(double xzero[2]) const {
   mfunnamep("int Parabol::find_zero(double xzero[2]) const");
-  convmut(Parabol);
+  const Parabol& t = (*this);
   if (s_dxzero == 0) {
     //mcout<<"Parabol::find_zero: s_dxzero == 0\n";
     t.s_dxzero = 1;

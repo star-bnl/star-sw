@@ -10,7 +10,6 @@
 #endif
 #include <cmath>
 #include "wcpplib/geometry/vec.h"
-#include "wcpplib/util/emul_new_stand.h"
 #ifdef USE_SRANLUX
 #include "wcpplib/random/ranluxint.h"
 #else

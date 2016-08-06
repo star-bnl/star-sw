@@ -82,9 +82,6 @@ void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 }
 }
 
-// This function is called by Heed after each step
-void check_point(gparticle* /*gp*/) {}
-
 extern trajestep_limit gtrajlim;
 trajestep_limit gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
                          0.2 * Heed::rad);

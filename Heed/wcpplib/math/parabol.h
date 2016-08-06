@@ -27,7 +27,6 @@ It is provided "as is" without express or implied warranty.
 
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/util/emul_new_stand.h"
 
 class Parabol  // a is omited to avoid coincidences with any other libraries
     {
@@ -70,7 +69,7 @@ class Parabol  // a is omited to avoid coincidences with any other libraries
   double find_maxmin(void);
 
   inline double determinant(void) const {
-    convmut(Parabol);
+    const Parabol& t = (*this);
     if (s_det == 0) {
       t.s_det = 1;
       t.det = db * db - 4 * da * dc;

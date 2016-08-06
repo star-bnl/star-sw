@@ -16,11 +16,8 @@ The file is provided "as is" without express or implied warranty.
 #include <cstring>
 #include <limits.h>
 #include <typeinfo>
-//#include "wcpplib/util/List.h"
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-//#include "math/minmax.h"
-#include "wcpplib/util/emul_new_stand.h"
 
 //#define USE_REPLACE_ALLOC
 
@@ -83,54 +80,6 @@ The file is provided "as is" without express or implied warranty.
 // to detect missings of copy functions in classes referred by
 // active pointers.
 
-//#define COPY_RETURNS_COMMON_BASE // to bypass bug in Linux compiler
-/*
-sorry, not implemented:
-adjusting pointers for covariant returns.
-
-This happens when copy function returns always the type of
-the class to which it belongs.
-
-g++ -v:
-Reading specs from /usr/lib/gcc-lib/i386-redhat-linux/2.96/specs
-gcc version 2.96 20000731 (Red Hat Linux 7.3 2.96-113)
-The same problem was detected at Red Hat Linux 8.0.
-At Scientific Linux 4.1 there is no such problem (at 4.5 - too).
-So this marco can be either commented off or commented on.
-I prefere comment it off when possible.
-Perhaps it is most convenient to declare this macro in environment variables
-which are invoked at compilation.
-The detailed explanation is following:
-
-You might derive a sequence of classes from a base and
-return this base. But if you have two such sequences derived from
-different bases and need to unifiy them in a common derivative,
-you meet the problem of covariant returns.
-In order the both base classes can be addressed by active pointer,
-the both should have functions "BaseClassName* copy(void) const".
-Their declarations differ only by return value.
-The old compilers cannot distinguish them correctly and produce
-this error.
-It is possible to bypass it by giving different names of copy function
-in the first and the second base. But then to assure the correct functioning
-of the program you have to define the both functions in derived class.
-Also you will need to supply their names to active pointer.
-The program then gets difficult to understand.
-
-It is possible, in principle, to make the copy function returning void
-and to convert void* to base type in CopyDefinition.
-But if the base class is not the first base from which this type is derived,
-such a scheme would not work correctly, although at compilation
-the error would not be found.
-
-It seems that the best solution is temporaty one consisting in derivation
-of all necessary classes which are handled by active pointers
-from a common base class with a virtual function, returning from copy
-function the pointer to this base and its conversion to real type
-by dynamic cast. All statements should be implemented through macro definitions
-by such a way that they should ne annuled as soon as the covariant
-return types are imtroduced in g++ compilers (expected in version 3.4).
-*/
 //#define DEBUG_ACTIVEPTR  // print some messages at running ActivePtr
 //  components
 // The pilfer constructor and the pilfer function is sometimes not resolved

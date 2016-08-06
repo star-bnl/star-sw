@@ -68,7 +68,6 @@ The file is provided "as is" without express or implied warranty.
 #include <iomanip>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/util/emul_new_stand.h"
 #include "wcpplib/util/String.h"
 
 // Here there is a good place to switch on the bound check in all programs

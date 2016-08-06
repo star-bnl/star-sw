@@ -1,5 +1,4 @@
 #include "wcpplib/geometry/volume.h"
-#include "wcpplib/util/emul_new_stand.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -68,21 +67,20 @@ int operator==(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2) {
 }
 
 void manip_absvol_treeid::print(std::ostream& file, int l) const {
-  if (l >= 0) {
-    if (qeid <= 0) {
-      Ifile << "no volume defined, qeid=" << qeid << '\n';
-    } else {
-      if (l > 0) {
-        for (int n = 0; n < qeid - 1; ++n) {
-          Ifile << "n=" << n;
-          eid[n].print(file, 0);
-        }
+  if (l < 0) return;
+  if (qeid <= 0) {
+    Ifile << "no volume defined, qeid=" << qeid << '\n';
+  } else {
+    if (l > 0) {
+      for (int n = 0; n < qeid - 1; ++n) {
+        Ifile << "n=" << n;
+        eid[n].print(file, 0);
       }
-      Ifile << "n=" << qeid - 1;
-      eid[qeid - 1].print(file, 0);
     }
-    file.flush();
+    Ifile << "n=" << qeid - 1;
+    eid[qeid - 1].print(file, 0);
   }
+  file.flush();
 }
 // ********  absvol   *******
 DynLinArr<manip_absvol*> absvol::Gamanip_embed(void) const {
