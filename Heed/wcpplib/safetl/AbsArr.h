@@ -78,10 +78,6 @@ The file is provided "as is" without express or implied warranty.
 #define ALR_CHECK_EACH_BOUND
 #endif
 
-#ifdef USE_REPLACE_ALLOC
-#include "wcpplib/safetl/ReplaceAlloc.h"
-#endif
-
 //#define DEBUG_DYNLINARR  // make some print
 //#define DEBUG_DYNARR  // make some print and in addition
 // functions from DynArr make some formally unnecessary checks, which are
@@ -173,16 +169,7 @@ class DynLinArr : public RegPassivePtr
             << '\n';
       spexit(mcerr);
     }
-#ifdef USE_REPLACE_ALLOC
-    if (fqel > 0) {
-      el = (T*)malloc(sizeof(T) * fqel);
-      long n;
-      for (n = 0; n < fqel; n++)
-        new (&(el[n])) T;
-    }
-#else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL;
-#endif
   }
 
   DynLinArr(long fqel, const T& val) : qel(fqel), el(NULL) {
@@ -202,16 +189,7 @@ class DynLinArr : public RegPassivePtr
             << '\n';
       spexit(mcerr);
     }
-#ifdef USE_REPLACE_ALLOC
-    if (fqel > 0) {
-      el = (T*)malloc(sizeof(T) * fqel);
-      long n;
-      for (n = 0; n < fqel; n++)
-        new (&(el[n])) T;
-    }
-#else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL;
-#endif
     assignAll(val);
   }
   DynLinArr(long fqel, const T* ar, ArgInterp_Arr /*t*/) : qel(fqel), el(NULL) {
@@ -231,18 +209,8 @@ class DynLinArr : public RegPassivePtr
             << '\n';
       spexit(mcerr);
     }
-#ifdef USE_REPLACE_ALLOC
-    if (fqel > 0) {
-      el = (T*)malloc(sizeof(T) * fqel);
-      long n;
-      for (n = 0; n < fqel; n++)
-        new (&(el[n])) T;
-    }
-#else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL;
-#endif
-    long n;
-    for (n = 0; n < qel; n++)
+    for (long n = 0; n < qel; n++)
       el[n] = ar[n];
   }
   // const T* ar is array here (of course).
@@ -463,16 +431,7 @@ class DynLinArr : public RegPassivePtr
           // of ActivePtr.
           spexit(mcerr);
         } else {
-#ifdef USE_REPLACE_ALLOC
-          {
-            long n;
-            for (n = 0; n < qel; n++)
-              el[n].~T();
-            free(el);
-          }
-#else
           delete[] el;
-#endif
           qel = 0;
         }
       }
@@ -561,26 +520,13 @@ class DynLinArr : public RegPassivePtr
   virtual ~DynLinArr() {
     check();
     if (el != NULL)
-#ifdef USE_REPLACE_ALLOC
-        {
-      long n;
-      for (n = 0; n < qel; n++) {
-        (&(el[n]))->~T();
-      }
-      free(el);
-    }
-#else
     delete[] el;
-#endif
   }
 
  private:
   PILF_MUTABLE long qel;  // number of elements, mutable only for pilfer
   PILF_MUTABLE T* el;     // array of qel elements, mutable only for pilfer
 //(regarding mutable and pilfer see ActivePtr for more comments).
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 #ifndef DONT_USE_ABSPTR
 template <class T>
@@ -661,39 +607,15 @@ DynLinArr<T>& DynLinArr<T>::operator=(const DynLinArr<T>& f) {
     // all elements from f, because f can be part of this array,
     // for example, one of its elements.
     long q = f.get_qel();
-#ifdef USE_REPLACE_ALLOC
-    T* temp_el;
-    if (q > 0) {
-      temp_el = (T*)malloc(sizeof(T) * q);
-      //long n; for(n=0; n<q; n++) new(&(temp_el[n])) T;
-      long n;
-      for (n = 0; n < q; n++)
-        new (&(temp_el[n])) T(f.el[n]);  // here
-      // we call copy constructor instead of creating default as for above
-      // and then to copy to it.
-    } else
-      temp_el = NULL;
-#else
-    //mcout<<"operator=:  sizeof(T)="<<std::setw(10)<<sizeof(T)<<" q="<<q<<'\n';
-    //T* temp_el = (q > 0) ? (new T[q]) : (T*)NULL;
     T* temp_el = (T*)NULL;
     if (q > 0) {
-      //mcout<<"operator=:  sizeof(T)="<<std::setw(10)<<sizeof(T)<<"
-      //q="<<q<<'\n';
       temp_el = new T[q];
-      long n;
-      for (n = 0; n < q; n++)
+      for (long n = 0; n < q; n++)
         temp_el[n] = f.el[n];
     }
-#endif
     //long n; for( n=0; n<q; n++) temp_el[n]=f.el[n];
     /*
-#ifdef USE_REPLACE_ALLOC
-    for(n=0; n<q; n++) el[n].~T();
-    free(el);
-#else
     delete[] el;
-#endif
     qel = q;
     el = temp_el;
     */
@@ -721,38 +643,12 @@ DynLinArr<T>& DynLinArr<T>::operator=(const DynLinArr<D>& f) {
   // all elements from f, because f can be part of this array,
   // for example, one of its elements.
   long q = f.get_qel();
-#ifdef USE_REPLACE_ALLOC
-  T* temp_el;
-  if (q > 0) {
-    temp_el = (T*)malloc(sizeof(T) * q);
-    //long n; for(n=0; n<q; n++) T* t = new(&(temp_el[n])) T;
-    // What is this (above)? Perhaps I did not debug this.
-
-    long n;
-    for (n = 0; n < q; n++)
-      new (&(temp_el[n])) T(f.el[n]);  // here
-    // we call copy constructor instead of creating default as for above
-    // and then to copy to it.
-  } else
-    temp_el = NULL;
-#else
-  //T* temp_el = (q > 0) ? (new T[q]) : (T*)NULL;
   T* temp_el = (T*)NULL;
   if (q > 0) {
-    //mcout<<"operator=:  sizeof(T)="<<std::setw(10)<<sizeof(T)<<" q="<<q<<'\n';
     temp_el = new T[q];
-    //long n; for( n=0; n<q; n++) temp_el[n]=f.el[n];
-    long n;
-    for (n = 0; n < q; n++)
-      temp_el[n] = f[n];
+    for (long n = 0; n < q; n++) temp_el[n] = f[n];
   }
-
-#endif
-  //long n; for( n=0; n<q; n++) temp_el[n] = f.acu(n);
   pass(q, temp_el);
-  //el = (qel > 0) ? (new T[qel]) : (T*)NULL;
-  //long n; for( n=0; n<qel; n++) el[n]=f.el[n];
-  //}
   return *this;
 }
 
@@ -790,46 +686,20 @@ template <class T> void DynLinArr<T>::put_qel(long fqel) {
   check();
   if (el == NULL) {
     qel = fqel;
-    if (qel > 0) {
-#ifdef USE_REPLACE_ALLOC
-      el = (T*)malloc(sizeof(T) * fqel);
-      for (long n = 0; n < fqel; ++n)
-        new (&(el[n])) T;
-#else
-      el = new T[fqel];
-#endif
-    }
+    if (qel > 0) el = new T[fqel];
   } else {
     if (qel != fqel) {
       if (fqel <= 0) {
         qel = 0;
-#ifdef USE_REPLACE_ALLOC
-        for (long n = 0; n < qel; ++n)
-          el[n].~T();
-        free(el);
-#else
         delete[] el;
-#endif
         el = NULL;
       } else {
         T* elh;
-#ifdef USE_REPLACE_ALLOC
-        elh = (T*)malloc(sizeof(T) * fqel);
-        for (n = 0; n < fqel; ++n)
-          new (&(elh[n])) T;
-#else
         elh = new T[fqel];  // long q = find_min(qel,fqel);
-#endif
         for (long n = 0; n < fqel; ++n) {
           if (n < qel) elh[n] = el[n];
         }
-#ifdef USE_REPLACE_ALLOC
-        for (long n = 0; n < qel; ++n)
-          el[n].~T();
-        free(el);
-#else
         delete[] el;
-#endif
         el = elh;
         qel = fqel;
       }
@@ -860,51 +730,25 @@ void DynLinArr<T>::put_qel(long fqel, const T* val, ArgInterp_SingleAdr t) {
   check();
   if (el == NULL) {
     qel = fqel;
-    if (qel > 0) {
-#ifdef USE_REPLACE_ALLOC
-      el = (T*)malloc(sizeof(T) * fqel);
-      for (long n = 0; n < fqel; ++n)
-        new (&(el[n])) T;
-#else
-      el = new T[fqel];
-#endif
-    }
+    if (qel > 0) el = new T[fqel];
     if (val != NULL) for (long n = 0; n < qel; ++n)
         el[n] = *val;
   } else {
     if (qel != fqel) {
       if (fqel <= 0) {
         qel = 0;
-#ifdef USE_REPLACE_ALLOC
-        for (long n = 0; n < qel; ++n)
-          el[n].~T();
-        free(el);
-#else
         delete[] el;
-#endif
         el = NULL;
       } else {
         T* elh;
-#ifdef USE_REPLACE_ALLOC
-        elh = (T*)malloc(sizeof(T) * fqel);
-        for (long n = 0; n < fqel; ++n)
-          new (&(elh[n])) T;
-#else
         elh = new T[fqel];  // long q = find_min(qel,fqel);
-#endif
         for (long n = 0; n < fqel; ++n) {
           if (n < qel)
             elh[n] = el[n];
           else if (val != NULL)
             elh[n] = *val;
         }
-#ifdef USE_REPLACE_ALLOC
-        for (long n = 0; n < qel; ++n)
-          el[n].~T();
-        free(el);
-#else
         delete[] el;
-#endif
         el = elh;
         qel = fqel;
       }
@@ -2681,9 +2525,6 @@ const\n";
                       // is not necessary.
     return i;
   }
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 
 };
 
@@ -2709,49 +2550,27 @@ DynArr<T>& DynArr<T>::operator=(const DynArr<D>& f) {
 #ifdef DEBUG_DYNLINARR
   mcout << "DynArr<T>& DynArr<T>::operator=(const DynArr<D>& f)\n";
 #endif
-  //if(this != &f)
-  //{
-  //mcout<<"DynLinArr<T>& operator=(const DynLinArr<T>& f): long(el)="
-  //<<long(el)<<'\n';
   check();
   f.check();
   DynLinArr<long> qel = f.get_qel();
   DynLinArr<long> cum_qel = f.get_cum_qel();
   // for example, one of its elements.
   long q = f.get_qel_lin();
-#ifdef USE_REPLACE_ALLOC
-  T* temp_el;
-  if (q > 0) {
-    temp_el = (T*)malloc(sizeof(T) * q);
-    long n;
-    for (n = 0; n < q; n++)
-      new (&(temp_el[n])) T;
-  } else
-    temp_el = NULL;
-#else
   T* temp_el = (q > 0) ? (new T[q]) : (T*)NULL;
-#endif
-  long n;
-  for (n = 0; n < q; n++)
-    temp_el[n] = f.acu_lin(n);
+  for (long n = 0; n < q; n++) temp_el[n] = f.acu_lin(n);
   pass(q, qel, cum_qel, temp_el);
-  //}
   return *this;
 }
 
 template <class T> void apply1(DynArr<T>& ar, void (*fun)(T& f)) {
-  long q = ar.el.get_qel();
-  long n;
-  for (n = 0; n < q; n++)
-    (*fun)(ar.el[n]);
+  const long q = ar.el.get_qel();
+  for (long n = 0; n < q; n++) (*fun)(ar.el[n]);
 }
 template <class T, class X>
 void apply2(DynArr<T>& ar, void (*fun1)(T& f, void (*fun21)(X& f)),
             void (*fun2)(X& f)) {
-  long q = ar.el.get_qel();
-  long n;
-  for (n = 0; n < q; n++)
-    (*fun1)(ar.el[n], fun2);
+  const long q = ar.el.get_qel();
+  for (long n = 0; n < q; n++) (*fun1)(ar.el[n], fun2);
 }
 
 int find_next_comb(const DynLinArr<long>& qel, DynLinArr<long>& f);
@@ -2959,17 +2778,8 @@ template <class T> DynLinArr<T>::DynLinArr(const DynArr<T>& f) {
   qel = qelem[0];
   //mcout<<"qel="<<qel<<'\n';
   if (qel > 0) {
-#ifdef USE_REPLACE_ALLOC
-    el = (T*)malloc(sizeof(T) * qel);
-    long n;
-    for (n = 0; n < qel; n++)
-      new (&(el[n])) T;
-#else
     el = new T[qel];
-#endif
-    long n;
-    for (n = 0; n < qel; n++)
-      el[n] = f.ac(n);
+    for (long n = 0; n < qel; n++) el[n] = f.ac(n);
   } else
     el = NULL;
 }
@@ -2998,14 +2808,7 @@ DynLinArr<T>::DynLinArr(const DynArr<T>& f, int n_of_dim,
   }
   //mcout<<"qel="<<qel<<'\n';
   if (qel > 0) {
-#ifdef USE_REPLACE_ALLOC
-    el = (T*)malloc(sizeof(T) * qel);
-    long n;
-    for (n = 0; n < qel; n++)
-      new (&(el[n])) T;
-#else
     el = new T[qel];
-#endif
     long n;
     if (n_of_dim == 0) {
       for (n = 0; n < qel; n++)

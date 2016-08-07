@@ -19,12 +19,6 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
-//#define USE_REPLACE_ALLOC
-
-#ifdef USE_REPLACE_ALLOC
-#include "wcpplib/safetl/ReplaceAlloc.h"
-#endif
-
 //#define IMPLICIT_X_STAR
 //#define INCLUDE_ActivePtrWI
 
@@ -677,9 +671,6 @@ class ActivePtr virt_common_base_col
 // Somewhy if without const, this function and this constructor
 // is sometimes not recognized by Scientific Linux 4.1 compiler.
 // (when argument is temporary, actual at receiving return value).
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 // Trying to change name
@@ -891,9 +882,6 @@ template <class X> class ActivePtrWI {
 
  private:
   X* ptr;
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 template <class X> inline X* ActivePtrWI<X>::operator->(void) const {
@@ -995,9 +983,6 @@ class CountPassivePtr  // counter of protected pointers
   // by a function which is declared as const.
 
   long number_of_booked;  // the counter of pointers
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 inline void CountPassivePtr::book(void) {
@@ -1607,9 +1592,6 @@ class RegPassivePtr virt_common_base_col
 
  private:
   mutable CountPP_ns::CountPassivePtr* cpp;  // reference to counter class
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 CountPP_ns::CountPassivePtr::~CountPassivePtr() {
@@ -1750,9 +1732,6 @@ template <class X> class PassivePtr virt_common_base_col {
   CountPP_ns::CountPassivePtr* cpp;
 #ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
   X* ptr;
-#endif
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
 #endif
 };
 
@@ -2289,9 +2268,6 @@ class ActivePtrReg : public RegPassivePtr,
   virtual void print(std::ostream& file, int l = 1) const;
   macro_copy_total(ActivePtrReg);
   virtual ~ActivePtrReg() {}
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 template <class X, class C>
@@ -2336,9 +2312,6 @@ class ActivePtrWIReg : public RegPassivePtr,
     return *this;
   }
   virtual ~ActivePtrWIReg() {}
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 #endif
 
@@ -2349,9 +2322,6 @@ class DoubleReg : public RegPassivePtr {
   inline DoubleReg(const DoubleReg& f) : RegPassivePtr(), val(f.val) {}
   inline DoubleReg(double f) : RegPassivePtr(), val(f) {}
   inline operator double(void) { return val; }
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
-#endif
 };
 
 std::ostream& operator<<(std::ostream& file, const DoubleReg& f);

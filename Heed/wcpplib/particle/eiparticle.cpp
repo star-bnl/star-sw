@@ -12,12 +12,11 @@
 namespace Heed {
 
 double eiparticle::Bethe_Bloch_en_loss() {
-
   mfunname("double eiparticle::Bethe_Bloch_energy_loss()");
   // Get least address of volume
   const absvol* av = currpos.G_lavol();
   const MatterType* amt = dynamic_cast<const MatterType*>(av);
-  if (amt == NULL) return 0.;
+  if (!amt) return 0.;
   MatterDef* amd = amt->matdef.get();
   const double beta = lorbeta(curr_gamma_1);
   const double loss =
@@ -28,8 +27,7 @@ double eiparticle::Bethe_Bloch_en_loss() {
 
 void eiparticle::physics_after_new_speed() {
   mfunname("void eiparticle::physics_after_new_speed(void)");
-  double loss = Bethe_Bloch_en_loss();
-  loss *= currpos.prange;
+  const double loss = Bethe_Bloch_en_loss() * currpos.prange;
   total_loss += loss;
   if (s_add_loss == 0) {
     curr_kin_energy -= loss;
@@ -52,11 +50,10 @@ void eiparticle::physics_after_new_speed() {
 }
 
 void eiparticle::print(std::ostream& file, int l) const {
-  if (l >= 0) {
-    Ifile << "eiparticle: s_add_loss=" << s_add_loss
-          << " total_loss/keV=" << total_loss / keV << '\n';
-    eparticle::print(file, l);
-  }
+  if (l < 0) return;
+  Ifile << "eiparticle: s_add_loss=" << s_add_loss
+        << " total_loss/keV=" << total_loss / keV << '\n';
+  eparticle::print(file, l);
 }
 
 }

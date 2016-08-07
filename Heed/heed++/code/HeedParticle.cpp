@@ -76,8 +76,7 @@ void HeedParticle::physics(void) {
       if (aetcs->quan[na][ns] > 0.0) {
         int ierror;
         qt = pois(aetcs->quan[na][ns] * currpos.prange / cm, ierror);
-        check_econd11a(
-            ierror, == 1,
+        check_econd11a(ierror, == 1,
             " aetcs->quan[na][ns]=" << aetcs->quan[na][ns]
                                     << " currpos.prange/cm=" << currpos.prange /
                                                                     cm << '\n',
