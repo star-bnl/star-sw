@@ -185,6 +185,7 @@ ostream&  operator<<(ostream& os,  const StTrack& t);
 class StParticleDefinition;
 class StVertex;
 class StTrackGeometry;
+class StExtGeometry;
 class StTrackDetectorInfo;
 class StTrackPidTraits;
 class StTrackNode;
@@ -212,6 +213,8 @@ public:
     const StTrackGeometry*         geometry() const;
     StTrackGeometry*               outerGeometry();
     const StTrackGeometry*         outerGeometry() const;
+    StExtGeometry*                 extGeometry()        {return mExtGeometry;}
+    const StExtGeometry*           extGeometry()   const {return mExtGeometry;}
     StTrackDetectorInfo*           detectorInfo();
     const StTrackDetectorInfo*     detectorInfo() const;
     StTrackFitTraits&              fitTraits();
@@ -278,6 +281,7 @@ public:
     void         setTopologyMap(const StTrackTopologyMap&);
     void         setGeometry(StTrackGeometry*);
     void         setOuterGeometry(StTrackGeometry*);
+    void         addExtGeometry(StExtGeometry* extGeo);
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
@@ -324,6 +328,7 @@ protected:
     Float_t                 mLength;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
+    StExtGeometry           *mExtGeometry;
     Int_t                   mIdTruth; // MC track id
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
@@ -349,6 +354,6 @@ protected:
     
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
-    ClassDef(StTrack,12)
+    ClassDef(StTrack,13)
 };
 #endif

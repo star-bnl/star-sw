@@ -1,4 +1,4 @@
-// $Id: StXTrak.cxx,v 1.3 2016/07/22 19:00:20 perev Exp $
+// $Id: StXTrak.cxx,v 1.5 2016/08/05 18:10:37 perev Exp $
 /// \File StXTrak.cxx
 /// \author V.Perev 2016
 //
@@ -17,6 +17,7 @@ Main tasks:
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include "TMath.h"
 #include "TCernLib.h"
 #include "TVector3.h"
 #include "StXTrak.h"
@@ -31,8 +32,6 @@ Main tasks:
 #include "THelixTrack.h"
 #include "StiUtilities/StiDebug.h"
 
-//#include "Sti/StiElossCalculator.h"
-#include "StvUtil/StvELossTrak.h"
 #include "StiUtilities/StiDebug.h"
 
 //_____________________________________________________________________________
@@ -58,6 +57,9 @@ StXTrak::StXTrak(MyMag *myMag,MyLoss* eLoss,TGeoSwimEnd* myEnd)
   mSwim = new TGeoSwim();
   mSwim->Set(mMyMag,mMyLoss,mMyEnd);
   mSwim->Set(500.,-400.,400.,5.);
+
+  mMass = 0.1349766;
+  if (mMyLoss) mMass = mMyLoss->GetMass();
 }
 
 //_____________________________________________________________________________
@@ -79,9 +81,9 @@ enum {kUndef, kPrimary, kDca,k1stPoint};
   TVector3 vMom(m1stTk.mMom),vPos(m1stTk.mPos);
   double B[3];
   (*mMyMag)(m1stTk.mPos,B);
-  m1stTk.mCurv=B[2]*m1stTk.mCharge/vMom.Perp();
+  m1stTk.mCurv= -B[2]*m1stTk.mCharge/vMom.Perp();
   m1stTk.mP = vMom.Mag();;
-  m1stTk.mPti = m1stTk.mCharge/vMom.Perp();
+  m1stTk.mPti = -m1stTk.mCharge/vMom.Perp();
   m1stTk.mPt  = 1./(fabs(m1stTk.mPti)+1e-10);
   m1stTk.mLen= 0;
   double dis = vPos.Perp();
@@ -91,7 +93,7 @@ enum {kUndef, kPrimary, kDca,k1stPoint};
 
   if (mFlag1st==k1stPoint) {
     double sinAlf = dis*m1stTk.mCurv/2;
-    m1stTk.mLen = (fabs(sinAlf)>1e-3)? asin(sinAlf)*2./m1stTk.mCurv:dis;
+    m1stTk.mLen = (fabs(sinAlf)>1e-3)? fabs(asin(sinAlf)*2./m1stTk.mCurv):dis;
     m1stTk.mLen/= m1stTk.mCosLam;
   }
 }
@@ -113,20 +115,49 @@ void StXTrak::Set2ndPoint(int charge2nd,double pos2nd[3],double mom2nd[3])
   
   double B[3];
   (*mMyMag)(m2ndTk.mPos,B);
-  m2ndTk.mCurv=B[2]*m2ndTk.mCharge/vMom.Perp();
+  m2ndTk.mCurv= -B[2]*m2ndTk.mCharge/vMom.Perp();
   m2ndTk.mP = vMom.Mag();;
-  m2ndTk.mPti = m2ndTk.mCharge/vMom.Perp();
+  m2ndTk.mPti = -m2ndTk.mCharge/vMom.Perp();
   m2ndTk.mPt  = 1./(fabs(m2ndTk.mPti)+1e-10);
   m2ndTk.mLen= 0;
-  double curv = (m1stTk.mCurv+m2ndTk.mCurv)*0.5;
+  double curv = (fabs(m1stTk.mCurv)>0)?(m1stTk.mCurv+m2ndTk.mCurv)*0.5 
+                                      :(             m2ndTk.mCurv);
   double dis = dPos.Perp();
   double sinAlf = dis*curv/2;
-  m2ndTk.mLen = (fabs(sinAlf)>1e-3)? asin(sinAlf)*2./curv:dis;
-  m2ndTk.mLen/= (m1stTk.mCosLam+m2ndTk.mCosLam)*0.5;
+  m2ndTk.mLen = (fabs(sinAlf)>1e-3)? fabs(asin(sinAlf)*2./curv):dis;
+  double cosLam = (fabs(m1stTk.mCosLam)>0) ? (m1stTk.mCosLam+m2ndTk.mCosLam)*0.5
+                                           : (               m2ndTk.mCosLam);
+  m2ndTk.mLen/= cosLam;
   m2ndTk.mLen+=m1stTk.mLen;
 
   mCurTk = m2ndTk;
+  double P1 = m1stTk.mP;
+  double P2 = m2ndTk.mP;
+  double betInv1 = sqrt(1.+mMass*mMass/(P1*P1));
+  double betInv2 = sqrt(1.+mMass*mMass/(P2*P2));
+  double betInv = 0.5*(betInv1+betInv2);
+  mAveBeta = 1./betInv;
+  assert(mAveBeta<1);
+  mAveMom = mMass*mAveBeta/sqrt(1-mAveBeta*mAveBeta);
+
 }
+//_____________________________________________________________________________
+double StXTrak::Get2ndTimeF() const
+{
+  double betInv = 1./mAveBeta;
+  return m2ndTk.mLen*betInv/TMath::C();
+}
+//_____________________________________________________________________________
+double StXTrak::GetTimeF() const
+{
+  return Get2ndTimeF()+mSwim->GetTime();
+}
+//_____________________________________________________________________________
+void StXTrak::SetLen2nd(double length)
+{
+  m2ndTk.mLen = length + m1stTk.mLen;
+  mCurTk.mLen = m2ndTk.mLen;
+} 
 
 //_____________________________________________________________________________
 int StXTrak::Next()
@@ -163,6 +194,8 @@ static StarMagField *magf = StarMagField::Instance();
      b[2]*=EC;
 }
 
+#if 0
+#include "StvUtil/StvELossTrak.h"
 MyLoss::MyLoss() 
 {
  mELoss = new StvELossTrak;
@@ -180,3 +213,26 @@ double MyLoss::operator()(const TGeoMaterial* mate,double P,double len
   if (theta2){};
   return dP;
 }
+#endif
+#if 1
+#include "Sti/StiElossCalculator.h"
+MyLoss::MyLoss() 
+{
+ mELoss = new StiElossCalculator;
+}
+
+
+double MyLoss::operator()(const TGeoMaterial* gmate,double P,double len
+                         ,double *theta2)
+{
+  double A = gmate->GetA(),Z=gmate->GetZ(),D=gmate->GetDensity();
+//double X0=gmate->GetRadLen();
+  mELoss->set(Z/A,0,A,Z,D);
+  double beta2 = P*P/(P*P+mMass*mMass);
+  double dedx  = mELoss->calculate(1., mMass,beta2);
+  double dP = dedx*len*sqrt(1+pow(mMass/P,2));
+  if (theta2){};
+  return dP;
+}
+
+#endif

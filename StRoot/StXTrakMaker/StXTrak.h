@@ -20,6 +20,7 @@ double mPt;
 double mPti;
 double mLen;
 double mPLoss;
+double mTimeF;
 int    mCharge;
 };  
 class StXTrak 
@@ -32,12 +33,16 @@ class StXTrak
     void Clear();	     
     void Set1stPoint(int charge1st,double pos1st[3],double mom1st[3]);	     
     void Set2ndPoint(int charge2nd,double pos2nd[3],double mom2nd[3]);	     
-    void SetLen2nd  (double length){ m2ndTk.mLen = length + m1stTk.mLen;
-                                     mCurTk.mLen = m2ndTk.mLen;} 
-  double GetLength  (int idx = 2) const;	     
-const char *GetName() const { return (mMyEnd)?mMyEnd->GetName():"" ;}
-TGeoSwimMag *GetMag()  	{return mMyMag;}
-StXTrakAux  &GetAux() 	{return mCurTk;}     
+    void SetLen2nd  (double length);
+
+      StXTrakAux &GetAux(int idx=3)      	{return (&m1stTk)[idx-1];}     
+const StXTrakAux &GetAux(int idx=3) const	{return (&m1stTk)[idx-1];}     
+  double Get2ndTimeF() const;
+  double GetTimeF()    const;
+  double GetMass()    const		{return mMass;}
+  double GetLen (int idx=3) const 	{return GetAux(idx).mLen;}	     
+const char *GetName() const 		{return (mMyEnd)?mMyEnd->GetName():"" ;}
+TGeoSwimMag *GetMag()  			{return mMyMag;}
 
  int Next();
 //=========================
@@ -48,9 +53,12 @@ StXTrakAux  &GetAux() 	{return mCurTk;}
  TGeoSwimLoss* mMyLoss;
  TGeoSwimEnd*  mMyEnd;
  private:
+double mMass;
 
 char   mBeg[1];
 int    mFlag1st; //0=undefined, 1=primary, 2=dca,3=1st point
+double mAveBeta;	//ave beta used for timing
+double mAveMom;		//ave momentum used for timing
 StXTrakAux m1stTk;
 StXTrakAux m2ndTk;
 StXTrakAux mCurTk;
@@ -67,6 +75,7 @@ public:
   virtual void operator()(const double* x, double* b);
 };
 
+#if 0
 class StvELossTrak;
 class MyLoss: public TGeoSwimLoss {
 public:
@@ -77,4 +86,22 @@ virtual double operator()(const TGeoMaterial* mate,double P,double len
 protected:
 StvELossTrak *mELoss;
 };
+#endif
+#if 1
+class StiElossCalculator;
+class MyLoss: public TGeoSwimLoss {
+public:
+MyLoss();
+//		returns momentum loss
+virtual double operator()(const TGeoMaterial* mate,double P,double len
+                       ,double *theta2=0);
+protected:
+StiElossCalculator *mELoss;
+};
+#endif
+
+
+
+
+
 #endif

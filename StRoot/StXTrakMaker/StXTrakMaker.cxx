@@ -1,4 +1,4 @@
-// $Id: StXTrakMaker.cxx,v 1.4 2016/07/22 19:00:20 perev Exp $
+// $Id: StXTrakMaker.cxx,v 1.6 2016/08/05 18:16:05 perev Exp $
 /// \File StXTrakMaker.cxx
 /// \author V.Perev 2016
 //
@@ -22,12 +22,13 @@ Main tasks:
 #include "TVector3.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
-#include "StTrack.h"
-#include "StPrimaryTrack.h"
-#include "StTrackNode.h"
-#include "StTrackGeometry.h"
-#include "StContainers.h"
-#include "StVertex.h"
+#include "StEvent/StTrack.h"
+#include "StEvent/StPrimaryTrack.h"
+#include "StEvent/StTrackNode.h"
+#include "StEvent/StTrackGeometry.h"
+#include "StEvent/StExtGeometry.h"
+#include "StEvent/StContainers.h"
+#include "StEvent/StVertex.h"
 #include "StThreeVectorD.hh"
 
 #include "StXTrakMaker.h"
@@ -105,44 +106,45 @@ Int_t StXTrakMaker::Make()
   if (!event) return kStWarn;
   double rxy,dca,*pos;
   const StEventSummary *summ = event->summary();if(summ){};
-  double lenStTr,lenHlx,lenExt;
+  double lenStTr=0,lenOutHlx=0,lenInnHlx=0,lenExt=0;
   const StSPtrVecTrackNode& nodes= event->trackNodes();
   int nNodes = nodes.size();
   for (int iNode = 0;iNode <nNodes; iNode++) {
     mSwim->Clear();
 //  ===================================================
-    const StTrackNode *node = nodes[iNode];
-    const StTrack *track = node->track(primary);
+    StTrackNode *node = nodes[iNode];
+    StTrack *track = node->track(primary);
     int iprim = track!=0;
-//VP    if (!iprim) continue;
+    if (!iprim) continue;
     if (!track) { track = node->track(global);}
     assert(track);
     lenStTr = track->length();
 
     const StTrackGeometry* geo1st = track->geometry();
     assert(geo1st);
-    StThreeVectorD stpos = geo1st->origin();
-    StThreeVectorD stmom = geo1st->momentum();
-    int           charge = geo1st->charge();
-    double curv = geo1st->curvature(); 
-    if (fabs(curv )>1./200) continue;    
+    StThreeVectorD priPOS = geo1st->origin();
+    StThreeVectorD priMOM = geo1st->momentum();
+    int            priCHARGE = geo1st->charge();
+    auto h = geo1st->helicity();
+    double priCURV = geo1st->curvature(); if (h<0) priCURV = -priCURV;
+    if (fabs(priCURV  )>1./200) continue;    
+    THelixTrack priHLX(priPOS.xyz(),priMOM.xyz(),priCURV);
 
-    mSwim->Set1stPoint(charge,stpos.xyz(),stmom.xyz());
+    mSwim->Set1stPoint(priCHARGE,priPOS.xyz(),priMOM.xyz());
 //  ===================================================
     const StTrackGeometry* geo2nd = track->outerGeometry();
     assert(geo2nd);
     int CHARGE = geo2nd->charge();
-    auto h = geo2nd->helicity();
+    h = geo2nd->helicity();
     double CURV = geo2nd->curvature(); if (h<0) CURV = -CURV;
     if (fabs(CURV )>1./200) continue;    
     StThreeVectorD STPOS = geo2nd->origin();
     StThreeVectorD STMOM = geo2nd->momentum();
     mSwim->Set2ndPoint(CHARGE,STPOS.xyz(),STMOM.xyz());
+    double lenSimp = mSwim->GetLen(2);
     mSwim->SetLen2nd(lenStTr);
 //  ===================================================
     THelixTrack HLX(STPOS.xyz(),STMOM.xyz(),CURV);
-    stpos = STPOS;
-    stmom = STMOM;
     TString found;
 
     while(1) {// Loop along the track
@@ -155,10 +157,27 @@ Int_t StXTrakMaker::Make()
       found = mSwim->GetName();
       auto &aux = mSwim->GetAux();
       pos = aux.mPos;
-      lenExt = aux.mLen;
+      lenExt = aux.mLen-lenStTr;
       rxy = TVector3(pos).Perp();
       dca = HLX.Dca(pos);
-      lenHlx = HLX.Path(pos);
+      lenOutHlx = HLX.Path(pos);
+      lenInnHlx = fabs(HLX.Path(0.,0.));
+
+      StExtGeometry *xg = new StExtGeometry;
+      xg->set(found.Data());
+      double pars[6];
+      pars[StExtGeometry::kPhi ] = atan2(pos[1],pos[0]);
+      pars[StExtGeometry::kZ   ] = pos[21];
+      pars[StExtGeometry::kPsi ] = atan2(aux.mMom[1],aux.mMom[0]);
+      pars[StExtGeometry::kPti ] = aux.mPti;
+      pars[StExtGeometry::kTan ] = atan2(aux.mMom[2],aux.mPt);
+      pars[StExtGeometry::kCurv] = aux.mCurv;
+      xg->setLength(aux.mLen);
+      xg->set(rxy,pars,0);
+      track->addExtGeometry(xg);
+
+
+      
       TString ts;
       if (iprim) {
 	ts ="PriDca:Z."; ts+=found;
@@ -177,9 +196,29 @@ Int_t StXTrakMaker::Make()
 	StiDebug::Count(ts,pos[2],aux.mPLoss);
 	ts ="PriPLoss:Pti."; ts+=found;
 	StiDebug::Count(ts,aux.mPti, aux.mPLoss);
-	ts ="LenInnRes:Z."; ts+=found;
-	StiDebug::Count("LenInnRes:Z",pos[2],lenExt-lenHlx);
+	ts ="LenOutRes:Z."; ts+=found;
+	StiDebug::Count(ts,pos[2],lenExt-lenOutHlx);
+	ts ="LenInnRes1:Z.";
+	StiDebug::Count(ts,pos[2],(lenSimp-lenStTr));
+	ts ="LenInnRes2:Z.";
+	StiDebug::Count(ts,pos[2],(lenInnHlx-lenStTr));
 	StiDebug::Count("Detectors",found.Data());
+
+        if (found.Contains("TOF")) {
+	  double myTime = mSwim->GetTimeF();
+	  StiDebug::Count("myTOFTime",myTime*1e6);
+          double beta = (lenSimp+lenOutHlx)/myTime/TMath::C();
+          if(beta<1) {
+            double p = mSwim->GetAux(1).mP;
+	    double mass = p*sqrt((1.-beta)*(1+beta))/beta-mSwim->GetMass();
+	    StiDebug::Count("DeltaMass_1",p,mass);
+            p = mSwim->GetAux(2).mP;
+	    mass = p*sqrt((1.-beta)*(1+beta))/beta-mSwim->GetMass();
+	    StiDebug::Count("DeltaMass_2",p,mass);
+          }          
+
+	}
+	
 
       } else {//global track
       }

@@ -1,5 +1,5 @@
 
-// $Id: TGeoSwim.cxx,v 1.4 2016/07/22 19:00:20 perev Exp $
+// $Id: TGeoSwim.cxx,v 1.6 2016/08/05 18:11:11 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -88,6 +88,11 @@ const double *TGeoSwim::GetDir  (int idx) const      {return fHelx[idx]->Dir();}
 //_____________________________________________________________________________
 const char   *TGeoSwim::GetPath ()        const      {return gGeoManager->GetPath();}
 //_____________________________________________________________________________
+double        TGeoSwim::GetTime ()        const      
+{
+  return fTimeFly/TMath::C();
+}
+//_____________________________________________________________________________
 int TGeoSwim::OutScene(const double *x) const
 {
   if (x[2]<fZmin  || x[2] > fZmax) 	return 1;
@@ -114,7 +119,8 @@ double *inOut = fInOutLen;
 
   *fHelx[1] = *fHelx[0];
   double maxLen = maxLenP;
-  double losLen = 1e11;
+  double cutLen = 1e11;
+  fInOutLen[2]=0; fTimeFly=0;
   while(1) {
     const double *poz = fHelx[0]->Pos();
     double range = fabs(poz[0])+fabs(poz[1])+fabs(poz[2]);
@@ -125,8 +131,7 @@ double *inOut = fInOutLen;
     fNode[0] = gGeoManager->GetCurrentNode();
     double myRad =1./(fabs(fHelx[0]->GetRho())+1e-10)/fHelx[0]->GetCos();
     double maxStep = fSmax;
-    if (maxStep>losLen) maxStep=losLen;
-    losLen = 1e11;
+    if (maxStep>cutLen) maxStep=cutLen; cutLen = 1e11;
     if (maxStep>maxLen) maxStep=maxLen;
     if (maxStep>myRad) maxStep = myRad;
     fInOutLen[0]=0; fInOutLen[1]=maxStep;
@@ -164,7 +169,6 @@ double *inOut = fInOutLen;
       if (step <myMicron) 	{ 	//if step is tiny try to change upper limit
 	step = myMicron;
 	if (step> range/2) step = range/2;			
-        if (losLen<1e10) {fInOutLen[1] = fInOutLen[0]; break;}
       }
       fHelx[1]->Eval(step,pos,dir); 
       kase = (gGeoManager->IsSameLocation(pos[0],pos[1],pos[2]))? kInside:kOutside;
@@ -176,13 +180,14 @@ double *inOut = fInOutLen;
 
     if (OutScene(fHelx[1]->Pos()))	return kOutScene;
     myLen = fInOutLen[1];
+    fInOutLen[2]+=fInOutLen[1];
     if (fLoss) { // Account of energy loss
 
       dP = -(*fLoss)(gmate,fP,myLen,0);
 //    ================================
 
       if (fabs(dP) > kMaxLoss*fP) { // Cut step, too big eloss
-         losLen = fInOutLen[1]/2;
+         cutLen = fInOutLen[1]/2;
          *fHelx[1]=*fHelx[0];
          gGeoManager->SetCurrentPoint    (fHelx[1]->Pos());
          gGeoManager->SetCurrentDirection(fHelx[1]->Dir());
@@ -218,6 +223,14 @@ double *inOut = fInOutLen;
       dir[0]+= -dir[1]*dPhi;
       dir[1]+=  dir[0]*dPhi;
       fHelx[1]->Set(pos,dir,fC);       
+//		Time of flight calculation
+      double m = fLoss->GetMass();
+      double p = fP-dP;
+      double betIn0 = sqrt((p*p+m*m)/(p*p));
+      p = fP;
+      double betIn1 = sqrt((p*p+m*m)/(p*p));
+      fTimeFly += 0.5*(betIn0+betIn1)*fInOutLen[1];
+//
     }
     gGeoManager->SetCurrentPoint    ((double*)fHelx[1]->Pos());
     gGeoManager->SetCurrentDirection((double*)fHelx[1]->Dir());

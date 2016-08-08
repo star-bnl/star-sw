@@ -1,4 +1,4 @@
-// $Id: TGeoSwim.h,v 1.4 2016/07/22 19:00:21 perev Exp $
+// $Id: TGeoSwim.h,v 1.6 2016/08/05 18:11:05 perev Exp $
 //
 //
 // Class StTGeoSwim
@@ -26,6 +26,7 @@ TGeoSwimLoss(double charge=1,double mass=0.13956995){mCharge = charge;mMass = ma
 //		returns momentum loss
 virtual double operator()(const TGeoMaterial* mate,double P,double len
                        ,double *theta2=0)=0;
+double GetMass() const {return mMass;}
 protected:
 double mCharge;
 double mMass;
@@ -72,19 +73,19 @@ void Set(double Rmax,double Zmin,double Zmax,double sMax=10);
  int OutScene(const double *x) const ;
 
  int Swim(double maxLen);
-double             GetLen  (int idx=1) const 	{return fInOutLen[idx];}
+double             GetLen  (int idx=2) const 	{return fInOutLen[idx];}
 const TGeoNode    *GetNode (int idx=1) const 	{return fNode[idx];}
       THelixTrack *GetHelix(int idx=1) const 	{return fHelx[idx];}
 const double      *GetPos  (int idx=1) const;   
 const double      *GetDir  (int idx=1) const;
 const char        *GetPath() const;
 const TGeoMaterial*GetMate() const; 
-const double       GetTime() const		{return fTimeFly;} 
-const double       GetPti()  const		{return fPti    ;} 
-const double       GetPt()   const		{return fPt     ;} 
-const double       GetP()    const		{return fP      ;} 
-const double       GetPLoss()const		{return fPLoss  ;} 
-const double       GetCurv() const		{return fC      ;} 
+      double       GetTime() const;
+      double       GetPti()  const		{return fPti    ;} 
+      double       GetPt()   const		{return fPt     ;} 
+      double       GetP()    const		{return fP      ;} 
+      double       GetPLoss()const		{return fPLoss  ;} 
+      double       GetCurv() const		{return fC      ;} 
 
 void Swap() { THelixTrack *h=fHelx[0];fHelx[0]=fHelx[1];fHelx[1]=h;}
 protected:
@@ -96,13 +97,13 @@ double fSmax;	// Max step size
 double fRmax;
 double fZmin;
 double fZmax;
-double fInOutLen[2];
+double fInOutLen[3];
 double fC;			//curvature 1/cm 
 double fP;			//momentum  loss(GeV) 
 double fPti;			//signed invers pt
 double fPt;			//momentum  loss(GeV) 
 double fPLoss;			//momentum  loss(GeV) 
-double fTimeFly;		//time in seconds 
+double fTimeFly;		//time of flight in seconds 
 double fB[3];
 THelixTrack 	*fHelx[2];
 const TGeoNode  *fNode[2];
