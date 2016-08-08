@@ -1,5 +1,4 @@
 #include "wcpplib/particle/eparticle.h"
-#include "wcpplib/util/emul_new_stand.h"
 /*
 1998 - 2004,   I. Smirnov
 */
@@ -13,7 +12,7 @@ eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,
                      vfloat time, particle_def* fpardef)
     : mparticle(), particle_type(fpardef) {
   gparticle gp(primvol, pt, vel, time);
-  statcast(mparticle&, *this) = mparticle(gp, fpardef->mass);
+  static_cast<mparticle&>(*this) = mparticle(gp, fpardef->mass);
 }
 
 eparticle::eparticle(manip_absvol* primvol, const point& pt, const vec& vel,

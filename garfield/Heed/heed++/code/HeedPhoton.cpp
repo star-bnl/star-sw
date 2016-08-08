@@ -7,13 +7,12 @@
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/ParticleBank.h"
 #include "heed++/code/HeedPhoton.h"
-                                            /*
+
+/*
 2003, I. Smirnov
 */
 
 namespace Heed {
-
-// long HeedPhoton::last_particle_number = 0;
 
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,

@@ -26,7 +26,7 @@ void Cubic::find_zero(double_complex& z1, double_complex& z2,
                       double_complex& z3) const {
   mfunname("void  Cubic::find_zero(double_complex &z1, double_complex &z2, "
            "double_complex &z3) const");
-  convmut(Cubic);
+  const Cubic& t = (*this);
   if (s_dxzero == 0) {
     check_econd11a(da, == 0.0, "this is not cubic polynomial!", mcerr);
     double a2 = db / da;

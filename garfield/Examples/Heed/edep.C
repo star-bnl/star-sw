@@ -90,10 +90,12 @@ int main(int argc, char * argv[]) {
   TCanvas* c1 = new TCanvas();
   hElectrons->GetXaxis()->SetTitle("number of electrons"); 
   hElectrons->Draw();
+  c1->SaveAs("edep.pdf");
 
   TCanvas* c2 = new TCanvas();
   hEdep->GetXaxis()->SetTitle("energy loss [keV]");
   hEdep->Draw();
+  c2->SaveAs("ne.pdf");
 
   app.Run(kTRUE); 
 

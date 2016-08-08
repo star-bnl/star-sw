@@ -51,10 +51,6 @@ The file is provided "as is" without express or implied warranty.
 
 #endif
 
-#ifdef USE_REPLACE_ALLOC
-#include "wcpplib/safetl/ReplaceAlloc.h"
-#endif
-
 //#define DEBUG_ABSLIST  // make some print
 
 template <class T> class AbsList;
@@ -144,9 +140,6 @@ class AbsListNode {
 //friend void AbsList<T>::pilfer(PILF_CONST AbsList<T>&);
 #ifndef DONT_USE_ABSPTR
   macro_copy_total(AbsListNode);
-#endif
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
 #endif
 };
 
@@ -259,9 +252,6 @@ class AbsList : public RegPassivePtr
 //friend template<class T> void AbsListNode<T>::exclude(void);
 #ifndef DONT_USE_ABSPTR
   macro_copy_total(AbsList);
-#endif
-#ifdef USE_REPLACE_ALLOC
-  macro_alloc
 #endif
 };
 

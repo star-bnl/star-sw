@@ -12,7 +12,6 @@ The file is provided "as is" without express or implied warranty.
 #include <iostream>
 #include <iomanip>
 #include "wcpplib/util/FunNameStack.h"
-#include "wcpplib/util/emul_new_stand.h"
 #ifdef USE_BOOST_MULTITHREADING
 #include "wcpplib/safetl/AbsList.h"
 #endif
@@ -505,11 +504,9 @@ std::ostream& operator<<(std::ostream& file, const FunNameWatch& f) {
   return file;
 }
 
-//ostream& operator<<(ostream& file, const GenError& f)
 void GenError::print(std::ostream& file) {
   file << "GenError::print: ERROR detected in:\n"
-       << statcast(FunNameStack*, this) << '\n';
-  //<<static_cast<FunNameStack*>(this)<<'\n';
+       << static_cast<FunNameStack*>(this) << '\n';
 }
 void GenError::finish(std::ostream& file) {
   print(file);

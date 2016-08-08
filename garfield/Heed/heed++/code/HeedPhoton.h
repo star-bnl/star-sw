@@ -19,7 +19,6 @@ class HeedPhoton : public gparticle {
  public:
   long particle_number;
   long parent_particle_number;
-  // static long last_particle_number;
   int s_print_listing;  // convenient to print internal algorithms
                         // of a selected event
 
@@ -33,16 +32,18 @@ class HeedPhoton : public gparticle {
   // sign that delta-electrons are already generated (or cannot be created)
   int s_delta_generated;
 
+  // Constructors
+  HeedPhoton(void) : gparticle() {}
   HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
              vfloat time, long fparent_particle_number,
              double fenergy, int fs_print_listing = 0);
+  // Destructor
+  virtual ~HeedPhoton() {}
   void physics_after_new_speed(void);
   virtual void physics(void);
-  HeedPhoton(void) : gparticle() { ; }
+
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(HeedPhoton);
-  virtual ~HeedPhoton() { ; }
-
 };
 
 }

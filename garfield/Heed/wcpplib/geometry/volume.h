@@ -214,11 +214,11 @@ class manip_absvol : virtual public absref, public RegPassivePtr {
   // The following two functions change reference frame of any object
   inline void down_absref(absref* f) const {
     const abssyscoor* asc = Gasc();
-    if (asc != NULL) f->down(asc);
+    if (asc) f->down(asc);
   }
   inline void up_absref(absref* f) const {
     const abssyscoor* asc = Gasc();
-    if (asc != NULL) f->up(asc);
+    if (asc) f->up(asc);
   }
   void m_chname(char* nm) const;
   virtual void m_print(std::ostream& file, int l) const;
