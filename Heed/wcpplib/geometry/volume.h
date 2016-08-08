@@ -20,6 +20,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 class gparticle;
 class manip_absvol;
 class volume;
@@ -289,5 +291,7 @@ class absref_transmit_manip : public absref_transmit {
 };
 
 //         *************************************
+
+}
 
 #endif

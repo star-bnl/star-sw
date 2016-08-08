@@ -4,7 +4,6 @@
 #include "wcpplib/random/pois.h"
 #include "wcpplib/math/kinem.h"
 #include "wcpplib/math/tline.h"
-#include "heed++/code/ParticleBank.h"
 #include "heed++/code/HeedParticle.h"
 #include "heed++/code/HeedCluster.h"
 #include "heed++/code/HeedDeltaElectron.h"
@@ -18,19 +17,21 @@ namespace Heed {
 
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
+                           std::list<ActivePtr<gparticle> >& particleBank,
                            int fs_loss_only, int fs_print_listing)
     : eparticle(primvol, pt, vel, time, fpardef),
       s_print_listing(fs_print_listing),
       particle_number(last_particle_number++),
       transferred_energy_in_step(0.0),
       qtransfer(0),
-      s_loss_only(fs_loss_only) {
+      s_loss_only(fs_loss_only),
+      m_particleBank(&particleBank) {
 
   mfunname("HeedParticle::HeedParticle(...)");
   transferred_energy.reserve(100);
   natom.reserve(100);
   nshell.reserve(100);
-  cluster_bank.reserve(100);
+  m_clusterBank.reserve(100);
 }
 
 void HeedParticle::physics(void) {
@@ -127,8 +128,8 @@ void HeedParticle::physics(void) {
           qtransfer++;
           if (s_loss_only != 0) continue;
           if (s_print_listing == 1) mcout << "generating new cluster\n";
-          cluster_bank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
-                                             0, pt, ptloc, prevpos.tid, na, ns));
+          m_clusterBank.push_back(HeedCluster(transferred_energy[qtransfer - 1],
+                                              0, pt, ptloc, prevpos.tid, na, ns));
 
           double Ep0 = mass * c_squared + curr_kin_energy;
           double Ep1 = Ep0 - transferred_energy[qtransfer - 1];
@@ -148,14 +149,14 @@ void HeedParticle::physics(void) {
           }
           HeedPhoton hp(currpos.tid.eid[0].amvol.getver(), pt, vel, time,
                         particle_number, transferred_energy[qtransfer - 1],
-                        0);
+                        *m_particleBank, 0);
           hp.s_photon_absorbed = 1;
           hp.s_delta_generated = 0;
           hp.na_absorbing = na;
           hp.ns_absorbing = ns;
           ActivePtr<gparticle> ac;
           ac.put(&hp);
-          particle_bank.push_back(ac);
+          m_particleBank->push_back(ac);
         }
       }
     }

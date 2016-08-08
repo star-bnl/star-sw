@@ -48,32 +48,24 @@ class EnergyMesh : public RegPassivePtr {
   //EnergyMesh(int fq, double fec[pqener]);
   EnergyMesh(DynLinArr<double> fec);
   //EnergyMesh(const EnergyMesh& fem);
+  macro_copy_total(EnergyMesh);
+  virtual ~EnergyMesh() {}
+
   inline long get_q() const { return q; }
   inline double get_emin() const { return emin; }
   inline double get_emax() const { return emax; }
-  inline double get_e(long n) const {
-    return e[n];
-  }  // left side of interval
-  inline double get_ec(long n) const {
-    return ec[n];
-  }  // center of interval
-  inline const double* get_ae(void) const {
-    return e;
-  }  // left sides
+  /// left side of interval
+  inline double get_e(long n) const { return e[n]; }  
+  // center of interval
+  inline double get_ec(long n) const { return ec[n]; }  
+  // left sides
+  inline const double* get_ae(void) const { return e; }  
   inline const double* get_aec(void) const { return ec; }
-  // array of left sides of intervals
+
   long get_interval_number(double ener);
   long get_interval_number_between_centers(double ener);  // left
   friend std::ostream& operator<<(std::ostream& file, EnergyMesh& f);
   virtual void print(std::ostream& file, int l) const;
-
-  // For two folowing things we need to define copying
-  //PointCoorMesh< double, double[pqener] > pcm_e;
-  //PointCoorMesh< double, double[pqener-1] > pcm_ec;
-  //EnergyMesh& operator=(const EnergyMesh& fem);
-  macro_copy_total(EnergyMesh);
-  virtual ~EnergyMesh() {}
-  ;
 
  private:
   // number of intervals
@@ -84,7 +76,7 @@ class EnergyMesh : public RegPassivePtr {
   double emax;
   // left side of interval, q + 1 numbers
   double e[pqener];
-  // center of interval, q numners
+  // center of interval, q numbers
   double ec[pqener - 1];
 
 };

@@ -21,11 +21,7 @@ PairProd::PairProd(const String& file_name, double fwa, double ffactorFano)
   mfunnamep("PairProd::PairProd(const String& file_name, double fwa, double "
             "ffactorFano)");
 
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;

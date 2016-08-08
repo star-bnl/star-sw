@@ -60,7 +60,6 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/HeedParticle_BGM.o \
 	$(OBJDIR)/Heed/HeedPhoton.o \
 	$(OBJDIR)/Heed/PairProd.o \
-	$(OBJDIR)/Heed/ParticleBank.o \
 	$(OBJDIR)/Heed/PhotoAbsCS.o \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
@@ -411,12 +410,6 @@ $(OBJDIR)/Heed/HeedPhoton.o: \
 $(OBJDIR)/Heed/PairProd.o: \
 	$(HEEDDIR)/heed++/code/PairProd.cpp \
 	$(HEEDDIR)/heed++/code/PairProd.h
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/Heed/ParticleBank.o: \
-	$(HEEDDIR)/heed++/code/ParticleBank.cpp \
-	$(HEEDDIR)/heed++/code/ParticleBank.h
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 

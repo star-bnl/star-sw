@@ -1,5 +1,4 @@
 #include <iostream>
-#include <list>
 
 #include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/MatterDef.h"
@@ -41,7 +40,6 @@ namespace Heed {
 
 // Particle id number for book-keeping
 long last_particle_number;
-std::list<ActivePtr<gparticle> > particle_bank;
 
 void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 
@@ -82,9 +80,9 @@ void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 }
 }
 
-extern trajestep_limit gtrajlim;
-trajestep_limit gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
-                         0.2 * Heed::rad);
+extern trajestep_limit Heed::gtrajlim;
+trajestep_limit Heed::gtrajlim(100. * Heed::cm, 1000. * Heed::cm, 0.1 * Heed::rad,
+                               0.2 * Heed::rad);
 
 // Actual class implementation
 
@@ -240,9 +238,9 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     m_mediumDensity = medium->GetMassDensity();
   }
 
-  std::list<ActivePtr<gparticle> >::iterator it = Heed::particle_bank.begin();
-  for (; it != Heed::particle_bank.end(); ++it) (*it).clear();
-  Heed::particle_bank.clear();
+  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
+  for (; it != m_particleBank.end(); ++it) (*it).clear();
+  m_particleBank.clear();
   m_deltaElectrons.clear();
   m_chamber->conduction_electron_bank.reserve(1000);
   m_chamber->conduction_electron_bank.clear();
@@ -328,7 +326,8 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     }
   }
 
-  m_particle = new Heed::HeedParticle(m_chamber, p0, velocity, t0, particleType);
+  m_particle = new Heed::HeedParticle(m_chamber, p0, velocity, t0,
+                                      particleType, m_particleBank);
   // Transport the particle.
   m_particle->fly();
   m_hasActiveTrack = true;
@@ -399,10 +398,10 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   bool ok = false;
   Medium* medium = NULL;
   // Get the first element from the particle bank.
-  std::list<ActivePtr<gparticle> >::iterator it = Heed::particle_bank.begin();
+  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
   Heed::HeedPhoton* virtualPhoton = NULL;
   while (!ok) {
-    if (it == Heed::particle_bank.end()) {
+    if (it == m_particleBank.end()) {
       m_hasActiveTrack = false;
       return false;
     }
@@ -415,7 +414,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       std::cerr << "    Program bug!\n";
       // Try the next element.
       (*it).clear();
-      it = Heed::particle_bank.erase(it);
+      it = m_particleBank.erase(it);
       continue;
     }
 
@@ -429,14 +428,14 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     if (!m_sensor->IsInArea(xcls, ycls, zcls)) {
       // Delete this virtual photon and proceed with the next one.
       (*it).clear();
-      it = Heed::particle_bank.erase(it);
+      it = m_particleBank.erase(it);
       continue;
     }
     // Make sure the cluster is inside a medium.
     if (!m_sensor->GetMedium(xcls, ycls, zcls, medium)) {
       // Delete this virtual photon and proceed with the next one.
       (*it).clear();
-      it = Heed::particle_bank.erase(it);
+      it = m_particleBank.erase(it);
       continue;
     }
     // Make sure the medium has not changed.
@@ -445,7 +444,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
         !medium->IsIonisable()) {
       // Delete this virtual photon and proceed with the next one.
       (*it).clear();
-      it = Heed::particle_bank.erase(it);
+      it = m_particleBank.erase(it);
       continue;
     }
     // Seems to be ok.
@@ -472,9 +471,9 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   bool deleteNode = false;
   Heed::HeedDeltaElectron* delta = NULL;
   Heed::HeedPhoton* photon = NULL;
-  it = Heed::particle_bank.erase(it);
+  it = m_particleBank.erase(it);
   // Loop over the particle bank.
-  while (it != Heed::particle_bank.end()) {
+  while (it != m_particleBank.end()) {
     deleteNode = false;
     // Check if it is a delta electron.
     delta = dynamic_cast<Heed::HeedDeltaElectron*>((*it).get());
@@ -525,7 +524,7 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     // Proceed with the next node in the particle bank.
     if (deleteNode) {
       (*it).clear();
-      it = Heed::particle_bank.erase(it);
+      it = m_particleBank.erase(it);
     } else {
       ++it;
     }
@@ -539,9 +538,9 @@ bool TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   }
 
   // Remove the virtual photon from the particle bank.
-  if (it != Heed::particle_bank.end()) {
+  if (it != m_particleBank.end()) {
     (*it).clear();
-    Heed::particle_bank.erase(it);
+    m_particleBank.erase(it);
   }
 
   return true;
@@ -808,9 +807,9 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   // Clusters from the current track will be lost.
   m_hasActiveTrack = false;
   Heed::last_particle_number = 0;
-  std::list<ActivePtr<gparticle> >::iterator it = Heed::particle_bank.begin();
-  for (; it != Heed::particle_bank.end(); ++it) (*it).clear();
-  Heed::particle_bank.clear();
+  std::list<ActivePtr<Heed::gparticle> >::iterator it = m_particleBank.begin();
+  for (; it != m_particleBank.end(); ++it) (*it).clear();
+  m_particleBank.clear();
   m_deltaElectrons.clear();
   m_chamber->conduction_electron_bank.clear();
 
@@ -839,7 +838,8 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Create and transport the photon.
-  Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 0);
+  Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
+                          m_particleBank, 0);
   photon.fly();
 
   // Make a list of parent particle id numbers.
@@ -853,9 +853,9 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   Heed::HeedPhoton* fluorescencePhoton = NULL;
 
   // Get the first element from the particle bank.
-  it = Heed::particle_bank.begin();
+  it = m_particleBank.begin();
   // Loop over the particle bank.
-  while (it != Heed::particle_bank.end()) {
+  while (it != m_particleBank.end()) {
     // Check if it is a delta electron.
     delta = dynamic_cast<Heed::HeedDeltaElectron*>((*it).get());
     if (delta) {
@@ -908,7 +908,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
     }
     // Proceed with the next element in the particle bank.
     (*it).clear();
-    it = Heed::particle_bank.erase(it);
+    it = m_particleBank.erase(it);
   }
 
   // Get the total number of electrons produced in this step.

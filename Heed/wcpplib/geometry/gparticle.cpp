@@ -11,6 +11,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 void stvpoint::print(std::ostream& file, int l) const {
   if (l < 0) return;
   Ifile << "stvpoint: sb=" << sb << " s_ent=" << s_ent << " prange=" << prange
@@ -230,4 +232,6 @@ void gparticle::print(std::ostream& file, int l) const {
   }
   indn.n -= 2;
   file.flush();
+}
+
 }

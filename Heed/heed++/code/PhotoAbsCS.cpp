@@ -407,11 +407,7 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(const String& fname, int fZ,
                                              const String& ffile_name)
     : PhotoAbsCS(fname, fZ, fthreshold), file_name(ffile_name) {
   mfunnamep("SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS(...)");
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;
@@ -826,11 +822,7 @@ FitBTPhotoAbsCS::FitBTPhotoAbsCS
   mfunname("FitBTPhotoAbsCS::FitBTPhotoAbsCS");
 
   name = fname;
-#ifdef USE_STLSTRING
   std::ifstream BT_file(name.c_str());
-#else
-  std::ifstream BT_file(name);
-#endif
   if( !BT_file )
   {
     funnw.ehdr(mcerr);
@@ -1333,11 +1325,7 @@ SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& ffile_name)
   mfunnamep("SimpleAtomPhotoAbsCS::SimpleAtomPhotoAbsCS(int fZ, const String& "
             "ffile_name)");
   check_econd11(fZ, < 1, mcerr);
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;
@@ -1535,11 +1523,7 @@ int SimpleAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   mfunname("int SimpleAtomPhotoAbsCS::get_main_shell_number(int nshell) const");
   String shell_name = acs[nshell]->get_name();
 #ifdef STRSTREAM_AVAILABLE
-#ifdef USE_STLSTRING
   istrstream sfile(shell_name.c_str());
-#else
-  istrstream sfile(shell_name);
-#endif
 #else
   std::istringstream sfile(shell_name.c_str());
 #endif
@@ -1569,11 +1553,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fthreshold_file_name,
             "fsimple_table_file_name, double fminimal_threshold)");
   //Imcout<<"ExAtomPhotoAbsCS::ExAtomPhotoAbsCS is run for fZ="<<fZ<<std::endl;
   check_econd11(fZ, < 1, mcerr);
-#ifdef USE_STLSTRING
   std::ifstream threshold_file(threshold_file_name.c_str());
-#else
-  std::ifstream threshold_file(threshold_file_name);
-#endif
   if (!threshold_file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << threshold_file_name << std::endl;
@@ -1854,11 +1834,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
   check_econd21(id, < 1 ||, > 2, mcerr);
 
   name = fname;
-#ifdef USE_STLSTRING
   std::ifstream BT_file(BT_file_name.c_str());
-#else
-  std::ifstream BT_file(BT_file_name);
-#endif
   if (!BT_file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << BT_file_name << std::endl;
@@ -1989,11 +1965,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(int fZ, const String& fname,
   check_econd21(id, < 1 ||, > 2, mcerr);
   Z = fZ;
   name = fname;
-#ifdef USE_STLSTRING
   std::ifstream BT_file(fFitBT_file_name.c_str());
-#else
-  std::ifstream BT_file(fFitBT_file_name);
-#endif
   if (!BT_file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << BT_file_name << std::endl;
@@ -2200,11 +2172,7 @@ ExAtomPhotoAbsCS::ExAtomPhotoAbsCS(
 
   check_econd11(first_shell, == NULL, mcerr);
   /*
-#ifdef USE_STLSTRING
   std::ifstream threshold_file(threshold_file_name.c_str());
-#else
-  std::ifstream threshold_file(threshold_file_name);
-#endif
   if( !threshold_file )
   {
     funnw.ehdr(mcerr);
@@ -2516,11 +2484,7 @@ int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const {
   mfunname("int ExAtomPhotoAbsCS::get_main_shell_number(int nshell) const");
   String shell_name = acs[nshell]->get_name();
 #ifdef STRSTREAM_AVAILABLE
-#ifdef USE_STLSTRING
   istrstream sfile(shell_name.c_str());
-#else
-  istrstream sfile(shell_name);
-#endif
 #else
   std::istringstream sfile(shell_name.c_str());
 #endif

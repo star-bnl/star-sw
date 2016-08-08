@@ -35,11 +35,7 @@ double ElElasticScatDataStruct::CS(double theta) {
 
 ElElasticScat::ElElasticScat(const String& file_name) : atom(0) {
   mfunnamep("ElElasticScat::ElElasticScat(const String& filename)");
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;
@@ -392,11 +388,7 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
   }
   angular_mesh_c[q_angular_mesh - 1] = 180.0;
 
-#ifdef USE_STLSTRING
   std::ofstream ofile(file_name.c_str());
-#else
-  std::ofstream ofile(file_name);
-#endif
   if (!ofile) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << endl;
@@ -554,11 +546,7 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
     }
   }
   if (s_write_dist == 1) {
-#ifdef USE_STLSTRING
     std::ofstream ofile(file_name_dist.c_str());
-#else
-    std::ofstream ofile(file_name_dist);
-#endif
     if (!ofile) {
       funnw.ehdr(mcerr);
       mcerr << "cannot open file " << file_name_dist << endl;
@@ -650,11 +638,7 @@ ElElasticScatLowSigma::ElElasticScatLowSigma(ElElasticScat* fees,
                                              const String& file_name)
     : ees(fees) {
   mfunnamep("ElElasticScatLowSigma::ElElasticScatLowSigma(...)");
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;

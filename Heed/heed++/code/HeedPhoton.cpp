@@ -5,7 +5,6 @@
 #include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/EnTransfCS.h"
-#include "heed++/code/ParticleBank.h"
 #include "heed++/code/HeedPhoton.h"
 
 /*
@@ -16,17 +15,19 @@ namespace Heed {
 
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
-                       double fenergy, int fs_print_listing)
+                       double fenergy, std::list<ActivePtr<gparticle> >& particleBank,
+                       int fs_print_listing)
     : gparticle(primvol, pt, vel, time),
       particle_number(last_particle_number++),
       parent_particle_number(fparent_particle_number),
-      s_print_listing(fs_print_listing),
       energy(fenergy),
       s_photon_absorbed(0),
 #ifdef SFER_PHOTOEL
       s_sfer_photoel(0),
 #endif
-      s_delta_generated(0) {
+      s_delta_generated(0),
+      s_print_listing(fs_print_listing),
+      m_particleBank(&particleBank) {
   mfunname("HeedPhoton::HeedPhoton(...)");
   double length_vel = length(vel);
   check_econd11(fabs(length_vel - c_light) / (length_vel + c_light), > 1.0e-10,
@@ -82,14 +83,14 @@ void HeedPhoton::physics(void) {
   }
   if (s_print_listing == 1) Iprintn(mcout, s);
   // Calculate the path length.
-  //s=s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
+  // s = s * hmd->eldens / hmd->matter->Z_mean() * C1_MEV_CM;
   s = s * 1.0e-18 * AVOGADRO / (hmd->matter->A_mean() / (gram / mole)) *
       hmd->matter->density() / (gram / cm3);
   if (s_print_listing == 1) Iprintn(mcout, s);
   const double path_length = 1.0 / s;  // cm
   if (s_print_listing == 1) Iprint2n(mcout, energy, path_length);
   // Draw a random step length.
-  double xleng = -path_length * log(1.0 - SRANLUX());
+  const double xleng = -path_length * log(1.0 - SRANLUX());
   if (s_print_listing == 1) {
     Iprintn(mcout, xleng);
     Iprintn(mcout, nextpos.prange / cm);
@@ -102,7 +103,7 @@ void HeedPhoton::physics(void) {
 #endif
     // Sample the shell.
     chispre(cs);
-    double r = chisran(SRANLUX(), cs);
+    const double r = chisran(SRANLUX(), cs);
     //Iprintn(mcout, r);
     long n = long(r);
     if (n < 0) n = 0;
@@ -182,10 +183,7 @@ void HeedPhoton::physics_after_new_speed(void) {
     ac.pass(
         new HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
                               vel, currpos.time, particle_number));
-    // particle_bank.insert_after(particle_bank.get_last_node(), ac);
-    particle_bank.push_back(ac);
-    // particle_bank.push_back(HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
-    //                         vel, currpos.time, particle_number));
+    m_particleBank->push_back(ac);
   }
   const long qph = ph_energy.get_qel();
   for (long nph = 0; nph < qph; nph++) {
@@ -198,11 +196,9 @@ void HeedPhoton::physics_after_new_speed(void) {
     }
     ActivePtr<gparticle> ac;
     ac.pass(new HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
-                           currpos.time, particle_number, ph_energy[nph]));
-    // particle_bank.insert_after(particle_bank.get_last_node(), ac);
-    particle_bank.push_back(ac);
-    // particle_bank.push_back(HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
-    //                                    currpos.time, particle_number, ph_energy[nph]));
+                           currpos.time, particle_number, ph_energy[nph], 
+                           *m_particleBank));
+    m_particleBank->push_back(ac);
   }
   s_delta_generated = 1;
   s_life = 0;

@@ -258,13 +258,8 @@ macro_copy_body(box)
 
 void box::income(gparticle* /*gp*/) {}
 void box::chname(char* nm) const {
-#ifdef USE_STLSTRING
   strcpy(nm, "box: ");
   strcat(nm, name.c_str());
-#else
-  strcpy(nm, "box: ");
-  strcat(nm, name);
-#endif
 }
 
 // *****   manip_box  ********
@@ -272,13 +267,8 @@ void box::chname(char* nm) const {
 absvol* manip_box::Gavol(void) const { return (box*)this; }
 macro_copy_body(manip_box)
 void manip_box::chname(char* nm) const {
-#ifdef USE_STLSTRING
   strcpy(nm, "manip_box: ");
   strcat(nm, name.c_str());
-#else
-  strcpy(nm, "manip_box: ");
-  strcat(nm, name);
-#endif
 }
 
 void manip_box::print(std::ostream& file, int l) const {
@@ -306,13 +296,8 @@ void sh_manip_box::get_components(ActivePtr<absref_transmit>& aref_tran) {
 
 macro_copy_body(sh_manip_box)
 void sh_manip_box::chname(char* nm) const {
-#ifdef USE_STLSTRING
   strcpy(nm, "sh_manip_box: ");
   strcat(nm, name.c_str());
-#else
-  strcpy(nm, "sh_manip_box: ");
-  strcat(nm, name);
-#endif
 }
 
 void sh_manip_box::print(std::ostream& file, int l) const {

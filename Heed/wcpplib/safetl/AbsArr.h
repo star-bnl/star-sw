@@ -274,91 +274,47 @@ class DynLinArr : public RegPassivePtr
   //DynLinArr& operator=(const T& f) { int n; for( n=0; n<qel; n++) el[n]=f; }
   inline T& operator[](long n) {
 #ifdef ALR_CHECK_BOUND
-    if (n >= 0 && n < qel) {
-      return el[n];
-    } else {
-      mcerr << "ERROR in const T& DynLinArr::operator[](long n) const: "
-            << "n is out of bounds, n=" << n << " qel=" << qel << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (n >= 0 && n < qel) return el[n];
+    mcerr << "ERROR in const T& DynLinArr::operator[](long n) const: "
+          << "n is out of bounds, n=" << n << " qel=" << qel << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[n];
 #endif
-    /*
-#ifdef ALR_CHECK_BOUND
-      if(n<0 || n>=qel)
-      {
-	mcerr<<"ERROR in T& DynLinArr::operator[](long n): "
-	     <<"n is out of bounds, n="<<n
-	     <<" qel="<<qel<<'\n';
-	mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
-	spexit(mcerr);
-      }
-#endif
-      return el[n];
-      */
   }
   inline const T& operator[](long n) const {
 #ifdef ALR_CHECK_BOUND
-    if (n >= 0 && n < qel) {
-      return el[n];
-    } else {
-      mcerr << "ERROR in const T& DynLinArr::operator[](long n) const: "
-            << "n is out of bounds, n=" << n << " qel=" << qel << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN   // Insert calming return
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (n >= 0 && n < qel) return el[n];
+    mcerr << "ERROR in const T& DynLinArr::operator[](long n) const: "
+          << "n is out of bounds, n=" << n << " qel=" << qel << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[n];
 #endif
-    /* // it is more simple to read but might be slower to execute
-#ifdef ALR_CHECK_BOUND
-    if(n<0 || n>=qel)
-    {
-      mcerr<<"ERROR in const T& DynLinArr::operator[](long n) const: "
-	   <<"n is out of bounds, n="<<n
-	   <<" qel="<<qel<<'\n';
-      mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
-      spexit(mcerr);
-    }
-#endif
-    return el[n];
-    */
   }
-  inline T& acu(long n)  // unchecked access
-      {
+  inline T& acu(long n) {
+    // unchecked access
     return el[n];
   }
-  inline const T& acu(long n) const  // unchecked access
-      {
+  inline const T& acu(long n) const {
+    // unchecked access
     return el[n];
   }
   inline T& last_el(void) {
 #ifdef ALR_CHECK_BOUND
-    if (qel > 0) {
-      return el[qel - 1];
-    } else {
-      mcerr << "ERROR in const T& DynLinArr::last_el(void) const: qel <=0:"
-            << " qel" << qel << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN   // Insert calming return
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (qel > 0) return el[qel - 1];
+    mcerr << "ERROR in const T& DynLinArr::last_el(void) const: qel <=0:"
+          << " qel" << qel << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[qel];
 #endif
@@ -366,19 +322,13 @@ class DynLinArr : public RegPassivePtr
 
   inline const T& last_el(void) const {
 #ifdef ALR_CHECK_BOUND
-    if (qel > 0) {
-      return el[qel - 1];
-    } else {
-      mcerr << "ERROR in const T& DynLinArr::last_el(void) const: qel <=0:"
-            << " qel" << qel << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN   // Insert calming return
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (qel > 0) return el[qel - 1];
+    mcerr << "ERROR in const T& DynLinArr::last_el(void) const: qel <=0:"
+          << " qel" << qel << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[qel];
 #endif
@@ -1897,46 +1847,25 @@ class DynArr : public RegPassivePtr
 #endif
   }
 
-  T& ac(long i)  // for 1-dimensional array
-      {
-    if (qel.get_qel() == 1)
-      return el[i];
-    else {
-      mcerr << "ERROR in DynArr::ac(long i): qel.get_qel()!= 1, qel.get_qel()="
-            << qel.get_qel() << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN   // Insert calming return
-      return el[0];  // to quiet Microsoft Visual Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
-    //return el[i];
+  T& ac(long i) {
+    // for 1-dimensional array
+    if (qel.get_qel() == 1) return el[i];
+    mcerr << "ERROR in DynArr::ac(long i): qel.get_qel()!= 1, qel.get_qel()="
+          << qel.get_qel() << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
   }
-  const T& ac(long i) const  // for 1-dimensional array
-      {
-    if (qel.get_qel() == 1)
-      return el[i];
-    else {
-      mcerr << "ERROR in DynArr::ac(long i): qel.get_qel()!= 1, qel.get_qel()="
-            << qel.get_qel() << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN   // Insert calming return
-      return el[0];  // to quiet Microsoft Visual Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
-    /*
-      if(qel.get_qel() != 1)
-      { mcerr<<"ERROR in DynArr::ac(long i): qel.get_qel()!= 1, qel.get_qel()="
-	     <<qel.get_qel()<<'\n';
-      mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
-      spexit(mcerr); }
-      return el[i];
-      */
+  const T& ac(long i) const {
+    // for 1-dimensional array
+    if (qel.get_qel() == 1) return el[i];
+    mcerr << "ERROR in DynArr::ac(long i): qel.get_qel()!= 1, qel.get_qel()="
+          << qel.get_qel() << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
   }
   inline T& acu(long i1)  // for 1-dimensional array, completely unchecked
       {
@@ -2136,10 +2065,7 @@ class DynArr : public RegPassivePtr
     mcerr << "Type of T is (in internal notations) " << typeid(T).name()
           << '\n';
     spexit(mcerr);
-#ifdef INS_CRETURN  // Insert calming return
-    return el[0];   // to quiet Microsoft Visual Studio compiler against
-                    // "not all control paths return a value"
-#endif
+    return el[0];
 #else  // for ifdef ALR_CHECK_EACH_BOUND
     return el[i1 * cum_qel.acu(0) + i2];
 
@@ -2206,10 +2132,7 @@ qel.acu(1)\n";
     mcerr << "Type of T is (in internal notations) " << typeid(T).name()
           << '\n';
     spexit(mcerr);
-#ifdef INS_CRETURN  // Insert calming return
-    return el[0];   // to quiet Microsoft Visual Studio compiler against
-                    // "not all control paths return a value"
-#endif
+    return el[0];
 #else  // for ifdef ALR_CHECK_EACH_BOUND
     return el[i1 * cum_qel.acu(0) + i2];
 
@@ -2344,19 +2267,13 @@ qel.acu(1)\n";
   inline T& ac_lin(long n) {
     long qelln = el.get_qel();
 #ifdef ALR_CHECK_BOUND
-    if (n >= 0 && n < qelln) {
-      return el[n];
-    } else {
-      mcerr << "ERROR in T& DynArr::ac_lin(long n): "
-            << "n is out of bounds, n=" << n << " qelln=" << qelln << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (n >= 0 && n < qelln) return el[n];
+    mcerr << "ERROR in T& DynArr::ac_lin(long n): "
+          << "n is out of bounds, n=" << n << " qelln=" << qelln << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[n];
 #endif
@@ -2364,19 +2281,13 @@ qel.acu(1)\n";
   inline const T& ac_lin(long n) const {
     long qelln = el.get_qel();
 #ifdef ALR_CHECK_BOUND
-    if (n >= 0 && n < qelln) {
-      return el[n];
-    } else {
-      mcerr << "ERROR in T& DynArr::ac_lin(long n): "
-            << "n is out of bounds, n=" << n << " qelln=" << qelln << '\n';
-      mcerr << "Type of T is (in internal notations) " << typeid(T).name()
-            << '\n';
-      spexit(mcerr);
-#ifdef INS_CRETURN
-      return el[0];  // to quiet Microsoft Visial Studio compiler against
-                     // "not all control paths return a value"
-#endif
-    }
+    if (n >= 0 && n < qelln) return el[n];
+    mcerr << "ERROR in T& DynArr::ac_lin(long n): "
+          << "n is out of bounds, n=" << n << " qelln=" << qelln << '\n';
+    mcerr << "Type of T is (in internal notations) " << typeid(T).name()
+          << '\n';
+    spexit(mcerr);
+    return el[0];
 #else
     return el[n];
 #endif

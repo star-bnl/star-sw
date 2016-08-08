@@ -314,11 +314,7 @@ void HeedMatterDef::inite_HeedMatterDef(void) {
 void HeedMatterDef::replace_epsi12(const String& file_name) {
   mfunnamep("void HeedMatterDef::replace_epsi12(const String& file_name)");
 
-#ifdef USE_STLSTRING
   std::ifstream file(file_name.c_str());
-#else
-  std::ifstream file(hist_file_name);
-#endif
   if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;

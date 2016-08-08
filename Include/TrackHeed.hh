@@ -4,10 +4,13 @@
 #define G_TRACK_HEED_H
 
 #include <vector>
+#include <list>
 
 #include "Track.hh"
+#include "heed++/code/HeedParticle.h"
 
 namespace Heed {
+class gparticle;
 class HeedParticle;
 class HeedMatterDef;
 class GasDef;
@@ -129,6 +132,8 @@ class TrackHeed : public Track {
   // Bounding box
   double m_lX, m_lY, m_lZ;
   double m_cX, m_cY, m_cZ;
+
+  std::list<ActivePtr<Heed::gparticle> > m_particleBank;
 
   bool Setup(Medium* medium);
   bool SetupGas(Medium* medium);

@@ -1243,9 +1243,7 @@ template <class T> class AbsCoorMesh : public RegPassivePtr {
     mcerr << "AbsCoorMesh::operator == cannot be called since this is abstract "
              "class\n";
     spexit(mcerr);
-#ifdef INS_CRETURN
-    return 0;  // to calm compiler
-#endif
+    return 0;
   }
   virtual int operator!=(const AbsCoorMesh<T>&) {
     mfunnamep("virtual int operator!=(const AbsCoorMesh<T>&)");
@@ -1253,9 +1251,7 @@ template <class T> class AbsCoorMesh : public RegPassivePtr {
     mcerr << "AbsCoorMesh::operator != cannot be called since this is abstract "
              "class\n";
     spexit(mcerr);
-#ifdef INS_CRETURN
-    return 0;  // to calm compiler
-#endif
+    return 0;
   }
   virtual int apeq_mant(const AbsCoorMesh<T>&, T /*prec*/) {
     mfunnamep("virtual int apeq_mant(const AbsCoorMesh<T>& m2, T prec)");
@@ -1263,9 +1259,7 @@ template <class T> class AbsCoorMesh : public RegPassivePtr {
     mcerr << "AbsCoorMesh::apeq_mant != cannot be called since this is "
              "abstract class\n";
     spexit(mcerr);
-#ifdef INS_CRETURN
-    return 0;  // to calm compiler
-#endif
+    return 0;
   }
 };
 
@@ -1630,9 +1624,7 @@ ActivePtr<AbsCoorMesh<T> > read_AbsCoorMesh(std::istream& file) {
   mcout << "cannot identifiy the type of derived AbsCoorMesh\n";
   Iprintn(mcout, keyline);
   spexit(mcerr);
-#ifdef INS_CRETURN
   return ActivePtr<AbsCoorMesh<T> >();
-#endif
 }
 
 // end of definitions of meshes

@@ -175,13 +175,8 @@ class ulsvolume : public absvol {
 
   virtual void income(gparticle* /*gp*/) {}
   virtual void chname(char* nm) const {
-#ifdef USE_STLSTRING
     strcpy(nm, "ulsvolume: ");
     strcat(nm, name.c_str());
-#else
-    strcpy(nm, "ulsvolume: ");
-    strcat(nm, name);
-#endif
   }
   virtual void print(std::ostream& file, int l) const;
   virtual int mandatory(void) const { return 0; }
@@ -201,13 +196,8 @@ class manip_ulsvolume : virtual public manip_absvol, public ulsvolume {
 
   virtual absvol* Gavol(void) const { return (ulsvolume*)this; }
   virtual void chname(char* nm) const {
-#ifdef USE_STLSTRING
     strcpy(nm, "manip_ulsvolume: ");
     strcat(nm, name.c_str());
-#else
-    strcpy(nm, "manip_ulsvolume: ");
-    strcat(nm, name);
-#endif
   }
   virtual void print(std::ostream& file, int l) const;
 

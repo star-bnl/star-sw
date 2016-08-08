@@ -21,6 +21,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 // point in space, time and velocity
 class stvpoint {
  public:
@@ -34,10 +36,8 @@ class stvpoint {
   vec dirloc;
   // longitudinal velocity
   vfloat speed;
-  //vfloat accel;     // longitudinal acceleration
   manip_absvol_treeid tid;
-  //int namvol;  // number of currect volumes
-  //manip_absvol* amvol[pqamvol];
+
   int sb;     // 0 - inside volume, or unknown
               // 1 - on the border of the volume
               // 2 - on the border of an embraced volume
@@ -48,7 +48,6 @@ class stvpoint {
                               // range from previous point
   vfloat prange;
   vfloat time;
-  //  vfloat vvel; // value of velocity
 
   // get least address of manipulator
   const manip_absvol_eid* G_laeid() const { return tid.G_laeid(); }
@@ -91,7 +90,6 @@ class stvpoint {
   }
   stvpoint(const stvpoint& pstv, const trajestep& ts,  // in the local system
            vfloat mrange,  // may be less than one in ts
-           //manip_absvol_treeid& ftid,
            int fsb, int fs_ent, manip_absvol_eid& faeid)
       : pt(),
         dir(),
@@ -243,5 +241,7 @@ class gparticle : public RegPassivePtr {
   macro_copy_total(gparticle);
   virtual ~gparticle() { ; }
 };
+
+}
 
 #endif
