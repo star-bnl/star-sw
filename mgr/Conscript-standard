@@ -1024,6 +1024,7 @@ TDataSet *CreateTable() {
 	      #	    my $xgeomlist = "y2013.*|devT|dev14|eStar";# "\^devT\$";#"dev13|devE|devT|y2013.*|y2012.*|y2011b|y2012a|y2013_1|y2013_2|y2003x";
 	      #	    print "key = $key, geom = $geom, xgeomList{$geom} = $xgeomList{$geom}\n";
 	      my $geometry = "Geometry." . $geom . ".C";
+	      my $hall = "HALL." . $geom . ".root";
 	      Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	      if (! $xgeomList{$geom}) {
 		Depends $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
@@ -1037,7 +1038,7 @@ TDataSet *CreateTable() {
 		Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
 		Command $env1 [$rz,$geometry], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
 		  #		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry %>:d); #   mv geom.rz %>:f;
+		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
 	      }
 	    }
 	    my $g2root = "g2Root";
