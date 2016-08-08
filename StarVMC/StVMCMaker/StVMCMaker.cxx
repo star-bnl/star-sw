@@ -147,10 +147,15 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     assert(geom);
   }
   if (!fVolume) {
+#if 0
     TGeoDrawHelper Helper;
     fVolume = (TDataSet *) Helper.GetVolume();
+#else
+    fVolume = (TDataSet *) GetDataBase("StarDb/AgiGeometry/HALL");
+#endif
   }
   if (fVolume) { 
+#if 0 /* Don't remember why I need to remove it */
      if (gGeometry) {
         TList *listOfVolume = gGeometry->GetListOfNodes();
 
@@ -158,6 +163,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
         listOfVolume->Remove(fVolume);
         listOfVolume->Remove(fVolume);
      }
+#endif 
      // Add "hall" into ".const" area of this maker
      ((StVMCMaker *)this)->AddConst(fVolume);
      if (Debug() > 1) fVolume->ls(3);

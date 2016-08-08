@@ -1,4 +1,4 @@
-void Ast2Rz(const Char_t *vers="y2005x", const Char_t *geom = "") {
+void Ast2Rz(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   gROOT->LoadMacro("bfc.C");
   //  TString cmd("bfc(0,\"gstar,useXgeom,nodefault,");
   //  TString cmd("bfc(0,\"gstar,nodefault,StEvent,");
@@ -18,6 +18,12 @@ void Ast2Rz(const Char_t *vers="y2005x", const Char_t *geom = "") {
   TString cmd("grfile"); 
   geant->Do(cmd.Data());
   //  geant->Do("FORTRAN/CLOSE 30");
+  TVolume *hall = geant->GetDataSet("HALL");
+  if (hall) {
+    TFile *f = new TFile(Form("HALL.%s.root",vers),"recreate");
+    hall->Write();
+    delete f;
+  }
 #if 1
   ofstream out;
   TString fOut("Geometry.");
