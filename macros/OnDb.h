@@ -2,8 +2,12 @@ TString OnDb(Int_t year = 2014, const Char_t *dataset="Conditions_daq") {
   // https://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map/
   TString database;
   if      (year == 2016)     {
+#if 1
+    database = "dbbak.starp.bnl.gov:3415";
+#else
     if (dataset[0] == 'R') database = "onldb2.starp.bnl.gov:3501";
     else                   database = "onldb2.starp.bnl.gov:3502";
+#endif
   }
   else if      (year == 2015)     {
 #if 1
