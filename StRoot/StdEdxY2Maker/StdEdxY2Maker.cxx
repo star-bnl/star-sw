@@ -72,6 +72,7 @@ static Int_t numberOfSectors = 0;
 static Int_t numberOfTimeBins = 0;
 static Int_t NumberOfRows = 0;
 static Int_t NumberOfInnerRows = 0;
+static Int_t NumberOfChannels = 8;
 static Int_t NoPads = 0;
 static Double_t innerSectorPadPitch = 0;
 static Double_t outerSectorPadPitch = 0;
@@ -1001,11 +1002,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NumberOfRows,150, 6.84, 6.99);
   static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",NumberOfRows,150, 6.84, 6.99);
   
-  static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Row","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfRows,22,-210,10);
-  static Hists3D Volt("Volt","log(dE/dx)","row","Voltage", NumberOfRows,410,990.,1400.);
+  static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10);
+  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
 
-  static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","row","Average Current [#{mu}A]",NumberOfRows,200,0.,1.0);
-  static Hists3D Qcm("Qcm","log(dEdx/Pion)","row","Accumulated Charge [uC/cm]",NumberOfRows,200,0.,1000);
+  static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
+  static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
   static Hists3D SecRow3;
   static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NumberOfRows,200,-2.,2.);
   //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
@@ -1334,6 +1335,17 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif /* __HEED_MODEL__ */
 	  FdEdx[k].dx
 	};
+	Double_t VarsV[9] = {
+	  FdEdx[k].C[StTpcdEdxCorrection::kTpcNoAnodeVGainC].dEdxN,
+	  Vars[1],
+	  Vars[2],
+	  Vars[3],
+	  Vars[4],
+	  Vars[5],
+	  Vars[6],
+	  Vars[7],
+	  Vars[8]
+	};
 	Double_t Pad2Edge = FdEdx[k].edge;
 	if (TMath::Abs(Pad2Edge) > 5) {
 	  SecRow3.Fill(FdEdx[k].sector,FdEdx[k].row,Vars);
@@ -1351,12 +1363,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    Double_t press = TMath::Log(p);
 	    Pressure.Fill(FdEdx[k].row,press,Vars);
 	  }
+	  Int_t channel = St_TpcAvgCurrentC::ChannelFromRow(FdEdx[k].row);
+	  Int_t cs = NumberOfChannels*(FdEdx[k].sector-1)+channel;
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
 	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
-	  Voltage.Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,VN,Vars);
-	  Volt.Fill(FdEdx[k].row,V,Vars);
-	  Qcm.Fill(FdEdx[k].row,FdEdx[k].Qcm,Vars);
-	  AvCurrent.Fill(FdEdx[k].row,FdEdx[k].Crow,Vars);
+	  Voltage.Fill(cs,VN,VarsV);
+	  Volt.Fill(cs,V,VarsV);
+	  Qcm.Fill(cs,FdEdx[k].Qcm,VarsV);
+	  AvCurrent.Fill(cs,FdEdx[k].Crow,VarsV);
 	  if (p*t > 0) {
 	    Double_t temp = TMath::Log(p/t);
 	    PressureT.Fill(FdEdx[k].row,temp,Vars);
