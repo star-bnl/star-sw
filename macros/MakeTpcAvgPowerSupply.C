@@ -1,5 +1,10 @@
 /* 
-   root.exe lmysql.C MakeTpcAvgPowerSupply.C+
+   root.exe -b -q  lmysql.C MakeTpcAvgPowerSupply.C+
+Test
+   root.exe 'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply",20160509,114213)'
+for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(s,r); cout << "s/r=" << s << "/" << r << " V = " << V; if (r <=13 && TMath::Abs(V-1100)>5 || r > 13 &&TMath::Abs(V-1390)>5) cout << " =========================="; cout << endl;}}
+
+
  */
 #include <stdio.h>
 #include "Riostream.h"
@@ -43,8 +48,8 @@ public:
   }
 };
 struct M_t {
-  M_t(Float_t x, Float_t C, Float_t V) : _x(x), _C(C), _V(V) {};
-  Float_t _x; // utime
+  M_t(Int_t x, Float_t C, Float_t V) : _x(x), _C(C), _V(V) {};
+  Int_t   _x; // utime
   Float_t _C; // current
   Float_t _V; // Voltage
 };
@@ -217,6 +222,7 @@ Int_t FitGraph(TGraph *graph = 0, Int_t iv = 0) {
   if (! gROOT->IsBatch() && Ask()) return 1;
   return iok;
 }
+#if 0
 //________________________________________________________________________________
 Int_t readI(const Char_t *string, Int_t *array) {
   TObjArray Opt;
@@ -226,6 +232,7 @@ Int_t readI(const Char_t *string, Int_t *array) {
   }
   return N;
 }
+#endif
 #include "OnDb.h"
 //________________________________________________________________________________
 TSQLServer *OnlDbServer(const Char_t *dataset = "Conditions_rich", Int_t year = 2013) {
@@ -282,29 +289,39 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
 }
 //________________________________________________________________________________
 void MakeTpcAvgPowerSupply(Int_t year = 2016) {
+  TDatime d(10000*(year-1) + 1201,0);
+  Int_t u95 = d.Convert();
+  TDatime nextyear(10000*(year+1) + 101, 0);
+  Int_t uNext = nextyear.Convert();
   struct FitP_t {
     Float_t run, uBegin, uStop, uEnd, channel, module, io, sector, socket, meanV, rmsV, Vfit, meanC, rmsC, Cfit, Charge, FitStatus, AcChargeI, AcChargeO, np;
   };
-  TFile *fOut = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"update");
+  TFile *fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"update");
   TNtuple *FitP = 0;
-  if (fOut) FitP = (TNtuple *) fOut->Get("FitP");
+  if (fSumF) FitP = (TNtuple *) fSumF->Get("FitP");
   if (!FitP) {
-    fOut = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"recreate");
+    delete fSumF;
+    fSumF = new TFile(Form("MakeTpcAvgPowerSupply.%i.root",year),"recreate");
     FitP = new TNtuple("FitP","Fit results",
 		       "run:uBegin:uStop:uEnd:channel:module:io:sector:socket:meanV:rmsV:Vfit:meanC:rmsC:Cfit:Charge:FitStatus:AcChargeI:AcChargeO:np");
     FitP->SetMarkerStyle(20);
     FitP->SetLineWidth(2);
+    FitP->SetAutoFlush(-10000000);
   }
   FitP_t Point;
   // List of runs
   //select beginTime,runNumber,from_unixtime(startRunRTS),from_unixtime(startRunDaq),from_unixtime(startRunTrg),from_unixtime(endRunRTS) from  runUpdateStatus limit 20;
   TSQLServer *RunLog = OnlDbServer("RunLog",year);
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus where beginTime > \"2012-04-23 10:09:15\" order by beginTime limit 2;");
-  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus where beginTime > \"2013-02-05\" order by beginTime;");
+  //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus where beginTime > \"2016-01-13\" order by beginTime;");
+  //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus order by beginTime;");
+  //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime) from daqSummary  order by beginTime;");
+  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  order by beginTime;");
   TSQLResult *res = RunLog->Query(sql.Data());
   Int_t Nruns = res->GetRowCount(); cout << "Got " << Nruns << " rows in result" << endl;
   Run_t **runs = new Run_t*[Nruns+1];
   Int_t nfields = res->GetFieldCount();
+  Int_t NoGoodRuns = 0;
   TString names[nfields];
   TSQLRow *row;
   Bool_t IsBeenZeroSaved = kFALSE;
@@ -322,13 +339,17 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	cout << Form("%i %20s = %s", j, names[j].Data(), row->GetField(j)) << endl;
       }
     }
-    runs[i] = new Run_t(TString(row->GetField(0)).Atoi(),row->GetField(1), row->GetField(2));
-    //    runs[i]->stop.Set(row->GetField(2));
-    runs[i]->Print();
+    Int_t u1 = TString(row->GetField(3)).Atoi();
+    Int_t u2 = TString(row->GetField(4)).Atoi();
+    if (u1 <= u95 || u1 > uNext || u2 <= u95 || u2 > uNext  || u2 <= u1) continue;
+    runs[NoGoodRuns] = new Run_t(TString(row->GetField(0)).Atoi(),row->GetField(1), row->GetField(2));
+    //    runs[NoGoodRuns]->stop.Set(row->GetField(2));
+    runs[NoGoodRuns]->Print();
+    NoGoodRuns++;
   }
-  runs[Nruns] = new Run_t(*runs[Nruns-1]);
-  runs[Nruns]->start = runs[Nruns]->stop;
-  runs[Nruns]->Print();
+  runs[NoGoodRuns] = new Run_t(*runs[NoGoodRuns-1]);
+  runs[NoGoodRuns]->start = runs[NoGoodRuns]->stop;
+  runs[NoGoodRuns]->Print();
   delete RunLog;
   //  return;
   TSQLServer *daq    = OnlDbServer("Conditions_daq",year);
@@ -337,29 +358,37 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
   TpcAvgPowerSupply_st avgT; memset(&avgT, 0, sizeof(TpcAvgPowerSupply_st)); // Tripped
   for (Int_t i = 0; i < 192; i++) avgT.Voltage[i] = -999.;
   Int_t runL = LastProcessedRun(&avgI, AcCharge);
-  for (Int_t r = 0; r < Nruns; r++) {
-    if (runs[r]->run <= runL) continue;
+  for (Int_t r = 0; r < NoGoodRuns; r++) {
+    if (! runs[r]) continue;
+    if (r > 0) SafeDelete(runs[r-1]);
+    if (runs[r]->run <= runL) {
+      //      SafeDelete(runs[r]); 
+      continue;
+    }
     Int_t uBegin = runs[r]->start.Convert();
     Int_t uStop  = runs[r]->stop.Convert();
     Int_t uLast  = uStop;
     Int_t uTrip  = -1;
     Int_t uLastNonTrip = -1;
-    if (uStop - uBegin < 300) {
+    if (uStop - uBegin < 10) {
+      //      SafeDelete(runs[r]); 
       continue; // ignore short runs
     }
     Int_t uEnd   = uStop;
-    if (r < Nruns-1) uEnd =  runs[r+1]->start.Convert();
+    if (r < NoGoodRuns-1) uEnd =  runs[r]->stop.Convert();
     TpcAvgPowerSupply_st avgC; memset(&avgC, 0, sizeof(TpcAvgPowerSupply_st)); // Current
     avgC.run = runs[r]->run;
     avgT.run = runs[r]->run;
     vector<M_t> mXCV[2][NUM_CARDS][NUM_CHANNELS];
 #if 0
-    if (avgC.run < 16166017) continue;
+    if (avgC.run < 16166017) {
+      //      SafeDelete(runs[r]); 
+      continue;
+    };
 #endif
     avgC.start_time = uBegin;
     avgC.stop_time  = uStop;
     TCL::ucopy(avgI.Charge,avgC.Charge,192); 
-    Int_t NIO[2] = {0,0};
     Double_t CurrentsSum = 0;
     Int_t NoRowsRead = 0;
     memset(&Point.run, 0, sizeof(Point));
@@ -368,19 +397,24 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
     Point.uStop = uStop;
     Point.uEnd = uEnd;
     for (Int_t io = 0; io < 2; io++) {
+      if (! runs[r]) continue;
       //      TString Sql(Form("select UNIX_TIMESTAMP(beginTime),Voltages,Currents,Status,Reason from Conditions_daq.tpcPowerSupply%s ",IO[io]));
       TString Sql(Form("select beginTime,Currents,Reason,Voltages from Conditions_daq.tpcPowerSupply%s",IO[io]));
-      Sql += " WHERE beginTime >= \"";
+      Sql += " WHERE beginTime > \"";
       Sql += runs[r]->start.AsSQLString();
-      if (r < Nruns - 1) {
+      if (r < NoGoodRuns - 1) {
 	Sql += " \" and beginTime < \"";
 	//      Sql += runs[r]->stop.AsSQLString();
-	Sql += runs[r+1]->start.AsSQLString();
+	//	Sql += runs[r+1]->start.AsSQLString();
+	Sql += runs[r]->stop.AsSQLString();
       }
       Sql += "\"  order by beginTime;";
       if (_debug > 2) cout << Sql.Data() << endl;
       res = daq->Query(Sql.Data());
-      if (! res) continue;
+      if (! res) {
+	//	SafeDelete(runs[r]); 
+	continue;
+      };
       nfields = res->GetFieldCount();
       for (Int_t i = 0; i < nfields; i++) names[i] = res->GetFieldName(i);
       
@@ -404,7 +438,10 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	}
 	TDatime t(row->GetField(0));//  t.Print(); 
 	Int_t u = t.Convert();
-	if (u > uLast) continue;
+	if (u > uLast) {
+	  //	  SafeDelete(runs[r]); 
+	  continue;
+	};
 	Int_t N;
 	N = readF(row->GetField(1),  Currents); assert(N == 96);
 	N = readF(row->GetField(3),  Voltages); assert(N == 96);
@@ -418,10 +455,9 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	if (_debug > 2) {
 	  cout << "Reason " << Reason << endl;
 	}
-	if (Reason != 1) {
-// 	  if ((Reason & 1 << 1) || // 1 Output is ramping to a higher absolute value.
-// 	      (Reason & 1 << 2)    // 2 Output is ramping to a lower absolute value or zero
-// 	      ) continue;
+	if (! Reason) {
+	  if (u > uLastNonTrip) uLastNonTrip = u;
+	} else if (Reason != 1) {
 	  if (
 	      (Reason & 1 << 5) || // 5 Trip for violation of supply limits
 	      (Reason & 1 << 6) || // 6 Trip for violation user's current limit
@@ -430,9 +466,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	      ) {
 	    if (uTrip < 0 || u < uTrip) {uTrip = u; uLast = uTrip;}
 	  }
-	  continue;
 	}
-	if (u > uLastNonTrip) uLastNonTrip = u;
 	for (Int_t k = 0; k < 96; k++) {
 	  if (Currents[k] < 0.0) Currents[k] = 0;
 	  if (Voltages[k] < 0.0) Voltages[k] = 0;
@@ -444,7 +478,10 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
       }
       delete res;
     }
-    if (! NoRowsRead) continue;
+    if (! NoRowsRead) {
+      //      SafeDelete(runs[r]); 
+      continue;
+    }
     // Fit
     Int_t failed = 0;
     for (Int_t io = 0; io < 2; io++) {
@@ -458,7 +495,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	  if (_debug > 1) cout << "sector = " << sec << " socket = " << socket << endl;
 	  Int_t l    = 8*(sec-1)+socket-1;
 	  UInt_t n = mXCV[io][module][channel].size();
-	  if (n < 2) {
+	  if (n < 3) {
 	    if (_debug > 1) cout << "mXCV[" << io << "][" << module << "][" << channel << "] = " << n << " skipped." << endl;
 	    continue;
 	  } 
@@ -502,7 +539,9 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	  avgC.Voltage[l] = mean;
 	  Point.meanV = mean;
 	  Point.rmsV  = rms;
-	  if (rms/(n-1) > 1) {  // 1V
+	  if (rms/(n-1) > 10) { // 10 V ignore as ramping
+	    failed++;
+	  } else if (rms/(n-1) > 1) {  // 1V
 	    iok1 = FitGraph(graphV,1);
 	    if (iok1 > 0 || ! lf) {
 	      failed++;
@@ -560,6 +599,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	TpcAvgPowerSupply->Print(0,24);
       }
     }
+    if (! runs[r]) continue;
     TString fOut =  Form("TpcAvgPowerSupply.%8i.%06i.root",runs[r]->start.GetDate(),runs[r]->start.GetTime());
     TFile *outf = new TFile(fOut.Data(),"recreate");
     TpcAvgPowerSupply->Write();
@@ -579,11 +619,13 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
       delete TpcAvgPowerSupply;
       cout << "Tripped " << fOut.Data() << " has been written" << endl;
     }
+    FitP->AutoSave("SaveSelf");
     if (! gROOT->IsBatch() && Ask()) return;
   }
   delete daq;
-  for (Int_t r = 0; r <= Nruns; r++) {
-    delete runs[r];
+  for (Int_t r = 0; r <= NoGoodRuns; r++) {
+    SafeDelete(runs[r]);
   }
   delete [] runs;
+  fSumF->Write();
 }
