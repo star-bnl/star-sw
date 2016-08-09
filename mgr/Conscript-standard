@@ -1005,7 +1005,9 @@ TDataSet *CreateTable() {
 	    my $geom_h = $geom . ".h";
 	    #	  my $rz = lc($geom . ".rz");
 	    my $rz = $geom . ".rz";
+	    my $HALL = "HALL." . $geom . ".root";
 	    if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
+	      # rz - files
 	      my $glob = ".sl*/obj/StarDb/AgiGeometry/" . $rz;
 	      my @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
 	      my $dir;
@@ -1016,6 +1018,19 @@ TDataSet *CreateTable() {
 		  my $file = "#" . $dir;
 		  #		print "$rz $file\n";
 		  Command $env1 [$rz], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		  last;
+		}
+	      }
+	      # HALL
+	      $glob = ".sl*/obj/StarDb/AgiGeometry/HALL*.root";
+	      @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
+	      foreach $dir (@dirs) {
+		if ($dir =~ /x86/ || $dir =~ /darwin/) {next;}
+		#	      print "found $dir\n";
+		if ($dir) {
+		  my $file = "#" . $dir;
+		  #		print "$rz $file\n";
+		  Command $env1 [$HALL], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
 		  last;
 		}
 	      }
