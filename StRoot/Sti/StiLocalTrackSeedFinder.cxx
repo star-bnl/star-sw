@@ -194,6 +194,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
+  if (fabs(dr) <=1.e-3) return false;
   assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
 //    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
