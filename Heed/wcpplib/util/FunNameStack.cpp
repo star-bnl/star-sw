@@ -430,10 +430,6 @@ FunNameStack::~FunNameStack() {
 #endif
 }
 
-#ifndef WCPPLIB_INLINE
-#include "util/FunNameStack.ic"
-#endif
-
 void FunNameStack::printput(std::ostream& file) {
   if (s_print == 1 || s_print == 2) {
 #ifdef USE_BOOST_MULTITHREADING

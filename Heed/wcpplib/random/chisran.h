@@ -10,6 +10,8 @@
 // The new ones are in wcpplib/math/tline.h
 // They are more generic, although the old ones should be working as well.
 
+namespace Heed {
+
 float chispre(float *x, float *p, float *f, long q);
 // here x is a left side of interval on which
 // function p is a constant.
@@ -40,5 +42,7 @@ double chispre(DynLinArr<double> &f, int s_allow_zero_f = 0);
 // (this have sence only for debug.)
 
 double chisran(double flat_random_number, DynLinArr<double> f);
+
+}
 
 #endif

@@ -2,6 +2,7 @@
 #define HEEDPHOTON_H
 
 #include <list>
+#include "HeedFieldMap.h"
 #include "heed++/code/HeedMatterDef.h"
 #include "wcpplib/geometry/gparticle.h"
 /*
@@ -19,10 +20,11 @@ extern long last_particle_number;
 class HeedPhoton : public gparticle {
  public:
   // Constructors
-  HeedPhoton(void) : gparticle(), m_particleBank(NULL) {}
+  HeedPhoton(void) : gparticle(), m_particleBank(NULL), m_fieldMap(NULL) {}
   HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
              vfloat time, long fparent_particle_number,
              double fenergy, std::list<ActivePtr<gparticle> >& particleBank,
+             HeedFieldMap* fieldmap,
              int fs_print_listing = 0);
   macro_copy_total(HeedPhoton);
   // Destructor
@@ -49,6 +51,7 @@ class HeedPhoton : public gparticle {
                         // of a selected event
 
   std::list<ActivePtr<gparticle> >* m_particleBank;
+  HeedFieldMap* m_fieldMap;
 };
 
 }

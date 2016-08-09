@@ -63,6 +63,9 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/PhotoAbsCS.o \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
+HEEDOBJS += \
+	$(OBJDIR)/Heed/HeedFieldMap.o \
+
 # Compilation flags
 CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
         `root-config --cflags` \
@@ -424,6 +427,13 @@ $(OBJDIR)/Heed/PhotoAbsCSLib.o: \
 	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.h \
 	$(HEEDDIR)/wcpplib/matter/GasLib.cpp\
 	$(HEEDDIR)/wcpplib/matter/GasLib.h
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Heed/HeedFieldMap.o: \
+	$(HEEDDIR)/HeedFieldMap.cpp \
+	$(HEEDDIR)/HeedFieldMap.h \
+	$(INCDIR)/Sensor.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 

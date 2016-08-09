@@ -31,7 +31,8 @@ class HeedParticle_BGM : public eparticle {
   HeedParticle_BGM() : eparticle(), m_particleBank(NULL) {}
   HeedParticle_BGM(manip_absvol* primvol, const point& pt, const vec& vel,
                    vfloat time, particle_def* fpardef,
-                   std::list<ActivePtr<gparticle> >& particleBank, 
+                   std::list<ActivePtr<gparticle> >& particleBank,
+                   HeedFieldMap* fieldmap, 
                    int fs_loss_only = 0,
                    int fs_print_listing = 0);
   // if fs_loss_only == 1 - only transfer energy and
@@ -40,7 +41,7 @@ class HeedParticle_BGM : public eparticle {
   // Thus it is just a PAI without even clusters
   macro_copy_total(HeedParticle_BGM);
   /// Destructor
-  virtual ~HeedParticle_BGM() { ; }
+  virtual ~HeedParticle_BGM() {}
 
   virtual void physics(void);
   virtual void print(std::ostream& file, int l) const;

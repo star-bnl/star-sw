@@ -306,20 +306,19 @@ void mparticle::new_speed() {
   check_consistency();
 }
 void mparticle::print(std::ostream& file, int l) const {
-  if (l >= 0) {
-    Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
-          << mass* c_squared / GeV << " GeV)\n";
-    Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
-          << orig_kin_energy / GeV << " GeV)"
-          << " orig_gamma_1=" << orig_gamma_1 << '\n';
-    Ifile << "prev_kin_energy=" << prev_kin_energy << " ("
-          << prev_kin_energy / GeV << " GeV)"
-          << " prev_gamma_1=" << prev_gamma_1 << '\n';
-    Ifile << "curr_kin_energy=" << curr_kin_energy << " ("
-          << curr_kin_energy / GeV << " GeV)"
-          << " curr_gamma_1=" << curr_gamma_1 << '\n';
-    gparticle::print(file, l);
-  }
+  if (l < 0) 
+  Ifile << "mparticle: mass=" << mass << " (" << mass / kg << " kg, "
+        << mass* c_squared / GeV << " GeV)\n";
+  Ifile << "orig_kin_energy=" << orig_kin_energy << " ("
+        << orig_kin_energy / GeV << " GeV)"
+        << " orig_gamma_1=" << orig_gamma_1 << '\n';
+  Ifile << "prev_kin_energy=" << prev_kin_energy << " ("
+        << prev_kin_energy / GeV << " GeV)"
+        << " prev_gamma_1=" << prev_gamma_1 << '\n';
+  Ifile << "curr_kin_energy=" << curr_kin_energy << " ("
+        << curr_kin_energy / GeV << " GeV)"
+        << " curr_gamma_1=" << curr_gamma_1 << '\n';
+  gparticle::print(file, l);
 }
 
 std::ostream& operator<<(std::ostream& file, const mparticle& f) {

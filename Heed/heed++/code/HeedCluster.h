@@ -8,17 +8,8 @@ namespace Heed {
 
 class HeedCluster : public RegPassivePtr {
  public:
-  double transferred_energy;  // internal units
-  long estimated_qel;
-  point pt;     // in the first system from tid system
-  point ptloc;  // in the local system, the last system from tid
-  manip_absvol_treeid tid;
-  long natom;
-  long nshell;
   HeedCluster(void)
-      : transferred_energy(0.0), estimated_qel(0), natom(0), nshell(0) {
-    ;
-  }
+      : transferred_energy(0.0), estimated_qel(0), natom(0), nshell(0) {}
   HeedCluster(double ftransferred_energy, long festimated_qel, const point& fpt,
               const point& fptloc, const manip_absvol_treeid& ftid, long fnatom,
               long fnshell)
@@ -31,6 +22,14 @@ class HeedCluster : public RegPassivePtr {
         nshell(fnshell) {
     ;
   }
+ 
+  double transferred_energy;  // internal units
+  long estimated_qel;
+  point pt;     // in the first system from tid system
+  point ptloc;  // in the local system, the last system from tid
+  manip_absvol_treeid tid;
+  long natom;
+  long nshell;
   virtual void print(std::ostream& file, int l) const;
 };
 

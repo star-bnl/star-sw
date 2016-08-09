@@ -15,25 +15,16 @@
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/PhotoAbsCSLib.h"
 
+#include "HeedChamber.hh"
+#include "HeedFieldMap.h"
+
 #include "Sensor.hh"
 #include "ViewDrift.hh"
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"
 #include "Random.hh"
-#include "HeedChamber.hh"
+
 #include "TrackHeed.hh"
-
-namespace Garfield {
-
-namespace HeedInterface {
-
-Sensor* sensor;
-Medium* medium;
-
-bool useEfield;
-bool useBfield;
-}
-}
 
 // Global functions and variables required by Heed
 namespace Heed {
@@ -41,43 +32,6 @@ namespace Heed {
 // Particle id number for book-keeping
 long last_particle_number;
 
-void field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
-
-  const double x = pt.v.x / cm;
-  const double y = pt.v.y / cm;
-  const double z = pt.v.z / cm;
-
-  // Initialise the electric and magnetic field.
-  efield = vec(0., 0., 0.);
-  bfield = vec(0., 0., 0.);
-  mrange = DBL_MAX;
-
-  if (!Garfield::HeedInterface::sensor) {
-    std::cerr << "TrackHeedGlobals::field_map:\n";
-    std::cerr << "    Sensor pointer is null pointer .\n";
-    return;
-  }
-
-  // TODO: check correct dimensions of E and B fields
-  if (Garfield::HeedInterface::useEfield) {
-    double ex = 0., ey = 0., ez = 0.;
-    int status = 0;
-    Garfield::HeedInterface::sensor->ElectricField(
-        x, y, z, ex, ey, ez, Garfield::HeedInterface::medium, status);
-    efield.x = ex * 1.e-5;
-    efield.y = ey * 1.e-5;
-    efield.z = ez * 1.e-5;
-  }
-
-  if (Garfield::HeedInterface::useBfield) {
-    double bx = 0., by = 0., bz = 0.;
-    int status = 0;
-    Garfield::HeedInterface::sensor->MagneticField(x, y, z, bx, by, bz, status);
-    bfield.x = bx * 1.e-3;
-    bfield.y = by * 1.e-3;
-    bfield.z = bz * 1.e-3;
-  }
-}
 }
 
 extern trajestep_limit Heed::gtrajlim;
@@ -120,11 +74,6 @@ TrackHeed::TrackHeed()
       m_cZ(0.) {
 
   m_className = "TrackHeed";
-
-  HeedInterface::sensor = NULL;
-  HeedInterface::useEfield = false;
-  HeedInterface::useBfield = false;
-
 }
 
 TrackHeed::~TrackHeed() {
@@ -142,8 +91,6 @@ TrackHeed::~TrackHeed() {
   if (m_pairProd) delete m_pairProd;
   if (m_deltaCs) delete m_deltaCs;
   if (m_chamber) delete m_chamber;
-
-  Garfield::HeedInterface::sensor = NULL;
 }
 
 bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
@@ -209,7 +156,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
               << "      z: " << m_cZ << " cm\n";
   }
 
-  HeedInterface::sensor = m_sensor;
+  m_fieldMap.SetSensor(m_sensor);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -327,7 +274,7 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
   }
 
   m_particle = new Heed::HeedParticle(m_chamber, p0, velocity, t0,
-                                      particleType, m_particleBank);
+                                      particleType, m_particleBank, &m_fieldMap);
   // Transport the particle.
   m_particle->fly();
   m_hasActiveTrack = true;
@@ -652,7 +599,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   m_cY = 0.5 * (ymin + ymax);
   m_cZ = 0.5 * (zmin + zmax);
 
-  HeedInterface::sensor = m_sensor;
+  m_fieldMap.SetSensor(m_sensor);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -717,7 +664,7 @@ void TrackHeed::TransportDeltaElectron(const double x0, const double y0,
   point p0((x0 - m_cX) * 10., (y0 - m_cY) * 10., (z0 - m_cZ) * 10.);
 
   // Transport the electron.
-  Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0);
+  Heed::HeedDeltaElectron delta(m_chamber, p0, velocity, t0, 0, &m_fieldMap);
   delta.fly();
 
   nel = m_chamber->conduction_electron_bank.size();
@@ -772,7 +719,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   m_cY = 0.5 * (ymin + ymax);
   m_cZ = 0.5 * (zmin + zmax);
 
-  HeedInterface::sensor = m_sensor;
+  m_fieldMap.SetSensor(m_sensor);
 
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium = NULL;
@@ -839,7 +786,7 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
 
   // Create and transport the photon.
   Heed::HeedPhoton photon(m_chamber, p0, velocity, t0, 0, e0 * 1.e-6, 
-                          m_particleBank, 0);
+                          m_particleBank, &m_fieldMap);
   photon.fly();
 
   // Make a list of parent particle id numbers.
@@ -919,13 +866,10 @@ void TrackHeed::TransportPhoton(const double x0, const double y0,
   }
 }
 
-void TrackHeed::EnableElectricField() { HeedInterface::useEfield = true; }
-
-void TrackHeed::DisableElectricField() { HeedInterface::useEfield = false; }
-
-void TrackHeed::EnableMagneticField() { HeedInterface::useBfield = true; }
-
-void TrackHeed::DisableMagneticField() { HeedInterface::useBfield = false; }
+void TrackHeed::EnableElectricField() { m_fieldMap.UseEfield(true); }
+void TrackHeed::DisableElectricField() { m_fieldMap.UseEfield(false); }
+void TrackHeed::EnableMagneticField() { m_fieldMap.UseBfield(true); }
+void TrackHeed::DisableMagneticField() { m_fieldMap.UseBfield(false); }
 
 void TrackHeed::SetEnergyMesh(const double e0, const double e1,
                               const int nsteps) {
@@ -1038,12 +982,12 @@ bool TrackHeed::Setup(Medium* medium) {
   }
 
   fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");
-  if (m_chamber != 0) {
+  if (m_chamber) {
     delete m_chamber;
-    m_chamber = 0;
+    m_chamber = NULL;
   }
   m_chamber = new HeedChamber(primSys, m_lX, m_lY, m_lZ, m_transferCs, m_deltaCs);
-
+  m_fieldMap.SetSensor(m_sensor);
   return true;
 }
 

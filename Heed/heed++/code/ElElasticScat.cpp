@@ -478,11 +478,7 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
         for (ncs = 0; ncs < quan[qquan - 1]; ncs++) {
           //mcout<<"nev="<<nev<<" dir="<<dir;
           basis temp(dir, "temp");
-          //#ifdef USE_SRANLUX
           double theta_rot = angular_points_ran.ran(SRANLUX());
-          //#else
-          //double theta_rot = angular_points_ran.ran(random_engine.flat());
-          //#endif          //Iprintn(mcout, theta_rot);
           //double phi = 2.0 * M_PI * SRANLUX();
           vec vturn;
           vturn.random_round_vec();

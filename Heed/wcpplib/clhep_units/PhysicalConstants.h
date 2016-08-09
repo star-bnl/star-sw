@@ -1,6 +1,3 @@
-// -*- C++ -*-
-// $Id: PhysicalConstants.h,v 1.5 2002/03/30 15:02:06 evc Exp $
-// ----------------------------------------------------------------------
 // HEP coherent Physical Constants
 //
 // This file has been provided by Geant4 (simulation toolkit for HEP).

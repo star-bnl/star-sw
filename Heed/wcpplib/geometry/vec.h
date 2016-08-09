@@ -27,28 +27,6 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/safetl/AbsPtr.h"
 #include <string.h>
 #include "wcpplib/util/String.h"
-#ifdef BORLANDC
-// The following macro provides debigging online.
-// It stops program before it terminates
-#define pvecerror                                    \
-  {                                                  \
-    if (vecerror != 0) {                             \
-      cerr << "vecerror is not zero(put any key)\n"; \
-      char c;                                        \
-      cin >> c;                                      \
-      exit(1);                                       \
-    }                                                \
-  }
-#define pvecerrorp                                   \
-  {                                                  \
-    if (vecerror != 0) {                             \
-      cerr << "vecerror is not zero(put any key)\n"; \
-      char c;                                        \
-      cin >> c;                                      \
-      exit(1);                                       \
-    }                                                \
-  }
-#else
 #define pvecerror(string)                                      \
   mfunname(string);                                            \
   if (vecerror != 0) {                                         \
@@ -63,12 +41,9 @@ The file is provided "as is" without express or implied warranty.
           << " function detected error is " << string << '\n'; \
     spexit(mcerr);                                             \
   }
-#endif
 // pvecerror is put after first line of function.
 // It makes up stack of functions names if FUNNAMESTACK is defined.
 // To work correctly stackline(string); should not be in any additional {}
-
-//#define pqcross 10
 
 #include "wcpplib/geometry/vfloat.h"
 /* Introduces type vfloat which is used throughout the geometrical calculations
@@ -76,28 +51,6 @@ instead of double. 'double' is meant to be replacable by 'float' for
 speeding up, but no consistent research was made to check that it really
 works in this way. So now vfloat is synonym of double.
 */
-
-//#include "wcpplib/memory/macrmem.h"
-/*
-It is to invoke special memory allocator for debug.
-*/
-
-// The following is removed because of passing to fortran generator RANLUX
-//#ifndef RandEngine_h
-//#include "CLHEP/Random/RandEngine.h"
-//#endif
-//extern RandEngine RandEng;
-//#ifdef USE_SRANLUX
-//#include "wcpplib/random/ranluxint.h"  // used only in .c
-//#else
-//#include <CLHEP/Random/RandomEngine.h>
-//extern HepRandomEngine& random_engine;
-// I will comment it off in order to compile all files
-// which include this files (quite a lot!) without need to set
-// USE_SRANLUX or path to CLHEP.
-// So I put this extern to vec.c
-
-//#endif
 
 extern int vecerror;
 
@@ -130,8 +83,8 @@ the point::down() and point::up() functions apply point::shift() function
 after or before vec::down() and vec::up().
 */
 
-class absref  // referencing not positioned abstract object
-    {
+// referencing not positioned abstract object
+class absref {
  public:
   // destructor
   virtual ~absref() {}
@@ -145,23 +98,9 @@ class absref  // referencing not positioned abstract object
 
  private:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  /*
-  virtual void Garef( // members of class:
-                     int& qaref ,  // number of vector objects members of class
-                     absref absref::**&aref , // reference to address of array
-                     // containing their relative addresses
-                     // as class members
-
-                     //free memory, their relative addresses are not available:
-                     int& qareff,  // number of vector objects
-                     absref **&areff); // reference to address of array
-                                       // containing addresses of objects.
-  */
 };
 
-/*
-Contains three methods of transmission, the fastest, slower and the slowest
- */
+// Contains three methods of transmission, the fastest, slower and the slowest
 class absref_transmit virt_common_base_col {
  public:
   // For transmiting the members of the class, when
@@ -288,21 +227,21 @@ class vec : public absref {
                r1.x * r2.y - r1.y * r2.x);
   }
   // return 1 if precisely the same vectors and 0 otherwise
-  friend wl_inline int operator==(const vec& r1, const vec& r2);
+  friend inline int operator==(const vec& r1, const vec& r2);
   // return 0 if precisely the same vectors and 1 otherwise
-  friend wl_inline int operator!=(const vec& r1, const vec& r2);
+  friend inline int operator!=(const vec& r1, const vec& r2);
   // return 1 if approximately the same vectors and 0 otherwise
   // Thus r2 may be is cube with side 2*prec with center marked by r1.
-  friend wl_inline int apeq(const vec& r1, const vec& r2, vfloat prec);
+  friend inline int apeq(const vec& r1, const vec& r2, vfloat prec);
   // return 0 if approximately the same vectors and 1 otherwise
-  friend wl_inline int not_apeq(const vec& r1, const vec& r2, vfloat prec);
+  friend inline int not_apeq(const vec& r1, const vec& r2, vfloat prec);
   friend vfloat length(const vec& v) {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
   }
   friend vfloat length2(const vec& v) {
     return (v.x * v.x + v.y * v.y + v.z * v.z);
   }
-  friend wl_inline vec unit_vec(const vec& v);
+  friend inline vec unit_vec(const vec& v);
   // cosinus of angle between vectors
   // If one of vectors has zero length, it makes vecerror=1 and returns 0.
   friend vfloat cos2vec(const vec& r1, const vec& r2);
@@ -321,15 +260,15 @@ class vec : public absref {
   // returns: 1 - parallel, -1  - antiparallel, 0 not parallel
   // 0 if one or both vectors have zero length
   // Thus, if angle between vectors < prec, they are parallel
-  friend wl_inline int check_par(const vec& r1, const vec& r2, vfloat prec);
+  friend inline int check_par(const vec& r1, const vec& r2, vfloat prec);
   // check whether the vectors are perpendicular.
   // returns: 1 perpendicular, 0 not perpendicular.
   // also 0 if one or both vectors have zero length
   // Thus, if angle between vectors
   // a > 0.5*M_PI - find_max( prec, vprecision )
   // and a < 0.5*M_PI + find_max( prec, vprecision ), they are perpendicular
-  friend wl_inline int check_perp(const vec& r1, const vec& r2, vfloat prec);
-  friend wl_inline vec switch_xyz(const vec&);  //don't change the vector itself
+  friend inline int check_perp(const vec& r1, const vec& r2, vfloat prec);
+  friend inline vec switch_xyz(const vec&);  //don't change the vector itself
                                                 // constructors
   vec(vfloat xx, vfloat yy, vfloat zz) {
     x = xx;
@@ -389,9 +328,7 @@ class vecReg : public vec, public RegPassivePtr {
 };
 std::ostream& operator<<(std::ostream& file, const vecReg& v);
 
-#ifdef WCPPLIB_INLINE
 #include "wcpplib/geometry/vec.ic"
-#endif
 //             **** basis ****
 
 class basis : public absref virt_common_base_pcomma {
@@ -476,38 +413,22 @@ std::ostream& operator<<(std::ostream& file, const basisReg& v);
 
 class point : public absref virt_common_base_pcomma {
  public:
-  vec v;  //
-
-  //vec Gv(){return v;}
-  //void Pv(vec& fv){v=fv;}
-
+  vec v; 
  private:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //                    int& fqareff, absref **&fareff) // free memory
-  // {
-  //   fqaref=1; fqareff=0; faref=&aref; fareff=NULL; }
-
   static absref(absref::* aref);
 
  public:
   virtual void down(const abssyscoor* fasc);
   virtual void up(const abssyscoor* fasc);
   virtual void shift(const vec& dir) {
+    // not defined for vectors, but defined for points
     v += dir;
-  }  // not defined for vectors, but
-     // defined for points
-  point(void) : v() {
-    ;
-  }  // v is not inited
-  point(const vec& fv) : v(fv) { ; }
+  }  
+  point(void) : v() {} // v is not initialised
+  point(const vec& fv) : v(fv) {}
   point(const vfloat& fex, const vfloat& fey, const vfloat& fez)
-      : v(fex, fey, fez) {
-    ;
-  }
-  //point(      point &fp): v(fp.v){;}
-  //point(const point &fp): v(fp.v){;}
+      : v(fex, fey, fez) {}
   point& operator=(const point& fp) {
     v = fp.v;
     return *this;
@@ -562,15 +483,12 @@ class abssyscoor {
   String name;
   virtual const point* Gapiv(void) const = 0;
   virtual const basis* Gabas(void) const = 0;
-  //virtual void Papiv(const point* const fapiv) =0;
-  //virtual void Pabas(const basis* const fabas) =0;
-  abssyscoor(void) : name("none") { ; }
-  abssyscoor(char* fname) : name(fname) { ; }
-  abssyscoor(const String& fname) : name(fname) { ; }
-  //abssyscoor(const abssyscoor& f):
+  abssyscoor(void) : name("none") {}
+  abssyscoor(char* fname) : name(fname) {}
+  abssyscoor(const String& fname) : name(fname) {}
   virtual void print(std::ostream& file, int l) const;
 
-  virtual ~abssyscoor() { ; }
+  virtual ~abssyscoor() {}
 };
 extern std::ostream& operator<<(std::ostream& file, const abssyscoor& s);
 
@@ -578,45 +496,28 @@ class fixsyscoor : public absref, public abssyscoor, public RegPassivePtr {
  public:
   virtual const point* Gapiv(void) const { return &piv; }
   virtual const basis* Gabas(void) const { return &bas; }
-  //virtual void Papiv(const point* const fapiv);
-  //virtual void Pabas(const basis* const fabas);
   void Ppiv(const point& fpiv);
   void Pbas(const basis& fbas);
-  fixsyscoor(void) {
-    ;
-  }  // nominal system
-  fixsyscoor(char* fname) : abssyscoor(fname) {
-    ;
-  }  // nominal system
-  fixsyscoor(const String& fname) : abssyscoor(fname) {
-    ;
-  }  // nominal system
+  fixsyscoor(void) {} // nominal system
+  fixsyscoor(char* fname) : abssyscoor(fname) {} // nominal system
+  fixsyscoor(const String& fname) : abssyscoor(fname) {} // nominal system
   fixsyscoor(const point& fpiv, const basis& fbas, const String& fname)
-      : abssyscoor(fname), piv(fpiv), bas(fbas) {
-    ;
-  }
+      : abssyscoor(fname), piv(fpiv), bas(fbas) {}
   fixsyscoor(const point* const fapiv, const basis* const fabas,
              const String& fname)
       : abssyscoor(fname),
         piv((fapiv != NULL) ? (*fapiv) : point()),
-        bas((fabas != NULL) ? (*fabas) : basis()) {
-    ;
-  }
+        bas((fabas != NULL) ? (*fabas) : basis()) {}
   fixsyscoor(const abssyscoor& f)
       : abssyscoor(f),
         piv((f.Gapiv() != NULL) ? (*(f.Gapiv())) : point()),
-        bas((f.Gabas() != NULL) ? (*(f.Gabas())) : basis()) {
-    ;
-  }
+        bas((f.Gabas() != NULL) ? (*(f.Gabas())) : basis()) {}
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(fixsyscoor);
-  virtual ~fixsyscoor() { ; }
+  virtual ~fixsyscoor() {}
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //                    int& fqareff, absref **&fareff) // free memory
-  //  { fqaref=2; fqareff=0; faref=&aref[0]; fareff=NULL; }
   static absref(absref::* aref[2]);
 
  private:

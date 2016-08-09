@@ -23,6 +23,7 @@ class ElElasticScat;
 class ElElasticScatLowSigma;
 class PairProd;
 class HeedDeltaElectronCS;
+class HeedFieldMap;
 }
 
 namespace Garfield {
@@ -128,7 +129,10 @@ class TrackHeed : public Track {
   Heed::PairProd* m_pairProd;
   Heed::HeedDeltaElectronCS* m_deltaCs;
 
+  // Interface classes
   HeedChamber* m_chamber;
+  Heed::HeedFieldMap m_fieldMap;
+
   // Bounding box
   double m_lX, m_lY, m_lZ;
   double m_cX, m_cY, m_cZ;

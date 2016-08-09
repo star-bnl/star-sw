@@ -2,6 +2,7 @@
 #ifndef G_HEED_CHAMBER_H
 #define G_HEED_CHAMBER_H
 
+#include "wcpplib/clhep_units/WSystemOfUnits.h"
 #include "wcpplib/geometry/box.h"
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedCondElectron.h"

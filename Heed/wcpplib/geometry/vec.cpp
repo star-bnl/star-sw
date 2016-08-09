@@ -10,12 +10,7 @@
 #endif
 #include <cmath>
 #include "wcpplib/geometry/vec.h"
-#ifdef USE_SRANLUX
 #include "wcpplib/random/ranluxint.h"
-#else
-#include <CLHEP/Random/RandomEngine.h>
-extern HepRandomEngine& random_engine;
-#endif
 /*
 Copyright (c) 2000 Igor B. Smirnov
 
@@ -304,22 +299,14 @@ vec vec::up_new(const abssyscoor* fasc) { return up_new(fasc->Gabas()); }
 void vec::up(const abssyscoor* fasc) { up(fasc->Gabas()); }
 
 void vec::random_round_vec(void) {
-#ifdef USE_SRANLUX
   vfloat phi = M_PI * 2.0 * SRANLUX();
-#else
-  vfloat phi = M_PI * 2.0 * random_engine.flat();
-#endif
   x = sin(phi);
   y = cos(phi);
   z = 0;
 }
 
 void vec::random_conic_vec(double theta) {
-#ifdef USE_SRANLUX
   vfloat phi = M_PI * 2.0 * SRANLUX();
-#else
-  vfloat phi = M_PI * 2.0 * random_engine.flat();
-#endif
   double stheta = sin(theta);
   x = sin(phi) * stheta;
   y = cos(phi) * stheta;
@@ -327,11 +314,7 @@ void vec::random_conic_vec(double theta) {
 }
 
 void vec::random_sfer_vec() {
-#ifdef USE_SRANLUX
   vfloat cteta = 2.0 * SRANLUX() - 1.0;
-#else
-  vfloat cteta = 2.0 * random_engine.flat() - 1.0;
-#endif
   random_round_vec();
   vfloat steta = sqrt(1.0 - cteta * cteta);
   *this = (*this) * steta;
@@ -355,10 +338,6 @@ std::ostream& operator<<(std::ostream& file, const vecReg& v) {
   Ifile << "vecReg=" << ((vec&)v);
   return file;
 }
-
-#ifndef WCPPLIB_INLINE
-#include "geometry/vec.ic"
-#endif
 
 // **** basis ****
 //absref absref::*(basis::aref[3])=
