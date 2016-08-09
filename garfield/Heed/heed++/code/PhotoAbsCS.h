@@ -45,12 +45,12 @@ const double Thomas_sum_rule_const =
 const double Thomas_sum_rule_const_Mb =
     2.0 * M_PI * M_PI / (FSCON * ELMAS) * 1.0E-6 / C1_MEV2_BN;  // [Mb*MeV]
 
-// Usually photo-absorption cross section descreases as inverse power function
+// Usually photo-absorption cross section decreases as inverse power function
 // of power like -2.75. Its linear interpolation inside large energy
 // intervals is remarkably not precise. This function (below) is designed
 // to determine the cases common for the total program when the inverse power
 // function is applied in such intervals.
-// Conditions are emphirical.
+// Conditions are empirical.
 // 1 - nonlinear, 0 - linear.
 // Energies and threshold are given in MeV. This is important!
 // e1 should be < e2.

@@ -152,19 +152,12 @@ int find1ofnmark(std::istream &file, int q,  // number of strings
                  const String str[])         // addresses
     {
   char **s = new char *[q];
-  int i;
-  for (i = 0; i < q; i++) {
-#ifdef USE_STLSTRING
+  for (int i = 0; i < q; i++) {
     s[i] = new char[strlen(str[i].c_str()) + 1];
     strcpy(s[i], str[i].c_str());
-//Iprint(mcout, s[i]);
-#else
-    s[i] = new char[strlen(str[i]) + 1];
-    strcpy(s[i], str[i]);
-#endif
   }
   int iret = find1ofnmark(file, q, s);
-  for (i = 0; i < q; i++) {
+  for (int i = 0; i < q; i++) {
     delete[] s[i];
   }
   delete[] s;

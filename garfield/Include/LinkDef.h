@@ -42,7 +42,7 @@
 #pragma link C++ class Garfield::ViewGeometry;
 
 #pragma link C++ class Garfield::Track;
-#pragma link C++ class Garfield::TrackHeed;
+//#pragma link C++ class Garfield::TrackHeed;
 #pragma link C++ class Garfield::TrackElectron;
 #pragma link C++ class Garfield::TrackBichsel;
 #pragma link C++ class Garfield::TrackPAI;

@@ -6,8 +6,7 @@ INCDIR = $(GARFIELD_HOME)/Include
 LIBDIR = .
 HEEDDIR = $(GARFIELD_HOME)/Heed
 
-HEADERS = $(wildcard $(INCDIR)/*.hh)
-
+HEADERS = $(filter-out $(INCDIR)/TrackHeed.hh,$(wildcard $(INCDIR)/*.hh))
 SOURCES = $(wildcard $(SRCDIR)/*.cc)
 
 OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cc=.o))
@@ -371,3 +370,4 @@ showbuild:
 	@echo "FFLAGS             = $(FFLAGS)"
 	@echo "NODEBUG            = $(NODEBUG)"
 	@echo "DYNAMIC            = $(DYNAMIC)"
+	@echo "HEADERS            = $(HEADERS)"

@@ -34,12 +34,11 @@ macro_copy_body(absref_transmit)
 //{return new absref_transmit(*this);}
 
 void absref_transmit::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "absref_transmit::print(l=" << l << ") qaref=" << qaref
-          << " qaref_pointer=" << qaref_pointer
-          << " qaref_other=" << qaref_other << "\n";
-    file.flush();
-  }
+  if (l <= 0) return;
+  Ifile << "absref_transmit::print(l=" << l << ") qaref=" << qaref
+        << " qaref_pointer=" << qaref_pointer
+        << " qaref_other=" << qaref_other << "\n";
+  file.flush();
 }
 
 absref* absref_transmit::get_other(int /*n*/) { return NULL; }
@@ -237,9 +236,6 @@ vec vec::down_new(const basis* fabas) {
   r.x = x * ex.x + y * ey.x + z * ez.x;
   r.y = x * ex.y + y * ey.y + z * ez.y;
   r.z = x * ex.z + y * ey.z + z * ez.z;
-  //mcout<<scout(*this);
-  //mcout<<scout(ex)<<scout(ey)<<scout(ez);
-  //mcout<<scout(r);
   return r;
 }
 

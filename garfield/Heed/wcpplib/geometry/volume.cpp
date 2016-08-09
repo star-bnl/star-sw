@@ -11,6 +11,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 manip_absvol_eid::manip_absvol_eid(void) {
   amvol.put(NULL);
   nembed = -1;
@@ -310,4 +312,6 @@ void sh_manip_absvol::m_print(std::ostream& file, int l) const {
     indn.n -= 2;
   }
   file.flush();
+}
+
 }

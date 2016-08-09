@@ -179,9 +179,6 @@ HelperForMcout __helper_for_mcout;
 
 #endif
 
-#define eeee '\n';
-#define scout(a) #a << " = " << a
-
 class indentation {
  public:
   int n;  // current number of blanks to print

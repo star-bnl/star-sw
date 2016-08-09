@@ -2,6 +2,7 @@
 #define HEEDPARTICLE_H
 
 #include <vector>
+#include <list>
 #include "wcpplib/particle/eparticle.h"
 #include "HeedCluster.h"
 /*
@@ -27,9 +28,11 @@ extern long last_particle_number;
 class HeedParticle : public eparticle {
  public:
   /// Constructors
-  HeedParticle(void) : eparticle() {}
+  HeedParticle() : eparticle(), m_particleBank(NULL) {}
   HeedParticle(manip_absvol* primvol, const point& pt, const vec& vel,
-               vfloat time, particle_def* fpardef, int fs_loss_only = 0,
+               vfloat time, particle_def* fpardef, 
+               std::list<ActivePtr<gparticle> >& particleBank,
+               int fs_loss_only = 0,
                int fs_print_listing = 0);
   // If fs_loss_only == 1 only transferred energy
   // is simulated: no deposition of clusters,
@@ -41,6 +44,7 @@ class HeedParticle : public eparticle {
   virtual void physics(void);
   virtual void print(std::ostream& file, int l) const;
 
+ private:
   int s_print_listing;
   long particle_number;
 
@@ -51,7 +55,8 @@ class HeedParticle : public eparticle {
   std::vector<long> natom;
   std::vector<long> nshell;
 
-  std::vector<HeedCluster> cluster_bank;
+  std::vector<HeedCluster> m_clusterBank;
+  std::list<ActivePtr<gparticle> >* m_particleBank;
 };
 
 }
