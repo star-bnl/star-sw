@@ -276,8 +276,8 @@ Int_t StBFChain::Instantiate()
 	  j = 0;
 	  if (MySQLDb       != "") {Dirs[j] = MySQLDb;    j++;}
 	  if (MainCintDb    != "") {Dirs[j] = MainCintDb; j++;}
-	  if (MainCintDbObj != "") {Dirs[j] = MainCintDbObj; j++;}
 	  if (MyCintDb      != "") {Dirs[j] = MyCintDb;   j++;}
+	  if (MainCintDbObj != "") {Dirs[j] = MainCintDbObj; j++;}
 	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
