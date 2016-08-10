@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/MatterDef.h"
@@ -954,9 +955,9 @@ bool TrackHeed::Setup(Medium* medium) {
   const int sel = m_isElectron ? 1 : 0;
   const double gamma = GetGamma();
 
-  if (m_transferCs != 0) {
+  if (m_transferCs) {
     delete m_transferCs;
-    m_transferCs = 0;
+    m_transferCs = NULL;
   }
   m_transferCs =
       new Heed::EnTransfCS(m_mass / 1.e6, gamma - 1, sel, m_matter, long(m_q));
@@ -1005,9 +1006,9 @@ bool TrackHeed::SetupGas(Medium* medium) {
     return false;
   }
 
-  if (m_molPacs != 0) {
+  if (m_molPacs) {
     delete m_molPacs;
-    m_molPacs = 0;
+    m_molPacs = NULL;
   }
   m_molPacs = new Heed::MolecPhotoAbsCS* [nComponents];
   DynLinArr<std::string> notations;
@@ -1147,23 +1148,23 @@ bool TrackHeed::SetupGas(Medium* medium) {
     pacsfile.close();
   }
 
-  std::string gasname = medium->GetName();
-  if (m_gas != 0) {
+  const std::string gasname = FindUnusedMaterialName(medium->GetName());
+  if (m_gas) {
     delete m_gas;
-    m_gas = 0;
+    m_gas = NULL;
   }
 
   m_gas = new Heed::GasDef(gasname, gasname, nComponents, notations, fractions,
-                         pressure, temperature, -1.);
+                           pressure, temperature, -1.);
 
   double w = medium->GetW() * 1.e-6;
   if (w < 0.) w = 0.;
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  if (m_matter != 0) {
+  if (m_matter) {
     delete m_matter;
-    m_matter = 0;
+    m_matter = NULL;
   }
   m_matter = new Heed::HeedMatterDef(m_energyMesh, m_gas, m_molPacs, w, f);
 
@@ -1177,9 +1178,9 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
   double density = medium->GetMassDensity() * Heed::g / Heed::cm3;
 
   const int nComponents = medium->GetNumberOfComponents();
-  if (m_atPacs != 0) {
+  if (m_atPacs) {
     delete m_atPacs;
-    m_atPacs = 0;
+    m_atPacs = NULL;
   }
   m_atPacs = new Heed::AtomPhotoAbsCS* [nComponents];
 
@@ -1232,22 +1233,22 @@ bool TrackHeed::SetupMaterial(Medium* medium) {
     }
     pacsfile.close();
   }
-  if (m_material != 0) {
+  if (m_material) {
     delete m_material;
-    m_material = 0;
+    m_material = NULL;
   }
-  std::string materialName = medium->GetName();
+  const std::string materialName = FindUnusedMaterialName(medium->GetName());
   m_material = new Heed::MatterDef(materialName, materialName, nComponents,
-                                 notations, fractions, density, temperature);
+                                   notations, fractions, density, temperature);
 
   double w = medium->GetW() * 1.e-6;
   if (w < 0.) w = 0.;
   double f = medium->GetFanoFactor();
   if (f <= 0.) f = Heed::standard_factor_Fano;
 
-  if (m_matter != 0) {
+  if (m_matter) {
     delete m_matter;
-    m_matter = 0;
+    m_matter = NULL;
   }
   m_matter = new Heed::HeedMatterDef(m_energyMesh, m_material, m_atPacs, w, f);
 
@@ -1265,9 +1266,9 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
   m_elScat = new Heed::ElElasticScat(filename);
 
   filename = databasePath + "elastic_disp.dat";
-  if (m_lowSigma != 0) {
+  if (m_lowSigma) {
     delete m_lowSigma;
-    m_lowSigma = 0;
+    m_lowSigma = NULL;
   }
   m_lowSigma = new Heed::ElElasticScatLowSigma(m_elScat, filename);
 
@@ -1276,15 +1277,15 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
   const double w = m_matter->W * 1.e6;
   const double f = m_matter->F;
   filename = databasePath + "delta_path.dat";
-  if (m_pairProd != 0) {
+  if (m_pairProd) {
     delete m_pairProd;
-    m_pairProd = 0;
+    m_pairProd = NULL;
   }
   m_pairProd = new Heed::PairProd(filename, w, f);
 
-  if (m_deltaCs != 0) {
+  if (m_deltaCs) {
     delete m_deltaCs;
-    m_deltaCs = 0;
+    m_deltaCs = NULL;
   }
   m_deltaCs = new Heed::HeedDeltaElectronCS(m_matter, m_elScat, m_lowSigma, m_pairProd);
   return true;
@@ -1293,4 +1294,17 @@ bool TrackHeed::SetupDelta(const std::string& databasePath) {
 double TrackHeed::GetW() const { return m_matter->W * 1.e6; }
 double TrackHeed::GetFanoFactor() const { return m_matter->F; }
 
+std::string TrackHeed::FindUnusedMaterialName(const std::string& namein) {
+
+  std::string nameout = namein;
+  unsigned int counter = 0;
+  while (Heed::MatterDef::get_MatterDef(nameout)) {
+    std::stringstream ss;
+    ss << namein << "_" << counter;
+    nameout = ss.str();
+    ++counter;
+  }
+  return nameout;
+
+}
 }
