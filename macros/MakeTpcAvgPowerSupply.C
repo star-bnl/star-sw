@@ -2,9 +2,13 @@
    root.exe -b -q  lmysql.C MakeTpcAvgPowerSupply.C+
 Test
    root.exe 'Db.C("StarDb/Calibrations/tpc/TpcAvgPowerSupply",20160509,114213)'
-for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(s,r); cout << "s/r=" << s << "/" << r << " V = " << V; if (r <=13 && TMath::Abs(V-1100)>5 || r > 13 &&TMath::Abs(V-1390)>5) cout << " =========================="; cout << endl;}}
+TH2F *voltP = new TH2F("VoltP","Voltage versus sector and row, TpcAvgPowerSupplyC",24,0.5,24.5,45,0.5,45.5);
+TH2F *voltHV = new TH2F("VoltHV","Voltage versus sector and row, tpcAnodeHVC",24,0.5,24.5,45,0.5,45.5);
+TH2F *voltHVA = new TH2F("VoltHVA","Voltage versus sector and row, tpcAnodeHVavgC",24,0.5,24.5,45,0.5,45.5);
+for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(s,r); cout << "s/r=" << s << "/" << r << " V = " << V; if (r <=13 && TMath::Abs(V-1100)>5 || r > 13 &&TMath::Abs(V-1390)>5) cout << " =========================="; cout << endl; voltP->Fill(s,r,V);}}
 
-
+for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St_tpcAnodeHVC::instance()->voltagePadrow(s,r); voltHV->Fill(s,r,V);}}
+for (Int_t s = 1; s <= 24; s++) {for (Int_t r = 1; r <=45; r++) {Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(s,r); voltHVA->Fill(s,r,V);}}
  */
 #include <stdio.h>
 #include "Riostream.h"
