@@ -4,6 +4,8 @@
 // Generation of two random numbers distributed by normal distribution.
 // It is generator-independent. The two flat numbers are its parameters.
 
+namespace Heed {
+
 class GausState {
  public:
   double second_ran;
@@ -14,10 +16,12 @@ extern GausState gaus_state;
 
 double rnorm_improved(void);  // uses calls to SRANLUX
 
-void rnorm_double(double r1, double r2,     // flat random numbers
-                  double &x1, double &x2);  // results
+void rnorm_double(const double r1, const double r2, // flat random numbers
+                  double &x1, double &x2);          // results
 
-void rnorm_float(float r1, float r2,     // flat random numbers
-                 float &x1, float &x2);  // results
+void rnorm_float(const float r1, const float r2,    // flat random numbers
+                 float &x1, float &x2);             // results
+
+}
 
 #endif

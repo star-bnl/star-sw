@@ -1,8 +1,7 @@
 #ifndef POIS_H
 #define POIS_H
 
-#include "wcpplib/safetl/AbsArr.h"
-#include "wcpplib/math/tline.h"
+namespace Heed {
 
 /*
 class PoisState
@@ -18,7 +17,7 @@ extern PoisState pois_state;
 // it for SRANLUX.
 // It needs also to set/get pois_state.
 
-long pois(double AMU, int &IERROR);
+long pois(const double amu, int &ierror);
 //long pois (float AMU,int &IERROR);
 
 // Now it calls SRANLUX
@@ -32,5 +31,7 @@ long pois(double AMU, int &IERROR);
 //C    ON RETURN IERROR.EQ.0 NORMALLY
 //C              IERROR.EQ.1 IF AMU.LE.0.
 //C
+
+}
 
 #endif

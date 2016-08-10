@@ -7,7 +7,7 @@
 #include <list>
 
 #include "Track.hh"
-//#include "heed++/code/HeedParticle.h"
+#include "heed++/code/HeedParticle.h"
 
 namespace Heed {
 class gparticle;
@@ -23,6 +23,7 @@ class ElElasticScat;
 class ElElasticScatLowSigma;
 class PairProd;
 class HeedDeltaElectronCS;
+class HeedFieldMap;
 }
 
 namespace Garfield {
@@ -128,7 +129,10 @@ class TrackHeed : public Track {
   Heed::PairProd* m_pairProd;
   Heed::HeedDeltaElectronCS* m_deltaCs;
 
+  // Interface classes
   HeedChamber* m_chamber;
+  Heed::HeedFieldMap m_fieldMap;
+
   // Bounding box
   double m_lX, m_lY, m_lZ;
   double m_cX, m_cY, m_cZ;
@@ -139,6 +143,8 @@ class TrackHeed : public Track {
   bool SetupGas(Medium* medium);
   bool SetupMaterial(Medium* medium);
   bool SetupDelta(const std::string& databasePath);
+  std::string FindUnusedMaterialName(const std::string& namein);
+
 public:
   Heed::EnergyMesh* EnergyMesh() {return m_energyMesh;}
   Heed::EnTransfCS* Transfercs() {return m_transferCs;}

@@ -7,7 +7,6 @@
 #include "wcpplib/math/tline.h"
 #include "heed++/code/HeedParticle_BGM.h"
 #include "heed++/code/HeedCluster.h"
-#include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/EnTransfCS_BGM.h"
 
@@ -21,9 +20,10 @@ HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
                                    const vec& vel, vfloat time,
                                    particle_def* fpardef, 
                                    std::list<ActivePtr<gparticle> >& particleBank,
+                                   HeedFieldMap* fieldmap,
                                    int fs_loss_only,
                                    int fs_print_listing)
-    : eparticle(primvol, pt, vel, time, fpardef),
+    : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
       s_print_listing(fs_print_listing),
       particle_number(last_particle_number++),
       transferred_energy_in_step(0.0),
@@ -185,7 +185,8 @@ void HeedParticle_BGM::physics(void) {
           if (s_print_listing == 1) mcout << "generating new virtual photon\n";
           HeedPhoton hp(currpos.tid.eid[0].amvol.getver(),
                         pt, vel, currpos.time, particle_number,
-                        transferred_energy[qtransfer - 1], *m_particleBank, 0);
+                        transferred_energy[qtransfer - 1], 
+                        *m_particleBank, m_fieldMap, 0);
           hp.s_photon_absorbed = 1;
           hp.s_delta_generated = 0;
           hp.na_absorbing = na;

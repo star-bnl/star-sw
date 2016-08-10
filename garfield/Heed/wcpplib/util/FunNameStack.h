@@ -15,7 +15,6 @@ It is provided "as is" without express or implied warranty.
 #include <string.h>
 #include <iostream>
 #include "wcpplib/stream/prstream.h"
-#include "wcpplib/util/inlinec.h"
 
 //#define USE_BOOST_MULTITHREADING
 //#define PRINT_MESSAGE_ABOUT_THREAD_INITIALIZATION
@@ -658,12 +657,12 @@ class FunNameStack {
   void printdel(std::ostream& file);  // called at deletion of name from stack
  public:
   //#ifdef USE_BOOST_MULTITHREADING
-  //wl_inline void put(char* fname);
+  //inline void put(char* fname);
   //#else
-  wl_inline int put(const char* fname);
+  inline int put(const char* fname);
   //#endif
-  wl_inline void del(int nname);
-  wl_inline void replace(const char* fname);
+  inline void del(int nname);
+  inline void replace(const char* fname);
   friend std::ostream& operator<<(std::ostream& file, const FunNameStack& f);
 };
 std::ostream& operator<<(std::ostream& file, const FunNameStack& f);
@@ -691,7 +690,7 @@ class FunNameWatch {
   const char* name;  // it is memorized independenlty on s_act.
                      // Used for printing of headers.
  public:
-  wl_inline FunNameWatch(const char* fname);
+  inline FunNameWatch(const char* fname);
   /*
   FunNameWatch(char* fname):name(fname)
     {
@@ -704,7 +703,7 @@ class FunNameWatch {
   */
   //FunNameWatch(void):name(NULL), nname(-1) { ; }  // temporary
 
-  wl_inline ~FunNameWatch();
+  inline ~FunNameWatch();
   /*
     {
 #ifdef FUNNAMESTACK
@@ -744,8 +743,6 @@ class GenError : public FunNameStack {
   virtual ~GenError() {}
 };
 //std::ostream& operator<<(std::ostream& file, const GenError& f);
-#ifdef WCPPLIB_INLINE
 #include "wcpplib/util/FunNameStack.ic"
-#endif
 
 #endif

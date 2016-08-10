@@ -16,6 +16,7 @@ namespace Heed {
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
                        double fenergy, std::list<ActivePtr<gparticle> >& particleBank,
+                       HeedFieldMap* fieldmap,
                        int fs_print_listing)
     : gparticle(primvol, pt, vel, time),
       particle_number(last_particle_number++),
@@ -27,7 +28,7 @@ HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
 #endif
       s_delta_generated(0),
       s_print_listing(fs_print_listing),
-      m_particleBank(&particleBank) {
+      m_particleBank(&particleBank), m_fieldMap(fieldmap) {
   mfunname("HeedPhoton::HeedPhoton(...)");
   double length_vel = length(vel);
   check_econd11(fabs(length_vel - c_light) / (length_vel + c_light), > 1.0e-10,
@@ -182,7 +183,7 @@ void HeedPhoton::physics_after_new_speed(void) {
     ActivePtr<gparticle> ac;
     ac.pass(
         new HeedDeltaElectron(currpos.tid.eid[0].amvol.getver(), currpos.pt,
-                              vel, currpos.time, particle_number));
+                              vel, currpos.time, particle_number, m_fieldMap));
     m_particleBank->push_back(ac);
   }
   const long qph = ph_energy.get_qel();
@@ -197,7 +198,7 @@ void HeedPhoton::physics_after_new_speed(void) {
     ActivePtr<gparticle> ac;
     ac.pass(new HeedPhoton(currpos.tid.eid[0].amvol.getver(), currpos.pt, vel,
                            currpos.time, particle_number, ph_energy[nph], 
-                           *m_particleBank));
+                           *m_particleBank, m_fieldMap));
     m_particleBank->push_back(ac);
   }
   s_delta_generated = 1;

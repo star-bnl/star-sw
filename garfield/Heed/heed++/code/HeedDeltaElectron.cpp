@@ -19,26 +19,26 @@ namespace Heed {
 
 const long max_q_low_path_length_for_direct = 5;
 
-// long HeedDeltaElectron::last_particle_number = 0;
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
 
 HeedDeltaElectron::HeedDeltaElectron(manip_absvol* primvol, const point& pt,
                                      const vec& vel, vfloat time,
                                      long fparent_particle_number,
+                                     HeedFieldMap* fieldmap,
                                      int fs_print_listing)
-    : eparticle(primvol, pt, vel, time, &electron_def),
-      particle_number(last_particle_number++),
+    : eparticle(primvol, pt, vel, time, &electron_def, fieldmap),
       parent_particle_number(fparent_particle_number),
+      particle_number(last_particle_number++),
       s_print_listing(fs_print_listing),
       phys_mrange(0.0),
       s_stop_eloss(0),
       s_mult_low_path_length(0),
       q_low_path_length(0.0),
       s_path_length(0),
-      necessary_energy(0.0) {
+      necessary_energy(0.0),
+      total_Eloss(0.) {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
-  //s_print_listing = 1;
 
 }
 
@@ -506,23 +506,22 @@ void HeedDeltaElectron::physics_after_new_speed(void) {
 }
 
 void HeedDeltaElectron::print(std::ostream& file, int l) const {
-  if (l >= 0) {
-    Ifile << "HeedDeltaElectron (l=" << l
-          << "): particle_number=" << particle_number << "\n";
-    if (l == 1) return;
-    indn.n += 2;
-    Ifile << "s_low_mult_scattering=" << s_low_mult_scattering
-          << " s_high_mult_scattering=" << s_high_mult_scattering << '\n';
-    Ifile << "phys_mrange=" << phys_mrange << " s_stop_eloss=" << s_stop_eloss
-          << " s_mult_low_path_length=" << s_mult_low_path_length << '\n';
-    Ifile << "q_low_path_length=" << q_low_path_length
-          << " s_path_length=" << s_path_length
-          << " necessary_energy/eV=" << necessary_energy / eV << '\n';
-    Ifile << " parent_particle_number=" << parent_particle_number << '\n';
+  if (l < 0) return;
+  Ifile << "HeedDeltaElectron (l=" << l
+        << "): particle_number=" << particle_number << "\n";
+  if (l == 1) return;
+  indn.n += 2;
+  Ifile << "s_low_mult_scattering=" << s_low_mult_scattering
+        << " s_high_mult_scattering=" << s_high_mult_scattering << '\n';
+  Ifile << "phys_mrange=" << phys_mrange << " s_stop_eloss=" << s_stop_eloss
+        << " s_mult_low_path_length=" << s_mult_low_path_length << '\n';
+  Ifile << "q_low_path_length=" << q_low_path_length
+        << " s_path_length=" << s_path_length
+        << " necessary_energy/eV=" << necessary_energy / eV << '\n';
+  Ifile << " parent_particle_number=" << parent_particle_number << '\n';
 
-    mparticle::print(file, l - 1);
-    indn.n -= 2;
-  }
+  mparticle::print(file, l - 1);
+  indn.n -= 2;
 }
 
 }

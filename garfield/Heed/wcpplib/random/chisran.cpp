@@ -4,6 +4,8 @@
 
 // I. B. Smirnov, 2003.
 
+namespace Heed {
+
 float chispre(float *x, float *p, float *f, long q) {
   mfunnamep("float chispre(float *x, float *p, float *f, long q)");
   check_econd11(q, <= 0, mcerr);
@@ -140,4 +142,6 @@ double chisran(double flat_random_number, DynLinArr<double> f) {
   mcerr << "should never happen\n";
   spexit(mcerr);
   return 0.0;
+}
+
 }

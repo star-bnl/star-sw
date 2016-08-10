@@ -16,20 +16,22 @@ namespace Heed {
 class eiparticle : public eparticle {
  public:
   /// Constructors
-  eiparticle(void) : eparticle() { ; }
+  eiparticle(void) : eparticle() {}
   eiparticle(manip_absvol* primvol, const point& pt, const vec& vel,
-             vfloat time, particle_def* fpardef, int fs_add_loss = 0)
-      : eparticle(primvol, pt, vel, time, fpardef),
+             vfloat time, particle_def* fpardef, HeedFieldMap* fieldmap,
+             int fs_add_loss = 0)
+      : eparticle(primvol, pt, vel, time, fpardef, fieldmap),
         s_add_loss(fs_add_loss),
         total_loss(0.0) {}
   AnyType_copy(eiparticle, gparticle);
   /// Destructor
   virtual ~eiparticle() {}
   virtual void print(std::ostream& file, int l) const;
+  virtual void physics_after_new_speed(void);
 
+ private:
   /// Energy loss per unit length
   double Bethe_Bloch_en_loss(void);
-  virtual void physics_after_new_speed(void);
 
   /// Flag for handling energy loss
   /// 0 - loss is subtracted from current particle energy

@@ -30,8 +30,9 @@ class HeedParticle : public eparticle {
   /// Constructors
   HeedParticle() : eparticle(), m_particleBank(NULL) {}
   HeedParticle(manip_absvol* primvol, const point& pt, const vec& vel,
-               vfloat time, particle_def* fpardef, 
+               vfloat time, particle_def* fpardef,
                std::list<ActivePtr<gparticle> >& particleBank,
+               HeedFieldMap* fieldmap,
                int fs_loss_only = 0,
                int fs_print_listing = 0);
   // If fs_loss_only == 1 only transferred energy

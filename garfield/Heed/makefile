@@ -64,6 +64,9 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/PhotoAbsCS.o \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
+HEEDOBJS += \
+	$(OBJDIR)/Heed/HeedFieldMap.o \
+
 # Compilation flags
 CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
         `root-config --cflags` \
