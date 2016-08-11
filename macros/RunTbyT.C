@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StSpectraPool/StTrackMateMaker/RunTbyT.C
+../StRoot/StSpectraPool/StTrackMateMaker/RunTbyT.C

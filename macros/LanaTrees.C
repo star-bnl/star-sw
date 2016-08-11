@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StLaserAnalysisMaker/LanaTrees.C
+../StRoot/StLaserAnalysisMaker/LanaTrees.C

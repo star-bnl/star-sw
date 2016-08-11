@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/calib/dEdx.C
+../StRoot/macros/calib/dEdx.C

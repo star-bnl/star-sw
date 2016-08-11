@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/examples/RunTrackMate.C
+../StRoot/macros/examples/RunTrackMate.C

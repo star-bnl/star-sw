@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/calib/Db.C
+../StRoot/macros/calib/Db.C

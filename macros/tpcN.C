@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/garfield/macros/tpcN.C
+../garfield/macros/tpcN.C

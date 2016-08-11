@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StSvtPool/EventT/MakeSvtLadderOnSurvey.C
+../StRoot/StSvtPool/EventT/MakeSvtLadderOnSurvey.C

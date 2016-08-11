@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StSvtPool/EventT/MakeSvtDriftVelocities.C
+../StRoot/StSvtPool/EventT/MakeSvtDriftVelocities.C

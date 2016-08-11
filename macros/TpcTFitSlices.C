@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StTpcMcAnalysisMaker/TpcTFitSlices.C
+../StRoot/StTpcMcAnalysisMaker/TpcTFitSlices.C

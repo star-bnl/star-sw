@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StBichsel/dEdxModel.C
+../StRoot/StBichsel/dEdxModel.C

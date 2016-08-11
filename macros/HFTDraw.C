@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StHftPool/EventT/HFTDraw.C
+../StRoot/StHftPool/EventT/HFTDraw.C

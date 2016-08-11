@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/KFParticle/lMuDstMZ.C
+../StRoot/KFParticle/lMuDstMZ.C

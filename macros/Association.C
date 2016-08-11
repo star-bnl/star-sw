@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StTpcMcAnalysisMaker/Association.C
+../StRoot/StTpcMcAnalysisMaker/Association.C

@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/analysis/runPicoMixedEvent.C
+../StRoot/macros/analysis/runPicoMixedEvent.C

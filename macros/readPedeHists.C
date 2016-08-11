@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/MillepedeII/tools/readPedeHists.C
+../MillepedeII/tools/readPedeHists.C

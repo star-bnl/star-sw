@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StTpcRSMaker/TpcRS.C
+../StRoot/StTpcRSMaker/TpcRS.C

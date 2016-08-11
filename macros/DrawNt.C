@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StTpcAlignerMaker/DrawNt.C
+../StRoot/StTpcAlignerMaker/DrawNt.C

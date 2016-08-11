@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/GeometryTags.C
+../StRoot/macros/GeometryTags.C

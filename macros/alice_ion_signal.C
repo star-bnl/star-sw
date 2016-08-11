@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/garfield/macros/alice_ion_signal.C
+../garfield/macros/alice_ion_signal.C

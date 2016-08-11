@@ -1,1 +1,1 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StSvtPool/EventT/FindPeaks.C
+../StRoot/StSvtPool/EventT/FindPeaks.C
