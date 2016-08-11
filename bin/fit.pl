@@ -20,7 +20,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
   @histGF = qw (SecRow3 SecRow3C 
 		PressureC PressureTC
 		Time TimeC
-		Voltage VoltageC  Qcm AvCurrent
+		Voltage VoltageC Volt VoltC Qcm AvCurrent
 		ppmOxygenInP  inputGasTemperatureP 
 		flowRateExhaustP flowRateRecirculationP
 		percentMethaneInP percentMethaneInPA percentMethaneInPC

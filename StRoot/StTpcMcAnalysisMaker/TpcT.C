@@ -1685,6 +1685,7 @@ Outer
       f2->SetParameters(6.52745e+01,  0, 0,  1.11882e+00, -1.30767e-02,  0.00000e+00);
       f2->FixParameter(1,0);
       f2->FixParameter(2,0);
+      f2->FixParameter(3,1);
       f2->FixParameter(4,0);
       f2->FixParameter(5,0);
       cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;

@@ -31,6 +31,7 @@ Initialdir     = ' . $DIR . '
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts >=1 && JobStatus==1) || (JobStatus == 2 && (CurrentTime - JobCurrentStartDate > (54000)) && ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) < 0.10)) || (((CurrentTime - EnteredCurrentStatus) > (2*24*3600)) && JobStatus == 5) || (JobRunCount >= 1 && JobStatus == 1)
 Priority        = +10
+getenv          = True
 Queue
 ';
 }
