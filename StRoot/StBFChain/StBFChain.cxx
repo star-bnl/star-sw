@@ -1491,6 +1491,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
+      SetOption("-UseXgeom","Default,-TGiant3");
       if (! (GetOption("Stv"))) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
