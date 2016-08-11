@@ -31,7 +31,57 @@ struct dEdxCorrection_t {
   Int_t   nrows;
   Double_t dE;
 };
-class dEdxY2_t;
+//________________________________________________________________________________
+class dEdxY2_t {
+ public:
+  dEdxY2_t() {}
+  virtual ~dEdxY2_t() {}
+  /* U->R->S->P->O->Z->X
+     U->R (TpcAdcCorrection) -> P (tpcPressure) ->
+     S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
+     Z (TpcZCorrection) -> X(TpcdXCorrection) */
+  Char_t   first[1];
+  Int_t    sector;
+  Int_t    row;
+  Float_t  pad;
+  Int_t    Npads;
+  Int_t    Ntbins;
+  Double_t ZdriftDistance;     // drift distance
+  Double_t ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
+  Double_t ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
+  Double_t DeltaZ;             // distance to privious cluster
+  Double_t QRatio;             // Ratio to previous cluster Charge 
+  Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
+  Double_t QSumA;              // Sum of all previous cluster Charge 
+  Double_t dx;                 // dx with accounting distortions
+  Double_t dxC;                // corrected dx which should be used with FitN
+  Double_t dE;
+  Double_t dEdx;   // after all corrections
+  Double_t dEdxL;  // log of dEdx
+  Double_t dEdxN;  // normolized to BB
+  Double_t xyz[3];  // local
+  Double_t xyzD[3]; // local direction
+  Double_t edge;    // distance to sector edge
+  Double_t PhiR;    // relative phi
+  Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
+  Double_t Prob; 
+  Double_t zdev; 
+  Double_t zP;      // the most probable value from Bichsel
+  Double_t zG;      // global z oh Hit
+  Double_t sigmaP;  // sigma from Bichsel
+  Double_t dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
+  Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
+  Int_t    lSimulated;
+  Double_t Qcm;     // accumulated charge uC/cm
+  Double_t Crow;    // Current per row;
+  Double_t Zdc;     // ZDC rate from trigger
+  Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
+  Double_t adc;     //  adc count from cluster finder
+  Double_t TanL;
+  dE_t     C[28]; //! StTpcdEdxCorrection::kTpcAllCorrections
+  Char_t   last[1];
+  void Reset() {memset(first, 0, last - first);}
+}; 
 //________________________________________________________________________________
 class StTpcdEdxCorrection : public TObject {
  public:
@@ -51,9 +101,9 @@ class StTpcdEdxCorrection : public TObject {
     kDrift            ,     //O  11					     
     kMultiplicity     ,     //M  12					     
     kzCorrection      ,     //Z  13					     
-    ktpcMethaneIn     ,     //m  13					     
+    ktpcMethaneIn     ,     //m  14					     
     ktpcGasTemperature,     //T  15					     
-    ktpcWaterOut      ,     //W	 16 				       	   
+    ktpcWaterOut      ,     //W	 16 				7       	   
     kSpaceCharge      ,     //C	 17 space charge near the wire	       	   
     kPhiDirection     ,     //p	 18 correction wrt local interception angle  
     kTanL             ,     //p	 19 correction wrt local tan(lambda)  
@@ -136,57 +186,5 @@ class StTpcdEdxCorrection : public TObject {
   Int_t                m_Debug;                //!
   ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
 };
-//________________________________________________________________________________
-class dEdxY2_t : public TObject {
- public:
-  dEdxY2_t() {}
-  virtual ~dEdxY2_t() {}
-  /* U->R->S->P->O->Z->X
-     U->R (TpcAdcCorrection) -> P (tpcPressure) ->
-     S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
-     Z (TpcZCorrection) -> X(TpcdXCorrection) */
-  Char_t   first[1];
-  Int_t    sector;
-  Int_t    row;
-  Float_t  pad;
-  Int_t    Npads;
-  Int_t    Ntbins;
-  Double_t ZdriftDistance;     // drift distance
-  Double_t ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
-  Double_t ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
-  Double_t DeltaZ;             // distance to privious cluster
-  Double_t QRatio;             // Ratio to previous cluster Charge 
-  Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
-  Double_t QSumA;              // Sum of all previous cluster Charge 
-  Double_t dx;                 // dx with accounting distortions
-  Double_t dxC;                // corrected dx which should be used with FitN
-  Double_t dE;
-  Double_t dEdx;   // after all corrections
-  Double_t dEdxL;  // log of dEdx
-  Double_t dEdxN;  // normolized to BB
-  Double_t xyz[3];  // local
-  Double_t xyzD[3]; // local direction
-  Double_t edge;    // distance to sector edge
-  Double_t PhiR;    // relative phi
-  Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
-  Double_t Prob; 
-  Double_t zdev; 
-  Double_t zP;      // the most probable value from Bichsel
-  Double_t zG;      // global z oh Hit
-  Double_t sigmaP;  // sigma from Bichsel
-  Double_t dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
-  Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
-  Int_t    lSimulated;
-  Double_t Qcm;     // accumulated charge uC/cm
-  Double_t Crow;    // Current per row;
-  Double_t Zdc;     // ZDC rate from trigger
-  Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
-  Double_t adc;     //  adc count from cluster finder
-  Double_t TanL;
-  dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
-  Char_t   last[1];
-  void Reset() {memset(first, 0, last - first);}
-  ClassDef(dEdxY2_t,1)
-}; 
 
 #endif

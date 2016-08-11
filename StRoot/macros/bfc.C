@@ -61,6 +61,7 @@ TString defChain("MC.2014,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,O
 //TString defChain("MC.2015,gstar,20Muons,TpcRS,StiCA,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
+//TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex")
 //void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",

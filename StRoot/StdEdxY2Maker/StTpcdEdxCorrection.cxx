@@ -14,7 +14,6 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcAvCurrentC.h"
 #include "St_db_Maker/St_db_Maker.h"
-ClassImp(dEdxY2_t);
 ClassImp(StTpcdEdxCorrection)
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
@@ -212,7 +211,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
     if (k != kAdcCorrection && CdEdx.lSimulated) goto ENDL;
     if (k == kTpcNoAnodeVGainC) {
-      CdEdx.C[k].dE      = dE/gainAVcorr;
+      CdEdx.C[k].dE      = dE*gainAVcorr;
       CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.dx;
       CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
       continue;
