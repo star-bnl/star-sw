@@ -1558,7 +1558,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
     if (fkChain >= 0) {
       fInFile = fBFC[fkChain].Comment;
       fInFile.ReplaceAll("\n",";");
-      if (! gSystem->AccessPathName(fInFile.Data())) fInFile.Prepend("/direct");
+      if (! gSystem->AccessPathName(fInFile.Data())) fInFile = fInFile.Prepend("/direct");
       gMessMgr->QAInfo() << "Default Input file name = " << fInFile.Data() << " for chain : " << fBFC[fkChain].Key << endm;
     }
   }
