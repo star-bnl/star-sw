@@ -1,8 +1,17 @@
-// $Id: TGeoSwim.h,v 1.6 2016/08/05 18:11:05 perev Exp $
-//
-//
-// Class StTGeoSwim
-// ------------------
+/// $Id: TGeoSwim.h,v 1.7 2016/08/11 18:31:04 perev Exp $
+///
+///
+/// Class StTGeoSwim
+/// ------------------
+///   This class provides tracking thru TGeo structure of volumes and materisls
+///   There are only ROOT dependencies and STAR class THelixTrack. 
+///   Communication with non ROOT entities,
+///   like Mag field, Energy loss provide4d via functors inherited from 
+///   auxiliary TGeoSwimMag and TGeoSwimLoss classes.
+///   Tracking accounts energy loss and magnetic field. It stops at the beginning
+///   of the volume if functor inherited from cauxiliary class TGeoSwimEnd returns non zero
+///   The current version is working only with mag field along Z. 
+///   
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 
 
@@ -90,21 +99,21 @@ const TGeoMaterial*GetMate() const;
 void Swap() { THelixTrack *h=fHelx[0];fHelx[0]=fHelx[1];fHelx[1]=h;}
 protected:
 
-TGeoSwimMag  *fMag;
-TGeoSwimLoss *fLoss;
-TGeoSwimEnd  *fEnd;
-double fSmax;	// Max step size
-double fRmax;
-double fZmin;
-double fZmax;
-double fInOutLen[3];
-double fC;			//curvature 1/cm 
-double fP;			//momentum  loss(GeV) 
-double fPti;			//signed invers pt
-double fPt;			//momentum  loss(GeV) 
-double fPLoss;			//momentum  loss(GeV) 
-double fTimeFly;		//time of flight in seconds 
-double fB[3];
+TGeoSwimMag  *fMag;	///< Mag functor
+TGeoSwimLoss *fLoss;	///< Energy loss functor
+TGeoSwimEnd  *fEnd;  	///< Stop condition functor
+double fSmax;		///< Max step size
+double fRmax;		///< Max radius(xy)
+double fZmin;		///< Min Z
+double fZmax;		///< Max Z
+double fInOutLen[3];	///< Length 0=VoluEnd 1=voluStart 2=total length
+double fC;		///<curvature 1/cm 
+double fP;		///<momentum  loss(GeV) 
+double fPti;		///<signed invers pt
+double fPt;		///<momentum  loss(GeV) 
+double fPLoss;		///<momentum  loss(GeV) 
+double fTimeFly;	///<time of flight in seconds 
+double fB[3];		///<Current mag field
 THelixTrack 	*fHelx[2];
 const TGeoNode  *fNode[2];
 ClassDef(TGeoSwim,0)
