@@ -1022,7 +1022,7 @@ TDataSet *CreateTable() {
 		}
 	      }
 	      # HALL
-	      $glob = ".sl*/obj/StarDb/AgiGeometry/HALL*.root";
+	      $glob = ".sl*/obj/StarDb/AgiGeometry/" . $HALL;
 	      @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
 	      foreach $dir (@dirs) {
 		if ($dir =~ /x86/ || $dir =~ /darwin/) {next;}
@@ -1042,18 +1042,18 @@ TDataSet *CreateTable() {
 	      my $hall = "HALL." . $geom . ".root";
 	      Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	      if (! $xgeomList{$geom}) {
-		Depends $env1 [$rz], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+		Depends $env1 [$rz,$HALL], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 		Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
-		Command $env1 [$rz,$geometry], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry %>:d); #   mv geom.rz %>:f;
+		Command $env1 [$rz,$geometry,$HALL], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
+		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $HALL %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv %>:f $geometry %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null; mv %>:f %>; ); #  mv geom.rz %>:f;
 		#		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
 	      } else{
 		Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
-		Command $env1 [$rz,$geometry], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
+		Command $env1 [$rz,$geometry,$HALL], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
 		  #		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
+		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $HALL %>:d); #   mv geom.rz %>:f;
 	      }
 	    }
 	    my $g2root = "g2Root";
