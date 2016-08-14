@@ -176,8 +176,7 @@ straight::straight(straight* sl, int qsl, const straight& sl_start, int anum,
     //}
   } while (mean2dist_prev < mean2dist ||
            (mean2dist != 0 && mean2dist_prev - mean2dist > precision));
-  //mcout<<"straight::straight: finishinging, *this="<<(*this)<<'\n';
-  delete ptf;
+  delete [] ptf;
 }
 
 vfloat straight::distance(const point& fpt) const {
@@ -229,8 +228,7 @@ straight::straight(const point* pt, int qpt, int anum)  // interpolates by xi2
   double* x = new double[qpt];
   double* y = new double[qpt];
   double* z = new double[qpt];
-  int n;
-  for (n = 0; n < qpt; n++) {
+  for (int n = 0; n < qpt; n++) {
     x[n] = pt[n].v.x;
     y[n] = pt[n].v.y;
     z[n] = pt[n].v.z;
@@ -258,9 +256,9 @@ straight::straight(const point* pt, int qpt, int anum)  // interpolates by xi2
   }
   dir = unit_vec(piv1 - piv);
 
-  delete x;
-  delete y;
-  delete z;
+  delete [] x;
+  delete [] y;
+  delete [] z;
 }
 
 straight::straight(const straight sl[4], point pt[2], vfloat precision) {
