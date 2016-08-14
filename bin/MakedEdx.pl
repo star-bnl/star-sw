@@ -1515,7 +1515,10 @@ my @badruns = qw(
 #$hist = "RunXVIAuAu200p21"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/04/16 Fix voltages, step back with TpcCurrentCorrection
 #$hist = "RunXVIAuAu200p22"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/05/16 use Tpc/Current/2016D/TpcAvgPowerSupply to double check this table
 #$hist = "RunXVIAuAu200p23"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/08/16 new TpcAvgPowerSupply from 2016J, new Voltage histograms
-$hist = "RunXVIAuAu200p24"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/10/16 clean mess with Anode Voltage Gain correction
+#$hist = "RunXVIAuAu200p24"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/10/16 clean mess with Anode Voltage Gain correction
+#$hist = "RunXVIAuAu200p25"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/16 add hack for gain correction to ignore variation in voltage, switch to SecRow3NN correction
+#$hist = "RunXVIAuAu200p26"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/16 add hack for gain correction to ignore variation in voltage, switch to SecRow3NN correction, fix a bug in gain
+$hist = "RunXVIAuAu200p27"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/14/16 fix an other bug in gain
 my $prod = $hist; #$Production;
 
 $prod =~ s/\*//g;
@@ -1693,7 +1696,8 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       } 
 #      else {
-#	print OUT "setenv NODEBUG yes\n";
+	print OUT "setenv NODEBUG yes\n";
+        print OUT "source $GROUP_DIR/setup 64b;\n";
         print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
 #      }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
