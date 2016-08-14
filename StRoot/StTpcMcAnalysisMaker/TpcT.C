@@ -933,7 +933,10 @@ Double_t ConvGausShaperF(Double_t *x, Double_t *par) {
   static TF1* shape = 0;
   if (! shape) {
     TDirectory *dir = gDirectory;
-    TFile *_fil = TFile::Open("/afs/rhic.bnl.gov/star/users/fisyak/macros/ShaperResponse.root");
+    Char_t *file = gSystem->Which(TROOT::GetMacroPath(),"ShaperResponse.root");
+    assert(file);
+    TFile *_fil = TFile::Open(file);
+    delete file;
     if (!_fil) return 0;
     TF1 *f = (TF1 *) _fil->Get("ShaperFunc_O_S01");
     if (! f) return 0;
