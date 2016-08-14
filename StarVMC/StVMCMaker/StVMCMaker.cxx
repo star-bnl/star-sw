@@ -143,7 +143,7 @@ Int_t StVMCMaker::Init() {
 //_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager) {
-    TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry");
+    TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry/Geometry");
     assert(geom);
   }
   if (!fVolume) {
