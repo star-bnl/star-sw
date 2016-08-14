@@ -1,4 +1,4 @@
-/// $Id: TGeoSwim.h,v 1.7 2016/08/11 18:31:04 perev Exp $
+/// $Id: TGeoSwim.h,v 1.8 2016/08/12 21:43:15 perev Exp $
 ///
 ///
 /// Class StTGeoSwim
@@ -107,13 +107,13 @@ double fRmax;		///< Max radius(xy)
 double fZmin;		///< Min Z
 double fZmax;		///< Max Z
 double fInOutLen[3];	///< Length 0=VoluEnd 1=voluStart 2=total length
-double fC;		///<curvature 1/cm 
-double fP;		///<momentum  loss(GeV) 
-double fPti;		///<signed invers pt
-double fPt;		///<momentum  loss(GeV) 
-double fPLoss;		///<momentum  loss(GeV) 
-double fTimeFly;	///<time of flight in seconds 
-double fB[3];		///<Current mag field
+double fC;		///< curvature 1/cm 
+double fP;		///< momentum  loss(GeV) 
+double fPti;		///< signed invers pt
+double fPt;		///< Pt(GeV) 
+double fPLoss;		///< momentum  loss(GeV) 
+double fTimeFly;	///< time of flight in seconds 
+double fB[3];		///< Current mag field
 THelixTrack 	*fHelx[2];
 const TGeoNode  *fNode[2];
 ClassDef(TGeoSwim,0)

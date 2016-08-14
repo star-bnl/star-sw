@@ -1,5 +1,5 @@
 
-// $Id: TGeoSwim.cxx,v 1.6 2016/08/05 18:11:11 perev Exp $
+// $Id: TGeoSwim.cxx,v 1.7 2016/08/12 21:43:15 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -27,6 +27,10 @@
 #include "TGeoSwim.h"
 #include "THelixTrack.h"
 ClassImp(TGeoSwim)
+//! TGeoSwim Constructor.
+/*!
+      \param Name of instance
+*/
 //_____________________________________________________________________________
 TGeoSwim::TGeoSwim(const char *name):TNamed(name,"TGeoSwim")
 {
@@ -50,6 +54,14 @@ TGeoSwim::TGeoSwim(const char *name):TNamed(name,"TGeoSwim")
   fTimeFly = 0;  		//time in seconds 
   memset(fB,0,sizeof(fB));
 }
+
+/// Setting of tracking region.
+/*!
+      \param Rmax - maxiimal xy Radius
+      \param Zmin - min Z
+      \param Zmax - max Z
+      \param sMax - max step
+*/
 //_____________________________________________________________________________
 void TGeoSwim::Set(double Rmax,double Zmin,double zMax,double sMax)
 {
@@ -59,6 +71,12 @@ void TGeoSwim::Set(double Rmax,double Zmin,double zMax,double sMax)
   fSmax = sMax;
 }
 
+/// Setting of tracking starting point.
+/*!
+      \param pos - 3d track start point position
+      \param dir - 3d track direction 
+      \param curv - curvatore(signed)
+*/
 //_____________________________________________________________________________
 int TGeoSwim::Set(const double* pos,const double* dir, double curv)
 {
@@ -106,6 +124,11 @@ const TGeoMaterial *TGeoSwim::GetMate () const
   return fNode[0]->GetMedium()->GetMaterial();
 }
 //_____________________________________________________________________________
+/// Start tracking..
+/*!
+      \param maxLenP - Max allowed tracking length
+    returns flag, see enum SwimExit
+*/
 //_____________________________________________________________________________
 int TGeoSwim::Swim(double maxLenP)
 {
