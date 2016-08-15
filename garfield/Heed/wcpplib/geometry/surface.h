@@ -116,7 +116,7 @@ class splane : public surface {
     polyline* plh = new polyline[fpl.Gqsl()];
     int qplh;
     int i = pn.cross(fpl, cntrpt, qcntrpt, plh, qplh, prec);
-    delete plh;
+    delete [] plh;
     return i;
   }
   virtual void print(std::ostream& file, int l) const;

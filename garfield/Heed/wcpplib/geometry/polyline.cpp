@@ -330,7 +330,7 @@ polygon::polygon(const straight* fsl, int fqsl, vfloat prec)
   polyline_pl pll(pnl, ptl, qptl);
   *this = polygon(pll, 1);
 
-  delete ptl;
+  delete [] ptl;
 
 }
 
