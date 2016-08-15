@@ -52,8 +52,7 @@ using namespace units;
 #endif
 #include "StTpcDedxPidAlgorithm.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
-#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
+#include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
 #ifdef  __CHECK_LargedEdx__
@@ -174,7 +173,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       memset(&mNormal[sector-1][0], 0, NumberOfRows*sizeof(StThreeVectorD*));
     }
     for (Int_t row = 1; row <= NumberOfRows; row++) {
-      //      if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+      //      if (! St_TpcAvgPowerSupplyC::instance()->livePadrow(sector,row)) continue;
       if (Debug()>1) cout << "========= sector/row ========" << sector << "/" << row << endl;
       StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
@@ -474,7 +473,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (Debug() > 1) {tpcHit->Print();}
 	Int_t sector = tpcHit->sector();
 	Int_t row    = tpcHit->padrow();
-	if (NumberOfRows == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
+	if (NumberOfRows == 45 && ! St_TpcAvgPowerSupplyC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 #ifdef __OLD_dX_Calculation__	
@@ -491,7 +490,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	if (NumberOfRows == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
-	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+	  Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,row);
 	  if ((row <= NumberOfInnerRows && 1170 - V > 100) || 
 	      (row >  NumberOfInnerRows && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
@@ -692,7 +691,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].QSumA = 0;
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
-	Double_t              Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
+	Double_t              Qcm      = St_TpcAvgPowerSupplyC::instance()->AcChargeRowL(sector,row); // C/cm
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
@@ -729,7 +728,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
 	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
-	CdEdx[NdEdx].Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+	CdEdx[NdEdx].Crow    = St_TpcAvgPowerSupplyC::instance()->AvCurrRow(sector,row);
 	CdEdx[NdEdx].TanL = -CdEdx[NdEdx].xyzD[2]/TMath::Sqrt(CdEdx[NdEdx].xyzD[0]*CdEdx[NdEdx].xyzD[0]+CdEdx[NdEdx].xyzD[1]*CdEdx[NdEdx].xyzD[1]);
 	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	CdEdx[NdEdx].adc     = tpcHit->adc();
@@ -1363,9 +1362,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    Double_t press = TMath::Log(p);
 	    Pressure.Fill(FdEdx[k].row,press,Vars);
 	  }
-	  Int_t channel = St_TpcAvgCurrentC::ChannelFromRow(FdEdx[k].row);
+	  Int_t channel = St_TpcAvgPowerSupplyC::ChannelFromRow(FdEdx[k].row);
 	  Int_t cs = NumberOfChannels*(FdEdx[k].sector-1)+channel;
-	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
+	  Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
 	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
 	  Voltage.Fill(cs,VN,VarsV);
 	  Volt.Fill(cs,V,VarsV);

@@ -543,9 +543,9 @@ void MakeTpcAvgPowerSupply(Int_t year = 2016) {
 	  avgC.Voltage[l] = mean;
 	  Point.meanV = mean;
 	  Point.rmsV  = rms;
-	  if (rms/(n-1) > 10) { // 10 V ignore as ramping
+	  if (rms/(n-1) > 0.5) { // 0.5 V ignore as ramping
 	    failed++;
-	  } else if (rms/(n-1) > 1) {  // 1V
+	  } else if (rms/(n-1) > 0.1) {  // 0.1V
 	    iok1 = FitGraph(graphV,1);
 	    if (iok1 > 0 || ! lf) {
 	      failed++;

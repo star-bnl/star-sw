@@ -646,11 +646,14 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
   V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
   if (V > 0) {
     Double_t v = V - V_nominal;
+#if 0
     // Hack for Run XVI
     if ( gC->min(l) > -1 && v > -100 && v < 0) {
       if (l == 0) v =   0;
       else        v = -70;
-    } else if (v < gC->min(l) || v > gC->max(l)) return gain;
+    } else 
+#endif
+    if (v < gC->min(l) || v > gC->max(l)) return gain;
     if (gC->min(l) < -150) {
       // if range was expanded below 150 V then use only the linear approximation
       gain  = TMath::Exp(gC->CalcCorrection(l,v, 0., 2));
