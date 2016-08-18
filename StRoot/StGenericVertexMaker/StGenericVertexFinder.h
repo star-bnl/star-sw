@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.38 2016/04/28 18:17:38 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.39 2016/08/18 17:46:14 smirnovd Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -39,7 +39,6 @@ class StGenericVertexFinder {
   StPrimaryVertex*       getVertex(int idx) const;
   void                   addVertex(StPrimaryVertex*);
   int                    size() const;
-  virtual void           UseVertexConstraint(double, double, double, double, double)=0;
           void           UseVertexConstraint(const vertexSeed_st& beamline);
           void           NoVertexConstraint();
           int            IsVertexConstraint() const {return mVertexConstrain;}
@@ -53,23 +52,25 @@ class StGenericVertexFinder {
 
   // General (default)
   virtual void           SetMode(Int_t mode=0 ) {mMode = mode;}
-  virtual int            GetMode() const 	{return mMode;}
+  virtual int            GetMode() const        {return mMode;}
           void           SetDebugLevel(Int_t level) {mDebugLevel=level;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
   virtual void           InitRun  (int runumber){ /* noop */;}
   virtual void           Clear();
-  const std::vector<StPrimaryVertex> *result() {return &mVertexList;} 
- 
+  const std::vector<StPrimaryVertex> *result() {return &mVertexList;}
+
   void                   FillStEvent(StEvent*);
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
-  virtual int            IsFixed() const 	{return 0;}
+  virtual int            IsFixed() const        {return 0;}
  protected: //................................
 
   StGenericVertexFinder(VertexFit_t fitMode=VertexFit_t::Unspecified);
 
  private:
   vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
+
+  virtual void           UseVertexConstraint()=0;
 
  protected: //................................
   StPrimaryVertexOrder   mVertexOrderMethod; // will default to 0 i.e. orderByNumberOfDaughters
@@ -80,7 +81,7 @@ class StGenericVertexFinder {
   VertexFit_t            mVertexFitMode;
 
   int                    mDebugLevel;
-  bool   		 mIsMC;              // flag minor differences between Data & M-C
+  bool                   mIsMC;              // flag minor differences between Data & M-C
   bool                   mUseBtof;           // default use btof = false
   bool                   mUseCtb;            // default use ctb = false
 
