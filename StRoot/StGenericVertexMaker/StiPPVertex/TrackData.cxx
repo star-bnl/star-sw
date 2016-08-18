@@ -26,9 +26,12 @@ TrackData::TrackData() {
 bool 
 TrackData::matchVertex(VertexData &V, float dzMax) {
 
-  float dz=zDca-V.r.z();
-  bool ret= fabs(dz) < dzMax+ezDca;
-  if(ret)   LOG_DEBUG<< Form("PPV::matchTr2Ver VerID=%d  weight=%.2f anyM=%d anyV=%d  m: ctb=%d  bemc=%d eemc=%d tpc=%d dz=%.2f +/- %.2f\n",V.id,weight,anyMatch,anyVeto,mCtb,mBemc,mEemc,mTpc,dz,ezDca)<<endm;
+  float dz = zDca - V.r.z();
+  bool ret = fabs(dz) < dzMax + ezDca;
+
+  if (ret)
+     LOG_DEBUG<< Form("PPV::matchTr2Ver VerID=%d  weight=%.2f anyM=%d anyV=%d  m: ctb=%d  bemc=%d eemc=%d tpc=%d dz=%.2f +/- %.2f\n",V.id,weight,anyMatch,anyVeto,mCtb,mBemc,mEemc,mTpc,dz,ezDca)<<endm;
+
   return ret;
 }
 
