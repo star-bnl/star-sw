@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.4 2016/03/08 15:54:19 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.5 2016/08/18 17:46:15 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -80,7 +80,6 @@ StPPVertexFinder::StPPVertexFinder()
 {
   LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
-  mdxdz=mdydz=mX0=mY0  = 0; // beam line params
   mTotEve              = 0;
   HList=0;
   mToolkit =0;
@@ -405,24 +404,6 @@ void StPPVertexFinder::CalibBeamLine()
 {
   LOG_INFO << "StPPVertexFinder::CalibBeamLine: activated saving high quality prim tracks for 3D fit of the beamLine"<<endm;
   mBeamLineTracks=1; 
-}
-
-//======================================================
-//======================================================
-void StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
-  mVertexConstrain = true;
-  mX0 = x0;
-  mY0 = y0;
-  mdxdz = dxdz;
-  mdydz = dydz;
-
-  // weight - not used ;
-  LOG_INFO << "StPPVertexFinder::Using Constrained Vertex" << endm;
-  LOG_INFO << "x origin = " << mX0 << endm;
-  LOG_INFO << "y origin = " << mY0 << endm;
-  LOG_INFO << "slope dxdz = " << mdxdz << endm;
-  LOG_INFO << "slope dydz = " << mdydz << endm;
-
 }
 
 
@@ -761,10 +742,7 @@ bool StPPVertexFinder::findVertexZ(VertexData &V) {
   if(sigZ<0.1) sigZ=0.1; // tmp, make it not smaller than the bin size
 
   // take x,y from beam line equation, TMP
-  float x=mX0+z0*mdxdz;
-  float y=mY0+z0*mdydz;
-
-  V.r=TVector3(x,y,z0);
+  V.r=TVector3(beamX(z0), beamY(z0), z0);
   V.er=TVector3(0.1,0.1,sigZ); //tmp
   V.Lmax=Lmax;
 
@@ -1238,6 +1216,74 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.5  2016/08/18 17:46:15  smirnovd
+ * Squashed commit of the following refactoring changes:
+ *
+ * Date:   Wed Jul 27 18:31:18 2016 -0400
+ *
+ *     Removed unused arguments in UseVertexConstraint()
+ *
+ *     In StiPPVertexFinder and StvPPVertexFinder this method does nothing
+ *
+ * Date:   Wed Jul 27 16:47:58 2016 -0400
+ *
+ *     Make old UseVertexConstraint private virtual and call it from its public replacement in the base class
+ *
+ *     also mark methods as private explicitly
+ *
+ * Date:   Wed Jul 27 16:52:02 2016 -0400
+ *
+ *     Removed unused private data member mWeight
+ *
+ * Date:   Wed Jul 27 16:50:42 2016 -0400
+ *
+ *     Prefer base class static beamline parameters rather than this class private members
+ *
+ * Date:   Wed Jul 27 16:21:49 2016 -0400
+ *
+ *     StPPVertexFinder: Got rid of unused private beamline parameters
+ *
+ *     The equivalent measurements are available from the base class
+ *     StGenericVertexFinder
+ *
+ * Date:   Wed Jul 27 16:19:19 2016 -0400
+ *
+ *     StPPVertexFinder: For beamline position use equivalent static methods from parent class
+ *
+ * Date:   Wed Jul 27 16:05:50 2016 -0400
+ *
+ *     StGenericVertexMaker: Assigning once is enough
+ *
+ * Date:   Mon Aug 15 10:43:49 2016 -0400
+ *
+ *     StGenericVertexFinder: Print out beamline parameters
+ *
+ *     Print beamline values as extracted from the database before any modification.
+ *
+ * Date:   Wed Jul 6 15:33:02 2016 -0400
+ *
+ *     Stylistic changes and minor refactoring
+ *
+ *     Whitespace and comments for improved readability
+ *     s/track/stiKalmanTrack/
+ *
+ * Date:   Wed Jul 6 15:28:16 2016 -0400
+ *
+ *     StPPVertexFinder: Switched to cleaner c++11 range loop syntax
+ *
+ * Date:   Wed Jul 6 15:22:14 2016 -0400
+ *
+ *     StPPVertexFinder: Minor c++ refactoring
+ *
+ *     - Removed unused counter
+ *     - c-style array to std::array
+ *
+ * Date:   Wed Jul 6 15:20:11 2016 -0400
+ *
+ *     Deleted commented out code
+ *
+ *     Removed unused #include's StMinuitVertexFinder
+ *
  * Revision 1.4  2016/03/08 15:54:19  smirnovd
  * Removed pointless remnants of past debugging
  *

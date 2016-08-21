@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.23 2016/04/28 18:17:55 smirnovd Exp $
+ * $Id: StPPVertexFinder.h,v 1.24 2016/08/18 17:46:14 smirnovd Exp $
  *
  */
 #ifdef __APPLE__
@@ -48,6 +48,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
   bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
   bool isPostCrossingTrack(const StiKalmanTrack* track);
+
+  /// A container with pre-selected tracks to be used in seed finding
   vector<TrackData>  mTrackData;
   vector<VertexData> mVertexData;
   Vertex3D *vertex3D; // for stand alone 3D vertex reco
@@ -81,12 +83,6 @@ class StPPVertexFinder: public StGenericVertexFinder {
   int    mBeamLineTracks; // activates writing them out + lot of QA histos, 
                           // use  BFC option: VtxSeedCalG to enable it, expert only
 
-  // beam line
-  double          mX0  ;     // starting point of beam parameterization
-  double          mY0  ;     // starting point of beam parameterization
-  double          mdxdz;     // beam slope
-  double          mdydz;     // beam slope
-
   // util
   StiToolkit     *mToolkit;
   BtofHitList    *btofList;  // dongx
@@ -101,6 +97,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   //  void plotVertex(VertexData *);
   //  void plotTracksDca();
   void initHisto();
+
+  virtual void  UseVertexConstraint() {}
   
 public:
   void UsePCT(bool x=true)			{setDropPostCrossingTrack(!x);}
@@ -118,7 +116,6 @@ public:
   virtual  ~StPPVertexFinder();
   int       fit(StEvent*);        
   void      printInfo(ostream& = cout) const;
-  void      UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
  
   // over-written method
   virtual void  Init();

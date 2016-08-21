@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.12 2012/12/12 22:09:58 fisyak Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.13 2016/08/18 17:46:14 smirnovd Exp $
  *
  */
 
@@ -27,7 +27,6 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     virtual         ~StppLMVVertexFinder();
     int             fit(StEvent*);         
     void            printInfo(ostream& = cout) const;
-    void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
     void            Clear();
 
     // over-written method
@@ -35,13 +34,10 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     void addFakeVerex(float z);
 
  private:
+
+    virtual void    UseVertexConstraint();
   
-    double          mX0  ;     // starting point of beam parameterization
-    double          mY0  ;     // starting point of beam parameterization
-    double          mdxdz;     // beam slope
-    double          mdydz;     // beam slope
     unsigned int           mMinNumberOfFitPointsOnTrack;
-    double                 mWeight ;          // Weight in fit for vertex contraint
     StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
 
     //jan--------------------
@@ -75,6 +71,74 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.13  2016/08/18 17:46:14  smirnovd
+ * Squashed commit of the following refactoring changes:
+ *
+ * Date:   Wed Jul 27 18:31:18 2016 -0400
+ *
+ *     Removed unused arguments in UseVertexConstraint()
+ *
+ *     In StiPPVertexFinder and StvPPVertexFinder this method does nothing
+ *
+ * Date:   Wed Jul 27 16:47:58 2016 -0400
+ *
+ *     Make old UseVertexConstraint private virtual and call it from its public replacement in the base class
+ *
+ *     also mark methods as private explicitly
+ *
+ * Date:   Wed Jul 27 16:52:02 2016 -0400
+ *
+ *     Removed unused private data member mWeight
+ *
+ * Date:   Wed Jul 27 16:50:42 2016 -0400
+ *
+ *     Prefer base class static beamline parameters rather than this class private members
+ *
+ * Date:   Wed Jul 27 16:21:49 2016 -0400
+ *
+ *     StPPVertexFinder: Got rid of unused private beamline parameters
+ *
+ *     The equivalent measurements are available from the base class
+ *     StGenericVertexFinder
+ *
+ * Date:   Wed Jul 27 16:19:19 2016 -0400
+ *
+ *     StPPVertexFinder: For beamline position use equivalent static methods from parent class
+ *
+ * Date:   Wed Jul 27 16:05:50 2016 -0400
+ *
+ *     StGenericVertexMaker: Assigning once is enough
+ *
+ * Date:   Mon Aug 15 10:43:49 2016 -0400
+ *
+ *     StGenericVertexFinder: Print out beamline parameters
+ *
+ *     Print beamline values as extracted from the database before any modification.
+ *
+ * Date:   Wed Jul 6 15:33:02 2016 -0400
+ *
+ *     Stylistic changes and minor refactoring
+ *
+ *     Whitespace and comments for improved readability
+ *     s/track/stiKalmanTrack/
+ *
+ * Date:   Wed Jul 6 15:28:16 2016 -0400
+ *
+ *     StPPVertexFinder: Switched to cleaner c++11 range loop syntax
+ *
+ * Date:   Wed Jul 6 15:22:14 2016 -0400
+ *
+ *     StPPVertexFinder: Minor c++ refactoring
+ *
+ *     - Removed unused counter
+ *     - c-style array to std::array
+ *
+ * Date:   Wed Jul 6 15:20:11 2016 -0400
+ *
+ *     Deleted commented out code
+ *
+ *     Removed unused #include's StMinuitVertexFinder
+ *
  * Revision 1.12  2012/12/12 22:09:58  fisyak
  * add sys/types.h include for APPLE
  *
