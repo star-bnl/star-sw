@@ -1,6 +1,6 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.4 2006/05/18 19:14:24 lbarnby Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.5 2016/08/18 17:46:14 smirnovd Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
@@ -74,7 +74,7 @@ void StFixedVertexFinder::printInfo(ostream& os)const{
     os << "Fixed position: x=" << mFixedX << " y=" << mFixedY << " z=" << mFixedZ << endl;
 }
 
-void StFixedVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight){
+void StFixedVertexFinder::UseVertexConstraint(){
     LOG_WARN << "StFixedVertexFinder::UseVertexConstraint() - vertex beam constraint NOT implemented in context of fixed vertex finder" << endm;
 
 }
@@ -87,6 +87,74 @@ void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.5  2016/08/18 17:46:14  smirnovd
+ * Squashed commit of the following refactoring changes:
+ *
+ * Date:   Wed Jul 27 18:31:18 2016 -0400
+ *
+ *     Removed unused arguments in UseVertexConstraint()
+ *
+ *     In StiPPVertexFinder and StvPPVertexFinder this method does nothing
+ *
+ * Date:   Wed Jul 27 16:47:58 2016 -0400
+ *
+ *     Make old UseVertexConstraint private virtual and call it from its public replacement in the base class
+ *
+ *     also mark methods as private explicitly
+ *
+ * Date:   Wed Jul 27 16:52:02 2016 -0400
+ *
+ *     Removed unused private data member mWeight
+ *
+ * Date:   Wed Jul 27 16:50:42 2016 -0400
+ *
+ *     Prefer base class static beamline parameters rather than this class private members
+ *
+ * Date:   Wed Jul 27 16:21:49 2016 -0400
+ *
+ *     StPPVertexFinder: Got rid of unused private beamline parameters
+ *
+ *     The equivalent measurements are available from the base class
+ *     StGenericVertexFinder
+ *
+ * Date:   Wed Jul 27 16:19:19 2016 -0400
+ *
+ *     StPPVertexFinder: For beamline position use equivalent static methods from parent class
+ *
+ * Date:   Wed Jul 27 16:05:50 2016 -0400
+ *
+ *     StGenericVertexMaker: Assigning once is enough
+ *
+ * Date:   Mon Aug 15 10:43:49 2016 -0400
+ *
+ *     StGenericVertexFinder: Print out beamline parameters
+ *
+ *     Print beamline values as extracted from the database before any modification.
+ *
+ * Date:   Wed Jul 6 15:33:02 2016 -0400
+ *
+ *     Stylistic changes and minor refactoring
+ *
+ *     Whitespace and comments for improved readability
+ *     s/track/stiKalmanTrack/
+ *
+ * Date:   Wed Jul 6 15:28:16 2016 -0400
+ *
+ *     StPPVertexFinder: Switched to cleaner c++11 range loop syntax
+ *
+ * Date:   Wed Jul 6 15:22:14 2016 -0400
+ *
+ *     StPPVertexFinder: Minor c++ refactoring
+ *
+ *     - Removed unused counter
+ *     - c-style array to std::array
+ *
+ * Date:   Wed Jul 6 15:20:11 2016 -0400
+ *
+ *     Deleted commented out code
+ *
+ *     Removed unused #include's StMinuitVertexFinder
+ *
  * Revision 1.4  2006/05/18 19:14:24  lbarnby
  * Added SetVertexPosition function. Tidied up comments/docs
  *

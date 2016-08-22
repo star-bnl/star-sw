@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.20 2016/04/28 18:17:38 smirnovd Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.21 2016/08/18 17:46:13 smirnovd Exp $
  *
  */
 
@@ -112,7 +112,6 @@ public:
     virtual        ~StMinuitVertexFinder();
     Int_t           fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
-    void            UseVertexConstraint(Double_t x0, Double_t y0, Double_t dxdz, Double_t dydz, Double_t weight);
     virtual void    InitRun  (Int_t runumber);
     void            Clear();
 
@@ -144,6 +143,8 @@ private:
     void    calculateRanks();
     Int_t   findSeeds();
 
+    virtual void UseVertexConstraint();
+
     static void fcn(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
     static void fcn1D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
     static void Chi2Beamline3D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t);
@@ -156,7 +157,6 @@ private:
     bool                   mRequireCTB;       // Set maker to use CTB
     UInt_t                 mMinNumberOfFitPointsOnTrack;
     Float_t                mDcaZMax;
-    Double_t               mWeight ;          // Weight in fit for vertex contraint
     Double_t               mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
     Int_t                  mMinTrack;         // Min number of tracks
     Float_t                mZMin;             // Min z of possible vertex positions
@@ -179,10 +179,6 @@ private:
     static Bool_t                   requireCTB;
     static Int_t                    nCTBHits;
     static Double_t                 mWidthScale;
-    static Double_t                 mX0  ; // starting point of beam parameterization
-    static Double_t                 mY0  ; // starting point of beam parameterization
-    static Double_t                 mdxdz; // beam slope
-    static Double_t                 mdydz; // beam slope
     Int_t                    mStatusMin;           // Minuit status flag 
     StThreeVectorD           mExternalSeed;
     Bool_t                   mExternalSeedPresent;
