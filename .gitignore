@@ -26,7 +26,8 @@ CVS
 *.root
 paw.metafile
 gphysi.dat
-.consign* 
+.consign
+.consign*
 ir.out 
 *.bck 
 *.hold* 
