@@ -1,6 +1,7 @@
-// $Id: StdEdxY2Maker.cxx,v 1.84 2015/12/24 00:23:03 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.85 2016/08/25 20:57:54 fisyak Exp $
 //#define CompareWithToF 
 #define __USEZ3A__
+//#define __Use_dNdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
@@ -784,6 +785,7 @@ Int_t StdEdxY2Maker::Make(){
 	    AddEdxTraits(tracks, dedx);
 	  }
 	}
+#ifdef __Use_dNdx__
 	// likelihood fit of no. of primary cluster per cm
 	Double_t chisqN, fitN, fitdN;
 	DoFitN(chisq, fitN, fitdN);
@@ -800,6 +802,7 @@ Int_t StdEdxY2Maker::Make(){
 	  dedx.method    =  kOtherMethodId;
 	  AddEdxTraits(tracks, dedx);
 	}
+#endif /* __Use_dNdx__ */
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
