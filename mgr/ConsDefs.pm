@@ -172,7 +172,7 @@
 #	}
     } else {
 	$G77       = "g77";
-	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
+	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -fno-automatic -Wall -Wsurprising -fPIC";
     }
 
     $G77EXTEND     = "-ffixed-line-length-132";
@@ -182,7 +182,7 @@
 #    $LDFLAGS = $SOFLAGS = "$XMACHOPT";
 
 #    $CXXFLAGS      .= " -fPIC -w";
-    $CXXFLAGS      .= " -w";
+#    $CXXFLAGS      .= " -w";
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
@@ -387,9 +387,9 @@
 #	$CC            = "icc";
 #	$CXX           = "icc";
 	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "-w -ansi -fPIC -wd1476"; #-fpstkchk"; $XMACHOPT 
+	$CXXFLAGS      = "-ansi -fPIC -wd1476"; #-fpstkchk"; $XMACHOPT 
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
-	$CFLAGS        = "-restrict -w -fPIC";     # -fpstkchk";# -restrict";# -Wall $XMACHOPT 
+	$CFLAGS        = "-restrict -fPIC";     # -fpstkchk";# -restrict";# -Wall $XMACHOPT 
 	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; /bin/rm  /tmp/icc_version;`;
         $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; /bin/rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
@@ -574,7 +574,7 @@
 #      $CXX           = "g++";
 #      $CC            = "gcc";
       if ($CXX eq 'g++') {
-	$CXXFLAGS      .= " -pipe -Wshadow  -W -Wall -Woverloaded-virtual -fsigned-char -fno-common";
+	$CXXFLAGS      .= " -pipe -Wshadow  -Wall -Woverloaded-virtual -fsigned-char -fno-common";
 	if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
 	$CXXFLAGS      .= " -Wshadow -Wunused-parameter -Wwrite-strings";
       } else {# clang
@@ -583,7 +583,7 @@
  #print "CXXFLAGS = $CXXFLAGS --------------------------------------------------------------------------------\n";
       if (! $EXTRA_CPPPATH) {$EXTRA_CPPPATH  =                         $FINK_CXXFLAGS;}
       else                  {$EXTRA_CPPPATH .= $main::PATH_SEPARATOR . $FINK_CXXFLAGS;}
-      $CFLAGS       .= " -pipe -W -Wall -fsigned-char -fno-common";# -Df2cFortran";
+      $CFLAGS       .= " -pipe -Wall -fsigned-char -fno-common";# -Df2cFortran";
       $CFLAGS      .= " -Wshadow -Wunused-parameter -Wwrite-strings";
       
       $CINTCXXFLAGS  = $CXXFLAGS .

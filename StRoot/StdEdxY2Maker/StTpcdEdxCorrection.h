@@ -43,6 +43,7 @@ class dEdxY2_t {
   Char_t   first[1];
   Int_t    sector;
   Int_t    row;
+  Int_t    channel;
   Float_t  pad;
   Int_t    Npads;
   Int_t    Ntbins;
@@ -78,6 +79,7 @@ class dEdxY2_t {
   Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
   Double_t adc;     //  adc count from cluster finder
   Double_t TanL;
+  Double_t Voltage; // Anode Voltage
   dE_t     C[28]; //! StTpcdEdxCorrection::kTpcAllCorrections
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
