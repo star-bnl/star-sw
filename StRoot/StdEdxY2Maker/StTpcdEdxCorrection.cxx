@@ -174,6 +174,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
+  Int_t channel           = CdEdx.channel;
   Double_t dx     	  = CdEdx.dx;    
   if (dE <= 0 || dx <= 0) return 3;
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
@@ -223,8 +224,11 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! cor) goto ENDL;
       nrows = cor->nrows;
       l = kTpcOuter;
-      if (nrows > 1 && nrows < mNumberOfRows) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
-      else  {if (nrows == mNumberOfRows) l = row - 1;}
+      if (nrows == 2) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
+      else {
+	if (nrows == mNumberOfRows) l = row - 1;
+	else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
+      }
       corl = cor + l;
     } else {
       goto ENDL;

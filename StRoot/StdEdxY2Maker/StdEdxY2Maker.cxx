@@ -1,7 +1,8 @@
-// $Id: StdEdxY2Maker.cxx,v 1.84 2015/12/24 00:23:03 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.85 2016/08/25 20:57:54 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
+#define __Use_dNdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
@@ -107,18 +108,21 @@ Int_t StdEdxY2Maker::Init(){
     SETBIT(m_Mask,StTpcdEdxCorrection::kTpcLast);
   }
   if (Debug()) {
-    if (! TESTBIT(m_Mode, kOldClusterFinder)) 
+    if (! TESTBIT(m_Mode, kOldClusterFinder)) {
       LOG_WARN << "StdEdxY2Maker::Init use new Cluster Finder parameterization" << endm;
-    else                  
+    } else {
       LOG_WARN << "StdEdxY2Maker::Init use old Cluster Finder parameterization" << endm;
-    if (TESTBIT(m_Mode, kPadSelection))     
+    }
+    if (TESTBIT(m_Mode, kPadSelection)) {
       LOG_WARN << "StdEdxY2Maker::Init Pad Selection is ON" << endm;
-    if (TESTBIT(m_Mode, kDoNotCorrectdEdx))     
+    }
+    if (TESTBIT(m_Mode, kDoNotCorrectdEdx)) {
       LOG_WARN << "StdEdxY2Maker::Init Don't Correct dEdx" << endm;
-    if (TESTBIT(m_Mode, kEmbedding))     
+    }
+    if (TESTBIT(m_Mode, kEmbedding)) {
       LOG_WARN << "StdEdxY2Maker::Init This is embedding run" << endm;
+    }
   }
-  
   gMessMgr->SetLimit("StdEdxY2Maker:: mismatched Sector",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: pad/TimeBucket out of range:",20);
   gMessMgr->SetLimit("StdEdxY2Maker:: Helix Prediction",20);
@@ -299,7 +303,7 @@ TF1 *StdEdxY2Maker::Gaus2() {
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Finish() {
-  static Double_t slope = 1.7502e-6;// slope from Blair   1/( O2 in ppm., cm )
+  //  static Double_t slope = 1.7502e-6;// slope from Blair   1/( O2 in ppm., cm )
   FinishRun(0);
 #ifdef __USEZ3A__
   if (Z3A) {// control Z slope
@@ -365,9 +369,9 @@ Int_t StdEdxY2Maker::Make(){
   if (! St_trigDetSumsC::GetInstance()) {
     StMaker::GetChain()->AddData(St_trigDetSumsC::instance());
   }
-  if ( ! St_trigDetSumsC::instance() ) LOG_ERROR << "StdEdxY2Maker:: Cannot find trigDetSums" << endm;
+  if ( ! St_trigDetSumsC::instance() ) {LOG_ERROR << "StdEdxY2Maker:: Cannot find trigDetSums" << endm;}
   else {
-    if (!St_trigDetSumsC::instance()->GetNRows()) LOG_ERROR << "StdEdxY2Maker:: trigDetSums has not data" << endm;
+    if (!St_trigDetSumsC::instance()->GetNRows()) {LOG_ERROR << "StdEdxY2Maker:: trigDetSums has not data" << endm;}
     else {
       UInt_t date = GetDateTime().Convert();
       if (date < St_trigDetSumsC::instance()->timeOffset()) {
@@ -376,6 +380,12 @@ Int_t StdEdxY2Maker::Make(){
 			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << GetRunNumber() << endm;
       }
     }
+  }
+  // Check that we have valid time for Power Suppliers
+  if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
+    LOG_ERROR <<  "StdEdxY2Maker:: Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
+	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
+    return kStErr;
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
@@ -691,7 +701,11 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].QSumA = 0;
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
-	Double_t              Qcm      = St_TpcAvgPowerSupplyC::instance()->AcChargeRowL(sector,row); // C/cm
+	CdEdx[NdEdx].channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row);
+	CdEdx[NdEdx].Voltage = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,row);
+	CdEdx[NdEdx].Crow    = St_TpcAvgPowerSupplyC::instance()->AvCurrRow(sector,row);
+	Double_t    Qcm      = St_TpcAvgPowerSupplyC::instance()->AcChargeRowL(sector,row); // C/cm
+	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
@@ -727,8 +741,6 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xyzD[2] = localDirectionOfTrack.position().z();
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
-	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
-	CdEdx[NdEdx].Crow    = St_TpcAvgPowerSupplyC::instance()->AvCurrRow(sector,row);
 	CdEdx[NdEdx].TanL = -CdEdx[NdEdx].xyzD[2]/TMath::Sqrt(CdEdx[NdEdx].xyzD[0]*CdEdx[NdEdx].xyzD[0]+CdEdx[NdEdx].xyzD[1]*CdEdx[NdEdx].xyzD[1]);
 	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	CdEdx[NdEdx].adc     = tpcHit->adc();
@@ -826,10 +838,11 @@ Int_t StdEdxY2Maker::Make(){
 	    AddEdxTraits(tracks, dedx);
 	  }
 	}
+#ifdef __Use_dNdx__
 	// likelihood fit of no. of primary cluster per cm
 	Double_t chisqN, fitN, fitdN;
-	DoFitN(chisq, fitN, fitdN);
-	if (chisq > -900.0 &&chisq < 10000.0) {
+	DoFitN(chisqN, fitN, fitdN);
+	if (chisqN > -900.0 &&chisqN < 10000.0) {
 	  dedx.id_track  =  Id;
 	  dedx.det_id    =  kTpcId;    // TPC track 
 	  dedx.method    =  kOtherMethodId2;
@@ -842,6 +855,7 @@ Int_t StdEdxY2Maker::Make(){
 	  dedx.method    =  kOtherMethodId;
 	  AddEdxTraits(tracks, dedx);
 	}
+#endif /* __Use_dNdx__ */
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
@@ -902,7 +916,6 @@ void StdEdxY2Maker::SortdEdx() {
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
-  const static Double_t GeV2keV = TMath::Log(1.e-6);
   class Hists3D {
   private:
     union {TH1 *hists[9]; TH3F *h3;}; // uncorrected
@@ -1008,7 +1021,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
   static Hists3D SecRow3;
   static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NumberOfRows,200,-2.,2.);
-  //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
+  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
   static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
   //  static Hists3D Edge3("Edge3","log(dEdx/Pion)","row"," Edge",NumberOfRows, 400,-100,100);
@@ -1033,7 +1046,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH2F *flowRateRecirculationP = 0; // *ppmOxygenOutP = 0,
   static TH2F *ppmWaterOutP = 0, *ppmWaterOutPC = 0, *ppmWaterOutPA = 0;
   // ProbabilityPlot
-  static TH3F *Prob = 0;
+  //  static TH3F *Prob = 0;
   // end of ProbabilityPlot
 #if 0
   static TH2F *BaddEdxZPhi70[2], *BaddEdxZPhiZ[2];
@@ -1151,7 +1164,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
   StPidStatus PiD(gTrack); 
   if (PiD.PiDStatus < 0) return;
-  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+  //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t l;
   for (l = kPidElectron; l < KPidParticles; l++) {
     Int_t k = PiD.PiDkeyU3;
@@ -1298,7 +1311,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  if (flowRateRecirculationP) flowRateRecirculationP->Fill(tpcGas->flowRateRecirculation,FdEdx[k].dEdxN);
 	}
 	if (St_trigDetSumsC::instance()) {
-	  if (St_trigDetSumsC::instance()->zdcX() > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->zdcX()), FdEdx[k].dEdxN);
+	  if (FdEdx[k].Zdc > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(FdEdx[k].Zdc), FdEdx[k].dEdxN);
 	  if (St_trigDetSumsC::instance()->bbcYellowBkg() > 0 && bbcYellowBkg) 
 	    bbcYellowBkg->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcYellowBkg()), FdEdx[k].dEdxN);
 	  if (St_trigDetSumsC::instance()->bbcBlueBkg() > 0 && bbcBlueBkg) 
@@ -1349,11 +1362,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (TMath::Abs(Pad2Edge) > 5) {
 	  SecRow3.Fill(FdEdx[k].sector,FdEdx[k].row,Vars);
 	}
-	//	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
+	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
-	Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
+	//Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
-	Double_t PhiD = 180./TMath::Pi()*TMath::ATan2(xyzD[0],xyzD[1]); 
+	//	Double_t PhiD = 180./TMath::Pi()*TMath::ATan2(xyzD[0],xyzD[1]); 
 	TanL3D.Fill(FdEdx[k].row,FdEdx[k].TanL,Vars);
 	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
@@ -1362,9 +1375,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    Double_t press = TMath::Log(p);
 	    Pressure.Fill(FdEdx[k].row,press,Vars);
 	  }
-	  Int_t channel = St_TpcAvgPowerSupplyC::ChannelFromRow(FdEdx[k].row);
-	  Int_t cs = NumberOfChannels*(FdEdx[k].sector-1)+channel;
-	  Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
+	  Int_t cs = NumberOfChannels*(FdEdx[k].sector-1)+FdEdx[k].channel;
+	  Double_t V = FdEdx[k].Voltage;
 	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
 	  Voltage.Fill(cs,VN,VarsV);
 	  Volt.Fill(cs,V,VarsV);
@@ -1607,7 +1619,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
       if (St_trigDetSumsC::instance()->bbcX() > 0 && BBC) BBC->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()));
       if (St_trigDetSumsC::instance()->mult() > 0 && Multiplicity) Multiplicity->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()));
     }
-  } // (TESTBIT(m_Mode, kGASHISTOGRAMS))n
+  } // (TESTBIT(m_Mode, kGASHISTOGRAMS))
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::XyzCheck(StGlobalCoordinate *global, Int_t iokCheck) {
@@ -1921,7 +1933,7 @@ void StdEdxY2Maker::V0CrossCheck() {
 //________________________________________________________________________________
 void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   static Int_t _debug = 0; 
-  Double_t Val[2];
+  //  Double_t Val[2];
 #ifndef __HEED_MODEL__
   static TF1 *zdE = 0;
   static TF1 *fMPV = 0;
