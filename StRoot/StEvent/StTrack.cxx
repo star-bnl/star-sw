@@ -578,7 +578,6 @@ void StTrack::setIdTruth() // match with IdTruth
     const StPtrVecHit& vh = di->hits();
     
     typedef std::map< int,float>  myMap_t;
-    typedef std::pair<int,float>  myPair_t;
     typedef myMap_t::const_iterator myIter_t;
     myMap_t  idTruths;
     

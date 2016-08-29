@@ -1521,6 +1521,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-fzinSDT","GeneratorFile");
     }
   }
+  if (! GetOption("AgML") && ! GetOption("VmcGeo") && ! GetOption("Agi")) SetOption("Agi","Default Geometry");
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",fNoChainOptions);

@@ -253,7 +253,7 @@ ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
   const Float_t *dxyz = v.positionError().xyz();
   for (Int_t i = 0; i < 3; i++)     {
     if (dxyz[i] <= 9.999) os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
-    else                  os << Form("%8.3f+/-9.999,",xyz[i],dxyz[i]);
+    else                  os << Form("%8.3f+/-9.999,",xyz[i]);
   }
   os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
      << " Rank: "      << Form("%8.1f",v.ranking());
