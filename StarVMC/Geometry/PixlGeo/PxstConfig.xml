@@ -1,0 +1,8 @@
+<Document file="StarVMC/Geometry/PxstGeo/PxstConfig.xml">
+<Detector name="PXST" comment="STAR Pixel detector">
+<Modules>PxstGeo1</Modules>
+<!-- D Tube, pixel support tube and pixel support services -->
+<Setup name="PXSTof" module="PxstGeo1" onoff="off" comment="OFF" />
+<Setup name="PXST01" onoff="on" module="PxstGeo1" comment="Pixel D-tube" />
+</Detector>
+</Document>
