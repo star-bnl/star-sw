@@ -1005,7 +1005,9 @@ TDataSet *CreateTable() {
 	    my $geom_h = $geom . ".h";
 	    #	  my $rz = lc($geom . ".rz");
 	    my $rz = $geom . ".rz";
-	    my $HALL = "HALL." . $geom . ".root";
+	    my $geometry = "Geometry." . $geom . ".C";
+#	    my $HALL = "HALL." . $geom . ".root";
+	    my $hall = "HALL." . $geom . ".root";
 	    if ($STAR_SYS =~ /x86/ || $STAR_SYS =~ /darwin/) {# platform with no root4star
 	      # rz - files
 	      my $glob = ".sl*/obj/StarDb/AgiGeometry/" . $rz;
@@ -1022,7 +1024,7 @@ TDataSet *CreateTable() {
 		}
 	      }
 	      # HALL
-	      $glob = ".sl*/obj/StarDb/AgiGeometry/" . $HALL;
+	      $glob = ".sl*/obj/StarDb/AgiGeometry/" . $hall;
 	      @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
 	      foreach $dir (@dirs) {
 		if ($dir =~ /x86/ || $dir =~ /darwin/) {next;}
@@ -1030,7 +1032,21 @@ TDataSet *CreateTable() {
 		if ($dir) {
 		  my $file = "#" . $dir;
 		  #		print "$rz $file\n";
-		  Command $env1 [$HALL], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		  Command $env1 [$hall], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
+		  last;
+		}
+	      }
+	      # geometry
+	      $glob = ".sl*/obj/StarDb/AgiGeometry/" . $geometry;
+	      @dirs = glob $glob;# print "glob = $glob $dirs = @dirs\n"; 
+	      foreach $dir (@dirs) {
+		if ($dir =~ /x86/ || $dir =~ /darwin/) {next;}
+		#	      print "found $dir\n";
+		if ($dir) {
+		  my $file = "#" . $dir;
+		  #		print "$rz $file\n";
+		  Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
+		  Command $env1 [$geometry], ($file), qq(cd %>:d; ln -s %<:a %>:f;);
 		  last;
 		}
 	      }
@@ -1038,22 +1054,20 @@ TDataSet *CreateTable() {
 	      my $root4star = $BIN . "/" . "root4star";
 	      #	    my $xgeomlist = "y2013.*|devT|dev14|eStar";# "\^devT\$";#"dev13|devE|devT|y2013.*|y2012.*|y2011b|y2012a|y2013_1|y2013_2|y2003x";
 	      #	    print "key = $key, geom = $geom, xgeomList{$geom} = $xgeomList{$geom}\n";
-	      my $geometry = "Geometry." . $geom . ".C";
-	      my $hall = "HALL." . $geom . ".root";
 	      Depends $env1 [$geometry], ($LIB . "/St_geant_Maker." .  $env1->{SUFSOLIB});
 	      if (! $xgeomList{$geom}) {
-		Depends $env1 [$rz,$HALL], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
+		Depends $env1 [$rz,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB});
 		Depends $env1 [$geometry], qw(CreateGeometry.h Material.h Media.h Rotations.h);
-		Command $env1 [$rz,$geometry,$HALL], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $HALL %>:d); #   mv geom.rz %>:f;
+		Command $env1 [$rz,$geometry,$hall], ($LIB . "/libgeometryNoField." .  $env1->{SUFSOLIB}),
+		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv %>:f $geometry %>:d); #   mv geom.rz %>:f;
 		#		qq (root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null; mv %>:f %>; ); #  mv geom.rz %>:f;
 		#		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom")' >& /dev/null;); #  mv geom.rz %>:f;
 	      } else{
 		Depends $env1 [$rz], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB});
-		Command $env1 [$rz,$geometry,$HALL], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
+		Command $env1 [$rz,$geometry,$hall], ($LIB . "/xgeometry." .  $env1->{SUFSOLIB}),
 		  #		qq (cd %>:d; root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null;); #   mv geom.rz %>:f;
-		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $HALL %>:d); #   mv geom.rz %>:f;
+		  qq (root4star -q -b 'Ast2Rz.C("$geom","UseXgeom")' >& /dev/null; mv $rz $geometry $hall %>:d); #   mv geom.rz %>:f;
 	      }
 	    }
 	    my $g2root = "g2Root";

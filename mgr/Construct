@@ -272,7 +272,7 @@ my  @items = qw(); #StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFg
 if (! -r "$ROOSYS/include/TPythia6.h") {
   push @items, "StEStructPool"; # pyhtia
 }
-if ($STAR_HOST_SYS =~ /darwin/ or (env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} >= 8))) {
+if ($STAR_HOST_SYS =~ /darwin/ or ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} >= 8))) {
   push @items, "St_geom_Maker";
 }
 #if (! -r "StarVMC/minicern/lnxgs/rdmin.F") {
