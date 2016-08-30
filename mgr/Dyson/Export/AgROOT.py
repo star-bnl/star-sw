@@ -640,6 +640,13 @@ class StarGeometry(Handler):
         protected:
         ClassDef(StarGeometry,1);
         };
+
+        // backwards compatability hack with StarDb/AgMLGeometry
+        class Geometry : public StarGeometry {
+        public:
+        static TDataSet *ConstructGeometry( const char* name ){ return Construct(name); }
+        ClassDef(Geometry,1);
+        };
 #endif        
         """%self.tag
         document.head(header)
@@ -977,7 +984,7 @@ class Init( Handler ):
         output += "\t{\n"        
         output += "\t   %s temp = %s;"%(tinfo,self.value)
         output += "\t   memcpy( &%s_detp->member_value, &temp, sizeof(temp) );\n"%self.struct
-        output += '\t   LOG_INFO << "  Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
+        output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
 #       output += "\t   %s_detp->member_value = %s;"%(self.struct,self.value)
 #       output += "\t   %s_detp->Add( temp );\n"%self.struct
 
