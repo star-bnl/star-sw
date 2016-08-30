@@ -191,7 +191,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     gasGain = tsspar->gain_in(sector,row) *tsspar->wire_coupling_in();
   }
   if (gasGain <= 0.0) return 4;
-  Double_t gainAVcorr = gasGain/gainNominal;
+  //  Double_t gainAVcorr = gasGain/gainNominal;
   mAdc2GeV = tsspar->ave_ion_pot() * tsspar->scale()/gainNominal;
   Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain;
   tpcGas_st *gas = m_tpcGas->GetTable();
@@ -205,163 +205,117 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   tpcCorrection_st *cor = 0;
   tpcCorrection_st *corl = 0;
   TpcSecRowCor_st *gain = 0;
-  Double_t VarX = 0;
   Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
+  Double_t VarXs[kTpcLast] = {-999.};
+  VarXs[kTpcZDC]               = (CdEdx.Zdc > 0) ? TMath::Log10(CdEdx.Zdc) : 0;
+  VarXs[kTpcCurrentCorrection] = CdEdx.Crow;                                   
+  VarXs[kTpcrCharge]           = CdEdx.rCharge;                               
+  VarXs[kTpcRowQ]              = CdEdx.Qcm;
+  VarXs[kTpcPadTBins]          = CdEdx.Npads*CdEdx.Ntbins;     
+  VarXs[ktpcPressure]          = TMath::Log(gas->barometricPressure);     
+  VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
+  VarXs[kMultiplicity]         = CdEdx.QRatio;     
+  VarXs[kzCorrection]          = ZdriftDistance;
+  VarXs[ktpcMethaneIn]         = gas->percentMethaneIn*1000./gas->barometricPressure;     
+  VarXs[ktpcGasTemperature]    = gas->outputGasTemperature;     
+  VarXs[ktpcWaterOut]          = gas->ppmWaterOut;     
+  VarXs[kEdge]                 = CdEdx.PhiR;
+  VarXs[kPhiDirection]         = (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) ? TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]) : 999.;
+  VarXs[kTanL]      = CdEdx.TanL;     
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
     if (k != kAdcCorrection && CdEdx.lSimulated) goto ENDL;
+#if 0 /* have been included in kAdcCorrection */
     if (k == kTpcNoAnodeVGainC) {
-      CdEdx.C[k].dE      = dE*gainAVcorr;
-      CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.dx;
-      CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
-      continue;
-    }
-    if (! TESTBIT(m_Mask, k)) goto ENDL;
-    cor = 0;
-    if ( m_Corrections[k].Chair) {
-      cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
-      if (! cor) goto ENDL;
-      nrows = cor->nrows;
-      l = kTpcOuter;
-      if (nrows == 2) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
-      else {
-	if (nrows == mNumberOfRows) l = row - 1;
-	else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
-      }
-      corl = cor + l;
-    } else {
+      dE                /= gainAVcorr;
       goto ENDL;
+    } 
+#endif
+    if (! TESTBIT(m_Mask, k)) goto ENDL;
+    if (! m_Corrections[k].Chair) goto ENDL;
+    cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
+    if (! cor) goto ENDL;
+    nrows = cor->nrows;
+    l = kTpcOuter;
+    if (nrows == 2) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
+    else {
+      if (nrows == mNumberOfRows) l = row - 1;
+      else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
     }
+    corl = cor + l;
     iCut = 0;
-    switch (k) {
-    case kAdcCorrection:
+    if (k ==  kAdcCorrection) {
       if (CdEdx.lSimulated) {
 	dE *= 2.116;//  1.75; // 1.25 is in Trs already <<<< !!!!!!
       } else {
-#if 0
-	ADC = dE/mAdc2GeV;
-	if (TMath::Abs(ADC - adcCF) > 1) {
-	  // check
-	}
-#else
 	ADC = adcCF;
-#endif
         if (ADC <=0) return 3; //HACK to avoid FPE (VP)
 	dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) return 3;
       }
       goto ENDL;
-    case kTpcdCharge:
-      slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,row+0.5);
-      dE *=  TMath::Exp(-slope*CdEdx.dCharge);
-      dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
-      goto ENDL;
-    case kTpcZDC: VarX = (CdEdx.Zdc > 0) ? TMath::Log10(CdEdx.Zdc) : 0; break;
-    case kTpcCurrentCorrection:
-      VarX = CdEdx.Crow;
-      break;
-    case kTpcrCharge:
-      VarX =  CdEdx.rCharge;
-      break;
-    case kTpcRowQ:
-      VarX = CdEdx.Qcm; break;
-    case kTpcSecRowB:
-    case kTpcSecRowC:
-      if (k == kTpcSecRowB)  gain = m_TpcSecRowB->GetTable() + sector - 1;
-      else                   gain = m_TpcSecRowC->GetTable() + sector - 1;
-      gc =  gain->GainScale[row-1];
-      if (gc <= 0.0) return 1;
-      dE *= gc;
-      CdEdx.Weight = 1;
-      if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
-      goto ENDL;
-    case kTpcPadTBins:
-      VarX = CdEdx.Npads*CdEdx.Ntbins;
-      break;
-    case    ktpcPressure:
-      VarX = TMath::Log(gas->barometricPressure);
-      break;
-    case    kDrift:  // Blair correction 
-      VarX =  ZdriftDistanceO2;
-      break;
-    case    kMultiplicity:
-      VarX = CdEdx.QRatio;
-      break;
-    case    kzCorrection:
-      VarX = ZdriftDistance;
-      iCut = 1; // Always cut
-      break;
-    case    kdXCorrection:
-      xL2 = TMath::Log2(dx);
-      dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
-      if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
-      if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
-      CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.dx;
-      goto ENDL;
-    case    kTpcdEdxCor:
-      break;
-    case    ktpcMethaneIn:
-      VarX = gas->percentMethaneIn*1000./gas->barometricPressure;
-      break;
-    case    ktpcGasTemperature:
-      VarX = gas->outputGasTemperature;
-      break;
-    case    ktpcWaterOut:
-      VarX = gas->ppmWaterOut;
-      break;
-    case   kSpaceCharge: 
-      if (cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
-	  cor[2*kTpcOutIn+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*kTpcOutIn+1].max) 
-	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn  ,CdEdx.QRatio)
-			 -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn+1,CdEdx.DeltaZ));
-      goto ENDL;
-    case kEdge:
-      VarX = CdEdx.PhiR;
-      if (corl->type == 200) VarX = TMath::Abs(CdEdx.edge);
-      break;
-    case kPhiDirection:
-      VarX = 999.;
-      if (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) VarX = TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]);
-      break;
-    case kTanL:
-      VarX = CdEdx.TanL;
-      break;
-    default:
-      goto ENDL;
-    }
-    if (corl->type == 200) {
-      VarX = TMath::Abs(CdEdx.edge);
-      if (corl->min > 0 && corl->min > VarX    ) return 2;
-      if (corl->max > 0 && VarX     > corl->max) return 2;
+    } else {
+      if (k == kTpcdCharge) {
+	slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,row+0.5);
+	dE *=  TMath::Exp(-slope*CdEdx.dCharge);
+	dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
+	goto ENDL;
+      } else if (k == kTpcSecRowB || k == kTpcSecRowC) {
+	  if (k == kTpcSecRowB)  gain = m_TpcSecRowB->GetTable() + sector - 1;
+	  else                   gain = m_TpcSecRowC->GetTable() + sector - 1;
+	  gc =  gain->GainScale[row-1];
+	  if (gc <= 0.0) return 1;
+	  dE *= gc;
+	  CdEdx.Weight = 1;
+	  if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
+	  goto ENDL;
+      } else if (k == kzCorrection) {iCut = 1; // Always cut
+      } else if (k == kdXCorrection) {
+	xL2 = TMath::Log2(dx);
+	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,xL2); 
+	if (nrows > 2) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
+	if (nrows > 6) dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
+	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.dx;
+	goto ENDL;
+      } else if (k == kSpaceCharge) {
+	if (cor[2*kTpcOutIn  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*kTpcOutIn  ].max &&
+	    cor[2*kTpcOutIn+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*kTpcOutIn+1].max) 
+	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn  ,CdEdx.QRatio)
+			   -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*kTpcOutIn+1,CdEdx.DeltaZ));
+	goto ENDL;
+      } else if (k == kEdge) {
+	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
+	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
+	if (corl->max > 0 && VarXs[kEdge]     > corl->max) return 2;
+      } 
     }
     if (corl->type == 300) {
-      if (corl->min > 0 && corl->min > VarX    ) VarX = corl->min;
-      if (corl->max > 0 && VarX     > corl->max) VarX = corl->max;
+      if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
+      if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
     }
     if (TMath::Abs(corl->npar) >= 100 || iCut) {
       Int_t iok = 2;
       if (corl->min >= corl->max) {
 	iok = 0;
       } else {
-	if (corl->min <= VarX && VarX <= corl->max) {
+	if (corl->min <= VarXs[k] && VarXs[k] <= corl->max) {
 	  iok = 0;
 	}
       }
       if (iok) return iok;
     }
-    if (corl->npar%100) dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarX));
+    if (corl->npar%100) dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 #if 0
     if (corl->npar%100 
-	&& ! (corl->type == 300 && corl->min >= corl->max && VarX < corl->min)
-	)  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarX));
+	&& ! (corl->type == 300 && corl->min >= corl->max && VarXs[k] < corl->min)
+	)  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 #endif
   ENDL:
     CdEdx.C[k].dE = dE;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
   }    
-  
   memcpy (&CdEdx.dE, &CdEdx.C[kTpcLast].dE, sizeof(dE_t));
   return 0;
 }

@@ -53,6 +53,8 @@ using namespace units;
 #endif
 #include "StTpcDedxPidAlgorithm.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
@@ -177,7 +179,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       memset(&mNormal[sector-1][0], 0, NumberOfRows*sizeof(StThreeVectorD*));
     }
     for (Int_t row = 1; row <= NumberOfRows; row++) {
-      //      if (! St_TpcAvgPowerSupplyC::instance()->livePadrow(sector,row)) continue;
+      //      if (! tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
       if (Debug()>1) cout << "========= sector/row ========" << sector << "/" << row << endl;
       StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
@@ -381,12 +383,14 @@ Int_t StdEdxY2Maker::Make(){
       }
     }
   }
+#if 0
   // Check that we have valid time for Power Suppliers
   if (St_TpcAvgPowerSupplyC::instance()->run() > 0 && ((UInt_t )St_TpcAvgPowerSupplyC::instance()->stop_time()) < GetDateTime().Convert()) {
     LOG_ERROR <<  "StdEdxY2Maker:: Illegal TpcAvgPowerSupply time = " <<  St_TpcAvgPowerSupplyC::instance()->stop_time() 
 	      << " < event time = " << GetDateTime().Convert() << "\t" << GetDateTime().AsString() << endm;
     return kStErr;
   }
+#endif
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
   const StBTofCollection* tof = pEvent->btofCollection();
@@ -483,7 +487,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (Debug() > 1) {tpcHit->Print();}
 	Int_t sector = tpcHit->sector();
 	Int_t row    = tpcHit->padrow();
-	if (NumberOfRows == 45 && ! St_TpcAvgPowerSupplyC::instance()->livePadrow(sector,row)) continue; // iTpx
+	if (NumberOfRows == 45 && ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue; // iTpx
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 #ifdef __OLD_dX_Calculation__	
@@ -500,7 +504,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	if (NumberOfRows == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
-	  Double_t V = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,row);
+	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
 	  if ((row <= NumberOfInnerRows && 1170 - V > 100) || 
 	      (row >  NumberOfInnerRows && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
@@ -702,9 +706,9 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
 	CdEdx[NdEdx].channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(row);
-	CdEdx[NdEdx].Voltage = St_TpcAvgPowerSupplyC::instance()->voltagePadrow(sector,row);
-	CdEdx[NdEdx].Crow    = St_TpcAvgPowerSupplyC::instance()->AvCurrRow(sector,row);
-	Double_t    Qcm      = St_TpcAvgPowerSupplyC::instance()->AcChargeRowL(sector,row); // C/cm
+	CdEdx[NdEdx].Voltage = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
+	CdEdx[NdEdx].Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
+	Double_t    Qcm      = St_TpcAvgCurrentC::instance()->AcChargeRowL(sector,row); // C/cm
 	CdEdx[NdEdx].Qcm     = 1e6*Qcm; // uC/cm
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();

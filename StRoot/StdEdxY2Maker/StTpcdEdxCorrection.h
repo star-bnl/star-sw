@@ -112,8 +112,8 @@ class StTpcdEdxCorrection : public TObject {
     kdXCorrection     ,     //X  20					     
     kTpcPadTBins      ,     //d  21					     
     kTpcZDC           ,     //   22					     
-    kTpcNoAnodeVGainC ,     //   23					     
-    kTpcLast          ,     // 	 24                                          
+    kTpcLast          ,     // 	 23                                          
+    kTpcNoAnodeVGainC ,     //   24					     
     kTpcLengthCorrection,   // 	 25                                          
     kTpcLengthCorrectionMDF,// 	 26					   
     kTpcdEdxCor       ,     // 	 27					   
