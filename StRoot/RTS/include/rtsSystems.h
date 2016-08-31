@@ -359,7 +359,8 @@ so we keep it here for source compatibility
 #define  TRG_QT4_INSTANCE  20 
 #define TRG_BBQ_INSTANCE 21
 #define TRG_MXQ_INSTANCE 22
-#define TRG_FEQ_INSTANCE 23
+// #define TRG_FEQ_INSTANCE 23   // JML via JN.  8/29/16
+#define TRG_EPQ_INSTANCE 23
 
 #define TRG_TCD_NEW_INSTANCE	24
 
@@ -535,7 +536,11 @@ so we keep it here for source compatibility
 #define  TRG_QT4_NODE   ((TRG_SYSTEM<<12) | TRG_QT4_INSTANCE)
 #define TRG_BBQ_NODE    ((TRG_SYSTEM<<12) | TRG_BBQ_INSTANCE)
 #define TRG_MXQ_NODE    ((TRG_SYSTEM<<12) | TRG_MXQ_INSTANCE)
-#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_FEQ_INSTANCE)
+//#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_FEQ_INSTANCE)
+#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)
+#define TRG_FQ1_NODE    ((TRG_SYSTEM<<12) | TRG_FQ1_INSTANCE)
+#define TRG_FQ2_NODE    ((TRG_SYSTEM<<12) | TRG_FQ2_INSTANCE)
+
 
 #define TRG_SCALER48_NODE  ((TRG_SYSTEM<<12) | TRG_SCALER48_INSTANCE)
 
