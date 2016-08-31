@@ -1485,8 +1485,8 @@ my $NEvents = 100000;
 #$hist = "RunXVIAuAu200p1"; $NEvents = 10000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/20/16 First check
 #$hist = "RunXVIAuAu200p2"; $NEvents = 10000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/22/16 Fix problem with wrong ranking
 #$hist = "RunXVIAuAu200p3"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/22/16 more problem with negative ranking for AuAu
-#$hist = "RunXVIAuAu200p4"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/11/16 overwrite TpcLengthCorrectionB.r2016.C
-my @badruns = qw(
+#$hist = "RunXVIAuAu200p4"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/11/16 overwrite TpcLengthCorrectionB.r2016.C 
+my @badruns = qw( 
 		  17123029 17123029 17123029 17123029 17121005 17119092
 		  17108041 17108024 17107054 17107057 17107052 17105022
 		  17102043 17102016 17100047 17100012 17100011 17100016
@@ -1498,8 +1498,11 @@ my @badruns = qw(
 		  17039042 17040050 17040051 17054017 17056007 17057006
 		  17068062 17072041 17104030 17104031 17108048 17110001
 		  17111059 17112041 17115029 17117062
-	       ); 
-#$hist = "RunXVIAuAu200p5"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/12/16 clean bad runs, reset all constants 
+		);
+#my  bad Runs from PowerSypply:		  17057012 17060037 17075027 17107055 17109059 
+
+
+#$hist = "RunXVIAuAu200p5"; $NEvents = 3000; $disk = "data9*/"; $RECO = "reco/AuAu_200_production_2016/ReversedFullField"; $Production = "/P16ie_TOF_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics*"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/12/16 clean bad runs, reset all constants  
 #$hist = "RunXVIAuAu200p5"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/12/16 clean bad runs, reset all constants 
 #$hist = "RunXVIAuAu200p6"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/15/16 new TpcSecRowB
 #$hist = "RunXVIAuAu200p7"; $NEvents = 3000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField"; $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/16/16 new tpcPressureB
@@ -1531,7 +1534,14 @@ my @badruns = qw(
 #$hist = "RunXVIAuAu200p33"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/23/16  ignore out of time TpcAvgPowerSupply
 #$hist = "RunXVIAuAu200p34"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/24/16 TpcCurrentCorrection.20160207.000033.C 
 #$hist = "RunXVIAuAu200p35"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/25/16 TpcSecRowB.20160207.000034
-$hist = "RunXVIAuAu200p36"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/16 TpcSecRowB.20160207.000035 no TpcZCorrectionB
+#$hist = "RunXVIAuAu200p36"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/16 TpcSecRowB.20160207.000035 no TpcZCorrectionB
+#$hist = "RunXVIAuAu200p37"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/16 TpcSecRowB.20160207.000036 + TpcdXCorrection
+#$hist = "RunXVIAuAu200p38"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/16 
+#$hist = "RunXVIAuAu200p39"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/28/16 TpcSecRowB.20160207.000038, reshape StTpcdEdxCorrection.cxx
+#$hist = "RunXVIAuAu200p39"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/28/16 TpcSecRowB.20160207.000038, reshape StTpcdEdxCorrection.cxx
+#$hist = "RunXVIAuAu200p40"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/30/16 TpcSecRowB.20160207.000038, reshape StTpcdEdxCorrection.cxx
+$hist = "RunXVIAuAu200p41"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/31/16 TpcSecRowB.20160207.000038, reshape StTpcdEdxCorrection.cxx
+deactivate TpcAvgPowerSupplay  for 17057012 17060037 17075027 17107055 17109059 
 my $prod = $hist; #$Production;
 
 $prod =~ s/\*//g;
@@ -1760,5 +1770,5 @@ print XML '
 close (XML);
 #close (CONDOR);
 my $GB = $Total_Size/1024/1024/1024;
-print "Total size = $GB GB\n";
+print "Total size = $GB GB\n"; 
 }
