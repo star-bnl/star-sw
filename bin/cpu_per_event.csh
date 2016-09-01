@@ -1,1 +1,0 @@
-/afs/rhic.bnl.gov/star/packages/.DEV2/mgr/cpu_per_event.csh
