@@ -549,12 +549,13 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
   }
   delete [] pbins;
   delete [] pbinsL;
+  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   // constants
-  Int_t Ndebug = 0; // debug printout depth
 #ifdef __DEBUG__
+  Int_t Ndebug = 0; // debug printout depth
   static Int_t iBreak = 0;
   static Int_t selectedSector = -1;
   static Int_t selectedRow = -1;
