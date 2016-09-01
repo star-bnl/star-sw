@@ -951,10 +951,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	print "words 1: $words[1], 3: $words[3], 4: $words[4], 5: $words[5]\n";
 	$tagList{$words[1]} = $geom;
 	if ($words[5] =~ /xgeometry/) {
-	  $xgeomList{$words[1]} = $geom;
+	  $xgeomList{$words[1]} = $geom; #print " xgeomList{$words[1]} =  $xgeomList{$words[1]}\n";
 	}
 	if ($words[5] =~ /AgML/) {
-	  $AgMLList{$words[1]} = $geom;
+	  $AgMLList{$words[1]} = $geom; #print " AgMLList{$words[1]} =  $AgMLList{$words[1]}\n";
 	}
 #	push @tagList, $words[1];
       }
@@ -962,21 +962,25 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       @versionList = script::sortu(@versionList);
       if ($param::debug) {
 	print "versionList = @versionList\n";
-	foreach my $key ( sort keys %tagList ) {
-	  print "tag = $key => \tgeometry = |$tagList{$key}| \txgeometry = |$xgeomList{$key}| \tAgML = |$AgMLList{key}|\n";
-	}
+#	foreach my $key ( sort keys %tagList ) {
+#	  print "tag = $key => \tgeometry = |$tagList{$key}| \txgeometry = |$xgeomList{$key}| \tAgML = |$AgMLList{$key}|\n";
+#	}
       }
-      if ($pkg eq 'AgMLGeometry') {
+      if ($pkg eq 'AgMLGeometry') {#print "pkg = $pkg\n ";
+#	my %AgMLListDone = ();
 	foreach my $tag ( sort keys %tagList ) {
-#	  my $geom = $AgMLList{$tag};
-	  my $geom = $tagLList{$tag};
+#	  print "tag = $tag => \tgeometry = |$tagList{$tag}| \txgeometry = |$xgeomList{$tag}| \tAgML = |$AgMLList{$tag}|\n";
+	  my $geom = $AgMLList{$tag};
+#	  my $geom = $tagList{$tag}; 
 	  next if ! $geom;
-	  print "Build $geometry for $tag\n" if $param::debug;
-	  my $geometry = "Geometry." . $tag . ".root";
-	  Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
-				      $LIB . "/" . "Geometry" . "." . $env1->{SUFSOLIB}),
-					qq(root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null; mv %>:f %>:d);
-	ENDL:
+#	  if (! $AgMLListDone{geom}) {
+	    print "Build $geometry for $tag\n" if $param::debug;
+	    my $geometry = "Geometry." . $tag . ".root";# print "geometry = $geometry\n";
+	    Command $env1 [$geometry], ($LIB . "/" . "StarAgmlLib" . "." . $env1->{SUFSOLIB},
+					$LIB . "/" . "Geometry" . "." . $env1->{SUFSOLIB}),
+					  qq(root.exe -q -b 'AgML.C("$tag","$geom")' >& /dev/null; mv %>:f %>:d);
+#	    $AgMLListDone{geom} = $geom;
+#	  }
 	}
       }	else { # AgiGeometry
 	if ( -d "./StarDb/starsim") {
