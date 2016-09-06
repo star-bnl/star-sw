@@ -3,7 +3,7 @@
 <job name="Nightlies" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
 <command>
 #  source ~/.tcshrc
-  setenv STARFPE NO
+#  setenv STARFPE NO
   cd ${SUBMITTINGDIRECTORY}  
   echo $INPUTFILE0
   echo $INPUTFILE0 | grep ':'
@@ -27,9 +27,9 @@
   if (! $?)  set exec = "root.exe"
   ${exec} -q -b -x 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/Nightlies_sched$JOBID.log" />
+<stdout URL="file:/net/l404/data/fisyak/prodlog/Nightlies_sched$JOBID.log" />
 <input URL="command:Nightlies.pl" />
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->
-<!-- <input URL="file:/star/subsys/tpc/fisyak/Nightlies/Test.MC.year_2009*.csh" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->
+<!-- <input URL="file:/net/l404/data/fisyak/Nightlies/Test.MC.year_2009*.csh" /> -->
 </job>
