@@ -5,7 +5,7 @@
     use Cwd;
     use Env;
     use File::Find();
-
+    use Sys::Hostname;
     #________________________________________
     *name     = *File::Find::name;
     *prune    = *File::Find::prune;
@@ -24,9 +24,10 @@
     }
     if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
     if ( !$XOPTSTAR or $XOPTSTAR eq '/dev/null') { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
-    $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD\n" unless ($param::quiet);
+ my $host = hostname;
+    $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host\n" unless ($param::quiet);
     $INCLUDE = $BUILD  . "/include";
-
+ 
     @search_files = ();
     $CC           = `root-config  --cc`; chomp($CC); # print "CC = $CC\n";
     if (! $CC) {die "ROOT has not been set !";}
