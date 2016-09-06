@@ -71,7 +71,7 @@ class StFgtPedReader {
    // pedistal.
    void setTimeBinMask( Short_t mask = 0xFF );
 
- protected:
+// protected:
    // mask for which time bins to read
    Short_t mTimeBinMask;
 
