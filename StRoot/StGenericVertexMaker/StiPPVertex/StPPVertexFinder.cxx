@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.57 2016/08/18 17:46:14 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.58 2016/09/06 20:03:02 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -878,6 +878,14 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 
    // Recalculate vertex seed coordinates to be used as initial point in the fit
    StThreeVectorD vertexSeed = StGenericVertexFinder::CalcVertexSeed(sDCAs());
+
+   // For fits with beamline force the seed to be on the beamline
+   if ( mVertexFitMode == VertexFit_t::Beamline1D ||
+        mVertexFitMode == VertexFit_t::Beamline3D )
+   {
+      vertexSeed.setX( beamX(vertexSeed.z()) );
+      vertexSeed.setY( beamY(vertexSeed.z()) );
+   }
 
    static TMinuit minuit(3);
 
