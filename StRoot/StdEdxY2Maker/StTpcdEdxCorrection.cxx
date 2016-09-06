@@ -251,7 +251,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else {
 	ADC = adcCF;
         if (ADC <=0) return 3; //HACK to avoid FPE (VP)
-	dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
+	if (corl->type == 12) 
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,VarXs[kTanL]);
+	else 
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) return 3;
       }
       goto ENDL;
