@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.58 2016/09/06 20:03:02 smirnovd Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.59 2016/09/06 20:03:08 smirnovd Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -897,7 +897,7 @@ void StPPVertexFinder::fitTracksToVertex(VertexData &vertex) const
 
    minuit.mnexcm("clear", 0, 0, minuitStatus);
 
-   static double step[3] = {0.03, 0.03, 0.03};
+   static double step[3] = {0.01, 0.01, 0.01};
 
    minuit.mnparm(0, "x", vertexSeed.x(), step[0], vertexSeed.x()-10, vertexSeed.x()+10, minuitStatus);
    minuit.mnparm(1, "y", vertexSeed.y(), step[1], vertexSeed.y()-10, vertexSeed.y()+10, minuitStatus);
