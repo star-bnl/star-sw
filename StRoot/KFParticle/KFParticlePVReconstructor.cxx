@@ -15,6 +15,7 @@
 
 #include <iostream>
 
+
 void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 {
     // copy tracks in particles.
@@ -125,7 +126,7 @@ void KFParticlePVReconstructor::Init(KFPTrackVector *tracks, int nParticles)
 
   for(int iP=0; iP<fNParticles; iP++)
   {
-    fParticles[iP].TransportToPoint(pvEstimation);
+//     fParticles[iP].TransportToPoint(pvEstimation);
 
     fWeight[iP] = fParticles[iP].CovarianceMatrix()[0]
       + fParticles[iP].CovarianceMatrix()[2] + fParticles[iP].CovarianceMatrix()[5];
@@ -151,7 +152,7 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
   vector<unsigned short int> notUsedTracks(fNParticles);
   vector<unsigned short int> *notUsedTracksPtr = &notUsedTracks;
   int nNotUsedTracks = fNParticles;
-
+  
   vector<unsigned short int> notUsedTracksNew(fNParticles);
   vector<unsigned short int> *notUsedTracksNewPtr = &notUsedTracksNew;
   int nNotUsedTracksNew = 0;
@@ -180,27 +181,26 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     KFParticleCluster cluster;
     cluster.fTracks.reserve(nNotUsedTracks);
 
-    const float *rBest = fParticles[bestTrack].Parameters();
-    const float *covBest = fParticles[bestTrack].CovarianceMatrix();
-
-    float rVertex[3] = {0.f};
-    float covVertex[6] = {0.f};
-    float weightVertex = 0.f;
-
+    KFVertex primVtx;
+    primVtx.SetConstructMethod(0);
+    
+    primVtx += fParticles[bestTrack];
+    cluster.fTracks.push_back(bestTrack);
+    
     for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
     {
       unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-
-      if( ( fParticles[curTrack].GetDeviationFromVertex(rBest, covBest) < fChi2CutPreparation && fWeight[curTrack] > -1.f) || curTrack == bestTrack)
+      if(curTrack == bestTrack) continue;
+      
+      KFVertex tmpVtx = primVtx;
+      tmpVtx += fParticles[curTrack];   
+      
+      if( ( fParticles[curTrack].GetDeviationFromVertex( fParticles[bestTrack] ) < fChi2Cut && (tmpVtx.Chi2()/tmpVtx.NDF() < 5) && fWeight[curTrack] > -1.f && fParticles[curTrack].GetP() > 0.5) )
       {
-        for(int iP=0; iP<3; iP++)
-          rVertex[iP] += fWeight[curTrack] * fParticles[curTrack].Parameters()[iP];
-        
-        float weight2 = fWeight[curTrack] * fWeight[curTrack];
-        for(int iC=0; iC<6; iC++)
-          covVertex[iC] += weight2 *fParticles[curTrack].CovarianceMatrix()[iC];
-
-        weightVertex += fWeight[curTrack];
+//         std::cout.precision(5);
+//         std::cout << " curTrack " << curTrack <<"  track " << fParticles[curTrack].DaughterIds()[0] << "  " << fParticles[curTrack].X() << "  " << fParticles[curTrack].Y() << " " << fParticles[curTrack].Z() << std::endl;
+//         std::cout << "        verex: r  " << primVtx.GetX() << " " << primVtx.GetY() << " " << primVtx.GetZ() << "      err " <<   primVtx.GetCovariance(0) << " " << primVtx.GetCovariance(2) << " " << primVtx.GetCovariance(5) << "   Chi2 " << primVtx.GetChi2()/primVtx.NDF() << std::endl;
+        primVtx = tmpVtx;
         cluster.fTracks.push_back(curTrack);
       }
       else
@@ -216,152 +216,136 @@ void KFParticlePVReconstructor::FindPrimaryClusters( int cutNDF )
     
     nNotUsedTracks = nNotUsedTracksNew;
     nNotUsedTracksNew = 0;
-
+        
     if(cluster.fTracks.size() < 2) continue;
     if((cluster.fTracks.size() < 3) && (fNParticles>3)) continue;
 
-    for(int iP=0; iP<3; iP++)
-      cluster.fP[iP] = rVertex[iP]/weightVertex;
-
-    for(int iC=0; iC<6; iC++)
-      cluster.fC[iC] = covVertex[iC]/(weightVertex*weightVertex);
-
-
-    int nPrimCand = cluster.fTracks.size(); // 1 is reserved for a beam line
-    int nTracks = cluster.fTracks.size();
-    
-    const KFParticle **pParticles = new const KFParticle*[nPrimCand+1]; // tmp array
-
-    for ( int iP = 0; iP < nPrimCand; iP++ )
-      pParticles[iP] = &fParticles[ cluster.fTracks[iP] ];
-
-    if( IsBeamLine() )
-    {
-      pParticles[nPrimCand] = &fBeamLine;
-      nPrimCand++;
-    }
-      
-      
-      // find prim vertex
-    KFVertex primVtx;
-
     if(fNParticles>1)
     {
-      // construct PV candidate from a cluster
-      bool *vFlags = new bool[nPrimCand];  // flags returned by the vertex finder
-      for(int iFl=0; iFl<nPrimCand; iFl++)
-        vFlags[iFl] = true;
-//       primVtx.SetVtxGuess(cluster.fP[0], cluster.fP[1], cluster.fP[2]);
-      primVtx.SetConstructMethod(0);
-      primVtx.ConstructPrimaryVertex( pParticles, nPrimCand, vFlags, fChi2Cut );
-
-      // clean cluster
-      vector<int> clearClusterInd;
-      clearClusterInd.reserve(cluster.fTracks.size());
-      for ( int iP = 0; iP < nTracks; iP++ ){
-        if(cluster.fTracks[iP] == bestTrack) {
-          clearClusterInd.push_back(cluster.fTracks[iP]);
-          continue;
-        }
-        if(vFlags[iP])
-          clearClusterInd.push_back(cluster.fTracks[iP]);
-        else
-        {
-          (*notUsedTracksPtr)[nNotUsedTracks] = cluster.fTracks[iP];
-          nNotUsedTracks++;
-        }
-      }
-      
-      for(unsigned short int iTr = 0; iTr < nNotUsedTracks; iTr++)
-      {
-        unsigned short int &curTrack = (*notUsedTracksPtr)[iTr];
-        if( fParticles[curTrack].GetDeviationFromVertex(primVtx)<fChi2Cut )
-        {
-          primVtx += fParticles[curTrack];
-          clearClusterInd.push_back(curTrack);
-        }
-        else
-        {
-          (*notUsedTracksNewPtr)[nNotUsedTracksNew] = curTrack;
-          nNotUsedTracksNew++;
-        }
-      }      
-      cluster.fTracks = clearClusterInd;
-      
-      notUsedTracksPtrSave = notUsedTracksPtr;
-      notUsedTracksPtr = notUsedTracksNewPtr;
-      notUsedTracksNewPtr = notUsedTracksPtrSave;
-    
-      nNotUsedTracks = nNotUsedTracksNew;
-      nNotUsedTracksNew = 0;
-    
-      // save PV
-#ifdef CBM
-      if( primVtx.GetNDF() >= cutNDF && ((cluster.fTracks.size()>0.1f*fNParticles && fNParticles > 30) || fNParticles<=30 ) ) //at least 2 particles
-#else
+// #ifdef CBM
+//       if( primVtx.GetNDF() >= cutNDF && ((cluster.fTracks.size()>0.1f*fNParticles && fNParticles > 30) || fNParticles<=30 ) ) //at least 2 particles
+// #else
       if( primVtx.GetNDF() >= cutNDF)
-#endif
+// #endif
       {
-//         std::cout << primVtx.X() << " " << primVtx.Y() << " " << primVtx.Z() << " " << cluster.fTracks.size() << std::endl;
+        KFParticleCluster clusterEmpty;
         fPrimVertices.push_back(primVtx);
-        fClusters.push_back(cluster);
+        fClusters.push_back(clusterEmpty);
+      }
+    }    
+  }
+}
+
+void FilterPV(KFVertex& v1, KFVertex& v2, KFVertex& v)
+{
+  float* r1 = v1.Parameters();
+  float* C1 = v1.CovarianceMatrix();
+
+  float* r2 = v2.Parameters();
+  float* C2 = v2.CovarianceMatrix();
+
+  float* r  = v.Parameters();
+  float* C  = v.CovarianceMatrix();
+  
+  float S[6] = { C1[0]+C2[0],
+                 C1[1]+C2[1], C1[2]+C2[2],
+                 C1[3]+C2[3], C1[4]+C2[4], C1[5]+C2[5] };
+                  
+  KFParticle::InvertCholetsky3(S);
+  
+  float K[3][3] = { {C2[0]*S[0]+C2[1]*S[1]+C2[3]*S[3], C2[0]*S[1]+C2[1]*S[2]+C2[3]*S[3], C2[0]*S[3]+C2[1]*S[4]+C2[3]*S[5]},
+                    {C2[1]*S[0]+C2[2]*S[1]+C2[4]*S[3], C2[1]*S[1]+C2[2]*S[2]+C2[4]*S[3], C2[1]*S[3]+C2[2]*S[4]+C2[4]*S[5]},
+                    {C2[3]*S[0]+C2[4]*S[1]+C2[5]*S[3], C2[3]*S[1]+C2[4]*S[2]+C2[5]*S[3], C2[3]*S[3]+C2[4]*S[4]+C2[5]*S[5]} };
+                    
+  float dr[3] = { r1[0] - r2[0], r1[1] - r2[1], r1[2] - r2[2] };
+  
+  for(int i=0; i<3; i++)
+    r[i] = r2[i] + (K[i][0]*dr[0] + K[i][1]*dr[1] + K[i][2]*dr[2]);
+
+  C[0] = C2[0] - (K[0][0]*C2[0]+K[0][1]*C2[1]+K[0][2]*C2[3]);
+  C[1] = C2[1] - (K[1][0]*C2[0]+K[1][1]*C2[1]+K[1][2]*C2[3]);
+  C[2] = C2[2] - (K[1][0]*C2[1]+K[1][1]*C2[2]+K[1][2]*C2[4]);
+  C[3] = C2[3] - (K[2][0]*C2[0]+K[2][1]*C2[1]+K[2][2]*C2[3]);
+  C[4] = C2[4] - (K[2][0]*C2[1]+K[2][1]*C2[2]+K[2][2]*C2[4]);
+  C[5] = C2[5] - (K[2][0]*C2[3]+K[2][1]*C2[4]+K[2][2]*C2[5]);
+  
+  v.Chi2() = (S[0]*dr[0] + S[1]*dr[1] + S[3]*dr[2])*dr[0]
+           + (S[1]*dr[0] + S[2]*dr[1] + S[4]*dr[2])*dr[1]
+           + (S[3]*dr[0] + S[4]*dr[1] + S[5]*dr[2])*dr[2];              
+}
+
+void KFParticlePVReconstructor::FindBestPV()
+{
+  int nIters = 3;
+  for(int iIter=0; iIter<nIters; iIter++)
+  {
+//     for(unsigned int iPV=0; iPV<fPrimVertices.size(); iPV++)
+//       for(unsigned int jPV=iPV+1; jPV<fPrimVertices.size(); jPV++)
+//       {
+//         KFVertex newVertex;
+//         FilterPV(fPrimVertices[iPV], fPrimVertices[jPV], newVertex);
+//         if(newVertex.Chi2() < 60)
+//         {
+//           fPrimVertices.erase(fPrimVertices.begin() + jPV);
+//           fClusters.erase(fClusters.begin() + jPV);
+//           
+//           fPrimVertices[iPV] = newVertex;
+//         }
+//       }
+      
+      
+    for(unsigned int iCluster=0; iCluster<fClusters.size(); iCluster++)
+      fClusters[iCluster].fTracks.clear();
+      
+    vector<KFVertex> tmpPrimVertex(fPrimVertices.size());
+    
+    for(int iParticle=0; iParticle<fNParticles; iParticle++)
+    {
+      if(fWeight[iParticle] < 0.f) continue;
+      if(fParticles[iParticle].GetP() < 0.5) continue;
+        
+      float minDeviation = fChi2Cut;
+      int minPV = -1;
+      for(unsigned int iPV=0; iPV<fPrimVertices.size(); iPV++)
+      {
+        float deviation = fParticles[iParticle].GetDeviationFromVertex(fPrimVertices[iPV]);
+        if(deviation < 0.f) continue;
+        
+        if(deviation < minDeviation)
+        {
+          minDeviation = deviation;
+          minPV = iPV;
+        }
       }
       
-      if(vFlags) delete [] vFlags;
+      if(minPV > -1)
+      {
+        tmpPrimVertex[minPV] += fParticles[iParticle];
+        fClusters[minPV].fTracks.push_back(iParticle);
+      }
     }
-    if(pParticles) delete [] pParticles;
+    
+    for(unsigned int iPV=0; iPV<fPrimVertices.size(); iPV++)
+    {
+      if( tmpPrimVertex[iPV].GetNDF() >= 1 && ((fClusters[iPV].fTracks.size()>0.1f*fNParticles && fNParticles > 30) || fNParticles<=30 ) )
+        fPrimVertices[iPV] = tmpPrimVertex[iPV];
+      else
+      {
+        fPrimVertices.erase(fPrimVertices.begin() + iPV);
+        fClusters.erase(fClusters.begin() + iPV);
+      }
+    }
   }
-//   if(fClusters.size()>1)
-//   {
-//     for(int i=1; i<fClusters.size(); i++)
-//     {
-//       float dx = fClusters[0].fP[0] - fClusters[i].fP[0];
-//       float dy = fClusters[0].fP[1] - fClusters[i].fP[1];
-//       float dz = fClusters[0].fP[2] - fClusters[i].fP[2];
-// 
-//       float dr[3] = {dx, dy, dz};
-//       float cov[6] = {fClusters[0].fC[0] + fClusters[i].fC[0],
-//                       fClusters[0].fC[1] + fClusters[i].fC[1],
-//                       fClusters[0].fC[2] + fClusters[i].fC[2],
-//                       fClusters[0].fC[3] + fClusters[i].fC[3],
-//                       fClusters[0].fC[4] + fClusters[i].fC[4],
-//                       fClusters[0].fC[5] + fClusters[i].fC[5] };
-//       float dr2 = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
-//       float drError2 = dr[0]* (cov[0]* dr[0] + cov[1]* dr[1] + cov[3]* dr[2]) +
-//                        dr[1]* (cov[1]* dr[0] + cov[2]* dr[1] + cov[4]* dr[2]) + 
-//                        dr[2]* (cov[3]* dr[0] + cov[4]* dr[1] + cov[5]* dr[2]);
-//       drError2 /= dr2;
-//     
-//       std::cout << "Ntr 1 " << fClusters[0].fTracks.size() << " ntr2  " << fClusters[i].fTracks.size() << std::endl;
-//       std::cout << "dr2 " << dr2 << " err " << drError2 << " chi " << sqrt(dr2/drError2) << std::endl;
-//     }
-//     int ui;
-//     std::cin >> ui;
-//   }
-//   static int nVert[10]={0.};
-//   if(fClusters.size()<10)
-//     nVert[fClusters.size()]++;
-//   std::cout << "N Vert     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nVert[i] << "     ";
-//   std::cout << std::endl;
-// 
-//   static int nPart[10]={0.};
-//   if(fNParticles<10)
-//     nPart[fNParticles]++;
-//   std::cout << "N Part     ";
-//   for(int i=0; i<10; i++)
-//     std::cout << i << ": " << nPart[i] << "     ";
-//   std::cout << std::endl;
 }
 
 void KFParticlePVReconstructor::ReconstructPrimVertex()
 {
 
   FindPrimaryClusters();
+  FindBestPV();
 
   if ( fPrimVertices.size() == 0 ) { // fill prim vertex by dummy values
-
+    
     float X=0,Y=0,Z=0;
 
     KFPVertex primVtx_tmp;

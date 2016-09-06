@@ -735,7 +735,7 @@ void KFTopoPerformance::MatchPV()
     for(int iD=0; iD<mcPV.NDaughterTracks(); iD++)
       if(MCtoRParticleId[ mcPV.DaughterTrack(iD) ].IsMatched())
         nReconstructedDaughters++;
-        
+    
     mcPV.SetNReconstructedDaughters(nReconstructedDaughters);
   }
 
@@ -1460,7 +1460,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 }
 
 void KFTopoPerformance::FillHistos()
-{
+{        
   vector<int> multiplicities[4];
   for(int iV=0; iV<4; iV++)
     multiplicities[iV].resize(KFPartEfficiencies::nParticles, 0);
@@ -1475,7 +1475,7 @@ void KFTopoPerformance::FillHistos()
     FillParticleParameters(TempPart,iParticle, iP, 0, hPartParam, hPartParam2D, 
                            hFitQA, hFitDaughtersQA, hDSToParticleQA, multiplicities);
   }
-
+  
   for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)
   {
     const std::vector<KFParticle>& SecondaryCandidates = fTopoReconstructor->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
@@ -1532,12 +1532,29 @@ void KFTopoPerformance::FillHistos()
       }
     }
   }
-  
+    
   //fill histograms with ChiPrim for every particle
   for(unsigned int iP=0; iP<fTopoReconstructor->GetParticles().size(); iP++)
   {
     KFParticle TempPart = fTopoReconstructor->GetParticles()[iP];
-    KFParticle & vtx = fTopoReconstructor->GetPrimVertex(0);
+    KFParticle vtx = fTopoReconstructor->GetPrimVertex(0);
+    
+    if(RtoMCParticleId[iP].IsMatched())
+    {
+      int iMCPV = vMCParticles[RtoMCParticleId[iP].GetBestMatch()].GetMotherId();
+      if(iMCPV<0.)
+      {
+        iMCPV = -iMCPV - 1;
+        if(MCtoRPVId[iMCPV].IsMatched())
+        { 
+          vtx = fTopoReconstructor->GetPrimVertex(MCtoRPVId[iMCPV].GetBestMatch());
+        }  
+      }
+    }
+//     else
+//       KFParticle & vtx = fTopoReconstructor->GetPrimVertex(0);
+    
+    
     float chi2 = TempPart.GetDeviationFromVertex(vtx);
     int ndf = 2;
     
@@ -1566,6 +1583,7 @@ void KFTopoPerformance::FillHistos()
     int iParticle = fParteff.GetParticleIndex(fTopoReconstructor->GetParticles()[iP].GetPDG());
     if(iParticle > -1 && iParticle<KFPartEfficiencies::nParticles)
       hTrackParameters[iParticle]->Fill(chi2 );
+    
   }
   
   
@@ -1736,9 +1754,9 @@ void KFTopoPerformance::FillHistos()
     int nDaughters = TempPart.NDaughters();
     if(nDaughters > 1) continue; //use only tracks, not short lived particles
     
-    if(!RtoMCParticleId[iP].IsMatchedWithPdg())  continue; //ghost
+    if(!RtoMCParticleId[iP].IsMatched())  continue; //ghost
     
-    int iMCPart = RtoMCParticleId[iP].GetBestMatchWithPdg();
+    int iMCPart = RtoMCParticleId[iP].GetBestMatch();
     KFMCParticle &mcPart = vMCParticles[iMCPart];
 
     int iMCTrack = mcPart.GetMCTrackID();
