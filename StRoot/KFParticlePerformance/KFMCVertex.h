@@ -33,6 +33,8 @@ class KFMCVertex
   float Y()           const { return fPar[1]; }
   float Z()           const { return fPar[2]; }
   
+  const float* GetPar()      const { return fPar; }
+  
   void SetPar( int i, float v )   { fPar[i] = v; }
   
   void SetX( float v )            { fPar[0] = v; }

@@ -174,7 +174,7 @@ class KFParticleFinder
   void SetMixedEventAnalysis() { fMixedEventAnalysis = 1; }
   
   //Get secondary particles with the mass constraint
-  static const int GetNSecondarySets() { return fNSecCandidatesSets; }
+  static int GetNSecondarySets()  { return fNSecCandidatesSets; }
   const std::vector<KFParticle>* GetSecondaryCandidates() const { return fSecCandidates;    }
   const std::vector<KFParticle>& GetSecondaryK0()         const { return fSecCandidates[0]; }
   const std::vector<KFParticle>& GetSecondaryLambda()     const { return fSecCandidates[1]; }
@@ -183,7 +183,7 @@ class KFParticleFinder
   const std::vector<KFParticle>& GetSecondaryPi0()        const { return fSecCandidates[4]; }
   
   //Get primary particles with the mass constraint
-  static const int GetNPrimarySets() { return fNPrimCandidatesTopoSets; }
+  static int GetNPrimarySets() { return fNPrimCandidatesTopoSets; }
   const std::vector< std::vector<KFParticle> >* GetPrimaryCandidates() const { return fPrimCandidates;    }
   const std::vector< std::vector<KFParticle> >& GetPrimaryK0()         const { return fPrimCandidates[0]; }
   const std::vector< std::vector<KFParticle> >& GetPrimaryLambda()     const { return fPrimCandidates[1]; }

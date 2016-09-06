@@ -75,6 +75,7 @@ class KFParticleTopoReconstructor{
   void ReconstructPrimVertex(bool isHeavySystem = 1); // find primary vertex
   void SortTracks(); //sort tracks according to the pdg hypothesis and pv index
   void ReconstructParticles(); //find short-lived particles 
+  void SelectParticleCandidates(); //clean particle candidates: track can belong to only one particle
 #ifdef WITHSCIF
   void SendDataToXeonPhi( int iHLT, scif_epd_t& endpoint, void* buffer, off_t& offsetServer, off_t& offsetSender, float Bz);
 #endif

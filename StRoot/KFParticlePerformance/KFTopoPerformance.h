@@ -87,8 +87,18 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   const KFPartEfficiencies GetEfficiency() const { return fParteff; }
   void SetPrintEffFrequency(int n) { fPrintEffFrequency = n;}
 
+  const vector<KFMCVertex> GetPrimVertices() { return fPrimVertices; }
   const vector<KFMCParticle>& MCParticles() { return vMCParticles; }
   const vector<KFPartMatch>& ParticlesMatch() { return RtoMCParticleId; }
+  const vector<KFPartMatch>& GetMCtoRPVId() { return MCtoRPVId; }
+  const vector<KFPartMatch>& GetRtoMCPVId() { return RtoMCPVId; }
+  const KFMCTrack& GetMCTrack(const int iRecoTrack)
+  { 
+    int iMCTrack = 0;
+    if(RtoMCParticleId[iRecoTrack].IsMatched())
+      iMCTrack = RtoMCParticleId[iRecoTrack].GetBestMatch();
+    return vMCTracks[iMCTrack]; 
+  }
   
  private:
 

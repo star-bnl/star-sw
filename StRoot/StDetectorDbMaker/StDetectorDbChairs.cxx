@@ -54,6 +54,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     switch  (cor->type) {
     case 10:// ADC correction offset + poly for ADC
     case 11:// ADC correction offset + poly for log(ADC) and |Z|  
+    case 12:// ADC correction offset + poly for log(ADC) and TanL    
       X = TMath::Log(x);      break;
     case 1: // Tchebyshev [-1,1] 
       if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
@@ -117,6 +118,10 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     break;
   case 11: // ADC correction offset + poly for log(ADC) and |Z|
     Sum = cor->a[1] + z*cor->a[2] + z*X*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
+    Sum *= TMath::Exp(-cor->a[0]);
+    break;
+  case 12: // ADC correction offset + poly for log(ADC) and TanL
+    Sum = cor->a[1] + z*cor->a[2] + z*z*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
     Sum *= TMath::Exp(-cor->a[0]);
     break;
   default: // polynomials

@@ -63,8 +63,8 @@ void KFVertex::SetBeamConstraintOff()
 }
 
 void KFVertex::ConstructPrimaryVertex( const KFParticle *vDaughters[], 
-					  int nDaughters, Bool_t vtxFlag[],
-					  float ChiCut  )
+                                       int nDaughters, Bool_t vtxFlag[],
+                                       float ChiCut  )
 {
   //* Primary vertex finder with simple rejection of outliers
 

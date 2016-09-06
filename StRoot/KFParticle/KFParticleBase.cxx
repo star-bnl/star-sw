@@ -538,21 +538,21 @@ bool KFParticleBase::GetMeasurement( const KFParticleBase& daughter, float m[], 
     V[4] += FVFT[2][1];
     V[5] += FVFT[2][2];
     
-    if(fNDF > 100)
-    {
-      float dx = fP[0] - m[0];
-      float dy = fP[1] - m[1];
-      float dz = fP[2] - m[2];
-      float sigmaS = 3.f*sqrt( (dx*dx + dy*dy + dz*dz) / (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]) );
-    
-      float h[3] = { m[3]*sigmaS, m[4]*sigmaS, m[5]*sigmaS };
-      V[0]+= h[0]*h[0];
-      V[1]+= h[1]*h[0];
-      V[2]+= h[1]*h[1];
-      V[3]+= h[2]*h[0];
-      V[4]+= h[2]*h[1];
-      V[5]+= h[2]*h[2];
-    }
+//     if(fNDF > 100)
+//     {
+//       float dx = fP[0] - m[0];
+//       float dy = fP[1] - m[1];
+//       float dz = fP[2] - m[2];
+//       float sigmaS = 3.f*sqrt( (dx*dx + dy*dy + dz*dz) / (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]) );
+//     
+//       float h[3] = { m[3]*sigmaS, m[4]*sigmaS, m[5]*sigmaS };
+//       V[0]+= h[0]*h[0];
+//       V[1]+= h[1]*h[0];
+//       V[2]+= h[1]*h[1];
+//       V[3]+= h[2]*h[0];
+//       V[4]+= h[2]*h[1];
+//       V[5]+= h[2]*h[2];
+//     }
   }
   
   return 1;
@@ -608,7 +608,7 @@ void KFParticleBase::AddDaughterWithEnergyFit( const KFParticleBase &Daughter )
     float dChi2 = (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
            +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
            +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]; 
-    if(fNDF > 100 && dChi2 > 9) return;
+//     if(fNDF > 100 && dChi2 > 9) return;
     
     float K[3][3];
     for(int i=0; i<3; i++)

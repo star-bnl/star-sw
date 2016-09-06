@@ -840,12 +840,18 @@ inline float_v * KFParticleSIMD::CovarianceMatrix()
 
 inline void KFParticleSIMD::operator +=( const KFParticleSIMD &Daughter )
 {
+#ifdef NonhomogeneousField
+  fField = Daughter.fField;
+#endif
   KFParticleBaseSIMD::operator +=( Daughter );
 }
   
 
 inline void KFParticleSIMD::AddDaughter( const KFParticleSIMD &Daughter )
 {
+#ifdef NonhomogeneousField
+  fField = Daughter.fField;
+#endif
   KFParticleBaseSIMD::AddDaughter( Daughter );
 }
 

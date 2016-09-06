@@ -17,6 +17,7 @@
 #endif
 
 #include "KFParticleSIMD.h"
+#include "KFParticleDatabase.h"
 
 #include <fstream>
 #include <iostream>
@@ -477,6 +478,25 @@ void KFParticleTopoReconstructor::SortTracks()
       
     for(int iTV=0; iTV<4; iTV++)
       fTracks[iTV+offset[iSet]].RecalculateLastIndex();
+    
+    //correct index of tracks in primary clusters with respect to the sorted array 
+    if(iSet == 0)
+    {
+      vector<int> newIndex(Size);
+      int iCurrentTrack=0;
+      for(int iTC=0; iTC<4; iTC++)
+      {
+        for(int iTrackIndex=0; iTrackIndex<fTracks[iTC].Size(); iTrackIndex++)
+        {
+          newIndex[trackIndex[iTC][iTrackIndex]] = iCurrentTrack;
+          iCurrentTrack++;
+        }
+      }
+      
+      for(int iPV=0; iPV<NPrimaryVertices(); iPV++)
+        for(unsigned int iTrack=0; iTrack<GetPVTrackIndexArray(iPV).size(); iTrack++)
+          fKFParticlePVReconstructor->GetPVTrackIndexArray(iPV)[iTrack] = newIndex[GetPVTrackIndexArray(iPV)[iTrack]];
+    }
   }
   
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
@@ -548,6 +568,258 @@ void KFParticleTopoReconstructor::GetChiToPrimVertex(KFParticleSIMD* pv, const i
       }
     } 
   }
+}
+
+struct ParticleInfo
+{
+  ParticleInfo():fParticleIndex(-1),fMassDistance(1.e9f) {};
+  ParticleInfo(int index, float massDistance):fParticleIndex(index),fMassDistance(massDistance) {};
+  
+  static bool compare(const ParticleInfo& a, const ParticleInfo& b) { return (a.fMassDistance < b.fMassDistance); }
+  
+  int   fParticleIndex;
+  float fMassDistance;
+};
+
+void KFParticleTopoReconstructor::SelectParticleCandidates()
+{
+  std::vector<ParticleInfo> particleInfo;
+  std::vector<bool> isUsed(fParticles.size());
+  std::vector<bool> deleteCandidate(fParticles.size());
+  
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    isUsed[iParticle] = false;
+    deleteCandidate[iParticle] = false;    
+  }
+
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    KFParticle tmp = fParticles[iParticle];
+    if(!(abs(fParticles[iParticle].GetPDG()) == 310 || abs(fParticles[iParticle].GetPDG()) == 3122)) continue;
+    tmp.SetProductionVertex(GetPrimVertex());
+    if(tmp.Chi2()/tmp.NDF()>3)
+      deleteCandidate[iParticle] = true;
+  }
+  
+  //clean K0 and Lambda
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(deleteCandidate[iParticle]) continue;
+    if(!(abs(fParticles[iParticle].GetPDG()) == 310 || abs(fParticles[iParticle].GetPDG()) == 3122)) continue;
+    
+    float mass, massSigma;
+    fParticles[iParticle].GetMass(mass, massSigma);
+    
+    float massPDG, massPDGSigma;
+    KFParticleDatabase::Instance()->GetMotherMass(fParticles[iParticle].GetPDG(), massPDG, massPDGSigma);
+    
+    float dm1 = fabs(mass - massPDG)/massPDGSigma;
+//     if(dm1 > 3.f)  continue;
+      
+    for(unsigned int jParticle=iParticle+1; jParticle<fParticles.size(); jParticle++)
+    {
+      if(deleteCandidate[jParticle]) continue;
+      if(!(abs(fParticles[jParticle].GetPDG()) == 310 || abs(fParticles[jParticle].GetPDG()) == 3122)) continue;
+      
+      fParticles[jParticle].GetMass(mass, massSigma);
+      KFParticleDatabase::Instance()->GetMotherMass(fParticles[jParticle].GetPDG(), massPDG, massPDGSigma);
+      
+      float dm2 = fabs(mass - massPDG)/massPDGSigma;
+//       if(dm2 > 3.f)  continue;
+      
+      if(! (fParticles[iParticle].DaughterIds()[0] == fParticles[jParticle].DaughterIds()[0] &&
+            fParticles[iParticle].DaughterIds()[1] == fParticles[jParticle].DaughterIds()[1]) ) continue;
+      
+      if(dm1 < 3.f || dm2 < 3.f)
+      {
+//         if(dm1 < 3.f && dm2<3.f)
+//         {
+//           KFParticle part1 = fParticles[iParticle];
+//           KFParticle part2 = fParticles[jParticle];
+//           
+//           if(fParticles[iParticle].GetPDG() == 310)
+//           {
+//             deleteCandidate[iParticle] = true;
+//             break;
+//           }
+//           else
+//           {
+//             deleteCandidate[jParticle] = true;
+//           }
+//         }
+          
+        if(dm1 < dm2)
+          deleteCandidate[jParticle] = true;
+        else
+        {
+          deleteCandidate[iParticle] = true;
+          break;
+        }
+      }
+    }
+  }
+  
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//   {
+//     if(!(abs(fParticles[iParticle].GetPDG()) == 22)) continue;
+//     
+//     bool bothDaughtersElectrons = 1;
+//     for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+//     {
+//       const int daughterIndex = fParticles[iParticle].DaughterIds()[iDaughter];
+//       bothDaughtersElectrons &= abs(fParticles[daughterIndex].GetPDG()) == 11;
+//     }
+//     if(!bothDaughtersElectrons)
+//     {
+//       deleteCandidate[iParticle] = true;
+//       continue;
+//     }
+//   }
+  //clean dielectron spectrum
+  //at first - both electrons are identified
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(deleteCandidate[iParticle]) continue;
+    if(!(abs(fParticles[iParticle].GetPDG()) == 22)) continue;
+    
+//     bool bothDaughtersElectrons = 1;
+//     for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+//     {
+//       const int daughterIndex = fParticles[iParticle].DaughterIds()[iDaughter];
+//       bothDaughtersElectrons &= abs(fParticles[daughterIndex].GetPDG()) == 11;
+//     }
+//     if(!bothDaughtersElectrons) continue;
+    
+    float mass, massSigma;
+    fParticles[iParticle].GetMass(mass, massSigma);  
+    float massPDG, massPDGSigma;
+    KFParticleDatabase::Instance()->GetMotherMass(fParticles[iParticle].GetPDG(), massPDG, massPDGSigma);
+    float dm = fabs(mass - massPDG)/massPDGSigma;
+    
+    if(dm < 3.f)
+      particleInfo.push_back(ParticleInfo(iParticle, dm));
+  }
+
+  std::sort(particleInfo.begin(), particleInfo.end(), ParticleInfo::compare);
+  
+  for(unsigned int iPI=0; iPI<particleInfo.size(); iPI++)
+  {
+    const int index = particleInfo[iPI].fParticleIndex;
+    if(deleteCandidate[index]) continue;
+    
+    bool isStore = true;
+    for(int iDaughter=0; iDaughter<fParticles[index].NDaughters(); iDaughter++)
+      isStore &= !(isUsed[ fParticles[index].DaughterIds()[iDaughter] ]);
+    
+    if(isStore)
+    {
+      for(int iDaughter=0; iDaughter<fParticles[index].NDaughters(); iDaughter++)
+        isUsed[ fParticles[index].DaughterIds()[iDaughter] ] = true;
+    }
+    else
+      deleteCandidate[index] = true;
+  }
+  
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(deleteCandidate[iParticle]) continue;
+    if(!(abs(fParticles[iParticle].GetPDG()) == 22)) continue;
+    
+    bool bothDaughtersElectrons = 1;
+    for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+    {
+      const int daughterIndex = fParticles[iParticle].DaughterIds()[iDaughter];
+      bothDaughtersElectrons &= abs(fParticles[daughterIndex].GetPDG()) == 11;
+    }
+    
+    float mass, massSigma;
+    fParticles[iParticle].GetMass(mass, massSigma);  
+    float massPDG, massPDGSigma;
+    KFParticleDatabase::Instance()->GetMotherMass(fParticles[iParticle].GetPDG(), massPDG, massPDGSigma);
+    float dm = fabs(mass - massPDG)/massPDGSigma;
+    
+//     if( (bothDaughtersElectrons && dm > 3.f) || !bothDaughtersElectrons)
+    if( dm > 3.f )
+    {
+      bool isStore = true;
+      for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+        isStore &= !(isUsed[ fParticles[iParticle].DaughterIds()[iDaughter] ]);
+      if(!isStore)
+      {
+        deleteCandidate[iParticle] = true;
+      }
+    }
+  }
+  
+  // clean LMVM spectrum
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+  {
+    if(!(abs(fParticles[iParticle].GetPDG()) == 100113 || abs(fParticles[iParticle].GetPDG()) == 443)) continue;
+    
+    bool bothDaughtersElectrons = 1;
+    for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+    {
+      const int daughterIndex = fParticles[iParticle].DaughterIds()[iDaughter];
+      bothDaughtersElectrons &= abs(fParticles[daughterIndex].GetPDG()) == 11;
+    }
+    if(!bothDaughtersElectrons)
+    {
+      deleteCandidate[iParticle] = true;
+      continue;
+    }
+    
+    bool isStore = true;
+    for(int iDaughter=0; iDaughter<fParticles[iParticle].NDaughters(); iDaughter++)
+      isStore &= !(isUsed[ fParticles[iParticle].DaughterIds()[iDaughter] ]);
+    if(!isStore)
+    {
+      deleteCandidate[iParticle] = true;
+    }
+  }
+//   for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+//   {
+//     if(deleteCandidate[iParticle]) continue;
+//     if(abs(fParticles[iParticle].GetPDG()) == 310 || abs(fParticles[iParticle].GetPDG()) == 3122)
+//     {
+// //       float mass, massSigma;
+// //       fParticles[iParticle].GetMass(mass, massSigma);
+// //       
+//       float massPDG, massPDGSigma;
+//       KFParticleDatabase::Instance()->GetMotherMass(fParticles[iParticle].GetPDG(), massPDG, massPDGSigma);
+// //       
+// //       float dm = fabs(mass - massPDG)/massPDGSigma;
+//       
+//       KFParticle tmp = fParticles[iParticle];
+// //       tmp.SetNonlinearMassConstraint(massPDG);
+//       
+//       particleInfo.push_back(ParticleInfo(iParticle, tmp.Chi2()));
+//     }
+//   }
+//   
+//   std::sort(particleInfo.begin(), particleInfo.end(), ParticleInfo::compare);
+//   
+//   for(unsigned int iPI=0; iPI<particleInfo.size(); iPI++)
+//   {
+//     const int index = particleInfo[iPI].fParticleIndex;
+//     if(deleteCandidate[index]) continue;
+//     
+//     bool isStore = true;
+//     for(int iDaughter=0; iDaughter<fParticles[index].NDaughters(); iDaughter++)
+//       isStore &= !(isUsed[ fParticles[index].DaughterIds()[iDaughter] ]);
+//     
+//     if(isStore)
+//     {
+//       for(int iDaughter=0; iDaughter<fParticles[index].NDaughters(); iDaughter++)
+//         isUsed[ fParticles[index].DaughterIds()[iDaughter] ] = true;
+//     }
+//     else
+//       deleteCandidate[index] = true;
+//   }
+  
+  for(unsigned int iParticle=0; iParticle<fParticles.size(); iParticle++)
+    if(deleteCandidate[iParticle])
+      fParticles[iParticle].SetPDG(-1);
 }
 
 void KFParticleTopoReconstructor::ReconstructParticles()
