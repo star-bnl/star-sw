@@ -68,7 +68,7 @@ class AgPlacement : public TNamed, public AgParameterList<double>
   {
     Double_t thetax, phix, thetay, phiy, thetaz, phiz;
   };
-
+public:
   union Rotation
   {
     Rotation3 rot3;
@@ -83,7 +83,7 @@ class AgPlacement : public TNamed, public AgParameterList<double>
     Double_t z;
     Translation() : x(0), y(0), z(0){ };
   };
-
+protected:
   enum { kUnknown, kRot3, kRot6, kRotO };
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
