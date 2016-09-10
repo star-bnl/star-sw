@@ -8,6 +8,8 @@
 #include <TF1.h>
 #include <TGraph.h>
 
+#include "FundamentalConstants.hh"
+
 namespace Garfield {
 
 class Medium;
@@ -31,27 +33,47 @@ class ViewMedium {
   void SetFunctionRange();
 
   void PlotElectronVelocity(const char xaxis, const double e, const double b,
-                            const double a);
+                            const double a = HalfPi);
   void PlotHoleVelocity(const char xaxis, const double e, const double b,
-                        const double a);
+                        const double a = HalfPi);
   void PlotIonVelocity(const char xaxis, const double e, const double b,
-                       const double a);
+                       const double a = HalfPi);
   void PlotElectronDiffusion(const char xaxis, const double e, const double b,
-                             const double a);
+                             const double a = HalfPi);
   void PlotHoleDiffusion(const char xaxis, const double e, const double b,
-                         const double a);
+                         const double a = HalfPi);
   void PlotIonDiffusion(const char xaxis, const double e, const double b,
-                        const double a);
+                        const double a = HalfPi);
   void PlotElectronTownsend(const char xaxis, const double e, const double b,
-                            const double a);
+                            const double a = HalfPi);
   void PlotHoleTownsend(const char xaxis, const double e, const double b,
-                        const double a);
+                        const double a = HalfPi);
   void PlotElectronAttachment(const char xaxis, const double e, const double b,
-                              const double a);
+                              const double a = HalfPi);
   void PlotHoleAttachment(const char xaxis, const double e, const double b,
-                          const double a);
+                          const double a = HalfPi);
   void PlotElectronCrossSections();
   double EvaluateFunction(double* pos, double* par);
+
+  enum Property {
+    ElectronVelocityE,
+    ElectronTransverseDiffusion,
+    ElectronLongitudinalDiffusion,
+    ElectronTownsend,
+    ElectronAttachment,
+    HoleVelocityE = 10,
+    HoleTransverseDiffusion,
+    HoleLongitudinalDiffusion,
+    HoleTownsend,
+    HoleAttachment,
+    IonVelocity = 20,
+    IonTransverseDiffusion,
+    IonLongitudinalDiffusion,
+    ElectronVelocityB,
+    ElectronVelocityExB,
+    HoleVelocityB,
+    HoleVelocityExB,
+  };
 
  private:
   std::string m_className;
@@ -81,18 +103,25 @@ class ViewMedium {
   double m_btolerance;
   double m_atolerance;
 
+  // Labels
+  std::string m_labele;
+  std::string m_labelb;
+  std::string m_labela;
+  std::string m_labelv;
+  std::string m_labeld;
+
   // Functions
   std::vector<TF1> m_functions;
-  int m_nFunctions;
   // Graphs
   std::vector<TGraph> m_graphs;
-  int m_nGraphs;
 
   void SetupCanvas();
   void AddFunction(const double xmin, const double xmax, const double ymin,
-                   const double ymax, const bool keep, const std::string xlabel,
-                   const std::string ylabel, const int type, const char xaxis,
+                   const double ymax, const bool keep, 
+                   const std::string& xlabel, const std::string& ylabel, 
+                   const int type, const char xaxis,
                    const double e, const double b, const double a);
+  int GetColor(const unsigned int property) const;
 };
 }
 #endif

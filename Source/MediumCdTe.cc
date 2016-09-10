@@ -289,7 +289,7 @@ void MediumCdTe::SetSaturationVelocity(const double vsate, const double vsath) {
 }
 
 bool MediumCdTe::GetOpticalDataRange(double& emin, double& emax, 
-                                     const unsigned int& i) {
+                                     const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetOpticalDataRange:\n";
@@ -315,8 +315,8 @@ bool MediumCdTe::GetOpticalDataRange(double& emin, double& emax,
   return true;
 }
 
-bool MediumCdTe::GetDielectricFunction(const double& e, double& eps1,
-                                       double& eps2, const unsigned int& i) {
+bool MediumCdTe::GetDielectricFunction(const double e, double& eps1,
+                                       double& eps2, const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetDielectricFunction:\n";

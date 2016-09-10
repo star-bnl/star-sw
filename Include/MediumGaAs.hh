@@ -47,9 +47,9 @@ class MediumGaAs : public Medium {
   void SetLowFieldMobility(const double mue, const double muh);
 
   bool GetOpticalDataRange(double& emin, double& emax, 
-                           const unsigned int& i = 0);
-  bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
-                             const unsigned int& i = 0);
+                           const unsigned int i = 0);
+  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
+                             const unsigned int i = 0);
 
  private:
   // Low-field mobility

@@ -270,7 +270,7 @@ void MediumGaAs::SetLowFieldMobility(const double mue, const double muh) {
 }
 
 bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax, 
-                                     const unsigned int& i) {
+                                     const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetOpticalDataRange:\n";
@@ -296,8 +296,8 @@ bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax,
   return true;
 }
 
-bool MediumGaAs::GetDielectricFunction(const double& e, double& eps1,
-                                       double& eps2, const unsigned int& i) {
+bool MediumGaAs::GetDielectricFunction(const double e, double& eps1,
+                                       double& eps2, const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetDielectricFunction:\n";
