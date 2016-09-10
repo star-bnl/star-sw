@@ -89,7 +89,7 @@ class MediumMagboltz : public MediumGas {
   bool GetDeexcitationProduct(const int i, double& t, double& s, int& type,
                               double& energy);
 
-  double GetPhotonCollisionRate(const double& e);
+  double GetPhotonCollisionRate(const double e);
   bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
                           double& ctheta, int& nsec, double& esec);
 

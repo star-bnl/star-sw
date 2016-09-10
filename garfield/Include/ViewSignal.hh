@@ -23,6 +23,8 @@ class ViewSignal {
   void SetCanvas(TCanvas* c);
 
   void PlotSignal(const std::string& label);
+  void PlotElectronSignal(const std::string& label);
+  void PlotIonSignal(const std::string& label);
   TH1D* GetHistogram() { return m_hSignal; }
 
   void EnableDebugging() { m_debug = true; }

@@ -1400,7 +1400,7 @@ bool Medium::IonDissociation(const double ex, const double ey, const double ez,
 }
 
 bool Medium::GetOpticalDataRange(double& emin, double& emax, 
-                                 const unsigned int& i) {
+                                 const unsigned int i) {
 
   if (i >= m_nComponents) {
     std::cerr << m_className << "::GetOpticalDataRange:\n";
@@ -1416,8 +1416,8 @@ bool Medium::GetOpticalDataRange(double& emin, double& emax,
   return false;
 }
 
-bool Medium::GetDielectricFunction(const double& e, double& eps1, double& eps2,
-                                   const unsigned int& i) {
+bool Medium::GetDielectricFunction(const double e, double& eps1, double& eps2,
+                                   const unsigned int i) {
 
   if (i >= m_nComponents) {
     std::cerr << m_className << "::GetDielectricFunction:\n";
@@ -1440,8 +1440,8 @@ bool Medium::GetDielectricFunction(const double& e, double& eps1, double& eps2,
   return false;
 }
 
-bool Medium::GetPhotoAbsorptionCrossSection(const double& e, double& sigma,
-                                            const unsigned int& i) {
+bool Medium::GetPhotoAbsorptionCrossSection(const double e, double& sigma,
+                                            const unsigned int i) {
 
   if (i >= m_nComponents) {
     std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
@@ -1463,7 +1463,7 @@ bool Medium::GetPhotoAbsorptionCrossSection(const double& e, double& sigma,
   return false;
 }
 
-double Medium::GetPhotonCollisionRate(const double& e) {
+double Medium::GetPhotonCollisionRate(const double e) {
 
   double sigma = 0.;
   if (!GetPhotoAbsorptionCrossSection(e, sigma)) return 0.;
@@ -1892,9 +1892,9 @@ void Medium::GetFieldGrid(std::vector<double>& efields,
   angles = bAngles;
 }
 
-bool Medium::GetElectronVelocityE(const unsigned int& ie, 
-                                  const unsigned int& ib, 
-                                  const unsigned int& ia, double& v) {
+bool Medium::GetElectronVelocityE(const unsigned int ie, 
+                                  const unsigned int ib, 
+                                  const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetElectronVelocityE:\n";
@@ -1916,9 +1916,9 @@ bool Medium::GetElectronVelocityE(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronVelocityExB(const unsigned int& ie, 
-                                    const unsigned int& ib, 
-                                    const unsigned int& ia, double& v) {
+bool Medium::GetElectronVelocityExB(const unsigned int ie, 
+                                    const unsigned int ib, 
+                                    const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetElectronVelocityExB:\n";
@@ -1940,9 +1940,9 @@ bool Medium::GetElectronVelocityExB(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronVelocityB(const unsigned int& ie, 
-                                  const unsigned int& ib, 
-                                  const unsigned int& ia, double& v) {
+bool Medium::GetElectronVelocityB(const unsigned int ie, 
+                                  const unsigned int ib, 
+                                  const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetElectronVelocityB:\n";
@@ -1964,9 +1964,9 @@ bool Medium::GetElectronVelocityB(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronLongitudinalDiffusion(const unsigned int& ie, 
-                                              const unsigned int& ib,
-                                              const unsigned int& ia, 
+bool Medium::GetElectronLongitudinalDiffusion(const unsigned int ie, 
+                                              const unsigned int ib,
+                                              const unsigned int ia, 
                                               double& dl) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
@@ -1989,9 +1989,9 @@ bool Medium::GetElectronLongitudinalDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronTransverseDiffusion(const unsigned int& ie, 
-                                            const unsigned int& ib,
-                                            const unsigned int& ia, 
+bool Medium::GetElectronTransverseDiffusion(const unsigned int ie, 
+                                            const unsigned int ib,
+                                            const unsigned int ia, 
                                             double& dt) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
@@ -2014,9 +2014,9 @@ bool Medium::GetElectronTransverseDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronTownsend(const unsigned int& ie, 
-                                 const unsigned int& ib, 
-                                 const unsigned int& ia, double& alpha) {
+bool Medium::GetElectronTownsend(const unsigned int ie, 
+                                 const unsigned int ib, 
+                                 const unsigned int ia, double& alpha) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetElectronTownsend:\n";
@@ -2038,9 +2038,9 @@ bool Medium::GetElectronTownsend(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetElectronAttachment(const unsigned int& ie, 
-                                   const unsigned int& ib, 
-                                   const unsigned int& ia, double& eta) {
+bool Medium::GetElectronAttachment(const unsigned int ie, 
+                                   const unsigned int ib, 
+                                   const unsigned int ia, double& eta) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetElectronAttachment:\n";
@@ -2062,9 +2062,9 @@ bool Medium::GetElectronAttachment(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleVelocityE(const unsigned int& ie, 
-                              const unsigned int& ib, 
-                              const unsigned int& ia, double& v) {
+bool Medium::GetHoleVelocityE(const unsigned int ie, 
+                              const unsigned int ib, 
+                              const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleVelocityE:\n";
@@ -2086,9 +2086,9 @@ bool Medium::GetHoleVelocityE(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleVelocityExB(const unsigned int& ie, 
-                                const unsigned int& ib, 
-                                const unsigned int& ia, double& v) {
+bool Medium::GetHoleVelocityExB(const unsigned int ie, 
+                                const unsigned int ib, 
+                                const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleVelocityExB:\n";
@@ -2110,9 +2110,9 @@ bool Medium::GetHoleVelocityExB(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleVelocityB(const unsigned int& ie, 
-                              const unsigned int& ib, 
-                              const unsigned int& ia, double& v) {
+bool Medium::GetHoleVelocityB(const unsigned int ie, 
+                              const unsigned int ib, 
+                              const unsigned int ia, double& v) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleVelocityB:\n";
@@ -2134,9 +2134,9 @@ bool Medium::GetHoleVelocityB(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleLongitudinalDiffusion(const unsigned int& ie, 
-                                          const unsigned int& ib,
-                                          const unsigned int& ia, double& dl) {
+bool Medium::GetHoleLongitudinalDiffusion(const unsigned int ie, 
+                                          const unsigned int ib,
+                                          const unsigned int ia, double& dl) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
@@ -2158,9 +2158,9 @@ bool Medium::GetHoleLongitudinalDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleTransverseDiffusion(const unsigned int& ie, 
-                                        const unsigned int& ib,
-                                        const unsigned int& ia, double& dt) {
+bool Medium::GetHoleTransverseDiffusion(const unsigned int ie, 
+                                        const unsigned int ib,
+                                        const unsigned int ia, double& dt) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
@@ -2182,9 +2182,9 @@ bool Medium::GetHoleTransverseDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleTownsend(const unsigned int& ie, 
-                             const unsigned int& ib, 
-                             const unsigned int& ia, double& alpha) {
+bool Medium::GetHoleTownsend(const unsigned int ie, 
+                             const unsigned int ib, 
+                             const unsigned int ia, double& alpha) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleTownsend:\n";
@@ -2206,9 +2206,9 @@ bool Medium::GetHoleTownsend(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetHoleAttachment(const unsigned int& ie, 
-                               const unsigned int& ib, 
-                               const unsigned int& ia, double& eta) {
+bool Medium::GetHoleAttachment(const unsigned int ie, 
+                               const unsigned int ib, 
+                               const unsigned int ia, double& eta) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetHoleAttachment:\n";
@@ -2230,8 +2230,8 @@ bool Medium::GetHoleAttachment(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetIonMobility(const unsigned int& ie, const unsigned int& ib, 
-                            const unsigned int& ia, double& mu) {
+bool Medium::GetIonMobility(const unsigned int ie, const unsigned int ib, 
+                            const unsigned int ia, double& mu) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetIonMobility:\n";
@@ -2253,9 +2253,9 @@ bool Medium::GetIonMobility(const unsigned int& ie, const unsigned int& ib,
   return true;
 }
 
-bool Medium::GetIonLongitudinalDiffusion(const unsigned int& ie, 
-                                         const unsigned int& ib,
-                                         const unsigned int& ia, double& dl) {
+bool Medium::GetIonLongitudinalDiffusion(const unsigned int ie, 
+                                         const unsigned int ib,
+                                         const unsigned int ia, double& dl) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
@@ -2277,9 +2277,9 @@ bool Medium::GetIonLongitudinalDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetIonTransverseDiffusion(const unsigned int& ie, 
-                                       const unsigned int& ib, 
-                                       const unsigned int& ia, double& dt) {
+bool Medium::GetIonTransverseDiffusion(const unsigned int ie, 
+                                       const unsigned int ib, 
+                                       const unsigned int ia, double& dt) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
@@ -2301,9 +2301,9 @@ bool Medium::GetIonTransverseDiffusion(const unsigned int& ie,
   return true;
 }
 
-bool Medium::GetIonDissociation(const unsigned int& ie, 
-                                const unsigned int& ib, 
-                                const unsigned int& ia, double& diss) {
+bool Medium::GetIonDissociation(const unsigned int ie, 
+                                const unsigned int ib, 
+                                const unsigned int ia, double& diss) {
 
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
     std::cerr << m_className << "::GetIonDissociation:\n";
@@ -2329,10 +2329,10 @@ void Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                         const std::vector<double>& efields,
                         const std::vector<double>& bfields,
                         const std::vector<double>& angles, 
-                        const unsigned int& intp,
-                        const unsigned int& extrLow, 
-                        const unsigned int& extrHigh,
-                        const double init, const std::string label) {
+                        const unsigned int intp,
+                        const unsigned int extrLow, 
+                        const unsigned int extrHigh,
+                        const double init, const std::string& label) {
 
   if (m_debug) {
     std::cout << m_className << "::CloneTable:\n";
@@ -2390,12 +2390,12 @@ void Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
 
 void Medium::CloneTensor(
     std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-    const unsigned int& n, 
+    const unsigned int n, 
     const std::vector<double>& efields, const std::vector<double>& bfields, 
     const std::vector<double>& angles,
-    const unsigned int& intp, 
-    const unsigned int& extrLow, const unsigned int& extrHigh, 
-    const double& init,
+    const unsigned int intp, 
+    const unsigned int extrLow, const unsigned int extrHigh, 
+    const double init,
     const std::string& label) {
 
   // Get the dimensions of the new grid.
@@ -2451,8 +2451,8 @@ void Medium::CloneTensor(
   }
 }
 
-bool Medium::SetIonMobility(const unsigned int& ie, const unsigned int& ib, 
-                            const unsigned int& ia, const double& mu) {
+bool Medium::SetIonMobility(const unsigned int ie, const unsigned int ib, 
+                            const unsigned int ia, const double mu) {
 
   // Check the index.
   if (ie >= m_nEfields || ib >= m_nBfields || ia >= m_nAngles) {
@@ -2632,7 +2632,7 @@ void Medium::SetExtrapolationMethodIonDissociation(const std::string& extrLow,
   }
 }
 
-bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb) {
+bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int extrNb) {
 
   // Convert to upper-case
   for (unsigned int i = 0; i < extrStr.length(); ++i) {
@@ -2652,52 +2652,52 @@ bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb) {
   return true;
 }
 
-void Medium::SetInterpolationMethodVelocity(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodVelocity(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpVelocity = intrp;
   }
 }
 
-void Medium::SetInterpolationMethodDiffusion(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodDiffusion(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpDiffusion = intrp;
   }
 }
 
-void Medium::SetInterpolationMethodTownsend(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodTownsend(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpTownsend = intrp;
   }
 }
 
-void Medium::SetInterpolationMethodAttachment(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodAttachment(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpAttachment = intrp;
   }
 }
 
-void Medium::SetInterpolationMethodIonMobility(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodIonMobility(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpMobility = intrp;
   }
 }
 
-void Medium::SetInterpolationMethodIonDissociation(const unsigned int& intrp) {
+void Medium::SetInterpolationMethodIonDissociation(const unsigned int intrp) {
 
   if (intrp > 0) {
     m_intpDissociation = intrp;
   }
 }
 
-double Medium::Interpolate1D(const double& e, const std::vector<double>& table,
+double Medium::Interpolate1D(const double e, const std::vector<double>& table,
                              const std::vector<double>& fields,
-                             const unsigned int& intpMeth, const int& extrLow,
-                             const int& extrHigh) {
+                             const unsigned int intpMeth, const int extrLow,
+                             const int extrHigh) {
 
   // This function is a generalized version of the Fortran functions
   // GASVEL, GASVT1, GASVT2, GASLOR, GASMOB, GASDFT, and GASDFL
@@ -2770,9 +2770,9 @@ double Medium::Interpolate1D(const double& e, const std::vector<double>& table,
 }
 
 void Medium::InitParamArrays(
-    const unsigned int& eRes, const unsigned int& bRes, 
-    const unsigned int& aRes,
-    std::vector<std::vector<std::vector<double> > >& tab, const double& val) {
+    const unsigned int eRes, const unsigned int bRes, 
+    const unsigned int aRes,
+    std::vector<std::vector<std::vector<double> > >& tab, const double val) {
 
   if (eRes == 0 || bRes == 0 || aRes == 0) {
     std::cerr << m_className << "::InitParamArrays:\n";
@@ -2790,10 +2790,10 @@ void Medium::InitParamArrays(
 }
 
 void Medium::InitParamTensor(
-    const unsigned int& eRes, const unsigned int& bRes, 
-    const unsigned int& aRes, const unsigned int& tRes,
+    const unsigned int eRes, const unsigned int bRes, 
+    const unsigned int aRes, const unsigned int tRes,
     std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-    const double& val) {
+    const double val) {
 
   if (eRes == 0 || bRes == 0 || aRes == 0 || tRes == 0) {
     std::cerr << m_className << "::InitParamArrays:\n";

@@ -598,9 +598,7 @@ bool MediumGas::LoadGasFile(const std::string& filename) {
 
   // Check the gas mixture.
   std::vector<std::string> gasnames;
-  gasnames.clear();
   std::vector<double> percentages;
-  percentages.clear();
   bool gasMixOk = true;
   unsigned int gasCount = 0;
   for (int i = 0; i < nMagboltzGases; ++i) {

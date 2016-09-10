@@ -18,13 +18,13 @@ class MediumSilicon : public Medium {
   bool IsSemiconductor() const { return true; }
 
   // Doping concentration [cm-3] and type ('i', 'n', 'p')
-  void SetDoping(const char& type, const double& c);
+  void SetDoping(const char type, const double c);
   void GetDoping(char& type, double& c) const;
 
   // Trapping cross-section
-  void SetTrapCrossSection(const double& ecs, const double& hcs);
-  void SetTrapDensity(const double& n);
-  void SetTrappingTime(const double& etau, const double& htau);
+  void SetTrapCrossSection(const double ecs, const double hcs);
+  void SetTrapDensity(const double n);
+  void SetTrappingTime(const double etau, const double htau);
 
   // Electron transport parameters
   bool ElectronVelocity(const double ex, const double ey, const double ez,
@@ -129,9 +129,9 @@ class MediumSilicon : public Medium {
   int GetElectronBandPopulation(const int band);
 
   bool GetOpticalDataRange(double& emin, double& emax, 
-                           const unsigned int& i = 0);
-  bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
-                             const unsigned int& i = 0);
+                           const unsigned int i = 0);
+  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
+                             const unsigned int i = 0);
 
   void ComputeSecondaries(const double e0, double& ee, double& eh);
 

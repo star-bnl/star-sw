@@ -926,7 +926,7 @@ bool MediumMagboltz::GetIonisationProduct(const int i, int& type,
   return true;
 }
 
-double MediumMagboltz::GetPhotonCollisionRate(const double& e) {
+double MediumMagboltz::GetPhotonCollisionRate(const double e) {
 
   if (e <= 0.) {
     std::cerr << m_className << "::GetPhotonCollisionRate:\n";
