@@ -94,10 +94,10 @@ Int_t StGeanePropagator::Propagate(const Char_t *opt) {
   static Float_t xxi[3], pii[3], xxo[3], ppo[3], rd[15];
   TString Opt(opt);
   Opt += "EVZ";
-  Int_t IfContinue = 1;
+  //  Int_t IfContinue = 1;
   if (! fNoSensVol) SetVolumes();
   if (! Opt.Contains("C")) {
-    IfContinue =  0;
+    //    IfContinue =  0;
     TCL::ucopy(fRD.GetArray(), rd, 15);
     TGeoHMatrix *rotI = gGeoManager->GetCurrentMatrix();
     if (rotI) {
