@@ -157,57 +157,57 @@ class Medium {
   void GetFieldGrid(std::vector<double>& efields, std::vector<double>& bfields,
                     std::vector<double>& angles);
 
-  bool GetElectronVelocityE(const unsigned int& ie, 
-                            const unsigned int& ib, 
-                            const unsigned int& ia, double& v);
-  bool GetElectronVelocityExB(const unsigned int& ie, 
-                              const unsigned int& ib, 
-                              const unsigned int& ia, double& v);
-  bool GetElectronVelocityB(const unsigned int& ie, 
-                            const unsigned int& ib, 
-                            const unsigned int& ia, double& v);
+  bool GetElectronVelocityE(const unsigned int ie, 
+                            const unsigned int ib, 
+                            const unsigned int ia, double& v);
+  bool GetElectronVelocityExB(const unsigned int ie, 
+                              const unsigned int ib, 
+                              const unsigned int ia, double& v);
+  bool GetElectronVelocityB(const unsigned int ie, 
+                            const unsigned int ib, 
+                            const unsigned int ia, double& v);
 
-  bool GetElectronLongitudinalDiffusion(const unsigned int& ie, 
-                                        const unsigned int& ib, 
-                                        const unsigned int& ia, double& dl);
-  bool GetElectronTransverseDiffusion(const unsigned int& ie, 
-                                      const unsigned int& ib, 
-                                      const unsigned int& ia, double& dt);
-  bool GetElectronTownsend(const unsigned int& ie, 
-                           const unsigned int& ib, 
-                           const unsigned int& ia, double& alpha);
-  bool GetElectronAttachment(const unsigned int& ie, 
-                             const unsigned int& ib, 
-                             const unsigned int& ia, double& eta);
+  bool GetElectronLongitudinalDiffusion(const unsigned int ie, 
+                                        const unsigned int ib, 
+                                        const unsigned int ia, double& dl);
+  bool GetElectronTransverseDiffusion(const unsigned int ie, 
+                                      const unsigned int ib, 
+                                      const unsigned int ia, double& dt);
+  bool GetElectronTownsend(const unsigned int ie, 
+                           const unsigned int ib, 
+                           const unsigned int ia, double& alpha);
+  bool GetElectronAttachment(const unsigned int ie, 
+                             const unsigned int ib, 
+                             const unsigned int ia, double& eta);
 
-  bool GetHoleVelocityE(const unsigned int& ie, const unsigned int& ib, 
-                        const unsigned int& ia, double& v);
-  bool GetHoleVelocityExB(const unsigned int& ie, const unsigned int& ib, 
-                          const unsigned int& ia, double& v);
-  bool GetHoleVelocityB(const unsigned int& ie, const unsigned int& ib, 
-                        const unsigned int& ia, double& v);
-  bool GetHoleLongitudinalDiffusion(const unsigned int& ie, 
-                                    const unsigned int& ib, 
-                                    const unsigned int& ia, double& dl);
-  bool GetHoleTransverseDiffusion(const unsigned int& ie, 
-                                  const unsigned int& ib, 
-                                  const unsigned int& ia, double& dt);
-  bool GetHoleTownsend(const unsigned int& ie, const unsigned int& ib, 
-                       const unsigned int& ia, double& alpha);
-  bool GetHoleAttachment(const unsigned int& ie, const unsigned int& ib, 
-                         const unsigned int& ia, double& eta);
+  bool GetHoleVelocityE(const unsigned int ie, const unsigned int ib, 
+                        const unsigned int ia, double& v);
+  bool GetHoleVelocityExB(const unsigned int ie, const unsigned int ib, 
+                          const unsigned int ia, double& v);
+  bool GetHoleVelocityB(const unsigned int ie, const unsigned int ib, 
+                        const unsigned int ia, double& v);
+  bool GetHoleLongitudinalDiffusion(const unsigned int ie, 
+                                    const unsigned int ib, 
+                                    const unsigned int ia, double& dl);
+  bool GetHoleTransverseDiffusion(const unsigned int ie, 
+                                  const unsigned int ib, 
+                                  const unsigned int ia, double& dt);
+  bool GetHoleTownsend(const unsigned int ie, const unsigned int ib, 
+                       const unsigned int ia, double& alpha);
+  bool GetHoleAttachment(const unsigned int ie, const unsigned int ib, 
+                         const unsigned int ia, double& eta);
 
-  bool GetIonMobility(const unsigned int& ie, const unsigned int& ib, 
-                      const unsigned int& ia, double& mu);
-  bool GetIonLongitudinalDiffusion(const unsigned int& ie, 
-                                   const unsigned int& ib, 
-                                   const unsigned int& ia, double& dl);
-  bool GetIonTransverseDiffusion(const unsigned int& ie, 
-                                 const unsigned int& ib, 
-                                 const unsigned int& ia, double& dt);
-  bool GetIonDissociation(const unsigned int& ie, 
-                          const unsigned int& ib, 
-                          const unsigned int& ia, double& diss);
+  bool GetIonMobility(const unsigned int ie, const unsigned int ib, 
+                      const unsigned int ia, double& mu);
+  bool GetIonLongitudinalDiffusion(const unsigned int ie, 
+                                   const unsigned int ib, 
+                                   const unsigned int ia, double& dl);
+  bool GetIonTransverseDiffusion(const unsigned int ie, 
+                                 const unsigned int ib, 
+                                 const unsigned int ia, double& dt);
+  bool GetIonDissociation(const unsigned int ie, 
+                          const unsigned int ib, 
+                          const unsigned int ia, double& diss);
 
   void ResetElectronVelocity();
   void ResetElectronDiffusion();
@@ -221,8 +221,8 @@ class Medium {
   void ResetIonDiffusion();
   void ResetIonDissociation();
 
-  bool SetIonMobility(const unsigned int& ie, const unsigned int& ib, 
-                      const unsigned int& ia, const double& mu);
+  bool SetIonMobility(const unsigned int ie, const unsigned int ib, 
+                      const unsigned int ia, const double mu);
   bool SetIonMobility(const std::vector<double>& fields,
                       const std::vector<double>& mobilities);
 
@@ -242,12 +242,12 @@ class Medium {
                                              const std::string& extrHigh);
 
   // Set the degree of polynomial interpolation (usually 2).
-  void SetInterpolationMethodVelocity(const unsigned int& intrp);
-  void SetInterpolationMethodDiffusion(const unsigned int& intrp);
-  void SetInterpolationMethodTownsend(const unsigned int& intrp);
-  void SetInterpolationMethodAttachment(const unsigned int& intrp);
-  void SetInterpolationMethodIonMobility(const unsigned int& intrp);
-  void SetInterpolationMethodIonDissociation(const unsigned int& intrp);
+  void SetInterpolationMethodVelocity(const unsigned int intrp);
+  void SetInterpolationMethodDiffusion(const unsigned int intrp);
+  void SetInterpolationMethodTownsend(const unsigned int intrp);
+  void SetInterpolationMethodAttachment(const unsigned int intrp);
+  void SetInterpolationMethodIonMobility(const unsigned int intrp);
+  void SetInterpolationMethodIonDissociation(const unsigned int intrp);
 
   // Scaling of fields and transport parameters.
   virtual double ScaleElectricField(const double e) const { return e; }
@@ -262,14 +262,14 @@ class Medium {
   // Optical properties
   // Energy range [eV] of available optical data
   virtual bool GetOpticalDataRange(double& emin, double& emax, 
-                                   const unsigned int& i = 0);
+                                   const unsigned int i = 0);
   // Complex dielectric function
-  virtual bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
-                                     const unsigned int& i = 0);
+  virtual bool GetDielectricFunction(const double e, double& eps1, double& eps2,
+                                     const unsigned int i = 0);
   // Photoabsorption cross-section [cm2]
-  virtual bool GetPhotoAbsorptionCrossSection(const double& e, double& sigma,
-                                              const unsigned int& i = 0);
-  virtual double GetPhotonCollisionRate(const double& e);
+  virtual bool GetPhotoAbsorptionCrossSection(const double e, double& sigma,
+                                              const unsigned int i = 0);
+  virtual double GetPhotonCollisionRate(const double e);
   virtual bool GetPhotonCollision(const double e, int& type, int& level,
                                   double& e1, double& ctheta, int& nsec,
                                   double& esec);
@@ -389,39 +389,39 @@ class Medium {
   unsigned int m_intpMobility;
   unsigned int m_intpDissociation;
 
-  double Interpolate1D(const double& e, const std::vector<double>& table,
+  double Interpolate1D(const double e, const std::vector<double>& table,
                        const std::vector<double>& fields, 
-                       const unsigned int& intpMeth,
-                       const int& jExtr, const int& iExtr);
-  bool GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb);
+                       const unsigned int intpMeth,
+                       const int jExtr, const int iExtr);
+  bool GetExtrapolationIndex(std::string extrStr, unsigned int extrNb);
   void CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                   const std::vector<double>& efields,
                   const std::vector<double>& bfields,
                   const std::vector<double>& angles, 
-                  const unsigned int& intp,
-                  const unsigned int& extrLow, const unsigned int& extrHigh, 
+                  const unsigned int intp,
+                  const unsigned int extrLow, const unsigned int extrHigh, 
                   const double init,
-                  const std::string label);
+                  const std::string& label);
   void CloneTensor(
       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-      const unsigned int& n, 
+      const unsigned int n, 
       const std::vector<double>& efields,
       const std::vector<double>& bfields, 
       const std::vector<double>& angles,
-      const unsigned int& intp, 
-      const unsigned int& extrLow, const unsigned int& extrHigh, 
-      const double& init,
+      const unsigned int intp, 
+      const unsigned int extrLow, const unsigned int extrHigh, 
+      const double init,
       const std::string& label);
 
-  void InitParamArrays(const unsigned int& eRes, const unsigned int& bRes, 
-                       const unsigned int& aRes,
+  void InitParamArrays(const unsigned int eRes, const unsigned int bRes, 
+                       const unsigned int aRes,
                        std::vector<std::vector<std::vector<double> > >& tab,
-                       const double& val);
+                       const double val);
   void InitParamTensor(
-      const unsigned int& eRes, const unsigned int& bRes, 
-      const unsigned int& aRes, const unsigned int& tRes,
+      const unsigned int eRes, const unsigned int bRes, 
+      const unsigned int aRes, const unsigned int tRes,
       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
-      const double& val);
+      const double val);
 };
 }
 

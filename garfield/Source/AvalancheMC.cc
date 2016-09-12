@@ -391,7 +391,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         // Only one component with active velocity is assumed to be attached to
         // AvalancheMC.
         ComponentBase* velocityCmp;
-        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+        const unsigned int nComponents = m_sensor->GetNumberOfComponents();
+        for (unsigned int i = 0; i < nComponents; ++i) {
           velocityCmp = m_sensor->GetComponent(i);
           if (velocityCmp->IsVelocityActive()) {
             Medium* m = 0;
@@ -432,7 +433,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         // Only one component with active velocity is assumed to be attached to
         // AvalancheMC.
         ComponentBase* velocityCmp;
-        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+        const unsigned int nComponents = m_sensor->GetNumberOfComponents();
+        for (unsigned int i = 0; i < nComponents; ++i) {
           velocityCmp = m_sensor->GetComponent(i);
           if (velocityCmp->IsVelocityActive()) {
             Medium* m = 0;
@@ -1149,7 +1151,8 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
         // Only one component with active traps and velocity map is assumed to
         // be attached to AvalancheMC.
         ComponentBase* trapCmp;
-        for (int i = 0; i < m_sensor->GetNumberOfComponents(); i++) {
+        const unsigned int nComponents = m_sensor->GetNumberOfComponents();
+        for (unsigned int i = 0; i < nComponents; ++i) {
           trapCmp = m_sensor->GetComponent(i);
           Medium* trapMed = trapCmp->GetMedium(x, y, z);
           if (trapCmp->IsTrapActive()) {

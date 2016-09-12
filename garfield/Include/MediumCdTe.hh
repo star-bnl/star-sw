@@ -49,9 +49,9 @@ class MediumCdTe : public Medium {
   void SetSaturationVelocity(const double vsate, const double vsath);
 
   bool GetOpticalDataRange(double& emin, double& emax, 
-                           const unsigned int& i = 0);
-  bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
-                             const unsigned int& i = 0);
+                           const unsigned int i = 0);
+  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
+                             const unsigned int i = 0);
 
  private:
   // double bandGap;

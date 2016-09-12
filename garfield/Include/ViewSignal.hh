@@ -22,7 +22,8 @@ class ViewSignal {
   void SetSensor(Sensor* s);
   void SetCanvas(TCanvas* c);
 
-  void PlotSignal(const std::string& label);
+  void PlotSignal(const std::string& label, const bool total = true,
+                  const bool electron = false, const bool ion = false);
   TH1D* GetHistogram() { return m_hSignal; }
 
   void EnableDebugging() { m_debug = true; }
@@ -43,9 +44,14 @@ class ViewSignal {
 
   // Histogram
   TH1D* m_hSignal;
+  TH1D* m_hSignalElectrons;
+  TH1D* m_hSignalIons;
 
   // Threshold crossings
   TGraph* m_gCrossings;
+
+  // Find an unused histogram name.
+  std::string FindHistogramName(const std::string& base) const;
 };
 }
 #endif

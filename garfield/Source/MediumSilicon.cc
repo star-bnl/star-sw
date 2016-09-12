@@ -137,7 +137,7 @@ MediumSilicon::MediumSilicon()
   ionProducts.clear();
 }
 
-void MediumSilicon::SetDoping(const char& type, const double& c) {
+void MediumSilicon::SetDoping(const char type, const double c) {
 
   if (toupper(type) == 'N') {
     m_dopingType = 'n';
@@ -180,7 +180,7 @@ void MediumSilicon::GetDoping(char& type, double& c) const {
   c = m_dopingConcentration;
 }
 
-void MediumSilicon::SetTrapCrossSection(const double& ecs, const double& hcs) {
+void MediumSilicon::SetTrapCrossSection(const double ecs, const double hcs) {
 
   if (ecs < 0.) {
     std::cerr << m_className << "::SetTrapCrossSection:\n";
@@ -200,7 +200,7 @@ void MediumSilicon::SetTrapCrossSection(const double& ecs, const double& hcs) {
   m_isChanged = true;
 }
 
-void MediumSilicon::SetTrapDensity(const double& n) {
+void MediumSilicon::SetTrapDensity(const double n) {
 
   if (n < 0.) {
     std::cerr << m_className << "::SetTrapDensity:\n";
@@ -214,7 +214,7 @@ void MediumSilicon::SetTrapDensity(const double& n) {
   m_isChanged = true;
 }
 
-void MediumSilicon::SetTrappingTime(const double& etau, const double& htau) {
+void MediumSilicon::SetTrappingTime(const double etau, const double htau) {
 
   if (etau <= 0.) {
     std::cerr << m_className << "::SetTrappingTime:\n";
@@ -1371,7 +1371,7 @@ int MediumSilicon::GetElectronBandPopulation(const int band) {
 }
 
 bool MediumSilicon::GetOpticalDataRange(double& emin, double& emax,
-                                        const unsigned int& i) {
+                                        const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetOpticalDataRange:\n";
@@ -1397,8 +1397,8 @@ bool MediumSilicon::GetOpticalDataRange(double& emin, double& emax,
   return true;
 }
 
-bool MediumSilicon::GetDielectricFunction(const double& e, double& eps1, 
-                                          double& eps2, const unsigned int& i) {
+bool MediumSilicon::GetDielectricFunction(const double e, double& eps1, 
+                                          double& eps2, const unsigned int i) {
 
   if (i != 0) {
     std::cerr << m_className << "::GetDielectricFunction:\n";

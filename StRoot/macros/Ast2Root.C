@@ -9,32 +9,12 @@ void Ast2Root(const Char_t *vers="y2005x") {
   gInterpreter->ProcessLine(cmd.Data());
   St_geant_Maker *geant = (St_geant_Maker *) chain->Maker("geant");
   if (! geant) return;
-#ifndef OLD_GEANT_VMC
-  //  geant->DetSetIndex();
-#endif
   chain->Make();
   TString rzFile(vers);
   rzFile += ".rz";
   TString cmd("grfile ");
   cmd += rzFile;
   geant->Do(cmd.Data());
-#ifdef OLD_GEANT_VMC
-//   Char_t *sets[2] = {"geom","Detectors"};
-//   for (Int_t i = 0; i < 2; i++) {
-//     TString setN(".const/");
-//     setN += sets[i];
-//     TDataSet *set = geant->Find(setN.Data());
-//     if (set) {
-//       TString file(sets[i]);
-//       file += ".";
-//       file += vers;
-//       file += ".root";
-//       TFile *f = new TFile(file.Data(),"RECREATE");
-//       set->Write();
-//       delete f;
-//     }
-//   }
-#endif
   //  cmd = "g2Root ";
   cmd = "g2root ";
   rzFile.ReplaceAll("grfile ","");
