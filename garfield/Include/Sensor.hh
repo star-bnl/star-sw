@@ -19,12 +19,12 @@ class Sensor {
 
   // Add a component
   void AddComponent(ComponentBase* comp);
-  int GetNumberOfComponents() { return m_nComponents; }
-  virtual ComponentBase* GetComponent(const int componentNumber);
+  unsigned int GetNumberOfComponents() const { return m_components.size(); }
+  virtual ComponentBase* GetComponent(const unsigned int componentNumber);
 
   // Add an electrode
-  void AddElectrode(ComponentBase* comp, std::string label);
-  int GetNumberOfElectrodes() { return m_nElectrodes; }
+  void AddElectrode(ComponentBase* comp, const std::string& label);
+  unsigned int GetNumberOfElectrodes() const { return m_electrodes.size(); }
   // Remove all components, electrodes and reset the sensor
   void Clear();
 
@@ -42,10 +42,10 @@ class Sensor {
   // Get the weighting field at (x, y, z)
   void WeightingField(const double x, const double y, const double z,
                       double& wx, double& wy, double& wz,
-                      const std::string label);
+                      const std::string& label);
   // Get the weighting potential at (x, y, z)
   double WeightingPotential(const double x, const double y, const double z,
-                            const std::string label);
+                            const std::string& label);
 
   // Get the medium at (x, y, z)
   bool GetMedium(const double x, const double y, const double z,
@@ -75,36 +75,39 @@ class Sensor {
   void NewSignal() { ++m_nEvents; }
   // Reset signals and induced charges of all electrodes
   void ClearSignal();
-  void AddSignal(const double& q, const double& t, const double& dt,
-                 const double& x, const double& y, const double& z,
-                 const double& vx, const double& vy, const double& vz);
+  void AddSignal(const double q, const double t, const double dt,
+                 const double x, const double y, const double z,
+                 const double vx, const double vy, const double vz);
   void AddInducedCharge(const double q, const double x0, const double y0,
                         const double z0, const double x1, const double y1,
                         const double z1);
   // Set/get the time window and binning for the signal calculation
-  void SetTimeWindow(const double tstart, const double tstep, const int nsteps);
-  void GetTimeWindow(double& tstart, double& tstep, int& nsteps) {
+  void SetTimeWindow(const double tstart, const double tstep, 
+                     const unsigned int nsteps);
+  void GetTimeWindow(double& tstart, double& tstep, unsigned int& nsteps) {
     tstart = m_tStart;
     tstep = m_tStep;
     nsteps = m_nTimeBins;
   }
-  double GetSignal(const std::string label, const int bin);
-  double GetElectronSignal(const std::string label, const int bin);
-  double GetIonSignal(const std::string label, const int bin);
-  double GetInducedCharge(const std::string label);
+  double GetSignal(const std::string& label, const unsigned int bin);
+  double GetElectronSignal(const std::string& label, const unsigned int bin);
+  double GetIonSignal(const std::string& label, const unsigned int bin);
+  double GetInducedCharge(const std::string& label);
   void SetTransferFunction(double (*f)(double t));
-  void SetTransferFunction(std::vector<double> times,
-                           std::vector<double> values);
+  void SetTransferFunction(const std::vector<double>& times,
+                           const std::vector<double>& values);
   double GetTransferFunction(const double t);
   bool ConvoluteSignal();
   bool IntegrateSignal();
   void SetNoiseFunction(double (*f)(double t));
   void AddNoise();
-  bool ComputeThresholdCrossings(const double thr, const std::string label,
+  bool ComputeThresholdCrossings(const double thr, const std::string& label,
                                  int& n);
-  int GetNumberOfThresholdCrossings() { return m_nThresholdCrossings; }
-  bool GetThresholdCrossing(const int i, double& time, double& level,
-                            bool& rise);
+  unsigned int GetNumberOfThresholdCrossings() const { 
+    return m_thresholdCrossings.size(); 
+  }
+  bool GetThresholdCrossing(const unsigned int i, double& time, double& level,
+                            bool& rise) const;
 
   // Switch on/off debugging messages
   void EnableDebugging() { m_debug = true; }
@@ -114,7 +117,6 @@ class Sensor {
   std::string m_className;
 
   // Components
-  int m_nComponents;
   struct component {
     ComponentBase* comp;
   };
@@ -122,7 +124,6 @@ class Sensor {
   int m_lastComponent;
 
   // Electrodes
-  int m_nElectrodes;
   struct electrode {
     ComponentBase* comp;
     std::string label;
@@ -134,9 +135,9 @@ class Sensor {
   std::vector<electrode> m_electrodes;
 
   // Time window for signals
-  int m_nTimeBins;
+  unsigned int m_nTimeBins;
   double m_tStart, m_tStep;
-  int m_nEvents;
+  unsigned int m_nEvents;
   static double m_signalConversion;
 
   // Transfer function
@@ -149,7 +150,6 @@ class Sensor {
   bool m_hasNoiseFunction;
   double (*m_fNoise)(double t);
 
-  int m_nThresholdCrossings;
   struct thresholdCrossing {
     double time;
     bool rise;

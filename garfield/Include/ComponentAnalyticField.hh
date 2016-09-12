@@ -215,10 +215,10 @@ class ComponentAnalyticField : public ComponentBase {
   // Parameters for D3 type cells
   // Conformal mapping in polygons
   std::vector<std::complex<double> > wmap;
-  double kappa;
+  double m_kappa;
   // Tables of coefficients
-  std::vector<std::vector<double> > cc1;
-  std::vector<std::vector<double> > cc2;
+  std::vector<std::vector<double> > m_cc1;
+  std::vector<std::vector<double> > m_cc2;
 
   // Reference potential
   double v0;
@@ -285,9 +285,9 @@ class ComponentAnalyticField : public ComponentBase {
   // Capacitance matrix
   std::vector<std::vector<double> > m_a;
   // Signal matrix
-  std::vector<std::vector<std::complex<double> > > sigmat;
+  std::vector<std::vector<std::complex<double> > > m_sigmat;
   // Induced charges on planes
-  std::vector<std::vector<double> > qplane;
+  std::vector<std::vector<double> > m_qplane;
 
   // Point charges
   int n3d;

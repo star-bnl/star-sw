@@ -1655,13 +1655,9 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
   if (na > 1) astep = (amax - amin) / (na - 1.);
 
   // Setup the field grids.
-  std::vector<double> eFieldsNew;
-  std::vector<double> bFieldsNew;
-  std::vector<double> bAnglesNew;
-  eFieldsNew.resize(ne);
-  bFieldsNew.resize(nb);
-  bAnglesNew.resize(na);
-
+  std::vector<double> eFieldsNew(ne);
+  std::vector<double> bFieldsNew(nb);
+  std::vector<double> bAnglesNew(na);
   for (int i = 0; i < ne; ++i) {
     if (logE) {
       eFieldsNew[i] = emin * pow(estep, i);
@@ -2780,6 +2776,8 @@ void Medium::InitParamArrays(
     return;
   }
 
+  tab.assign(aRes, std::vector<std::vector<double> >(bRes, std::vector<double>(eRes, val))); 
+  /*
   tab.resize(aRes);
   for (unsigned int i = 0; i < aRes; ++i) {
     tab[i].resize(bRes);
@@ -2787,6 +2785,7 @@ void Medium::InitParamArrays(
       tab[i][j].assign(eRes, val);
     }
   }
+  */
 }
 
 void Medium::InitParamTensor(
