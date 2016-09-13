@@ -393,7 +393,7 @@ class Medium {
                        const std::vector<double>& fields, 
                        const unsigned int intpMeth,
                        const int jExtr, const int iExtr);
-  bool GetExtrapolationIndex(std::string extrStr, unsigned int extrNb);
+  bool GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb);
   void CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                   const std::vector<double>& efields,
                   const std::vector<double>& bfields,
