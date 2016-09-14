@@ -57,7 +57,7 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
     UInt_t sector = 0;
     for (vector<SeedHit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
       StiHit *hit = (*hitb)->hit;
-      if (!hit || hit->timesUsed()) continue;
+      if (!hit) continue; // || hit->timesUsed()) continue;
       if (StiKalmanTrackFinder::DoAlignment()) {
 	const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit->stHit());
 	if (tpcHit) {
