@@ -240,7 +240,9 @@ static int nCall =0; nCall++;
  void StiHit::addTimesUsed()
 {
     mTimesUsed++;
+#ifndef DO_TPCCATRACKER
     assert(mTimesUsed <=mMaxTimes);
+#endif /* ! DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
  void StiHit::subTimesUsed()

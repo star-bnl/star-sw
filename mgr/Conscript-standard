@@ -1533,20 +1533,13 @@ if ( $#src > -1 ) {
 #      if ( -r $libf) {print "$libf\n";}	
 #      if ( -r $libv) {print "$libv\n";}	
       if ((  -r $locf or -r $libf) and -r $libv ) {
-	#	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
 	$SO_PKG_PLAIN = $pkg . "CA";
 	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
 	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
-	if ((-e "StRoot/TPCCATracker"       and  -e "StRoot/TPCCATracker/code")  or
-	    (-e "$STAR/StRoot/TPCCATracker" and  -e  "$STAR/StRoot/TPCCATracker/code")) {
-	} else {
-#	  $CPPFLAGS .= " -D__NEW_TPCCATracker__";
-	}
-#	print "CPPFLAGS = $CPPFLAGS <<<<<<<<<<<<<<<<\n";
 	$envCA = $env2->clone('CPPFLAGS' => $CPPFLAGS,
 			      'SUFOBJ'   => "CA.o",
 			      'CXXFLAGS' => $CXXFLAGS . " -DNVALGRIND -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION" . $SSE_FLAGS); # -msse -msse2"
-	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx);
+	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx StiHit.cxx);
 	my $ListCA = join('|',@ListCA);
 	@PlainObj = ();
 	@Obj = ();

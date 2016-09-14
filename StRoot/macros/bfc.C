@@ -51,7 +51,7 @@ void Load(const Char_t *options="");
 //TString defChain("MC.2014,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,AgML,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,pythia,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2014,gstar,20Muons,StiCA,beamline,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
-TString defChain("MC.2014,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
+//TString defChain("MC.2014,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("P2014aPxLSim,gstar,20Muons,TpcRS,TpxClu,bbcSim,btofsim,btofMatch,emcY2,emcSim,EEfs,McEvent,StiCA,KFVertex,useXgeom,HftMatTree");
 //TString defChain("MC.2014,gstar,20Muons,TpcRS,Sti,KFVertex,beamline,-hitfilt,useXgeom,pxlFastSim,IstSim");
 //TString defChain("MC.2014,gstar,20Muons,TpcRS,StiCA,KFVertex,-hitfilt,useXgeom,pxlFastSim,IstSim,sdt20140410.123905,phys_off");
@@ -64,10 +64,10 @@ TString defChain("MC.2014,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,O
 //TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex")
 //void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
-void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
+void bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 //	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
-void bfc(Int_t Last, const Char_t *Chain = defChain,
+void bfc(Int_t Last, const Char_t *Chain = "",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
 	 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
@@ -187,14 +187,18 @@ void bfc(Int_t First, Int_t Last,
   // "-" sign before requiest means that this option is disallowed
   // Chain = "gstar,20Muons" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Dynamically link some shared libs
-  if (gClassTable->GetID("StBFChain") < 0) Load(Chain);
-  chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
   TString tChain(Chain);
+  if (tChain == "") {
+  if (Last == -2 && tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
+    if ( TString(gProgName) == "root4star") tChain = "MC.2014,gstar,20Muons,StiCA,-hitfilt,KFVertex,Corr4,OSpaceZ2,OGridLeak3D,StiHftC,pxlFastSim,ssdfast,useXgeom";
+    else                                    tChain = "test.RC.AuAu200.y2016,StiCA,KFVertex";
+  }
+  if (gClassTable->GetID("StBFChain") < 0) Load(tChain.Data());
+  chain = new StBFChain(); cout << "Create chain " << chain->GetName() << endl;
   chain->cd();
   chain->SetDebug(1);
   if (Last < -3) return;
-  chain->SetFlags(Chain);
-  if (tChain == "" || ! tChain.CompareTo("ittf",TString::kIgnoreCase)) Usage();
+  chain->SetFlags(tChain);
   gMessMgr->QAInfo() << Form("Process [First=%6i/Last=%6i/Total=%6i] Events",First,Last,Last-First+1) << endm;
   if (Last < -2) return;
   if (chain->Load() > kStOk) {

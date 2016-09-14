@@ -412,7 +412,8 @@ if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
 }
-if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_HOST_SYS !~ /darwin/){
+#if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_HOST_SYS !~ /darwin/){
+if ($STAR_HOST_SYS !~ /darwin/){
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/rexe";
