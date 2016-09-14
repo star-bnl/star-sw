@@ -5,6 +5,7 @@
 #define __Use_dNdx__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
+#include "StTpcdEdxCorrection.h" 
 // ROOT
 #include "TMinuit.h"
 #include "TSystem.h"
@@ -81,7 +82,6 @@ static Double_t outerSectorPadPitch = 0;
 
 const static Double_t pMomin = 0.35; // range for dE/dx calibration
 const static Double_t pMomax = 0.75;
-#include "dEdxTrackY2.h"
 //______________________________________________________________________________
 // QA histograms
 const static Int_t  fNZOfBadHits = 11;
@@ -171,112 +171,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   }
   SafeDelete(m_TpcdEdxCorrection);
   m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
-#ifdef __OLD_dX_Calculation__  
-  StTpcCoordinateTransform transform(gStTpcDb);
-  for (Int_t sector = 1; sector<= numberOfSectors; sector++) {
-    if (! mNormal[sector-1])  {
-      mNormal[sector-1] = new StThreeVectorD*[NumberOfRows]; 
-      memset(&mNormal[sector-1][0], 0, NumberOfRows*sizeof(StThreeVectorD*));
-    }
-    for (Int_t row = 1; row <= NumberOfRows; row++) {
-      //      if (! tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
-      if (Debug()>1) cout << "========= sector/row ========" << sector << "/" << row << endl;
-      StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
-      StTpcLocalDirection        dirL;      
-      transform(dirLS,dirL);                     if (Debug()>1) cout << "dirL\t" << dirL << endl;
-      StGlobalDirection          dirG;
-      transform(dirL,dirG);                       if (Debug()>1) cout << "dirG\t" << dirG << endl;
-      SafeDelete(mNormal[sector-1][row-1]);
-      mNormal[sector-1][row-1] = new StThreeVectorD(dirG.position().unit());
-      if (Debug()>1) cout << "Normal[" << sector-1 << "][" << row-1 << "] = " << *mNormal[sector-1][row-1] << endl;
-      Double_t padlength;
-      if (row <= NumberOfInnerRows) padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
-      else 	                    padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
-      for (Int_t l = 0; l < 3; l++) {
-	if (! mRowPosition[sector-1][l]) {
-	  mRowPosition[sector-1][l]  = new StThreeVectorD*[NumberOfRows]; 
-	  memset(&mRowPosition[sector-1][l][0], 0, NumberOfRows*sizeof(StThreeVectorD*));
-	}
-	Double_t y = transform.yFromRow(row);
-	if (l == 1) y += padlength/2.;
-	if (l == 2) y -= padlength/2.;
-	StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row); if (Debug()>1) cout << lsCoord << endl;
-	StGlobalCoordinate  gCoord; 
-	transform(lsCoord, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
-	SafeDelete(mRowPosition[sector-1][l][row-1]);
-	mRowPosition[sector-1][l][row-1] = 
-	  new  StThreeVectorD(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
-	if (Debug()>1) cout << "mRowPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
-			    << *mRowPosition[sector-1][l][row-1] << endl;
-      }
-    }
-  }
-  for (Int_t iWestEast = 0; iWestEast < 2; iWestEast++) {
-    for (Int_t io = 0; io < 2; io++) {
-      if (Debug()>1) cout << "========= West (0) or  East(1) / Inner(0) or Outer (1)  ========" 
-			  << iWestEast << "/" << io << endl;
-      Int_t sector = (iWestEast == 0) ? 12 : 24;
-      Int_t row    = (io    == 0) ?  1 : NumberOfInnerRows+1;
-      StTpcLocalSectorDirection  dirLS(0.,0.,1.0,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
-      StTpcLocalDirection        dirL;      
-      transform(dirLS,dirL);    if (Debug()>1) cout << "dirL\t" << dirL << endl;
-      StGlobalDirection dirG;
-      transform(dirL,dirG);      if (Debug()>1) cout << "dirG\t" << dirG << endl;
-      SafeDelete(mPromptNormal[iWestEast][io]);
-      mPromptNormal[iWestEast][io] = new StThreeVectorD(dirG.position().unit());
-      if (Debug()>1) cout << "mPromptNormal[" << iWestEast << "][" << io << "] = " << *mPromptNormal[iWestEast][io] << endl;
-      //      Double_t zGG = gStTpcDb->Dimensions()->gatingGridZ(); // outerSectorPadPlaneZ is 210.107 cm in Db instead of 209.99 on Drawings ?
-      Double_t z[2][3] = { 
-	// Anodes         GG          Pads
-	{ -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
- 	{ -0.6 - 0.4,     0,  -0.6 - 2*0.4}  // Outer
-      };
-      for (Int_t l = 0; l < 3; l++) {
-	SafeDelete(mPromptPosition[iWestEast][io][l]); 
-	Double_t y = transform.yFromRow(row);
-	StTpcLocalSectorCoordinate  lsCoord(0., y, z[io][l],sector,row); if (Debug()>1) cout << lsCoord << endl;
-	StGlobalCoordinate  gCoord; 
-	transform(lsCoord, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
-	SafeDelete(mPromptPosition[iWestEast][io][l]);
-	mPromptPosition[iWestEast][io][l] = 
-	  new  StThreeVectorD(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
-	if (Debug()>1) cout << "mPromptPosition[" << sector-1 << "][" << row-1 << "][" << l << "] = " 
-			    << *mPromptPosition[iWestEast][io][l] << endl;
-      }
-    }
-  }
-#endif
   return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StdEdxY2Maker::FinishRun(Int_t OldRunNumber) {
-#ifdef __OLD_dX_Calculation__
-  // Move Clean up to InitRun
-  for (Int_t sector = 1; sector<= numberOfSectors; sector++) {
-    if (! mNormal[sector-1])  {
-      for (Int_t row = 1; row <= NumberOfRows; row++) { SafeDelete(mNormal[sector-1][row-1]);}
-      delete [] mNormal[sector-1]; mNormal[sector-1] = 0;
-    }
-    for (Int_t l = 0; l < 3; l++) {
-      if (! mRowPosition[sector-1][l]) {
-	for (Int_t row = 1; row <= NumberOfRows; row++) { SafeDelete(mRowPosition[sector-1][l][row-1]);}
-	delete [] mRowPosition[sector-1][l]; mRowPosition[sector-1][l] = 0;
-      }
-      for (Int_t iWestEast = 0; iWestEast < 2; iWestEast++) {
-	for (Int_t io = 0; io < 2; io++) {
-	  SafeDelete(mPromptPosition[iWestEast][io][l]);
-	}
-      }
-    }
-  }
-  for (Int_t iWestEast = 0; iWestEast < 2; iWestEast++) {
-    for (Int_t io = 0; io < 2; io++) {
-      SafeDelete(mPromptNormal[iWestEast][io]);
-    }
-  }
-#endif
-  SafeDelete(m_TpcdEdxCorrection);
-  return StMaker::FinishRun(OldRunNumber);
 }
 //________________________________________________________________________________
 Double_t StdEdxY2Maker::gaus2(Double_t *x, Double_t *p) {
@@ -306,7 +201,6 @@ TF1 *StdEdxY2Maker::Gaus2() {
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Finish() {
   //  static Double_t slope = 1.7502e-6;// slope from Blair   1/( O2 in ppm., cm )
-  FinishRun(0);
 #ifdef __USEZ3A__
   if (Z3A) {// control Z slope
     const Char_t *IO[2] = {"Inner", "Outer"};
@@ -331,8 +225,9 @@ Int_t StdEdxY2Maker::Finish() {
     }
   }
 #endif
-  SafeDelete(m_TpcdEdxCorrection);
   SafeDelete(m_Minuit);
+  if (m_TpcdEdxCorrection && m_TpcdEdxCorrection->TestBit(kCanDelete)) delete m_TpcdEdxCorrection;
+  m_TpcdEdxCorrection = 0;
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
@@ -1014,20 +909,20 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     virtual ~Hists2D() {}
   };
   // Histograms
-  static THnSparseF *Time = 0, *TimeP = 0, *TimeC = 0;
+  static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
   static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",NumberOfRows,150, 6.84, 6.99);
-  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",NumberOfRows,150, 6.84, 6.99);
+  //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",NumberOfRows,150, 6.84, 6.99);
   
   static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10);
-  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
+  //  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
 
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
   static Hists3D SecRow3;
   static Hists3D TanL3D("TanL3D","log(dEdx/Pion)","row","Tan(#lambda)",NumberOfRows,200,-2.,2.);
-  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
+  //  static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",NumberOfRows,100,0.,10.);
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",NumberOfRows,105,0,210);
-  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
+  //  static Hists3D Z3O("Z3O","<log(dEdx/Pion)>","row","(Drift)*ppmO2In",NumberOfRows,100,0,1e4);
   //  static Hists3D Edge3("Edge3","log(dEdx/Pion)","row"," Edge",NumberOfRows, 400,-100,100);
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",NumberOfRows, 100,0,10.);
   static TH2F *ZdcCP = 0, *BBCP = 0;
@@ -1107,7 +1002,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     Double_t xMax[2] = {(Double_t ) i2, ZdEdxMax};
     Time   = new THnSparseF("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 2, nBins, xMin, xMax); f->Add(Time);
     TimeC  = new THnSparseF("TimeC","log(dE/dx)_{corrected} - log(I(pi)) versus Date& Time after correction", 2, nBins, xMin, xMax); f->Add(TimeC);
-    TimeP  = new THnSparseF("TimeP","log(dE/dx)_{after pressure correction} - log(I(pi)) versus Date& Time",  2, nBins, xMin, xMax); f->Add(TimeP);
+    //    TimeP  = new THnSparseF("TimeP","log(dE/dx)_{after pressure correction} - log(I(pi)) versus Date& Time",  2, nBins, xMin, xMax); f->Add(TimeP);
     TString title("log(dE/dx/Pion) vs inputTPCGasPressure (mbar)");
     inputTPCGasPressureP = new TH2F("inputTPCGasPressureP","log(dE/dx/Pion) vs inputTPCGasPressure (mbar)",100,1.0,3.0,nZBins,ZdEdxMin,ZdEdxMax);
     nitrogenPressureP = new TH2F("nitrogenPressureP","log(dE/dx/Pion) vs nitrogenPressure (mbar)",100,0.9,1.1,nZBins,ZdEdxMin,ZdEdxMax);
@@ -1366,7 +1261,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (TMath::Abs(Pad2Edge) > 5) {
 	  SecRow3.Fill(FdEdx[k].sector,FdEdx[k].row,Vars);
 	}
-	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
+	//	if (FdEdx[k].Zdc > 0) Zdc3.Fill(FdEdx[k].row,TMath::Log10(FdEdx[k].Zdc),Vars);
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
 	//Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
@@ -1374,7 +1269,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	TanL3D.Fill(FdEdx[k].row,FdEdx[k].TanL,Vars);
 	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
-	  Double_t t     = tpcGas->inputGasTemperature/298.2;
+	  //	  Double_t t     = tpcGas->inputGasTemperature/298.2;
 	  if (p > 0) {
 	    Double_t press = TMath::Log(p);
 	    Pressure.Fill(FdEdx[k].row,press,Vars);
@@ -1383,20 +1278,20 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  Double_t V = FdEdx[k].Voltage;
 	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
 	  Voltage.Fill(cs,VN,VarsV);
-	  Volt.Fill(cs,V,VarsV);
+	  //	  Volt.Fill(cs,V,VarsV);
 	  Qcm.Fill(cs,FdEdx[k].Qcm,VarsV);
 	  AvCurrent.Fill(cs,FdEdx[k].Crow,VarsV);
-	  if (p*t > 0) {
-	    Double_t temp = TMath::Log(p/t);
-	    PressureT.Fill(FdEdx[k].row,temp,Vars);
-	  }
+// 	  if (p*t > 0) {
+// 	    Double_t temp = TMath::Log(p/t);
+// 	    PressureT.Fill(FdEdx[k].row,temp,Vars);
+// 	  }
 	}
 	Double_t vars[2] = {date,FdEdx[k].C[ StTpcdEdxCorrection::ktpcTime-1].dEdxN};
 	if (Time)    Time->Fill(vars);
-	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
+	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].dEdxN; TimeC->Fill(vars);}
 	Z3.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistance,Vars);
-	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
+	//	Z3O.Fill(FdEdx[k].row,FdEdx[k].ZdriftDistanceO2,Vars);
 	//	Edge3.Fill(FdEdx[k].row,FdEdx[k].edge, Vars);
 	dX3.Fill(FdEdx[k].row,FdEdx[k].dx, Vars);
       }
@@ -1975,7 +1870,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     if (FdEdx[i].row > 13) io = 1;
     Double_t Sigma = TMath::Sqrt(sigma_p[io]*sigma_p[io] + 1./n_P);
     zdE->SetParameter(3,Sigma);
-    Double_t dE = 1e6*FdEdx[i].dEdx*FdEdx[i].dxC; // GeV => keV
+    Double_t dE = 1e6*FdEdx[i].dE; // GeV => keV
 #else /* __HEED_MODEL__ */
     Double_t dX = FdEdx[i].dxC;
     Double_t n_P = dNdx*dX;
@@ -1985,7 +1880,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     zFunc[kTpcOuterInner]->SetParameter(0,n_PL);
     Double_t Sigma = TMath::Sqrt(sigma_p[kTpcOuterInner]*sigma_p[kTpcOuterInner] + 1./n_P);
     zFunc[kTpcOuterInner]->SetParameter(1,Sigma);
-    Double_t dE = 1e9*FdEdx[i].dEdx*dX; // GeV => eV
+    Double_t dE = 1e9*FdEdx[i].dE; // GeV => eV
 #endif /* __HEED_MODEL__ */
     Double_t z  = TMath::Log(dE);
 #ifndef __HEED_MODEL__

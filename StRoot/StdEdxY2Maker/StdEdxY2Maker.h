@@ -12,7 +12,6 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StTpcdEdxCorrection.h" 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
@@ -24,6 +23,9 @@ class StGlobalCoordinate;
 class TH2F;
 class StTpcPadrowHitCollection;
 class StTrack;
+class StTpcdEdxCorrection;
+class dEdxY2_t;
+class dst_dedx_st;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder     =  0,
@@ -50,7 +52,6 @@ class StdEdxY2Maker : public StMaker {
   virtual Int_t Init();
   virtual Int_t InitRun(Int_t RunNumber);
   virtual Int_t Finish();
-  virtual Int_t FinishRun(Int_t OldRunNumber);
   virtual Int_t Make();
   virtual void  SetMask(Int_t mask) {m_Mask = mask;}
   static  void  SortdEdx();
