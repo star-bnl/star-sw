@@ -130,7 +130,8 @@ Int_t StTpcRSMaker::Finish() {
     SafeDelete(mPadResponseFunction[io]);
     SafeDelete(mPolya[io]);
   }
-  SafeDelete(m_TpcdEdxCorrection);
+  if (m_TpcdEdxCorrection && m_TpcdEdxCorrection->TestBit(kCanDelete)) delete m_TpcdEdxCorrection;
+  m_TpcdEdxCorrection = 0;
   return StMaker::Finish();
 }
 //________________________________________________________________________________
