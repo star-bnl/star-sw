@@ -20,10 +20,10 @@ using namespace units;
 #include "TH1.h"
 #include "TTree.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
 #include "TArrayF.h"
 class Altro;
+class StTpcdEdxCorrection;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
