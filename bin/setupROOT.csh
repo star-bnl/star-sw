@@ -13,7 +13,8 @@ endif
 #setenv PYTHIA6 $STAR_LIB
 #setenv VENUS $OPTSTAR
 #if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd/xrootd-3.2.7) source $ROOTSYS/bin/setxrd.csh  /opt/xrootd/xrootd-3.2.7
-if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  /opt/xrootd
+#if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  /opt/xrootd
+if (-r $ROOTSYS/bin/setxrd.csh && -d /opt/xrootd) source $ROOTSYS/bin/setxrd.csh  $ROOTSYS
 setenv CERN_ROOT_Local $CERN_ROOT
 setenv SHIFTLIB "" #"-lshift"
 setenv SHIFTLIBDIR ""#$CERN/../usr.local/lib
@@ -118,14 +119,14 @@ endsw
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
     case *gcc492*:
+    case *gcc482*:
      setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      breaksw
-    case *gcc482*:
-      setenv ENABLE_CXX11 "--enable-cxx11"
+#      setenv ENABLE_CXX11 "--enable-cxx11"
 # only for gcc from devtoolset 
 #     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
-     breaksw
+#     breaksw
     case *darwin*:
       setenv ENABLE_CXX11 "--enable-cxx11"
       setenv EXTRA_FLAGS  "--cflags=-fcolor-diagnostics"
