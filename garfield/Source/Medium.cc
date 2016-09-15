@@ -2628,7 +2628,7 @@ void Medium::SetExtrapolationMethodIonDissociation(const std::string& extrLow,
   }
 }
 
-bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int extrNb) {
+bool Medium::GetExtrapolationIndex(std::string extrStr, unsigned int& extrNb) {
 
   // Convert to upper-case
   for (unsigned int i = 0; i < extrStr.length(); ++i) {

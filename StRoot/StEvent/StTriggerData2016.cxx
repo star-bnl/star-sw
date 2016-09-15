@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2016.cxx,v 2.4 2016/06/07 15:51:34 akio Exp $
+ * $Id: StTriggerData2016.cxx,v 2.5 2016/09/14 15:11:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Dec 2015
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2016.cxx,v $
+ * Revision 2.5  2016/09/14 15:11:37  ullrich
+ * Added missing check for validity of mBBC[buffer]
+ *
  * Revision 2.4  2016/06/07 15:51:34  akio
  * Making code better based on Coverity reports
  *
@@ -1115,11 +1118,11 @@ unsigned short StTriggerData2016::vpdTimeDifference() const
 
 unsigned short StTriggerData2016::bbcVP101(int ch, int prepost) const
 {
-        int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
+    int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
     if(ch<0 || ch>7) return 0;
         int buffer = prepostAddress(prepost);
-        if (buffer >= 0){
-                return mBBC[buffer]->VPD[map[ch]];
+        if (buffer >= 0 && mBBC[buffer]){
+	    return mBBC[buffer]->VPD[map[ch]];	    
         }
         return 0;
 }

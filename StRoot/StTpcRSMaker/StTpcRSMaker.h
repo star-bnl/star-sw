@@ -24,6 +24,7 @@ using namespace units;
 #include "TArrayF.h"
 class StTpcdEdxCorrection;
 class Altro;
+class StTpcdEdxCorrection;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;

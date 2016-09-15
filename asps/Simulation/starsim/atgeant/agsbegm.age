@@ -44,8 +44,10 @@
    Character*8       CHTAG(2)/'Bank-ID','Bank-ID'/,CHDIR(n),omod
    Real              Xtime,XXtime
    Common /AgCMTIME/ Xtime,XXtime
+#ifndef __NON_ELASTIC_ZEBRA__
    Integer           AgIPAW,IwTyp
    COMMON /AgCIPAW/  AgIPAW,IwTyp
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
    Logical           EXST,Opnd,First/.true./
    Integer           LRZDOC
    Common /AgCZDOC/  LRZDOC
@@ -83,11 +85,14 @@
    }            }
 
                               * * *
+#ifndef __NON_ELASTIC_ZEBRA__
    ENTRY AGSBEGD
 
    If (LdArea(1)=0) call MZLINT(IxCONS,'AGCDOCL',LDarea,L1Doc,Lpar)
    CALL RZCDIR(CWD,'R')
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
    INQUIRE(FILE='detm.rz',OPENED=opnd)
+#ifndef __NON_ELASTIC_ZEBRA__
    If LUN==61 & .not.opnd  " & LVGEOM(1)>=0 "
    {
      Istat=0; Lrecl=256;  %ChDir='RZDOC'
@@ -115,7 +120,17 @@
        IF (EXST & IWTYP>0) <w>; (' presence of detm.rz may be dangerous ')
      }
    }
+#else /* __NON_ELASTIC_ZEBRA__ */
+   If .not.opnd
+   {  Lrecl=256;   INQUIRE(FILE='detm.rz',EXIST=EXST);  %ChDir='RZDOC'
+      If !EXST { Call RZOPEN (Lun,%CHdir,'detm.rz','NWX', Lrecl,Istat)
+                 Call RZMAKE (Lun,%CHdir,2,'HH',CHTAG,5000,'XO')
+                 call RZCLOS (%Chdir,' ')
+               }
+      Call RZOPEN (Lun,%ChDir, 'detm.rz','UWXD',Lrecl,Istat);
+#endif /* __NON_ELASTIC_ZEBRA__ */
 *
+#ifndef __NON_ELASTIC_ZEBRA__
    If (Istat==0)
    {
        CALL RZCDIR('//'//%ChDIR,' ')
@@ -129,9 +144,22 @@
    If (IDebug>2) Call ZVERIF(0,0,' module started ')
 *
 * from pawrop: bug in RZOPEN with C I/O, TOPDIR is not returned correctly
+#else /* __NON_ELASTIC_ZEBRA__ */
+* from pawrop:
+*--- bug in RZOPEN with C I/O, TOPDIR is not returned correctly ---
+#endif /* __NON_ELASTIC_ZEBRA__ */
 *     IF (IOPTC!=0 & LUN <10) WRITE(TOPDIR,'(3HLUN,i1)') LUN
 *     IF (IOPTC!=0 & LUN>=10) WRITE(TOPDIR,'(3HLUN,i2)') LUN
 *
+#ifdef __NON_ELASTIC_ZEBRA__
+      Call RZLOGL (Lun,-3);    "  Call RZCDIR (ChDir0,'P') "
+      Do Itry=1,2
+      {  Call RZFILE(Lun,%ChDir,'UDX'); if (Iquest(1)==0) Break
+         Call Rzfree('RZFILE');         Call RZEND(%Chdir)
+      }
+      If Istat!=0     { <w>; (' detm.rz absent - no documentation available');}
+      If Iquest(1)!=0 { <w>Iquest(1);(' problem opening detm.rz, IQUEST=',i6);}
+*     Chdir0=%Chdir
+   }
+#endif /* __NON_ELASTIC_ZEBRA__ */
    END
-
-

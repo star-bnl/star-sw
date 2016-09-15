@@ -41,82 +41,70 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Debug(debug)
 {
   assert(gStTpcDb);
-  //  memset (&m_Corrections, 0, sizeof(m_Corrections));
-  m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,"");
-  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge", St_TpcEdgeC::instance());
-  m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"              , St_TpcAdcCorrectionBC::instance());
-  m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"                , St_TpcdChargeC::instance());
-  m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"                  , St_TpcrChargeC::instance());
-  m_Corrections[kTpcCurrentCorrection  ] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current", St_TpcCurrentCorrectionC::instance());
-  m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge, absolute normalization", St_TpcRowQC::instance());
-  m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"                  , St_TpcSecRowBC::instance());
-  m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"       , St_TpcSecRowCC::instance());
-  m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Dependence of the Gain on Gas Density due to Pressure",St_tpcPressureBC::instance());
-  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"");
-  m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"        , St_TpcDriftDistOxygenC::instance());
-  m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"                , St_TpcMultiplicityC::instance());
-  m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance"                         , St_TpcZCorrectionBC::instance());
-  m_Corrections[ktpcMethaneIn          ] = dEdxCorrection_t("tpcMethaneIn"        ,"Dependence of the Gain on Methane content"           , St_tpcMethaneInC::instance());
-  m_Corrections[ktpcGasTemperature     ] = dEdxCorrection_t("tpcGasTemperature"   ,"Dependence of the Gain on Gas Density due to Temperature", St_tpcGasTemperatureC::instance());
-  m_Corrections[ktpcWaterOut           ] = dEdxCorrection_t("tpcWaterOut"         ,"Dependence of the Gain on Water content"             , St_tpcWaterOutC::instance());
-  m_Corrections[kSpaceCharge           ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Dependence of the Gain on space charge near the wire", St_TpcSpaceChargeC::instance());
-  m_Corrections[kPhiDirection          ] = dEdxCorrection_t("TpcPhiDirection"     ,"Dependence of the Gain on interception angle"        , St_TpcPhiDirectionC::instance());
-  m_Corrections[kTanL                  ] = dEdxCorrection_t("TpcTanL"             ,"Dependence of the Gain on Tan(lambda)"               , St_TpcTanLC::instance());
-  m_Corrections[kdXCorrection          ] = dEdxCorrection_t("TpcdXCorrectionB"    ,"dX correction"                                       , St_TpcdXCorrectionBC::instance());
-  m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"        , St_TpcEffectivedXC::instance()); 
-  m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size");
-  m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Dependence of the Gain on Zdc CoincidenceRate"       , St_TpcZDCC::instance());
-  m_Corrections[kTpcLast               ] = dEdxCorrection_t("Final"        	  ,"");
-  m_Corrections[kTpcNoAnodeVGainC      ] = dEdxCorrection_t("No Anode Voltage Cor" ,"");
-  m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation vs Track length and relative error in Ionization", St_TpcLengthCorrectionBC::instance());
-  m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX) >  and relative error in Ionization", St_TpcLengthCorrectionMDF::instance());
-  m_Corrections[kTpcNoAnodeVGainC      ] = dEdxCorrection_t("TpcNoAnodeVGainC"    ,"Remove tpc Anode Voltage gain correction");
-  m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"          ,"dEdx correction wrt Bichsel parameterization"        , St_TpcdEdxCorC::instance()); 
-  m_Corrections[kTpcAllCorrections     ] = dEdxCorrection_t("Total corrections"   ,"");
-  mNumberOfRows           = gStTpcDb->PadPlaneGeometry()->numberOfRows();
   mNumberOfInnerRows      = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
-
+  mNumberOfRows           = gStTpcDb->PadPlaneGeometry()->numberOfRows();											          
   if (!m_Mask) m_Mask = -1;
-  // 
   ReSetCorrections();
 }
 //________________________________________________________________________________
 void StTpcdEdxCorrection::ReSetCorrections() {
-  St_tpcGas *k_tpcGas = (St_tpcGas *) St_tpcGasC::instance()->Table(); //(St_tpcGas *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcGas");
-  if (!k_tpcGas || ! k_tpcGas->GetNRows()) {
+  St_tpcGas *tpcGas = (St_tpcGas *) St_tpcGasC::instance()->Table(); //
+  //  St_tpcGas *tpcGas = (St_tpcGas *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcGas");
+  if (!tpcGas || ! tpcGas->GetNRows()) {
     LOG_ERROR << "=== tpcGas is missing ===" << endm; 
-    assert(k_tpcGas);
+    assert(tpcGas);
   }
-  SettpcGas(k_tpcGas);
-  Int_t N = 0;
-  Int_t k = 0;
-  Int_t i = 0;
-  Int_t npar = 0;
-  for (k = kUncorrected+1; k < kTpcAllCorrections; k++) {
+  SettpcGas(tpcGas);
+  m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                    ,0); 					       
+  m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
+  m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
+  m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"				,St_TpcdChargeC::instance());		     
+  m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
+  m_Corrections[kTpcCurrentCorrection  ] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current"		,St_TpcCurrentCorrectionC::instance());     
+  m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge,"             ,St_TpcRowQC::instance());		           
+  m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
+  m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
+  m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
+  m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,""									,0);					         
+  m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"			,St_TpcDriftDistOxygenC::instance());	     
+  m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"				,St_TpcMultiplicityC::instance());	     
+  m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance"					,St_TpcZCorrectionBC::instance());	     
+  m_Corrections[ktpcMethaneIn          ] = dEdxCorrection_t("tpcMethaneIn"        ,"Gain on Methane content"					        ,St_tpcMethaneInC::instance());	     
+  m_Corrections[ktpcGasTemperature     ] = dEdxCorrection_t("tpcGasTemperature"   ,"Gain on Gas Dens. due to Temperature"			        ,St_tpcGasTemperatureC::instance());	         
+  m_Corrections[ktpcWaterOut           ] = dEdxCorrection_t("tpcWaterOut"         ,"Gain on Water content"					        ,St_tpcWaterOutC::instance());		     
+  m_Corrections[kSpaceCharge           ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Gain on space charge near the wire"			                ,St_TpcSpaceChargeC::instance());	     
+  m_Corrections[kPhiDirection          ] = dEdxCorrection_t("TpcPhiDirection"     ,"Gain on interception angle"				                ,St_TpcPhiDirectionC::instance());	     
+  m_Corrections[kTanL                  ] = dEdxCorrection_t("TpcTanL"             ,"Gain on Tan(lambda)"					        ,St_TpcTanLC::instance());		     
+  m_Corrections[kdXCorrection          ] = dEdxCorrection_t("TpcdXCorrectionB"    ,"dX correction"							,St_TpcdXCorrectionBC::instance());	     
+  m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"			,St_TpcEffectivedXC::instance()); 	     
+  m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
+  m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
+  m_Corrections[kTpcLast               ] = dEdxCorrection_t("Final"        	  ,""								        ,0);					     
+  m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB"  ,"Variation vs Track length and relative error in Ionization"	,St_TpcLengthCorrectionBC::instance());     
+  m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX)> and rel. error in dE/dx" ,St_TpcLengthCorrectionMDF::instance());         
+  m_Corrections[kTpcNoAnodeVGainC      ] = dEdxCorrection_t("TpcNoAnodeVGainC"      ,"Remove tpc Anode Voltage gain correction"				,0);					         
+  m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"            ,"dEdx correction wrt Bichsel parameterization"			,St_TpcdEdxCorC::instance());               
+  for (Int_t k = kUncorrected+1; k < kTpcAllCorrections; k++) {
     if (! m_Corrections[k].Chair) continue;
     LOG_INFO << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title << endm;
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
       LOG_INFO << " \tis missing" << endm; 
-      //      if (m_Corrections[k].Chair->Table()->IsMarked()) delete m_Corrections[k].Chair->Table();
-      //      SafeDelete(m_Corrections[k].Chair); continue;
       m_Corrections[k].Chair = 0;
       continue;
     }
-    //    LOG_INFO << "StTpcdEdxCorrection: " <<  m_Corrections[k].Name << " is ON" << endm;
     St_tpcCorrectionC *chair =  Correction(k);
     if (! chair ) continue; // not St_tpcCorrectionC
     const St_tpcCorrection *table = (const St_tpcCorrection *) chair->Table();
     const tpcCorrection_st *cor = table->GetTable();
-    N = table->GetNRows();
+    Int_t N = table->GetNRows();
     if (! cor || ! N) {
       LOG_INFO << " \tis empty" << endm;
       CLRBIT(m_Mask,k); 
-      //      SafeDelete(m_Corrections[k].Chair); continue;
       m_Corrections[k].Chair = 0;
       continue;
     }
-    npar = 0;
-    for (i = 0; i < N; i++, cor++) {
+    Int_t npar = 0;
+    for (Int_t i = 0; i < N; i++, cor++) {
       if (cor->nrows == 0 && cor->idx == 0) continue;
       npar += TMath::Abs(cor->npar); 
       if (TMath::Abs(cor->OffSet) > 1.e-7 ||
@@ -126,7 +114,6 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     if (! npar ) {
       LOG_INFO << " \thas no significant corrections => switch it off" << endm;
       CLRBIT(m_Mask,k); 
-      //      SafeDelete(m_Corrections[k].Chair); continue;
       m_Corrections[k].Chair = 0;
       continue;
     }	

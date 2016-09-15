@@ -20,16 +20,16 @@ foreach my $arg (@ARGV) {
 }
 if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0) {
   @histGF = qw (SecRow3 SecRow3C 
-		PressureC PressureTC
+		PressureC 
 		Time TimeC
-		Voltage VoltageC Volt VoltC Qcm AvCurrent QcmC AvCurrentC
+		Voltage VoltageC Qcm AvCurrent QcmC AvCurrentC
 		ppmOxygenInP  inputGasTemperatureP 
 		flowRateExhaustP flowRateRecirculationP
 		percentMethaneInP percentMethaneInPA percentMethaneInPC
 		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
-		Z3C Z3OC
-		Zdc3C dX3C TanL3DC
-	      );
+		Z3C 
+		dX3C TanL3DC
+	      ); # PressureTC Volt VoltC Z3OC Zdc3C 
   @histRL5 = @histGF;
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
@@ -38,7 +38,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
 		 PullI70 PullIfit PullNfit
 	      ); 
-  @histNF = qw(PressureN PressureTN VoltageN VoltN AvCurrentN QcmN Zdc3N Z3N Z3ON Edge3N  SecRow3N dX3N TanL3DN);
+  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); #Edge3N PressureTN VoltN Zdc3N  Z3ON 
 #  @histXF = @histNF;
 }
 print "fit.pl for  @rootfiles \n";
@@ -54,6 +54,8 @@ open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
 <job name="dEdxFit" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths">
 	 <command>
+setenv NODEBUG yes
+starver .DEV2
 csh -x $INPUTFILE0
          </command>
 	<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/shed$JOBID.log" />

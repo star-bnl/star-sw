@@ -92,8 +92,9 @@ if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
 if ($STAR_SYS =~ /x8664/ || $STAR_SYS =~ /darwin/) {
   $FPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__ ";
   $CPPFLAGS .= " -DCERNLIB_QMLXIA64 -D__NON_ELASTIC_ZEBRA__";
-  
 }
+#  $FPPFLAGS .= " -D__NON_ELASTIC_ZEBRA__ ";
+#  $CPPFLAGS .= " -D__NON_ELASTIC_ZEBRA__";
 
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; 
@@ -145,6 +146,7 @@ foreach my $s (@src) {
 #    next if $ss =~ /comis\/mdext\.F/ and $STAR_SYS !~ /^sl/;
 #    next if $ss =~ /comis\/mhloc\.F/ and $STAR_SYS !~ /^sl/;
     next if ($ss =~ /deccc\/cs_dlfcn\.c/ and $STAR_SYS =~ /darwin/);
+#    next if ($ss =~ /comis/ and $ss !~ /csjcal1s/ and ($STAR_SYS =~ /darwin/ or $STAR_SYS =~ /x8664/));
     push @sources, $ss; 
   }
 }

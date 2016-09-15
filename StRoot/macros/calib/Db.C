@@ -33,7 +33,7 @@ void Load() {
 //________________________________________________________________________________
 //void Db(const Char_t *tabNam  = "Calibrations/tpc/noiseElim", 
 void Db(const Char_t *tabNam  = 
-	"Calibrations/svt/svtBadAnodes",
+	"Geometry/tpc/tpcPadPlanes",
 	Int_t date = -1, Int_t time = 0,
 	Int_t debugL = 1,
 	const Char_t *flavor="sim+ofl+laserDV"

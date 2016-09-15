@@ -170,24 +170,24 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"devTY",       20190101,     0, "dev2019",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
   {"devTZ",       20190101,     0, "dev2019",     "devTY with no HFT,xgeometry"}, // 
 
-  {"upgr01",      20190101,     4, "upgr01",   ""},
-  {"upgr02",      20190101,     5, "upgr02",   ""},
-  {"upgr03",      20190101,     6, "upgr03",   ""},
-  {"upgr04",      20190101,     7, "upgr04",   ""},
-  {"upgr05",      20190101,     8, "upgr05",   ""},
-  {"upgr06",      20190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
-  {"upgr07",      20190101,    10, "upgr07",   ""},
-  {"upgr08",      20190101,    11, "upgr08",   ""},
-  {"upgr09",      20190101,    12, "upgr09",   ""},
-  {"upgr10",      20190101,    13, "upgr10",   ""},
-  {"upgr11",      20190101,    14, "upgr11",   ""},
-  {"upgr12",      20190101,    15, "upgr12",   ""},
-  {"upgr13",      20190101,    16, "upgr13",   ""},
-  {"upgr14",      20190101,    17, "upgr14",   ""},
-  {"upgr15",      20190101,    18, "upgr15",   ""},
-  {"upgr16",      20190101,    19, "upgr16",   ""},
-  {"upgr17",      20190101,    20, "upgr17",   ""},
-  {"upgr16a",     20190101,    21, "upgr16a",  ""},
+  //  {"upgr01",      20190101,     4, "upgr01",   ""},
+  //  {"upgr02",      20190101,     5, "upgr02",   ""},
+  //  {"upgr03",      20190101,     6, "upgr03",   ""},
+  //  {"upgr04",      20190101,     7, "upgr04",   ""},
+  //  {"upgr05",      20190101,     8, "upgr05",   ""},
+  //  {"upgr06",      20190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
+  //  {"upgr07",      20190101,    10, "upgr07",   ""},
+  //  {"upgr08",      20190101,    11, "upgr08",   ""},
+  //  {"upgr09",      20190101,    12, "upgr09",   ""},
+  //  {"upgr10",      20190101,    13, "upgr10",   ""},
+  //  {"upgr11",      20190101,    14, "upgr11",   ""},
+  //  {"upgr12",      20190101,    15, "upgr12",   ""},
+  //  {"upgr13",      20190101,    16, "upgr13",   ""},
+  //  {"upgr14",      20190101,    17, "upgr14",   ""},
+  //  {"upgr15",      20190101,    18, "upgr15",   ""},
+  //  {"upgr16",      20190101,    19, "upgr16",   ""},
+  //  {"upgr17",      20190101,    20, "upgr17",   ""},
+  //  {"upgr16a",     20190101,    21, "upgr16a",  ""},
   // Future development:
   //  {"simpletpc",   20200102,    16, "simpletpc",""},
   //  {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
