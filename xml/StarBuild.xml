@@ -7,6 +7,6 @@
   cd $STAR
   cons -k  &gt;&amp; ${SUBMITTINGDIRECTORY}/${INPUTFILE0}.log
 </command>
-<stdout URL="file:/net/l404/data/fisyak/prodlog/Build_sched$JOBID.log" />
+<stdout URL="file:/star/u/fisyak/prodlog/Build_sched$JOBID.log" />
 <input URL="command:BuildList.pl" />
 </job>

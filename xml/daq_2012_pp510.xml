@@ -25,7 +25,7 @@
 # root4star -b -q 'bfc.C(500000,"DbV20130502 pp2012b AgML mtdDat btof fmsDat KFVertex BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D -hitfilt","st_physics_13076023_raw_5020002.daq")'
   root4star -q -b 'bfc.C('${f}','${l}',"pp2012b,beamline,mtdDat,btof,fmsDat,StiCA,KFVertex,BEmcChkStat,Tree,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt,-evout,NoHistos,noRunco,noTags","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 </command>
-<stdout URL="file:/star/subsys/tpc/fisyak/prodlog/sched$JOBID.log" />
+<stdout URL="file:/star/u/fisyak/prodlog/sched$JOBID.log" />
 <!-- <input URL="file:/star/data03/daq/2012/065/*/st_physics_adc_*.daq" /> -->
 <input URL="command:SplitJobs2012.pl"/>
 </job>

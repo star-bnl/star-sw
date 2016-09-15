@@ -44,7 +44,7 @@
     <ResourceUsage>
       <Priority>99</Priority>
     </ResourceUsage>
-        <stdout URL="file:/net/l404/data/fisyak/prodlog/daq2014$JOBID.log" />
-        <stderr URL="file:/net/l404/data/fisyak/prodlog/daq2014$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/daq2014$JOBID.err" />
 <input URL="file:/star/u/fisyak/work/daq/2013/083B/*.daq" />
 </job>

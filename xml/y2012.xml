@@ -41,8 +41,8 @@
   root4star -q -b 'bfc.C(1,5,"MC.y2012,verybig,sdt20120319.033000,fzin'${fitter}',beamline,-evout,-geantout,NoHistos,noTags,noRunco,-MiniMcEvent,-MiniMcMk,Corr4,OSpaceZ2,OGridLeak3D,Tree","'${evtsFile}'\n  gfile b '${dir}'/'${file}'_2000evts_minb.fzd\n mode TPCE back 4001400\n gback 400 400 1.066 106.6","'${out}'","'${tagFile}'")' &gt;&amp; ${logFile}
   endif
         </command>
-        <stdout URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.log" />
-        <stderr URL="file:/star/subsys/tpc/fisyak/prodlog/$JOBID.err" />
+        <stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+        <stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <input URL="command:Simu2012_Wplus_enu.pl" />
 
 </job>

@@ -23,8 +23,8 @@
   if ( -r $output) exit 0;
   root4star -q -b 'bfc.C('${f}','${l}',"RC.y2007,NoHistos,noRunco,noTags,-EvOut,KFVertex,StiCA","'${evtsFile}'","'${output}'")' &gt;&amp; ${logFile}
 	</command>
-	<stdout URL="file:/star/institutions/bnl/fisyak/prodlog/$JOBID.log" />
-	<stderr URL="file:/star/institutions/bnl/fisyak/prodlog/$JOBID.err" />
+	<stdout URL="file:/star/u/fisyak/prodlog/$JOBID.log" />
+	<stderr URL="file:/star/u/fisyak/prodlog/$JOBID.err" />
 <!-- <input URL="command:GetCosmicsDaq.pl" /> -->
 <input URL="file:/star/data03/daq/2007/*/*/*.daq" />
 </job>
