@@ -558,7 +558,7 @@ double TrackPAI::ComputeDeDxTail(const double emin, const double emax) {
   return log(emax / emin);
 }
 
-double TrackPAI::SampleAsymptoticCs(double u) {
+double TrackPAI::SampleAsymptoticCs(double u) const {
 
   const double emin = m_energies.back();
   // Rescale the random number
@@ -590,7 +590,7 @@ double TrackPAI::SampleAsymptoticCs(double u) {
   return emin * m_emax / (u * emin + (1. - u) * m_emax);
 }
 
-double TrackPAI::SampleAsymptoticCsSpinZero(const double emin, double u) {
+double TrackPAI::SampleAsymptoticCsSpinZero(const double emin, double u) const {
 
   const double a = emin / m_emax;
   const double b = m_beta2 * a;
@@ -609,7 +609,7 @@ double TrackPAI::SampleAsymptoticCsSpinZero(const double emin, double u) {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::SampleAsymptoticCsSpinHalf(const double emin, double u) {
+double TrackPAI::SampleAsymptoticCsSpinHalf(const double emin, double u) const {
 
   const double a = emin / m_emax;
   const double b = m_beta2 * a;
@@ -629,7 +629,7 @@ double TrackPAI::SampleAsymptoticCsSpinHalf(const double emin, double u) {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::SampleAsymptoticCsSpinOne(const double emin, double u) {
+double TrackPAI::SampleAsymptoticCsSpinOne(const double emin, double u) const {
 
   const double e2 = 2 * m_energy * m_energy;
   const double ec = m_mass * m_mass / ElectronMass;
@@ -653,7 +653,7 @@ double TrackPAI::SampleAsymptoticCsSpinOne(const double emin, double u) {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::SampleAsymptoticCsElectron(const double emin, double u) {
+double TrackPAI::SampleAsymptoticCsElectron(const double emin, double u) const {
 
   const double ek = m_energy - m_mass;
   const double ek2 = ek * ek;
@@ -673,7 +673,7 @@ double TrackPAI::SampleAsymptoticCsElectron(const double emin, double u) {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::SampleAsymptoticCsPositron(const double emin, double u) {
+double TrackPAI::SampleAsymptoticCsPositron(const double emin, double u) const {
 
   const double ek = m_energy - m_mass;
   const double ek2 = ek * ek;
@@ -704,7 +704,7 @@ double TrackPAI::SampleAsymptoticCsPositron(const double emin, double u) {
   return 0.5 * (eLow + eUp);
 }
 
-double TrackPAI::LossFunction(const double eps1, const double eps2) {
+double TrackPAI::LossFunction(const double eps1, const double eps2) const {
 
   const double eps = eps1 * eps1 + eps2 * eps2;
   if (eps <= 0.) {
