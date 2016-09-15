@@ -4,6 +4,7 @@ macro y2014
 *  DETP geom y2014
 * field=-5  hadr_off=1
   gexec $STAR_LIB/StarMagFieldNoDict.so
+  gexec $STAR_LIB/StarAgmlUtil.so	
   gexec $STAR_LIB/xgeometry.so
   gclos all
   grap/opt grid
