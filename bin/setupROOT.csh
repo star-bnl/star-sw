@@ -118,13 +118,9 @@ endsw
     setenv EXTRA_FLAGS ""
 switch ( $STAR_HOST_SYS )  
     case *gcc492*:
+    case *gcc482*:
      setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
-     breaksw
-    case *gcc482*:
-      setenv ENABLE_CXX11 "--enable-cxx11"
-# only for gcc from devtoolset 
-#     setenv EXTRA_FLAGS " --cflags=-fdiagnostics-color=always --cxxflags=-fdiagnostics-color=always"
      breaksw
     case *darwin*:
       setenv ENABLE_CXX11 "--enable-cxx11"
