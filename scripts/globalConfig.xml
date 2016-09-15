@@ -3901,6 +3901,80 @@ end
             </object>
         </void>
        <!-- ***************************************** End of STAR ONLINE block ***************************************** --> 
+       <!-- ************************************************* Start of STAR HLT block ***************************************************** --> 
+
+            <void method="add">
+            <object class="gov.bnl.star.offline.scheduler.Site">
+                <void property="siteName"><string>l4.bnl.local</string></void>
+               
+               <void method="addAccessPoint">   
+                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
+                        <void method="addAccessMethod">
+                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">    
+                                <void property="dispatcher">       <object idref="Generic_Fast_condor_Dispatcher"/>     </void>  <!--SHould chaneg to generic name-->
+                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
+                                <void method="addQueue">           <object idref="BNL_condor_online_quick"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
+                            </object>
+                        </void>
+                    </object>
+                   
+                </void>
+                
+
+                <void property="logConf">
+                    <object class="java.util.Hashtable">
+                        <void method="put">
+                          <string>directory</string>
+                          <!--<string>/data/r20g/log</string>-->
+                          <string>./</string>
+                        </void>
+                        <void method="put">
+                          <string>level</string>
+                          <string>INFO</string> <!-- DEBUG INFO WARN ERROR FATAL -->
+                        </void>
+                    </object>
+                </void>
+
+
+                <void property="programLocations">
+                    <object class="java.util.Hashtable">
+                        <void method="put">
+                            <string>$SCRATCH</string>
+                            <string>/scratch</string>
+                        </void>
+                        <void method="put">
+                          <string>unzip</string>
+                          <string>/usr/bin/unzip</string>
+                        </void>  
+                        <void method="put">
+                          <string>ls</string>
+                          <string>/bin/ls</string>
+                        </void>
+                        <void method="put">
+                          <string>csh</string>
+                          <string>/bin/csh</string>
+                        </void>
+                        
+                        <void method="put">
+                          <string>pacman_setup_script</string>
+                          <string>$OSG_APP/star/pacman-3.18.3/setup.csh</string>
+                        </void>
+                        <void method="put">
+                          <string>pacman_caches</string>
+                          <string>gsiftp://stargrid02.rcf.bnl.gov/afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES</string>
+                        </void>
+  
+                    </object>
+                </void>
+
+                
+               <void property="defaultPolicy">
+                   <object idref="bnl_condor_online_Policy"/>
+               </void>
+
+            </object>
+        </void>
+       <!-- ***************************************** End of STAR HLT block ***************************************** --> 
        
        
 
