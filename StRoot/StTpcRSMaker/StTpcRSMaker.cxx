@@ -50,6 +50,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
+#include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "TArrayI.h"
 // g2t tables
 #include "tables/St_g2t_tpc_hit_Table.h"
