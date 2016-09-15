@@ -658,7 +658,7 @@ endif
 if ( $?DECHO ) echo "$self :: OS Specific tasks. Our OS=$STAR_SYS"
 switch ($STAR_SYS)
     case "rs_aix*":
-        if ( -x ${GROUP_DIR}/dropit) setenv MANPATH `${GROUP_DIR}/dropit -p {$MANPATH} -p /usr/share/man`
+        if ( -x ${GROUP_DIR}/dropit) setenv MANPATH `${GROUP_DIR}/dropit -p {$MANPATH} -p ^/usr/share/man`
         breaksw
     case "alpha_osf32c":
 	breaksw
@@ -993,7 +993,7 @@ if ( -x ${GROUP_DIR}/dropit) then
 	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH"`
 	breaksw
     endsw
-    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH /usr/lib"`
+    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p "$LD_LIBRARY_PATH ^/usr/lib"`
     if ($USE_64BITS) then 
 	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
     else                  

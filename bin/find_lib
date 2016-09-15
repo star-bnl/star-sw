@@ -65,14 +65,15 @@
 #set dirlist = /opt/gcc/4.8.2/lib/gcc/x86_64-redhat-linux7E/4.8.2/32
 #set dirlist = `gfortran -print-search-dirs | grep libraries | awk -F= '{print $2}' | sed -e 's/:/ /g'`
 #set dirlist = `echo .${STAR_HOST_SYS}/LIB`;# ${STAR}/.${STAR_HOST_SYS}/lib`
-set dirlist = /usr/lib
+#set dirlist = /usr/lib
+set dirlist = /opt/rh/devtoolset-4/root/usr/lib/gcc/x86_64-redhat-linux/5.2.1/
 foreach p ($dirlist) 
-#    set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
-    set list = `echo ${p}/libboost*.so`
+    set list = `echo ${p}/*.so* ${p}/*.a ${p}/*.o` 
+#    set list = `echo ${p}/libboost*.so`
 #    set list = `echo $STAR/.sl44_gcc346/lib/*.so` #echo ${p}/lib*.so*`
     foreach lib ($list) 
 	echo "lib = " $lib 
-	nm -p $lib |  grep -i _ZNK5boost15program_options29value_semantic_codecvt_helperIcE5parseERNS_3anyERKSt6vectorISsSaISsEEb
+	nm -p $lib |  grep -i memget_
     end
 end
 #set list = `find .sl64_gcc447/obj/StarVMC/Geometry/ -name "*.o"`
