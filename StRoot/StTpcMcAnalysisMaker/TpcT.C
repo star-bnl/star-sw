@@ -1061,6 +1061,87 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   fOut->Write();
 }
 //________________________________________________________________________________
+void TpcTAdcTz(const Char_t *files="*.root", const Char_t *Out = "") { // replace Z => tZ
+  TDirIter Dir(files);
+  Char_t *file = 0;
+  Char_t *file1 = 0;
+  Int_t NFiles = 0;
+  TTreeIter iter("TpcT");
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString File(file);
+    if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
+	File.Contains("hist") || File.Contains("tags") || File.Contains("MuMc") ||
+	File.Contains("minimc") || File.Contains("event") ||
+	File.Contains("All") || File.Contains("Sparse") ||
+	File.Contains("MuDst.root")) continue;
+    TFile *f = new TFile (File);
+    if (f) {
+      TTree *tree = (TTree *) f->Get("TpcT");
+      if (! tree ) continue;
+      //    tree->Show(0);
+      iter.AddFile(file); 
+      NFiles++; 
+      file1 = file;
+      SetInnerPadrows();
+    }
+    delete f;
+  }
+  cout << files << "\twith " << NFiles << " files" << endl; 
+  if (! file1 ) return;
+  TString output(Out);
+  if (output == "") {
+    output = file1;
+    output.ReplaceAll(".root",".ADCtZ.root");
+  }
+  cout << "Output for " << output << endl;
+  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
+  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
+  const Int_t&       fAdcSum                                  = iter("fAdcSum");
+  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+  const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
+  const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
+  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
+  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+  const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
+  //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
+  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  if (! fOut) fOut = new TFile(output,"recreate");
+  fOut->cd();
+#if 0
+  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
+#endif
+  TProfile2D *inout[4];
+  inout[0] = new TProfile2D("inner","log(simulated ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[1] = new TProfile2D("outer","log(simulated ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[2] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[3] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  Double_t dsCut[2] = {1., 2.};
+  while (iter.Next()) {
+    if (fNoRcHit != 1) continue;
+    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
+    if (fAdcSum <= 0) continue;
+    for (Int_t k = 0; k < fNoMcHit; k++) {
+      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
+      if (fRcHit_mQuality[k] < 95) continue;
+      Int_t io = 0;
+      if (fMcHit_mVolumeId[k]%100 > NoInnerRows) io = 1;
+      if (fMcHit_mdS[k] < dsCut[io]) continue;
+      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
+      if (fMcHit_mAdc[k] <= 0) continue;
+      Double_t ratio = fMcHit_mAdc[k]/fAdcSum;
+      if (ratio < 0.1 || ratio > 10) continue;
+      inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k]));
+      inout[io+2]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mAdc[k])-TMath::Log(fAdcSum));
+    }
+  }
+  fOut->Write();
+}
+//________________________________________________________________________________
 void TpcTdENP(const Char_t *files="*.root", const Char_t *Out = "") {
   TDirIter Dir(files);
   Char_t *file = 0;
