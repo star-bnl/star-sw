@@ -19,7 +19,7 @@ MakeChairInstance(ftpcVoltageStatus,Calibrations/ftpc/ftpcVoltageStatus);
 #include "St_tpcGasC.h"
 MakeChairInstance(tpcGas,Calibrations/tpc/tpcGas);
 #include "St_TpcEffectivedXC.h"
-MakeChairOptionalInstance(TpcEffectivedX,Calibrations/tpc/TpcEffectivedX);
+MakeChairInstance(TpcEffectivedX,Calibrations/tpc/TpcEffectivedX);
 #include "St_tpcGridLeakC.h"
 MakeChairInstance(tpcGridLeak,Calibrations/tpc/tpcGridLeak);
 #include "St_tpcOmegaTauC.h"
@@ -29,11 +29,11 @@ MakeChairInstance(tpcDriftVelocity,Calibrations/tpc/tpcDriftVelocity);
 #include "St_TpcSecRowCorC.h"
 ClassImp(St_TpcSecRowCorC);
 #include "St_TpcSecRowBC.h"
-MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowBC,Calibrations/tpc/TpcSecRowB);
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowBC,Calibrations/tpc/TpcSecRowB);
 #include "St_TpcSecRowCC.h"
 MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRowC);
 #include "St_TpcSecRowXC.h"
-MakeChairOptionalInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
 ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
@@ -136,47 +136,47 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
 #include "St_TpcRowQC.h"
 MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
 #include "St_TpcDriftDistOxygenC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDriftDistOxygen);
+MakeChairInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDriftDistOxygen);
 #include "St_TpcMultiplicityC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
+MakeChairInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
 #include "St_TpcZCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrectionB);
 #include "St_TpcdXCorrectionBC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
 #include "St_TpcEdgeC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
+MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 #include "St_TpcAdcCorrectionBC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
+MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_tpcTimeBucketCorC,Calibrations/tpc/tpcTimeBucketCor);
+MakeChairInstance2(tpcCorrection,St_tpcTimeBucketCorC,Calibrations/tpc/tpcTimeBucketCor);
 #include "St_tpcGasTemperatureC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_tpcGasTemperatureC,Calibrations/tpc/tpcGasTemperature);
+MakeChairInstance2(tpcCorrection,St_tpcGasTemperatureC,Calibrations/tpc/tpcGasTemperature);
 #include "St_tpcWaterOutC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_tpcWaterOutC,Calibrations/tpc/tpcWaterOut);
+MakeChairInstance2(tpcCorrection,St_tpcWaterOutC,Calibrations/tpc/tpcWaterOut);
 #include "St_TpcdChargeC.h"
 MakeChairOptionalInstance2(tpcCorrection,St_TpcdChargeC,Calibrations/tpc/TpcdCharge);
 #include "St_TpcrChargeC.h"
 MakeChairOptionalInstance2(tpcCorrection,St_TpcrChargeC,Calibrations/tpc/TpcrCharge);
 #include "St_TpcTanLC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcTanLC,Calibrations/tpc/TpcTanL);
+MakeChairInstance2(tpcCorrection,St_TpcTanLC,Calibrations/tpc/TpcTanL);
 #include "St_TpcCurrentCorrectionC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
+MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 #include "St_TpcZDCC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcZDCC,Calibrations/tpc/TpcZDC);
+MakeChairInstance2(tpcCorrection,St_TpcZDCC,Calibrations/tpc/TpcZDC);
 #include "St_TpcSpaceChargeC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcSpaceChargeC,Calibrations/tpc/TpcSpaceCharge);
+MakeChairInstance2(tpcCorrection,St_TpcSpaceChargeC,Calibrations/tpc/TpcSpaceCharge);
 #include "St_TpcPhiDirectionC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcPhiDirectionC,Calibrations/tpc/TpcPhiDirection);
+MakeChairInstance2(tpcCorrection,St_TpcPhiDirectionC,Calibrations/tpc/TpcPhiDirection);
 #include "St_TpcdEdxCorC.h"
-MakeChairOptionalInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
+MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
 #include "St_TpcLengthCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
 #include "St_TpcLengthCorrectionMDF.h"
-MakeChairOptionalInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
+MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
 ClassImp(St_MDFCorrectionC);
 //____________________________________________________________________
 Double_t St_MDFCorrectionC::Eval(Int_t k, const Double_t x0, Double_t x1) const {
@@ -382,7 +382,7 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
-MakeChairOptionalInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
+MakeChairInstance(TpcAvgPowerSupply,Calibrations/tpc/TpcAvgPowerSupply);
 //________________________________________________________________________________
 Float_t St_TpcAvgPowerSupplyC::voltagePadrow(Int_t sector, Int_t padrow) const {
   Int_t e1 = 0, e2 = 0;
@@ -743,9 +743,9 @@ MakeChairOptionalInstance(trigPrescales,RunLog/onl/trigPrescales);
 #include "St_L0TriggerInfoC.h"
 MakeChairInstance(L0TriggerInfo,RunLog/onl/L0TriggerInfo);
 #include "St_trigL3ExpandedC.h"
-MakeChairOptionalInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
+MakeChairInstance(trigL3Expanded,RunLog/onl/trigL3Expanded);
 #include "St_dsmPrescalesC.h"
-MakeChairOptionalInstance(dsmPrescales,RunLog/onl/dsmPrescales);
+MakeChairInstance(dsmPrescales,RunLog/onl/dsmPrescales);
 #include "St_additionalTriggerIDC.h"
 MakeChairOptionalInstance(additionalTriggerID,RunLog/onl/additionalTriggerID);
 #include "StDetectorDbTriggerID.h"
