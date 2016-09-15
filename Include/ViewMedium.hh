@@ -72,7 +72,7 @@ class ViewMedium {
     ElectronVelocityB,
     ElectronVelocityExB,
     HoleVelocityB,
-    HoleVelocityExB,
+    HoleVelocityExB
   };
 
  private:
