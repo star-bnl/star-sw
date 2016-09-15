@@ -17,5 +17,7 @@ my @list = qw(
 	       gcc620.DEV2.x8664
 	    );
 foreach my $item (@list) {
+	my $log = $item . ".log";
+	if (-r $log) {next;}
    print "string:$item\n";
 }
