@@ -54,19 +54,30 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
   while (! seeds.empty()) {
     Seed_t &aSeed = seeds.back();
     vector<StiHit*>        _seedHits;
-    UInt_t sector = 0;
+    Int_t noHits = 0;
+    Int_t noHitsUsed = 0;
     for (vector<SeedHit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
       StiHit *hit = (*hitb)->hit;
-      if (!hit) continue; // || hit->timesUsed()) continue;
-      if (StiKalmanTrackFinder::DoAlignment()) {
-	const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit->stHit());
-	if (tpcHit) {
-	  if (! sector) sector = tpcHit->sector();
-	  else if (sector != tpcHit->sector()) continue;
+      if (! hit) continue;
+      noHits++;
+      if (! hit->timesUsed()) continue;
+      noHitsUsed++;
+    }
+    if (! noHitsUsed || noHitsUsed < Int_t (1 + 0.1*noHits)) { // No more than 10% of used hits allowed
+      UInt_t sector = 0;
+      for (vector<SeedHit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
+	StiHit *hit = (*hitb)->hit;
+	if (!hit) continue; // || hit->timesUsed()) continue;
+	if (StiKalmanTrackFinder::DoAlignment()) {
+	  const StTpcHit *tpcHit = dynamic_cast<const StTpcHit *>(hit->stHit());
+	  if (tpcHit) {
+	    if (! sector) sector = tpcHit->sector();
+	    else if (sector != tpcHit->sector()) continue;
+	  }
 	}
+	// check that all hits are coming from the same sector
+	_seedHits.push_back(hit);
       }
-      // check that all hits are coming from the same sector
-      _seedHits.push_back(hit);
     }
     seeds.pop_back();
 #ifdef PRINT_SEED_STATISTIC

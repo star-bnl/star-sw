@@ -947,7 +947,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 #endif      
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
-      hh->setFitFlag(1);
+      hh->setFitFlag(stiHit->timesUsed());
 //Kind of HACK, save residials into StiHack 
       fillResHack(hh,stiHit,node);
   }
