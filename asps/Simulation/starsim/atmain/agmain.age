@@ -125,7 +125,7 @@
                  // ' [ -n(o login_kumac)]'   _
            ; stop 'Done with help'
          }
-#else /* ! __NON_ELASTIC_ZEBRA__ */
+#else /* __NON_ELASTIC_ZEBRA__ */
          if comd(1:2)=='-h'
          { print *, ' usage: '//prog(1:LP)    _
                  // ' [ -V version]'          _
@@ -138,7 +138,7 @@
                  // ' [ -n(o login_kumac)]'   _
            ; stop 'Done with help'
          }
-#endif /*  __NON_ELASTIC_ZEBRA__ */
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
          if comd(1:1)='-'
          { Na+=1;  Nr=1;
            Arg=comd(3:);       If (Arg==' ') CALL GETARGF(J+1,Arg);
@@ -152,7 +152,9 @@
            If (comd(1:2)='-l') ILOG    = 1
            If (comd(1:2)='-f') FATCAT  = Arg
       }  }
+#ifndef __NON_ELASTIC_ZEBRA__
       IDEBUG=JDEB
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
       CALL CUTOL(VERSION)
       S = Prog.ne.'gstar' .and. Prog.ne.'atlsim' .and. Prog.ne.'paw'
       G = Version.ne.'staf' .and. Version.ne.'paw'
@@ -170,8 +172,10 @@
       CALL MZPAW   (NWPAW,' ')      ! store 1 - pawc
 
       CALL PAWINT1 (PROG(1:LP),BATCHF,PAWLOGF)
+#ifndef __NON_ELASTIC_ZEBRA__
       CALL KGETAR  (CHARGS)         ! pawint does not know the length
       if (ILOG==0) CALL AFNAME (PAWLOGF,'.logon.kumac')
+#endif /* ! __NON_ELASTIC_ZEBRA__ */
       CALL PAWINT2 (0,'+?',AgPAWE,IWTYP)  ! type of PAW, HBOOK, command
       CALL FMLOGL  (-3)
       IF (LENOCC(FATCAT)>0) CALL FMSTRT(62,63,%L(FATCAT),Irc)
@@ -191,7 +195,7 @@
       if (G) CALL UGINIT(PROG(1:LP))! user MENUs
       if (G) CALL GDINIT            ! Initialise Drawing pkg
       CALL TIMEL (TIMINT)
-
+#ifndef __NON_ELASTIC_ZEBRA__
       if ( PROG!='staf' & PROG!='paw' & Iwtyp>0 _
          | Version!=' ' & Version!='staf') Call AgVERSION
       if (G) Call KUEXEC('ROOT /GEANT')
@@ -209,7 +213,6 @@
       call KUEXEC('alias/create cd    dui/cd      c')
       call KUEXEC('alias/create more  table/print c')
       endif
-*#ifndef __NON_ELASTIC_ZEBRA__
 *                  AGI documentation system
       if (G) then
       call agsbegd('DOCU',ier)
@@ -222,7 +225,9 @@
       call dzdire  " initialise internal dzedit "
       open (99,file='/dev/null',STATUS= 'UNKNOWN')
       endif
-*#endif /*  __NON_ELASTIC_ZEBRA__ */
+#else /* __NON_ELASTIC_ZEBRA__TWO */
+      if (G) { Call AgVERSION; CALL KUEXEC('ROOT /GEANT') }
+#endif /* __NON_ELASTIC_ZEBRA__ */
 ****>
       CALL KUEXEC('SET/PROMPT '''//PROG(1:LP)//' >''')
       j=0
@@ -236,9 +241,6 @@
       NOLOG = LENOCC(PAWLOGF).le.0
       CALL PAWINT4 (PAWLOGF)
       BATCH = LENOCC(BATCHF).gt.0
-*     IF (BATCH) THEN
-*        CALL PAWINT4(BATCHF)
-*     ENDIF
 
       JE=LENOCC(Chargs)
       For (J1=INDEX(Chargs,' -'); 0<J1&J1<JE; J1=J2 )
@@ -260,12 +262,12 @@
       return
 ****>
       Entry AGEXIT
+#ifndef __NON_ELASTIC_ZEBRA__
       if (S) Istaf = CsADDR('STAF_STOP')
       If (Istaf!=0) call CsJCAL(Istaf,0,0,0,0,0,0,0,0,0,0,0)
       WRITE(*,'(/1x,a)') 'Exiting from '//%L(PROG)
+#endif /* __NON_ELASTIC_ZEBRA__ */
       if (G) Call UGLAST
       CALL PAEXIT
       :return:
       END
-
-
