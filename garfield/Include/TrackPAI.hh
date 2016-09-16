@@ -82,14 +82,14 @@ class TrackPAI : public Track {
   double ComputeCsTail(const double emin, const double emax);
   double ComputeDeDxTail(const double emin, const double emax);
 
-  double SampleAsymptoticCs(double u);
-  double SampleAsymptoticCsSpinZero(const double emin, double u);
-  double SampleAsymptoticCsSpinHalf(const double emin, double u);
-  double SampleAsymptoticCsSpinOne(const double emin, double u);
-  double SampleAsymptoticCsElectron(const double emin, double u);
-  double SampleAsymptoticCsPositron(const double emin, double u);
+  double SampleAsymptoticCs(double u) const;
+  double SampleAsymptoticCsSpinZero(const double emin, double u) const;
+  double SampleAsymptoticCsSpinHalf(const double emin, double u) const;
+  double SampleAsymptoticCsSpinOne(const double emin, double u) const;
+  double SampleAsymptoticCsElectron(const double emin, double u) const;
+  double SampleAsymptoticCsPositron(const double emin, double u) const;
 
-  double LossFunction(const double eps1, const double eps2);
+  double LossFunction(const double eps1, const double eps2) const;
 };
 }
 
