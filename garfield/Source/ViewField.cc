@@ -31,7 +31,7 @@ ViewField::ViewField()
       m_emax(10000.),
       m_wmin(0.),
       m_wmax(100.),
-      m_nContours(nMaxContours),
+      m_nContours(m_nMaxContours),
       m_nSamples1d(1000),
       m_nSamples2dX(200),
       m_nSamples2dY(200),
@@ -153,11 +153,11 @@ void ViewField::SetWeightingFieldRange(const double minval,
 
 void ViewField::SetNumberOfContours(const unsigned int n) {
 
-  if (n <= nMaxContours) {
+  if (n <= m_nMaxContours) {
     m_nContours = n;
   } else {
     std::cerr << m_className << "::SetNumberOfContours:\n";
-    std::cerr << "    Max. number of contours is " << nMaxContours << ".\n";
+    std::cerr << "    Max. number of contours is " << m_nMaxContours << ".\n";
   }
 }
 
@@ -204,7 +204,7 @@ void ViewField::PlotContour(const std::string& option) {
   if (!m_fPot) CreateFunction();
   const int plotType = SetupFunction(option, m_fPot);
 
-  double level[nMaxContours];
+  double level[m_nMaxContours];
   const double ymin = plotType == 0 ? m_fmin : m_emin;
   const double ymax = plotType == 0 ? m_fmax : m_emax;
   for (unsigned int i = 0; i < m_nContours; ++i) {
@@ -395,7 +395,7 @@ void ViewField::PlotContourWeightingField(const std::string& label,
     m_fWfield->SetMaximum(m_wmax);
   }
 
-  double level[nMaxContours];
+  double level[m_nMaxContours];
   for (unsigned int i = 0; i < m_nContours; ++i) {
     if (m_nContours > 1) {
       level[i] = i / (m_nContours - 1.);
