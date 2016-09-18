@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.30 2015/12/24 00:23:03 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.31 2016/09/18 22:40:31 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -12,7 +12,6 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StTpcdEdxCorrection.h" 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
@@ -24,6 +23,9 @@ class StGlobalCoordinate;
 class TH2F;
 class StTpcPadrowHitCollection;
 class StTrack;
+class StTpcdEdxCorrection;
+class dEdxY2_t;
+class dst_dedx_st;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder     =  0,
@@ -50,7 +52,6 @@ class StdEdxY2Maker : public StMaker {
   virtual Int_t Init();
   virtual Int_t InitRun(Int_t RunNumber);
   virtual Int_t Finish();
-  virtual Int_t FinishRun(Int_t OldRunNumber);
   virtual Int_t Make();
   virtual void  SetMask(Int_t mask) {m_Mask = mask;}
   static  void  SortdEdx();
@@ -94,7 +95,7 @@ class StdEdxY2Maker : public StMaker {
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.30 2015/12/24 00:23:03 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.31 2016/09/18 22:40:31 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
