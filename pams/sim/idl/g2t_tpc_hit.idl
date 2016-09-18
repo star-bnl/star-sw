@@ -13,4 +13,5 @@
        float     adc;        /* signal in ADC  after digitization */
        float     pad;        /* hit pad position used in digitization */
        float     timebucket; /* hit time position -"- */
+       long      np;         /* no. of primary electrons */
 };

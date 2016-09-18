@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.18 2015/10/12 20:46:58 jwebb Exp $
+  /* $Id: g2t_track.idl,v 1.19 2016/09/18 22:35:56 fisyak Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.19  2016/09/18 22:35:56  fisyak
+     Add no. of primary electrons in Hit
+
      Revision 1.18  2015/10/12 20:46:58  jwebb
      Hit definition and starsim to root interface for FTS.
 
@@ -96,7 +99,7 @@ struct g2t_track {
        long      n_svt_hit;  /* Nhits in svt */
        long      n_pix_hit;  /* Nhits in pix */
        long      n_tof_hit;  /* Nhits in tof */
-       long      n_tpc_hit;  /* Nhits in tpc */
+       long      n_tpc_hit;  /* Nhits in tpc + (no. of real hits after TpcRS) << 8 */
        long      n_vpd_hit;  /* Nhits in vpd */
        long      n_etr_hit;  /* Nhits on etr */
        long      n_hca_hit;  /* Nhits on hca */
