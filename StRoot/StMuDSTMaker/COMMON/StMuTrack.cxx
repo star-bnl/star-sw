@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.50 2014/01/15 22:00:04 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.51 2016/09/18 23:00:49 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -27,6 +27,7 @@
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "THelixTrack.h"
 #include "TMath.h"
 #include "TString.h"
@@ -436,6 +437,12 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
 	  mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
 	  mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
       }
+      if (dedxPidTraits->method() == kOtherMethodIdentifier)  {
+         mProbPidTraits.setdNdxFit( dedxPidTraits->mean() ); 
+         mProbPidTraits.setdNdxErrorFit( dedxPidTraits->errorOnMean() ); 
+         mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
+         mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
+      }
   }
   if (StMuDebug::level()>=3) {
       cout << endl;
@@ -689,10 +696,14 @@ Double_t StMuTrack::dEdxPull(Double_t mass, Bool_t fit, Int_t charge) const {
       dedx_measured = probPidTraits().dEdxTruncated();
       dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(momentum*TMath::Abs(charge)/mass)); 
       dedx_resolution = probPidTraits().dEdxErrorTruncated();
-    } else {     // Ifit
+    } else if ( fit == 1) {     // Ifit
       dedx_measured = probPidTraits().dEdxFit();
       dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(momentum*TMath::Abs(charge)/mass)));
       dedx_resolution = probPidTraits().dEdxErrorFit();
+    } else {     // dNdx
+      dedx_measured = probPidTraits().dNdxFit();
+      dedx_expected = StdEdxModel::instance()->dNdx(momentum*TMath::Abs(charge)/mass,charge);
+      dedx_resolution = probPidTraits().dNdxErrorFit();
     }
     if (dedx_resolution > 0)
       z = TMath::Log(dedx_measured/dedx_expected)/dedx_resolution;
@@ -706,6 +717,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.51  2016/09/18 23:00:49  fisyak
+ * Add dNdx
+ *
  * Revision 1.50  2014/01/15 22:00:04  fisyak
  * Add method to calculate dE/dx pulls for I70 and Ifit
  *
