@@ -11,7 +11,7 @@ class St_tpcAnodeHVavgC : public TChair {
   UInt_t     	    getNumRows()                const {return GetNRows();}
   UShort_t          sector(Int_t i = 0) 	const {return Struct(i)->sector;}
   UShort_t          socket(Int_t i = 0) 	const {return Struct(i)->socket;}
-  Float_t 	    voltage(Int_t i = 0) 	const {return Struct(i)->voltage;}
+  Float_t 	    voltage(Int_t i = 0) 	const;
   Float_t 	    rms(Int_t i = 0) 	        const {return Struct(i)->rms;}
   Int_t 	    numentries(Int_t i = 0) 	const {return Struct(i)->numentries;}
   Int_t 	    numoutliers(Int_t i = 0) 	const {return Struct(i)->numoutliers;}
