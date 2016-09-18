@@ -19,12 +19,11 @@ using namespace units;
 #include "TF1F.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "PAI.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
 #include "TArrayF.h"
 class Altro;
+class StTpcdEdxCorrection;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
@@ -32,8 +31,9 @@ struct SignalSum_t {
 };
 class StTpcRSMaker : public StMaker {
  public:
-  enum EMode {kPAI         = 0,// switch to PAI from GEANT
+  enum EMode {kPAI         = 0,// switch to PAI from GEANT (obsolete)
 	      kBICHSEL     = 1,// switch to Bichsel from GEANT 
+	      kHEED        = 6,// switch to HEED
 	      kGAINOAtALL  = 2,// do not use GAIN at all
 	      kdEdxCorr    = 3,// do use TpcdEdxCorrection
 	      kDistortion  = 4,// include distortions
@@ -82,7 +82,8 @@ class StTpcRSMaker : public StMaker {
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!
   TH1D*    mdNdx;                     //!
-  TH1D*    mdNdE;                     //!
+  TH1D*    mdNdxL10;                  //!
+  TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
   TF1F  *mChargeFraction[2];          //!
   TF1F  *mPadResponseFunction[2];     //!
@@ -90,7 +91,6 @@ class StTpcRSMaker : public StMaker {
   TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  PAI  *mPAI;                         //!
   Double_t InnerAlphaVariation;       //!
   Double_t OuterAlphaVariation;       //!
   Altro *mAltro;                      //!
@@ -119,6 +119,7 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower;  //!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
+  Double_t    mLocalYDirectionCoupling[2][7]; //!
   const Int_t NoOfSectors;            //!
   Int_t       NoOfRows;               //!
   Int_t       NoOfInnerRows;          //!
@@ -128,14 +129,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.27 2015/07/19 22:48:14 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.27 2015/07/19 22:48:14 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.28 2016/09/18 22:45:25 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.28  2016/09/18 22:45:25  fisyak
+// Clean up, add Heed model, adjust for new StTpcdEdxCorrections
+//
 // Revision 1.27  2015/07/19 22:48:14  fisyak
 // Fix cvs message
 //
