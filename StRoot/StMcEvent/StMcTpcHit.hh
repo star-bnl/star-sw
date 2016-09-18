@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.15 2016/09/18 22:41:39 fisyak Exp $
+ * $Id: StMcTpcHit.hh,v 2.16 2016/09/18 22:43:02 fisyak Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.16  2016/09/18 22:43:02  fisyak
+ * increament version no.
+ *
  * Revision 2.15  2016/09/18 22:41:39  fisyak
  * Add no. of primary electrons
  *
@@ -108,7 +111,7 @@ private:
   Float_t     mMcl_x;      /* average pad */
   Float_t     mMcl_t;      /* average timebucket */
   Int_t       mnP;         /* no. of primary electrons */
-  ClassDef(StMcTpcHit,2)
+  ClassDef(StMcTpcHit,3)
 };
 
 ostream&  operator<<(ostream& os, const StMcTpcHit&);
