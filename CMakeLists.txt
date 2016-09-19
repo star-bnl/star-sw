@@ -20,7 +20,7 @@ ELSE()
 ENDIF(DEFINED ENV{ROOTSYS})
 
 
-FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
+FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom Gdml)
 SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
 INCLUDE( MacroCheckPackageLibs )
 INCLUDE( MacroRootDict )
@@ -46,7 +46,7 @@ ELSE()
     # ROOT 5
     INCLUDE_DIRECTORIES ( ${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
     # COMPONENT mechanism in the FIND_PACKAGE is not supported 
-    SET(ROOT_COMPONENT_LIBRARIES "-lGeom")
+    SET(ROOT_COMPONENT_LIBRARIES "-lGeom -Gdml")
 ENDIF(DEFINED ROOT_INCLUDE_DIRS)
 
 ## add garfield  #######################################
@@ -134,11 +134,12 @@ IF(BUILD_WITH_VERSION_NUMBER)
 ENDIF(BUILD_WITH_VERSION_NUMBER)
 
 ## BUILD examples             ##########################
-if(NoExamples)
-    MESSAGE(STATUS "Building of examples is switched off.")
-else()
-    MESSAGE(STATUS "Garfield++ exmaples will be build. In order disable this option use -DNoExamples=true")
+option(WITH_EXAMPLES "Build Garfield++ examples" ON)
+if(WITH_EXAMPLES)
+    MESSAGE(STATUS "Garfield++ exmaples will be build. In order disable this option use -DWITH_EXAMPLES=OFF")
     add_subdirectory(Examples)
+else()
+    MESSAGE(STATUS "Building of examples is switched off.")
 endif()
 ## EXPORT PACKAGE INFORMATION ##########################
 export(PACKAGE ${PROJECT_NAME})
