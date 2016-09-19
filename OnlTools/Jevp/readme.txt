@@ -15,53 +15,23 @@ readme files:
 ***************************************************************************
 
 > cvs co OnlTools/Jevp
-
-*** Most current OFFLINE DISTRO:   SL14a ******
-> cvs co OnlTools/Jevp
-> starver SL14a
 > cons
-(....  At this point, depending on the linux distribution  ...)
-(....  You may find many errors                            ...)
-(....  If so, type the following lines                     ...)
-(....  Otherwise you are done                              ...)
-> cd .$STAR_HOST_SYS/obj/OnlTools/Jevp/StJevpPresenter/
-> $QTDIR/bin/uic EventInfoUi.ui -o ui_EventInfoUi.h
-> $QTDIR/bin/uic ServerInfoUi.ui -o ui_ServerInfoUi.h
-> $QTDIR/bin/uic TriggerDetectorBitsInfoUi.ui -o ui_TriggerDetectorBitsInfoUi.h
-> cd
-> cd cvs  
-(....  This assumes your base directory was cvs ....)
+
+Unfortunately, the JEVP and Offline codes can frequently get out of sync
+complicating the compilation of the JEVP codes.  The first easy thing to try
+is to run in dev using;
+
+> stardev
 > cons
-(....  This time, the compile should finish!    ....)
 
-
-*** old OFFLINE: SL12d ****
-> cvs co OnlTools/Jevp
-> cvs co OnlTools/PDFUtil
-> cvs co StRoot/RTS
-> cvs co mgr
-Modify the file mgr/construct with the following changes:
-#   diff -r1.180 Construct
-#   375a376
-#   >     push @sysdirlist, "OnlTools/Jevp"; 
-> starver SL12d
+Or else to run in the latest production version of JEVP
+  
+> source OnlTools/Jevp/level.source
 > cons
-***************************
 
+Event then, however there may be trouble compiling.   To resolve these issues
+consult the compile troubleshooting section at the end of this document.
 
-
-Should build everything.   The "executables" will be in the form
-of shared object libraries stored in the directory tree
-
-   .sl53_gcc432/   (or a varient for different linux systems...)
-
-In order to run the code you will need to execute the root scripts
-described in the following sections.
-
-One should source OnlTools/Jevp/level.source at the begining of each 
-session.   The programs will most likely work with the default
-offline source level, but are only guarenteed at the software level
-indicated...
 
 **********************************
 * II.  Code structure
@@ -95,7 +65,10 @@ Here are the rules that builders must follow:
 
         Jevp/StJevpPlot/
 
-3.  The builder classes must contain the appropriate CINT tags:
+3.  The "plotsetname" variable in the xxxBuilder constructor should be set 
+    to your "xxx" prefix.
+
+4.  The builder classes must contain the appropriate CINT tags:
     ClassDef() and ClassInt()
 
 *****************************************
@@ -125,6 +98,7 @@ The full set of possible arguments are
 
     Set the output filename
 
+ -maxevts ###           (only read first ### events of the file)
  -datadir datadir       (default /RTScache/conf/jevp)
  -clientdatadir datadir (default /a/jevp/client)
 
@@ -226,3 +200,28 @@ deep        --   value     // typically these are not neccessary.  The program a
                               histograms with sqrt(nhistos) to a side.   However, if you want for example 
                               a 1 x 10 stack of histograms you can set wide=1 and deep=10
 scaley      --   value     // This forces all histos in the tab to have the same maximum y value
+
+
+***********************************************************
+* VI. Compile Troubleshooting
+*********************************************************** 
+
+1.   If you see the Error:  "fatal error: TGTab2.h: No such file or directory"
+
+> cd OnlTools/Jevp
+> rm -rf StJevpViewer
+> cd
+> cd cvs
+> cons
+
+2.   If you see errors related to QT xxxui.h not being present:
+
+> cd .$STAR_HOST_SYS/obj/OnlTools/Jevp/StJevpPresenter/
+> $QTDIR/bin/uic EventInfoUi.ui -o ui_EventInfoUi.h
+> $QTDIR/bin/uic ServerInfoUi.ui -o ui_ServerInfoUi.h
+> $QTDIR/bin/uic TriggerDetectorBitsInfoUi.ui -o ui_TriggerDetectorBitsInfoUi.h
+> cd
+> cd cvs  
+(....  This assumes your base directory was cvs ....)
+> cons
+(....  This time, the compile should finish!    ....)
