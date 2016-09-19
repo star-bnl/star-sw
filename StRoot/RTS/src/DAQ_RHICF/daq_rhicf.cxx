@@ -115,11 +115,20 @@ daq_dta *daq_rhicf::handle_raw(int sec, int rdo)
 		return 0 ;
 	}
 
+	char *ptr = (char *) malloc(size) ;
+	caller->sfs->read(full_name, ptr, size) ;
+
+	//I need to skip the 40 byte bankHeader!
+	size -= 40 ;	//bank header
+	ptr += 40 ;
+
 	raw->create(size,"rhicf_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 	char *st = (char *) raw->request(size) ;
 
-	caller->sfs->read(full_name, st, size) ;
+	memcpy(st,ptr,size) ;
+	free(ptr) ;
+
 
         raw->finalize(size,1,1,0) ;
 
@@ -132,6 +141,8 @@ daq_dta *daq_rhicf::handle_raw(int sec, int rdo)
 // knows how to get the token out of an event...
 int daq_rhicf::get_token(char *addr, int words)
 {
+	LOG(ERR,"get_token") ;
+
 	int cou ;
 	struct daq_trg_word trg[128] ;
 
@@ -149,7 +160,18 @@ int daq_rhicf::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int t_cou = 0 ;
 	int in_words = words ;
 	int err = 0 ;
+	static int token ;
 
+	//LOG(TERR,"get_l2") ;
+
+	token++ ;
+	if(token==0) token = 1 ;
+	else if(token>=4096) token = 1 ;
+
+	trg[0].t = token ;
+	trg[0].trg = 4 ;
+	trg[0].daq = 0 ;
+	t_cou++ ;
 
 	if(err) {
 		LOG(ERR,"[%d] Bad Event: T %4d: words %d",
