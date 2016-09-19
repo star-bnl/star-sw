@@ -1,0 +1,19 @@
+<Document file="StarVMC/Geometry/MagpGeo/MagpConf.xml">
+<Detector name="MAGP" comment="The STAR Magnet">
+  <Modules>
+    MagpGeo
+  </Modules>
+
+  <Setup name="MAGPof" comment="OFF" module="MagpGeo" onoff="off" />
+
+  <Setup name="MAGPon" comment="STAR Magnet" module="MagpGeo" onoff="on" />
+
+  <Setup name="MAGPv1" comment="Improved STAR Magnet" module="MagpGeo" onoff="on" >
+
+    <Init struct="magg" var="version" value="2.0" />
+
+  </Setup>
+
+
+</Detector>
+</Document>

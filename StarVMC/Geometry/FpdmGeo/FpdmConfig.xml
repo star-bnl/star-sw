@@ -1,0 +1,24 @@
+<Document file="StarVMC/Geometry/FpdmGeo/FpdmConf.xml">
+<Detector name="FPDM" comment="Barrel EMC">
+  <Modules>
+    FpdmGeo1,
+    FpdmGeo2,
+    FpdmGeo3,
+    FpdmGeo4
+  </Modules>
+
+  <Setup name="FPDMof" comment="OFF" module="FpdmGeo1" onoff="off" />
+  
+  <Setup name="FPDM00" comment="Forward pion detector" module="FpdmGeo1" onoff="on" /> <!-- should be FpdmGeo -->
+  <Setup name="FPDM01" comment="Forward pion detector" module="FpdmGeo1" onoff="on" />
+  <Setup name="FPDM02" comment="Forward pion detector" module="FpdmGeo2" onoff="on" />
+  <Setup name="FPDM03" comment="FPD/FMS"               module="FpdmGeo3" onoff="on" />
+  <Setup name="FPDM04" comment="FPD/FMS/FPS"           module="FpdmGeo4" onoff="on" />
+
+  <Setup name="FPDM13" comment="FPD/FMS in open position" module="FpdmGeo3" onoff="on"  >
+    <Init struct="fmcg" var="fmsnorthx" value="-50.3" />
+    <Init struct="fmcg" var="fmssouthx" value="+50.3" />
+  </Setup>
+
+</Detector>
+</Document>

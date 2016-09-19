@@ -155,7 +155,10 @@ _prepend = ''
 
 # TODO: Populate the symbol table on a Varlist
 _symbol_table = {}
-_struct_table = {}
+_struct_table = {} # values of structure members
+_struct_dims  = {} # 
+
+
 
 seperator = '// ---------------------------------------------------------------------------------------------------'
 skip      = '//'
@@ -231,6 +234,7 @@ def requireAttributes( tag, attr, mylist, warning=True ):
 # ----------------------------------------------------------------------------------------------------
 
 def replacements( line ):
+    global _struct_dims
 
     if line==None: return line
 
@@ -298,7 +302,82 @@ def replacements( line ):
             myline = myline.replace( Old, New )     
                                                     
 
-            #print "REPL: - " + myline                                           
+    # NEW STRUCT IMPLEMENTATION
+        
+    # Now we need to change the indexing of the arrays in the structure.  We
+    # scan for something matching struct.var( idx ) and replace with struct.var[idx-1]
+
+    myline = myline.replace(' ','') # Remove ALL whitespace
+
+
+    for struct in document.structs:
+
+#        if struct in myline:
+#            print "----------------------------------------------------------"                        
+#            print ":in:  %s"%myline
+        
+        # Lower case struct to be certain
+        struct = struct.lower()        
+
+        # The loop below searches for (I) and replaces with [I-1]
+        # We replace all , with () so that the replacement will replace (I,J,...) with [I-1][J-1][...-1]
+        # myline = myline.replace(',',')(')
+
+        # Loop over all variables in this struct.  
+        for key,value in _struct_dims.iteritems(): # isnt this backward?
+
+            #
+            # Look for things of the form struct.array(index,jndex) and replace with struct.array[int(jndex)-1][int(index)-1]
+            #
+            expr = "%s\(([a-z0-9_\+\-\*\/\ \.]*)\,([a-z0-9_\+\-\*\/\ \.]*)\)"%key
+            for match in re.finditer( expr, myline, re.IGNORECASE ):
+                Old = match.group()
+
+                length = Old.replace(key,'')
+                length = length.strip('(')
+                length = length.strip(')')                
+                length = length.split(',')
+                index = ""
+                for i in reversed(length):
+                    index += '[int(%s)-1]'%i
+
+                New = key + index
+                
+                # Old is goingt to be of the form struc.array(I,J).  We need to
+                # revese this to struct.array[J-1][I-1]
+
+                #New = Old.replace( ',', ')(' )
+                #New = New.replace('(','[int(')
+                #New = New.replace(')',')-1]')                
+                
+                myline = myline.replace(Old,New)
+
+            #
+            # Look for things of the form struct.array(index) and replace with struct.array[int(index)-1]
+            #
+            expr = "%s\(([a-z0-9_\+\-\*\/\ \.]*)\)"%key
+
+            for match in re.finditer( "%s\(([a-z0-9_\+\-\*\/\ \.]*)\)"%key, myline, re.IGNORECASE  ):
+
+                Old = match.group()
+                New = Old.replace('(','[int(')
+                New = New.replace(')',')-1]')
+
+                #print match
+                #print New
+
+                myline = myline.replace(Old,New)
+
+
+
+#        if struct in myline:
+#            print ":out: %s"%myline                
+            
+            
+
+
+
+
             
     #
     # Replace single quote for double quote
@@ -351,6 +430,7 @@ class Document( Handler ):
         self.fills      = []        
         self.fill_count = {}
         self.content    = []
+        self.geometries = []
 
     def setParent(self,p):
         self.parent = p
@@ -389,15 +469,21 @@ class Document( Handler ):
         #
         # Flush buffers in implementation file
         #
-        self.impl.unit('global').dump()
-        self.impl.unit('modctr').dump()
+        myglobal = self.impl.unit('global')
+        mymodctr = self.impl.unit('modctr')
+        if myglobal: myglobal.dump()
+        if mymodctr: mymodctr.dump()
         #
         for name in self.blocks:
-            self.impl.unit(name).dump()
+            myblock=self.impl.unit(name)
+            if myblock: myblock.dump()
+
         #
         self.impl.write( '// ----------------------------------------------------------------------- geoctr\n' )
-        self.impl.unit('geoctr').dump()
-        #
+
+        mygeoctr = self.impl.unit('geoctr')
+        if mygeoctr: mygeoctr.dump()
+
         # Final sanity check for options
         for volume in self.content:
             if volume in self.blocks:
@@ -408,14 +494,527 @@ class Document( Handler ):
         
         
     def GetModule(self):
+
         array  = self.input.split('/')
         infile = array[len(array)-1]
         module = infile.split('.')[0]
         if ( self.options.module_name != None ):
             module = self.options.module_name
         return module
+#______________________________________________________________________________________________
+# Begin support for new steering     
+class Tag( Handler ):
+    def __init__(self):
+        global document
+        self.parent   = None
+
+        self.name     = None
+        self.comment  = None
+        self.flags    = []
+        self.includes = []
+        self.modules  = []
+
+        # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
+        for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
+            for f in files:
+                if 'Config.xml' in f:
+                    name = f
+                    name = name.replace('.xml','.h')
+                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
+
+
+                if 'Geo' in f and '.xml' in f:
+                    name = f[:4].lower()
+                    if '.' in name or '#' in name: continue
+                    if name in self.modules:
+                        pass
+                    else:
+                        self.modules.append(name)
+
+
+
+        Handler.__init__(self)
+        
+    def setParent(self, p):
+        self.parent = p
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+        self.top     = attr.get('top', None )
+        
+        document.head( '#ifndef   __%s__tag__'  % self.name )
+        document.head( '#define   __%s__tag__'  % self.name )
+
+        for inc in self.includes:
+            document.head( '#include "%s"'%inc )
+
+        
+        document.head( 'namespace StarGeometry { //$NMSPC'      )
+        document.head( 'struct %s {'   % self.name )
+        document.head( ' virtual ~%s(){ };' % self.name )
+        document.head( ' static bool select();' )
+        document.head( ' ClassDef(%s,1);'%self.name )
+        document.head( '};' )
+        document.head( '};' )
+        document.head( '#endif  //__%s__tag__'  % self.name )
+
         
 
+
+    def characters(self,content):
+        for flag in content.split(' '):
+            if len(flag.strip()):
+                self.flags.append(flag)
+                ## name = flag[:4]
+                ## print '%s::setup();' % flag
+                ## print '%s::Module *%s = new %s::Module();' % ( flag, name, flag )
+                ## print '%s -> ConstructGeometry();' %name
+
+
+    def endElement(self,tag):
+
+
+        if self.parent.geometries == []:
+            # Add module includes into header file
+            for inc in self.includes:
+                document.impl( '#include "%s"' % inc, unit='global' )
+            
+            for mod in self.modules:
+                document.impl( 'AgModule *_%s = 0;'%mod, unit='global' )
+
+            document.impl( '#include "StarVMC/StarGeometry/StarGeo.h"',            unit='global' )
+            document.impl( '#include "StMessMgr.h"',                                    unit='global' )
+            document.impl( '#include "TGeoManager.h"',                                  unit='global' )
+
+
+        # Register this geometry with the document
+        self.parent.geometries.append(self)
+
+        document.impl( 'bool StarGeometry::%s::select() {\n'%self.name,                 unit='global' )                        
+        document.impl( '// Create modules',                                         unit='global' )
+        for flag in self.flags:
+            name = flag[:4].lower()
+            document.impl( '%s::setup();\n' % flag,                                 unit='global' )
+            document.impl( '_%s = new %s::Module();\n'%(name,flag), unit='global' )
+            document.impl( 'LOG_INFO << "Construct " << %s::name << "[%s]" << endm;'%{flag,flag})
+        document.impl( '// Construct modules',                                      unit='global' )
+
+# Geometry construction for later ...
+#       for flag in self.flags:
+#           name = flag[:4].lower()
+#           document.impl( 'LOG_INFO << "[ " << %s::name() << " " << %s::module() << " " << %s::comment() << " ]" << endm;\n'%(flag,flag,flag), unit='global' )
+#           document.impl( '%s -> ConstructGeometry();\n'%name,                     unit='global' )
+
+        if self.top:
+            document.impl( 'TGeoVolume *top = gGeoManager->FindVolumeFast("%s");\n'%self.top, unit='global' )
+            document.impl( 'if (top) gGeoManager->SetTopVolume(top);\n',            unit='global' )
+        document.impl( 'return true;\n',                                            unit='global' )
+        document.impl( '};\n\n',                                                    unit='global' )
+
+
+class StarGeometry(Handler):
+    def __init__(self):
+        self.parent = None
+        self.name   = "StarGeometry"
+        self.tag    = None
+        self.geoms  = []
+    def setParent(self, p):
+        self.parent = p
+    def addGeometry(self,geom):
+        self.geoms.append(geom)
+    def startElement(self,tag,attr):
+        self.tag = attr.get('default','blackhole')
+    def endElement(self,tag):
+        global document
+        
+        header = """
+#ifndef __StarGeometry_h__
+#define __StarGeometry_h__
+#include "TDataSet.h"        
+        class StarGeometry {
+        public:
+        /// Construct geometry with the specified tag, and return wrapped in a TDataSet
+        static TDataSet* Construct( const char* name = "%s" );
+        private:
+        protected:
+        ClassDef(StarGeometry,1);
+        };
+
+        // backwards compatability hack with StarDb/AgMLGeometry
+        class Geometry : public StarGeometry {
+        public:
+        static TDataSet *ConstructGeometry( const char* name ){ return Construct(name); }
+        ClassDef(Geometry,1);
+        };
+#endif        
+        """%self.tag
+        document.head(header)
+
+        implement1 = """
+#include "StarVMC/StarGeometry/StarGeo.h"
+#include "TObjectSet.h"
+#include "TGeoManager.h"        
+#include <string>        
+        TDataSet* StarGeometry::Construct( const char* name )
+        {
+        std::string tag = name;
+        """
+        document.impl( implement1, unit='global' )
+        for geom in self.geoms:
+            name    = geom.name;
+            output = '             if (tag=="%s") { %s::construct(); }'  %(name,name)          
+            document.impl( output, unit='global' )
+        document.impl( 'if (0 == gGeoManager) return NULL;', unit='global')
+        document.impl( 'TObjectSet* dataset = new TObjectSet( "Geometry", gGeoManager, false );', unit='global' )
+        document.impl( 'return (TDataSet*)dataset;', unit='global' )
+        document.impl( '};',              unit='global' )        
+        
+
+        
+        
+
+class Geometry( Handler ):
+
+    def __init__(self):
+        self.parent   = None
+        self.name     = None
+        self.docum    = None
+        self.modules  = []
+        self.pmodules = []
+        self.constructs = []
+        self.sys    = [] # subsystems
+        self.config = {} # subsystem configuration
+        self.includes = [] # include files for dstector tags        
+        Handler.__init__(self)
+
+    def addModule(self, module):
+        self.modules.append(module)
+        self.pmodules.append( module[:4].lower() )
+
+    def addSystem(self, system, config ):
+        self.sys.append(system)
+        self.config[system] = config
+
+    def setParent(self, p):
+        self.parent = p
+
+    def startElement(self, tag, attr ):
+        self.name  = attr.get('tag', None)
+        self.docum = attr.get('comment', None )       
+        self.parent.addGeometry(self)
+
+        # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
+        self.includes.append('StarVMC/StarGeometry/StarGeo.h')
+        for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
+            for f in files:
+                if f[:1] == '.': continue # skip special files
+                if 'Config.xml' in f:
+                    name = f
+                    name = name.replace('.xml','.h')
+                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
+
+        ## self.name = attr.get('name', None)
+        ## self.docum = attr.get('comment', None )
+
+    def endElement(self,tag):
+        global document
+        document.head( '#ifndef __construct_%s_geometry__'%self.name )
+        document.head( '#define __construct_%s_geometry__'%self.name )
+           
+#       document.head( 'namespace Star { //$NMSPC' )
+        document.head( 'struct %s {' % self.name )
+        document.head( 'static bool construct();' )
+        #document.head( '#if 0\n  ClassDef(%s,1);\n#endif\n'%self.name )
+        document.head( '};' )
+#       document.head( '};' )
+        document.head( '#endif')
+
+
+        for i in self.includes:
+            document.impl('#include "%s"'%i, unit='global' )
+ 
+        document.impl( 'bool %s::construct() {'%self.name, unit='global' )
+        document.impl( 'bool result = true;',                    unit='global' )
+        # Loop over detector tags.  Create in order and construct
+        for sub in self.sys:
+            subup = sub.upper();
+            cfg = self.config[sub]
+            document.impl( '%s::%s::setup();'%(subup,cfg), unit='global' )
+            document.impl( '%s::%s::construct();'%(subup,cfg), unit='global' )
+        document.impl( 'return result;\n',                      unit='global' )
+        document.impl( '};',                                      unit='global' )
+
+        ## for pmod in self.pmodules:
+        ##     document.impl( 'if(_%s) _%s -> ConstructGeometry(); // Make template function' % (pmod,pmod), unit='global' )
+        ## document.impl( 'return result;', unit='global' )
+        ## document.impl( '}', unit='global' )
+        
+        ## print self.name
+        ## print self.docum
+        ## for mod in self.modules:
+        ##     print mod
+        ## for pmod in self.pmodules:
+        ##     print pmod
+    
+class Construct( Handler ):
+    def __init__(self):
+        self.parent = None
+        self.sys    = None
+        self.config = None
+    def setParent(self, p):
+        self.parent = p
+    
+    def startElement(self, tag, attr ):
+        self.parent.constructs.append(self)
+        self.sys = attr.get('sys',None)
+        self.config = attr.get('config',None)
+        
+        self.parent.addSystem( self.sys, self.config )
+
+        ## self.module = attr.get('module', None)
+        ## self.track  = attr.get('track', 'primary' )
+        ## self.parent.addModule( self.module )
+        
+class Detector( Handler ):
+    """
+    class Detector handles the detector tag in AgML
+
+    <Detector name="NAME" comment="A documentation string">
+    </Detector>
+
+    The tag consists of two attributes: a name and a documentation string.  Its
+    contents will specify various detector configurations, which will enable a
+    concrete geometry construction code to realize the time evolution of the
+    detector.
+    """
+            
+    def __init__(self):
+        global document
+        self.parent = None
+
+        self.name = None
+        self.comment = None
+        self.modules = []
+        self.setups  = []
+
+        Handler.__init__(self)
+
+    def setParent(self, p):
+        self.parent = p
+
+    def addModule( self, module ):
+        self.modules.append( module )
+
+    def addSetup( self, setup ):
+        self.setups.add( setup )
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+ 
+        document.head( '#ifndef __%s_CONFIG__' % self.name )
+        document.head( '#define __%s_CONFIG__' % self.name )
+
+        document.impl( '#include "StarVMC/StarGeometry/%s.h"\n\n' % document.agmodule )
+        document.impl( '#include "StMessMgr.h"\n' )
+        document.impl( '#include "TGeoManager.h"\n' )
+
+    def endElement(self, tag ):
+        # List include files for modules
+        for module in self.modules:
+            module = module.strip()
+            if ''==module:
+                continue
+            document.head( '# include "%s/%s.h"'%( document.agpath, module ) )
+
+        for setup in self.setups:
+            document.head( setup )
+
+        document.head( '#endif' )            
+
+class Setup( Handler ):
+    """
+    class Setup specifies an individual detector configuration.
+    """
+    def __init__(self):
+        self.parent = None
+        self.name = None
+        self.comment = None
+        self.module = None
+        self.onoff = None
+        self.topvolume = None
+        # flags (call agsflag ...)
+        self.prin = None
+#       self.grap = None
+#       self.hist = None
+#       self.geom = None
+#       self.mfld = None
+        self.debu = None
+        self.simu = None
+        
+        self.inits = []
+        Handler.__init__(self);
+
+    def setParent(self,p):
+        self.parent = p
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name',    None)
+        self.comment = attr.get('comment', None)
+        self.module  = attr.get('module',  None)
+        self.onoff   = attr.get('onoff',   None)
+        self.topvolume = attr.get('top',   None)
+
+
+    def endElement(self, tag):
+
+        # First, declare the object in the header file
+        output = "namespace %s { //\n"% self.module.upper()[:4]
+        output += 'struct %s {\n' % self.name 
+        output +=  '  static const char *name()    { return "%s"; }\n'  % self.name 
+        output +=  '  static const char *comment() { return "%s"; }\n'  % self.comment 
+        output +=  '  static const char *module()  { return "%s"; }\n'  % self.module  
+        output +=  '  typedef %s::%s Module;\n'%( self.module.upper(), self.module ) 
+        #output +=  '  static       bool  active; // true if detector configuration has been built\n' 
+        #document.impl( '  bool %s::active = false;\n'%self.name );
+        if "on" in self.onoff.lower():
+            output +=  '  static const bool onoff = true;\n'
+            output +=  '  static       AgModule* New(){ return new Module(); }\n'            
+        else:
+            output +=  '  static const bool onoff = false;\n'
+            output +=  '  static       AgModule* New(){ return NULL; }\n'
+            
+        output +=  '  static       void  setup();\n'
+        output +=  '  static       AgModule* construct();\n'
+        
+        output +=  '#if 0\n'
+#       output +=  'ClassDef(%s,1);\n'%self.name
+        output +=  '#endif\n'
+        output +=  '};\n'
+        output +=  '};\n'
+        
+# No need for dictionary in AgML2
+#$$$    output += "#if 0\n ClassDef(%s,1)\n#endif\n"% self.name # insert into ROOT dictionary
+        self.parent.setups.append(output)
+
+        
+        # Not sure the following has any effect...
+        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
+        #for init in self.inits:
+        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
+        #output +=  '  };\n'                
+
+        # Now implementation
+        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
+        #for init in self.inits:
+        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
+        #output +=  '  };\n'                
+
+        # Wrap in namespace
+        nmspc = self.module.upper()[:4]
+
+        # Add SETUP
+        output = "\n"
+        output += "void %s::%s::setup() {\n"%(nmspc,self.name)
+        document.impl( output, unit='global' )
+
+        for init in self.inits:
+            init.implement()
+
+        output = "\n};\n"
+        document.impl( output, unit='global' )
+
+        # Add CONSTRUCT
+        output = "\n"
+        output += "AgModule* %s::%s::construct() {\n"%(nmspc,self.name)
+        output += 'LOG_INFO << "Construct module " << %s::%s::module() << endm;\n'%(nmspc,self.name)
+        document.impl( output, unit='global' )
+
+        #output = "active=true;\n"
+        output  = "AgModule* _module = New();\n"
+        output += "if (_module) _module->ConstructGeometry();\n"
+
+        if self.topvolume:
+            output += 'TGeoVolume* _top = gGeoManager->FindVolumeFast("%s");\n'%self.topvolume
+            output += 'if (_top) {\n'
+            output += '    gGeoManager->SetTopVolume(_top);'
+            output += '} else { \n'
+            output += '    LOG_WARN << "Could not find top volume %s... kaboom imminent..." << endm;\n'%self.topvolume
+            output += '};\n'
+        
+        output += "return _module;"
+        document.impl( output, unit='global' )
+        
+        output = "\n};\n"
+        document.impl( output, unit='global' )
+       
+class Init( Handler ):
+    def __init__(self):
+        self.parent = None
+
+    def setParent( self, p ):
+        self.parent = p
+        self.parent.inits.append(self)
+
+    def startElement(self, tag, attr ):
+        self.struct   = attr.get('struct', None )
+        if self.struct: self.struct = self.struct.lower()
+        self.variable = attr.get('var', None )
+        self.value    = attr.get('value', None )
+        self.index    = attr.get('index', None )
+        self.namespace = self.parent.module.upper()
+
+    def endElement(self, tag ):
+        pass
+
+    def implement(self):
+        
+        info = self.struct.replace("_t","_info")
+
+        sinfo = '%s::%s_info'%(self.namespace,     info)
+        minfo = sinfo + '::%s'%self.variable
+        tinfo = minfo + '::Type'
+        
+        output  = "\n";
+        output += "{\n";
+        template = "%s,%s,%s"%(sinfo,minfo,tinfo)
+        output += "AgMLDetp<%s>* %s_detp = \n\tAgMLDetp<%s>::New();\n"%( template, self.struct, template )
+
+        output += "\t{\n"        
+        output += "\t   %s temp = %s;"%(tinfo,self.value)
+        output += "\t   memcpy( &%s_detp->member_value, &temp, sizeof(temp) );\n"%self.struct
+        output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
+#       output += "\t   %s_detp->member_value = %s;"%(self.struct,self.value)
+#       output += "\t   %s_detp->Add( temp );\n"%self.struct
+
+        output += "\t}\n"
+        output += "}\n"
+        
+        
+        document.impl( output, unit='global' )
+class Modules( Handler ):
+    """
+    class Modules
+
+    content specifies the list of modules which define a given detector 
+    """
+    def __init__(self):
+
+        self.parent  = None
+        self.modules = []
+        Handler.__init__(self);
+
+    def setParent(self,p):
+        self.parent = p
+
+    def characters(self, content):
+        for module in content.split(','):
+            module = module.strip()
+            self.modules.append( module )
+        self.parent.modules = self.modules
+# End support for new steering
+#______________________________________________________________________________________________
 class Module ( Handler ):
     """
     class Module handles the module tag in AgML
@@ -509,6 +1108,8 @@ class Module ( Handler ):
         document.head( banner );
         document.head('')
         document.head('#include "StarVMC/StarAgmlLib/AgModule.h"')
+        document.head('#include "StarVMC/StarAgmlLib/AgMLStructure.h"')
+        document.head('#include <stddef.h>')
         document.head('')
 
 
@@ -552,11 +1153,7 @@ class Module ( Handler ):
         document.head('%s();' % document.agmodule )
         document.head('virtual void ConstructGeometry( const Char_t *dummy="" );')
         document.head('~%s(){ };' % document.agmodule )
-##        if namespace:
-##            document.head('ClassDef(%s::%s,1);'% (document.agmodule,document.agmodule) )
-##        else:
 
-        document.head('ClassDef(%s,1);'% document.agmodule )
             
         document.head('public:')        
         document.head('};')
@@ -578,17 +1175,6 @@ class Module ( Handler ):
             pass
         else:
             pass
-
-
-#
-# class Block defines the block tag in AgML
-#
-# <Block name="NAME" comment="A documentation string">
-# ...
-#     <Shape ... />
-# ...
-# </Block>
-
 class Block( Handler ):
 
     def __init__(self):
@@ -714,8 +1300,6 @@ class Block( Handler ):
         if ( not re.match(';$',content) ):
             content += ';'             
         document.impl( content, unit=current )
-       
-
 class Group( Handler ):
     """
     
@@ -738,8 +1322,6 @@ class Group( Handler ):
         if self.cond:
             document.impl('if (%s)'%self.cond, unit=current)
         document.impl('{ AddGroup("%s"); }'%(self.name), unit=current)
-
-
 class Export( Handler ):
     """
     Language-specific language block.  Code wrapped in an export block will only
@@ -764,11 +1346,6 @@ class Export( Handler ):
         Restore export when exiting an export block
         """
         setExport(True)
-                
-                
-            
-
-# ==========================================================================================
 class Subroutine ( Handler ):
     """
     Handles the definition of subroutines and their mapping from the F/Mortran subroutines
@@ -847,9 +1424,6 @@ class Subroutine ( Handler ):
 
         if namespace:
             document.head( '}' );
-        
-
-# ==========================================================================================
 class Assign( Handler ):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p
@@ -869,8 +1443,6 @@ class Assign( Handler ):
         else:
             val=replacements(val.lower())
             document.impl( '%s = %s;'%( var.lower(), val ), unit=current )
-
-# ==========================================================================================        
 class Keep( Handler ):
     def __init__(self):
         self.export = 'All'
@@ -885,9 +1457,6 @@ class Keep( Handler ):
     def characters(self,contents):
         if len(contents.strip())>0:
             document.impl( contents.strip(), unit=current )
-            
-
-# ==========================================================================================
 class Content ( Handler ):
 
     def setParent(self,p): self.parent = p    
@@ -902,9 +1471,6 @@ class Content ( Handler ):
             if len(block):
                 document.impl( 'AddBlock("%s", %s::Instance());' %(block,block), unit=current ) # ought to be modctr
                 document.content.append('%s'%block)
-
-
-# ==========================================================================================
 class Include ( Handler ):
     def __init__(self):
         Handler.__init__(self)
@@ -914,9 +1480,6 @@ class Include ( Handler ):
         if ( file != None ):
             #form( "#include \"%s\"" % file )
             pass
-
-
-# ==========================================================================================
 class Cde ( Handler ):
     cde = False
     def __init__(self): Handler.__init__(self)
@@ -928,10 +1491,7 @@ class Cde ( Handler ):
             #form( "+CDE,"+char.lower().strip()+"." )
             pass
 
-
-# ==========================================================================================
 _inlined_functions = {}
-
 class Inline( Handler ):
     """
     So called 'inline' functions (more properly operator functions in mortran)
@@ -1001,11 +1561,6 @@ class Inline( Handler ):
 
         # Add this inline function to the implementation file
         document.impl( mydef, unit=self.name )
-
-
-        
-
-# ==========================================================================================
 class Arguement(Handler):
     """
     The Arguement class handles the <Arguement .../> keyword found in subroutine,
@@ -1042,8 +1597,6 @@ class Arguement(Handler):
         pass
     def endElement(self,tag):
         pass
-
-# ==========================================================================================
 class Return(Handler):
     def setParent(self,p): self.parent = p    
     def __init__(self): Handler.__init__(self)                    
@@ -1053,8 +1606,6 @@ class Return(Handler):
             value = value.lower()
             value = replacements(value)
             self.parent.rvalue = value
-
-# ==========================================================================================        
 class External( Handler ):
     def __init__(self):
         Handler.__init__(self)
@@ -1064,16 +1615,12 @@ class External( Handler ):
         pass
     def endElement(self,tag):
         pass
-
-
 class Import( Handler ):
     def __init__(self): Handler.__init__(self)
     def startElement(self,tag,attr):
         pass
     def endElement(self,tag):
         pass  
- 
-# ==========================================================================================   
 class Comment( Handler ):
     """
     All user comments will be stripped before export to AgROOT, because we will
@@ -1084,8 +1631,6 @@ class Comment( Handler ):
         Handler.__init__(self)
     def setParent(self,p):
         self.parent = p
-
-# ==========================================================================================
 class Varlist( Handler ):
 
     def setParent(self,p):
@@ -1245,7 +1790,6 @@ class Varlist( Handler ):
                 continue
 
         document.impl('///@}', unit=myunit )            
-
 class Var ( Handler ):
 
     def setParent(self,p): self.parent = p    
@@ -1298,22 +1842,12 @@ class Var ( Handler ):
         content = content.lower()
         content = replacements(content)        
         pass 
-
-# ----------------------------------------------------------------------------------------------------
-# TODO: Implement DATA statement handler for direct age --> agroot
 class Data( Handler ):
 
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p
     def startElement(self,tag,attr):
         pass
-    #### Need to refactor so that Mortran Data statements
-    #### can be routed through the assign statement
-        
-        
-        
-
-    
 class Parameter( Handler ):     
     """
     Class to represent PARAMETER (name=value) statements.  Limitation: only one
@@ -1357,14 +1891,227 @@ class Parameter( Handler ):
         # Add the parameter definition to the module constructor
         #document.impl( '%s=%s;'%( name.lower(), value.lower()), unit='modctr')
         document.impl( '%s=%s;'%( name.lower(), value.lower()), unit=current)
-        
 class Enum( Handler ):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p    
+class Struct( Handler ): # new style structures
+
+    def setParent(self,p): self.parent = p    
+    def __init__(self):
+
+        self. name = 0
+        self. var_list = [] # variable names
+        self. var_dict = {} # type 
+        self. var_dims = {} # dimensions
+        Handler.__init__(self)
+
+    def addVar(self,name,mytype,dim,value,comment):
+        global _struct_table
+        global _struct_dims
+        
+        table = { 'real'    : 'float',
+                  'double'  : 'double',
+                  'int'     : 'int',
+                  'integer' : 'int',
+                  'float'   : 'float',
+                  'Float_t' : 'float',
+                  'Double_t': 'double',
+                  'Int_t'   : 'int',
+                  'char'    : 'string' }        
+
+        # Nothing to do if passed a null string (WHY SILENT HERE?)
+        if len(name.strip()) == 0:            return
+
+        # Get the mytype of the variable
+        mytype = table[mytype]
+
+        # All variable names are lower case
+        name = name.lower()
+
+        self.var_list.append(name)
+        self.var_dict[name] = mytype
+        self.var_dims[name] = dim
+
+    def startElement( self, tag, attr ):
+
+        # Name of the structure
+        name      = attr.get('name',None)
+        self.name = name.lower()
+
+        # Append name of strcture to all structs in document
+        document.structs.append( name.lower() )
+
+        # Add to global 
+        _structures[ name+ _agml_sep ] = name+_struct_sep
+       
+    def endElement( self, tag ):
+        global _struct_table
+        global _struct_dims
+
+        # Add an index to the structure to enable selection of default
+        self.addVar(name='_index',mytype='int',dim=None,value=None,comment='!$ agml index')
+        
+        # Name of the c-structure
+        name = self.name.lower()
+
+        # Make type dictionary persistent
+        _struct_table[ self.name ] = self.var_dict
+
+        # Name of the structure wrapper which handles the fill/use interface
+        wrap = name.upper()
+
+        # First stage: declare plain c-structure
+        struct = "struct %s_t {\n" % name
+        for var in self.var_list:
+            typ = self.var_dict[var] # type of the variable
+            dim = self.var_dims[var] # dimension of the variable
+            if dim == None:               dim = ""
+            else:
+                key = '%s.%s'%(self.name.lower(), var.lower())
+                _struct_dims[key] = dim
 
 
-# ==============================================================================================================
-class Struct( Handler ):
+
+                # Transform array a(1,2,3) to a[3][2][1]
+                dim = dim.strip('()')
+                length = dim.split(',')
+                dim = ""
+                for i in reversed(length):
+                    dim += "[%s]"%i
+                                
+#                dim = "[%s]"%dim
+#                # hack to handle 2d arrauys
+#                dim = dim.replace(',', '][')
+
+            struct += "%s %s%s;\n"%( typ, var, dim )
+        struct += "};\n"
+
+
+        # Second, setup documentation structure
+        docum =  "struct _%s_docum_ {\n"%name
+        for var in self.var_list:
+            docum += "string %s;\n"%var
+        docum += "};\n";
+
+        # Third, setup a typedef lookup
+        typedef = " struct _%s_types_ {\n"%name
+        for myvar in self.var_list:
+            mytype = self.var_dict[myvar]
+            mydim  = self.var_dims[myvar] # dimension of the variable
+            if mydim != None:
+
+                mydim = mydim.strip('()')
+                length = mydim.split(',')
+                mydim = ""
+                for i in reversed(length):
+                    mydim += '[%s]'%i                                
+                #mydim = '[' + mydim + ']'
+                #mydim = mydim.replace(',','][')
+            else:
+                mydim=''
+            ##     mytype += mydim
+            
+            typedef += "  typedef %s %s%s;\n"%(mytype, myvar, mydim)
+        typedef += "};\n"
+
+        # Fourth, setup a member info ... dictionary
+
+        membid  = "\n#ifndef __CINT__\n";
+        membid += "\nstruct %s_info {\n"%name
+
+        membid += 'typedef %s_t Type;\n'%name
+#       membid += 'Type prototype;\n';                                       # NEW 05/11/16
+        membid += 'static const char *name(){ return "%s_t"; }\n'%name
+
+        lastvar = None
+        for myvar in self.var_list:
+            mytype = self.var_dict[myvar]
+            mydim  = self.var_dims[myvar] # dimension of the variable
+            membid += "struct %s {\n"%myvar
+            membid += '  static const char *name() { return  "%s"; }\n'%myvar
+
+            membid += '  static int Offset(){ return offsetof( struct %s_t, %s ); }\n'%(name,myvar)
+            
+#           if lastvar == None:
+#               membid += '  static int Offset(){ return 0; }\n'
+#           else:
+#               membid += '  static int Offset(){ return %s::Offset()+sizeof(%s::Type); }\n'%(lastvar,lastvar)
+
+
+            membid += '  static void* address(){ \n'
+            membid += '         long long iadd = (long long)%s_info::address;\n'%name
+            membid += '         iadd += Offset();\n'
+            membid += '         return (void *)iadd;}\n'
+
+            #
+            # FIX THIS PLEASE.  We output the dimension of the array, but we need
+            # to know how many indicies it has.  i.e. is this array hx[10] or hx[2][5]?
+            #
+            if mydim == None:
+                membid += "  typedef %s Type;\n" %mytype
+                membid += "  static const int rank = 0;"
+            else:
+
+
+                #mydim = mydim.replace(',','][')
+                mydim = mydim.strip('()')
+                length = mydim.split(',')
+                mydim = ""
+                for i in reversed(length):
+                    mydim += '[%s]'%i
+                    
+                
+                membid += "  typedef %s Type%s;\n" % (mytype,mydim)
+                #membid += "  static const int rank = %s;"%mydim
+
+            membid += "};\n"
+            lastvar = myvar;
+
+        membid += "static void              *address;\n"
+        membid += "static AgMLStructureBase *structure;\n"
+            
+        membid += "};\n"
+        membid += "#endif\n";
+
+
+        dictionary  = "\n\tvoid              *%s_info::address   = &%s;\n"%(name,name)
+        dictionary += "\tAgMLStructureBase   *%s_info::structure = &%s;\n"%(name,name.upper())
+
+        # Setup search predicates for each scalar variable
+        preds = "// Selectors for %s\n"%name
+        for var in self.var_list:
+            typ = self.var_dict[var] # type of the variable
+            dim = self.var_dims[var] # dimension of the variable
+            if dim == None:
+                preds += "isEqual<%s_t, %s> __%s_%s__( __%s, &__%s->%s );\n"%(
+                    name,
+                    typ,
+                    name,
+                    var,
+                    name,
+                    name,
+                    var
+                    )
+
+        # preds += "delete __%s; __%s = 0;\n\n"%(name,name) # cleanup memory but needs to be in body of code
+
+        # Setup table wrapper, and get reference to the structure 
+        wrapper  = "%s_t *__%s = new %s_t; // dummy\n "%( name, name, name )       
+        wrapper += 'AgMLStructure<%s_t,%s_info> %s("%s");\n'%(name,name,name.upper(),name)
+        wrapper += "%s_t &%s = %s;\n"%(name,name,name.upper())
+        
+
+        # Place definitions in the header file
+        document.head( struct )
+        document.head( docum )
+        document.head( typedef )
+        document.head( membid )
+
+        # Place declarations into implementation file
+        document.impl( wrapper, unit='global' )
+        document.impl( preds,   unit='global' )
+        document.impl( dictionary, unit='global' )
+class Structure( Handler ):
 
     def setParent(self,p): self.parent = p    
     def __init__(self):
@@ -1425,14 +2172,16 @@ class Struct( Handler ):
         name=self.name
 
         self.addVar(name='_index',type='Int_t',dim=None,value=None,comment='!$ agml index')
+        self.mkdocs = True
 
-        document.impl('//  -----------------------------------------------------',       unit='global')
-        document.impl('/// @defgroup %s_doc'%name,           unit='global') # doxygen group is lowercase struct name
-        document.impl('/// \class %s_t'%camelCase(name),     unit='global') # declares it as a class (which it is)
-        document.impl('/// \\brief User-defined structure',  unit='global') # provides a brief description
-        document.impl('///                        ',         unit='global') #        
-        document.impl('/// AgML structure members:',         unit='global') # followed by list of structure members
-        document.impl('///                        ',         unit='global') #
+        if self.mkdocs:
+            document.impl('//  -----------------------------------------------------',       unit='global')
+            document.impl('/// @defgroup %s_doc'%name,           unit='global') # doxygen group is lowercase struct name
+            document.impl('/// \class %s_t'%camelCase(name),     unit='global') # declares it as a class (which it is)
+            document.impl('/// \\brief User-defined structure',  unit='global') # provides a brief description
+            document.impl('///                        ',         unit='global') #        
+            document.impl('/// AgML structure members:',         unit='global') # followed by list of structure members
+            document.impl('///                        ',         unit='global') #
         
         #document.head('struct %s_t' % camelCase(name))
         #document.head('{',                           )
@@ -1505,8 +2254,6 @@ class Struct( Handler ):
 ##        document.impl('ClassImp(%s_t);'%camelCase(name),                          unit='global')
         document.impl('%s_t %s;'%(camelCase(name),name),                          unit='global')
         document.impl(skip,                                                       unit='global')
-
-
 class ArrayFormatter:
     def __init__(self,limit=60,indent='    ',level=2 ):
         self.limit  = 65
@@ -1588,8 +2335,92 @@ class ArrayFormatter:
 
         # And now add the comment
         output += ' ! %s' % comment
-           
+class Filling( Handler ):
 
+    def setParent(self,p): self.parent = p    
+    def __init__(self):
+
+        self. name = 0
+        self. commemt = 0
+        self. var_list = [] # list of variables
+        self. typ_list = [] # list of types
+        self. val_list = [] # list of values
+        self. com_list = [] # list of comments    
+        
+        Handler.__init__(self)
+
+    def addVar(self,name,type,dim,value,comment):
+        """
+        The <var> tag will result in addVar being called.  This will append
+        the variable name, type, value(s) and comments to the lists stored
+        in this class.
+        """    
+
+        self.var_list.append(name.lower())
+        self.typ_list.append(type)
+        self.val_list.append(value)
+        self.com_list.append(comment)
+
+    def startElement(self,tag,attr):
+        """
+        On the start of a <Fill> tag we begin collecting the information
+        about the elements of the struct which need to be filled, and'
+        what values.
+        """
+        global document
+        
+        name = attr.get('name',None);        self.name = name.lower()
+        comm = attr.get('comment',None);     self.comment = comm        
+   
+        name=name.lower()
+        count = document.fill_count.get(name,0)
+        document.fill_count[name]=count+1
+                
+    def endElement(self,tag):
+        global _struct_table, document
+
+        document.impl( seperator, unit=current)
+        name = self.name
+        name = name.lower()
+
+        # Increment the fill index
+
+        output =  "// Fill %s\n"%name
+        output += '++%s._index;\n' % self.name;
+        for i,var in enumerate(self.var_list):
+
+            val = self.val_list[i].lower()
+            com = self.com_list[i]
+
+            # TODO: support strings
+
+            # Detect and handle multidim arrays
+            if ';' in val:
+
+                output += '{\n'
+                val = val.strip(';') # remove trailing semi
+                val = val.replace( '{','{{' )
+                val = val.replace( '}','}}' )
+                val = val.replace( ';', '},{')
+                output += '%s_info::%s::Type temp = %s;\n'%(name,var,val)
+                output += 'memcpy(&%s.%s, &temp, sizeof(temp));;\n'%(name,var)                
+                output += '}\n'            
+                
+            elif '{' in val:
+
+                output += '{\n'
+                output += '%s_info::%s::Type temp = %s;\n'%(name,var,val)
+                output += 'memcpy(&%s.%s, &temp, sizeof(temp));;\n'%(name,var)                
+                output += '}\n'
+                
+            else :
+                output += '%s.%s = %s;\n'%(name,var,val)
+
+            output += '// %s_docum.%s = "%s";\n'%(name,var,com)
+
+        output += "%s.fill();\n"%name.upper()
+
+        document.impl( output, unit=current )
 class Fill( Handler ):
 
     def setParent(self,p): self.parent = p    
@@ -1635,9 +2466,6 @@ class Fill( Handler ):
     def endElement(self,tag):
         """
         On the </Fill> tag, we export the fill statement to the output file.
-    ==  We examine the master geometry control file (Geometry.py) to determine
-        if any of the module's structures are overridden.  If so, we use the
-        value contained in the master geometry file. DEPRECATED ==
         """
         global _struct_table, document
 
@@ -1699,8 +2527,6 @@ class Fill( Handler ):
         document.impl('%s.fill();'%self.name, unit=current )
         document.impl( '///@}', unit=current )                                
         document.impl(skip, unit=current)
-
-
 class Use(Handler):
 
     def __init__(self): Handler.__init__(self)
@@ -1736,6 +2562,29 @@ class Use(Handler):
             type = _struct_table[struct][selector]
             document.impl( '%s.Use("%s",(%s)%s);'%(struct,selector,type,value), unit=current )
         document.impl( '',                                       unit=current )
+class Using(Handler):
+
+    def __init__(self): Handler.__init__(self)
+    def setParent(self,p): self.parent = p    
+    def startElement(self,tag,attr):
+
+        struct   = attr.get('struct').lower()
+        selector = attr.get('select', None); 
+        value    = attr.get('value',  None);
+
+        if selector == None:
+            selector = "_index"
+            value    = "1"
+
+        selector = selector.lower().strip()
+        value    = value.lower().strip()
+        value    = replacements(value)
+
+        # TODO: handle strings
+        document.impl( '/// USE %s %s=%s;'%(struct,selector,value), unit=current )
+        document.impl( '%s.use( __%s_%s__ = %s );\n'%(struct.upper(), struct.lower(), selector.lower(), value ), unit=current)
+        
+
 
 # ----------------------------------------------------------------------------------------------------
         
@@ -1821,7 +2670,6 @@ class Material(Handler):
     def endElement(self,tag):
         document.impl( '_material = mat;', unit=current )
         document.impl( '}', unit=current )
-                   
 class Medium(Handler):
 
     def __init__(self):
@@ -1861,7 +2709,6 @@ class Medium(Handler):
     def endElement(self,tag):
         document.impl( '_medium = med;', unit=current )
         document.impl( '}', unit=current )
-        
 class Mixture(Handler):
 
     def setParent(self,p): self.parent = p    
@@ -1930,11 +2777,6 @@ class Mixture(Handler):
 
         if sumw==100.0:
             RaiseWarning( MixtureComponentError( self ) )
-
-        
-            
-
-    
 class Component(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p    
@@ -1960,7 +2802,6 @@ class Component(Handler):
         
         self.parent.addComponent( 'mix.Component("%s",%s,%s,%s);'%( name, a, z, w ), {'name':name, 'a':a, 'z':z, 'w':w} )
         document.impl( '/// Component %s\ta=%s\tz=%s\tw=%s'%(name,a,z,w), unit=current )
-
 class Attribute(Handler):
 
     def __init__(self):
@@ -2104,10 +2945,6 @@ class Shape(Handler):
         
         document.impl('_stacker -> Build(this);', unit=current )
         document.impl('}', unit=current )
-        
-        
-        
-                    
 class Create(Handler):
 
     def __init__(self):
@@ -2224,9 +3061,6 @@ class Position(Handler):
             pos=pos.strip('\n') # chomp
             pos=pos.strip(',')  # strip stray commas from arguements
             output += " %s"% pos
-        #self.form( output, cchar=' _' )
-        #form( output )
-
 class Create_and_Position(Position):
 # >>>> TODO <<<<
     def setParent(self,p):
@@ -2257,9 +3091,6 @@ class Create_and_Position(Position):
             output +=" in %s"%self.into
         for i,pos in enumerate(self.pos):
             output += " %s"% pos.strip(',')
-        #form( output             )
-
-# ----------------------------------------------------------------------------------------------------
 class Placement(Handler):
 
     def __init__(self):
@@ -2337,12 +3168,6 @@ class Placement(Handler):
         # If provided, add the conditional to the placement
         if cond:            document.impl( 'if ( %s )'%cond, unit=current )
 
-        ## if group:
-        ##     document.impl( '{ AgPlacement place = AgPlacement("%s","%s","%s");' %( block, into, group ), unit=current )
-        ## else:
-        ##     document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
-
-
         document.impl( '{', unit=current ) # Open scope
         if oldplacement:
             document.impl( 'AgPlacement place;', unit=current )
@@ -2364,10 +3189,6 @@ class Placement(Handler):
         if ( z != None ):
             document.impl( 'place.TranslateZ(%s);'% z, unit=current )
             document.impl( '/// Translate z = %s'%z, unit=current )
-
-        ## if ( matrix != None ):
-        ##     document.impl( '{ double matrix[] = %s; place.Matrix( matrix ); }'%matrix, unit=current )
-        ##     document.impl( '/// Rotation Matrix = %s'%matrix, unit=current )
         
         if ( only != None ):
             document.impl( 'place.par("only")=%s;'% only, unit=current )
@@ -2392,7 +3213,6 @@ class Placement(Handler):
 
     def add(self,thingy):
         self.contents.append(thingy)
-
 class Translation(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p
@@ -2421,8 +3241,7 @@ class Rotation(Handler):
     def startElement(self,tag,attr):
 
         # Validate attributes
-        checkAttributes( tag, attr,
-                         ['alphax','alphay','alphaz',  'thetax','thetay','thetaz','phix','phiy','phiz', 'ort'] )
+        checkAttributes( tag, attr, ['alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
 
         list = ['alphax','alphay','alphaz' ]
         func = {'alphax' : 'AlphaX',
@@ -2476,6 +3295,8 @@ class Rotation(Handler):
         if ( ortho ):
             document.impl( 'place.Ortho( "%s" ); // ORT=%s'%( ortho, ortho ), unit=current )
             document.impl( '/// Axis substitution: XYZ --> %s'%ortho, unit=current )
+     
+
                
         
 # ----------------------------------------------------------------------------------------------------
@@ -2518,7 +3339,6 @@ class For(Handler):
         if ( not re.match(';$',content) ):
              content += ';'
              document.impl( content, unit=current )
-
 class While(Handler):
 
     def setParent(self,p): self.parent = p    
@@ -2543,11 +3363,9 @@ class While(Handler):
         if ( not re.match(';$',content) ):
              content += ';'
              document.impl( content, unit=current )
-
 class Foreach(Handler):
     def setParent(self,p): self.parent = p    
     def __init__(self): Handler.__init__(self)
-
 class Call(Handler):
     
     def setParent(self,p): self.parent = p
@@ -2564,9 +3382,6 @@ class Call(Handler):
         #form('Call %s( %s )' %( self.routine, self.expr ) )
         document.impl( '%s( %s );// CALL %s'%(self.routine,self.expr,self.routine), unit=current )
         if self.routine.lower() in routine_skip_list:            document.impl('}*/', unit=current )
-
-# ----------------------------------------------------------------------------------------------------
-
 class If(Handler):
 
     def setParent(self,p): self.parent = p    
@@ -2608,7 +3423,6 @@ class Then(Handler): # always ignoring thens
         self.parent = p
     def __init__(self):
         Handler.__init__(self)    
-
 class Elif(Handler):
     def setParent(self,p): self.parent = p    
     def __init__(self):
@@ -2636,7 +3450,6 @@ class Elif(Handler):
         if ( not re.match(';$',content) ):
              content += ';'
         document.impl( content, unit=current )
-       
 class Else(Handler):
     def setParent(self,p): self.parent = p    
     def __init__(self): Handler.__init__(self)
@@ -2657,13 +3470,6 @@ class Else(Handler):
         if ( not re.match(';$',content) ):
              content += ';'
         document.impl(content, unit=current)
-
-
-
-##        if ( value != None ):            out( unit='impl', text='return %s;'%value )
-##        else:                            out( unit='impl', text='return;' );
-
-
 class Check(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p
@@ -2677,7 +3483,6 @@ class Check(Handler):
             else:
                 document.impl( 'if ( not (%s)) { continue; }'%expr,unit=current)
 
-# ====================================================================================================
 class Author(Handler):
 
     def __init__(self): Handler.__init__(self)
@@ -2694,8 +3499,6 @@ class Author(Handler):
         if ( email != None ):
             document.impl('/// Email:  %s'%email, unit=current )
         document.impl('///@}', unit=current )            
-
-# ====================================================================================================
 class Created(Handler):
 
     def __init__(self): Handler.__init__(self)
@@ -2709,8 +3512,6 @@ class Created(Handler):
         document.impl('///@{', unit=current )
         document.impl('/// Created: %s'%date, unit=current )
         document.impl('///@}', unit=current )        
-    
-# ====================================================================================================        
 class Translator(Handler):
 # TODO            
     def __init__(self): Handler.__init__(self)
@@ -2725,7 +3526,6 @@ class Translator(Handler):
             #form( "!Translator %s"%name )
             pass
 
-
 class Par(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
@@ -2737,9 +3537,6 @@ class Par(Handler):
         
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
         document.impl( 'module()->AddPar(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )        
-
-
-# ====================================================================================================        
 class Cut(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
@@ -2752,9 +3549,6 @@ class Cut(Handler):
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
         document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
-
-
-# ====================================================================================================        
 class Hits(Handler):
 # TODO        
     def __init__(self):
@@ -2798,10 +3592,6 @@ class Hits(Handler):
         for i,hit in enumerate(self.hit_list):
             arg = self.arg_list[i]
             declare += "%s:%s "%( hit, arg )
-        #form(declare,breakers=' ')
-
-
-# Placeholder for new stype hit definitions
 class Hit(Handler):
     def __init__(self):
         Handler.__init__(self)
@@ -2812,7 +3602,6 @@ class Hit(Handler):
         self.parent.addHit(self)
     def endElement(self,tag):
         pass
-    
 class Instrument(Handler):
     """
     Instrument is processed in scope of a block
@@ -2841,20 +3630,12 @@ class Instrument(Handler):
             mx   =replacements(mx).lower()
             document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
 
-                            
 
-
-
-        
-# ====================================================================================================            
 class Gsckov(Handler):
 # TODO            
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
     pass
-
-
-# ====================================================================================================
 class Info(Handler):
     def __init__(self):
         self.level=0
@@ -2930,8 +3711,6 @@ class Info(Handler):
         
         document.impl( "// - Info - ",                    unit=current )
         document.impl( 'Info( GetName(), %s );'%form,     unit=current )
-
-
 class Print(Handler):
 
     def __init__(self):
@@ -2974,10 +3753,6 @@ class Print(Handler):
                 if i and len(a.strip()):
                     stmt += ', %s'  % a          
             document.impl( '%s << Form("%s",%s) << std::endl;' %(logger, self.format, stmt), unit=current )
-        
-
-
-# ====================================================================================================
 class Replace(Handler):
 # TODO            
     def __init__(self):
@@ -3001,12 +3776,7 @@ class Replace(Handler):
             #form( "REPLACE [%s] with [" %self.match.rstrip(';') )
             for rpl in self.replace:
                 rpl = rpl.rstrip(';')
-                #form( "    %s"%( rpl ) )
-            #form( "    ];" )
-            #print ""
-        
 
-# ====================================================================================================
 class Function(Handler):
 # TODO        
     def __init__(self):
@@ -3030,9 +3800,13 @@ class Function(Handler):
         self.type = attr.get('type','void')
     def content(self, content):
         content = replacements(content)        
-        pass
     def endElement(self,tag):
         pass
+
+
+
+
+
 
 # ====================================================================================================
 class Fatal(Handler):

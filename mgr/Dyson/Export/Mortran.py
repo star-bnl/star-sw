@@ -372,6 +372,139 @@ class Document( Handler ):
 # ====================================================================================================
 # Begin definition of Mortran syntax
 
+class Detector( Handler ):
+    """
+    The <Detector> block specifies configuration options for the detector
+    """
+    def __init__(self):
+        global document
+        self.parent = None
+
+        self.name = None
+        self.comment = None
+        self.modules = []
+        self.setups  = []
+
+        Handler.__init__(self)
+
+    def setParent(self, p):
+        self.parent = p
+
+    def addModule( self, module ):
+        self.modules.append( module )
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+
+#        formatter( '#ifndef __%s_CONFIG__' % self.name )
+#        formatter( '#define __%s_CONFIG__' % self.name )
+
+    def endElement(self, tag ):
+        pass
+#        formatter ('#endif')
+
+class Setup( Handler ):
+    """
+    The <Setup> block defines a specific configuration for the detector
+    """
+    def __init__(self):
+        self.parent = None
+        self.name = None
+        self.comment = None
+        self.module = None
+        self.onoff = None
+        self.inits = []
+        self.flags = {}
+        Handler.__init__(self);
+
+    def setParent(self,p):
+        self.parent = p
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name',    None)
+        self.comment = attr.get('comment', None)
+        self.module  = attr.get('module',  None)
+        self.onoff   = attr.get('onoff',   None)
+        self.detector = self.parent.name
+
+        # Flags set by agsflag
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            myflag = attr.get(flag, None)
+            if myflag:
+                self.flags[flag] = int(myflag)
+
+
+    def endElement(self, tag):
+#       formatter( 'REPLACE [SETUP %s] with {'%self.name )
+#       formatter( "%s_module = CsAddr('%s')"%(self.detector,self.module) )
+#       formatter( "Call AgDetp NEW('%s')"%(self.detector) )
+        formatter( "FUNCTION SETUP_%s()"%self.name )
+        formatter( "  Integer       :: SETUP_%s"%self.name )
+        formatter( "  Integer, save :: address" )
+        formatter( "  Integer       :: CsAddr" )
+        formatter( "  Real    :: tmp(100)" )
+        if self.onoff == 'off' or self.onoff == 'OFF':
+            formatter ( "address = 0")
+            formatter ( "SETUP_%s = 0"%self.name )
+            formatter ( "RETURN" )
+        else:
+            # Pointer to the constructor defined below
+            formatter( "  SETUP_%s = CsAddr('CONSTRUCT_%s')"%(self.name,self.name) )
+            # Pointer to the detector module
+            formatter( "  address  = CsAddr('%s')"%(self.module) ) 
+            #formatter( "  WRITE(*,*)  '[%10s :: %20s]'"%(self.name,self.module) )
+            formatter( "  Write(*,*) '%12s [%20s] : %80s'"%(self.name,self.module,self.comment) )
+        
+            name = self.parent.name.upper()
+            formatter( "Call AgDetp NEW('%s')"%name )
+
+            for i in self.inits:
+                value = i.value
+                value = value.strip('{}')
+                value = value.split(',')
+                if len(value) == 1:
+                    formatter( "Call AgDetp ADD('%s.%s=',%s,1)"%(i.struct,i.variable,i.value) )
+                else:
+                    formatter( "tmp = %s" %i.value )
+                    formatter( "Call AgDetp ADD('%s.%s=',tmp,%i)"%(i.struct,i.variable,len(value)) )
+
+            formatter("RETURN")
+            
+        formatter("ENTRY construct_%s"%self.name)
+        # Setup flags
+        formatter("IF address.le.0 { return; }")
+        for flag,value in self.flags.iteritems():
+            formatter("   CALL Agsflag('%s',%i)"%(flag,value))
+        # Call the module stored during setup
+        formatter("   CALL CsjCal(address,0, 0,0,0,0,0, 0,0,0,0,0)" )
+        formatter("RETURN")        
+        formatter("END")
+#       formatter( '}' )
+
+class Init( Handler ):
+    def __init__(self):
+        self.parent = None
+
+    def setParent( self, p ):
+        self.parent = p
+        self.parent.inits.append(self)
+
+    def startElement(self, tag, attr ):
+        self.struct   = attr.get('struct', None )
+        if self.struct: self.struct = self.struct.lower()
+        self.variable = attr.get('var', None )
+        self.value    = attr.get('value', None )
+        self.namespace = self.parent.module.upper()
+
+    def endElement(self, tag ):
+        pass
+#        self.parent.inits.append(self)
+
+
+
+class Modules( Handler ):
+    pass
 
 class Module ( Handler ):
     def __init__(self):
@@ -843,7 +976,7 @@ class Enum( Handler ):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p    
 # ====================================================================================================
-class Struct( Handler ):
+class Structure( Handler ):
     def setParent(self,p): self.parent = p    
     def __init__(self):
         self. name = 0
@@ -881,6 +1014,11 @@ class Struct( Handler ):
         #form( "}! %s" % self.name )
         output += "}"
         form ( output )
+
+class Struct( Structure ):
+    def __init__(self):
+        Structure.__init__(self)
+
 # ====================================================================================================
 class ArrayFormatter:
     def __init__(self,limit=60,indent='    ',level=2 ):
@@ -1020,64 +1158,11 @@ class Fill( Handler ):
                 form      ( '%s = %s ! %s'%( var, val, com ) )
 
         form('ENDFILL')
-                
-            
+                      
 
-    def __NEW_OLD_endElement(self,tag):
 
-        limit = 60
-
-        for i,var in enumerate(self.var_list):
-
-            val = self.val_list[i].strip()  # value(s)
-            com = self.com_list[i]          # comment
-
-            if ( val[0]=='{' ):             # dealing with either matrix or array
-
-                n=len(val)
-                myval=val[1:n-1]
-
-                print myval
-
-                mylines = myval.split(';')
-                nlines = len(mylines)
-
-                output = '%s = {' % var
-                justfy = '      '
-                output += justfy
-                justfy += justfy
-                
-                for myline in mylines:
-
-                    values = myline.split(',')
-                    nv = len(values)
-
-                    for i,v in enumerate(values):
-                        v = v.strip()
-                        if ( i!= nv-1 ):
-                            output += '%s, '% v
-                            if ( len(output)%limit == 0 ):
-                                output+='\n'
-                        else:
-                            output += '%s'  % v
-
-                    if ( nlines > 1 ):
-                        output += ';\n'
-                        output += justfy
-    
-                output += '} ! %s '% com
-
-                for line in output.split('\n'):
-
-                    line = line.strip(',')
-                    #print line                    
-                    #form(line)
-                
-                        
-            else:
-                form ( '%s=%s ! %s'%( var, val, com ) )
-            
-
+class Filling(Fill):
+    def __init__(self): Fill.__init__(self)
             
 
 
@@ -1094,6 +1179,9 @@ class Use(Handler):
             form( "use %s" % struct )
         else:
             form( "use %s %s=%s"%( struct, selector, value ) )
+
+class Using(Use):
+    def __init__(self): Use.__init__(self)
 # ====================================================================================================
 class Material(Handler):
     def __init__(self):
@@ -1335,6 +1423,7 @@ class Create_and_Position(Position):
         Position.__init__(self)                
     def startElement(self,tag,attr):
 
+
         # Arrange shape arguements first
         for key in shape_params:
             val = attr.get(key,None)
@@ -1547,12 +1636,6 @@ class Placement(Handler):
         #
         formatter( "CALL AxPosition" )
 
-        
-
-            
-
-        
-
     def agstar_placement(self,tag):
 
         block  = self.attr.pop('block')
@@ -1639,11 +1722,6 @@ class Rotation(Handler):
 
     def output(self):
         out=''
-
-#       if self.key=='matrix':
-#           out='""" Got a matrix %s """' % self.value
-#           return out
-        
         if ( self.key != None ):
             out='%s=%s '%(self.key, self.value)
             return out
@@ -2143,6 +2221,182 @@ class Arguement(Handler):
         pass
     def endElement(self,tag):
         pass
+#__________________________________________________________________________________________
+# Begin support for new steering
+module_tags  = []
+module_flags = {}
+
+class Tag(Handler):
+    def __init__(self):
+        global document
+        self.parent   = None
+
+        self.name     = None
+        self.comment  = None
+        self.flags    = []
+        self.includes = []
+        self.modules  = []
+
+        # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
+        for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
+            for f in files:
+                if 'Config.xml' in f:
+                    name = f
+                    name = name.replace('.xml','.age')
+                    self.includes.append( 'StarVMC/xgeometry/%s' % name )
+
+                if 'Geo' in f and '.xml' in f:
+                    name = f[:4].lower()
+                    if '.' in name or '#' in name: continue
+                    if name in self.modules:
+                        pass
+                    else:
+                        self.modules.append(name)
+        
+        Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+
+    def startElement(self, tag, attr ):
+        global module_tags
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+        self.top     = attr.get('top', None )
+        formatter( 'REPLACE [EXE %s] with {'%self.name )
+
+        module_tags.append( self.name.upper() )
+    
+
+    def characters(self,content):
+        global module_flags
+        for flag in content.split(' '):
+            if len(flag.strip()):
+                self.flags.append(flag)
+                module_flags[flag]=1
+    
+#       for line in content.split('\n'):
+#           line = line.strip(' ')
+#           for element in line.split(' '):
+#               element = element.strip(' ')
+#               if element != '':
+#                   formatter( '%s = SETUP_%s()'%('???',element) )
+
+    def endElement(self,tag):
+        for flag in self.flags: 
+            name = flag[:4].upper()
+            formatter( '%s = %s()'%(name,flag) )
+#       
+        formatter('}')
+    
+class StarGeometry(Handler):
+    def __init__(self):
+        self.parent = None
+        self.name   = "StarGeometry"
+        self.tag    = None
+        self.geoms  = []
+    def setParent(self, p):
+        self.parent = p
+    def addGeometry(self,geom):
+        self.geoms.append(geom)
+
+        
+class Geometry(Handler):
+    def __init__(self):    
+        self.parent   = None
+        self.name     = None
+        self.docum    = None
+        self.modules  = []
+        self.pmodules = []
+        self.constructs = []
+        self.sys    = [] # subsystems
+        self.config = {} # subsystem configuration
+        Handler.__init__(self)
+        
+    def setParent(self,p): self.parent = p
+
+    def addSystem( self, system, config ):
+        self.sys.append(system)
+        self.config[system] = config
+#       self.modules.append(module)
+#       self.pmodules.append( module[:4].lower() )
+
+
+    def startElement(self, tag, attr ):
+        global module_flags
+        self.name  = attr.get('tag', None)
+        self.docum = attr.get('comment', None )
+
+        formatter('SUBROUTINE GEOM_%s' % self.name )
+
+    def endElement(self,tag):
+
+        # Declare integers to hold the address
+        for sub in self.sys:
+            formatter( 'INTEGER :: %s_addr = 0'%sub )
+
+        # Execute the module
+        for sub in self.sys:
+            config = self.config[sub]
+            formatter( '%s_addr = SETUP_%s()'%(sub,config))
+            formatter( 'call construct_%s'%config )
+        
+        # First setup integers to hold pointer to the method's address
+##         global module_tags
+##         for module in self.modules:
+##             formatter( 'INTEGER :: %s /0/' % module )
+##         formatter( 'SELECT CASE (tag)' )
+##         for tag in module_tags:
+##             formatter( '  Case ("%s")'%tag )
+##             formatter( '     EXE %s'%tag )
+##         formatter( '  Case DEFAULT' )
+##         formatter( "     write(*,*) 'Unknown tag ',tag " )
+##         formatter( 'END SELECT' )
+##         for construct in self.constructs:
+##             print str(construct) 
+## #   
+# Loop over all modules again and create
+#        for module in self.modules:
+#           formatter( 'IF %s { Call CsJCAL( %s, 0, 0,0,0,0,0, 0,0,0,0,0) }'%(module,module) )
+
+        formatter('END SUBROUTINE GEOM_%s'%self.name)
+                  
+       
+        
+
+class Construct(Handler):
+    def __init__(self):
+        self.parent = None
+        self.sys    = None
+        self.config = None
+        
+    def setParent(self, p):
+        self.parent = p
+    
+    def startElement(self, tag, attr ):
+        self.parent.constructs.append(self)
+
+        self.sys     = attr.get('sys', None)
+        self.config  = attr.get('config', None)
+        
+        #self.module = attr.get('module', None)
+        #self.track  = attr.get('track', 'primary' )
+
+        self.parent.addSystem( self.sys, self.config )
+        
+
+    def __str__(self):
+        output = ''
+#       output =  'IF %s {\n' % self.module 
+#       result = 1
+#       if self.track.lower() == 'secondary': result = 2
+#       output += "   CALL AgSFlag('SIMU',%i);\n"%result 
+#       output += "   CALL CsJCAL( %s, 0, 0,0,0,0,0, 0,0,0,0,0);\n"%self.module 
+#       output += "}\n"
+        return output
+        
+ 
+        
+# End support new steering
+#__________________________________________________________________________________________
 # ====================================================================================================
 class Fatal(Handler):
     def __init__(self): Handler.__init__(self)
