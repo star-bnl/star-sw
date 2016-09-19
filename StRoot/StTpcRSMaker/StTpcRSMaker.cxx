@@ -64,7 +64,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.71 2015/10/08 13:58:45 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.71 2016/09/18 22:45:25 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -1749,8 +1749,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.71 2015/10/08 13:58:45 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.71 2016/09/18 22:45:25 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.71  2016/09/18 22:45:25  fisyak
+// Clean up, add Heed model, adjust for new StTpcdEdxCorrections
+//
 // Revision 1.71  2015/10/08 13:58:45  fisyak
 // Add requirement for Check Plots for TTree file
 //

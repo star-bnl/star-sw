@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2014.C,v 1.1 2014/01/27 14:35:11 fisyak Exp $
-// $Log: TpcResponseSimulator.y2014.C,v $
+// $Id: TpcResponseSimulator.y2015.C,v 1.1 2016/09/19 12:25:07 fisyak Exp $
+// $Log: TpcResponseSimulator.y2015.C,v $
+// Revision 1.1  2016/09/19 12:25:07  fisyak
+// Set/ReSet default values
+//
 // Revision 1.1  2014/01/27 14:35:11  fisyak
 // Add y2014 simulation (ideal) tables for y2014
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.30 2014/01/09 20:06:45 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.31 2016/09/18 23:02:11 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.31  2016/09/18 23:02:11  fisyak
+ * Add dNdx
+ *
  * Revision 2.30  2014/01/09 20:06:45  fisyak
  * Add numberOfSigma() for kLikelihoodFitId method
  *
@@ -129,7 +132,7 @@
 #include "StBichsel/StdEdxModel.h"
 #include "TMath.h"
 static Bichsel *m_Bichsel = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.30 2014/01/09 20:06:45 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.31 2016/09/18 23:02:11 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)

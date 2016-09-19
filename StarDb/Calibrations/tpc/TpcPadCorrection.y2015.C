@@ -1,4 +1,4 @@
-// $Id: TpcPadCorrection.y2014.C,v 1.1 2014/01/27 14:35:11 fisyak Exp $
+// $Id: TpcPadCorrection.y2015.C,v 1.1 2016/09/19 12:25:06 fisyak Exp $
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_TpcPadCorrection")) return 0;
   Int_t n = 28;
@@ -39,7 +39,10 @@ TDataSet *CreateTable() {
   }
   return (TDataSet *)tableSet;
 }
-// $Log: TpcPadCorrection.y2014.C,v $
+// $Log: TpcPadCorrection.y2015.C,v $
+// Revision 1.1  2016/09/19 12:25:06  fisyak
+// Set/ReSet default values
+//
 // Revision 1.1  2014/01/27 14:35:11  fisyak
 // Add y2014 simulation (ideal) tables for y2014
 //

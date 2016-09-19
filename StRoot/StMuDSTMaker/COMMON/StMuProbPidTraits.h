@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.10 2013/07/16 14:30:30 fisyak Exp $
+ * $Id: StMuProbPidTraits.h,v 1.12 2016/09/18 23:00:49 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -96,6 +96,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.12  2016/09/18 23:00:49  fisyak
+ * Add dNdx
+ *
  * Revision 1.10  2013/07/16 14:30:30  fisyak
  * Restore mass fit tracks
  *

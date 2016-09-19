@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.7 2015/12/24 00:23:03 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.8 2016/09/18 22:40:31 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
