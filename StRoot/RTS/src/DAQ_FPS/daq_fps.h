@@ -98,9 +98,9 @@ struct fps_pedrms_t {
 
 class daq_fps : public daq_det {
 private:
-	class daq_dta *handle_raw() ;
-	class daq_dta *handle_pedrms() ;
-	class daq_dta *handle_adc() ;
+	class daq_dta *handle_raw(int sec) ;
+	class daq_dta *handle_pedrms(int sec) ;
+	class daq_dta *handle_adc(int sec) ;
 
 	class daq_dta *raw ;
 	class daq_dta *adc ;
@@ -117,7 +117,7 @@ public:
 	int get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo) ;
 
 
-	// this is the meta data, per event!
+	// this is the meta data, overwritten per sector!
 	struct fps_evt_hdr_t meta_hdr ;
 
 	const char *GetCVS() const {
