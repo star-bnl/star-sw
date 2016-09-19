@@ -1,0 +1,62 @@
+<Document file="StarVMC/Geometry/PipeGeo/PipeConf.xml">
+<Detector name="PIPE" comment="Intermediate Silicon Detector">
+  <Modules>
+    PipeGeo,
+    PipeGeo00,
+    PipeGeo1,
+    PipeGeo2,
+    PipeGeo3
+  </Modules>
+
+<!-- NOTE:  Pipeflag in PipeGeo may need to be set -->
+
+  <Setup name="PIPEof" onoff="off" module="PipeGeo" comment="OFF"  />
+
+  <Setup name="PIPEon" onoff="on" module="PipeGeo" comment="Default pipe configuration">
+    <Init struct="pipv" var="pipeconfig" value="2" />
+    <Init struct="pipv" var="pipeflag"   value="3" />
+  </Setup>
+  
+  <Setup name="PIPE00" onoff="on"  module="PipeGeo00" comment="Simplest beam pipe" >
+    <Init struct="pipv" var="pipeconfig" value="-1" />
+<!--<Init struct="pipv" var="pipeflag"   value="-1" />-->
+  </Setup>
+
+
+  <Setup name="PIPE12" onoff="on"  module="PipeGeo" comment="Default pipe" >
+    <Init struct="pipv" var="pipeconfig" value="2" />
+    <Init struct="pipv" var="pipeflag"   value="1" />
+  </Setup>
+
+
+  <Setup name="PIPE04" onoff="on"  module="PipeGeo" comment="">
+    <Init struct="pipv" var="pipeconfig" value="4" />
+    <Init struct="pipv" var="pipeflag"   value="0" />
+  </Setup>
+
+  <Setup name="PIPE14" onoff="on"  module="PipeGeo" comment="">
+    <Init struct="pipv" var="pipeconfig" value="4" />
+    <Init struct="pipv" var="pipeflag"   value="1" />
+  </Setup>
+
+  <Setup name="PIPE06" onoff="on"  module="PipeGeo" comment="">
+    <Init struct="pipv" var="pipeconfig" value="6" />
+    <Init struct="pipv" var="pipeflag"   value="0" />
+  </Setup>
+
+  <Setup name="PIPEv1" onoff="on"  module="PipeGeo1" comment="New beampipe">
+    <Init struct="pipv" var="config" value="0" />
+  </Setup>
+
+  <Setup name="PIPEv2" onoff="on"  module="PipeGeo2" comment="New beampipe">
+    <Init struct="pipv" var="config" value="0" />
+  </Setup>
+
+  <Setup name="PIPEv3" onoff="on"  module="PipeGeo3" comment="HFT beampipe">
+    <Init struct="pipv" var="pipeconfig" value="30" />
+    <Init struct="pipv" var="pipeflag"   value="1" />
+  </Setup>
+
+
+</Detector>
+</Document>

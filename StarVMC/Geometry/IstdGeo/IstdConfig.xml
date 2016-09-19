@@ -1,0 +1,13 @@
+<Document file="StarVMC/Geometry/IstdGeo/IstdConf.xml">
+<Detector name="ISTD" comment="Intermediate Silicon Detector">
+  <Modules>
+    IstdGeo0,
+    IstdGeo1
+  </Modules>
+
+  <Setup name="ISTDof" comment="OFF"                           module="IstdGeo0"  onoff="off" />
+  <Setup name="ISTD01" comment="Intermediate Silicon Detector" module="IstdGeo0"  onoff="on"/>
+  <Setup name="ISTD02" comment="Intermediate Silicon Detector" module="IstdGeo1"  onoff="on"/>
+
+</Detector>
+</Document>

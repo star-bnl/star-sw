@@ -1,0 +1,22 @@
+<Document  file="StarVMC/Geometry/ShldGeo/ShldConfig.xml">
+
+  <Detector name="SHLD" comment="Shield wall configuration" >
+ 
+    <Modules>ShldGeo</Modules>
+
+    <Setup  name   = "SHLDof" comment="Shield off" module="ShldGeo" onoff="off" />
+
+    <Setup  name   = "SHLDon"
+	    comment= "Default configuration for the beam tunnel shielding"
+	    module = "ShldGeo"
+	    onoff  = "on" >
+
+    </Setup>
+  
+  </Detector> 
+   
+</Document>
+  
+ 
+ 
+ 

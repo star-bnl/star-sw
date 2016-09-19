@@ -1,0 +1,55 @@
+<Document file="StarVMC/Geometry/CalbGeo/CalbConf.xml">
+<Detector name="CALB" comment="Barrel EMC">
+  <Modules>
+    CalbGeo,
+    CalbGeo1,
+    CalbGeo2
+  </Modules> 
+  <Setup  name  = "CALBof" comment="No CALB" module="CalbGeo" onoff="off" />
+
+  <Setup name="CALB00" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{12,0}" />
+    <Init struct="calg" var="shift"   value="{87,0}" />
+  </Setup>
+  <Setup name="CALBa0" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{24,0}" />
+    <Init struct="calg" var="shift"   value="{21,0}" />
+  </Setup>
+  <Setup name="CALBb0" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,0}" />
+    <Init struct="calg" var="shift"   value="{0,0}" />
+  </Setup>
+  <Setup name="CALBc0" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,60}" />
+    <Init struct="calg" var="shift"   value="{75,105}" />
+  </Setup>
+  <Setup name="CALBd0" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,75}" />
+    <Init struct="calg" var="shift"   value="{75,0}" />
+  </Setup>
+  <Setup name="CALBe0" comment="Full BEMC 2007" module="CalbGeo" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,60}" />
+    <Init struct="calg" var="shift"   value="{75,105}" />
+  </Setup>
+  <Setup name="CALB01" comment="Full BEMC 2007" module="CalbGeo1" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,60}" />
+    <Init struct="calg" var="shift"   value="{75,105}" />
+  </Setup>
+
+  <Setup name="CALB02" comment="Full BEMC 2007" module="CalbGeo2" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,60}" />
+    <Init struct="calg" var="shift"   value="{75,105}" />
+    <Init struct="ccut" var="absorber"  value="1" />
+    <Init struct="ccut" var="sensitive" value="1" />
+  </Setup>
+
+  <Setup name="CALB02_cut00" comment="Full BEMC 2007 diable EM cuts" module="CalbGeo2" onoff="on">
+    <Init struct="calg" var="nmodule" value="{60,60}" />
+    <Init struct="calg" var="shift"   value="{75,105}" />
+    <Init struct="ccut" var="absorber"  value="0" />
+    <Init struct="ccut" var="sensitive" value="0" />
+  </Setup>
+
+
+</Detector>
+</Document>

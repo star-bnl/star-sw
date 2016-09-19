@@ -1,0 +1,40 @@
+<Document  file="StarVMC/Geometry/PhmdGeo/PhmdConfig.xml">
+
+  <Detector name="PHMD" comment="Photon Multiplicity Counter"> 
+ 
+    <Modules>PhmdGeo</Modules>
+
+    <Setup  name   = "PHMDof" comment="PHMD off" module="PhmdGeo" onoff="off" />
+
+    <Setup  name   = "PHMDon"
+	    comment= "Default configuration for the Forward GEM tracker"
+	    module = "PhmdGeo"
+	    onoff  = "on" >
+
+    </Setup>
+
+    <Setup  name   = "PHMD01"
+	    comment= "Default configuration for the Forward GEM tracker"
+	    module = "PhmdGeo"
+	    onoff  = "on" >
+      
+      <Init struct="pmvr" var="config" value="1.0" />
+
+    </Setup>
+
+    <Setup  name   = "PHMD02"
+	    comment= "Default configuration for the Forward GEM tracker"
+	    module = "PhmdGeo"
+	    onoff  = "on" >
+      
+      <Init struct="pmvr" var="config" value="2.0" />
+
+    </Setup>
+  
+  </Detector> 
+   
+</Document>
+  
+ 
+ 
+ 
