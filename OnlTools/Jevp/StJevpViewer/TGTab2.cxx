@@ -1,4 +1,4 @@
-// @(#)root/gui:$Id: TGTab2.cxx,v 1.1 2016/04/05 20:33:01 evpops Exp $
+// @(#)root/gui:$Id: TGTab2.cxx,v 1.2 2016/09/19 17:53:28 evpops Exp $
 // Author: Fons Rademakers   13/01/98
 
 /*************************************************************************
@@ -36,7 +36,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "TGTab2.h"
+#include "Jevp/StJevpViewer/TGTab2.h"
 #include "TGResourcePool.h"
 #include "TList.h"
 #include "Riostream.h"

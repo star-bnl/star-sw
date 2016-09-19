@@ -11,7 +11,7 @@
 #include <TObjArray.h>
 #include <TRegexp.h>
 #include <TSocket.h>
-#include "TGTab2.h"
+#include "Jevp/StJevpViewer/TGTab2.h"
 
 #include "Jevp/StJevpPlot/JevpPlot.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
