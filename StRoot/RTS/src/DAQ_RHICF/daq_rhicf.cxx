@@ -109,24 +109,27 @@ daq_dta *daq_rhicf::handle_raw(int sec, int rdo)
 
 	int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-	LOG(DBG,"Got %d",size) ;
+	LOG(DBG,"Got size %d",size) ;
 	if(size <= 0) {
 		LOG(DBG,"%s: %s: not found in this event",name,str) ;
 		return 0 ;
 	}
 
 	char *ptr = (char *) malloc(size) ;
+	LOG(DBG,"Malloc at %p",ptr) ;
+
 	caller->sfs->read(full_name, ptr, size) ;
+
+	LOG(DBG,"sfs read succeeded") ;
 
 	//I need to skip the 40 byte bankHeader!
 	size -= 40 ;	//bank header
-	ptr += 40 ;
 
 	raw->create(size,"rhicf_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 	char *st = (char *) raw->request(size) ;
 
-	memcpy(st,ptr,size) ;
+	memcpy(st,ptr+40,size) ;
 	free(ptr) ;
 
 
