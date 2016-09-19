@@ -9,7 +9,7 @@
 #include <TRootEmbeddedCanvas.h>
 #include <RQ_OBJECT.h>
 #include <TObject.h>
-#include "TGTab2.h"
+#include "Jevp/StJevpViewer/TGTab2.h"
 #include <THashTable.h>
 #include <TList.h>
 #include <TText.h>

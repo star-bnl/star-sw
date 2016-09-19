@@ -3,7 +3,7 @@
 
 #include "example.h"
 #include <stdio.h>
-#include <TGTab2.h>
+#include "Jevp/StJevpViewer/TGTab2.h"
 #include <TGMenu.h>
 
 #include "EthClient.h"

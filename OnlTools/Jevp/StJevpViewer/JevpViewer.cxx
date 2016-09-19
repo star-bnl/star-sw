@@ -4,7 +4,7 @@
 
 #include <TROOT.h>
 #include <TStyle.h>
-#include <TGTab2.h>
+#include "Jevp/StJevpViewer/TGTab2.h"
 #include <TGMenu.h>
 #include <TApplication.h>
 
