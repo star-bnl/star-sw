@@ -1,3 +1,6 @@
+/*
+  root.exe VoltageScan.C+
+ */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -65,7 +68,7 @@ class TDirIter;
 class TTreeIter;
 #endif
 //________________________________________________________________________________
-void VoltageScan(const Char_t *files = "./VoltCGF*.root") {
+void VoltageScan(const Char_t *files = "./VoltageCGF*.root") {
   TDirIter Dir(files);
   Char_t *file = 0;
   Int_t NFiles = 0;
@@ -74,6 +77,7 @@ void VoltageScan(const Char_t *files = "./VoltCGF*.root") {
     if (! f) {cout << "Can't open file " << file << endl; continue;}
     TNtuple *FitP = (TNtuple *) f->Get("FitP");
     if (! FitP) {cout << "No FitP in file " << file << endl; delete f; continue;}
+    FitP->SetScanField(192);
     NFiles++;
     Long64_t n = FitP->Draw("mu:y>>V","i&&j&&abs(mu)>0.15","goff");
     if (n) {
@@ -85,7 +89,7 @@ void VoltageScan(const Char_t *files = "./VoltCGF*.root") {
 	V->Draw();
 	c1->Update();
 	cout << gDirectory->GetName() << endl;
-	FitP->Scan("i:(i-(i-1)%8-1)/8+1:(i-1)%8+1:y:mu","i&&j&&abs(mu)>0.15","entry:sector:channel:V:mu",192);
+	FitP->Scan("i:(i-(i-1)%8-1)/8+1:(i-1)%8+1:y:mu","i&&j&&abs(mu)>0.10","entry:sector:channel:V:mu",192);
 	if (! gROOT->IsBatch()) {
 	  if (Ask()) break;
 	}

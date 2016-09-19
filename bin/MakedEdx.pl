@@ -1498,6 +1498,9 @@ my @badruns = qw(
 		  17039042 17040050 17040051 17054017 17056007 17057006
 		  17068062 17072041 17104030 17104031 17108048 17110001
 		  17111059 17112041 17115029 17117062
+		  17044004 17049028 17050016 17050033 17053020 17053045
+		  17067004 17068037 17097036 17101035 17108013 17123005
+		  17123006 17123035 17128001 17129044 
 		);
 #my  bad Runs from PowerSypply:		  17057012 17060037 17075027 17107055 17109059 
 # new Bad runs  17044012 (20160213/105923 -----   20160213/130532)  previous (20160213/104848 -----   20160213/105923)
@@ -1558,7 +1561,20 @@ my @badruns = qw(
 #$hist = "RunXVIAuAu200p54"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/12/16 reset TpcEffectivedX
 #$hist = "RunXVIAuAu200p55"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/13/16 new version of StdEdxY2Maker, reset TpcSecRowB and TpcRowQ, use TpcEffectivedX adn TpcTanL
 #$hist = "RunXVIAuAu200p56"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/14/16 new version of StdEdxY2Maker, new TpcSecRowB and TpcRowQ
-$hist = "RunXVIAuAu200p57"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/15/16 TpcZCorrectionB
+#$hist = "RunXVIAuAu200p57"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/15/16 TpcZCorrectionB
+#$hist = "RunXVIAuAu200p58"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/16/16 tpcPressureB and TpcSecRowB and TpcRowQ, stop and add more bad runs
+#$hist = "RunXVIAuAu200p59"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/16/16 tpcPressureB and TpcSecRowB and TpcRowQ, more bad runs
+#$hist = "RunXVIAuAu200p100"; $NEvents = 500; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/17/16 TpcSecRowB and TpcRowQ, new TpcTanL from GF
+#$hist = "RunXVIAuAu200p101"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/17/16 TpcSecRowB and TpcRowQ
+
+
+#$hist = "RunXVIAuAu200p202"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/16/16 step back Pass 44
+#$hist = "RunXVIAuAu200p203"; $NEvents = 500; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/16/16 step back Pass 44. Reset TpcSecRowB to 1
+
+#$hist = "RunXVIAuAu200p102"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/18/16 TpcSecRowB and TpcRowQ based on SecRow3CGFRunXVIAuAu200p101
+#$hist = "RunXVIAuAu200p103"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/18/16 update TpcRowQ, tpcPressureB, TpcLengthCorrectionMDF
+$hist = "RunXVIAuAu200p104"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/AuAu_*_production*_2016/ReversedFullField";  $Production = "/P16i*_dEdx"; $year = "/2016/*/*/"; $FILE = "st_physics"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/19/16 fix bug TpcRowQ => TpcEffectivedX
+
 my $prod = $hist; #$Production;
 
 $prod =~ s/\*//g;
