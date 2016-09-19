@@ -70,6 +70,11 @@ static sigjmp_buf env;
 int JEVPSERVERport;
 JevpServer serv;
 
+void PO(char *s) {
+    int fd = open("boo.txt", O_CREAT | O_WRONLY, 0666);
+    close(fd);
+    LOG("JEFF", "(%s): num files: %d", s, fd);
+}
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -239,6 +244,7 @@ void JevpServer::readSocket()
     TSocket *s;
     TMessage *mess;
   
+    //PO("readSocket: ");
     CP;
     s = mon->Select(100);
     if((long) s <= 0) {
@@ -254,6 +260,9 @@ void JevpServer::readSocket()
 	TSocket *nsocket = ssocket->Accept();
 	//TInetAddress adr = nsocket->GetInetAddress();
 	mon->Add(nsocket);
+
+	//PO("accept: ");
+
 	return;
     }
     CP;
@@ -268,6 +277,8 @@ void JevpServer::readSocket()
 	mon->Remove(s);
 	delete s;
 	delete mess;
+	//PO("disconnect: ");
+		
 	return;
     }
     CP;
@@ -282,6 +293,7 @@ void JevpServer::readSocket()
 	    CP;
 	    //LOG("JEFF", "Handle message from reader");
 
+
 	    handleNewEvent(msg);
       
 	    EvpMessage m;
@@ -291,12 +303,16 @@ void JevpServer::readSocket()
 	    TMessage mess(kMESS_OBJECT);
 	    mess.WriteObject(&m);
 	    s->Send(mess);
+
+	    //PO("EvpMessage readerThread: ");
+
 	    CP;
 	}
 	else {                                // from a client!
 	    CP;
 	    //LOG("JEFF", "Handle message from client");
 	    handleEvpMessage(s, msg);
+	    //PO("EvpMessage: ");
 	    CP;
 	}
     
