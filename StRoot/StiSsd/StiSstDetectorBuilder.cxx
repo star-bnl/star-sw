@@ -23,7 +23,7 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSsd/StiSsdIsActiveFunctor.h"
 #include "StSsdUtil/StSstConsts.h"
-#include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiSstHitErrorCalculator.h"
 
 
 /**
@@ -36,7 +36,7 @@
  * transformation stored in the survey DB tables
  */
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
-   : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
+   : StiDetectorBuilder("Sst", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
    setGroupId(kSstId);
 }
@@ -107,13 +107,14 @@ void StiSstDetectorBuilder::useVMCGeometry()
       std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
 
-      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
+      bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
 
       if (!isAvail) {
-         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder..." << endm;
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node:" 
+		  << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
          continue;
       }
-
+      gGeoManager->cd(geoPath.str().c_str());
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
       TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
@@ -149,7 +150,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
          static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
       stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
-      stiDetector->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
+      stiDetector->setHitErrorCalculator(StiSstHitErrorCalculator::instance());
 
       add(stiRow, iLadder-1, stiDetector);
    }
