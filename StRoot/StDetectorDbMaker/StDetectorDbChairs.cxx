@@ -880,6 +880,11 @@ MakeChairInstance2(Survey,StSsdOnGlobal,Geometry/ssd/SsdOnGlobal);
 MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
+#include "StSstSurveyC.h"
+MakeChairInstance2(Survey,StSstOnGlobal,Geometry/sst/SstOnGlobal);
+MakeChairInstance2(Survey,StSstSectorsOnGlobal,Geometry/sst/SstSectorsOnGlobal);
+MakeChairInstance2(Survey,StSstLaddersOnSectors,Geometry/sst/SstLaddersOnSectors);
+MakeChairInstance2(Survey,StSstWafersOnLadders,Geometry/sst/SstWafersOnLadders);
 #include "StTpcSurveyC.h"
 MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
