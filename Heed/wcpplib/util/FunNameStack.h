@@ -44,31 +44,11 @@ It is provided "as is" without express or implied warranty.
 // Definitions which can be switched off
 #ifdef FUNNAMESTACK
 #define mfunname(string)             \
-  static char* FunNameIIII = string; \
+  static const char* FunNameIIII = string; \
   FunNameWatch funnw(FunNameIIII)
-#define mfunname1(string)             \
-  static char* FunNameIIII1 = string; \
-  FunNameWatch funnw1(FunNameIIII1)
-#define mfunname2(string)             \
-  static char* FunNameIIII2 = string; \
-  FunNameWatch funnw2(FunNameIIII2)
-#define mfunname3(string)             \
-  static char* FunNameIIII3 = string; \
-  FunNameWatch funnw3(FunNameIIII3)
-#define mfunname4(string)             \
-  static char* FunNameIIII4 = string; \
-  FunNameWatch funnw4(FunNameIIII4)
-#define mfunname5(string)             \
-  static char* FunNameIIII5 = string; \
-  FunNameWatch funnw5(FunNameIIII5)
 //#define stackprt(stream)  stream<<funnamestack
 #else
 #define mfunname(string)
-#define mfunname1(string)
-#define mfunname2(string)
-#define mfunname3(string)
-#define mfunname4(string)
-#define mfunname5(string)
 //#define stackprt(stream)
 #endif
 
@@ -76,21 +56,6 @@ It is provided "as is" without express or implied warranty.
 #define mfunnamep(string)                  \
   static const char* FunNameIIII = string; \
   FunNameWatch funnw(FunNameIIII)
-#define mfunnamep1(string)                  \
-  static const char* FunNameIIII1 = string; \
-  FunNameWatch funnw1(FunNameIIII1)
-#define mfunnamep2(string)                  \
-  static const char* FunNameIIII2 = string; \
-  FunNameWatch funnw2(FunNameIIII2)
-#define mfunnamep3(string)                  \
-  static const char* FunNameIIII3 = string; \
-  FunNameWatch funnw3(FunNameIIII3)
-#define mfunnamep4(string)                  \
-  static const char* FunNameIIII4 = string; \
-  FunNameWatch funnw4(FunNameIIII4)
-#define mfunnamep5(string)                  \
-  static const char* FunNameIIII5 = string; \
-  FunNameWatch funnw5(FunNameIIII5)
 
 // Checks
 #define DO_CHECKS

@@ -33,9 +33,6 @@ Sensor::Sensor()
 
   m_className = "Sensor";
 
-  m_components.clear();
-  m_electrodes.clear();
-  m_thresholdCrossings.clear();
 }
 
 ComponentBase* Sensor::GetComponent(const unsigned int i) {
@@ -892,8 +889,6 @@ bool Sensor::ComputeThresholdCrossings(const double thr,
     // Initialise the vectors.
     std::vector<double> times;
     std::vector<double> values;
-    times.clear();
-    values.clear();
     times.push_back(m_tStart);
     values.push_back(signal[0]);
     int nValues = 1;
