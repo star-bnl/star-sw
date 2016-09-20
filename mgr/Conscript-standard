@@ -194,6 +194,7 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpServer"
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpData"
 	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpBuilders"
+	      .   $main::PATH_SEPARATOR . "#OnlTools/Jevp/StJevpViewer"
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
     $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 } 
