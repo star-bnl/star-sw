@@ -107,14 +107,13 @@ void StiSstDetectorBuilder::useVMCGeometry()
       std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
 
-      bool isAvail = gGeoManager->CheckPath(geoPath.str().c_str());
+      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node:" 
-		  << geoPath.str().c_str() << " Skipping to next ladder..." << endm;
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
-      gGeoManager->cd(geoPath.str().c_str());
+
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
       TGeoHMatrix sensorMatrix( *gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix() );
 
