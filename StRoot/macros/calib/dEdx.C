@@ -54,7 +54,7 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,dEdxY2,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,AlignSectors");
   //  TString Chain("in,dEdxY2,magF,StEvent,AlignSectors,Corr4,OSpaceZ2");
   //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
-  TString Chain("in,TpcHitMover,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
+  TString Chain("in,TpcHitMover,CorrX,OSpaceZ2,OGridLeak3D,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
   TString RootFile(rootFile);
   if (RootFile == "") {
     RootFile = gSystem->BaseName(MainFile);
@@ -62,7 +62,6 @@ void dEdx(Int_t nevents=1000,
   }
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->GetMaker("dEdxY2"); 
-  dEdxY2->SetDebug(1);
   StMaker *tofCalib = chain->Maker("tofCalib");
   if (tofCalib) chain->AddAfter("tofCalib",dEdxY2);
   Int_t Mode = 0;

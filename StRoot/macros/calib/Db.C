@@ -5,38 +5,15 @@ TTable *table = 0;
 //________________________________________________________________________________
 void Load() {
   if (gClassTable->GetID("StDbManager") < 0) {
-    // Baseline shared libraries
-    //    gSystem->Load("libTable");
-    gSystem->Load("St_base"); 
-    gSystem->Load("liblog4cxx.so");
-    gSystem->Load("StStarLogger");
-    gSystem->Load("StChain");
-    gSystem->Load("StUtilities");
-    // DB-specific libs
-    // may only need libStDb_Tables.so
-    // but may need St_Tables.so... so I'm using this one
-    //  gSystem->Load("libStDb_Tables.so");
-    Char_t *mysql = "libmysqlclient";
-    Char_t *libs[]  = {"", "/usr/mysql/lib/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
-    //Char_t *libs[]  = {"/usr/lib/", 0};
-    Int_t i = 0;
-    while ((libs[i])) {
-      TString lib(libs[i]);
-      lib += mysql;
-      lib = gSystem->ExpandPathName(lib.Data());
-      if (gSystem->DynamicPathName(lib,kTRUE)) {
-	gSystem->Load(lib.Data()); cout << " + " << lib.Data() << endl;
-	break;
-      }
-	i++;
-    }
-    gSystem->Load("St_Tables.so");
-    gSystem->Load("StDbLib.so");
-    gSystem->Load("StDbBroker.so"); 
-    gSystem->Load("St_db_Maker.so");
-  }
-  //    dbMk = new St_db_Maker("db","MySQL:StarDb");
-    dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
+    gROOT->LoadMacro("bfc.C");
+    //    bfc(-1,"tpcDb,detDb,CorrX,nodefault");
+    bfc(-2,"tpcDb,detDb,mysql,nodefault,CorrX");
+    //   bfc(-2,"tpcDb,detDb,mysql,nodefault,Corr4,DbV20140905");
+  }    
+//   gROOT->ProcessLine("typedef trgTimeOffset_st              trgTimeOffsetB_st;");
+//   gROOT->ProcessLine("typedef St_trgTimeOffset              St_trgTimeOffsetB_;");
+  // dbMk = new St_db_Maker("db","MySQL:StarDb");
+  dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
   //  dbMk->SetFlavor("sim","WaferOnLadder");
   //  dbMk->SetDebug(2);
   //  dbMk->SetFlavor("laserDV","tpcDriftVelocity");
@@ -56,14 +33,22 @@ void Load() {
 //________________________________________________________________________________
 //void Db(const Char_t *tabNam  = "Calibrations/tpc/noiseElim", 
 void Db(const Char_t *tabNam  = 
-	"Calibrations/svt/svtBadAnodes",
-	Int_t date = 20091215, Int_t time = 0,
+	"Geometry/tpc/tpcPadPlanes",
+	Int_t date = -1, Int_t time = 0,
 	Int_t debugL = 1,
-	const Char_t *flavor="sim+ofl"
+	const Char_t *flavor="sim+ofl+laserDV"
 	){ 
   if (dbMk == 0) Load();
   dbMk->SetDebug(debugL);
-  dbMk->SetDateTime(date,time); 
+  Int_t D = date;
+  Int_t T = time;
+  if (D <= 0) {
+    TDatime dt;
+    D = dt.GetDate();
+    T = dt.GetTime();
+    cout << "Set Date " << D << " Time " << T << endl;
+  }
+  dbMk->SetDateTime(D,T); 
   TString TabNam(tabNam);
   if (TabNam.BeginsWith("StarDb/")) TabNam.ReplaceAll("StarDb/","");
   TString name(gSystem->BaseName(tabNam));
@@ -79,8 +64,24 @@ void Db(const Char_t *tabNam  =
     cout << "Found table " << table->GetName() << " with NRows = " << Nrows << " in db" << endl;
     cout << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 	 << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endl;
+    if (name == "tpcPadrowT0") {
+      Double_t t0Inner = 0, t0Outer = 0;
+      Int_t      Inner = 0,   Outer = 0;
+      tpcPadrowT0_st *row = ((St_tpcPadrowT0 *) table)->GetTable();
+      for (Int_t sec = 0; sec < 24; sec++, row++) {
+	for (Int_t r = 0; r < 45; r++) {
+	  if (row->T0[r]) {
+	    if (r < 13) {t0Inner += row->T0[r]; Inner++;}
+	    else        {t0Outer += row->T0[r]; Outer++;}
+	  }
+	}
+      }
+      if (Inner > 0) t0Inner /= Inner;
+      if (Outer > 0) t0Outer /= Outer;
+      cout << name.Data() << "\tInner <T0> = " << t0Inner << "\tOuter <T0> = " << t0Outer << endl;
+    }
     if (Nrows > 10) Nrows = 10;
-    //    table->Print(0,Nrows);
+    if (table->GetRowSize() < 256) table->Print(0,Nrows);
     cout << "==============================================" << endl;
 #if 0
     name += Form(".%06i.%06i.root",t[0].GetDate(),t[0].GetTime());
@@ -95,5 +96,13 @@ void Db(const Char_t *tabNam  =
 #endif
   }
   else cout << "Table:" << tabNam << " has not been found" << endl;
-  
+}
+//________________________________________________________________________________
+void Db(const Char_t *tabNam  = "StarDb/AgiGeometry/Geometry",
+	const Char_t *tag){ 
+  if (dbMk == 0) Load();
+  cout << "Db(" << tabNam << "," << tag << ")" << endl;
+  Int_t date = StMaker::AliasDate(tag);
+  Int_t time = StMaker::AliasTime(tag);
+  Db(tabNam,date,time);
 }

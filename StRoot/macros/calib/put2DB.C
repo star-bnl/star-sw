@@ -1,3 +1,6 @@
+/*
+  root.exe lDb.C 'put2DB.C("StarDb/Geometry/tpc/TpcHalfPosition.r2016.C")'
+ */
 //#include "SvtIndexMap.h"
 class TTable;
 TTable *table = 0;
@@ -6,11 +9,25 @@ StDbTable* dbTable = 0;
 class StDbManager;
 StDbManager* mgr = 0;
 Int_t DT = 0;
+#if 0
 //________________________________________________________________________________
 void Load() {
   //  gSystem->Load("libTable");
   gSystem->Load("libStDb_Tables");
-  gSystem->Load("libmysqlclient");
+  Char_t *mysql = "libmysqlclient";
+  Char_t *libs[]  = {"", "/usr/mysql/lib/", "/usr/lib/mysql/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
+  //Char_t *libs[]  = {"/usr/lib/", 0};
+  Int_t i = 0;
+  while ((libs[i])) {
+    TString lib(libs[i]);
+    lib += mysql;
+    lib = gSystem->ExpandPathName(lib.Data());
+    if (gSystem->DynamicPathName(lib,kTRUE)) {
+      gSystem->Load(lib.Data()); cout << " + " << lib.Data() << endl;
+      break;
+    }
+    i++;
+  }
   gSystem->Load("liblog4cxx.so");
   gSystem->Load("libSt_base");                                        //  TMemStat::PrintMem("load St_base");
   gSystem->Load("libStStarLogger.so");
@@ -18,6 +35,7 @@ void Load() {
   gSystem->Load("StDbLib");
   
 }
+#endif
 //________________________________________________________________________________
 void put2DB(const char* file=
 	    "$STAR/StarDb/Geometry/svt/svtWafersPosition.20050101.000200.C"
@@ -28,6 +46,10 @@ void put2DB(const char* file=
 	      UPDATE svtDriftCorrection set entryTime=entryTime,beginTime=''2005-01-01 00:00:00' where beginTime like '2005-01-01%'; 
 	    */
 	    ){
+  gSystem->Setenv("DB_ACCESS_MODE","write");
+#if 0
+  Load();
+#endif
   TString bName(gSystem->BaseName(file));// cout << bName << endl;
   Int_t indx = bName.Index(".");
   TString TName(bName.Data(),indx);  cout << "Table name " << TName << endl;
@@ -35,11 +57,20 @@ void put2DB(const char* file=
   Time.ReplaceAll("C","");
   Time.ReplaceAll("root","");//  cout << "Time " << Time << endl;
   //  1996-12-01 23:59:59
-  //  int d=19960101;
-  int d=20000101;
-  int t =      0;
+  //  Int_t d=19960101;
+  Int_t d=20000101;
+  Int_t t =      0;
   //  sscanf(Time.Data(),"%d",&d);
-  sscanf(Time.Data(),"%d.%d",&d,&t);
+  Int_t n = sscanf(Time.Data(),"%d.%d",&d,&t);
+  if (n != 2) {
+    Char_t tag[10];
+    n = sscanf(Time.Data(),"%s",&tag);
+    if (n == 1) {
+      d = StMaker::AliasDate(tag);
+      t = StMaker::AliasTime(tag);
+      cout << "n = " << n << " tag: " << tag << " d = " << d << " t = " << t << endl;
+    }
+  }
   TDatime Date(d,t); cout << " Date " << Date.GetDate() << "\tTime " << Date.GetTime() << endl;
   TString dName(gSystem->DirName(file));
   TString DB("");
@@ -47,6 +78,8 @@ void put2DB(const char* file=
   if (indx >= 0) {
     DB = dName.Data()+indx+7;
     DB.ReplaceAll("/","_");
+  } else {
+    DB = dName;
   }
   TString fName(file); cout << "Load " << fName << " to DB: " << DB << endl;
   if (DB == "") return;
@@ -96,9 +129,9 @@ void put2DB(const char* file=
     myTable->ReAllocate(Nmax);
     tpcCorrection_st row;
     memset(&row, 0, sizeof(tpcCorrection_st));
-    for (int i = N; i < Nmax; i++) myTable->AddAt(&row);
+    for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
     tpcCorrection_st *r = myTable->GetTable();
-    for (int i = 0; i < N; i++, r++) {
+    for (Int_t i = 0; i < N; i++, r++) {
       r->idx = i+1;
       r->nrows = N;
     }
@@ -112,9 +145,9 @@ void put2DB(const char* file=
     myTable->ReAllocate(Nmax);
     svtHybridDriftVelocity_st row;
     memset(&row, 0, sizeof(svtHybridDriftVelocity_st));
-    for (int i = N; i < Nmax; i++) myTable->AddAt(&row);
+    for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
     svtHybridDriftVelocity_st *r = myTable->GetTable();
-    for (int i = 0; i < N; i++, r++) {
+    for (Int_t i = 0; i < N; i++, r++) {
       r->idx = i+1;
       r->nrows = N;
     }
@@ -127,13 +160,13 @@ void put2DB(const char* file=
   if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
 #ifndef _SvtIndexMap_h
   if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
-  for(int ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
+  for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
 #else
   if (TName.Contains("svtWafersPosition")) {
     offset = 0; // Mike found that for svt offset should be 0
     St_svtWafersPosition *S = (St_svtWafersPosition *) table;
     svtWafersPosition_st *s = S->GetTable();
-    for(int ti=0;ti<N;ti++, s++) {
+    for(Int_t ti=0;ti<N;ti++, s++) {
       Int_t elementID = -1;
       for (Int_t j = 0; j < N; j++) {
 	Int_t layer = 2*SvtMap[j].Barrel - 1 + SvtMap[j].Ladder%2; 
@@ -172,7 +205,7 @@ void put2DB(const char* file=
       rowIDs[ti]= elementID;
     }
   } else {
-    for(int ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
+    for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
   }
 #endif 
   Char_t* gstr = (Char_t*) myTable->GetTable();
@@ -180,7 +213,7 @@ void put2DB(const char* file=
 #if 1
   Int_t status = 0;
   Int_t maxIter = 1; // 5
-  for (int i = 0; i < maxIter; i++) {
+  for (Int_t i = 0; i < maxIter; i++) {
     TString TimeStamp(Form("%8d.%06d",d,t+i)); cout << "TimeStamp " << TimeStamp << endl;
     //    TDatime dt(d,t+i);
     TUnixTime dt(d,t+i,1);
@@ -189,7 +222,7 @@ void put2DB(const char* file=
     mgr->setStoreTime(DT);
     status = mgr->storeDbTable(dbTable);
     if(!status) {
-      cout<<" ------> error storing in DB --> try to change TimeStamp by 1 sec"<<endl;
+      if (i+1 < maxIter)  cout<<" ------> error storing in DB --> try to change TimeStamp by 1 sec"<<endl;
     } else {break;}
   }
   if (status) cout << " ------> Done" << endl;
@@ -197,3 +230,11 @@ void put2DB(const char* file=
   delete [] rowIDs;
 #endif
 }
+/*
+  select * from tpcDriftVelocity where beginTime > "2014" and beginTime < "2014-03-14 19:37:58" and deactive=1423867472 order by beginTime ;
+  select * from tpcDriftVelocity where beginTime > "2014-06-16 10:06:06" and beginTime < "2014-07-30 19:38:58" and deactive=1423867472 order by beginTime ;
+
+ update tpcDriftVelocity set deactive=0, entryTime = entryTime  where deactive = 1423867472 and ( beginTime > "2014" and beginTime < "2014-03-14 19:37:58");
+ update tpcDriftVelocity set deactive=0, entryTime = entryTime  where deactive = 1423867472 and ( beginTime >"2014-06-16 10:06:06" and beginTime < "2014-07-30 19:38:58");
+
+*/
