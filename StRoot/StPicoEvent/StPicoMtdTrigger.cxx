@@ -166,9 +166,9 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
     }
 
     LOG_DEBUG << "input1 = " << (std::bitset<16>) decision << "\n"
-              << "input2 = " << (std::bitset<16>) decision2 << "\n"
-              << "output = " << (std::bitset<16>) mTF201TriggerBit
-              << endm;
+	      << "input2 = " << (std::bitset<16>) decision2 << "\n"
+	      << "output = " << (std::bitset<16>) mTF201TriggerBit 
+	      << endm;
   }
 }
 

@@ -85,6 +85,6 @@ void StPicoTrack::Print(Char_t const* option) const
            << " nHitsFit: " << nHitsFit()
            << " nHitsdEdx: " << nHitsDedx() << "\n"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
-           << nSigmaProton() << "/" << nSigmaElectron()
+                                  << nSigmaProton() << "/" << nSigmaElectron()
            << endm;
 }
