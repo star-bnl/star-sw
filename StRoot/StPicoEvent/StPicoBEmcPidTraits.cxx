@@ -23,7 +23,10 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, Floa
 {
   mTrackIndex = (index > std::numeric_limits<short>::max()) ? -1 : (Short_t)index;
 
-  auto getConstrainedShort = [](float x) { return fabs(x) >= std::numeric_limits<short>::max() ? std::numeric_limits<short>::max() : (short)(TMath::Nint(x));};
+  auto getConstrainedShort = [](float x)
+  {
+    return fabs(x) >= std::numeric_limits<short>::max() ? std::numeric_limits<short>::max() : (short)(TMath::Nint(x));
+  };
 
   mBemcId       = (id > std::numeric_limits<short>::max()) ? -1 : (Short_t)id;
   mBemcAdc0     = (adc0 > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc0;
