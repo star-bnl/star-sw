@@ -42,8 +42,8 @@ file(GLOB headers ${garfield_SOURCE_DIR}/Include/*.hh)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(exampleGarfield ${G4_DIR}/exampleGarfield.cc ${sources} ${headers})
-target_link_libraries(exampleGarfield ${Geant4_LIBRARIES} Garfield ${ROOT_COMPONENT_LIBRARIES} ${ROOT_LIBRARIES})
+add_executable(exampleGeant4Interface ${G4_DIR}/exampleGarfield.cc ${sources} ${headers})
+target_link_libraries(exampleGeant4Interface ${Geant4_LIBRARIES} Garfield ${ROOT_COMPONENT_LIBRARIES} ${ROOT_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -70,7 +70,7 @@ endforeach()
 endif(Geant4_FOUND)
 #### Install                ############################
 if(Geant4_FOUND)
-INSTALL(TARGETS gasfile edep exampleGarfield DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
+INSTALL(TARGETS gasfile edep exampleGeant4Interface DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
 else()
 INSTALL(TARGETS gasfile edep DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/)
 endif(Geant4_FOUND)
