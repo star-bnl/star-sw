@@ -1,5 +1,5 @@
 ########################################################
-# build scripts to run garfield simulations
+# build Garfield++ library and examples
 # depend on: ROOT
 # @author Klaus Zenker
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
@@ -16,11 +16,11 @@ ELSEIF(DEFINED ROOT_CMAKE_DIR)
     SET( CMAKE_MODULE_PATH ${ROOT_CMAKE_DIR} )
 ELSE()
     MESSAGE(FATAL_ERROR "Please consider to set ROOTSYS or use -DROOTSYS=..."
-                        "If still there is a proplem point to the directory which includes FindROOT.cmake using -DROOT_CMAKE_DIR=...")
+                        "If still there is a proplem, point to the directory which includes FindROOT.cmake using -DROOT_CMAKE_DIR=...")
 ENDIF(DEFINED ENV{ROOTSYS})
 
 
-FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
+FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom Gdml)
 SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
 INCLUDE( MacroCheckPackageLibs )
 INCLUDE( MacroRootDict )
@@ -46,12 +46,11 @@ ELSE()
     # ROOT 5
     INCLUDE_DIRECTORIES ( ${PROJECT_SOURCE_DIR} ${ROOT_INCLUDE_DIR} )
     # COMPONENT mechanism in the FIND_PACKAGE is not supported 
-    SET(ROOT_COMPONENT_LIBRARIES "-lGeom")
+    SET(ROOT_COMPONENT_LIBRARIES "-lGeom -Gdml")
 ENDIF(DEFINED ROOT_INCLUDE_DIRS)
 
 ## add garfield  #######################################
 AUX_SOURCE_DIRECTORY( Source garfield_sources )
-LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include )
 
 ## add magboltz ########################################
 SET( magboltz_sources Source/magboltz-9.01.f )
@@ -59,6 +58,7 @@ SET_SOURCE_FILES_PROPERTIES( ${magboltz_sources}  PROPERTIES LANGUAGE Fortran )
 
 ## add Heed ############################################
 SET( heed_dirs 
+    Heed
     Heed/heed++/code 
     Heed/wcpplib/clhep_units 
     Heed/wcpplib/geometry 
@@ -99,11 +99,13 @@ ENDIF()
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES COMPILE_FLAGS "-DNOT_INCLUDE_GASLIB_IN_PACSLIB -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN -DFUNNAMESTACK")
 
 ## create dictionary  ##################################
+LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include Heed)
 SET( ROOT_DICT_CINT_DEFINITIONS "-DHANDLE_DICT_EXCEPTIONS=IGNORED_FOR_CINT" )
 PREPARE_ROOT_DICT_HEADERS( Include )
 GEN_ROOT_DICT_SOURCES( GarfieldDict.cxx )
 LIST( APPEND garfield_sources ${ROOT_DICT_OUTPUT_SOURCES} )
 
+## print information on considered files and the root dictionary include directories
 MESSAGE( STATUS "###########################################################" )
 MESSAGE( STATUS "Considered Garfield files :             ${garfield_sources}" )
 MESSAGE( STATUS "-----------------------------------------------------------" )
@@ -130,6 +132,15 @@ IF(BUILD_WITH_VERSION_NUMBER)
         VERSION ${${PROJECT_NAME}_VERSION}
         SOVERSION ${${PROJECT_NAME}_SOVERSION} )
 ENDIF(BUILD_WITH_VERSION_NUMBER)
+
+## BUILD examples             ##########################
+option(WITH_EXAMPLES "Build Garfield++ examples" ON)
+if(WITH_EXAMPLES)
+    MESSAGE(STATUS "Garfield++ exmaples will be build. In order disable this option use -DWITH_EXAMPLES=OFF")
+    add_subdirectory(Examples)
+else()
+    MESSAGE(STATUS "Building of examples is switched off.")
+endif()
 ## EXPORT PACKAGE INFORMATION ##########################
 export(PACKAGE ${PROJECT_NAME})
 
