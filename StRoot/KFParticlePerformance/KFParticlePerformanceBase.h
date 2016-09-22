@@ -111,8 +111,8 @@ class KFParticlePerformanceBase
   TH1F *hPartParamSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
   TH1F *hPartParamSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam];
 
-  static const int nHistoPartParam2D = 2;
-  TH2F *hPartParam2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r
+  static const int nHistoPartParam2D = 3;
+  TH2F *hPartParam2D[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; // y-pt, z-r, armenteros
   TH2F *hPartParam2DPrimary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];
   TH2F *hPartParam2DPrimaryTopo[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D];

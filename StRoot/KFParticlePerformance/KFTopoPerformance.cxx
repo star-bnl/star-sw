@@ -1160,6 +1160,7 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   float Theta;
   float Phi;
   float X,Y,Z,R;
+  float QtAlpha[2];
   
   TempPart.GetMass(M,ErrM);
   TempPart.GetMomentum(P,ErrP);
@@ -1197,7 +1198,29 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   
   bool drawZR = ((iParticle<5) || (iParticle==41)) && histoDSToParticleQA;
   if(drawZR)
+  {
     histoParameters2D[0][iParticle][1]->Fill(Z,R,1);
+    
+    int index1 = TempPart.DaughterIds()[0];
+    int index2 = TempPart.DaughterIds()[1];
+    KFParticle posDaughter, negDaughter;
+    if(int(fTopoReconstructor->GetParticles()[index1].Q()) > 0)
+    {
+      posDaughter = fTopoReconstructor->GetParticles()[index1];
+      negDaughter = fTopoReconstructor->GetParticles()[index2];
+    }
+    else
+    {
+      negDaughter = fTopoReconstructor->GetParticles()[index1];
+      posDaughter = fTopoReconstructor->GetParticles()[index2];
+    }
+    float vertex[3] = {TempPart.GetX(), TempPart.GetY(), TempPart.GetZ()};
+    posDaughter.TransportToPoint(vertex);
+    negDaughter.TransportToPoint(vertex);
+    KFParticle::GetArmenterosPodolanski(posDaughter, negDaughter, QtAlpha );
+    
+    histoParameters2D[0][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
+  }
 
   int iSet = 1;
   if(!RtoMCParticleId[iP].IsMatchedWithPdg()) //background
@@ -1247,7 +1270,10 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
   
   histoParameters2D[iSet][iParticle][0]->Fill(Rapidity,Pt,1);
   if(drawZR)
+  {
     histoParameters2D[iSet][iParticle][1]->Fill(Z,R,1);
+    histoParameters2D[iSet][iParticle][2]->Fill(QtAlpha[1],QtAlpha[0],1);
+  }
   
   if(iSet != 1) return;
 
