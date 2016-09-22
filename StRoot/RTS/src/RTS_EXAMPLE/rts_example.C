@@ -41,6 +41,7 @@
 #include <DAQ_PXL/daq_pxl.h>
 #include <DAQ_SST/daq_sst.h>
 #include <DAQ_FPS/daq_fps.h>
+#include <DAQ_RHICF/daq_rhicf.h>
 
 #include <TPC/rowlen.h>
 
@@ -76,6 +77,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print);
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
 static int sst_doer(daqReader *rdr, const char *do_print) ;
 static int fps_doer(daqReader *rdr, const char *do_print) ;
+static int rhicf_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 static int bad ;
@@ -355,6 +357,9 @@ int main(int argc, char *argv[])
 
 		/*************************** FPS **************************/
 		fps_doer(evp,print_det) ;
+
+		/*************************** RHICF **************************/
+		rhicf_doer(evp,print_det) ;
 		
 
 
@@ -1800,18 +1805,17 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"fps")) ;	// leave as is...
 	else do_print = 0 ;
 
-	static int tot_charge[21] ;
-
-
 
 	dd = rdr->det("fps")->get("adc") ;
 	if(dd) {
-		u_int ev_ch = 0 ;	//count of channels
-
-		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
-
 		while(dd->iterate()) {	//per xing and per RDO
-			adc_found = 1 ;
+			adc_found |= 1 << (dd->sec - 1) ;	//sector mask
+
+			u_int ev_ch = 0 ;	//count of channels
+
+			
+			fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
+
 
 
 			fps_adc_t *a = (fps_adc_t *)dd->Void ;
@@ -1825,13 +1829,13 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 					sum += a[i].adc ;
 				}
 				
-				printf("  xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",(char)dd->sec,dd->rdo,dd->ncontent,occ,sum) ;
+				printf("FPS sector %d: xing %2d, QT %d, chs %d (occupancy %.2f %%, charge %d)\n",dd->sec,(char)dd->row,dd->rdo,dd->ncontent,occ,sum) ;
 		
-				int xing = (char)dd->sec ;
+				int xing = (char)dd->row ;
 
-				int ix = xing + 10 ;
+				//int ix = xing + 10 ;
 
-				if(ix>=0 && ix<21) tot_charge[ix] += sum ;
+				//if(ix>=0 && ix<21) tot_charge[ix] += sum ;
 
 				if(xing==0) ev_ch += dd->ncontent;;
 
@@ -1845,38 +1849,35 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 					
 				}
 			}
-		}
+		
 
-		// moved it to the end, when I know the channel count
-		if(do_print && adc_found) {
-			//time of arrival of the STP command
-			double stp = ((double) hdr->tick) * 1024.0 ;	//in clocks
+			// moved it to the end, when I know the channel count
+			if(do_print) {
+				//time of arrival of the STP command
+				double stp = ((double) hdr->tick) * 1024.0 ;	//in clocks
 
-			stp /= cpu_clock ;
-			stp *= 1000000.0 ;
+				stp /= cpu_clock ;
+				stp *= 1000000.0 ;
 
-			//time at the end of the full event readout
-			double readout = ((double) (u_int) hdr->delta) * 1024.0 ;
+				//time at the end of the full event readout
+				double readout = ((double) (u_int) hdr->delta) * 1024.0 ;
 
-			readout /= cpu_clock ;
-			readout *= 1000000.0 ;
+				readout /= cpu_clock ;
+				readout *= 1000000.0 ;
 			
-			double just_readout = ((double)(u_int) hdr->reserved[0]) * 1024.0 ;
-			just_readout /= cpu_clock ;
-			just_readout *= 1000000.0 ;
+				double just_readout = ((double)(u_int) hdr->reserved[0]) * 1024.0 ;
+				just_readout /= cpu_clock ;
+				just_readout *= 1000000.0 ;
 
-			printf("FPS META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), ch count  %u\n",
-			       stp, readout, readout-stp, readout-just_readout, ev_ch) ;
+				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), ch count  %u\n",
+				       dd->sec,stp, readout, readout-stp, readout-just_readout, ev_ch) ;
+			}
+
+
 		}
 
-
 	}
 
-	if(adc_found && do_print) {
-		printf("FPS: total charge per crossing: ") ; 
-		for(int i=0;i<21;i++) printf("%d ",tot_charge[i]) ;
-		printf("\n") ;
-	}
 
 	dd = rdr->det("fps")->get("pedrms") ;
 	if(dd) {
@@ -1886,7 +1887,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 			fps_pedrms_t *ped = (fps_pedrms_t *) dd->Void ;
 
 			if(do_print) {
-				printf("FPS PEDRMS: QT %d\n",dd->rdo) ;
+				printf("FPS PEDRMS: Sector %d: QT %d\n",dd->sec,dd->rdo) ;
 
 				for(int i=0;i<ped->ch_cou;i++) {
 					printf("    ch %2d: %f +- %f (bad 0x%X)\n",i,
@@ -1898,10 +1899,12 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 	}
 
 
-	char fstr[128] ;
+	char fstr[256] ;
 	fstr[0] = 0 ;
 
-	if(adc_found) strcat(fstr,"ADC ") ;
+	if(adc_found | 1) strcat(fstr,"FPS-ADC ") ;
+	if(adc_found | 2) strcat(fstr,"FPOST-ADC ") ;
+
 	if(pedrms_found) strcat(fstr,"PEDRMS ") ;
 
 	int found = 0 ;
@@ -1910,6 +1913,42 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 	if(found) {
 		LOG(INFO,"FPS found: [%s]",fstr) ;
+	}
+
+	return found ;
+
+}
+
+static int rhicf_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"rhicf")) ;	// leave as is...
+	else do_print = 0 ;
+
+	dd = rdr->det("rhicf")->get("raw") ;
+	
+
+	if(dd) {
+		while(dd->iterate()) {	//per xing and per RDO
+			found = 1 ;
+
+			if(do_print) {
+				printf("RHICF: %d bytes\n",dd->ncontent) ;
+
+				for(int i=0;i<10;i++) {
+					printf("    %d: 0x%08X\n",i,dd->Int32[i]) ;
+				}
+			}
+
+		}
+
+	}
+
+
+	if(found) {
+		LOG(INFO,"RHICF found") ;
 	}
 
 	return found ;
