@@ -7,7 +7,6 @@
 #include "TClonesArray.h"
 
 #include "StChain/StMaker.h"
-#include "StPicoDstMaker/StPicoEnumerations.h"
 #include "StPicoDstMaker/StPicoArrays.h"
 
 class TFile;
@@ -26,8 +25,11 @@ class StPicoEvent;
 class StPicoDstMaker : public StMaker
 {
 public:
+  enum PicoIoMode {IoWrite=1, IoRead=2};
+  enum PicoVtxMode {NotSet=0, Default=1, AuAu200=2};
+
   StPicoDstMaker(char const* name = "PicoDst");
-  StPicoDstMaker(int mode, char const* fileName = "", char const* name = "PicoDst");
+  StPicoDstMaker(PicoIoMode ioMode, char const* fileName = "", char const* name = "PicoDst");
   virtual ~StPicoDstMaker();
 
   virtual Int_t Init();
@@ -53,7 +55,7 @@ public:
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp = 9);
 
-  void setVtxMode(int);
+  void setVtxMode(PicoVtxMode);
 
 protected:
 
@@ -109,9 +111,8 @@ protected:
   * param[out]  towid[]  Unique ids of the three BEMC towers identified for ene[2], ene[3], and ene[4]
   */
   bool getBEMC(StMuTrack* t, int* id, int* adc, float* ene, float* d, int* nep, int* towid);
+  int  setVtxModeAttr();
   bool selectVertex();
-
-  enum ioMode {ioRead, ioWrite};
 
   StMuDst*   mMuDst;
   StEmcCollection* mEmcCollection;
@@ -121,8 +122,7 @@ protected:
   StPicoDst* mPicoDst;
   Float_t    mBField;
 
-  Int_t      mIoMode;         //! I/O mode:  0: - read,   1: - write
-  Int_t      mVtxMode;
+  PicoVtxMode mVtxMode;
 
   TString   mInputFileName;        //! *.list - MuDst or picoDst
   TString   mOutputFileName;       //! FileName
@@ -155,5 +155,5 @@ inline TTree* StPicoDstMaker::tree() { return mTTree; }
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
 inline void StPicoDstMaker::setCompression(int comp) { mCompression = comp; }
 inline void StPicoDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
-inline void StPicoDstMaker::setVtxMode(int const vtxMode) { mVtxMode = vtxMode; }
+inline void StPicoDstMaker::setVtxMode(PicoVtxMode const vtxMode) { mVtxMode = vtxMode; }
 #endif
