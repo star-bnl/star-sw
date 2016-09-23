@@ -74,7 +74,7 @@
 #define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only; unused
-#define TCD_FCAL        10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_FCS        10	//0x14, Sep 16: was IST, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -99,7 +99,7 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 #define RHICF_GRP	8
-#define FCAL_GRP        9
+#define FCS_GRP        9
 //#define xxx_GRP		10	// unused
 //#define xxx_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
@@ -280,8 +280,8 @@ so we keep it here for source compatibility
 #define RHICF_ID           RHICF_SYSTEM
 
 //reserved for DEP tests in Jan 2017
-#define FCAL_SYSTEM       30
-#define FCAL_ID           FCAL_SYSTEM
+#define FCS_SYSTEM       30
+#define FCS_ID           FCS_SYSTEM
 
 #define RTS_NUM_SYSTEMS	31	/* current maximum. Can not be greater than 32! */
 
@@ -637,7 +637,7 @@ extern inline char *getTrgDetBitName(int x) {
 
 #define RHICF_NODES(x)  ((EXT2_SYSTEM<<12) | (RHICF_SYSTEM<<7) | (x))
 
-#define FCAL_NODES(x)  ((EXT2_SYSTEM<<12) | (FCAL_SYSTEM<<7) | (x))
+#define FCS_NODES(x)  ((EXT2_SYSTEM<<12) | (FCS_SYSTEM<<7) | (x))
 
 extern inline const char *rts2name(int rts_id)
 {
@@ -698,8 +698,8 @@ extern inline const char *rts2name(int rts_id)
 		return "FPS" ;
 	case ETOF_SYSTEM :
 		return "ETOF" ;
-	case FCAL_SYSTEM :
-		return "FCAL" ;
+	case FCS_SYSTEM :
+		return "FCS" ;
 	case RHICF_SYSTEM :
 		return "RHICF" ;
 	default :
@@ -768,8 +768,8 @@ extern inline const char *rts2sfs_name(int rts_id)
 		return "etof";
 	case RHICF_SYSTEM :
 		return "rhicf";
-	case FCAL_SYSTEM :
-		return "fcal";
+	case FCS_SYSTEM :
+		return "fcs";
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -817,7 +817,7 @@ extern inline int rts2det(int ix)
 	case FPS_ID:
 	case ETOF_ID:
 	case RHICF_ID:
-	case FCAL_ID:
+	case FCS_ID:
 		return ix ;
 	default :
 		return -1 ;
@@ -851,7 +851,7 @@ extern inline int rts2tcd(int rts)
 		TCD_TPX,	//20
 		TCD_RHICF,	//21 PXL
 		TCD_MTD,	//22 MTD
-		TCD_FCAL,	//23 IST
+		TCD_FCS,	//23 IST
 		TCD_ETOF,	//24 SST
 		-1,		//25 
 		TCD_GMT,	//26 GMT
@@ -882,7 +882,7 @@ extern inline int tcd2rts(int tcd)
         -1,		//7 BBC
         ETOW_SYSTEM,	//8
         -1,		//9 ; used for MTD_QT, was SSD?
-        FCAL_SYSTEM,	//10 ; moved from FGT; moved from FPD
+        FCS_SYSTEM,	//10 ; moved from FGT; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
         MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
@@ -915,7 +915,7 @@ extern inline int tcd2rts(int tcd)
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<RHICF_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
 		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<ETOF_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID)) | (1<<FPS_ID) |\
-			(1<<FCAL_ID) 
+			(1<<FCS_ID) 
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -951,8 +951,8 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << RHICF_GRP)) {
 	  ret |= (1 << RHICF_SYSTEM);
 	}
-	if(grp & (1 << FCAL_GRP)) {
-	  ret |= (1 << FCAL_SYSTEM);
+	if(grp & (1 << FCS_GRP)) {
+	  ret |= (1 << FCS_SYSTEM);
 	}
 	if(grp & (1 << MTD_GRP)) {
 	  ret |= (1 << MTD_SYSTEM);
@@ -992,8 +992,8 @@ extern inline int rts2grp(int rts)
 		return ETOF_GRP;
 	case RHICF_ID :
 		return RHICF_GRP;
-	case FCAL_ID :
-		return FCAL_GRP ;
+	case FCS_ID :
+		return FCS_GRP ;
 	default:
 		return 31 ;	// this is an ERROR since groups < 16
    }
