@@ -61,6 +61,32 @@
     <Construct sys="psup" config="PSUP01" />
 
   </Geometry>
+
+   <!-- y2016 series geometry tags -->
+  <Geometry tag="y2016a"  check="false" comment="Y2016 production geometry">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85" />
+    <Construct sys="istd" config="ISTD03" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD16" />
+    <Construct sys="pixl" config="PIXL62" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
  
   <!-- y2015 series geometry tags -->
   <Geometry tag="y2015"  check="false" comment="Y2015 rough cut geometry">
