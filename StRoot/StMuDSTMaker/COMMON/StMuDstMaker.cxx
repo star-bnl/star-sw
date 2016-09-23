@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.125 2015/11/06 17:47:16 jdb Exp $
+ * $Id: StMuDstMaker.cxx,v 1.125.2.1 2016/09/23 18:18:53 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -8,6 +8,7 @@
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "StChain.h"
+#include "StChainOpt.h"
 #include "THack.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
@@ -501,8 +502,7 @@ int StMuDstMaker::Init(){
 #ifndef __NO_STRANGE_MUDST__
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
 #endif
-  TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
-  if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
+  ToWhiteConst("muDst",mStMuDst);
 
   return 0;
 }
@@ -1835,6 +1835,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.125.2.1  2016/09/23 18:18:53  perev
+ * Simplification only, ToWhiteConst used
+ *
  * Revision 1.125  2015/11/06 17:47:16  jdb
  * Added StMuFmsInfo.{h,cxx} as a new branch for storing event-by-event FMS paramters
  *
