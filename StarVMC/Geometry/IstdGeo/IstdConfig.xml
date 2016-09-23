@@ -2,7 +2,8 @@
 <Detector name="ISTD" comment="Intermediate Silicon Detector">
   <Modules>
     IstdGeo0,
-    IstdGeo1
+    IstdGeo1,
+    IstdGeo2
   </Modules>
 
   <Setup name="ISTDof" comment="OFF"                           module="IstdGeo0"  onoff="off" />
