@@ -8,6 +8,7 @@
   <Setup name="ISTDof" comment="OFF"                           module="IstdGeo0"  onoff="off" />
   <Setup name="ISTD01" comment="Intermediate Silicon Detector" module="IstdGeo0"  onoff="on"/>
   <Setup name="ISTD02" comment="Intermediate Silicon Detector" module="IstdGeo1"  onoff="on"/>
+  <Setup name="ISTD03" comment="Intermediate Silicon Detector" module="IstdGeo2"  onoff="on"/>
 
 </Detector>
 </Document>
