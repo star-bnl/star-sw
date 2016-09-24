@@ -1355,6 +1355,8 @@ Bfc_st BFC[] = { // standard chains
   //   ,                                                                     "<Early StEvent creation>",kFALSE},
   {"MakeEvent","0Event","","StEvent,detDb","StEventMaker","StTpcDb,StEventMaker"
      ,                                                                     "<Early StEvent creation>",kFALSE},
+  {"PicoVtxDefault","PicoVtxDefault",""           ,""                          ,"StPicoDstMaker","",kFALSE},
+  {"PicoVtxAuAu200","PicoVtxAuAu200",""           ,""                          ,"StPicoDstMaker","",kFALSE},
   {"LaserAvEv"          ,"","",""             ,"StLaserAvEventMaker","StLaserAvEventMaker","Hejrad",kFALSE},
   {"LaserAvCl"          ,"","",""               ,"StLaserAvClusterMaker","StLaserAvClusterMaker","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
